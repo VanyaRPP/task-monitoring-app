@@ -2,6 +2,7 @@ import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Layout } from 'antd'
 import { useState } from 'react';
 import MainFooter from '../Footer';
+import MainHeader from '../Header';
 import s from './MainLayout.style.module.sass'
 
 const { Header, Footer, Sider, Content } = Layout;
@@ -15,12 +16,11 @@ const MainLayout: React.FC<Props> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <Layout className={s.Layout}>
-      <Header className={s.Header}>
-        <h2>Logo</h2>
-      </Header>
-      <Layout>
-        {/* <Sider
+    <>
+      <Layout className={s.Layout}>
+        <MainHeader />
+        <Layout>
+          {/* <Sider
           theme='light'
           trigger={null}
           collapsible
@@ -36,12 +36,13 @@ const MainLayout: React.FC<Props> = ({ children }) => {
           </div>
           Sider
         </Sider> */}
-        <Content className={s.Container}>{children}</Content>
-      </Layout>
-      <Footer>
-        <MainFooter />
-      </Footer>
-    </Layout >
+          <Content className={s.Container}>{children}</Content>
+        </Layout>
+        <Footer>
+          <MainFooter />
+        </Footer>
+      </Layout >
+    </>
   )
 }
 

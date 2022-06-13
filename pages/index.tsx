@@ -10,6 +10,9 @@ export default function Home() {
         size="large"
       >
         <h1>Home</h1>
+        <p>
+          site for search work
+        </p>
       </Space>
     </div>
   );
