@@ -25,7 +25,7 @@ const RegistrationPage: FC = () => {
         </Link>
       </div>
       <div className={s.HalfBlock}>
-        <h2>Login</h2>
+        <h2>Registration</h2>
         <Form
           name="normal_login"
           className="login-form"
