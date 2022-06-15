@@ -1,6 +1,7 @@
 import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Image } from 'antd'
 import { FC } from 'react'
+import withAuth from '../../components/withPrivateRoute'
 
 const Profile: FC = () => {
   return (

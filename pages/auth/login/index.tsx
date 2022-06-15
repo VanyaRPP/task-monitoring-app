@@ -7,6 +7,10 @@ import { Button, Checkbox, Form, Input } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import s from './style.module.sass'
 
+import { useSession, signIn, signOut } from "next-auth/react"
+
+
+
 const LoginPage: FC = () => {
 
   const router = useRouter()
@@ -21,6 +25,24 @@ const LoginPage: FC = () => {
   const onFinishFailed = (errorInfo: any) => {
     console.log('Failed:', errorInfo);
   };
+
+  function Component() {
+    const { data: session } = useSession()
+    if (session) {
+      return (
+        <>
+          Signed in as {session.user.email} <br />
+          <button onClick={() => signOut()}>Sign out</button>
+        </>
+      )
+    }
+    return (
+      <>
+        Not signed in <br />
+        <button onClick={() => signIn()}>Sign in</button>
+      </>
+    )
+  }
 
   return (
     <div className={s.Container}>
@@ -73,7 +95,7 @@ const LoginPage: FC = () => {
         <Link href='/auth/registration'>
           <Button type="primary" size="large">Registration</Button>
         </Link>
-
+        {Component()}
       </div>
     </div>
   )
