@@ -2,13 +2,35 @@ import NextAuth from "next-auth"
 import GithubProvider from "next-auth/providers/github"
 import GoogleProvider from "next-auth/providers/google"
 import FacebookProvider from "next-auth/providers/facebook"
+import { MongoDBAdapter } from "@next-auth/mongodb-adapter"
+import jwt from "jsonwebtoken"
+import clientPromise from "../../../lib/mongodb"
 
 export default NextAuth({
-  // callbacks: {
-  //   session({ session, token, user }) {
-  //     return session // The return type will match the one returned in `useSession()`
-  //   },
-  // },
+  callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      return true
+    },
+    async redirect({ url, baseUrl }) {
+      return baseUrl
+    },
+    async session({ session, user, token }) {
+      return session
+    },
+    async jwt({ token, user, account, profile, isNewUser }) {
+      return token
+    }
+  },
+  adapter: MongoDBAdapter(clientPromise),
+  secret: `process.env.NEXTAUTH_SECRET`,
+  jwt: {
+    encode: async ({ secret, token }) => {
+      return jwt.sign(token as any, secret);
+    },
+    decode: async ({ secret, token }) => {
+      return jwt.verify(token as string, secret) as any;
+    },
+  },
   // Configure one or more authentication providers
   providers: [
     GoogleProvider({
@@ -25,4 +47,11 @@ export default NextAuth({
     })
     // ...add more providers here
   ],
+  pages: {
+    signIn: '/auth/sigin',
+    // signOut: '/auth/signout',
+    // error: '/auth/error', // Error code passed in query string as ?error=
+    // verifyRequest: '/auth/verify-request', // (used for check email message)
+    // newUser: '/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
+  }
 })

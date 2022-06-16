@@ -11,7 +11,7 @@ import { useSession, signIn, signOut } from "next-auth/react"
 
 
 
-const LoginPage: FC = () => {
+const LoginPage: FC = ({providers, session}) => {
 
   const router = useRouter()
   const dispatch = useAppDispatch()
