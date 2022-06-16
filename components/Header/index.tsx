@@ -12,17 +12,12 @@ const { Header } = Layout;
 
 const MainHeader = () => {
 
-  const user = useAppSelector(selectUser)
-
-  console.log('user', user)
-
-
   return (
     <Header className={s.Header}>
       <Link href='/'>
         <h1>LOGO</h1>
       </Link>
-      <LoginUser user={user} />
+      <LoginUser />
     </Header>
   )
 }

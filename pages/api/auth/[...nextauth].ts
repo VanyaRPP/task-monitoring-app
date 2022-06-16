@@ -21,8 +21,8 @@ export default NextAuth({
       return token
     }
   },
-  adapter: MongoDBAdapter(clientPromise),
-  secret: `process.env.NEXTAUTH_SECRET`,
+  adapter: MongoDBAdapter(clientPromise,),
+  secret: process.env.NEXTAUTH_SECRET,
   jwt: {
     encode: async ({ secret, token }) => {
       return jwt.sign(token as any, secret);
@@ -31,7 +31,6 @@ export default NextAuth({
       return jwt.verify(token as string, secret) as any;
     },
   },
-  // Configure one or more authentication providers
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,

@@ -1,9 +1,24 @@
 import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Image } from 'antd'
+import { useSession } from 'next-auth/react'
 import { FC } from 'react'
-import withAuth from '../../components/withPrivateRoute'
+import { useRouter } from 'next/router'
+import Loading from '../../components/Loading'
 
 const Profile: FC = () => {
+
+  const router = useRouter()
+  const { status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      router.push('/api/auth/signin')
+    }
+  })
+
+  if (status === 'loading') {
+    return <Loading />
+  }
+  
   return (
     <div>
       <h2>My profile</h2>
