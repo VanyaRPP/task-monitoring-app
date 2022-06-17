@@ -1,10 +1,10 @@
-import { useEffect } from "react"
 import { getProviders, useSession } from 'next-auth/react'
-import Router from 'next/router'
+import Router, { useRouter } from 'next/router'
 import { Button, Checkbox, Divider, Form, Input } from "antd"
 import SinginBtn from "../../../components/SinginBtn"
 import s from './style.module.sass'
 import { LockOutlined, UserOutlined } from "@ant-design/icons"
+import Loading from "../../../components/Loading"
 
 const SiginPage = ({ providers }) => {
 
@@ -12,15 +12,7 @@ const SiginPage = ({ providers }) => {
 
   console.log(session);
 
-  // useEffect(() => {
-  //   async () => {
-  //     // const session = await getSession()
-  //     if (session) return Router.push('/')
-  //   }
-  //   console.log('ses', session)
-  // }, [session])
 
-  // if (session) return null;
 
   return (
     <div className={s.Container}>
@@ -64,7 +56,6 @@ const SiginPage = ({ providers }) => {
                 Forgot password
               </a>
             </Form.Item>
-
             <Form.Item>
               <Button block type="primary" htmlType="submit" className="login-form-button">
                 Sing in
@@ -72,12 +63,10 @@ const SiginPage = ({ providers }) => {
             </Form.Item>
           </Form>
         </div>
-
       </div>
       <div className={s.HalfBlock}>
         <h1>Hi))))</h1>
       </div>
-
     </div>
   )
 }

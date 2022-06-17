@@ -9,7 +9,12 @@ import clientPromise from "../../../lib/mongodb"
 export default NextAuth({
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
-      return true
+      const isAllowedToSignIn = true
+      if (isAllowedToSignIn) {
+        return true
+      } else {
+        return false
+      }
     },
     async redirect({ url, baseUrl }) {
       return baseUrl

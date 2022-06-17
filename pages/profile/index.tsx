@@ -18,7 +18,7 @@ const Profile: FC = () => {
   if (status === 'loading') {
     return <Loading />
   }
-  
+
   return (
     <div>
       <h2>My profile</h2>
