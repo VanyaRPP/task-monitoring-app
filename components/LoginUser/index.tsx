@@ -1,23 +1,23 @@
 import { FC } from "react"
 import Link from "next/link"
 import { Avatar, Button, Card, Dropdown, Image, Menu } from "antd"
-import s from './style.module.sass'
 import { UserOutlined } from "@ant-design/icons"
 import { useAppDispatch, useAppSelector } from "../../store/hooks"
-import { login, logout, selectUser } from "../../features/user/userSlice"
 import { signIn, signOut, useSession } from "next-auth/react"
-
-// interface Props {
-//   user: boolean
-// }
+import s from './style.module.sass'
+import { log } from "console"
+import { useGetUserByEmailQuery } from "../../api/userApi/user.api"
+import RoleSwither from "../roleSwitcher"
 
 
 
 const LoginUser = () => {
 
   const { data: session } = useSession()
-  const dispatch = useAppDispatch()
-  const count = useAppSelector(selectUser)
+  const { data, error, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
+  const user = data?.data
+  console.log(data);
+
 
   const menu = (
     <>
@@ -32,7 +32,7 @@ const LoginUser = () => {
           />
           <h2>{session?.user?.name}</h2>
           <p>{session?.user?.email}</p>
-          <p>User/Worker/Moder</p>
+          <RoleSwither />
         </div>
 
 
@@ -68,11 +68,7 @@ const LoginUser = () => {
 
     if (session) {
       return (
-        // <>
-        //   Signed in as {session.user.email} <br />
-        //   <button >Sign out</button>
-        // </>
-        <Dropdown overlay={menu} >
+        <Dropdown overlay={menu}>
           <Avatar
             icon={<UserOutlined />}
             src={<Image src={session.user.image} preview={false} style={{ width: 32 }} alt="UserImg" />}
@@ -87,7 +83,6 @@ const LoginUser = () => {
           ghost
           danger
         >Sign in</Button>
-        {/* <button onClick={() => signIn()}>Sign in</button> */}
       </>
     )
   }

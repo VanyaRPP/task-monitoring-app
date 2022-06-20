@@ -1,7 +1,7 @@
 import mongoose, { Schema, Types, model } from 'mongoose';
 
 
-interface IUser {
+export interface IUser {
   name: string;
   email: string;
   image?: string;
@@ -17,4 +17,6 @@ const UserShema = new Schema<IUser>({
   // organization: { type: Schema.Types.ObjectId, ref: 'Organization' }
 })
 
-module.exports = mongoose.models.Users || model('User', UserShema)
+// const User = mongoose.models.Users || model('User', UserShema)
+// export default User
+module.exports = mongoose.models.User || mongoose.model("User", UserShema);
