@@ -1,0 +1,81 @@
+.Header {
+  text-align: center;
+  font-size: 56px;
+  margin: 0;  
+}
+
+.Text {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 400;
+  margin: 24px 0;
+
+  a {
+    cursor: pointer;
+    color: #ff4d4f;
+
+    &:hover {
+      color: #ff7875;
+    }
+  }
+}
+
+.Container {
+  display: flex;
+  min-height: 100%;
+  justify-content: center;
+  align-items: center;
+
+  @media (max-width: 889px) {
+    flex-direction: column;
+  }
+}
+  
+.HalfBlock {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-width: 300px;
+}
+  
+.LoginForm {
+  width: 100%;
+
+  div:last-child {
+    margin-bottom: 0;
+  }
+
+  .FormForgot {
+    color: #ff4d4f;
+    float: right;
+
+    &:hover {
+      color: #ff7875;
+    }
+  }
+
+  .FormButton {
+    border-color: #ff4d4f;
+    background: #ff4d4f;
+
+    &:hover {
+      border-color: #ff7875;
+      background: #ff7875;
+    }
+  }
+}
+  
+.Divider {
+  width: 1px;
+  height: 200px;
+  opacity: .8;
+  background-color: #858f96;
+  margin: 0 70px;
+
+  @media (max-width: 889px) {
+    width: 300px;
+    height: 1px;
+    margin: 50px 0;
+  }
+}

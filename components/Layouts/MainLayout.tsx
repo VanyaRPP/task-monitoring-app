@@ -1,9 +1,9 @@
 import { Layout } from 'antd'
-import MainFooter from '../Footer';
-import MainHeader from '../Header';
-import s from './MainLayout.style.module.sass'
+import MainFooter from '../Footer'
+import MainHeader from '../Header'
+import s from './MainLayout.style.module.scss'
 
-const { Footer, Sider, Content } = Layout;
+const { Footer, Content } = Layout;
 
 interface Props {
   children: React.ReactNode;
@@ -16,7 +16,11 @@ const MainLayout: React.FC<Props> = ({ children }) => {
       <Layout className={s.Layout}>
         <MainHeader />
         <Layout>
-          <Content className={s.Container}>{children}</Content>
+          <Content className={s.Container}>
+            <div className={s.Background}>
+              {children}
+            </div>
+          </Content>
           {/* {
             user ?
               <Sider
@@ -37,9 +41,7 @@ const MainLayout: React.FC<Props> = ({ children }) => {
               </Sider> : null
           } */}
         </Layout>
-        <Footer>
-          <MainFooter />
-        </Footer>
+        <MainFooter />
       </Layout >
     </>
   )

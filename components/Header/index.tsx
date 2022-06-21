@@ -1,24 +1,42 @@
-import { Button, Layout } from 'antd'
 import Link from "next/link"
+import { Layout, Menu, Input } from 'antd'
 import { selectUser } from '../../features/user/userSlice';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import LoginUser from '../LoginUser';
 import NavBarItem from "../UI/NavBarItem"
-import s from './style.module.sass'
+import s from './style.module.scss'
 
-const { Header } = Layout;
+
 
 
 
 const MainHeader = () => {
 
+  const onSearch = (value: string) => console.log(value)
+
+  const menuItems = [
+    {
+      key: 'login',
+      label: (
+        <LoginUser />
+      )
+    }
+  ]
+
   return (
-    <Header className={s.Header}>
-      <Link href='/'>
-        <h1>LOGO</h1>
-      </Link>
-      <LoginUser />
-    </Header>
+    <Layout.Header className={s.Header}>
+      <div className={s.Item}>
+
+        <Link href='/'><h1 className={s.Logo}>LOGO</h1></Link>
+
+        <Input.Search
+          placeholder='input search text'
+          onSearch={onSearch}
+          enterButton
+          className={s.Search} />
+      </div>
+      <Menu theme='light' mode='horizontal' items={menuItems} className={s.Menu} />
+    </Layout.Header >
   )
 }
 

@@ -1,0 +1,71 @@
+.Header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  z-index: 1;
+  width: 100%;
+  background-color: #fff;
+  box-shadow: 0 2px 8px #00000050;
+
+  .Item {
+    display: flex;
+    align-items: center;
+
+    .Logo {
+      float: left;
+      height: 31px;
+      color: #ff4d4f;
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: start;
+      line-height: 31px;
+      margin: 0 20px;
+      cursor: pointer;
+
+      &:hover {
+        color: #ff7875;
+      }
+    }
+
+    .Search {
+      min-width: 350px;
+
+      input:hover,
+      input:focus       {
+        border-color: #ff7875;
+        box-shadow: 0 0 0 2px rgb(255 24 24 / 20%);
+      }
+
+      span button {
+        border-color: #ff4d4f;
+        background: #ff4d4f;
+      }
+
+      span button:hover,
+      span button:focus {
+        border-color: #ff7875;
+        background: #ff7875;
+      }
+
+      span button:active {
+        border-color: #fe3a3d;
+        background: #fe3a3d;
+      }
+    }
+  }
+
+  .Menu {
+    display: flex;
+    justify-content: flex-end;
+    min-width: 115px;
+
+    li:hover
+     {
+      &::after {
+        border-bottom: 2px solid #ff7875 !important;
+      }
+    }
+    
+  }
+}

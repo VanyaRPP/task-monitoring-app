@@ -5,13 +5,13 @@ import { useAppDispatch } from "../../../store/hooks"
 import { login } from "../../../features/user/userSlice"
 import { Button, Checkbox, Form, Input } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
-import s from './style.module.sass'
+import s from './style.module.scss'
 
 import { useSession, signIn, signOut } from "next-auth/react"
 
 
 
-const LoginPage: FC = ({providers, session}) => {
+const LoginPage: FC = ({ providers, session }) => {
 
   const router = useRouter()
   const dispatch = useAppDispatch()

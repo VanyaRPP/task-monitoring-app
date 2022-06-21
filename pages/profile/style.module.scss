@@ -1,0 +1,18 @@
+.Container {
+  display: flex;
+  min-height: 100%;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.HalfBlock {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  // align-items: center;
+  min-width: 350px;
+  width: 49%;
+}

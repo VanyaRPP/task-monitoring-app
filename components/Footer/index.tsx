@@ -1,16 +1,13 @@
 import { FC } from 'react'
-import s from './style.module.sass'
+import s from './style.module.scss'
+import { Layout } from 'antd'
 
 const MainFooter: FC = () => {
   return (
-    <footer
-      className={s.Footer}
-    >
+    <Layout.Footer className={s.Footer}>
       <h2>LOGO</h2>
-      <p>
-        HZ CHO ZA SAIT
-      </p>
-    </footer>
+      <p>HZ CHO ZA SAIT</p>
+    </Layout.Footer >
   )
 }
 
