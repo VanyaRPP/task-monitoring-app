@@ -1,5 +1,5 @@
-import { Spin } from 'antd';
-import s from './style.module.sass'
+import { Spin } from 'antd'
+import s from './style.module.scss'
 
 const spinner = <div
   className={s.SpinnerScreen}

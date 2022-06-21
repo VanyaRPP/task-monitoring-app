@@ -1,0 +1,18 @@
+.Layout {
+  min-height: 100vh;
+
+  .Container {
+    padding: 0 50px; 
+    margin-top: 114px;
+  
+    .Background {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - 114px);
+      padding: 24px;
+      background: #fff;
+    }
+  }
+}
+
+ 

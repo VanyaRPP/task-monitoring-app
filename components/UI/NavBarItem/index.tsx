@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import s from './style.module.sass'
+import s from './style.module.scss'
 
 interface Props {
   children: React.ReactNode;

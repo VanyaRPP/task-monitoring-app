@@ -1,0 +1,15 @@
+.Container {
+  display: flex;
+  width: 100%;
+
+  &Column {
+    flex-direction: column;
+    background-color: #5d1969;
+  }
+    
+  &Row {
+    flex-direction: row;
+    background-color: #8b4cc0;
+  } 
+}
+  

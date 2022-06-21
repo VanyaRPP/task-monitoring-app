@@ -2,9 +2,10 @@ import { getProviders, useSession } from 'next-auth/react'
 import Router, { useRouter } from 'next/router'
 import { Button, Checkbox, Divider, Form, Input } from "antd"
 import SinginBtn from "../../../components/SinginBtn"
-import s from './style.module.sass'
+import s from './style.module.scss'
 import { LockOutlined, UserOutlined } from "@ant-design/icons"
 import Loading from "../../../components/Loading"
+import Link from 'next/link'
 
 const SiginPage = ({ providers }) => {
 
@@ -12,22 +13,15 @@ const SiginPage = ({ providers }) => {
 
   console.log(session);
 
-
-
   return (
-    <div className={s.Container}>
-      <div className={s.HalfBlock}>
-        <div className={s.FormContainer}>
-          <h2>Sing in</h2>
-          {Object.values(providers).map((provider) => (
-            <SinginBtn
-              key={provider?.name}
-              provider={provider} />
-          ))}
-          <Divider>or mail</Divider>
+    <>
+      <h2 className={s.Header}>Log In</h2>
+      <p className={s.Text}>Don't have an account? <Link href='/auth/registration'>Sign Up</Link></p>
+      <div className={s.Container}>
+        <div className={s.HalfBlock}>
           <Form
             name="normal_login"
-            className="login-form"
+            className={s.LoginForm}
             initialValues={{ remember: true }}
             onFinish={() => console.log('Login vith credentals')}
           >
@@ -35,39 +29,43 @@ const SiginPage = ({ providers }) => {
               name="username"
               rules={[{ required: true, message: 'Please input your Username!' }]}
             >
-              <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Username" />
+              <Input prefix={<UserOutlined />} placeholder="Username" />
             </Form.Item>
             <Form.Item
               name="password"
               rules={[{ required: true, message: 'Please input your Password!' }]}
             >
               <Input.Password
-                prefix={<LockOutlined className="site-form-item-icon" />}
+                prefix={<LockOutlined />}
                 type="password"
                 placeholder="Password"
               />
             </Form.Item>
             <Form.Item>
               <Form.Item name="remember" valuePropName="checked" noStyle>
-                <Checkbox>Remember me</Checkbox>
+                <Checkbox className={s.Checkbox}>Remember me</Checkbox>
               </Form.Item>
-
-              <a className="login-form-forgot" href="">
+              <Link href="/"><a className={s.FormForgot} >
                 Forgot password
-              </a>
+              </a></Link>
             </Form.Item>
             <Form.Item>
-              <Button block type="primary" htmlType="submit" className="login-form-button">
+              <Button block type="primary" htmlType="submit" className={s.FormButton}>
                 Sing in
               </Button>
             </Form.Item>
           </Form>
         </div>
+        <div className={s.Divider} />
+        <div className={s.HalfBlock}>
+          {Object.values(providers).map((provider) => (
+            <SinginBtn
+              key={provider?.name}
+              provider={provider} />
+          ))}
+        </div>
       </div>
-      <div className={s.HalfBlock}>
-        <h1>Hi))))</h1>
-      </div>
-    </div>
+    </>
   )
 }
 

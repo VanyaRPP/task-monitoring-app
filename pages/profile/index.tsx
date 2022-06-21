@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react'
 import { FC, useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Loading from '../../components/Loading'
-import s from './style.module.sass'
+import s from './style.module.scss'
 import { useGetUserByEmailQuery, useUpdateUserMutation } from '../../api/userApi/user.api'
 import RoleSwither from '../../components/roleSwitcher'
 
