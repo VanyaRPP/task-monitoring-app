@@ -1,17 +1,15 @@
 import { getProviders, useSession } from 'next-auth/react'
-import Router, { useRouter } from 'next/router'
 import { Button, Checkbox, Divider, Form, Input } from "antd"
 import SinginBtn from "../../../components/SinginBtn"
 import s from './style.module.scss'
 import { LockOutlined, UserOutlined } from "@ant-design/icons"
 import Loading from "../../../components/Loading"
 import Link from 'next/link'
+import { GetServerSideProps } from 'next'
 
 const SiginPage = ({ providers }) => {
 
   const { data: session } = useSession()
-
-  console.log(session);
 
   return (
     <>
@@ -69,7 +67,7 @@ const SiginPage = ({ providers }) => {
   )
 }
 
-export async function getServerSideProps(context) {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   const providers = await getProviders()
   return {
     props: { providers },
