@@ -1,3 +1,4 @@
+import { userApi } from './../api/userApi/user.api';
 import {
   Action,
   configureStore,
@@ -7,8 +8,11 @@ import userReduser from '../features/user/userSlice';
 
 export const store = configureStore({
   reducer: {
-    user: userReduser
+    // user: userReduser,
+    [userApi.reducerPath]: userApi.reducer
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(userApi.middleware),
 });
 
 export type AppDispatch = typeof store.dispatch;

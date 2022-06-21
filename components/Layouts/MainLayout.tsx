@@ -1,13 +1,9 @@
-import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Layout } from 'antd'
-import { useState } from 'react';
-import { selectUser } from '../../features/user/userSlice';
-import { useAppSelector } from '../../store/hooks';
 import MainFooter from '../Footer';
 import MainHeader from '../Header';
 import s from './MainLayout.style.module.sass'
 
-const { Header, Footer, Sider, Content } = Layout;
+const { Footer, Sider, Content } = Layout;
 
 interface Props {
   children: React.ReactNode;
@@ -15,17 +11,13 @@ interface Props {
 
 const MainLayout: React.FC<Props> = ({ children }) => {
 
-  const user = useAppSelector(selectUser)
-
-  const [collapsed, setCollapsed] = useState(false);
-
   return (
     <>
       <Layout className={s.Layout}>
         <MainHeader />
         <Layout>
           <Content className={s.Container}>{children}</Content>
-          {
+          {/* {
             user ?
               <Sider
                 theme='light'
@@ -43,8 +35,7 @@ const MainLayout: React.FC<Props> = ({ children }) => {
                 </div>
                 Sider
               </Sider> : null
-          }
-
+          } */}
         </Layout>
         <Footer>
           <MainFooter />
