@@ -11,9 +11,8 @@ const RoleSwither = () => {
   const { data: session } = useSession()
   const { data, error, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const user = data?.data
-  console.log('userino', user, isLoading);
 
-  const [role, setRole] = useState(user?.role)
+  const [role, setRole] = useState('')
 
   const [
     updateUser,
@@ -21,15 +20,12 @@ const RoleSwither = () => {
   ] = useUpdateUserMutation()
 
   // useEffect(() => {
-  //   const udate = async () => {
-  //     await updateUser({ email: user?.email, role: role })
-  //   }
-  //   udate()
-  // }, [role, user])
+
+  // }, [data])
 
   const onChange = async (e: RadioChangeEvent) => {
     await updateUser({ email: user?.email, role: `${e.target.value}` })
-    setRole(`${e.target.value}`)
+    // setRole(user?.role)
   };
 
   return (
@@ -40,8 +36,9 @@ const RoleSwither = () => {
         <Option value="Admin" disabled>Admin</Option>
       </Select> */}
       <Radio.Group
+        disabled={isUpdating}
         onChange={onChange}
-        defaultValue={user?.role || role}
+        defaultValue={user?.role}
         style={{ width: '100%' }}
         buttonStyle="solid">
         <Radio.Button value="User">User</Radio.Button>

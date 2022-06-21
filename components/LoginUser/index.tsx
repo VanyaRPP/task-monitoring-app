@@ -19,7 +19,6 @@ const LoginUser = () => {
   const [menuActive, setMenuActive] = useState(false)
 
   function toSinginComponent() {
-
     if (session) {
       return (
         <>
