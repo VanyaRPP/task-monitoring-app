@@ -14,9 +14,7 @@ import RoleSwither from "../roleSwitcher"
 const LoginUser = () => {
 
   const { data: session } = useSession()
-  const { data, error, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const user = data?.data
-  console.log(data);
+  // const { data, error, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
 
   const [menuActive, setMenuActive] = useState(false)
 
