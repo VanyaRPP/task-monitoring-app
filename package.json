@@ -19,6 +19,7 @@
     "antd": "^4.21.0",
     "axios": "^0.27.2",
     "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.3",
     "mongodb": "^4.7.0",
     "mongoose": "^6.3.8",
     "next": "12.1.6",
