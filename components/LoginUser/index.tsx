@@ -24,7 +24,7 @@ const LoginUser = () => {
         <>
           <Avatar
             icon={<UserOutlined />}
-            src={<Image src={session.user.image} preview={false} style={{ width: 32 }} alt="UserImg" />}
+            src={<Image src={session?.user?.image} preview={false} style={{ width: 32 }} alt="UserImg" />}
             onClick={() => setMenuActive(prevState => !prevState)}
           />
           <div onClick={() => setMenuActive(false)} className={`${s.Info} ${menuActive ? s.active : ''}`}>

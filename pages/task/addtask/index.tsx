@@ -1,4 +1,6 @@
 import { Button, DatePicker, Form, Input, Select } from 'antd'
+import type { RangePickerProps } from 'antd/es/date-picker'
+import moment from 'moment'
 import { useAddTaskMutation } from '../../../api/taskApi/task.api'
 import s from './style.module.scss'
 
@@ -12,6 +14,10 @@ const AddTasks: React.FC = () => {
 
     const validateMessages = {
         required: '${label} is required!',
+    }
+
+    const disabledDate: RangePickerProps['disabledDate'] = current => {
+        return current && current < moment().startOf('day')
     }
 
     return (
@@ -49,7 +55,7 @@ const AddTasks: React.FC = () => {
                     </Select>
                 </Form.Item>
                 <Form.Item name='deadline' label="Deadline" rules={[{ required: true }]}>
-                    <DatePicker />
+                    <DatePicker disabledDate={disabledDate} />
                 </Form.Item>
                 <Form.Item wrapperCol={{ span: 8, offset: 8 }}>
                     <Button htmlType="submit">Create task</Button>

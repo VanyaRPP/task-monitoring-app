@@ -4,13 +4,14 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { useGetUserByEmailQuery, useUpdateUserMutation } from '../../api/userApi/user.api'
 
-const { Option } = Select;
 
 const RoleSwither = () => {
 
   const { data: session } = useSession()
   const { data, error, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const user = data?.data
+
+  console.log('data: ', data)
 
   const [role, setRole] = useState('')
 
@@ -30,11 +31,6 @@ const RoleSwither = () => {
 
   return (
     <>
-      {/* <Select >
-        <Option value="User">User</Option>
-        <Option value="Worker">Worker</Option>
-        <Option value="Admin" disabled>Admin</Option>
-      </Select> */}
       <Radio.Group
         disabled={isUpdating}
         onChange={onChange}
