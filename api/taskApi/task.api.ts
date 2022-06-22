@@ -21,7 +21,7 @@ export const taskApi = createApi({
                 console.log(data, 'data');
                 const { ...body } = data
                 return {
-                    url: `task?user=62aaff0d18ceccb99ebc5c79`,
+                    url: `task`,
                     method: 'POST',
                     body,
                 }

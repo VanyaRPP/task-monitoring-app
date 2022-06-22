@@ -15,7 +15,7 @@ export interface ITask {
 const TaskShema = new Schema<ITask>({
   name: { type: String, required: true },
   creator: { type: Schema.Types.ObjectId, ref: 'User' },
-  desription: { type: String, required: true, default:'no description' },
+  desription: { type: String, default:'no description' },
   domain: { type: String },
   category: { type: String },
   dateofcreate: { type: Date, required: true, default: Date.now },

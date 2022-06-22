@@ -1,10 +1,7 @@
 import { Button, DatePicker, Form, Input, Select } from 'antd'
-<<<<<<< Updated upstream
 import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
-=======
 import { useSession } from 'next-auth/react'
->>>>>>> Stashed changes
 import { useAddTaskMutation } from '../../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../../api/userApi/user.api'
 import { useAppSelector } from '../../../store/hooks'
@@ -42,7 +39,7 @@ const AddTasks: React.FC = () => {
                 <Form.Item name='name' label="Name of task" rules={[{ required: true }]}>
                     <Input />
                 </Form.Item>
-                <Form.Item name='description' label="Description">
+                <Form.Item name='desription' label="Description">
                     <Input.TextArea />
                 </Form.Item>
                 <Form.Item name='domain' label="Domain">
