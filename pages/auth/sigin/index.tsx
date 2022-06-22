@@ -1,18 +1,56 @@
 import { getProviders, useSession } from 'next-auth/react'
-import { Button, Checkbox, Divider, Form, Input } from "antd"
+import { Button, Checkbox, message, Form, Input, Alert } from "antd"
 import SinginBtn from "../../../components/SinginBtn"
 import s from './style.module.scss'
 import { LockOutlined, UserOutlined } from "@ant-design/icons"
 import Loading from "../../../components/Loading"
 import Link from 'next/link'
 import { GetServerSideProps } from 'next'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
+import ErrorMessage from '../../../components/ErrorMessage'
+
+const errors = {
+  Signin: "Try signing in with a different account.",
+  OAuthSignin: "Try signing in with a different account.",
+  OAuthCallback: "Try signing in with a different account.",
+  OAuthCreateAccount: "Try signing in with a different account.",
+  EmailCreateAccount: "Try signing in with a different account.",
+  Callback: "Try signing in with a different account.",
+  OAuthAccountNotLinked: "To confirm your identity, sign in with the same account you used originally.",
+  EmailSignin: "The e-mail could not be sent.",
+  CredentialsSignin: "Sign in failed. Check the details you provided are correct.",
+  SessionRequired: "Please sign in to access this page.",
+  default: "Unable to sign in."
+}
 
 const SiginPage = ({ providers }) => {
+  const router = useRouter()
+  const { status } = useSession()
+  if (status === 'authenticated') {
+    router.push('/')
+  }
 
-  const { data: session } = useSession()
+  const { error } = useRouter().query;
+  const [errrorr, setErrrorr] = useState('')
+
+  useEffect(() => {
+    setErrrorr(error && (errors[error] ?? errors.default))
+  }, [])
 
   return (
     <>
+      {
+        error ? errrorr !== undefined || '' ?
+          <Alert
+            message="Error"
+            description={errrorr}
+            type="error"
+            showIcon
+            closable
+          />
+          : null : null
+      }
       <h2 className={s.Header}>Log In</h2>
       <p className={s.Text}>Don't have an account? <Link href='/auth/registration'>Sign Up</Link></p>
       <div className={s.Container}>
@@ -68,10 +106,7 @@ const SiginPage = ({ providers }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const providers = await getProviders()
-  return {
-    props: { providers },
-  }
+  return { props: { providers: await getProviders() } };
 }
 
 export default SiginPage
