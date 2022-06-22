@@ -39,7 +39,7 @@ const MainHeader = () => {
         {
           status === "authenticated"
           && <Button
-            onClick={() => Router.push('/tasks/addtask')}
+            onClick={() => Router.push('/task/addtask')}
             ghost
             danger
             className={s.Button}>

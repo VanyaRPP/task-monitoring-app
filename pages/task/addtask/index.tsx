@@ -1,10 +1,13 @@
 import { Button, DatePicker, Form, Input, Select } from 'antd'
+import { useAddTaskMutation } from '../../../api/taskApi/task.api'
 import s from './style.module.scss'
 
 const AddTasks: React.FC = () => {
 
-    const onSubmit = (values: any) => {
-        console.log(values)
+    const [addTask, { isLoading: isUpdating }] = useAddTaskMutation()
+
+    const onSubmit = async (formData: any) => {
+        await addTask(formData)
     }
 
     const validateMessages = {
