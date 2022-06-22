@@ -1,4 +1,5 @@
-import mongoose, { Schema, Types, model } from 'mongoose';
+import mongoose, { Schema, Types, model } from 'mongoose'
+import { User } from '../models/User'
 
 export interface ITask {
   name: string;
@@ -7,19 +8,18 @@ export interface ITask {
   domain?: string;
   category?: any;
   dateofcreate: Date;
-  deadline: string;
+  deadline: Date;
   // organization: Types.ObjectId;
 }
 
 const TaskShema = new Schema<ITask>({
   name: { type: String, required: true },
-  creator: { type: String, required: true },
-  desription: { type: String },
+  creator: { type: Schema.Types.ObjectId, ref: 'User' },
+  desription: { type: String, required: true, default:'no description' },
   domain: { type: String },
   category: { type: String },
   dateofcreate: { type: Date, required: true, default: Date.now },
-  deadline: { type: String, required: true },
-  // organization: { type: Schema.Types.ObjectId, ref: 'Organization' }
+  deadline: { type: Date, required: true },
 })
 
 module.exports = mongoose.models.Task || mongoose.model("Task", TaskShema);

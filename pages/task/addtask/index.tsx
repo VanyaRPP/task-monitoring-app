@@ -1,15 +1,24 @@
 import { Button, DatePicker, Form, Input, Select } from 'antd'
+<<<<<<< Updated upstream
 import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
+=======
+import { useSession } from 'next-auth/react'
+>>>>>>> Stashed changes
 import { useAddTaskMutation } from '../../../api/taskApi/task.api'
+import { useGetUserByEmailQuery } from '../../../api/userApi/user.api'
+import { useAppSelector } from '../../../store/hooks'
 import s from './style.module.scss'
 
 const AddTasks: React.FC = () => {
 
     const [addTask, { isLoading: isUpdating }] = useAddTaskMutation()
+    const { data: session, status } = useSession()
+    const { data, error, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
+    const user = data?.data
 
     const onSubmit = async (formData: any) => {
-        await addTask(formData)
+        await addTask({ ...formData, creator: user?._id })
     }
 
     const validateMessages = {

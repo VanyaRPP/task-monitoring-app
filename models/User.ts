@@ -1,3 +1,4 @@
+import { ITask } from './Task';
 import mongoose, { Schema, Types, model } from 'mongoose';
 
 
@@ -6,6 +7,7 @@ export interface IUser {
   email: string;
   image?: string;
   role?: string;
+  tasks?: [ITask]
   // organization: Types.ObjectId;
 }
 
@@ -14,7 +16,7 @@ const UserShema = new Schema<IUser>({
   email: { type: String, required: true },
   image: String,
   role: { type: String, default: 'User' },
-  // organization: { type: Schema.Types.ObjectId, ref: 'Organization' }
+  tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }]
 })
 
 // const User = mongoose.models.Users || model('User', UserShema)

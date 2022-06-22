@@ -6,8 +6,8 @@ interface Quer {
     data: ITask
 }
 
-export const userApi = createApi({
-    reducerPath: 'userApi',
+export const taskApi = createApi({
+    reducerPath: 'taskApi',
     tagTypes: ['User', 'IUser'],
     refetchOnFocus: true,
     refetchOnReconnect: true,
@@ -17,14 +17,18 @@ export const userApi = createApi({
             query: () => '/task',
         }),
         addTask: builder.mutation<ITask, Partial<ITask>>({
-            query: (body) => ({
-                url: 'task',
-                method: 'POST',
-                body,
-            }),
+            query(data) {
+                console.log(data, 'data');
+                const { ...body } = data
+                return {
+                    url: `task?user=62aaff0d18ceccb99ebc5c79`,
+                    method: 'POST',
+                    body,
+                }
+            },
             // invalidatesTags: [{ type: 'Post', id: 'LIST' }],
         })
     })
 })
 
-export const { useGetAllTaskQuery, useAddTaskMutation } = userApi
+export const { useGetAllTaskQuery, useAddTaskMutation } = taskApi

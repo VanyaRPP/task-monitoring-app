@@ -28,7 +28,13 @@ export default async function handler(
     case 'POST':
       try {
         console.log(req.body);
+
         const task = await Task.create(req.body)
+        // console.log(req.query.user);
+        // const task = new Task({
+        //   ...req.body,
+        // })
+        // task.save()
         return res.status(201).json({ success: true, data: task })
       } catch (error) {
         return res.status(400).json({ success: false, e: error })
