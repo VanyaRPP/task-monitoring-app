@@ -24,12 +24,14 @@
     "mongoose": "^6.3.8",
     "next": "12.1.6",
     "next-auth": "^4.5.0",
+    "next-swagger-doc": "^0.3.4",
     "nextjs-progressbar": "^0.0.14",
     "react": "18.1.0",
     "react-dom": "18.1.0",
     "react-redux": "^8.0.2",
     "sass": "^1.52.3",
-    "scss": "^0.2.4"
+    "scss": "^0.2.4",
+    "swagger-ui-react": "^4.12.0"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^8.5.8",
