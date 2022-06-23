@@ -1,4 +1,5 @@
 import { Layout } from 'antd'
+import Head from 'next/head';
 import MainFooter from '../Footer'
 import MainHeader from '../Header'
 import s from './MainLayout.style.module.scss'
@@ -13,6 +14,9 @@ const MainLayout: React.FC<Props> = ({ children }) => {
 
   return (
     <>
+      <Head>
+        <title>Task-monitoring-app</title>
+      </Head>
       <Layout className={s.Layout}>
         <MainHeader />
         <Layout>

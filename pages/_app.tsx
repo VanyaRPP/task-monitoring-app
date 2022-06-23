@@ -10,7 +10,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
 
   return <SessionProvider session={session}>
     <Provider store={store}>
-      <MainLayout>
+      <MainLayout >
         <NextNProgress color="#ff4d4f" height={2} showOnShallow={false} />
         <Component {...pageProps} />
       </MainLayout>

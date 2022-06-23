@@ -6,16 +6,23 @@ import { useAddTaskMutation } from '../../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../../api/userApi/user.api'
 import { useAppSelector } from '../../../store/hooks'
 import s from './style.module.scss'
+import {useState} from 'react';
 
 const AddTasks: React.FC = () => {
 
     const [addTask, { isLoading: isUpdating }] = useAddTaskMutation()
-    const { data: session, status } = useSession()
+    const { data: session } = useSession()
     const { data, error, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
     const user = data?.data
 
+    const [form] = Form.useForm()
+    const [formDisabled, setFormDisabled] = useState(false)
+
     const onSubmit = async (formData: any) => {
+        setFormDisabled(true)
         await addTask({ ...formData, creator: user?._id })
+        form.resetFields()
+        setFormDisabled(false)
     }
 
     const validateMessages = {
@@ -34,16 +41,18 @@ const AddTasks: React.FC = () => {
                 wrapperCol={{ span: 8 }}
                 layout="horizontal"
                 onFinish={onSubmit}
+                form={form}
+                disabled={formDisabled}
                 validateMessages={validateMessages}
             >
                 <Form.Item name='name' label="Name of task" rules={[{ required: true }]}>
-                    <Input />
+                    <Input className={s.Input}/>
                 </Form.Item>
                 <Form.Item name='desription' label="Description">
-                    <Input.TextArea />
+                    <Input.TextArea className={s.Input}/>
                 </Form.Item>
                 <Form.Item name='domain' label="Domain">
-                    <Select>
+                    <Select className={s.Select}>
                         <Select.Option value="domain 1">Domain 1</Select.Option>
                         <Select.Option value="domain 2">Domain 2</Select.Option>
                         <Select.Option value="domain 3">Domain 3</Select.Option>
@@ -52,7 +61,7 @@ const AddTasks: React.FC = () => {
                     </Select>
                 </Form.Item>
                 <Form.Item name='category' label="Categories">
-                    <Select>
+                    <Select className={s.Select}>
                         <Select.Option value="category 1">Category 1</Select.Option>
                         <Select.Option value="category 2">Category 2</Select.Option>
                         <Select.Option value="category 3">Category 3</Select.Option>
@@ -61,10 +70,10 @@ const AddTasks: React.FC = () => {
                     </Select>
                 </Form.Item>
                 <Form.Item name='deadline' label="Deadline" rules={[{ required: true }]}>
-                    <DatePicker disabledDate={disabledDate} />
+                    <DatePicker  className={s.DatePicker} disabledDate={disabledDate} />
                 </Form.Item>
                 <Form.Item wrapperCol={{ span: 8, offset: 8 }}>
-                    <Button htmlType="submit">Create task</Button>
+                    <Button ghost danger htmlType="submit">Create task</Button>
                 </Form.Item>
             </Form>
         </>

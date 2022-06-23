@@ -1,3 +1,5 @@
+@import "./../../styles/variables.scss";
+
 .Header {
   display: flex;
   justify-content: space-between;
@@ -15,7 +17,7 @@
     .Logo {
       float: left;
       height: 31px;
-      color: #ff4d4f;
+      color: $mainColor;
       font-size: 2rem;
       font-weight: 700;
       text-align: start;
@@ -24,7 +26,7 @@
       cursor: pointer;
 
       &:hover {
-        color: #ff7875;
+        color: $mainColorHoverFocus;
       }
     }
 
@@ -33,24 +35,24 @@
 
       input:hover,
       input:focus       {
-        border-color: #ff7875;
-        box-shadow: 0 0 0 2px rgb(255 24 24 / 20%);
+        border-color: $mainColorHoverFocus;
+        box-shadow: 0 0 0 2px $mainColorShadow;
       }
 
       span button {
-        border-color: #ff4d4f;
-        background: #ff4d4f;
+        border-color: $mainColor;
+        background: $mainColor;
       }
 
       span button:hover,
       span button:focus {
-        border-color: #ff7875;
-        background: #ff7875;
+        border-color: $mainColorHoverFocus;
+        background: $mainColorHoverFocus;
       }
 
       span button:active {
-        border-color: #fe3a3d;
-        background: #fe3a3d;
+        border-color: $mainColorActive;
+        background: $mainColorActive;
       }
     }
   }
@@ -64,11 +66,14 @@
     justify-content: flex-end;
     min-width: 115px;
 
-    li:hover
-     {
+    li:hover {
       &::after {
-        border-bottom: 2px solid #ff7875 !important;
+        border-bottom: 2px solid $mainColorHoverFocus !important;
       }
+    }
+
+    li::after {      
+      border-bottom: 2px solid $mainColorHoverFocus !important;
     }
     
   }

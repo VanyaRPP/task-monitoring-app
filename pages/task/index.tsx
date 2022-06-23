@@ -1,18 +1,40 @@
-import { Card } from 'antd'
+import { Button, Card } from 'antd'
+import { useState } from 'react'
+import { useGetAllTaskQuery } from '../../api/taskApi/task.api'
+import withAuthRedirect from '../../components/HOC/withAuthRedirect'
 import s from './style.module.scss'
+import { ITask } from '../../models/Task'
 
 
 const Tasks: React.FC = () => {
+
+    const { data } = useGetAllTaskQuery('')
+
+    const tasks = data?.data
+
     return (
         <div className={s.Container}>
-            <Card title='Fix some shit' extra={<a href="#">More</a>} className={s.Card}>
-                <p>Catagory: Some category</p>
-                <p>Description: I don`t know how but I need you to do this task</p>
-                <p>Domain: some area</p>
-                <p>Deadline: 09.10.2022</p>
-            </Card>
+            {
+                tasks && tasks.map((task: ITask, index) => {
+                    return <Card
+                        key={index}
+                        title={task.name}
+                        extra={<Button
+                            ghost
+                            danger
+                            onClick={() => console.log('aplly')}>
+                            Apply
+                        </Button>}
+                        className={s.Card}>
+                        <p>Catagory: Some category</p>
+                        <p>Description: {task.desription}</p>
+                        <p>Domain: some area</p>
+                        <p>Deadline: {task.deadline}</p>
+                    </Card>
+                })
+            }
         </div>
     )
 }
 
-export default Tasks
+export default withAuthRedirect(Tasks)

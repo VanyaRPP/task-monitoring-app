@@ -14,7 +14,7 @@ import s from './style.module.scss'
 
 const MainHeader = () => {
 
-  const { data: session, status } = useSession()
+  const { status } = useSession()
 
   const onSearch = (value: string) => console.log(value)
 
@@ -30,7 +30,9 @@ const MainHeader = () => {
   return (
     <Layout.Header className={s.Header}>
       <div className={s.Item}>
-        <Link href='/'><h1 className={s.Logo}>LOGO</h1></Link>
+        <Link href={status === "authenticated" ? '/task' : '/'}>
+          <h1 className={s.Logo}>LOGO</h1>
+        </Link>
         <Input.Search
           placeholder='input search text'
           onSearch={onSearch}

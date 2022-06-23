@@ -1,3 +1,5 @@
+@import "./../../../styles/variables.scss";
+
 .Header {
   text-align: center;
   font-size: 56px;
@@ -12,10 +14,10 @@
 
   a {
     cursor: pointer;
-    color: #ff4d4f;
+    color: $mainColor;
 
     &:hover {
-      color: #ff7875;
+      color: $mainColorHoverFocus;
     }
   }
 }
@@ -47,21 +49,21 @@
   }
 
   .FormForgot {
-    color: #ff4d4f;
+    color: $mainColor;
     float: right;
 
     &:hover {
-      color: #ff7875;
+      color: $mainColorHoverFocus;
     }
   }
 
   .FormButton {
-    border-color: #ff4d4f;
-    background: #ff4d4f;
+    border-color: $mainColor;
+    background: $mainColor;
 
     &:hover {
-      border-color: #ff7875;
-      background: #ff7875;
+      border-color: $mainColorHoverFocus;
+      background: $mainColorHoverFocus;
     }
   }
 }

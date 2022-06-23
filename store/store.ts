@@ -4,7 +4,7 @@ import {
   Action,
   configureStore,
   ThunkAction,
-} from '@reduxjs/toolkit';
+} from '@reduxjs/toolkit'
 
 export const store = configureStore({
   reducer: {
@@ -14,7 +14,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(userApi.middleware).concat(taskApi.middleware),
-});
+})
 
 export type AppDispatch = typeof store.dispatch;
 export type RootState = ReturnType<typeof store.getState>;
@@ -23,4 +23,4 @@ export type AppThunk<ReturnType = void> = ThunkAction<
   RootState,
   unknown,
   Action<string>
->;
+>

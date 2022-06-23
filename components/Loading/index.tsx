@@ -36,4 +36,4 @@ const spinner = <div
 const Loading: React.FC = () => <Spin indicator={spinner} />;
 
 
-export default Loading;
+export default Loading

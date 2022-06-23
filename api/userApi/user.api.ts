@@ -1,4 +1,4 @@
-import { IUser } from './../../models/User';
+import { IUser } from './../../models/User'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 interface Quer {
@@ -15,10 +15,10 @@ export const userApi = createApi({
   endpoints: (builder) => ({
     getUserByEmail: builder.query<Quer, string>({
       query: (email) => `user/${email}`,
+      providesTags: result => ['User']
     }),
     updateUser: builder.mutation<IUser, Partial<IUser>>({
       query(data) {
-        console.log('data', data);
         const { email, ...body } = data
         return {
           url: `user/${email}?role=${body.role}`,
@@ -26,7 +26,7 @@ export const userApi = createApi({
           body,
         }
       },
-      invalidatesTags: (result, error, { email }) => [{ type: 'User', email }],
+      invalidatesTags: ['User'],
     }),
 
   }),
