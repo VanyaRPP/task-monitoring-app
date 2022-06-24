@@ -2,7 +2,6 @@ import { FC } from "react"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { useAppDispatch } from "../../../store/hooks"
-import { login } from "../../../features/user/userSlice"
 import { Button, Checkbox, Form, Input } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import s from './style.module.scss'
@@ -16,11 +15,11 @@ const LoginPage: FC = ({ providers, session }) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
 
-  const onFinish = (values: any) => {
-    dispatch(login())
-    router.push('/')
-    console.log('Success:', values);
-  };
+  // const onFinish = (values: any) => {
+  //   dispatch(login())
+  //   router.push('/')
+  //   console.log('Success:', values);
+  // };
 
   const onFinishFailed = (errorInfo: any) => {
     console.log('Failed:', errorInfo);
