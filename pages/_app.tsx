@@ -6,7 +6,7 @@ import { store } from '../store/store'
 import NextNProgress from "nextjs-progressbar"
 import MainLayout from '../components/Layouts/MainLayout'
 
-function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
+export default function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
 
   return <SessionProvider session={session}>
     <Provider store={store}>
@@ -18,4 +18,4 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   </SessionProvider >
 }
 
-export default MyApp
+

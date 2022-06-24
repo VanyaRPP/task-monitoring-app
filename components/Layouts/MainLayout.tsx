@@ -1,5 +1,5 @@
 import { Layout } from 'antd'
-import Head from 'next/head';
+import Head from 'next/head'
 import MainFooter from '../Footer'
 import MainHeader from '../Header'
 import s from './MainLayout.style.module.scss'

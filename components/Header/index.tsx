@@ -1,5 +1,5 @@
 import Link from "next/link"
-import Router from 'next/router'
+import Router, { useRouter } from 'next/router'
 import { useSession } from "next-auth/react"
 import { Layout, Menu, Input, Button } from 'antd'
 import { selectUser } from '../../features/user/userSlice'
@@ -9,12 +9,11 @@ import NavBarItem from "../UI/NavBarItem"
 import s from './style.module.scss'
 
 
-
-
-
-const MainHeader = () => {
+const MainHeader: React.FC = () => {
 
   const { status } = useSession()
+
+  const router = useRouter()
 
   const onSearch = (value: string) => console.log(value)
 
@@ -27,10 +26,30 @@ const MainHeader = () => {
     }
   ]
 
+  let taskButton = null
+
+  if (status === "authenticated" && router.route === '/task') {
+    taskButton = <Button
+      onClick={() => Router.push('/task/addtask')}
+      ghost
+      danger
+      className={s.Button}>
+      Add task
+    </Button>
+  } else if (status === "authenticated") {
+    taskButton = <Button
+      onClick={() => Router.push('/task')}
+      ghost
+      danger
+      className={s.Button}>
+      Tasks
+    </Button>
+  }
+
   return (
     <Layout.Header className={s.Header}>
       <div className={s.Item}>
-        <Link href={status === "authenticated" ? '/task' : '/'}>
+        <Link href='/'>
           <h1 className={s.Logo}>LOGO</h1>
         </Link>
         <Input.Search
@@ -39,14 +58,7 @@ const MainHeader = () => {
           enterButton
           className={s.Search} />
         {
-          status === "authenticated"
-          && <Button
-            onClick={() => Router.push('/task/addtask')}
-            ghost
-            danger
-            className={s.Button}>
-            Add task
-          </Button>
+          taskButton
         }
       </div>
       <Menu theme='light' mode='horizontal' items={menuItems} className={s.Menu} />
