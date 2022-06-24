@@ -3,7 +3,7 @@ import { ITask } from '../../models/Task'
 
 interface Quer {
     success: boolean
-    data: ITask
+    data: ITask[]
 }
 
 export const taskApi = createApi({
@@ -26,7 +26,6 @@ export const taskApi = createApi({
                     body,
                 }
             },
-            // invalidatesTags: [{ type: 'Post', id: 'LIST' }],
         })
     })
 })

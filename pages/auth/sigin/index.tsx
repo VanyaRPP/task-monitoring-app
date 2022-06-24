@@ -52,7 +52,7 @@ const SiginPage = ({ providers }) => {
           : null : null
       }
       <h2 className={s.Header}>Log In</h2>
-      <p className={s.Text}>Don't have an account? <Link href='/auth/registration'>Sign Up</Link></p>
+      <p className={s.Text}>Don`t have an account? <Link href='/auth/registration'>Sign Up</Link></p>
       <div className={s.Container}>
         <div className={s.HalfBlock}>
           <Form
@@ -106,7 +106,7 @@ const SiginPage = ({ providers }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  return { props: { providers: await getProviders() } };
+  return { props: { providers: await getProviders() } }
 }
 
 export default SiginPage

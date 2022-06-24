@@ -1,22 +1,25 @@
-import { useSession } from "next-auth/react"
+import { useSession } from 'next-auth/react'
 import Router from 'next/router'
-import Loading from "../Loading"
+import Loading from '../Loading'
 
 const withAuthRedirect = (Component: React.ComponentType) => {
+    const ProtectedComponent = (props: any) => {
 
-    const { data: session, status } = useSession()
+        const { status } = useSession({
+            required: true,
+            onUnauthenticated() {
+              Router.push('/api/auth/signin')
+            }
+          })       
 
-    const AuthComponent = (props: any) => {
-        if (status === 'unauthenticated') {
-            return Router.push('/auth/sigin')
-        } else if (status === 'loading') {
-            return <Loading />
-        } else {
-            return <Component {...props} />
+        if (status === "loading") {
+            return <Loading/>
         }
+
+        return <Component {...props} />
     }
 
-    return <AuthComponent />
+    return ProtectedComponent
 }
 
 export default withAuthRedirect
