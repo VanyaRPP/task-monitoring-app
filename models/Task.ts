@@ -1,5 +1,4 @@
 import mongoose, { Schema, Types, model } from 'mongoose'
-import { User } from '../models/User'
 
 export interface ITask {
   name: string;
