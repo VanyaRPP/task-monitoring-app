@@ -1,10 +1,10 @@
-import { Button, Card } from 'antd'
+import { Button, Card, message } from 'antd';
 import { useState } from 'react'
 import { useGetAllTaskQuery } from '../../api/taskApi/task.api'
 import withAuthRedirect from '../../components/HOC/withAuthRedirect'
 import s from './style.module.scss'
 import { ITask } from '../../models/Task'
-
+import { DeleteOutlined } from '@ant-design/icons';
 
 const Tasks: React.FC = () => {
 
@@ -30,6 +30,13 @@ const Tasks: React.FC = () => {
                         <p>Description: {task.desription}</p>
                         <p>Domain: some area</p>
                         <p>Deadline: {task.deadline}</p>
+                        <Button
+                            className={s.Delete}
+                            onClick={() => console.log('delete')}
+                            ghost
+                            danger>
+                            <DeleteOutlined />
+                        </Button>
                     </Card>
                 })
             }
