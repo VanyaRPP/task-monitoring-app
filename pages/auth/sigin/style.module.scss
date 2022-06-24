@@ -1,0 +1,83 @@
+@import "./../../../styles/variables.scss";
+
+.Header {
+  text-align: center;
+  font-size: 56px;
+  margin: 0;  
+}
+
+.Text {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 400;
+  margin: 24px 0;
+
+  a {
+    cursor: pointer;
+    color: $mainColor;
+
+    &:hover {
+      color: $mainColorHoverFocus;
+    }
+  }
+}
+
+.Container {
+  display: flex;
+  min-height: 100%;
+  justify-content: center;
+  align-items: center;
+
+  @media (max-width: 889px) {
+    flex-direction: column;
+  }
+}
+  
+.HalfBlock {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-width: 300px;
+}
+  
+.LoginForm {
+  width: 100%;
+
+  div:last-child {
+    margin-bottom: 0;
+  }
+
+  .FormForgot {
+    color: $mainColor;
+    float: right;
+
+    &:hover {
+      color: $mainColorHoverFocus;
+    }
+  }
+
+  .FormButton {
+    border-color: $mainColor;
+    background: $mainColor;
+
+    &:hover {
+      border-color: $mainColorHoverFocus;
+      background: $mainColorHoverFocus;
+    }
+  }
+}
+  
+.Divider {
+  width: 1px;
+  height: 200px;
+  opacity: .8;
+  background-color: #858f96;
+  margin: 0 70px;
+
+  @media (max-width: 889px) {
+    width: 300px;
+    height: 1px;
+    margin: 50px 0;
+  }
+}

@@ -2,22 +2,20 @@ import { FC } from "react"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { useAppDispatch } from "../../../store/hooks"
-import { login } from "../../../features/user/userSlice"
 import { Button, Checkbox, Form, Input } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
-import s from './style.module.sass'
+import s from './style.module.scss'
 
 import { useSession, signIn, signOut } from "next-auth/react"
 
 
 
-const LoginPage: FC = ({providers, session}) => {
+const LoginPage: FC = () => {
 
   const router = useRouter()
   const dispatch = useAppDispatch()
 
   const onFinish = (values: any) => {
-    dispatch(login())
     router.push('/')
     console.log('Success:', values);
   };
@@ -31,7 +29,7 @@ const LoginPage: FC = ({providers, session}) => {
     if (session) {
       return (
         <>
-          Signed in as {session.user.email} <br />
+          Signed in as {session?.user?.email} <br />
           <button onClick={() => signOut()}>Sign out</button>
         </>
       )

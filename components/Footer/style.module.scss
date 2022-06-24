@@ -1,0 +1,16 @@
+@import "./../../styles/variables.scss";
+
+.Footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-top: 2px solid $mainColor;
+  margin: 0 50px;
+  padding: 0;
+
+  h2 {
+    color: $mainColor;
+  }
+}
+  

@@ -1,5 +1,5 @@
-import { Spin } from 'antd';
-import s from './style.module.sass'
+import { Spin } from 'antd'
+import s from './style.module.scss'
 
 const spinner = <div
   className={s.SpinnerScreen}
@@ -36,4 +36,4 @@ const spinner = <div
 const Loading: React.FC = () => <Spin indicator={spinner} />;
 
 
-export default Loading;
+export default Loading

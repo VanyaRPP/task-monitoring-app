@@ -1,0 +1,10 @@
+@import "./../../styles/variables.scss";
+
+.Button {
+    &:hover,
+    &:focus,
+    &:active {
+        color: $mainColorHoverFocus;
+        border-color: $mainColorHoverFocus;
+    }
+}

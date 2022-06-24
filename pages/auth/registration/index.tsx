@@ -1,7 +1,7 @@
 import { FC } from "react"
 import { Button, Checkbox, Form, Input } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import s from './style.module.sass'
+import s from './style.module.scss'
 import Link from "next/link";
 
 const RegistrationPage: FC = () => {

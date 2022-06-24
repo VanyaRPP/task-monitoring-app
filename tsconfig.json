@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -15,6 +17,6 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "components/withPrivateRoute.jsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "components/withPrivateRoute.jsx", "custom.d.ts", "pages/api-doc.js"],
   "exclude": ["node_modules"]
 }

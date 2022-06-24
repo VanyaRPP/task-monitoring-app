@@ -1,39 +1,24 @@
 import { EditOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Card, Image } from 'antd'
-import { useSession } from 'next-auth/react'
 import { FC, useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
-import Loading from '../../components/Loading'
-import s from './style.module.sass'
+import s from './style.module.scss'
 import { useGetUserByEmailQuery, useUpdateUserMutation } from '../../api/userApi/user.api'
 import RoleSwither from '../../components/roleSwitcher'
+import withAuthRedirect from '../../components/HOC/withAuthRedirect';
+import { useSession } from 'next-auth/react'
 
 
 const Profile: FC = () => {
 
-  const router = useRouter()
-  const { data: session, status } = useSession({
-    required: true,
-    onUnauthenticated() {
-      router.push('/api/auth/signin')
-    }
-  })
+  const { data: session } = useSession()
 
   const { data, error, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const user = data?.data
-
-
 
   const [
     updateUser,
     { isLoading: isUpdating },
   ] = useUpdateUserMutation()
-
-  if (status === 'loading') {
-    return <Loading />
-  }
-
-
 
   return (
     <div className={s.Container}>
@@ -41,7 +26,7 @@ const Profile: FC = () => {
         <Avatar
           size={300}
           icon={<UserOutlined />}
-          src={<Image src={session?.user?.image} alt="User" />}
+          src={<Image src={session?.user?.image || undefined} alt="User" />}
         />
 
       </div>
@@ -84,4 +69,4 @@ const Profile: FC = () => {
   )
 }
 
-export default Profile
+export default withAuthRedirect(Profile)

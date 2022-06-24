@@ -1,4 +1,4 @@
-import { IUser } from './../../models/User';
+import { IUser } from './../../models/User'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 interface Quer {
@@ -8,11 +8,14 @@ interface Quer {
 
 export const userApi = createApi({
   reducerPath: 'userApi',
-  tagTypes: ['User'],
+  tagTypes: ['User', 'IUser'],
+  refetchOnFocus: true,
+  refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:3000/api/' }),
   endpoints: (builder) => ({
     getUserByEmail: builder.query<Quer, string>({
       query: (email) => `user/${email}`,
+      providesTags: result => ['User']
     }),
     updateUser: builder.mutation<IUser, Partial<IUser>>({
       query(data) {
@@ -20,10 +23,10 @@ export const userApi = createApi({
         return {
           url: `user/${email}?role=${body.role}`,
           method: 'PATCH',
-          body,//body
+          body,
         }
       },
-      invalidatesTags: (result, error, { email }) => [{ type: 'User', email }],
+      invalidatesTags: ['User'],
     }),
 
   }),
