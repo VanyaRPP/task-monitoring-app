@@ -1,4 +1,6 @@
 declare global {
-  const mongoose: any
+  var mongoose: any
   const _mongoClientPromise: any
 }
+
+export {};

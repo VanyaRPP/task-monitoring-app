@@ -3,11 +3,12 @@ import mongoose, { Schema, Types, model } from 'mongoose';
 
 
 export interface IUser {
+  _id?: any;
   name: string;
   email: string;
   image?: string;
   role?: string;
-  tasks?: [ITask]
+  tasks?: [ITask];
   // organization: Types.ObjectId;
 }
 

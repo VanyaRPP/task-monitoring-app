@@ -39,13 +39,13 @@ const SiginPage = ({ providers }: any) => {
 
   const [errrorr, setErrrorr] = useState('')
 
-  useEffect(() => {
-    setErrrorr(error && (errors[error] ?? errors.default))
-  }, [])
+  // useEffect(() => {
+  //   setErrrorr(error && (errors[error] ?? errors.default))
+  // }, [])
 
   return (
     <>
-      {
+      {/* {
         error ? errrorr !== undefined || '' ?
           <Alert
             message="Error"
@@ -55,7 +55,7 @@ const SiginPage = ({ providers }: any) => {
             closable
           />
           : null : null
-      }
+      } */}
       <h2 className={s.Header}>Log In</h2>
       <p className={s.Text}>Don`t have an account? <Link href='/auth/registration'>Sign Up</Link></p>
       <div className={s.Container}>

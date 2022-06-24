@@ -26,7 +26,7 @@ const Profile: FC = () => {
         <Avatar
           size={300}
           icon={<UserOutlined />}
-          src={<Image src={session?.user?.image} alt="User" />}
+          src={<Image src={session?.user?.image || undefined} alt="User" />}
         />
 
       </div>
@@ -69,4 +69,4 @@ const Profile: FC = () => {
   )
 }
 
-export default withAuthRedirect( Profile)
+export default withAuthRedirect(Profile)
