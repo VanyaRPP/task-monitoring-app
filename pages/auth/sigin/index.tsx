@@ -10,6 +10,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import ErrorMessage from '../../../components/ErrorMessage'
 
+
 const errors = {
   Signin: "Try signing in with a different account.",
   OAuthSignin: "Try signing in with a different account.",
@@ -31,7 +32,7 @@ const SiginPage = ({ providers }) => {
     router.push('/')
   }
 
-  const { error } = useRouter().query;
+  const { error } = useRouter().query
   const [errrorr, setErrrorr] = useState('')
 
   useEffect(() => {
