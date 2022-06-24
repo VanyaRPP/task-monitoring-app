@@ -19,6 +19,6 @@ const UserShema = new Schema<IUser>({
   tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }]
 })
 
-// const User = mongoose.models.Users || model('User', UserShema)
-// export default User
-module.exports = mongoose.models.User || mongoose.model("User", UserShema);
+const User = mongoose.models.User || mongoose.model("User", UserShema);
+export default User;
+// module.exports = mongoose.models.User || mongoose.model("User", UserShema);

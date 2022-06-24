@@ -21,4 +21,7 @@ const TaskShema = new Schema<ITask>({
   deadline: { type: Date, required: true },
 })
 
-module.exports = mongoose.models.Task || mongoose.model("Task", TaskShema);
+const Task = mongoose.models.Task || mongoose.model("Task", TaskShema);
+export default Task
+
+// module.exports = mongoose.models.Task || mongoose.model("Task", TaskShema);
