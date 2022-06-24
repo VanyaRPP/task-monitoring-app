@@ -3,9 +3,9 @@ import dbConnect from "../../../utils/dbConnect"
 import User from '../../../models/User'
 
 type Data = {
-  name: string,
   data?: any,
   success: boolean,
+  error?: any,
 }
 
 async function start() {

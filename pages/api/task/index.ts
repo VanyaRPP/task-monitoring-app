@@ -3,9 +3,9 @@ import dbConnect from '../../../utils/dbConnect'
 import Task from '../../../models/Task'
 
 type Data = {
-  name: string,
   data?: any,
   success: boolean,
+  error?: any,
 }
 
 async function start() {
@@ -112,7 +112,7 @@ export default async function handler(
         const task = await Task.create(req.body)
         return res.status(201).json({ success: true, data: task })
       } catch (error) {
-        return res.status(400).json({ success: false, e: error })
+        return res.status(400).json({ success: false, error: error })
       }
     // try {
     //   const maybeteam = await User.findOne({ name: req.body.name }).exec()
