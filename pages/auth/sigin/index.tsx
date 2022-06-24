@@ -35,7 +35,7 @@ const SiginPage = ({ providers }: any) => {
     router.push('/')
   }
 
-  const { error }: query = useRouter().query
+  const { error } = useRouter().query
 
   const [errrorr, setErrrorr] = useState('')
 
