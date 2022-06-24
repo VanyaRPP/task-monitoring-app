@@ -10,16 +10,15 @@ import { useSession, signIn, signOut } from "next-auth/react"
 
 
 
-const LoginPage: FC = ({ providers, session }) => {
+const LoginPage: FC = () => {
 
   const router = useRouter()
   const dispatch = useAppDispatch()
 
-  // const onFinish = (values: any) => {
-  //   dispatch(login())
-  //   router.push('/')
-  //   console.log('Success:', values);
-  // };
+  const onFinish = (values: any) => {
+    router.push('/')
+    console.log('Success:', values);
+  };
 
   const onFinishFailed = (errorInfo: any) => {
     console.log('Failed:', errorInfo);
@@ -30,7 +29,7 @@ const LoginPage: FC = ({ providers, session }) => {
     if (session) {
       return (
         <>
-          Signed in as {session.user.email} <br />
+          Signed in as {session?.user?.email} <br />
           <button onClick={() => signOut()}>Sign out</button>
         </>
       )

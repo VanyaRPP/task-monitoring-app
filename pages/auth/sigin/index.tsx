@@ -10,8 +10,11 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import ErrorMessage from '../../../components/ErrorMessage'
 
+interface errors {
+  [index: string]: string
+}
 
-const errors = {
+const errors: errors = {
   Signin: "Try signing in with a different account.",
   OAuthSignin: "Try signing in with a different account.",
   OAuthCallback: "Try signing in with a different account.",
@@ -25,14 +28,15 @@ const errors = {
   default: "Unable to sign in."
 }
 
-const SiginPage = ({ providers }) => {
+const SiginPage = ({ providers }: any) => {
   const router = useRouter()
   const { status } = useSession()
   if (status === 'authenticated') {
     router.push('/')
   }
 
-  const { error } = useRouter().query
+  const { error }: query = useRouter().query
+
   const [errrorr, setErrrorr] = useState('')
 
   useEffect(() => {
@@ -95,7 +99,7 @@ const SiginPage = ({ providers }) => {
         </div>
         <div className={s.Divider} />
         <div className={s.HalfBlock}>
-          {Object.values(providers).map((provider) => (
+          {Object.values(providers).map((provider: any) => (
             <SinginBtn
               key={provider?.name}
               provider={provider} />
