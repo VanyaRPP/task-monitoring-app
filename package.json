@@ -30,6 +30,7 @@
     "next": "12.1.6",
     "next-auth": "^4.5.0",
     "nextjs-progressbar": "^0.0.14",
+    "openapi-types": "^12.0.0",
     "react": "18.1.0",
     "react-dom": "18.1.0",
     "react-redux": "^8.0.2",
@@ -44,13 +45,15 @@
     "@types/react-dom": "18.0.5",
     "@types/swagger-ui-react": "^4.11.0",
     "@typescript-eslint/eslint-plugin": "^5.29.0",
+    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "8.17.0",
     "eslint-config-next": "12.1.6",
     "eslint-config-prettier": "^8.5.0",
+    "next-swagger-doc": "^0.3.4",
     "prettier": "^2.7.1",
     "sass-loader": "^13.0.1",
-    "next-swagger-doc": "^0.3.4",
     "swagger-ui-react": "^4.12.0",
-    "typescript": "4.7.3"
+    "typescript": "4.7.3",
+    "webpack": "^5.73.0"
   }
 }
