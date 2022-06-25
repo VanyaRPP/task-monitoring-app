@@ -34,11 +34,10 @@ const SiginPage = ({ providers }: any) => {
   }
 
   const { error } = useRouter().query
-
   const [errrorr, setErrrorr] = useState('')
 
   useEffect(() => {
-    setErrrorr(error && (errors[error] ?? errors.default))
+    setErrrorr(error && (errors[`${error}`] ?? errors.default))
   }, [error])
 
   return (
