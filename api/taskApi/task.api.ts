@@ -11,7 +11,7 @@ export const taskApi = createApi({
     tagTypes: ['User', 'IUser'],
     refetchOnFocus: true,
     refetchOnReconnect: true,
-    baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:3000/api/' }),
+    baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
     endpoints: (builder) => ({
         getAllTask: builder.query<Quer, string>({
             query: () => '/task',
