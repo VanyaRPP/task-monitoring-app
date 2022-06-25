@@ -8,13 +8,12 @@ export interface ITask {
   category?: any;
   dateofcreate: Date;
   deadline: Date;
-  // organization: Types.ObjectId;
 }
 
 const TaskShema = new Schema<ITask>({
   name: { type: String, required: true },
   creator: { type: Schema.Types.ObjectId, ref: 'User' },
-  desription: { type: String, default:'no description' },
+  desription: { type: String, default: 'no description' },
   domain: { type: String },
   category: { type: String },
   dateofcreate: { type: Date, required: true, default: Date.now },
@@ -23,5 +22,3 @@ const TaskShema = new Schema<ITask>({
 
 const Task = mongoose.models.Task || mongoose.model("Task", TaskShema);
 export default Task
-
-// module.exports = mongoose.models.Task || mongoose.model("Task", TaskShema);

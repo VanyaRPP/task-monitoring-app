@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "npm run lint -- --fix",
+    "prettier": "npx prettier src test --check",
+    "prettier:fix": "npm run prettier -- --write",
+    "format": "npm run prettier:fix && npm run lint:fix"
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
@@ -39,8 +43,11 @@
     "@types/react": "18.0.12",
     "@types/react-dom": "18.0.5",
     "@types/swagger-ui-react": "^4.11.0",
+    "@typescript-eslint/eslint-plugin": "^5.29.0",
     "eslint": "8.17.0",
     "eslint-config-next": "12.1.6",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
     "sass-loader": "^13.0.1",
     "next-swagger-doc": "^0.3.4",
     "swagger-ui-react": "^4.12.0",

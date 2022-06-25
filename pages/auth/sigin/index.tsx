@@ -1,14 +1,12 @@
 import { getProviders, useSession } from 'next-auth/react'
-import { Button, Checkbox, message, Form, Input, Alert } from "antd"
+import { Button, Checkbox, Form, Input, Alert } from "antd"
 import SinginBtn from "../../../components/SinginBtn"
 import s from './style.module.scss'
 import { LockOutlined, UserOutlined } from "@ant-design/icons"
-import Loading from "../../../components/Loading"
 import Link from 'next/link'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import ErrorMessage from '../../../components/ErrorMessage'
 
 interface errors {
   [index: string]: string
@@ -39,13 +37,13 @@ const SiginPage = ({ providers }: any) => {
 
   const [errrorr, setErrrorr] = useState('')
 
-  // useEffect(() => {
-  //   setErrrorr(error && (errors[error] ?? errors.default))
-  // }, [])
+  useEffect(() => {
+    setErrrorr(error && (errors[error] ?? errors.default))
+  }, [error])
 
   return (
     <>
-      {/* {
+      {
         error ? errrorr !== undefined || '' ?
           <Alert
             message="Error"
@@ -55,7 +53,7 @@ const SiginPage = ({ providers }: any) => {
             closable
           />
           : null : null
-      } */}
+      }
       <h2 className={s.Header}>Log In</h2>
       <p className={s.Text}>Don`t have an account? <Link href='/auth/registration'>Sign Up</Link></p>
       <div className={s.Container}>
