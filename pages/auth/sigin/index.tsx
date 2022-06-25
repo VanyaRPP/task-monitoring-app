@@ -41,7 +41,7 @@ const SiginPage = ({ providers }: any) => {
 
   useEffect(() => {
     setErrrorr(error && (errors[error] ?? errors.default))
-  }, [])
+  }, [error])
 
   return (
     <>
