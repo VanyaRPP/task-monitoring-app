@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken"
 import clientPromise from "../../../lib/mongodb"
 
 export default NextAuth({
-  adapter: MongoDBAdapter(clientPromise,),
+  adapter: MongoDBAdapter(clientPromise),
   secret: process.env.NEXTAUTH_SECRET,
   jwt: {
     encode: async ({ secret, token }) => {
@@ -32,6 +32,25 @@ export default NextAuth({
     })
     // ...add more providers here
   ],
+  callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      const isAllowedToSignIn = true
+      if (isAllowedToSignIn) {
+        return true
+      } else {
+        return false
+      }
+    },
+    async redirect({ url, baseUrl }) {
+      return baseUrl
+    },
+    async session({ session, user, token }) {
+      return session
+    },
+    async jwt({ token, user, account, profile, isNewUser }) {
+      return token
+    }
+  },
   pages: {
     signIn: '/auth/sigin',
     error: '/auth/sigin', ///auth/error Error code passed in query string as ?error=
