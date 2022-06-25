@@ -13,7 +13,7 @@ if (!process.env.MONGODB_URI) {
   throw new Error("Please add your Mongo URI to .env.local")
 }
 
-let globalWithMongo = global as typeof globalThis & {
+const globalWithMongo = global as typeof globalThis & {
   _mongoClientPromise: Promise<MongoClient>
 }
 
