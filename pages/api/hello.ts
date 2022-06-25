@@ -10,5 +10,10 @@ export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  res.status(200).json({ success: true })
+  try {
+    res.status(200).json({ success: true })
+  } catch (error) {
+    res.status(400).json({ success: false })
+  }
+  
 }

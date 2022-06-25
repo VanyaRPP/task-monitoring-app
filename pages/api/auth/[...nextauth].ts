@@ -7,6 +7,31 @@ import jwt from "jsonwebtoken"
 import clientPromise from "../../../lib/mongodb"
 
 export default NextAuth({
+  adapter: MongoDBAdapter(clientPromise),
+  secret: process.env.NEXTAUTH_SECRET,
+  jwt: {
+    encode: async ({ secret, token }) => {
+      return jwt.sign(token as any, secret);
+    },
+    decode: async ({ secret, token }) => {
+      return jwt.verify(token as string, secret) as any;
+    },
+  },
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || ''
+    }),
+    GithubProvider({
+      clientId: process.env.GITHUB_ID,
+      clientSecret: process.env.GITHUB_SECRET
+    }),
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID || '',
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || ''
+    })
+    // ...add more providers here
+  ],
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
       const isAllowedToSignIn = true
@@ -26,31 +51,6 @@ export default NextAuth({
       return token
     }
   },
-  adapter: MongoDBAdapter(clientPromise,),
-  secret: process.env.NEXTAUTH_SECRET,
-  jwt: {
-    encode: async ({ secret, token }) => {
-      return jwt.sign(token as any, secret);
-    },
-    decode: async ({ secret, token }) => {
-      return jwt.verify(token as string, secret) as any;
-    },
-  },
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID||'',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET||''
-    }),
-    GithubProvider({
-      clientId: process.env.GITHUB_ID,
-      clientSecret: process.env.GITHUB_SECRET
-    }),
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID||'',
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET||''
-    })
-    // ...add more providers here
-  ],
   pages: {
     signIn: '/auth/sigin',
     // signOut: '/auth/signout',
