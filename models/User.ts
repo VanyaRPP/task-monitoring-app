@@ -9,7 +9,6 @@ export interface IUser {
   image?: string;
   role?: string;
   tasks?: [ITask];
-  // organization: Types.ObjectId;
 }
 
 const UserShema = new Schema<IUser>({
@@ -22,4 +21,3 @@ const UserShema = new Schema<IUser>({
 
 const User = mongoose.models.User || mongoose.model("User", UserShema);
 export default User;
-// module.exports = mongoose.models.User || mongoose.model("User", UserShema);
