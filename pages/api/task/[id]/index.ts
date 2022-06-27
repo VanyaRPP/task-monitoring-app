@@ -28,7 +28,13 @@ export default async function handler(
     case 'DELETE':
       try {
         await Task.findByIdAndRemove(req.query.id)
-        return res.status(200).json({ success: true, data: req.query.id + ' was dell' })
+          .then((user) => {
+            if (!user) {
+              return res.status(400).json({ success: false, data: req.query.id + ' was not found' })
+            } else {
+              return res.status(200).json({ success: true, data: req.query.id + ' was dell' })
+            }
+          })
       } catch (error) {
         return res.status(400).json({ success: false })
       }
