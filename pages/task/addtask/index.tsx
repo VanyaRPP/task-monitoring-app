@@ -4,9 +4,8 @@ import moment from 'moment'
 import { useSession } from 'next-auth/react'
 import { useAddTaskMutation } from '../../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../../api/userApi/user.api'
-import { useAppSelector } from '../../../store/hooks'
 import s from './style.module.scss'
-import {useState} from 'react';
+import {useState} from 'react'
 
 const AddTasks: React.FC = () => {
 

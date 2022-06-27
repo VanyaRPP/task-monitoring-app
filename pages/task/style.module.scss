@@ -18,3 +18,14 @@
         float: right;
     }
 }
+
+.TaskContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+
+    .Task {
+        width: 100%;
+    }
+}

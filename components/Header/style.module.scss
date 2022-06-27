@@ -10,6 +10,14 @@
   background-color: #fff;
   box-shadow: 0 2px 8px #00000050;
 
+  @media (max-width: 889px) {
+    padding: 0
+  }
+
+  @media (max-width: 585px) {
+    min-width: 300px;
+  }
+
   .Item {
     display: flex;
     align-items: center;
@@ -31,7 +39,11 @@
     }
 
     .Search {
-      min-width: 350px;
+      max-width: 350px;
+   
+      @media (max-width: 889px) {
+        
+      }
 
       input:hover,
       input:focus       {

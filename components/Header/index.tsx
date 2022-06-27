@@ -3,9 +3,7 @@ import Router, { useRouter } from 'next/router'
 import { useSession } from "next-auth/react"
 import { Layout, Menu, Input, Button } from 'antd'
 // import { selectUser } from '../../features/user/userSlice'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import LoginUser from '../LoginUser'
-import NavBarItem from "../UI/NavBarItem"
 import s from './style.module.scss'
 
 
@@ -17,18 +15,9 @@ const MainHeader: React.FC = () => {
 
   const onSearch = (value: string) => console.log(value)
 
-  const menuItems = [
-    {
-      key: 'login',
-      label: (
-        <LoginUser />
-      )
-    }
-  ]
-
   let taskButton = null
-
-  if (status === "authenticated" && router.route === '/task') {
+  
+  if ( status === "authenticated" && router.route === '/task') {
     taskButton = <Button
       onClick={() => Router.push('/task/addtask')}
       ghost
@@ -51,7 +40,7 @@ const MainHeader: React.FC = () => {
       <div className={s.Item}>
         <Link href='/'>
           <h1 className={s.Logo}>LOGO</h1>
-        </Link>
+        </Link>        
         <Input.Search
           placeholder='input search text'
           onSearch={onSearch}
@@ -61,7 +50,7 @@ const MainHeader: React.FC = () => {
           taskButton
         }
       </div>
-      <Menu theme='light' mode='horizontal' items={menuItems} className={s.Menu} />
+      <LoginUser />
     </Layout.Header >
   )
 }
