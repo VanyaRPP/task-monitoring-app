@@ -1,19 +1,27 @@
 import s from './style.module.scss'
-import { DeleteOutlined, EditOutlined, SettingOutlined } from '@ant-design/icons'
-import { Avatar, Card, Skeleton } from 'antd'
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
+import { Avatar, Card } from 'antd'
 import { useRouter } from 'next/router'
-import { useGetAllTaskQuery } from '../../api/taskApi/task.api'
+import { useGetTaskByIdQuery } from '../../api/taskApi/task.api'
+import { useGetUserByIdQuery } from '../../api/userApi/user.api'
+
 
 const Task: React.FC = () => {
 
-    const router = useRouter()
+    const router = useRouter()  
 
-    const { data } = useGetAllTaskQuery('')
+    const { data } = useGetTaskByIdQuery(`${router.query.id}`, {
+      skip: !router.query.id,
+    })
+    const task = data?.data
 
-    const tasks = data?.data
+    const { data: userData } = useGetUserByIdQuery(`${task?.creator}`, {
+      skip: !task,
+    })
+    const user = userData?.data
 
     return (
-        <div className={s.TaskContainer}>
+          <div className={s.TaskContainer}>
             <Card
               className={s.Task}
               actions={[
@@ -21,13 +29,19 @@ const Task: React.FC = () => {
               <DeleteOutlined key="ellipsis" />,
               ]}
             >
-              <Skeleton loading={true} avatar active>
-              <Card.Meta
-                avatar={<Avatar src="https://joeschmoe.io/api/v1/random" />}
-                title="Card title"
-                description="This is the description"
-               />
-              </Skeleton>
+              <div className={s.Content}>
+                <div className={s.UserInfo}>
+                  <Avatar size={200} src={user?.image} />
+                  <p>{user?.name}</p>
+                </div>
+                <div className={s.TaskInfo}>
+                  <h2>{task?.name}</h2>
+                  <p>Description: {task?.desription}</p>
+                  <p>Category: {task?.category}</p>
+                  <p>Domain: {task?.domain}</p>
+                  <p>Deadline: {task?.deadline}</p>
+                </div>  
+              </div>            
             </Card>
         </div>
     )
@@ -35,11 +49,3 @@ const Task: React.FC = () => {
 
 export default Task
 
-// _id: ObjectId;
-// name: string;
-// creator: ObjectId;
-// desription?: string;
-// domain?: string;
-// category?: any;
-// dateofcreate: Date;
-// deadline: Date;
