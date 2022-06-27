@@ -21,6 +21,7 @@
   .Item {
     display: flex;
     align-items: center;
+    width: 100%;
 
     .Logo {
       float: left;
@@ -71,22 +72,5 @@
 
   .Button {
     margin-left: 20px;
-  }
-
-  .Menu {
-    display: flex;
-    justify-content: flex-end;
-    min-width: 115px;
-
-    li:hover {
-      &::after {
-        border-bottom: 2px solid $mainColorHoverFocus !important;
-      }
-    }
-
-    li::after {      
-      border-bottom: 2px solid $mainColorHoverFocus !important;
-    }
-    
   }
 }

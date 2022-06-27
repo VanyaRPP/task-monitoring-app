@@ -3,7 +3,7 @@ import mongoose, { Schema, Types, model, ObjectId } from 'mongoose';
 
 
 export interface IUser {
-  _id?: ObjectId;
+  _id?: string;
   name: string;
   email: string;
   image?: string;
