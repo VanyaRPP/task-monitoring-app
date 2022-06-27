@@ -1,8 +1,10 @@
-import mongoose, { Schema, Types, model } from 'mongoose'
+
+import mongoose, { Schema, Types, model, ObjectId } from 'mongoose'
 
 export interface ITask {
+  _id: ObjectId;
   name: string;
-  creator: any;
+  creator: ObjectId;
   desription?: string;
   domain?: string;
   category?: any;
