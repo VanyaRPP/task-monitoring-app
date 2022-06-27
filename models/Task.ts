@@ -1,4 +1,3 @@
-
 import mongoose, { Schema, Types, model, ObjectId } from 'mongoose'
 
 export interface ITask {

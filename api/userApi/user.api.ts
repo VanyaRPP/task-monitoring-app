@@ -17,6 +17,10 @@ export const userApi = createApi({
       query: (email) => `user/${email}`,
       providesTags: result => ['User']
     }),
+    getUserById: builder.query<Quer, string>({
+      query: (id) => `user/id/${id}`,
+      providesTags: result => ['User']
+    }),
     updateUser: builder.mutation<IUser, Partial<IUser>>({
       query(data) {
         const { email, ...body } = data
@@ -27,9 +31,8 @@ export const userApi = createApi({
         }
       },
       invalidatesTags: ['User'],
-    }),
-
+    })
   }),
 })
 
-export const { useGetUserByEmailQuery, useUpdateUserMutation } = userApi
+export const { useGetUserByEmailQuery, useGetUserByIdQuery, useUpdateUserMutation } = userApi

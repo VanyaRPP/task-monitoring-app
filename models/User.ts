@@ -1,9 +1,9 @@
 import { ITask } from './Task';
-import mongoose, { Schema, Types, model } from 'mongoose';
+import mongoose, { Schema, Types, model, ObjectId } from 'mongoose';
 
 
 export interface IUser {
-  _id?: any;
+  _id?: ObjectId;
   name: string;
   email: string;
   image?: string;
