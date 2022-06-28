@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { ObjectId } from 'mongoose'
 import { ITask } from '../../models/Task'
 
 interface AllTasksQuer {
@@ -36,8 +37,18 @@ export const taskApi = createApi({
                     body,
                 }
             },
-        })
+            invalidatesTags: ['Task'],
+        }),
+        deleteTask: builder.mutation<{ success: boolean; id: ObjectId }, ObjectId>({
+            query(id) {
+              return {
+                url: `task/${id}`,
+                method: 'DELETE',
+              }
+            },
+            invalidatesTags: ['Task'],
+        }),
     })
 })
 
-export const { useGetAllTaskQuery, useAddTaskMutation, useGetTaskByIdQuery } = taskApi
+export const { useGetAllTaskQuery, useAddTaskMutation, useGetTaskByIdQuery, useDeleteTaskMutation } = taskApi

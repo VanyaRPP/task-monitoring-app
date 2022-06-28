@@ -8,7 +8,7 @@ export interface ITask {
   domain?: string;
   category?: any;
   dateofcreate: Date;
-  deadline: Date;
+  deadline: string;
 }
 
 const TaskShema = new Schema<ITask>({
@@ -18,7 +18,7 @@ const TaskShema = new Schema<ITask>({
   domain: { type: String },
   category: { type: String },
   dateofcreate: { type: Date, required: true, default: Date.now },
-  deadline: { type: Date, required: true },
+  deadline: { type: String, required: true },
 })
 
 const Task = mongoose.models.Task || mongoose.model("Task", TaskShema);

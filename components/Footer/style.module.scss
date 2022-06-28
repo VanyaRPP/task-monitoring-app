@@ -1,11 +1,9 @@
-@import "./../../styles/variables.scss";
-
 .Footer {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border-top: 2px solid $mainColor;
+  border-top: 2px solid #1890ff;
   margin: 0 50px;
   padding: 0;
 
@@ -18,7 +16,7 @@
   }
 
   h2 {
-    color: $mainColor;
+    color: #1890ff;
   }
 }
   

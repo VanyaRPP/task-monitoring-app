@@ -9,9 +9,9 @@ import {useState} from 'react'
 
 const AddTasks: React.FC = () => {
 
-    const [addTask, { isLoading: isUpdating }] = useAddTaskMutation()
+    const [addTask ] = useAddTaskMutation()
     const { data: session } = useSession()
-    const { data, error, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
+    const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
     const user = data?.data
 
     const [form] = Form.useForm()
@@ -45,13 +45,13 @@ const AddTasks: React.FC = () => {
                 validateMessages={validateMessages}
             >
                 <Form.Item name='name' label="Name of task" rules={[{ required: true }]}>
-                    <Input className={s.Input}/>
+                    <Input />
                 </Form.Item>
                 <Form.Item name='desription' label="Description">
-                    <Input.TextArea className={s.Input}/>
+                    <Input.TextArea />
                 </Form.Item>
                 <Form.Item name='domain' label="Domain">
-                    <Select className={s.Select}>
+                    <Select >
                         <Select.Option value="domain 1">Domain 1</Select.Option>
                         <Select.Option value="domain 2">Domain 2</Select.Option>
                         <Select.Option value="domain 3">Domain 3</Select.Option>
@@ -60,7 +60,7 @@ const AddTasks: React.FC = () => {
                     </Select>
                 </Form.Item>
                 <Form.Item name='category' label="Categories">
-                    <Select className={s.Select}>
+                    <Select >
                         <Select.Option value="category 1">Category 1</Select.Option>
                         <Select.Option value="category 2">Category 2</Select.Option>
                         <Select.Option value="category 3">Category 3</Select.Option>
@@ -69,10 +69,10 @@ const AddTasks: React.FC = () => {
                     </Select>
                 </Form.Item>
                 <Form.Item name='deadline' label="Deadline" rules={[{ required: true }]}>
-                    <DatePicker  className={s.DatePicker} disabledDate={disabledDate} />
+                    <DatePicker disabledDate={disabledDate} />
                 </Form.Item>
                 <Form.Item wrapperCol={{ span: 8, offset: 8 }}>
-                    <Button ghost danger htmlType="submit">Create task</Button>
+                    <Button ghost type="primary" htmlType="submit">Create task</Button>
                 </Form.Item>
             </Form>
         </>

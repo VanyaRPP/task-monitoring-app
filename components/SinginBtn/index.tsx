@@ -1,9 +1,7 @@
 import { FC } from 'react'
 import { signIn } from 'next-auth/react'
 import { Button } from 'antd'
-import { AppleOutlined, createFromIconfontCN } from '@ant-design/icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import s from './style.module.scss'
+import { createFromIconfontCN } from '@ant-design/icons'
 
 
 interface Props {
@@ -24,7 +22,6 @@ const SinginBtn: FC<Props> = ({ provider }) => {
       style={{ margin: 5 }}
       onClick={() => signIn(provider?.id)}
       block
-      className={s.Button}
     >
       <IconFont
         style={{ fontSize: '1.2rem' }}
