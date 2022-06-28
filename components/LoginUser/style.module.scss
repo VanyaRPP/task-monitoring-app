@@ -26,7 +26,9 @@
     border-radius: 10px;
     box-shadow: 2px 5px 9px 0px rgb(0 0 0 / 31%);
 
-    
+    @media (max-width: 889px) {
+        right: 16px;
+    }    
 
     &:after {
         content: '';
@@ -43,5 +45,14 @@
         display: flex;
         flex-direction: column;
     }
+}
+
+.Avatar {
+    padding: 0 20px;
+    cursor: pointer;
+}
+
+.Button {
+    margin: 0 20px;
 }
 

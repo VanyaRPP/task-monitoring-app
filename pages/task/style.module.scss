@@ -18,3 +18,38 @@
         float: right;
     }
 }
+
+.TaskContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 50%;
+
+    .Task {
+        width: 100%;
+
+        .Content {
+            display: flex;
+
+            .UserInfo {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                flex: 0 1 25%;
+
+                p {
+                    font-size: 20px;
+                    font-weight: 600;
+                }
+            }
+    
+            .TaskInfo {
+                padding: 0 20px;
+                flex: 0 1 75%;
+            }
+        }
+
+        
+    }
+}

@@ -10,9 +10,18 @@
   background-color: #fff;
   box-shadow: 0 2px 8px #00000050;
 
+  @media (max-width: 889px) {
+    padding: 0
+  }
+
+  @media (max-width: 585px) {
+    min-width: 300px;
+  }
+
   .Item {
     display: flex;
     align-items: center;
+    width: 100%;
 
     .Logo {
       float: left;
@@ -31,7 +40,11 @@
     }
 
     .Search {
-      min-width: 350px;
+      max-width: 350px;
+   
+      @media (max-width: 889px) {
+        
+      }
 
       input:hover,
       input:focus       {
@@ -59,22 +72,5 @@
 
   .Button {
     margin-left: 20px;
-  }
-
-  .Menu {
-    display: flex;
-    justify-content: flex-end;
-    min-width: 115px;
-
-    li:hover {
-      &::after {
-        border-bottom: 2px solid $mainColorHoverFocus !important;
-      }
-    }
-
-    li::after {      
-      border-bottom: 2px solid $mainColorHoverFocus !important;
-    }
-    
   }
 }

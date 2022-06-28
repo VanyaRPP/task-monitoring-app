@@ -9,6 +9,14 @@
   margin: 0 50px;
   padding: 0;
 
+  @media (max-width: 889px) {
+    margin: 0 25px;
+  }
+
+  @media (max-width: 500px) {
+    margin: 0 10px;
+  }
+
   h2 {
     color: $mainColor;
   }

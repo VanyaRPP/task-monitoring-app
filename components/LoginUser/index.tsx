@@ -18,6 +18,7 @@ const LoginUser: FC = () => {
       return (
         <>
           <div
+            className={s.Avatar}
             onClick={() => setMenuActive(prevState => !prevState)}
           >
             <Avatar
@@ -63,6 +64,7 @@ const LoginUser: FC = () => {
           onClick={() => signIn()}
           ghost
           danger
+          className={s.Button}
         >Sign in</Button>
       </>
     )

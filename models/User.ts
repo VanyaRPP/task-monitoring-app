@@ -1,15 +1,14 @@
 import { ITask } from './Task';
-import mongoose, { Schema, Types, model } from 'mongoose';
+import mongoose, { Schema, Types, model, ObjectId } from 'mongoose';
 
 
 export interface IUser {
-  _id?: any;
+  _id?: string;
   name: string;
   email: string;
   image?: string;
   role?: string;
   tasks?: [ITask];
-  // organization: Types.ObjectId;
 }
 
 const UserShema = new Schema<IUser>({
@@ -22,4 +21,3 @@ const UserShema = new Schema<IUser>({
 
 const User = mongoose.models.User || mongoose.model("User", UserShema);
 export default User;
-// module.exports = mongoose.models.User || mongoose.model("User", UserShema);

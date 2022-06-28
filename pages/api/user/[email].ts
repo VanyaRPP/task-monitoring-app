@@ -57,29 +57,29 @@ export default async function handler(
 ) {
   switch (req.method) {
     case 'GET':
-/**
- * @swagger
- * /api/user/{email}:
- *   get:
- *     summary: Get the user by email
- *     tags: [User]
- *     parameters:
- *       - in: path
- *         name: email
- *         schema:
- *           type: string
- *         required: true
- *         description: The user email
- *     responses:
- *       201:
- *         description: The user description by email
- *         contens:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *       404:
- *         description: The user was not found
- */
+      /**
+       * @swagger
+       * /api/user/{email}:
+       *   get:
+       *     summary: Get the user by email
+       *     tags: [User]
+       *     parameters:
+       *       - in: path
+       *         name: email
+       *         schema:
+       *           type: string
+       *         required: true
+       *         description: The user email
+       *     responses:
+       *       201:
+       *         description: The user description by email
+       *         contens:
+       *           application/json:
+       *             schema:
+       *               $ref: '#/components/schemas/User'
+       *       404:
+       *         description: The user was not found
+       */
       try {
         const user = await User.findOne({ email: req.query.email })
         return res.status(201).json({ success: true, data: user })
@@ -87,37 +87,37 @@ export default async function handler(
         return res.status(400).json({ success: false })
       }
     case 'PATCH':
-/**
- * @swagger
- * /api/user/{email}:
- *  patch:
- *    summary: Update the user role by the email
- *    tags: [User]
- *    parameters:
- *      - in: path
- *        name: email
- *        schema:
- *          type: string
- *        required: true
- *        description: The user email
- *    requestBody:
- *      required: true
- *      content:
- *        application/json:
- *          schema:
- *            $ref: '#/components/schemas/User'
- *    responses:
- *      201:
- *        description: The user role was updated
- *        content:
- *          application/json:
- *            schema:
- *              $ref: '#/components/schemas/User'
- *      404:
- *        description: The book was not found
- *      500:
- *        description: Some error happened
- */
+      /**
+       * @swagger
+       * /api/user/{email}:
+       *  patch:
+       *    summary: Update the user role by the email
+       *    tags: [User]
+       *    parameters:
+       *      - in: path
+       *        name: email
+       *        schema:
+       *          type: string
+       *        required: true
+       *        description: The user email
+       *    requestBody:
+       *      required: true
+       *      content:
+       *        application/json:
+       *          schema:
+       *            $ref: '#/components/schemas/User'
+       *    responses:
+       *      201:
+       *        description: The user role was updated
+       *        content:
+       *          application/json:
+       *            schema:
+       *              $ref: '#/components/schemas/User'
+       *      404:
+       *        description: The book was not found
+       *      500:
+       *        description: Some error happened
+       */
       try {
         const user = await User.findOneAndUpdate({ email: req.query.email }, { role: req.query.role })
         console.log(req.query);
