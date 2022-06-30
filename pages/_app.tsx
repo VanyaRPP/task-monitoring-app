@@ -11,7 +11,7 @@ export default function MyApp({ Component, pageProps: { session, ...pageProps } 
   return <SessionProvider session={session}>
     <Provider store={store}>
       <MainLayout >
-        <NextNProgress color="#ff4d4f" height={2} showOnShallow={false} />
+        <NextNProgress color="#1890ff" height={2} showOnShallow={false} />
         <Component {...pageProps} />
       </MainLayout>
     </Provider>

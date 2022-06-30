@@ -1,18 +1,17 @@
 import { EditOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Card, Image } from 'antd'
-import { FC, useEffect, useState } from 'react'
 import s from './style.module.scss'
 import { useGetUserByEmailQuery, useUpdateUserMutation } from '../../api/userApi/user.api'
 import RoleSwither from '../../components/roleSwitcher'
-import withAuthRedirect from '../../components/HOC/withAuthRedirect';
+import withAuthRedirect from '../../components/HOC/withAuthRedirect'
 import { useSession } from 'next-auth/react'
 
 
-const Profile: FC = () => {
+const Profile: React.FC = () => {
 
   const { data: session } = useSession()
 
-  const { data, error, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
+  const { data, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const user = data?.data
 
   const [
@@ -58,11 +57,6 @@ const Profile: FC = () => {
             size="small">
             <p>City: Zhytomyr</p>
           </Card>
-          {/* <Card
-            loading={isLoading}
-            size="small">
-            <p>Date of birdth: {Date()}</p>
-          </Card> */}
         </Card>
       </div>
     </div >

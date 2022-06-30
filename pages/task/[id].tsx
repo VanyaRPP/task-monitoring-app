@@ -1,14 +1,18 @@
 import s from './style.module.scss'
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
-import { Avatar, Card } from 'antd'
+import { Avatar, Button, Card } from 'antd'
 import moment from 'moment'
-import { useRouter } from 'next/router'
-import { useGetTaskByIdQuery } from '../../api/taskApi/task.api'
+import Router, { useRouter } from 'next/router'
+import {
+  useDeleteTaskMutation,
+  useGetTaskByIdQuery,
+} from '../../api/taskApi/task.api'
 import { useGetUserByIdQuery } from '../../api/userApi/user.api'
-
+import { useSession } from 'next-auth/react'
+import { ObjectId } from 'mongoose'
 
 const Task: React.FC = () => {
-
+  const { data: session } = useSession()
   const router = useRouter()
 
   const { data } = useGetTaskByIdQuery(`${router.query.id}`, {
@@ -21,14 +25,34 @@ const Task: React.FC = () => {
   })
   const user = userData?.data
 
+  const [deleteTask] = useDeleteTaskMutation()
+
+  const taskDelete = (id: ObjectId) => {
+    deleteTask(id)
+    Router.push('/task')
+  }
+
   return (
     <div className={s.TaskContainer}>
       <Card
         className={s.Task}
-        actions={[
-          <EditOutlined key="edit" />,
-          <DeleteOutlined key="ellipsis" />,
-        ]}
+        actions={
+          session?.user?.email === user?.email
+            ? [
+                <Button key="edit" ghost type="primary">
+                  <EditOutlined />
+                </Button>,
+                <Button
+                  key="delete"
+                  ghost
+                  type="primary"
+                  onClick={() => taskDelete(task?._id)}
+                >
+                  <DeleteOutlined />
+                </Button>,
+              ]
+            : null
+        }
       >
         <div className={s.Content}>
           <div className={s.UserInfo}>
@@ -40,7 +64,7 @@ const Task: React.FC = () => {
             <p>Description: {task?.desription}</p>
             <p>Category: {task?.category}</p>
             <p>Domain: {task?.domain}</p>
-            <p>DeadLine: {moment(task?.deadline).format("MMM Do YY")}</p>
+            <p>DeadLine: {moment(task?.deadline).format('MMM Do YY')}</p>
           </div>
         </div>
       </Card>
@@ -49,4 +73,3 @@ const Task: React.FC = () => {
 }
 
 export default Task
-

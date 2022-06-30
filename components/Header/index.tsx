@@ -1,8 +1,7 @@
 import Link from "next/link"
 import Router, { useRouter } from 'next/router'
 import { useSession } from "next-auth/react"
-import { Layout, Menu, Input, Button } from 'antd'
-// import { selectUser } from '../../features/user/userSlice'
+import { Layout, Input, Button } from 'antd'
 import LoginUser from '../LoginUser'
 import s from './style.module.scss'
 
@@ -21,7 +20,7 @@ const MainHeader: React.FC = () => {
     taskButton = <Button
       onClick={() => Router.push('/task/addtask')}
       ghost
-      danger
+      type="primary"
       className={s.Button}>
       Add task
     </Button>
@@ -29,7 +28,7 @@ const MainHeader: React.FC = () => {
     taskButton = <Button
       onClick={() => Router.push('/task')}
       ghost
-      danger
+      type="primary"
       className={s.Button}>
       Tasks
     </Button>
