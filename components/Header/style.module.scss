@@ -9,7 +9,7 @@
   box-shadow: 0 2px 8px #00000050;
 
   @media (max-width: 889px) {
-    padding: 0
+    padding: 0;
   }
 
   @media (max-width: 585px) {
@@ -24,7 +24,7 @@
     .Logo {
       float: left;
       height: 31px;
-      color: #1890ff;
+      color: #f5222d;
       font-size: 2rem;
       font-weight: 700;
       text-align: start;
@@ -33,12 +33,20 @@
       cursor: pointer;
     }
 
-    .Search {
+    .SearchBarHeader {
       max-width: 350px;
+
+      @media (max-width: 660px) {
+        display: none;
+      }
     }
   }
 
   .Button {
     margin-left: 20px;
+
+    @media (max-width: 660px) {
+      margin-left: 0;
+    }
   }
 }

@@ -2,19 +2,27 @@
   min-height: 100vh;
 
   .Container {
-    padding: 0 50px; 
+    padding: 0 50px;
     margin-top: 114px;
 
     @media (max-width: 889px) {
-      padding: 0 25px; 
+      padding: 0 25px;
       margin-top: 89px;
     }
 
     @media (max-width: 500px) {
-      padding: 0 10px; 
+      padding: 0 10px;
       margin-top: 74px;
     }
-  
+
+    .SearchBar {
+      display: none;
+
+      @media (max-width: 660px) {
+        display: block;
+      }
+    }
+
     .Background {
       display: flex;
       flex-direction: column;
@@ -24,5 +32,3 @@
     }
   }
 }
-
- 

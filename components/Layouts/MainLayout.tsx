@@ -2,16 +2,16 @@ import { Layout } from 'antd'
 import Head from 'next/head'
 import MainFooter from '../Footer'
 import MainHeader from '../Header'
+import { SearchBar } from '../SearchBar'
 import s from './MainLayout.style.module.scss'
 
-const { Footer, Content } = Layout;
+const { Footer, Content } = Layout
 
 interface Props {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 const MainLayout: React.FC<Props> = ({ children }) => {
-
   return (
     <>
       <Head>
@@ -21,9 +21,8 @@ const MainLayout: React.FC<Props> = ({ children }) => {
         <MainHeader />
         <Layout>
           <Content className={s.Container}>
-            <div className={s.Background}>
-              {children}
-            </div>
+            <SearchBar className={s.SearchBar} />
+            <div className={s.Background}>{children}</div>
           </Content>
           {/* {
             user ?
@@ -46,7 +45,7 @@ const MainLayout: React.FC<Props> = ({ children }) => {
           } */}
         </Layout>
         <MainFooter />
-      </Layout >
+      </Layout>
     </>
   )
 }
