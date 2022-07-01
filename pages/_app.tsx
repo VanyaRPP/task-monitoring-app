@@ -9,7 +9,7 @@ import { ConfigProvider } from 'antd'
 
 ConfigProvider.config({
   theme: {
-    primaryColor: '#f5222d',
+    primaryColor: '#722ed1',
   },
 })
 
@@ -21,7 +21,7 @@ export default function MyApp({
     <SessionProvider session={session}>
       <Provider store={store}>
         <MainLayout>
-          <NextNProgress color="#f5222d" height={2} showOnShallow={false} />
+          <NextNProgress color="#722ed1" height={2} showOnShallow={false} />
           <Component {...pageProps} />
         </MainLayout>
       </Provider>
