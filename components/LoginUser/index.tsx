@@ -5,10 +5,10 @@ import { UserOutlined } from '@ant-design/icons'
 import { signIn, signOut, useSession } from 'next-auth/react'
 import RoleSwither from '../roleSwitcher'
 import s from './style.module.scss'
+import { AppRoutes } from '../../utils/constants'
 
 const LoginUser: FC = () => {
   const { data: session } = useSession()
-  // const { data, error, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
 
   const [menuActive, setMenuActive] = useState(false)
 
@@ -55,7 +55,7 @@ const LoginUser: FC = () => {
                 <Button
                   type="link"
                   block
-                  onClick={() => Router.push('/profile')}
+                  onClick={() => Router.push(AppRoutes.PROFILE)}
                 >
                   My Profile
                 </Button>

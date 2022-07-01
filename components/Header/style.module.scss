@@ -1,3 +1,5 @@
+@import './../../styles/variables.scss';
+
 .Header {
   display: flex;
   justify-content: space-between;
@@ -24,13 +26,17 @@
     .Logo {
       float: left;
       height: 31px;
-      color: #f5222d;
+      color: $primaryColor;
       font-size: 2rem;
       font-weight: 700;
       text-align: start;
       line-height: 31px;
       margin: 0 20px;
       cursor: pointer;
+
+      &:hover {
+        color: $primaryColorHover;
+      }
     }
 
     .SearchBarHeader {
@@ -39,14 +45,6 @@
       @media (max-width: 660px) {
         display: none;
       }
-    }
-  }
-
-  .Button {
-    margin-left: 20px;
-
-    @media (max-width: 660px) {
-      margin-left: 0;
     }
   }
 }

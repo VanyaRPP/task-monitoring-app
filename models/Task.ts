@@ -1,14 +1,14 @@
-import mongoose, { Schema, Types, model, ObjectId } from 'mongoose'
+import mongoose, { Schema, ObjectId } from 'mongoose'
 
 export interface ITask {
-  _id: ObjectId;
-  name: string;
-  creator: ObjectId;
-  desription?: string;
-  domain?: string;
-  category?: any;
-  dateofcreate: Date;
-  deadline: string;
+  _id?: ObjectId
+  name: string
+  creator: ObjectId | string
+  desription?: string
+  domain?: string
+  category?: string
+  dateofcreate: Date
+  deadline: string
 }
 
 const TaskShema = new Schema<ITask>({
@@ -21,5 +21,5 @@ const TaskShema = new Schema<ITask>({
   deadline: { type: String, required: true },
 })
 
-const Task = mongoose.models.Task || mongoose.model("Task", TaskShema);
+const Task = mongoose.models.Task || mongoose.model('Task', TaskShema)
 export default Task

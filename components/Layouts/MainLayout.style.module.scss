@@ -20,6 +20,11 @@
 
       @media (max-width: 660px) {
         display: block;
+        margin-bottom: 25px;
+      }
+
+      @media (max-width: 500px) {
+        margin-bottom: 10px;
       }
     }
 
