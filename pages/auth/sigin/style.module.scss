@@ -1,23 +1,23 @@
-@import "./../../../styles/variables.scss";
+@import './../../../styles/variables.scss';
 
 .Header {
   text-align: center;
-  font-size: 56px;
-  margin: 0;  
+  font-size: calc(30px + (20 + 20 * 0.7) * ((100vw - 320px) / 1400));
+  margin: 0;
 }
 
 .Text {
   text-align: center;
-  font-size: 18px;
+  font-size: calc(15px + (5 + 5 * 0.7) * ((100vw - 320px) / 1400));
   font-weight: 400;
-  margin: 24px 0;
+  margin: calc(4px + 20 * (100vw / 1400)) 0;
 
   a {
     cursor: pointer;
-    color: $mainColor;
+    color: $primaryColor;
 
     &:hover {
-      color: $mainColorHoverFocus;
+      color: $primaryColorHover;
     }
   }
 }
@@ -32,15 +32,19 @@
     flex-direction: column;
   }
 }
-  
+
 .HalfBlock {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   min-width: 300px;
+
+  @media (max-width: 889px) {
+    padding: 0 10px;
+  }
 }
-  
+
 .LoginForm {
   width: 100%;
 
@@ -49,34 +53,24 @@
   }
 
   .FormForgot {
-    color: $mainColor;
+    color: $primaryColor;
     float: right;
 
     &:hover {
-      color: $mainColorHoverFocus;
-    }
-  }
-
-  .FormButton {
-    border-color: $mainColor;
-    background: $mainColor;
-
-    &:hover {
-      border-color: $mainColorHoverFocus;
-      background: $mainColorHoverFocus;
+      color: $primaryColorHover;
     }
   }
 }
-  
+
 .Divider {
   width: 1px;
   height: 200px;
-  opacity: .8;
+  opacity: 0.8;
   background-color: #858f96;
   margin: 0 70px;
 
   @media (max-width: 889px) {
-    width: 300px;
+    width: 85vw;
     height: 1px;
     margin: 50px 0;
   }

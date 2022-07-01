@@ -1,55 +1,71 @@
 .Container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  width: 100%;
 }
 
 .Card {
-    box-shadow: 0 2px 8px rgb(0 0 0 / 31%);
-    flex: 0 1 29.333%;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 31%);
+  flex: 0 1 29.333%;
+  max-width: 29.333%;
+  margin: 2%;
+
+  &.Disabled {
+    box-shadow: none;
+    background-color: #f5f5f5;
+  }
+
+  @media (max-width: 1200px) {
+    max-width: 46%;
+    flex: 0 1 46%;
     margin: 2%;
+  }
 
-    .Button {
-        float: right;
-    }
+  @media (max-width: 800px) {
+    max-width: 96%;
+    flex: 0 1 96%;
+    margin: 2%;
+  }
 
-    .Delete {
-        float: right;
-    }
+  .Button {
+    float: right;
+  }
+
+  .Delete {
+    float: right;
+  }
 }
 
 .TaskContainer {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 50%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 50%;
 
-    .Task {
-        width: 100%;
+  .Task {
+    width: 100%;
 
-        .Content {
-            display: flex;
+    .Content {
+      display: flex;
 
-            .UserInfo {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                flex: 0 1 25%;
+      .UserInfo {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        flex: 0 1 25%;
 
-                p {
-                    font-size: 20px;
-                    font-weight: 600;
-                }
-            }
-    
-            .TaskInfo {
-                padding: 0 20px;
-                flex: 0 1 75%;
-            }
+        p {
+          font-size: 20px;
+          font-weight: 600;
         }
+      }
 
-        
+      .TaskInfo {
+        padding: 0 20px;
+        flex: 0 1 75%;
+      }
     }
+  }
 }

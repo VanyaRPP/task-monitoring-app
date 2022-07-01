@@ -1,4 +1,4 @@
-@import "./../../styles/variables.scss";
+@import './../../styles/variables.scss';
 
 .Header {
   display: flex;
@@ -11,7 +11,7 @@
   box-shadow: 0 2px 8px #00000050;
 
   @media (max-width: 889px) {
-    padding: 0
+    padding: 0;
   }
 
   @media (max-width: 585px) {
@@ -26,7 +26,7 @@
     .Logo {
       float: left;
       height: 31px;
-      color: $mainColor;
+      color: $primaryColor;
       font-size: 2rem;
       font-weight: 700;
       text-align: start;
@@ -35,42 +35,16 @@
       cursor: pointer;
 
       &:hover {
-        color: $mainColorHoverFocus;
+        color: $primaryColorHover;
       }
     }
 
-    .Search {
+    .SearchBarHeader {
       max-width: 350px;
-   
-      @media (max-width: 889px) {
-        
-      }
 
-      input:hover,
-      input:focus       {
-        border-color: $mainColorHoverFocus;
-        box-shadow: 0 0 0 2px $mainColorShadow;
-      }
-
-      span button {
-        border-color: $mainColor;
-        background: $mainColor;
-      }
-
-      span button:hover,
-      span button:focus {
-        border-color: $mainColorHoverFocus;
-        background: $mainColorHoverFocus;
-      }
-
-      span button:active {
-        border-color: $mainColorActive;
-        background: $mainColorActive;
+      @media (max-width: 660px) {
+        display: none;
       }
     }
-  }
-
-  .Button {
-    margin-left: 20px;
   }
 }

@@ -1,32 +1,5 @@
-@import './../../../styles/variables.scss';
-
 .Header {
-    text-align: center;
-    font-size: 56px;
-    margin: 0;  
-}
-
-.Input {
-    &:hover {
-        border-color: $mainColorHoverFocus;
-    }
-
-    &:focus {
-        border-color: $mainColorHoverFocus;
-        box-shadow: 0 0 0 2px $mainColorShadow;
-    }
-}
-
-.Select {
-    &:hover {    
-        & div {
-            border-color: $mainColorHoverFocus !important;
-        }
-    }
-}
-
-.DatePicker {
-    &:hover {
-        border-color: $mainColorHoverFocus !important;        
-    }
+  text-align: center;
+  font-size: calc(30px + (20 + 20 * 0.7) * ((100vw - 320px) / 1400));
+  margin: 0;
 }
