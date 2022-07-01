@@ -25,8 +25,6 @@ const AddTasks: React.FC = () => {
   const [formDisabled, setFormDisabled] = useState<boolean>(false)
 
   const onSubmit = async (formData: FormData) => {
-    console.log(formData)
-
     setFormDisabled(true)
     await addTask({ ...formData, creator: user?._id })
     form.resetFields()
