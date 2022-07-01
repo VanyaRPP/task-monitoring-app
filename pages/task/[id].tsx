@@ -1,7 +1,6 @@
 import s from './style.module.scss'
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card } from 'antd'
-import moment from 'moment'
 import Router, { useRouter } from 'next/router'
 import {
   useDeleteTaskMutation,
@@ -10,6 +9,8 @@ import {
 import { useGetUserByIdQuery } from '../../api/userApi/user.api'
 import { useSession } from 'next-auth/react'
 import { ObjectId } from 'mongoose'
+import { dateToDefaultFormat } from '../../components/features/formatDate'
+import { AppRoutes } from '../../utils/constants'
 
 const Task: React.FC = () => {
   const { data: session } = useSession()
@@ -29,7 +30,7 @@ const Task: React.FC = () => {
 
   const taskDelete = (id: ObjectId) => {
     deleteTask(id)
-    Router.push('/task')
+    Router.push(AppRoutes.INDEX)
   }
 
   return (
@@ -64,7 +65,7 @@ const Task: React.FC = () => {
             <p>Description: {task?.desription}</p>
             <p>Category: {task?.category}</p>
             <p>Domain: {task?.domain}</p>
-            <p>DeadLine: {moment(task?.deadline).format('MMM Do YY')}</p>
+            <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
           </div>
         </div>
       </Card>

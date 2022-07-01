@@ -3,10 +3,10 @@ import { signIn } from 'next-auth/react'
 import { Button } from 'antd'
 import { createFromIconfontCN } from '@ant-design/icons'
 
-
 interface Props {
   provider: any
 }
+
 const IconFont = createFromIconfontCN({
   scriptUrl: [
     '//at.alicdn.com/t/font_8d5l8fzk5b87iudi.js',
@@ -16,19 +16,13 @@ const IconFont = createFromIconfontCN({
 })
 
 const SinginBtn: FC<Props> = ({ provider }) => {
-
   return (
-    <Button
-      style={{ margin: 5 }}
-      onClick={() => signIn(provider?.id)}
-      block
-    >
+    <Button style={{ margin: 5 }} onClick={() => signIn(provider?.id)} block>
       <IconFont
         style={{ fontSize: '1.2rem' }}
         type={`icon-${provider?.name.toLowerCase()}`}
-      // type='linkedin'
+        // type='linkedin'
       />
-
       Sign in with {provider?.name}
     </Button>
   )

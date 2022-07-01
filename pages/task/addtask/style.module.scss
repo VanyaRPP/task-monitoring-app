@@ -1,5 +1,5 @@
 .Header {
-    text-align: center;
-    font-size: 56px;
-    margin: 0;  
+  text-align: center;
+  font-size: calc(30px + (20 + 20 * 0.7) * ((100vw - 320px) / 1400));
+  margin: 0;
 }

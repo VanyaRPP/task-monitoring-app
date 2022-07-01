@@ -1,0 +1,7 @@
+.Button {
+  margin-left: 20px;
+
+  @media (max-width: 660px) {
+    margin-left: 0;
+  }
+}
