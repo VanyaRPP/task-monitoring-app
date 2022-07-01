@@ -59,9 +59,5 @@
     "ts-jest": "^28.0.5",
     "typescript": "4.7.3",
     "webpack": "^5.73.0"
-  },
-  "engines": {
-    "npm": "please-use-yarn",
-    "yarn": ">= 1.19.1"
   }
 }
