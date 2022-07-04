@@ -1,7 +1,7 @@
 import { Layout } from 'antd'
 import Head from 'next/head'
-import MainFooter from '../Footer'
-import MainHeader from '../Header'
+import MainFooter from '../MainFooter'
+import MainHeader from '../MainHeader'
 import { SearchBar } from '../SearchBar'
 import s from './MainLayout.style.module.scss'
 
