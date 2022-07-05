@@ -62,7 +62,7 @@ const Sidebar: React.FC = () => {
 
       <Collapse
         activeKey={activeKeys}
-        onChange={setActiveKeys}
+        onChange={() => setActiveKeys}
         bordered={false}
         className={s.Rating}
         style={{
