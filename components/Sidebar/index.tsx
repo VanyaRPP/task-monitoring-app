@@ -9,6 +9,8 @@ import {
 import type { MenuProps } from 'antd'
 import s from './style.module.scss'
 
+import config from './Sidebar.config'
+
 const { Panel } = Collapse
 
 type MenuItem = Required<MenuProps>['items'][number]
@@ -30,39 +32,22 @@ const items: MenuItem[] = [
   },
 ]
 
-const bestMaster = {
-  name: 'Best master',
-  avatar: null,
-  rate: 4,
-  about:
-    'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos, culpa.',
-}
-
-const bestDomain = {
-  name: 'Best domain',
-  address: 'Zhytomyr city, Mala Berdichivska street, 17',
-  rate: 4,
-}
+const bestMaster = config.bestMaster
+const bestDomain = config.bestDomain
 
 const Sidebar: React.FC = () => {
   const [collapsed, setCollapsed] = useState(true)
-  const [activeKeys, setActiveKeys] = useState([])
 
   return (
     <Layout.Sider
       className={s.Sidebar}
       collapsible
       collapsed={collapsed}
-      onCollapse={(value) => {
-        setCollapsed(value)
-        setActiveKeys([])
-      }}
+      onCollapse={(value) => setCollapsed(value)}
     >
       <Menu className={s.List} mode="inline" items={items} />
 
       <Collapse
-        activeKey={activeKeys}
-        onChange={() => setActiveKeys}
         bordered={false}
         className={s.Rating}
         style={{
@@ -75,7 +60,7 @@ const Sidebar: React.FC = () => {
               <img className={s.Avatar} src={bestMaster.avatar} alt="" />
               {bestMaster.name}
             </span>
-            <span className={s.Rate}>
+            <span>
               {bestMaster.rate}/5
               <StarOutlined />
             </span>
@@ -86,7 +71,7 @@ const Sidebar: React.FC = () => {
         <Panel header="Best domain" key="2" className={s.RateBlock}>
           <div className={s.InfoBlock}>
             <span className={s.Title}>{bestDomain.name}</span>
-            <span className={s.Rate}>
+            <span>
               {bestDomain.rate}/5
               <StarOutlined />
             </span>
