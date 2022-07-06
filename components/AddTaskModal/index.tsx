@@ -1,11 +1,10 @@
-import { Button, DatePicker, Form, Input, Select } from 'antd'
+import { Modal, DatePicker, Form, Input, Select } from 'antd'
 import type { RangePickerProps } from 'antd/es/date-picker'
-import moment, { Moment } from 'moment'
+import moment from 'moment'
 import { useSession } from 'next-auth/react'
-import { useAddTaskMutation } from '../../../api/taskApi/task.api'
-import { useGetUserByEmailQuery } from '../../../api/userApi/user.api'
-import s from './style.module.scss'
 import { useState } from 'react'
+import { useAddTaskMutation } from '../../api/taskApi/task.api'
+import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
 
 type FormData = {
   category?: string
@@ -15,24 +14,36 @@ type FormData = {
   name: string
 }
 
-const AddTasks: React.FC = () => {
+type PropsType = {
+  isModalVisible: boolean
+  setIsModalVisible: (isModalVisible: boolean) => void
+}
+
+const AddTaskModal: React.FC<PropsType> = ({
+  isModalVisible,
+  setIsModalVisible,
+}) => {
+  const [formDisabled, setFormDisabled] = useState<boolean>(false)
+
+  const [form] = Form.useForm()
+
   const [addTask] = useAddTaskMutation()
   const { data: session } = useSession()
   const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const user = data?.data
 
-  const [form] = Form.useForm()
-  const [formDisabled, setFormDisabled] = useState<boolean>(false)
-
-  const onSubmit = async (formData: FormData) => {
+  const onSubmit = async () => {
+    const formData: FormData = await form.validateFields()
     setFormDisabled(true)
     await addTask({ ...formData, creator: user?._id })
     form.resetFields()
+    setIsModalVisible(false)
     setFormDisabled(false)
   }
 
-  const validateMessages = {
-    required: '${label} is required!',
+  const onCancel = () => {
+    setIsModalVisible(false)
+    form.resetFields()
   }
 
   const disabledDate: RangePickerProps['disabledDate'] = (current) => {
@@ -40,16 +51,19 @@ const AddTasks: React.FC = () => {
   }
 
   return (
-    <>
-      <h2 className={s.Header}>Add new task</h2>
+    <Modal
+      visible={isModalVisible}
+      title="Add task"
+      okText="Create task"
+      cancelText="Cancel"
+      onCancel={onCancel}
+      onOk={onSubmit}
+    >
       <Form
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 8 }}
-        layout="horizontal"
-        onFinish={onSubmit}
         form={form}
+        layout="vertical"
+        name="form_in_modal"
         disabled={formDisabled}
-        validateMessages={validateMessages}
       >
         <Form.Item
           name="name"
@@ -86,14 +100,9 @@ const AddTasks: React.FC = () => {
         >
           <DatePicker disabledDate={disabledDate} />
         </Form.Item>
-        <Form.Item wrapperCol={{ span: 8, offset: 8 }}>
-          <Button ghost type="primary" htmlType="submit">
-            Create task
-          </Button>
-        </Form.Item>
       </Form>
-    </>
+    </Modal>
   )
 }
 
-export default AddTasks
+export default AddTaskModal
