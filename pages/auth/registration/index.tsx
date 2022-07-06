@@ -1,34 +1,33 @@
-import { FC } from "react"
-import { Button, Checkbox, Form, Input } from 'antd'
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { FC } from 'react'
+import { useRouter } from 'next/router'
+import { Button, Form, Input } from 'antd'
+import { LockOutlined, UserOutlined, MailOutlined } from '@ant-design/icons'
 import s from './style.module.scss'
-import Link from "next/link";
+import Link from 'next/link'
 
 const RegistrationPage: FC = () => {
+  const router = useRouter()
 
   const onFinish = (values: any) => {
-    console.log('Success:', values);
-  };
+    router.push('/auth/verify')
+    console.log('Success:', values)
+  }
 
   const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
-  };
+    console.log('Failed:', errorInfo)
+  }
 
   return (
-    <div className={s.Container}>
-      <div className={s.HalfBlock}>
-        <h2>
-          Got an account?
-        </h2>
-        <Link href='/auth/login'>
-          <Button type="primary" size="large">Log in</Button>
-        </Link>
-      </div>
-      <div className={s.HalfBlock}>
-        <h2>Registration</h2>
+    <>
+      <h2 className={s.Header}>Sign Up</h2>
+      <p className={s.Text}>
+        Have an account? <Link href="/auth/sigin">Log In</Link>
+      </p>
+
+      <div className={s.Container}>
         <Form
           name="normal_login"
-          className="login-form"
+          className={s.LoginForm}
           initialValues={{ remember: true }}
           onFinish={onFinish}
         >
@@ -36,8 +35,12 @@ const RegistrationPage: FC = () => {
             name="username"
             rules={[{ required: true, message: 'Please input your Username!' }]}
           >
-            <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Username" />
+            <Input
+              prefix={<UserOutlined className="site-form-item-icon" />}
+              placeholder="Username"
+            />
           </Form.Item>
+
           <Form.Item
             name="password"
             rules={[{ required: true, message: 'Please input your Password!' }]}
@@ -48,24 +51,31 @@ const RegistrationPage: FC = () => {
               placeholder="Password"
             />
           </Form.Item>
-          <Form.Item>
-            <Form.Item name="remember" valuePropName="checked" noStyle>
-              <Checkbox>Remember me</Checkbox>
-            </Form.Item>
 
-            <a className="login-form-forgot" href="">
-              Forgot password
-            </a>
+          <Form.Item
+            name="email"
+            rules={[{ required: true, message: 'Please input your E-Mail!' }]}
+          >
+            <Input
+              prefix={<MailOutlined className="site-form-item-icon" />}
+              type="email"
+              placeholder="E-Mail"
+            />
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="login-form-button">
-              Log in
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="login-form-button"
+              style={{ width: '100%' }}
+            >
+              Sign Up
             </Button>
           </Form.Item>
         </Form>
       </div>
-    </div>
+    </>
   )
 }
 

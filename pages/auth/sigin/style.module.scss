@@ -70,8 +70,8 @@
   margin: 0 70px;
 
   @media (max-width: 889px) {
-    width: 85vw;
+    width: 50%;
     height: 1px;
-    margin: 50px 0;
+    margin: 50px 0 45px; // looks more symmetrical
   }
 }
