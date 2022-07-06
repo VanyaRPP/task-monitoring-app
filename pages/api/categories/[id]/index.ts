@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import dbConnect from '../../../utils/dbConnect'
-import Category from '../../../models/Category'
+import dbConnect from '../../../../utils/dbConnect'
+import Category from '../../../../models/Category'
 
 type Data = {
   data?: any,
@@ -21,22 +21,27 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const categories = await Category.find({})
+        const categories = await Category.findById(req.query.id)
         return res.status(201).json({ success: true, data: categories })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }
-    case 'POST':
+    case 'DELETE':
       try {
-        console.log(req.body.name)
-
-        await Category.create(req.body)
+        await Category.findByIdAndRemove(req.query.id)
           .then((category) => {
-            return res.status(201).json({ success: true, data: category })
+            if (!category) {
+              return res.status(400).json({ success: false, data: 'Category ' + req.query.id + ' was not found' })
+            } else {
+              return res.status(200).json({ success: true, data: 'Category ' + req.query.id + ' was dell' })
+            }
           })
-          .catch((error) => {
-            throw error + 'Blya'
-          })
+      } catch (error) {
+        return res.status(400).json({ success: false, error: error })
+      }
+    case 'PUT':
+      try {
+
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }

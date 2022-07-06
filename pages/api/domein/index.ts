@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../utils/dbConnect'
-import Category from '../../../models/Category'
+import Domein from '../../../models/Domein'
+
 
 type Data = {
   data?: any,
@@ -21,8 +22,8 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const categories = await Category.find({})
-        return res.status(201).json({ success: true, data: categories })
+        const domein = await Domein.find({})
+        return res.status(201).json({ success: true, data: domein })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }
@@ -30,9 +31,9 @@ export default async function handler(
       try {
         console.log(req.body.name)
 
-        await Category.create(req.body)
-          .then((category) => {
-            return res.status(201).json({ success: true, data: category })
+        await Domein.create(req.body)
+          .then((domein) => {
+            return res.status(201).json({ success: true, data: domein })
           })
           .catch((error) => {
             throw error + 'Blya'
