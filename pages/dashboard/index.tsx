@@ -1,5 +1,7 @@
 import React from 'react'
-import { Tabs, Card } from 'antd'
+import { Tabs, Card, Button } from 'antd'
+import Router from 'next/router'
+import { AppRoutes } from '../../utils/constants'
 
 import Orders from './tabs/orders'
 import Masters from './tabs/masters'
@@ -14,7 +16,10 @@ const { TabPane } = Tabs
 const Dashboard: React.FC = () => {
   return (
     <>
-      <h1>Dashboard</h1>
+      <div className={s.Header}>
+        <h1>Dashboard</h1>
+        <Button onClick={() => Router.push(AppRoutes.INDEX)}>Home</Button>
+      </div>
 
       <Tabs defaultActiveKey="1" className={s.TabList}>
         <TabPane tab="My orders" key="1">

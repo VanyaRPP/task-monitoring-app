@@ -1,5 +1,5 @@
 import React from 'react'
-import { List, Avatar, Image } from 'antd'
+import { List, Avatar } from 'antd'
 import { StarOutlined } from '@ant-design/icons'
 import s from '../style.module.scss'
 

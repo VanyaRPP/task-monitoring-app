@@ -1,5 +1,6 @@
 export enum AppRoutes {
   INDEX = '/',
+  DASHBOARD = '/dashboard',
   PROFILE = '/profile',
   TASK = '/task',
   ADD_TASK = '/task/addtask',
