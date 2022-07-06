@@ -6,11 +6,11 @@
   justify-content: center;
   align-items: center;
   border-top: 2px solid $primaryColor;
-  margin: 0 50px;
+  margin: 0 50px 0 130px;
   padding: 0;
 
   @media (max-width: 889px) {
-    margin: 0 25px;
+    margin: 0 25px 0 105px;
   }
 
   @media (max-width: 500px) {
