@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Layout, Menu, Collapse } from 'antd'
+import { Layout, Menu, Collapse, Avatar } from 'antd'
 import {
   StarOutlined,
   CheckOutlined,
@@ -57,7 +57,7 @@ const Sidebar: React.FC = () => {
         <Panel header="Best master" key="1" className={s.RateBlock}>
           <div className={s.InfoBlock}>
             <span className={s.Title}>
-              <img className={s.Avatar} src={bestMaster.avatar} alt="" />
+              <Avatar size={40} src={bestMaster.avatar} />
               {bestMaster.name}
             </span>
             <span>
