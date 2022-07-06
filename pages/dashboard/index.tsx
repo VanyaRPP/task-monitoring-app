@@ -7,7 +7,7 @@ import Domains from './tabs/domains'
 
 import s from './style.module.scss'
 
-import config from './dashboard.config'
+import config from '../../lib/dashboard.config'
 
 const { TabPane } = Tabs
 
