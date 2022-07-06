@@ -1,0 +1,12 @@
+.Header {
+  text-align: center;
+  font-size: calc(30px + (20 + 20 * 0.7) * ((100vw - 320px) / 1400));
+  margin: 0;
+}
+
+.Text {
+  text-align: center;
+  font-size: calc(15px + (5 + 5 * 0.7) * ((100vw - 320px) / 1400));
+  font-weight: 400;
+  margin: calc(4px + 20 * (100vw / 1400)) 0;
+}
