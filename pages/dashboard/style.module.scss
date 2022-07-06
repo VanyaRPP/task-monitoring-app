@@ -33,9 +33,10 @@
     display: flex;
     padding: 1rem;
     border-radius: 1rem;
+    transition: background 0.3s ease-in-out;
 
     &:hover {
-      background-color: rgba(88, 88, 88, 0.05);
+      background: rgba(88, 88, 88, 0.1);
     }
 
     > div {
