@@ -3,3 +3,5 @@ describe('MainFooter.cy.ts', () => {
     // cy.mount()
   })
 })
+
+export {}
