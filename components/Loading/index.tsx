@@ -1,8 +1,8 @@
 import { Spin } from 'antd'
-import s from './style.module.scss'
+import style from './style.module.scss'
 
 const spinner = (
-  <div className={s.SpinnerScreen}>
+  <div className={style.SpinnerScreen}>
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="120"

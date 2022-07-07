@@ -1,8 +1,7 @@
 import { getCsrfToken, getProviders, useSession } from 'next-auth/react'
-import { Button, Checkbox, Form, Input, Alert } from 'antd'
+import { Alert } from 'antd'
 import SinginBtn from '../../../components/SinginBtn'
 import s from './style.module.scss'
-import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import Link from 'next/link'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -59,55 +58,6 @@ const SiginPage = ({ providers, csrfToken }: any) => {
       </p>
       <div className={s.Container}>
         <div className={s.HalfBlock}>
-          <Form
-            name="normal_login"
-            className={s.LoginForm}
-            initialValues={{ remember: true }}
-            onFinish={() => console.log('Login vith credentals')}
-          >
-            <Form.Item
-              name="username"
-              rules={[
-                { required: true, message: 'Please input your Username!' },
-              ]}
-            >
-              <Input prefix={<UserOutlined />} placeholder="Username" />
-            </Form.Item>
-            <Form.Item
-              name="password"
-              rules={[
-                { required: true, message: 'Please input your Password!' },
-              ]}
-            >
-              <Input.Password
-                prefix={<LockOutlined />}
-                type="password"
-                placeholder="Password"
-              />
-            </Form.Item>
-            <Form.Item>
-              <Form.Item name="remember" valuePropName="checked" noStyle>
-                <Checkbox className={s.Checkbox}>Remember me</Checkbox>
-              </Form.Item>
-              <Link href="/">
-                <a className={s.FormForgot}>Forgot password</a>
-              </Link>
-            </Form.Item>
-            <Form.Item>
-              <Button
-                block
-                type="primary"
-                htmlType="submit"
-                className={s.FormButton}
-              >
-                Sing in
-              </Button>
-            </Form.Item>
-          </Form>
-        </div>
-
-        {/* Karen's changes */}
-        {/* <div className={s.HalfBlock}>
           <form method="post" action="/api/auth/signin/email">
             <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
             <label>
@@ -116,7 +66,10 @@ const SiginPage = ({ providers, csrfToken }: any) => {
             </label>
             <button type="submit">Sign in with Email</button>
           </form>
+        </div>
 
+        {/* Karen's changes */}
+        {/* 
           <Form
             method="post"
             action="/api/auth/signin/email"

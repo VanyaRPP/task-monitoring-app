@@ -1,8 +1,17 @@
-import { Modal, DatePicker, Form, Input, Select } from 'antd'
+import {
+  Modal,
+  DatePicker,
+  Form,
+  Input,
+  Select,
+  Radio,
+  RadioChangeEvent,
+} from 'antd'
 import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
 import { useSession } from 'next-auth/react'
 import { useState } from 'react'
+import { useGetAllCategoriesQuery } from '../../api/categoriesApi/category.api'
 import { useAddTaskMutation } from '../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
 
@@ -24,13 +33,16 @@ const AddTaskModal: React.FC<PropsType> = ({
   setIsModalVisible,
 }) => {
   const [formDisabled, setFormDisabled] = useState<boolean>(false)
+  const [domain, setDomain] = useState<string>('default')
 
   const [form] = Form.useForm()
 
   const [addTask] = useAddTaskMutation()
   const { data: session } = useSession()
-  const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const user = data?.data
+  const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
+  const user = userData?.data
+  const { data: categoriesData } = useGetAllCategoriesQuery('')
+  const categories = categoriesData?.data
 
   const onSubmit = async () => {
     const formData: FormData = await form.validateFields()
@@ -44,6 +56,10 @@ const AddTaskModal: React.FC<PropsType> = ({
   const onCancel = () => {
     setIsModalVisible(false)
     form.resetFields()
+  }
+
+  const onChangeDomain = (e: RadioChangeEvent) => {
+    setDomain(e.target.value)
   }
 
   const disabledDate: RangePickerProps['disabledDate'] = (current) => {
@@ -76,21 +92,19 @@ const AddTaskModal: React.FC<PropsType> = ({
           <Input.TextArea />
         </Form.Item>
         <Form.Item name="domain" label="Domain">
-          <Select>
-            <Select.Option value="domain 1">Domain 1</Select.Option>
-            <Select.Option value="domain 2">Domain 2</Select.Option>
-            <Select.Option value="domain 3">Domain 3</Select.Option>
-            <Select.Option value="domain 4">Domain 4</Select.Option>
-            <Select.Option value="domain 5">Domain 5</Select.Option>
-          </Select>
+          <Radio.Group onChange={onChangeDomain} value={domain}>
+            <Radio value="default">Default domain</Radio>
+            <Radio value="custom">Custom domain</Radio>
+          </Radio.Group>
         </Form.Item>
         <Form.Item name="category" label="Categories">
           <Select>
-            <Select.Option value="category 1">Category 1</Select.Option>
-            <Select.Option value="category 2">Category 2</Select.Option>
-            <Select.Option value="category 3">Category 3</Select.Option>
-            <Select.Option value="category 4">Category 4</Select.Option>
-            <Select.Option value="category 5">Category 5</Select.Option>
+            {categories &&
+              categories.map((category) => (
+                <Select.Option key={category?._id} value={category?.name}>
+                  {category?.name}
+                </Select.Option>
+              ))}
           </Select>
         </Form.Item>
         <Form.Item

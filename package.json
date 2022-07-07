@@ -39,7 +39,8 @@
     "react-dom": "18.1.0",
     "react-redux": "^8.0.2",
     "sass": "^1.53.0",
-    "scss": "^0.2.4"
+    "scss": "^0.2.4",
+    "yarn": "^1.22.19"
   },
   "devDependencies": {
     "@types/jest": "^28.1.4",
@@ -55,6 +56,7 @@
     "eslint": "8.17.0",
     "eslint-config-next": "12.1.6",
     "eslint-config-prettier": "^8.5.0",
+    "husky": "^8.0.0",
     "jest": "^28.1.2",
     "moment": "^2.29.4",
     "next-swagger-doc": "^0.3.4",
@@ -63,7 +65,6 @@
     "swagger-ui-react": "^4.12.0",
     "ts-jest": "^28.0.5",
     "typescript": "4.7.3",
-    "webpack": "^5.73.0",
-    "husky": "^8.0.0"
+    "webpack": "^5.73.0"
   }
 }
