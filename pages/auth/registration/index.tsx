@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import { Button, Checkbox, Form, Input } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
-import s from './style.module.scss'
+import style from './style.module.scss'
 import Link from 'next/link'
 
 const RegistrationPage: FC = () => {
@@ -14,8 +14,8 @@ const RegistrationPage: FC = () => {
   }
 
   return (
-    <div className={s.Container}>
-      <div className={s.HalfBlock}>
+    <div className={style.Container}>
+      <div className={style.HalfBlock}>
         <h2>Got an account?</h2>
         <Link href="/auth/login">
           <Button type="primary" size="large">
@@ -23,7 +23,7 @@ const RegistrationPage: FC = () => {
           </Button>
         </Link>
       </div>
-      <div className={s.HalfBlock}>
+      <div className={style.HalfBlock}>
         <h2>Registration</h2>
         <Form
           name="normal_login"

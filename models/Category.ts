@@ -2,7 +2,7 @@ import mongoose, { Schema, ObjectId } from 'mongoose'
 import { ITask } from './Task'
 
 export interface ICategory {
-  _id: ObjectId
+  _id: string
   name: string
   desription?: string
   taskincategory?: [ITask | ObjectId]

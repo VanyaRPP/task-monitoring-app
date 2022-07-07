@@ -1,6 +1,6 @@
 import { EditOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Card, Image } from 'antd'
-import s from './style.module.scss'
+import style from './style.module.scss'
 import {
   useGetUserByEmailQuery,
   useUpdateUserMutation,
@@ -18,15 +18,15 @@ const Profile: React.FC = () => {
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
 
   return (
-    <div className={s.Container}>
-      <div className={s.HalfBlock}>
+    <div className={style.Container}>
+      <div className={style.HalfBlock}>
         <Avatar
           size={300}
           icon={<UserOutlined />}
           src={<Image src={session?.user?.image || undefined} alt="User" />}
         />
       </div>
-      <div className={s.HalfBlock}>
+      <div className={style.HalfBlock}>
         <h2>My profile</h2>
         <Card loading={isLoading} size="small">
           <h2>{user?.name}</h2>

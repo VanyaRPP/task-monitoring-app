@@ -3,7 +3,7 @@ import Head from 'next/head'
 import MainFooter from '../Footer'
 import MainHeader from '../Header'
 import { SearchBar } from '../SearchBar'
-import s from './MainLayout.style.module.scss'
+import style from './MainLayout.style.module.scss'
 
 interface Props {
   children: React.ReactNode
@@ -15,12 +15,12 @@ const MainLayout: React.FC<Props> = ({ children }) => {
       <Head>
         <title>Task-monitoring-app</title>
       </Head>
-      <Layout className={s.Layout}>
+      <Layout className={style.Layout}>
         <MainHeader />
         <Layout>
-          <Layout.Content className={s.Container}>
-            <SearchBar className={s.SearchBar} />
-            <div className={s.Background}>{children}</div>
+          <Layout.Content className={style.Container}>
+            <SearchBar className={style.SearchBar} />
+            <div className={style.Background}>{children}</div>
           </Layout.Content>
         </Layout>
         <MainFooter />

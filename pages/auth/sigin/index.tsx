@@ -1,8 +1,7 @@
 import { getCsrfToken, getProviders, useSession } from 'next-auth/react'
-import { Button, Checkbox, Form, Input, Alert } from 'antd'
+import { Alert } from 'antd'
 import SinginBtn from '../../../components/SinginBtn'
-import s from './style.module.scss'
-import { LockOutlined, UserOutlined } from '@ant-design/icons'
+import style from './style.module.scss'
 import Link from 'next/link'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -55,12 +54,12 @@ const SiginPage = ({ providers, csrfToken }: any) => {
           />
         ) : null
       ) : null}
-      <h2 className={s.Header}>Log In</h2>
-      <p className={s.Text}>
+      <h2 className={style.Header}>Log In</h2>
+      <p className={style.Text}>
         Don`t have an account? <Link href="/auth/registration">Sign Up</Link>
       </p>
-      <div className={s.Container}>
-        <div className={s.HalfBlock}>
+      <div className={style.Container}>
+        <div className={style.HalfBlock}>
           <form method="post" action="/api/auth/signin/email">
             <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
             <label>
@@ -69,38 +68,9 @@ const SiginPage = ({ providers, csrfToken }: any) => {
             </label>
             <button type="submit">Sign in with Email</button>
           </form>
-          {/* <Form
-            method="post"
-            action="/api/auth/signin/email"
-            name="normal_login"
-            className={s.LoginForm}
-            initialValues={{ remember: true }}
-          // onFinish={() => {
-          //   fetch('/api/auth/signin/email', {
-          //     method: 'POST'
-          //   })
-          // }}
-          >
-            <Form.Item
-              name="email"
-              rules={[{ required: true, type: 'email', message: 'Please input your email!' }]}
-            >
-              <Input prefix={<UserOutlined />} placeholder="email" />
-            </Form.Item>
-            <Form.Item>
-              <Button
-                block
-                type="primary"
-                htmlType="submit"
-                className={s.FormButton}
-              >
-                Sing in
-              </Button>
-            </Form.Item>
-          </Form> */}
         </div>
-        <div className={s.Divider} />
-        <div className={s.HalfBlock}>
+        <div className={style.Divider} />
+        <div className={style.HalfBlock}>
           {Object.values(providers).map((provider: any) =>
             provider?.name !== 'Email' ? (
               <SinginBtn key={provider?.name} provider={provider} />

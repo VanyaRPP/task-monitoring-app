@@ -1,7 +1,7 @@
 import { Button, Card } from 'antd'
 import { useGetAllTaskQuery } from '../../api/taskApi/task.api'
 import withAuthRedirect from '../../components/HOC/withAuthRedirect'
-import s from './style.module.scss'
+import style from './style.module.scss'
 import { ITask } from '../../models/Task'
 import Router from 'next/router'
 import { useSession } from 'next-auth/react'
@@ -22,7 +22,7 @@ const Tasks: React.FC = () => {
   const user = userData?.data
 
   return (
-    <div className={s.Container}>
+    <div className={style.Container}>
       {tasks &&
         tasks.map((task: ITask, index) => {
           return (
@@ -43,8 +43,8 @@ const Tasks: React.FC = () => {
               }
               className={
                 isDeadlineExpired(task?.deadline)
-                  ? `${s.Card} ${s.Disabled}`
-                  : s.Card
+                  ? `${style.Card} ${style.Disabled}`
+                  : style.Card
               }
             >
               <p>Catagory: {task?.category}</p>

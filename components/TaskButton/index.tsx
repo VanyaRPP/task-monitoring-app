@@ -4,7 +4,7 @@ import Router, { useRouter } from 'next/router'
 import { useState } from 'react'
 import { AppRoutes } from '../../utils/constants'
 import AddTaskModal from '../AddTaskModal'
-import s from './style.module.scss'
+import style from './style.module.scss'
 
 const TaskButton: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
@@ -22,7 +22,7 @@ const TaskButton: React.FC = () => {
         }}
         ghost
         type="primary"
-        className={s.Button}
+        className={style.Button}
       >
         {router.route === AppRoutes.TASK ? 'Add task' : 'Tasks'}
       </Button>
@@ -35,9 +35,3 @@ const TaskButton: React.FC = () => {
 }
 
 export default TaskButton
-
-{
-  /* <Button type="primary" onClick={showModal}>
-        Open Modal
-      </Button> */
-}

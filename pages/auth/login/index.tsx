@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import { useAppDispatch } from '../../../store/hooks'
 import { Button, Checkbox, Form, Input } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
-import s from './style.module.scss'
+import style from './style.module.scss'
 
 import { useSession, signIn, signOut } from 'next-auth/react'
 
@@ -40,8 +40,8 @@ const LoginPage: FC = () => {
   }
 
   return (
-    <div className={s.Container}>
-      <div className={s.HalfBlock}>
+    <div className={style.Container}>
+      <div className={style.HalfBlock}>
         <h2>Login</h2>
         <Form
           name="normal_login"
@@ -89,7 +89,7 @@ const LoginPage: FC = () => {
           </Form.Item>
         </Form>
       </div>
-      <div className={s.HalfBlock}>
+      <div className={style.HalfBlock}>
         <h2>No account? Join us!</h2>
         <Link href="/auth/registration">
           <Button type="primary" size="large">

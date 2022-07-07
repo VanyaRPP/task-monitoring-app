@@ -4,7 +4,7 @@ import { Avatar, Button, Card, Image } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import { signIn, signOut, useSession } from 'next-auth/react'
 import RoleSwither from '../roleSwitcher'
-import s from './style.module.scss'
+import style from './style.module.scss'
 import { AppRoutes } from '../../utils/constants'
 
 const LoginUser: FC = () => {
@@ -17,7 +17,7 @@ const LoginUser: FC = () => {
       return (
         <>
           <div
-            className={s.Avatar}
+            className={style.Avatar}
             onClick={() => setMenuActive((prevState) => !prevState)}
           >
             <Avatar
@@ -34,9 +34,9 @@ const LoginUser: FC = () => {
           </div>
           <div
             onClick={() => setMenuActive(false)}
-            className={`${s.Info} ${menuActive ? s.active : ''}`}
+            className={`${style.Info} ${menuActive ? style.active : ''}`}
           >
-            <Card onClick={(e) => e.stopPropagation()} className={s.Card}>
+            <Card onClick={(e) => e.stopPropagation()} className={style.Card}>
               <Avatar
                 size={100}
                 icon={<UserOutlined />}
@@ -51,7 +51,7 @@ const LoginUser: FC = () => {
               <h2>{session?.user?.name}</h2>
               <p>{session?.user?.email}</p>
               <RoleSwither />
-              <div className={s.Buttons}>
+              <div className={style.Buttons}>
                 <Button
                   type="link"
                   block

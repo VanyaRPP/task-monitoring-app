@@ -1,4 +1,4 @@
-import s from './style.module.scss'
+import style from './style.module.scss'
 import {
   DeleteOutlined,
   EditOutlined,
@@ -38,9 +38,9 @@ const Task: React.FC = () => {
   }
 
   return (
-    <div className={s.TaskContainer}>
+    <div className={style.TaskContainer}>
       <Card
-        className={s.Task}
+        className={style.Task}
         actions={
           session?.user?.email === user?.email
             ? [
@@ -63,12 +63,12 @@ const Task: React.FC = () => {
             : null
         }
       >
-        <div className={s.Content}>
-          <div className={s.UserInfo}>
+        <div className={style.Content}>
+          <div className={style.UserInfo}>
             <Avatar size={200} src={user?.image} />
             <p>{user?.name}</p>
           </div>
-          <div className={s.TaskInfo}>
+          <div className={style.TaskInfo}>
             <h2>{task?.name}</h2>
             <p>Description: {task?.desription}</p>
             <p>Category: {task?.category}</p>
