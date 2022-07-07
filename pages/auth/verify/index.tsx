@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { useRouter } from 'next/router'
-import s from './style.module.scss'
+import styles from './style.module.scss'
 
 const Verify: FC = () => {
   const router = useRouter()
@@ -9,8 +9,8 @@ const Verify: FC = () => {
 
   return (
     <div>
-      <h2 className={s.Header}>Verify tour E-Mail</h2>
-      <p className={s.Text}>
+      <h2 className={styles.Header}>Verify tour E-Mail</h2>
+      <p className={styles.Text}>
         We have sent you a message by email.
         <br />
         Please verify your email by following the instructions in the message.

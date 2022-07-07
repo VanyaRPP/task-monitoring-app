@@ -1,6 +1,8 @@
 import React from 'react'
 import { List } from 'antd'
-import s from '../style.module.scss'
+import styles from '../style.module.scss'
+
+import moment from 'moment'
 
 interface Props {
   data: {
@@ -14,10 +16,10 @@ interface Props {
 
 const Orders: React.FC<Props> = ({ data }) => (
   <List
-    className={`${s.List} ${s.Orders}`}
+    className={`${styles.List} ${styles.Orders}`}
     dataSource={data}
     renderItem={(item, index) => (
-      <List.Item className={s.ListItem}>
+      <List.Item className={styles.ListItem}>
         <div>
           <span>{index + 1}.</span>
           <span>{item.task}</span>
@@ -25,19 +27,7 @@ const Orders: React.FC<Props> = ({ data }) => (
         </div>
 
         <div>
-          <div>
-            {item.date.getDate() +
-              '.' +
-              (item.date.getMonth() + 1) +
-              '.' +
-              item.date.getFullYear() +
-              ' ' +
-              (item.date.getHours() < 10 ? '0' : '') +
-              item.date.getHours() +
-              ':' +
-              (item.date.getMinutes() < 10 ? '0' : '') +
-              item.date.getMinutes()}
-          </div>
+          <div>{moment(item.date).format('DD.MM.yyyy hh:mm')}</div>
           <div>{item.status}</div>
         </div>
       </List.Item>

@@ -2,48 +2,60 @@ import React from 'react'
 import { Tabs, Card, Button } from 'antd'
 import Router from 'next/router'
 import { AppRoutes } from '../../utils/constants'
+import { useSession } from 'next-auth/react'
 
-import Orders from './tabs/orders'
-import Masters from './tabs/masters'
-import Domains from './tabs/domains'
+import OrdersList from './tabs/orders'
+import MastersList from './tabs/masters'
+import DomainsList from './tabs/domains'
 
-import s from './style.module.scss'
+import styles from './style.module.scss'
 
 import config from '../../lib/dashboard.config'
 
 const { TabPane } = Tabs
 
 const Dashboard: React.FC = () => {
+  const { data: session } = useSession()
+
+  if (!session?.user) {
+    return (
+      <div className={styles.Header}>
+        <h1>Dashboard is availible only for logged users</h1>
+        <Button onClick={() => Router.push(AppRoutes.INDEX)}>Home</Button>
+      </div>
+    )
+  }
+
   return (
     <>
-      <div className={s.Header}>
+      <div className={styles.Header}>
         <h1>Dashboard</h1>
         <Button onClick={() => Router.push(AppRoutes.INDEX)}>Home</Button>
       </div>
 
-      <Tabs defaultActiveKey="1" className={s.TabList}>
+      <Tabs defaultActiveKey="1" className={styles.TabList}>
         <TabPane tab="My orders" key="1">
-          <Orders data={config.myOrders} />
+          <OrdersList data={config.myOrders} />
         </TabPane>
 
         <TabPane tab="Masters list" key="2">
-          <Masters data={config.mastersList} />
+          <MastersList data={config.mastersList} />
         </TabPane>
 
         <TabPane tab="Domains list" key="3">
-          <Domains data={config.domainLists} />
+          <DomainsList data={config.domainLists} />
         </TabPane>
       </Tabs>
 
-      <div className={s.TablessList}>
+      <div className={styles.TablessList}>
         <Card title="My Orders" style={{ flex: '1.5' }}>
-          <Orders data={config.myOrders} />
+          <OrdersList data={config.myOrders} />
         </Card>
         <Card title="Masters List" style={{ flex: '1' }}>
-          <Masters data={config.mastersList} />
+          <MastersList data={config.mastersList} />
         </Card>
         <Card title="Domain Lists" style={{ flex: '1.5' }}>
-          <Domains data={config.domainLists} />
+          <DomainsList data={config.domainLists} />
         </Card>
       </div>
     </>

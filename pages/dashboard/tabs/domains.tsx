@@ -1,7 +1,7 @@
 import React from 'react'
 import { List } from 'antd'
 import { StarOutlined } from '@ant-design/icons'
-import s from '../style.module.scss'
+import styles from '../style.module.scss'
 
 interface Props {
   data: {
@@ -14,10 +14,10 @@ interface Props {
 
 const Domains: React.FC<Props> = ({ data }) => (
   <List
-    className={`${s.List} ${s.Domains}`}
+    className={`${styles.List} ${styles.Domains}`}
     dataSource={data}
     renderItem={(item) => (
-      <List.Item className={s.ListItem}>
+      <List.Item className={styles.ListItem}>
         <div>
           <span>{item.name}</span>
           <span style={{ gap: '0.5rem', display: 'flex' }}>

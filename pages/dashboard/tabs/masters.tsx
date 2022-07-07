@@ -1,7 +1,7 @@
 import React from 'react'
 import { List, Avatar } from 'antd'
 import { StarOutlined } from '@ant-design/icons'
-import s from '../style.module.scss'
+import styles from '../style.module.scss'
 
 interface Props {
   data: {
@@ -15,10 +15,10 @@ interface Props {
 
 const Masters: React.FC<Props> = ({ data }) => (
   <List
-    className={`${s.List} ${s.Masters}`}
+    className={`${styles.List} ${styles.Masters}`}
     dataSource={data}
     renderItem={(item) => (
-      <List.Item className={s.ListItem}>
+      <List.Item className={styles.ListItem}>
         <List.Item.Meta
           avatar={<Avatar size={40} src={item.avatar} />}
           title={item.name}
