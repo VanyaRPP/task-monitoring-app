@@ -1,0 +1,73 @@
+@import '../../styles/variables.scss';
+
+.Sidebar {
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  position: fixed;
+
+  background-color: #fff;
+  z-index: 1;
+
+  padding-top: 110px;
+
+  transition: height none;
+
+  @media (max-width: 500px) {
+    display: none;
+    // TODO: придумать что-то для мобильной версии
+  }
+
+  @media (max-width: 889px) {
+    padding-top: 110px;
+  }
+
+  box-shadow: 2px 0 8px #00000050;
+  > *:last-child {
+    box-shadow: 2px 0 8px #00000050;
+  }
+}
+
+.List {
+  padding: 0;
+
+  > * {
+    padding: 0;
+    margin: 0;
+  }
+}
+
+.Rating {
+  width: 200px;
+  position: absolute;
+  bottom: 50px;
+  background-color: #fff;
+
+  .RateBlock {
+    max-height: 200px;
+
+    .InfoBlock {
+      width: 100%;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+
+      .Title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        overflow: hidden;
+      }
+    }
+
+    > *:first-child {
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+  }
+}
