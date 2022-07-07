@@ -1,8 +1,5 @@
-
 const VerifiRequest = () => {
-  return (
-    <div>VerifiRequest</div>
-  )
+  return <div>VerifiRequest</div>
 }
 
 export default VerifiRequest

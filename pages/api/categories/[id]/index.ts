@@ -3,9 +3,9 @@ import dbConnect from '../../../../utils/dbConnect'
 import Category from '../../../../models/Category'
 
 type Data = {
-  data?: any,
-  success: boolean,
-  error?: any,
+  data?: any
+  success: boolean
+  error?: any
 }
 
 async function start() {
@@ -28,20 +28,24 @@ export default async function handler(
       }
     case 'DELETE':
       try {
-        await Category.findByIdAndRemove(req.query.id)
-          .then((category) => {
-            if (!category) {
-              return res.status(400).json({ success: false, data: 'Category ' + req.query.id + ' was not found' })
-            } else {
-              return res.status(200).json({ success: true, data: 'Category ' + req.query.id + ' was dell' })
-            }
-          })
+        await Category.findByIdAndRemove(req.query.id).then((category) => {
+          if (!category) {
+            return res.status(400).json({
+              success: false,
+              data: 'Category ' + req.query.id + ' was not found',
+            })
+          } else {
+            return res.status(200).json({
+              success: true,
+              data: 'Category ' + req.query.id + ' was dell',
+            })
+          }
+        })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }
     case 'PUT':
       try {
-
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }
