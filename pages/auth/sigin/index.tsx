@@ -43,17 +43,15 @@ const SiginPage = ({ providers, csrfToken }: any) => {
 
   return (
     <>
-      {error ? (
-        errrorr !== undefined || '' ? (
-          <Alert
-            message="Error"
-            description={errrorr}
-            type="error"
-            showIcon
-            closable
-          />
-        ) : null
-      ) : null}
+      {error && errrorr !== undefined && (
+        <Alert
+          message="Error"
+          description={errrorr}
+          type="error"
+          showIcon
+          closable
+        />
+      )}
       <h2 className={s.Header}>Log In</h2>
       <p className={s.Text}>
         Don`t have an account? <Link href="/auth/registration">Sign Up</Link>
@@ -69,7 +67,42 @@ const SiginPage = ({ providers, csrfToken }: any) => {
             <button type="submit">Sign in with Email</button>
           </form>
         </div>
+
+        {/* Karen's changes */}
+        {/* 
+          <Form
+            method="post"
+            action="/api/auth/signin/email"
+            name="normal_login"
+            className={s.LoginForm}
+            initialValues={{ remember: true }}
+          // onFinish={() => {
+          //   fetch('/api/auth/signin/email', {
+          //     method: 'POST'
+          //   })
+          // }}
+          >
+            <Form.Item
+              name="email"
+              rules={[{ required: true, type: 'email', message: 'Please input your email!' }]}
+            >
+              <Input prefix={<UserOutlined />} placeholder="email" />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                block
+                type="primary"
+                htmlType="submit"
+                className={s.FormButton}
+              >
+                Sing in
+              </Button>
+            </Form.Item>
+          </Form>
+        </div> */}
+
         <div className={s.Divider} />
+
         <div className={s.HalfBlock}>
           {Object.values(providers).map((provider: any) =>
             provider?.name !== 'Email' ? (
