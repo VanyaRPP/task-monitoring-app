@@ -7,8 +7,6 @@ interface Props {
 }
 
 const MainFooter: FC<Props> = ({ style }) => {
-  console.log(style)
-
   return (
     <Layout.Footer className={s.Footer} style={style}>
       <div className={s.Divider} />
