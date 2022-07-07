@@ -43,7 +43,15 @@ const MainLayout: React.FC<Props> = ({ children }) => {
             <SearchBar className={s.SearchBar} />
             <div className={s.Background}>{children}</div>
           </Layout.Content>
-          <MainFooter />
+          <MainFooter
+            style={{
+              marginLeft: session?.user
+                ? collapsed
+                  ? '80px'
+                  : '200px'
+                : '0px',
+            }}
+          />
         </Layout>
       </Layout>
     </>
