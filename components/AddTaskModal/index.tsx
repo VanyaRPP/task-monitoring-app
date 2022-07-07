@@ -3,6 +3,7 @@ import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
 import { useSession } from 'next-auth/react'
 import { useState } from 'react'
+import { useGetAllCategoriesQuery } from '../../api/categoriesApi/category.api'
 import { useAddTaskMutation } from '../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
 
@@ -29,8 +30,11 @@ const AddTaskModal: React.FC<PropsType> = ({
 
   const [addTask] = useAddTaskMutation()
   const { data: session } = useSession()
-  const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const user = data?.data
+  const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
+  const user = userData?.data
+  const { data: categoriesData } = useGetAllCategoriesQuery('')
+  const categories = categoriesData?.data
+  console.log(categories)
 
   const onSubmit = async () => {
     const formData: FormData = await form.validateFields()
