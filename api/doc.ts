@@ -1,4 +1,4 @@
-import { withSwagger } from 'next-swagger-doc';
+import { withSwagger } from 'next-swagger-doc'
 
 const swaggerHandler = withSwagger({
   definition: {
@@ -9,5 +9,5 @@ const swaggerHandler = withSwagger({
     },
   },
   apiFolder: 'pages/api',
-});
-export default swaggerHandler();
+})
+export default swaggerHandler()

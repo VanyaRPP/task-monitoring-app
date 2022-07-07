@@ -1,11 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import dbConnect from "../../../../utils/dbConnect"
+import dbConnect from '../../../../utils/dbConnect'
 import User from '../../../../models/User'
 
 type Data = {
-  data?: any,
-  success: boolean,
-  error?: any,
+  data?: any
+  success: boolean
+  error?: any
 }
 
 async function start() {

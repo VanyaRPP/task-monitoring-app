@@ -8,7 +8,6 @@ if (!MONGODB_URI) {
   )
 }
 
-
 let cached = global.mongoose
 
 if (!cached) {
@@ -21,10 +20,9 @@ async function dbConnect() {
   }
 
   if (!cached.promise) {
-    const opts = {
-    }
+    const opts = {}
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then(mongoose => {
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
       return mongoose
     })
   }

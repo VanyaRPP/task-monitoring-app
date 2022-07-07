@@ -3,16 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "yarn open-browser && next dev",
+    "open-browser": "open http://localhost:3000",
     "build": "next build",
     "start": "next start",
     "cypress:open": "cypress open",
     "test": "jest",
-    "lint": "next lint",
-    "lint:fix": "npm run lint -- --fix",
-    "prettier": "npx prettier src test --check",
-    "prettier:fix": "npm run prettier -- --write",
-    "format": "npm run prettier:fix && npm run lint:fix"
+    "lint": "eslint \"./**/*.{js,jsx,ts,tsx,json}\"",
+    "lint:fix": "eslint --fix \"./**/*.{js,jsx,ts,tsx,json}\"",
+    "prettier": "prettier --check --ignore-path .gitignore .",
+    "prettier:fix": "prettier --write --ignore-path .gitignore .",
+    "format": "npm run prettier:fix && npm run lint:fix",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
@@ -61,6 +63,7 @@
     "swagger-ui-react": "^4.12.0",
     "ts-jest": "^28.0.5",
     "typescript": "4.7.3",
-    "webpack": "^5.73.0"
+    "webpack": "^5.73.0",
+    "husky": "^8.0.0"
   }
 }
