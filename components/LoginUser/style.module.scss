@@ -1,58 +1,57 @@
 .Info {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
 
-    &.active {
-        visibility: visible;
-        opacity: 1;
-    }
+  &.active {
+    visibility: visible;
+    opacity: 1;
+  }
 }
 
 .Card {
-    display: flex;
+  display: flex;
+  position: absolute;
+  right: 66px;
+  top: 75px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 10px;
+  box-shadow: 2px 5px 9px 0px rgb(0 0 0 / 31%);
+
+  @media (max-width: 889px) {
+    right: 16px;
+  }
+
+  &:after {
+    content: '';
     position: absolute;
-    right: 66px;
-    top: 75px;
+    top: -5px;
+    right: 11px;
+    width: 14px;
+    height: 14px;
+    background-color: #fff;
+    transform: rotate(45deg);
+  }
+
+  .Buttons {
+    display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    border-radius: 10px;
-    box-shadow: 2px 5px 9px 0px rgb(0 0 0 / 31%);
-
-    @media (max-width: 889px) {
-        right: 16px;
-    }    
-
-    &:after {
-        content: '';
-        position: absolute;
-        top: -5px;
-        right: 11px;
-        width: 14px;
-        height: 14px;
-        background-color: #fff;
-        transform: rotate(45deg);
-    }
-
-    .Buttons {
-        display: flex;
-        flex-direction: column;
-    }
+  }
 }
 
 .Avatar {
-    padding: 0 20px;
-    cursor: pointer;
+  padding: 0 20px;
+  cursor: pointer;
 }
 
 .Button {
-    margin: 0 20px;
+  margin: 0 20px;
 }
-

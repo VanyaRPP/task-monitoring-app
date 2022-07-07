@@ -7,7 +7,7 @@ const MainFooter: FC = () => {
     <Layout.Footer className={s.Footer}>
       <h2>LOGO</h2>
       <p>HZ CHO ZA SAIT</p>
-    </Layout.Footer >
+    </Layout.Footer>
   )
 }
 

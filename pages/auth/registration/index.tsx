@@ -1,27 +1,26 @@
-import { FC } from "react"
+import { FC } from 'react'
 import { Button, Checkbox, Form, Input } from 'antd'
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import s from './style.module.scss'
-import Link from "next/link";
+import Link from 'next/link'
 
 const RegistrationPage: FC = () => {
-
   const onFinish = (values: any) => {
-    console.log('Success:', values);
-  };
+    console.log('Success:', values)
+  }
 
   const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
-  };
+    console.log('Failed:', errorInfo)
+  }
 
   return (
     <div className={s.Container}>
       <div className={s.HalfBlock}>
-        <h2>
-          Got an account?
-        </h2>
-        <Link href='/auth/login'>
-          <Button type="primary" size="large">Log in</Button>
+        <h2>Got an account?</h2>
+        <Link href="/auth/login">
+          <Button type="primary" size="large">
+            Log in
+          </Button>
         </Link>
       </div>
       <div className={s.HalfBlock}>
@@ -36,7 +35,10 @@ const RegistrationPage: FC = () => {
             name="username"
             rules={[{ required: true, message: 'Please input your Username!' }]}
           >
-            <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Username" />
+            <Input
+              prefix={<UserOutlined className="site-form-item-icon" />}
+              placeholder="Username"
+            />
           </Form.Item>
           <Form.Item
             name="password"
@@ -59,7 +61,11 @@ const RegistrationPage: FC = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="login-form-button">
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="login-form-button"
+            >
               Log in
             </Button>
           </Form.Item>
