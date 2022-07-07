@@ -1,7 +1,7 @@
 import { Button, Card } from 'antd'
 import { useGetAllTaskQuery } from '../../api/taskApi/task.api'
 import withAuthRedirect from '../../components/HOC/withAuthRedirect'
-import style from './style.module.scss'
+import s from './style.module.scss'
 import { ITask } from '../../models/Task'
 import Router from 'next/router'
 import { useSession } from 'next-auth/react'
@@ -22,7 +22,7 @@ const Tasks: React.FC = () => {
   const user = userData?.data
 
   return (
-    <div className={style.Container}>
+    <div className={s.Container}>
       {tasks &&
         tasks.map((task: ITask, index) => {
           return (
@@ -36,15 +36,15 @@ const Tasks: React.FC = () => {
                   onClick={() => Router.push(AppRoutes.TASK + '/' + task._id)}
                 >
                   {user?._id.toString() === task?.creator.toString() ||
-                  isDeadlineExpired(task?.deadline)
+                    isDeadlineExpired(task?.deadline)
                     ? 'Info'
                     : 'Apply'}
                 </Button>
               }
               className={
                 isDeadlineExpired(task?.deadline)
-                  ? `${style.Card} ${style.Disabled}`
-                  : style.Card
+                  ? `${s.Card} ${s.Disabled}`
+                  : s.Card
               }
             >
               <p>Catagory: {task?.category}</p>

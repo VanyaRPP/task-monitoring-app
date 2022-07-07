@@ -1,7 +1,7 @@
 import { getCsrfToken, getProviders, useSession } from 'next-auth/react'
 import { Alert } from 'antd'
 import SinginBtn from '../../../components/SinginBtn'
-import style from './style.module.scss'
+import s from './style.module.scss'
 import Link from 'next/link'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -54,12 +54,12 @@ const SiginPage = ({ providers, csrfToken }: any) => {
           />
         ) : null
       ) : null}
-      <h2 className={style.Header}>Log In</h2>
-      <p className={style.Text}>
+      <h2 className={s.Header}>Log In</h2>
+      <p className={s.Text}>
         Don`t have an account? <Link href="/auth/registration">Sign Up</Link>
       </p>
-      <div className={style.Container}>
-        <div className={style.HalfBlock}>
+      <div className={s.Container}>
+        <div className={s.HalfBlock}>
           <form method="post" action="/api/auth/signin/email">
             <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
             <label>
@@ -69,8 +69,8 @@ const SiginPage = ({ providers, csrfToken }: any) => {
             <button type="submit">Sign in with Email</button>
           </form>
         </div>
-        <div className={style.Divider} />
-        <div className={style.HalfBlock}>
+        <div className={s.Divider} />
+        <div className={s.HalfBlock}>
           {Object.values(providers).map((provider: any) =>
             provider?.name !== 'Email' ? (
               <SinginBtn key={provider?.name} provider={provider} />
