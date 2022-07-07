@@ -15,11 +15,11 @@ export const userApi = createApi({
   endpoints: (builder) => ({
     getUserByEmail: builder.query<Quer, string>({
       query: (email) => `user/${email}`,
-      providesTags: result => ['User']
+      providesTags: (result) => ['User'],
     }),
     getUserById: builder.query<Quer, string>({
       query: (id) => `user/id/${id}`,
-      providesTags: result => ['User']
+      providesTags: (result) => ['User'],
     }),
     updateUser: builder.mutation<IUser, Partial<IUser>>({
       query(data) {
@@ -31,8 +31,12 @@ export const userApi = createApi({
         }
       },
       invalidatesTags: ['User'],
-    })
+    }),
   }),
 })
 
-export const { useGetUserByEmailQuery, useGetUserByIdQuery, useUpdateUserMutation } = userApi
+export const {
+  useGetUserByEmailQuery,
+  useGetUserByIdQuery,
+  useUpdateUserMutation,
+} = userApi

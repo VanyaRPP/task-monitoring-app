@@ -3,9 +3,9 @@ import dbConnect from '../../../utils/dbConnect'
 import Task from '../../../models/Task'
 
 type Data = {
-  data?: any,
-  success: boolean,
-  error?: any,
+  data?: any
+  success: boolean
+  error?: any
 }
 
 async function start() {

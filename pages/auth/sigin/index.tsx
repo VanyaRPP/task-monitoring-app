@@ -1,8 +1,8 @@
 import { getProviders, useSession } from 'next-auth/react'
-import { Button, Checkbox, Form, Input, Alert } from "antd"
-import SinginBtn from "../../../components/SinginBtn"
+import { Button, Checkbox, Form, Input, Alert } from 'antd'
+import SinginBtn from '../../../components/SinginBtn'
 import s from './style.module.scss'
-import { LockOutlined, UserOutlined } from "@ant-design/icons"
+import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import Link from 'next/link'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -13,17 +13,19 @@ interface errors {
 }
 
 const errors: errors = {
-  Signin: "Try signing in with a different account.",
-  OAuthSignin: "Try signing in with a different account.",
-  OAuthCallback: "Try signing in with a different account.",
-  OAuthCreateAccount: "Try signing in with a different account.",
-  EmailCreateAccount: "Try signing in with a different account.",
-  Callback: "Try signing in with a different account.",
-  OAuthAccountNotLinked: "To confirm your identity, sign in with the same account you used originally.",
-  EmailSignin: "The e-mail could not be sent.",
-  CredentialsSignin: "Sign in failed. Check the details you provided are correct.",
-  SessionRequired: "Please sign in to access this page.",
-  default: "Unable to sign in."
+  Signin: 'Try signing in with a different account.',
+  OAuthSignin: 'Try signing in with a different account.',
+  OAuthCallback: 'Try signing in with a different account.',
+  OAuthCreateAccount: 'Try signing in with a different account.',
+  EmailCreateAccount: 'Try signing in with a different account.',
+  Callback: 'Try signing in with a different account.',
+  OAuthAccountNotLinked:
+    'To confirm your identity, sign in with the same account you used originally.',
+  EmailSignin: 'The e-mail could not be sent.',
+  CredentialsSignin:
+    'Sign in failed. Check the details you provided are correct.',
+  SessionRequired: 'Please sign in to access this page.',
+  default: 'Unable to sign in.',
 }
 
 const SiginPage = ({ providers }: any) => {
@@ -42,8 +44,8 @@ const SiginPage = ({ providers }: any) => {
 
   return (
     <>
-      {
-        error ? errrorr !== undefined || '' ?
+      {error ? (
+        errrorr !== undefined || '' ? (
           <Alert
             message="Error"
             description={errrorr}
@@ -51,10 +53,12 @@ const SiginPage = ({ providers }: any) => {
             showIcon
             closable
           />
-          : null : null
-      }
+        ) : null
+      ) : null}
       <h2 className={s.Header}>Log In</h2>
-      <p className={s.Text}>Don`t have an account? <Link href='/auth/registration'>Sign Up</Link></p>
+      <p className={s.Text}>
+        Don`t have an account? <Link href="/auth/registration">Sign Up</Link>
+      </p>
       <div className={s.Container}>
         <div className={s.HalfBlock}>
           <Form
@@ -65,13 +69,17 @@ const SiginPage = ({ providers }: any) => {
           >
             <Form.Item
               name="username"
-              rules={[{ required: true, message: 'Please input your Username!' }]}
+              rules={[
+                { required: true, message: 'Please input your Username!' },
+              ]}
             >
               <Input prefix={<UserOutlined />} placeholder="Username" />
             </Form.Item>
             <Form.Item
               name="password"
-              rules={[{ required: true, message: 'Please input your Password!' }]}
+              rules={[
+                { required: true, message: 'Please input your Password!' },
+              ]}
             >
               <Input.Password
                 prefix={<LockOutlined />}
@@ -83,12 +91,17 @@ const SiginPage = ({ providers }: any) => {
               <Form.Item name="remember" valuePropName="checked" noStyle>
                 <Checkbox className={s.Checkbox}>Remember me</Checkbox>
               </Form.Item>
-              <Link href="/"><a className={s.FormForgot} >
-                Forgot password
-              </a></Link>
+              <Link href="/">
+                <a className={s.FormForgot}>Forgot password</a>
+              </Link>
             </Form.Item>
             <Form.Item>
-              <Button block type="primary" htmlType="submit" className={s.FormButton}>
+              <Button
+                block
+                type="primary"
+                htmlType="submit"
+                className={s.FormButton}
+              >
                 Sing in
               </Button>
             </Form.Item>
@@ -97,9 +110,7 @@ const SiginPage = ({ providers }: any) => {
         <div className={s.Divider} />
         <div className={s.HalfBlock}>
           {Object.values(providers).map((provider: any) => (
-            <SinginBtn
-              key={provider?.name}
-              provider={provider} />
+            <SinginBtn key={provider?.name} provider={provider} />
           ))}
         </div>
       </div>

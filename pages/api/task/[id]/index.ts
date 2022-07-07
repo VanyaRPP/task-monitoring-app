@@ -3,9 +3,9 @@ import dbConnect from '../../../../utils/dbConnect'
 import Task from '../../../../models/Task'
 
 type Data = {
-  data?: any,
-  success: boolean,
-  error?: any,
+  data?: any
+  success: boolean
+  error?: any
 }
 
 async function start() {
@@ -58,16 +58,21 @@ export default async function handler(
        *         description: Task not found
        */
       try {
-        await Task.findByIdAndRemove(req.query.id)
-          .then((user) => {
-            if (!user) {
-              return res.status(400).json({ success: false, data: req.query.id + ' was not found' })
-            } else {
-              return res.status(200).json({ success: true, data: req.query.id + ' was dell' })
-            }
-          })
+        await Task.findByIdAndRemove(req.query.id).then((user) => {
+          if (!user) {
+            return res
+              .status(400)
+              .json({ success: false, data: req.query.id + ' was not found' })
+          } else {
+            return res
+              .status(200)
+              .json({ success: true, data: req.query.id + ' was dell' })
+          }
+        })
       } catch (error) {
-        return res.status(400).json({ success: false, data: req.query.id + ' error' })
+        return res
+          .status(400)
+          .json({ success: false, data: req.query.id + ' error' })
       }
     // try {
     //   const maybeteam = await User.findOne({ name: req.body.name }).exec()
