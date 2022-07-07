@@ -44,8 +44,6 @@ const SiginPage = ({ providers, csrfToken }: any) => {
 
   return (
     <>
-      {/* {error ? (
-        errrorr !== undefined || '' ? ( */}
       {error && errrorr !== undefined && (
         <Alert
           message="Error"
@@ -55,14 +53,10 @@ const SiginPage = ({ providers, csrfToken }: any) => {
           closable
         />
       )}
-      {/* ) : null
-      ) : null} */}
-
       <h2 className={s.Header}>Log In</h2>
       <p className={s.Text}>
         Don`t have an account? <Link href="/auth/registration">Sign Up</Link>
       </p>
-
       <div className={s.Container}>
         <div className={s.HalfBlock}>
           <Form
@@ -142,7 +136,12 @@ const SiginPage = ({ providers, csrfToken }: any) => {
               <Input prefix={<UserOutlined />} placeholder="email" />
             </Form.Item>
             <Form.Item>
-              <Button block type="primary" htmlType="submit" className={s.FormButton}>
+              <Button
+                block
+                type="primary"
+                htmlType="submit"
+                className={s.FormButton}
+              >
                 Sing in
               </Button>
             </Form.Item>
