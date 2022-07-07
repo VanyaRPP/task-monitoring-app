@@ -19,8 +19,8 @@ export default function Home() {
     <Space direction="vertical" size="large">
       <HomePage />
       <Button onClick={() => Router.push(AppRoutes.DASHBOARD)}>
-          Dashboard
-        </Button>
+        Dashboard
+      </Button>
     </Space>
   )
 }

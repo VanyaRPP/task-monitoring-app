@@ -36,7 +36,7 @@ const Tasks: React.FC = () => {
                   onClick={() => Router.push(AppRoutes.TASK + '/' + task._id)}
                 >
                   {user?._id.toString() === task?.creator.toString() ||
-                    isDeadlineExpired(task?.deadline)
+                  isDeadlineExpired(task?.deadline)
                     ? 'Info'
                     : 'Apply'}
                 </Button>
