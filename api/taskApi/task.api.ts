@@ -29,7 +29,6 @@ export const taskApi = createApi({
     }),
     addTask: builder.mutation<ITask, Partial<ITask>>({
       query(data) {
-        console.log(data, 'data')
         const { ...body } = data
         return {
           url: `task`,

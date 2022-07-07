@@ -2,9 +2,28 @@ import NextAuth from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
 import FacebookProvider from 'next-auth/providers/facebook'
+import EmailProvider from 'next-auth/providers/email'
 import { MongoDBAdapter } from '@next-auth/mongodb-adapter'
 import jwt from 'jsonwebtoken'
+import nodemailer from 'nodemailer'
 import clientPromise from '../../../lib/mongodb'
+
+function html({ url, host, email }) {
+  const escapedEmail = `${email.replace(/\./g, '&#8203;.')}`
+  const escapedHost = `${host.replace(/\./g, '&#8203;.')}`
+  return `
+      <body>
+        <h1>Your magic link</h1>
+        <h3>You requested a login form ${escapedEmail}</h3>
+        <p>
+          <a href="${url}">Login to ${escapedHost}</a>
+      </body>
+  `
+}
+
+function text({ url, host }) {
+  return `Login to ${host}\n${url}\n\n`
+}
 
 export default NextAuth({
   adapter: MongoDBAdapter(clientPromise),
@@ -18,6 +37,32 @@ export default NextAuth({
     },
   },
   providers: [
+    EmailProvider({
+      server: {
+        host: process.env.EMAIL_SERVER_HOST,
+        port: process.env.EMAIL_SERVER_PORT,
+        auth: {
+          user: process.env.EMAIL_SERVER_USER,
+          pass: process.env.EMAIL_SERVER_PASSWORD,
+        },
+      },
+      from: process.env.EMAIL_FROM,
+      async sendVerificationRequest({
+        identifier: email,
+        url,
+        provider: { server, from },
+      }) {
+        const { host } = new URL(url)
+        const transport = nodemailer.createTransport(server)
+        await transport.sendMail({
+          to: email,
+          from,
+          subject: `Login to ${host}`,
+          text: text({ url, host }),
+          html: html({ url, host, email }),
+        })
+      },
+    }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -55,7 +100,7 @@ export default NextAuth({
     signIn: '/auth/sigin',
     error: '/auth/sigin', ///auth/error Error code passed in query string as ?error=
     // signOut: '/auth/signout',
-    // verifyRequest: '/auth/verify-request', // (used for check email message)
+    verifyRequest: '/auth/verify-request', // (used for check email message)
     // newUser: '/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
   },
 })

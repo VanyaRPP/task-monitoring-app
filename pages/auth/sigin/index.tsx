@@ -1,4 +1,4 @@
-import { getProviders, useSession } from 'next-auth/react'
+import { getCsrfToken, getProviders, useSession } from 'next-auth/react'
 import { Button, Checkbox, Form, Input, Alert } from 'antd'
 import SinginBtn from '../../../components/SinginBtn'
 import s from './style.module.scss'
@@ -28,7 +28,7 @@ const errors: errors = {
   default: 'Unable to sign in.',
 }
 
-const SiginPage = ({ providers }: any) => {
+const SiginPage = ({ providers, csrfToken }: any) => {
   const router = useRouter()
   const { status } = useSession()
   if (status === 'authenticated') {
@@ -61,39 +61,31 @@ const SiginPage = ({ providers }: any) => {
       </p>
       <div className={s.Container}>
         <div className={s.HalfBlock}>
-          <Form
+          <form method="post" action="/api/auth/signin/email">
+            <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+            <label>
+              Email address
+              <input type="email" id="email" name="email" />
+            </label>
+            <button type="submit">Sign in with Email</button>
+          </form>
+          {/* <Form
+            method="post"
+            action="/api/auth/signin/email"
             name="normal_login"
             className={s.LoginForm}
             initialValues={{ remember: true }}
-            onFinish={() => console.log('Login vith credentals')}
+          // onFinish={() => {
+          //   fetch('/api/auth/signin/email', {
+          //     method: 'POST'
+          //   })
+          // }}
           >
             <Form.Item
-              name="username"
-              rules={[
-                { required: true, message: 'Please input your Username!' },
-              ]}
+              name="email"
+              rules={[{ required: true, type: 'email', message: 'Please input your email!' }]}
             >
-              <Input prefix={<UserOutlined />} placeholder="Username" />
-            </Form.Item>
-            <Form.Item
-              name="password"
-              rules={[
-                { required: true, message: 'Please input your Password!' },
-              ]}
-            >
-              <Input.Password
-                prefix={<LockOutlined />}
-                type="password"
-                placeholder="Password"
-              />
-            </Form.Item>
-            <Form.Item>
-              <Form.Item name="remember" valuePropName="checked" noStyle>
-                <Checkbox className={s.Checkbox}>Remember me</Checkbox>
-              </Form.Item>
-              <Link href="/">
-                <a className={s.FormForgot}>Forgot password</a>
-              </Link>
+              <Input prefix={<UserOutlined />} placeholder="email" />
             </Form.Item>
             <Form.Item>
               <Button
@@ -105,13 +97,15 @@ const SiginPage = ({ providers }: any) => {
                 Sing in
               </Button>
             </Form.Item>
-          </Form>
+          </Form> */}
         </div>
         <div className={s.Divider} />
         <div className={s.HalfBlock}>
-          {Object.values(providers).map((provider: any) => (
-            <SinginBtn key={provider?.name} provider={provider} />
-          ))}
+          {Object.values(providers).map((provider: any) =>
+            provider?.name !== 'Email' ? (
+              <SinginBtn key={provider?.name} provider={provider} />
+            ) : null
+          )}
         </div>
       </div>
     </>
@@ -119,7 +113,8 @@ const SiginPage = ({ providers }: any) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  return { props: { providers: await getProviders() } }
+  const csrfToken = await getCsrfToken(context)
+  return { props: { providers: await getProviders(), csrfToken } }
 }
 
 export default SiginPage

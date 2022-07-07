@@ -1,15 +1,16 @@
-import mongoose, { Schema, Types, model, ObjectId } from 'mongoose'
+import mongoose, { Schema, ObjectId } from 'mongoose'
+import { ITask } from './Task'
 
 export interface ICategory {
   _id: ObjectId
   name: string
   desription?: string
-  taskincategory: []
+  taskincategory?: [ITask | ObjectId]
 }
 
 const CategoryShema = new Schema<ICategory>({
   name: { type: String, required: true },
-  taskincategory: [{ type: Schema.Types.ObjectId, ref: 'Task', default: [] }],
+  taskincategory: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
   desription: { type: String, default: 'no description' },
 })
 
