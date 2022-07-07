@@ -5,4 +5,5 @@ export enum AppRoutes {
   TASK = '/task',
   AUTH = '/auth/',
   AUTH_SIGNIN = '/auth/sigin',
+  CONTACTS = '/contacts',
 }

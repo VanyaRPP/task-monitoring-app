@@ -1,0 +1,47 @@
+.Block {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+.Block2 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.Block3 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.Home {
+  padding-top: 0%;
+  text-align: center;
+  font-size: calc(30px + (40 + 40 * 0.7) * ((100vw - 320px) / 2560));
+}
+.Text {
+  font-size: calc(10px + (25 + 25 * 0.7) * ((100vw - 320px) / 2560));
+  text-align: left;
+  padding: 0% 2% 0% 2%;
+}
+.Button {
+  margin-top: 1rem;
+  padding: 1.5% 1% 7% 1%;
+  margin-left: 10em;
+  margin-right: 10em;
+  font-size: calc(15px + (10 + 10 * 0.7) * ((100vw - 320px) / 2560));
+  border-radius: 5px;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+.Img {
+  width: calc(155px + (305 + 305 * 0.7) * ((100vw - 320px) / 2560));
+}
+.HalfBlock {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 350px;
+  width: 49%;
+}
