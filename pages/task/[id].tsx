@@ -1,6 +1,10 @@
 import s from './style.module.scss'
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
-import { Avatar, Button, Card } from 'antd'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons'
+import { Avatar, Button, Card, Popconfirm } from 'antd'
 import Router, { useRouter } from 'next/router'
 import {
   useDeleteTaskMutation,
@@ -30,7 +34,7 @@ const Task: React.FC = () => {
 
   const taskDelete = (id: ObjectId) => {
     deleteTask(id)
-    Router.push(AppRoutes.INDEX)
+    Router.push(AppRoutes.TASK)
   }
 
   return (
@@ -40,18 +44,22 @@ const Task: React.FC = () => {
         actions={
           session?.user?.email === user?.email
             ? [
-                <Button key="edit" ghost type="primary">
-                  <EditOutlined />
-                </Button>,
-                <Button
-                  key="delete"
-                  ghost
-                  type="primary"
-                  onClick={() => taskDelete(task?._id)}
-                >
+              <Button key="edit" ghost type="primary">
+                <EditOutlined />
+              </Button>,
+              <Popconfirm
+                key="delete"
+                title="Are you sure？"
+                okText="Yes"
+                cancelText="No"
+                icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                onConfirm={() => taskDelete(task?._id)}
+              >
+                <Button ghost type="primary">
                   <DeleteOutlined />
-                </Button>,
-              ]
+                </Button>
+              </Popconfirm>,
+            ]
             : null
         }
       >

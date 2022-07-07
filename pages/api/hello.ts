@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 type Data = {
-  data?: any,
-  success: boolean,
-  error?: any,
+  data?: any
+  success: boolean
+  error?: any
 }
 
 export default function handler(
@@ -15,5 +15,4 @@ export default function handler(
   } catch (error) {
     res.status(400).json({ success: false })
   }
-  
 }
