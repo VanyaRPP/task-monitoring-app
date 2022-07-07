@@ -44,23 +44,70 @@ const SiginPage = ({ providers, csrfToken }: any) => {
 
   return (
     <>
-      {error ? (
-        errrorr !== undefined || '' ? (
-          <Alert
-            message="Error"
-            description={errrorr}
-            type="error"
-            showIcon
-            closable
-          />
-        ) : null
-      ) : null}
+      {error && errrorr !== undefined && (
+        <Alert
+          message="Error"
+          description={errrorr}
+          type="error"
+          showIcon
+          closable
+        />
+      )}
       <h2 className={s.Header}>Log In</h2>
       <p className={s.Text}>
         Don`t have an account? <Link href="/auth/registration">Sign Up</Link>
       </p>
       <div className={s.Container}>
         <div className={s.HalfBlock}>
+          <Form
+            name="normal_login"
+            className={s.LoginForm}
+            initialValues={{ remember: true }}
+            onFinish={() => console.log('Login vith credentals')}
+          >
+            <Form.Item
+              name="username"
+              rules={[
+                { required: true, message: 'Please input your Username!' },
+              ]}
+            >
+              <Input prefix={<UserOutlined />} placeholder="Username" />
+            </Form.Item>
+            <Form.Item
+              name="password"
+              rules={[
+                { required: true, message: 'Please input your Password!' },
+              ]}
+            >
+              <Input.Password
+                prefix={<LockOutlined />}
+                type="password"
+                placeholder="Password"
+              />
+            </Form.Item>
+            <Form.Item>
+              <Form.Item name="remember" valuePropName="checked" noStyle>
+                <Checkbox className={s.Checkbox}>Remember me</Checkbox>
+              </Form.Item>
+              <Link href="/">
+                <a className={s.FormForgot}>Forgot password</a>
+              </Link>
+            </Form.Item>
+            <Form.Item>
+              <Button
+                block
+                type="primary"
+                htmlType="submit"
+                className={s.FormButton}
+              >
+                Sing in
+              </Button>
+            </Form.Item>
+          </Form>
+        </div>
+
+        {/* Karen's changes */}
+        {/* <div className={s.HalfBlock}>
           <form method="post" action="/api/auth/signin/email">
             <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
             <label>
@@ -69,7 +116,8 @@ const SiginPage = ({ providers, csrfToken }: any) => {
             </label>
             <button type="submit">Sign in with Email</button>
           </form>
-          {/* <Form
+
+          <Form
             method="post"
             action="/api/auth/signin/email"
             name="normal_login"
@@ -97,9 +145,11 @@ const SiginPage = ({ providers, csrfToken }: any) => {
                 Sing in
               </Button>
             </Form.Item>
-          </Form> */}
-        </div>
+          </Form>
+        </div> */}
+
         <div className={s.Divider} />
+
         <div className={s.HalfBlock}>
           {Object.values(providers).map((provider: any) =>
             provider?.name !== 'Email' ? (
