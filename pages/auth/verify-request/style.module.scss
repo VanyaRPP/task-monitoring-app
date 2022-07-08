@@ -10,3 +10,19 @@
   font-weight: 400;
   margin: calc(4px + 20 * (100vw / 1400)) 0;
 }
+
+.Buttons {
+  margin: calc(4px + 20 * (100vw / 1400)) 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.Divider {
+  width: 1px;
+  height: 50px;
+  opacity: 0.8;
+  background-color: #858f96;
+}

@@ -1,5 +1,6 @@
 import { getCsrfToken, getProviders, useSession } from 'next-auth/react'
-import { Alert } from 'antd'
+import { Alert, Form, Input, Button } from 'antd'
+import { UserOutlined } from '@ant-design/icons'
 import SinginBtn from '../../../components/SinginBtn'
 import s from './style.module.scss'
 import Link from 'next/link'
@@ -30,6 +31,7 @@ const errors: errors = {
 const SiginPage = ({ providers, csrfToken }: any) => {
   const router = useRouter()
   const { status } = useSession()
+
   if (status === 'authenticated') {
     router.push('/')
   }
@@ -52,42 +54,49 @@ const SiginPage = ({ providers, csrfToken }: any) => {
           closable
         />
       )}
+
       <h2 className={s.Header}>Log In</h2>
-      <p className={s.Text}>
+      {/* <p className={s.Text}>
         Don`t have an account? <Link href="/auth/registration">Sign Up</Link>
-      </p>
+      </p> */}
+
       <div className={s.Container}>
         <div className={s.HalfBlock}>
           <form method="post" action="/api/auth/signin/email">
             <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-            <label>
-              Email address
-              <input type="email" id="email" name="email" />
-            </label>
+
+            <input type="email" id="email" name="email" />
             <button type="submit">Sign in with Email</button>
           </form>
         </div>
 
         {/* Karen's changes */}
-        {/* 
+        {/* <div className={s.HalfBlock}>
           <Form
             method="post"
             action="/api/auth/signin/email"
             name="normal_login"
             className={s.LoginForm}
             initialValues={{ remember: true }}
-          // onFinish={() => {
-          //   fetch('/api/auth/signin/email', {
-          //     method: 'POST'
-          //   })
-          // }}
+            // onFinish={() => {
+            //   fetch('/api/auth/signin/email', {
+            //     method: 'POST',
+            //   })
+            // }}
           >
             <Form.Item
               name="email"
-              rules={[{ required: true, type: 'email', message: 'Please input your email!' }]}
+              rules={[
+                {
+                  required: true,
+                  type: 'email',
+                  message: 'Please input your email!',
+                },
+              ]}
             >
               <Input prefix={<UserOutlined />} placeholder="email" />
             </Form.Item>
+
             <Form.Item>
               <Button
                 block
@@ -95,7 +104,7 @@ const SiginPage = ({ providers, csrfToken }: any) => {
                 htmlType="submit"
                 className={s.FormButton}
               >
-                Sing in
+                Sign In with Email
               </Button>
             </Form.Item>
           </Form>
