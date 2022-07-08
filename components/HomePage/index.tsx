@@ -2,7 +2,6 @@ import { Button } from 'antd'
 // import Tool from '../../assets/svg/Tool'
 import s from './style.module.scss'
 import Image from 'next/image'
-import { calculateProvidedBy } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '../../utils/constants'
 

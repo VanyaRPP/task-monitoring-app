@@ -1,7 +1,6 @@
 .Container {
   display: flex;
   min-height: 100%;
-  flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-around;
   align-items: center;
@@ -9,9 +8,34 @@
 }
 
 .HalfBlock {
+  flex: 0 1 50%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-width: 350px;
-  width: 49%;
+
+  @media (max-width: 768px) {
+    flex: 0 1 100%;
+  }
+}
+
+.Header {
+  text-align: left;
+
+  @media (max-width: 768px) {
+    text-align: center;
+  }
+}
+
+.Avatar {
+  width: 280px;
+  height: 280px;
+  line-height: 280px;
+  font-size: 150px;
+
+  @media (max-width: 768px) {
+    margin: 0 auto;
+    width: 250px;
+    height: 250px;
+    line-height: 250px;
+  }
 }

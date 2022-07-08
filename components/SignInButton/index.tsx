@@ -15,7 +15,7 @@ const IconFont = createFromIconfontCN({
   ],
 })
 
-const SinginBtn: FC<Props> = ({ provider }) => {
+const SignInButton: FC<Props> = ({ provider }) => {
   return (
     <Button style={{ margin: 5 }} onClick={() => signIn(provider?.id)} block>
       <IconFont
@@ -28,4 +28,4 @@ const SinginBtn: FC<Props> = ({ provider }) => {
   )
 }
 
-export default SinginBtn
+export default SignInButton

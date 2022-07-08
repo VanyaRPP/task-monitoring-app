@@ -1,11 +1,11 @@
 import { getCsrfToken, getProviders, useSession } from 'next-auth/react'
 import { Alert } from 'antd'
-import SinginBtn from '../../../components/SinginBtn'
 import s from './style.module.scss'
 import Link from 'next/link'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import SignInButton from '../../../components/SignInButton'
 
 interface errors {
   [index: string]: string
@@ -106,7 +106,7 @@ const SiginPage = ({ providers, csrfToken }: any) => {
         <div className={s.HalfBlock}>
           {Object.values(providers).map((provider: any) =>
             provider?.name !== 'Email' ? (
-              <SinginBtn key={provider?.name} provider={provider} />
+              <SignInButton key={provider?.name} provider={provider} />
             ) : null
           )}
         </div>
