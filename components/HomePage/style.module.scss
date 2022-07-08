@@ -45,3 +45,15 @@
   min-width: 350px;
   width: 49%;
 }
+
+.Home,
+.Text {
+  transition: color 0.5s ease-in-out;
+}
+
+.Home {
+  color: var(--primaryColor) !important;
+}
+.Text {
+  color: var(--textColor);
+}

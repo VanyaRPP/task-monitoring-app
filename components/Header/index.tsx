@@ -14,7 +14,7 @@ const MainHeader: React.FC = () => {
         <Link href={AppRoutes.INDEX}>
           <h1 className={style.Logo}>LOGO</h1>
         </Link>
-        <SearchBar className={style.SearchBarHeader} />
+        <SearchBar className={style.Search} />
         <TaskButton />
         <ThemeSwitcher />
       </div>

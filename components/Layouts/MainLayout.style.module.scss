@@ -1,5 +1,9 @@
+@import '../../styles/variables.scss';
+
 .Layout {
   min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
 
   .Container {
     padding: 0 50px;
@@ -29,12 +33,23 @@
       }
     }
 
-    .Background {
+    .Foreground {
       display: flex;
       flex-direction: column;
       min-height: calc(100vh - 114px);
       padding: 24px;
-      background: #fff;
     }
   }
+}
+
+.Background,
+.Foreground {
+  transition: background 0.5s ease-in-out;
+}
+
+.Background {
+  background: var(--backgroundColor) !important;
+}
+.Foreground {
+  background: var(--backgroundColorPrimary) !important;
 }
