@@ -12,7 +12,6 @@
 
   position: fixed;
 
-  background-color: var(--backgroundColorPrimary);
   z-index: 1;
 
   padding-top: 110px;
@@ -29,6 +28,8 @@
     padding-top: 110px;
   }
 
+  transition: background 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+  background: var(--backgroundColorPrimary);
   box-shadow: 2px 0 8px var(--shadowColor);
 }
 
