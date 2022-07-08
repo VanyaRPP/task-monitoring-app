@@ -1,9 +1,9 @@
 import React from 'react'
 import { Switch } from 'antd'
 import { BulbOutlined, BulbFilled } from '@ant-design/icons'
-import { useAppSelector, useAppDispatch } from '../../store/hooks'
+import { useAppSelector, useAppDispatch } from '../../../store/hooks'
 import styles from './style.module.scss'
-import { themeSlice } from '../../store/reducers/ThemeSlice'
+import { themeSlice } from '../../../store/reducers/ThemeSlice'
 
 const ThemeSwitcher: React.FC = () => {
   const { theme } = useAppSelector((state) => state.themeReducer)

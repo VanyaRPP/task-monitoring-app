@@ -3,7 +3,7 @@ import { Layout } from 'antd'
 import LoginUser from '../LoginUser'
 import style from './style.module.scss'
 import { SearchBar } from '../SearchBar'
-import ThemeSwitcher from '../ThemeSwitcher'
+import ThemeSwitcher from '../UI/ThemeSwitcher'
 import TaskButton from '../TaskButton'
 import { AppRoutes } from '../../utils/constants'
 
