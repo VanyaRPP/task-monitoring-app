@@ -1,0 +1,73 @@
+.Header {
+  text-align: center;
+  font-size: calc(30px + (20 + 20 * 0.7) * ((100vw - 320px) / 1400));
+  margin: 0;
+}
+.Text {
+  text-align: center;
+  font-size: calc(15px + (5 + 5 * 0.7) * ((100vw - 320px) / 1400));
+  font-weight: 400;
+  margin: calc(4px + 20 * (100vw / 1400)) 0;
+}
+.Container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  @media (max-width: 969px) {
+    flex-direction: column;
+  }
+}
+.HalfBlock {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-width: 300px;
+
+  @media (max-width: 969px) {
+    padding: 0 10px;
+  }
+}
+.MyForm {
+  min-width: 275px;
+}
+.Divider {
+  width: 1px;
+  height: 250px;
+  opacity: 0.8;
+  background-color: #858f96;
+  margin: 0 10px;
+
+  @media (max-width: 969px) {
+    width: 100%;
+    height: 1px;
+    margin: 10px 0 45px;
+  }
+}
+.Block {
+  display: flex;
+  flex-direction: row;
+  font-size: calc(15px + (10 + 10 * 0.7) * ((100vw - 320px) / 1400));
+  margin-right: 1rem;
+  @media (max-width: 969px) {
+    font-size: calc(15px + (20 + 20 * 0.7) * ((100vw - 320px) / 1400));
+  }
+}
+.HalfBlock svg {
+  width: 2rem;
+  height: 2rem;
+  margin-left: 2rem;
+  margin-right: 1rem;
+  @media (max-width: 969px) {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-left: 1rem;
+    margin-right: 0.5rem;
+  }
+}
+.Links {
+  @media (max-width: 969px) {
+    margin-top: 2rem;
+  }
+}
