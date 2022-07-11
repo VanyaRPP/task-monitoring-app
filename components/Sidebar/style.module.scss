@@ -28,15 +28,15 @@
     padding-top: 110px;
   }
 
-  transition: background 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+  transition: flex 0.2s, width 0.2s, max-width 0.2s, min-width 0.2s,
+    background 0.5s ease-in-out;
   background: var(--backgroundColorPrimary);
-  box-shadow: 2px 0 8px var(--shadowColor);
 }
 
 .List {
   padding: 0;
 
-  background-color: transparent;
+  background: transparent;
   color: var(--textColor);
 
   > * {
@@ -50,8 +50,11 @@
   position: absolute;
   bottom: 48px;
 
-  background-color: transparent;
+  transition: background 0.5s ease-in-out;
+  background: var(--backgroundColorPrimary);
+
   * {
+    transition: color 0.5s ease-in-out;
     color: var(--textColor);
   }
 

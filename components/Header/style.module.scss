@@ -37,6 +37,11 @@
     .Search {
       max-width: 350px;
 
+      input {
+        color: var(--textColor);
+        background: transparent !important;
+      }
+
       @media (max-width: 660px) {
         display: none;
       }
@@ -45,9 +50,8 @@
 }
 
 .Header {
-  transition: background 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+  transition: background 0.5s ease-in-out;
   background: var(--backgroundColorPrimary);
-  box-shadow: 0 2px 8px var(--shadowColor);
 }
 
 .Logo {

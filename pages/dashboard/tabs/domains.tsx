@@ -20,9 +20,9 @@ const Domains: React.FC<Props> = ({ data }) => (
       <List.Item className={styles.ListItem}>
         <div>
           <span>{item.name}</span>
-          <span style={{ gap: '0.5rem', display: 'flex' }}>
+          <span>
             {item.rate}/5
-            <StarOutlined style={{ fontSize: '20px' }} />
+            <StarOutlined style={{ marginLeft: '0.25rem' }} />
           </span>
         </div>
         <div>{item.address}</div>

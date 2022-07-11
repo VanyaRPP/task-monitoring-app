@@ -57,8 +57,12 @@
 
 .Card,
 .Card::after {
-  color: white !important;
-  // TODO: к имени пользователся хз как применить
-  transition: background 0.5s ease-in-out;
   background: var(--backgroundColorPrimary);
+}
+
+.Card {
+  h2,
+  p {
+    color: var(--textColor);
+  }
 }

@@ -8,9 +8,10 @@
   .Container {
     padding: 0 50px;
     margin-top: 114px;
-    transition: margin 0.2s ease-in-out;
+    transition: margin 0.2s;
 
     @media (max-width: 889px) {
+      margin-top: 89px;
       padding: 0 25px;
     }
 
@@ -22,6 +23,11 @@
 
     .SearchBar {
       display: none;
+
+      input {
+        color: var(--textColor);
+        background: transparent !important;
+      }
 
       @media (max-width: 660px) {
         display: block;

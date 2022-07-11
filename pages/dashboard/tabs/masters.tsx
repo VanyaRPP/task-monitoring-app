@@ -25,10 +25,10 @@ const Masters: React.FC<Props> = ({ data }) => (
           description={item.special}
         />
 
-        <div style={{ gap: '0.5rem' }}>
+        <span>
           {item.rate}/5
-          <StarOutlined style={{ fontSize: '20px' }} />
-        </div>
+          <StarOutlined style={{ marginLeft: '0.25rem' }} />
+        </span>
       </List.Item>
     )}
   />

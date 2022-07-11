@@ -2,26 +2,29 @@ import { FC } from 'react'
 import { signIn } from 'next-auth/react'
 import { Button } from 'antd'
 import { GoogleOutlined, GithubFilled, FacebookFilled } from '@ant-design/icons'
+import styles from './style.module.scss'
 
 interface Props {
   provider: any
 }
 
 const Icons = {
-  google: <GoogleOutlined style={{ fontSize: '1.2rem' }} />,
-  github: <GithubFilled style={{ fontSize: '1.2rem' }} />,
-  facebook: <FacebookFilled style={{ fontSize: '1.2rem' }} />,
+  google: <GoogleOutlined />,
+  github: <GithubFilled />,
+  facebook: <FacebookFilled />,
 }
 
 const SinginBtn: FC<Props> = ({ provider }) => {
   return (
     <Button
-      style={{ margin: 5, display: 'flex', paddingLeft: '4rem' }}
+      className={styles.Button}
       onClick={() => signIn(provider?.id)}
       block
     >
-      {Icons[provider?.name.toLowerCase()]}
-      Sign in with {provider?.name}
+      <span style={{ fontSize: '1.2rem' }}>
+        {Icons[provider?.name.toLowerCase()]}
+      </span>
+      <span>Sign in with {provider?.name}</span>
     </Button>
   )
 }

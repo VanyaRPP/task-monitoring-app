@@ -48,9 +48,12 @@ const LoginUser: FC = () => {
                   />
                 }
               />
+
               <h2>{session?.user?.name}</h2>
               <p>{session?.user?.email}</p>
+
               <RoleSwither />
+
               <div className={s.Buttons}>
                 <Button
                   type="link"

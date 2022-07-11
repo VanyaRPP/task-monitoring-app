@@ -31,7 +31,8 @@ const Verify: FC = () => {
         <div className={styles.Divider} />
 
         <Button
-          type="default"
+          type="primary"
+          ghost
           size="large"
           style={{ width: '100px' }}
           onClick={() => router.push(AppRoutes.INDEX)}
