@@ -3,7 +3,6 @@ import Router from 'next/router'
 import { Avatar, Button, Card, Image } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import { signIn, signOut, useSession } from 'next-auth/react'
-import RoleSwither from '../roleSwitcher'
 import s from './style.module.scss'
 import { AppRoutes } from '../../utils/constants'
 
@@ -50,7 +49,6 @@ const LoginUser: FC = () => {
               />
               <h2>{session?.user?.name}</h2>
               <p>{session?.user?.email}</p>
-              <RoleSwither />
               <div className={s.Buttons}>
                 <Button
                   type="link"

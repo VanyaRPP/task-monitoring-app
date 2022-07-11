@@ -1,12 +1,4 @@
-import {
-  Modal,
-  DatePicker,
-  Form,
-  Input,
-  Select,
-  Radio,
-  RadioChangeEvent,
-} from 'antd'
+import { Modal, DatePicker, Form, Input, Select, AutoComplete } from 'antd'
 import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
 import { useSession } from 'next-auth/react'
@@ -33,7 +25,6 @@ const AddTaskModal: React.FC<PropsType> = ({
   setIsModalVisible,
 }) => {
   const [formDisabled, setFormDisabled] = useState<boolean>(false)
-  const [domain, setDomain] = useState<string>('default')
 
   const [form] = Form.useForm()
 
@@ -58,13 +49,15 @@ const AddTaskModal: React.FC<PropsType> = ({
     form.resetFields()
   }
 
-  const onChangeDomain = (e: RadioChangeEvent) => {
-    setDomain(e.target.value)
-  }
-
   const disabledDate: RangePickerProps['disabledDate'] = (current) => {
     return current && current < moment().startOf('day')
   }
+
+  const adresses = [
+    { value: 'Burns Bay Road' },
+    { value: 'Downing Street' },
+    { value: 'Wall Street' },
+  ]
 
   return (
     <Modal
@@ -91,11 +84,17 @@ const AddTaskModal: React.FC<PropsType> = ({
         <Form.Item name="desription" label="Description">
           <Input.TextArea />
         </Form.Item>
-        <Form.Item name="domain" label="Domain">
-          <Radio.Group onChange={onChangeDomain} value={domain}>
-            <Radio value="default">Default domain</Radio>
-            <Radio value="custom">Custom domain</Radio>
-          </Radio.Group>
+        <Form.Item rules={[{ required: true }]} name="domain" label="Adress">
+          <AutoComplete
+            allowClear={true}
+            options={adresses}
+            defaultValue="Medovyi Lane 23"
+            filterOption={(inputValue, adresses) =>
+              adresses!.value
+                .toUpperCase()
+                .indexOf(inputValue.toUpperCase()) !== -1
+            }
+          />
         </Form.Item>
         <Form.Item name="category" label="Categories">
           <Select>

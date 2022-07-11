@@ -1,6 +1,6 @@
 import { useSession } from 'next-auth/react'
 import Router from 'next/router'
-import Loading from '../Loading'
+import Preloader from '../Preloader'
 
 const withAuthRedirect = (Component: React.ComponentType) => {
   const ProtectedComponent = (props: any) => {
@@ -12,7 +12,7 @@ const withAuthRedirect = (Component: React.ComponentType) => {
     })
 
     if (status === 'loading') {
-      return <Loading />
+      return <Preloader />
     }
 
     return <Component {...props} />

@@ -1,0 +1,16 @@
+.Preloader {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  background-color: #00000050;
+}
+
+.Icon {
+  font-size: calc(50px + (50 + 50 * 0.7) * ((100vw - 320px) / 1440)) !important;
+}
