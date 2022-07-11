@@ -113,10 +113,11 @@ const SiginPage = ({ providers, csrfToken }: any) => {
         <div className={s.Divider} />
 
         <div className={s.HalfBlock}>
-          {Object.values(providers).map((provider: any) =>
-            provider?.name !== 'Email' ? (
-              <SinginBtn key={provider?.name} provider={provider} />
-            ) : null
+          {Object.values(providers).map(
+            (provider: any) =>
+              provider?.name !== 'Email' && (
+                <SinginBtn key={provider?.name} provider={provider} />
+              )
           )}
         </div>
       </div>
