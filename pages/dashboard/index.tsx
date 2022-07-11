@@ -30,7 +30,9 @@ const Dashboard: React.FC = () => {
     <>
       <div className={styles.Header}>
         <h1>Dashboard</h1>
-        <Button onClick={() => Router.push(AppRoutes.INDEX)}>Home</Button>
+        <Button type="primary" onClick={() => Router.push(AppRoutes.INDEX)}>
+          Home
+        </Button>
       </div>
 
       <Tabs defaultActiveKey="1" className={styles.TabList}>
