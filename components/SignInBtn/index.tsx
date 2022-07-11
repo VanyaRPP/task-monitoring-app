@@ -14,7 +14,7 @@ const Icons = {
   facebook: <FacebookFilled />,
 }
 
-const SinginBtn: FC<Props> = ({ provider }) => {
+const SingInBtn: FC<Props> = ({ provider }) => {
   return (
     <Button
       className={styles.Button}
@@ -29,4 +29,4 @@ const SinginBtn: FC<Props> = ({ provider }) => {
   )
 }
 
-export default SinginBtn
+export default SingInBtn

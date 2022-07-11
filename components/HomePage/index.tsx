@@ -34,7 +34,7 @@ const HomePage: React.FC = () => {
               type="primary"
               className={s.Button}
               onClick={() => {
-                router.push(AppRoutes.AUTH_SIGNIN)
+                router.push(AppRoutes.AUTH_SIGN_IN)
               }}
             >
               LOGIN

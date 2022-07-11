@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Layout } from 'antd'
 import Head from 'next/head'
 import MainFooter from '../Footer'
@@ -8,6 +8,7 @@ import { SearchBar } from '../SearchBar'
 import { useSession } from 'next-auth/react'
 import { useAppSelector } from '../../store/hooks'
 import themes from '../../lib/themes.config'
+import useTheme from '../../assets/hooks/useTheme'
 
 import styles from './MainLayout.style.module.scss'
 
@@ -62,14 +63,6 @@ const MainLayout: React.FC<Props> = ({ children }) => {
       </Layout>
     </>
   )
-}
-
-function useTheme(theme) {
-  useEffect(() => {
-    for (const key in theme) {
-      document.documentElement.style.setProperty(`--${key}`, theme[key])
-    }
-  }, [theme])
 }
 
 export default MainLayout

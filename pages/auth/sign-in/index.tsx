@@ -1,34 +1,15 @@
 import { getCsrfToken, getProviders, useSession } from 'next-auth/react'
 import { Alert, Form, Input, Button } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
-import SinginBtn from '../../../components/SinginBtn'
+import SignInBtn from '../../../components/SignInBtn'
 import s from './style.module.scss'
 import Link from 'next/link'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { errors } from '../../../utils/constants'
 
-interface errors {
-  [index: string]: string
-}
-
-const errors: errors = {
-  Signin: 'Try signing in with a different account.',
-  OAuthSignin: 'Try signing in with a different account.',
-  OAuthCallback: 'Try signing in with a different account.',
-  OAuthCreateAccount: 'Try signing in with a different account.',
-  EmailCreateAccount: 'Try signing in with a different account.',
-  Callback: 'Try signing in with a different account.',
-  OAuthAccountNotLinked:
-    'To confirm your identity, sign in with the same account you used originally.',
-  EmailSignin: 'The e-mail could not be sent.',
-  CredentialsSignin:
-    'Sign in failed. Check the details you provided are correct.',
-  SessionRequired: 'Please sign in to access this page.',
-  default: 'Unable to sign in.',
-}
-
-const SiginPage = ({ providers, csrfToken }: any) => {
+const SignInPage = ({ providers, csrfToken }: any) => {
   const router = useRouter()
   const { status } = useSession()
 
@@ -37,18 +18,18 @@ const SiginPage = ({ providers, csrfToken }: any) => {
   }
 
   const { error } = useRouter().query
-  const [errrorr, setErrrorr] = useState('')
+  const [customError, setCustomError] = useState('')
 
   useEffect(() => {
-    setErrrorr(error && (errors[`${error}`] ?? errors.default))
+    setCustomError(error && (errors[`${error}`] ?? errors.default))
   }, [error])
 
   return (
     <>
-      {error && errrorr !== undefined && (
+      {error && customError !== undefined && (
         <Alert
           message="Error"
-          description={errrorr}
+          description={customError}
           type="error"
           showIcon
           closable
@@ -116,7 +97,7 @@ const SiginPage = ({ providers, csrfToken }: any) => {
           {Object.values(providers).map(
             (provider: any) =>
               provider?.name !== 'Email' && (
-                <SinginBtn key={provider?.name} provider={provider} />
+                <SignInBtn key={provider?.name} provider={provider} />
               )
           )}
         </div>
@@ -130,4 +111,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return { props: { providers: await getProviders(), csrfToken } }
 }
 
-export default SiginPage
+export default SignInPage
