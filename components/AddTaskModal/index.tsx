@@ -71,7 +71,7 @@ const AddTaskModal: React.FC<PropsType> = ({
   //   options: { types: ["address"] },
   //   onPlaceSelected: (place) => console.log(place)
   // })
-  const [Pvalue, setPValue] = useState(null);
+  const [Pvalue, setPValue] = useState(null)
 
   return (
     <Modal
