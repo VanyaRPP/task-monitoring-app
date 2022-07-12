@@ -2,15 +2,20 @@
 
 .Sidebar {
   min-height: 100vh;
+
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+
   overflow-x: hidden;
   overflow-y: auto;
 
   position: fixed;
 
-  background-color: #fff;
   z-index: 1;
 
   padding-top: 110px;
+  padding-bottom: 48px;
 
   transition: height none;
 
@@ -23,14 +28,16 @@
     padding-top: 110px;
   }
 
-  box-shadow: 2px 0 8px #00000050;
-  > *:last-child {
-    box-shadow: 2px 0 8px #00000050;
-  }
+  transition: flex 0.2s, width 0.2s, max-width 0.2s, min-width 0.2s,
+    background 0.5s ease-in-out;
+  background: var(--backgroundColorPrimary);
 }
 
 .List {
   padding: 0;
+
+  background: transparent;
+  color: var(--textColor);
 
   > * {
     padding: 0;
@@ -41,8 +48,15 @@
 .Rating {
   width: 200px;
   position: absolute;
-  bottom: 50px;
-  background-color: #fff;
+  bottom: 48px;
+
+  transition: background 0.5s ease-in-out;
+  background: var(--backgroundColorPrimary);
+
+  * {
+    transition: color 0.5s ease-in-out;
+    color: var(--textColor);
+  }
 
   .RateBlock {
     max-height: 200px;

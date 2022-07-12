@@ -5,13 +5,6 @@ import { Provider } from 'react-redux'
 import { store } from '../store/store'
 import NextNProgress from 'nextjs-progressbar'
 import MainLayout from '../components/Layouts/MainLayout'
-import { ConfigProvider } from 'antd'
-
-ConfigProvider.config({
-  theme: {
-    primaryColor: '#722ed1',
-  },
-})
 
 export default function MyApp({
   Component,

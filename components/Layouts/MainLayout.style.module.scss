@@ -1,12 +1,17 @@
+@import '../../styles/variables.scss';
+
 .Layout {
   min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
 
   .Container {
     padding: 0 50px;
     margin-top: 114px;
-    transition: margin 0.2s ease-in-out;
+    transition: margin 0.2s;
 
     @media (max-width: 889px) {
+      margin-top: 89px;
       padding: 0 25px;
     }
 
@@ -19,6 +24,11 @@
     .SearchBar {
       display: none;
 
+      input {
+        color: var(--textColor);
+        background: transparent !important;
+      }
+
       @media (max-width: 660px) {
         display: block;
         margin-bottom: 25px;
@@ -29,12 +39,23 @@
       }
     }
 
-    .Background {
+    .Foreground {
       display: flex;
       flex-direction: column;
       min-height: calc(100vh - 114px);
       padding: 24px;
-      background: #fff;
     }
   }
+}
+
+.Background,
+.Foreground {
+  transition: background 0.5s ease-in-out;
+}
+
+.Background {
+  background: var(--backgroundColor) !important;
+}
+.Foreground {
+  background: var(--backgroundColorPrimary) !important;
 }

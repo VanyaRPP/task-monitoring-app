@@ -5,9 +5,9 @@ import MainFooter from '../Footer'
 import MainHeader from '../Header'
 import Sidebar from '../Sidebar'
 import { SearchBar } from '../SearchBar'
-import s from './MainLayout.style.module.scss'
-
 import { useSession } from 'next-auth/react'
+
+import styles from './MainLayout.style.module.scss'
 
 interface Props {
   children: React.ReactNode
@@ -23,15 +23,15 @@ const MainLayout: React.FC<Props> = ({ children }) => {
         <title>Task-monitoring-app</title>
       </Head>
 
-      <Layout className={s.Layout}>
+      <Layout className={styles.Layout}>
         {session?.user && (
           <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
         )}
 
-        <Layout>
+        <Layout className={styles.Background}>
           <MainHeader />
           <Layout.Content
-            className={s.Container}
+            className={styles.Container}
             style={{
               marginLeft: session?.user
                 ? collapsed
@@ -40,8 +40,8 @@ const MainLayout: React.FC<Props> = ({ children }) => {
                 : '0px',
             }}
           >
-            <SearchBar className={s.SearchBar} />
-            <div className={s.Background}>{children}</div>
+            <SearchBar className={styles.SearchBar} />
+            <div className={styles.Foreground}>{children}</div>
           </Layout.Content>
           <MainFooter
             style={{

@@ -2,6 +2,9 @@
   text-align: center;
   font-size: calc(30px + (20 + 20 * 0.7) * ((100vw - 320px) / 1400));
   margin: 0;
+
+  transition: color 0.5s ease-in-out;
+  color: var(--primaryColor);
 }
 
 .Text {
@@ -9,4 +12,23 @@
   font-size: calc(15px + (5 + 5 * 0.7) * ((100vw - 320px) / 1400));
   font-weight: 400;
   margin: calc(4px + 20 * (100vw / 1400)) 0;
+
+  transition: color 0.5s ease-in-out;
+  color: var(--textColor);
+}
+
+.Buttons {
+  margin: calc(4px + 20 * (100vw / 1400)) 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.Divider {
+  width: 1px;
+  height: 50px;
+  opacity: 0.8;
+  background-color: #858f96;
 }

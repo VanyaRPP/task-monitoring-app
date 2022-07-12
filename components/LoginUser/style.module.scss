@@ -24,26 +24,25 @@
   justify-content: center;
   text-align: center;
   border-radius: 10px;
-  box-shadow: 2px 5px 9px 0px rgb(0 0 0 / 31%);
+  box-shadow: 0 2px 10px 0 var(--primaryColor);
 
   @media (max-width: 889px) {
     right: 16px;
   }
 
-  &:after {
+  &::after {
     content: '';
     position: absolute;
     top: -5px;
     right: 11px;
     width: 14px;
     height: 14px;
-    background-color: #fff;
     transform: rotate(45deg);
   }
 
   .Buttons {
+    margin-top: 20px;
     display: flex;
-    flex-direction: column;
   }
 }
 
@@ -54,4 +53,16 @@
 
 .Button {
   margin: 0 20px;
+}
+
+.Card,
+.Card::after {
+  background: var(--backgroundColorPrimary);
+}
+
+.Card {
+  h2,
+  p {
+    color: var(--textColor);
+  }
 }
