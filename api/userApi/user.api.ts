@@ -6,6 +6,11 @@ interface Quer {
   data: IUser
 }
 
+interface AllUsersQuer {
+  success: boolean
+  data: ITask[]
+}
+
 export const userApi = createApi({
   reducerPath: 'userApi',
   tagTypes: ['User', 'IUser'],
@@ -32,6 +37,10 @@ export const userApi = createApi({
       },
       invalidatesTags: ['User'],
     }),
+    getAllUsers: builder.query<AllUsersQuer, string>({
+      query: () => '/user',
+      providesTags: (result) => ['User'],
+    }),
   }),
 })
 
@@ -39,4 +48,5 @@ export const {
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
   useUpdateUserMutation,
+  useGetAllUsersQuery,
 } = userApi
