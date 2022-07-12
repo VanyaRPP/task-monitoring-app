@@ -1,17 +1,22 @@
-import { Modal, DatePicker, Form, Input, Select, AutoComplete } from 'antd'
+import { Modal, DatePicker, Form, Input, Select } from 'antd'
 import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
 import { useSession } from 'next-auth/react'
 import { useState } from 'react'
+import Autocomplete from 'react-google-autocomplete'
+import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
 import { useGetAllCategoriesQuery } from '../../api/categoriesApi/category.api'
 import { useAddTaskMutation } from '../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
+import Gmap from '../Gmap'
+import GoogleAutocomplete, { PlacesAutocomplete } from '../GMAutoCompleteField'
+import s from './style.module.scss'
 
 type FormData = {
   category?: string
   deadline: string
   desription?: string
-  domain?: string
+  domain?: { any }
   name: string
 }
 
@@ -25,6 +30,8 @@ const AddTaskModal: React.FC<PropsType> = ({
   setIsModalVisible,
 }) => {
   const [formDisabled, setFormDisabled] = useState<boolean>(false)
+
+  const [place, setPlace] = useState({})
 
   const [form] = Form.useForm()
 
@@ -59,6 +66,13 @@ const AddTaskModal: React.FC<PropsType> = ({
     { value: 'Wall Street' },
   ]
 
+  // const { ref } = usePlacesWidget({
+  //   apiKey: 'AIzaSyCrLYvKmksLWFJc17LLPTmfFDkacN4l0To',
+  //   options: { types: ["address"] },
+  //   onPlaceSelected: (place) => console.log(place)
+  // })
+  const [Pvalue, setPValue] = useState(null);
+
   return (
     <Modal
       visible={isModalVisible}
@@ -85,16 +99,37 @@ const AddTaskModal: React.FC<PropsType> = ({
           <Input.TextArea />
         </Form.Item>
         <Form.Item rules={[{ required: true }]} name="domain" label="Adress">
-          <AutoComplete
-            allowClear={true}
-            options={adresses}
-            defaultValue="Medovyi Lane 23"
-            filterOption={(inputValue, adresses) =>
-              adresses!.value
-                .toUpperCase()
-                .indexOf(inputValue.toUpperCase()) !== -1
-            }
+          {/* <Autocomplete
+            className={s.AntDinputAutocomplete}
+            apiKey={'AIzaSyCrLYvKmksLWFJc17LLPTmfFDkacN4l0To'}
+            style={{ width: "100%", zIndex: "100" }}
+            options={{
+              types: ["address"],
+            }}
+          // defaultValue="Amsterdam"
+
           />
+          <Autocomplete
+            apiKey={'AIzaSyCrLYvKmksLWFJc17LLPTmfFDkacN4l0To'}
+            // className={s.AntDinputAutocomplete}
+            style={{ width: "100%", zIndex: "100" }}
+            options={{
+              types: ["address"],
+            }}
+            onPlaceSelected={(place) => console.log(place.geometry.location)}
+          /> */}
+          {/* <GooglePlacesAutocomplete
+            apiKey="AIzaSyCrLYvKmksLWFJc17LLPTmfFDkacN4l0To"
+            selectProps={{
+              isClearable: true,
+              // value: address,
+              onChange: (val) => {
+                console.log(val);
+              }
+            }}
+          /> */}
+          <PlacesAutocomplete />
+          <Gmap place={place} />
         </Form.Item>
         <Form.Item name="category" label="Categories">
           <Select>
