@@ -1,4 +1,4 @@
-import s from './style.module.scss'
+import styles from './style.module.scss'
 import {
   DeleteOutlined,
   EditOutlined,
@@ -37,46 +37,82 @@ const Task: React.FC = () => {
     Router.push(AppRoutes.TASK)
   }
 
+  const Actions = [
+    <Button key="edit" ghost type="primary">
+      <EditOutlined />
+    </Button>,
+    <Popconfirm
+      key="delete"
+      title="Are you sure？"
+      okText="Yes"
+      cancelText="No"
+      icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+      onConfirm={() => taskDelete(task?._id)}
+    >
+      <Button ghost type="primary">
+        <DeleteOutlined />
+      </Button>
+    </Popconfirm>,
+  ]
+
   return (
-    <div className={s.TaskContainer}>
+    <div className={styles.TaskContainer}>
       <Card
-        className={s.Task}
-        actions={
-          session?.user?.email === user?.email
-            ? [
-                <Button key="edit" ghost type="primary">
-                  <EditOutlined />
-                </Button>,
-                <Popconfirm
-                  key="delete"
-                  title="Are you sure？"
-                  okText="Yes"
-                  cancelText="No"
-                  icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-                  onConfirm={() => taskDelete(task?._id)}
-                >
-                  <Button ghost type="primary">
-                    <DeleteOutlined />
-                  </Button>
-                </Popconfirm>,
-              ]
-            : null
-        }
+        className={`${styles.Card} ${styles.Task}`}
+        actions={session?.user?.email === user?.email && Actions}
       >
-        <div className={s.Content}>
-          <div className={s.UserInfo}>
-            <Avatar size={200} src={user?.image} />
-            <p>{user?.name}</p>
-          </div>
-          <div className={s.TaskInfo}>
-            <h2>{task?.name}</h2>
-            <p>Description: {task?.desription}</p>
-            <p>Category: {task?.category}</p>
-            <p>Domain: {task?.domain}</p>
-            <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
-          </div>
+        <div className={styles.UserInfo}>
+          <Avatar size={200} src={user?.image} />
+          <h2>{user?.name}</h2>
+        </div>
+        <div className={styles.TaskInfo}>
+          <h3>{task?.name}</h3>
+          <p className={styles.Description}>Description: {task?.desription}</p>
+          <p>Category: {task?.category}</p>
+          <p>Domain: {task?.domain}</p>
+          <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
         </div>
       </Card>
+
+      <Card className={`${styles.Card} ${styles.Auction}`} title="Auction">
+        <ul>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+        </ul>
+      </Card>
+
+      <Card
+        className={`${styles.Card} ${styles.Additional}`}
+        title="Additional card"
+      ></Card>
     </div>
   )
 }

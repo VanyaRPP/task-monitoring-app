@@ -6,9 +6,6 @@ import MainHeader from '../Header'
 import Sidebar from '../Sidebar'
 import { SearchBar } from '../SearchBar'
 import { useSession } from 'next-auth/react'
-import { useAppSelector } from '../../store/hooks'
-import themes from '../../lib/themes.config'
-import useTheme from '../../assets/hooks/useTheme'
 
 import styles from './MainLayout.style.module.scss'
 
@@ -17,12 +14,8 @@ interface Props {
 }
 
 const MainLayout: React.FC<Props> = ({ children }) => {
-  const { theme } = useAppSelector((state) => state.themeReducer)
-
   const { data: session } = useSession()
   const [collapsed, setCollapsed] = useState(true)
-
-  useTheme(theme === 'light' ? themes.light : themes.dark)
 
   return (
     <>
@@ -30,7 +23,7 @@ const MainLayout: React.FC<Props> = ({ children }) => {
         <title>Task-monitoring-app</title>
       </Head>
 
-      <Layout className={`${styles.Dark} ${styles.Layout}`}>
+      <Layout className={styles.Layout}>
         {session?.user && (
           <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
         )}
