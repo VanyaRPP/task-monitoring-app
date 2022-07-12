@@ -26,7 +26,11 @@ const Categories: React.FC = () => {
       renderItem={(category) => (
         <List.Item
           actions={[
-            <Button key="info" type="primary" onClick={() => {}}>
+            <Button
+              key="info"
+              type="primary"
+              onClick={() => console.log('info')}
+            >
               Info
             </Button>,
           ].concat(

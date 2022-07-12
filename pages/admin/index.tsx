@@ -53,7 +53,7 @@ const AdminPage: React.FC = () => {
             <Search
               className={s.Search}
               placeholder="input search text"
-              onSearch={() => {}}
+              onSearch={() => console.log('search')}
               enterButton
             />
             <Button
@@ -76,7 +76,7 @@ const AdminPage: React.FC = () => {
         </TabPane>
 
         <TabPane tab="Clients" key="2">
-          <Tabs onChange={() => {}} type="card">
+          <Tabs type="card">
             <TabPane tab="Users" key="1">
               <Tabs type="card" tabPosition="left">
                 User

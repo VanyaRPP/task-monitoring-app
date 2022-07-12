@@ -8,7 +8,7 @@ interface Quer {
 
 interface AllUsersQuer {
   success: boolean
-  data: ITask[]
+  data: IUser[]
 }
 
 export const userApi = createApi({
