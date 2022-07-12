@@ -1,13 +1,11 @@
+import { useEffect, useState } from 'react'
 import { getCsrfToken, getProviders, useSession } from 'next-auth/react'
-import { Alert, Form, Input, Button } from 'antd'
-import { UserOutlined } from '@ant-design/icons'
-import SignInBtn from '../../../components/SignInBtn'
-import s from './style.module.scss'
-import Link from 'next/link'
+import { Alert } from 'antd'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
 import { errors } from '../../../utils/constants'
+import SignInButton from '../../../components/SignInButton'
+import styles from './style.module.scss'
 
 const SignInPage = ({ providers, csrfToken }: any) => {
   const router = useRouter()
@@ -36,13 +34,10 @@ const SignInPage = ({ providers, csrfToken }: any) => {
         />
       )}
 
-      <h2 className={s.Header}>Log In</h2>
-      {/* <p className={s.Text}>
-        Don`t have an account? <Link href="/auth/registration">Sign Up</Link>
-      </p> */}
+      <h2 className={styles.Header}>Log In</h2>
 
-      <div className={s.Container}>
-        <div className={s.HalfBlock}>
+      <div className={styles.Container}>
+        <div className={styles.HalfBlock}>
           <form method="post" action="/api/auth/signin/email">
             <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
 
@@ -51,7 +46,6 @@ const SignInPage = ({ providers, csrfToken }: any) => {
           </form>
         </div>
 
-        {/* Karen's changes */}
         {/* <div className={s.HalfBlock}>
           <Form
             method="post"
@@ -91,13 +85,13 @@ const SignInPage = ({ providers, csrfToken }: any) => {
           </Form>
         </div> */}
 
-        <div className={s.Divider} />
+        <div className={styles.Divider} />
 
-        <div className={s.HalfBlock}>
+        <div className={styles.HalfBlock}>
           {Object.values(providers).map(
             (provider: any) =>
               provider?.name !== 'Email' && (
-                <SignInBtn key={provider?.name} provider={provider} />
+                <SignInButton key={provider?.name} provider={provider} />
               )
           )}
         </div>
