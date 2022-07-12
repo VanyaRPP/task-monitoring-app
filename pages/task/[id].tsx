@@ -15,6 +15,7 @@ import { useSession } from 'next-auth/react'
 import { ObjectId } from 'mongoose'
 import { dateToDefaultFormat } from '../../components/features/formatDate'
 import { AppRoutes } from '../../utils/constants'
+import DeleteButton from '../../components/DeleteButton/index'
 
 const Task: React.FC = () => {
   const { data: session } = useSession()
@@ -44,21 +45,13 @@ const Task: React.FC = () => {
         actions={
           session?.user?.email === user?.email
             ? [
-                <Button key="edit" ghost type="primary">
+                <Button key="edit" type="primary">
                   <EditOutlined />
                 </Button>,
-                <Popconfirm
+                <DeleteButton
                   key="delete"
-                  title="Are you sure？"
-                  okText="Yes"
-                  cancelText="No"
-                  icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-                  onConfirm={() => taskDelete(task?._id)}
-                >
-                  <Button ghost type="primary">
-                    <DeleteOutlined />
-                  </Button>
-                </Popconfirm>,
+                  onDelete={() => taskDelete(task?._id)}
+                />,
               ]
             : null
         }

@@ -6,14 +6,7 @@ import { useState } from 'react'
 import { useGetAllCategoriesQuery } from '../../api/categoriesApi/category.api'
 import { useAddTaskMutation } from '../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
-
-type FormData = {
-  category?: string
-  deadline: string
-  desription?: string
-  domain?: string
-  name: string
-}
+import { ITask } from '../../models/Task'
 
 type PropsType = {
   isModalVisible: boolean
@@ -31,14 +24,13 @@ const AddTaskModal: React.FC<PropsType> = ({
   const [addTask] = useAddTaskMutation()
   const { data: session } = useSession()
   const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const user = userData?.data
   const { data: categoriesData } = useGetAllCategoriesQuery('')
   const categories = categoriesData?.data
 
   const onSubmit = async () => {
-    const formData: FormData = await form.validateFields()
+    const formData: ITask = await form.validateFields()
     setFormDisabled(true)
-    await addTask({ ...formData, creator: user?._id })
+    await addTask({ ...formData, creator: userData?.data?._id })
     form.resetFields()
     setIsModalVisible(false)
     setFormDisabled(false)
@@ -90,7 +82,7 @@ const AddTaskModal: React.FC<PropsType> = ({
             options={adresses}
             defaultValue="Medovyi Lane 23"
             filterOption={(inputValue, adresses) =>
-              adresses!.value
+              adresses?.value
                 .toUpperCase()
                 .indexOf(inputValue.toUpperCase()) !== -1
             }

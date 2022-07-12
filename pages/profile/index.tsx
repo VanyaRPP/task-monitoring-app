@@ -1,10 +1,7 @@
 import { EditOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card, Image } from 'antd'
 import s from './style.module.scss'
-import {
-  useGetUserByEmailQuery,
-  useUpdateUserMutation,
-} from '../../api/userApi/user.api'
+import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
 import RoleSwither from '../../components/roleSwitcher'
 import withAuthRedirect from '../../components/HOC/withAuthRedirect'
 import { useSession } from 'next-auth/react'

@@ -3,10 +3,10 @@ import mongoose, { Schema, ObjectId } from 'mongoose'
 export interface ITask {
   _id?: ObjectId
   name: string
-  creator: ObjectId | string
+  creator?: ObjectId | string
   desription?: string
   domain?: string
-  category?: string
+  category: string
   dateofcreate: Date
   deadline: string
 }
