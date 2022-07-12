@@ -1,10 +1,10 @@
 import { Button } from 'antd'
 // import Tool from '../../assets/svg/Tool'
-import style from './style.module.scss'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '../../utils/constants'
 import cityImg from './../../public/city.png'
+import style from './style.module.scss'
 
 const HomePage: React.FC = () => {
   const router = useRouter()
@@ -28,12 +28,13 @@ const HomePage: React.FC = () => {
           type="primary"
           className={style.Button}
           onClick={() => {
-            router.push(AppRoutes.AUTH_SIGNIN)
+            router.push(AppRoutes.AUTH_SIGN_IN)
           }}
         >
           Login
         </Button>
         <Button
+          ghost
           type="primary"
           className={style.Button}
           onClick={() => {
