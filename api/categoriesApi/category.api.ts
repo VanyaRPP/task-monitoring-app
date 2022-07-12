@@ -31,7 +31,7 @@ export const categoryApi = createApi({
     }),
     deleteCategory: builder.mutation<
       { success: boolean; id: ObjectId },
-      ObjectId
+      string
     >({
       query(id) {
         return {
