@@ -1,4 +1,22 @@
-const config = {
+interface IConfig {
+  data: {
+    id: number
+    name: string
+    special?: string
+    avatar?: any
+    price: number
+    rating: number
+  }[]
+  columns: {
+    title: string
+    dataIndex: string
+    key: string
+    width?: number
+    sorter?: any
+  }[]
+}
+
+const config: IConfig = {
   data: [
     {
       id: 0,
