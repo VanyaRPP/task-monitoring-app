@@ -1,10 +1,9 @@
-import styles from './style.module.scss'
 import {
   DeleteOutlined,
   EditOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons'
-import { Avatar, Button, Card, Popconfirm } from 'antd'
+import { Avatar, Button, Card, Popconfirm, Table } from 'antd'
 import Router, { useRouter } from 'next/router'
 import {
   useDeleteTaskMutation,
@@ -15,6 +14,9 @@ import { useSession } from 'next-auth/react'
 import { ObjectId } from 'mongoose'
 import { dateToDefaultFormat } from '../../components/features/formatDate'
 import { AppRoutes } from '../../utils/constants'
+import s from './style.module.scss'
+
+import config from '../../lib/auction.config'
 
 const Task: React.FC = () => {
   const { data: session } = useSession()
@@ -43,7 +45,7 @@ const Task: React.FC = () => {
     </Button>,
     <Popconfirm
       key="delete"
-      title="Are you sure？"
+      title="Are you sure?"
       okText="Yes"
       cancelText="No"
       icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
@@ -56,61 +58,38 @@ const Task: React.FC = () => {
   ]
 
   return (
-    <div className={styles.TaskContainer}>
+    <div className={s.TaskContainer}>
       <Card
-        className={`${styles.Card} ${styles.Task}`}
+        className={`${s.Card} ${s.Task}`}
         actions={session?.user?.email === user?.email && Actions}
       >
-        <div className={styles.UserInfo}>
+        <div className={s.UserInfo}>
           <Avatar size={200} src={user?.image} />
           <h2>{user?.name}</h2>
         </div>
-        <div className={styles.TaskInfo}>
+
+        <div className={s.TaskInfo}>
           <h3>{task?.name}</h3>
-          <p className={styles.Description}>Description: {task?.desription}</p>
+          <p className={s.Description}>Description: {task?.desription}</p>
           <p>Category: {task?.category}</p>
           <p>Domain: {task?.domain}</p>
           <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
         </div>
       </Card>
 
-      <Card className={`${styles.Card} ${styles.Auction}`} title="Auction">
-        <ul>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-          <li>Master name</li>
-        </ul>
+      <Card
+        className={`${s.Card} ${s.Auction}`}
+        title={`Auction: ${config.data.length}`}
+      >
+        {config.data.length ? (
+          <Table dataSource={config.data} columns={config.columns} />
+        ) : (
+          <h2 style={{ textAlign: 'center' }}>Nobody</h2>
+        )}
       </Card>
 
       <Card
-        className={`${styles.Card} ${styles.Additional}`}
+        className={`${s.Card} ${s.Additional}`}
         title="Additional card"
       ></Card>
     </div>

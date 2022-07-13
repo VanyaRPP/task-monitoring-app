@@ -63,7 +63,7 @@
   flex: 0.5 0.5 1;
 
   width: 100%;
-  gap: 2rem;
+  gap: 1rem;
 
   .Card {
     position: relative;
@@ -83,15 +83,12 @@
   }
 
   .Task {
-    width: 400px;
-    max-height: 600px;
+    width: 350px;
+    min-height: 400px;
+    max-height: 750px;
 
-    @media (max-width: 900px) {
+    @media (max-width: 1000px) {
       width: 100%;
-    }
-
-    @media (max-width: 1440px) {
-      width: calc(100% - 2rem - 300px);
     }
 
     display: flex;
@@ -127,31 +124,34 @@
   }
 
   .Auction {
-    width: 300px;
-    max-height: 600px;
+    width: 500px;
+    max-height: 750px;
     position: relative;
 
-    @include scrollbar;
-
     > div:first-of-type {
-      background-color: white;
-      position: sticky;
-      top: 0;
+      margin-bottom: 0;
+    }
+    > div:last-of-type {
+      padding: 0;
     }
 
     ul {
-      list-style-type: none;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+      padding: 0 1rem;
+    }
+
+    @media (max-width: 1440px) {
+      width: calc(100% - 1rem - 350px);
+    }
+
+    @media (max-width: 1000px) {
+      width: 100%;
     }
   }
 
   .Additional {
-    width: calc(100% - 4rem - 300px - 400px);
-    min-height: 200px;
-    max-height: 600px;
+    width: calc(100% - 2rem - 500px - 350px);
+    min-height: 400px;
+    max-height: 750px;
 
     @media (max-width: 1440px) {
       width: 100%;
