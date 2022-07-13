@@ -25,7 +25,7 @@
     "components/withPrivateRoute.jsx",
     "custom.d.ts",
     "pages/api-doc.js",
-    "pages/admin/middleware.js"
+    "pages/admin/khkjh__middleware.ts"
   ],
   "exclude": ["node_modules"]
 }
