@@ -1,6 +1,6 @@
 import { FC } from 'react'
-import s from './style.module.scss'
 import { Layout } from 'antd'
+import s from './style.module.scss'
 
 interface Props {
   style: React.CSSProperties

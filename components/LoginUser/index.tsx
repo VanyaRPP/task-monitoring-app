@@ -5,7 +5,7 @@ import { UserOutlined } from '@ant-design/icons'
 import { signIn, signOut, useSession } from 'next-auth/react'
 import RoleSwither from '../roleSwitcher'
 import { AppRoutes } from '../../utils/constants'
-import styles from './style.module.scss'
+import s from './style.module.scss'
 
 const LoginUser: FC = () => {
   const { data: session } = useSession()
@@ -19,7 +19,7 @@ const LoginUser: FC = () => {
           onClick={() => signIn()}
           ghost
           type="primary"
-          className={styles.Button}
+          className={s.Button}
         >
           Sign in
         </Button>
@@ -30,7 +30,7 @@ const LoginUser: FC = () => {
   return (
     <>
       <div
-        className={styles.Avatar}
+        className={s.Avatar}
         onClick={() => setMenuActive((prevState) => !prevState)}
       >
         <Avatar
@@ -47,9 +47,9 @@ const LoginUser: FC = () => {
       </div>
       <div
         onClick={() => setMenuActive(false)}
-        className={`${styles.Info} ${menuActive ? styles.active : ''}`}
+        className={`${s.Info} ${menuActive ? s.active : ''}`}
       >
-        <Card onClick={(e) => e.stopPropagation()} className={styles.Card}>
+        <Card onClick={(e) => e.stopPropagation()} className={s.Card}>
           <Avatar
             size={100}
             icon={<UserOutlined />}
@@ -67,7 +67,7 @@ const LoginUser: FC = () => {
 
           <RoleSwither />
 
-          <div className={styles.Buttons}>
+          <div className={s.Buttons}>
             <Button
               type="link"
               block

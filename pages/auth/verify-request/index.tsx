@@ -2,21 +2,21 @@ import { FC } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '../../../utils/constants'
 import { Button } from 'antd'
-import styles from './style.module.scss'
+import s from './style.module.scss'
 
 const Verify: FC = () => {
   const router = useRouter()
 
   return (
     <div>
-      <h2 className={styles.Header}>Verify your E-Mail</h2>
-      <p className={styles.Text}>
+      <h2 className={s.Header}>Verify your E-Mail</h2>
+      <p className={s.Text}>
         We have sent you a message by email.
         <br />
         Please verify your email by following the instructions in the message.
       </p>
 
-      <div className={styles.Buttons}>
+      <div className={s.Buttons}>
         <Button
           type="primary"
           size="large"
@@ -28,7 +28,7 @@ const Verify: FC = () => {
           Verify
         </Button>
 
-        <div className={styles.Divider} />
+        <div className={s.Divider} />
 
         <Button
           type="primary"
