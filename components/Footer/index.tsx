@@ -1,12 +1,12 @@
 import { FC } from 'react'
-import s from './style.module.scss'
 import { Layout } from 'antd'
+import s from './style.module.scss'
 
 interface Props {
   style: React.CSSProperties
 }
 
-const MainFooter: FC<Props> = ({ style }) => {
+const Footer: FC<Props> = ({ style }) => {
   return (
     <Layout.Footer className={s.Footer} style={style}>
       <div className={s.Divider} />
@@ -16,4 +16,4 @@ const MainFooter: FC<Props> = ({ style }) => {
   )
 }
 
-export default MainFooter
+export default Footer

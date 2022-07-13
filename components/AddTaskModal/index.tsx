@@ -1,25 +1,23 @@
-import {
-  Modal,
-  DatePicker,
-  Form,
-  Input,
-  Select,
-  Radio,
-  RadioChangeEvent,
-} from 'antd'
+import { useJsApiLoader } from '@react-google-maps/api'
+import { Modal, DatePicker, Form, Input, Select } from 'antd'
 import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
 import { useSession } from 'next-auth/react'
 import { useState } from 'react'
+import Autocomplete from 'react-google-autocomplete'
+import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
 import { useGetAllCategoriesQuery } from '../../api/categoriesApi/category.api'
 import { useAddTaskMutation } from '../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
+import Map from '../Map'
+import { PlacesAutocomplete } from '../PlacesAutocomplete'
+import s from './style.module.scss'
 
 type FormData = {
   category?: string
   deadline: string
   desription?: string
-  domain?: string
+  domain?: { any }
   name: string
 }
 
@@ -33,7 +31,14 @@ const AddTaskModal: React.FC<PropsType> = ({
   setIsModalVisible,
 }) => {
   const [formDisabled, setFormDisabled] = useState<boolean>(false)
-  const [domain, setDomain] = useState<string>('default')
+
+  const [libraries] = useState(['places'] as any)
+
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    libraries,
+  })
 
   const [form] = Form.useForm()
 
@@ -58,13 +63,17 @@ const AddTaskModal: React.FC<PropsType> = ({
     form.resetFields()
   }
 
-  const onChangeDomain = (e: RadioChangeEvent) => {
-    setDomain(e.target.value)
-  }
-
   const disabledDate: RangePickerProps['disabledDate'] = (current) => {
     return current && current < moment().startOf('day')
   }
+
+  const adresses = [
+    { value: 'Burns Bay Road' },
+    { value: 'Downing Street' },
+    { value: 'Wall Street' },
+  ]
+
+  const [Pvalue, setPValue] = useState(null)
 
   return (
     <Modal
@@ -91,11 +100,15 @@ const AddTaskModal: React.FC<PropsType> = ({
         <Form.Item name="desription" label="Description">
           <Input.TextArea />
         </Form.Item>
-        <Form.Item name="domain" label="Domain">
-          <Radio.Group onChange={onChangeDomain} value={domain}>
-            <Radio value="default">Default domain</Radio>
-            <Radio value="custom">Custom domain</Radio>
-          </Radio.Group>
+        <Form.Item rules={[{ required: true }]} name="domain" label="Adress">
+          <PlacesAutocomplete isLoaded={isLoaded} />
+          <Map
+            isLoaded={isLoaded}
+            center={{
+              lat: 50.264915,
+              lng: 28.661954,
+            }}
+          />
         </Form.Item>
         <Form.Item name="category" label="Categories">
           <Select>

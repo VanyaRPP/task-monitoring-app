@@ -1,13 +1,12 @@
 import React, { useState } from 'react'
 import { Layout } from 'antd'
 import Head from 'next/head'
-import MainFooter from '../Footer'
-import MainHeader from '../Header'
+import Footer from '../Footer'
+import Header from '../Header'
 import Sidebar from '../Sidebar'
 import { SearchBar } from '../SearchBar'
-import s from './MainLayout.style.module.scss'
-
 import { useSession } from 'next-auth/react'
+import s from './MainLayout.style.module.scss'
 
 interface Props {
   children: React.ReactNode
@@ -28,8 +27,8 @@ const MainLayout: React.FC<Props> = ({ children }) => {
           <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
         )}
 
-        <Layout>
-          <MainHeader />
+        <Layout className={s.Background}>
+          <Header />
           <Layout.Content
             className={s.Container}
             style={{
@@ -41,9 +40,9 @@ const MainLayout: React.FC<Props> = ({ children }) => {
             }}
           >
             <SearchBar className={s.SearchBar} />
-            <div className={s.Background}>{children}</div>
+            <div className={s.Foreground}>{children}</div>
           </Layout.Content>
-          <MainFooter
+          <Footer
             style={{
               marginLeft: session?.user
                 ? collapsed
