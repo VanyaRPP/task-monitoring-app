@@ -27,26 +27,31 @@
   border: 2px dashed grey;
   margin: 1rem;
   padding: 1rem;
+
   h2 {
     font-size: calc(20px + (15 + 15 * 0.7) * ((100vw - 320px) / 1400));
     margin: 0 1rem;
   }
+
   h3 {
     font-size: calc(30px + (30 + 30 * 0.7) * ((100vw - 320px) / 1400));
     margin: 0 1rem;
   }
+
   p {
     font-size: calc(15px + (10 + 10 * 0.7) * ((100vw - 320px) / 1400));
     margin: 0 1rem;
   }
-}
-.HalfBlock:hover {
-  background-color: plum;
-  border: 0;
-  .Divider {
-    background-color: white;
+
+  &:hover {
+    background-color: plum;
+    border: 0;
+    .Divider {
+      background-color: white;
+    }
   }
 }
+
 .Divider {
   width: 250px;
   height: 1px;

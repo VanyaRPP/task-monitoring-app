@@ -1,13 +1,12 @@
 import React, { useState } from 'react'
 import { Layout } from 'antd'
 import Head from 'next/head'
-import MainFooter from '../Footer'
-import MainHeader from '../Header'
+import Footer from '../Footer'
+import Header from '../Header'
 import Sidebar from '../Sidebar'
 import { SearchBar } from '../SearchBar'
 import { useSession } from 'next-auth/react'
-
-import styles from './MainLayout.style.module.scss'
+import s from './MainLayout.style.module.scss'
 
 interface Props {
   children: React.ReactNode
@@ -23,15 +22,15 @@ const MainLayout: React.FC<Props> = ({ children }) => {
         <title>Task-monitoring-app</title>
       </Head>
 
-      <Layout className={styles.Layout}>
+      <Layout className={s.Layout}>
         {session?.user && (
           <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
         )}
 
-        <Layout className={styles.Background}>
-          <MainHeader />
+        <Layout className={s.Background}>
+          <Header />
           <Layout.Content
-            className={styles.Container}
+            className={s.Container}
             style={{
               marginLeft: session?.user
                 ? collapsed
@@ -40,10 +39,10 @@ const MainLayout: React.FC<Props> = ({ children }) => {
                 : '0px',
             }}
           >
-            <SearchBar className={styles.SearchBar} />
-            <div className={styles.Foreground}>{children}</div>
+            <SearchBar className={s.SearchBar} />
+            <div className={s.Foreground}>{children}</div>
           </Layout.Content>
-          <MainFooter
+          <Footer
             style={{
               marginLeft: session?.user
                 ? collapsed

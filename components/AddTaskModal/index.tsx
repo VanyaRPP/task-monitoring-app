@@ -90,7 +90,7 @@ const AddTaskModal: React.FC<PropsType> = ({
             options={adresses}
             defaultValue="Medovyi Lane 23"
             filterOption={(inputValue, adresses) =>
-              adresses!.value
+              adresses?.value
                 .toUpperCase()
                 .indexOf(inputValue.toUpperCase()) !== -1
             }
