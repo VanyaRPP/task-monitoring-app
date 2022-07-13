@@ -1,10 +1,9 @@
-import s from './style.module.scss'
 import {
   DeleteOutlined,
   EditOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons'
-import { Avatar, Button, Card, Popconfirm } from 'antd'
+import { Avatar, Button, Card, Popconfirm, Table } from 'antd'
 import Router, { useRouter } from 'next/router'
 import {
   useDeleteTaskMutation,
@@ -15,6 +14,9 @@ import { useSession } from 'next-auth/react'
 import { ObjectId } from 'mongoose'
 import { dateToDefaultFormat } from '../../components/features/formatDate'
 import { AppRoutes } from '../../utils/constants'
+import s from './style.module.scss'
+
+import config from '../../lib/auction.config'
 
 const Task: React.FC = () => {
   const { data: session } = useSession()
@@ -43,7 +45,7 @@ const Task: React.FC = () => {
     </Button>,
     <Popconfirm
       key="delete"
-      title="Are you sure？"
+      title="Are you sure?"
       okText="Yes"
       cancelText="No"
       icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
@@ -65,13 +67,17 @@ const Task: React.FC = () => {
           <Avatar size={200} src={user?.image} />
           <h2>{user?.name}</h2>
         </div>
-        <div className={s.TaskInfo}>
-          <h3>{task?.name}</h3>
+
+        <Card
+          className={s.TaskInfo}
+          title={task?.name}
+          actions={session?.user?.email === user?.email && Actions}
+        >
           <p className={s.Description}>Description: {task?.desription}</p>
           <p>Category: {task?.category}</p>
           <p>Domain: {task?.domain}</p>
           <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
-        </div>
+        </Card>
       </Card>
 
       <Card className={`${s.Card} ${s.Auction}`} title="Auction">

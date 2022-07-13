@@ -4,8 +4,8 @@ import { Avatar, Button, Card, Image } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import { signIn, signOut, useSession } from 'next-auth/react'
 import { AppRoutes } from '../../utils/constants'
-import s from './style.module.scss'
 import classNames from 'classnames'
+import s from './style.module.scss'
 
 const LoginUser: React.FC = () => {
   const { data: session } = useSession()
@@ -76,8 +76,8 @@ const LoginUser: React.FC = () => {
               Sign out
             </Button>
           </div>
-        </Card>
-      </div>
+        </Card >
+      </div >
     </>
   )
 }

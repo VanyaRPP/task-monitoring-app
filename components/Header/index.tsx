@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import { Layout } from 'antd'
 import LoginUser from '../LoginUser'
-import s from './style.module.scss'
 import { SearchBar } from '../SearchBar'
 import ThemeSwitcher from '../UI/ThemeSwitcher'
 import TaskButton from '../TaskButton'
 import { AppRoutes } from '../../utils/constants'
+import s from './style.module.scss'
 
 const Header: React.FC = () => {
   return (

@@ -1,6 +1,6 @@
 import { Spin } from 'antd'
-import s from './style.module.scss'
 import { LoadingOutlined } from '@ant-design/icons'
+import s from './style.module.scss'
 
 const Preloader: React.FC = () => {
   return (
