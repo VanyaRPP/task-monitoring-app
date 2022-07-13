@@ -5,24 +5,9 @@
   font-size: calc(30px + (20 + 20 * 0.7) * ((100vw - 320px) / 1400));
   margin: 0;
   margin-bottom: 2rem;
+  transition: color 0.5s;
   color: var(--primaryColor);
 }
-
-// .Text {
-//   text-align: center;
-//   font-size: calc(15px + (5 + 5 * 0.7) * ((100vw - 320px) / 1400));
-//   font-weight: 400;
-//   margin: calc(4px + 20 * (100vw / 1400)) 0;
-
-//   a {
-//     cursor: pointer;
-//     color: $primaryColor;
-
-//     &:hover {
-//       color: $primaryColorHover;
-//     }
-//   }
-// }
 
 .Container {
   display: flex;

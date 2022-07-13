@@ -4,7 +4,7 @@ import { BulbOutlined, BulbFilled } from '@ant-design/icons'
 import useLocalStorage from '../../../assets/hooks/useLocalStorage'
 import themes from '../../../lib/themes.config'
 import useTheme from '../../../assets/hooks/useTheme'
-import styles from './style.module.scss'
+import s from './style.module.scss'
 
 const ThemeSwitcher: React.FC = () => {
   let systemColorScheme
@@ -28,7 +28,7 @@ const ThemeSwitcher: React.FC = () => {
 
   return (
     <Switch
-      className={styles.ThemeSwitcher}
+      className={s.ThemeSwitcher}
       checked={isChecked}
       checkedChildren={<BulbOutlined />}
       unCheckedChildren={<BulbFilled />}

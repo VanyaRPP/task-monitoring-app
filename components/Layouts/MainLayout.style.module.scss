@@ -15,7 +15,7 @@
       padding: 0 25px;
     }
 
-    @media (max-width: 500px) {
+    @media (max-width: 600px) {
       padding: 0 10px;
       margin-top: 74px;
       margin-left: 0 !important;
@@ -25,8 +25,9 @@
       display: none;
 
       input {
+        transition: color 0.5s, background 0.5s;
         color: var(--textColor);
-        background: transparent !important;
+        background: var(--backgroundColorPrimary) !important;
       }
 
       @media (max-width: 660px) {
@@ -34,7 +35,7 @@
         margin-bottom: 25px;
       }
 
-      @media (max-width: 500px) {
+      @media (max-width: 600px) {
         margin-bottom: 10px;
       }
     }
@@ -50,7 +51,7 @@
 
 .Background,
 .Foreground {
-  transition: background 0.5s ease-in-out;
+  transition: background 0.5s;
 }
 
 .Background {

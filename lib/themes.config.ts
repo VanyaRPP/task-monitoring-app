@@ -4,6 +4,7 @@ const themes = {
     shadowColor: '#00000030', // shadow for modal windows
     backgroundColor: '#f0f2f5', // main layout background color
     backgroundColorPrimary: '#fff', // main layout elements background color
+    backgroundColorElements: '#f4f6f8', // forms|cards|modals background color
     primaryColor: '#722ed1',
     primaryColorHover: '#9254de',
   },
@@ -12,6 +13,7 @@ const themes = {
     shadowColor: '#ffffff50', // shadow for modal windows
     backgroundColor: '#010409', // main layout background color
     backgroundColorPrimary: '#0d1117', // main layout elements background color
+    backgroundColorElements: '#161b22', // forms|cards|modals background color
     primaryColor: '#238636',
     primaryColorHover: '#2ea043',
   },

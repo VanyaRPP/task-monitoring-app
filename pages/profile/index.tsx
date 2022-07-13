@@ -1,10 +1,7 @@
 import { EditOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card, Image } from 'antd'
-
 import s from './style.module.scss'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
-
-
 import RoleSwither from '../../components/roleSwitcher'
 import withAuthRedirect from '../../components/HOC/withAuthRedirect'
 import { useSession } from 'next-auth/react'
@@ -17,17 +14,17 @@ const Profile: React.FC = () => {
 
   return (
     <>
-      <h2 className={styles.Header}>My profile</h2>
+      <h2 className={s.Header}>My profile</h2>
 
-      <Card loading={isLoading} title={user?.name} className={styles.Container}>
-        <div className={styles.Avatar}>
+      <Card loading={isLoading} title={user?.name} className={s.Container}>
+        <div className={s.Avatar}>
           <Avatar
             icon={<UserOutlined />}
             src={<Image src={session?.user?.image || undefined} alt="User" />}
           />
         </div>
 
-        <div className={styles.Info}>
+        <div className={s.Info}>
           <Card size="small" title="Role">
             <RoleSwither />
           </Card>

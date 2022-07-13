@@ -7,7 +7,7 @@ import {
   RedoOutlined,
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
-import styles from './style.module.scss'
+import s from './style.module.scss'
 
 import config from '../../lib/Sidebar.config'
 
@@ -43,23 +43,23 @@ const bestDomain = config.bestDomain
 const Sidebar: React.FC<Props> = ({ collapsed, setCollapsed }) => {
   return (
     <Layout.Sider
-      className={styles.Sidebar}
+      className={s.Sidebar}
       collapsible
       collapsed={collapsed}
       onCollapse={(value) => setCollapsed(value)}
     >
-      <Menu className={styles.List} mode="inline" items={items} />
+      <Menu className={s.List} mode="inline" items={items} />
 
       <Collapse
         bordered={false}
-        className={styles.Rating}
+        className={s.Rating}
         style={{
           display: collapsed && 'none',
         }}
       >
-        <Panel header="Best master" key="1" className={styles.RateBlock}>
-          <div className={styles.InfoBlock}>
-            <span className={styles.Title}>
+        <Panel header="Best master" key="1" className={s.RateBlock}>
+          <div className={s.InfoBlock}>
+            <span className={s.Title}>
               <Avatar size={40} src={bestMaster.avatar} />
               {bestMaster.name}
             </span>
@@ -71,9 +71,9 @@ const Sidebar: React.FC<Props> = ({ collapsed, setCollapsed }) => {
           <p>{bestMaster.about}</p>
         </Panel>
 
-        <Panel header="Best domain" key="2" className={styles.RateBlock}>
-          <div className={styles.InfoBlock}>
-            <span className={styles.Title}>{bestDomain.name}</span>
+        <Panel header="Best domain" key="2" className={s.RateBlock}>
+          <div className={s.InfoBlock}>
+            <span className={s.Title}>{bestDomain.name}</span>
             <span>
               {bestDomain.rate}/5
               <StarOutlined />

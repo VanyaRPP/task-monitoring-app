@@ -1,0 +1,12 @@
+.RoleSwitcher {
+  > * {
+    transition: color 0.5s, background 0.5s;
+    background: var(--backgroundColorPrimary);
+    color: var(--textColor);
+
+    border-color: #88888830;
+    &::before {
+      background: #88888830 !important;
+    }
+  }
+}

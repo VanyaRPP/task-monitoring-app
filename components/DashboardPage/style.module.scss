@@ -3,7 +3,7 @@
 
   h1 {
     font-size: 26px;
-    transition: color 0.5s ease-in-out;
+    transition: color 0.5s;
     color: var(--primaryColor);
   }
 }
@@ -12,7 +12,7 @@
   display: none;
 
   * {
-    transition: color 0.5s ease-in-out;
+    transition: color 0.5s;
     color: var(--textColor);
   }
 
@@ -31,13 +31,13 @@
     width: 30%;
     border-radius: 1rem;
 
-    transition: box-shadow 0.5s ease-in-out;
+    transition: box-shadow 0.5s;
     box-shadow: 0 2px 10px -2px var(--shadowColor);
     background: transparent !important;
   }
 
   * {
-    transition: color 0.5s ease-in-out, border-color 0.5s ease-in-out;
+    transition: color 0.5s, border-color 0.5s;
     color: var(--textColor);
     border-color: var(--shadowColor);
   }
@@ -61,7 +61,7 @@
     transition: border-color 0.2s;
 
     * {
-      transition: color 0.5s ease-in-out;
+      transition: color 0.5s;
       color: var(--textColor);
     }
 
