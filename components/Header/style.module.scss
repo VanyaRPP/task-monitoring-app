@@ -9,8 +9,6 @@
   left: 0;
   z-index: 2;
   width: 100%;
-  background-color: #fff;
-  box-shadow: 0 2px 8px #00000050;
 
   @media (max-width: 889px) {
     padding: 0;
@@ -28,25 +26,39 @@
     .Logo {
       float: left;
       height: 31px;
-      color: $primaryColor;
       font-size: 2rem;
       font-weight: 700;
       text-align: start;
       line-height: 31px;
       margin: 0 20px;
       cursor: pointer;
-
-      &:hover {
-        color: $primaryColorHover;
-      }
     }
 
-    .SearchBarHeader {
+    .Search {
       max-width: 350px;
+
+      input {
+        transition: color 0.5s, background 0.5s;
+        color: var(--textColor);
+        background: transparent !important;
+      }
 
       @media (max-width: 660px) {
         display: none;
       }
     }
+  }
+}
+
+.Header {
+  transition: background 0.5s;
+  background: var(--backgroundColorPrimary);
+}
+
+.Logo {
+  transition: color 0.5s;
+  color: var(--primaryColor);
+  &:hover {
+    color: var(--primaryColorHover);
   }
 }

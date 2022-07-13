@@ -16,39 +16,36 @@ const Profile: React.FC = () => {
   const user = data?.data
 
   return (
-    <div className={s.Container}>
-      <div className={s.HalfBlock}>
-        <Avatar
-          className={s.Avatar}
-          icon={<UserOutlined />}
-          src={<Image src={session?.user?.image || undefined} alt="User" />}
-        />
-      </div>
-      <div className={s.HalfBlock}>
-        <h2 className={s.Header}>My profile</h2>
-        <Card loading={isLoading} size="small">
-          <h2>{user?.name}</h2>
-        </Card>
-        <Card loading={isLoading} size="small" title="Role">
-          <RoleSwither />
-        </Card>
-        <Card loading={isLoading} size="small" title="Email">
-          <p>{user?.email}</p>
-        </Card>
-        <Card title="General information" loading={isLoading} size="small">
-          <p>City: Zhytomyr</p>
-        </Card>
-        <Card
-          style={{ display: 'flex', justifyContent: 'center' }}
-          size="small"
-          loading={isLoading}
-        >
-          <Button ghost type="primary">
+    <>
+      <h2 className={s.Header}>My profile</h2>
+
+      <Card loading={isLoading} title={user?.name} className={s.Container}>
+        <div className={s.Avatar}>
+          <Avatar
+            icon={<UserOutlined />}
+            src={<Image src={session?.user?.image || undefined} alt="User" />}
+          />
+        </div>
+
+        <div className={s.Info}>
+          <Card size="small" title="Role">
+            <RoleSwither />
+          </Card>
+
+          <Card size="small" title="Email">
+            <p>{user?.email}</p>
+          </Card>
+
+          <Card title="General information" size="small">
+            <p>City: Zhytomyr</p>
+          </Card>
+
+          <Button type="primary">
             <EditOutlined key="edit" />
           </Button>
-        </Card>
-      </div>
-    </div>
+        </div>
+      </Card>
+    </>
   )
 }
 

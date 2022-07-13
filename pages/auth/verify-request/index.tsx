@@ -1,20 +1,45 @@
 import { FC } from 'react'
 import { useRouter } from 'next/router'
-import styles from './style.module.scss'
+import { AppRoutes } from '../../../utils/constants'
+import { Button } from 'antd'
+import s from './style.module.scss'
 
 const Verify: FC = () => {
   const router = useRouter()
 
-  // TODO: some logic (HZ KAK SDELAT)
-
   return (
     <div>
-      <h2 className={styles.Header}>Verify tour E-Mail</h2>
-      <p className={styles.Text}>
+      <h2 className={s.Header}>Verify your E-Mail</h2>
+      <p className={s.Text}>
         We have sent you a message by email.
         <br />
         Please verify your email by following the instructions in the message.
       </p>
+
+      <div className={s.Buttons}>
+        <Button
+          type="primary"
+          size="large"
+          style={{ width: '100px' }}
+          onClick={() => {
+            // TODO: redirect to user email page
+          }}
+        >
+          Verify
+        </Button>
+
+        <div className={s.Divider} />
+
+        <Button
+          type="primary"
+          ghost
+          size="large"
+          style={{ width: '100px' }}
+          onClick={() => router.push(AppRoutes.INDEX)}
+        >
+          Return
+        </Button>
+      </div>
     </div>
   )
 }

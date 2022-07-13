@@ -1,17 +1,16 @@
 import { Radio } from 'antd'
 import type { RadioChangeEvent } from 'antd'
 import { useSession } from 'next-auth/react'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   useGetUserByEmailQuery,
   useUpdateUserMutation,
 } from '../../api/userApi/user.api'
+import s from './style.module.scss'
 
-const RoleSwither = () => {
+const RoleSwither: React.FC = () => {
   const { data: session } = useSession()
-  const { data, error, isLoading } = useGetUserByEmailQuery(
-    `${session?.user?.email}`
-  )
+  const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
 
   const user = data?.data
@@ -29,6 +28,7 @@ const RoleSwither = () => {
   return (
     <>
       <Radio.Group
+        className={s.RoleSwitcher}
         disabled={isUpdating}
         onChange={onChange}
         value={role}

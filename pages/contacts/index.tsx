@@ -1,3 +1,4 @@
+import React, { FC } from 'react'
 import {
   FacebookOutlined,
   GithubOutlined,
@@ -5,30 +6,28 @@ import {
   InstagramOutlined,
   LinkedinOutlined,
   MailOutlined,
-  MinusCircleOutlined,
   PhoneOutlined,
-  PlusOutlined,
 } from '@ant-design/icons'
-import { Button, Form, Input, InputNumber, Select, Space } from 'antd'
-import React from 'react'
-import style from './style.module.scss'
+import { Button, Form, Input } from 'antd'
+import s from './style.module.scss'
 
-const ContactsPage = () => {
+const ContactsPage: FC = () => {
   const onFinish = (values: any) => {
     console.log(values)
   }
+
   return (
     <>
-      <h1 className={style.Header}>Contact Us</h1>
-      <p className={style.Text}>
+      <h1 className={s.Header}>Contact Us</h1>
+      <p className={s.Text}>
         We can`t solve your problem if you don`t tell us about it!
       </p>
-      <div className={style.Container}>
-        <div className={style.HalfBlock}>
-          <div className={style.MyForm}>
+      <div className={s.Container}>
+        <div className={s.HalfBlock}>
+          <div className={s.MyForm}>
             <Form name="nest-messages" onFinish={onFinish}>
               <Form.Item name={['user', 'name']} rules={[{ required: true }]}>
-                <Input placeholder="*Name" />
+                <Input placeholder="Name" />
               </Form.Item>
               <Form.Item name={['user', 'email']} rules={[{ type: 'email' }]}>
                 <Input placeholder="Email" />
@@ -44,26 +43,34 @@ const ContactsPage = () => {
             </Form>
           </div>
         </div>
-        <div className={style.Divider} />
-        <div className={style.HalfBlock}>
-          <div className={style.MediumBlock}>
-            <div className={style.Block}>
+        <div className={s.Divider} />
+        <div className={s.HalfBlock}>
+          <div className={s.MediumBlock}>
+            <div className={s.Block}>
               <HomeOutlined />
               <p>Zhytomyr</p>
             </div>
-            <div className={style.Block}>
+            <div className={s.Block}>
               <PhoneOutlined />
               <p>+(380)96-111-2222</p>
             </div>
-            <div className={style.Block}>
+            <div className={s.Block}>
               <MailOutlined />
-              <p>gmail.com</p>
+              <a href="">random@gmail.com</a>
             </div>
-            <div className={style.Links}>
-              <FacebookOutlined />
-              <LinkedinOutlined />
-              <InstagramOutlined />
-              <GithubOutlined />
+            <div className={s.Links}>
+              <a href="#">
+                <FacebookOutlined />
+              </a>
+              <a href="#">
+                <LinkedinOutlined />
+              </a>
+              <a href="#">
+                <InstagramOutlined />
+              </a>
+              <a href="#">
+                <GithubOutlined />
+              </a>
             </div>
           </div>
         </div>

@@ -1,24 +1,16 @@
 $primaryColor: #722ed1;
 $primaryColorHover: #9254de;
 
-// // light theme variables
-// #light {
-//   $textColor: rgba(0, 0, 0, 0.8); // main text color
+// light theme variables
+// rgba(0, 0, 0, 0.8); // main text color
+// #f0f2f5; // main background color
+// white; // layout elements bg color
+// #722ed1; // primary color
+// #9254de; // primary hover color
 
-//   $backgroundColor: #f0f2f5; // main background color
-//   $backgroundColorPrimary: #fff; // layout elements bg color
-
-//   $primaryColor: #722ed1;
-//   $primaryColorHover: #9254de;
-// }
-
-// // dark theme variables
-// #dark {
-//   $textColor: white;
-
-//   $backgroundColor: #010409;
-//   $backgroundColorPrimary: #0d1117;
-
-//   $primaryColor: #238636;
-//   $primaryColorHover: #2ea043;
-// }
+// dark theme variables
+// white; // main text color
+// #010409; // main background color
+// #0d1117; // layout elements bg color
+// #238636; // primary color
+// #2ea043; // primary hover color

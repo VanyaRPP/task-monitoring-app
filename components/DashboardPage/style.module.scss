@@ -1,13 +1,22 @@
 .Header {
   width: 100%;
-  display: flex;
-  justify-content: space-between;
+
+  h1 {
+    font-size: 26px;
+    transition: color 0.5s;
+    color: var(--primaryColor);
+  }
 }
 
 .TabList {
   display: none;
 
-  @media (max-width: 1440px) {
+  * {
+    transition: color 0.5s;
+    color: var(--textColor);
+  }
+
+  @media (max-width: 1600px) {
     display: block;
   }
 }
@@ -21,38 +30,61 @@
   > * {
     width: 30%;
     border-radius: 1rem;
+
+    transition: box-shadow 0.5s;
+    box-shadow: 0 2px 10px -2px var(--shadowColor);
+    background: transparent !important;
   }
 
-  @media (max-width: 1440px) {
+  * {
+    transition: color 0.5s, border-color 0.5s;
+    color: var(--textColor);
+    border-color: var(--shadowColor);
+  }
+
+  @media (max-width: 1600px) {
     display: none;
   }
 }
 
 .List {
   width: 100%;
-  max-height: 50vh;
+  max-height: 80vh;
   overflow-x: hidden;
   overflow-y: auto;
 
   .ListItem {
     width: 100%;
-    display: flex;
     padding: 1rem;
-    border-radius: 1rem;
-    transition: background 0.3s ease-in-out;
+    border-color: var(--shadowColor);
+    opacity: 0.75;
+    transition: border-color 0.2s;
+
+    * {
+      transition: color 0.5s;
+      color: var(--textColor);
+    }
+
+    &:last-of-type {
+      border-bottom: 1px solid transparent;
+    }
 
     &:hover {
-      background: rgba(88, 88, 88, 0.1);
+      border-color: var(--primaryColorHover);
+      opacity: 1;
     }
 
     > div {
-      width: 50%;
+      width: 60%;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 1rem;
+      margin-right: 1rem;
 
       &:last-of-type {
-        justify-content: flex-end;
+        width: 40%;
+        margin-right: 0;
       }
     }
   }
@@ -66,6 +98,14 @@
         &:last-of-type {
           width: 25%;
         }
+      }
+    }
+  }
+
+  &.Domains {
+    .ListItem {
+      > div:first-of-type {
+        justify-content: flex-start;
       }
     }
   }
