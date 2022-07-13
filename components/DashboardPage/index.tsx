@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react'
 import { StarOutlined } from '@ant-design/icons'
 import { dateToDefaultFormat } from '../features/formatDate'
 import config from '../../lib/dashboard.config'
-import styles from './style.module.scss'
+import s from './style.module.scss'
 
 const { TabPane } = Tabs
 
@@ -15,7 +15,7 @@ const Dashboard: React.FC = () => {
 
   if (!session?.user) {
     return (
-      <div className={styles.Header}>
+      <div className={s.Header}>
         <h1>Dashboard is availible only for logged users</h1>
         <Button onClick={() => Router.push(AppRoutes.INDEX)}>Home</Button>
       </div>
@@ -24,17 +24,17 @@ const Dashboard: React.FC = () => {
 
   return (
     <>
-      <div className={styles.Header}>
+      <div className={s.Header}>
         <h1>Dashboard</h1>
       </div>
 
-      <Tabs defaultActiveKey="1" className={styles.TabList}>
+      <Tabs defaultActiveKey="1" className={s.TabList}>
         <TabPane tab="My orders" key="1">
           <List
-            className={`${styles.List} ${styles.Orders}`}
+            className={`${s.List} ${s.Orders}`}
             dataSource={config.myOrders}
             renderItem={(item, index) => (
-              <List.Item className={styles.ListItem}>
+              <List.Item className={s.ListItem}>
                 <span style={{ marginRight: '1rem' }}>
                   <span>{index + 1}.</span>
                 </span>
@@ -54,10 +54,10 @@ const Dashboard: React.FC = () => {
 
         <TabPane tab="Masters list" key="2">
           <List
-            className={`${styles.List} ${styles.Masters}`}
+            className={`${s.List} ${s.Masters}`}
             dataSource={config.mastersList}
             renderItem={(item) => (
-              <List.Item className={styles.ListItem}>
+              <List.Item className={s.ListItem}>
                 <List.Item.Meta
                   avatar={<Avatar size={40} src={item.avatar} />}
                   title={item.name}
@@ -75,10 +75,10 @@ const Dashboard: React.FC = () => {
 
         <TabPane tab="Domains list" key="3">
           <List
-            className={`${styles.List} ${styles.Domains}`}
+            className={`${s.List} ${s.Domains}`}
             dataSource={config.domainLists}
             renderItem={(item) => (
-              <List.Item className={styles.ListItem}>
+              <List.Item className={s.ListItem}>
                 <div>
                   <span>{item.name}</span>
                   <span>
@@ -93,13 +93,13 @@ const Dashboard: React.FC = () => {
         </TabPane>
       </Tabs>
 
-      <div className={styles.TablessList}>
+      <div className={s.TablessList}>
         <Card title="My Orders" style={{ flex: '1.5' }}>
           <List
-            className={`${styles.List} ${styles.Orders}`}
+            className={`${s.List} ${s.Orders}`}
             dataSource={config.myOrders}
             renderItem={(item, index) => (
-              <List.Item className={styles.ListItem}>
+              <List.Item className={s.ListItem}>
                 <span style={{ marginRight: '1rem' }}>
                   <span>{index + 1}.</span>
                 </span>
@@ -119,10 +119,10 @@ const Dashboard: React.FC = () => {
 
         <Card title="Masters List" style={{ flex: '1' }}>
           <List
-            className={`${styles.List} ${styles.Masters}`}
+            className={`${s.List} ${s.Masters}`}
             dataSource={config.mastersList}
             renderItem={(item) => (
-              <List.Item className={styles.ListItem}>
+              <List.Item className={s.ListItem}>
                 <List.Item.Meta
                   avatar={<Avatar size={40} src={item.avatar} />}
                   title={item.name}
@@ -140,10 +140,10 @@ const Dashboard: React.FC = () => {
 
         <Card title="Domain Lists" style={{ flex: '1.5' }}>
           <List
-            className={`${styles.List} ${styles.Domains}`}
+            className={`${s.List} ${s.Domains}`}
             dataSource={config.domainLists}
             renderItem={(item) => (
-              <List.Item className={styles.ListItem}>
+              <List.Item className={s.ListItem}>
                 <div>
                   <span>{item.name}</span>
                   <span>
