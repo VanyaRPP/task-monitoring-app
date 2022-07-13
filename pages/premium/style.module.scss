@@ -10,63 +10,84 @@
 .Text {
   text-align: center;
   font-size: calc(15px + (5 + 5 * 0.7) * ((100vw - 320px) / 1400));
-
   margin: 1rem 0 2rem 0;
-  // margin: 0 calc(1rem + 10 * (100vw / 1400));
 
   transition: color 0.5s;
   color: var(--textColor);
 }
+
 .Container {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 1rem;
-  @media (max-width: 969px) {
-    flex-direction: column;
+  flex-wrap: wrap;
+  gap: 1rem 4rem;
+
+  @media (max-width: 1000px) {
+    gap: 1rem 2rem;
   }
 }
-.HalfBlock {
+
+.Card {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-width: 250px;
+
+  width: 300px;
   border: 2px dashed grey;
-  margin: 1rem;
+  border-radius: 1rem;
   padding: 1rem;
+
+  &.Active {
+    // TODO: styles for active plan
+  }
+
   h2 {
-    font-size: calc(20px + (15 + 15 * 0.7) * ((100vw - 320px) / 1400));
-    margin: 0 1rem;
+    font-size: 24px;
   }
   h3 {
-    font-size: calc(30px + (30 + 30 * 0.7) * ((100vw - 320px) / 1400));
-    margin: 0 1rem;
+    font-size: 46px;
   }
   p {
-    font-size: calc(15px + (10 + 10 * 0.7) * ((100vw - 320px) / 1400));
-    margin: 0 1rem;
+    font-size: 18px;
+  }
+
+  h2,
+  h3,
+  p {
+    transition: color 0.5s;
+    color: var(--textColor);
+  }
+
+  transition: background 0.5s, border 0.5s;
+
+  button {
+    margin-top: 1rem;
   }
 }
-.HalfBlock:hover {
-  background-color: plum;
-  border: 0;
+
+.Card:hover {
+  h2,
+  h3,
+  p {
+    color: rgba(255, 255, 255, 80%);
+  }
+
+  // background-color: plum;
+  background-color: var(--primaryColor);
+  border-color: transparent;
+
   .Divider {
-    background-color: white;
+    background-color: rgba(255, 255, 255, 80%);
   }
 }
+
 .Divider {
-  width: 250px;
+  width: 100%;
   height: 1px;
   opacity: 0.8;
+  margin: 1rem;
+  transition: background 0.5s;
   background-color: grey;
-  margin: 10px 0;
-
-  @media (max-width: 969px) {
-    width: 100%;
-    height: 1px;
-  }
-}
-.Click {
-  margin-top: 1rem;
 }
