@@ -24,6 +24,8 @@
   justify-content: center;
   text-align: center;
   border-radius: 10px;
+
+  transition: box-shadow 0.5s;
   box-shadow: 0 2px 10px 0 var(--primaryColor);
 
   @media (max-width: 889px) {

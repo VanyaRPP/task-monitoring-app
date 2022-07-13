@@ -25,7 +25,7 @@
       display: none;
 
       input {
-        transition: color 0.5s ease-in-out, background 0.5s ease-in-out;
+        transition: color 0.5s, background 0.5s;
         color: var(--textColor);
         background: var(--backgroundColorPrimary) !important;
       }
@@ -51,7 +51,7 @@
 
 .Background,
 .Foreground {
-  transition: background 0.5s ease-in-out;
+  transition: background 0.5s;
 }
 
 .Background {

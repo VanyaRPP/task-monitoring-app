@@ -59,22 +59,22 @@ const Task: React.FC = () => {
 
   return (
     <div className={s.TaskContainer}>
-      <Card
-        className={`${s.Card} ${s.Task}`}
-        actions={session?.user?.email === user?.email && Actions}
-      >
+      <Card className={`${s.Card} ${s.Task}`}>
         <div className={s.UserInfo}>
           <Avatar size={200} src={user?.image} />
           <h2>{user?.name}</h2>
         </div>
 
-        <div className={s.TaskInfo}>
-          <h3>{task?.name}</h3>
+        <Card
+          className={s.TaskInfo}
+          title={task?.name}
+          actions={session?.user?.email === user?.email && Actions}
+        >
           <p className={s.Description}>Description: {task?.desription}</p>
           <p>Category: {task?.category}</p>
           <p>Domain: {task?.domain}</p>
           <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
-        </div>
+        </Card>
       </Card>
 
       <Card
@@ -88,10 +88,9 @@ const Task: React.FC = () => {
         )}
       </Card>
 
-      <Card
-        className={`${s.Card} ${s.Additional}`}
-        title="Additional card"
-      ></Card>
+      <Card className={`${s.Card} ${s.Additional}`} title="Additional card">
+        <h2>Additional card</h2>
+      </Card>
     </div>
   )
 }

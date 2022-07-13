@@ -6,6 +6,7 @@ import {
   useGetUserByEmailQuery,
   useUpdateUserMutation,
 } from '../../api/userApi/user.api'
+import s from './style.module.scss'
 
 const RoleSwither = () => {
   const { data: session } = useSession()
@@ -29,6 +30,7 @@ const RoleSwither = () => {
   return (
     <>
       <Radio.Group
+        className={s.RoleSwitcher}
         disabled={isUpdating}
         onChange={onChange}
         value={role}
