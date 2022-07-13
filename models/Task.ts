@@ -5,7 +5,7 @@ export interface ITask {
   name: string
   creator: ObjectId | string
   desription?: string
-  domain?: string
+  domain?: any
   category?: string
   dateofcreate: Date
   deadline: string
