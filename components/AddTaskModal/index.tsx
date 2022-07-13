@@ -1,3 +1,4 @@
+import { useJsApiLoader } from '@react-google-maps/api'
 import { Modal, DatePicker, Form, Input, Select } from 'antd'
 import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
@@ -8,8 +9,8 @@ import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
 import { useGetAllCategoriesQuery } from '../../api/categoriesApi/category.api'
 import { useAddTaskMutation } from '../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
-import Gmap from '../Gmap'
-import GoogleAutocomplete, { PlacesAutocomplete } from '../GMAutoCompleteField'
+import Map from '../Map'
+import { PlacesAutocomplete } from '../PlacesAutocomplete'
 import s from './style.module.scss'
 
 type FormData = {
@@ -31,7 +32,12 @@ const AddTaskModal: React.FC<PropsType> = ({
 }) => {
   const [formDisabled, setFormDisabled] = useState<boolean>(false)
 
-  const [place, setPlace] = useState({})
+  const [libraries] = useState(['places']);
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    libraries,
+  })
 
   const [form] = Form.useForm()
 
@@ -66,11 +72,6 @@ const AddTaskModal: React.FC<PropsType> = ({
     { value: 'Wall Street' },
   ]
 
-  // const { ref } = usePlacesWidget({
-  //   apiKey: 'AIzaSyCrLYvKmksLWFJc17LLPTmfFDkacN4l0To',
-  //   options: { types: ["address"] },
-  //   onPlaceSelected: (place) => console.log(place)
-  // })
   const [Pvalue, setPValue] = useState(null)
 
   return (
@@ -99,37 +100,13 @@ const AddTaskModal: React.FC<PropsType> = ({
           <Input.TextArea />
         </Form.Item>
         <Form.Item rules={[{ required: true }]} name="domain" label="Adress">
-          {/* <Autocomplete
-            className={s.AntDinputAutocomplete}
-            apiKey={'AIzaSyCrLYvKmksLWFJc17LLPTmfFDkacN4l0To'}
-            style={{ width: "100%", zIndex: "100" }}
-            options={{
-              types: ["address"],
-            }}
-          // defaultValue="Amsterdam"
-
-          />
-          <Autocomplete
-            apiKey={'AIzaSyCrLYvKmksLWFJc17LLPTmfFDkacN4l0To'}
-            // className={s.AntDinputAutocomplete}
-            style={{ width: "100%", zIndex: "100" }}
-            options={{
-              types: ["address"],
-            }}
-            onPlaceSelected={(place) => console.log(place.geometry.location)}
-          /> */}
-          {/* <GooglePlacesAutocomplete
-            apiKey="AIzaSyCrLYvKmksLWFJc17LLPTmfFDkacN4l0To"
-            selectProps={{
-              isClearable: true,
-              // value: address,
-              onChange: (val) => {
-                console.log(val);
-              }
-            }}
-          /> */}
-          <PlacesAutocomplete />
-          <Gmap place={place} />
+          <PlacesAutocomplete isLoaded={isLoaded} />
+          <Map
+            isLoaded={isLoaded}
+            center={{
+              lat: 50.264915,
+              lng: 28.661954
+            }} />
         </Form.Item>
         <Form.Item name="category" label="Categories">
           <Select>

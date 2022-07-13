@@ -25,7 +25,7 @@
     "components/withPrivateRoute.jsx",
     "custom.d.ts",
     "pages/api-doc.js",
-    "components/GMAutoCompleteField/index.jsx"
+    "components/PlacesAutocomplete/index.jsx"
   ],
   "exclude": ["node_modules"]
 }
