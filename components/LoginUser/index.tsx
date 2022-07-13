@@ -76,8 +76,8 @@ const LoginUser: React.FC = () => {
               Sign out
             </Button>
           </div>
-        </Card >
-      </div >
+        </Card>
+      </div>
     </>
   )
 }

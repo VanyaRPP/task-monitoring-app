@@ -39,9 +39,9 @@
   border-radius: 1rem;
   padding: 1rem;
 
-  &.Active {
-    // TODO: styles for active plan
-  }
+  // &.Active {
+  //   // TODO: styles for active plan
+  // }
 
   h2 {
     font-size: 24px;
@@ -62,8 +62,7 @@
     color: var(--textColor);
   }
 
-  transition: background 0.5s,
-  border 0.5s;
+  transition: background 0.5s, border 0.5s;
 
   button {
     margin-top: 1rem;
@@ -79,7 +78,6 @@
   }
 
   .Card:hover {
-
     h2,
     h3,
     p {
@@ -103,3 +101,4 @@
     transition: background 0.5s;
     background-color: grey;
   }
+}

@@ -78,7 +78,6 @@
     }
   }
 
-
   .Links {
     width: 100%;
     max-width: 350px;
@@ -86,12 +85,11 @@
     align-items: center;
     justify-content: space-between;
 
-    >a {
+    > a {
       transition: color 0.5s, opacity 0.2s;
       color: var(--textColor);
       opacity: 0.5;
     }
-
   }
 
   .Links {
@@ -105,7 +103,7 @@
       .Contacts {
         gap: 1.25rem;
 
-        >div {
+        > div {
           display: flex;
           gap: 0.5rem;
         }
@@ -114,7 +112,7 @@
       .Media {
         gap: 0.5rem;
 
-        >a {
+        > a {
           font-size: 18px;
         }
       }
@@ -124,8 +122,8 @@
         display: flex;
         flex-direction: column;
 
-        >* {
-          >* {
+        > * {
+          > * {
             font-size: 18px;
             line-height: 18px;
             transition: color 0.5s;
