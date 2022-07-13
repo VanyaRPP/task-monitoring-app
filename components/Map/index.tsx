@@ -1,7 +1,7 @@
 import React, { useCallback, useRef } from 'react'
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api'
 import s from './style.module.scss'
-import { DarkMapTheme, LightMapTheme } from './MapStyle';
+import { DarkMapTheme, LightMapTheme } from './MapStyle'
 
 const defaultOptions = {
   panControl: true,
@@ -19,12 +19,11 @@ const defaultOptions = {
 }
 
 const containerStyle = {
-  width: "1fr",
-  height: "400px"
-};
+  width: '1fr',
+  height: '400px',
+}
 
 const Map = ({ center, isLoaded }) => {
-
   const G_MAP_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
   const libraries = ['places']
@@ -54,11 +53,13 @@ const Map = ({ center, isLoaded }) => {
         onUnmount={onUnmount}
         options={defaultOptions}
       >
-        { /* Child components, such as markers, info windows, etc. */}
+        {/* Child components, such as markers, info windows, etc. */}
         <></>
       </GoogleMap>
     </div>
-  ) : <></>
+  ) : (
+    <></>
+  )
 }
 
 export default Map

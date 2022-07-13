@@ -32,7 +32,7 @@ const AddTaskModal: React.FC<PropsType> = ({
 }) => {
   const [formDisabled, setFormDisabled] = useState<boolean>(false)
 
-  const [libraries] = useState(['places']);
+  const [libraries] = useState(['places'])
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
@@ -105,8 +105,9 @@ const AddTaskModal: React.FC<PropsType> = ({
             isLoaded={isLoaded}
             center={{
               lat: 50.264915,
-              lng: 28.661954
-            }} />
+              lng: 28.661954,
+            }}
+          />
         </Form.Item>
         <Form.Item name="category" label="Categories">
           <Select>

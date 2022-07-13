@@ -3,12 +3,11 @@ import usePlacesAutocomplete, {
   getLatLng,
 } from 'use-places-autocomplete'
 import useOnclickOutside from 'react-cool-onclickoutside'
-import { useEffect } from 'react';
-import { Input } from 'antd';
+import { useEffect } from 'react'
+import { Input } from 'antd'
 import s from './style.module.scss'
 
 export const PlacesAutocomplete = ({ isLoaded }) => {
-
   const {
     ready,
     value,
@@ -19,44 +18,47 @@ export const PlacesAutocomplete = ({ isLoaded }) => {
   } = usePlacesAutocomplete({
     initOnMount: false,
     debounce: 300,
-  });
+  })
   const ref = useOnclickOutside(() => {
-    clearSuggestions();
-  });
+    clearSuggestions()
+  })
 
   const handleInput = (e) => {
-    setValue(e.target.value);
-  };
+    setValue(e.target.value)
+  }
   const handleSearch = (val) => {
-    setValue(val);
-  };
+    setValue(val)
+  }
 
   const handleSelect =
     ({ description }) =>
-      () => {
-        setValue(description, false);
-        clearSuggestions();
-        console.log("📍 Adr: ", description);
-        getGeocode({ address: description }).then((results) => {
-          const { lat, lng } = getLatLng(results[0]);
-          console.log("📍 Coordinates: ", { lat, lng });
-        });
-      };
+    () => {
+      setValue(description, false)
+      clearSuggestions()
+      console.log('📍 Adr: ', description)
+      getGeocode({ address: description }).then((results) => {
+        const { lat, lng } = getLatLng(results[0])
+        console.log('📍 Coordinates: ', { lat, lng })
+      })
+    }
 
   const renderSuggestions = () =>
     data.map((suggestion) => {
       const {
         place_id,
         structured_formatting: { main_text, secondary_text },
-      } = suggestion;
+      } = suggestion
 
       return (
-        <div className={s.subListItem} key={place_id} onClick={handleSelect(suggestion)}>
+        <div
+          className={s.subListItem}
+          key={place_id}
+          onClick={handleSelect(suggestion)}
+        >
           <strong>{main_text}</strong> <small>{secondary_text}</small>
         </div>
-      );
-
-    });
+      )
+    })
 
   useEffect(() => {
     if (isLoaded) {
@@ -64,14 +66,17 @@ export const PlacesAutocomplete = ({ isLoaded }) => {
     }
   }, [isLoaded, init])
 
-
-  return <div ref={ref}>
-    <Input
-      value={value}
-      onChange={handleInput}
-      disabled={!ready}
-      placeholder="Куди поїде майстер?"
-    />
-    {status === "OK" && <div className={s.subList}>{renderSuggestions()}</div>}
-  </div>
+  return (
+    <div ref={ref}>
+      <Input
+        value={value}
+        onChange={handleInput}
+        disabled={!ready}
+        placeholder="Куди поїде майстер?"
+      />
+      {status === 'OK' && (
+        <div className={s.subList}>{renderSuggestions()}</div>
+      )}
+    </div>
+  )
 }
