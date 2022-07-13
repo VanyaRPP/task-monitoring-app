@@ -32,7 +32,8 @@ const AddTaskModal: React.FC<PropsType> = ({
 }) => {
   const [formDisabled, setFormDisabled] = useState<boolean>(false)
 
-  const [libraries] = useState(['places'])
+  const [libraries] = useState(['places'] as any)
+
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
