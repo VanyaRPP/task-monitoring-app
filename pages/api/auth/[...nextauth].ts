@@ -1,4 +1,4 @@
-import NextAuth from 'next-auth'
+import NextAuth, { NextAuthOptions } from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
 import FacebookProvider from 'next-auth/providers/facebook'
@@ -25,7 +25,7 @@ function text({ url, host }) {
   return `Login to ${host}\n${url}\n\n`
 }
 
-export default NextAuth({
+export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
   secret: process.env.NEXTAUTH_SECRET,
   jwt: {
@@ -103,4 +103,6 @@ export default NextAuth({
     verifyRequest: '/auth/verify-request', // (used for check email message)
     // newUser: '/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
   },
-})
+}
+
+export default NextAuth(authOptions)

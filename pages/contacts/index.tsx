@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { FC } from 'react'
 import {
   FacebookOutlined,
   GithubOutlined,
@@ -11,7 +11,7 @@ import {
 import { Button, Form, Input } from 'antd'
 import s from './style.module.scss'
 
-const ContactsPage = () => {
+const ContactsPage: FC = () => {
   const onFinish = (values: any) => {
     console.log(values)
   }
@@ -19,65 +19,59 @@ const ContactsPage = () => {
   return (
     <>
       <h1 className={s.Header}>Contact Us</h1>
-
       <p className={s.Text}>
         We can`t solve your problem if you don`t tell us about it!
       </p>
-
       <div className={s.Container}>
-        <div className={s.Form}>
-          <Form name="nest-messages" onFinish={onFinish}>
-            <Form.Item name={['user', 'name']} rules={[{ required: true }]}>
-              <Input placeholder="*Name" />
-            </Form.Item>
-
-            <Form.Item name={['user', 'email']} rules={[{ type: 'email' }]}>
-              <Input placeholder="Email" />
-            </Form.Item>
-
-            <Form.Item name={['user', 'introduction']}>
-              <Input.TextArea placeholder="Message" />
-            </Form.Item>
-
-            <Form.Item>
-              <Button block type="primary" htmlType="submit">
-                Send
-              </Button>
-            </Form.Item>
-          </Form>
+        <div className={s.HalfBlock}>
+          <div className={s.MyForm}>
+            <Form name="nest-messages" onFinish={onFinish}>
+              <Form.Item name={['user', 'name']} rules={[{ required: true }]}>
+                <Input placeholder="Name" />
+              </Form.Item>
+              <Form.Item name={['user', 'email']} rules={[{ type: 'email' }]}>
+                <Input placeholder="Email" />
+              </Form.Item>
+              <Form.Item name={['user', 'introduction']}>
+                <Input.TextArea placeholder="Message" />
+              </Form.Item>
+              <Form.Item>
+                <Button block type="primary" htmlType="submit">
+                  Send
+                </Button>
+              </Form.Item>
+            </Form>
+          </div>
         </div>
-
         <div className={s.Divider} />
-
-        <div className={s.Links}>
-          <div className={s.Contacts}>
-            <div>
+        <div className={s.HalfBlock}>
+          <div className={s.MediumBlock}>
+            <div className={s.Block}>
               <HomeOutlined />
               <p>Zhytomyr</p>
             </div>
-            <div>
+            <div className={s.Block}>
               <PhoneOutlined />
               <p>+(380)96-111-2222</p>
             </div>
-            <div>
+            <div className={s.Block}>
               <MailOutlined />
               <a href="">random@gmail.com</a>
             </div>
-          </div>
-
-          <div className={s.Media}>
-            <a href="">
-              <FacebookOutlined />
-            </a>
-            <a href="">
-              <LinkedinOutlined />
-            </a>
-            <a href="">
-              <InstagramOutlined />
-            </a>
-            <a href="">
-              <GithubOutlined />
-            </a>
+            <div className={s.Links}>
+              <a href="#">
+                <FacebookOutlined />
+              </a>
+              <a href="#">
+                <LinkedinOutlined />
+              </a>
+              <a href="#">
+                <InstagramOutlined />
+              </a>
+              <a href="#">
+                <GithubOutlined />
+              </a>
+            </div>
           </div>
         </div>
       </div>

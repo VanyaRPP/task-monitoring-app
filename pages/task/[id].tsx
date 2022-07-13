@@ -59,7 +59,10 @@ const Task: React.FC = () => {
 
   return (
     <div className={s.TaskContainer}>
-      <Card className={`${s.Card} ${s.Task}`}>
+      <Card
+        className={`${s.Card} ${s.Task}`}
+        actions={session?.user?.email === user?.email && Actions}
+      >
         <div className={s.UserInfo}>
           <Avatar size={200} src={user?.image} />
           <h2>{user?.name}</h2>
@@ -77,20 +80,45 @@ const Task: React.FC = () => {
         </Card>
       </Card>
 
-      <Card
-        className={`${s.Card} ${s.Auction}`}
-        title={`Auction: ${config.data.length}`}
-      >
-        {config.data.length ? (
-          <Table dataSource={config.data} columns={config.columns} />
-        ) : (
-          <h2 style={{ textAlign: 'center' }}>Nobody</h2>
-        )}
+      <Card className={`${s.Card} ${s.Auction}`} title="Auction">
+        <ul>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+        </ul>
       </Card>
 
-      <Card className={`${s.Card} ${s.Additional}`} title="Additional card">
-        <h2>Additional card</h2>
-      </Card>
+      <Card
+        className={`${s.Card} ${s.Additional}`}
+        title="Additional card"
+      ></Card>
     </div>
   )
 }

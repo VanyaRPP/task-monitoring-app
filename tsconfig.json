@@ -24,7 +24,8 @@
     "**/*.tsx",
     "components/withPrivateRoute.jsx",
     "custom.d.ts",
-    "pages/api-doc.js"
+    "pages/api-doc.js",
+    "pages/admin/khkjh__middleware.ts"
   ],
   "exclude": ["node_modules"]
 }
