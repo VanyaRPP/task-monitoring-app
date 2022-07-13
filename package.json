@@ -27,6 +27,7 @@
     "@types/mongoose": "^5.11.97",
     "antd": "^4.21.0",
     "axios": "^0.27.2",
+    "classnames": "^2.3.1",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^4.7.0",
     "mongoose": "^6.3.8",

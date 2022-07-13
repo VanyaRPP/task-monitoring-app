@@ -1,37 +1,96 @@
+import { PlusOutlined } from '@ant-design/icons'
 import {
   Tabs,
   Button,
   Col,
   Row,
   Statistic,
+  Input,
   Comment,
   Avatar,
   Tooltip,
+  Form,
 } from 'antd'
 import moment from 'moment'
+import { useState } from 'react'
+import { useAddCategoryMutation } from '../../api/categoriesApi/category.api'
+import { useGetAllUsersQuery } from '../../api/userApi/user.api'
+import AddCategoryForm from '../../components/AddCategoryForm'
 import Categories from '../../components/Categories'
+import ModalWindow from '../../components/UI/ModalWindow'
+import { ICategory } from '../../models/Category'
+import s from './style.module.scss'
 
 const AdminPage: React.FC = () => {
   const { TabPane } = Tabs
+  const { Search } = Input
+  const [form] = Form.useForm()
+
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+  const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
+
+  const [addCategory] = useAddCategoryMutation()
+
+  const onCancelModal = () => {
+    setIsModalVisible(false)
+    form.resetFields()
+  }
+
+  const onSubmiModal = async () => {
+    const formData: ICategory = await form.validateFields()
+    setIsFormDisabled(true)
+    await addCategory({ ...formData })
+    form.resetFields()
+    setIsModalVisible(false)
+    setIsFormDisabled(false)
+  }
 
   return (
     <>
       <Tabs defaultActiveKey="1">
-        <TabPane tab="Statistics" key="1">
-          <Row gutter={16}>
-            <Col span={12}>
-              <Statistic title="Active Users" value={1128} />
-              <Statistic title="Active Workers" value={893} />
-            </Col>
-            <Col span={12}>
-              <Statistic title="Tasks in process" value={893} />
-              <Statistic title="Open tasks" value={93} />
-            </Col>
-          </Row>
-        </TabPane>
-        <TabPane tab="Categories" key="2">
+        <TabPane tab="Categories" key="1">
+          <div className={s.Controls}>
+            <Search
+              className={s.Search}
+              placeholder="input search text"
+              onSearch={() => console.log('search')}
+              enterButton
+            />
+            <Button
+              className={s.AddButton}
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setIsModalVisible(true)}
+            />
+            <ModalWindow
+              isModalVisible={isModalVisible}
+              onCancel={onCancelModal}
+              onOk={onSubmiModal}
+              okText="Create category"
+              cancelText="Cancel"
+            >
+              <AddCategoryForm isFormDisabled={isFormDisabled} form={form} />
+            </ModalWindow>
+          </div>
           <Categories />
         </TabPane>
+
+        <TabPane tab="Clients" key="2">
+          <Tabs type="card">
+            <TabPane tab="Users" key="1">
+              <Tabs type="card" tabPosition="left">
+                User
+              </Tabs>
+            </TabPane>
+            <TabPane tab="Worker" key="2">
+              Worker
+            </TabPane>
+            <TabPane tab="Premium" key="3">
+              Premium
+            </TabPane>
+          </Tabs>
+        </TabPane>
+
         <TabPane tab="Сomplaints" key="3">
           <Comment
             author={<a>Han Solo</a>}
