@@ -55,24 +55,23 @@
   position: relative;
 
   > *:first-of-type {
+    position: absolute !important;
+
     > * {
-      position: absolute !important;
-      top: 0;
-      left: 0;
       animation: floater 10s ease-in-out infinite;
       z-index: 2;
 
-      transition: filter 0.5s;
-      filter: drop-shadow(2mm 2mm 2mm var(--primaryColor));
+      // transition: filter 0.5s;
+      // filter: drop-shadow(2mm 2mm 20px var(--textColor));
     }
   }
   > *:last-of-type {
     > * {
-      animation: floater 10s ease-in-out 1s infinite;
+      animation: floater 10s ease-in-out 0.5s infinite;
       z-index: 1;
 
-      transition: filter 0.5s;
-      filter: drop-shadow(1mm 1mm 1mm var(--primaryColor));
+      // transition: filter 0.5s;
+      // filter: drop-shadow(1mm 1mm 10px var(--textColor));
     }
   }
 
@@ -89,12 +88,12 @@
 
 @keyframes floater {
   0% {
-    transform: translateY(-2.5%);
+    transform: translateY(-5%);
   }
   50% {
-    transform: translateY(2.5%);
+    transform: translateY(8%);
   }
   100% {
-    transform: translateY(-2.5%);
+    transform: translateY(-5%);
   }
 }
