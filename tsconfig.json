@@ -25,7 +25,7 @@
     "components/withPrivateRoute.jsx",
     "custom.d.ts",
     "pages/api-doc.js",
-    "pages/admin/khkjh__middleware.ts"
+    "components/PlacesAutocomplete/index.jsx"
   ],
   "exclude": ["node_modules"]
 }
