@@ -46,7 +46,6 @@ const AddTaskModal: React.FC<PropsType> = ({
   const [addTask] = useAddTaskMutation()
   const { data: session } = useSession()
   const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const user = userData?.data
   const { data: categoriesData } = useGetAllCategoriesQuery('')
   const categories = categoriesData?.data
 
@@ -58,7 +57,6 @@ const AddTaskModal: React.FC<PropsType> = ({
 
   useEffect(() => {
     if (address) {
-      console.log('alo')
       check()
     }
   }, [address, check])
@@ -72,7 +70,11 @@ const AddTaskModal: React.FC<PropsType> = ({
     const formData: FormData = await form.validateFields()
     if (error !== true) {
       setFormDisabled(true)
-      await addTask({ ...formData, address: address, creator: user?._id })
+      await addTask({
+        ...formData,
+        address: address,
+        creator: userData?.data?._id,
+      })
       form.resetFields()
       setIsModalVisible(false)
       setFormDisabled(false)

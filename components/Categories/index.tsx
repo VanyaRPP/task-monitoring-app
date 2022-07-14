@@ -1,4 +1,4 @@
-import { Button, List, Skeleton } from 'antd'
+import { Button, List, Popconfirm, Skeleton } from 'antd'
 import Link from 'next/link'
 import {
   useDeleteCategoryMutation,
@@ -7,7 +7,8 @@ import {
 import { AppRoutes } from '../../utils/constants'
 import { useSession } from 'next-auth/react'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
-import { DeleteOutlined } from '@ant-design/icons'
+import { DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import DeleteButton from '../DeleteButton'
 
 const Categories: React.FC = () => {
   const { data: categoriesData } = useGetAllCategoriesQuery('')
@@ -36,13 +37,10 @@ const Categories: React.FC = () => {
           ].concat(
             role === 'Worker'
               ? [
-                  <Button
+                  <DeleteButton
                     key="delete"
-                    type="primary"
-                    onClick={() => deleteCategory(category._id)}
-                  >
-                    <DeleteOutlined />
-                  </Button>,
+                    onDelete={() => deleteCategory(category._id)}
+                  />,
                 ]
               : []
           )}

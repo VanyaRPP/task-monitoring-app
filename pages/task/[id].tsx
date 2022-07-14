@@ -14,6 +14,7 @@ import { useSession } from 'next-auth/react'
 import { ObjectId } from 'mongoose'
 import { dateToDefaultFormat } from '../../components/features/formatDate'
 import { AppRoutes } from '../../utils/constants'
+import DeleteButton from '../../components/DeleteButton/index'
 import s from './style.module.scss'
 
 import config from '../../lib/auction.config'
