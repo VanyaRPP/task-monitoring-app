@@ -1,17 +1,9 @@
-import { PlusOutlined } from '@ant-design/icons'
-import { Tabs, Button, Input, Comment, Avatar, Tooltip, Form } from 'antd'
-import moment from 'moment'
+import { Tabs } from 'antd'
 import { unstable_getServerSession } from 'next-auth'
-import { useState } from 'react'
-import { useAddCategoryMutation } from '../../api/categoriesApi/category.api'
-import AddCategoryForm from '../../components/AddCategoryForm'
 import AdminPageCategories from '../../components/AdminIU/AdminPageCategorie'
 import AdminPageClients from '../../components/AdminIU/AdminPageClients'
-import Categories from '../../components/Categories'
-import ModalWindow from '../../components/UI/ModalWindow'
-import { ICategory } from '../../models/Category'
+import AdminPageTasks from '../../components/AdminIU/AdminPageTasks'
 import { authOptions } from '../api/auth/[...nextauth]'
-import s from './style.module.scss'
 
 const AdminPage: React.FC = () => {
   const { TabPane } = Tabs
@@ -25,7 +17,10 @@ const AdminPage: React.FC = () => {
         <TabPane tab="Clients" key="2">
           <AdminPageClients />
         </TabPane>
-        <TabPane tab="Domains" key="3">
+        <TabPane tab="Tasks" key="3">
+          <AdminPageTasks />
+        </TabPane>
+        <TabPane tab="Domains" key="4">
           Domains
         </TabPane>
       </Tabs>

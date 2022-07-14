@@ -1,7 +1,7 @@
 import mongoose, { Schema, ObjectId } from 'mongoose'
 
 export interface ITask {
-  _id?: ObjectId
+  _id?: string
   name: string
   creator?: ObjectId | string
   desription?: string

@@ -5,6 +5,10 @@ import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
 import RoleSwither from '../../components/roleSwitcher'
 import withAuthRedirect from '../../components/HOC/withAuthRedirect'
 import { useSession } from 'next-auth/react'
+import { unstable_getServerSession } from 'next-auth'
+import { authOptions } from '../api/auth/[...nextauth]'
+import { AppRoutes } from '../../utils/constants'
+import { GetServerSideProps } from 'next'
 
 const Profile: React.FC = () => {
   const { data: session } = useSession()
@@ -47,3 +51,24 @@ const Profile: React.FC = () => {
 }
 
 export default withAuthRedirect(Profile)
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions
+  )
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: AppRoutes.AUTH_SIGN_IN,
+        permanent: false,
+      },
+    }
+  }
+
+  return {
+    props: {},
+  }
+}
