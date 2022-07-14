@@ -148,9 +148,9 @@
 
   .Auction {
     width: 500px;
-    // min-height: 400px;
-    padding-bottom: 64px;
+    min-height: 400px;
     max-height: 750px;
+    padding-bottom: 64px;
     position: relative;
 
     @media (max-width: 1440px) {
@@ -171,14 +171,14 @@
 
     > div:first-of-type {
       margin-bottom: 0;
-    }
+    } // card header (antd)
     > div:last-of-type {
       padding: 0;
-    }
+    } // card body (antd)
 
     ul {
       position: absolute;
-      bottom: -64px;
+      bottom: 0;
       left: 0;
       width: 100%;
       margin: 0;
@@ -204,30 +204,40 @@
           }
         }
       }
-    }
+    } // pagination buttons
 
-    table {
-      background-color: transparent;
-      transition: color 0.5s;
-      color: var(--textColor);
-      * {
-        border-color: #88888830;
+    > div:last-of-type {
+      div {
+        position: static;
       }
 
-      th {
-        transition: color 0.5s, background 0.5s;
+      > * > * > * > div {
+        background: transparent;
+      } // table-wrapper bg-color (antd)
+
+      table {
+        background: transparent !important;
+        transition: color 0.5s;
         color: var(--textColor);
-        background: var(--backgroundColorElements);
-      }
-
-      tr {
-        transition: background 0.5s;
-
-        &:hover {
-          background-color: #88888830;
+        * {
+          border-color: #88888830;
         }
-        td {
-          background: transparent !important;
+
+        th {
+          transition: color 0.5s, background 0.5s;
+          color: var(--textColor);
+          background: var(--backgroundColorElements) !important;
+        }
+
+        tr {
+          transition: background 0.5s;
+
+          &:hover {
+            background-color: #88888830;
+          }
+          td {
+            background: transparent !important;
+          }
         }
       }
     }
