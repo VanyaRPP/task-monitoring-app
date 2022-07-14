@@ -61,22 +61,6 @@ const Task: React.FC = () => {
   return (
     <div className={s.TaskContainer}>
       <Card
-//Pay attention !!!
-        className={s.Task}
-        actions={
-          session?.user?.email === user?.email
-            ? [
-                <Button key="edit" type="primary">
-                  <EditOutlined />
-                </Button>,
-                <DeleteButton
-                  key="delete"
-                  onDelete={() => taskDelete(task?._id)}
-                />,
-              ]
-            : null
-        }
-//Pay attention !!!
         className={`${s.Card} ${s.Task}`}
         actions={session?.user?.email === user?.email && Actions}
       >
@@ -97,20 +81,45 @@ const Task: React.FC = () => {
         </Card>
       </Card>
 
-      <Card
-        className={`${s.Card} ${s.Auction}`}
-        title={`Auction: ${config.data.length}`}
-      >
-        {config.data.length ? (
-          <Table dataSource={config.data} columns={config.columns} />
-        ) : (
-          <h2 style={{ textAlign: 'center' }}>Nobody</h2>
-        )}
+      <Card className={`${s.Card} ${s.Auction}`} title="Auction">
+        <ul>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+          <li>Master name</li>
+        </ul>
       </Card>
 
-      <Card className={`${s.Card} ${s.Additional}`} title="Additional card">
-        <h2>Additional card</h2>
-      </Card>
+      <Card
+        className={`${s.Card} ${s.Additional}`}
+        title="Additional card"
+      ></Card>
     </div>
   )
 }

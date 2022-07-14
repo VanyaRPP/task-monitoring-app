@@ -1,12 +1,25 @@
-import { Modal, DatePicker, Form, Input, Select, AutoComplete } from 'antd'
+import { useJsApiLoader } from '@react-google-maps/api'
+import { Modal, DatePicker, Form, Input, Select } from 'antd'
 import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
 import { useSession } from 'next-auth/react'
 import { useState } from 'react'
+import Autocomplete from 'react-google-autocomplete'
+import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
 import { useGetAllCategoriesQuery } from '../../api/categoriesApi/category.api'
 import { useAddTaskMutation } from '../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
-import { ITask } from '../../models/Task'
+import Map from '../Map'
+import { PlacesAutocomplete } from '../PlacesAutocomplete'
+import s from './style.module.scss'
+
+type FormData = {
+  category?: string
+  deadline: string
+  desription?: string
+  domain?: { any }
+  name: string
+}
 
 type PropsType = {
   isModalVisible: boolean
@@ -18,6 +31,14 @@ const AddTaskModal: React.FC<PropsType> = ({
   setIsModalVisible,
 }) => {
   const [formDisabled, setFormDisabled] = useState<boolean>(false)
+
+  const [libraries] = useState(['places'] as any)
+
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    libraries,
+  })
 
   const [form] = Form.useForm()
 
@@ -51,6 +72,8 @@ const AddTaskModal: React.FC<PropsType> = ({
     { value: 'Wall Street' },
   ]
 
+  const [Pvalue, setPValue] = useState(null)
+
   return (
     <Modal
       visible={isModalVisible}
@@ -77,15 +100,13 @@ const AddTaskModal: React.FC<PropsType> = ({
           <Input.TextArea />
         </Form.Item>
         <Form.Item rules={[{ required: true }]} name="domain" label="Adress">
-          <AutoComplete
-            allowClear={true}
-            options={adresses}
-            defaultValue="Medovyi Lane 23"
-            filterOption={(inputValue, adresses) =>
-              adresses?.value
-                .toUpperCase()
-                .indexOf(inputValue.toUpperCase()) !== -1
-            }
+          <PlacesAutocomplete isLoaded={isLoaded} />
+          <Map
+            isLoaded={isLoaded}
+            center={{
+              lat: 50.264915,
+              lng: 28.661954,
+            }}
           />
         </Form.Item>
         <Form.Item name="category" label="Categories">

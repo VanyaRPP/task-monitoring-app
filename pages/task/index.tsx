@@ -10,6 +10,7 @@ import {
   isDeadlineExpired,
 } from '../../components/features/formatDate'
 import { AppRoutes } from '../../utils/constants'
+import classNames from 'classnames'
 import s from './style.module.scss'
 
 const Tasks: React.FC = () => {
@@ -41,9 +42,9 @@ const Tasks: React.FC = () => {
                     : 'Apply'}
                 </Button>
               }
-              className={`${s.Card} ${
-                isDeadlineExpired(task?.deadline) && s.Disabled
-              }`}
+              className={classNames(s.Card, {
+                [s.Disabled]: isDeadlineExpired(task?.deadline),
+              })}
             >
               <p>Catagory: {task?.category}</p>
               <p>Description: {task.desription}</p>

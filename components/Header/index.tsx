@@ -7,7 +7,7 @@ import TaskButton from '../TaskButton'
 import { AppRoutes } from '../../utils/constants'
 import s from './style.module.scss'
 
-const MainHeader: React.FC = () => {
+const Header: React.FC = () => {
   return (
     <Layout.Header className={s.Header}>
       <div className={s.Item}>
@@ -23,4 +23,4 @@ const MainHeader: React.FC = () => {
   )
 }
 
-export default MainHeader
+export default Header

@@ -24,7 +24,8 @@
     "**/*.tsx",
     "components/withPrivateRoute.jsx",
     "custom.d.ts",
-    "pages/api-doc.js"
+    "pages/api-doc.js",
+    "components/PlacesAutocomplete/index.jsx"
   ],
   "exclude": ["node_modules"]
 }
