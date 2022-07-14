@@ -31,10 +31,23 @@ export interface IGeoCode {
   lng: number
 }
 
-const TaskShema = new Schema<ITask>({
+interface ITaskModel {
+  _id?: ObjectId
+  name: string
+  creator: ObjectId | string
+  domain: string
+  desription?: string
+  address: IAddress
+  category: string
+  dateofcreate: Date
+  deadline: string
+}
+
+const TaskShema = new Schema<ITaskModel>({
   name: { type: String, required: true },
   creator: { type: Schema.Types.ObjectId, ref: 'User' },
   desription: { type: String, default: 'no description' },
+  address: { type: Object, required: true },
   domain: { type: String },
   category: { type: String },
   dateofcreate: { type: Date, required: true, default: Date.now },
