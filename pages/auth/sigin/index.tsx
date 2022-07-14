@@ -4,7 +4,7 @@ import { Alert } from 'antd'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import { errors } from '../../../utils/constants'
-import SignInButton from '../../../components/SignInButton'
+import SignInButton from '../../../common/components/SignInButton'
 import s from './style.module.scss'
 
 const SignInPage = ({ providers, csrfToken }: any) => {

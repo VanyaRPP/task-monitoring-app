@@ -8,16 +8,16 @@ import Router, { useRouter } from 'next/router'
 import {
   useDeleteTaskMutation,
   useGetTaskByIdQuery,
-} from '../../api/taskApi/task.api'
-import { useGetUserByIdQuery } from '../../api/userApi/user.api'
+} from '../../common/api/taskApi/task.api'
+import { useGetUserByIdQuery } from '../../common/api/userApi/user.api'
 import { useSession } from 'next-auth/react'
 import { ObjectId } from 'mongoose'
-import { dateToDefaultFormat } from '../../components/features/formatDate'
+import { dateToDefaultFormat } from '../../common/components/features/formatDate'
 import { AppRoutes } from '../../utils/constants'
-import DeleteButton from '../../components/DeleteButton/index'
+import DeleteButton from '../../common/components/DeleteButton/index'
 import s from './style.module.scss'
 
-import config from '../../lib/auction.config'
+import config from '../../common/lib/auction.config'
 
 const Task: React.FC = () => {
   const { data: session } = useSession()

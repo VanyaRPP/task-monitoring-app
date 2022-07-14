@@ -1,6 +1,6 @@
 import { useSession } from 'next-auth/react'
-import HomePage from '../components/HomePage'
-import DashboardPage from '../components/DashboardPage'
+import HomePage from '../common/components/HomePage'
+import DashboardPage from '../common/components/DashboardPage'
 
 const Home: React.FC = () => {
   const { status } = useSession()

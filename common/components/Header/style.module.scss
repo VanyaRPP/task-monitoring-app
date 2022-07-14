@@ -1,0 +1,64 @@
+@import 'styles/variables.scss';
+
+.Header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 100%;
+
+  @media (max-width: 889px) {
+    padding: 0;
+  }
+
+  @media (max-width: 585px) {
+    min-width: 300px;
+  }
+
+  .Item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    .Logo {
+      float: left;
+      height: 31px;
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: start;
+      line-height: 31px;
+      margin: 0 20px;
+      cursor: pointer;
+    }
+
+    .Search {
+      max-width: 350px;
+
+      input {
+        transition: color 0.5s, background 0.5s;
+        color: var(--textColor);
+        background: transparent !important;
+      }
+
+      @media (max-width: 660px) {
+        display: none;
+      }
+    }
+  }
+}
+
+.Header {
+  transition: background 0.5s;
+  background: var(--backgroundColorPrimary);
+}
+
+.Logo {
+  transition: color 0.5s;
+  color: var(--primaryColor);
+  &:hover {
+    color: var(--primaryColorHover);
+  }
+}
