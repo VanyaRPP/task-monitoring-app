@@ -1,13 +1,13 @@
-import { FC, useState } from 'react'
+import { useState } from 'react'
 import Router from 'next/router'
 import { Avatar, Button, Card, Image } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import { signIn, signOut, useSession } from 'next-auth/react'
-import RoleSwither from '../roleSwitcher'
 import { AppRoutes } from '../../utils/constants'
+import classNames from 'classnames'
 import s from './style.module.scss'
 
-const LoginUser: FC = () => {
+const LoginUser: React.FC = () => {
   const { data: session } = useSession()
 
   const [menuActive, setMenuActive] = useState(false)
@@ -47,7 +47,7 @@ const LoginUser: FC = () => {
       </div>
       <div
         onClick={() => setMenuActive(false)}
-        className={`${s.Info} ${menuActive ? s.active : ''}`}
+        className={classNames(s.Info, { [s.Active]: menuActive })}
       >
         <Card onClick={(e) => e.stopPropagation()} className={s.Card}>
           <Avatar
@@ -64,9 +64,6 @@ const LoginUser: FC = () => {
 
           <h2>{session?.user?.name}</h2>
           <p>{session?.user?.email}</p>
-
-          <RoleSwither />
-
           <div className={s.Buttons}>
             <Button
               type="link"

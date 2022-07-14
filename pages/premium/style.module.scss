@@ -39,16 +39,18 @@
   border-radius: 1rem;
   padding: 1rem;
 
-  &.Active {
-    // TODO: styles for active plan
-  }
+  // &.Active {
+  //   // TODO: styles for active plan
+  // }
 
   h2 {
     font-size: 24px;
   }
+
   h3 {
     font-size: 46px;
   }
+
   p {
     font-size: 18px;
   }
@@ -65,29 +67,38 @@
   button {
     margin-top: 1rem;
   }
-}
 
-.Card:hover {
-  h2,
-  h3,
-  p {
-    color: rgba(255, 255, 255, 80%);
+  &:hover {
+    background-color: plum;
+    border: 0;
+
+    .Divider {
+      background-color: white;
+    }
   }
 
-  // background-color: plum;
-  background-color: var(--primaryColor);
-  border-color: transparent;
+  .Card:hover {
+    h2,
+    h3,
+    p {
+      color: rgba(255, 255, 255, 80%);
+    }
+
+    // background-color: plum;
+    background-color: var(--primaryColor);
+    border-color: transparent;
+
+    .Divider {
+      background-color: rgba(255, 255, 255, 80%);
+    }
+  }
 
   .Divider {
-    background-color: rgba(255, 255, 255, 80%);
+    width: 100%;
+    height: 1px;
+    opacity: 0.8;
+    margin: 1rem;
+    transition: background 0.5s;
+    background-color: grey;
   }
-}
-
-.Divider {
-  width: 100%;
-  height: 1px;
-  opacity: 0.8;
-  margin: 1rem;
-  transition: background 0.5s;
-  background-color: grey;
 }

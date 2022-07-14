@@ -1,11 +1,11 @@
 import React from 'react'
 import Router from 'next/router'
-import { Tabs, Card, Button, List, Avatar } from 'antd'
-import { AppRoutes } from '../../utils/constants'
-import { useSession } from 'next-auth/react'
+import { Tabs, Card, List, Avatar, Button } from 'antd'
 import { StarOutlined } from '@ant-design/icons'
-import { dateToDefaultFormat } from '../features/formatDate'
+import { useSession } from 'next-auth/react'
+import { AppRoutes } from '../../utils/constants'
 import config from '../../lib/dashboard.config'
+import { dateToDefaultFormat } from '../features/formatDate'
 import s from './style.module.scss'
 
 const { TabPane } = Tabs
@@ -42,7 +42,6 @@ const Dashboard: React.FC = () => {
                   <span>{item.task}</span>
                   <span>{item.master}</span>
                 </div>
-
                 <div>
                   <div>{dateToDefaultFormat(item.date)}</div>
                   <div>{item.status}</div>

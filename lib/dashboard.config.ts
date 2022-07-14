@@ -11,7 +11,7 @@ const config = {
       id: 1,
       task: 'Fix the door',
       master: 'Joe Rogan',
-      date: '1993-14-15T03:24:00',
+      date: '2022-12-17T03:24:00',
       status: 'Pending',
     },
     {

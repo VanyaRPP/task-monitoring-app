@@ -12,7 +12,8 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
       .concat(userApi.middleware)
-      .concat(taskApi.middleware),
+      .concat(taskApi.middleware)
+      .concat(categoryApi.middleware),
 })
 
 export type AppDispatch = typeof store.dispatch
