@@ -5,10 +5,30 @@ export interface ITask {
   name: string
   creator: ObjectId | string
   desription?: string
-  domain?: any
-  category?: string
+  domain: string
+  category: string
   dateofcreate: Date
   deadline: string
+}
+
+export interface ICreateTask {
+  name: string
+  creator: ObjectId | string
+  desription?: string
+  address: IAddress
+  category: string
+  dateofcreate: Date
+  deadline: string
+}
+
+export interface IAddress {
+  name: string
+  geoCode: IGeoCode
+}
+
+export interface IGeoCode {
+  lat: number
+  lng: number
 }
 
 const TaskShema = new Schema<ITask>({
