@@ -2,8 +2,9 @@ import {
   DeleteOutlined,
   EditOutlined,
   QuestionCircleOutlined,
+  StarOutlined,
 } from '@ant-design/icons'
-import { Avatar, Button, Card, Popconfirm, Table } from 'antd'
+import { Avatar, Button, Card, List, Popconfirm, Table, Tabs } from 'antd'
 import Router, { useRouter } from 'next/router'
 import {
   useDeleteTaskMutation,
@@ -16,7 +17,7 @@ import { dateToDefaultFormat } from '../../components/features/formatDate'
 import { AppRoutes } from '../../utils/constants'
 import s from './style.module.scss'
 
-import config from '../../lib/auction.config'
+import config from '../../lib/task.config'
 
 const Task: React.FC = () => {
   const { data: session } = useSession()
@@ -79,17 +80,59 @@ const Task: React.FC = () => {
 
       <Card
         className={`${s.Card} ${s.Auction}`}
-        title={`Auction: ${config.data.length}`}
+        title={`Auction: ${config.auction.data.length}`}
       >
-        {config.data.length ? (
-          <Table dataSource={config.data} columns={config.columns} />
+        {config.auction.data.length ? (
+          <Table
+            dataSource={config.auction.data}
+            columns={config.auction.columns}
+          />
         ) : (
           <h2 style={{ textAlign: 'center' }}>Nobody</h2>
         )}
       </Card>
 
-      <Card className={`${s.Card} ${s.Additional}`} title="Additional card">
-        <h2>Additional card</h2>
+      <Card className={`${s.Card} ${s.Comments}`}>
+        <Tabs defaultActiveKey="1" className={s.Tabs}>
+          <Tabs.TabPane tab="Comments" key="1">
+            <List
+              className={s.List}
+              dataSource={config.comments.data}
+              renderItem={(item) => (
+                <List.Item>
+                  <List.Item.Meta
+                    avatar={<Avatar src={item.avatar} />}
+                    title={item.name}
+                    description={
+                      <p className={s.Description}>{item.comment}</p>
+                    }
+                  />
+                </List.Item>
+              )}
+            ></List>
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Feedbacks" key="2">
+            <List
+              className={s.List}
+              dataSource={config.feedbacks.data}
+              renderItem={(item) => (
+                <List.Item>
+                  <List.Item.Meta
+                    avatar={<Avatar src={item.avatar} />}
+                    title={item.name}
+                    description={
+                      <p className={s.Description}>{item.feedback}</p>
+                    }
+                  />
+                  <span>
+                    {item.rate}/5
+                    <StarOutlined />
+                  </span>
+                </List.Item>
+              )}
+            ></List>
+          </Tabs.TabPane>
+        </Tabs>
       </Card>
     </div>
   )
