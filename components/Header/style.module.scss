@@ -7,7 +7,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 2;
+  z-index: 10;
   width: 100%;
 
   @media (max-width: 889px) {
@@ -38,9 +38,15 @@
       max-width: 350px;
 
       input {
-        transition: color 0.5s, background 0.5s;
+        transition: color 0.5s, background 0.5s, border 0.2s;
+        border-color: #88888850;
         color: var(--textColor);
         background: transparent !important;
+
+        &:hover,
+        &:focus {
+          border-color: var(--primaryColor);
+        }
       }
 
       @media (max-width: 660px) {
