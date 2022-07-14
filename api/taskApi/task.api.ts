@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { ObjectId } from 'mongoose'
-import { ITask } from '../../models/Task'
+import { ICreateTask, ITask } from '../../models/Task'
 
 interface AllTasksQuer {
   success: boolean
@@ -27,7 +27,7 @@ export const taskApi = createApi({
       query: (id) => `/task/${id}`,
       providesTags: (result) => ['Task'],
     }),
-    addTask: builder.mutation<ITask, Partial<ITask>>({
+    addTask: builder.mutation<ICreateTask, Partial<ICreateTask>>({
       query(data) {
         const { ...body } = data
         return {

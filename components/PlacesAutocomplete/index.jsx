@@ -4,10 +4,11 @@ import usePlacesAutocomplete, {
 } from 'use-places-autocomplete'
 import useOnclickOutside from 'react-cool-onclickoutside'
 import { useEffect } from 'react'
-import { Input } from 'antd'
+import { Form, Input } from 'antd'
 import s from './style.module.scss'
+import Item from 'antd/lib/list/Item'
 
-export const PlacesAutocomplete = ({ isLoaded }) => {
+export const PlacesAutocomplete = ({ isLoaded, setAddress, error }) => {
   const {
     ready,
     value,
@@ -39,6 +40,7 @@ export const PlacesAutocomplete = ({ isLoaded }) => {
       getGeocode({ address: description }).then((results) => {
         const { lat, lng } = getLatLng(results[0])
         console.log('📍 Coordinates: ', { lat, lng })
+        setAddress({ name: description, geoCode: { lat, lng } })
       })
     }
 
@@ -73,6 +75,7 @@ export const PlacesAutocomplete = ({ isLoaded }) => {
         onChange={handleInput}
         disabled={!ready}
         placeholder="Куди поїде майстер?"
+        className={error ? s.error : ''}
       />
       {status === 'OK' && (
         <div className={s.subList}>{renderSuggestions()}</div>

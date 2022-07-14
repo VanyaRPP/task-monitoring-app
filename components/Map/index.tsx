@@ -1,7 +1,7 @@
 import React, { useCallback, useRef } from 'react'
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api'
 import s from './style.module.scss'
-import { DarkMapTheme, LightMapTheme } from './MapStyle'
+import { DarkMapTheme } from './MapStyle'
 
 const defaultOptions = {
   panControl: true,

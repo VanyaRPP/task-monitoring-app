@@ -3,13 +3,11 @@ import { Modal, DatePicker, Form, Input, Select } from 'antd'
 import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
 import { useSession } from 'next-auth/react'
-import { useState } from 'react'
-import Autocomplete from 'react-google-autocomplete'
-import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
+import { useCallback, useEffect, useState } from 'react'
 import { useGetAllCategoriesQuery } from '../../api/categoriesApi/category.api'
 import { useAddTaskMutation } from '../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
-import { ITask } from '../../models/Task'
+import { IAddress } from '../../models/Task'
 import Map from '../Map'
 import { PlacesAutocomplete } from '../PlacesAutocomplete'
 import s from './style.module.scss'
@@ -32,6 +30,8 @@ const AddTaskModal: React.FC<PropsType> = ({
   setIsModalVisible,
 }) => {
   const [formDisabled, setFormDisabled] = useState<boolean>(false)
+  const [address, setAddress] = useState<IAddress>(null)
+  const [error, setError] = useState<boolean>(false)
 
   const [libraries] = useState(['places'] as any)
 
@@ -49,13 +49,36 @@ const AddTaskModal: React.FC<PropsType> = ({
   const { data: categoriesData } = useGetAllCategoriesQuery('')
   const categories = categoriesData?.data
 
+  const check = useCallback(() => {
+    if (!address && Object.keys(address).length <= 0) {
+      setError(true)
+    } else setError(false)
+  }, [address, setError])
+
+  useEffect(() => {
+    if (address) {
+      check()
+    }
+  }, [address, check])
+
   const onSubmit = async () => {
-    const formData: ITask = await form.validateFields()
-    setFormDisabled(true)
-    await addTask({ ...formData, creator: userData?.data?._id })
-    form.resetFields()
-    setIsModalVisible(false)
-    setFormDisabled(false)
+    let error = false
+    if (!address || Object.keys(address).length <= 0) {
+      setError(true)
+      error = true
+    } else setError(false)
+    const formData: FormData = await form.validateFields()
+    if (error !== true) {
+      setFormDisabled(true)
+      await addTask({
+        ...formData,
+        address: address,
+        creator: userData?.data?._id,
+      })
+      form.resetFields()
+      setIsModalVisible(false)
+      setFormDisabled(false)
+    }
   }
 
   const onCancel = () => {
@@ -74,6 +97,7 @@ const AddTaskModal: React.FC<PropsType> = ({
   ]
 
   const [Pvalue, setPValue] = useState(null)
+  console.log(error)
 
   return (
     <Modal
@@ -100,8 +124,15 @@ const AddTaskModal: React.FC<PropsType> = ({
         <Form.Item name="desription" label="Description">
           <Input.TextArea />
         </Form.Item>
-        <Form.Item rules={[{ required: true }]} name="domain" label="Adress">
-          <PlacesAutocomplete isLoaded={isLoaded} />
+        <Form.Item name="domain" label="Address">
+          <PlacesAutocomplete
+            isLoaded={isLoaded}
+            setAddress={setAddress}
+            error={error}
+          />
+          <div className={`${s.default} ${error ? '' : s.error}`}>
+            Enter address, please!
+          </div>
           <Map
             isLoaded={isLoaded}
             center={{
