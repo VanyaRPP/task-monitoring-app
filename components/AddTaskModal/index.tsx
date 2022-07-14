@@ -9,6 +9,7 @@ import GooglePlacesAutocomplete from 'react-google-places-autocomplete'
 import { useGetAllCategoriesQuery } from '../../api/categoriesApi/category.api'
 import { useAddTaskMutation } from '../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
+import { ITask } from '../../models/Task'
 import Map from '../Map'
 import { PlacesAutocomplete } from '../PlacesAutocomplete'
 import s from './style.module.scss'
@@ -45,14 +46,13 @@ const AddTaskModal: React.FC<PropsType> = ({
   const [addTask] = useAddTaskMutation()
   const { data: session } = useSession()
   const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const user = userData?.data
   const { data: categoriesData } = useGetAllCategoriesQuery('')
   const categories = categoriesData?.data
 
   const onSubmit = async () => {
-    const formData: FormData = await form.validateFields()
+    const formData: ITask = await form.validateFields()
     setFormDisabled(true)
-    await addTask({ ...formData, creator: user?._id })
+    await addTask({ ...formData, creator: userData?.data?._id })
     form.resetFields()
     setIsModalVisible(false)
     setFormDisabled(false)
