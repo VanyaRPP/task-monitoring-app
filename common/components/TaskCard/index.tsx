@@ -52,7 +52,7 @@ const TaskCard = ({ taskId }) => {
       >
         <p className={s.Description}>Description: {task?.desription}</p>
         <p>Category: {task?.category}</p>
-        <p>Domain: {task?.domain}</p>
+        <p>Adress: {task?.address?.name}</p>
         <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
       </Card>
     </Card>

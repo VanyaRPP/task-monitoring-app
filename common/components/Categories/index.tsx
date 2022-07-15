@@ -1,13 +1,12 @@
-import { Button, List, Popconfirm, Skeleton } from 'antd'
+import { Button, List, Skeleton } from 'antd'
 import Link from 'next/link'
 import {
   useDeleteCategoryMutation,
   useGetAllCategoriesQuery,
-} from '../../api/categoriesApi/category.api'
-import { AppRoutes } from '../../../utils/constants'
+} from 'common/api/categoriesApi/category.api'
+import { AppRoutes } from 'utils/constants'
 import { useSession } from 'next-auth/react'
-import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
-import { DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 import DeleteButton from '../DeleteButton'
 
 const Categories: React.FC = () => {

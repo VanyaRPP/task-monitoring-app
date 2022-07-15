@@ -1,8 +1,8 @@
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Form, Input } from 'antd'
 import { useState } from 'react'
-import { useAddCategoryMutation } from '../../../api/categoriesApi/category.api'
-import { ICategory } from '../../../modules/models/Category'
+import { useAddCategoryMutation } from 'common/api/categoriesApi/category.api'
+import { ICategory } from 'common/modules/models/Category'
 import AddCategoryForm from '../../AddCategoryForm'
 import Categories from '../../Categories'
 import ModalWindow from '../../UI/ModalWindow'
@@ -47,6 +47,7 @@ const AdminPageCategories: React.FC = () => {
           onClick={() => setIsModalVisible(true)}
         />
         <ModalWindow
+          title="Add category"
           isModalVisible={isModalVisible}
           onCancel={onCancelModal}
           onOk={onSubmiModal}

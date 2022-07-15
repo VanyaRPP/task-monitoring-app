@@ -1,8 +1,6 @@
 import React from 'react'
 import { Tabs, Card, List, Avatar } from 'antd'
 import { StarOutlined } from '@ant-design/icons'
-import { useSession } from 'next-auth/react'
-import { AppRoutes } from '../../../utils/constants'
 import config from '../../lib/dashboard.config'
 import { dateToDefaultFormat } from '../features/formatDate'
 import s from './style.module.scss'
