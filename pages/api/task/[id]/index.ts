@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../../utils/dbConnect'
-import Task from '../../../../models/Task'
+import Task from '../../../../common/modules/models/Task'
 
 type Data = {
   data?: any

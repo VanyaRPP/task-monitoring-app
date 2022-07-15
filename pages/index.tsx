@@ -1,9 +1,10 @@
 import { useSession } from 'next-auth/react'
-import HomePage from '../components/HomePage'
-import DashboardPage from '../components/DashboardPage'
+
+import DashboardPage from '../common/components/DashboardPage'
 import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from './api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
+import HomePage from '../common/components/HomePage/index'
 
 type PropsType = {
   isAuth: boolean

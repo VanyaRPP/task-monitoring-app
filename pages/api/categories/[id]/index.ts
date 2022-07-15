@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from '../../../../utils/dbConnect'
-import Category from '../../../../models/Category'
+import Category from '../../../../common/modules/models/Category'
 
 type Data = {
   data?: any
