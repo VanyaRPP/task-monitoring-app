@@ -1,0 +1,62 @@
+@import 'styles/variables.scss';
+
+.Layout {
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  .Container {
+    padding: 0 50px;
+    margin-top: 114px;
+    transition: margin 0.2s;
+
+    @media (max-width: 889px) {
+      margin-top: 89px;
+      padding: 0 25px;
+    }
+
+    @media (max-width: 600px) {
+      padding: 0 10px;
+      margin-top: 74px;
+      margin-left: 0 !important;
+    }
+
+    .SearchBar {
+      display: none;
+
+      input {
+        transition: color 0.5s, background 0.5s;
+        color: var(--textColor);
+        background: var(--backgroundColorPrimary) !important;
+      }
+
+      @media (max-width: 660px) {
+        display: block;
+        margin-bottom: 25px;
+      }
+
+      @media (max-width: 600px) {
+        margin-bottom: 10px;
+      }
+    }
+
+    .Foreground {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - 114px);
+      padding: 24px;
+    }
+  }
+}
+
+.Background,
+.Foreground {
+  transition: background 0.5s;
+}
+
+.Background {
+  background: var(--backgroundColor) !important;
+}
+.Foreground {
+  background: var(--backgroundColorPrimary) !important;
+}

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import User from '../../../models/User'
+import User from '../../../common/modules/models/User'
 import dbConnect from '../../../utils/dbConnect'
 
 type Data = {

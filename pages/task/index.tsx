@@ -1,17 +1,20 @@
 import { Button, Card } from 'antd'
-import { useGetAllTaskQuery } from '../../api/taskApi/task.api'
-import withAuthRedirect from '../../components/HOC/withAuthRedirect'
-import { ITask } from '../../models/Task'
+import { useGetAllTaskQuery } from '../../common/api/taskApi/task.api'
+import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
+import { ITask } from '../../common/modules/models/Task'
 import Router from 'next/router'
 import { useSession } from 'next-auth/react'
-import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
+import { useGetUserByEmailQuery } from '../../common/api/userApi/user.api'
 import {
   dateToDefaultFormat,
   isDeadlineExpired,
-} from '../../components/features/formatDate'
+} from '../../common/components/features/formatDate'
 import { AppRoutes } from '../../utils/constants'
 import classNames from 'classnames'
 import s from './style.module.scss'
+import { unstable_getServerSession } from 'next-auth'
+import { authOptions } from '../api/auth/[...nextauth]'
+import { GetServerSideProps } from 'next'
 
 const Tasks: React.FC = () => {
   const { data: session } = useSession()
@@ -58,3 +61,24 @@ const Tasks: React.FC = () => {
 }
 
 export default withAuthRedirect(Tasks)
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await unstable_getServerSession(
+    context.req,
+    context.res,
+    authOptions
+  )
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: AppRoutes.AUTH_SIGN_IN,
+        permanent: false,
+      },
+    }
+  }
+
+  return {
+    props: {},
+  }
+}
