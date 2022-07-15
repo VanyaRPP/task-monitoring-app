@@ -3,12 +3,16 @@ import usePlacesAutocomplete, {
   getLatLng,
 } from 'use-places-autocomplete'
 import useOnclickOutside from 'react-cool-onclickoutside'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Form, Input } from 'antd'
 import s from './style.module.scss'
-import Item from 'antd/lib/list/Item'
 
-export const PlacesAutocomplete = ({ isLoaded, setAddress, error }) => {
+export const PlacesAutocomplete = ({
+  isLoaded,
+  setAddress,
+  error,
+  address,
+}) => {
   const {
     ready,
     value,
@@ -26,9 +30,6 @@ export const PlacesAutocomplete = ({ isLoaded, setAddress, error }) => {
 
   const handleInput = (e) => {
     setValue(e.target.value)
-  }
-  const handleSearch = (val) => {
-    setValue(val)
   }
 
   const handleSelect =
@@ -67,6 +68,10 @@ export const PlacesAutocomplete = ({ isLoaded, setAddress, error }) => {
       init()
     }
   }, [isLoaded, init])
+
+  useEffect(() => {
+    setValue(address)
+  }, [address, setValue])
 
   return (
     <div ref={ref}>

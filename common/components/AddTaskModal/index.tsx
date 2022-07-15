@@ -128,6 +128,7 @@ const AddTaskModal: React.FC<PropsType> = ({
             isLoaded={isLoaded}
             setAddress={setAddress}
             error={error}
+            address={address?.name}
           />
           <div className={`${s.default} ${error ? '' : s.error}`}>
             Enter address, please!
