@@ -5,7 +5,7 @@ import s from './style.module.scss'
 import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
-import TaskCard from '../../components/TaskCard'
+import TaskCard from '../../common/components/TaskCard'
 
 const Task: React.FC = () => {
   const router = useRouter()

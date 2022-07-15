@@ -1,5 +1,6 @@
 import { Tabs } from 'antd'
-import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
+import { useGetAllTaskQuery } from 'common/api/taskApi/task.api'
+
 import TaskCard from 'common/components/TaskCard/index'
 
 const AdminPageTasks: React.FC = () => {
