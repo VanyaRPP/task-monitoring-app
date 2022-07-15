@@ -11,7 +11,7 @@ const Footer: FC<Props> = ({ style }) => {
     <Layout.Footer className={s.Footer} style={style}>
       <div className={s.Divider} />
       <h2>LOGO</h2>
-      <p>HZ CHO ZA SAIT</p>
+      <span>© 2022 task-monitoring-app</span>
     </Layout.Footer>
   )
 }

@@ -4,10 +4,10 @@ import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
 import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useState } from 'react'
-import { useGetAllCategoriesQuery } from '../../api/categoriesApi/category.api'
-import { useAddTaskMutation } from '../../api/taskApi/task.api'
-import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
-import { IAddress } from '../../modules/models/Task'
+import { useGetAllCategoriesQuery } from 'common/api/categoriesApi/category.api'
+import { useAddTaskMutation } from 'common/api/taskApi/task.api'
+import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
+import { IAddress } from 'common/modules/models/Task'
 import Map from '../Map'
 import { PlacesAutocomplete } from '../PlacesAutocomplete'
 import s from './style.module.scss'
@@ -89,15 +89,6 @@ const AddTaskModal: React.FC<PropsType> = ({
   const disabledDate: RangePickerProps['disabledDate'] = (current) => {
     return current && current < moment().startOf('day')
   }
-
-  const adresses = [
-    { value: 'Burns Bay Road' },
-    { value: 'Downing Street' },
-    { value: 'Wall Street' },
-  ]
-
-  const [Pvalue, setPValue] = useState(null)
-  console.log(error)
 
   return (
     <Modal

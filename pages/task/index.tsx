@@ -27,35 +27,34 @@ const Tasks: React.FC = () => {
 
   return (
     <div className={s.TasksList}>
-      {tasks &&
-        tasks.map((task: ITask, index) => {
-          return (
-            <Card
-              key={index}
-              title={task.name}
-              extra={
-                <Button
-                  ghost
-                  type="primary"
-                  onClick={() => Router.push(AppRoutes.TASK + '/' + task._id)}
-                >
-                  {user?._id.toString() === task?.creator.toString() ||
-                  isDeadlineExpired(task?.deadline)
-                    ? 'Info'
-                    : 'Apply'}
-                </Button>
-              }
-              className={classNames(s.Card, {
-                [s.Disabled]: isDeadlineExpired(task?.deadline),
-              })}
-            >
-              <p>Catagory: {task?.category}</p>
-              <p>Description: {task.desription}</p>
-              <p>Domain: {task?.domain}</p>
-              <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
-            </Card>
-          )
-        })}
+      {tasks?.map((task: ITask, index) => {
+        return (
+          <Card
+            key={index}
+            title={task.name}
+            extra={
+              <Button
+                ghost
+                type="primary"
+                onClick={() => Router.push(AppRoutes.TASK + '/' + task._id)}
+              >
+                {user?._id.toString() === task?.creator.toString() ||
+                isDeadlineExpired(task?.deadline)
+                  ? 'Info'
+                  : 'Apply'}
+              </Button>
+            }
+            className={classNames(s.Card, {
+              [s.Disabled]: isDeadlineExpired(task?.deadline),
+            })}
+          >
+            <p>Catagory: {task?.category}</p>
+            <p>Description: {task.desription}</p>
+            <p>Adress: {task?.address?.name}</p>
+            <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
+          </Card>
+        )
+      })}
     </div>
   )
 }
