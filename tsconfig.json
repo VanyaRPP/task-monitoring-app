@@ -17,16 +17,24 @@
     "jsx": "preserve",
     "incremental": true,
     "types": ["cypress"],
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "common": ["common/*"],
+      "assets": ["common/assets/*"],
+      "modules": ["common/modules/*"],
+      "utils": ["utils/*"],
+      "styles": ["styles/*"],
+      "pages": ["pages/*"]
+    }
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "components/withPrivateRoute.jsx",
+    "common/components/withPrivateRoute.jsx",
     "custom.d.ts",
     "pages/api-doc.js",
-    "components/PlacesAutocomplete/index.jsx"
+    "common/components/PlacesAutocomplete/index.jsx"
   ],
   "exclude": ["node_modules"]
 }

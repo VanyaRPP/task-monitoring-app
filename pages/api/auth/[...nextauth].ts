@@ -6,7 +6,7 @@ import EmailProvider from 'next-auth/providers/email'
 import { MongoDBAdapter } from '@next-auth/mongodb-adapter'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
-import clientPromise from '../../../lib/mongodb'
+import clientPromise from '../../../common/lib/mongodb'
 
 function html({ url, host, email }) {
   const escapedEmail = `${email.replace(/\./g, '&#8203;.')}`

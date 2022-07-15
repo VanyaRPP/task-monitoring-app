@@ -1,14 +1,14 @@
 import { Button, Card } from 'antd'
-import { useGetAllTaskQuery } from '../../api/taskApi/task.api'
-import withAuthRedirect from '../../components/HOC/withAuthRedirect'
-import { ITask } from '../../models/Task'
+import { useGetAllTaskQuery } from '../../common/api/taskApi/task.api'
+import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
+import { ITask } from '../../common/modules/models/Task'
 import Router from 'next/router'
 import { useSession } from 'next-auth/react'
-import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
+import { useGetUserByEmailQuery } from '../../common/api/userApi/user.api'
 import {
   dateToDefaultFormat,
   isDeadlineExpired,
-} from '../../components/features/formatDate'
+} from '../../common/components/features/formatDate'
 import { AppRoutes } from '../../utils/constants'
 import classNames from 'classnames'
 import s from './style.module.scss'
