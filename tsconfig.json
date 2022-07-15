@@ -20,8 +20,6 @@
     "baseUrl": ".",
     "paths": {
       "common": ["common/*"],
-      "assets": ["common/assets/*"],
-      "modules": ["common/modules/*"],
       "utils": ["utils/*"],
       "styles": ["styles/*"],
       "pages": ["pages/*"]
