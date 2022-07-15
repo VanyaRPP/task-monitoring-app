@@ -3,7 +3,7 @@ import { unstable_getServerSession } from 'next-auth'
 import AdminPageCategories from 'common/components/AdminIU/AdminPageCategorie'
 import AdminPageClients from 'common/components/AdminIU/AdminPageClients'
 import { authOptions } from '../api/auth/[...nextauth]'
-import AdminPageTasks from 'components/AdminIU/AdminPageTasks'
+import AdminPageTasks from 'common/components/AdminIU/AdminPageTasks'
 
 const AdminPage: React.FC = () => {
   const { TabPane } = Tabs
