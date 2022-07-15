@@ -1,7 +1,8 @@
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { GoogleMap, Marker } from '@react-google-maps/api'
-import { IGeoCode } from 'common/modules/models/Task'
+import { IAddress, IGeoCode } from 'common/modules/models/Task'
 import s from './style.module.scss'
+import { useEffect } from 'react'
 // import { DarkMapTheme } from './MapStyle'
 
 const defaultOptions = {
@@ -30,20 +31,14 @@ interface IMapOptions {
 const Map = ({
   isLoaded,
   mapOptions,
+  setAddress,
 }: {
   isLoaded: boolean
   mapOptions: IMapOptions
+  setAddress: React.Dispatch<React.SetStateAction<IAddress>>
 }) => {
-  const G_MAP_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-
-  const libraries = ['places']
-
-  // const { isLoaded } = useJsApiLoader({
-  //   id: 'google-map-script',
-  //   googleMapsApiKey: G_MAP_API_KEY
-  // })
-
   const mapRef = useRef(undefined)
+  const [isMounted, setIsMounted] = useState<boolean>(false)
 
   const onLoad = useCallback(function callback(map) {
     mapRef.current = map
@@ -51,6 +46,25 @@ const Map = ({
 
   const onUnmount = useCallback(function callback(map) {
     mapRef.current = undefined
+  }, [])
+
+  const handleDragEnd = useCallback(
+    (e) => {
+      const geoCode: IGeoCode = {
+        lat: e.latLng.lat(),
+        lng: e.latLng.lng(),
+      }
+      console.log('Value: ')
+      setAddress({
+        name: '',
+        geoCode,
+      })
+    },
+    [setAddress]
+  )
+
+  useEffect(() => {
+    setIsMounted(true)
   }, [])
 
   return isLoaded ? (
@@ -65,7 +79,13 @@ const Map = ({
         options={defaultOptions}
       >
         {/* Child components, such as markers, info windows, etc. */}
-        <Marker position={mapOptions?.geoCode} />
+        {isMounted && (
+          <Marker
+            position={mapOptions?.geoCode}
+            draggable
+            onDragEnd={handleDragEnd}
+          />
+        )}
       </GoogleMap>
     </div>
   ) : (

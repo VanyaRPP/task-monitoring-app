@@ -3,7 +3,7 @@ import { Modal, DatePicker, Form, Input, Select } from 'antd'
 import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
 import { useSession } from 'next-auth/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useMemo } from 'react'
 import { centerTownGeoCode } from 'utils/constants'
 import { useGetAllCategoriesQuery } from '../../api/categoriesApi/category.api'
 import { useAddTaskMutation } from '../../api/taskApi/task.api'
@@ -91,10 +91,12 @@ const AddTaskModal: React.FC<PropsType> = ({
     return current && current < moment().startOf('day')
   }
 
-  const mapOptions = {
-    geoCode: address ? address.geoCode : centerTownGeoCode,
-    zoom: address ? 17 : 12,
-  }
+  const mapOptions = useMemo(() => {
+    return {
+      geoCode: address ? address.geoCode : centerTownGeoCode,
+      zoom: address ? 17 : 12,
+    }
+  }, [address])
 
   return (
     <Modal
@@ -130,7 +132,11 @@ const AddTaskModal: React.FC<PropsType> = ({
           <div className={`${s.default} ${error ? '' : s.error}`}>
             Enter address, please!
           </div>
-          <Map isLoaded={isLoaded} mapOptions={mapOptions} />
+          <Map
+            isLoaded={isLoaded}
+            mapOptions={mapOptions}
+            setAddress={setAddress}
+          />
         </Form.Item>
         <Form.Item name="category" label="Categories">
           <Select>
