@@ -1,7 +1,11 @@
-import React, { useCallback, useRef } from 'react'
-import { GoogleMap, useJsApiLoader } from '@react-google-maps/api'
+import React, { useCallback, useRef, useState } from 'react'
+import { GoogleMap, Marker } from '@react-google-maps/api'
+import { IAddress, IGeoCode } from 'common/modules/models/Task'
 import s from './style.module.scss'
-import { DarkMapTheme } from './MapStyle'
+import { useEffect } from 'react'
+import useGetAddressFromGeoCode from 'common/modules/hooks/useGetAddressFromGeoCode'
+import { add } from 'cypress/types/lodash'
+// import { DarkMapTheme } from './MapStyle'
 
 const defaultOptions = {
   panControl: true,
@@ -10,9 +14,7 @@ const defaultOptions = {
   scaleControl: false,
   streetViewControl: false,
   rotateControl: false,
-  clickableIcons: false,
   keyboardShortcuts: false,
-  scrollwheel: false,
   disableDoubleClickZoom: false,
   fullscreenControl: false,
   // styles: DarkMapTheme // theme change after build
@@ -23,17 +25,23 @@ const containerStyle = {
   height: '400px',
 }
 
-const Map = ({ center, isLoaded }) => {
-  const G_MAP_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+interface IMapOptions {
+  geoCode: IGeoCode
+  zoom: number
+}
 
-  const libraries = ['places']
-
-  // const { isLoaded } = useJsApiLoader({
-  //   id: 'google-map-script',
-  //   googleMapsApiKey: G_MAP_API_KEY
-  // })
-
+const Map = ({
+  isLoaded,
+  mapOptions,
+  setAddress,
+}: {
+  isLoaded: boolean
+  mapOptions: IMapOptions
+  setAddress: React.Dispatch<React.SetStateAction<IAddress>>
+}) => {
   const mapRef = useRef(undefined)
+  const [isMounted, setIsMounted] = useState<boolean>(false)
+  const { getAddress, address } = useGetAddressFromGeoCode()
 
   const onLoad = useCallback(function callback(map) {
     mapRef.current = map
@@ -43,18 +51,44 @@ const Map = ({ center, isLoaded }) => {
     mapRef.current = undefined
   }, [])
 
+  const handleDragEnd = useCallback(
+    (e) => {
+      const geoCode: IGeoCode = {
+        lat: e.latLng.lat(),
+        lng: e.latLng.lng(),
+      }
+      getAddress(geoCode)
+      setAddress({
+        name: address,
+        geoCode,
+      })
+    },
+    [address, getAddress, setAddress]
+  )
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   return isLoaded ? (
     <div className={s.Container}>
       <GoogleMap
+        id="map-with-marker"
         mapContainerStyle={containerStyle}
-        center={center}
-        zoom={12}
+        center={mapOptions?.geoCode}
+        zoom={mapOptions?.zoom}
         onLoad={onLoad}
         onUnmount={onUnmount}
         options={defaultOptions}
       >
         {/* Child components, such as markers, info windows, etc. */}
-        <></>
+        {isMounted && (
+          <Marker
+            position={mapOptions?.geoCode}
+            draggable
+            onDragEnd={handleDragEnd}
+          />
+        )}
       </GoogleMap>
     </div>
   ) : (

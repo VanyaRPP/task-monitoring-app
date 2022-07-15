@@ -3,11 +3,12 @@ import { Modal, DatePicker, Form, Input, Select } from 'antd'
 import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
 import { useSession } from 'next-auth/react'
-import { useCallback, useEffect, useState } from 'react'
-import { useGetAllCategoriesQuery } from 'common/api/categoriesApi/category.api'
-import { useAddTaskMutation } from 'common/api/taskApi/task.api'
-import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
-import { IAddress } from 'common/modules/models/Task'
+import { useCallback, useEffect, useState, useMemo } from 'react'
+import { centerTownGeoCode } from 'utils/constants'
+import { useGetAllCategoriesQuery } from '../../api/categoriesApi/category.api'
+import { useAddTaskMutation } from '../../api/taskApi/task.api'
+import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
+import { IAddress } from '../../modules/models/Task'
 import Map from '../Map'
 import { PlacesAutocomplete } from '../PlacesAutocomplete'
 import s from './style.module.scss'
@@ -90,6 +91,13 @@ const AddTaskModal: React.FC<PropsType> = ({
     return current && current < moment().startOf('day')
   }
 
+  const mapOptions = useMemo(() => {
+    return {
+      geoCode: address ? address.geoCode : centerTownGeoCode,
+      zoom: address ? 17 : 12,
+    }
+  }, [address])
+
   return (
     <Modal
       visible={isModalVisible}
@@ -120,16 +128,15 @@ const AddTaskModal: React.FC<PropsType> = ({
             isLoaded={isLoaded}
             setAddress={setAddress}
             error={error}
+            address={address?.name}
           />
           <div className={`${s.default} ${error ? '' : s.error}`}>
             Enter address, please!
           </div>
           <Map
             isLoaded={isLoaded}
-            center={{
-              lat: 50.264915,
-              lng: 28.661954,
-            }}
+            mapOptions={mapOptions}
+            setAddress={setAddress}
           />
         </Form.Item>
         <Form.Item name="category" label="Categories">
