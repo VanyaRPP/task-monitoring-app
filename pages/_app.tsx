@@ -2,9 +2,10 @@ import '../styles/globals.scss'
 import type { AppProps } from 'next/app'
 import { SessionProvider } from 'next-auth/react'
 import { Provider } from 'react-redux'
-import { store } from '../store/store'
+import { store } from '../common/modules/store/store'
 import NextNProgress from 'nextjs-progressbar'
-import MainLayout from '../components/Layouts/MainLayout'
+import MainLayout from '../common/components/Layouts/MainLayout'
+import themes from 'common/lib/themes.config'
 
 export default function MyApp({
   Component,

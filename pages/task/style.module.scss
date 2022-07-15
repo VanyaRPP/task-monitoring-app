@@ -3,16 +3,7 @@
   overflow-y: scroll;
 
   &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    border-radius: 2px;
-
-    background: #7e7e7e70;
-    &:hover {
-      background: #7e7e7e90;
-    }
+    display: none;
   }
 }
 
@@ -72,7 +63,7 @@
   flex: 0.5 0.5 1;
 
   width: 100%;
-  gap: 1rem;
+  gap: 1.5rem;
 
   .Card {
     position: relative;
@@ -139,8 +130,11 @@
 
       .Description {
         width: 100%;
-        max-height: 80px;
+        max-height: 100px;
 
+        border-bottom: 1px solid #88888830;
+
+        overflow: hidden;
         @include scrollbar;
       }
     }
@@ -148,13 +142,13 @@
 
   .Auction {
     width: 500px;
-    // min-height: 400px;
-    padding-bottom: 64px;
+    min-height: 400px;
     max-height: 750px;
+    padding-bottom: 64px;
     position: relative;
 
     @media (max-width: 1440px) {
-      width: calc(100% - 1rem - 350px);
+      width: calc(100% - 1.5rem - 350px);
     }
 
     @media (max-width: 1000px) {
@@ -171,14 +165,14 @@
 
     > div:first-of-type {
       margin-bottom: 0;
-    }
+    } // card header (antd)
     > div:last-of-type {
       padding: 0;
-    }
+    } // card body (antd)
 
     ul {
       position: absolute;
-      bottom: -64px;
+      bottom: 0;
       left: 0;
       width: 100%;
       margin: 0;
@@ -204,39 +198,57 @@
           }
         }
       }
-    }
+    } // pagination buttons
 
-    table {
-      background-color: transparent;
-      transition: color 0.5s;
-      color: var(--textColor);
-      * {
-        border-color: #88888830;
+    > div:last-of-type {
+      div {
+        position: static;
       }
 
-      th {
-        transition: color 0.5s, background 0.5s;
+      > * > * > * > div {
+        background: transparent;
+      } // table-wrapper bg-color (antd)
+
+      table {
+        background: transparent !important;
+        transition: color 0.5s;
         color: var(--textColor);
-        background: var(--backgroundColorElements);
-      }
-
-      tr {
-        transition: background 0.5s;
-
-        &:hover {
-          background-color: #88888830;
+        * {
+          border-color: #88888830;
         }
-        td {
-          background: transparent !important;
+
+        th {
+          transition: color 0.5s, background 0.5s;
+          color: var(--textColor);
+          background: var(--backgroundColorElements) !important;
+        }
+
+        tr {
+          transition: background 0.5s;
+          opacity: 0.8;
+
+          &:first-of-type {
+            opacity: 1;
+          }
+
+          &:hover {
+            opacity: 1;
+            background: var(--backgroundColorElements);
+          }
+          td {
+            background: transparent !important;
+          }
         }
       }
     }
   }
 
-  .Additional {
-    width: calc(100% - 2rem - 500px - 350px);
+  .Comments {
+    width: calc(100% - 3rem - 500px - 350px);
     min-height: 400px;
     max-height: 750px;
+    position: relative;
+    overflow: hidden;
 
     > * {
       h2 {
@@ -244,9 +256,75 @@
         color: var(--textColor);
       }
       &:first-of-type {
+        position: sticky;
+        left: 0;
+        top: 0;
+        z-index: 1;
         transition: background 0.5s, color 0.5s;
         color: var(--textColor);
-        background: var(--backgroundColorPrimary);
+        background: var(--backgroundColor);
+      }
+      &:last-of-type {
+        z-index: 0;
+        padding: 0;
+      }
+
+      .Tabs {
+        > *:first-of-type {
+          position: absolute;
+          z-index: 1;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 58px;
+          margin: 0;
+          padding: 0 1rem;
+
+          transition: background 0.5s, color 0.2s;
+          color: var(--textColor);
+          background-color: var(--backgroundColorPrimary) !important;
+          border-bottom: 1px solid #88888830;
+        }
+        > * {
+          background-color: transparent !important;
+          margin-top: calc(58px - 1.5rem);
+          z-index: 0;
+          padding-top: 24px;
+        }
+      }
+
+      .List {
+        transition: background 0.5s;
+        background-color: transparent !important;
+        border-bottom: 0 0 10px 10px;
+        overflow: hidden;
+      }
+      .List ul {
+        height: 100%;
+        max-height: 580px;
+
+        @include scrollbar;
+
+        li {
+          transition: background 0.2s, color 0.5s;
+          padding: 1rem 1.5rem 0;
+          border-color: #88888830;
+
+          * {
+            transition: color 0.5s;
+            color: var(--textColor);
+          }
+          .Description {
+            opacity: 0.5;
+          }
+
+          opacity: 0.8;
+
+          &:hover {
+            opacity: 1;
+            background: var(--backgroundColorElements);
+          }
+        }
       }
     }
 

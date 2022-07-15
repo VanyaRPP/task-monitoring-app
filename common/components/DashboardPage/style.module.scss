@@ -1,0 +1,129 @@
+.Header {
+  font-size: 26px;
+  transition: color 0.5s;
+  color: var(--primaryColor);
+}
+
+.TabList {
+  display: none;
+
+  * {
+    transition: color 0.5s;
+    color: var(--textColor);
+  }
+
+  @media (max-width: 1600px) {
+    display: block;
+  }
+}
+
+.TablessList {
+  display: flex;
+  gap: 1rem;
+
+  align-items: flex-start;
+
+  > * {
+    width: 30%;
+    border-radius: 1rem;
+
+    transition: box-shadow 0.5s;
+    box-shadow: 0 2px 10px -2px var(--shadowColor);
+    background: transparent !important;
+  }
+
+  * {
+    transition: color 0.5s, border-color 0.5s;
+    color: var(--textColor);
+    border-color: var(--shadowColor);
+  }
+
+  @media (max-width: 1600px) {
+    display: none;
+  }
+}
+
+.List {
+  width: 100%;
+  max-height: 80vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  .ListItem {
+    width: 100%;
+    padding: 1rem;
+    border-color: var(--shadowColor);
+    opacity: 0.75;
+    transition: border-color 0.2s;
+
+    * {
+      transition: color 0.5s;
+      color: var(--textColor);
+    }
+
+    &:last-of-type {
+      border-bottom: 1px solid transparent;
+    }
+
+    &:hover {
+      border-color: var(--primaryColorHover);
+      opacity: 1;
+    }
+
+    > div {
+      width: 60%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-right: 1rem;
+
+      &:last-of-type {
+        width: 40%;
+        margin-right: 0;
+      }
+    }
+  }
+
+  &.Masters {
+    .ListItem {
+      > div {
+        &:first-of-type {
+          width: 75%;
+        }
+        &:last-of-type {
+          width: 25%;
+        }
+      }
+    }
+  }
+
+  &.Domains {
+    .ListItem {
+      > div:first-of-type {
+        justify-content: flex-start;
+      }
+    }
+  }
+
+  &.Orders,
+  &.Domains {
+    .ListItem {
+      @media (max-width: 600px) {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      > div {
+        @media (max-width: 600px) {
+          width: 100%;
+          justify-content: flex-start;
+
+          &:last-of-type {
+            justify-content: flex-start;
+          }
+        }
+      }
+    }
+  }
+}

@@ -27,3 +27,8 @@ export const errors: errors = {
   SessionRequired: 'Please sign in to access this page.',
   default: 'Unable to sign in.',
 }
+
+export const centerTownGeoCode = {
+  lat: 50.264915,
+  lng: 28.661954,
+}

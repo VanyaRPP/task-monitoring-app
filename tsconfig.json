@@ -16,16 +16,23 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "types": ["cypress"]
+    "types": ["cypress"],
+    "baseUrl": ".",
+    "paths": {
+      "common": ["common/*"],
+      "utils": ["utils/*"],
+      "styles": ["styles/*"],
+      "pages": ["pages/*"]
+    }
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "components/withPrivateRoute.jsx",
+    "common/components/withPrivateRoute.jsx",
     "custom.d.ts",
     "pages/api-doc.js",
-    "components/PlacesAutocomplete/index.jsx"
+    "common/components/PlacesAutocomplete/index.jsx"
   ],
   "exclude": ["node_modules"]
 }
