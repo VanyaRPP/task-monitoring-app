@@ -3,8 +3,8 @@ import usePlacesAutocomplete, {
   getLatLng,
 } from 'use-places-autocomplete'
 import useOnclickOutside from 'react-cool-onclickoutside'
-import { useEffect, useState } from 'react'
-import { Form, Input } from 'antd'
+import { useEffect } from 'react'
+import { Input } from 'antd'
 import s from './style.module.scss'
 
 export const PlacesAutocomplete = ({
