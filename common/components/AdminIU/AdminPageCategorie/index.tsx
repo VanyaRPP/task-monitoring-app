@@ -47,6 +47,7 @@ const AdminPageCategories: React.FC = () => {
           onClick={() => setIsModalVisible(true)}
         />
         <ModalWindow
+          title="Add category"
           isModalVisible={isModalVisible}
           onCancel={onCancelModal}
           onOk={onSubmiModal}

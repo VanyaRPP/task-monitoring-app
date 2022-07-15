@@ -113,7 +113,7 @@ const AddTaskModal: React.FC<PropsType> = ({
           <Input />
         </Form.Item>
         <Form.Item name="desription" label="Description">
-          <Input.TextArea />
+          <Input.TextArea maxLength={250} />
         </Form.Item>
         <Form.Item name="domain" label="Address">
           <PlacesAutocomplete

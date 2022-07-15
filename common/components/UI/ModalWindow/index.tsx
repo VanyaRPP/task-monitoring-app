@@ -7,6 +7,7 @@ type PropsType = {
   onOk: () => void
   okText: string
   cancelText: string
+  title: string
 }
 
 const ModalWindow: React.FC<PropsType> = ({
@@ -16,11 +17,12 @@ const ModalWindow: React.FC<PropsType> = ({
   onOk,
   okText,
   cancelText,
+  title,
 }) => {
   return (
     <Modal
       visible={isModalVisible}
-      title="Add task"
+      title={title}
       onCancel={onCancel}
       onOk={onOk}
       okText={okText}
