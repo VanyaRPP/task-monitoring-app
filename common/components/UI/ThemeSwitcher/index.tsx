@@ -24,7 +24,7 @@ const ThemeSwitcher: React.FC = () => {
   const [isChecked, setIsChecked] = useState(theme === 'light')
   useEffect(() => {
     setIsChecked(!isChecked)
-  }, [isChecked, theme])
+  }, [theme])
 
   return (
     <Switch
