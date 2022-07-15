@@ -35,25 +35,6 @@
   }
 }
 
-.LoginForm {
-  width: 100%;
-  max-width: 300px;
-  padding: 10px;
-
-  div:last-child {
-    margin-bottom: 0;
-  }
-
-  // .FormForgot {
-  //   color: $primaryColor;
-  //   float: right;
-
-  //   &:hover {
-  //     color: $primaryColorHover;
-  //   }
-  // }
-}
-
 .Divider {
   width: 1px;
   height: 200px;
@@ -63,5 +44,78 @@
   @media (max-width: 969px) {
     width: 200px;
     height: 1px;
+  }
+}
+
+.Form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  .Input {
+    text-align: center;
+    margin: 5px 0;
+    font-variant: tabular-nums;
+    list-style: none;
+    font-feature-settings: 'tnum';
+    min-width: 0;
+    padding: 4px 11px;
+    font-size: 14px;
+    line-height: 1.5715;
+    border: 1px solid #d9d9d9;
+    border-radius: 2px;
+
+    &:hover {
+      border-color: var(--ant-primary-5);
+    }
+
+    &:focus {
+      border-color: var(--ant-primary-5);
+      box-shadow: 0 0 0 2px var(--ant-primary-color-outline);
+      outline: 0;
+    }
+
+    &:active {
+      color: var(--ant-primary-color-active);
+      border-color: var(--ant-primary-color-active);
+    }
+  }
+
+  .Button {
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-left: 4rem;
+    background: transparent !important;
+    line-height: 1.5715;
+    position: relative;
+    font-weight: 400;
+    white-space: nowrap;
+    text-align: center;
+    box-shadow: 0 2px 0 rgb(0 0 0 / 2%);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+    height: 32px;
+    font-size: 14px;
+    border-radius: 2px;
+    color: rgba(0, 0, 0, 0.85);
+    border: 1px solid #d9d9d9;
+
+    &:hover,
+    &:focus {
+      color: var(--ant-primary-color-hover);
+      border-color: var(--ant-primary-color-hover);
+    }
+
+    &:active {
+      color: var(--ant-primary-color-active);
+      border-color: var(--ant-primary-color-active);
+    }
   }
 }

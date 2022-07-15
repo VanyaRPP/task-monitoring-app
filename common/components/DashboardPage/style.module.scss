@@ -1,11 +1,7 @@
 .Header {
-  width: 100%;
-
-  h1 {
-    font-size: 26px;
-    transition: color 0.5s;
-    color: var(--primaryColor);
-  }
+  font-size: 26px;
+  transition: color 0.5s;
+  color: var(--primaryColor);
 }
 
 .TabList {
