@@ -6,6 +6,7 @@ export interface ITask {
   creator?: ObjectId | string
   desription?: string
   domain: string
+  address: IAddress
   category: string
   dateofcreate: Date
   deadline: string

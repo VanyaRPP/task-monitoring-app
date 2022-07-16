@@ -1,8 +1,8 @@
 import { DeleteOutlined, EditOutlined, UserOutlined } from '@ant-design/icons'
-import { Avatar, Button, Card, Image, Tabs, Comment } from 'antd'
+import { Avatar, Button, Card, Image, Tabs } from 'antd'
 import Meta from 'antd/lib/card/Meta'
-import { useGetAllUsersQuery } from '../../../api/userApi/user.api'
-import { IUser } from '../../../modules/models/User'
+import { useGetAllUsersQuery } from 'common/api/userApi/user.api'
+import { IUser } from 'common/modules/models/User'
 
 type PropsType = {
   clientInfo: IUser

@@ -3,8 +3,8 @@ import { Layout } from 'antd'
 import LoginUser from '../LoginUser'
 import { SearchBar } from '../SearchBar'
 import ThemeSwitcher from '../UI/ThemeSwitcher'
-import TaskButton from '../TaskButton'
-import { AppRoutes } from '../../../utils/constants'
+import TaskButton from '../UI/Buttons/TaskButton'
+import { AppRoutes } from 'utils/constants'
 import s from './style.module.scss'
 
 const Header: React.FC = () => {

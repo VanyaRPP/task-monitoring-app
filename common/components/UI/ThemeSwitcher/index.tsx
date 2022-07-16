@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Switch } from 'antd'
 import { BulbOutlined, BulbFilled } from '@ant-design/icons'
-import useLocalStorage from '../../../assets/hooks/useLocalStorage'
+import useLocalStorage from '../../../modules/hooks/useLocalStorage'
 import themes from '../../../lib/themes.config'
-import useTheme from '../../../assets/hooks/useTheme'
+import useTheme from 'common/modules/hooks/useTheme'
 import s from './style.module.scss'
 
 const ThemeSwitcher: React.FC = () => {

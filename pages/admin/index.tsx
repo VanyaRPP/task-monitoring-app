@@ -38,7 +38,7 @@ export async function getServerSideProps(context) {
   )
 
   const response = await fetch(
-    `http://localhost:3000/api/user/${session?.user?.email}`
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/${session?.user?.email}`
   )
   const data = await response.json()
   const role = data?.data?.role
