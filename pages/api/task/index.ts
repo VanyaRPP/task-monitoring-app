@@ -110,6 +110,7 @@ export default async function handler(
        */
       try {
         const task = await Task.create(req.body)
+
         return res.status(201).json({ success: true, data: task })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })

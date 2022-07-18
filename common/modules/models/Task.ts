@@ -10,6 +10,7 @@ export interface ITask {
   category: string
   dateofcreate: Date
   deadline: string
+  customer?: string
 }
 
 export interface ICreateTask {
@@ -20,6 +21,7 @@ export interface ICreateTask {
   category: string
   dateofcreate: Date
   deadline: string
+  customer?: string
 }
 
 export interface IAddress {
@@ -42,9 +44,17 @@ interface ITaskModel {
   category: string
   dateofcreate: Date
   deadline: string
+  customer?: string
+  taskexecutors: [object]
 }
 
-const TaskShema = new Schema<ITaskModel>({
+interface TaskExecutors {
+  workerId: ObjectId
+  price: number
+  workerdeadline?: Date
+}
+
+const TaskSchema = new Schema<ITaskModel>({
   name: { type: String, required: true },
   creator: { type: Schema.Types.ObjectId, ref: 'User' },
   desription: { type: String, default: 'no description' },
@@ -53,7 +63,9 @@ const TaskShema = new Schema<ITaskModel>({
   category: { type: String },
   dateofcreate: { type: Date, required: true, default: Date.now },
   deadline: { type: String, required: true },
+  customer: { type: String },
+  taskexecutors: [{ type: Object }],
 })
 
-const Task = mongoose.models.Task || mongoose.model('Task', TaskShema)
+const Task = mongoose.models.Task || mongoose.model('Task', TaskSchema)
 export default Task
