@@ -6,7 +6,75 @@
     max-width: 300px;
   }
 
+  input {
+    max-width: 300px;
+    color: var(--textColor);
+    border-color: #88888830 !important;
+    &:hover {
+      border-color: var(--primaryColor) !important;
+    }
+    &:focus {
+      border-color: var(--primaryColorHover) !important;
+    }
+    background-color: transparent;
+  }
+
   .AddButton {
     margin-left: 20px;
+  }
+}
+
+.Container {
+  margin: auto 0;
+  width: 100%;
+  display: flex;
+  gap: 2rem;
+
+  .List {
+    width: 200px;
+    max-width: 200px;
+    min-width: 200px;
+    border-right: 1px solid #88888830;
+
+    .ListItem {
+      min-width: 50px;
+      border: 1px solid #88888830 !important;
+      border-right: transparent !important;
+      padding: 0.5rem 1rem;
+      margin-bottom: 2px;
+      position: relative;
+
+      transition: background 0.5s, color 0.2s, opacity 0.5s;
+      background: var(--backgroundColorElements);
+      opacity: 0.5;
+      color: var(--textColor);
+
+      &::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        transform: translateX(2px);
+        width: 2px;
+        height: 100%;
+
+        transition: background 0.5s;
+        background: transparent;
+      }
+
+      &.Active {
+        background: var(--backgroundColorPrimary);
+        opacity: 1;
+        color: var(--primaryColor);
+
+        &::after {
+          background: var(--backgroundColorPrimary);
+        }
+      }
+    }
+  }
+
+  .Task {
+    width: 100%;
   }
 }

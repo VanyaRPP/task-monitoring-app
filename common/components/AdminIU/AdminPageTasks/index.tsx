@@ -1,27 +1,48 @@
-import { Button, Tabs } from 'antd'
-import { useGetAllTaskQuery } from 'common/api/taskApi/task.api'
-import s from './style.module.scss'
-import TaskCard from 'common/components/TaskCard/index'
+import { useState, useEffect } from 'react'
+import useDebounce from 'common/assets/hooks/useDebounce'
+import { Button, Input } from 'antd'
 import Search from 'antd/lib/input/Search'
+import { useGetAllTaskQuery } from 'common/api/taskApi/task.api'
 import { PlusOutlined } from '@ant-design/icons'
-import { useState } from 'react'
 import AddTaskModal from '../../AddTaskModal/index'
+import Tasks from './TasksList'
+import s from './style.module.scss'
 
 const AdminPageTasks: React.FC = () => {
-  const { TabPane } = Tabs
-
   const { data } = useGetAllTaskQuery('')
-  const tasks = data?.data
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+
+  const [tasks, setTasks] = useState(data?.data)
+  const [search, setSearch] = useState('')
+  const debounced = useDebounce<string>(search)
+
+  // const searchTask = () => {
+  //   console.log(search)
+  //   setTasks(
+  //     data?.data.filter((item) =>
+  //       item.name.toLowerCase().includes(search.toLowerCase())
+  //     )
+  //   )
+  // }
+
+  useEffect(() => {
+    setTasks(
+      data?.data.filter((item) =>
+        item.name.toLowerCase().includes(debounced.toLowerCase())
+      )
+    )
+  }, [debounced, data])
 
   return (
     <>
       <div className={s.Controls}>
-        <Search
+        {/* <Search
+          value={search}
           className={s.Search}
-          placeholder="input search text"
-          onSearch={() => console.log('search')}
+          placeholder="Task name"
+          onChange={(e) => setSearch(e.target.value)}
+          onSearch={searchTask}
           enterButton
         />
         <Button
@@ -29,21 +50,18 @@ const AdminPageTasks: React.FC = () => {
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => setIsModalVisible(true)}
+        /> */}
+        <Input
+          placeholder="Search Task..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
         <AddTaskModal
           isModalVisible={isModalVisible}
           setIsModalVisible={setIsModalVisible}
         />
       </div>
-      <div className={s.Content}>
-        <Tabs type="card" tabPosition="left">
-          {tasks?.map((task) => (
-            <TabPane className={s.TabPane} tab={task?.name} key={task?._id}>
-              <TaskCard taskId={task?._id} />
-            </TabPane>
-          ))}
-        </Tabs>
-      </div>
+      <Tasks tasks={tasks} />
     </>
   )
 }

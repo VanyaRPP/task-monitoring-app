@@ -37,7 +37,7 @@ const TaskCard = ({ taskId }) => {
   ]
 
   return (
-    <Card className={`${s.Card} ${s.Task}`}>
+    <Card className={s.Card}>
       <div className={s.UserInfo}>
         <Avatar
           icon={<UserOutlined />}
