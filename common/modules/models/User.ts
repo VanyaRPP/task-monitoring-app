@@ -1,5 +1,6 @@
 import { ITask } from './Task'
-import mongoose, { Schema, Types, model, ObjectId } from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
+import { ObjectId } from 'mongodb'
 
 export interface IUser {
   _id?: string
@@ -8,6 +9,15 @@ export interface IUser {
   image?: string
   role?: string
   tasks?: [ITask]
+  feedback?: [IFeedback]
+  isWorker: boolean
+  tel?: string
+}
+
+export interface IFeedback {
+  taskId: ObjectId
+  grade: number
+  text: string
 }
 
 const UserShema = new Schema<IUser>({
@@ -16,6 +26,9 @@ const UserShema = new Schema<IUser>({
   image: String,
   role: { type: String, default: 'User' },
   tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
+  feedback: [{ type: Object }],
+  isWorker: { type: Boolean, default: false },
+  tel: { type: String },
 })
 
 const User = mongoose.models.User || mongoose.model('User', UserShema)
