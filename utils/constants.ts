@@ -6,6 +6,7 @@ export enum AppRoutes {
   AUTH = '/auth',
   AUTH_SIGN_IN = '/auth/sigin',
   CONTACTS = '/contacts',
+  ADMIN = '/admin',
   PREMIUM = '/premium',
 }
 

@@ -1,4 +1,4 @@
-import { EditOutlined } from '@ant-design/icons'
+import { EditOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card } from 'antd'
 import { useSession } from 'next-auth/react'
 import React from 'react'
@@ -7,13 +7,11 @@ import {
   useGetTaskByIdQuery,
 } from '../../api/taskApi/task.api'
 import { useGetUserByIdQuery } from '../../api/userApi/user.api'
-import DeleteButton from '../DeleteButton'
+import DeleteButton from '../UI/Buttons/DeleteButton'
 import { dateToDefaultFormat } from '../features/formatDate'
 import s from './style.module.scss'
 
 const TaskCard = ({ taskId }) => {
-  console.log(typeof taskId)
-
   const { data: session } = useSession()
   const { data } = useGetTaskByIdQuery(`${taskId}`, {
     skip: !taskId,
@@ -41,8 +39,12 @@ const TaskCard = ({ taskId }) => {
   return (
     <Card className={s.Card}>
       <div className={s.UserInfo}>
-        <Avatar size={200} src={user?.image} />
-        <h2>{user?.name}</h2>
+        <Avatar
+          icon={<UserOutlined />}
+          size={200}
+          src={!task?.customer ? user?.image : null}
+        />
+        <h2>{task?.customer ? task?.customer : user?.name}</h2>
       </div>
 
       <Card

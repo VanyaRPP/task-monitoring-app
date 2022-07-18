@@ -11,8 +11,6 @@ const AdminPageClients: React.FC = () => {
   const { data } = useGetAllUsersQuery('')
   const allClients = data?.data
 
-  console.log(allClients)
-
   return (
     <Tabs
       activeKey={active}

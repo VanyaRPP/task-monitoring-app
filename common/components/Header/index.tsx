@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Button, Layout } from 'antd'
 import LoginUser from '../LoginUser'
-import { SearchBar } from '../SearchBar'
+import { SearchBar } from '../UI/SearchBar'
 import ThemeSwitcher from '../UI/ThemeSwitcher'
 import TaskButton from '../UI/Buttons/TaskButton'
 import { AppRoutes } from 'utils/constants'

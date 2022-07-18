@@ -10,6 +10,7 @@ export interface ITask {
   category: string
   dateofcreate: Date
   deadline: string
+  customer?: string
 }
 
 export interface ICreateTask {
@@ -20,6 +21,7 @@ export interface ICreateTask {
   category: string
   dateofcreate: Date
   deadline: string
+  customer?: string
 }
 
 export interface IAddress {
@@ -42,6 +44,7 @@ interface ITaskModel {
   category: string
   dateofcreate: Date
   deadline: string
+  customer?: string
   taskexecutors: [object]
 }
 
@@ -60,6 +63,7 @@ const TaskSchema = new Schema<ITaskModel>({
   category: { type: String },
   dateofcreate: { type: Date, required: true, default: Date.now },
   deadline: { type: String, required: true },
+  customer: { type: String },
   taskexecutors: [{ type: Object }],
 })
 
