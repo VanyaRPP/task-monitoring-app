@@ -22,7 +22,10 @@ export default async function handler(
     case 'PATCH':
       try {
         const task = await Task.findById(req.query.id)
-        const Utask = await Task.findOneAndUpdate({ _id: task._id }, { taskexecutors: [...task.taskexecutors, req.body] })
+        const Utask = await Task.findOneAndUpdate(
+          { _id: task._id },
+          { taskexecutors: [...task.taskexecutors, req.body] }
+        )
         return res.status(201).json({ success: true, data: Utask })
       } catch (error) {
         return res.status(400).json({ success: false })

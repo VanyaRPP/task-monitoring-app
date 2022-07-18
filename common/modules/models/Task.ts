@@ -60,7 +60,7 @@ const TaskSchema = new Schema<ITaskModel>({
   category: { type: String },
   dateofcreate: { type: Date, required: true, default: Date.now },
   deadline: { type: String, required: true },
-  taskexecutors: [{ type: Object }]
+  taskexecutors: [{ type: Object }],
 })
 
 const Task = mongoose.models.Task || mongoose.model('Task', TaskSchema)
