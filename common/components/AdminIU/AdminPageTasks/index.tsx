@@ -37,12 +37,11 @@ const AdminPageTasks: React.FC = () => {
       </div>
       <div className={s.Content}>
         <Tabs type="card" tabPosition="left">
-          {tasks &&
-            tasks.map((task) => (
-              <TabPane className={s.TabPane} tab={task.name} key={task._id}>
-                <TaskCard taskId={task._id} />
-              </TabPane>
-            ))}
+          {tasks?.map((task) => (
+            <TabPane className={s.TabPane} tab={task?.name} key={task?._id}>
+              <TaskCard taskId={task?._id} />
+            </TabPane>
+          ))}
         </Tabs>
       </div>
     </>

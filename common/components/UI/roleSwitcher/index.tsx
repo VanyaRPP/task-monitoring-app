@@ -5,10 +5,10 @@ import { useEffect, useState } from 'react'
 import {
   useGetUserByEmailQuery,
   useUpdateUserMutation,
-} from '../../api/userApi/user.api'
+} from '../../../api/userApi/user.api'
 import s from './style.module.scss'
-import ModalWindow from '../UI/ModalWindow/index'
-import WorkerForm from '../WorkerForm/index'
+import ModalWindow from '../ModalWindow/index'
+import WorkerForm from '../../WorkerForm/index'
 
 const RoleSwither: React.FC = () => {
   const { data: session } = useSession()
@@ -60,9 +60,7 @@ const RoleSwither: React.FC = () => {
       >
         <Radio.Button value="User">User</Radio.Button>
         <Radio.Button value="Worker">Worker</Radio.Button>
-        <Radio.Button value="Admin" disabled>
-          Admin
-        </Radio.Button>
+        <Radio.Button value="Admin">Admin</Radio.Button>
       </Radio.Group>
       <ModalWindow
         title="Update role to worker"

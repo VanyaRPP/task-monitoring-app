@@ -40,32 +40,28 @@ const AdminPageClients: React.FC = () => {
   const { data } = useGetAllUsersQuery('')
   const allClients = data?.data
 
-  console.log(allClients)
-
   return (
     <Tabs type="card">
       <TabPane tab="Users" key="1">
         <Tabs type="card" tabPosition="left">
-          {allClients &&
-            allClients
-              .filter((client) => client.role === 'User')
-              .map((user) => (
-                <TabPane tab={user.name || user.email} key={user._id}>
-                  <ClientInfo clientInfo={user} />
-                </TabPane>
-              ))}
+          {allClients
+            ?.filter((client) => client?.role === 'User')
+            .map((user) => (
+              <TabPane tab={user?.name || user?.email} key={user?._id}>
+                <ClientInfo clientInfo={user} />
+              </TabPane>
+            ))}
         </Tabs>
       </TabPane>
       <TabPane tab="Worker" key="2">
         <Tabs type="card" tabPosition="left">
-          {allClients &&
-            allClients
-              .filter((client) => client.role === 'Worker')
-              .map((worker) => (
-                <TabPane tab={worker.name || worker.email} key={worker._id}>
-                  <ClientInfo clientInfo={worker} />
-                </TabPane>
-              ))}
+          {allClients
+            ?.filter((client) => client?.role === 'Worker')
+            .map((worker) => (
+              <TabPane tab={worker?.name || worker?.email} key={worker?._id}>
+                <ClientInfo clientInfo={worker} />
+              </TabPane>
+            ))}
         </Tabs>
       </TabPane>
       <TabPane tab="Premium" key="3">

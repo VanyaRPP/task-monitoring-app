@@ -38,12 +38,12 @@ export async function getServerSideProps(context) {
   )
 
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/${session?.user?.email}`
+    `${process.env.BASE_URL}/api/user/${session?.user?.email}`
   )
   const data = await response.json()
   const role = data?.data?.role
 
-  if (role !== 'Worker') {
+  if (role !== 'Admin') {
     return {
       redirect: {
         destination: '/',
