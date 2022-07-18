@@ -52,10 +52,7 @@ const AuctionCard = ({ taskId }) => {
   ]
 
   return (
-    <Card
-      className={`${s.Card} ${s.Auction}`}
-      title={`Auction: ${config.length}`}
-    >
+    <Card className={s.Card} title={`Auction: ${config.length}`}>
       <Table dataSource={data} columns={columns} pagination={false} />
     </Card>
   )

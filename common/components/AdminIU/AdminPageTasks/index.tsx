@@ -62,7 +62,7 @@ const AdminPageTasks: React.FC = () => {
         />
       </div>
 
-      <Tasks tasks={tasks} />
+      {tasks && <Tasks tasks={tasks} />}
     </>
   )
 }
