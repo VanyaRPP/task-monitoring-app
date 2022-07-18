@@ -11,7 +11,7 @@ const HomePage: React.FC = () => {
   return (
     <>
       <h1 className={s.Header} id={s.Bigger}>
-        КОМУНАЛЬНИК
+        Комунальник
       </h1>
       <h3 className={s.Header} id={s.Smaller}>
         Ваше електронне житлово-комунальне господарство
