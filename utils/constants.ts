@@ -32,3 +32,4 @@ export const centerTownGeoCode = {
   lat: 50.264915,
   lng: 28.661954,
 }
+///rdtfyghjfdcv
