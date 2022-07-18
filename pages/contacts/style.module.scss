@@ -2,7 +2,7 @@
   text-align: center;
   font-size: calc(30px + (20 + 20 * 0.7) * ((100vw - 320px) / 1400));
   margin: 0;
-  transition: color 0.5s;
+  transition: color 0.2s;
   color: var(--primaryColor);
 }
 
@@ -11,7 +11,7 @@
   font-size: calc(15px + (5 + 5 * 0.7) * ((100vw - 320px) / 1400));
   margin: 1rem 0 2rem 0;
 
-  transition: color 0.5s;
+  transition: color 0.2s;
   color: var(--textColor);
 }
 
@@ -31,7 +31,7 @@
 
   input,
   textarea {
-    transition: color 0.5s;
+    transition: color 0.2s, border 0.2s;
     color: var(--textColor);
     border-color: #88888830;
     background: transparent !important;
@@ -61,7 +61,7 @@
   justify-content: space-between;
 
   > a {
-    transition: color 0.5s, opacity 0.2s;
+    transition: color 0.2s, opacity 0.2s;
     color: var(--textColor);
     opacity: 0.5;
   }
@@ -92,7 +92,7 @@
       > * {
         font-size: 18px;
         line-height: 18px;
-        transition: color 0.5s;
+        transition: color 0.2s;
         color: var(--textColor) !important;
       }
 
