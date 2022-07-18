@@ -1,0 +1,7 @@
+.Category {
+  a,
+  div:last-child {
+    transition: color 0.2s;
+    color: var(--textColor);
+  }
+}

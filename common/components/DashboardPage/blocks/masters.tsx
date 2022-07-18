@@ -8,6 +8,10 @@ interface Props {
   style?: string
 }
 
+function removeDublicates(data) {
+  return data.filter((value, index) => data.indexOf(value) === index)
+}
+
 const Masters: React.FC<Props> = ({ style }) => {
   const [data, setData] = useState(config)
   const [search, setSearch] = useState({ name: '' })
@@ -65,21 +69,12 @@ const Masters: React.FC<Props> = ({ style }) => {
       dataIndex: 'specials',
       key: 'specials',
       width: '20%',
-      filters: [
-        {
-          text: 'Plomber',
-          value: 'Plomber',
-        },
-        {
-          text: 'Elektrick',
-          value: 'Elektrick',
-        },
-        {
-          text: 'Programmer',
-          value: 'Programmer',
-        },
-        // TODO: Automatic filters import (all posible and unique specials)
-      ],
+      filters: removeDublicates(
+        [].concat(...config.map((item) => item.specials))
+      ).map((item) => {
+        return { text: item, value: item }
+      }),
+      filterSearch: true,
       onFilter: (value: string, record) => record.specials.indexOf(value) === 0,
       render: (specials) => (
         <div style={{ display: 'flex', gap: '0 1rem', flexWrap: 'wrap' }}>

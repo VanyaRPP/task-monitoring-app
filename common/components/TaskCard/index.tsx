@@ -39,7 +39,7 @@ const TaskCard = ({ taskId }) => {
   ]
 
   return (
-    <Card className={`${s.Card} ${s.Task}`}>
+    <Card className={s.Card}>
       <div className={s.UserInfo}>
         <Avatar size={200} src={user?.image} />
         <h2>{user?.name}</h2>

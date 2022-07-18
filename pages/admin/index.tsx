@@ -1,30 +1,29 @@
 import { Tabs } from 'antd'
 import { unstable_getServerSession } from 'next-auth'
+import { authOptions } from '../api/auth/[...nextauth]'
 import AdminPageCategories from 'common/components/AdminIU/AdminPageCategorie'
 import AdminPageClients from 'common/components/AdminIU/AdminPageClients'
-import { authOptions } from '../api/auth/[...nextauth]'
 import AdminPageTasks from 'common/components/AdminIU/AdminPageTasks'
+import s from './style.module.scss'
+
+const { TabPane } = Tabs
 
 const AdminPage: React.FC = () => {
-  const { TabPane } = Tabs
-
   return (
-    <>
-      <Tabs defaultActiveKey="1">
-        <TabPane tab="Categories" key="1">
-          <AdminPageCategories />
-        </TabPane>
-        <TabPane tab="Clients" key="2">
-          <AdminPageClients />
-        </TabPane>
-        <TabPane tab="Tasks" key="3">
-          <AdminPageTasks />
-        </TabPane>
-        <TabPane tab="Domains" key="4">
-          Domains
-        </TabPane>
-      </Tabs>
-    </>
+    <Tabs defaultActiveKey="1" className={s.Tabs}>
+      <TabPane tab="Categories" key="1">
+        <AdminPageCategories />
+      </TabPane>
+      <TabPane tab="Clients" key="2">
+        <AdminPageClients />
+      </TabPane>
+      <TabPane tab="Tasks" key="3">
+        <AdminPageTasks />
+      </TabPane>
+      <TabPane tab="Domains" key="4">
+        Domains
+      </TabPane>
+    </Tabs>
   )
 }
 
