@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import dbConnect from '../../../../utils/dbConnect'
-import Task from '../../../../common/modules/models/Task'
+import dbConnect from '../../../../../utils/dbConnect'
+import Task from '../../../../../common/modules/models/Task'
 
 type Data = {
   data?: any
@@ -19,20 +19,13 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   switch (req.method) {
-    case 'GET':
-      try {
-        const task = await Task.findById(req.query.id)
-        return res.status(201).json({ success: true, data: task })
-      } catch (error) {
-        return res.status(400).json({ success: false })
-      }
     case 'PATCH':
       try {
-
+        const task = await Task.findById(req.query.id)
+        const Utask = await Task.findOneAndUpdate({ _id: task._id }, { taskexecutors: [...task.taskexecutors, req.body] })
+        return res.status(201).json({ success: true, data: Utask })
       } catch (error) {
-        return res
-          .status(400)
-          .json({ success: false, data: req.query.id + ' error' })
+        return res.status(400).json({ success: false })
       }
     case 'DELETE':
       try {
