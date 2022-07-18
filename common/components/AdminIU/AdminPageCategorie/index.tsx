@@ -44,17 +44,17 @@ const AdminPageCategories: React.FC = () => {
           placeholder="input search text"
           onSearch={() => console.log('search')}
           enterButton
+        /> */}
+        <Input
+          placeholder="Search Category..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
         <Button
           className={s.AddButton}
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => setIsModalVisible(true)}
-        /> */}
-        <Input
-          placeholder="Search Category..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
         />
         <ModalWindow
           title="Add category"
