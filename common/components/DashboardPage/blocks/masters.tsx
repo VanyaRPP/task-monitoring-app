@@ -17,11 +17,6 @@ const Masters: React.FC<Props> = ({ style }) => {
   const [search, setSearch] = useState({ name: '' })
   const debounced = useDebounce<{ name: string }>(search)
 
-  console.log([].concat(...config.map((item) => item.specials)))
-  console.log(
-    removeDublicates([].concat(...config.map((item) => item.specials)))
-  )
-
   useEffect(() => {
     setData(
       config.filter((item) =>

@@ -1,75 +1,49 @@
-import { DeleteOutlined, EditOutlined, UserOutlined } from '@ant-design/icons'
-import { Avatar, Button, Card, Image, Tabs } from 'antd'
-import Meta from 'antd/lib/card/Meta'
+import { Tabs } from 'antd'
 import { useGetAllUsersQuery } from 'common/api/userApi/user.api'
-import { IUser } from 'common/modules/models/User'
+import { useState } from 'react'
+import Users from './UsersList'
+import s from './style.module.scss'
 
-type PropsType = {
-  clientInfo: IUser
-}
-
-const ClientInfo: React.FC<PropsType> = ({ clientInfo }) => {
-  return (
-    <Card
-      actions={[
-        <Button key="edit" ghost type="primary">
-          <EditOutlined />
-        </Button>,
-        <Button key="delete" ghost type="primary">
-          <DeleteOutlined />
-        </Button>,
-      ]}
-    >
-      <Meta
-        avatar={
-          <Avatar
-            icon={<UserOutlined />}
-            src={<Image src={clientInfo.image} alt={clientInfo.name} />}
-          />
-        }
-        title={clientInfo.name}
-        description={'Email: ' + clientInfo.email}
-      />
-    </Card>
-  )
-}
+const { TabPane } = Tabs
 
 const AdminPageClients: React.FC = () => {
-  const { TabPane } = Tabs
-
+  const [active, setActive] = useState('1')
   const { data } = useGetAllUsersQuery('')
   const allClients = data?.data
 
   console.log(allClients)
 
   return (
-    <Tabs type="card">
-      <TabPane tab="Users" key="1">
-        <Tabs type="card" tabPosition="left">
-          {allClients &&
-            allClients
-              .filter((client) => client.role === 'User')
-              .map((user) => (
-                <TabPane tab={user.name || user.email} key={user._id}>
-                  <ClientInfo clientInfo={user} />
-                </TabPane>
-              ))}
-        </Tabs>
+    <Tabs
+      activeKey={active}
+      onChange={(activeKey) => setActive(activeKey)}
+      type="card"
+      className={`${s.CardTabs} ${
+        active === '1'
+          ? s.Users
+          : active === '2'
+          ? s.Workers
+          : active === '3'
+          ? s.Premium
+          : ''
+      }`}
+    >
+      <TabPane tab="Users" key="1" className={s.Users}>
+        {allClients && (
+          <Users
+            users={allClients.filter((client) => client.role === 'User')}
+          />
+        )}
       </TabPane>
-      <TabPane tab="Worker" key="2">
-        <Tabs type="card" tabPosition="left">
-          {allClients &&
-            allClients
-              .filter((client) => client.role === 'Worker')
-              .map((worker) => (
-                <TabPane tab={worker.name || worker.email} key={worker._id}>
-                  <ClientInfo clientInfo={worker} />
-                </TabPane>
-              ))}
-        </Tabs>
+      <TabPane tab="Workers" key="2" className={s.Workers}>
+        {allClients && (
+          <Users
+            users={allClients.filter((client) => client.role === 'Worker')}
+          />
+        )}
       </TabPane>
-      <TabPane tab="Premium" key="3">
-        Premium
+      <TabPane tab="Premium" key="3" className={s.Premium}>
+        {allClients && <Users users={[] /* TODO: filter users by premium */} />}
       </TabPane>
     </Tabs>
   )
