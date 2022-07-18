@@ -10,7 +10,9 @@ const HomePage: React.FC = () => {
   const router = useRouter()
   return (
     <>
-      <h1 className={s.Header}>Ваш електронний жек: Комунальник</h1>
+      <h1 className={s.Header}>
+        Ваше електронне житлово-комунальне господарство: Комунальник
+      </h1>
 
       <div className={s.Container}>
         <div className={s.HalfBlock}>

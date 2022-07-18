@@ -75,6 +75,8 @@
 
 .Image {
   position: relative;
+  width: 80%;
+  height: 80%;
 
   > *:first-of-type {
     position: absolute !important;
