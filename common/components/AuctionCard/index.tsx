@@ -71,7 +71,7 @@ const AuctionCard = ({ taskId }) => {
 
   return (
     <Card
-      className={`${s.Card} ${s.Auction}`}
+      className={s.Card}
       title={`Auction: ${config.length}`}
       extra={
         <Button type="primary" ghost onClick={() => setIsModalVisible(true)}>
@@ -89,6 +89,7 @@ const AuctionCard = ({ taskId }) => {
       >
         <ApplyAuctionForm isFormDisabled={isFormDisabled} form={form} />
       </ModalWindow>
+
       <Table dataSource={data} columns={columns} pagination={false} />
     </Card>
   )

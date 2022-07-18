@@ -61,7 +61,8 @@ const AdminPageTasks: React.FC = () => {
           setIsModalVisible={setIsModalVisible}
         />
       </div>
-      <Tasks tasks={tasks} />
+
+      {tasks && <Tasks tasks={tasks} />}
     </>
   )
 }

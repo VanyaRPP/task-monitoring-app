@@ -1,13 +1,10 @@
-@mixin scrollbar {
-  overflow-x: hidden;
-  overflow-y: scroll;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
 .Card {
+  width: calc(100% - 3rem - 450px - 450px);
+
+  @media (max-width: 1600px) {
+    width: 100%;
+  }
+
   min-height: 400px;
   max-height: 750px;
   position: relative;
@@ -22,10 +19,6 @@
   > * {
     border-color: #88888830;
   }
-}
-
-.Comments {
-  width: calc(100% - 3rem - 500px - 350px);
 
   position: relative;
   overflow: hidden;
@@ -82,7 +75,12 @@
       height: 100%;
       max-height: 580px;
 
-      @include scrollbar;
+      overflow-x: hidden;
+      overflow-y: scroll;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
 
       li {
         transition: background 0.5s, color 0.2s, opacity 0.2s;
@@ -104,9 +102,5 @@
         }
       }
     }
-  }
-
-  @media (max-width: 1440px) {
-    width: 100%;
   }
 }
