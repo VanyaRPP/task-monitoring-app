@@ -1,6 +1,5 @@
 import { IUser } from '../../modules/models/User'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { invalid } from 'moment'
 
 interface Quer {
   success: boolean
@@ -42,6 +41,17 @@ export const userApi = createApi({
       query: () => '/user',
       providesTags: (result) => ['User'],
     }),
+    addFeedback: builder.mutation<IUser, Partial<IUser>>({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `user/id/${_id}`,
+          method: 'PATCH',
+          body,
+        }
+      },
+      invalidatesTags: ['User'],
+    }),
   }),
 })
 
@@ -50,4 +60,5 @@ export const {
   useGetUserByIdQuery,
   useUpdateUserMutation,
   useGetAllUsersQuery,
+  useAddFeedbackMutation,
 } = userApi

@@ -15,7 +15,7 @@ export interface IUser {
 }
 
 export interface IFeedback {
-  taskId: ObjectId
+  id: string
   grade: number
   text: string
 }
