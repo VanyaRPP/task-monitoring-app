@@ -16,14 +16,15 @@ const AdminPageClients: React.FC = () => {
       activeKey={active}
       onChange={(activeKey) => setActive(activeKey)}
       type="card"
-      className={`${s.CardTabs} ${active === '1'
-        ? s.Users
-        : active === '2'
+      className={`${s.CardTabs} ${
+        active === '1'
+          ? s.Users
+          : active === '2'
           ? s.Workers
           : active === '3'
-            ? s.Premium
-            : ''
-        }`}
+          ? s.Premium
+          : ''
+      }`}
     >
       <TabPane tab="Users" key="1" className={s.Users}>
         {allClients && (

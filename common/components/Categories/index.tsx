@@ -53,11 +53,11 @@ const Categories: React.FC<Props> = ({ nameFilter }) => {
           ].concat(
             role === 'Admin'
               ? [
-                <DeleteButton
-                  key="delete"
-                  onDelete={() => deleteCategory(category._id)}
-                />,
-              ]
+                  <DeleteButton
+                    key="delete"
+                    onDelete={() => deleteCategory(category._id)}
+                  />,
+                ]
               : []
           )}
         >

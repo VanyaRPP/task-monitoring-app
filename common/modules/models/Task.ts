@@ -34,6 +34,13 @@ export interface IGeoCode {
   lng: number
 }
 
+interface ItaskExecutors {
+  workerid: ObjectId | string //profile photo and rating will be obtained from this id
+  price: number | string
+  description: string
+  workerdeadline?: Date
+}
+
 interface ITaskModel {
   _id?: ObjectId
   name: string
@@ -45,13 +52,7 @@ interface ITaskModel {
   dateofcreate: Date
   deadline: string
   customer?: string
-  taskexecutors: [object]
-}
-
-interface TaskExecutors {
-  workerId: ObjectId
-  price: number
-  workerdeadline?: Date
+  taskexecutors: [ItaskExecutors]
 }
 
 const TaskSchema = new Schema<ITaskModel>({
