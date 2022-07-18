@@ -6,7 +6,6 @@ import { signIn, signOut, useSession } from 'next-auth/react'
 import { AppRoutes } from '../../../utils/constants'
 import classNames from 'classnames'
 import s from './style.module.scss'
-import AdminButton from '../UI/Buttons/AdminButton/index'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 
 const LoginUser: React.FC = () => {
