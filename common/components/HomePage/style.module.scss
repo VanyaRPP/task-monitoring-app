@@ -12,15 +12,34 @@
   flex-wrap: wrap;
 }
 
+.HalfBlock {
+  flex: 0 1 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    flex: 0 1 100%;
+  }
+  p {
+    font-size: calc(15px + (20 + 20 * 0.7) * ((100vw - 320px) / 1440));
+  }
+}
+
 .Buttons {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  margin-top: 1rem;
+  margin-top: 0;
   gap: 1rem;
 
   @media (max-width: 600px) {
     gap: 0.5rem;
+  }
+  @media (min-width: 1440px) {
+    margin-left: 50%;
+    margin-top: -10rem;
   }
 
   button {
@@ -41,13 +60,16 @@
   transition: color 0.5s;
   color: var(--textColor);
   padding: 20px;
-
+  margin-top: -2em;
   font-weight: 200;
 
   font-size: 20px;
   @media (max-width: 600px) {
     padding: 20px 0;
     font-size: 16px;
+  }
+  @media (min-width: 1440px) {
+    margin-top: -10em;
   }
 }
 
