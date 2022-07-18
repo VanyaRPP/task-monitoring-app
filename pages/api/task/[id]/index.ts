@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import dbConnect from '../../../../utils/dbConnect'
-import Task from '../../../../common/modules/models/Task'
+import dbConnect from 'utils/dbConnect'
+import Task from 'common/modules/models/Task'
 
 type Data = {
   data?: any
@@ -66,7 +66,7 @@ export default async function handler(
           } else {
             return res
               .status(200)
-              .json({ success: true, data: req.query.id + ' was dell' })
+              .json({ success: true, data: req.query.id + ' was deleted' })
           }
         })
       } catch (error) {
