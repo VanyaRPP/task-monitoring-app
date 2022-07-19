@@ -43,7 +43,7 @@ const Profile: React.FC = () => {
           </Card>
 
           <Card title="Address" size="small">
-            <p>{user?.address?.name || "Zhytomyr"}</p>
+            <p>{user?.address?.name || 'Zhytomyr'}</p>
           </Card>
 
           <Button type="primary">

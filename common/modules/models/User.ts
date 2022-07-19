@@ -1,4 +1,4 @@
-import { IAddress } from 'common/modules/models/Task';
+import { IAddress } from 'common/modules/models/Task'
 import { ITask } from './Task'
 import mongoose, { Schema } from 'mongoose'
 export interface IUser {
