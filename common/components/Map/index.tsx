@@ -1,10 +1,11 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { Children, useCallback, useRef, useState } from 'react'
 import { GoogleMap, Marker } from '@react-google-maps/api'
 import { IAddress, IGeoCode } from 'common/modules/models/Task'
 import s from './style.module.scss'
 import { useEffect } from 'react'
 import useGetAddressFromGeoCode from 'common/modules/hooks/useGetAddressFromGeoCode'
 import { add } from 'cypress/types/lodash'
+import { DarkMapTheme } from './MapStyle'
 // import { DarkMapTheme } from './MapStyle'
 
 const defaultOptions = {
@@ -17,7 +18,7 @@ const defaultOptions = {
   keyboardShortcuts: false,
   disableDoubleClickZoom: false,
   fullscreenControl: false,
-  // styles: DarkMapTheme // theme change after build
+  styles: DarkMapTheme // theme change after build
 }
 
 const containerStyle = {
@@ -31,13 +32,15 @@ interface IMapOptions {
 }
 
 const Map = ({
+  children,
   isLoaded,
   mapOptions,
   setAddress,
 }: {
+  children?: any
   isLoaded: boolean
   mapOptions: IMapOptions
-  setAddress: React.Dispatch<React.SetStateAction<IAddress>>
+  setAddress?: React.Dispatch<React.SetStateAction<IAddress>>
 }) => {
   const mapRef = useRef(undefined)
   const [isMounted, setIsMounted] = useState<boolean>(false)
@@ -69,6 +72,9 @@ const Map = ({
   useEffect(() => {
     setIsMounted(true)
   }, [])
+  useEffect(() => {
+    setIsMounted(true)
+  }, [children, mapOptions])
 
   return isLoaded ? (
     <div className={s.Container}>
@@ -83,12 +89,16 @@ const Map = ({
       >
         {/* Child components, such as markers, info windows, etc. */}
         {isMounted && (
-          <Marker
-            position={mapOptions?.geoCode}
-            draggable
-            onDragEnd={handleDragEnd}
-          />
-        )}
+          <>
+            <Marker
+              position={mapOptions?.geoCode}
+              draggable
+              onDragEnd={handleDragEnd}
+            />
+            {children}
+          </>
+        )
+        }
       </GoogleMap>
     </div>
   ) : (

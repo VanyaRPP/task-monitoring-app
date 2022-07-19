@@ -17,6 +17,8 @@ const Profile: React.FC = () => {
   const { data, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const user = data?.data
 
+  // console.log(user)
+
   return (
     <>
       <h2 className={s.Header}>My profile</h2>

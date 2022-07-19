@@ -34,6 +34,17 @@
 .default {
   color: red;
 }
+
 .error {
   visibility: hidden;
+}
+
+.Card {
+  display: flex;
+  flex-direction: row;
+}
+
+.Half {
+  display: flex;
+  flex-direction: column;
 }
