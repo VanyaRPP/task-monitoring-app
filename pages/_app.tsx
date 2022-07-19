@@ -16,6 +16,7 @@ export default function MyApp({
       <Provider store={store}>
         <MainLayout>
           <NextNProgress color="#722ed1" height={2} showOnShallow={false} />
+
           <Component {...pageProps} />
         </MainLayout>
       </Provider>
