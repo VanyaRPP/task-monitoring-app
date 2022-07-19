@@ -4,7 +4,7 @@ import { StarOutlined, UserOutlined } from '@ant-design/icons'
 import { IFeedback } from 'common/modules/models/User'
 import s from './style.module.scss'
 
-const Feedback: React.FC = ({ feedback }: { feedback: IFeedback }) => {
+const Feedback: React.FC<{ feedback: IFeedback }> = ({ feedback }) => {
   const { data } = useGetUserByIdQuery(feedback.id)
   const user = data?.data
 
