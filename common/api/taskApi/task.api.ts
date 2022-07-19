@@ -54,7 +54,6 @@ export const taskApi = createApi({
     }),
     addComment: builder.mutation<ITask, Partial<ITask>>({
       query(data) {
-        console.log(data)
         const { _id, ...body } = data
         return {
           url: `task/comments/${_id}`,
