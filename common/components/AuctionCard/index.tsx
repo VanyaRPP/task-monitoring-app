@@ -89,13 +89,7 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
             <Executor executor={executor} type="workerInfo" />
           )}
         />
-        <Column
-          title="Price"
-          dataIndex="price"
-          key="price"
-          width="15%"
-          sorter={(a, b) => a.price - b.price}
-        />
+        <Column title="Price" dataIndex="price" key="price" width="15%" />
         <Column
           title="Rating"
           dataIndex="rating"
