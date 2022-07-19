@@ -1,0 +1,9 @@
+.Tabs {
+  > *:first-of-type {
+    color: var(--textColor);
+
+    &::before {
+      background: #88888830;
+    }
+  }
+}

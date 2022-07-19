@@ -1,13 +1,14 @@
-@mixin scrollbar {
-  overflow-x: hidden;
-  overflow-y: scroll;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
 .Card {
+  width: 450px;
+
+  @media (max-width: 1600px) {
+    width: calc(100% - 1.5rem - 450px);
+  }
+
+  @media (max-width: 1200px) {
+    width: 100%;
+  }
+
   min-height: 400px;
   max-height: 750px;
   position: relative;
@@ -22,20 +23,12 @@
   > * {
     border-color: #88888830;
   }
-}
 
-.Auction {
-  width: 500px;
-  position: relative;
+  overflow-x: hidden;
+  overflow-y: scroll;
 
-  @include scrollbar;
-
-  @media (max-width: 1440px) {
-    width: calc(100% - 1.5rem - 350px);
-  }
-
-  @media (max-width: 1000px) {
-    width: 100%;
+  &::-webkit-scrollbar {
+    display: none;
   }
 
   > * {
@@ -62,14 +55,20 @@
 
     input {
       color: var(--textColor);
-      border-color: #88888830;
+      border-color: #88888830 !important;
+      &:hover {
+        border-color: var(--primaryColor) !important;
+      }
+      &:focus {
+        border-color: var(--primaryColorHover) !important;
+      }
       background-color: transparent;
     }
 
     h4,
     span,
     & {
-      transition: color 0.5s;
+      transition: color 0.2s;
       color: var(--textColor);
     }
     * {
@@ -81,33 +80,31 @@
       top: 58px;
       z-index: 1;
 
+      th {
+        border-radius: 0 !important;
+        transition: color 0.5s, background 0.5s !important;
+        color: var(--textColor);
+        background: var(--backgroundColorElements) !important;
+      }
+    }
+
+    tbody {
       tr {
-        opacity: 1;
-      }
-    }
+        transition: background 0.5s;
 
-    th {
-      border-radius: 0 !important;
-      transition: color 0.5s, background 0.5s !important;
-      color: var(--textColor);
-      background: var(--backgroundColorElements) !important;
-    }
+        opacity: 0.8;
 
-    tr {
-      transition: background 0.5s;
-
-      opacity: 0.8;
-
-      &:hover {
-        opacity: 1;
-        background: var(--backgroundColorElements);
-      }
-      td {
-        > * {
-          transition: color 0.2s;
-          color: var(--textColor);
-        } // "no data" color
-        background: transparent !important;
+        &:hover {
+          opacity: 1;
+          background: var(--backgroundColorElements);
+        }
+        td {
+          > * {
+            transition: color 0.2s;
+            color: var(--textColor);
+          } // "no data" color
+          background: transparent !important;
+        }
       }
     }
   }

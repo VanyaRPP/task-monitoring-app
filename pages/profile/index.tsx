@@ -5,7 +5,7 @@ import {
   useAddCommentMutation,
   useGetUserByEmailQuery,
 } from '../../common/api/userApi/user.api'
-import RoleSwither from '../../common/components/roleSwitcher'
+import RoleSwither from 'common/components/UI/roleSwitcher'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
 import { useSession } from 'next-auth/react'
 import { unstable_getServerSession } from 'next-auth'
@@ -13,6 +13,7 @@ import { authOptions } from '../api/auth/[...nextauth]'
 import { AppRoutes } from '../../utils/constants'
 import { GetServerSideProps } from 'next'
 import React from 'react'
+import Router from 'next/router'
 
 const Profile: React.FC = () => {
   const { data: session } = useSession()
@@ -37,8 +38,18 @@ const Profile: React.FC = () => {
   return (
     <>
       <h2 className={s.Header}>My profile</h2>
-
-      <Card loading={isLoading} title={user?.name} className={s.Container}>
+      <Card
+        loading={isLoading}
+        title={user?.name}
+        className={s.Container}
+        extra={
+          user?.role === 'Admin' && (
+            <Button type="link" onClick={() => Router.push(AppRoutes.ADMIN)}>
+              Admin Panel
+            </Button>
+          )
+        }
+      >
         <div className={s.Avatar}>
           <Avatar
             icon={<UserOutlined />}

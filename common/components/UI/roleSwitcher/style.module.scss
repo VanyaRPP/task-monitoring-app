@@ -4,7 +4,7 @@
     background: var(--backgroundColorPrimary);
     color: var(--textColor);
 
-    border-color: #88888830;
+    border-color: #88888830 !important;
     &::before {
       background: #88888830 !important;
     }

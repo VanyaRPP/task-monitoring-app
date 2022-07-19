@@ -1,13 +1,10 @@
-@mixin scrollbar {
-  overflow-x: hidden;
-  overflow-y: scroll;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
 .Card {
+  width: calc(100% - 3rem - 450px - 450px);
+
+  @media (max-width: 1600px) {
+    width: 100%;
+  }
+
   min-height: 400px;
   max-height: 750px;
   position: relative;
@@ -22,10 +19,6 @@
   > * {
     border-color: #88888830;
   }
-}
-
-.Comments {
-  width: calc(100% - 3rem - 500px - 350px);
 
   position: relative;
   overflow: hidden;
@@ -50,25 +43,26 @@
 
     .Tabs {
       > *:first-of-type {
-        position: absolute;
+        position: sticky;
         z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
+
         height: 58px;
-        margin: 0;
         padding: 0 1rem;
+        margin: 0;
 
         transition: background 0.5s, color 0.2s;
         color: var(--textColor);
         background-color: var(--backgroundColorPrimary) !important;
         border-bottom: 1px solid #88888830;
+
+        &::before {
+          display: none;
+        }
       }
-      > * {
-        background-color: transparent !important;
-        margin-top: calc(58px - 1.5rem);
+      > *:last-of-type {
+        margin: 0;
+        padding: 0;
         z-index: 0;
-        padding-top: 24px;
       }
     }
 
@@ -81,7 +75,12 @@
       height: 100%;
       max-height: 580px;
 
-      @include scrollbar;
+      overflow-x: hidden;
+      overflow-y: scroll;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
 
       li {
         transition: background 0.5s, color 0.2s, opacity 0.2s;
@@ -103,9 +102,5 @@
         }
       }
     }
-  }
-
-  @media (max-width: 1440px) {
-    width: 100%;
   }
 }

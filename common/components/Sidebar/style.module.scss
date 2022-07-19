@@ -85,3 +85,15 @@
     }
   }
 }
+
+.AdminButton {
+  width: 100%;
+  display: flex;
+  padding: 12px 40px;
+  color: rgba(0, 0, 0, 0.85);
+  line-height: 1.5715;
+  cursor: pointer;
+  border: 0;
+  white-space: nowrap;
+  background: var(--backgroundColorPrimary);
+}
