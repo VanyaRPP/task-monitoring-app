@@ -24,7 +24,7 @@ export default async function handler(
           const updatedUser = await User.findOneAndUpdate(
             { _id: user._id },
             {
-              comment: [...(user.comment ?? []), ...req.body?.comment],
+              feedback: [...(user.feedback ?? []), ...req.body?.feedback],
             }
           )
           return res.status(201).json({ success: true, data: updatedUser })
@@ -33,22 +33,5 @@ export default async function handler(
         return res.status(400).json({ success: false, data: error.message })
       }
       break
-    case 'DELETE':
-      try {
-        console.log('query', req.query)
-        await User.findById(req.query.id).then(async (user) => {
-          const updatedUser = await User.updateOne(
-            { _id: req.query.id },
-            {
-              comment: user.comment.filter(
-                (comm) => comm.id !== req.query.comment
-              ),
-            }
-          )
-          return res.status(400).json({ success: true, data: updatedUser })
-        })
-      } catch (error) {
-        return res.status(400).json({ success: false, data: error.message })
-      }
   }
 }

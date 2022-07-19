@@ -1,7 +1,12 @@
 import { IUser } from '../../modules/models/User'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
-interface Quer {
+interface IDeleteQuery {
+  userId: number | string
+  itemId: number | string
+}
+
+interface BaseQuery {
   success: boolean
   data: IUser
 }
@@ -18,11 +23,11 @@ export const userApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getUserByEmail: builder.query<Quer, string>({
+    getUserByEmail: builder.query<BaseQuery, string>({
       query: (email) => `user/${email}`,
       providesTags: (result) => ['User'],
     }),
-    getUserById: builder.query<Quer, string>({
+    getUserById: builder.query<BaseQuery, string>({
       query: (id) => `user/id/${id}`,
       providesTags: (result) => ['User'],
     }),
@@ -45,7 +50,7 @@ export const userApi = createApi({
       query(data) {
         const { _id, ...body } = data
         return {
-          url: `user/id/${_id}`,
+          url: `user/feedbacks/${_id}`,
           method: 'PATCH',
           body,
         }
@@ -63,6 +68,16 @@ export const userApi = createApi({
       },
       invalidatesTags: ['User'],
     }),
+    deleteComment: builder.mutation<IDeleteQuery, Partial<IDeleteQuery>>({
+      query(data) {
+        const { userId, itemId } = data
+        return {
+          url: `user/comments/${userId}?comment=${itemId}`,
+          method: 'DELETE',
+        }
+      },
+      invalidatesTags: ['User'],
+    }),
   }),
 })
 
@@ -73,4 +88,5 @@ export const {
   useGetAllUsersQuery,
   useAddFeedbackMutation,
   useAddCommentMutation,
+  useDeleteCommentMutation,
 } = userApi
