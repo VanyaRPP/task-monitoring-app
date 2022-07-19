@@ -43,7 +43,6 @@ const AddTaskModal: React.FC<PropsType> = ({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     libraries,
   })
-  console.log('address: ', address)
 
   const [form] = Form.useForm()
 
@@ -79,7 +78,6 @@ const AddTaskModal: React.FC<PropsType> = ({
         address: address,
         creator: userData?.data?._id,
       })
-      console.log(formData)
 
       form.resetFields()
       setIsModalVisible(false)

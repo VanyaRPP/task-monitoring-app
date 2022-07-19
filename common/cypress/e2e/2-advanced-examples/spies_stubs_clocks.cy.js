@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /// <reference types="cypress" />
 // remove no check once Cypress.sinon is typed

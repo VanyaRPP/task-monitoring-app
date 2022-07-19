@@ -39,10 +39,10 @@ export const PlacesAutocomplete = ({
     () => {
       setValue(description, false)
       clearSuggestions()
-      console.log('📍 Adr: ', description)
+      //console.log('📍 Adr: ', description)
       getGeocode({ address: description }).then((results) => {
         const { lat, lng } = getLatLng(results[0])
-        console.log('📍 Coordinates: ', { lat, lng })
+        //console.log('📍 Coordinates: ', { lat, lng })
         setAddress({ name: description, geoCode: { lat, lng } })
       })
     }
@@ -77,8 +77,6 @@ export const PlacesAutocomplete = ({
       setValue(address)
     }
   }, [address, addressObj, addressObj?.geoCode, getAddress, setValue])
-
-  console.log('address in place: ', address)
 
   return (
     <div ref={ref}>
