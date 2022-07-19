@@ -52,6 +52,17 @@ export const userApi = createApi({
       },
       invalidatesTags: ['User'],
     }),
+    addComment: builder.mutation<IUser, Partial<IUser>>({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `user/comments/${_id}`,
+          method: 'PATCH',
+          body,
+        }
+      },
+      invalidatesTags: ['User'],
+    }),
   }),
 })
 
@@ -61,4 +72,5 @@ export const {
   useUpdateUserMutation,
   useGetAllUsersQuery,
   useAddFeedbackMutation,
+  useAddCommentMutation,
 } = userApi

@@ -1,7 +1,10 @@
 import { EditOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card, Image } from 'antd'
 import s from './style.module.scss'
-import { useGetUserByEmailQuery } from '../../common/api/userApi/user.api'
+import {
+  useAddCommentMutation,
+  useGetUserByEmailQuery,
+} from '../../common/api/userApi/user.api'
 import RoleSwither from '../../common/components/roleSwitcher'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
 import { useSession } from 'next-auth/react'
@@ -9,12 +12,27 @@ import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { AppRoutes } from '../../utils/constants'
 import { GetServerSideProps } from 'next'
+import React from 'react'
 
 const Profile: React.FC = () => {
   const { data: session } = useSession()
 
   const { data, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
+  const [addComment, result] = useAddCommentMutation()
   const user = data?.data
+
+  React.useEffect(() => {
+    const addComm = async () => {
+      await addComment({
+        _id: user?._id,
+        comment: [{ id: '1', text: 'akldmamdl;s' }],
+      })
+    }
+    setTimeout(() => {
+      ;('')
+    }, 0)
+    addComm()
+  }, [addComment, user?._id])
 
   return (
     <>

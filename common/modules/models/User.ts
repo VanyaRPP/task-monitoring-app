@@ -12,11 +12,17 @@ export interface IUser {
   feedback?: [IFeedback]
   isWorker: boolean
   tel?: string
+  comment?: [IComment]
 }
 
 export interface IFeedback {
   id: string
   grade: number
+  text: string
+}
+
+export interface IComment {
+  id: string
   text: string
 }
 
@@ -29,6 +35,7 @@ const UserShema = new Schema<IUser>({
   feedback: [{ type: Object }],
   isWorker: { type: Boolean, default: false },
   tel: { type: String },
+  comment: [{ type: Object }],
 })
 
 const User = mongoose.models.User || mongoose.model('User', UserShema)
