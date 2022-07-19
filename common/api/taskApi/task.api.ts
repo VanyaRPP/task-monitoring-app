@@ -2,6 +2,11 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { ObjectId } from 'mongoose'
 import { ICreateTask, ITask } from '../../modules/models/Task'
 
+interface IDeleteQuery {
+  userId: number | string
+  itemId: number | string
+}
+
 interface AllTasksQuer {
   success: boolean
   data: ITask[]
@@ -47,6 +52,27 @@ export const taskApi = createApi({
       },
       invalidatesTags: ['Task'],
     }),
+    addComment: builder.mutation<ITask, Partial<ITask>>({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `task/comments/${_id}`,
+          method: 'PATCH',
+          body,
+        }
+      },
+      invalidatesTags: ['Task'],
+    }),
+    deleteComment: builder.mutation<IDeleteQuery, Partial<IDeleteQuery>>({
+      query(data) {
+        const { userId, itemId } = data
+        return {
+          url: `task/comments/${userId}?comment=${itemId}`,
+          method: 'DELETE',
+        }
+      },
+      invalidatesTags: ['Task'],
+    }),
   }),
 })
 
@@ -55,4 +81,6 @@ export const {
   useAddTaskMutation,
   useGetTaskByIdQuery,
   useDeleteTaskMutation,
+  useAddCommentMutation,
+  useDeleteCommentMutation,
 } = taskApi

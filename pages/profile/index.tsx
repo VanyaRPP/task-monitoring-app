@@ -1,7 +1,7 @@
 import { EditOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card, Image } from 'antd'
 import { useGetUserByEmailQuery } from '../../common/api/userApi/user.api'
-import RoleSwither from '../../common/components/UI/roleSwitcher'
+import RoleSwither from 'common/components/UI/roleSwitcher'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
 import { useSession } from 'next-auth/react'
 import { unstable_getServerSession } from 'next-auth'
@@ -11,7 +11,6 @@ import Router from 'next/router'
 import { GetServerSideProps } from 'next'
 import FeedbacksCard from 'common/components/FeedbacksCard'
 import s from './style.module.scss'
-
 
 const Profile: React.FC = () => {
   const { data: session } = useSession()
@@ -42,7 +41,6 @@ const Profile: React.FC = () => {
               src={<Image src={session?.user?.image || undefined} alt="User" />}
             />
           </div>
-
 
           <div className={s.Info}>
             <Card size="small" title="Role">

@@ -32,7 +32,7 @@ const Header: React.FC = () => {
             type="primary"
             onClick={() => Router.push(AppRoutes.PREMIUM)}
           >
-            &nbsp; Premium plan
+            <span>Premium</span>
           </Button>
         )}
         <TaskButton />
