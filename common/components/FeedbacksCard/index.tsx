@@ -5,7 +5,7 @@ import s from './style.module.scss'
 
 interface Props {
   user: IUser
-  loading: boolean
+  loading?: boolean
 }
 
 const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
