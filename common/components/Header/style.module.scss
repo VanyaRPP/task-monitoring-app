@@ -71,5 +71,9 @@
 
 .Button_Premium {
   display: flex;
-  padding-bottom: 2rem;
+  align-items: center;
+  justify-content: center;
+  span {
+    margin-left: 0.25rem;
+  }
 }

@@ -12,6 +12,7 @@ export interface ITask {
   deadline: string
   customer?: string
   taskexecutors: [ItaskExecutors]
+  comment?: [IComment]
 }
 
 export interface ICreateTask {
@@ -35,6 +36,11 @@ export interface IGeoCode {
   lng: number
 }
 
+export interface IComment {
+  id: string
+  text: string
+}
+
 export interface ItaskExecutors {
   workerid: ObjectId | string //profile photo and rating will be obtained from this id
   taskId: ObjectId | string
@@ -55,6 +61,7 @@ export interface ITaskModel {
   deadline: string
   customer?: string
   taskexecutors: [ItaskExecutors]
+  comment?: [IComment]
 }
 
 const TaskSchema = new Schema<ITaskModel>({
@@ -68,6 +75,7 @@ const TaskSchema = new Schema<ITaskModel>({
   deadline: { type: String, required: true },
   customer: { type: String },
   taskexecutors: [{ type: Object }],
+  comment: [{ type: Object }],
 })
 
 const Task = mongoose.models.Task || mongoose.model('Task', TaskSchema)

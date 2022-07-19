@@ -26,7 +26,7 @@ const Task: React.FC = () => {
     <div className={s.TaskContainer}>
       <TaskCard taskId={router.query.id} task={task} />
       <AuctionCard taskId={router.query.id} taskExecutors={taskExecutors} />
-      <CommentsCard taskId={router.query.id} />
+      <CommentsCard />
     </div>
   )
 }

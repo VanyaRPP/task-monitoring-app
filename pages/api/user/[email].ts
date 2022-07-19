@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import dbConnect from '../../../utils/dbConnect'
-import User from '../../../common/modules/models/User'
+import dbConnect from 'utils/dbConnect'
+import User from 'common/modules/models/User'
 
 type Data = {
   data?: any
@@ -119,11 +119,22 @@ export default async function handler(
        *        description: Some error happened
        */
       try {
-        const user = await User.findOneAndUpdate(
-          { email: req.query.email },
-          { role: req.query.role }
-        )
-        console.log(req.query)
+        let user
+        if (req.body.tel) {
+          user = await User.findOneAndUpdate(
+            { email: req.query.email },
+            {
+              isWorker: true,
+              tel: req.body.tel,
+              role: 'Worker',
+            }
+          )
+        } else {
+          user = await User.findOneAndUpdate(
+            { email: req.query.email },
+            { role: req.query.role }
+          )
+        }
         return res.status(201).json({ success: true, data: user })
       } catch (error) {
         return res.status(400).json({ success: false })

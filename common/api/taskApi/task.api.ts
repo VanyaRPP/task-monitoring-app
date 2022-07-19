@@ -2,6 +2,11 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { ObjectId } from 'mongoose'
 import { ICreateTask, ITask, ItaskExecutors } from '../../modules/models/Task'
 
+interface IDeleteQuery {
+  userId: number | string
+  itemId: number | string
+}
+
 interface AllTasksQuer {
   success: boolean
   data: ITask[]
@@ -38,7 +43,7 @@ export const taskApi = createApi({
       },
       invalidatesTags: ['Task'],
     }),
-    deleteTask: builder.mutation<{ success: boolean; id: ObjectId }, ObjectId>({
+    deleteTask: builder.mutation<{ success: boolean; id: ObjectId }, string>({
       query(id) {
         return {
           url: `task/${id}`,
@@ -47,16 +52,34 @@ export const taskApi = createApi({
       },
       invalidatesTags: ['Task'],
     }),
-    addTaskExecutor: builder.mutation<
-      TaskQuer,
-      { data: ItaskExecutors; id: string }
-    >({
+    addTaskExecutor: builder.mutation<TaskQuer, ItaskExecutors>({
       query(data) {
         const { ...body } = data
         return {
           url: `task/${data.taskId}/apply`,
           method: 'PATCH',
           body,
+        }
+      },
+      invalidatesTags: ['Task'],
+    }),
+    addComment: builder.mutation<ITask, Partial<ITask>>({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `task/comments/${_id}`,
+          method: 'PATCH',
+          body,
+        }
+      },
+      invalidatesTags: ['Task'],
+    }),
+    deleteComment: builder.mutation<IDeleteQuery, Partial<IDeleteQuery>>({
+      query(data) {
+        const { userId, itemId } = data
+        return {
+          url: `task/comments/${userId}?comment=${itemId}`,
+          method: 'DELETE',
         }
       },
       invalidatesTags: ['Task'],
@@ -70,4 +93,6 @@ export const {
   useGetTaskByIdQuery,
   useDeleteTaskMutation,
   useAddTaskExecutorMutation,
+  useAddCommentMutation,
+  useDeleteCommentMutation,
 } = taskApi
