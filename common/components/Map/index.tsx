@@ -3,7 +3,6 @@ import { GoogleMap, Marker } from '@react-google-maps/api'
 import { IAddress, IGeoCode } from 'common/modules/models/Task'
 import s from './style.module.scss'
 import { useEffect } from 'react'
-import useGetAddressFromGeoCode from 'common/modules/hooks/useGetAddressFromGeoCode'
 import { add } from 'cypress/types/lodash'
 // import { DarkMapTheme } from './MapStyle'
 
@@ -41,7 +40,6 @@ const Map = ({
 }) => {
   const mapRef = useRef(undefined)
   const [isMounted, setIsMounted] = useState<boolean>(false)
-  const { getAddress, address } = useGetAddressFromGeoCode()
 
   const onLoad = useCallback(function callback(map) {
     mapRef.current = map
@@ -57,13 +55,12 @@ const Map = ({
         lat: e.latLng.lat(),
         lng: e.latLng.lng(),
       }
-      getAddress(geoCode)
       setAddress({
-        name: address,
+        name: '',
         geoCode,
       })
     },
-    [address, getAddress, setAddress]
+    [setAddress]
   )
 
   useEffect(() => {

@@ -6,12 +6,13 @@ import useOnclickOutside from 'react-cool-onclickoutside'
 import { useEffect } from 'react'
 import { Input } from 'antd'
 import s from './style.module.scss'
+import useGetAddressFromGeoCode from 'common/modules/hooks/useGetAddressFromGeoCode'
 
 export const PlacesAutocomplete = ({
   isLoaded,
   setAddress,
   error,
-  address,
+  addressObj,
 }) => {
   const {
     ready,
@@ -24,6 +25,7 @@ export const PlacesAutocomplete = ({
     initOnMount: false,
     debounce: 300,
   })
+  const { getAddress, address } = useGetAddressFromGeoCode()
   const ref = useOnclickOutside(() => {
     clearSuggestions()
   })
@@ -70,8 +72,13 @@ export const PlacesAutocomplete = ({
   }, [isLoaded, init])
 
   useEffect(() => {
-    setValue(address)
-  }, [address, setValue])
+    if (addressObj) {
+      getAddress(addressObj.geoCode)
+      setValue(address)
+    }
+  }, [address, addressObj, addressObj?.geoCode, getAddress, setValue])
+
+  console.log('address in place: ', address)
 
   return (
     <div ref={ref}>

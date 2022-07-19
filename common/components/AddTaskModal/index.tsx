@@ -43,6 +43,7 @@ const AddTaskModal: React.FC<PropsType> = ({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     libraries,
   })
+  console.log('address: ', address)
 
   const [form] = Form.useForm()
 
@@ -137,7 +138,7 @@ const AddTaskModal: React.FC<PropsType> = ({
             isLoaded={isLoaded}
             setAddress={setAddress}
             error={error}
-            address={address?.name}
+            addressObj={address}
           />
           <div className={`${s.default} ${error ? '' : s.error}`}>
             Enter address, please!
