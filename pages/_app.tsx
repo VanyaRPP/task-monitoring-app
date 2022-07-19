@@ -6,7 +6,6 @@ import { store } from '../common/modules/store/store'
 import NextNProgress from 'nextjs-progressbar'
 import MainLayout from '../common/components/Layouts/MainLayout'
 import themes from 'common/lib/themes.config'
-import useSelection from 'antd/lib/table/hooks/useSelection'
 
 export default function MyApp({
   Component,
