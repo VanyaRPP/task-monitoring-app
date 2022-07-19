@@ -24,7 +24,7 @@ const TaskCard = ({ taskId }) => {
     skip: !task,
   })
   const user = userData?.data
-  console.log(task);
+  console.log(task)
 
   const [libraries] = useState(['places'] as any)
   const { isLoaded } = useJsApiLoader({
@@ -76,13 +76,12 @@ const TaskCard = ({ taskId }) => {
         </Card>
       </div>
 
-
       <div className={s.TaskInfo}>
         <Map isLoaded={isLoaded} mapOptions={mapOptions}>
           <Marker position={mapOptions?.geoCode} />
         </Map>
       </div>
-    </Card >
+    </Card>
   )
 }
 

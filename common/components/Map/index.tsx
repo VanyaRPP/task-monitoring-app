@@ -18,7 +18,7 @@ const defaultOptions = {
   keyboardShortcuts: false,
   disableDoubleClickZoom: false,
   fullscreenControl: false,
-  styles: DarkMapTheme // theme change after build
+  styles: DarkMapTheme, // theme change after build
 }
 
 const containerStyle = {
@@ -97,8 +97,7 @@ const Map = ({
             />
             {children}
           </>
-        )
-        }
+        )}
       </GoogleMap>
     </div>
   ) : (
