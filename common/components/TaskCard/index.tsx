@@ -28,7 +28,6 @@ const TaskCard = ({ taskId }) => {
     skip: !task,
   })
   const user = userData?.data
-  console.log(task)
 
   const [libraries] = useState(['places'] as any)
   const { isLoaded } = useJsApiLoader({
