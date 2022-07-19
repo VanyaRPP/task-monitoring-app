@@ -72,9 +72,9 @@ const Map = ({
   useEffect(() => {
     setIsMounted(true)
   }, [])
-  useEffect(() => {
-    setIsMounted(true)
-  }, [children, mapOptions])
+  // useEffect(() => {
+  //   setIsMounted(true)
+  // }, [children, mapOptions])
 
   return isLoaded ? (
     <div className={s.Container}>

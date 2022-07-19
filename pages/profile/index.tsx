@@ -38,9 +38,12 @@ const Profile: React.FC = () => {
           <Card size="small" title="Email">
             <p>{user?.email}</p>
           </Card>
+          <Card size="small" title="Phone">
+            <p>{user?.tel}</p>
+          </Card>
 
-          <Card title="General information" size="small">
-            <p>City: Zhytomyr</p>
+          <Card title="Address" size="small">
+            <p>{user?.address?.name || "Zhytomyr"}</p>
           </Card>
 
           <Button type="primary">

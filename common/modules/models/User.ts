@@ -1,7 +1,6 @@
+import { IAddress } from 'common/modules/models/Task';
 import { ITask } from './Task'
 import mongoose, { Schema } from 'mongoose'
-import { ObjectId } from 'mongodb'
-
 export interface IUser {
   _id?: string
   name: string
@@ -12,15 +11,15 @@ export interface IUser {
   feedback?: [IFeedback]
   isWorker: boolean
   tel?: string
+  address?: IAddress
 }
-
 export interface IFeedback {
   id: string
   grade: number
   text: string
 }
 
-const UserShema = new Schema<IUser>({
+const UserSchema = new Schema<IUser>({
   name: { type: String, required: true },
   email: { type: String, required: true },
   image: String,
@@ -31,5 +30,5 @@ const UserShema = new Schema<IUser>({
   tel: { type: String },
 })
 
-const User = mongoose.models.User || mongoose.model('User', UserShema)
+const User = mongoose.models.User || mongoose.model('User', UserSchema)
 export default User
