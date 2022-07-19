@@ -21,7 +21,7 @@ const Profile: React.FC = () => {
   return (
     <>
       <h2 className={s.Header}>My profile</h2>
-      
+
       <div className={s.Container}>
         <Card
           loading={isLoading}
