@@ -10,7 +10,6 @@ import { useSession } from 'next-auth/react'
 import Router from 'next/router'
 import premiumIcon from '../../assets/premium/diamond.png'
 import Image from 'next/image'
-import { SketchOutlined } from '@ant-design/icons'
 
 const Header: React.FC = () => {
   const { status } = useSession()
