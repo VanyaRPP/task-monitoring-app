@@ -1,11 +1,6 @@
 import { IUser } from '../../modules/models/User'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
-interface IDeleteQuery {
-  userId: number | string
-  itemId: number | string
-}
-
 interface BaseQuery {
   success: boolean
   data: IUser
@@ -57,27 +52,6 @@ export const userApi = createApi({
       },
       invalidatesTags: ['User'],
     }),
-    addComment: builder.mutation<IUser, Partial<IUser>>({
-      query(data) {
-        const { _id, ...body } = data
-        return {
-          url: `user/comments/${_id}`,
-          method: 'PATCH',
-          body,
-        }
-      },
-      invalidatesTags: ['User'],
-    }),
-    deleteComment: builder.mutation<IDeleteQuery, Partial<IDeleteQuery>>({
-      query(data) {
-        const { userId, itemId } = data
-        return {
-          url: `user/comments/${userId}?comment=${itemId}`,
-          method: 'DELETE',
-        }
-      },
-      invalidatesTags: ['User'],
-    }),
   }),
 })
 
@@ -87,6 +61,4 @@ export const {
   useUpdateUserMutation,
   useGetAllUsersQuery,
   useAddFeedbackMutation,
-  useAddCommentMutation,
-  useDeleteCommentMutation,
 } = userApi
