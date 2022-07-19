@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { ObjectId } from 'mongoose'
-import { ICreateTask, ITask } from '../../modules/models/Task'
+import { ICreateTask, ITask, ItaskExecutors } from '../../modules/models/Task'
 
 interface IDeleteQuery {
   userId: number | string
@@ -43,11 +43,22 @@ export const taskApi = createApi({
       },
       invalidatesTags: ['Task'],
     }),
-    deleteTask: builder.mutation<{ success: boolean; id: ObjectId }, ObjectId>({
+    deleteTask: builder.mutation<{ success: boolean; id: ObjectId }, string>({
       query(id) {
         return {
           url: `task/${id}`,
           method: 'DELETE',
+        }
+      },
+      invalidatesTags: ['Task'],
+    }),
+    addTaskExecutor: builder.mutation<TaskQuer, ItaskExecutors>({
+      query(data) {
+        const { ...body } = data
+        return {
+          url: `task/${data.taskId}/apply`,
+          method: 'PATCH',
+          body,
         }
       },
       invalidatesTags: ['Task'],
@@ -81,6 +92,7 @@ export const {
   useAddTaskMutation,
   useGetTaskByIdQuery,
   useDeleteTaskMutation,
+  useAddTaskExecutorMutation,
   useAddCommentMutation,
   useDeleteCommentMutation,
 } = taskApi

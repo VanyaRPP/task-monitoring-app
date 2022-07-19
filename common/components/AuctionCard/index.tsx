@@ -1,20 +1,48 @@
-import { useState, useEffect } from 'react'
-import { Card, Table, Input, Button, Form } from 'antd'
-import useDebounce from 'common/assets/hooks/useDebounce'
+import { useState } from 'react'
+import { Card, Table, Button, Form, Avatar } from 'antd'
 import s from './style.module.scss'
 
-import { auction as config } from 'common/lib/task.config'
 import ModalWindow from '../UI/ModalWindow/index'
 import ApplyAuctionForm from '../ApplyAuctionForm/index'
+import {
+  useGetUserByEmailQuery,
+  useGetUserByIdQuery,
+} from '../../api/userApi/user.api'
+import Column from 'antd/lib/table/Column'
+import { ItaskExecutors } from '../../modules/models/Task'
+import Meta from 'antd/lib/card/Meta'
+import { useAddTaskExecutorMutation } from 'common/api/taskApi/task.api'
+import { useSession } from 'next-auth/react'
 
-const AuctionCard = ({ taskId }) => {
-  const [data, setData] = useState(config)
-  const [search, setSearch] = useState({ name: '', address: '' })
+export const Executor = ({ executor, type }) => {
+  const { data } = useGetUserByIdQuery(`${executor.workerid}`)
+  const worker = data?.data
+
+  if (type === 'workerInfo') {
+    return (
+      <Meta
+        avatar={<Avatar src={worker?.image} />}
+        title={worker?.name}
+        description={<p>{executor.description}</p>}
+      />
+    )
+  }
+
+  if (type === 'rating') {
+    return <div>{worker?.rating}</div>
+  }
+}
+
+const AuctionCard = ({ taskId, taskExecutors }) => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
-  const debounced = useDebounce<{ name: string; address: string }>(search)
 
   const [form] = Form.useForm()
+
+  const { data: session } = useSession()
+  const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
+
+  const [addTaskExecutor] = useAddTaskExecutorMutation()
 
   const onCancelModal = () => {
     setIsModalVisible(false)
@@ -23,56 +51,18 @@ const AuctionCard = ({ taskId }) => {
 
   const onSubmiModal = async () => {
     const formData = await form.validateFields()
+    const data = { ...formData, workerid: userData?.data?._id, taskId: taskId }
     setIsFormDisabled(true)
-    // await addCategory({ ...formData })
+    addTaskExecutor(data)
     form.resetFields()
     setIsModalVisible(false)
     setIsFormDisabled(false)
   }
 
-  useEffect(() => {
-    setData(
-      config.filter((item) =>
-        item.name.toLowerCase().includes(debounced.name.toLowerCase())
-      )
-    )
-  }, [debounced])
-
-  const searchInput = (order: string) => (
-    <Input
-      placeholder={order.charAt(0).toUpperCase() + order.slice(1)}
-      value={search[order]}
-      onChange={(e) => setSearch({ ...search, [order]: e.target.value })}
-    />
-  )
-
-  const columns = [
-    {
-      title: searchInput('name'),
-      dataIndex: 'name',
-      key: 'name',
-      width: '70%',
-    },
-    {
-      title: 'Price',
-      dataIndex: 'price',
-      key: 'price',
-      width: '15%',
-      sorter: (a, b) => a.price - b.price,
-    },
-    {
-      title: 'Rating',
-      dataIndex: 'rating',
-      key: 'rating',
-      width: '15%',
-      sorter: (a, b) => a.rating - b.rating,
-    },
-  ]
-
   return (
     <Card
       className={s.Card}
-      title={`Auction: ${config.length}`}
+      title={`Auction: ${taskExecutors ? taskExecutors.length : ''}`}
       extra={
         <Button type="primary" ghost onClick={() => setIsModalVisible(true)}>
           Apply
@@ -89,8 +79,27 @@ const AuctionCard = ({ taskId }) => {
       >
         <ApplyAuctionForm isFormDisabled={isFormDisabled} form={form} />
       </ModalWindow>
-
-      <Table dataSource={data} columns={columns} pagination={false} />
+      <Table dataSource={taskExecutors} pagination={false}>
+        <Column
+          title="Executors"
+          dataIndex="workerid"
+          key="executors"
+          width="70%"
+          render={(_, executor: ItaskExecutors) => (
+            <Executor executor={executor} type="workerInfo" />
+          )}
+        />
+        <Column title="Price" dataIndex="price" key="price" width="15%" />
+        <Column
+          title="Rating"
+          dataIndex="rating"
+          key="rating"
+          width="15%"
+          render={(_, executor: ItaskExecutors) => (
+            <Executor executor={executor} type="rating" />
+          )}
+        />
+      </Table>
     </Card>
   )
 }

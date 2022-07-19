@@ -4,11 +4,10 @@ import s from './style.module.scss'
 import { comments } from 'common/lib/task.config'
 
 interface Props {
-  taskId: string | string[]
   loading?: boolean
 }
 
-const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
+const CommentsCard: React.FC<Props> = ({ loading = false }) => {
   return (
     <Card loading={loading} className={s.Card} title="Comments">
       {comments.length ? (

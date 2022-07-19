@@ -2,10 +2,7 @@ import { EditOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card } from 'antd'
 import { useSession } from 'next-auth/react'
 import React, { useMemo, useState } from 'react'
-import {
-  useDeleteTaskMutation,
-  useGetTaskByIdQuery,
-} from '../../api/taskApi/task.api'
+import { useDeleteTaskMutation } from '../../api/taskApi/task.api'
 import { useGetUserByIdQuery } from '../../api/userApi/user.api'
 import DeleteButton from '../UI/Buttons/DeleteButton'
 import { dateToDefaultFormat } from '../features/formatDate'
@@ -15,14 +12,10 @@ import s from './style.module.scss'
 import { Marker, useJsApiLoader } from '@react-google-maps/api'
 import Map from '../Map'
 
-const TaskCard = ({ taskId }) => {
+const TaskCard = ({ taskId, task }) => {
   const router = useRouter()
 
   const { data: session } = useSession()
-  const { data } = useGetTaskByIdQuery(`${taskId}`, {
-    skip: !taskId,
-  })
-  const task = data?.data
 
   const { data: userData } = useGetUserByIdQuery(`${task?.creator}`, {
     skip: !task,
