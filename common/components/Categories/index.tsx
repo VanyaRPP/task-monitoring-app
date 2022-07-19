@@ -8,7 +8,7 @@ import {
 import { AppRoutes } from 'utils/constants'
 import { useSession } from 'next-auth/react'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
-import DeleteButton from '../DeleteButton'
+import DeleteButton from '../UI/Buttons/DeleteButton'
 import s from './style.module.scss'
 
 interface Props {
@@ -51,7 +51,7 @@ const Categories: React.FC<Props> = ({ nameFilter }) => {
               Info
             </Button>,
           ].concat(
-            role === 'Worker'
+            role === 'Admin'
               ? [
                   <DeleteButton
                     key="delete"

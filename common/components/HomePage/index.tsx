@@ -10,18 +10,27 @@ const HomePage: React.FC = () => {
   const router = useRouter()
   return (
     <>
-      <h1 className={s.Header}>Ваш електронний жек: Комунальник</h1>
+      <h1 className={s.Header} id={s.Bigger}>
+        Комунальник
+      </h1>
+      <h3 className={s.Header} id={s.Smaller}>
+        Ваше електронне житлово-комунальне господарство
+      </h3>
 
       <div className={s.Container}>
-        <div className={s.Image}>
-          <Image src={cityImg1} alt="City" />
-          <Image src={cityImg2} alt="City" />
+        <div className={s.HalfBlock}>
+          <div className={s.Image}>
+            <Image src={cityImg1} alt="City" />
+            <Image src={cityImg2} alt="City" />
+          </div>
         </div>
 
-        <div className={s.Text}>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Tenetur
-          ducimus incidunt modi laborum voluptas asperiores id fuga debitis est
-          vitae!
+        <div className={s.HalfBlock}>
+          <div className={s.Text}>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Tenetur
+            ducimus incidunt modi laborum voluptas asperiores id fuga debitis
+            est vitae!
+          </div>
         </div>
       </div>
 
