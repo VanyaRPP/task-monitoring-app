@@ -1,7 +1,7 @@
 import { IUser } from '../../modules/models/User'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
-interface Quer {
+interface BaseQuery {
   success: boolean
   data: IUser
 }
@@ -18,11 +18,11 @@ export const userApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getUserByEmail: builder.query<Quer, string>({
+    getUserByEmail: builder.query<BaseQuery, string>({
       query: (email) => `user/${email}`,
       providesTags: (result) => ['User'],
     }),
-    getUserById: builder.query<Quer, string>({
+    getUserById: builder.query<BaseQuery, string>({
       query: (id) => `user/id/${id}`,
       providesTags: (result) => ['User'],
     }),
@@ -41,6 +41,17 @@ export const userApi = createApi({
       query: () => '/user',
       providesTags: (result) => ['User'],
     }),
+    addFeedback: builder.mutation<IUser, Partial<IUser>>({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `user/feedbacks/${_id}`,
+          method: 'PATCH',
+          body,
+        }
+      },
+      invalidatesTags: ['User'],
+    }),
   }),
 })
 
@@ -49,4 +60,5 @@ export const {
   useGetUserByIdQuery,
   useUpdateUserMutation,
   useGetAllUsersQuery,
+  useAddFeedbackMutation,
 } = userApi
