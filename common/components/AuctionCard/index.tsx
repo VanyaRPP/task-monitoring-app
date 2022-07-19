@@ -6,8 +6,6 @@ import s from './style.module.scss'
 import { auction as config } from 'common/lib/task.config'
 
 const AuctionCard = ({ taskId }) => {
-  console.log(typeof taskId)
-
   const [data, setData] = useState(config)
   const [search, setSearch] = useState({ name: '', address: '' })
   const debounced = useDebounce<{ name: string; address: string }>(search)

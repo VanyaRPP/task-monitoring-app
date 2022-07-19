@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { List } from 'antd'
 import UserInfo from 'common/components/UserCard'
 import { IUser } from 'common/modules/models/User'
+import FeedbacksCard from 'common/components/FeedbacksCard'
 import s from './style.module.scss'
 
 interface Props {
@@ -30,7 +31,10 @@ const Users: React.FC<Props> = ({ users }) => {
         )}
       />
 
-      <UserInfo user={user} />
+      <div className={s.About}>
+        <UserInfo user={user} />
+        <FeedbacksCard user={user} />
+      </div>
     </div>
   )
 }

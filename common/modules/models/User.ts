@@ -1,6 +1,12 @@
 import { ITask } from './Task'
 import mongoose, { Schema, Types, model, ObjectId } from 'mongoose'
 
+export interface IFeedback {
+  id: string
+  text: string
+  grade: number
+}
+
 export interface IUser {
   _id?: string
   name: string
@@ -8,6 +14,7 @@ export interface IUser {
   image?: string
   role?: string
   tasks?: [ITask]
+  feedback: [IFeedback]
 }
 
 const UserShema = new Schema<IUser>({
