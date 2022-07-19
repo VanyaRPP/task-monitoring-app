@@ -35,7 +35,6 @@ export default async function handler(
       break
     case 'DELETE':
       try {
-        console.log('query', req.query)
         await User.findById(req.query.id).then(async (user) => {
           const updatedUser = await User.updateOne(
             { _id: req.query.id },

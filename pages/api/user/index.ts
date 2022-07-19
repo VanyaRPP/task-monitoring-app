@@ -19,22 +19,6 @@ export default async function handler(
 ) {
   switch (req.method) {
     case 'GET':
-      /**
-       * @swagger
-       * /api/task:
-       *   get:
-       *     summary: Returns the list of all the Task
-       *     tags: [Tasks]
-       *     responses:
-       *       201:
-       *         description: The list of the Task
-       *         content:
-       *           application/json:
-       *             schema:
-       *               type: array
-       *               items:
-       *                 $ref: '#/components/schemas/Task'
-       */
       try {
         const users = await User.find({})
         return res.status(201).json({ success: true, data: users })
@@ -42,28 +26,6 @@ export default async function handler(
         return res.status(400).json({ success: false })
       }
     // case 'POST':
-    /**
-     * @swagger
-     * /api/task:
-     *   post:
-     *     summary: Create a new Task
-     *     tags: [Tasks]
-     *     requestBody:
-     *       required: true
-     *       content:
-     *         application/json:
-     *           schema:
-     *             $ref: '#/components/schemas/Task'
-     *     responses:
-     *       201:
-     *         description: The Task was successfully created
-     *         content:
-     *           application/json:
-     *             schema:
-     *               $ref: '#/components/schemas/Tasks'
-     *       500:
-     *         description: Some server error
-     */
     //   try {
     //     const task = await Task.create(req.body)
     //     return res.status(201).json({ success: true, data: task })

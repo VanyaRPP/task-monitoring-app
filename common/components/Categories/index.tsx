@@ -43,11 +43,7 @@ const Categories: React.FC<Props> = ({ nameFilter }) => {
         <List.Item
           className={s.Category}
           actions={[
-            <Button
-              key="info"
-              type="primary"
-              onClick={() => console.log('info')}
-            >
+            <Button key="info" type="primary" onClick={() => ''}>
               Info
             </Button>,
           ].concat(

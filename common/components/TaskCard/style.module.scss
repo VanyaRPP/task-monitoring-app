@@ -16,8 +16,10 @@
   background: var(--backgroundColor) !important;
 
   border-color: #88888830;
+
   > * {
     border-color: #88888830;
+
     > * {
       border-color: #88888830;
     }
@@ -37,13 +39,15 @@
   .TaskInfo {
     border-radius: 10px;
     overflow: hidden;
-
+    margin: 10px;
     transition: background 0.5s;
     background: var(--backgroundColorElements) !important;
 
     border-color: #88888830;
+
     > * {
       border-color: #88888830;
+
       > * {
         border-color: #88888830;
       }
@@ -81,5 +85,7 @@
     li {
       border-color: #88888830 !important;
     }
-  } // actions
+  }
+
+  // actions
 }

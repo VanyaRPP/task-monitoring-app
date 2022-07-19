@@ -2,9 +2,7 @@
 import s from './style.module.scss'
 
 const PremiumPage: React.FC = () => {
-  const onFinish = (plan) => {
-    console.log('Selected plan is', plan)
-  }
+  const onFinish = (plan) => null
 
   return (
     <>

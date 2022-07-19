@@ -28,8 +28,6 @@ export default async function handler(
       }
     case 'POST':
       try {
-        console.log(req.body.name)
-
         await Category.create(req.body)
           .then((category) => {
             return res.status(201).json({ success: true, data: category })
