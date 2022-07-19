@@ -1,3 +1,4 @@
+import { StarOutlined } from '@ant-design/icons'
 import { Card, List } from 'antd'
 import { IUser } from 'common/modules/models/User'
 import Feedback from './feedback'
@@ -8,9 +9,25 @@ interface Props {
   loading?: boolean
 }
 
+function CalculateAVG(feedback) {
+  return feedback.length > 0
+    ? feedback.reduce((a, b) => a + b.grade, 0) / feedback.length
+    : 0
+}
+
 const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
   return (
-    <Card loading={loading} className={s.Card} title="Feedbacks">
+    <Card
+      loading={loading}
+      className={s.Card}
+      title="Feedbacks"
+      extra={
+        <span>
+          {`Rating: ${CalculateAVG(user?.feedback)} / 5 `}
+          <StarOutlined />
+        </span>
+      }
+    >
       {user?.feedback ? (
         <List
           className={s.List}
