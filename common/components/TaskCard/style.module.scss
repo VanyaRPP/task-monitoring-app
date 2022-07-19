@@ -1,30 +1,29 @@
 .Card {
-  position: relative;
+  width: 100%;
+  max-width: 450px;
+
+  @media (max-width: 1200px) {
+    max-width: 100%;
+  }
+
   border-radius: 20px;
+
   overflow: hidden;
+  position: relative;
 
   transition: background 0.5s, box-shadow 0.5s;
   box-shadow: 0 2px 10px -4px var(--shadowColor);
   background: var(--backgroundColor) !important;
 
   border-color: #88888830;
+
   > * {
     border-color: #88888830;
+
+    > * {
+      border-color: #88888830;
+    }
   }
-}
-
-.Task {
-  width: 350px;
-  min-height: 400px;
-  max-height: 750px;
-
-  @media (max-width: 1000px) {
-    width: 100%;
-  }
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
 
   .UserInfo {
     display: flex;
@@ -36,34 +35,57 @@
       color: var(--textColor);
     }
   }
-}
 
-.TaskInfo {
-  border-radius: 10px;
-  overflow: hidden;
+  .TaskInfo {
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 10px;
+    transition: background 0.5s;
+    background: var(--backgroundColorElements) !important;
 
-  transition: background 0.5s;
-  background: var(--backgroundColorElements) !important;
-
-  border-color: #88888830;
-  > * {
     border-color: #88888830;
+
     > * {
       border-color: #88888830;
+
+      > * {
+        border-color: #88888830;
+      }
+    }
+
+    > * {
+      transition: background 0.5s, color 0.5s;
+      color: var(--textColor);
+
+      &:first-of-type {
+        background: var(--backgroundColorPrimary);
+      }
+    }
+
+    .Description {
+      width: 100%;
+      max-height: 80px;
+      word-wrap: break-word;
+      border-bottom: 1px solid #88888830;
+
+      overflow-x: hidden;
+      overflow-y: scroll;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
     }
   }
 
-  > * {
+  ul {
     transition: background 0.5s, color 0.5s;
     color: var(--textColor);
+    background: var(--backgroundColorPrimary) !important;
 
-    &:first-of-type {
-      background: var(--backgroundColorPrimary);
+    li {
+      border-color: #88888830 !important;
     }
   }
 
-  .Description {
-    width: 100%;
-    max-height: 80px;
-  }
+  // actions
 }

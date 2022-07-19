@@ -22,7 +22,7 @@ const WorkerForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
       disabled={isFormDisabled}
     >
       <Form.Item
-        name="phone"
+        name="tel"
         label="Phone Number"
         rules={[{ required: true, message: 'Please input your phone number!' }]}
       >

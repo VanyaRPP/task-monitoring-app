@@ -1,0 +1,113 @@
+.CardTabs {
+  > *:first-of-type {
+    color: var(--textColor);
+
+    &::before {
+      background: #88888830;
+    }
+  }
+
+  > div:first-of-type > div:first-of-type > div:first-of-type > div {
+    border-color: #88888830;
+    opacity: 0.5;
+    background: var(--backgroundColorElements);
+    transition: background 0.2s, opacity 0.2s, border-bottom-color 0.5s;
+  }
+
+  &.Users {
+    > div:first-of-type
+      > div:first-of-type
+      > div:first-of-type
+      > div:nth-child(1) {
+      opacity: 1;
+      background: var(--backgroundColorPrimary);
+      border-bottom-color: var(--backgroundColorPrimary);
+    }
+  }
+  &.Workers {
+    > div:first-of-type
+      > div:first-of-type
+      > div:first-of-type
+      > div:nth-child(2) {
+      opacity: 1;
+      background: var(--backgroundColorPrimary);
+      border-bottom-color: var(--backgroundColorPrimary);
+    }
+  }
+  &.Premium {
+    > div:first-of-type
+      > div:first-of-type
+      > div:first-of-type
+      > div:nth-child(3) {
+      opacity: 1;
+      background: var(--backgroundColorPrimary);
+      border-bottom-color: var(--backgroundColorPrimary);
+    }
+  }
+}
+
+.Container {
+  width: 100%;
+  display: flex;
+  gap: 2rem;
+
+  .List {
+    width: 200px;
+    max-width: 200px;
+    min-width: 200px;
+    border-right: 1px solid #88888830;
+
+    .ListItem {
+      min-width: 50px;
+      border: 1px solid #88888830 !important;
+      border-right: transparent !important;
+      padding: 0.5rem 1rem;
+      margin-bottom: 2px;
+      position: relative;
+
+      transition: background 0.5s, color 0.2s, opacity 0.5s;
+      background: var(--backgroundColorElements);
+      opacity: 0.5;
+      color: var(--textColor);
+
+      &::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        transform: translateX(2px);
+        width: 2px;
+        height: 100%;
+
+        transition: background 0.5s;
+        background: transparent;
+      }
+
+      &.Active {
+        background: var(--backgroundColorPrimary);
+        opacity: 1;
+        color: var(--primaryColor);
+
+        &::after {
+          background: var(--backgroundColorPrimary);
+        }
+      }
+    }
+  }
+
+  .User {
+    width: 100%;
+  }
+
+  .About {
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    > div {
+      width: 100%;
+    }
+  }
+}

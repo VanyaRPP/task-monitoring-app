@@ -68,3 +68,12 @@
     color: var(--primaryColorHover);
   }
 }
+
+.Button_Premium {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  span {
+    margin-left: 0.25rem;
+  }
+}

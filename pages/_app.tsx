@@ -5,7 +5,6 @@ import { Provider } from 'react-redux'
 import { store } from '../common/modules/store/store'
 import NextNProgress from 'nextjs-progressbar'
 import MainLayout from '../common/components/Layouts/MainLayout'
-import themes from 'common/lib/themes.config'
 
 export default function MyApp({
   Component,
@@ -15,7 +14,12 @@ export default function MyApp({
     <SessionProvider session={session}>
       <Provider store={store}>
         <MainLayout>
-          <NextNProgress color="#722ed1" height={2} showOnShallow={false} />
+          <NextNProgress
+            color="var(--primaryColor)"
+            height={2}
+            showOnShallow={false}
+          />
+
           <Component {...pageProps} />
         </MainLayout>
       </Provider>

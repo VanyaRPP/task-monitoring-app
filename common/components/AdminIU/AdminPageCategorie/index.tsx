@@ -1,6 +1,7 @@
+import { useState, useEffect } from 'react'
+import useDebounce from 'common/assets/hooks/useDebounce'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Form, Input } from 'antd'
-import { useState } from 'react'
 import { useAddCategoryMutation } from 'common/api/categoriesApi/category.api'
 import { ICategory } from 'common/modules/models/Category'
 import AddCategoryForm from '../../AddCategoryForm'
@@ -31,14 +32,23 @@ const AdminPageCategories: React.FC = () => {
     setIsModalVisible(false)
     setIsFormDisabled(false)
   }
+
+  const [search, setSearch] = useState('')
+  const debounced = useDebounce<string>(search)
+
   return (
     <>
       <div className={s.Controls}>
-        <Search
+        {/* <Search
           className={s.Search}
           placeholder="input search text"
           onSearch={() => console.log('search')}
           enterButton
+        /> */}
+        <Input
+          placeholder="Search Category..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
         <Button
           className={s.AddButton}
@@ -57,7 +67,8 @@ const AdminPageCategories: React.FC = () => {
           <AddCategoryForm isFormDisabled={isFormDisabled} form={form} />
         </ModalWindow>
       </div>
-      <Categories />
+
+      <Categories nameFilter={debounced} />
     </>
   )
 }

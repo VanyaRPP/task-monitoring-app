@@ -19,6 +19,8 @@ type FormData = {
   desription?: string
   domain?: { any }
   name: string
+  creator?: string
+  customer: string
 }
 
 type PropsType = {
@@ -76,6 +78,7 @@ const AddTaskModal: React.FC<PropsType> = ({
         address: address,
         creator: userData?.data?._id,
       })
+
       form.resetFields()
       setIsModalVisible(false)
       setFormDisabled(false)
@@ -113,6 +116,11 @@ const AddTaskModal: React.FC<PropsType> = ({
         name="form_in_modal"
         disabled={formDisabled}
       >
+        {userData?.data?.role == 'Admin' && (
+          <Form.Item name="customer" label="Name of customer">
+            <Input />
+          </Form.Item>
+        )}
         <Form.Item
           name="name"
           label="Name of task"
@@ -128,7 +136,7 @@ const AddTaskModal: React.FC<PropsType> = ({
             isLoaded={isLoaded}
             setAddress={setAddress}
             error={error}
-            address={address?.name}
+            addressObj={address}
           />
           <div className={`${s.default} ${error ? '' : s.error}`}>
             Enter address, please!
