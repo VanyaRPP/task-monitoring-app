@@ -3,6 +3,7 @@ import { List } from 'antd'
 import { ITask } from 'common/modules/models/Task'
 import TaskCard from 'common/components/TaskCard/index'
 import s from './style.module.scss'
+import { useGetTaskByIdQuery } from '../../../api/taskApi/task.api'
 
 interface Props {
   tasks: ITask[]
@@ -30,7 +31,7 @@ const Tasks: React.FC<Props> = ({ tasks }) => {
         )}
       />
 
-      <TaskCard taskId={task._id} />
+      <TaskCard taskId={task._id} task={tasks[0]} />
     </div>
   )
 }
