@@ -78,7 +78,6 @@ const AddTaskModal: React.FC<PropsType> = ({
         address: address,
         creator: userData?.data?._id,
       })
-      console.log(formData)
 
       form.resetFields()
       setIsModalVisible(false)
@@ -137,7 +136,7 @@ const AddTaskModal: React.FC<PropsType> = ({
             isLoaded={isLoaded}
             setAddress={setAddress}
             error={error}
-            address={address?.name}
+            addressObj={address}
           />
           <div className={`${s.default} ${error ? '' : s.error}`}>
             Enter address, please!
