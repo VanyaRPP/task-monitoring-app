@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Layout } from 'antd'
+import { Button, Layout } from 'antd'
 import Head from 'next/head'
 import Footer from '../Footer'
 import Header from '../Header'
@@ -7,6 +7,10 @@ import Sidebar from '../Sidebar'
 import { SearchBar } from '../UI/SearchBar'
 import { useSession } from 'next-auth/react'
 import s from './MainLayout.style.module.scss'
+import premiumIcon from '../../assets/premium/diamond.png'
+import Image from 'next/image'
+import Router from 'next/router'
+import { AppRoutes } from 'utils/constants'
 
 interface Props {
   children: React.ReactNode
@@ -16,6 +20,9 @@ const MainLayout: React.FC<Props> = ({ children }) => {
   const { data: session } = useSession()
   const [collapsed, setCollapsed] = useState(true)
 
+  const { status } = useSession()
+
+  status === 'authenticated'
   return (
     <>
       <Head>
@@ -39,7 +46,9 @@ const MainLayout: React.FC<Props> = ({ children }) => {
                 : '0px',
             }}
           >
-            <SearchBar className={s.SearchBar} />
+            {status === 'authenticated' && (
+              <SearchBar className={s.SearchBar} />
+            )}
             <div className={s.Foreground}>{children}</div>
           </Layout.Content>
           <Footer
