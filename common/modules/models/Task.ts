@@ -11,6 +11,7 @@ export interface ITask {
   dateofcreate: Date
   deadline: string
   customer?: string
+  taskexecutors: [ItaskExecutors]
 }
 
 export interface ICreateTask {
@@ -34,14 +35,15 @@ export interface IGeoCode {
   lng: number
 }
 
-interface ItaskExecutors {
+export interface ItaskExecutors {
   workerid: ObjectId | string //profile photo and rating will be obtained from this id
+  taskId: ObjectId | string
   price: number | string
   description: string
   workerdeadline?: Date
 }
 
-interface ITaskModel {
+export interface ITaskModel {
   _id?: ObjectId
   name: string
   creator: ObjectId | string

@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { ObjectId } from 'mongoose'
-import { ICreateTask, ITask } from '../../modules/models/Task'
+import { ICreateTask, ITask, ItaskExecutors } from '../../modules/models/Task'
 
 interface AllTasksQuer {
   success: boolean
@@ -47,6 +47,20 @@ export const taskApi = createApi({
       },
       invalidatesTags: ['Task'],
     }),
+    addTaskExecutor: builder.mutation<
+      TaskQuer,
+      { data: ItaskExecutors; id: string }
+    >({
+      query(data) {
+        const { ...body } = data
+        return {
+          url: `task/${data.taskId}/apply`,
+          method: 'PATCH',
+          body,
+        }
+      },
+      invalidatesTags: ['Task'],
+    }),
   }),
 })
 
@@ -55,4 +69,5 @@ export const {
   useAddTaskMutation,
   useGetTaskByIdQuery,
   useDeleteTaskMutation,
+  useAddTaskExecutorMutation,
 } = taskApi

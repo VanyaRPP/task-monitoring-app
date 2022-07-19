@@ -5,8 +5,6 @@ import s from './style.module.scss'
 import { comments, feedbacks } from 'common/lib/task.config'
 
 const Comments = ({ taskId }) => {
-  console.log(typeof taskId)
-
   return (
     <Card className={`${s.Card} ${s.Comments}`}>
       <Tabs defaultActiveKey="1" className={s.Tabs}>

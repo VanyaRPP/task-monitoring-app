@@ -8,6 +8,7 @@ export interface IUser {
   image?: string
   role?: string
   tasks?: [ITask]
+  rating?: number
 }
 
 const UserShema = new Schema<IUser>({
@@ -16,6 +17,7 @@ const UserShema = new Schema<IUser>({
   image: String,
   role: { type: String, default: 'User' },
   tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
+  rating: { type: Number, default: 0 },
 })
 
 const User = mongoose.models.User || mongoose.model('User', UserShema)

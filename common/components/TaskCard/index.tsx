@@ -10,13 +10,10 @@ import { useGetUserByIdQuery } from '../../api/userApi/user.api'
 import DeleteButton from '../UI/Buttons/DeleteButton'
 import { dateToDefaultFormat } from '../features/formatDate'
 import s from './style.module.scss'
+import { useRouter } from 'next/router'
 
-const TaskCard = ({ taskId }) => {
+const TaskCard = ({ taskId, task }) => {
   const { data: session } = useSession()
-  const { data } = useGetTaskByIdQuery(`${taskId}`, {
-    skip: !taskId,
-  })
-  const task = data?.data
 
   const { data: userData } = useGetUserByIdQuery(`${task?.creator}`, {
     skip: !task,
@@ -25,15 +22,11 @@ const TaskCard = ({ taskId }) => {
 
   const [deleteTask] = useDeleteTaskMutation()
 
-  const taskDelete = (id) => {
-    deleteTask(id)
-  }
-
   const Actions = [
     <Button key="edit" type="primary">
       <EditOutlined />
     </Button>,
-    <DeleteButton key="delete" onDelete={() => taskDelete(taskId)} />,
+    <DeleteButton key="delete" onDelete={() => deleteTask(taskId)} />,
   ]
 
   return (
