@@ -12,9 +12,7 @@ import { Button, Form, Input } from 'antd'
 import s from './style.module.scss'
 
 const ContactsPage: React.FC = () => {
-  const onFinish = (values: any) => {
-    console.log(values)
-  }
+  const onFinish = (values: any) => null
 
   return (
     <>

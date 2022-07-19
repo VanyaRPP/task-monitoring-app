@@ -28,8 +28,6 @@ export default async function handler(
       }
     case 'POST':
       try {
-        console.log(req.body.name)
-
         await Domein.create(req.body)
           .then((domein) => {
             return res.status(201).json({ success: true, data: domein })

@@ -7,7 +7,7 @@ const useGetAddressFromGeoCode = () => {
 
   const getAddress = async (geoCode: IGeoCode) => {
     const responce = fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${geoCode.lat},${geoCode.lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${geoCode?.lat},${geoCode?.lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
     )
     const answer: IPlusCode = await (await responce).json()
     const { results } = answer
