@@ -18,6 +18,8 @@ const Profile: React.FC = () => {
   const { data, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const user = data?.data
 
+  // console.log(user)
+
   return (
     <>
       <h2 className={s.Header}>My profile</h2>
@@ -51,10 +53,16 @@ const Profile: React.FC = () => {
               <p>{user?.email}</p>
             </Card>
 
-            <Card title="General information" size="small">
-              <p>City: Zhytomyr</p>
+            <Card size="small" title="Email">
+              <p>{user?.email}</p>
+            </Card>
+            <Card size="small" title="Phone">
+              <p>{user?.tel}</p>
             </Card>
 
+            <Card title="Address" size="small">
+              <p>{user?.address?.name || 'Zhytomyr'}</p>
+            </Card>
             <Button type="primary">
               <EditOutlined key="edit" />
             </Button>
