@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import { Card, notification, Table, Button, Form, Avatar } from 'antd'
-import s from './style.module.scss'
-
 import ModalWindow from '../UI/ModalWindow/index'
 import ApplyAuctionForm from '../ApplyAuctionForm/index'
 import {
@@ -13,6 +11,7 @@ import { ITask, ItaskExecutors } from '../../modules/models/Task'
 import Meta from 'antd/lib/card/Meta'
 import { useAddTaskExecutorMutation } from 'common/api/taskApi/task.api'
 import { useSession } from 'next-auth/react'
+import s from './style.module.scss'
 
 export const Executor = ({ executor, type }) => {
   const { data } = useGetUserByIdQuery(`${executor.workerid}`)
@@ -56,7 +55,7 @@ const CompetitionCard: React.FC<{
     form.resetFields()
   }
 
-  const onSubmiModal = async () => {
+  const onSubmitModal = async () => {
     const formData = await form.validateFields()
     const data = {
       ...formData,
@@ -88,9 +87,8 @@ const CompetitionCard: React.FC<{
   return (
     <Card
       className={s.Card}
-      title={`Competition: ${
-        task?.taskexecutors ? task?.taskexecutors.length : ''
-      }`}
+      title={`Competition: ${task?.taskexecutors ? task?.taskexecutors.length : ''
+        }`}
       extra={
         task?.creator !== userData?.data?._id && (
           <Button type="primary" ghost onClick={onApplyCompetition}>
@@ -100,16 +98,16 @@ const CompetitionCard: React.FC<{
       }
     >
       <ModalWindow
-        title="Apply for an сompetition"
+        title="Apply for an competition"
         isModalVisible={isModalVisible}
         onCancel={onCancelModal}
-        onOk={onSubmiModal}
+        onOk={onSubmitModal}
         okText="Apply"
         cancelText="Cancel"
       >
         <ApplyAuctionForm isFormDisabled={isFormDisabled} form={form} />
       </ModalWindow>
-      <Table key="сompetition" dataSource={executors} pagination={false}>
+      <Table key="competition" dataSource={executors} pagination={false}>
         <Column
           title="Executors"
           dataIndex="workerid"
@@ -129,16 +127,20 @@ const CompetitionCard: React.FC<{
             <Executor executor={executor} type="rating" />
           )}
         />
-        <Column
-          title="Actions"
-          key="actions"
-          width="15%"
-          render={() => (
-            <Button type="primary" ghost>
-              Submit worker
-            </Button>
-          )}
-        />
+        {
+          task?.creator === userData?.data?._id && (
+            <Column
+              title="Actions"
+              key="actions"
+              width="15%"
+              render={() => (
+                <Button type="primary" ghost>
+                  Submit worker
+                </Button>
+              )}
+            />
+          )
+        }
       </Table>
     </Card>
   )
