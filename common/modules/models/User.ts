@@ -3,12 +3,6 @@ import { ITask } from './Task'
 import mongoose, { Schema } from 'mongoose'
 import { ObjectId } from 'mongodb'
 
-export interface IFeedback {
-  id: string
-  text: string
-  grade: number
-}
-
 export interface IUser {
   _id?: string
   name: string
