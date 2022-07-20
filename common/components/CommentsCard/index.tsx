@@ -1,10 +1,7 @@
 import { useState } from 'react'
-import { PlusOutlined } from '@ant-design/icons'
-import { Card, List, Button, Form } from 'antd'
-import ModalWindow from 'common/components/UI/ModalWindow'
-import AddCommentForm from 'common/components/AddCommentForm'
+import { SendOutlined } from '@ant-design/icons'
+import { Card, List, Button, Input } from 'antd'
 import Comment from './comment'
-import { IComment } from '../../modules/models/Task'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 import {
   useGetTaskByIdQuery,
@@ -28,65 +25,26 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
     skip: !taskId,
   })
 
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
-  const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
-
-  const [form] = Form.useForm()
-
   const [addComment] = useAddCommentMutation()
+  const [input, setInput] = useState<string>('')
 
-  const Reset = () => {
-    form.resetFields()
-    setIsModalVisible(false)
-    setIsFormDisabled(false)
-  }
+  const handleAddTask = async () => {
+    if (!input.trim()) return
 
-  const onCancelModal = () => {
-    Reset()
-  }
-
-  const onSubmiModal = async () => {
-    const formData: IComment = await form.validateFields()
-
-    setIsFormDisabled(true)
     await addComment({
       _id: task?.data?._id,
       comment: [
         {
           id: sessionUser?.data?._id,
-          text: formData?.text,
+          text: input,
         },
       ],
     })
-
-    Reset()
+    setInput('')
   }
 
   return (
-    <Card
-      loading={loading}
-      className={s.Card}
-      title={
-        <span style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          Comments
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsModalVisible(true)}
-          />
-          <ModalWindow
-            title={`Leave comment to ${task?.data?.name}`}
-            isModalVisible={isModalVisible}
-            onCancel={onCancelModal}
-            onOk={onSubmiModal}
-            okText="Leave comment"
-            cancelText="Cancel"
-          >
-            <AddCommentForm isFormDisabled={isFormDisabled} form={form} />
-          </ModalWindow>
-        </span>
-      }
-    >
+    <Card loading={loading} className={s.Card} title="Comments">
       <List
         className={s.List}
         dataSource={task?.data?.comment}
@@ -96,6 +54,19 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
           </List.Item>
         )}
       />
+
+      <div className={s.Input}>
+        <Input
+          placeholder="Type your comment here..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <Button
+          type="primary"
+          onClick={handleAddTask}
+          icon={<SendOutlined />}
+        />
+      </div>
     </Card>
   )
 }

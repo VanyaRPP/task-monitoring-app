@@ -1,6 +1,6 @@
 import { List, Avatar, Image } from 'antd'
 import { useGetUserByIdQuery } from 'common/api/userApi/user.api'
-import { StarOutlined, UserOutlined } from '@ant-design/icons'
+import { UserOutlined } from '@ant-design/icons'
 import { IComment } from 'common/modules/models/Task'
 import s from './style.module.scss'
 
