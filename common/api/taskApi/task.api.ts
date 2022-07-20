@@ -2,6 +2,11 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { ObjectId } from 'mongoose'
 import { ICreateTask, ITask } from '../../modules/models/Task'
 
+interface IAcceptQuery {
+  taskId: ObjectId | string
+  workerId: ObjectId | string
+}
+
 interface IDeleteQuery {
   userId: number | string
   itemId: number | string
@@ -69,6 +74,16 @@ export const taskApi = createApi({
         return {
           url: `task/comments/${userId}?comment=${itemId}`,
           method: 'DELETE',
+        }
+      },
+      invalidatesTags: ['Task'],
+    }),
+    acceptWorker: builder.mutation<ITask, Partial<IAcceptQuery>>({
+      query(data) {
+        const { taskId, workerId } = data
+        return {
+          url: `task/${taskId}/accept?executant=${workerId}`,
+          method: 'PATCH',
         }
       },
       invalidatesTags: ['Task'],
