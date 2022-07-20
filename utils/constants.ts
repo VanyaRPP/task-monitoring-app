@@ -34,4 +34,10 @@ export const centerTownGeoCode = {
   lat: 50.264915,
   lng: 28.661954,
 }
-///rdtfyghjfdcv
+
+export enum TaskStatuses {
+  PENDING = 'pending',
+  REJECTED = 'rejected',
+  IN_WORK = 'in work',
+  COMPLETED = 'completed',
+}
