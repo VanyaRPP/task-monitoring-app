@@ -87,8 +87,9 @@ const CompetitionCard: React.FC<{
   return (
     <Card
       className={s.Card}
-      title={`Competition: ${task?.taskexecutors ? task?.taskexecutors.length : ''
-        }`}
+      title={`Competition: ${
+        task?.taskexecutors ? task?.taskexecutors.length : ''
+      }`}
       extra={
         task?.creator !== userData?.data?._id && (
           <Button type="primary" ghost onClick={onApplyCompetition}>
@@ -127,20 +128,18 @@ const CompetitionCard: React.FC<{
             <Executor executor={executor} type="rating" />
           )}
         />
-        {
-          task?.creator === userData?.data?._id && (
-            <Column
-              title="Actions"
-              key="actions"
-              width="15%"
-              render={() => (
-                <Button type="primary" ghost>
-                  Submit worker
-                </Button>
-              )}
-            />
-          )
-        }
+        {task?.creator === userData?.data?._id && (
+          <Column
+            title="Actions"
+            key="actions"
+            width="15%"
+            render={() => (
+              <Button type="primary" ghost>
+                Submit worker
+              </Button>
+            )}
+          />
+        )}
       </Table>
     </Card>
   )
