@@ -1,5 +1,5 @@
 import { StarOutlined } from '@ant-design/icons'
-import { Card, List } from 'antd'
+import { Card, Empty, List } from 'antd'
 import { IUser } from 'common/modules/models/User'
 import Feedback from './feedback'
 import s from './style.module.scss'
@@ -10,7 +10,7 @@ interface Props {
 }
 
 function CalculateAVG(feedback) {
-  return feedback.length > 0
+  return feedback?.length > 0
     ? feedback.reduce((a, b) => a + b.grade, 0) / feedback.length
     : 0
 }
@@ -28,7 +28,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
         </span>
       }
     >
-      {user?.feedback ? (
+      {user?.feedback.length ? (
         <List
           className={s.List}
           dataSource={user?.feedback}
@@ -39,7 +39,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
           )}
         />
       ) : (
-        <h2 style={{ textAlign: 'center' }}>Nobody here</h2>
+        <Empty className={s.Empty} />
       )}
     </Card>
   )
