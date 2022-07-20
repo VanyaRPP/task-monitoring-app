@@ -5,11 +5,11 @@ import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
 import TaskCard from 'common/components/TaskCard'
-import СompetitionCard from 'common/components/CompetitionCard'
+
 import CommentsCard from 'common/components/CommentsCard'
 import { useGetTaskByIdQuery } from 'common/api/taskApi/task.api'
-
 import s from './style.module.scss'
+import СompetitionCard from 'common/components/CompetitionCard'
 
 const Task: React.FC = () => {
   const router = useRouter()
