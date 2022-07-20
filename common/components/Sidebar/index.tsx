@@ -88,7 +88,7 @@ const Sidebar: React.FC<Props> = ({ collapsed, setCollapsed }) => {
           </div>
           <p>{bestDomain.address}</p>
         </Panel>
-        {user?.role === 'Admin' && (
+        {/* {user?.role === 'Admin' && (
           <Button
             type="primary"
             className={s.AdminButton}
@@ -96,7 +96,7 @@ const Sidebar: React.FC<Props> = ({ collapsed, setCollapsed }) => {
           >
             Admin Panel
           </Button>
-        )}
+        )} */}
       </Collapse>
     </Layout.Sider>
   )

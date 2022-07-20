@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 import { useState } from 'react'
-import { Card, Table, Button, Form, Avatar } from 'antd'
+import { Card, notification, Table, Button, Form, Avatar } from 'antd'
 import s from './style.module.scss'
 
 import ModalWindow from '../UI/ModalWindow/index'
@@ -9,7 +10,7 @@ import {
   useGetUserByIdQuery,
 } from '../../api/userApi/user.api'
 import Column from 'antd/lib/table/Column'
-import { ItaskExecutors } from '../../modules/models/Task'
+import { ITask, ItaskExecutors } from '../../modules/models/Task'
 import Meta from 'antd/lib/card/Meta'
 import { useAddTaskExecutorMutation } from 'common/api/taskApi/task.api'
 import { useSession } from 'next-auth/react'
@@ -33,7 +34,16 @@ export const Executor = ({ executor, type }) => {
   }
 }
 
-const AuctionCard = ({ taskId, taskExecutors }) => {
+type PropsType = {
+  task: ITask
+}
+
+const AuctionCard: React.FC<PropsType> = ({ task }) => {
+  const executors = task?.taskexecutors.map((executor) => ({
+    ...executor,
+    key: executor.workerid,
+  }))
+
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
 
@@ -51,7 +61,11 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
 
   const onSubmiModal = async () => {
     const formData = await form.validateFields()
-    const data = { ...formData, workerid: userData?.data?._id, taskId: taskId }
+    const data = {
+      ...formData,
+      workerid: userData?.data?._id,
+      taskId: task?._id,
+    }
     setIsFormDisabled(true)
     addTaskExecutor(data)
     form.resetFields()
@@ -59,14 +73,33 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
     setIsFormDisabled(false)
   }
 
+  const onApplyAuction = () => {
+    if (
+      task?.taskexecutors.every(
+        (executor) => executor.workerid !== userData?.data?._id
+      )
+    ) {
+      setIsModalVisible(true)
+    } else {
+      notification.info({
+        message: 'You already apply for this task',
+        placement: 'topRight',
+      })
+    }
+  }
+
   return (
     <Card
       className={s.Card}
-      title={`Auction: ${taskExecutors ? taskExecutors.length : ''}`}
+      title={`Auction: ${
+        task?.taskexecutors ? task?.taskexecutors.length : ''
+      }`}
       extra={
-        <Button type="primary" ghost onClick={() => setIsModalVisible(true)}>
-          Apply
-        </Button>
+        task?.creator !== userData?.data?._id && (
+          <Button type="primary" ghost onClick={onApplyAuction}>
+            Apply
+          </Button>
+        )
       }
     >
       <ModalWindow
@@ -79,12 +112,12 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
       >
         <ApplyAuctionForm isFormDisabled={isFormDisabled} form={form} />
       </ModalWindow>
-      <Table dataSource={taskExecutors} pagination={false}>
+      <Table key="auction" dataSource={executors} pagination={false}>
         <Column
           title="Executors"
           dataIndex="workerid"
           key="executors"
-          width="70%"
+          width="55%"
           render={(_, executor: ItaskExecutors) => (
             <Executor executor={executor} type="workerInfo" />
           )}
@@ -97,6 +130,16 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
           width="15%"
           render={(_, executor: ItaskExecutors) => (
             <Executor executor={executor} type="rating" />
+          )}
+        />
+        <Column
+          title="Actions"
+          key="actions"
+          width="15%"
+          render={() => (
+            <Button type="primary" ghost>
+              Submit worker
+            </Button>
           )}
         />
       </Table>
