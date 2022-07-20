@@ -25,7 +25,6 @@ const ApplyAuctionForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
     <Form.Item name="suffix" noStyle>
       <Select defaultValue="UAH" style={{ width: 70 }}>
         <Option value="UAH">₴</Option>
-        <Option value="USD">$</Option>
       </Select>
     </Form.Item>
   )

@@ -10,7 +10,7 @@ interface Props {
 }
 
 function CalculateAVG(feedback) {
-  return feedback.length > 0
+  return feedback?.length > 0
     ? feedback.reduce((a, b) => a + b.grade, 0) / feedback.length
     : 0
 }

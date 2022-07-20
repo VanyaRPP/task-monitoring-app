@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Form, Radio } from 'antd'
 import type { RadioChangeEvent } from 'antd'
 import { useSession } from 'next-auth/react'
@@ -27,6 +28,8 @@ const RoleSwither: React.FC = () => {
     setRole(user?.role)
   }, [user?.role])
 
+  console.log(user)
+
   const onChange = async (e: RadioChangeEvent) => {
     if (!user?.isWorker) {
       if (e.target.value === 'Worker') {
@@ -45,8 +48,7 @@ const RoleSwither: React.FC = () => {
   const onSubmitModal = async () => {
     const formData = await form.validateFields()
     setIsFormDisabled(true)
-    // await addCategory({ ...formData })
-    await updateUser({ email: user?.email, ...formData })
+    await updateUser({ email: user?.email, tel: `+380${formData.tel}` })
     form.resetFields()
     setIsModalVisible(false)
     setIsFormDisabled(false)
