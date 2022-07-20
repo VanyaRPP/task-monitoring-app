@@ -1,4 +1,5 @@
 import mongoose, { Schema, ObjectId } from 'mongoose'
+import { TaskStatuses } from 'utils/constants'
 
 export interface ITask {
   _id?: string
@@ -11,7 +12,10 @@ export interface ITask {
   dateofcreate: Date
   deadline: string
   customer?: string
+  taskexecutors: [ItaskExecutors]
   comment?: [IComment]
+  status: TaskStatuses
+  executant?: ObjectId
 }
 
 export interface ICreateTask {
@@ -40,14 +44,15 @@ export interface IComment {
   text: string
 }
 
-interface ItaskExecutors {
+export interface ItaskExecutors {
   workerid: ObjectId | string //profile photo and rating will be obtained from this id
+  taskId: ObjectId | string
   price: number | string
   description: string
   workerdeadline?: Date
 }
 
-interface ITaskModel {
+export interface ITaskModel {
   _id?: ObjectId
   name: string
   creator: ObjectId | string
@@ -60,6 +65,8 @@ interface ITaskModel {
   customer?: string
   taskexecutors: [ItaskExecutors]
   comment?: [IComment]
+  status: TaskStatuses
+  executant: ObjectId
 }
 
 const TaskSchema = new Schema<ITaskModel>({
@@ -74,6 +81,8 @@ const TaskSchema = new Schema<ITaskModel>({
   customer: { type: String },
   taskexecutors: [{ type: Object }],
   comment: [{ type: Object }],
+  status: { type: String, required: true, default: TaskStatuses.PENDING },
+  executant: { type: Schema.Types.ObjectId },
 })
 
 const Task = mongoose.models.Task || mongoose.model('Task', TaskSchema)

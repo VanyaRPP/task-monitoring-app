@@ -1,7 +1,6 @@
 import { IAddress } from 'common/modules/models/Task'
 import { ITask } from './Task'
 import mongoose, { Schema } from 'mongoose'
-import { ObjectId } from 'mongodb'
 
 export interface IUser {
   _id?: string
@@ -10,6 +9,7 @@ export interface IUser {
   image?: string
   role?: string
   tasks?: [ITask]
+  rating?: number
   feedback?: [IFeedback]
   isWorker: boolean
   tel?: string
@@ -27,6 +27,7 @@ const UserSchema = new Schema<IUser>({
   image: String,
   role: { type: String, default: 'User' },
   tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
+  rating: { type: Number, default: 0 },
   feedback: [{ type: Object }],
   isWorker: { type: Boolean, default: false },
   tel: { type: String },

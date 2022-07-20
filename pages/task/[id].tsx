@@ -5,19 +5,25 @@ import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
 import TaskCard from 'common/components/TaskCard'
-import AuctionCard from 'common/components/AuctionCard'
-import CommentsCard from 'common/components/CommentsCard'
 
+import CommentsCard from 'common/components/CommentsCard'
+import { useGetTaskByIdQuery } from 'common/api/taskApi/task.api'
 import s from './style.module.scss'
+import СompetitionCard from '../../common/components/CompetitionCard'
 
 const Task: React.FC = () => {
   const router = useRouter()
 
+  const { data } = useGetTaskByIdQuery(`${router.query.id}`, {
+    skip: !router.query.id,
+  })
+  const task = data?.data
+
   return (
     <div className={s.TaskContainer}>
-      <TaskCard taskId={router.query.id} />
-      <AuctionCard taskId={router.query.id} />
-      <CommentsCard taskId={router.query.id} />
+      <TaskCard taskId={router.query.id} task={task} />
+      <СompetitionCard task={task} />
+      <CommentsCard />
     </div>
   )
 }
