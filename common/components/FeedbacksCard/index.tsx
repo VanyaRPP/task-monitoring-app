@@ -1,6 +1,6 @@
+import { Empty,   Card, List, Button, Form } from 'antd'
 import { useState } from 'react'
 import { StarOutlined, PlusOutlined } from '@ant-design/icons'
-import { Card, List, Button, Form } from 'antd'
 import { IFeedback, IUser } from 'common/modules/models/User'
 import ModalWindow from 'common/components/UI/ModalWindow'
 import AddFeedbackForm from 'common/components/AddFeedbackForm'
@@ -103,15 +103,19 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
         </span>
       }
     >
-      <List
-        className={s.List}
-        dataSource={user?.feedback}
-        renderItem={(item, index) => (
-          <List.Item key={index}>
-            <Feedback feedback={item} />
-          </List.Item>
-        )}
-      />
+      {user?.feedback.length ? (
+        <List
+          className={s.List}
+          dataSource={user?.feedback}
+          renderItem={(item, index) => (
+            <List.Item key={index}>
+              <Feedback feedback={item} />
+            </List.Item>
+          )}
+        />
+      ) : (
+        <Empty className={s.Empty} />
+      )}
     </Card>
   )
 }

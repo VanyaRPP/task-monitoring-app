@@ -50,10 +50,6 @@ const Profile: React.FC = () => {
             <Card size="small" title="Email">
               <p>{user?.email}</p>
             </Card>
-
-            <Card size="small" title="Email">
-              <p>{user?.email}</p>
-            </Card>
             <Card size="small" title="Phone">
               {user?.tel && <p>+380{user?.tel}</p>}
             </Card>
