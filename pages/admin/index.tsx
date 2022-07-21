@@ -4,6 +4,7 @@ import { authOptions } from '../api/auth/[...nextauth]'
 import AdminPageCategories from 'common/components/AdminIU/AdminPageCategorie'
 import AdminPageClients from 'common/components/AdminIU/AdminPageClients'
 import AdminPageTasks from 'common/components/AdminIU/AdminPageTasks'
+import AdminPageDomains from 'common/components/AdminIU/AdminPageDomains'
 import s from './style.module.scss'
 
 const { TabPane } = Tabs
@@ -21,7 +22,8 @@ const AdminPage: React.FC = () => {
         <AdminPageTasks />
       </TabPane>
       <TabPane tab="Domains" key="4">
-        Domains
+        <AdminPageDomains />
+        {/* Domains */}
       </TabPane>
     </Tabs>
   )
