@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { List } from 'antd'
+import { Empty, List } from 'antd'
 import { ITask } from 'common/modules/models/Task'
 import TaskCard from 'common/components/TaskCard/index'
 import s from './style.module.scss'
@@ -9,11 +9,10 @@ interface Props {
   tasks: ITask[]
 }
 
-const Tasks: React.FC<Props> = ({ tasks }) => {
+const TasksList: React.FC<Props> = ({ tasks }) => {
   const [task, setTask] = useState(tasks[0])
 
-  if (!tasks || tasks.length === 0)
-    return <h2 style={{ color: 'var(--textColor)' }}>No tasks</h2>
+  if (!tasks || tasks.length === 0) return <Empty />
 
   return (
     <div className={s.Container}>
@@ -31,8 +30,8 @@ const Tasks: React.FC<Props> = ({ tasks }) => {
         )}
       />
 
-      <TaskCard taskId={task._id} task={tasks[0]} />
+      <TaskCard taskId={task._id} task={task} />
     </div>
   )
 }
-export default Tasks
+export default TasksList

@@ -1,5 +1,8 @@
 import { Form, FormInstance, Input } from 'antd'
-import { deleteExtraWhitespace, validateField } from '../validators'
+import {
+  deleteExtraWhitespace,
+  validateField,
+} from '../../../assets/features/validators'
 
 type PropsType = {
   isFormDisabled: boolean

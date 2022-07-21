@@ -9,11 +9,15 @@ import { useGetAllCategoriesQuery } from '../../api/categoriesApi/category.api'
 import { useAddTaskMutation } from '../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
 import { IAddress } from '../../modules/models/Task'
-import { deleteExtraWhitespace, validateField } from '../Forms/validators'
+import {
+  deleteExtraWhitespace,
+  validateField,
+} from '../../assets/features/validators'
 import Map from '../Map'
 import { PlacesAutocomplete } from '../PlacesAutocomplete'
 import CustomTooltip from '../UI/CustomTooltip'
 import s from './style.module.scss'
+import { disabledDate } from '../../assets/features/formatDate'
 
 type FormData = {
   category?: string
@@ -90,10 +94,6 @@ const AddTaskModal: React.FC<PropsType> = ({
   const onCancel = () => {
     setIsModalVisible(false)
     form.resetFields()
-  }
-
-  const disabledDate: RangePickerProps['disabledDate'] = (current) => {
-    return current && current < moment().startOf('day')
   }
 
   const mapOptions = useMemo(() => {
@@ -173,7 +173,7 @@ const AddTaskModal: React.FC<PropsType> = ({
           name="deadline"
           label={
             <CustomTooltip
-              title="When you expect the service"
+              title="When you expect the job to be done"
               text="Deadline"
               placement="topLeft"
             />

@@ -1,5 +1,8 @@
 import { Form, FormInstance, Input } from 'antd'
-import { allowOnlyNumbers, validateField } from '../validators'
+import {
+  allowOnlyNumbers,
+  validateField,
+} from '../../../assets/features/validators'
 
 type PropsType = {
   isFormDisabled: boolean

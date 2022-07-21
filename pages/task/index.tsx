@@ -1,20 +1,20 @@
-import { Button, Card } from 'antd'
+import { Button, Card, Empty } from 'antd'
 import { useGetAllTaskQuery } from '../../common/api/taskApi/task.api'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
 import { ITask } from '../../common/modules/models/Task'
 import Router from 'next/router'
 import { useSession } from 'next-auth/react'
 import { useGetUserByEmailQuery } from '../../common/api/userApi/user.api'
-import {
-  dateToDefaultFormat,
-  isDeadlineExpired,
-} from '../../common/components/features/formatDate'
 import { AppRoutes } from '../../utils/constants'
 import classNames from 'classnames'
 import s from './style.module.scss'
 import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
+import {
+  dateToDefaultFormat,
+  isDeadlineExpired,
+} from '../../common/assets/features/formatDate'
 
 const Tasks: React.FC = () => {
   const { data: session } = useSession()
@@ -26,37 +26,45 @@ const Tasks: React.FC = () => {
   const user = userData?.data
 
   return (
-    <div className={s.TasksList}>
-      {tasks &&
-        [...tasks].reverse().map((task: ITask, index) => {
-          return (
-            <Card
-              key={index}
-              title={task.name}
-              extra={
-                <Button
-                  ghost
-                  type="primary"
-                  onClick={() => Router.push(AppRoutes.TASK + '/' + task._id)}
+    <>
+      {tasks && tasks.length !== 0 ? (
+        <div className={s.TasksList}>
+          {tasks &&
+            [...tasks].reverse().map((task: ITask, index) => {
+              return (
+                <Card
+                  key={index}
+                  title={task.name}
+                  extra={
+                    <Button
+                      ghost
+                      type="primary"
+                      onClick={() =>
+                        Router.push(AppRoutes.TASK + '/' + task._id)
+                      }
+                    >
+                      {user?._id.toString() === task?.creator.toString() ||
+                      isDeadlineExpired(task?.deadline)
+                        ? 'Info'
+                        : 'Apply'}
+                    </Button>
+                  }
+                  className={classNames(s.Card, {
+                    [s.Disabled]: isDeadlineExpired(task?.deadline),
+                  })}
                 >
-                  {user?._id.toString() === task?.creator.toString() ||
-                  isDeadlineExpired(task?.deadline)
-                    ? 'Info'
-                    : 'Apply'}
-                </Button>
-              }
-              className={classNames(s.Card, {
-                [s.Disabled]: isDeadlineExpired(task?.deadline),
-              })}
-            >
-              <p>Category: {task?.category}</p>
-              <p>Description: {task.description}</p>
-              <p>Address: {task?.address?.name}</p>
-              <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
-            </Card>
-          )
-        })}
-    </div>
+                  <p>Category: {task?.category}</p>
+                  <p>Description: {task.description}</p>
+                  <p>Address: {task?.address?.name}</p>
+                  <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
+                </Card>
+              )
+            })}
+        </div>
+      ) : (
+        <Empty />
+      )}
+    </>
   )
 }
 
