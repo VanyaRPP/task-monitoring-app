@@ -6,4 +6,7 @@
       background: #88888830;
     }
   }
+  *:last-of-type {
+    color: var(--textColor);
+  }
 }

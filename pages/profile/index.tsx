@@ -1,7 +1,7 @@
 import { EditOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card, Image } from 'antd'
 import { useGetUserByEmailQuery } from '../../common/api/userApi/user.api'
-import RoleSwither from 'common/components/UI/roleSwitcher'
+import RoleSwitcher from 'common/components/UI/roleSwitcher'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
 import { useSession } from 'next-auth/react'
 import { unstable_getServerSession } from 'next-auth'
@@ -44,17 +44,16 @@ const Profile: React.FC = () => {
 
           <div className={s.Info}>
             <Card size="small" title="Role">
-              <RoleSwither />
+              <RoleSwitcher />
             </Card>
 
             <Card size="small" title="Email">
               <p>{user?.email}</p>
             </Card>
-            {user?.tel && (
-              <Card size="small" title="Phone">
-                <p>{user?.tel}</p>
-              </Card>
-            )}
+
+            <Card size="small" title="Phone">
+              {user?.tel && <p>+380{user?.tel}</p>}
+            </Card>
 
             <Card title="Address" size="small">
               <p>{user?.address?.name || 'Zhytomyr'}</p>

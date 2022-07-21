@@ -9,7 +9,7 @@ import TaskCard from 'common/components/TaskCard'
 import CommentsCard from 'common/components/CommentsCard'
 import { useGetTaskByIdQuery } from 'common/api/taskApi/task.api'
 import s from './style.module.scss'
-import СompetitionCard from '../../common/components/CompetitionCard'
+import CompetitionCard from '../../common/components/CompetitionCard'
 
 const Task: React.FC = () => {
   const router = useRouter()
@@ -22,8 +22,8 @@ const Task: React.FC = () => {
   return (
     <div className={s.TaskContainer}>
       <TaskCard taskId={router.query.id} task={task} />
-      <СompetitionCard task={task} />
-      <CommentsCard />
+      <CompetitionCard task={task} />
+      <CommentsCard taskId={task?._id} />
     </div>
   )
 }
