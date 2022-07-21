@@ -1,4 +1,4 @@
-import { IUser } from '../../modules/models/User'
+import { IFeedback, IUser } from '../../modules/models/User'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 interface BaseQuery {

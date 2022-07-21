@@ -23,7 +23,7 @@ const Task: React.FC = () => {
     <div className={s.TaskContainer}>
       <TaskCard taskId={router.query.id} task={task} />
       <CompetitionCard task={task} />
-      <CommentsCard />
+      <CommentsCard taskId={task?._id} />
     </div>
   )
 }
