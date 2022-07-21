@@ -2,12 +2,6 @@ import { IAddress } from 'common/modules/models/Task'
 import { ITask } from './Task'
 import mongoose, { Schema } from 'mongoose'
 
-export interface IFeedback {
-  id: string
-  text: string
-  grade: number
-}
-
 export interface IUser {
   _id?: string
   name: string
