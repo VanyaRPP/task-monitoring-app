@@ -10,6 +10,7 @@ import { useSession } from 'next-auth/react'
 import Router from 'next/router'
 import premiumIcon from '../../assets/premium/diamond.png'
 import Image from 'next/image'
+import BurgerMenu from '../BurgerMenu'
 
 const Header: React.FC = () => {
   const { status } = useSession()
@@ -17,6 +18,7 @@ const Header: React.FC = () => {
   status === 'authenticated'
   return (
     <Layout.Header className={s.Header}>
+      <BurgerMenu />
       <div className={s.Item}>
         <Link href={AppRoutes.INDEX}>
           <h1 className={s.Logo}>LOGO</h1>
