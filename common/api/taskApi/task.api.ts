@@ -110,4 +110,5 @@ export const {
   useAddTaskExecutorMutation,
   useAddCommentMutation,
   useDeleteCommentMutation,
+  useAcceptWorkerMutation,
 } = taskApi
