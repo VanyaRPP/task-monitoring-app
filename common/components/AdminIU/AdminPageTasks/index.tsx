@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import useDebounce from 'common/assets/hooks/useDebounce'
+import useDebounce from 'common/modules/hooks/useDebounce'
 import { Button, Input } from 'antd'
 import Search from 'antd/lib/input/Search'
 import { useGetAllTaskQuery } from 'common/api/taskApi/task.api'

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import useDebounce from 'common/assets/hooks/useDebounce'
+import useDebounce from 'common/modules/hooks/useDebounce'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Form, Input } from 'antd'
 import { useAddCategoryMutation } from 'common/api/categoriesApi/category.api'
