@@ -76,4 +76,7 @@
   span {
     margin-left: 0.25rem;
   }
+  @media (max-width: 425px) {
+    display: none;
+  }
 }

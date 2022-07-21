@@ -1,3 +1,12 @@
+.Menu {
+  display: block;
+  margin-left: 1rem;
+  padding: 0.1rem;
+  @media (min-width: 425px) {
+    display: none;
+  }
+}
+
 .Drawer {
   .Buttons {
     margin: -1.5rem;

@@ -1,3 +1,9 @@
 .ThemeSwitcher {
   margin-left: 20px;
+  @media (max-width: 425px) {
+    margin-left: 9rem;
+  }
+  @media (max-width: 320px) {
+    margin-left: 5.5rem;
+  }
 }

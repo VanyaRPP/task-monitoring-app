@@ -22,7 +22,12 @@ const BurgerMenu: React.FC = () => {
 
   return (
     <>
-      <Button type="primary" icon={<MenuOutlined />} onClick={showDrawer} />
+      <Button
+        type="primary"
+        icon={<MenuOutlined />}
+        onClick={showDrawer}
+        className={s.Menu}
+      />
       <Drawer
         headerStyle={{
           backgroundColor: 'var(--primaryColorHover)',
