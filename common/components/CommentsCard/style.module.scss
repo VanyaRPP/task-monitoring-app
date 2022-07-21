@@ -94,6 +94,7 @@
       height: 64px;
       padding: 0 2rem;
       font-size: 16px;
+      transition: background 0.5s, color 0.2s, border 0.2s;
       color: var(--textColor);
       background-color: var(--backgroundColorPrimary);
       border-color: transparent !important;
