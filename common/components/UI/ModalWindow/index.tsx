@@ -21,6 +21,7 @@ const ModalWindow: React.FC<PropsType> = ({
 }) => {
   return (
     <Modal
+      maskClosable={false}
       visible={isModalVisible}
       title={title}
       onCancel={onCancel}

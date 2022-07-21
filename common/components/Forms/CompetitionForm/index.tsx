@@ -1,3 +1,4 @@
+import { QuestionCircleOutlined } from '@ant-design/icons'
 import {
   DatePicker,
   Form,
@@ -5,29 +6,25 @@ import {
   Input,
   InputNumber,
   Select,
+  Tooltip,
 } from 'antd'
 import { RangePickerProps } from 'antd/lib/date-picker'
 import moment from 'moment'
+import CustomTooltip from '../../UI/CustomTooltip'
+import { allowOnlyNumbers, validateField } from '../validators'
 
 type PropsType = {
   isFormDisabled: boolean
   form: FormInstance
 }
 
-const ApplyAuctionForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
+const CompetitionForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
   const { Option } = Select
 
   const disabledDate: RangePickerProps['disabledDate'] = (current) => {
     return current && current < moment().startOf('day')
   }
 
-  const suffixSelector = (
-    <Form.Item name="suffix" noStyle>
-      <Select defaultValue="UAH" style={{ width: 70 }}>
-        <Option value="UAH">₴</Option>
-      </Select>
-    </Form.Item>
-  )
   return (
     <Form
       form={form}
@@ -36,20 +33,31 @@ const ApplyAuctionForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
       disabled={isFormDisabled}
     >
       <Form.Item
+        normalize={allowOnlyNumbers}
         name="price"
         label="Price"
-        rules={[{ required: true, message: 'Please input amount of money!' }]}
+        rules={validateField('price')}
       >
-        <InputNumber addonAfter={suffixSelector} style={{ width: '100%' }} />
+        <Input addonAfter="₴" style={{ width: '100%' }} />
       </Form.Item>
       <Form.Item name="description" label="Description">
         <Input.TextArea maxLength={250} />
       </Form.Item>
-      <Form.Item name="deadline" label="Deadline" rules={[{ required: true }]}>
+      <Form.Item
+        name="deadline"
+        label={
+          <CustomTooltip
+            title="When you expect to finish"
+            text="Deadline"
+            placement="topLeft"
+          />
+        }
+        rules={validateField('deadline')}
+      >
         <DatePicker disabledDate={disabledDate} />
       </Form.Item>
     </Form>
   )
 }
 
-export default ApplyAuctionForm
+export default CompetitionForm

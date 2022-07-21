@@ -12,7 +12,7 @@ import {
 import Column from 'antd/lib/table/Column'
 import Meta from 'antd/lib/card/Meta'
 import ModalWindow from '../UI/ModalWindow/index'
-import ApplyAuctionForm from '../ApplyAuctionForm/index'
+import CompetitionForm from '../Forms/CompetitionForm/index'
 import { ITask, ItaskExecutors } from '../../modules/models/Task'
 import {
   useAcceptWorkerMutation,
@@ -123,7 +123,7 @@ const CompetitionCard: React.FC<{
         okText="Apply"
         cancelText="Cancel"
       >
-        <ApplyAuctionForm isFormDisabled={isFormDisabled} form={form} />
+        <CompetitionForm isFormDisabled={isFormDisabled} form={form} />
       </ModalWindow>
       <Table key="competition" dataSource={executors} pagination={false}>
         <Column

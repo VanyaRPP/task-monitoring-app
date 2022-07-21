@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { StarOutlined, PlusOutlined } from '@ant-design/icons'
 import { IFeedback, IUser } from 'common/modules/models/User'
 import ModalWindow from 'common/components/UI/ModalWindow'
-import AddFeedbackForm from 'common/components/AddFeedbackForm'
+import AddFeedbackForm from 'common/components/Forms/AddFeedbackForm'
 import Feedback from './feedback'
 import {
   useGetUserByEmailQuery,
@@ -49,7 +49,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
     Reset()
   }
 
-  const onSubmiModal = async () => {
+  const onSubmitModal = async () => {
     // user can't leave feedback to himself
     if (sessionUser?.data?._id === user?._id) return Reset()
 
@@ -88,7 +88,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
             title={`Leave feedback about ${user?.name}`}
             isModalVisible={isModalVisible}
             onCancel={onCancelModal}
-            onOk={onSubmiModal}
+            onOk={onSubmitModal}
             okText="Leave feedback"
             cancelText="Cancel"
           >
