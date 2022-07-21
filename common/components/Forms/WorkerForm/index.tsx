@@ -1,4 +1,5 @@
 import { Form, FormInstance, Input } from 'antd'
+import { allowOnlyNumbers, validateField } from '../validators'
 
 type PropsType = {
   isFormDisabled: boolean
@@ -16,11 +17,8 @@ const WorkerForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
       <Form.Item
         name="tel"
         label="Phone Number"
-        normalize={(value) => value.replace(/[^+\d]/g, '')}
-        rules={[
-          { required: true, message: 'Please input your phone number!' },
-          { len: 9, message: 'Phone number should have 9 digits!' },
-        ]}
+        normalize={allowOnlyNumbers}
+        rules={validateField('phone')}
       >
         <Input addonBefore="+380" style={{ width: '100%' }} />
       </Form.Item>

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Form, Radio } from 'antd'
 import type { RadioChangeEvent } from 'antd'
 import { useSession } from 'next-auth/react'
@@ -9,9 +8,10 @@ import {
 } from '../../../api/userApi/user.api'
 import s from './style.module.scss'
 import ModalWindow from '../ModalWindow/index'
-import WorkerForm from '../../WorkerForm/index'
+import WorkerForm from '../../Forms/WorkerForm/index'
+import { Roles } from '../../../../utils/constants'
 
-const RoleSwither: React.FC = () => {
+const RoleSwitcher: React.FC = () => {
   const { data: session } = useSession()
   const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
@@ -28,11 +28,9 @@ const RoleSwither: React.FC = () => {
     setRole(user?.role)
   }, [user?.role])
 
-  console.log(user)
-
   const onChange = async (e: RadioChangeEvent) => {
     if (!user?.isWorker) {
-      if (e.target.value === 'Worker') {
+      if (e.target.value === Roles.WORKER) {
         setIsModalVisible(true)
       }
     } else {
@@ -82,4 +80,4 @@ const RoleSwither: React.FC = () => {
   )
 }
 
-export default RoleSwither
+export default RoleSwitcher

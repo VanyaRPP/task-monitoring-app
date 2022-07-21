@@ -1,5 +1,6 @@
 import React from 'react'
 import { Form, FormInstance, Input } from 'antd'
+import { deleteExtraWhitespace, validateField } from '../validators'
 
 interface Props {
   isFormDisabled: boolean
@@ -14,8 +15,13 @@ const AddCommentForm: React.FC<Props> = ({ isFormDisabled, form }) => {
       name="form_in_modal"
       disabled={isFormDisabled}
     >
-      <Form.Item name="text" label="Your comment">
-        <Input.TextArea />
+      <Form.Item
+        normalize={deleteExtraWhitespace}
+        name="text"
+        label="Your comment"
+        rules={validateField('comment')}
+      >
+        <Input.TextArea maxLength={250} />
       </Form.Item>
     </Form>
   )

@@ -5,6 +5,7 @@ import AdminPageCategories from 'common/components/AdminIU/AdminPageCategorie'
 import AdminPageClients from 'common/components/AdminIU/AdminPageClients'
 import AdminPageTasks from 'common/components/AdminIU/AdminPageTasks'
 import s from './style.module.scss'
+import { Roles } from '../../utils/constants'
 
 const { TabPane } = Tabs
 
@@ -37,12 +38,12 @@ export async function getServerSideProps(context) {
   )
 
   const response = await fetch(
-    `${process.env.BASE_URL}/api/user/${session?.user?.email}`
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/${session?.user?.email}`
   )
   const data = await response.json()
   const role = data?.data?.role
 
-  if (role !== 'Admin') {
+  if (role !== Roles.ADMIN) {
     return {
       redirect: {
         destination: '/',
