@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Form, Radio } from 'antd'
 import type { RadioChangeEvent } from 'antd'
 import { useSession } from 'next-auth/react'
@@ -10,6 +9,7 @@ import {
 import s from './style.module.scss'
 import ModalWindow from '../ModalWindow/index'
 import WorkerForm from '../../Forms/WorkerForm/index'
+import { Roles } from '../../../../utils/constants'
 
 const RoleSwitcher: React.FC = () => {
   const { data: session } = useSession()
@@ -30,7 +30,7 @@ const RoleSwitcher: React.FC = () => {
 
   const onChange = async (e: RadioChangeEvent) => {
     if (!user?.isWorker) {
-      if (e.target.value === 'Worker') {
+      if (e.target.value === Roles.WORKER) {
         setIsModalVisible(true)
       }
     } else {

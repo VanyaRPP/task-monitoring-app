@@ -6,7 +6,7 @@ import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
 import { useSession } from 'next-auth/react'
 import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
-import { AppRoutes } from '../../utils/constants'
+import { AppRoutes, Roles } from '../../utils/constants'
 import Router from 'next/router'
 import { GetServerSideProps } from 'next'
 import FeedbacksCard from 'common/components/FeedbacksCard'
@@ -28,7 +28,7 @@ const Profile: React.FC = () => {
           title={user?.name}
           className={s.Profile}
           extra={
-            user?.role === 'Admin' && (
+            user?.role === Roles.ADMIN && (
               <Button type="link" onClick={() => Router.push(AppRoutes.ADMIN)}>
                 Admin Panel
               </Button>

@@ -13,7 +13,7 @@ import Column from 'antd/lib/table/Column'
 import Meta from 'antd/lib/card/Meta'
 import ModalWindow from '../UI/ModalWindow/index'
 import CompetitionForm from '../Forms/CompetitionForm/index'
-import { ITask, ItaskExecutors } from '../../modules/models/Task'
+import { ITask, ITaskExecutors } from '../../modules/models/Task'
 import {
   useAcceptWorkerMutation,
   useAddTaskExecutorMutation,
@@ -131,7 +131,7 @@ const CompetitionCard: React.FC<{
           dataIndex="workerid"
           key="executors"
           width="55%"
-          render={(_, executor: ItaskExecutors) => (
+          render={(_, executor: ITaskExecutors) => (
             <Executor executor={executor} type="workerInfo" />
           )}
         />
@@ -147,7 +147,7 @@ const CompetitionCard: React.FC<{
           dataIndex="rating"
           key="rating"
           width="15%"
-          render={(_, executor: ItaskExecutors) => (
+          render={(_, executor: ITaskExecutors) => (
             <Executor executor={executor} type="rating" />
           )}
         />
@@ -156,7 +156,7 @@ const CompetitionCard: React.FC<{
             title="Actions"
             key="actions"
             width="10%"
-            render={(_, executor: ItaskExecutors) => (
+            render={(_, executor: ITaskExecutors) => (
               <Popconfirm
                 title="Are you sure?"
                 okText="Yes"

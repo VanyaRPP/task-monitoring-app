@@ -19,8 +19,6 @@ type PropsType = {
 }
 
 const CompetitionForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
-  const { Option } = Select
-
   const disabledDate: RangePickerProps['disabledDate'] = (current) => {
     return current && current < moment().startOf('day')
   }

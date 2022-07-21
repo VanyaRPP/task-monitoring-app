@@ -49,9 +49,9 @@ const Tasks: React.FC = () => {
                 [s.Disabled]: isDeadlineExpired(task?.deadline),
               })}
             >
-              <p>Catagory: {task?.category}</p>
-              <p>Description: {task.desription}</p>
-              <p>Adress: {task?.address?.name}</p>
+              <p>Category: {task?.category}</p>
+              <p>Description: {task.description}</p>
+              <p>Address: {task?.address?.name}</p>
               <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
             </Card>
           )

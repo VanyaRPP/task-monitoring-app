@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import useDebounce from 'common/assets/hooks/useDebounce'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Form, Input } from 'antd'
@@ -24,7 +24,7 @@ const AdminPageCategories: React.FC = () => {
     form.resetFields()
   }
 
-  const onSubmiModal = async () => {
+  const onSubmitModal = async () => {
     const formData: ICategory = await form.validateFields()
     setIsFormDisabled(true)
     await addCategory({ ...formData })
@@ -60,7 +60,7 @@ const AdminPageCategories: React.FC = () => {
           title="Add category"
           isModalVisible={isModalVisible}
           onCancel={onCancelModal}
-          onOk={onSubmiModal}
+          onOk={onSubmitModal}
           okText="Create category"
           cancelText="Cancel"
         >

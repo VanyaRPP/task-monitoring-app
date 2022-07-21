@@ -1,11 +1,10 @@
-import { QuestionCircleOutlined } from '@ant-design/icons'
 import { useJsApiLoader } from '@react-google-maps/api'
 import { Modal, DatePicker, Form, Input, Select, Tooltip } from 'antd'
 import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
 import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useState, useMemo } from 'react'
-import { centerTownGeoCode } from 'utils/constants'
+import { centerTownGeoCode, Roles } from 'utils/constants'
 import { useGetAllCategoriesQuery } from '../../api/categoriesApi/category.api'
 import { useAddTaskMutation } from '../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
@@ -19,7 +18,7 @@ import s from './style.module.scss'
 type FormData = {
   category?: string
   deadline: string
-  desription?: string
+  description?: string
   domain?: { any }
   name: string
   creator?: string
@@ -120,7 +119,7 @@ const AddTaskModal: React.FC<PropsType> = ({
         name="form_in_modal"
         disabled={formDisabled}
       >
-        {userData?.data?.role == 'Admin' && (
+        {userData?.data?.role == Roles.ADMIN && (
           <Form.Item
             name="customer"
             label="Name of customer"

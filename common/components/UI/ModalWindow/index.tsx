@@ -1,6 +1,6 @@
 import { Modal } from 'antd'
 
-type PropsType = {
+interface Props {
   children: React.ReactNode
   isModalVisible: boolean
   onCancel: () => void
@@ -10,7 +10,7 @@ type PropsType = {
   title: string
 }
 
-const ModalWindow: React.FC<PropsType> = ({
+const ModalWindow: React.FC<Props> = ({
   children,
   isModalVisible,
   onCancel,

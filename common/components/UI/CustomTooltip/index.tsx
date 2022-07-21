@@ -3,13 +3,13 @@ import { Tooltip } from 'antd'
 import { TooltipPlacement } from 'antd/lib/tooltip'
 import s from './style.module.scss'
 
-type PropsType = {
+interface Props {
   title: string
   text: string
   placement: TooltipPlacement
 }
 
-const CustomTooltip: React.FC<PropsType> = ({ title, text, placement }) => {
+const CustomTooltip: React.FC<Props> = ({ title, text, placement }) => {
   return (
     <Tooltip className={s.Tooltip} placement={placement} title={title}>
       <p>{text}</p>
