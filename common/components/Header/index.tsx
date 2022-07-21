@@ -11,6 +11,7 @@ import Router from 'next/router'
 import premiumIcon from '../../assets/premium/diamond.png'
 import Image from 'next/image'
 import BurgerMenu from '../BurgerMenu'
+import Diamant from '../../assets/svg/diamant'
 
 const Header: React.FC = () => {
   const { status } = useSession()
@@ -28,7 +29,8 @@ const Header: React.FC = () => {
         ) : (
           <Button
             icon={
-              <Image src={premiumIcon} alt="Premium" width={25} height={25} />
+              // <Image src={premiumIcon} alt="Premium" width={25} height={25} />
+              <Diamant />
             }
             className={s.Button_Premium}
             type="primary"
