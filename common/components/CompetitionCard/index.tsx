@@ -1,17 +1,18 @@
 import { useState } from 'react'
-import { Card, notification, Table, Button, Form, Avatar } from 'antd'
+import { useSession } from 'next-auth/react'
+import { Card, notification, Table, Button, Form, Avatar, Popconfirm } from 'antd'
+import Column from 'antd/lib/table/Column'
+import Meta from 'antd/lib/card/Meta'
 import ModalWindow from '../UI/ModalWindow/index'
 import ApplyAuctionForm from '../ApplyAuctionForm/index'
+import { ITask, ItaskExecutors } from '../../modules/models/Task'
+import { useAcceptWorkerMutation, useAddTaskExecutorMutation } from 'common/api/taskApi/task.api'
 import {
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
 } from '../../api/userApi/user.api'
-import Column from 'antd/lib/table/Column'
-import { ITask, ItaskExecutors } from '../../modules/models/Task'
-import Meta from 'antd/lib/card/Meta'
-import { useAddTaskExecutorMutation } from 'common/api/taskApi/task.api'
-import { useSession } from 'next-auth/react'
 import s from './style.module.scss'
+import { QuestionCircleOutlined } from '@ant-design/icons'
 
 export const Executor = ({ executor, type }) => {
   const { data } = useGetUserByIdQuery(`${executor.workerid}`)
@@ -49,6 +50,7 @@ const CompetitionCard: React.FC<{
   const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
 
   const [addTaskExecutor] = useAddTaskExecutorMutation()
+  const [acceptWorker] = useAcceptWorkerMutation()
 
   const onCancelModal = () => {
     setIsModalVisible(false)
@@ -84,12 +86,17 @@ const CompetitionCard: React.FC<{
     }
   }
 
+
+
+  const onApprove = (executor) => {
+    acceptWorker({ taskId: executor.taskId, workerId: executor.workerid })
+  }
+
   return (
     <Card
       className={s.Card}
-      title={`Competition: ${
-        task?.taskexecutors ? task?.taskexecutors.length : ''
-      }`}
+      title={`Competition: ${task?.taskexecutors ? task?.taskexecutors.length : ''
+        }`}
       extra={
         task?.creator !== userData?.data?._id && (
           <Button type="primary" ghost onClick={onApplyCompetition}>
@@ -132,11 +139,22 @@ const CompetitionCard: React.FC<{
           <Column
             title="Actions"
             key="actions"
-            width="15%"
-            render={() => (
-              <Button type="primary" ghost>
-                Submit worker
-              </Button>
+            width="10%"
+            render={(_, executor: ItaskExecutors) => (
+              <Popconfirm
+                title="Are you sure?"
+                okText="Yes"
+                cancelText="No"
+                icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                onConfirm={() => onApprove(executor)}
+              >
+                <Button
+                  type="primary"
+                  ghost
+                >
+                  Submit worker
+                </Button>
+              </Popconfirm>
             )}
           />
         )}
