@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dbConnect from 'utils/dbConnect'
-import User from 'common/modules/models/User'
+import Task from 'common/modules/models/Task'
 
 type Data = {
   data?: any
@@ -20,14 +20,14 @@ export default async function handler(
   switch (req.method) {
     case 'PATCH':
       try {
-        await User.findById(req.query.id).then(async (user) => {
-          const updatedUser = await User.findOneAndUpdate(
-            { _id: user._id },
+        await Task.findById(req.query.id).then(async (task) => {
+          const updatedTask = await Task.findOneAndUpdate(
+            { _id: task._id },
             {
-              comment: [...(user.comment ?? []), ...req.body?.comment],
+              comment: [...(task.comment ?? []), ...req.body?.comment],
             }
           )
-          return res.status(201).json({ success: true, data: updatedUser })
+          return res.status(201).json({ success: true, data: updatedTask })
         })
       } catch (error) {
         return res.status(400).json({ success: false, data: error.message })
@@ -35,16 +35,16 @@ export default async function handler(
       break
     case 'DELETE':
       try {
-        await User.findById(req.query.id).then(async (user) => {
-          const updatedUser = await User.updateOne(
+        await Task.findById(req.query.id).then(async (task) => {
+          const updatedTask = await Task.updateOne(
             { _id: req.query.id },
             {
-              comment: user.comment.filter(
+              comment: task.comment.filter(
                 (comm) => comm.id !== req.query.comment
               ),
             }
           )
-          return res.status(400).json({ success: true, data: updatedUser })
+          return res.status(400).json({ success: true, data: updatedTask })
         })
       } catch (error) {
         return res.status(400).json({ success: false, data: error.message })

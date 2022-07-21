@@ -1,5 +1,4 @@
-import { Form, FormInstance, Input, Select } from 'antd'
-import { Option } from 'antd/lib/mentions'
+import { Form, FormInstance, Input } from 'antd'
 
 type PropsType = {
   isFormDisabled: boolean
@@ -7,13 +6,6 @@ type PropsType = {
 }
 
 const WorkerForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
-  const prefixSelector = (
-    <Form.Item name="prefix" noStyle>
-      <Select defaultValue="380" style={{ width: 80 }}>
-        <Option value="380">+380</Option>
-      </Select>
-    </Form.Item>
-  )
   return (
     <Form
       form={form}
@@ -24,9 +16,13 @@ const WorkerForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
       <Form.Item
         name="tel"
         label="Phone Number"
-        rules={[{ required: true, message: 'Please input your phone number!' }]}
+        normalize={(value) => value.replace(/[^+\d]/g, '')}
+        rules={[
+          { required: true, message: 'Please input your phone number!' },
+          { len: 9, message: 'Phone number should have 9 digits!' },
+        ]}
       >
-        <Input addonBefore={prefixSelector} style={{ width: '100%' }} />
+        <Input addonBefore="+380" style={{ width: '100%' }} />
       </Form.Item>
     </Form>
   )

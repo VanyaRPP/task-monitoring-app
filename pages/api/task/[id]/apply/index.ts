@@ -24,7 +24,9 @@ export default async function handler(
         const task = await Task.findById(req.query.id)
         const Utask = await Task.findOneAndUpdate(
           { _id: task._id },
-          { taskexecutors: [...task.taskexecutors, req.body] }
+          {
+            taskexecutors: [...task.taskexecutors, req.body],
+          }
         )
         return res.status(201).json({ success: true, data: Utask })
       } catch (error) {
