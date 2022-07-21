@@ -4,7 +4,7 @@ import { PlusOutlined } from '@ant-design/icons'
 import { Button, Form, Input } from 'antd'
 import { useAddCategoryMutation } from 'common/api/categoriesApi/category.api'
 import { ICategory } from 'common/modules/models/Category'
-import AddCategoryForm from '../../AddCategoryForm'
+import AddCategoryForm from '../../Forms/AddCategoryForm'
 import Categories from '../../Categories'
 import ModalWindow from '../../UI/ModalWindow'
 import s from './style.module.scss'
@@ -24,7 +24,7 @@ const AdminPageCategories: React.FC = () => {
     form.resetFields()
   }
 
-  const onSubmiModal = async () => {
+  const onSubmitModal = async () => {
     const formData: ICategory = await form.validateFields()
     setIsFormDisabled(true)
     await addCategory({ ...formData })
@@ -60,7 +60,7 @@ const AdminPageCategories: React.FC = () => {
           title="Add category"
           isModalVisible={isModalVisible}
           onCancel={onCancelModal}
-          onOk={onSubmiModal}
+          onOk={onSubmitModal}
           okText="Create category"
           cancelText="Cancel"
         >

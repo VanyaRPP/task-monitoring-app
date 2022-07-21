@@ -3,6 +3,7 @@ import { useSession } from 'next-auth/react'
 import Router, { useRouter } from 'next/router'
 import { useState } from 'react'
 import { AppRoutes } from '../../../../../utils/constants'
+import { useGetUserByEmailQuery } from '../../../../api/userApi/user.api'
 import AddTaskModal from '../../../AddTaskModal'
 import s from './style.module.scss'
 
@@ -10,22 +11,44 @@ const TaskButton: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
 
   const router = useRouter()
-  const { status } = useSession()
+  const { data: session, status } = useSession()
+  const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
+  const user = data?.data
+
+  const taskButton = () => {
+    if (user?.role === 'User') {
+      return (
+        <Button
+          onClick={() => setIsModalVisible(true)}
+          ghost
+          type="primary"
+          className={s.Button}
+        >
+          Add task
+        </Button>
+      )
+    }
+
+    if (user?.role === 'Worker' || user?.role === 'Admin')
+      return (
+        <Button
+          onClick={() => {
+            router.route === AppRoutes.TASK
+              ? setIsModalVisible(true)
+              : Router.push(AppRoutes.TASK)
+          }}
+          ghost
+          type="primary"
+          className={s.Button}
+        >
+          {router.route === AppRoutes.TASK ? 'Add task' : 'Tasks'}
+        </Button>
+      )
+  }
 
   return status === 'authenticated' ? (
     <>
-      <Button
-        onClick={() => {
-          router.route === AppRoutes.TASK
-            ? setIsModalVisible(true)
-            : Router.push(AppRoutes.TASK)
-        }}
-        ghost
-        type="primary"
-        className={s.Button}
-      >
-        {router.route === AppRoutes.TASK ? 'Add task' : 'Tasks'}
-      </Button>
+      {taskButton()}
       <AddTaskModal
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}
@@ -35,3 +58,28 @@ const TaskButton: React.FC = () => {
 }
 
 export default TaskButton
+
+{
+  /* {router.route === AppRoutes.TASK ? 'Add task' : 'Tasks'} */
+}
+
+// return status === 'authenticated' ? (
+//   <>
+//     <Button
+//       onClick={() => {
+//         router.route === AppRoutes.TASK
+//           ? setIsModalVisible(true)
+//           : Router.push(AppRoutes.TASK)
+//       }}
+//       ghost
+//       type="primary"
+//       className={s.Button}
+//     >
+//       {router.route === AppRoutes.TASK ? 'Add task' : 'Tasks'}
+//     </Button>
+//     <AddTaskModal
+//       isModalVisible={isModalVisible}
+//       setIsModalVisible={setIsModalVisible}
+//     />
+//   </>
+// ) : null

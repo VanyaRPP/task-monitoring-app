@@ -1,18 +1,29 @@
 import { useState } from 'react'
-import { Card, notification, Table, Button, Form, Avatar } from 'antd'
-import s from './style.module.scss'
-
+import { useSession } from 'next-auth/react'
+import {
+  Card,
+  notification,
+  Table,
+  Button,
+  Form,
+  Avatar,
+  Popconfirm,
+} from 'antd'
+import Column from 'antd/lib/table/Column'
+import Meta from 'antd/lib/card/Meta'
 import ModalWindow from '../UI/ModalWindow/index'
-import ApplyAuctionForm from '../ApplyAuctionForm/index'
+import CompetitionForm from '../Forms/CompetitionForm/index'
+import { ITask, ITaskExecutors } from '../../modules/models/Task'
+import {
+  useAcceptWorkerMutation,
+  useAddTaskExecutorMutation,
+} from 'common/api/taskApi/task.api'
 import {
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
 } from '../../api/userApi/user.api'
-import Column from 'antd/lib/table/Column'
-import { ITask, ItaskExecutors } from '../../modules/models/Task'
-import Meta from 'antd/lib/card/Meta'
-import { useAddTaskExecutorMutation } from 'common/api/taskApi/task.api'
-import { useSession } from 'next-auth/react'
+import s from './style.module.scss'
+import { QuestionCircleOutlined } from '@ant-design/icons'
 
 export const Executor = ({ executor, type }) => {
   const { data } = useGetUserByIdQuery(`${executor.workerid}`)
@@ -56,13 +67,14 @@ const CompetitionCard: React.FC<{
   const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
 
   const [addTaskExecutor] = useAddTaskExecutorMutation()
+  const [acceptWorker] = useAcceptWorkerMutation()
 
   const onCancelModal = () => {
     setIsModalVisible(false)
     form.resetFields()
   }
 
-  const onSubmiModal = async () => {
+  const onSubmitModal = async () => {
     const formData = await form.validateFields()
     const data = {
       ...formData,
@@ -91,6 +103,10 @@ const CompetitionCard: React.FC<{
     }
   }
 
+  const onApprove = (executor) => {
+    acceptWorker({ taskId: executor.taskId, workerId: executor.workerid })
+  }
+
   return (
     <Card
       className={s.Card}
@@ -106,45 +122,61 @@ const CompetitionCard: React.FC<{
       }
     >
       <ModalWindow
-        title="Apply for an сompetition"
+        title="Apply for an competition"
         isModalVisible={isModalVisible}
         onCancel={onCancelModal}
-        onOk={onSubmiModal}
+        onOk={onSubmitModal}
         okText="Apply"
         cancelText="Cancel"
       >
-        <ApplyAuctionForm isFormDisabled={isFormDisabled} form={form} />
+        <CompetitionForm isFormDisabled={isFormDisabled} form={form} />
       </ModalWindow>
-      <Table key="сompetition" dataSource={executors} pagination={false}>
+      <Table key="competition" dataSource={executors} pagination={false}>
         <Column
           title="Executors"
           dataIndex="workerid"
           key="executors"
           width="55%"
-          render={(_, executor: ItaskExecutors) => (
+          render={(_, executor: ITaskExecutors) => (
             <Executor executor={executor} type="workerInfo" />
           )}
         />
-        <Column title="Price" dataIndex="price" key="price" width="15%" />
+        <Column
+          title="Price"
+          dataIndex="price"
+          key="price"
+          width="15%"
+          render={(price) => <div>{price} ₴</div>}
+        />
         <Column
           title="Rating"
           dataIndex="rating"
           key="rating"
           width="15%"
-          render={(_, executor: ItaskExecutors) => (
+          render={(_, executor: ITaskExecutors) => (
             <Executor executor={executor} type="rating" />
           )}
         />
-        <Column
-          title="Actions"
-          key="actions"
-          width="15%"
-          render={() => (
-            <Button type="primary" ghost>
-              Submit worker
-            </Button>
-          )}
-        />
+        {task?.creator === userData?.data?._id && (
+          <Column
+            title="Actions"
+            key="actions"
+            width="10%"
+            render={(_, executor: ITaskExecutors) => (
+              <Popconfirm
+                title="Are you sure?"
+                okText="Yes"
+                cancelText="No"
+                icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                onConfirm={() => onApprove(executor)}
+              >
+                <Button type="primary" ghost>
+                  Submit worker
+                </Button>
+              </Popconfirm>
+            )}
+          />
+        )}
       </Table>
     </Card>
   )

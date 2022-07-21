@@ -72,11 +72,11 @@ export const PlacesAutocomplete = ({
   }, [isLoaded, init])
 
   useEffect(() => {
-    if (addressObj) {
-      getAddress(addressObj.geoCode)
+    if (addressObj?.geoCode) {
+      getAddress(addressObj?.geoCode)
       setValue(address)
     }
-  }, [address, addressObj, addressObj?.geoCode, getAddress, setValue])
+  }, [address, addressObj?.geoCode])
 
   return (
     <div ref={ref}>
