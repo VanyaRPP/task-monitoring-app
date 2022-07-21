@@ -1,12 +1,23 @@
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { Card, notification, Table, Button, Form, Avatar, Popconfirm } from 'antd'
+import {
+  Card,
+  notification,
+  Table,
+  Button,
+  Form,
+  Avatar,
+  Popconfirm,
+} from 'antd'
 import Column from 'antd/lib/table/Column'
 import Meta from 'antd/lib/card/Meta'
 import ModalWindow from '../UI/ModalWindow/index'
 import ApplyAuctionForm from '../ApplyAuctionForm/index'
 import { ITask, ItaskExecutors } from '../../modules/models/Task'
-import { useAcceptWorkerMutation, useAddTaskExecutorMutation } from 'common/api/taskApi/task.api'
+import {
+  useAcceptWorkerMutation,
+  useAddTaskExecutorMutation,
+} from 'common/api/taskApi/task.api'
 import {
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
@@ -86,8 +97,6 @@ const CompetitionCard: React.FC<{
     }
   }
 
-
-
   const onApprove = (executor) => {
     acceptWorker({ taskId: executor.taskId, workerId: executor.workerid })
   }
@@ -95,8 +104,9 @@ const CompetitionCard: React.FC<{
   return (
     <Card
       className={s.Card}
-      title={`Competition: ${task?.taskexecutors ? task?.taskexecutors.length : ''
-        }`}
+      title={`Competition: ${
+        task?.taskexecutors ? task?.taskexecutors.length : ''
+      }`}
       extra={
         task?.creator !== userData?.data?._id && (
           <Button type="primary" ghost onClick={onApplyCompetition}>
@@ -148,10 +158,7 @@ const CompetitionCard: React.FC<{
                 icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
                 onConfirm={() => onApprove(executor)}
               >
-                <Button
-                  type="primary"
-                  ghost
-                >
+                <Button type="primary" ghost>
                   Submit worker
                 </Button>
               </Popconfirm>
