@@ -57,6 +57,17 @@ export const taskApi = createApi({
       },
       invalidatesTags: ['Task'],
     }),
+    editTask: builder.mutation<ITask, Partial<ITask>>({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `task/${_id}/edit-task`,
+          method: 'PATCH',
+          body,
+        }
+      },
+      invalidatesTags: ['Task'],
+    }),
     addTaskExecutor: builder.mutation<TaskQuer, ITaskExecutors>({
       query(data) {
         const { ...body } = data
@@ -111,4 +122,5 @@ export const {
   useAddCommentMutation,
   useDeleteCommentMutation,
   useAcceptWorkerMutation,
+  useEditTaskMutation,
 } = taskApi
