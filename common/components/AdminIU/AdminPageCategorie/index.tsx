@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import useDebounce from 'common/assets/hooks/useDebounce'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Form, Input } from 'antd'
