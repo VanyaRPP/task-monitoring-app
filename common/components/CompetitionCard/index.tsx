@@ -135,7 +135,13 @@ const CompetitionCard: React.FC<{
             <Executor executor={executor} type="workerInfo" />
           )}
         />
-        <Column title="Price" dataIndex="price" key="price" width="15%" />
+        <Column
+          title="Price"
+          dataIndex="price"
+          key="price"
+          width="15%"
+          render={(price) => <div>{price} ₴</div>}
+        />
         <Column
           title="Rating"
           dataIndex="rating"

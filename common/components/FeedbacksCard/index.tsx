@@ -1,4 +1,4 @@
-import { Empty,   Card, List, Button, Form } from 'antd'
+import { Empty, Card, List, Button, Form } from 'antd'
 import { useState } from 'react'
 import { StarOutlined, PlusOutlined } from '@ant-design/icons'
 import { IFeedback, IUser } from 'common/modules/models/User'
