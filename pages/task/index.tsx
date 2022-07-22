@@ -43,7 +43,7 @@ const Tasks: React.FC = () => {
                         Router.push(AppRoutes.TASK + '/' + task._id)
                       }
                     >
-                      {user?._id.toString() === task?.creator.toString() ||
+                      {user?._id === task?.creator ||
                       isDeadlineExpired(task?.deadline)
                         ? 'Info'
                         : 'Apply'}

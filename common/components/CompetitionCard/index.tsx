@@ -12,8 +12,8 @@ import {
 import Column from 'antd/lib/table/Column'
 import Meta from 'antd/lib/card/Meta'
 import ModalWindow from '../UI/ModalWindow/index'
+import { ITask, ITaskExecutors } from 'common/modules/models/Task'
 import CompetitionForm from '../Forms/CompetitionForm/index'
-import { ITask, ITaskExecutors } from '../../modules/models/Task'
 import {
   useAcceptWorkerMutation,
   useAddTaskExecutorMutation,
