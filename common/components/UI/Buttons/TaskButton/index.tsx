@@ -2,7 +2,7 @@ import { Button } from 'antd'
 import { useSession } from 'next-auth/react'
 import Router, { useRouter } from 'next/router'
 import { useState } from 'react'
-import { AppRoutes } from '../../../../../utils/constants'
+import { AppRoutes, Roles } from '../../../../../utils/constants'
 import { useGetUserByEmailQuery } from '../../../../api/userApi/user.api'
 import AddTaskModal from '../../../AddTaskModal'
 import s from './style.module.scss'
@@ -16,7 +16,7 @@ const TaskButton: React.FC = () => {
   const user = data?.data
 
   const taskButton = () => {
-    if (user?.role === 'User') {
+    if (user?.role === Roles.USER) {
       return (
         <Button
           onClick={() => setIsModalVisible(true)}
@@ -29,7 +29,7 @@ const TaskButton: React.FC = () => {
       )
     }
 
-    if (user?.role === 'Worker' || user?.role === 'Admin')
+    if (user?.role === Roles.WORKER || user?.role === Roles.ADMIN)
       return (
         <Button
           onClick={() => {
@@ -58,28 +58,3 @@ const TaskButton: React.FC = () => {
 }
 
 export default TaskButton
-
-{
-  /* {router.route === AppRoutes.TASK ? 'Add task' : 'Tasks'} */
-}
-
-// return status === 'authenticated' ? (
-//   <>
-//     <Button
-//       onClick={() => {
-//         router.route === AppRoutes.TASK
-//           ? setIsModalVisible(true)
-//           : Router.push(AppRoutes.TASK)
-//       }}
-//       ghost
-//       type="primary"
-//       className={s.Button}
-//     >
-//       {router.route === AppRoutes.TASK ? 'Add task' : 'Tasks'}
-//     </Button>
-//     <AddTaskModal
-//       isModalVisible={isModalVisible}
-//       setIsModalVisible={setIsModalVisible}
-//     />
-//   </>
-// ) : null

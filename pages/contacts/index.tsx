@@ -13,7 +13,7 @@ import s from './style.module.scss'
 import {
   deleteExtraWhitespace,
   validateField,
-} from '../../common/components/Forms/validators'
+} from '../../common/assets/features/validators'
 
 const ContactsPage: React.FC = () => {
   const onFinish = (values: any) => null

@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
 import useDebounce from 'common/assets/hooks/useDebounce'
 import { Button, Input } from 'antd'
-import Search from 'antd/lib/input/Search'
 import { useGetAllTaskQuery } from 'common/api/taskApi/task.api'
 import { PlusOutlined } from '@ant-design/icons'
 import AddTaskModal from '../../AddTaskModal/index'
-import Tasks from './TasksList'
+import TasksList from './TasksList'
 import s from './style.module.scss'
 
 const AdminPageTasks: React.FC = () => {
@@ -16,15 +15,6 @@ const AdminPageTasks: React.FC = () => {
   const [tasks, setTasks] = useState(data?.data)
   const [search, setSearch] = useState('')
   const debounced = useDebounce<string>(search)
-
-  // const searchTask = () => {
-  //   console.log(search)
-  //   setTasks(
-  //     data?.data.filter((item) =>
-  //       item.name.toLowerCase().includes(search.toLowerCase())
-  //     )
-  //   )
-  // }
 
   useEffect(() => {
     setTasks(
@@ -37,32 +27,23 @@ const AdminPageTasks: React.FC = () => {
   return (
     <>
       <div className={s.Controls}>
-        {/* <Search
+        <Input
+          placeholder="Search Task..."
           value={search}
-          className={s.Search}
-          placeholder="Task name"
           onChange={(e) => setSearch(e.target.value)}
-          onSearch={searchTask}
-          enterButton
         />
         <Button
           className={s.AddButton}
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => setIsModalVisible(true)}
-        /> */}
-        <Input
-          placeholder="Search Task..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <AddTaskModal
-          isModalVisible={isModalVisible}
-          setIsModalVisible={setIsModalVisible}
         />
       </div>
-
-      {tasks && <Tasks tasks={tasks} />}
+      <AddTaskModal
+        isModalVisible={isModalVisible}
+        setIsModalVisible={setIsModalVisible}
+      />
+      {tasks && <TasksList tasks={tasks} />}
     </>
   )
 }

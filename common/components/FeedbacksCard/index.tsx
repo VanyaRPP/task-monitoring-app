@@ -79,11 +79,13 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
       title={
         <span style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           Feedbacks
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsModalVisible(true)}
-          />
+          {
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setIsModalVisible(true)}
+            />
+          }
           <ModalWindow
             title={`Leave feedback about ${user?.name}`}
             isModalVisible={isModalVisible}

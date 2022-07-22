@@ -1,28 +1,17 @@
-import { QuestionCircleOutlined } from '@ant-design/icons'
-import {
-  DatePicker,
-  Form,
-  FormInstance,
-  Input,
-  InputNumber,
-  Select,
-  Tooltip,
-} from 'antd'
-import { RangePickerProps } from 'antd/lib/date-picker'
-import moment from 'moment'
+import { DatePicker, Form, FormInstance, Input } from 'antd'
 import CustomTooltip from '../../UI/CustomTooltip'
-import { allowOnlyNumbers, validateField } from '../validators'
+import {
+  allowOnlyNumbers,
+  validateField,
+} from '../../../assets/features/validators'
+import { disabledDate } from '../../../assets/features/formatDate'
 
-type PropsType = {
+interface Props {
   isFormDisabled: boolean
   form: FormInstance
 }
 
-const CompetitionForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
-  const disabledDate: RangePickerProps['disabledDate'] = (current) => {
-    return current && current < moment().startOf('day')
-  }
-
+const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form }) => {
   return (
     <Form
       form={form}

@@ -1,6 +1,9 @@
 import React from 'react'
 import { Form, FormInstance, Input } from 'antd'
-import { deleteExtraWhitespace, validateField } from '../validators'
+import {
+  deleteExtraWhitespace,
+  validateField,
+} from '../../../assets/features/validators'
 
 interface Props {
   isFormDisabled: boolean
