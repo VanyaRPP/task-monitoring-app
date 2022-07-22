@@ -44,8 +44,12 @@ export default async function handler(
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }
-    case 'PUT':
+    case 'PATCH':
       try {
+        const category = await Category.findByIdAndUpdate(req.query.id, {
+          ...req.body,
+        })
+        return res.status(200).json({ success: true, data: category })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }

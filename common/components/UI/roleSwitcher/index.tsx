@@ -8,9 +8,10 @@ import {
 } from '../../../api/userApi/user.api'
 import s from './style.module.scss'
 import ModalWindow from '../ModalWindow/index'
-import WorkerForm from '../../WorkerForm/index'
+import WorkerForm from '../../Forms/WorkerForm/index'
+import { Roles } from '../../../../utils/constants'
 
-const RoleSwither: React.FC = () => {
+const RoleSwitcher: React.FC = () => {
   const { data: session } = useSession()
   const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
@@ -29,7 +30,7 @@ const RoleSwither: React.FC = () => {
 
   const onChange = async (e: RadioChangeEvent) => {
     if (!user?.isWorker) {
-      if (e.target.value === 'Worker') {
+      if (e.target.value === Roles.WORKER) {
         setIsModalVisible(true)
       }
     } else {
@@ -45,8 +46,7 @@ const RoleSwither: React.FC = () => {
   const onSubmitModal = async () => {
     const formData = await form.validateFields()
     setIsFormDisabled(true)
-    // await addCategory({ ...formData })
-    await updateUser({ email: user?.email, ...formData })
+    await updateUser({ email: user?.email, tel: `+380${formData.tel}` })
     form.resetFields()
     setIsModalVisible(false)
     setIsFormDisabled(false)
@@ -80,4 +80,4 @@ const RoleSwither: React.FC = () => {
   )
 }
 
-export default RoleSwither
+export default RoleSwitcher

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Card, Table, Input } from 'antd'
-import { dateToDefaultFormat } from '../../features/formatDate'
-import useDebounce from 'common/modules/hooks/useDebounce'
+import { dateToDefaultFormat } from '../../../assets/features/formatDate'
 import { orders as config } from 'common/lib/dashboard.config'
+import useDebounce from '../../../modules/hooks/useDebounce'
 
 interface Props {
   style?: string

@@ -1,5 +1,6 @@
 import { Input } from 'antd'
 import { useState } from 'react'
+import s from './style.module.scss'
 
 export const SearchBar = ({ className }) => {
   const [search, setSearch] = useState<string>('')
@@ -11,7 +12,7 @@ export const SearchBar = ({ className }) => {
       placeholder="input search text"
       onSearch={onSearch}
       enterButton
-      className={className}
+      className={s.Search}
     />
   )
 }

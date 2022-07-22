@@ -35,7 +35,7 @@
     }
 
     .Search {
-      max-width: 350px;
+      max-width: 320px;
 
       input {
         transition: color 0.5s, background 0.5s, border 0.2s;
@@ -75,5 +75,8 @@
   justify-content: center;
   span {
     margin-left: 0.25rem;
+  }
+  @media (max-width: 425px) {
+    display: none;
   }
 }
