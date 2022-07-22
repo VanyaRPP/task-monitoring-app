@@ -1,11 +1,11 @@
 import { DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import { Button, Popconfirm } from 'antd'
 
-type PropsType = {
+interface Props {
   onDelete: () => void
 }
 
-const DeleteButton: React.FC<PropsType> = ({ onDelete }) => {
+const DeleteButton: React.FC<Props> = ({ onDelete }) => {
   return (
     <Popconfirm
       title="Are you sure?"

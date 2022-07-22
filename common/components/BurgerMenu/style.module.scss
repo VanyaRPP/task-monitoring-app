@@ -1,0 +1,42 @@
+.Menu {
+  display: block;
+  padding: 0.1rem;
+  margin: 0 0.75rem;
+  @media (min-width: 425px) {
+    display: none;
+  }
+}
+.Drawer {
+  .Buttons {
+    margin: -1.5rem;
+  }
+}
+.Points {
+  display: flex;
+  align-items: left;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.Image {
+  margin-top: 0.17rem;
+}
+.Diamant {
+  color: var(--textColor) !important;
+}
+.Premium {
+  span {
+    font-size: 20px;
+    color: var(--textColor);
+    padding: 0.25em 0.5em;
+  }
+}
+.SignIn {
+  color: var(--textColor);
+  font-size: 20px;
+  padding: 0 0.5em;
+}
+.Divider {
+  color: var(--textColor);
+  margin: 0;
+}

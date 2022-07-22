@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { ObjectId } from 'mongoose'
-import { ICreateTask, ITask, ItaskExecutors } from '../../modules/models/Task'
+import { ICreateTask, ITask, ITaskExecutors } from '../../modules/models/Task'
 
 interface IAcceptQuery {
   taskId: ObjectId | string
@@ -57,7 +57,18 @@ export const taskApi = createApi({
       },
       invalidatesTags: ['Task'],
     }),
-    addTaskExecutor: builder.mutation<TaskQuer, ItaskExecutors>({
+    editTask: builder.mutation<ITask, Partial<ITask>>({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `task/${_id}/edit-task`,
+          method: 'PATCH',
+          body,
+        }
+      },
+      invalidatesTags: ['Task'],
+    }),
+    addTaskExecutor: builder.mutation<TaskQuer, ITaskExecutors>({
       query(data) {
         const { ...body } = data
         return {
@@ -110,4 +121,6 @@ export const {
   useAddTaskExecutorMutation,
   useAddCommentMutation,
   useDeleteCommentMutation,
+  useAcceptWorkerMutation,
+  useEditTaskMutation,
 } = taskApi
