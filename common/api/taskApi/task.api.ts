@@ -77,6 +77,7 @@ export const taskApi = createApi({
       invalidatesTags: ['Task'],
     }),
     deleteComment: builder.mutation<IDeleteQuery, Partial<IDeleteQuery>>({
+      // need to fix and add to POSTMAN
       query(data) {
         const { userId, itemId } = data
         return {
