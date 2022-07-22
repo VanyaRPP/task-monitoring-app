@@ -26,7 +26,7 @@ const AddDomainModal: React.FC<Props> = ({ isFormDisabled, form }) => {
   const mapOptions = useMemo(() => {
     return {
       geoCode: centerTownGeoCode,
-      zoom: 17,
+      zoom: 12,
     }
   }, [waypoints])
 
@@ -105,7 +105,6 @@ const AddDomainModal: React.FC<Props> = ({ isFormDisabled, form }) => {
         <Map
           isLoaded={isLoaded}
           mapOptions={waypoints.length < 2 ? mapOptions : null}
-          // mapOptions={mapOptions}
           setAddress={setAddress}
         >
           <Polygon
@@ -125,6 +124,21 @@ const AddDomainModal: React.FC<Props> = ({ isFormDisabled, form }) => {
             onLoad={onLoad}
             onUnmount={onUnmount}
           />
+
+          {/* Template to output all domains, that already created */}
+          {/* {domains.map((item) => (
+            <Polygon
+              options={{
+                fillColor: 'red',
+                fillOpacity: 0.2,
+                strokeColor: 'red',
+                strokeOpacity: 0.75,
+                strokeWeight: 2,
+                strokePosition: 2,
+              }}
+              path={item.path}
+            />
+          ))} */}
         </Map>
       </Form.Item>
     </Form>
