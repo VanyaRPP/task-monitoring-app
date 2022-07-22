@@ -32,14 +32,14 @@ const Tasks: React.FC = () => {
           return (
             <Card
               key={index}
-              title={task.name}
+              title={task?.name}
               extra={
                 <Button
                   ghost
                   type="primary"
                   onClick={() => Router.push(AppRoutes.TASK + '/' + task._id)}
                 >
-                  {user?._id.toString() === task?.creator.toString() ||
+                  {user?._id.toString() === task?.creator?.toString() ||
                   isDeadlineExpired(task?.deadline)
                     ? 'Info'
                     : 'Apply'}
