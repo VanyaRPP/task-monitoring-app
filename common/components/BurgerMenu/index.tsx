@@ -55,13 +55,6 @@ const BurgerMenu: React.FC = () => {
             >
               <span>Premium</span>
               <Diamant className={s.Diamant} />
-              {/* <Image
-                src={premiumIcon}
-                alt="Premium"
-                width={25}
-                height={25}
-                className={s.Image}
-              /> */}
             </div>
             <Divider className={s.Divider} />
             <div

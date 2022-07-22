@@ -28,10 +28,7 @@ const Header: React.FC = () => {
           <SearchBar className={s.Search} />
         ) : (
           <Button
-            icon={
-              // <Image src={premiumIcon} alt="Premium" width={25} height={25} />
-              <Diamant />
-            }
+            icon={<Diamant className={s.Diamant} />}
             className={s.Button_Premium}
             type="primary"
             onClick={() => Router.push(AppRoutes.PREMIUM)}
