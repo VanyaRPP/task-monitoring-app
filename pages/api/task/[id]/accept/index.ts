@@ -1,23 +1,13 @@
 import type { NextApiResponse, NextApiRequest } from 'next'
-import dbConnect from 'utils/dbConnect'
 import { TaskStatuses } from 'utils/constants'
 import Task from 'common/modules/models/Task'
-
-interface IData {
-  data?: any
-  success: boolean
-  error?: string
-}
-
-async function start() {
-  await dbConnect()
-}
+import start, { Data } from 'pages/api/api.config'
 
 start()
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<IData>
+  res: NextApiResponse<Data>
 ) {
   switch (req.method) {
     case 'PATCH':

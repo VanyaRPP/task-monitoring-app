@@ -1,15 +1,5 @@
-import { IFeedback, IUser } from '../../modules/models/User'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-
-interface BaseQuery {
-  success: boolean
-  data: IUser
-}
-
-interface AllUsersQuer {
-  success: boolean
-  data: IUser[]
-}
+import { BaseQuery, IUser, AllUsersQuer } from './user.api.types'
 
 export const userApi = createApi({
   reducerPath: 'userApi',
@@ -23,7 +13,7 @@ export const userApi = createApi({
       providesTags: (result) => ['User'],
     }),
     getUserById: builder.query<BaseQuery, string>({
-      query: (id) => `user/id/${id}`,
+      query: (id) => `user/${id}`,
       providesTags: (result) => ['User'],
     }),
     updateUser: builder.mutation<IUser, Partial<IUser>>({
@@ -45,7 +35,7 @@ export const userApi = createApi({
       query(data) {
         const { _id, ...body } = data
         return {
-          url: `user/feedbacks/${_id}`,
+          url: `user/${_id}/feedback`,
           method: 'PATCH',
           body,
         }

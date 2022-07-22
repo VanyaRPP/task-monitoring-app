@@ -12,7 +12,7 @@ export interface ITask {
   dateofcreate: Date
   deadline: string
   customer?: string
-  taskexecutors: [ItaskExecutors]
+  taskexecutors: [ITaskExecutors]
   comment?: [IComment]
   status: TaskStatuses
   executant?: ObjectId
@@ -44,7 +44,7 @@ export interface IComment {
   text: string
 }
 
-export interface ItaskExecutors {
+export interface ITaskExecutors {
   workerid: ObjectId | string //profile photo and rating will be obtained from this id
   taskId: ObjectId | string
   price: number | string
@@ -63,7 +63,7 @@ export interface ITaskModel {
   dateofcreate: Date
   deadline: string
   customer?: string
-  taskexecutors: [ItaskExecutors]
+  taskexecutors: [ITaskExecutors]
   comment?: [IComment]
   status: TaskStatuses
   executant: ObjectId
