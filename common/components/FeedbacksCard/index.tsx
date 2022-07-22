@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { PlusOutlined } from '@ant-design/icons'
-import { Card, List, Button, Form, Rate } from 'antd'
+import { Empty, Card, List, Button, Form, Rate } from 'antd'
 import { IFeedback, IUser } from 'common/modules/models/User'
 import ModalWindow from 'common/components/UI/ModalWindow'
-import AddFeedbackForm from 'common/components/AddFeedbackForm'
+import AddFeedbackForm from 'common/components/Forms/AddFeedbackForm'
 import Feedback from './feedback'
 import {
   useGetUserByEmailQuery,
@@ -52,7 +52,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
     Reset()
   }
 
-  const onSubmiModal = async () => {
+  const onSubmitModal = async () => {
     // user can't leave feedback to himself
     if (sessionUser?.data?._id === user?._id) return Reset()
 
@@ -95,7 +95,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
             title={`Leave feedback about ${user?.name}`}
             isModalVisible={isModalVisible}
             onCancel={onCancelModal}
-            onOk={onSubmiModal}
+            onOk={onSubmitModal}
             okText="Leave feedback"
             cancelText="Cancel"
           >
@@ -112,15 +112,19 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
         />
       }
     >
-      <List
-        className={s.List}
-        dataSource={user?.feedback}
-        renderItem={(item, index) => (
-          <List.Item key={index} className={s.ListItem}>
-            <Feedback feedback={item} />
-          </List.Item>
-        )}
-      />
+      {user?.feedback?.length ? (
+        <List
+          className={s.List}
+          dataSource={user?.feedback}
+          renderItem={(item, index) => (
+            <List.Item key={index}>
+              <Feedback feedback={item} />
+            </List.Item>
+          )}
+        />
+      ) : (
+        <Empty className={s.Empty} />
+      )}
     </Card>
   )
 }

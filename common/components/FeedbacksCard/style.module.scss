@@ -1,5 +1,9 @@
 .Card {
   width: calc(100% - 3rem - 450px - 450px);
+  color: var(--textColor);
+  span {
+    color: var(--textColor);
+  }
 
   @media (max-width: 1600px) {
     width: 100%;
@@ -106,4 +110,8 @@
     padding: 0 !important;
     margin: 0 !important;
   }
+}
+
+.Empty {
+  margin-top: 1em;
 }

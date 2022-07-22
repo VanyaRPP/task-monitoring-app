@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react'
 import { useDeleteTaskMutation } from '../../api/taskApi/task.api'
 import { useGetUserByIdQuery } from '../../api/userApi/user.api'
 import DeleteButton from '../UI/Buttons/DeleteButton'
-import { dateToDefaultFormat } from '../features/formatDate'
+import { dateToDefaultFormat } from '../../assets/features/formatDate'
 import { useRouter } from 'next/router'
 import { AppRoutes } from 'utils/constants'
 import s from './style.module.scss'
@@ -66,7 +66,7 @@ const TaskCard = ({ taskId, task }) => {
           title={task?.name}
           actions={session?.user?.email === user?.email && Actions}
         >
-          <p className={s.Description}>Description: {task?.desription}</p>
+          <p className={s.Description}>Description: {task?.description}</p>
           <p>Category: {task?.category}</p>
           <p>Address: {task?.address?.name}</p>
           <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>

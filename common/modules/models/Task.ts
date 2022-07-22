@@ -5,14 +5,14 @@ export interface ITask {
   _id?: string
   name: string
   creator?: ObjectId | string
-  desription?: string
+  description?: string
   domain: string
   address: IAddress
   category: string
   dateofcreate: Date
   deadline: string
   customer?: string
-  taskexecutors: [ItaskExecutors]
+  taskexecutors: [ITaskExecutors]
   comment?: [IComment]
   status: TaskStatuses
   executant?: ObjectId
@@ -21,7 +21,7 @@ export interface ITask {
 export interface ICreateTask {
   name: string
   creator: ObjectId | string
-  desription?: string
+  description?: string
   address: IAddress
   category: string
   dateofcreate: Date
@@ -45,7 +45,7 @@ export interface IComment {
   datetime: Date
 }
 
-export interface ItaskExecutors {
+export interface ITaskExecutors {
   workerid: ObjectId | string //profile photo and rating will be obtained from this id
   taskId: ObjectId | string
   price: number | string
@@ -58,13 +58,13 @@ export interface ITaskModel {
   name: string
   creator: ObjectId | string
   domain: string
-  desription?: string
+  description?: string
   address: IAddress
   category: string
   dateofcreate: Date
   deadline: string
   customer?: string
-  taskexecutors: [ItaskExecutors]
+  taskexecutors: [ITaskExecutors]
   comment?: [IComment]
   status: TaskStatuses
   executant: ObjectId
@@ -73,7 +73,7 @@ export interface ITaskModel {
 const TaskSchema = new Schema<ITaskModel>({
   name: { type: String, required: true },
   creator: { type: Schema.Types.ObjectId, ref: 'User' },
-  desription: { type: String, default: 'no description' },
+  description: { type: String, default: 'no description' },
   address: { type: Object, required: true },
   domain: { type: String },
   category: { type: String },

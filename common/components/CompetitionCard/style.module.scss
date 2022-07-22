@@ -1,6 +1,5 @@
 .Card {
   width: 450px;
-
   @media (max-width: 1600px) {
     width: calc(100% - 1.5rem - 450px);
   }
@@ -73,6 +72,7 @@
     }
     * {
       border-color: #88888830 !important;
+      color: var(--textColor);
     }
 
     thead {
