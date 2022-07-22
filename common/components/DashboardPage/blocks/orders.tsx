@@ -34,19 +34,19 @@ const Orders: React.FC<Props> = ({ style }) => {
 
   const columns = [
     {
-      title: searchInput('task'),
+      title: searchInput('Завдання'),
       dataIndex: 'task',
       key: 'task',
       width: '35%',
     },
     {
-      title: searchInput('master'),
+      title: searchInput('Майстер'),
       dataIndex: 'master',
       key: 'master',
       width: '25%',
     },
     {
-      title: 'Date',
+      title: 'Дата',
       dataIndex: 'date',
       key: 'date',
       width: '20%',
@@ -54,7 +54,7 @@ const Orders: React.FC<Props> = ({ style }) => {
       render: (text) => dateToDefaultFormat(text),
     },
     {
-      title: 'Status',
+      title: 'Статус',
       dataIndex: 'status',
       key: 'status',
       width: '20%',
@@ -73,7 +73,7 @@ const Orders: React.FC<Props> = ({ style }) => {
   ]
 
   return (
-    <Card className={style} title="My Orders" style={{ flex: '1.5' }}>
+    <Card className={style} title="Мої замовлення" style={{ flex: '1.5' }}>
       <Table dataSource={data} columns={columns} pagination={false} />
     </Card>
   )

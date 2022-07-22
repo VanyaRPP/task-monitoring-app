@@ -20,10 +20,10 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
     <Card
       loading={loading}
       className={s.Card}
-      title="Feedbacks"
+      title="Відгуки"
       extra={
         <span>
-          {`Rating: ${CalculateAVG(user?.feedback)} / 5 `}
+          {`Рейтинг: ${CalculateAVG(user?.feedback)} / 5 `}
           <StarOutlined />
         </span>
       }
@@ -39,7 +39,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
           )}
         />
       ) : (
-        <Empty className={s.Empty} />
+        <Empty className={s.Empty} description="Немає даних" />
       )}
     </Card>
   )

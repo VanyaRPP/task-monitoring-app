@@ -18,5 +18,5 @@ const SvgComponent = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 )
 
-const LogoC = memo(SvgComponent)
-export default LogoC
+const LogoCircle = memo(SvgComponent)
+export default LogoCircle

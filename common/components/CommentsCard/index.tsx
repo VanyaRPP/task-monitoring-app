@@ -9,7 +9,7 @@ interface Props {
 
 const CommentsCard: React.FC<Props> = ({ loading = false }) => {
   return (
-    <Card loading={loading} className={s.Card} title="Comments">
+    <Card loading={loading} className={s.Card} title="Коментарі">
       {comments.length ? (
         <List
           className={s.List}
@@ -25,7 +25,7 @@ const CommentsCard: React.FC<Props> = ({ loading = false }) => {
           )}
         />
       ) : (
-        <h2 style={{ textAlign: 'center' }}>Nobody here</h2>
+        <h2 style={{ textAlign: 'center' }}>Коментарів ще немає</h2>
       )}
     </Card>
   )

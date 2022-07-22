@@ -38,16 +38,20 @@ const ApplyAuctionForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
     >
       <Form.Item
         name="price"
-        label="Price"
+        label="Ціна"
         rules={[{ required: true, message: 'Please input amount of money!' }]}
       >
         <InputNumber addonAfter={suffixSelector} style={{ width: '100%' }} />
       </Form.Item>
-      <Form.Item name="description" label="Description">
+      <Form.Item name="description" label="Опис">
         <Input.TextArea maxLength={250} />
       </Form.Item>
-      <Form.Item name="deadline" label="Deadline" rules={[{ required: true }]}>
-        <DatePicker disabledDate={disabledDate} />
+      <Form.Item
+        name="deadline"
+        label="Виконати до"
+        rules={[{ required: true }]}
+      >
+        <DatePicker disabledDate={disabledDate} placeholder="Оберіть дату" />
       </Form.Item>
     </Form>
   )

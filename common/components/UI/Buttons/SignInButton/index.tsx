@@ -20,7 +20,7 @@ const SingInBtn: FC<Props> = ({ provider }) => {
       <span style={{ fontSize: '1.2rem' }}>
         {Icons[provider?.name.toLowerCase()]}
       </span>
-      <span>Sign in with {provider?.name}</span>
+      <span>Увійти з {provider?.name}</span>
     </Button>
   )
 }

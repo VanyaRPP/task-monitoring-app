@@ -16,29 +16,29 @@ const ContactsPage: React.FC = () => {
 
   return (
     <>
-      <h1 className={s.Header}>Contact Us</h1>
+      <h1 className={s.Header}>Зв`яжіться з нами</h1>
       <p className={s.Text}>
-        We can`t solve your problem if you don`t tell us about it!
+        Ми не можемо вирішити вашу проблему, якщо ви про неї не скаже те!
       </p>
 
       <div className={s.Container}>
         <div className={s.Form}>
           <Form name="nest-messages" onFinish={onFinish}>
             <Form.Item name={['user', 'name']} rules={[{ required: true }]}>
-              <Input placeholder="Name" />
+              <Input placeholder="Ім`я" />
             </Form.Item>
 
             <Form.Item name={['user', 'email']} rules={[{ type: 'email' }]}>
-              <Input placeholder="Email" />
+              <Input placeholder="Електронна пошта" />
             </Form.Item>
 
             <Form.Item name={['user', 'introduction']}>
-              <Input.TextArea placeholder="Message" />
+              <Input.TextArea placeholder="Повідомлення" />
             </Form.Item>
 
             <Form.Item>
               <Button block type="primary" htmlType="submit">
-                Send
+                Надіслати
               </Button>
             </Form.Item>
           </Form>
@@ -50,7 +50,7 @@ const ContactsPage: React.FC = () => {
           <div className={s.Contacts}>
             <div>
               <HomeOutlined />
-              <p>Zhytomyr</p>
+              <p>Житомир</p>
             </div>
             <div>
               <PhoneOutlined />

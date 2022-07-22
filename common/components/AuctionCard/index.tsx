@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, Table, Button, Form, Avatar } from 'antd'
+import { Card, Table, Button, Form, Avatar, Empty } from 'antd'
 import s from './style.module.scss'
 
 import ModalWindow from '../UI/ModalWindow/index'
@@ -62,44 +62,48 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
   return (
     <Card
       className={s.Card}
-      title={`Auction: ${taskExecutors ? taskExecutors.length : ''}`}
+      title={`Пропозиції: ${taskExecutors ? taskExecutors.length : ''}`}
       extra={
         <Button type="primary" ghost onClick={() => setIsModalVisible(true)}>
-          Apply
+          Подати заявку
         </Button>
       }
     >
       <ModalWindow
-        title="Apply for an auction"
+        title="Подати заявку в пропозиції"
         isModalVisible={isModalVisible}
         onCancel={onCancelModal}
         onOk={onSubmiModal}
-        okText="Apply"
-        cancelText="Cancel"
+        okText="Подати заявку"
+        cancelText="Скасувати"
       >
         <ApplyAuctionForm isFormDisabled={isFormDisabled} form={form} />
       </ModalWindow>
-      <Table dataSource={taskExecutors} pagination={false}>
-        <Column
-          title="Executors"
-          dataIndex="workerid"
-          key="executors"
-          width="70%"
-          render={(_, executor: ItaskExecutors) => (
-            <Executor executor={executor} type="workerInfo" />
-          )}
-        />
-        <Column title="Price" dataIndex="price" key="price" width="15%" />
-        <Column
-          title="Rating"
-          dataIndex="rating"
-          key="rating"
-          width="15%"
-          render={(_, executor: ItaskExecutors) => (
-            <Executor executor={executor} type="rating" />
-          )}
-        />
-      </Table>
+      {taskExecutors && taskExecutors.length !== 0 ? (
+        <Table dataSource={taskExecutors} pagination={false}>
+          <Column
+            title="Список майстрів"
+            dataIndex="workerid"
+            key="executors"
+            width="70%"
+            render={(_, executor: ItaskExecutors) => (
+              <Executor executor={executor} type="workerInfo" />
+            )}
+          />
+          <Column title="Ціни" dataIndex="price" key="price" width="15%" />
+          <Column
+            title="Рейтинг"
+            dataIndex="rating"
+            key="rating"
+            width="15%"
+            render={(_, executor: ItaskExecutors) => (
+              <Executor executor={executor} type="rating" />
+            )}
+          />
+        </Table>
+      ) : (
+        <Empty description="Немає даних" className={s.Empty} />
+      )}
     </Card>
   )
 }

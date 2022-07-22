@@ -52,7 +52,7 @@ const AdminPageTasks: React.FC = () => {
           onClick={() => setIsModalVisible(true)}
         /> */}
         <Input
-          placeholder="Search Task..."
+          placeholder="Пошук завдання..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />

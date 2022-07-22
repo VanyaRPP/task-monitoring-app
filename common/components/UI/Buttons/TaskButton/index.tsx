@@ -24,7 +24,7 @@ const TaskButton: React.FC = () => {
         type="primary"
         className={s.Button}
       >
-        {router.route === AppRoutes.TASK ? 'Add task' : 'Tasks'}
+        {router.route === AppRoutes.TASK ? 'Створити завдання' : 'Завдання'}
       </Button>
       <AddTaskModal
         isModalVisible={isModalVisible}

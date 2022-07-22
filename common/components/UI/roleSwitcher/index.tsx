@@ -62,17 +62,17 @@ const RoleSwither: React.FC = () => {
         style={{ width: '100%' }}
         buttonStyle="solid"
       >
-        <Radio.Button value="User">User</Radio.Button>
-        <Radio.Button value="Worker">Worker</Radio.Button>
-        <Radio.Button value="Admin">Admin</Radio.Button>
+        <Radio.Button value="User">Замовник</Radio.Button>
+        <Radio.Button value="Worker">Майстер</Radio.Button>
+        <Radio.Button value="Admin">Адмін</Radio.Button>
       </Radio.Group>
       <ModalWindow
-        title="Update role to worker"
+        title="Переключити на роль майстра"
         isModalVisible={isModalVisible}
         onCancel={onCancelModal}
         onOk={onSubmitModal}
-        okText="Submit"
-        cancelText="Cancel"
+        okText="Так"
+        cancelText="Ні"
       >
         <WorkerForm isFormDisabled={isFormDisabled} form={form} />
       </ModalWindow>

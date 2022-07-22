@@ -23,8 +23,13 @@ const WorkerForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
     >
       <Form.Item
         name="tel"
-        label="Phone Number"
-        rules={[{ required: true, message: 'Please input your phone number!' }]}
+        label="Ромер телефону"
+        rules={[
+          {
+            required: true,
+            message: 'Введіть свій номер телефону, будь ласка!',
+          },
+        ]}
       >
         <Input addonBefore={prefixSelector} style={{ width: '100%' }} />
       </Form.Item>

@@ -13,12 +13,16 @@ const AddCategoryForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
       name="form_in_modal"
       disabled={isFormDisabled}
     >
-      <Form.Item name="name" label="Category name" rules={[{ required: true }]}>
+      <Form.Item
+        name="name"
+        label="Назва категорії"
+        rules={[{ required: true }]}
+      >
         <Input />
       </Form.Item>
       <Form.Item
         name="desription"
-        label="Category description"
+        label="Опис категорії"
         rules={[{ required: true }]}
       >
         <Input.TextArea />

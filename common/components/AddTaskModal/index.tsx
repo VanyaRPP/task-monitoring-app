@@ -104,9 +104,9 @@ const AddTaskModal: React.FC<PropsType> = ({
   return (
     <Modal
       visible={isModalVisible}
-      title="Add task"
-      okText="Create task"
-      cancelText="Cancel"
+      title="Створити завдання"
+      okText="Створити"
+      cancelText="Скасувати"
       onCancel={onCancel}
       onOk={onSubmit}
     >
@@ -123,15 +123,15 @@ const AddTaskModal: React.FC<PropsType> = ({
         )}
         <Form.Item
           name="name"
-          label="Name of task"
+          label="Назва завдання"
           rules={[{ required: true }]}
         >
           <Input />
         </Form.Item>
-        <Form.Item name="desription" label="Description">
+        <Form.Item name="desription" label="Опис">
           <Input.TextArea maxLength={250} />
         </Form.Item>
-        <Form.Item name="domain" label="Address">
+        <Form.Item name="domain" label="Адреса">
           <PlacesAutocomplete
             isLoaded={isLoaded}
             setAddress={setAddress}
@@ -147,7 +147,7 @@ const AddTaskModal: React.FC<PropsType> = ({
             setAddress={setAddress}
           />
         </Form.Item>
-        <Form.Item name="category" label="Categories">
+        <Form.Item name="category" label="Категорії">
           <Select>
             {categories &&
               categories.map((category) => (
@@ -159,10 +159,10 @@ const AddTaskModal: React.FC<PropsType> = ({
         </Form.Item>
         <Form.Item
           name="deadline"
-          label="Deadline"
+          label="Виконати до"
           rules={[{ required: true }]}
         >
-          <DatePicker disabledDate={disabledDate} />
+          <DatePicker disabledDate={disabledDate} placeholder="Оберіть дату" />
         </Form.Item>
       </Form>
     </Modal>

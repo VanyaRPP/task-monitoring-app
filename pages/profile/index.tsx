@@ -22,7 +22,7 @@ const Profile: React.FC = () => {
 
   return (
     <>
-      <h2 className={s.Header}>My profile</h2>
+      <h2 className={s.Header}>Мій Профіль</h2>
 
       <div className={s.Container}>
         <Card
@@ -32,7 +32,7 @@ const Profile: React.FC = () => {
           extra={
             user?.role === 'Admin' && (
               <Button type="link" onClick={() => Router.push(AppRoutes.ADMIN)}>
-                Admin Panel
+                Панель адміна
               </Button>
             )
           }
@@ -40,24 +40,30 @@ const Profile: React.FC = () => {
           <div className={s.Avatar}>
             <Avatar
               icon={<UserOutlined />}
-              src={<Image src={session?.user?.image || undefined} alt="User" />}
+              src={
+                <Image
+                  placeholder={'fghj'}
+                  src={session?.user?.image || undefined}
+                  alt="User"
+                />
+              }
             />
           </div>
 
           <div className={s.Info}>
-            <Card size="small" title="Role">
+            <Card size="small" title="Роль">
               <RoleSwither />
             </Card>
 
-            <Card size="small" title="Email">
+            <Card size="small" title="Електронна пошиа">
               <p>{user?.email}</p>
             </Card>
-            <Card size="small" title="Phone">
+            <Card size="small" title="Номер телефону">
               <p>{user?.tel}</p>
             </Card>
 
-            <Card title="Address" size="small">
-              <p>{user?.address?.name || 'Zhytomyr'}</p>
+            <Card title="Адреса" size="small">
+              <p>{user?.address?.name || 'Житомир'}</p>
             </Card>
             <Button type="primary">
               <EditOutlined key="edit" />

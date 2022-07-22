@@ -12,8 +12,8 @@ import premiumIcon from '../../assets/premium/diamond.png'
 import Image from 'next/image'
 import BurgerMenu from '../BurgerMenu'
 import Diamant from '../../assets/svg/diamant'
-import LogoR from '../../assets/svg/logo_rectangle'
-import LogoC from '../../assets/svg/logo_circle'
+import LogoRectangle from '../../assets/svg/logo_rectangle'
+import LogoCircle from '../../assets/svg/logo_circle'
 
 const Header: React.FC = () => {
   const { status } = useSession()
@@ -24,7 +24,8 @@ const Header: React.FC = () => {
       <BurgerMenu />
       <div className={s.Item}>
         <Link href={AppRoutes.INDEX}>
-          <LogoC className={s.Logo} />
+          <LogoCircle className={s.Logo} />
+          {/* <LogoRectangle className={s.Logo} /> */}
         </Link>
         <TaskButton />
       </div>
@@ -40,8 +41,9 @@ const Header: React.FC = () => {
           <span>Преміум</span>
         </Button>
       )}
-      <LoginUser />
+
       <ThemeSwitcher />
+      <LoginUser />
     </Layout.Header>
   )
 }

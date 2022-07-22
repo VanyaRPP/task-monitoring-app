@@ -44,7 +44,7 @@ const Categories: React.FC<Props> = ({ nameFilter }) => {
           className={s.Category}
           actions={[
             <Button key="info" type="primary" onClick={() => ''}>
-              Info
+              Інформація
             </Button>,
           ].concat(
             role === 'Admin'

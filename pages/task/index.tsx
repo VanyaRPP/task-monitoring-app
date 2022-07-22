@@ -39,20 +39,20 @@ const Tasks: React.FC = () => {
                   type="primary"
                   onClick={() => Router.push(AppRoutes.TASK + '/' + task._id)}
                 >
-                  {user?._id.toString() === task?.creator.toString() ||
+                  {user?._id.toString() === task?.creator?.toString() ||
                   isDeadlineExpired(task?.deadline)
-                    ? 'Info'
-                    : 'Apply'}
+                    ? 'Інформація'
+                    : 'Подати заявку'}
                 </Button>
               }
               className={classNames(s.Card, {
                 [s.Disabled]: isDeadlineExpired(task?.deadline),
               })}
             >
-              <p>Catagory: {task?.category}</p>
-              <p>Description: {task.desription}</p>
-              <p>Adress: {task?.address?.name}</p>
-              <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
+              <p>Категорія: {task?.category}</p>
+              <p>Опис: {task.desription}</p>
+              <p>Адреса: {task?.address?.name}</p>
+              <p>Виконати до: {dateToDefaultFormat(task?.deadline)}</p>
             </Card>
           )
         })}

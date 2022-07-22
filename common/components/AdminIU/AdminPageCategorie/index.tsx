@@ -46,7 +46,7 @@ const AdminPageCategories: React.FC = () => {
           enterButton
         /> */}
         <Input
-          placeholder="Search Category..."
+          placeholder="Пошук категорії..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -57,12 +57,12 @@ const AdminPageCategories: React.FC = () => {
           onClick={() => setIsModalVisible(true)}
         />
         <ModalWindow
-          title="Add category"
+          title="Додати категорію"
           isModalVisible={isModalVisible}
           onCancel={onCancelModal}
           onOk={onSubmiModal}
-          okText="Create category"
-          cancelText="Cancel"
+          okText="Додати"
+          cancelText="Скасувати"
         >
           <AddCategoryForm isFormDisabled={isFormDisabled} form={form} />
         </ModalWindow>

@@ -35,7 +35,7 @@ const Masters: React.FC<Props> = ({ style }) => {
 
   const columns = [
     {
-      title: searchInput('name'),
+      title: searchInput('Ім`я'),
       dataIndex: 'about',
       key: 'about',
       width: '65%',
@@ -57,7 +57,7 @@ const Masters: React.FC<Props> = ({ style }) => {
       },
     },
     {
-      title: 'Rate',
+      title: 'Оцінка',
       dataIndex: 'rate',
       key: 'rate',
       width: '15%',
@@ -65,7 +65,7 @@ const Masters: React.FC<Props> = ({ style }) => {
       render: (text) => <>{text} / 5</>,
     },
     {
-      title: 'Specials',
+      title: 'Спеціалізація',
       dataIndex: 'specials',
       key: 'specials',
       width: '20%',
@@ -87,7 +87,7 @@ const Masters: React.FC<Props> = ({ style }) => {
   ]
 
   return (
-    <Card className={style} title="Masters" style={{ flex: '1.5' }}>
+    <Card className={style} title="Майстри" style={{ flex: '1.5' }}>
       <Table dataSource={data} columns={columns} pagination={false} />
     </Card>
   )
