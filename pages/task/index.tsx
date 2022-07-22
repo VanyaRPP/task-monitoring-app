@@ -54,7 +54,7 @@ const Tasks: React.FC = () => {
                   })}
                 >
                   <p>Category: {task?.category}</p>
-                  <p>Description: {task.desription}</p>
+                  <p>Description: {task.description}</p>
                   <p>Address: {task?.address?.name}</p>
                   <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
                 </Card>
