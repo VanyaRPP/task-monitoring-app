@@ -9,7 +9,7 @@ export const userApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getUserByEmail: builder.query<BaseQuery, string>({
-      query: (email) => `user/${email}`,
+      query: (email) => `user/email/${email}`,
       providesTags: (result) => ['User'],
     }),
     getUserById: builder.query<BaseQuery, string>({
