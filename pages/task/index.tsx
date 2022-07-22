@@ -43,7 +43,7 @@ const Tasks: React.FC = () => {
                         Router.push(AppRoutes.TASK + '/' + task._id)
                       }
                     >
-                      {user?._id.toString() === task?.creator.toString() ||
+                      {user?._id === task?.creator ||
                       isDeadlineExpired(task?.deadline)
                         ? 'Info'
                         : 'Apply'}
@@ -54,7 +54,7 @@ const Tasks: React.FC = () => {
                   })}
                 >
                   <p>Category: {task?.category}</p>
-                  <p>Description: {task.description}</p>
+                  <p>Description: {task.desription}</p>
                   <p>Address: {task?.address?.name}</p>
                   <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
                 </Card>
