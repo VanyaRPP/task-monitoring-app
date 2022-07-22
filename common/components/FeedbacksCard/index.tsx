@@ -117,7 +117,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
           className={s.List}
           dataSource={user?.feedback}
           renderItem={(item, index) => (
-            <List.Item key={index}>
+            <List.Item key={index} className={s.ListItem}>
               <Feedback feedback={item} />
             </List.Item>
           )}
