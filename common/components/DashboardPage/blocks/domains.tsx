@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Card, Table, Input } from 'antd'
-import useDebounce from 'common/assets/hooks/useDebounce'
-
+import useDebounce from 'common/modules/hooks/useDebounce'
 import { domains as config } from 'common/lib/dashboard.config'
 
 interface Props {

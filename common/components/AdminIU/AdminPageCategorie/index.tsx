@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import useDebounce from 'common/assets/hooks/useDebounce'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Form, Input } from 'antd'
 import { useAddCategoryMutation } from 'common/api/categoriesApi/category.api'
@@ -8,6 +7,7 @@ import AddCategoryForm from '../../Forms/AddCategoryForm'
 import Categories from '../../Categories'
 import ModalWindow from '../../UI/ModalWindow'
 import s from './style.module.scss'
+import useDebounce from '../../../modules/hooks/useDebounce'
 
 const AdminPageCategories: React.FC = () => {
   const { Search } = Input

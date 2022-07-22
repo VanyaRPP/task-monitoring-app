@@ -33,8 +33,14 @@ export const Executor = ({ executor, type }) => {
     return (
       <Meta
         avatar={<Avatar src={worker?.image} />}
-        title={worker?.name}
-        description={<p>{executor.description}</p>}
+        title={
+          <span style={{ color: 'var(--textColor)' }}>{worker?.name}</span>
+        }
+        description={
+          <span style={{ color: 'var(--textColor)', opacity: 0.5 }}>
+            {executor.description}
+          </span>
+        }
       />
     )
   }
