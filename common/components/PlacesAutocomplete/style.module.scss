@@ -4,7 +4,10 @@
   font-variant: tabular-nums;
   list-style: none;
   font-feature-settings: 'tnum';
-  position: relative;
+  position: absolute;
+  left: 0;
+  top: 32px;
+  z-index: 1;
   display: inline-block;
   width: 100%;
   min-width: 0;

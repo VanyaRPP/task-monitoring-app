@@ -41,7 +41,12 @@ const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form }) => {
         }
         rules={validateField('deadline')}
       >
-        <DatePicker disabledDate={disabledDate} />
+        <div id="datePicker" style={{ position: 'relative' }}>
+          <DatePicker
+            getPopupContainer={() => document.getElementById('datePicker')}
+            disabledDate={disabledDate}
+          />
+        </div>
       </Form.Item>
     </Form>
   )

@@ -1,5 +1,14 @@
 import { useJsApiLoader } from '@react-google-maps/api'
-import { Modal, DatePicker, Form, Input, Select, Tooltip } from 'antd'
+import {
+  Modal,
+  DatePicker,
+  Form,
+  Input,
+  Select,
+  Tooltip,
+  Collapse,
+  Upload,
+} from 'antd'
 import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
 import { useSession } from 'next-auth/react'
@@ -18,6 +27,7 @@ import { PlacesAutocomplete } from '../PlacesAutocomplete'
 import CustomTooltip from '../UI/CustomTooltip'
 import s from './style.module.scss'
 import { disabledDate } from '../../assets/features/formatDate'
+import UploadImages from '../UploadImages'
 
 type FormData = {
   category?: string
@@ -143,6 +153,9 @@ const AddTaskModal: React.FC<PropsType> = ({
         >
           <Input.TextArea maxLength={250} />
         </Form.Item>
+        <Form.Item name="images">
+          <UploadImages />
+        </Form.Item>
         <Form.Item name="domain" label="Address">
           <PlacesAutocomplete
             isLoaded={isLoaded}
@@ -160,14 +173,16 @@ const AddTaskModal: React.FC<PropsType> = ({
           />
         </Form.Item>
         <Form.Item name="category" label="Categories">
-          <Select>
-            {categories &&
-              categories.map((category) => (
-                <Select.Option key={category?._id} value={category?.name}>
-                  {category?.name}
-                </Select.Option>
-              ))}
-          </Select>
+          <div id="select" style={{ position: 'relative' }}>
+            <Select getPopupContainer={() => document.getElementById('select')}>
+              {categories &&
+                categories.map((category) => (
+                  <Select.Option key={category?._id} value={category?.name}>
+                    {category?.name}
+                  </Select.Option>
+                ))}
+            </Select>
+          </div>
         </Form.Item>
         <Form.Item
           name="deadline"
@@ -180,7 +195,12 @@ const AddTaskModal: React.FC<PropsType> = ({
           }
           rules={validateField('deadline')}
         >
-          <DatePicker disabledDate={disabledDate} />
+          <div id="datePicker" style={{ position: 'relative' }}>
+            <DatePicker
+              getPopupContainer={() => document.getElementById('datePicker')}
+              disabledDate={disabledDate}
+            />
+          </div>
         </Form.Item>
       </Form>
     </Modal>
