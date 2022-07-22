@@ -56,7 +56,7 @@ const HomePage: React.FC = () => {
             router.push(AppRoutes.CONTACTS)
           }}
         >
-          Зв'яжіться з нами
+          Зв`яжіться з нами
         </Button>
       </div>
     </>

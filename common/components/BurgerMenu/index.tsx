@@ -6,7 +6,6 @@ import Router from 'next/router'
 import { useState } from 'react'
 import PremiumPage from '../../../pages/premium'
 import { AppRoutes } from '../../../utils/constants'
-import premiumIcon from '../../assets/premium/diamond.png'
 import Diamant from '../../assets/svg/diamant'
 import { SearchBar } from '../UI/SearchBar'
 import s from './style.module.scss'
@@ -64,7 +63,7 @@ const BurgerMenu: React.FC = () => {
                 Router.push(AppRoutes.CONTACTS)
               }}
             >
-              Зв'яжіться з нами
+              Зв`яжіться з нами
             </div>
             <Divider className={s.Divider} />
             <div
