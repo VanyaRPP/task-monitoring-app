@@ -10,6 +10,12 @@ export enum AppRoutes {
   PREMIUM = '/premium',
 }
 
+export enum Roles {
+  USER = 'User',
+  WORKER = 'Worker',
+  ADMIN = 'Admin',
+}
+
 export interface errors {
   [index: string]: string
 }

@@ -54,6 +54,10 @@
 
 .Button {
   margin: 0 20px;
+  display: block;
+  @media (max-width: 425px) {
+    display: none;
+  }
 }
 
 .Card,

@@ -5,17 +5,15 @@ import {
   useDeleteCategoryMutation,
   useGetAllCategoriesQuery,
 } from 'common/api/categoriesApi/category.api'
-import { AppRoutes } from 'utils/constants'
+import { AppRoutes, Roles } from 'utils/constants'
 import { useSession } from 'next-auth/react'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 import DeleteButton from '../UI/Buttons/DeleteButton'
 import s from './style.module.scss'
 
-interface Props {
+const Categories: React.FC<{
   nameFilter: string
-}
-
-const Categories: React.FC<Props> = ({ nameFilter }) => {
+}> = ({ nameFilter }) => {
   const { data: categoriesData } = useGetAllCategoriesQuery('')
 
   // const categories = categoriesData?.data
@@ -47,7 +45,7 @@ const Categories: React.FC<Props> = ({ nameFilter }) => {
               Info
             </Button>,
           ].concat(
-            role === 'Admin'
+            role === Roles.ADMIN
               ? [
                   <DeleteButton
                     key="delete"
@@ -60,7 +58,7 @@ const Categories: React.FC<Props> = ({ nameFilter }) => {
           <Skeleton title={false} loading={false} active>
             <List.Item.Meta
               title={<Link href={AppRoutes.INDEX}>{category?.name}</Link>}
-              description={category?.desription}
+              description={category?.description}
             />
           </Skeleton>
         </List.Item>

@@ -5,7 +5,7 @@ export interface ITask {
   _id?: string
   name: string
   creator?: ObjectId | string
-  desription?: string
+  description?: string
   domain: string
   address: IAddress
   category: string
@@ -21,7 +21,7 @@ export interface ITask {
 export interface ICreateTask {
   name: string
   creator: ObjectId | string
-  desription?: string
+  description?: string
   address: IAddress
   category: string
   dateofcreate: Date
@@ -57,7 +57,7 @@ export interface ITaskModel {
   name: string
   creator: ObjectId | string
   domain: string
-  desription?: string
+  description?: string
   address: IAddress
   category: string
   dateofcreate: Date
@@ -72,7 +72,7 @@ export interface ITaskModel {
 const TaskSchema = new Schema<ITaskModel>({
   name: { type: String, required: true },
   creator: { type: Schema.Types.ObjectId, ref: 'User' },
-  desription: { type: String, default: 'no description' },
+  description: { type: String, default: 'no description' },
   address: { type: Object, required: true },
   domain: { type: String },
   category: { type: String },

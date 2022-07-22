@@ -1,22 +1,28 @@
 import { useJsApiLoader } from '@react-google-maps/api'
-import { Modal, DatePicker, Form, Input, Select } from 'antd'
+import { Modal, DatePicker, Form, Input, Select, Tooltip } from 'antd'
 import type { RangePickerProps } from 'antd/es/date-picker'
 import moment from 'moment'
 import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useState, useMemo } from 'react'
-import { centerTownGeoCode } from 'utils/constants'
+import { centerTownGeoCode, Roles } from 'utils/constants'
 import { useGetAllCategoriesQuery } from '../../api/categoriesApi/category.api'
 import { useAddTaskMutation } from '../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
 import { IAddress } from '../../modules/models/Task'
+import {
+  deleteExtraWhitespace,
+  validateField,
+} from '../../assets/features/validators'
 import Map from '../Map'
 import { PlacesAutocomplete } from '../PlacesAutocomplete'
+import CustomTooltip from '../UI/CustomTooltip'
 import s from './style.module.scss'
+import { disabledDate } from '../../assets/features/formatDate'
 
 type FormData = {
   category?: string
   deadline: string
-  desription?: string
+  description?: string
   domain?: { any }
   name: string
   creator?: string
@@ -90,10 +96,6 @@ const AddTaskModal: React.FC<PropsType> = ({
     form.resetFields()
   }
 
-  const disabledDate: RangePickerProps['disabledDate'] = (current) => {
-    return current && current < moment().startOf('day')
-  }
-
   const mapOptions = useMemo(() => {
     return {
       geoCode: address ? address.geoCode : centerTownGeoCode,
@@ -103,6 +105,7 @@ const AddTaskModal: React.FC<PropsType> = ({
 
   return (
     <Modal
+      maskClosable={false}
       visible={isModalVisible}
       title="Add task"
       okText="Create task"
@@ -116,19 +119,28 @@ const AddTaskModal: React.FC<PropsType> = ({
         name="form_in_modal"
         disabled={formDisabled}
       >
-        {userData?.data?.role == 'Admin' && (
-          <Form.Item name="customer" label="Name of customer">
+        {userData?.data?.role == Roles.ADMIN && (
+          <Form.Item
+            name="customer"
+            label="Name of customer"
+            normalize={deleteExtraWhitespace}
+            rules={validateField('name')}
+          >
             <Input />
           </Form.Item>
         )}
         <Form.Item
           name="name"
           label="Name of task"
-          rules={[{ required: true }]}
+          rules={validateField('name')}
         >
           <Input />
         </Form.Item>
-        <Form.Item name="desription" label="Description">
+        <Form.Item
+          normalize={deleteExtraWhitespace}
+          name="description"
+          label="Description"
+        >
           <Input.TextArea maxLength={250} />
         </Form.Item>
         <Form.Item name="domain" label="Address">
@@ -159,8 +171,14 @@ const AddTaskModal: React.FC<PropsType> = ({
         </Form.Item>
         <Form.Item
           name="deadline"
-          label="Deadline"
-          rules={[{ required: true }]}
+          label={
+            <CustomTooltip
+              title="When you expect the job to be done"
+              text="Deadline"
+              placement="topLeft"
+            />
+          }
+          rules={validateField('deadline')}
         >
           <DatePicker disabledDate={disabledDate} />
         </Form.Item>

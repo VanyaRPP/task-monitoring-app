@@ -1,10 +1,9 @@
-import { FC } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '../../../utils/constants'
 import { Button } from 'antd'
 import s from './style.module.scss'
 
-const Verify: FC = () => {
+const Verify: React.FC = () => {
   const router = useRouter()
 
   return (

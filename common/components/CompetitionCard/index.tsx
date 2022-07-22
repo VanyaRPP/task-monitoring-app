@@ -12,8 +12,8 @@ import {
 import Column from 'antd/lib/table/Column'
 import Meta from 'antd/lib/card/Meta'
 import ModalWindow from '../UI/ModalWindow/index'
-import ApplyAuctionForm from '../ApplyAuctionForm/index'
 import { ITask, ITaskExecutors } from 'common/modules/models/Task'
+import CompetitionForm from '../Forms/CompetitionForm/index'
 import {
   useAcceptWorkerMutation,
   useAddTaskExecutorMutation,
@@ -33,8 +33,14 @@ export const Executor = ({ executor, type }) => {
     return (
       <Meta
         avatar={<Avatar src={worker?.image} />}
-        title={worker?.name}
-        description={<p>{executor.description}</p>}
+        title={
+          <span style={{ color: 'var(--textColor)' }}>{worker?.name}</span>
+        }
+        description={
+          <span style={{ color: 'var(--textColor)', opacity: 0.5 }}>
+            {executor.description}
+          </span>
+        }
       />
     )
   }
@@ -123,7 +129,7 @@ const CompetitionCard: React.FC<{
         okText="Apply"
         cancelText="Cancel"
       >
-        <ApplyAuctionForm isFormDisabled={isFormDisabled} form={form} />
+        <CompetitionForm isFormDisabled={isFormDisabled} form={form} />
       </ModalWindow>
       <Table key="competition" dataSource={executors} pagination={false}>
         <Column

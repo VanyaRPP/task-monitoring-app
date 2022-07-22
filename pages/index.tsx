@@ -1,16 +1,12 @@
-import { useSession } from 'next-auth/react'
-
 import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from './api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
 import HomePage from '../common/components/HomePage/index'
 import DashboardPage from '../common/components/DashboardPage'
 
-type PropsType = {
+const Home: React.FC<{
   isAuth: boolean
-}
-
-const Home: React.FC<PropsType> = ({ isAuth }) => {
+}> = ({ isAuth }) => {
   return isAuth ? <DashboardPage /> : <HomePage />
 }
 

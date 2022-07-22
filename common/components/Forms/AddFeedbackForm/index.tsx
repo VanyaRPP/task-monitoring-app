@@ -1,5 +1,9 @@
 import React from 'react'
 import { Form, FormInstance, Input, Slider } from 'antd'
+import {
+  deleteExtraWhitespace,
+  validateField,
+} from '../../../assets/features/validators'
 
 interface Props {
   isFormDisabled: boolean
@@ -14,8 +18,13 @@ const AddFeedbackForm: React.FC<Props> = ({ isFormDisabled, form }) => {
       name="form_in_modal"
       disabled={isFormDisabled}
     >
-      <Form.Item name="text" label="Your feedback">
-        <Input.TextArea />
+      <Form.Item
+        normalize={deleteExtraWhitespace}
+        name="text"
+        label="Your feedback"
+        rules={validateField('feedback')}
+      >
+        <Input.TextArea maxLength={250} />
       </Form.Item>
 
       <Form.Item name="grade" label="Your grade">
