@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { BaseQuery, IUser, AllUsersQuer } from './user.api.types'
+import { BaseQuery, IUser, AllUsersQuery } from './user.api.types'
 
 export const userApi = createApi({
   reducerPath: 'userApi',
@@ -27,7 +27,7 @@ export const userApi = createApi({
       },
       invalidatesTags: ['User'],
     }),
-    getAllUsers: builder.query<AllUsersQuer, string>({
+    getAllUsers: builder.query<AllUsersQuery, string>({
       query: () => '/user',
       providesTags: (result) => ['User'],
     }),

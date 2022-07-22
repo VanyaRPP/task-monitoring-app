@@ -6,7 +6,7 @@ export interface BaseQuery {
   data: IUser
 }
 
-export interface AllUsersQuer {
+export interface AllUsersQuery {
   success: boolean
   data: IUser[]
 }
