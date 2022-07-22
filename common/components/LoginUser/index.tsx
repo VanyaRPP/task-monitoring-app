@@ -24,7 +24,7 @@ const LoginUser: React.FC = () => {
           type="primary"
           className={s.Button}
         >
-          Sign in
+          Увійти
         </Button>
       </>
     )

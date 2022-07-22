@@ -9,7 +9,7 @@ export const SearchBar = ({ className }) => {
   return (
     <Input.Search
       value={search}
-      placeholder="input search text"
+      placeholder="Пошук"
       onSearch={onSearch}
       enterButton
       className={s.Search}

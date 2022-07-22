@@ -39,7 +39,7 @@ const BurgerMenu: React.FC = () => {
           backgroundColor: 'var(--backgroundColor)',
         }}
         onClose={onClose}
-        title="Menu"
+        title="Меню"
         placement="left"
         closable={false}
         visible={isActive}
@@ -50,20 +50,12 @@ const BurgerMenu: React.FC = () => {
           <SearchBar className={s.Search} />
           <div className={s.Points}>
             <div
-              className={s.Premium}
-              onClick={() => Router.push(AppRoutes.PREMIUM)}
-            >
-              <span>Premium</span>
-              <Diamant className={s.Diamant} />
-            </div>
-            <Divider className={s.Divider} />
-            <div
               className={s.SignIn}
               onClick={() => {
                 Router.push(AppRoutes.AUTH_SIGN_IN)
               }}
             >
-              Sign in
+              Увійти
             </div>
             <Divider className={s.Divider} />
             <div
@@ -72,7 +64,15 @@ const BurgerMenu: React.FC = () => {
                 Router.push(AppRoutes.CONTACTS)
               }}
             >
-              Contact us
+              Зв'яжіться з нами
+            </div>
+            <Divider className={s.Divider} />
+            <div
+              className={s.Premium}
+              onClick={() => Router.push(AppRoutes.PREMIUM)}
+            >
+              <span>Преміум</span>
+              <Diamant className={s.Diamant} />
             </div>
             <Divider className={s.Divider} />
           </div>
