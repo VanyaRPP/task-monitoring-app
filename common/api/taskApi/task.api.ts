@@ -80,7 +80,7 @@ export const taskApi = createApi({
       query(data) {
         const { userId, itemId } = data
         return {
-          url: `task/comments/${userId}?comment=${itemId}`,
+          url: `task/comment/${userId}?comment=${itemId}`,
           method: 'DELETE',
         }
       },

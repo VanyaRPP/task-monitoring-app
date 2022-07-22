@@ -42,7 +42,6 @@ const bestMaster = config.bestMaster
 const bestDomain = config.bestDomain
 
 const Sidebar: React.FC<Props> = ({ collapsed, setCollapsed }) => {
-
   return (
     <Layout.Sider
       className={s.Sidebar}
