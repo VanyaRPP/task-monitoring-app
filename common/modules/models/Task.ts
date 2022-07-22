@@ -43,8 +43,6 @@ export interface IComment {
   id: string
   text: string
   datetime: Date
-  like?: [string]
-  dislike?: [string]
 }
 
 export interface ItaskExecutors {
