@@ -1,6 +1,6 @@
-import { Empty, Card, List, Button, Form } from 'antd'
 import { useState } from 'react'
-import { StarOutlined, PlusOutlined } from '@ant-design/icons'
+import { PlusOutlined } from '@ant-design/icons'
+import { Empty, Card, List, Button, Form, Rate } from 'antd'
 import { IFeedback, IUser } from 'common/modules/models/User'
 import ModalWindow from 'common/components/UI/ModalWindow'
 import AddFeedbackForm from 'common/components/Forms/AddFeedbackForm'
@@ -11,6 +11,9 @@ import {
 } from 'common/api/userApi/user.api'
 import { useSession } from 'next-auth/react'
 import s from './style.module.scss'
+import { feedbacks } from '../../lib/task.config'
+
+const RateDescription = ['Terrible', 'Bad', 'Normal', 'Good', 'Wonderful']
 
 interface Props {
   user: IUser
@@ -21,9 +24,9 @@ function CalculateAVG(feedback) {
   return (
     Math.floor(
       (feedback?.length > 0
-        ? feedback?.reduce((a, b) => a + b.grade, 0) / feedback?.length
-        : 0) * 100
-    ) / 100
+        ? feedback?.reduce((a, b) => a + b.rate, 0) / feedback?.length
+        : 3.5) * 2
+    ) / 2
   )
 }
 
@@ -72,6 +75,8 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
     Reset()
   }
 
+  CalculateAVG(feedbacks)
+
   return (
     <Card
       loading={loading}
@@ -99,18 +104,20 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
         </span>
       }
       extra={
-        <span style={{ color: 'var(--textColor)' }}>
-          {`Rating: ${CalculateAVG(user?.feedback)} / 5 `}
-          <StarOutlined />
-        </span>
+        <Rate
+          tooltips={RateDescription}
+          disabled
+          allowHalf
+          value={CalculateAVG(feedbacks)}
+        />
       }
     >
-      {user?.feedback.length ? (
+      {user?.feedback?.length ? (
         <List
           className={s.List}
           dataSource={user?.feedback}
           renderItem={(item, index) => (
-            <List.Item key={index}>
+            <List.Item key={index} className={s.ListItem}>
               <Feedback feedback={item} />
             </List.Item>
           )}

@@ -42,10 +42,6 @@ const bestMaster = config.bestMaster
 const bestDomain = config.bestDomain
 
 const Sidebar: React.FC<Props> = ({ collapsed, setCollapsed }) => {
-  const { data: session } = useSession()
-  const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const user = data?.data
-
   return (
     <Layout.Sider
       className={s.Sidebar}

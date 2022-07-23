@@ -42,6 +42,7 @@ export interface IGeoCode {
 export interface IComment {
   id: string
   text: string
+  datetime: Date
 }
 
 export interface ITaskExecutors {

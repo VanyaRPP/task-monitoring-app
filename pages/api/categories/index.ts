@@ -1,16 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import dbConnect from '../../../utils/dbConnect'
-import Category from '../../../common/modules/models/Category'
-
-type Data = {
-  data?: any
-  success: boolean
-  error?: any
-}
-
-async function start() {
-  await dbConnect()
-}
+import Category from 'common/modules/models/Category'
+import start, { Data } from 'pages/api/api.config'
 
 start()
 

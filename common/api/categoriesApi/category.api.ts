@@ -1,11 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { ICategory } from '../../modules/models/Category'
 import { ObjectId } from 'mongoose'
-
-interface AllCategoriesQuer {
-  success: boolean
-  data: ICategory[]
-}
+import { AllCategoriesQuery, ICategory } from './category.api.types'
 
 export const categoryApi = createApi({
   reducerPath: 'categoryApi',
@@ -14,7 +9,7 @@ export const categoryApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getAllCategories: builder.query<AllCategoriesQuer, string>({
+    getAllCategories: builder.query<AllCategoriesQuery, string>({
       query: () => '/categories',
       providesTags: (result) => ['Category'],
     }),

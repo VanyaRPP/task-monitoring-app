@@ -1,26 +1,12 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { ObjectId } from 'mongoose'
-import { ICreateTask, ITask, ITaskExecutors } from '../../modules/models/Task'
-
-interface IAcceptQuery {
-  taskId: ObjectId | string
-  workerId: ObjectId | string
-}
-
-interface IDeleteQuery {
-  userId: number | string
-  itemId: number | string
-}
-
-interface AllTasksQuer {
-  success: boolean
-  data: ITask[]
-}
-
-interface TaskQuer {
-  success: boolean
-  data: ITask
-}
+import { ICreateTask, ITask, ITaskExecutors } from 'common/modules/models/Task'
+import {
+  AllTasksQuery,
+  TaskQuery,
+  IDeleteQuery,
+  IAcceptQuery,
+} from './task.api.types'
 
 export const taskApi = createApi({
   reducerPath: 'taskApi',
@@ -29,11 +15,11 @@ export const taskApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getAllTask: builder.query<AllTasksQuer, string>({
+    getAllTask: builder.query<AllTasksQuery, string>({
       query: () => '/task',
       providesTags: (result) => ['Task'],
     }),
-    getTaskById: builder.query<TaskQuer, string>({
+    getTaskById: builder.query<TaskQuery, string>({
       query: (id) => `/task/${id}`,
       providesTags: (result) => ['Task'],
     }),
@@ -68,7 +54,7 @@ export const taskApi = createApi({
       },
       invalidatesTags: ['Task'],
     }),
-    addTaskExecutor: builder.mutation<TaskQuer, ITaskExecutors>({
+    addTaskExecutor: builder.mutation<TaskQuery, ITaskExecutors>({
       query(data) {
         const { ...body } = data
         return {
@@ -83,7 +69,7 @@ export const taskApi = createApi({
       query(data) {
         const { _id, ...body } = data
         return {
-          url: `task/comments/${_id}`,
+          url: `task/${_id}/comment`,
           method: 'PATCH',
           body,
         }
@@ -91,10 +77,11 @@ export const taskApi = createApi({
       invalidatesTags: ['Task'],
     }),
     deleteComment: builder.mutation<IDeleteQuery, Partial<IDeleteQuery>>({
+      // need to fix and add to POSTMAN
       query(data) {
         const { userId, itemId } = data
         return {
-          url: `task/comments/${userId}?comment=${itemId}`,
+          url: `task/comment/${userId}?comment=${itemId}`,
           method: 'DELETE',
         }
       },

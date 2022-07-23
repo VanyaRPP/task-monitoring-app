@@ -46,7 +46,6 @@
       overflow: hidden;
     }
     .List ul {
-      height: 100%;
       max-height: calc(750px - 64px - 64px);
 
       overflow-x: hidden;
@@ -56,17 +55,16 @@
         display: none;
       }
 
-      li {
+      .Comment {
+        padding: 0 5rem 0 1rem;
         transition: background 0.5s, color 0.2s, opacity 0.2s;
-        padding: 1rem 1.5rem 0;
-        border-color: #88888830;
+        border: 0;
+        border-bottom: 1px solid #88888830;
+        background-color: transparent;
 
         * {
-          transition: color 0.5s;
+          transition: color 0.2s;
           color: var(--textColor);
-        }
-        .Description {
-          opacity: 0.5;
         }
 
         opacity: 0.8;
@@ -74,6 +72,47 @@
           opacity: 1;
           background: var(--backgroundColorElements);
         }
+
+        width: 100%;
+        margin: 0;
+
+        &.Active {
+          padding: 0 1rem 0 5rem;
+
+          > div {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: right;
+            width: 100%;
+            position: relative;
+
+            > div:first-of-type {
+              margin: 0 0 0 12px;
+            }
+
+            > div:last-of-type {
+              > div:first-of-type {
+                display: flex;
+                flex-direction: row-reverse;
+
+                > span {
+                  padding: 0 0 0 8px;
+                }
+              }
+
+              > div:last-of-type {
+                display: flex;
+                justify-content: flex-end;
+                text-align: justify;
+              }
+            }
+          }
+        }
+      }
+
+      li {
+        padding: 0;
+        margin: 0;
       }
     }
   }
