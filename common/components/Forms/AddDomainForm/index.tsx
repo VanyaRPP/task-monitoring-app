@@ -2,9 +2,9 @@ import { useJsApiLoader } from '@react-google-maps/api'
 import { Form, Input, FormInstance } from 'antd'
 import { useCallback, useState, useMemo, useRef, useEffect } from 'react'
 import { centerTownGeoCode } from 'utils/constants'
-import Map from '../Map'
+import Map from '../../Map'
 import { Polygon } from '@react-google-maps/api'
-import { IAddress } from '../../modules/models/Task'
+import { IAddress } from '../../../modules/models/Task'
 
 interface Props {
   isFormDisabled: boolean

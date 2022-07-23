@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Form, Button } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import ModalWindow from '../../UI/ModalWindow'
-import AddDomainModal from '../../AddDomainForm'
+import AddDomainModal from '../../Forms/AddDomainForm'
 import s from './style.module.scss'
 
 const AdminPageDomains: React.FC = () => {
