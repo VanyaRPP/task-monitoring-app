@@ -38,6 +38,7 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
         {
           id: sessionUser?.data?._id,
           text: input,
+          datetime: new Date(),
         },
       ],
     })
@@ -51,7 +52,7 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
         dataSource={task?.data?.comment}
         renderItem={(item, index) => (
           <List.Item key={index}>
-            <Comment comment={item} />
+            <Comment comment={item} taskId={task?.data?._id} />
           </List.Item>
         )}
       />

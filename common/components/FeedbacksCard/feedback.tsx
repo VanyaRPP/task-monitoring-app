@@ -1,8 +1,10 @@
-import { List, Avatar, Image } from 'antd'
+import { List, Avatar, Image, Rate } from 'antd'
 import { useGetUserByIdQuery } from 'common/api/userApi/user.api'
-import { StarOutlined, UserOutlined } from '@ant-design/icons'
+import { UserOutlined } from '@ant-design/icons'
 import { IFeedback } from 'common/modules/models/User'
 import s from './style.module.scss'
+
+const RateDescription = ['Terrible', 'Bad', 'Normal', 'Good', 'Wonderful']
 
 const Feedback: React.FC<{ feedback: IFeedback }> = ({ feedback }) => {
   const { data } = useGetUserByIdQuery(feedback.id)
@@ -17,12 +19,11 @@ const Feedback: React.FC<{ feedback: IFeedback }> = ({ feedback }) => {
             src={<Image src={user?.image || undefined} alt="User" />}
           />
         }
-        title={user ? user?.name : 'User not found'}
+        title={<h4>{user ? user?.name : 'User not found'}</h4>}
         description={<p className={s.Description}>{feedback?.text}</p>}
       />
-      <span>
-        {feedback?.grade} / 5 <StarOutlined />
-      </span>
+
+      <Rate className={s.Rate} disabled value={feedback?.grade} />
     </>
   )
 }
