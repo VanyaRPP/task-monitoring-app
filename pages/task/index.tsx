@@ -62,7 +62,6 @@ const Tasks: React.FC = () => {
         <Empty />
       )}
     </>
-
   )
 }
 
