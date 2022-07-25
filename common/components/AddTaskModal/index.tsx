@@ -179,8 +179,14 @@ const AddTaskModal: React.FC<PropsType> = ({
         </Form.Item>
         <Form.Item
           name="deadline"
-          label="Виконати до"
-          rules={[{ required: true }]}
+          label={
+            <CustomTooltip
+              title="Коли ви очікуєте виконання роботи"
+              text="Виконати до"
+              placement="topLeft"
+            />
+          }
+          // rules={validateField('deadline')}
         >
           <DatePicker disabledDate={disabledDate} placeholder="Оберіть дату" />
         </Form.Item>
