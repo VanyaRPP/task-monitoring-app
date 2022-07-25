@@ -36,7 +36,12 @@ const Tasks: React.FC = () => {
                   key={index}
                   title={task.name}
                   extra={
-                    <Badge color='gold' count={task?.taskexecutors ? task?.taskexecutors.length : 0}>
+                    <Badge
+                      color="gold"
+                      count={
+                        task?.taskexecutors ? task?.taskexecutors.length : 0
+                      }
+                    >
                       <Button
                         ghost
                         type="primary"
