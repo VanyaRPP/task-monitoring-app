@@ -80,3 +80,9 @@
     display: none;
   }
 }
+
+.ThemeSwitcher {
+  @media (max-width: 425px) {
+    display: none;
+  }
+}

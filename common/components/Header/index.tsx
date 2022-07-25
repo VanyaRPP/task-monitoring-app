@@ -40,7 +40,9 @@ const Header: React.FC = () => {
           </Button>
         )}
         <TaskButton />
-        <ThemeSwitcher />
+        <div className={s.ThemeSwitcher}>
+          <ThemeSwitcher />
+        </div>
       </div>
       <LoginUser />
     </Layout.Header>

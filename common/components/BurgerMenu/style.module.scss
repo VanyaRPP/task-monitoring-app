@@ -2,28 +2,40 @@
   display: block;
   padding: 0.1rem;
   margin: 0 0.75rem;
+  background-color: var(----textColor); //burger background
+  color: var(--primaryColor);
   @media (min-width: 425px) {
     display: none;
   }
 }
-.Drawer {
-  .Buttons {
-    margin: -1.5rem;
-  }
+
+.Search {
+  margin-top: 15px;
+  height: 50px;
 }
+
+.Drawer {
+  // .Buttons {
+  //   margin: -1.5rem;
+  // }
+}
+
 .Points {
   display: flex;
   align-items: left;
   justify-content: center;
   flex-direction: column;
+  margin-top: 20px;
 }
 
 .Image {
   margin-top: 0.17rem;
 }
+
 .Diamant {
   color: var(--textColor) !important;
 }
+
 .Premium {
   span {
     font-size: 20px;
@@ -31,12 +43,20 @@
     padding: 0.25em 0.5em;
   }
 }
+
 .SignIn {
   color: var(--textColor);
   font-size: 20px;
   padding: 0 0.5em;
 }
+
 .Divider {
   color: var(--textColor);
-  margin: 0;
+  margin: 5;
+}
+
+.Buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
