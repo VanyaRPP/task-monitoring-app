@@ -9,7 +9,7 @@ import { AppRoutes } from '../../../utils/constants'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
 import premiumIcon from '../../assets/premium/diamond.png'
 import Diamant from '../../assets/svg/diamant'
-import Logo from '../../assets/svg/logo'
+import LogoCircle from '../../assets/svg/logo_circle'
 import { SearchBar } from '../UI/SearchBar'
 import s from './style.module.scss'
 
@@ -44,14 +44,14 @@ const BurgerMenu: React.FC = () => {
         //   backgroundColor: 'var(--backgroundColor)',
         // }}
         onClose={onClose}
-        title="Меню"
+        // title="Меню"
         placement="left"
         closable={false}
         visible={isActive}
-        // className={s.Drawer}
-        // width="70%"
+        className={s.Drawer}
+        width="70%"
       >
-        <Logo />
+        {/* <LogoCircle /> */}
         <div className={s.Buttons}>
           <SearchBar className={s.Search} />
           <div className={s.Points}>

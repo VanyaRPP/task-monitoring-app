@@ -15,7 +15,6 @@ import LogoCircle from '../../assets/svg/logo_circle'
 const Header: React.FC = () => {
   const { status } = useSession()
 
-  status === 'authenticated'
   return (
     <Layout.Header className={s.Header}>
       <BurgerMenu />
@@ -28,9 +27,7 @@ const Header: React.FC = () => {
           <ThemeSwitcher />
         </div>
       </div>
-      {status === 'authenticated' ? (
-        <SearchBar className={s.Search} />
-      ) : (
+      {status === 'authenticated' && (
         <Button
           icon={<Diamant className={s.Diamant} />}
           className={s.Button_Premium}
@@ -40,9 +37,9 @@ const Header: React.FC = () => {
           <span>Преміум</span>
         </Button>
       )}
-
-      <ThemeSwitcher />
-      <LoginUser />
+      <div className={s.LoginUser}>
+        <LoginUser />
+      </div>
     </Layout.Header>
   )
 }
