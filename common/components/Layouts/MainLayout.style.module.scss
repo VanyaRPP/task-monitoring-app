@@ -19,25 +19,6 @@
       margin-left: 0 !important;
     }
 
-    .SearchBar {
-      display: none;
-
-      input {
-        transition: color 0.5s, background 0.5s;
-        color: var(--textColor);
-        background: var(--backgroundColorPrimary) !important;
-      }
-
-      @media (max-width: 660px) {
-        display: block;
-        margin-bottom: 25px;
-      }
-
-      @media (max-width: 600px) {
-        margin-bottom: 10px;
-      }
-    }
-
     .Foreground {
       display: flex;
       flex-direction: column;

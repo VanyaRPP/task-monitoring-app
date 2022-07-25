@@ -58,12 +58,6 @@ const AdminPageCategories: React.FC = () => {
   return (
     <>
       <div className={s.Controls}>
-        {/* <Search
-          className={s.Search}
-          placeholder="input search text"
-          onSearch={() => console.log('search')}
-          enterButton
-        /> */}
         <Input
           placeholder="Пошук категорії..."
           value={search}
