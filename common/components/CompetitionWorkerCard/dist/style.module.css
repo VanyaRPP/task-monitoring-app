@@ -1,0 +1,36 @@
+.container {
+  display: flex;
+  position: absolute;
+  flex-direction: column;
+  width: 100%;
+  z-index: 999;
+  background-color: var(--primaryColor);
+}
+
+.Card {
+  margin: 0 auto;
+  max-width: 350px;
+  min-width: 250px;
+  transition: background 0.5s, box-shadow 0.5s, opacity 0.2s;
+  box-shadow: 5px 5px 10px 1px var(--primaryColor);
+  background: var(--backgroundColorElements) !important;
+  border-color: var(--backgroundColorPrimary);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.Card > * {
+  border-color: var(--primaryColor);
+  transition: background 0.5s, color 0.5s;
+  color: var(--textColor);
+}
+.Card > *:first-of-type {
+  background: var(--backgroundColorPrimary);
+}
+.Card.Disabled {
+  opacity: 0.5;
+}
+
+.Avatar {
+  width: 100px;
+  height: 100px;
+}

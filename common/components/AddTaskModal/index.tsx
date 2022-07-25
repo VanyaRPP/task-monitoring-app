@@ -193,7 +193,7 @@ const AddTaskModal: React.FC<PropsType> = ({
               placement="topLeft"
             />
           }
-          rules={validateField('deadline')}
+        // rules={validateField('deadline')}
         >
           <div id="datePicker" style={{ position: 'relative' }}>
             <DatePicker
