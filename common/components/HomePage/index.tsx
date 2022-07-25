@@ -29,9 +29,11 @@ const HomePage: React.FC = () => {
 
         <div className={s.HalfBlock}>
           <div className={s.Text}>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Tenetur
-            ducimus incidunt modi laborum voluptas asperiores id fuga debitis
-            est vitae!
+            Вітаємо Вас на платформі електронних замовлень для домогосподарств.
+            Тут Ви можете замовити або отримати роботу по встановленню/ремонту
+            сантехніки, електрики, теплотехніки, кондиціонування та вентиляції,
+            загальнобудівельним, столярним роботам (вікна, двері) та багато
+            іншого.
           </div>
         </div>
       </div>
@@ -43,7 +45,7 @@ const HomePage: React.FC = () => {
             router.push(AppRoutes.AUTH_SIGN_IN)
           }}
         >
-          Login
+          Логін
         </Button>
 
         <Button
@@ -54,7 +56,7 @@ const HomePage: React.FC = () => {
             router.push(AppRoutes.CONTACTS)
           }}
         >
-          Contact us
+          Зв’яжіться з нами
         </Button>
       </div>
     </>

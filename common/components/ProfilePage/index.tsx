@@ -24,7 +24,7 @@ const ProfilePage: React.FC = () => {
 
   return (
     <>
-      <h2 className={s.Header}>My profile</h2>
+      <h2 className={s.Header}>Мій Профіль</h2>
 
       <div className={s.Container}>
         <Card
@@ -34,7 +34,7 @@ const ProfilePage: React.FC = () => {
           extra={
             user?.role === Roles.ADMIN && (
               <Button type="link" onClick={() => Router.push(AppRoutes.ADMIN)}>
-                Admin Panel
+                Панель Адміністратора
               </Button>
             )
           }
@@ -47,22 +47,22 @@ const ProfilePage: React.FC = () => {
           </div>
 
           <div className={s.Info}>
-            <Card size="small" title="Role">
+            <Card size="small" title="Роль">
               {router.query.id ? user?.role : <RoleSwitcher />}
             </Card>
 
-            <Card size="small" title="Email">
+            <Card size="small" title="Електронна пошта">
               <p>{user?.email}</p>
             </Card>
 
             {user?.tel && (
-              <Card size="small" title="Phone">
+              <Card size="small" title="Номер телефону">
                 <p>{user?.tel}</p>
               </Card>
             )}
 
-            <Card title="Address" size="small">
-              <p>{user?.address?.name || 'Zhytomyr'}</p>
+            <Card title="Адреса" size="small">
+              <p>{user?.address?.name || 'Житомир'}</p>
             </Card>
             <Button type="primary">
               <EditOutlined key="edit" />

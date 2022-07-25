@@ -24,7 +24,7 @@ const LoginUser: React.FC = () => {
           type="primary"
           className={s.Button}
         >
-          Sign in
+          Увійти
         </Button>
       </>
     )
@@ -69,7 +69,7 @@ const LoginUser: React.FC = () => {
           <p>{session?.user?.email}</p>
           {user?.role === 'Admin' && (
             <Button type="link" onClick={() => Router.push(AppRoutes.ADMIN)}>
-              Admin Panel
+              Панель адміна
             </Button>
           )}
           <div className={s.Buttons}>
@@ -78,10 +78,10 @@ const LoginUser: React.FC = () => {
               block
               onClick={() => Router.push(AppRoutes.PROFILE)}
             >
-              My Profile
+              Мій профіль
             </Button>
             <Button type="link" block onClick={() => signOut()}>
-              Sign out
+              Вийти
             </Button>
           </div>
         </Card>

@@ -13,16 +13,16 @@ const { TabPane } = Tabs
 const AdminPage: React.FC = () => {
   return (
     <Tabs defaultActiveKey="1" className={s.Tabs}>
-      <TabPane tab="Categories" key="1">
+      <TabPane tab="Категорії" key="1">
         <AdminPageCategories />
       </TabPane>
-      <TabPane tab="Clients" key="2">
+      <TabPane tab="Клієнти" key="2">
         <AdminPageClients />
       </TabPane>
-      <TabPane tab="Tasks" key="3">
+      <TabPane tab="Завдання" key="3">
         <AdminPageTasks />
       </TabPane>
-      <TabPane tab="Domains" key="4">
+      <TabPane tab="Домени" key="4">
         <AdminPageDomains />
       </TabPane>
     </Tabs>

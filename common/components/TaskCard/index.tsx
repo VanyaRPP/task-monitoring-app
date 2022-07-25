@@ -68,10 +68,10 @@ const TaskCard = ({ taskId, task }) => {
           title={task?.name}
           actions={session?.user?.email === user?.email && Actions}
         >
-          <p className={s.Description}>Description: {task?.description}</p>
-          <p>Category: {task?.category}</p>
-          <p>Address: {task?.address?.name}</p>
-          <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
+          <p className={s.Description}>Опис: {task?.desription}</p>
+          <p>Категорія: {task?.category}</p>
+          <p>Адреса: {task?.address?.name}</p>
+          <p>Виконати до: {dateToDefaultFormat(task?.deadline)}</p>
         </Card>
       </div>
 

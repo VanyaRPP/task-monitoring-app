@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { SendOutlined } from '@ant-design/icons'
-import { Card, List, Button, Input } from 'antd'
+import { Card, List, Button, Input, Avatar } from 'antd'
 import Comment from './comment'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 import {
@@ -46,7 +46,7 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
   }
 
   return (
-    <Card loading={loading} className={s.Card} title="Comments">
+    <Card loading={loading} className={s.Card} title="Коментарі">
       <List
         className={s.List}
         dataSource={task?.data?.comment}
@@ -60,7 +60,7 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
       <div className={s.Input}>
         <Input
           maxLength={250}
-          placeholder="Type your comment here..."
+          placeholder="Введіть свій коментар..."
           value={deleteExtraWhitespace(input)}
           onChange={(e) => setInput(e.target.value)}
           onPressEnter={handleAddTask}

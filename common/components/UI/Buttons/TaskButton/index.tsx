@@ -48,7 +48,18 @@ const TaskButton: React.FC = () => {
 
   return status === 'authenticated' ? (
     <>
-      {taskButton()}
+      <Button
+        onClick={() => {
+          router.route === AppRoutes.TASK
+            ? setIsModalVisible(true)
+            : Router.push(AppRoutes.TASK)
+        }}
+        ghost
+        type="primary"
+        className={s.Button}
+      >
+        {router.route === AppRoutes.TASK ? 'Створити завдання' : 'Завдання'}
+      </Button>
       <AddTaskModal
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}

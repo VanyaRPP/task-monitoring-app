@@ -1,4 +1,4 @@
-import { Button, Card, Empty } from 'antd'
+import { Badge, Button, Card, Empty } from 'antd'
 import { useGetAllTaskQuery } from '../../common/api/taskApi/task.api'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
 import { ITask } from '../../common/modules/models/Task'
@@ -36,24 +36,31 @@ const Tasks: React.FC = () => {
                   key={index}
                   title={task.name}
                   extra={
-                    <Button
-                      ghost
-                      type="primary"
-                      onClick={() =>
-                        Router.push(AppRoutes.TASK + '/' + task._id)
+                    <Badge
+                      color="gold"
+                      count={
+                        task?.taskexecutors ? task?.taskexecutors.length : 0
                       }
                     >
-                      {isDeadlineExpired(task?.deadline) ? 'Info' : 'Apply'}
-                    </Button>
+                      <Button
+                        ghost
+                        type="primary"
+                        onClick={() =>
+                          Router.push(AppRoutes.TASK + '/' + task._id)
+                        }
+                      >
+                        {isDeadlineExpired(task?.deadline) ? 'Info' : 'Apply'}
+                      </Button>
+                    </Badge>
                   }
                   className={classNames(s.Card, {
                     [s.Disabled]: isDeadlineExpired(task?.deadline),
                   })}
                 >
-                  <p>Category: {task?.category}</p>
-                  <p>Description: {task.description}</p>
-                  <p>Address: {task?.address?.name}</p>
-                  <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
+                  <p>Категорія: {task?.category}</p>
+                  <p>Опис: {task.description}</p>
+                  <p>Адреса: {task?.address?.name}</p>
+                  <p>Виконати до: {dateToDefaultFormat(task?.deadline)}</p>
                 </Card>
               )
             })}

@@ -10,7 +10,7 @@ const Footer: FC<Props> = ({ style }) => {
   return (
     <Layout.Footer className={s.Footer} style={style}>
       <div className={s.Divider} />
-      <h2>LOGO</h2>
+      <h2>Лого</h2>
       <span>© 2022 task-monitoring-app</span>
     </Layout.Footer>
   )

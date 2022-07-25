@@ -36,7 +36,7 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
     <>
       {error && customError !== undefined && (
         <Alert
-          message="Error"
+          message="Помилка"
           description={customError}
           type="error"
           showIcon
@@ -44,7 +44,7 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
         />
       )}
 
-      <h2 className={s.Header}>Sign In</h2>
+      <h2 className={s.Header}>Увійти</h2>
 
       <div className={s.Container}>
         <div className={s.HalfBlock}>
@@ -56,14 +56,14 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
             <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
             <input
               className={s.Input}
-              placeholder="Enter your email"
+              placeholder="Введіть електронну пошту"
               type="email"
               id="email"
               name="email"
             />
             <button className={s.Button} type="submit">
               <MailOutlined style={{ fontSize: '1.2rem' }} />
-              <span>Sign in with Email</span>
+              <span>Увійти з Email</span>
             </button>
           </form>
         </div>

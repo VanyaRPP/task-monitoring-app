@@ -8,10 +8,9 @@ import { AppRoutes } from 'utils/constants'
 import s from './style.module.scss'
 import { useSession } from 'next-auth/react'
 import Router from 'next/router'
-import premiumIcon from '../../assets/premium/diamond.png'
-import Image from 'next/image'
 import BurgerMenu from '../BurgerMenu'
 import Diamant from '../../assets/svg/diamant'
+import LogoCircle from '../../assets/svg/logo_circle'
 
 const Header: React.FC = () => {
   const { status } = useSession()
@@ -22,26 +21,24 @@ const Header: React.FC = () => {
       <BurgerMenu />
       <div className={s.Item}>
         <Link href={AppRoutes.INDEX}>
-          <h1 className={s.Logo}>LOGO</h1>
+          <LogoCircle className={s.Logo} />
         </Link>
-        {status === 'authenticated' ? (
-          <SearchBar className={s.Search} />
-        ) : (
-          <Button
-            icon={
-              // <Image src={premiumIcon} alt="Premium" width={25} height={25} />
-              <Diamant />
-            }
-            className={s.Button_Premium}
-            type="primary"
-            onClick={() => Router.push(AppRoutes.PREMIUM)}
-          >
-            <span>Premium</span>
-          </Button>
-        )}
         <TaskButton />
-        <ThemeSwitcher />
       </div>
+      {status === 'authenticated' ? (
+        <SearchBar className={s.Search} />
+      ) : (
+        <Button
+          icon={<Diamant className={s.Diamant} />}
+          className={s.Button_Premium}
+          type="primary"
+          onClick={() => Router.push(AppRoutes.PREMIUM)}
+        >
+          <span>Преміум</span>
+        </Button>
+      )}
+
+      <ThemeSwitcher />
       <LoginUser />
     </Layout.Header>
   )
