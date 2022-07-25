@@ -1,7 +1,7 @@
 import { Tabs } from 'antd'
 import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
-import AdminPageCategories from 'common/components/AdminIU/AdminPageCategorie'
+import AdminPageCategories from 'common/components/AdminIU/AdminPageCategories'
 import AdminPageClients from 'common/components/AdminIU/AdminPageClients'
 import AdminPageTasks from 'common/components/AdminIU/AdminPageTasks'
 import AdminPageDomains from 'common/components/AdminIU/AdminPageDomains'
@@ -23,7 +23,7 @@ const AdminPage: React.FC = () => {
         <AdminPageTasks />
       </TabPane>
       <TabPane tab="Домени" key="4">
-        {/* Домени */}
+        <AdminPageDomains />
       </TabPane>
     </Tabs>
   )
