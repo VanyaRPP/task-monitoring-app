@@ -1,19 +1,49 @@
 .Header {
+  display: none;
+  font-size: calc(8.25px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
+  text-align: center;
+  transition: color 0.5s;
+  color: var(--primaryColor);
+  @media (min-width: 425px) {
+    display: block;
+  }
+}
+.Komunalnik {
   font-size: calc(27px + (45 + 45 * 0.7) * ((100vw - 320px) / 1440));
   text-align: center;
   transition: color 0.5s;
   color: var(--primaryColor);
-}
-#Smaller {
-  margin-top: 0;
-  @media (min-width: 320px) {
-    font-size: calc(7px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
-  }
-}
-#Bigger {
-  margin-bottom: -0.25em;
+  letter-spacing: 3px;
+  margin-bottom: -0.1em;
   font-weight: 700;
 }
+.HeaderMobile {
+  display: none;
+  letter-spacing: 3px;
+  text-align: center;
+  transition: color 0.5s;
+  font-size: calc(12px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
+  color: var(--primaryColor);
+  @media (max-width: 425px) {
+    display: block;
+  }
+}
+.Smaller1 {
+  margin-top: 0;
+  @media (min-width: 320px) {
+    margin-bottom: -0.75rem;
+    letter-spacing: 2px;
+    font-size: calc(12px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
+  }
+}
+.Smaller2 {
+  margin-top: 0;
+  @media (min-width: 320px) {
+    letter-spacing: 2px;
+    font-size: calc(11px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
+  }
+}
+
 .Name {
   display: block;
   padding: 0 1rem;

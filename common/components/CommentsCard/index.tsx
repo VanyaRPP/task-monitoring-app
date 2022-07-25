@@ -9,6 +9,7 @@ import {
 } from 'common/api/taskApi/task.api'
 import { useSession } from 'next-auth/react'
 import s from './style.module.scss'
+import { deleteExtraWhitespace } from '../../assets/features/validators'
 
 interface Props {
   taskId: any
@@ -37,6 +38,7 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
         {
           id: sessionUser?.data?._id,
           text: input,
+          datetime: new Date(),
         },
       ],
     })
@@ -50,16 +52,18 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
         dataSource={task?.data?.comment}
         renderItem={(item, index) => (
           <List.Item key={index}>
-            <Comment comment={item} />
+            <Comment comment={item} taskId={task?.data?._id} />
           </List.Item>
         )}
       />
 
       <div className={s.Input}>
         <Input
+          maxLength={250}
           placeholder="Type your comment here..."
-          value={input}
+          value={deleteExtraWhitespace(input)}
           onChange={(e) => setInput(e.target.value)}
+          onPressEnter={handleAddTask}
         />
         <Button
           type="primary"

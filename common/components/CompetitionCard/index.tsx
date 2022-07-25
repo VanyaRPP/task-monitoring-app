@@ -12,8 +12,8 @@ import {
 import Column from 'antd/lib/table/Column'
 import Meta from 'antd/lib/card/Meta'
 import ModalWindow from '../UI/ModalWindow/index'
-import ApplyAuctionForm from '../ApplyAuctionForm/index'
-import { ITask, ItaskExecutors } from '../../modules/models/Task'
+import { ITask, ITaskExecutors } from 'common/modules/models/Task'
+import CompetitionForm from '../Forms/CompetitionForm/index'
 import {
   useAcceptWorkerMutation,
   useAddTaskExecutorMutation,
@@ -24,6 +24,7 @@ import {
 } from '../../api/userApi/user.api'
 import s from './style.module.scss'
 import { QuestionCircleOutlined } from '@ant-design/icons'
+import CompetitionWorkerCard from '../CompetitionWorkerCard'
 
 export const Executor = ({ executor, type }) => {
   const { data } = useGetUserByIdQuery(`${executor.workerid}`)
@@ -33,8 +34,14 @@ export const Executor = ({ executor, type }) => {
     return (
       <Meta
         avatar={<Avatar src={worker?.image} />}
-        title={worker?.name}
-        description={<p>{executor.description}</p>}
+        title={
+          <span style={{ color: 'var(--textColor)' }}>{worker?.name}</span>
+        }
+        description={
+          <span style={{ color: 'var(--textColor)', opacity: 0.5 }}>
+            {executor.description}
+          </span>
+        }
       />
     )
   }
@@ -109,12 +116,22 @@ const CompetitionCard: React.FC<{
       }`}
       extra={
         task?.creator !== userData?.data?._id && (
-          <Button type="primary" ghost onClick={onApplyCompetition}>
+          <Button
+            type="primary"
+            ghost
+            onClick={onApplyCompetition}
+            disabled={
+              !task?.taskexecutors.every(
+                (executor) => executor.workerid !== userData?.data?._id
+              )
+            }
+          >
             Apply
           </Button>
         )
       }
     >
+      {task?.executant ? <CompetitionWorkerCard _id={task?.executant} /> : null}
       <ModalWindow
         title="Apply for an competition"
         isModalVisible={isModalVisible}
@@ -123,7 +140,7 @@ const CompetitionCard: React.FC<{
         okText="Apply"
         cancelText="Cancel"
       >
-        <ApplyAuctionForm isFormDisabled={isFormDisabled} form={form} />
+        <CompetitionForm isFormDisabled={isFormDisabled} form={form} />
       </ModalWindow>
       <Table key="competition" dataSource={executors} pagination={false}>
         <Column
@@ -131,7 +148,7 @@ const CompetitionCard: React.FC<{
           dataIndex="workerid"
           key="executors"
           width="55%"
-          render={(_, executor: ItaskExecutors) => (
+          render={(_, executor: ITaskExecutors) => (
             <Executor executor={executor} type="workerInfo" />
           )}
         />
@@ -147,7 +164,7 @@ const CompetitionCard: React.FC<{
           dataIndex="rating"
           key="rating"
           width="15%"
-          render={(_, executor: ItaskExecutors) => (
+          render={(_, executor: ITaskExecutors) => (
             <Executor executor={executor} type="rating" />
           )}
         />
@@ -156,7 +173,7 @@ const CompetitionCard: React.FC<{
             title="Actions"
             key="actions"
             width="10%"
-            render={(_, executor: ItaskExecutors) => (
+            render={(_, executor: ITaskExecutors) => (
               <Popconfirm
                 title="Are you sure?"
                 okText="Yes"

@@ -1,16 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import dbConnect from 'utils/dbConnect'
 import Task from 'common/modules/models/Task'
+import start, { Data } from 'pages/api/api.config'
 
-type Data = {
-  data?: any
-  success: boolean
-  error?: any
-}
-
-async function start() {
-  await dbConnect()
-}
 start()
 
 export default async function handler(

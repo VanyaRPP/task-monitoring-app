@@ -19,7 +19,6 @@ export default function MyApp({
             height={2}
             showOnShallow={false}
           />
-
           <Component {...pageProps} />
         </MainLayout>
       </Provider>
