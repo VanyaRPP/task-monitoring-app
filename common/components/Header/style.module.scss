@@ -47,7 +47,7 @@
       }
 
       @media (max-width: 660px) {
-        display: none;
+        display: block;
       }
     }
   }
@@ -58,19 +58,19 @@
   background: var(--backgroundColorPrimary);
   .Button_Premium {
     @media (min-width: 425px) {
-      margin: 0 2rem;
+      margin-right: 2rem;
     }
     @media (min-width: 768px) {
-      margin: 0 10rem;
+      margin-right: 30rem;
     }
     @media (min-width: 1024px) {
-      margin: 0 15rem;
+      margin-right: 30rem;
     }
     @media (min-width: 1440px) {
-      margin: 0 30rem;
+      margin-right: 20rem;
     }
     @media (min-width: 2560px) {
-      margin: 0 60rem;
+      margin-right: 20rem;
     }
   }
 }
