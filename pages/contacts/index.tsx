@@ -22,7 +22,7 @@ const ContactsPage: React.FC = () => {
     <>
       <h1 className={s.Header}>Зв`яжіться з нами</h1>
       <p className={s.Text}>
-        Ми не можемо вирішити вашу проблему, якщо ви про неї не скаже те!
+        Опишіть, будь ласка, вашу проблему, а ми допоможемо її вирішити.
       </p>
 
       <div className={s.Container}>

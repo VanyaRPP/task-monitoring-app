@@ -30,7 +30,7 @@ const Profile: React.FC = () => {
           extra={
             user?.role === Roles.ADMIN && (
               <Button type="link" onClick={() => Router.push(AppRoutes.ADMIN)}>
-                Панель адміна
+                Адміністративна панель
               </Button>
             )
           }
