@@ -124,6 +124,8 @@ const AddTaskModal: React.FC<PropsType> = ({
       onOk={onSubmit}
     >
       <Form
+        id="addTaskForm"
+        style={{ position: 'relative' }}
         form={form}
         layout="vertical"
         name="form_in_modal"
@@ -173,16 +175,16 @@ const AddTaskModal: React.FC<PropsType> = ({
           />
         </Form.Item>
         <Form.Item name="category" label="Categories">
-          <div id="select" style={{ position: 'relative' }}>
-            <Select getPopupContainer={() => document.getElementById('select')}>
-              {categories &&
-                categories.map((category) => (
-                  <Select.Option key={category?._id} value={category?.name}>
-                    {category?.name}
-                  </Select.Option>
-                ))}
-            </Select>
-          </div>
+          <Select
+            getPopupContainer={() => document.getElementById('addTaskForm')}
+          >
+            {categories &&
+              categories.map((category) => (
+                <Select.Option key={category?._id} value={category?.name}>
+                  {category?.name}
+                </Select.Option>
+              ))}
+          </Select>
         </Form.Item>
         <Form.Item
           name="deadline"
@@ -195,12 +197,10 @@ const AddTaskModal: React.FC<PropsType> = ({
           }
           rules={validateField('deadline')}
         >
-          <div id="datePicker" style={{ position: 'relative' }}>
-            <DatePicker
-              getPopupContainer={() => document.getElementById('datePicker')}
-              disabledDate={disabledDate}
-            />
-          </div>
+          <DatePicker
+            getPopupContainer={() => document.getElementById('addTaskForm')}
+            disabledDate={disabledDate}
+          />
         </Form.Item>
       </Form>
     </Modal>
