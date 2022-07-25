@@ -6,6 +6,7 @@ import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 import classNames from 'classnames'
 import moment from 'moment'
 import s from './style.module.scss'
+import UserLink from '../UserLink'
 
 const Comment: React.FC<{ comment: IComment; taskId: string }> = ({
   comment,
@@ -24,7 +25,7 @@ const Comment: React.FC<{ comment: IComment; taskId: string }> = ({
         className={classNames(s.Comment, {
           [s.Active]: sessionUser?.data?._id === user?._id,
         })}
-        author={user ? user?.name : 'User not found'}
+        author={user ? <UserLink user={user} /> : 'User not found'}
         avatar={user?.image || undefined}
         content={<p className={s.Description}>{comment?.text}</p>}
         datetime={moment(comment?.datetime).fromNow()}

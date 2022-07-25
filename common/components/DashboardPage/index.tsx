@@ -8,7 +8,7 @@ const Dashboard: React.FC = () => {
   return (
     <>
       <div className={s.Header}>
-        <h1>Dashboard</h1>
+        <h1>Дошка</h1>
       </div>
 
       <div className={s.Container}>

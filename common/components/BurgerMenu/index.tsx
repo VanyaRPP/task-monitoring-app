@@ -44,7 +44,7 @@ const BurgerMenu: React.FC = () => {
         //   backgroundColor: 'var(--backgroundColor)',
         // }}
         onClose={onClose}
-        // title="Menu"
+        title="Меню"
         placement="left"
         closable={false}
         visible={isActive}
@@ -59,7 +59,7 @@ const BurgerMenu: React.FC = () => {
               className={s.Premium}
               onClick={() => Router.push(AppRoutes.PREMIUM)}
             >
-              <span>Premium</span>
+              <span>Преміум</span>
               <Diamant className={s.Diamant} />
               {/* <Image
                 src={premiumIcon}
@@ -77,7 +77,7 @@ const BurgerMenu: React.FC = () => {
                   signOut()
                 }}
               >
-                <span>Sign out</span>
+                <span>Вийти</span>
               </div>
             ) : (
               <div
@@ -86,7 +86,7 @@ const BurgerMenu: React.FC = () => {
                   Router.push(AppRoutes.AUTH_SIGN_IN)
                 }}
               >
-                <span>Sign in</span>
+                <span>Увійти</span>
               </div>
             )}
 

@@ -38,6 +38,15 @@ const AdminPageTasks: React.FC = () => {
           icon={<PlusOutlined />}
           onClick={() => setIsModalVisible(true)}
         />
+        <Input
+          placeholder="Пошук завдання..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <AddTaskModal
+          isModalVisible={isModalVisible}
+          setIsModalVisible={setIsModalVisible}
+        />
       </div>
       <AddTaskModal
         isModalVisible={isModalVisible}

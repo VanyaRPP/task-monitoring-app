@@ -42,7 +42,7 @@ const Categories: React.FC<{
           className={s.Category}
           actions={[
             <Button key="info" type="primary" onClick={() => ''}>
-              Info
+              Інформація
             </Button>,
           ].concat(
             role === Roles.ADMIN

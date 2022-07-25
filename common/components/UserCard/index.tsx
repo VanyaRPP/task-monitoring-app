@@ -30,7 +30,9 @@ const UserInfo: React.FC<Props> = ({ user }) => {
           />
         }
         title={<h4 className={s.Title}>{user.name}</h4>}
-        description={<p className={s.Description}>Email: {user.email}</p>}
+        description={
+          <p className={s.Description}>Електронна пошта: {user.email}</p>
+        }
       />
     </Card>
   )

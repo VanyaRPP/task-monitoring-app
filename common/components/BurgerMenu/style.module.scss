@@ -1,6 +1,6 @@
 .Menu {
   display: block;
-  padding: 0.1rem;
+  padding: 0.25rem;
   margin: 0 0.75rem;
   background-color: var(----textColor); //burger background
   color: var(--primaryColor);
@@ -33,10 +33,11 @@
 }
 
 .Diamant {
-  color: var(--textColor) !important;
+  margin-bottom: -0.3em;
 }
 
 .Premium {
+  margin: 1rem 0;
   span {
     font-size: 20px;
     color: var(--textColor);
@@ -44,7 +45,11 @@
   }
 }
 
+.Premium:hover + .Divider {
+  background-color: var(--primaryColor);
+}
 .SignIn {
+  margin: 1rem 0;
   color: var(--textColor);
   font-size: 20px;
   padding: 0 0.5em;
@@ -59,4 +64,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+.SignIn:hover + .Divider {
+  background-color: var(--primaryColor);
+}
+.Divider {
+  display: flex;
+  background-color: #88888830;
+  margin: 0;
 }

@@ -19,7 +19,7 @@ const AddCategoryForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
     >
       <Form.Item
         name="name"
-        label="Category name"
+        label="Назва категорії"
         normalize={deleteExtraWhitespace}
         rules={validateField('name')}
       >
@@ -27,7 +27,7 @@ const AddCategoryForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
       </Form.Item>
       <Form.Item
         name="description"
-        label="Category description"
+        label="Опис категорії"
         normalize={deleteExtraWhitespace}
         rules={validateField('description')}
       >
