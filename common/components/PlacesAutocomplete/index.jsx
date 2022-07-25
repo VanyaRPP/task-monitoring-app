@@ -3,10 +3,11 @@ import usePlacesAutocomplete, {
   getLatLng,
 } from 'use-places-autocomplete'
 import useOnclickOutside from 'react-cool-onclickoutside'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Input } from 'antd'
 import s from './style.module.scss'
 import useGetAddressFromGeoCode from 'common/modules/hooks/useGetAddressFromGeoCode'
+import { debounce } from 'lodash'
 
 export const PlacesAutocomplete = ({
   isLoaded,
@@ -23,7 +24,7 @@ export const PlacesAutocomplete = ({
     clearSuggestions,
   } = usePlacesAutocomplete({
     initOnMount: false,
-    debounce: 300,
+    debounce: 1000,
   })
   const { getAddress, address } = useGetAddressFromGeoCode()
   const ref = useOnclickOutside(() => {
@@ -36,16 +37,16 @@ export const PlacesAutocomplete = ({
 
   const handleSelect =
     ({ description }) =>
-    () => {
-      setValue(description, false)
-      clearSuggestions()
-      //console.log('📍 Adr: ', description)
-      getGeocode({ address: description }).then((results) => {
-        const { lat, lng } = getLatLng(results[0])
-        //console.log('📍 Coordinates: ', { lat, lng })
-        setAddress({ name: description, geoCode: { lat, lng } })
-      })
-    }
+      () => {
+        setValue(description, false)
+        clearSuggestions()
+        //console.log('📍 Adr: ', description)
+        getGeocode({ address: description }).then((results) => {
+          const { lat, lng } = getLatLng(results[0])
+          //console.log('📍 Coordinates: ', { lat, lng })
+          setAddress({ name: description, geoCode: { lat, lng } })
+        })
+      }
 
   const renderSuggestions = () =>
     data.map((suggestion) => {
