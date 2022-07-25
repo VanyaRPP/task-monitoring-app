@@ -1,4 +1,4 @@
-import { Button, Card, Empty } from 'antd'
+import { Badge, Button, Card, Empty } from 'antd'
 import { useGetAllTaskQuery } from '../../common/api/taskApi/task.api'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
 import { ITask } from '../../common/modules/models/Task'
@@ -36,15 +36,17 @@ const Tasks: React.FC = () => {
                   key={index}
                   title={task.name}
                   extra={
-                    <Button
-                      ghost
-                      type="primary"
-                      onClick={() =>
-                        Router.push(AppRoutes.TASK + '/' + task._id)
-                      }
-                    >
-                      {isDeadlineExpired(task?.deadline) ? 'Info' : 'Apply'}
-                    </Button>
+                    <Badge color='gold' count={task?.taskexecutors ? task?.taskexecutors.length : 0}>
+                      <Button
+                        ghost
+                        type="primary"
+                        onClick={() =>
+                          Router.push(AppRoutes.TASK + '/' + task._id)
+                        }
+                      >
+                        {isDeadlineExpired(task?.deadline) ? 'Info' : 'Apply'}
+                      </Button>
+                    </Badge>
                   }
                   className={classNames(s.Card, {
                     [s.Disabled]: isDeadlineExpired(task?.deadline),
