@@ -1,7 +1,7 @@
 import { Tabs } from 'antd'
 import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
-import AdminPageCategories from 'common/components/AdminIU/AdminPageCategorie'
+import AdminPageCategories from 'common/components/AdminIU/AdminPageCategories'
 import AdminPageClients from 'common/components/AdminIU/AdminPageClients'
 import AdminPageTasks from 'common/components/AdminIU/AdminPageTasks'
 import AdminPageDomains from 'common/components/AdminIU/AdminPageDomains'
@@ -24,7 +24,6 @@ const AdminPage: React.FC = () => {
       </TabPane>
       <TabPane tab="Domains" key="4">
         <AdminPageDomains />
-        {/* Domains */}
       </TabPane>
     </Tabs>
   )
@@ -40,7 +39,7 @@ export async function getServerSideProps(context) {
   )
 
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/${session?.user?.email}`
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/email/${session?.user?.email}`
   )
   const data = await response.json()
   const role = data?.data?.role

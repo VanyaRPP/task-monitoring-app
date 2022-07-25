@@ -144,6 +144,7 @@ const AddTaskModal: React.FC<PropsType> = ({
         <Form.Item
           name="name"
           label="Name of task"
+          normalize={deleteExtraWhitespace}
           rules={validateField('name')}
         >
           <Input />
@@ -155,9 +156,11 @@ const AddTaskModal: React.FC<PropsType> = ({
         >
           <Input.TextArea maxLength={250} />
         </Form.Item>
-        <Form.Item name="images">
+        {/* Waiting for backend !!! */}
+
+        {/* <Form.Item name="images">
           <UploadImages />
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item name="domain" label="Address">
           <PlacesAutocomplete
             isLoaded={isLoaded}
@@ -181,7 +184,9 @@ const AddTaskModal: React.FC<PropsType> = ({
             {categories &&
               categories.map((category) => (
                 <Select.Option key={category?._id} value={category?.name}>
-                  {category?.name}
+                  <Tooltip placement="top" title={category?.description}>
+                    {category?.name}
+                  </Tooltip>
                 </Select.Option>
               ))}
           </Select>

@@ -11,6 +11,8 @@ import { AppRoutes } from 'utils/constants'
 import s from './style.module.scss'
 import { Marker, useJsApiLoader } from '@react-google-maps/api'
 import Map from '../Map'
+import Link from 'next/link'
+import UserLink from '../UserLink'
 
 const TaskCard = ({ taskId, task }) => {
   const router = useRouter()
@@ -59,7 +61,7 @@ const TaskCard = ({ taskId, task }) => {
             size={200}
             src={!task?.customer ? user?.image : null}
           />
-          <h2>{task?.customer ? task?.customer : user?.name}</h2>
+          <h2>{!task?.customer ? <UserLink user={user} /> : task?.customer}</h2>
         </div>
         <Card
           className={s.TaskInfo}
