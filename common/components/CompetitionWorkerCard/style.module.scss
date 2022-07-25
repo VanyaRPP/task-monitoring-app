@@ -4,7 +4,6 @@
   flex-direction: column;
   width: 100%;
   z-index: 999;
-
 }
 
 .Card {
@@ -17,7 +16,7 @@
 
   border-color: var(--backgroundColorPrimary);
 
-  >* {
+  > * {
     border-color: var(--primaryColor);
     transition: background 0.5s, color 0.5s;
     color: var(--textColor);

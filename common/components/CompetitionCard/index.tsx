@@ -54,7 +54,6 @@ export const Executor = ({ executor, type }) => {
 const CompetitionCard: React.FC<{
   task: ITask
 }> = ({ task }) => {
-
   const executors = task?.taskexecutors.map((executor) => ({
     ...executor,
     key: executor.workerid,
@@ -112,8 +111,9 @@ const CompetitionCard: React.FC<{
   return (
     <Card
       className={s.Card}
-      title={`Competition: ${task?.taskexecutors ? task?.taskexecutors.length : ''
-        }`}
+      title={`Competition: ${
+        task?.taskexecutors ? task?.taskexecutors.length : ''
+      }`}
       extra={
         task?.creator !== userData?.data?._id && (
           <Button
@@ -131,12 +131,7 @@ const CompetitionCard: React.FC<{
         )
       }
     >
-      {
-        task?.executant ?
-          <CompetitionWorkerCard _id={task?.executant} />
-          :
-          null
-      }
+      {task?.executant ? <CompetitionWorkerCard _id={task?.executant} /> : null}
       <ModalWindow
         title="Apply for an competition"
         isModalVisible={isModalVisible}

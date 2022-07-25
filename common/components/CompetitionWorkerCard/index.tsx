@@ -9,7 +9,6 @@ interface Props {
 }
 
 const CompetitionWorkerCard: FC<Props> = ({ _id }) => {
-
   const { data } = useGetUserByIdQuery(_id)
   const user = data?.data
 
@@ -21,7 +20,10 @@ const CompetitionWorkerCard: FC<Props> = ({ _id }) => {
           icon={<UserOutlined />}
           src={
             <Image
-              src={user?.image || 'https://anime.anidub.life/templates/kinolife-blue/images/bump.png'}
+              src={
+                user?.image ||
+                'https://anime.anidub.life/templates/kinolife-blue/images/bump.png'
+              }
               preview={false}
               style={{ width: 88 }}
               alt="UserImg"
@@ -33,7 +35,6 @@ const CompetitionWorkerCard: FC<Props> = ({ _id }) => {
         <p>Phone: {user?.tel}</p>
         <Rate disabled defaultValue={user?.rating} />
       </Card>
-
     </div>
   )
 }
