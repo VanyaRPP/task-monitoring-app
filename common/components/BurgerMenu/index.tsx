@@ -7,7 +7,6 @@ import { useState } from 'react'
 import PremiumPage from '../../../pages/premium'
 import { AppRoutes } from '../../../utils/constants'
 import Diamant from '../../assets/svg/diamant'
-import { SearchBar } from '../UI/SearchBar'
 import s from './style.module.scss'
 
 const BurgerMenu: React.FC = () => {
@@ -46,7 +45,6 @@ const BurgerMenu: React.FC = () => {
         width="70%"
       >
         <div className={s.Buttons}>
-          <SearchBar className={s.Search} />
           <div className={s.Points}>
             <div
               className={s.SignIn}
