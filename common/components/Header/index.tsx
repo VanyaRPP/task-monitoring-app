@@ -8,11 +8,8 @@ import { AppRoutes } from 'utils/constants'
 import s from './style.module.scss'
 import { useSession } from 'next-auth/react'
 import Router from 'next/router'
-import premiumIcon from '../../assets/premium/diamond.png'
-import Image from 'next/image'
 import BurgerMenu from '../BurgerMenu'
 import Diamant from '../../assets/svg/diamant'
-import LogoRectangle from '../../assets/svg/logo_rectangle'
 import LogoCircle from '../../assets/svg/logo_circle'
 
 const Header: React.FC = () => {
@@ -25,7 +22,6 @@ const Header: React.FC = () => {
       <div className={s.Item}>
         <Link href={AppRoutes.INDEX}>
           <LogoCircle className={s.Logo} />
-          {/* <LogoRectangle className={s.Logo} /> */}
         </Link>
         <TaskButton />
       </div>

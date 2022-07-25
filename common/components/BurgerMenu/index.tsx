@@ -63,7 +63,7 @@ const BurgerMenu: React.FC = () => {
                 Router.push(AppRoutes.CONTACTS)
               }}
             >
-              Зв`яжіться з нами
+              Зв’яжіться з нами
             </div>
             <Divider className={s.Divider} />
             <div
