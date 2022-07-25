@@ -1,20 +1,37 @@
 .Menu {
-  display: block;
-  padding: 0.25rem;
-  margin: 0 0.75rem;
-  background-color: var(----textColor); //burger background
   color: var(--primaryColor);
+  margin-left: 15px;
+  display: inline-block;
+  cursor: pointer;
+
+  .FirstLine,
+  .SecondLine,
+  .ThirdLine {
+    width: 35px;
+    height: 5px;
+    background-color: var(--primaryColor);
+    margin: 6px 0;
+    transition: 0.4s;
+  }
+
+  .ChangeBurger .FirstLine {
+    -webkit-transform: rotate(-45deg) translate(-9px, 6px);
+    transform: rotate(-45deg) translate(-9px, 6px);
+  }
+
+  .ChangeBurger .SecondLine {
+    opacity: 0;
+  }
+
+  .ChangeBurger .ThirdLine {
+    -webkit-transform: rotate(45deg) translate(-9px, -6px);
+    transform: rotate(45deg) translate(-9px, -7px);
+  }
 
   @media (min-width: 425px) {
     display: none;
   }
 }
-
-.Search {
-  margin-top: 15px;
-  height: 50px;
-}
-
 .Drawer {
   top: 60px;
   // .Buttons {
@@ -22,17 +39,27 @@
   // }
 }
 
+.LogoUser {
+  width: 50px;
+  height: 50px;
+}
+
+.UserInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  span {
+    font-size: 16px;
+  }
+}
+
 .Points {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  margin-top: 20px;
+  // margin-top: 20px;
   width: 100%;
-}
-
-.Image {
-  margin-top: 0.17rem;
 }
 
 .Diamant {
@@ -78,3 +105,25 @@
   background-color: #88888830;
   margin: 0;
 }
+////////////////////
+
+// .Menu {
+//   display: block;
+//   padding: 0.25rem;
+//   margin: 0 0.75rem;
+//   background-color: var(----textColor); //burger background
+//   color: var(--primaryColor);
+
+//   @media (min-width: 425px) {
+//     display: none;
+//   }
+// }
+
+// .Search {
+//   margin-top: 15px;
+//   height: 50px;
+// }
+
+// .Image {
+// margin-top: 0.17rem;
+// }

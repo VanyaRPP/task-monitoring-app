@@ -10,13 +10,14 @@ import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
 import premiumIcon from '../../assets/premium/diamond.png'
 import Diamant from '../../assets/svg/diamant'
 import LogoCircle from '../../assets/svg/logo_circle'
+import LoginUser from '../LoginUser'
 import { SearchBar } from '../UI/SearchBar'
 import s from './style.module.scss'
 
 const BurgerMenu: React.FC = () => {
   const [isActive, setIsActive] = useState(false)
   const showDrawer = () => {
-    setIsActive(true)
+    setIsActive(!isActive)
   }
 
   const onClose = () => {
@@ -26,34 +27,32 @@ const BurgerMenu: React.FC = () => {
   const { data: session, status } = useSession()
 
   const { data, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
+  const userName = session?.user?.name
+  const userEmail = session?.user?.email
 
   return (
     <>
-      <Button
-        type="primary"
-        icon={<MenuOutlined />}
-        onClick={showDrawer}
-        className={s.Menu}
-      />
+      <div className={s.Menu} onClick={showDrawer}>
+        <div className={isActive ? s.ChangeBurger : null}>
+          <div className={s.FirstLine}></div>
+          <div className={s.SecondLine}></div>
+          <div className={s.ThirdLine}></div>
+        </div>
+      </div>
       <Drawer
-        // headerStyle={{
-        //   backgroundColor: 'var(--primaryColorHover)',
-        //   textAlign: 'center',
-        // }}
-        // drawerStyle={{
-        //   backgroundColor: 'var(--backgroundColor)',
-        // }}
         onClose={onClose}
-        // title="Меню"
         placement="left"
         closable={false}
         visible={isActive}
         className={s.Drawer}
         width="70%"
       >
-        {/* <LogoCircle /> */}
         <div className={s.Buttons}>
-          <SearchBar className={s.Search} />
+          <div className={s.UserInfo}>
+            <LoginUser />
+            <span>{userName}</span>
+            <span>{userEmail}</span>
+          </div>
           <div className={s.Points}>
             <div
               className={s.Premium}
