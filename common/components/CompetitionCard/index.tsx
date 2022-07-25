@@ -24,6 +24,7 @@ import {
 } from '../../api/userApi/user.api'
 import s from './style.module.scss'
 import { QuestionCircleOutlined } from '@ant-design/icons'
+import CompetitionWorkerCard from '../CompetitionWorkerCard'
 
 export const Executor = ({ executor, type }) => {
   const { data } = useGetUserByIdQuery(`${executor.workerid}`)
@@ -115,12 +116,22 @@ const CompetitionCard: React.FC<{
       }`}
       extra={
         task?.creator !== userData?.data?._id && (
-          <Button type="primary" ghost onClick={onApplyCompetition}>
+          <Button
+            type="primary"
+            ghost
+            onClick={onApplyCompetition}
+            disabled={
+              !task?.taskexecutors.every(
+                (executor) => executor.workerid !== userData?.data?._id
+              )
+            }
+          >
             Apply
           </Button>
         )
       }
     >
+      {task?.executant ? <CompetitionWorkerCard _id={task?.executant} /> : null}
       <ModalWindow
         title="Apply for an competition"
         isModalVisible={isModalVisible}

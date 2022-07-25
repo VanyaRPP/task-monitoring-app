@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "yarn open-browser && next dev",
+    "devw": "next dev",
     "open-browser": "open http://localhost:3000",
     "build": "next build",
     "start": "next start",
