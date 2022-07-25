@@ -5,3 +5,8 @@ export interface AllCategoriesQuery {
   success: boolean
   data: ICategory[]
 }
+
+export interface BaseQuery {
+  success: boolean
+  data: ICategory
+}
