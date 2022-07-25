@@ -83,7 +83,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
       className={s.Card}
       title={
         <span style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          Feedbacks
+          Відгуки
           {sessionUser?.data?._id !== user?._id && (
             <Button
               type="primary"
@@ -92,12 +92,12 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
             />
           )}
           <ModalWindow
-            title={`Leave feedback about ${user?.name}`}
+            title={`Залиште відгук про ${user?.name}`}
             isModalVisible={isModalVisible}
             onCancel={onCancelModal}
             onOk={onSubmitModal}
-            okText="Leave feedback"
-            cancelText="Cancel"
+            okText="Залишити відгук"
+            cancelText="Скасувати"
           >
             <AddFeedbackForm isFormDisabled={isFormDisabled} form={form} />
           </ModalWindow>
@@ -123,7 +123,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
           )}
         />
       ) : (
-        <Empty className={s.Empty} />
+        <Empty className={s.Empty} description="Немає даних" />
       )}
     </Card>
   )

@@ -20,9 +20,9 @@ const ContactsPage: React.FC = () => {
 
   return (
     <>
-      <h1 className={s.Header}>Contact Us</h1>
+      <h1 className={s.Header}>Зв`яжіться з нами</h1>
       <p className={s.Text}>
-        We can`t solve your problem if you don`t tell us about it!
+        Опишіть, будь ласка, вашу проблему, а ми допоможемо її вирішити.
       </p>
 
       <div className={s.Container}>
@@ -33,20 +33,20 @@ const ContactsPage: React.FC = () => {
               normalize={deleteExtraWhitespace}
               rules={validateField('name')}
             >
-              <Input maxLength={30} placeholder="Name" />
+              <Input maxLength={30} placeholder="Ім’я" />
             </Form.Item>
 
             <Form.Item name="email" rules={validateField('email')}>
-              <Input placeholder="Email" />
+              <Input placeholder="Електронна пошта" />
             </Form.Item>
 
             <Form.Item normalize={deleteExtraWhitespace} name="message">
-              <Input.TextArea maxLength={150} placeholder="Message" />
+              <Input.TextArea maxLength={150} placeholder="Повідомлення" />
             </Form.Item>
 
             <Form.Item>
               <Button block type="primary" htmlType="submit">
-                Send
+                Надіслати
               </Button>
             </Form.Item>
           </Form>
@@ -58,7 +58,7 @@ const ContactsPage: React.FC = () => {
           <div className={s.Contacts}>
             <div>
               <HomeOutlined />
-              <p>Zhytomyr</p>
+              <p>Житомир</p>
             </div>
             <div>
               <PhoneOutlined />

@@ -6,7 +6,6 @@ import Router from 'next/router'
 import { useState } from 'react'
 import PremiumPage from '../../../pages/premium'
 import { AppRoutes } from '../../../utils/constants'
-import premiumIcon from '../../assets/premium/diamond.png'
 import Diamant from '../../assets/svg/diamant'
 import { SearchBar } from '../UI/SearchBar'
 import s from './style.module.scss'
@@ -39,7 +38,7 @@ const BurgerMenu: React.FC = () => {
           backgroundColor: 'var(--backgroundColor)',
         }}
         onClose={onClose}
-        title="Menu"
+        title="Меню"
         placement="left"
         closable={false}
         visible={isActive}
@@ -50,27 +49,12 @@ const BurgerMenu: React.FC = () => {
           <SearchBar className={s.Search} />
           <div className={s.Points}>
             <div
-              className={s.Premium}
-              onClick={() => Router.push(AppRoutes.PREMIUM)}
-            >
-              <span>Premium</span>
-              <Diamant className={s.Diamant} />
-              {/* <Image
-                src={premiumIcon}
-                alt="Premium"
-                width={25}
-                height={25}
-                className={s.Image}
-              /> */}
-            </div>
-            <Divider className={s.Divider} />
-            <div
               className={s.SignIn}
               onClick={() => {
                 Router.push(AppRoutes.AUTH_SIGN_IN)
               }}
             >
-              Sign in
+              Увійти
             </div>
             <Divider className={s.Divider} />
             <div
@@ -79,7 +63,15 @@ const BurgerMenu: React.FC = () => {
                 Router.push(AppRoutes.CONTACTS)
               }}
             >
-              Contact us
+              Зв’яжіться з нами
+            </div>
+            <Divider className={s.Divider} />
+            <div
+              className={s.Premium}
+              onClick={() => Router.push(AppRoutes.PREMIUM)}
+            >
+              <span>Преміум</span>
+              <Diamant className={s.Diamant} />
             </div>
             <Divider className={s.Divider} />
           </div>

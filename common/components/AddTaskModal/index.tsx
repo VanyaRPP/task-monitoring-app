@@ -117,9 +117,9 @@ const AddTaskModal: React.FC<PropsType> = ({
     <Modal
       maskClosable={false}
       visible={isModalVisible}
-      title="Add task"
-      okText="Create task"
-      cancelText="Cancel"
+      title="Створити завдання"
+      okText="Створити"
+      cancelText="Скасувати"
       onCancel={onCancel}
       onOk={onSubmit}
     >
@@ -143,22 +143,15 @@ const AddTaskModal: React.FC<PropsType> = ({
         )}
         <Form.Item
           name="name"
-          label="Name of task"
-          rules={validateField('name')}
+          label="Назва завдання"
+          rules={[{ required: true }]}
         >
           <Input />
         </Form.Item>
-        <Form.Item
-          normalize={deleteExtraWhitespace}
-          name="description"
-          label="Description"
-        >
+        <Form.Item name="desription" label="Опис">
           <Input.TextArea maxLength={250} />
         </Form.Item>
-        <Form.Item name="images">
-          <UploadImages />
-        </Form.Item>
-        <Form.Item name="domain" label="Address">
+        <Form.Item name="domain" label="Адреса">
           <PlacesAutocomplete
             isLoaded={isLoaded}
             setAddress={setAddress}
@@ -174,10 +167,8 @@ const AddTaskModal: React.FC<PropsType> = ({
             setAddress={setAddress}
           />
         </Form.Item>
-        <Form.Item name="category" label="Categories">
-          <Select
-            getPopupContainer={() => document.getElementById('addTaskForm')}
-          >
+        <Form.Item name="category" label="Категорії">
+          <Select>
             {categories &&
               categories.map((category) => (
                 <Select.Option key={category?._id} value={category?.name}>
@@ -190,17 +181,14 @@ const AddTaskModal: React.FC<PropsType> = ({
           name="deadline"
           label={
             <CustomTooltip
-              title="When you expect the job to be done"
-              text="Deadline"
+              title="Коли ви очікуєте виконання роботи"
+              text="Виконати до"
               placement="topLeft"
             />
           }
           // rules={validateField('deadline')}
         >
-          <DatePicker
-            getPopupContainer={() => document.getElementById('addTaskForm')}
-            disabledDate={disabledDate}
-          />
+          <DatePicker disabledDate={disabledDate} placeholder="Оберіть дату" />
         </Form.Item>
       </Form>
     </Modal>

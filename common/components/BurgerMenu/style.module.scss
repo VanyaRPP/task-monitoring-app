@@ -1,6 +1,6 @@
 .Menu {
   display: block;
-  padding: 0.1rem;
+  padding: 0.25rem;
   margin: 0 0.75rem;
   @media (min-width: 425px) {
     display: none;
@@ -18,25 +18,31 @@
   flex-direction: column;
 }
 
-.Image {
-  margin-top: 0.17rem;
-}
 .Diamant {
-  color: var(--textColor) !important;
+  margin-bottom: -0.3em;
 }
 .Premium {
+  margin: 1rem 0;
   span {
     font-size: 20px;
     color: var(--textColor);
     padding: 0.25em 0.5em;
   }
 }
+.Premium:hover + .Divider {
+  background-color: var(--primaryColor);
+}
 .SignIn {
+  margin: 1rem 0;
   color: var(--textColor);
   font-size: 20px;
   padding: 0 0.5em;
 }
+.SignIn:hover + .Divider {
+  background-color: var(--primaryColor);
+}
 .Divider {
-  color: var(--textColor);
+  display: flex;
+  background-color: #88888830;
   margin: 0;
 }
