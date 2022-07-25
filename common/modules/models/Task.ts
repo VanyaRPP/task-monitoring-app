@@ -78,7 +78,7 @@ const TaskSchema = new Schema<ITaskModel>({
   domain: { type: String },
   category: { type: String },
   dateofcreate: { type: Date, required: true, default: Date.now },
-  deadline: { type: String, required: true },
+  deadline: { type: String, required: false }, //true
   customer: { type: String },
   taskexecutors: [{ type: Object }],
   comment: [{ type: Object }],

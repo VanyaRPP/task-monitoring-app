@@ -200,7 +200,7 @@ const AddTaskModal: React.FC<PropsType> = ({
               placement="topLeft"
             />
           }
-          rules={validateField('deadline')}
+          // rules={validateField('deadline')}
         >
           <DatePicker
             getPopupContainer={() => document.getElementById('addTaskForm')}
