@@ -1,5 +1,5 @@
 import React from 'react'
-import { Layout, Menu, Collapse, Avatar, Button } from 'antd'
+import { Layout, Menu, Collapse, Avatar } from 'antd'
 import {
   StarOutlined,
   CheckOutlined,
@@ -9,8 +9,6 @@ import {
 import type { MenuProps } from 'antd'
 import s from './style.module.scss'
 import config from '../../lib/Sidebar.config'
-import Router from 'next/router'
-import { AppRoutes } from '../../../utils/constants'
 import { useSession } from 'next-auth/react'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 
@@ -44,10 +42,6 @@ const bestMaster = config.bestMaster
 const bestDomain = config.bestDomain
 
 const Sidebar: React.FC<Props> = ({ collapsed, setCollapsed }) => {
-  const { data: session } = useSession()
-  const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const user = data?.data
-
   return (
     <Layout.Sider
       className={s.Sidebar}
@@ -88,15 +82,6 @@ const Sidebar: React.FC<Props> = ({ collapsed, setCollapsed }) => {
           </div>
           <p>{bestDomain.address}</p>
         </Panel>
-        {user?.role === 'Admin' && (
-          <Button
-            type="primary"
-            className={s.AdminButton}
-            onClick={() => Router.push(AppRoutes.ADMIN)}
-          >
-            Admin Panel
-          </Button>
-        )}
       </Collapse>
     </Layout.Sider>
   )

@@ -1,15 +1,5 @@
-import { IUser } from '../../modules/models/User'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-
-interface BaseQuery {
-  success: boolean
-  data: IUser
-}
-
-interface AllUsersQuer {
-  success: boolean
-  data: IUser[]
-}
+import { BaseQuery, IUser, AllUsersQuery } from './user.api.types'
 
 export const userApi = createApi({
   reducerPath: 'userApi',
@@ -19,25 +9,25 @@ export const userApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getUserByEmail: builder.query<BaseQuery, string>({
-      query: (email) => `user/${email}`,
+      query: (email) => `user/email/${email}`,
       providesTags: (result) => ['User'],
     }),
     getUserById: builder.query<BaseQuery, string>({
-      query: (id) => `user/id/${id}`,
+      query: (id) => `user/${id}`,
       providesTags: (result) => ['User'],
     }),
     updateUser: builder.mutation<IUser, Partial<IUser>>({
       query(data) {
         const { email, ...body } = data
         return {
-          url: `user/${email}?role=${body.role}`,
+          url: `user/email/${email}?role=${body.role}`,
           method: 'PATCH',
           body,
         }
       },
       invalidatesTags: ['User'],
     }),
-    getAllUsers: builder.query<AllUsersQuer, string>({
+    getAllUsers: builder.query<AllUsersQuery, string>({
       query: () => '/user',
       providesTags: (result) => ['User'],
     }),
@@ -45,7 +35,7 @@ export const userApi = createApi({
       query(data) {
         const { _id, ...body } = data
         return {
-          url: `user/feedbacks/${_id}`,
+          url: `user/${_id}/feedback`,
           method: 'PATCH',
           body,
         }

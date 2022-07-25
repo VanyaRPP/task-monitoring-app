@@ -10,6 +10,12 @@ export enum AppRoutes {
   PREMIUM = '/premium',
 }
 
+export enum Roles {
+  USER = 'User',
+  WORKER = 'Worker',
+  ADMIN = 'Admin',
+}
+
 export interface errors {
   [index: string]: string
 }
@@ -34,4 +40,10 @@ export const centerTownGeoCode = {
   lat: 50.264915,
   lng: 28.661954,
 }
-///rdtfyghjfdcv
+
+export enum TaskStatuses {
+  PENDING = 'pending',
+  REJECTED = 'rejected',
+  IN_WORK = 'in work',
+  COMPLETED = 'completed',
+}

@@ -1,0 +1,13 @@
+.Tooltip {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  p {
+    margin: 0;
+  }
+
+  span {
+    margin: 2px 0 0 5px;
+  }
+}

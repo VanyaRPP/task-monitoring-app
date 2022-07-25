@@ -5,7 +5,7 @@ import s from './style.module.scss'
 import { useEffect } from 'react'
 import { add } from 'cypress/types/lodash'
 import { DarkMapTheme } from './MapStyle'
-// import { DarkMapTheme } from './MapStyle'
+import { useAppSelector } from '../../modules/store/hooks'
 
 const defaultOptions = {
   panControl: true,
@@ -17,7 +17,7 @@ const defaultOptions = {
   keyboardShortcuts: false,
   disableDoubleClickZoom: false,
   fullscreenControl: false,
-  styles: DarkMapTheme, // theme change after build
+  styles: null, // theme change after build
 }
 
 const containerStyle = {
@@ -41,6 +41,17 @@ const Map = ({
   mapOptions: IMapOptions
   setAddress?: React.Dispatch<React.SetStateAction<IAddress>>
 }) => {
+  const { theme } = useAppSelector((state) => state.themeReducer)
+
+  const [options, setOptions] = useState({})
+
+  useEffect(() => {
+    setOptions({
+      ...defaultOptions,
+      styles: theme === 'light' ? null : DarkMapTheme,
+    })
+  }, [theme])
+
   const mapRef = useRef(undefined)
   const [isMounted, setIsMounted] = useState<boolean>(false)
 
@@ -82,7 +93,7 @@ const Map = ({
         zoom={mapOptions?.zoom}
         onLoad={onLoad}
         onUnmount={onUnmount}
-        options={defaultOptions}
+        options={options}
       >
         {/* Child components, such as markers, info windows, etc. */}
         {isMounted && (

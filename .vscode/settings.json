@@ -8,5 +8,6 @@
   "[sass]": {
     "editor.defaultFormatter": "syler.sass-indented"
   }, // Tell VSCode to use Prettier as default file formatter
-  "typescript.preferences.importModuleSpecifier": "relative"
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "cSpell.words": ["Popconfirm"]
 }

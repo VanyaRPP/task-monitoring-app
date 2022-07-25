@@ -10,6 +10,10 @@ import {
 } from '@ant-design/icons'
 import { Button, Form, Input } from 'antd'
 import s from './style.module.scss'
+import {
+  deleteExtraWhitespace,
+  validateField,
+} from '../../common/assets/features/validators'
 
 const ContactsPage: React.FC = () => {
   const onFinish = (values: any) => null
@@ -24,16 +28,20 @@ const ContactsPage: React.FC = () => {
       <div className={s.Container}>
         <div className={s.Form}>
           <Form name="nest-messages" onFinish={onFinish}>
-            <Form.Item name={['user', 'name']} rules={[{ required: true }]}>
-              <Input placeholder="Ім`я" />
+            <Form.Item
+              name="name"
+              normalize={deleteExtraWhitespace}
+              rules={validateField('name')}
+            >
+              <Input maxLength={30} placeholder="Ім’я" />
             </Form.Item>
 
-            <Form.Item name={['user', 'email']} rules={[{ type: 'email' }]}>
+            <Form.Item name="email" rules={validateField('email')}>
               <Input placeholder="Електронна пошта" />
             </Form.Item>
 
-            <Form.Item name={['user', 'introduction']}>
-              <Input.TextArea placeholder="Повідомлення" />
+            <Form.Item normalize={deleteExtraWhitespace} name="message">
+              <Input.TextArea maxLength={150} placeholder="Повідомлення" />
             </Form.Item>
 
             <Form.Item>

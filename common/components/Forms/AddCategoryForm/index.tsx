@@ -1,4 +1,8 @@
 import { Form, FormInstance, Input } from 'antd'
+import {
+  deleteExtraWhitespace,
+  validateField,
+} from '../../../assets/features/validators'
 
 type PropsType = {
   isFormDisabled: boolean
@@ -16,14 +20,16 @@ const AddCategoryForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
       <Form.Item
         name="name"
         label="Назва категорії"
-        rules={[{ required: true }]}
+        normalize={deleteExtraWhitespace}
+        rules={validateField('name')}
       >
         <Input />
       </Form.Item>
       <Form.Item
-        name="desription"
+        name="description"
         label="Опис категорії"
-        rules={[{ required: true }]}
+        normalize={deleteExtraWhitespace}
+        rules={validateField('description')}
       >
         <Input.TextArea />
       </Form.Item>

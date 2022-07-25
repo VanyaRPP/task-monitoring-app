@@ -1,12 +1,12 @@
 import { EditOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card, Image } from 'antd'
 import { useGetUserByEmailQuery } from '../../common/api/userApi/user.api'
-import RoleSwither from 'common/components/UI/roleSwitcher'
+import RoleSwitcher from 'common/components/UI/roleSwitcher'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
 import { useSession } from 'next-auth/react'
 import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
-import { AppRoutes } from '../../utils/constants'
+import { AppRoutes, Roles } from '../../utils/constants'
 import Router from 'next/router'
 import { GetServerSideProps } from 'next'
 import FeedbacksCard from 'common/components/FeedbacksCard'
@@ -18,8 +18,6 @@ const Profile: React.FC = () => {
   const { data, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const user = data?.data
 
-  // console.log(user)
-
   return (
     <>
       <h2 className={s.Header}>Мій Профіль</h2>
@@ -30,7 +28,7 @@ const Profile: React.FC = () => {
           title={user?.name}
           className={s.Profile}
           extra={
-            user?.role === 'Admin' && (
+            user?.role === Roles.ADMIN && (
               <Button type="link" onClick={() => Router.push(AppRoutes.ADMIN)}>
                 Панель адміна
               </Button>
@@ -52,15 +50,18 @@ const Profile: React.FC = () => {
 
           <div className={s.Info}>
             <Card size="small" title="Роль">
-              <RoleSwither />
+              <RoleSwitcher />
             </Card>
 
             <Card size="small" title="Електронна пошиа">
               <p>{user?.email}</p>
             </Card>
-            <Card size="small" title="Номер телефону">
-              <p>{user?.tel}</p>
-            </Card>
+
+            {user?.tel && (
+              <Card size="small" title="Номер телефону">
+                <p>{user?.tel}</p>
+              </Card>
+            )}
 
             <Card title="Адреса" size="small">
               <p>{user?.address?.name || 'Житомир'}</p>

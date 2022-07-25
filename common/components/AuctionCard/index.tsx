@@ -9,7 +9,7 @@ import {
   useGetUserByIdQuery,
 } from '../../api/userApi/user.api'
 import Column from 'antd/lib/table/Column'
-import { ItaskExecutors } from '../../modules/models/Task'
+import { ITaskExecutors } from '../../modules/models/Task'
 import Meta from 'antd/lib/card/Meta'
 import { useAddTaskExecutorMutation } from 'common/api/taskApi/task.api'
 import { useSession } from 'next-auth/react'
@@ -86,7 +86,7 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
             dataIndex="workerid"
             key="executors"
             width="70%"
-            render={(_, executor: ItaskExecutors) => (
+            render={(_, executor: ITaskExecutors) => (
               <Executor executor={executor} type="workerInfo" />
             )}
           />
@@ -96,7 +96,7 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
             dataIndex="rating"
             key="rating"
             width="15%"
-            render={(_, executor: ItaskExecutors) => (
+            render={(_, executor: ITaskExecutors) => (
               <Executor executor={executor} type="rating" />
             )}
           />
