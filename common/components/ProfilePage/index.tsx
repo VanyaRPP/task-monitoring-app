@@ -64,9 +64,11 @@ const ProfilePage: React.FC = () => {
             <Card title="Адреса" size="small">
               <p>{user?.address?.name || 'Житомир'}</p>
             </Card>
-            <Button type="primary">
-              <EditOutlined key="edit" />
-            </Button>
+            {
+              !router.query.id ? <Button type="primary">
+                <EditOutlined key="edit" />
+              </Button> : null
+            }
           </div>
         </Card>
 
