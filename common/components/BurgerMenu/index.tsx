@@ -26,10 +26,6 @@ const BurgerMenu: React.FC = () => {
   }
 
   const { data: session, status } = useSession()
-
-  // const { data, isLoading } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  // const userName = session?.user?.name
-  // const userEmail = session?.user?.email
   const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const user = data?.data
 
