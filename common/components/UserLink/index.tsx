@@ -14,7 +14,7 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
             : `/profile/${user?._id}`
         }
       >
-        {user?.name}
+        {user?.name ?? user?.email}
       </Link>
     )
   }
