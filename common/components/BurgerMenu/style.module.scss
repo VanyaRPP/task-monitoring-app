@@ -32,6 +32,7 @@
     display: none;
   }
 }
+
 .Drawer {
   top: 60px;
 }
@@ -77,8 +78,8 @@
 
 .Premium {
   margin: 1rem 0;
+
   span {
-    font-size: 20px;
     color: var(--textColor);
     padding: 0.25em 0.5em;
   }
