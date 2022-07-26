@@ -50,6 +50,12 @@
     color: var(--textColor);
   }
 
+  .rowClass {
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
   > div:first-of-type {
     position: sticky;
     top: 0;

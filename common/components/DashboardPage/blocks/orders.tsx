@@ -1,37 +1,30 @@
-import React, { useEffect, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Card, Table, Input, Button } from 'antd'
-import { dateToDefaultFormat } from '../../../assets/features/formatDate'
-import { orders as config } from 'common/lib/dashboard.config'
-import useDebounce from '../../../modules/hooks/useDebounce'
-import Router from 'next/router'
-import { useGetUserByEmailQuery } from '../../../api/userApi/user.api'
+import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
+import { firstTextToUpperCase } from '../../../../utils/helpers'
+import {
+  useGetUserByEmailQuery,
+  useGetUserByIdQuery,
+} from '../../../api/userApi/user.api'
+import moment from 'moment'
+import Router, { useRouter } from 'next/router'
+import { AppRoutes } from '../../../../utils/constants'
+
+import s from '../style.module.scss'
 import { useSession } from 'next-auth/react'
 
-interface Props {
-  style?: string
-}
-
-const Orders: React.FC<Props> = ({ style }) => {
-  const { data: session } = useSession()
-
-  const { data: userData, isLoading } = useGetUserByEmailQuery(
-    session?.user?.email
-  )
-  const user = userData?.data
-
-  const [data, setData] = useState(config)
+const Orders: React.FC<{ style: string }> = ({ style }) => {
+  const session = useSession()
   const [search, setSearch] = useState({ task: '', master: '' })
-  const debounced = useDebounce<{ task: string; master: string }>(search)
+  const router = useRouter()
+  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
+  const tasksResponse = useGetAllTaskQuery('')
+  const user = userResponse?.data?.data
+  const tasks = tasksResponse?.data?.data
 
-  useEffect(() => {
-    setData(
-      config.filter(
-        (item) =>
-          item.task.toLowerCase().includes(debounced.task.toLowerCase()) &&
-          item.master.toLowerCase().includes(debounced.master.toLowerCase())
-      )
-    )
-  }, [debounced])
+  const dataSource = useMemo(() => {
+    return tasks?.filter((task) => task?.creator === user?._id)
+  }, [tasks, user?._id])
 
   const searchInput = (order: string) => (
     <Input
@@ -44,40 +37,31 @@ const Orders: React.FC<Props> = ({ style }) => {
   const columns = [
     {
       title: searchInput('Завдання'),
-      dataIndex: 'task',
-      key: 'task',
+      dataIndex: 'name',
+      key: 'name',
       width: '35%',
     },
     {
       title: searchInput('Майстер'),
-      dataIndex: 'master',
-      key: 'master',
+      dataIndex: 'executant',
+      key: 'executant',
       width: '25%',
+      render: (text) => (text ? text : 'Не назначено'),
     },
     {
       title: 'Дата',
-      dataIndex: 'date',
-      key: 'date',
+      dataIndex: 'deadline',
+      key: 'deadline',
       width: '20%',
       sorter: (a, b) => Date.parse(a.date) - Date.parse(b.date),
-      render: (text) => dateToDefaultFormat(text),
+      render: (text) => moment(text).format('DD-MM hh:mm'),
     },
     {
       title: 'Статус',
       dataIndex: 'status',
       key: 'status',
       width: '20%',
-      filters: [
-        {
-          text: 'Pending',
-          value: 'Pending',
-        },
-        {
-          text: 'Done',
-          value: 'Done',
-        },
-      ],
-      onFilter: (value: string, record) => record.status.indexOf(value) === 0,
+      render: (text) => firstTextToUpperCase(text),
     },
   ]
 
@@ -96,7 +80,25 @@ const Orders: React.FC<Props> = ({ style }) => {
         </Button>
       }
     >
-      <Table dataSource={data} columns={columns} pagination={false} />
+      <Table
+        rowKey="_id"
+        rowClassName={s.rowClass}
+        showHeader={false}
+        dataSource={dataSource}
+        columns={columns}
+        pagination={{
+          responsive: false,
+          size: 'small',
+          pageSize: 6,
+          position: ['bottomCenter'],
+          hideOnSinglePage: true,
+        }}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: (event) => router.push(`${AppRoutes.TASK}/${record._id}`),
+          }
+        }}
+      />
     </Card>
   )
 }
