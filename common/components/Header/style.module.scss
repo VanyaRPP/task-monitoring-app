@@ -59,6 +59,18 @@
     display: none;
   }
 }
+
+.LoginUser {
+  @media (max-width: 425px) {
+    display: none;
+  }
+}
+
+.ThemeSwitcher {
+  @media (max-width: 425px) {
+    display: none;
+  }
+}
 .Diamant {
   fill: white !important;
 }
