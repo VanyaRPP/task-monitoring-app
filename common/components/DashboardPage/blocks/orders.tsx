@@ -1,30 +1,30 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Card, Table, Input } from 'antd'
 import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
 import { firstTextToUpperCase } from '../../../../utils/helpers'
-import { useGetUserByIdQuery } from '../../../api/userApi/user.api'
-import UserLink from '../../UserLink'
+import {
+  useGetUserByEmailQuery,
+  useGetUserByIdQuery,
+} from '../../../api/userApi/user.api'
 import moment from 'moment'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '../../../../utils/constants'
 
 import s from '../style.module.scss'
+import { useSession } from 'next-auth/react'
 
-interface Props {
-  style?: string
-}
-
-const Master: React.FC<{ id: string }> = ({ id }) => {
-  const { data } = useGetUserByIdQuery(id)
-  const user = data?.data
-  return <UserLink user={user} />
-}
-
-const Orders: React.FC<Props> = ({ style }) => {
+const Orders: React.FC<{ style: string }> = ({ style }) => {
+  const session = useSession()
   const [search, setSearch] = useState({ task: '', master: '' })
   const router = useRouter()
-  const { data } = useGetAllTaskQuery('')
-  const tasks = data?.data
+  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
+  const tasksResponse = useGetAllTaskQuery('')
+  const user = userResponse?.data?.data
+  const tasks = tasksResponse?.data?.data
+
+  const dataSource = useMemo(() => {
+    return tasks?.filter((task) => task?.creator === user?._id)
+  }, [tasks, user?._id])
 
   const searchInput = (order: string) => (
     <Input
@@ -46,7 +46,7 @@ const Orders: React.FC<Props> = ({ style }) => {
       dataIndex: 'executant',
       key: 'executant',
       width: '25%',
-      render: (text) => (text ? <Master id={text} /> : 'Не назначено'),
+      render: (text) => (text ? text : 'Не назначено'),
     },
     {
       title: 'Дата',
@@ -71,9 +71,15 @@ const Orders: React.FC<Props> = ({ style }) => {
         rowKey="_id"
         rowClassName={s.rowClass}
         showHeader={false}
-        dataSource={tasks}
+        dataSource={dataSource}
         columns={columns}
-        pagination={{ responsive: true, size: 'small', pageSize: 6 }}
+        pagination={{
+          responsive: false,
+          size: 'small',
+          pageSize: 6,
+          position: ['bottomCenter'],
+          hideOnSinglePage: true,
+        }}
         onRow={(record, rowIndex) => {
           return {
             onClick: (event) => router.push(`${AppRoutes.TASK}/${record._id}`),
