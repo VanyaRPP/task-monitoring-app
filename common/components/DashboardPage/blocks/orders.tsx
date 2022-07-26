@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
 import { Card, Table, Input } from 'antd'
-import { dateToDefaultFormat } from '../../../assets/features/formatDate'
-import useDebounce from '../../../modules/hooks/useDebounce'
 import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
 import { firstTextToUpperCase } from '../../../../utils/helpers'
 import { useGetUserByIdQuery } from '../../../api/userApi/user.api'
 import UserLink from '../../UserLink'
 import moment from 'moment'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '../../../../utils/constants'
+
+import s from '../style.module.scss'
 
 interface Props {
   style?: string
@@ -20,8 +22,9 @@ const Master: React.FC<{ id: string }> = ({ id }) => {
 
 const Orders: React.FC<Props> = ({ style }) => {
   const [search, setSearch] = useState({ task: '', master: '' })
-  const debounced = useDebounce<{ task: string; master: string }>(search)
+  const router = useRouter()
   const { data } = useGetAllTaskQuery('')
+  const tasks = data?.data
 
   const searchInput = (order: string) => (
     <Input
@@ -65,10 +68,17 @@ const Orders: React.FC<Props> = ({ style }) => {
   return (
     <Card className={style} title="Мої замовлення" style={{ flex: '1.5' }}>
       <Table
+        rowKey="_id"
+        rowClassName={s.rowClass}
         showHeader={false}
-        dataSource={data?.data}
+        dataSource={tasks}
         columns={columns}
         pagination={{ responsive: true, size: 'small', pageSize: 6 }}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: (event) => router.push(`${AppRoutes.TASK}/${record._id}`),
+          }
+        }}
       />
     </Card>
   )
