@@ -27,14 +27,16 @@ const Header: React.FC = () => {
         <TaskButton />
       </div>
 
-      <Button
-        icon={<Diamant className={s.Diamant} />}
-        className={s.Button_Premium}
-        type="primary"
-        onClick={() => Router.push(AppRoutes.PREMIUM)}
-      >
-        <span>Преміум</span>
-      </Button>
+      {status === 'authenticated' && (
+        <Button
+          icon={<Diamant className={s.Diamant} />}
+          className={s.Button_Premium}
+          type="primary"
+          onClick={() => Router.push(AppRoutes.PREMIUM)}
+        >
+          <span>Преміум</span>
+        </Button>
+      )}
 
       <ThemeSwitcher />
       <LoginUser />
