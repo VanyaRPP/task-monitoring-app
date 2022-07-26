@@ -28,7 +28,7 @@ const AdminPageTasks: React.FC = () => {
     <>
       <div className={s.Controls}>
         <Input
-          placeholder="Search Task..."
+          placeholder="Пошук завдання..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -37,11 +37,6 @@ const AdminPageTasks: React.FC = () => {
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => setIsModalVisible(true)}
-        />
-        <Input
-          placeholder="Пошук завдання..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
         />
         <AddTaskModal
           isModalVisible={isModalVisible}

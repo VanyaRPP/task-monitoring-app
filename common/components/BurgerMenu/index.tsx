@@ -12,7 +12,7 @@ import premiumIcon from '../../assets/premium/diamond.png'
 import Diamant from '../../assets/svg/diamant'
 import LogoCircle from '../../assets/svg/logo_circle'
 import LoginUser from '../LoginUser'
-import { SearchBar } from '../UI/SearchBar'
+// import { SearchBar } from '../UI/SearchBar'
 import s from './style.module.scss'
 
 const BurgerMenu: React.FC = () => {

@@ -1,4 +1,6 @@
 import { Form, FormInstance, Input } from 'antd'
+import { useEffect } from 'react'
+import { useGetCategoryByIdQuery } from '../../../api/categoriesApi/category.api'
 import {
   deleteExtraWhitespace,
   validateField,
@@ -7,9 +9,21 @@ import {
 type PropsType = {
   isFormDisabled: boolean
   form: FormInstance
+  id: string
 }
 
-const AddCategoryForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
+const AddCategoryForm: React.FC<PropsType> = ({ isFormDisabled, form, id }) => {
+  const { data } = useGetCategoryByIdQuery(id)
+
+  useEffect(() => {
+    if (id) {
+      form.setFieldsValue({
+        name: data?.data?.name,
+        description: data?.data.description,
+      })
+    }
+  }, [data, form, id])
+
   return (
     <Form
       form={form}
