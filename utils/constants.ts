@@ -22,16 +22,16 @@ export interface errors {
 
 export const errors: errors = {
   SignIn: 'Спробуйте ввійти за допомогою іншого облікового запису.',
-  OAuthSignIn: 'Try signing in with a different account.',
-  OAuthCallback: 'Try signing in with a different account.',
-  OAuthCreateAccount: 'Try signing in with a different account.',
-  EmailCreateAccount: 'Try signing in with a different account.',
-  Callback: 'Try signing in with a different account.',
+  OAuthSignIn: 'Спробуйте ввійти за допомогою іншого облікового запису.',
+  OAuthCallback: 'Спробуйте ввійти за допомогою іншого облікового запису.',
+  OAuthCreateAccount: 'Спробуйте ввійти за допомогою іншого облікового запису.',
+  EmailCreateAccount: 'Спробуйте ввійти за допомогою іншого облікового запису.',
+  Callback: 'Спробуйте ввійти за допомогою іншого облікового запису.',
   OAuthAccountNotLinked:
-    'To confirm your identity, sign in with the same account you used originally.',
-  EmailSignIn: 'The e-mail could not be sent.',
+    'Щоб підтвердити свою особу, увійдіть за допомогою того самого облікового запису, який використовували спочатку.',
+  EmailSignIn: 'Не вдалося надіслати електронний лист.',
   CredentialsSignIn:
-    'Sign in failed. Check the details you provided are correct.',
+    'Помилка входу. Перевірте правильність наданих вами даних.',
   SessionRequired: 'Please sign in to access this page.',
   default: 'Unable to sign in.',
 }

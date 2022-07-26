@@ -110,7 +110,6 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
           disabled
           allowHalf
           value={CalculateAVG(feedbacks)}
-          className={s.Rate}
         />
       }
     >
