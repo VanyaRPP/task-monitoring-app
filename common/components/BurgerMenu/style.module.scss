@@ -34,9 +34,6 @@
 }
 .Drawer {
   top: 60px;
-  // .Buttons {
-  //   margin: -1.5rem;
-  // }
 }
 
 .LogoUser {
@@ -44,26 +41,38 @@
   height: 50px;
 }
 
+.Image {
+  transition: box-shadow 0.5s;
+  box-shadow: 0 3px 10px 0 var(--primaryColor);
+}
+
 .UserInfo {
+  color: var(--textColor);
+  height: 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   span {
     font-size: 16px;
   }
 }
 
 .Points {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  // margin-top: 20px;
   width: 100%;
+  height: 100%;
+  position: relative;
 }
 
 .Diamant {
   margin-bottom: -0.3em;
+  margin-right: 10px;
+  color: white;
 }
 
 .Premium {
@@ -78,17 +87,6 @@
 .Premium:hover + .Divider {
   background-color: var(--primaryColor);
 }
-.SignIn {
-  margin: 1rem 0;
-  color: var(--textColor);
-  font-size: 20px;
-  padding: 0 0.5em;
-}
-
-.Divider {
-  color: var(--textColor);
-  margin: 5;
-}
 
 .Buttons {
   display: flex;
@@ -101,29 +99,56 @@
 }
 
 .Divider {
+  color: var(--textColor);
+  margin: 5;
   display: flex;
   background-color: #88888830;
   margin: 0;
 }
-////////////////////
 
-// .Menu {
-//   display: block;
-//   padding: 0.25rem;
-//   margin: 0 0.75rem;
-//   background-color: var(----textColor); //burger background
-//   color: var(--primaryColor);
+.Card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 10px;
+  transition: box-shadow 0.5s;
+  box-shadow: 0 2px 10px 0 var(--primaryColor);
 
-//   @media (min-width: 425px) {
-//     display: none;
-//   }
-// }
+  .Buttons {
+    color: var(--textColor);
+    display: flex;
+  }
+  h2,
+  p {
+    color: var(--textColor);
+  }
+}
 
-// .Search {
-//   margin-top: 15px;
-//   height: 50px;
-// }
+.Avatar {
+  padding: 0 20px;
+  cursor: pointer;
+}
 
-// .Image {
-// margin-top: 0.17rem;
-// }
+.Card,
+.Card::after {
+  background: var(--backgroundColorPrimary);
+}
+
+.Button {
+  margin: 1rem 0;
+  color: var(--textColor);
+  font-size: 20px;
+}
+
+.ButtonPremium {
+  font-size: 20px;
+  width: 100%;
+  height: 70px;
+  background-color: var(--primaryColor);
+  color: var(--textColor);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
