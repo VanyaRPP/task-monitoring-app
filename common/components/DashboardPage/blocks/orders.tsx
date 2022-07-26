@@ -1,14 +1,25 @@
 import React, { useEffect, useState } from 'react'
-import { Card, Table, Input } from 'antd'
+import { Card, Table, Input, Button } from 'antd'
 import { dateToDefaultFormat } from '../../../assets/features/formatDate'
 import { orders as config } from 'common/lib/dashboard.config'
 import useDebounce from '../../../modules/hooks/useDebounce'
+import Router from 'next/router'
+import { useGetUserByEmailQuery } from '../../../api/userApi/user.api'
+import { useSession } from 'next-auth/react'
 
 interface Props {
   style?: string
 }
 
 const Orders: React.FC<Props> = ({ style }) => {
+
+  const { data: session } = useSession()
+
+  const { data: userData, isLoading } = useGetUserByEmailQuery(
+    session?.user?.email
+  )
+  const user = userData?.data
+
   const [data, setData] = useState(config)
   const [search, setSearch] = useState({ task: '', master: '' })
   const debounced = useDebounce<{ task: string; master: string }>(search)
@@ -72,7 +83,20 @@ const Orders: React.FC<Props> = ({ style }) => {
   ]
 
   return (
-    <Card className={style} title="Мої замовлення" style={{ flex: '1.5' }}>
+    <Card
+      className={style}
+      title="Мої замовлення"
+      style={{ flex: '1.5' }}
+      extra={
+        <Button
+          onClick={() => Router.push(`/task/user/${user?._id}`)}
+          ghost
+          type="primary"
+        >
+          Всі
+        </Button>
+      }
+    >
       <Table dataSource={data} columns={columns} pagination={false} />
     </Card>
   )
