@@ -6,6 +6,7 @@ import { PlusOutlined } from '@ant-design/icons'
 import AddTaskModal from '../../AddTaskModal/index'
 import TasksList from './TasksList'
 import s from './style.module.scss'
+import { deleteExtraWhitespace } from '../../../assets/features/validators'
 
 const AdminPageTasks: React.FC = () => {
   const { data } = useGetAllTaskQuery('')
@@ -30,7 +31,7 @@ const AdminPageTasks: React.FC = () => {
         <Input
           placeholder="Пошук завдання..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => setSearch(deleteExtraWhitespace(e.target.value))}
         />
         <Button
           className={s.AddButton}
