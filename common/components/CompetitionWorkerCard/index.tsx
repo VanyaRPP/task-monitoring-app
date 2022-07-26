@@ -38,10 +38,6 @@ const CompetitionWorkerCard: FC<Props> = ({ _id }) => {
         <p>Пошта: {user?.email}</p>
         <p>Телефон: {user?.tel}</p>
         <Rate disabled defaultValue={user?.rating} />
-        {/* {!router.query.id ? (
-              
-            ) : null} */}
-
         <div className={s.btnGroup}>
           <Button type="primary">
             <CloseCircleOutlined />
