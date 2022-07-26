@@ -15,7 +15,6 @@ import Logo from '../Logo'
 const Header: React.FC = () => {
   const { status } = useSession()
 
-  status === 'authenticated'
   return (
     <Layout.Header className={s.Header}>
       <BurgerMenu />
@@ -23,6 +22,9 @@ const Header: React.FC = () => {
 
         <Logo />
         <TaskButton />
+        <div className={s.ThemeSwitcher}>
+          <ThemeSwitcher />
+        </div>
       </div>
       {status === 'authenticated' && (
         <Button
@@ -34,9 +36,9 @@ const Header: React.FC = () => {
           <span>Преміум</span>
         </Button>
       )}
-
-      <ThemeSwitcher />
-      <LoginUser />
+      <div className={s.LoginUser}>
+        <LoginUser />
+      </div>
     </Layout.Header>
   )
 }
