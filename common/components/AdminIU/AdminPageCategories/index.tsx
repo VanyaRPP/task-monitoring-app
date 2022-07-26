@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Form, Input } from 'antd'
-import { useAddCategoryMutation } from 'common/api/categoriesApi/category.api'
+import {
+  useAddCategoryMutation,
+  useEditCategoryMutation,
+} from 'common/api/categoriesApi/category.api'
 import { ICategory } from 'common/modules/models/Category'
 import AddCategoryForm from '../../Forms/AddCategoryForm'
 import Categories from '../../Categories'
@@ -16,8 +19,10 @@ const AdminPageCategories: React.FC = () => {
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
+  const [id, setId] = useState<string>(null)
 
   const [addCategory] = useAddCategoryMutation()
+  const [editCategory] = useEditCategoryMutation()
 
   const onCancelModal = () => {
     setIsModalVisible(false)
@@ -33,18 +38,26 @@ const AdminPageCategories: React.FC = () => {
     setIsFormDisabled(false)
   }
 
+  const onSubmitEditModal = async () => {
+    const formData: ICategory = await form.validateFields()
+    setIsFormDisabled(true)
+    editCategory({ _id: id, ...formData })
+    form.resetFields()
+    setIsModalVisible(false)
+    setIsFormDisabled(false)
+  }
+
+  const handleEdit = useCallback((value) => {
+    setId(value)
+    setIsModalVisible(true)
+  }, [])
+
   const [search, setSearch] = useState('')
   const debounced = useDebounce<string>(search)
 
   return (
     <>
       <div className={s.Controls}>
-        {/* <Search
-          className={s.Search}
-          placeholder="input search text"
-          onSearch={() => console.log('search')}
-          enterButton
-        /> */}
         <Input
           placeholder="Пошук категорії..."
           value={search}
@@ -57,18 +70,22 @@ const AdminPageCategories: React.FC = () => {
           onClick={() => setIsModalVisible(true)}
         />
         <ModalWindow
-          title="Додати категорію"
+          title={!id ? 'Додати категорію' : 'Змінити категорію'}
           isModalVisible={isModalVisible}
           onCancel={onCancelModal}
-          onOk={onSubmitModal}
-          okText="Додати"
+          onOk={!id ? onSubmitModal : onSubmitEditModal}
+          okText={!id ? 'Додати' : 'Змінити'}
           cancelText="Скасувати"
         >
-          <AddCategoryForm isFormDisabled={isFormDisabled} form={form} />
+          <AddCategoryForm
+            isFormDisabled={isFormDisabled}
+            form={form}
+            id={id}
+          />
         </ModalWindow>
       </div>
 
-      <Categories nameFilter={debounced} />
+      <Categories nameFilter={debounced} handleEdit={handleEdit} />
     </>
   )
 }

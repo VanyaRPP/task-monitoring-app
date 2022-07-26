@@ -4,7 +4,6 @@ import Head from 'next/head'
 import Footer from '../Footer'
 import Header from '../Header'
 import Sidebar from '../Sidebar'
-import { SearchBar } from '../UI/SearchBar'
 import { useSession } from 'next-auth/react'
 import s from './MainLayout.style.module.scss'
 import premiumIcon from '../../assets/premium/diamond.png'
@@ -46,9 +45,6 @@ const MainLayout: React.FC<Props> = ({ children }) => {
                 : '0px',
             }}
           >
-            {status === 'authenticated' && (
-              <SearchBar className={s.SearchBar} />
-            )}
             <div className={s.Foreground}>{children}</div>
           </Layout.Content>
           <Footer

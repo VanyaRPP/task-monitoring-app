@@ -1,16 +1,5 @@
 import { useJsApiLoader } from '@react-google-maps/api'
-import {
-  Modal,
-  DatePicker,
-  Form,
-  Input,
-  Select,
-  Tooltip,
-  Collapse,
-  Upload,
-} from 'antd'
-import type { RangePickerProps } from 'antd/es/date-picker'
-import moment from 'moment'
+import { Modal, DatePicker, Form, Input, Select, Tooltip } from 'antd'
 import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import { centerTownGeoCode, Roles } from 'utils/constants'
@@ -143,15 +132,21 @@ const AddTaskModal: React.FC<PropsType> = ({
         )}
         <Form.Item
           name="name"
+          normalize={deleteExtraWhitespace}
+          rules={validateField('name')}
           label="Назва завдання"
-          rules={[{ required: true }]}
         >
           <Input />
         </Form.Item>
-        <Form.Item name="desription" label="Опис">
+        <Form.Item name="description" label="Опис">
           <Input.TextArea maxLength={250} />
         </Form.Item>
-        <Form.Item name="domain" label="Адреса">
+        {/* Waiting for backend !!! */}
+
+        {/* <Form.Item name="images">
+          <UploadImages />
+        </Form.Item> */}
+        <Form.Item name="domain" label="Address">
           <PlacesAutocomplete
             isLoaded={isLoaded}
             setAddress={setAddress}
@@ -168,11 +163,15 @@ const AddTaskModal: React.FC<PropsType> = ({
           />
         </Form.Item>
         <Form.Item name="category" label="Категорії">
-          <Select>
+          <Select
+            getPopupContainer={() => document.getElementById('addTaskForm')}
+          >
             {categories &&
               categories.map((category) => (
                 <Select.Option key={category?._id} value={category?.name}>
-                  {category?.name}
+                  <Tooltip placement="top" title={category?.description}>
+                    {category?.name}
+                  </Tooltip>
                 </Select.Option>
               ))}
           </Select>
@@ -186,9 +185,13 @@ const AddTaskModal: React.FC<PropsType> = ({
               placement="topLeft"
             />
           }
-          // rules={validateField('deadline')}
+          rules={validateField('deadline')}
         >
-          <DatePicker disabledDate={disabledDate} placeholder="Оберіть дату" />
+          <DatePicker
+            getPopupContainer={() => document.getElementById('addTaskForm')}
+            disabledDate={disabledDate}
+            placeholder="Оберіть дату"
+          />
         </Form.Item>
       </Form>
     </Modal>

@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { Button, Layout } from 'antd'
 import LoginUser from '../LoginUser'
-import { SearchBar } from '../UI/SearchBar'
 import ThemeSwitcher from '../UI/ThemeSwitcher'
 import TaskButton from '../UI/Buttons/TaskButton'
 import { AppRoutes } from 'utils/constants'
@@ -26,7 +25,6 @@ const Header: React.FC = () => {
         <h1 className={s.Title}>КОМУНАЛЬНИК</h1>
         <TaskButton />
       </div>
-
       {status === 'authenticated' && (
         <Button
           icon={<Diamant className={s.Diamant} />}

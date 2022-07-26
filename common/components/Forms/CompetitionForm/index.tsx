@@ -15,6 +15,8 @@ const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form }) => {
   return (
     <Form
       form={form}
+      id="competitionForm"
+      style={{ position: 'relative' }}
       layout="vertical"
       name="form_in_modal"
       disabled={isFormDisabled}
@@ -39,14 +41,12 @@ const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form }) => {
             placement="topLeft"
           />
         }
-        rules={validateField('deadline')}
+        // rules={validateField('deadline')}
       >
-        <div id="datePicker" style={{ position: 'relative' }}>
-          <DatePicker
-            getPopupContainer={() => document.getElementById('datePicker')}
-            disabledDate={disabledDate}
-          />
-        </div>
+        <DatePicker
+          getPopupContainer={() => document.getElementById('competitionForm')}
+          disabledDate={disabledDate}
+        />
       </Form.Item>
     </Form>
   )
