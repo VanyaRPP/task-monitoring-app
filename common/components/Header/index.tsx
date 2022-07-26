@@ -10,6 +10,7 @@ import Router from 'next/router'
 import BurgerMenu from '../BurgerMenu'
 import Diamant from '../../assets/svg/diamant'
 import LogoCircle from '../../assets/svg/logo_circle'
+import Logo from '../Logo'
 
 const Header: React.FC = () => {
   const { status } = useSession()
@@ -19,10 +20,7 @@ const Header: React.FC = () => {
     <Layout.Header className={s.Header}>
       <BurgerMenu />
       <div className={s.Item}>
-        <Link href={AppRoutes.INDEX}>
-          <LogoCircle className={s.Logo} />
-        </Link>
-        <h1 className={s.Title}>КОМУНАЛЬНИК</h1>
+        <Logo />
         <TaskButton />
       </div>
       {status === 'authenticated' && (

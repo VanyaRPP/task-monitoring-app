@@ -13,7 +13,8 @@ import { useSession } from 'next-auth/react'
 import s from './style.module.scss'
 import { feedbacks } from '../../lib/task.config'
 
-const RateDescription = ['Terrible', 'Bad', 'Normal', 'Good', 'Wonderful']
+// const RateDescription = ['Terrible', 'Bad', 'Normal', 'Good', 'Wonderful']
+const RateDescription = ['Жахливо', 'Погано', 'Нормально', 'Добре', 'Прекрасно']
 
 interface Props {
   user: IUser
@@ -109,6 +110,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
           disabled
           allowHalf
           value={CalculateAVG(feedbacks)}
+          className={s.Rate}
         />
       }
     >
