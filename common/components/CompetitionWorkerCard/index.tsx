@@ -40,11 +40,6 @@ const CompetitionWorkerCard: FC<Props> = ({ _id }) => {
         <Rate disabled defaultValue={user?.rating} />
         <div className={s.btnGroup}>
           <Button type="primary">
-            <CloseCircleOutlined />
-            Відмова
-          </Button>
-          <Button type="primary">
-            <CheckCircleOutlined />
             Готово
           </Button>
         </div>
