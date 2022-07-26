@@ -132,10 +132,10 @@
   width: 80%;
   height: 80%;
 
-  >*:first-of-type {
+  > *:first-of-type {
     position: absolute !important;
 
-    >* {
+    > * {
       animation: floater 10s ease-in-out infinite;
       z-index: 2;
 
@@ -144,8 +144,8 @@
     }
   }
 
-  >*:last-of-type {
-    >* {
+  > *:last-of-type {
+    > * {
       animation: floater 10s ease-in-out 0.5s infinite;
       z-index: 1;
 

@@ -34,7 +34,7 @@
   }
 }
 
-.Premium:hover+.Divider {
+.Premium:hover + .Divider {
   background-color: var(--primaryColor);
 }
 
@@ -44,7 +44,7 @@
   padding: 0 0.5em;
 }
 
-.SignIn:hover+.Divider {
+.SignIn:hover + .Divider {
   background-color: var(--primaryColor);
 }
 
