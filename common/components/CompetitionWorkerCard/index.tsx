@@ -39,9 +39,7 @@ const CompetitionWorkerCard: FC<Props> = ({ _id }) => {
         <p>Телефон: {user?.tel}</p>
         <Rate disabled defaultValue={user?.rating} />
         <div className={s.btnGroup}>
-          <Button type="primary">
-            Готово
-          </Button>
+          <Button type="primary">Готово</Button>
         </div>
       </Card>
     </div>

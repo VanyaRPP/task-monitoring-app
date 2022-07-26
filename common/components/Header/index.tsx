@@ -19,7 +19,6 @@ const Header: React.FC = () => {
     <Layout.Header className={s.Header}>
       <BurgerMenu />
       <div className={s.Item}>
-
         <Logo />
         <TaskButton />
         <div className={s.ThemeSwitcher}>
