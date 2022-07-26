@@ -15,7 +15,7 @@ interface Props {
 const CompetitionWorkerCard: FC<Props> = ({ _id }) => {
   const { data } = useGetUserByIdQuery(_id)
   const user = data?.data
-
+  const desc = ['Жахливо', 'Погано', 'Нормально', 'Добре', 'Прекрасно']
   return (
     <div className={s.container}>
       <Card className={s.Card}>

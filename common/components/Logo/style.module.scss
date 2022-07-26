@@ -1,0 +1,32 @@
+.All {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+.Logo {
+  float: left;
+  font-size: 2rem;
+  text-align: start;
+  margin: 0;
+  cursor: pointer;
+  margin-left: 0.5em;
+  transition: color 0.5s;
+  color: var(--primaryColor);
+  &:hover {
+    color: var(--primaryColorHover);
+  }
+}
+.Title {
+  font-weight: 650;
+  color: var(--primaryColor);
+  @media (min-width: 768px) {
+    font-size: 2em;
+    margin-top: 0.75rem;
+  }
+  @media (max-width: 425px) {
+    font-size: 0.5em;
+    margin-left: 0.05rem;
+    margin-right: 0.5rem;
+  }
+}

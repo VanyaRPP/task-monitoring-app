@@ -123,7 +123,7 @@ const AddTaskModal: React.FC<PropsType> = ({
         {userData?.data?.role == Roles.ADMIN && (
           <Form.Item
             name="customer"
-            label="Name of customer"
+            label="Ім'я замовника"
             normalize={deleteExtraWhitespace}
             rules={validateField('name')}
           >
@@ -146,7 +146,7 @@ const AddTaskModal: React.FC<PropsType> = ({
         {/* <Form.Item name="images">
           <UploadImages />
         </Form.Item> */}
-        <Form.Item name="domain" label="Address">
+        <Form.Item name="domain" label="Адреса">
           <PlacesAutocomplete
             isLoaded={isLoaded}
             setAddress={setAddress}

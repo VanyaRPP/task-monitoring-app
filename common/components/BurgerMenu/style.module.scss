@@ -2,15 +2,18 @@
   display: block;
   padding: 0.25rem;
   margin: 0 0.75rem;
+
   @media (min-width: 425px) {
     display: none;
   }
 }
+
 .Drawer {
   .Buttons {
     margin: -1.5rem;
   }
 }
+
 .Points {
   display: flex;
   align-items: left;
@@ -21,26 +24,30 @@
 .Diamant {
   margin-bottom: -0.3em;
 }
+
 .Premium {
   margin: 1rem 0;
+
   span {
-    font-size: 20px;
     color: var(--textColor);
     padding: 0.25em 0.5em;
   }
 }
+
 .Premium:hover + .Divider {
   background-color: var(--primaryColor);
 }
+
 .SignIn {
   margin: 1rem 0;
   color: var(--textColor);
-  font-size: 20px;
   padding: 0 0.5em;
 }
+
 .SignIn:hover + .Divider {
   background-color: var(--primaryColor);
 }
+
 .Divider {
   display: flex;
   background-color: #88888830;

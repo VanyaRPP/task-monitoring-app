@@ -63,7 +63,7 @@ const Categories: React.FC<{
         >
           <Skeleton title={false} loading={false} active>
             <List.Item.Meta
-              title={<Link href={AppRoutes.INDEX}>{category?.name}</Link>}
+              title={category?.name}
               description={category?.description}
             />
           </Skeleton>

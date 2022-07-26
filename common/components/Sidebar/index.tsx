@@ -19,17 +19,17 @@ const items: MenuItem[] = [
   {
     key: 0,
     icon: <CheckOutlined />,
-    label: 'Finished orders',
+    label: 'Готові замовлення', //finished orders
   },
   {
     key: 1,
     icon: <SendOutlined />,
-    label: 'Active orders',
+    label: 'Активні замовлення', //active orders
   },
   {
     key: 2,
     icon: <RedoOutlined />,
-    label: 'In-work orders',
+    label: 'Замовлення в роботі', //in-work orders
   },
 ]
 
