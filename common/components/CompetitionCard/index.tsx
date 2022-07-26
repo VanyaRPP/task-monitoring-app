@@ -114,8 +114,9 @@ const CompetitionCard: React.FC<{
   return (
     <Card
       className={s.Card}
-      title={`Competition: ${task?.taskexecutors ? task?.taskexecutors.length : ''
-        }`}
+      title={`Competition: ${
+        task?.taskexecutors ? task?.taskexecutors.length : ''
+      }`}
       extra={
         task?.creator !== userData?.data?._id && (
           <Button

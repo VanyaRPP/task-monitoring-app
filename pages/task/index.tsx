@@ -26,9 +26,7 @@ const Tasks: React.FC = () => {
         <div className={s.TasksList}>
           {tasks &&
             [...tasks].reverse().map((task: ITask, index) => {
-              return (
-                <CardOneTask key={index} task={task} />
-              )
+              return <CardOneTask key={index} task={task} />
             })}
         </div>
       ) : (

@@ -1,5 +1,9 @@
 import React, { FC } from 'react'
-import { CheckCircleOutlined, CloseCircleOutlined, UserOutlined } from '@ant-design/icons'
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  UserOutlined,
+} from '@ant-design/icons'
 import { Avatar, Button, Card, Image, Rate } from 'antd'
 import { useGetUserByIdQuery } from '../../api/userApi/user.api'
 import s from './style.module.scss'
@@ -48,7 +52,6 @@ const CompetitionWorkerCard: FC<Props> = ({ _id }) => {
             Готово
           </Button>
         </div>
-
       </Card>
     </div>
   )
