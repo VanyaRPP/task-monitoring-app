@@ -26,17 +26,3 @@
   transition: background 0.5s;
   background: var(--primaryColor);
 }
-
-.Footer {
-  h2,
-  span {
-    transition: color 0.5s;
-  }
-
-  h2 {
-    color: var(--primaryColor);
-  }
-  span {
-    color: var(--textColor);
-  }
-}

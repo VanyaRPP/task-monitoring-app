@@ -11,7 +11,7 @@ interface Props {
 const CompetitionWorkerCard: FC<Props> = ({ _id }) => {
   const { data } = useGetUserByIdQuery(_id)
   const user = data?.data
-
+  const desc = ['Жахливо', 'Погано', 'Нормально', 'Добре', 'Прекрасно']
   return (
     <div className={s.container}>
       <Card className={s.Card}>
@@ -33,7 +33,7 @@ const CompetitionWorkerCard: FC<Props> = ({ _id }) => {
         <p>Name: {user?.name || user?.email}</p>
         <p>Mail: {user?.email}</p>
         <p>Phone: {user?.tel}</p>
-        <Rate disabled defaultValue={user?.rating} />
+        <Rate tooltips={desc} disabled defaultValue={user?.rating} />
       </Card>
     </div>
   )

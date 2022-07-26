@@ -25,7 +25,7 @@ const Comment: React.FC<{ comment: IComment; taskId: string }> = ({
         className={classNames(s.Comment, {
           [s.Active]: sessionUser?.data?._id === user?._id,
         })}
-        author={user ? <UserLink user={user} /> : 'User not found'}
+        author={user ? <UserLink user={user} /> : 'Власника не знайдено'}
         avatar={user?.image || undefined}
         content={<p className={s.Description}>{comment?.text}</p>}
         datetime={moment(comment?.datetime).fromNow()}
