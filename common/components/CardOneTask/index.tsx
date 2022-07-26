@@ -2,7 +2,10 @@ import { Badge, Button, Card } from 'antd'
 import classNames from 'classnames'
 import Router from 'next/router'
 import { AppRoutes } from '../../../utils/constants'
-import { dateToDefaultFormat, isDeadlineExpired } from '../../assets/features/formatDate'
+import {
+  dateToDefaultFormat,
+  isDeadlineExpired,
+} from '../../assets/features/formatDate'
 import { ITask } from '../../modules/models/Task'
 import s from './style.module.scss'
 
@@ -17,9 +20,7 @@ const CardOneTask: React.FC<Props> = ({ task }) => {
       extra={
         <Badge
           color="gold"
-          count={
-            task?.taskexecutors ? task?.taskexecutors.length : 0
-          }
+          count={task?.taskexecutors ? task?.taskexecutors.length : 0}
         >
           <Button
             ghost
