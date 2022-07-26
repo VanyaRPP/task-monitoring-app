@@ -21,7 +21,7 @@ export interface errors {
 }
 
 export const errors: errors = {
-  SignIn: 'Try signing in with a different account.',
+  SignIn: 'Спробуйте ввійти за допомогою іншого облікового запису.',
   OAuthSignIn: 'Try signing in with a different account.',
   OAuthCallback: 'Try signing in with a different account.',
   OAuthCreateAccount: 'Try signing in with a different account.',
