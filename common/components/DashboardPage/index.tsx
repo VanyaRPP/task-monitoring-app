@@ -7,7 +7,6 @@ import AddTaskModal from '../AddTaskModal'
 import s from './style.module.scss'
 
 const Dashboard: React.FC = () => {
-
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
 
   return (

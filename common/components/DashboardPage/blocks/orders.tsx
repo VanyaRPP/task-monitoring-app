@@ -12,7 +12,6 @@ interface Props {
 }
 
 const Orders: React.FC<Props> = ({ style }) => {
-
   const { data: session } = useSession()
 
   const { data: userData, isLoading } = useGetUserByEmailQuery(
