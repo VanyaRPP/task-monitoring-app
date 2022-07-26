@@ -10,7 +10,7 @@ const SvgComponent = (props: SVGProps<SVGSVGElement>) => (
     height={20}
     style={{
       // fill: 'var(--textColor)',
-      fill: '#474A50',
+      fill: '#FFFFFF',
     }}
     xmlSpace="preserve"
   >
