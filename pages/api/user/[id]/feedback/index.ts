@@ -5,7 +5,10 @@ import start, { Data } from 'pages/api/api.config'
 start()
 
 function averageNum(arr, keyName) {
-  return arr.reduce((sum, a) => sum + (keyName === undefined ? a : +a[keyName]), 0) / arr.length;
+  return (
+    arr.reduce((sum, a) => sum + (keyName === undefined ? a : +a[keyName]), 0) /
+    arr.length
+  )
 }
 
 export default async function handler(
