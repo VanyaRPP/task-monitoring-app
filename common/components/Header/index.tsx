@@ -23,30 +23,18 @@ const Header: React.FC = () => {
         <Link href={AppRoutes.INDEX}>
           <LogoCircle className={s.Logo} />
         </Link>
+        <h1 className={s.Title}>КОМУНАЛЬНИК</h1>
         <TaskButton />
       </div>
-      {status === 'authenticated' ? (
-        <>
-          <Button
-            icon={<Diamant className={s.Diamant} />}
-            className={s.Button_Premium}
-            type="primary"
-            onClick={() => Router.push(AppRoutes.PREMIUM)}
-          >
-            <span>Преміум</span>
-          </Button>
-          <SearchBar className={s.Search} />
-        </>
-      ) : (
-        <Button
-          icon={<Diamant className={s.Diamant} />}
-          className={s.Button_Premium}
-          type="primary"
-          onClick={() => Router.push(AppRoutes.PREMIUM)}
-        >
-          <span>Преміум</span>
-        </Button>
-      )}
+
+      <Button
+        icon={<Diamant className={s.Diamant} />}
+        className={s.Button_Premium}
+        type="primary"
+        onClick={() => Router.push(AppRoutes.PREMIUM)}
+      >
+        <span>Преміум</span>
+      </Button>
 
       <ThemeSwitcher />
       <LoginUser />
