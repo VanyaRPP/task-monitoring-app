@@ -15,6 +15,7 @@ import {
   dateToDefaultFormat,
   isDeadlineExpired,
 } from '../../common/assets/features/formatDate'
+import CardOneTask from '../../common/components/CardOneTask'
 
 const Tasks: React.FC = () => {
   const { data: session } = useSession()
@@ -32,36 +33,37 @@ const Tasks: React.FC = () => {
           {tasks &&
             [...tasks].reverse().map((task: ITask, index) => {
               return (
-                <Card
-                  key={index}
-                  title={task.name}
-                  extra={
-                    <Badge
-                      color="gold"
-                      count={
-                        task?.taskexecutors ? task?.taskexecutors.length : 0
-                      }
-                    >
-                      <Button
-                        ghost
-                        type="primary"
-                        onClick={() =>
-                          Router.push(AppRoutes.TASK + '/' + task._id)
-                        }
-                      >
-                        {isDeadlineExpired(task?.deadline) ? 'Info' : 'Apply'}
-                      </Button>
-                    </Badge>
-                  }
-                  className={classNames(s.Card, {
-                    [s.Disabled]: isDeadlineExpired(task?.deadline),
-                  })}
-                >
-                  <p>Категорія: {task?.category}</p>
-                  <p>Опис: {task.description}</p>
-                  <p>Адреса: {task?.address?.name}</p>
-                  <p>Виконати до: {dateToDefaultFormat(task?.deadline)}</p>
-                </Card>
+                <CardOneTask key={index} task={task} />
+                // <Card
+                //   key={index}
+                //   title={task.name}
+                //   extra={
+                //     <Badge
+                //       color="gold"
+                //       count={
+                //         task?.taskexecutors ? task?.taskexecutors.length : 0
+                //       }
+                //     >
+                //       <Button
+                //         ghost
+                //         type="primary"
+                //         onClick={() =>
+                //           Router.push(AppRoutes.TASK + '/' + task._id)
+                //         }
+                //       >
+                //         {isDeadlineExpired(task?.deadline) ? 'Info' : 'Apply'}
+                //       </Button>
+                //     </Badge>
+                //   }
+                //   className={classNames(s.Card, {
+                //     [s.Disabled]: isDeadlineExpired(task?.deadline),
+                //   })}
+                // >
+                //   <p>Категорія: {task?.category}</p>
+                //   <p>Опис: {task.description}</p>
+                //   <p>Адреса: {task?.address?.name}</p>
+                //   <p>Виконати до: {dateToDefaultFormat(task?.deadline)}</p>
+                // </Card>
               )
             })}
         </div>

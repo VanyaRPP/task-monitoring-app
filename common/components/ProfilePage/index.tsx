@@ -64,11 +64,11 @@ const ProfilePage: React.FC = () => {
             <Card title="Адреса" size="small">
               <p>{user?.address?.name || 'Житомир'}</p>
             </Card>
-            {
-              !router.query.id ? <Button type="primary">
+            {!router.query.id ? (
+              <Button type="primary">
                 <EditOutlined key="edit" />
-              </Button> : null
-            }
+              </Button>
+            ) : null}
           </div>
         </Card>
 
