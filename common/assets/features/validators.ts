@@ -1,13 +1,14 @@
-import { message, Upload } from 'antd'
 import { Rule } from 'antd/lib/form'
-import type { UploadFile } from 'antd/es/upload/interface'
 
 //Normalizers
 export const allowOnlyNumbers = (value: string): string =>
   value.replace(/[^+\d]/g, '')
 
 export const deleteExtraWhitespace = (value: string): string =>
-  value.replace(/(#[\wа-яё]+)/gi, '').replace(/[ ]+/g, ' ')
+  value
+    .replace(/(#[\wа-яё]+)/gi, '')
+    .replace(/[ ]+/g, ' ')
+    .trimStart()
 
 //Validators
 

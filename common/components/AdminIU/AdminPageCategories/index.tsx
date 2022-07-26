@@ -11,6 +11,7 @@ import Categories from '../../Categories'
 import ModalWindow from '../../UI/ModalWindow'
 import s from './style.module.scss'
 import useDebounce from '../../../modules/hooks/useDebounce'
+import { deleteExtraWhitespace } from '../../../assets/features/validators'
 
 const AdminPageCategories: React.FC = () => {
   const { Search } = Input
@@ -61,7 +62,7 @@ const AdminPageCategories: React.FC = () => {
         <Input
           placeholder="Пошук категорії..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => setSearch(deleteExtraWhitespace(e.target.value))}
         />
         <Button
           className={s.AddButton}
