@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
-import { UserOutlined } from '@ant-design/icons'
-import { Avatar, Card, Image, Rate } from 'antd'
+import { CheckCircleOutlined, CloseCircleOutlined, UserOutlined } from '@ant-design/icons'
+import { Avatar, Button, Card, Image, Rate } from 'antd'
 import { useGetUserByIdQuery } from '../../api/userApi/user.api'
 import s from './style.module.scss'
 
@@ -30,10 +30,25 @@ const CompetitionWorkerCard: FC<Props> = ({ _id }) => {
             />
           }
         />
-        <p>Name: {user?.name || user?.email}</p>
-        <p>Mail: {user?.email}</p>
-        <p>Phone: {user?.tel}</p>
+        <p>Ім`я: {user?.name || user?.email}</p>
+        <p>Пошта: {user?.email}</p>
+        <p>Телефон: {user?.tel}</p>
         <Rate disabled defaultValue={user?.rating} />
+        {/* {!router.query.id ? (
+              
+            ) : null} */}
+
+        <div className={s.btnGroup}>
+          <Button type="primary">
+            <CloseCircleOutlined />
+            Відмова
+          </Button>
+          <Button type="primary">
+            <CheckCircleOutlined />
+            Готово
+          </Button>
+        </div>
+
       </Card>
     </div>
   )

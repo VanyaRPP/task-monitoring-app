@@ -35,6 +35,7 @@ const CardOneTask: React.FC<Props> = ({ task }) => {
         [s.Disabled]: isDeadlineExpired(task?.deadline),
       })}
     >
+      <p>Статус: {task?.status}</p>
       <p>Категорія: {task?.category}</p>
       <p>Опис: {task.description}</p>
       <p>Адреса: {task?.address?.name}</p>

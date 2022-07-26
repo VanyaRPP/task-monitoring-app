@@ -1,13 +1,9 @@
-import { Button, Card, Empty } from 'antd'
-import classNames from 'classnames'
+import { Empty } from 'antd'
 import { GetServerSideProps } from 'next'
 import { unstable_getServerSession } from 'next-auth'
-import Router, { useRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import { useGetAllTaskQuery } from '../../../common/api/taskApi/task.api'
-import {
-  dateToDefaultFormat,
-  isDeadlineExpired,
-} from '../../../common/assets/features/formatDate'
+import CardOneTask from '../../../common/components/CardOneTask'
 import { ITask } from '../../../common/modules/models/Task'
 import { AppRoutes } from '../../../utils/constants'
 import { authOptions } from '../../api/auth/[...nextauth]'
@@ -29,29 +25,7 @@ const UserTasks: React.FC = () => {
           {userTasks &&
             [...userTasks].reverse().map((task: ITask, index) => {
               return (
-                <Card
-                  key={index}
-                  title={task.name}
-                  extra={
-                    <Button
-                      ghost
-                      type="primary"
-                      onClick={() =>
-                        Router.push(AppRoutes.TASK + '/' + task._id)
-                      }
-                    >
-                      {isDeadlineExpired(task?.deadline) ? 'Info' : 'Apply'}
-                    </Button>
-                  }
-                  className={classNames(s.Card, {
-                    [s.Disabled]: isDeadlineExpired(task?.deadline),
-                  })}
-                >
-                  <p>Category: {task?.category}</p>
-                  <p>Description: {task.description}</p>
-                  <p>Address: {task?.address?.name}</p>
-                  <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
-                </Card>
+                <CardOneTask key={index} task={task} />
               )
             })}
         </div>

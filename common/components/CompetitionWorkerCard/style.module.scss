@@ -16,7 +16,7 @@
 
   border-color: var(--backgroundColorPrimary);
 
-  > * {
+  >* {
     border-color: var(--primaryColor);
     transition: background 0.5s, color 0.5s;
     color: var(--textColor);
@@ -39,4 +39,11 @@
   width: 100px;
   height: 100px;
   margin: 10px auto;
+}
+
+.btnGroup {
+  margin-top: 10px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
 }

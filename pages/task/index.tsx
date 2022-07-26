@@ -1,21 +1,15 @@
-import { Badge, Button, Card, Empty } from 'antd'
+import { Empty } from 'antd'
 import { useGetAllTaskQuery } from '../../common/api/taskApi/task.api'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
 import { ITask } from '../../common/modules/models/Task'
-import Router from 'next/router'
 import { useSession } from 'next-auth/react'
 import { useGetUserByEmailQuery } from '../../common/api/userApi/user.api'
 import { AppRoutes } from '../../utils/constants'
-import classNames from 'classnames'
-import s from './style.module.scss'
 import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
-import {
-  dateToDefaultFormat,
-  isDeadlineExpired,
-} from '../../common/assets/features/formatDate'
 import CardOneTask from '../../common/components/CardOneTask'
+import s from './style.module.scss'
 
 const Tasks: React.FC = () => {
   const { data: session } = useSession()
@@ -34,36 +28,6 @@ const Tasks: React.FC = () => {
             [...tasks].reverse().map((task: ITask, index) => {
               return (
                 <CardOneTask key={index} task={task} />
-                // <Card
-                //   key={index}
-                //   title={task.name}
-                //   extra={
-                //     <Badge
-                //       color="gold"
-                //       count={
-                //         task?.taskexecutors ? task?.taskexecutors.length : 0
-                //       }
-                //     >
-                //       <Button
-                //         ghost
-                //         type="primary"
-                //         onClick={() =>
-                //           Router.push(AppRoutes.TASK + '/' + task._id)
-                //         }
-                //       >
-                //         {isDeadlineExpired(task?.deadline) ? 'Info' : 'Apply'}
-                //       </Button>
-                //     </Badge>
-                //   }
-                //   className={classNames(s.Card, {
-                //     [s.Disabled]: isDeadlineExpired(task?.deadline),
-                //   })}
-                // >
-                //   <p>Категорія: {task?.category}</p>
-                //   <p>Опис: {task.description}</p>
-                //   <p>Адреса: {task?.address?.name}</p>
-                //   <p>Виконати до: {dateToDefaultFormat(task?.deadline)}</p>
-                // </Card>
               )
             })}
         </div>
