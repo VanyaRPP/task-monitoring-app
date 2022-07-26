@@ -1,8 +1,10 @@
-import { Empty } from 'antd'
+import { Button, Empty } from 'antd'
 import { GetServerSideProps } from 'next'
 import { unstable_getServerSession } from 'next-auth'
 import { useRouter } from 'next/router'
+import { useState } from 'react'
 import { useGetAllTaskQuery } from '../../../common/api/taskApi/task.api'
+import AddTaskModal from '../../../common/components/AddTaskModal'
 import CardOneTask from '../../../common/components/CardOneTask'
 import { ITask } from '../../../common/modules/models/Task'
 import { AppRoutes } from '../../../utils/constants'
@@ -14,12 +16,24 @@ const UserTasks: React.FC = () => {
   const { data } = useGetAllTaskQuery('')
   const tasks = data?.data
 
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+
   const userTasks = tasks?.filter(
     (task: ITask) => task.creator === router.query.id
   )
 
   return (
     <>
+      <div className={s.Header}>
+        <h1>Мої замовлення</h1>
+        <Button
+          ghost
+          type="primary"
+          onClick={() => setIsModalVisible(!isModalVisible)}
+        >
+          Створити завдання
+        </Button>
+      </div>
       {userTasks && userTasks.length !== 0 ? (
         <div className={s.TasksList}>
           {userTasks &&
@@ -30,6 +44,10 @@ const UserTasks: React.FC = () => {
       ) : (
         <Empty />
       )}
+      <AddTaskModal
+        isModalVisible={isModalVisible}
+        setIsModalVisible={setIsModalVisible}
+      />
     </>
   )
 }
