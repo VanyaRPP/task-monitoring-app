@@ -54,9 +54,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  span {
-    font-size: 16px;
-  }
 }
 
 .Points {
@@ -140,11 +137,9 @@
 .Button {
   margin: 1rem 0;
   color: var(--textColor);
-  font-size: 20px;
 }
 
 .ButtonPremium {
-  font-size: 20px;
   width: 100%;
   height: 70px;
   background-color: var(--primaryColor);
