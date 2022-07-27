@@ -115,8 +115,9 @@ const CompetitionCard: React.FC<{
   return (
     <Card
       className={s.Card}
-      title={`Список майстрів: ${task?.taskexecutors ? task?.taskexecutors.length : ''
-        }`}
+      title={`Список майстрів: ${
+        task?.taskexecutors ? task?.taskexecutors.length : ''
+      }`}
       extra={
         task?.creator !== userData?.data?._id && (
           <Button
@@ -134,7 +135,13 @@ const CompetitionCard: React.FC<{
         )
       }
     >
-      {task?.executant ? <CompetitionWorkerCard _id={task?.executant} taskCreatorId={task?.creator} taskStatus={task?.status} /> : null}
+      {task?.executant ? (
+        <CompetitionWorkerCard
+          _id={task?.executant}
+          taskCreatorId={task?.creator}
+          taskStatus={task?.status}
+        />
+      ) : null}
       <ModalWindow
         title="Подати заявку"
         isModalVisible={isModalVisible}

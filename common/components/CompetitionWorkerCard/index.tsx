@@ -5,7 +5,11 @@ import {
   UserOutlined,
 } from '@ant-design/icons'
 import { Avatar, Button, Card, Form, Image, Rate } from 'antd'
-import { useAddFeedbackMutation, useGetUserByEmailQuery, useGetUserByIdQuery } from '../../api/userApi/user.api'
+import {
+  useAddFeedbackMutation,
+  useGetUserByEmailQuery,
+  useGetUserByIdQuery,
+} from '../../api/userApi/user.api'
 import s from './style.module.scss'
 import ModalWindow from '../UI/ModalWindow'
 import EndTask from '../EndTask'
@@ -21,7 +25,11 @@ interface Props {
   taskStatus: TaskStatuses
 }
 
-const CompetitionWorkerCard: FC<Props> = ({ _id, taskCreatorId, taskStatus }) => {
+const CompetitionWorkerCard: FC<Props> = ({
+  _id,
+  taskCreatorId,
+  taskStatus,
+}) => {
   const session = useSession()
   const { data: sessionUser } = useGetUserByEmailQuery(
     session?.data?.user?.email
@@ -69,8 +77,6 @@ const CompetitionWorkerCard: FC<Props> = ({ _id, taskCreatorId, taskStatus }) =>
     Reset()
   }
 
-
-
   return (
     <div className={s.container}>
       <Card className={s.Card}>
@@ -93,17 +99,17 @@ const CompetitionWorkerCard: FC<Props> = ({ _id, taskCreatorId, taskStatus }) =>
         <p>Пошта: {user?.email}</p>
         <p>Телефон: {user?.tel}</p>
         <RateStars disabled defaultValue={user?.rating} />
-        {
-          sessionUser?.data?._id === user?._id || sessionUser?.data?._id === taskCreatorId ?
-            <div className={s.btnGroup}>
-              <Button
-                type="primary"
-                onClick={() => setIsModalVisible(!isModalVisible)}
-              >
-                Завершити
-              </Button>
-            </div> : null
-        }
+        {sessionUser?.data?._id === user?._id ||
+        sessionUser?.data?._id === taskCreatorId ? (
+          <div className={s.btnGroup}>
+            <Button
+              type="primary"
+              onClick={() => setIsModalVisible(!isModalVisible)}
+            >
+              Завершити
+            </Button>
+          </div>
+        ) : null}
       </Card>
       <ModalWindow
         title={`Завершити завдання з ${user?.name || user?.email}`}

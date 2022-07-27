@@ -17,7 +17,7 @@ export default async function handler(
           { _id: task._id },
           {
             taskexecutors: [...task.taskexecutors, req.body],
-            status: TaskStatuses.PENDING_SELECTION
+            status: TaskStatuses.PENDING_SELECTION,
           }
         )
         return res.status(201).json({ success: true, data: Utask })
