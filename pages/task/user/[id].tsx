@@ -1,13 +1,11 @@
-import { Button, Card, Empty } from 'antd'
-import classNames from 'classnames'
+import { Button, Empty } from 'antd'
 import { GetServerSideProps } from 'next'
 import { unstable_getServerSession } from 'next-auth'
-import Router, { useRouter } from 'next/router'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
 import { useGetAllTaskQuery } from '../../../common/api/taskApi/task.api'
-import {
-  dateToDefaultFormat,
-  isDeadlineExpired,
-} from '../../../common/assets/features/formatDate'
+import AddTaskModal from '../../../common/components/AddTaskModal'
+import CardOneTask from '../../../common/components/CardOneTask'
 import { ITask } from '../../../common/modules/models/Task'
 import { AppRoutes } from '../../../utils/constants'
 import { authOptions } from '../../api/auth/[...nextauth]'
@@ -18,46 +16,38 @@ const UserTasks: React.FC = () => {
   const { data } = useGetAllTaskQuery('')
   const tasks = data?.data
 
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+
   const userTasks = tasks?.filter(
     (task: ITask) => task.creator === router.query.id
   )
 
   return (
     <>
+      <div className={s.Header}>
+        <h1>Мої замовлення</h1>
+        <Button
+          ghost
+          type="primary"
+          onClick={() => setIsModalVisible(!isModalVisible)}
+        >
+          Створити завдання
+        </Button>
+      </div>
       {userTasks && userTasks.length !== 0 ? (
         <div className={s.TasksList}>
           {userTasks &&
             [...userTasks].reverse().map((task: ITask, index) => {
-              return (
-                <Card
-                  key={index}
-                  title={task.name}
-                  extra={
-                    <Button
-                      ghost
-                      type="primary"
-                      onClick={() =>
-                        Router.push(AppRoutes.TASK + '/' + task._id)
-                      }
-                    >
-                      {isDeadlineExpired(task?.deadline) ? 'Info' : 'Apply'}
-                    </Button>
-                  }
-                  className={classNames(s.Card, {
-                    [s.Disabled]: isDeadlineExpired(task?.deadline),
-                  })}
-                >
-                  <p>Category: {task?.category}</p>
-                  <p>Description: {task.description}</p>
-                  <p>Address: {task?.address?.name}</p>
-                  <p>DeadLine: {dateToDefaultFormat(task?.deadline)}</p>
-                </Card>
-              )
+              return <CardOneTask key={index} task={task} />
             })}
         </div>
       ) : (
         <Empty />
       )}
+      <AddTaskModal
+        isModalVisible={isModalVisible}
+        setIsModalVisible={setIsModalVisible}
+      />
     </>
   )
 }

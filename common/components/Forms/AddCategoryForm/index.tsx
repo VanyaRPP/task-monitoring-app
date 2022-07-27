@@ -19,7 +19,7 @@ const AddCategoryForm: React.FC<PropsType> = ({ isFormDisabled, form, id }) => {
     if (id) {
       form.setFieldsValue({
         name: data?.data?.name,
-        description: data?.data.description,
+        description: data?.data?.description,
       })
     }
   }, [data, form, id])

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { Card, Table, Input } from 'antd'
+import { Card, Table, Input, Button } from 'antd'
 import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
 import { firstTextToUpperCase } from '../../../../utils/helpers'
 import {
@@ -7,11 +7,12 @@ import {
   useGetUserByIdQuery,
 } from '../../../api/userApi/user.api'
 import moment from 'moment'
-import { useRouter } from 'next/router'
+import Router, { useRouter } from 'next/router'
 import { AppRoutes } from '../../../../utils/constants'
 
 import s from '../style.module.scss'
 import { useSession } from 'next-auth/react'
+import MicroInfoProfile from '../../MicroInfoProfile'
 
 const Orders: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
@@ -46,7 +47,8 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'executant',
       key: 'executant',
       width: '25%',
-      render: (text) => (text ? text : 'Не назначено'),
+      render: (text) =>
+        text ? <MicroInfoProfile id={text} /> : 'Не назначено',
     },
     {
       title: 'Дата',
@@ -66,7 +68,20 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
   ]
 
   return (
-    <Card className={style} title="Мої замовлення" style={{ flex: '1.5' }}>
+    <Card
+      className={style}
+      title="Мої замовлення"
+      style={{ flex: '1.5' }}
+      extra={
+        <Button
+          onClick={() => Router.push(`/task/user/${user?._id}`)}
+          ghost
+          type="primary"
+        >
+          Всі
+        </Button>
+      }
+    >
       <Table
         rowKey="_id"
         rowClassName={s.rowClass}

@@ -1,3 +1,16 @@
+.Header {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  h1 {
+    font-size: 26px;
+    transition: color 0.2s;
+    color: var(--primaryColor);
+  }
+}
+
 // ===TASKS LIST=== //
 
 .TasksList {
@@ -6,15 +19,19 @@
   width: 100%;
 
   grid-template-columns: repeat(5, 1fr);
+
   @media (max-width: 1800px) {
     grid-template-columns: repeat(4, 1fr);
   }
+
   @media (max-width: 1550px) {
     grid-template-columns: repeat(3, 1fr);
   }
+
   @media (max-width: 1300px) {
     grid-template-columns: repeat(2, 1fr);
   }
+
   @media (max-width: 1000px) {
     grid-template-columns: 1fr;
   }
@@ -26,6 +43,7 @@
     background: var(--backgroundColorElements) !important;
 
     border-color: #88888830;
+
     > * {
       border-color: #88888830;
       transition: background 0.5s, color 0.5s;
