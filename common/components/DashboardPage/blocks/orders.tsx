@@ -12,6 +12,7 @@ import { AppRoutes } from '../../../../utils/constants'
 
 import s from '../style.module.scss'
 import { useSession } from 'next-auth/react'
+import MicroInfoProfile from '../../MicroInfoProfile'
 
 const Orders: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
@@ -46,7 +47,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'executant',
       key: 'executant',
       width: '25%',
-      render: (text) => (text ? text : 'Не назначено'),
+      render: (text) => (text ? <MicroInfoProfile id={text} /> : 'Не назначено'),
     },
     {
       title: 'Дата',
