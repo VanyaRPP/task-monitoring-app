@@ -24,26 +24,27 @@ const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form }) => {
       <Form.Item
         normalize={allowOnlyNumbers}
         name="price"
-        label="Price"
+        label="Ціна"
         rules={validateField('price')}
       >
         <Input addonAfter="₴" style={{ width: '100%' }} />
       </Form.Item>
-      <Form.Item name="description" label="Description">
+      <Form.Item name="description" label="Опис">
         <Input.TextArea maxLength={250} />
       </Form.Item>
       <Form.Item
         name="deadline"
         label={
           <CustomTooltip
-            title="When you expect to finish"
-            text="Deadline"
+            title="Коли ви очікуєте закінчити"
+            text="Виконати до"
             placement="topLeft"
           />
         }
         // rules={validateField('deadline')}
       >
         <DatePicker
+          placeholder="Оберіть дату"
           getPopupContainer={() => document.getElementById('competitionForm')}
           disabledDate={disabledDate}
         />

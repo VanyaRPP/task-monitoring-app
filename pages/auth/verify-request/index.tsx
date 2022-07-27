@@ -8,11 +8,11 @@ const Verify: React.FC = () => {
 
   return (
     <div>
-      <h2 className={s.Header}>Підтвердьте свою електронну пошту</h2>
+      <h2 className={s.Header}>Підтвердіть свою електронну пошту</h2>
       <p className={s.Text}>
         Ми надіслали Вам повідомлення на вашу електронну пошту.
         <br />
-        Підтвердьте свою електронну адресу, дотримуючись інструкцій у
+        Підтвердіть свою електронну адресу, дотримуючись інструкцій у
         повідомленні.
       </p>
 
@@ -24,6 +24,7 @@ const Verify: React.FC = () => {
           onClick={() => {
             // TODO: redirect to user email page
           }}
+          className={s.Buttons}
         >
           Підтвердити
         </Button>
@@ -36,6 +37,7 @@ const Verify: React.FC = () => {
           size="large"
           style={{ width: '100px' }}
           onClick={() => router.push(AppRoutes.INDEX)}
+          className={s.Buttons}
         >
           Повернутись
         </Button>
