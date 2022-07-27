@@ -47,7 +47,8 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'executant',
       key: 'executant',
       width: '25%',
-      render: (text) => (text ? <MicroInfoProfile id={text} /> : 'Не назначено'),
+      render: (text) =>
+        text ? <MicroInfoProfile id={text} /> : 'Не назначено',
     },
     {
       title: 'Дата',
