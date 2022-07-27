@@ -4,8 +4,9 @@ import { UserOutlined } from '@ant-design/icons'
 import { IFeedback } from 'common/modules/models/User'
 import s from './style.module.scss'
 import UserLink from '../UserLink'
+import RateStars from '../UI/RateStars'
 
-const RateDescription = ['Terrible', 'Bad', 'Normal', 'Good', 'Wonderful']
+// const RateDescription = ['Terrible', 'Bad', 'Normal', 'Good', 'Wonderful']
 
 const Feedback: React.FC<{ feedback: IFeedback }> = ({ feedback }) => {
   const { data } = useGetUserByIdQuery(feedback.id)
@@ -25,8 +26,8 @@ const Feedback: React.FC<{ feedback: IFeedback }> = ({ feedback }) => {
         }
         description={<p className={s.Description}>{feedback?.text}</p>}
       />
-
-      <Rate className={s.Rate} disabled value={feedback?.grade} />
+      <RateStars value={feedback?.grade} disabled />
+      {/* <Rate className={s.Rate} disabled value={feedback?.grade} /> */}
     </>
   )
 }
