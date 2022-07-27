@@ -43,7 +43,12 @@ const Categories: React.FC<{
         <List.Item
           className={s.Category}
           actions={[
-            <Button key="info" type="primary" onClick={() => ''}>
+            <Button
+              className={s.Button}
+              key="info"
+              type="primary"
+              onClick={() => ''}
+            >
               Інформація
             </Button>,
           ].concat(
