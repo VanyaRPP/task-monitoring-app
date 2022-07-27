@@ -39,7 +39,9 @@ const ApplyAuctionForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
       <Form.Item
         name="price"
         label="Ціна"
-        rules={[{ required: true, message: 'Please input amount of money!' }]}
+        rules={[
+          { required: true, message: 'Будь ласка, введіть суму грошей!' },
+        ]}
       >
         <InputNumber addonAfter={suffixSelector} style={{ width: '100%' }} />
       </Form.Item>
