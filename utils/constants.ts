@@ -32,8 +32,8 @@ export const errors: errors = {
   EmailSignIn: 'Не вдалося надіслати електронний лист.',
   CredentialsSignIn:
     'Помилка входу. Перевірте правильність наданих вами даних.',
-  SessionRequired: 'Please sign in to access this page.',
-  default: 'Unable to sign in.',
+  SessionRequired: 'Увійдіть, щоб отримати доступ до цієї сторінки.',
+  default: 'Не вдається ввійти.',
 }
 
 export const centerTownGeoCode = {
