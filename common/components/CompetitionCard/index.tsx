@@ -114,7 +114,7 @@ const CompetitionCard: React.FC<{
   return (
     <Card
       className={s.Card}
-      title={`Competition: ${
+      title={`Список майстрів: ${
         task?.taskexecutors ? task?.taskexecutors.length : ''
       }`}
       extra={
@@ -129,25 +129,25 @@ const CompetitionCard: React.FC<{
               )
             }
           >
-            Apply
+            Подати заявку
           </Button>
         )
       }
     >
       {task?.executant ? <CompetitionWorkerCard _id={task?.executant} /> : null}
       <ModalWindow
-        title="Apply for an competition"
+        title="Подати заявку"
         isModalVisible={isModalVisible}
         onCancel={onCancelModal}
         onOk={onSubmitModal}
-        okText="Apply"
-        cancelText="Cancel"
+        okText="Додати"
+        cancelText="Скасувати"
       >
         <CompetitionForm isFormDisabled={isFormDisabled} form={form} />
       </ModalWindow>
       <Table key="competition" dataSource={executors} pagination={false}>
         <Column
-          title="Executors"
+          title="Майстри"
           dataIndex="workerid"
           key="executors"
           width="55%"
@@ -156,14 +156,14 @@ const CompetitionCard: React.FC<{
           )}
         />
         <Column
-          title="Price"
+          title="Ціна"
           dataIndex="price"
           key="price"
           width="15%"
           render={(price) => <div>{price} ₴</div>}
         />
         <Column
-          title="Rating"
+          title="Рейтинг"
           dataIndex="rating"
           key="rating"
           width="15%"
@@ -173,19 +173,19 @@ const CompetitionCard: React.FC<{
         />
         {task?.creator === userData?.data?._id && (
           <Column
-            title="Actions"
+            title="Обрати майстра"
             key="actions"
             width="10%"
             render={(_, executor: ITaskExecutors) => (
               <Popconfirm
-                title="Are you sure?"
-                okText="Yes"
-                cancelText="No"
+                title="Ви впевнені?"
+                okText="Так"
+                cancelText="Ні"
                 icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
                 onConfirm={() => onApprove(executor)}
               >
                 <Button type="primary" ghost>
-                  Submit worker
+                  Обрати
                 </Button>
               </Popconfirm>
             )}

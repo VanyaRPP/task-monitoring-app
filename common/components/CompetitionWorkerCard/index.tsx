@@ -34,13 +34,10 @@ const CompetitionWorkerCard: FC<Props> = ({ _id }) => {
             />
           }
         />
-        <p>Ім`я: {user?.name || user?.email}</p>
-        <p>Пошта: {user?.email}</p>
+        <p>Ім&apos;я: {user?.name || user?.email}</p>
+        <p>Електронна пошта: {user?.email}</p>
         <p>Телефон: {user?.tel}</p>
-        <Rate disabled defaultValue={user?.rating} />
-        <div className={s.btnGroup}>
-          <Button type="primary">Готово</Button>
-        </div>
+        <Rate tooltips={desc} disabled defaultValue={user?.rating} />
       </Card>
     </div>
   )
