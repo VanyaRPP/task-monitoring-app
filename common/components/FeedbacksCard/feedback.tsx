@@ -20,7 +20,9 @@ const Feedback: React.FC<{ feedback: IFeedback }> = ({ feedback }) => {
             src={<Image src={user?.image || undefined} alt="User" />}
           />
         }
-        title={<h4>{user ? <UserLink user={user} /> : 'User not found'}</h4>}
+        title={
+          <h4>{user ? <UserLink user={user} /> : 'Замовника не знайдено'}</h4>
+        }
         description={<p className={s.Description}>{feedback?.text}</p>}
       />
 

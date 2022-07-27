@@ -44,7 +44,7 @@ const Categories: React.FC<{
           className={s.Category}
           actions={[
             <Button
-              className={s.Button}
+              className={s.Buttons}
               key="info"
               type="primary"
               onClick={() => ''}

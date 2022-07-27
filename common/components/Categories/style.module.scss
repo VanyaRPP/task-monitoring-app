@@ -1,10 +1,5 @@
 .Category {
-  a,
-  div:last-child {
-    transition: color 0.2s;
-    color: var(--textColor);
-  }
-}
-.Category {
+  transition: color 0.2s;
+
   border-bottom: 1px solid #88888830 !important;
 }
