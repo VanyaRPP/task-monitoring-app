@@ -4,6 +4,13 @@ import start, { Data } from 'pages/api/api.config'
 
 start()
 
+function averageNum(arr, keyName) {
+  return (
+    arr.reduce((sum, a) => sum + (keyName === undefined ? a : +a[keyName]), 0) /
+    arr.length
+  )
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
@@ -12,10 +19,12 @@ export default async function handler(
     case 'PATCH':
       try {
         await User.findById(req.query.id).then(async (user) => {
+          const rating = averageNum(user?.feedback, 'grade')
           const updatedUser = await User.findOneAndUpdate(
             { _id: user._id },
             {
               feedback: [...(user.feedback ?? []), ...req.body?.feedback],
+              rating: rating,
             }
           )
           return res.status(201).json({ success: true, data: updatedUser })

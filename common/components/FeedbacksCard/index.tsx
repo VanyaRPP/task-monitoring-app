@@ -21,15 +21,15 @@ interface Props {
   loading?: boolean
 }
 
-function CalculateAVG(feedback) {
-  return (
-    Math.floor(
-      (feedback?.length > 0
-        ? feedback?.reduce((a, b) => a + b.rate, 0) / feedback?.length
-        : 3.5) * 2
-    ) / 2
-  )
-}
+// function CalculateAVG(feedback) {
+//   return (
+//     Math.floor(
+//       (feedback?.length > 0
+//         ? feedback?.reduce((a, b) => a + b.rate, 0) / feedback?.length
+//         : 3.5) * 2
+//     ) / 2
+//   )
+// }
 
 const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
   const session = useSession()
@@ -76,7 +76,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
     Reset()
   }
 
-  CalculateAVG(feedbacks)
+  // CalculateAVG(feedbacks)
 
   return (
     <Card
@@ -109,7 +109,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
           tooltips={RateDescription}
           disabled
           allowHalf
-          value={CalculateAVG(feedbacks)}
+          value={user?.rating}
         />
       }
     >
