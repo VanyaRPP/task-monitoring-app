@@ -47,31 +47,53 @@ const BurgerMenu: React.FC = () => {
         width="70%"
       >
         <div className={s.Buttons}>
-          <Card onClick={(e) => e.stopPropagation()} className={s.Card}>
-            <Avatar
-              className={s.Image}
-              size={100}
-              icon={<UserOutlined />}
-              src={
-                <Image
-                  src={session?.user?.image || undefined}
-                  preview={false}
-                  alt="UserImg"
-                />
-              }
-            />
-            <h2>{session?.user?.name}</h2>
-            <p>{session?.user?.email}</p>
-          </Card>
-          <div className={s.Points}>
-            <div
-              className={s.Button}
-              onClick={() => Router.push(AppRoutes.PROFILE)}
-            >
-              <span>Профіль</span>
-            </div>
-            <Divider className={s.Divider} />
+          {status == 'authenticated' ? (
+            <Card onClick={(e) => e.stopPropagation()} className={s.Card}>
+              <Avatar
+                className={s.Image}
+                size={100}
+                icon={<UserOutlined />}
+                src={
+                  <Image
+                    src={session?.user?.image || undefined}
+                    preview={false}
+                    alt="UserImg"
+                  />
+                }
+              />
+              <h2>{session?.user?.name}</h2>
+              <p>{session?.user?.email}</p>
+            </Card>
+          ) : null}
+          {/* <div>
+              <Avatar
+                className={s.Image}
+                size={100}
+                icon={<UserOutlined />}
+                src={
+                  <Image
+                    src={session?.user?.image || undefined}
+                    preview={false}
+                    alt="UserImg"
+                  />
+                }
+              />
+              <h2>{session?.user?.name}</h2>
+              <p>{session?.user?.email}</p>
+            </div> */}
 
+          <div className={s.Points}>
+            {status == 'authenticated' ? (
+              <div>
+                <div
+                  className={s.Button}
+                  onClick={() => Router.push(AppRoutes.PROFILE)}
+                >
+                  <span>Профіль</span>
+                </div>
+                <Divider className={s.Divider} />
+              </div>
+            ) : null}
             {user?.role === 'Admin' && (
               <div
                 className={s.Button}

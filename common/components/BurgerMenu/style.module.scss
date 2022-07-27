@@ -140,9 +140,8 @@
 }
 
 .ButtonPremium {
-  width: 100%;
-  height: 70px;
-  background-color: var(--primaryColor);
+  margin: 1rem 0;
+  // background-color: var(--primaryColor);
   color: var(--textColor);
   display: flex;
   align-items: center;
