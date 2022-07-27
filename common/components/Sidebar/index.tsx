@@ -19,17 +19,17 @@ const items: MenuItem[] = [
   {
     key: 0,
     icon: <CheckOutlined />,
-    label: 'Finished orders',
+    label: 'Готові замовлення', //finished orders
   },
   {
     key: 1,
     icon: <SendOutlined />,
-    label: 'Active orders',
+    label: 'Активні замовлення', //active orders
   },
   {
     key: 2,
     icon: <RedoOutlined />,
-    label: 'In-work orders',
+    label: 'Замовлення в роботі', //in-work orders
   },
 ]
 
@@ -58,7 +58,7 @@ const Sidebar: React.FC<Props> = ({ collapsed, setCollapsed }) => {
           display: collapsed && 'none',
         }}
       >
-        <Panel header="Best master" key="1" className={s.RateBlock}>
+        <Panel header="Найкращий майстер" key="1" className={s.RateBlock}>
           <div className={s.InfoBlock}>
             <span className={s.Title}>
               <Avatar size={40} src={bestMaster.avatar} />
@@ -72,7 +72,7 @@ const Sidebar: React.FC<Props> = ({ collapsed, setCollapsed }) => {
           <p>{bestMaster.about}</p>
         </Panel>
 
-        <Panel header="Best domain" key="2" className={s.RateBlock}>
+        <Panel header="Найкращий домен" key="2" className={s.RateBlock}>
           <div className={s.InfoBlock}>
             <span className={s.Title}>{bestDomain.name}</span>
             <span>

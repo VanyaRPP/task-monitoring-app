@@ -1,42 +1,149 @@
 .Menu {
-  display: block;
-  padding: 0.1rem;
-  margin: 0 0.75rem;
+  color: var(--primaryColor);
+  margin-left: 15px;
+  display: inline-block;
+  cursor: pointer;
+
+  .FirstLine,
+  .SecondLine,
+  .ThirdLine {
+    width: 35px;
+    height: 5px;
+    background-color: var(--primaryColor);
+    margin: 6px 0;
+    transition: 0.4s;
+  }
+
+  .ChangeBurger .FirstLine {
+    -webkit-transform: rotate(-45deg) translate(-9px, 6px);
+    transform: rotate(-45deg) translate(-9px, 6px);
+  }
+
+  .ChangeBurger .SecondLine {
+    opacity: 0;
+  }
+
+  .ChangeBurger .ThirdLine {
+    -webkit-transform: rotate(45deg) translate(-9px, -6px);
+    transform: rotate(45deg) translate(-9px, -7px);
+  }
+
   @media (min-width: 425px) {
     display: none;
   }
 }
+
 .Drawer {
-  .Buttons {
-    margin: -1.5rem;
-  }
+  top: 60px;
 }
-.Points {
-  display: flex;
-  align-items: left;
-  justify-content: center;
-  flex-direction: column;
+
+.LogoUser {
+  width: 50px;
+  height: 50px;
 }
 
 .Image {
-  margin-top: 0.17rem;
+  transition: box-shadow 0.5s;
+  box-shadow: 0 3px 10px 0 var(--primaryColor);
 }
+
+.UserInfo {
+  color: var(--textColor);
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.Points {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
 .Diamant {
-  color: var(--textColor) !important;
+  margin-bottom: -0.3em;
+  margin-right: 10px;
+  color: white;
 }
+
 .Premium {
+  margin: 1rem 0;
+
   span {
-    font-size: 20px;
     color: var(--textColor);
     padding: 0.25em 0.5em;
   }
 }
-.SignIn {
-  color: var(--textColor);
-  font-size: 20px;
-  padding: 0 0.5em;
+
+.Premium:hover + .Divider {
+  background-color: var(--primaryColor);
 }
+
+.Buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.SignIn:hover + .Divider {
+  background-color: var(--primaryColor);
+}
+
 .Divider {
   color: var(--textColor);
+  margin: 5;
+  display: flex;
+  background-color: #88888830;
   margin: 0;
+}
+
+.Card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 10px;
+  transition: box-shadow 0.5s;
+  box-shadow: 0 2px 10px 0 var(--primaryColor);
+
+  .Buttons {
+    color: var(--textColor);
+    display: flex;
+  }
+  h2,
+  p {
+    color: var(--textColor);
+  }
+}
+
+.Avatar {
+  padding: 0 20px;
+  cursor: pointer;
+}
+
+.Card,
+.Card::after {
+  background: var(--backgroundColorPrimary);
+}
+
+.Button {
+  margin: 1rem 0;
+  color: var(--textColor);
+}
+
+.ButtonPremium {
+  margin: 1rem 0;
+  // background-color: var(--primaryColor);
+  color: var(--textColor);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

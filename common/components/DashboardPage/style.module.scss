@@ -9,6 +9,9 @@
 
 .Header {
   width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 
   h1 {
     font-size: 26px;
@@ -22,6 +25,7 @@
   min-width: 550px;
   min-height: 400px;
   max-height: 750px;
+
   @media (max-width: 800px) {
     min-width: 100%;
     max-height: 80vh;
@@ -38,6 +42,7 @@
   background: var(--backgroundColor) !important;
 
   border-color: #88888830;
+
   > * {
     border-color: #88888830;
 
@@ -45,19 +50,31 @@
     color: var(--textColor);
   }
 
+  .rowClass {
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
   > div:first-of-type {
     position: sticky;
     top: 0;
     z-index: 1;
     background: var(--backgroundColorPrimary);
-  } // card header (antd)
+  }
+
+  // card header (antd)
   > div:last-of-type {
     padding: 0;
 
     > * > * > * > div {
       background: transparent;
-    } // table-wrapper bg-color (antd)
-  } // card body (antd)
+    }
+
+    // table-wrapper bg-color (antd)
+  }
+
+  // card body (antd)
 
   table {
     background: transparent !important;
@@ -65,12 +82,15 @@
     input {
       color: var(--textColor);
       border-color: #88888830 !important;
+
       &:hover {
         border-color: var(--primaryColor) !important;
       }
+
       &:focus {
         border-color: var(--primaryColorHover) !important;
       }
+
       background-color: transparent;
     }
 
@@ -80,6 +100,7 @@
       transition: color 0.2s;
       color: var(--textColor);
     }
+
     * {
       border-color: #88888830 !important;
     }
@@ -107,11 +128,14 @@
           opacity: 1;
           background: var(--backgroundColorElements);
         }
+
         td {
           > * {
             transition: color 0.2s;
             color: var(--textColor);
-          } // "no data" color
+          }
+
+          // "no data" color
           background: transparent !important;
         }
       }

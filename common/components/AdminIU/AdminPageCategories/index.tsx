@@ -1,13 +1,17 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Form, Input } from 'antd'
-import { useAddCategoryMutation } from 'common/api/categoriesApi/category.api'
+import {
+  useAddCategoryMutation,
+  useEditCategoryMutation,
+} from 'common/api/categoriesApi/category.api'
 import { ICategory } from 'common/modules/models/Category'
 import AddCategoryForm from '../../Forms/AddCategoryForm'
 import Categories from '../../Categories'
 import ModalWindow from '../../UI/ModalWindow'
 import s from './style.module.scss'
 import useDebounce from '../../../modules/hooks/useDebounce'
+import { deleteExtraWhitespace } from '../../../assets/features/validators'
 
 const AdminPageCategories: React.FC = () => {
   const { Search } = Input
@@ -16,8 +20,10 @@ const AdminPageCategories: React.FC = () => {
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
+  const [id, setId] = useState<string>(null)
 
   const [addCategory] = useAddCategoryMutation()
+  const [editCategory] = useEditCategoryMutation()
 
   const onCancelModal = () => {
     setIsModalVisible(false)
@@ -33,22 +39,30 @@ const AdminPageCategories: React.FC = () => {
     setIsFormDisabled(false)
   }
 
+  const onSubmitEditModal = async () => {
+    const formData: ICategory = await form.validateFields()
+    setIsFormDisabled(true)
+    editCategory({ _id: id, ...formData })
+    form.resetFields()
+    setIsModalVisible(false)
+    setIsFormDisabled(false)
+  }
+
+  const handleEdit = useCallback((value) => {
+    setId(value)
+    setIsModalVisible(true)
+  }, [])
+
   const [search, setSearch] = useState('')
   const debounced = useDebounce<string>(search)
 
   return (
     <>
       <div className={s.Controls}>
-        {/* <Search
-          className={s.Search}
-          placeholder="input search text"
-          onSearch={() => console.log('search')}
-          enterButton
-        /> */}
         <Input
-          placeholder="Search Category..."
+          placeholder="Пошук категорії..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => setSearch(deleteExtraWhitespace(e.target.value))}
         />
         <Button
           className={s.AddButton}
@@ -57,18 +71,22 @@ const AdminPageCategories: React.FC = () => {
           onClick={() => setIsModalVisible(true)}
         />
         <ModalWindow
-          title="Add category"
+          title={!id ? 'Додати категорію' : 'Змінити категорію'}
           isModalVisible={isModalVisible}
           onCancel={onCancelModal}
-          onOk={onSubmitModal}
-          okText="Create category"
-          cancelText="Cancel"
+          onOk={!id ? onSubmitModal : onSubmitEditModal}
+          okText={!id ? 'Додати' : 'Змінити'}
+          cancelText="Скасувати"
         >
-          <AddCategoryForm isFormDisabled={isFormDisabled} form={form} />
+          <AddCategoryForm
+            isFormDisabled={isFormDisabled}
+            form={form}
+            id={id}
+          />
         </ModalWindow>
       </div>
 
-      <Categories nameFilter={debounced} />
+      <Categories nameFilter={debounced} handleEdit={handleEdit} />
     </>
   )
 }

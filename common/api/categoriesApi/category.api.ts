@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { ObjectId } from 'mongoose'
-import { AllCategoriesQuery, ICategory } from './category.api.types'
+import { AllCategoriesQuery, ICategory, BaseQuery } from './category.api.types'
 
 export const categoryApi = createApi({
   reducerPath: 'categoryApi',
@@ -9,6 +9,10 @@ export const categoryApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
+    getCategoryById: builder.query<BaseQuery, string>({
+      query: (id) => `/categories/${id}`,
+      providesTags: (result) => ['Category'],
+    }),
     getAllCategories: builder.query<AllCategoriesQuery, string>({
       query: () => '/categories',
       providesTags: (result) => ['Category'],
@@ -42,6 +46,7 @@ export const categoryApi = createApi({
         return {
           url: `categories/${_id}`,
           method: 'PATCH',
+          body,
         }
       },
       invalidatesTags: ['Category'],
@@ -54,4 +59,5 @@ export const {
   useAddCategoryMutation,
   useDeleteCategoryMutation,
   useEditCategoryMutation,
+  useGetCategoryByIdQuery,
 } = categoryApi

@@ -1,28 +1,22 @@
 import * as React from 'react'
 import { SVGProps, memo } from 'react'
 
-const SvgDiamant = (props: SVGProps<SVGSVGElement>) => (
+const SvgComponent = (props: SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 54.391 54.391"
     width={20}
     height={20}
-    version="1.1"
-    id="Capa_1"
-    xmlns="http://www.w3.org/2000/svg"
-    x="0px"
-    y="0px"
-    viewBox="0 0 54.391 54.391"
+    style={{
+      // fill: 'var(--textColor)',
+      fill: '#FFFFFF',
+    }}
+    xmlSpace="preserve"
   >
-    <polygon points="0.285,19.392 24.181,49.057 13.342,19.392 	" />
-    <polygon points="15.472,19.392 27.02,50.998 38.795,19.392 	" />
-    <polygon points="29.593,49.823 54.105,19.392 40.929,19.392 	" />
-    <polygon points="44.755,3.392 29.297,3.392 39.896,16.437 	" />
-    <polygon points="38.094,17.392 27.195,3.979 16.297,17.392 	" />
-    <polygon points="25.094,3.392 9.625,3.392 14.424,16.525 	" />
-    <polygon points="7.959,4.658 0,17.392 12.611,17.392 	" />
-    <polygon points="54.391,17.392 46.424,4.645 41.674,17.392 	" />
+    <path d="m.285 19.392 23.896 29.665-10.839-29.665zM15.472 19.392 27.02 50.998l11.775-31.606zM29.593 49.823l24.512-30.431H40.929zM44.755 3.392H29.297l10.599 13.045zM38.094 17.392 27.195 3.979 16.297 17.392zM25.094 3.392H9.625l4.799 13.133zM7.959 4.658 0 17.392h12.611zM54.391 17.392 46.424 4.645l-4.75 12.747z" />
   </svg>
 )
 
-const Diamant = memo(SvgDiamant)
+const Diamant = memo(SvgComponent)
 export default Diamant

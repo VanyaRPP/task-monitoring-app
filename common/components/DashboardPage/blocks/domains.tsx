@@ -32,19 +32,19 @@ const Domains: React.FC<Props> = ({ style }) => {
 
   const columns = [
     {
-      title: searchInput('name'),
+      title: searchInput('Назва'),
       dataIndex: 'name',
       key: 'name',
       width: '35%',
     },
     {
-      title: searchInput('address'),
+      title: searchInput('Адреса'),
       dataIndex: 'address',
       key: 'address',
       width: '50%',
     },
     {
-      title: 'Rate',
+      title: 'Оцінка',
       dataIndex: 'rate',
       key: 'rate',
       width: '15%',
@@ -54,7 +54,7 @@ const Domains: React.FC<Props> = ({ style }) => {
   ]
 
   return (
-    <Card className={style} title="Domains" style={{ flex: '1.5' }}>
+    <Card className={style} title="Домени" style={{ flex: '1.5' }}>
       <Table dataSource={data} columns={columns} pagination={false} />
     </Card>
   )

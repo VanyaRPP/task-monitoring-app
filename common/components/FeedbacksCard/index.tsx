@@ -13,22 +13,23 @@ import { useSession } from 'next-auth/react'
 import s from './style.module.scss'
 import { feedbacks } from '../../lib/task.config'
 
-const RateDescription = ['Terrible', 'Bad', 'Normal', 'Good', 'Wonderful']
+// const RateDescription = ['Terrible', 'Bad', 'Normal', 'Good', 'Wonderful']
+const RateDescription = ['Жахливо', 'Погано', 'Нормально', 'Добре', 'Прекрасно']
 
 interface Props {
   user: IUser
   loading?: boolean
 }
 
-function CalculateAVG(feedback) {
-  return (
-    Math.floor(
-      (feedback?.length > 0
-        ? feedback?.reduce((a, b) => a + b.rate, 0) / feedback?.length
-        : 3.5) * 2
-    ) / 2
-  )
-}
+// function CalculateAVG(feedback) {
+//   return (
+//     Math.floor(
+//       (feedback?.length > 0
+//         ? feedback?.reduce((a, b) => a + b.rate, 0) / feedback?.length
+//         : 3.5) * 2
+//     ) / 2
+//   )
+// }
 
 const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
   const session = useSession()
@@ -75,7 +76,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
     Reset()
   }
 
-  CalculateAVG(feedbacks)
+  // CalculateAVG(feedbacks)
 
   return (
     <Card
@@ -83,7 +84,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
       className={s.Card}
       title={
         <span style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          Feedbacks
+          Відгуки
           {sessionUser?.data?._id !== user?._id && (
             <Button
               type="primary"
@@ -92,12 +93,12 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
             />
           )}
           <ModalWindow
-            title={`Leave feedback about ${user?.name}`}
+            title={`Залиште відгук про ${user?.name}`}
             isModalVisible={isModalVisible}
             onCancel={onCancelModal}
             onOk={onSubmitModal}
-            okText="Leave feedback"
-            cancelText="Cancel"
+            okText="Залишити відгук"
+            cancelText="Скасувати"
           >
             <AddFeedbackForm isFormDisabled={isFormDisabled} form={form} />
           </ModalWindow>
@@ -108,7 +109,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
           tooltips={RateDescription}
           disabled
           allowHalf
-          value={CalculateAVG(feedbacks)}
+          value={user?.rating}
         />
       }
     >
@@ -123,7 +124,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
           )}
         />
       ) : (
-        <Empty className={s.Empty} />
+        <Empty className={s.Empty} description="Немає даних" />
       )}
     </Card>
   )

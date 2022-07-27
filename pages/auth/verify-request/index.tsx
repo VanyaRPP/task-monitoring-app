@@ -8,11 +8,12 @@ const Verify: React.FC = () => {
 
   return (
     <div>
-      <h2 className={s.Header}>Verify your E-Mail</h2>
+      <h2 className={s.Header}>Підтвердьте свою електронну пошту</h2>
       <p className={s.Text}>
-        We have sent you a message by email.
+        Ми надіслали Вам повідомлення на вашу електронну пошту.
         <br />
-        Please verify your email by following the instructions in the message.
+        Підтвердьте свою електронну адресу, дотримуючись інструкцій у
+        повідомленні.
       </p>
 
       <div className={s.Buttons}>
@@ -24,7 +25,7 @@ const Verify: React.FC = () => {
             // TODO: redirect to user email page
           }}
         >
-          Verify
+          Підтвердити
         </Button>
 
         <div className={s.Divider} />
@@ -36,7 +37,7 @@ const Verify: React.FC = () => {
           style={{ width: '100px' }}
           onClick={() => router.push(AppRoutes.INDEX)}
         >
-          Return
+          Повернутись
         </Button>
       </div>
     </div>

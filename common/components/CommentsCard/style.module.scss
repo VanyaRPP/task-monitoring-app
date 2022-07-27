@@ -61,6 +61,8 @@
         border: 0;
         border-bottom: 1px solid #88888830;
         background-color: transparent;
+        box-sizing: border-box;
+        word-break: break-all;
 
         * {
           transition: color 0.2s;

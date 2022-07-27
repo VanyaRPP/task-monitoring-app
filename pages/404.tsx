@@ -13,11 +13,11 @@ const NotFoundPage: React.FC = () => {
       status="404"
       title={<h3 style={style}>404</h3>}
       subTitle={
-        <p style={style}>Sorry, the page you visited does not exist.</p>
+        <p style={style}>Вибачте, сторінка, яку ви відвідали, не існує.</p>
       }
       extra={
         <Button onClick={() => Router.push(AppRoutes.INDEX)} type="primary">
-          Back Home
+          Назад
         </Button>
       }
     />

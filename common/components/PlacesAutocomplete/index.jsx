@@ -3,10 +3,11 @@ import usePlacesAutocomplete, {
   getLatLng,
 } from 'use-places-autocomplete'
 import useOnclickOutside from 'react-cool-onclickoutside'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Input } from 'antd'
 import s from './style.module.scss'
 import useGetAddressFromGeoCode from 'common/modules/hooks/useGetAddressFromGeoCode'
+import { debounce } from 'lodash'
 
 export const PlacesAutocomplete = ({
   isLoaded,
@@ -23,7 +24,7 @@ export const PlacesAutocomplete = ({
     clearSuggestions,
   } = usePlacesAutocomplete({
     initOnMount: false,
-    debounce: 300,
+    debounce: 1000,
   })
   const { getAddress, address } = useGetAddressFromGeoCode()
   const ref = useOnclickOutside(() => {
