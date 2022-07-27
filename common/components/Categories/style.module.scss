@@ -1,5 +1,10 @@
 .Category {
   transition: color 0.2s;
-
   border-bottom: 1px solid #88888830 !important;
+}
+.Category {
+  & h4,
+  & div {
+    color: var(--textColor);
+  }
 }
