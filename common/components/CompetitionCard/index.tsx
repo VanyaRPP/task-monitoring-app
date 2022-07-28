@@ -26,6 +26,7 @@ import s from './style.module.scss'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 import UserLink from '../UserLink'
 import CompetitionWorkerCard from '../CompetitionWorkerCard'
+import { TaskStatuses } from '../../../utils/constants'
 
 export const Executor = ({ executor, type }) => {
   const { data } = useGetUserByIdQuery(`${executor.workerid}`)
@@ -134,7 +135,13 @@ const CompetitionCard: React.FC<{
         )
       }
     >
-      {task?.executant ? <CompetitionWorkerCard _id={task?.executant} /> : null}
+      {task?.executant ? (
+        <CompetitionWorkerCard
+          _id={task?.executant}
+          taskCreatorId={task?.creator}
+          taskStatus={task?.status}
+        />
+      ) : null}
       <ModalWindow
         title="Подати заявку"
         isModalVisible={isModalVisible}
