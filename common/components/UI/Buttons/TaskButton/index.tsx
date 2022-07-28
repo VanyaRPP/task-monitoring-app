@@ -24,7 +24,7 @@ const TaskButton: React.FC = () => {
           type="primary"
           className={s.Button}
         >
-          Add task
+          Створити завдання
         </Button>
       )
     }
@@ -41,14 +41,15 @@ const TaskButton: React.FC = () => {
           type="primary"
           className={s.Button}
         >
-          {router.route === AppRoutes.TASK ? 'Add task' : 'Tasks'}
+          {router.route === AppRoutes.TASK ? 'Створити завдання' : 'Завдання'}
         </Button>
       )
   }
 
   return status === 'authenticated' ? (
     <>
-      <Button
+      {taskButton()}
+      {/* <Button
         onClick={() => {
           router.route === AppRoutes.TASK
             ? setIsModalVisible(true)
@@ -59,7 +60,7 @@ const TaskButton: React.FC = () => {
         className={s.Button}
       >
         {router.route === AppRoutes.TASK ? 'Створити завдання' : 'Завдання'}
-      </Button>
+      </Button> */}
       <AddTaskModal
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}
