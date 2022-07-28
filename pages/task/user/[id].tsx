@@ -2,12 +2,13 @@ import { Button, Empty } from 'antd'
 import { GetServerSideProps } from 'next'
 import { unstable_getServerSession } from 'next-auth'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import task from '..'
 import { useGetAllTaskQuery } from '../../../common/api/taskApi/task.api'
 import AddTaskModal from '../../../common/components/AddTaskModal'
 import CardOneTask from '../../../common/components/CardOneTask'
 import { ITask } from '../../../common/modules/models/Task'
-import { AppRoutes } from '../../../utils/constants'
+import { AppRoutes, TaskStatuses } from '../../../utils/constants'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import s from './../style.module.scss'
 
@@ -17,10 +18,24 @@ const UserTasks: React.FC = () => {
   const tasks = data?.data
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+  const [taskList, setTaskList] = useState([])
+  const [filter, setFilter] = useState('')
 
-  const userTasks = tasks?.filter(
-    (task: ITask) => task.creator === router.query.id
-  )
+  const resetFilters = () => {
+    setFilter(null)
+    setTaskList([])
+  }
+
+  useEffect(() => {
+    console.log(filter, 'filter')
+    setTaskList(tasks?.filter((task: ITask) => task.status === filter))
+    console.log(taskList)
+  }, [filter, tasks])
+
+  useEffect(() => {
+    setTaskList(tasks)
+    console.log(tasks)
+  }, [])
 
   return (
     <>
@@ -33,17 +48,44 @@ const UserTasks: React.FC = () => {
         >
           Створити завдання
         </Button>
+        <div>
+          <Button
+            ghost
+            type="primary"
+            onClick={() => setFilter(TaskStatuses.PENDING)}
+          >
+            Pending
+          </Button>
+          <Button
+            ghost
+            type="primary"
+            onClick={() => setFilter(TaskStatuses.IN_WORK)}
+          >
+            In work
+          </Button>
+          <Button ghost type="primary" onClick={() => resetFilters()}>
+            X
+          </Button>
+        </div>
       </div>
-      {userTasks && userTasks.length !== 0 ? (
+      {taskList && taskList.length !== 0 ? (
         <div className={s.TasksList}>
-          {userTasks &&
-            [...userTasks].reverse().map((task: ITask, index) => {
+          {taskList &&
+            taskList.map((task: ITask, index) => {
+              return <CardOneTask key={index} task={task} />
+            })}
+        </div>
+      ) : tasks && tasks.length !== 0 ? (
+        <div className={s.TasksList}>
+          {tasks &&
+            tasks.map((task: ITask, index) => {
               return <CardOneTask key={index} task={task} />
             })}
         </div>
       ) : (
         <Empty />
       )}
+
       <AddTaskModal
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}
