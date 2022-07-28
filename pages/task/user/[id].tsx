@@ -27,14 +27,14 @@ const UserTasks: React.FC = () => {
   }
 
   useEffect(() => {
-    console.log(filter, 'filter')
+    // console.log(filter, 'filter')
     setTaskList(tasks?.filter((task: ITask) => task.status === filter))
-    console.log(taskList)
+    // console.log(taskList)
   }, [filter, tasks])
 
   useEffect(() => {
     setTaskList(tasks)
-    console.log(tasks)
+    // console.log(tasks)
   }, [])
 
   return (

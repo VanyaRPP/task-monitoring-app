@@ -19,7 +19,7 @@ const WorkerForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
     >
       <Form.Item
         name="tel"
-        label="Phone Number"
+        label="Номер телефону"
         normalize={allowOnlyNumbers}
         rules={validateField('phone')}
       >

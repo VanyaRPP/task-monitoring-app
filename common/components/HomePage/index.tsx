@@ -1,4 +1,4 @@
-import { Button, Steps } from 'antd'
+import { Button, Skeleton, Space, Steps } from 'antd'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '../../../utils/constants'
