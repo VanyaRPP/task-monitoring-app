@@ -1,12 +1,13 @@
 import { RangePickerProps } from 'antd/lib/date-picker'
 import moment from 'moment'
+import 'moment/locale/uk'
 
 export const dateToDefaultFormat = (deadline: string): string =>
-  moment(deadline).locale('de').format('MMM Do YY')
+  moment(deadline).locale('uk').format('LL')
 
 export const isDeadlineExpired = (deadline: string): boolean =>
-  moment().locale('de').isAfter(moment(deadline), 'day')
+  moment().locale('uk').isAfter(moment(deadline), 'day')
 
 export const disabledDate: RangePickerProps['disabledDate'] = (current) => {
-  return current && current < moment().locale('de').startOf('day')
+  return current && current < moment().locale('uk').startOf('day')
 }
