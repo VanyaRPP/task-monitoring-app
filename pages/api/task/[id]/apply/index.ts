@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Task from 'common/modules/models/Task'
 import start, { Data } from 'pages/api/api.config'
+import { TaskStatuses } from '../../../../../utils/constants'
 
 start()
 
@@ -16,6 +17,7 @@ export default async function handler(
           { _id: task._id },
           {
             taskexecutors: [...task.taskexecutors, req.body],
+            status: TaskStatuses.PENDING_SELECTION,
           }
         )
         return res.status(201).json({ success: true, data: Utask })
