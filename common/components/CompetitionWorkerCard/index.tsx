@@ -34,7 +34,7 @@ const CompetitionWorkerCard: FC<Props> = ({ _id }) => {
             />
           }
         />
-        <p>Ім`я: {user?.name || user?.email}</p>
+        <p>Ім&#x27;я: {user?.name || user?.email}</p>
         <p>Пошта: {user?.email}</p>
         <p>Телефон: {user?.tel}</p>
         <Rate disabled defaultValue={user?.rating} />

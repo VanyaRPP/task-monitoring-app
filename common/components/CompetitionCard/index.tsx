@@ -101,7 +101,7 @@ const CompetitionCard: React.FC<{
       setIsModalVisible(true)
     } else {
       notification.info({
-        message: 'You already apply for this task',
+        message: 'Ви вже подали заявку на це завдання',
         placement: 'topRight',
       })
     }

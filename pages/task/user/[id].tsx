@@ -7,6 +7,7 @@ import task from '..'
 import { useGetAllTaskQuery } from '../../../common/api/taskApi/task.api'
 import AddTaskModal from '../../../common/components/AddTaskModal'
 import CardOneTask from '../../../common/components/CardOneTask'
+import Filter from '../../../common/components/UI/FiltrationSidebar'
 import { ITask } from '../../../common/modules/models/Task'
 import { AppRoutes, TaskStatuses } from '../../../utils/constants'
 import { authOptions } from '../../api/auth/[...nextauth]'
@@ -48,6 +49,9 @@ const UserTasks: React.FC = () => {
         >
           Створити завдання
         </Button>
+        {/* <div>
+          <Filter />
+        </div> */}
         <div>
           <Button
             ghost
