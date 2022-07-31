@@ -6,7 +6,7 @@
       background: #88888830;
     }
   }
-  *:last-of-type {
+  &:first-of-type {
     color: var(--textColor);
   }
 }

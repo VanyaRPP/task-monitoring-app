@@ -74,10 +74,6 @@
   @media (max-width: 768px) {
     flex: 0 1 100%;
   }
-
-  p {
-    font-size: calc(15px + (20 + 20 * 0.7) * ((100vw - 320px) / 1440));
-  }
 }
 
 .Buttons {
@@ -93,7 +89,8 @@
 
   @media (min-width: 1440px) {
     margin-left: 50%;
-    margin-top: -10rem;
+    margin-top: -5rem;
+    margin-bottom: 1rem;
   }
 
   button {
@@ -110,20 +107,37 @@
 
 .Text {
   width: 100%;
-  max-width: 600px;
+  max-width: 900px;
   transition: color 0.5s;
   color: var(--textColor);
   padding: 20px;
   margin-top: -2em;
   font-weight: 200;
+  font-size: calc(15px + (7 + 7 * 0.7) * ((100vw - 320px) / 1440));
 
   @media (max-width: 600px) {
     padding: 20px 0;
     font-size: 16px;
   }
 
+  @media (min-width: 1024px) {
+    margin-left: -2rem;
+    width: 120%;
+    padding-top: 0.5rem;
+  }
   @media (min-width: 1440px) {
-    margin-top: -10em;
+    width: 100%;
+    padding-top: 0.5rem;
+  }
+  @media (min-width: 2560px) {
+    max-width: 1000px;
+    width: 100%;
+  }
+  @media (width: 320px) {
+    line-height: 1em;
+  }
+  span {
+    font-weight: 500;
   }
 }
 
