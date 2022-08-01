@@ -7,7 +7,6 @@ interface Props {
   onOk: () => void
   okText: string
   cancelText: string
-  // footer: any
   title: string
 }
 
@@ -18,7 +17,6 @@ const ModalWindow: React.FC<Props> = ({
   onOk,
   okText,
   cancelText,
-  footer,
   title,
 }) => {
   return (
@@ -26,7 +24,6 @@ const ModalWindow: React.FC<Props> = ({
       maskClosable={false}
       visible={isModalVisible}
       title={title}
-      footer={footer}
       onCancel={onCancel}
       onOk={onOk}
       okText={okText}
