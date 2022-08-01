@@ -1,5 +1,5 @@
 import React from 'react'
-import { Layout, Menu, Collapse, Avatar } from 'antd'
+import { Layout, Menu, Collapse, Avatar, Empty } from 'antd'
 import {
   StarOutlined,
   CheckOutlined,
@@ -9,8 +9,7 @@ import {
 import type { MenuProps } from 'antd'
 import s from './style.module.scss'
 import config from '../../lib/Sidebar.config'
-import { useSession } from 'next-auth/react'
-import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
+import Filter from '../UI/FiltrationSidebar'
 
 const { Panel } = Collapse
 
@@ -50,7 +49,6 @@ const Sidebar: React.FC<Props> = ({ collapsed, setCollapsed }) => {
       onCollapse={(value) => setCollapsed(value)}
     >
       <Menu className={s.List} mode="inline" items={items} />
-
       <Collapse
         bordered={false}
         className={s.Rating}

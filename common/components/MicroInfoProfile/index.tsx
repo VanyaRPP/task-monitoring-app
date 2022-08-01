@@ -15,7 +15,7 @@ const MicroInfoProfile: FC<Props> = ({ id }) => {
     <div className={s.microDiv}>
       <Avatar
         icon={<UserOutlined />}
-        src={<Image src={user?.image} preview={false} alt="User" />}
+        src={<Image src={user?.image} preview={false} alt="Користувач" />}
       />
       <p>{user?.name || user?.email}</p>
     </div>
