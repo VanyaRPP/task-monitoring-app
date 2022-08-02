@@ -30,7 +30,7 @@ const Tasks: React.FC = () => {
             })}
         </div>
       ) : (
-        <Empty />
+        <Empty description="Немає даних" />
       )}
     </>
   )

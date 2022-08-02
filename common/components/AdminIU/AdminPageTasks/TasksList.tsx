@@ -12,7 +12,7 @@ interface Props {
 const TasksList: React.FC<Props> = ({ tasks }) => {
   const [task, setTask] = useState(tasks[0])
 
-  if (!tasks || tasks.length === 0) return <Empty />
+  if (!tasks || tasks.length === 0) return <Empty description="Немає даних" />
 
   return (
     <div className={s.Container}>

@@ -8,9 +8,9 @@ interface Props {
 const DeleteButton: React.FC<Props> = ({ onDelete }) => {
   return (
     <Popconfirm
-      title="Are you sure?"
-      okText="Yes"
-      cancelText="No"
+      title="Ви впевнені?"
+      okText="Так"
+      cancelText="Ні"
       icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
       onConfirm={onDelete}
     >

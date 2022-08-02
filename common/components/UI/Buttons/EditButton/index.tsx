@@ -4,9 +4,9 @@ import { Button, Popconfirm } from 'antd'
 const EditButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
   return (
     <Popconfirm
-      title="Are you sure?"
-      okText="Yes"
-      cancelText="No"
+      title="Ви впевнені?"
+      okText="Так"
+      cancelText="Ні"
       icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
       onConfirm={onClick}
     >
