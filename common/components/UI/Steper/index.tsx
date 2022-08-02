@@ -4,7 +4,7 @@ import ConfirmTask from '../../Forms/ConfirmTask'
 
 const { Step } = Steps
 
-const Steper: React.FC<any> = ({ steps }) => {
+const Steper: React.FC<any> = ({ steps, onSubmitModal }) => {
   const [current, setCurrent] = useState(0)
 
   const next = () => {
@@ -26,8 +26,8 @@ const Steper: React.FC<any> = ({ steps }) => {
       <div className="stepsAction">
         {current < 1 && <ConfirmTask next={next} prev={prev} />}
         {current == 1 && (
-          <Button type="primary" onClick={() => next()}>
-            Наступний крок
+          <Button type="primary" onClick={() => onSubmitModal()}>
+            Відправити відгук
           </Button>
         )}
         {/* {current == 2 && (

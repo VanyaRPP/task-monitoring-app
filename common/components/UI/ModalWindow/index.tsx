@@ -4,10 +4,10 @@ interface Props {
   children: React.ReactNode
   isModalVisible: boolean
   onCancel: () => void
-  onOk: () => void
+  // onOk: () => void
   okText: string
   cancelText: string
-  // footer: any
+  footer: any
   title: string
 }
 
@@ -15,7 +15,7 @@ const ModalWindow: React.FC<Props> = ({
   children,
   isModalVisible,
   onCancel,
-  onOk,
+  // onOk,
   okText,
   cancelText,
   footer,
@@ -28,7 +28,7 @@ const ModalWindow: React.FC<Props> = ({
       title={title}
       footer={footer}
       onCancel={onCancel}
-      onOk={onOk}
+      // onOk={onOk}
       okText={okText}
       cancelText={cancelText}
     >

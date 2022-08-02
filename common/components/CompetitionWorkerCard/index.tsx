@@ -119,12 +119,12 @@ const CompetitionWorkerCard: FC<Props> = ({
         isModalVisible={isModalVisible}
         footer={null}
         onCancel={onCancelModal}
-        onOk={onSubmitModal}
+        // onOk={onSubmitModal}
         okText="Готово"
         cancelText="Cancel"
       >
         <Steper
-          onSubmitModal={onSubmitModal()}
+          onSubmitModal={onSubmitModal}
           steps={[
             {
               title: 'Перший крок',
