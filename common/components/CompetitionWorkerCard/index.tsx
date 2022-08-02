@@ -4,7 +4,7 @@ import {
   CloseCircleOutlined,
   UserOutlined,
 } from '@ant-design/icons'
-import { Avatar, Button, Card, Form, Image, Rate } from 'antd'
+import { Avatar, Button, Card, Form, Image, Alert } from 'antd'
 import {
   useAddFeedbackMutation,
   useGetUserByEmailQuery,
@@ -12,17 +12,21 @@ import {
 } from '../../api/userApi/user.api'
 import s from './style.module.scss'
 import ModalWindow from '../UI/ModalWindow'
+import ModalNoFooter from '../UI/ModalNoFooter'
 import EndTask from '../EndTask'
 import AddFeedbackForm from '../Forms/AddFeedbackForm'
 import { useSession } from 'next-auth/react'
 import { IFeedback } from '../../modules/models/User'
 import { TaskStatuses } from '../../../utils/constants'
 import RateStars from '../UI/RateStars'
+import Steper from '../UI/Steper'
+// import ConfirmTask from '../Forms/ConfirmTask'
 
 interface Props {
   _id: string | any
   taskCreatorId: string | any
   taskStatus: TaskStatuses
+  // steps
 }
 
 const CompetitionWorkerCard: FC<Props> = ({
@@ -73,8 +77,7 @@ const CompetitionWorkerCard: FC<Props> = ({
         },
       ],
     })
-
-    Reset()
+    // Reset()
   }
 
   return (
@@ -111,17 +114,45 @@ const CompetitionWorkerCard: FC<Props> = ({
           </div>
         ) : null}
       </Card>
-      <ModalWindow
+
+      <ModalNoFooter
         title={`Завершити завдання з ${user?.name || user?.email}`}
         isModalVisible={isModalVisible}
+        footer={null}
         onCancel={onCancelModal}
-        onOk={onSubmitModal}
+        // onOk={onSubmitModal}
         okText="Готово"
         cancelText="Cancel"
       >
-        {/* <EndTask /> */}
-        <AddFeedbackForm isFormDisabled={isFormDisabled} form={form} />
-      </ModalWindow>
+        <Steper
+          closeModal={Reset}
+          onSubmitModal={onSubmitModal}
+          steps={[
+            {
+              title: 'Перший крок',
+              content: '',
+            },
+            {
+              title: 'Другий крок',
+              content: (
+                <AddFeedbackForm isFormDisabled={isFormDisabled} form={form} />
+              ),
+            },
+            {
+              title: 'Третій крок',
+              content: (
+                <Alert
+                  style={{ marginTop: '15px' }}
+                  message="Успішно"
+                  type="success"
+                  showIcon
+                />
+              ),
+            },
+          ]}
+        />
+        {/* <AddFeedbackForm isFormDisabled={isFormDisabled} form={form} /> */}
+      </ModalNoFooter>
     </div>
   )
 }
