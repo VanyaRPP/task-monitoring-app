@@ -26,7 +26,7 @@ interface Props {
   _id: string | any
   taskCreatorId: string | any
   taskStatus: TaskStatuses
-  steps
+  // steps
 }
 
 const CompetitionWorkerCard: FC<Props> = ({
