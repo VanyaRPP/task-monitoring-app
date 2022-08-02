@@ -12,6 +12,7 @@ import {
 } from '../../api/userApi/user.api'
 import s from './style.module.scss'
 import ModalWindow from '../UI/ModalWindow'
+import ModalNoFooter from '../UI/ModalNoFooter'
 import EndTask from '../EndTask'
 import AddFeedbackForm from '../Forms/AddFeedbackForm'
 import { useSession } from 'next-auth/react'
@@ -113,7 +114,8 @@ const CompetitionWorkerCard: FC<Props> = ({
           </div>
         ) : null}
       </Card>
-      <ModalWindow
+
+      <ModalNoFooter
         title={`Завершити завдання з ${user?.name || user?.email}`}
         isModalVisible={isModalVisible}
         footer={null}
@@ -150,7 +152,7 @@ const CompetitionWorkerCard: FC<Props> = ({
           ]}
         />
         {/* <AddFeedbackForm isFormDisabled={isFormDisabled} form={form} /> */}
-      </ModalWindow>
+      </ModalNoFooter>
     </div>
   )
 }
