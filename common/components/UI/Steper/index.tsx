@@ -15,6 +15,11 @@ const Steper: React.FC<any> = ({ steps, onSubmitModal }) => {
     message.error('Error')
   }
 
+  const submitAndNext = () => {
+    setCurrent(current + 1)
+    onSubmitModal()
+  }
+
   return (
     <>
       <Steps current={current}>
@@ -26,15 +31,10 @@ const Steper: React.FC<any> = ({ steps, onSubmitModal }) => {
       <div className="stepsAction">
         {current < 1 && <ConfirmTask next={next} prev={prev} />}
         {current == 1 && (
-          <Button type="primary" onClick={() => onSubmitModal()}>
+          <Button type="primary" onClick={() => submitAndNext()}>
             Відправити відгук
           </Button>
         )}
-        {/* {current == 2 && (
-          <Button type="primary" onClick={() => next()}>
-            Отправка форми
-          </Button>
-        )} */}
       </div>
     </>
   )

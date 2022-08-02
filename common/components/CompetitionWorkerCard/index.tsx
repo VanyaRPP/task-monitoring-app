@@ -76,8 +76,7 @@ const CompetitionWorkerCard: FC<Props> = ({
         },
       ],
     })
-
-    Reset()
+    // Reset()
   }
 
   return (
@@ -124,6 +123,7 @@ const CompetitionWorkerCard: FC<Props> = ({
         cancelText="Cancel"
       >
         <Steper
+          closeModal={Reset}
           onSubmitModal={onSubmitModal}
           steps={[
             {
