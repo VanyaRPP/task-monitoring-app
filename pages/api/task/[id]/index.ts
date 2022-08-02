@@ -18,6 +18,7 @@ export default async function handler(
       }
     case 'PATCH':
       try {
+
       } catch (error) {
         return res
           .status(400)
