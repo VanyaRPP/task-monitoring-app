@@ -6,7 +6,7 @@ jobs:
   cron:
     runs-on: ubuntu-latest
     steps:
-      - name: Hourly cron job
+      - name: Hourly cron job heroku
         run: |
-          curl --request POST \
-          --url 'https://example.com/api/task' \
+          curl --request GET \
+          --url 'https://taskmonitoringapp.herokuapp.com/api/hourly' \
