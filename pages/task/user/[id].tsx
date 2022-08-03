@@ -10,11 +10,7 @@ import AddTaskModal from '../../../common/components/AddTaskModal'
 import CardOneTask from '../../../common/components/CardOneTask'
 import Filter from '../../../common/components/UI/FiltrationSidebar'
 import { ITask } from '../../../common/modules/models/Task'
-import {
-  AppRoutes,
-  TaskStatuses,
-  TaskStatusesConst,
-} from '../../../utils/constants'
+import { AppRoutes, TaskStatuses } from '../../../utils/constants'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import s from './../style.module.scss'
 
@@ -24,16 +20,15 @@ const UserTasks: React.FC = () => {
   const tasks = data?.data
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
-  const [taskList, setTaskList] = useState([])
+  const [taskList, setTaskList] = useState(tasks)
   const [filter, setFilter] = useState('')
 
   const resetFilters = () => {
     setFilter(null)
-    setTaskList([])
+    setTaskList(tasks)
   }
 
   useEffect(() => {
-    // setTaskList(tasks?.filter((task: ITask) => task.status === filter))
     setTaskList(tasks?.filter((task: ITask) => task.status === filter))
   }, [filter, tasks])
 
@@ -53,26 +48,6 @@ const UserTasks: React.FC = () => {
           Створити завдання
         </Button>
       </div>
-      {/* <div>
-          <Filter />
-        </div> */}
-      {/* <Button
-            ghost
-            type="primary"
-            onClick={() => setFilter(TaskStatuses.PENDING)}
-          >
-          Pending
-          </Button>
-          <Button
-          ghost
-            type="primary"
-            onClick={() => setFilter(TaskStatuses.IN_WORK)}
-          >
-          In work
-          </Button>
-          <Button ghost type="primary" onClick={() => resetFilters()}>
-            X
-          </Button> */}
 
       <div className={s.Filtration}>
         <Radio.Group value={filter} onChange={(e) => setFilter(e.target.value)}>
@@ -83,25 +58,19 @@ const UserTasks: React.FC = () => {
               </Radio>
             )
           })}
-          {/* <Radio value={TaskStatuses.PENDING} className={s.Filter}>
-            В очікуванні
-          </Radio>
-          <Radio value={TaskStatuses.IN_WORK} className={s.Filter}>
-            В роботі
-          </Radio> */}
           <Button type="primary" onClick={() => resetFilters()}>
             X
           </Button>
         </Radio.Group>
       </div>
-      {taskList && taskList.length !== 0 ? (
+      {taskList?.length !== 0 ? (
         <div className={s.TasksList}>
           {taskList &&
             taskList.map((task: ITask, index) => {
               return <CardOneTask key={index} task={task} />
             })}
         </div>
-      ) : tasks && tasks.length !== 0 ? (
+      ) : filter?.length == 0 && tasks?.length !== 0 ? (
         <div className={s.TasksList}>
           {tasks &&
             tasks.map((task: ITask, index) => {
