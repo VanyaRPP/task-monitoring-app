@@ -13,6 +13,7 @@ import { AppRoutes } from '../../../../utils/constants'
 import s from '../style.module.scss'
 import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
+import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.api'
 
 const Orders: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
@@ -34,7 +35,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       onChange={(e) => setSearch({ ...search, [order]: e.target.value })}
     />
   )
-
+  // useGetAllCategoriesQuery
   const columns = [
     {
       title: searchInput('Завдання'),

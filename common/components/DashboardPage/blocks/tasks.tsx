@@ -16,6 +16,7 @@ import { AppRoutes } from '../../../../utils/constants'
 import s from '../style.module.scss'
 import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
+import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.api'
 
 const Tasks: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
@@ -25,12 +26,16 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
   const user = userResponse?.data?.data
   const tasksResponse = useGetAllTaskQuery('')
   const tasks = tasksResponse?.data?.data
+  // const categoriesResponse = useGetAllCategoriesQuery('')
+  // const categories = categoriesResponse?.data?.data
+  // console.log('allCat', categories)
 
   const dataSource = useMemo(() => {
     return tasks?.filter((task) => task?.executant === user?._id)
   }, [tasks, user?._id])
 
   const searchInput = (order: string) => (
+    // console.log('order', order)
     <Input
       placeholder={order.charAt(0).toUpperCase() + order.slice(1)}
       value={search[order]}
@@ -44,6 +49,7 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'name',
       key: 'name',
       width: '35%',
+      render: (text) => text,
     },
     // {
     //   title: searchInput('Клієнт'),
@@ -65,8 +71,16 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'deadline',
       key: 'deadline',
       width: '20%',
-      sorter: (a, b) => Date.parse(a.date) - Date.parse(b.date),
-      render: (text) => moment(text).format('DD-MM hh:mm'),
+      sorter: (a, b) => Date.parse(a?.deadline) - Date.parse(b?.deadline),
+      render: (date) => moment(date).format('DD-MM hh:mm'),
+    },
+    {
+      title: 'Категорія',
+      dataIndex: 'status',
+      key: 'status',
+      width: '20%',
+      filters: [],
+      render: (text) => firstTextToUpperCase(text),
     },
     {
       title: 'Статус',
