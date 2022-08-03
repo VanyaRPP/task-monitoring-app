@@ -47,3 +47,9 @@ export enum TaskStatuses {
   IN_WORK = 'in work',
   COMPLETED = 'completed',
 }
+export const TaskStatusesConst = {
+  PENDING: 'pending',
+  REJECTED: 'rejected',
+  IN_WORK: 'in work',
+  COMPLETED: 'completed',
+}

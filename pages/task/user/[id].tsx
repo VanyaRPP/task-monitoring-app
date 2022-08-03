@@ -5,13 +5,16 @@ import { GetServerSideProps } from 'next'
 import { unstable_getServerSession } from 'next-auth'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import task from '..'
 import { useGetAllTaskQuery } from '../../../common/api/taskApi/task.api'
 import AddTaskModal from '../../../common/components/AddTaskModal'
 import CardOneTask from '../../../common/components/CardOneTask'
 import Filter from '../../../common/components/UI/FiltrationSidebar'
 import { ITask } from '../../../common/modules/models/Task'
-import { AppRoutes, TaskStatuses } from '../../../utils/constants'
+import {
+  AppRoutes,
+  TaskStatuses,
+  TaskStatusesConst,
+} from '../../../utils/constants'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import s from './../style.module.scss'
 
@@ -30,18 +33,13 @@ const UserTasks: React.FC = () => {
   }
 
   useEffect(() => {
-    // console.log(filter, 'filter')
+    // setTaskList(tasks?.filter((task: ITask) => task.status === filter))
     setTaskList(tasks?.filter((task: ITask) => task.status === filter))
-    // console.log(taskList)
   }, [filter, tasks])
 
   useEffect(() => {
     setTaskList(tasks)
-    // console.log(tasks)
   }, [])
-
-  const keys = Object.keys(TaskStatuses)
-  const values = Object.values(TaskStatuses)
 
   return (
     <>
@@ -58,34 +56,43 @@ const UserTasks: React.FC = () => {
       {/* <div>
           <Filter />
         </div> */}
-      <div>
-        {/* <Button
+      {/* <Button
             ghost
             type="primary"
             onClick={() => setFilter(TaskStatuses.PENDING)}
           >
-            Pending
+          Pending
           </Button>
           <Button
-            ghost
+          ghost
             type="primary"
             onClick={() => setFilter(TaskStatuses.IN_WORK)}
           >
-            In work
+          In work
           </Button>
           <Button ghost type="primary" onClick={() => resetFilters()}>
             X
           </Button> */}
+
+      <div className={s.Filtration}>
         <Radio.Group value={filter} onChange={(e) => setFilter(e.target.value)}>
-          {/* {Object.values(TaskStatuses).forEach((keys) => {
-            return <Radio value={values}>{values}</Radio>
-          })} */}
-          <Radio value={TaskStatuses.PENDING}>В очікуванні</Radio>
-          <Radio value={TaskStatuses.IN_WORK}>В роботі</Radio>
+          {Object.entries(TaskStatuses).map((key) => {
+            return (
+              <Radio key={key[1]} value={key[1]} className={s.Filter}>
+                {key[1]}
+              </Radio>
+            )
+          })}
+          {/* <Radio value={TaskStatuses.PENDING} className={s.Filter}>
+            В очікуванні
+          </Radio>
+          <Radio value={TaskStatuses.IN_WORK} className={s.Filter}>
+            В роботі
+          </Radio> */}
+          <Button type="primary" onClick={() => resetFilters()}>
+            X
+          </Button>
         </Radio.Group>
-        <Button type="primary" onClick={() => resetFilters()}>
-          X
-        </Button>
       </div>
       {taskList && taskList.length !== 0 ? (
         <div className={s.TasksList}>
@@ -104,7 +111,6 @@ const UserTasks: React.FC = () => {
       ) : (
         <Empty description="Немає даних" />
       )}
-
       <AddTaskModal
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}
