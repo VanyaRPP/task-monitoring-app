@@ -56,27 +56,36 @@ const ProfilePage: React.FC = () => {
               {router.query.id ? user?.role : <RoleSwitcher />}
             </Card>
 
-            <Card size="small" title="Електронна пошта">
+            <Card size="small" title="Електронна пошта" className={s.Edit}>
               {editing ? (
-                <input onChange={(event) => user?.email} />
+                <input
+                  onChange={(event) => user?.email}
+                  placeholder={user.email}
+                />
               ) : (
                 <p>{user?.email}</p>
               )}
             </Card>
 
             {user?.tel && (
-              <Card size="small" title="Номер телефону">
+              <Card size="small" title="Номер телефону" className={s.Edit}>
                 {editing ? (
-                  <input onChange={(event) => user?.tel} />
+                  <input
+                    onChange={(event) => user?.tel}
+                    placeholder={user.tel}
+                  />
                 ) : (
                   <p>{user?.tel}</p>
                 )}
               </Card>
             )}
 
-            <Card title="Адреса" size="small">
+            <Card title="Адреса" size="small" className={s.Edit}>
               {editing ? (
-                <input onChange={(event) => user?.address?.name} />
+                <input
+                  onChange={(event) => user?.address?.name}
+                  placeholder={user?.address?.name}
+                />
               ) : (
                 <p>{user?.address?.name || 'Житомир'}</p>
               )}

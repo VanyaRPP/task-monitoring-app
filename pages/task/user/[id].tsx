@@ -1,4 +1,6 @@
-import { Button, Empty } from 'antd'
+import { Button, Checkbox, Empty, Radio, RadioChangeEvent } from 'antd'
+import { CheckboxChangeEvent } from 'antd/lib/checkbox'
+import { CheckboxValueType } from 'antd/lib/checkbox/Group'
 import { GetServerSideProps } from 'next'
 import { unstable_getServerSession } from 'next-auth'
 import { useRouter } from 'next/router'
@@ -38,6 +40,9 @@ const UserTasks: React.FC = () => {
     // console.log(tasks)
   }, [])
 
+  const keys = Object.keys(TaskStatuses)
+  const values = Object.values(TaskStatuses)
+
   return (
     <>
       <div className={s.Header}>
@@ -49,11 +54,12 @@ const UserTasks: React.FC = () => {
         >
           Створити завдання
         </Button>
-        {/* <div>
+      </div>
+      {/* <div>
           <Filter />
         </div> */}
-        <div>
-          <Button
+      <div>
+        {/* <Button
             ghost
             type="primary"
             onClick={() => setFilter(TaskStatuses.PENDING)}
@@ -69,8 +75,17 @@ const UserTasks: React.FC = () => {
           </Button>
           <Button ghost type="primary" onClick={() => resetFilters()}>
             X
-          </Button>
-        </div>
+          </Button> */}
+        <Radio.Group value={filter} onChange={(e) => setFilter(e.target.value)}>
+          {/* {Object.values(TaskStatuses).forEach((keys) => {
+            return <Radio value={values}>{values}</Radio>
+          })} */}
+          <Radio value={TaskStatuses.PENDING}>В очікуванні</Radio>
+          <Radio value={TaskStatuses.IN_WORK}>В роботі</Radio>
+        </Radio.Group>
+        <Button type="primary" onClick={() => resetFilters()}>
+          X
+        </Button>
       </div>
       {taskList && taskList.length !== 0 ? (
         <div className={s.TasksList}>
@@ -87,7 +102,7 @@ const UserTasks: React.FC = () => {
             })}
         </div>
       ) : (
-        <Empty />
+        <Empty description="Немає даних" />
       )}
 
       <AddTaskModal
