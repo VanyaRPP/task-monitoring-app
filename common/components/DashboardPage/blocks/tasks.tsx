@@ -49,21 +49,15 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'name',
       key: 'name',
       width: '35%',
+      ellipsis: true,
       render: (text) => text,
     },
-    // {
-    //   title: searchInput('Клієнт'),
-    //   dataIndex: 'creator',
-    //   key: 'creator',
-    //   width: '25%',
-    //   render: (text) =>
-    //     text ? <MicroInfoProfile id={text} /> : 'Не назначено',
-    // },
     {
       title: searchInput('Адреса'),
       dataIndex: 'address',
       key: 'address',
       width: '35%',
+      ellipsis: true,
       render: (address) => address?.name,
     },
     {
@@ -71,6 +65,7 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'deadline',
       key: 'deadline',
       width: '20%',
+      ellipsis: true,
       sorter: (a, b) => Date.parse(a?.deadline) - Date.parse(b?.deadline),
       render: (date) => moment(date).format('DD-MM hh:mm'),
     },
@@ -79,6 +74,7 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'status',
       key: 'status',
       width: '20%',
+      ellipsis: true,
       filters: [],
       render: (text) => firstTextToUpperCase(text),
     },
@@ -87,6 +83,7 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'status',
       key: 'status',
       width: '20%',
+      ellipsis: true,
       render: (text) => firstTextToUpperCase(text),
     },
   ]

@@ -42,12 +42,14 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'name',
       key: 'name',
       width: '35%',
+      ellipsis: true,
     },
     {
       title: searchInput('Майстер'),
       dataIndex: 'executant',
       key: 'executant',
       width: '25%',
+      ellipsis: true,
       render: (text) =>
         text ? <MicroInfoProfile id={text} /> : 'Не назначено',
     },
@@ -56,6 +58,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'deadline',
       key: 'deadline',
       width: '20%',
+      ellipsis: true,
       sorter: (a, b) => Date.parse(a.date) - Date.parse(b.date),
       render: (text) => moment(text).format('DD-MM hh:mm'),
     },
@@ -64,6 +67,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'status',
       key: 'status',
       width: '20%',
+      ellipsis: true,
       render: (text) => firstTextToUpperCase(text),
     },
   ]
