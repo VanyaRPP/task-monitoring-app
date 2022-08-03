@@ -43,8 +43,10 @@ export const centerTownGeoCode = {
 
 export enum TaskStatuses {
   PENDING = 'pending',
+  PENDING_SELECTION = 'pending selection',
   REJECTED = 'rejected',
   IN_WORK = 'in work',
+  EXPIRED = 'expired',
   COMPLETED = 'completed',
 }
 export const TaskStatusesConst = {
