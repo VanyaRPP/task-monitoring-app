@@ -74,3 +74,15 @@
   width: 100%;
   gap: 1.5rem;
 }
+
+// ===FILTRATION=== //
+
+.Filtration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.5rem;
+}
+.Filter {
+  color: var(--textColor);
+}

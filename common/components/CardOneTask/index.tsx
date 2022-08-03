@@ -27,7 +27,7 @@ const CardOneTask: React.FC<Props> = ({ task }) => {
             type="primary"
             onClick={() => Router.push(AppRoutes.TASK + '/' + task._id)}
           >
-            {isDeadlineExpired(task?.deadline) ? 'Info' : 'Apply'}
+            {isDeadlineExpired(task?.deadline) ? 'Інформація' : 'Подати заявку'}
           </Button>
         </Badge>
       }
