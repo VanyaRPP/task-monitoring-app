@@ -22,12 +22,13 @@ const UserTasks: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [taskList, setTaskList] = useState(tasks)
   const [filter, setFilter] = useState('')
+  const [sorting, setSorting] = useState('')
 
   const resetFilters = () => {
     setFilter(null)
     setTaskList(tasks)
   }
-
+  //Filtration
   useEffect(() => {
     setTaskList(tasks?.filter((task: ITask) => task.status === filter))
   }, [filter, tasks])
@@ -35,6 +36,11 @@ const UserTasks: React.FC = () => {
   useEffect(() => {
     setTaskList(tasks)
   }, [])
+
+  //Sorting
+  // useEffect(() => {
+  //   setSorting(tasks.sort((a, b) => a.address - b.address))
+  // }, [])
 
   return (
     <>
