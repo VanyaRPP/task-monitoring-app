@@ -91,7 +91,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
         pagination={{
           responsive: false,
           size: 'small',
-          pageSize: 6,
+          pageSize: 5,
           position: ['bottomCenter'],
           hideOnSinglePage: true,
         }}
