@@ -55,19 +55,19 @@
   span {
     margin-left: 0.1em;
   }
-  @media (max-width: 425px) {
+  @media (max-width: 768px) {
     display: none;
   }
 }
 
 .LoginUser {
-  @media (max-width: 425px) {
+  @media (max-width: 767px) {
     display: none;
   }
 }
 
 .ThemeSwitcher {
-  @media (max-width: 425px) {
+  @media (max-width: 568px) {
     transform: rotate(90deg);
   }
 }
