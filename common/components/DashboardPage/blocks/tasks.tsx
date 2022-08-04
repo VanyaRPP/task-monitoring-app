@@ -12,7 +12,6 @@ import {
 import moment from 'moment'
 import Router, { useRouter } from 'next/router'
 import { AppRoutes } from '../../../../utils/constants'
-
 import s from '../style.module.scss'
 import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
@@ -26,16 +25,12 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
   const user = userResponse?.data?.data
   const tasksResponse = useGetAllTaskQuery('')
   const tasks = tasksResponse?.data?.data
-  // const categoriesResponse = useGetAllCategoriesQuery('')
-  // const categories = categoriesResponse?.data?.data
-  // console.log('allCat', categories)
 
   const dataSource = useMemo(() => {
     return tasks?.filter((task) => task?.executant === user?._id)
   }, [tasks, user?._id])
 
   const searchInput = (order: string) => (
-    // console.log('order', order)
     <Input
       placeholder={order.charAt(0).toUpperCase() + order.slice(1)}
       value={search[order]}
@@ -45,7 +40,8 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
 
   const columns = [
     {
-      title: searchInput('Завдання'),
+      // title: searchInput('Завдання'),
+      title: 'Завдання',
       dataIndex: 'name',
       key: 'name',
       width: '35%',
@@ -53,7 +49,8 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       render: (text) => text,
     },
     {
-      title: searchInput('Адреса'),
+      // title: searchInput('Адреса'),
+      title: 'Адреса',
       dataIndex: 'address',
       key: 'address',
       width: '35%',
@@ -75,7 +72,6 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       key: 'status',
       width: '20%',
       ellipsis: true,
-      filters: [],
       render: (text) => firstTextToUpperCase(text),
     },
     {
@@ -93,15 +89,15 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       className={style}
       title="Мої завдання"
       style={{ flex: '1.5' }}
-      // extra={
-      //   <Button
-      //     onClick={() => Router.push(`/task/user/${user?._id}`)}
-      //     ghost
-      //     type="primary"
-      //   >
-      //     Всі
-      //   </Button>
-      // }
+      extra={
+        <Button
+          onClick={() => Router.push(`/task/worker/${user?._id}`)}
+          ghost
+          type="primary"
+        >
+          Всі
+        </Button>
+      }
     >
       <Table
         rowKey="_id"

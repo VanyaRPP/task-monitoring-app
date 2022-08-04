@@ -38,14 +38,16 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
   // useGetAllCategoriesQuery
   const columns = [
     {
-      title: searchInput('Завдання'),
+      // title: searchInput('Завдання'),
+      title: 'Завдання',
       dataIndex: 'name',
       key: 'name',
       width: '35%',
       ellipsis: true,
     },
     {
-      title: searchInput('Майстер'),
+      // title: searchInput('Майстер'),
+      title: 'Майстер',
       dataIndex: 'executant',
       key: 'executant',
       width: '25%',
@@ -90,7 +92,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       <Table
         rowKey="_id"
         rowClassName={s.rowClass}
-        showHeader={false}
+        showHeader={true}
         dataSource={dataSource}
         columns={columns}
         pagination={{
