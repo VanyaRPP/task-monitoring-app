@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { useGetAllTaskQuery } from '../../../common/api/taskApi/task.api'
 import AddTaskModal from '../../../common/components/AddTaskModal'
 import CardOneTask from '../../../common/components/CardOneTask'
-import Filter from '../../../common/components/UI/FiltrationSidebar'
+import Filter from '../../../common/components/UI/Filtration'
 import { ITask } from '../../../common/modules/models/Task'
 import { AppRoutes, TaskStatuses } from '../../../utils/constants'
 import { authOptions } from '../../api/auth/[...nextauth]'
@@ -20,27 +20,6 @@ const UserTasks: React.FC = () => {
   const tasks = data?.data
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
-  const [taskList, setTaskList] = useState(tasks)
-  const [filter, setFilter] = useState('')
-  const [sorting, setSorting] = useState('')
-
-  const resetFilters = () => {
-    setFilter(null)
-    setTaskList(tasks)
-  }
-  //Filtration
-  useEffect(() => {
-    setTaskList(tasks?.filter((task: ITask) => task.status === filter))
-  }, [filter, tasks])
-
-  useEffect(() => {
-    setTaskList(tasks)
-  }, [])
-
-  //Sorting
-  // useEffect(() => {
-  //   setSorting(tasks.sort((a, b) => a.address - b.address))
-  // }, [])
 
   return (
     <>
@@ -54,38 +33,7 @@ const UserTasks: React.FC = () => {
           Створити завдання
         </Button>
       </div>
-
-      <div className={s.Filtration}>
-        <Radio.Group value={filter} onChange={(e) => setFilter(e.target.value)}>
-          {Object.entries(TaskStatuses).map((key) => {
-            return (
-              <Radio key={key[1]} value={key[1]} className={s.Filter}>
-                {key[1]}
-              </Radio>
-            )
-          })}
-          <Button type="primary" onClick={() => resetFilters()}>
-            X
-          </Button>
-        </Radio.Group>
-      </div>
-      {taskList?.length !== 0 ? (
-        <div className={s.TasksList}>
-          {taskList &&
-            taskList.map((task: ITask, index) => {
-              return <CardOneTask key={index} task={task} />
-            })}
-        </div>
-      ) : filter?.length == 0 && tasks?.length !== 0 ? (
-        <div className={s.TasksList}>
-          {tasks &&
-            tasks.map((task: ITask, index) => {
-              return <CardOneTask key={index} task={task} />
-            })}
-        </div>
-      ) : (
-        <Empty description="Немає даних" />
-      )}
+      <Filter />
       <AddTaskModal
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}
