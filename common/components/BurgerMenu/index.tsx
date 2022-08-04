@@ -13,6 +13,7 @@ import LogoCircle from '../../assets/svg/logo_circle'
 import LoginUser from '../LoginUser'
 // import { SearchBar } from '../UI/SearchBar'
 import s from './style.module.scss'
+import ThemeSwitcher from '../UI/ThemeSwitcher'
 
 const BurgerMenu: React.FC = () => {
   const [isActive, setIsActive] = useState(false)
@@ -67,16 +68,16 @@ const BurgerMenu: React.FC = () => {
           ) : null}
           {/* <div>
               <Avatar
-                className={s.Image}
-                size={100}
-                icon={<UserOutlined />}
-                src={
-                  <Image
-                    src={session?.user?.image || undefined}
-                    preview={false}
-                    alt="UserImg"
-                  />
-                }
+              className={s.Image}
+              size={100}
+              icon={<UserOutlined />}
+              src={
+                <Image
+                src={session?.user?.image || undefined}
+                preview={false}
+                alt="UserImg"
+                />
+              }
               />
               <h2>{session?.user?.name}</h2>
               <p>{session?.user?.email}</p>

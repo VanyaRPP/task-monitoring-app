@@ -68,7 +68,7 @@
 
 .ThemeSwitcher {
   @media (max-width: 425px) {
-    display: none;
+    transform: rotate(90deg);
   }
 }
 .Diamant {
