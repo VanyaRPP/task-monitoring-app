@@ -97,7 +97,7 @@ export const taskApi = createApi({
       },
       invalidatesTags: ['Task'],
     }),
-    changeTaskStatus: builder.mutation<ITask, Partial<ITask>>({
+    changeTaskStatus: builder.mutation<ITask, Partial<any>>({
       query(data) {
         const { _id, ...body } = data
         return {
