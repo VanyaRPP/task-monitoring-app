@@ -9,7 +9,6 @@ import {
 import type { MenuProps } from 'antd'
 import s from './style.module.scss'
 import config from '../../lib/Sidebar.config'
-import Filter from '../UI/FiltrationSidebar'
 import {
   categoryApi,
   useGetAllCategoriesQuery,
