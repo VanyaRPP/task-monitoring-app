@@ -13,6 +13,7 @@ import LogoCircle from '../../assets/svg/logo_circle'
 import LoginUser from '../LoginUser'
 // import { SearchBar } from '../UI/SearchBar'
 import s from './style.module.scss'
+import ThemeSwitcher from '../UI/ThemeSwitcher'
 
 const BurgerMenu: React.FC = () => {
   const [isActive, setIsActive] = useState(false)
@@ -102,7 +103,6 @@ const BurgerMenu: React.FC = () => {
                 <span>Панель адміна</span>
               </div>
             )}
-
             <Divider className={s.Divider} />
             <div
               className={s.Button}
@@ -142,6 +142,7 @@ const BurgerMenu: React.FC = () => {
             </div>
             <Divider className={s.Divider} />
           </div>
+          <Divider className={s.Divider} />
         </div>
       </Drawer>
     </>
