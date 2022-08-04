@@ -77,7 +77,7 @@ const CompetitionWorkerCard: FC<Props> = ({
         },
       ],
     })
-    // Reset()
+    Reset()
   }
 
   return (

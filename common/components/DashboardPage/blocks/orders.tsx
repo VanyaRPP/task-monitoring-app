@@ -13,6 +13,7 @@ import { AppRoutes } from '../../../../utils/constants'
 import s from '../style.module.scss'
 import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
+import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.api'
 
 const Orders: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
@@ -34,19 +35,23 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       onChange={(e) => setSearch({ ...search, [order]: e.target.value })}
     />
   )
-
+  // useGetAllCategoriesQuery
   const columns = [
     {
-      title: searchInput('Завдання'),
+      // title: searchInput('Завдання'),
+      title: 'Завдання',
       dataIndex: 'name',
       key: 'name',
       width: '35%',
+      ellipsis: true,
     },
     {
-      title: searchInput('Майстер'),
+      // title: searchInput('Майстер'),
+      title: 'Майстер',
       dataIndex: 'executant',
       key: 'executant',
       width: '25%',
+      ellipsis: true,
       render: (text) =>
         text ? <MicroInfoProfile id={text} /> : 'Не назначено',
     },
@@ -55,6 +60,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'deadline',
       key: 'deadline',
       width: '20%',
+      ellipsis: true,
       sorter: (a, b) => Date.parse(a.date) - Date.parse(b.date),
       render: (text) => moment(text).format('DD-MM hh:mm'),
     },
@@ -63,6 +69,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'status',
       key: 'status',
       width: '20%',
+      ellipsis: true,
       render: (text) => firstTextToUpperCase(text),
     },
   ]
@@ -85,7 +92,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       <Table
         rowKey="_id"
         rowClassName={s.rowClass}
-        showHeader={false}
+        showHeader={true}
         dataSource={dataSource}
         columns={columns}
         pagination={{
