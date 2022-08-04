@@ -48,4 +48,5 @@ export enum TaskStatuses {
   IN_WORK = 'in work',
   EXPIRED = 'expired',
   COMPLETED = 'completed',
+  ARCHIVED = 'archived',
 }
