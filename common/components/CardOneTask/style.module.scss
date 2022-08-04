@@ -22,4 +22,20 @@
   &.Disabled {
     opacity: 0.5;
   }
+  &.InWork {
+    border-color: rgb(48, 135, 172) !important;
+    transition: background 0.5s, box-shadow 0.5s, opacity 0.4s;
+    box-shadow: 0 8px 10px -5px rgb(48, 135, 172);
+  }
+  &.Completed {
+    border-color: rgb(34, 255, 0) !important;
+    transition: background 0.5s, box-shadow 0.5s, opacity 0.4s;
+    box-shadow: 0 8px 10px -5px rgb(34, 255, 0);
+  }
+  &.Rejected {
+    border-color: #ff0000 !important;
+    transition: background 0.5s, box-shadow 0.5s, opacity 0.4s;
+    box-shadow: 0 8px 10px -5px #ff0000;
+  }
+
 }
