@@ -11,7 +11,9 @@ export default async function handler(
   switch (req.method) {
     case 'PATCH':
       try {
-        const task = Task.findByIdAndUpdate(req.query.id, {})
+        const task = Task.findByIdAndUpdate(req.query.id, {
+          status: req.body.status,
+        })
 
         res.status(200).json({ success: false, data: task })
       } catch (error) {
