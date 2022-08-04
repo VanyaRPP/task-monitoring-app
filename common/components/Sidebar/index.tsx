@@ -1,5 +1,5 @@
-import React from 'react'
-import { Layout, Menu, Collapse, Avatar } from 'antd'
+import React, { useEffect, useState } from 'react'
+import { Layout, Menu, Collapse, Avatar, Empty } from 'antd'
 import {
   StarOutlined,
   CheckOutlined,
@@ -9,8 +9,11 @@ import {
 import type { MenuProps } from 'antd'
 import s from './style.module.scss'
 import config from '../../lib/Sidebar.config'
-import { useSession } from 'next-auth/react'
-import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
+import {
+  categoryApi,
+  useGetAllCategoriesQuery,
+} from '../../api/categoriesApi/category.api'
+import Categories from '../Categories'
 
 const { Panel } = Collapse
 
@@ -19,7 +22,7 @@ const items: MenuItem[] = [
   {
     key: 0,
     icon: <CheckOutlined />,
-    label: 'Готові замовлення', //finished orders
+    label: 'Категорія', //finished orders
   },
   {
     key: 1,
@@ -42,6 +45,14 @@ const bestMaster = config.bestMaster
 const bestDomain = config.bestDomain
 
 const Sidebar: React.FC<Props> = ({ collapsed, setCollapsed }) => {
+  // const { data: categoriesData } = useGetAllCategoriesQuery('')
+  // const [categories, setCategories] = useState(categoriesData?.data)
+  // const categoryFilter = ''
+
+  // useEffect(() => {
+  //   setCategories(categories?.sort())
+  // }, [categoryFilter, categoriesData])
+
   return (
     <Layout.Sider
       className={s.Sidebar}
@@ -49,8 +60,12 @@ const Sidebar: React.FC<Props> = ({ collapsed, setCollapsed }) => {
       collapsed={collapsed}
       onCollapse={(value) => setCollapsed(value)}
     >
-      <Menu className={s.List} mode="inline" items={items} />
-
+      <Menu
+        className={s.List}
+        mode="inline"
+        items={items}
+        // onClick={() => setCategories()}
+      />
       <Collapse
         bordered={false}
         className={s.Rating}

@@ -1,7 +1,7 @@
 import { Badge, Button, Card } from 'antd'
 import classNames from 'classnames'
 import Router from 'next/router'
-import { AppRoutes } from '../../../utils/constants'
+import { AppRoutes, TaskStatuses } from '../../../utils/constants'
 import {
   dateToDefaultFormat,
   isDeadlineExpired,
@@ -27,12 +27,17 @@ const CardOneTask: React.FC<Props> = ({ task }) => {
             type="primary"
             onClick={() => Router.push(AppRoutes.TASK + '/' + task._id)}
           >
-            {isDeadlineExpired(task?.deadline) ? 'Info' : 'Apply'}
+            {'Інформація'}
           </Button>
         </Badge>
       }
       className={classNames(s.Card, {
-        [s.Disabled]: isDeadlineExpired(task?.deadline),
+        [s.Disabled]:
+          task?.status === TaskStatuses.EXPIRED ||
+          task?.status === TaskStatuses.ARCHIVED,
+        [s.InWork]: task?.status === TaskStatuses.IN_WORK,
+        [s.Completed]: task?.status === TaskStatuses.COMPLETED,
+        [s.Rejected]: task?.status === TaskStatuses.REJECTED,
       })}
     >
       <p>Статус: {task?.status}</p>

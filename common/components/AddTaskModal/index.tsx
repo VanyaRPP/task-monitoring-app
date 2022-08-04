@@ -154,7 +154,7 @@ const AddTaskModal: React.FC<PropsType> = ({
             addressObj={address}
           />
           <div className={`${s.default} ${error ? '' : s.error}`}>
-            Enter address, please!
+            Введіть свою адресу, будь ласка!
           </div>
           <Map
             isLoaded={isLoaded}

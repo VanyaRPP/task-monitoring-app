@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from 'react'
 import { Card, Table, Input, Button } from 'antd'
-import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
+import {
+  useGetTaskByIdQuery,
+  useGetAllTaskQuery,
+} from '../../../api/taskApi/task.api'
 import { firstTextToUpperCase } from '../../../../utils/helpers'
 import {
   useGetUserByEmailQuery,
@@ -9,23 +12,22 @@ import {
 import moment from 'moment'
 import Router, { useRouter } from 'next/router'
 import { AppRoutes } from '../../../../utils/constants'
-
 import s from '../style.module.scss'
 import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
 import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.api'
 
-const Orders: React.FC<{ style: string }> = ({ style }) => {
+const Tasks: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
   const [search, setSearch] = useState({ task: '', master: '' })
   const router = useRouter()
   const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
-  const tasksResponse = useGetAllTaskQuery('')
   const user = userResponse?.data?.data
+  const tasksResponse = useGetAllTaskQuery('')
   const tasks = tasksResponse?.data?.data
 
   const dataSource = useMemo(() => {
-    return tasks?.filter((task) => task?.creator === user?._id)
+    return tasks?.filter((task) => task?.executant === user?._id)
   }, [tasks, user?._id])
 
   const searchInput = (order: string) => (
@@ -35,7 +37,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       onChange={(e) => setSearch({ ...search, [order]: e.target.value })}
     />
   )
-  // useGetAllCategoriesQuery
+
   const columns = [
     {
       // title: searchInput('Завдання'),
@@ -44,16 +46,16 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       key: 'name',
       width: '35%',
       ellipsis: true,
+      render: (text) => text,
     },
     {
-      // title: searchInput('Майстер'),
-      title: 'Майстер',
-      dataIndex: 'executant',
-      key: 'executant',
-      width: '25%',
+      // title: searchInput('Адреса'),
+      title: 'Адреса',
+      dataIndex: 'address',
+      key: 'address',
+      width: '35%',
       ellipsis: true,
-      render: (text) =>
-        text ? <MicroInfoProfile id={text} /> : 'Не назначено',
+      render: (address) => address?.name,
     },
     {
       title: 'Дата',
@@ -62,7 +64,15 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       width: '20%',
       ellipsis: true,
       sorter: (a, b) => Date.parse(a?.deadline) - Date.parse(b?.deadline),
-      render: (text) => moment(text).format('DD-MM hh:mm'),
+      render: (date) => moment(date).format('DD-MM hh:mm'),
+    },
+    {
+      title: 'Категорія',
+      dataIndex: 'category',
+      key: 'category',
+      width: '20%',
+      ellipsis: true,
+      render: (text) => firstTextToUpperCase(text),
     },
     {
       title: 'Статус',
@@ -77,11 +87,11 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
   return (
     <Card
       className={style}
-      title="Мої замовлення"
+      title="Мої завдання"
       style={{ flex: '1.5' }}
       extra={
         <Button
-          onClick={() => Router.push(`/task/user/${user?._id}`)}
+          onClick={() => Router.push(`/task/worker/${user?._id}`)}
           ghost
           type="primary"
         >
@@ -112,4 +122,4 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
   )
 }
 
-export default Orders
+export default Tasks

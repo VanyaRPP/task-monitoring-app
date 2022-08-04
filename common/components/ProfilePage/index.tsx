@@ -1,5 +1,6 @@
-import { EditOutlined, UserOutlined } from '@ant-design/icons'
-import { Avatar, Button, Card, Image } from 'antd'
+import React, { useState } from 'react'
+import { CheckOutlined, EditOutlined, UserOutlined } from '@ant-design/icons'
+import { Avatar, Button, Card, Form, Image } from 'antd'
 import RoleSwitcher from 'common/components/UI/roleSwitcher'
 import { useSession } from 'next-auth/react'
 import Router, { useRouter } from 'next/router'
@@ -21,6 +22,10 @@ const ProfilePage: React.FC = () => {
     `${router.query.id ? data?.data?.email : session?.user?.email}`
   )
   const user = userData?.data
+
+  //---------------------------
+  const [editing, setEditing] = useState(false)
+  //---------------------------
 
   return (
     <>
@@ -51,22 +56,47 @@ const ProfilePage: React.FC = () => {
               {router.query.id ? user?.role : <RoleSwitcher />}
             </Card>
 
-            <Card size="small" title="Електронна пошта">
-              <p>{user?.email}</p>
+            <Card size="small" title="Електронна пошта" className={s.Edit}>
+              {editing ? (
+                <input
+                  onChange={(event) => user?.email}
+                  placeholder={user.email}
+                />
+              ) : (
+                <p>{user?.email}</p>
+              )}
             </Card>
 
             {user?.tel && (
-              <Card size="small" title="Номер телефону">
-                <p>{user?.tel}</p>
+              <Card size="small" title="Номер телефону" className={s.Edit}>
+                {editing ? (
+                  <input
+                    onChange={(event) => user?.tel}
+                    placeholder={user.tel}
+                  />
+                ) : (
+                  <p>{user?.tel}</p>
+                )}
               </Card>
             )}
 
-            <Card title="Адреса" size="small">
-              <p>{user?.address?.name || 'Житомир'}</p>
+            <Card title="Адреса" size="small" className={s.Edit}>
+              {editing ? (
+                <input
+                  onChange={(event) => user?.address?.name}
+                  placeholder={user?.address?.name}
+                />
+              ) : (
+                <p>{user?.address?.name || 'Житомир'}</p>
+              )}
             </Card>
             {!router.query.id ? (
-              <Button type="primary">
-                <EditOutlined key="edit" />
+              <Button type="primary" onClick={() => setEditing(!editing)}>
+                {editing ? (
+                  <CheckOutlined key="check" />
+                ) : (
+                  <EditOutlined key="edit" />
+                )}
               </Button>
             ) : null}
           </div>

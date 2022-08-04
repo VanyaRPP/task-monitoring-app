@@ -28,7 +28,7 @@
     transform: rotate(45deg) translate(-9px, -7px);
   }
 
-  @media (min-width: 425px) {
+  @media (min-width: 768px) {
     display: none;
   }
 }
@@ -70,7 +70,7 @@
 .Diamant {
   margin-bottom: -0.3em;
   margin-right: 10px;
-  color: white;
+  fill: var(--textColor) !important;
 }
 
 .Premium {
