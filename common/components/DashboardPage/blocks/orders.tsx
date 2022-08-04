@@ -61,7 +61,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       key: 'deadline',
       width: '20%',
       ellipsis: true,
-      sorter: (a, b) => Date.parse(a.date) - Date.parse(b.date),
+      sorter: (a, b) => Date.parse(a?.deadline) - Date.parse(b?.deadline),
       render: (text) => moment(text).format('DD-MM hh:mm'),
     },
     {
