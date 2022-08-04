@@ -15,7 +15,7 @@ export interface ITask {
   taskexecutors: [ITaskExecutors]
   comment?: [IComment]
   status: TaskStatuses
-  executant?: ObjectId
+  executant?: ObjectId | string
 }
 
 export interface ICreateTask {
