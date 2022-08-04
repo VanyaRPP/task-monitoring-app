@@ -32,10 +32,12 @@ const CardOneTask: React.FC<Props> = ({ task }) => {
         </Badge>
       }
       className={classNames(s.Card, {
-        [s.Disabled]: task?.status===TaskStatuses.EXPIRED||task?.status===TaskStatuses.ARCHIVED,
-        [s.InWork]: task?.status===TaskStatuses.IN_WORK,
-        [s.Completed]: task?.status===TaskStatuses.COMPLETED,
-        [s.Rejected]: task?.status===TaskStatuses.REJECTED
+        [s.Disabled]:
+          task?.status === TaskStatuses.EXPIRED ||
+          task?.status === TaskStatuses.ARCHIVED,
+        [s.InWork]: task?.status === TaskStatuses.IN_WORK,
+        [s.Completed]: task?.status === TaskStatuses.COMPLETED,
+        [s.Rejected]: task?.status === TaskStatuses.REJECTED,
       })}
     >
       <p>Статус: {task?.status}</p>
