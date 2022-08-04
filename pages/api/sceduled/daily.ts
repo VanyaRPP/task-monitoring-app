@@ -14,13 +14,15 @@ export default async function handler(
   try {
     await Task.find({}).then((tasks) => {
       tasks.map(async (task: ITask) => {
-        if (moment(task?.deadline).isBefore(Date.now())) {
-          await Task.findOneAndUpdate(
-            { _id: task._id },
-            {
-              status: TaskStatuses.EXPIRED,
-            }
-          )
+        if (task?.status !== TaskStatuses.IN_WORK) {
+          if (moment(task?.deadline).isBefore(Date.now())) {
+            await Task.findOneAndUpdate(
+              { _id: task._id },
+              {
+                status: TaskStatuses.EXPIRED,
+              }
+            )
+          }
         }
       })
       return res
