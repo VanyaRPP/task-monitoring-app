@@ -14,7 +14,7 @@ export interface ITask {
   customer?: string
   taskexecutors: [ITaskExecutors]
   comment?: [IComment]
-  status: TaskStatuses
+  status: TaskStatuses | string
   executant?: ObjectId | string
 }
 

@@ -97,6 +97,17 @@ export const taskApi = createApi({
       },
       invalidatesTags: ['Task'],
     }),
+    changeTaskStatus: builder.mutation<ITask, Partial<any>>({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `task/${_id}/change-status-task`,
+          method: 'PATCH',
+          body,
+        }
+      },
+      invalidatesTags: ['Task'],
+    }),
   }),
 })
 
@@ -110,4 +121,5 @@ export const {
   useDeleteCommentMutation,
   useAcceptWorkerMutation,
   useEditTaskMutation,
+  useChangeTaskStatusMutation,
 } = taskApi

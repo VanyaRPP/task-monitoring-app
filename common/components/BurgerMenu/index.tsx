@@ -103,7 +103,6 @@ const BurgerMenu: React.FC = () => {
                 <span>Панель адміна</span>
               </div>
             )}
-
             <Divider className={s.Divider} />
             <div
               className={s.Button}
@@ -143,6 +142,7 @@ const BurgerMenu: React.FC = () => {
             </div>
             <Divider className={s.Divider} />
           </div>
+          <Divider className={s.Divider} />
         </div>
       </Drawer>
     </>

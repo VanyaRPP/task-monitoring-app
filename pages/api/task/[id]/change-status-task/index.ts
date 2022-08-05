@@ -11,11 +11,11 @@ export default async function handler(
   switch (req.method) {
     case 'PATCH':
       try {
-        const task = Task.findByIdAndUpdate(req.query.id, {
+        const task = await Task.findByIdAndUpdate(req.query.id, {
           status: req.body.status,
         })
 
-        res.status(200).json({ success: false, data: task })
+        res.status(200).json({ success: true, data: task })
       } catch (error) {
         res.status(400).json({ success: false, error: error.message })
       }
