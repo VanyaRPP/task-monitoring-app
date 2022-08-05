@@ -63,7 +63,7 @@ const Filter: React.FC = () => {
             })}
         </div>
       ) : (
-        <Empty description="Немає даних" />
+        <Empty description="Немає даних" className={s.Empty} />
       )}
     </>
   )

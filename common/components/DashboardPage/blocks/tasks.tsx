@@ -68,8 +68,8 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
     },
     {
       title: 'Категорія',
-      dataIndex: 'status',
-      key: 'status',
+      dataIndex: 'category',
+      key: 'category',
       width: '20%',
       ellipsis: true,
       render: (text) => firstTextToUpperCase(text),
