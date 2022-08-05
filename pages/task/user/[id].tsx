@@ -2,7 +2,7 @@ import { Button } from 'antd'
 import { GetServerSideProps } from 'next'
 import { unstable_getServerSession } from 'next-auth'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useGetAllTaskQuery } from '../../../common/api/taskApi/task.api'
 import AddTaskModal from '../../../common/components/AddTaskModal'
 import Filter from '../../../common/components/UI/Filtration/index'
@@ -14,8 +14,14 @@ const UserTasks: React.FC = () => {
   const router = useRouter()
   const { data } = useGetAllTaskQuery('')
   const tasks = data?.data
+  const [taskList, setTaskList] = useState(tasks)
+  const [sorting, setSorting] = useState('')
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+
+  // useEffect(()=>{
+  //   setTaskList(tasks?.sort(a, b) =>)
+  // }, [])
 
   return (
     <>
