@@ -43,6 +43,7 @@
 
     .Info {
       > div {
+        color: var(--textColor);
         transition: background 0.5s, opacity 0.2s;
         opacity: 0.5;
       }

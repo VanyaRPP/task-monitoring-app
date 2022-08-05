@@ -30,7 +30,8 @@
     margin-top: 0.75rem;
   }
 
-  @media (max-width: 425px) {
+  @media (max-width: 700px) {
+    display: none;
     font-size: 0.5em;
     margin-left: 0.05rem;
     margin-right: 0.5rem;
