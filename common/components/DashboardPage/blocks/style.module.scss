@@ -1,0 +1,19 @@
+.Table {
+  button {
+    color: var(--textColor);
+  }
+  button:disabled {
+    color: #88888830;
+  }
+  li a {
+    color: var(--primaryColor);
+  }
+  :global {
+    .ant-pagination-item-active {
+      background-color: var(--primaryColorHover);
+    }
+    .ant-pagination-item-active a {
+      color: white;
+    }
+  }
+}
