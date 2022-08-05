@@ -21,7 +21,7 @@ const AddFeedbackForm: React.FC<Props> = ({ isFormDisabled, form }) => {
       <Form.Item
         normalize={deleteExtraWhitespace}
         name="text"
-        label="Your feedback"
+        label="Ваш відгук"
         rules={validateField('feedback')}
       >
         <Input.TextArea maxLength={250} />
