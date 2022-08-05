@@ -29,10 +29,10 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className={s.Container}>
-        <Orders style={`${s.Card} ${s.Orders}`} />
         {userRole == 'Worker' ? (
           <Tasks style={`${s.Card} ${s.Orders}`} />
         ) : null}
+        <Orders style={`${s.Card} ${s.Orders}`} />
 
         {/* <Masters style={`${s.Card} ${s.Masters}`} />
         <Domains style={`${s.Card} ${s.Domains}`} /> */}

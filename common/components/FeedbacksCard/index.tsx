@@ -44,7 +44,6 @@ const FeedbacksCard: React.FC<Props> = ({
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
-
   const [form] = Form.useForm()
 
   const [addFeedback] = useAddFeedbackMutation()
@@ -67,7 +66,6 @@ const FeedbacksCard: React.FC<Props> = ({
     // if () return Reset()
 
     const formData: IFeedback = await form.validateFields()
-
     setIsFormDisabled(true)
     await addFeedback({
       _id: user?._id,
@@ -75,10 +73,11 @@ const FeedbacksCard: React.FC<Props> = ({
         {
           id: sessionUser?.data?._id,
           text: formData?.text,
-          grade: formData?.grade,
+          grade: formData?.grade ?? 1,
         },
       ],
     })
+
     Reset()
   }
 
