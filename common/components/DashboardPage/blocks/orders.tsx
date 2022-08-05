@@ -9,11 +9,11 @@ import {
 import moment from 'moment'
 import Router, { useRouter } from 'next/router'
 import { AppRoutes } from '../../../../utils/constants'
-
-import s from '../style.module.scss'
 import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
 import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.api'
+
+import s from './style.module.scss'
 
 const Orders: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
@@ -87,6 +87,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       }
     >
       <Table
+        className={s.Table}
         rowKey="_id"
         rowClassName={s.rowClass}
         showHeader={true}
