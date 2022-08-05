@@ -35,10 +35,8 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       onChange={(e) => setSearch({ ...search, [order]: e.target.value })}
     />
   )
-  // useGetAllCategoriesQuery
   const columns = [
     {
-      // title: searchInput('Завдання'),
       title: 'Завдання',
       dataIndex: 'name',
       key: 'name',
@@ -46,7 +44,6 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       ellipsis: true,
     },
     {
-      // title: searchInput('Майстер'),
       title: 'Майстер',
       dataIndex: 'executant',
       key: 'executant',
@@ -54,7 +51,6 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       ellipsis: true,
       render: (text) =>
         text ? <MicroInfoProfile id={text} /> : 'Не назначено',
-      // render: (executant) => executant,
     },
     {
       title: 'Дата',

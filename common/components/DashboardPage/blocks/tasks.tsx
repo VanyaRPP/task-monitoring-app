@@ -40,7 +40,6 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
 
   const columns = [
     {
-      // title: searchInput('Завдання'),
       title: 'Завдання',
       dataIndex: 'name',
       key: 'name',
@@ -49,7 +48,6 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       render: (text) => text,
     },
     {
-      // title: searchInput('Адреса'),
       title: 'Адреса',
       dataIndex: 'address',
       key: 'address',
@@ -72,7 +70,6 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       key: 'category',
       width: '20%',
       ellipsis: true,
-      // render: (text) => firstTextToUpperCase(text),
     },
     {
       title: 'Статус',
