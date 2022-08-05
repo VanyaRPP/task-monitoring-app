@@ -18,11 +18,17 @@ const Task: React.FC = () => {
     skip: !router.query.id,
   })
   const task = data?.data
+  const taskStatus = task?.status
 
   return (
     <div className={s.TaskContainer}>
       <TaskCard taskId={router.query.id} task={task} />
-      <CompetitionCard task={task} />
+      {taskStatus == 'completed' ? (
+        <h3>Тут може бути ваша реклама</h3>
+      ) : (
+        <CompetitionCard task={task} />
+      )}
+      {/* <CompetitionCard task={task} /> */}
       <CommentsCard taskId={task?._id} />
     </div>
   )
