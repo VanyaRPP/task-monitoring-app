@@ -18,6 +18,7 @@ const Task: React.FC = () => {
     skip: !router.query.id,
   })
   const task = data?.data
+  const taskStatus = task?.status
 
   return (
     <div className={s.TaskContainer}>
