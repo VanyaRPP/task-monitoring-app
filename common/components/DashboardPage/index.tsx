@@ -13,7 +13,7 @@ const Dashboard: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const session = useSession()
   const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
-  const userRole = userResponse?.data?.data.role
+  const userRole = userResponse?.data?.data?.role
 
   return (
     <>

@@ -27,6 +27,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
   const dataSource = useMemo(() => {
     return tasks?.filter((task) => task?.creator === user?._id)
   }, [tasks, user?._id])
+  console.log('data', dataSource)
 
   const searchInput = (order: string) => (
     <Input
@@ -54,6 +55,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       ellipsis: true,
       render: (text) =>
         text ? <MicroInfoProfile id={text} /> : 'Не назначено',
+      // render: (executant) => executant,
     },
     {
       title: 'Дата',

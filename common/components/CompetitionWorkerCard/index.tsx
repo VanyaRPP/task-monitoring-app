@@ -25,7 +25,7 @@ import Steper from '../UI/Steper'
 interface Props {
   _id: string | any
   taskCreatorId: string | any
-  taskStatus: TaskStatuses
+  taskStatus: TaskStatuses | string
   // steps
 }
 

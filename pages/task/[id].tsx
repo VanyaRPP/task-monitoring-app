@@ -23,12 +23,12 @@ const Task: React.FC = () => {
   return (
     <div className={s.TaskContainer}>
       <TaskCard taskId={router.query.id} task={task} />
-      {taskStatus == 'completed' ? (
+      {/* {taskStatus == 'completed' ? (
         <h3>Тут може бути ваша реклама</h3>
       ) : (
         <CompetitionCard task={task} />
-      )}
-      {/* <CompetitionCard task={task} /> */}
+      )} */}
+      <CompetitionCard task={task} />
       <CommentsCard taskId={task?._id} />
     </div>
   )
