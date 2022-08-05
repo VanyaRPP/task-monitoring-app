@@ -8,6 +8,7 @@ import {
 } from 'antd'
 import { RangePickerProps } from 'antd/lib/date-picker'
 import moment from 'moment'
+import { useGetUserByIdQuery } from '../../api/userApi/user.api'
 
 type PropsType = {
   isFormDisabled: boolean
@@ -16,7 +17,6 @@ type PropsType = {
 
 const ApplyAuctionForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
   const { Option } = Select
-
   const disabledDate: RangePickerProps['disabledDate'] = (current) => {
     return current && current < moment().startOf('day')
   }

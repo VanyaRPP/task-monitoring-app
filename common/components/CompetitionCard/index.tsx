@@ -150,7 +150,11 @@ const CompetitionCard: React.FC<{
         okText="Додати"
         cancelText="Скасувати"
       >
-        <CompetitionForm isFormDisabled={isFormDisabled} form={form} />
+        <CompetitionForm
+          isFormDisabled={isFormDisabled}
+          form={form}
+          task={task}
+        />
       </ModalWindow>
       <Table key="competition" dataSource={executors} pagination={false}>
         <Column

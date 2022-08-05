@@ -6,7 +6,8 @@ start()
 
 function averageNum(arr, keyName) {
   return (
-    arr.reduce((sum, a) => sum + (keyName === undefined ? a : +a[keyName]), 0) / arr.length
+    arr.reduce((sum, a) => sum + (keyName === undefined ? a : +a[keyName]), 0) /
+    arr.length
   )
 }
 

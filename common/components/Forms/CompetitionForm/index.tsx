@@ -9,9 +9,10 @@ import { disabledDate } from '../../../assets/features/formatDate'
 interface Props {
   isFormDisabled: boolean
   form: FormInstance
+  task: any
 }
 
-const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form }) => {
+const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form, task }) => {
   return (
     <Form
       form={form}
@@ -44,7 +45,7 @@ const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form }) => {
         // rules={validateField('deadline')}
       >
         <DatePicker
-          placeholder="Оберіть дату"
+          placeholder="Оберіть датуу"
           getPopupContainer={() => document.getElementById('competitionForm')}
           disabledDate={disabledDate}
         />
