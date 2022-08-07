@@ -14,13 +14,13 @@ import { ITask } from '../../modules/models/Task'
 type PropsType = {
   isFormDisabled: boolean
   form: FormInstance
-  task: ITask
+  // task: ITask
 }
 
 const ApplyAuctionForm: React.FC<PropsType> = ({
   isFormDisabled,
   form,
-  task,
+  // task,
 }) => {
   const { Option } = Select
   // console.log('MOMENT', moment(task?.deadline))
