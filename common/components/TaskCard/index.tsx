@@ -68,9 +68,7 @@ const TaskCard = ({ taskId, task }) => {
           className={s.TaskInfo}
           title={task?.name}
           actions={session?.user?.email === user?.email && Actions}
-          extra={
-            <StatusTag status={task?.status} />
-          }
+          extra={<StatusTag status={task?.status} />}
         >
           <p className={s.Description}>Опис: {task?.description}</p>
           <p>Категорія: {task?.category}</p>
