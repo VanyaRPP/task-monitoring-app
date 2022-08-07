@@ -45,7 +45,7 @@ const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form, task }) => {
         // rules={validateField('deadline')}
       >
         <DatePicker
-          placeholder="Оберіть датуу"
+          placeholder="Оберіть дату"
           getPopupContainer={() => document.getElementById('competitionForm')}
           disabledDate={disabledDate}
         />
