@@ -8,7 +8,7 @@ import {
   isDeadlineExpired,
 } from '../../assets/features/formatDate'
 import { ITask } from '../../modules/models/Task'
-import StatusTag from '../UI/Tag'
+import StatusTag from '../UI/StatusTag'
 import s from './style.module.scss'
 
 interface Props {
