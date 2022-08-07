@@ -18,6 +18,7 @@ interface Props {
 const CardOneTask: React.FC<Props> = ({ task }) => {
   return (
     <Card
+      onClick={() => Router.push(AppRoutes.TASK + '/' + task._id)}
       title={task.name}
       extra={
         <>

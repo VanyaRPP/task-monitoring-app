@@ -13,6 +13,7 @@ import { Marker, useJsApiLoader } from '@react-google-maps/api'
 import Map from '../Map'
 import Link from 'next/link'
 import UserLink from '../UserLink'
+import StatusTag from '../UI/StatusTag'
 
 const TaskCard = ({ taskId, task }) => {
   const router = useRouter()
@@ -67,6 +68,7 @@ const TaskCard = ({ taskId, task }) => {
           className={s.TaskInfo}
           title={task?.name}
           actions={session?.user?.email === user?.email && Actions}
+          extra={<StatusTag status={task?.status} />}
         >
           <p className={s.Description}>Опис: {task?.description}</p>
           <p>Категорія: {task?.category}</p>
