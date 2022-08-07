@@ -5,10 +5,10 @@ import {
   MinusCircleOutlined,
   PlusCircleOutlined,
   SyncOutlined,
-} from '@ant-design/icons';
-import { Divider, Tag } from 'antd';
-import { FC, ReactElement } from 'react';
-import { TaskStatuses } from '../../../../utils/constants';
+} from '@ant-design/icons'
+import { Divider, Tag } from 'antd'
+import { FC, ReactElement } from 'react'
+import { TaskStatuses } from '../../../../utils/constants'
 
 interface Props {
   status: TaskStatuses | string
@@ -17,21 +17,21 @@ interface Props {
 const getColorTag = (status): string => {
   switch (status) {
     case TaskStatuses.PENDING:
-      return "#36cfc9"
+      return '#36cfc9'
     case TaskStatuses.PENDING_SELECTION:
-      return "#36cfc9"
+      return '#36cfc9'
     case TaskStatuses.REJECTED:
-      return "#a8071a"
+      return '#a8071a'
     case TaskStatuses.IN_WORK:
-      return "#096dd9"
+      return '#096dd9'
     case TaskStatuses.EXPIRED:
-      return "#002329"
+      return '#002329'
     case TaskStatuses.COMPLETED:
-      return "#389e0d"
+      return '#389e0d'
     case TaskStatuses.ARCHIVED:
-      return "#22075e"
+      return '#22075e'
     default:
-      return "#d46b08"
+      return '#d46b08'
   }
 }
 const getIconTag = (status): ReactElement => {
@@ -61,6 +61,6 @@ const StatusTag: FC<Props> = ({ status }) => (
       {status}
     </Tag>
   </>
-);
+)
 
 export default StatusTag

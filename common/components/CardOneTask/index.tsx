@@ -36,7 +36,6 @@ const CardOneTask: React.FC<Props> = ({ task }) => {
             </Button>
           </Badge>
         </>
-
       }
       className={classNames(s.Card, {
         [s.Disabled]:
