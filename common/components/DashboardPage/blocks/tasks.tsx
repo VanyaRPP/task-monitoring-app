@@ -16,6 +16,7 @@ import s from '../style.module.scss'
 import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
 import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.api'
+import StatusTag from '../../UI/StatusTag'
 
 const Tasks: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
@@ -43,7 +44,7 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       title: 'Завдання',
       dataIndex: 'name',
       key: 'name',
-      width: '35%',
+      width: '20%',
       ellipsis: true,
       render: (text) => text,
     },
@@ -51,7 +52,7 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       title: 'Адреса',
       dataIndex: 'address',
       key: 'address',
-      width: '35%',
+      width: '20%',
       ellipsis: true,
       render: (address) => address?.name,
     },
@@ -77,7 +78,7 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       key: 'status',
       width: '20%',
       ellipsis: true,
-      render: (text) => firstTextToUpperCase(text),
+      render: (status) => <StatusTag status={status} />,
     },
   ]
 

@@ -13,6 +13,7 @@ export enum AppRoutes {
 export enum Roles {
   USER = 'User',
   WORKER = 'Worker',
+  MODERATOR = 'Moderator',
   ADMIN = 'Admin',
 }
 
