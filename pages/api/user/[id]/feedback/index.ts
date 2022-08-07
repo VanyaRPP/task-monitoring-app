@@ -6,8 +6,7 @@ start()
 
 function averageNum(arr, keyName) {
   return (
-    arr.reduce((sum, a) => sum + (keyName === undefined ? a : +a[keyName]), 0) /
-    arr.length
+    arr.reduce((sum, a) => sum + (keyName === undefined ? a : +a[keyName]), 0) / arr.length
   )
 }
 
@@ -24,7 +23,7 @@ export default async function handler(
             { _id: user._id },
             {
               feedback: [...(user.feedback ?? []), ...req.body?.feedback],
-              rating: rating,
+              rating: rating || 0,
             }
           )
           return res.status(201).json({ success: true, data: updatedUser })
