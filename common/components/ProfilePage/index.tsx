@@ -22,6 +22,7 @@ const ProfilePage: React.FC = () => {
     `${router.query.id ? data?.data?.email : session?.user?.email}`
   )
   const user = userData?.data
+  const userRate = userData?.data?.rating
 
   //---------------------------
   const [editing, setEditing] = useState(false)
@@ -102,7 +103,7 @@ const ProfilePage: React.FC = () => {
           </div>
         </Card>
 
-        <FeedbacksCard user={user} loading={isLoading} />
+        <FeedbacksCard user={user} loading={isLoading} userRate={userRate} />
       </div>
     </>
   )

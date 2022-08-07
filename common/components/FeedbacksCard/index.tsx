@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PlusOutlined } from '@ant-design/icons'
 import { Empty, Card, List, Button, Form, Rate } from 'antd'
 import { IFeedback, IUser } from 'common/modules/models/User'
@@ -19,6 +19,7 @@ const RateDescription = ['Жахливо', 'Погано', 'Нормально',
 interface Props {
   user: IUser
   loading?: boolean
+  userRate: number
 }
 
 // function CalculateAVG(feedback) {
@@ -31,14 +32,18 @@ interface Props {
 //   )
 // }
 
-const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
+const FeedbacksCard: React.FC<Props> = ({
+  user,
+  loading = false,
+  userRate,
+}) => {
   const session = useSession()
   const { data: sessionUser } = useGetUserByEmailQuery(
     session?.data?.user?.email
   )
+
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
-
   const [form] = Form.useForm()
 
   const [addFeedback] = useAddFeedbackMutation()
@@ -61,7 +66,6 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
     // if () return Reset()
 
     const formData: IFeedback = await form.validateFields()
-
     setIsFormDisabled(true)
     await addFeedback({
       _id: user?._id,
@@ -69,10 +73,11 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
         {
           id: sessionUser?.data?._id,
           text: formData?.text,
-          grade: formData?.grade,
+          grade: formData?.grade ?? 1,
         },
       ],
     })
+
     Reset()
   }
 
@@ -104,14 +109,7 @@ const FeedbacksCard: React.FC<Props> = ({ user, loading = false }) => {
           </ModalWindow>
         </span>
       }
-      extra={
-        <Rate
-          tooltips={RateDescription}
-          disabled
-          allowHalf
-          value={user?.rating}
-        />
-      }
+      extra={<Rate tooltips={RateDescription} disabled value={userRate} />}
     >
       {user?.feedback?.length ? (
         <List

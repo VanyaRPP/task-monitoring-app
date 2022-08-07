@@ -11,6 +11,7 @@ interface Props {
 
 const Users: React.FC<Props> = ({ users }) => {
   const [user, setUser] = useState(users[0])
+  const userRate = user?.rating
 
   if (!users || users.length === 0)
     return <h2 style={{ color: 'var(--textColor)' }}>Ще немає користувачів</h2>
@@ -30,10 +31,9 @@ const Users: React.FC<Props> = ({ users }) => {
           </List.Item>
         )}
       />
-
       <div className={s.About}>
         <UserInfo user={user} />
-        <FeedbacksCard user={user} />
+        <FeedbacksCard user={user} userRate={userRate} />
       </div>
     </div>
   )

@@ -14,6 +14,7 @@ import MicroInfoProfile from '../../MicroInfoProfile'
 import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.api'
 
 import s from './style.module.scss'
+import StatusTag from '../../UI/StatusTag'
 
 const Orders: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
@@ -67,7 +68,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       key: 'status',
       width: '20%',
       ellipsis: true,
-      render: (text) => firstTextToUpperCase(text),
+      render: (status) => <StatusTag status={status} />,
     },
   ]
 
