@@ -1,3 +1,4 @@
+import { InfoOutlined } from '@ant-design/icons'
 import { Badge, Button, Card } from 'antd'
 import classNames from 'classnames'
 import Router from 'next/router'
@@ -7,6 +8,7 @@ import {
   isDeadlineExpired,
 } from '../../assets/features/formatDate'
 import { ITask } from '../../modules/models/Task'
+import StatusTag from '../UI/Tag'
 import s from './style.module.scss'
 
 interface Props {
@@ -18,18 +20,23 @@ const CardOneTask: React.FC<Props> = ({ task }) => {
     <Card
       title={task.name}
       extra={
-        <Badge
-          color="gold"
-          count={task?.taskexecutors ? task?.taskexecutors.length : 0}
-        >
-          <Button
-            ghost
-            type="primary"
-            onClick={() => Router.push(AppRoutes.TASK + '/' + task._id)}
+        <>
+          <StatusTag status={task?.status} />
+          <Badge
+            color="gold"
+            count={task?.taskexecutors ? task?.taskexecutors.length : 0}
           >
-            {'Інформація'}
-          </Button>
-        </Badge>
+            <Button
+              ghost
+              type="primary"
+              onClick={() => Router.push(AppRoutes.TASK + '/' + task._id)}
+            >
+              <InfoOutlined />
+              {/* {'Info'} */}
+            </Button>
+          </Badge>
+        </>
+
       }
       className={classNames(s.Card, {
         [s.Disabled]:
