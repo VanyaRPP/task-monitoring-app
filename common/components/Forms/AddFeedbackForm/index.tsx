@@ -1,5 +1,5 @@
 import React from 'react'
-import { Form, FormInstance, Input, Slider } from 'antd'
+import { Form, FormInstance, Input, Slider, Rate } from 'antd'
 import {
   deleteExtraWhitespace,
   validateField,
@@ -28,18 +28,20 @@ const AddFeedbackForm: React.FC<Props> = ({ isFormDisabled, form }) => {
       </Form.Item>
 
       <Form.Item name="grade" label="Your grade">
-        <Slider
-          min={1}
+        {/* <Slider
+          min={0}
           max={5}
           step={1}
           marks={{
+            0: 0,
             1: 1,
             2: 2,
             3: 3,
             4: 4,
             5: 5,
           }}
-        />
+        /> */}
+        <Rate defaultValue={1} />
       </Form.Item>
     </Form>
   )

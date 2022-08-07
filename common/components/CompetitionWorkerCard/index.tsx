@@ -45,7 +45,6 @@ const CompetitionWorkerCard: FC<Props> = ({
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
 
   const [form] = Form.useForm()
-
   const { data } = useGetUserByIdQuery(_id)
   const user = data?.data
   const desc = ['Жахливо', 'Погано', 'Нормально', 'Добре', 'Прекрасно']
@@ -82,38 +81,44 @@ const CompetitionWorkerCard: FC<Props> = ({
 
   return (
     <div className={s.container}>
-      <Card className={s.Card}>
-        <Avatar
-          className={s.Avatar}
-          icon={<UserOutlined />}
-          src={
-            <Image
-              src={
-                user?.image ||
-                'https://anime.anidub.life/templates/kinolife-blue/images/bump.png'
-              }
-              preview={false}
-              style={{ width: 88 }}
-              alt="UserImg"
-            />
-          }
-        />
-        <p>Ім&#x27;я: {user?.name || user?.email}</p>
-        <p>Пошта: {user?.email}</p>
-        <p>Телефон: {user?.tel}</p>
-        <RateStars disabled defaultValue={user?.rating} />
-        {sessionUser?.data?._id === user?._id ||
-        sessionUser?.data?._id === taskCreatorId ? (
-          <div className={s.btnGroup}>
-            <Button
-              type="primary"
-              onClick={() => setIsModalVisible(!isModalVisible)}
-            >
-              Завершити
-            </Button>
-          </div>
-        ) : null}
-      </Card>
+      {
+        <Card className={s.Card}>
+          <Avatar
+            className={s.Avatar}
+            icon={<UserOutlined />}
+            src={
+              <Image
+                src={
+                  user?.image ||
+                  'https://anime.anidub.life/templates/kinolife-blue/images/bump.png'
+                }
+                preview={false}
+                style={{ width: 88 }}
+                alt="UserImg"
+              />
+            }
+          />
+          <p>Ім&#x27;я: {user?.name || user?.email}</p>
+          <p>Пошта: {user?.email}</p>
+          <p>Телефон: {user?.tel}</p>
+          <RateStars disabled defaultValue={user?.rating} />
+          {sessionUser?.data?._id === user?._id ||
+          sessionUser?.data?._id === taskCreatorId ? (
+            <div className={s.btnGroup}>
+              {taskStatus !== 'completed' ? (
+                <Button
+                  type="primary"
+                  onClick={() => setIsModalVisible(!isModalVisible)}
+                >
+                  Завершити
+                </Button>
+              ) : (
+                <p>Замовлення недоступне</p>
+              )}
+            </div>
+          ) : null}
+        </Card>
+      }
 
       <ModalNoFooter
         title={`Завершити завдання з ${user?.name || user?.email}`}
