@@ -29,9 +29,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className={s.Container}>
-        {userRole == 'Worker' ? (
-          <Tasks style={`${s.Card} ${s.Orders}`} />
-        ) : null}
+        {userRole !== 'User' ? <Tasks style={`${s.Card} ${s.Orders}`} /> : null}
         <Orders style={`${s.Card} ${s.Orders}`} />
 
         {/* <Masters style={`${s.Card} ${s.Masters}`} />
