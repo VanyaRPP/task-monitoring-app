@@ -40,12 +40,10 @@ export default async function handler(
           }
         }
       })
-      return res
-        .status(201)
-        .json({
-          success: true,
-          data: 'task statuses update to EXPIRED/ARCHIVED',
-        })
+      return res.status(201).json({
+        success: true,
+        data: 'task statuses update to EXPIRED/ARCHIVED',
+      })
     })
   } catch (err) {
     return res.status(500)
