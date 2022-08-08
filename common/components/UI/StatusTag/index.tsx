@@ -9,6 +9,7 @@ import {
 import { Divider, Tag } from 'antd'
 import { FC, ReactElement } from 'react'
 import { TaskStatuses } from '../../../../utils/constants'
+import s from './style.module.scss'
 
 interface Props {
   status: TaskStatuses | string
@@ -57,7 +58,11 @@ const getIconTag = (status): ReactElement => {
 
 const StatusTag: FC<Props> = ({ status }) => (
   <>
-    <Tag icon={getIconTag(status)} color={getColorTag(status)}>
+    <Tag
+      icon={getIconTag(status)}
+      color={getColorTag(status)}
+      className={s.Tag}
+    >
       {status}
     </Tag>
   </>
