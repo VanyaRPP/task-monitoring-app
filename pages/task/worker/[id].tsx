@@ -8,6 +8,7 @@ import { useGetAllTaskQuery } from '../../../common/api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../../common/api/userApi/user.api'
 import AddTaskModal from '../../../common/components/AddTaskModal'
 import CardOneTask from '../../../common/components/CardOneTask'
+import Filter from '../../../common/components/UI/Filtration'
 import { ITask } from '../../../common/modules/models/Task'
 import { AppRoutes, TaskStatuses } from '../../../utils/constants'
 import { authOptions } from '../../api/auth/[...nextauth]'
@@ -44,58 +45,7 @@ const WorkerTasks: React.FC = () => {
       <div className={s.Header}>
         <h1>Мої замовлення</h1>
       </div>
-      {/* <div>
-          <Filter />
-        </div> */}
-      <div>
-        {/* <Button
-            ghost
-            type="primary"
-            onClick={() => setFilter(TaskStatuses.PENDING)}
-          >
-            Pending
-          </Button>
-          <Button
-            ghost
-            type="primary"
-            onClick={() => setFilter(TaskStatuses.IN_WORK)}
-          >
-            In work
-          </Button>
-          <Button ghost type="primary" onClick={() => resetFilters()}>
-            X
-          </Button> */}
-        <Radio.Group value={filter} onChange={(e) => setFilter(e.target.value)}>
-          {/* {Object.values(TaskStatuses).forEach((keys) => {
-            return <Radio value={values}>{values}</Radio>
-          })} */}
-          <Radio value={TaskStatuses.PENDING}>В очікуванні</Radio>
-          <Radio value={TaskStatuses.IN_WORK}>В роботі</Radio>
-        </Radio.Group>
-        <Button type="primary" onClick={() => resetFilters()}>
-          X
-        </Button>
-      </div>
-      {taskList?.length !== 0 ? (
-        <div className={s.TasksList}>
-          {taskList?.map((task: ITask, index) => {
-            return <CardOneTask key={index} task={task} />
-          })}
-        </div>
-      ) : dataSource?.length !== 0 ? (
-        <div className={s.TasksList}>
-          {dataSource?.map((task: ITask, index) => {
-            return <CardOneTask key={index} task={task} />
-          })}
-        </div>
-      ) : (
-        <Empty description="Немає даних" />
-      )}
-
-      {/* <AddTaskModal
-        isModalVisible={isModalVisible}
-        setIsModalVisible={setIsModalVisible}
-      /> */}
+      <Filter tasks={taskList} />
     </>
   )
 }

@@ -1,15 +1,21 @@
 import { Button, Empty, Radio } from 'antd'
-import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { useEffect, useMemo, useState } from 'react'
 import { TaskStatuses } from '../../../../utils/constants'
 import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
+import { useGetUserByEmailQuery } from '../../../api/userApi/user.api'
 import { ITask } from '../../../modules/models/Task'
+import User from '../../../modules/models/User'
 import CardOneTask from '../../CardOneTask'
 import s from './style.module.scss'
 
-const Filter: React.FC = () => {
-  const { data } = useGetAllTaskQuery('')
-  const tasks = data?.data
-
+interface Props {
+  // tasks: [ITask]
+  tasks: any
+}
+const Filter: React.FC<Props> = ({ tasks }) => {
+  // const { data } = useGetAllTaskQuery('')
+  // const tasks = data?.data
   const [taskList, setTaskList] = useState(tasks)
   const [filter, setFilter] = useState('')
 
@@ -17,6 +23,7 @@ const Filter: React.FC = () => {
     setFilter('')
     setTaskList(tasks)
   }
+
   useEffect(() => {
     setTaskList(tasks?.filter((task: ITask) => task.status === filter))
   }, [filter, tasks])
