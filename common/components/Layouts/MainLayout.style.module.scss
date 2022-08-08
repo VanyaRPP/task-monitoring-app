@@ -5,7 +5,7 @@
 
   .Container {
     padding: 0 50px;
-    margin-top: 114px;
+    margin-top: 100px;
     transition: margin 0.2s;
 
     @media (max-width: 889px) {
@@ -36,6 +36,7 @@
 .Background {
   background: var(--backgroundColor) !important;
 }
+
 .Foreground {
   background: var(--backgroundColorPrimary) !important;
 }

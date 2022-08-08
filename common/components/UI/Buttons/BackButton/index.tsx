@@ -7,9 +7,10 @@ const BackButton = () => {
   const router = useRouter()
 
   return (
-    <Button onClick={() => router.back()}>
-      <LeftCircleOutlined />
-    </Button>
+    <LeftCircleOutlined
+      onClick={() => router.back()}
+      style={{ fontSize: '2rem', color: 'var(--primaryColor)' }}
+    />
   )
 }
 
