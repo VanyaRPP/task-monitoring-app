@@ -35,6 +35,7 @@ const MainLayout: React.FC<Props> = ({ children }) => {
 
         <Layout className={s.Background}>
           <Header />
+
           <Layout.Content
             className={s.Container}
             style={{
