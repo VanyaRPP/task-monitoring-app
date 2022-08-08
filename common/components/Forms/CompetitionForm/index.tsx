@@ -4,9 +4,7 @@ import {
   allowOnlyNumbers,
   validateField,
 } from '../../../assets/features/validators'
-import {
-  disabledDate,
-} from '../../../assets/features/formatDate'
+import { disabledDate } from '../../../assets/features/formatDate'
 import moment from 'moment'
 import { RangePickerProps } from 'antd/lib/date-picker'
 import { ITask } from '../../../modules/models/Task'

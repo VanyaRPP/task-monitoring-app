@@ -54,7 +54,6 @@ const ApplyAuctionForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
         rules={[{ required: true }]}
       >
         <DatePicker disabledDate={disabledDate} placeholder="Оберіть дату" />
-        
       </Form.Item>
     </Form>
   )
