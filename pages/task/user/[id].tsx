@@ -29,9 +29,9 @@ const UserTasks: React.FC = () => {
   //   )
   // }, [sorting, tasks])
 
-  useEffect(() => {
-    setTaskList(tasks)
-  }, [])
+  // useEffect(() => {
+  //   setTaskList(tasks)
+  // }, [])
 
   return (
     <>
@@ -45,7 +45,7 @@ const UserTasks: React.FC = () => {
           Створити завдання
         </Button>
       </div>
-      <Radio.Group value={sorting} onChange={(e) => setSorting(e.target.value)}>
+      {/* <Radio.Group value={sorting} onChange={(e) => setSorting(e.target.value)}>
         <Radio>За адресою</Radio>
       </Radio.Group>
       {taskList?.length !== 0 ? (
@@ -64,7 +64,7 @@ const UserTasks: React.FC = () => {
         </div>
       ) : (
         <Empty description="Немає даних" className={s.Empty} />
-      )}
+      )} */}
       <Filter />
       <AddTaskModal
         isModalVisible={isModalVisible}

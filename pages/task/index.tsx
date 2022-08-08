@@ -10,6 +10,7 @@ import { authOptions } from '../api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
 import CardOneTask from '../../common/components/CardOneTask'
 import s from './style.module.scss'
+import Filter from '../../common/components/UI/Filtration'
 
 const Tasks: React.FC = () => {
   const { data: session } = useSession()
@@ -24,6 +25,8 @@ const Tasks: React.FC = () => {
     <>
       {tasks && tasks.length !== 0 ? (
         <div className={s.TasksList}>
+          <Filter />
+
           {tasks &&
             [...tasks].reverse().map((task: ITask, index) => {
               // {task?.status == 'Completed' ? null : return <CardOneTask key={index} task={task} />}
