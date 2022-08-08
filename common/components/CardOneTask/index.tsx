@@ -22,7 +22,6 @@ const CardOneTask: React.FC<Props> = ({ task }) => {
       title={task.name}
       extra={
         <>
-          <StatusTag status={task?.status} />
           <Badge
             color="gold"
             count={task?.taskexecutors ? task?.taskexecutors.length : 0}
@@ -47,7 +46,7 @@ const CardOneTask: React.FC<Props> = ({ task }) => {
         [s.Rejected]: task?.status === TaskStatuses.REJECTED,
       })}
     >
-      <p>Статус: {task?.status}</p>
+      <p>Статус: {<StatusTag status={task?.status} />}</p>
       <p>Категорія: {task?.category}</p>
       <p>Опис: {task.description}</p>
       <p>Адреса: {task?.address?.name}</p>
