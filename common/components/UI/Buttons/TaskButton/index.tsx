@@ -29,21 +29,21 @@ const TaskButton: React.FC = () => {
       )
     }
 
-    if (user?.role === Roles.WORKER || user?.role === Roles.ADMIN)
-      return (
-        <Button
-          onClick={() => {
-            router.route === AppRoutes.TASK
-              ? setIsModalVisible(true)
-              : Router.push(AppRoutes.TASK)
-          }}
-          ghost
-          type="primary"
-          className={s.Button}
-        >
-          {router.route === AppRoutes.TASK ? 'Створити завдання' : 'Завдання'}
-        </Button>
-      )
+    // if (user?.role === Roles.WORKER || user?.role === Roles.ADMIN)
+    //   return (
+    //     <Button
+    //       onClick={() => {
+    //         router.route === AppRoutes.TASK
+    //           ? setIsModalVisible(true)
+    //           : Router.push(AppRoutes.TASK)
+    //       }}
+    //       ghost
+    //       type="primary"
+    //       className={s.Button}
+    //     >
+    //       {router.route === AppRoutes.TASK ? 'Створити завдання' : ''}
+    //     </Button>
+    //   )
   }
 
   return status === 'authenticated' ? (

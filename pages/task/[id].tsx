@@ -8,7 +8,6 @@ import CommentsCard from 'common/components/CommentsCard'
 import { useGetTaskByIdQuery } from 'common/api/taskApi/task.api'
 import s from './style.module.scss'
 import CompetitionCard from '../../common/components/CompetitionCard'
-import Filter from '../../common/components/UI/Filtration'
 
 const Task: React.FC = () => {
   const router = useRouter()
