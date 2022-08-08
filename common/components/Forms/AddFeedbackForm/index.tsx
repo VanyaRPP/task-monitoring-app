@@ -1,9 +1,10 @@
 import React from 'react'
-import { Form, FormInstance, Input, Slider, Rate } from 'antd'
+import { Form, FormInstance, Input, Rate } from 'antd'
 import {
   deleteExtraWhitespace,
   validateField,
 } from '../../../assets/features/validators'
+import s from './style.module.scss'
 
 interface Props {
   isFormDisabled: boolean
@@ -28,20 +29,7 @@ const AddFeedbackForm: React.FC<Props> = ({ isFormDisabled, form }) => {
       </Form.Item>
 
       <Form.Item name="grade" label="Your grade">
-        {/* <Slider
-          min={0}
-          max={5}
-          step={1}
-          marks={{
-            0: 0,
-            1: 1,
-            2: 2,
-            3: 3,
-            4: 4,
-            5: 5,
-          }}
-        /> */}
-        <Rate defaultValue={1} />
+        <Rate defaultValue={1} className={s.Rate} />
       </Form.Item>
     </Form>
   )

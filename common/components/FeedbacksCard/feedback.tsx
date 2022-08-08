@@ -26,7 +26,7 @@ const Feedback: React.FC<{ feedback: IFeedback }> = ({ feedback }) => {
         }
         description={<p className={s.Description}>{feedback?.text}</p>}
       />
-      <RateStars value={feedback?.grade} disabled />
+      <RateStars className={s.RateStar} value={feedback?.grade} disabled />
       {/* <Rate className={s.Rate} disabled value={feedback?.grade} /> */}
     </>
   )
