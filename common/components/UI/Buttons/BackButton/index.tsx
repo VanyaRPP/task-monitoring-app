@@ -4,13 +4,10 @@ import { useRouter } from 'next/router'
 import React from 'react'
 
 const BackButton = () => {
-
   const router = useRouter()
 
   return (
-    <Button
-      onClick={() => router.back()}
-    >
+    <Button onClick={() => router.back()}>
       <LeftCircleOutlined />
     </Button>
   )
