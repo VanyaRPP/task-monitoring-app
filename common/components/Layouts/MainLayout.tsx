@@ -41,9 +41,7 @@ const MainLayout: React.FC<Props> = ({ children }) => {
                 : '0px',
             }}
           >
-            {session?.user && (
-              <TouchBar />
-            )}
+            {session?.user && <TouchBar />}
             <div className={s.Foreground}>{children}</div>
           </Layout.Content>
           <Footer
