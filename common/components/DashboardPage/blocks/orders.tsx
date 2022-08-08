@@ -67,7 +67,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'status',
       key: 'status',
       width: '20%',
-      ellipsis: true,
+      // ellipsis: true,
       render: (status) => <StatusTag status={status} />,
     },
   ]

@@ -1,6 +1,7 @@
 import { RangePickerProps } from 'antd/lib/date-picker'
 import moment from 'moment'
 import 'moment/locale/uk'
+import { Date } from 'mongoose'
 
 export const dateToDefaultFormat = (deadline: string): string =>
   moment(deadline).locale('uk').format('LL')

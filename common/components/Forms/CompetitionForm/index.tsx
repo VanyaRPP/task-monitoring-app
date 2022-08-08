@@ -4,12 +4,17 @@ import {
   allowOnlyNumbers,
   validateField,
 } from '../../../assets/features/validators'
-import { disabledDate } from '../../../assets/features/formatDate'
+import {
+  disabledDate,
+} from '../../../assets/features/formatDate'
+import moment from 'moment'
+import { RangePickerProps } from 'antd/lib/date-picker'
+import { ITask } from '../../../modules/models/Task'
 
 interface Props {
   isFormDisabled: boolean
   form: FormInstance
-  task: any
+  task: ITask
 }
 
 const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form, task }) => {
@@ -42,12 +47,15 @@ const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form, task }) => {
             placement="topLeft"
           />
         }
-        // rules={validateField('deadline')}
       >
         <DatePicker
           placeholder="Оберіть дату"
           getPopupContainer={() => document.getElementById('competitionForm')}
-          disabledDate={disabledDate}
+          disabledDate={(current) =>
+            !current ||
+            current < moment().locale('uk').startOf('day') ||
+            current.isSameOrAfter(moment(task?.deadline).add(1, 'day'))
+          }
         />
       </Form.Item>
     </Form>
