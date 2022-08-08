@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { CheckOutlined, EditOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card, Form, Image } from 'antd'
 import RoleSwitcher from 'common/components/UI/roleSwitcher'
@@ -25,7 +25,12 @@ const ProfilePage: React.FC = () => {
   const userRate = userData?.data?.rating
 
   //---------------------------
+
   const [editing, setEditing] = useState(false)
+  // const [editTel, setEditTel] = useState(user?.tel)
+
+  // useEffect(() => {}, [editTel])
+
   //---------------------------
 
   return (
@@ -57,6 +62,7 @@ const ProfilePage: React.FC = () => {
               {router.query.id ? user?.role : <RoleSwitcher />}
             </Card>
 
+            {/* <div onDoubleClick={}> */}
             <Card size="small" title="Електронна пошта" className={s.Edit}>
               {editing ? (
                 <input
@@ -67,6 +73,7 @@ const ProfilePage: React.FC = () => {
                 <p>{user?.email}</p>
               )}
             </Card>
+            {/* </div> */}
 
             {user?.tel && (
               <Card size="small" title="Номер телефону" className={s.Edit}>

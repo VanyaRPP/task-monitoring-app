@@ -16,25 +16,24 @@ const Tasks: React.FC = () => {
   const { data: session } = useSession()
 
   const { data } = useGetAllTaskQuery('')
-  const tasks = data?.data
+  const tasks: ITask[] = data?.data
 
   const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const user = userData?.data
 
   return (
     <>
+      <Filter tasks={tasks} />
       {tasks && tasks.length !== 0 ? (
         <div className={s.TasksList}>
-          <Filter />
-
-          {tasks &&
+          {/* {tasks &&
             [...tasks].reverse().map((task: ITask, index) => {
               // {task?.status == 'Completed' ? null : return <CardOneTask key={index} task={task} />}
               return task?.status == 'completed' ? null : (
                 <CardOneTask key={index} task={task} />
               )
               // return <CardOneTask key={index} task={task} />
-            })}
+            })} */}
         </div>
       ) : (
         <Empty description="Немає даних" />
