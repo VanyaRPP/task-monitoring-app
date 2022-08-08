@@ -11,7 +11,7 @@ import {
 } from '../../../api/userApi/user.api'
 import moment from 'moment'
 import Router, { useRouter } from 'next/router'
-import { AppRoutes } from '../../../../utils/constants'
+import { AppRoutes, TaskStatuses } from '../../../../utils/constants'
 import s from '../style.module.scss'
 import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
@@ -30,6 +30,15 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
   const dataSource = useMemo(() => {
     return tasks?.filter((task) => task?.executant === user?._id)
   }, [tasks, user?._id])
+
+  const filterdeDataSource = useMemo(() => {
+    return dataSource?.filter(
+      (data) =>
+        data?.status !== TaskStatuses.ARCHIVED &&
+        data?.status !== TaskStatuses.COMPLETED &&
+        data?.status !== TaskStatuses.EXPIRED
+    )
+  }, [dataSource])
 
   const searchInput = (order: string) => (
     <Input
@@ -77,7 +86,6 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'status',
       key: 'status',
       width: '20%',
-      // ellipsis: true,
       render: (status) => <StatusTag status={status} />,
     },
   ]
@@ -101,7 +109,7 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
         rowKey="_id"
         rowClassName={s.rowClass}
         showHeader={true}
-        dataSource={dataSource}
+        dataSource={filterdeDataSource}
         columns={columns}
         pagination={{
           responsive: false,

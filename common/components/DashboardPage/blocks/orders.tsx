@@ -8,7 +8,7 @@ import {
 } from '../../../api/userApi/user.api'
 import moment from 'moment'
 import Router, { useRouter } from 'next/router'
-import { AppRoutes } from '../../../../utils/constants'
+import { AppRoutes, TaskStatuses } from '../../../../utils/constants'
 import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
 import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.api'
@@ -28,6 +28,15 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
   const dataSource = useMemo(() => {
     return tasks?.filter((task) => task?.creator === user?._id)
   }, [tasks, user?._id])
+
+  const filterdeDataSource = useMemo(() => {
+    return dataSource?.filter(
+      (data) =>
+        data?.status !== TaskStatuses.ARCHIVED &&
+        data?.status !== TaskStatuses.COMPLETED &&
+        data?.status !== TaskStatuses.EXPIRED
+    )
+  }, [dataSource])
 
   const searchInput = (order: string) => (
     <Input
@@ -92,7 +101,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
         rowKey="_id"
         rowClassName={s.rowClass}
         showHeader={true}
-        dataSource={dataSource}
+        dataSource={filterdeDataSource}
         columns={columns}
         pagination={{
           responsive: false,
