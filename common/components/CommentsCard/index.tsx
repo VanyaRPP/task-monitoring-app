@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { SendOutlined } from '@ant-design/icons'
 import { Card, List, Button, Input, Avatar } from 'antd'
 import Comment from './comment'
@@ -44,6 +44,10 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
     })
     setInput('')
   }
+  // const bottomRef = useRef(null)
+  // useEffect(() => {
+  //   bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  // }, [input])
 
   return (
     <Card loading={loading} className={s.Card} title="Коментарі">
@@ -53,6 +57,7 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
         renderItem={(item, index) => (
           <List.Item key={index}>
             <Comment comment={item} taskId={task?.data?._id} />
+            {/* <div ref={bottomRef} /> */}
           </List.Item>
         )}
       />
