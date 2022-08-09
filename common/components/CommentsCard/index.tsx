@@ -45,14 +45,15 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
     setInput('')
   }
 
-  // const bottomRef = useRef(null)
-  // useEffect(() => {
-  //   bottomRef.current?.scrollIntoView()
-  // }, [task])
   const bottomRef = useRef(null)
   useEffect(() => {
     bottomRef.current?.scrollIntoView()
   }, [task])
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
 
   return (
     <div className={s.CardDiv}>

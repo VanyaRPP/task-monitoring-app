@@ -51,7 +51,8 @@
 
     .List {
       background-color: transparent !important;
-      overflow: hidden;
+      // overflow: hidden;
+      overflow-y: scroll;
     }
     .List ul {
       max-height: calc(750px - 64px - 64px);
