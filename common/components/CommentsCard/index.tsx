@@ -54,7 +54,6 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
     window.scrollTo(0, 0)
   }, [])
 
-
   return (
     <div className={s.CardDiv}>
       <Card loading={loading} className={s.Card} title="Коментарі">
