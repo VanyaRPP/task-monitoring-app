@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { SendOutlined } from '@ant-design/icons'
-import { Card, List, Button, Input, Avatar } from 'antd'
+import { Card, List, Button, Input, Avatar, Empty } from 'antd'
 import Comment from './comment'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 import {
@@ -47,15 +47,19 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
 
   return (
     <Card loading={loading} className={s.Card} title="Коментарі">
-      <List
-        className={s.List}
-        dataSource={task?.data?.comment}
-        renderItem={(item, index) => (
-          <List.Item key={index}>
-            <Comment comment={item} taskId={task?.data?._id} />
-          </List.Item>
-        )}
-      />
+      {loading ? (
+        <List
+          className={s.List}
+          dataSource={task?.data?.comment}
+          renderItem={(item, index) => (
+            <List.Item key={index}>
+              <Comment comment={item} taskId={task?.data?._id} />
+            </List.Item>
+          )}
+        />
+      ) : (
+        <Empty description="Немає даних" className={s.Empty} />
+      )}
 
       <div className={s.Input}>
         <Input
