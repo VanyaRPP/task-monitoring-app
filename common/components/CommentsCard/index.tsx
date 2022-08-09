@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { createRef, useEffect, useRef, useState } from 'react'
 import { SendOutlined } from '@ant-design/icons'
 import { Card, List, Button, Input, Avatar } from 'antd'
 import Comment from './comment'
@@ -44,24 +44,30 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
     })
     setInput('')
   }
+
   // const bottomRef = useRef(null)
   // useEffect(() => {
-  //   bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  // }, [input])
+  //   bottomRef.current?.scrollIntoView()
+  // }, [task])
+  const bottomRef = useRef(null)
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView()
+  }, [task])
 
   return (
-    <Card loading={loading} className={s.Card} title="Коментарі">
-      <List
-        className={s.List}
-        dataSource={task?.data?.comment}
-        renderItem={(item, index) => (
-          <List.Item key={index}>
-            <Comment comment={item} taskId={task?.data?._id} />
-            {/* <div ref={bottomRef} /> */}
-          </List.Item>
-        )}
-      />
-
+    <div className={s.CardDiv}>
+      <Card loading={loading} className={s.Card} title="Коментарі">
+        <List
+          className={s.List}
+          dataSource={task?.data?.comment}
+          renderItem={(item, index) => (
+            <List.Item key={index}>
+              <Comment comment={item} taskId={task?.data?._id} />
+              <div ref={bottomRef} />
+            </List.Item>
+          )}
+        />
+      </Card>
       <div className={s.Input}>
         <Input
           maxLength={250}
@@ -76,7 +82,7 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
           icon={<SendOutlined />}
         />
       </div>
-    </Card>
+    </div>
   )
 }
 
