@@ -17,10 +17,12 @@ export default async function handler(
         if (
           task?.status !== TaskStatuses.IN_WORK &&
           task?.status !== TaskStatuses.COMPLETED &&
-          task?.status !== TaskStatuses.EXPIRED &&
           task?.status !== TaskStatuses.ARCHIVED
         ) {
-          if (moment(task?.deadline).isBefore(Date.now())) {
+          if (
+            moment(task?.deadline).isBefore(Date.now()) &&
+            task?.status !== TaskStatuses.EXPIRED
+          ) {
             await Task.findOneAndUpdate(
               { _id: task._id },
               {
@@ -28,11 +30,20 @@ export default async function handler(
               }
             )
           }
+          if (moment(task?.deadline).add(3, 'days').isBefore(Date.now())) {
+            await Task.findOneAndUpdate(
+              { _id: task._id },
+              {
+                status: TaskStatuses.ARCHIVED,
+              }
+            )
+          }
         }
       })
-      return res
-        .status(201)
-        .json({ success: true, data: 'task statuses update to EXPIRED' })
+      return res.status(201).json({
+        success: true,
+        data: 'task statuses update to EXPIRED/ARCHIVED',
+      })
     })
   } catch (err) {
     return res.status(500)
