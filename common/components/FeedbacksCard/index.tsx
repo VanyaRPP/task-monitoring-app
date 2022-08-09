@@ -113,6 +113,7 @@ const FeedbacksCard: React.FC<Props> = ({
     >
       {user?.feedback?.length ? (
         <List
+          // ref={bottomRef}
           className={s.List}
           dataSource={user?.feedback}
           renderItem={(item, index) => (

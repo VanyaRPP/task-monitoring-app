@@ -39,7 +39,6 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
         data?.status !== TaskStatuses.EXPIRED
     )
   }, [dataSource])
-
   const searchInput = (order: string) => (
     <Input
       placeholder={order.charAt(0).toUpperCase() + order.slice(1)}
