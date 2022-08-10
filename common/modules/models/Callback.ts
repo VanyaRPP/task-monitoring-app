@@ -7,12 +7,12 @@ export interface ICallback {
   email: string
   phone?: string
   description?: string
-
 }
 
 const CallBackSchema = new Schema<ICallback>({
   name: { type: String, required: true },
 })
 
-const CallBack = mongoose.models.Category || mongoose.model('CallBack', CallBackSchema)
+const CallBack =
+  mongoose.models.Category || mongoose.model('CallBack', CallBackSchema)
 export default CallBack
