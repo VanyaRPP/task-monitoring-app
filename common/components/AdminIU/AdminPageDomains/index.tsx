@@ -20,6 +20,8 @@ const AdminPageDomains: React.FC = () => {
     // const formData: ICategory = await form.validateFields()
     setIsFormDisabled(true)
     // await addCategory({ ...formData })
+    // console.log(form.getFieldsValue());
+
     form.resetFields()
     setIsModalVisible(false)
     setIsFormDisabled(false)
