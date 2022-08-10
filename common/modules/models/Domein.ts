@@ -16,6 +16,6 @@ const DomeinShema = new Schema<IDomein>({
   users: { type: String },
 })
 
-const Domein = mongoose.models.Category ||
-  mongoose.model('Category', DomeinShema)
+const Domein =
+  mongoose.models.Category || mongoose.model('Category', DomeinShema)
 export default Domein
