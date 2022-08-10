@@ -16,7 +16,6 @@ import { useAddCallbackMutation } from '../../common/api/callbackApi/callback.ap
 import s from './style.module.scss'
 
 const ContactsPage: React.FC = () => {
-
   const [addCallback, { isLoading }] = useAddCallbackMutation()
 
   const onFinish = (values: any) => {
@@ -50,7 +49,12 @@ const ContactsPage: React.FC = () => {
             </Form.Item>
 
             <Form.Item>
-              <Button block type="primary" htmlType="submit" disabled={isLoading}>
+              <Button
+                block
+                type="primary"
+                htmlType="submit"
+                disabled={isLoading}
+              >
                 Надіслати
               </Button>
             </Form.Item>

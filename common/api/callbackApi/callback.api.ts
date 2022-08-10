@@ -47,5 +47,5 @@ export const {
   useAddCallbackMutation,
   useDeleteCallbackMutation,
   useGetAllCallbacksQuery,
-  useGetCallbackByIdQuery
+  useGetCallbackByIdQuery,
 } = callbackApi

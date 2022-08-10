@@ -1,6 +1,5 @@
 import mongoose, { Schema } from 'mongoose'
 
-
 export interface ICallback {
   _id?: string
   name: string
@@ -16,5 +15,6 @@ const CallBackSchema = new Schema<ICallback>({
   message: { type: String },
 })
 
-const CallBack = mongoose.models.Category || mongoose.model('CallBack', CallBackSchema)
+const CallBack =
+  mongoose.models.Category || mongoose.model('CallBack', CallBackSchema)
 export default CallBack

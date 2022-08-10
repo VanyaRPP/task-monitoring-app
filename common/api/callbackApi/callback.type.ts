@@ -1,4 +1,4 @@
-import { ICallback } from './../../modules/models/Callback';
+import { ICallback } from './../../modules/models/Callback'
 export type { ICallback } from 'common/modules/models/Callback'
 
 export interface AllCallbackQuery {
