@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   FacebookOutlined,
   GithubOutlined,
@@ -9,14 +8,20 @@ import {
   PhoneOutlined,
 } from '@ant-design/icons'
 import { Button, Form, Input } from 'antd'
-import s from './style.module.scss'
 import {
   deleteExtraWhitespace,
   validateField,
 } from '../../common/assets/features/validators'
+import { useAddCallbackMutation } from '../../common/api/callbackApi/callback.api'
+import s from './style.module.scss'
 
 const ContactsPage: React.FC = () => {
-  const onFinish = (values: any) => null
+
+  const [addCallback, { isLoading }] = useAddCallbackMutation()
+
+  const onFinish = (values: any) => {
+    addCallback(values)
+  }
 
   return (
     <>
@@ -45,7 +50,7 @@ const ContactsPage: React.FC = () => {
             </Form.Item>
 
             <Form.Item>
-              <Button block type="primary" htmlType="submit">
+              <Button block type="primary" htmlType="submit" disabled={isLoading}>
                 Надіслати
               </Button>
             </Form.Item>
@@ -62,7 +67,7 @@ const ContactsPage: React.FC = () => {
             </div>
             <div>
               <PhoneOutlined />
-              <p>+(380)96-111-2222</p>
+              <p>+38(096)-111-2222</p>
             </div>
             <div>
               <MailOutlined />
