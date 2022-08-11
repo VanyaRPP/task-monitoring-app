@@ -1,4 +1,4 @@
-import { Table } from 'antd'
+import { List, Table } from 'antd'
 import moment from 'moment'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '../../../utils/constants'
@@ -7,10 +7,11 @@ import StatusTag from '../UI/StatusTag'
 import s from './style.module.scss'
 
 interface Props {
-  task: ITask
+  task: ITask[]
 }
 
-const CardOneTaskTable: React.FC<Props> = ({ task }) => {
+const ListOneTask: React.FC<Props> = ({ task }) => {
+  // console.log(tasks)
   const router = useRouter()
   const columns = [
     {
@@ -19,7 +20,7 @@ const CardOneTaskTable: React.FC<Props> = ({ task }) => {
       key: 'name',
       width: '16.6%',
       ellipsis: true,
-      render: (text) => task.name,
+      render: (name) => name,
     },
     {
       title: 'Статус',
@@ -34,7 +35,7 @@ const CardOneTaskTable: React.FC<Props> = ({ task }) => {
       key: 'category',
       width: '16.6%',
       ellipsis: true,
-      render: (category) => task.category,
+      render: (category) => category,
     },
     {
       title: 'Опис',
@@ -42,7 +43,7 @@ const CardOneTaskTable: React.FC<Props> = ({ task }) => {
       key: 'description',
       width: '16.6%',
       ellipsis: true,
-      render: (description) => task.description,
+      render: (description) => description,
     },
     {
       title: 'Адреса',
@@ -50,7 +51,7 @@ const CardOneTaskTable: React.FC<Props> = ({ task }) => {
       key: 'address',
       width: '16.6%',
       ellipsis: true,
-      render: (address) => task.address.name,
+      render: (address) => address.name,
     },
     {
       title: 'Дата',
@@ -64,14 +65,16 @@ const CardOneTaskTable: React.FC<Props> = ({ task }) => {
   ]
   return (
     <Table
+      className={s.Table}
       rowKey="_id"
       rowClassName={s.rowClass}
       showHeader={true}
+      dataSource={task}
       columns={columns}
       pagination={{
         responsive: false,
         size: 'small',
-        pageSize: 5,
+        pageSize: 10,
         position: ['bottomCenter'],
         hideOnSinglePage: true,
       }}
@@ -84,4 +87,4 @@ const CardOneTaskTable: React.FC<Props> = ({ task }) => {
   )
 }
 
-export default CardOneTaskTable
+export default ListOneTask
