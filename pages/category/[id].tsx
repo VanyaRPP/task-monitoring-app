@@ -29,7 +29,7 @@ const Category: React.FC = () => {
   const dataSource = useMemo(() => {
     return tasks?.filter((task) => task?.category === categoryTask?.name)
   }, [tasks, categoryTask?.name])
-  console.log('dataS', dataSource)
+  // console.log('dataS', dataSource)
 
   return (
     <>
