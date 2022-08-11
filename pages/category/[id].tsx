@@ -18,8 +18,6 @@ import Filter from '../../common/components/UI/Filtration'
 const Category: React.FC = () => {
   const tasksResponse = useGetAllTaskQuery('')
   const tasks = tasksResponse?.data?.data
-  // const { data: categoriesData } = useGetAllCategoriesQuery('')
-  // const categories = categoriesData?.data
   const router = useRouter()
   const { data } = useGetCategoryByIdQuery(`${router.query.id}`, {
     skip: !router.query.id,
@@ -29,7 +27,6 @@ const Category: React.FC = () => {
   const dataSource = useMemo(() => {
     return tasks?.filter((task) => task?.category === categoryTask?.name)
   }, [tasks, categoryTask?.name])
-  // console.log('dataS', dataSource)
 
   return (
     <>

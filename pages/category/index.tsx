@@ -6,11 +6,16 @@ import { authOptions } from '../api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
 import s from './style.module.scss'
 import { useGetAllCategoriesQuery } from '../../common/api/categoriesApi/category.api'
+import { useGetAllTaskQuery } from '../../common/api/taskApi/task.api'
 
 const CategoriesPage: React.FC = () => {
   const { data: categoriesData } = useGetAllCategoriesQuery('')
   const categories = categoriesData?.data
-
+  const tasksResponse = useGetAllTaskQuery('')
+  const tasks = tasksResponse?.data?.data
+  const getCount = (name) => {
+    return tasks?.filter((task) => task?.category == name)
+  }
   return (
     <>
       <List
@@ -20,8 +25,8 @@ const CategoriesPage: React.FC = () => {
         renderItem={(item) => (
           <List.Item>
             {item?.name}
-            {/* <List.Item.Meta description={item?.taskincategory.length} /> */}
-            <div>{item?.taskincategory.length}</div>
+
+            <div> {getCount(item?.name).length}</div>
           </List.Item>
         )}
       />

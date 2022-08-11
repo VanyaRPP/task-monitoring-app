@@ -10,6 +10,7 @@ import {
 } from '../../../api/categoriesApi/category.api'
 import s from './style.module.scss'
 import StatusTag from '../../UI/StatusTag'
+import TaskInCategory from '../../../../pages/task/category/[id]'
 
 const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
@@ -22,7 +23,7 @@ const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
   const getCount = (name) => {
     return tasks?.filter((task) => task?.category == name)
   }
-  // console.log(getCount('Vodniki1').length)
+  // console.log(getCount('Vodniki1'))
 
   const columns = [
     {
@@ -30,14 +31,21 @@ const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'name',
       key: 'name',
       width: '70%',
+      render: (name) => name,
     },
+    // {
+    //   title: 'Кількість',
+    //   dataIndex: 'taskincategory',
+    //   key: 'taskincategory',
+    //   width: '30%',
+    //   render: (taskincategory) => taskincategory.length,
+    // },
     {
       title: 'Кількість',
-      dataIndex: 'taskincategory',
-      key: 'taskincategory',
-      width: '30%',
-      // render: (taskincategory) =>
-      //   taskincategory !== [] ? taskincategory.length : getCount(name).length,
+      dataIndex: 'name',
+      key: 'name',
+      width: '20%',
+      render: (name) => getCount(name)?.length,
     },
   ]
 
