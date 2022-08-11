@@ -8,6 +8,7 @@ import s from './style.module.scss'
 import Tasks from './blocks/tasks'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 import { useSession } from 'next-auth/react'
+import CategoriesBlock from './blocks/categories'
 
 const Dashboard: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
@@ -31,7 +32,7 @@ const Dashboard: React.FC = () => {
       <div className={s.Container}>
         {userRole !== 'User' ? <Tasks style={`${s.Card} ${s.Orders}`} /> : null}
         <Orders style={`${s.Card} ${s.Orders}`} />
-
+        <CategoriesBlock style={`${s.Card} ${s.Orders}`} />
         {/* <Masters style={`${s.Card} ${s.Masters}`} />
         <Domains style={`${s.Card} ${s.Domains}`} /> */}
       </div>

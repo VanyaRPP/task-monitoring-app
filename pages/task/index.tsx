@@ -11,6 +11,7 @@ import { GetServerSideProps } from 'next'
 import CardOneTask from '../../common/components/CardOneTask'
 import s from './style.module.scss'
 import Filter from '../../common/components/UI/Filtration'
+import { _id } from '@next-auth/mongodb-adapter'
 
 const Tasks: React.FC = () => {
   const { data: session } = useSession()
@@ -34,6 +35,9 @@ const Tasks: React.FC = () => {
               )
               // return <CardOneTask key={index} task={task} />
             })} */}
+          {/* {tasks.map((task) => {
+            return <CardOneTask key={task._id} task={task} />
+          })} */}
         </div>
       ) : (
         <Empty description="Немає даних" />
