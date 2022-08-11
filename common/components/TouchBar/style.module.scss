@@ -4,4 +4,7 @@
   align-items: center;
   justify-content: space-between;
   margin: 5px 0;
+  @media (max-width: 450px) {
+    display: none;
+  }
 }
