@@ -1,18 +1,19 @@
 import { useJsApiLoader } from '@react-google-maps/api'
 import { Form, Input, FormInstance } from 'antd'
-import { useCallback, useState, useMemo, useRef, useEffect } from 'react'
+import { useCallback, useState, useMemo, useRef, useEffect, Dispatch, SetStateAction } from 'react'
 import { centerTownGeoCode } from 'utils/constants'
 import Map from '../../Map'
 import { Polygon } from '@react-google-maps/api'
-import { IAddress } from '../../../modules/models/Task'
+import { IAddress, IGeoCode } from '../../../modules/models/Task'
 
 interface Props {
   isFormDisabled: boolean
   form: FormInstance
+  waypoints: IGeoCode[]
+  setWaypoints: Dispatch<SetStateAction<IGeoCode[]>>
 }
 
-const AddDomainModal: React.FC<Props> = ({ isFormDisabled, form }) => {
-  const [waypoints, setWaypoints] = useState([])
+const AddDomainModal: React.FC<Props> = ({ isFormDisabled, form, waypoints, setWaypoints }) => {
   const [address, setAddress] = useState<IAddress>(null)
 
   const [libraries] = useState(['places'] as any)
@@ -98,7 +99,7 @@ const AddDomainModal: React.FC<Props> = ({ isFormDisabled, form }) => {
         <Input.TextArea maxLength={250} />
       </Form.Item>
       <Form.Item
-        name="domain"
+        name="area"
         label="Polygon (Domain area)"
         rules={[{ required: true }]}
       >
