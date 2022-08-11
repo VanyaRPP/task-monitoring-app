@@ -1,6 +1,14 @@
 import { useJsApiLoader } from '@react-google-maps/api'
 import { Form, Input, FormInstance } from 'antd'
-import { useCallback, useState, useMemo, useRef, useEffect, Dispatch, SetStateAction } from 'react'
+import {
+  useCallback,
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+} from 'react'
 import { centerTownGeoCode } from 'utils/constants'
 import Map from '../../Map'
 import { Polygon } from '@react-google-maps/api'
@@ -13,7 +21,12 @@ interface Props {
   setWaypoints: Dispatch<SetStateAction<IGeoCode[]>>
 }
 
-const AddDomainModal: React.FC<Props> = ({ isFormDisabled, form, waypoints, setWaypoints }) => {
+const AddDomainModal: React.FC<Props> = ({
+  isFormDisabled,
+  form,
+  waypoints,
+  setWaypoints,
+}) => {
   const [address, setAddress] = useState<IAddress>(null)
 
   const [libraries] = useState(['places'] as any)
