@@ -2,10 +2,7 @@ import { GetServerSideProps } from 'next'
 import { unstable_getServerSession } from 'next-auth'
 import { useRouter } from 'next/router'
 import React from 'react'
-import {
-  useGetAllCategoriesQuery,
-  useGetCategoryByIdQuery,
-} from '../../../common/api/categoriesApi/category.api'
+import { useGetCategoryByIdQuery } from '../../../common/api/categoriesApi/category.api'
 import { AppRoutes } from '../../../utils/constants'
 import { authOptions } from '../../api/auth/[...nextauth]'
 
@@ -14,7 +11,7 @@ const TaskInCategory = () => {
   const { data } = useGetCategoryByIdQuery(`${router.query.id}`, {
     skip: !router.query.id,
   })
-  const categoryTask = data?.data
+
   return <div>TaskInCategory</div>
 }
 

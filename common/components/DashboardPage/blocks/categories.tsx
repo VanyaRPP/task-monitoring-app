@@ -11,6 +11,7 @@ import {
 import s from './style.module.scss'
 import StatusTag from '../../UI/StatusTag'
 import TaskInCategory from '../../../../pages/task/category/[id]'
+import { getCount } from '../../../../utils/helpers'
 
 const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
@@ -20,11 +21,6 @@ const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
   const { data: categoriesData } = useGetAllCategoriesQuery('')
   const categories = categoriesData?.data
 
-  const getCount = (name) => {
-    return tasks?.filter((task) => task?.category == name)
-  }
-  // console.log(getCount('Vodniki1'))
-
   const columns = [
     {
       title: 'Назва',
@@ -33,19 +29,12 @@ const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
       width: '70%',
       render: (name) => name,
     },
-    // {
-    //   title: 'Кількість',
-    //   dataIndex: 'taskincategory',
-    //   key: 'taskincategory',
-    //   width: '30%',
-    //   render: (taskincategory) => taskincategory.length,
-    // },
     {
       title: 'Кількість',
       dataIndex: 'name',
       key: 'name',
       width: '20%',
-      render: (name) => getCount(name)?.length,
+      render: (name) => getCount(tasks, name)?.length,
     },
   ]
 

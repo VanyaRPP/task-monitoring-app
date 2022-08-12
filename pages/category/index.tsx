@@ -7,15 +7,14 @@ import { GetServerSideProps } from 'next'
 import s from './style.module.scss'
 import { useGetAllCategoriesQuery } from '../../common/api/categoriesApi/category.api'
 import { useGetAllTaskQuery } from '../../common/api/taskApi/task.api'
+import { getCount } from '../../utils/helpers'
 
 const CategoriesPage: React.FC = () => {
   const { data: categoriesData } = useGetAllCategoriesQuery('')
   const categories = categoriesData?.data
   const tasksResponse = useGetAllTaskQuery('')
   const tasks = tasksResponse?.data?.data
-  const getCount = (name) => {
-    return tasks?.filter((task) => task?.category == name)
-  }
+
   return (
     <>
       <List
@@ -24,9 +23,10 @@ const CategoriesPage: React.FC = () => {
         dataSource={categories}
         renderItem={(item) => (
           <List.Item>
-            {item?.name}
-
-            <div> {getCount(item?.name).length}</div>
+            <p>{item?.name}</p>
+            <p>
+              Загальна кількість завдань: {getCount(tasks, item?.name).length}
+            </p>
           </List.Item>
         )}
       />
