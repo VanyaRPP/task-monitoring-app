@@ -36,7 +36,8 @@ const TaskCard = ({ taskId, task }) => {
 
   const taskDelete = (id) => {
     deleteTask(id)
-    router.push(AppRoutes.TASK)
+    // router.push(AppRoutes.TASK)
+    router.push(`/task/user/${user?._id}`)
   }
 
   const Actions = [
