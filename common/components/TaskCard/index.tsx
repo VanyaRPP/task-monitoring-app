@@ -9,7 +9,7 @@ import { dateToDefaultFormat } from '../../assets/features/formatDate'
 import { useRouter } from 'next/router'
 import { AppRoutes } from 'utils/constants'
 import s from './style.module.scss'
-import { Marker, useJsApiLoader } from '@react-google-maps/api'
+import { InfoWindow, Marker, useJsApiLoader } from '@react-google-maps/api'
 import Map from '../Map'
 import Link from 'next/link'
 import UserLink from '../UserLink'
@@ -53,6 +53,8 @@ const TaskCard = ({ taskId, task }) => {
     }
   }, [task?.address])
 
+  const [activeMarker, setActiveMarker] = useState(null)
+
   return (
     <Card className={s.Card}>
       <div className={s.Half}>
@@ -79,7 +81,16 @@ const TaskCard = ({ taskId, task }) => {
 
       <div className={s.TaskInfo}>
         <Map isLoaded={isLoaded} mapOptions={mapOptions}>
-          <Marker position={mapOptions?.geoCode} />
+          <Marker
+            position={mapOptions?.geoCode}
+            onClick={() => setActiveMarker(true)}
+          >
+            {activeMarker ? (
+              <InfoWindow onCloseClick={() => setActiveMarker(null)}>
+                <div>{task?.address?.name}</div>
+              </InfoWindow>
+            ) : null}
+          </Marker>
         </Map>
       </div>
     </Card>
