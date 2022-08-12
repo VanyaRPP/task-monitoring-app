@@ -22,7 +22,7 @@ const CategoriesPage: React.FC = () => {
         bordered
         dataSource={categories}
         renderItem={(item) => (
-          <List.Item>
+          <List.Item key={item?._id}>
             <p>{item?.name}</p>
             <p>
               Загальна кількість завдань: {getCount(tasks, item?.name).length}

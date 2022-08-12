@@ -61,9 +61,8 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
           className={s.List}
           dataSource={task?.data?.comment}
           renderItem={(item, index) => (
-            <List.Item key={index}>
+            <List.Item key={index} ref={bottomRef}>
               <Comment comment={item} taskId={task?.data?._id} />
-              <div ref={bottomRef} />
             </List.Item>
           )}
         />
