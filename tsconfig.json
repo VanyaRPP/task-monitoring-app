@@ -19,10 +19,15 @@
     "types": ["cypress"],
     "baseUrl": ".",
     "paths": {
-      "common": ["common/*"],
-      "utils": ["utils/*"],
-      "styles": ["styles/*"],
-      "pages": ["pages/*"]
+      "@common/*": ["common/*"],
+      "@utils/*": ["utils/*"],
+      "@styles/*": ["styles/*"],
+      "@pages/*": ["pages/*"],
+      "@components/*": ["common/components/*"],
+      "@queries/*": ["common/api"],
+      "@assets/*": ["common/assets"],
+      "@modules/*": ["common/modules"],
+      "@lib/*": ["common/lib"]
     }
   },
   "include": [
