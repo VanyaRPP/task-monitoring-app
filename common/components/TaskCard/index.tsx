@@ -11,9 +11,9 @@ import { AppRoutes } from 'utils/constants'
 import s from './style.module.scss'
 import { Marker, useJsApiLoader } from '@react-google-maps/api'
 import Map from '../Map'
-import Link from 'next/link'
 import UserLink from '../UserLink'
 import StatusTag from '../UI/StatusTag'
+import { getFormattedAddress } from '../../../utils/helpers'
 
 const TaskCard = ({ taskId, task }) => {
   const router = useRouter()
@@ -72,7 +72,7 @@ const TaskCard = ({ taskId, task }) => {
         >
           <p className={s.Description}>Опис: {task?.description}</p>
           <p>Категорія: {task?.category}</p>
-          <p>Адреса: {task?.address?.name}</p>
+          <p>Адреса: {getFormattedAddress(task?.address?.name)}</p>
           <p>Виконати до: {dateToDefaultFormat(task?.deadline)}</p>
         </Card>
       </div>

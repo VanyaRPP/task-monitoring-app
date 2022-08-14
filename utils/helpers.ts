@@ -11,3 +11,22 @@ export const getModifiedObjectOfFormInstance = (
   values.map((item) => Object.assign(fields, { [item.name]: item.value }))
   return fields
 }
+
+export const getFormattedAddress = (address: string) => {
+  if (address) {
+    const addressChunks = address.split(',')
+    if (
+      addressChunks[0].includes('вулиця') ||
+      addressChunks[0].includes('вул') ||
+      addressChunks[0].includes('улица')
+    ) {
+      if (
+        parseInt(addressChunks[1]) &&
+        parseInt(addressChunks[1]) === parseInt(addressChunks[1])
+      ) {
+        return `${addressChunks[0]}, ${addressChunks[1]}`
+      }
+      return addressChunks[0]
+    } else return addressChunks.join(', ')
+  }
+}

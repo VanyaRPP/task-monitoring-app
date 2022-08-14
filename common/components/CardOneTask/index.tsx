@@ -3,6 +3,7 @@ import { Badge, Button, Card } from 'antd'
 import classNames from 'classnames'
 import Router from 'next/router'
 import { AppRoutes, TaskStatuses } from '../../../utils/constants'
+import { getFormattedAddress } from '../../../utils/helpers'
 import {
   dateToDefaultFormat,
   isDeadlineExpired,
@@ -49,7 +50,7 @@ const CardOneTask: React.FC<Props> = ({ task }) => {
       <p>Статус: {<StatusTag status={task?.status} />}</p>
       <p>Категорія: {task?.category}</p>
       <p>Опис: {task.description}</p>
-      <p>Адреса: {task?.address?.name}</p>
+      <p>Адреса: {getFormattedAddress(task?.address?.name)}</p>
       <p>Виконати до: {dateToDefaultFormat(task?.deadline)}</p>
     </Card>
   )
