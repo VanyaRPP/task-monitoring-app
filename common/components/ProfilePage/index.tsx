@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { CheckOutlined, EditOutlined, UserOutlined } from '@ant-design/icons'
+import React, { useEffect, useState } from 'react'
+import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card, Form, Image, Input } from 'antd'
 import RoleSwitcher from 'common/components/UI/roleSwitcher'
 import { useSession } from 'next-auth/react'
