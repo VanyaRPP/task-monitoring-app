@@ -21,7 +21,7 @@ const AddCommentForm: React.FC<Props> = ({ isFormDisabled, form }) => {
       <Form.Item
         normalize={deleteExtraWhitespace}
         name="text"
-        label="Your comment"
+        label="Ваш коментар"
         rules={validateField('comment')}
       >
         <Input.TextArea maxLength={250} />

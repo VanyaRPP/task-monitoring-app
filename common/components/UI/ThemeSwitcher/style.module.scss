@@ -1,14 +1,5 @@
 .ThemeSwitcher {
-  margin-left: 5px;
-  @media (max-width: 500px) {
-    margin-right: -0.01rem;
-  }
-  @media (max-width: 320px) {
-    margin-bottom: 7rem;
-    margin-left: -0.05rem;
-    margin-right: -0.1rem;
-  }
-  @media (min-width: 425px) {
-    margin-right: -0.01rem;
+  @media (min-width: 1024px) {
+    margin-right: 2rem;
   }
 }

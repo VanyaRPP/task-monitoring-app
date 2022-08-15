@@ -1,6 +1,6 @@
 import { createRef, useEffect, useRef, useState } from 'react'
 import { SendOutlined } from '@ant-design/icons'
-import { Card, List, Button, Input, Avatar } from 'antd'
+import { Card, List, Button, Input, Avatar, Empty } from 'antd'
 import Comment from './comment'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 import {
@@ -10,6 +10,7 @@ import {
 import { useSession } from 'next-auth/react'
 import s from './style.module.scss'
 import { deleteExtraWhitespace } from '../../assets/features/validators'
+import { is } from 'cypress/types/bluebird'
 
 interface Props {
   taskId: any
@@ -45,6 +46,7 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
     setInput('')
   }
 
+
   const bottomRef = useRef(null)
   useEffect(() => {
     bottomRef.current?.scrollIntoView()
@@ -54,9 +56,11 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
     window.scrollTo(0, 0)
   }, [])
 
+
   return (
     <div className={s.CardDiv}>
       <Card loading={loading} className={s.Card} title="Коментарі">
+        {loading ? (
         <List
           className={s.List}
           dataSource={task?.data?.comment}
@@ -66,6 +70,9 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
             </List.Item>
           )}
         />
+        ) : (
+          <Empty description="Немає даних" className={s.Empty} />
+        )}  
       </Card>
       <div className={s.Input}>
         <Input
