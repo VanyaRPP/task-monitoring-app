@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { CheckOutlined, EditOutlined, UserOutlined } from '@ant-design/icons'
-import { Avatar, Button, Card, Form, Image } from 'antd'
+import { Avatar, Button, Card, Form, Image, Input } from 'antd'
 import RoleSwitcher from 'common/components/UI/roleSwitcher'
 import { useSession } from 'next-auth/react'
 import Router, { useRouter } from 'next/router'
@@ -9,29 +9,56 @@ import s from './style.module.scss'
 import {
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
+  useUpdateUserMutation,
 } from '../../api/userApi/user.api'
 import { AppRoutes, Roles } from '../../../utils/constants'
+import { IProfileData } from './index.types'
+import UnsavedChangesModal from '../UI/UnsavedChangesModal'
+import { faL } from '@fortawesome/free-solid-svg-icons'
 
 const ProfilePage: React.FC = () => {
   const router = useRouter()
+  const [profileData, setProfileData] = useState<IProfileData>()
+  const [editing, setEditing] = useState<boolean>(false)
   const { data: session } = useSession()
 
   const { data } = useGetUserByIdQuery(`${router.query.id}`)
 
+  const [updateUser] = useUpdateUserMutation()
   const { data: userData, isLoading } = useGetUserByEmailQuery(
     `${router.query.id ? data?.data?.email : session?.user?.email}`
   )
   const user = userData?.data
   const userRate = userData?.data?.rating
 
-  //---------------------------
+  const memoizedData = profileData
 
-  const [editing, setEditing] = useState(false)
-  // const [editTel, setEditTel] = useState(user?.tel)
+  const handleChange = (value: any) => {
+    if (value.name === 'address') {
+      const address = { ...profileData.address, name: value.value }
+      setProfileData({ ...profileData, [value.name]: address })
+    }
+    setProfileData({ ...profileData, [value.name]: value.value })
+    setEditing(true)
+  }
 
-  // useEffect(() => {}, [editTel])
+  const handleSubmit = () => {
+    updateUser({ _id: user?._id, ...profileData })
+    setEditing(false)
+  }
 
-  //---------------------------
+  const handleCancel = () => {
+    setEditing(false)
+    setProfileData(memoizedData)
+  }
+
+  useEffect(() => {
+    setProfileData({
+      email: user?.email,
+      tel: user?.tel,
+      address: user?.address,
+    })
+  }, [user?.address, user?.email, user?.tel])
 
   return (
     <>
@@ -64,54 +91,42 @@ const ProfilePage: React.FC = () => {
 
             {/* <div onDoubleClick={}> */}
             <Card size="small" title="Електронна пошта" className={s.Edit}>
-              {editing ? (
-                <input
-                  onChange={(event) => user?.email}
-                  placeholder={user.email}
-                />
-              ) : (
-                <p>{user?.email}</p>
-              )}
+              <Input
+                name="email"
+                onChange={(event) => handleChange(event.target)}
+                value={profileData?.email}
+              />
             </Card>
             {/* </div> */}
 
             {user?.tel && (
               <Card size="small" title="Номер телефону" className={s.Edit}>
-                {editing ? (
-                  <input
-                    onChange={(event) => user?.tel}
-                    placeholder={user.tel}
-                  />
-                ) : (
-                  <p>{user?.tel}</p>
-                )}
+                <Input
+                  name="tel"
+                  onChange={(event) => handleChange(event.target)}
+                  value={profileData?.tel}
+                />
               </Card>
             )}
 
             <Card title="Адреса" size="small" className={s.Edit}>
-              {editing ? (
-                <input
-                  onChange={(event) => user?.address?.name}
-                  placeholder={user?.address?.name}
-                />
-              ) : (
-                <p>{user?.address?.name || 'Житомир'}</p>
-              )}
+              <Input
+                name="address"
+                onChange={(event) => handleChange(event.target)}
+                value={profileData?.address?.name}
+              />
             </Card>
-            {!router.query.id ? (
-              <Button type="primary" onClick={() => setEditing(!editing)}>
-                {editing ? (
-                  <CheckOutlined key="check" />
-                ) : (
-                  <EditOutlined key="edit" />
-                )}
-              </Button>
-            ) : null}
           </div>
         </Card>
 
         <FeedbacksCard user={user} loading={isLoading} userRate={userRate} />
       </div>
+      {editing && (
+        <UnsavedChangesModal
+          onCancel={handleCancel}
+          onSubmit={handleSubmit}
+        />
+      )}
     </>
   )
 }
