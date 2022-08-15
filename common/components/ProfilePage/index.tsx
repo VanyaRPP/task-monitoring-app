@@ -14,9 +14,10 @@ import {
 import { AppRoutes, Roles } from '../../../utils/constants'
 import { IProfileData } from './index.types'
 import UnsavedChangesModal from '../UI/UnsavedChangesModal'
-import { faL } from '@fortawesome/free-solid-svg-icons'
+import useLocalStorage from '@common/modules/hooks/useLocalStorage'
 
 const ProfilePage: React.FC = () => {
+  const [storedData, setValue] = useLocalStorage('profile-data', null)
   const router = useRouter()
   const [profileData, setProfileData] = useState<IProfileData>()
   const [editing, setEditing] = useState<boolean>(false)
@@ -30,8 +31,6 @@ const ProfilePage: React.FC = () => {
   )
   const user = userData?.data
   const userRate = userData?.data?.rating
-
-  const memoizedData = profileData
 
   const handleChange = (value: any) => {
     if (value.name === 'address') {
@@ -49,15 +48,17 @@ const ProfilePage: React.FC = () => {
 
   const handleCancel = () => {
     setEditing(false)
-    setProfileData(memoizedData)
+    setProfileData(storedData)
   }
 
   useEffect(() => {
-    setProfileData({
+    const profileData = {
       email: user?.email,
       tel: user?.tel,
       address: user?.address,
-    })
+    }
+    setProfileData(profileData)
+    setValue(profileData)
   }, [user?.address, user?.email, user?.tel])
 
   return (
@@ -89,7 +90,6 @@ const ProfilePage: React.FC = () => {
               {router.query.id ? user?.role : <RoleSwitcher />}
             </Card>
 
-            {/* <div onDoubleClick={}> */}
             <Card size="small" title="Електронна пошта" className={s.Edit}>
               <Input
                 name="email"
@@ -97,7 +97,6 @@ const ProfilePage: React.FC = () => {
                 value={profileData?.email}
               />
             </Card>
-            {/* </div> */}
 
             {user?.tel && (
               <Card size="small" title="Номер телефону" className={s.Edit}>
@@ -122,10 +121,7 @@ const ProfilePage: React.FC = () => {
         <FeedbacksCard user={user} loading={isLoading} userRate={userRate} />
       </div>
       {editing && (
-        <UnsavedChangesModal
-          onCancel={handleCancel}
-          onSubmit={handleSubmit}
-        />
+        <UnsavedChangesModal onCancel={handleCancel} onSubmit={handleSubmit} />
       )}
     </>
   )
