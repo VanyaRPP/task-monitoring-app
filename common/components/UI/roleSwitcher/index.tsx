@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import {
   useGetUserByEmailQuery,
-  useUpdateUserMutation,
+  useUpdateUserRoleMutation,
 } from '../../../api/userApi/user.api'
 import s from './style.module.scss'
 import ModalWindow from '../ModalWindow/index'
@@ -14,7 +14,8 @@ import { Roles } from '../../../../utils/constants'
 const RoleSwitcher: React.FC = () => {
   const { data: session } = useSession()
   const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
+  const [updateUserRole, { isLoading: isUpdating }] =
+    useUpdateUserRoleMutation()
 
   const user = data?.data
 
@@ -34,7 +35,7 @@ const RoleSwitcher: React.FC = () => {
         setIsModalVisible(true)
       }
     } else {
-      await updateUser({ email: user?.email, role: `${e.target.value}` })
+      await updateUserRole({ email: user?.email, role: `${e.target.value}` })
     }
   }
 
@@ -46,7 +47,7 @@ const RoleSwitcher: React.FC = () => {
   const onSubmitModal = async () => {
     const formData = await form.validateFields()
     setIsFormDisabled(true)
-    await updateUser({ email: user?.email, tel: `+380${formData.tel}` })
+    await updateUserRole({ email: user?.email, tel: `+380${formData.tel}` })
     form.resetFields()
     setIsModalVisible(false)
     setIsFormDisabled(false)

@@ -1,0 +1,29 @@
+$border-radius: 5px;
+
+.unsavedChangesModal {
+  position: fixed;
+  right: 50%;
+  transform: translate(57%, 590px);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 600px;
+  border-radius: $border-radius;
+  box-shadow: 0 2px 10px -5px var(--textColor);
+  background: var(--backgroundColor) !important;
+  border-color: rgba(136, 136, 136, 0.1882352941);
+  padding: 8px;
+
+  .btnContainer {
+    .save {
+      color: #ffffff;
+      background-color: var(--primaryColor);
+      border-radius: $border-radius;
+    }
+    .cancel {
+      color: var(--textColor);
+      border-radius: $border-radius;
+    }
+  }
+}
