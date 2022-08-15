@@ -16,20 +16,7 @@ const TaskButton: React.FC = () => {
   const user = data?.data
 
   const taskButton = () => {
-    if (user?.role === Roles.USER) {
-      return (
-        <Button
-          onClick={() => setIsModalVisible(true)}
-          ghost
-          type="primary"
-          className={s.Button}
-        >
-          Створити завдання
-        </Button>
-      )
-    }
-
-    if (user?.role === Roles.WORKER || user?.role === Roles.ADMIN)
+    if (user?.role === Roles.WORKER || user?.role === Roles.ADMIN) {
       return (
         <Button
           onClick={() => {
@@ -41,26 +28,17 @@ const TaskButton: React.FC = () => {
           type="primary"
           className={s.Button}
         >
-          {router.route === AppRoutes.TASK ? 'Створити завдання' : 'Завдання'}
+          {router.route === AppRoutes.TASK
+            ? 'Створити завдання'
+            : 'Всі завдання'}
         </Button>
       )
+    }
   }
 
   return status === 'authenticated' ? (
     <>
       {taskButton()}
-      {/* <Button
-        onClick={() => {
-          router.route === AppRoutes.TASK
-            ? setIsModalVisible(true)
-            : Router.push(AppRoutes.TASK)
-        }}
-        ghost
-        type="primary"
-        className={s.Button}
-      >
-        {router.route === AppRoutes.TASK ? 'Створити завдання' : 'Завдання'}
-      </Button> */}
       <AddTaskModal
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}

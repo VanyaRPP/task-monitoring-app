@@ -8,6 +8,7 @@ export enum AppRoutes {
   CONTACTS = '/contacts',
   ADMIN = '/admin',
   PREMIUM = '/premium',
+  CATEGORY = '/category',
 }
 
 export enum Roles {

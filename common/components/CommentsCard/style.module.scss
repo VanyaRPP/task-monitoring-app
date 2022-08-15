@@ -1,14 +1,22 @@
-.Card {
+.CardDiv {
   width: calc(100% - 3rem - 450px - 450px);
 
   @media (max-width: 1600px) {
     width: 100%;
   }
+}
+
+.Card {
+  // width: calc(100% - 3rem - 450px - 450px);
+
+  // @media (max-width: 1600px) {
+  //   width: 100%;
+  // }
 
   min-height: 400px;
   max-height: 750px;
   position: relative;
-  border-radius: 20px;
+  border-top: 20px;
   overflow: hidden;
 
   transition: background 0.5s, box-shadow 0.5s;
@@ -43,14 +51,14 @@
 
     .List {
       background-color: transparent !important;
-      overflow: hidden;
+      // overflow: hidden;
+      overflow-y: scroll;
     }
     .List ul {
       max-height: calc(750px - 64px - 64px);
 
-      overflow-x: hidden;
+      // overflow-x: hidden;
       overflow-y: scroll;
-
       &::-webkit-scrollbar {
         display: none;
       }
@@ -119,41 +127,89 @@
     }
   }
 
-  padding-bottom: 64px;
+  // .Input {
+  //   position: absolute;
+  //   bottom: 0;
+  //   left: 0;
+  //   width: 100%;
+  //   height: 64px;
+  //   display: flex;
+  //   align-items: center;
 
-  .Input {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
+  //   input {
+  //     width: calc(100% - 64px);
+  //     height: 64px;
+  //     padding: 0 2rem;
+  //     font-size: 16px;
+  //     transition: background 0.5s, color 0.2s, border 0.2s;
+  //     color: var(--textColor);
+  //     background-color: var(--backgroundColorPrimary);
+  //     border-color: transparent !important;
+  //     &:hover {
+  //       border-color: var(--primaryColor) !important;
+  //     }
+  //     &:focus {
+  //       border-color: var(--primaryColorHover) !important;
+  //     }
+  //     border-radius: 0 0 0 20px;
+  //     border-top: 1px solid #88888830 !important;
+  //   }
+
+  //   button {
+  //     width: 64px;
+  //     height: 64px;
+  //     border-radius: 0;
+  //     border: 0;
+  //   }
+  // }
+}
+
+.Input {
+  width: 100%;
+  height: 64px;
+  display: flex;
+  align-items: center;
+
+  input {
+    width: calc(100% - 64px);
     height: 64px;
-    display: flex;
-    align-items: center;
-
-    input {
-      width: calc(100% - 64px);
-      height: 64px;
-      padding: 0 2rem;
-      font-size: 16px;
-      transition: background 0.5s, color 0.2s, border 0.2s;
-      color: var(--textColor);
-      background-color: var(--backgroundColorPrimary);
-      border-color: transparent !important;
-      &:hover {
-        border-color: var(--primaryColor) !important;
-      }
-      &:focus {
-        border-color: var(--primaryColorHover) !important;
-      }
-      border-radius: 0 0 0 20px;
-      border-top: 1px solid #88888830 !important;
+    padding: 0 2rem;
+    font-size: 16px;
+    transition: background 0.5s, color 0.2s, border 0.2s;
+    color: var(--textColor);
+    background-color: var(--backgroundColorPrimary);
+    border-color: transparent !important;
+    &:hover {
+      border-color: var(--primaryColor) !important;
     }
+    &:focus {
+      border-color: var(--primaryColorHover) !important;
+    }
+    border-radius: 0 0 0 20px;
+    border-top: 1px solid #88888830 !important;
+  }
 
-    button {
-      width: 64px;
-      height: 64px;
-      border-radius: 0;
-      border: 0;
+  button {
+    width: 64px;
+    height: 64px;
+    border-radius: 0;
+    border: 0;
+    border-bottom-right-radius: 20px;
+  }
+}
+
+.Block {
+  border: 1px solid blue;
+}
+
+.Card {
+  :global {
+    .ant-empty-normal {
+      color: var(--textColor);
     }
   }
+}
+
+.Empty {
+  color: var(--textColor);
 }

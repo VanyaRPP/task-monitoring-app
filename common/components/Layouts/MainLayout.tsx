@@ -1,16 +1,12 @@
 import React, { useState } from 'react'
-import { Button, Layout } from 'antd'
+import { Layout } from 'antd'
 import Head from 'next/head'
 import Footer from '../Footer'
 import Header from '../Header'
 import Sidebar from '../Sidebar'
 import { useSession } from 'next-auth/react'
+import TouchBar from '../TouchBar'
 import s from './MainLayout.style.module.scss'
-import premiumIcon from '../../assets/premium/diamond.png'
-import Image from 'next/image'
-import Router from 'next/router'
-import { AppRoutes } from 'utils/constants'
-
 interface Props {
   children: React.ReactNode
 }
@@ -45,6 +41,7 @@ const MainLayout: React.FC<Props> = ({ children }) => {
                 : '0px',
             }}
           >
+            {session?.user && <TouchBar />}
             <div className={s.Foreground}>{children}</div>
           </Layout.Content>
           <Footer

@@ -8,8 +8,8 @@ import {
 } from 'antd'
 import { RangePickerProps } from 'antd/lib/date-picker'
 import moment from 'moment'
-import { isDeadlineExpired } from '../../assets/features/formatDate'
 import { ITask } from '../../modules/models/Task'
+import { isDeadlineExpired } from '../../assets/features/formatDate'
 
 type PropsType = {
   isFormDisabled: boolean
@@ -17,13 +17,8 @@ type PropsType = {
   // task: ITask
 }
 
-const ApplyAuctionForm: React.FC<PropsType> = ({
-  isFormDisabled,
-  form,
-  // task,
-}) => {
+const ApplyAuctionForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
   const { Option } = Select
-  // console.log('MOMENT', moment(task?.deadline))
   const disabledDate: RangePickerProps['disabledDate'] = (current) => {
     return current && current < moment().startOf('day')
   }

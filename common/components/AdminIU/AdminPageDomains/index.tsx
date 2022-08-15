@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Form, Button } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import ModalWindow from '../../UI/ModalWindow'
 import AddDomainModal from '../../Forms/AddDomainForm'
 import s from './style.module.scss'
+import { getModifiedObjectOfFormInstance } from '../../../../utils/helpers'
+import { useAddDomainMutation } from '../../../api/domainApi/domain.api'
+import { IDomain } from '../../../modules/models/Domain'
 
 const AdminPageDomains: React.FC = () => {
+  const [waypoints, setWaypoints] = useState([])
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
+  const [addDomain] = useAddDomainMutation()
 
   const [form] = Form.useForm()
 
@@ -16,10 +21,17 @@ const AdminPageDomains: React.FC = () => {
     form.resetFields()
   }
 
-  const onSubmiModal = async () => {
-    // const formData: ICategory = await form.validateFields()
+  const onSubmitModal = async () => {
+    form.setFieldsValue(
+      getModifiedObjectOfFormInstance(form, [
+        { name: 'area', value: waypoints },
+      ])
+    )
+    const formData: IDomain = await form.validateFields()
     setIsFormDisabled(true)
-    // await addCategory({ ...formData })
+
+    await addDomain({ ...formData })
+
     form.resetFields()
     setIsModalVisible(false)
     setIsFormDisabled(false)
@@ -53,11 +65,16 @@ const AdminPageDomains: React.FC = () => {
           title={`Add new domain`}
           isModalVisible={isModalVisible}
           onCancel={onCancelModal}
-          onOk={onSubmiModal}
+          onOk={onSubmitModal}
           okText="Create domain"
           cancelText="Cancel"
         >
-          <AddDomainModal isFormDisabled={isFormDisabled} form={form} />
+          <AddDomainModal
+            isFormDisabled={isFormDisabled}
+            form={form}
+            waypoints={waypoints}
+            setWaypoints={setWaypoints}
+          />
         </ModalWindow>
       </div>
     </div>

@@ -15,13 +15,16 @@ export const deleteExtraWhitespace = (value: string): string =>
 export const validateField = (name: string): Rule[] => {
   const required: Rule = {
     required: true,
-    message: `${name[0].toUpperCase() + name.slice(1)} is required!`,
+    message: "Назва обов'язкова!",
   }
   const email: Rule = {
     type: 'email',
-    message: 'Please input correct email!',
+    message: 'Введіть правильну електронну адресу!',
   }
-  const phone: Rule = { len: 9, message: 'Phone number should have 9 digits!' }
+  const phone: Rule = {
+    len: 9,
+    message: 'Номер телефону має складатися з 9 цифр!',
+  }
 
   const price: Rule = {
     validator(_, value) {
@@ -30,7 +33,9 @@ export const validateField = (name: string): Rule[] => {
       }
       return Promise.reject(
         new Error(
-          `${name[0].toUpperCase() + name.slice(1)} can not be less or equal 0`
+          `${
+            name[0].toUpperCase() + name.slice(1)
+          } не може бути менше або дорівнювати 0`
         )
       )
     },

@@ -1,0 +1,37 @@
+.Table {
+  button {
+    color: var(--textColor);
+  }
+  button:disabled {
+    color: #88888830;
+  }
+  li a {
+    color: var(--primaryColor);
+  }
+  :global {
+    .ant-table-thead > tr > th {
+      text-align: center;
+    }
+    .ant-table-tbody > tr.ant-table-row:hover > td {
+      background: var(--backgroundColorElements) !important;
+    }
+    .ant-pagination-item-active {
+      background-color: var(--primaryColorHover);
+    }
+    .ant-pagination-item-active a {
+      color: white;
+    }
+  }
+  tr {
+    text-align: center;
+    background-color: var(--backgroundColor);
+    color: var(--textColor);
+  }
+  tr > th {
+    background-color: var(--backgroundColorElements);
+    color: var(--textColor);
+  }
+  * {
+    border-color: #88888830 !important;
+  }
+}

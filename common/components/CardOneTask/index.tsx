@@ -1,8 +1,10 @@
 import { InfoOutlined } from '@ant-design/icons'
-import { Badge, Button, Card } from 'antd'
+import { Badge, Button, Card, Table } from 'antd'
 import classNames from 'classnames'
-import Router from 'next/router'
+import moment from 'moment'
+import Router, { useRouter } from 'next/router'
 import { AppRoutes, TaskStatuses } from '../../../utils/constants'
+import { getFormattedAddress } from '../../../utils/helpers'
 import {
   dateToDefaultFormat,
   isDeadlineExpired,
@@ -22,7 +24,6 @@ const CardOneTask: React.FC<Props> = ({ task }) => {
       title={task.name}
       extra={
         <>
-          <StatusTag status={task?.status} />
           <Badge
             color="gold"
             count={task?.taskexecutors ? task?.taskexecutors.length : 0}
@@ -47,10 +48,10 @@ const CardOneTask: React.FC<Props> = ({ task }) => {
         [s.Rejected]: task?.status === TaskStatuses.REJECTED,
       })}
     >
-      <p>Статус: {task?.status}</p>
+      <p>Статус: {<StatusTag status={task?.status} />}</p>
       <p>Категорія: {task?.category}</p>
       <p>Опис: {task.description}</p>
-      <p>Адреса: {task?.address?.name}</p>
+      <p>Адреса: {getFormattedAddress(task?.address?.name)}</p>
       <p>Виконати до: {dateToDefaultFormat(task?.deadline)}</p>
     </Card>
   )

@@ -9,11 +9,11 @@ import { dateToDefaultFormat } from '../../assets/features/formatDate'
 import { useRouter } from 'next/router'
 import { AppRoutes } from 'utils/constants'
 import s from './style.module.scss'
-import { Marker, useJsApiLoader } from '@react-google-maps/api'
+import { InfoWindow, Marker, useJsApiLoader } from '@react-google-maps/api'
 import Map from '../Map'
-import Link from 'next/link'
 import UserLink from '../UserLink'
 import StatusTag from '../UI/StatusTag'
+import { getFormattedAddress } from '../../../utils/helpers'
 
 const TaskCard = ({ taskId, task }) => {
   const router = useRouter()
@@ -36,7 +36,8 @@ const TaskCard = ({ taskId, task }) => {
 
   const taskDelete = (id) => {
     deleteTask(id)
-    router.push(AppRoutes.TASK)
+    // router.push(AppRoutes.TASK)
+    router.push(`/task/user/${user?._id}`)
   }
 
   const Actions = [
@@ -52,6 +53,8 @@ const TaskCard = ({ taskId, task }) => {
       zoom: task?.address ? 17 : 12,
     }
   }, [task?.address])
+
+  const [activeMarker, setActiveMarker] = useState(null)
 
   return (
     <Card className={s.Card}>
@@ -72,14 +75,23 @@ const TaskCard = ({ taskId, task }) => {
         >
           <p className={s.Description}>Опис: {task?.description}</p>
           <p>Категорія: {task?.category}</p>
-          <p>Адреса: {task?.address?.name}</p>
+          <p>Адреса: {getFormattedAddress(task?.address?.name)}</p>
           <p>Виконати до: {dateToDefaultFormat(task?.deadline)}</p>
         </Card>
       </div>
 
       <div className={s.TaskInfo}>
         <Map isLoaded={isLoaded} mapOptions={mapOptions}>
-          <Marker position={mapOptions?.geoCode} />
+          <Marker
+            position={mapOptions?.geoCode}
+            onClick={() => setActiveMarker(true)}
+          >
+            {activeMarker ? (
+              <InfoWindow onCloseClick={() => setActiveMarker(null)}>
+                <div>{task?.address?.name}</div>
+              </InfoWindow>
+            ) : null}
+          </Marker>
         </Map>
       </div>
     </Card>

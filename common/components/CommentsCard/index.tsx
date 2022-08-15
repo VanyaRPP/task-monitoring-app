@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { createRef, useEffect, useRef, useState } from 'react'
 import { SendOutlined } from '@ant-design/icons'
-import { Card, List, Button, Input, Avatar } from 'antd'
+import { Card, List, Button, Input, Avatar, Empty } from 'antd'
 import Comment from './comment'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 import {
@@ -10,6 +10,7 @@ import {
 import { useSession } from 'next-auth/react'
 import s from './style.module.scss'
 import { deleteExtraWhitespace } from '../../assets/features/validators'
+import { is } from 'cypress/types/bluebird'
 
 interface Props {
   taskId: any
@@ -45,18 +46,32 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
     setInput('')
   }
 
-  return (
-    <Card loading={loading} className={s.Card} title="Коментарі">
-      <List
-        className={s.List}
-        dataSource={task?.data?.comment}
-        renderItem={(item, index) => (
-          <List.Item key={index}>
-            <Comment comment={item} taskId={task?.data?._id} />
-          </List.Item>
-        )}
-      />
+  const bottomRef = useRef(null)
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView()
+  }, [task])
 
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
+  return (
+    <div className={s.CardDiv}>
+      <Card loading={loading} className={s.Card} title="Коментарі">
+        {!loading ? (
+          <List
+            className={s.List}
+            dataSource={task?.data?.comment}
+            renderItem={(item, index) => (
+              <List.Item key={index} ref={bottomRef}>
+                <Comment comment={item} taskId={task?.data?._id} />
+              </List.Item>
+            )}
+          />
+        ) : (
+          <Empty description="Немає даних" className={s.Empty} />
+        )}
+      </Card>
       <div className={s.Input}>
         <Input
           maxLength={250}
@@ -71,7 +86,7 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
           icon={<SendOutlined />}
         />
       </div>
-    </Card>
+    </div>
   )
 }
 

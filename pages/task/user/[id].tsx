@@ -1,11 +1,13 @@
 import { Button, Checkbox, Empty, Radio } from 'antd'
 import { GetServerSideProps } from 'next'
 import { unstable_getServerSession } from 'next-auth'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useGetAllTaskQuery } from '../../../common/api/taskApi/task.api'
+import { useGetUserByEmailQuery } from '../../../common/api/userApi/user.api'
 import AddTaskModal from '../../../common/components/AddTaskModal'
-import CardOneTask from '../../../common/components/CardOneTask'
+import ListOneTask from '../../../common/components/ListOneTask'
 import Filter from '../../../common/components/UI/Filtration/index'
 import { ITask } from '../../../common/modules/models/Task'
 import { AppRoutes } from '../../../utils/constants'
@@ -13,13 +15,19 @@ import { authOptions } from '../../api/auth/[...nextauth]'
 import s from './../style.module.scss'
 
 const UserTasks: React.FC = () => {
-  const router = useRouter()
+  const session = useSession()
+  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
+  const user = userResponse?.data?.data
   const { data } = useGetAllTaskQuery('')
-  const tasks = data?.data
+  const tasks: ITask[] = data?.data
   const [taskList, setTaskList] = useState(tasks)
   const [sorting, setSorting] = useState('')
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+
+  const dataSource = useMemo(() => {
+    return tasks?.filter((task) => task?.creator === user?._id)
+  }, [tasks, user?._id])
 
   // useEffect(() => {
   //   setTaskList(
@@ -29,9 +37,9 @@ const UserTasks: React.FC = () => {
   //   )
   // }, [sorting, tasks])
 
-  useEffect(() => {
-    setTaskList(tasks)
-  }, [])
+  // useEffect(() => {
+  //   setTaskList(tasks)
+  // }, [])
 
   return (
     <>
@@ -45,7 +53,7 @@ const UserTasks: React.FC = () => {
           Створити завдання
         </Button>
       </div>
-      <Radio.Group value={sorting} onChange={(e) => setSorting(e.target.value)}>
+      {/* <Radio.Group value={sorting} onChange={(e) => setSorting(e.target.value)}>
         <Radio>За адресою</Radio>
       </Radio.Group>
       {taskList?.length !== 0 ? (
@@ -64,8 +72,8 @@ const UserTasks: React.FC = () => {
         </div>
       ) : (
         <Empty description="Немає даних" className={s.Empty} />
-      )}
-      <Filter />
+      )} */}
+      <Filter tasks={dataSource} />
       <AddTaskModal
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}
