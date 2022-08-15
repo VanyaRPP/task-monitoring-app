@@ -16,19 +16,6 @@ const TaskButton: React.FC = () => {
   const user = data?.data
 
   const taskButton = () => {
-    if (user?.role === Roles.USER) {
-      return (
-        <Button
-          onClick={() => setIsModalVisible(true)}
-          ghost
-          type="primary"
-          className={s.Button}
-        >
-          Створити завдання
-        </Button>
-      )
-    }
-
     if (user?.role === Roles.WORKER || user?.role === Roles.ADMIN) {
       return (
         <Button

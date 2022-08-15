@@ -13,6 +13,7 @@ import s from './style.module.scss'
 import Filter from '../../common/components/UI/Filtration'
 import CardOneList from '../../common/components/ListOneTask'
 
+
 const Tasks: React.FC = () => {
   const { data: session } = useSession()
 
@@ -35,6 +36,9 @@ const Tasks: React.FC = () => {
               )
               // return <CardOneTask key={index} task={task} />
             })} */}
+          {/* {tasks.map((task) => {
+            return <CardOneTask key={task._id} task={task} />
+          })} */}
         </div>
       ) : (
         <Empty description="Немає даних" />

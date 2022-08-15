@@ -58,16 +58,22 @@ const Filter: React.FC<Props> = ({ tasks }) => {
       {taskList?.length !== 0 ? (
         <div className={s.TasksList}>
           {taskList &&
-            taskList.map((task: ITask, index) => {
-              return <CardOneTask key={index} task={task} />
-            })}
+            taskList
+              .slice(0)
+              .reverse()
+              .map((task: ITask, index) => {
+                return <CardOneTask key={index} task={task} />
+              })}
         </div>
       ) : filter?.length === 0 && tasks?.length !== 0 ? (
         <div className={s.TasksList}>
           {tasks &&
-            tasks.map((task: ITask, index) => {
-              return <CardOneTask key={index} task={task} />
-            })}
+            tasks
+              .slice(0)
+              .reverse()
+              .map((task: ITask, index) => {
+                return <CardOneTask key={index} task={task} />
+              })}
         </div>
       ) : (
         <Empty description="Немає даних" className={s.Empty} />
