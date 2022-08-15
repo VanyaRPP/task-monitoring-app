@@ -46,7 +46,6 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
     setInput('')
   }
 
-
   const bottomRef = useRef(null)
   useEffect(() => {
     bottomRef.current?.scrollIntoView()
@@ -56,23 +55,22 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
     window.scrollTo(0, 0)
   }, [])
 
-
   return (
     <div className={s.CardDiv}>
       <Card loading={loading} className={s.Card} title="Коментарі">
-        {loading ? (
-        <List
-          className={s.List}
-          dataSource={task?.data?.comment}
-          renderItem={(item, index) => (
-            <List.Item key={index} ref={bottomRef}>
-              <Comment comment={item} taskId={task?.data?._id} />
-            </List.Item>
-          )}
-        />
+        {!loading ? (
+          <List
+            className={s.List}
+            dataSource={task?.data?.comment}
+            renderItem={(item, index) => (
+              <List.Item key={index} ref={bottomRef}>
+                <Comment comment={item} taskId={task?.data?._id} />
+              </List.Item>
+            )}
+          />
         ) : (
           <Empty description="Немає даних" className={s.Empty} />
-        )}  
+        )}
       </Card>
       <div className={s.Input}>
         <Input
