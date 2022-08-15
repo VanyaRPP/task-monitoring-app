@@ -1,0 +1,40 @@
+.Card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 10px;
+
+  .Buttons {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.Avatar {
+  cursor: pointer;
+}
+
+.Button {
+  display: block;
+  @media (max-width: 425px) {
+    display: none;
+  }
+}
+
+.Card,
+.Card::after {
+  background: var(--backgroundColorPrimary);
+}
+
+.Card {
+  h2,
+  p {
+    color: var(--textColor);
+  }
+}
+
+.Accordion {
+  margin-left: 20px;
+}
