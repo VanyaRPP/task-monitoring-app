@@ -28,7 +28,7 @@ const AddFeedbackForm: React.FC<Props> = ({ isFormDisabled, form }) => {
         <Input.TextArea maxLength={250} />
       </Form.Item>
 
-      <Form.Item name="grade" label="Your grade">
+      <Form.Item name="grade" label="Ваша оцінка">
         <Rate defaultValue={1} className={s.Rate} />
       </Form.Item>
     </Form>

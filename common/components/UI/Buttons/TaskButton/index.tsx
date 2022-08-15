@@ -43,7 +43,7 @@ const TaskButton: React.FC = () => {
         >
           {router.route === AppRoutes.TASK
             ? 'Створити завдання'
-            : 'OllZavdannya'}
+            : 'Всі завдання'}
         </Button>
       )
     }

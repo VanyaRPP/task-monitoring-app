@@ -157,3 +157,15 @@
     }
   }
 }
+
+.Card {
+  :global {
+    .ant-empty-normal {
+      color: var(--textColor);
+    }
+  }
+}
+
+.Empty {
+  color: var(--textColor);
+}

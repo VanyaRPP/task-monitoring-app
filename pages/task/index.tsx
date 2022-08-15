@@ -8,9 +8,10 @@ import { AppRoutes } from '../../utils/constants'
 import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
-import CardOneTask from '../../common/components/CardOneTask'
+import ListOneTask from '../../common/components/ListOneTask'
 import s from './style.module.scss'
 import Filter from '../../common/components/UI/Filtration'
+import CardOneList from '../../common/components/ListOneTask'
 
 const Tasks: React.FC = () => {
   const { data: session } = useSession()
@@ -23,7 +24,7 @@ const Tasks: React.FC = () => {
 
   return (
     <>
-      <Filter tasks={tasks} />
+      {/* <Filter tasks={tasks} /> */}
       {tasks && tasks.length !== 0 ? (
         <div className={s.TasksList}>
           {/* {tasks &&
@@ -38,6 +39,10 @@ const Tasks: React.FC = () => {
       ) : (
         <Empty description="Немає даних" />
       )}
+      {/* {tasks?.map((task) => {
+        return <ListOneTask task={tasks} />
+      })} */}
+      <ListOneTask task={tasks} />
     </>
   )
 }
