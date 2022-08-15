@@ -13,7 +13,6 @@ import s from './style.module.scss'
 import Filter from '../../common/components/UI/Filtration'
 import CardOneList from '../../common/components/ListOneTask'
 
-
 const Tasks: React.FC = () => {
   const { data: session } = useSession()
 
