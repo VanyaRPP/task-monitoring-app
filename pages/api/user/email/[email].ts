@@ -26,7 +26,7 @@ export default async function handler(
               isWorker: true,
               tel: req.body.tel,
               role: 'Worker',
-              address: req.body.address
+              address: req.body.address,
             }
           )
         } else {

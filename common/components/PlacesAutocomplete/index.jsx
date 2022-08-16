@@ -13,7 +13,7 @@ export const PlacesAutocomplete = ({
   setAddress,
   error,
   addressObj = null,
-  placeholder = 'Куди поїде майстер?'
+  placeholder = 'Куди поїде майстер?',
 }) => {
   const {
     ready,
@@ -75,7 +75,7 @@ export const PlacesAutocomplete = ({
   useEffect(() => {
     if (address?.name) {
       setValue(address?.name)
-      setAddress({...addressObj, name: address?.name})
+      setAddress({ ...addressObj, name: address?.name })
     }
   }, [address?.name])
 

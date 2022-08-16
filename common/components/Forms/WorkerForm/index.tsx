@@ -1,9 +1,18 @@
-import { allowOnlyNumbers, validateField } from '@common/assets/features/validators'
+import {
+  allowOnlyNumbers,
+  validateField,
+} from '@common/assets/features/validators'
 import { PlacesAutocomplete } from '@common/components/PlacesAutocomplete'
 import { IAddress } from '@common/modules/models/Task'
 import { IUser } from '@common/modules/models/User'
 import { Form, FormInstance, Input } from 'antd'
-import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react'
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import s from './index.module.scss'
 
 type PropsType = {
@@ -17,7 +26,15 @@ type PropsType = {
   address: IAddress
 }
 
-const WorkerForm: React.FC<PropsType> = ({ isFormDisabled, form, user, setAddress, isLoaded, error, setError }) => {  
+const WorkerForm: React.FC<PropsType> = ({
+  isFormDisabled,
+  form,
+  user,
+  setAddress,
+  isLoaded,
+  error,
+  setError,
+}) => {
   const check = useCallback(() => {
     if (!user.address && Object.keys(user?.address).length <= 0) {
       setError(true)
@@ -29,8 +46,6 @@ const WorkerForm: React.FC<PropsType> = ({ isFormDisabled, form, user, setAddres
       check()
     }
   }, [user?.address, check])
-
-  console.log(user);
 
   return (
     <Form
@@ -57,13 +72,15 @@ const WorkerForm: React.FC<PropsType> = ({ isFormDisabled, form, user, setAddres
             isLoaded={isLoaded}
             setAddress={setAddress}
             error={error}
-            placeholder='Введіть свою адресу'
+            placeholder="Введіть свою адресу"
           />
           <div className={`${s.default} ${error ? '' : s.error}`}>
             Введіть свою адресу, будь ласка!
           </div>
         </Form.Item>
-      ) : ''}
+      ) : (
+        ''
+      )}
     </Form>
   )
 }

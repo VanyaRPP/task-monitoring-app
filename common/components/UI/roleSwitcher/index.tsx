@@ -56,7 +56,11 @@ const RoleSwitcher: React.FC = () => {
     const formData = await form.validateFields()
     if (error !== true) {
       setIsFormDisabled(true)
-      await updateUserRole({ email: user?.email, tel: `+380${formData.tel}`, address })
+      await updateUserRole({
+        email: user?.email,
+        tel: `+380${formData.tel}`,
+        address,
+      })
 
       form.resetFields()
       setIsModalVisible(false)

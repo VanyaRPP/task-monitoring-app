@@ -110,7 +110,7 @@ const ProfilePage: React.FC = () => {
                 name="tel"
                 onChange={(event) => handleChange(event.target)}
                 value={profileData?.tel}
-                placeholder='Введіть номер телефону'
+                placeholder="Введіть номер телефону"
               />
             </Card>
 
@@ -119,7 +119,7 @@ const ProfilePage: React.FC = () => {
                 name="address"
                 onChange={(event) => handleChange(event.target)}
                 value={getFormattedAddress(profileData?.address?.name)}
-                placeholder='Введіть адресу'
+                placeholder="Введіть адресу"
               />
             </Card>
           </div>
