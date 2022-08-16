@@ -1,31 +1,10 @@
 .Card {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   text-align: center;
   border-radius: 10px;
-
-  .Buttons {
-    display: flex;
-    flex-direction: column;
-  }
-}
-
-.Avatar {
-  cursor: pointer;
-}
-
-.Button {
-  display: block;
-  @media (max-width: 425px) {
-    display: none;
-  }
-}
-
-.Card,
-.Card::after {
-  background: var(--backgroundColorPrimary);
 }
 
 .Card {
@@ -33,8 +12,23 @@
   p {
     color: var(--textColor);
   }
+  p {
+    @media (max-width: 440px) {
+      display: none;
+    }
+  }
 }
 
-.Accordion {
-  margin-left: 20px;
+.ListItem {
+  width: 500px;
+  @media (max-width: 1200px) {
+    width: 320px;
+    flex-direction: column;
+  }
+  @media (max-width: 768px) {
+    width: 180px;
+  }
+  @media (max-width: 480px) {
+    width: 120px;
+  }
 }
