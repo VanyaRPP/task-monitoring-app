@@ -1,14 +1,16 @@
+import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 import { categoryApi } from '../../api/categoriesApi/category.api'
 import { userApi } from '../../api/userApi/user.api'
 import { taskApi } from '../../api/taskApi/task.api'
+import { domainApi } from '../../api/domainApi/domain.api'
 import themeReducer from './reducers/ThemeSlice'
-import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 
 export const store = configureStore({
   reducer: {
     [categoryApi.reducerPath]: categoryApi.reducer,
     [userApi.reducerPath]: userApi.reducer,
     [taskApi.reducerPath]: taskApi.reducer,
+    [domainApi.reducerPath]: domainApi.reducer,
     themeReducer,
   },
   middleware: (getDefaultMiddleware) =>

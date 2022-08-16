@@ -18,7 +18,6 @@ const Categories: React.FC<{
 }> = ({ nameFilter, handleEdit }) => {
   const { data: categoriesData } = useGetAllCategoriesQuery('')
 
-  // const categories = categoriesData?.data
   const [categories, setCategories] = useState(categoriesData?.data)
 
   const [deleteCategory] = useDeleteCategoryMutation()

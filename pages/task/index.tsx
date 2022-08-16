@@ -35,6 +35,9 @@ const Tasks: React.FC = () => {
               )
               // return <CardOneTask key={index} task={task} />
             })} */}
+          {/* {tasks.map((task) => {
+            return <CardOneTask key={task._id} task={task} />
+          })} */}
         </div>
       ) : (
         <Empty description="Немає даних" />
