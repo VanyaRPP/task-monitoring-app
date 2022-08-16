@@ -5,22 +5,46 @@
   justify-content: center;
   text-align: center;
   border-radius: 10px;
+  background-color: var(--backgroundColorPrimary);
+  color: var(--textColor);
+}
+.Panel {
+  width: 100%;
 }
 
 .Card {
   h2,
+  h4,
   p {
     color: var(--textColor);
   }
+}
+
+.Panel {
   p {
-    @media (max-width: 440px) {
-      display: none;
+    width: 100px;
+  }
+  :global {
+    .ant-collapse-header-text {
+      color: var(--textColor);
+    }
+    .ant-collapse-arrow {
+      color: var(--textColor);
     }
   }
 }
 
+.Drawer {
+  :global {
+    .ant-drawer-title {
+      color: var(--textColor);
+    }
+  }
+}
+.List {
+}
 .ListItem {
-  width: 500px;
+  width: 100%;
   @media (max-width: 1200px) {
     width: 320px;
     flex-direction: column;

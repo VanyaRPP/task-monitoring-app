@@ -43,6 +43,10 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
           visible={visible}
           width={'50%'}
           className={s.Drawer}
+          bodyStyle={{ backgroundColor: 'var(--backgroundColor)' }}
+          headerStyle={{
+            backgroundColor: 'var(--backgroundColorPrimary)',
+          }}
         >
           <Card onClick={(e) => e.stopPropagation()} className={s.Card}>
             <Avatar
@@ -58,7 +62,8 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
             />
             <h2>{user?.name}</h2>
             <Divider />
-            <p>{user?.email}</p>
+            <p className={s.Email}>{user?.email}</p>
+            <Divider />
             <Rate disabled value={user?.rating} />
             <Divider />
             <Collapse
@@ -67,7 +72,7 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
               expandIconPosition="end"
               className={s.Accordion}
             >
-              <Panel header="Відгуки" key="1">
+              <Panel header="Відгуки" key="1" className={s.Panel}>
                 {user?.feedback?.length ? (
                   <List
                     className={s.List}
@@ -97,7 +102,6 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
                 )}
               </Panel>
             </Collapse>
-
             <Divider />
             <div className={s.Buttons}>
               <Button
