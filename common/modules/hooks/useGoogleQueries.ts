@@ -12,10 +12,12 @@ const useGoogleQueries = () => {
     const answer: IPlusCode = await (await response).json()
     const { results } = answer
     const rooftopResults = results.map((item) => {
-      if (item.geometry.location_type === LocationType.Rooftop)
-        return item
+      if (item.geometry.location_type === LocationType.Rooftop) return item
     })
-    setAddress({name: rooftopResults[0].formatted_address, geoCode: rooftopResults[0].geometry.location})
+    setAddress({
+      name: rooftopResults[0].formatted_address,
+      geoCode: rooftopResults[0].geometry.location,
+    })
   }
 
   const getGeoCode = useCallback(async (address: string) => {
@@ -26,10 +28,12 @@ const useGoogleQueries = () => {
     const answer = await (await response).json()
     const { results } = answer
     const rooftopResults = results.map((item) => {
-      if (item.geometry.location_type === LocationType.Rooftop)
-        return item
+      if (item.geometry.location_type === LocationType.Rooftop) return item
     })
-    setAddress({name: rooftopResults[0].formatted_address, geoCode: rooftopResults[0].geometry.location})
+    setAddress({
+      name: rooftopResults[0].formatted_address,
+      geoCode: rooftopResults[0].geometry.location,
+    })
   }, [])
 
   return { getAddress, getGeoCode, address }

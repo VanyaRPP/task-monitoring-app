@@ -3,17 +3,17 @@ import usePlacesAutocomplete, {
   getLatLng,
 } from 'use-places-autocomplete'
 import useOnclickOutside from 'react-cool-onclickoutside'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { Input } from 'antd'
 import s from './style.module.scss'
 import useGoogleQueries from '@common/modules/hooks/useGoogleQueries'
-import { debounce } from 'lodash'
 
 export const PlacesAutocomplete = ({
   isLoaded,
   setAddress,
   error,
-  addressObj,
+  addressObj = null,
+  placeholder = 'Куди поїде майстер?',
 }) => {
   const {
     ready,
@@ -73,11 +73,17 @@ export const PlacesAutocomplete = ({
   }, [isLoaded, init])
 
   useEffect(() => {
+    if (address?.name) {
+      setValue(address?.name)
+      setAddress({ ...addressObj, name: address?.name })
+    }
+  }, [address?.name])
+
+  useEffect(() => {
     if (addressObj?.geoCode) {
       getAddress(addressObj?.geoCode)
-      setValue(address.name)
     }
-  }, [address, addressObj?.geoCode])
+  }, [addressObj?.geoCode])
 
   return (
     <div ref={ref}>
@@ -85,7 +91,7 @@ export const PlacesAutocomplete = ({
         value={value}
         onChange={handleInput}
         disabled={!ready}
-        placeholder="Куди поїде майстер?"
+        placeholder={placeholder}
         className={error ? s.error : ''}
       />
       {status === 'OK' && (
