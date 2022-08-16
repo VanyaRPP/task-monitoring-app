@@ -1,5 +1,4 @@
 import { UserOutlined } from '@ant-design/icons'
-import { useGetUserByIdQuery } from '@common/api/userApi/user.api'
 import { AppRoutes } from '@utils/constants'
 import {
   Avatar,
@@ -13,11 +12,9 @@ import {
   List,
   Empty,
 } from 'antd'
-import { signOut, useSession } from 'next-auth/react'
 import Router from 'next/router'
 import { useState } from 'react'
-import { IFeedback, IUser } from '../../modules/models/User'
-import Feedback from '../FeedbacksCard/feedback'
+import { IUser } from '../../modules/models/User'
 import RateStars from '../UI/RateStars'
 import s from './style.module.scss'
 

@@ -53,7 +53,10 @@ const TaskCard = ({ taskId, task }) => {
       zoom: task?.address ? 17 : 12,
     }
   }, [task?.address])
+  const lat = task?.address?.geoCode?.lat
+  const lng = task?.address?.geoCode?.lng
 
+  const url = `https://maps.google.com/?q=${lat},${lng}`
   const [activeMarker, setActiveMarker] = useState(null)
 
   return (
@@ -89,6 +92,7 @@ const TaskCard = ({ taskId, task }) => {
             {activeMarker ? (
               <InfoWindow onCloseClick={() => setActiveMarker(null)}>
                 <div>{task?.address?.name}</div>
+                <a href={url}>Перейти в Google Maps</a>
               </InfoWindow>
             ) : null}
           </Marker>
