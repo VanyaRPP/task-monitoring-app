@@ -20,7 +20,7 @@ import { getFormattedAddress } from '@utils/helpers'
 
 const ProfilePage: React.FC = () => {
   const [storedData, setValue] = useLocalStorage('profile-data', null)
-  const {getGeoCode, address} = useGoogleQueries()
+  const { getGeoCode, address } = useGoogleQueries()
   const router = useRouter()
   const [profileData, setProfileData] = useState<IProfileData>()
   const [editing, setEditing] = useState<boolean>(false)
@@ -45,8 +45,10 @@ const ProfilePage: React.FC = () => {
   }
 
   const handleSubmit = async () => {
-    await getGeoCode(profileData.address.name)
-    profileData.address = address
+    if (profileData.address.name) {
+      await getGeoCode(profileData.address.name)
+      profileData.address = address
+    }
     updateUser({ _id: user?._id, ...profileData })
     setEditing(false)
   }
@@ -103,21 +105,21 @@ const ProfilePage: React.FC = () => {
               />
             </Card>
 
-            {user?.tel && (
-              <Card size="small" title="Номер телефону" className={s.Edit}>
-                <Input
-                  name="tel"
-                  onChange={(event) => handleChange(event.target)}
-                  value={profileData?.tel}
-                />
-              </Card>
-            )}
+            <Card size="small" title="Номер телефону" className={s.Edit}>
+              <Input
+                name="tel"
+                onChange={(event) => handleChange(event.target)}
+                value={profileData?.tel}
+                placeholder='Введіть номер телефону'
+              />
+            </Card>
 
             <Card title="Адреса" size="small" className={s.Edit}>
               <Input
                 name="address"
                 onChange={(event) => handleChange(event.target)}
                 value={getFormattedAddress(profileData?.address?.name)}
+                placeholder='Введіть адресу'
               />
             </Card>
           </div>
