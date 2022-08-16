@@ -16,11 +16,22 @@ export const userApi = createApi({
       query: (id) => `user/${id}`,
       providesTags: (result) => ['User'],
     }),
-    updateUser: builder.mutation<IUser, Partial<IUser>>({
+    updateUserRole: builder.mutation<IUser, Partial<IUser>>({
       query(data) {
         const { email, ...body } = data
         return {
           url: `user/email/${email}?role=${body.role}`,
+          method: 'PATCH',
+          body,
+        }
+      },
+      invalidatesTags: ['User'],
+    }),
+    updateUser: builder.mutation<IUser, Partial<IUser>>({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `user/${_id}`,
           method: 'PATCH',
           body,
         }
@@ -48,6 +59,7 @@ export const userApi = createApi({
 export const {
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
+  useUpdateUserRoleMutation,
   useUpdateUserMutation,
   useGetAllUsersQuery,
   useAddFeedbackMutation,

@@ -17,7 +17,7 @@ const Verify: React.FC = () => {
       </p>
 
       <div className={s.Buttons}>
-        <Button
+        {/* <Button
           type="primary"
           size="large"
           style={{ width: '100px' }}
@@ -27,9 +27,9 @@ const Verify: React.FC = () => {
           className={s.Buttons}
         >
           Підтвердити
-        </Button>
+        </Button> */}
 
-        <div className={s.Divider} />
+        {/* <div className={s.Divider} /> */}
 
         <Button
           type="primary"

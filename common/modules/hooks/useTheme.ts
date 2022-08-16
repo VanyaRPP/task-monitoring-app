@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ConfigProvider } from 'antd'
 import { useAppDispatch } from '../store/hooks'
-import { themeSlice } from 'common/modules/store/reducers/ThemeSlice'
+import { themeSlice } from '@common/modules/store/reducers/ThemeSlice'
 import themes from '../../lib/themes.config'
 
 function getDefaultTheme() {
