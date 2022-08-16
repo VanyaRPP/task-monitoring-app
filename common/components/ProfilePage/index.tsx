@@ -15,9 +15,12 @@ import { AppRoutes, Roles } from '../../../utils/constants'
 import { IProfileData } from './index.types'
 import UnsavedChangesModal from '../UI/UnsavedChangesModal'
 import useLocalStorage from '@common/modules/hooks/useLocalStorage'
+import useGoogleQueries from '@common/modules/hooks/useGoogleQueries'
+import { getFormattedAddress } from '@utils/helpers'
 
 const ProfilePage: React.FC = () => {
   const [storedData, setValue] = useLocalStorage('profile-data', null)
+  const {getGeoCode, address} = useGoogleQueries()
   const router = useRouter()
   const [profileData, setProfileData] = useState<IProfileData>()
   const [editing, setEditing] = useState<boolean>(false)
@@ -41,7 +44,9 @@ const ProfilePage: React.FC = () => {
     setEditing(true)
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    await getGeoCode(profileData.address.name)
+    profileData.address = address
     updateUser({ _id: user?._id, ...profileData })
     setEditing(false)
   }
@@ -112,7 +117,7 @@ const ProfilePage: React.FC = () => {
               <Input
                 name="address"
                 onChange={(event) => handleChange(event.target)}
-                value={profileData?.address?.name}
+                value={getFormattedAddress(profileData?.address?.name)}
               />
             </Card>
           </div>

@@ -6,7 +6,7 @@ import useOnclickOutside from 'react-cool-onclickoutside'
 import { useEffect, useRef } from 'react'
 import { Input } from 'antd'
 import s from './style.module.scss'
-import useGetAddressFromGeoCode from 'common/modules/hooks/useGetAddressFromGeoCode'
+import useGoogleQueries from '@common/modules/hooks/useGoogleQueries'
 import { debounce } from 'lodash'
 
 export const PlacesAutocomplete = ({
@@ -26,7 +26,7 @@ export const PlacesAutocomplete = ({
     initOnMount: false,
     debounce: 1000,
   })
-  const { getAddress, address } = useGetAddressFromGeoCode()
+  const { getAddress, address } = useGoogleQueries()
   const ref = useOnclickOutside(() => {
     clearSuggestions()
   })
@@ -75,7 +75,7 @@ export const PlacesAutocomplete = ({
   useEffect(() => {
     if (addressObj?.geoCode) {
       getAddress(addressObj?.geoCode)
-      setValue(address)
+      setValue(address.name)
     }
   }, [address, addressObj?.geoCode])
 
