@@ -34,6 +34,17 @@ export const taskApi = createApi({
       },
       invalidatesTags: ['Task'],
     }),
+    postFile: builder.mutation<any, any>({
+      query(data) {
+        const { ...body } = data
+        return {
+          url: `task/add-file`,
+          method: 'POST',
+          body,
+        }
+      },
+      invalidatesTags: ['Task'],
+    }),
     deleteTask: builder.mutation<{ success: boolean; id: ObjectId }, string>({
       query(id) {
         return {
@@ -122,4 +133,5 @@ export const {
   useAcceptWorkerMutation,
   useEditTaskMutation,
   useChangeTaskStatusMutation,
+  usePostFileMutation
 } = taskApi
