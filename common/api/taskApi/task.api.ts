@@ -133,5 +133,5 @@ export const {
   useAcceptWorkerMutation,
   useEditTaskMutation,
   useChangeTaskStatusMutation,
-  usePostFileMutation
+  usePostFileMutation,
 } = taskApi
