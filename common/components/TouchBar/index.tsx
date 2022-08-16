@@ -1,22 +1,20 @@
-import { Select } from 'antd'
+import { AppstoreOutlined, ProfileOutlined } from '@ant-design/icons'
+import { Button, Radio, Select } from 'antd'
 import { Option } from 'antd/lib/mentions'
 import React, { useEffect, useState } from 'react'
+import task from '../../../pages/task'
+import { TaskView } from '../../../utils/constants'
+import useLocalStorage from '../../modules/hooks/useLocalStorage'
+import { ITask } from '../../modules/models/Task'
+import CardOneTask from '../CardOneTask'
 import ListOneTask from '../ListOneTask'
 import { BackButton, TaskButton } from '../UI/Buttons'
 import s from './style.module.scss'
 
 const TouchBar = () => {
-  // const [select, setSelect] = useState('card')
-  // //
-  // const onChange = async (e : )
   return (
     <div className={s.TouchBar}>
       <BackButton />
-      {/* <Select className={s.Select} onChange={(e) => setSelect(e.target.value)}> */}
-      {/* <Select className={s.Select}>
-        <Option value="list">Список</Option>
-        <Option value="card">Картка</Option>
-      </Select> */}
       <TaskButton />
     </div>
   )

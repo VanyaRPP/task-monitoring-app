@@ -1,10 +1,10 @@
-import { Empty } from 'antd'
+import { Empty, Radio } from 'antd'
 import { useGetAllTaskQuery } from '../../common/api/taskApi/task.api'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
 import { ITask } from '../../common/modules/models/Task'
 import { useSession } from 'next-auth/react'
 import { useGetUserByEmailQuery } from '../../common/api/userApi/user.api'
-import { AppRoutes } from '../../utils/constants'
+import { AppRoutes, TaskView } from '../../utils/constants'
 import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
@@ -12,6 +12,11 @@ import ListOneTask from '../../common/components/ListOneTask'
 import s from './style.module.scss'
 import Filter from '../../common/components/UI/Filtration'
 import CardOneList from '../../common/components/ListOneTask'
+import CardAllTasks from '@common/components/CardAllTasks'
+import useLocalStorage from '@common/modules/hooks/useLocalStorage'
+import { useEffect, useState } from 'react'
+import { AppstoreOutlined, ProfileOutlined } from '@ant-design/icons'
+import TaskViewer from '@common/components/UI/Buttons/TaskViewer'
 
 const Tasks: React.FC = () => {
   const { data: session } = useSession()
@@ -22,8 +27,13 @@ const Tasks: React.FC = () => {
   const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const user = userData?.data
 
+  // useEffect(() => {
+  //   setValue('task-view', TaskView.CARD)
+  // }, [taskView])
+
   return (
     <>
+      <TaskViewer tasks={tasks} />
       {/* <Filter tasks={tasks} /> */}
       {tasks && tasks.length !== 0 ? (
         <div className={s.TasksList}>
@@ -32,7 +42,7 @@ const Tasks: React.FC = () => {
               // {task?.status == 'Completed' ? null : return <CardOneTask key={index} task={task} />}
               return task?.status == 'completed' ? null : (
                 <CardOneTask key={index} task={task} />
-              )
+                )
               // return <CardOneTask key={index} task={task} />
             })} */}
           {/* {tasks.map((task) => {
@@ -45,7 +55,6 @@ const Tasks: React.FC = () => {
       {/* {tasks?.map((task) => {
         return <ListOneTask task={tasks} />
       })} */}
-      <ListOneTask task={tasks} />
     </>
   )
 }

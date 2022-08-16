@@ -8,6 +8,8 @@
     display: none;
   }
 }
-.Select {
-  width: 10rem;
+.Buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-inline: 1rem;
 }

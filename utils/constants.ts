@@ -52,3 +52,8 @@ export enum TaskStatuses {
   COMPLETED = 'completed',
   ARCHIVED = 'archived',
 }
+
+export enum TaskView {
+  CARD = 'card',
+  LIST = 'list',
+}
