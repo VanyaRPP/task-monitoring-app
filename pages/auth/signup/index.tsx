@@ -17,6 +17,7 @@ import { authOptions } from '../../api/auth/[...nextauth]'
 import { unstable_getServerSession } from 'next-auth'
 import { useForm } from 'antd/lib/form/Form'
 import AuthCard from '@common/components/AuthCard'
+import config from '@utils/config'
 
 type PropsType = {
   providers: Record<
@@ -26,12 +27,14 @@ type PropsType = {
   csrfToken: string | undefined
 }
 
-const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
+const SignUpPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
   const [form] = useForm()
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
   const [credentials, setCredentials] = useState<Record<string, string>>({
+    name: '',
     email: '',
     password: '',
+    confirmPassword: '',
   })
   const { error } = useRouter().query
   const [customError, setCustomError] = useState('')
@@ -40,7 +43,7 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
     setCustomError(error && (errors[`${error}`] ?? errors.default))
   }, [error])
 
-  const handleChange = (target) =>  {
+  const handleChange = (target) => {
     const { name, value } = target
     setCredentials({ ...credentials, [name]: value })
   }
@@ -48,7 +51,11 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
   const handleSubmit = async () => {
     setIsFormDisabled(true)
     const formData = form.validateFields()
-    await signIn('credentials', { ...formData })
+    if (credentials.password !== credentials.confirmPassword) {
+      setCustomError(config.errors.comparePasswordError)
+    } else {
+      // await signIn('credentials', { ...formData })
+    }
 
     form.resetFields()
     setIsFormDisabled(false)
@@ -71,11 +78,11 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
       <div className={s.Container}>
         <div className={s.HalfBlock}>
           <AuthCard
-            csrfToken={csrfToken}
             form={form}
             value={credentials}
             onChange={handleChange}
             onSubmit={handleSubmit}
+            isSignUp
             disabled={isFormDisabled}
           />
         </div>
@@ -96,7 +103,7 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
   )
 }
 
-export default SignInPage
+export default SignUpPage
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await unstable_getServerSession(

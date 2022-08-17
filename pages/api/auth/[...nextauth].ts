@@ -7,8 +7,9 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { MongoDBAdapter } from '@next-auth/mongodb-adapter'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
-import clientPromise from '../../../common/lib/mongodb'
-import config from '@utils/config'
+import clientPromise from '@common/lib/mongodb'
+import User from '@common/modules/models/User'
+import { ICredentials } from '@common/lib/credentials.types'
 
 function html({ url, host, email }) {
   const escapedEmail = `${email.replace(/\./g, '&#8203;.')}`
@@ -41,33 +42,21 @@ export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
-      credentials: {
-        username: {
-          label: config.auth.credentialsNameLabel,
-          type: 'text',
-          placeholder: config.auth.credentialsNamePlaceholder,
-        },
-        email: {
-          label: config.auth.credentialsEmailLabel,
-          type: 'email',
-          placeholder: config.auth.credentialsEmailPlaceholder,
-        },
-        password: {
-          label: config.auth.credentialsPasswordLabel,
-          type: 'password',
-          placeholder: config.auth.credentialsPasswordPlaceholder,
-        },
-      },
-      async authorize(credentials, req) {
+      credentials: {},
+      async authorize(credentials: ICredentials, req) {
         const res = await fetch('auth/credentials', {
           method: 'POST',
           body: JSON.stringify(credentials),
           headers: { 'Content-Type': 'application/json' },
         })
-        const user = await res.json()
+        try {
+          const user = await User.findOne({
+            email: credentials.email,
+          })
 
-        if (res.ok && user) {
-          return user
+          // encrypting and comparing password
+        } catch (error) {
+          // console.error(error);
         }
 
         return null
