@@ -14,6 +14,7 @@ import Map from '../Map'
 import UserLink from '../UserLink'
 import StatusTag from '../UI/StatusTag'
 import { getFormattedAddress } from '../../../utils/helpers'
+import moment from 'moment'
 
 const TaskCard = ({ taskId, task }) => {
   const router = useRouter()
@@ -58,6 +59,8 @@ const TaskCard = ({ taskId, task }) => {
 
   const url = `https://maps.google.com/?q=${lat},${lng}`
   const [activeMarker, setActiveMarker] = useState(null)
+  const taskDeadline = moment(task?.deadline).format('YYYY-MM-DD')
+  const currentDate = moment().format('YYYY-MM-DD')
 
   return (
     <Card className={s.Card}>
