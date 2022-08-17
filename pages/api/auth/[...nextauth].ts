@@ -42,15 +42,27 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        username: {label: config.auth.credentialsNameLabel, type: 'text', placeholder: config.auth.credentialsNamePlaceholder },
-        email: {label: config.auth.credentialsEmailLabel, type: 'email', placeholder: config.auth.credentialsEmailPlaceholder },
-        password: {label: config.auth.credentialsPasswordLabel, type: 'password', placeholder: config.auth.credentialsPasswordPlaceholder },
+        username: {
+          label: config.auth.credentialsNameLabel,
+          type: 'text',
+          placeholder: config.auth.credentialsNamePlaceholder,
+        },
+        email: {
+          label: config.auth.credentialsEmailLabel,
+          type: 'email',
+          placeholder: config.auth.credentialsEmailPlaceholder,
+        },
+        password: {
+          label: config.auth.credentialsPasswordLabel,
+          type: 'password',
+          placeholder: config.auth.credentialsPasswordPlaceholder,
+        },
       },
-      async authorize (credentials, req) {
+      async authorize(credentials, req) {
         const res = await fetch('auth/credentials', {
           method: 'POST',
           body: JSON.stringify(credentials),
-          headers: {"Content-Type": 'application/json'}
+          headers: { 'Content-Type': 'application/json' },
         })
         const user = await res.json()
 
@@ -59,7 +71,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         return null
-      }
+      },
     }),
     EmailProvider({
       server: {
