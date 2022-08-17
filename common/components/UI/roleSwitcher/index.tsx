@@ -4,17 +4,19 @@ import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import {
   useGetUserByEmailQuery,
-  useUpdateUserMutation,
+  useUpdateUserRoleMutation,
 } from '../../../api/userApi/user.api'
 import s from './style.module.scss'
 import ModalWindow from '../ModalWindow/index'
 import WorkerForm from '../../Forms/WorkerForm/index'
 import { Roles } from '../../../../utils/constants'
+import { IAddress } from '@common/modules/models/Task'
 
 const RoleSwitcher: React.FC = () => {
   const { data: session } = useSession()
   const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
+  const [updateUserRole, { isLoading: isUpdating }] =
+    useUpdateUserRoleMutation()
 
   const user = data?.data
 
@@ -23,6 +25,8 @@ const RoleSwitcher: React.FC = () => {
   const [role, setRole] = useState<string>(user?.role)
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
+  const [error, setError] = useState<boolean>(false)
+  const [address, setAddress] = useState<IAddress>(null)
 
   useEffect(() => {
     setRole(user?.role)
@@ -34,7 +38,7 @@ const RoleSwitcher: React.FC = () => {
         setIsModalVisible(true)
       }
     } else {
-      await updateUser({ email: user?.email, role: `${e.target.value}` })
+      await updateUserRole({ email: user?.email, role: `${e.target.value}` })
     }
   }
 
@@ -44,12 +48,24 @@ const RoleSwitcher: React.FC = () => {
   }
 
   const onSubmitModal = async () => {
+    let error = false
+    if (!address || Object.keys(address).length <= 0) {
+      setError(true)
+      error = true
+    } else setError(false)
     const formData = await form.validateFields()
-    setIsFormDisabled(true)
-    await updateUser({ email: user?.email, tel: `+380${formData.tel}` })
-    form.resetFields()
-    setIsModalVisible(false)
-    setIsFormDisabled(false)
+    if (error !== true) {
+      setIsFormDisabled(true)
+      await updateUserRole({
+        email: user?.email,
+        tel: `+380${formData.tel}`,
+        address,
+      })
+
+      form.resetFields()
+      setIsModalVisible(false)
+      setIsFormDisabled(false)
+    }
   }
 
   return (
@@ -74,7 +90,16 @@ const RoleSwitcher: React.FC = () => {
         okText="Так"
         cancelText="Ні"
       >
-        <WorkerForm isFormDisabled={isFormDisabled} form={form} />
+        <WorkerForm
+          isFormDisabled={isFormDisabled}
+          form={form}
+          user={user}
+          setAddress={setAddress}
+          address={address}
+          isLoaded={Object.keys(user).length > 0 ?? false}
+          error={error}
+          setError={setError}
+        />
       </ModalWindow>
     </>
   )
