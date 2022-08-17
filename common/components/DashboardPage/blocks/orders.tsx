@@ -15,6 +15,7 @@ import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.ap
 
 import s from './style.module.scss'
 import StatusTag from '../../UI/StatusTag'
+import { SelectOutlined } from '@ant-design/icons'
 
 const Orders: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
@@ -84,17 +85,18 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
   return (
     <Card
       className={style}
-      title="Мої замовлення"
-      style={{ flex: '1.5' }}
-      extra={
+      title={
         <Button
+          type="link"
           onClick={() => Router.push(`/task/user/${user?._id}`)}
           ghost
-          type="primary"
+          style={{ fontSize: '16px' }}
         >
-          Всі
+          Мої замовлення
+          <SelectOutlined style={{ fontSize: '14px' }} />
         </Button>
       }
+      style={{ flex: '1.5' }}
     >
       <Table
         className={s.Table}

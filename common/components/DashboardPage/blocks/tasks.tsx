@@ -17,6 +17,7 @@ import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
 import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.api'
 import StatusTag from '../../UI/StatusTag'
+import { SelectOutlined } from '@ant-design/icons'
 
 const Tasks: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
@@ -92,17 +93,18 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
   return (
     <Card
       className={style}
-      title="Мої завдання"
-      style={{ flex: '1.5' }}
-      extra={
+      title={
         <Button
+          type="link"
           onClick={() => Router.push(`/task/worker/${user?._id}`)}
           ghost
-          type="primary"
+          style={{ fontSize: '16px' }}
         >
-          Всі
+          Мої Завдання
+          <SelectOutlined style={{ fontSize: '14px' }} />
         </Button>
       }
+      style={{ flex: '1.5' }}
     >
       <Table
         rowKey="_id"

@@ -112,6 +112,11 @@
       overflow: hidden;
     }
 
+    &:last-of-type {
+      border-radius: 0 0 10px 10px;
+      overflow: hidden;
+    }
+
     > * {
       > * {
         transition: color 0.5s;

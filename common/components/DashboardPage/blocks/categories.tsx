@@ -12,6 +12,7 @@ import s from './style.module.scss'
 import StatusTag from '../../UI/StatusTag'
 import TaskInCategory from '../../../../pages/task/category/[id]'
 import { getCount } from '../../../../utils/helpers'
+import { SelectOutlined } from '@ant-design/icons'
 
 const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
@@ -41,13 +42,18 @@ const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
   return (
     <Card
       className={style}
-      title="Категорії"
-      style={{ flex: '1.5' }}
-      extra={
-        <Button onClick={() => Router.push(`/category`)} ghost type="primary">
-          Всі
+      title={
+        <Button
+          type="link"
+          onClick={() => Router.push(`/category`)}
+          ghost
+          style={{ fontSize: '16px' }}
+        >
+          Категорії
+          <SelectOutlined style={{ fontSize: '14px' }} />
         </Button>
       }
+      style={{ flex: '1.5' }}
     >
       <Table
         className={s.Table}
