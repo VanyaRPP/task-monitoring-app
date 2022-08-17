@@ -3,10 +3,12 @@ import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
 import FacebookProvider from 'next-auth/providers/facebook'
 import EmailProvider from 'next-auth/providers/email'
+import CredentialsProvider from 'next-auth/providers/credentials'
 import { MongoDBAdapter } from '@next-auth/mongodb-adapter'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
 import clientPromise from '../../../common/lib/mongodb'
+import config from '@utils/config'
 
 function html({ url, host, email }) {
   const escapedEmail = `${email.replace(/\./g, '&#8203;.')}`
@@ -37,6 +39,28 @@ export const authOptions: NextAuthOptions = {
     },
   },
   providers: [
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        username: {label: config.auth.credentialsNameLabel, type: 'text', placeholder: config.auth.credentialsNamePlaceholder },
+        email: {label: config.auth.credentialsEmailLabel, type: 'email', placeholder: config.auth.credentialsEmailPlaceholder },
+        password: {label: config.auth.credentialsPasswordLabel, type: 'password', placeholder: config.auth.credentialsPasswordPlaceholder },
+      },
+      async authorize (credentials, req) {
+        const res = await fetch('auth/credentials', {
+          method: 'POST',
+          body: JSON.stringify(credentials),
+          headers: {"Content-Type": 'application/json'}
+        })
+        const user = await res.json()
+
+        if (res.ok && user) {
+          return user
+        }
+
+        return null
+      }
+    }),
     EmailProvider({
       server: {
         host: process.env.EMAIL_SERVER_HOST,
