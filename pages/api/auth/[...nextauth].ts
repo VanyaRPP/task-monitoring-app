@@ -6,6 +6,7 @@ import EmailProvider from 'next-auth/providers/email'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { MongoDBAdapter } from '@next-auth/mongodb-adapter'
 import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
 import nodemailer from 'nodemailer'
 import clientPromise from '@common/lib/mongodb'
 import User from '@common/modules/models/User'
@@ -44,22 +45,25 @@ export const authOptions: NextAuthOptions = {
       name: 'Credentials',
       credentials: {},
       async authorize(credentials: ICredentials, req) {
-        const res = await fetch('auth/credentials', {
-          method: 'POST',
-          body: JSON.stringify(credentials),
-          headers: { 'Content-Type': 'application/json' },
-        })
         try {
           const user = await User.findOne({
             email: credentials.email,
           })
 
           // encrypting and comparing password
-        } catch (error) {
-          // console.error(error);
-        }
+          bcrypt.compare(
+            credentials.password,
+            user.password,
+            function (err, result) {
+              if (err) throw Error('Error: Decryption error!')
+              if (!result) throw Error('Error: Incorrect password!')
+            }
+          )
 
-        return null
+          return { success: true, data: user }
+        } catch (error) {
+          return { success: false, error }
+        }
       },
     }),
     EmailProvider({

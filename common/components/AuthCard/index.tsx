@@ -120,7 +120,9 @@ const AuthCard = ({
                   type="password"
                   value={value.confirmPassword}
                   onChange={(e) => onChange(e.target)}
-                  placeholder={config.auth.credentialsConfirmPasswordPlaceholder}
+                  placeholder={
+                    config.auth.credentialsConfirmPasswordPlaceholder
+                  }
                 />
               </Form.Item>
             )}

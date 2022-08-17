@@ -18,6 +18,7 @@ import { unstable_getServerSession } from 'next-auth'
 import { useForm } from 'antd/lib/form/Form'
 import AuthCard from '@common/components/AuthCard'
 import config from '@utils/config'
+import { useSignUpMutation } from '@common/api/userApi/user.api'
 
 type PropsType = {
   providers: Record<
@@ -29,6 +30,7 @@ type PropsType = {
 
 const SignUpPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
   const [form] = useForm()
+  const [signUp] = useSignUpMutation()
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
   const [credentials, setCredentials] = useState<Record<string, string>>({
     name: '',
@@ -50,11 +52,15 @@ const SignUpPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
 
   const handleSubmit = async () => {
     setIsFormDisabled(true)
-    const formData = form.validateFields()
+    const formData = await form.validateFields()
     if (credentials.password !== credentials.confirmPassword) {
       setCustomError(config.errors.comparePasswordError)
     } else {
-      // await signIn('credentials', { ...formData })
+      await signUp({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      })
     }
 
     form.resetFields()
@@ -73,7 +79,7 @@ const SignUpPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
         />
       )}
 
-      <h2 className={s.Header}>Увійти</h2>
+      <h2 className={s.Header}>{config.titles.signUpTitle}</h2>
 
       <div className={s.Container}>
         <div className={s.HalfBlock}>

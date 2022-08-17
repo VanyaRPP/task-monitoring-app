@@ -17,6 +17,7 @@ import { authOptions } from '../../api/auth/[...nextauth]'
 import { unstable_getServerSession } from 'next-auth'
 import { useForm } from 'antd/lib/form/Form'
 import AuthCard from '@common/components/AuthCard'
+import config from '@utils/config'
 
 type PropsType = {
   providers: Record<
@@ -40,7 +41,7 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
     setCustomError(error && (errors[`${error}`] ?? errors.default))
   }, [error])
 
-  const handleChange = (target) =>  {
+  const handleChange = (target) => {
     const { name, value } = target
     setCredentials({ ...credentials, [name]: value })
   }
@@ -66,7 +67,7 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
         />
       )}
 
-      <h2 className={s.Header}>Увійти</h2>
+      <h2 className={s.Header}>{config.titles.signInTitle}</h2>
 
       <div className={s.Container}>
         <div className={s.HalfBlock}>

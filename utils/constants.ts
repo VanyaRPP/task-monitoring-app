@@ -52,3 +52,5 @@ export enum TaskStatuses {
   COMPLETED = 'completed',
   ARCHIVED = 'archived',
 }
+
+export const saltRounds = 10
