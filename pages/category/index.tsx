@@ -18,14 +18,15 @@ const CategoriesPage: React.FC = () => {
   return (
     <>
       <List
+        className={s.List}
         header={<div>Всі категорії</div>}
         bordered
         dataSource={categories}
         renderItem={(item) => (
-          <List.Item key={item?._id}>
+          <List.Item key={item?._id} className={s.Item}>
             <p>{item?.name}</p>
             <p>
-              Загальна кількість завдань: {getCount(tasks, item?.name).length}
+              Загальна кількість завдань: {getCount(tasks, item?.name)?.length}
             </p>
           </List.Item>
         )}
