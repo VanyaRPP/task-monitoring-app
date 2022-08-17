@@ -46,7 +46,6 @@ const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
         <Button
           type="link"
           onClick={() => Router.push(`/category`)}
-          ghost
           style={{ fontSize: '16px' }}
         >
           Категорії

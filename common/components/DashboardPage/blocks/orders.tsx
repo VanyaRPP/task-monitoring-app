@@ -11,8 +11,6 @@ import Router, { useRouter } from 'next/router'
 import { AppRoutes, TaskStatuses } from '../../../../utils/constants'
 import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
-import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.api'
-
 import s from './style.module.scss'
 import StatusTag from '../../UI/StatusTag'
 import { SelectOutlined } from '@ant-design/icons'
@@ -89,7 +87,6 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
         <Button
           type="link"
           onClick={() => Router.push(`/task/user/${user?._id}`)}
-          ghost
           style={{ fontSize: '16px' }}
         >
           Мої замовлення

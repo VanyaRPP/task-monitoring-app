@@ -97,7 +97,6 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
         <Button
           type="link"
           onClick={() => Router.push(`/task/worker/${user?._id}`)}
-          ghost
           style={{ fontSize: '16px' }}
         >
           Мої Завдання
