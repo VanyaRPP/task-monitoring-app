@@ -33,7 +33,7 @@ export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
   secret: process.env.NEXTAUTH_SECRET,
   session: {
-    strategy: 'jwt'
+    strategy: 'jwt',
   },
   jwt: {
     encode: async ({ secret, token }) => {
