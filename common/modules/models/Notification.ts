@@ -7,6 +7,7 @@ export interface INotification {
   user: IUser
   url: string
   text: string
+  timestamp: Date
 }
 
 const NotificationSchema = new Schema<INotification>({
@@ -14,6 +15,7 @@ const NotificationSchema = new Schema<INotification>({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   url: { type: String },
   text: { type: String },
+  timestamp: { type: Date, default: new Date() },
 })
 
 const Notification =
