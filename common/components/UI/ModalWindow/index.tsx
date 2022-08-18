@@ -1,4 +1,5 @@
 import { Modal } from 'antd'
+import s from './style.module.scss'
 
 interface Props {
   children: React.ReactNode
@@ -31,6 +32,7 @@ const ModalWindow: React.FC<Props> = ({
       onOk={onOk}
       okText={okText}
       cancelText={cancelText}
+      className={s.Modal}
     >
       {children}
     </Modal>
