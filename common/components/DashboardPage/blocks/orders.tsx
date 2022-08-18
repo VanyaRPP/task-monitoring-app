@@ -86,11 +86,10 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       title={
         <Button
           type="link"
-          onClick={() => Router.push(`/task/user/${user?._id}`)}
-          style={{ fontSize: '16px' }}
+          onClick={() => Router.push(`${AppRoutes.TASK}/user/${user?._id}`)}
         >
           Мої замовлення
-          <SelectOutlined style={{ fontSize: '14px' }} />
+          <SelectOutlined className={s.Icon} />
         </Button>
       }
       style={{ flex: '1.5' }}

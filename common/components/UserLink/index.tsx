@@ -21,6 +21,7 @@ import s from './style.module.scss'
 const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
   const [visible, setVisible] = useState(false)
   const { Panel } = Collapse
+
   const showDrawer = () => {
     setVisible(true)
   }
@@ -32,7 +33,9 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
   if (user) {
     return (
       <>
-        <a onClick={showDrawer}>{user?.name ?? user?.email}</a>
+        <Button type="link" onClick={showDrawer}>
+          {user?.name ?? user?.email}
+        </Button>
         <Drawer
           title={`Профіль користувача ${user?.name}`}
           placement="right"
@@ -79,7 +82,13 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
                         <Avatar
                           icon={<UserOutlined />}
                           src={
-                            <Image src={user?.image || undefined} alt="User" />
+                            <Image
+                              src={
+                                user?.image ||
+                                'https://anime.anidub.life/templates/kinolife-blue/images/bump.png'
+                              }
+                              alt="User"
+                            />
                           }
                         />
                         <h4>
@@ -95,7 +104,7 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
                     )}
                   />
                 ) : (
-                  <Empty className={s.Empty} description="Немає даних" />
+                  <Empty className={s.Empty} description="Дані відсутні" />
                 )}
               </Panel>
             </Collapse>
@@ -104,7 +113,7 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
               <Button
                 type="link"
                 block
-                onClick={() => Router.push(AppRoutes.PROFILE + '/' + user._id)}
+                onClick={() => Router.push(`${AppRoutes.PROFILE}/${user._id}`)}
               >
                 Профіль користувача
               </Button>

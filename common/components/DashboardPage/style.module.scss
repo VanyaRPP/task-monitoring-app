@@ -43,6 +43,10 @@
 
   border-color: #88888830;
 
+  button {
+    font-size: 16px;
+  }
+
   > * {
     border-color: #88888830;
 
@@ -145,7 +149,6 @@
 
 .Container {
   width: 100%;
-
   display: flex;
   flex-wrap: wrap;
   flex: 0.33, 0.33, 0.33;

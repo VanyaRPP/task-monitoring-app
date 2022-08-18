@@ -43,13 +43,9 @@ const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
     <Card
       className={style}
       title={
-        <Button
-          type="link"
-          onClick={() => Router.push(`/category`)}
-          style={{ fontSize: '16px' }}
-        >
+        <Button type="link" onClick={() => Router.push(AppRoutes.CATEGORY)}>
           Категорії
-          <SelectOutlined style={{ fontSize: '14px' }} />
+          <SelectOutlined className={s.Icon} />
         </Button>
       }
       style={{ flex: '1.5' }}

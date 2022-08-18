@@ -96,11 +96,10 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
       title={
         <Button
           type="link"
-          onClick={() => Router.push(`/task/worker/${user?._id}`)}
-          style={{ fontSize: '16px' }}
+          onClick={() => Router.push(`${AppRoutes.TASK}/worker/${user?._id}`)}
         >
           Мої Завдання
-          <SelectOutlined style={{ fontSize: '14px' }} />
+          <SelectOutlined className={s.Icon} />
         </Button>
       }
       style={{ flex: '1.5' }}
