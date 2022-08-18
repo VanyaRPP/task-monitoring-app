@@ -9,6 +9,21 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   switch (req.method) {
+    case 'PATCH':
+      try {
+        const { isSeen, type, userId } = req.body
+        if (type) {
+          const notification = await Notification.findOneAndUpdate({userId}, { isSeen })
+
+          return res.status(201).json({ success: true, data: notification })
+        } else {
+          const notifications = await Notification.updateMany({userId}, { isSeen })
+
+          return res.status(201).json({ success: true, data: notifications })
+        }
+      } catch (error) {
+        return res.status(400).json({ success: false, error: error })
+      }
     case 'GET':
       try {
         const notifications = await Notification.find({ _id: req.query.id })

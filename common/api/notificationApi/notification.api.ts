@@ -23,8 +23,46 @@ export const notificationApi = createApi({
       },
       invalidatesTags: ['Notification'],
     }),
+    updateNotificationStatusByUserId: builder.mutation<
+      INotification,
+      Partial<INotification>
+    >({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `notify/${_id}`,
+          method: 'PATCH',
+          body: {
+            ...body,
+            type: true,
+          },
+        }
+      },
+      invalidatesTags: ['Notification'],
+    }),
+    updateNotificationsStatusByUserId: builder.mutation<
+      INotification,
+      Partial<INotification>
+    >({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `notify/${_id}`,
+          method: 'PATCH',
+          body: {
+            ...body,
+            type: false,
+          },
+        }
+      },
+      invalidatesTags: ['Notification'],
+    }),
   }),
 })
 
-export const { useGetNotificationsByUserIdQuery, useAddNotificationMutation } =
-  notificationApi
+export const {
+  useGetNotificationsByUserIdQuery,
+  useAddNotificationMutation,
+  useUpdateNotificationStatusByUserIdMutation,
+  useUpdateNotificationsStatusByUserIdMutation,
+} = notificationApi
