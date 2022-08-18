@@ -53,4 +53,8 @@ export enum TaskStatuses {
   ARCHIVED = 'archived',
 }
 
+export enum TaskView {
+  CARD = 'card',
+  LIST = 'list',
+}
 export const saltRounds = 10
