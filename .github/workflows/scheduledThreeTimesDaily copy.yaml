@@ -1,0 +1,12 @@
+name: Three times daily cron job
+on:
+  schedule:
+    - cron: '0 0 */3 * *'
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Three times daily cron job
+        run: |
+          curl --request GET \
+          --url 'https://taskmonitoringapp.herokuapp.com/api/sceduled/threeTimesDaily' \
