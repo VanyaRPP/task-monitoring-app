@@ -1,19 +1,38 @@
 import Link from 'next/link'
-import { Button, Layout } from 'antd'
+import { Button, Layout, Popover } from 'antd'
 import LoginUser from '../LoginUser'
 import ThemeSwitcher from '../UI/ThemeSwitcher'
-import TaskButton from '../UI/Buttons/TaskButton'
 import { AppRoutes } from 'utils/constants'
 import s from './style.module.scss'
 import { useSession } from 'next-auth/react'
 import Router from 'next/router'
 import BurgerMenu from '../BurgerMenu'
 import Diamant from '../../assets/svg/diamant'
-import LogoCircle from '../../assets/svg/logo_circle'
 import Logo from '../Logo'
+import NotificationOutlined from '@ant-design/icons/lib/icons/NotificationOutlined'
+import ExclamationCircleFilled from '@ant-design/icons/lib/icons/ExclamationCircleFilled'
+import { useMemo } from 'react'
+
+const Notification = ({ text }: { text: string }) => {
+  return (
+    <div className={s.Notification}>
+      <div className={s.notificationIcon}>
+        <ExclamationCircleFilled />
+      </div>
+      <div className={s.notificationText}>{text}</div>
+    </div>
+  )
+}
 
 const Header: React.FC = () => {
   const { status } = useSession()
+
+  const content = useMemo(() => {
+    /*
+      return notifications.map(item => <Notification key={item.id} {...item} />)
+    */
+    return <p>Test content</p>
+  }, [])
 
   return (
     <Layout.Header className={s.Header}>
@@ -34,6 +53,11 @@ const Header: React.FC = () => {
         >
           <span>Преміум</span>
         </Button>
+      )}
+      {status === 'authenticated' && (
+        <Popover content={content} trigger="click">
+          <NotificationOutlined />
+        </Popover>
       )}
       <div className={s.LoginUser}>
         <LoginUser />
