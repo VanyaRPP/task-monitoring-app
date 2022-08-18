@@ -11,17 +11,17 @@ export default async function handler(
   switch (req.method) {
     case 'PATCH':
       try {
-        const { isSeen, type, userId } = req.body
+        const { isSeen, type, id } = req.body
         if (type) {
           const notification = await Notification.findOneAndUpdate(
-            { userId },
+            { _id: id },
             { isSeen }
           )
 
           return res.status(201).json({ success: true, data: notification })
         } else {
           const notifications = await Notification.updateMany(
-            { userId },
+            { userId: id },
             { isSeen }
           )
 

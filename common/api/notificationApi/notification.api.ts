@@ -23,7 +23,7 @@ export const notificationApi = createApi({
       },
       invalidatesTags: ['Notification'],
     }),
-    updateNotificationStatusByUserId: builder.mutation<
+    updateNotificationStatusById: builder.mutation<
       INotification,
       Partial<INotification>
     >({
@@ -63,6 +63,6 @@ export const notificationApi = createApi({
 export const {
   useGetNotificationsByUserIdQuery,
   useAddNotificationMutation,
-  useUpdateNotificationStatusByUserIdMutation,
+  useUpdateNotificationStatusByIdMutation,
   useUpdateNotificationsStatusByUserIdMutation,
 } = notificationApi
