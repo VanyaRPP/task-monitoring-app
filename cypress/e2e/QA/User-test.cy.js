@@ -19,7 +19,8 @@ it("Logo", function(){
   //  cy.get().click()
     cy.go('back')
   
-    cy.contains("Зв’яжіться з нами").click()
+   // cy.get('button[class="ant-btn ant-btn-primary ant-btn-background-ghost"]')
+  //  .click()
     
     cy.get('input[id="nest-messages_name"]')
      .type('text')
