@@ -8,7 +8,7 @@ export const notificationApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getNotificationById: builder.query<BaseQuery, string>({
+    getNotificationsByUserId: builder.query<BaseQuery, string>({
       query: (id) => `notify/${id}`,
       providesTags: (result) => ['Notification'],
     }),
@@ -26,5 +26,5 @@ export const notificationApi = createApi({
   }),
 })
 
-export const { useGetNotificationByIdQuery, useAddNotificationMutation } =
+export const { useGetNotificationsByUserIdQuery, useAddNotificationMutation } =
   notificationApi

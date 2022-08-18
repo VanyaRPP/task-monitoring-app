@@ -11,8 +11,8 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const notification = await Notification.findById(req.query.id)
-        return res.status(200).json({ success: true, error: notification })
+        const notifications = await Notification.find({ _id: req.query.id })
+        return res.status(200).json({ success: true, error: notifications })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }

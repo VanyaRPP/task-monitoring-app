@@ -11,7 +11,13 @@ export default async function handler(
   switch (req.method) {
     case 'POST':
       try {
-        const notification = await Notification.create(req.body)
+        const { userId, text, url } = req.body
+        const notification = await Notification.create({
+          userId,
+          url,
+          text,
+        })
+
         return res.status(201).json({ success: true, data: notification })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
