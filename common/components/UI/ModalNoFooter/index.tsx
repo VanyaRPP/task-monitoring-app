@@ -1,4 +1,5 @@
 import { Modal } from 'antd'
+import s from './style.module.scss'
 
 interface Props {
   children: React.ReactNode
@@ -28,6 +29,7 @@ const ModalNoFooter: React.FC<Props> = ({
       onCancel={onCancel}
       okText={okText}
       cancelText={cancelText}
+      className={s.Modal}
     >
       {children}
     </Modal>
