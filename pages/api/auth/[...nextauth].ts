@@ -32,6 +32,9 @@ function text({ url, host }) {
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
   secret: process.env.NEXTAUTH_SECRET,
+  session: {
+    strategy: 'jwt',
+  },
   jwt: {
     encode: async ({ secret, token }) => {
       return jwt.sign(token as any, secret)
@@ -55,11 +58,11 @@ export const authOptions: NextAuthOptions = {
             credentials.password,
             user.password
           )
-          if (!result) throw Error('Error: Incorrect password!')
+          if (!result) return null
 
-          return { success: true, data: user }
+          return user
         } catch (error) {
-          return { success: false, error }
+          return null
         }
       },
     }),
