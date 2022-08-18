@@ -17,16 +17,14 @@ import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { useGetTaskByIdQuery } from '@common/api/taskApi/task.api'
 
 const Notification = ({ id }: { id: string }) => {
-  const {data} = useGetTaskByIdQuery(id)
-  
+  const { data } = useGetTaskByIdQuery(id)
+
   return (
     <div className={s.Notification}>
       <div className={s.NotificationIcon}>
         <ExclamationCircleFilled />
       </div>
-      <div className={s.NotificationText}>
-        New task: {data?.data?.name}
-      </div>
+      <div className={s.NotificationText}>New task: {data?.data?.name}</div>
     </div>
   )
 }
@@ -61,7 +59,7 @@ const Header: React.FC = () => {
         </Button>
       )}
       {status === 'authenticated' && (
-        <Popover content={<Empty/>} trigger="click">
+        <Popover content={<Empty />} trigger="click">
           <NotificationOutlined />
         </Popover>
       )}
