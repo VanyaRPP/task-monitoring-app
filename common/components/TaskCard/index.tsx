@@ -1,4 +1,9 @@
-import { EditOutlined, UserOutlined } from '@ant-design/icons'
+import {
+  EditOutlined,
+  FieldTimeOutlined,
+  FireOutlined,
+  UserOutlined,
+} from '@ant-design/icons'
 import { Avatar, Button, Card } from 'antd'
 import { useSession } from 'next-auth/react'
 import React, { useMemo, useState } from 'react'
@@ -14,6 +19,8 @@ import Map from '../Map'
 import UserLink from '../UserLink'
 import StatusTag from '../UI/StatusTag'
 import { getFormattedAddress } from '../../../utils/helpers'
+import moment from 'moment'
+import classNames from 'classnames'
 
 const TaskCard = ({ taskId, task }) => {
   const router = useRouter()
@@ -53,8 +60,14 @@ const TaskCard = ({ taskId, task }) => {
       zoom: task?.address ? 17 : 12,
     }
   }, [task?.address])
+  const lat = task?.address?.geoCode?.lat
+  const lng = task?.address?.geoCode?.lng
 
+  const url = `https://maps.google.com/?q=${lat},${lng}`
   const [activeMarker, setActiveMarker] = useState(null)
+  const taskDeadline = moment(task?.deadline)
+  const currentDate = moment(new Date())
+  const differ = taskDeadline.diff(currentDate, 'days')
 
   return (
     <Card className={s.Card}>
@@ -76,7 +89,20 @@ const TaskCard = ({ taskId, task }) => {
           <p className={s.Description}>Опис: {task?.description}</p>
           <p>Категорія: {task?.category}</p>
           <p>Адреса: {getFormattedAddress(task?.address?.name)}</p>
-          <p>Виконати до: {dateToDefaultFormat(task?.deadline)}</p>
+          <div className={s.DeadlineBlock}>
+            <p
+              className={classNames(s.Deadline, {
+                [s.CloseDeadline]: differ <= 1,
+              })}
+            >
+              Виконати до: {dateToDefaultFormat(task?.deadline)}
+              {differ <= 1 ? (
+                <FireOutlined
+                  style={{ paddingLeft: '10px', fontSize: '25px' }}
+                />
+              ) : null}
+            </p>
+          </div>
         </Card>
       </div>
 
@@ -89,6 +115,7 @@ const TaskCard = ({ taskId, task }) => {
             {activeMarker ? (
               <InfoWindow onCloseClick={() => setActiveMarker(null)}>
                 <div>{task?.address?.name}</div>
+                <a href={url}>Перейти в Google Maps</a>
               </InfoWindow>
             ) : null}
           </Marker>

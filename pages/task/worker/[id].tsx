@@ -43,7 +43,7 @@ const WorkerTasks: React.FC = () => {
   return (
     <>
       <div className={s.Header}>
-        <h1>Мої замовлення</h1>
+        <h1>Мої завдання</h1>
       </div>
       <Filter tasks={taskList} />
     </>

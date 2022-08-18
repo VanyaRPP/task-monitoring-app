@@ -17,7 +17,7 @@ const TouchBar = () => {
   return (
     <div className={s.TouchBar}>
       <BackButton />
-      <TaskButton />
+      {/* <TaskButton /> */}
     </div>
   )
 }

@@ -3,10 +3,14 @@ import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
 import FacebookProvider from 'next-auth/providers/facebook'
 import EmailProvider from 'next-auth/providers/email'
+import CredentialsProvider from 'next-auth/providers/credentials'
 import { MongoDBAdapter } from '@next-auth/mongodb-adapter'
 import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
 import nodemailer from 'nodemailer'
-import clientPromise from '../../../common/lib/mongodb'
+import clientPromise from '@common/lib/mongodb'
+import User from '@common/modules/models/User'
+import { ICredentials } from '@common/lib/credentials.types'
 
 function html({ url, host, email }) {
   const escapedEmail = `${email.replace(/\./g, '&#8203;.')}`
@@ -28,6 +32,9 @@ function text({ url, host }) {
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
   secret: process.env.NEXTAUTH_SECRET,
+  session: {
+    strategy: 'jwt',
+  },
   jwt: {
     encode: async ({ secret, token }) => {
       return jwt.sign(token as any, secret)
@@ -37,6 +44,28 @@ export const authOptions: NextAuthOptions = {
     },
   },
   providers: [
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {},
+      async authorize(credentials: ICredentials, req) {
+        try {
+          const user = await User.findOne({
+            email: credentials.email,
+          })
+
+          // encrypting and comparing password
+          const result = await bcrypt.compare(
+            credentials.password,
+            user.password
+          )
+          if (!result) return null
+
+          return user
+        } catch (error) {
+          return null
+        }
+      },
+    }),
     EmailProvider({
       server: {
         host: process.env.EMAIL_SERVER_HOST,
