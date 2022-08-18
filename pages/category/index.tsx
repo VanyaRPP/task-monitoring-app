@@ -21,11 +21,12 @@ const CategoriesPage: React.FC = () => {
         header={<div>Всі категорії</div>}
         bordered
         dataSource={categories}
+        className={s.List}
         renderItem={(item) => (
           <List.Item key={item?._id}>
             <p>{item?.name}</p>
             <p>
-              Загальна кількість завдань: {getCount(tasks, item?.name).length}
+              Загальна кількість завдань: {getCount(tasks, item?.name)?.length}
             </p>
           </List.Item>
         )}

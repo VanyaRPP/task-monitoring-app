@@ -11,10 +11,9 @@ import Router, { useRouter } from 'next/router'
 import { AppRoutes, TaskStatuses } from '../../../../utils/constants'
 import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
-import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.api'
-
 import s from './style.module.scss'
 import StatusTag from '../../UI/StatusTag'
+import { SelectOutlined } from '@ant-design/icons'
 
 const Orders: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
@@ -84,17 +83,16 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
   return (
     <Card
       className={style}
-      title="Мої замовлення"
-      style={{ flex: '1.5' }}
-      extra={
+      title={
         <Button
-          onClick={() => Router.push(`/task/user/${user?._id}`)}
-          ghost
-          type="primary"
+          type="link"
+          onClick={() => Router.push(`${AppRoutes.TASK}/user/${user?._id}`)}
         >
-          Всі
+          Мої замовлення
+          <SelectOutlined className={s.Icon} />
         </Button>
       }
+      style={{ flex: '1.5' }}
     >
       <Table
         className={s.Table}
