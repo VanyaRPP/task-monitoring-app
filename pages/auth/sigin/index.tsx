@@ -48,7 +48,7 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
 
   const handleSubmit = async () => {
     setIsFormDisabled(true)
-    const formData = form.validateFields()
+    const formData = await form.validateFields()
     await signIn('credentials', { ...formData })
 
     form.resetFields()

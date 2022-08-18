@@ -51,14 +51,11 @@ export const authOptions: NextAuthOptions = {
           })
 
           // encrypting and comparing password
-          bcrypt.compare(
+          const result = await bcrypt.compare(
             credentials.password,
-            user.password,
-            function (err, result) {
-              if (err) throw Error('Error: Decryption error!')
-              if (!result) throw Error('Error: Incorrect password!')
-            }
+            user.password
           )
+          if (!result) throw Error('Error: Incorrect password!')
 
           return { success: true, data: user }
         } catch (error) {
