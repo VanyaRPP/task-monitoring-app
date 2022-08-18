@@ -14,6 +14,7 @@ export interface IUser {
   isWorker: boolean
   tel?: string
   address?: IAddress
+  password?: string
 }
 export interface IFeedback {
   id: string
@@ -35,6 +36,7 @@ const UserSchema = new Schema<IUser>({
   isWorker: { type: Boolean, default: false },
   tel: { type: String },
   address: { type: Object },
+  password: { type: String },
 })
 
 const User = mongoose.models.User || mongoose.model('User', UserSchema)
