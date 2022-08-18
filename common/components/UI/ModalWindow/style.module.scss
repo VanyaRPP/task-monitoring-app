@@ -5,7 +5,10 @@
     .ant-input,
     .ant-picker,
     .ant-btn-default,
-    .ant-input-group-addon {
+    .ant-input-group-addon,
+    .ant-picker-header,
+    .ant-picker-body,
+    .ant-picker-footer {
       background-color: var(--backgroundColorPrimary);
     }
     .ant-modal-title,
@@ -16,8 +19,20 @@
     .ant-select-item,
     .ant-picker-suffix,
     .ant-btn-default,
-    .ant-input-group-addon {
+    .ant-input-group-addon,
+    .ant-picker-header,
+    .ant-picker-header button,
+    .ant-picker-content th,
+    .ant-picker-content td,
+    .ant-picker input {
       color: var(--textColor);
+    }
+    .ant-picker-cell-disabled {
+      background-color: var(--backgroundColorElements);
+    }
+    .ant-picker-cell-in-view:hover {
+      color: var(--primaryColorHover);
+      font-weight: 500;
     }
   }
 }
