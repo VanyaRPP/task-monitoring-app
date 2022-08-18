@@ -13,11 +13,17 @@ export default async function handler(
       try {
         const { isSeen, type, userId } = req.body
         if (type) {
-          const notification = await Notification.findOneAndUpdate({userId}, { isSeen })
+          const notification = await Notification.findOneAndUpdate(
+            { userId },
+            { isSeen }
+          )
 
           return res.status(201).json({ success: true, data: notification })
         } else {
-          const notifications = await Notification.updateMany({userId}, { isSeen })
+          const notifications = await Notification.updateMany(
+            { userId },
+            { isSeen }
+          )
 
           return res.status(201).json({ success: true, data: notifications })
         }
