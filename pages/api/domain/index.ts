@@ -23,7 +23,7 @@ export default async function handler(
             return res.status(201).json({ success: true, data: domain })
           })
           .catch((error) => {
-            throw error + 'Blya'
+            throw error
           })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
