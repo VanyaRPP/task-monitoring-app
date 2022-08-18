@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Button, Layout, Popover } from 'antd'
+import { Button, Empty, Layout, Popover } from 'antd'
 import LoginUser from '../LoginUser'
 import ThemeSwitcher from '../UI/ThemeSwitcher'
 import { AppRoutes } from 'utils/constants'
@@ -11,28 +11,34 @@ import Diamant from '../../assets/svg/diamant'
 import Logo from '../Logo'
 import NotificationOutlined from '@ant-design/icons/lib/icons/NotificationOutlined'
 import ExclamationCircleFilled from '@ant-design/icons/lib/icons/ExclamationCircleFilled'
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
+import useLocalStorage from '@common/modules/hooks/useLocalStorage'
+import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
+import { useGetTaskByIdQuery } from '@common/api/taskApi/task.api'
 
-const Notification = ({ text }: { text: string }) => {
+const Notification = ({ id }: { id: string }) => {
+  const {data} = useGetTaskByIdQuery(id)
+  
   return (
     <div className={s.Notification}>
-      <div className={s.notificationIcon}>
+      <div className={s.NotificationIcon}>
         <ExclamationCircleFilled />
       </div>
-      <div className={s.notificationText}>{text}</div>
+      <div className={s.NotificationText}>
+        New task: {data?.data?.name}
+      </div>
     </div>
   )
 }
 
 const Header: React.FC = () => {
-  const { status } = useSession()
-
-  const content = useMemo(() => {
-    /*
-      return notifications.map(item => <Notification key={item.id} {...item} />)
-    */
-    return <p>Test content</p>
-  }, [])
+  const { status, data: session } = useSession()
+  const [notification, setNotification] = useState<number>(0)
+  const [storedValue, setValue] = useLocalStorage('service-notifications', {
+    total: 0,
+    tasks: [],
+  })
+  const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
 
   return (
     <Layout.Header className={s.Header}>
@@ -55,7 +61,7 @@ const Header: React.FC = () => {
         </Button>
       )}
       {status === 'authenticated' && (
-        <Popover content={content} trigger="click">
+        <Popover content={<Empty/>} trigger="click">
           <NotificationOutlined />
         </Popover>
       )}
