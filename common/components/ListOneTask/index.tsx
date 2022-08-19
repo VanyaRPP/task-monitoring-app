@@ -6,6 +6,7 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '../../../utils/constants'
 import { ITask } from '../../modules/models/Task'
 import StatusTag from '../UI/StatusTag'
+import ListItemDeadline from './deadline'
 import s from './style.module.scss'
 
 interface Props {
@@ -62,26 +63,7 @@ const ListOneTask: React.FC<Props> = ({ tasks }) => {
       width: '16.6%',
       ellipsis: true,
       sorter: (a, b) => Date.parse(a?.deadline) - Date.parse(b?.deadline),
-      render: (date) => (
-        <p
-          className={classNames(s.Column, {
-            [s.CloseDateColumn]:
-              moment(date).diff(moment(new Date()), 'days') <= 1 &&
-              moment(date).diff(moment(new Date()), 'days') >= 0,
-            [s.OutDateColumn]:
-              moment(date).diff(moment(new Date()), 'days') < 0,
-          })}
-        >
-          {moment(date).format('DD-MM hh:mm')}
-
-          {moment(date).diff(moment(new Date()), 'days') <= 1 &&
-          moment(date).diff(moment(new Date()), 'days') >= 0 ? (
-            <FireOutlined className={s.Icon} />
-          ) : moment(date).diff(moment(new Date()), 'days') < 0 ? (
-            <FieldTimeOutlined className={s.Icon} />
-          ) : null}
-        </p>
-      ),
+      render: (deadline) => <ListItemDeadline deadline={deadline} />,
     },
   ]
   return (

@@ -15,7 +15,7 @@ export const deleteExtraWhitespace = (value: string): string =>
 export const validateField = (name: string): Rule[] => {
   const required: Rule = {
     required: true,
-    message: "Назва обов'язкова!",
+    message: "Поле обов'язкове!",
   }
   const email: Rule = {
     type: 'email',
@@ -24,6 +24,10 @@ export const validateField = (name: string): Rule[] => {
   const phone: Rule = {
     len: 9,
     message: 'Номер телефону має складатися з 9 цифр!',
+  }
+  const password: Rule = {
+    min: 8,
+    message: 'Пароль має складатися з 8 символів!',
   }
 
   const price: Rule = {
@@ -65,5 +69,8 @@ export const validateField = (name: string): Rule[] => {
 
     case 'comment':
       return [required]
+
+    case 'password':
+      return [required, password]
   }
 }

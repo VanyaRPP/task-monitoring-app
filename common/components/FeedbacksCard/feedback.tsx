@@ -3,7 +3,6 @@ import { useGetUserByIdQuery } from 'common/api/userApi/user.api'
 import { UserOutlined } from '@ant-design/icons'
 import { IFeedback } from 'common/modules/models/User'
 import s from './style.module.scss'
-import UserLink from '../UserLink'
 import RateStars from '../UI/RateStars'
 
 const Feedback: React.FC<{ feedback: IFeedback }> = ({ feedback }) => {
