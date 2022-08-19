@@ -1,0 +1,25 @@
+.Controls {
+  display: flex;
+  margin: 5px 0;
+
+  .Search {
+    max-width: 300px;
+  }
+
+  input {
+    max-width: 300px;
+    color: var(--textColor);
+    border-color: #88888830 !important;
+    &:hover {
+      border-color: var(--primaryColor) !important;
+    }
+    &:focus {
+      border-color: var(--primaryColorHover) !important;
+    }
+    background-color: transparent;
+  }
+
+  .AddButton {
+    margin-left: 10px;
+  }
+}
