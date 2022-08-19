@@ -1,19 +1,42 @@
 import Link from 'next/link'
-import { Button, Layout } from 'antd'
+import { Button, Empty, Layout, Popover } from 'antd'
 import LoginUser from '../LoginUser'
 import ThemeSwitcher from '../UI/ThemeSwitcher'
-import TaskButton from '../UI/Buttons/TaskButton'
 import { AppRoutes } from 'utils/constants'
 import s from './style.module.scss'
 import { useSession } from 'next-auth/react'
 import Router from 'next/router'
 import BurgerMenu from '../BurgerMenu'
 import Diamant from '../../assets/svg/diamant'
-import LogoCircle from '../../assets/svg/logo_circle'
 import Logo from '../Logo'
+import NotificationOutlined from '@ant-design/icons/lib/icons/NotificationOutlined'
+import ExclamationCircleFilled from '@ant-design/icons/lib/icons/ExclamationCircleFilled'
+import { useEffect, useState } from 'react'
+import useLocalStorage from '@common/modules/hooks/useLocalStorage'
+import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
+import { useGetTaskByIdQuery } from '@common/api/taskApi/task.api'
+
+const Notification = ({ id }: { id: string }) => {
+  const { data } = useGetTaskByIdQuery(id)
+
+  return (
+    <div className={s.Notification}>
+      <div className={s.NotificationIcon}>
+        <ExclamationCircleFilled />
+      </div>
+      <div className={s.NotificationText}>New task: {data?.data?.name}</div>
+    </div>
+  )
+}
 
 const Header: React.FC = () => {
-  const { status } = useSession()
+  const { status, data: session } = useSession()
+  const [notification, setNotification] = useState<number>(0)
+  const [storedValue, setValue] = useLocalStorage('service-notifications', {
+    total: 0,
+    tasks: [],
+  })
+  const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
 
   return (
     <Layout.Header className={s.Header}>
@@ -34,6 +57,11 @@ const Header: React.FC = () => {
         >
           <span>Преміум</span>
         </Button>
+      )}
+      {status === 'authenticated' && (
+        <Popover content={<Empty />} trigger="click">
+          <NotificationOutlined />
+        </Popover>
       )}
       <div className={s.LoginUser}>
         <LoginUser />

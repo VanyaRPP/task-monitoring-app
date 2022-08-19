@@ -48,6 +48,14 @@
   // }
 }
 
+.Notification {
+  display: flex;
+  align-content: center;
+  div:first-child {
+    margin-right: 7px;
+  }
+}
+
 .Button_Premium {
   display: flex;
   align-items: center;

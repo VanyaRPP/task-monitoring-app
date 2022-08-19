@@ -9,10 +9,10 @@ import StatusTag from '../UI/StatusTag'
 import s from './style.module.scss'
 
 interface Props {
-  task: ITask[]
+  tasks: ITask[]
 }
 
-const ListOneTask: React.FC<Props> = ({ task }) => {
+const ListOneTask: React.FC<Props> = ({ tasks }) => {
   const router = useRouter()
 
   const columns = [
@@ -90,7 +90,7 @@ const ListOneTask: React.FC<Props> = ({ task }) => {
       rowKey="_id"
       rowClassName={s.rowClass}
       showHeader={true}
-      dataSource={task}
+      dataSource={tasks}
       columns={columns}
       pagination={{
         responsive: false,

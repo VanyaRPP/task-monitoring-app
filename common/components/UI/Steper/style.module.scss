@@ -11,3 +11,10 @@
 .stepsAction {
   margin-top: 24px;
 }
+.Confirm {
+  :global {
+    .ant-modal-header {
+      background-color: purple;
+    }
+  }
+}
