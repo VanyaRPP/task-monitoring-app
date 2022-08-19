@@ -7,6 +7,7 @@ import {
   useGetAllTaskQuery,
 } from '../../../api/taskApi/task.api'
 import ConfirmTask from '../../Forms/ConfirmTask'
+import s from './style.module.scss'
 
 const { Step } = Steps
 
@@ -40,7 +41,9 @@ const Steper: React.FC<any> = ({ steps, onSubmitModal }) => {
       </Steps>
       <div className="stepsContent">{steps[current].content}</div>
       <div className="stepsAction">
-        {current < 1 && <ConfirmTask next={next} prev={prev} />}
+        {current < 1 && (
+          <ConfirmTask next={next} prev={prev} className={s.Confirm} />
+        )}
         {current == 1 && (
           <Button type="primary" onClick={() => submitAndNext()}>
             Відправити відгук

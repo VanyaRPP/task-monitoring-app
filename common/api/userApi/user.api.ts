@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { BaseQuery, IUser, AllUsersQuery } from './user.api.types'
+import { BaseQuery, IUser, AllUsersQuery, ISignUpData } from './user.api.types'
 
 export const userApi = createApi({
   reducerPath: 'userApi',
@@ -8,6 +8,17 @@ export const userApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
+    signUp: builder.mutation<ISignUpData, Partial<ISignUpData>>({
+      query(data) {
+        const { ...body } = data
+        return {
+          url: 'auth/sign-up',
+          method: 'POST',
+          body,
+        }
+      },
+      invalidatesTags: ['User'],
+    }),
     getUserByEmail: builder.query<BaseQuery, string>({
       query: (email) => `user/email/${email}`,
       providesTags: (result) => ['User'],
@@ -57,6 +68,7 @@ export const userApi = createApi({
 })
 
 export const {
+  useSignUpMutation,
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
   useUpdateUserRoleMutation,

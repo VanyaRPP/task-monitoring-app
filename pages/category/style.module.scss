@@ -1,0 +1,26 @@
+.List {
+  color: var(--textColor);
+  border-color: #88888830;
+  border-radius: 20px !important;
+  background-color: var(--backgroundColorElements);
+  .Item {
+    color: var(--textColor);
+    border-color: #88888830;
+  }
+  :last-of-type {
+    border-radius: 0 0 20px 20px;
+  }
+  :global {
+    .ant-list-header {
+      background-color: var(--backgroundColorPrimary);
+      border-radius: 20px 20px 0 0;
+      border-color: #88888830;
+      font-weight: 500;
+      font-size: 15px;
+    }
+
+    p {
+      color: var(--textColor);
+    }
+  }
+}

@@ -110,6 +110,7 @@ const AddTaskModal: React.FC<PropsType> = ({
       cancelText="Скасувати"
       onCancel={onCancel}
       onOk={onSubmit}
+      className={s.Modal}
     >
       <Form
         id="addTaskForm"
