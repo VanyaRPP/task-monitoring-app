@@ -1,6 +1,6 @@
-import { createRef, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { SendOutlined } from '@ant-design/icons'
-import { Card, List, Button, Input, Avatar, Empty } from 'antd'
+import { Card, List, Button, Input, Empty } from 'antd'
 import Comment from './comment'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 import {
@@ -10,7 +10,6 @@ import {
 import { useSession } from 'next-auth/react'
 import s from './style.module.scss'
 import { deleteExtraWhitespace } from '../../assets/features/validators'
-import { is } from 'cypress/types/bluebird'
 
 interface Props {
   taskId: any
@@ -47,13 +46,13 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
   }
 
   const bottomRef = useRef(null)
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView()
-  }, [task])
+  // useEffect(() => {
+  //   bottomRef.current?.scrollIntoView()
+  // }, [task])
 
-  useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
+  // useEffect(() => {
+  //   window.scrollTo(0, 0)
+  // }, [])
 
   return (
     <div className={s.CardDiv}>

@@ -37,4 +37,15 @@
     transition: background 0.5s, box-shadow 0.5s, opacity 0.4s;
     box-shadow: 0 8px 10px -5px #ff0000;
   }
+  .CloseDateColumn {
+    color: rgb(249, 184, 4);
+  }
+
+  .OutDateColumn {
+    color: rgb(255, 0, 0);
+  }
+
+  .Icon {
+    padding-left: 10px;
+  }
 }

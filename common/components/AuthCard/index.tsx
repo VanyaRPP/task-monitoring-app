@@ -68,12 +68,14 @@ const AuthCard = ({
           <Form form={form} disabled={disabled}>
             {isSignUp && (
               <Form.Item
+                className={s.FormItem}
                 name="name"
                 required
                 labelCol={{ span: 24 }}
                 label={config.auth.credentialsNameLabel}
               >
                 <Input
+                  className={s.Input}
                   type="text"
                   value={value.email}
                   onChange={(e) => onChange(e.target)}
@@ -82,6 +84,7 @@ const AuthCard = ({
               </Form.Item>
             )}
             <Form.Item
+              className={s.FormItem}
               name="email"
               required
               labelCol={{ span: 24 }}
@@ -90,6 +93,7 @@ const AuthCard = ({
               normalize={(v) => v.trim()}
             >
               <Input
+                className={s.Input}
                 type="text"
                 value={value.email}
                 onChange={(e) => onChange(e.target)}
@@ -97,6 +101,7 @@ const AuthCard = ({
               />
             </Form.Item>
             <Form.Item
+              className={s.FormItem}
               name="password"
               required
               labelCol={{ span: 24 }}
@@ -113,6 +118,7 @@ const AuthCard = ({
             </Form.Item>
             {isSignUp && (
               <Form.Item
+                className={s.FormItem}
                 name="confirmPassword"
                 required
                 labelCol={{ span: 24 }}

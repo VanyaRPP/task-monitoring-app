@@ -39,9 +39,12 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
   if (user) {
     return (
       <>
-        <Button type="link" onClick={showDrawer} className={s.LinkButton}>
+        {/* <Button type="link" onClick={showDrawer} className={s.LinkButton}>
           {user?.name ?? user?.email}
-        </Button>
+        </Button> */}
+        <a onClick={showDrawer} className={s.LinkButton}>
+          {user?.name ?? user?.email}
+        </a>
         <Drawer
           title={`Профіль користувача ${user?.name}`}
           placement="right"
