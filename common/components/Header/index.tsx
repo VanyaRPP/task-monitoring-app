@@ -51,7 +51,6 @@ const Header: React.FC = () => {
       <BurgerMenu />
       <div className={s.Item}>
         <Logo />
-        {/* <TaskButton /> */}
         <div className={s.ThemeSwitcher}>
           <ThemeSwitcher />
         </div>
