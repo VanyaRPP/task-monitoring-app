@@ -1,6 +1,4 @@
-import Notification, {
-  INotification,
-} from '@common/modules/models/Notification'
+import Notification from '@common/modules/models/Notification'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from '../api.config'
 

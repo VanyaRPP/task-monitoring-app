@@ -1,49 +1,83 @@
-import Link from 'next/link'
-import { Button, Empty, Layout, Popover } from 'antd'
+import { Badge, Button, Empty, Layout, Popover } from 'antd'
 import LoginUser from '../LoginUser'
 import ThemeSwitcher from '../UI/ThemeSwitcher'
 import { AppRoutes } from 'utils/constants'
 import s from './style.module.scss'
 import { useSession } from 'next-auth/react'
-import Router from 'next/router'
+import Router, { useRouter } from 'next/router'
 import BurgerMenu from '../BurgerMenu'
 import Diamant from '../../assets/svg/diamant'
 import Logo from '../Logo'
-import NotificationOutlined from '@ant-design/icons/lib/icons/NotificationOutlined'
-import ExclamationCircleFilled from '@ant-design/icons/lib/icons/ExclamationCircleFilled'
-import { useEffect, useState } from 'react'
-import useLocalStorage from '@common/modules/hooks/useLocalStorage'
+import NotificationWrapper from '../NotificationWrapper'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
-import { useGetTaskByIdQuery } from '@common/api/taskApi/task.api'
+import {
+  useGetNotificationsByUserIdQuery,
+  useUpdateNotificationStatusByIdMutation,
+} from '@common/api/notificationApi/notification.api'
+import { INotification } from '@common/modules/models/Notification'
+import Circle from '@common/assets/svg/circle'
+import config from '@utils/config'
+import { useMemo } from 'react'
+import {
+  NotificationActive,
+  NotificationInactive,
+} from '@common/assets/svg/notification'
 
-const Notification = ({ id }: { id: string }) => {
-  const { data } = useGetTaskByIdQuery(id)
+const Notification = ({
+  id,
+  isSeen,
+  url,
+  text,
+}: {
+  id: string
+  isSeen: boolean
+  url: string
+  text: string
+}) => {
+  const router = useRouter()
+  const [updateNotificationStatusById] =
+    useUpdateNotificationStatusByIdMutation()
+
+  const handleClick = async () => {
+    await updateNotificationStatusById({ _id: id })
+    router.push(url)
+  }
 
   return (
-    <div className={s.Notification}>
+    <div className={s.Notification} onClick={handleClick}>
       <div className={s.NotificationIcon}>
-        <ExclamationCircleFilled />
+        <Circle width={8} height={8} color={!isSeen ? '#61e279' : '#5b5b5b'} />
       </div>
-      <div className={s.NotificationText}>New task: {data?.data?.name}</div>
+      <div className={s.NotificationText}>{text}</div>
     </div>
   )
 }
 
 const Header: React.FC = () => {
   const { status, data: session } = useSession()
-  const [notification, setNotification] = useState<number>(0)
-  const [storedValue, setValue] = useLocalStorage('service-notifications', {
-    total: 0,
-    tasks: [],
-  })
   const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
+  const { data: notificationData } = useGetNotificationsByUserIdQuery(
+    userData?.data?._id
+  )
+
+  const unreadNotificationsExist = useMemo(() => {
+    if (notificationData?.data) {
+      let check = false
+      notificationData?.data?.forEach((notification: INotification) => {
+        if (!check && !notification?.isSeen) check = true
+      })
+
+      return check
+    }
+
+    return false
+  }, [notificationData?.data])
 
   return (
     <Layout.Header className={s.Header}>
       <BurgerMenu />
       <div className={s.Item}>
         <Logo />
-        {/* <TaskButton /> */}
         <div className={s.ThemeSwitcher}>
           <ThemeSwitcher />
         </div>
@@ -55,12 +89,44 @@ const Header: React.FC = () => {
           type="primary"
           onClick={() => Router.push(AppRoutes.PREMIUM)}
         >
-          <span>Преміум</span>
+          <span>{config.titles.premium}</span>
         </Button>
       )}
       {status === 'authenticated' && (
-        <Popover content={<Empty />} trigger="click">
-          <NotificationOutlined />
+        <Popover
+          placement="bottomRight"
+          content={
+            notificationData?.data?.length === 0 ? (
+              <Empty />
+            ) : (
+              <NotificationWrapper userId={userData?.data?._id}>
+                {notificationData?.data?.map((notification: INotification) => (
+                  <Notification
+                    key={notification?._id}
+                    id={notification?._id}
+                    url={notification?.url}
+                    text={notification?.text}
+                    isSeen={notification?.isSeen}
+                  />
+                ))}
+              </NotificationWrapper>
+            )
+          }
+          trigger="click"
+        >
+          {unreadNotificationsExist ? (
+            <NotificationActive
+              style={{ cursor: 'pointer' }}
+              height={30}
+              width={30}
+            />
+          ) : (
+            <NotificationInactive
+              style={{ cursor: 'pointer' }}
+              height={30}
+              width={30}
+            />
+          )}
         </Popover>
       )}
       <div className={s.LoginUser}>
