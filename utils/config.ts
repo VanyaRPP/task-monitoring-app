@@ -18,6 +18,8 @@ const config = {
   titles: {
     signInTitle: 'Увійти',
     signUpTitle: 'Зареєструватись',
+    notification: 'Сповіщення',
+    premium: 'Преміум',
   },
   labels: {
     readAllNotificationsLabel: 'Прочитати все',

@@ -25,11 +25,14 @@ const NotificationWrapper = ({
   return (
     <div className={s.NotificationWrapper}>
       <div className={s.header}>
-        <div onClick={() => handleClick(true)}>
-          {config.labels.readAllNotificationsLabel}
-        </div>
-        <div onClick={() => handleClick(false)}>
-          {config.labels.deleteAllNotificationsLabel}
+        <div className={s.title}>{config.titles.notification}</div>
+        <div className={s.controls}>
+          <div onClick={() => handleClick(true)}>
+            {config.labels.readAllNotificationsLabel}
+          </div>
+          <div onClick={() => handleClick(false)}>
+            {config.labels.deleteAllNotificationsLabel}
+          </div>
         </div>
       </div>
       <div className={s.body}>{children}</div>

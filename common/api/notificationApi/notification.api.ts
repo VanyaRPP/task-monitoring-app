@@ -28,12 +28,12 @@ export const notificationApi = createApi({
       Partial<INotification>
     >({
       query(data) {
-        const { _id, ...body } = data
+        const { _id } = data
         return {
           url: `notify/${_id}`,
           method: 'PATCH',
           body: {
-            ...body,
+            isSeen: true,
             type: true,
           },
         }
@@ -45,12 +45,12 @@ export const notificationApi = createApi({
       Partial<INotification>
     >({
       query(data) {
-        const { _id, ...body } = data
+        const { _id } = data
         return {
           url: `notify/${_id}`,
           method: 'PATCH',
           body: {
-            ...body,
+            isSeen: true,
             type: false,
           },
         }
