@@ -1,4 +1,8 @@
 import { UserOutlined } from '@ant-design/icons'
+import {
+  useGetAllUsersQuery,
+  useGetUserByIdQuery,
+} from '@common/api/userApi/user.api'
 import { AppRoutes } from '@utils/constants'
 import {
   Avatar,
@@ -14,8 +18,10 @@ import {
 } from 'antd'
 import Router from 'next/router'
 import { useState } from 'react'
-import { IUser } from '../../modules/models/User'
+import { IFeedback, IUser } from '../../modules/models/User'
+import Feedback from '../FeedbacksCard/feedback'
 import RateStars from '../UI/RateStars'
+import DrawerFeedback from './drawerFeedback'
 import s from './style.module.scss'
 
 const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
@@ -33,7 +39,7 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
   if (user) {
     return (
       <>
-        <Button type="link" onClick={showDrawer}>
+        <Button type="link" onClick={showDrawer} className={s.LinkButton}>
           {user?.name ?? user?.email}
         </Button>
         <Drawer
@@ -79,27 +85,7 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
                     dataSource={user?.feedback}
                     renderItem={(item, index) => (
                       <List.Item key={index} className={s.ListItem}>
-                        <Avatar
-                          icon={<UserOutlined />}
-                          src={
-                            <Image
-                              src={
-                                user?.image ||
-                                'https://anime.anidub.life/templates/kinolife-blue/images/bump.png'
-                              }
-                              alt="User"
-                            />
-                          }
-                        />
-                        <h4>
-                          {user ? <p>{user?.name}</p> : 'Замовника не знайдено'}
-                        </h4>
-                        <p>{item?.text}</p>
-                        <RateStars
-                          className={s.RateStar}
-                          value={item?.grade}
-                          disabled
-                        />
+                        <DrawerFeedback feedback={item} />
                       </List.Item>
                     )}
                   />

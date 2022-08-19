@@ -34,7 +34,15 @@
   * {
     border-color: #88888830 !important;
   }
-  .DateColumn {
-    color: orange;
+  .CloseDateColumn {
+    color: rgb(249, 184, 4);
+  }
+
+  .OutDateColumn {
+    color: rgb(255, 0, 0);
+  }
+
+  .Icon {
+    padding-left: 10px;
   }
 }
