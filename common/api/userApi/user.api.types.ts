@@ -10,3 +10,9 @@ export interface AllUsersQuery {
   success: boolean
   data: IUser[]
 }
+
+export interface ISignUpData {
+  name: string
+  email: string
+  password: string
+}

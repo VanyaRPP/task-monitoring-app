@@ -1,9 +1,10 @@
 import {
-  ConsoleSqlOutlined,
   EditOutlined,
+  FieldTimeOutlined,
+  FireOutlined,
   UserOutlined,
 } from '@ant-design/icons'
-import { Avatar, Button, Card, Form } from 'antd'
+import { Avatar, Button, Card } from 'antd'
 import { useSession } from 'next-auth/react'
 import React, { useMemo, useState } from 'react'
 import {
@@ -24,6 +25,8 @@ import ModalWindow from '../UI/ModalWindow'
 import { ITask } from 'common/modules/models/Task'
 import EditTaskForm from 'common/components/Forms/EditTaskForm'
 import moment from 'moment'
+import { getFormattedAddress } from '../../../utils/helpers'
+import classNames from 'classnames'
 
 interface Props {
   taskId: any
@@ -98,6 +101,14 @@ const TaskCard: React.FC<Props> = ({ taskId, task }) => {
       zoom: task?.address ? 17 : 12,
     }
   }, [task?.address])
+  const lat = task?.address?.geoCode?.lat
+  const lng = task?.address?.geoCode?.lng
+
+  const url = `https://maps.google.com/?q=${lat},${lng}`
+  const [activeMarker, setActiveMarker] = useState(null)
+  const taskDeadline = moment(task?.deadline)
+  const currentDate = moment(new Date())
+  const differ = taskDeadline.diff(currentDate, 'days')
 
   return (
     <Card className={s.Card}>
@@ -118,14 +129,38 @@ const TaskCard: React.FC<Props> = ({ taskId, task }) => {
         >
           <p className={s.Description}>Опис: {task?.description}</p>
           <p>Категорія: {task?.category}</p>
-          <p>Адреса: {task?.address?.name}</p>
-          <p>Виконати до: {dateToDefaultFormat(task?.deadline)}</p>
+          <p>Адреса: {getFormattedAddress(task?.address?.name)}</p>
+          <div className={s.DeadlineBlock}>
+            <p
+              className={classNames(s.Deadline, {
+                [s.CloseDeadline]: differ <= 1,
+              })}
+            >
+              Виконати до: {dateToDefaultFormat(task?.deadline)}
+              {differ <= 1 ? (
+                <FireOutlined
+                  style={{ paddingLeft: '10px', fontSize: '25px' }}
+                />
+              ) : null}
+            </p>
+          </div>
         </Card>
       </div>
 
       <div className={s.TaskInfo}>
         <Map isLoaded={isLoaded} mapOptions={mapOptions}>
-          <Marker position={mapOptions?.geoCode} />
+
+          <Marker
+            position={mapOptions?.geoCode}
+            onClick={() => setActiveMarker(true)}
+          >
+            {activeMarker ? (
+              <InfoWindow onCloseClick={() => setActiveMarker(null)}>
+                <div>{task?.address?.name}</div>
+                <a href={url}>Перейти в Google Maps</a>
+              </InfoWindow>
+            ) : null}
+          </Marker>
         </Map>
       </div>
 

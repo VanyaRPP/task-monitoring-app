@@ -1,0 +1,39 @@
+.Modal {
+  :global {
+    .ant-modal-content,
+    .ant-modal-header,
+    .ant-input,
+    .ant-picker,
+    .ant-btn-default,
+    .ant-input-group-addon,
+    .ant-picker-header,
+    .ant-picker-body,
+    .ant-picker-footer {
+      background-color: var(--backgroundColorPrimary);
+    }
+    .ant-modal-title,
+    .ant-modal-close-x,
+    .ant-form-item label,
+    .ant-select:not(.ant-select-customize-input) .ant-select-selector,
+    .ant-btn-default,
+    .ant-select-item,
+    .ant-picker-suffix,
+    .ant-btn-default,
+    .ant-input-group-addon,
+    .ant-picker-header,
+    .ant-picker-header button,
+    .ant-picker-content th,
+    .ant-picker-content td,
+    .ant-picker input,
+    .ant-input {
+      color: var(--textColor);
+    }
+    .ant-picker-cell-disabled {
+      background-color: var(--backgroundColorElements);
+    }
+    .ant-picker-cell-in-view:hover {
+      color: var(--primaryColorHover);
+      font-weight: 500;
+    }
+  }
+}

@@ -4,6 +4,7 @@ import { userApi } from '../../api/userApi/user.api'
 import { taskApi } from '../../api/taskApi/task.api'
 import { domainApi } from '../../api/domainApi/domain.api'
 import themeReducer from './reducers/ThemeSlice'
+import { notificationApi } from '@common/api/notificationApi/notification.api'
 
 export const store = configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export const store = configureStore({
     [userApi.reducerPath]: userApi.reducer,
     [taskApi.reducerPath]: taskApi.reducer,
     [domainApi.reducerPath]: domainApi.reducer,
+    [notificationApi.reducerPath]: notificationApi.reducer,
     themeReducer,
   },
   middleware: (getDefaultMiddleware) =>

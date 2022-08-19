@@ -4,17 +4,20 @@ import {
   getCsrfToken,
   getProviders,
   LiteralUnion,
+  signIn,
 } from 'next-auth/react'
 import { Alert } from 'antd'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import { AppRoutes, errors } from '../../../utils/constants'
-import SignInButton from '../../../common/components/UI/Buttons/SignInButton'
+import { AppRoutes, errors } from '@utils/constants'
+import SignInButton from '@common/components/UI/Buttons/SignInButton'
 import s from './style.module.scss'
 import { BuiltInProviderType } from 'next-auth/providers'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import { unstable_getServerSession } from 'next-auth'
-import { MailOutlined } from '@ant-design/icons'
+import { useForm } from 'antd/lib/form/Form'
+import AuthCard from '@common/components/AuthCard'
+import config from '@utils/config'
 
 type PropsType = {
   providers: Record<
@@ -25,12 +28,32 @@ type PropsType = {
 }
 
 const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
+  const [form] = useForm()
+  const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
+  const [credentials, setCredentials] = useState<Record<string, string>>({
+    email: '',
+    password: '',
+  })
   const { error } = useRouter().query
   const [customError, setCustomError] = useState('')
 
   useEffect(() => {
     setCustomError(error && (errors[`${error}`] ?? errors.default))
   }, [error])
+
+  const handleChange = (target) => {
+    const { name, value } = target
+    setCredentials({ ...credentials, [name]: value })
+  }
+
+  const handleSubmit = async () => {
+    setIsFormDisabled(true)
+    const formData = await form.validateFields()
+    await signIn('credentials', { ...formData })
+
+    form.resetFields()
+    setIsFormDisabled(false)
+  }
 
   return (
     <>
@@ -44,28 +67,18 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
         />
       )}
 
-      <h2 className={s.Header}>Увійти</h2>
+      <h2 className={s.Header}>{config.titles.signInTitle}</h2>
 
       <div className={s.Container}>
         <div className={s.HalfBlock}>
-          <form
-            method="post"
-            action="/api/auth/signin/email"
-            className={s.Form}
-          >
-            <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-            <input
-              className={s.Input}
-              placeholder="Введіть електронну пошту"
-              type="email"
-              id="email"
-              name="email"
-            />
-            <button className={s.Button} type="submit">
-              <MailOutlined style={{ fontSize: '1.2rem' }} />
-              <span>Увійти з Email</span>
-            </button>
-          </form>
+          <AuthCard
+            csrfToken={csrfToken}
+            form={form}
+            value={credentials}
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+            disabled={isFormDisabled}
+          />
         </div>
 
         <div className={s.Divider} />
@@ -73,7 +86,8 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
         <div className={s.HalfBlock}>
           {Object.values(providers).map(
             (provider: any) =>
-              provider?.name !== 'Email' && (
+              provider?.name !== 'Email' &&
+              provider?.name !== 'Credentials' && (
                 <SignInButton key={provider?.name} provider={provider} />
               )
           )}

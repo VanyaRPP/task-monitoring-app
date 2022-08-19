@@ -1,4 +1,5 @@
 import { List, Table } from 'antd'
+import classNames from 'classnames'
 import moment from 'moment'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '../../../utils/constants'
@@ -7,12 +8,12 @@ import StatusTag from '../UI/StatusTag'
 import s from './style.module.scss'
 
 interface Props {
-  task: ITask[]
+  tasks: ITask[]
 }
 
-const ListOneTask: React.FC<Props> = ({ task }) => {
-  // console.log(tasks)
+const ListOneTask: React.FC<Props> = ({ tasks }) => {
   const router = useRouter()
+
   const columns = [
     {
       title: 'Назва',
@@ -60,7 +61,15 @@ const ListOneTask: React.FC<Props> = ({ task }) => {
       width: '16.6%',
       ellipsis: true,
       sorter: (a, b) => Date.parse(a?.deadline) - Date.parse(b?.deadline),
-      render: (date) => moment(date).format('DD-MM hh:mm'),
+      render: (date) => (
+        <p
+          className={classNames(s.Column, {
+            [s.DateColumn]: moment(date).diff(moment(new Date()), 'days') <= 1,
+          })}
+        >
+          {moment(date).format('DD-MM hh:mm')}
+        </p>
+      ),
     },
   ]
   return (
@@ -69,7 +78,7 @@ const ListOneTask: React.FC<Props> = ({ task }) => {
       rowKey="_id"
       rowClassName={s.rowClass}
       showHeader={true}
-      dataSource={task}
+      dataSource={tasks}
       columns={columns}
       pagination={{
         responsive: false,
