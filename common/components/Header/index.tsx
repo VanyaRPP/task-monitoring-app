@@ -59,7 +59,7 @@ const Header: React.FC = () => {
         </Button>
       )}
       {status === 'authenticated' && (
-        <Popover content={<Empty />} trigger="click">
+        <Popover placement="bottomRight" content={<Empty />} trigger="click">
           <NotificationOutlined />
         </Popover>
       )}
