@@ -1,3 +1,4 @@
+import { FieldTimeOutlined, FireOutlined } from '@ant-design/icons'
 import { List, Table } from 'antd'
 import classNames from 'classnames'
 import moment from 'moment'
@@ -64,10 +65,21 @@ const ListOneTask: React.FC<Props> = ({ task }) => {
       render: (date) => (
         <p
           className={classNames(s.Column, {
-            [s.DateColumn]: moment(date).diff(moment(new Date()), 'days') <= 1,
+            [s.CloseDateColumn]:
+              moment(date).diff(moment(new Date()), 'days') <= 1 &&
+              moment(date).diff(moment(new Date()), 'days') >= 0,
+            [s.OutDateColumn]:
+              moment(date).diff(moment(new Date()), 'days') < 0,
           })}
         >
           {moment(date).format('DD-MM hh:mm')}
+
+          {moment(date).diff(moment(new Date()), 'days') <= 1 &&
+          moment(date).diff(moment(new Date()), 'days') >= 0 ? (
+            <FireOutlined className={s.Icon} />
+          ) : moment(date).diff(moment(new Date()), 'days') < 0 ? (
+            <FieldTimeOutlined className={s.Icon} />
+          ) : null}
         </p>
       ),
     },
