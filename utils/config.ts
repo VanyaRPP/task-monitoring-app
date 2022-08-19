@@ -19,6 +19,10 @@ const config = {
     signInTitle: 'Увійти',
     signUpTitle: 'Зареєструватись',
   },
+  labels: {
+    readAllNotificationsLabel: 'Прочитати все',
+    deleteAllNotificationsLabel: 'Видалити все'
+  }
 }
 
 export default config
