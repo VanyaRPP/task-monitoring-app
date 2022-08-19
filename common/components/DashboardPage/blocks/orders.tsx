@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Card, Table, Input, Button } from 'antd'
 import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
 import { firstTextToUpperCase } from '../../../../utils/helpers'
@@ -14,10 +14,11 @@ import MicroInfoProfile from '../../MicroInfoProfile'
 import s from './style.module.scss'
 import StatusTag from '../../UI/StatusTag'
 import { SelectOutlined } from '@ant-design/icons'
+import { deleteExtraWhitespace } from 'common/assets/features/validators'
 
 const Orders: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
-  const [search, setSearch] = useState({ task: '', master: '' })
+
   const router = useRouter()
   const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
   const tasksResponse = useGetAllTaskQuery('')
@@ -28,7 +29,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
     return tasks?.filter((task) => task?.creator === user?._id)
   }, [tasks, user?._id])
 
-  const filterdeDataSource = useMemo(() => {
+  const filteredDataSource = useMemo(() => {
     return dataSource?.filter(
       (data) =>
         data?.status !== TaskStatuses.ARCHIVED &&
@@ -37,22 +38,46 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
     )
   }, [dataSource])
 
-  const searchInput = (order: string) => (
+  const [search, setSearch] = useState({ name: '', master: '' })
+  const [filteredData, setFilteredData] = useState(filteredDataSource)
+
+  useEffect(() => {
+    setFilteredData(
+      filteredDataSource?.filter(
+        (data) =>
+          // !!!filtering by master name is not working!!!
+          // data?.executant
+          //   ?.toString()
+          //   .toLowerCase()
+          //   .includes(search.master.toLowerCase()) ||
+          // (search.master
+          //   .toLowerCase()
+          //   .includes(data?.executant?.toString().toLowerCase()) &&
+          data?.name.toLowerCase().includes(search.name.toLowerCase()) ||
+          search.name.toLowerCase().includes(data?.name.toLowerCase())
+      )
+    )
+  }, [search, filteredDataSource])
+
+  const searchInput = (order: string, placeholder: string) => (
     <Input
-      placeholder={order.charAt(0).toUpperCase() + order.slice(1)}
+      placeholder={placeholder}
       value={search[order]}
-      onChange={(e) => setSearch({ ...search, [order]: e.target.value })}
+      onChange={(e) =>
+        setSearch({ ...search, [order]: deleteExtraWhitespace(e.target.value) })
+      }
     />
   )
   const columns = [
     {
-      title: 'Завдання',
+      title: searchInput('name', 'Завдання'),
       dataIndex: 'name',
       key: 'name',
       width: '35%',
       ellipsis: true,
     },
     {
+      // title: searchInput('master', 'Майстер'),
       title: 'Майстер',
       dataIndex: 'executant',
       key: 'executant',
@@ -77,6 +102,25 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       width: '20%',
       // ellipsis: true,
       render: (status) => <StatusTag status={status} />,
+      onFilter: (value: string, record) => record.status.indexOf(value) === 0,
+      filters: [
+        {
+          text: TaskStatuses.IN_WORK,
+          value: TaskStatuses.IN_WORK,
+        },
+        {
+          text: TaskStatuses.PENDING,
+          value: TaskStatuses.PENDING,
+        },
+        {
+          text: TaskStatuses.PENDING_SELECTION,
+          value: TaskStatuses.PENDING_SELECTION,
+        },
+        {
+          text: TaskStatuses.REJECTED,
+          value: TaskStatuses.REJECTED,
+        },
+      ],
     },
   ]
 
@@ -99,7 +143,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
         rowKey="_id"
         rowClassName={s.rowClass}
         showHeader={true}
-        dataSource={filterdeDataSource}
+        dataSource={filteredData}
         columns={columns}
         pagination={{
           responsive: false,

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Card, Table, Input, Button } from 'antd'
 import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
 import Router, { useRouter } from 'next/router'
@@ -13,6 +13,8 @@ import StatusTag from '../../UI/StatusTag'
 import TaskInCategory from '../../../../pages/task/category/[id]'
 import { getCount } from '../../../../utils/helpers'
 import { SelectOutlined } from '@ant-design/icons'
+import { ICategory } from 'common/modules/models/Category'
+import { deleteExtraWhitespace } from 'common/assets/features/validators'
 
 const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
   const session = useSession()
@@ -20,11 +22,33 @@ const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
   const tasksResponse = useGetAllTaskQuery('')
   const tasks = tasksResponse?.data?.data
   const { data: categoriesData } = useGetAllCategoriesQuery('')
-  const categories = categoriesData?.data
+  const [categories, setCategories] = useState<ICategory[]>(
+    categoriesData?.data
+  )
+
+  const [search, setSearch] = useState<string>('')
+  const searchInput = (order: string, placeholder: string) => (
+    <Input
+      placeholder={placeholder}
+      value={search[order]}
+      onChange={(e) => setSearch(deleteExtraWhitespace(e.target.value))}
+    />
+  )
+
+  useEffect(() => {
+    setCategories(
+      categoriesData?.data?.filter(
+        (data) =>
+          data?.name?.toLowerCase().includes(search.toLowerCase()) ||
+          search.toLowerCase().includes(data?.name?.toLowerCase())
+      )
+    )
+  }, [search, categoriesData?.data])
 
   const columns = [
     {
-      title: 'Назва',
+      // title: 'Назва',
+      title: searchInput('name', 'Назва'),
       dataIndex: 'name',
       key: 'name',
       width: '70%',

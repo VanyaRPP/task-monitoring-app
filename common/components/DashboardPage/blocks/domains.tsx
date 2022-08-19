@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Card, Table, Input } from 'antd'
 import useDebounce from 'common/modules/hooks/useDebounce'
 import { domains as config } from 'common/lib/dashboard.config'
+import { deleteExtraWhitespace } from 'common/assets/features/validators'
 
 interface Props {
   style?: string
@@ -22,23 +23,25 @@ const Domains: React.FC<Props> = ({ style }) => {
     )
   }, [debounced])
 
-  const searchInput = (order: string) => (
+  const searchInput = (order: string, placeholder: string) => (
     <Input
-      placeholder={order.charAt(0).toUpperCase() + order.slice(1)}
+      placeholder={placeholder}
       value={search[order]}
-      onChange={(e) => setSearch({ ...search, [order]: e.target.value })}
+      onChange={(e) =>
+        setSearch({ ...search, [order]: deleteExtraWhitespace(e.target.value) })
+      }
     />
   )
 
   const columns = [
     {
-      title: searchInput('Назва'),
+      title: searchInput('name', 'Назва'),
       dataIndex: 'name',
       key: 'name',
       width: '35%',
     },
     {
-      title: searchInput('Адреса'),
+      title: searchInput('address', 'Адреса'),
       dataIndex: 'address',
       key: 'address',
       width: '50%',
