@@ -12,7 +12,7 @@ export default async function handler(
     case 'PATCH':
       try {
         const task = Task.findByIdAndUpdate(req.query.id, { ...req.body })
-        res.status(201).json({ success: true, data: task })
+        res.status(200).json({ success: true, data: task })
       } catch (error) {
         res.status(400).json({ success: false, error: error.message })
       }

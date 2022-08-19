@@ -19,7 +19,7 @@ export default async function handler(
     case 'PATCH':
       try {
         await User.findById(req.query.id).then(async (user) => {
-          const rating = averageNum(user?.feedback, 'grade')
+          const rating = averageNum(user?.feedback, 'grade').toFixed(1)
           const updatedUser = await User.findOneAndUpdate(
             { _id: user._id },
             {
@@ -27,7 +27,7 @@ export default async function handler(
               rating: rating || 0,
             }
           )
-          return res.status(201).json({ success: true, data: updatedUser })
+          return res.status(200).json({ success: true, data: updatedUser })
         })
       } catch (error) {
         return res.status(400).json({ success: false, data: error.message })

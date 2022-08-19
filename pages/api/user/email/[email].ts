@@ -12,7 +12,7 @@ export default async function handler(
     case 'GET':
       try {
         const user = await User.findOne({ email: req.query.email })
-        return res.status(201).json({ success: true, data: user })
+        return res.status(200).json({ success: true, data: user })
       } catch (error) {
         return res.status(400).json({ success: false })
       }
@@ -35,7 +35,7 @@ export default async function handler(
             { role: req.query.role }
           )
         }
-        return res.status(201).json({ success: true, data: user })
+        return res.status(200).json({ success: true, data: user })
       } catch (error) {
         return res.status(400).json({ success: false })
       }
