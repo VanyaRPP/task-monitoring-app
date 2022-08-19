@@ -1,21 +1,36 @@
-import { EditOutlined, UserOutlined } from '@ant-design/icons'
-import { Avatar, Button, Card } from 'antd'
+import {
+  ConsoleSqlOutlined,
+  EditOutlined,
+  UserOutlined,
+} from '@ant-design/icons'
+import { Avatar, Button, Card, Form } from 'antd'
 import { useSession } from 'next-auth/react'
 import React, { useMemo, useState } from 'react'
-import { useDeleteTaskMutation } from '../../api/taskApi/task.api'
+import {
+  useDeleteTaskMutation,
+  useEditTaskMutation,
+} from '../../api/taskApi/task.api'
 import { useGetUserByIdQuery } from '../../api/userApi/user.api'
 import DeleteButton from '../UI/Buttons/DeleteButton'
 import { dateToDefaultFormat } from '../../assets/features/formatDate'
 import { useRouter } from 'next/router'
 import { AppRoutes } from 'utils/constants'
 import s from './style.module.scss'
-import { InfoWindow, Marker, useJsApiLoader } from '@react-google-maps/api'
+import { Marker, useJsApiLoader } from '@react-google-maps/api'
 import Map from '../Map'
 import UserLink from '../UserLink'
 import StatusTag from '../UI/StatusTag'
-import { getFormattedAddress } from '../../../utils/helpers'
+import ModalWindow from '../UI/ModalWindow'
+import { ITask } from 'common/modules/models/Task'
+import EditTaskForm from 'common/components/Forms/EditTaskForm'
+import moment from 'moment'
 
-const TaskCard = ({ taskId, task }) => {
+interface Props {
+  taskId: any
+  task: ITask
+}
+
+const TaskCard: React.FC<Props> = ({ taskId, task }) => {
   const router = useRouter()
 
   const { data: session } = useSession()
@@ -32,19 +47,49 @@ const TaskCard = ({ taskId, task }) => {
     libraries,
   })
 
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+  const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
+  const [form] = Form.useForm()
+
+  const [editTask] = useEditTaskMutation()
   const [deleteTask] = useDeleteTaskMutation()
 
-  const taskDelete = (id) => {
-    deleteTask(id)
-    // router.push(AppRoutes.TASK)
-    router.push(`/task/user/${user?._id}`)
+  const Reset = () => {
+    form.resetFields()
+    setIsModalVisible(false)
+    setIsFormDisabled(false)
+  }
+
+  const onCancelModal = () => {
+    Reset()
+  }
+
+  const onSubmitModal = async () => {
+    const formData: any = await form.validateFields()
+    setIsFormDisabled(true)
+
+    // editTask({
+    //   ...task,
+    //   ...formData,
+    //   //TODO: properly datetime format
+    //   deadline: task.deadline,
+    // })
+
+    await editTask({ ...task })
+
+    Reset()
+  }
+
+  const taskDelete = () => {
+    deleteTask(taskId)
+    router.push(AppRoutes.TASK)
   }
 
   const Actions = [
-    <Button key="edit" type="primary">
+    <Button key="edit" type="primary" onClick={() => setIsModalVisible(true)}>
       <EditOutlined />
     </Button>,
-    <DeleteButton key="delete" onDelete={() => taskDelete(taskId)} />,
+    <DeleteButton key="delete" onDelete={taskDelete} />,
   ]
 
   const mapOptions = useMemo(() => {
@@ -53,8 +98,6 @@ const TaskCard = ({ taskId, task }) => {
       zoom: task?.address ? 17 : 12,
     }
   }, [task?.address])
-
-  const [activeMarker, setActiveMarker] = useState(null)
 
   return (
     <Card className={s.Card}>
@@ -75,25 +118,31 @@ const TaskCard = ({ taskId, task }) => {
         >
           <p className={s.Description}>Опис: {task?.description}</p>
           <p>Категорія: {task?.category}</p>
-          <p>Адреса: {getFormattedAddress(task?.address?.name)}</p>
+          <p>Адреса: {task?.address?.name}</p>
           <p>Виконати до: {dateToDefaultFormat(task?.deadline)}</p>
         </Card>
       </div>
 
       <div className={s.TaskInfo}>
         <Map isLoaded={isLoaded} mapOptions={mapOptions}>
-          <Marker
-            position={mapOptions?.geoCode}
-            onClick={() => setActiveMarker(true)}
-          >
-            {activeMarker ? (
-              <InfoWindow onCloseClick={() => setActiveMarker(null)}>
-                <div>{task?.address?.name}</div>
-              </InfoWindow>
-            ) : null}
-          </Marker>
+          <Marker position={mapOptions?.geoCode} />
         </Map>
       </div>
+
+      <ModalWindow
+        title={`Редагування завдання від "${task?.customer}"`}
+        isModalVisible={isModalVisible}
+        onCancel={onCancelModal}
+        onOk={onSubmitModal}
+        okText="Зберегти"
+        cancelText="Скасувати"
+      >
+        <EditTaskForm
+          defaultTask={task}
+          formDisabled={isFormDisabled}
+          form={form}
+        />
+      </ModalWindow>
     </Card>
   )
 }
