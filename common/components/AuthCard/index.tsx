@@ -5,6 +5,7 @@ import config from '@utils/config'
 import s from './index.module.scss'
 import { useState } from 'react'
 import useLocalStorage from '@common/modules/hooks/useLocalStorage'
+import { validateField } from '@common/assets/features/validators'
 
 const AuthCard = ({
   disabled,
@@ -85,6 +86,7 @@ const AuthCard = ({
               required
               labelCol={{ span: 24 }}
               label={config.auth.credentialsEmailLabel}
+              rules={validateField('email')}
               normalize={(v) => v.trim()}
             >
               <Input
@@ -99,6 +101,7 @@ const AuthCard = ({
               required
               labelCol={{ span: 24 }}
               label={config.auth.credentialsPasswordLabel}
+              rules={validateField('password')}
               normalize={(v) => v.trim()}
             >
               <Input
@@ -113,7 +116,23 @@ const AuthCard = ({
                 name="confirmPassword"
                 required
                 labelCol={{ span: 24 }}
+                dependencies={['password']}
                 label={config.auth.credentialsConfirmPasswordLabel}
+                rules={[
+                  {
+                    required: true,
+                    min: 8,
+                    message: 'Пароль має складатися з 8 символів!',
+                  },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue('password') === value) {
+                        return Promise.resolve()
+                      }
+                      return Promise.reject(new Error('Паролі не співпадають!'))
+                    },
+                  }),
+                ]}
                 normalize={(v) => v.trim()}
               >
                 <Input
@@ -127,14 +146,24 @@ const AuthCard = ({
               </Form.Item>
             )}
             <div>
-              <Button
-                onClick={() => onSubmit()}
-                className={s.signInCardSubmitBtn}
-                htmlType="submit"
-                type="primary"
-              >
-                {config.auth.credentialsButtonLabel}
-              </Button>
+              <Form.Item shouldUpdate>
+                {() => (
+                  <Button
+                    onClick={() => onSubmit()}
+                    className={s.signInCardSubmitBtn}
+                    htmlType="submit"
+                    type="primary"
+                    disabled={
+                      !form.isFieldsTouched(true) ||
+                      !!form
+                        .getFieldsError()
+                        .filter(({ errors }) => errors.length).length
+                    }
+                  >
+                    {config.auth.credentialsButtonLabel}
+                  </Button>
+                )}
+              </Form.Item>
             </div>
           </Form>
         )}

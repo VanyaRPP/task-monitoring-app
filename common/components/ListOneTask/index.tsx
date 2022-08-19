@@ -1,3 +1,4 @@
+import { FieldTimeOutlined, FireOutlined } from '@ant-design/icons'
 import { List, Table } from 'antd'
 import classNames from 'classnames'
 import moment from 'moment'
@@ -5,6 +6,7 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '../../../utils/constants'
 import { ITask } from '../../modules/models/Task'
 import StatusTag from '../UI/StatusTag'
+import ListItemDeadline from './deadline'
 import s from './style.module.scss'
 
 interface Props {
@@ -61,15 +63,7 @@ const ListOneTask: React.FC<Props> = ({ tasks }) => {
       width: '16.6%',
       ellipsis: true,
       sorter: (a, b) => Date.parse(a?.deadline) - Date.parse(b?.deadline),
-      render: (date) => (
-        <p
-          className={classNames(s.Column, {
-            [s.DateColumn]: moment(date).diff(moment(new Date()), 'days') <= 1,
-          })}
-        >
-          {moment(date).format('DD-MM hh:mm')}
-        </p>
-      ),
+      render: (deadline) => <ListItemDeadline deadline={deadline} />,
     },
   ]
   return (
