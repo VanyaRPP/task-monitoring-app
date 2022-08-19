@@ -45,4 +45,9 @@
   .Icon {
     padding-left: 10px;
   }
+  :global {
+    .ant-select-selector {
+      display: none;
+    }
+  }
 }
