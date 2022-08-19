@@ -78,7 +78,7 @@ const AdminPageDomains: React.FC = () => {
         item.name.toLowerCase().includes(debounced.toLowerCase())
       )
     )
-  }, [debounced, data])
+  }, [debounced, data?.data])
 
   return (
     <div className={s.Container}>

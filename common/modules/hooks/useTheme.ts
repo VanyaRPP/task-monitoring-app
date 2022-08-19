@@ -43,7 +43,7 @@ export default function useTheme(value: string = getDefaultTheme()) {
     for (const key in themes[theme]) {
       document.documentElement.style.setProperty(`--${key}`, themes[theme][key])
     } // custom css variables
-  }, [theme])
+  }, [theme, changeTheme])
 
   return [theme, setTheme] as const
 }
