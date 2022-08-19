@@ -45,8 +45,8 @@ const ProfilePage: React.FC = () => {
   }
 
   const handleSubmit = async () => {
-    if (profileData.address.name) {
-      await getGeoCode(profileData.address.name)
+    if (profileData.address?.name) {
+      await getGeoCode(profileData.address?.name)
       profileData.address = address
     }
     updateUser({ _id: user?._id, ...profileData })
