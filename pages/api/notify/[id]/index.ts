@@ -9,6 +9,21 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   switch (req.method) {
+    case 'DELETE':
+      try {
+        const { isSeen, type, id } = req.body
+        if (type) {
+          await Notification.findOneAndRemove({ _id: id })
+
+          return res.status(201).json({ success: true })
+        } else {
+          await Notification.remove({ userId: id })
+
+          return res.status(201).json({ success: true })
+        }
+      } catch (error) {
+        return res.status(400).json({ success: false, error: error })
+      }
     case 'PATCH':
       try {
         const { isSeen, type, id } = req.body

@@ -57,6 +57,38 @@ export const notificationApi = createApi({
       },
       invalidatesTags: ['Notification'],
     }),
+    deleteNotificationById: builder.mutation<
+      INotification,
+      Partial<INotification>
+    >({
+      query(data) {
+        const { _id } = data
+        return {
+          url: `notify/${_id}`,
+          method: 'DELETE',
+          body: {
+            type: true,
+          },
+        }
+      },
+      invalidatesTags: ['Notification'],
+    }),
+    deleteNotificationsByUserId: builder.mutation<
+      INotification,
+      Partial<INotification>
+    >({
+      query(data) {
+        const { _id } = data
+        return {
+          url: `notify/${_id}`,
+          method: 'DELETE',
+          body: {
+            type: false,
+          },
+        }
+      },
+      invalidatesTags: ['Notification'],
+    }),
   }),
 })
 
@@ -65,4 +97,6 @@ export const {
   useAddNotificationMutation,
   useUpdateNotificationStatusByIdMutation,
   useUpdateNotificationsStatusByUserIdMutation,
+  useDeleteNotificationByIdMutation,
+  useDeleteNotificationsByUserIdMutation,
 } = notificationApi
