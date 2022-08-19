@@ -29,6 +29,14 @@
   justify-content: center;
   align-items: center;
   min-width: 300px;
+  color: var(--textColor);
+  label {
+    color: var(--textColor);
+  }
+  input {
+    color: var(--textColor);
+    background-color: var(--backgroundColorPrimary);
+  }
 
   @media (max-width: 969px) {
     padding: 0 10px;
