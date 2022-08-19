@@ -85,6 +85,16 @@ const AuthCard = ({
               required
               labelCol={{ span: 24 }}
               label={config.auth.credentialsEmailLabel}
+              rules={[
+                {
+                  type: 'email',
+                  message: 'The input is not valid E-mail!',
+                },
+                {
+                  required: true,
+                  message: 'Please input your E-mail!',
+                },
+              ]}
               normalize={(v) => v.trim()}
             >
               <Input
@@ -99,6 +109,12 @@ const AuthCard = ({
               required
               labelCol={{ span: 24 }}
               label={config.auth.credentialsPasswordLabel}
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input your password!',
+                },
+              ]}
               normalize={(v) => v.trim()}
             >
               <Input
@@ -127,14 +143,24 @@ const AuthCard = ({
               </Form.Item>
             )}
             <div>
-              <Button
-                onClick={() => onSubmit()}
-                className={s.signInCardSubmitBtn}
-                htmlType="submit"
-                type="primary"
-              >
-                {config.auth.credentialsButtonLabel}
-              </Button>
+              <Form.Item shouldUpdate>
+                {() => (
+                  <Button
+                    onClick={() => onSubmit()}
+                    className={s.signInCardSubmitBtn}
+                    htmlType="submit"
+                    type="primary"
+                    disabled={
+                      !form.isFieldsTouched(true) ||
+                      !!form
+                        .getFieldsError()
+                        .filter(({ errors }) => errors.length).length
+                    }
+                  >
+                    {config.auth.credentialsButtonLabel}
+                  </Button>
+                )}
+              </Form.Item>
             </div>
           </Form>
         )}
