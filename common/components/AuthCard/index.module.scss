@@ -32,9 +32,11 @@
       }
     }
   }
-  :global {
-    .ant-fom-item-label > label {
-      color: purple;
-    }
+}
+.Signing {
+  display: flex;
+  justify-content: space-between;
+  .Link_signup {
+    color: var(--primaryColor);
   }
 }

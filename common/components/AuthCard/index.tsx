@@ -7,6 +7,9 @@ import { useState } from 'react'
 import useLocalStorage from '@common/modules/hooks/useLocalStorage'
 import { validateField } from '@common/assets/features/validators'
 import { LogoutOutlined } from '@ant-design/icons'
+import { AppRoutes } from '@utils/constants'
+import { useRouter } from 'next/router'
+import Link from 'next/link'
 
 const AuthCard = ({
   disabled,
@@ -27,6 +30,7 @@ const AuthCard = ({
 }) => {
   const [storedValue, setValue] = useLocalStorage('login-type', null)
   const [cardSide, setCardSide] = useState<boolean>(storedValue)
+  const router = useRouter()
 
   const handleSideChange = () => {
     setCardSide(!cardSide)
@@ -45,16 +49,7 @@ const AuthCard = ({
           <LoginOutlined />
         </div>
       )}
-      {!isSignUp && (
-        <div className={s.cardHeader}>
-          <div onClick={handleSideChange}>
-            {storedValue
-              ? config.titles.signUpTitle
-              : config.titles.signUpTitle}
-          </div>
-          <LogoutOutlined />
-        </div>
-      )}
+
       <div className={s.cardInner}>
         {!isSignUp && cardSide ? (
           <form
@@ -73,6 +68,14 @@ const AuthCard = ({
             <Button className={s.Button} htmlType="submit" type="primary">
               <MailOutlined style={{ fontSize: '1.2rem' }} />
               <span>Увійти з Email</span>
+            </Button>
+            <Button
+              type="primary"
+              onClick={() => {
+                router.push(AppRoutes.AUTH_SIGN_UP)
+              }}
+            >
+              {config.titles.signUpTitle}
             </Button>
           </form>
         ) : (
@@ -156,7 +159,7 @@ const AuthCard = ({
                 />
               </Form.Item>
             )}
-            <div>
+            <div className={s.Signing}>
               <Form.Item shouldUpdate>
                 {() => (
                   <Button
@@ -175,6 +178,25 @@ const AuthCard = ({
                   </Button>
                 )}
               </Form.Item>
+              {router.route !== AppRoutes.AUTH_SIGN_UP ? (
+                <div
+                  className={s.Link_signup}
+                  onClick={() => {
+                    router.push(AppRoutes.AUTH_SIGN_UP)
+                  }}
+                >
+                  {config.titles.signUpTitle}
+                </div>
+              ) : (
+                <div
+                  className={s.Link_signup}
+                  onClick={() => {
+                    router.push(AppRoutes.AUTH_SIGN_IN)
+                  }}
+                >
+                  {config.titles.signInTitle}
+                </div>
+              )}
             </div>
           </Form>
         )}
