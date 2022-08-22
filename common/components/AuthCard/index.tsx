@@ -6,6 +6,7 @@ import s from './index.module.scss'
 import { useState } from 'react'
 import useLocalStorage from '@common/modules/hooks/useLocalStorage'
 import { validateField } from '@common/assets/features/validators'
+import { LogoutOutlined } from '@ant-design/icons'
 
 const AuthCard = ({
   disabled,
@@ -42,6 +43,16 @@ const AuthCard = ({
               : config.auth.magicLinkTypeLabel}
           </div>
           <LoginOutlined />
+        </div>
+      )}
+      {!isSignUp && (
+        <div className={s.cardHeader}>
+          <div onClick={handleSideChange}>
+            {storedValue
+              ? config.titles.signUpTitle
+              : config.titles.signUpTitle}
+          </div>
+          <LogoutOutlined />
         </div>
       )}
       <div className={s.cardInner}>

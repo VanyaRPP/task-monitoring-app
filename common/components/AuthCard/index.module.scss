@@ -12,6 +12,7 @@
     display: flex;
     align-items: center;
     justify-content: right;
+
     div {
       margin-right: 7px;
     }
@@ -29,6 +30,11 @@
       .Input {
         width: 100%;
       }
+    }
+  }
+  :global {
+    .ant-fom-item-label > label {
+      color: purple;
     }
   }
 }
