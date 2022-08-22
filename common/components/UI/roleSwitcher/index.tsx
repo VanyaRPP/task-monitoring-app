@@ -82,6 +82,7 @@ const RoleSwitcher: React.FC = () => {
         <Radio.Button value="Worker">Майстер</Radio.Button>
         <Radio.Button value="Admin">Адмін</Radio.Button>
       </Radio.Group>
+      <div className={s.Worker}>
       <ModalWindow
         title="Переключити на роль майстра"
         isModalVisible={isModalVisible}
@@ -101,6 +102,7 @@ const RoleSwitcher: React.FC = () => {
           setError={setError}
         />
       </ModalWindow>
+      </div>
     </>
   )
 }

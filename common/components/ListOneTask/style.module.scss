@@ -11,6 +11,13 @@
   :global {
     .ant-table-thead > tr > th {
       text-align: center;
+      background-color: var(--backgroundColorElements);
+    }
+    .ant-table-column-title- {
+      color: var(--textColor);
+    }
+    td.ant-table-column-sort {
+      background-color: var(--backgroundColor);
     }
     .ant-table-tbody > tr.ant-table-row:hover > td {
       background: var(--backgroundColorElements) !important;
@@ -25,6 +32,7 @@
   tr {
     text-align: center;
     background-color: var(--backgroundColor);
+
     color: var(--textColor);
   }
   tr > th {
