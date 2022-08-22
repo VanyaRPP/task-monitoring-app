@@ -7,6 +7,7 @@ import { useAppSelector } from '@common/modules/store/hooks'
 import { TaskView } from '@utils/constants'
 import { Radio } from 'antd'
 import { useState } from 'react'
+import BackButton from '../BackButton'
 import s from './style.module.scss'
 
 interface Props {
@@ -18,29 +19,34 @@ const TaskViewer: React.FC<Props> = ({ tasks }) => {
   // const { viewer } = useAppSelector((state)=>state.taskApi)
   return (
     <>
-      <div className={s.Buttons}>
-        <Radio.Group
-          defaultValue={TaskView.CARD}
-          buttonStyle="solid"
-          onChange={(e) => setValue(e.target.value)}
-        >
-          <Radio.Button
-            value={TaskView.CARD}
-            onChange={() => {
-              setView(taskView)
-            }}
+      <div className={s.Opportunities}>
+        <div className={s.Button}>
+          <BackButton />
+        </div>
+        <div className={s.Buttons}>
+          <Radio.Group
+            defaultValue={TaskView.CARD}
+            buttonStyle="solid"
+            onChange={(e) => setValue(e.target.value)}
           >
-            <AppstoreOutlined />
-          </Radio.Button>
-          <Radio.Button
-            value={TaskView.LIST}
-            onChange={() => {
-              setView(taskView)
-            }}
-          >
-            <ProfileOutlined />
-          </Radio.Button>
-        </Radio.Group>
+            <Radio.Button
+              value={TaskView.CARD}
+              onChange={() => {
+                setView(taskView)
+              }}
+            >
+              <AppstoreOutlined />
+            </Radio.Button>
+            <Radio.Button
+              value={TaskView.LIST}
+              onChange={() => {
+                setView(taskView)
+              }}
+            >
+              <ProfileOutlined />
+            </Radio.Button>
+          </Radio.Group>
+        </div>
       </div>
       {taskView === TaskView.CARD ? (
         <CardAllTasks tasks={tasks} />

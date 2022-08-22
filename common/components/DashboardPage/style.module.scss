@@ -17,6 +17,7 @@
     font-size: 26px;
     transition: color 0.2s;
     color: var(--primaryColor);
+    margin-top: -0.5rem;
   }
 }
 
@@ -157,7 +158,7 @@
 }
 
 .Buttons {
-  @media (max-width: 425px) {
+  @media (max-width: 525px) {
     display: flex;
     flex-direction: column;
     margin-top: -1rem;
