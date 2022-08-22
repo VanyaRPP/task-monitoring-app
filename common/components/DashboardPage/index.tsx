@@ -21,8 +21,9 @@ const Dashboard: React.FC = () => {
     <>
       <div className={s.Header}>
         <h1>Дошка</h1>
-        <div>
+        <div className={s.Buttons}>
           <Button
+            className={s.Button}
             ghost
             type="primary"
             onClick={() => setIsModalVisible(!isModalVisible)}
