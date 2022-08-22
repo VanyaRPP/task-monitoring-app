@@ -60,7 +60,7 @@ const Header: React.FC = () => {
       )}
       {status === 'authenticated' && (
         <Popover content={<Empty />} trigger="click">
-          <NotificationOutlined />
+          <NotificationOutlined className={s.Notification} />
         </Popover>
       )}
       <div className={s.LoginUser}>
