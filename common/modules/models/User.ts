@@ -22,7 +22,23 @@ export interface IFeedback {
   text: string
 }
 
-const UserSchema = new Schema<IUser>({
+// const UserSchema = new Schema<IUser>({
+//   name: { type: String, required: true },
+//   email: { type: String, required: true },
+//   image: {
+//     type: String,
+//     default: 'https://avatars.githubusercontent.com/u/583231?v=4',
+//   },
+//   role: { type: String, default: 'User' },
+//   tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
+//   rating: { type: Number, default: 0 },
+//   feedback: [{ type: Object }],
+//   isWorker: { type: Boolean, default: false },
+//   tel: { type: String },
+//   address: { type: Object },
+//   password: { type: String },
+// })
+const UserSchema = new mongoose.Schema<IUser>({
   name: { type: String, required: true },
   email: { type: String, required: true },
   image: {
@@ -40,5 +56,5 @@ const UserSchema = new Schema<IUser>({
 })
 
 // const User = mongoose.models.User || mongoose.model('User', UserSchema)
-const User = mongoose.models.User as mongoose.Model<IUser>
+const User = mongoose.models.IUser as mongoose.Model<IUser>
 export default User
