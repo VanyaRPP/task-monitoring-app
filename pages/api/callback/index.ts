@@ -1,3 +1,5 @@
+/* eslint-disable */
+// @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from 'pages/api/api.config'
 import CallBack from '../../../common/modules/models/Callback'
