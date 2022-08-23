@@ -77,24 +77,20 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
 
   const columns = [
     {
-      // title: 'Завдання',
       title: searchInput('name', 'Завдання'),
       dataIndex: 'name',
       key: 'name',
       width: '20%',
       ellipsis: true,
       render: (text) => text,
-      sorter: (a, b) => a.name.length - b.name.length,
     },
     {
-      // title: 'Адреса',
       title: searchInput('address', 'Адреса'),
       dataIndex: 'address',
       key: 'address',
       width: '20%',
       ellipsis: true,
       render: (address) => address?.name,
-      sorter: (a, b) => a.address.length - b.address.length,
     },
     {
       title: 'Дата',

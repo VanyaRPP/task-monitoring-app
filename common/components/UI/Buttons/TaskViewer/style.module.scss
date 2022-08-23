@@ -4,3 +4,105 @@
   justify-content: center;
   margin-bottom: 0.5rem;
 }
+
+.Filtration {
+  display: flex;
+
+  margin-bottom: 1rem;
+  gap: 1rem;
+
+  @media (max-width: 1080px) {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  > * {
+    flex: 0 1 15%;
+
+    @media (max-width: 1080px) {
+      flex: 0 1 1;
+    }
+  }
+
+  > div {
+    display: inline-flex;
+  }
+
+  input,
+  > div > div {
+    width: 200px;
+    @media (max-width: 1080px) {
+      width: 100%;
+    }
+  }
+
+  input {
+    color: var(--textColor);
+    border-color: #88888830 !important;
+    &:hover {
+      border-color: var(--primaryColor) !important;
+    }
+    &:focus {
+      border-color: var(--primaryColorHover) !important;
+    }
+    background-color: transparent;
+  }
+
+  input,
+  button,
+  > div > div {
+    background: var(--backgroundColor) !important;
+    color: var(--textColor);
+    border-color: #88888830 !important;
+
+    &:hover {
+      border-color: var(--primaryColor) !important;
+    }
+
+    input::placeholder {
+      color: blue !important;
+      font-size: 1.5em;
+    }
+
+    transition: 0.3s;
+
+    span {
+      color: #c4bfcb !important;
+    }
+
+    > div {
+      background-color: transparent !important;
+      border-color: #88888830 !important;
+      &:hover {
+        border-color: var(--primaryColor) !important;
+      }
+      &:focus {
+        border-color: var(--primaryColorHover) !important;
+      }
+
+      span {
+        color: #c4bfcb !important;
+        z-index: 1;
+      }
+    }
+  }
+  input,
+  > div > div {
+    &:focus {
+      border-color: var(--primaryColorHover) !important;
+    }
+  }
+
+  button {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    padding: 0;
+    color: #c4bfcb;
+    transform: 0.3s;
+  }
+}
+
+.SortButton {
+  width: auto !important;
+}

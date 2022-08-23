@@ -12,6 +12,7 @@ import Filter from '../../../common/components/UI/Filtration/index'
 import { ITask } from '../../../common/modules/models/Task'
 import { AppRoutes } from '../../../utils/constants'
 import { authOptions } from '../../api/auth/[...nextauth]'
+import TaskViewer from '@common/components/UI/Buttons/TaskViewer'
 import s from './../style.module.scss'
 
 const UserTasks: React.FC = () => {
@@ -73,7 +74,13 @@ const UserTasks: React.FC = () => {
       ) : (
         <Empty description="Немає даних" className={s.Empty} />
       )} */}
-      <Filter tasks={dataSource} />
+
+      {/* <Filter tasks={dataSource} /> */}
+
+      {/* <Filter> */}
+      <TaskViewer tasks={tasks} />
+      {/* </Filter> */}
+
       <AddTaskModal
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}

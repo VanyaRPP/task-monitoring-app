@@ -47,7 +47,6 @@ const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
 
   const columns = [
     {
-      // title: 'Назва',
       title: searchInput('name', 'Назва'),
       dataIndex: 'name',
       key: 'name',
