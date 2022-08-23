@@ -22,7 +22,7 @@ export interface IFeedback {
   text: string
 }
 
-const UserSchema = new mongoose.Schema<IUser>({
+const UserSchema = new Schema<IUser>({
   name: { type: String, required: true },
   email: { type: String, required: true },
   image: {
