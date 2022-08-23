@@ -14,6 +14,8 @@ export default async function handler(
     case 'POST':
       try {
         const { name, email, password } = req.body
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         User.findOne({
           email,
         }).then(() => new Error('Error: User is already exist!'))
