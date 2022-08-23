@@ -1,3 +1,5 @@
+/* eslint-disable */
+// @ts-ignore
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
@@ -49,8 +51,6 @@ export const authOptions: NextAuthOptions = {
       credentials: {},
       async authorize(credentials: ICredentials, req) {
         try {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
           const user = await User.findOne({
             email: credentials.email,
           })
