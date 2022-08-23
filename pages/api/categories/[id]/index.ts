@@ -14,7 +14,7 @@ export default async function handler(
     case 'GET':
       try {
         const categories = await Category.findById(req.query.id)
-        return res.status(201).json({ success: true, data: categories })
+        return res.status(200).json({ success: true, data: categories })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }

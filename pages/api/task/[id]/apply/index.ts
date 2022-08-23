@@ -20,7 +20,7 @@ export default async function handler(
             status: TaskStatuses.PENDING_SELECTION,
           }
         )
-        return res.status(201).json({ success: true, data: Utask })
+        return res.status(200).json({ success: true, data: Utask })
       } catch (error) {
         return res.status(400).json({ success: false })
       }

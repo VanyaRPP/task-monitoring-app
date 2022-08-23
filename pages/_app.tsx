@@ -1,4 +1,5 @@
 import '../styles/globals.scss'
+import '@styles/antd-override.scss'
 import type { AppProps } from 'next/app'
 import { SessionProvider } from 'next-auth/react'
 import { Provider } from 'react-redux'

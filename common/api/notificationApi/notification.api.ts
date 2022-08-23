@@ -28,12 +28,12 @@ export const notificationApi = createApi({
       Partial<INotification>
     >({
       query(data) {
-        const { _id, ...body } = data
+        const { _id } = data
         return {
           url: `notify/${_id}`,
           method: 'PATCH',
           body: {
-            ...body,
+            isSeen: true,
             type: true,
           },
         }
@@ -45,12 +45,44 @@ export const notificationApi = createApi({
       Partial<INotification>
     >({
       query(data) {
-        const { _id, ...body } = data
+        const { _id } = data
         return {
           url: `notify/${_id}`,
           method: 'PATCH',
           body: {
-            ...body,
+            isSeen: true,
+            type: false,
+          },
+        }
+      },
+      invalidatesTags: ['Notification'],
+    }),
+    deleteNotificationById: builder.mutation<
+      INotification,
+      Partial<INotification>
+    >({
+      query(data) {
+        const { _id } = data
+        return {
+          url: `notify/${_id}`,
+          method: 'DELETE',
+          body: {
+            type: true,
+          },
+        }
+      },
+      invalidatesTags: ['Notification'],
+    }),
+    deleteNotificationsByUserId: builder.mutation<
+      INotification,
+      Partial<INotification>
+    >({
+      query(data) {
+        const { _id } = data
+        return {
+          url: `notify/${_id}`,
+          method: 'DELETE',
+          body: {
             type: false,
           },
         }
@@ -65,4 +97,6 @@ export const {
   useAddNotificationMutation,
   useUpdateNotificationStatusByIdMutation,
   useUpdateNotificationsStatusByUserIdMutation,
+  useDeleteNotificationByIdMutation,
+  useDeleteNotificationsByUserIdMutation,
 } = notificationApi
