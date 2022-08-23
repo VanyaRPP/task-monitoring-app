@@ -55,5 +55,6 @@
   .Input:-webkit-autofill:focus {
     -webkit-text-fill-color: var(--textColor) !important;
     -webkit-box-shadow: 0 0 0 100px var(--backgroundColorPrimary) inset !important;
+    box-shadow: 0 0 0 100px var(--backgroundColorPrimary) inset !important;
   }
 }
