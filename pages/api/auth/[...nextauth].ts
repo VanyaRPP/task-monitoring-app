@@ -49,11 +49,11 @@ export const authOptions: NextAuthOptions = {
       credentials: {},
       async authorize(credentials: ICredentials, req) {
         try {
-          // @ts-ignore:next-line
+          /* eslint-disable  @typescript-eslint/no-unused-vars */
           const user = await User.findOne({
             email: credentials.email,
           })
-
+          /* eslint-enable  @typescript-eslint/no-unused-vars */
           // encrypting and comparing password
           const result = await bcrypt.compare(
             credentials.password,
