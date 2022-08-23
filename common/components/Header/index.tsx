@@ -13,7 +13,6 @@ import NotificationOutlined from '@ant-design/icons/lib/icons/NotificationOutlin
 import ExclamationCircleFilled from '@ant-design/icons/lib/icons/ExclamationCircleFilled'
 import { useEffect, useState } from 'react'
 import useLocalStorage from '@common/modules/hooks/useLocalStorage'
-import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { useGetTaskByIdQuery } from '@common/api/taskApi/task.api'
 
 const Notification = ({ id }: { id: string }) => {
