@@ -51,7 +51,7 @@ export const Executor = ({ executor, type }) => {
   }
 
   if (type === 'rating') {
-    return <div>{worker?.rating}</div>
+    return <div>{Math.round(worker?.rating)}</div>
   }
 }
 
