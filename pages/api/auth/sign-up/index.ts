@@ -22,6 +22,8 @@ export default async function handler(
 
         bcrypt.hash(password, saltRounds, async function (err, hash) {
           if (err) throw Error('Error: Encryption error!')
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           await User.create({
             name,
             email,
