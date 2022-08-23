@@ -1,5 +1,3 @@
-/* eslint-disable */
-// @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import bcrypt from 'bcrypt'
 import start, { Data } from 'pages/api/api.config'
