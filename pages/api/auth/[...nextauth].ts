@@ -49,6 +49,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {},
       async authorize(credentials: ICredentials, req) {
         try {
+          // @ts-ignore:next-line
           const user = await User.findOne({
             email: credentials.email,
           })
