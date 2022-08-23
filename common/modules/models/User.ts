@@ -39,5 +39,6 @@ const UserSchema = new Schema<IUser>({
   password: { type: String },
 })
 
-const User = mongoose.models.User || mongoose.model('User', UserSchema)
+// const User = mongoose.models.User || mongoose.model('User', UserSchema)
+const User = mongoose.models.User as mongoose.Model<IUser>
 export default User
