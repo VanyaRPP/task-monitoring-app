@@ -7,16 +7,16 @@
   .FirstLine,
   .SecondLine,
   .ThirdLine {
-    width: 35px;
-    height: 5px;
+    width: 25px;
+    height: 2px;
     background-color: var(--primaryColor);
     margin: 6px 0;
     transition: 0.4s;
   }
 
   .ChangeBurger .FirstLine {
-    -webkit-transform: rotate(-45deg) translate(-9px, 6px);
-    transform: rotate(-45deg) translate(-9px, 6px);
+    -webkit-transform: rotate(-45deg) translate(-4px, 5px);
+    transform: rotate(-45deg) translate(-4px, 5px);
   }
 
   .ChangeBurger .SecondLine {
@@ -24,8 +24,8 @@
   }
 
   .ChangeBurger .ThirdLine {
-    -webkit-transform: rotate(45deg) translate(-9px, -6px);
-    transform: rotate(45deg) translate(-9px, -7px);
+    -webkit-transform: rotate(45deg) translate(-6px, -7px);
+    transform: rotate(45deg) translate(-6px, -7px);
   }
 
   @media (min-width: 768px) {

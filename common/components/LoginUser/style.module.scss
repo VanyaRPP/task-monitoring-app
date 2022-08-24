@@ -71,3 +71,8 @@
     color: var(--textColor);
   }
 }
+
+.SignButtons {
+  display: flex;
+  flex-direction: row;
+}

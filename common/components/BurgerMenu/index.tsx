@@ -11,7 +11,6 @@ import premiumIcon from '../../assets/premium/diamond.png'
 import Diamant from '../../assets/svg/diamant'
 import LogoCircle from '../../assets/svg/logo_circle'
 import LoginUser from '../LoginUser'
-// import { SearchBar } from '../UI/SearchBar'
 import s from './style.module.scss'
 import ThemeSwitcher from '../UI/ThemeSwitcher'
 
@@ -123,14 +122,25 @@ const BurgerMenu: React.FC = () => {
                 <span>Вийти</span>
               </div>
             ) : (
-              <div
-                className={s.Button}
-                onClick={() => {
-                  Router.push(AppRoutes.AUTH_SIGN_IN)
-                }}
-              >
-                <span>Увійти</span>
-              </div>
+              <>
+                <div
+                  className={s.Button}
+                  onClick={() => {
+                    Router.push(AppRoutes.AUTH_SIGN_IN)
+                  }}
+                >
+                  <span>Увійти</span>
+                </div>
+                <Divider className={s.Divider} />
+                <div
+                  className={s.Button}
+                  onClick={() => {
+                    Router.push(AppRoutes.AUTH_SIGN_UP)
+                  }}
+                >
+                  <span>Зареєструватися</span>
+                </div>
+              </>
             )}
             <Divider className={s.Divider} />
             <div
@@ -142,7 +152,6 @@ const BurgerMenu: React.FC = () => {
             </div>
             <Divider className={s.Divider} />
           </div>
-          <Divider className={s.Divider} />
         </div>
       </Drawer>
     </>

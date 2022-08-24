@@ -45,7 +45,7 @@ const HomePage: React.FC = () => {
             router.push(AppRoutes.AUTH_SIGN_IN)
           }}
         >
-          Логін
+          Увійти
         </Button>
 
         <Button
