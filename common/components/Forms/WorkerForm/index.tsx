@@ -64,6 +64,7 @@ const WorkerForm: React.FC<PropsType> = ({
           addonBefore="+380"
           style={{ width: '100%' }}
           placeholder="Введіть номер телефону"
+          autoComplete="off"
           className={s.Input}
         />
       </Form.Item>

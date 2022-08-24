@@ -40,14 +40,23 @@
 }
 
 .Divider {
+  background-color: var(--textColor);
   width: 1px;
   height: 200px;
   opacity: 0.8;
-  background-color: #858f96;
 
   @media (max-width: 969px) {
     width: 200px;
     height: 1px;
+  }
+}
+
+.DividerOr {
+  :global {
+    .ant-divider-horizontal.ant-divider-with-text,
+    .ant-divider-inner-text {
+      color: var(--textColor);
+    }
   }
 }
 

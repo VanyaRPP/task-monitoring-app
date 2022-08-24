@@ -111,7 +111,9 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
               <span onClick={handleSideChange}>Увійти з Email</span>
             </Button>
           </form>
-          <Divider plain>Або</Divider>
+          <Divider className={s.DividerOr} plain>
+            Або
+          </Divider>
           {Object.values(providers).map(
             (provider: any) =>
               provider?.name !== 'Email' &&
