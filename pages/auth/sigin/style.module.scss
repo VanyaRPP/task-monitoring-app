@@ -50,14 +50,23 @@
 }
 
 .Divider {
+  background-color: var(--textColor);
   width: 1px;
   height: 200px;
   opacity: 0.8;
-  background-color: #858f96;
 
   @media (max-width: 969px) {
     width: 200px;
     height: 1px;
+  }
+}
+
+.DividerOr {
+  :global {
+    .ant-divider-horizontal.ant-divider-with-text,
+    .ant-divider-inner-text {
+      color: var(--textColor);
+    }
   }
 }
 
@@ -78,6 +87,11 @@
     line-height: 1.5715;
     border: 1px solid #d9d9d9;
     border-radius: 2px;
+    background-color: var(--backgroundColorPrimary);
+
+    &::placeholder {
+      color: var(--textColor);
+    }
 
     &:hover {
       border-color: var(--ant-primary-5);
@@ -93,6 +107,13 @@
       color: var(--ant-primary-color-active);
       border-color: var(--ant-primary-color-active);
     }
+  }
+
+  .Input:-webkit-autofill,
+  .Input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--textColor) !important;
+    -webkit-box-shadow: 0 0 0 100px var(--backgroundColorPrimary) inset !important;
+    box-shadow: 0 0 0 100px var(--backgroundColorPrimary) inset !important;
   }
 
   .Button {

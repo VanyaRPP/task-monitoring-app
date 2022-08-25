@@ -7,6 +7,7 @@ import { AppRoutes } from '../../../utils/constants'
 import classNames from 'classnames'
 import s from './style.module.scss'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
+import router from 'next/router'
 
 const LoginUser: React.FC = () => {
   const [menuActive, setMenuActive] = useState(false)
@@ -17,7 +18,7 @@ const LoginUser: React.FC = () => {
 
   if (!session?.user) {
     return (
-      <>
+      <div className={s.SignButtons}>
         <Button
           onClick={() => signIn()}
           ghost
@@ -26,7 +27,17 @@ const LoginUser: React.FC = () => {
         >
           Увійти
         </Button>
-      </>
+        <Button
+          onClick={() => {
+            router.push(AppRoutes.AUTH_SIGN_UP)
+          }}
+          ghost
+          type="primary"
+          className={s.Button}
+        >
+          Зареєструватися
+        </Button>
+      </div>
     )
   }
 

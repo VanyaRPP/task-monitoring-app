@@ -16,9 +16,12 @@ $border-radius: 5px;
   padding: 8px;
   color: var(--textColor);
 
+  .text {
+    color: var(--textColor);
+  }
   .btnContainer {
     .save {
-      color: #ffffff;
+      color: var(--textColor);
       background-color: var(--primaryColor);
       border-radius: $border-radius;
     }

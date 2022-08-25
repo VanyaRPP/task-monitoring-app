@@ -68,7 +68,6 @@ const TaskCard = ({ taskId, task }) => {
   const taskDeadline = moment(task?.deadline)
   const currentDate = moment(new Date())
   const differ = taskDeadline.diff(currentDate, 'days')
-  // console.log(differ)
 
   return (
     <Card className={s.Card}>

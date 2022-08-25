@@ -1,4 +1,8 @@
-import { InfoOutlined } from '@ant-design/icons'
+import {
+  FieldTimeOutlined,
+  FireOutlined,
+  InfoOutlined,
+} from '@ant-design/icons'
 import { Badge, Button, Card, Table } from 'antd'
 import classNames from 'classnames'
 import moment from 'moment'
@@ -18,6 +22,9 @@ interface Props {
 }
 
 const CardOneTask: React.FC<Props> = ({ task }) => {
+  const deadline = task?.deadline
+  const dateDiff = moment(deadline).diff(moment(new Date()), 'days')
+
   return (
     <Card
       onClick={() => Router.push(AppRoutes.TASK + '/' + task._id)}
@@ -34,7 +41,6 @@ const CardOneTask: React.FC<Props> = ({ task }) => {
               onClick={() => Router.push(AppRoutes.TASK + '/' + task._id)}
             >
               <InfoOutlined />
-              {/* {'Info'} */}
             </Button>
           </Badge>
         </>
@@ -48,11 +54,25 @@ const CardOneTask: React.FC<Props> = ({ task }) => {
         [s.Rejected]: task?.status === TaskStatuses.REJECTED,
       })}
     >
-      <p>Статус: {<StatusTag status={task?.status} />}</p>
-      <p>Категорія: {task?.category}</p>
-      <p>Опис: {task.description}</p>
-      <p>Адреса: {getFormattedAddress(task?.address?.name)}</p>
-      <p>Виконати до: {dateToDefaultFormat(task?.deadline)}</p>
+      <div className={s.CardInfo}>
+        <p>Статус: {<StatusTag status={task?.status} />}</p>
+        <p>Категорія: {task?.category}</p>
+        <p>Опис: {task.description}</p>
+        <p>Адреса: {getFormattedAddress(task?.address?.name)}</p>
+        <p
+          className={classNames(s.Column, {
+            [s.CloseDateColumn]: dateDiff <= 1 && dateDiff >= 0,
+            [s.OutDateColumn]: dateDiff < 0,
+          })}
+        >
+          Виконати до: {dateToDefaultFormat(task?.deadline)}
+          {dateDiff <= 1 && dateDiff >= 0 ? (
+            <FireOutlined className={s.Icon} />
+          ) : dateDiff < 0 ? (
+            <FieldTimeOutlined className={s.Icon} />
+          ) : null}
+        </p>
+      </div>
     </Card>
   )
 }
