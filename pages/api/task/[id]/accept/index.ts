@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import User from 'common/modules/models/User'
 import type { NextApiResponse, NextApiRequest } from 'next'
 import { TaskStatuses } from 'utils/constants'
