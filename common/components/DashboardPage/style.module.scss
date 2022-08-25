@@ -17,6 +17,7 @@
     font-size: 26px;
     transition: color 0.2s;
     color: var(--primaryColor);
+    margin-top: -0.5rem;
   }
 }
 
@@ -154,4 +155,18 @@
   flex: 0.33, 0.33, 0.33;
   gap: 1rem;
   justify-content: space-between;
+}
+
+.Buttons {
+  @media (max-width: 525px) {
+    display: flex;
+    flex-direction: column;
+    margin-top: -1rem;
+    margin-bottom: 0.5rem;
+    .Button {
+      font-size: calc(11px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
+      padding: 0;
+      margin-bottom: 1px;
+    }
+  }
 }

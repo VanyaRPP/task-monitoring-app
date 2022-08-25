@@ -82,25 +82,27 @@ const RoleSwitcher: React.FC = () => {
         <Radio.Button value="Worker">Майстер</Radio.Button>
         <Radio.Button value="Admin">Адмін</Radio.Button>
       </Radio.Group>
-      <ModalWindow
-        title="Переключити на роль майстра"
-        isModalVisible={isModalVisible}
-        onCancel={onCancelModal}
-        onOk={onSubmitModal}
-        okText="Так"
-        cancelText="Ні"
-      >
-        <WorkerForm
-          isFormDisabled={isFormDisabled}
-          form={form}
-          user={user}
-          setAddress={setAddress}
-          address={address}
-          isLoaded={Object.keys(user).length > 0 ?? false}
-          error={error}
-          setError={setError}
-        />
-      </ModalWindow>
+      <div className={s.Worker}>
+        <ModalWindow
+          title="Переключити на роль майстра"
+          isModalVisible={isModalVisible}
+          onCancel={onCancelModal}
+          onOk={onSubmitModal}
+          okText="Так"
+          cancelText="Ні"
+        >
+          <WorkerForm
+            isFormDisabled={isFormDisabled}
+            form={form}
+            user={user}
+            setAddress={setAddress}
+            address={address}
+            isLoaded={Object.keys(user).length > 0 ?? false}
+            error={error}
+            setError={setError}
+          />
+        </ModalWindow>
+      </div>
     </>
   )
 }

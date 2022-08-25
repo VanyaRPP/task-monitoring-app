@@ -2,5 +2,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  :global {
+    .ant-radio-button-wrapper {
+      background-color: var(--backgroundColorElements);
+      color: var(--textColor);
+    }
+  }
+}
+.Opportunities {
+  .Button {
+    display: none;
+  }
+  @media (max-width: 525px) {
+    display: flex;
+    justify-content: space-evenly;
+    .Button {
+      display: flex;
+    }
+  }
 }

@@ -12,6 +12,7 @@
     display: flex;
     align-items: center;
     justify-content: right;
+
     div {
       margin-right: 7px;
     }
@@ -30,5 +31,12 @@
         width: 100%;
       }
     }
+  }
+}
+.Signing {
+  display: flex;
+  justify-content: space-between;
+  .Link_signup {
+    color: var(--primaryColor);
   }
 }

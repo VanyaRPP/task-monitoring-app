@@ -9,7 +9,7 @@ import Tasks from './blocks/tasks'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 import { useSession } from 'next-auth/react'
 import CategoriesBlock from './blocks/categories'
-import { TaskButton } from '../UI/Buttons'
+import { BackButton, TaskButton } from '../UI/Buttons'
 
 const Dashboard: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
@@ -20,9 +20,11 @@ const Dashboard: React.FC = () => {
   return (
     <>
       <div className={s.Header}>
+        <BackButton />
         <h1>Дошка</h1>
-        <div>
+        <div className={s.Buttons}>
           <Button
+            className={s.Button}
             ghost
             type="primary"
             onClick={() => setIsModalVisible(!isModalVisible)}

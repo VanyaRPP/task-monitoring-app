@@ -178,7 +178,7 @@
     transition: background 0.5s, color 0.2s, border 0.2s;
     color: var(--textColor);
     background-color: var(--backgroundColorPrimary);
-    border-color: transparent !important;
+    border-color: #88888830 !important;
     &:hover {
       border-color: var(--primaryColor) !important;
     }
