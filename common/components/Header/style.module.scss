@@ -51,9 +51,19 @@
 .Notification {
   display: flex;
   align-content: center;
+  background-color: rgba(170, 170, 170, 0.2);
+  padding: 5px;
+  border-radius: 10px;
   div:first-child {
-    margin-right: 7px;
+    margin: 0 7px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
+}
+.Notification:hover {
+  background-color: rgba(170, 170, 170, 0.5);
+  cursor: pointer;
 }
 
 .Button_Premium {

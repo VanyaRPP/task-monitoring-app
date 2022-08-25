@@ -22,7 +22,7 @@ export default async function handler(
         const form = new formidable.IncomingForm()
         form.parse(req, async function (err, fields, files) {
           const id = await saveFile(files.file)
-          return res.status(200).send({ success: true, data: { imageId: id } })
+          return res.status(201).send({ success: true, data: { imageId: id } })
         })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
