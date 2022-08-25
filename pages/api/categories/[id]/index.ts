@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Category from 'common/modules/models/Category'

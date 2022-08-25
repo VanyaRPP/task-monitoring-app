@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Domain from 'common/modules/models/Domain'
 import start, { Data } from 'pages/api/api.config'
