@@ -12,6 +12,7 @@
     display: flex;
     align-items: center;
     justify-content: right;
+
     div {
       margin-right: 7px;
     }
@@ -34,7 +35,6 @@
     }
   }
 }
-
 .FormItem {
   :global {
     .ant-form-item-label > label {

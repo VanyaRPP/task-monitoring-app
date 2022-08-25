@@ -6,6 +6,12 @@
   font-size: 32px;
 }
 
+.Admin {
+  @media (max-width: 525px) {
+    display: none;
+  }
+}
+
 .Container {
   display: flex;
   gap: 2rem;

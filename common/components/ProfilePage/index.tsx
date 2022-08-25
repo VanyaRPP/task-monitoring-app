@@ -79,7 +79,11 @@ const ProfilePage: React.FC = () => {
           className={s.Profile}
           extra={
             user?.role === Roles.ADMIN && (
-              <Button type="link" onClick={() => Router.push(AppRoutes.ADMIN)}>
+              <Button
+                type="link"
+                onClick={() => Router.push(AppRoutes.ADMIN)}
+                className={s.Admin}
+              >
                 Панель Адміністратора
               </Button>
             )

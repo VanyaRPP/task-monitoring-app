@@ -6,6 +6,10 @@ import s from './index.module.scss'
 import { useState } from 'react'
 import useLocalStorage from '@common/modules/hooks/useLocalStorage'
 import { validateField } from '@common/assets/features/validators'
+import { LogoutOutlined } from '@ant-design/icons'
+import { AppRoutes } from '@utils/constants'
+import { useRouter } from 'next/router'
+import Link from 'next/link'
 
 const AuthCard = ({
   disabled,
@@ -26,6 +30,7 @@ const AuthCard = ({
 }) => {
   const [storedValue, setValue] = useLocalStorage('login-type', null)
   const [cardSide, setCardSide] = useState<boolean>(storedValue)
+  const router = useRouter()
 
   const handleSideChange = () => {
     setCardSide(!cardSide)
