@@ -25,7 +25,7 @@ const CategoriesPage: React.FC = () => {
         renderItem={(item) => (
           <List.Item key={item?._id} className={s.Item}>
             <p>{item?.name}</p>
-            <p>
+            <p className={s.Tasks}>
               Загальна кількість завдань: {getCount(tasks, item?.name)?.length}
             </p>
           </List.Item>

@@ -4,6 +4,9 @@
   border-radius: 20px !important;
   background-color: var(--backgroundColorElements);
   .Item {
+    @media (max-width: 555px) {
+      display: block;
+    }
     color: var(--textColor);
     border-color: #88888830;
   }
@@ -23,4 +26,8 @@
       color: var(--textColor);
     }
   }
+  // .Tasks {
+  //   margin-top: 5rem;
+  //   margin-left: -10rem;
+  // }
 }

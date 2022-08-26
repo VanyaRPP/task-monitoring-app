@@ -98,7 +98,7 @@ const Header: React.FC = () => {
           className={s.Popover}
           content={
             notificationData?.data?.length === 0 ? (
-              <Empty description="Немає даних" />
+              <Empty description="Немає даних" className={s.Empty} />
             ) : (
               <NotificationWrapper userId={userData?.data?._id}>
                 {notificationData?.data?.map((notification: INotification) => (

@@ -93,6 +93,15 @@
 .Diamant {
   fill: white !important;
 }
+
 .Popover {
-  fill: blue;
+  :global {
+    .ant-popover-inner-content {
+      background-color: red;
+      color: gold;
+    }
+  }
 }
+// .Empty {
+//   background-color: green;
+// }

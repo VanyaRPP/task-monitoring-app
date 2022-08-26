@@ -31,7 +31,6 @@ const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form, task }) => {
         name="price"
         label="Ціна"
         rules={validateField('price')}
-        // className={s.Price}
       >
         <Input className={s.Price} addonAfter="₴" style={{ width: '100%' }} />
       </Form.Item>
