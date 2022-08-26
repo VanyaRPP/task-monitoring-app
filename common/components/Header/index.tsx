@@ -95,9 +95,10 @@ const Header: React.FC = () => {
       {status === 'authenticated' && (
         <Popover
           placement="bottomRight"
+          className={s.Popover}
           content={
             notificationData?.data?.length === 0 ? (
-              <Empty />
+              <Empty description="Немає даних" />
             ) : (
               <NotificationWrapper userId={userData?.data?._id}>
                 {notificationData?.data?.map((notification: INotification) => (

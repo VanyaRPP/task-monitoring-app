@@ -8,6 +8,7 @@ import { disabledDate } from '../../../assets/features/formatDate'
 import moment from 'moment'
 import { RangePickerProps } from 'antd/lib/date-picker'
 import { ITask } from '../../../modules/models/Task'
+import s from './style.module.scss'
 
 interface Props {
   isFormDisabled: boolean
@@ -30,8 +31,9 @@ const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form, task }) => {
         name="price"
         label="Ціна"
         rules={validateField('price')}
+        // className={s.Price}
       >
-        <Input addonAfter="₴" style={{ width: '100%' }} />
+        <Input className={s.Price} addonAfter="₴" style={{ width: '100%' }} />
       </Form.Item>
       <Form.Item name="description" label="Опис">
         <Input.TextArea maxLength={250} />

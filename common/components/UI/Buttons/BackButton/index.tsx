@@ -11,6 +11,12 @@ const BackButton = () => {
       onClick={() => router.back()}
       style={{ fontSize: '2rem', color: 'var(--primaryColor)' }}
     />
+    // <Button
+    //   onClick={() => router.back()}
+    //   style={{ fontSize: '1rem', color: 'var(--primaryColor)' }}
+    // >
+    //   Назад
+    // </Button>
   )
 }
 

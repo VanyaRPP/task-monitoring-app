@@ -185,6 +185,7 @@ const CompetitionCard: React.FC<{
         {task?.creator === userData?.data?._id && (
           <Column
             title="Обрати майстра"
+            className={s.Column}
             key="actions"
             width="10%"
             render={(_, executor: ITaskExecutors) => (

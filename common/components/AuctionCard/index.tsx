@@ -80,7 +80,11 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
         <ApplyAuctionForm isFormDisabled={isFormDisabled} form={form} />
       </ModalWindow>
       {taskExecutors && taskExecutors.length !== 0 ? (
-        <Table dataSource={taskExecutors} pagination={false}>
+        <Table
+          dataSource={taskExecutors}
+          pagination={false}
+          className={s.Table}
+        >
           <Column
             title="Список майстрів"
             dataIndex="workerid"
@@ -96,6 +100,7 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
             dataIndex="rating"
             key="rating"
             width="15%"
+            className={s.Column}
             render={(_, executor: ITaskExecutors) => (
               <Executor executor={executor} type="rating" />
             )}

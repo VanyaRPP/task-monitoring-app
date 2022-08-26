@@ -10,6 +10,7 @@ import { RangePickerProps } from 'antd/lib/date-picker'
 import moment from 'moment'
 import { ITask } from '../../modules/models/Task'
 import { isDeadlineExpired } from '../../assets/features/formatDate'
+import s from './style.module.scss'
 
 type PropsType = {
   isFormDisabled: boolean
@@ -41,9 +42,14 @@ const ApplyAuctionForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
       <Form.Item
         name="price"
         label="Ціна"
+        className={s.Price}
         rules={[{ required: true, message: 'Введіть ціну послуги!' }]}
       >
-        <InputNumber addonAfter={suffixSelector} style={{ width: '100%' }} />
+        <InputNumber
+          className={s.Price}
+          addonAfter={suffixSelector}
+          style={{ width: '100%' }}
+        />
       </Form.Item>
       <Form.Item name="description" label="Опис">
         <Input.TextArea maxLength={250} />
