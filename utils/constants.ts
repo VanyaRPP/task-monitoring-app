@@ -46,9 +46,9 @@ export const centerTownGeoCode = {
 
 // export enum TaskStatuses {
 //   PENDING = 'в очікуванні',
-//   PENDING_SELECTION = 'відбір',
+//   PENDING_SELECTION = 'вибір',
 //   REJECTED = 'відхилено',
-//   IN_WORK = 'в дії',
+//   IN_WORK = 'в роботі',
 //   EXPIRED = 'прострочений',
 //   COMPLETED = 'виконано',
 //   ARCHIVED = 'без відгуку',

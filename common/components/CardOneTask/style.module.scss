@@ -37,4 +37,9 @@
     transition: background 0.5s, box-shadow 0.5s, opacity 0.4s;
     box-shadow: 0 8px 10px -5px #ff0000;
   }
+  :global {
+    .ant-card-head-title {
+      white-space: normal;
+    }
+  }
 }
