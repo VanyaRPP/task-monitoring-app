@@ -25,7 +25,7 @@ const TaskViewer: React.FC<Props> = ({ tasks }) => {
         </div>
         <div className={s.Buttons}>
           <Radio.Group
-            defaultValue={TaskView.CARD}
+            defaultValue={taskView}
             buttonStyle="solid"
             onChange={(e) => setValue(e.target.value)}
           >

@@ -31,10 +31,10 @@
   }
   .body {
     padding: 10px;
-    :global {
-      .ant-popover-inner-content {
-        background-color: aqua;
-      }
-    }
+    // :global {
+    //   .ant-popover-inner-content {
+    //     background-color: aqua;
+    //   }
+    // }
   }
 }
