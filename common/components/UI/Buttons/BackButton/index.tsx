@@ -14,13 +14,13 @@ const BackButton = () => {
         color: 'var(--primaryColor)',
         marginBottom: '1rem',
       }}
+      // <Button
+      //   onClick={() => router.back()}
+      //   style={{ fontSize: '1rem', color: 'var(--primaryColor)' }}
+      // >
+      //   Назад
+      // </Button>
     />
-    // <Button
-    //   onClick={() => router.back()}
-    //   style={{ fontSize: '1rem', color: 'var(--primaryColor)' }}
-    // >
-    //   Назад
-    // </Button>
   )
 }
 
