@@ -195,6 +195,7 @@ const CompetitionCard: React.FC<{
                 cancelText="Ні"
                 icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
                 onConfirm={() => onApprove(executor)}
+                color="var(--backgroundColorElements)"
               >
                 <Button type="primary" ghost>
                   Обрати

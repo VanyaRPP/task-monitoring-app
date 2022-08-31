@@ -113,14 +113,3 @@
 .Empty {
   margin-top: 1rem;
 }
-
-.Column {
-  :global {
-    .ant-popover-inner-content {
-      background-color: aquamarine;
-    }
-    .ant-popover-message title {
-      color: purple;
-    }
-  }
-}

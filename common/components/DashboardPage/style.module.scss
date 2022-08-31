@@ -146,6 +146,27 @@
       }
     }
   }
+  @media (max-width: 525px) {
+    table * {
+      white-space: pre-line;
+      word-wrap: break-word;
+      font-size: 10px;
+    }
+    :global {
+      .ant-table-cell-ellipsis .ant-table-column-title {
+        overflow: inherit;
+      }
+      .ant-table-tbody > tr > td {
+        padding: 5px;
+      }
+
+      .ant-table-cell span {
+        padding: 1px;
+        font-size: 7px;
+        text-align: center;
+      }
+    }
+  }
 }
 
 .Container {
@@ -155,6 +176,18 @@
   flex: 0.33, 0.33, 0.33;
   gap: 1rem;
   justify-content: space-between;
+  :global {
+    .ant-table-thead {
+      text-align: center;
+    }
+    .ant-table-cell span {
+      text-align: center;
+    }
+  }
+  table * {
+    white-space: pre-line;
+    word-wrap: break-word;
+  }
 }
 
 .Buttons {
