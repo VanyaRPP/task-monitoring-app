@@ -47,7 +47,7 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
           placement="right"
           onClose={onClose}
           visible={visible}
-          width={'50%'}
+          width={'75%'}
           className={s.Drawer}
           bodyStyle={{ backgroundColor: 'var(--backgroundColor)' }}
           headerStyle={{
@@ -67,11 +67,11 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
               }
             />
             <h2>{user?.name}</h2>
-            <Divider />
+            <Divider className={s.Divider} />
             <p className={s.Email}>{user?.email}</p>
-            <Divider />
+            <Divider className={s.Divider} />
             <Rate disabled value={user?.rating} />
-            <Divider />
+            <Divider className={s.Divider} />
             <Collapse
               ghost
               accordion
@@ -94,7 +94,7 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
                 )}
               </Panel>
             </Collapse>
-            <Divider />
+            <Divider className={s.Divider} />
             <div className={s.Buttons}>
               <Button
                 type="link"
