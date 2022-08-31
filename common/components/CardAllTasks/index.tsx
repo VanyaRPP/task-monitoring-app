@@ -11,9 +11,12 @@ const CardAllTasks: React.FC<Props> = ({ tasks }) => {
   // const reverseTasks = tasks?.reverse()
   return (
     <div className={s.Cards}>
-      {tasks?.map((task) => {
-        return <CardOneTask key={task._id} task={task} />
-      })}
+      {tasks
+        ?.slice(0)
+        .reverse()
+        .map((task) => {
+          return <CardOneTask key={task._id} task={task} />
+        })}
     </div>
   )
 }

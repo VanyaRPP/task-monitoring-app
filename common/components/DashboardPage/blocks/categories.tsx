@@ -60,7 +60,7 @@ const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
         pagination={{
           responsive: false,
           size: 'small',
-          pageSize: 5,
+          pageSize: 6,
           position: ['bottomCenter'],
           hideOnSinglePage: true,
         }}

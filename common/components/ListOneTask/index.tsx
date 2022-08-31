@@ -72,7 +72,7 @@ const ListOneTask: React.FC<Props> = ({ tasks }) => {
       rowKey="_id"
       rowClassName={s.rowClass}
       showHeader={true}
-      dataSource={tasks}
+      dataSource={tasks.slice(0).reverse()}
       columns={columns}
       pagination={{
         responsive: false,
