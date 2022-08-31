@@ -88,6 +88,11 @@
 .ThemeSwitcher {
   @media (max-width: 430px) {
     transform: rotate(90deg);
+    :global {
+      .anticon svg {
+        transform: rotate(270deg);
+      }
+    }
   }
 }
 .Diamant {
