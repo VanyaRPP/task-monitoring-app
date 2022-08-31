@@ -9,6 +9,9 @@
       color: var(--textColor);
     }
   }
+  @media (max-width: 524px) {
+    display: none;
+  }
 }
 .Opportunities {
   .Button {

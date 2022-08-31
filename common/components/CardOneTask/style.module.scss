@@ -42,4 +42,8 @@
       white-space: normal;
     }
   }
+  p {
+    white-space: pre-line;
+    word-wrap: break-word;
+  }
 }

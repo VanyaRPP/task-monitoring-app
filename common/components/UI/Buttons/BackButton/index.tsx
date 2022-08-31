@@ -9,7 +9,11 @@ const BackButton = () => {
   return (
     <LeftCircleOutlined
       onClick={() => router.back()}
-      style={{ fontSize: '2rem', color: 'var(--primaryColor)' }}
+      style={{
+        fontSize: '2rem',
+        color: 'var(--primaryColor)',
+        marginBottom: '1rem',
+      }}
     />
     // <Button
     //   onClick={() => router.back()}
