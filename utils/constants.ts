@@ -10,6 +10,7 @@ export enum AppRoutes {
   ADMIN = '/admin',
   PREMIUM = '/premium',
   CATEGORY = '/category',
+  PAYMENT = '/payment',
 }
 
 export enum Roles {

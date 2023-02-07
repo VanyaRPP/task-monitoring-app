@@ -10,6 +10,7 @@ import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 import { useSession } from 'next-auth/react'
 import CategoriesBlock from './blocks/categories'
 import { BackButton, TaskButton } from '../UI/Buttons'
+import PaymentsBlock from './blocks/payments'
 
 const Dashboard: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
@@ -22,7 +23,7 @@ const Dashboard: React.FC = () => {
       <div className={s.Header}>
         <BackButton />
         <h1>Дошка</h1>
-        <div className={s.Buttons}>
+        {/* <div className={s.Buttons}>
           <Button
             className={s.Button}
             ghost
@@ -32,13 +33,13 @@ const Dashboard: React.FC = () => {
             Створити завдання
           </Button>
           <TaskButton />
-        </div>
+        </div> */}
       </div>
-
       <div className={s.Container}>
-        {userRole !== 'User' ? <Tasks style={`${s.Card} ${s.Orders}`} /> : null}
-        <Orders style={`${s.Card} ${s.Orders}`} />
-        <CategoriesBlock style={`${s.Card} ${s.Orders}`} />
+        {/* {userRole !== 'User' ? <Tasks style={`${s.Card} ${s.Orders}`} /> : null} */}
+        {/* <Orders style={`${s.Card} ${s.Orders}`} />
+        <CategoriesBlock style={`${s.Card} ${s.Orders}`} /> */}
+        <PaymentsBlock style={`${s.Card} ${s.Orders}`} />
         {/* <Masters style={`${s.Card} ${s.Masters}`} />
         <Domains style={`${s.Card} ${s.Domains}`} /> */}
       </div>
