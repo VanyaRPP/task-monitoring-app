@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { FC, useMemo, useState } from 'react'
 import { Card, Table, Input, Button } from 'antd'
 import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
 import { firstTextToUpperCase } from '../../../../utils/helpers'
@@ -14,8 +14,9 @@ import MicroInfoProfile from '../../MicroInfoProfile'
 import s from './style.module.scss'
 import StatusTag from '../../UI/StatusTag'
 import { SelectOutlined } from '@ant-design/icons'
+import TableCard from '@common/components/UI/TableCard'
 
-const Orders: React.FC<{ style: string }> = ({ style }) => {
+const Orders: FC = () => {
   const session = useSession()
   const [search, setSearch] = useState({ task: '', master: '' })
   const router = useRouter()
@@ -81,18 +82,16 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
   ]
 
   return (
-    <Card
-      className={style}
+    <TableCard
       title={
         <Button
           type="link"
           onClick={() => Router.push(`${AppRoutes.TASK}/user/${user?._id}`)}
         >
           Мої замовлення
-          <SelectOutlined className={s.Icon} />
+          <SelectOutlined />
         </Button>
       }
-      style={{ flex: '1.5' }}
     >
       <Table
         className={s.Table}
@@ -114,7 +113,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
           }
         }}
       />
-    </Card>
+    </TableCard>
   )
 }
 
