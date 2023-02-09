@@ -1,0 +1,13 @@
+.Header {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  h1 {
+    font-size: 26px;
+    transition: color 0.2s;
+    color: var(--primaryColor);
+    margin-top: -0.5rem;
+  }
+}

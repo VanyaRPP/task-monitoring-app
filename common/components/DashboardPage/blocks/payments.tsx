@@ -3,19 +3,12 @@ import { Card, Table } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import PaymentTableSum from '@common/components/UI/PaymentTableSum'
 import { columns, dataSource } from '@utils/mocks'
+import TableCard from '@common/components/UI/TableCard'
 import s from './style.module.scss'
 
-interface Props {
-  style: string
-}
-
-const PaymentsBlock: FC<Props> = ({ style }) => {
+const PaymentsBlock: FC = () => {
   return (
-    <Card
-      className={style}
-      title={<PaymentCardHeader />}
-      style={{ flex: '1.5' }}
-    >
+    <TableCard title={<PaymentCardHeader />}>
       <Table
         className={s.Table}
         columns={columns}
@@ -39,7 +32,7 @@ const PaymentsBlock: FC<Props> = ({ style }) => {
           )
         }}
       />
-    </Card>
+    </TableCard>
   )
 }
 
