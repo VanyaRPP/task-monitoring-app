@@ -72,5 +72,8 @@ export const validateField = (name: string): Rule[] => {
 
     case 'password':
       return [required, password]
+
+    case 'required':
+      return [required]
   }
 }

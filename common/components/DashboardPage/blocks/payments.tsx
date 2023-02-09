@@ -15,22 +15,22 @@ const PaymentsBlock: FC = () => {
         dataSource={dataSource}
         pagination={false}
         bordered
-        summary={(pageData) => {
-          let totalCredit = 0
-          let totalDebit = 0
+        // summary={(pageData) => { //TODO: Use when it will be necessary to display summary info
+        //   let totalCredit = 0
+        //   let totalDebit = 0
 
-          pageData.forEach(({ credit, debit }) => {
-            totalCredit += credit
-            totalDebit += debit
-          })
+        //   pageData.forEach(({ credit, debit }) => {
+        //     totalCredit += credit
+        //     totalDebit += debit
+        //   })
 
-          return (
-            <PaymentTableSum
-              totalDebit={totalDebit}
-              totalCredit={totalCredit}
-            />
-          )
-        }}
+        //   return (
+        //     <PaymentTableSum
+        //       totalDebit={totalDebit}
+        //       totalCredit={totalCredit}
+        //     />
+        //   )
+        // }}
       />
     </TableCard>
   )
