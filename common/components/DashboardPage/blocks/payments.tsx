@@ -18,7 +18,7 @@ const PaymentsBlock: FC = () => {
   let content: ReactElement
 
   if (isLoading || isFetching || !payments) {
-    content = <Spin />
+    content = <Spin className={s.Spin} />
   } else if (isError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {

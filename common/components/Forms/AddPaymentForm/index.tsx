@@ -27,7 +27,7 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
         return (
           <Form.Item
             name="debit"
-            label="Дебет(Реалізація)"
+            label="Сума"
             rules={validateField('required')}
           >
             <Input />
@@ -37,7 +37,7 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
         return (
           <Form.Item
             name="credit"
-            label="Кредит(Оплата)"
+            label="Сума"
             rules={validateField('required')}
           >
             <Input />
@@ -54,9 +54,8 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
       {userRole === Roles.ADMIN ? (
         <>
           <div className={s.SelectBlock}>
-            <p>Кредит/Дебет</p>
+            <p>Тип операції</p>
             <Select
-              placeholder="Оберіть кредит/дебет"
               onChange={handleChange}
               options={[
                 { value: 'credit', label: 'Кредит(Оплата)' },
