@@ -1,8 +1,5 @@
-import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
-import { validateField } from '@common/assets/features/validators'
-import { DatePicker, Form, Input, Modal } from 'antd'
-import { Moment } from 'moment'
-import { useSession } from 'next-auth/react'
+import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
+import { Form, Modal } from 'antd'
 import React, { FC } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 
@@ -12,7 +9,7 @@ interface Props {
 }
 
 type FormData = {
-  date: Moment
+  date: Date
   debit: string
   credit: string
   description: string
@@ -20,12 +17,13 @@ type FormData = {
 
 const AddPaymentModal: FC<Props> = ({ isModalOpen, closeModal }) => {
   const [form] = Form.useForm()
+  const [addPayment] = useAddPaymentMutation()
 
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
+    await addPayment(formData)
     form.resetFields()
     closeModal()
-    // console.log(formData)
   }
 
   return (

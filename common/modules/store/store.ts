@@ -5,6 +5,7 @@ import { taskApi } from '../../api/taskApi/task.api'
 import { domainApi } from '../../api/domainApi/domain.api'
 import themeReducer from './reducers/ThemeSlice'
 import { notificationApi } from '@common/api/notificationApi/notification.api'
+import { paymentApi } from '@common/api/paymentApi/payment.api'
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     [userApi.reducerPath]: userApi.reducer,
     [taskApi.reducerPath]: taskApi.reducer,
     [domainApi.reducerPath]: domainApi.reducer,
+    [paymentApi.reducerPath]: paymentApi.reducer,
     [notificationApi.reducerPath]: notificationApi.reducer,
     themeReducer,
   },
@@ -19,7 +21,8 @@ export const store = configureStore({
     getDefaultMiddleware()
       .concat(userApi.middleware)
       .concat(taskApi.middleware)
-      .concat(categoryApi.middleware),
+      .concat(categoryApi.middleware)
+      .concat(paymentApi.middleware),
 })
 
 export type AppDispatch = typeof store.dispatch

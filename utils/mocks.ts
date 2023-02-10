@@ -1,3 +1,5 @@
+import moment from 'moment'
+
 export const dataSource = [
   {
     key: '1',
@@ -27,21 +29,27 @@ export const columns = [
     title: 'Дата',
     dataIndex: 'date',
     key: 'date',
+    render: (date) => moment(date).format('DD-MM-YYYY'),
   },
   {
     title: 'Дебет(Реалізація)',
     dataIndex: 'debit',
     key: 'debit',
+    width: '20%',
+    render: (debit) => (debit === '0' ? undefined : debit),
   },
   {
     title: 'Кредит(Оплата)',
     dataIndex: 'credit',
     key: 'credit',
+    width: '20%',
+    render: (credit) => (credit === '0' ? undefined : credit),
   },
   {
     title: 'Опис',
     dataIndex: 'description',
     key: 'description',
-    width: '20%',
+    width: '40%',
+    ellipsis: true,
   },
 ]

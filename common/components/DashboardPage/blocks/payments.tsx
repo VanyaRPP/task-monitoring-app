@@ -1,19 +1,39 @@
-import React, { FC } from 'react'
-import { Card, Table } from 'antd'
+import React, { FC, ReactElement } from 'react'
+import { Alert, Card, Spin, Table } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import PaymentTableSum from '@common/components/UI/PaymentTableSum'
 import { columns, dataSource } from '@utils/mocks'
 import TableCard from '@common/components/UI/TableCard'
+import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import s from './style.module.scss'
 
 const PaymentsBlock: FC = () => {
-  return (
-    <TableCard title={<PaymentCardHeader />}>
+  const {
+    data: payments,
+    isLoading,
+    isFetching,
+    isError,
+  } = useGetAllPaymentsQuery('')
+
+  let content: ReactElement
+
+  if (isLoading || isFetching || !payments) {
+    content = <Spin />
+  } else if (isError) {
+    content = <Alert message="Помилка" type="error" showIcon closable />
+  } else {
+    content = (
       <Table
         className={s.Table}
         columns={columns}
-        dataSource={dataSource}
-        pagination={false}
+        dataSource={payments?.data}
+        pagination={{
+          responsive: false,
+          size: 'small',
+          pageSize: 5,
+          position: ['bottomCenter'],
+          hideOnSinglePage: true,
+        }}
         bordered
         // summary={(pageData) => { //TODO: Use when it will be necessary to display summary info
         //   let totalCredit = 0
@@ -32,8 +52,10 @@ const PaymentsBlock: FC = () => {
         //   )
         // }}
       />
-    </TableCard>
-  )
+    )
+  }
+
+  return <TableCard title={<PaymentCardHeader />}>{content}</TableCard>
 }
 
 export default PaymentsBlock
