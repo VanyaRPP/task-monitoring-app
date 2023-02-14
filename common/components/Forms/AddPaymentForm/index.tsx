@@ -21,7 +21,7 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
   const { Option } = Select
   const {
     data: {
-      user: { email },
+      user: { email, name },
     },
   } = useSession()
 
@@ -35,10 +35,10 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
           <>
             <Form.Item
               name="operation"
-              label="Тип операції"
+              label="Рахунок"
               rules={validateField('required')}
             >
-              <Select placeholder="Оберіть тип операції" className={s.Select}>
+              <Select placeholder="Оберіть тип рахунку" className={s.Select}>
                 <Option value="credit">Кредит (Оплата)</Option>
                 <Option value="debit">Дебет (Реалізація)</Option>
               </Select>
@@ -74,7 +74,7 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
         return (
           <Form.Item
             name="credit"
-            label="Сума (кредит)"
+            label={`Рахунок від ${name}`}
             rules={validateField('required')}
           >
             <InputNumber className={s.InputNumber} />
