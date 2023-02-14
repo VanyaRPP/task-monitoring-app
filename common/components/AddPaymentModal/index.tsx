@@ -1,4 +1,5 @@
 import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
+import { objectWithoutKey } from '@common/assets/features/formDataHelpers'
 import { Form, Modal } from 'antd'
 import React, { FC } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
@@ -10,8 +11,8 @@ interface Props {
 
 type FormData = {
   date: Date
-  debit: string
-  credit: string
+  debit: number
+  credit: number
   description: string
 }
 
@@ -21,7 +22,7 @@ const AddPaymentModal: FC<Props> = ({ isModalOpen, closeModal }) => {
 
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
-    await addPayment(formData)
+    await addPayment(objectWithoutKey(formData, 'operation'))
     form.resetFields()
     closeModal()
   }

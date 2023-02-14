@@ -2,7 +2,7 @@ import React, { FC, ReactElement } from 'react'
 import { Alert, Card, Spin, Table } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import PaymentTableSum from '@common/components/UI/PaymentTableSum'
-import { columns, dataSource } from '@utils/mocks'
+import { columns } from '@utils/mocks'
 import TableCard from '@common/components/UI/TableCard'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import s from './style.module.scss'
@@ -26,7 +26,7 @@ const PaymentsBlock: FC = () => {
       <Table
         className={s.Table}
         columns={columns}
-        dataSource={payments?.data}
+        dataSource={payments}
         pagination={{
           responsive: false,
           size: 'small',

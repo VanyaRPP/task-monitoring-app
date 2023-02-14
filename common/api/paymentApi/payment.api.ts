@@ -1,4 +1,9 @@
-import { IAddPayment, IPaymentResponse } from './payment.api.types'
+import {
+  IAddPaymentResponse,
+  IExtendedPayment,
+  IGetPaymentResponse,
+  IPayment,
+} from './payment.api.types'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export const paymentApi = createApi({
@@ -7,11 +12,12 @@ export const paymentApi = createApi({
   tagTypes: ['Payment'],
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getAllPayments: builder.query<any, string>({
-      query: () => '/spacehub/payment',
+    getAllPayments: builder.query<IExtendedPayment[], string>({
+      query: () => 'spacehub/payment',
       providesTags: ['Payment'],
+      transformResponse: (response: IGetPaymentResponse) => response.data,
     }),
-    addPayment: builder.mutation<IPaymentResponse, IAddPayment>({
+    addPayment: builder.mutation<IAddPaymentResponse, IPayment>({
       query(body) {
         return {
           url: `spacehub/payment`,

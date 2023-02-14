@@ -1,20 +1,21 @@
 export interface IPayment {
+  date: Date
+  credit: number
+  debit: number
+  description: string
+}
+
+export interface IExtendedPayment extends IPayment {
   _id: string
   _v: number
-  date: Date
-  credit: string
-  debit: string
-  description: string
 }
 
-export interface IAddPayment {
-  date: Date
-  credit: string
-  debit: string
-  description: string
-}
-
-export interface IPaymentResponse {
+export interface IAddPaymentResponse {
   success: boolean
-  data: IPayment | IPayment[]
+  data: IExtendedPayment
+}
+
+export interface IGetPaymentResponse {
+  success: boolean
+  data: IExtendedPayment[]
 }

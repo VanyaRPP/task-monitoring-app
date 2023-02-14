@@ -1,10 +1,16 @@
-import React, { FC, useState } from 'react'
+import React, { FC } from 'react'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { validateField } from '@common/assets/features/validators'
-import { DatePicker, Form, FormInstance, Input, Select } from 'antd'
+import {
+  DatePicker,
+  Form,
+  FormInstance,
+  Input,
+  InputNumber,
+  Select,
+} from 'antd'
 import { useSession } from 'next-auth/react'
 import { Roles } from '@utils/constants'
-import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import s from './style.module.scss'
 
 interface Props {
@@ -12,35 +18,66 @@ interface Props {
 }
 
 const AddPaymentForm: FC<Props> = ({ form }) => {
-  const session = useSession()
-  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
-  const userRole = userResponse?.data?.data?.role
-  const [paymentType, setPaymentType] = useState<string>()
+  const { Option } = Select
+  const {
+    data: {
+      user: { email },
+    },
+  } = useSession()
 
-  const handleChange = (value: string) => {
-    setPaymentType(value)
-  }
+  const userResponse = useGetUserByEmailQuery(email)
+  const userRole = userResponse?.data?.data?.role
 
   const handlePaymentType = () => {
-    switch (paymentType) {
-      case 'debit':
+    switch (userRole) {
+      case Roles.ADMIN:
         return (
-          <Form.Item
-            name="debit"
-            label="Сума"
-            rules={validateField('required')}
-          >
-            <Input />
-          </Form.Item>
+          <>
+            <Form.Item
+              name="operation"
+              label="Тип операції"
+              rules={validateField('required')}
+            >
+              <Select placeholder="Оберіть тип операції" className={s.Select}>
+                <Option value="credit">Кредит (Оплата)</Option>
+                <Option value="debit">Дебет (Реалізація)</Option>
+              </Select>
+            </Form.Item>
+            <Form.Item
+              shouldUpdate={(prevValues, currentValues) =>
+                prevValues.operation !== currentValues.operation
+              }
+            >
+              {({ getFieldValue }) =>
+                getFieldValue('operation') === 'credit' ? (
+                  <Form.Item
+                    name="credit"
+                    label="Сума"
+                    rules={validateField('required')}
+                  >
+                    <InputNumber className={s.InputNumber} />
+                  </Form.Item>
+                ) : (
+                  <Form.Item
+                    name="debit"
+                    label="Сума"
+                    rules={validateField('required')}
+                  >
+                    <InputNumber className={s.InputNumber} />
+                  </Form.Item>
+                )
+              }
+            </Form.Item>
+          </>
         )
-      case 'credit':
+      case Roles.USER || Roles.WORKER:
         return (
           <Form.Item
             name="credit"
-            label="Сума"
+            label="Сума (кредит)"
             rules={validateField('required')}
           >
-            <Input />
+            <InputNumber className={s.InputNumber} />
           </Form.Item>
         )
     }
@@ -51,30 +88,7 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
       <Form.Item name="date" label="Дата" rules={validateField('required')}>
         <DatePicker placeholder="Оберіть дату" className={s.DatePicker} />
       </Form.Item>
-      {userRole === Roles.ADMIN ? (
-        <>
-          <div className={s.SelectBlock}>
-            <p>Тип операції</p>
-            <Select
-              onChange={handleChange}
-              options={[
-                { value: 'credit', label: 'Кредит(Оплата)' },
-                { value: 'debit', label: 'Дебет(Реалізація)' },
-              ]}
-              className={s.Select}
-            />
-          </div>
-          {handlePaymentType()}
-        </>
-      ) : (
-        <Form.Item
-          name="credit"
-          label="Кредит(Оплата)"
-          rules={validateField('required')}
-        >
-          <Input />
-        </Form.Item>
-      )}
+      {handlePaymentType()}
       <Form.Item
         name="description"
         label="Опис"
