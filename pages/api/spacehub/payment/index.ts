@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import Payment from '@common/modules/models/Payment'
+import { Payment, postValidateBody } from '@common/modules/models/Payment'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from 'pages/api/api.config'
 
@@ -20,10 +20,12 @@ export default async function handler(
       }
     case 'POST':
       try {
-        const payment = await Payment.create(req.body)
-        return res.status(201).json({ success: true, data: payment })
+        await postValidateBody(req, res)
+        const payments = await Payment.find({})
+        return res.status(200).json({ success: true, data: payments })
       } catch (error) {
-        return res.status(400).json({ success: false, error: error })
+        const errors = postValidateBody(req)
+        return res.status(400).json({ errors: errors.array() })
       }
   }
 }
