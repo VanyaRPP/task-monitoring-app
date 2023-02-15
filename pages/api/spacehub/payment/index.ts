@@ -1,10 +1,25 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import Payment from '@common/modules/models/Payment'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from 'pages/api/api.config'
+import Payment from '@common/modules/models/Payment'
+import { check, validationResult } from 'express-validator'
+import initMiddleware from '../../../../common/lib/initMiddleware'
+import validateMiddleware from '../../../../common/lib/validateMiddleware'
 
 start()
+
+const postValidateBody = initMiddleware(
+  validateMiddleware(
+    [
+      check('date'),
+      check('credit').isInt({ min: 1, max: 10000 }).optional(),
+      check('debit').isInt({ min: 1, max: 10000 }).optional(),
+      check('description').trim(),
+    ],
+    validationResult
+  )
+)
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,10 +35,12 @@ export default async function handler(
       }
     case 'POST':
       try {
-        const payment = await Payment.create(req.body)
-        return res.status(201).json({ success: true, data: payment })
+        await postValidateBody(req, res)
+        const payments = await Payment.find({})
+        return res.status(200).json({ success: true, data: payments })
       } catch (error) {
-        return res.status(400).json({ success: false, error: error })
+        const errors = postValidateBody(req)
+        return res.status(400).json({ errors: errors.array() })
       }
   }
 }

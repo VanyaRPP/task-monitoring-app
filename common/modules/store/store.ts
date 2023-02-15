@@ -22,7 +22,8 @@ export const store = configureStore({
       .concat(userApi.middleware)
       .concat(taskApi.middleware)
       .concat(categoryApi.middleware)
-      .concat(paymentApi.middleware),
+      .concat(paymentApi.middleware)
+      .concat(notificationApi.middleware),
 })
 
 export type AppDispatch = typeof store.dispatch
