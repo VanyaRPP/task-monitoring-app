@@ -1,10 +1,19 @@
 import React, { FC, ReactElement } from 'react'
-import { Alert, Card, Spin, Table } from 'antd'
+import { Alert, Button, Card, message, Spin, Table } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import PaymentTableSum from '@common/components/UI/PaymentTableSum'
 import { columns } from '@utils/mocks'
 import TableCard from '@common/components/UI/TableCard'
-import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
+import {
+  useDeletePaymentMutation,
+  useGetAllPaymentsQuery,
+} from '@common/api/paymentApi/payment.api'
+import { dateToDefaultFormat } from '@common/assets/features/formatDate'
+import {
+  IExtendedPayment,
+  IPayment,
+} from '@common/api/paymentApi/payment.api.types'
+import { DeleteOutlined } from '@ant-design/icons'
 import s from './style.module.scss'
 
 const PaymentsBlock: FC = () => {
@@ -14,6 +23,58 @@ const PaymentsBlock: FC = () => {
     isFetching,
     isError,
   } = useGetAllPaymentsQuery('')
+  const [deletePayment] = useDeletePaymentMutation()
+
+  const handleDeletePayment = async (id: string) => {
+    const response = await deletePayment(id)
+    if ('data' in response) {
+      message.success('Видалено!')
+    } else {
+      message.error('Помилка при видаленні рахунку')
+    }
+  }
+
+  const columns = [
+    {
+      title: 'Дата',
+      dataIndex: 'date',
+      key: 'date',
+      render: (date) => dateToDefaultFormat(date),
+    },
+    {
+      title: 'Дебет (Реалізація)',
+      dataIndex: 'debit',
+      key: 'debit',
+      width: '20%',
+      render: (debit) => (debit === 0 ? null : debit),
+    },
+    {
+      title: 'Кредит (Оплата)',
+      dataIndex: 'credit',
+      key: 'credit',
+      width: '20%',
+      render: (credit) => (credit === 0 ? null : credit),
+    },
+    {
+      title: 'Опис',
+      dataIndex: 'description',
+      key: 'description',
+      width: '40%',
+      ellipsis: true,
+    },
+    {
+      title: '',
+      dataIndex: '',
+
+      render: (_, payment: IExtendedPayment) => (
+        <Button
+          type="link"
+          icon={<DeleteOutlined />}
+          onClick={() => handleDeletePayment(payment._id)}
+        />
+      ),
+    },
+  ]
 
   let content: ReactElement
 
