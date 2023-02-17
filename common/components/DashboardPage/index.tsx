@@ -19,12 +19,12 @@ const Dashboard: FC = () => {
     <>
       {/* <DashboardHeader /> */}
       <div className={s.Container}>
-        {/* {userRole !== 'User' ? <Tasks style={`${s.Card} ${s.Orders}`} /> : null} */}
-        {/* <Orders />
-        <CategoriesBlock /> */}
         <PaymentsBlock />
-        {/* <Masters style={`${s.Card} ${s.Masters}`} /> // TODO: Add wrapper instead of style props
-        <Domains style={`${s.Card} ${s.Domains}`} /> */}
+        {userRole !== 'User' ? <Tasks style={`${s.Card} ${s.Orders}`} /> : null}
+        <Orders />
+        <CategoriesBlock />
+        <Masters style={`${s.Card} ${s.Masters}`} />
+        <Domains style={`${s.Card} ${s.Domains}`} />
       </div>
     </>
   )

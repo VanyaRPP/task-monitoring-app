@@ -19,3 +19,8 @@ export interface IGetPaymentResponse {
   success: boolean
   data: IExtendedPayment[]
 }
+
+export interface IDeletePaymentResponse {
+  data: string
+  success: boolean
+}
