@@ -1,8 +1,6 @@
 import React, { FC, ReactElement } from 'react'
-import { Alert, Button, Card, message, Spin, Table } from 'antd'
+import { Alert, Button, message, Spin, Table } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
-import PaymentTableSum from '@common/components/UI/PaymentTableSum'
-import { columns } from '@utils/mocks'
 import TableCard from '@common/components/UI/TableCard'
 import {
   useDeletePaymentMutation,
@@ -14,9 +12,15 @@ import {
   IPayment,
 } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
+import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
+import { useSession } from 'next-auth/react'
+import { Roles } from '@utils/constants'
 import s from './style.module.scss'
 
 const PaymentsBlock: FC = () => {
+  const session = useSession()
+  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
+
   const {
     data: payments,
     isLoading,
@@ -24,6 +28,8 @@ const PaymentsBlock: FC = () => {
     isError,
   } = useGetAllPaymentsQuery('')
   const [deletePayment] = useDeletePaymentMutation()
+
+  const userRole = userResponse?.data?.data?.role
 
   const handleDeletePayment = async (id: string) => {
     const response = await deletePayment(id)
@@ -62,18 +68,19 @@ const PaymentsBlock: FC = () => {
       width: '40%',
       ellipsis: true,
     },
-    {
-      title: '',
-      dataIndex: '',
-
-      render: (_, payment: IExtendedPayment) => (
-        <Button
-          type="link"
-          icon={<DeleteOutlined />}
-          onClick={() => handleDeletePayment(payment._id)}
-        />
-      ),
-    },
+    userRole === Roles.ADMIN
+      ? {
+          title: '',
+          dataIndex: '',
+          render: (_, payment: IExtendedPayment) => (
+            <Button
+              type="link"
+              icon={<DeleteOutlined />}
+              onClick={() => handleDeletePayment(payment._id)}
+            />
+          ),
+        }
+      : { width: '0' },
   ]
 
   let content: ReactElement
