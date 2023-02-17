@@ -18,8 +18,8 @@ import { Roles } from '@utils/constants'
 import s from './style.module.scss'
 
 const PaymentsBlock: FC = () => {
-  const session = useSession()
-  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
+  const { data } = useSession()
+  const userResponse = useGetUserByEmailQuery(data?.user?.email)
 
   const {
     data: payments,
