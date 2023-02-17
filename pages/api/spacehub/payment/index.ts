@@ -46,8 +46,8 @@ export default async function handler(
     case 'POST':
       try {
         await postValidateBody(req, res)
-        const payments = await Payment.find({})
-        return res.status(200).json({ success: true, data: payments })
+        const payment = await Payment.create(req.body)
+        return res.status(200).json({ success: true, data: payment })
       } catch (error) {
         const errors = postValidateBody(req)
         return res.status(400).json({ errors: errors.array() })

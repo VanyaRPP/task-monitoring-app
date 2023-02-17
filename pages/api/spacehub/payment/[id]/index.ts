@@ -13,15 +13,15 @@ export default async function handler(
     case 'DELETE':
       try {
         await Payment.findByIdAndRemove(req.query.id).then((payment) => {
-          if (!payment) {
-            return res.status(400).json({
-              success: false,
-              data: 'Payment ' + req.query.id + ' was not found',
-            })
-          } else {
+          if (payment) {
             return res.status(200).json({
               success: true,
               data: 'Payment ' + req.query.id + ' was deleted',
+            })
+          } else {
+            return res.status(400).json({
+              success: false,
+              data: 'Payment ' + req.query.id + ' was not found',
             })
           }
         })

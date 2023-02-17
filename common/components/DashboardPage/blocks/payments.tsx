@@ -51,14 +51,14 @@ const PaymentsBlock: FC = () => {
       title: 'Дебет (Реалізація)',
       dataIndex: 'debit',
       key: 'debit',
-      width: '20%',
+      width: '15%',
       render: (debit) => (debit === 0 ? null : debit),
     },
     {
       title: 'Кредит (Оплата)',
       dataIndex: 'credit',
       key: 'credit',
-      width: '20%',
+      width: '15%',
       render: (credit) => (credit === 0 ? null : credit),
     },
     {
