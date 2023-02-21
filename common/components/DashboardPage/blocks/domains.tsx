@@ -2,12 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { Card, Table, Input } from 'antd'
 import useDebounce from 'common/modules/hooks/useDebounce'
 import { domains as config } from 'common/lib/dashboard.config'
+import TableCard from '@common/components/UI/TableCard'
 
-interface Props {
-  style?: string
-}
-
-const Domains: React.FC<Props> = ({ style }) => {
+const Domains = () => {
   const [data, setData] = useState(config)
   const [search, setSearch] = useState({ name: '', address: '' })
   const debounced = useDebounce<{ name: string; address: string }>(search)
@@ -54,9 +51,9 @@ const Domains: React.FC<Props> = ({ style }) => {
   ]
 
   return (
-    <Card className={style} title="Домени" style={{ flex: '1.5' }}>
+    <TableCard title="Домени">
       <Table dataSource={data} columns={columns} pagination={false} />
-    </Card>
+    </TableCard>
   )
 }
 

@@ -22,13 +22,12 @@ const AdminPage: React.FC = () => {
       <TabPane tab="Завдання" key="3">
         <AdminPageTasks />
       </TabPane>
-      <TabPane tab="Домени" key="4">
+      {/* <TabPane tab="Домени" key="4">
         <AdminPageDomains />
-      </TabPane>
+      </TabPane> */}
     </Tabs>
   )
 }
-
 export default AdminPage
 
 export async function getServerSideProps(context) {

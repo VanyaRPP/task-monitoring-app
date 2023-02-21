@@ -85,7 +85,6 @@ const AdminPageCategories: React.FC = () => {
           />
         </ModalWindow>
       </div>
-
       <Categories nameFilter={debounced} handleEdit={handleEdit} />
     </>
   )

@@ -9,7 +9,7 @@ const DashboardHeader = () => {
   return (
     <>
       <div className={s.Header}>
-        <BackButton />
+        {/* <BackButton /> */}
         <h1>Дошка</h1>
         <div className={s.Buttons}>
           <Button

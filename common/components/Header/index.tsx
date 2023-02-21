@@ -2,7 +2,6 @@ import { Badge, Button, Empty, Layout, Popover } from 'antd'
 import LoginUser from '../LoginUser'
 import ThemeSwitcher from '../UI/ThemeSwitcher'
 import { AppRoutes } from 'utils/constants'
-import s from './style.module.scss'
 import { useSession } from 'next-auth/react'
 import Router, { useRouter } from 'next/router'
 import BurgerMenu from '../BurgerMenu'
@@ -22,6 +21,7 @@ import {
   NotificationActive,
   NotificationInactive,
 } from '@common/assets/svg/notification'
+import s from './style.module.scss'
 
 const Notification = ({
   id,
@@ -82,7 +82,7 @@ const Header: React.FC = () => {
           <ThemeSwitcher />
         </div>
       </div>
-      {status === 'authenticated' && (
+      {/* {status === 'authenticated' && (
         <Button
           icon={<Diamant className={s.Diamant} />}
           className={s.Button_Premium}
@@ -91,8 +91,8 @@ const Header: React.FC = () => {
         >
           <span>{config.titles.premium}</span>
         </Button>
-      )}
-      {status === 'authenticated' && (
+      )} */}
+      {/* {status === 'authenticated' && (
         <Popover
           placement="bottomRight"
           content={
@@ -128,7 +128,7 @@ const Header: React.FC = () => {
             />
           )}
         </Popover>
-      )}
+      )} */}
       <div className={s.LoginUser}>
         <LoginUser />
       </div>

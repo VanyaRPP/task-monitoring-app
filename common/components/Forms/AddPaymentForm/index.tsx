@@ -1,14 +1,10 @@
 import React, { FC } from 'react'
-import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
-import { validateField } from '@common/assets/features/validators'
 import {
-  DatePicker,
-  Form,
-  FormInstance,
-  Input,
-  InputNumber,
-  Select,
-} from 'antd'
+  useGetAllUsersQuery,
+  useGetUserByEmailQuery,
+} from '@common/api/userApi/user.api'
+import { validateField } from '@common/assets/features/validators'
+import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import { useSession } from 'next-auth/react'
 import { Roles } from '@utils/constants'
 import s from './style.module.scss'
@@ -24,9 +20,10 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
       user: { email, name },
     },
   } = useSession()
-
   const userResponse = useGetUserByEmailQuery(email)
+
   const userRole = userResponse?.data?.data?.role
+  const { data: users } = useGetAllUsersQuery('')
 
   const handlePaymentType = () => {
     switch (userRole) {
@@ -35,10 +32,10 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
           <>
             <Form.Item
               name="operation"
-              label="Рахунок"
+              label="Тип оплати"
               rules={validateField('required')}
             >
-              <Select placeholder="Оберіть тип рахунку" className={s.Select}>
+              <Select placeholder="Оберіть тип оплати" className={s.Select}>
                 <Option value="credit">Кредит (Оплата)</Option>
                 <Option value="debit">Дебет (Реалізація)</Option>
               </Select>
@@ -53,7 +50,7 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
                   <Form.Item
                     name="credit"
                     label="Сума"
-                    rules={validateField('required')}
+                    rules={validateField('paymentPrice')}
                   >
                     <InputNumber className={s.InputNumber} />
                   </Form.Item>
@@ -61,7 +58,7 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
                   <Form.Item
                     name="debit"
                     label="Сума"
-                    rules={validateField('required')}
+                    rules={validateField('paymentPrice')}
                   >
                     <InputNumber className={s.InputNumber} />
                   </Form.Item>
@@ -74,8 +71,8 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
         return (
           <Form.Item
             name="credit"
-            label={`Рахунок від ${name}`}
-            rules={validateField('required')}
+            label={`Оплата від ${name}`}
+            rules={validateField('paymentPrice')}
           >
             <InputNumber className={s.InputNumber} />
           </Form.Item>
@@ -85,8 +82,14 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
 
   return (
     <Form form={form} layout="vertical" className={s.Form}>
-      <Form.Item name="date" label="Дата" rules={validateField('required')}>
-        <DatePicker placeholder="Оберіть дату" className={s.DatePicker} />
+      <Form.Item name="payer" label="Платник">
+        <Select
+          style={{ width: '100%' }}
+          options={users?.data.map((user) => ({
+            label: user.email,
+            value: user._id,
+          }))}
+        />
       </Form.Item>
       {handlePaymentType()}
       <Form.Item
