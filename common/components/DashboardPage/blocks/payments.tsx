@@ -16,6 +16,9 @@ import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { useSession } from 'next-auth/react'
 import { Roles } from '@utils/constants'
 import s from './style.module.scss'
+import { Tooltip } from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
+import { Popconfirm } from 'antd'
 
 const PaymentsBlock: FC = () => {
   const { data } = useSession()
@@ -48,7 +51,11 @@ const PaymentsBlock: FC = () => {
       render: (date) => dateToDefaultFormat(date),
     },
     {
-      title: 'Дебет (Реалізація)',
+      title: (
+        <Tooltip title="Дебет (Реалізація)">
+          <span>Дебет</span>
+        </Tooltip>
+      ),
       dataIndex: 'debit',
       key: 'debit',
       width: '15%',

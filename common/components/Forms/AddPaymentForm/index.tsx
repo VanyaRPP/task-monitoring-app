@@ -35,7 +35,7 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
           <>
             <Form.Item
               name="operation"
-              label="Рахунок"
+              label="Тип оплати"
               rules={validateField('required')}
             >
               <Select placeholder="Оберіть тип рахунку" className={s.Select}>
@@ -74,7 +74,7 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
         return (
           <Form.Item
             name="credit"
-            label={`Рахунок від ${name}`}
+            label={`Оплата від ${name}`}
             rules={validateField('required')}
           >
             <InputNumber className={s.InputNumber} />

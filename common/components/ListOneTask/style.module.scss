@@ -13,6 +13,7 @@
     .ant-table-thead > tr > th {
       text-align: center;
       background-color: var(--backgroundColorElements);
+      word-break: break-word;
     }
     .ant-table-column-title- {
       color: var(--textColor);
