@@ -8,8 +8,12 @@
 
 .Input {
   :global {
-    .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
-    .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input:hover {
+    .ant-input-status-error:not(.ant-input-disabled):not(
+        .ant-input-borderless
+      ).ant-input,
+    .ant-input-status-error:not(.ant-input-disabled):not(
+        .ant-input-borderless
+      ).ant-input:hover {
       background: var(--backgroundColorPrimary);
     }
   }

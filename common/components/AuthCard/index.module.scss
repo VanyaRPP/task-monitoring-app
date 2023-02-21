@@ -43,7 +43,9 @@
     .ant-input {
       background-color: var(--backgroundColorPrimary);
     }
-    .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
+    .ant-input-status-error:not(.ant-input-disabled):not(
+        .ant-input-borderless
+      ).ant-input,
     .ant-input-status-success {
       color: var(--textColor);
       background-color: var(--backgroundColorPrimary);
