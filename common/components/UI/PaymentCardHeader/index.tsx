@@ -7,6 +7,7 @@ import AddPaymentModal from '@common/components/AddPaymentModal'
 import s from './style.module.scss'
 import { useSession } from 'next-auth/react'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
+import { Roles } from '@utils/constants'
 
 const PaymentCardHeader = () => {
   const Router = useRouter()
@@ -28,7 +29,7 @@ const PaymentCardHeader = () => {
       </Button>
 
       <Card onClick={(e) => e.stopPropagation()} className={s.Card}>
-        {user?.role === 'Admin' && (
+        {user?.role === Roles.ADMIN && (
           <Button type="link" onClick={() => setIsModalOpen(true)}>
             <PlusOutlined /> Додати оплату
           </Button>
