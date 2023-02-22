@@ -17,8 +17,6 @@ import { useSession } from 'next-auth/react'
 import { Roles } from '@utils/constants'
 import s from './style.module.scss'
 import { Tooltip } from 'antd'
-import { QuestionCircleOutlined } from '@ant-design/icons'
-import { Popconfirm } from 'antd'
 
 const PaymentsBlock: FC = () => {
   const { data } = useSession()
@@ -62,7 +60,11 @@ const PaymentsBlock: FC = () => {
       render: (debit) => (debit === 0 ? null : debit),
     },
     {
-      title: 'Кредит (Оплата)',
+      title: (
+        <Tooltip title="Кредит (Оплата)">
+          <span>Кредит</span>
+        </Tooltip>
+      ),
       dataIndex: 'credit',
       key: 'credit',
       width: '15%',
