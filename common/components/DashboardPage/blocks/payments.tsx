@@ -19,6 +19,7 @@ import {
 import { useSession } from 'next-auth/react'
 import { Roles } from '@utils/constants'
 import s from './style.module.scss'
+import { Tooltip } from 'antd'
 
 const PaymentsBlock: FC = () => {
   const { data } = useSession()
@@ -53,14 +54,22 @@ const PaymentsBlock: FC = () => {
       render: (date) => dateToDefaultFormat(date),
     },
     {
-      title: 'Дебет (Реалізація)',
+      title: (
+        <Tooltip title="Дебет (Реалізація)">
+          <span>Дебет</span>
+        </Tooltip>
+      ),
       dataIndex: 'debit',
       key: 'debit',
       width: '20%',
       render: (debit) => (debit === 0 ? null : debit),
     },
     {
-      title: 'Кредит (Оплата)',
+      title: (
+        <Tooltip title="Кредит (Оплата)">
+          <span>Кредит</span>
+        </Tooltip>
+      ),
       dataIndex: 'credit',
       key: 'credit',
       width: '20%',
