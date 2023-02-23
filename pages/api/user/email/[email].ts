@@ -11,7 +11,9 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const user = await User.findOne({ email: req.query.email })
+        const user = await User.findOne({ email: req.query.email }).populate(
+          'payments'
+        )
         return res.status(200).json({ success: true, data: user })
       } catch (error) {
         return res.status(400).json({ success: false })

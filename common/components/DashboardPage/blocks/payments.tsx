@@ -22,7 +22,7 @@ import s from './style.module.scss'
 
 const PaymentsBlock: FC = () => {
   const { data } = useSession()
-  const userResponse = useGetUserByEmailQuery(data?.user?.email)
+  const { data: userResponse } = useGetUserByEmailQuery(data?.user?.email)
 
   const {
     data: payments,
@@ -33,7 +33,7 @@ const PaymentsBlock: FC = () => {
   const [deletePayment] = useDeletePaymentMutation()
   const { data: usersData } = useGetAllUsersQuery('')
 
-  const userRole = userResponse?.data?.data?.role
+  const userRole = userResponse?.data?.role
 
   const handleDeletePayment = async (id: string) => {
     const response = await deletePayment(id)
@@ -70,24 +70,26 @@ const PaymentsBlock: FC = () => {
       title: 'Опис',
       dataIndex: 'description',
       key: 'description',
-      width: '20%',
+      width: '15%',
       ellipsis: true,
     },
     userRole === Roles.ADMIN
       ? {
           title: '',
           dataIndex: '',
-          width: '10%',
+          width: '15%',
           render: (_, payment: IExtendedPayment) => (
-            <Popconfirm
-              title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                payment.date as unknown as string
-              )}?`}
-              onConfirm={() => handleDeletePayment(payment._id)}
-              cancelText="Відміна"
-            >
-              <DeleteOutlined />
-            </Popconfirm>
+            <div className={s.Popconfirm}>
+              <Popconfirm
+                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+                  payment.date as unknown as string
+                )}?`}
+                onConfirm={() => handleDeletePayment(payment._id)}
+                cancelText="Відміна"
+              >
+                <DeleteOutlined className={s.Icon} />
+              </Popconfirm>
+            </div>
           ),
         }
       : { width: '0' },
@@ -104,7 +106,9 @@ const PaymentsBlock: FC = () => {
       <Table
         className={s.Table}
         columns={columns}
-        dataSource={payments}
+        dataSource={
+          userRole === Roles.ADMIN ? payments : userResponse?.data.payments
+        }
         pagination={{
           responsive: false,
           size: 'small',
