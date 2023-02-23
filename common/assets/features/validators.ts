@@ -32,8 +32,8 @@ export const validateField = (name: string): Rule[] => {
   const paymentPrice: Rule = {
     type: 'number',
     min: 1,
-    max: 10000,
-    message: 'Сума рахунку повинна бути в межах [1, 10000]',
+    max: 200000,
+    message: 'Сума рахунку повинна бути в межах [1, 200000]',
   }
 
   const price: Rule = {

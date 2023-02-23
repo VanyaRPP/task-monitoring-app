@@ -27,7 +27,6 @@ const AddPaymentModal: FC<Props> = ({ isModalOpen, closeModal }) => {
     const formData: FormData = await form.validateFields()
     const response = await addPayment({
       payer: formData.payer,
-      date: new Date(),
       credit: formData.credit,
       debit: formData.debit,
       description: formData.description,

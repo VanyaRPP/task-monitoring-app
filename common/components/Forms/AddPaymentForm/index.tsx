@@ -81,7 +81,7 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
 
   return (
     <Form form={form} layout="vertical" className={s.Form}>
-      <Form.Item name="payer" label="Платник">
+      <Form.Item name="payer" label="Платник" rules={validateField('required')}>
         <Select
           style={{ width: '100%' }}
           options={users?.data.map((user) => ({

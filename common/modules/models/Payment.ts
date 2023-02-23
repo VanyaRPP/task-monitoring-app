@@ -11,7 +11,7 @@ export interface IPaymentModel {
 
 export const PaymentSchema = new Schema<IPaymentModel>({
   payer: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  date: { type: Date, required: true },
+  date: { type: Date, required: true, default: new Date() },
   credit: { type: Number, required: true, default: 0 },
   debit: { type: Number, required: true, default: 0 },
   description: { type: String, required: true },

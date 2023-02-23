@@ -17,13 +17,13 @@ const postValidateBody = initMiddleware(
         'credit',
         'Сума кредита повинна бути цілим значенням в межах [1, 10000]'
       )
-        .isInt({ min: 1, max: 10000 })
+        .isInt({ min: 1, max: 200000 })
         .optional(),
       check(
         'debit',
         'Сума кредита повинна бути цілим значенням в межах [1, 10000]'
       )
-        .isInt({ min: 1, max: 10000 })
+        .isInt({ min: 1, max: 200000 })
         .optional(),
       check('description').trim(),
     ],
