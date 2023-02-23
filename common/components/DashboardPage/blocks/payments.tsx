@@ -1,5 +1,5 @@
 import React, { FC, ReactElement } from 'react'
-import { Alert, Button, message, Spin, Table } from 'antd'
+import { Alert, Button, message, Popconfirm, Spin, Table } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
 import {
@@ -12,7 +12,10 @@ import {
   IPayment,
 } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
-import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
+import {
+  useGetAllUsersQuery,
+  useGetUserByEmailQuery,
+} from '@common/api/userApi/user.api'
 import { useSession } from 'next-auth/react'
 import { Roles } from '@utils/constants'
 import s from './style.module.scss'
@@ -20,7 +23,7 @@ import { Tooltip } from 'antd'
 
 const PaymentsBlock: FC = () => {
   const { data } = useSession()
-  const userResponse = useGetUserByEmailQuery(data?.user?.email)
+  const { data: userResponse } = useGetUserByEmailQuery(data?.user?.email)
 
   const {
     data: payments,
@@ -29,8 +32,9 @@ const PaymentsBlock: FC = () => {
     isError,
   } = useGetAllPaymentsQuery('')
   const [deletePayment] = useDeletePaymentMutation()
+  const { data: usersData } = useGetAllUsersQuery('')
 
-  const userRole = userResponse?.data?.data?.role
+  const userRole = userResponse?.data?.role
 
   const handleDeletePayment = async (id: string) => {
     const response = await deletePayment(id)
@@ -46,6 +50,7 @@ const PaymentsBlock: FC = () => {
       title: 'Дата',
       dataIndex: 'date',
       key: 'date',
+      width: '15%',
       render: (date) => dateToDefaultFormat(date),
     },
     {
@@ -56,7 +61,7 @@ const PaymentsBlock: FC = () => {
       ),
       dataIndex: 'debit',
       key: 'debit',
-      width: '15%',
+      width: '20%',
       render: (debit) => (debit === 0 ? null : debit),
     },
     {
@@ -67,26 +72,33 @@ const PaymentsBlock: FC = () => {
       ),
       dataIndex: 'credit',
       key: 'credit',
-      width: '15%',
+      width: '20%',
       render: (credit) => (credit === 0 ? null : credit),
     },
     {
       title: 'Опис',
       dataIndex: 'description',
       key: 'description',
-      width: '40%',
+      width: '15%',
       ellipsis: true,
     },
     userRole === Roles.ADMIN
       ? {
           title: '',
           dataIndex: '',
+          width: '15%',
           render: (_, payment: IExtendedPayment) => (
-            <Button
-              type="link"
-              icon={<DeleteOutlined />}
-              onClick={() => handleDeletePayment(payment._id)}
-            />
+            <div className={s.Popconfirm}>
+              <Popconfirm
+                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+                  payment.date as unknown as string
+                )}?`}
+                onConfirm={() => handleDeletePayment(payment._id)}
+                cancelText="Відміна"
+              >
+                <DeleteOutlined className={s.Icon} />
+              </Popconfirm>
+            </div>
           ),
         }
       : { width: '0' },
@@ -103,7 +115,9 @@ const PaymentsBlock: FC = () => {
       <Table
         className={s.Table}
         columns={columns}
-        dataSource={payments}
+        dataSource={
+          userRole === Roles.ADMIN ? payments : userResponse?.data.payments
+        }
         pagination={{
           responsive: false,
           size: 'small',

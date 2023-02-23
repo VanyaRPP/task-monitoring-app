@@ -70,7 +70,7 @@ const CompetitionWorkerCard: FC<Props> = ({
       _id: user?._id,
       feedback: [
         {
-          id: sessionUser?.data?._id,
+          id: sessionUser?.data?._id as string,
           text: formData?.text,
           grade: formData?.grade,
         },

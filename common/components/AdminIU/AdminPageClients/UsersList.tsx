@@ -23,7 +23,7 @@ const Users: React.FC<Props> = ({ users }) => {
         dataSource={users}
         renderItem={(item) => (
           <List.Item
-            key={item._id}
+            key={item._id as string}
             onClick={() => setUser(item)}
             className={`${s.ListItem} ${user._id === item._id ? s.Active : ''}`}
           >

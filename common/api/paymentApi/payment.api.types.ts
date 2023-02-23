@@ -1,5 +1,8 @@
+import { ObjectId } from 'mongoose'
+
 export interface IPayment {
-  date: Date
+  payer: ObjectId | string
+  date?: Date
   credit: number
   debit: number
   description: string

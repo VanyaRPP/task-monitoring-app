@@ -11,8 +11,8 @@ import premiumIcon from '../../assets/premium/diamond.png'
 import Diamant from '../../assets/svg/diamant'
 import LogoCircle from '../../assets/svg/logo_circle'
 import LoginUser from '../LoginUser'
-import s from './style.module.scss'
 import ThemeSwitcher from '../UI/ThemeSwitcher'
+import s from './style.module.scss'
 
 const BurgerMenu: React.FC = () => {
   const [isActive, setIsActive] = useState(false)
@@ -84,73 +84,81 @@ const BurgerMenu: React.FC = () => {
 
           <div className={s.Points}>
             {status == 'authenticated' ? (
-              <div>
-                <div
+              <>
+                <Button
+                  type="link"
+                  onClick={() => {
+                    Router.push(AppRoutes.PROFILE)
+                  }}
                   className={s.Button}
-                  onClick={() => Router.push(AppRoutes.PROFILE)}
                 >
-                  <span>Профіль</span>
-                </div>
+                  Профіль
+                </Button>
                 <Divider className={s.Divider} />
-              </div>
+              </>
             ) : null}
             {user?.role === 'Admin' && (
-              <div
+              <Button
+                type="link"
+                onClick={() => {
+                  Router.push(AppRoutes.ADMIN)
+                }}
                 className={s.Button}
-                onClick={() => Router.push(AppRoutes.ADMIN)}
               >
-                <span>Панель адміна</span>
-              </div>
+                Панель адміна
+              </Button>
             )}
             <Divider className={s.Divider} />
-            <div
-              className={s.Button}
+            <Button
+              type="link"
               onClick={() => {
                 Router.push(AppRoutes.CONTACTS)
               }}
+              className={s.Button}
             >
-              <span>Контакти</span>
-            </div>
+              Контакти
+            </Button>
             <Divider className={s.Divider} />
             {status == 'authenticated' ? (
-              <div
+              <Button
+                type="link"
+                onClick={() => signOut()}
                 className={s.Button}
-                onClick={() => {
-                  signOut()
-                }}
               >
-                <span>Вийти</span>
-              </div>
+                Вийти
+              </Button>
             ) : (
               <>
-                <div
-                  className={s.Button}
+                <Button
+                  type="link"
                   onClick={() => {
                     Router.push(AppRoutes.AUTH_SIGN_IN)
                   }}
-                >
-                  <span>Увійти</span>
-                </div>
-                <Divider className={s.Divider} />
-                <div
                   className={s.Button}
+                >
+                  Увійти
+                </Button>
+                <Divider className={s.Divider} />
+                <Button
+                  type="link"
                   onClick={() => {
                     Router.push(AppRoutes.AUTH_SIGN_UP)
                   }}
+                  className={s.Button}
                 >
-                  <span>Зареєструватися</span>
-                </div>
+                  Зареєструватися
+                </Button>
               </>
             )}
             <Divider className={s.Divider} />
-            <div
+            {/* <div
               className={s.ButtonPremium}
               onClick={() => Router.push(AppRoutes.PREMIUM)}
             >
               <Diamant className={s.Diamant} />
               <span>Преміум</span>
             </div>
-            <Divider className={s.Divider} />
+            <Divider className={s.Divider} /> */}
           </div>
         </div>
       </Drawer>

@@ -4,7 +4,7 @@ import s from './style.module.scss'
 import Logo from '../Logo'
 
 interface Props {
-  style: React.CSSProperties
+  style?: React.CSSProperties
 }
 
 const Footer: FC<Props> = ({ style }) => {

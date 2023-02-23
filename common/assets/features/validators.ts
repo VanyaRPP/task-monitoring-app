@@ -29,6 +29,12 @@ export const validateField = (name: string): Rule[] => {
     min: 8,
     message: 'Пароль має складатися з 8 символів!',
   }
+  const paymentPrice: Rule = {
+    type: 'number',
+    min: 1,
+    max: 200000,
+    message: 'Сума рахунку повинна бути в межах [1, 200000]',
+  }
 
   const price: Rule = {
     validator(_, value) {
@@ -72,6 +78,9 @@ export const validateField = (name: string): Rule[] => {
 
     case 'password':
       return [required, password]
+
+    case 'paymentPrice':
+      return [required, paymentPrice]
 
     case 'required':
       return [required]

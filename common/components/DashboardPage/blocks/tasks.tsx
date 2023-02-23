@@ -12,14 +12,15 @@ import {
 import moment from 'moment'
 import Router, { useRouter } from 'next/router'
 import { AppRoutes, TaskStatuses } from '../../../../utils/constants'
-import s from '../style.module.scss'
 import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
 import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.api'
 import StatusTag from '../../UI/StatusTag'
 import { SelectOutlined } from '@ant-design/icons'
+import TableCard from '@common/components/UI/TableCard'
+import s from '../style.module.scss'
 
-const Tasks: React.FC<{ style: string }> = ({ style }) => {
+const Tasks = () => {
   const session = useSession()
   const [search, setSearch] = useState({ task: '', master: '' })
   const router = useRouter()
@@ -91,18 +92,16 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
   ]
 
   return (
-    <Card
-      className={style}
+    <TableCard
       title={
         <Button
           type="link"
           onClick={() => Router.push(`${AppRoutes.TASK}/worker/${user?._id}`)}
         >
           Мої Завдання
-          <SelectOutlined className={s.Icon} />
+          <SelectOutlined />
         </Button>
       }
-      style={{ flex: '1.5' }}
     >
       <Table
         rowKey="_id"
@@ -123,7 +122,7 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
           }
         }}
       />
-    </Card>
+    </TableCard>
   )
 }
 

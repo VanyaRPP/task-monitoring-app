@@ -20,6 +20,15 @@
   }
 }
 
+.Popconfirm {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .Icon {
+    font-size: 1.25rem;
+  }
+}
+
 .Spin {
   display: flex;
   justify-content: center;

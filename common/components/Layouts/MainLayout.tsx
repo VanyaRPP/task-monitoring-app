@@ -25,33 +25,33 @@ const MainLayout: React.FC<Props> = ({ children }) => {
       </Head>
 
       <Layout className={s.Layout}>
-        {session?.user && (
+        {/* {session?.user && (
           <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-        )}
+        )} */}
 
         <Layout className={s.Background}>
           <Header />
           <Layout.Content
             className={s.Container}
-            style={{
-              marginLeft: session?.user
-                ? collapsed
-                  ? '80px'
-                  : '200px'
-                : '0px',
-            }}
+            // style={{
+            //   marginLeft: session?.user
+            //     ? collapsed
+            //       ? '80px'
+            //       : '200px'
+            //     : '0px',
+            // }}
           >
             {session?.user && <TouchBar />}
             <div className={s.Foreground}>{children}</div>
           </Layout.Content>
           <Footer
-            style={{
-              marginLeft: session?.user
-                ? collapsed
-                  ? '80px'
-                  : '200px'
-                : '0px',
-            }}
+          // style={{
+          //   marginLeft: session?.user
+          //     ? collapsed
+          //       ? '80px'
+          //       : '200px'
+          //     : '0px',
+          // }}
           />
         </Layout>
       </Layout>

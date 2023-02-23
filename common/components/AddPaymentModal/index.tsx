@@ -1,6 +1,8 @@
 import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { objectWithoutKey } from '@common/assets/features/formDataHelpers'
+import { IUser } from '@common/modules/models/User'
 import { Form, message, Modal } from 'antd'
+import { useSession } from 'next-auth/react'
 import React, { FC } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 
@@ -10,7 +12,7 @@ interface Props {
 }
 
 type FormData = {
-  date: Date
+  payer: IUser['_id']
   debit: number
   credit: number
   description: string
@@ -19,10 +21,16 @@ type FormData = {
 const AddPaymentModal: FC<Props> = ({ isModalOpen, closeModal }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
+  const data = useSession()
 
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
-    const response = await addPayment(objectWithoutKey(formData, 'operation'))
+    const response = await addPayment({
+      payer: formData.payer,
+      credit: formData.credit,
+      debit: formData.debit,
+      description: formData.description,
+    })
     if ('data' in response) {
       form.resetFields()
       closeModal()

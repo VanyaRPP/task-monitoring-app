@@ -52,32 +52,36 @@
 .Modal {
   :global {
     .ant-modal-content,
-      .ant-modal-header,
-      .ant-input,
-      .ant-picker,
-      .ant-select:not(.ant-select-customize-input) .ant-select-selector,
-      .ant-btn-default,
-      .ant-select-item,
-      .ant-select-dropdown,
-      .ant-picker-header,
-      .ant-picker-body,
-      .ant-picker-footer,
-      // .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
-      // .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input:hover {
-      //   background-color: var(--backgroundColorPrimary);
-      // }
-      .ant-modal-title,
-      .ant-form-item label,
-      .ant-modal-close-x,
-      .ant-select:not(.ant-select-customize-input) .ant-select-selector,
-      .ant-btn-default,
-      .ant-select-item,
-      .ant-picker-header,
-      .ant-picker-header button,
-      .ant-picker-content th,
-      .ant-picker-content td,
-      .ant-picker input,
-      .ant-input {
+    .ant-modal-header,
+    .ant-input,
+    .ant-picker,
+    .ant-select:not(.ant-select-customize-input) .ant-select-selector,
+    .ant-btn-default,
+    .ant-select-item,
+    .ant-select-dropdown,
+    .ant-picker-header,
+    .ant-picker-body,
+    .ant-picker-footer,
+    .ant-input-status-error:not(.ant-input-disabled):not(
+        .ant-input-borderless
+      ).ant-input,
+    .ant-input-status-error:not(.ant-input-disabled):not(
+        .ant-input-borderless
+      ).ant-input:hover {
+      background-color: var(--backgroundColorPrimary);
+    }
+    .ant-modal-title,
+    .ant-form-item label,
+    .ant-modal-close-x,
+    .ant-select:not(.ant-select-customize-input) .ant-select-selector,
+    .ant-btn-default,
+    .ant-select-item,
+    .ant-picker-header,
+    .ant-picker-header button,
+    .ant-picker-content th,
+    .ant-picker-content td,
+    .ant-picker input,
+    .ant-input {
       color: var(--textColor);
     }
     .anticon-calendar,

@@ -17,14 +17,14 @@ const Dashboard: FC = () => {
 
   return (
     <>
-      {/* <DashboardHeader /> */}
+      <DashboardHeader />
       <div className={s.Container}>
         <PaymentsBlock />
-        {userRole !== 'User' ? <Tasks style={`${s.Card} ${s.Orders}`} /> : null}
+        {userRole !== 'User' ? <Tasks /> : null}
         <Orders />
         <CategoriesBlock />
-        <Masters style={`${s.Card} ${s.Masters}`} />
-        <Domains style={`${s.Card} ${s.Domains}`} />
+        {/* <Masters />
+        <Domains /> */}
       </div>
     </>
   )
