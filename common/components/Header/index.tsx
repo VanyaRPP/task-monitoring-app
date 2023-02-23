@@ -57,7 +57,7 @@ const Header: React.FC = () => {
   const { status, data: session } = useSession()
   const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const { data: notificationData } = useGetNotificationsByUserIdQuery(
-    userData?.data?._id
+    userData?.data?._id as string
   )
 
   const unreadNotificationsExist = useMemo(() => {

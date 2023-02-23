@@ -36,7 +36,7 @@ const CommentsCard: React.FC<Props> = ({ taskId, loading = false }) => {
       _id: task?.data?._id,
       comment: [
         {
-          id: sessionUser?.data?._id,
+          id: sessionUser?.data?._id as string,
           text: input,
           datetime: new Date(),
         },
