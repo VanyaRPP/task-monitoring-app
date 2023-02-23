@@ -83,8 +83,10 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
     <Form form={form} layout="vertical" className={s.Form}>
       <Form.Item name="payer" label="Платник" rules={validateField('required')}>
         <Select
+          placeholder="Оберіть платника"
           style={{ width: '100%' }}
           options={users?.data.map((user) => ({
+            key: user._id,
             label: user.email,
             value: user._id,
           }))}
@@ -121,7 +123,10 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
               label="Сума"
               rules={validateField('paymentPrice')}
             >
-              <InputNumber className={s.InputNumber} />
+              <InputNumber
+                placeholder="Введіть суму"
+                className={s.InputNumber}
+              />
             </Form.Item>
           )
         }
@@ -131,7 +136,7 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
         label="Опис"
         rules={validateField('required')}
       >
-        <Input.TextArea maxLength={256} />
+        <Input.TextArea placeholder="Введіть опис" maxLength={256} />
       </Form.Item>
     </Form>
   )
