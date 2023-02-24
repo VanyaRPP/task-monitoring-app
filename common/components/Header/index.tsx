@@ -54,24 +54,24 @@ const Notification = ({
 }
 
 const Header: React.FC = () => {
-  const { status, data: session } = useSession()
-  const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const { data: notificationData } = useGetNotificationsByUserIdQuery(
-    userData?.data?._id as string
-  )
+  // const { status, data: session } = useSession()
+  // const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
+  // const { data: notificationData } = useGetNotificationsByUserIdQuery(
+  //   userData?.data?._id as string
+  // )
 
-  const unreadNotificationsExist = useMemo(() => {
-    if (notificationData?.data) {
-      let check = false
-      notificationData?.data?.forEach((notification: INotification) => {
-        if (!check && !notification?.isSeen) check = true
-      })
+  // const unreadNotificationsExist = useMemo(() => {
+  //   if (notificationData?.data) {
+  //     let check = false
+  //     notificationData?.data?.forEach((notification: INotification) => {
+  //       if (!check && !notification?.isSeen) check = true
+  //     })
 
-      return check
-    }
+  //     return check
+  //   }
 
-    return false
-  }, [notificationData?.data])
+  //   return false
+  // }, [notificationData?.data])
 
   return (
     <Layout.Header className={s.Header}>

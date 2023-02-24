@@ -1,26 +1,24 @@
 import React, { FC, useMemo, useState } from 'react'
-import { Card, Table, Input, Button } from 'antd'
+import { Table, Input, ConfigProvider } from 'antd'
 import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
-import { firstTextToUpperCase } from '../../../../utils/helpers'
-import {
-  useGetUserByEmailQuery,
-  useGetUserByIdQuery,
-} from '../../../api/userApi/user.api'
+import { useGetUserByEmailQuery } from '../../../api/userApi/user.api'
 import moment from 'moment'
-import Router, { useRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import { AppRoutes, TaskStatuses } from '../../../../utils/constants'
 import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
-import s from './style.module.scss'
 import StatusTag from '../../UI/StatusTag'
-import { SelectOutlined } from '@ant-design/icons'
 import TableCard from '@common/components/UI/TableCard'
+import OrdersTableHeader from '@common/components/UI/OrdersTableHeader'
+import s from './style.module.scss'
 
 const Orders: FC = () => {
   const session = useSession()
   const [search, setSearch] = useState({ task: '', master: '' })
   const router = useRouter()
-  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
+  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email, {
+    skip: !session?.data?.user?.email,
+  })
   const tasksResponse = useGetAllTaskQuery('')
   const user = userResponse?.data?.data
   const tasks = tasksResponse?.data?.data
@@ -29,7 +27,7 @@ const Orders: FC = () => {
     return tasks?.filter((task) => task?.creator === user?._id)
   }, [tasks, user?._id])
 
-  const filterdeDataSource = useMemo(() => {
+  const filteredDataSource = useMemo(() => {
     return dataSource?.filter(
       (data) =>
         data?.status !== TaskStatuses.ARCHIVED &&
@@ -47,7 +45,7 @@ const Orders: FC = () => {
   )
   const columns = [
     {
-      title: 'Завдання',
+      title: 'Замовлення',
       dataIndex: 'name',
       key: 'name',
       width: '35%',
@@ -76,29 +74,18 @@ const Orders: FC = () => {
       dataIndex: 'status',
       key: 'status',
       width: '20%',
-      // ellipsis: true,
       render: (status) => <StatusTag status={status} />,
     },
   ]
 
   return (
-    <TableCard
-      title={
-        <Button
-          type="link"
-          onClick={() => Router.push(`${AppRoutes.TASK}/user/${user?._id}`)}
-        >
-          Мої замовлення
-          <SelectOutlined />
-        </Button>
-      }
-    >
+    <TableCard title={<OrdersTableHeader user={user} />}>
       <Table
         className={s.Table}
         rowKey="_id"
         rowClassName={s.rowClass}
         showHeader={true}
-        dataSource={filterdeDataSource}
+        dataSource={filteredDataSource}
         columns={columns}
         pagination={{
           responsive: false,

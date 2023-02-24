@@ -50,7 +50,7 @@ const UserTasks: React.FC = () => {
           type="primary"
           onClick={() => setIsModalVisible(!isModalVisible)}
         >
-          Створити завдання
+          Створити замовлення
         </Button>
       </div>
       {/* <Radio.Group value={sorting} onChange={(e) => setSorting(e.target.value)}>

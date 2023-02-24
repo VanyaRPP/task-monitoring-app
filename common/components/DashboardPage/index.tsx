@@ -22,8 +22,8 @@ const Dashboard: FC = () => {
         <PaymentsBlock />
         {userRole !== 'User' ? <Tasks /> : null}
         <Orders />
-        <CategoriesBlock />
-        {/* <Masters />
+        {/* <CategoriesBlock />
+        <Masters />
         <Domains /> */}
       </div>
     </>
