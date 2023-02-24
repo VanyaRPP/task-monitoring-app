@@ -25,7 +25,7 @@ const TaskButton: React.FC = () => {
               : Router.push(AppRoutes.TASK)
           }}
           ghost
-          type="primary"
+          type="link"
           className={s.Button}
         >
           {router.route === AppRoutes.TASK

@@ -1,5 +1,5 @@
 import React, { FC, ReactElement } from 'react'
-import { Alert, Button, message, Popconfirm, Spin, Table } from 'antd'
+import { Alert, message, Popconfirm, Spin, Table } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
 import {
@@ -7,10 +7,7 @@ import {
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
-import {
-  IExtendedPayment,
-  IPayment,
-} from '@common/api/paymentApi/payment.api.types'
+import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import {
   useGetAllUsersQuery,
@@ -18,12 +15,14 @@ import {
 } from '@common/api/userApi/user.api'
 import { useSession } from 'next-auth/react'
 import { Roles } from '@utils/constants'
-import s from './style.module.scss'
 import { Tooltip } from 'antd'
+import s from './style.module.scss'
 
 const PaymentsBlock: FC = () => {
   const { data } = useSession()
-  const { data: userResponse } = useGetUserByEmailQuery(data?.user?.email)
+  const { data: userResponse } = useGetUserByEmailQuery(data?.user?.email, {
+    skip: !data?.user?.email,
+  })
 
   const {
     data: payments,
@@ -44,6 +43,14 @@ const PaymentsBlock: FC = () => {
       message.error('Помилка при видаленні рахунку')
     }
   }
+
+  const filteredAdminPayments = payments
+    ?.slice()
+    .sort((a, b) => (a.date < b.date ? 1 : -1))
+
+  const filteredUserPayments = userResponse?.data?.payments
+    .slice()
+    .sort((a, b) => (a.date < b.date ? 1 : -1))
 
   const columns = [
     {
@@ -116,7 +123,9 @@ const PaymentsBlock: FC = () => {
         className={s.Table}
         columns={columns}
         dataSource={
-          userRole === Roles.ADMIN ? payments : userResponse?.data.payments
+          userRole === Roles.ADMIN
+            ? filteredAdminPayments
+            : filteredUserPayments
         }
         pagination={{
           responsive: false,

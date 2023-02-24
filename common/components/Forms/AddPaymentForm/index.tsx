@@ -1,12 +1,7 @@
 import React, { FC } from 'react'
-import {
-  useGetAllUsersQuery,
-  useGetUserByEmailQuery,
-} from '@common/api/userApi/user.api'
+import { useGetAllUsersQuery } from '@common/api/userApi/user.api'
 import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
-import { useSession } from 'next-auth/react'
-import { Roles } from '@utils/constants'
 import s from './style.module.scss'
 
 interface Props {
@@ -107,6 +102,7 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
         shouldUpdate={(prevValues, currentValues) =>
           prevValues.operation !== currentValues.operation
         }
+        className={s.PriceItem}
       >
         {({ getFieldValue }) =>
           getFieldValue('operation') === 'credit' ? (
