@@ -1,5 +1,6 @@
 import React, { FC } from 'react'
 import Orders from './blocks/orders'
+import Services from './blocks/services'
 import Masters from './blocks/masters'
 import Domains from './blocks/domains'
 import Tasks from './blocks/tasks'
@@ -20,6 +21,7 @@ const Dashboard: FC = () => {
       <DashboardHeader />
       <div className={s.Container}>
         <PaymentsBlock />
+        <Services />
         {userRole !== 'User' ? <Tasks /> : null}
         <Orders />
         {/* <CategoriesBlock />

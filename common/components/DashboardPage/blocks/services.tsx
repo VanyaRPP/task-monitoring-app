@@ -1,25 +1,34 @@
 import React, { FC, ReactElement } from 'react'
-import { Alert, message, Popconfirm, Spin, Table } from 'antd'
-import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
-import TableCard from '@common/components/UI/TableCard'
+import { Alert, Button, message, Popconfirm, Spin, Table } from 'antd'
+import ServiceCardHeader from '@common/components/UI/ServiceCardHeader'
+import ServiceCard from '@common/components/UI/ServiceCard'
 import {
   useDeletePaymentMutation,
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import {
+  IExtendedPayment,
+  IPayment,
+} from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
-import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
+import {
+  useGetAllUsersQuery,
+  useGetUserByEmailQuery,
+} from '@common/api/userApi/user.api'
 import { useSession } from 'next-auth/react'
 import { Roles } from '@utils/constants'
-import { Tooltip } from 'antd'
 import s from './style.module.scss'
+import { Tooltip } from 'antd'
+import type { DatePickerProps } from 'antd'
 
-const PaymentsBlock: FC = () => {
+// const onChange: DatePickerProps['onChange'] = (date, dateString) => {
+//   console.log(date, dateString)
+// }
+
+const ServiceBlock: FC = () => {
   const { data } = useSession()
-  const { data: userResponse } = useGetUserByEmailQuery(data?.user?.email, {
-    skip: !data?.user?.email,
-  })
+  const { data: userResponse } = useGetUserByEmailQuery(data?.user?.email)
 
   const {
     data: payments,
@@ -28,6 +37,7 @@ const PaymentsBlock: FC = () => {
     isError,
   } = useGetAllPaymentsQuery('')
   const [deletePayment] = useDeletePaymentMutation()
+  const { data: usersData } = useGetAllUsersQuery('')
 
   const userRole = userResponse?.data?.role
 
@@ -40,56 +50,37 @@ const PaymentsBlock: FC = () => {
     }
   }
 
-  // const filteredAdminPayments = payments if use sort on FE
-  //   ?.slice()
-  //   .sort((a, b) => (a.date < b.date ? 1 : -1))
-
-  // const filteredUserPayments = userResponse?.data?.payments
-  //   .slice()
-  //   .sort((a, b) => (a.date < b.date ? 1 : -1))
-
   const columns = [
     {
-      title: 'Дата',
+      title: 'Місяць',
       dataIndex: 'date',
       key: 'date',
       width: '15%',
       render: (date) => dateToDefaultFormat(date),
     },
-    userRole === Roles.ADMIN
-      ? {
-          title: 'Платник',
-          dataIndex: 'payer',
-          key: 'payer',
-          width: '15%',
-          ellipsis: true,
-          render: (payer) => payer.email,
-        }
-      : { width: '0' },
     {
-      title: (
-        <Tooltip title="Дебет (Реалізація)">
-          <span>Дебет</span>
-        </Tooltip>
-      ),
+      title: 'Утримання',
       dataIndex: 'debit',
       key: 'debit',
       width: '20%',
       render: (debit) => (debit === 0 ? null : debit),
     },
     {
-      title: (
-        <Tooltip title="Кредит (Оплата)">
-          <span>Кредит</span>
-        </Tooltip>
-      ),
+      title: 'Електрика',
       dataIndex: 'credit',
       key: 'credit',
       width: '20%',
       render: (credit) => (credit === 0 ? null : credit),
     },
     {
-      title: 'Опис',
+      title: 'Вода',
+      dataIndex: 'description',
+      key: 'description',
+      width: '15%',
+      ellipsis: true,
+    },
+    {
+      title: 'Інд Інф',
       dataIndex: 'description',
       key: 'description',
       width: '15%',
@@ -139,27 +130,11 @@ const PaymentsBlock: FC = () => {
           hideOnSinglePage: true,
         }}
         bordered
-        // summary={(pageData) => { //TODO: Use when it will be necessary to display summary info
-        //   let totalCredit = 0
-        //   let totalDebit = 0
-
-        //   pageData.forEach(({ credit, debit }) => {
-        //     totalCredit += credit
-        //     totalDebit += debit
-        //   })
-
-        //   return (
-        //     <PaymentTableSum
-        //       totalDebit={totalDebit}
-        //       totalCredit={totalCredit}
-        //     />
-        //   )
-        // }}
       />
     )
   }
 
-  return <TableCard title={<PaymentCardHeader />}>{content}</TableCard>
+  return <ServiceCard title={<ServiceCardHeader />}>{content}</ServiceCard>
 }
 
-export default PaymentsBlock
+export default ServiceBlock
