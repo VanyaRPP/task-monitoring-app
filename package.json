@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "yarn open-browser && next dev",
-    "devw": "next dev",
+    "devw": "next dev && nodemon",
     "open-browser": "open http://localhost:3000",
     "build": "next build",
     "start": "next start",
@@ -73,6 +73,7 @@
     "jest": "^28.1.2",
     "moment": "^2.29.4",
     "next-swagger-doc": "^0.3.4",
+    "nodemon": "^2.0.20",
     "prettier": "^2.7.1",
     "sass-loader": "^13.0.1",
     "swagger-ui-react": "^4.12.0",

@@ -2,7 +2,6 @@ import { IAddress } from 'common/modules/models/Task'
 import { ITask } from './Task'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import mongoose, { ObjectId, Schema } from 'mongoose'
-import Payment from './Payment'
 
 export interface IUser {
   _id?: ObjectId | string
