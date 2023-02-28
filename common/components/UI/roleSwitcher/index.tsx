@@ -38,7 +38,9 @@ const RoleSwitcher: React.FC = () => {
         setIsModalVisible(true)
       }
     } else {
-      await updateUserRole({ email: user?.email, role: `${e.target.value}` })
+      if (user?.role === Roles.ADMIN) {
+        await updateUserRole({ email: user?.email, role: `${e.target.value}` })
+      }
     }
   }
 

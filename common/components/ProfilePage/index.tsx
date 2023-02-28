@@ -93,9 +93,11 @@ const ProfilePage: React.FC = () => {
           </div>
 
           <div className={s.Info}>
-            <Card size="small" title="Роль">
-              {router.query.id ? user?.role : <RoleSwitcher />}
-            </Card>
+            {user?.role === Roles.ADMIN && (
+              <Card size="small" title="Роль">
+                {router.query.id ? user?.role : <RoleSwitcher />}
+              </Card>
+            )}
 
             <Card size="small" title="Електронна пошта" className={s.Edit}>
               <Input
