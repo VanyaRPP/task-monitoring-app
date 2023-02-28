@@ -44,13 +44,14 @@ export default async function handler(
       try {
         const session = await getServerSession(req, res, authOptions)
         const user = await User.findOne({ email: session.user.email })
+        const isAdmin = user.role === Roles.ADMIN
         const payments = await Payment.find({})
           .sort({ date: -1 })
           .limit(5)
           .populate('payer')
 
         let userPayments
-        if (user.role !== Roles.ADMIN) {
+        if (!isAdmin) {
           userPayments = payments.filter((p) => {
             return p.payer.email === user.email
           })
@@ -58,7 +59,7 @@ export default async function handler(
 
         return res.status(200).json({
           success: true,
-          data: user.role === Roles.ADMIN ? payments : userPayments,
+          data: isAdmin ? payments : userPayments,
         })
       } catch (error) {
         return res.status(400).json({ success: false })
