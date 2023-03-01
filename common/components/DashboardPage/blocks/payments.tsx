@@ -119,29 +119,30 @@ const PaymentsBlock: FC = () => {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
-      <Table
-        columns={columns}
-        dataSource={payments}
-        pagination={false}
-        bordered
-        rowKey="_id"
-        // summary={(pageData) => { //TODO: Use when it will be necessary to display summary info
-        //   let totalCredit = 0
-        //   let totalDebit = 0
+      <p>hello</p>
+      // <Table
+      //   columns={columns}
+      //   dataSource={payments}
+      //   pagination={false}
+      //   bordered
+      //   rowKey="_id"
+      // summary={(pageData) => { //TODO: Use when it will be necessary to display summary info
+      //   let totalCredit = 0
+      //   let totalDebit = 0
 
-        //   pageData.forEach(({ credit, debit }) => {
-        //     totalCredit += credit
-        //     totalDebit += debit
-        //   })
+      //   pageData.forEach(({ credit, debit }) => {
+      //     totalCredit += credit
+      //     totalDebit += debit
+      //   })
 
-        //   return (
-        //     <PaymentTableSum
-        //       totalDebit={totalDebit}
-        //       totalCredit={totalCredit}
-        //     />
-        //   )
-        // }}
-      />
+      //   return (
+      //     <PaymentTableSum
+      //       totalDebit={totalDebit}
+      //       totalCredit={totalCredit}
+      //     />
+      //   )
+      // }}
+      // />
     )
   }
 
