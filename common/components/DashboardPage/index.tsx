@@ -22,7 +22,7 @@ const Dashboard: FC = () => {
     <>
       <DashboardHeader />
       <div className={s.Container}>
-        {/* <PaymentsBlock /> */}
+        <PaymentsBlock />
         {userRole !== Roles.USER && <Tasks />}
         <Orders />
         {/* <CategoriesBlock />

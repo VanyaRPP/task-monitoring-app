@@ -32,7 +32,7 @@ const PaymentsBlock: FC = () => {
   } = useGetAllPaymentsQuery('')
   const [deletePayment] = useDeletePaymentMutation()
 
-  const userRole = userResponse?.data?.role
+  const isAdmin = userResponse?.data?.role === Roles.ADMIN
 
   const handleDeletePayment = async (id: string) => {
     const response = await deletePayment(id)
@@ -51,7 +51,7 @@ const PaymentsBlock: FC = () => {
       width: '15%',
       render: (date) => dateToDefaultFormat(date),
     },
-    userRole === Roles.ADMIN
+    isAdmin
       ? {
           title: 'Платник',
           dataIndex: 'payer',
@@ -90,7 +90,7 @@ const PaymentsBlock: FC = () => {
       width: '15%',
       ellipsis: true,
     },
-    userRole === Roles.ADMIN
+    isAdmin
       ? {
           title: '',
           dataIndex: '',
@@ -114,7 +114,7 @@ const PaymentsBlock: FC = () => {
 
   let content: ReactElement
 
-  if (isLoading || isFetching) {
+  if (isLoading || isFetching || !payments) {
     content = <Spin className={s.Spin} />
   } else if (isError || userError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
@@ -126,6 +126,7 @@ const PaymentsBlock: FC = () => {
         dataSource={payments}
         pagination={false}
         bordered
+        rowKey="_id"
         // summary={(pageData) => { //TODO: Use when it will be necessary to display summary info
         //   let totalCredit = 0
         //   let totalDebit = 0
