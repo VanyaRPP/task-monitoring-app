@@ -11,8 +11,9 @@ import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { useSession } from 'next-auth/react'
-import { Roles } from '@utils/constants'
+import { AppRoutes, Roles } from '@utils/constants'
 import { Tooltip } from 'antd'
+import Link from 'next/link'
 import s from './style.module.scss'
 
 const PaymentsBlock: FC = () => {
@@ -26,7 +27,7 @@ const PaymentsBlock: FC = () => {
     isLoading,
     isFetching,
     isError,
-  } = useGetAllPaymentsQuery('')
+  } = useGetAllPaymentsQuery(5)
   const [deletePayment] = useDeletePaymentMutation()
 
   const userRole = userResponse?.data?.role
@@ -39,14 +40,6 @@ const PaymentsBlock: FC = () => {
       message.error('Помилка при видаленні рахунку')
     }
   }
-
-  // const filteredAdminPayments = payments if use sort on FE
-  //   ?.slice()
-  //   .sort((a, b) => (a.date < b.date ? 1 : -1))
-
-  // const filteredUserPayments = userResponse?.data?.payments
-  //   .slice()
-  //   .sort((a, b) => (a.date < b.date ? 1 : -1))
 
   const columns = [
     {
@@ -63,7 +56,16 @@ const PaymentsBlock: FC = () => {
           key: 'payer',
           width: '15%',
           ellipsis: true,
-          render: (payer) => payer.email,
+          render: (payer) => (
+            <Link
+              href={{
+                pathname: AppRoutes.PAYMENT,
+                query: { email: payer.email },
+              }}
+            >
+              <span className={s.Payer}>{payer.email}</span>
+            </Link>
+          ),
         }
       : { width: '0' },
     {
@@ -119,7 +121,7 @@ const PaymentsBlock: FC = () => {
 
   let content: ReactElement
 
-  if (isLoading || isFetching || !payments) {
+  if (isLoading || isFetching) {
     content = <Spin className={s.Spin} />
   } else if (isError) {
     content = <Alert message="Помилка" type="error" showIcon closable />

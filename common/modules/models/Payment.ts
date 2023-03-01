@@ -1,8 +1,9 @@
+import { IUser } from './User'
 import { paymentSchemeMiddleware } from '@common/lib/paymentSchemeMiddleware'
 import mongoose, { ObjectId, Schema } from 'mongoose'
 
 export interface IPaymentModel {
-  payer: ObjectId
+  payer: ObjectId | IUser
   date: Date
   credit: number
   debit: number

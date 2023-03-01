@@ -34,3 +34,10 @@
   justify-content: center;
   align-items: center;
 }
+
+.Payer {
+  color: #1677ff !important;
+  &:hover {
+    color: #4096ff;
+  }
+}

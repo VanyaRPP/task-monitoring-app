@@ -19,7 +19,7 @@ const PaymentCardHeader = () => {
 
   const { data: session } = useSession()
   const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const user = data?.data
+  const isAdmin = data?.data.role === Roles.ADMIN
 
   return (
     <div className={s.TableHeader}>
@@ -27,7 +27,7 @@ const PaymentCardHeader = () => {
         Проплати
         <SelectOutlined className={s.Icon} />
       </Button>
-      {user?.role === Roles.ADMIN && (
+      {isAdmin && (
         <Button type="link" onClick={() => setIsModalOpen(true)}>
           <PlusOutlined /> Додати оплату
         </Button>

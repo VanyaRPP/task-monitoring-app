@@ -13,12 +13,21 @@ export const paymentApi = createApi({
   tagTypes: ['Payment'],
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getAllPayments: builder.query<IExtendedPayment[], string>({
-      query: () => 'spacehub/payment',
+    getAllPayments: builder.query<IExtendedPayment[], number>({
+      query: (limit) => {
+        return {
+          url: `spacehub/payment`,
+          params: { limit },
+        }
+      },
       providesTags: (response) =>
         response
           ? response.map((item) => ({ type: 'Payment', id: item._id }))
           : [],
+      transformResponse: (response: IGetPaymentResponse) => response.data,
+    }),
+    getPaymentsByEmail: builder.query<IExtendedPayment[], string>({
+      query: (email) => `spacehub/payment/email/${email}`,
       transformResponse: (response: IGetPaymentResponse) => response.data,
     }),
     addPayment: builder.mutation<IAddPaymentResponse, IPayment>({
@@ -50,4 +59,5 @@ export const {
   useAddPaymentMutation,
   useGetAllPaymentsQuery,
   useDeletePaymentMutation,
+  useGetPaymentsByEmailQuery,
 } = paymentApi
