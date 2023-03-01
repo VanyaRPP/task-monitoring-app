@@ -9,10 +9,13 @@ import CategoriesBlock from './blocks/categories'
 import PaymentsBlock from './blocks/payments'
 import DashboardHeader from '../DashboardHeader'
 import s from './style.module.scss'
+import { Roles } from '@utils/constants'
 
 const Dashboard: FC = () => {
   const session = useSession()
-  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
+  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email, {
+    skip: !session,
+  })
   const userRole = userResponse?.data?.data?.role
 
   return (
@@ -20,7 +23,7 @@ const Dashboard: FC = () => {
       <DashboardHeader />
       <div className={s.Container}>
         <PaymentsBlock />
-        {userRole !== 'User' ? <Tasks /> : null}
+        {userRole !== Roles.USER ? <Tasks /> : null}
         <Orders />
         {/* <CategoriesBlock />
         <Masters />

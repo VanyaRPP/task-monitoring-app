@@ -40,14 +40,6 @@ const PaymentsBlock: FC = () => {
     }
   }
 
-  // const filteredAdminPayments = payments if use sort on FE
-  //   ?.slice()
-  //   .sort((a, b) => (a.date < b.date ? 1 : -1))
-
-  // const filteredUserPayments = userResponse?.data?.payments
-  //   .slice()
-  //   .sort((a, b) => (a.date < b.date ? 1 : -1))
-
   const columns = [
     {
       title: 'Дата',
