@@ -17,6 +17,7 @@ import s from './style.module.scss'
 
 const PaymentsBlock: FC = () => {
   const { data } = useSession()
+
   const {
     data: userResponse,
     isError: userError,
@@ -113,20 +114,8 @@ const PaymentsBlock: FC = () => {
   ]
 
   let content: ReactElement
-  const [domLoaded, setDomLoaded] = useState(false)
 
-  useEffect(() => {
-    setDomLoaded(true)
-  }, [])
-
-  if (
-    isLoading ||
-    isFetching ||
-    !payments ||
-    userLoading ||
-    !userFetching ||
-    !userResponse
-  ) {
+  if (isLoading || isFetching || userLoading || userFetching) {
     content = <Spin className={s.Spin} />
   } else if (isError || userError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
