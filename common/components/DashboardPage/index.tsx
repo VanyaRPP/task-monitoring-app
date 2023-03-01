@@ -12,11 +12,14 @@ import { Roles } from '@utils/constants'
 import s from './style.module.scss'
 
 const Dashboard: FC = () => {
-  const session = useSession()
-  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email, {
-    skip: !session,
-  })
-  const userRole = userResponse?.data?.data?.role
+  const { data } = useSession()
+  const { data: userResponse } = useGetUserByEmailQuery(
+    `${data?.user?.email}`,
+    {
+      skip: !data,
+    }
+  )
+  const userRole = userResponse?.data?.role
 
   return (
     <>

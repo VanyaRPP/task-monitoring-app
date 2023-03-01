@@ -23,7 +23,7 @@ const PaymentsBlock: FC = () => {
     isError: userError,
     isLoading: userLoading,
     isFetching: userFetching,
-  } = useGetUserByEmailQuery(data?.user?.email)
+  } = useGetUserByEmailQuery(`${data?.user?.email}`, { skip: !data })
 
   const {
     data: payments,
