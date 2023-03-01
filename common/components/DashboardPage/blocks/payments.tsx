@@ -42,13 +42,81 @@ const PaymentsBlock: FC = () => {
     }
   }
 
+  // const columns = [
+  //   {
+  //     title: 'Дата',
+  //     dataIndex: 'date',
+  //     key: 'date',
+  //     width: '15%',
+  //     render: (date) => dateToDefaultFormat(date),
+  //   },
+  //   isAdmin
+  //     ? {
+  //         title: 'Платник',
+  //         dataIndex: 'payer',
+  //         key: 'payer',
+  //         width: '15%',
+  //         ellipsis: true,
+  //         render: (payer) => payer.email,
+  //       }
+  //     : { width: '0' },
+  //   {
+  //     title: (
+  //       <Tooltip title="Дебет (Реалізація)">
+  //         <span>Дебет</span>
+  //       </Tooltip>
+  //     ),
+  //     dataIndex: 'debit',
+  //     key: 'debit',
+  //     width: '20%',
+  //     render: (debit) => (debit === 0 ? null : debit),
+  //   },
+  //   {
+  //     title: (
+  //       <Tooltip title="Кредит (Оплата)">
+  //         <span>Кредит</span>
+  //       </Tooltip>
+  //     ),
+  //     dataIndex: 'credit',
+  //     key: 'credit',
+  //     width: '20%',
+  //     render: (credit) => (credit === 0 ? null : credit),
+  //   },
+  //   {
+  //     title: 'Опис',
+  //     dataIndex: 'description',
+  //     key: 'description',
+  //     width: '15%',
+  //     ellipsis: true,
+  //   },
+  //   isAdmin
+  //     ? {
+  //         title: '',
+  //         dataIndex: '',
+  //         width: '15%',
+  //         render: (_, payment: IExtendedPayment) => (
+  //           <div className={s.Popconfirm}>
+  //             <Popconfirm
+  //               title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+  //                 payment.date as unknown as string
+  //               )}?`}
+  //               onConfirm={() => handleDeletePayment(payment._id)}
+  //               cancelText="Відміна"
+  //             >
+  //               <DeleteOutlined className={s.Icon} />
+  //             </Popconfirm>
+  //           </div>
+  //         ),
+  //       }
+  //     : { width: '0' },
+  // ]
+
   const columns = [
     {
       title: 'Дата',
       dataIndex: 'date',
       key: 'date',
       width: '15%',
-      render: (date) => dateToDefaultFormat(date),
     },
     isAdmin
       ? {
@@ -61,26 +129,16 @@ const PaymentsBlock: FC = () => {
         }
       : { width: '0' },
     {
-      title: (
-        <Tooltip title="Дебет (Реалізація)">
-          <span>Дебет</span>
-        </Tooltip>
-      ),
+      title: 'Дебет',
       dataIndex: 'debit',
       key: 'debit',
       width: '20%',
-      render: (debit) => (debit === 0 ? null : debit),
     },
     {
-      title: (
-        <Tooltip title="Кредит (Оплата)">
-          <span>Кредит</span>
-        </Tooltip>
-      ),
+      title: 'Кредит',
       dataIndex: 'credit',
       key: 'credit',
       width: '20%',
-      render: (credit) => (credit === 0 ? null : credit),
     },
     {
       title: 'Опис',
@@ -89,26 +147,6 @@ const PaymentsBlock: FC = () => {
       width: '15%',
       ellipsis: true,
     },
-    isAdmin
-      ? {
-          title: '',
-          dataIndex: '',
-          width: '15%',
-          render: (_, payment: IExtendedPayment) => (
-            <div className={s.Popconfirm}>
-              <Popconfirm
-                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                  payment.date as unknown as string
-                )}?`}
-                onConfirm={() => handleDeletePayment(payment._id)}
-                cancelText="Відміна"
-              >
-                <DeleteOutlined className={s.Icon} />
-              </Popconfirm>
-            </div>
-          ),
-        }
-      : { width: '0' },
   ]
 
   let content: ReactElement
@@ -119,30 +157,29 @@ const PaymentsBlock: FC = () => {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
-      <p>hello</p>
-      // <Table
-      //   columns={columns}
-      //   dataSource={payments}
-      //   pagination={false}
-      //   bordered
-      //   rowKey="_id"
-      // summary={(pageData) => { //TODO: Use when it will be necessary to display summary info
-      //   let totalCredit = 0
-      //   let totalDebit = 0
+      <Table
+        columns={columns}
+        dataSource={payments}
+        bordered
+        pagination={false}
+        rowKey="_id"
+        // summary={(pageData) => { //TODO: Use when it will be necessary to display summary info
+        //   let totalCredit = 0
+        //   let totalDebit = 0
 
-      //   pageData.forEach(({ credit, debit }) => {
-      //     totalCredit += credit
-      //     totalDebit += debit
-      //   })
+        //   pageData.forEach(({ credit, debit }) => {
+        //     totalCredit += credit
+        //     totalDebit += debit
+        //   })
 
-      //   return (
-      //     <PaymentTableSum
-      //       totalDebit={totalDebit}
-      //       totalCredit={totalCredit}
-      //     />
-      //   )
-      // }}
-      // />
+        //   return (
+        //     <PaymentTableSum
+        //       totalDebit={totalDebit}
+        //       totalCredit={totalCredit}
+        //     />
+        //   )
+        // }}
+      />
     )
   }
 
