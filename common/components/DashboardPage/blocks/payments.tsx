@@ -59,7 +59,7 @@ const PaymentsBlock: FC = () => {
           key: 'payer',
           width: '15%',
           ellipsis: true,
-          render: (payer) => payer.email,
+          render: (payer) => payer?.email,
         }
       : { width: '0' },
     {
