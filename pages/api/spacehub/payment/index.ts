@@ -42,31 +42,24 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        // const session = await getServerSession(req, res, authOptions)
-        // const user = await User.findOne({ email: session.user.email })
-        // const isAdmin = user?.role === Roles.ADMIN
-        // const payments = await Payment.find({})
-        //   .sort({ date: -1 })
-        //   .limit(5)
-        //   .populate('payer')
-
-        // let userPayments
-        // if (!isAdmin) {
-        //   userPayments = payments?.filter((p) => {
-        //     return p?.payer?.email === user.email
-        //   })
-        // }
-
-        // return res.status(200).json({
-        //   success: true,
-        //   data: isAdmin ? payments : userPayments,
-        // })
+        const session = await getServerSession(req, res, authOptions)
+        const user = await User.findOne({ email: session.user.email })
+        const isAdmin = user?.role === Roles.ADMIN
         const payments = await Payment.find({})
-        // .populate('payer')
+          .sort({ date: -1 })
+          .limit(5)
+          .populate('payer')
+
+        let userPayments
+        if (!isAdmin) {
+          userPayments = payments?.filter((p) => {
+            return p?.payer?.email === user.email
+          })
+        }
 
         return res.status(200).json({
           success: true,
-          data: payments,
+          data: isAdmin ? payments : userPayments,
         })
       } catch (error) {
         return res.status(400).json({ success: false })

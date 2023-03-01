@@ -1,4 +1,4 @@
-import React, { FC, ReactElement } from 'react'
+import React, { FC, ReactElement, useEffect, useState } from 'react'
 import { Alert, message, Popconfirm, Spin, Table } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
@@ -110,8 +110,13 @@ const PaymentsBlock: FC = () => {
   ]
 
   let content: ReactElement
+  const [domLoaded, setDomLoaded] = useState(false)
 
-  if (isLoading || isFetching || !payments) {
+  useEffect(() => {
+    setDomLoaded(true)
+  }, [])
+
+  if (isLoading || isFetching || !payments || !domLoaded) {
     content = <Spin className={s.Spin} />
   } else if (isError || userError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
