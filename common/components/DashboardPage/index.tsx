@@ -8,8 +8,8 @@ import { useSession } from 'next-auth/react'
 import CategoriesBlock from './blocks/categories'
 import PaymentsBlock from './blocks/payments'
 import DashboardHeader from '../DashboardHeader'
-import s from './style.module.scss'
 import { Roles } from '@utils/constants'
+import s from './style.module.scss'
 
 const Dashboard: FC = () => {
   const session = useSession()
@@ -22,8 +22,8 @@ const Dashboard: FC = () => {
     <>
       <DashboardHeader />
       <div className={s.Container}>
-        <PaymentsBlock />
-        {userRole !== Roles.USER ? <Tasks /> : null}
+        {/* <PaymentsBlock /> */}
+        {userRole !== Roles.USER && <Tasks />}
         <Orders />
         {/* <CategoriesBlock />
         <Masters />
