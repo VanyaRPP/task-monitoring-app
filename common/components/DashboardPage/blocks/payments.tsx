@@ -17,9 +17,9 @@ import s from './style.module.scss'
 
 const PaymentsBlock: FC = () => {
   const { data } = useSession()
-  // const { data: userResponse, isError: userError } = useGetUserByEmailQuery(
-  //   data?.user?.email
-  // )
+  const { data: userResponse, isError: userError } = useGetUserByEmailQuery(
+    data?.user?.email
+  )
 
   const {
     data: payments,
@@ -29,7 +29,7 @@ const PaymentsBlock: FC = () => {
   } = useGetAllPaymentsQuery('')
   const [deletePayment] = useDeletePaymentMutation()
 
-  // const isAdmin = userResponse?.data?.role === Roles.ADMIN
+  const isAdmin = userResponse?.data?.role === Roles.ADMIN
 
   const handleDeletePayment = async (id: string) => {
     const response = await deletePayment(id)
@@ -39,6 +39,7 @@ const PaymentsBlock: FC = () => {
       message.error('Помилка при видаленні рахунку')
     }
   }
+
   const columns = [
     {
       title: 'Дата',
@@ -47,14 +48,16 @@ const PaymentsBlock: FC = () => {
       width: '15%',
       render: (date) => dateToDefaultFormat(date),
     },
-    {
-      title: 'Платник',
-      dataIndex: 'payer',
-      key: 'payer',
-      width: '15%',
-      ellipsis: true,
-      render: (payer) => payer.email,
-    },
+    isAdmin
+      ? {
+          title: 'Платник',
+          dataIndex: 'payer',
+          key: 'payer',
+          width: '15%',
+          ellipsis: true,
+          render: (payer) => payer.email,
+        }
+      : { width: '0' },
     {
       title: (
         <Tooltip title="Дебет (Реалізація)">
@@ -84,81 +87,33 @@ const PaymentsBlock: FC = () => {
       width: '15%',
       ellipsis: true,
     },
+    isAdmin
+      ? {
+          title: '',
+          dataIndex: '',
+          width: '15%',
+          render: (_, payment: IExtendedPayment) => (
+            <div className={s.Popconfirm}>
+              <Popconfirm
+                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+                  payment.date as unknown as string
+                )}?`}
+                onConfirm={() => handleDeletePayment(payment._id)}
+                cancelText="Відміна"
+              >
+                <DeleteOutlined className={s.Icon} />
+              </Popconfirm>
+            </div>
+          ),
+        }
+      : { width: '0' },
   ]
-  // const columns = [
-  //   {
-  //     title: 'Дата',
-  //     dataIndex: 'date',
-  //     key: 'date',
-  //     width: '15%',
-  //     render: (date) => dateToDefaultFormat(date),
-  //   },
-  //   isAdmin
-  //     ? {
-  //         title: 'Платник',
-  //         dataIndex: 'payer',
-  //         key: 'payer',
-  //         width: '15%',
-  //         ellipsis: true,
-  //         render: (payer) => payer.email,
-  //       }
-  //     : { width: '0' },
-  //   {
-  //     title: (
-  //       <Tooltip title="Дебет (Реалізація)">
-  //         <span>Дебет</span>
-  //       </Tooltip>
-  //     ),
-  //     dataIndex: 'debit',
-  //     key: 'debit',
-  //     width: '20%',
-  //     render: (debit) => (debit === 0 ? null : debit),
-  //   },
-  //   {
-  //     title: (
-  //       <Tooltip title="Кредит (Оплата)">
-  //         <span>Кредит</span>
-  //       </Tooltip>
-  //     ),
-  //     dataIndex: 'credit',
-  //     key: 'credit',
-  //     width: '20%',
-  //     render: (credit) => (credit === 0 ? null : credit),
-  //   },
-  //   {
-  //     title: 'Опис',
-  //     dataIndex: 'description',
-  //     key: 'description',
-  //     width: '15%',
-  //     ellipsis: true,
-  //   },
-  //   isAdmin
-  //     ? {
-  //         title: '',
-  //         dataIndex: '',
-  //         width: '15%',
-  //         render: (_, payment: IExtendedPayment) => (
-  //           <div className={s.Popconfirm}>
-  //             <Popconfirm
-  //               title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-  //                 payment.date as unknown as string
-  //               )}?`}
-  //               onConfirm={() => handleDeletePayment(payment._id)}
-  //               cancelText="Відміна"
-  //             >
-  //               <DeleteOutlined className={s.Icon} />
-  //             </Popconfirm>
-  //           </div>
-  //         ),
-  //       }
-  //     : { width: '0' },
-  // ]
 
   let content: ReactElement
 
   if (isLoading || isFetching || !payments) {
     content = <Spin className={s.Spin} />
-  } else if (isError) {
+  } else if (isError || userError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
@@ -187,8 +142,7 @@ const PaymentsBlock: FC = () => {
       />
     )
   }
-  return <>{content}</>
-  // return <TableCard title={<PaymentCardHeader />}>{content}</TableCard>
+  return <TableCard title={<PaymentCardHeader />}>{content}</TableCard>
 }
 
 export default PaymentsBlock
