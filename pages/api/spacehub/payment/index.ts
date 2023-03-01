@@ -61,7 +61,7 @@ export default async function handler(
         //   success: true,
         //   data: isAdmin ? payments : userPayments,
         // })
-        const payments = await Payment.find({}).sort({ date: -1 }).limit(5)
+        const payments = await Payment.find({})
         // .populate('payer')
 
         return res.status(200).json({
