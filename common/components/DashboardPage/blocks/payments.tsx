@@ -17,9 +17,12 @@ import s from './style.module.scss'
 
 const PaymentsBlock: FC = () => {
   const { data } = useSession()
-  const { data: userResponse, isError: userError } = useGetUserByEmailQuery(
-    data?.user?.email
-  )
+  const {
+    data: userResponse,
+    isError: userError,
+    isLoading: userLoading,
+    isFetching: userFetching,
+  } = useGetUserByEmailQuery(data?.user?.email)
 
   const {
     data: payments,
@@ -116,7 +119,14 @@ const PaymentsBlock: FC = () => {
     setDomLoaded(true)
   }, [])
 
-  if (isLoading || isFetching || !payments || !domLoaded) {
+  if (
+    isLoading ||
+    isFetching ||
+    !payments ||
+    userLoading ||
+    !userFetching ||
+    !userResponse
+  ) {
     content = <Spin className={s.Spin} />
   } else if (isError || userError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
