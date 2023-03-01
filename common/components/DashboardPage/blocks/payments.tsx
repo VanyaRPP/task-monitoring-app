@@ -17,9 +17,12 @@ import s from './style.module.scss'
 
 const PaymentsBlock: FC = () => {
   const { data } = useSession()
-  const { data: userResponse } = useGetUserByEmailQuery(data?.user?.email, {
-    skip: !data?.user?.email,
-  })
+  const { data: userResponse, isError: userError } = useGetUserByEmailQuery(
+    data?.user?.email,
+    {
+      skip: !data?.user?.email,
+    }
+  )
 
   const {
     data: payments,
@@ -111,9 +114,9 @@ const PaymentsBlock: FC = () => {
 
   let content: ReactElement
 
-  if (isLoading || isFetching || !payments) {
+  if (isLoading || isFetching) {
     content = <Spin className={s.Spin} />
-  } else if (isError) {
+  } else if (isError || userError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
@@ -121,13 +124,7 @@ const PaymentsBlock: FC = () => {
         className={s.Table}
         columns={columns}
         dataSource={payments}
-        pagination={{
-          responsive: false,
-          size: 'small',
-          pageSize: 5,
-          position: ['bottomCenter'],
-          hideOnSinglePage: true,
-        }}
+        pagination={false}
         bordered
         // summary={(pageData) => { //TODO: Use when it will be necessary to display summary info
         //   let totalCredit = 0
