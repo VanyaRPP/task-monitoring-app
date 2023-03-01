@@ -23,7 +23,6 @@ const PaymentsBlock: FC = () => {
       skip: !data?.user?.email,
     }
   )
-
   const {
     data: payments,
     isLoading,
@@ -121,7 +120,6 @@ const PaymentsBlock: FC = () => {
   } else {
     content = (
       <Table
-        className={s.Table}
         columns={columns}
         dataSource={payments}
         pagination={false}
