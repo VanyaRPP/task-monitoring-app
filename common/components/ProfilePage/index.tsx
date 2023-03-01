@@ -57,6 +57,7 @@ const ProfilePage: React.FC = () => {
     setEditing(false)
     setProfileData(storedData)
   }
+  const isAdmin = user?.role === Roles.ADMIN
 
   useEffect(() => {
     const profileData = {
@@ -71,7 +72,6 @@ const ProfilePage: React.FC = () => {
   return (
     <>
       <h2 className={s.Header}>Мій Профіль</h2>
-
       <div className={s.Container}>
         <Card
           loading={isLoading}
@@ -97,7 +97,7 @@ const ProfilePage: React.FC = () => {
           </div>
 
           <div className={s.Info}>
-            {user?.role === Roles.ADMIN && (
+            {isAdmin && (
               <Card size="small" title="Роль">
                 {router.query.id ? user?.role : <RoleSwitcher />}
               </Card>
