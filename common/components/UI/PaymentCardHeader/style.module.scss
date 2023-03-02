@@ -1,8 +1,12 @@
-.TableHeader {
+.tableHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   .Icon {
     font-size: 14px;
+  }
+  .userTitle {
+    color: var(--primaryColor);
+    font-weight: 400;
   }
 }

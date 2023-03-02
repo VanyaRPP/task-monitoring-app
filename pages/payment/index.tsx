@@ -4,10 +4,10 @@ import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
 import { FC } from 'react'
-import PaymentPage from '@common/components/pages/PaymentPage'
+import PaymentsBlock from '@common/components/DashboardPage/blocks/payments'
 
 const Payments: FC = () => {
-  return <PaymentPage />
+  return <PaymentsBlock allPayments />
 }
 
 export default withAuthRedirect(Payments)

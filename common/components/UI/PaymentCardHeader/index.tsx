@@ -22,11 +22,15 @@ const PaymentCardHeader = () => {
   const isAdmin = data?.data.role === Roles.ADMIN
 
   return (
-    <div className={s.TableHeader}>
-      <Button type="link" onClick={() => Router.push(AppRoutes.PAYMENT)}>
-        Проплати
-        <SelectOutlined className={s.Icon} />
-      </Button>
+    <div className={s.tableHeader}>
+      {isAdmin ? (
+        <Button type="link" onClick={() => Router.push(AppRoutes.PAYMENT)}>
+          Проплати
+          <SelectOutlined className={s.Icon} />
+        </Button>
+      ) : (
+        <span className={s.userTitle}>Мої проплати</span>
+      )}
       {isAdmin && (
         <Button type="link" onClick={() => setIsModalOpen(true)}>
           <PlusOutlined /> Додати оплату
