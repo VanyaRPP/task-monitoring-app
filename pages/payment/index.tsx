@@ -5,9 +5,10 @@ import { authOptions } from '../api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
 import { FC } from 'react'
 import PaymentsBlock from '@common/components/DashboardPage/blocks/payments'
+import PaymentsWrapper from '@common/components/PaymentsWrapper'
 
 const Payments: FC = () => {
-  return <PaymentsBlock allPayments />
+  return <PaymentsWrapper />
 }
 
 export default withAuthRedirect(Payments)

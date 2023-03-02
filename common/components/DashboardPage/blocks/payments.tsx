@@ -5,14 +5,12 @@ import TableCard from '@common/components/UI/TableCard'
 import {
   useDeletePaymentMutation,
   useGetAllPaymentsQuery,
-  useGetPaymentsByEmailQuery,
 } from '@common/api/paymentApi/payment.api'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
-import { useSession } from 'next-auth/react'
-import { AppRoutes, Roles } from '@utils/constants'
+import { AppRoutes } from '@utils/constants'
 import { Tooltip } from 'antd'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -20,13 +18,15 @@ import cn from 'classnames'
 import s from './style.module.scss'
 
 interface Props {
-  allPayments?: boolean
+  payments?: IExtendedPayment[]
+  isAdmin?: boolean
+  isLoading?: boolean
 }
 
-const PaymentsBlock: FC<Props> = ({ allPayments }) => {
-  const { data } = useSession()
+const PaymentsBlock: FC<Props> = ({ payments, isAdmin, isLoading }) => {
   const router = useRouter()
   const {
+    pathname,
     query: { email },
   } = router
 
@@ -35,23 +35,22 @@ const PaymentsBlock: FC<Props> = ({ allPayments }) => {
     isLoading: userLoading,
     isFetching: userFetching,
     isError: userError,
-  } = useGetUserByEmailQuery(data?.user?.email, {
-    skip: !data?.user?.email,
+  } = useGetUserByEmailQuery(email as string, {
+    skip: !email,
   })
-  const isAdmin = userResponse?.data?.role === Roles.ADMIN
   const {
-    data: payments,
-    isLoading: paymentsLoading,
-    isFetching: paymentsFetching,
-    isError: paymentsError,
-  } = useGetAllPaymentsQuery(isAdmin && !allPayments ? 5 : 100)
+    data: paymentsByEmail,
+    isLoading: paymentsByEmailLoading,
+    isFetching: paymentsByEmailFetching,
+    isError: paymentsByEmailError,
+  } = useGetAllPaymentsQuery(
+    {
+      limit: 200,
+      userId: userResponse?.data._id as string,
+    },
+    { skip: !email }
+  )
 
-  const {
-    data: byEmailPayments,
-    isLoading: byEmailPaymentsLoading,
-    isFetching: byEmailPaymentsFetching,
-    isError: byEmailPaymentsError,
-  } = useGetPaymentsByEmailQuery(email as string, { skip: !email })
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
 
@@ -146,26 +145,20 @@ const PaymentsBlock: FC<Props> = ({ allPayments }) => {
   let content: ReactElement
 
   if (
-    paymentsLoading ||
-    paymentsFetching ||
-    byEmailPaymentsLoading ||
-    byEmailPaymentsFetching ||
     userLoading ||
-    userFetching
+    userFetching ||
+    paymentsByEmailLoading ||
+    paymentsByEmailFetching ||
+    isLoading
   ) {
     content = <Spin className={s.spin} />
-  } else if (
-    paymentsError ||
-    byEmailPaymentsError ||
-    userError ||
-    deleteError
-  ) {
+  } else if (userError || deleteError || paymentsByEmailError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
       <Table
         columns={columns}
-        dataSource={email ? byEmailPayments : payments}
+        dataSource={email ? paymentsByEmail : payments}
         pagination={false}
         bordered
         rowKey="_id"
@@ -178,15 +171,17 @@ const PaymentsBlock: FC<Props> = ({ allPayments }) => {
       title={
         email ? (
           <span className={s.title}>{`Оплата від користувача ${email}`}</span>
-        ) : router.pathname === AppRoutes.PAYMENT ? (
-          <span className={s.title}>Оплати</span>
+        ) : pathname === AppRoutes.PAYMENT ? (
+          <span className={s.title}>Всі оплати</span>
         ) : isAdmin ? (
           <PaymentCardHeader />
         ) : (
-          <span className={s.title}>Мої оплати</span>
+          <Link href={AppRoutes.PAYMENT}>
+            <a className={s.title}>Мої оплати</a>
+          </Link>
         )
       }
-      className={cn({ [s.noScroll]: email })}
+      className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}
     >
       {content}
     </TableCard>
