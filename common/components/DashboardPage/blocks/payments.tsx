@@ -176,11 +176,13 @@ const PaymentsBlock: FC<Props> = ({ allPayments }) => {
     <TableCard
       title={
         email ? (
-          `Оплата від користувача ${email}`
+          <span className={s.title}>{`Оплата від користувача ${email}`}</span>
         ) : router.pathname === AppRoutes.PAYMENT ? (
-          'Оплати'
-        ) : (
+          <span className={s.title}>Оплати</span>
+        ) : isAdmin ? (
           <PaymentCardHeader />
+        ) : (
+          <span className={s.title}>Мої оплати</span>
         )
       }
       className={email && s.noScroll}

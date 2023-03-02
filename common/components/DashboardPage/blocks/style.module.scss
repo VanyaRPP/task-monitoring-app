@@ -42,6 +42,11 @@
   }
 }
 
+.title {
+  color: var(--primaryColor);
+  font-weight: 400;
+}
+
 .noScroll {
   max-height: max-content;
 }

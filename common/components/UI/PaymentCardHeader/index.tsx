@@ -23,19 +23,21 @@ const PaymentCardHeader = () => {
 
   return (
     <div className={s.tableHeader}>
-      {isAdmin ? (
+      {/* {isAdmin ? (
         <Button type="link" onClick={() => Router.push(AppRoutes.PAYMENT)}>
           Проплати
           <SelectOutlined className={s.Icon} />
         </Button>
       ) : (
         <span className={s.userTitle}>Мої проплати</span>
-      )}
-      {isAdmin && (
-        <Button type="link" onClick={() => setIsModalOpen(true)}>
-          <PlusOutlined /> Додати оплату
-        </Button>
-      )}
+      )} */}
+      <Button type="link" onClick={() => Router.push(AppRoutes.PAYMENT)}>
+        Проплати
+        <SelectOutlined className={s.Icon} />
+      </Button>
+      <Button type="link" onClick={() => setIsModalOpen(true)}>
+        <PlusOutlined /> Додати оплату
+      </Button>
       <AddPaymentModal isModalOpen={isModalOpen} closeModal={closeModal} />
     </div>
   )
