@@ -21,7 +21,6 @@ type FormData = {
 const AddPaymentModal: FC<Props> = ({ isModalOpen, closeModal }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
-  const data = useSession()
 
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()

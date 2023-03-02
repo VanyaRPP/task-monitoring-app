@@ -19,19 +19,25 @@ const PaymentCardHeader = () => {
 
   const { data: session } = useSession()
   const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const user = data?.data
+  const isAdmin = data?.data.role === Roles.ADMIN
 
   return (
-    <div className={s.TableHeader}>
+    <div className={s.tableHeader}>
+      {/* {isAdmin ? (
+        <Button type="link" onClick={() => Router.push(AppRoutes.PAYMENT)}>
+          Проплати
+          <SelectOutlined className={s.Icon} />
+        </Button>
+      ) : (
+        <span className={s.userTitle}>Мої проплати</span>
+      )} */}
       <Button type="link" onClick={() => Router.push(AppRoutes.PAYMENT)}>
         Проплати
         <SelectOutlined className={s.Icon} />
       </Button>
-      {user?.role === Roles.ADMIN && (
-        <Button type="link" onClick={() => setIsModalOpen(true)}>
-          <PlusOutlined /> Додати оплату
-        </Button>
-      )}
+      <Button type="link" onClick={() => setIsModalOpen(true)}>
+        <PlusOutlined /> Додати оплату
+      </Button>
       <AddPaymentModal isModalOpen={isModalOpen} closeModal={closeModal} />
     </div>
   )

@@ -47,13 +47,13 @@ export default async function handler(
         const isAdmin = user?.role === Roles.ADMIN
         const payments = await Payment.find({})
           .sort({ date: -1 })
-          .limit(5)
+          .limit(req.query.limit)
           .populate('payer')
 
         let userPayments
         if (!isAdmin) {
           userPayments = payments?.filter((p) => {
-            return p?.payer?.email === user.email
+            return p?.payer?.email === user?.email
           })
         }
 

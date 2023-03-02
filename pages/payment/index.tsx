@@ -4,16 +4,13 @@ import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
 import { FC } from 'react'
+import PaymentsBlock from '@common/components/DashboardPage/blocks/payments'
 
-const PaymentsPage: FC = () => {
-  return (
-    <>
-      <p>payments page</p>
-    </>
-  )
+const Payments: FC = () => {
+  return <PaymentsBlock allPayments />
 }
 
-export default withAuthRedirect(PaymentsPage)
+export default withAuthRedirect(Payments)
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await unstable_getServerSession(
