@@ -20,22 +20,22 @@
   }
 }
 
-.Popconfirm {
+.popconfirm {
   display: flex;
   justify-content: center;
   align-items: center;
-  .Icon {
+  .icon {
     font-size: 1.25rem;
   }
 }
 
-.Spin {
+.spin {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.Payer {
+.payer {
   color: #1677ff !important;
   &:hover {
     color: #4096ff;

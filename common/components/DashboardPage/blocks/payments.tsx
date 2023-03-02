@@ -16,6 +16,7 @@ import { AppRoutes, Roles } from '@utils/constants'
 import { Tooltip } from 'antd'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import cn from 'classnames'
 import s from './style.module.scss'
 
 interface Props {
@@ -85,7 +86,7 @@ const PaymentsBlock: FC<Props> = ({ allPayments }) => {
                 query: { email: payer?.email },
               }}
             >
-              <a className={s.Payer}>{payer?.email}</a>
+              <a className={s.payer}>{payer?.email}</a>
             </Link>
           ),
         }
@@ -125,7 +126,7 @@ const PaymentsBlock: FC<Props> = ({ allPayments }) => {
           dataIndex: '',
           width: '15%',
           render: (_, payment: IExtendedPayment) => (
-            <div className={s.Popconfirm}>
+            <div className={s.popconfirm}>
               <Popconfirm
                 title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
                   payment?.date as unknown as string
@@ -134,7 +135,7 @@ const PaymentsBlock: FC<Props> = ({ allPayments }) => {
                 cancelText="Відміна"
                 disabled={deleteLoading}
               >
-                <DeleteOutlined className={s.Icon} />
+                <DeleteOutlined className={s.icon} />
               </Popconfirm>
             </div>
           ),
@@ -152,7 +153,7 @@ const PaymentsBlock: FC<Props> = ({ allPayments }) => {
     userLoading ||
     userFetching
   ) {
-    content = <Spin className={s.Spin} />
+    content = <Spin className={s.spin} />
   } else if (
     paymentsError ||
     byEmailPaymentsError ||
@@ -185,7 +186,7 @@ const PaymentsBlock: FC<Props> = ({ allPayments }) => {
           <span className={s.title}>Мої оплати</span>
         )
       }
-      className={email && s.noScroll}
+      className={cn({ [s.noScroll]: email })}
     >
       {content}
     </TableCard>

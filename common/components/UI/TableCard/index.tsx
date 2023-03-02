@@ -11,11 +11,7 @@ interface Props {
 
 const TableCard: FC<Props> = ({ children, title, className }) => {
   return (
-    <Card
-      className={cn(s.Card, className)}
-      title={title}
-      style={{ flex: '1.5' }}
-    >
+    <Card className={cn(s.Card, className)} title={title}>
       {children}
     </Card>
   )
