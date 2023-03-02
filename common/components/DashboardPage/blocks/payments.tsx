@@ -10,46 +10,48 @@ import { dateToDefaultFormat } from '@common/assets/features/formatDate'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
-import { AppRoutes } from '@utils/constants'
+import { AppRoutes, Roles } from '@utils/constants'
 import { Tooltip } from 'antd'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
 import s from './style.module.scss'
+import { useSession } from 'next-auth/react'
 
-interface Props {
-  payments?: IExtendedPayment[]
-  isAdmin?: boolean
-  isLoading?: boolean
-}
-
-const PaymentsBlock: FC<Props> = ({ payments, isAdmin, isLoading }) => {
+const PaymentsBlock = () => {
   const router = useRouter()
   const {
     pathname,
     query: { email },
   } = router
+  const { data } = useSession()
 
   const {
-    data: userResponse,
-    isLoading: userLoading,
-    isFetching: userFetching,
-    isError: userError,
-  } = useGetUserByEmailQuery(email as string, {
-    skip: !email,
-  })
+    data: byEmailUser,
+    isLoading: byEmailUserLoading,
+    isFetching: byEmailUserFetching,
+    isError: byEmailUserError,
+  } = useGetUserByEmailQuery(email, { skip: !email })
   const {
-    data: paymentsByEmail,
-    isLoading: paymentsByEmailLoading,
-    isFetching: paymentsByEmailFetching,
-    isError: paymentsByEmailError,
-  } = useGetAllPaymentsQuery(
-    {
-      limit: 200,
-      userId: userResponse?.data._id as string,
-    },
-    { skip: !email }
-  )
+    data: currUser,
+    isLoading: currUserLoading,
+    isFetching: currUserFetching,
+    isError: currUserError,
+  } = useGetUserByEmailQuery(data?.user.email, { skip: !data?.user.email })
+
+  const isAdmin = currUser?.data?.role === Roles.ADMIN
+
+  const {
+    data: payments,
+    isLoading: paymentsLoading,
+    isFetching: paymentsFetching,
+    isError: paymentsError,
+  } = useGetAllPaymentsQuery({
+    limit: pathname === AppRoutes.PAYMENT ? 200 : 5,
+    ...(email || isAdmin
+      ? { userId: byEmailUser?.data._id as string }
+      : { userId: currUser?.data._id as string }),
+  })
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
@@ -145,20 +147,26 @@ const PaymentsBlock: FC<Props> = ({ payments, isAdmin, isLoading }) => {
   let content: ReactElement
 
   if (
-    userLoading ||
-    userFetching ||
-    paymentsByEmailLoading ||
-    paymentsByEmailFetching ||
-    isLoading
+    byEmailUserLoading ||
+    byEmailUserFetching ||
+    currUserLoading ||
+    currUserFetching ||
+    paymentsLoading ||
+    paymentsFetching
   ) {
     content = <Spin className={s.spin} />
-  } else if (userError || deleteError || paymentsByEmailError) {
+  } else if (
+    byEmailUserError ||
+    deleteError ||
+    paymentsError ||
+    currUserError
+  ) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
       <Table
         columns={columns}
-        dataSource={email ? paymentsByEmail : payments}
+        dataSource={payments}
         pagination={false}
         bordered
         rowKey="_id"
