@@ -97,11 +97,14 @@ const ProfilePage: React.FC = () => {
           </div>
 
           <div className={s.Info}>
-            {isAdmin && (
+            {/* {isAdmin && ( //TODO: Hard to work with it(uncoment on prod version)
               <Card size="small" title="Роль">
                 {router.query.id ? user?.role : <RoleSwitcher />}
               </Card>
-            )}
+            )} */}
+            <Card size="small" title="Роль">
+              {router.query.id ? user?.role : <RoleSwitcher />}
+            </Card>
 
             <Card size="small" title="Електронна пошта" className={s.Edit}>
               <Input
