@@ -45,21 +45,18 @@ export default async function handler(
         // const session = await getServerSession(req, res, authOptions)
         // const user = await User.findOne({ email: session.user.email })
         // const isAdmin = user?.role === Roles.ADMIN //TODO: UncomMent when use limit only for ADMIN
-        let payments
-
-        if (req.query.userId) {
-          payments = await Payment.find({
-            payer: { _id: req.query.userId },
-          })
-            .sort({ date: -1 })
-            .limit(req.query.limit)
-            .populate('payer')
-        } else {
-          payments = await Payment.find({})
-            .sort({ date: -1 })
-            .limit(req.query.limit)
-            .populate('payer')
-        }
+        // let payments
+        // }
+        const payments = await Payment.find({
+          ...(req.query.userId
+            ? {
+                payer: { _id: req.query.userId },
+              }
+            : {}),
+        })
+          .sort({ date: -1 })
+          .limit(req.query.limit)
+          .populate('payer')
 
         return res.status(200).json({
           success: true,
