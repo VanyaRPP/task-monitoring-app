@@ -1,10 +1,9 @@
 import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
-import { objectWithoutKey } from '@common/assets/features/formDataHelpers'
 import { IUser } from '@common/modules/models/User'
 import { Form, message, Modal } from 'antd'
-import { useSession } from 'next-auth/react'
 import React, { FC } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
+import s from './style.module.scss'
 
 interface Props {
   isModalOpen: boolean
@@ -48,6 +47,7 @@ const AddPaymentModal: FC<Props> = ({ isModalOpen, closeModal }) => {
       okText={'Додати'}
       cancelText={'Відміна'}
       confirmLoading={isLoading}
+      className={s.Modal}
     >
       <AddPaymentForm form={form} />
     </Modal>
