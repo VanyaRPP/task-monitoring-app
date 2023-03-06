@@ -8,7 +8,7 @@ import { useSession } from 'next-auth/react'
 import CategoriesBlock from './blocks/categories'
 import DashboardHeader from '../DashboardHeader'
 import { Roles } from '@utils/constants'
-import PaymentsWrapper from '../PaymentsWrapper'
+import PaymentsBlock from './blocks/payments'
 import s from './style.module.scss'
 
 const Dashboard: FC = () => {
@@ -16,7 +16,7 @@ const Dashboard: FC = () => {
   const { data: userResponse } = useGetUserByEmailQuery(
     `${data?.user?.email}`,
     {
-      skip: !data,
+      skip: !data?.user?.email,
     }
   )
   const userRole = userResponse?.data?.role
@@ -25,7 +25,7 @@ const Dashboard: FC = () => {
     <>
       <DashboardHeader />
       <div className={s.Container}>
-        <PaymentsWrapper />
+        <PaymentsBlock />
         {userRole !== Roles.USER && <Tasks />}
         <Orders />
         {/* <CategoriesBlock />

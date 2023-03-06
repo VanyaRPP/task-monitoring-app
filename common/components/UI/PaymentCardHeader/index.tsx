@@ -18,7 +18,9 @@ const PaymentCardHeader = () => {
   }
 
   const { data: session } = useSession()
-  const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
+  const { data } = useGetUserByEmailQuery(`${session?.user?.email}`, {
+    skip: !session?.user?.email,
+  })
   const isAdmin = data?.data.role === Roles.ADMIN
 
   return (
