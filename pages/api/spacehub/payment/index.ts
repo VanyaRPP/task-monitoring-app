@@ -42,17 +42,16 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        // const session = await getServerSession(req, res, authOptions)
-        // const user = await User.findOne({ email: session.user.email })
-        // const isAdmin = user?.role === Roles.ADMIN //TODO: UncomMent when use limit only for ADMIN
-        // let payments
-        // }
+        const session = await getServerSession(req, res, authOptions)
+        const user = await User.findOne({ email: session.user.email })
+        const isAdmin = user?.role === Roles.ADMIN
+
         const payments = await Payment.find({
           ...(req.query.userId
             ? {
                 payer: { _id: req.query.userId },
               }
-            : {}),
+            : isAdmin && {}),
         })
           .sort({ date: -1 })
           .limit(req.query.limit)

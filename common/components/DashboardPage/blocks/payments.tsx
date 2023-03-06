@@ -146,21 +146,7 @@ const PaymentsBlock = () => {
 
   let content: ReactElement
 
-  if (
-    byEmailUserLoading ||
-    byEmailUserFetching ||
-    currUserLoading ||
-    currUserFetching ||
-    paymentsLoading ||
-    paymentsFetching
-  ) {
-    content = <Spin className={s.spin} />
-  } else if (
-    byEmailUserError ||
-    deleteError ||
-    paymentsError ||
-    currUserError
-  ) {
+  if (byEmailUserError || deleteError || paymentsError || currUserError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
@@ -169,6 +155,14 @@ const PaymentsBlock = () => {
         dataSource={payments}
         pagination={false}
         bordered
+        loading={
+          byEmailUserLoading ||
+          byEmailUserFetching ||
+          currUserLoading ||
+          currUserFetching ||
+          paymentsLoading ||
+          paymentsFetching
+        }
         rowKey="_id"
       />
     )
