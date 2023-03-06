@@ -1,5 +1,5 @@
 import React, { FC, useMemo, useState } from 'react'
-import { Table, Input, ConfigProvider, Empty } from 'antd'
+import { Table, Input, ConfigProvider } from 'antd'
 import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../../api/userApi/user.api'
 import moment from 'moment'
@@ -80,33 +80,26 @@ const Orders: FC = () => {
 
   return (
     <TableCard title={<OrdersTableHeader user={user} />}>
-      <ConfigProvider
-        renderEmpty={() => (
-          <Empty description={false} image={Empty.PRESENTED_IMAGE_SIMPLE} />
-        )}
-      >
-        <Table
-          className={s.Table}
-          rowKey="_id"
-          rowClassName={s.rowClass}
-          showHeader={true}
-          dataSource={filteredDataSource}
-          columns={columns}
-          pagination={{
-            responsive: false,
-            size: 'small',
-            pageSize: 5,
-            position: ['bottomCenter'],
-            hideOnSinglePage: true,
-          }}
-          onRow={(record, rowIndex) => {
-            return {
-              onClick: (event) =>
-                router.push(`${AppRoutes.TASK}/${record._id}`),
-            }
-          }}
-        />
-      </ConfigProvider>
+      <Table
+        className={s.Table}
+        rowKey="_id"
+        rowClassName={s.rowClass}
+        showHeader={true}
+        dataSource={filteredDataSource}
+        columns={columns}
+        pagination={{
+          responsive: false,
+          size: 'small',
+          pageSize: 5,
+          position: ['bottomCenter'],
+          hideOnSinglePage: true,
+        }}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: (event) => router.push(`${AppRoutes.TASK}/${record._id}`),
+          }
+        }}
+      />
     </TableCard>
   )
 }

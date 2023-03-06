@@ -1,5 +1,5 @@
 import React, { FC, useMemo, useState } from 'react'
-import { Card, Table, Input, Button, ConfigProvider, Empty } from 'antd'
+import { Card, Table, Input, Button } from 'antd'
 import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
 import Router, { useRouter } from 'next/router'
 import { AppRoutes, TaskStatuses } from '../../../../utils/constants'
@@ -48,33 +48,27 @@ const CategoriesBlock: FC = () => {
         </Button>
       }
     >
-      <ConfigProvider
-        renderEmpty={() => (
-          <Empty description={false} image={Empty.PRESENTED_IMAGE_SIMPLE} />
-        )}
-      >
-        <Table
-          className={s.Table}
-          rowKey="_id"
-          rowClassName={s.rowClass}
-          showHeader={true}
-          dataSource={categories}
-          columns={columns}
-          pagination={{
-            responsive: false,
-            size: 'small',
-            pageSize: 5,
-            position: ['bottomCenter'],
-            hideOnSinglePage: true,
-          }}
-          onRow={(record, rowIndex) => {
-            return {
-              onClick: (event) =>
-                router.push(`${AppRoutes.CATEGORY}/${record._id}`),
-            }
-          }}
-        />
-      </ConfigProvider>
+      <Table
+        className={s.Table}
+        rowKey="_id"
+        rowClassName={s.rowClass}
+        showHeader={true}
+        dataSource={categories}
+        columns={columns}
+        pagination={{
+          responsive: false,
+          size: 'small',
+          pageSize: 5,
+          position: ['bottomCenter'],
+          hideOnSinglePage: true,
+        }}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: (event) =>
+              router.push(`${AppRoutes.CATEGORY}/${record._id}`),
+          }
+        }}
+      />
     </TableCard>
   )
 }

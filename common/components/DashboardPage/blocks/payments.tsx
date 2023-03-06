@@ -1,13 +1,5 @@
 import React, { FC, ReactElement } from 'react'
-import {
-  Alert,
-  message,
-  Popconfirm,
-  Spin,
-  Table,
-  ConfigProvider,
-  Empty,
-} from 'antd'
+import { Alert, message, Popconfirm, Spin, Table } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
 import {
@@ -158,27 +150,21 @@ const PaymentsBlock = () => {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
-      <ConfigProvider
-        renderEmpty={() => (
-          <Empty description={false} image={Empty.PRESENTED_IMAGE_SIMPLE} />
-        )}
-      >
-        <Table
-          columns={columns}
-          dataSource={payments}
-          pagination={false}
-          bordered
-          loading={
-            byEmailUserLoading ||
-            byEmailUserFetching ||
-            currUserLoading ||
-            currUserFetching ||
-            paymentsLoading ||
-            paymentsFetching
-          }
-          rowKey="_id"
-        />
-      </ConfigProvider>
+      <Table
+        columns={columns}
+        dataSource={payments}
+        pagination={false}
+        bordered
+        loading={
+          byEmailUserLoading ||
+          byEmailUserFetching ||
+          currUserLoading ||
+          currUserFetching ||
+          paymentsLoading ||
+          paymentsFetching
+        }
+        rowKey="_id"
+      />
     )
   }
 
