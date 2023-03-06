@@ -1,5 +1,6 @@
 import '../styles/globals.scss'
 import '@styles/antd-override.scss'
+import { ConfigProvider, Empty } from 'antd'
 import type { AppProps } from 'next/app'
 import { SessionProvider } from 'next-auth/react'
 import { Provider } from 'react-redux'
@@ -20,7 +21,13 @@ export default function MyApp({
             height={2}
             showOnShallow={false}
           />
-          <Component {...pageProps} />
+          <ConfigProvider
+            renderEmpty={() => (
+              <Empty description={false} image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            )}
+          >
+            <Component {...pageProps} />
+          </ConfigProvider>
         </MainLayout>
       </Provider>
     </SessionProvider>
