@@ -13,8 +13,16 @@ export const paymentApi = createApi({
   tagTypes: ['Payment'],
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getAllPayments: builder.query<IExtendedPayment[], string>({
-      query: () => 'spacehub/payment',
+    getAllPayments: builder.query<
+      IExtendedPayment[],
+      { limit: number; userId?: string }
+    >({
+      query: ({ limit, userId }) => {
+        return {
+          url: `spacehub/payment`,
+          params: { limit, userId },
+        }
+      },
       providesTags: (response) =>
         response
           ? response.map((item) => ({ type: 'Payment', id: item._id }))

@@ -20,17 +20,33 @@
   }
 }
 
-.Popconfirm {
+.popconfirm {
   display: flex;
   justify-content: center;
   align-items: center;
-  .Icon {
+  .icon {
     font-size: 1.25rem;
   }
 }
 
-.Spin {
+.spin {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.payer {
+  color: #1677ff !important;
+  &:hover {
+    color: #4096ff;
+  }
+}
+
+.title {
+  color: var(--primaryColor);
+  font-weight: 400;
+}
+
+.noScroll {
+  max-height: max-content;
 }

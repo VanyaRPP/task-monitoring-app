@@ -9,31 +9,52 @@ import {
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
-import {
-  useGetAllUsersQuery,
-  useGetUserByEmailQuery,
-} from '@common/api/userApi/user.api'
-import { useSession } from 'next-auth/react'
-import { Roles } from '@utils/constants'
+import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
+import { AppRoutes, Roles } from '@utils/constants'
 import { Tooltip } from 'antd'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import cn from 'classnames'
 import s from './style.module.scss'
+import { useSession } from 'next-auth/react'
 
-const PaymentsBlock: FC = () => {
+const PaymentsBlock = () => {
+  const router = useRouter()
+  const {
+    pathname,
+    query: { email },
+  } = router
   const { data } = useSession()
-  const { data: userResponse } = useGetUserByEmailQuery(data?.user?.email, {
-    skip: !data?.user?.email,
-  })
+
+  const {
+    data: byEmailUser,
+    isLoading: byEmailUserLoading,
+    isFetching: byEmailUserFetching,
+    isError: byEmailUserError,
+  } = useGetUserByEmailQuery(email, { skip: !email })
+  const {
+    data: currUser,
+    isLoading: currUserLoading,
+    isFetching: currUserFetching,
+    isError: currUserError,
+  } = useGetUserByEmailQuery(data?.user.email, { skip: !data?.user.email })
+
+  const isAdmin = currUser?.data?.role === Roles.ADMIN
 
   const {
     data: payments,
-    isLoading,
-    isFetching,
-    isError,
-  } = useGetAllPaymentsQuery('')
-  const [deletePayment] = useDeletePaymentMutation()
-  const { data: usersData } = useGetAllUsersQuery('')
+    isLoading: paymentsLoading,
+    isFetching: paymentsFetching,
+    isError: paymentsError,
+  } = useGetAllPaymentsQuery({
+    limit: pathname === AppRoutes.PAYMENT ? 200 : 5,
+    ...(email || isAdmin
+      ? { userId: byEmailUser?.data._id as string }
+      : { userId: currUser?.data._id as string }),
+  })
 
-  const userRole = userResponse?.data?.role
+  const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
+    useDeletePaymentMutation()
 
   const handleDeletePayment = async (id: string) => {
     const response = await deletePayment(id)
@@ -44,14 +65,6 @@ const PaymentsBlock: FC = () => {
     }
   }
 
-  const filteredAdminPayments = payments
-    ?.slice()
-    .sort((a, b) => (a.date < b.date ? 1 : -1))
-
-  const filteredUserPayments = userResponse?.data?.payments
-    .slice()
-    .sort((a, b) => (a.date < b.date ? 1 : -1))
-
   const columns = [
     {
       title: 'Дата',
@@ -60,6 +73,25 @@ const PaymentsBlock: FC = () => {
       width: '15%',
       render: (date) => dateToDefaultFormat(date),
     },
+    isAdmin && !email
+      ? {
+          title: 'Платник',
+          dataIndex: 'payer',
+          key: 'payer',
+          width: '15%',
+          ellipsis: true,
+          render: (payer) => (
+            <Link
+              href={{
+                pathname: AppRoutes.PAYMENT,
+                query: { email: payer?.email },
+              }}
+            >
+              <a className={s.payer}>{payer?.email}</a>
+            </Link>
+          ),
+        }
+      : { width: '0' },
     {
       title: (
         <Tooltip title="Дебет (Реалізація)">
@@ -89,21 +121,22 @@ const PaymentsBlock: FC = () => {
       width: '15%',
       ellipsis: true,
     },
-    userRole === Roles.ADMIN
+    isAdmin
       ? {
           title: '',
           dataIndex: '',
           width: '15%',
           render: (_, payment: IExtendedPayment) => (
-            <div className={s.Popconfirm}>
+            <div className={s.popconfirm}>
               <Popconfirm
                 title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                  payment.date as unknown as string
+                  payment?.date as unknown as string
                 )}?`}
-                onConfirm={() => handleDeletePayment(payment._id)}
+                onConfirm={() => handleDeletePayment(payment?._id)}
                 cancelText="Відміна"
+                disabled={deleteLoading}
               >
-                <DeleteOutlined className={s.Icon} />
+                <DeleteOutlined className={s.icon} />
               </Popconfirm>
             </div>
           ),
@@ -113,49 +146,48 @@ const PaymentsBlock: FC = () => {
 
   let content: ReactElement
 
-  if (isLoading || isFetching || !payments) {
-    content = <Spin className={s.Spin} />
-  } else if (isError) {
+  if (byEmailUserError || deleteError || paymentsError || currUserError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
       <Table
-        className={s.Table}
         columns={columns}
-        dataSource={
-          userRole === Roles.ADMIN
-            ? filteredAdminPayments
-            : filteredUserPayments
-        }
-        pagination={{
-          responsive: false,
-          size: 'small',
-          pageSize: 5,
-          position: ['bottomCenter'],
-          hideOnSinglePage: true,
-        }}
+        dataSource={payments}
+        pagination={false}
         bordered
-        // summary={(pageData) => { //TODO: Use when it will be necessary to display summary info
-        //   let totalCredit = 0
-        //   let totalDebit = 0
-
-        //   pageData.forEach(({ credit, debit }) => {
-        //     totalCredit += credit
-        //     totalDebit += debit
-        //   })
-
-        //   return (
-        //     <PaymentTableSum
-        //       totalDebit={totalDebit}
-        //       totalCredit={totalCredit}
-        //     />
-        //   )
-        // }}
+        loading={
+          byEmailUserLoading ||
+          byEmailUserFetching ||
+          currUserLoading ||
+          currUserFetching ||
+          paymentsLoading ||
+          paymentsFetching
+        }
+        rowKey="_id"
       />
     )
   }
 
-  return <TableCard title={<PaymentCardHeader />}>{content}</TableCard>
+  return (
+    <TableCard
+      title={
+        email ? (
+          <span className={s.title}>{`Оплата від користувача ${email}`}</span>
+        ) : pathname === AppRoutes.PAYMENT ? (
+          <span className={s.title}>Всі оплати</span>
+        ) : isAdmin ? (
+          <PaymentCardHeader />
+        ) : (
+          <Link href={AppRoutes.PAYMENT}>
+            <a className={s.title}>Мої оплати</a>
+          </Link>
+        )
+      }
+      className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}
+    >
+      {content}
+    </TableCard>
+  )
 }
 
 export default PaymentsBlock

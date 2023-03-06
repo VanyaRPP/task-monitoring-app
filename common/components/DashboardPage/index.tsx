@@ -6,21 +6,27 @@ import Tasks from './blocks/tasks'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 import { useSession } from 'next-auth/react'
 import CategoriesBlock from './blocks/categories'
-import PaymentsBlock from './blocks/payments'
 import DashboardHeader from '../DashboardHeader'
+import { Roles } from '@utils/constants'
+import PaymentsBlock from './blocks/payments'
 import s from './style.module.scss'
 
 const Dashboard: FC = () => {
-  const session = useSession()
-  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
-  const userRole = userResponse?.data?.data?.role
+  const { data } = useSession()
+  const { data: userResponse } = useGetUserByEmailQuery(
+    `${data?.user?.email}`,
+    {
+      skip: !data?.user?.email,
+    }
+  )
+  const userRole = userResponse?.data?.role
 
   return (
     <>
       <DashboardHeader />
       <div className={s.Container}>
         <PaymentsBlock />
-        {userRole !== 'User' ? <Tasks /> : null}
+        {userRole !== Roles.USER && <Tasks />}
         <Orders />
         {/* <CategoriesBlock />
         <Masters />

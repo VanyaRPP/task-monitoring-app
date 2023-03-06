@@ -6,6 +6,10 @@ import Payment from '@common/modules/models/Payment'
 import { check, validationResult } from 'express-validator'
 import initMiddleware from '@common/lib/initMiddleware'
 import validateMiddleware from '@common/lib/validateMiddleware'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@pages/api/auth/[...nextauth]'
+import User from '@common/modules/models/User'
+import { Roles } from '@utils/constants'
 
 start()
 
@@ -38,8 +42,25 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const payments = await Payment.find({})
-        return res.status(200).json({ success: true, data: payments })
+        const session = await getServerSession(req, res, authOptions)
+        const user = await User.findOne({ email: session.user.email })
+        const isAdmin = user?.role === Roles.ADMIN
+
+        const payments = await Payment.find({
+          ...(req.query.userId
+            ? {
+                payer: { _id: req.query.userId },
+              }
+            : isAdmin && {}),
+        })
+          .sort({ date: -1 })
+          .limit(req.query.limit)
+          .populate('payer')
+
+        return res.status(200).json({
+          success: true,
+          data: payments,
+        })
       } catch (error) {
         return res.status(400).json({ success: false })
       }

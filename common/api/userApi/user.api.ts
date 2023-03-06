@@ -19,7 +19,7 @@ export const userApi = createApi({
       },
       invalidatesTags: ['User'],
     }),
-    getUserByEmail: builder.query<BaseQuery, string>({
+    getUserByEmail: builder.query<BaseQuery, string | string[]>({
       query: (email) => `user/email/${email}`,
       providesTags: (result) => ['User'],
     }),

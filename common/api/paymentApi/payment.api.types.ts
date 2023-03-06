@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongoose'
 
 export interface IPayment {
-  payer: ObjectId | string
+  payer: IExtendedPayment | ObjectId | string
   date?: Date
   credit: number
   debit: number
