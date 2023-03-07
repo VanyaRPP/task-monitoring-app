@@ -2,45 +2,8 @@ import { Input, Table, Button, Tooltip } from 'antd'
 import { useState, useEffect, FC, ChangeEvent } from 'react'
 import { ColumnProps } from 'antd/lib/table'
 import moment from 'moment'
+import { dataSource, ITableData } from '@utils/tableData'
 import s from './style.module.scss'
-
-interface ITableData {
-  id: string
-  name: string
-  lastAmount?: number
-  amount: number
-  price: number
-  sum?: number
-}
-
-const dataSource: ITableData[] = [
-  {
-    id: '1',
-    name: 'Утримання',
-    amount: 0,
-    price: 0,
-  },
-  {
-    id: '2',
-    name: 'Розміщення',
-    amount: 0,
-    price: 0,
-  },
-  {
-    id: '3',
-    name: 'Електропостачання',
-    lastAmount: 0,
-    amount: 0,
-    price: 0,
-  },
-  {
-    id: '4',
-    name: 'Водопостачання',
-    lastAmount: 0,
-    amount: 0,
-    price: 0,
-  },
-]
 
 const PaymentModalTable: FC = () => {
   const [tableData, setTableData] = useState(dataSource)
@@ -96,7 +59,7 @@ const PaymentModalTable: FC = () => {
       title: 'К-сть',
       dataIndex: 'amount',
       render: (text, record, index) => (
-        <Tooltip title={text}>
+        <>
           {record.name === 'Електропостачання' ||
           record.name === 'Водопостачання' ? (
             <div className={s.doubleInputs}>
@@ -108,7 +71,7 @@ const PaymentModalTable: FC = () => {
           ) : (
             <Input onChange={onInputChange('amount', index)} />
           )}
-        </Tooltip>
+        </>
       ),
     },
     {
