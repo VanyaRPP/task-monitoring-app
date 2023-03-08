@@ -1,4 +1,4 @@
-import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
+import { useAddFavorMutation } from '@common/api/favorApi/favor.api'
 import { objectWithoutKey } from '@common/assets/features/formDataHelpers'
 import { IUser } from '@common/modules/models/User'
 import { Form, message, Modal } from 'antd'
@@ -11,22 +11,41 @@ interface Props {
   closeModal: VoidFunction
 }
 
-// type FormData = {
-//   payer: IUser['_id']
-//   debit: number
-//   credit: number
-//   description: string
-// }
+type FormData = {
+  orenda: string
+  electricPrice: number
+  waterPrice: number
+  inflaPrice: number
+  description: string
+}
 
 const AddFavorModal: FC<Props> = ({ isModalOpen, closeModal }) => {
   const [form] = Form.useForm()
-  const [addPayment, { isLoading }] = useAddPaymentMutation()
+  const [addFavor, { isLoading }] = useAddFavorMutation()
+
+  const handleSubmit = async () => {
+    const formData: FormData = await form.validateFields()
+    const response = await addFavor({
+      orenda: formData.orenda,
+      electricPrice: formData.electricPrice,
+      waterPrice: formData.waterPrice,
+      inflaPrice: formData.inflaPrice,
+      description: formData.description,
+    })
+    if ('data' in response) {
+      form.resetFields()
+      closeModal()
+      message.success('Додано')
+    } else {
+      message.error('Помилка при додаванні рахунку')
+    }
+  }
 
   return (
     <Modal
       visible={isModalOpen}
       title="Ціна на послуги в місяць"
-      // onOk={handleSubmit}
+      onOk={handleSubmit}
       onCancel={closeModal}
       okText={'Додати'}
       cancelText={'Відміна'}

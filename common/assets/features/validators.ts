@@ -35,6 +35,24 @@ export const validateField = (name: string): Rule[] => {
     max: 200000,
     message: 'Сума рахунку повинна бути в межах [1, 200000]',
   }
+  const electricPrice: Rule = {
+    type: 'number',
+    min: 1,
+    max: 200000,
+    message: 'Сума рахунку повинна бути в межах [1, 200000]',
+  }
+  const waterPrice: Rule = {
+    type: 'number',
+    min: 1,
+    max: 200000,
+    message: 'Сума рахунку повинна бути в межах [1, 200000]',
+  }
+  const inflaPrice: Rule = {
+    type: 'number',
+    min: 1,
+    max: 200000,
+    message: 'Сума рахунку повинна бути в межах [1, 200000]',
+  }
 
   const price: Rule = {
     validator(_, value) {
@@ -61,6 +79,9 @@ export const validateField = (name: string): Rule[] => {
     case 'description':
       return [required]
 
+    case 'orenda':
+      return [required]
+
     case 'phone':
       return [required, phone]
 
@@ -81,6 +102,15 @@ export const validateField = (name: string): Rule[] => {
 
     case 'paymentPrice':
       return [required, paymentPrice]
+
+    case 'electricPrice':
+      return [required, electricPrice]
+
+    case 'waterPrice':
+      return [required, waterPrice]
+
+    case 'inflaPrice':
+      return [required, inflaPrice]
 
     case 'required':
       return [required]

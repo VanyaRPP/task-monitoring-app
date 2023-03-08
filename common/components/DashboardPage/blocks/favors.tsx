@@ -3,11 +3,11 @@ import { Alert, message, Popconfirm, Spin, Table } from 'antd'
 import FavorCardHeader from '@common/components/UI/FavorCardHeader'
 import TableCard from '@common/components/UI/TableCard'
 import {
-  useDeletePaymentMutation,
-  useGetAllPaymentsQuery,
-} from '@common/api/paymentApi/payment.api'
+  useDeleteFavorMutation,
+  useGetAllFavorsQuery,
+} from '@common/api/favorApi/favor.api'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { IExtendedFavor } from '@common/api/favorApi/favor.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
@@ -42,22 +42,22 @@ const FavorsBlock = () => {
   const isAdmin = currUser?.data?.role === Roles.ADMIN
 
   const {
-    data: payments,
-    isLoading: paymentsLoading,
-    isFetching: paymentsFetching,
-    isError: paymentsError,
-  } = useGetAllPaymentsQuery({
-    limit: pathname === AppRoutes.PAYMENT ? 200 : 5,
+    data: favors,
+    isLoading: favorsLoading,
+    isFetching: favorsFetching,
+    isError: favorsError,
+  } = useGetAllFavorsQuery({
+    limit: pathname === AppRoutes.FAVOR ? 200 : 5,
     ...(email || isAdmin
       ? { userId: byEmailUser?.data._id as string }
       : { userId: currUser?.data._id as string }),
   })
 
-  const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
-    useDeletePaymentMutation()
+  const [deleteFavor, { isLoading: deleteLoading, isError: deleteError }] =
+    useDeleteFavorMutation()
 
-  const handleDeletePayment = async (id: string) => {
-    const response = await deletePayment(id)
+  const handleDeleteFavor = async (id: string) => {
+    const response = await deleteFavor(id)
     if ('data' in response) {
       message.success('Видалено!')
     } else {
@@ -111,13 +111,13 @@ const FavorsBlock = () => {
           title: '',
           dataIndex: '',
           width: '15%',
-          render: (_, payment: IExtendedPayment) => (
+          render: (_, favor: IExtendedFavor) => (
             <div className={s.popconfirm}>
               <Popconfirm
                 title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                  payment?.date as unknown as string
+                  favor?.date as unknown as string
                 )}?`}
-                onConfirm={() => handleDeletePayment(payment?._id)}
+                onConfirm={() => handleDeleteFavor(favor?._id)}
                 cancelText="Відміна"
                 disabled={deleteLoading}
               >
@@ -131,13 +131,13 @@ const FavorsBlock = () => {
 
   let content: ReactElement
 
-  if (byEmailUserError || deleteError || paymentsError || currUserError) {
+  if (byEmailUserError || deleteError || favorsError || currUserError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
       <Table
         columns={columns}
-        dataSource={payments}
+        dataSource={favors}
         pagination={false}
         bordered
         loading={
@@ -145,8 +145,8 @@ const FavorsBlock = () => {
           byEmailUserFetching ||
           currUserLoading ||
           currUserFetching ||
-          paymentsLoading ||
-          paymentsFetching
+          favorsLoading ||
+          favorsFetching
         }
         rowKey="_id"
       />
