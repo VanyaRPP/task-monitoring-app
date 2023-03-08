@@ -16,10 +16,15 @@ start()
 const postValidateBody = initMiddleware(
   validateMiddleware(
     [
-      check('orenda'),
       check('date'),
       check(
         'inflaPrice',
+        'Сума кредита повинна бути цілим значенням в межах [1, 10000]'
+      )
+        .isInt({ min: 1, max: 200000 })
+        .optional(),
+      check(
+        'orenda',
         'Сума кредита повинна бути цілим значенням в межах [1, 10000]'
       )
         .isInt({ min: 1, max: 200000 })

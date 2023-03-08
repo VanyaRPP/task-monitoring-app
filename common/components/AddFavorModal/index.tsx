@@ -12,7 +12,7 @@ interface Props {
 }
 
 type FormData = {
-  orenda: string
+  orenda: number
   electricPrice: number
   waterPrice: number
   inflaPrice: number

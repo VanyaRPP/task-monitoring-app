@@ -3,7 +3,7 @@ import { IUser } from './User'
 import mongoose, { ObjectId, Schema } from 'mongoose'
 
 export interface IFavorModel {
-  orenda: string
+  orenda: number
   date: Date
   electricPrice: number
   waterPrice: number
@@ -12,7 +12,7 @@ export interface IFavorModel {
 }
 
 export const FavorSchema = new Schema<IFavorModel>({
-  orenda: { type: String, required: true },
+  orenda: { type: Number, required: true },
   date: { type: Date, required: true, default: Date.now() },
   electricPrice: { type: Number, required: true },
   waterPrice: { type: Number, required: true },

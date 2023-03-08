@@ -6,8 +6,6 @@ import {
   IFavor,
 } from './favor.api.types'
 
-import { ObjectId } from 'mongoose'
-
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export const favorApi = createApi({
@@ -42,7 +40,7 @@ export const favorApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Favor'] : []),
     }),
-    deleteFavor: builder.mutation<IDeleteFavorResponse, ObjectId>({
+    deleteFavor: builder.mutation<IDeleteFavorResponse, IExtendedFavor['_id']>({
       query(id) {
         return {
           url: `/favor/${id}`,
