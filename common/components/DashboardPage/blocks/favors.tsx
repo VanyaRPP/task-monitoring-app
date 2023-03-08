@@ -81,8 +81,8 @@ const FavorsBlock = () => {
     },
     {
       title: 'Електрика',
-      dataIndex: 'elctricPrice',
-      key: 'elctricPrice',
+      dataIndex: 'electricPrice',
+      key: 'electricPrice',
       width: '20%',
     },
     {

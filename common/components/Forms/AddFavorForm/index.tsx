@@ -36,10 +36,10 @@ const AddFavorForm: FC<Props> = ({ form }) => {
         // rules={validateField('required')}
       >
         {' '}
-        <Input.TextArea placeholder="Введіть опис" maxLength={256} />
+        <InputNumber className={s.InputNumber} />
       </Form.Item>
       <Form.Item
-        name="elctricPrice"
+        name="electricPrice"
         label="Електроенергія"
         // rules={validateField('required')}
       >

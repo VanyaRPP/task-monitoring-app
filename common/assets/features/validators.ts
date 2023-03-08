@@ -79,9 +79,6 @@ export const validateField = (name: string): Rule[] => {
     case 'description':
       return [required]
 
-    case 'orenda':
-      return [required]
-
     case 'phone':
       return [required, phone]
 
@@ -110,6 +107,9 @@ export const validateField = (name: string): Rule[] => {
       return [required, waterPrice]
 
     case 'inflaPrice':
+      return [required, inflaPrice]
+
+    case 'orenda':
       return [required, inflaPrice]
 
     case 'required':

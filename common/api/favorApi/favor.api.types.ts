@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongoose'
 
 export interface IFavor {
-  orenda: string
+  orenda: number
   date?: Date
   electricPrice: number
   waterPrice: number
