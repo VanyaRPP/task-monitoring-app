@@ -1,0 +1,6 @@
+.Modal {
+  min-width: 400px;
+  @media (min-width: 768px) {
+    min-width: 700px;
+  }
+}

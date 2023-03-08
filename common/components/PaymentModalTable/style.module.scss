@@ -1,0 +1,14 @@
+.rowText {
+  .month {
+    color: #7e7e7e;
+    font-size: 12px;
+  }
+}
+
+.doubleInputs {
+  @media (min-width: 768px) {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+  }
+}
