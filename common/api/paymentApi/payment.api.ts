@@ -8,6 +8,7 @@ import {
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export const paymentApi = createApi({
+  reducerPath: 'paymentApi',
   refetchOnFocus: true,
   refetchOnReconnect: true,
   tagTypes: ['Payment'],

@@ -9,6 +9,7 @@ import {
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export const favorApi = createApi({
+  reducerPath: 'favorApi',
   refetchOnFocus: true,
   refetchOnReconnect: true,
   tagTypes: ['Favor'],
@@ -20,7 +21,7 @@ export const favorApi = createApi({
     >({
       query: ({ limit, userId }) => {
         return {
-          url: `/favor`,
+          url: `favor`,
           params: { limit, userId },
         }
       },
@@ -33,7 +34,7 @@ export const favorApi = createApi({
     addFavor: builder.mutation<IAddFavorResponse, IFavor>({
       query(body) {
         return {
-          url: `/favor`,
+          url: `favor`,
           method: 'POST',
           body,
         }
@@ -43,7 +44,7 @@ export const favorApi = createApi({
     deleteFavor: builder.mutation<IDeleteFavorResponse, IExtendedFavor['_id']>({
       query(id) {
         return {
-          url: `/favor/${id}`,
+          url: `favor/${id}`,
           method: 'DELETE',
         }
       },
