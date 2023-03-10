@@ -14,10 +14,6 @@ function getDefaultTheme() {
 
   let theme = systemColorScheme ? 'dark' : 'light'
 
-  if (typeof window !== 'undefined') {
-    theme = JSON.parse(localStorage.getItem('theme'))
-  }
-
   return theme
 }
 
