@@ -1,5 +1,5 @@
 import React, { FC, ReactElement } from 'react'
-import { Alert, message, Popconfirm, Spin, Table } from 'antd'
+import { Alert, message, Popconfirm, Table } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
 import {
@@ -15,8 +15,8 @@ import { Tooltip } from 'antd'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
-import s from './style.module.scss'
 import { useSession } from 'next-auth/react'
+import s from './style.module.scss'
 
 const PaymentsBlock = () => {
   const router = useRouter()
@@ -57,14 +57,15 @@ const PaymentsBlock = () => {
     isLoading: paymentsLoading,
     isFetching: paymentsFetching,
     isError: paymentsError,
-  } = useGetAllPaymentsQuery({
-    limit: pathname === AppRoutes.PAYMENT ? 200 : 5,
-    ...(!isAdmin
-      ? { userId: currUser?.data._id as string }
-      : isAdmin && email
-      ? { userId: email as string }
-      : {}),
-  })
+  } = useGetAllPaymentsQuery(
+    {
+      limit: pathname === AppRoutes.PAYMENT ? 200 : 5,
+      ...(isAdmin || email
+        ? { userId: email as string }
+        : { userId: currUser?.data._id as string }),
+    },
+    { skip: currUserLoading }
+  )
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
