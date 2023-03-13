@@ -36,7 +36,11 @@ const AddFavorForm: FC<Props> = ({ form }) => {
         // rules={validateField('required')}
       >
         {' '}
-        <InputNumber type="number" className={s.InputNumber} />
+        <InputNumber
+          type="number"
+          style={{ width: '32%' }}
+          className={s.InputNumber}
+        />
       </Form.Item>
       <Form.Item
         name="electricPrice"
@@ -44,7 +48,11 @@ const AddFavorForm: FC<Props> = ({ form }) => {
         // rules={validateField('required')}
       >
         {' '}
-        <InputNumber type="number" className={s.InputNumber} />
+        <InputNumber
+          type="number"
+          style={{ width: '32%' }}
+          className={s.InputNumber}
+        />
       </Form.Item>
       <Form.Item
         name="waterPrice"
@@ -52,7 +60,11 @@ const AddFavorForm: FC<Props> = ({ form }) => {
         // rules={validateField('required')}
       >
         {' '}
-        <InputNumber type="number" className={s.InputNumber} />
+        <InputNumber
+          type="number"
+          style={{ width: '32%' }}
+          className={s.InputNumber}
+        />
       </Form.Item>
       <Form.Item
         name="inflaPrice"
@@ -60,14 +72,22 @@ const AddFavorForm: FC<Props> = ({ form }) => {
         // rules={validateField('required')}
       >
         {' '}
-        <InputNumber type="number" className={s.InputNumber} />
+        <InputNumber
+          type="number"
+          style={{ width: '32%' }}
+          className={s.InputNumber}
+        />
       </Form.Item>
       <Form.Item
         name="description"
         label="Опис"
         // rules={validateField('required')}
       >
-        <Input.TextArea placeholder="Введіть опис" maxLength={256} />
+        <Input.TextArea
+          placeholder="Введіть опис"
+          style={{ width: '90%' }}
+          maxLength={256}
+        />
       </Form.Item>
     </Form>
   )
