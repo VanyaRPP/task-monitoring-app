@@ -36,7 +36,7 @@ const AddFavorForm: FC<Props> = ({ form }) => {
         // rules={validateField('required')}
       >
         {' '}
-        <InputNumber className={s.InputNumber} />
+        <InputNumber type="number" className={s.InputNumber} />
       </Form.Item>
       <Form.Item
         name="electricPrice"
@@ -44,7 +44,7 @@ const AddFavorForm: FC<Props> = ({ form }) => {
         // rules={validateField('required')}
       >
         {' '}
-        <InputNumber className={s.InputNumber} />
+        <InputNumber type="number" className={s.InputNumber} />
       </Form.Item>
       <Form.Item
         name="waterPrice"
@@ -52,7 +52,7 @@ const AddFavorForm: FC<Props> = ({ form }) => {
         // rules={validateField('required')}
       >
         {' '}
-        <InputNumber className={s.InputNumber} />
+        <InputNumber type="number" className={s.InputNumber} />
       </Form.Item>
       <Form.Item
         name="inflaPrice"
@@ -60,7 +60,7 @@ const AddFavorForm: FC<Props> = ({ form }) => {
         // rules={validateField('required')}
       >
         {' '}
-        <InputNumber className={s.InputNumber} />
+        <InputNumber type="number" className={s.InputNumber} />
       </Form.Item>
       <Form.Item
         name="description"
