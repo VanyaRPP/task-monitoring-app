@@ -21,7 +21,7 @@
   flex: 0.33, 0.33, 0.33;
   gap: 1rem;
   justify-content: space-between;
-  tr > td {
+  :global .ant-table-placeholder > td {
     border-bottom: none;
   }
 }
