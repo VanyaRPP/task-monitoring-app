@@ -2,13 +2,13 @@ import { ObjectId } from 'mongoose'
 
 export interface IOptionsParams {
   limit: number
-  userId?: string | ObjectId
+  userId?: string
   isAdmin?: boolean
-  email?: string | string[]
+  email?: string
 }
 
 export interface IBeParams {
   isAdmin: boolean
   req: string | ObjectId
-  userIdByEmail: string | ObjectId
+  userId: string | ObjectId
 }

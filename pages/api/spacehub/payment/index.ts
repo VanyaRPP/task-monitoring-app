@@ -46,16 +46,22 @@ export default async function handler(
         const session = await getServerSession(req, res, authOptions)
         const user = await User.findOne({ email: session.user.email })
         const isAdmin = user?.role === Roles.ADMIN
-        const userIdByEmail = await User.findOne({
-          email: req.query.userId,
-        })
+        // const userIdByEmail = await User.findOne({
+        //   email: req.query.userId,
+        // })
+        // const payments = await Payment.find(
+        //   getPaymentsOnBE({
+        //     isAdmin,
+        //     req: req.query.userId as string,
+        //     userId: userIdByEmail?._id as string,
+        //   })
+        // )
+        //   .sort({ date: -1 })
+        //   .limit(req.query.limit)
+        //   .populate('payer')
 
         const payments = await Payment.find(
-          getPaymentsOnBE({
-            isAdmin: isAdmin,
-            req: req.query.userId as string,
-            userIdByEmail: userIdByEmail?._id as string,
-          })
+          isAdmin ? { email: req.query.email } : { email: session.user.email }
         )
           .sort({ date: -1 })
           .limit(req.query.limit)

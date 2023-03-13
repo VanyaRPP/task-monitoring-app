@@ -59,16 +59,23 @@ export default async function handler(
         const user = await User.findOne({ email: session.user.email })
         const isAdmin = user?.role === Roles.ADMIN
 
-        const favors = await Favor.find({
-          ...(req.query.userId
-            ? {
-                payer: { _id: req.query.userId },
-              }
-            : isAdmin && {}),
-        })
+        const favors = await Favor.find(
+          isAdmin ? { email: req.query.email } : { email: session.user.email }
+        )
           .sort({ date: -1 })
           .limit(req.query.limit)
           .populate('payer')
+
+        // const favors = await Favor.find({
+        //   ...(req.query.userId
+        //     ? {
+        //         payer: { _id: req.query.userId },
+        //       }
+        //     : isAdmin && {}),
+        // })
+        //   .sort({ date: -1 })
+        //   .limit(req.query.limit)
+        //   .populate('payer')
 
         return res.status(200).json({
           success: true,

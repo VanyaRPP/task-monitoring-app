@@ -39,10 +39,10 @@ export const getFormattedAddress = (address: string) => {
 export const getPaymentsOptions = (params: IOptionsParams) => {
   const options: { limit: number; userId?: string } = { limit: params.limit }
   if (params.isAdmin && params.email) {
-    options.userId = params.email as string
+    options.userId = params.email
   }
   if (!params.isAdmin && params.userId) {
-    options.userId = params.userId as string
+    options.userId = params.userId
   }
   return options
 }
@@ -50,7 +50,7 @@ export const getPaymentsOptions = (params: IOptionsParams) => {
 export const getPaymentsOnBE = (params: IBeParams) => {
   const options: { payer?: { _id: string | ObjectId } } = {}
   if (params.isAdmin && params.req) {
-    options.payer = { _id: params.userIdByEmail }
+    options.payer = { _id: params.userId }
   }
   if (!params.isAdmin && params.req) {
     options.payer = { _id: params.req }

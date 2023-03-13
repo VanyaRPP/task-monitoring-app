@@ -21,11 +21,9 @@ import s from './style.module.scss'
 
 const PaymentsBlock = () => {
   const router = useRouter()
-  const {
-    pathname,
-    query: { email },
-  } = router
+  const { pathname, query } = router
   const { data } = useSession()
+  const email = String(query.email)
 
   const {
     data: currUser,
@@ -42,12 +40,13 @@ const PaymentsBlock = () => {
     isFetching: paymentsFetching,
     isError: paymentsError,
   } = useGetAllPaymentsQuery(
-    getPaymentsOptions({
-      limit: pathname === AppRoutes.PAYMENT ? 200 : 5,
-      userId: currUser?.data._id as string,
-      isAdmin: isAdmin,
-      email: email,
-    }),
+    // getPaymentsOptions({
+    //   limit: pathname === AppRoutes.PAYMENT ? 200 : 5,
+    //   userId: currUser?.data._id as string,
+    //   isAdmin: isAdmin,
+    //   email: email as string,
+    // }),
+    { limit: pathname === AppRoutes.PAYMENT ? 200 : 5, email },
     { skip: currUserLoading || !currUser }
   )
 
