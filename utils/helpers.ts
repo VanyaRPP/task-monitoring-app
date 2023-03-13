@@ -1,4 +1,6 @@
 import { FormInstance } from 'antd'
+import { ObjectId } from 'mongoose'
+import { IBeParams, IOptionsParams } from './types'
 
 export const firstTextToUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
@@ -32,4 +34,26 @@ export const getFormattedAddress = (address: string) => {
       return addressChunks[0]
     } else return addressChunks.join(', ')
   }
+}
+
+export const getPaymentsOptions = (params: IOptionsParams) => {
+  const options: { limit: number; userId?: string } = { limit: params.limit }
+  if (params.isAdmin && params.email) {
+    options.userId = params.email as string
+  }
+  if (!params.isAdmin && params.userId) {
+    options.userId = params.userId as string
+  }
+  return options
+}
+
+export const getPaymentsOnBE = (params: IBeParams) => {
+  const options: { payer?: { _id: string | ObjectId } } = {}
+  if (params.isAdmin && params.req) {
+    options.payer = { _id: params.userIdByEmail }
+  }
+  if (!params.isAdmin && params.req) {
+    options.payer = { _id: params.req }
+  }
+  return options
 }

@@ -10,6 +10,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
 import User from '@common/modules/models/User'
 import { Roles } from '@utils/constants'
+import { getPaymentsOnBE } from '@utils/helpers'
 
 start()
 
@@ -49,33 +50,16 @@ export default async function handler(
           email: req.query.userId,
         })
 
-        // const payments = await Payment.find({
-        //   ...(req.query.userId
-        //     ? {
-        //         payer: { _id: req.query.userId },
-        //       }
-        //     : isAdmin && {}),
-        // })
-        //   .sort({ date: -1 })
-        //   .limit(req.query.limit)
-        //   .populate('payer')
-        let payments
-        if (isAdmin && !req.query.userId) {
-          payments = await Payment.find({})
-            .sort({ date: -1 })
-            .limit(req.query.limit)
-            .populate('payer')
-        } else if (isAdmin && req.query.userId) {
-          payments = await Payment.find({ payer: { _id: userIdByEmail._id } })
-            .sort({ date: -1 })
-            .limit(req.query.limit)
-            .populate('payer')
-        } else {
-          payments = await Payment.find({ payer: { _id: req.query.userId } })
-            .sort({ date: -1 })
-            .limit(req.query.limit)
-            .populate('payer')
-        }
+        const payments = await Payment.find(
+          getPaymentsOnBE({
+            isAdmin: isAdmin,
+            req: req.query.userId as string,
+            userIdByEmail: userIdByEmail?._id as string,
+          })
+        )
+          .sort({ date: -1 })
+          .limit(req.query.limit)
+          .populate('payer')
 
         return res.status(200).json({
           success: true,

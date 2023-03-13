@@ -1,4 +1,4 @@
-import React, { FC, ReactElement } from 'react'
+import React, { ReactElement } from 'react'
 import { Alert, message, Popconfirm, Table } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
@@ -16,6 +16,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
 import { useSession } from 'next-auth/react'
+import { getPaymentsOptions } from '@utils/helpers'
 import s from './style.module.scss'
 
 const PaymentsBlock = () => {
@@ -26,12 +27,6 @@ const PaymentsBlock = () => {
   } = router
   const { data } = useSession()
 
-  // const {
-  //   data: byEmailUser,
-  //   isLoading: byEmailUserLoading,
-  //   isFetching: byEmailUserFetching,
-  //   isError: byEmailUserError,
-  // } = useGetUserByEmailQuery(email, { skip: !email })
   const {
     data: currUser,
     isLoading: currUserLoading,
@@ -41,30 +36,19 @@ const PaymentsBlock = () => {
 
   const isAdmin = currUser?.data?.role === Roles.ADMIN
 
-  // const {
-  //   data: payments,
-  //   isLoading: paymentsLoading,
-  //   isFetching: paymentsFetching,
-  //   isError: paymentsError,
-  // } = useGetAllPaymentsQuery({
-  //   limit: pathname === AppRoutes.PAYMENT ? 200 : 5,
-  //   ...(email || isAdmin
-  //     ? { userId: byEmailUser?.data._id as string }
-  //     : { userId: currUser?.data._id as string }),
-  // })
   const {
     data: payments,
     isLoading: paymentsLoading,
     isFetching: paymentsFetching,
     isError: paymentsError,
   } = useGetAllPaymentsQuery(
-    {
+    getPaymentsOptions({
       limit: pathname === AppRoutes.PAYMENT ? 200 : 5,
-      ...(isAdmin || email
-        ? { userId: email as string }
-        : { userId: currUser?.data._id as string }),
-    },
-    { skip: currUserLoading }
+      userId: currUser?.data._id as string,
+      isAdmin: isAdmin,
+      email: email,
+    }),
+    { skip: currUserLoading || !currUser }
   )
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
@@ -170,8 +154,6 @@ const PaymentsBlock = () => {
         pagination={false}
         bordered
         loading={
-          // byEmailUserLoading ||
-          // byEmailUserFetching ||
           currUserLoading ||
           currUserFetching ||
           paymentsLoading ||
