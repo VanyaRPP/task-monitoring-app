@@ -45,17 +45,37 @@ export default async function handler(
         const session = await getServerSession(req, res, authOptions)
         const user = await User.findOne({ email: session.user.email })
         const isAdmin = user?.role === Roles.ADMIN
-
-        const payments = await Payment.find({
-          ...(req.query.userId
-            ? {
-                payer: { _id: req.query.userId },
-              }
-            : isAdmin && {}),
+        const userIdByEmail = await User.findOne({
+          email: req.query.userId,
         })
-          .sort({ date: -1 })
-          .limit(req.query.limit)
-          .populate('payer')
+
+        // const payments = await Payment.find({
+        //   ...(req.query.userId
+        //     ? {
+        //         payer: { _id: req.query.userId },
+        //       }
+        //     : isAdmin && {}),
+        // })
+        //   .sort({ date: -1 })
+        //   .limit(req.query.limit)
+        //   .populate('payer')
+        let payments
+        if (isAdmin && !req.query.userId) {
+          payments = await Payment.find({})
+            .sort({ date: -1 })
+            .limit(req.query.limit)
+            .populate('payer')
+        } else if (isAdmin && req.query.userId) {
+          payments = await Payment.find({ payer: { _id: userIdByEmail._id } })
+            .sort({ date: -1 })
+            .limit(req.query.limit)
+            .populate('payer')
+        } else {
+          payments = await Payment.find({ payer: { _id: req.query.userId } })
+            .sort({ date: -1 })
+            .limit(req.query.limit)
+            .populate('payer')
+        }
 
         return res.status(200).json({
           success: true,

@@ -26,12 +26,12 @@ const PaymentsBlock = () => {
   } = router
   const { data } = useSession()
 
-  const {
-    data: byEmailUser,
-    isLoading: byEmailUserLoading,
-    isFetching: byEmailUserFetching,
-    isError: byEmailUserError,
-  } = useGetUserByEmailQuery(email, { skip: !email })
+  // const {
+  //   data: byEmailUser,
+  //   isLoading: byEmailUserLoading,
+  //   isFetching: byEmailUserFetching,
+  //   isError: byEmailUserError,
+  // } = useGetUserByEmailQuery(email, { skip: !email })
   const {
     data: currUser,
     isLoading: currUserLoading,
@@ -41,6 +41,17 @@ const PaymentsBlock = () => {
 
   const isAdmin = currUser?.data?.role === Roles.ADMIN
 
+  // const {
+  //   data: payments,
+  //   isLoading: paymentsLoading,
+  //   isFetching: paymentsFetching,
+  //   isError: paymentsError,
+  // } = useGetAllPaymentsQuery({
+  //   limit: pathname === AppRoutes.PAYMENT ? 200 : 5,
+  //   ...(email || isAdmin
+  //     ? { userId: byEmailUser?.data._id as string }
+  //     : { userId: currUser?.data._id as string }),
+  // })
   const {
     data: payments,
     isLoading: paymentsLoading,
@@ -48,9 +59,11 @@ const PaymentsBlock = () => {
     isError: paymentsError,
   } = useGetAllPaymentsQuery({
     limit: pathname === AppRoutes.PAYMENT ? 200 : 5,
-    ...(email || isAdmin
-      ? { userId: byEmailUser?.data._id as string }
-      : { userId: currUser?.data._id as string }),
+    ...(!isAdmin
+      ? { userId: currUser?.data._id as string }
+      : isAdmin && email
+      ? { userId: email as string }
+      : {}),
   })
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
@@ -146,7 +159,7 @@ const PaymentsBlock = () => {
 
   let content: ReactElement
 
-  if (byEmailUserError || deleteError || paymentsError || currUserError) {
+  if (deleteError || paymentsError || currUserError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
@@ -156,8 +169,8 @@ const PaymentsBlock = () => {
         pagination={false}
         bordered
         loading={
-          byEmailUserLoading ||
-          byEmailUserFetching ||
+          // byEmailUserLoading ||
+          // byEmailUserFetching ||
           currUserLoading ||
           currUserFetching ||
           paymentsLoading ||
