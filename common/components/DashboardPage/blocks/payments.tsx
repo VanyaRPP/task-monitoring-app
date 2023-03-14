@@ -16,21 +16,24 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
 import { useSession } from 'next-auth/react'
-import { getPaymentsOptions } from '@utils/helpers'
 import s from './style.module.scss'
 
 const PaymentsBlock = () => {
   const router = useRouter()
-  const { pathname, query } = router
+  const {
+    pathname,
+    query: { email },
+  } = router
   const { data } = useSession()
-  const email = String(query.email)
 
   const {
     data: currUser,
     isLoading: currUserLoading,
     isFetching: currUserFetching,
     isError: currUserError,
-  } = useGetUserByEmailQuery(data?.user.email, { skip: !data?.user.email })
+  } = useGetUserByEmailQuery(data?.user?.email, {
+    skip: !data?.user?.email,
+  })
 
   const isAdmin = currUser?.data?.role === Roles.ADMIN
 
@@ -40,13 +43,7 @@ const PaymentsBlock = () => {
     isFetching: paymentsFetching,
     isError: paymentsError,
   } = useGetAllPaymentsQuery(
-    // getPaymentsOptions({
-    //   limit: pathname === AppRoutes.PAYMENT ? 200 : 5,
-    //   userId: currUser?.data._id as string,
-    //   isAdmin: isAdmin,
-    //   email: email as string,
-    // }),
-    { limit: pathname === AppRoutes.PAYMENT ? 200 : 5, email },
+    { limit: pathname === AppRoutes.PAYMENT ? 200 : 5, email: email as string },
     { skip: currUserLoading || !currUser }
   )
 

@@ -10,7 +10,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
 import User from '@common/modules/models/User'
 import { Roles } from '@utils/constants'
-import { getPaymentsOnBE } from '@utils/helpers'
+import { getPaymentOptions } from '@utils/helpers'
 
 start()
 
@@ -46,26 +46,17 @@ export default async function handler(
         const session = await getServerSession(req, res, authOptions)
         const user = await User.findOne({ email: session.user.email })
         const isAdmin = user?.role === Roles.ADMIN
-        // const userIdByEmail = await User.findOne({
-        //   email: req.query.userId,
-        // })
-        // const payments = await Payment.find(
-        //   getPaymentsOnBE({
-        //     isAdmin,
-        //     req: req.query.userId as string,
-        //     userId: userIdByEmail?._id as string,
-        //   })
-        // )
-        //   .sort({ date: -1 })
-        //   .limit(req.query.limit)
-        //   .populate('payer')
 
-        const payments = await Payment.find(
-          isAdmin ? { email: req.query.email } : { email: session.user.email }
-        )
+        const options = await getPaymentOptions({
+          searchEmail: req.query.email,
+          userEmail: session.user.email,
+          isAdmin,
+        })
+
+        const payments = await Payment.find(options)
           .sort({ date: -1 })
           .limit(req.query.limit)
-          .populate('payer')
+          .populate({ path: 'payer', select: '_id email' })
 
         return res.status(200).json({
           success: true,
@@ -78,6 +69,7 @@ export default async function handler(
       try {
         await postValidateBody(req, res)
         const payment = await Payment.create(req.body)
+
         return res.status(200).json({ success: true, data: payment })
       } catch (error) {
         const errors = postValidateBody(req)

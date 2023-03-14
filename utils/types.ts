@@ -1,14 +1,5 @@
-import { ObjectId } from 'mongoose'
-
-export interface IOptionsParams {
-  limit: number
-  userId?: string
-  isAdmin?: boolean
-  email?: string
-}
-
-export interface IBeParams {
+export type PaymentOptions = {
+  searchEmail?: string | string[]
+  userEmail: string
   isAdmin: boolean
-  req: string | ObjectId
-  userId: string | ObjectId
 }
