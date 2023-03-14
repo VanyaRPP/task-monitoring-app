@@ -8,8 +8,6 @@ import initMiddleware from '@common/lib/initMiddleware'
 import validateMiddleware from '@common/lib/validateMiddleware'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
-import User from '@common/modules/models/User'
-import { Roles } from '@utils/constants'
 import { getPaymentOptions } from '@utils/helpers'
 
 start()
@@ -44,13 +42,10 @@ export default async function handler(
     case 'GET':
       try {
         const session = await getServerSession(req, res, authOptions)
-        const user = await User.findOne({ email: session.user.email })
-        const isAdmin = user?.role === Roles.ADMIN
 
         const options = await getPaymentOptions({
           searchEmail: req.query.email,
           userEmail: session.user.email,
-          isAdmin,
         })
 
         const payments = await Payment.find(options)
