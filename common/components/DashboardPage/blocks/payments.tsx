@@ -1,5 +1,5 @@
-import React, { FC, ReactElement } from 'react'
-import { Alert, message, Popconfirm, Spin, Table } from 'antd'
+import React, { ReactElement } from 'react'
+import { Alert, message, Popconfirm, Table } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
 import {
@@ -15,8 +15,8 @@ import { Tooltip } from 'antd'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
-import s from './style.module.scss'
 import { useSession } from 'next-auth/react'
+import s from './style.module.scss'
 
 const PaymentsBlock = () => {
   const router = useRouter()
@@ -27,17 +27,13 @@ const PaymentsBlock = () => {
   const { data } = useSession()
 
   const {
-    data: byEmailUser,
-    isLoading: byEmailUserLoading,
-    isFetching: byEmailUserFetching,
-    isError: byEmailUserError,
-  } = useGetUserByEmailQuery(email, { skip: !email })
-  const {
     data: currUser,
     isLoading: currUserLoading,
     isFetching: currUserFetching,
     isError: currUserError,
-  } = useGetUserByEmailQuery(data?.user.email, { skip: !data?.user.email })
+  } = useGetUserByEmailQuery(data?.user?.email, {
+    skip: !data?.user?.email,
+  })
 
   const isAdmin = currUser?.data?.role === Roles.ADMIN
 
@@ -46,12 +42,10 @@ const PaymentsBlock = () => {
     isLoading: paymentsLoading,
     isFetching: paymentsFetching,
     isError: paymentsError,
-  } = useGetAllPaymentsQuery({
-    limit: pathname === AppRoutes.PAYMENT ? 200 : 5,
-    ...(email || isAdmin
-      ? { userId: byEmailUser?.data._id as string }
-      : { userId: currUser?.data._id as string }),
-  })
+  } = useGetAllPaymentsQuery(
+    { limit: pathname === AppRoutes.PAYMENT ? 200 : 5, email: email as string },
+    { skip: currUserLoading || !currUser }
+  )
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
@@ -146,7 +140,7 @@ const PaymentsBlock = () => {
 
   let content: ReactElement
 
-  if (byEmailUserError || deleteError || paymentsError || currUserError) {
+  if (deleteError || paymentsError || currUserError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
@@ -156,8 +150,6 @@ const PaymentsBlock = () => {
         pagination={false}
         bordered
         loading={
-          byEmailUserLoading ||
-          byEmailUserFetching ||
           currUserLoading ||
           currUserFetching ||
           paymentsLoading ||

@@ -28,7 +28,7 @@ export interface IFeedback {
 
 const UserSchema = new mongoose.Schema<IUser>({
   name: { type: String, required: true },
-  email: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
   image: {
     type: String,
     default: 'https://avatars.githubusercontent.com/u/583231?v=4',
@@ -46,7 +46,7 @@ const UserSchema = new mongoose.Schema<IUser>({
 })
 
 const User =
-  (mongoose.models.User as mongoose.Model<IUser>) ||
-  mongoose.model('User', UserSchema)
+  (mongoose?.models?.User as mongoose.Model<IUser>) ||
+  mongoose?.model('User', UserSchema)
 
 export default User
