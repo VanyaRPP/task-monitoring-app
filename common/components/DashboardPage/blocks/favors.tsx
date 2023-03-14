@@ -14,6 +14,7 @@ import { AppRoutes, Roles } from '@utils/constants'
 import { Tooltip } from 'antd'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { SelectOutlined } from '@ant-design/icons'
 import cn from 'classnames'
 import s from './style.module.scss'
 import { useSession } from 'next-auth/react'
@@ -153,6 +154,27 @@ const FavorsBlock = () => {
     )
   }
 
-  return <TableCard title={<FavorCardHeader />}>{content}</TableCard>
+  return (
+    <TableCard
+      title={
+        email ? (
+          <span className={s.title}>{`Оплата від користувача ${email}`}</span>
+        ) : pathname === AppRoutes.FAVOR ? (
+          <span className={s.title}>Послуги</span>
+        ) : isAdmin ? (
+          <FavorCardHeader />
+        ) : (
+          <Link href={AppRoutes.FAVOR}>
+            <a className={s.title}>
+              Послуги <SelectOutlined />
+            </a>
+          </Link>
+        )
+      }
+      className={cn({ [s.noScroll]: pathname === AppRoutes.FAVOR })}
+    >
+      {content}
+    </TableCard>
+  )
 }
 export default FavorsBlock

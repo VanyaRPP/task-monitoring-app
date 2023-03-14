@@ -4,9 +4,6 @@ import { AppRoutes } from '@utils/constants'
 import { Button } from 'antd'
 import { useRouter } from 'next/router'
 import AddFavorModal from '@common/components/AddFavorModal'
-import { useSession } from 'next-auth/react'
-import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
-import { Roles } from '@utils/constants'
 import s from './style.module.scss'
 
 const FavorCardHeader = () => {
@@ -17,15 +14,12 @@ const FavorCardHeader = () => {
     setIsModalOpen(false)
   }
 
-  const { data: session } = useSession()
-  const { data } = useGetUserByEmailQuery(`${session?.user?.email}`, {
-    skip: !session?.user?.email,
-  })
-  const isAdmin = data?.data.role === Roles.ADMIN
-
   return (
     <div className={s.tableHeader}>
-      {'Послуги'}
+      <Button type="link" onClick={() => Router.push(AppRoutes.FAVOR)}>
+        Послуги
+        <SelectOutlined className={s.Icon} />
+      </Button>
       <Button type="link" onClick={() => setIsModalOpen(true)}>
         <PlusOutlined /> Додати
       </Button>
