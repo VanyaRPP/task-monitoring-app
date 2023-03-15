@@ -159,8 +159,6 @@ const FavorsBlock = () => {
       title={
         email ? (
           <span className={s.title}>{`Оплата від користувача ${email}`}</span>
-        ) : pathname === AppRoutes.FAVOR ? (
-          <span className={s.title}>Послуги</span>
         ) : isAdmin ? (
           <FavorCardHeader />
         ) : (
