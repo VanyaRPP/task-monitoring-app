@@ -13,6 +13,7 @@ import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import { Tooltip } from 'antd'
 import Link from 'next/link'
+import { SelectOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
 import { useSession } from 'next-auth/react'
@@ -171,7 +172,9 @@ const PaymentsBlock = () => {
           <PaymentCardHeader />
         ) : (
           <Link href={AppRoutes.PAYMENT}>
-            <a className={s.title}>Мої оплати</a>
+            <a className={s.title}>
+              Мої оплати <SelectOutlined />
+            </a>
           </Link>
         )
       }
