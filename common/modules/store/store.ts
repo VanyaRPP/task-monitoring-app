@@ -6,7 +6,7 @@ import { domainApi } from '../../api/domainApi/domain.api'
 import themeReducer from './reducers/ThemeSlice'
 import { notificationApi } from '@common/api/notificationApi/notification.api'
 import { paymentApi } from '@common/api/paymentApi/payment.api'
-import { favorApi } from '@common/api/favorApi/favor.api'
+import { serviceApi } from '@common/api/serviceApi/service.api'
 
 export const store = configureStore({
   reducer: {
@@ -15,7 +15,7 @@ export const store = configureStore({
     [taskApi.reducerPath]: taskApi.reducer,
     [domainApi.reducerPath]: domainApi.reducer,
     [paymentApi.reducerPath]: paymentApi.reducer,
-    [favorApi.reducerPath]: favorApi.reducer,
+    [serviceApi.reducerPath]: serviceApi.reducer,
     [notificationApi.reducerPath]: notificationApi.reducer,
     themeReducer,
   },
@@ -25,7 +25,7 @@ export const store = configureStore({
       .concat(taskApi.middleware)
       .concat(categoryApi.middleware)
       .concat(paymentApi.middleware)
-      .concat(favorApi.middleware)
+      .concat(serviceApi.middleware)
       .concat(notificationApi.middleware),
 })
 

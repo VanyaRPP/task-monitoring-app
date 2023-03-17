@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongoose'
 
-export interface IFavor {
+export interface IService {
   orenda: number
   date?: Date
   electricPrice: number
@@ -9,22 +9,22 @@ export interface IFavor {
   description: string
 }
 
-export interface IExtendedFavor extends IFavor {
+export interface IExtendedService extends IService {
   _id: string
   _v: number
 }
 
-export interface IAddFavorResponse {
+export interface IAddServiceResponse {
   success: boolean
-  data: IExtendedFavor
+  data: IExtendedService
 }
 
-export interface IGetFavorResponse {
+export interface IGetServiceResponse {
   success: boolean
-  data: IExtendedFavor[]
+  data: IExtendedService[]
 }
 
-export interface IDeleteFavorResponse {
+export interface IDeleteServiceResponse {
   data: string
   success: boolean
 }

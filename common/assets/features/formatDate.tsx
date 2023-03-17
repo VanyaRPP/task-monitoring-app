@@ -9,6 +9,9 @@ export const dateToDefaultFormat = (deadline: string): string =>
 export const isDeadlineExpired = (deadline: string): boolean =>
   moment().locale('uk').isAfter(moment(deadline), 'day')
 
+export const dateToPick = (deadline: string): boolean =>
+  moment().locale('uk').isAfter(moment(deadline))
+
 export const disabledDate: RangePickerProps['disabledDate'] = (current) => {
   return current && current < moment().locale('uk').startOf('day')
 }

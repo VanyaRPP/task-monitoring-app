@@ -11,7 +11,7 @@ export enum AppRoutes {
   PREMIUM = '/premium',
   CATEGORY = '/category',
   PAYMENT = '/payment',
-  FAVOR = '/favor',
+  SERVICE = '/service',
 }
 
 export enum Roles {

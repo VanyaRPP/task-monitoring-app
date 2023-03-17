@@ -3,10 +3,10 @@ import React, { FC, useState } from 'react'
 import { AppRoutes } from '@utils/constants'
 import { Button } from 'antd'
 import { useRouter } from 'next/router'
-import AddFavorModal from '@common/components/AddFavorModal'
+import AddServiceModal from '@common/components/AddServiceModal'
 import s from './style.module.scss'
 
-const FavorCardHeader = () => {
+const ServiceCardHeader = () => {
   const Router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -16,16 +16,16 @@ const FavorCardHeader = () => {
 
   return (
     <div className={s.tableHeader}>
-      <Button type="link" onClick={() => Router.push(AppRoutes.FAVOR)}>
+      <Button type="link" onClick={() => Router.push(AppRoutes.SERVICE)}>
         Послуги
         <SelectOutlined className={s.Icon} />
       </Button>
       <Button type="link" onClick={() => setIsModalOpen(true)}>
         <PlusOutlined /> Додати
       </Button>
-      <AddFavorModal isModalOpen={isModalOpen} closeModal={closeModal} />
+      <AddServiceModal isModalOpen={isModalOpen} closeModal={closeModal} />
     </div>
   )
 }
 
-export default FavorCardHeader
+export default ServiceCardHeader

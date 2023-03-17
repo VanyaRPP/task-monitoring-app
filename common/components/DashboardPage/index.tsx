@@ -9,7 +9,7 @@ import CategoriesBlock from './blocks/categories'
 import DashboardHeader from '../DashboardHeader'
 import { Roles } from '@utils/constants'
 import PaymentsBlock from './blocks/payments'
-import FavorsBlock from './blocks/favors'
+import ServicesBlock from './blocks/services'
 import s from './style.module.scss'
 
 const Dashboard: FC = () => {
@@ -27,7 +27,7 @@ const Dashboard: FC = () => {
       <DashboardHeader />
       <div className={s.Container}>
         <PaymentsBlock />
-        <FavorsBlock />
+        <ServicesBlock />
         {userRole !== Roles.USER && <Tasks />}
         <Orders />
         {/* <CategoriesBlock />

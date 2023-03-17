@@ -14,7 +14,7 @@ interface Props {
   form: FormInstance<any>
 }
 
-const AddFavorForm: FC<Props> = ({ form }) => {
+const AddServiceForm: FC<Props> = ({ form }) => {
   const { Option } = Select
   const { data: users } = useGetAllUsersQuery('')
   const dayjs = require('dayjs')
@@ -45,7 +45,7 @@ const AddFavorForm: FC<Props> = ({ form }) => {
       <Form.Item
         name="electricPrice"
         label="Електроенергія"
-        // rules={validateField('required')}
+        // rules={validateField('electricPrice')}
       >
         {' '}
         <InputNumber
@@ -93,4 +93,4 @@ const AddFavorForm: FC<Props> = ({ form }) => {
   )
 }
 
-export default AddFavorForm
+export default AddServiceForm
