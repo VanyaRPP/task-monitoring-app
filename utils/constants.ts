@@ -61,3 +61,10 @@ export enum TaskView {
   LIST = 'list',
 }
 export const saltRounds = 10
+
+export const paymentsTitle = {
+  maintenance: 'Утримання',
+  placing: 'Розміщення',
+  electricity: 'Електропостачання',
+  water: 'Водопостачання',
+}
