@@ -5,11 +5,11 @@
 
   .Container {
     padding: 0 80px;
-    margin-top: 100px;
+    margin-top: 74px;
+    margin-bottom: 10px;
     transition: margin 0.2s;
 
     @media (max-width: 889px) {
-      margin-top: 89px;
       padding: 0 25px;
     }
 
@@ -20,9 +20,12 @@
     }
 
     .Foreground {
-      display: flex;
       flex-direction: column;
-      min-height: calc(100vh - 114px);
+      min-height: calc(100vh - 156px);
+
+      @media (max-width: 768px) {
+        min-height: calc(100vh - 146px);
+      }
       padding: 24px;
     }
     .TouchBar {
