@@ -79,28 +79,24 @@ const ServicesBlock = () => {
       dataIndex: 'orenda',
       key: 'orenda',
       width: '20%',
-      render: (orenda) => orenda,
     },
     {
       title: 'Електрика',
       dataIndex: 'electricPrice',
       key: 'electricPrice',
       width: '20%',
-      render: (electricPrice) => electricPrice,
     },
     {
       title: 'Вода',
       dataIndex: 'waterPrice',
       key: 'waterPrice',
       width: '15%',
-      render: (waterPrice) => waterPrice,
     },
     {
       title: 'Інд Інф',
       dataIndex: 'inflaPrice',
       key: 'inflaPrice',
       width: '15%',
-      render: (inflaPrice) => inflaPrice,
     },
     {
       title: 'Опис',
