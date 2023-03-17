@@ -53,6 +53,12 @@ export const validateField = (name: string): Rule[] => {
     max: 200000,
     message: 'Сума рахунку повинна бути в межах [1, 200000]',
   }
+  const orenda: Rule = {
+    type: 'number',
+    min: 1,
+    max: 200000,
+    message: 'Сума рахунку повинна бути в межах [1, 200000]',
+  }
 
   const price: Rule = {
     validator(_, value) {
@@ -110,7 +116,7 @@ export const validateField = (name: string): Rule[] => {
       return [required, inflaPrice]
 
     case 'orenda':
-      return [required, inflaPrice]
+      return [required, orenda]
 
     case 'required':
       return [required]

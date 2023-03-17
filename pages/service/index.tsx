@@ -4,13 +4,13 @@ import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
 import { FC } from 'react'
-import FavorsBlock from '@common/components/DashboardPage/blocks/favors'
+import ServicesBlock from '@common/components/DashboardPage/blocks/services'
 
-const Favors: FC = () => {
-  return <FavorsBlock />
+const Services: FC = () => {
+  return <ServicesBlock />
 }
 
-export default withAuthRedirect(Favors)
+export default withAuthRedirect(Services)
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await unstable_getServerSession(

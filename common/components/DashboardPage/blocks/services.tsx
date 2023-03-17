@@ -1,13 +1,13 @@
 import React, { FC, ReactElement } from 'react'
 import { Alert, message, Popconfirm, Spin, Table } from 'antd'
-import FavorCardHeader from '@common/components/UI/FavorCardHeader'
+import ServiceCardHeader from '@common/components/UI/ServiceCardHeader'
 import TableCard from '@common/components/UI/TableCard'
 import {
-  useDeleteFavorMutation,
-  useGetAllFavorsQuery,
-} from '@common/api/favorApi/favor.api'
-import { dateToDefaultFormat } from '@common/assets/features/formatDate'
-import { IExtendedFavor } from '@common/api/favorApi/favor.api.types'
+  useDeleteServiceMutation,
+  useGetAllServicesQuery,
+} from '@common/api/serviceApi/service.api'
+import { dateToPick } from '@common/assets/features/formatDate'
+import { IExtendedService } from '@common/api/serviceApi/service.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
@@ -19,7 +19,7 @@ import cn from 'classnames'
 import s from './style.module.scss'
 import { useSession } from 'next-auth/react'
 
-const FavorsBlock = () => {
+const ServicesBlock = () => {
   const router = useRouter()
   const {
     pathname,
@@ -43,22 +43,22 @@ const FavorsBlock = () => {
   const isAdmin = currUser?.data?.role === Roles.ADMIN
 
   const {
-    data: favors,
-    isLoading: favorsLoading,
-    isFetching: favorsFetching,
-    isError: favorsError,
-  } = useGetAllFavorsQuery({
-    limit: pathname === AppRoutes.FAVOR ? 200 : 5,
+    data: services,
+    isLoading: servicesLoading,
+    isFetching: servicesFetching,
+    isError: servicesError,
+  } = useGetAllServicesQuery({
+    limit: pathname === AppRoutes.SERVICE ? 200 : 5,
     ...(email || isAdmin
       ? { userId: byEmailUser?.data._id as string }
       : { userId: currUser?.data._id as string }),
   })
 
-  const [deleteFavor, { isLoading: deleteLoading, isError: deleteError }] =
-    useDeleteFavorMutation()
+  const [deleteService, { isLoading: deleteLoading, isError: deleteError }] =
+    useDeleteServiceMutation()
 
-  const handleDeleteFavor = async (id: string) => {
-    const response = await deleteFavor(id)
+  const handleDeleteService = async (id: string) => {
+    const response = await deleteService(id)
     if ('data' in response) {
       message.success('Видалено!')
     } else {
@@ -72,33 +72,35 @@ const FavorsBlock = () => {
       dataIndex: 'date',
       key: 'date',
       width: '15%',
-      render: (date) => dateToDefaultFormat(date),
+      render: (date) => dateToPick(date),
     },
     {
       title: 'Утримання',
       dataIndex: 'orenda',
       key: 'orenda',
       width: '20%',
+      render: (orenda) => orenda,
     },
     {
       title: 'Електрика',
       dataIndex: 'electricPrice',
       key: 'electricPrice',
       width: '20%',
+      render: (electricPrice) => electricPrice,
     },
     {
       title: 'Вода',
       dataIndex: 'waterPrice',
       key: 'waterPrice',
       width: '15%',
-      ellipsis: true,
+      render: (waterPrice) => waterPrice,
     },
     {
       title: 'Інд Інф',
       dataIndex: 'inflaPrice',
       key: 'inflaPrice',
       width: '15%',
-      ellipsis: true,
+      render: (inflaPrice) => inflaPrice,
     },
     {
       title: 'Опис',
@@ -112,13 +114,13 @@ const FavorsBlock = () => {
           title: '',
           dataIndex: '',
           width: '15%',
-          render: (_, favor: IExtendedFavor) => (
+          render: (_, service: IExtendedService) => (
             <div className={s.popconfirm}>
               <Popconfirm
-                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                  favor?.date as unknown as string
+                title={`Ви впевнені що хочете видалити оплату від ${dateToPick(
+                  service?.date as unknown as string
                 )}?`}
-                onConfirm={() => handleDeleteFavor(favor?._id)}
+                onConfirm={() => handleDeleteService(service?._id)}
                 cancelText="Відміна"
                 disabled={deleteLoading}
               >
@@ -132,13 +134,13 @@ const FavorsBlock = () => {
 
   let content: ReactElement
 
-  if (byEmailUserError || deleteError || favorsError || currUserError) {
+  if (byEmailUserError || deleteError || servicesError || currUserError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
       <Table
         columns={columns}
-        dataSource={favors}
+        dataSource={services}
         pagination={false}
         bordered
         loading={
@@ -146,8 +148,8 @@ const FavorsBlock = () => {
           byEmailUserFetching ||
           currUserLoading ||
           currUserFetching ||
-          favorsLoading ||
-          favorsFetching
+          servicesLoading ||
+          servicesFetching
         }
         rowKey="_id"
       />
@@ -160,19 +162,19 @@ const FavorsBlock = () => {
         email ? (
           <span className={s.title}>{`Оплата від користувача ${email}`}</span>
         ) : isAdmin ? (
-          <FavorCardHeader />
+          <ServiceCardHeader />
         ) : (
-          <Link href={AppRoutes.FAVOR}>
+          <Link href={AppRoutes.SERVICE}>
             <a className={s.title}>
               Послуги <SelectOutlined />
             </a>
           </Link>
         )
       }
-      className={cn({ [s.noScroll]: pathname === AppRoutes.FAVOR })}
+      className={cn({ [s.noScroll]: pathname === AppRoutes.SERVICE })}
     >
       {content}
     </TableCard>
   )
 }
-export default FavorsBlock
+export default ServicesBlock

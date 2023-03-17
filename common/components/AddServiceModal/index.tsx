@@ -1,10 +1,10 @@
-import { useAddFavorMutation } from '@common/api/favorApi/favor.api'
+import { useAddServiceMutation } from '@common/api/serviceApi/service.api'
 import { objectWithoutKey } from '@common/assets/features/formDataHelpers'
 import { IUser } from '@common/modules/models/User'
 import { Form, message, Modal } from 'antd'
 import { useSession } from 'next-auth/react'
 import React, { FC } from 'react'
-import AddFavorForm from '../Forms/AddFavorForm'
+import AddServiceForm from '../Forms/AddServiceForm'
 
 interface Props {
   isModalOpen: boolean
@@ -19,13 +19,13 @@ type FormData = {
   description: string
 }
 
-const AddFavorModal: FC<Props> = ({ isModalOpen, closeModal }) => {
+const AddServiceModal: FC<Props> = ({ isModalOpen, closeModal }) => {
   const [form] = Form.useForm()
-  const [addFavor, { isLoading }] = useAddFavorMutation()
+  const [addService, { isLoading }] = useAddServiceMutation()
 
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
-    const response = await addFavor({
+    const response = await addService({
       orenda: formData.orenda,
       electricPrice: formData.electricPrice,
       waterPrice: formData.waterPrice,
@@ -51,9 +51,9 @@ const AddFavorModal: FC<Props> = ({ isModalOpen, closeModal }) => {
       cancelText={'Відміна'}
       confirmLoading={isLoading}
     >
-      <AddFavorForm form={form} />
+      <AddServiceForm form={form} />
     </Modal>
   )
 }
 
-export default AddFavorModal
+export default AddServiceModal
