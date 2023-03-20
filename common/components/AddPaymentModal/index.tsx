@@ -1,5 +1,6 @@
 import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { IUser } from '@common/modules/models/User'
+import { ITableData } from '@utils/tableData'
 import { Form, message, Modal } from 'antd'
 import React, { FC } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
@@ -12,9 +13,12 @@ interface Props {
 
 type FormData = {
   payer: IUser['_id']
-  debit: number
   credit: number
-  description: string
+  description?: string
+  maintenance?: ITableData
+  placing?: ITableData
+  electricity?: ITableData
+  water?: ITableData
 }
 
 const AddPaymentModal: FC<Props> = ({ isModalOpen, closeModal }) => {
@@ -23,19 +27,21 @@ const AddPaymentModal: FC<Props> = ({ isModalOpen, closeModal }) => {
 
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
-    const response = await addPayment({
-      payer: formData.payer,
-      credit: formData.credit,
-      debit: formData.debit,
-      description: formData.description,
-    })
-    if ('data' in response) {
-      form.resetFields()
-      closeModal()
-      message.success('Додано')
-    } else {
-      message.error('Помилка при додаванні рахунку')
-    }
+    console.log(formData)
+
+    // const response = await addPayment({
+    //   payer: formData.payer,
+    //   credit: formData.credit,
+    //   debit: formData.debit,
+    //   description: formData.description,
+    // })
+    // if ('data' in response) {
+    //   form.resetFields()
+    //   closeModal()
+    //   message.success('Додано')
+    // } else {
+    //   message.error('Помилка при додаванні рахунку')
+    // }
   }
 
   return (

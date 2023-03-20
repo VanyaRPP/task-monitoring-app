@@ -1,41 +1,51 @@
-import { Input, Table, Button, Tooltip } from 'antd'
-import { useState, useEffect, FC, ChangeEvent } from 'react'
+import { Table, Tooltip, InputNumber, Form, FormInstance } from 'antd'
+import { FC } from 'react'
 import { ColumnProps } from 'antd/lib/table'
 import moment from 'moment'
 import { dataSource, ITableData } from '@utils/tableData'
+import { paymentsTitle } from '@utils/constants'
+import { getName } from '@utils/helpers'
+import { validateField } from '@common/assets/features/validators'
 import s from './style.module.scss'
 
-const PaymentModalTable: FC = () => {
-  const [tableData, setTableData] = useState(dataSource)
+interface Props {
+  form: FormInstance<any>
+}
 
-  // useEffect(() => { TODO: set total after first render
-  //   const newData = [...tableData]
-  //   for (let index = 0; index < tableData.length; index++) {
-  //     setTotal(newData, index)
-  //   }
-  //   setTableData(newData)
-  // }, [])
+const PaymentModalTable: FC<Props> = (form) => {
+  const { setFieldValue } = form.form
 
-  const onInputChange = (key, index) => (e: ChangeEvent<HTMLInputElement>) => {
-    const newData = [...tableData]
-    newData[index][key] = Number(e.target.value)
-    setTotal(newData, index)
-    setTableData(newData)
-  }
+  const maintenance = Form.useWatch('maintenance', form.form)
+  const m = maintenance?.amount * maintenance?.price
 
-  const setTotal = (data, index) => {
-    if (data[index]['lastAmount']) {
-      data[index]['sum'] = Number(
-        (data[index]['lastAmount'] - data[index]['amount']) *
-          data[index]['price']
-      )
-    } else {
-      data[index]['sum'] = Number(data[index]['amount'] * data[index]['price'])
+  const placing = Form.useWatch('placing', form.form)
+  const p = placing?.amount * placing?.price
+
+  const electricity = Form.useWatch('electricity', form.form)
+  const e = (electricity?.lastAmount - electricity?.amount) * electricity?.price
+
+  const water = Form.useWatch('water', form.form)
+  const w = (water?.lastAmount - water?.amount) * water?.price
+
+  const getVal = (record) => {
+    switch (record) {
+      case 'maintenance': {
+        setFieldValue(['maintenance', 'sum'], m)
+        return m || 0
+      }
+      case 'placing': {
+        setFieldValue(['placing', 'sum'], p)
+        return p || 0
+      }
+      case 'electricity': {
+        setFieldValue(['electricity', 'sum'], e)
+        return e || 0
+      }
+      case 'water': {
+        setFieldValue(['water', 'sum'], w)
+        return w || 0
+      }
     }
-  }
-
-  const onConfirm = () => {
-    console.log(tableData)
   }
 
   const columns: ColumnProps<ITableData>[] = [
@@ -47,10 +57,12 @@ const PaymentModalTable: FC = () => {
     {
       title: 'Назва',
       dataIndex: 'name',
+      width: 100,
       render: (name) => (
         <Tooltip title={`${name} (${moment().format('MMMM')})`}>
           <span className={s.rowText}>
-            {name} <span className={s.month}>({moment().format('MMMM')})</span>
+            {getName(name, paymentsTitle)}{' '}
+            <span className={s.month}>({moment().format('MMMM')})</span>
           </span>
         </Tooltip>
       ),
@@ -58,18 +70,32 @@ const PaymentModalTable: FC = () => {
     {
       title: 'К-сть',
       dataIndex: 'amount',
-      render: (text, record, index) => (
+      width: '30%',
+      render: (text, record) => (
         <>
-          {record.name === 'Електропостачання' ||
-          record.name === 'Водопостачання' ? (
+          {record.name === 'electricity' || record.name === 'water' ? (
             <div className={s.doubleInputs}>
-              {/* value={text} */}
-              <Input onChange={onInputChange('lastAmount', index)} />
+              <Form.Item
+                rules={validateField('required')}
+                name={[record.name, 'lastAmount']}
+              >
+                <InputNumber className={s.input} />
+              </Form.Item>
               -
-              <Input onChange={onInputChange('amount', index)} />
+              <Form.Item
+                name={[record.name, 'amount']}
+                rules={validateField('required')}
+              >
+                <InputNumber className={s.input} />
+              </Form.Item>
             </div>
           ) : (
-            <Input onChange={onInputChange('amount', index)} />
+            <Form.Item
+              name={[record.name, 'amount']}
+              rules={validateField('required')}
+            >
+              <InputNumber className={s.input} />
+            </Form.Item>
           )}
         </>
       ),
@@ -77,32 +103,36 @@ const PaymentModalTable: FC = () => {
     {
       title: 'Ціна',
       dataIndex: 'price',
-      render: (text, record, index) => (
+      render: (text, record) => (
         <Tooltip title={text}>
-          <Input onChange={onInputChange('price', index)} />
+          <Form.Item
+            name={[record.name, 'price']}
+            rules={validateField('required')}
+          >
+            <InputNumber className={s.input} />
+          </Form.Item>
         </Tooltip>
       ),
     },
     {
       title: 'Сума',
       dataIndex: 'sum',
-      render: (text, record, index) => <h4>{text}</h4>,
+      render: (text, record) => (
+        <Form.Item name={[record?.name, 'sum']}>
+          <h4 className={s.price}>{getVal(record?.name)}</h4>
+        </Form.Item>
+      ),
       width: 80,
     },
   ]
 
   return (
-    <>
-      <Table
-        rowKey="id"
-        columns={columns}
-        dataSource={tableData}
-        pagination={false}
-      />
-      <Button type="primary" onClick={onConfirm}>
-        Get data
-      </Button>
-    </>
+    <Table
+      rowKey="id"
+      columns={columns}
+      dataSource={dataSource}
+      pagination={false}
+    />
   )
 }
 
