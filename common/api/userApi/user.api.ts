@@ -53,6 +53,11 @@ export const userApi = createApi({
       query: () => '/user',
       providesTags: (result) => ['User'],
     }),
+    getCurrentUser: builder.query<IUser, void>({
+      query: () => '/user/current',
+      providesTags: (result) => ['User'],
+      transformResponse: (response: BaseQuery) => response.data,
+    }),
     addFeedback: builder.mutation<IUser, Partial<IUser>>({
       query(data) {
         const { _id, ...body } = data
@@ -71,6 +76,7 @@ export const {
   useSignUpMutation,
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
+  useGetCurrentUserQuery,
   useUpdateUserRoleMutation,
   useUpdateUserMutation,
   useGetAllUsersQuery,
