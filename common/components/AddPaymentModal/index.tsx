@@ -17,7 +17,12 @@ type FormData = {
   description: string
 }
 
-const AddPaymentModal: FC<Props> = ({ isModalOpen, closeModal }) => {
+const AddPaymentModal: FC<Props> = ({
+  isModalOpen,
+  closeModal,
+  paymentData,
+  edit,
+}) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
 
@@ -44,12 +49,17 @@ const AddPaymentModal: FC<Props> = ({ isModalOpen, closeModal }) => {
       title="Додавання рахунку"
       onOk={handleSubmit}
       onCancel={closeModal}
-      okText={'Додати'}
-      cancelText={'Відміна'}
+      okText={!edit && 'Додати'}
+      cancelText={edit ? 'Закрити' : 'Відміна'}
       confirmLoading={isLoading}
       className={s.Modal}
     >
-      <AddPaymentForm form={form} />
+      <AddPaymentForm
+        form={form}
+        edit={edit}
+        isModalOpen={isModalOpen}
+        paymentData={paymentData}
+      />
     </Modal>
   )
 }
