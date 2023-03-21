@@ -97,7 +97,7 @@ const PaymentsBlock = () => {
       dataIndex: 'debit',
       key: 'debit',
       width: '10%',
-      render: (debit) => (debit === 0 ? null : debit),
+      render: (debit) => debit,
     },
     {
       title: (

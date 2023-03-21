@@ -18,15 +18,37 @@ const postValidateBody = initMiddleware(
       check('date'),
       check(
         'credit',
-        'Сума кредита повинна бути цілим значенням в межах [1, 10000]'
-      )
-        .isInt({ min: 1, max: 200000 })
-        .optional(),
+        'Сума кредита повинна бути цілим значенням в межах [1, 200000]'
+      ).optional(),
       check(
         'debit',
-        'Сума кредита повинна бути цілим значенням в межах [1, 10000]'
+        'Сума дебита повинна бути цілим значенням в межах [1, 200000]'
       )
-        .isInt({ min: 1, max: 200000 })
+        .isFloat({ min: 0, max: 200000 })
+        .optional(),
+      check(
+        'maintenance.sum',
+        'Сума за утримання повинна бути в межах [1, 200000]' // TODO: Change on valid range
+      )
+        .isFloat({ min: 0, max: 200000 })
+        .optional(),
+      check(
+        'placing.sum',
+        'Сума за розміщення повинна бути в межах [1, 200000]' // TODO: Change on valid range
+      )
+        .isFloat({ min: 0, max: 200000 })
+        .optional(),
+      check(
+        'electricity.sum',
+        'Сума за електропостачання повинна бути в межах [1, 200000]' // TODO: Change on valid range
+      )
+        .isFloat({ min: 0, max: 200000 })
+        .optional(),
+      check(
+        'water.sum',
+        'Сума за водопостачання повинна бути в межах [1, 200000]' // TODO: Change on valid range
+      )
+        .isFloat({ min: 0, max: 200000 })
         .optional(),
       check('description').trim(),
     ],

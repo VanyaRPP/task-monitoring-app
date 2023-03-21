@@ -1,4 +1,4 @@
-export interface ITableData {
+export interface IPaymentTableData {
   id: number
   name: string
   lastAmount?: number
@@ -7,7 +7,7 @@ export interface ITableData {
   sum?: number
 }
 
-export const dataSource: ITableData[] = [
+export const dataSource: IPaymentTableData[] = [
   {
     id: 1,
     name: 'maintenance',
