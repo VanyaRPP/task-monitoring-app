@@ -10,7 +10,6 @@ import {
 } from '@common/api/paymentApi/payment.api'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-// import setIsModalOpen from '@common/components/UI/PaymentCardHeader'
 import { DeleteOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
@@ -70,12 +69,11 @@ const PaymentsBlock = () => {
   const handleEyeClick = (id) => {
     setCurrentPayment(payments.find((item) => item._id === id))
     setIsModalOpen(true)
-    console.log('Iclick')
   }
   const handleCloseModal = () => {
     setIsModalOpen(false)
-    console.log('Iclick')
   }
+
   const columns = [
     {
       title: 'Дата',
@@ -178,8 +176,6 @@ const PaymentsBlock = () => {
   if (deleteError || paymentsError || currUserError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
-    // console.log(columns)
-    // console.log(payments)
     content = (
       <Table
         columns={columns}
@@ -196,8 +192,6 @@ const PaymentsBlock = () => {
       />
     )
   }
-  console.log(columns)
-  console.log(payments)
   return (
     <TableCard
       title={

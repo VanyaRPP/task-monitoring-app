@@ -1,7 +1,7 @@
 import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { IUser } from '@common/modules/models/User'
 import { Form, message, Modal } from 'antd'
-import React, { FC } from 'react'
+import React, { FC, useEffect } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import s from './style.module.scss'
 
@@ -25,7 +25,6 @@ const AddPaymentModal: FC<Props> = ({
 }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
-
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
     const response = await addPayment({
@@ -36,8 +35,7 @@ const AddPaymentModal: FC<Props> = ({
     })
     if ('data' in response) {
       form.resetFields()
-      closeModal()
-      message.success('Додано')
+      closeModal(), message.success('Додано')
     } else {
       message.error('Помилка при додаванні рахунку')
     }
@@ -48,18 +46,18 @@ const AddPaymentModal: FC<Props> = ({
       visible={isModalOpen}
       title="Додавання рахунку"
       onOk={handleSubmit}
-      onCancel={closeModal}
+      onCancel={() => {
+        form.resetFields()
+        closeModal()
+      }}
       okText={!edit && 'Додати'}
       cancelText={edit ? 'Закрити' : 'Відміна'}
       confirmLoading={isLoading}
       className={s.Modal}
     >
-      <AddPaymentForm
-        form={form}
-        edit={edit}
-        isModalOpen={isModalOpen}
-        paymentData={paymentData}
-      />
+      {isModalOpen && (
+        <AddPaymentForm form={form} edit={edit} paymentData={paymentData} />
+      )}
     </Modal>
   )
 }

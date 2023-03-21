@@ -9,16 +9,10 @@ interface Props {
   form: FormInstance<any>
 }
 
-const AddPaymentForm: FC<Props> = ({
-  form,
-  paymentData,
-  isModalOpen,
-  edit,
-}) => {
+const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
   const { Option } = Select
   const { data: users } = useGetAllUsersQuery('')
   // console.log(paymentData)
-
   return (
     <Form
       initialValues={{
