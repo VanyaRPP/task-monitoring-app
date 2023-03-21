@@ -19,7 +19,7 @@
   display: flex;
   flex-wrap: wrap;
   flex: 0.33, 0.33, 0.33;
-  gap: 1rem;
+  gap: 14px;
   justify-content: space-between;
   :global .ant-table-placeholder > td {
     border-bottom: none;
@@ -29,6 +29,9 @@
   }
   :global table tbody tr.ant-table-placeholder:hover {
     background: transparent;
+  }
+  :global .ant-card-head-title {
+    padding: 9px 0;
   }
 }
 
