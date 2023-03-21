@@ -2,7 +2,7 @@ import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { IUser } from '@common/modules/models/User'
 import { ITableData } from '@utils/tableData'
 import { Form, message, Modal } from 'antd'
-import React, { FC } from 'react'
+import React, { FC, useEffect } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import s from './style.module.scss'
 
@@ -21,27 +21,28 @@ type FormData = {
   water?: ITableData
 }
 
-const AddPaymentModal: FC<Props> = ({ isModalOpen, closeModal }) => {
+const AddPaymentModal: FC<Props> = ({
+  isModalOpen,
+  closeModal,
+  paymentData,
+  edit,
+}) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
-
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
-    console.log(formData)
-
-    // const response = await addPayment({
-    //   payer: formData.payer,
-    //   credit: formData.credit,
-    //   debit: formData.debit,
-    //   description: formData.description,
-    // })
-    // if ('data' in response) {
-    //   form.resetFields()
-    //   closeModal()
-    //   message.success('Додано')
-    // } else {
-    //   message.error('Помилка при додаванні рахунку')
-    // }
+    const response = await addPayment({
+      payer: formData.payer,
+      credit: formData.credit,
+      debit: formData.debit,
+      description: formData.description,
+    })
+    if ('data' in response) {
+      form.resetFields()
+      closeModal(), message.success('Додано')
+    } else {
+      message.error('Помилка при додаванні рахунку')
+    }
   }
 
   return (
@@ -49,13 +50,18 @@ const AddPaymentModal: FC<Props> = ({ isModalOpen, closeModal }) => {
       visible={isModalOpen}
       title="Додавання рахунку"
       onOk={handleSubmit}
-      onCancel={closeModal}
-      okText={'Додати'}
-      cancelText={'Відміна'}
+      onCancel={() => {
+        form.resetFields()
+        closeModal()
+      }}
+      okText={!edit && 'Додати'}
+      cancelText={edit ? 'Закрити' : 'Відміна'}
       confirmLoading={isLoading}
       className={s.Modal}
     >
-      <AddPaymentForm form={form} />
+      {isModalOpen && (
+        <AddPaymentForm form={form} edit={edit} paymentData={paymentData} />
+      )}
     </Modal>
   )
 }
