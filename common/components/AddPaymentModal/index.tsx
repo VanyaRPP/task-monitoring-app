@@ -1,5 +1,6 @@
 import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { IUser } from '@common/modules/models/User'
+import { ITableData } from '@utils/tableData'
 import { Form, message, Modal } from 'antd'
 import React, { FC, useEffect } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
@@ -12,9 +13,12 @@ interface Props {
 
 type FormData = {
   payer: IUser['_id']
-  debit: number
   credit: number
-  description: string
+  description?: string
+  maintenance?: ITableData
+  placing?: ITableData
+  electricity?: ITableData
+  water?: ITableData
 }
 
 const AddPaymentModal: FC<Props> = ({

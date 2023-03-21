@@ -67,3 +67,13 @@ export const getPaymentOptions = async ({
 
   return options
 }
+
+export const getName = (name, obj) => {
+  let key = null
+  Object.entries(obj).forEach(([field, value]) => {
+    if (name === field) {
+      key = value
+    }
+  })
+  return key
+}

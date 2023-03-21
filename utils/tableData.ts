@@ -1,5 +1,5 @@
 export interface ITableData {
-  id: string
+  id: number
   name: string
   lastAmount?: number
   amount: number
@@ -9,29 +9,33 @@ export interface ITableData {
 
 export const dataSource: ITableData[] = [
   {
-    id: '1',
-    name: 'Утримання',
+    id: 1,
+    name: 'maintenance',
     amount: 0,
     price: 0,
+    sum: 0,
   },
   {
-    id: '2',
-    name: 'Розміщення',
+    id: 2,
+    name: 'placing',
     amount: 0,
     price: 0,
+    sum: 0,
   },
   {
-    id: '3',
-    name: 'Електропостачання',
+    id: 3,
+    name: 'electricity',
     lastAmount: 0,
     amount: 0,
     price: 0,
+    sum: 0,
   },
   {
-    id: '4',
-    name: 'Водопостачання',
+    id: 4,
+    name: 'water',
     lastAmount: 0,
     amount: 0,
     price: 0,
+    sum: 0,
   },
 ]

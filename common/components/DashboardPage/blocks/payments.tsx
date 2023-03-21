@@ -80,6 +80,7 @@ const PaymentsBlock = () => {
       dataIndex: 'date',
       key: 'date',
       width: '15%',
+      ellipsis: true,
       render: (date) => dateToDefaultFormat(date),
     },
     isAdmin && !email
@@ -109,7 +110,7 @@ const PaymentsBlock = () => {
       ),
       dataIndex: 'debit',
       key: 'debit',
-      width: '20%',
+      width: '10%',
       render: (debit) => (debit === 0 ? null : debit),
     },
     {
@@ -120,7 +121,7 @@ const PaymentsBlock = () => {
       ),
       dataIndex: 'credit',
       key: 'credit',
-      width: '20%',
+      width: '10%',
       render: (credit) => (credit === 0 ? null : credit),
     },
     {
@@ -134,7 +135,7 @@ const PaymentsBlock = () => {
       ? {
           title: '',
           dataIndex: '',
-          width: '15%',
+          width: '10%',
           render: (_, payment: IExtendedPayment) => (
             <div className={s.popconfirm}>
               <Popconfirm

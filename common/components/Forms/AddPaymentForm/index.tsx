@@ -83,7 +83,7 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
               </Form.Item>
             </>
           ) : (
-            <PaymentModalTable />
+            <PaymentModalTable form={form} />
           )
         }
       </Form.Item>
