@@ -7,6 +7,9 @@ import s from './style.module.scss'
 
 interface Props {
   form: FormInstance<any>
+  paymentData: object
+  edit: boolean
+  isModalOpen: boolean
 }
 
 const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
