@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from 'pages/api/api.config'
 import User from 'common/modules/models/User'
+import { Roles } from '@utils/constants'
 
 start()
 
@@ -32,7 +33,7 @@ export default async function handler(
           )
         } else {
           user = await User.findOneAndUpdate(
-            { email: req.query.email },
+            { email: req.query.email, role: Roles.ADMIN },
             { role: req.query.role }
           )
         }
