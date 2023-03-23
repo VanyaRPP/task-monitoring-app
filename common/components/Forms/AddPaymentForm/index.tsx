@@ -4,15 +4,18 @@ import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import PaymentModalTable from '@common/components/PaymentModalTable'
 import s from './style.module.scss'
+import { IPayment } from '@common/api/paymentApi/payment.api.types'
 
 interface Props {
   form: FormInstance<any>
+  paymentData: any
+  edit: boolean
+  isModalOpen: boolean
 }
 
 const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
   const { Option } = Select
   const { data: users } = useGetAllUsersQuery('')
-  // console.log(paymentData)
   return (
     <Form
       initialValues={{
