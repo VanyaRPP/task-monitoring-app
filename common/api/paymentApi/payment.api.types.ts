@@ -1,11 +1,17 @@
+import { IUser } from './../../modules/models/User'
+import { IPaymentTableData } from '@utils/tableData'
 import { ObjectId } from 'mongoose'
 
 export interface IPayment {
-  payer: IExtendedPayment | ObjectId | string
+  payer: IExtendedPayment | ObjectId | IUser['_id'] | string
   date?: Date
-  credit: number
-  debit: number
-  description: string
+  credit?: number
+  debit?: number
+  description?: string
+  maintenance?: IPaymentTableData
+  placing?: IPaymentTableData
+  electricity?: IPaymentTableData
+  water?: IPaymentTableData
 }
 
 export interface IExtendedPayment extends IPayment {

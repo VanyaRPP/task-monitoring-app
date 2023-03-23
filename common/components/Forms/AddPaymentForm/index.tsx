@@ -4,7 +4,6 @@ import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import PaymentModalTable from '@common/components/PaymentModalTable'
 import s from './style.module.scss'
-import { IPayment } from '@common/api/paymentApi/payment.api.types'
 
 interface Props {
   form: FormInstance<any>
@@ -16,6 +15,20 @@ interface Props {
 const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
   const { Option } = Select
   const { data: users } = useGetAllUsersQuery('')
+  const [total, setTotal] = useState(0)
+
+  const maintenance = Form.useWatch('maintenance', form)
+  const placing = Form.useWatch('placing', form)
+  const electricity = Form.useWatch('electricity', form)
+  const water = Form.useWatch('water', form)
+
+  useEffect(() => {
+    setTotal(
+      maintenance?.sum + placing?.sum + electricity?.sum + water?.sum || 0
+    )
+    form.setFieldValue('debit', total)
+  }, [maintenance, placing, electricity, water, form, total])
+
   return (
     <Form
       initialValues={{
@@ -58,7 +71,7 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
         shouldUpdate={(prevValues, currentValues) =>
           prevValues.operation !== currentValues.operation
         }
-        className={s.PriceItem}
+        className={s.priceItem}
       >
         {({ getFieldValue }) =>
           getFieldValue('operation') === 'credit' ? (
@@ -69,7 +82,7 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
                 rules={validateField('paymentPrice')}
               >
                 <InputNumber
-                  className={s.InputNumber}
+                  className={s.inputNumber}
                   disabled={edit && true}
                 />
               </Form.Item>
@@ -86,7 +99,15 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
               </Form.Item>
             </>
           ) : (
-            <PaymentModalTable form={form} />
+            <>
+              <PaymentModalTable form={form} />
+              <Form.Item name="debit">
+                <div className={s.totalItem}>
+                  <p>Сума:</p>
+                  <p>{total.toFixed(2)} ₴</p>
+                </div>
+              </Form.Item>
+            </>
           )
         }
       </Form.Item>

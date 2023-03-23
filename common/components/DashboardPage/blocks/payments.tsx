@@ -20,9 +20,8 @@ import { SelectOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
 import { useSession } from 'next-auth/react'
-import s from './style.module.scss'
 import AddPaymentModal from '@common/components/AddPaymentModal'
-import { useRef } from 'react'
+import s from './style.module.scss'
 
 const PaymentsBlock = () => {
   const router = useRouter()
@@ -111,7 +110,7 @@ const PaymentsBlock = () => {
       dataIndex: 'debit',
       key: 'debit',
       width: '10%',
-      render: (debit) => (debit === 0 ? null : debit),
+      render: (debit) => debit,
     },
     {
       title: (
@@ -122,7 +121,7 @@ const PaymentsBlock = () => {
       dataIndex: 'credit',
       key: 'credit',
       width: '10%',
-      render: (credit) => (credit === 0 ? null : credit),
+      render: (credit) => credit,
     },
     {
       title: 'Опис',
@@ -155,7 +154,7 @@ const PaymentsBlock = () => {
     {
       title: '',
       dataIndex: '',
-      width: '15%',
+      width: '10%',
       render: (_, payment: IExtendedPayment) => (
         <div className={s.icon}>
           <Button type="link" onClick={() => handleEyeClick(payment?._id)}>

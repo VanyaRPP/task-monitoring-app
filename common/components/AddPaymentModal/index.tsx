@@ -1,9 +1,7 @@
 import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
-import { IPaymentModel } from '@common/modules/models/Payment'
-import { IUser } from '@common/modules/models/User'
-import { ITableData } from '@utils/tableData'
+import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { Form, message, Modal } from 'antd'
-import React, { FC, useEffect } from 'react'
+import React, { FC } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import s from './style.module.scss'
 
@@ -12,17 +10,6 @@ interface Props {
   closeModal: VoidFunction
   paymentData?: object
   edit?: boolean
-}
-
-type FormData = {
-  payer: IUser['_id']
-  credit: number
-  description?: string
-  maintenance?: ITableData
-  placing?: ITableData
-  electricity?: ITableData
-  water?: ITableData
-  debit?: number
 }
 
 const AddPaymentModal: FC<Props> = ({
@@ -34,16 +21,21 @@ const AddPaymentModal: FC<Props> = ({
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const handleSubmit = async () => {
-    const formData: FormData = await form.validateFields()
+    const formData: IPayment = await form.validateFields()
     const response = await addPayment({
       payer: formData.payer,
       credit: formData.credit,
-      debit: formData.debit,
       description: formData.description,
+      maintenance: formData.maintenance,
+      placing: formData.placing,
+      electricity: formData.electricity,
+      water: formData.water,
+      debit: formData.debit,
     })
     if ('data' in response) {
       form.resetFields()
-      closeModal(), message.success('Додано')
+      closeModal()
+      message.success('Додано')
     } else {
       message.error('Помилка при додаванні рахунку')
     }

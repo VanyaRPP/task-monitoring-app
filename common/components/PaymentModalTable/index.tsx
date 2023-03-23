@@ -2,7 +2,7 @@ import { Table, Tooltip, InputNumber, Form, FormInstance } from 'antd'
 import { FC } from 'react'
 import { ColumnProps } from 'antd/lib/table'
 import moment from 'moment'
-import { dataSource, ITableData } from '@utils/tableData'
+import { dataSource, IPaymentTableData } from '@utils/tableData'
 import { paymentsTitle } from '@utils/constants'
 import { getName } from '@utils/helpers'
 import { validateField } from '@common/assets/features/validators'
@@ -31,24 +31,24 @@ const PaymentModalTable: FC<Props> = (form) => {
     switch (record) {
       case 'maintenance': {
         setFieldValue(['maintenance', 'sum'], m)
-        return m || 0
+        return +m.toFixed(1) || 0
       }
       case 'placing': {
         setFieldValue(['placing', 'sum'], p)
-        return p || 0
+        return +p.toFixed(1) || 0
       }
       case 'electricity': {
         setFieldValue(['electricity', 'sum'], e)
-        return e || 0
+        return +e.toFixed(1) || 0
       }
       case 'water': {
         setFieldValue(['water', 'sum'], w)
-        return w || 0
+        return +w.toFixed(1) || 0
       }
     }
   }
 
-  const columns: ColumnProps<ITableData>[] = [
+  const columns: ColumnProps<IPaymentTableData>[] = [
     {
       title: '№',
       dataIndex: 'id',
@@ -117,9 +117,10 @@ const PaymentModalTable: FC<Props> = (form) => {
     {
       title: 'Сума',
       dataIndex: 'sum',
+      ellipsis: true,
       render: (text, record) => (
         <Form.Item name={[record?.name, 'sum']}>
-          <h4 className={s.price}>{getVal(record?.name)}</h4>
+          <h4 className={s.price}>{getVal(record?.name)} ₴</h4>
         </Form.Item>
       ),
       width: 80,
