@@ -8,12 +8,18 @@ import s from './style.module.scss'
 interface Props {
   isModalOpen: boolean
   closeModal: VoidFunction
+  paymentData?: object
+  edit?: boolean
 }
 
-const AddPaymentModal: FC<Props> = ({ isModalOpen, closeModal }) => {
+const AddPaymentModal: FC<Props> = ({
+  isModalOpen,
+  closeModal,
+  paymentData,
+  edit,
+}) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
-
   const handleSubmit = async () => {
     const formData: IPayment = await form.validateFields()
     const response = await addPayment({
@@ -40,13 +46,21 @@ const AddPaymentModal: FC<Props> = ({ isModalOpen, closeModal }) => {
       visible={isModalOpen}
       title="Додавання рахунку"
       onOk={handleSubmit}
-      onCancel={closeModal}
-      okText={'Додати'}
-      cancelText={'Відміна'}
+      onCancel={() => {
+        form.resetFields()
+        closeModal()
+      }}
+      okText={!edit && 'Додати'}
+      cancelText={edit ? 'Закрити' : 'Відміна'}
       confirmLoading={isLoading}
       className={s.Modal}
     >
-      <AddPaymentForm form={form} />
+      <AddPaymentForm
+        form={form}
+        edit={edit}
+        isModalOpen={isModalOpen}
+        paymentData={paymentData}
+      />
     </Modal>
   )
 }

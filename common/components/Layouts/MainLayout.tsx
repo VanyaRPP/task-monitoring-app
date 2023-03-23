@@ -5,7 +5,7 @@ import Footer from '../Footer'
 import Header from '../Header'
 import Sidebar from '../Sidebar'
 import { useSession } from 'next-auth/react'
-import TouchBar from '../TouchBar'
+// import TouchBar from '../TouchBar'
 import s from './MainLayout.style.module.scss'
 interface Props {
   children: React.ReactNode
@@ -41,11 +41,11 @@ const MainLayout: React.FC<Props> = ({ children }) => {
             //     : '0px',
             // }}
           >
-            {session?.user && (
+            {/* {session?.user && (
               <div className={s.TouchBar}>
                 <TouchBar />
               </div>
-            )}
+            )} */}
             <div className={s.Foreground}>{children}</div>
           </Layout.Content>
           <Footer

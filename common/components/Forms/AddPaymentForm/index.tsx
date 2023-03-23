@@ -7,9 +7,12 @@ import s from './style.module.scss'
 
 interface Props {
   form: FormInstance<any>
+  paymentData: any
+  edit: boolean
+  isModalOpen: boolean
 }
 
-const AddPaymentForm: FC<Props> = ({ form }) => {
+const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
   const { Option } = Select
   const { data: users } = useGetAllUsersQuery('')
   const [total, setTotal] = useState(0)
@@ -27,9 +30,19 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
   }, [maintenance, placing, electricity, water, form, total])
 
   return (
-    <Form form={form} layout="vertical" className={s.Form}>
+    <Form
+      initialValues={{
+        description: paymentData?.description,
+        credit: paymentData?.credit,
+        payer: paymentData?.payer?._id,
+      }}
+      form={form}
+      layout="vertical"
+      className={s.Form}
+    >
       <Form.Item name="payer" label="Платник" rules={validateField('required')}>
         <Select
+          disabled={edit && true}
           placeholder="Оберіть платника"
           style={{ width: '100%' }}
           options={users?.data.map((user) => ({
@@ -45,7 +58,11 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
         initialValue="credit"
         rules={validateField('required')}
       >
-        <Select placeholder="Оберіть тип оплати" className={s.Select}>
+        <Select
+          placeholder="Оберіть тип оплати"
+          className={s.Select}
+          disabled={edit && true}
+        >
           <Option value="credit">Кредит (Оплата)</Option>
           <Option value="debit">Дебет (Реалізація)</Option>
         </Select>
@@ -64,14 +81,21 @@ const AddPaymentForm: FC<Props> = ({ form }) => {
                 label="Сума"
                 rules={validateField('paymentPrice')}
               >
-                <InputNumber className={s.inputNumber} />
+                <InputNumber
+                  className={s.inputNumber}
+                  disabled={edit && true}
+                />
               </Form.Item>
               <Form.Item
                 name="description"
                 label="Опис"
                 rules={validateField('required')}
               >
-                <Input.TextArea placeholder="Введіть опис" maxLength={256} />
+                <Input.TextArea
+                  placeholder="Введіть опис"
+                  maxLength={256}
+                  disabled={edit && true}
+                />
               </Form.Item>
             </>
           ) : (
