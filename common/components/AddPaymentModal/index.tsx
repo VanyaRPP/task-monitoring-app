@@ -1,7 +1,5 @@
 import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import { IUser } from '@common/modules/models/User'
-import { IPaymentTableData } from '@utils/tableData'
 import { Form, message, Modal } from 'antd'
 import React, { FC } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'

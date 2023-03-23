@@ -27,7 +27,7 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   water: { type: Object },
 })
 
-// paymentSchemeMiddleware()
+paymentSchemeMiddleware()
 
 const Payment =
   mongoose.models.Payment || mongoose.model('Payment', PaymentSchema)

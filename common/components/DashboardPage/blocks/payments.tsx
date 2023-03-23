@@ -108,7 +108,7 @@ const PaymentsBlock = () => {
       dataIndex: 'credit',
       key: 'credit',
       width: '10%',
-      render: (credit) => (credit === 0 ? null : credit),
+      render: (credit) => credit,
     },
     {
       title: 'Опис',
