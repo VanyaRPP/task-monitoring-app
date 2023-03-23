@@ -9,6 +9,8 @@ import s from './style.module.scss'
 interface Props {
   isModalOpen: boolean
   closeModal: VoidFunction
+  paymentData: boolean
+  edit: boolean
 }
 
 type FormData = {
@@ -59,9 +61,12 @@ const AddPaymentModal: FC<Props> = ({
       confirmLoading={isLoading}
       className={s.Modal}
     >
-      {isModalOpen && (
-        <AddPaymentForm form={form} edit={edit} paymentData={paymentData} />
-      )}
+      <AddPaymentForm
+        form={form}
+        edit={edit}
+        isModalOpen={isModalOpen}
+        paymentData={paymentData}
+      />
     </Modal>
   )
 }
