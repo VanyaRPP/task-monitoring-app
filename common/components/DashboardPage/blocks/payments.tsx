@@ -158,7 +158,7 @@ const PaymentsBlock = () => {
       width: '15%',
       render: (_, payment: IExtendedPayment) => (
         <div className={s.icon}>
-          <Button type="link " onClick={() => handleEyeClick(payment?._id)}>
+          <Button type="link" onClick={() => handleEyeClick(payment?._id)}>
             <EyeOutlined className={s.icon} />
           </Button>
           <AddPaymentModal
@@ -193,6 +193,7 @@ const PaymentsBlock = () => {
       />
     )
   }
+
   return (
     <TableCard
       title={

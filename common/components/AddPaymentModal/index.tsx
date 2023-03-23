@@ -1,4 +1,5 @@
 import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
+import { IPaymentModel } from '@common/modules/models/Payment'
 import { IUser } from '@common/modules/models/User'
 import { ITableData } from '@utils/tableData'
 import { Form, message, Modal } from 'antd'
@@ -9,6 +10,8 @@ import s from './style.module.scss'
 interface Props {
   isModalOpen: boolean
   closeModal: VoidFunction
+  paymentData?: object
+  edit?: boolean
 }
 
 type FormData = {
@@ -19,6 +22,7 @@ type FormData = {
   placing?: ITableData
   electricity?: ITableData
   water?: ITableData
+  debit?: number
 }
 
 const AddPaymentModal: FC<Props> = ({
@@ -59,9 +63,12 @@ const AddPaymentModal: FC<Props> = ({
       confirmLoading={isLoading}
       className={s.Modal}
     >
-      {isModalOpen && (
-        <AddPaymentForm form={form} edit={edit} paymentData={paymentData} />
-      )}
+      <AddPaymentForm
+        form={form}
+        edit={edit}
+        isModalOpen={isModalOpen}
+        paymentData={paymentData}
+      />
     </Modal>
   )
 }
