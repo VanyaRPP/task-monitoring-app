@@ -1,4 +1,4 @@
-import React, { FC, ReactElement } from 'react'
+import React, { FC, ReactElement, useState } from 'react'
 import { Alert, message, Popconfirm, Spin, Table } from 'antd'
 import ServiceCardHeader from '@common/components/UI/ServiceCardHeader'
 import TableCard from '@common/components/UI/TableCard'
@@ -11,21 +11,26 @@ import { IExtendedService } from '@common/api/serviceApi/service.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
+import { EyeOutlined } from '@ant-design/icons'
 import { Tooltip } from 'antd'
 import Link from 'next/link'
+import { Button } from 'antd'
 import { useRouter } from 'next/router'
 import { SelectOutlined } from '@ant-design/icons'
 import cn from 'classnames'
 import s from './style.module.scss'
 import { useSession } from 'next-auth/react'
+import AddServiceModal from '@common/components/AddServiceModal'
 
 const ServicesBlock = () => {
   const router = useRouter()
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const {
     pathname,
     query: { email },
   } = router
   const { data } = useSession()
+  const [currentService, setCurrentService] = useState({})
 
   const {
     data: byEmailUser,
@@ -64,6 +69,13 @@ const ServicesBlock = () => {
     } else {
       message.error('Помилка при видаленні рахунку')
     }
+  }
+  const handleEyeClick = (id) => {
+    setCurrentService(services.find((item) => item._id === id))
+    setIsModalOpen(true)
+  }
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
   }
 
   const columns = [
@@ -130,6 +142,24 @@ const ServicesBlock = () => {
           ),
         }
       : { width: '0' },
+    {
+      title: '',
+      dataIndex: '',
+      width: '15%',
+      render: (_, service: IExtendedService) => (
+        <div className={s.icon}>
+          <Button type="link " onClick={() => handleEyeClick(service?._id)}>
+            <EyeOutlined className={s.icon} />
+          </Button>
+          <AddServiceModal
+            serviceData={currentServie} // added this line to send prop with all info to modal and there you will be able to show all the needed info
+            isModalOpen={isModalOpen}
+            edit
+            closeModal={handleCloseModal}
+          />
+        </div>
+      ),
+    },
   ]
 
   let content: ReactElement
