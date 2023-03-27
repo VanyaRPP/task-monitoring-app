@@ -148,13 +148,12 @@ const ServicesBlock = () => {
       width: '15%',
       render: (_, service: IExtendedService) => (
         <div className={s.icon}>
-          <Button type="link " onClick={() => handleEyeClick(service?._id)}>
+          <Button type="link" onClick={() => handleEyeClick(service?._id)}>
             <EyeOutlined className={s.icon} />
           </Button>
           <AddServiceModal
-            serviceData={currentServie} // added this line to send prop with all info to modal and there you will be able to show all the needed info
+            // serviceData={currentServie} // added this line to send prop with all info to modal and there you will be able to show all the needed info
             isModalOpen={isModalOpen}
-            edit
             closeModal={handleCloseModal}
           />
         </div>
