@@ -9,7 +9,6 @@ interface Props {
   form: FormInstance<any>
   paymentData: any
   edit: boolean
-  isModalOpen: boolean
 }
 
 const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {

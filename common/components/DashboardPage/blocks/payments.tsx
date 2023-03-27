@@ -25,8 +25,7 @@ import s from './style.module.scss'
 
 const PaymentsBlock = () => {
   const router = useRouter()
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [currentPayment, setCurrentPayment] = useState({})
+  const [currentPayment, setCurrentPayment] = useState(null)
   const {
     pathname,
     query: { email },
@@ -67,10 +66,9 @@ const PaymentsBlock = () => {
   }
   const handleEyeClick = (id) => {
     setCurrentPayment(payments.find((item) => item._id === id))
-    setIsModalOpen(true)
   }
   const handleCloseModal = () => {
-    setIsModalOpen(false)
+    setCurrentPayment(null)
   }
 
   const columns = [
@@ -204,12 +202,13 @@ const PaymentsBlock = () => {
       }
       className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}
     >
-      <AddPaymentModal
-        paymentData={currentPayment}
-        isModalOpen={isModalOpen}
-        edit
-        closeModal={handleCloseModal}
-      />
+      {currentPayment && (
+        <AddPaymentModal
+          paymentData={currentPayment}
+          edit
+          closeModal={handleCloseModal}
+        />
+      )}
       {content}
     </TableCard>
   )
