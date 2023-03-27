@@ -199,8 +199,6 @@ const PaymentsBlock = () => {
       title={
         email ? (
           <span className={s.title}>{`Оплата від користувача ${email}`}</span>
-        ) : pathname === AppRoutes.PAYMENT ? (
-          <span className={s.title}>Всі оплати</span>
         ) : isAdmin ? (
           <PaymentCardHeader />
         ) : (
