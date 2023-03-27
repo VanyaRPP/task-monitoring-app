@@ -160,12 +160,6 @@ const PaymentsBlock = () => {
           <Button type="link" onClick={() => handleEyeClick(payment?._id)}>
             <EyeOutlined className={s.icon} />
           </Button>
-          <AddPaymentModal
-            paymentData={currentPayment} // added this line to send prop with all info to modal and there you will be able to show all the needed info
-            isModalOpen={isModalOpen}
-            edit
-            closeModal={handleCloseModal}
-          />
         </div>
       ),
     },
@@ -212,6 +206,12 @@ const PaymentsBlock = () => {
       }
       className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}
     >
+      <AddPaymentModal
+        paymentData={currentPayment}
+        isModalOpen={isModalOpen}
+        edit
+        closeModal={handleCloseModal}
+      />
       {content}
     </TableCard>
   )

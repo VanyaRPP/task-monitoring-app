@@ -43,7 +43,7 @@ const AddPaymentModal: FC<Props> = ({
 
   return (
     <Modal
-      visible={isModalOpen}
+      open={isModalOpen}
       title="Додавання рахунку"
       onOk={handleSubmit}
       onCancel={() => {
