@@ -22,7 +22,7 @@ const AddServiceForm: FC<Props> = ({ form }) => {
   return (
     <Form form={form} layout="vertical" className={s.Form}>
       <Form.Item
-        name="payer"
+        name="date"
         label="Місяць та рік"
         rules={validateField('data')}
       >
@@ -35,7 +35,6 @@ const AddServiceForm: FC<Props> = ({ form }) => {
         label="Утримання приміщень"
         // rules={validateField('required')}
       >
-        {' '}
         <InputNumber
           type="number"
           style={{ width: '32%' }}
@@ -47,7 +46,6 @@ const AddServiceForm: FC<Props> = ({ form }) => {
         label="Електроенергія"
         // rules={validateField('electricPrice')}
       >
-        {' '}
         <InputNumber
           type="number"
           style={{ width: '32%' }}
@@ -59,7 +57,6 @@ const AddServiceForm: FC<Props> = ({ form }) => {
         label="Водопостачання"
         // rules={validateField('required')}
       >
-        {' '}
         <InputNumber
           type="number"
           style={{ width: '32%' }}
@@ -71,7 +68,6 @@ const AddServiceForm: FC<Props> = ({ form }) => {
         label="Індекс інфляції"
         // rules={validateField('required')}
       >
-        {' '}
         <InputNumber
           type="number"
           style={{ width: '32%' }}
