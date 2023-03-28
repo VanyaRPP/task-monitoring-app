@@ -23,7 +23,7 @@ const PaymentCardHeader = () => {
       <Button type="link" onClick={() => setIsModalOpen(true)}>
         <PlusOutlined /> Додати оплату
       </Button>
-      <AddPaymentModal isModalOpen={isModalOpen} closeModal={closeModal} />
+      {isModalOpen && <AddPaymentModal closeModal={closeModal} />}
     </div>
   )
 }
