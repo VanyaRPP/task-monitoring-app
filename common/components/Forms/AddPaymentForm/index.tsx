@@ -3,6 +3,7 @@ import { useGetAllUsersQuery } from '@common/api/userApi/user.api'
 import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import PaymentModalTable from '@common/components/PaymentModalTable'
+import { useRouter } from 'next/router'
 import s from './style.module.scss'
 
 interface Props {
@@ -15,6 +16,10 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
   const { Option } = Select
   const { data: users } = useGetAllUsersQuery('')
   const [total, setTotal] = useState(0)
+  const router = useRouter()
+  const {
+    query: { email },
+  } = router
 
   const maintenance = Form.useWatch('maintenance', form)
   const placing = Form.useWatch('placing', form)
@@ -27,6 +32,15 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
     )
     form.setFieldValue('debit', total)
   }, [maintenance, placing, electricity, water, form, total])
+
+  useEffect(() => {
+    if (email) {
+      const foundUser = users?.data.find((itm) => itm.email === email)
+      if (foundUser?._id) {
+        form.setFieldValue('payer', foundUser?._id)
+      }
+    }
+  }, [email, users?.data?.length, form])
 
   return (
     <Form
@@ -44,6 +58,10 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
           disabled={edit && true}
           placeholder="Оберіть платника"
           style={{ width: '100%' }}
+          showSearch
+          filterOption={(input, option) =>
+            (option?.label || '').includes(input)
+          }
           options={users?.data.map((user) => ({
             key: user._id,
             label: user.email,

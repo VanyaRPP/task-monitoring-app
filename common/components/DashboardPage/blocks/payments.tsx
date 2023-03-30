@@ -2,6 +2,7 @@ import React, { ReactElement, useState } from 'react'
 import { Alert, message, Popconfirm, Table } from 'antd'
 import { Modal } from 'antd'
 import { Button } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
 import {
@@ -24,6 +25,7 @@ import AddPaymentModal from '@common/components/AddPaymentModal'
 import s from './style.module.scss'
 
 const PaymentsBlock = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const router = useRouter()
   const [currentPayment, setCurrentPayment] = useState(null)
   const {
@@ -184,12 +186,20 @@ const PaymentsBlock = () => {
       />
     )
   }
+  const closeModal = () => {
+    setIsModalOpen(false)
+  }
 
   return (
     <TableCard
       title={
         email ? (
-          <span className={s.title}>{`Оплата від користувача ${email}`}</span>
+          <div className={s.block}>
+            <span className={s.title}>{`Оплата від користувача ${email}`}</span>
+            <Button type="link" onClick={() => setIsModalOpen(true)}>
+              <PlusOutlined /> Додати оплату
+            </Button>
+          </div>
         ) : isAdmin ? (
           <PaymentCardHeader />
         ) : (
@@ -209,6 +219,7 @@ const PaymentsBlock = () => {
           closeModal={handleCloseModal}
         />
       )}
+      {isModalOpen && <AddPaymentModal closeModal={closeModal} />}
       {content}
     </TableCard>
   )
