@@ -12,6 +12,7 @@ export enum AppRoutes {
   CATEGORY = '/category',
   PAYMENT = '/payment',
   SERVICE = '/service',
+  CUSTOMER = '/customer',
 }
 
 export enum Roles {

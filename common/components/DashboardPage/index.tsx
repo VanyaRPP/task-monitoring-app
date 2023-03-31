@@ -11,6 +11,7 @@ import { Roles } from '@utils/constants'
 import PaymentsBlock from './blocks/payments'
 import ServicesBlock from './blocks/services'
 import s from './style.module.scss'
+import CustomersBlock from './blocks/customers'
 
 const Dashboard: FC = () => {
   const { data } = useSession()
@@ -28,6 +29,7 @@ const Dashboard: FC = () => {
       <div className={s.Container}>
         <PaymentsBlock />
         <ServicesBlock />
+        <CustomersBlock />
         {userRole !== Roles.USER && <Tasks />}
         <Orders />
         {/* <CategoriesBlock />
