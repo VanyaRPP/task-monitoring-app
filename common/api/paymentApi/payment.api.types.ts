@@ -3,7 +3,7 @@ import { IPaymentTableData } from '@utils/tableData'
 import { ObjectId } from 'mongoose'
 
 export interface IPayment {
-  payer: IExtendedPayment | ObjectId | IUser['_id'] | string
+  payer: IPayer
   date?: Date
   credit?: number
   debit?: number
@@ -32,4 +32,9 @@ export interface IGetPaymentResponse {
 export interface IDeletePaymentResponse {
   data: string
   success: boolean
+}
+
+export interface IPayer {
+  email: string
+  _id: ObjectId | string | IUser['_id']
 }
