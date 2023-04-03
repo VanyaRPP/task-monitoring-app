@@ -1,4 +1,4 @@
-import { Table, Tooltip, InputNumber, Form, FormInstance } from 'antd'
+import { Table, Tooltip, InputNumber, Form, FormInstance, Input } from 'antd'
 import { FC, useEffect, useState } from 'react'
 import { ColumnProps } from 'antd/lib/table'
 import moment from 'moment'
@@ -28,10 +28,11 @@ const PaymentModalTable: FC<Props> = (form) => {
 
   const electricity = Form.useWatch('electricity', form.form)
   const e =
-    (lastPayment?.electricity?.sum - electricity?.amount) * electricity?.price
+    (electricity?.amount - lastPayment?.electricity?.amount) *
+    electricity?.price
 
   const water = Form.useWatch('water', form.form)
-  const w = (lastPayment?.water?.sum - water?.amount) * water?.price
+  const w = (water?.amount - lastPayment?.water?.amount) * water?.price
 
   const getVal = (record) => {
     switch (record) {
@@ -59,6 +60,8 @@ const PaymentModalTable: FC<Props> = (form) => {
       return p?.payer?._id === payer && p?.debit > 0
     })
     setLastPayment(payment)
+    setFieldValue(['electricity', 'lastAmount'], payment?.electricity?.amount)
+    setFieldValue(['water', 'lastAmount'], payment?.water?.amount)
   }
 
   useEffect(() => {
@@ -95,15 +98,8 @@ const PaymentModalTable: FC<Props> = (form) => {
         <>
           {record.name === 'electricity' || record.name === 'water' ? (
             <div className={s.doubleInputs}>
-              <Form.Item
-                name={[record.name, 'lastAmount']}
-                className={s.formItem}
-              >
-                <h4>
-                  {(record.name === 'electricity'
-                    ? lastPayment?.electricity?.sum
-                    : lastPayment?.water?.sum) || 0}
-                </h4>
+              <Form.Item name={[record.name, 'lastAmount']}>
+                <InputNumber className={s.input} />
               </Form.Item>
               -
               <Form.Item
@@ -157,6 +153,7 @@ const PaymentModalTable: FC<Props> = (form) => {
       columns={columns}
       dataSource={dataSource}
       pagination={false}
+      className={s.table}
     />
   )
 }
