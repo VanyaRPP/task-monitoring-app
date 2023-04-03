@@ -57,9 +57,12 @@ const PaymentModalTable: FC<Props> = (form) => {
     {
       title: 'Назва',
       dataIndex: 'name',
-      width: 100,
+      width: 'max-content',
+      ellipsis: true,
       render: (name) => (
-        <Tooltip title={`${name} (${moment().format('MMMM')})`}>
+        <Tooltip
+          title={`${getName(name, paymentsTitle)} (${moment().format('MMMM')})`}
+        >
           <span className={s.rowText}>
             {getName(name, paymentsTitle)}{' '}
             <span className={s.month}>({moment().format('MMMM')})</span>
@@ -78,6 +81,7 @@ const PaymentModalTable: FC<Props> = (form) => {
               <Form.Item
                 rules={validateField('required')}
                 name={[record.name, 'lastAmount']}
+                className={s.formItem}
               >
                 <InputNumber className={s.input} />
               </Form.Item>
