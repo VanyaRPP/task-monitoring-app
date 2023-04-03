@@ -98,7 +98,10 @@ const PaymentModalTable: FC<Props> = (form) => {
         <>
           {record.name === 'electricity' || record.name === 'water' ? (
             <div className={s.doubleInputs}>
-              <Form.Item name={[record.name, 'lastAmount']}>
+              <Form.Item
+                name={[record.name, 'lastAmount']}
+                rules={validateField('required')}
+              >
                 <InputNumber className={s.input} />
               </Form.Item>
               -
