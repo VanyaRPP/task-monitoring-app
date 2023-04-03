@@ -19,7 +19,10 @@
     }
   }
 }
-
+.block {
+  display: flex;
+  justify-content: space-between;
+}
 .popconfirm {
   display: flex;
   justify-content: center;
