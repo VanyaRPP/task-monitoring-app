@@ -3,6 +3,7 @@ import { ITask } from './Task'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import mongoose, { ObjectId, Schema } from 'mongoose'
+import { ICustomer } from '@common/api/customerApi/customer.api.types'
 
 export interface IUser {
   _id?: ObjectId | string
@@ -13,6 +14,7 @@ export interface IUser {
   tasks?: [ITask]
   payments?: [IPayment]
   services?: [IService]
+  customers?: [ICustomer]
   rating?: number
   feedback?: [IFeedback]
   isWorker: boolean
@@ -37,6 +39,7 @@ const UserSchema = new mongoose.Schema<IUser>({
   tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
   payments: [{ type: Schema.Types.ObjectId, ref: 'Payment' }],
   services: [{ type: Schema.Types.ObjectId, ref: 'Service' }],
+  customers: [{ type: Schema.Types.ObjectId, ref: 'Customer' }],
   rating: { type: Number, default: 0 },
   feedback: [{ type: Object }],
   isWorker: { type: Boolean, default: false },
