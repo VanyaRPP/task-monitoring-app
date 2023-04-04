@@ -2,7 +2,7 @@ import { ObjectId } from 'mongoose'
 
 export interface IService {
   orenda: number
-  date?: Date
+  data: Date
   electricPrice: number
   waterPrice: number
   inflaPrice: number

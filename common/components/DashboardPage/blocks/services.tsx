@@ -130,7 +130,7 @@ const ServicesBlock = () => {
             <div className={s.popconfirm}>
               <Popconfirm
                 title={`Ви впевнені що хочете видалити оплату від ${dateToPick(
-                  service?.date as unknown as string
+                  service?.data as unknown as string
                 )}?`}
                 onConfirm={() => handleDeleteService(service?._id)}
                 cancelText="Відміна"
