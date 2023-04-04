@@ -1,7 +1,6 @@
 import React, { FC, useState } from 'react'
-import { useGetAllUsersQuery } from '@common/api/userApi/user.api'
 import { validateField } from '@common/assets/features/validators'
-import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
+import { Form, FormInstance, Input, InputNumber } from 'antd'
 import { DatePicker } from 'antd'
 import s from './style.module.scss'
 
@@ -10,9 +9,6 @@ interface Props {
 }
 
 const AddServiceForm: FC<Props> = ({ form }) => {
-  const { Option } = Select
-  const { data: users } = useGetAllUsersQuery('')
-  const dayjs = require('dayjs')
   const { MonthPicker } = DatePicker
 
   return (
