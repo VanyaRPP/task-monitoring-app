@@ -7,7 +7,7 @@ import type { DatePickerProps } from 'antd'
 import { DatePicker, Space } from 'antd'
 
 const onChange: DatePickerProps['onChange'] = (date, dateString) => {
-  //console.warn(date, dateString)
+  console.warn(date, dateString)
 }
 
 interface Props {
