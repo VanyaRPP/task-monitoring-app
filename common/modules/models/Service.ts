@@ -1,10 +1,11 @@
+import { Moment } from 'moment'
 import { IUser } from './User'
 //import { serviceSchemeMiddleware } from '@common/lib/serviceSchemeMiddleware'
 import mongoose, { ObjectId, Schema } from 'mongoose'
 
 export interface IServiceModel {
   orenda: number
-  date: Date
+  data: Moment
   electricPrice: number
   waterPrice: number
   inflaPrice: number
@@ -12,8 +13,8 @@ export interface IServiceModel {
 }
 
 export const ServiceSchema = new Schema<IServiceModel>({
+  data: { type: Date, required: true },
   orenda: { type: Number, required: true, default: 0 },
-  date: { type: Date, required: true, default: Date.now() },
   electricPrice: { type: Number, required: true, default: 0 },
   waterPrice: { type: Number, required: true, default: 0 },
   inflaPrice: { type: Number, required: true, default: 0 },

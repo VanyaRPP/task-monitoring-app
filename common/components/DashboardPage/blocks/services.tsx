@@ -6,7 +6,10 @@ import {
   useDeleteServiceMutation,
   useGetAllServicesQuery,
 } from '@common/api/serviceApi/service.api'
-import { dateToPick } from '@common/assets/features/formatDate'
+import {
+  dateToDefaultFormat,
+  dateToPick,
+} from '@common/assets/features/formatDate'
 import { IExtendedService } from '@common/api/serviceApi/service.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
@@ -18,9 +21,11 @@ import { Button } from 'antd'
 import { useRouter } from 'next/router'
 import { SelectOutlined } from '@ant-design/icons'
 import cn from 'classnames'
-import s from './style.module.scss'
 import { useSession } from 'next-auth/react'
 import AddServiceModal from '@common/components/AddServiceModal'
+import moment from 'moment'
+import s from './style.module.scss'
+import { firstTextToUpperCase } from '@utils/helpers'
 
 const ServicesBlock = () => {
   const router = useRouter()
@@ -70,6 +75,7 @@ const ServicesBlock = () => {
       message.error('Помилка при видаленні рахунку')
     }
   }
+
   const handleEyeClick = (id) => {
     setCurrentService(services.find((item) => item._id === id))
     setIsModalOpen(true)
@@ -81,10 +87,10 @@ const ServicesBlock = () => {
   const columns = [
     {
       title: 'Місяць',
-      dataIndex: 'date',
-      key: 'date',
+      dataIndex: 'data',
+      key: 'data',
       width: '15%',
-      render: (date) => dateToPick(date),
+      render: (data) => firstTextToUpperCase(moment(data).format('MMMM')),
     },
     {
       title: 'Утримання',
