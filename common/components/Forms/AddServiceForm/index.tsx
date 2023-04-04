@@ -5,10 +5,6 @@ import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import { DatePicker } from 'antd'
 import s from './style.module.scss'
 
-// const onChange: DatePickerProps['onChange'] = (date, dateString) => {
-//   console.warn(date, dateString)
-// }
-
 interface Props {
   form: FormInstance<any>
 }
