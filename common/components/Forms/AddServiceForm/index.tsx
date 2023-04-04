@@ -36,7 +36,12 @@ const AddServiceForm: FC<Props> = ({ form }) => {
         label="Електроенергія"
         // rules={validateField('electricPrice')}
       >
-        <InputNumber className={s.formInput} />
+        {' '}
+        <InputNumber
+          type="number"
+          style={{ width: '32%' }}
+          className={s.InputNumber}
+        />
       </Form.Item>
       <Form.Item
         name="waterPrice"
@@ -61,6 +66,7 @@ const AddServiceForm: FC<Props> = ({ form }) => {
           placeholder="Введіть опис"
           maxLength={256}
           className={s.formInput}
+          style={{ width: '90%' }}
         />
       </Form.Item>
     </Form>
