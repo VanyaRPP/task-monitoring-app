@@ -48,14 +48,24 @@ const AddServiceForm: FC<Props> = ({ form }) => {
         label="Водопостачання"
         // rules={validateField('required')}
       >
-        <InputNumber className={s.formInput} />
+        {' '}
+        <InputNumber
+          type="number"
+          style={{ width: '32%' }}
+          className={s.InputNumber}
+        />
       </Form.Item>
       <Form.Item
         name="inflaPrice"
         label="Індекс інфляції"
         // rules={validateField('required')}
       >
-        <InputNumber className={s.formInput} />
+        {' '}
+        <InputNumber
+          type="number"
+          style={{ width: '32%' }}
+          className={s.InputNumber}
+        />
       </Form.Item>
       <Form.Item
         name="description"
