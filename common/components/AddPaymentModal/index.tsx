@@ -6,18 +6,12 @@ import AddPaymentForm from '../Forms/AddPaymentForm'
 import s from './style.module.scss'
 
 interface Props {
-  isModalOpen: boolean
   closeModal: VoidFunction
   paymentData?: object
   edit?: boolean
 }
 
-const AddPaymentModal: FC<Props> = ({
-  isModalOpen,
-  closeModal,
-  paymentData,
-  edit,
-}) => {
+const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const handleSubmit = async () => {
@@ -43,7 +37,7 @@ const AddPaymentModal: FC<Props> = ({
 
   return (
     <Modal
-      visible={isModalOpen}
+      open={true}
       title="Додавання рахунку"
       onOk={handleSubmit}
       onCancel={() => {
@@ -55,12 +49,7 @@ const AddPaymentModal: FC<Props> = ({
       confirmLoading={isLoading}
       className={s.Modal}
     >
-      <AddPaymentForm
-        form={form}
-        edit={edit}
-        isModalOpen={isModalOpen}
-        paymentData={paymentData}
-      />
+      <AddPaymentForm form={form} edit={edit} paymentData={paymentData} />
     </Modal>
   )
 }

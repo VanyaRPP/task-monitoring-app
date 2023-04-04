@@ -2,6 +2,7 @@ import React, { ReactElement, useState } from 'react'
 import { Alert, message, Popconfirm, Table } from 'antd'
 import { Modal } from 'antd'
 import { Button } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
 import {
@@ -24,9 +25,9 @@ import AddPaymentModal from '@common/components/AddPaymentModal'
 import s from './style.module.scss'
 
 const PaymentsBlock = () => {
-  const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [currentPayment, setCurrentPayment] = useState({})
+  const router = useRouter()
+  const [currentPayment, setCurrentPayment] = useState(null)
   const {
     pathname,
     query: { email },
@@ -67,10 +68,9 @@ const PaymentsBlock = () => {
   }
   const handleEyeClick = (id) => {
     setCurrentPayment(payments.find((item) => item._id === id))
-    setIsModalOpen(true)
   }
   const handleCloseModal = () => {
-    setIsModalOpen(false)
+    setCurrentPayment(null)
   }
 
   const columns = [
@@ -160,12 +160,6 @@ const PaymentsBlock = () => {
           <Button type="link" onClick={() => handleEyeClick(payment?._id)}>
             <EyeOutlined className={s.icon} />
           </Button>
-          <AddPaymentModal
-            paymentData={currentPayment} // added this line to send prop with all info to modal and there you will be able to show all the needed info
-            isModalOpen={isModalOpen}
-            edit
-            closeModal={handleCloseModal}
-          />
         </div>
       ),
     },
@@ -192,14 +186,20 @@ const PaymentsBlock = () => {
       />
     )
   }
+  const closeModal = () => {
+    setIsModalOpen(false)
+  }
 
   return (
     <TableCard
       title={
         email ? (
-          <span className={s.title}>{`Оплата від користувача ${email}`}</span>
-        ) : pathname === AppRoutes.PAYMENT ? (
-          <span className={s.title}>Всі оплати</span>
+          <div className={s.block}>
+            <span className={s.title}>{`Оплата від користувача ${email}`}</span>
+            <Button type="link" onClick={() => setIsModalOpen(true)}>
+              <PlusOutlined /> Додати оплату
+            </Button>
+          </div>
         ) : isAdmin ? (
           <PaymentCardHeader />
         ) : (
@@ -212,6 +212,14 @@ const PaymentsBlock = () => {
       }
       className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}
     >
+      {currentPayment && (
+        <AddPaymentModal
+          paymentData={currentPayment}
+          edit
+          closeModal={handleCloseModal}
+        />
+      )}
+      {isModalOpen && <AddPaymentModal closeModal={closeModal} />}
       {content}
     </TableCard>
   )
