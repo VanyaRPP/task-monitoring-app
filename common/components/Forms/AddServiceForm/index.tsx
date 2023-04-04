@@ -1,6 +1,7 @@
 import React, { FC, useState } from 'react'
+import { useGetAllUsersQuery } from '@common/api/userApi/user.api'
 import { validateField } from '@common/assets/features/validators'
-import { Form, FormInstance, Input, InputNumber } from 'antd'
+import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import { DatePicker } from 'antd'
 import s from './style.module.scss'
 
@@ -36,36 +37,21 @@ const AddServiceForm: FC<Props> = ({ form }) => {
         label="Електроенергія"
         // rules={validateField('electricPrice')}
       >
-        {' '}
-        <InputNumber
-          type="number"
-          style={{ width: '32%' }}
-          className={s.InputNumber}
-        />
+        <InputNumber className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="waterPrice"
         label="Водопостачання"
         // rules={validateField('required')}
       >
-        {' '}
-        <InputNumber
-          type="number"
-          style={{ width: '32%' }}
-          className={s.InputNumber}
-        />
+        <InputNumber className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="inflaPrice"
         label="Індекс інфляції"
         // rules={validateField('required')}
       >
-        {' '}
-        <InputNumber
-          type="number"
-          style={{ width: '32%' }}
-          className={s.InputNumber}
-        />
+        <InputNumber className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="description"
@@ -76,7 +62,6 @@ const AddServiceForm: FC<Props> = ({ form }) => {
           placeholder="Введіть опис"
           maxLength={256}
           className={s.formInput}
-          style={{ width: '90%' }}
         />
       </Form.Item>
     </Form>
