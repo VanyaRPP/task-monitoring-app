@@ -52,8 +52,7 @@ export const userApi = createApi({
     getAllUsers: builder.query<IUser[], void>({
       query: () => '/user',
       providesTags: (result) => ['User'],
-      transformResponse: (response: AllUsersQuery) =>
-        response.data.filter((user) => user.payments.length),
+      transformResponse: (response: AllUsersQuery) => response.data,
     }),
     getCurrentUser: builder.query<IUser, void>({
       query: () => '/user/current',

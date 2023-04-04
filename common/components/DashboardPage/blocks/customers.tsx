@@ -41,7 +41,7 @@ const CustomersBlock = () => {
       key: 'email',
       width: '25%',
       ellipsis: true,
-      render: (customer) => customer,
+      render: (email) => email,
     },
     {
       title: 'Розміщення',
@@ -75,7 +75,7 @@ const CustomersBlock = () => {
       <Table
         columns={columns}
         dataSource={
-          pathname === '/' && allUsers ? allUsers.slice(0, 5) : allUsers
+          pathname === '/' && allUsers ? allUsers?.slice(0, 5) : allUsers
         }
         pagination={false}
         bordered
