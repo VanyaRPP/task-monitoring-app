@@ -1,5 +1,4 @@
 import React, { FC, useState } from 'react'
-import { useGetAllUsersQuery } from '@common/api/userApi/user.api'
 import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import { DatePicker } from 'antd'
@@ -28,35 +27,35 @@ const AddServiceForm: FC<Props> = ({ form }) => {
       <Form.Item
         name="orenda"
         label="Утримання приміщень"
-        // rules={validateField('required')}
+        rules={validateField('required')}
       >
         <InputNumber className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="electricPrice"
         label="Електроенергія"
-        // rules={validateField('electricPrice')}
+        rules={validateField('electricPrice')}
       >
         <InputNumber className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="waterPrice"
         label="Водопостачання"
-        // rules={validateField('required')}
+        rules={validateField('required')}
       >
         <InputNumber className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="inflaPrice"
         label="Індекс інфляції"
-        // rules={validateField('required')}
+        rules={validateField('required')}
       >
         <InputNumber className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="description"
         label="Опис"
-        // rules={validateField('required')}
+        rules={validateField('required')}
       >
         <Input.TextArea
           placeholder="Введіть опис"
