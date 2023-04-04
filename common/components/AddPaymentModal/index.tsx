@@ -1,7 +1,10 @@
 import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
-import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import { Form, message, Modal } from 'antd'
-import React, { FC } from 'react'
+import {
+  IExtendedPayment,
+  IPayment,
+} from '@common/api/paymentApi/payment.api.types'
+import { Form, message, Modal, Tabs, TabsProps } from 'antd'
+import React, { FC, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import s from './style.module.scss'
 
@@ -14,6 +17,9 @@ interface Props {
 const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
+  const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
+  const [activeTabKey, setActiveTabKey] = useState('1')
+
   const handleSubmit = async () => {
     const formData: IPayment = await form.validateFields()
     const response = await addPayment({
@@ -27,29 +33,52 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       debit: formData.debit,
     })
     if ('data' in response) {
+      setCurrPayment(response?.data.data)
+      setActiveTabKey('2')
       form.resetFields()
-      closeModal()
       message.success('Додано')
     } else {
       message.error('Помилка при додаванні рахунку')
     }
   }
 
+  const items: TabsProps['items'] = [
+    {
+      key: '1',
+      label: 'Рахунок',
+      children: (
+        <AddPaymentForm form={form} edit={edit} paymentData={paymentData} />
+      ),
+    },
+    {
+      key: '2',
+      label: 'Перегляд',
+      disabled: currPayment ? false : true,
+      children: (
+        <>
+          <p>{currPayment?.debit}</p>
+          <p>{currPayment?.credit}</p>
+          <p>{currPayment?.description}</p>
+        </>
+      ),
+    },
+  ]
+
   return (
     <Modal
       open={true}
       title="Додавання рахунку"
-      onOk={handleSubmit}
+      onOk={activeTabKey === '1' ? handleSubmit : closeModal}
       onCancel={() => {
         form.resetFields()
         closeModal()
       }}
-      okText={!edit && 'Додати'}
-      cancelText={edit ? 'Закрити' : 'Відміна'}
+      okText={!edit && activeTabKey === '1' ? 'Додати' : 'OK'}
+      cancelText="Закрити"
       confirmLoading={isLoading}
       className={s.Modal}
     >
-      <AddPaymentForm form={form} edit={edit} paymentData={paymentData} />
+      <Tabs activeKey={activeTabKey} items={items} onChange={setActiveTabKey} />
     </Modal>
   )
 }
