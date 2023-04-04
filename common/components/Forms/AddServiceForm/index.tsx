@@ -23,7 +23,7 @@ interface Props {
 
 const AddServiceForm: FC<Props> = ({ form }) => {
   const { Option } = Select
-  const { data: users } = useGetAllUsersQuery('')
+  const { data: users } = useGetAllUsersQuery()
   const dayjs = require('dayjs')
   const [tabPosition] = useState<TabPosition>('left')
 

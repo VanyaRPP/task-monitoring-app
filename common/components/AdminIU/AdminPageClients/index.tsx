@@ -8,8 +8,7 @@ const { TabPane } = Tabs
 
 const AdminPageClients: React.FC = () => {
   const [active, setActive] = useState('1')
-  const { data } = useGetAllUsersQuery('')
-  const allClients = data?.data
+  const { data } = useGetAllUsersQuery()
 
   return (
     <Tabs
@@ -27,21 +26,17 @@ const AdminPageClients: React.FC = () => {
       }`}
     >
       <TabPane tab="Замовники" key="1" className={s.Users}>
-        {allClients && (
-          <Users
-            users={allClients.filter((client) => client.role === 'User')}
-          />
+        {data && (
+          <Users users={data.filter((client) => client.role === 'User')} />
         )}
       </TabPane>
       <TabPane tab="Майстри" key="2" className={s.Workers}>
-        {allClients && (
-          <Users
-            users={allClients.filter((client) => client.role === 'Worker')}
-          />
+        {data && (
+          <Users users={data.filter((client) => client.role === 'Worker')} />
         )}
       </TabPane>
       <TabPane tab="Преміум" key="3" className={s.Premium}>
-        {allClients && <Users users={[] /* TODO: filter users by premium */} />}
+        {data && <Users users={[] /* TODO: filter users by premium */} />}
       </TabPane>
     </Tabs>
   )
