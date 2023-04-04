@@ -12,6 +12,7 @@ interface Props {
 }
 
 type FormData = {
+  date: Date
   orenda: number
   electricPrice: number
   waterPrice: number
@@ -25,7 +26,10 @@ const AddServiceModal: FC<Props> = ({ isModalOpen, closeModal }) => {
 
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
+    console.log(formData)
+
     const response = await addService({
+      date: formData.date,
       orenda: formData.orenda,
       electricPrice: formData.electricPrice,
       waterPrice: formData.waterPrice,
