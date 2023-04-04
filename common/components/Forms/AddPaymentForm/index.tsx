@@ -62,7 +62,7 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
           filterOption={(input, option) =>
             (option?.label || '').includes(input)
           }
-          options={users?.data.map((user) => ({
+          options={users?.map((user) => ({
             key: user._id,
             label: user.email,
             value: user._id,

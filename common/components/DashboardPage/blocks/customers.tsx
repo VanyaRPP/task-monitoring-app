@@ -5,8 +5,10 @@ import {
   useDeleteCustomerMutation,
   useGetAllCustomerQuery,
 } from '@common/api/customerApi/customer.api'
-// import { IExtendedCustomer } from '@common/api/customerApi/customer.api.types'
-import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
+import {
+  useGetAllUsersQuery,
+  useGetUserByEmailQuery,
+} from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import Link from 'next/link'
 import { SelectOutlined } from '@ant-design/icons'
@@ -15,6 +17,7 @@ import cn from 'classnames'
 import { useSession } from 'next-auth/react'
 import s from './style.module.scss'
 import CustomerCardHeader from '@common/components/UI/CustomerCardHeader'
+import { useEffect } from 'react'
 
 const CustomersBlock = () => {
   const router = useRouter()
@@ -25,55 +28,21 @@ const CustomersBlock = () => {
   const { data } = useSession()
 
   const {
-    data: byEmailUser,
-    isLoading: byEmailUserLoading,
-    isFetching: byEmailUserFetching,
-    isError: byEmailUserError,
-  } = useGetUserByEmailQuery(email, { skip: !email })
-  const {
-    data: currUser,
-    isLoading: currUserLoading,
-    isFetching: currUserFetching,
-    isError: currUserError,
-  } = useGetUserByEmailQuery(data?.user.email, { skip: !data?.user.email })
-
-  const isAdmin = currUser?.data?.role === Roles.ADMIN
-
-  const {
-    data: customers,
-    isLoading: customersLoading,
-    isFetching: customersFetching,
-    isError: customersError,
-  } = useGetAllCustomerQuery({
-    limit: pathname === AppRoutes.CUSTOMER ? 200 : 5,
-    ...(email || isAdmin
-      ? { userId: byEmailUser?.data._id as string }
-      : { userId: currUser?.data._id as string }),
-  })
-
-  const [deleteCustomer, { isLoading: deleteLoading, isError: deleteError }] =
-    useDeleteCustomerMutation()
+    data: allUsers,
+    isLoading: allUsersLoading,
+    isError: allUsersError,
+    isFetching: allUsersFetching,
+  } = useGetAllUsersQuery()
 
   const columns = [
-    isAdmin && !email
-      ? {
-          title: 'Клієнт',
-          dataIndex: 'customer',
-          key: 'customer',
-          width: '25%',
-          ellipsis: true,
-          render: (customer) => (
-            <Link
-              href={{
-                pathname: AppRoutes.CUSTOMER,
-                query: { email: customer?.email },
-              }}
-            >
-              <a className={s.customer}>{customer?.email}</a>
-            </Link>
-          ),
-        }
-      : { width: '0' },
+    {
+      title: 'Клієнт',
+      dataIndex: 'email',
+      key: 'email',
+      width: '25%',
+      ellipsis: true,
+      render: (customer) => customer,
+    },
     {
       title: 'Розміщення',
       dataIndex: 'locations',
@@ -99,23 +68,18 @@ const CustomersBlock = () => {
 
   let content: ReactElement
 
-  if (byEmailUserError || deleteError || customersError || currUserError) {
+  if (allUsersError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
       <Table
         columns={columns}
-        dataSource={customers}
+        dataSource={
+          pathname === '/' && allUsers ? allUsers.slice(0, 5) : allUsers
+        }
         pagination={false}
         bordered
-        loading={
-          byEmailUserLoading ||
-          byEmailUserFetching ||
-          currUserLoading ||
-          currUserFetching ||
-          customersLoading ||
-          customersFetching
-        }
+        loading={allUsersLoading || allUsersFetching}
         rowKey="_id"
       />
     )
@@ -124,7 +88,7 @@ const CustomersBlock = () => {
   return (
     <TableCard
       title={
-        isAdmin ? (
+        data ? (
           <CustomerCardHeader />
         ) : (
           <Link href={AppRoutes.CUSTOMER}>
