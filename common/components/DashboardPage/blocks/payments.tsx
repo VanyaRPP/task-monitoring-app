@@ -176,6 +176,7 @@ const PaymentsBlock = () => {
         dataSource={payments}
         pagination={false}
         bordered
+        size="small"
         loading={
           currUserLoading ||
           currUserFetching ||

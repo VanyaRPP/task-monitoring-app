@@ -8,6 +8,12 @@
   padding: 0 50px;
   background: transparent;
 
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: black;
+  z-index: 1000;
+
   transition: margin 0.2s;
 
   @media (max-width: 889px) {
