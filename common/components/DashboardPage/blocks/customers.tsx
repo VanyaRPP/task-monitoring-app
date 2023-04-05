@@ -41,7 +41,6 @@ const CustomersBlock = () => {
       key: 'email',
       width: '25%',
       ellipsis: true,
-      render: (customer) => customer,
     },
     {
       title: 'Розміщення',
