@@ -121,7 +121,7 @@ const ServicesBlock = () => {
       ),
       dataIndex: 'inflaPrice',
       key: 'inflaPrice',
-      width: '12%',
+      width: '13%',
       render: (inflaPrice) => inflaPrice,
     },
     {
