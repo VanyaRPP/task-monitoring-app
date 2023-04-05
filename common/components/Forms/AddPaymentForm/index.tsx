@@ -10,11 +10,12 @@ interface Props {
   form: FormInstance<any>
   paymentData: any
   edit: boolean
+  users?: any
 }
 
 const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
   const { Option } = Select
-  const { data: users } = useGetAllUsersQuery('')
+  const { data: users } = useGetAllUsersQuery()
   const [total, setTotal] = useState(0)
   const router = useRouter()
   const {
@@ -35,18 +36,19 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
 
   useEffect(() => {
     if (email) {
-      const foundUser = users?.data.find((itm) => itm.email === email)
+      const foundUser = users?.find((itm) => itm.email === email)
       if (foundUser?._id) {
         form.setFieldValue('payer', foundUser?._id)
       }
     }
-  }, [email, users?.data?.length, form])
+  }, [email, users?.length, form])
 
   return (
     <Form
       initialValues={{
         description: paymentData?.description,
         credit: paymentData?.credit,
+        debit: paymentData?.debit,
         payer: paymentData?.payer?._id,
       }}
       form={form}
@@ -62,7 +64,7 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
           filterOption={(input, option) =>
             (option?.label || '').includes(input)
           }
-          options={users?.data.map((user) => ({
+          options={users?.map((user) => ({
             key: user._id,
             label: user.email,
             value: user._id,
