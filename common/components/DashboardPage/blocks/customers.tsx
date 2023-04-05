@@ -79,6 +79,7 @@ const CustomersBlock = () => {
         }
         pagination={false}
         bordered
+        size="small"
         loading={allUsersLoading || allUsersFetching}
         rowKey="_id"
       />
