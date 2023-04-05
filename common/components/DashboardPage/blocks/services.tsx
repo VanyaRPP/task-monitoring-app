@@ -86,24 +86,24 @@ const ServicesBlock = () => {
 
   const columns = [
     {
-      title: 'Місяць',
+      title: '',
       dataIndex: 'data',
       key: 'data',
-      width: '15%',
+      width: '19%',
       render: (data) => firstTextToUpperCase(moment(data).format('MMMM')),
     },
     {
       title: 'Утримання',
       dataIndex: 'orenda',
       key: 'orenda',
-      width: '20%',
+      width: '23%',
       render: (orenda) => orenda,
     },
     {
       title: 'Електрика',
       dataIndex: 'electricPrice',
       key: 'electricPrice',
-      width: '20%',
+      width: '22%',
       render: (electricPrice) => electricPrice,
     },
     {
@@ -114,10 +114,14 @@ const ServicesBlock = () => {
       render: (waterPrice) => waterPrice,
     },
     {
-      title: 'Інд Інф',
+      title: (
+        <Tooltip title="Індекс Інфляції">
+          <span>Інд. Інф.</span>
+        </Tooltip>
+      ),
       dataIndex: 'inflaPrice',
       key: 'inflaPrice',
-      width: '15%',
+      width: '12%',
       render: (inflaPrice) => inflaPrice,
     },
     {
