@@ -9,7 +9,8 @@ interface Props {
 }
 
 const AddServiceForm: FC<Props> = ({ form }) => {
-  const { MonthPicker } = DatePicker
+  const {onthPicker } = DatePicker
+
 
   return (
     <Form form={form} layout="vertical" className={s.Form}>
