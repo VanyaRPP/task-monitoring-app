@@ -5,6 +5,7 @@ import { Form, message, Modal } from 'antd'
 import { useSession } from 'next-auth/react'
 import React, { FC } from 'react'
 import AddServiceForm from '../Forms/AddServiceForm'
+import moment from 'moment'
 
 interface Props {
   isModalOpen: boolean
@@ -12,7 +13,7 @@ interface Props {
 }
 
 type FormData = {
-  date: Date
+  data: Date
   orenda: number
   electricPrice: number
   waterPrice: number
@@ -29,7 +30,7 @@ const AddServiceModal: FC<Props> = ({ isModalOpen, closeModal }) => {
     console.log(formData)
 
     const response = await addService({
-      date: formData.date,
+      data: moment(formData.data).toDate(),
       orenda: formData.orenda,
       electricPrice: formData.electricPrice,
       waterPrice: formData.waterPrice,
