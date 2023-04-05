@@ -3,6 +3,7 @@ import { useGetAllUsersQuery } from 'common/api/userApi/user.api'
 import { useState } from 'react'
 import Users from './UsersList'
 import s from './style.module.scss'
+import { Roles } from 'utils/constants'
 
 const { TabPane } = Tabs
 
@@ -27,12 +28,14 @@ const AdminPageClients: React.FC = () => {
     >
       <TabPane tab="Замовники" key="1" className={s.Users}>
         {data && (
-          <Users users={data.filter((client) => client.role === 'User')} />
+          <Users users={data.filter((client) => client.role === Roles.USER)} />
         )}
       </TabPane>
       <TabPane tab="Майстри" key="2" className={s.Workers}>
         {data && (
-          <Users users={data.filter((client) => client.role === 'Worker')} />
+          <Users
+            users={data.filter((client) => client.role === Roles.WORKER)}
+          />
         )}
       </TabPane>
       <TabPane tab="Преміум" key="3" className={s.Premium}>
