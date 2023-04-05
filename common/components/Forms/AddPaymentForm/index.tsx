@@ -41,7 +41,7 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
         form.setFieldValue('payer', foundUser?._id)
       }
     }
-  }, [email, users?.length, form])
+  }, [email, users.length, form, users])
 
   return (
     <Form
