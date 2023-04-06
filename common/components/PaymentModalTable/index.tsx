@@ -1,13 +1,13 @@
 import { Table, Tooltip, InputNumber, Form, FormInstance, Input } from 'antd'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect } from 'react'
 import { ColumnProps } from 'antd/lib/table'
 import moment from 'moment'
 import { dataSource, IPaymentTableData } from '@utils/tableData'
 import { paymentsTitle } from '@utils/constants'
-import { getName } from '@utils/helpers'
+import { getCurrentMonthService, getName } from '@utils/helpers'
 import { validateField } from '@common/assets/features/validators'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import s from './style.module.scss'
 
 interface Props {
@@ -16,8 +16,16 @@ interface Props {
 
 const PaymentModalTable: FC<Props> = (form) => {
   const { setFieldValue } = form.form
-  const { data: payments } = useGetAllPaymentsQuery({ limit: 100 })
-  const [lastPayment, setLastPayment] = useState<IExtendedPayment>()
+  const {
+    data: payments,
+    isFetching: paymentsFetching,
+    isLoading: paymentsLoading,
+  } = useGetAllPaymentsQuery({ limit: 100 })
+  const {
+    data: services,
+    isFetching: servicesFetching,
+    isLoading: servicesLoading,
+  } = useGetAllServicesQuery({ limit: 12 })
 
   const payer = Form.useWatch('payer', form.form)
   const maintenance = Form.useWatch('maintenance', form.form)
@@ -27,12 +35,10 @@ const PaymentModalTable: FC<Props> = (form) => {
   const p = placing?.amount * placing?.price
 
   const electricity = Form.useWatch('electricity', form.form)
-  const e =
-    (electricity?.amount - lastPayment?.electricity?.amount) *
-    electricity?.price
+  const e = (electricity?.amount - electricity?.lastAmount) * electricity?.price
 
   const water = Form.useWatch('water', form.form)
-  const w = (water?.amount - lastPayment?.water?.amount) * water?.price
+  const w = (water?.amount - water?.lastAmount) * water?.price
 
   const getVal = (record) => {
     switch (record) {
@@ -55,18 +61,22 @@ const PaymentModalTable: FC<Props> = (form) => {
     }
   }
 
-  const getLastPayment = () => {
+  const setFormDefaultValues = () => {
     const payment = payments?.find((p) => {
       return p?.payer?._id === payer && p?.debit > 0
     })
-    setLastPayment(payment)
+    const monthServices = getCurrentMonthService(services)
+
     setFieldValue(['electricity', 'lastAmount'], payment?.electricity?.amount)
     setFieldValue(['water', 'lastAmount'], payment?.water?.amount)
+    setFieldValue(['maintenance', 'price'], monthServices?.orenda)
+    setFieldValue(['electricity', 'price'], monthServices?.electricPrice)
+    setFieldValue(['water', 'price'], monthServices?.waterPrice)
   }
 
   useEffect(() => {
-    getLastPayment()
-  }, [payer, payments])
+    setFormDefaultValues()
+  }, [payer, payments, services])
 
   const columns: ColumnProps<IPaymentTableData>[] = [
     {
@@ -156,6 +166,12 @@ const PaymentModalTable: FC<Props> = (form) => {
       columns={columns}
       dataSource={dataSource}
       pagination={false}
+      loading={
+        paymentsLoading ||
+        paymentsLoading ||
+        servicesLoading ||
+        servicesFetching
+      }
       className={s.table}
     />
   )
