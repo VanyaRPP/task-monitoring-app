@@ -87,6 +87,7 @@ const Orders: FC = () => {
         showHeader={true}
         dataSource={filteredDataSource}
         columns={columns}
+        size="small"
         pagination={{
           responsive: false,
           size: 'small',
