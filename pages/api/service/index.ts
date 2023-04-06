@@ -24,7 +24,7 @@ export default async function handler(
         const services = await Service.find(
           isAdmin ? { email: req.query.email } : { email: session.user.email }
         )
-          .sort({ date: -1 })
+          .sort({ data: -1 })
           .limit(req.query.limit)
 
         return res.status(200).json({
