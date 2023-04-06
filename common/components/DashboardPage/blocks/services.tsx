@@ -116,7 +116,7 @@ const ServicesBlock = () => {
     {
       title: (
         <Tooltip title="Індекс Інфляції">
-          <span>Інд. Інф.</span>
+          <span>Індекс</span>
         </Tooltip>
       ),
       dataIndex: 'inflaPrice',
@@ -181,6 +181,7 @@ const ServicesBlock = () => {
         columns={columns}
         dataSource={services}
         pagination={false}
+        size="small"
         bordered
         loading={
           byEmailUserLoading ||

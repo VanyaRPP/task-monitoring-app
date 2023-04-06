@@ -55,6 +55,7 @@ const CategoriesBlock: FC = () => {
         showHeader={true}
         dataSource={categories}
         columns={columns}
+        size="small"
         pagination={{
           responsive: false,
           size: 'small',
