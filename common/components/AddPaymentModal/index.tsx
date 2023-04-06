@@ -73,8 +73,8 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
         form.resetFields()
         closeModal()
       }}
-      okText={!edit && activeTabKey === '1' ? 'Додати' : 'OK'}
-      cancelText="Закрити"
+      okText={!edit && 'Додати'}
+      cancelText={edit ? 'Закрити' : 'Відміна'}
       confirmLoading={isLoading}
       className={s.Modal}
     >
