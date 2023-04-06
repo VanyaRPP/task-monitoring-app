@@ -24,15 +24,6 @@ import { useSession } from 'next-auth/react'
 import AddPaymentModal from '@common/components/AddPaymentModal'
 import s from './style.module.scss'
 
-// const prices = [19.99, 4.95, 25, 3.5]
-// let new_prices = prices.map((price) => price * 1.06)
-
-const prices = [19.99, 4.95, 25, 3.5]
-let new_prices = prices.map((price) => {
-  return price * 1.06
-})
-console.log(prices)
-
 const PaymentsBlock = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const router = useRouter()
