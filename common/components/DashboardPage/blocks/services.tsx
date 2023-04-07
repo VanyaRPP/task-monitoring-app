@@ -29,13 +29,11 @@ import { firstTextToUpperCase } from '@utils/helpers'
 
 const ServicesBlock = () => {
   const router = useRouter()
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const {
     pathname,
     query: { email },
   } = router
   const { data } = useSession()
-  const [currentService, setCurrentService] = useState({})
 
   const {
     data: byEmailUser,
@@ -74,14 +72,6 @@ const ServicesBlock = () => {
     } else {
       message.error('Помилка при видаленні рахунку')
     }
-  }
-
-  const handleEyeClick = (id) => {
-    setCurrentService(services.find((item) => item._id === id))
-    setIsModalOpen(true)
-  }
-  const handleCloseModal = () => {
-    setIsModalOpen(false)
   }
 
   const columns = [
@@ -152,23 +142,6 @@ const ServicesBlock = () => {
           ),
         }
       : { width: '0' },
-    {
-      title: '',
-      dataIndex: '',
-      width: '15%',
-      render: (_, service: IExtendedService) => (
-        <div className={s.icon}>
-          <Button type="link" onClick={() => handleEyeClick(service?._id)}>
-            <EyeOutlined className={s.icon} />
-          </Button>
-          <AddServiceModal
-            // serviceData={currentServie} // added this line to send prop with all info to modal and there you will be able to show all the needed info
-            isModalOpen={isModalOpen}
-            closeModal={handleCloseModal}
-          />
-        </div>
-      ),
-    },
   ]
 
   let content: ReactElement

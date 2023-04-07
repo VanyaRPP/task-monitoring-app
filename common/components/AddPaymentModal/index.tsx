@@ -18,6 +18,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
+
   const [activeTabKey, setActiveTabKey] = useState('1')
 
   const handleSubmit = async () => {
@@ -53,7 +54,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     {
       key: '2',
       label: 'Перегляд',
-      disabled: currPayment ? false : true,
+      disabled: currPayment || edit ? false : true,
       children: (
         <>
           <p>{currPayment?.debit}</p>

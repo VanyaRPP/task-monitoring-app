@@ -29,9 +29,9 @@ const Dashboard: FC = () => {
       <div className={s.Container}>
         <PaymentsBlock />
         <ServicesBlock />
-        <CustomersBlock />
-        {userRole !== Roles.USER && <Tasks />}
-        <Orders />
+        {userRole === Roles.ADMIN && <CustomersBlock />}
+        {/* {userRole !== Roles.USER && <Tasks />}
+        <Orders /> */}
         {/* <CategoriesBlock />
         <Masters />
         <Domains /> */}

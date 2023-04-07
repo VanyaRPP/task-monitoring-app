@@ -1,6 +1,7 @@
 import '../styles/globals.scss'
 import '@styles/antd-override.scss'
 import { ConfigProvider, Empty } from 'antd'
+import ukUA from 'antd/lib/locale/uk_UA'
 import type { AppProps } from 'next/app'
 import { SessionProvider } from 'next-auth/react'
 import { Provider } from 'react-redux'
@@ -25,6 +26,7 @@ export default function MyApp({
             renderEmpty={() => (
               <Empty description={false} image={Empty.PRESENTED_IMAGE_SIMPLE} />
             )}
+            locale={ukUA}
           >
             <Component {...pageProps} />
           </ConfigProvider>

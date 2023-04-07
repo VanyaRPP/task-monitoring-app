@@ -1,6 +1,5 @@
 import React, { ReactElement, useState } from 'react'
 import { Alert, message, Popconfirm, Table } from 'antd'
-import { Modal } from 'antd'
 import { Button } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
@@ -69,8 +68,13 @@ const PaymentsBlock = () => {
   const handleEyeClick = (id) => {
     setCurrentPayment(payments.find((item) => item._id === id))
   }
-  const handleCloseModal = () => {
-    setCurrentPayment(null)
+
+  const closeModal = () => {
+    if (currentPayment) {
+      setCurrentPayment(null)
+    } else {
+      setIsModalOpen(false)
+    }
   }
 
   const columns = [
@@ -187,9 +191,6 @@ const PaymentsBlock = () => {
       />
     )
   }
-  const closeModal = () => {
-    setIsModalOpen(false)
-  }
 
   return (
     <TableCard
@@ -213,14 +214,13 @@ const PaymentsBlock = () => {
       }
       className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}
     >
-      {currentPayment && (
+      {(currentPayment || isModalOpen) && (
         <AddPaymentModal
           paymentData={currentPayment}
-          edit
-          closeModal={handleCloseModal}
+          edit={currentPayment && true}
+          closeModal={closeModal}
         />
       )}
-      {isModalOpen && <AddPaymentModal closeModal={closeModal} />}
       {content}
     </TableCard>
   )
