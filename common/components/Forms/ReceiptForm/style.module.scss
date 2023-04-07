@@ -1,0 +1,161 @@
+.info_order {
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: underline;
+  margin-bottom: 120px;
+}
+.info_order_2 {
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: underline;
+  margin-bottom: 40px;
+}
+.info_adres__bold {
+  font-weight: 700;
+}
+
+.info_adres {
+  width: 400px;
+  height: 130px;
+  position: absolute;
+  left: 16%;
+  top: 0.5%;
+  font-weight: 500;
+}
+
+.info_user {
+  width: 100px;
+  height: 15px;
+  position: absolute;
+  left: 16%;
+  top: 26%;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.invoice_title {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.invoice_data {
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.invoice_end__pay {
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+$base-spacing-unit: 24px;
+$half-spacing-unit: $base-spacing-unit / 2;
+
+$color-form-highlight: #eeeeee;
+
+.container {
+  max-width: 1000px;
+  justify-content: center;
+  min-height: 20vh;
+}
+
+.table_header {
+  display: flex;
+  width: 100%;
+  background: #7a7979;
+  padding: ($half-spacing-unit * 1.5) 0;
+}
+
+.table_row {
+  display: flex;
+  width: 100%;
+}
+.table_data_1 {
+  border: 1px solid black;
+}
+
+.table_data,
+.header__item {
+  flex: 1 1 20%;
+  text-align: center;
+}
+.filter__link_1 {
+  border: 1px solid black;
+  width: 200px;
+  color: white;
+  text-decoration: none;
+  position: relative;
+  display: inline-block;
+}
+
+.filter__link {
+  color: white;
+  text-decoration: none;
+  position: relative;
+  display: inline-block;
+  padding-left: $base-spacing-unit;
+  padding-right: $base-spacing-unit;
+}
+
+.pay_table {
+  font-size: 16px;
+  margin-right: 300px;
+  position: relative;
+  left: 20px;
+  display: flex;
+  margin-bottom: 15px;
+}
+
+.pay_table_bold {
+  font-weight: 800;
+  margin-left: 15px;
+}
+
+.pay_info {
+  font-weight: 800;
+  font-size: 16px;
+  margin-right: 300px;
+  position: relative;
+  left: 20px;
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.pay_info_money {
+  margin-left: 292px;
+}
+
+.pay_admin {
+  font-weight: 700;
+  font-size: 16px;
+  margin-right: 300px;
+  position: relative;
+  left: 20px;
+  display: flex;
+  margin-bottom: 60px;
+}
+
+.pay_admin__down {
+  font-weight: 800;
+  margin-left: 70px;
+}
+
+.pay_admin_name {
+  font-weight: 800;
+  margin-left: 70px;
+}
+
+.end_info {
+  width: 800px;
+  height: 120px;
+  position: relative;
+  left: 20px;
+  display: flex;
+}
+
+.end_info_bolt {
+  font-weight: 800;
+}
