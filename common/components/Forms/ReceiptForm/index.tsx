@@ -1,13 +1,41 @@
 import React, { FC, useEffect, useState } from 'react'
+import { Table } from 'antd'
 import s from './style.module.scss'
+<<<<<<< HEAD
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+=======
+import { dataSource } from '@utils/tableData'
+>>>>>>> 25d9f196f2a2b595189e860bfb14c2b3d96dd19d
 
 interface Props {
   currPayment: IExtendedPayment
   paymentData: any
 }
 
+<<<<<<< HEAD
 const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
+=======
+const ReceiptForm: FC<Props> = ({}) => {
+  const [columns, setColumns] = useState([
+    {
+      title: '№',
+      dataIndex: 'id',
+    },
+    {
+      title: 'Назва',
+    },
+    {
+      title: 'Кількість',
+    },
+    {
+      title: 'Ціна',
+    },
+    {
+      title: 'Сума',
+    },
+  ])
+
+>>>>>>> 25d9f196f2a2b595189e860bfb14c2b3d96dd19d
   return (
     <>
       <main className={s.page}>
@@ -35,7 +63,17 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           Підлягає сплаті до $Day $month $year
         </div>
 
-        <div className={s.container}>
+        <div>
+          <Table
+            columns={columns}
+            dataSource={dataSource}
+            size="small"
+            pagination={false}
+            bordered
+          />
+        </div>
+
+        {/* <div className={s.container}>
           <div className={s.table}>
             <div className={s.table_header}>
               <div className={s.header__item}>
@@ -81,7 +119,8 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
+
         <div className={s.pay_table}>
           Всього на суму:
           <div className={s.pay_table_bold}>$write_the_sum_in_letters</div>
