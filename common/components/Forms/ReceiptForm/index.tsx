@@ -1,9 +1,13 @@
 import React, { FC, useEffect, useState } from 'react'
 import s from './style.module.scss'
+import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 
-interface Props {}
+interface Props {
+  currPayment: IExtendedPayment
+  paymentData: any
+}
 
-const ReceiptForm: FC<Props> = ({}) => {
+const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   return (
     <>
       <main className={s.page}>
@@ -24,7 +28,8 @@ const ReceiptForm: FC<Props> = ({}) => {
             <div className={s.info_user}>$$Клієнт</div>
           </div>
         </header>
-        <div className={s.invoice_title}>INVOICE № INV-0060</div>
+        <div className={s.invoice_title}>{currPayment.credit}</div>
+
         <div className={s.invoice_data}>від $Day $month $year</div>
         <div className={s.invoice_end__pay}>
           Підлягає сплаті до $Day $month $year
@@ -64,13 +69,13 @@ const ReceiptForm: FC<Props> = ({}) => {
                 <div className={s.table_data_1}>1.</div>
                 <div className={s.table_data}>За водопостачання ($month)</div>
                 <div className={s.table_data}>$</div>
-                <div className={s.table_data}>$</div>
+                <div className={s.table_data}>{currPayment.credit}</div>
                 <div className={s.table_data}>$</div>
               </div>
               <div className={s.table_row}>
                 <div className={s.table_data_1}>2.</div>
                 <div className={s.table_data}>За електропостачання($month)</div>
-                <div className={s.table_data}>$</div>
+                <div className={s.table_data}>{currPayment.credit}</div>
                 <div className={s.table_data}>$</div>
                 <div className={s.table_data}>$</div>
               </div>

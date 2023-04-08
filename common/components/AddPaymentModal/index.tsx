@@ -56,7 +56,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       label: 'Перегляд',
       disabled: currPayment ? false : true,
       children: (
-        <ReceiptForm />
+        <ReceiptForm currPayment={currPayment} paymentData={paymentData} />
         // <>
         //   <p>{currPayment?.debit}</p>
         //   <p>{currPayment?.credit}</p>
