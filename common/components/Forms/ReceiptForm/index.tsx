@@ -1,21 +1,15 @@
 import React, { FC, useEffect, useState } from 'react'
 import { Table } from 'antd'
 import s from './style.module.scss'
-<<<<<<< HEAD
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-=======
 import { dataSource } from '@utils/tableData'
->>>>>>> 25d9f196f2a2b595189e860bfb14c2b3d96dd19d
+import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 
 interface Props {
   currPayment: IExtendedPayment
   paymentData: any
 }
 
-<<<<<<< HEAD
 const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
-=======
-const ReceiptForm: FC<Props> = ({}) => {
   const [columns, setColumns] = useState([
     {
       title: '№',
@@ -35,7 +29,6 @@ const ReceiptForm: FC<Props> = ({}) => {
     },
   ])
 
->>>>>>> 25d9f196f2a2b595189e860bfb14c2b3d96dd19d
   return (
     <>
       <main className={s.page}>
