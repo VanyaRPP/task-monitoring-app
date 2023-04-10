@@ -9,7 +9,92 @@ interface Props {
   paymentData: any
 }
 
-const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
+function numToPr(number) {
+  const k = [
+      'одна тисяча',
+      'дві тисячі',
+      'три тисячі',
+      'чотири тисячі',
+      "п'ять тисяч",
+      'шість тисяч',
+      'сім тисяч',
+      'вісім тисяч',
+      "дев'ять тисяч",
+    ],
+    h = [
+      'сто',
+      'двісті',
+      'триста',
+      'чотириста',
+      "п'ятсот",
+      'шість сотень',
+      'сімсот',
+      'вісімсот',
+      "дев'ятсот",
+    ],
+    t = [
+      '',
+      'двадцять',
+      'тридцять',
+      'сорок',
+      "п'ятдесят",
+      'шістдесят',
+      'сімдесят',
+      'вісімдесят',
+      "дев'яносто",
+    ],
+    o = [
+      'один',
+      'два',
+      'три',
+      'чотири',
+      "п'ять",
+      'шість',
+      'сім',
+      'вісім',
+      "дев'ять",
+    ],
+    p = [
+      'одиннадцять',
+      'дванадцять',
+      'тринадцять',
+      'чотирнадцять',
+      "п'ятнадцять",
+      'шістнадцять',
+      'сімнадцять',
+      'вісімнадцять',
+      "де'ятнадцять",
+    ]
+  let str = number.toString(),
+    out = ''
+
+  if (str.length == 1) return o[number - 1]
+  else if (str.length == 2) {
+    if (str[0] == 1) out = p[parseInt(str[1]) - 1]
+    else
+      out =
+        t[parseInt(str[0]) - 1] +
+        (str[1] != '0' ? ' ' + o[parseInt(str[1]) - 1] : '')
+  } else if (str.length == 3) {
+    out =
+      h[parseInt(str[0]) - 1] +
+      (str[1] != '0' ? ' ' + t[parseInt(str[1]) - 1] : '') +
+      (str[2] != '0' ? ' ' + o[parseInt(str[2]) - 1] : '')
+  } else if (str.length == 4) {
+    out =
+      k[parseInt(str[0]) - 1] +
+      (str[1] != '0' ? ' ' + h[parseInt(str[1]) - 1] : '') +
+      (str[2] != '0' ? ' ' + t[parseInt(str[2]) - 1] : '') +
+      (str[3] != '0' ? ' ' + o[parseInt(str[3]) - 1] : '')
+  }
+
+  let arr = out.split('')
+  arr[0] = arr[0].toUpperCase()
+  out = arr.join('')
+  return out
+}
+
+const ReceiptForm: FC<Props> = ({ currPayment }) => {
   const [columns, setColumns] = useState([
     {
       title: '№',
@@ -28,7 +113,6 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
       title: 'Сума',
     },
   ])
-
   return (
     <>
       <main className={s.page}>
@@ -49,7 +133,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
             <div className={s.info_user}>$$Клієнт</div>
           </div>
         </header>
-        <div className={s.invoice_title}>{currPayment.credit}</div>
+        <div className={s.invoice_title}>INVOICE № INV-0060</div>
 
         <div className={s.invoice_data}>від $Day $month $year</div>
         <div className={s.invoice_end__pay}>
@@ -65,62 +149,18 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
             bordered
           />
         </div>
-
-        {/* <div className={s.container}>
-          <div className={s.table}>
-            <div className={s.table_header}>
-              <div className={s.header__item}>
-                <a id="name" className={s.filter__link_1} href="#">
-                  №
-                </a>
-              </div>
-              <div className={s.header__item}>
-                <a id="wins" className={s.filter__link} href="#">
-                  Назва
-                </a>
-              </div>
-              <div className={s.header__item}>
-                <a id="draws" className={s.filter__link} href="#">
-                  Кількіст
-                </a>
-              </div>
-              <div className={s.header__item}>
-                <a id="losses" className={s.filter__link} href="#">
-                  Ціна
-                </a>
-              </div>
-              <div className={s.header__item}>
-                <a id="total" className={s.filter__link} href="#">
-                  Сумма
-                </a>
-              </div>
-            </div>
-            <div className={s.table_content}>
-              <div className={s.table_row}>
-                <div className={s.table_data_1}>1.</div>
-                <div className={s.table_data}>За водопостачання ($month)</div>
-                <div className={s.table_data}>$</div>
-                <div className={s.table_data}>{currPayment.credit}</div>
-                <div className={s.table_data}>$</div>
-              </div>
-              <div className={s.table_row}>
-                <div className={s.table_data_1}>2.</div>
-                <div className={s.table_data}>За електропостачання($month)</div>
-                <div className={s.table_data}>{currPayment.credit}</div>
-                <div className={s.table_data}>$</div>
-                <div className={s.table_data}>$</div>
-              </div>
-            </div>
-          </div>
-        </div> */}
-
         <div className={s.pay_table}>
           Всього на суму:
-          <div className={s.pay_table_bold}>$write_the_sum_in_letters</div>
+          <div className={s.pay_table_bold}>
+            {numToPr(currPayment?.credit)} гривень
+          </div>
         </div>
         <div className={s.pay_info}>
-          Загальна сумма оплати:{' '}
-          <div className={s.pay_info_money}>$$$$$.$$ грн</div>
+          Загальна сумма оплати:
+          <div className={s.pay_info_money}>
+            {/* {currPayment?.debit} */}
+            {currPayment?.credit} грн
+          </div>
         </div>
 
         <div className={s.pay_admin}>
