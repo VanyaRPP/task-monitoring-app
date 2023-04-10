@@ -6,6 +6,7 @@ import {
 import { Form, message, Modal, Tabs, TabsProps } from 'antd'
 import React, { FC, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
+import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
 
 interface Props {
@@ -55,11 +56,12 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       label: 'Перегляд',
       disabled: currPayment ? false : true,
       children: (
-        <>
-          <p>{currPayment?.debit}</p>
-          <p>{currPayment?.credit}</p>
-          <p>{currPayment?.description}</p>
-        </>
+        <ReceiptForm currPayment={currPayment} paymentData={paymentData} />
+        // <>
+        //   <p>{currPayment?.debit}</p>
+        //   <p>{currPayment?.credit}</p>
+        //   <p>{currPayment?.description}</p>
+        // </>
       ),
     },
   ]
