@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useState } from 'react'
 import { Table } from 'antd'
+import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
 import { dataSource } from '@utils/tableData'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
@@ -94,25 +95,57 @@ function numToPr(number) {
   return out
 }
 
+interface DataType {
+  id: number
+  Назва: string
+  Кількість: number
+  Ціна: number
+  Сумма: number
+}
+
 const ReceiptForm: FC<Props> = ({ currPayment }) => {
-  const [columns, setColumns] = useState([
+  const columns: ColumnsType<DataType> = [
     {
       title: '№',
       dataIndex: 'id',
     },
     {
       title: 'Назва',
+      dataIndex: 'Назва',
+      key: 'Назва',
     },
     {
       title: 'Кількість',
+      dataIndex: 'Кількість',
+      key: 'Кількість',
     },
     {
       title: 'Ціна',
+      key: 'Ціна',
+      dataIndex: 'Ціна',
     },
     {
-      title: 'Сума',
+      title: 'Сумма',
+      key: 'Сумма',
+      dataIndex: 'Сумма',
     },
-  ])
+  ]
+  const data: DataType[] = [
+    {
+      id: 1,
+      Назва: 'За водопостачання $month',
+      Кількість: 0.85,
+      Ціна: 37.54,
+      Сумма: 31.91,
+    },
+    {
+      id: 2,
+      Назва: 'За електропостачання $month',
+      Кількість: 261,
+      Ціна: 6.16,
+      Сумма: 1607.76,
+    },
+  ]
   return (
     <>
       <main className={s.page}>
@@ -143,10 +176,9 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
         <div>
           <Table
             columns={columns}
-            dataSource={dataSource}
+            dataSource={data}
             size="small"
             pagination={false}
-            bordered
           />
         </div>
         <div className={s.pay_table}>
