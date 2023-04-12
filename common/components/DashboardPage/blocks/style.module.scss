@@ -28,18 +28,17 @@
   justify-content: center;
   align-items: center;
 }
-//   .icon {
-//     font-size: 1.25rem;
-//   }
-// }
-// .icon {
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   .icon {
-//     font-size: 1.25rem;
-//   }
-// }
+.icon {
+  font-size: 14px;
+}
+.eyelined {
+  display: flex;
+  align-items: center;
+  display: flex;
+  align-items: center;
+  height: 9px;
+  width: 9px;
+}
 .spin {
   display: flex;
   justify-content: center;
