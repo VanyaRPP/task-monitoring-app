@@ -101,8 +101,9 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
                 rules={validateField('paymentPrice')}
               >
                 <InputNumber
-                  className={s.inputNumber}
+                  placeholder="Вкажіть суму"
                   disabled={edit && true}
+                  className={s.inputNumber}
                 />
               </Form.Item>
               <Form.Item

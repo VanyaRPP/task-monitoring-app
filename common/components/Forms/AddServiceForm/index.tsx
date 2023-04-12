@@ -20,7 +20,7 @@ const AddServiceForm: FC<Props> = ({ form }) => {
       >
         <MonthPicker
           format="MMMM YYYY"
-          placeholder="Select month"
+          placeholder="Оберіть місяць"
           className={s.formInput}
         />
       </Form.Item>
@@ -29,28 +29,28 @@ const AddServiceForm: FC<Props> = ({ form }) => {
         label="Утримання приміщень"
         rules={validateField('required')}
       >
-        <InputNumber className={s.formInput} />
+        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="electricPrice"
         label="Електроенергія"
         rules={validateField('electricPrice')}
       >
-        <InputNumber className={s.formInput} />
+        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="waterPrice"
         label="Водопостачання"
         rules={validateField('required')}
       >
-        <InputNumber className={s.formInput} />
+        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="inflaPrice"
         label="Індекс інфляції"
         rules={validateField('required')}
       >
-        <InputNumber className={s.formInput} />
+        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="description"
