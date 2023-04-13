@@ -106,6 +106,9 @@ interface DataType {
   Сумма: number
 }
 const ReceiptForm: FC<Props> = ({ currPayment }) => {
+  const { data } = useGetUserByIdQuery(currPayment?.payer as any)
+  console.log(data)
+
   const columns: ColumnsType<DataType> = [
     {
       title: '№',
@@ -183,7 +186,11 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
               </div>
             </div>
             <div className={s.info_order_2}>Одержувач</div>
-            <div className={s.info_user}></div>
+            <div className={s.info_user}>
+              {data?.data.name} &nbsp;
+              {data?.data.email} &nbsp;
+              {data?.data.tel}
+            </div>
           </div>
         </header>
         <div className={s.invoice_title}>INVOICE № INV-0060</div>
