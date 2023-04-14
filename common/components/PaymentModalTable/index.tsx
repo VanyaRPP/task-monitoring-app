@@ -75,6 +75,8 @@ const PaymentModalTable: FC<Props> = ({ form, edit, paymentData }) => {
     setFieldValue(['water', 'price'], monthServices?.waterPrice)
     setFieldValue(['maintenance', 'amount'], payment?.maintenance?.amount)
     setFieldValue(['placing', 'amount'], payment?.placing?.amount)
+    setFieldValue(['electricity', 'amount'], payment?.electricity?.amount)
+    setFieldValue(['electricity', 'sum'], payment?.electricity?.sum)
   }
 
   useEffect(() => {
