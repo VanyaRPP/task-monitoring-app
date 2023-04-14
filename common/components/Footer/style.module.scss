@@ -7,11 +7,11 @@
   align-items: center;
   padding: 0 50px;
   background: transparent;
-
+  transition: background 0.5s;
+  background: var(--backgroundColorPrimary);
   position: fixed;
   bottom: 0;
   width: 100%;
-  background-color: black;
   z-index: 1000;
 
   transition: margin 0.2s;
