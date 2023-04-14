@@ -83,6 +83,7 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
           placeholder="Оберіть тип оплати"
           className={s.Select}
           disabled={edit && true}
+          defaultValue={paymentData?.maintenance ? 'debit' : 'credit'}
         >
           <Option value="credit">Кредит (Оплата)</Option>
           <Option value="debit">Дебет (Реалізація)</Option>
