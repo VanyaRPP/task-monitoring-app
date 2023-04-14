@@ -68,14 +68,21 @@ const PaymentModalTable: FC<Props> = ({ form, edit, paymentData }) => {
     })
     const monthServices = getCurrentMonthService(services)
 
-    setFieldValue(['electricity', 'lastAmount'], payment?.electricity?.amount)
-    setFieldValue(['water', 'lastAmount'], payment?.water?.amount)
+    setFieldValue(['electricity', 'amount'], payment?.electricity?.amount)
+    setFieldValue(
+      ['electricity', 'lastAmount'],
+      payment?.electricity?.lastAmount
+    )
+    setFieldValue(['water', 'amount'], payment?.water?.amount)
+    setFieldValue(['water', 'lastAmount'], payment?.water?.lastAmount)
     setFieldValue(['maintenance', 'price'], monthServices?.orenda)
     setFieldValue(['electricity', 'price'], monthServices?.electricPrice)
     setFieldValue(['water', 'price'], monthServices?.waterPrice)
     setFieldValue(['maintenance', 'amount'], payment?.maintenance?.amount)
     setFieldValue(['placing', 'amount'], payment?.placing?.amount)
-    setFieldValue(['electricity', 'amount'], payment?.electricity?.amount)
+    setFieldValue(['placing', 'sum'], payment?.placing?.sum)
+    setFieldValue(['placing', 'price'], payment?.placing?.price)
+
     setFieldValue(['electricity', 'sum'], payment?.electricity?.sum)
   }
 
