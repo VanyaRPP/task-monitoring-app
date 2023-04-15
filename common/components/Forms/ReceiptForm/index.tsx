@@ -3,6 +3,9 @@ import { Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
 import { dataSource } from '@utils/tableData'
+import moment from 'moment'
+import { ObjectId } from 'mongoose'
+import { useGetUserByIdQuery } from 'common/api/userApi/user.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 
 interface Props {
@@ -102,8 +105,10 @@ interface DataType {
   Ціна: number
   Сумма: number
 }
-
 const ReceiptForm: FC<Props> = ({ currPayment }) => {
+  const { data } = useGetUserByIdQuery(currPayment?.payer as any)
+  console.log(data)
+
   const columns: ColumnsType<DataType> = [
     {
       title: '№',
@@ -130,20 +135,39 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
       dataIndex: 'Сумма',
     },
   ]
-  const data: DataType[] = [
+
+  const tt: DataType[] = [
     {
       id: 1,
-      Назва: 'За водопостачання $month',
-      Кількість: 0.85,
-      Ціна: 37.54,
-      Сумма: 31.91,
+      Назва: `Утримання  (${moment().format('MMMM')})`,
+      Кількість: Number(currPayment?.maintenance.amount),
+      Ціна: Number(currPayment?.maintenance.price),
+      Сумма: Number(currPayment?.maintenance.sum),
     },
     {
       id: 2,
-      Назва: 'За електропостачання $month',
-      Кількість: 261,
-      Ціна: 6.16,
-      Сумма: 1607.76,
+      Назва: `Розміщення  (${moment().format('MMMM')})`,
+      Кількість: Number(currPayment?.placing.amount),
+      Ціна: Number(currPayment?.placing.price),
+      Сумма: Number(currPayment?.placing.sum),
+    },
+    {
+      id: 3,
+      Назва: `За водопостачання (${moment().format('MMMM')})`,
+      Кількість:
+        Number(currPayment?.water.amount) -
+        Number(currPayment?.water.lastAmount),
+      Ціна: Number(currPayment?.water.price),
+      Сумма: Number(currPayment?.water.sum),
+    },
+    {
+      id: 4,
+      Назва: `За електропостачання (${moment().format('MMMM')})`,
+      Кількість:
+        Number(currPayment?.electricity.amount) -
+        Number(currPayment?.electricity.lastAmount),
+      Ціна: Number(currPayment?.electricity.price),
+      Сумма: Number(currPayment?.electricity.sum),
     },
   ]
   return (
@@ -163,20 +187,31 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
               </div>
             </div>
             <div className={s.info_order_2}>Одержувач</div>
-            <div className={s.info_user}>$$Клієнт</div>
+            <div className={s.info_user}>
+              {data?.data.name} &nbsp;
+              {data?.data.email} &nbsp;
+              {data?.data.tel}
+            </div>
           </div>
         </header>
         <div className={s.invoice_title}>INVOICE № INV-0060</div>
 
-        <div className={s.invoice_data}>від $Day $month $year</div>
+        <div className={s.invoice_data}>
+          Від &nbsp;
+          {String(currPayment?.date).slice(8, -14)}.
+          {String(currPayment?.date).slice(5, -17)}.
+          {String(currPayment?.date).slice(0, -20)} року.
+        </div>
         <div className={s.invoice_end__pay}>
-          Підлягає сплаті до $Day $month $year
+          Підлягає сплаті до {String(currPayment?.date).slice(8, -14)}.
+          {String(currPayment?.date).slice(5, -17)}.
+          {String(currPayment?.date).slice(0, -20)} року.
         </div>
 
         <div>
           <Table
             columns={columns}
-            dataSource={data}
+            dataSource={tt}
             size="small"
             pagination={false}
           />
@@ -184,6 +219,7 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
         <div className={s.pay_table}>
           Всього на суму:
           <div className={s.pay_table_bold}>{currPayment?.debit} гривень</div>
+
         </div>
         <div className={s.pay_info}>
           Загальна сумма оплати:

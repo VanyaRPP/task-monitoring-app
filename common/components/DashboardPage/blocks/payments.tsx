@@ -160,9 +160,9 @@ const PaymentsBlock = () => {
       dataIndex: '',
       width: '10%',
       render: (_, payment: IExtendedPayment) => (
-        <div className={s.icon}>
+        <div className={s.eyelined}>
           <Button type="link" onClick={() => handleEyeClick(payment?._id)}>
-            <EyeOutlined className={s.icon} />
+            <EyeOutlined className={s.eyelined} />
           </Button>
         </div>
       ),
@@ -220,7 +220,6 @@ const PaymentsBlock = () => {
           edit={currentPayment && true}
           closeModal={closeModal}
         />
-        //fgjjgffu
       )}
       {content}
     </TableCard>

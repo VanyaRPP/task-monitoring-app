@@ -60,7 +60,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
         <ReceiptForm currPayment={currPayment} paymentData={paymentData} />
         // <>
         //   <p>{currPayment?.debit}</p>
-        //   <p>{currPayment?.credit}</p>
+        // <p>{currPayment?.credit}</p>
         //   <p>{currPayment?.description}</p>
         // </>
       ),
