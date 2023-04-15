@@ -50,7 +50,6 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
         credit: paymentData?.credit,
         debit: paymentData?.debit,
         operation: paymentData?.debit ? 'debit' : 'credit',
-
         payer: paymentData?.payer?._id,
       }}
       form={form}
@@ -76,14 +75,12 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
       <Form.Item
         name="operation"
         label="Тип оплати"
-        initialValue="credit"
         rules={validateField('required')}
       >
         <Select
           placeholder="Оберіть тип оплати"
           className={s.Select}
           disabled={edit && true}
-          defaultValue={paymentData?.maintenance ? 'debit' : 'credit'}
         >
           <Option value="credit">Кредит (Оплата)</Option>
           <Option value="debit">Дебет (Реалізація)</Option>

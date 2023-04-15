@@ -70,7 +70,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   return (
     <Modal
       open={true}
-      // title="Додавання рахунку"
+      title={!edit && 'Додавання рахунку'}
       onOk={activeTabKey === '1' ? handleSubmit : closeModal}
       onCancel={() => {
         form.resetFields()
