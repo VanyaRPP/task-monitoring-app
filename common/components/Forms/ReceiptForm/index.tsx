@@ -183,14 +183,13 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
         </div>
         <div className={s.pay_table}>
           Всього на суму:
-          <div className={s.pay_table_bold}>{currPayment?.credit} гривень</div>
+          <div className={s.pay_table_bold}>
+            {numToPr(currPayment.debit)} гривень
+          </div>
         </div>
         <div className={s.pay_info}>
           Загальна сумма оплати:
-          <div className={s.pay_info_money}>
-            {currPayment?.debit}
-            {currPayment?.credit} грн
-          </div>
+          <div className={s.pay_info_money}>{currPayment.debit}грн</div>
         </div>
 
         <div className={s.pay_admin}>
