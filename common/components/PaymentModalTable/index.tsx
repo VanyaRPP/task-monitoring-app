@@ -12,10 +12,12 @@ import s from './style.module.scss'
 
 interface Props {
   form: FormInstance<any>
+  edit: boolean
+  paymentData: any
 }
 
-const PaymentModalTable: FC<Props> = (form) => {
-  const { setFieldValue } = form.form
+const PaymentModalTable: FC<Props> = ({ form, edit, paymentData }) => {
+  const { setFieldValue } = form
   const {
     data: payments,
     isFetching: paymentsFetching,
@@ -27,17 +29,17 @@ const PaymentModalTable: FC<Props> = (form) => {
     isLoading: servicesLoading,
   } = useGetAllServicesQuery({ limit: 12 })
 
-  const payer = Form.useWatch('payer', form.form)
-  const maintenance = Form.useWatch('maintenance', form.form)
+  const payer = Form.useWatch('payer', form)
+  const maintenance = Form.useWatch('maintenance', form)
   const m = maintenance?.amount * maintenance?.price
 
-  const placing = Form.useWatch('placing', form.form)
+  const placing = Form.useWatch('placing', form)
   const p = placing?.amount * placing?.price
 
-  const electricity = Form.useWatch('electricity', form.form)
+  const electricity = Form.useWatch('electricity', form)
   const e = (electricity?.amount - electricity?.lastAmount) * electricity?.price
 
-  const water = Form.useWatch('water', form.form)
+  const water = Form.useWatch('water', form)
   const w = (water?.amount - water?.lastAmount) * water?.price
 
   const getVal = (record) => {
@@ -60,18 +62,28 @@ const PaymentModalTable: FC<Props> = (form) => {
       }
     }
   }
-
   const setFormDefaultValues = () => {
     const payment = payments?.find((p) => {
       return p?.payer?._id === payer && p?.debit > 0
     })
     const monthServices = getCurrentMonthService(services)
 
-    setFieldValue(['electricity', 'lastAmount'], payment?.electricity?.amount)
-    setFieldValue(['water', 'lastAmount'], payment?.water?.amount)
-    setFieldValue(['maintenance', 'price'], monthServices?.orenda)
-    setFieldValue(['electricity', 'price'], monthServices?.electricPrice)
-    setFieldValue(['water', 'price'], monthServices?.waterPrice)
+    setFieldValue(['electricity', 'amount'], payment?.electricity?.amount)
+    setFieldValue(
+      ['electricity', 'lastAmount'],
+      payment?.electricity?.lastAmount
+    )
+    setFieldValue(['water', 'amount'], payment?.water?.amount)
+    setFieldValue(['water', 'lastAmount'], payment?.water?.lastAmount)
+    setFieldValue(['electricity', 'price'], payment?.electricity?.price)
+    setFieldValue(['maintenance', 'amount'], payment?.maintenance?.amount)
+    setFieldValue(['placing', 'amount'], payment?.placing?.amount)
+    setFieldValue(['placing', 'sum'], payment?.placing?.sum)
+    setFieldValue(['placing', 'price'], payment?.placing?.price)
+    setFieldValue(['maintenance', 'price'], payment?.maintenance?.price)
+    setFieldValue(['water', 'price'], payment?.water?.price)
+
+    setFieldValue(['electricity', 'sum'], payment?.electricity?.sum)
   }
 
   useEffect(() => {
@@ -112,14 +124,20 @@ const PaymentModalTable: FC<Props> = (form) => {
                 name={[record.name, 'lastAmount']}
                 rules={validateField('required')}
               >
-                <InputNumber className={s.input} />
+                <InputNumber
+                  disabled={edit ? true : false}
+                  className={s.input}
+                />
               </Form.Item>
-              -
+
               <Form.Item
                 name={[record.name, 'amount']}
                 rules={validateField('required')}
               >
-                <InputNumber className={s.input} />
+                <InputNumber
+                  disabled={edit ? true : false}
+                  className={s.input}
+                />
               </Form.Item>
             </div>
           ) : (
@@ -127,7 +145,7 @@ const PaymentModalTable: FC<Props> = (form) => {
               name={[record.name, 'amount']}
               rules={validateField('required')}
             >
-              <InputNumber className={s.input} />
+              <InputNumber disabled={edit ? true : false} className={s.input} />
             </Form.Item>
           )}
         </>
@@ -142,7 +160,7 @@ const PaymentModalTable: FC<Props> = (form) => {
             name={[record.name, 'price']}
             rules={validateField('required')}
           >
-            <InputNumber className={s.input} />
+            <InputNumber disabled={edit ? true : false} className={s.input} />
           </Form.Item>
         </Tooltip>
       ),

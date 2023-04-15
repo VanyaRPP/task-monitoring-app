@@ -20,7 +20,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
 
-  const [activeTabKey, setActiveTabKey] = useState('1')
+  const [activeTabKey, setActiveTabKey] = useState(edit ? '2' : '1')
 
   const handleSubmit = async () => {
     const formData: IPayment = await form.validateFields()
@@ -70,7 +70,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   return (
     <Modal
       open={true}
-      title="Додавання рахунку"
+      title={!edit && 'Додавання рахунку'}
       onOk={activeTabKey === '1' ? handleSubmit : closeModal}
       onCancel={() => {
         form.resetFields()

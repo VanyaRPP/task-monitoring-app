@@ -49,6 +49,7 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
         description: paymentData?.description,
         credit: paymentData?.credit,
         debit: paymentData?.debit,
+        operation: paymentData?.debit ? 'debit' : 'credit',
         payer: paymentData?.payer?._id,
       }}
       form={form}
@@ -74,7 +75,6 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
       <Form.Item
         name="operation"
         label="Тип оплати"
-        initialValue="credit"
         rules={validateField('required')}
       >
         <Select
@@ -120,7 +120,11 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
             </>
           ) : (
             <>
-              <PaymentModalTable form={form} />
+              <PaymentModalTable
+                paymentData={paymentData}
+                edit={edit}
+                form={form}
+              />
               <Form.Item name="debit">
                 <div className={s.totalItem}>
                   <p>Сума:</p>
@@ -134,5 +138,4 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
     </Form>
   )
 }
-
 export default AddPaymentForm
