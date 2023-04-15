@@ -182,7 +182,7 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
           />
         </div>
         <div className={s.pay_table}>
-          Всього на суму:
+          {/* Всього на суму:
           <div className={s.pay_table_bold}>{currPayment?.credit} гривень</div>
         </div>
         <div className={s.pay_info}>
@@ -191,7 +191,7 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
             {currPayment?.debit}
             {currPayment?.credit} грн
           </div>
-        </div>
+        </div> */}
 
         <div className={s.pay_admin}>
           Виписав Директор{' '}
