@@ -140,34 +140,34 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
     {
       id: 1,
       Назва: `Утримання  (${moment().format('MMMM')})`,
-      Кількість: Number(currPayment?.maintenance.amount),
-      Ціна: Number(currPayment?.maintenance.price),
-      Сумма: Number(currPayment?.maintenance.sum),
+      Кількість: Number(currPayment?.maintenance?.amount),
+      Ціна: Number(currPayment?.maintenance?.price),
+      Сумма: Number(currPayment?.maintenance?.sum),
     },
     {
       id: 2,
       Назва: `Розміщення  (${moment().format('MMMM')})`,
-      Кількість: Number(currPayment?.placing.amount),
-      Ціна: Number(currPayment?.placing.price),
-      Сумма: Number(currPayment?.placing.sum),
+      Кількість: Number(currPayment?.placing?.amount),
+      Ціна: Number(currPayment?.placing?.price),
+      Сумма: Number(currPayment?.placing?.sum),
     },
     {
       id: 3,
       Назва: `За водопостачання (${moment().format('MMMM')})`,
       Кількість:
         Number(currPayment?.water.amount) -
-        Number(currPayment?.water.lastAmount),
-      Ціна: Number(currPayment?.water.price),
-      Сумма: Number(currPayment?.water.sum),
+        Number(currPayment?.water?.lastAmount),
+      Ціна: Number(currPayment?.water?.price),
+      Сумма: Number(currPayment?.water?.sum),
     },
     {
       id: 4,
       Назва: `За електропостачання (${moment().format('MMMM')})`,
       Кількість:
-        Number(currPayment?.electricity.amount) -
-        Number(currPayment?.electricity.lastAmount),
-      Ціна: Number(currPayment?.electricity.price),
-      Сумма: Number(currPayment?.electricity.sum),
+        Number(currPayment?.electricity?.amount) -
+        Number(currPayment?.electricity?.lastAmount),
+      Ціна: Number(currPayment?.electricity?.price),
+      Сумма: Number(currPayment?.electricity?.sum),
     },
   ]
   return (
@@ -219,7 +219,6 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
         <div className={s.pay_table}>
           Всього на суму:
           <div className={s.pay_table_bold}>{currPayment?.debit} гривень</div>
-
         </div>
         <div className={s.pay_info}>
           Загальна сумма оплати:
