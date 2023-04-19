@@ -27,7 +27,7 @@ const PaymentsBlock = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const router = useRouter()
   const [currentPayment, setCurrentPayment] = useState(null)
-  const [currPayment, setCurrPayment] = useState(null)
+  const [currPayment, setCurrPayment] = useState<IExtendedPayment>(null)
 
   const {
     pathname,

@@ -8,17 +8,18 @@ import React, { FC, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
-import setCurrPayment from '@common/components/DashboardPage/blocks/payments'
 
 interface Props {
   closeModal: VoidFunction
   paymentData?: object
   edit?: boolean
   currPayment?: IExtendedPayment
+  // setCurrPayment: VoidFunction
 }
 
 const AddPaymentModal: FC<Props> = ({
   closeModal,
+  // setCurrPayment,
   paymentData,
   edit,
   currPayment,
@@ -42,7 +43,7 @@ const AddPaymentModal: FC<Props> = ({
       debit: formData.debit,
     })
     if ('data' in response) {
-      setCurrPayment(response?.data.data)
+      // setCurrPayment(response?.data.data)
       setActiveTabKey('2')
       form.resetFields()
       message.success('Додано')
