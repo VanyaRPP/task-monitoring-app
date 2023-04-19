@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react'
+import React, { FC, ReactElement, useState } from 'react'
 import { Alert, message, Popconfirm, Table } from 'antd'
 import { Button } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
@@ -27,6 +27,8 @@ const PaymentsBlock = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const router = useRouter()
   const [currentPayment, setCurrentPayment] = useState(null)
+  const [currPayment, setCurrPayment] = useState(null)
+
   const {
     pathname,
     query: { email },
@@ -67,16 +69,19 @@ const PaymentsBlock = () => {
   }
   const handleEyeClick = (id) => {
     setCurrentPayment(payments.find((item) => item._id === id))
+    setCurrPayment(payments.find((item) => item._id === id))
   }
 
   const closeModal = () => {
     if (currentPayment) {
       setCurrentPayment(null)
-    } else {
-      setIsModalOpen(false)
+      if (currPayment) {
+        setCurrPayment(null)
+      } else {
+        setIsModalOpen(false)
+      }
     }
   }
-
   const columns = [
     {
       title: 'Дата',
@@ -218,6 +223,14 @@ const PaymentsBlock = () => {
         <AddPaymentModal
           paymentData={currentPayment}
           edit={currentPayment && true}
+          closeModal={closeModal}
+        />
+      )}
+      {(currPayment || isModalOpen) && (
+        <AddPaymentModal
+          paymentData={currPayment}
+          edit={currPayment ? true : false}
+          currPayment={currPayment}
           closeModal={closeModal}
         />
       )}

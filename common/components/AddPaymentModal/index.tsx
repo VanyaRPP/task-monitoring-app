@@ -8,17 +8,24 @@ import React, { FC, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
+import setCurrPayment from '@common/components/DashboardPage/blocks/payments'
 
 interface Props {
   closeModal: VoidFunction
   paymentData?: object
   edit?: boolean
+  currPayment?: IExtendedPayment
 }
 
-const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
+const AddPaymentModal: FC<Props> = ({
+  closeModal,
+  paymentData,
+  edit,
+  currPayment,
+}) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
-  const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
+  // const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
 
   const [activeTabKey, setActiveTabKey] = useState(edit ? '2' : '1')
 

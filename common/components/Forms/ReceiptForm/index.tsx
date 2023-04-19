@@ -107,7 +107,6 @@ interface DataType {
 }
 const ReceiptForm: FC<Props> = ({ currPayment }) => {
   const { data } = useGetUserByIdQuery(currPayment?.payer as any)
-  console.log(data)
 
   const columns: ColumnsType<DataType> = [
     {
@@ -219,7 +218,6 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
         <div className={s.pay_table}>
           Всього на суму:
           <div className={s.pay_table_bold}>{currPayment?.debit} гривень</div>
-
         </div>
         <div className={s.pay_info}>
           Загальна сумма оплати:
