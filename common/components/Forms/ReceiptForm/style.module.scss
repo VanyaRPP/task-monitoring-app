@@ -9,6 +9,7 @@
   font-weight: 700;
   text-decoration: underline;
   margin-bottom: 40px;
+  margin-top: -130px;
 }
 .info_adres__bold {
   font-weight: 700;
@@ -17,18 +18,18 @@
 .info_adres {
   width: 400px;
   height: 130px;
-  position: absolute;
-  left: 16%;
-  top: 0.5%;
+  position: relative;
+  margin-left: 150px;
+  top: -140px;
   font-weight: 500;
 }
 
 .info_user {
   width: 300px;
-  height: 20px;
-  position: absolute;
-  left: 16%;
-  top: 17%;
+  height: 30px;
+  position: relative;
+  margin-left: 150px;
+  top: -65px;
   font-size: 16px;
   font-weight: 700;
 }
@@ -106,12 +107,13 @@ $color-form-highlight: #eeeeee;
   position: relative;
   left: 20px;
   display: flex;
-  margin-bottom: 15px;
+  margin-top: 15px;
 }
 
 .pay_table_bold {
   font-weight: 800;
   margin-left: 15px;
+  margin-bottom: 10px;
 }
 
 .pay_info {
@@ -121,7 +123,7 @@ $color-form-highlight: #eeeeee;
   position: relative;
   left: 20px;
   display: flex;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .pay_info_money {
@@ -158,4 +160,24 @@ $color-form-highlight: #eeeeee;
 
 .end_info_bolt {
   font-weight: 800;
+  margin-right: 10px;
+}
+
+.button {
+  background-color: white;
+  color: black;
+  border: 2px solid #008cba;
+  padding: 10px 12px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.button:hover {
+  background-color: #008cba;
+  color: white;
 }

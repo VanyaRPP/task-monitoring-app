@@ -8,6 +8,7 @@ import React, { FC, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
+// import ReactPdfPrint from '../Forms/ReceiptForm/ReactPdfPrint'
 
 interface Props {
   closeModal: VoidFunction
@@ -57,7 +58,8 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       label: 'Перегляд',
       disabled: currPayment || edit ? false : true,
       children: (
-        <ReceiptForm currPayment={currPayment} paymentData={paymentData} />
+        <ReceiptForm currPayment={currPayment} />
+
         // <>
         //   <p>{currPayment?.debit}</p>
         // <p>{currPayment?.credit}</p>
