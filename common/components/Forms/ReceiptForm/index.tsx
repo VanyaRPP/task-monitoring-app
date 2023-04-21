@@ -1,5 +1,5 @@
-import React, { FC, useEffect, useState } from 'react'
-import { Table } from 'antd'
+import React, { FC, useEffect, useState, useRef } from 'react'
+import { Button, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
 import { dataSource } from '@utils/tableData'
@@ -7,10 +7,10 @@ import moment from 'moment'
 import { ObjectId } from 'mongoose'
 import { useGetUserByIdQuery } from 'common/api/userApi/user.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { useReactToPrint } from 'react-to-print'
 
 interface Props {
   currPayment: IExtendedPayment
-  paymentData: any
 }
 
 // function numToPr(number) {
@@ -106,8 +106,13 @@ interface DataType {
   Сумма: number
 }
 const ReceiptForm: FC<Props> = ({ currPayment }) => {
-  const { data } = useGetUserByIdQuery(currPayment?.payer as any)
+  const { data } = useGetUserByIdQuery(String(currPayment?.payer))
   console.log(data)
+  const componentRef = useRef()
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+    documentTitle: 'emp-data',
+  })
 
   const columns: ColumnsType<DataType> = [
     {
@@ -140,60 +145,67 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
     {
       id: 1,
       Назва: `Утримання  (${moment().format('MMMM')})`,
-      Кількість: Number(currPayment?.maintenance.amount),
-      Ціна: Number(currPayment?.maintenance.price),
-      Сумма: Number(currPayment?.maintenance.sum),
+      Кількість: Number(currPayment?.maintenance?.amount),
+      Ціна: Number(currPayment?.maintenance?.price),
+      Сумма: Number(currPayment?.maintenance?.sum),
     },
     {
       id: 2,
       Назва: `Розміщення  (${moment().format('MMMM')})`,
-      Кількість: Number(currPayment?.placing.amount),
-      Ціна: Number(currPayment?.placing.price),
-      Сумма: Number(currPayment?.placing.sum),
+      Кількість: Number(currPayment?.placing?.amount),
+      Ціна: Number(currPayment?.placing?.price),
+      Сумма: Number(currPayment?.placing?.sum),
     },
     {
       id: 3,
       Назва: `За водопостачання (${moment().format('MMMM')})`,
       Кількість:
-        Number(currPayment?.water.amount) -
-        Number(currPayment?.water.lastAmount),
-      Ціна: Number(currPayment?.water.price),
-      Сумма: Number(currPayment?.water.sum),
+        Number(currPayment?.water?.amount) -
+        Number(currPayment?.water?.lastAmount),
+      Ціна: Number(currPayment?.water?.price),
+      Сумма: Number(currPayment?.water?.sum),
     },
     {
       id: 4,
       Назва: `За електропостачання (${moment().format('MMMM')})`,
       Кількість:
-        Number(currPayment?.electricity.amount) -
-        Number(currPayment?.electricity.lastAmount),
-      Ціна: Number(currPayment?.electricity.price),
-      Сумма: Number(currPayment?.electricity.sum),
+        Number(currPayment?.electricity?.amount) -
+        Number(currPayment?.electricity?.lastAmount),
+      Ціна: Number(currPayment?.electricity?.price),
+      Сумма: Number(currPayment?.electricity?.sum),
     },
   ]
   return (
     <>
-      <main className={s.page}>
-        <header>
-          <div>
-            <div className={s.info_order}>Постачальник</div>
-            <div className={s.info_adres}>
-              ТОВ "Український центр дуальної освіти" <br /> Adress 01030, м.
-              Київ, вул. Б. Хмельницького, буд. 51Б <br />
-              Registatipn number 42637285 <br />
-              є платником податку на прибуток на загальних підставах <br />
-              <div className={s.info_adres__bold}>
-                Р/р UA903052990000026006016402729 <br />
-                АТ КБ «ПРИВАТБАНК» МФО: 311744
-              </div>
-            </div>
-            <div className={s.info_order_2}>Одержувач</div>
-            <div className={s.info_user}>
-              {data?.data.name} &nbsp;
-              {data?.data.email} &nbsp;
-              {data?.data.tel}
+      <div
+        ref={componentRef}
+        style={{
+          width: '100%',
+          height: '100%',
+          marginTop: '2em',
+          marginRight: '1.5em',
+          marginLeft: '1.5em',
+        }}
+      >
+        <>
+          <div className={s.info_order}>Постачальник</div>
+          <div className={s.info_adres}>
+            ТОВ "Український центр дуальної освіти" <br /> Adress 01030, м.
+            Київ, вул. Б. Хмельницького, буд. 51Б <br />
+            Registatipn number 42637285 <br />є платником податку на прибуток на
+            загальних підставах <br />
+            <div className={s.info_adres__bold}>
+              Р/р UA903052990000026006016402729 <br />
+              АТ КБ «ПРИВАТБАНК» МФО: 311744
             </div>
           </div>
-        </header>
+          <div className={s.info_order_2}>Одержувач</div>
+          <div className={s.info_user}>
+            {data?.data.name} &nbsp;
+            {data?.data.email} &nbsp;
+            {data?.data.tel}
+          </div>
+        </>
         <div className={s.invoice_title}>INVOICE № INV-0060</div>
 
         <div className={s.invoice_data}>
@@ -219,7 +231,6 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
         <div className={s.pay_table}>
           Всього на суму:
           <div className={s.pay_table_bold}>{currPayment?.debit} гривень</div>
-
         </div>
         <div className={s.pay_info}>
           Загальна сумма оплати:
@@ -238,17 +249,19 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
           послуги вказана з урахуванням ПДВ.
           <br />
           **Ціни на комунальні послуги виставляють компанії-постачальники,
-          відповідно їх ціна може змінюватись у <br />
-          будь-який час в односторонньму порядку компанією-постачальником.
-          <br />
-          ***Нарахування цыни "за утримання приміщень" за січень буде здійснено
-          в наступному місяці в зв'язку з<br />
-          відсутістю зафіксованого тарифу на дану послугу.
-          <br />
-          ****В березні місяці оплату "за утримання" необхідно буде виконати
-          одразу за січень та лютий.
+          відповідно їх ціна може <br />
+          змінюватись у будь-який час в односторонньму порядку
+          компанією-постачальником.
         </div>
-      </main>
+      </div>
+
+      <Button type="primary" onClick={handlePrint}>
+        {' '}
+        Роздрукувати Документ
+      </Button>
+      {/* <button className={s.button} onClick={handlePrint}> */}
+      {/* Роздрукувати Документ
+      </button>  */}
     </>
   )
 }
