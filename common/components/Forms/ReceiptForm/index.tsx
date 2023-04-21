@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState, useRef } from 'react'
-import { Table } from 'antd'
+import { Button, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
 import { dataSource } from '@utils/tableData'
@@ -181,8 +181,9 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
         ref={componentRef}
         style={{
           width: '100%',
-          height: '100',
+          height: '100%',
           marginTop: '2em',
+          marginRight: '1.5em',
           marginLeft: '1.5em',
         }}
       >
@@ -248,13 +249,19 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
           послуги вказана з урахуванням ПДВ.
           <br />
           **Ціни на комунальні послуги виставляють компанії-постачальники,
-          відповідно їх ціна може змінюватись у <br />
-          будь-який час в односторонньму порядку компанією-постачальником.
+          відповідно їх ціна може <br />
+          змінюватись у будь-який час в односторонньму порядку
+          компанією-постачальником.
         </div>
       </div>
-      <button className={s.button} onClick={handlePrint}>
+
+      <Button type="primary" onClick={handlePrint}>
+        {' '}
         Роздрукувати Документ
-      </button>
+      </Button>
+      {/* <button className={s.button} onClick={handlePrint}> */}
+      {/* Роздрукувати Документ
+      </button>  */}
     </>
   )
 }

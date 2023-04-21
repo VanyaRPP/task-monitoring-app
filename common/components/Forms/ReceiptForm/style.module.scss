@@ -52,55 +52,6 @@
   margin-bottom: 15px;
 }
 
-$base-spacing-unit: 24px;
-$half-spacing-unit: $base-spacing-unit / 2;
-
-$color-form-highlight: #eeeeee;
-
-.container {
-  max-width: 1000px;
-  justify-content: center;
-  min-height: 20vh;
-}
-
-.table_header {
-  display: flex;
-  width: 100%;
-  background: #7a7979;
-  padding: ($half-spacing-unit * 1.5) 0;
-}
-
-.table_row {
-  display: flex;
-  width: 100%;
-}
-.table_data_1 {
-  border: 1px solid black;
-}
-
-.table_data,
-.header__item {
-  flex: 1 1 20%;
-  text-align: center;
-}
-.filter__link_1 {
-  border: 1px solid black;
-  width: 200px;
-  color: white;
-  text-decoration: none;
-  position: relative;
-  display: inline-block;
-}
-
-.filter__link {
-  color: white;
-  text-decoration: none;
-  position: relative;
-  display: inline-block;
-  padding-left: $base-spacing-unit;
-  padding-right: $base-spacing-unit;
-}
-
 .pay_table {
   font-size: 16px;
   margin-right: 300px;
@@ -161,23 +112,4 @@ $color-form-highlight: #eeeeee;
 .end_info_bolt {
   font-weight: 800;
   margin-right: 10px;
-}
-
-.button {
-  background-color: white;
-  color: black;
-  border: 2px solid #008cba;
-  padding: 10px 12px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 14px;
-  margin: 4px 2px;
-  transition-duration: 0.4s;
-  cursor: pointer;
-}
-
-.button:hover {
-  background-color: #008cba;
-  color: white;
 }
