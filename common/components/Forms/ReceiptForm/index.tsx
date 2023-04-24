@@ -11,6 +11,7 @@ import { useReactToPrint } from 'react-to-print'
 
 interface Props {
   currPayment: IExtendedPayment
+  paymentData: any
 }
 
 // function numToPr(number) {
@@ -105,9 +106,9 @@ interface DataType {
   Ціна: number
   Сумма: number
 }
-const ReceiptForm: FC<Props> = ({ currPayment }) => {
-  const { data } = useGetUserByIdQuery(String(currPayment?.payer))
-  console.log(data)
+const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
+  const newData = currPayment || paymentData
+  const { data } = useGetUserByIdQuery(String(newData?.payer))
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -145,34 +146,33 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
     {
       id: 1,
       Назва: `Утримання  (${moment().format('MMMM')})`,
-      Кількість: Number(currPayment?.maintenance?.amount),
-      Ціна: Number(currPayment?.maintenance?.price),
-      Сумма: Number(currPayment?.maintenance?.sum),
+      Кількість: Number(newData?.maintenance?.amount),
+      Ціна: Number(newData?.maintenance?.price),
+      Сумма: Number(newData?.maintenance?.sum),
     },
     {
       id: 2,
       Назва: `Розміщення  (${moment().format('MMMM')})`,
-      Кількість: Number(currPayment?.placing?.amount),
-      Ціна: Number(currPayment?.placing?.price),
-      Сумма: Number(currPayment?.placing?.sum),
+      Кількість: Number(newData?.placing?.amount),
+      Ціна: Number(newData?.placing?.price),
+      Сумма: Number(newData?.placing?.sum),
     },
     {
       id: 3,
       Назва: `За водопостачання (${moment().format('MMMM')})`,
       Кількість:
-        Number(currPayment?.water?.amount) -
-        Number(currPayment?.water?.lastAmount),
-      Ціна: Number(currPayment?.water?.price),
-      Сумма: Number(currPayment?.water?.sum),
+        Number(newData?.water?.amount) - Number(newData?.water?.lastAmount),
+      Ціна: Number(newData?.water?.price),
+      Сумма: Number(newData?.water?.sum),
     },
     {
       id: 4,
       Назва: `За електропостачання (${moment().format('MMMM')})`,
       Кількість:
-        Number(currPayment?.electricity?.amount) -
-        Number(currPayment?.electricity?.lastAmount),
-      Ціна: Number(currPayment?.electricity?.price),
-      Сумма: Number(currPayment?.electricity?.sum),
+        Number(newData?.electricity?.amount) -
+        Number(newData?.electricity?.lastAmount),
+      Ціна: Number(newData?.electricity?.price),
+      Сумма: Number(newData?.electricity?.sum),
     },
   ]
   return (
@@ -210,14 +210,14 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
 
         <div className={s.invoice_data}>
           Від &nbsp;
-          {String(currPayment?.date).slice(8, -14)}.
-          {String(currPayment?.date).slice(5, -17)}.
-          {String(currPayment?.date).slice(0, -20)} року.
+          {String(newData?.date).slice(8, -14)}.
+          {String(newData?.date).slice(5, -17)}.
+          {String(newData?.date).slice(0, -20)} року.
         </div>
         <div className={s.invoice_end__pay}>
-          Підлягає сплаті до {String(currPayment?.date).slice(8, -14)}.
-          {String(currPayment?.date).slice(5, -17)}.
-          {String(currPayment?.date).slice(0, -20)} року.
+          Підлягає сплаті до {String(newData?.date).slice(8, -14)}.
+          {String(newData?.date).slice(5, -17)}.
+          {String(newData?.date).slice(0, -20)} року.
         </div>
 
         <div>
@@ -230,11 +230,11 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
         </div>
         <div className={s.pay_table}>
           Всього на суму:
-          <div className={s.pay_table_bold}>{currPayment?.debit} гривень</div>
+          <div className={s.pay_table_bold}>{newData?.debit} гривень</div>
         </div>
         <div className={s.pay_info}>
           Загальна сумма оплати:
-          <div className={s.pay_info_money}>{currPayment?.debit}грн</div>
+          <div className={s.pay_info_money}>{newData?.debit}грн</div>
         </div>
 
         <div className={s.pay_admin}>

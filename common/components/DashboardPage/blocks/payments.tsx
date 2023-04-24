@@ -27,6 +27,7 @@ const PaymentsBlock = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const router = useRouter()
   const [currentPayment, setCurrentPayment] = useState(null)
+  const [currPayment, setCurrPayment] = useState<IExtendedPayment>(null)
   const {
     pathname,
     query: { email },
@@ -67,11 +68,16 @@ const PaymentsBlock = () => {
   }
   const handleEyeClick = (id) => {
     setCurrentPayment(payments.find((item) => item._id === id))
+    setCurrPayment(payments.find((item) => item._id === id))
+    setCurrentPayment || true
   }
 
   const closeModal = () => {
     if (currentPayment) {
       setCurrentPayment(null)
+    }
+    if (currPayment) {
+      setCurrPayment(null)
     } else {
       setIsModalOpen(false)
     }
