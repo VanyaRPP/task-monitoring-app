@@ -11,92 +11,93 @@ import { useReactToPrint } from 'react-to-print'
 
 interface Props {
   currPayment: IExtendedPayment
+  paymentData: any
 }
 
-// function numToPr(number) {
-//   const k = [
-//       'одна тисяча',
-//       'дві тисячі',
-//       'три тисячі',
-//       'чотири тисячі',
-//       "п'ять тисяч",
-//       'шість тисяч',
-//       'сім тисяч',
-//       'вісім тисяч',
-//       "дев'ять тисяч",
-//     ],
-//     h = [
-//       'сто',
-//       'двісті',
-//       'триста',
-//       'чотириста',
-//       "п'ятсот",
-//       'шість сотень',
-//       'сімсот',
-//       'вісімсот',
-//       "дев'ятсот",
-//     ],
-//     t = [
-//       '',
-//       'двадцять',
-//       'тридцять',
-//       'сорок',
-//       "п'ятдесят",
-//       'шістдесят',
-//       'сімдесят',
-//       'вісімдесят',
-//       "дев'яносто",
-//     ],
-//     o = [
-//       'один',
-//       'два',
-//       'три',
-//       'чотири',
-//       "п'ять",
-//       'шість',
-//       'сім',
-//       'вісім',
-//       "дев'ять",
-//     ],
-//     p = [
-//       'одиннадцять',
-//       'дванадцять',
-//       'тринадцять',
-//       'чотирнадцять',
-//       "п'ятнадцять",
-//       'шістнадцять',
-//       'сімнадцять',
-//       'вісімнадцять',
-//       "де'ятнадцять",
-//     ]
-//   let str = number.toString(),
-//     out = ''
+function numToPr(number) {
+  const k = [
+      'одна тисяча',
+      'дві тисячі',
+      'три тисячі',
+      'чотири тисячі',
+      "п'ять тисяч",
+      'шість тисяч',
+      'сім тисяч',
+      'вісім тисяч',
+      "дев'ять тисяч",
+    ],
+    h = [
+      'сто',
+      'двісті',
+      'триста',
+      'чотириста',
+      "п'ятсот",
+      'шість сотень',
+      'сімсот',
+      'вісімсот',
+      "дев'ятсот",
+    ],
+    t = [
+      '',
+      'двадцять',
+      'тридцять',
+      'сорок',
+      "п'ятдесят",
+      'шістдесят',
+      'сімдесят',
+      'вісімдесят',
+      "дев'яносто",
+    ],
+    o = [
+      'один',
+      'два',
+      'три',
+      'чотири',
+      "п'ять",
+      'шість',
+      'сім',
+      'вісім',
+      "дев'ять",
+    ],
+    p = [
+      'одиннадцять',
+      'дванадцять',
+      'тринадцять',
+      'чотирнадцять',
+      "п'ятнадцять",
+      'шістнадцять',
+      'сімнадцять',
+      'вісімнадцять',
+      "де'ятнадцять",
+    ]
+  let str = number.toString(),
+    out = ''
 
-//   if (str.length == 1) return o[number - 1]
-//   else if (str.length == 2) {
-//     if (str[0] == 1) out = p[parseInt(str[1]) - 1]
-//     else
-//       out =
-//         t[parseInt(str[0]) - 1] +
-//         (str[1] != '0' ? ' ' + o[parseInt(str[1]) - 1] : '')
-//   } else if (str.length == 3) {
-//     out =
-//       h[parseInt(str[0]) - 1] +
-//       (str[1] != '0' ? ' ' + t[parseInt(str[1]) - 1] : '') +
-//       (str[2] != '0' ? ' ' + o[parseInt(str[2]) - 1] : '')
-//   } else if (str.length == 4) {
-//     out =
-//       k[parseInt(str[0]) - 1] +
-//       (str[1] != '0' ? ' ' + h[parseInt(str[1]) - 1] : '') +
-//       (str[2] != '0' ? ' ' + t[parseInt(str[2]) - 1] : '') +
-//       (str[3] != '0' ? ' ' + o[parseInt(str[3]) - 1] : '')
-//   }
+  if (str.length == 1) return o[number - 1]
+  else if (str.length == 2) {
+    if (str[0] == 1) out = p[parseInt(str[1]) - 1]
+    else
+      out =
+        t[parseInt(str[0]) - 1] +
+        (str[1] != '0' ? ' ' + o[parseInt(str[1]) - 1] : '')
+  } else if (str.length == 3) {
+    out =
+      h[parseInt(str[0]) - 1] +
+      (str[1] != '0' ? ' ' + t[parseInt(str[1]) - 1] : '') +
+      (str[2] != '0' ? ' ' + o[parseInt(str[2]) - 1] : '')
+  } else if (str.length == 4) {
+    out =
+      k[parseInt(str[0]) - 1] +
+      (str[1] != '0' ? ' ' + h[parseInt(str[1]) - 1] : '') +
+      (str[2] != '0' ? ' ' + t[parseInt(str[2]) - 1] : '') +
+      (str[3] != '0' ? ' ' + o[parseInt(str[3]) - 1] : '')
+  }
 
-//   let arr = out.split('')
-//   arr[0] = arr[0].toUpperCase()
-//   out = arr.join('')
-//   return out
-// }
+  let arr = out.split('')
+  arr[0] = arr[0].toUpperCase()
+  out = arr.join('')
+  return out
+}
 
 interface DataType {
   id: number
@@ -105,8 +106,9 @@ interface DataType {
   Ціна: number
   Сумма: number
 }
-const ReceiptForm: FC<Props> = ({ currPayment }) => {
-  const { data } = useGetUserByIdQuery(String(currPayment?.payer))
+const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
+  const newData = currPayment || paymentData
+  const { data } = useGetUserByIdQuery(String(newData?.payer))
   console.log(data)
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
@@ -145,34 +147,33 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
     {
       id: 1,
       Назва: `Утримання  (${moment().format('MMMM')})`,
-      Кількість: Number(currPayment?.maintenance?.amount),
-      Ціна: Number(currPayment?.maintenance?.price),
-      Сумма: Number(currPayment?.maintenance?.sum),
+      Кількість: Number(newData?.maintenance?.amount),
+      Ціна: Number(newData?.maintenance?.price),
+      Сумма: Number(newData?.maintenance?.sum),
     },
     {
       id: 2,
       Назва: `Розміщення  (${moment().format('MMMM')})`,
-      Кількість: Number(currPayment?.placing?.amount),
-      Ціна: Number(currPayment?.placing?.price),
-      Сумма: Number(currPayment?.placing?.sum),
+      Кількість: Number(newData?.placing?.amount),
+      Ціна: Number(newData?.placing?.price),
+      Сумма: Number(newData?.placing?.sum),
     },
     {
       id: 3,
       Назва: `За водопостачання (${moment().format('MMMM')})`,
       Кількість:
-        Number(currPayment?.water?.amount) -
-        Number(currPayment?.water?.lastAmount),
-      Ціна: Number(currPayment?.water?.price),
-      Сумма: Number(currPayment?.water?.sum),
+        Number(newData?.water?.amount) - Number(newData?.water?.lastAmount),
+      Ціна: Number(newData?.water?.price),
+      Сумма: Number(newData?.water?.sum),
     },
     {
       id: 4,
       Назва: `За електропостачання (${moment().format('MMMM')})`,
       Кількість:
-        Number(currPayment?.electricity?.amount) -
-        Number(currPayment?.electricity?.lastAmount),
-      Ціна: Number(currPayment?.electricity?.price),
-      Сумма: Number(currPayment?.electricity?.sum),
+        Number(newData?.electricity?.amount) -
+        Number(newData?.electricity?.lastAmount),
+      Ціна: Number(newData?.electricity?.price),
+      Сумма: Number(newData?.electricity?.sum),
     },
   ]
   return (
@@ -210,14 +211,14 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
 
         <div className={s.invoice_data}>
           Від &nbsp;
-          {String(currPayment?.date).slice(8, -14)}.
-          {String(currPayment?.date).slice(5, -17)}.
-          {String(currPayment?.date).slice(0, -20)} року.
+          {String(newData?.date).slice(8, -14)}.
+          {String(newData?.date).slice(5, -17)}.
+          {String(newData?.date).slice(0, -20)} року.
         </div>
         <div className={s.invoice_end__pay}>
-          Підлягає сплаті до {String(currPayment?.date).slice(8, -14)}.
-          {String(currPayment?.date).slice(5, -17)}.
-          {String(currPayment?.date).slice(0, -20)} року.
+          Підлягає сплаті до {String(newData?.date).slice(8, -14)}.
+          {String(newData?.date).slice(5, -17)}.
+          {String(newData?.date).slice(0, -20)} року.
         </div>
 
         <div>
@@ -230,11 +231,13 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
         </div>
         <div className={s.pay_table}>
           Всього на суму:
-          <div className={s.pay_table_bold}>{currPayment?.debit} гривень</div>
+          <div className={s.pay_table_bold}>
+            {numToPr(newData?.debit)} гривень
+          </div>
         </div>
         <div className={s.pay_info}>
           Загальна сумма оплати:
-          <div className={s.pay_info_money}>{currPayment?.debit}грн</div>
+          <div className={s.pay_info_money}>{newData?.debit}грн</div>
         </div>
 
         <div className={s.pay_admin}>
@@ -259,9 +262,6 @@ const ReceiptForm: FC<Props> = ({ currPayment }) => {
         {' '}
         Роздрукувати Документ
       </Button>
-      {/* <button className={s.button} onClick={handlePrint}> */}
-      {/* Роздрукувати Документ
-      </button>  */}
     </>
   )
 }
