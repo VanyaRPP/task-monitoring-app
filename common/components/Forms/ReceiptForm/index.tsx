@@ -14,90 +14,90 @@ interface Props {
   paymentData: any
 }
 
-// function numToPr(number) {
-//   const k = [
-//       'одна тисяча',
-//       'дві тисячі',
-//       'три тисячі',
-//       'чотири тисячі',
-//       "п'ять тисяч",
-//       'шість тисяч',
-//       'сім тисяч',
-//       'вісім тисяч',
-//       "дев'ять тисяч",
-//     ],
-//     h = [
-//       'сто',
-//       'двісті',
-//       'триста',
-//       'чотириста',
-//       "п'ятсот",
-//       'шість сотень',
-//       'сімсот',
-//       'вісімсот',
-//       "дев'ятсот",
-//     ],
-//     t = [
-//       '',
-//       'двадцять',
-//       'тридцять',
-//       'сорок',
-//       "п'ятдесят",
-//       'шістдесят',
-//       'сімдесят',
-//       'вісімдесят',
-//       "дев'яносто",
-//     ],
-//     o = [
-//       'один',
-//       'два',
-//       'три',
-//       'чотири',
-//       "п'ять",
-//       'шість',
-//       'сім',
-//       'вісім',
-//       "дев'ять",
-//     ],
-//     p = [
-//       'одиннадцять',
-//       'дванадцять',
-//       'тринадцять',
-//       'чотирнадцять',
-//       "п'ятнадцять",
-//       'шістнадцять',
-//       'сімнадцять',
-//       'вісімнадцять',
-//       "де'ятнадцять",
-//     ]
-//   let str = number.toString(),
-//     out = ''
+function numToPr(number) {
+  const k = [
+      'одна тисяча',
+      'дві тисячі',
+      'три тисячі',
+      'чотири тисячі',
+      "п'ять тисяч",
+      'шість тисяч',
+      'сім тисяч',
+      'вісім тисяч',
+      "дев'ять тисяч",
+    ],
+    h = [
+      'сто',
+      'двісті',
+      'триста',
+      'чотириста',
+      "п'ятсот",
+      'шість сотень',
+      'сімсот',
+      'вісімсот',
+      "дев'ятсот",
+    ],
+    t = [
+      '',
+      'двадцять',
+      'тридцять',
+      'сорок',
+      "п'ятдесят",
+      'шістдесят',
+      'сімдесят',
+      'вісімдесят',
+      "дев'яносто",
+    ],
+    o = [
+      'один',
+      'два',
+      'три',
+      'чотири',
+      "п'ять",
+      'шість',
+      'сім',
+      'вісім',
+      "дев'ять",
+    ],
+    p = [
+      'одиннадцять',
+      'дванадцять',
+      'тринадцять',
+      'чотирнадцять',
+      "п'ятнадцять",
+      'шістнадцять',
+      'сімнадцять',
+      'вісімнадцять',
+      "де'ятнадцять",
+    ]
+  let str = number.toString(),
+    out = ''
 
-//   if (str.length == 1) return o[number - 1]
-//   else if (str.length == 2) {
-//     if (str[0] == 1) out = p[parseInt(str[1]) - 1]
-//     else
-//       out =
-//         t[parseInt(str[0]) - 1] +
-//         (str[1] != '0' ? ' ' + o[parseInt(str[1]) - 1] : '')
-//   } else if (str.length == 3) {
-//     out =
-//       h[parseInt(str[0]) - 1] +
-//       (str[1] != '0' ? ' ' + t[parseInt(str[1]) - 1] : '') +
-//       (str[2] != '0' ? ' ' + o[parseInt(str[2]) - 1] : '')
-//   } else if (str.length == 4) {
-//     out =
-//       k[parseInt(str[0]) - 1] +
-//       (str[1] != '0' ? ' ' + h[parseInt(str[1]) - 1] : '') +
-//       (str[2] != '0' ? ' ' + t[parseInt(str[2]) - 1] : '') +
-//       (str[3] != '0' ? ' ' + o[parseInt(str[3]) - 1] : '')
-//   }
+  if (str.length == 1) return o[number - 1]
+  else if (str.length == 2) {
+    if (str[0] == 1) out = p[parseInt(str[1]) - 1]
+    else
+      out =
+        t[parseInt(str[0]) - 1] +
+        (str[1] != '0' ? ' ' + o[parseInt(str[1]) - 1] : '')
+  } else if (str.length == 3) {
+    out =
+      h[parseInt(str[0]) - 1] +
+      (str[1] != '0' ? ' ' + t[parseInt(str[1]) - 1] : '') +
+      (str[2] != '0' ? ' ' + o[parseInt(str[2]) - 1] : '')
+  } else if (str.length == 4) {
+    out =
+      k[parseInt(str[0]) - 1] +
+      (str[1] != '0' ? ' ' + h[parseInt(str[1]) - 1] : '') +
+      (str[2] != '0' ? ' ' + t[parseInt(str[2]) - 1] : '') +
+      (str[3] != '0' ? ' ' + o[parseInt(str[3]) - 1] : '')
+  }
 
-//   let arr = out.split('')
-//   arr[0] = arr[0].toUpperCase()
-//   out = arr.join('')
-//   return out
-// }
+  let arr = out.split('')
+  arr[0] = arr[0].toUpperCase()
+  out = arr.join('')
+  return out
+}
 
 interface DataType {
   id: number
@@ -109,6 +109,7 @@ interface DataType {
 const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const newData = currPayment || paymentData
   const { data } = useGetUserByIdQuery(String(newData?.payer))
+  console.log(data)
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -230,7 +231,9 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
         </div>
         <div className={s.pay_table}>
           Всього на суму:
-          <div className={s.pay_table_bold}>{newData?.debit} гривень</div>
+          <div className={s.pay_table_bold}>
+            {numToPr(newData?.debit)} гривень
+          </div>
         </div>
         <div className={s.pay_info}>
           Загальна сумма оплати:
@@ -259,9 +262,6 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
         {' '}
         Роздрукувати Документ
       </Button>
-      {/* <button className={s.button} onClick={handlePrint}> */}
-      {/* Роздрукувати Документ
-      </button>  */}
     </>
   )
 }
