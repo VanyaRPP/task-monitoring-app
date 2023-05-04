@@ -14,6 +14,10 @@ export enum AppRoutes {
   SERVICE = '/service',
   CUSTOMER = '/customer',
 }
+export enum COLOR_THEME {
+  DARK = 'Dark',
+  LIGHT = 'Light',
+}
 
 export enum Roles {
   USER = 'User',
