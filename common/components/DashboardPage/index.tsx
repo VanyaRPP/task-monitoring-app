@@ -30,8 +30,8 @@ const Dashboard: FC = () => {
         <PaymentsBlock />
         <ServicesBlock />
         {userRole === Roles.ADMIN && <CustomersBlock />}
-        {userRole !== Roles.USER && <Tasks />}
-        <Orders />
+        {/* {userRole !== Roles.USER && <Tasks />}
+        <Orders /> */}
         {/* <CategoriesBlock />
         <Masters />
         <Domains /> */}
