@@ -4,24 +4,24 @@ import { useAppDispatch } from '../store/hooks'
 import { themeSlice } from '@common/modules/store/reducers/ThemeSlice'
 import { COLOR_THEME } from 'utils/constants'
 import themes from '../../lib/themes.config'
-const colors = ['', COLOR_THEME.DARK, COLOR_THEME.LIGHT]
 
 function getDefaultTheme() {
-  let isDarkColorScheme
   if (typeof window !== 'undefined') {
-    isDarkColorScheme = window.matchMedia(
+    const localValue = JSON.parse(localStorage.getItem('theme')) || ''
+    if (localValue) {
+      const browserColor = COLOR_THEME[localValue.toUpperCase()]
+      if (browserColor) {
+        return browserColor // local storage color
+      }
+    }
+    const isDarkColorScheme = window.matchMedia?.(
       '(prefers-color-scheme: dark)'
     ).matches
-  } // user system/browser theme (color scheme)
 
-  let theme = isDarkColorScheme ? COLOR_THEME.DARK : COLOR_THEME.LIGHT
-  if (typeof window !== 'undefined') {
-    const localValue =
-      JSON.parse(localStorage.getItem('theme')) || COLOR_THEME.LIGHT
-    if (colors.includes(localValue)) theme = localValue
+    return isDarkColorScheme ? COLOR_THEME.DARK : COLOR_THEME.LIGHT // system prefer color
   }
 
-  return theme
+  return COLOR_THEME.LIGHT // default color
 }
 
 export default function useTheme(value: string = getDefaultTheme()) {
@@ -42,7 +42,9 @@ export default function useTheme(value: string = getDefaultTheme()) {
       theme: {
         primaryColor: themes[theme].primaryColor,
       },
-    }) // antd
+    })
+
+    // antd
     for (const key in themes[theme]) {
       document.documentElement.style.setProperty(`--${key}`, themes[theme][key])
     } // custom css variables

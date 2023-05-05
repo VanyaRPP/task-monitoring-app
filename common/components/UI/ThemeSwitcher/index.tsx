@@ -2,21 +2,23 @@ import React from 'react'
 import { Switch } from 'antd'
 import { BulbOutlined, BulbFilled } from '@ant-design/icons'
 import useTheme from 'common/modules/hooks/useTheme'
-import { useAppSelector } from '../../../modules/store/hooks'
 import s from './style.module.scss'
+import { COLOR_THEME } from '@utils/constants'
 
 const ThemeSwitcher: React.FC = () => {
-  const [_, setTheme] = useTheme()
-
-  const { theme } = useAppSelector((state) => state.themeReducer)
+  const [theme, setTheme] = useTheme()
 
   return (
     <Switch
       className={s.ThemeSwitcher}
-      checked={theme == 'dark'}
+      checked={theme === COLOR_THEME.DARK}
       checkedChildren={<BulbOutlined />}
       unCheckedChildren={<BulbFilled />}
-      onChange={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+      onChange={() =>
+        setTheme(
+          theme === COLOR_THEME.LIGHT ? COLOR_THEME.DARK : COLOR_THEME.LIGHT
+        )
+      }
     />
   )
 }
