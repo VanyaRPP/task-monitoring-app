@@ -15,8 +15,8 @@ export enum AppRoutes {
   CUSTOMER = '/customer',
 }
 export enum COLOR_THEME {
-  DARK = 'Dark',
-  LIGHT = 'Light',
+  DARK = 'dark',
+  LIGHT = 'light',
 }
 
 export enum Roles {
