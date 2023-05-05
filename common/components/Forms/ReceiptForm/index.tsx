@@ -104,7 +104,7 @@ interface DataType {
   Назва: string
   Кількість: number
   Ціна: number
-  Сумма: number
+  Сума: number
 }
 const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const newData = currPayment || paymentData
@@ -119,26 +119,31 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     {
       title: '№',
       dataIndex: 'id',
+      width: '10%',
     },
     {
       title: 'Назва',
       dataIndex: 'Назва',
       key: 'Назва',
+      width: '40%',
     },
     {
       title: 'Кількість',
       dataIndex: 'Кількість',
       key: 'Кількість',
+      width: '15%',
     },
     {
       title: 'Ціна',
       key: 'Ціна',
       dataIndex: 'Ціна',
+      width: '15%',
     },
     {
-      title: 'Сумма',
-      key: 'Сумма',
-      dataIndex: 'Сумма',
+      title: 'Сума',
+      key: 'Сума',
+      dataIndex: 'Сума',
+      width: '20%',
     },
   ]
 
@@ -148,14 +153,14 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
       Назва: `Утримання  (${moment().format('MMMM')})`,
       Кількість: Number(newData?.maintenance?.amount),
       Ціна: Number(newData?.maintenance?.price),
-      Сумма: Number(newData?.maintenance?.sum),
+      Сума: Number(newData?.maintenance?.sum),
     },
     {
       id: 2,
       Назва: `Розміщення  (${moment().format('MMMM')})`,
       Кількість: Number(newData?.placing?.amount),
       Ціна: Number(newData?.placing?.price),
-      Сумма: Number(newData?.placing?.sum),
+      Сума: Number(newData?.placing?.sum),
     },
     {
       id: 3,
@@ -163,7 +168,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
       Кількість:
         Number(newData?.water?.amount) - Number(newData?.water?.lastAmount),
       Ціна: Number(newData?.water?.price),
-      Сумма: Number(newData?.water?.sum),
+      Сума: Number(newData?.water?.sum),
     },
     {
       id: 4,
@@ -172,7 +177,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
         Number(newData?.electricity?.amount) -
         Number(newData?.electricity?.lastAmount),
       Ціна: Number(newData?.electricity?.price),
-      Сумма: Number(newData?.electricity?.sum),
+      Сума: Number(newData?.electricity?.sum),
     },
   ]
   return (
@@ -190,10 +195,10 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
         <>
           <div className={s.info_order}>Постачальник</div>
           <div className={s.info_adres}>
-            ТОВ Український центр дуальної освіти <br /> Adress 01030, м. Київ,
+            ТОВ Український центр дуальної освіти <br /> Адреса: 01030, м. Київ,
             вул. Б. Хмельницького, буд. 51Б <br />
-            Registatipn number 42637285 <br />є платником податку на прибуток на
-            загальних підставах <br />
+            Реєстраційний номер 42637285 <br />є платником податку на прибуток
+            на загальних підставах <br />
             <div className={s.info_adres__bold}>
               Р/р UA903052990000026006016402729 <br />
               АТ КБ «ПРИВАТБАНК» МФО: 311744
