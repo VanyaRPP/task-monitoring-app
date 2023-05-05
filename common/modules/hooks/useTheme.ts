@@ -2,17 +2,24 @@ import { useEffect, useState } from 'react'
 import { ConfigProvider } from 'antd'
 import { useAppDispatch } from '../store/hooks'
 import { themeSlice } from '@common/modules/store/reducers/ThemeSlice'
+import { COLOR_THEME } from 'utils/constants'
 import themes from '../../lib/themes.config'
+const colors = ['', COLOR_THEME.DARK, COLOR_THEME.LIGHT]
 
 function getDefaultTheme() {
-  let systemColorScheme
+  let isDarkColorScheme
   if (typeof window !== 'undefined') {
-    systemColorScheme = window.matchMedia(
+    isDarkColorScheme = window.matchMedia(
       '(prefers-color-scheme: dark)'
     ).matches
   } // user system/browser theme (color scheme)
 
-  let theme = systemColorScheme ? 'dark' : 'light'
+  let theme = isDarkColorScheme ? COLOR_THEME.DARK : COLOR_THEME.LIGHT
+  if (typeof window !== 'undefined') {
+    const localValue =
+      JSON.parse(localStorage.getItem('theme')) || COLOR_THEME.LIGHT
+    if (colors.includes(localValue)) theme = localValue
+  }
 
   return theme
 }
