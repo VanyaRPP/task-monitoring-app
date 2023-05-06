@@ -47,9 +47,14 @@
   }
 }
 
+.SkeletonAvatar,
 .Avatar {
   padding: 0 20px;
   cursor: pointer;
+}
+
+.SkeletonAvatar {
+  margin-top: 28px;
 }
 
 .Button {

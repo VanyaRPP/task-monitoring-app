@@ -9,17 +9,19 @@ const ThemeSwitcher: React.FC = () => {
   const [theme, setTheme] = useTheme()
 
   return (
-    <Switch
-      className={s.ThemeSwitcher}
-      checked={theme === COLOR_THEME.DARK}
-      checkedChildren={<BulbOutlined />}
-      unCheckedChildren={<BulbFilled />}
-      onChange={() =>
-        setTheme(
-          theme === COLOR_THEME.LIGHT ? COLOR_THEME.DARK : COLOR_THEME.LIGHT
-        )
-      }
-    />
+    <div className={s.tsWrapper}>
+      <Switch
+        className={s.ThemeSwitcher}
+        checked={theme === COLOR_THEME.DARK}
+        checkedChildren={<BulbOutlined />}
+        unCheckedChildren={<BulbFilled />}
+        onChange={() =>
+          setTheme(
+            theme === COLOR_THEME.LIGHT ? COLOR_THEME.DARK : COLOR_THEME.LIGHT
+          )
+        }
+      />
+    </div>
   )
 }
 

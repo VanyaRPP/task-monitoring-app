@@ -1,28 +1,22 @@
-import React, { FC, ReactElement, useState } from 'react'
-import { Alert, message, Popconfirm, Spin, Table } from 'antd'
+import React, { ReactElement } from 'react'
+import { Alert, message, Popconfirm, Table } from 'antd'
 import ServiceCardHeader from '@common/components/UI/ServiceCardHeader'
 import TableCard from '@common/components/UI/TableCard'
 import {
   useDeleteServiceMutation,
   useGetAllServicesQuery,
 } from '@common/api/serviceApi/service.api'
-import {
-  dateToDefaultFormat,
-  dateToPick,
-} from '@common/assets/features/formatDate'
+import { dateToPick } from '@common/assets/features/formatDate'
 import { IExtendedService } from '@common/api/serviceApi/service.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
-import { EyeOutlined } from '@ant-design/icons'
 import { Tooltip } from 'antd'
 import Link from 'next/link'
-import { Button } from 'antd'
 import { useRouter } from 'next/router'
 import { SelectOutlined } from '@ant-design/icons'
 import cn from 'classnames'
 import { useSession } from 'next-auth/react'
-import AddServiceModal from '@common/components/AddServiceModal'
 import moment from 'moment'
 import s from './style.module.scss'
 import { firstTextToUpperCase } from '@utils/helpers'
@@ -35,12 +29,8 @@ const ServicesBlock = () => {
   } = router
   const { data } = useSession()
 
-  const {
-    data: byEmailUser,
-    isLoading: byEmailUserLoading,
-    isFetching: byEmailUserFetching,
-    isError: byEmailUserError,
-  } = useGetUserByEmailQuery(email, { skip: !email })
+  // TODO: Fix security. Something wrong here. User NOT ALLOWED to fetch other users
+  // User should have route without email argument inside
   const {
     data: currUser,
     isLoading: currUserLoading,
@@ -57,9 +47,6 @@ const ServicesBlock = () => {
     isError: servicesError,
   } = useGetAllServicesQuery({
     limit: pathname === AppRoutes.SERVICE ? 200 : 5,
-    ...(email || isAdmin
-      ? { userId: byEmailUser?.data._id as string }
-      : { userId: currUser?.data._id as string }),
   })
 
   const [deleteService, { isLoading: deleteLoading, isError: deleteError }] =
@@ -146,7 +133,7 @@ const ServicesBlock = () => {
 
   let content: ReactElement
 
-  if (byEmailUserError || deleteError || servicesError || currUserError) {
+  if (deleteError || servicesError || currUserError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
@@ -157,8 +144,6 @@ const ServicesBlock = () => {
         size="small"
         bordered
         loading={
-          byEmailUserLoading ||
-          byEmailUserFetching ||
           currUserLoading ||
           currUserFetching ||
           servicesLoading ||
