@@ -69,6 +69,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   return (
     <Modal
       open={true}
+      maskClosable={false}
       title={!edit && 'Додавання рахунку'}
       onOk={
         activeTabKey === '1'
@@ -99,7 +100,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
 }
 
 function getActiveTab(paymentData, edit) {
-  if (paymentData.credit) return '1'
+  if (paymentData?.credit) return '1'
   return edit ? '2' : '1'
 }
 

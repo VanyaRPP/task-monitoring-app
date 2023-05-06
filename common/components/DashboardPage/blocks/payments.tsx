@@ -120,6 +120,7 @@ const PaymentsBlock = () => {
       dataIndex: 'debit',
       key: 'debit',
       width: '10%',
+      render: renderCurrency,
     },
     {
       title: (
@@ -130,6 +131,7 @@ const PaymentsBlock = () => {
       dataIndex: 'credit',
       key: 'credit',
       width: '10%',
+      render: renderCurrency,
     },
     {
       title: 'Опис',
@@ -227,6 +229,15 @@ const PaymentsBlock = () => {
       )}
       {content}
     </TableCard>
+  )
+}
+
+// TODO: move to common helpers
+export function renderCurrency(number) {
+  return (
+    <div className={s.currency}>
+      {number ? new Intl.NumberFormat('en-EN').format(number) : '-'}
+    </div>
   )
 }
 

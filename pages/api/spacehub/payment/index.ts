@@ -84,6 +84,7 @@ export default async function handler(
       } catch (error) {
         return res.status(400).json({ success: false })
       }
+
     case 'POST':
       try {
         const session = await getServerSession(req, res, authOptions)
