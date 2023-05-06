@@ -35,7 +35,7 @@ export const validateField = (name: string): Rule[] => {
     max: 200000,
     message: 'Сума рахунку повинна бути в межах [1, 200000]',
   }
-  const electricPrice: Rule = {
+  const electricityPrice: Rule = {
     type: 'number',
     min: 1,
     max: 200000,
@@ -47,13 +47,13 @@ export const validateField = (name: string): Rule[] => {
     max: 200000,
     message: 'Сума рахунку повинна бути в межах [1, 200000]',
   }
-  const inflaPrice: Rule = {
+  const inflicionPrice: Rule = {
     type: 'number',
     min: 1,
     max: 200000,
     message: 'Сума рахунку повинна бути в межах [1, 200000]',
   }
-  const orenda: Rule = {
+  const rentPrice: Rule = {
     type: 'number',
     min: 1,
     max: 200000,
@@ -106,17 +106,17 @@ export const validateField = (name: string): Rule[] => {
     case 'paymentPrice':
       return [required, paymentPrice]
 
-    case 'electricPrice':
-      return [required, electricPrice]
+    case 'electricityPrice':
+      return [required, electricityPrice]
 
     case 'waterPrice':
       return [required, waterPrice]
 
-    case 'inflaPrice':
-      return [required, inflaPrice]
+    case 'inflicionPrice':
+      return [required, inflicionPrice]
 
-    case 'orenda':
-      return [required, orenda]
+    case 'rentPrice':
+      return [required, rentPrice]
 
     case 'required':
       return [required]

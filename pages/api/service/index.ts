@@ -14,16 +14,29 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  const session = await getServerSession(req, res, authOptions)
+  const user = await User.findOne({ email: session?.user?.email })
+
+  if (!user) {
+    return res.status(400).json({ success: false, message: 'not allowed' })
+  }
+
+  const isAdmin = user?.role === Roles.ADMIN
+
   switch (req.method) {
     case 'GET':
       try {
-        const session = await getServerSession(req, res, authOptions)
-        const user = await User.findOne({ email: session.user.email })
-        const isAdmin = user?.role === Roles.ADMIN
+        const props = {}
 
-        const services = await Service.find(
-          isAdmin ? { email: req.query.email } : { email: session.user.email }
-        )
+        if (isAdmin) {
+          if (req.query.email) {
+            props.email = req.query.email
+          }
+        } else {
+          props.email = session.user.email
+        }
+
+        const services = await Service.find(props)
           .sort({ data: -1 })
           .limit(req.query.limit)
 
@@ -34,10 +47,18 @@ export default async function handler(
       } catch (error) {
         return res.status(400).json({ success: false })
       }
+
     case 'POST':
       try {
-        const service = await Service.create(req.body)
-        return res.status(200).json({ success: true, data: service })
+        if (isAdmin) {
+          // TODO: body validation
+          const service = await Service.create(req.body)
+          return res.status(200).json({ success: true, data: service })
+        } else {
+          return res
+            .status(400)
+            .json({ success: false, message: 'not allowed' })
+        }
       } catch (error) {
         return res.status(400).json({ success: false })
       }
