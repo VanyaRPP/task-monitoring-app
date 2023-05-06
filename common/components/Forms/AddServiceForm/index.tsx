@@ -16,11 +16,18 @@ const AddServiceForm: FC<Props> = ({ form }) => {
       <Form.Item
         name="date"
         label="Місяць та рік"
-        rules={validateField('data')}
+        rules={validateField('date')}
       >
         <MonthPicker
           format="MMMM YYYY"
           placeholder="Оберіть місяць"
+          className={s.formInput}
+        />
+      </Form.Item>
+      <Form.Item name="address" label="Адреса" rules={validateField('address')}>
+        <Input
+          placeholder="Введіть адресу"
+          maxLength={256}
           className={s.formInput}
         />
       </Form.Item>

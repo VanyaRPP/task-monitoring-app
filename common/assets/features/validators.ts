@@ -82,6 +82,9 @@ export const validateField = (name: string): Rule[] => {
     case 'email':
       return [required, email]
 
+    case 'address':
+      return [required]
+
     case 'description':
       return [required]
 

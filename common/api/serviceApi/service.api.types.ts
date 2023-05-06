@@ -3,6 +3,7 @@ import { ObjectId } from 'mongoose'
 export interface IService {
   rentPrice: number
   date: Date
+  address: string
   electricityPrice: number
   waterPrice: number
   inflicionPrice: number
