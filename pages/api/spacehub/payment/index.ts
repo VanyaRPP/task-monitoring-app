@@ -9,6 +9,8 @@ import validateMiddleware from '@common/lib/validateMiddleware'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
 import { getPaymentOptions } from '@utils/helpers'
+import User from '@common/modules/models/User'
+import { Roles } from '@utils/constants'
 
 start()
 
@@ -84,10 +86,18 @@ export default async function handler(
       }
     case 'POST':
       try {
-        await postValidateBody(req, res)
-        const payment = await Payment.create(req.body)
-
-        return res.status(200).json({ success: true, data: payment })
+        const session = await getServerSession(req, res, authOptions)
+        const user = await User.findOne({ email: session.user.email })
+        const isAdmin = user?.role === Roles.ADMIN
+        if (isAdmin) {
+          await postValidateBody(req, res)
+          const payment = await Payment.create(req.body)
+          return res.status(200).json({ success: true, data: payment })
+        } else {
+          return res
+            .status(400)
+            .json({ success: false, message: 'not allowed' })
+        }
       } catch (error) {
         const errors = postValidateBody(req)
         return res.status(400).json({ errors: errors.array() })

@@ -5,6 +5,7 @@ import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import PaymentModalTable from '@common/components/PaymentModalTable'
 import { useRouter } from 'next/router'
 import s from './style.module.scss'
+import { Operations } from '@utils/constants'
 
 interface Props {
   form: FormInstance<any>
@@ -49,7 +50,7 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
         description: paymentData?.description,
         credit: paymentData?.credit,
         debit: paymentData?.debit,
-        operation: paymentData?.debit ? 'debit' : 'credit',
+        operation: paymentData?.debit ? Operations.Debit : Operations.Credit,
         payer: paymentData?.payer?._id,
       }}
       form={form}
@@ -93,7 +94,7 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
         className={s.priceItem}
       >
         {({ getFieldValue }) =>
-          getFieldValue('operation') === 'credit' ? (
+          getFieldValue('operation') === Operations.Credit ? (
             <>
               <Form.Item
                 name="credit"

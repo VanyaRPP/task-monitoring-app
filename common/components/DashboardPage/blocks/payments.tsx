@@ -120,7 +120,6 @@ const PaymentsBlock = () => {
       dataIndex: 'debit',
       key: 'debit',
       width: '10%',
-      render: (debit) => debit,
     },
     {
       title: (
@@ -131,7 +130,6 @@ const PaymentsBlock = () => {
       dataIndex: 'credit',
       key: 'credit',
       width: '10%',
-      render: (credit) => credit,
     },
     {
       title: 'Опис',
