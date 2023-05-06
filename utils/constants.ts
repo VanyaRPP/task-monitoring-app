@@ -14,6 +14,12 @@ export enum AppRoutes {
   SERVICE = '/service',
   CUSTOMER = '/customer',
 }
+
+export enum Operations {
+  Credit = 'credit',
+  Debit = 'debit',
+}
+
 export enum COLOR_THEME {
   DARK = 'dark',
   LIGHT = 'light',

@@ -8,7 +8,7 @@ import React, { FC, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
-// import ReactPdfPrint from '../Forms/ReceiptForm/ReactPdfPrint'
+import { Operations } from '@utils/constants'
 
 interface Props {
   closeModal: VoidFunction
@@ -70,8 +70,12 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
         activeTabKey === '1'
           ? () => {
               form.validateFields().then((values) => {
-                setCurrPayment(values)
-                setActiveTabKey('2')
+                if (values.operation === Operations.Credit) {
+                  handleSubmit()
+                } else {
+                  setCurrPayment(values)
+                  setActiveTabKey('2')
+                }
               })
             }
           : handleSubmit
