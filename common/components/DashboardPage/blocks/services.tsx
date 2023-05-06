@@ -64,31 +64,30 @@ const ServicesBlock = () => {
   const columns = [
     {
       title: '',
-      dataIndex: 'data',
-      key: 'data',
+      dataIndex: 'date',
+      key: 'date',
       width: '19%',
+      // TODO: use formatter from helper
+      // dateToPick
       render: (data) => firstTextToUpperCase(moment(data).format('MMMM')),
     },
     {
       title: 'Утримання',
-      dataIndex: 'orenda',
-      key: 'orenda',
+      dataIndex: 'rentPrice',
+      key: 'rentPrice',
       width: '23%',
-      render: (orenda) => orenda,
     },
     {
       title: 'Електрика',
-      dataIndex: 'electricPrice',
-      key: 'electricPrice',
+      dataIndex: 'electricityPrice',
+      key: 'electricityPrice',
       width: '22%',
-      render: (electricPrice) => electricPrice,
     },
     {
       title: 'Вода',
       dataIndex: 'waterPrice',
       key: 'waterPrice',
       width: '15%',
-      render: (waterPrice) => waterPrice,
     },
     {
       title: (
@@ -96,10 +95,9 @@ const ServicesBlock = () => {
           <span>Індекс</span>
         </Tooltip>
       ),
-      dataIndex: 'inflaPrice',
-      key: 'inflaPrice',
+      dataIndex: 'inflicionPrice',
+      key: 'inflicionPrice',
       width: '13%',
-      render: (inflaPrice) => inflaPrice,
     },
     {
       title: 'Опис',
@@ -117,7 +115,7 @@ const ServicesBlock = () => {
             <div className={s.popconfirm}>
               <Popconfirm
                 title={`Ви впевнені що хочете видалити оплату від ${dateToPick(
-                  service?.data as unknown as string
+                  service?.date as unknown as string
                 )}?`}
                 onConfirm={() => handleDeleteService(service?._id)}
                 cancelText="Відміна"

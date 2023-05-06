@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
 import {
   IExtendedPayment,
@@ -21,7 +22,9 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
 
-  const [activeTabKey, setActiveTabKey] = useState(edit ? '2' : '1')
+  const [activeTabKey, setActiveTabKey] = useState(
+    getActiveTab(paymentData, edit)
+  )
 
   const handleSubmit = async () => {
     const formData: IPayment = await form.validateFields()
@@ -55,7 +58,8 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     {
       key: '2',
       label: 'Перегляд',
-      disabled: !edit,
+      // @ts-ignore
+      disabled: !edit || !!paymentData?.credit,
       children: (
         <ReceiptForm currPayment={currPayment} paymentData={paymentData} />
       ),
@@ -92,6 +96,11 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       <Tabs activeKey={activeTabKey} items={items} onChange={setActiveTabKey} />
     </Modal>
   )
+}
+
+function getActiveTab(paymentData, edit) {
+  if (paymentData.credit) return '1'
+  return edit ? '2' : '1'
 }
 
 export default AddPaymentModal

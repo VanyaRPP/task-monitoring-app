@@ -13,11 +13,11 @@ interface Props {
 }
 
 type FormData = {
-  data: Date
-  orenda: number
-  electricPrice: number
+  date: Date
+  rentPrice: number
+  electricityPrice: number
   waterPrice: number
-  inflaPrice: number
+  inflicionPrice: number
   description: string
 }
 
@@ -27,14 +27,13 @@ const AddServiceModal: FC<Props> = ({ isModalOpen, closeModal }) => {
 
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
-    console.log(formData)
 
     const response = await addService({
-      data: moment(formData.data).toDate(),
-      orenda: formData.orenda,
-      electricPrice: formData.electricPrice,
+      date: moment(formData.date).toDate(),
+      rentPrice: formData.rentPrice,
+      electricityPrice: formData.electricityPrice,
       waterPrice: formData.waterPrice,
-      inflaPrice: formData.inflaPrice,
+      inflicionPrice: formData.inflicionPrice,
       description: formData.description,
     })
     if ('data' in response) {
@@ -48,7 +47,7 @@ const AddServiceModal: FC<Props> = ({ isModalOpen, closeModal }) => {
 
   return (
     <Modal
-      visible={isModalOpen}
+      open={isModalOpen}
       title="Ціна на послуги в місяць"
       onOk={handleSubmit}
       onCancel={closeModal}

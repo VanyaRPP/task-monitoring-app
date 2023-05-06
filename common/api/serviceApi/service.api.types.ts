@@ -1,11 +1,11 @@
 import { ObjectId } from 'mongoose'
 
 export interface IService {
-  orenda: number
-  data: Date
-  electricPrice: number
+  rentPrice: number
+  date: Date
+  electricityPrice: number
   waterPrice: number
-  inflaPrice: number
+  inflicionPrice: number
   description: string
 }
 
