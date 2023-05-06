@@ -20,6 +20,7 @@ import { useSession } from 'next-auth/react'
 import moment from 'moment'
 import s from './style.module.scss'
 import { firstTextToUpperCase } from '@utils/helpers'
+import { renderCurrency } from './payments'
 
 const ServicesBlock = () => {
   const router = useRouter()
@@ -65,29 +66,26 @@ const ServicesBlock = () => {
     {
       title: '',
       dataIndex: 'date',
-      key: 'date',
       width: '19%',
-      // TODO: use formatter from helper
-      // dateToPick
       render: (data) => firstTextToUpperCase(moment(data).format('MMMM')),
     },
     {
       title: 'Утримання',
       dataIndex: 'rentPrice',
-      key: 'rentPrice',
-      width: '23%',
+      width: '12%',
+      render: renderCurrency,
     },
     {
       title: 'Електрика',
       dataIndex: 'electricityPrice',
-      key: 'electricityPrice',
-      width: '22%',
+      width: '12%',
+      render: renderCurrency,
     },
     {
       title: 'Вода',
       dataIndex: 'waterPrice',
-      key: 'waterPrice',
-      width: '15%',
+      width: '12%',
+      render: renderCurrency,
     },
     {
       title: (
@@ -96,8 +94,7 @@ const ServicesBlock = () => {
         </Tooltip>
       ),
       dataIndex: 'inflicionPrice',
-      key: 'inflicionPrice',
-      width: '13%',
+      width: '12%',
     },
     {
       title: 'Опис',

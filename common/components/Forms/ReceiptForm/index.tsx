@@ -1,103 +1,17 @@
-import React, { FC, useEffect, useState, useRef } from 'react'
+import React, { FC, useRef } from 'react'
 import { Button, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
-import { dataSource } from '@utils/tableData'
 import moment from 'moment'
-import { ObjectId } from 'mongoose'
 import { useGetUserByIdQuery } from 'common/api/userApi/user.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useReactToPrint } from 'react-to-print'
+import { renderCurrency } from '@common/components/DashboardPage/blocks/payments'
 
 interface Props {
   currPayment: IExtendedPayment
   paymentData: any
 }
-
-// function numToPr(number) {
-//   const k = [
-//       'одна тисяча',
-//       'дві тисячі',
-//       'три тисячі',
-//       'чотири тисячі',
-//       "п'ять тисяч",
-//       'шість тисяч',
-//       'сім тисяч',
-//       'вісім тисяч',
-//       "дев'ять тисяч",
-//     ],
-//     h = [
-//       'сто',
-//       'двісті',
-//       'триста',
-//       'чотириста',
-//       "п'ятсот",
-//       'шість сотень',
-//       'сімсот',
-//       'вісімсот',
-//       "дев'ятсот",
-//     ],
-//     t = [
-//       '',
-//       'двадцять',
-//       'тридцять',
-//       'сорок',
-//       "п'ятдесят",
-//       'шістдесят',
-//       'сімдесят',
-//       'вісімдесят',
-//       "дев'яносто",
-//     ],
-//     o = [
-//       'один',
-//       'два',
-//       'три',
-//       'чотири',
-//       "п'ять",
-//       'шість',
-//       'сім',
-//       'вісім',
-//       "дев'ять",
-//     ],
-//     p = [
-//       'одиннадцять',
-//       'дванадцять',
-//       'тринадцять',
-//       'чотирнадцять',
-//       "п'ятнадцять",
-//       'шістнадцять',
-//       'сімнадцять',
-//       'вісімнадцять',
-//       "де'ятнадцять",
-//     ]
-//   let str = number.toString(),
-//     out = ''
-
-//   if (str.length == 1) return o[number - 1]
-//   else if (str.length == 2) {
-//     if (str[0] == 1) out = p[parseInt(str[1]) - 1]
-//     else
-//       out =
-//         t[parseInt(str[0]) - 1] +
-//         (str[1] != '0' ? ' ' + o[parseInt(str[1]) - 1] : '')
-//   } else if (str.length == 3) {
-//     out =
-//       h[parseInt(str[0]) - 1] +
-//       (str[1] != '0' ? ' ' + t[parseInt(str[1]) - 1] : '') +
-//       (str[2] != '0' ? ' ' + o[parseInt(str[2]) - 1] : '')
-//   } else if (str.length == 4) {
-//     out =
-//       k[parseInt(str[0]) - 1] +
-//       (str[1] != '0' ? ' ' + h[parseInt(str[1]) - 1] : '') +
-//       (str[2] != '0' ? ' ' + t[parseInt(str[2]) - 1] : '') +
-//       (str[3] != '0' ? ' ' + o[parseInt(str[3]) - 1] : '')
-//   }
-
-//   let arr = out.split('')
-//   arr[0] = arr[0].toUpperCase()
-//   out = arr.join('')
-//   return out
-// }
 
 interface DataType {
   id: number
@@ -106,46 +20,45 @@ interface DataType {
   Ціна: number
   Сума: number
 }
+
+const columns: ColumnsType<DataType> = [
+  {
+    title: '№',
+    dataIndex: 'id',
+    width: '10%',
+  },
+  {
+    title: 'Назва',
+    dataIndex: 'Назва',
+    width: '30%',
+  },
+  {
+    title: 'Кількість',
+    dataIndex: 'Кількість',
+    width: '15%',
+  },
+  {
+    title: 'Ціна',
+    dataIndex: 'Ціна',
+    width: '15%',
+    render: renderCurrency,
+  },
+  {
+    title: 'Сума',
+    dataIndex: 'Сума',
+    width: '15%',
+    render: renderCurrency,
+  },
+]
+
 const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const newData = currPayment || paymentData
-  const { data } = useGetUserByIdQuery(String(newData?.payer))
+  const { data } = useGetUserByIdQuery(newData.payer._id)
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle: 'emp-data',
   })
-
-  const columns: ColumnsType<DataType> = [
-    {
-      title: '№',
-      dataIndex: 'id',
-      width: '10%',
-    },
-    {
-      title: 'Назва',
-      dataIndex: 'Назва',
-      key: 'Назва',
-      width: '30%',
-    },
-    {
-      title: 'Кількість',
-      dataIndex: 'Кількість',
-      key: 'Кількість',
-      width: '20%',
-    },
-    {
-      title: 'Ціна',
-      key: 'Ціна',
-      dataIndex: 'Ціна',
-      width: '20%',
-    },
-    {
-      title: 'Сума',
-      key: 'Сума',
-      dataIndex: 'Сума',
-      width: '20%',
-    },
-  ]
 
   const tt: DataType[] = [
     {
@@ -180,6 +93,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
       Сума: Number(newData?.electricity?.sum),
     },
   ]
+
   return (
     <>
       <div
@@ -211,6 +125,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
             {data?.data.tel}
           </div>
         </>
+
         <div className={s.invoice_title}>INVOICE № INV-0060</div>
 
         <div className={s.invoice_data}>
@@ -225,7 +140,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           {String(newData?.date).slice(0, -20)} року.
         </div>
 
-        <div>
+        <div className={s.tableSum}>
           <Table
             columns={columns}
             dataSource={tt}
@@ -239,7 +154,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
         </div>
         <div className={s.pay_info}>
           Загальна сума оплати:
-          <div className={s.pay_info_money}>{newData?.debit}грн</div>
+          <div className={s.pay_info_money}>{newData?.debit} грн</div>
         </div>
 
         <div className={s.pay_admin}>

@@ -81,8 +81,8 @@ export const getName = (name, obj) => {
 }
 
 export const getCurrentMonthService = (services: IService[]) => {
-  const filteredServices = services?.find((s) => {
-    return dateToYearMonthFormat(s?.data) === dateToYearMonthFormat(new Date())
-  })
+  const filteredServices = services?.find(
+    (s) => dateToYearMonthFormat(s?.date) === dateToYearMonthFormat(new Date())
+  )
   return filteredServices
 }
