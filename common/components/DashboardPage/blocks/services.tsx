@@ -66,25 +66,31 @@ const ServicesBlock = () => {
     {
       title: '',
       dataIndex: 'date',
-      width: '19%',
+      width: '12%',
+      // TODO: to helper
       render: (data) => firstTextToUpperCase(moment(data).format('MMMM')),
+    },
+    {
+      title: 'Адреса',
+      dataIndex: 'address',
+      width: '20%',
     },
     {
       title: 'Утримання',
       dataIndex: 'rentPrice',
-      width: '12%',
+      width: '15%',
       render: renderCurrency,
     },
     {
       title: 'Електрика',
       dataIndex: 'electricityPrice',
-      width: '12%',
+      width: '15%',
       render: renderCurrency,
     },
     {
       title: 'Вода',
       dataIndex: 'waterPrice',
-      width: '12%',
+      width: '15%',
       render: renderCurrency,
     },
     {
@@ -94,7 +100,7 @@ const ServicesBlock = () => {
         </Tooltip>
       ),
       dataIndex: 'inflicionPrice',
-      width: '12%',
+      width: '14%',
     },
     {
       title: 'Опис',
@@ -106,14 +112,13 @@ const ServicesBlock = () => {
     isAdmin
       ? {
           title: '',
-          dataIndex: '',
           width: '15%',
           render: (_, service: IExtendedService) => (
             <div className={s.popconfirm}>
               <Popconfirm
-                title={`Ви впевнені що хочете видалити оплату від ${dateToPick(
-                  service?.date as unknown as string
-                )}?`}
+                title={`Ви впевнені що хочете видалити послугу за місяць ${moment(
+                  service.date
+                ).format('MMMM')}?`}
                 onConfirm={() => handleDeleteService(service?._id)}
                 cancelText="Відміна"
                 disabled={deleteLoading}
