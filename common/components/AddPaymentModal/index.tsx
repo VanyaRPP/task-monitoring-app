@@ -36,10 +36,9 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       debit: formData.debit,
     })
     if ('data' in response) {
-      setCurrPayment(response?.data.data)
-      setActiveTabKey('2')
       form.resetFields()
       message.success('Додано')
+      closeModal()
     } else {
       message.error('Помилка при додаванні рахунку')
     }
@@ -56,15 +55,9 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     {
       key: '2',
       label: 'Перегляд',
-      disabled: currPayment || edit ? false : true,
+      disabled: !edit,
       children: (
         <ReceiptForm currPayment={currPayment} paymentData={paymentData} />
-
-        // <>
-        //   <p>{currPayment?.debit}</p>
-        // <p>{currPayment?.credit}</p>
-        //   <p>{currPayment?.description}</p>
-        // </>
       ),
     },
   ]
@@ -73,7 +66,16 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     <Modal
       open={true}
       title={!edit && 'Додавання рахунку'}
-      onOk={activeTabKey === '1' ? handleSubmit : closeModal}
+      onOk={
+        activeTabKey === '1'
+          ? () => {
+              form.validateFields().then((values) => {
+                setCurrPayment(values)
+                setActiveTabKey('2')
+              })
+            }
+          : handleSubmit
+      }
       onCancel={() => {
         form.resetFields()
         closeModal()
