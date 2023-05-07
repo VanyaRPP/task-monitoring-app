@@ -1,9 +1,8 @@
 import { Form, Radio } from 'antd'
 import type { RadioChangeEvent } from 'antd'
-import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import {
-  useGetUserByEmailQuery,
+  useGetCurrentUserQuery,
   useUpdateUserRoleMutation,
 } from '../../../api/userApi/user.api'
 import s from './style.module.scss'
@@ -12,13 +11,11 @@ import WorkerForm from '../../Forms/WorkerForm/index'
 import { Roles } from '../../../../utils/constants'
 import { IAddress } from '@common/modules/models/Task'
 
+// TODO: REMOVE AT PROD !!!
 const RoleSwitcher: React.FC = () => {
-  const { data: session } = useSession()
-  const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
+  const { data: user } = useGetCurrentUserQuery()
   const [updateUserRole, { isLoading: isUpdating }] =
     useUpdateUserRoleMutation()
-
-  const user = data?.data
 
   const [form] = Form.useForm()
 
@@ -78,9 +75,9 @@ const RoleSwitcher: React.FC = () => {
         style={{ width: '100%' }}
         buttonStyle="solid"
       >
-        <Radio.Button value="User">Замовник</Radio.Button>
-        <Radio.Button value="Worker">Майстер</Radio.Button>
-        <Radio.Button value="Admin">Адмін</Radio.Button>
+        <Radio.Button value={Roles.USER}>Замовник</Radio.Button>
+        <Radio.Button value={Roles.WORKER}>Майстер</Radio.Button>
+        <Radio.Button value={Roles.ADMIN}>Адмін</Radio.Button>
       </Radio.Group>
       <div className={s.Worker}>
         <ModalWindow

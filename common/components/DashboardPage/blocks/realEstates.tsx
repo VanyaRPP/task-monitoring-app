@@ -1,15 +1,8 @@
-import React, { ReactElement, useState } from 'react'
+import React, { ReactElement } from 'react'
 import { Alert, Table } from 'antd'
 import TableCard from '@common/components/UI/TableCard'
-import {
-  useDeleteCustomerMutation,
-  useGetAllCustomerQuery,
-} from '@common/api/customerApi/customer.api'
-import {
-  useGetAllUsersQuery,
-  useGetUserByEmailQuery,
-} from '@common/api/userApi/user.api'
-import { AppRoutes, Roles } from '@utils/constants'
+import { useGetAllUsersQuery } from '@common/api/userApi/user.api'
+import { AppRoutes } from '@utils/constants'
 import Link from 'next/link'
 import { SelectOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/router'
@@ -17,13 +10,11 @@ import cn from 'classnames'
 import { useSession } from 'next-auth/react'
 import s from './style.module.scss'
 import CustomerCardHeader from '@common/components/UI/CustomerCardHeader'
-import { useEffect } from 'react'
 
-const CustomersBlock = () => {
+const RealEstateBlock = () => {
   const router = useRouter()
   const {
-    pathname,
-    query: { email },
+    pathname, // query: { email }
   } = router
   const { data } = useSession()
 
@@ -33,37 +24,6 @@ const CustomersBlock = () => {
     isError: allUsersError,
     isFetching: allUsersFetching,
   } = useGetAllUsersQuery()
-
-  const columns = [
-    {
-      title: 'Клієнт',
-      dataIndex: 'email',
-      key: 'email',
-      width: '25%',
-      ellipsis: true,
-    },
-    {
-      title: 'Розміщення',
-      dataIndex: 'locations',
-      key: 'locations',
-      width: '25%',
-      render: (locations) => locations,
-    },
-    {
-      title: 'Інформація',
-      dataIndex: 'information',
-      key: 'information',
-      width: '25%',
-      render: (information) => information,
-    },
-    {
-      title: '',
-      dataIndex: '',
-      key: 'description',
-      width: '25%',
-      ellipsis: true,
-    },
-  ]
 
   let content: ReactElement
 
@@ -91,7 +51,7 @@ const CustomersBlock = () => {
         data ? (
           <CustomerCardHeader />
         ) : (
-          <Link href={AppRoutes.CUSTOMER}>
+          <Link href={AppRoutes.REAL_ESTATE}>
             <a className={s.title}>
               Клієнти
               <SelectOutlined />
@@ -99,11 +59,47 @@ const CustomersBlock = () => {
           </Link>
         )
       }
-      className={cn({ [s.noScroll]: pathname === AppRoutes.CUSTOMER })}
+      className={cn({ [s.noScroll]: pathname === AppRoutes.REAL_ESTATE })}
     >
       {content}
     </TableCard>
   )
 }
 
-export default CustomersBlock
+const columns = [
+  {
+    title: 'Адреса',
+    dataIndex: 'address',
+    ellipsis: true,
+  },
+  {
+    title: 'Назва компанії',
+    dataIndex: 'description',
+  },
+  {
+    title: 'Адміністратори',
+    dataIndex: 'adminEmails',
+  },
+  {
+    title: 'Кількість метрів',
+    dataIndex: 'totalArea',
+  },
+  {
+    title: 'Ціна за метр',
+    dataIndex: 'pricePerMeter',
+  },
+  {
+    title: 'Індивідуальне утримання за метр',
+    dataIndex: 'servicePricePerMeter',
+  },
+  {
+    title: 'Вивіз сміття',
+    dataIndex: 'garbageCollector',
+  },
+  {
+    title: 'Платник',
+    dataIndex: 'payer',
+  },
+]
+
+export default RealEstateBlock

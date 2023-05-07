@@ -10,8 +10,8 @@ const CustomerCardHeader = () => {
 
   return (
     <div className={s.tableHeader}>
-      <Button type="link" onClick={() => Router.push(AppRoutes.CUSTOMER)}>
-        Клієнти
+      <Button type="link" onClick={() => Router.push(AppRoutes.REAL_ESTATE)}>
+        Об'єкти нерухомості
         <SelectOutlined className={s.Icon} />
       </Button>
     </div>

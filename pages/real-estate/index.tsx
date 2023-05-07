@@ -3,14 +3,9 @@ import { AppRoutes } from '../../utils/constants'
 import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
-import { FC } from 'react'
-import CustomersBlock from '@common/components/DashboardPage/blocks/customers'
+import { RealEstate } from '@common/components/DashboardPage'
 
-const Customer: FC = () => {
-  return <CustomersBlock />
-}
-
-export default withAuthRedirect(Customer)
+export default withAuthRedirect(RealEstate)
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await unstable_getServerSession(
