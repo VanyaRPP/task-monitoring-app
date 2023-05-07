@@ -1,41 +1,73 @@
 import RealEstateCardHeader from '@common/components/UI/RealEstateComponents/RealEstateCardHeader'
-import { useGetAllUsersQuery } from '@common/api/userApi/user.api'
+import {
+  useDeleteRealEstateMutation,
+  useGetAllRealEstateQuery,
+} from '@common/api/realestateApi/realestate.api'
 import TableCard from '@common/components/UI/TableCard'
 import { AppRoutes } from '@utils/constants'
 import React, { ReactElement } from 'react'
 import { useRouter } from 'next/router'
-import { Alert, Table } from 'antd'
+import { Alert, Popconfirm, Table, message } from 'antd'
 import cn from 'classnames'
 import s from './style.module.scss'
+import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { DeleteOutlined } from '@ant-design/icons'
 
 const RealEstateBlock = () => {
   const router = useRouter()
-  const {
-    pathname, // query: { email }
-  } = router
+  const { pathname } = router
 
   const {
-    data: allUsers,
-    isLoading: allUsersLoading,
-    isError: allUsersError,
-    isFetching: allUsersFetching,
-  } = useGetAllUsersQuery()
+    data: allRealEstate,
+    isLoading: allRealEstateLoading,
+    isError: allRealEstateError,
+  } = useGetAllRealEstateQuery({
+    limit: pathname === AppRoutes.REAL_ESTATE ? 200 : 5,
+  })
+  const [deleteRealEstate, { isLoading: deleteLoading }] =
+    useDeleteRealEstateMutation()
 
   let content: ReactElement
 
-  if (allUsersError) {
+  const handleDelete = async (id: string) => {
+    const response = await deleteRealEstate(id)
+    if ('data' in response) {
+      message.success('Видалено!')
+    } else {
+      message.error('Помилка при видаленні')
+    }
+  }
+
+  if (allRealEstateError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
       <Table
-        columns={columns}
-        dataSource={
-          pathname === '/' && allUsers ? allUsers?.slice(0, 5) : allUsers
-        }
+        columns={[
+          ...columns,
+          {
+            title: '',
+            dataIndex: '',
+            width: '5%',
+            render: (_, realEstate: IExtendedRealestate) => (
+              <div className={s.popconfirm}>
+                <Popconfirm
+                  title={`Ви впевнені що хочете видалити нерухомість ${realEstate.address} ${realEstate.description}?`}
+                  onConfirm={() => handleDelete(realEstate?._id)}
+                  cancelText="Відміна"
+                  disabled={deleteLoading}
+                >
+                  <DeleteOutlined className={s.icon} />
+                </Popconfirm>
+              </div>
+            ),
+          },
+        ]}
+        dataSource={allRealEstate}
         pagination={false}
         bordered
         size="small"
-        loading={allUsersLoading || allUsersFetching}
+        loading={allRealEstateLoading}
         rowKey="_id"
       />
     )

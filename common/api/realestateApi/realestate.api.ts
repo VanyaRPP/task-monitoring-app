@@ -1,4 +1,5 @@
 import {
+  IDeleteRealestateResponse,
   IAddRealestateResponse,
   IGetRealestateResponse,
   IExtendedRealestate,
@@ -7,8 +8,8 @@ import {
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
-export const realEstateApi = createApi({
-  reducerPath: 'realEstateApi',
+export const realestateApi = createApi({
+  reducerPath: 'realestateApi',
   refetchOnFocus: true,
   refetchOnReconnect: true,
   tagTypes: ['RealEstate'],
@@ -37,8 +38,23 @@ export const realEstateApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['RealEstate'] : []),
     }),
+    deleteRealEstate: builder.mutation<
+      IDeleteRealestateResponse,
+      IExtendedRealestate['_id']
+    >({
+      query(id) {
+        return {
+          url: `real-estate/${id}`,
+          method: 'DELETE',
+        }
+      },
+      invalidatesTags: (response) => (response ? ['RealEstate'] : []),
+    }),
   }),
 })
 
-export const { useGetAllRealEstateQuery, useAddRealEstateMutation } =
-  realEstateApi
+export const {
+  useDeleteRealEstateMutation,
+  useAddRealEstateMutation,
+  useGetAllRealEstateQuery,
+} = realestateApi

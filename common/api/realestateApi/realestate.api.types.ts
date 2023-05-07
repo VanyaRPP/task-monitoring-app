@@ -8,6 +8,7 @@ export interface IRealestate {
   servicePricePerMeter: number
   totalArea: number
   garbageCollector: number
+  payer: string
 }
 
 export interface IExtendedRealestate extends IRealestate {
@@ -23,4 +24,8 @@ export interface IAddRealestateResponse {
 export interface IGetRealestateResponse {
   success: boolean
   data: IExtendedRealestate[]
+}
+
+export interface IDeleteRealestateResponse {
+  success: boolean
 }

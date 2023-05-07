@@ -40,6 +40,12 @@ const RealEstateForm: FC<Props> = ({ form }) => {
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
+      <Form.Item name="payer" label="Платник" rules={validateField('required')}>
+        <Input.TextArea
+          placeholder="Одержувач рахунку"
+          className={s.formInput}
+        />
+      </Form.Item>
       <Form.Item
         name="servicePricePerMeter"
         label="Індивідуальне утримання за метр"

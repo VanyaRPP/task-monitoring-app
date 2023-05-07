@@ -26,6 +26,7 @@ const RealEstateModal: FC<Props> = ({ isModalOpen, closeModal }) => {
       servicePricePerMeter: formData.servicePricePerMeter,
       totalArea: formData.totalArea,
       garbageCollector: formData.garbageCollector,
+      payer: formData.payer,
     })
 
     if ('data' in response) {
@@ -45,7 +46,6 @@ const RealEstateModal: FC<Props> = ({ isModalOpen, closeModal }) => {
       onCancel={closeModal}
       okText={'Додати'}
       cancelText={'Відміна'}
-      // confirmLoading={isLoading}
     >
       <RealEstateForm form={form} />
     </Modal>

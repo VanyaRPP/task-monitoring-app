@@ -1,4 +1,3 @@
-import { Moment } from 'moment'
 import mongoose, { Schema } from 'mongoose'
 
 export interface IRealEstateModel {
@@ -9,6 +8,7 @@ export interface IRealEstateModel {
   servicePricePerMeter: number
   totalArea: number
   garbageCollector: number
+  payer: string
 }
 
 export const RealEstateSchema = new Schema<IRealEstateModel>({
@@ -19,6 +19,7 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   servicePricePerMeter: { type: Number, required: true, default: 0 },
   totalArea: { type: Number, required: true, default: 0 },
   garbageCollector: { type: Number, required: true, default: 0 },
+  payer: { type: String, required: true },
 })
 
 const RealEstate =
