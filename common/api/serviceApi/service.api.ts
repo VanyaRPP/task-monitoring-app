@@ -31,6 +31,14 @@ export const serviceApi = createApi({
           : [],
       transformResponse: (response: IGetServiceResponse) => response.data,
     }),
+    getServicesAddress: builder.query({
+      query: () => {
+        return {
+          url: `service/address`,
+        }
+      },
+      transformResponse: (response: IGetServiceResponse) => response.data,
+    }),
     addService: builder.mutation<IAddServiceResponse, IService>({
       query(body) {
         return {
@@ -59,5 +67,6 @@ export const serviceApi = createApi({
 export const {
   useAddServiceMutation,
   useGetAllServicesQuery,
+  useGetServicesAddressQuery,
   useDeleteServiceMutation,
 } = serviceApi

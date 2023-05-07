@@ -1,7 +1,8 @@
-// import { useAddServiceMutation } from '@common/api/serviceApi/service.api'
-import { Form, Modal } from 'antd'
-import React, { FC } from 'react'
+import { useAddRealEstateMutation } from '@common/api/realestateApi/realestate.api'
 import RealEstateForm from './RealEstateForm'
+import { Form, Modal, message } from 'antd'
+import React, { FC } from 'react'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 // import AddServiceForm from '../Forms/AddServiceForm'
 // import moment from 'moment'
 
@@ -10,39 +11,30 @@ interface Props {
   closeModal: VoidFunction
 }
 
-type FormData = {
-  date: Date
-  address: string
-  rentPrice: number
-  electricityPrice: number
-  waterPrice: number
-  inflicionPrice: number
-  description: string
-}
-
 const RealEstateModal: FC<Props> = ({ isModalOpen, closeModal }) => {
   const [form] = Form.useForm()
-  // const [addService, { isLoading }] = useAddServiceMutation()
+  const [addRealEstate] = useAddRealEstateMutation()
 
   const handleSubmit = async () => {
-    const formData: FormData = await form.validateFields()
+    const formData: IRealestate = await form.validateFields()
 
-    // const response = await addService({
-    //   address: formData.address,
-    //   date: moment(formData.date).toDate(),
-    //   rentPrice: formData.rentPrice,
-    //   electricityPrice: formData.electricityPrice,
-    //   waterPrice: formData.waterPrice,
-    //   inflicionPrice: formData.inflicionPrice,
-    //   description: formData.description,
-    // })
-    // if ('data' in response) {
-    //   form.resetFields()
-    //   closeModal()
-    //   message.success('Додано')
-    // } else {
-    //   message.error('Помилка при додаванні рахунку')
-    // }
+    const response = await addRealEstate({
+      address: formData.address,
+      description: formData.description,
+      adminEmails: formData.adminEmails,
+      pricePerMeter: formData.pricePerMeter,
+      servicePricePerMeter: formData.servicePricePerMeter,
+      totalArea: formData.totalArea,
+      garbageCollector: formData.garbageCollector,
+    })
+
+    if ('data' in response) {
+      form.resetFields()
+      closeModal()
+      message.success('Додано')
+    } else {
+      message.error('Помилка при додаванні')
+    }
   }
 
   return (

@@ -55,7 +55,6 @@ const columns = [
   {
     title: 'Адреса',
     dataIndex: 'address',
-    ellipsis: true,
   },
   {
     title: 'Назва компанії',
