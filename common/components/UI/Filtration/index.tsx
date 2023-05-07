@@ -1,11 +1,7 @@
-import { Button, Empty, Radio } from 'antd'
-import { useSession } from 'next-auth/react'
-import { useEffect, useMemo, useState } from 'react'
+import { Empty, Radio } from 'antd'
+import { useEffect, useState } from 'react'
 import { TaskStatuses } from '../../../../utils/constants'
-import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
-import { useGetUserByEmailQuery } from '../../../api/userApi/user.api'
 import { ITask } from '../../../modules/models/Task'
-import User from '../../../modules/models/User'
 import CardOneTask from '../../CardOneTask'
 import s from './style.module.scss'
 

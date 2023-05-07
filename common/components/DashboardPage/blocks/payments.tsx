@@ -12,14 +12,13 @@ import { dateToDefaultFormat } from '@common/assets/features/formatDate'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
-import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import { Tooltip } from 'antd'
 import Link from 'next/link'
 import { SelectOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
-import { useSession } from 'next-auth/react'
 import AddPaymentModal from '@common/components/AddPaymentModal'
 import s from './style.module.scss'
 
@@ -32,18 +31,15 @@ const PaymentsBlock = () => {
     pathname,
     query: { email },
   } = router
-  const { data } = useSession()
 
   const {
     data: currUser,
     isLoading: currUserLoading,
     isFetching: currUserFetching,
     isError: currUserError,
-  } = useGetUserByEmailQuery(data?.user?.email, {
-    skip: !data?.user?.email,
-  })
+  } = useGetCurrentUserQuery()
 
-  const isAdmin = currUser?.data?.role === Roles.ADMIN
+  const isAdmin = currUser?.role === Roles.ADMIN
 
   const {
     data: payments,

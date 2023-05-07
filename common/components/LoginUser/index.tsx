@@ -3,16 +3,16 @@ import Router from 'next/router'
 import { Skeleton, Avatar, Button, Card, Image } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import { signIn, signOut, useSession } from 'next-auth/react'
-import { AppRoutes } from '../../../utils/constants'
+import { AppRoutes, Roles } from '../../../utils/constants'
 import classNames from 'classnames'
 import s from './style.module.scss'
-import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
+import { useGetCurrentUserQuery } from 'common/api/userApi/user.api'
 import router from 'next/router'
 
 const LoginUser: React.FC = () => {
   const { data: session, status } = useSession()
 
-  if (session?.user) return <SessionUser session={session} />
+  if (session?.user) return <SessionUser image={session?.user?.image} />
 
   const isLoading = status === 'loading'
   return (
@@ -47,11 +47,9 @@ const LoginUser: React.FC = () => {
   )
 }
 
-function SessionUser({ session }) {
-  // TODO: replace. not by email. current request should be without params
-  const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
+function SessionUser({ image }) {
+  const { data: user } = useGetCurrentUserQuery()
   const [menuActive, setMenuActive] = useState(false)
-  const user = data?.data
 
   return (
     <>
@@ -63,7 +61,7 @@ function SessionUser({ session }) {
           icon={<UserOutlined />}
           src={
             <Image
-              src={session?.user?.image || undefined}
+              src={image || undefined}
               preview={false}
               style={{ width: 32 }}
               alt="UserImg"
@@ -81,16 +79,17 @@ function SessionUser({ session }) {
             icon={<UserOutlined />}
             src={
               <Image
-                src={session?.user?.image || undefined}
+                src={user?.image || undefined}
                 preview={false}
                 alt="UserImg"
               />
             }
           />
 
-          <h2>{session?.user?.name}</h2>
-          <p>{session?.user?.email}</p>
-          {user?.role === 'Admin' && (
+          <h2>{user?.name}</h2>
+          <p>{user?.email}</p>
+
+          {user?.role === Roles.ADMIN && (
             <Button type="link" onClick={() => Router.push(AppRoutes.ADMIN)}>
               Панель адміна
             </Button>

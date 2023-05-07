@@ -2,12 +2,10 @@ import { Button, Checkbox, Empty, Radio } from 'antd'
 import { GetServerSideProps } from 'next'
 import { unstable_getServerSession } from 'next-auth'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useGetAllTaskQuery } from '../../../common/api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../../common/api/userApi/user.api'
 import AddTaskModal from '../../../common/components/AddTaskModal'
-import ListOneTask from '../../../common/components/ListOneTask'
 import Filter from '../../../common/components/UI/Filtration/index'
 import { ITask } from '../../../common/modules/models/Task'
 import { AppRoutes } from '../../../utils/constants'
@@ -29,18 +27,6 @@ const UserTasks: React.FC = () => {
     return tasks?.filter((task) => task?.creator === user?._id)
   }, [tasks, user?._id])
 
-  // useEffect(() => {
-  //   setTaskList(
-  //     tasks?.sort((a: ITask, b: ITask) =>
-  //       a.address.name.localeCompare(b.address.name)
-  //     )
-  //   )
-  // }, [sorting, tasks])
-
-  // useEffect(() => {
-  //   setTaskList(tasks)
-  // }, [])
-
   return (
     <>
       <div className={s.Header}>
@@ -53,26 +39,7 @@ const UserTasks: React.FC = () => {
           Створити замовлення
         </Button>
       </div>
-      {/* <Radio.Group value={sorting} onChange={(e) => setSorting(e.target.value)}>
-        <Radio>За адресою</Radio>
-      </Radio.Group>
-      {taskList?.length !== 0 ? (
-        <div className={s.TasksList}>
-          {taskList &&
-            taskList.map((task: ITask, index) => {
-              return <CardOneTask key={index} task={task} />
-            })}
-        </div>
-      ) : sorting?.length === 0 && tasks?.length !== 0 ? (
-        <div className={s.TasksList}>
-          {tasks &&
-            tasks.map((task: ITask, index) => {
-              return <CardOneTask key={index} task={task} />
-            })}
-        </div>
-      ) : (
-        <Empty description="Немає даних" className={s.Empty} />
-      )} */}
+
       <Filter tasks={dataSource} />
       <AddTaskModal
         isModalVisible={isModalVisible}

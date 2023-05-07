@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { UserOutlined } from '@ant-design/icons'
-import { Avatar, Button, Card, Form, Image, Input } from 'antd'
+import { Avatar, Button, Card, Image, Input } from 'antd'
 import RoleSwitcher from 'common/components/UI/roleSwitcher'
-import { useSession } from 'next-auth/react'
 import Router, { useRouter } from 'next/router'
 import FeedbacksCard from 'common/components/FeedbacksCard'
 import s from './style.module.scss'
 import {
-  useGetUserByEmailQuery,
-  useGetUserByIdQuery,
+  useGetCurrentUserQuery,
   useUpdateUserMutation,
 } from '../../api/userApi/user.api'
 import { AppRoutes, Roles } from '../../../utils/constants'
@@ -24,16 +22,11 @@ const ProfilePage: React.FC = () => {
   const router = useRouter()
   const [profileData, setProfileData] = useState<IProfileData>()
   const [editing, setEditing] = useState<boolean>(false)
-  const { data: session } = useSession()
-
-  const { data } = useGetUserByIdQuery(`${router.query.id}`)
 
   const [updateUser] = useUpdateUserMutation()
-  const { data: userData, isLoading } = useGetUserByEmailQuery(
-    `${router.query.id ? data?.data?.email : session?.user?.email}`
-  )
-  const user = userData?.data
-  const userRate = userData?.data?.rating
+  const { data: userData, isLoading } = useGetCurrentUserQuery()
+  const user = userData
+  const userRate = userData?.rating
 
   const handleChange = (value: any) => {
     if (value.name === 'address') {
@@ -57,7 +50,6 @@ const ProfilePage: React.FC = () => {
     setEditing(false)
     setProfileData(storedData)
   }
-  const isAdmin = user?.role === Roles.ADMIN
 
   useEffect(() => {
     const profileData = {
@@ -97,11 +89,6 @@ const ProfilePage: React.FC = () => {
           </div>
 
           <div className={s.Info}>
-            {/* {isAdmin && ( //TODO: Hard to work with it(uncoment on prod version)
-              <Card size="small" title="Роль">
-                {router.query.id ? user?.role : <RoleSwitcher />}
-              </Card>
-            )} */}
             <Card size="small" title="Роль">
               {router.query.id ? user?.role : <RoleSwitcher />}
             </Card>

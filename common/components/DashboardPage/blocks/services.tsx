@@ -6,17 +6,15 @@ import {
   useDeleteServiceMutation,
   useGetAllServicesQuery,
 } from '@common/api/serviceApi/service.api'
-import { dateToPick } from '@common/assets/features/formatDate'
 import { IExtendedService } from '@common/api/serviceApi/service.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
-import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import { Tooltip } from 'antd'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { SelectOutlined } from '@ant-design/icons'
 import cn from 'classnames'
-import { useSession } from 'next-auth/react'
 import moment from 'moment'
 import s from './style.module.scss'
 import { firstTextToUpperCase } from '@utils/helpers'
@@ -28,18 +26,15 @@ const ServicesBlock = () => {
     pathname,
     query: { email },
   } = router
-  const { data } = useSession()
 
-  // TODO: Fix security. Something wrong here. User NOT ALLOWED to fetch other users
-  // User should have route without email argument inside
   const {
     data: currUser,
     isLoading: currUserLoading,
     isFetching: currUserFetching,
     isError: currUserError,
-  } = useGetUserByEmailQuery(data?.user.email, { skip: !data?.user.email })
+  } = useGetCurrentUserQuery()
 
-  const isAdmin = currUser?.data?.role === Roles.ADMIN
+  const isAdmin = currUser?.role === Roles.ADMIN
 
   const {
     data: services,

@@ -53,7 +53,7 @@ const columns: ColumnsType<DataType> = [
 
 const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const newData = currPayment || paymentData
-  const { data } = useGetUserByIdQuery(newData.payer._id)
+  const { data } = useGetUserByIdQuery(currPayment?.payer || newData?.payer._id)
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
