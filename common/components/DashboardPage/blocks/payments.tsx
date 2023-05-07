@@ -1,7 +1,6 @@
 import React, { ReactElement, useState } from 'react'
 import { Alert, message, Popconfirm, Table } from 'antd'
 import { Button } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
 import {
@@ -16,17 +15,13 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import { Tooltip } from 'antd'
 import Link from 'next/link'
-import { SelectOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
-import AddPaymentModal from '@common/components/AddPaymentModal'
 import s from './style.module.scss'
 
 const PaymentsBlock = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const router = useRouter()
-  const [currentPayment, setCurrentPayment] = useState(null)
-  const [currPayment, setCurrPayment] = useState<IExtendedPayment>(null)
+  const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
   const {
     pathname,
     query: { email },
@@ -38,8 +33,6 @@ const PaymentsBlock = () => {
     isFetching: currUserFetching,
     isError: currUserError,
   } = useGetCurrentUserQuery()
-
-  const isAdmin = currUser?.role === Roles.ADMIN
 
   const {
     data: payments,
@@ -54,28 +47,14 @@ const PaymentsBlock = () => {
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
 
+  const isAdmin = currUser?.role === Roles.ADMIN
+
   const handleDeletePayment = async (id: string) => {
     const response = await deletePayment(id)
     if ('data' in response) {
       message.success('Видалено!')
     } else {
       message.error('Помилка при видаленні рахунку')
-    }
-  }
-  const handleEyeClick = (id) => {
-    setCurrentPayment(payments.find((item) => item._id === id))
-    setCurrPayment(payments.find((item) => item._id === id))
-    setCurrentPayment || true
-  }
-
-  const closeModal = () => {
-    if (currentPayment) {
-      setCurrentPayment(null)
-    }
-    if (currPayment) {
-      setCurrPayment(null)
-    } else {
-      setIsModalOpen(false)
     }
   }
 
@@ -86,7 +65,7 @@ const PaymentsBlock = () => {
       key: 'date',
       width: '15%',
       ellipsis: true,
-      render: (date) => dateToDefaultFormat(date),
+      render: dateToDefaultFormat,
     },
     isAdmin && !email
       ? {
@@ -163,7 +142,14 @@ const PaymentsBlock = () => {
       width: '10%',
       render: (_, payment: IExtendedPayment) => (
         <div className={s.eyelined}>
-          <Button type="link" onClick={() => handleEyeClick(payment?._id)}>
+          <Button
+            type="link"
+            onClick={() => {
+              setCurrentPayment(
+                payments.find((item) => item._id === payment?._id)
+              )
+            }}
+          >
             <EyeOutlined className={s.eyelined} />
           </Button>
         </div>
@@ -197,32 +183,13 @@ const PaymentsBlock = () => {
   return (
     <TableCard
       title={
-        email ? (
-          <div className={s.block}>
-            <span className={s.title}>{`Оплата від користувача ${email}`}</span>
-            <Button type="link" onClick={() => setIsModalOpen(true)}>
-              <PlusOutlined /> Додати оплату
-            </Button>
-          </div>
-        ) : isAdmin ? (
-          <PaymentCardHeader />
-        ) : (
-          <Link href={AppRoutes.PAYMENT}>
-            <a className={s.title}>
-              Мої оплати <SelectOutlined />
-            </a>
-          </Link>
-        )
+        <PaymentCardHeader
+          closeEditModal={() => setCurrentPayment(null)}
+          currentPayment={currentPayment}
+        />
       }
       className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}
     >
-      {(currentPayment || isModalOpen) && (
-        <AddPaymentModal
-          paymentData={currentPayment}
-          edit={currentPayment && true}
-          closeModal={closeModal}
-        />
-      )}
       {content}
     </TableCard>
   )

@@ -1,22 +1,18 @@
-import React, { ReactElement } from 'react'
-import { Alert, Table } from 'antd'
-import TableCard from '@common/components/UI/TableCard'
+import RealEstateCardHeader from '@common/components/UI/RealEstateComponents/RealEstateCardHeader'
 import { useGetAllUsersQuery } from '@common/api/userApi/user.api'
+import TableCard from '@common/components/UI/TableCard'
 import { AppRoutes } from '@utils/constants'
-import Link from 'next/link'
-import { SelectOutlined } from '@ant-design/icons'
+import React, { ReactElement } from 'react'
 import { useRouter } from 'next/router'
+import { Alert, Table } from 'antd'
 import cn from 'classnames'
-import { useSession } from 'next-auth/react'
 import s from './style.module.scss'
-import CustomerCardHeader from '@common/components/UI/CustomerCardHeader'
 
 const RealEstateBlock = () => {
   const router = useRouter()
   const {
     pathname, // query: { email }
   } = router
-  const { data } = useSession()
 
   const {
     data: allUsers,
@@ -47,18 +43,7 @@ const RealEstateBlock = () => {
 
   return (
     <TableCard
-      title={
-        data ? (
-          <CustomerCardHeader />
-        ) : (
-          <Link href={AppRoutes.REAL_ESTATE}>
-            <a className={s.title}>
-              Клієнти
-              <SelectOutlined />
-            </a>
-          </Link>
-        )
-      }
+      title={<RealEstateCardHeader />}
       className={cn({ [s.noScroll]: pathname === AppRoutes.REAL_ESTATE })}
     >
       {content}
