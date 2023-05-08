@@ -64,6 +64,11 @@ const WorkerForm: React.FC<PropsType> = ({
           addonBefore="+380"
           style={{ width: '100%' }}
           placeholder="Введіть номер телефону"
+<<<<<<< HEAD
+=======
+          autoComplete="off"
+          className={s.Input}
+>>>>>>> origin/dev
         />
       </Form.Item>
       {!user?.address?.name ? (

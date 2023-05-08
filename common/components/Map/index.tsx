@@ -1,11 +1,11 @@
-import React, { Children, useCallback, useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { GoogleMap, Marker } from '@react-google-maps/api'
 import { IAddress, IGeoCode } from 'common/modules/models/Task'
 import s from './style.module.scss'
 import { useEffect } from 'react'
-import { add } from 'cypress/types/lodash'
 import { DarkMapTheme } from './MapStyle'
 import { useAppSelector } from '../../modules/store/hooks'
+import { COLOR_THEME } from '@utils/constants'
 
 const defaultOptions = {
   panControl: true,
@@ -43,15 +43,6 @@ const Map = ({
 }) => {
   const { theme } = useAppSelector((state) => state.themeReducer)
 
-  const [options, setOptions] = useState({})
-
-  useEffect(() => {
-    setOptions({
-      ...defaultOptions,
-      styles: theme === 'light' ? null : DarkMapTheme,
-    })
-  }, [theme])
-
   const mapRef = useRef(undefined)
   const [isMounted, setIsMounted] = useState<boolean>(false)
 
@@ -80,9 +71,6 @@ const Map = ({
   useEffect(() => {
     setIsMounted(true)
   }, [])
-  // useEffect(() => {
-  //   setIsMounted(true)
-  // }, [children, mapOptions])
 
   return isLoaded ? (
     <div className={s.Container}>
@@ -93,7 +81,10 @@ const Map = ({
         zoom={mapOptions?.zoom}
         onLoad={onLoad}
         onUnmount={onUnmount}
-        options={options}
+        options={{
+          ...defaultOptions,
+          styles: theme === COLOR_THEME.LIGHT ? null : DarkMapTheme,
+        }}
       >
         {/* Child components, such as markers, info windows, etc. */}
         {isMounted && (

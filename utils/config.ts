@@ -18,6 +18,21 @@ const config = {
   titles: {
     signInTitle: 'Увійти',
     signUpTitle: 'Зареєструватись',
+<<<<<<< HEAD
+=======
+    notification: 'Сповіщення',
+    premium: 'Преміум',
+  },
+  labels: {
+    readAllNotificationsLabel: 'Прочитати все',
+    deleteAllNotificationsLabel: 'Видалити все',
+    newTaskNotification: 'Нове завдання:',
+    newMessageNotification: 'Вам нове повідомлення!',
+    newGradeNotification: 'Вас оцінили!',
+    newTaskInDomainNotification: 'Нове завдання в вашій області!',
+    newTaskInCategory: 'Нове завдання в вашій категорії:',
+    newWorkerOnTask: 'Хтось відгукнувся на замовлення:',
+>>>>>>> origin/dev
   },
 }
 

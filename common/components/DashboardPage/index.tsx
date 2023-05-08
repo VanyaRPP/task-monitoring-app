@@ -1,10 +1,9 @@
-import React, { useState } from 'react'
-import Orders from './blocks/orders'
-import Masters from './blocks/masters'
-import Domains from './blocks/domains'
-import { Button } from 'antd'
-import AddTaskModal from '../AddTaskModal'
+import React, { FC } from 'react'
+import DashboardHeader from '../DashboardHeader'
+import PaymentsBlock from './blocks/payments'
+import ServicesBlock from './blocks/services'
 import s from './style.module.scss'
+<<<<<<< HEAD
 import Tasks from './blocks/tasks'
 import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
 import { useSession } from 'next-auth/react'
@@ -16,9 +15,16 @@ const Dashboard: React.FC = () => {
   const session = useSession()
   const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
   const userRole = userResponse?.data?.data?.role
+=======
+import RealEstateBlock from './blocks/realEstates'
+import { Roles } from '@utils/constants'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+>>>>>>> origin/dev
 
+const Dashboard: FC = () => {
   return (
     <>
+<<<<<<< HEAD
       <div className={s.Header}>
         <h1>Дошка</h1>
         <div>
@@ -33,19 +39,23 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
+=======
+      <DashboardHeader />
+>>>>>>> origin/dev
       <div className={s.Container}>
-        {userRole !== 'User' ? <Tasks style={`${s.Card} ${s.Orders}`} /> : null}
-        <Orders style={`${s.Card} ${s.Orders}`} />
-        <CategoriesBlock style={`${s.Card} ${s.Orders}`} />
-        {/* <Masters style={`${s.Card} ${s.Masters}`} />
-        <Domains style={`${s.Card} ${s.Domains}`} /> */}
+        <PaymentsBlock />
+        <ServicesBlock />
+        <RealEstate />
       </div>
-      <AddTaskModal
-        isModalVisible={isModalVisible}
-        setIsModalVisible={setIsModalVisible}
-      />
     </>
   )
+}
+
+export function RealEstate() {
+  const { data: userResponse } = useGetCurrentUserQuery()
+  const userRole = userResponse?.role
+
+  return userRole === Roles.ADMIN && <RealEstateBlock />
 }
 
 export default Dashboard

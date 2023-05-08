@@ -1,4 +1,5 @@
 .Table {
+  cursor: pointer;
   button {
     color: var(--textColor);
   }
@@ -11,6 +12,14 @@
   :global {
     .ant-table-thead > tr > th {
       text-align: center;
+      background-color: var(--backgroundColorElements);
+      word-break: break-word;
+    }
+    .ant-table-column-title- {
+      color: var(--textColor);
+    }
+    td.ant-table-column-sort {
+      background-color: var(--backgroundColor);
     }
     .ant-table-tbody > tr.ant-table-row:hover > td {
       background: var(--backgroundColorElements) !important;
@@ -25,6 +34,7 @@
   tr {
     text-align: center;
     background-color: var(--backgroundColor);
+
     color: var(--textColor);
   }
   tr > th {
@@ -34,7 +44,25 @@
   * {
     border-color: #88888830 !important;
   }
+<<<<<<< HEAD
   .DateColumn {
     color: orange;
+=======
+  .CloseDateColumn {
+    color: rgb(249, 184, 4);
+  }
+
+  .OutDateColumn {
+    color: rgb(255, 0, 0);
+  }
+
+  .Icon {
+    padding-left: 10px;
+  }
+  :global {
+    .ant-select-selector {
+      display: none;
+    }
+>>>>>>> origin/dev
   }
 }

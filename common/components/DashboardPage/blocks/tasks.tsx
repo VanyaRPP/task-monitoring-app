@@ -12,18 +12,25 @@ import {
 import moment from 'moment'
 import Router, { useRouter } from 'next/router'
 import { AppRoutes, TaskStatuses } from '../../../../utils/constants'
-import s from '../style.module.scss'
 import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
 import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.api'
 import StatusTag from '../../UI/StatusTag'
 import { SelectOutlined } from '@ant-design/icons'
+<<<<<<< HEAD
+=======
+import TableCard from '@common/components/UI/TableCard'
+import { TaskButton } from '@common/components/UI/Buttons'
+import s from '../style.module.scss'
+>>>>>>> origin/dev
 
-const Tasks: React.FC<{ style: string }> = ({ style }) => {
+const Tasks = () => {
   const session = useSession()
   const [search, setSearch] = useState({ task: '', master: '' })
   const router = useRouter()
-  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
+  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email, {
+    skip: !session?.data?.user?.email,
+  })
   const user = userResponse?.data?.data
   const tasksResponse = useGetAllTaskQuery('')
   const tasks = tasksResponse?.data?.data
@@ -32,7 +39,7 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
     return tasks?.filter((task) => task?.executant === user?._id)
   }, [tasks, user?._id])
 
-  const filterdeDataSource = useMemo(() => {
+  const filteredDataSource = useMemo(() => {
     return dataSource?.filter(
       (data) =>
         data?.status !== TaskStatuses.ARCHIVED &&
@@ -40,13 +47,13 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
         data?.status !== TaskStatuses.EXPIRED
     )
   }, [dataSource])
-  const searchInput = (order: string) => (
-    <Input
-      placeholder={order.charAt(0).toUpperCase() + order.slice(1)}
-      value={search[order]}
-      onChange={(e) => setSearch({ ...search, [order]: e.target.value })}
-    />
-  )
+  // const searchInput = (order: string) => (
+  //   <Input
+  //     placeholder={order.charAt(0).toUpperCase() + order.slice(1)}
+  //     value={search[order]}
+  //     onChange={(e) => setSearch({ ...search, [order]: e.target.value })}
+  //   />
+  // )
 
   const columns = [
     {
@@ -91,6 +98,7 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
   ]
 
   return (
+<<<<<<< HEAD
     <Card
       className={style}
       title={
@@ -101,6 +109,20 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
           Мої Завдання
           <SelectOutlined className={s.Icon} />
         </Button>
+=======
+    <TableCard
+      title={
+        <div className={s.TasksHeader}>
+          <Button
+            type="link"
+            onClick={() => Router.push(`${AppRoutes.TASK}/worker/${user?._id}`)}
+          >
+            Мої Завдання
+            <SelectOutlined />
+          </Button>
+          <TaskButton />
+        </div>
+>>>>>>> origin/dev
       }
       style={{ flex: '1.5' }}
     >
@@ -108,8 +130,9 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
         rowKey="_id"
         rowClassName={s.rowClass}
         showHeader={true}
-        dataSource={filterdeDataSource}
+        dataSource={filteredDataSource}
         columns={columns}
+        size="small"
         pagination={{
           responsive: false,
           size: 'small',
@@ -123,7 +146,7 @@ const Tasks: React.FC<{ style: string }> = ({ style }) => {
           }
         }}
       />
-    </Card>
+    </TableCard>
   )
 }
 

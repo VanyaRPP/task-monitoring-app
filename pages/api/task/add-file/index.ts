@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+>>>>>>> origin/dev
 import type { NextApiRequest, NextApiResponse } from 'next'
 import formidable from 'formidable'
 import fs from 'fs'
@@ -22,7 +27,11 @@ export default async function handler(
         const form = new formidable.IncomingForm()
         form.parse(req, async function (err, fields, files) {
           const id = await saveFile(files.file)
+<<<<<<< HEAD
           return res.status(200).send({ success: true, data: { imageId: id } })
+=======
+          return res.status(201).send({ success: true, data: { imageId: id } })
+>>>>>>> origin/dev
         })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })

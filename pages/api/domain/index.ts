@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Domain from 'common/modules/models/Domain'
 import start, { Data } from 'pages/api/api.config'
@@ -12,7 +14,7 @@ export default async function handler(
     case 'GET':
       try {
         const domain = await Domain.find({})
-        return res.status(201).json({ success: true, data: domain })
+        return res.status(200).json({ success: true, data: domain })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }
@@ -23,7 +25,7 @@ export default async function handler(
             return res.status(201).json({ success: true, data: domain })
           })
           .catch((error) => {
-            throw error + 'Blya'
+            throw error
           })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })

@@ -27,6 +27,7 @@ const Tasks: React.FC = () => {
   return (
     <>
       <TaskViewer tasks={tasks} />
+<<<<<<< HEAD
       {/* <Filter tasks={tasks} /> */}
       {tasks && tasks.length !== 0 ? (
         <div className={s.TasksList}>
@@ -48,6 +49,13 @@ const Tasks: React.FC = () => {
       {/* {tasks?.map((task) => {
         return <ListOneTask task={tasks} />
       })} */}
+=======
+      {tasks && tasks.length !== 0 ? (
+        <div className={s.TasksList}></div>
+      ) : (
+        <Empty description="Немає даних" />
+      )}
+>>>>>>> origin/dev
     </>
   )
 }

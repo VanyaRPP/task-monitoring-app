@@ -2,23 +2,26 @@ import { useEffect, useState } from 'react'
 import { ConfigProvider } from 'antd'
 import { useAppDispatch } from '../store/hooks'
 import { themeSlice } from '@common/modules/store/reducers/ThemeSlice'
+import { COLOR_THEME } from 'utils/constants'
 import themes from '../../lib/themes.config'
 
 function getDefaultTheme() {
-  let systemColorScheme
   if (typeof window !== 'undefined') {
-    systemColorScheme = window.matchMedia(
+    const localValue = JSON.parse(localStorage.getItem('theme')) || ''
+    if (localValue) {
+      const browserColor = COLOR_THEME[localValue.toUpperCase()]
+      if (browserColor) {
+        return browserColor // local storage color
+      }
+    }
+    const isDarkColorScheme = window.matchMedia?.(
       '(prefers-color-scheme: dark)'
     ).matches
-  } // user system/browser theme (color scheme)
 
-  let theme = systemColorScheme ? 'dark' : 'light'
-
-  if (typeof window !== 'undefined') {
-    theme = JSON.parse(localStorage.getItem('theme'))
+    return isDarkColorScheme ? COLOR_THEME.DARK : COLOR_THEME.LIGHT // system prefer color
   }
 
-  return theme
+  return COLOR_THEME.LIGHT // default color
 }
 
 export default function useTheme(value: string = getDefaultTheme()) {
@@ -39,7 +42,9 @@ export default function useTheme(value: string = getDefaultTheme()) {
       theme: {
         primaryColor: themes[theme].primaryColor,
       },
-    }) // antd
+    })
+
+    // antd
     for (const key in themes[theme]) {
       document.documentElement.style.setProperty(`--${key}`, themes[theme][key])
     } // custom css variables

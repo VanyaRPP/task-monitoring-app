@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from 'pages/api/api.config'
 import User from 'common/modules/models/User'
@@ -11,8 +13,11 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const user = await User.findById(req.query.id)
-        return res.status(201).json({ success: true, data: user })
+        const user = await User.findById(req.query.id).populate('payments')
+        return res.status(200).json({
+          success: true,
+          data: { email: user.email, name: user.name, image: user.image },
+        })
       } catch (error) {
         return res.status(400).json({ success: false })
       }
@@ -24,7 +29,10 @@ export default async function handler(
             ...req.body,
           }
         )
-        return res.status(201).json({ success: true, data: user })
+        return res.status(200).json({
+          data: { email: user.email, name: user.name, image: user.image },
+          success: true,
+        })
       } catch (error) {
         return res.status(400).json({ success: false })
       }

@@ -41,16 +41,17 @@ const Categories: React.FC<{
       renderItem={(category) => (
         <List.Item
           className={s.Category}
-          actions={[
-            <Button
-              className={s.Buttons}
-              key="info"
-              type="primary"
-              onClick={() => ''}
-            >
-              Інформація
-            </Button>,
-          ].concat(
+          actions={
+            //   [
+            //   <Button
+            //     className={s.Buttons}
+            //     key="info"
+            //     type="primary"
+            //     onClick={() => ''}
+            //   >
+            //     Інформація
+            //   </Button>,
+            // ].concat(
             role === Roles.ADMIN
               ? [
                   <DeleteButton
@@ -63,7 +64,8 @@ const Categories: React.FC<{
                   />,
                 ]
               : []
-          )}
+            // )
+          }
         >
           <Skeleton title={false} loading={false} active>
             <List.Item.Meta

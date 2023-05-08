@@ -1,0 +1,9 @@
+.Modal {
+  min-width: 450px;
+  @media (min-width: 768px) {
+    min-width: calc(100% - 2rem);
+  }
+  @media (min-width: 1024px) {
+    min-width: 1000px;
+  }
+}

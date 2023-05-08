@@ -5,10 +5,25 @@ export enum AppRoutes {
   TASK = '/task',
   AUTH = '/auth',
   AUTH_SIGN_IN = '/auth/sigin',
+  AUTH_SIGN_UP = '/auth/signup',
   CONTACTS = '/contacts',
   ADMIN = '/admin',
   PREMIUM = '/premium',
   CATEGORY = '/category',
+  PAYMENT = '/payment',
+  SERVICE = '/service',
+  CUSTOMER = '/customer',
+  REAL_ESTATE = '/real-estate',
+}
+
+export enum Operations {
+  Credit = 'credit',
+  Debit = 'debit',
+}
+
+export enum COLOR_THEME {
+  DARK = 'dark',
+  LIGHT = 'light',
 }
 
 export enum Roles {
@@ -58,3 +73,13 @@ export enum TaskView {
   LIST = 'list',
 }
 export const saltRounds = 10
+<<<<<<< HEAD
+=======
+
+export const paymentsTitle = {
+  maintenance: 'Утримання',
+  placing: 'Розміщення',
+  electricity: 'Електропостачання',
+  water: 'Водопостачання',
+}
+>>>>>>> origin/dev

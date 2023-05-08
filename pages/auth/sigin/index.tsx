@@ -6,7 +6,7 @@ import {
   LiteralUnion,
   signIn,
 } from 'next-auth/react'
-import { Alert } from 'antd'
+import { Alert, Button, Divider } from 'antd'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import { AppRoutes, errors } from '@utils/constants'
@@ -18,6 +18,11 @@ import { unstable_getServerSession } from 'next-auth'
 import { useForm } from 'antd/lib/form/Form'
 import AuthCard from '@common/components/AuthCard'
 import config from '@utils/config'
+<<<<<<< HEAD
+=======
+import useLocalStorage from '@common/modules/hooks/useLocalStorage'
+import { MailOutlined } from '@ant-design/icons'
+>>>>>>> origin/dev
 
 type PropsType = {
   providers: Record<
@@ -36,6 +41,13 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
   })
   const { error } = useRouter().query
   const [customError, setCustomError] = useState('')
+  const [storedValue, setValue] = useLocalStorage('login-type', null)
+  const [cardSide, setCardSide] = useState<boolean>(storedValue)
+
+  const handleSideChange = () => {
+    setCardSide(!cardSide)
+    setValue(!cardSide)
+  }
 
   useEffect(() => {
     setCustomError(error && (errors[`${error}`] ?? errors.default))
@@ -84,6 +96,30 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
         <div className={s.Divider} />
 
         <div className={s.HalfBlock}>
+<<<<<<< HEAD
+=======
+          <form
+            method="post"
+            action="/api/auth/signin/email"
+            className={s.Form}
+          >
+            <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+            <input
+              className={s.Input}
+              placeholder="Введіть електронну пошту"
+              type="email"
+              id="email"
+              name="email"
+            />
+            <Button className={s.Button} htmlType="submit" type="primary">
+              <MailOutlined style={{ fontSize: '1.2rem' }} />
+              <span onClick={handleSideChange}>Увійти з Email</span>
+            </Button>
+          </form>
+          <Divider className={s.DividerOr} plain>
+            Або
+          </Divider>
+>>>>>>> origin/dev
           {Object.values(providers).map(
             (provider: any) =>
               provider?.name !== 'Email' &&

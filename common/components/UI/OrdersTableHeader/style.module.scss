@@ -1,12 +1,8 @@
-.TouchBar {
+.TableHeader {
   display: flex;
   flex-direction: row;
-  align-items: center;
   justify-content: space-between;
-  margin: 5px 0;
-  @media (max-width: 450px) {
-    display: none;
-  }
+  align-items: center;
 }
 .Buttons {
   display: flex;

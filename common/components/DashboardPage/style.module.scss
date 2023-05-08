@@ -7,11 +7,11 @@
   }
 }
 
-.Header {
-  width: 100%;
+.TasksHeader {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+<<<<<<< HEAD
 
   h1 {
     font-size: 26px;
@@ -145,6 +145,9 @@
       }
     }
   }
+=======
+  align-items: center;
+>>>>>>> origin/dev
 }
 
 .Container {
@@ -152,6 +155,29 @@
   display: flex;
   flex-wrap: wrap;
   flex: 0.33, 0.33, 0.33;
-  gap: 1rem;
+  gap: 14px;
   justify-content: space-between;
+  :global .ant-table-placeholder > td {
+    border-bottom: none;
+  }
+  :global .ant-empty-image {
+    margin: 64px 0;
+  }
+  :global table tbody tr.ant-table-placeholder:hover {
+    background: transparent;
+  }
+}
+
+.Buttons {
+  @media (max-width: 525px) {
+    display: flex;
+    flex-direction: column;
+    margin-top: -1rem;
+    margin-bottom: 0.5rem;
+    .Button {
+      font-size: calc(11px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
+      padding: 0;
+      margin-bottom: 1px;
+    }
+  }
 }

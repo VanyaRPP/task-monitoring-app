@@ -1,10 +1,17 @@
 .signInCard {
   width: 100%;
   padding: 15px;
+<<<<<<< HEAD
 
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
 
   .cardHeader {
+=======
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+
+  .cardHeader {
+    color: var(--textColor);
+>>>>>>> origin/dev
     text-align: right;
     margin-top: 10px;
     margin-bottom: 20px;
@@ -12,12 +19,24 @@
     display: flex;
     align-items: center;
     justify-content: right;
+<<<<<<< HEAD
     div {
       margin-right: 7px;
     }
     div:hover {
       cursor: pointer;
     }
+=======
+
+    div {
+      margin-right: 7px;
+    }
+  }
+
+  .cardHeader:hover {
+    cursor: pointer;
+    color: var(--primaryColorHover);
+>>>>>>> origin/dev
   }
 
   .cardInner {
@@ -32,3 +51,31 @@
     }
   }
 }
+<<<<<<< HEAD
+=======
+.FormItem {
+  margin: 0 0 20px;
+  :global {
+    .ant-form-item-label > label {
+      color: var(--textColor);
+    }
+    .ant-input {
+      background-color: var(--backgroundColorPrimary);
+    }
+    .ant-input-status-error:not(.ant-input-disabled):not(
+        .ant-input-borderless
+      ).ant-input,
+    .ant-input-status-success {
+      color: var(--textColor);
+      background-color: var(--backgroundColorPrimary);
+    }
+  }
+
+  .Input:-webkit-autofill,
+  .Input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--textColor) !important;
+    -webkit-box-shadow: 0 0 0 100px var(--backgroundColorPrimary) inset !important;
+    box-shadow: 0 0 0 100px var(--backgroundColorPrimary) inset !important;
+  }
+}
+>>>>>>> origin/dev

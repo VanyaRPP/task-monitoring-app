@@ -1,4 +1,10 @@
+.currency {
+  float: right;
+}
+
 .Table {
+  max-height: max-content;
+  cursor: pointer;
   button {
     color: var(--textColor);
   }
@@ -17,7 +23,51 @@
     }
   }
 }
+<<<<<<< HEAD
 
 .Icon {
   font-size: 14px;
 }
+=======
+.block {
+  display: flex;
+  justify-content: space-between;
+}
+.popconfirm {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.icon {
+  font-size: 14px;
+}
+.eyelined {
+  display: flex;
+  align-items: center;
+  display: flex;
+  align-items: center;
+  height: 9px;
+  width: 9px;
+}
+.spin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.payer {
+  color: #1677ff !important;
+  &:hover {
+    color: #4096ff;
+  }
+}
+
+.title {
+  color: var(--primaryColor);
+  font-weight: 400;
+}
+
+.noScroll {
+  max-height: max-content;
+}
+>>>>>>> origin/dev

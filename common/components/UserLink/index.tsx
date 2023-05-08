@@ -1,4 +1,11 @@
 import { UserOutlined } from '@ant-design/icons'
+<<<<<<< HEAD
+=======
+import {
+  useGetAllUsersQuery,
+  useGetUserByIdQuery,
+} from '@common/api/userApi/user.api'
+>>>>>>> origin/dev
 import { AppRoutes } from '@utils/constants'
 import {
   Avatar,
@@ -14,8 +21,15 @@ import {
 } from 'antd'
 import Router from 'next/router'
 import { useState } from 'react'
+<<<<<<< HEAD
 import { IUser } from '../../modules/models/User'
 import RateStars from '../UI/RateStars'
+=======
+import { IFeedback, IUser } from '../../modules/models/User'
+import Feedback from '../FeedbacksCard/feedback'
+import RateStars from '../UI/RateStars'
+import DrawerFeedback from './drawerFeedback'
+>>>>>>> origin/dev
 import s from './style.module.scss'
 
 const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
@@ -33,9 +47,18 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
   if (user) {
     return (
       <>
+<<<<<<< HEAD
         <Button type="link" onClick={showDrawer}>
           {user?.name ?? user?.email}
         </Button>
+=======
+        {/* <Button type="link" onClick={showDrawer} className={s.LinkButton}>
+          {user?.name ?? user?.email}
+        </Button> */}
+        <a onClick={showDrawer} className={s.LinkButton}>
+          {user?.name ?? user?.email}
+        </a>
+>>>>>>> origin/dev
         <Drawer
           title={`Профіль користувача ${user?.name}`}
           placement="right"
@@ -79,6 +102,7 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
                     dataSource={user?.feedback}
                     renderItem={(item, index) => (
                       <List.Item key={index} className={s.ListItem}>
+<<<<<<< HEAD
                         <Avatar
                           icon={<UserOutlined />}
                           src={
@@ -100,6 +124,9 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
                           value={item?.grade}
                           disabled
                         />
+=======
+                        <DrawerFeedback feedback={item} />
+>>>>>>> origin/dev
                       </List.Item>
                     )}
                   />

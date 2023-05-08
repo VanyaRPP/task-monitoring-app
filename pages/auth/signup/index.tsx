@@ -6,7 +6,11 @@ import {
   LiteralUnion,
   signIn,
 } from 'next-auth/react'
+<<<<<<< HEAD
 import { Alert } from 'antd'
+=======
+import { Alert, message } from 'antd'
+>>>>>>> origin/dev
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import { AppRoutes, errors } from '@utils/constants'
@@ -29,6 +33,10 @@ type PropsType = {
 }
 
 const SignUpPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
+<<<<<<< HEAD
+=======
+  const router = useRouter()
+>>>>>>> origin/dev
   const [form] = useForm()
   const [signUp] = useSignUpMutation()
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
@@ -56,11 +64,24 @@ const SignUpPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
     if (credentials.password !== credentials.confirmPassword) {
       setCustomError(config.errors.comparePasswordError)
     } else {
+<<<<<<< HEAD
       await signUp({
+=======
+      const response = await signUp({
+>>>>>>> origin/dev
         name: formData.name,
         email: formData.email,
         password: formData.password,
       })
+<<<<<<< HEAD
+=======
+      if ((response as any)?.data.success) {
+        message.success('Ви успішно зареєструвалися')
+        router.push(AppRoutes.AUTH_SIGN_IN)
+      } else {
+        message.error('Помилка при реєстрації!')
+      }
+>>>>>>> origin/dev
     }
 
     form.resetFields()

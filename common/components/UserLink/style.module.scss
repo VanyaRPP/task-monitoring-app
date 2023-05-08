@@ -7,12 +7,15 @@
   border-radius: 10px;
   background-color: var(--backgroundColorPrimary);
   color: var(--textColor);
+<<<<<<< HEAD
 }
 .Panel {
   width: 100%;
 }
 
 .Card {
+=======
+>>>>>>> origin/dev
   h2,
   h4,
   p {
@@ -21,9 +24,12 @@
 }
 
 .Panel {
+<<<<<<< HEAD
   p {
     width: 100px;
   }
+=======
+>>>>>>> origin/dev
   :global {
     .ant-collapse-header-text {
       color: var(--textColor);
@@ -45,16 +51,59 @@
   }
 }
 
+<<<<<<< HEAD
 .ListItem {
   width: 100%;
   @media (max-width: 1200px) {
     width: 320px;
+=======
+.UserInfo {
+  margin: 0;
+  padding: 0;
+}
+
+.RateStar {
+  width: max-content;
+}
+
+.ListItem {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+
+  h4,
+  p {
+    padding: 0;
+    margin: 0;
+  }
+  p {
+    max-width: 300px;
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+
+  @media (max-width: 1200px) {
+>>>>>>> origin/dev
     flex-direction: column;
   }
   @media (max-width: 768px) {
     width: 180px;
+<<<<<<< HEAD
   }
   @media (max-width: 480px) {
     width: 120px;
+=======
+    p {
+      max-width: 150px;
+    }
+  }
+  @media (max-width: 480px) {
+    width: 120px;
+    p {
+      max-width: 100px;
+      margin: 0;
+    }
+>>>>>>> origin/dev
   }
 }

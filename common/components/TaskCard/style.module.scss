@@ -75,6 +75,13 @@
         display: none;
       }
     }
+    word-wrap: break-word;
+    :global {
+      .ant-card-head-title {
+        white-space: initial;
+        padding: 9px 0 !important;
+      }
+    }
   }
 
   ul {
@@ -93,5 +100,20 @@
 .CloseDeadline {
   font-size: 16px;
   font-weight: bold;
+<<<<<<< HEAD
   color: rgb(255, 132, 0);
+=======
+  color: rgb(249, 184, 4);
+}
+
+.AfterDeadline {
+  font-size: 16px;
+  font-weight: bold;
+  color: rgb(255, 0, 0);
+}
+
+.Icon {
+  font-size: 25px;
+  padding-left: 10px;
+>>>>>>> origin/dev
 }

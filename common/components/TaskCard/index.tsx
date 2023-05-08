@@ -92,6 +92,7 @@ const TaskCard = ({ taskId, task }) => {
           <div className={s.DeadlineBlock}>
             <p
               className={classNames(s.Deadline, {
+<<<<<<< HEAD
                 [s.CloseDeadline]: differ <= 1,
               })}
             >
@@ -100,6 +101,17 @@ const TaskCard = ({ taskId, task }) => {
                 <FireOutlined
                   style={{ paddingLeft: '10px', fontSize: '25px' }}
                 />
+=======
+                [s.CloseDeadline]: differ <= 1 && differ >= 0,
+                [s.AfterDeadline]: differ < 0,
+              })}
+            >
+              Виконати до: {dateToDefaultFormat(task?.deadline)}
+              {differ <= 1 && differ >= 0 ? (
+                <FireOutlined className={s.Icon} />
+              ) : differ < 0 ? (
+                <FieldTimeOutlined className={s.Icon} />
+>>>>>>> origin/dev
               ) : null}
             </p>
           </div>

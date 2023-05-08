@@ -15,7 +15,7 @@ export const deleteExtraWhitespace = (value: string): string =>
 export const validateField = (name: string): Rule[] => {
   const required: Rule = {
     required: true,
-    message: "Назва обов'язкова!",
+    message: "Поле обов'язкове!",
   }
   const email: Rule = {
     type: 'email',
@@ -24,6 +24,40 @@ export const validateField = (name: string): Rule[] => {
   const phone: Rule = {
     len: 9,
     message: 'Номер телефону має складатися з 9 цифр!',
+  }
+  const password: Rule = {
+    min: 8,
+    message: 'Пароль має складатися з 8 символів!',
+  }
+  const paymentPrice: Rule = {
+    type: 'number',
+    min: 1,
+    max: 200000,
+    message: 'Сума рахунку повинна бути в межах [1, 200000]',
+  }
+  const electricityPrice: Rule = {
+    type: 'number',
+    min: 1,
+    max: 200000,
+    message: 'Сума рахунку повинна бути в межах [1, 200000]',
+  }
+  const waterPrice: Rule = {
+    type: 'number',
+    min: 1,
+    max: 200000,
+    message: 'Сума рахунку повинна бути в межах [1, 200000]',
+  }
+  const inflicionPrice: Rule = {
+    type: 'number',
+    min: 1,
+    max: 200000,
+    message: 'Сума рахунку повинна бути в межах [1, 200000]',
+  }
+  const rentPrice: Rule = {
+    type: 'number',
+    min: 1,
+    max: 200000,
+    message: 'Сума рахунку повинна бути в межах [1, 200000]',
   }
 
   const price: Rule = {
@@ -48,6 +82,9 @@ export const validateField = (name: string): Rule[] => {
     case 'email':
       return [required, email]
 
+    case 'address':
+      return [required]
+
     case 'description':
       return [required]
 
@@ -64,6 +101,27 @@ export const validateField = (name: string): Rule[] => {
       return [required]
 
     case 'comment':
+      return [required]
+
+    case 'password':
+      return [required, password]
+
+    case 'paymentPrice':
+      return [required, paymentPrice]
+
+    case 'electricityPrice':
+      return [required, electricityPrice]
+
+    case 'waterPrice':
+      return [required, waterPrice]
+
+    case 'inflicionPrice':
+      return [required, inflicionPrice]
+
+    case 'rentPrice':
+      return [required, rentPrice]
+
+    case 'required':
       return [required]
   }
 }

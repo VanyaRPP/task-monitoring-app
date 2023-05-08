@@ -61,7 +61,17 @@
     .ant-select-dropdown,
     .ant-picker-header,
     .ant-picker-body,
+<<<<<<< HEAD
     .ant-picker-footer {
+=======
+    .ant-picker-footer,
+    .ant-input-status-error:not(.ant-input-disabled):not(
+        .ant-input-borderless
+      ).ant-input,
+    .ant-input-status-error:not(.ant-input-disabled):not(
+        .ant-input-borderless
+      ).ant-input:hover {
+>>>>>>> origin/dev
       background-color: var(--backgroundColorPrimary);
     }
     .ant-modal-title,

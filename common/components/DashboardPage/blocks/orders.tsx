@@ -1,25 +1,30 @@
-import React, { useMemo, useState } from 'react'
-import { Card, Table, Input, Button } from 'antd'
+import React, { FC, useMemo, useState } from 'react'
+import { Table, Input, ConfigProvider } from 'antd'
 import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
-import { firstTextToUpperCase } from '../../../../utils/helpers'
-import {
-  useGetUserByEmailQuery,
-  useGetUserByIdQuery,
-} from '../../../api/userApi/user.api'
+import { useGetUserByEmailQuery } from '../../../api/userApi/user.api'
 import moment from 'moment'
-import Router, { useRouter } from 'next/router'
+import { useRouter } from 'next/router'
 import { AppRoutes, TaskStatuses } from '../../../../utils/constants'
 import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
+<<<<<<< HEAD
 import s from './style.module.scss'
 import StatusTag from '../../UI/StatusTag'
 import { SelectOutlined } from '@ant-design/icons'
+=======
+import StatusTag from '../../UI/StatusTag'
+import TableCard from '@common/components/UI/TableCard'
+import OrdersTableHeader from '@common/components/UI/OrdersTableHeader'
+import s from './style.module.scss'
+>>>>>>> origin/dev
 
-const Orders: React.FC<{ style: string }> = ({ style }) => {
+const Orders: FC = () => {
   const session = useSession()
   const [search, setSearch] = useState({ task: '', master: '' })
   const router = useRouter()
-  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
+  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email, {
+    skip: !session?.data?.user?.email,
+  })
   const tasksResponse = useGetAllTaskQuery('')
   const user = userResponse?.data?.data
   const tasks = tasksResponse?.data?.data
@@ -28,7 +33,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
     return tasks?.filter((task) => task?.creator === user?._id)
   }, [tasks, user?._id])
 
-  const filterdeDataSource = useMemo(() => {
+  const filteredDataSource = useMemo(() => {
     return dataSource?.filter(
       (data) =>
         data?.status !== TaskStatuses.ARCHIVED &&
@@ -46,7 +51,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
   )
   const columns = [
     {
-      title: 'Завдання',
+      title: 'Замовлення',
       dataIndex: 'name',
       key: 'name',
       width: '35%',
@@ -75,12 +80,12 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       dataIndex: 'status',
       key: 'status',
       width: '20%',
-      // ellipsis: true,
       render: (status) => <StatusTag status={status} />,
     },
   ]
 
   return (
+<<<<<<< HEAD
     <Card
       className={style}
       title={
@@ -94,13 +99,17 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
       }
       style={{ flex: '1.5' }}
     >
+=======
+    <TableCard title={<OrdersTableHeader user={user} />}>
+>>>>>>> origin/dev
       <Table
         className={s.Table}
         rowKey="_id"
         rowClassName={s.rowClass}
         showHeader={true}
-        dataSource={filterdeDataSource}
+        dataSource={filteredDataSource}
         columns={columns}
+        size="small"
         pagination={{
           responsive: false,
           size: 'small',
@@ -114,7 +123,7 @@ const Orders: React.FC<{ style: string }> = ({ style }) => {
           }
         }}
       />
-    </Card>
+    </TableCard>
   )
 }
 

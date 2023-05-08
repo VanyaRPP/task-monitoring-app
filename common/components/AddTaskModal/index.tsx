@@ -104,7 +104,7 @@ const AddTaskModal: React.FC<PropsType> = ({
   return (
     <Modal
       maskClosable={false}
-      visible={isModalVisible}
+      open={isModalVisible}
       title="Створити завдання"
       okText="Створити"
       cancelText="Скасувати"

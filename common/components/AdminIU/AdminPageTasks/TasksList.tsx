@@ -29,8 +29,9 @@ const TasksList: React.FC<Props> = ({ tasks }) => {
           </List.Item>
         )}
       />
-
-      <TaskCard taskId={task._id} task={task} />
+      <div>
+        <TaskCard taskId={task._id} task={task} />
+      </div>
     </div>
   )
 }

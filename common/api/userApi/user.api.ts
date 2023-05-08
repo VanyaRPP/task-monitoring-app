@@ -19,7 +19,11 @@ export const userApi = createApi({
       },
       invalidatesTags: ['User'],
     }),
+<<<<<<< HEAD
     getUserByEmail: builder.query<BaseQuery, string>({
+=======
+    getUserByEmail: builder.query<BaseQuery, string | string[]>({
+>>>>>>> origin/dev
       query: (email) => `user/email/${email}`,
       providesTags: (result) => ['User'],
     }),
@@ -49,9 +53,15 @@ export const userApi = createApi({
       },
       invalidatesTags: ['User'],
     }),
-    getAllUsers: builder.query<AllUsersQuery, string>({
+    getAllUsers: builder.query<IUser[], void>({
       query: () => '/user',
       providesTags: (result) => ['User'],
+      transformResponse: (response: AllUsersQuery) => response.data,
+    }),
+    getCurrentUser: builder.query<IUser, void>({
+      query: () => '/user/current',
+      providesTags: (result) => ['User'],
+      transformResponse: (response: BaseQuery) => response.data,
     }),
     addFeedback: builder.mutation<IUser, Partial<IUser>>({
       query(data) {
@@ -71,6 +81,7 @@ export const {
   useSignUpMutation,
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
+  useGetCurrentUserQuery,
   useUpdateUserRoleMutation,
   useUpdateUserMutation,
   useGetAllUsersQuery,
