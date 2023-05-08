@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
-import { Form, FormInstance, Input, InputNumber } from 'antd'
-import { DatePicker } from 'antd'
+import { Select, Form, FormInstance, Input, InputNumber } from 'antd'
+import EstateAddresses from './EstateAddresses'
 import s from './style.module.scss'
 
 interface Props {
@@ -11,9 +11,7 @@ interface Props {
 const RealEstateForm: FC<Props> = ({ form }) => {
   return (
     <Form form={form} layout="vertical" className={s.Form}>
-      <Form.Item name="address" label="Адреса" rules={validateField('address')}>
-        <Input placeholder="Опис" maxLength={256} className={s.formInput} />
-      </Form.Item>
+      <EstateAddresses />
       <Form.Item
         name="description"
         label="Назва компанії"
@@ -26,13 +24,12 @@ const RealEstateForm: FC<Props> = ({ form }) => {
         label="Адміністратори"
         rules={validateField('required')}
       >
-        {/* TODO: select */}
-        <Input placeholder="Опис" maxLength={256} className={s.formInput} />
+        <Select mode="tags" placeholder="Пошти адмінів компанії" />
       </Form.Item>
       <Form.Item
         name="totalArea"
         label="Кількість метрів"
-        rules={validateField('totalArea')}
+        rules={validateField('required')}
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
@@ -43,18 +40,19 @@ const RealEstateForm: FC<Props> = ({ form }) => {
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
+      <Form.Item name="payer" label="Платник" rules={validateField('required')}>
+        <Input.TextArea
+          placeholder="Одержувач рахунку"
+          className={s.formInput}
+        />
+      </Form.Item>
       <Form.Item
         name="servicePricePerMeter"
         label="Індивідуальне утримання за метр"
-        // rules={validateField('required')}
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item
-        name="garbageCollector"
-        label="Вивіз сміття"
-        // rules={validateField('required')}
-      >
+      <Form.Item name="garbageCollector" label="Вивіз сміття">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
     </Form>
