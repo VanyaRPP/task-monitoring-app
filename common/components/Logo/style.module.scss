@@ -19,6 +19,16 @@
   &:hover {
     color: var(--primaryColorHover);
   }
+
+  @media only screen and (max-width: 360px) {
+    width: 150px;
+    height: 36px;
+  }
+
+  @media only screen and (min-width: 361px) and (max-width: 768px) {
+    width: 200px;
+    height: 48px;
+  }
 }
 
 .Title {
