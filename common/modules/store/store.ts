@@ -28,6 +28,7 @@ export const store = configureStore({
       .concat(userApi.middleware)
       .concat(taskApi.middleware)
       .concat(categoryApi.middleware)
+      .concat(domainApi.middleware)
       .concat(paymentApi.middleware)
       .concat(serviceApi.middleware)
       .concat(customerApi.middleware)
