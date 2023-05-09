@@ -4,27 +4,29 @@ import PaymentsBlock from './blocks/payments'
 import ServicesBlock from './blocks/services'
 import s from './style.module.scss'
 import RealEstateBlock from './blocks/realEstates'
+import DomainsBlock from './blocks/domains'
 import { Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 const Dashboard: FC = () => {
+  const { data: userResponse } = useGetCurrentUserQuery()
+  const userRole = userResponse?.role
+
   return (
     <>
       <DashboardHeader />
       <div className={s.Container}>
+        {userRole === Roles.ADMIN && <DomainsBlock />}
+      </div>
+      <div className={s.Container}>
         <PaymentsBlock />
         <ServicesBlock />
-        <RealEstate />
+      </div>
+      <div className={s.Container}>
+        {userRole === Roles.ADMIN && <RealEstateBlock />}
       </div>
     </>
   )
-}
-
-export function RealEstate() {
-  const { data: userResponse } = useGetCurrentUserQuery()
-  const userRole = userResponse?.role
-
-  return userRole === Roles.ADMIN && <RealEstateBlock />
 }
 
 export default Dashboard
