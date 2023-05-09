@@ -93,6 +93,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       cancelText={edit ? 'Закрити' : 'Відміна'}
       confirmLoading={isLoading}
       className={s.Modal}
+      style={{ top: 20 }}
     >
       <Tabs activeKey={activeTabKey} items={items} onChange={setActiveTabKey} />
     </Modal>
