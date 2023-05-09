@@ -3,7 +3,7 @@ import { Table } from 'antd'
 import TableCard from '@common/components/UI/TableCard'
 import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
 
-const Domains = () => {
+const DomainsBlock = () => {
   return (
     <TableCard title="Домени">
       <Table
@@ -62,4 +62,4 @@ const testData = [
   },
 ]
 
-export default Domains
+export default DomainsBlock

@@ -26,7 +26,6 @@ const ProfilePage: React.FC = () => {
   const [updateUser] = useUpdateUserMutation()
   const { data: userData, isLoading } = useGetCurrentUserQuery()
   const user = userData
-  const userRate = userData?.rating
 
   const handleChange = (value: any) => {
     if (value.name === 'address') {
@@ -120,8 +119,7 @@ const ProfilePage: React.FC = () => {
             </Card>
           </div>
         </Card>
-
-        <FeedbacksCard user={user} loading={isLoading} userRate={userRate} />
+        {/* <FeedbacksCard user={user} loading={isLoading} userRate={userRate} /> */}
       </div>
       {editing && (
         <UnsavedChangesModal onCancel={handleCancel} onSubmit={handleSubmit} />
