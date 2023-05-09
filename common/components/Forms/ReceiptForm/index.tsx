@@ -7,6 +7,7 @@ import { useGetUserByIdQuery } from 'common/api/userApi/user.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useReactToPrint } from 'react-to-print'
 import { renderCurrency } from '@common/components/DashboardPage/blocks/payments'
+import { numberToTextNumber } from '@utils/helpers'
 
 interface Props {
   currPayment: IExtendedPayment
@@ -93,10 +94,12 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
       Сума: Number(newData?.electricity?.sum),
     },
   ]
-
+  //батьківський компонент повинен мати стиль, всі діти вкладені всередину
+  //не використовувати інлайн стилі
   return (
     <>
       <div
+        className={s.invoiceContainer}
         ref={componentRef}
         style={{
           width: '100%',
@@ -107,39 +110,44 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
         }}
       >
         <>
-          <div className={s.info_order}>Постачальник</div>
-          <div className={s.info_adres}>
-            ТОВ Український центр дуальної освіти <br /> Адреса 01030, м. Київ,
-            вул. Б. Хмельницького, буд. 51Б <br />
-            Реєстраційний номер 42637285 <br />є платником податку на прибуток
-            на загальних підставах <br />
-            <div className={s.info_adres__bold}>
-              Р/р UA903052990000026006016402729 <br />
-              АТ КБ «ПРИВАТБАНК» МФО: 311744
+          <div className={s.providerInfo}>
+            <div className={s.label}>Постачальник</div>
+            <div>
+              ТОВ &quot;Український центр дуальної освіти&quot; <br /> Адреса
+              01030, м. Київ, вул. Б. Хмельницького, буд. 51Б <br />
+              Реєстраційний номер 42637285 <br />є платником податку на прибуток
+              на загальних підставах <br />
+              <div className={s.info_adres__bold}>
+                Р/р UA903052990000026006016402729 <br />
+                АТ КБ «ПРИВАТБАНК» МФО: 311744
+              </div>
             </div>
           </div>
-          <div className={s.info_order_2}>Одержувач</div>
-          <div className={s.info_user}>
-            {data?.data.name} &nbsp;
-            {data?.data.email} &nbsp;
-            {data?.data.tel}
+
+          <div className={s.receiverInfo}>
+            <div className={s.label}>Одержувач</div>
+            <div>
+              {data?.data.name} &nbsp;
+              {data?.data.email} &nbsp;
+              {data?.data.tel}
+            </div>
           </div>
         </>
+        <div className={s.providerInvoice}>
+          <div className={s.datecellTitle}>INVOICE № INV-0060</div>
 
-        <div className={s.invoice_title}>INVOICE № INV-0060</div>
-
-        <div className={s.invoice_data}>
-          Від &nbsp;
-          {String(newData?.date).slice(8, -14)}.
-          {String(newData?.date).slice(5, -17)}.
-          {String(newData?.date).slice(0, -20)} року.
+          <div className={s.datecellDate}>
+            Від &nbsp;
+            {String(newData?.date).slice(8, -14)}.
+            {String(newData?.date).slice(5, -17)}.
+            {String(newData?.date).slice(0, -20)} року.
+          </div>
+          <div className={s.datecell}>
+            Підлягає сплаті до {String(newData?.date).slice(8, -14)}.
+            {String(newData?.date).slice(5, -17)}.
+            {String(newData?.date).slice(0, -20)} року.
+          </div>
         </div>
-        <div className={s.invoice_end__pay}>
-          Підлягає сплаті до {String(newData?.date).slice(8, -14)}.
-          {String(newData?.date).slice(5, -17)}.
-          {String(newData?.date).slice(0, -20)} року.
-        </div>
-
         <div className={s.tableSum}>
           <Table
             columns={columns}
@@ -148,24 +156,27 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
             pagination={false}
           />
         </div>
-        <div className={s.pay_table}>
-          Всього на суму:
-          <div className={s.pay_table_bold}>{newData?.debit} грн</div>
-        </div>
-        <div className={s.pay_info}>
-          Загальна сума оплати:
-          <div className={s.pay_info_money}>{newData?.debit} грн</div>
+        <div className={s.payTable}>
+          <div className={s.payFixed}>
+            Всього на суму:
+            <div className={s.payBold}>
+              {numberToTextNumber(newData?.debit)} грн
+            </div>
+          </div>
+          <div className={s.payFixed}>
+            Загальна сума оплати:
+            <div className={s.payBoldSum}>{newData?.debit} грн</div>
+          </div>
+
+          <div className={s.payFixed}>
+            Виписав Директор{' '}
+            <div className={s.lineInner}>_______________________________</div>
+            <div className={s.payBoldInner}>Єршов М.В.</div>
+          </div>
         </div>
 
-        <div className={s.pay_admin}>
-          Виписав Директор{' '}
-          <div className={s.pay_admin__down}>
-            _______________________________
-          </div>
-          <div className={s.pay_admin_name}>Єршов М.В.</div>
-        </div>
-        <div className={s.end_info}>
-          <div className={s.end_info_bolt}>Примітка:</div> *Ціна за комунальні
+        <div className={s.endInfo}>
+          <div className={s.endInfobolt}>Примітка:</div> *Ціна за комунальні
           послуги вказана з урахуванням ПДВ.
           <br />
           **Ціни на комунальні послуги виставляють компанії-постачальники,
