@@ -5,19 +5,15 @@ import { AppRoutes } from '../../../utils/constants'
 import cityImg1 from '../../assets/images/city.png'
 import cityImg2 from '../../assets/images/city2.png'
 import s from './style.module.scss'
+import HomePageTitle from "@common/assets/svg/homePageTitle";
 
 const HomePage: React.FC = () => {
   const router = useRouter()
   return (
     <>
-      <h3 className={`${s.HeaderMobile} ${s.Smaller1}`}>Ваше електронне</h3>
-      <h1 className={s.Komunalnik}>Комунальник</h1>
-      <h3 className={`${s.HeaderMobile} ${s.Smaller2}`}>
-        житлово-комунальне господарство
-      </h3>
-      <h3 className={s.Header}>
-        Ваше електронне житлово-комунальне господарство
-      </h3>
+      <div className={s.Title}>
+        <HomePageTitle/>
+      </div>
 
       <div className={s.Container}>
         <div className={s.HalfBlock}>
@@ -30,11 +26,12 @@ const HomePage: React.FC = () => {
         <div className={s.HalfBlock}>
           <div className={s.Text}>
             <p>
-              <span>Вітаємо Вас</span> на платформі електронних замовлень для
-              домогосподарств. Тут Ви можете замовити або отримати роботу по
-              встановленню/ремонту сантехніки, електрики, теплотехніки,
-              кондиціонування та вентиляції, загальнобудівельним, столярним
-              роботам (вікна, двері) та багато іншого.
+                Керуйте процесом оренди та систематизуйте відносини з орендарями
+                з нашим сайтом! Ресурс допоможе з автоматичним розрахунком платежів
+                та своєчасним формуванням та виставленням рахунків. Власник ви, або
+                орендар, платформа дозволяє із легкістю впоратися з усіма аспектами
+                користування нерухомим майном.
+                Забезпечте собі простоту, ефективність та зручність у управлінні!
             </p>
           </div>
         </div>
