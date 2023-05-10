@@ -2,15 +2,19 @@ import React from 'react'
 import { Table } from 'antd'
 import TableCard from '@common/components/UI/TableCard'
 import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 
 const DomainsBlock = () => {
+  const { data: domains, isLoading } = useGetDomainsQuery({})
+
   return (
     <TableCard title="Домени">
       <Table
+        loading={isLoading}
         expandable={{
           expandedRowRender: (data) => <DomainStreetsComponent data={data} />,
         }}
-        dataSource={testData}
+        dataSource={domains}
         columns={columns}
         pagination={false}
       />
@@ -46,19 +50,6 @@ const columns = [
   {
     title: 'Пошта',
     dataIndex: 'email',
-  },
-]
-
-const testData = [
-  {
-    name: 'КП з експлуатації',
-    address: 'Короленка 12',
-    adminEmails: ['my@gmail.com'],
-    streets: ['123', '32434'],
-    description: 'sdadsadasd',
-    bankInformation: 'тов КП',
-    phone: '252467',
-    email: 'kpeab@gmail.com',
   },
 ]
 
