@@ -9,6 +9,7 @@ import { paymentApi } from '@common/api/paymentApi/payment.api'
 import { serviceApi } from '@common/api/serviceApi/service.api'
 import { customerApi } from '@common/api/customerApi/customer.api'
 import { realestateApi } from '@common/api/realestateApi/realestate.api'
+import { streetApi } from '@common/api/streetApi/street.api'
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
     [notificationApi.reducerPath]: notificationApi.reducer,
     [realestateApi.reducerPath]: realestateApi.reducer,
     themeReducer,
+    [streetApi.reducerPath]: streetApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -33,7 +35,8 @@ export const store = configureStore({
       .concat(serviceApi.middleware)
       .concat(customerApi.middleware)
       .concat(notificationApi.middleware)
-      .concat(realestateApi.middleware),
+      .concat(realestateApi.middleware)
+      .concat(streetApi.middleware),
 })
 
 export type AppDispatch = typeof store.dispatch
