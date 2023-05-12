@@ -1,9 +1,20 @@
 import React from 'react'
 import { Table } from 'antd'
 import TableCard from '@common/components/UI/TableCard'
+import DomainsCardHeader from '@common/components/UI/DomainsCardHeader'
+import { useRouter } from 'next/router'
 import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
+import { AppRoutes, Roles } from '@utils/constants'
+import cn from 'classnames'
+import s from './style.module.scss'
 
 const DomainsBlock = () => {
+  const router = useRouter()
+  const {
+    pathname,
+    query: { email },
+  } = router
+
   return (
     <TableCard title="Домени">
       <Table
@@ -13,6 +24,7 @@ const DomainsBlock = () => {
         dataSource={testData}
         columns={columns}
         pagination={false}
+        className={cn({ [s.noScroll]: pathname === AppRoutes.DOMAIN })}
       />
     </TableCard>
   )
