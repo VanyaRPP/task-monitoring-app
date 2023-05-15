@@ -1,34 +1,20 @@
 import React from 'react'
-import OrganistaionsComponents from '../../OrganistaionsComponents'
 import s from './style.module.scss'
-import { Table } from 'antd'
+import { Button } from 'antd'
+import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
 
 const DomainStreetsComponent = ({ data }) => {
   return (
     <div className={s.tableHeader}>
-      <Table
-        expandable={{
-          expandedRowRender: (data) => <OrganistaionsComponents />,
-        }}
-        dataSource={testData}
-        columns={columns}
-        pagination={false}
-      />
+      <Button type="link">
+        Домени
+        <SelectOutlined className={s.Icon} />
+      </Button>
+      <Button type="link">
+        <PlusOutlined /> Додати
+      </Button>
     </div>
   )
 }
-
-const columns = [
-  {
-    title: 'Вулиця',
-    dataIndex: 'street',
-  },
-]
-
-const testData = [
-  {
-    street: '12 Короленка 12',
-  },
-]
 
 export default DomainStreetsComponent

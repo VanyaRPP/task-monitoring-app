@@ -1,18 +1,32 @@
-import React from 'react'
+import React, { FC } from 'react'
 import { Table } from 'antd'
 import TableCard from '@common/components/UI/TableCard'
 import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import OrganistaionsComponents from '@common/components/UI/OrganistaionsComponents'
 
-const DomainsBlock = () => {
+interface Props {
+  data: string
+}
+
+const DomainsBlock: FC<Props> = ({ data }) => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
 
   return (
-    <TableCard title="Домени">
+    <TableCard title={<DomainStreetsComponent data={data} />}>
       <Table
         loading={isLoading}
         expandable={{
-          expandedRowRender: (data) => <DomainStreetsComponent data={data} />,
+          expandedRowRender: (data) => (
+            <Table
+              expandable={{
+                expandedRowRender: (data) => <OrganistaionsComponents />,
+              }}
+              dataSource={testData1}
+              columns={columns1}
+              pagination={false}
+            />
+          ),
         }}
         dataSource={domains}
         columns={columns}
@@ -21,7 +35,18 @@ const DomainsBlock = () => {
     </TableCard>
   )
 }
+const columns1 = [
+  {
+    title: 'Вулиця',
+    dataIndex: 'street',
+  },
+]
 
+const testData1 = [
+  {
+    street: '12 Короленка 12',
+  },
+]
 const columns = [
   {
     title: 'Назва',
