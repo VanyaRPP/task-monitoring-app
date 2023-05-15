@@ -1,14 +1,27 @@
 import React from 'react'
-import { Table } from 'antd'
+import { Button, Table } from 'antd'
 import TableCard from '@common/components/UI/TableCard'
+import { AppRoutes } from '@utils/constants'
+import { useRouter } from 'next/router'
+import Link from 'next/link'
 import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import cn from 'classnames'
+import s from './style.module.scss'
 
 const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
+  const router = useRouter()
 
   return (
-    <TableCard title="Домени">
+    <TableCard
+      title={
+        <Button type="link" onClick={() => router.push(AppRoutes.DOMAIN)}>
+          Домени
+        </Button>
+      }
+      // className={cn({ [s.noScroll]: pathname === AppRoutes.DOMAIN })}
+    >
       <Table
         loading={isLoading}
         expandable={{
