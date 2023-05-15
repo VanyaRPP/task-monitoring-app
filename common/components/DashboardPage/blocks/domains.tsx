@@ -1,5 +1,6 @@
 import React from 'react'
 import { Button, Table } from 'antd'
+import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
 import TableCard from '@common/components/UI/TableCard'
 import { AppRoutes } from '@utils/constants'
 import { useRouter } from 'next/router'
@@ -12,15 +13,20 @@ import s from './style.module.scss'
 const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
   const router = useRouter()
+  const {
+    pathname,
+    query: { email },
+  } = router
 
   return (
     <TableCard
       title={
         <Button type="link" onClick={() => router.push(AppRoutes.DOMAIN)}>
           Домени
+          <SelectOutlined className={s.Icon} />
         </Button>
       }
-      // className={cn({ [s.noScroll]: pathname === AppRoutes.DOMAIN })}
+      className={cn({ [s.noScroll]: pathname === AppRoutes.DOMAIN })}
     >
       <Table
         loading={isLoading}
