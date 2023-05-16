@@ -1,37 +1,28 @@
-import React from 'react'
-import { Button, Table } from 'antd'
-import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
+import React, { FC } from 'react'
+import { Table } from 'antd'
 import TableCard from '@common/components/UI/TableCard'
-import { AppRoutes } from '@utils/constants'
-import { useRouter } from 'next/router'
-import Link from 'next/link'
-import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import cn from 'classnames'
-import s from './style.module.scss'
+import OrganistaionsComponents from '@common/components/UI/OrganistaionsComponents'
+import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
 
 const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
-  const router = useRouter()
-  const {
-    pathname,
-    query: { email },
-  } = router
 
   return (
-    <TableCard
-      title={
-        <Button type="link" onClick={() => router.push(AppRoutes.DOMAIN)}>
-          Домени
-          <SelectOutlined className={s.Icon} />
-        </Button>
-      }
-      className={cn({ [s.noScroll]: pathname === AppRoutes.DOMAIN })}
-    >
+    <TableCard title={<DomainStreetsComponent data={domains} />}>
       <Table
         loading={isLoading}
         expandable={{
-          expandedRowRender: (data) => <DomainStreetsComponent data={data} />,
+          expandedRowRender: (data) => (
+            <Table
+              expandable={{
+                expandedRowRender: (data) => <OrganistaionsComponents />,
+              }}
+              dataSource={testData1}
+              columns={columns1}
+              pagination={false}
+            />
+          ),
         }}
         dataSource={domains}
         columns={columns}
@@ -40,7 +31,18 @@ const DomainsBlock = () => {
     </TableCard>
   )
 }
+const columns1 = [
+  {
+    title: 'Вулиця',
+    dataIndex: 'street',
+  },
+]
 
+const testData1 = [
+  {
+    street: '12 Короленка 12',
+  },
+]
 const columns = [
   {
     title: 'Назва',
