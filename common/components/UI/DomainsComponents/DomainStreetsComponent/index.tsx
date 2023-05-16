@@ -18,6 +18,7 @@ const DomainStreetsComponent = ({ data }) => {
         Домени
         <SelectOutlined className={s.Icon} />
       </Button>
+
       <Button type="link">
         <PlusOutlined /> Додати
       </Button>

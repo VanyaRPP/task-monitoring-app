@@ -1,5 +1,9 @@
 import React, { FC } from 'react'
 import { Table } from 'antd'
+import cn from 'classnames'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@utils/constants'
+import s from './style.module.scss'
 import TableCard from '@common/components/UI/TableCard'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import OrganistaionsComponents from '@common/components/UI/OrganistaionsComponents'
@@ -7,9 +11,16 @@ import DomainStreetsComponent from '@common/components/UI/DomainsComponents/Doma
 
 const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
-
+  const router = useRouter()
+  const {
+    pathname,
+    query: { email },
+  } = router
   return (
-    <TableCard title={<DomainStreetsComponent data={domains} />}>
+    <TableCard
+      title={<DomainStreetsComponent data={domains} />}
+      className={cn({ [s.noScroll]: pathname === AppRoutes.DOMAIN })}
+    >
       <Table
         loading={isLoading}
         expandable={{
