@@ -6,11 +6,8 @@ import Payment from '@common/modules/models/Payment'
 import { check, validationResult } from 'express-validator'
 import initMiddleware from '@common/lib/initMiddleware'
 import validateMiddleware from '@common/lib/validateMiddleware'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@pages/api/auth/[...nextauth]'
 import { getPaymentOptions } from '@utils/helpers'
-import User from '@common/modules/models/User'
-import { Roles } from '@utils/constants'
+import { getCurrentUser } from '@utils/getCurrentUser'
 
 start()
 
@@ -65,7 +62,7 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const session = await getServerSession(req, res, authOptions)
+        const { session } = await getCurrentUser(req, res)
 
         const options = await getPaymentOptions({
           searchEmail: req.query.email,
@@ -87,9 +84,8 @@ export default async function handler(
 
     case 'POST':
       try {
-        const session = await getServerSession(req, res, authOptions)
-        const user = await User.findOne({ email: session.user.email })
-        const isAdmin = user?.role === Roles.ADMIN
+        const { isAdmin } = await getCurrentUser(req, res)
+
         if (isAdmin) {
           await postValidateBody(req, res)
           const payment = await Payment.create(req.body)
