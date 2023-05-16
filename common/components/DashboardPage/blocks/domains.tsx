@@ -51,7 +51,7 @@ const columns = [
     dataIndex: 'address',
   },
   {
-    title: 'Адміністратори',
+    title: 'Адміни',
     dataIndex: 'adminEmails',
   },
   {
