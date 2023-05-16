@@ -6,7 +6,7 @@ import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import OrganistaionsComponents from '@common/components/UI/OrganistaionsComponents'
 
 interface Props {
-  data: string
+  data: { streetName: string }
 }
 
 const DomainsBlock: FC<Props> = ({ data }) => {
