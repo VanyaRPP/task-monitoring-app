@@ -1,19 +1,15 @@
 import React, { FC } from 'react'
 import { Table } from 'antd'
 import TableCard from '@common/components/UI/TableCard'
-import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import OrganistaionsComponents from '@common/components/UI/OrganistaionsComponents'
+import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
 
-interface Props {
-  data: { streetName: string }
-}
-
-const DomainsBlock: FC<Props> = ({ data }) => {
+const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
 
   return (
-    <TableCard title={<DomainStreetsComponent data={data} />}>
+    <TableCard title={<DomainStreetsComponent data={domains} />}>
       <Table
         loading={isLoading}
         expandable={{
