@@ -1,11 +1,11 @@
-import mongoose, { HydratedDocument, Schema } from 'mongoose'
+import mongoose, { ObjectId, Schema } from 'mongoose'
 export interface IStreet {
   _id?: string
-  adress: string
+  address: string
 }
 
 const StreetSchema = new Schema<IStreet>({
-  adress: { type: String, required: true },
+  address: { type: String, required: true },
 })
 
 const Street = mongoose.models.Street || mongoose.model('Street', StreetSchema)

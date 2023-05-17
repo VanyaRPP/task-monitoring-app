@@ -13,13 +13,19 @@ export const streetApi = createApi({
       query: (id) => `/streets/${id}`,
       providesTags: (result) => ['Street'],
     }),
-    getAllStreets: builder.query<AllStreetsQuery, string>({
+    // TODO: fix and add typisation
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    getAllStreets: builder.query<any>({
       query: () => '/streets',
-      providesTags: (result) => ['Street'],
+      providesTags: (response) =>
+        response
+          ? response.map((item) => ({ type: 'Street', id: item._id }))
+          : [],
+      transformResponse: (response: AllStreetsQuery) => response.data,
     }),
     addStreet: builder.mutation<IStreet, Partial<IStreet>>({
-      query(data) {
-        const { ...body } = data
+      query(body) {
         return {
           url: `streets`,
           method: 'POST',

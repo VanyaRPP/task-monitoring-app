@@ -7,6 +7,7 @@ import RealEstateBlock from './blocks/realEstates'
 import DomainsBlock from './blocks/domains'
 import { Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import StreetsBlock from './blocks/streets'
 
 const Dashboard: FC = () => {
   const { data: userResponse } = useGetCurrentUserQuery()
@@ -17,6 +18,9 @@ const Dashboard: FC = () => {
       <DashboardHeader />
       <div className={s.Container}>
         {userRole === Roles.ADMIN && <DomainsBlock />}
+      </div>
+      <div className={s.Container}>
+        <StreetsBlock />
       </div>
       <div className={s.Container}>
         <PaymentsBlock />
