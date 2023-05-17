@@ -52,7 +52,7 @@ const RealEstateBlock = () => {
             render: (_, realEstate: IExtendedRealestate) => (
               <div className={s.popconfirm}>
                 <Popconfirm
-                  title={`Ви впевнені що хочете видалити нерухомість ${realEstate.address} ${realEstate.description}?`}
+                  title={`Ви впевнені що хочете видалити нерухомість?`}
                   onConfirm={() => handleDelete(realEstate?._id)}
                   cancelText="Відміна"
                   disabled={deleteLoading}
@@ -85,12 +85,30 @@ const RealEstateBlock = () => {
 
 const columns = [
   {
+    title: 'Домен',
+    dataIndex: 'domain',
+    render: (i) => i.name,
+  },
+  // TODO: Street WIP as ObjectId. (it is plain string still)
+  {
     title: 'Адреса',
-    dataIndex: 'address',
+    dataIndex: 'street',
   },
   {
     title: 'Назва компанії',
-    dataIndex: 'description',
+    dataIndex: 'companyName',
+  },
+  {
+    title: 'Банківська інформація',
+    dataIndex: 'bankInformation',
+  },
+  {
+    title: 'Договір',
+    dataIndex: 'agreement',
+  },
+  {
+    title: 'Телефон',
+    dataIndex: 'phone',
   },
   {
     title: 'Адміністратори',
@@ -111,10 +129,6 @@ const columns = [
   {
     title: 'Вивіз сміття',
     dataIndex: 'garbageCollector',
-  },
-  {
-    title: 'Платник',
-    dataIndex: 'payer',
   },
 ]
 

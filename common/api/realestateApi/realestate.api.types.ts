@@ -1,14 +1,15 @@
-import { ObjectId } from 'mongoose'
-
-export interface IRealestate {
-  address: string
-  description: string
+export type IRealestate = {
+  domain: string
+  street: string
+  companyName: string
+  bankInformation: string
+  agreement: string
+  phone: string
   adminEmails: string[]
   pricePerMeter: number
   servicePricePerMeter: number
   totalArea: number
   garbageCollector: number
-  payer: string
 }
 
 export interface IExtendedRealestate extends IRealestate {

@@ -19,14 +19,17 @@ const RealEstateModal: FC<Props> = ({ isModalOpen, closeModal }) => {
     const formData: IRealestate = await form.validateFields()
 
     const response = await addRealEstate({
-      address: formData.address,
-      description: formData.description,
+      domain: formData.domain,
+      street: formData.street,
+      companyName: formData.companyName,
+      bankInformation: formData.bankInformation,
+      agreement: formData.agreement,
+      phone: formData.phone,
       adminEmails: formData.adminEmails,
       pricePerMeter: formData.pricePerMeter,
       servicePricePerMeter: formData.servicePricePerMeter,
       totalArea: formData.totalArea,
       garbageCollector: formData.garbageCollector,
-      payer: formData.payer,
     })
 
     if ('data' in response) {
@@ -41,6 +44,7 @@ const RealEstateModal: FC<Props> = ({ isModalOpen, closeModal }) => {
   return (
     <Modal
       open={isModalOpen}
+      style={{ top: 20 }}
       title={"Об'єкти нерухомості"}
       onOk={handleSubmit}
       onCancel={closeModal}

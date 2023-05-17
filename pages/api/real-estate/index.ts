@@ -23,13 +23,14 @@ export default async function handler(
         const realEstates = await RealEstate.find({})
           .sort({ data: -1 })
           .limit(req.query.limit)
+          .populate({ path: 'domain', select: '_id name' })
 
         return res.status(200).json({
           success: true,
           data: realEstates,
         })
       } catch (error) {
-        return res.status(400).json({ success: false })
+        return res.status(400).json({ success: false, message: error })
       }
 
     case 'POST':
@@ -37,6 +38,8 @@ export default async function handler(
         // TODO: body validation
         const realEstate = await RealEstate.create(req.body)
         return res.status(200).json({ success: true, data: realEstate })
-      } catch (error) {}
+      } catch (error) {
+        return res.status(400).json({ success: false, message: error })
+      }
   }
 }

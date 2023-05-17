@@ -10,9 +10,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { user, isAdmin } = await getCurrentUser(req, res)
+  const { isAdmin } = await getCurrentUser(req, res)
 
-  if (!user || !isAdmin) {
+  if (!isAdmin) {
     return res.status(400).json({ success: false, message: 'not allowed' })
   }
 
