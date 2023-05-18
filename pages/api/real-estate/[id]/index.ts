@@ -20,8 +20,8 @@ export default async function handler(
   switch (req.method) {
     case 'DELETE':
       try {
-        await RealEstate.findByIdAndRemove(req.query.id).then((service) => {
-          if (service) {
+        await RealEstate.findByIdAndRemove(req.query.id).then((realEstate) => {
+          if (realEstate) {
             return res.status(200).json({
               success: true,
               data: 'RealEstate ' + req.query.id + ' was deleted',
@@ -29,7 +29,7 @@ export default async function handler(
           } else {
             return res.status(400).json({
               success: false,
-              data: 'Service ' + req.query.id + ' was not found',
+              data: 'RealEstate ' + req.query.id + ' was not found',
             })
           }
         })

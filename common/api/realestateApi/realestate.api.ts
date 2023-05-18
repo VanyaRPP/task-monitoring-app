@@ -5,7 +5,6 @@ import {
   IExtendedRealestate,
   IRealestate,
 } from './realestate.api.types'
-
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export const realestateApi = createApi({
