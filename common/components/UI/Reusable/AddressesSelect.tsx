@@ -33,7 +33,7 @@ export default function AddressesSelect({ disabled, form }) {
         options={streets?.map((i) => ({ value: i._id, label: i.address }))}
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={!domain || streets.length === 1 || disabled}
+        disabled={!domain || streets?.length === 1 || disabled}
         loading={isLoading}
         showSearch
       />

@@ -72,6 +72,7 @@ export default async function handler(
         const payments = await Payment.find(options)
           .sort({ date: -1 })
           .limit(req.query.limit)
+        // TODO: use domain, street, company
         // .populate({ path: 'payer', select: '_id email' })
 
         return res.status(200).json({
