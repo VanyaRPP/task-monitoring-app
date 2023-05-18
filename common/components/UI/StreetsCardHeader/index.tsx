@@ -2,17 +2,13 @@ import React, { useState } from 'react'
 import s from './style.module.scss'
 import { Button } from 'antd'
 import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
-import { AppRoutes, Roles } from '@utils/constants'
+import { AppRoutes } from '@utils/constants'
 import { useRouter } from 'next/router'
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddStreetModal from '@common/components/AddStreetModal'
 
-const StreetsCardHeader = ({ data }) => {
+const StreetsCardHeader = () => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
-
-  const { data: currUser } = useGetCurrentUserQuery()
-  const isAdmin = currUser?.role === Roles.ADMIN
 
   const {
     pathname,
@@ -31,12 +27,9 @@ const StreetsCardHeader = ({ data }) => {
           Вулиці
           <SelectOutlined className={s.Icon} />
         </Button>
-
-        {isAdmin && (
-          <Button type="link" onClick={() => setIsModalOpen(true)}>
-            <PlusOutlined /> Додати
-          </Button>
-        )}
+        <Button type="link" onClick={() => setIsModalOpen(true)}>
+          <PlusOutlined /> Додати
+        </Button>
       </div>
       {isModalOpen && (
         <AddStreetModal closeModal={() => setIsModalOpen(false)} />
