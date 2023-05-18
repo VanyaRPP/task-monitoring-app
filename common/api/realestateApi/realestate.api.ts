@@ -5,11 +5,7 @@ import {
   IExtendedRealestate,
   IRealestate,
 } from './realestate.api.types'
-
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { getCurrentUser } from '@utils/getCurrentUser'
-const { user } = await getCurrentUser(req, res)
-const userId = user._id
 
 export const realestateApi = createApi({
   reducerPath: 'realestateApi',
@@ -52,19 +48,6 @@ export const realestateApi = createApi({
         }
       },
       invalidatesTags: (response) => (response ? ['RealEstate'] : []),
-    }),
-    getMyRealEstate: builder.query<IExtendedRealestate[], { limit: number }>({
-      query: ({ limit }) => {
-        return {
-          url: `real-estate/my`,
-          params: { limit, userId },
-        }
-      },
-      providesTags: (response) =>
-        response
-          ? response.map((item) => ({ type: 'RealEstate', id: item._id }))
-          : [],
-      transformResponse: (response: IGetRealestateResponse) => response.data,
     }),
   }),
 })
