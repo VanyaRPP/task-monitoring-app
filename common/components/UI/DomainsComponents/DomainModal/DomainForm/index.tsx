@@ -1,7 +1,8 @@
 import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
-import { Select, Form, FormInstance, Input, InputNumber } from 'antd'
+import { Form, FormInstance, Input, Select } from 'antd'
 import s from './style.module.scss'
+import DomainStreets from './DomainStreets'
 
 interface Props {
   form: FormInstance<any>
@@ -31,17 +32,7 @@ const DomainForm: FC<Props> = ({ form }) => {
       >
         <Select mode="tags" placeholder="Пошти адмінів компанії" />
       </Form.Item>
-      <Form.Item
-        name="streets"
-        label="Вулиця"
-        rules={validateField('required')}
-      >
-        <Input
-          placeholder="Вкажіть значення"
-          maxLength={256}
-          className={s.formInput}
-        />
-      </Form.Item>
+      <DomainStreets />
       <Form.Item
         name="description"
         label="Опис"
