@@ -2,12 +2,15 @@ import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { validateField } from '@common/assets/features/validators'
 import { Form, Select } from 'antd'
 
-export default function EstateDomains() {
+export default function EstateDomains({ form }) {
   const { data, isLoading } = useGetDomainsQuery({})
 
   return (
     <Form.Item name="domain" label="Домен" rules={validateField('required')}>
       <Select
+        onSelect={() => {
+          form.resetFields(['street'])
+        }}
         filterSort={(optionA, optionB) =>
           (optionA?.label ?? '')
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment

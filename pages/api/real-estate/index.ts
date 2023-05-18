@@ -24,6 +24,7 @@ export default async function handler(
           .sort({ data: -1 })
           .limit(req.query.limit)
           .populate({ path: 'domain', select: '_id name' })
+          .populate({ path: 'street', select: '_id address' })
 
         return res.status(200).json({
           success: true,

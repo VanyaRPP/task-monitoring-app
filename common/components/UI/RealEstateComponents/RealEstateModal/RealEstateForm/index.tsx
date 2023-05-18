@@ -12,8 +12,8 @@ interface Props {
 const RealEstateForm: FC<Props> = ({ form }) => {
   return (
     <Form form={form} layout="vertical" className={s.Form}>
-      <EstateDomains />
-      <EstateAddresses />
+      <EstateDomains form={form} />
+      <EstateAddresses form={form} />
       <Form.Item
         name="companyName"
         label="Назва компанії"
