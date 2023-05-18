@@ -27,6 +27,8 @@ export default async function handler(
         }
 
         const services = await Service.find(props)
+          .populate({ path: 'domain', select: '_id name' })
+          .populate({ path: 'street', select: '_id address' })
           .sort({ data: -1 })
           .limit(req.query.limit)
 
@@ -50,7 +52,7 @@ export default async function handler(
             .json({ success: false, message: 'not allowed' })
         }
       } catch (error) {
-        return res.status(400).json({ success: false })
+        return res.status(400).json({ success: false, message: error })
       }
   }
 }

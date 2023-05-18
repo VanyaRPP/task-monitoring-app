@@ -59,33 +59,35 @@ const ServicesBlock = () => {
 
   const columns = [
     {
-      title: '',
+      title: 'Домен',
+      dataIndex: 'domain',
+      render: (i) => i?.name,
+    },
+    {
+      title: 'Адреса',
+      dataIndex: 'street',
+      render: (i) => i?.address,
+    },
+    {
+      title: 'Місяць',
       dataIndex: 'date',
       width: '12%',
       // TODO: to helper
       render: (data) => firstTextToUpperCase(moment(data).format('MMMM')),
     },
     {
-      title: 'Адреса',
-      dataIndex: 'address',
-      width: '20%',
-    },
-    {
       title: 'Утримання',
       dataIndex: 'rentPrice',
-      width: '15%',
       render: renderCurrency,
     },
     {
       title: 'Електрика',
       dataIndex: 'electricityPrice',
-      width: '15%',
       render: renderCurrency,
     },
     {
       title: 'Вода',
       dataIndex: 'waterPrice',
-      width: '15%',
       render: renderCurrency,
     },
     {
@@ -95,19 +97,16 @@ const ServicesBlock = () => {
         </Tooltip>
       ),
       dataIndex: 'inflicionPrice',
-      width: '14%',
     },
     {
       title: 'Опис',
       dataIndex: 'description',
       key: 'description',
-      width: '15%',
       ellipsis: true,
     },
     isAdmin
       ? {
           title: '',
-          width: '15%',
           render: (_, service: IExtendedService) => (
             <div className={s.popconfirm}>
               <Popconfirm

@@ -3,7 +3,6 @@ import { Button, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
 import moment from 'moment'
-import { useGetUserByIdQuery } from 'common/api/userApi/user.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useReactToPrint } from 'react-to-print'
 import { renderCurrency } from '@common/components/DashboardPage/blocks/payments'
@@ -54,7 +53,9 @@ const columns: ColumnsType<DataType> = [
 
 const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const newData = currPayment || paymentData
-  const { data } = useGetUserByIdQuery(currPayment?.payer || newData?.payer._id)
+
+  // TODO: use real data from Domain, Company
+  const data = { name: 'asd', email: 'asda', tel: '123' }
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -94,8 +95,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
       Сума: Number(newData?.electricity?.sum),
     },
   ]
-  //батьківський компонент повинен мати стиль, всі діти вкладені всередину
-  //не використовувати інлайн стилі
+
   return (
     <>
       <div
@@ -127,9 +127,9 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.receiverInfo}>
             <div className={s.label}>Одержувач</div>
             <div>
-              {data?.data.name} &nbsp;
-              {data?.data.email} &nbsp;
-              {data?.data.tel}
+              {data?.name} &nbsp;
+              {data?.email} &nbsp;
+              {data?.tel}
             </div>
           </div>
         </>

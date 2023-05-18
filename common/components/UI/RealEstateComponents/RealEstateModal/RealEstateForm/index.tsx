@@ -1,8 +1,8 @@
 import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import { Select, Form, FormInstance, Input, InputNumber } from 'antd'
-import EstateAddresses from './EstateAddresses'
-import EstateDomains from './EstateDomains'
+import AddressesSelect from '../../../Reusable/AddressesSelect'
+import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
 
 interface Props {
@@ -12,8 +12,8 @@ interface Props {
 const RealEstateForm: FC<Props> = ({ form }) => {
   return (
     <Form form={form} layout="vertical" className={s.Form}>
-      <EstateDomains form={form} />
-      <EstateAddresses form={form} />
+      <DomainsSelect form={form} />
+      <AddressesSelect form={form} />
       <Form.Item
         name="companyName"
         label="Назва компанії"
