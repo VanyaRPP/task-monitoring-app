@@ -92,7 +92,7 @@ const columns = [
   {
     title: 'Адреса',
     dataIndex: 'street',
-    render: (i) => i.address,
+    render: (i) => i?.address,
   },
   {
     title: 'Назва компанії',
