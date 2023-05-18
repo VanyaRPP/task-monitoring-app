@@ -87,7 +87,7 @@ const columns = [
   {
     title: 'Домен',
     dataIndex: 'domain',
-    render: (i) => i.name,
+    render: (i) => i?.name,
   },
   {
     title: 'Адреса',
