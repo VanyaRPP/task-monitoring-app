@@ -2,7 +2,13 @@ import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { validateField } from '@common/assets/features/validators'
 import { Form, Select } from 'antd'
 
-export default function DomainsSelect({ disabled, form }) {
+export default function DomainsSelect({
+  disabled,
+  form,
+}: {
+  disabled?: boolean
+  form: any
+}) {
   const { data, isLoading } = useGetDomainsQuery({})
 
   return (

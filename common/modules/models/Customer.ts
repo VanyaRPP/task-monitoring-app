@@ -1,7 +1,5 @@
 import { IUser } from './User'
-// import { paymentSchemeMiddleware } from '@common/lib/paymentSchemeMiddleware'
 import mongoose, { ObjectId, Schema } from 'mongoose'
-// import { IPaymentTableData } from '@utils/tableData'
 
 export interface ICustomerModel {
   customer: ObjectId | IUser
@@ -16,8 +14,6 @@ export const CustomerSchema = new Schema<ICustomerModel>({
   information: { type: String, required: true },
   description: { type: String, required: true },
 })
-
-// paymentSchemeMiddleware()
 
 const Customer =
   mongoose.models.Customer || mongoose.model('Customer', CustomerSchema)

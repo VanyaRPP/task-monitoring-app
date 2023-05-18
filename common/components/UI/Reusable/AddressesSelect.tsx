@@ -3,7 +3,13 @@ import { validateField } from '@common/assets/features/validators'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
-export default function AddressesSelect({ disabled, form }) {
+export default function AddressesSelect({
+  disabled,
+  form,
+}: {
+  disabled?: boolean
+  form: any
+}) {
   const { data, isLoading } = useGetDomainsQuery({})
   const domain = Form.useWatch('domain', form)
   const domainObj = data?.find((i) => i._id === domain)

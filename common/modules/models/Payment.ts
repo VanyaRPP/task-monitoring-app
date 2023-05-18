@@ -1,6 +1,4 @@
-import { IUser } from './User'
-import { paymentSchemeMiddleware } from '@common/lib/paymentSchemeMiddleware'
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 import { IPaymentTableData } from '@utils/tableData'
 
 export interface IPaymentModel {
@@ -27,8 +25,6 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   electricity: { type: Object },
   water: { type: Object },
 })
-
-paymentSchemeMiddleware()
 
 const Payment =
   mongoose.models.Payment || mongoose.model('Payment', PaymentSchema)
