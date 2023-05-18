@@ -1,4 +1,4 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 export interface IStreet {
   _id?: string
   address: string

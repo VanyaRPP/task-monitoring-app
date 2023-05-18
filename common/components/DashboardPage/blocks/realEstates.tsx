@@ -89,10 +89,10 @@ const columns = [
     dataIndex: 'domain',
     render: (i) => i.name,
   },
-  // TODO: Street WIP as ObjectId. (it is plain string still)
   {
     title: 'Адреса',
     dataIndex: 'street',
+    render: (i) => i.address,
   },
   {
     title: 'Назва компанії',

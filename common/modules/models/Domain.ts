@@ -11,7 +11,7 @@ export interface IDomain {
   name: string
   address: string
   adminEmails: [string]
-  streets: [string] //  Streets id
+  streets: [ObjectId]
   description: string
   bankInformation: string
   phone: string
@@ -27,7 +27,10 @@ const DomainSchema = new Schema<IDomain>({
   name: { type: String, required: true },
   address: { type: String, required: true },
   adminEmails: { type: [String], required: true },
-  streets: { type: [String], required: true }, //  Streets id
+  streets: {
+    type: [{ type: Schema.Types.ObjectId, ref: 'Street' }],
+    required: true,
+  },
   description: { type: String, required: true },
   bankInformation: { type: String, required: true },
   phone: { type: String, required: true },

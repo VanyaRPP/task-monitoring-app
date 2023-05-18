@@ -11,23 +11,25 @@ interface Props {
 const AddServiceForm: FC<Props> = ({ form }) => {
   const { MonthPicker } = DatePicker
 
+  //       TODO: Додати вибір домену як ObjectId приклад в формі ріал естейт
+  // потім додати вибір адресу. Також із ObjectId
   return (
     <Form form={form} layout="vertical" className={s.Form}>
-      <Form.Item
-        name="date"
-        label="Місяць та рік"
-        rules={validateField('date')}
-      >
-        <MonthPicker
-          format="MMMM YYYY"
-          placeholder="Оберіть місяць"
-          className={s.formInput}
-        />
-      </Form.Item>
       <Form.Item name="address" label="Адреса" rules={validateField('address')}>
         <Input
           placeholder="Введіть адресу"
           maxLength={256}
+          className={s.formInput}
+        />
+      </Form.Item>
+      <Form.Item
+        name="date"
+        label="Місяць та рік"
+        rules={validateField('required')}
+      >
+        <MonthPicker
+          format="MMMM YYYY"
+          placeholder="Оберіть місяць"
           className={s.formInput}
         />
       </Form.Item>

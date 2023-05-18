@@ -21,7 +21,10 @@ export default async function handler(
     case 'GET':
       try {
         // TODO: filter by user email and this email should be inside amdinEmails
-        const domain = await Domain.find({})
+        const domain = await Domain.find({}).populate({
+          path: 'streets',
+          select: '_id address',
+        })
         return res.status(200).json({ success: true, data: domain })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })

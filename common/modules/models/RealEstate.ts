@@ -1,10 +1,8 @@
 import mongoose, { ObjectId, Schema } from 'mongoose'
-import { IDomain } from './Domain'
 
 export interface IRealEstateModel {
-  domain: ObjectId | IDomain
-  // TODO: Street WIP as ObjectId
-  street: string
+  domain: ObjectId
+  street: ObjectId
   companyName: string
   bankInformation: string
   agreement: string
@@ -18,9 +16,7 @@ export interface IRealEstateModel {
 
 export const RealEstateSchema = new Schema<IRealEstateModel>({
   domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
-  // TODO: Street WIP as ObjectId
-  // streetId: [{ type: Schema.Types.ObjectId, ref: 'Street' }],
-  street: { type: String, required: true },
+  street: { type: Schema.Types.ObjectId, ref: 'Street' },
   companyName: { type: String, required: true },
   bankInformation: { type: String, required: true },
   agreement: { type: String, required: true },
