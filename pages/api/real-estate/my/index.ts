@@ -20,7 +20,8 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const my = await RealEstate.find({ adminEmails: user.email })
+        const my = await RealEstate.find({ adminEmails: { $in: [user.email] } })
+
         return res.status(200).json({ success: true, data: my })
       } catch (error) {
         return res.status(400).json({ success: false })
