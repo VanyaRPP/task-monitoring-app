@@ -13,14 +13,11 @@ export const streetApi = createApi({
       query: (id) => `/streets/${id}`,
       providesTags: (result) => ['Street'],
     }),
-    // TODO: fix and add typisation
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    getAllStreets: builder.query<any>({
+    getAllStreets: builder.query<IStreet[], string>({
       query: () => '/streets',
-      providesTags: (response) =>
+      providesTags: (response: IStreet[]) =>
         response
-          ? response.map((item) => ({ type: 'Street', id: item._id }))
+          ? response.map((item: IStreet) => ({ type: 'Street', id: item._id }))
           : [],
       transformResponse: (response: AllStreetsQuery) => response.data,
     }),

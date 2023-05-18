@@ -1,7 +1,8 @@
 import mongoose, { Schema } from 'mongoose'
 export interface IStreet {
-  _id?: string
   address: string
+  _id?: string
+  _v: number
 }
 
 const StreetSchema = new Schema<IStreet>({

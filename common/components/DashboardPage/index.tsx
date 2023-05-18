@@ -17,10 +17,12 @@ const Dashboard: FC = () => {
     <>
       <DashboardHeader />
       <div className={s.Container}>
-        {userRole === Roles.ADMIN && <DomainsBlock />}
-      </div>
-      <div className={s.Container}>
-        <StreetsBlock />
+        {userRole === Roles.ADMIN && (
+          <>
+            <DomainsBlock />
+            <StreetsBlock />
+          </>
+        )}
       </div>
       <div className={s.Container}>
         <PaymentsBlock />

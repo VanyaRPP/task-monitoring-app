@@ -16,6 +16,45 @@ const DomainsBlock = () => {
     pathname,
     query: { email },
   } = router
+
+  const domainsPageColumns =
+    router.pathname === AppRoutes.DOMAIN
+      ? [
+          {
+            title: 'Телефон',
+            dataIndex: 'phone',
+          },
+          {
+            title: 'Пошта',
+            dataIndex: 'email',
+          },
+        ]
+      : []
+
+  const columns = [
+    {
+      title: 'Назва',
+      dataIndex: 'name',
+    },
+    {
+      title: 'Адреса',
+      dataIndex: 'address',
+    },
+    {
+      title: 'Адміністратори',
+      dataIndex: 'adminEmails',
+    },
+    {
+      title: 'Опис',
+      dataIndex: 'description',
+    },
+    {
+      title: 'Отримувач',
+      dataIndex: 'bankInformation',
+    },
+    ...domainsPageColumns,
+  ]
+
   return (
     <TableCard
       title={<DomainStreetsComponent data={domains} />}
@@ -52,36 +91,6 @@ const columns1 = [
 const testData1 = [
   {
     street: '12 Короленка 12',
-  },
-]
-const columns = [
-  {
-    title: 'Назва',
-    dataIndex: 'name',
-  },
-  {
-    title: 'Адреса',
-    dataIndex: 'address',
-  },
-  {
-    title: 'Адміністратори',
-    dataIndex: 'adminEmails',
-  },
-  {
-    title: 'Опис',
-    dataIndex: 'description',
-  },
-  {
-    title: 'Отримувач',
-    dataIndex: 'bankInformation',
-  },
-  {
-    title: 'Телефон',
-    dataIndex: 'phone',
-  },
-  {
-    title: 'Пошта',
-    dataIndex: 'email',
   },
 ]
 
