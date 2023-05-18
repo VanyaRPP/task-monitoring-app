@@ -87,12 +87,12 @@ const columns = [
   {
     title: 'Домен',
     dataIndex: 'domain',
-    render: (i) => i.name,
+    render: (i) => i?.name,
   },
   {
     title: 'Адреса',
     dataIndex: 'street',
-    render: (i) => i.address,
+    render: (i) => i?.address,
   },
   {
     title: 'Назва компанії',
