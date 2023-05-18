@@ -2,13 +2,20 @@ import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { validateField } from '@common/assets/features/validators'
 import { Form, Select } from 'antd'
 
-export default function EstateDomains({ form }) {
+export default function DomainsSelect({
+  disabled,
+  form,
+}: {
+  disabled?: boolean
+  form: any
+}) {
   const { data, isLoading } = useGetDomainsQuery({})
 
   return (
     <Form.Item name="domain" label="Домен" rules={validateField('required')}>
       <Select
         onSelect={() => {
+          // TODO: check if this should be inside street component
           form.resetFields(['street'])
         }}
         filterSort={(optionA, optionB) =>
@@ -25,6 +32,7 @@ export default function EstateDomains({ form }) {
         filterOption={(input, option) => (option?.label ?? '').includes(input)}
         options={data?.map((i) => ({ value: i._id, label: i.name }))}
         optionFilterProp="children"
+        disabled={disabled}
         placeholder="Пошук домена"
         loading={isLoading}
         showSearch

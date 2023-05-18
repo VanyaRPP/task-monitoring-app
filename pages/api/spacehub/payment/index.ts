@@ -72,7 +72,8 @@ export default async function handler(
         const payments = await Payment.find(options)
           .sort({ date: -1 })
           .limit(req.query.limit)
-          .populate({ path: 'payer', select: '_id email' })
+        // TODO: use domain, street, company
+        // .populate({ path: 'payer', select: '_id email' })
 
         return res.status(200).json({
           success: true,
@@ -96,8 +97,8 @@ export default async function handler(
             .json({ success: false, message: 'not allowed' })
         }
       } catch (error) {
-        const errors = postValidateBody(req)
-        return res.status(400).json({ errors: errors.array() })
+        // const errors = postValidateBody(req)
+        return res.status(400).json({ success: false, message: error })
       }
   }
 }

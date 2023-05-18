@@ -20,7 +20,13 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const realEstates = await RealEstate.find({})
+        const options = {}
+        const { domainId, streetId } = req.query
+        if (domainId && streetId) {
+          options.domain = domainId
+          options.street = streetId
+        }
+        const realEstates = await RealEstate.find(options)
           .sort({ data: -1 })
           .limit(req.query.limit)
           .populate({ path: 'domain', select: '_id name' })

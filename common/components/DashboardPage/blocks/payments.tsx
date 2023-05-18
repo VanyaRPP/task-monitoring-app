@@ -67,25 +67,25 @@ const PaymentsBlock = () => {
       ellipsis: true,
       render: dateToDefaultFormat,
     },
-    isAdmin && !email
-      ? {
-          title: 'Платник',
-          dataIndex: 'payer',
-          key: 'payer',
-          width: '15%',
-          ellipsis: true,
-          render: (payer) => (
-            <Link
-              href={{
-                pathname: AppRoutes.PAYMENT,
-                query: { email: payer?.email },
-              }}
-            >
-              <a className={s.payer}>{payer?.email}</a>
-            </Link>
-          ),
-        }
-      : { width: '0' },
+    // isAdmin && !email
+    //   ? {
+    //       title: 'Платник',
+    //       dataIndex: 'payer',
+    //       key: 'payer',
+    //       width: '15%',
+    //       ellipsis: true,
+    //       render: (payer) => (
+    //         <Link
+    //           href={{
+    //             pathname: AppRoutes.PAYMENT,
+    //             query: { email: payer?.email },
+    //           }}
+    //         >
+    //           <a className={s.payer}>{payer?.email}</a>
+    //         </Link>
+    //       ),
+    //     }
+    //   : { width: '0' },
     {
       title: (
         <Tooltip title="Дебет (Реалізація)">

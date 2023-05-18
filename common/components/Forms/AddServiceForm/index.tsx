@@ -1,8 +1,10 @@
-import React, { FC, useState } from 'react'
+import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
-import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
+import { Form, FormInstance, Input, InputNumber } from 'antd'
 import { DatePicker } from 'antd'
 import s from './style.module.scss'
+import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
+import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 
 interface Props {
   form: FormInstance<any>
@@ -11,17 +13,10 @@ interface Props {
 const AddServiceForm: FC<Props> = ({ form }) => {
   const { MonthPicker } = DatePicker
 
-  //       TODO: Додати вибір домену як ObjectId приклад в формі ріал естейт
-  // потім додати вибір адресу. Також із ObjectId
   return (
     <Form form={form} layout="vertical" className={s.Form}>
-      <Form.Item name="address" label="Адреса" rules={validateField('address')}>
-        <Input
-          placeholder="Введіть адресу"
-          maxLength={256}
-          className={s.formInput}
-        />
-      </Form.Item>
+      <DomainsSelect form={form} />
+      <AddressesSelect form={form} />
       <Form.Item
         name="date"
         label="Місяць та рік"

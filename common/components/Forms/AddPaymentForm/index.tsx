@@ -6,6 +6,9 @@ import PaymentModalTable from '@common/components/PaymentModalTable'
 import { useRouter } from 'next/router'
 import s from './style.module.scss'
 import { Operations } from '@utils/constants'
+import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
+import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
+import CompanySelect from './CompanySelect'
 
 interface Props {
   form: FormInstance<any>
@@ -57,22 +60,9 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
       layout="vertical"
       className={s.Form}
     >
-      <Form.Item name="payer" label="Платник" rules={validateField('required')}>
-        <Select
-          disabled={edit && true}
-          placeholder="Оберіть платника"
-          style={{ width: '100%' }}
-          showSearch
-          filterOption={(input, option) =>
-            (option?.label || '').includes(input)
-          }
-          options={users?.map((user) => ({
-            key: user._id,
-            label: user.email,
-            value: user._id,
-          }))}
-        />
-      </Form.Item>
+      <DomainsSelect disabled={edit} form={form} />
+      <AddressesSelect disabled={edit} form={form} />
+      <CompanySelect disabled={edit} form={form} />
       <Form.Item
         name="operation"
         label="Тип оплати"
@@ -87,6 +77,7 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
           <Option value="debit">Дебет (Реалізація)</Option>
         </Select>
       </Form.Item>
+
       <Form.Item
         shouldUpdate={(prevValues, currentValues) =>
           prevValues.operation !== currentValues.operation

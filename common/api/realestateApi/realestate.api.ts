@@ -14,11 +14,14 @@ export const realestateApi = createApi({
   tagTypes: ['RealEstate'],
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getAllRealEstate: builder.query<IExtendedRealestate[], { limit: number }>({
-      query: ({ limit }) => {
+    getAllRealEstate: builder.query<
+      IExtendedRealestate[],
+      { limit?: number; domainId?: string; streetId?: string }
+    >({
+      query: ({ limit, domainId, streetId }) => {
         return {
           url: `real-estate`,
-          params: { limit },
+          params: { limit, domainId, streetId },
         }
       },
       providesTags: (response) =>

@@ -1,10 +1,9 @@
-import { IUser } from './User'
-import { paymentSchemeMiddleware } from '@common/lib/paymentSchemeMiddleware'
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 import { IPaymentTableData } from '@utils/tableData'
 
 export interface IPaymentModel {
-  payer: ObjectId | IUser
+  //TODO: Add domain, street, company
+  // payer: ObjectId | IUser
   date: Date
   credit: number
   debit: number
@@ -16,7 +15,7 @@ export interface IPaymentModel {
 }
 
 export const PaymentSchema = new Schema<IPaymentModel>({
-  payer: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  // payer: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   date: { type: Date, required: true, default: Date.now() },
   credit: { type: Number, required: true, default: 0 },
   description: { type: String },
@@ -26,8 +25,6 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   electricity: { type: Object },
   water: { type: Object },
 })
-
-paymentSchemeMiddleware()
 
 const Payment =
   mongoose.models.Payment || mongoose.model('Payment', PaymentSchema)
