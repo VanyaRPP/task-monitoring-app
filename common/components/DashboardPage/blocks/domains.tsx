@@ -8,11 +8,9 @@ import TableCard from '@common/components/UI/TableCard'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import OrganistaionsComponents from '@common/components/UI/OrganistaionsComponents'
 import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
-import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
 
 const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
-  const { data: streets } = useGetAllStreetsQuery({})
   const router = useRouter()
   const {
     pathname,
