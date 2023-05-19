@@ -17,7 +17,6 @@ import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
 
 const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
-  const { data: streets } = useGetAllStreetsQuery({})
   const router = useRouter()
   const {
     pathname,
