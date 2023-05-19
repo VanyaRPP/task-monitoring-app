@@ -111,7 +111,7 @@ const DomainsBlock = () => {
                 expandedRowRender: (street) => (
                   <OrganistaionsComponents
                     domainId={data._id}
-                    streetId={street}
+                    streetId={street._id}
                   />
                 ),
               }}

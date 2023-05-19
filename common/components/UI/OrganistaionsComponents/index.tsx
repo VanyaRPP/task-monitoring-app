@@ -2,26 +2,18 @@ import React from 'react'
 import s from './style.module.scss'
 import { Table } from 'antd'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
-import { AppRoutes } from '@utils/constants'
-import { useRouter } from 'next/router'
 
 const OrganistaionsComponents = ({ domainId, streetId }) => {
-  const router = useRouter()
-  const {
-    pathname,
-    query: { email },
-  } = router
   const { data: realEstates, isLoading } = useGetAllRealEstateQuery({
-    limit: pathname === AppRoutes.DOMAIN ? 200 : 5,
     domainId,
-    streetId
+    streetId,
   })
 
   return (
     <div className={s.tableHeader}>
       <Table
         loading={isLoading}
-        dataSource={realEstates}
+        dataSource={domainId && streetId ? realEstates : null}
         columns={columns}
         pagination={false}
       />
