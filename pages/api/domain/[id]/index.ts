@@ -12,7 +12,7 @@ export default async function handler(
   const { isAdmin } = await getCurrentUser(req, res)
 
   if (!isAdmin) {
-    return res.status(400).json({ success: false, message: 'not allowed' })
+    return res.status(400).json({ success: false })
   }
 
   switch (req.method) {
