@@ -7,6 +7,10 @@ export interface IPaymentTableData {
   sum?: number
 }
 
+export interface IRentTableData extends IPaymentTableData {
+  inflicionPrice?: number
+}
+
 export const dataSource: IPaymentTableData[] = [
   {
     id: 1,

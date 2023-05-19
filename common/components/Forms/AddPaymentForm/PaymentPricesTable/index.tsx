@@ -1,13 +1,11 @@
-import { Table, Tooltip, InputNumber, Form, FormInstance, Input } from 'antd'
-import { FC, useEffect } from 'react'
+import { Table, Tooltip, InputNumber, Form, FormInstance } from 'antd'
+import { FC } from 'react'
 import { ColumnProps } from 'antd/lib/table'
 import moment from 'moment'
 import { dataSource, IPaymentTableData } from '@utils/tableData'
 import { paymentsTitle } from '@utils/constants'
-import { getCurrentMonthService, getName } from '@utils/helpers'
+import { getName } from '@utils/helpers'
 import { validateField } from '@common/assets/features/validators'
-import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
-import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import s from './style.module.scss'
 
 interface Props {
@@ -16,20 +14,8 @@ interface Props {
   paymentData: any
 }
 
-const PaymentModalTable: FC<Props> = ({ form, edit, paymentData }) => {
-  const { setFieldValue } = form
-  const {
-    data: payments,
-    isFetching: paymentsFetching,
-    isLoading: paymentsLoading,
-  } = useGetAllPaymentsQuery({ limit: 100 })
-  const {
-    data: services,
-    isFetching: servicesFetching,
-    isLoading: servicesLoading,
-  } = useGetAllServicesQuery({ limit: 12 })
-
-  const payer = Form.useWatch('payer', form)
+const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
+  // TODO: fix labels
   const maintenance = Form.useWatch('maintenance', form)
   const m = maintenance?.amount * maintenance?.price
 
@@ -42,53 +28,27 @@ const PaymentModalTable: FC<Props> = ({ form, edit, paymentData }) => {
   const water = Form.useWatch('water', form)
   const w = (water?.amount - water?.lastAmount) * water?.price
 
+  // TODO: fix. such items should be "Clear function". Without side effect
   const getVal = (record) => {
     switch (record) {
       case 'maintenance': {
-        setFieldValue(['maintenance', 'sum'], m)
+        // setFieldValue(['maintenance', 'sum'], m)
         return +m.toFixed(1) || 0
       }
       case 'placing': {
-        setFieldValue(['placing', 'sum'], p)
+        // setFieldValue(['placing', 'sum'], p)
         return +p.toFixed(1) || 0
       }
       case 'electricity': {
-        setFieldValue(['electricity', 'sum'], e)
+        // setFieldValue(['electricity', 'sum'], e)
         return +e.toFixed(1) || 0
       }
       case 'water': {
-        setFieldValue(['water', 'sum'], w)
+        // setFieldValue(['water', 'sum'], w)
         return +w.toFixed(1) || 0
       }
     }
   }
-  const setFormDefaultValues = () => {
-    const payment = payments?.find((p) => {
-      return p?.payer?._id === payer && p?.debit > 0
-    })
-    const monthServices = getCurrentMonthService(services)
-
-    setFieldValue(['electricity', 'amount'], payment?.electricity?.amount)
-    setFieldValue(
-      ['electricity', 'lastAmount'],
-      payment?.electricity?.lastAmount
-    )
-    setFieldValue(['water', 'amount'], payment?.water?.amount)
-    setFieldValue(['water', 'lastAmount'], payment?.water?.lastAmount)
-    setFieldValue(['electricity', 'price'], payment?.electricity?.price)
-    setFieldValue(['maintenance', 'amount'], payment?.maintenance?.amount)
-    setFieldValue(['placing', 'amount'], payment?.placing?.amount)
-    setFieldValue(['placing', 'sum'], payment?.placing?.sum)
-    setFieldValue(['placing', 'price'], payment?.placing?.price)
-    setFieldValue(['maintenance', 'price'], payment?.maintenance?.price)
-    setFieldValue(['water', 'price'], payment?.water?.price)
-
-    setFieldValue(['electricity', 'sum'], payment?.electricity?.sum)
-  }
-
-  useEffect(() => {
-    setFormDefaultValues()
-  }, [payer, payments, services])
 
   const columns: ColumnProps<IPaymentTableData>[] = [
     {
@@ -102,6 +62,7 @@ const PaymentModalTable: FC<Props> = ({ form, edit, paymentData }) => {
       width: 'max-content',
       ellipsis: true,
       render: (name) => (
+        // TODO: use moment from helper (single access point)
         <Tooltip
           title={`${getName(name, paymentsTitle)} (${moment().format('MMMM')})`}
         >
@@ -118,26 +79,21 @@ const PaymentModalTable: FC<Props> = ({ form, edit, paymentData }) => {
       width: '30%',
       render: (text, record) => (
         <>
+          {/* TODO: Use enum for record type. there is no "electricity", but "electricityPrice" */}
           {record.name === 'electricity' || record.name === 'water' ? (
             <div className={s.doubleInputs}>
               <Form.Item
                 name={[record.name, 'lastAmount']}
                 rules={validateField('required')}
               >
-                <InputNumber
-                  disabled={edit ? true : false}
-                  className={s.input}
-                />
+                <InputNumber disabled={edit} className={s.input} />
               </Form.Item>
 
               <Form.Item
                 name={[record.name, 'amount']}
                 rules={validateField('required')}
               >
-                <InputNumber
-                  disabled={edit ? true : false}
-                  className={s.input}
-                />
+                <InputNumber disabled={edit} className={s.input} />
               </Form.Item>
             </div>
           ) : (
@@ -145,7 +101,7 @@ const PaymentModalTable: FC<Props> = ({ form, edit, paymentData }) => {
               name={[record.name, 'amount']}
               rules={validateField('required')}
             >
-              <InputNumber disabled={edit ? true : false} className={s.input} />
+              <InputNumber disabled={edit} className={s.input} />
             </Form.Item>
           )}
         </>
@@ -160,7 +116,7 @@ const PaymentModalTable: FC<Props> = ({ form, edit, paymentData }) => {
             name={[record.name, 'price']}
             rules={validateField('required')}
           >
-            <InputNumber disabled={edit ? true : false} className={s.input} />
+            <InputNumber disabled={edit} className={s.input} />
           </Form.Item>
         </Tooltip>
       ),
@@ -184,15 +140,9 @@ const PaymentModalTable: FC<Props> = ({ form, edit, paymentData }) => {
       columns={columns}
       dataSource={dataSource}
       pagination={false}
-      loading={
-        paymentsLoading ||
-        paymentsLoading ||
-        servicesLoading ||
-        servicesFetching
-      }
       className={s.table}
     />
   )
 }
 
-export default PaymentModalTable
+export default PaymentPricesTable

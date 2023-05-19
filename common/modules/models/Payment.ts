@@ -1,29 +1,34 @@
-import mongoose, { Schema } from 'mongoose'
-import { IPaymentTableData } from '@utils/tableData'
+import mongoose, { ObjectId, Schema } from 'mongoose'
+import { IPaymentTableData, IRentTableData } from '@utils/tableData'
 
 export interface IPaymentModel {
-  //TODO: Add domain, street, company
-  // payer: ObjectId | IUser
+  domain: ObjectId
+  street: ObjectId
+  company: ObjectId
   date: Date
   credit: number
   debit: number
   maintenance?: IPaymentTableData
-  placing?: IPaymentTableData
-  electricity?: IPaymentTableData
-  water?: IPaymentTableData
+  rentPrice?: IRentTableData
+  electricityPrice?: IPaymentTableData
+  waterPrice?: IPaymentTableData
   description?: string
+  services?: IPaymentTableData[]
 }
 
 export const PaymentSchema = new Schema<IPaymentModel>({
-  // payer: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
+  street: { type: Schema.Types.ObjectId, ref: 'Street' },
+  company: { type: Schema.Types.ObjectId, ref: 'RealEstate' },
   date: { type: Date, required: true, default: Date.now() },
   credit: { type: Number, required: true, default: 0 },
   description: { type: String },
   debit: { type: Number, required: true, default: 0 },
   maintenance: { type: Object },
-  placing: { type: Object },
-  electricity: { type: Object },
-  water: { type: Object },
+  rentPrice: { type: Object },
+  electricityPrice: { type: Object },
+  waterPrice: { type: Object },
+  services: { type: [Object] },
 })
 
 const Payment =
