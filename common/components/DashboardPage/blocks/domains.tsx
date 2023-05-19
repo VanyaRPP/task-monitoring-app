@@ -1,13 +1,20 @@
-import React, { FC } from 'react'
+import React, { ReactElement } from 'react'
 import { Table } from 'antd'
 import cn from 'classnames'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
 import s from './style.module.scss'
 import TableCard from '@common/components/UI/TableCard'
-import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import {
+  useDeleteDomainMutation,
+  useGetDomainsQuery,
+} from '@common/api/domainApi/domain.api'
 import OrganistaionsComponents from '@common/components/UI/OrganistaionsComponents'
 import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
+import { Alert, Popconfirm, message } from 'antd'
+import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import { DeleteOutlined } from '@ant-design/icons'
+import { ObjectId } from 'mongoose'
 
 const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
@@ -16,6 +23,26 @@ const DomainsBlock = () => {
     pathname,
     query: { email },
   } = router
+
+  const {
+    data: allDomain,
+    isLoading: allDomainLoading,
+    isError: allDomainError,
+  } = useGetDomainsQuery({
+    limit: pathname === AppRoutes.DOMAIN ? 200 : 5,
+  })
+  const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
+
+  let content: ReactElement
+
+  const handleDelete = async (id: string) => {
+    const response = await deleteDomain(id)
+    if ('data' in response) {
+      message.success('Видалено!')
+    } else {
+      message.error('Помилка при видаленні')
+    }
+  }
 
   const domainsPageColumns =
     router.pathname === AppRoutes.DOMAIN
@@ -52,6 +79,7 @@ const DomainsBlock = () => {
       title: 'Отримувач',
       dataIndex: 'bankInformation',
     },
+
     ...domainsPageColumns,
   ]
 
@@ -61,7 +89,6 @@ const DomainsBlock = () => {
       className={cn({ [s.noScroll]: pathname === AppRoutes.DOMAIN })}
     >
       <Table
-        loading={isLoading}
         expandable={{
           expandedRowRender: (data) => (
             <Table
@@ -74,13 +101,37 @@ const DomainsBlock = () => {
             />
           ),
         }}
-        dataSource={domains}
-        columns={columns}
+        columns={[
+          ...columns,
+          {
+            title: '',
+            dataIndex: '',
+            width: '10%',
+            render: (_, domain: IExtendedDomain) => (
+              <div className={s.popconfirm}>
+                <Popconfirm
+                  title={`Ви впевнені що хочете видалити нерухомість?`}
+                  onConfirm={() => handleDelete(domain?._id)}
+                  cancelText="Відміна"
+                  disabled={deleteLoading}
+                >
+                  <DeleteOutlined className={s.icon} />
+                </Popconfirm>
+              </div>
+            ),
+          },
+        ]}
+        loading={isLoading || allDomainLoading}
+        dataSource={domains || allDomain}
         pagination={false}
+        bordered
+        size="small"
+        rowKey="_id"
       />
     </TableCard>
   )
 }
+
 const columns1 = [
   {
     title: 'Вулиця',
