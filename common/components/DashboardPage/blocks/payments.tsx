@@ -62,30 +62,9 @@ const PaymentsBlock = () => {
     {
       title: 'Дата',
       dataIndex: 'date',
-      key: 'date',
-      width: '15%',
       ellipsis: true,
       render: dateToDefaultFormat,
     },
-    // isAdmin && !email
-    //   ? {
-    //       title: 'Платник',
-    //       dataIndex: 'payer',
-    //       key: 'payer',
-    //       width: '15%',
-    //       ellipsis: true,
-    //       render: (payer) => (
-    //         <Link
-    //           href={{
-    //             pathname: AppRoutes.PAYMENT,
-    //             query: { email: payer?.email },
-    //           }}
-    //         >
-    //           <a className={s.payer}>{payer?.email}</a>
-    //         </Link>
-    //       ),
-    //     }
-    //   : { width: '0' },
     {
       title: (
         <Tooltip title="Дебет (Реалізація)">
@@ -93,8 +72,6 @@ const PaymentsBlock = () => {
         </Tooltip>
       ),
       dataIndex: 'debit',
-      key: 'debit',
-      width: '10%',
       render: renderCurrency,
     },
     {
@@ -104,22 +81,16 @@ const PaymentsBlock = () => {
         </Tooltip>
       ),
       dataIndex: 'credit',
-      key: 'credit',
-      width: '10%',
       render: renderCurrency,
     },
     {
       title: 'Опис',
       dataIndex: 'description',
-      key: 'description',
-      width: '15%',
-      ellipsis: true,
     },
     isAdmin
       ? {
           title: '',
           dataIndex: '',
-          width: '10%',
           render: (_, payment: IExtendedPayment) => (
             <div className={s.popconfirm}>
               <Popconfirm
@@ -157,6 +128,13 @@ const PaymentsBlock = () => {
     },
   ]
 
+  if (isAdmin && !email) {
+    columns.unshift({
+      title: 'Компанія',
+      dataIndex: 'company',
+      render: (i) => i?.companyName,
+    })
+  }
   let content: ReactElement
 
   if (deleteError || paymentsError || currUserError) {

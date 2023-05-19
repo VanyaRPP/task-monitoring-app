@@ -1,14 +1,13 @@
-import React, { FC, useEffect, useState } from 'react'
-import { useGetAllUsersQuery } from '@common/api/userApi/user.api'
+import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
-import PaymentModalTable from '@common/components/PaymentModalTable'
-import { useRouter } from 'next/router'
 import s from './style.module.scss'
 import { Operations } from '@utils/constants'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import CompanySelect from './CompanySelect'
+import PaymentTotal from './PaymentTotal'
+import PaymentPricesTable from './PaymentPricesTable'
 
 interface Props {
   form: FormInstance<any>
@@ -18,35 +17,7 @@ interface Props {
 }
 
 const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
-  const { Option } = Select
-  const { data: users } = useGetAllUsersQuery()
-  const [total, setTotal] = useState(0)
-  const router = useRouter()
-  const {
-    query: { email },
-  } = router
-
-  const maintenance = Form.useWatch('maintenance', form)
-  const placing = Form.useWatch('placing', form)
-  const electricity = Form.useWatch('electricity', form)
-  const water = Form.useWatch('water', form)
-
-  useEffect(() => {
-    setTotal(
-      maintenance?.sum + placing?.sum + electricity?.sum + water?.sum || 0
-    )
-    form.setFieldValue('debit', total)
-  }, [maintenance, placing, electricity, water, form, total])
-
-  useEffect(() => {
-    if (email) {
-      const foundUser = users?.find((itm) => itm.email === email)
-      if (foundUser?._id) {
-        form.setFieldValue('payer', foundUser?._id)
-      }
-    }
-  }, [email, users?.length, form, users])
-
+  // TODO: fix init values
   return (
     <Form
       initialValues={{
@@ -54,7 +25,6 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
         credit: paymentData?.credit,
         debit: paymentData?.debit,
         operation: paymentData?.debit ? Operations.Debit : Operations.Credit,
-        payer: paymentData?.payer?._id,
       }}
       form={form}
       layout="vertical"
@@ -73,8 +43,8 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
           className={s.Select}
           disabled={edit && true}
         >
-          <Option value="credit">Кредит (Оплата)</Option>
-          <Option value="debit">Дебет (Реалізація)</Option>
+          <Select.Option value="credit">Кредит (Оплата)</Select.Option>
+          <Select.Option value="debit">Дебет (Реалізація)</Select.Option>
         </Select>
       </Form.Item>
 
@@ -112,17 +82,12 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
             </>
           ) : (
             <>
-              <PaymentModalTable
+              <PaymentPricesTable
                 paymentData={paymentData}
                 edit={edit}
                 form={form}
               />
-              <Form.Item name="debit">
-                <div className={s.totalItem}>
-                  <p>Сума:</p>
-                  <p>{total.toFixed(2)} ₴</p>
-                </div>
-              </Form.Item>
+              <PaymentTotal form={form} />
             </>
           )
         }
