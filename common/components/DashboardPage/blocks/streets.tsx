@@ -34,13 +34,12 @@ const StreetsBlock = () => {
     },
     {
       title: '',
-      dataIndex: '',
       width: '10%',
       render: (_, street: IStreet) => (
         <div className={s.popconfirm}>
           <Popconfirm
             title={`Ви впевнені що хочете видалити вулицю ${street.address}?`}
-            onConfirm={() => handleDeleteStreet(street?._id)}
+            onConfirm={() => handleDeleteStreet(street._id)}
             cancelText="Відміна"
             disabled={deleteLoading}
           >
@@ -63,6 +62,7 @@ const StreetsBlock = () => {
       <Table
         loading={isLoading}
         dataSource={streets}
+        rowKey="_id"
         columns={columns}
         pagination={{
           responsive: false,

@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react'
+import React from 'react'
 import cn from 'classnames'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
@@ -16,22 +16,10 @@ import { DeleteOutlined } from '@ant-design/icons'
 
 const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
+
   const router = useRouter()
-  const {
-    pathname,
-    query: { email },
-  } = router
 
-  const {
-    data: allDomain,
-    isLoading: allDomainLoading,
-    isError: allDomainError,
-  } = useGetDomainsQuery({
-    limit: pathname === AppRoutes.DOMAIN ? 200 : 5,
-  })
   const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
-
-  let content: ReactElement | null = null
 
   const handleDelete = async (id: string) => {
     const response = await deleteDomain(id)
@@ -81,36 +69,26 @@ const DomainsBlock = () => {
     ...domainsPageColumns,
   ]
 
-  const columns1 = [
-    {
-      title: 'Вулиця',
-      dataIndex: 'street',
-    },
-  ]
-
-  const testData1 = [
-    {
-      street: '12 Короленка 12',
-    },
-  ]
-
-  if (allDomainError) {
-    content = <Alert message="Помилка" type="error" showIcon closable />
-  }
   return (
     <TableCard
       title={<DomainStreetsComponent data={domains} />}
-      className={cn({ [s.noScroll]: pathname === AppRoutes.DOMAIN })}
+      className={cn({ [s.noScroll]: router.pathname === AppRoutes.DOMAIN })}
     >
       <Table
         expandable={{
           expandedRowRender: (data) => (
             <Table
               expandable={{
-                expandedRowRender: (data) => <OrganistaionsComponents />,
+                expandedRowRender: (street) => (
+                  <OrganistaionsComponents
+                    domainId={data._id}
+                    streetId={street}
+                  />
+                ),
               }}
-              dataSource={testData1}
-              columns={columns1}
+              // dataSource={data.streets}
+              dataSource={[]}
+              columns={[{ title: 'Вулиця', dataIndex: 'street' }]}
               pagination={false}
             />
           ),
@@ -135,8 +113,8 @@ const DomainsBlock = () => {
             ),
           },
         ]}
-        loading={allDomainLoading}
-        dataSource={allDomain}
+        loading={isLoading}
+        dataSource={domains}
         pagination={false}
         bordered
         size="small"
