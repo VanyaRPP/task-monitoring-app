@@ -13,9 +13,11 @@ import DomainStreetsComponent from '@common/components/UI/DomainsComponents/Doma
 import { Alert, Popconfirm, Table, message } from 'antd'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
+import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
 
 const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
+  const { data: streets } = useGetAllStreetsQuery({})
   const router = useRouter()
   const {
     pathname,
@@ -81,22 +83,21 @@ const DomainsBlock = () => {
     ...domainsPageColumns,
   ]
 
-  const columns1 = [
-    {
-      title: 'Вулиця',
-      dataIndex: 'street',
-    },
-  ]
-
-  const testData1 = [
-    {
-      street: '12 Короленка 12',
-    },
-  ]
+  const dataWithKeys = (arr) => {
+    const sourceData = []
+    for (let i = 0; i < arr?.length; i++) {
+      sourceData.push({
+        key: i,
+        ...arr[i],
+      })
+    }
+    return sourceData
+  }
 
   if (allDomainError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   }
+
   return (
     <TableCard
       title={<DomainStreetsComponent data={domains} />}
@@ -107,9 +108,14 @@ const DomainsBlock = () => {
           expandedRowRender: (data) => (
             <Table
               expandable={{
-                expandedRowRender: (data) => <OrganistaionsComponents />,
+                expandedRowRender: (street) => (
+                  <OrganistaionsComponents
+                    domainId={data._id}
+                    streetId={street}
+                  />
+                ),
               }}
-              dataSource={testData1}
+              dataSource={dataWithKeys(data.streets)}
               columns={columns1}
               pagination={false}
             />
