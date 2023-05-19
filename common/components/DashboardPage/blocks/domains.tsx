@@ -14,9 +14,9 @@ import { Alert, Popconfirm, Table, message } from 'antd'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 
+
 const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
-
   const router = useRouter()
 
   const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
