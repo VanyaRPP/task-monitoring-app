@@ -1,11 +1,30 @@
 import React from 'react'
 import s from './style.module.scss'
 import { Table } from 'antd'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { AppRoutes } from '@utils/constants'
+import { useRouter } from 'next/router'
 
-const OrganistaionsComponents = () => {
+const OrganistaionsComponents = ({ domainId, streetId }) => {
+  const router = useRouter()
+  const {
+    pathname,
+    query: { email },
+  } = router
+  const { data: realEstates, isLoading } = useGetAllRealEstateQuery({
+    limit: pathname === AppRoutes.DOMAIN ? 200 : 5,
+    domainId,
+    streetId
+  })
+
   return (
     <div className={s.tableHeader}>
-      <Table dataSource={testData} columns={columns} pagination={false} />
+      <Table
+        loading={isLoading}
+        dataSource={realEstates}
+        columns={columns}
+        pagination={false}
+      />
     </div>
   )
 }
@@ -13,7 +32,7 @@ const OrganistaionsComponents = () => {
 const columns = [
   {
     title: 'Назва',
-    dataIndex: 'name',
+    dataIndex: 'companyName',
   },
   {
     title: 'Адреса',

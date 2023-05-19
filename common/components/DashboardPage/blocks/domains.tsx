@@ -8,9 +8,11 @@ import TableCard from '@common/components/UI/TableCard'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import OrganistaionsComponents from '@common/components/UI/OrganistaionsComponents'
 import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
+import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
 
 const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
+  const { data: streets } = useGetAllStreetsQuery({})
   const router = useRouter()
   const {
     pathname,
@@ -55,6 +57,17 @@ const DomainsBlock = () => {
     ...domainsPageColumns,
   ]
 
+  const dataWithKeys = (arr) => {
+    const sourceData = []
+    for (let i = 0; i < arr?.length; i++) {
+      sourceData.push({
+        key: i,
+        ...arr[i],
+      })
+    }
+    return sourceData
+  }
+
   return (
     <TableCard
       title={<DomainStreetsComponent data={domains} />}
@@ -66,15 +79,20 @@ const DomainsBlock = () => {
           expandedRowRender: (data) => (
             <Table
               expandable={{
-                expandedRowRender: (data) => <OrganistaionsComponents />,
+                expandedRowRender: (street) => (
+                  <OrganistaionsComponents
+                    domainId={data._id}
+                    streetId={street}
+                  />
+                ),
               }}
-              dataSource={testData1}
+              dataSource={dataWithKeys(data.streets)}
               columns={columns1}
               pagination={false}
             />
           ),
         }}
-        dataSource={domains}
+        dataSource={dataWithKeys(domains)}
         columns={columns}
         pagination={false}
       />
@@ -84,7 +102,7 @@ const DomainsBlock = () => {
 const columns1 = [
   {
     title: 'Вулиця',
-    dataIndex: 'street',
+    dataIndex: 'address',
   },
 ]
 
