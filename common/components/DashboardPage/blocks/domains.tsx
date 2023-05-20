@@ -1,5 +1,4 @@
 import React, { ReactElement } from 'react'
-import { Table } from 'antd'
 import cn from 'classnames'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
@@ -11,7 +10,7 @@ import {
 } from '@common/api/domainApi/domain.api'
 import OrganistaionsComponents from '@common/components/UI/OrganistaionsComponents'
 import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
-import { Popconfirm, message } from 'antd'
+import { Alert, Popconfirm, Table, message } from 'antd'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 
@@ -32,7 +31,7 @@ const DomainsBlock = () => {
   })
   const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
 
-  let content: ReactElement
+  let content: ReactElement | null = null
 
   const handleDelete = async (id: string) => {
     const response = await deleteDomain(id)
@@ -82,6 +81,22 @@ const DomainsBlock = () => {
     ...domainsPageColumns,
   ]
 
+  const columns1 = [
+    {
+      title: 'Вулиця',
+      dataIndex: 'street',
+    },
+  ]
+
+  const testData1 = [
+    {
+      street: '12 Короленка 12',
+    },
+  ]
+
+  if (allDomainError) {
+    content = <Alert message="Помилка" type="error" showIcon closable />
+  }
   return (
     <TableCard
       title={<DomainStreetsComponent data={domains} />}
@@ -120,8 +135,8 @@ const DomainsBlock = () => {
             ),
           },
         ]}
-        loading={isLoading || allDomainLoading}
-        dataSource={domains || allDomain}
+        loading={allDomainLoading}
+        dataSource={allDomain}
         pagination={false}
         bordered
         size="small"
@@ -130,18 +145,5 @@ const DomainsBlock = () => {
     </TableCard>
   )
 }
-
-const columns1 = [
-  {
-    title: 'Вулиця',
-    dataIndex: 'street',
-  },
-]
-
-const testData1 = [
-  {
-    street: '12 Короленка 12',
-  },
-]
 
 export default DomainsBlock
