@@ -1,15 +1,5 @@
 import { ObjectId } from 'mongoose'
 
-// export interface BaseQuery {
-//   success: boolean
-//   data: IDomain
-// }
-
-// export interface AllDomainQuery {
-//   success: boolean
-//   data: IDomain[]
-// }
-
 export interface IDomainModel {
   name: string
   address: string
@@ -35,5 +25,6 @@ export interface IGetDomainResponse {
 }
 
 export interface IDeleteDomainResponse {
+  data: string
   success: boolean
 }

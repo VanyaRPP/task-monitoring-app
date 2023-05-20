@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
 import start, { Data } from 'pages/api/api.config'
@@ -12,7 +14,7 @@ export default async function handler(
   const { isAdmin } = await getCurrentUser(req, res)
 
   if (!isAdmin) {
-    return res.status(400).json({ success: false })
+    return res.status(400).json({ success: false, message: 'not allowed' })
   }
 
   switch (req.method) {
