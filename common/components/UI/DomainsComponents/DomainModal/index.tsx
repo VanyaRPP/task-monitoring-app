@@ -1,7 +1,7 @@
 import { useAddDomainMutation } from '@common/api/domainApi/domain.api'
 import { Form, Modal, message } from 'antd'
 import React, { FC } from 'react'
-import { IDomain } from '@common/api/domainApi/domain.api.types'
+import { IDomainModel } from '@common/api/domainApi/domain.api.types'
 import DomainForm from './DomainForm'
 
 interface Props {
@@ -14,7 +14,7 @@ const DomainModal: FC<Props> = ({ isModalOpen, closeModal }) => {
   const [addDomainEstate] = useAddDomainMutation()
 
   const handleSubmit = async () => {
-    const formData: IDomain = await form.validateFields()
+    const formData: IDomainModel = await form.validateFields()
 
     const response = await addDomainEstate({
       name: formData.name,

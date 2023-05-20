@@ -1,7 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import {
-  AllDomainQuery,
-  IDomain,
+  IDomainModel,
   IExtendedDomain,
   IDeleteDomainResponse,
   IAddDomainResponse,
@@ -20,12 +19,12 @@ export const domainApi = createApi({
     // @ts-ignore
     getDomains: builder.query<
       IExtendedDomain[],
-      { limit?: number; domainId?: string; streetId?: string }
+      { limit?: number; streetId?: string }
     >({
-      query: ({ limit, domainId, streetId }) => {
+      query: ({ limit, streetId }) => {
         return {
           url: `domain`,
-          params: { limit, domainId, streetId },
+          params: { limit, streetId },
         }
       },
       providesTags: (response) =>
@@ -34,7 +33,7 @@ export const domainApi = createApi({
           : [],
       transformResponse: (response: IGetDomainResponse) => response.data,
     }),
-    addDomain: builder.mutation<IDomain, Partial<IDomain>>({
+    addDomain: builder.mutation<IAddDomainResponse, IDomainModel>({
       query(data) {
         const { ...body } = data
         return {

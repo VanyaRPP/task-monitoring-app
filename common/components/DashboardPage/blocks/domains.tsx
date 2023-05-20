@@ -11,10 +11,9 @@ import {
 } from '@common/api/domainApi/domain.api'
 import OrganistaionsComponents from '@common/components/UI/OrganistaionsComponents'
 import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
-import { Alert, Popconfirm, message } from 'antd'
+import { Popconfirm, message } from 'antd'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
-import { ObjectId } from 'mongoose'
 
 const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})

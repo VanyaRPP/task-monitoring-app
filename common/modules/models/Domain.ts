@@ -2,7 +2,7 @@ import mongoose, { Schema, ObjectId } from 'mongoose'
 import { IGeoCode } from './Task'
 
 export interface IDomain {
-  _id: string
+  _id: ObjectId | string
   creator?: ObjectId | string
   tasks?: [ObjectId | string]
   users?: [ObjectId | string]
