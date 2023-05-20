@@ -29,6 +29,7 @@ const columns = [
   {
     title: 'Адреса',
     dataIndex: 'street',
+    render: (street) => street.address,
   },
   {
     title: 'Платник',
