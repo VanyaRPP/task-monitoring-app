@@ -1,4 +1,5 @@
 import React from 'react'
+import { Table } from 'antd'
 import cn from 'classnames'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
