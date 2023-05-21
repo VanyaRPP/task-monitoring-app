@@ -13,6 +13,7 @@ import DomainStreetsComponent from '@common/components/UI/DomainsComponents/Doma
 import { Alert, Popconfirm, Table, message } from 'antd'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
+import { Table } from 'antd'
 import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
 
 const DomainsBlock = () => {

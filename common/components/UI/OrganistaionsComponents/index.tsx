@@ -49,15 +49,4 @@ const columns = [
   },
 ]
 
-const testData = [
-  {
-    name: 'DEU',
-    street: 'Мала Бердичівська 17',
-    bankInformation: 'ТОВ Укр',
-    phone: '22-22-2211',
-    adminEmails: ['asdasa@dsad.scos'],
-    agreement: 'N3 2323sd 2019',
-  },
-]
-
 export default OrganistaionsComponents
