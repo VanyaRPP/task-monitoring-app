@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React from 'react'
 import { Table } from 'antd'
 import cn from 'classnames'
 import { useRouter } from 'next/router'
@@ -101,12 +101,6 @@ const columns1 = [
   {
     title: 'Вулиця',
     dataIndex: 'address',
-  },
-]
-
-const testData1 = [
-  {
-    street: '12 Короленка 12',
   },
 ]
 
