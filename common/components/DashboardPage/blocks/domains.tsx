@@ -9,6 +9,7 @@ import {
   useGetDomainsQuery,
 } from '@common/api/domainApi/domain.api'
 import OrganistaionsComponents from '@common/components/UI/OrganistaionsComponents'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
 import { Alert, Popconfirm, Table, message } from 'antd'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
@@ -80,20 +81,9 @@ const DomainsBlock = () => {
       title: 'Отримувач',
       dataIndex: 'bankInformation',
     },
-
     ...domainsPageColumns,
   ]
 
-  const dataWithKeys = (arr) => {
-    const sourceData = []
-    for (let i = 0; i < arr?.length; i++) {
-      sourceData.push({
-        key: i,
-        ...arr[i],
-      })
-    }
-    return sourceData
-  }
 
   if (allDomainError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
@@ -113,9 +103,10 @@ const DomainsBlock = () => {
                   <RealEstateBlock domainId={data._id} streetId={street._id} />
                 ),
               }}
-              dataSource={dataWithKeys(data.streets)}
+              dataSource={data.streets}
               columns={columns1}
               pagination={false}
+              rowKey="_id"
             />
           ),
         }}

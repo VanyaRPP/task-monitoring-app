@@ -18,6 +18,12 @@ interface IRealEstate {
   streetId?: string
 }
 
+interface IRealEstateColumns {
+  title: string
+  dataIndex: string
+  render?: (i: any) => any
+}
+
 const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
   const router = useRouter()
   const { pathname } = router
@@ -45,7 +51,15 @@ const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
     }
   }
 
-  const columns = [
+  const columns: IRealEstateColumns[] = [
+    {
+      title: 'Назва компанії',
+      dataIndex: 'companyName',
+    },
+    {
+      title: 'Банківська інформація',
+      dataIndex: 'bankInformation',
+    },
     {
       title: 'Договір',
       dataIndex: 'agreement',
@@ -76,18 +90,27 @@ const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
     },
   ]
 
-  const visibleColumns =
-    domainId && streetId
-      ? columns
-      : [
-          {
-            title: 'Назва компанії',
-            dataIndex: 'companyName',
-          },
-          {
-            title: 'Банківська інформація',
-            dataIndex: 'bankInformation',
-          },
+  if (!domainId && !streetId && !allRealEstateLoading) {
+    columns.unshift(
+      {
+        title: 'Домен',
+        dataIndex: 'domain',
+        render: (i) => i?.name,
+      },
+      {
+        title: 'Адреса',
+        dataIndex: 'street',
+        render: (i) => i?.address,
+      }
+    )
+  }
+
+  if (allRealEstateError) {
+    content = <Alert message="Помилка" type="error" showIcon closable />
+  } else {
+    content = (
+      <Table
+        columns={[
           ...columns,
           {
             title: '',
@@ -106,14 +129,7 @@ const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
               </div>
             ),
           },
-        ]
-
-  if (allRealEstateError) {
-    content = <Alert message="Помилка" type="error" showIcon closable />
-  } else {
-    content = (
-      <Table
-        columns={visibleColumns}
+        ]}
         dataSource={allRealEstate}
         pagination={false}
         bordered
@@ -124,18 +140,14 @@ const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
     )
   }
 
-  if (domainId && streetId) {
-    return <>{content}</>
-  } else {
-    return (
-      <TableCard
-        title={<RealEstateCardHeader />}
-        className={cn({ [s.noScroll]: pathname === AppRoutes.REAL_ESTATE })}
-      >
-        {content}
-      </TableCard>
-    )
-  }
+  return (
+    <TableCard
+      title={<RealEstateCardHeader />}
+      className={cn({ [s.noScroll]: pathname === AppRoutes.REAL_ESTATE })}
+    >
+      {content}
+    </TableCard>
+  )
 }
 
 export default RealEstateBlock
