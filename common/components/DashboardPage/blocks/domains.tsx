@@ -15,6 +15,7 @@ import { Alert, Popconfirm, Table, message } from 'antd'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 
+import RealEstateBlock from './realEstates'
 
 const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
@@ -81,10 +82,7 @@ const DomainsBlock = () => {
             <Table
               expandable={{
                 expandedRowRender: (street) => (
-                  <OrganistaionsComponents
-                    domainId={data._id}
-                    streetId={street._id}
-                  />
+                  <RealEstateBlock domainId={data._id} streetId={street._id} />
                 ),
               }}
               // dataSource={data.streets}
