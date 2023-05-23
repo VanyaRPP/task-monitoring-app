@@ -85,13 +85,15 @@ const DomainsBlock = () => {
                   <RealEstateBlock domainId={data._id} streetId={street._id} />
                 ),
               }}
-              // dataSource={data.streets}
               dataSource={[]}
               columns={[{ title: 'Вулиця', dataIndex: 'street' }]}
+              dataSource={data.streets}
               pagination={false}
+              rowKey="_id"
             />
           ),
         }}
+<<<<<<< HEAD
         columns={[
           ...columns,
           {
