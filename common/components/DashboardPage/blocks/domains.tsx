@@ -120,7 +120,7 @@ const DomainsBlock = () => {
           {
             title: '',
             dataIndex: '',
-            width: '10%',
+            width: '9%',
             render: (_, domain: IExtendedDomain) => (
               <div className={s.popconfirm}>
                 <Popconfirm

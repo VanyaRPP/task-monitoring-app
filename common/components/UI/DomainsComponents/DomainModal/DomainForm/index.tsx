@@ -7,7 +7,6 @@ import DomainStreets from './DomainStreets'
 interface Props {
   form: FormInstance<any>
 }
-
 const DomainForm: FC<Props> = ({ form }) => {
   return (
     <Form form={form} layout="vertical" className={s.Form}>
