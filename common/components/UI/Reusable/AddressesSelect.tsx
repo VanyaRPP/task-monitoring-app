@@ -13,7 +13,7 @@ export default function AddressesSelect({
   const { data, isLoading } = useGetDomainsQuery({})
   const domain = Form.useWatch('domain', form)
   const domainObj = data?.find((i) => i._id === domain)
-  const streets = domainObj?.streets || [] // eslint-disable-line react-hooks/exhaustive-deps
+  const streets = (domainObj?.streets as any[]) || [] // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (streets.length === 1) {
@@ -36,7 +36,9 @@ export default function AddressesSelect({
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         filterOption={(input, option) => (option?.label ?? '').includes(input)}
-        options={streets?.map((i) => ({ value: i._id, label: i.address }))}
+        options={
+          streets?.map((i) => ({ value: i._id, label: i.address })) || []
+        }
         optionFilterProp="children"
         placeholder="Пошук адреси"
         disabled={!domain || streets?.length === 1 || disabled}
