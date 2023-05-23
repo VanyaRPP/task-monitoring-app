@@ -6,7 +6,6 @@ import { AppRoutes } from '@utils/constants'
 import s from './style.module.scss'
 import TableCard from '@common/components/UI/TableCard'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import OrganistaionsComponents from '@common/components/UI/OrganistaionsComponents'
 import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
 import RealEstateBlock from './realEstates'
 
@@ -56,17 +55,6 @@ const DomainsBlock = () => {
     ...domainsPageColumns,
   ]
 
-  const dataWithKeys = (arr) => {
-    const sourceData = []
-    for (let i = 0; i < arr?.length; i++) {
-      sourceData.push({
-        key: i,
-        ...arr[i],
-      })
-    }
-    return sourceData
-  }
-
   return (
     <TableCard
       title={<DomainStreetsComponent data={domains} />}
@@ -82,15 +70,17 @@ const DomainsBlock = () => {
                   <RealEstateBlock domainId={data._id} streetId={street._id} />
                 ),
               }}
-              dataSource={dataWithKeys(data.streets)}
+              dataSource={data.streets}
               columns={columns1}
               pagination={false}
+              rowKey="_id"
             />
           ),
         }}
-        dataSource={dataWithKeys(domains)}
+        dataSource={domains}
         columns={columns}
         pagination={false}
+        rowKey="_id"
       />
     </TableCard>
   )
