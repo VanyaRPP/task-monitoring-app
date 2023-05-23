@@ -15,6 +15,7 @@ import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { Table } from 'antd'
 import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
+import RealEstateBlock from './realEstates'
 
 const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
@@ -109,10 +110,7 @@ const DomainsBlock = () => {
             <Table
               expandable={{
                 expandedRowRender: (street) => (
-                  <OrganistaionsComponents
-                    domainId={data._id}
-                    streetId={street._id}
-                  />
+                  <RealEstateBlock domainId={data._id} streetId={street._id} />
                 ),
               }}
               dataSource={dataWithKeys(data.streets)}

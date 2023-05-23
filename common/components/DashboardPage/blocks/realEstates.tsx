@@ -5,7 +5,7 @@ import {
 } from '@common/api/realestateApi/realestate.api'
 import TableCard from '@common/components/UI/TableCard'
 import { AppRoutes } from '@utils/constants'
-import React, { ReactElement } from 'react'
+import React, { FC, ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { Alert, Popconfirm, Table, message } from 'antd'
 import cn from 'classnames'
@@ -13,7 +13,12 @@ import s from './style.module.scss'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 
-const RealEstateBlock = () => {
+interface IRealEstate {
+  domainId?: string
+  streetId?: string
+}
+
+const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
   const router = useRouter()
   const { pathname } = router
 
@@ -23,6 +28,8 @@ const RealEstateBlock = () => {
     isError: allRealEstateError,
   } = useGetAllRealEstateQuery({
     limit: pathname === AppRoutes.REAL_ESTATE ? 200 : 5,
+    domainId,
+    streetId,
   })
   const [deleteRealEstate, { isLoading: deleteLoading }] =
     useDeleteRealEstateMutation()
@@ -38,12 +45,49 @@ const RealEstateBlock = () => {
     }
   }
 
-  if (allRealEstateError) {
-    content = <Alert message="Помилка" type="error" showIcon closable />
-  } else {
-    content = (
-      <Table
-        columns={[
+  const columns = [
+    {
+      title: 'Договір',
+      dataIndex: 'agreement',
+    },
+    {
+      title: 'Телефон',
+      dataIndex: 'phone',
+    },
+    {
+      title: 'Адміністратори',
+      dataIndex: 'adminEmails',
+    },
+    {
+      title: 'Кількість метрів',
+      dataIndex: 'totalArea',
+    },
+    {
+      title: 'Ціна за метр',
+      dataIndex: 'pricePerMeter',
+    },
+    {
+      title: 'Індивідуальне утримання за метр',
+      dataIndex: 'servicePricePerMeter',
+    },
+    {
+      title: 'Вивіз сміття',
+      dataIndex: 'garbageCollector',
+    },
+  ]
+
+  const visibleColumns =
+    domainId && streetId
+      ? columns
+      : [
+          {
+            title: 'Назва компанії',
+            dataIndex: 'companyName',
+          },
+          {
+            title: 'Банківська інформація',
+            dataIndex: 'bankInformation',
+          },
           ...columns,
           {
             title: '',
@@ -62,7 +106,14 @@ const RealEstateBlock = () => {
               </div>
             ),
           },
-        ]}
+        ]
+
+  if (allRealEstateError) {
+    content = <Alert message="Помилка" type="error" showIcon closable />
+  } else {
+    content = (
+      <Table
+        columns={visibleColumns}
         dataSource={allRealEstate}
         pagination={false}
         bordered
@@ -73,63 +124,18 @@ const RealEstateBlock = () => {
     )
   }
 
-  return (
-    <TableCard
-      title={<RealEstateCardHeader />}
-      className={cn({ [s.noScroll]: pathname === AppRoutes.REAL_ESTATE })}
-    >
-      {content}
-    </TableCard>
-  )
+  if (domainId && streetId) {
+    return <>{content}</>
+  } else {
+    return (
+      <TableCard
+        title={<RealEstateCardHeader />}
+        className={cn({ [s.noScroll]: pathname === AppRoutes.REAL_ESTATE })}
+      >
+        {content}
+      </TableCard>
+    )
+  }
 }
-
-const columns = [
-  {
-    title: 'Домен',
-    dataIndex: 'domain',
-    render: (i) => i?.name,
-  },
-  {
-    title: 'Адреса',
-    dataIndex: 'street',
-    render: (i) => i?.address,
-  },
-  {
-    title: 'Назва компанії',
-    dataIndex: 'companyName',
-  },
-  {
-    title: 'Банківська інформація',
-    dataIndex: 'bankInformation',
-  },
-  {
-    title: 'Договір',
-    dataIndex: 'agreement',
-  },
-  {
-    title: 'Телефон',
-    dataIndex: 'phone',
-  },
-  {
-    title: 'Адміністратори',
-    dataIndex: 'adminEmails',
-  },
-  {
-    title: 'Кількість метрів',
-    dataIndex: 'totalArea',
-  },
-  {
-    title: 'Ціна за метр',
-    dataIndex: 'pricePerMeter',
-  },
-  {
-    title: 'Індивідуальне утримання за метр',
-    dataIndex: 'servicePricePerMeter',
-  },
-  {
-    title: 'Вивіз сміття',
-    dataIndex: 'garbageCollector',
-  },
-]
 
 export default RealEstateBlock
