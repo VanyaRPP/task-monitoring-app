@@ -11,12 +11,12 @@ import { DeleteOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/router'
 import s from './style.module.scss'
 import { AppRoutes } from '@utils/constants'
+import RealEstateBlock from './realEstates'
 
-const StreetsBlock = () => {
-  const { data: streets, isLoading } = useGetAllStreetsQuery({})
+const StreetsBlock = ({ domainId }: { domainId?: string }) => {
+  const { data: streets, isLoading } = useGetAllStreetsQuery({ domainId })
   const router = useRouter()
-  const [deleteStreet, { isLoading: deleteLoading, isError: deleteError }] =
-    useDeleteStreetMutation()
+  const [deleteStreet, { isLoading: deleteLoading }] = useDeleteStreetMutation()
 
   const handleDeleteStreet = async (id: string) => {
     const response = await deleteStreet(id)
@@ -50,17 +50,19 @@ const StreetsBlock = () => {
     },
   ]
 
-  const {
-    pathname,
-    //query: { email },
-  } = router
   return (
     <TableCard
       title={<StreetsCardHeader />}
-      className={cn({ [s.noScroll]: pathname === AppRoutes.STREETS })}
+      className={cn({ [s.noScroll]: router.pathname === AppRoutes.STREETS })}
     >
       <Table
         loading={isLoading}
+        expandable={{
+          rowExpandable: () => !!domainId,
+          expandedRowRender: (street) => (
+            <RealEstateBlock domainId={domainId} streetId={street._id} />
+          ),
+        }}
         dataSource={streets}
         rowKey="_id"
         columns={columns}

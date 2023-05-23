@@ -1,5 +1,4 @@
 import React from 'react'
-import { Table } from 'antd'
 import cn from 'classnames'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
@@ -9,13 +8,11 @@ import {
   useDeleteDomainMutation,
   useGetDomainsQuery,
 } from '@common/api/domainApi/domain.api'
-import OrganistaionsComponents from '@common/components/UI/OrganistaionsComponents'
 import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
-import { Alert, Popconfirm, Table, message } from 'antd'
+import { Popconfirm, Table, message } from 'antd'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
-
-import RealEstateBlock from './realEstates'
+import StreetsBlock from './streets'
 
 const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
@@ -32,45 +29,6 @@ const DomainsBlock = () => {
     }
   }
 
-  const domainsPageColumns =
-    router.pathname === AppRoutes.DOMAIN
-      ? [
-          {
-            title: 'Телефон',
-            dataIndex: 'phone',
-          },
-          {
-            title: 'Пошта',
-            dataIndex: 'email',
-          },
-        ]
-      : []
-
-  const columns = [
-    {
-      title: 'Назва',
-      dataIndex: 'name',
-    },
-    {
-      title: 'Адреса',
-      dataIndex: 'address',
-    },
-    {
-      title: 'Адміністратори',
-      dataIndex: 'adminEmails',
-    },
-    {
-      title: 'Опис',
-      dataIndex: 'description',
-    },
-    {
-      title: 'Отримувач',
-      dataIndex: 'bankInformation',
-    },
-
-    ...domainsPageColumns,
-  ]
-
   return (
     <TableCard
       title={<DomainStreetsComponent data={domains} />}
@@ -78,24 +36,11 @@ const DomainsBlock = () => {
     >
       <Table
         expandable={{
-          expandedRowRender: (data) => (
-            <Table
-              expandable={{
-                expandedRowRender: (street) => (
-                  <RealEstateBlock domainId={data._id} streetId={street._id} />
-                ),
-              }}
-              dataSource={[]}
-              columns={[{ title: 'Вулиця', dataIndex: 'street' }]}
-              dataSource={data.streets}
-              pagination={false}
-              rowKey="_id"
-            />
-          ),
+          expandedRowRender: (data) => <StreetsBlock domainId={data._id} />,
         }}
-<<<<<<< HEAD
         columns={[
           ...columns,
+          ...(router.pathname === AppRoutes.DOMAIN ? domainsPageColumns : []),
           {
             title: '',
             dataIndex: '',
@@ -124,5 +69,39 @@ const DomainsBlock = () => {
     </TableCard>
   )
 }
+
+const domainsPageColumns = [
+  {
+    title: 'Телефон',
+    dataIndex: 'phone',
+  },
+  {
+    title: 'Пошта',
+    dataIndex: 'email',
+  },
+]
+
+const columns = [
+  {
+    title: 'Назва',
+    dataIndex: 'name',
+  },
+  {
+    title: 'Адреса',
+    dataIndex: 'address',
+  },
+  {
+    title: 'Адміністратори',
+    dataIndex: 'adminEmails',
+  },
+  {
+    title: 'Опис',
+    dataIndex: 'description',
+  },
+  {
+    title: 'Отримувач',
+    dataIndex: 'bankInformation',
+  },
+]
 
 export default DomainsBlock
