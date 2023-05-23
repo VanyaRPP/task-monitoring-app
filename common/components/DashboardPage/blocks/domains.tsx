@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 import React, { ReactElement } from 'react'
+import React from 'react'
+import { Table } from 'antd'
 import cn from 'classnames'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
@@ -16,6 +19,8 @@ import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { Table } from 'antd'
 import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
 import RealEstateBlock from './realEstates'
 
 const DomainsBlock = () => {
