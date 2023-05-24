@@ -16,17 +16,29 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const props = {}
+        const options = {}
+
+        const { domainId, streetId } = req.query
+        if (domainId && streetId) {
+          options.domain = domainId
+          options.street = streetId
+          const services = await Service.find(options).sort({ data: -1 })
+
+          return res.status(200).json({
+            success: true,
+            data: services,
+          })
+        }
 
         if (isAdmin) {
           if (req.query.email) {
-            props.email = req.query.email
+            options.email = req.query.email
           }
         } else {
-          props.email = session.user.email
+          options.email = session.user.email
         }
 
-        const services = await Service.find(props)
+        const services = await Service.find(options)
           .populate({ path: 'domain', select: '_id name' })
           .populate({ path: 'street', select: '_id address' })
           .sort({ data: -1 })

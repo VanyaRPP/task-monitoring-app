@@ -1,47 +1,48 @@
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { validateField } from '@common/assets/features/validators'
+import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
-export default function CompanySelect({ disabled, form }) {
+export default function MonthServiceSelect({ disabled, form }) {
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
 
   return domainId && streetId ? (
-    <RealEstateDataFetcher
+    <MonthServiceDataFetcher
       disabled={disabled}
       domainId={domainId}
       streetId={streetId}
       form={form}
     />
   ) : (
-    <Form.Item label="Компанія">
+    <Form.Item label="Місяць">
       <Select placeholder="Оберіть домен та вулицю" disabled />
     </Form.Item>
   )
 }
 
-function RealEstateDataFetcher({ disabled, domainId, streetId, form }) {
-  const { data: companies, isLoading } = useGetAllRealEstateQuery({
+function MonthServiceDataFetcher({ disabled, domainId, streetId, form }) {
+  const { data: monthsServices, isLoading } = useGetAllServicesQuery({
     domainId,
     streetId,
   })
 
   useEffect(() => {
-    form.resetFields(['company'])
+    form.resetFields(['monthService'])
   }, [streetId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (companies?.length === 1) {
-      form.setFieldValue('company', companies[0]._id)
+    if (monthsServices?.length === 1) {
+      form.setFieldValue('monthService', monthsServices[0]._id)
     }
-  }, [companies?.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [monthsServices?.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item
-      name="company"
-      label="Компанія"
       rules={validateField('required')}
+      name="monthService"
+      label="Місяць"
     >
       <Select
         filterSort={(optionA, optionB) =>
@@ -56,13 +57,13 @@ function RealEstateDataFetcher({ disabled, domainId, streetId, form }) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         filterOption={(input, option) => (option?.label ?? '').includes(input)}
-        options={companies?.map((i) => ({
+        options={monthsServices?.map((i) => ({
           value: i._id,
-          label: i.companyName,
+          label: getFormattedDate(i.date),
         }))}
         optionFilterProp="children"
-        placeholder="Пошук адреси"
-        disabled={disabled || companies?.length === 1}
+        placeholder="Місяць"
+        disabled={disabled || monthsServices?.length === 1}
         loading={isLoading}
         showSearch
       />
