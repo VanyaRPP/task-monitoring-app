@@ -1,46 +1,95 @@
+import { mocked } from 'ts-jest/utils'
 import { NextApiRequest, NextApiResponse } from 'next'
-import handler from 'path/to/your/api/handler'
+import Domain from 'common/modules/models/Domain'
+import handler from '../your-handler-file' // Замініть на ваш файл обробника запитів
+import { getCurrentUser } from '@utils/getCurrentUser'
 
-// Mock the required dependencies
-jest.mock('common/modules/models/Domain', () => ({
-  find: jest.fn().mockResolvedValue([]),
+// Мокуємо функцію getCurrentUser з utils/getCurrentUser
+jest.mock('@utils/getCurrentUser', () => ({
+  getCurrentUser: jest.fn()
 }))
 
-jest.mock('@utils/getCurrentUser', () => ({
-  getCurrentUser: jest.fn().mockResolvedValue({ isAdmin: true }),
+// Мокуємо модуль Domain
+jest.mock('common/modules/models/Domain', () => ({
+  find: jest.fn(),
+  create: jest.fn()
 }))
 
 describe('API Handler', () => {
   let req: NextApiRequest
-  let res: NextApiResponse<any>
+  let res: NextApiResponse
 
   beforeEach(() => {
-    req = {} as NextApiRequest
-    res = {} as NextApiResponse<any>
-    res.status = jest.fn().mockReturnThis()
-    res.json = jest.fn().mockReturnThis()
+    req = {
+      method: '',
+      body: {},
+    } as unknown as NextApiRequest
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as NextApiResponse
   })
 
   afterEach(() => {
     jest.clearAllMocks()
   })
 
-  it('should return all domains on GET request without limit', async () => {
-    await handler({ ...req, method: 'GET' }, res)
-    expect(res.status).toHaveBeenCalledWith(200)
-    expect(res.json).toHaveBeenCalledWith({ success: true, data: [] })
-  })
+  describe('GET request', () => {
+    beforeEach(() => {
+      req.method = 'GET'
+      mocked(Domain.find).mockReset()
+    })
 
-  it('should return domains with limit on GET request', async () => {
-    const domainMock = [{ name: 'Domain 1' }, { name: 'Domain 2' }]
-    const findMock = jest.fn().mockResolvedValue(domainMock)
-    jest
-      .spyOn(require('common/modules/models/Domain'), 'find')
-      .mockImplementation(findMock)
+    test('should return domains', async () => {
+      // Мокуємо поведінку функції getCurrentUser
+      mocked(getCurrentUser).mockResolvedValueOnce({ isAdmin: true })
 
-    await handler({ ...req, method: 'GET', query: { limit: '2' } }, res)
-    expect(res.status).toHaveBeenCalledWith(200)
-    expect(res.json).toHaveBeenCalledWith({ success: true, data: domainMock })
-    expect(findMock).toHaveBeenCalledWith({}).limit(2)
-  })
-})
+      // Підготовка даних
+      const domains = [
+        {
+          _id: '1',
+          name: 'Domain 1',
+        },
+        {
+          _id: '2',
+          name: 'Domain 2',
+        },
+      ]
+
+      // Мокуємо функцію find з модуля Domain
+      mocked(Domain.find).mockResolvedValueOnce(domains)
+
+      // Виклик обробника
+      await handler(req, res)
+
+      // Перевірка, що статус і json були викликані з правильними аргументами
+      expect(res.status).toHaveBeenCalledWith(200)
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: domains,
+      })
+    })
+
+    test('should return error if not admin', async () => {
+      // Мокуємо поведінку функції getCurrentUser
+      mocked(getCurrentUser).mockResolvedValueOnce({ isAdmin: false })
+
+      // Виклик обробника
+      await handler(req, res)
+
+      // Перевірка, що статус і json були викликані з правильними аргументами
+      expect(res.status).toHaveBeenCalledWith(400)
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'not allowed',
+      })
+    })
+
+    test('should return error if find throws an error', async () => {
+      // Мокуємо поведінку функції getCurrentUser
+      mocked(getCurrentUser).mockResolvedValueOnce({ isAdmin: true })
+
+      // Мокуємо функцію find з модуля Domain, щоб кинути помилку
+      const error = new Error('Database error')
+      mocked(Domain.find).mockRejectedValueOnce(error)
