@@ -7,7 +7,13 @@ import { paymentsTitle } from '@utils/constants'
 import { getName } from '@utils/helpers'
 import { validateField } from '@common/assets/features/validators'
 import s from './style.module.scss'
-
+import { IExtendedService } from '@common/api/serviceApi/service.api.types'
+import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import { useAppSelector } from '@common/modules/store/hooks'
+import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
+import useCompany from '@common/modules/hooks/useCompany'
 interface Props {
   form: FormInstance<any>
   edit: boolean
@@ -15,6 +21,23 @@ interface Props {
 }
 
 const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
+  const domainId = Form.useWatch('domain', form)
+  const streetId = Form.useWatch('street', form)
+  const month = Form.useWatch('monthService', form)
+  const company = Form.useWatch('company', form)
+
+  const { data: allRealEstate } = useGetAllRealEstateQuery({
+    domainId,
+    streetId,
+  })
+
+  const { data: allServices } = useGetAllServicesQuery({
+    domainId,
+    streetId,
+  })
+
+  const service = allServices?.find((item) => item._id === month)
+  const realEstate = allRealEstate?.find((item) => item._id === company)
   const columns: ColumnProps<IPaymentTableData>[] = [
     {
       title: '№',
@@ -34,7 +57,7 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
         >
           <span className={s.rowText}>
             {getName(name, paymentsTitle)}{' '}
-            <span className={s.month}>({moment().format('MMMM')})</span>
+            <span className={s.month}>({getFormattedDate(service?.date)})</span>
           </span>
         </Tooltip>
       ),
@@ -76,9 +99,14 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
     {
       title: 'Ціна',
       dataIndex: 'price',
-      render: (text, record) => (
-        <PriceWrapper record={record} form={form} edit={edit} />
-      ),
+      render: (text, record) => {
+        if (record.name === 'maintenance') {
+          return (
+            <PriceMaintainceField record={record} form={form} edit={edit} />
+          )
+        }
+        return <PriceWrapper record={record} form={form} edit={edit} />
+      },
     },
     {
       title: 'Сума',
@@ -97,6 +125,30 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
       pagination={false}
       className={s.table}
     />
+  )
+}
+
+function PriceMaintainceField({ record, form, edit }) {
+  const fieldName = [record.name, 'price']
+
+  const domainId = Form.useWatch('domain', form)
+  const streetId = Form.useWatch('street', form)
+  const companyId = Form.useWatch('company', form)
+
+  const { company, isLoading } = useCompany({ companyId, domainId, streetId })
+
+  useEffect(() => {
+    if (company?._id) {
+      if (company.pricePerMeter) {
+        form.setFieldValue(fieldName, company.pricePerMeter)
+      }
+    }
+  }, [company?._id]) //eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <Form.Item name={fieldName} rules={validateField('required')}>
+      <InputNumber disabled={edit} className={s.input} />
+    </Form.Item>
   )
 }
 
@@ -132,7 +184,7 @@ function getRelationshipByRecordName(recordName) {
         fieldName: 'monthService',
         valueName: 'rentPrice',
         // тестове значення повинно бути динамічне
-        testValue: 123,
+        testValue: recordName,
       },
       // компанія та її ціна за метр розміщення (оренди) береться з компанії (рілестейт)
       placing: {

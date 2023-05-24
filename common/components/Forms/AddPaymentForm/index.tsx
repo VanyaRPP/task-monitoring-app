@@ -11,6 +11,7 @@ import PaymentPricesTable from './PaymentPricesTable'
 import MonthServiceSelect from './MonthServiceSelect'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 
 interface Props {
   form: FormInstance<any>
@@ -21,8 +22,11 @@ interface Props {
 
 const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
   // TODO: fix init values
-  const [domainId, setDomainId] = useState()
-  const [streetId, setStreetId] = useState()
+
+  /*const domainId = Form.useWatch('domain', form)
+  const streetId = Form.useWatch('street', form)
+  const month = Form.useWatch('monthService', form)
+  const company = Form.useWatch('company', form)
 
   const { data: allRealEstate } = useGetAllRealEstateQuery({
     domainId,
@@ -33,6 +37,9 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
     domainId,
     streetId,
   })
+
+  const service = allServices?.find((item) => item._id === month)
+  const realEstate = allRealEstate?.find((item) => item._id === company)*/
 
   return (
     <Form
@@ -46,22 +53,8 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
       layout="vertical"
       className={s.Form}
     >
-      <DomainsSelect disabled={edit} form={form} setDomainId={setDomainId} />
-      <AddressesSelect disabled={edit} form={form} setStreetId={setStreetId} />
-      {domainId && streetId ? (
-        <>
-          <p>Об&apos;єкти нерухомості</p>
-          {allRealEstate?.map((item) => (
-            <p key={item._id}>{item.companyName}</p>
-          ))}
-          <p>Послуги</p>
-          {allServices?.map((item) => (
-            <p key={item._id}>{item.description}</p>
-          ))}
-        </>
-      ) : (
-        <p>none</p>
-      )}
+      <DomainsSelect disabled={edit} form={form} />
+      <AddressesSelect disabled={edit} form={form} />
       <MonthServiceSelect disabled={edit} form={form} />
       <CompanySelect disabled={edit} form={form} />
       <Form.Item
