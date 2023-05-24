@@ -72,8 +72,7 @@ const ServicesBlock = () => {
       title: 'Місяць',
       dataIndex: 'date',
       width: '12%',
-      // TODO: to helper
-      render: (data) => firstTextToUpperCase(moment(data).format('MMMM')),
+      render: getFormattedDate,
     },
     {
       title: 'Утримання',
@@ -169,4 +168,10 @@ const ServicesBlock = () => {
     </TableCard>
   )
 }
+
+// TODO: to helper
+export function getFormattedDate(data) {
+  return firstTextToUpperCase(moment(data).format('MMMM'))
+}
+
 export default ServicesBlock

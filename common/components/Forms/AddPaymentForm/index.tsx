@@ -8,6 +8,7 @@ import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import CompanySelect from './CompanySelect'
 import PaymentTotal from './PaymentTotal'
 import PaymentPricesTable from './PaymentPricesTable'
+import MonthServiceSelect from './MonthServiceSelect'
 
 interface Props {
   form: FormInstance<any>
@@ -32,6 +33,7 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
     >
       <DomainsSelect disabled={edit} form={form} />
       <AddressesSelect disabled={edit} form={form} />
+      <MonthServiceSelect disabled={edit} form={form} />
       <CompanySelect disabled={edit} form={form} />
       <Form.Item
         name="operation"
