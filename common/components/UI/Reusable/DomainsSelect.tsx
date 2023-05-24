@@ -5,18 +5,21 @@ import { Form, Select } from 'antd'
 export default function DomainsSelect({
   disabled,
   form,
+  setDomainId,
 }: {
   disabled?: boolean
   form: any
+  setDomainId?: (any) => void
 }) {
   const { data, isLoading } = useGetDomainsQuery({})
 
   return (
     <Form.Item name="domain" label="Домен" rules={validateField('required')}>
       <Select
-        onSelect={() => {
+        onSelect={(e) => {
           // TODO: check if this should be inside street component
           form.resetFields(['street'])
+          setDomainId(e)
         }}
         filterSort={(optionA, optionB) =>
           (optionA?.label ?? '')

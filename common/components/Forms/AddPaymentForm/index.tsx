@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, useState } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import s from './style.module.scss'
@@ -9,6 +9,8 @@ import CompanySelect from './CompanySelect'
 import PaymentTotal from './PaymentTotal'
 import PaymentPricesTable from './PaymentPricesTable'
 import MonthServiceSelect from './MonthServiceSelect'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 
 interface Props {
   form: FormInstance<any>
@@ -19,6 +21,19 @@ interface Props {
 
 const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
   // TODO: fix init values
+  const [domainId, setDomainId] = useState()
+  const [streetId, setStreetId] = useState()
+
+  const { data: allRealEstate } = useGetAllRealEstateQuery({
+    domainId,
+    streetId,
+  })
+
+  const { data: allServices } = useGetAllServicesQuery({
+    domainId,
+    streetId,
+  })
+
   return (
     <Form
       initialValues={{
@@ -31,8 +46,22 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
       layout="vertical"
       className={s.Form}
     >
-      <DomainsSelect disabled={edit} form={form} />
-      <AddressesSelect disabled={edit} form={form} />
+      <DomainsSelect disabled={edit} form={form} setDomainId={setDomainId} />
+      <AddressesSelect disabled={edit} form={form} setStreetId={setStreetId} />
+      {domainId && streetId ? (
+        <>
+          <p>Об&apos;єкти нерухомості</p>
+          {allRealEstate?.map((item) => (
+            <p key={item._id}>{item.companyName}</p>
+          ))}
+          <p>Послуги</p>
+          {allServices?.map((item) => (
+            <p key={item._id}>{item.description}</p>
+          ))}
+        </>
+      ) : (
+        <p>none</p>
+      )}
       <MonthServiceSelect disabled={edit} form={form} />
       <CompanySelect disabled={edit} form={form} />
       <Form.Item
