@@ -2,7 +2,6 @@ import {
   useDeleteStreetMutation,
   useGetAllStreetsQuery,
 } from '@common/api/streetApi/street.api'
-import StreetsCardHeader from '@common/components/UI/StreetsCardHeader'
 import TableCard from '@common/components/UI/TableCard'
 import { IStreet } from '@common/modules/models/Street'
 import { Table, Popconfirm, message } from 'antd'
@@ -12,8 +11,15 @@ import { useRouter } from 'next/router'
 import s from './style.module.scss'
 import { AppRoutes } from '@utils/constants'
 import RealEstateBlock from './realEstates'
+import StreetsCardHeader from '@common/components/UI/StreetsCardHeader'
 
-const StreetsBlock = ({ domainId }: { domainId?: string }) => {
+const StreetsBlock = ({
+  domainId,
+  showAddButton,
+}: {
+  domainId?: string
+  showAddButton?: boolean
+}) => {
   const { data: streets, isLoading } = useGetAllStreetsQuery({ domainId })
   const router = useRouter()
   const [deleteStreet, { isLoading: deleteLoading }] = useDeleteStreetMutation()
@@ -52,7 +58,7 @@ const StreetsBlock = ({ domainId }: { domainId?: string }) => {
 
   return (
     <TableCard
-      title={<StreetsCardHeader />}
+      title={<StreetsCardHeader showAddButton={showAddButton} />}
       className={cn({ [s.noScroll]: router.pathname === AppRoutes.STREETS })}
     >
       <Table
