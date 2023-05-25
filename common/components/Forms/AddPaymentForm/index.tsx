@@ -9,9 +9,6 @@ import CompanySelect from './CompanySelect'
 import PaymentTotal from './PaymentTotal'
 import PaymentPricesTable from './PaymentPricesTable'
 import MonthServiceSelect from './MonthServiceSelect'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
-import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 
 interface Props {
   form: FormInstance<any>
@@ -22,24 +19,6 @@ interface Props {
 
 const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
   // TODO: fix init values
-
-  /*const domainId = Form.useWatch('domain', form)
-  const streetId = Form.useWatch('street', form)
-  const month = Form.useWatch('monthService', form)
-  const company = Form.useWatch('company', form)
-
-  const { data: allRealEstate } = useGetAllRealEstateQuery({
-    domainId,
-    streetId,
-  })
-
-  const { data: allServices } = useGetAllServicesQuery({
-    domainId,
-    streetId,
-  })
-
-  const service = allServices?.find((item) => item._id === month)
-  const realEstate = allRealEstate?.find((item) => item._id === company)*/
 
   return (
     <Form

@@ -17,14 +17,12 @@ export function PriceMaintainceField({ record, form, edit }) {
   const { company } = useCompany({ companyId, domainId, streetId })
 
   useEffect(() => {
-    if (service?._id) {
-      if (company.servicePricePerMeter) {
-        form.setFieldValue(fieldName, company.servicePricePerMeter)
-      } else if (service.rentPrice) {
-        form.setFieldValue(fieldName, service.rentPrice)
-      }
+    if (company?.servicePricePerMeter) {
+      form.setFieldValue(fieldName, company.servicePricePerMeter)
+    } else if (service?.rentPrice) {
+      form.setFieldValue(fieldName, service.rentPrice)
     }
-  }, [service?._id]) //eslint-disable-line react-hooks/exhaustive-deps
+  }, [company?.servicePricePerMeter, service?.rentPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
@@ -43,12 +41,10 @@ export function PricePlacingField({ record, form, edit }) {
   const { company, isLoading } = useCompany({ companyId, domainId, streetId })
 
   useEffect(() => {
-    if (company?._id) {
-      if (company.pricePerMeter) {
-        form.setFieldValue(fieldName, company.pricePerMeter)
-      }
+    if (company?._id && company?.pricePerMeter) {
+      form.setFieldValue(fieldName, company.pricePerMeter)
     }
-  }, [company?._id]) //eslint-disable-line react-hooks/exhaustive-deps
+  }, [company?._id, company?.pricePerMeter]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
@@ -67,12 +63,10 @@ export function PriceElectricityField({ record, form, edit }) {
   const { service, isLoading } = useService({ serviceId, domainId, streetId })
 
   useEffect(() => {
-    if (service?._id) {
-      if (service.electricityPrice) {
-        form.setFieldValue(fieldName, service.electricityPrice)
-      }
+    if (service?._id && service?.electricityPrice) {
+      form.setFieldValue(fieldName, service.electricityPrice)
     }
-  }, [service?._id]) //eslint-disable-line react-hooks/exhaustive-deps
+  }, [service?._id, service?.electricityPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
@@ -91,12 +85,10 @@ export function PriceWaterField({ record, form, edit }) {
   const { service, isLoading } = useService({ serviceId, domainId, streetId })
 
   useEffect(() => {
-    if (service?._id) {
-      if (service.waterPrice) {
-        form.setFieldValue(fieldName, service.waterPrice)
-      }
+    if ((service?._id, service?.waterPrice)) {
+      form.setFieldValue(fieldName, service.waterPrice)
     }
-  }, [service?._id]) //eslint-disable-line react-hooks/exhaustive-deps
+  }, [service?._id, service?.waterPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>

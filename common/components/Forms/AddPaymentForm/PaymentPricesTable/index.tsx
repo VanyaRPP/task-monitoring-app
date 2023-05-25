@@ -93,18 +93,15 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
       title: 'Ціна',
       dataIndex: 'price',
       render: (text, record) => {
-        if (record.name === 'maintenance') {
-          return (
-            <PriceMaintainceField record={record} form={form} edit={edit} />
-          )
-        } else if (record.name === 'placing') {
-          return <PricePlacingField record={record} form={form} edit={edit} />
-        } else if (record.name === 'electricity') {
-          return (
-            <PriceElectricityField record={record} form={form} edit={edit} />
-          )
-        } else if (record.name === 'water') {
-          return <PriceWaterField record={record} form={form} edit={edit} />
+        const fields = {
+          maintenance: PriceMaintainceField,
+          placing: PricePlacingField,
+          electricity: PriceElectricityField,
+          water: PriceWaterField,
+        }
+        if (record.name in fields) {
+          const Component = fields[record.name]
+          return <Component record={record} form={form} edit={edit} />
         }
         return <PriceWrapper record={record} form={form} edit={edit} />
       },
@@ -192,14 +189,11 @@ function SumWrapper({ record, form }) {
   // вся ця штука повинна бути також динамічна за прикладом компонента зверху.
   // ми повинні прописати умови прорахунку, за яким беруться значення
   // TODO: fix labels
-  const maintenance = Form.useWatch('maintenance', form)
-  const placing = Form.useWatch('placing', form)
-  const electricity = Form.useWatch('electricity', form)
-  const water = Form.useWatch('water', form)
 
-  const obj = Form.useWatch(record.name, form)
+  const formFields = Form.useWatch(record.name, form)
 
   // TODO: fix. such items should be "Clear function". Without side effect
+
   const getVal = (record, obj) => {
     switch (record) {
       case 'maintenance': {
@@ -220,9 +214,10 @@ function SumWrapper({ record, form }) {
       }
     }
   }
+  form.setFieldValue([record.name, 'sum'], getVal(record?.name, formFields))
   return (
     <Form.Item name={[record?.name, 'sum']}>
-      <h4 className={s.price}>{getVal(record?.name, obj)} ₴</h4>
+      <h4 className={s.price}>{getVal(record?.name, formFields)} ₴</h4>
     </Form.Item>
   )
 }

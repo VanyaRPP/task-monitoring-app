@@ -14,12 +14,10 @@ export function AmountTotalAreaField({ record, form, edit }) {
   const { company, isLoading } = useCompany({ companyId, domainId, streetId })
 
   useEffect(() => {
-    if (company?._id) {
-      if (company.totalArea) {
-        form.setFieldValue(fieldName, company.totalArea)
-      }
+    if (company?._id && company?.totalArea) {
+      form.setFieldValue(fieldName, company.totalArea)
     }
-  }, [company?._id]) //eslint-disable-line react-hooks/exhaustive-deps
+  }, [company?._id, company?.totalArea]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
