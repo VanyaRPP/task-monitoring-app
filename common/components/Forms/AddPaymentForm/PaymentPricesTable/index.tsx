@@ -7,13 +7,16 @@ import { paymentsTitle } from '@utils/constants'
 import { getName } from '@utils/helpers'
 import { validateField } from '@common/assets/features/validators'
 import s from './style.module.scss'
-import { IExtendedService } from '@common/api/serviceApi/service.api.types'
-import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
-import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import { useAppSelector } from '@common/modules/store/hooks'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
+import useService from '@common/modules/hooks/useService'
+import {
+  PriceElectricityField,
+  PriceMaintainceField,
+  PricePlacingField,
+  PriceWaterField,
+} from './fields/priceFields'
 import useCompany from '@common/modules/hooks/useCompany'
+import { AmountTotalAreaField } from './fields/amountFields'
 interface Props {
   form: FormInstance<any>
   edit: boolean
@@ -23,21 +26,12 @@ interface Props {
 const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
-  const month = Form.useWatch('monthService', form)
-  const company = Form.useWatch('company', form)
+  const serviceId = Form.useWatch('monthService', form)
+  const companyId = Form.useWatch('company', form)
 
-  const { data: allRealEstate } = useGetAllRealEstateQuery({
-    domainId,
-    streetId,
-  })
+  const { company } = useCompany({ companyId, domainId, streetId })
+  const { service } = useService({ serviceId, domainId, streetId })
 
-  const { data: allServices } = useGetAllServicesQuery({
-    domainId,
-    streetId,
-  })
-
-  const service = allServices?.find((item) => item._id === month)
-  const realEstate = allRealEstate?.find((item) => item._id === company)
   const columns: ColumnProps<IPaymentTableData>[] = [
     {
       title: '№',
@@ -58,6 +52,10 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
           <span className={s.rowText}>
             {getName(name, paymentsTitle)}{' '}
             <span className={s.month}>({getFormattedDate(service?.date)})</span>
+            {company?.servicePricePerMeter &&
+              getName(name, paymentsTitle) === 'Утримання' && (
+                <span className={s.month}> індивідуальне</span>
+              )}
           </span>
         </Tooltip>
       ),
@@ -86,12 +84,7 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
               </Form.Item>
             </div>
           ) : (
-            <Form.Item
-              name={[record.name, 'amount']}
-              rules={validateField('required')}
-            >
-              <InputNumber disabled={edit} className={s.input} />
-            </Form.Item>
+            <AmountTotalAreaField record={record} form={form} edit={edit} />
           )}
         </>
       ),
@@ -104,6 +97,14 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
           return (
             <PriceMaintainceField record={record} form={form} edit={edit} />
           )
+        } else if (record.name === 'placing') {
+          return <PricePlacingField record={record} form={form} edit={edit} />
+        } else if (record.name === 'electricity') {
+          return (
+            <PriceElectricityField record={record} form={form} edit={edit} />
+          )
+        } else if (record.name === 'water') {
+          return <PriceWaterField record={record} form={form} edit={edit} />
         }
         return <PriceWrapper record={record} form={form} edit={edit} />
       },
@@ -125,30 +126,6 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
       pagination={false}
       className={s.table}
     />
-  )
-}
-
-function PriceMaintainceField({ record, form, edit }) {
-  const fieldName = [record.name, 'price']
-
-  const domainId = Form.useWatch('domain', form)
-  const streetId = Form.useWatch('street', form)
-  const companyId = Form.useWatch('company', form)
-
-  const { company, isLoading } = useCompany({ companyId, domainId, streetId })
-
-  useEffect(() => {
-    if (company?._id) {
-      if (company.pricePerMeter) {
-        form.setFieldValue(fieldName, company.pricePerMeter)
-      }
-    }
-  }, [company?._id]) //eslint-disable-line react-hooks/exhaustive-deps
-
-  return (
-    <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={edit} className={s.input} />
-    </Form.Item>
   )
 }
 
@@ -191,21 +168,21 @@ function getRelationshipByRecordName(recordName) {
         fieldName: 'company',
         valueName: 'pricePerMeter',
         // тестове значення повинно бути динамічне
-        testValue: 345,
+        testValue: recordName,
       },
       // ціна електрики за кіловат. береться із стандартної ціни послуг в місяць
       electricity: {
         fieldName: 'monthService',
         valueName: 'electricityPrice',
         // тестове значення повинно бути динамічне
-        testValue: 567,
+        testValue: recordName,
       },
       // ціна води за куб. береться із стандартної ціни послуг в місяць
       water: {
         fieldName: 'monthService',
         valueName: 'waterPrice',
         // тестове значення повинно бути динамічне
-        testValue: 689,
+        testValue: recordName,
       },
     }[recordName] || {}
   )
@@ -220,31 +197,32 @@ function SumWrapper({ record, form }) {
   const electricity = Form.useWatch('electricity', form)
   const water = Form.useWatch('water', form)
 
+  const obj = Form.useWatch(record.name, form)
+
   // TODO: fix. such items should be "Clear function". Without side effect
-  const getVal = (record) => {
+  const getVal = (record, obj) => {
     switch (record) {
       case 'maintenance': {
-        const m = maintenance?.amount * maintenance?.price
+        const m = obj?.amount * obj?.price
         return +m.toFixed(1) || 0
       }
       case 'placing': {
-        const p = placing?.amount * placing?.price
+        const p = obj?.amount * obj?.price
         return +p.toFixed(1) || 0
       }
       case 'electricity': {
-        const e =
-          (electricity?.amount - electricity?.lastAmount) * electricity?.price
+        const e = (obj?.amount - obj?.lastAmount) * obj?.price
         return +e.toFixed(1) || 0
       }
       case 'water': {
-        const w = (water?.amount - water?.lastAmount) * water?.price
+        const w = (obj?.amount - obj?.lastAmount) * obj?.price
         return +w.toFixed(1) || 0
       }
     }
   }
   return (
     <Form.Item name={[record?.name, 'sum']}>
-      <h4 className={s.price}>{getVal(record?.name)} ₴</h4>
+      <h4 className={s.price}>{getVal(record?.name, obj)} ₴</h4>
     </Form.Item>
   )
 }

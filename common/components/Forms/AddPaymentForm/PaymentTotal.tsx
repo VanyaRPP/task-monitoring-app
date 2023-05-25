@@ -15,9 +15,10 @@ const PaymentTotal: FC<Props> = ({ form }) => {
   const water = Form.useWatch('water', form)
 
   useEffect(() => {
-    setTotal(
-      maintenance?.sum + placing?.sum + electricity?.sum + water?.sum || 0
-    )
+    setTotal(maintenance?.sum + placing?.sum + electricity?.sum + water?.sum)
+    if (maintenance) {
+      alert(maintenance.sum)
+    }
     form.setFieldValue('debit', total)
   }, [maintenance, placing, electricity, water, form, total])
 
