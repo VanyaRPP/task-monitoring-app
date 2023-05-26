@@ -72,6 +72,8 @@ const StreetsBlock = ({
         dataSource={streets}
         rowKey="_id"
         columns={columns}
+        size="small"
+        bordered
         pagination={{
           responsive: false,
           size: 'small',
