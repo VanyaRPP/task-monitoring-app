@@ -34,11 +34,6 @@ const DomainsBlock = ({}) => {
       title={<DomainStreetsComponent data={domains} />}
       className={cn({ [s.noScroll]: router.pathname === AppRoutes.DOMAIN })}
     >
-      {false && (
-        <div className={s.addButtonContainer}>
-          <Button type="primary">додати</Button>
-        </div>
-      )}
       <Table
         expandable={{
           expandedRowRender: (data) => (
