@@ -7,7 +7,16 @@ import { paymentsTitle } from '@utils/constants'
 import { getName } from '@utils/helpers'
 import { validateField } from '@common/assets/features/validators'
 import s from './style.module.scss'
-
+import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
+import useService from '@common/modules/hooks/useService'
+import {
+  PriceElectricityField,
+  PriceMaintainceField,
+  PricePlacingField,
+  PriceWaterField,
+} from './fields/priceFields'
+import useCompany from '@common/modules/hooks/useCompany'
+import { AmountTotalAreaField } from './fields/amountFields'
 interface Props {
   form: FormInstance<any>
   edit: boolean
@@ -15,6 +24,14 @@ interface Props {
 }
 
 const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
+  const domainId = Form.useWatch('domain', form)
+  const streetId = Form.useWatch('street', form)
+  const serviceId = Form.useWatch('monthService', form)
+  const companyId = Form.useWatch('company', form)
+
+  const { company } = useCompany({ companyId, domainId, streetId })
+  const { service } = useService({ serviceId, domainId, streetId })
+
   const columns: ColumnProps<IPaymentTableData>[] = [
     {
       title: '№',
@@ -34,7 +51,11 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
         >
           <span className={s.rowText}>
             {getName(name, paymentsTitle)}{' '}
-            <span className={s.month}>({moment().format('MMMM')})</span>
+            <span className={s.month}>({getFormattedDate(service?.date)})</span>
+            {company?.servicePricePerMeter &&
+              getName(name, paymentsTitle) === 'Утримання' && (
+                <span className={s.month}> індивідуальне</span>
+              )}
           </span>
         </Tooltip>
       ),
@@ -63,12 +84,7 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
               </Form.Item>
             </div>
           ) : (
-            <Form.Item
-              name={[record.name, 'amount']}
-              rules={validateField('required')}
-            >
-              <InputNumber disabled={edit} className={s.input} />
-            </Form.Item>
+            <AmountTotalAreaField record={record} form={form} edit={edit} />
           )}
         </>
       ),
@@ -76,9 +92,19 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
     {
       title: 'Ціна',
       dataIndex: 'price',
-      render: (text, record) => (
-        <PriceWrapper record={record} form={form} edit={edit} />
-      ),
+      render: (text, record) => {
+        const fields = {
+          maintenance: PriceMaintainceField,
+          placing: PricePlacingField,
+          electricity: PriceElectricityField,
+          water: PriceWaterField,
+        }
+        if (record.name in fields) {
+          const Component = fields[record.name]
+          return <Component record={record} form={form} edit={edit} />
+        }
+        return <PriceWrapper record={record} form={form} edit={edit} />
+      },
     },
     {
       title: 'Сума',
@@ -132,28 +158,28 @@ function getRelationshipByRecordName(recordName) {
         fieldName: 'monthService',
         valueName: 'rentPrice',
         // тестове значення повинно бути динамічне
-        testValue: 123,
+        testValue: recordName,
       },
       // компанія та її ціна за метр розміщення (оренди) береться з компанії (рілестейт)
       placing: {
         fieldName: 'company',
         valueName: 'pricePerMeter',
         // тестове значення повинно бути динамічне
-        testValue: 345,
+        testValue: recordName,
       },
       // ціна електрики за кіловат. береться із стандартної ціни послуг в місяць
       electricity: {
         fieldName: 'monthService',
         valueName: 'electricityPrice',
         // тестове значення повинно бути динамічне
-        testValue: 567,
+        testValue: recordName,
       },
       // ціна води за куб. береться із стандартної ціни послуг в місяць
       water: {
         fieldName: 'monthService',
         valueName: 'waterPrice',
         // тестове значення повинно бути динамічне
-        testValue: 689,
+        testValue: recordName,
       },
     }[recordName] || {}
   )
@@ -163,36 +189,35 @@ function SumWrapper({ record, form }) {
   // вся ця штука повинна бути також динамічна за прикладом компонента зверху.
   // ми повинні прописати умови прорахунку, за яким беруться значення
   // TODO: fix labels
-  const maintenance = Form.useWatch('maintenance', form)
-  const placing = Form.useWatch('placing', form)
-  const electricity = Form.useWatch('electricity', form)
-  const water = Form.useWatch('water', form)
+
+  const formFields = Form.useWatch(record.name, form)
 
   // TODO: fix. such items should be "Clear function". Without side effect
-  const getVal = (record) => {
+
+  const getVal = (record, obj) => {
     switch (record) {
       case 'maintenance': {
-        const m = maintenance?.amount * maintenance?.price
+        const m = obj?.amount * obj?.price
         return +m.toFixed(1) || 0
       }
       case 'placing': {
-        const p = placing?.amount * placing?.price
+        const p = obj?.amount * obj?.price
         return +p.toFixed(1) || 0
       }
       case 'electricity': {
-        const e =
-          (electricity?.amount - electricity?.lastAmount) * electricity?.price
+        const e = (obj?.amount - obj?.lastAmount) * obj?.price
         return +e.toFixed(1) || 0
       }
       case 'water': {
-        const w = (water?.amount - water?.lastAmount) * water?.price
+        const w = (obj?.amount - obj?.lastAmount) * obj?.price
         return +w.toFixed(1) || 0
       }
     }
   }
+  form.setFieldValue([record.name, 'sum'], getVal(record?.name, formFields))
   return (
     <Form.Item name={[record?.name, 'sum']}>
-      <h4 className={s.price}>{getVal(record?.name)} ₴</h4>
+      <h4 className={s.price}>{getVal(record?.name, formFields)} ₴</h4>
     </Form.Item>
   )
 }
