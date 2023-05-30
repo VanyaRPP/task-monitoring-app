@@ -6,10 +6,7 @@ import { useRouter } from 'next/router'
 import s from './style.module.scss'
 import RealEstateModal from '../RealEstateModal'
 
-interface Props {
-  handleSubmit: any
-}
-const RealEstateCardHeader = (handleSubmit) => {
+const RealEstateCardHeader = () => {
   const Router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const closeModal = () => {
@@ -25,11 +22,7 @@ const RealEstateCardHeader = (handleSubmit) => {
       <Button type="link" onClick={() => setIsModalOpen(true)}>
         <PlusOutlined /> Додати
       </Button>
-      <RealEstateModal
-        isModalOpen={isModalOpen}
-        closeModal={closeModal}
-        onSubmit={handleSubmit}
-      />
+      <RealEstateModal isModalOpen={isModalOpen} closeModal={closeModal} />
     </div>
   )
 }

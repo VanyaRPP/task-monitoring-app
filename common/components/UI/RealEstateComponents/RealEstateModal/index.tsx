@@ -9,10 +9,9 @@ import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 interface Props {
   isModalOpen: boolean
   closeModal: VoidFunction
-  onSubmit: () => void
 }
 
-const RealEstateModal: FC<Props> = ({ isModalOpen, closeModal, onSubmit }) => {
+const RealEstateModal: FC<Props> = ({ isModalOpen, closeModal }) => {
   const [form] = Form.useForm()
   const [addRealEstate] = useAddRealEstateMutation()
 
