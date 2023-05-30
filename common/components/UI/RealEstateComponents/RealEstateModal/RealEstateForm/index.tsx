@@ -3,13 +3,11 @@ import { validateField } from '@common/assets/features/validators'
 import { Select, Form, FormInstance, Input, InputNumber } from 'antd'
 import s from './style.module.scss'
 import { useGetAllRealEstateQuery } from 'common/api/realestateApi/realestate.api'
-
 interface Props {
   form: any
-  onSubmit: (values: any) => void
 }
 
-const RealEstateForm: FC<Props> = ({ form, onSubmit }) => {
+const RealEstateForm: FC<Props> = ({ form }) => {
   const companyName = form.getFieldValue('companyName')
   const { data: realEstates, isLoading } = useGetAllRealEstateQuery({
     limit: 5,
@@ -29,15 +27,10 @@ const RealEstateForm: FC<Props> = ({ form, onSubmit }) => {
     }
   }, [companyNameTest, realEstates])
 
-  const onFinish = (values: any) => {
-    const updatedValues = { ...values, matchingObject }
-    onSubmit(updatedValues)
-  }
-
   // Rest of the component code...
 
   return (
-    <Form form={form} layout="vertical" className={s.Form} onFinish={onFinish}>
+    <Form form={form} layout="vertical" className={s.Form}>
       <Form.Item label="Domain">
         <Input
           name="domain"
