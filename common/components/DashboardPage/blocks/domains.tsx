@@ -13,8 +13,9 @@ import { Popconfirm, Table, message } from 'antd'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import StreetsBlock from './streets'
+import { Button } from 'antd'
 
-const DomainsBlock = () => {
+const DomainsBlock = ({}) => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
   const router = useRouter()
 
@@ -28,7 +29,6 @@ const DomainsBlock = () => {
       message.error('Помилка при видаленні')
     }
   }
-
   return (
     <TableCard
       title={<DomainStreetsComponent data={domains} />}
@@ -36,7 +36,9 @@ const DomainsBlock = () => {
     >
       <Table
         expandable={{
-          expandedRowRender: (data) => <StreetsBlock domainId={data._id} />,
+          expandedRowRender: (data) => (
+            <StreetsBlock domainId={data._id} showAddButton={false} />
+          ),
         }}
         columns={[
           ...columns,
