@@ -6,10 +6,12 @@ import { useRouter } from 'next/router'
 import s from './style.module.scss'
 import RealEstateModal from '../RealEstateModal'
 
-const RealEstateCardHeader = () => {
+interface Props {
+  handleSubmit: any
+}
+const RealEstateCardHeader = (handleSubmit) => {
   const Router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
-
   const closeModal = () => {
     setIsModalOpen(false)
   }
@@ -17,13 +19,17 @@ const RealEstateCardHeader = () => {
   return (
     <div className={s.tableHeader}>
       <Button type="link" onClick={() => Router.push(AppRoutes.REAL_ESTATE)}>
-        Об'єкти нерухомості
+        Об&#x27;єкти нерухомості
         <SelectOutlined className={s.Icon} />
       </Button>
       <Button type="link" onClick={() => setIsModalOpen(true)}>
         <PlusOutlined /> Додати
       </Button>
-      <RealEstateModal isModalOpen={isModalOpen} closeModal={closeModal} />
+      <RealEstateModal
+        isModalOpen={isModalOpen}
+        closeModal={closeModal}
+        onSubmit={handleSubmit}
+      />
     </div>
   )
 }

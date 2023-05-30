@@ -1,25 +1,68 @@
-import React, { FC } from 'react'
+import React, { FC, useState, useEffect } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import { Select, Form, FormInstance, Input, InputNumber } from 'antd'
-import AddressesSelect from '../../../Reusable/AddressesSelect'
-import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
+import { useGetAllRealEstateQuery } from 'common/api/realestateApi/realestate.api'
 
 interface Props {
-  form: FormInstance<any>
+  form: any
+  onSubmit: (values: any) => void
 }
 
-const RealEstateForm: FC<Props> = ({ form }) => {
+const RealEstateForm: FC<Props> = ({ form, onSubmit }) => {
+  const companyName = form.getFieldValue('companyName')
+  const { data: realEstates, isLoading } = useGetAllRealEstateQuery({
+    limit: 5,
+  })
+  const [companyNameTest, setCompanyName] = useState('')
+  const [matchingObject, setMatchingObject] = useState(null)
+
+  useEffect(() => {
+    const foundObject = realEstates.find(
+      (obj) => obj.companyName === companyNameTest
+    )
+
+    if (foundObject) {
+      setMatchingObject(foundObject)
+    } else {
+      setMatchingObject(null)
+    }
+  }, [companyNameTest, realEstates])
+
+  const onFinish = (values: any) => {
+    const updatedValues = { ...values, matchingObject }
+    onSubmit(updatedValues)
+  }
+
+  // Rest of the component code...
+
   return (
-    <Form form={form} layout="vertical" className={s.Form}>
-      <DomainsSelect form={form} />
-      <AddressesSelect form={form} />
+    <Form form={form} layout="vertical" className={s.Form} onFinish={onFinish}>
+      <Form.Item label="Domain">
+        <Input
+          name="domain"
+          disabled={true} // Set disabled to true to close the field from changes
+          value={matchingObject?.domain?.name || ''}
+        />
+      </Form.Item>
+      <Form.Item label="Address">
+        <Input
+          name="address"
+          disabled={true} // Set disabled to true to close the field from changes
+          value={matchingObject?.street?.address || ''}
+        />
+      </Form.Item>
       <Form.Item
         name="companyName"
         label="Назва компанії"
         rules={validateField('required')}
       >
-        <Input placeholder="Опис" maxLength={256} className={s.formInput} />
+        <Input
+          onChange={(e) => setCompanyName(e.target.value)}
+          placeholder="Опис"
+          maxLength={256}
+          className={s.formInput}
+        />
       </Form.Item>
       <Form.Item
         name="bankInformation"

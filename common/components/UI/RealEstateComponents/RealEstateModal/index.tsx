@@ -1,7 +1,7 @@
 import { useAddRealEstateMutation } from '@common/api/realestateApi/realestate.api'
 import RealEstateForm from './RealEstateForm'
 import { Form, Modal, message } from 'antd'
-import React, { FC } from 'react'
+import React, { FC, useState } from 'react'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 // import AddServiceForm from '../Forms/AddServiceForm'
 // import moment from 'moment'
@@ -9,14 +9,21 @@ import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 interface Props {
   isModalOpen: boolean
   closeModal: VoidFunction
+  onSubmit: () => void
 }
 
 const RealEstateModal: FC<Props> = ({ isModalOpen, closeModal }) => {
   const [form] = Form.useForm()
   const [addRealEstate] = useAddRealEstateMutation()
+  const [domainId, setDomainId] = useState<string | undefined>(undefined)
+  const [streetId, setStreetId] = useState<string | undefined>(undefined)
+  const [matchingObject, setMatchingObject] = useState<IRealestate | null>(null)
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (values: any) => {
     const formData: IRealestate = await form.validateFields()
+
+    setDomainId(formData.domain)
+    setStreetId(formData.street)
 
     const response = await addRealEstate({
       domain: formData.domain,
@@ -51,7 +58,7 @@ const RealEstateModal: FC<Props> = ({ isModalOpen, closeModal }) => {
       okText={'Додати'}
       cancelText={'Відміна'}
     >
-      <RealEstateForm form={form} />
+      <RealEstateForm form={form} onSubmit={handleSubmit} />
     </Modal>
   )
 }
