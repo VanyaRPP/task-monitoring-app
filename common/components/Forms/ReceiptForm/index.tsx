@@ -1,4 +1,4 @@
-import React, { FC, useRef } from 'react'
+import React, { FC, useEffect, useRef } from 'react'
 import { Button, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
@@ -7,6 +7,10 @@ import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useReactToPrint } from 'react-to-print'
 import { renderCurrency } from '@common/components/DashboardPage/blocks/payments'
 import { numberToTextNumber } from '@utils/helpers'
+import useCompany from '@common/modules/hooks/useCompany'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import useService from '@common/modules/hooks/useService'
+import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 
 interface Props {
   currPayment: IExtendedPayment
@@ -55,31 +59,54 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const newData = currPayment || paymentData
 
   // TODO: use real data from Domain, Company
-  const data = { name: 'asd', email: 'asda', tel: '123' }
+  /*const data = {
+    name: newData?.name,
+    email: newData?.email,
+    tel: newData?.phone,
+  }*/
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle: 'emp-data',
   })
 
+  const { company } = useCompany({
+    companyId: newData?.company,
+    domainId: newData?.domain,
+    streetId: newData?.street,
+  })
+
+  const { service } = useService({
+    serviceId: newData?.monthService,
+    domainId: newData?.domain,
+    streetId: newData?.street,
+  })
+
+  const { data: domains } = useGetDomainsQuery({})
+  const currentDomain = domains?.find(
+    (domain) => domain._id === newData?.domain
+  )
+
+  const date = getFormattedDate(service?.date)
+
   const tt: DataType[] = [
     {
       id: 1,
-      Назва: `Утримання  (${moment().format('MMMM')})`,
+      Назва: `Утримання  (${date})`,
       Кількість: Number(newData?.maintenance?.amount),
       Ціна: Number(newData?.maintenance?.price),
       Сума: Number(newData?.maintenance?.sum),
     },
     {
       id: 2,
-      Назва: `Розміщення  (${moment().format('MMMM')})`,
+      Назва: `Розміщення  (${date})`,
       Кількість: Number(newData?.placing?.amount),
       Ціна: Number(newData?.placing?.price),
       Сума: Number(newData?.placing?.sum),
     },
     {
       id: 3,
-      Назва: `За водопостачання (${moment().format('MMMM')})`,
+      Назва: `За водопостачання (${date})`,
       Кількість:
         Number(newData?.water?.amount) - Number(newData?.water?.lastAmount),
       Ціна: Number(newData?.water?.price),
@@ -87,7 +114,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     },
     {
       id: 4,
-      Назва: `За електропостачання (${moment().format('MMMM')})`,
+      Назва: `За електропостачання (${date})`,
       Кількість:
         Number(newData?.electricity?.amount) -
         Number(newData?.electricity?.lastAmount),
@@ -113,13 +140,14 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.providerInfo}>
             <div className={s.label}>Постачальник</div>
             <div>
-              ТОВ &quot;Український центр дуальної освіти&quot; <br /> Адреса
-              01030, м. Київ, вул. Б. Хмельницького, буд. 51Б <br />
+              ТОВ &quot;{currentDomain?.name}&quot; <br />
+              Адреса {currentDomain?.address}
+              <br />
               Реєстраційний номер 42637285 <br />є платником податку на прибуток
               на загальних підставах <br />
               <div className={s.info_adres__bold}>
                 Р/р UA903052990000026006016402729 <br />
-                АТ КБ «ПРИВАТБАНК» МФО: 311744
+                {currentDomain?.bankInformation}
               </div>
             </div>
           </div>
@@ -127,9 +155,9 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.receiverInfo}>
             <div className={s.label}>Одержувач</div>
             <div>
-              {data?.name} &nbsp;
-              {data?.email} &nbsp;
-              {data?.tel}
+              {company?.companyName} &nbsp;
+              {company?.adminEmails[0]} &nbsp;
+              {company?.phone}
             </div>
           </div>
         </>
