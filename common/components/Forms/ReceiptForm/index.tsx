@@ -1,16 +1,13 @@
-import React, { FC, useEffect, useRef } from 'react'
+import React, { FC, useRef } from 'react'
 import { Button, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
-import moment from 'moment'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useReactToPrint } from 'react-to-print'
 import { renderCurrency } from '@common/components/DashboardPage/blocks/payments'
 import { numberToTextNumber } from '@utils/helpers'
-import useCompany from '@common/modules/hooks/useCompany'
-import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import useService from '@common/modules/hooks/useService'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
+import useServiceCompanyDomain from '@common/modules/hooks/useServiceCompanyDomain'
 
 interface Props {
   currPayment: IExtendedPayment
@@ -70,22 +67,12 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     documentTitle: 'emp-data',
   })
 
-  const { company } = useCompany({
+  const { company, service, domain } = useServiceCompanyDomain({
+    serviceId: newData?.monthService,
     companyId: newData?.company,
     domainId: newData?.domain,
     streetId: newData?.street,
   })
-
-  const { service } = useService({
-    serviceId: newData?.monthService,
-    domainId: newData?.domain,
-    streetId: newData?.street,
-  })
-
-  const { data: domains } = useGetDomainsQuery({})
-  const currentDomain = domains?.find(
-    (domain) => domain._id === newData?.domain
-  )
 
   const date = getFormattedDate(service?.date)
 
@@ -140,14 +127,13 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.providerInfo}>
             <div className={s.label}>Постачальник</div>
             <div>
-              ТОВ &quot;{currentDomain?.name}&quot; <br />
-              Адреса {currentDomain?.address}
+              {domain?.name} <br />
+              Адреса {domain?.address}
               <br />
-              Реєстраційний номер 42637285 <br />є платником податку на прибуток
-              на загальних підставах <br />
+              Реєстраційний номер ... <br />є платником податку на прибуток на
+              загальних підставах <br />
               <div className={s.info_adres__bold}>
-                Р/р UA903052990000026006016402729 <br />
-                {currentDomain?.bankInformation}
+                {domain?.bankInformation}
               </div>
             </div>
           </div>
@@ -155,12 +141,17 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.receiverInfo}>
             <div className={s.label}>Одержувач</div>
             <div>
-              {company?.companyName} &nbsp;
-              {company?.adminEmails[0]} &nbsp;
+              {company?.companyName} <br />
+              {company?.adminEmails.map((email) => (
+                <>
+                  {email} <br />
+                </>
+              ))}
               {company?.phone}
             </div>
           </div>
         </>
+
         <div className={s.providerInvoice}>
           <div className={s.datecellTitle}>INVOICE № INV-0060</div>
 
