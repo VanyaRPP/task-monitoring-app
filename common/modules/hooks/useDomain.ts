@@ -1,10 +1,13 @@
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 
 function useDomain({ domainId }) {
-  const { data: domains, isLoading: isDomainsLoading } = useGetDomainsQuery({})
-  const domain = domains?.find((domain) => domain._id === domainId)
+  const { data, isLoading } = useGetDomainsQuery({})
+  if (domainId) {
+    const singleDomain = data?.find((i) => i._id === domainId)
+    return { data: singleDomain ? [singleDomain] : [], isLoading }
+  }
 
-  return { domain, isDomainsLoading }
+  return { data, isLoading }
 }
 
 export default useDomain

@@ -11,9 +11,8 @@ import {
 import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
 import { Popconfirm, Table, message } from 'antd'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import { DeleteOutlined } from '@ant-design/icons'
+import { DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import StreetsBlock from './streets'
-import { Button } from 'antd'
 
 const DomainsBlock = ({}) => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
@@ -37,7 +36,9 @@ const DomainsBlock = ({}) => {
       <Table
         expandable={{
           expandedRowRender: (data) => (
-            <StreetsBlock domainId={data._id} showAddButton={false} />
+            <div className={cn(s.StreetsBlockContainer)}>
+              <StreetsBlock domainId={data._id} showAddButton={false} />
+            </div>
           ),
         }}
         columns={[
