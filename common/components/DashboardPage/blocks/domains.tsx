@@ -13,7 +13,6 @@ import { Popconfirm, Table, message } from 'antd'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import StreetsBlock from './streets'
-import { Button, Tooltip } from 'antd'
 
 const DomainsBlock = ({}) => {
   const { data: domains, isLoading } = useGetDomainsQuery({})
@@ -99,11 +98,7 @@ const columns = [
     dataIndex: 'adminEmails',
   },
   {
-    title: (
-      <Tooltip title="опис">
-        <QuestionCircleOutlined className={s.Icon} />
-      </Tooltip>
-    ),
+    title: 'Опис',
     dataIndex: 'description',
   },
   {
