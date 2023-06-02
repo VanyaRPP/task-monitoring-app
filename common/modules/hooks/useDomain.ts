@@ -1,4 +1,4 @@
-import { useGetDomainsQuery } from '../../../common/api/domainApi/domain.api'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 
 function useDomain({ domainId }) {
   const { data: domains, isLoading: isDomainsLoading } = useGetDomainsQuery({})
