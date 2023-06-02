@@ -15,7 +15,7 @@ function useServiceCompanyDomain({ serviceId, companyId, domainId, streetId }) {
     streetId,
   })
 
-  const { domain } = useDomain({ domainId })
+  const { data: domain } = useDomain({ domainId })
 
   return { company, service, domain }
 }

@@ -56,11 +56,6 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const newData = currPayment || paymentData
 
   // TODO: use real data from Domain, Company
-  /*const data = {
-    name: newData?.name,
-    email: newData?.email,
-    tel: newData?.phone,
-  }*/
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -127,13 +122,13 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.providerInfo}>
             <div className={s.label}>Постачальник</div>
             <div>
-              {domain?.name} <br />
-              Адреса {domain?.address}
+              {domain[0]?.name} <br />
+              Адреса {domain[0]?.address}
               <br />
               Реєстраційний номер ... <br />є платником податку на прибуток на
               загальних підставах <br />
               <div className={s.info_adres__bold}>
-                {domain?.bankInformation}
+                {domain[0]?.bankInformation}
               </div>
             </div>
           </div>
