@@ -5,13 +5,19 @@ import {
 } from '@common/api/realestateApi/realestate.api'
 import TableCard from '@common/components/UI/TableCard'
 import { AppRoutes } from '@utils/constants'
-import React, { FC, ReactElement } from 'react'
+import React, { FC, ReactElement, useContext } from 'react'
 import { useRouter } from 'next/router'
 import { Alert, Popconfirm, Table, message } from 'antd'
 import cn from 'classnames'
 import s from './style.module.scss'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
+import { createContext } from 'react'
+
+export const CompanyPageContext = createContext(
+  {} as { domainId?: string; streetId?: string }
+)
+export const useCompanyPageContext = () => useContext(CompanyPageContext)
 
 interface IRealEstate {
   domainId?: string
@@ -142,7 +148,11 @@ const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
 
   return (
     <TableCard
-      title={<RealEstateCardHeader />}
+      title={
+        <CompanyPageContext.Provider value={{ domainId, streetId }}>
+          <RealEstateCardHeader />
+        </CompanyPageContext.Provider>
+      }
       className={cn({ [s.noScroll]: pathname === AppRoutes.REAL_ESTATE })}
     >
       {content}
