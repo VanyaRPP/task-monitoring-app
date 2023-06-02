@@ -15,7 +15,10 @@ function useServiceCompanyDomain({ serviceId, companyId, domainId, streetId }) {
     streetId,
   })
 
-  const { domain } = useDomain({ domainId })
+  const { data: domain } = useDomain({ domainId })
+
+  // eslint-disable-next-line no-console
+  console.log('domain', domain)
 
   return { company, service, domain }
 }
