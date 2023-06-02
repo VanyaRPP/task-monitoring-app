@@ -60,7 +60,10 @@
   color: var(--primaryColor);
   font-weight: 400;
 }
-
 .noScroll {
   height: 100vh;
+}
+.StreetsBlockContainer {
+  height: 500px !important;
+  background-color: #4096ff;
 }
