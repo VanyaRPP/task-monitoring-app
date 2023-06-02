@@ -14,7 +14,9 @@ import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.ty
 import { DeleteOutlined } from '@ant-design/icons'
 import { createContext } from 'react'
 
-export const CompanyPageContext = createContext({})
+export const CompanyPageContext = createContext(
+  {} as { domainId?: string; streetId?: string }
+)
 export const useCompanyPageContext = () => useContext(CompanyPageContext)
 
 interface IRealEstate {

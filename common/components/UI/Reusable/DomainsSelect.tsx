@@ -11,8 +11,6 @@ export default function DomainsSelect({
   disabled?: boolean
   form: any
 }) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   const { domainId } = useCompanyPageContext()
   const { data, isLoading } = useDomain({ domainId })
 

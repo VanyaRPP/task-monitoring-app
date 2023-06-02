@@ -11,8 +11,6 @@ export default function AddressesSelect({
   disabled?: boolean
   form: any
 }) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   const { streetId } = useCompanyPageContext()
   const { data, isLoading } = useGetDomainsQuery({})
   const domain = Form.useWatch('domain', form)
