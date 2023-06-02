@@ -1,4 +1,4 @@
-import React, { FC, useRef } from 'react'
+import React, { FC, useRef, useEffect } from 'react'
 import { Button, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
@@ -76,6 +76,11 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
 
   const date = getFormattedDate(service?.date)
 
+  /*useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('newData: ', newData)
+  }, [newData])*/
+
   const tt: DataType[] = [
     {
       id: 1,
@@ -127,13 +132,13 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.providerInfo}>
             <div className={s.label}>Постачальник</div>
             <div>
-              {domain?.name} <br />
-              Адреса {domain?.address}
+              {domain[0]?.name} <br />
+              Адреса {domain[0]?.address}
               <br />
               Реєстраційний номер ... <br />є платником податку на прибуток на
               загальних підставах <br />
               <div className={s.info_adres__bold}>
-                {domain?.bankInformation}
+                {domain[0]?.bankInformation}
               </div>
             </div>
           </div>
