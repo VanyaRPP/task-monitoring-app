@@ -2,12 +2,24 @@ import { IUser } from './../../modules/models/User'
 import { IPaymentTableData } from '@utils/tableData'
 import { ObjectId } from 'mongoose'
 
-type ServiceType = {
+interface PaymentData {
   type: string
   lastAmount?: number
   amount: number
   price: number
   sum: number
+}
+
+interface IProvider {
+  name: string
+  address: string
+  bankInformation: string
+}
+
+interface IReciever {
+  companyName: string
+  emails: string[]
+  phone: string
 }
 
 export interface IPayment {
@@ -17,14 +29,11 @@ export interface IPayment {
   street: ObjectId
   company: ObjectId
   service: ObjectId
-  credit: number
-  debit: number
-  electricity: IPaymentTableData
-  water: IPaymentTableData
-  placing: IPaymentTableData
-  maintenance: IPaymentTableData
   description?: string
   services?: IPaymentTableData[]
+  invoice: PaymentData[]
+  from: IProvider
+  to: IReciever
 }
 
 export interface IExtendedPayment extends IPayment {

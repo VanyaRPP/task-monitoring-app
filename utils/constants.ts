@@ -82,3 +82,11 @@ export const paymentsTitle = {
   electricity: 'Електропостачання',
   water: 'Водопостачання',
 }
+
+export enum ServiceType {
+  Electricity = 'electricityPrice',
+  Water = 'waterPrice',
+  Placing = 'PlacingPrice',
+  Rent = 'RentPrice',
+  Maintenance = 'MaintenancePrice',
+}

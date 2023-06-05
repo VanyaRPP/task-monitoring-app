@@ -9,7 +9,8 @@ import React, { FC, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
-import { Operations } from '@utils/constants'
+import { Operations, ServiceType } from '@utils/constants'
+import useServiceCompanyDomain from '@common/modules/hooks/useServiceCompanyDomain'
 
 interface Props {
   closeModal: VoidFunction
@@ -26,22 +27,21 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     getActiveTab(paymentData, edit)
   )
 
+  /*const { service, company, domain } = useServiceCompanyDomain({
+    serviceId: formData.monthService,
+    companyId:
+  })*/
+
   const handleSubmit = async () => {
     const formData = await form.validateFields()
-    const response = await addPayment({
+    /*const response = await addPayment({
       type: formData.credit ? 'credit' : 'debit',
       date: new Date(),
       domain: formData.domain,
       street: formData.street,
       company: formData.company,
       service: formData.monthService,
-      credit: formData.credit,
-      debit: formData.debit,
-      electricity: formData.electricity,
-      water: formData.water,
-      placing: formData.placing,
-      maintenance: formData.maintenance,
-      /*invoice: [
+      invoice: [
         {
           type: 'electricity',
           lastAmount: formData.electricity.lastAmount,
@@ -68,33 +68,60 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
           price: formData.maintenance.price,
           sum: formData.maintenance.sum,
         },
-      ],*/
-    })
+      ],
+    })*/
 
-    /*const response = {
-      type: formData.credit ? 'credit' : 'debit',
+    const response = {
+      type: formData.credit ? Operations.Credit : Operations.Debit,
       date: new Date(),
       domain: formData.domain,
       street: formData.street,
       company: formData.company,
       service: formData.monthService,
-      electricity: formData.electricity,
-      water: formData.water,
-      placing: formData.placing,
-      maintenance: formData.maintenance,
-      debit: formData.debit,
-    }*/
+      invoice: [
+        {
+          type: ServiceType.Electricity,
+          lastAmount: formData.electricity.lastAmount,
+          amount: formData.electricity.amount,
+          price: formData.electricity.price,
+          sum: formData.electricity.sum,
+        },
+        {
+          type: ServiceType.Water,
+          lastAmount: formData.water.lastAmount,
+          amount: formData.water.amount,
+          price: formData.water.price,
+          sum: formData.water.sum,
+        },
+        {
+          type: ServiceType.Placing,
+          amount: formData.placing.amount,
+          price: formData.placing.price,
+          sum: formData.placing.sum,
+        },
+        {
+          type: ServiceType.Maintenance,
+          amount: formData.maintenance.amount,
+          price: formData.maintenance.price,
+          sum: formData.maintenance.sum,
+        },
+      ],
+      from: {},
+    }
 
     //eslint-disable-next-line no-console
     console.log('res: ', response)
 
-    if ('data' in response) {
+    //eslint-disable-next-line no-console
+    console.log('formData: ', formData)
+
+    /*if ('data' in response) {
       form.resetFields()
       message.success('Додано')
       closeModal()
     } else {
       message.error('Помилка при додаванні рахунку')
-    }
+    }*/
   }
 
   const items: TabsProps['items'] = [
