@@ -2,16 +2,29 @@ import { IUser } from './../../modules/models/User'
 import { IPaymentTableData } from '@utils/tableData'
 import { ObjectId } from 'mongoose'
 
+type ServiceType = {
+  type: string
+  lastAmount?: number
+  amount: number
+  price: number
+  sum: number
+}
+
 export interface IPayment {
-  payer: IPayer
-  date?: Date
-  credit?: number
-  debit?: number
+  type: string
+  date: Date
+  domain: ObjectId
+  street: ObjectId
+  company: ObjectId
+  service: ObjectId
+  credit: number
+  debit: number
+  electricity: IPaymentTableData
+  water: IPaymentTableData
+  placing: IPaymentTableData
+  maintenance: IPaymentTableData
   description?: string
-  maintenance?: IPaymentTableData
-  placing?: IPaymentTableData
-  electricity?: IPaymentTableData
-  water?: IPaymentTableData
+  services?: IPaymentTableData[]
 }
 
 export interface IExtendedPayment extends IPayment {

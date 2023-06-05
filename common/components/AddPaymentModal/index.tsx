@@ -27,17 +27,67 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   )
 
   const handleSubmit = async () => {
-    const formData: IPayment = await form.validateFields()
+    const formData = await form.validateFields()
     const response = await addPayment({
-      payer: formData.payer,
+      type: formData.credit ? 'credit' : 'debit',
+      date: new Date(),
+      domain: formData.domain,
+      street: formData.street,
+      company: formData.company,
+      service: formData.monthService,
       credit: formData.credit,
-      description: formData.description,
-      maintenance: formData.maintenance,
-      placing: formData.placing,
+      debit: formData.debit,
       electricity: formData.electricity,
       water: formData.water,
-      debit: formData.debit,
+      placing: formData.placing,
+      maintenance: formData.maintenance,
+      /*invoice: [
+        {
+          type: 'electricity',
+          lastAmount: formData.electricity.lastAmount,
+          amount: formData.electricity.amount,
+          price: formData.electricity.price,
+          sum: formData.electricity.sum,
+        },
+        {
+          type: 'water',
+          lastAmount: formData.water.lastAmount,
+          amount: formData.water.amount,
+          price: formData.water.price,
+          sum: formData.water.sum,
+        },
+        {
+          type: 'placing',
+          amount: formData.placing.amount,
+          price: formData.placing.price,
+          sum: formData.placing.sum,
+        },
+        {
+          type: 'maintenance',
+          amount: formData.maintenance.amount,
+          price: formData.maintenance.price,
+          sum: formData.maintenance.sum,
+        },
+      ],*/
     })
+
+    /*const response = {
+      type: formData.credit ? 'credit' : 'debit',
+      date: new Date(),
+      domain: formData.domain,
+      street: formData.street,
+      company: formData.company,
+      service: formData.monthService,
+      electricity: formData.electricity,
+      water: formData.water,
+      placing: formData.placing,
+      maintenance: formData.maintenance,
+      debit: formData.debit,
+    }*/
+
+    //eslint-disable-next-line no-console
+    console.log('res: ', response)
+
     if ('data' in response) {
       form.resetFields()
       message.success('Додано')
