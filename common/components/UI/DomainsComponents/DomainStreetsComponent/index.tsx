@@ -4,7 +4,7 @@ import { Button, Tooltip } from 'antd'
 import {
   PlusOutlined,
   SelectOutlined,
-  QuestionOutlined,
+  QuestionCircleOutlined,
 } from '@ant-design/icons'
 import { AppRoutes } from '@utils/constants'
 import { useRouter } from 'next/router'
@@ -19,18 +19,22 @@ const DomainStreetsComponent = ({ data }) => {
   }
   return (
     <div className={s.tableHeader}>
+      <div>
+      <Tooltip
+        title="Домени - це організації та компанії, що здійснюють управління та мають під собою менші компанії та об'єкти нерухомості. Управляються адміністраторами">
+          <QuestionCircleOutlined className={s.Icon} />
+      </Tooltip>
       <Button type="link" onClick={() => router.push(AppRoutes.DOMAIN)}>
-        <Tooltip title="Домени - це організації та компанії, що здійснюють управління та мають під собою менші компанії та об'єкти нерухомості. Управляються адміністраторами">
-          <QuestionOutlined className={s.Icon} />
-        </Tooltip>
         Домени
         <SelectOutlined className={s.Icon} />
-      </Button>
-
+        </Button>
+      </div>
+      <div>
       <Button type="link" onClick={() => setIsModalOpen(true)}>
         <PlusOutlined /> Додати
       </Button>
-      <DomainModal isModalOpen={isModalOpen} closeModal={closeModal} />
+        <DomainModal isModalOpen={isModalOpen} closeModal={closeModal} />
+      </div>
     </div>
   )
 }
