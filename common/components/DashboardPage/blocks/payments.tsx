@@ -12,7 +12,7 @@ import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { AppRoutes, Roles } from '@utils/constants'
+import { AppRoutes, Operations, Roles } from '@utils/constants'
 import { Tooltip } from 'antd'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -72,7 +72,12 @@ const PaymentsBlock = () => {
         </Tooltip>
       ),
       dataIndex: 'debit',
-      render: renderCurrency,
+      render: (_, payment: IExtendedPayment) => {
+        if (payment.type === Operations.Debit) {
+          return renderCurrency(payment.generalSum)
+        }
+        return <span className={s.currency}>-</span>
+      },
     },
     {
       title: (
@@ -81,7 +86,12 @@ const PaymentsBlock = () => {
         </Tooltip>
       ),
       dataIndex: 'credit',
-      render: renderCurrency,
+      render: (_, payment: IExtendedPayment) => {
+        if (payment.type === Operations.Credit) {
+          return renderCurrency(payment.generalSum)
+        }
+        return <span className={s.currency}>-</span>
+      },
     },
     {
       title: 'Опис',

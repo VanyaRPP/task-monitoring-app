@@ -4,12 +4,12 @@ import { validateField } from '@common/assets/features/validators'
 import s from '../style.module.scss'
 import useCompany from '@common/modules/hooks/useCompany'
 
-export function AmountTotalAreaField({ record, form, edit }) {
+export function AmountTotalAreaField({ record, form, edit, paymentData }) {
   const fieldName = [record.name, 'amount']
 
-  const domainId = Form.useWatch('domain', form)
-  const streetId = Form.useWatch('street', form)
-  const companyId = Form.useWatch('company', form)
+  const domainId = Form.useWatch('domain', form) || paymentData?.domain
+  const streetId = Form.useWatch('street', form) || paymentData?.street
+  const companyId = Form.useWatch('company', form) || paymentData?.company
 
   const { company, isLoading } = useCompany({ companyId, domainId, streetId })
 

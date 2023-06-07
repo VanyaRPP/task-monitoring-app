@@ -1,3 +1,4 @@
+import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { validateField } from '@common/assets/features/validators'
 import { useCompanyPageContext } from '@common/components/DashboardPage/blocks/realEstates'
 import useDomain from '@common/modules/hooks/useDomain'
@@ -7,12 +8,18 @@ import { useEffect } from 'react'
 export default function DomainsSelect({
   disabled,
   form,
+  paymentData,
 }: {
   disabled?: boolean
   form: any
+  paymentData?: IPayment
 }) {
   const { domainId } = useCompanyPageContext()
-  const { data, isLoading } = useDomain({ domainId })
+  const paymentDataDomain = paymentData?.domain
+
+  const { data, isLoading } = useDomain({
+    domainId: paymentDataDomain ? paymentDataDomain : domainId,
+  })
 
   useEffect(() => {
     if (data?.length === 1) {
