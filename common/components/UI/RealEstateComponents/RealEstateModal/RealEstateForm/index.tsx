@@ -42,7 +42,13 @@ const RealEstateForm: FC<Props> = ({ form }) => {
       <Form.Item
         name="adminEmails"
         label="Адміністратори"
-        rules={validateField('required')}
+        rules={[
+          ...validateField('required'),
+          {
+            type: 'email',
+            message: 'Невірний формат електронної пошти',
+          },
+        ]}
       >
         <Select mode="tags" placeholder="Пошти адмінів компанії" />
       </Form.Item>
