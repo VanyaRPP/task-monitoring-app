@@ -38,7 +38,9 @@ export const validateField = (name: string): Rule[] => {
       ) {
         return Promise.resolve()
       }
-      return Promise.reject(new Error('Введіть правильний номер телефону!'))
+      return Promise.reject(
+        new Error('Введіть правильний номер телефону починаючи з +380 !')
+      )
     },
   }
   const password: Rule = {
