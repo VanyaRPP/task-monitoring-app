@@ -36,13 +36,17 @@ const RealEstateForm: FC<Props> = ({ form }) => {
         <Input placeholder="Опис" maxLength={256} className={s.formInput} />
       </Form.Item>
       <Form.Item name="phone" label="Телефон" rules={validateField('phone')}>
-        <Input placeholder="Опис" maxLength={256} className={s.formInput} />
+        <Input
+          placeholder="Вкажіть значення"
+          maxLength={256}
+          className={s.formInput}
+        />
       </Form.Item>
       {/* TODO: validation */}
       <Form.Item
         name="adminEmails"
         label="Адміністратори"
-        rules={validateField('required')}
+        rules={validateField('email')}
       >
         <Select mode="tags" placeholder="Пошти адмінів компанії" />
       </Form.Item>
