@@ -47,7 +47,7 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
         // TODO: use moment from helper (single access point)
         // getFormattedDate
         <Tooltip
-          title={`${getName(name, paymentsTitle)} (${(moment(service?.date).format("MMMM"))})`}
+          title={`${getName(name, paymentsTitle)}(${(moment(service?.date).format("MMMM"))})`}
         >
           <span className={s.rowText}>
             {getName(name, paymentsTitle)}{' '}
