@@ -12,18 +12,34 @@ export const deleteExtraWhitespace = (value: string): string =>
 
 //Validators
 
+export const emailRegex =
+  /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i
+
 export const validateField = (name: string): Rule[] => {
   const required: Rule = {
     required: true,
     message: "Поле обов'язкове!",
   }
   const email: Rule = {
-    type: 'email',
-    message: 'Введіть правильну електронну адресу!',
+    validator(_, value) {
+      if (!value || emailRegex.test(value)) {
+        return Promise.resolve()
+      }
+      return Promise.reject(new Error('Введіть правильну електронну адресу!'))
+    },
   }
   const phone: Rule = {
-    len: 9,
-    message: 'Номер телефону має складатися з 9 цифр!',
+    validator(_, value) {
+      if (
+        !value ||
+        /^[\+]?3?[\s]?8?[\s]?\(?0\d{2}?\)?[\s]?\d{3}[\s|-]?\d{2}[\s|-]?\d{2}$/.test(
+          value
+        )
+      ) {
+        return Promise.resolve()
+      }
+      return Promise.reject(new Error('Введіть правильний номер телефону!'))
+    },
   }
   const password: Rule = {
     min: 8,
