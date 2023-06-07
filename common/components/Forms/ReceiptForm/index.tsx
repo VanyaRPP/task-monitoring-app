@@ -90,7 +90,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const tt: DataType[] = paymentData
     ? newData?.invoice.map((item) => {
         return {
-          id: item._id,
+          id: newData?.invoice.indexOf(item) + 1,
           Назва: `${fieldNames[item.type]} (${date})`,
           Кількість: +item.amount,
           Ціна: +item.price,
