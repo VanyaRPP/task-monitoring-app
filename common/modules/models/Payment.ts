@@ -1,21 +1,17 @@
 import mongoose, { ObjectId, Schema } from 'mongoose'
 import { IPaymentTableData, IRentTableData } from '@utils/tableData'
-
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 export interface IPaymentModel {
   type: string
   date: Date
   domain: ObjectId
   street: ObjectId
   company: ObjectId
-  service: ObjectId
-  credit: number
-  debit: number
-  electricity: IPaymentTableData
-  water: IPaymentTableData
-  placing: IPaymentTableData
-  maintenance: IPaymentTableData
+  monthService: ObjectId
+  invoice: IPaymentField[]
   description?: string
   services?: IPaymentTableData[]
+  generalSum: number
 }
 
 export const PaymentSchema = new Schema<IPaymentModel>({
@@ -24,15 +20,11 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
   street: { type: Schema.Types.ObjectId, ref: 'Street' },
   company: { type: Schema.Types.ObjectId, ref: 'RealEstate' },
-  service: { type: Schema.Types.ObjectId, ref: 'Service' },
-  credit: { type: Number, required: true, default: 0 },
-  debit: { type: Number, required: true, default: 0 },
+  monthService: { type: Schema.Types.ObjectId, ref: 'Service' },
   description: { type: String },
-  maintenance: { type: Object },
-  placing: { type: Object },
-  electricity: { type: Object },
-  water: { type: Object },
+  invoice: { type: [Object] },
   services: { type: [Object] },
+  generalSum: { type: Number },
 })
 
 const Payment =

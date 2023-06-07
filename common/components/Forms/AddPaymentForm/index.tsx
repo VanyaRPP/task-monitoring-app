@@ -9,6 +9,7 @@ import CompanySelect from './CompanySelect'
 import PaymentTotal from './PaymentTotal'
 import PaymentPricesTable from './PaymentPricesTable'
 import MonthServiceSelect from './MonthServiceSelect'
+import Operation from 'antd/lib/transfer/operation'
 
 interface Props {
   form: FormInstance<any>
@@ -26,13 +27,13 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
         description: paymentData?.description,
         credit: paymentData?.credit,
         debit: paymentData?.debit,
-        operation: paymentData?.debit ? Operations.Debit : Operations.Credit,
+        operation: paymentData ? paymentData.type : Operations.Credit,
       }}
       form={form}
       layout="vertical"
       className={s.Form}
     >
-      <DomainsSelect disabled={edit} form={form} />
+      <DomainsSelect disabled={edit} form={form} paymentData={paymentData} />
       <AddressesSelect disabled={edit} form={form} />
       <MonthServiceSelect disabled={edit} form={form} />
       <CompanySelect disabled={edit} form={form} />
@@ -46,8 +47,12 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
           className={s.Select}
           disabled={edit && true}
         >
-          <Select.Option value="credit">Кредит (Оплата)</Select.Option>
-          <Select.Option value="debit">Дебет (Реалізація)</Select.Option>
+          <Select.Option value={Operations.Credit}>
+            Кредит (Оплата)
+          </Select.Option>
+          <Select.Option value={Operations.Debit}>
+            Дебет (Реалізація)
+          </Select.Option>
         </Select>
       </Form.Item>
 
@@ -61,7 +66,7 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
           getFieldValue('operation') === Operations.Credit ? (
             <>
               <Form.Item
-                name="credit"
+                name={Operations.Credit}
                 label="Сума"
                 rules={validateField('paymentPrice')}
               >

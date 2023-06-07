@@ -8,6 +8,11 @@ import { renderCurrency } from '@common/components/DashboardPage/blocks/payments
 import { numberToTextNumber } from '@utils/helpers'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import useServiceCompanyDomain from '@common/modules/hooks/useServiceCompanyDomain'
+import {
+  dateToDayYearMonthFormat,
+  dateToYearMonthFormat,
+} from '@common/assets/features/formatDate'
+import { dateToDefaultFormat } from '@common/assets/features/formatDate'
 
 interface Props {
   currPayment: IExtendedPayment
@@ -71,39 +76,61 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
 
   const date = getFormattedDate(service?.date)
 
-  const tt: DataType[] = [
-    {
-      id: 1,
-      Назва: `Утримання  (${date})`,
-      Кількість: Number(newData?.maintenance?.amount),
-      Ціна: Number(newData?.maintenance?.price),
-      Сума: Number(newData?.maintenance?.sum),
-    },
-    {
-      id: 2,
-      Назва: `Розміщення  (${date})`,
-      Кількість: Number(newData?.placing?.amount),
-      Ціна: Number(newData?.placing?.price),
-      Сума: Number(newData?.placing?.sum),
-    },
-    {
-      id: 3,
-      Назва: `За водопостачання (${date})`,
-      Кількість:
-        Number(newData?.water?.amount) - Number(newData?.water?.lastAmount),
-      Ціна: Number(newData?.water?.price),
-      Сума: Number(newData?.water?.sum),
-    },
-    {
-      id: 4,
-      Назва: `За електропостачання (${date})`,
-      Кількість:
-        Number(newData?.electricity?.amount) -
-        Number(newData?.electricity?.lastAmount),
-      Ціна: Number(newData?.electricity?.price),
-      Сума: Number(newData?.electricity?.sum),
-    },
-  ]
+  const currentDate = newData?.date ? new Date(newData?.date) : new Date()
+  const expirationDate = newData?.date ? new Date(newData?.date) : new Date()
+  expirationDate.setDate(currentDate.getDate() + 5)
+
+  const fieldNames = {
+    maintenancePrice: 'Утримання',
+    placingPrice: 'Розміщення',
+    waterPrice: 'За водопостачання',
+    electricityPrice: 'За електропостачання',
+  }
+
+  const tt: DataType[] = paymentData
+    ? newData?.invoice.map((item) => {
+        return {
+          id: item._id,
+          Назва: `${fieldNames[item.type]} (${date})`,
+          Кількість: +item.amount,
+          Ціна: +item.price,
+          Сума: +item.sum,
+        }
+      })
+    : [
+        {
+          id: 1,
+          Назва: `Утримання  (${date})`,
+          Кількість: Number(newData?.maintenancePrice?.amount),
+          Ціна: Number(newData?.maintenancePrice?.price),
+          Сума: Number(newData?.maintenancePrice?.sum),
+        },
+        {
+          id: 2,
+          Назва: `Розміщення  (${date})`,
+          Кількість: Number(newData?.placingPrice?.amount),
+          Ціна: Number(newData?.placingPrice?.price),
+          Сума: Number(newData?.placingPrice?.sum),
+        },
+        {
+          id: 3,
+          Назва: `За водопостачання (${date})`,
+          Кількість:
+            Number(newData?.waterPrice?.amount) -
+            Number(newData?.waterPrice?.lastAmount),
+          Ціна: Number(newData?.waterPrice?.price),
+          Сума: Number(newData?.waterPrice?.sum),
+        },
+        {
+          id: 4,
+          Назва: `За електропостачання (${date})`,
+          Кількість:
+            Number(newData?.electricityPrice?.amount) -
+            Number(newData?.electricityPrice?.lastAmount),
+          Ціна: Number(newData?.electricityPrice?.price),
+          Сума: Number(newData?.electricityPrice?.sum),
+        },
+      ]
 
   return (
     <>
@@ -152,14 +179,13 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
 
           <div className={s.datecellDate}>
             Від &nbsp;
-            {String(newData?.date).slice(8, -14)}.
-            {String(newData?.date).slice(5, -17)}.
-            {String(newData?.date).slice(0, -20)} року.
+            {dateToDayYearMonthFormat(currentDate)}
+            &nbsp; року.
           </div>
           <div className={s.datecell}>
-            Підлягає сплаті до {String(newData?.date).slice(8, -14)}.
-            {String(newData?.date).slice(5, -17)}.
-            {String(newData?.date).slice(0, -20)} року.
+            Підлягає сплаті до &nbsp;
+            {dateToDayYearMonthFormat(expirationDate)}
+            &nbsp; року.
           </div>
         </div>
         <div className={s.tableSum}>
@@ -174,12 +200,17 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.payFixed}>
             Всього на суму:
             <div className={s.payBold}>
-              {numberToTextNumber(newData?.debit)} грн
+              {numberToTextNumber(
+                newData?.generalSum ? newData?.generalSum : newData?.debit
+              )}{' '}
+              грн
             </div>
           </div>
           <div className={s.payFixed}>
             Загальна сума оплати:
-            <div className={s.payBoldSum}>{newData?.debit} грн</div>
+            <div className={s.payBoldSum}>
+              {newData?.generalSum ? newData?.generalSum : newData?.debit} грн
+            </div>
           </div>
 
           <div className={s.payFixed}>

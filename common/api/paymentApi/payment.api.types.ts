@@ -2,7 +2,7 @@ import { IUser } from './../../modules/models/User'
 import { IPaymentTableData } from '@utils/tableData'
 import { ObjectId } from 'mongoose'
 
-interface PaymentData {
+export interface IPaymentField {
   type: string
   lastAmount?: number
   amount: number
@@ -28,12 +28,11 @@ export interface IPayment {
   domain: ObjectId
   street: ObjectId
   company: ObjectId
-  service: ObjectId
+  monthService: ObjectId
   description?: string
   services?: IPaymentTableData[]
-  invoice: PaymentData[]
-  from: IProvider
-  to: IReciever
+  invoice: IPaymentField[]
+  generalSum: number
 }
 
 export interface IExtendedPayment extends IPayment {
