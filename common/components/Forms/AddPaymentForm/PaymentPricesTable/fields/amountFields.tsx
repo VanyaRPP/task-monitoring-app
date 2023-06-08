@@ -3,8 +3,10 @@ import { useEffect } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import s from '../style.module.scss'
 import useCompany from '@common/modules/hooks/useCompany'
+import { usePaymentContext } from '@common/components/AddPaymentModal'
 
-export function AmountTotalAreaField({ record, form, edit, paymentData }) {
+export function AmountTotalAreaField({ record, edit }) {
+  const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'amount']
 
   const domainId = Form.useWatch('domain', form) || paymentData?.domain

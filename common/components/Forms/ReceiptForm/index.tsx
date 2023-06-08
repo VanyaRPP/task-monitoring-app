@@ -8,11 +8,7 @@ import { renderCurrency } from '@common/components/DashboardPage/blocks/payments
 import { numberToTextNumber } from '@utils/helpers'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import useServiceCompanyDomain from '@common/modules/hooks/useServiceCompanyDomain'
-import {
-  dateToDayYearMonthFormat,
-  dateToYearMonthFormat,
-} from '@common/assets/features/formatDate'
-import { dateToDefaultFormat } from '@common/assets/features/formatDate'
+import { dateToDayYearMonthFormat } from '@common/assets/features/formatDate'
 
 interface Props {
   currPayment: IExtendedPayment
