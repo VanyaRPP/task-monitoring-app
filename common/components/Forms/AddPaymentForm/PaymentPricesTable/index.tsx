@@ -17,13 +17,15 @@ import {
 } from './fields/priceFields'
 import useCompany from '@common/modules/hooks/useCompany'
 import { AmountTotalAreaField } from './fields/amountFields'
+import { usePaymentContext } from '@common/components/AddPaymentModal'
 interface Props {
   form: FormInstance<any>
   edit: boolean
   paymentData: any
 }
 
-const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
+const PaymentPricesTable: FC<Props> = ({ edit }) => {
+  const { paymentData, form } = usePaymentContext()
   const domainId = Form.useWatch('domain', form) || paymentData?.domain
   const streetId = Form.useWatch('street', form) || paymentData?.street
   const serviceId = Form.useWatch('service', form) || paymentData?.monthService
@@ -47,7 +49,9 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
         // TODO: use moment from helper (single access point)
         // getFormattedDate
         <Tooltip
-          title={`${getName(name, paymentsTitle)}(${(moment(service?.date).format("MMMM"))})`}
+          title={`${getName(name, paymentsTitle)}(${moment(
+            service?.date
+          ).format('MMMM')})`}
         >
           <span className={s.rowText}>
             {getName(name, paymentsTitle)}{' '}
@@ -66,20 +70,12 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
       width: '30%',
       render: (text, record) => (
         <>
-          {/* TODO: Use enum for record type. there is no "electricity", but "electricityPrice" */}
           {record.name === ServiceType.Electricity ||
           record.name === ServiceType.Water ? (
             <div className={s.doubleInputs}>
               <Form.Item
                 name={[record.name, 'lastAmount']}
                 rules={validateField('required')}
-                initialValue={
-                  paymentData
-                    ? paymentData.invoice.find(
-                        (item) => item.type === record.name
-                      ).lastAmount
-                    : ''
-                }
               >
                 <InputNumber disabled={edit} className={s.input} />
               </Form.Item>
@@ -87,24 +83,12 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
               <Form.Item
                 name={[record.name, 'amount']}
                 rules={validateField('required')}
-                initialValue={
-                  paymentData
-                    ? paymentData.invoice.find(
-                        (item) => item.type === record.name
-                      ).amount
-                    : ''
-                }
               >
                 <InputNumber disabled={edit} className={s.input} />
               </Form.Item>
             </div>
           ) : (
-            <AmountTotalAreaField
-              record={record}
-              form={form}
-              edit={edit}
-              paymentData={paymentData}
-            />
+            <AmountTotalAreaField record={record} edit={edit} />
           )}
         </>
       ),
@@ -121,14 +105,7 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
         }
         if (record.name in fields) {
           const Component = fields[record.name]
-          return (
-            <Component
-              record={record}
-              form={form}
-              edit={edit}
-              paymentData={paymentData}
-            />
-          )
+          return <Component record={record} edit={edit} />
         }
         return <PriceWrapper record={record} form={form} edit={edit} />
       },
@@ -223,19 +200,19 @@ function SumWrapper({ record, form }) {
 
   const getVal = (record, obj) => {
     switch (record) {
-      case 'maintenancePrice': {
+      case ServiceType.Maintenance: {
         const m = obj?.amount * obj?.price
         return +m.toFixed(1) || 0
       }
-      case 'placingPrice': {
+      case ServiceType.Placing: {
         const p = obj?.amount * obj?.price
         return +p.toFixed(1) || 0
       }
-      case 'electricityPrice': {
+      case ServiceType.Electricity: {
         const e = (obj?.amount - obj?.lastAmount) * obj?.price
         return +e.toFixed(1) || 0
       }
-      case 'waterPrice': {
+      case ServiceType.Water: {
         const w = (obj?.amount - obj?.lastAmount) * obj?.price
         return +w.toFixed(1) || 0
       }

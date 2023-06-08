@@ -2,7 +2,7 @@ import React, { FC, useState } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import s from './style.module.scss'
-import { Operations } from '@utils/constants'
+import { Operations, ServiceType } from '@utils/constants'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import CompanySelect from './CompanySelect'
@@ -10,6 +10,7 @@ import PaymentTotal from './PaymentTotal'
 import PaymentPricesTable from './PaymentPricesTable'
 import MonthServiceSelect from './MonthServiceSelect'
 import Operation from 'antd/lib/transfer/operation'
+import { usePaymentContext } from '@common/components/AddPaymentModal'
 
 interface Props {
   form: FormInstance<any>
@@ -18,7 +19,8 @@ interface Props {
   users?: any
 }
 
-const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
+const AddPaymentForm: FC<Props> = ({ edit }) => {
+  const { paymentData, form } = usePaymentContext()
   // TODO: fix init values
 
   return (
@@ -28,6 +30,22 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
         credit: paymentData?.credit,
         debit: paymentData?.debit,
         operation: paymentData ? paymentData.type : Operations.Credit,
+        [ServiceType.Electricity]: {
+          lastAmount: paymentData?.invoice.find(
+            (item) => item?.type === ServiceType.Electricity
+          ).lastAmount,
+          amount: paymentData?.invoice.find(
+            (item) => item?.type === ServiceType.Electricity
+          ).amount,
+        },
+        [ServiceType.Water]: {
+          lastAmount: paymentData?.invoice.find(
+            (item) => item?.type === ServiceType.Water
+          ).lastAmount,
+          amount: paymentData?.invoice.find(
+            (item) => item?.type === ServiceType.Water
+          ).amount,
+        },
       }}
       form={form}
       layout="vertical"
@@ -74,6 +92,7 @@ const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
                   placeholder="Вкажіть суму"
                   disabled={edit && true}
                   className={s.inputNumber}
+                  defaultValue={paymentData ? paymentData?.generalSum : ''}
                 />
               </Form.Item>
               <Form.Item

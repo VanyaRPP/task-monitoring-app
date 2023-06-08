@@ -4,8 +4,10 @@ import { validateField } from '@common/assets/features/validators'
 import s from '../style.module.scss'
 import useCompany from '@common/modules/hooks/useCompany'
 import useService from '@common/modules/hooks/useService'
+import { usePaymentContext } from '@common/components/AddPaymentModal'
 
-export function PriceMaintainceField({ record, form, edit, paymentData }) {
+export function PriceMaintainceField({ record, edit }) {
+  const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
   const domainId = Form.useWatch('domain', form) || paymentData?.domain
@@ -32,7 +34,8 @@ export function PriceMaintainceField({ record, form, edit, paymentData }) {
   )
 }
 
-export function PricePlacingField({ record, form, edit, paymentData }) {
+export function PricePlacingField({ record, edit }) {
+  const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
   const domainId = Form.useWatch('domain', form) || paymentData?.domain
@@ -54,7 +57,8 @@ export function PricePlacingField({ record, form, edit, paymentData }) {
   )
 }
 
-export function PriceElectricityField({ record, form, edit, paymentData }) {
+export function PriceElectricityField({ record, edit }) {
+  const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
   const domainId = Form.useWatch('domain', form) || paymentData?.domain
@@ -77,7 +81,8 @@ export function PriceElectricityField({ record, form, edit, paymentData }) {
   )
 }
 
-export function PriceWaterField({ record, form, edit, paymentData }) {
+export function PriceWaterField({ record, edit }) {
+  const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
   const domainId = Form.useWatch('domain', form) || paymentData?.domain
