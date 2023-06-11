@@ -33,18 +33,18 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
         [ServiceType.Electricity]: {
           lastAmount: paymentData?.invoice.find(
             (item) => item?.type === ServiceType.Electricity
-          ).lastAmount,
+          )?.lastAmount,
           amount: paymentData?.invoice.find(
             (item) => item?.type === ServiceType.Electricity
-          ).amount,
+          )?.amount,
         },
         [ServiceType.Water]: {
           lastAmount: paymentData?.invoice.find(
             (item) => item?.type === ServiceType.Water
-          ).lastAmount,
+          )?.lastAmount,
           amount: paymentData?.invoice.find(
             (item) => item?.type === ServiceType.Water
-          ).amount,
+          )?.amount,
         },
       }}
       form={form}

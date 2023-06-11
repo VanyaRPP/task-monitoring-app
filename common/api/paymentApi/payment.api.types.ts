@@ -25,10 +25,10 @@ interface IReciever {
 export interface IPayment {
   type: string
   date: Date
-  domain: ObjectId
-  street: ObjectId
-  company: ObjectId
-  monthService: ObjectId
+  domain: string
+  street: string
+  company: string
+  monthService: string
   description?: string
   services?: IPaymentTableData[]
   invoice: IPaymentField[]
