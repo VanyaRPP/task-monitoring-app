@@ -1,33 +1,58 @@
-import React from 'react'
-import cn from 'classnames'
-import { useRouter } from 'next/router'
-import { AppRoutes } from '@utils/constants'
-import s from './style.module.scss'
-import TableCard from '@common/components/UI/TableCard'
+import React from 'react';
+import cn from 'classnames';
+import { useRouter } from 'next/router';
+import { AppRoutes } from '@utils/constants';
+import s from './style.module.scss';
+import TableCard from '@common/components/UI/TableCard';
 import {
   useDeleteDomainMutation,
   useGetDomainsQuery,
-} from '@common/api/domainApi/domain.api'
-import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
-import { Popconfirm, Table, message } from 'antd'
-import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import { DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import StreetsBlock from './streets'
+} from '@common/api/domainApi/domain.api';
+import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent';
+import { Popconfirm, Table, message } from 'antd';
+import { IExtendedDomain } from '@common/api/domainApi/domain.api.types';
+import { DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import StreetsBlock from './streets';
 
 const DomainsBlock = ({}) => {
-  const { data: domains, isLoading } = useGetDomainsQuery({})
-  const router = useRouter()
+  const { data: domains, isLoading } = useGetDomainsQuery({});
+  const router = useRouter();
 
-  const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
+  const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation();
 
   const handleDelete = async (id: string) => {
-    const response = await deleteDomain(id)
+    const response = await deleteDomain(id);
     if ('data' in response) {
-      message.success('Видалено!')
+      message.success('Видалено!');
     } else {
-      message.error('Помилка при видаленні')
+      message.error('Помилка при видаленні');
     }
-  }
+  };
+
+  // Resolved conflict for the "columns" variable
+  const columns = [
+    {
+      title: 'Назва',
+      dataIndex: 'name',
+    },
+    {
+      title: 'Адреса',
+      dataIndex: 'address',
+    },
+    {
+      title: 'Адміністратори',
+      dataIndex: 'adminEmails',
+    },
+    {
+      title: 'Опис',
+      dataIndex: 'description',
+    },
+    {
+      title: 'Отримувач',
+      dataIndex: 'bankInformation',
+    },
+  ];
+
   return (
     <TableCard
       title={<DomainStreetsComponent data={domains} />}
@@ -35,9 +60,7 @@ const DomainsBlock = ({}) => {
     >
       <Table
         expandable={{
-          expandedRowRender: (data) => (
-              <StreetsBlock domainId={data._id} showAddButton={false} height={500} />
-          ),
+          expandedRowRender: (data) => <StreetsBlock domainId={data._id} showAddButton={false} height={500} />,
         }}
         columns={[
           ...columns,
@@ -68,8 +91,8 @@ const DomainsBlock = ({}) => {
         rowKey="_id"
       />
     </TableCard>
-  )
-}
+  );
+};
 
 const domainsPageColumns = [
   {
@@ -80,29 +103,6 @@ const domainsPageColumns = [
     title: 'Пошта',
     dataIndex: 'email',
   },
-]
+];
 
-const columns = [
-  {
-    title: 'Назва',
-    dataIndex: 'name',
-  },
-  {
-    title: 'Адреса',
-    dataIndex: 'address',
-  },
-  {
-    title: 'Адміністратори',
-    dataIndex: 'adminEmails',
-  },
-  {
-    title: 'Опис',
-    dataIndex: 'description',
-  },
-  {
-    title: 'Отримувач',
-    dataIndex: 'bankInformation',
-  },
-]
-
-export default DomainsBlock
+export default DomainsBlock;
