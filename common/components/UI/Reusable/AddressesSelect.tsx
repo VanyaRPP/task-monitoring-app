@@ -41,7 +41,10 @@ export default function AddressesSelect({
         // @ts-ignore
         filterOption={(input, option) => (option?.label ?? '').includes(input)}
         options={
-          streets?.map((i) => ({ value: i._id, label: i.address })) || []
+          streets?.map((i) => ({
+            value: i._id,
+            label: `${i.address} (м. ${i.city})`,
+          })) || []
         }
         optionFilterProp="children"
         placeholder="Пошук адреси"

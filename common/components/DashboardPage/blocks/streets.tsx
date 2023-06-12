@@ -10,8 +10,8 @@ import { DeleteOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/router'
 import s from './style.module.scss'
 import { AppRoutes } from '@utils/constants'
-import RealEstateBlock from './realEstates'
 import StreetsCardHeader from '@common/components/UI/StreetsCardHeader'
+import RealEstateBlock from './realEstates'
 
 const StreetsBlock = ({
   domainId,
@@ -35,7 +35,12 @@ const StreetsBlock = ({
 
   const columns = [
     {
-      title: 'Назва',
+      title: 'Місто',
+      width: '25%',
+      dataIndex: 'city',
+    },
+    {
+      title: 'Вулиця',
       dataIndex: 'address',
     },
     {
@@ -44,7 +49,7 @@ const StreetsBlock = ({
       render: (_, street: IStreet) => (
         <div className={s.popconfirm}>
           <Popconfirm
-            title={`Ви впевнені що хочете видалити вулицю ${street.address}?`}
+            title={`Ви впевнені що хочете видалити вулицю ${street.address} (м. ${street.city})?`}
             onConfirm={() => handleDeleteStreet(street._id)}
             cancelText="Відміна"
             disabled={deleteLoading}
@@ -63,12 +68,13 @@ const StreetsBlock = ({
     >
       <Table
         loading={isLoading}
-        expandable={{
-          rowExpandable: () => !!domainId,
-          expandedRowRender: (street) => (
-            <RealEstateBlock domainId={domainId} streetId={street._id} />
-          ),
-        }}
+        expandable={
+          domainId && {
+            expandedRowRender: (street) => (
+              <RealEstateBlock domainId={domainId} streetId={street._id} />
+            ),
+          }
+        }
         dataSource={streets}
         rowKey="_id"
         columns={columns}
