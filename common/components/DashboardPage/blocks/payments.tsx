@@ -12,9 +12,8 @@ import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { AppRoutes, Operations, Roles } from '@utils/constants'
+import { AppRoutes, Operations, Roles, paymentsTitle } from '@utils/constants'
 import { Tooltip } from 'antd'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
 import s from './style.module.scss'
@@ -58,6 +57,22 @@ const PaymentsBlock = () => {
     }
   }
 
+  const invoiceTypes = Object.keys(paymentsTitle)
+
+  const paymentsPageColumns =
+    router.pathname === AppRoutes.PAYMENT
+      ? [
+          ...invoiceTypes.map((type) => ({
+            title: paymentsTitle[type],
+            dataIndex: 'invoice',
+            render: (invoice) => {
+              const item = invoice.find((item) => item.type === type)
+              return item ? item.sum : <span className={s.currency}>-</span>
+            },
+          })),
+        ]
+      : []
+
   const columns = [
     {
       title: 'Дата',
@@ -97,10 +112,12 @@ const PaymentsBlock = () => {
       title: 'Опис',
       dataIndex: 'description',
     },
+    ...paymentsPageColumns,
     isAdmin
       ? {
           title: '',
           dataIndex: '',
+          width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
           render: (_, payment: IExtendedPayment) => (
             <div className={s.popconfirm}>
               <Popconfirm
@@ -120,7 +137,7 @@ const PaymentsBlock = () => {
     {
       title: '',
       dataIndex: '',
-      width: '10%',
+      width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
       render: (_, payment: IExtendedPayment) => (
         <div className={s.eyelined}>
           <Button
@@ -139,11 +156,18 @@ const PaymentsBlock = () => {
   ]
 
   if (isAdmin && !email) {
-    columns.unshift({
-      title: 'Компанія',
-      dataIndex: 'company',
-      render: (i) => i?.companyName,
-    })
+    columns.unshift(
+      {
+        title: 'Компанія',
+        dataIndex: 'company',
+        render: (i) => i?.companyName,
+      },
+      {
+        title: 'Вулиця',
+        dataIndex: 'street',
+        render: (i) => i?.address,
+      }
+    )
   }
   let content: ReactElement
 
