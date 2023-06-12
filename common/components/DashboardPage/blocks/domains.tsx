@@ -29,7 +29,6 @@ const DomainsBlock = ({}) => {
     }
   };
 
-  // Resolved conflict for the "columns" variable
   const columns = [
     {
       title: 'Назва',
@@ -60,7 +59,11 @@ const DomainsBlock = ({}) => {
     >
       <Table
         expandable={{
-          expandedRowRender: (data) => <StreetsBlock domainId={data._id} showAddButton={false} height={500} />,
+          expandedRowRender: (data) => (
+            <div className={cn(s.StreetsBlockContainer)}>
+              <StreetsBlock domainId={data._id} showAddButton={false} height={500} />
+            </div>
+          ),
         }}
         columns={[
           ...columns,
