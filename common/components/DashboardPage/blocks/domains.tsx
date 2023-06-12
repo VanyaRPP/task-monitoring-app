@@ -59,11 +59,7 @@ const DomainsBlock = ({}) => {
     >
       <Table
         expandable={{
-          expandedRowRender: (data) => (
-            <div className={cn(s.StreetsBlockContainer)}>
-              <StreetsBlock domainId={data._id} showAddButton={false} height={500} />
-            </div>
-          ),
+          expandedRowRender: (data) => <StreetsBlock domainId={data._id} showAddButton={false} height={500} />,
         }}
         columns={[
           ...columns,
