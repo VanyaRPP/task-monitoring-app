@@ -3,6 +3,7 @@ import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, Select } from 'antd'
 import s from './style.module.scss'
 import DomainStreets from './DomainStreets'
+import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
 
 interface Props {
   form: FormInstance<any>
@@ -24,13 +25,7 @@ const DomainForm: FC<Props> = ({ form }) => {
           className={s.formInput}
         />
       </Form.Item>
-      <Form.Item
-        name="adminEmails"
-        label="Адміністратори"
-        rules={validateField('email')}
-      >
-        <Select mode="tags" placeholder="Пошти адмінів компанії" />
-      </Form.Item>
+      <EmailSelect form={form} />
       <DomainStreets />
       <Form.Item
         name="description"

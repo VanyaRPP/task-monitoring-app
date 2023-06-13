@@ -16,12 +16,17 @@ export const realestateApi = createApi({
   endpoints: (builder) => ({
     getAllRealEstate: builder.query<
       IExtendedRealestate[],
-      { limit?: number; domainId?: string; streetId?: string }
+      {
+        limit?: number
+        domainId?: string
+        streetId?: string
+        adminEmails?: string
+      }
     >({
-      query: ({ limit, domainId, streetId }) => {
+      query: ({ limit, domainId, streetId, adminEmails }) => {
         return {
           url: `real-estate`,
-          params: { limit, domainId, streetId },
+          params: { limit, domainId, streetId, adminEmails },
         }
       },
       providesTags: (response) =>
