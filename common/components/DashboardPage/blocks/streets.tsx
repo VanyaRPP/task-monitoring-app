@@ -1,37 +1,40 @@
+import React from 'react';
 import {
   useDeleteStreetMutation,
   useGetAllStreetsQuery,
-} from '@common/api/streetApi/street.api'
-import TableCard from '@common/components/UI/TableCard'
-import { IStreet } from '@common/modules/models/Street'
-import { Table, Popconfirm, message } from 'antd'
-import cn from 'classnames'
-import { DeleteOutlined } from '@ant-design/icons'
-import { useRouter } from 'next/router'
-import s from './style.module.scss'
-import { AppRoutes } from '@utils/constants'
-import RealEstateBlock from './realEstates'
-import StreetsCardHeader from '@common/components/UI/StreetsCardHeader'
+} from '@common/api/streetApi/street.api';
+import TableCard from '@common/components/UI/TableCard';
+import { IStreet } from '@common/modules/models/Street';
+import { Table, Popconfirm, message } from 'antd';
+import cn from 'classnames';
+import { DeleteOutlined } from '@ant-design/icons';
+import { useRouter } from 'next/router';
+import s from './style.module.scss';
+import { AppRoutes } from '@utils/constants';
+import RealEstateBlock from './realEstates';
+import StreetsCardHeader from '@common/components/UI/StreetsCardHeader';
 
 const StreetsBlock = ({
   domainId,
   showAddButton,
+  height, 
 }: {
-  domainId?: string
-  showAddButton?: boolean
+  domainId?: string;
+  showAddButton?: boolean;
+  height?: number; 
 }) => {
-  const { data: streets, isLoading } = useGetAllStreetsQuery({ domainId })
-  const router = useRouter()
-  const [deleteStreet, { isLoading: deleteLoading }] = useDeleteStreetMutation()
+  const { data: streets, isLoading } = useGetAllStreetsQuery({ domainId });
+  const router = useRouter();
+  const [deleteStreet, { isLoading: deleteLoading }] = useDeleteStreetMutation();
 
   const handleDeleteStreet = async (id: string) => {
-    const response = await deleteStreet(id)
+    const response = await deleteStreet(id);
     if ('data' in response) {
-      message.success('Видалено!')
+      message.success('Видалено!');
     } else {
-      message.error('Помилка при видаленні рахунку')
+      message.error('Помилка при видаленні рахунку');
     }
-  }
+  };
 
   const columns = [
     {
@@ -54,12 +57,13 @@ const StreetsBlock = ({
         </div>
       ),
     },
-  ]
+  ];
 
   return (
     <TableCard
       title={<StreetsCardHeader showAddButton={showAddButton} />}
       className={cn({ [s.noScroll]: router.pathname === AppRoutes.STREETS })}
+      style={{ height: height ? `${height}px` : '300px' }}
     >
       <Table
         loading={isLoading}

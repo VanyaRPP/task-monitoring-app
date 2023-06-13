@@ -22,6 +22,12 @@
     max-height: 80vh;
   }
 
+  :global {
+    .ant-table.ant-table-small .ant-table-tbody .ant-table-wrapper:only-child .ant-table {
+      margin: 0px;
+    }
+  }
+
   position: relative;
   overflow: hidden;
 
