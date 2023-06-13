@@ -3,7 +3,7 @@ import { FC, useEffect } from 'react'
 import { ColumnProps } from 'antd/lib/table'
 import moment from 'moment'
 import { dataSource, IPaymentTableData } from '@utils/tableData'
-import { paymentsTitle } from '@utils/constants'
+import { ServiceType, paymentsTitle } from '@utils/constants'
 import { getName } from '@utils/helpers'
 import { validateField } from '@common/assets/features/validators'
 import s from './style.module.scss'
@@ -17,17 +17,19 @@ import {
 } from './fields/priceFields'
 import useCompany from '@common/modules/hooks/useCompany'
 import { AmountTotalAreaField } from './fields/amountFields'
+import { usePaymentContext } from '@common/components/AddPaymentModal'
 interface Props {
   form: FormInstance<any>
   edit: boolean
   paymentData: any
 }
 
-const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
-  const domainId = Form.useWatch('domain', form)
-  const streetId = Form.useWatch('street', form)
-  const serviceId = Form.useWatch('monthService', form)
-  const companyId = Form.useWatch('company', form)
+const PaymentPricesTable: FC<Props> = ({ edit }) => {
+  const { paymentData, form } = usePaymentContext()
+  const domainId = Form.useWatch('domain', form) || paymentData?.domain
+  const streetId = Form.useWatch('street', form) || paymentData?.street
+  const serviceId = Form.useWatch('service', form) || paymentData?.monthService
+  const companyId = Form.useWatch('company', form) || paymentData?.company
 
   const { company } = useCompany({ companyId, domainId, streetId })
   const { service } = useService({ serviceId, domainId, streetId })
@@ -47,7 +49,9 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
         // TODO: use moment from helper (single access point)
         // getFormattedDate
         <Tooltip
-          title={`${getName(name, paymentsTitle)} (${moment().format('MMMM')})`}
+          title={`${getName(name, paymentsTitle)}(${moment(
+            service?.date
+          ).format('MMMM')})`}
         >
           <span className={s.rowText}>
             {getName(name, paymentsTitle)}{' '}
@@ -66,8 +70,8 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
       width: '30%',
       render: (text, record) => (
         <>
-          {/* TODO: Use enum for record type. there is no "electricity", but "electricityPrice" */}
-          {record.name === 'electricity' || record.name === 'water' ? (
+          {record.name === ServiceType.Electricity ||
+          record.name === ServiceType.Water ? (
             <div className={s.doubleInputs}>
               <Form.Item
                 name={[record.name, 'lastAmount']}
@@ -84,7 +88,7 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
               </Form.Item>
             </div>
           ) : (
-            <AmountTotalAreaField record={record} form={form} edit={edit} />
+            <AmountTotalAreaField record={record} edit={edit} />
           )}
         </>
       ),
@@ -94,14 +98,14 @@ const PaymentPricesTable: FC<Props> = ({ form, edit, paymentData }) => {
       dataIndex: 'price',
       render: (text, record) => {
         const fields = {
-          maintenance: PriceMaintainceField,
-          placing: PricePlacingField,
-          electricity: PriceElectricityField,
-          water: PriceWaterField,
+          maintenancePrice: PriceMaintainceField,
+          placingPrice: PricePlacingField,
+          electricityPrice: PriceElectricityField,
+          waterPrice: PriceWaterField,
         }
         if (record.name in fields) {
           const Component = fields[record.name]
-          return <Component record={record} form={form} edit={edit} />
+          return <Component record={record} edit={edit} />
         }
         return <PriceWrapper record={record} form={form} edit={edit} />
       },
@@ -154,28 +158,28 @@ function getRelationshipByRecordName(recordName) {
       // ще треба подумати чи можна її легко взяти із компанії (рілестейт) індивідуальну ціну за обслуговування
       // servicePricePerMeter
       // також треба проінформувати юзера, що це індивідуальна ціна за метр, а не загальна
-      maintenance: {
+      maintenancePrice: {
         fieldName: 'monthService',
         valueName: 'rentPrice',
         // тестове значення повинно бути динамічне
         testValue: recordName,
       },
       // компанія та її ціна за метр розміщення (оренди) береться з компанії (рілестейт)
-      placing: {
+      placingPrice: {
         fieldName: 'company',
         valueName: 'pricePerMeter',
         // тестове значення повинно бути динамічне
         testValue: recordName,
       },
       // ціна електрики за кіловат. береться із стандартної ціни послуг в місяць
-      electricity: {
+      electricityPrice: {
         fieldName: 'monthService',
         valueName: 'electricityPrice',
         // тестове значення повинно бути динамічне
         testValue: recordName,
       },
       // ціна води за куб. береться із стандартної ціни послуг в місяць
-      water: {
+      waterPrice: {
         fieldName: 'monthService',
         valueName: 'waterPrice',
         // тестове значення повинно бути динамічне
@@ -196,19 +200,19 @@ function SumWrapper({ record, form }) {
 
   const getVal = (record, obj) => {
     switch (record) {
-      case 'maintenance': {
+      case ServiceType.Maintenance: {
         const m = obj?.amount * obj?.price
         return +m.toFixed(1) || 0
       }
-      case 'placing': {
+      case ServiceType.Placing: {
         const p = obj?.amount * obj?.price
         return +p.toFixed(1) || 0
       }
-      case 'electricity': {
+      case ServiceType.Electricity: {
         const e = (obj?.amount - obj?.lastAmount) * obj?.price
         return +e.toFixed(1) || 0
       }
-      case 'water': {
+      case ServiceType.Water: {
         const w = (obj?.amount - obj?.lastAmount) * obj?.price
         return +w.toFixed(1) || 0
       }

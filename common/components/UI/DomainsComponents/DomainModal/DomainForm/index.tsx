@@ -27,7 +27,7 @@ const DomainForm: FC<Props> = ({ form }) => {
       <Form.Item
         name="adminEmails"
         label="Адміністратори"
-        rules={validateField('required')}
+        rules={validateField('email')}
       >
         <Select mode="tags" placeholder="Пошти адмінів компанії" />
       </Form.Item>
@@ -56,7 +56,7 @@ const DomainForm: FC<Props> = ({ form }) => {
         />
       </Form.Item>
 
-      <Form.Item name="phone" label="Телефон" rules={validateField('required')}>
+      <Form.Item name="phone" label="Телефон" rules={validateField('phone')}>
         <Input
           placeholder="Вкажіть значення"
           maxLength={256}
@@ -64,7 +64,7 @@ const DomainForm: FC<Props> = ({ form }) => {
         />
       </Form.Item>
 
-      <Form.Item name="email" label="Пошта" rules={validateField('required')}>
+      <Form.Item name="email" label="Пошта" rules={validateField('email')}>
         <Input
           placeholder="Вкажіть значення"
           maxLength={256}

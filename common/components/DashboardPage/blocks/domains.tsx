@@ -41,7 +41,6 @@ const DomainsBlock = ({}) => {
                 domainId={data._id}
                 showAddButton={false}
                 height={500}
-              />
             </div>
           ),
         }}

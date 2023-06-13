@@ -4,14 +4,17 @@ import { validateField } from '@common/assets/features/validators'
 import s from '../style.module.scss'
 import useCompany from '@common/modules/hooks/useCompany'
 import useService from '@common/modules/hooks/useService'
+import { usePaymentContext } from '@common/components/AddPaymentModal'
 
-export function PriceMaintainceField({ record, form, edit }) {
+export function PriceMaintainceField({ record, edit }) {
+  const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
-  const domainId = Form.useWatch('domain', form)
-  const streetId = Form.useWatch('street', form)
-  const serviceId = Form.useWatch('monthService', form)
-  const companyId = Form.useWatch('company', form)
+  const domainId = Form.useWatch('domain', form) || paymentData?.domain
+  const streetId = Form.useWatch('street', form) || paymentData?.street
+  const serviceId =
+    Form.useWatch('monthService', form) || paymentData?.monthService
+  const companyId = Form.useWatch('company', form) || paymentData?.company
 
   const { service } = useService({ serviceId, domainId, streetId })
   const { company } = useCompany({ companyId, domainId, streetId })
@@ -31,12 +34,13 @@ export function PriceMaintainceField({ record, form, edit }) {
   )
 }
 
-export function PricePlacingField({ record, form, edit }) {
+export function PricePlacingField({ record, edit }) {
+  const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
-  const domainId = Form.useWatch('domain', form)
-  const streetId = Form.useWatch('street', form)
-  const companyId = Form.useWatch('company', form)
+  const domainId = Form.useWatch('domain', form) || paymentData?.domain
+  const streetId = Form.useWatch('street', form) || paymentData?.street
+  const companyId = Form.useWatch('company', form) || paymentData?.company
 
   const { company, isLoading } = useCompany({ companyId, domainId, streetId })
 
@@ -53,12 +57,14 @@ export function PricePlacingField({ record, form, edit }) {
   )
 }
 
-export function PriceElectricityField({ record, form, edit }) {
+export function PriceElectricityField({ record, edit }) {
+  const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
-  const domainId = Form.useWatch('domain', form)
-  const streetId = Form.useWatch('street', form)
-  const serviceId = Form.useWatch('monthService', form)
+  const domainId = Form.useWatch('domain', form) || paymentData?.domain
+  const streetId = Form.useWatch('street', form) || paymentData?.street
+  const serviceId =
+    Form.useWatch('monthService', form) || paymentData?.monthService
 
   const { service, isLoading } = useService({ serviceId, domainId, streetId })
 
@@ -75,12 +81,14 @@ export function PriceElectricityField({ record, form, edit }) {
   )
 }
 
-export function PriceWaterField({ record, form, edit }) {
+export function PriceWaterField({ record, edit }) {
+  const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
-  const domainId = Form.useWatch('domain', form)
-  const streetId = Form.useWatch('street', form)
-  const serviceId = Form.useWatch('monthService', form)
+  const domainId = Form.useWatch('domain', form) || paymentData?.domain
+  const streetId = Form.useWatch('street', form) || paymentData?.street
+  const serviceId =
+    Form.useWatch('monthService', form) || paymentData?.monthService
 
   const { service, isLoading } = useService({ serviceId, domainId, streetId })
 

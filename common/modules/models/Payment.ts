@@ -1,34 +1,30 @@
 import mongoose, { ObjectId, Schema } from 'mongoose'
 import { IPaymentTableData, IRentTableData } from '@utils/tableData'
-
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 export interface IPaymentModel {
+  type: string
+  date: Date
   domain: ObjectId
   street: ObjectId
   company: ObjectId
-  date: Date
-  credit: number
-  debit: number
-  maintenance?: IPaymentTableData
-  rentPrice?: IRentTableData
-  electricityPrice?: IPaymentTableData
-  waterPrice?: IPaymentTableData
+  monthService: ObjectId
+  invoice: IPaymentField[]
   description?: string
   services?: IPaymentTableData[]
+  generalSum: number
 }
 
 export const PaymentSchema = new Schema<IPaymentModel>({
+  type: { type: String },
+  date: { type: Date, required: true, default: Date.now() },
   domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
   street: { type: Schema.Types.ObjectId, ref: 'Street' },
   company: { type: Schema.Types.ObjectId, ref: 'RealEstate' },
-  date: { type: Date, required: true, default: Date.now() },
-  credit: { type: Number, required: true, default: 0 },
+  monthService: { type: Schema.Types.ObjectId, ref: 'Service' },
   description: { type: String },
-  debit: { type: Number, required: true, default: 0 },
-  maintenance: { type: Object },
-  rentPrice: { type: Object },
-  electricityPrice: { type: Object },
-  waterPrice: { type: Object },
+  invoice: { type: [Object] },
   services: { type: [Object] },
+  generalSum: { type: Number },
 })
 
 const Payment =
