@@ -16,7 +16,11 @@ export interface IRealEstateModel {
 
 export const RealEstateSchema = new Schema<IRealEstateModel>({
   domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
-  street: { type: Schema.Types.ObjectId, ref: 'Street' },
+  street: {
+    type: Schema.Types.ObjectId,
+    ref: 'Street',
+    populate: { select: 'address city' },
+  },
   companyName: { type: String, required: true },
   bankInformation: { type: String, required: true },
   agreement: { type: String, required: true },
