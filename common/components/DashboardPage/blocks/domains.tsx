@@ -14,13 +14,13 @@ import { IExtendedDomain } from '@common/api/domainApi/domain.api.types';
 import { DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import StreetsBlock from './streets';
 
-const DomainsBlock = ({}) => {
+const DomainsBlock = () => {
   const { data: domains, isLoading } = useGetDomainsQuery({});
   const router = useRouter();
 
   const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation();
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id) => {
     const response = await deleteDomain(id);
     if ('data' in response) {
       message.success('Видалено!');
@@ -52,6 +52,17 @@ const DomainsBlock = ({}) => {
     },
   ];
 
+  const domainsPageColumns = [
+    {
+      title: 'Телефон',
+      dataIndex: 'phone',
+    },
+    {
+      title: 'Пошта',
+      dataIndex: 'email',
+    },
+  ];
+
   return (
     <TableCard
       title={<DomainStreetsComponent data={domains} />}
@@ -68,10 +79,10 @@ const DomainsBlock = ({}) => {
             title: '',
             dataIndex: '',
             width: '9%',
-            render: (_, domain: IExtendedDomain) => (
+            render: (_, domain) => (
               <div className={s.popconfirm}>
                 <Popconfirm
-                  title={`Ви впевнені що хочете видалити нерухомість?`}
+                  title="Ви впевнені що хочете видалити нерухомість?"
                   onConfirm={() => handleDelete(domain?._id)}
                   cancelText="Відміна"
                   disabled={deleteLoading}
@@ -92,16 +103,5 @@ const DomainsBlock = ({}) => {
     </TableCard>
   );
 };
-
-const domainsPageColumns = [
-  {
-    title: 'Телефон',
-    dataIndex: 'phone',
-  },
-  {
-    title: 'Пошта',
-    dataIndex: 'email',
-  },
-];
 
 export default DomainsBlock;

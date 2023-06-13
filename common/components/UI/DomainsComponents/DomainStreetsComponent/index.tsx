@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import s from './style.module.scss';
-import { Button, Tooltip } from 'antd';
+import { Button as AntdButton, Tooltip as AntdTooltip } from 'antd';
 import {
   PlusOutlined,
   SelectOutlined,
@@ -21,20 +21,20 @@ const DomainStreetsComponent = ({ data }) => {
   return (
     <div className={s.tableHeader}>
       <div>
-        <Tooltip
+        <AntdTooltip
           title="Домени - це організації та компанії, що здійснюють управління та мають під собою менші компанії та об'єкти нерухомості. Управляються адміністраторами"
         >
           <QuestionCircleOutlined className={s.Icon} />
-        </Tooltip>
-        <Button type="link" onClick={() => router.push(AppRoutes.DOMAIN)}>
+        </AntdTooltip>
+        <AntdButton type="link" onClick={() => router.push(AppRoutes.DOMAIN)}>
           Домени
           <SelectOutlined className={s.Icon} />
-        </Button>
+        </AntdButton>
       </div>
       <div>
-        <Button type="link" onClick={() => setIsModalOpen(true)}>
+        <AntdButton type="link" onClick={() => setIsModalOpen(true)}>
           <PlusOutlined /> Додати
-        </Button>
+        </AntdButton>
         <DomainModal isModalOpen={isModalOpen} closeModal={closeModal} />
       </div>
     </div>
