@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   useDeleteStreetMutation,
   useGetAllStreetsQuery,
@@ -16,9 +17,11 @@ import RealEstateBlock from './realEstates'
 const StreetsBlock = ({
   domainId,
   showAddButton,
+  height,
 }: {
   domainId?: string
   showAddButton?: boolean
+  height?: number
 }) => {
   const { data: streets, isLoading } = useGetAllStreetsQuery({ domainId })
   const router = useRouter()
@@ -65,6 +68,7 @@ const StreetsBlock = ({
     <TableCard
       title={<StreetsCardHeader showAddButton={showAddButton} />}
       className={cn({ [s.noScroll]: router.pathname === AppRoutes.STREETS })}
+      style={{ height: height ? `${height}px` : '300px' }}
     >
       <Table
         loading={isLoading}

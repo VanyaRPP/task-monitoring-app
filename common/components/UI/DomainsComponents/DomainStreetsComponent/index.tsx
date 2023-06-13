@@ -4,7 +4,7 @@ import { Button, Tooltip } from 'antd'
 import {
   PlusOutlined,
   SelectOutlined,
-  QuestionOutlined,
+  QuestionCircleOutlined,
 } from '@ant-design/icons'
 import { AppRoutes } from '@utils/constants'
 import { useRouter } from 'next/router'
@@ -21,7 +21,7 @@ const DomainStreetsComponent = ({ data }) => {
     <div className={s.tableHeader}>
       <Button type="link" onClick={() => router.push(AppRoutes.DOMAIN)}>
         <Tooltip title="Домени - це організації та компанії, що здійснюють управління та мають під собою менші компанії та об'єкти нерухомості. Управляються адміністраторами">
-          <QuestionOutlined className={s.Icon} />
+          <QuestionCircleOutlined className={s.Icon} />
         </Tooltip>
         Домени
         <SelectOutlined className={s.Icon} />
