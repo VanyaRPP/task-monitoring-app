@@ -1,23 +1,3 @@
-import { model } from "mongoose";
-
-module.exports = {
-    testEnvironment: 'node',
-    transform: {},
-    moduleFileExtensions: ['js', 'json', 'ts'],
-    moduleNameMapper: {
-        '^@/(.*)$': '<rootDir>/$1'
-    },
-    transformIgnorePatterns: ['<rootDir>/node_modules/'],
-    globals: {
-        'ts-jest': {
-            tsconfig: 'tsconfig.json'
-        }
-    },
-    testMatch: [
-        '<rootDir>/tests/**/*.spec.ts'
-    ],
-    preset: 'ts-jest'
-};
 module.exports = {
   roots: ['<rootDir>/common/assets/features'], 
   testMatch: ['**/*.test.ts'], 
@@ -30,3 +10,4 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'js'], //  file extensions
 };
+export{};
