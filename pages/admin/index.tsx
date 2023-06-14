@@ -43,7 +43,7 @@ export async function getServerSideProps(context) {
   const data = await response.json()
   const roles = data?.data?.roles
 
-  if (!roles.includes(Roles.GLOBAL_ADMIN)) {
+  if (!roles?.includes(Roles.GLOBAL_ADMIN)) {
     return {
       redirect: {
         destination: '/',

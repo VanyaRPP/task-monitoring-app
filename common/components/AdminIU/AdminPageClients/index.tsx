@@ -29,14 +29,16 @@ const AdminPageClients: React.FC = () => {
       <TabPane tab="Замовники" key="1" className={s.Users}>
         {data && (
           <Users
-            users={data.filter((client) => client.roles.includes(Roles.USER))}
+            users={data.filter((client) => client.roles?.includes(Roles.USER))}
           />
         )}
       </TabPane>
       <TabPane tab="Майстри" key="2" className={s.Workers}>
         {data && (
           <Users
-            users={data.filter((client) => client.roles.includes(Roles.WORKER))}
+            users={data.filter((client) =>
+              client.roles?.includes(Roles.WORKER)
+            )}
           />
         )}
       </TabPane>

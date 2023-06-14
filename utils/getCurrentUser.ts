@@ -20,7 +20,7 @@ export async function getCurrentUser(req, res) {
       throw new Error('no user found')
       return
     }
-    const isGlobalAdmin = user?.roles.includes(Roles.GLOBAL_ADMIN)
+    const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
     return { session, user, isGlobalAdmin }
   } else {
     throw new Error('bad request no permitions')

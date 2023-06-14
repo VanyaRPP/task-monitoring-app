@@ -19,7 +19,7 @@ const Dashboard: FC = () => {
       <div className={s.Container}>
         {userRoles?.includes(Roles.GLOBAL_ADMIN) && (
           <>
-            <DomainsBlock />
+            {userRoles?.includes(Roles.DOMAIN_ADMIN) && <DomainsBlock />}
             <StreetsBlock />
           </>
         )}

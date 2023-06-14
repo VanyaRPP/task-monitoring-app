@@ -48,7 +48,7 @@ export const getPaymentOptions = async ({
   // searching for original user
   const user = await User.findOne({ email: userEmail })
 
-  const isGlobalAdmin = user?.roles.includes(Roles.GLOBAL_ADMIN)
+  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   if (isGlobalAdmin) {
     if (searchEmail) {

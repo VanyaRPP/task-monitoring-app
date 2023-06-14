@@ -69,7 +69,7 @@ const ProfilePage: React.FC = () => {
           title={user?.name}
           className={s.Profile}
           extra={
-            user?.roles.includes(Roles.GLOBAL_ADMIN) && (
+            user?.roles?.includes(Roles.GLOBAL_ADMIN) && (
               <Button
                 type="link"
                 onClick={() => Router.push(AppRoutes.ADMIN)}

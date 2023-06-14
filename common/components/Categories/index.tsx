@@ -52,7 +52,7 @@ const Categories: React.FC<{
             //     Інформація
             //   </Button>,
             // ].concat(
-            roles.includes(Roles.ADMIN)
+            roles?.includes(Roles.GLOBAL_ADMIN)
               ? [
                   <DeleteButton
                     key="delete"

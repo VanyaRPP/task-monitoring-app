@@ -23,7 +23,7 @@ const PaymentCardHeader = ({ currentPayment, closeEditModal }) => {
     closeEditModal()
   }
 
-  const isGlobalAdmin = currUser?.roles.includes(Roles.GLOBAL_ADMIN)
+  const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   return (
     <>

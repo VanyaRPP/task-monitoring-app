@@ -17,8 +17,8 @@ const TaskButton: React.FC = () => {
 
   const taskButton = () => {
     if (
-      user?.roles.includes(Roles.WORKER) ||
-      user?.roles.includes(Roles.GLOBAL_ADMIN)
+      user?.roles?.includes(Roles.WORKER) ||
+      user?.roles?.includes(Roles.GLOBAL_ADMIN)
     ) {
       return (
         <Button

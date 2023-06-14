@@ -34,7 +34,7 @@ const ServicesBlock = () => {
     isError: currUserError,
   } = useGetCurrentUserQuery()
 
-  const isGlobalAdmin = currUser?.roles.includes(Roles.GLOBAL_ADMIN)
+  const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   const {
     data: services,

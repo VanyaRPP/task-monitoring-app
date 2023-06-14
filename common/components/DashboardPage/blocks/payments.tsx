@@ -46,7 +46,7 @@ const PaymentsBlock = () => {
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
 
-  const isGlobalAdmin = currUser?.roles.includes(Roles.GLOBAL_ADMIN)
+  const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   const handleDeletePayment = async (id: string) => {
     const response = await deletePayment(id)
