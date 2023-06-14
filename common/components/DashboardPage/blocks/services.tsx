@@ -66,7 +66,7 @@ const ServicesBlock = () => {
     {
       title: 'Адреса',
       dataIndex: 'street',
-      render: (i) => i?.address,
+      render: (i) => `${i?.address} (м. ${i?.city})`,
     },
     {
       title: 'Місяць',

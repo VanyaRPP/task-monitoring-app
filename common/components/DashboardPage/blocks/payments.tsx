@@ -165,7 +165,7 @@ const PaymentsBlock = () => {
       {
         title: 'Вулиця',
         dataIndex: 'street',
-        render: (i) => i?.address,
+        render: (i) => `${i?.address} (м. ${i?.city})`,
       }
     )
   }

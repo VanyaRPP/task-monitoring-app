@@ -1,44 +1,49 @@
-import React from 'react';
+import React from 'react'
 import {
   useDeleteStreetMutation,
   useGetAllStreetsQuery,
-} from '@common/api/streetApi/street.api';
-import TableCard from '@common/components/UI/TableCard';
-import { IStreet } from '@common/modules/models/Street';
-import { Table, Popconfirm, message } from 'antd';
-import cn from 'classnames';
-import { DeleteOutlined } from '@ant-design/icons';
-import { useRouter } from 'next/router';
-import s from './style.module.scss';
-import { AppRoutes } from '@utils/constants';
-import RealEstateBlock from './realEstates';
-import StreetsCardHeader from '@common/components/UI/StreetsCardHeader';
+} from '@common/api/streetApi/street.api'
+import TableCard from '@common/components/UI/TableCard'
+import { IStreet } from '@common/modules/models/Street'
+import { Table, Popconfirm, message } from 'antd'
+import cn from 'classnames'
+import { DeleteOutlined } from '@ant-design/icons'
+import { useRouter } from 'next/router'
+import s from './style.module.scss'
+import { AppRoutes } from '@utils/constants'
+import StreetsCardHeader from '@common/components/UI/StreetsCardHeader'
+import RealEstateBlock from './realEstates'
 
 const StreetsBlock = ({
   domainId,
   showAddButton,
-  height, 
+  height,
 }: {
-  domainId?: string;
-  showAddButton?: boolean;
-  height?: number; 
+  domainId?: string
+  showAddButton?: boolean
+  height?: number
 }) => {
-  const { data: streets, isLoading } = useGetAllStreetsQuery({ domainId });
-  const router = useRouter();
-  const [deleteStreet, { isLoading: deleteLoading }] = useDeleteStreetMutation();
+  const { data: streets, isLoading } = useGetAllStreetsQuery({ domainId })
+  const router = useRouter()
+  const [deleteStreet, { isLoading: deleteLoading }] = useDeleteStreetMutation()
 
   const handleDeleteStreet = async (id: string) => {
-    const response = await deleteStreet(id);
+    const response = await deleteStreet(id)
     if ('data' in response) {
-      message.success('Видалено!');
+      message.success('Видалено!')
     } else {
-      message.error('Помилка при видаленні рахунку');
+      message.error('Помилка при видаленні рахунку')
     }
-  };
+  }
 
   const columns = [
     {
-      title: 'Назва',
+      title: 'Місто',
+      width: '25%',
+      dataIndex: 'city',
+    },
+    {
+      title: 'Вулиця',
       dataIndex: 'address',
     },
     {
@@ -47,7 +52,7 @@ const StreetsBlock = ({
       render: (_, street: IStreet) => (
         <div className={s.popconfirm}>
           <Popconfirm
-            title={`Ви впевнені що хочете видалити вулицю ${street.address}?`}
+            title={`Ви впевнені що хочете видалити вулицю ${street.address} (м. ${street.city})?`}
             onConfirm={() => handleDeleteStreet(street._id)}
             cancelText="Відміна"
             disabled={deleteLoading}
@@ -57,7 +62,7 @@ const StreetsBlock = ({
         </div>
       ),
     },
-  ];
+  ]
 
   return (
     <TableCard
@@ -67,12 +72,13 @@ const StreetsBlock = ({
     >
       <Table
         loading={isLoading}
-        expandable={{
-          rowExpandable: () => !!domainId,
-          expandedRowRender: (street) => (
-            <RealEstateBlock domainId={domainId} streetId={street._id} />
-          ),
-        }}
+        expandable={
+          domainId && {
+            expandedRowRender: (street) => (
+              <RealEstateBlock domainId={domainId} streetId={street._id} />
+            ),
+          }
+        }
         dataSource={streets}
         rowKey="_id"
         columns={columns}

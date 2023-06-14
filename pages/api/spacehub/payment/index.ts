@@ -74,7 +74,7 @@ export default async function handler(
           .limit(req.query.limit)
           // TODO: use domain, street
           .populate({ path: 'company', select: '_id companyName' })
-          .populate({ path: 'street', select: '_id address' })
+          .populate({ path: 'street', select: '_id address city' })
 
         return res.status(200).json({
           success: true,

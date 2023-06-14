@@ -23,7 +23,7 @@ export default async function handler(
         // TODO: filter by user email and this email should be inside amdinEmails
         const domain = await Domain.find({}).populate({
           path: 'streets',
-          select: '_id address',
+          select: '_id address city',
         })
         return res.status(200).json({ success: true, data: domain })
       } catch (error) {

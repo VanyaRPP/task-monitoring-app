@@ -9,7 +9,7 @@ import {
   useGetDomainsQuery,
 } from '@common/api/domainApi/domain.api'
 import DomainStreetsComponent from '@common/components/UI/DomainsComponents/DomainStreetsComponent'
-import { Popconfirm, Table, message } from 'antd'
+import { Popconfirm, Table, message, Tooltip } from 'antd'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import StreetsBlock from './streets'
@@ -104,6 +104,11 @@ const columns = [
   {
     title: 'Опис',
     dataIndex: 'description',
+    render: (text) => (
+      <Tooltip title={text}>
+        <QuestionCircleOutlined />
+      </Tooltip>
+    ),
   },
   {
     title: 'Отримувач',
