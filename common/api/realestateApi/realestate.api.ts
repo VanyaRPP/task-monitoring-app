@@ -20,13 +20,12 @@ export const realestateApi = createApi({
         limit?: number
         domainId?: string
         streetId?: string
-        adminEmails?: string
       }
     >({
-      query: ({ limit, domainId, streetId, adminEmails }) => {
+      query: ({ limit, domainId, streetId }) => {
         return {
           url: `real-estate`,
-          params: { limit, domainId, streetId, adminEmails },
+          params: { limit, domainId, streetId },
         }
       },
       providesTags: (response) =>

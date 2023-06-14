@@ -19,12 +19,12 @@ export const domainApi = createApi({
     // @ts-ignore
     getDomains: builder.query<
       IExtendedDomain[],
-      { limit?: number; streetId?: string; adminEmails?: string }
+      { limit?: number; streetId?: string }
     >({
-      query: ({ limit, streetId, adminEmails }) => {
+      query: ({ limit, streetId }) => {
         return {
           url: `domain`,
-          params: { limit, streetId, adminEmails },
+          params: { limit, streetId },
         }
       },
       providesTags: (response) =>
