@@ -40,7 +40,7 @@ export default async function handler(
 
         const services = await Service.find(options)
           .populate({ path: 'domain', select: '_id name' })
-          .populate({ path: 'street', select: '_id address' })
+          .populate({ path: 'street', select: '_id address city' })
           .sort({ data: -1 })
           .limit(req.query.limit)
 

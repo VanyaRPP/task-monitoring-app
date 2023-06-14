@@ -21,7 +21,7 @@ export default async function handler(
         if (domainId) {
           const domain = await Domain.findOne({ _id: domainId }).populate({
             path: 'streets',
-            select: '_id address',
+            select: '_id address city',
           })
 
           return res

@@ -15,11 +15,7 @@ export interface IServiceModel {
 export const ServiceSchema = new Schema<IServiceModel>({
   date: { type: Date, required: true },
   domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
-  street: {
-    type: Schema.Types.ObjectId,
-    ref: 'Street',
-    populate: { select: 'address city' },
-  },
+  street: { type: Schema.Types.ObjectId, ref: 'Street' },
   rentPrice: { type: Number, required: true, default: 0 },
   electricityPrice: { type: Number, required: true, default: 0 },
   waterPrice: { type: Number, required: true, default: 0 },

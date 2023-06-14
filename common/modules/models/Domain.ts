@@ -30,7 +30,6 @@ const DomainSchema = new Schema<IDomain>({
   streets: {
     type: [{ type: Schema.Types.ObjectId, ref: 'Street' }],
     required: true,
-    populate: { select: 'address city' },
   },
   description: { type: String, required: true },
   bankInformation: { type: String, required: true },

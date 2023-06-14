@@ -18,11 +18,7 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   type: { type: String },
   date: { type: Date, required: true, default: Date.now() },
   domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
-  street: {
-    type: Schema.Types.ObjectId,
-    ref: 'Street',
-    populate: { select: 'address city' },
-  },
+  street: { type: Schema.Types.ObjectId, ref: 'Street' },
   company: { type: Schema.Types.ObjectId, ref: 'RealEstate' },
   monthService: { type: Schema.Types.ObjectId, ref: 'Service' },
   description: { type: String },
