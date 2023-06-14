@@ -4,6 +4,7 @@ import { Select, Form, FormInstance, Input, InputNumber } from 'antd'
 import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
+import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
 
 interface Props {
   form: FormInstance<any>
@@ -43,13 +44,7 @@ const RealEstateForm: FC<Props> = ({ form }) => {
         />
       </Form.Item>
       {/* TODO: validation */}
-      <Form.Item
-        name="adminEmails"
-        label="Адміністратори"
-        rules={validateField('email')}
-      >
-        <Select mode="tags" placeholder="Пошти адмінів компанії" />
-      </Form.Item>
+      <EmailSelect form={form} />
       <Form.Item
         name="totalArea"
         label="Кількість метрів"
