@@ -37,7 +37,11 @@ const DomainsBlock = ({}) => {
         expandable={{
           expandedRowRender: (data) => (
             <div className={cn(s.StreetsBlockContainer)}>
-              <StreetsBlock domainId={data._id} showAddButton={false} />
+              <StreetsBlock
+                domainId={data._id}
+                showAddButton={false}
+                height={500}
+              />
             </div>
           ),
         }}
@@ -106,5 +110,4 @@ const columns = [
     dataIndex: 'bankInformation',
   },
 ]
-
 export default DomainsBlock

@@ -7,11 +7,12 @@ interface Props {
   children: ReactNode
   title?: ReactNode
   className?: string
+  style?: React.CSSProperties
 }
 
-const TableCard: FC<Props> = ({ children, title, className }) => {
+const TableCard: FC<Props> = ({ children, title, className, style }) => {
   return (
-    <Card className={cn(s.Card, className)} title={title}>
+    <Card className={cn(s.Card, className)} style={style} title={title}>
       {children}
     </Card>
   )
