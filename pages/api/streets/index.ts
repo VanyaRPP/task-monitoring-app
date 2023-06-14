@@ -12,7 +12,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isAdmin } = await getCurrentUser(req, res)
+  const { isGlobalAdmin } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'GET':
@@ -43,7 +43,7 @@ export default async function handler(
 
     case 'POST':
       try {
-        if (isAdmin) {
+        if (isGlobalAdmin) {
           // TODO: body validation
           const street = await Street.create(req.body)
           return res.status(200).json({ success: true, data: street })

@@ -16,7 +16,10 @@ const TaskButton: React.FC = () => {
   const user = data?.data
 
   const taskButton = () => {
-    if (user?.role === Roles.WORKER || user?.role === Roles.ADMIN) {
+    if (
+      user?.roles?.includes(Roles.WORKER) ||
+      user?.roles?.includes(Roles.GLOBAL_ADMIN)
+    ) {
       return (
         <Button
           onClick={() => {

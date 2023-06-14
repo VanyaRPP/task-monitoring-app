@@ -33,6 +33,8 @@ export enum Roles {
   WORKER = 'Worker',
   MODERATOR = 'Moderator',
   ADMIN = 'Admin',
+  GLOBAL_ADMIN = 'GlobalAdmin',
+  DOMAIN_ADMIN = 'DomainAdmin',
 }
 
 export interface errors {

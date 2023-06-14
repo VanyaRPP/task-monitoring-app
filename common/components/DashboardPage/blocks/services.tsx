@@ -34,7 +34,7 @@ const ServicesBlock = () => {
     isError: currUserError,
   } = useGetCurrentUserQuery()
 
-  const isAdmin = currUser?.role === Roles.ADMIN
+  const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   const {
     data: services,
@@ -103,7 +103,7 @@ const ServicesBlock = () => {
       key: 'description',
       ellipsis: true,
     },
-    isAdmin
+    isGlobalAdmin
       ? {
           title: '',
           render: (_, service: IExtendedService) => (
@@ -152,7 +152,7 @@ const ServicesBlock = () => {
       title={
         email ? (
           <span className={s.title}>{`Оплата від користувача ${email}`}</span>
-        ) : isAdmin ? (
+        ) : isGlobalAdmin ? (
           <ServiceCardHeader />
         ) : (
           <Link href={AppRoutes.SERVICE}>

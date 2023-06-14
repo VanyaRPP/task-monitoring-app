@@ -43,7 +43,7 @@ describe('API Handler', () => {
 
     test('should return domains', async () => {
       // Мокуємо поведінку функції getCurrentUser
-      mocked(getCurrentUser).mockResolvedValueOnce({ isAdmin: true })
+      mocked(getCurrentUser).mockResolvedValueOnce({ isGlobalAdmin: true })
 
       // Підготовка даних
       const domains = [
@@ -73,7 +73,7 @@ describe('API Handler', () => {
 
     test('should return error if not admin', async () => {
       // Мокуємо поведінку функції getCurrentUser
-      mocked(getCurrentUser).mockResolvedValueOnce({ isAdmin: false })
+      mocked(getCurrentUser).mockResolvedValueOnce({ isGlobalAdmin: false })
 
       // Виклик обробника
       await handler(req, res)
@@ -88,7 +88,7 @@ describe('API Handler', () => {
 
     test('should return error if find throws an error', async () => {
       // Мокуємо поведінку функції getCurrentUser
-      mocked(getCurrentUser).mockResolvedValueOnce({ isAdmin: true })
+      mocked(getCurrentUser).mockResolvedValueOnce({ isGlobalAdmin: true })
 
       // Мокуємо функцію find з модуля Domain, щоб кинути помилку
       const error = new Error('Database error')

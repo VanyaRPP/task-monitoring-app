@@ -41,9 +41,9 @@ export async function getServerSideProps(context) {
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/email/${session?.user?.email}`
   )
   const data = await response.json()
-  const role = data?.data?.role
+  const roles = data?.data?.roles
 
-  if (role !== Roles.ADMIN) {
+  if (!roles?.includes(Roles.GLOBAL_ADMIN)) {
     return {
       redirect: {
         destination: '/',
