@@ -120,7 +120,7 @@ const AddTaskModal: React.FC<PropsType> = ({
         name="form_in_modal"
         disabled={formDisabled}
       >
-        {userData?.data?.role == Roles.ADMIN && (
+        {userData?.data?.roles.includes(Roles.GLOBAL_ADMIN) && (
           <Form.Item
             name="customer"
             label="Ім'я замовника"

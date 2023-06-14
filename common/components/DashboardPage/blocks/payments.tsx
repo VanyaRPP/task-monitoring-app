@@ -46,7 +46,7 @@ const PaymentsBlock = () => {
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
 
-  const isAdmin = currUser?.role === Roles.ADMIN
+  const isGlobalAdmin = currUser?.roles.includes(Roles.GLOBAL_ADMIN)
 
   const handleDeletePayment = async (id: string) => {
     const response = await deletePayment(id)
@@ -113,7 +113,7 @@ const PaymentsBlock = () => {
       dataIndex: 'description',
     },
     ...paymentsPageColumns,
-    isAdmin
+    isGlobalAdmin
       ? {
           title: '',
           dataIndex: '',
@@ -155,7 +155,7 @@ const PaymentsBlock = () => {
     },
   ]
 
-  if (isAdmin && !email) {
+  if (isGlobalAdmin && !email) {
     columns.unshift(
       {
         title: 'Компанія',

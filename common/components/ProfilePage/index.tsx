@@ -69,7 +69,7 @@ const ProfilePage: React.FC = () => {
           title={user?.name}
           className={s.Profile}
           extra={
-            user?.role === Roles.ADMIN && (
+            user?.roles.includes(Roles.GLOBAL_ADMIN) && (
               <Button
                 type="link"
                 onClick={() => Router.push(AppRoutes.ADMIN)}
@@ -89,7 +89,7 @@ const ProfilePage: React.FC = () => {
 
           <div className={s.Info}>
             <Card size="small" title="Роль">
-              {router.query.id ? user?.role : <RoleSwitcher />}
+              {router.query.id ? user?.roles[0] : <RoleSwitcher />}
             </Card>
 
             <Card size="small" title="Електронна пошта" className={s.Edit}>

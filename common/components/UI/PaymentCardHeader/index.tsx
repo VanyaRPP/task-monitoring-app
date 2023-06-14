@@ -23,12 +23,12 @@ const PaymentCardHeader = ({ currentPayment, closeEditModal }) => {
     closeEditModal()
   }
 
-  const isAdmin = currUser?.role === Roles.ADMIN
+  const isGlobalAdmin = currUser?.roles.includes(Roles.GLOBAL_ADMIN)
 
   return (
     <>
       <div className={s.tableHeader}>
-        {isAdmin ? (
+        {isGlobalAdmin ? (
           <>
             {email ? (
               <span

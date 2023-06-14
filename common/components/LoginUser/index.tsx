@@ -89,7 +89,7 @@ function SessionUser({ image }) {
           <h2>{user?.name}</h2>
           <p>{user?.email}</p>
 
-          {user?.role === Roles.ADMIN && (
+          {user?.roles.includes(Roles.GLOBAL_ADMIN) && (
             <Button type="link" onClick={() => Router.push(AppRoutes.ADMIN)}>
               Панель адміна
             </Button>
