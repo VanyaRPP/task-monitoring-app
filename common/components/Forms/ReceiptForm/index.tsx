@@ -171,7 +171,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
         </>
 
         <div className={s.providerInvoice}>
-          <div className={s.datecellTitle}>INVOICE № INV-0060</div>
+          <div className={s.datecellTitle}>INVOICE № INV-{newData.index}</div>
 
           <div className={s.datecellDate}>
             Від &nbsp;

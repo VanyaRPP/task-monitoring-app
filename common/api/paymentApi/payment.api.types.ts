@@ -23,6 +23,7 @@ interface IReciever {
 }
 
 export interface IPayment {
+  index: number
   type: string
   date: Date
   domain: string
@@ -58,4 +59,9 @@ export interface IDeletePaymentResponse {
 export interface IPayer {
   email: string
   _id: ObjectId | string | IUser['_id']
+}
+
+export interface IGetPaymentsCountResponse {
+  success: boolean
+  data: number
 }

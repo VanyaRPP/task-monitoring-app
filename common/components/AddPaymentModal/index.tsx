@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
+import {
+  useAddPaymentMutation,
+  useGetPaymentsCountQuery,
+} from '@common/api/paymentApi/payment.api'
 import {
   IExtendedPayment,
   IPayment,
@@ -28,13 +31,20 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
 
+  const { data: count } = useGetPaymentsCountQuery()
+
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, edit)
   )
 
   const handleSubmit = async () => {
+    if (!count || count < 0) {
+      return message.error('Помилка при додаванні рахунку')
+    }
+
     const formData = await form.validateFields()
     const response = await addPayment({
+      index: count + 1,
       type: formData.credit ? Operations.Credit : Operations.Debit,
       date: new Date(),
       domain: formData.domain,
