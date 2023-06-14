@@ -2,7 +2,7 @@ import mongoose, { ObjectId, Schema } from 'mongoose'
 import { IPaymentTableData, IRentTableData } from '@utils/tableData'
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 export interface IPaymentModel {
-  index: number
+  invoiceNumber: number
   type: string
   date: Date
   domain: ObjectId
@@ -16,7 +16,7 @@ export interface IPaymentModel {
 }
 
 export const PaymentSchema = new Schema<IPaymentModel>({
-  index: { type: Number, required: true },
+  invoiceNumber: { type: Number, required: true },
   type: { type: String },
   date: { type: Date, required: true, default: Date.now() },
   domain: { type: Schema.Types.ObjectId, ref: 'Domain' },

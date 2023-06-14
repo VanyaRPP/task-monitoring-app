@@ -44,7 +44,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
 
     const formData = await form.validateFields()
     const response = await addPayment({
-      index: count + 1,
+      invoiceNumber: count + 1,
       type: formData.credit ? Operations.Credit : Operations.Debit,
       date: new Date(),
       domain: formData.domain,

@@ -23,7 +23,7 @@ interface IReciever {
 }
 
 export interface IPayment {
-  index: number
+  invoiceNumber: number
   type: string
   date: Date
   domain: string
