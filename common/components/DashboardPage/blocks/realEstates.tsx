@@ -5,15 +5,32 @@ import {
 } from '@common/api/realestateApi/realestate.api'
 import TableCard from '@common/components/UI/TableCard'
 import { AppRoutes } from '@utils/constants'
-import React, { ReactElement } from 'react'
+import React, { FC, ReactElement, useContext } from 'react'
 import { useRouter } from 'next/router'
 import { Alert, Popconfirm, Table, message } from 'antd'
 import cn from 'classnames'
 import s from './style.module.scss'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
+import { createContext } from 'react'
 
-const RealEstateBlock = () => {
+export const CompanyPageContext = createContext(
+  {} as { domainId?: string; streetId?: string }
+)
+export const useCompanyPageContext = () => useContext(CompanyPageContext)
+
+interface IRealEstate {
+  domainId?: string
+  streetId?: string
+}
+
+interface IRealEstateColumns {
+  title: string
+  dataIndex: string
+  render?: (i: any) => any
+}
+
+const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
   const router = useRouter()
   const { pathname } = router
 
@@ -23,6 +40,8 @@ const RealEstateBlock = () => {
     isError: allRealEstateError,
   } = useGetAllRealEstateQuery({
     limit: pathname === AppRoutes.REAL_ESTATE ? 200 : 5,
+    domainId,
+    streetId,
   })
   const [deleteRealEstate, { isLoading: deleteLoading }] =
     useDeleteRealEstateMutation()
@@ -36,6 +55,60 @@ const RealEstateBlock = () => {
     } else {
       message.error('Помилка при видаленні')
     }
+  }
+
+  const columns: IRealEstateColumns[] = [
+    {
+      title: 'Назва компанії',
+      dataIndex: 'companyName',
+    },
+    {
+      title: 'Банківська інформація',
+      dataIndex: 'bankInformation',
+    },
+    {
+      title: 'Договір',
+      dataIndex: 'agreement',
+    },
+    {
+      title: 'Телефон',
+      dataIndex: 'phone',
+    },
+    {
+      title: 'Адміністратори',
+      dataIndex: 'adminEmails',
+    },
+    {
+      title: 'Кількість метрів',
+      dataIndex: 'totalArea',
+    },
+    {
+      title: 'Ціна за метр',
+      dataIndex: 'pricePerMeter',
+    },
+    {
+      title: 'Індивідуальне утримання за метр',
+      dataIndex: 'servicePricePerMeter',
+    },
+    {
+      title: 'Вивіз сміття',
+      dataIndex: 'garbageCollector',
+    },
+  ]
+
+  if (!domainId && !streetId && !allRealEstateLoading) {
+    columns.unshift(
+      {
+        title: 'Домен',
+        dataIndex: 'domain',
+        render: (i) => i?.name,
+      },
+      {
+        title: 'Адреса',
+        dataIndex: 'street',
+        render: (i) => `${i?.address} (м. ${i?.city})`,
+      }
+    )
   }
 
   if (allRealEstateError) {
@@ -75,61 +148,16 @@ const RealEstateBlock = () => {
 
   return (
     <TableCard
-      title={<RealEstateCardHeader />}
+      title={
+        <CompanyPageContext.Provider value={{ domainId, streetId }}>
+          <RealEstateCardHeader />
+        </CompanyPageContext.Provider>
+      }
       className={cn({ [s.noScroll]: pathname === AppRoutes.REAL_ESTATE })}
     >
       {content}
     </TableCard>
   )
 }
-
-const columns = [
-  {
-    title: 'Домен',
-    dataIndex: 'domain',
-    render: (i) => i?.name,
-  },
-  {
-    title: 'Адреса',
-    dataIndex: 'street',
-    render: (i) => i?.address,
-  },
-  {
-    title: 'Назва компанії',
-    dataIndex: 'companyName',
-  },
-  {
-    title: 'Банківська інформація',
-    dataIndex: 'bankInformation',
-  },
-  {
-    title: 'Договір',
-    dataIndex: 'agreement',
-  },
-  {
-    title: 'Телефон',
-    dataIndex: 'phone',
-  },
-  {
-    title: 'Адміністратори',
-    dataIndex: 'adminEmails',
-  },
-  {
-    title: 'Кількість метрів',
-    dataIndex: 'totalArea',
-  },
-  {
-    title: 'Ціна за метр',
-    dataIndex: 'pricePerMeter',
-  },
-  {
-    title: 'Індивідуальне утримання за метр',
-    dataIndex: 'servicePricePerMeter',
-  },
-  {
-    title: 'Вивіз сміття',
-    dataIndex: 'garbageCollector',
-  },
-]
 
 export default RealEstateBlock

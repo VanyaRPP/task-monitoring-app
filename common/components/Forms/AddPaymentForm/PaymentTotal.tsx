@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useState } from 'react'
 import { Form, FormInstance } from 'antd'
 import s from './style.module.scss'
+import { Operations } from '@utils/constants'
 
 interface Props {
   form: FormInstance<any>
@@ -9,20 +10,30 @@ interface Props {
 const PaymentTotal: FC<Props> = ({ form }) => {
   const [total, setTotal] = useState(0)
 
-  const maintenance = Form.useWatch('maintenance', form)
-  const placing = Form.useWatch('placing', form)
-  const electricity = Form.useWatch('electricity', form)
-  const water = Form.useWatch('water', form)
+  const maintenancePrice = Form.useWatch('maintenancePrice', form)
+  const placingPrice = Form.useWatch('placingPrice', form)
+  const electricityPrice = Form.useWatch('electricityPrice', form)
+  const waterPrice = Form.useWatch('waterPrice', form)
 
   useEffect(() => {
     setTotal(
-      maintenance?.sum + placing?.sum + electricity?.sum + water?.sum || 0
+      maintenancePrice?.sum +
+        placingPrice?.sum +
+        electricityPrice?.sum +
+        waterPrice?.sum
     )
-    form.setFieldValue('debit', total)
-  }, [maintenance, placing, electricity, water, form, total])
+    form.setFieldValue(Operations.Debit, total)
+  }, [
+    maintenancePrice,
+    placingPrice,
+    electricityPrice,
+    waterPrice,
+    form,
+    total,
+  ])
 
   return (
-    <Form.Item name="debit">
+    <Form.Item name={Operations.Debit}>
       <div className={s.totalItem}>
         <p>Сума:</p>
         <p>{total.toFixed(2)} ₴</p>

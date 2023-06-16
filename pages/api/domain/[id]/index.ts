@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
-import Service from '@common/modules/models/Service'
+import { authOptions } from '@pages/api/auth/[...nextauth]'
 import start, { Data } from 'pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import Domain from '@common/modules/models/Domain'
 start()
 
 export default async function handler(
@@ -19,21 +20,21 @@ export default async function handler(
   switch (req.method) {
     case 'DELETE':
       try {
-        await Service.findByIdAndRemove(req.query.id).then((service) => {
-          if (service) {
+        await Domain.findByIdAndRemove(req.query.id).then((domain) => {
+          if (domain) {
             return res.status(200).json({
               success: true,
-              data: 'Service ' + req.query.id + ' was deleted',
+              data: 'Domain ' + req.query.id + ' was deleted',
             })
           } else {
             return res.status(400).json({
               success: false,
-              data: 'Service ' + req.query.id + ' was not found',
+              data: 'Domain ' + req.query.id + ' was not found',
             })
           }
         })
       } catch (error) {
-        return res.status(400).json({ success: false, error: error })
+        return res.status(400).json({ success: false, error })
       }
   }
 }

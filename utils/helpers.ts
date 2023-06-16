@@ -48,9 +48,9 @@ export const getPaymentOptions = async ({
   // searching for original user
   const user = await User.findOne({ email: userEmail })
 
-  const isAdmin = user?.role === Roles.ADMIN
+  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
 
-  if (isAdmin) {
+  if (isGlobalAdmin) {
     if (searchEmail) {
       // 1. admin looking for someone items
       const searchUser = await User.findOne({ email: searchEmail })

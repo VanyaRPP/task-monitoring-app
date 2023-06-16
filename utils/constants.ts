@@ -33,6 +33,8 @@ export enum Roles {
   WORKER = 'Worker',
   MODERATOR = 'Moderator',
   ADMIN = 'Admin',
+  GLOBAL_ADMIN = 'GlobalAdmin',
+  DOMAIN_ADMIN = 'DomainAdmin',
 }
 
 export interface errors {
@@ -77,8 +79,15 @@ export enum TaskView {
 export const saltRounds = 10
 
 export const paymentsTitle = {
-  maintenance: 'Утримання',
-  placing: 'Розміщення',
-  electricity: 'Електропостачання',
-  water: 'Водопостачання',
+  maintenancePrice: 'Утримання',
+  placingPrice: 'Розміщення',
+  electricityPrice: 'Електропостачання',
+  waterPrice: 'Водопостачання',
+}
+
+export enum ServiceType {
+  Electricity = 'electricityPrice',
+  Water = 'waterPrice',
+  Placing = 'placingPrice',
+  Maintenance = 'maintenancePrice',
 }

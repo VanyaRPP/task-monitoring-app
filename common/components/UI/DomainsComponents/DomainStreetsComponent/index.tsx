@@ -1,7 +1,11 @@
 import React, { useState } from 'react'
 import s from './style.module.scss'
-import { Button } from 'antd'
-import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
+import { Button, Tooltip } from 'antd'
+import {
+  PlusOutlined,
+  SelectOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons'
 import { AppRoutes } from '@utils/constants'
 import { useRouter } from 'next/router'
 import DomainModal from '../DomainModal'
@@ -16,6 +20,9 @@ const DomainStreetsComponent = ({ data }) => {
   return (
     <div className={s.tableHeader}>
       <Button type="link" onClick={() => router.push(AppRoutes.DOMAIN)}>
+        <Tooltip title="Домени - це організації та компанії, що здійснюють управління та мають під собою менші компанії та об'єкти нерухомості. Управляються адміністраторами">
+          <QuestionCircleOutlined className={s.Icon} />
+        </Tooltip>
         Домени
         <SelectOutlined className={s.Icon} />
       </Button>

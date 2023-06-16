@@ -19,15 +19,15 @@ const RoleSwitcher: React.FC = () => {
 
   const [form] = Form.useForm()
 
-  const [role, setRole] = useState<string>(user?.role)
+  const [roles, setRoles] = useState<string[]>(user?.roles)
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
   const [error, setError] = useState<boolean>(false)
   const [address, setAddress] = useState<IAddress>(null)
 
   useEffect(() => {
-    setRole(user?.role)
-  }, [user?.role])
+    setRoles(user?.roles)
+  }, [user?.roles])
 
   const onChange = async (e: RadioChangeEvent) => {
     if (!user?.isWorker) {
@@ -35,7 +35,7 @@ const RoleSwitcher: React.FC = () => {
         setIsModalVisible(true)
       }
     } else {
-      await updateUserRole({ email: user?.email, role: `${e.target.value}` })
+      await updateUserRole({ email: user?.email, roles: [`${e.target.value}`] })
     }
   }
 
@@ -71,7 +71,7 @@ const RoleSwitcher: React.FC = () => {
         className={s.RoleSwitcher}
         disabled={isUpdating}
         onChange={onChange}
-        value={role}
+        value={roles}
         style={{ width: '100%' }}
         buttonStyle="solid"
       >

@@ -34,7 +34,7 @@ const ServicesBlock = () => {
     isError: currUserError,
   } = useGetCurrentUserQuery()
 
-  const isAdmin = currUser?.role === Roles.ADMIN
+  const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   const {
     data: services,
@@ -66,14 +66,13 @@ const ServicesBlock = () => {
     {
       title: 'Адреса',
       dataIndex: 'street',
-      render: (i) => i?.address,
+      render: (i) => `${i?.address} (м. ${i?.city})`,
     },
     {
       title: 'Місяць',
       dataIndex: 'date',
       width: '12%',
-      // TODO: to helper
-      render: (data) => firstTextToUpperCase(moment(data).format('MMMM')),
+      render: getFormattedDate,
     },
     {
       title: 'Утримання',
@@ -104,7 +103,7 @@ const ServicesBlock = () => {
       key: 'description',
       ellipsis: true,
     },
-    isAdmin
+    isGlobalAdmin
       ? {
           title: '',
           render: (_, service: IExtendedService) => (
@@ -153,7 +152,7 @@ const ServicesBlock = () => {
       title={
         email ? (
           <span className={s.title}>{`Оплата від користувача ${email}`}</span>
-        ) : isAdmin ? (
+        ) : isGlobalAdmin ? (
           <ServiceCardHeader />
         ) : (
           <Link href={AppRoutes.SERVICE}>
@@ -169,4 +168,10 @@ const ServicesBlock = () => {
     </TableCard>
   )
 }
+
+// TODO: to helper
+export function getFormattedDate(data) {
+  return firstTextToUpperCase(moment(data).format('MMMM'))
+}
+
 export default ServicesBlock

@@ -30,7 +30,9 @@ const AdminPageDomains: React.FC = () => {
     const formData: IDomain = await form.validateFields()
     setIsFormDisabled(true)
 
-    await addDomain({ ...formData })
+    const stringStreets: string[] = waypoints.map((street) => street.toString())
+
+    await addDomain({ ...formData, streets: stringStreets })
 
     form.resetFields()
     setIsModalVisible(false)
