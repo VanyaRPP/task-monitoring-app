@@ -18,7 +18,6 @@ const AddStreetModal: FC<Props> = ({ closeModal, edit }) => {
     const formData: IStreet = await form.validateFields()
     const response = await addStreet({
       address: formData.address,
-      city: formData.city,
     })
     if ('data' in response) {
       form.resetFields()

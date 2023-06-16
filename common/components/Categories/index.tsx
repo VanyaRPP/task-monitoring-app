@@ -24,7 +24,7 @@ const Categories: React.FC<{
 
   const { data: session } = useSession()
   const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const roles = data?.data?.roles
+  const role = data?.data?.role
 
   useEffect(() => {
     setCategories(
@@ -52,7 +52,7 @@ const Categories: React.FC<{
             //     Інформація
             //   </Button>,
             // ].concat(
-            roles?.includes(Roles.GLOBAL_ADMIN)
+            role === Roles.ADMIN
               ? [
                   <DeleteButton
                     key="delete"

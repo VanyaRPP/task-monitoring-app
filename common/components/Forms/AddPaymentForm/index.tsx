@@ -1,16 +1,13 @@
-import React, { FC, useState } from 'react'
+import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import s from './style.module.scss'
-import { Operations, ServiceType } from '@utils/constants'
+import { Operations } from '@utils/constants'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import CompanySelect from './CompanySelect'
 import PaymentTotal from './PaymentTotal'
 import PaymentPricesTable from './PaymentPricesTable'
-import MonthServiceSelect from './MonthServiceSelect'
-import Operation from 'antd/lib/transfer/operation'
-import { usePaymentContext } from '@common/components/AddPaymentModal'
 
 interface Props {
   form: FormInstance<any>
@@ -19,41 +16,22 @@ interface Props {
   users?: any
 }
 
-const AddPaymentForm: FC<Props> = ({ edit }) => {
-  const { paymentData, form } = usePaymentContext()
+const AddPaymentForm: FC<Props> = ({ form, paymentData, edit }) => {
   // TODO: fix init values
-
   return (
     <Form
       initialValues={{
         description: paymentData?.description,
         credit: paymentData?.credit,
         debit: paymentData?.debit,
-        operation: paymentData ? paymentData.type : Operations.Credit,
-        [ServiceType.Electricity]: {
-          lastAmount: paymentData?.invoice.find(
-            (item) => item?.type === ServiceType.Electricity
-          )?.lastAmount,
-          amount: paymentData?.invoice.find(
-            (item) => item?.type === ServiceType.Electricity
-          )?.amount,
-        },
-        [ServiceType.Water]: {
-          lastAmount: paymentData?.invoice.find(
-            (item) => item?.type === ServiceType.Water
-          )?.lastAmount,
-          amount: paymentData?.invoice.find(
-            (item) => item?.type === ServiceType.Water
-          )?.amount,
-        },
+        operation: paymentData?.debit ? Operations.Debit : Operations.Credit,
       }}
       form={form}
       layout="vertical"
       className={s.Form}
     >
-      <DomainsSelect disabled={edit} form={form} paymentData={paymentData} />
+      <DomainsSelect disabled={edit} form={form} />
       <AddressesSelect disabled={edit} form={form} />
-      <MonthServiceSelect disabled={edit} form={form} />
       <CompanySelect disabled={edit} form={form} />
       <Form.Item
         name="operation"
@@ -65,12 +43,8 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
           className={s.Select}
           disabled={edit && true}
         >
-          <Select.Option value={Operations.Credit}>
-            Кредит (Оплата)
-          </Select.Option>
-          <Select.Option value={Operations.Debit}>
-            Дебет (Реалізація)
-          </Select.Option>
+          <Select.Option value="credit">Кредит (Оплата)</Select.Option>
+          <Select.Option value="debit">Дебет (Реалізація)</Select.Option>
         </Select>
       </Form.Item>
 
@@ -84,7 +58,7 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
           getFieldValue('operation') === Operations.Credit ? (
             <>
               <Form.Item
-                name={Operations.Credit}
+                name="credit"
                 label="Сума"
                 rules={validateField('paymentPrice')}
               >
@@ -92,7 +66,6 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
                   placeholder="Вкажіть суму"
                   disabled={edit && true}
                   className={s.inputNumber}
-                  defaultValue={paymentData ? paymentData?.generalSum : ''}
                 />
               </Form.Item>
               <Form.Item

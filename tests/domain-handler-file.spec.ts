@@ -6,7 +6,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin }      
+  const { isAdmin }      
       
       Виклик обробника
       await handler(req, res)
@@ -28,7 +28,7 @@ export default async function handler(
 
     test('should create domain', async () => {
       // Мокуємо поведінку функції getCurrentUser
-      mocked(getCurrentUser).mockResolvedValueOnce({ isGlobalAdmin: true })
+      mocked(getCurrentUser).mockResolvedValueOnce({ isAdmin: true })
 
       // Мокуємо функцію create з модуля Domain
       const createdDomain = {
@@ -51,7 +51,7 @@ export default async function handler(
 
     test('should return error if not admin', async () => {
       // Мокуємо поведінку функції getCurrentUser
-      mocked(getCurrentUser).mockResolvedValueOnce({ isGlobalAdmin: false })
+      mocked(getCurrentUser).mockResolvedValueOnce({ isAdmin: false })
 
       // Виклик обробника
       await handler(req, res)
@@ -66,7 +66,7 @@ export default async function handler(
 
     test('should return error if create throws an error', async () => {
       // Мокуємо поведінку функції getCurrentUser
-      mocked(getCurrentUser).mockResolvedValueOnce({ isGlobalAdmin: true })
+      mocked(getCurrentUser).mockResolvedValueOnce({ isAdmin: true })
 
       // Мокуємо функцію create з модуля Domain, щоб кинути помилку
       const error = new Error('Database error')

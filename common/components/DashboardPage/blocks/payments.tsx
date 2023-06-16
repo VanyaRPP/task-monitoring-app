@@ -12,8 +12,9 @@ import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { AppRoutes, Operations, Roles, paymentsTitle } from '@utils/constants'
+import { AppRoutes, Roles } from '@utils/constants'
 import { Tooltip } from 'antd'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
 import s from './style.module.scss'
@@ -46,7 +47,7 @@ const PaymentsBlock = () => {
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
 
-  const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isAdmin = currUser?.role === Roles.ADMIN
 
   const handleDeletePayment = async (id: string) => {
     const response = await deletePayment(id)
@@ -56,22 +57,6 @@ const PaymentsBlock = () => {
       message.error('Помилка при видаленні рахунку')
     }
   }
-
-  const invoiceTypes = Object.keys(paymentsTitle)
-
-  const paymentsPageColumns =
-    router.pathname === AppRoutes.PAYMENT
-      ? [
-          ...invoiceTypes.map((type) => ({
-            title: paymentsTitle[type],
-            dataIndex: 'invoice',
-            render: (invoice) => {
-              const item = invoice.find((item) => item.type === type)
-              return item ? item.sum : <span className={s.currency}>-</span>
-            },
-          })),
-        ]
-      : []
 
   const columns = [
     {
@@ -87,12 +72,7 @@ const PaymentsBlock = () => {
         </Tooltip>
       ),
       dataIndex: 'debit',
-      render: (_, payment: IExtendedPayment) => {
-        if (payment.type === Operations.Debit) {
-          return renderCurrency(payment.generalSum)
-        }
-        return <span className={s.currency}>-</span>
-      },
+      render: renderCurrency,
     },
     {
       title: (
@@ -101,23 +81,16 @@ const PaymentsBlock = () => {
         </Tooltip>
       ),
       dataIndex: 'credit',
-      render: (_, payment: IExtendedPayment) => {
-        if (payment.type === Operations.Credit) {
-          return renderCurrency(payment.generalSum)
-        }
-        return <span className={s.currency}>-</span>
-      },
+      render: renderCurrency,
     },
     {
       title: 'Опис',
       dataIndex: 'description',
     },
-    ...paymentsPageColumns,
-    isGlobalAdmin
+    isAdmin
       ? {
           title: '',
           dataIndex: '',
-          width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
           render: (_, payment: IExtendedPayment) => (
             <div className={s.popconfirm}>
               <Popconfirm
@@ -137,7 +110,7 @@ const PaymentsBlock = () => {
     {
       title: '',
       dataIndex: '',
-      width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
+      width: '10%',
       render: (_, payment: IExtendedPayment) => (
         <div className={s.eyelined}>
           <Button
@@ -155,19 +128,12 @@ const PaymentsBlock = () => {
     },
   ]
 
-  if (isGlobalAdmin && !email) {
-    columns.unshift(
-      {
-        title: 'Компанія',
-        dataIndex: 'company',
-        render: (i) => i?.companyName,
-      },
-      {
-        title: 'Вулиця',
-        dataIndex: 'street',
-        render: (i) => `${i?.address} (м. ${i?.city})`,
-      }
-    )
+  if (isAdmin && !email) {
+    columns.unshift({
+      title: 'Компанія',
+      dataIndex: 'company',
+      render: (i) => i?.companyName,
+    })
   }
   let content: ReactElement
 

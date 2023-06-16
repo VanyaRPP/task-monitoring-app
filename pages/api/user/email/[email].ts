@@ -30,14 +30,14 @@ export default async function handler(
             {
               isWorker: true,
               tel: req.body.tel,
-              roles: ['Worker'],
+              role: 'Worker',
               address: req.body.address,
             }
           )
         } else {
           user = await User.findOneAndUpdate(
-            { email: req.query.email, roles: [Roles.GLOBAL_ADMIN] },
-            { roles: req.query.roles }
+            { email: req.query.email, role: Roles.ADMIN },
+            { role: req.query.role }
           )
         }
         return res.status(200).json({ success: true, data: user })

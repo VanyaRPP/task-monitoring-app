@@ -1,8 +1,8 @@
-import React from 'react'
 import {
   useDeleteStreetMutation,
   useGetAllStreetsQuery,
 } from '@common/api/streetApi/street.api'
+import StreetsCardHeader from '@common/components/UI/StreetsCardHeader'
 import TableCard from '@common/components/UI/TableCard'
 import { IStreet } from '@common/modules/models/Street'
 import { Table, Popconfirm, message } from 'antd'
@@ -11,21 +11,12 @@ import { DeleteOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/router'
 import s from './style.module.scss'
 import { AppRoutes } from '@utils/constants'
-import StreetsCardHeader from '@common/components/UI/StreetsCardHeader'
-import RealEstateBlock from './realEstates'
 
-const StreetsBlock = ({
-  domainId,
-  showAddButton,
-  height,
-}: {
-  domainId?: string
-  showAddButton?: boolean
-  height?: number
-}) => {
-  const { data: streets, isLoading } = useGetAllStreetsQuery({ domainId })
+const StreetsBlock = () => {
+  const { data: streets, isLoading } = useGetAllStreetsQuery({})
   const router = useRouter()
-  const [deleteStreet, { isLoading: deleteLoading }] = useDeleteStreetMutation()
+  const [deleteStreet, { isLoading: deleteLoading, isError: deleteError }] =
+    useDeleteStreetMutation()
 
   const handleDeleteStreet = async (id: string) => {
     const response = await deleteStreet(id)
@@ -38,22 +29,18 @@ const StreetsBlock = ({
 
   const columns = [
     {
-      title: 'Місто',
-      width: '25%',
-      dataIndex: 'city',
-    },
-    {
-      title: 'Вулиця',
+      title: 'Назва',
       dataIndex: 'address',
     },
     {
       title: '',
+      dataIndex: '',
       width: '10%',
       render: (_, street: IStreet) => (
         <div className={s.popconfirm}>
           <Popconfirm
-            title={`Ви впевнені що хочете видалити вулицю ${street.address} (м. ${street.city})?`}
-            onConfirm={() => handleDeleteStreet(street._id)}
+            title={`Ви впевнені що хочете видалити вулицю ${street.address}?`}
+            onConfirm={() => handleDeleteStreet(street?._id)}
             cancelText="Відміна"
             disabled={deleteLoading}
           >
@@ -64,26 +51,19 @@ const StreetsBlock = ({
     },
   ]
 
+  const {
+    pathname,
+    //query: { email },
+  } = router
   return (
     <TableCard
-      title={<StreetsCardHeader showAddButton={showAddButton} />}
-      className={cn({ [s.noScroll]: router.pathname === AppRoutes.STREETS })}
-      style={{ height: height ? `${height}px` : '300px' }}
+      title={<StreetsCardHeader />}
+      className={cn({ [s.noScroll]: pathname === AppRoutes.STREETS })}
     >
       <Table
         loading={isLoading}
-        expandable={
-          domainId && {
-            expandedRowRender: (street) => (
-              <RealEstateBlock domainId={domainId} streetId={street._id} />
-            ),
-          }
-        }
         dataSource={streets}
-        rowKey="_id"
         columns={columns}
-        size="small"
-        bordered
         pagination={{
           responsive: false,
           size: 'small',

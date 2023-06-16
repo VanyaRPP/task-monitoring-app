@@ -11,9 +11,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin } = await getCurrentUser(req, res)
+  const { isAdmin } = await getCurrentUser(req, res)
 
-  if (!isGlobalAdmin) {
+  if (!isAdmin) {
     return res.status(400).json({ success: false, message: 'not allowed' })
   }
 
@@ -30,7 +30,7 @@ export default async function handler(
           .sort({ data: -1 })
           .limit(req.query.limit)
           .populate({ path: 'domain', select: '_id name' })
-          .populate({ path: 'street', select: '_id address city' })
+          .populate({ path: 'street', select: '_id address' })
 
         return res.status(200).json({
           success: true,

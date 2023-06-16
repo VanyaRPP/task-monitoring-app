@@ -3,11 +3,11 @@ import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, Select } from 'antd'
 import s from './style.module.scss'
 import DomainStreets from './DomainStreets'
-import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
 
 interface Props {
   form: FormInstance<any>
 }
+
 const DomainForm: FC<Props> = ({ form }) => {
   return (
     <Form form={form} layout="vertical" className={s.Form}>
@@ -25,7 +25,13 @@ const DomainForm: FC<Props> = ({ form }) => {
           className={s.formInput}
         />
       </Form.Item>
-      <EmailSelect form={form} />
+      <Form.Item
+        name="adminEmails"
+        label="Адміністратори"
+        rules={validateField('required')}
+      >
+        <Select mode="tags" placeholder="Пошти адмінів компанії" />
+      </Form.Item>
       <DomainStreets />
       <Form.Item
         name="description"
@@ -51,7 +57,7 @@ const DomainForm: FC<Props> = ({ form }) => {
         />
       </Form.Item>
 
-      <Form.Item name="phone" label="Телефон" rules={validateField('phone')}>
+      <Form.Item name="phone" label="Телефон" rules={validateField('required')}>
         <Input
           placeholder="Вкажіть значення"
           maxLength={256}
@@ -59,7 +65,7 @@ const DomainForm: FC<Props> = ({ form }) => {
         />
       </Form.Item>
 
-      <Form.Item name="email" label="Пошта" rules={validateField('email')}>
+      <Form.Item name="email" label="Пошта" rules={validateField('required')}>
         <Input
           placeholder="Вкажіть значення"
           maxLength={256}

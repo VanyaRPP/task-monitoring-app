@@ -14,21 +14,21 @@ export interface IRentTableData extends IPaymentTableData {
 export const dataSource: IPaymentTableData[] = [
   {
     id: 1,
-    name: 'maintenancePrice',
+    name: 'maintenance',
     amount: 0,
     price: 0,
     sum: 0,
   },
   {
     id: 2,
-    name: 'placingPrice',
+    name: 'placing',
     amount: 0,
     price: 0,
     sum: 0,
   },
   {
     id: 3,
-    name: 'electricityPrice',
+    name: 'electricity',
     lastAmount: 0,
     amount: 0,
     price: 0,
@@ -36,7 +36,7 @@ export const dataSource: IPaymentTableData[] = [
   },
   {
     id: 4,
-    name: 'waterPrice',
+    name: 'water',
     lastAmount: 0,
     amount: 0,
     price: 0,

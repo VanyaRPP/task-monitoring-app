@@ -1,3 +1,4 @@
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { validateField } from '@common/assets/features/validators'
 import { Form, Select } from 'antd'
@@ -28,6 +29,7 @@ function RealEstateDataFetcher({ disabled, domainId, streetId, form }) {
   })
 
   useEffect(() => {
+    // form.setFieldValue('street', streets[0]._id)
     form.resetFields(['company'])
   }, [streetId]) // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -11,36 +11,24 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { session, isGlobalAdmin } = await getCurrentUser(req, res)
+  const { session, isAdmin } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'GET':
       try {
-        const options = {}
+        const props = {}
 
-        const { domainId, streetId } = req.query
-        if (domainId && streetId) {
-          options.domain = domainId
-          options.street = streetId
-          const services = await Service.find(options).sort({ data: -1 })
-
-          return res.status(200).json({
-            success: true,
-            data: services,
-          })
-        }
-
-        if (isGlobalAdmin) {
+        if (isAdmin) {
           if (req.query.email) {
-            options.email = req.query.email
+            props.email = req.query.email
           }
         } else {
-          options.email = session.user.email
+          props.email = session.user.email
         }
 
-        const services = await Service.find(options)
+        const services = await Service.find(props)
           .populate({ path: 'domain', select: '_id name' })
-          .populate({ path: 'street', select: '_id address city' })
+          .populate({ path: 'street', select: '_id address' })
           .sort({ data: -1 })
           .limit(req.query.limit)
 
@@ -54,7 +42,7 @@ export default async function handler(
 
     case 'POST':
       try {
-        if (isGlobalAdmin) {
+        if (isAdmin) {
           // TODO: body validation
           const service = await Service.create(req.body)
           return res.status(200).json({ success: true, data: service })

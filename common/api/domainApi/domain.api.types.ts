@@ -1,30 +1,12 @@
-export interface IDomainModel {
-  name: string
-  address: string
-  adminEmails: [string]
-  streets: string[]
-  description: string
-  bankInformation: string
-  phone: string
-  email: string
-}
+import { IDomain } from 'common/modules/models/Domain'
+export type { IDomain } from 'common/modules/models/Domain'
 
-export interface IExtendedDomain extends IDomainModel {
-  _id: string
-  _v: number
-}
-
-export interface IAddDomainResponse {
+export interface BaseQuery {
   success: boolean
-  data: IExtendedDomain
+  data: IDomain
 }
 
-export interface IGetDomainResponse {
+export interface AllDomainQuery {
   success: boolean
-  data: IExtendedDomain[]
-}
-
-export interface IDeleteDomainResponse {
-  data: string
-  success: boolean
+  data: IDomain[]
 }

@@ -73,8 +73,7 @@ export default async function handler(
           .sort({ date: -1 })
           .limit(req.query.limit)
           // TODO: use domain, street
-          .populate({ path: 'company', select: '_id companyName' })
-          .populate({ path: 'street', select: '_id address city' })
+          // .populate({ path: 'company', select: '_id companyName' })
 
         return res.status(200).json({
           success: true,
@@ -86,9 +85,9 @@ export default async function handler(
 
     case 'POST':
       try {
-        const { isGlobalAdmin } = await getCurrentUser(req, res)
+        const { isAdmin } = await getCurrentUser(req, res)
 
-        if (isGlobalAdmin) {
+        if (isAdmin) {
           await postValidateBody(req, res)
           const payment = await Payment.create(req.body)
           return res.status(200).json({ success: true, data: payment })

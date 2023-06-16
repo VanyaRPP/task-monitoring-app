@@ -3,11 +3,8 @@ import { validateField } from '@common/assets/features/validators'
 import { Select, Form } from 'antd'
 import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
 
-const DomainStreets: React.FC = () => {
+const DomainForm = () => {
   const { data: streets, isLoading } = useGetAllStreetsQuery({})
-
-  console.log(streets)
-
   return (
     <Form.Item
       name="streets"
@@ -28,10 +25,7 @@ const DomainStreets: React.FC = () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         filterOption={(input, option) => (option?.label ?? '').includes(input)}
-        options={streets?.map((i) => ({
-          value: i._id,
-          label: `${i.address} (м. ${i.city})`,
-        }))}
+        options={streets?.map((i) => ({ value: i._id, label: i.address }))}
         optionFilterProp="children"
         placeholder="Пошук адреси"
         loading={isLoading}
@@ -41,4 +35,4 @@ const DomainStreets: React.FC = () => {
   )
 }
 
-export default DomainStreets
+export default DomainForm

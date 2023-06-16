@@ -13,7 +13,7 @@ export const deleteExtraWhitespace = (value: string): string =>
 //Validators
 
 export const emailRegex =
-  /^([a-zA-Z0-9_]{6,30})@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})(,\s*([a-zA-Z0-9_]{6,30})@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,}))*$/i
+  /^([a-zA-Z0-9_]{6,30})@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i
 
 export const validateField = (name: string): Rule[] => {
   const required: Rule = {

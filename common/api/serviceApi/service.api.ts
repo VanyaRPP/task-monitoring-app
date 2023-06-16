@@ -17,12 +17,12 @@ export const serviceApi = createApi({
   endpoints: (builder) => ({
     getAllServices: builder.query<
       IExtendedService[],
-      { limit?: number; userId?: string; domainId?: string; streetId?: string }
+      { limit: number; userId?: string }
     >({
-      query: ({ limit, userId, domainId, streetId }) => {
+      query: ({ limit, userId }) => {
         return {
           url: `service`,
-          params: { limit, userId, domainId, streetId },
+          params: { limit, userId },
         }
       },
       providesTags: (response) =>

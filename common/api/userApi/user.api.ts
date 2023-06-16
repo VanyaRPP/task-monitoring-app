@@ -31,7 +31,7 @@ export const userApi = createApi({
       query(data) {
         const { email, ...body } = data
         return {
-          url: `user/email/${email}?role=${body.roles[0]}`,
+          url: `user/email/${email}?role=${body.role}`,
           method: 'PATCH',
           body,
         }

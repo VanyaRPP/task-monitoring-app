@@ -10,7 +10,7 @@ export interface IUser {
   name: string
   email: string
   image?: string
-  roles?: string[]
+  role?: string
   tasks?: [ITask]
   payments?: [IPayment]
   services?: [IService]
@@ -35,7 +35,7 @@ const UserSchema = new mongoose.Schema<IUser>({
     type: String,
     default: 'https://avatars.githubusercontent.com/u/583231?v=4',
   },
-  roles: { type: [String], default: ['User'] },
+  role: { type: String, default: 'User' },
   tasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
   payments: [{ type: Schema.Types.ObjectId, ref: 'Payment' }],
   services: [{ type: Schema.Types.ObjectId, ref: 'Service' }],

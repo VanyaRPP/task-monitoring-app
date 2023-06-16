@@ -1,22 +1,11 @@
 import React from 'react'
 import s from './style.module.scss'
 import { Table } from 'antd'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 
-const OrganistaionsComponents = ({ domainId, streetId }) => {
-  const { data: realEstates, isLoading } = useGetAllRealEstateQuery({
-    domainId,
-    streetId,
-  })
-
+const OrganistaionsComponents = () => {
   return (
     <div className={s.tableHeader}>
-      <Table
-        loading={isLoading}
-        dataSource={domainId && streetId ? realEstates : null}
-        columns={columns}
-        pagination={false}
-      />
+      <Table dataSource={testData} columns={columns} pagination={false} />
     </div>
   )
 }
@@ -24,12 +13,11 @@ const OrganistaionsComponents = ({ domainId, streetId }) => {
 const columns = [
   {
     title: 'Назва',
-    dataIndex: 'companyName',
+    dataIndex: 'name',
   },
   {
     title: 'Адреса',
     dataIndex: 'street',
-    render: (street) => street?.address,
   },
   {
     title: 'Платник',
@@ -46,6 +34,17 @@ const columns = [
   {
     title: 'Договір',
     dataIndex: 'agreement',
+  },
+]
+
+const testData = [
+  {
+    name: 'DEU',
+    street: 'Мала Бердичівська 17',
+    bankInformation: 'ТОВ Укр',
+    phone: '22-22-2211',
+    adminEmails: ['asdasa@dsad.scos'],
+    agreement: 'N3 2323sd 2019',
   },
 ]
 

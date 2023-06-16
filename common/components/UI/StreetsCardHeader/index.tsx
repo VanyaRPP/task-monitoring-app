@@ -6,19 +6,14 @@ import { AppRoutes } from '@utils/constants'
 import { useRouter } from 'next/router'
 import AddStreetModal from '@common/components/AddStreetModal'
 
-interface StreetsCardHeaderProps {
-  showAddButton?: boolean
-}
-
-const StreetsCardHeader: React.FC<StreetsCardHeaderProps> = ({
-  showAddButton = true,
-}) => {
+const StreetsCardHeader = () => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const handleClick = () => {
-    setIsModalOpen(true)
-  }
+  const {
+    pathname,
+    query: { email },
+  } = router
 
   return (
     <>
@@ -32,11 +27,9 @@ const StreetsCardHeader: React.FC<StreetsCardHeaderProps> = ({
           Вулиці
           <SelectOutlined className={s.Icon} />
         </Button>
-        {showAddButton && (
-          <Button type="link" onClick={handleClick}>
-            <PlusOutlined /> Додати
-          </Button>
-        )}
+        <Button type="link" onClick={() => setIsModalOpen(true)}>
+          <PlusOutlined /> Додати
+        </Button>
       </div>
       {isModalOpen && (
         <AddStreetModal closeModal={() => setIsModalOpen(false)} />
