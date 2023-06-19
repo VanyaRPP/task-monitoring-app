@@ -1,4 +1,4 @@
-import { Form, Radio } from 'antd'
+import { Form, Radio, Checkbox } from 'antd'
 import type { RadioChangeEvent } from 'antd'
 import { useEffect, useState } from 'react'
 import {
@@ -25,18 +25,42 @@ const RoleSwitcher: React.FC = () => {
   const [error, setError] = useState<boolean>(false)
   const [address, setAddress] = useState<IAddress>(null)
 
-  useEffect(() => {
-    setRoles(user?.roles)
-  }, [user?.roles])
+  const adminRoles = [Roles.GLOBAL_ADMIN, Roles.DOMAIN_ADMIN]
+  const [adminSelection, setAdminSelection] = useState(false)
 
-  const onChange = async (e: RadioChangeEvent) => {
-    if (!user?.isWorker) {
-      if (e.target.value === Roles.WORKER) {
-        setIsModalVisible(true)
-      }
-    } else {
-      await updateUserRole({ email: user?.email, roles: [`${e.target.value}`] })
+  const options = [
+    { label: 'Глобальний Адмін', value: Roles.GLOBAL_ADMIN },
+    { label: 'Адмін Доменів', value: Roles.DOMAIN_ADMIN },
+  ]
+
+  useEffect(() => {
+    if (adminRoles.some((item) => user?.roles?.includes(item))) {
+      setAdminSelection(true)
     }
+  }, [])
+
+  const onRadioChange = async (e: RadioChangeEvent) => {
+    if (e?.target?.value === adminRoles) {
+      setAdminSelection(true)
+      setRoles(e.target.value)
+    } else if (e?.target?.value === Roles.WORKER) {
+      if (!user?.isWorker) setIsModalVisible(true)
+    } else {
+      setAdminSelection(false)
+      setRoles([`${e.target.value}`])
+      await updateUserRole({
+        email: user?.email,
+        roles: [`${e.target.value}`],
+      })
+    }
+  }
+
+  const onCheckboxChange = async (e) => {
+    setRoles(e)
+    await updateUserRole({
+      email: user?.email,
+      roles: e,
+    })
   }
 
   const onCancelModal = () => {
@@ -70,15 +94,27 @@ const RoleSwitcher: React.FC = () => {
       <Radio.Group
         className={s.RoleSwitcher}
         disabled={isUpdating}
-        onChange={onChange}
-        value={roles}
+        onChange={onRadioChange}
         style={{ width: '100%' }}
         buttonStyle="solid"
+        value={
+          adminRoles.some((item) => roles.includes(item))
+            ? adminRoles
+            : roles[0]
+        }
       >
         <Radio.Button value={Roles.USER}>Замовник</Radio.Button>
         <Radio.Button value={Roles.WORKER}>Майстер</Radio.Button>
-        <Radio.Button value={Roles.ADMIN}>Адмін</Radio.Button>
+        <Radio.Button value={adminRoles}>Адмін</Radio.Button>
       </Radio.Group>
+      {adminSelection && (
+        <Checkbox.Group
+          options={options}
+          disabled={isUpdating}
+          onChange={onCheckboxChange}
+          defaultValue={user?.roles}
+        />
+      )}
       <div className={s.Worker}>
         <ModalWindow
           title="Переключити на роль майстра"
