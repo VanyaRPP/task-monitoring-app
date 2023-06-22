@@ -1,4 +1,4 @@
-import { Form, Radio } from 'antd'
+import { Form, Radio, Checkbox } from 'antd'
 import type { RadioChangeEvent } from 'antd'
 import { useEffect, useState } from 'react'
 import {
@@ -17,19 +17,17 @@ const RoleSwitcher: React.FC = () => {
   const [updateUserRole, { isLoading: isUpdating }] =
     useUpdateUserRoleMutation()
 
-  const [form] = Form.useForm()
+  //const [form] = Form.useForm()
 
   const [roles, setRoles] = useState<string[]>(user?.roles)
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+  /*const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
   const [error, setError] = useState<boolean>(false)
-  const [address, setAddress] = useState<IAddress>(null)
+  const [address, setAddress] = useState<IAddress>(null)*/
 
-  useEffect(() => {
-    setRoles(user?.roles)
-  }, [user?.roles])
+  const adminRoles = [Roles.GLOBAL_ADMIN, Roles.DOMAIN_ADMIN]
 
-  const onChange = async (e: RadioChangeEvent) => {
+  /*const onChange = async (e: RadioChangeEvent) => {
     if (!user?.isWorker) {
       if (e.target.value === Roles.WORKER) {
         setIsModalVisible(true)
@@ -63,23 +61,26 @@ const RoleSwitcher: React.FC = () => {
       setIsModalVisible(false)
       setIsFormDisabled(false)
     }
-  }
+  }*/
 
   return (
     <>
       <Radio.Group
         className={s.RoleSwitcher}
         disabled={isUpdating}
-        onChange={onChange}
-        value={roles}
         style={{ width: '100%' }}
         buttonStyle="solid"
+        value={
+          adminRoles.some((item) => roles.includes(item))
+            ? adminRoles
+            : roles[0]
+        }
       >
         <Radio.Button value={Roles.USER}>Замовник</Radio.Button>
         <Radio.Button value={Roles.WORKER}>Майстер</Radio.Button>
-        <Radio.Button value={Roles.ADMIN}>Адмін</Radio.Button>
+        <Radio.Button value={adminRoles}>Адмін</Radio.Button>
       </Radio.Group>
-      <div className={s.Worker}>
+      {/*<div className={s.Worker}>
         <ModalWindow
           title="Переключити на роль майстра"
           isModalVisible={isModalVisible}
@@ -99,7 +100,7 @@ const RoleSwitcher: React.FC = () => {
             setError={setError}
           />
         </ModalWindow>
-      </div>
+      </div>*/}
     </>
   )
 }
