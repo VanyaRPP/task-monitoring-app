@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react'
+import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import s from './style.module.scss'
@@ -9,8 +9,10 @@ import CompanySelect from './CompanySelect'
 import PaymentTotal from './PaymentTotal'
 import PaymentPricesTable from './PaymentPricesTable'
 import MonthServiceSelect from './MonthServiceSelect'
-import Operation from 'antd/lib/transfer/operation'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
+import useDomain from '@common/modules/hooks/useDomain'
+import useService from '@common/modules/hooks/useService'
+import moment from 'moment'
 
 interface Props {
   form: FormInstance<any>
@@ -21,32 +23,66 @@ interface Props {
 
 const AddPaymentForm: FC<Props> = ({ edit }) => {
   const { paymentData, form } = usePaymentContext()
-  // TODO: fix init values
+
+  const { data: domains } = useDomain({ domainId: paymentData?.domain })
+  const { service } = useService({
+    serviceId: paymentData?.monthService,
+    domainId: paymentData?.domain,
+    streetId: paymentData?.street[0],
+  })
+  const domain = domains[0]
+
+  const month = moment(service?.date).format('MMMM')
+
+  const invoices = {
+    maintenance: paymentData?.invoice.find(
+      (item) => item?.type === ServiceType.Maintenance
+    ),
+    placing: paymentData?.invoice.find(
+      (item) => item?.type === ServiceType.Placing
+    ),
+    electricity: paymentData?.invoice.find(
+      (item) => item?.type === ServiceType.Electricity
+    ),
+    water: paymentData?.invoice.find(
+      (item) => item?.type === ServiceType.Water
+    ),
+  }
+
+  const initialValues = {
+    domain: domain?.name,
+    street:
+      paymentData?.street &&
+      `${paymentData.street.address} (м. ${paymentData.street.city})`,
+    monthService: month.charAt(0).toUpperCase() + month.slice(1),
+    company: paymentData?.company.companyName,
+    description: paymentData?.description,
+    credit: paymentData?.credit,
+    debit: paymentData?.debit,
+    operation: paymentData ? paymentData.type : Operations.Credit,
+    [ServiceType.Maintenance]: {
+      amount: invoices.maintenance?.amount,
+      price: invoices.maintenance?.price,
+    },
+    [ServiceType.Placing]: {
+      amount: invoices.placing?.amount,
+      price: invoices.placing?.price,
+    },
+    [ServiceType.Electricity]: {
+      lastAmount: invoices.electricity?.lastAmount,
+      amount: invoices.electricity?.amount,
+      price: invoices.electricity?.price,
+    },
+    [ServiceType.Water]: {
+      lastAmount: invoices.water?.lastAmount,
+      amount: invoices.water?.amount,
+      price: invoices.water?.price,
+    },
+  }
 
   return (
     <Form
-      initialValues={{
-        description: paymentData?.description,
-        credit: paymentData?.credit,
-        debit: paymentData?.debit,
-        operation: paymentData ? paymentData.type : Operations.Credit,
-        [ServiceType.Electricity]: {
-          lastAmount: paymentData?.invoice.find(
-            (item) => item?.type === ServiceType.Electricity
-          )?.lastAmount,
-          amount: paymentData?.invoice.find(
-            (item) => item?.type === ServiceType.Electricity
-          )?.amount,
-        },
-        [ServiceType.Water]: {
-          lastAmount: paymentData?.invoice.find(
-            (item) => item?.type === ServiceType.Water
-          )?.lastAmount,
-          amount: paymentData?.invoice.find(
-            (item) => item?.type === ServiceType.Water
-          )?.amount,
-        },
-      }}
+      initialValues={initialValues}
       form={form}
       layout="vertical"
       className={s.Form}

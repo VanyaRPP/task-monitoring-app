@@ -9,6 +9,9 @@ import { numberToTextNumber } from '@utils/helpers'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import useServiceCompanyDomain from '@common/modules/hooks/useServiceCompanyDomain'
 import { dateToDayYearMonthFormat } from '@common/assets/features/formatDate'
+import useCompany from '@common/modules/hooks/useCompany'
+import useService from '@common/modules/hooks/useService'
+import useDomain from '@common/modules/hooks/useDomain'
 
 interface Props {
   currPayment: IExtendedPayment
@@ -63,11 +66,11 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     documentTitle: 'emp-data',
   })
 
-  const { company, service, domain } = useServiceCompanyDomain({
+  const { service, company, domain } = useServiceCompanyDomain({
     serviceId: newData?.monthService,
-    companyId: newData?.company,
+    companyId: newData?.company._id,
     domainId: newData?.domain,
-    streetId: newData?.street,
+    streetId: newData?.street._id,
   })
 
   const date = getFormattedDate(service?.date)
@@ -171,7 +174,9 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
         </>
 
         <div className={s.providerInvoice}>
-          <div className={s.datecellTitle}>INVOICE № INV-0060</div>
+          <div className={s.datecellTitle}>
+            INVOICE № INV-{newData.invoiceNumber}
+          </div>
 
           <div className={s.datecellDate}>
             Від &nbsp;
