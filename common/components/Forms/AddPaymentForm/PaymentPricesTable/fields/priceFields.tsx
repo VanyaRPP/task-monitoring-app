@@ -11,23 +11,15 @@ export function PriceMaintainceField({ record, edit }) {
   const fieldName = [record.name, 'price']
 
   const domainId = Form.useWatch('domain', form) || paymentData?.domain
-  const streetId = Form.useWatch('street', form) || paymentData?.street._id
+  const streetId = Form.useWatch('street', form) || paymentData?.street
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
-  const companyId = Form.useWatch('company', form) || paymentData?.company._id
+  const companyId = Form.useWatch('company', form) || paymentData?.company
 
   const { service } = useService({ serviceId, domainId, streetId })
   const { company } = useCompany({ companyId, domainId, streetId })
 
   useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('field: ', record.name)
-    const price = paymentData?.invoice?.find(
-      (item) => item.type === record.name
-    ).price
-    if (paymentData?.invoice) {
-      return form.setFieldValue(fieldName, price)
-    }
     if (company?.servicePricePerMeter) {
       form.setFieldValue(fieldName, company.servicePricePerMeter)
     } else if (service?.rentPrice) {
@@ -53,12 +45,6 @@ export function PricePlacingField({ record, edit }) {
   const { company, isLoading } = useCompany({ companyId, domainId, streetId })
 
   useEffect(() => {
-    const price = paymentData?.invoice?.find(
-      (item) => item.type === record.name
-    ).price
-    if (paymentData?.invoice) {
-      return form.setFieldValue(fieldName, price)
-    }
     if (company?._id && company?.pricePerMeter) {
       form.setFieldValue(fieldName, company.pricePerMeter)
     }
@@ -83,12 +69,6 @@ export function PriceElectricityField({ record, edit }) {
   const { service, isLoading } = useService({ serviceId, domainId, streetId })
 
   useEffect(() => {
-    const price = paymentData?.invoice?.find(
-      (item) => item.type === record.name
-    ).price
-    if (paymentData?.invoice) {
-      return form.setFieldValue(fieldName, price)
-    }
     if (service?._id && service?.electricityPrice) {
       form.setFieldValue(fieldName, service.electricityPrice)
     }
@@ -113,12 +93,6 @@ export function PriceWaterField({ record, edit }) {
   const { service, isLoading } = useService({ serviceId, domainId, streetId })
 
   useEffect(() => {
-    const price = paymentData?.invoice?.find(
-      (item) => item.type === record.name
-    ).price
-    if (paymentData?.invoice) {
-      return form.setFieldValue(fieldName, price)
-    }
     if ((service?._id, service?.waterPrice)) {
       form.setFieldValue(fieldName, service.waterPrice)
     }

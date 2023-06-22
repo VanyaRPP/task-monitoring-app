@@ -16,12 +16,6 @@ export function AmountTotalAreaField({ record, edit }) {
   const { company, isLoading } = useCompany({ companyId, domainId, streetId })
 
   useEffect(() => {
-    const amount = paymentData?.invoice?.find(
-      (item) => item.type === record.name
-    ).amount
-    if (paymentData?.invoice) {
-      return form.setFieldValue(fieldName, amount)
-    }
     if (company?._id && company?.totalArea) {
       form.setFieldValue(fieldName, company.totalArea)
     }

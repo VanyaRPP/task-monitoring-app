@@ -36,7 +36,6 @@ export default async function handler(
           )
         } else {
           user = await User.findOneAndUpdate(
-            // Check if user is GlobalAdmin
             { email: req.query.email, roles: [Roles.GLOBAL_ADMIN] },
             { roles: req.query.roles }
           )

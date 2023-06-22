@@ -99,7 +99,7 @@ const RoleSwitcher: React.FC = () => {
             error={error}
             setError={setError}
           />
-      </ModalWindow>
+        </ModalWindow>
       </div>*/}
     </>
   )

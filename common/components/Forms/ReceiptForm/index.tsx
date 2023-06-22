@@ -1,4 +1,4 @@
-import React, { FC, useRef, useEffect } from 'react'
+import React, { FC, useRef } from 'react'
 import { Button, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
@@ -65,23 +65,10 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
 
   const { company, service, domain } = useServiceCompanyDomain({
     serviceId: newData?.monthService,
-    companyId: newData?.company?._id || newData?.company,
+    companyId: newData?.company,
     domainId: newData?.domain,
-    streetId: newData?.street?._id || newData?.street,
+    streetId: newData?.street,
   })
-
-  useEffect(() => {
-    const obj = {
-      serviceId: newData?.monthService,
-      companyId: newData?.company?._id || newData?.company,
-      domainId: newData?.domain,
-      streetId: newData?.street?._id || newData?.street,
-    }
-    // eslint-disable-next-line no-console
-    console.log('obj: ', obj)
-    // eslint-disable-next-line no-console
-    console.log('company: ', company)
-  }, [])
 
   const date = getFormattedDate(service?.date)
 
