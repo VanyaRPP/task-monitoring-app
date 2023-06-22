@@ -22,7 +22,7 @@ export default async function handler(
         return res.status(400).json({ success: false })
       }
     case 'PATCH':
-      try {
+      /*try {
         let user
         if (req.body.tel) {
           user = await User.findOneAndUpdate(
@@ -36,6 +36,7 @@ export default async function handler(
           )
         } else {
           user = await User.findOneAndUpdate(
+            // Check if user is GlobalAdmin
             { email: req.query.email, roles: [Roles.GLOBAL_ADMIN] },
             { roles: req.query.roles }
           )
@@ -43,6 +44,7 @@ export default async function handler(
         return res.status(200).json({ success: true, data: user })
       } catch (error) {
         return res.status(400).json({ success: false })
-      }
+      }*/
+      return null
   }
 }

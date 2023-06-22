@@ -27,12 +27,17 @@ interface Props {
 const PaymentPricesTable: FC<Props> = ({ edit }) => {
   const { paymentData, form } = usePaymentContext()
   const domainId = Form.useWatch('domain', form) || paymentData?.domain
-  const streetId = Form.useWatch('street', form) || paymentData?.street
+  const streetId = Form.useWatch('street', form) || paymentData?.street._id
   const serviceId = Form.useWatch('service', form) || paymentData?.monthService
-  const companyId = Form.useWatch('company', form) || paymentData?.company
+  const companyId = Form.useWatch('company', form) || paymentData?.company._id
 
   const { company } = useCompany({ companyId, domainId, streetId })
   const { service } = useService({ serviceId, domainId, streetId })
+
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('data: ', paymentData)
+  }, [])
 
   const columns: ColumnProps<IPaymentTableData>[] = [
     {
