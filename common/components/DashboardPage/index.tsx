@@ -11,25 +11,23 @@ import StreetsBlock from './blocks/streets'
 
 const Dashboard: FC = () => {
   const { data: userResponse } = useGetCurrentUserQuery()
-  const userRole = userResponse?.role
-
+  const userRoles = userResponse?.roles
+  const globalAdmin = userRoles?.includes(Roles.GLOBAL_ADMIN)
   return (
     <>
       <DashboardHeader />
       <div className={s.Container}>
-        {userRole === Roles.ADMIN && (
+        {globalAdmin && (
           <>
-            <DomainsBlock />
             <StreetsBlock />
+            <DomainsBlock />
           </>
         )}
       </div>
+      <div className={s.Container}>{globalAdmin && <RealEstateBlock />}</div>
       <div className={s.Container}>
-        <PaymentsBlock />
         <ServicesBlock />
-      </div>
-      <div className={s.Container}>
-        {userRole === Roles.ADMIN && <RealEstateBlock />}
+        <PaymentsBlock />
       </div>
     </>
   )
