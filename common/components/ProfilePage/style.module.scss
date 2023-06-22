@@ -152,3 +152,12 @@
     border: none;
   }
 }
+
+.DomainMatch {
+  background-color: var(--backgroundColor);
+  border: 1px solid #bdbdbd;
+  border-radius: 0.25rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  padding: 8px;
+  margin-top: 5px;
+}

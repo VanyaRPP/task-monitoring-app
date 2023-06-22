@@ -15,6 +15,7 @@ import UnsavedChangesModal from '../UI/UnsavedChangesModal'
 import useLocalStorage from '@common/modules/hooks/useLocalStorage'
 import useGoogleQueries from '@common/modules/hooks/useGoogleQueries'
 import { getFormattedAddress } from '@utils/helpers'
+import { useGetDomainsQuery } from '../../api/domainApi/domain.api'
 
 const ProfilePage: React.FC = () => {
   const [storedData, setValue] = useLocalStorage('profile-data', null)
@@ -22,10 +23,20 @@ const ProfilePage: React.FC = () => {
   const router = useRouter()
   const [profileData, setProfileData] = useState<IProfileData>()
   const [editing, setEditing] = useState<boolean>(false)
-
   const [updateUser] = useUpdateUserMutation()
   const { data: userData, isLoading } = useGetCurrentUserQuery()
-  const user = userData
+  let user: any
+  if (userData) {
+    user = userData
+  }
+
+  const { data: domainData, isLoading: isDomainLoading } = useGetDomainsQuery({
+    streetId: '',
+    limit: undefined,
+    adminEmail: user?.email ? user?.email[0] : undefined, // Pass the first email from the adminEmails array to fetch domains associated with the user
+  })
+
+  const userDomains = domainData || []
 
   const handleChange = (value: any) => {
     if (value.name === 'address') {
@@ -116,6 +127,19 @@ const ProfilePage: React.FC = () => {
                 value={getFormattedAddress(profileData?.address?.name)}
                 placeholder="Введіть адресу"
               />
+            </Card>
+            <Card size="small" title="Мій домен" className={s.Edit}>
+              {userDomains.map((domain) => {
+                const isAdmin = domain.adminEmails.includes(user?.email)
+                if (isAdmin) {
+                  return (
+                    <div key={domain._id} className={s.DomainMatch}>
+                      {domain.name}
+                    </div>
+                  )
+                }
+                return null
+              })}
             </Card>
           </div>
         </Card>
