@@ -36,7 +36,7 @@ export default async function handler(
           )
         } else {
           user = await User.findOneAndUpdate(
-            { email: req.query.email /*, roles: [Roles.GLOBAL_ADMIN]*/ },
+            { email: req.query.email, roles: [Roles.GLOBAL_ADMIN] },
             { roles: req.query.roles }
           )
         }

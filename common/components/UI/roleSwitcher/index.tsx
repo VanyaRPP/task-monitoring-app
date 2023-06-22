@@ -26,41 +26,15 @@ const RoleSwitcher: React.FC = () => {
   const [address, setAddress] = useState<IAddress>(null)
 
   const adminRoles = [Roles.GLOBAL_ADMIN, Roles.DOMAIN_ADMIN]
-  const [adminSelection, setAdminSelection] = useState(false)
 
-  const options = [
-    { label: 'Глобальний Адмін', value: Roles.GLOBAL_ADMIN },
-    { label: 'Адмін Доменів', value: Roles.DOMAIN_ADMIN },
-  ]
-
-  useEffect(() => {
-    if (adminRoles.some((item) => user?.roles?.includes(item))) {
-      setAdminSelection(true)
-    }
-  }, [])
-
-  const onRadioChange = async (e: RadioChangeEvent) => {
-    if (e?.target?.value === adminRoles) {
-      setAdminSelection(true)
-      setRoles(e.target.value)
-    } else if (e?.target?.value === Roles.WORKER) {
-      if (!user?.isWorker) setIsModalVisible(true)
+  const onChange = async (e: RadioChangeEvent) => {
+    if (!user?.isWorker) {
+      if (e.target.value === Roles.WORKER) {
+        setIsModalVisible(true)
+      }
     } else {
-      setAdminSelection(false)
-      setRoles([`${e.target.value}`])
-      await updateUserRole({
-        email: user?.email,
-        roles: [`${e.target.value}`],
-      })
+      await updateUserRole({ email: user?.email, roles: [`${e.target.value}`] })
     }
-  }
-
-  const onCheckboxChange = async (e) => {
-    setRoles(e)
-    await updateUserRole({
-      email: user?.email,
-      roles: e,
-    })
   }
 
   const onCancelModal = () => {
@@ -94,7 +68,7 @@ const RoleSwitcher: React.FC = () => {
       <Radio.Group
         className={s.RoleSwitcher}
         disabled={isUpdating}
-        onChange={onRadioChange}
+        onChange={onChange}
         style={{ width: '100%' }}
         buttonStyle="solid"
         value={
@@ -107,14 +81,6 @@ const RoleSwitcher: React.FC = () => {
         <Radio.Button value={Roles.WORKER}>Майстер</Radio.Button>
         <Radio.Button value={adminRoles}>Адмін</Radio.Button>
       </Radio.Group>
-      {adminSelection && (
-        <Checkbox.Group
-          options={options}
-          disabled={isUpdating}
-          onChange={onCheckboxChange}
-          defaultValue={user?.roles}
-        />
-      )}
       <div className={s.Worker}>
         <ModalWindow
           title="Переключити на роль майстра"
