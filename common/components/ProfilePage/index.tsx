@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { Radio } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card, Image, Input } from 'antd'
 import RoleSwitcher from 'common/components/UI/roleSwitcher'
@@ -15,7 +16,6 @@ import UnsavedChangesModal from '../UI/UnsavedChangesModal'
 import useLocalStorage from '@common/modules/hooks/useLocalStorage'
 import useGoogleQueries from '@common/modules/hooks/useGoogleQueries'
 import { getFormattedAddress } from '@utils/helpers'
-import { useGetDomainsQuery } from '../../api/domainApi/domain.api'
 
 const ProfilePage: React.FC = () => {
   const [storedData, setValue] = useLocalStorage('profile-data', null)
@@ -29,14 +29,6 @@ const ProfilePage: React.FC = () => {
   if (userData) {
     user = userData
   }
-
-  const { data: domainData, isLoading: isDomainLoading } = useGetDomainsQuery({
-    streetId: '',
-    limit: undefined,
-    adminEmail: user?.email ? user?.email[0] : undefined, // Pass the first email from the adminEmails array to fetch domains associated with the user
-  })
-
-  const userDomains = domainData || []
 
   const handleChange = (value: any) => {
     if (value.name === 'address') {
@@ -60,6 +52,31 @@ const ProfilePage: React.FC = () => {
     setEditing(false)
     setProfileData(storedData)
   }
+
+  const [selectedDomain, setSelectedDomain] = useState<string | null>(null)
+  const [allAdminEmails, setAllAdminEmails] = useState<
+    { email: string; domainName: string }[]
+  >([])
+
+  useEffect(() => {
+    const fetchAllAdminEmails = async () => {
+      try {
+        const response = await fetch('/api/domain/my')
+        const data = await response.json()
+
+        if (data.success) {
+          const adminEmails = data.data
+          setAllAdminEmails(adminEmails)
+        } else {
+          ;('Failed to fetch all admin emails')
+        }
+      } catch (error) {
+        ;('Error while fetching all admin emails')
+      }
+    }
+
+    fetchAllAdminEmails()
+  }, [])
 
   useEffect(() => {
     const profileData = {
@@ -97,12 +114,10 @@ const ProfilePage: React.FC = () => {
               src={<Image src={user?.image || undefined} alt="User" />}
             />
           </div>
-
           <div className={s.Info}>
             <Card size="small" title="Роль">
               {router.query.id ? user?.roles[0] : <RoleSwitcher />}
             </Card>
-
             <Card size="small" title="Електронна пошта" className={s.Edit}>
               <Input
                 name="email"
@@ -110,7 +125,6 @@ const ProfilePage: React.FC = () => {
                 value={profileData?.email}
               />
             </Card>
-
             <Card size="small" title="Номер телефону" className={s.Edit}>
               <Input
                 name="tel"
@@ -119,7 +133,6 @@ const ProfilePage: React.FC = () => {
                 placeholder="Введіть номер телефону"
               />
             </Card>
-
             <Card title="Адреса" size="small" className={s.Edit}>
               <Input
                 name="address"
@@ -129,17 +142,16 @@ const ProfilePage: React.FC = () => {
               />
             </Card>
             <Card size="small" title="Мій домен" className={s.Edit}>
-              {userDomains.map((domain) => {
-                const isAdmin = domain.adminEmails.includes(user?.email)
-                if (isAdmin) {
-                  return (
-                    <div key={domain._id} className={s.DomainMatch}>
-                      {domain.name}
-                    </div>
-                  )
-                }
-                return null
-              })}
+              <Radio.Group>
+                {allAdminEmails
+                  .filter((item) => item.email === user?.email)
+                  .map((item) => (
+                    <Radio.Button value={item} key={item.domainName}>
+                      {' '}
+                      {item.domainName}
+                    </Radio.Button>
+                  ))}
+              </Radio.Group>
             </Card>
           </div>
         </Card>
