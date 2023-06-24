@@ -25,10 +25,7 @@ const ProfilePage: React.FC = () => {
   const [editing, setEditing] = useState<boolean>(false)
   const [updateUser] = useUpdateUserMutation()
   const { data: userData, isLoading } = useGetCurrentUserQuery()
-  let user: any
-  if (userData) {
-    user = userData
-  }
+  const user = userData
 
   const handleChange = (value: any) => {
     if (value.name === 'address') {
