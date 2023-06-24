@@ -53,7 +53,6 @@ const ProfilePage: React.FC = () => {
     setProfileData(storedData)
   }
 
-  const [selectedDomain, setSelectedDomain] = useState<string | null>(null)
   const [allAdminEmails, setAllAdminEmails] = useState<
     { email: string; domainName: string }[]
   >([])
