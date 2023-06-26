@@ -1,4 +1,4 @@
-import React, { FC, useRef } from 'react'
+import React, { FC, useRef, useEffect } from 'react'
 import { Button, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
@@ -9,9 +9,7 @@ import { numberToTextNumber } from '@utils/helpers'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import useServiceCompanyDomain from '@common/modules/hooks/useServiceCompanyDomain'
 import { dateToDayYearMonthFormat } from '@common/assets/features/formatDate'
-import useCompany from '@common/modules/hooks/useCompany'
-import useService from '@common/modules/hooks/useService'
-import useDomain from '@common/modules/hooks/useDomain'
+import { usePaymentContext } from '@common/components/AddPaymentModal'
 
 interface Props {
   currPayment: IExtendedPayment
@@ -68,10 +66,30 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
 
   const { service, company, domain } = useServiceCompanyDomain({
     serviceId: newData?.monthService,
-    companyId: newData?.company._id,
+    companyId: newData?.company,
     domainId: newData?.domain,
-    streetId: newData?.street._id,
+    streetId: newData?.street,
   })
+
+  const { setProvider, setReciever } = usePaymentContext()
+
+  const provider = paymentData?.provider || {
+    name: domain[0]?.name,
+    address: domain[0]?.address,
+    bankInformation: domain[0]?.bankInformation,
+  }
+
+  const reciever = paymentData?.reciever || {
+    companyName: company?.companyName,
+    adminEmails: company?.adminEmails,
+    phone: company?.phone,
+  }
+
+  useEffect(() => {
+    setProvider(provider)
+    setReciever(reciever)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [provider, reciever])
 
   const date = getFormattedDate(service?.date)
 
@@ -148,13 +166,13 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.providerInfo}>
             <div className={s.label}>Постачальник</div>
             <div>
-              {domain[0]?.name} <br />
-              Адреса {domain[0]?.address}
+              {provider?.name} <br />
+              Адреса {provider?.address}
               <br />
               Реєстраційний номер ... <br />є платником податку на прибуток на
               загальних підставах <br />
               <div className={s.info_adres__bold}>
-                {domain[0]?.bankInformation}
+                {provider?.bankInformation}
               </div>
             </div>
           </div>
@@ -162,13 +180,13 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.receiverInfo}>
             <div className={s.label}>Одержувач</div>
             <div>
-              {company?.companyName} <br />
-              {company?.adminEmails.map((email) => (
+              {reciever?.companyName} <br />
+              {reciever?.adminEmails.map((email) => (
                 <>
                   {email} <br />
                 </>
               ))}
-              {company?.phone}
+              {reciever?.phone}
             </div>
           </div>
         </>

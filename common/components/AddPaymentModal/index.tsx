@@ -5,10 +5,18 @@ import {
 } from '@common/api/paymentApi/payment.api'
 import {
   IExtendedPayment,
-  IPayment,
+  IProvider,
+  IReciever,
 } from '@common/api/paymentApi/payment.api.types'
 import { Form, message, Modal, Tabs, TabsProps } from 'antd'
-import React, { FC, createContext, useContext, useState } from 'react'
+import React, {
+  Dispatch,
+  FC,
+  SetStateAction,
+  createContext,
+  useContext,
+  useState,
+} from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
@@ -22,7 +30,12 @@ interface Props {
 }
 
 export const PaymentContext = createContext(
-  {} as { paymentData: any; form: FormInstance }
+  {} as {
+    paymentData: any
+    form: FormInstance
+    setProvider: Dispatch<SetStateAction<IProvider>>
+    setReciever: Dispatch<SetStateAction<IReciever>>
+  }
 )
 export const usePaymentContext = () => useContext(PaymentContext)
 
@@ -30,6 +43,8 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
+  const [provider, setProvider] = useState<IProvider>()
+  const [reciever, setReciever] = useState<IReciever>()
 
   const { data: count } = useGetPaymentsCountQuery()
 
@@ -58,6 +73,8 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
           formData.placingPrice.sum +
           formData.electricityPrice.sum +
           formData.waterPrice.sum,
+      provider,
+      reciever,
       invoice: formData.debit
         ? [
             {
@@ -119,7 +136,14 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   ]
 
   return (
-    <PaymentContext.Provider value={{ paymentData, form }}>
+    <PaymentContext.Provider
+      value={{
+        paymentData,
+        form,
+        setProvider,
+        setReciever,
+      }}
+    >
       <Modal
         open={true}
         maskClosable={false}
