@@ -17,7 +17,7 @@ import { SelectOutlined } from '@ant-design/icons'
 import cn from 'classnames'
 import moment from 'moment'
 import s from './style.module.scss'
-import { firstTextToUpperCase } from '@utils/helpers'
+import { firstTextToUpperCase, isAdminCheck } from '@utils/helpers'
 import { renderCurrency } from './payments'
 
 const ServicesBlock = () => {
@@ -35,6 +35,7 @@ const ServicesBlock = () => {
   } = useGetCurrentUserQuery()
 
   const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isAdmin = isAdminCheck(currUser?.roles)
 
   const {
     data: services,
@@ -152,7 +153,7 @@ const ServicesBlock = () => {
       title={
         email ? (
           <span className={s.title}>{`Оплата від користувача ${email}`}</span>
-        ) : isGlobalAdmin ? (
+        ) : isAdmin ? (
           <ServiceCardHeader />
         ) : (
           <Link href={AppRoutes.SERVICE}>

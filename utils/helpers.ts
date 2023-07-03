@@ -182,3 +182,9 @@ export function numberToTextNumber(number) {
   out = arr.join('')
   return out
 }
+
+export const isAdminCheck = (roles) => {
+  return [Roles.GLOBAL_ADMIN, Roles.DOMAIN_ADMIN].some((role) =>
+    roles?.includes(role)
+  )
+}

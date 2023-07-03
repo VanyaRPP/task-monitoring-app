@@ -8,11 +8,13 @@ import DomainsBlock from './blocks/domains'
 import { Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import StreetsBlock from './blocks/streets'
+import { isAdminCheck } from '@utils/helpers'
 
 const Dashboard: FC = () => {
   const { data: userResponse } = useGetCurrentUserQuery()
   const userRoles = userResponse?.roles
   const globalAdmin = userRoles?.includes(Roles.GLOBAL_ADMIN)
+  const admin = isAdminCheck(userRoles)
   return (
     <>
       <DashboardHeader />
@@ -24,7 +26,7 @@ const Dashboard: FC = () => {
           </>
         )}
       </div>
-      <div className={s.Container}>{globalAdmin && <RealEstateBlock />}</div>
+      <div className={s.Container}>{admin && <RealEstateBlock />}</div>
       <div className={s.Container}>
         <ServicesBlock />
         <PaymentsBlock />

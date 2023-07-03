@@ -86,9 +86,9 @@ export default async function handler(
 
     case 'POST':
       try {
-        const { isGlobalAdmin } = await getCurrentUser(req, res)
+        const { isAdmin } = await getCurrentUser(req, res)
 
-        if (isGlobalAdmin) {
+        if (isAdmin) {
           await postValidateBody(req, res)
           const payment = await Payment.create(req.body)
           return res.status(200).json({ success: true, data: payment })
