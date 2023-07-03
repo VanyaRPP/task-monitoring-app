@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
 import User from '@common/modules/models/User'
 import { Roles } from './constants'
+import { isAdminCheck } from './helpers'
 
 function isNextApiRequest(obj: any): obj is NextApiRequest {
   return (
@@ -21,7 +22,8 @@ export async function getCurrentUser(req, res) {
       return
     }
     const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
-    return { session, user, isGlobalAdmin }
+    const isAdmin = isAdminCheck(user?.roles)
+    return { session, user, isGlobalAdmin, isAdmin }
   } else {
     throw new Error('bad request no permitions')
   }

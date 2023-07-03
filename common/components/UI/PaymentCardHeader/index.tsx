@@ -1,12 +1,12 @@
 import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
-import React, { FC, useState } from 'react'
-import { AppRoutes, Roles } from '@utils/constants'
+import React, { useState } from 'react'
+import { AppRoutes } from '@utils/constants'
 import { Button } from 'antd'
 import { useRouter } from 'next/router'
 import AddPaymentModal from '@common/components/AddPaymentModal'
-import Link from 'next/link'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import s from './style.module.scss'
+import { isAdminCheck } from '@utils/helpers'
 
 const PaymentCardHeader = ({ currentPayment, closeEditModal }) => {
   const router = useRouter()
@@ -23,12 +23,12 @@ const PaymentCardHeader = ({ currentPayment, closeEditModal }) => {
     closeEditModal()
   }
 
-  const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isAdmin = isAdminCheck(currUser?.roles)
 
   return (
     <>
       <div className={s.tableHeader}>
-        {isGlobalAdmin ? (
+        {isAdmin ? (
           <>
             {email ? (
               <span

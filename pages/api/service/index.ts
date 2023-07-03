@@ -11,7 +11,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { session, isGlobalAdmin } = await getCurrentUser(req, res)
+  const { session, isGlobalAdmin, isAdmin } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'GET':
@@ -54,7 +54,7 @@ export default async function handler(
 
     case 'POST':
       try {
-        if (isGlobalAdmin) {
+        if (isAdmin) {
           // TODO: body validation
           const service = await Service.create(req.body)
           return res.status(200).json({ success: true, data: service })
