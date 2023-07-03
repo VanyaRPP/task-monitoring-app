@@ -10,15 +10,15 @@ export interface IPaymentField {
   sum: number
 }
 
-interface IProvider {
+export interface IProvider {
   name: string
   address: string
   bankInformation: string
 }
 
-interface IReciever {
+export interface IReciever {
   companyName: string
-  emails: string[]
+  adminEmails: string[]
   phone: string
 }
 
@@ -33,6 +33,8 @@ export interface IPayment {
   description?: string
   services?: IPaymentTableData[]
   invoice: IPaymentField[]
+  provider: IProvider
+  reciever: IReciever
   generalSum: number
 }
 

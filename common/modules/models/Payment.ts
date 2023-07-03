@@ -1,6 +1,10 @@
 import mongoose, { ObjectId, Schema } from 'mongoose'
 import { IPaymentTableData, IRentTableData } from '@utils/tableData'
-import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
+import {
+  IPaymentField,
+  IProvider,
+  IReciever,
+} from '@common/api/paymentApi/payment.api.types'
 export interface IPaymentModel {
   invoiceNumber: number
   type: string
@@ -12,6 +16,8 @@ export interface IPaymentModel {
   invoice: IPaymentField[]
   description?: string
   services?: IPaymentTableData[]
+  provider: IProvider
+  reciever: IReciever
   generalSum: number
 }
 
@@ -26,6 +32,8 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   description: { type: String },
   invoice: { type: [Object] },
   services: { type: [Object] },
+  provider: { type: Object },
+  reciever: { type: Object },
   generalSum: { type: Number },
 })
 
