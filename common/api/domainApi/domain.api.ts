@@ -24,10 +24,22 @@ export const domainApi = createApi({
       query: ({ limit, streetId }) => {
         return {
           url: `domain`,
-          params: {
-            limit,
-            streetId,
-          },
+          params: { limit, streetId },
+        }
+      },
+      providesTags: (response) =>
+        response
+          ? response.map((item) => ({ type: 'Domain', id: item._id }))
+          : [],
+      transformResponse: (response: IGetDomainResponse) => response.data,
+    }),
+    // TODO: fix and add typisation
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    getMyDomains: builder.query<IExtendedDomain[]>({
+      query: () => {
+        return {
+          url: `domain/my`,
         }
       },
       providesTags: (response) =>
@@ -63,6 +75,7 @@ export const domainApi = createApi({
 })
 
 export const {
+  useGetMyDomainsQuery,
   useGetDomainsQuery,
   useAddDomainMutation,
   useDeleteDomainMutation,

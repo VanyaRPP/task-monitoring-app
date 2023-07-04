@@ -4,7 +4,6 @@ import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card, Image, Input } from 'antd'
 import RoleSwitcher from 'common/components/UI/roleSwitcher'
 import Router, { useRouter } from 'next/router'
-import FeedbacksCard from 'common/components/FeedbacksCard'
 import s from './style.module.scss'
 import {
   useGetCurrentUserQuery,
@@ -16,6 +15,7 @@ import UnsavedChangesModal from '../UI/UnsavedChangesModal'
 import useLocalStorage from '@common/modules/hooks/useLocalStorage'
 import useGoogleQueries from '@common/modules/hooks/useGoogleQueries'
 import { getFormattedAddress } from '@utils/helpers'
+import MyDomain from './my-domain'
 
 const ProfilePage: React.FC = () => {
   const [storedData, setValue] = useLocalStorage('profile-data', null)
@@ -49,30 +49,6 @@ const ProfilePage: React.FC = () => {
     setEditing(false)
     setProfileData(storedData)
   }
-
-  const [allAdminEmails, setAllAdminEmails] = useState<
-    { email: string; domainName: string }[]
-  >([])
-
-  useEffect(() => {
-    const fetchAllAdminEmails = async () => {
-      try {
-        const response = await fetch('/api/domain/my')
-        const data = await response.json()
-
-        if (data.success) {
-          const adminEmails = data.data
-          setAllAdminEmails(adminEmails)
-        } else {
-          ;('Failed to fetch all admin emails')
-        }
-      } catch (error) {
-        ;('Error while fetching all admin emails')
-      }
-    }
-
-    fetchAllAdminEmails()
-  }, [])
 
   useEffect(() => {
     const profileData = {
@@ -137,18 +113,7 @@ const ProfilePage: React.FC = () => {
                 placeholder="Введіть адресу"
               />
             </Card>
-            <Card size="small" title="Мій домен" className={s.Edit}>
-              <Radio.Group>
-                {allAdminEmails
-                  .filter((item) => item.email === user?.email)
-                  .map((item) => (
-                    <Radio.Button value={item} key={item.domainName}>
-                      {' '}
-                      {item.domainName}
-                    </Radio.Button>
-                  ))}
-              </Radio.Group>
-            </Card>
+            <MyDomain />
           </div>
         </Card>
         {/* <FeedbacksCard user={user} loading={isLoading} userRate={userRate} /> */}
