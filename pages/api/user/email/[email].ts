@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from 'pages/api/api.config'
 import User from 'common/modules/models/User'
-import { Roles } from '@utils/constants'
+import { getCurrentUser } from '@utils/getCurrentUser'
 
 start()
 
@@ -12,38 +12,18 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const user = await User.findOne({ email: req.query.email })
-
-        return res.status(200).json({
-          success: true,
-          data: { email: user.email, name: user.name, image: user.image },
-        })
+        const { isAdmin } = await getCurrentUser(req, res)
+        if (isAdmin) {
+          const user = await User.findOne({ email: req.query.email })
+          return res.status(200).json({
+            success: true,
+            data: { email: user.email, name: user.name, image: user.image },
+          })
+        }
       } catch (error) {
         return res.status(400).json({ success: false })
       }
     case 'PATCH':
-      /*try {
-        let user
-        if (req.body.tel) {
-          user = await User.findOneAndUpdate(
-            { email: req.query.email },
-            {
-              isWorker: true,
-              tel: req.body.tel,
-              roles: ['Worker'],
-              address: req.body.address,
-            }
-          )
-        } else {
-          user = await User.findOneAndUpdate(
-            { email: req.query.email, roles: [Roles.GLOBAL_ADMIN] },
-            { roles: req.query.roles }
-          )
-        }
-        return res.status(200).json({ success: true, data: user })
-      } catch (error) {
-        return res.status(400).json({ success: false })
-      }*/
-      return null
+      return return res.status(400).json({ success: false })
   }
 }
