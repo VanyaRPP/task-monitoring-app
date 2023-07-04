@@ -2,7 +2,6 @@
 // @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from 'pages/api/api.config'
-import User from 'common/modules/models/User'
 
 start()
 
@@ -13,28 +12,33 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const user = await User.findById(req.query.id).populate('payments')
-        return res.status(200).json({
-          success: true,
-          data: { email: user.email, name: user.name, image: user.image },
-        })
+        return res
+          .status(400)
+          .json({ success: false, message: 'not implemented' })
+        // const user = await User.findById(req.query.id).populate('payments')
+        // return res.status(200).json({
+        //   success: true,
+        //   data: { email: user.email, name: user.name, image: user.image },
+        // })
       } catch (error) {
         return res.status(400).json({ success: false })
       }
     case 'PATCH':
-      try {
-        const user = await User.updateOne(
-          { _id: req.query.id },
-          {
-            ...req.body,
-          }
-        )
-        return res.status(200).json({
-          data: { email: user.email, name: user.name, image: user.image },
-          success: true,
-        })
-      } catch (error) {
-        return res.status(400).json({ success: false })
-      }
+      // TODO: user should update only himself
+      return res.status(400).json({ success: false, message: 'not allowed' })
+    // try {
+    //   const user = await User.updateOne(
+    //     { _id: req.query.id },
+    //     {
+    //       ...req.body,
+    //     }
+    //   )
+    //   return res.status(200).json({
+    //     data: { email: user.email, name: user.name, image: user.image },
+    //     success: true,
+    //   })
+    // } catch (error) {
+    //   return res.status(400).json({ success: false })
+    // }
   }
 }

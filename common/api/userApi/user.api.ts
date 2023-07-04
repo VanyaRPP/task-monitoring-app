@@ -27,17 +27,19 @@ export const userApi = createApi({
       query: (id) => `user/${id}`,
       providesTags: (result) => ['User'],
     }),
-    updateUserRole: builder.mutation<IUser, Partial<IUser>>({
-      query(data) {
-        const { email, ...body } = data
-        return {
-          url: `user/email/${email}?roles=${body.roles}`,
-          method: 'PATCH',
-          body,
-        }
-      },
-      invalidatesTags: ['User'],
-    }),
+    // updateUserRole: builder.mutation<IUser, Partial<IUser>>({
+    //   query(data) {
+    //     const { email, ...body } = data
+    //     return {
+    //       url: `user/email/${email}?roles=${body.roles}`,
+    //       method: 'PATCH',
+    //       body,
+    //     }
+    //   },
+    //   invalidatesTags: ['User'],
+    // }),
+
+    // TODO: fix. user can update only himself
     updateUser: builder.mutation<IUser, Partial<IUser>>({
       query(data) {
         const { _id, ...body } = data
@@ -78,7 +80,7 @@ export const {
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
   useGetCurrentUserQuery,
-  useUpdateUserRoleMutation,
+  // useUpdateUserRoleMutation,
   useUpdateUserMutation,
   useGetAllUsersQuery,
   useAddFeedbackMutation,
