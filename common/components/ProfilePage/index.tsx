@@ -3,7 +3,6 @@ import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card, Image, Input } from 'antd'
 import RoleSwitcher from 'common/components/UI/roleSwitcher'
 import Router, { useRouter } from 'next/router'
-import FeedbacksCard from 'common/components/FeedbacksCard'
 import s from './style.module.scss'
 import {
   useGetCurrentUserQuery,
@@ -15,6 +14,7 @@ import UnsavedChangesModal from '../UI/UnsavedChangesModal'
 import useLocalStorage from '@common/modules/hooks/useLocalStorage'
 import useGoogleQueries from '@common/modules/hooks/useGoogleQueries'
 import { getFormattedAddress } from '@utils/helpers'
+import MyDomain from './my-domain'
 
 const ProfilePage: React.FC = () => {
   const [storedData, setValue] = useLocalStorage('profile-data', null)
@@ -22,7 +22,6 @@ const ProfilePage: React.FC = () => {
   const router = useRouter()
   const [profileData, setProfileData] = useState<IProfileData>()
   const [editing, setEditing] = useState<boolean>(false)
-
   const [updateUser] = useUpdateUserMutation()
   const { data: userData, isLoading } = useGetCurrentUserQuery()
   const user = userData
@@ -86,12 +85,10 @@ const ProfilePage: React.FC = () => {
               src={<Image src={user?.image || undefined} alt="User" />}
             />
           </div>
-
           <div className={s.Info}>
             <Card size="small" title="Роль">
               {router.query.id ? user?.roles[0] : <RoleSwitcher />}
             </Card>
-
             <Card size="small" title="Електронна пошта" className={s.Edit}>
               <Input
                 name="email"
@@ -99,7 +96,6 @@ const ProfilePage: React.FC = () => {
                 value={profileData?.email}
               />
             </Card>
-
             <Card size="small" title="Номер телефону" className={s.Edit}>
               <Input
                 name="tel"
@@ -108,7 +104,6 @@ const ProfilePage: React.FC = () => {
                 placeholder="Введіть номер телефону"
               />
             </Card>
-
             <Card title="Адреса" size="small" className={s.Edit}>
               <Input
                 name="address"
@@ -117,6 +112,7 @@ const ProfilePage: React.FC = () => {
                 placeholder="Введіть адресу"
               />
             </Card>
+            <MyDomain />
           </div>
         </Card>
         {/* <FeedbacksCard user={user} loading={isLoading} userRate={userRate} /> */}

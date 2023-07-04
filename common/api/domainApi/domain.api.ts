@@ -33,6 +33,21 @@ export const domainApi = createApi({
           : [],
       transformResponse: (response: IGetDomainResponse) => response.data,
     }),
+    // TODO: fix and add typisation
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    getMyDomains: builder.query<IExtendedDomain[]>({
+      query: () => {
+        return {
+          url: `domain/my`,
+        }
+      },
+      providesTags: (response) =>
+        response
+          ? response.map((item) => ({ type: 'Domain', id: item._id }))
+          : [],
+      transformResponse: (response: IGetDomainResponse) => response.data,
+    }),
     addDomain: builder.mutation<IAddDomainResponse, IDomainModel>({
       query(data) {
         const { ...body } = data
@@ -60,6 +75,7 @@ export const domainApi = createApi({
 })
 
 export const {
+  useGetMyDomainsQuery,
   useGetDomainsQuery,
   useAddDomainMutation,
   useDeleteDomainMutation,
