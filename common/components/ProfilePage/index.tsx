@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { Radio } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Card, Image, Input } from 'antd'
 import RoleSwitcher from 'common/components/UI/roleSwitcher'
