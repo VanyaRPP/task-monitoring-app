@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import start, { Data } from 'pages/api/api.config'
-import Payment from '@common/modules/models/Payment'
-import { check, validationResult } from 'express-validator'
-import initMiddleware from '@common/lib/initMiddleware'
 import validateMiddleware from '@common/lib/validateMiddleware'
-import { getPaymentOptions } from '@utils/helpers'
+import type { NextApiRequest, NextApiResponse } from 'next'
+import { check, validationResult } from 'express-validator'
+import RealEstate from '@common/modules/models/RealEstate'
+import initMiddleware from '@common/lib/initMiddleware'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import Payment from '@common/modules/models/Payment'
+import start, { Data } from 'pages/api/api.config'
+import { getPaymentOptions } from '@utils/helpers'
+import Domain from '@common/modules/models/Domain'
 
 start()
 
@@ -62,12 +64,28 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { session } = await getCurrentUser(req, res)
+        const { isDomainAdmin, isUser, user } = await getCurrentUser(req, res)
 
         const options = await getPaymentOptions({
           searchEmail: req.query.email,
-          userEmail: session.user.email,
+          userEmail: user.email,
         })
+
+        if (isDomainAdmin) {
+          const domains = await Domain.find({
+            adminEmails: { $in: [user.email] },
+          })
+          const domainsIds = domains.map((i) => i._id)
+          options.domain = { $in: domainsIds }
+        }
+
+        if (isUser) { 
+          const realEstates = await RealEstate.find({
+            adminEmails: { $in: [user.email] },
+          })
+          const realEstatesIds = realEstates.map((i) => i._id)
+          options.company = { $in: realEstatesIds }
+        }
 
         const payments = await Payment.find(options)
           .sort({ date: -1 })
