@@ -21,10 +21,14 @@ export default async function handler(
         if (user.roles?.includes(Roles.DOMAIN_ADMIN)) {
           const domains = await Domain.find({
             adminEmails: { $in: [user.email] },
-          })
+          }).populate({path: 'streets', select: '_id address city'})
           // TODO: return more fields, add typisation
           // TODO: IDomain
-          const data = domains.map((i) => ({ name: i.name }))
+          const data = domains.map((i) => ({
+            _id: i._id,
+            name: i.name,
+            streets: i.streets
+          }))
           return res.status(200).json({ success: true, data })
         }
 

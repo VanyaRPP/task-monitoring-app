@@ -1,4 +1,4 @@
-import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import { useGetDomainsQuery, useGetMyDomainsQuery } from '@common/api/domainApi/domain.api'
 import { validateField } from '@common/assets/features/validators'
 import { useCompanyPageContext } from '@common/components/DashboardPage/blocks/realEstates'
 import { Form, Select } from 'antd'
@@ -12,9 +12,11 @@ export default function AddressesSelect({
   form: any
 }) {
   const { streetId } = useCompanyPageContext()
-  const { data, isLoading } = useGetDomainsQuery({})
+  const { data: allDomains, isLoading: allDomainsLoading } = useGetDomainsQuery({})
+  const { data: myDomains = [], isLoading: myDomainsLoading } =
+    useGetMyDomainsQuery({})
   const domain = Form.useWatch('domain', form)
-  const domainObj = data?.find((i) => i._id === domain)
+  const domainObj = allDomains?.find((i) => i._id === domain) || myDomains?.find((i) => i._id === domain)
   const temp = (domainObj?.streets as any[]) || [] // eslint-disable-line react-hooks/exhaustive-deps
   const singleStreet = streetId && temp.find((i) => i._id === streetId)
   const streets = singleStreet ? [singleStreet] : temp
@@ -49,7 +51,7 @@ export default function AddressesSelect({
         optionFilterProp="children"
         placeholder="Пошук адреси"
         disabled={!domain || streets?.length === 1 || disabled}
-        loading={isLoading}
+        loading={myDomainsLoading}
         showSearch
       />
     </Form.Item>
