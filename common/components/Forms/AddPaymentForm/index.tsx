@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, useEffect } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import s from './style.module.scss'
@@ -48,6 +48,11 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
       (item) => item?.type === ServiceType.Water
     ),
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('invoice', paymentData)
+  })
 
   const initialValues = {
     domain: domain?.name,

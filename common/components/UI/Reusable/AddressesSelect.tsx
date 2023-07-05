@@ -1,6 +1,8 @@
 import { useGetDomainsQuery, useGetMyDomainsQuery } from '@common/api/domainApi/domain.api'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { validateField } from '@common/assets/features/validators'
 import { useCompanyPageContext } from '@common/components/DashboardPage/blocks/realEstates'
+import { Roles } from '@utils/constants'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
@@ -12,11 +14,12 @@ export default function AddressesSelect({
   form: any
 }) {
   const { streetId } = useCompanyPageContext()
-  const { data: allDomains, isLoading: allDomainsLoading } = useGetDomainsQuery({})
-  const { data: myDomains = [], isLoading: myDomainsLoading } =
-    useGetMyDomainsQuery({})
+  const { data: userResponse } = useGetCurrentUserQuery()
+  const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const useQuery = isGlobalAdmin ? useGetDomainsQuery : useGetMyDomainsQuery
+  const { data: data = [], isLoading } = useQuery({})
   const domain = Form.useWatch('domain', form)
-  const domainObj = allDomains?.find((i) => i._id === domain) || myDomains?.find((i) => i._id === domain)
+  const domainObj = data?.find((i) => i._id === domain)
   const temp = (domainObj?.streets as any[]) || [] // eslint-disable-line react-hooks/exhaustive-deps
   const singleStreet = streetId && temp.find((i) => i._id === streetId)
   const streets = singleStreet ? [singleStreet] : temp
@@ -51,7 +54,7 @@ export default function AddressesSelect({
         optionFilterProp="children"
         placeholder="Пошук адреси"
         disabled={!domain || streets?.length === 1 || disabled}
-        loading={allDomainsLoading || myDomainsLoading}
+        loading={isLoading}
         showSearch
       />
     </Form.Item>

@@ -7,25 +7,26 @@ import { Roles } from '@utils/constants'
 
 function useDomain({ domainId }) {
   const { data: userResponse } = useGetCurrentUserQuery()
+  const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
+  
+  const useQuery = isGlobalAdmin ? useGetDomainsQuery : useGetMyDomainsQuery
 
-  const { data: allDomains, isLoading: allDomainsLoading } = useGetDomainsQuery({})
-  const {data: myDomains, isLoading: myDomainsLoading} = useGetMyDomainsQuery({})
+  const { data, isLoading } = useQuery({})
   if (domainId) {
-    const domains = allDomains || myDomains
-    const singleDomain = domains?.find((i) => i._id === domainId)
+    const singleDomain = data?.find((i) => i._id === domainId)
     return {
       data: singleDomain ? [singleDomain] : [],
-      isLoading: allDomainsLoading,
+      isLoading
     }
   }
   if (
     userResponse?.roles?.includes(Roles.DOMAIN_ADMIN) ||
     userResponse?.roles?.includes(Roles.USER)
   ) {
-    return { data: myDomains ? myDomains : [], isLoading: myDomainsLoading }
+    return { data: data || [], isLoading }
   }
 
-  return { data: allDomains, isLoading: allDomainsLoading }
+  return { data, isLoading }
 }
 
 export default useDomain
