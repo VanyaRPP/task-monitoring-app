@@ -71,15 +71,6 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     streetId: newData?.street,
   })
 
-  useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('Service: ', service)
-    // eslint-disable-next-line no-console
-    console.log('Company: ', company)
-    // eslint-disable-next-line no-console
-    console.log('Domain: ', domain)
-  }, [])
-
   const { setProvider, setReciever } = usePaymentContext()
 
   const provider = paymentData?.provider || {
