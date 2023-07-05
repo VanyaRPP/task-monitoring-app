@@ -24,6 +24,6 @@ export default async function handler(
         return res.status(400).json({ success: false })
       }
     case 'PATCH':
-      return return res.status(400).json({ success: false })
+      return res.status(400).json({ success: false })
   }
 }

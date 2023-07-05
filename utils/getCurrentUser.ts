@@ -19,11 +19,12 @@ export async function getCurrentUser(req, res) {
     const user = await User.findOne({ email: session?.user?.email })
     if (!user) {
       throw new Error('no user found')
-      return
     }
     const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
+    const isDomainAdmin = user?.roles?.includes(Roles.DOMAIN_ADMIN)
+    const isUser = user?.roles?.includes(Roles.USER)
     const isAdmin = isAdminCheck(user?.roles)
-    return { session, user, isGlobalAdmin, isAdmin }
+    return { isDomainAdmin, isGlobalAdmin, isUser, isAdmin, session, user }
   } else {
     throw new Error('bad request no permitions')
   }
