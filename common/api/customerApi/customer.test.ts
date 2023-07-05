@@ -1,11 +1,13 @@
+/* eslint-disable no-console */
 import { jest, test, expect } from '@jest/globals';
-import { useAddCustomerMutation, useGetAllCustomerQuery } from './customer.api';
+import { customerApi, useAddCustomerMutation, useGetAllCustomerQuery } from './customer.api';
 import { ICustomer } from './customer.api.types';
 
-jest.mock('./customer.api', () => ({
-  useAddCustomerMutation: jest.fn(),
-  useGetAllCustomerQuery: jest.fn(),
-}));
+jest.mock('./customer.api')
+// jest.mock('./customer.api', () => ({
+//   useAddCustomerMutation: jest.fn(),
+//   useGetAllCustomerQuery: jest.fn(),
+// }));
 
 describe('customerApi', () => {
   const mockMutation = useAddCustomerMutation as jest.Mock;
@@ -49,12 +51,16 @@ describe('customerApi', () => {
   });
 
   test('GET limit test', async () => {
-    const mockResponse = Array(5).fill({ customer: "test", location: "test" });
-    mockQuery.mockReturnValueOnce({ data: mockResponse });
+    const limitLength = 10;
+    const mockResponse = new Array(limitLength).fill({customer:"test"});
 
-    const response = await mockQuery({ limit: 5 });
+    mockQuery.mockReturnValue({ data: mockResponse });
 
-    expect(mockQuery).toHaveBeenCalledWith({ limit: 5 });
+    const response = await useGetAllCustomerQuery({ limit: limitLength });
+   
+    expect.assertions(3);
+    expect(mockQuery).toHaveBeenCalledWith({ limit: limitLength });
+    expect(response.data.length).toEqual(limitLength);
     expect(response.data).toEqual(mockResponse);
   });
 });

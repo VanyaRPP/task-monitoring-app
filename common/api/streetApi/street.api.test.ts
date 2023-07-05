@@ -1,21 +1,24 @@
 import { useGetAllStreetsQuery } from './street.api';
-import {jest,expect,test} from "@jest/globals";
+import {jest,test,expect} from "@jest/globals";
 
 jest.mock('./street.api', () => ({
   useGetAllStreetsQuery: jest.fn(),
 }));
 
 describe('GET', () => {
-    test('getAllStreets return 5', async () => {
-      const mockUseGetAllStreetsQuery = jest.fn(() => ({
-        data: {
-          data: Array(5).fill({}),
-          isLoading: false,
-          isError: false,
-        },
-      }));
-  
-      const { data } = mockUseGetAllStreetsQuery();
-      expect(data.data).toHaveLength(5);
-    });
+  const mockStreetQuery = useGetAllStreetsQuery as jest.Mock;
+
+  test('returns 5 values', async () => {
+    const mockResponse = new Array(5).fill({});
+    const domainId = "admin";
+
+    mockStreetQuery.mockResolvedValueOnce({ data: mockResponse });
+
+    const { data } = await useGetAllStreetsQuery({ domainId });
+
+    expect.assertions(3);
+    expect(mockStreetQuery).toHaveBeenCalledWith({ domainId });
+    expect(data).toEqual(mockResponse);
+    expect(data.length).toEqual(5);
+  });
 });
