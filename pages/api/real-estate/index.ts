@@ -12,14 +12,14 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isDomainAdmin, isAdmin, isUser, user } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'GET':
       try {
         const options = {}
         const { domainId, streetId } = req.query
-        if (domainId && streetId) {
+        if (isGlobalAdmin && domainId && streetId) {
           options.domain = domainId
           options.street = streetId
         }
