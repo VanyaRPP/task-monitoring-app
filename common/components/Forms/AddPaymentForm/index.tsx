@@ -1,4 +1,4 @@
-import React, { FC } from 'react'
+import React, { FC, useEffect } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import s from './style.module.scss'
@@ -10,7 +10,7 @@ import PaymentTotal from './PaymentTotal'
 import PaymentPricesTable from './PaymentPricesTable'
 import MonthServiceSelect from './MonthServiceSelect'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
-import useDomain from '@common/modules/hooks/useDomain'
+// import useDomain from '@common/modules/hooks/useDomain'
 import useService from '@common/modules/hooks/useService'
 import moment from 'moment'
 
@@ -24,13 +24,12 @@ interface Props {
 const AddPaymentForm: FC<Props> = ({ edit }) => {
   const { paymentData, form } = usePaymentContext()
 
-  const { data: domains } = useDomain({ domainId: paymentData?.domain })
+  // const { data: domains } = useDomain({ domainId: edit && paymentData?.domain  })
   const { service } = useService({
     serviceId: paymentData?.monthService,
     domainId: paymentData?.domain,
     streetId: paymentData?.street[0],
   })
-  const domain = domains[0]
 
   const month = moment(service?.date).format('MMMM')
 
@@ -50,10 +49,9 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
   }
 
   const initialValues = {
-    domain: domain?.name,
-    street:
-      paymentData?.street &&
-      `${paymentData.street.address} (м. ${paymentData.street.city})`,
+    domain: paymentData?.domain,
+    street: paymentData?.street?._id,
+    // street: paymentData?.street && `${paymentData.street.address} (м. ${paymentData.street.city})`,
     monthService: month.charAt(0).toUpperCase() + month.slice(1),
     company: paymentData?.company.companyName,
     description: paymentData?.description,
@@ -79,15 +77,18 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
       price: invoices.water?.price,
     },
   }
-
+  // TODO: fix initialValues
+  // something strange
+  // MonthServiceSelect CompanySelect
+  // infinite render
   return (
     <Form
-      initialValues={initialValues}
+      // initialValues={initialValues}
       form={form}
       layout="vertical"
       className={s.Form}
     >
-      <DomainsSelect disabled={edit} form={form} paymentData={paymentData} />
+      <DomainsSelect disabled={edit} form={form} />
       <AddressesSelect disabled={edit} form={form} />
       <MonthServiceSelect disabled={edit} form={form} />
       <CompanySelect disabled={edit} form={form} />

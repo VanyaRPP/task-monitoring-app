@@ -14,32 +14,14 @@ export const domainApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    // TODO: fix and add typisation
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     getDomains: builder.query<
       IExtendedDomain[],
-      { limit?: number; streetId?: string }
+      { limit?: number; streetId?: string; domainId?: string }
     >({
-      query: ({ limit, streetId }) => {
+      query: ({ limit, streetId, domainId }) => {
         return {
           url: `domain`,
-          params: { limit, streetId },
-        }
-      },
-      providesTags: (response) =>
-        response
-          ? response.map((item) => ({ type: 'Domain', id: item._id }))
-          : [],
-      transformResponse: (response: IGetDomainResponse) => response.data,
-    }),
-    // TODO: fix and add typisation
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    getMyDomains: builder.query<IExtendedDomain[]>({
-      query: () => {
-        return {
-          url: `domain/my`,
+          params: { limit, streetId, domainId },
         }
       },
       providesTags: (response) =>
@@ -75,7 +57,6 @@ export const domainApi = createApi({
 })
 
 export const {
-  useGetMyDomainsQuery,
   useGetDomainsQuery,
   useAddDomainMutation,
   useDeleteDomainMutation,
