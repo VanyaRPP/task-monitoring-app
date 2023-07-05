@@ -1,8 +1,7 @@
-import { useGetDomainsQuery, useGetMyDomainsQuery } from '@common/api/domainApi/domain.api'
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { validateField } from '@common/assets/features/validators'
 import { useCompanyPageContext } from '@common/components/DashboardPage/blocks/realEstates'
-import { Roles } from '@utils/constants'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import { validateField } from '@common/assets/features/validators'
+import { IDomain } from '@common/modules/models/Domain'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
@@ -13,13 +12,12 @@ export default function AddressesSelect({
   disabled?: boolean
   form: any
 }) {
+  // TODO: recheck
+  // in preview mode we need to prevent all data fetching. only single
   const { streetId } = useCompanyPageContext()
-  const { data: userResponse } = useGetCurrentUserQuery()
-  const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
-  const useQuery = isGlobalAdmin ? useGetDomainsQuery : useGetMyDomainsQuery
-  const { data: data = [], isLoading } = useQuery({})
-  const domain = Form.useWatch('domain', form)
-  const domainObj = data?.find((i) => i._id === domain)
+  const domainId = Form.useWatch('domain', form)
+  const { data = [], isLoading } = useGetDomainsQuery({ domainId: domainId || undefined })
+  const domainObj = data.length > 0 ? data[0] : {} as IDomain
   const temp = (domainObj?.streets as any[]) || [] // eslint-disable-line react-hooks/exhaustive-deps
   const singleStreet = streetId && temp.find((i) => i._id === streetId)
   const streets = singleStreet ? [singleStreet] : temp
@@ -42,8 +40,6 @@ export default function AddressesSelect({
             // @ts-ignore
             .localeCompare((optionB?.label ?? '').toLowerCase())
         }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         filterOption={(input, option) => (option?.label ?? '').includes(input)}
         options={
           streets?.map((i) => ({
@@ -53,7 +49,7 @@ export default function AddressesSelect({
         }
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={!domain || streets?.length === 1 || disabled}
+        disabled={!domainId || streets?.length === 1 || disabled}
         loading={isLoading}
         showSearch
       />

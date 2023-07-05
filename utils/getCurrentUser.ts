@@ -20,9 +20,9 @@ export async function getCurrentUser(req, res) {
     if (!user) {
       throw new Error('no user found')
     }
+    const isUser = user?.roles?.includes(Roles.USER) || user?.roles?.length === 0 || !user?.roles
     const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
     const isDomainAdmin = user?.roles?.includes(Roles.DOMAIN_ADMIN)
-    const isUser = user?.roles?.includes(Roles.USER)
     const isAdmin = isAdminCheck(user?.roles)
     return { isDomainAdmin, isGlobalAdmin, isUser, isAdmin, session, user }
   } else {

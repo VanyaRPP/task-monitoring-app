@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
-import Domain from 'common/modules/models/Domain'
-import start, { Data } from 'pages/api/api.config'
+import RealEstate from '@common/modules/models/RealEstate'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import start, { Data } from 'pages/api/api.config'
+import Domain from 'common/modules/models/Domain'
 
 start()
 
@@ -11,21 +12,43 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin } = await getCurrentUser(req, res)
-
-  if (!isGlobalAdmin) {
-    return res.status(400).json({ success: false, message: 'not allowed' })
-  }
+  const { isDomainAdmin, isUser, user } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'GET':
       try {
-        // TODO: filter by user email and this email should be inside amdinEmails
-        const domain = await Domain.find({}).populate({
-          path: 'streets',
-          select: '_id address city',
-        })
-        return res.status(200).json({ success: true, data: domain })
+        const options = {}
+        let domainsIds
+
+        if (isDomainAdmin) {
+          options.adminEmails = { $in: [user.email] }
+        }
+
+        if (isUser) {
+          const realEstates = await RealEstate.find({
+            adminEmails: { $in: [user.email] },
+          }).populate({ path: 'domain', select: 'name' })
+
+          domainsIds = realEstates.map((i) => i.domain._id)
+        }
+
+        if (req.query.domainId) {
+          domainsIds = domainsIds
+            ? domainsIds.filter((i) => i === req.query.domainId)
+            : [req.query.domainId]
+        }
+
+        if (domainsIds) {
+          options._id = { $in: domainsIds }
+        }
+
+        const domains = await Domain.find(options)
+          .limit(req.query.limit)
+          .populate({
+            path: 'streets',
+            select: '_id address city',
+          })
+        return res.status(200).json({ success: true, data: domains })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }
