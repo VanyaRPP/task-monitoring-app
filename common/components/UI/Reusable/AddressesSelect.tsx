@@ -51,7 +51,7 @@ export default function AddressesSelect({
         optionFilterProp="children"
         placeholder="Пошук адреси"
         disabled={!domain || streets?.length === 1 || disabled}
-        loading={myDomainsLoading}
+        loading={allDomainsLoading || myDomainsLoading}
         showSearch
       />
     </Form.Item>

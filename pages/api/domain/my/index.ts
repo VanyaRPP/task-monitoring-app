@@ -26,7 +26,9 @@ export default async function handler(
           const data = domains.map((i) => ({
             _id: i._id,
             name: i.name,
-            streets: i.streets
+            streets: i.streets,
+            address: i.address,
+            bankInformation: i.bankInformation
           }))
           return res.status(200).json({ success: true, data })
         }

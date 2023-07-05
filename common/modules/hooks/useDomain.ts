@@ -11,7 +11,8 @@ function useDomain({ domainId }) {
   const { data: allDomains, isLoading: allDomainsLoading } = useGetDomainsQuery({})
   const {data: myDomains, isLoading: myDomainsLoading} = useGetMyDomainsQuery({})
   if (domainId) {
-    const singleDomain = allDomains?.find((i) => i._id === domainId)
+    const domains = allDomains || myDomains
+    const singleDomain = domains?.find((i) => i._id === domainId)
     return {
       data: singleDomain ? [singleDomain] : [],
       isLoading: allDomainsLoading,
