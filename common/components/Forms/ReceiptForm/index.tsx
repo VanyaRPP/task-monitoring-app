@@ -9,7 +9,6 @@ import { numberToTextNumber } from '@utils/helpers'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import useServiceCompanyDomain from '@common/modules/hooks/useServiceCompanyDomain'
 import { dateToDayYearMonthFormat } from '@common/assets/features/formatDate'
-import { usePaymentContext } from '@common/components/AddPaymentModal'
 
 interface Props {
   currPayment: IExtendedPayment
@@ -70,8 +69,6 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     streetId: newData?.street,
   })
 
-  const { setProvider, setReciever } = usePaymentContext()
-
   const provider = paymentData?.provider || {
     name: domain[0]?.name,
     address: domain[0]?.address,
@@ -84,11 +81,6 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     phone: company?.phone,
   }
 
-  useEffect(() => {
-    setProvider(provider)
-    setReciever(reciever)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [provider, reciever])
 
   const date = getFormattedDate(service?.date)
 

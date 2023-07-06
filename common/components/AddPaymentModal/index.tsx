@@ -1,22 +1,10 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import {
   useAddPaymentMutation,
   useGetPaymentsCountQuery,
 } from '@common/api/paymentApi/payment.api'
-import {
-  IExtendedPayment,
-  IProvider,
-  IReciever,
-} from '@common/api/paymentApi/payment.api.types'
+import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { Form, message, Modal, Tabs, TabsProps } from 'antd'
-import React, {
-  Dispatch,
-  FC,
-  SetStateAction,
-  createContext,
-  useContext,
-  useState,
-} from 'react'
+import React, { FC, createContext, useContext, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
@@ -33,8 +21,6 @@ export const PaymentContext = createContext(
   {} as {
     paymentData: any
     form: FormInstance
-    setProvider: Dispatch<SetStateAction<IProvider>>
-    setReciever: Dispatch<SetStateAction<IReciever>>
   }
 )
 export const usePaymentContext = () => useContext(PaymentContext)
@@ -43,21 +29,28 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const [provider, setProvider] = useState<IProvider>()
-  const [reciever, setReciever] = useState<IReciever>()
-
-  const { data: count } = useGetPaymentsCountQuery()
+  const { data: count = 0 } = useGetPaymentsCountQuery()
 
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, edit)
   )
 
   const handleSubmit = async () => {
-    if (!count || count < 0) {
-      return message.error('Помилка при додаванні рахунку')
-    }
-
     const formData = await form.validateFields()
+
+    // TODO: fill it 
+    // const provider =  {
+    //   name: domain[0]?.name,
+    //   address: domain[0]?.address,
+    //   bankInformation: domain[0]?.bankInformation,
+    // }
+  
+    // const reciever = {
+    //   companyName: company?.companyName,
+    //   adminEmails: company?.adminEmails,
+    //   phone: company?.phone,
+    // }
+
     const response = await addPayment({
       invoiceNumber: count + 1,
       type: formData.credit ? Operations.Credit : Operations.Debit,
@@ -72,9 +65,10 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
         : formData.maintenancePrice.sum +
           formData.placingPrice.sum +
           formData.electricityPrice.sum +
-          formData.waterPrice.sum,
-      provider,
-      reciever,
+        formData.waterPrice.sum,
+      // TODO: fix
+      provider: {} as unknown as any,
+      reciever: {} as unknown as any,
       invoice: formData.debit
         ? [
             {
@@ -127,8 +121,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     {
       key: '2',
       label: 'Перегляд',
-      // @ts-ignore
-      disabled: !edit || !!paymentData?.credit,
+      disabled: !edit || !!(paymentData as unknown as any)?.credit,
       children: (
         <ReceiptForm currPayment={currPayment} paymentData={paymentData} />
       ),
@@ -140,8 +133,6 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       value={{
         paymentData,
         form,
-        setProvider,
-        setReciever,
       }}
     >
       <Modal

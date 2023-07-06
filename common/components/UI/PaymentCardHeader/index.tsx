@@ -62,7 +62,7 @@ const PaymentCardHeader = ({ currentPayment, closeEditModal }) => {
       </div>
       {(isModalOpen || currentPayment) && (
         <AddPaymentModal
-          edit={currentPayment && true}
+          edit={!!currentPayment}
           paymentData={currentPayment}
           closeModal={closeModal}
         />
