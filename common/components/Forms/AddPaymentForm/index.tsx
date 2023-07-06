@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react'
+import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import s from './style.module.scss'
@@ -10,9 +10,6 @@ import PaymentTotal from './PaymentTotal'
 import PaymentPricesTable from './PaymentPricesTable'
 import MonthServiceSelect from './MonthServiceSelect'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
-// import useDomain from '@common/modules/hooks/useDomain'
-import useService from '@common/modules/hooks/useService'
-import moment from 'moment'
 
 interface Props {
   form: FormInstance<any>
@@ -22,76 +19,48 @@ interface Props {
 }
 
 const AddPaymentForm: FC<Props> = ({ edit }) => {
-  const { paymentData, form } = usePaymentContext()
+  const { form } = usePaymentContext()
+  const initialValues = useInitialValues()
 
-  // const { data: domains } = useDomain({ domainId: edit && paymentData?.domain  })
-  const { service } = useService({
-    serviceId: paymentData?.monthService,
-    domainId: paymentData?.domain,
-    streetId: paymentData?.street[0],
-  })
-
-  const month = moment(service?.date).format('MMMM')
-
-  const invoices = {
-    maintenance: paymentData?.invoice.find(
-      (item) => item?.type === ServiceType.Maintenance
-    ),
-    placing: paymentData?.invoice.find(
-      (item) => item?.type === ServiceType.Placing
-    ),
-    electricity: paymentData?.invoice.find(
-      (item) => item?.type === ServiceType.Electricity
-    ),
-    water: paymentData?.invoice.find(
-      (item) => item?.type === ServiceType.Water
-    ),
-  }
-
-  const initialValues = {
-    domain: paymentData?.domain,
-    street: paymentData?.street?._id,
-    // street: paymentData?.street && `${paymentData.street.address} (м. ${paymentData.street.city})`,
-    monthService: month.charAt(0).toUpperCase() + month.slice(1),
-    company: paymentData?.company.companyName,
-    description: paymentData?.description,
-    credit: paymentData?.credit,
-    debit: paymentData?.debit,
-    operation: paymentData ? paymentData.type : Operations.Credit,
-    [ServiceType.Maintenance]: {
-      amount: invoices.maintenance?.amount,
-      price: invoices.maintenance?.price,
-    },
-    [ServiceType.Placing]: {
-      amount: invoices.placing?.amount,
-      price: invoices.placing?.price,
-    },
-    [ServiceType.Electricity]: {
-      lastAmount: invoices.electricity?.lastAmount,
-      amount: invoices.electricity?.amount,
-      price: invoices.electricity?.price,
-    },
-    [ServiceType.Water]: {
-      lastAmount: invoices.water?.lastAmount,
-      amount: invoices.water?.amount,
-      price: invoices.water?.price,
-    },
-  }
-  // TODO: fix initialValues
-  // something strange
-  // MonthServiceSelect CompanySelect
-  // infinite render
   return (
     <Form
-      // initialValues={initialValues}
+      initialValues={initialValues}
       form={form}
       layout="vertical"
       className={s.Form}
     >
-      <DomainsSelect disabled={edit} form={form} />
-      <AddressesSelect disabled={edit} form={form} />
-      <MonthServiceSelect disabled={edit} form={form} />
-      <CompanySelect disabled={edit} form={form} />
+      {edit ? (
+        <Form.Item name="domain" label="Домен">
+          <Input disabled />
+        </Form.Item>
+      ) : (
+        <DomainsSelect form={form} />
+      )}
+
+      {edit ? (
+        <Form.Item name="street" label="Адреса">
+          <Input disabled />
+        </Form.Item>
+      ) : (
+        <AddressesSelect form={form} />
+      )}
+
+      {edit ? (
+        <Form.Item name="monthService" label="Місяць">
+          <Input disabled />
+        </Form.Item>
+      ) : (
+        <MonthServiceSelect form={form} />
+      )}
+
+      {edit ? (
+        <Form.Item name="company" label="Компанія">
+          <Input disabled />
+        </Form.Item>
+      ) : (
+        <CompanySelect form={form} />
+      )}
+
       <Form.Item
         name="operation"
         label="Тип оплати"
@@ -121,15 +90,14 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
           getFieldValue('operation') === Operations.Credit ? (
             <>
               <Form.Item
-                name={Operations.Credit}
+                name="generalSum"
                 label="Сума"
                 rules={validateField('paymentPrice')}
               >
                 <InputNumber
                   placeholder="Вкажіть суму"
-                  disabled={edit && true}
+                  disabled={edit}
                   className={s.inputNumber}
-                  defaultValue={paymentData ? paymentData?.generalSum : ''}
                 />
               </Form.Item>
               <Form.Item
@@ -147,7 +115,6 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
           ) : (
             <>
               <PaymentPricesTable
-                paymentData={paymentData}
                 edit={edit}
                 form={form}
               />
@@ -158,5 +125,56 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
       </Form.Item>
     </Form>
   )
+}
+
+function useInitialValues() {
+  const { paymentData } = usePaymentContext()
+  const invoices = {
+    maintenance: paymentData?.invoice.find(
+      (item) => item?.type === ServiceType.Maintenance
+    ),
+    placing: paymentData?.invoice.find(
+      (item) => item?.type === ServiceType.Placing
+    ),
+    electricity: paymentData?.invoice.find(
+      (item) => item?.type === ServiceType.Electricity
+    ),
+    water: paymentData?.invoice.find(
+      (item) => item?.type === ServiceType.Water
+    ),
+  }
+
+  const initialValues = {
+    domain: paymentData?.domain,
+    street: paymentData?.street?._id,
+    // street: paymentData?.street && `${paymentData.street.address} (м. ${paymentData.street.city})`,
+    monthService: paymentData?.monthService,
+    company: paymentData?.company.companyName,
+    description: paymentData?.description,
+    credit: paymentData?.credit,
+    generalSum: paymentData?.paymentData,
+    debit: paymentData?.debit,
+    operation: paymentData ? paymentData.type : Operations.Credit,
+    [ServiceType.Maintenance]: {
+      amount: invoices.maintenance?.amount,
+      price: invoices.maintenance?.price,
+    },
+    [ServiceType.Placing]: {
+      amount: invoices.placing?.amount,
+      price: invoices.placing?.price,
+    },
+    [ServiceType.Electricity]: {
+      lastAmount: invoices.electricity?.lastAmount,
+      amount: invoices.electricity?.amount,
+      price: invoices.electricity?.price,
+    },
+    [ServiceType.Water]: {
+      lastAmount: invoices.water?.lastAmount,
+      amount: invoices.water?.amount,
+      price: invoices.water?.price,
+    },
+  }
+
+  return initialValues
 }
 export default AddPaymentForm

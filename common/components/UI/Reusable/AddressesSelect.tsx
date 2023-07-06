@@ -6,14 +6,10 @@ import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
 export default function AddressesSelect({
-  disabled,
   form,
 }: {
-  disabled?: boolean
   form: any
 }) {
-  // TODO: recheck
-  // in preview mode we need to prevent all data fetching. only single
   const { streetId } = useCompanyPageContext()
   const domainId = Form.useWatch('domain', form)
   const { data = [], isLoading } = useGetDomainsQuery({ domainId: domainId || undefined })
@@ -49,7 +45,7 @@ export default function AddressesSelect({
         }
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={!domainId || streets?.length === 1 || disabled}
+        disabled={!domainId || streets?.length === 1}
         loading={isLoading}
         showSearch
       />

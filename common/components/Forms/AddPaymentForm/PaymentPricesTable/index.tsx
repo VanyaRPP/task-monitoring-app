@@ -21,7 +21,6 @@ import { usePaymentContext } from '@common/components/AddPaymentModal'
 interface Props {
   form: FormInstance<any>
   edit: boolean
-  paymentData: any
 }
 
 const PaymentPricesTable: FC<Props> = ({ edit }) => {

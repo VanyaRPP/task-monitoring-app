@@ -5,10 +5,8 @@ import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
 export default function DomainsSelect({
-  disabled,
   form,
 }: {
-  disabled?: boolean
   form: any
 }) {
   // TODO: recheck
@@ -43,7 +41,7 @@ export default function DomainsSelect({
         filterOption={(input, option) => (option?.label ?? '').includes(input)}
         options={data?.map((i) => ({ value: i._id, label: i.name }))}
         optionFilterProp="children"
-        disabled={disabled || data?.length === 1}
+        disabled={data?.length === 1}
         placeholder="Пошук домена"
         loading={isLoading}
         showSearch

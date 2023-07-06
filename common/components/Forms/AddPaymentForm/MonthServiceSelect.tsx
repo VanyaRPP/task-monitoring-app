@@ -4,13 +4,12 @@ import { getFormattedDate } from '@common/components/DashboardPage/blocks/servic
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
-export default function MonthServiceSelect({ disabled, form }) {
+export default function MonthServiceSelect({ form }) {
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
 
   return domainId && streetId ? (
     <MonthServiceDataFetcher
-      disabled={disabled}
       domainId={domainId}
       streetId={streetId}
       form={form}
@@ -22,7 +21,7 @@ export default function MonthServiceSelect({ disabled, form }) {
   )
 }
 
-function MonthServiceDataFetcher({ disabled, domainId, streetId, form }) {
+function MonthServiceDataFetcher({ domainId, streetId, form }) {
   const { data: monthsServices, isLoading } = useGetAllServicesQuery({
     domainId,
     streetId,
@@ -63,7 +62,7 @@ function MonthServiceDataFetcher({ disabled, domainId, streetId, form }) {
         }))}
         optionFilterProp="children"
         placeholder="Місяць"
-        disabled={disabled || monthsServices?.length === 1}
+        disabled={monthsServices?.length === 1}
         loading={isLoading}
         showSearch
       />

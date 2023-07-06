@@ -57,7 +57,6 @@ const columns: ColumnsType<DataType> = [
 const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const newData = currPayment || paymentData
 
-  // TODO: use real data from Domain, Company
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
