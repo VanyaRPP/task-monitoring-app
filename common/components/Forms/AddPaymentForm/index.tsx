@@ -10,6 +10,7 @@ import PaymentTotal from './PaymentTotal'
 import PaymentPricesTable from './PaymentPricesTable'
 import MonthServiceSelect from './MonthServiceSelect'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
+import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 
 interface Props {
   form: FormInstance<any>
@@ -145,10 +146,9 @@ function useInitialValues() {
   }
 
   const initialValues = {
-    domain: paymentData?.domain,
-    street: paymentData?.street?._id,
-    // street: paymentData?.street && `${paymentData.street.address} (м. ${paymentData.street.city})`,
-    monthService: paymentData?.monthService,
+    domain: paymentData?.domain?.name,
+    street: paymentData?.street && `${paymentData.street.address} (м. ${paymentData.street.city})`,
+    monthService: getFormattedDate(paymentData?.monthService?.date),
     company: paymentData?.company.companyName,
     description: paymentData?.description,
     credit: paymentData?.credit,
