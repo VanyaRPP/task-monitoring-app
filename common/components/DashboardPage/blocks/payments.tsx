@@ -143,9 +143,7 @@ const PaymentsBlock = () => {
           <Button
             type="link"
             onClick={() => {
-              setCurrentPayment(
-                payments.find((item) => item._id === payment?._id)
-              )
+              setCurrentPayment(payment)
             }}
           >
             <EyeOutlined className={s.eyelined} />

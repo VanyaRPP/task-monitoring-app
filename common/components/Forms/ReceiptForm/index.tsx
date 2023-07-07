@@ -1,4 +1,4 @@
-import React, { FC, useRef, useEffect } from 'react'
+import React, { FC, useRef } from 'react'
 import { Button, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
@@ -7,8 +7,8 @@ import { useReactToPrint } from 'react-to-print'
 import { renderCurrency } from '@common/components/DashboardPage/blocks/payments'
 import { numberToTextNumber } from '@utils/helpers'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
-import useServiceCompanyDomain from '@common/modules/hooks/useServiceCompanyDomain'
 import { dateToDayYearMonthFormat } from '@common/assets/features/formatDate'
+import useService from '@common/modules/hooks/useService'
 
 interface Props {
   currPayment: IExtendedPayment
@@ -62,18 +62,19 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     documentTitle: 'emp-data',
   })
 
-  const { service, company, domain } = useServiceCompanyDomain({
+  const { service } = useService({
     serviceId: newData?.monthService,
-    companyId: newData?.company,
     domainId: newData?.domain,
     streetId: newData?.street,
+    skip: !!paymentData
   })
 
   const provider = newData?.provider
   const reciever = newData?.reciever
 
-
-  const date = getFormattedDate(service?.date)
+  const date = paymentData
+    ? getFormattedDate(paymentData?.monthService?.date)
+    : getFormattedDate(service?.date)
 
   const currentDate = newData?.date ? new Date(newData?.date) : new Date()
   const expirationDate = newData?.date ? new Date(newData?.date) : new Date()
