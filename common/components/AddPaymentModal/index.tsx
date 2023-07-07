@@ -69,8 +69,8 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
           formData.electricityPrice.sum +
         formData.waterPrice.sum,
       // TODO: fix
-      provider: {} as unknown as any,
-      reciever: {} as unknown as any,
+      provider,
+      reciever,
       invoice: formData.debit
         ? [
             {
