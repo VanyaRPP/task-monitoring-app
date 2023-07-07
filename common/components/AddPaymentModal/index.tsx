@@ -40,13 +40,12 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     getActiveTab(paymentData, edit)
   )
 
-  /*const provider = realEstate?.length
+  const provider = realEstate?.length
     && {
         name: realEstate[0]?.domain?.name,
         address: realEstate[0]?.domain?.address,
         bankInformation: realEstate[0]?.domain?.bankInformation,
-      }*/
-  const provider = undefined
+      }
 
   const reciever = realEstate?.length
     && {
