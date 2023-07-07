@@ -30,8 +30,8 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
   const serviceId = Form.useWatch('service', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
-  const { company } = useCompany({ companyId, domainId, streetId })
-  const { service } = useService({ serviceId, domainId, streetId })
+  const { company } = useCompany({ companyId, domainId, streetId, skip: edit })
+  const { service } = useService({ serviceId, domainId, streetId, skip: edit })
 
   const columns: ColumnProps<IPaymentTableData>[] = [
     {

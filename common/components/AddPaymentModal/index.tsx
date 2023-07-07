@@ -30,7 +30,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const { data: count = 0 } = useGetPaymentsCountQuery({ skip: edit })
+  const { data: count = 0 } = useGetPaymentsCountQuery(undefined, { skip: edit })
   const { data: realEstate } = useGetAllRealEstateQuery(
     { domainId: currPayment?.domain, streetId: currPayment?.street },
     { skip: edit }
@@ -42,20 +42,18 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
 
   // TODO: fill it
   const provider = realEstate?.length
-    ? {
+    && {
         name: realEstate[0]?.domain?.name,
         address: realEstate[0]?.domain?.address,
         bankInformation: realEstate[0]?.domain?.bankInformation,
       }
-    : {}
 
   const reciever = realEstate?.length
-    ? {
+    && {
         companyName: realEstate[0]?.companyName,
         adminEmails: realEstate[0]?.adminEmails,
         phone: realEstate[0]?.phone,
       }
-    : {}
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
