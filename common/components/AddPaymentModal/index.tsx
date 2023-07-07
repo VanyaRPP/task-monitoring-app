@@ -40,11 +40,6 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const handleSubmit = async () => {
     const formData = await form.validateFields()
 
-    // eslint-disable-next-line no-console
-    console.log('formData: ', formData)
-    // eslint-disable-next-line no-console
-    console.log('currPayment: ', currPayment.domain)
-
     // TODO: fill it
     const provider = {
       name: realEstate[0]?.domain?.name,
@@ -58,12 +53,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       phone: realEstate[0]?.phone,
     }
 
-    // eslint-disable-next-line no-console
-    console.log('provider: ', provider)
-    // eslint-disable-next-line no-console
-    console.log('reciever: ', reciever)
-
-    /*const response = await addPayment({
+    const response = await addPayment({
       invoiceNumber: count + 1,
       type: formData.credit ? Operations.Credit : Operations.Debit,
       date: new Date(),
@@ -119,7 +109,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       closeModal()
     } else {
       message.error('Помилка при додаванні рахунку')
-    }*/
+    }
   }
 
   const items: TabsProps['items'] = [
