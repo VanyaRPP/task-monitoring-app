@@ -10,6 +10,7 @@ import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
 import { Operations, ServiceType } from '@utils/constants'
 import { FormInstance } from 'antd/es/form/Form'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 
 interface Props {
   closeModal: VoidFunction
@@ -29,27 +30,35 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const { data: count = 0 } = useGetPaymentsCountQuery()
+  const { data: count = 0 } = useGetPaymentsCountQuery({ skip: edit })
+  const { data: realEstate } = useGetAllRealEstateQuery(
+    { domainId: currPayment?.domain, streetId: currPayment?.street },
+    { skip: edit }
+  )
 
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, edit)
   )
 
+  // TODO: fill it
+  const provider = realEstate?.length
+    ? {
+        name: realEstate[0]?.domain?.name,
+        address: realEstate[0]?.domain?.address,
+        bankInformation: realEstate[0]?.domain?.bankInformation,
+      }
+    : {}
+
+  const reciever = realEstate?.length
+    ? {
+        companyName: realEstate[0]?.companyName,
+        adminEmails: realEstate[0]?.adminEmails,
+        phone: realEstate[0]?.phone,
+      }
+    : {}
+
   const handleSubmit = async () => {
     const formData = await form.validateFields()
-
-    // TODO: fill it 
-    // const provider =  {
-    //   name: domain[0]?.name,
-    //   address: domain[0]?.address,
-    //   bankInformation: domain[0]?.bankInformation,
-    // }
-  
-    // const reciever = {
-    //   companyName: company?.companyName,
-    //   adminEmails: company?.adminEmails,
-    //   phone: company?.phone,
-    // }
 
     const response = await addPayment({
       invoiceNumber: count + 1,
@@ -67,8 +76,8 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
           formData.electricityPrice.sum +
         formData.waterPrice.sum,
       // TODO: fix
-      provider: {} as unknown as any,
-      reciever: {} as unknown as any,
+      provider,
+      reciever,
       invoice: formData.debit
         ? [
             {
@@ -146,7 +155,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
                   if (values.operation === Operations.Credit) {
                     handleSubmit()
                   } else {
-                    setCurrPayment(values)
+                    setCurrPayment({ ...values, provider, reciever })
                     setActiveTabKey('2')
                   }
                 })

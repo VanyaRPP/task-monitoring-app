@@ -39,7 +39,7 @@ export default async function handler(
         const realEstates = await RealEstate.find(options)
           .sort({ data: -1 })
           .limit(req.query.limit)
-          .populate({ path: 'domain', select: '_id name' })
+          .populate({ path: 'domain', select: '_id name address bankInformation' })
           .populate({ path: 'street', select: '_id address city' })
 
         return res.status(200).json({ success: true, data: realEstates })
