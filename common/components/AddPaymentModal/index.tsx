@@ -40,13 +40,13 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     getActiveTab(paymentData, edit)
   )
 
-  // TODO: fill it
-  const provider = realEstate?.length
+  /*const provider = realEstate?.length
     && {
         name: realEstate[0]?.domain?.name,
         address: realEstate[0]?.domain?.address,
         bankInformation: realEstate[0]?.domain?.bankInformation,
-      }
+      }*/
+  const provider = undefined
 
   const reciever = realEstate?.length
     && {
@@ -73,7 +73,6 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
           formData.placingPrice.sum +
           formData.electricityPrice.sum +
         formData.waterPrice.sum,
-      // TODO: fix
       provider,
       reciever,
       invoice: formData.debit
