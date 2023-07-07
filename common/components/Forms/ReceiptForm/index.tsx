@@ -173,9 +173,9 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
             <div>
               {reciever?.companyName} <br />
               {reciever?.adminEmails?.map((email) => (
-                <span key={email}>
+                <div key={email}>
                   {email} <br />
-                </span>
+                </div>
               ))}
               {reciever?.phone}
             </div>

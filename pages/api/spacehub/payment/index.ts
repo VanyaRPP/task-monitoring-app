@@ -93,6 +93,8 @@ export default async function handler(
           // TODO: use domain, street
           .populate({ path: 'company', select: '_id companyName' })
           .populate({ path: 'street', select: '_id address city' })
+          .populate({ path: 'domain', select: '_id name' })
+          .populate({ path: 'monthService', select: '_id date' })
 
         return res.status(200).json({
           success: true,
