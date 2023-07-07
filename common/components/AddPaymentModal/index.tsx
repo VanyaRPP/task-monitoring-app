@@ -30,30 +30,34 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const { data: count = 0 } = useGetPaymentsCountQuery()
-  const {data: realEstate} = useGetAllRealEstateQuery({domainId: currPayment?.domain, streetId: currPayment?.street})
+  const { data: count = 0 } = useGetPaymentsCountQuery({ skip: edit })
+  const { data: realEstate } = useGetAllRealEstateQuery({ domainId: currPayment?.domain, streetId: currPayment?.street }, { skip: edit })
 
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, edit)
   )
 
+  const provider = realEstate?.length ? {
+    name: realEstate[0]?.domain?.name,
+    address: realEstate[0]?.domain?.address,
+    bankInformation: realEstate[0]?.domain?.bankInformation,
+  } : {}
+
+  const reciever = realEstate?.length ? {
+    companyName: realEstate[0]?.companyName,
+    adminEmails: realEstate[0]?.adminEmails,
+    phone: realEstate[0]?.phone,
+  } : {}
+
   const handleSubmit = async () => {
     const formData = await form.validateFields()
 
     // TODO: fill it
-    const provider = {
-      name: realEstate[0]?.domain?.name,
-      address: realEstate[0]?.domain?.address,
-      bankInformation: realEstate[0]?.domain?.bankInformation,
-    }
 
-    const reciever = {
-      companyName: realEstate[0]?.companyName,
-      adminEmails: realEstate[0]?.adminEmails,
-      phone: realEstate[0]?.phone,
-    }
+    // eslint-disable-next-line no-console
+    console.log('currPayment', currPayment)
 
-    const response = await addPayment({
+    /*const response = await addPayment({
       invoiceNumber: count + 1,
       type: formData.credit ? Operations.Credit : Operations.Debit,
       date: new Date(),
@@ -109,7 +113,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       closeModal()
     } else {
       message.error('Помилка при додаванні рахунку')
-    }
+    }*/
   }
 
   const items: TabsProps['items'] = [
@@ -148,7 +152,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
                   if (values.operation === Operations.Credit) {
                     handleSubmit()
                   } else {
-                    setCurrPayment(values)
+                    setCurrPayment({...values, provider, reciever})
                     setActiveTabKey('2')
                   }
                 })

@@ -69,17 +69,8 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     streetId: newData?.street,
   })
 
-  const provider = paymentData?.provider || {
-    name: domain[0]?.name,
-    address: domain[0]?.address,
-    bankInformation: domain[0]?.bankInformation,
-  }
-
-  const reciever = paymentData?.reciever || {
-    companyName: company?.companyName,
-    adminEmails: company?.adminEmails,
-    phone: company?.phone,
-  }
+  const provider = newData?.provider
+  const reciever = newData?.reciever
 
 
   const date = getFormattedDate(service?.date)

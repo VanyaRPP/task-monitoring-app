@@ -53,7 +53,7 @@ export const paymentApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Payment'] : []),
     }),
-    getPaymentsCount: builder.query<number, void>({
+    getPaymentsCount: builder.query<number, object>({
       query: () => `spacehub/payment/count`,
       transformResponse: (response: IGetPaymentsCountResponse) => response.data,
     }),
