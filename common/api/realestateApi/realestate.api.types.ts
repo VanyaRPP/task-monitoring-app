@@ -1,5 +1,7 @@
+import { IDomain } from '@common/modules/models/Domain';
+
 export type IRealestate = {
-  domain: string
+  domain: IDomain
   street: string
   companyName: string
   bankInformation: string

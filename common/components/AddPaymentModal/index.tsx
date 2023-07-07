@@ -10,6 +10,7 @@ import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
 import { Operations, ServiceType } from '@utils/constants'
 import { FormInstance } from 'antd/es/form/Form'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 
 interface Props {
   closeModal: VoidFunction
@@ -30,6 +31,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
   const { data: count = 0 } = useGetPaymentsCountQuery()
+  const {data: realEstate} = useGetAllRealEstateQuery({domainId: currPayment?.domain, streetId: currPayment?.street})
 
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, edit)
@@ -38,20 +40,30 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const handleSubmit = async () => {
     const formData = await form.validateFields()
 
-    // TODO: fill it 
-    // const provider =  {
-    //   name: domain[0]?.name,
-    //   address: domain[0]?.address,
-    //   bankInformation: domain[0]?.bankInformation,
-    // }
-  
-    // const reciever = {
-    //   companyName: company?.companyName,
-    //   adminEmails: company?.adminEmails,
-    //   phone: company?.phone,
-    // }
+    // eslint-disable-next-line no-console
+    console.log('formData: ', formData)
+    // eslint-disable-next-line no-console
+    console.log('currPayment: ', currPayment.domain)
 
-    const response = await addPayment({
+    // TODO: fill it
+    const provider = {
+      name: realEstate[0]?.domain?.name,
+      address: realEstate[0]?.domain?.address,
+      bankInformation: realEstate[0]?.domain?.bankInformation,
+    }
+
+    const reciever = {
+      companyName: realEstate[0]?.companyName,
+      adminEmails: realEstate[0]?.adminEmails,
+      phone: realEstate[0]?.phone,
+    }
+
+    // eslint-disable-next-line no-console
+    console.log('provider: ', provider)
+    // eslint-disable-next-line no-console
+    console.log('reciever: ', reciever)
+
+    /*const response = await addPayment({
       invoiceNumber: count + 1,
       type: formData.credit ? Operations.Credit : Operations.Debit,
       date: new Date(),
@@ -107,7 +119,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       closeModal()
     } else {
       message.error('Помилка при додаванні рахунку')
-    }
+    }*/
   }
 
   const items: TabsProps['items'] = [
