@@ -4,7 +4,7 @@ import {
 } from '@common/api/paymentApi/payment.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { Form, message, Modal, Tabs, TabsProps } from 'antd'
-import React, { FC, createContext, useContext, useState } from 'react'
+import React, { FC, createContext, useContext, useEffect, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
@@ -53,6 +53,18 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
         adminEmails: realEstate[0]?.adminEmails,
         phone: realEstate[0]?.phone,
       }
+
+  useEffect(() => {
+    if (currPayment?.street) {
+      setCurrPayment({
+        ...currPayment,
+        provider,
+        reciever,
+        invoiceNumber: count + 1,
+      })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currPayment])
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
@@ -151,7 +163,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
                   if (values.operation === Operations.Credit) {
                     handleSubmit()
                   } else {
-                    setCurrPayment({ ...values, provider, reciever })
+                    setCurrPayment(values)
                     setActiveTabKey('2')
                   }
                 })
