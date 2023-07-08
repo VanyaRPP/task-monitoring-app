@@ -33,7 +33,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const { data: count = 0 } = useGetPaymentsCountQuery(undefined, { skip: edit })
   const { data: realEstate } = useGetAllRealEstateQuery(
     { domainId: currPayment?.domain, streetId: currPayment?.street },
-    { skip: edit }
+    { skip: !currPayment?.street }
   )
 
   const [activeTabKey, setActiveTabKey] = useState(
