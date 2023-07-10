@@ -5,6 +5,7 @@ import RoleSwitcher from 'common/components/UI/roleSwitcher'
 import s from './style.module.scss'
 import { useGetCurrentUserQuery } from '../../api/userApi/user.api'
 import MyDomain from './my-domain'
+import MyCompany from './my-company'
 
 const ProfilePage: React.FC = () => {
   const { data: user, isLoading } = useGetCurrentUserQuery()
@@ -37,7 +38,8 @@ const ProfilePage: React.FC = () => {
           </div>
           <div className={s.Info}>
             <RoleSwitcher />
-            <MyDomain />
+            {user?.roles.includes("GlobalAdmin") ? null: <MyDomain />}
+            <MyCompany/>
             <Card size="small" title="Електронна пошта">
               {user?.email}
             </Card>

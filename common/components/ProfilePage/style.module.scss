@@ -141,4 +141,16 @@
     height: 50px;
     border-radius: 0 0 10px 10px;
   }
+
+  .companyName {
+    border-radius: 2px;
+    margin: 1.5px;
+    text-align: center;
+    width: 23.5%;
+    min-width: 100px;
+    height: 20%;
+  }
+  .companyName::before {
+    display: none !important;
+  }
 }
