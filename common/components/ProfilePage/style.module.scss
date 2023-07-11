@@ -142,3 +142,46 @@
     border-radius: 0 0 10px 10px;
   }
 }
+.DomainMyCard {
+  display: flex;
+  gap: 2rem;
+
+  @media (max-width: 1440px) {
+    align-items: center;
+    flex-direction: column;
+  }
+
+  > div:first-of-type {
+    width: 100%;
+    min-width: 300px;
+    max-width: 1300px;
+    padding-bottom: 30px;
+    overflow: hidden;
+
+    transition: background 0.5s, box-shadow 0.5s;
+    box-shadow: 0 2px 10px -5px var(--textColor);
+    background: var(--backgroundColor) !important;
+
+    border-color: #88888830;
+    > * {
+      border-color: #88888830;
+      transition: background 0.5s, color 0.2s;
+      color: var(--textColor);
+
+      &:first-of-type {
+        background: var(--backgroundColorPrimary);
+      }
+    }
+
+    * {
+      border-color: #88888830;
+    }
+  }
+}
+.DomainMyCardInfo {
+  border-radius: 10px 10px 10px 10px;
+  margin-bottom: 20px;
+}
+.DomainNameboldText {
+  font-weight: bold;
+}
