@@ -64,7 +64,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       })
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currPayment])
+  }, [currPayment?.street])
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
