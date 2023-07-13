@@ -5,11 +5,14 @@ import { Button } from 'antd'
 import { useRouter } from 'next/router'
 import s from './style.module.scss'
 import RealEstateModal from '../RealEstateModal'
+import {isAdminCheck} from "@utils/helpers";
+import {useGetCurrentUserQuery} from "@common/api/userApi/user.api";
 
 const RealEstateCardHeader = () => {
   const Router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
-
+  const { data: currUser} = useGetCurrentUserQuery()
+  const isAdmin = isAdminCheck(currUser?.roles)
   const closeModal = () => {
     setIsModalOpen(false)
   }
@@ -20,9 +23,11 @@ const RealEstateCardHeader = () => {
         Об'єкти нерухомості
         <SelectOutlined className={s.Icon} />
       </Button>
-      <Button type="link" onClick={() => setIsModalOpen(true)}>
-        <PlusOutlined /> Додати
-      </Button>
+      {isAdmin && (
+        <Button type="link" onClick={() => setIsModalOpen(true)}>
+          <PlusOutlined/> Додати
+        </Button>
+      )}
       <RealEstateModal isModalOpen={isModalOpen} closeModal={closeModal} />
     </div>
   )
