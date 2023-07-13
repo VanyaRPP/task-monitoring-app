@@ -39,7 +39,7 @@ const ProfilePage: React.FC = () => {
           <div className={s.Info}>
             <RoleSwitcher />
             {user?.roles.includes("GlobalAdmin") ? null: <MyDomain />}
-            <MyCompany/>
+            <MyCompany user={user}/>
             <Card size="small" title="Електронна пошта">
               {user?.email}
             </Card>

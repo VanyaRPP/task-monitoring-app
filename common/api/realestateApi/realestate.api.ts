@@ -34,6 +34,36 @@ export const realestateApi = createApi({
           : [],
       transformResponse: (response: IGetRealestateResponse) => response.data,
     }),
+    getByRealEstate: builder.query<
+      IExtendedRealestate[],
+      {
+        limit?: number
+        domainId?: string
+        streetId?: string
+      }
+    >({
+      query: ({ limit, domainId, streetId }) => {
+        return {
+          url: `real-estate`,
+          method : "GET",
+          params: { limit, domainId, streetId },
+        }
+      },
+      providesTags: (response) =>
+        response
+          ? response.map((item) => ({ type: 'RealEstate', id: item._id }))
+          : [],
+      transformResponse: (response: IGetRealestateResponse, meta, arg) => {
+        const filtered = response.data.filter((item) => {
+          if (arg.domainId && arg.streetId) return item.domain._id === arg.domainId && item.street._id === arg.streetId;
+          else if (arg.domainId) return item.domain._id === arg.domainId;
+          else if (arg.streetId) return item.street._id === arg.streetId;
+          return true;
+        });
+
+        return filtered;
+      }
+    }),
     addRealEstate: builder.mutation<IAddRealestateResponse, IRealestate>({
       query(body) {
         return {
@@ -61,6 +91,7 @@ export const realestateApi = createApi({
 
 export const {
   useDeleteRealEstateMutation,
+  useGetByRealEstateQuery,
   useAddRealEstateMutation,
   useGetAllRealEstateQuery,
 } = realestateApi
