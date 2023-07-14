@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
 import validateMiddleware from '@common/lib/validateMiddleware'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { check, validationResult } from 'express-validator'
@@ -66,12 +64,14 @@ export default async function handler(
       try {
         const { isDomainAdmin, isUser, user } = await getCurrentUser(req, res)
 
-        const options = await getPaymentOptions({
+        const options = (await getPaymentOptions({
           searchEmail: req.query.email,
           userEmail: user.email,
-        })
+        })) as any
 
         if (isDomainAdmin) {
+          /* eslint-disable @typescript-eslint/ban-ts-comment */
+          // @ts-ignore
           const domains = await Domain.find({
             adminEmails: { $in: [user.email] },
           })
@@ -79,7 +79,9 @@ export default async function handler(
           options.domain = { $in: domainsIds }
         }
 
-        if (isUser) { 
+        if (isUser) {
+          /* eslint-disable @typescript-eslint/ban-ts-comment */
+          // @ts-ignore
           const realEstates = await RealEstate.find({
             adminEmails: { $in: [user.email] },
           })
@@ -87,18 +89,24 @@ export default async function handler(
           options.company = { $in: realEstatesIds }
         }
 
+        /* eslint-disable @typescript-eslint/ban-ts-comment */
+        // @ts-ignore
         const payments = await Payment.find(options)
           .sort({ date: -1 })
           .limit(req.query.limit)
-          // TODO: use domain, street
           .populate({ path: 'company', select: '_id companyName' })
           .populate({ path: 'street', select: '_id address city' })
           .populate({ path: 'domain', select: '_id name' })
           .populate({ path: 'monthService', select: '_id date' })
 
         return res.status(200).json({
-          success: true,
+          // TODO: calc of all, not current
+          /* eslint-disable @typescript-eslint/ban-ts-comment */
+          // @ts-ignore
+          currentCompaniesCount: new Set(payments.map((item) => item.company._id)).size,
+          currentDomainsCount: new Set(payments.map((item) => item.domain._id)).size,
           data: payments,
+          success: true,
         })
       } catch (error) {
         return res.status(400).json({ success: false })
@@ -110,15 +118,23 @@ export default async function handler(
 
         if (isAdmin) {
           await postValidateBody(req, res)
+          /* eslint-disable @typescript-eslint/ban-ts-comment */
+          // @ts-ignore
           const payment = await Payment.create(req.body)
           return res.status(200).json({ success: true, data: payment })
         } else {
-          return res
-            .status(400)
-            .json({ success: false, message: 'not allowed' })
+          return (
+            res
+              .status(400)
+              /* eslint-disable @typescript-eslint/ban-ts-comment */
+              // @ts-ignore
+              .json({ success: false, message: 'not allowed' })
+          )
         }
       } catch (error) {
         // const errors = postValidateBody(req)
+        /* eslint-disable @typescript-eslint/ban-ts-comment */
+        // @ts-ignore
         return res.status(400).json({ success: false, message: error })
       }
   }

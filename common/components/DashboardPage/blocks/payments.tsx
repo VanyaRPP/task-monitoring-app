@@ -73,7 +73,18 @@ const PaymentsBlock = () => {
         ]
       : []
 
+  // currentCompaniesCount, currentDomainsCount done, just use it
   const columns = [
+    {
+      title: 'Домен',
+      dataIndex: 'domain',
+      render: (i) => i.name,
+    },
+    {
+      title: 'Компанія',
+      dataIndex: 'company',
+      render: (i) => i.companyName,
+    },
     {
       title: 'Дата',
       dataIndex: 'date',

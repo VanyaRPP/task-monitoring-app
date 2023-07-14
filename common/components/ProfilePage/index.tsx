@@ -6,35 +6,17 @@ import s from './style.module.scss'
 import { useGetCurrentUserQuery } from '../../api/userApi/user.api'
 import MyDomain from './my-domain'
 import MyCompany from './my-company'
-
+        
 const ProfilePage: React.FC = () => {
-  const { data: user, isLoading } = useGetCurrentUserQuery()
+  const { data: user, isLoading: userLoading } = useGetCurrentUserQuery();
 
   return (
     <>
       <h2 className={s.Header}>Мій Профіль</h2>
       <div className={s.Container}>
-        <Card
-          loading={isLoading}
-          title={user?.name}
-          className={s.Profile}
-          // extra={
-          //   user?.roles?.includes(Roles.GLOBAL_ADMIN) && (
-          //     <Button
-          //       type="link"
-          //       onClick={() => Router.push(AppRoutes.ADMIN)}
-          //       className={s.Admin}
-          //     >
-          //       Панель Адміністратора
-          //     </Button>
-          //   )
-          // }
-        >
+        <Card loading={userLoading} title={user?.name} className={s.Profile}>
           <div className={s.Avatar}>
-            <Avatar
-              icon={<UserOutlined />}
-              src={<Image src={user?.image || undefined} alt="User" />}
-            />
+            <Avatar icon={<UserOutlined />} src={<Image src={user?.image || undefined} alt="User" />} />
           </div>
           <div className={s.Info}>
             <RoleSwitcher />
@@ -52,10 +34,15 @@ const ProfilePage: React.FC = () => {
             </Card> */}
           </div>
         </Card>
-        {/* <FeedbacksCard user={user} loading={isLoading} userRate={userRate} /> */}
+        
+         <div className={s.DomainMyCard}>
+          <Card title=" " loading={userLoading}>
+          <MyDomainsCard />
+          </Card>
+          </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default ProfilePage
+export default ProfilePage;

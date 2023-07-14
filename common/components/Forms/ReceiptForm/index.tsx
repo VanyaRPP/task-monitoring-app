@@ -66,7 +66,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     serviceId: newData?.monthService,
     domainId: newData?.domain,
     streetId: newData?.street,
-    skip: !!paymentData
+    skip: !!paymentData,
   })
 
   const provider = newData?.provider

@@ -1,5 +1,5 @@
 import mongoose, { ObjectId, Schema } from 'mongoose'
-import { IPaymentTableData, IRentTableData } from '@utils/tableData'
+import { IPaymentTableData } from '@utils/tableData'
 import {
   IPaymentField,
   IProvider,
