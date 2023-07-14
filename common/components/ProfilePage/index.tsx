@@ -6,6 +6,7 @@ import s from './style.module.scss'
 import { useGetCurrentUserQuery } from '../../api/userApi/user.api'
 import MyDomain from './my-domain'
 import MyCompany from './my-company'
+import MyDomainsCard from './my-domainCard'
         
 const ProfilePage: React.FC = () => {
   const { data: user, isLoading: userLoading } = useGetCurrentUserQuery();
