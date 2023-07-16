@@ -10,7 +10,7 @@ const MyDomainsCard: React.FC = () => {
     <Row gutter={16}>
       {domains.map((item, index) => (
         <Col span={8} key={item.name}>
-          <Card loading={domainsLoading} title={`Домен ${index + 1}`} bordered={false} className={s.DomainMyCardInfo}>
+          <Card loading={domainsLoading} title={item.name} bordered={false} className={s.DomainMyCardInfo}>
             <p><strong>Назва:</strong> {item.name}</p>
             <p><strong>Адреса:</strong> {item.address}</p>
             <p><strong>Адміністратори:</strong> {item.adminEmails.join(", ")}</p>     
