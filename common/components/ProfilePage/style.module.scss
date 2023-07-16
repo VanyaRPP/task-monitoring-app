@@ -143,18 +143,23 @@
   }
 }
 .DomainMyCard {
+  width: 450px;
   display: flex;
   gap: 2rem;
+  overflow-x: auto; /* Додаємо горизонтальний скрол для менших екранів */
+  box-shadow: 0 2px 10px -5px var(--textColor);
+  border-radius: 20px;
 
-  @media (max-width: 1440px) {
+  @media (max-width: 450px) {
     align-items: center;
     flex-direction: column;
   }
 
   > div:first-of-type {
+    /* Зберігаємо попередні стилі для основного контейнера */
     width: 100%;
-    min-width: 300px;
-    max-width: 1300px;
+    min-width: 1000px; /* Забезпечуємо мінімальну ширину для картки */
+    max-width: 1440px; /* Встановлюємо максимальну ширину для картки */
     padding-bottom: 30px;
     overflow: hidden;
 
@@ -162,8 +167,8 @@
     box-shadow: 0 2px 10px -5px var(--textColor);
     background: var(--backgroundColor) !important;
 
-    border-color: #88888830;
     > * {
+      min-height: 57px;
       border-color: #88888830;
       transition: background 0.5s, color 0.2s;
       color: var(--textColor);
@@ -178,11 +183,33 @@
     }
   }
 }
-.DomainMyCardInfo {
-  border-radius: 10px 10px 10px 10px;
-  margin-bottom: 20px;
-  word-break: break-word;
-}
-.DomainNameboldText {
-  font-weight: bold;
+.CardInfo {
+  width: 300px;
+
+  @media screen and (min-width: 768px) {
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    height: 80%;
+  }
+  @media screen and (min-width: 1200px) {
+    max-width: 300px;
+  }
+
+  &:hover,
+  &:focus {
+    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.12), 0px 4px 4px rgba(0, 0, 0, 0.06),
+      1px 4px 6px rgba(0, 0, 0, 0.16);
+    transition-duration: 250ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .DomainMyCardInfo {
+    border-radius: 10px 10px 10px 10px;
+    margin-bottom: 30px;
+    word-break: break-word;
+  }
+  .DomainNameboldText {
+    font-weight: bold;
+  }
 }
