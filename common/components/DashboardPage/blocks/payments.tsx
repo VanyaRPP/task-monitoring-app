@@ -1,5 +1,5 @@
-import React, { ReactElement, useState } from 'react'
-import { Alert, message, Popconfirm, Table } from 'antd'
+import React, { ReactElement, useState, useEffect, Fragment } from 'react'
+import { Alert, message, Pagination, Popconfirm, Table } from 'antd'
 import { Button } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
@@ -21,6 +21,15 @@ import s from './style.module.scss'
 const PaymentsBlock = () => {
   const router = useRouter()
   const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
+  const [page, setPage] = useState({
+    data: [],
+    currentPage: 1,
+    pageSize : 10,
+    totalPage: 0,
+    minIndex: 0,
+    maxIndex: 0,
+    loading: true,
+  })
   const {
     pathname,
     query: { email },
@@ -42,6 +51,23 @@ const PaymentsBlock = () => {
     { limit: pathname === AppRoutes.PAYMENT ? 200 : 5, email: email as string },
     { skip: currUserLoading || !currUser }
   )
+  // eslint-disable-next-line no-console
+  console.log(payments)
+  
+  useEffect(() => {
+    if(!paymentsLoading && !paymentsError)
+    {
+      setPage((prevState)=>({
+        ...prevState,
+        data: payments,
+        totalPage: Math.ceil(payments?.length / prevState.pageSize),
+        minIndex: 0,
+        maxIndex: prevState.pageSize,
+        loading: false,
+      }))
+    }
+  }, [payments])
+  
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
@@ -179,15 +205,27 @@ const PaymentsBlock = () => {
     )
   }
   let content: ReactElement
+  
+  const handlePaginationChange = (page: number, pageSize: number) => {
+    setPage((prevState) => ({
+      ...prevState,
+      currentPage: page,
+      minIndex: (page - 1) * pageSize,
+      maxIndex: page * pageSize,
+    }));
+  };
 
+  const { data, currentPage, pageSize, minIndex, maxIndex } = page;
+  
   if (deleteError || paymentsError || currUserError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
-      <Table
+      <Fragment>
+       <Table
         columns={columns}
-        dataSource={payments}
-        pagination={false}
+        dataSource={payments?.slice(minIndex, maxIndex)}
+        pagination={false} 
         bordered
         size="small"
         loading={
@@ -198,7 +236,21 @@ const PaymentsBlock = () => {
         }
         rowKey="_id"
       />
-    )
+
+      <Pagination
+          className={s.Pagination}
+          current={page.currentPage}
+          pageSize={page.pageSize}
+          total={payments?.length}
+          showSizeChanger
+          pageSizeOptions={[10, 30, 50]}
+          onChange={handlePaginationChange}
+          onShowSizeChange={(current,size) => {
+            setPage((prevPage) => ({ ...prevPage, pageSize: size }));
+        }}
+      />
+    </Fragment> 
+  )
   }
 
   return (
