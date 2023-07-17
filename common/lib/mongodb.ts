@@ -9,9 +9,9 @@ const options = {
 let client
 let clientPromise: any
 
-if (!uri) {
-  throw new Error('Please add your Mongo URI to .env.local')
-}
+// if (!uri) {
+//   throw new Error('Please add your Mongo URI to .env.local')
+// }
 
 const globalWithMongo = global as typeof globalThis & {
   _mongoClientPromise: Promise<MongoClient>
@@ -19,12 +19,12 @@ const globalWithMongo = global as typeof globalThis & {
 
 if (process.env.NODE_ENV === 'development') {
   if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(uri || '') //dell option
+    client = new MongoClient(process.env.MONGODB_URI || '') //dell option
     globalWithMongo._mongoClientPromise = client.connect()
   }
   clientPromise = globalWithMongo._mongoClientPromise
 } else {
-  client = new MongoClient(uri || '') //dell option
+  client = new MongoClient(process.env.MONGODB_URI || '') //dell option
   clientPromise = client.connect()
 }
 
