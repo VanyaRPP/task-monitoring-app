@@ -186,14 +186,11 @@
 .CardInfo {
   width: 300px;
 
-  @media screen and (min-width: 768px) {
+  @media screen and (min-width: 2629px) {
     max-width: 300px;
     display: flex;
     flex-direction: column;
     height: 80%;
-  }
-  @media screen and (min-width: 1200px) {
-    max-width: 300px;
   }
 
   &:hover,
