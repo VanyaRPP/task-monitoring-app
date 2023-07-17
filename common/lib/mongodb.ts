@@ -1,6 +1,6 @@
 import { MongoClient } from 'mongodb'
 
-const uri = process.env.MONGODB_URI || process.env.AMPLIFY_MONGODB_URI
+const uri = process.env.MONGODB
 const options = {
   useUnifiedTopology: true,
   useNewUrlParser: true,
@@ -9,9 +9,9 @@ const options = {
 let client
 let clientPromise: any
 
-// if (!uri) {
-//   throw new Error('Please add your Mongo URI to .env.local')
-// }
+if (!process.env.MONGODB) {
+  throw new Error('Please add your Mongo URI to .env.local')
+}
 
 const globalWithMongo = global as typeof globalThis & {
   _mongoClientPromise: Promise<MongoClient>
@@ -19,12 +19,12 @@ const globalWithMongo = global as typeof globalThis & {
 
 if (process.env.NODE_ENV === 'development') {
   if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(process.env.MONGODB_URI || '') //dell option
+    client = new MongoClient(uri || '') //dell option
     globalWithMongo._mongoClientPromise = client.connect()
   }
   clientPromise = globalWithMongo._mongoClientPromise
 } else {
-  client = new MongoClient(process.env.MONGODB_URI || '') //dell option
+  client = new MongoClient(uri || '') //dell option
   clientPromise = client.connect()
 }
 
