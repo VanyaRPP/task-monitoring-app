@@ -28,7 +28,7 @@ const email: Rule = {
     }
 
     const emails = Array.isArray(value) ? value : [value];
-    const invalidEmails = emails.filter(email => !/^([a-zA-Z0-9.]{6,30})@([a-zA-Z]+(\.[a-zA-Z]+)+)$/.test(email));
+    const invalidEmails = emails.filter(email => !/^[a-zA-Z0-9_.]{6,30}@(?!.*\d)[a-zA-Z][a-zA-Z0-9.-]+\.[a-zA-Z]{2,3}$/i.test(email));
 
     if (invalidEmails.length > 0) {
       return Promise.reject(new Error('Введіть правильну електронну адресу!'));
