@@ -99,12 +99,15 @@ export default async function handler(
           .populate({ path: 'domain', select: '_id name' })
           .populate({ path: 'monthService', select: '_id date' })
 
+        const companies = payments.map((item) => item?.company?._id).filter(Boolean)
+        const domains = payments.map((item) => item?.domain?._id).filter(Boolean)
+
         return res.status(200).json({
           // TODO: calc of all, not current
           /* eslint-disable @typescript-eslint/ban-ts-comment */
           // @ts-ignore
-          currentCompaniesCount: new Set(payments.map((item) => item.company._id)).size,
-          currentDomainsCount: new Set(payments.map((item) => item.domain._id)).size,
+          currentCompaniesCount: new Set(companies).size,
+          currentDomainsCount: new Set(domains).size,
           data: payments,
           success: true,
         })
