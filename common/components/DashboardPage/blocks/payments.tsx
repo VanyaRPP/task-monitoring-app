@@ -51,18 +51,21 @@ const PaymentsBlock = () => {
     { limit: pathname === AppRoutes.PAYMENT ? 200 : 5, email: email as string },
     { skip: currUserLoading || !currUser }
   )
-  // eslint-disable-next-line no-console
-  console.log(payments)
   
   useEffect(() => {
-    if(!paymentsLoading && !paymentsError)
-    {
+    if(!paymentsLoading && !paymentsError){
+      const limit = pathname === AppRoutes.PAYMENT ? 10 : 30;
+      const currentPage = Number(router.query.page) || 1;
+      const skip = (currentPage - 1) * limit;
+    
       setPage((prevState)=>({
         ...prevState,
         data: payments,
-        totalPage: Math.ceil(payments?.length / prevState.pageSize),
-        minIndex: 0,
-        maxIndex: prevState.pageSize,
+        currentPage,
+        pageSize: limit,
+        totalPage: Math.ceil(payments?.length / limit),
+        minIndex: skip,
+        maxIndex: skip + limit,
         loading: false,
       }))
     }
@@ -207,11 +210,19 @@ const PaymentsBlock = () => {
   let content: ReactElement
   
   const handlePaginationChange = (page: number, pageSize: number) => {
+    const limit = pageSize;
+    const skip = (page - 1) * limit;
+    router.push({
+      pathname: AppRoutes.PAYMENT,
+      query: { page: page.toString() },
+    });
+
     setPage((prevState) => ({
       ...prevState,
       currentPage: page,
-      minIndex: (page - 1) * pageSize,
-      maxIndex: page * pageSize,
+      pageSize: limit,
+      minIndex: skip,
+      maxIndex: skip + limit,
     }));
   };
 
