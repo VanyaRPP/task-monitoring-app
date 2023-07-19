@@ -16,7 +16,7 @@ export const paymentApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getAllPayments: builder.query<
-      IExtendedPayment[],
+      IGetPaymentResponse,
       { limit: number; email?: string }
     >({
       query: ({ limit, email }) => {
@@ -27,9 +27,8 @@ export const paymentApi = createApi({
       },
       providesTags: (response) =>
         response
-          ? response.map((item) => ({ type: 'Payment', id: item._id }))
+          ? response.data.map((item) => ({ type: 'Payment', id: item._id }))
           : [],
-      transformResponse: (response: IGetPaymentResponse) => response.data,
     }),
     addPayment: builder.mutation<IAddPaymentResponse, IPayment>({
       query(body) {
