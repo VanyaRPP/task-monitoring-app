@@ -12,7 +12,6 @@ const MyDomainsCard: React.FC = () => {
         <Col span={8} key={item.name}>
           <div className={s.CardInfo}> {/* Wrap the Card component in a div */}
             <Card loading={domainsLoading} title={item.name} bordered={false} className={s.DomainMyCardInfo}>
-              <p><strong>Назва:</strong> {item.name}</p>
               <p><strong>Адреса:</strong> {item.address}</p>
               <p><strong>Адміністратори:</strong> {item.adminEmails.join(", ")}</p>     
               <p><strong>Опис:</strong> {item.description}</p>
