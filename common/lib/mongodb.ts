@@ -1,6 +1,6 @@
 import { MongoClient } from 'mongodb'
 
-const uri = process.env.EMAIL_FROM
+const uri = 'mongodb+srv://Vanya:Artemlox1@cluster0.et1qg.mongodb.net/?retryWrites=true&w=majority	'
 const options = {
   useUnifiedTopology: true,
   useNewUrlParser: true,
