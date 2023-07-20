@@ -1,6 +1,6 @@
 import { MongoClient } from 'mongodb'
 
-const uri = process.env.MONGODB
+const uri = process.env.NEXT_PUBLIC_MONGODB
 
 const options = {
   useUnifiedTopology: true,
