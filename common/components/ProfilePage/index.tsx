@@ -7,6 +7,7 @@ import { useGetCurrentUserQuery } from '../../api/userApi/user.api'
 import MyDomain from './my-domain'
 import MyCompany from './my-company'
 import MyDomainsCard from './my-domainCard'
+import { Roles } from '@utils/constants'
         
 const ProfilePage: React.FC = () => {
   const { data: user, isLoading: userLoading } = useGetCurrentUserQuery();
@@ -21,7 +22,7 @@ const ProfilePage: React.FC = () => {
           </div>
           <div className={s.Info}>
             <RoleSwitcher />
-            {user?.roles.includes("GlobalAdmin") ? null: <MyDomain />}
+            {user?.roles.includes(Roles.GLOBAL_ADMIN) ? null: <MyDomain />}
             <MyCompany user={user}/>
             <Card size="small" title="Електронна пошта">
               {user?.email}

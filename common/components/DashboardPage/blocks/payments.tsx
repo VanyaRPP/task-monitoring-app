@@ -30,6 +30,11 @@ const PaymentsBlock = () => {
     maxIndex: 0,
     loading: true,
   })
+  const [filter, setFilter] = useState({
+    companiesArray: [],
+    domainsArray: [],
+  })
+
   const {
     pathname,
     query: { email },
@@ -60,14 +65,37 @@ const PaymentsBlock = () => {
     
       setPage((prevState)=>({
         ...prevState,
-        data: payments,
+        data: payments?.data,
         currentPage,
         pageSize: limit,
-        totalPage: Math.ceil(payments?.length / limit),
+        totalPage: Math.ceil(payments?.data.length / limit),
         minIndex: skip,
         maxIndex: skip + limit,
         loading: false,
       }))
+    }
+
+    if (paymentsLoading === false && payments) {
+      const companiesTemp = payments.data.reduce((acc, curr) => {
+        if (!acc.includes(curr.company.companyName)) {
+          acc.push(curr.company.companyName);
+        }
+        return acc;
+      }, []); 
+
+      const domainsTemp = payments.data.reduce((acc, curr) => {
+        if (!acc.includes(curr.domain.name)) {
+          acc.push(curr.domain.name);
+        }
+        return acc;
+      }, []); 
+
+      setFilter((prevState) => ({
+        ...prevState,
+        companiesArray:companiesTemp,
+        domainsArray:domainsTemp,
+      }));
+      
     }
   }, [payments])
   
@@ -87,7 +115,7 @@ const PaymentsBlock = () => {
   }
 
   const invoiceTypes = Object.keys(paymentsTitle)
-
+  
   const paymentsPageColumns =
     router.pathname === AppRoutes.PAYMENT
       ? [
@@ -104,6 +132,29 @@ const PaymentsBlock = () => {
 
   // currentCompaniesCount, currentDomainsCount done, just use it
   const columns = [
+    {
+      title: 'Домен',
+      dataIndex: 'domain',
+      filters: pathname === AppRoutes.PAYMENT ? filter.domainsArray?.map((item) => ({
+        text: item || null,
+        value: item || null,
+      })) 
+      : null,
+      onFilter: (value, record) => record.domain.name === value,
+      render: (i) => i.name,
+    },
+    {
+      title: 'Компанія',
+      dataIndex: 'company',
+      filters: pathname === AppRoutes.PAYMENT
+        ? filter.companiesArray?.map((item) => ({
+            text: item || null,
+            value: item || null,
+          }))
+        : null,
+      onFilter: (value, record) => record.company.companyName === value,
+      render: (i) => i?.companyName,
+    },
     {
       title: 'Дата',
       dataIndex: 'date',
@@ -182,14 +233,10 @@ const PaymentsBlock = () => {
       ),
     },
   ]
-
+  
   if (isGlobalAdmin && !email) {
     columns.unshift(
-      {
-        title: 'Компанія',
-        dataIndex: 'company',
-        render: (i) => i?.companyName,
-      },
+      
       {
         title: 'Вулиця',
         dataIndex: 'street',
@@ -242,7 +289,7 @@ const PaymentsBlock = () => {
       <Fragment>
        <Table
         columns={columns}
-        dataSource={payments?.slice(minIndex, maxIndex)}
+        dataSource={payments?.data.slice(minIndex, maxIndex)}
         pagination={false} 
         bordered
         size="small"
@@ -255,18 +302,18 @@ const PaymentsBlock = () => {
         rowKey="_id"
       />
 
-      <Pagination
+      {router.pathname === AppRoutes.PAYMENT && <Pagination
           className={s.Pagination}
           current={page.currentPage}
           pageSize={page.pageSize}
-          total={payments?.length}
+          total={payments?.data.length}
           showSizeChanger
           pageSizeOptions={[10, 30, 50]}
           onChange={handlePaginationChange}
           onShowSizeChange={(current,size) => {
             setPage((prevPage) => ({ ...prevPage, pageSize: size }));
         }}
-      />
+      />}
     </Fragment> 
   )
   }
