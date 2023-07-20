@@ -8,7 +8,7 @@ import {
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { IExtendedPayment, IGetPaymentResponse } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
@@ -105,16 +105,6 @@ const PaymentsBlock = () => {
   // currentCompaniesCount, currentDomainsCount done, just use it
   const columns = [
     {
-      title: 'Домен',
-      dataIndex: 'domain',
-      render: (i) => i.name,
-    },
-    {
-      title: 'Компанія',
-      dataIndex: 'company',
-      render: (i) => i.companyName,
-    },
-    {
       title: 'Дата',
       dataIndex: 'date',
       ellipsis: true,
@@ -207,6 +197,23 @@ const PaymentsBlock = () => {
       }
     )
   }
+
+  if (payments?.currentCompaniesCount > 1) {
+    columns.unshift({
+      title: 'Компанія',
+      dataIndex: 'company',
+      render: (i) => i.companyName,
+    })
+  }
+
+  if (payments?.currentDomainsCount > 1) {
+    columns.unshift({
+      title: 'Домен',
+      dataIndex: 'domain',
+      render: (i) => i.name,
+    })
+  }
+
   let content: ReactElement
   
   const handlePaginationChange = (page: number, pageSize: number) => {

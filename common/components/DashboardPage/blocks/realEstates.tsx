@@ -75,9 +75,12 @@ const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
       dataIndex: 'phone',
     },
     {
-      title: 'Адміністратори',
-      dataIndex: 'adminEmails',
-    },
+  title: 'Адміністратори',
+  dataIndex: 'adminEmails',
+  render: (adminEmails) => (
+    <span>{adminEmails.join(', ')}</span>
+  ),
+},
     {
       title: 'Кількість метрів',
       dataIndex: 'totalArea',

@@ -51,6 +51,8 @@ export interface IAddPaymentResponse {
 export interface IGetPaymentResponse {
   success: boolean
   data: IExtendedPayment[]
+  currentCompaniesCount: number
+  currentDomainsCount: number
 }
 
 export interface IDeletePaymentResponse {
