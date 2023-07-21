@@ -17,12 +17,12 @@ export const paymentApi = createApi({
   endpoints: (builder) => ({
     getAllPayments: builder.query<
       IGetPaymentResponse,
-      { limit: number; email?: string }
+      { limit: number; email?: string, year?: number, quarter?: number[], month?: number, day?: number }
     >({
-      query: ({ limit, email }) => {
+      query: ({ limit, email, year, quarter, month, day }) => {
         return {
           url: `spacehub/payment`,
-          params: { limit, email },
+          params: { limit, email, year, quarter, month, day },
         }
       },
       providesTags: (response) =>

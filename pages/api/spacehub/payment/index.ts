@@ -89,6 +89,31 @@ export default async function handler(
           options.company = { $in: realEstatesIds }
         }
 
+        const filterByDateOptions = []
+        const { year, quarter, month, day } = req.query
+
+        year &&
+          filterByDateOptions.push({
+            $eq: [{ $year: '$date' }, year],
+          })
+        quarter &&
+          filterByDateOptions.push({
+            // @ts-ignore
+            $in: [{ $month: '$date' }, quarter.split(',').map(Number)],
+          })
+        month &&
+          filterByDateOptions.push({
+            $eq: [{ $month: '$date' }, month],
+          })
+        day &&
+          filterByDateOptions.push({
+            $eq: [{ $dayOfMonth: '$date' }, day],
+          })
+
+        options.$expr = {
+          $and: filterByDateOptions,
+        }
+
         /* eslint-disable @typescript-eslint/ban-ts-comment */
         // @ts-ignore
         const payments = await Payment.find(options)
@@ -99,8 +124,12 @@ export default async function handler(
           .populate({ path: 'domain', select: '_id name' })
           .populate({ path: 'monthService', select: '_id date' })
 
-        const companies = payments.map((item) => item?.company?._id).filter(Boolean)
-        const domains = payments.map((item) => item?.domain?._id).filter(Boolean)
+        const companies = payments
+          .map((item) => item?.company?._id)
+          .filter(Boolean)
+        const domains = payments
+          .map((item) => item?.domain?._id)
+          .filter(Boolean)
 
         return res.status(200).json({
           // TODO: calc of all, not current
