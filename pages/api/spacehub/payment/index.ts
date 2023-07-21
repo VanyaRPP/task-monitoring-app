@@ -92,6 +92,13 @@ export default async function handler(
         const filterByDateOptions = []
         const { year, quarter, month, day } = req.query
 
+        const quarters = {
+          '1': [1, 2, 3],
+          '2': [4, 5, 6],
+          '3': [7, 8, 9],
+          '4': [10, 11, 12],
+        }
+
         year &&
           filterByDateOptions.push({
             $eq: [{ $year: '$date' }, year],
@@ -99,7 +106,7 @@ export default async function handler(
         quarter &&
           filterByDateOptions.push({
             // @ts-ignore
-            $in: [{ $month: '$date' }, quarter.split(',').map(Number)],
+            $in: [{ $month: '$date' }, quarters[quarter]],
           })
         month &&
           filterByDateOptions.push({

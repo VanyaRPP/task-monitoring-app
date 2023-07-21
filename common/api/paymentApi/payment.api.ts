@@ -17,7 +17,7 @@ export const paymentApi = createApi({
   endpoints: (builder) => ({
     getAllPayments: builder.query<
       IGetPaymentResponse,
-      { limit: number; email?: string, year?: number, quarter?: number[], month?: number, day?: number }
+      { limit: number; email?: string, year?: number, quarter?: number, month?: number, day?: number }
     >({
       query: ({ limit, email, year, quarter, month, day }) => {
         return {
