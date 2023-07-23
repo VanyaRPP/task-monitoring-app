@@ -8,6 +8,7 @@ import Payment from '@common/modules/models/Payment'
 import start, { Data } from 'pages/api/api.config'
 import { getPaymentOptions } from '@utils/helpers'
 import Domain from '@common/modules/models/Domain'
+import { quarters } from '@utils/constants'
 
 start()
 
@@ -92,30 +93,27 @@ export default async function handler(
         const filterByDateOptions = []
         const { year, quarter, month, day } = req.query
 
-        const quarters = {
-          '1': [1, 2, 3],
-          '2': [4, 5, 6],
-          '3': [7, 8, 9],
-          '4': [10, 11, 12],
-        }
-
-        year &&
+        if (year) {
           filterByDateOptions.push({
             $eq: [{ $year: '$date' }, year],
           })
-        quarter &&
+        }
+        if (quarter) {
           filterByDateOptions.push({
             // @ts-ignore
             $in: [{ $month: '$date' }, quarters[quarter]],
           })
-        month &&
+        }
+        if (month) {
           filterByDateOptions.push({
             $eq: [{ $month: '$date' }, month],
           })
-        day &&
+        }
+        if (day) {
           filterByDateOptions.push({
             $eq: [{ $dayOfMonth: '$date' }, day],
           })
+        }
 
         options.$expr = {
           $and: filterByDateOptions,
