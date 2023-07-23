@@ -8,6 +8,7 @@ import Payment from '@common/modules/models/Payment'
 import start, { Data } from 'pages/api/api.config'
 import { getPaymentOptions } from '@utils/helpers'
 import Domain from '@common/modules/models/Domain'
+import { quarters } from '@utils/constants'
 
 start()
 
@@ -89,6 +90,35 @@ export default async function handler(
           options.company = { $in: realEstatesIds }
         }
 
+        const filterByDateOptions = []
+        const { year, quarter, month, day } = req.query
+
+        if (year) {
+          filterByDateOptions.push({
+            $eq: [{ $year: '$date' }, year],
+          })
+        }
+        if (quarter) {
+          filterByDateOptions.push({
+            // @ts-ignore
+            $in: [{ $month: '$date' }, quarters[quarter]],
+          })
+        }
+        if (month) {
+          filterByDateOptions.push({
+            $eq: [{ $month: '$date' }, month],
+          })
+        }
+        if (day) {
+          filterByDateOptions.push({
+            $eq: [{ $dayOfMonth: '$date' }, day],
+          })
+        }
+
+        options.$expr = {
+          $and: filterByDateOptions,
+        }
+
         /* eslint-disable @typescript-eslint/ban-ts-comment */
         // @ts-ignore
         const payments = await Payment.find(options)
@@ -99,8 +129,12 @@ export default async function handler(
           .populate({ path: 'domain', select: '_id name' })
           .populate({ path: 'monthService', select: '_id date' })
 
-        const companies = payments.map((item) => item?.company?._id).filter(Boolean)
-        const domains = payments.map((item) => item?.domain?._id).filter(Boolean)
+        const companies = payments
+          .map((item) => item?.company?._id)
+          .filter(Boolean)
+        const domains = payments
+          .map((item) => item?.domain?._id)
+          .filter(Boolean)
 
         return res.status(200).json({
           // TODO: calc of all, not current
