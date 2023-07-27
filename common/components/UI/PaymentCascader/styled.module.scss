@@ -1,12 +1,10 @@
 .PaymentCascader {
   width: 300px;
-  padding-left: -50px !important;
 }
 
-.CascaderElement {
-  :global {
-    .ant-select-arrow {
-      margin: -20px;
-    }
+@media (max-width: 768px) {
+  .CustomCascader {
+    display: flex;
+    flex-direction: column;
   }
 }

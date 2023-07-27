@@ -16,6 +16,7 @@
     height: 500px !important;
     background-color: #4096ff;
   }
+
   @media (max-width: 800px) {
     min-width: 100%;
     max-height: 80vh;
@@ -36,20 +37,25 @@
   }
 
   :global {
+    .ant-select {
+      position: relative;
+      left: -110px;
+      z-index: 1000;
+      flex-direction: column;
+      overflow: visible;
+    }
+
     .ant-select-selector {
-      margin-left: -120px;
-    }
-  }
-  :global {
-    .ant-select-selector .ant-select-arrow {
-      display: flex;
       position: absolute;
-      right: 0;
+      top: 0;
+      left: 0px;
     }
   }
   :global {
-    .anticon .anticon-down .ant-select-suffix {
-      margin-left: -30px;
+    .ant-btn ant-btn-link {
+      display: inline-block;
+      position: relative;
+      z-index: 2000;
     }
   }
 
