@@ -22,13 +22,34 @@
   }
 
   :global {
-    .ant-table.ant-table-small .ant-table-tbody .ant-table-wrapper:only-child .ant-table {
+    .ant-table.ant-table-small
+      .ant-table-tbody
+      .ant-table-wrapper:only-child
+      .ant-table {
       margin: 0px;
     }
   }
   :global {
     .ant-card-head {
       height: 60px;
+    }
+  }
+
+  :global {
+    .ant-select-selector {
+      margin-left: -120px;
+    }
+  }
+  :global {
+    .ant-select-selector .ant-select-arrow {
+      display: flex;
+      position: absolute;
+      right: 0;
+    }
+  }
+  :global {
+    .anticon .anticon-down .ant-select-suffix {
+      margin-left: -30px;
     }
   }
 

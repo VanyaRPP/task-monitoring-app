@@ -1,0 +1,12 @@
+.PaymentCascader {
+  width: 300px;
+  padding-left: -50px !important;
+}
+
+.CascaderElement {
+  :global {
+    .ant-select-arrow {
+      margin: -20px;
+    }
+  }
+}
