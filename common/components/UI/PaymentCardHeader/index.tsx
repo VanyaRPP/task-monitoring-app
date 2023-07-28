@@ -7,7 +7,7 @@ import AddPaymentModal from '@common/components/AddPaymentModal'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import s from './style.module.scss'
 import { isAdminCheck } from '@utils/helpers'
-import CustomCascader from '@common/components/UI/PaymentCascader/index'
+import PaymentCascader from '@common/components/UI/PaymentCascader/index'
 
 const PaymentCardHeader = ({ currentPayment, closeEditModal, customOptions, handleChange}) => {
   const router = useRouter()
@@ -41,7 +41,7 @@ const PaymentCardHeader = ({ currentPayment, closeEditModal, customOptions, hand
                 Проплати
                 <SelectOutlined className={s.Icon} />
               </Button>
-              <CustomCascader options={customOptions} onChange={handleChange} 
+              <PaymentCascader options={customOptions} onChange={handleChange} 
     />
             </>
           )}

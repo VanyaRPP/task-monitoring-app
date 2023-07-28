@@ -3,7 +3,7 @@ import { Cascader } from 'antd';
 import s from '@components/UI/PaymentCardHeader/style.module.scss'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api';
 
-const CustomCascader = ({options,onChange}) => {
+const PaymentCascader = ({options,onChange}) => {
   const [customOptions, setCustomOptions] = useState([]);
 
   const { data, error, isLoading } = useGetAllPaymentsQuery({});
@@ -71,4 +71,4 @@ const CustomCascader = ({options,onChange}) => {
   );
 };
 
-export default CustomCascader;
+export default PaymentCascader;
