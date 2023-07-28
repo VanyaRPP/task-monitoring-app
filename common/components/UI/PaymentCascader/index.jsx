@@ -67,11 +67,7 @@ const CustomCascader = ({options,onChange}) => {
 
  
   return (
-     <>
-      <div className={s.PaymentCascader}>
         <Cascader options={customOptions} onChange={handleChange} className={s.CascaderElement} placeholder="Please select" />
-      </div>
-      </>
   );
 };
 

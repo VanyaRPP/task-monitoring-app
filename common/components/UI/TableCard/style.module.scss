@@ -59,6 +59,12 @@
     }
   }
 
+  :global {
+    .style_tableHeader__f8nke {
+      position: flex-start;
+      z-index: 2000;
+    }
+  }
   position: relative;
   overflow: hidden;
 
