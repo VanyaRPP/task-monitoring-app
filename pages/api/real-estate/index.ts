@@ -18,21 +18,24 @@ export default async function handler(
     case 'GET':
       try {
         const options = {}
-        const { domainId, streetId } = req.query
-        if (isGlobalAdmin && domainId && streetId) {
-          options.domain = domainId
-          options.street = streetId
+        const { domainId, streetId } = req.query;
+        
+        if (isGlobalAdmin && domainId) {
+          options.domain = domainId;
+          options.street = streetId;
         }
 
-        if (isDomainAdmin) {
-          const domains = await Domain.find({
+        if (isDomainAdmin && domainId) {
+          options.domain = streetId;
+
+            const domains = await Domain.find({
             adminEmails: { $in: [user.email] },
           })
           const domainsIds = domains.map((i) => i._id)
           options.domain = { $in: domainsIds }
         }
 
-        if (isUser) { 
+        if (isUser) {
           options.adminEmails = { $in: [user.email] }
         }
 
