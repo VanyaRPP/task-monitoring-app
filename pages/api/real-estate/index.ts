@@ -22,11 +22,10 @@ export default async function handler(
         
         if (isGlobalAdmin && domainId) {
           options.domain = domainId;
-          options.street = streetId;
         }
 
         if (isDomainAdmin && domainId) {
-          options.domain = streetId;
+          options.domain = domainId;
 
             const domains = await Domain.find({
             adminEmails: { $in: [user.email] },
