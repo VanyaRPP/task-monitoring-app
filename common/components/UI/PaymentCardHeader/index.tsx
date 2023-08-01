@@ -9,7 +9,7 @@ import s from './style.module.scss'
 import { isAdminCheck } from '@utils/helpers'
 import PaymentCascader from '@common/components/UI/PaymentCascader/index'
 
-const PaymentCardHeader = ({ currentPayment, closeEditModal, customOptions, handleChange}) => {
+const PaymentCardHeader = ({ currentPayment, closeEditModal, handleChange, year, quarter, month, day}) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -41,7 +41,12 @@ const PaymentCardHeader = ({ currentPayment, closeEditModal, customOptions, hand
                 Проплати
                 <SelectOutlined className={s.Icon} />
               </Button>
-              <PaymentCascader options={customOptions} onChange={handleChange} 
+                  <PaymentCascader year={year}    
+                   quarter={quarter}  
+                   month={month}  
+                   day={day}  
+                   onChange={handleChange}
+                   
     />
             </>
           )}

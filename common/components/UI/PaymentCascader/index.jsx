@@ -3,7 +3,7 @@ import { Cascader } from 'antd';
 import s from '@components/UI/PaymentCardHeader/style.module.scss';
 import {useGetAllPaymentsQuery,useFilterPaymentsMutation} from '@common/api/paymentApi/payment.api'
 
-const PaymentCascader = ({ year, quarter, month, day, onChange }) => {
+const PaymentCascader = ({ year, quarter, month, day, onChange}) => {
 
   const [customOptions, setCustomOptions] = useState([]);
 
@@ -92,15 +92,15 @@ const PaymentCascader = ({ year, quarter, month, day, onChange }) => {
                     value: '1',
                   },
                   {
-                    label: `  ІІ квартал`,
+                    label: `ІІ квартал`,
                     value: '2',
                   },
                   {
-                    label: ` III квартал`,
+                    label: `III квартал`,
                     value:'3',
                   },
                   {
-                    label: ` IV квартал`,
+                    label: `IV квартал`,
                     value: '4',
                     },
                             ],
@@ -114,7 +114,7 @@ const PaymentCascader = ({ year, quarter, month, day, onChange }) => {
 
   const handleChange = (value) => {
     if (onChange) {
-     console.log(filterPayments)
+    //  console.log(filterPayments)
       onChange(value);
     }
     filterPayments({ limit: '1', email: 'denys1234@gmail.com', year: "2023", quarter: "3", month: '7', day: "17" })
@@ -124,7 +124,6 @@ const PaymentCascader = ({ year, quarter, month, day, onChange }) => {
     <Cascader
       options={customOptions}
       onChange={handleChange}
-      className={s.CascaderElement}
       placeholder="Please select"
     />
   );
