@@ -1,73 +1,132 @@
-import React, { useEffect, useState }  from 'react';
+import React, { useEffect, useState } from 'react';
 import { Cascader } from 'antd';
-import s from '@components/UI/PaymentCardHeader/style.module.scss'
-import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api';
+import s from '@components/UI/PaymentCardHeader/style.module.scss';
+import {useGetAllPaymentsQuery,useFilterPaymentsMutation} from '@common/api/paymentApi/payment.api'
 
-const PaymentCascader = ({options,onChange}) => {
+const PaymentCascader = ({ year, quarter, month, day, onChange }) => {
+
   const [customOptions, setCustomOptions] = useState([]);
 
-  const { data, error, isLoading } = useGetAllPaymentsQuery({});
+  const [filterPayments]= useFilterPaymentsMutation()
 
+  // const { getAllPayments} = useGetAllPaymentsQuery({limit:'1', email: 'denys1234@gmail.com', year: "2023", quarter: "3", month: '7', day:"17"})
+  
   useEffect(() => {
-    if (data && !isLoading) {
-      const { year, quarter, month, day } = data?.query || {};
+    //  if {
+    //   const =  ;
 
-      setCustomOptions([
-        {
-          value: 'year',
-          label: 'Рік',
-          children: [
-            {
-              value: year,
-              label: `${year}`,
-              children: [
-                {
-                  value: 'whole-year',
-                  label: 'Весь рік',
-                },
-                {
-                  value: 'quarter',
-                  label: 'Квартал',
-                  children: [
-                    {
-                      value: quarter,
-                      label: `Квартал ${quarter}`,
-                      children: [
-                        {
-                          value: 'month',
-                          label: 'Місяць',
-                          children: [
-                            {
-                              value: month,
-                              label: `Місяць ${month}`,
-                              children: [
-                                {
-                                  value: day,
-                                  label: `День ${day}`,
-                                },
-                              ],
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
+    setCustomOptions([
+      {
+        label: 'Рік',
+        value: 'year',
+        children: [
+          {
+            label: `2023`,
+            value: '2023',
+            children: [
+              {
+              label: 'Увесь рік',
+              value: 'year',
             },
-          ],
-        },
-      ]);
-    }
-  }, [data, isLoading]);
+              {
+                label: 'Місяць',
+                value: 'month',
+                children: [
+                    {
+                     label: 'Січень',
+                    value: '1',
+                    },
+                    {
+                     label: 'Лютий',
+                     value: '2',
+                     },
+                    {
+                    label: 'Березень',
+                    value: '3',
+                  },
+                       {
+                     label: 'Квітень',
+                     value: '4',
+                    },
+                    {
+                     label: 'Травень',
+                     value: '5',
+                     },
+                    {
+                    label: 'Червень',
+                    value: '6',
+                  },
+                     {
+                     label: 'Липень',
+                     value: '7',
+                    },
+                    {
+                     label: 'Серпень',
+                     value: '8',
+                     },
+                    {
+                    label: 'Вересень',
+                    value: '9',
+                  },
+                       {
+                     label: 'Жовтень',
+                     value: '10',
+                    },
+                    {
+                     label: 'Листопад',
+                     value: '11',
+                     },
+                    {
+                    label: 'Грудень',
+                    value: '12',
+                  },
+                    
+                            ],
+              },
+               {
+                label: 'Квартал',
+                value: 'quarter',
+                children: [
+                  {
+                    label: ` І квартал`,
+                    value: '1',
+                  },
+                  {
+                    label: `  ІІ квартал`,
+                    value: '2',
+                  },
+                  {
+                    label: ` III квартал`,
+                    value:'3',
+                  },
+                  {
+                    label: ` IV квартал`,
+                    value: '4',
+                    },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+    ]);
+  }, [year, quarter, month, day]);
 
   const handleChange = (value) => {
-    // Handle the onChange event here
+    if (onChange) {
+     console.log(filterPayments)
+      onChange(value);
+    }
+    filterPayments({ limit: '1', email: 'denys1234@gmail.com', year: "2023", quarter: "3", month: '7', day: "17" })
   };
 
- 
   return (
-        <Cascader options={customOptions} onChange={handleChange} className={s.CascaderElement} placeholder="Please select" />
+    <Cascader
+      options={customOptions}
+      onChange={handleChange}
+      className={s.CascaderElement}
+      placeholder="Please select"
+    />
   );
 };
 
