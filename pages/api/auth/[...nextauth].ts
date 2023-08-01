@@ -117,9 +117,9 @@ export const authOptions: NextAuthOptions = {
         return false
       }
     },
-    async redirect({ url, baseUrl }) {
-      return baseUrl
-    },
+    // async redirect({ url, baseUrl }) {
+    //   return baseUrl
+    // },
     async session({ session, user, token }) {
       return session
     },
