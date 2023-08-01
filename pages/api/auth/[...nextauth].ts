@@ -14,10 +14,6 @@ import clientPromise from '@common/lib/mongodb'
 import User from '@common/modules/models/User'
 import { ICredentials } from '@common/lib/credentials.types'
 
-if (true) {
-  throw new Error(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID)
-}
-
 function html({ url, host, email }) {
   const escapedEmail = `${email.replace(/\./g, '&#8203;.')}`
   const escapedHost = `${host.replace(/\./g, '&#8203;.')}`
