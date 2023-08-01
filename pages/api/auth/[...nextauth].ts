@@ -14,24 +14,27 @@ import clientPromise from '@common/lib/mongodb'
 import User from '@common/modules/models/User'
 import { ICredentials } from '@common/lib/credentials.types'
 
+if (true) {
+  throw new Error(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID)
+}
+
 function html({ url, host, email }) {
   const escapedEmail = `${email.replace(/\./g, '&#8203;.')}`
   const escapedHost = `${host.replace(/\./g, '&#8203;.')}`
   return `
-      <body>
-        <h1>Your magic link</h1>
-        <h3>You requested a login form ${escapedEmail}</h3>
-        <p>
-          <a href="${url}">Login to ${escapedHost}</a>
-      </body>
+  <body>
+  <h1>Your magic link</h1>
+  <h3>You requested a login form ${escapedEmail}</h3>
+  <p>
+  <a href="${url}">Login to ${escapedHost}</a>
+  </body>
   `
 }
-
-console.log('gogle id', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID)
 
 function text({ url, host }) {
   return `Login to ${host}\n${url}\n\n`
 }
+
 
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
@@ -56,49 +59,49 @@ export const authOptions: NextAuthOptions = {
           const user = await User.findOne({
             email: credentials.email,
           })
-
+          
           // encrypting and comparing password
           const result = await bcrypt.compare(
             credentials.password,
             user.password
-          )
-          if (!result) return null
-
-          return user
-        } catch (error) {
-          return null
-        }
-      },
-    }),
-    EmailProvider({
-      server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: process.env.EMAIL_SERVER_PORT,
-        auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD,
+            )
+            if (!result) return null
+            
+            return user
+          } catch (error) {
+            return null
+          }
         },
-      },
-      from: process.env.EMAIL_FROM,
-      async sendVerificationRequest({
-        identifier: email,
-        url,
-        provider: { server, from },
-      }) {
-        const { host } = new URL(url)
-        const transport = nodemailer.createTransport(server)
-        await transport.sendMail({
-          to: email,
-          from,
-          subject: `Login to ${host}`,
-          text: text({ url, host }),
-          html: html({ url, host, email }),
-        })
-      },
-    }),
-    GoogleProvider({
-      clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-      clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
+      }),
+      EmailProvider({
+        server: {
+          host: process.env.EMAIL_SERVER_HOST,
+          port: process.env.EMAIL_SERVER_PORT,
+          auth: {
+            user: process.env.EMAIL_SERVER_USER,
+            pass: process.env.EMAIL_SERVER_PASSWORD,
+          },
+        },
+        from: process.env.EMAIL_FROM,
+        async sendVerificationRequest({
+          identifier: email,
+          url,
+          provider: { server, from },
+        }) {
+          const { host } = new URL(url)
+          const transport = nodemailer.createTransport(server)
+          await transport.sendMail({
+            to: email,
+            from,
+            subject: `Login to ${host}`,
+            text: text({ url, host }),
+            html: html({ url, host, email }),
+          })
+        },
+      }),
+      GoogleProvider({
+        clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
     }),
     GithubProvider({
       clientId: process.env.NEXT_PUBLIC_GITHUB_ID,
