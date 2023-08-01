@@ -27,6 +27,8 @@ function html({ url, host, email }) {
   `
 }
 
+console.log('gogle id', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID)
+
 function text({ url, host }) {
   return `Login to ${host}\n${url}\n\n`
 }
@@ -117,9 +119,9 @@ export const authOptions: NextAuthOptions = {
         return false
       }
     },
-    // async redirect({ url, baseUrl }) {
-    //   return baseUrl
-    // },
+    async redirect({ url, baseUrl }) {
+      return baseUrl
+    },
     async session({ session, user, token }) {
       return session
     },
