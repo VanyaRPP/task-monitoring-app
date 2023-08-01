@@ -1,5 +1,5 @@
-import React, { ReactElement, useEffect, useState } from 'react'
-import { Alert, message, Popconfirm, Table } from 'antd'
+import React, { ReactElement, useState, useEffect, Fragment } from 'react'
+import { Alert, message, Pagination, Popconfirm, Table } from 'antd'
 import { Button } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
@@ -8,7 +8,7 @@ import {
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
-import { IExtendedPayment, IGetPaymentResponse } from '@common/api/paymentApi/payment.api.types'
+import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
@@ -20,26 +20,33 @@ import s from './style.module.scss'
 
 const PaymentsBlock = () => {
   const router = useRouter()
-  const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
   const {
     pathname,
     query: { email },
   } = router
-
+  const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
+  const [pageData, setPageData] = useState({
+    pageSize: pathname === AppRoutes.PAYMENT ? 10 : 5,
+    currentPage: 1,
+  })
   const {
-    data: currUser,
-    isLoading: currUserLoading,
     isFetching: currUserFetching,
+    isLoading: currUserLoading,
     isError: currUserError,
+    data: currUser,
   } = useGetCurrentUserQuery()
 
   const {
-    data: payments,
-    isLoading: paymentsLoading,
     isFetching: paymentsFetching,
+    isLoading: paymentsLoading,
     isError: paymentsError,
+    data: payments,
   } = useGetAllPaymentsQuery(
-    { limit: pathname === AppRoutes.PAYMENT ? 200 : 5, email: email as string },
+    {
+      skip: (pageData.currentPage - 1) * pageData.pageSize,
+      limit: pageData.pageSize,
+      email: email as string,
+    },
     { skip: currUserLoading || !currUser }
   )
 
@@ -73,8 +80,33 @@ const PaymentsBlock = () => {
         ]
       : []
 
-  // currentCompaniesCount, currentDomainsCount done, just use it
   const columns = [
+    {
+      title: 'Домен',
+      dataIndex: 'domain',
+      // filters:
+      //   pathname === AppRoutes.PAYMENT
+      //     ? filter.domainsArray?.map((item) => ({
+      //         text: item || null,
+      //         value: item || null,
+      //       }))
+      //     : null,
+      // onFilter: (value, record) => record.domain.name === value,
+      render: (i) => i.name,
+    },
+    {
+      title: 'Компанія',
+      dataIndex: 'company',
+      // filters:
+      //   pathname === AppRoutes.PAYMENT
+      //     ? filter.companiesArray?.map((item) => ({
+      //         text: item || null,
+      //         value: item || null,
+      //       }))
+      //     : null,
+      // onFilter: (value, record) => record.company.companyName === value,
+      render: (i) => i?.companyName,
+    },
     {
       title: 'Дата',
       dataIndex: 'date',
@@ -155,18 +187,11 @@ const PaymentsBlock = () => {
   ]
 
   if (isGlobalAdmin && !email) {
-    columns.unshift(
-      {
-        title: 'Компанія',
-        dataIndex: 'company',
-        render: (i) => i?.companyName,
-      },
-      {
-        title: 'Вулиця',
-        dataIndex: 'street',
-        render: (i) => `${i?.address} (м. ${i?.city})`,
-      }
-    )
+    columns.unshift({
+      title: 'Вулиця',
+      dataIndex: 'street',
+      render: (i) => `${i?.address} (м. ${i?.city})`,
+    })
   }
 
   if (payments?.currentCompaniesCount > 1) {
@@ -191,20 +216,40 @@ const PaymentsBlock = () => {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
-      <Table
-        columns={columns}
-        dataSource={payments?.data}
-        pagination={false}
-        bordered
-        size="small"
-        loading={
-          currUserLoading ||
-          currUserFetching ||
-          paymentsLoading ||
-          paymentsFetching
-        }
-        rowKey="_id"
-      />
+      <>
+        <Table
+          columns={columns}
+          dataSource={payments?.data}
+          pagination={false}
+          bordered
+          size="small"
+          loading={
+            currUserLoading ||
+            currUserFetching ||
+            paymentsLoading ||
+            paymentsFetching
+          }
+          rowKey="_id"
+        />
+
+        {router.pathname === AppRoutes.PAYMENT &&
+          !paymentsLoading &&
+          !currUserLoading && (
+            <Pagination
+              className={s.Pagination}
+              pageSize={pageData.pageSize}
+              total={payments?.total}
+              showSizeChanger
+              pageSizeOptions={[10, 30, 50]}
+              onChange={(currentPage) => {
+                setPageData((ps) => ({ ...ps, currentPage }))
+              }}
+              onShowSizeChange={(__, pageSize) => {
+                setPageData((ps) => ({ ...ps, pageSize, currentPage: 1 }))
+              }}
+            />
+          )}
+      </>
     )
   }
 

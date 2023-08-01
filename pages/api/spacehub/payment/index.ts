@@ -123,11 +123,14 @@ export default async function handler(
         // @ts-ignore
         const payments = await Payment.find(options)
           .sort({ date: -1 })
+          .skip(req.query.skip)
           .limit(req.query.limit)
           .populate({ path: 'company', select: '_id companyName' })
           .populate({ path: 'street', select: '_id address city' })
           .populate({ path: 'domain', select: '_id name' })
           .populate({ path: 'monthService', select: '_id date' })
+
+        const total = await Payment.countDocuments(options)
 
         const companies = payments
           .map((item) => item?.company?._id)
@@ -137,13 +140,13 @@ export default async function handler(
           .filter(Boolean)
 
         return res.status(200).json({
-          // TODO: calc of all, not current
           /* eslint-disable @typescript-eslint/ban-ts-comment */
           // @ts-ignore
           currentCompaniesCount: new Set(companies).size,
           currentDomainsCount: new Set(domains).size,
           data: payments,
           success: true,
+          total,
         })
       } catch (error) {
         return res.status(400).json({ success: false })

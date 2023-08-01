@@ -1,12 +1,14 @@
-import React from 'react';
-import { UserOutlined } from '@ant-design/icons';
-import { Avatar, Card, Image, Input } from 'antd';
-import RoleSwitcher from 'common/components/UI/roleSwitcher';
-import s from './style.module.scss';
-import { useGetCurrentUserQuery } from '../../api/userApi/user.api';
-import MyDomain from './my-domain';
-import MyDomainsCard from '@components/ProfilePage/my-domainCard';
-
+import React from 'react'
+import { UserOutlined } from '@ant-design/icons'
+import { Avatar, Card, Image, Input } from 'antd'
+import RoleSwitcher from 'common/components/UI/roleSwitcher'
+import s from './style.module.scss'
+import { useGetCurrentUserQuery } from '../../api/userApi/user.api'
+import MyDomain from './my-domain'
+import MyCompany from './my-company'
+import MyDomainsCard from './my-domainCard'
+import { Roles } from '@utils/constants'
+        
 const ProfilePage: React.FC = () => {
   const { data: user, isLoading: userLoading } = useGetCurrentUserQuery();
 
@@ -20,7 +22,8 @@ const ProfilePage: React.FC = () => {
           </div>
           <div className={s.Info}>
             <RoleSwitcher />
-            <MyDomain />
+            {user?.roles.includes(Roles.GLOBAL_ADMIN) ? null: <MyDomain />}
+            <MyCompany user={user}/>
             <Card size="small" title="Електронна пошта">
               {user?.email}
             </Card>

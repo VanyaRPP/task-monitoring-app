@@ -21,6 +21,7 @@ export const domainApi = createApi({
       query: ({ limit, streetId, domainId }) => {
         return {
           url: `domain`,
+          method:"GET",
           params: { limit, streetId, domainId },
         }
       },
