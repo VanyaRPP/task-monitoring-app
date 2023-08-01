@@ -8,6 +8,7 @@ import Payment from '@common/modules/models/Payment'
 import start, { Data } from 'pages/api/api.config'
 import { getPaymentOptions } from '@utils/helpers'
 import Domain from '@common/modules/models/Domain'
+import { quarters } from '@utils/constants'
 
 start()
 
@@ -87,6 +88,35 @@ export default async function handler(
           })
           const realEstatesIds = realEstates.map((i) => i._id)
           options.company = { $in: realEstatesIds }
+        }
+
+        const filterByDateOptions = []
+        const { year, quarter, month, day } = req.query
+
+        if (year) {
+          filterByDateOptions.push({
+            $eq: [{ $year: '$date' }, year],
+          })
+        }
+        if (quarter) {
+          filterByDateOptions.push({
+            // @ts-ignore
+            $in: [{ $month: '$date' }, quarters[quarter]],
+          })
+        }
+        if (month) {
+          filterByDateOptions.push({
+            $eq: [{ $month: '$date' }, month],
+          })
+        }
+        if (day) {
+          filterByDateOptions.push({
+            $eq: [{ $dayOfMonth: '$date' }, day],
+          })
+        }
+
+        options.$expr = {
+          $and: filterByDateOptions,
         }
 
         /* eslint-disable @typescript-eslint/ban-ts-comment */
