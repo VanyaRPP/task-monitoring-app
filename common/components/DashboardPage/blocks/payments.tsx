@@ -8,7 +8,7 @@ import {
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
-import { IExtendedPayment, IGetPaymentResponse } from '@common/api/paymentApi/payment.api.types'
+import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
@@ -20,81 +20,35 @@ import s from './style.module.scss'
 
 const PaymentsBlock = () => {
   const router = useRouter()
-  const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
-  const [page, setPage] = useState({
-    data: [],
-    currentPage: 1,
-    pageSize: 10,
-    totalPage: 0,
-    skipPage: 0,
-    loading: true,
-  })
-  const [filter, setFilter] = useState({
-    companiesArray: [],
-    domainsArray: [],
-  })
-
   const {
     pathname,
     query: { email },
   } = router
-
+  const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
+  const [pageData, setPageData] = useState({
+    pageSize: pathname === AppRoutes.PAYMENT ? 10 : 5,
+    currentPage: 1,
+  })
   const {
-    data: currUser,
-    isLoading: currUserLoading,
     isFetching: currUserFetching,
+    isLoading: currUserLoading,
     isError: currUserError,
+    data: currUser,
   } = useGetCurrentUserQuery()
 
   const {
-    data: payments,
-    isLoading: paymentsLoading,
     isFetching: paymentsFetching,
+    isLoading: paymentsLoading,
     isError: paymentsError,
-    refetch,
+    data: payments,
   } = useGetAllPaymentsQuery(
-    { limit: pathname === AppRoutes.PAYMENT ? 200 : 5, skip: page.skipPage, email: email as string },
+    {
+      skip: (pageData.currentPage - 1) * pageData.pageSize,
+      limit: pageData.pageSize,
+      email: email as string,
+    },
     { skip: currUserLoading || !currUser }
   )
-
-  useEffect(() => {
-    if (!paymentsLoading && !paymentsError) {
-      const limit = pathname === AppRoutes.PAYMENT ? 10 : 30;
-      const currentPage = Number(router.query.page) || 1;
-
-      setPage((prevState) => ({
-        ...prevState,
-        data: payments?.data,
-        currentPage,
-        pageSize: limit,
-        loading: false,
-      }))
-    }
-
-    if (paymentsLoading === false && payments) {
-      const companiesTemp = payments.data.reduce((acc, curr) => {
-        if (!acc.includes(curr.company)) {
-          acc.push(curr.company);
-        }
-        return acc;
-      }, []);
-
-      const domainsTemp = payments.data.reduce((acc, curr) => {
-        if (!acc.includes(curr.domain)) {
-          acc.push(curr.domain);
-        }
-        return acc;
-      }, []);
-
-      setFilter((prevState) => ({
-        ...prevState,
-        companiesArray: companiesTemp,
-        domainsArray: domainsTemp,
-      }));
-    }
-
-  }, [payments])
-
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
@@ -115,40 +69,42 @@ const PaymentsBlock = () => {
   const paymentsPageColumns =
     router.pathname === AppRoutes.PAYMENT
       ? [
-        ...invoiceTypes.map((type) => ({
-          title: paymentsTitle[type],
-          dataIndex: 'invoice',
-          render: (invoice) => {
-            const item = invoice.find((item) => item.type === type)
-            return item ? item.sum : <span className={s.currency}>-</span>
-          },
-        })),
-      ]
+          ...invoiceTypes.map((type) => ({
+            title: paymentsTitle[type],
+            dataIndex: 'invoice',
+            render: (invoice) => {
+              const item = invoice.find((item) => item.type === type)
+              return item ? item.sum : <span className={s.currency}>-</span>
+            },
+          })),
+        ]
       : []
 
-  // currentCompaniesCount, currentDomainsCount done, just use it
   const columns = [
     {
       title: 'Домен',
       dataIndex: 'domain',
-      filters: pathname === AppRoutes.PAYMENT ? filter.domainsArray?.map((item) => ({
-        text: item || null,
-        value: item || null,
-      }))
-        : null,
-      onFilter: (value, record) => record.domain.name === value,
+      // filters:
+      //   pathname === AppRoutes.PAYMENT
+      //     ? filter.domainsArray?.map((item) => ({
+      //         text: item || null,
+      //         value: item || null,
+      //       }))
+      //     : null,
+      // onFilter: (value, record) => record.domain.name === value,
       render: (i) => i.name,
     },
     {
       title: 'Компанія',
       dataIndex: 'company',
-      filters: pathname === AppRoutes.PAYMENT
-        ? filter.companiesArray?.map((item) => ({
-          text: item || null,
-          value: item || null,
-        }))
-        : null,
-      onFilter: (value, record) => record.company.companyName === value,
+      // filters:
+      //   pathname === AppRoutes.PAYMENT
+      //     ? filter.companiesArray?.map((item) => ({
+      //         text: item || null,
+      //         value: item || null,
+      //       }))
+      //     : null,
+      // onFilter: (value, record) => record.company.companyName === value,
       render: (i) => i?.companyName,
     },
     {
@@ -192,24 +148,24 @@ const PaymentsBlock = () => {
     ...paymentsPageColumns,
     isGlobalAdmin
       ? {
-        title: '',
-        dataIndex: '',
-        width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
-        render: (_, payment: IExtendedPayment) => (
-          <div className={s.popconfirm}>
-            <Popconfirm
-              title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                payment?.date as unknown as string
-              )}?`}
-              onConfirm={() => handleDeletePayment(payment?._id)}
-              cancelText="Відміна"
-              disabled={deleteLoading}
-            >
-              <DeleteOutlined className={s.icon} />
-            </Popconfirm>
-          </div>
-        ),
-      }
+          title: '',
+          dataIndex: '',
+          width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
+          render: (_, payment: IExtendedPayment) => (
+            <div className={s.popconfirm}>
+              <Popconfirm
+                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+                  payment?.date as unknown as string
+                )}?`}
+                onConfirm={() => handleDeletePayment(payment?._id)}
+                cancelText="Відміна"
+                disabled={deleteLoading}
+              >
+                <DeleteOutlined className={s.icon} />
+              </Popconfirm>
+            </div>
+          ),
+        }
       : { width: '0' },
     {
       title: '',
@@ -231,14 +187,11 @@ const PaymentsBlock = () => {
   ]
 
   if (isGlobalAdmin && !email) {
-    columns.unshift(
-
-      {
-        title: 'Вулиця',
-        dataIndex: 'street',
-        render: (i) => `${i?.address} (м. ${i?.city})`,
-      }
-    )
+    columns.unshift({
+      title: 'Вулиця',
+      dataIndex: 'street',
+      render: (i) => `${i?.address} (м. ${i?.city})`,
+    })
   }
 
   if (payments?.currentCompaniesCount > 1) {
@@ -259,25 +212,11 @@ const PaymentsBlock = () => {
 
   let content: ReactElement
 
-  const handlePaginationChange = (page: number, pageSize: number) => {
-    router.push({
-      pathname: AppRoutes.PAYMENT,
-      query: { page: page.toString()},
-    });
-    setPage((prevState) => ({
-      ...prevState,
-      currentPage: page,
-      skipPage: (page -1) * pageSize,
-      pageSize: pageSize,
-    }));
-  };
-
-
   if (deleteError || paymentsError || currUserError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
-      <Fragment>
+      <>
         <Table
           columns={columns}
           dataSource={payments?.data}
@@ -293,19 +232,24 @@ const PaymentsBlock = () => {
           rowKey="_id"
         />
 
-        {router.pathname === AppRoutes.PAYMENT && <Pagination
-          className={s.Pagination}
-          current={page.currentPage}
-          pageSize={page.pageSize}
-          total={payments?.data.length}
-          showSizeChanger
-          pageSizeOptions={[10, 30, 50]}
-          onChange={handlePaginationChange}
-          onShowSizeChange={(current, size) => {
-            setPage((prevPage) => ({ ...prevPage, pageSize: size }));
-          }}
-        />}
-      </Fragment>
+        {router.pathname === AppRoutes.PAYMENT &&
+          !paymentsLoading &&
+          !currUserLoading && (
+            <Pagination
+              className={s.Pagination}
+              pageSize={pageData.pageSize}
+              total={payments?.total}
+              showSizeChanger
+              pageSizeOptions={[10, 30, 50]}
+              onChange={(currentPage) => {
+                setPageData((ps) => ({ ...ps, currentPage }))
+              }}
+              onShowSizeChange={(__, pageSize) => {
+                setPageData((ps) => ({ ...ps, pageSize, currentPage: 1 }))
+              }}
+            />
+          )}
+      </>
     )
   }
 
@@ -333,4 +277,4 @@ export function renderCurrency(number) {
   )
 }
 
-export default PaymentsBlock;
+export default PaymentsBlock
