@@ -93,6 +93,7 @@ export default async function handler(
         // @ts-ignore
         const payments = await Payment.find(options)
           .sort({ date: -1 })
+          .skip(req.query.skip)
           .limit(req.query.limit)
           .populate({ path: 'company', select: '_id companyName' })
           .populate({ path: 'street', select: '_id address city' })
@@ -142,3 +143,4 @@ export default async function handler(
       }
   }
 }
+

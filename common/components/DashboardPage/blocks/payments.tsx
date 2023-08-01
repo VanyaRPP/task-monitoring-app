@@ -24,10 +24,9 @@ const PaymentsBlock = () => {
   const [page, setPage] = useState({
     data: [],
     currentPage: 1,
-    pageSize : 10,
+    pageSize: 10,
     totalPage: 0,
-    minIndex: 0,
-    maxIndex: 0,
+    skipPage: 0,
     loading: true,
   })
   const [filter, setFilter] = useState({
@@ -52,53 +51,50 @@ const PaymentsBlock = () => {
     isLoading: paymentsLoading,
     isFetching: paymentsFetching,
     isError: paymentsError,
+    refetch,
   } = useGetAllPaymentsQuery(
-    { limit: pathname === AppRoutes.PAYMENT ? 200 : 5, email: email as string },
+    { limit: pathname === AppRoutes.PAYMENT ? 200 : 5, skip: page.skipPage, email: email as string },
     { skip: currUserLoading || !currUser }
   )
-  
+
   useEffect(() => {
-    if(!paymentsLoading && !paymentsError){
+    if (!paymentsLoading && !paymentsError) {
       const limit = pathname === AppRoutes.PAYMENT ? 10 : 30;
       const currentPage = Number(router.query.page) || 1;
-      const skip = (currentPage - 1) * limit;
-    
-      setPage((prevState)=>({
+
+      setPage((prevState) => ({
         ...prevState,
         data: payments?.data,
         currentPage,
         pageSize: limit,
-        totalPage: Math.ceil(payments?.data.length / limit),
-        minIndex: skip,
-        maxIndex: skip + limit,
         loading: false,
       }))
     }
 
     if (paymentsLoading === false && payments) {
       const companiesTemp = payments.data.reduce((acc, curr) => {
-        if (!acc.includes(curr.company.companyName)) {
-          acc.push(curr.company.companyName);
+        if (!acc.includes(curr.company)) {
+          acc.push(curr.company);
         }
         return acc;
-      }, []); 
+      }, []);
 
       const domainsTemp = payments.data.reduce((acc, curr) => {
-        if (!acc.includes(curr.domain.name)) {
-          acc.push(curr.domain.name);
+        if (!acc.includes(curr.domain)) {
+          acc.push(curr.domain);
         }
         return acc;
-      }, []); 
+      }, []);
 
       setFilter((prevState) => ({
         ...prevState,
-        companiesArray:companiesTemp,
-        domainsArray:domainsTemp,
+        companiesArray: companiesTemp,
+        domainsArray: domainsTemp,
       }));
-      
     }
+
   }, [payments])
-  
+
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
@@ -115,19 +111,19 @@ const PaymentsBlock = () => {
   }
 
   const invoiceTypes = Object.keys(paymentsTitle)
-  
+
   const paymentsPageColumns =
     router.pathname === AppRoutes.PAYMENT
       ? [
-          ...invoiceTypes.map((type) => ({
-            title: paymentsTitle[type],
-            dataIndex: 'invoice',
-            render: (invoice) => {
-              const item = invoice.find((item) => item.type === type)
-              return item ? item.sum : <span className={s.currency}>-</span>
-            },
-          })),
-        ]
+        ...invoiceTypes.map((type) => ({
+          title: paymentsTitle[type],
+          dataIndex: 'invoice',
+          render: (invoice) => {
+            const item = invoice.find((item) => item.type === type)
+            return item ? item.sum : <span className={s.currency}>-</span>
+          },
+        })),
+      ]
       : []
 
   // currentCompaniesCount, currentDomainsCount done, just use it
@@ -138,8 +134,8 @@ const PaymentsBlock = () => {
       filters: pathname === AppRoutes.PAYMENT ? filter.domainsArray?.map((item) => ({
         text: item || null,
         value: item || null,
-      })) 
-      : null,
+      }))
+        : null,
       onFilter: (value, record) => record.domain.name === value,
       render: (i) => i.name,
     },
@@ -148,9 +144,9 @@ const PaymentsBlock = () => {
       dataIndex: 'company',
       filters: pathname === AppRoutes.PAYMENT
         ? filter.companiesArray?.map((item) => ({
-            text: item || null,
-            value: item || null,
-          }))
+          text: item || null,
+          value: item || null,
+        }))
         : null,
       onFilter: (value, record) => record.company.companyName === value,
       render: (i) => i?.companyName,
@@ -196,24 +192,24 @@ const PaymentsBlock = () => {
     ...paymentsPageColumns,
     isGlobalAdmin
       ? {
-          title: '',
-          dataIndex: '',
-          width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
-          render: (_, payment: IExtendedPayment) => (
-            <div className={s.popconfirm}>
-              <Popconfirm
-                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                  payment?.date as unknown as string
-                )}?`}
-                onConfirm={() => handleDeletePayment(payment?._id)}
-                cancelText="Відміна"
-                disabled={deleteLoading}
-              >
-                <DeleteOutlined className={s.icon} />
-              </Popconfirm>
-            </div>
-          ),
-        }
+        title: '',
+        dataIndex: '',
+        width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
+        render: (_, payment: IExtendedPayment) => (
+          <div className={s.popconfirm}>
+            <Popconfirm
+              title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+                payment?.date as unknown as string
+              )}?`}
+              onConfirm={() => handleDeletePayment(payment?._id)}
+              cancelText="Відміна"
+              disabled={deleteLoading}
+            >
+              <DeleteOutlined className={s.icon} />
+            </Popconfirm>
+          </div>
+        ),
+      }
       : { width: '0' },
     {
       title: '',
@@ -233,10 +229,10 @@ const PaymentsBlock = () => {
       ),
     },
   ]
-  
+
   if (isGlobalAdmin && !email) {
     columns.unshift(
-      
+
       {
         title: 'Вулиця',
         dataIndex: 'street',
@@ -262,47 +258,42 @@ const PaymentsBlock = () => {
   }
 
   let content: ReactElement
-  
+
   const handlePaginationChange = (page: number, pageSize: number) => {
-    const limit = pageSize;
-    const skip = (page - 1) * limit;
     router.push({
       pathname: AppRoutes.PAYMENT,
-      query: { page: page.toString() },
+      query: { page: page.toString()},
     });
-
     setPage((prevState) => ({
       ...prevState,
       currentPage: page,
-      pageSize: limit,
-      minIndex: skip,
-      maxIndex: skip + limit,
+      skipPage: (page -1) * pageSize,
+      pageSize: pageSize,
     }));
   };
 
-  const { data, currentPage, pageSize, minIndex, maxIndex } = page;
-  
+
   if (deleteError || paymentsError || currUserError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
       <Fragment>
-       <Table
-        columns={columns}
-        dataSource={payments?.data.slice(minIndex, maxIndex)}
-        pagination={false} 
-        bordered
-        size="small"
-        loading={
-          currUserLoading ||
-          currUserFetching ||
-          paymentsLoading ||
-          paymentsFetching
-        }
-        rowKey="_id"
-      />
+        <Table
+          columns={columns}
+          dataSource={payments?.data}
+          pagination={false}
+          bordered
+          size="small"
+          loading={
+            currUserLoading ||
+            currUserFetching ||
+            paymentsLoading ||
+            paymentsFetching
+          }
+          rowKey="_id"
+        />
 
-      {router.pathname === AppRoutes.PAYMENT && <Pagination
+        {router.pathname === AppRoutes.PAYMENT && <Pagination
           className={s.Pagination}
           current={page.currentPage}
           pageSize={page.pageSize}
@@ -310,12 +301,12 @@ const PaymentsBlock = () => {
           showSizeChanger
           pageSizeOptions={[10, 30, 50]}
           onChange={handlePaginationChange}
-          onShowSizeChange={(current,size) => {
+          onShowSizeChange={(current, size) => {
             setPage((prevPage) => ({ ...prevPage, pageSize: size }));
-        }}
-      />}
-    </Fragment> 
-  )
+          }}
+        />}
+      </Fragment>
+    )
   }
 
   return (
@@ -342,4 +333,4 @@ export function renderCurrency(number) {
   )
 }
 
-export default PaymentsBlock
+export default PaymentsBlock;
