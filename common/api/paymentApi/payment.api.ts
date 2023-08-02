@@ -1,4 +1,4 @@
-import { months } from 'moment';
+import { months } from 'moment'
 import {
   IAddPaymentResponse,
   IDeletePaymentResponse,
@@ -40,9 +40,16 @@ export const paymentApi = createApi({
           ? response.data.map((item) => ({ type: 'Payment', id: item._id }))
           : [],
     }),
-       filterPayments: builder.mutation<
+    filterPayments: builder.mutation<
       IGetPaymentResponse,
-      { limit: number; email?: string, year?: number, quarter?: number, month?: number, day?: number }
+      {
+        limit: number
+        email?: string
+        year?: number
+        quarter?: number
+        month?: number
+        day?: number
+      }
     >({
       query: ({ limit, email, year, quarter, month, day }) => {
         return {
@@ -50,10 +57,7 @@ export const paymentApi = createApi({
           params: { limit, email, year, quarter, month, day },
         }
       },
-      invalidatesTags: (response) =>
-        response
-          ? ['Payment']
-          : [],
+      invalidatesTags: (response) => (response ? ['Payment'] : []),
     }),
     addPayment: builder.mutation<IAddPaymentResponse, IPayment>({
       query(body) {

@@ -12,7 +12,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
+    await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'GET':
@@ -32,14 +33,17 @@ export default async function handler(
           options.domain = { $in: domainsIds }
         }
 
-        if (isUser) { 
+        if (isUser) {
           options.adminEmails = { $in: [user.email] }
         }
 
         const realEstates = await RealEstate.find(options)
           .sort({ data: -1 })
           .limit(req.query.limit)
-          .populate({ path: 'domain', select: '_id name address bankInformation' })
+          .populate({
+            path: 'domain',
+            select: '_id name address bankInformation',
+          })
           .populate({ path: 'street', select: '_id address city' })
 
         return res.status(200).json({ success: true, data: realEstates })

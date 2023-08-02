@@ -9,7 +9,11 @@ import s from './style.module.scss'
 import { isAdminCheck } from '@utils/helpers'
 import PaymentCascader from '@common/components/UI/PaymentCascader/index'
 
-const PaymentCardHeader = ({ currentPayment, closeEditModal, handleChange, year, quarter, month, day}) => {
+const PaymentCardHeader = ({
+  setCurrentDateFilter,
+  currentPayment,
+  closeEditModal,
+}) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -36,20 +40,17 @@ const PaymentCardHeader = ({ currentPayment, closeEditModal, handleChange, year,
                 className={s.title}
               >{`Оплата від користувача ${email}`}</span>
             ) : (
-             <>
-              <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT)}>
-                Проплати
-                <SelectOutlined className={s.Icon} />
-              </Button>
-                  <PaymentCascader year={year}    
-                   quarter={quarter}  
-                   month={month}  
-                   day={day}  
-                   onChange={handleChange}
-                   
-    />
-            </>
-          )}
+              <>
+                <Button
+                  type="link"
+                  onClick={() => router.push(AppRoutes.PAYMENT)}
+                >
+                  Проплати
+                  <SelectOutlined className={s.Icon} />
+                </Button>
+                <PaymentCascader onChange={setCurrentDateFilter} />
+              </>
+            )}
             <Button type="link" onClick={() => setIsModalOpen(true)}>
               <PlusOutlined /> Додати
             </Button>

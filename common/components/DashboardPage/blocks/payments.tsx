@@ -18,6 +18,15 @@ import { useRouter } from 'next/router'
 import cn from 'classnames'
 import s from './style.module.scss'
 
+function getDateFilter(value) {
+  const [, year, period, number] = value || []
+  // TODO: add enums
+  if (period === 'quarter') return { quarter: number }
+  if (period === 'month') return { month: number }
+  if (period === 'year') return { year }
+  return {}
+}
+
 const PaymentsBlock = () => {
   const router = useRouter()
   const {
@@ -25,6 +34,7 @@ const PaymentsBlock = () => {
     query: { email },
   } = router
   const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
+  const [currentDateFilter, setCurrentDateFilter] = useState()
   const [pageData, setPageData] = useState({
     pageSize: pathname === AppRoutes.PAYMENT ? 10 : 5,
     currentPage: 1,
@@ -46,6 +56,7 @@ const PaymentsBlock = () => {
       skip: (pageData.currentPage - 1) * pageData.pageSize,
       limit: pageData.pageSize,
       email: email as string,
+      ...getDateFilter(currentDateFilter),
     },
     { skip: currUserLoading || !currUser }
   )
@@ -258,6 +269,7 @@ const PaymentsBlock = () => {
       title={
         <PaymentCardHeader
           closeEditModal={() => setCurrentPayment(null)}
+          setCurrentDateFilter={setCurrentDateFilter}
           currentPayment={currentPayment}
         />
       }
