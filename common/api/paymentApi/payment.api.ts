@@ -1,3 +1,4 @@
+import { months } from 'moment'
 import {
   IAddPaymentResponse,
   IDeletePaymentResponse,
@@ -33,6 +34,7 @@ export const paymentApi = createApi({
           params: { limit, skip, email, year, quarter, month, day },
         }
       },
+
       providesTags: (response) =>
         response
           ? response.data.map((item) => ({ type: 'Payment', id: item._id }))
