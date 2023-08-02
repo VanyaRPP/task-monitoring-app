@@ -40,25 +40,6 @@ export const paymentApi = createApi({
           ? response.data.map((item) => ({ type: 'Payment', id: item._id }))
           : [],
     }),
-    filterPayments: builder.mutation<
-      IGetPaymentResponse,
-      {
-        limit: number
-        email?: string
-        year?: number
-        quarter?: number
-        month?: number
-        day?: number
-      }
-    >({
-      query: ({ limit, email, year, quarter, month, day }) => {
-        return {
-          url: `spacehub/payment`,
-          params: { limit, email, year, quarter, month, day },
-        }
-      },
-      invalidatesTags: (response) => (response ? ['Payment'] : []),
-    }),
     addPayment: builder.mutation<IAddPaymentResponse, IPayment>({
       query(body) {
         return {
