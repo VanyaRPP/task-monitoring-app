@@ -1,6 +1,8 @@
+import { IDomain } from '@common/modules/models/Domain'
 import { IUser } from './../../modules/models/User'
 import { IPaymentTableData } from '@utils/tableData'
 import { ObjectId } from 'mongoose'
+import { IRealestate } from '../realestateApi/realestate.api.types'
 
 export interface IPaymentField {
   type: string
@@ -26,9 +28,9 @@ export interface IPayment {
   invoiceNumber: number
   type: string
   date: Date
-  domain: string
+  domain: Partial<IDomain>
   street: string
-  company: string
+  company: Partial<IRealestate>
   monthService: string
   description?: string
   services?: IPaymentTableData[]

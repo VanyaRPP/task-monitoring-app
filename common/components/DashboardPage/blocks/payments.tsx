@@ -91,33 +91,21 @@ const PaymentsBlock = () => {
         ]
       : []
 
-  const columns = [
-    {
-      title: 'Домен',
-      dataIndex: 'domain',
-      // filters:
-      //   pathname === AppRoutes.PAYMENT
-      //     ? filter.domainsArray?.map((item) => ({
-      //         text: item || null,
-      //         value: item || null,
-      //       }))
-      //     : null,
-      // onFilter: (value, record) => record.domain.name === value,
-      render: (i) => i.name,
-    },
-    {
-      title: 'Компанія',
-      dataIndex: 'company',
-      // filters:
-      //   pathname === AppRoutes.PAYMENT
-      //     ? filter.companiesArray?.map((item) => ({
-      //         text: item || null,
-      //         value: item || null,
-      //       }))
-      //     : null,
-      // onFilter: (value, record) => record.company.companyName === value,
-      render: (i) => i?.companyName,
-    },
+  const domainsFilter = Array.from(
+    new Set(payments?.data?.map((payment) => payment.domain.name))
+  ).map((domainName) => ({
+    text: domainName,
+    value: domainName,
+  }))
+
+  const realEstatesFilter = Array.from(
+    new Set(payments?.data?.map((payment) => payment.company.companyName))
+  ).map((companyName) => ({
+    text: companyName,
+    value: companyName,
+  }))
+
+  const columns: any = [
     {
       title: 'Дата',
       dataIndex: 'date',
@@ -209,7 +197,9 @@ const PaymentsBlock = () => {
     columns.unshift({
       title: 'Компанія',
       dataIndex: 'company',
-      render: (i) => i.companyName,
+      filters: pathname === AppRoutes.PAYMENT ? realEstatesFilter : null,
+      onFilter: (value, record) => record.company.companyName === value,
+      render: (i) => i?.companyName,
     })
   }
 
@@ -217,6 +207,8 @@ const PaymentsBlock = () => {
     columns.unshift({
       title: 'Домен',
       dataIndex: 'domain',
+      filters: pathname === AppRoutes.PAYMENT ? domainsFilter : null,
+      onFilter: (value, record) => record.domain.name === value,
       render: (i) => i.name,
     })
   }
