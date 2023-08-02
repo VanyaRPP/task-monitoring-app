@@ -72,7 +72,6 @@ export const paymentApi = createApi({
 export const {
   useAddPaymentMutation,
   useGetAllPaymentsQuery,
-  useFilterPaymentsMutation,
   useDeletePaymentMutation,
   useGetPaymentsCountQuery,
 } = paymentApi
