@@ -1,4 +1,4 @@
-import React, { ReactElement, useState, useEffect, Fragment } from 'react'
+import React, { ReactElement, useState } from 'react'
 import { Alert, message, Pagination, Popconfirm, Table } from 'antd'
 import { Button } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'

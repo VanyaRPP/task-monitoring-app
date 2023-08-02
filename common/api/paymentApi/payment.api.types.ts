@@ -28,9 +28,9 @@ export interface IPayment {
   invoiceNumber: number
   type: string
   date: Date
-  domain: Partial<IDomain>
+  domain: any
   street: string
-  company: Partial<IRealestate>
+  company: any
   monthService: string
   description?: string
   services?: IPaymentTableData[]
