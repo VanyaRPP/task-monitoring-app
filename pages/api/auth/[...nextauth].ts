@@ -102,7 +102,6 @@ export const authOptions: NextAuthOptions = {
     GithubProvider({
       clientId: process.env.NEXT_PUBLIC_GITHUB_ID,
       clientSecret: process.env.NEXT_PUBLIC_GITHUB_SECRET,
-      redirectUri: 'https://www.e-orenda.com/'
     }),
     FacebookProvider({
       clientId: process.env.NEXT_PUBLIC_FACEBOOK_CLIENT_ID,
@@ -120,7 +119,7 @@ export const authOptions: NextAuthOptions = {
       }
     },
     async redirect({ url, baseUrl }) {
-      return baseUrl
+      return 'https://www.e-orenda.com/'
     },
     async session({ session, user, token }) {
       return session
