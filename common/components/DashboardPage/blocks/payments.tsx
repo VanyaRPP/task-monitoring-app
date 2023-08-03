@@ -39,6 +39,8 @@ const PaymentsBlock = () => {
     pageSize: pathname === AppRoutes.PAYMENT ? 10 : 5,
     currentPage: 1,
   })
+  const [filters, setFilters] = useState<any>()
+
   const {
     isFetching: currUserFetching,
     isLoading: currUserLoading,
@@ -57,6 +59,8 @@ const PaymentsBlock = () => {
       limit: pageData.pageSize,
       email: email as string,
       ...getDateFilter(currentDateFilter),
+      domainIds: filters?.domain,
+      companyIds: filters?.company,
     },
     { skip: currUserLoading || !currUser }
   )
@@ -184,7 +188,7 @@ const PaymentsBlock = () => {
       title: 'Компанія',
       dataIndex: 'company',
       filters: pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
-      onFilter: (value, record) => record.company.companyName === value,
+      onFilter: (value, record) => record.company._id === value,
       render: (i) => i?.companyName,
     })
   }
@@ -194,7 +198,7 @@ const PaymentsBlock = () => {
       title: 'Домен',
       dataIndex: 'domain',
       filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
-      onFilter: (value, record) => record.domain.name === value,
+      onFilter: (value, record) => record.domain._id === value,
       render: (i) => i.name,
     })
   }
@@ -210,6 +214,9 @@ const PaymentsBlock = () => {
           columns={columns}
           dataSource={payments?.data}
           pagination={false}
+          onChange={(pagination, filters) => {
+            setFilters(filters)
+          }}
           bordered
           size="small"
           loading={

@@ -159,6 +159,7 @@ export default async function handler(
           {
             $project: {
               'domainDetails.name': 1,
+              'domainDetails._id': 1
             },
           },
         ]
@@ -183,6 +184,7 @@ export default async function handler(
           {
             $project: {
               'companyDetails.companyName': 1,
+              'companyDetails._id': 1
             },
           },
         ]
@@ -197,11 +199,11 @@ export default async function handler(
           currentDomainsCount: new Set(domains).size,
           domainsFilter: distinctDomains?.map(({ domainDetails }) => ({
             text: domainDetails.name,
-            value: domainDetails.name,
+            value: domainDetails._id,
           })),
           realEstatesFilter: distinctCompanies?.map(({ companyDetails }) => ({
             text: companyDetails.companyName,
-            value: companyDetails.companyName,
+            value: companyDetails._id,
           })),
           data: payments,
           success: true,
