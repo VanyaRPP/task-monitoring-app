@@ -14,7 +14,7 @@ export default function MyApp({
   pageProps: { session, ...pageProps },
 }: AppProps) {
   return (
-    <SessionProvider session={session} basePath='https://e-orenda.com'>
+    <SessionProvider session={session}>
       <Provider store={store}>
         <MainLayout>
           <NextNProgress
