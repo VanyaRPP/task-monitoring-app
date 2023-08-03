@@ -32,7 +32,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
   const { data: count = 0 } = useGetPaymentsCountQuery(undefined, { skip: edit })
   const { data: realEstate } = useGetAllRealEstateQuery(
-    { domainId: currPayment?.domain, streetId: currPayment?.street },
+    { domainId: currPayment?.domain as string, streetId: currPayment?.street },
     { skip: !currPayment?.street }
   )
 

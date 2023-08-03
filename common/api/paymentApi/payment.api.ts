@@ -26,12 +26,34 @@ export const paymentApi = createApi({
         quarter?: number
         month?: number
         day?: number
+        domainIds?: string[]
+        companyIds?: string[]
       }
     >({
-      query: ({ limit, skip, email, year, quarter, month, day }) => {
+      query: ({
+        limit,
+        skip,
+        email,
+        year,
+        quarter,
+        month,
+        day,
+        domainIds,
+        companyIds,
+      }) => {
         return {
           url: `spacehub/payment`,
-          params: { limit, skip, email, year, quarter, month, day },
+          params: {
+            limit,
+            skip,
+            email,
+            year,
+            quarter,
+            month,
+            day,
+            domainIds,
+            companyIds,
+          },
         }
       },
 

@@ -1,4 +1,4 @@
-import React, { ReactElement, useState, useEffect, Fragment } from 'react'
+import React, { ReactElement, useState } from 'react'
 import { Alert, message, Pagination, Popconfirm, Table } from 'antd'
 import { Button } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
@@ -39,6 +39,8 @@ const PaymentsBlock = () => {
     pageSize: pathname === AppRoutes.PAYMENT ? 10 : 5,
     currentPage: 1,
   })
+  const [filters, setFilters] = useState<any>()
+
   const {
     isFetching: currUserFetching,
     isLoading: currUserLoading,
@@ -57,6 +59,8 @@ const PaymentsBlock = () => {
       limit: pageData.pageSize,
       email: email as string,
       ...getDateFilter(currentDateFilter),
+      companyIds: filters?.company || undefined,
+      domainIds: filters?.domain || undefined,
     },
     { skip: currUserLoading || !currUser }
   )
@@ -91,33 +95,7 @@ const PaymentsBlock = () => {
         ]
       : []
 
-  const columns = [
-    {
-      title: 'Домен',
-      dataIndex: 'domain',
-      // filters:
-      //   pathname === AppRoutes.PAYMENT
-      //     ? filter.domainsArray?.map((item) => ({
-      //         text: item || null,
-      //         value: item || null,
-      //       }))
-      //     : null,
-      // onFilter: (value, record) => record.domain.name === value,
-      render: (i) => i.name,
-    },
-    {
-      title: 'Компанія',
-      dataIndex: 'company',
-      // filters:
-      //   pathname === AppRoutes.PAYMENT
-      //     ? filter.companiesArray?.map((item) => ({
-      //         text: item || null,
-      //         value: item || null,
-      //       }))
-      //     : null,
-      // onFilter: (value, record) => record.company.companyName === value,
-      render: (i) => i?.companyName,
-    },
+  const columns: any = [
     {
       title: 'Дата',
       dataIndex: 'date',
@@ -209,7 +187,9 @@ const PaymentsBlock = () => {
     columns.unshift({
       title: 'Компанія',
       dataIndex: 'company',
-      render: (i) => i.companyName,
+      filters:
+        pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
+      render: (i) => i?.companyName,
     })
   }
 
@@ -217,6 +197,7 @@ const PaymentsBlock = () => {
     columns.unshift({
       title: 'Домен',
       dataIndex: 'domain',
+      filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
       render: (i) => i.name,
     })
   }
@@ -232,6 +213,9 @@ const PaymentsBlock = () => {
           columns={columns}
           dataSource={payments?.data}
           pagination={false}
+          onChange={(pagination, filters) => {
+            setFilters(filters)
+          }}
           bordered
           size="small"
           loading={
