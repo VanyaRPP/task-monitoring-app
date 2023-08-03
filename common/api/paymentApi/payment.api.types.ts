@@ -28,9 +28,9 @@ export interface IPayment {
   invoiceNumber: number
   type: string
   date: Date
-  domain: any
+  domain: Partial<IDomain> | string
   street: string
-  company: any
+  company: Partial<IRealestate> | string
   monthService: string
   description?: string
   services?: IPaymentTableData[]
@@ -50,9 +50,16 @@ export interface IAddPaymentResponse {
   data: IExtendedPayment
 }
 
+interface IFilter {
+  text: string
+  value: string
+}
+
 export interface IGetPaymentResponse {
   currentCompaniesCount: number
   currentDomainsCount: number
+  domainsFilter: IFilter[]
+  realEstatesFilter: IFilter[]
   data: IExtendedPayment[]
   success: boolean
   total: number

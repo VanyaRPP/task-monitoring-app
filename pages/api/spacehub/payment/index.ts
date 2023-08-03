@@ -139,11 +139,70 @@ export default async function handler(
           .map((item) => item?.domain?._id)
           .filter(Boolean)
 
+        const domainsPipeline = [
+          {
+            $group: {
+              _id: '$domain',
+            },
+          },
+          {
+            $lookup: {
+              from: 'domains',
+              localField: '_id',
+              foreignField: '_id',
+              as: 'domainDetails',
+            },
+          },
+          {
+            $unwind: '$domainDetails',
+          },
+          {
+            $project: {
+              'domainDetails.name': 1,
+            },
+          },
+        ]
+
+        const realEstatesPipeline = [
+          {
+            $group: {
+              _id: '$company',
+            },
+          },
+          {
+            $lookup: {
+              from: 'realestates',
+              localField: '_id',
+              foreignField: '_id',
+              as: 'companyDetails',
+            },
+          },
+          {
+            $unwind: '$companyDetails',
+          },
+          {
+            $project: {
+              'companyDetails.companyName': 1,
+            },
+          },
+        ]
+
+        const distinctDomains = await Payment.aggregate(domainsPipeline)
+        const distinctCompanies = await Payment.aggregate(realEstatesPipeline)
+
         return res.status(200).json({
           /* eslint-disable @typescript-eslint/ban-ts-comment */
           // @ts-ignore
           currentCompaniesCount: new Set(companies).size,
           currentDomainsCount: new Set(domains).size,
+          domainsFilter: distinctDomains?.map(({ domainDetails }) => ({
+            text: domainDetails.name,
+            value: domainDetails.name,
+          })),
+          realEstatesFilter: distinctCompanies?.map(({ companyDetails }) => ({
+            text: companyDetails.companyName,
+            value: companyDetails.companyName,
+          })),
           data: payments,
           success: true,
           total,
