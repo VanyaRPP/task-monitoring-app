@@ -59,8 +59,8 @@ const PaymentsBlock = () => {
       limit: pageData.pageSize,
       email: email as string,
       ...getDateFilter(currentDateFilter),
-      domainIds: filters?.domain,
-      companyIds: filters?.company,
+      companyIds: filters?.company || undefined,
+      domainIds: filters?.domain || undefined,
     },
     { skip: currUserLoading || !currUser }
   )
@@ -187,8 +187,8 @@ const PaymentsBlock = () => {
     columns.unshift({
       title: 'Компанія',
       dataIndex: 'company',
-      filters: pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
-      onFilter: (value, record) => record.company._id === value,
+      filters:
+        pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
       render: (i) => i?.companyName,
     })
   }
@@ -198,7 +198,6 @@ const PaymentsBlock = () => {
       title: 'Домен',
       dataIndex: 'domain',
       filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
-      onFilter: (value, record) => record.domain._id === value,
       render: (i) => i.name,
     })
   }

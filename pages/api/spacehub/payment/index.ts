@@ -65,8 +65,10 @@ export default async function handler(
       try {
         const { isDomainAdmin, isUser, user } = await getCurrentUser(req, res)
 
+        const { companyIds, domainIds, email, limit, skip } = req.query
+
         const options = (await getPaymentOptions({
-          searchEmail: req.query.email,
+          searchEmail: email,
           userEmail: user.email,
         })) as any
 
@@ -76,7 +78,7 @@ export default async function handler(
           const domains = await Domain.find({
             adminEmails: { $in: [user.email] },
           })
-          const domainsIds = domains.map((i) => i._id)
+          const domainsIds = domains.map((i) => i._id.toString())
           options.domain = { $in: domainsIds }
         }
 
@@ -86,58 +88,34 @@ export default async function handler(
           const realEstates = await RealEstate.find({
             adminEmails: { $in: [user.email] },
           })
-          const realEstatesIds = realEstates.map((i) => i._id)
+          const realEstatesIds = realEstates.map((i) => i._id.toString())
           options.company = { $in: realEstatesIds }
         }
 
-        const filterByDateOptions = []
-        const { year, quarter, month, day } = req.query
+        if (domainIds) {
+          options.domain = filterOptions(options?.domain, domainIds)
+        }
 
-        if (year) {
-          filterByDateOptions.push({
-            $eq: [{ $year: '$date' }, year],
-          })
-        }
-        if (quarter) {
-          filterByDateOptions.push({
-            // @ts-ignore
-            $in: [{ $month: '$date' }, quarters[quarter]],
-          })
-        }
-        if (month) {
-          filterByDateOptions.push({
-            $eq: [{ $month: '$date' }, month],
-          })
-        }
-        if (day) {
-          filterByDateOptions.push({
-            $eq: [{ $dayOfMonth: '$date' }, day],
-          })
+        if (companyIds) {
+          options.company = filterOptions(options?.company, companyIds)
         }
 
         options.$expr = {
-          $and: filterByDateOptions,
+          $and: filterPeriodOptions(req.query),
         }
 
         /* eslint-disable @typescript-eslint/ban-ts-comment */
         // @ts-ignore
         const payments = await Payment.find(options)
           .sort({ date: -1 })
-          .skip(req.query.skip)
-          .limit(req.query.limit)
+          .skip(skip)
+          .limit(limit)
           .populate({ path: 'company', select: '_id companyName' })
           .populate({ path: 'street', select: '_id address city' })
           .populate({ path: 'domain', select: '_id name' })
           .populate({ path: 'monthService', select: '_id date' })
 
         const total = await Payment.countDocuments(options)
-
-        const companies = payments
-          .map((item) => item?.company?._id)
-          .filter(Boolean)
-        const domains = payments
-          .map((item) => item?.domain?._id)
-          .filter(Boolean)
 
         const domainsPipeline = [
           {
@@ -159,7 +137,7 @@ export default async function handler(
           {
             $project: {
               'domainDetails.name': 1,
-              'domainDetails._id': 1
+              'domainDetails._id': 1,
             },
           },
         ]
@@ -184,19 +162,21 @@ export default async function handler(
           {
             $project: {
               'companyDetails.companyName': 1,
-              'companyDetails._id': 1
+              'companyDetails._id': 1,
             },
           },
         ]
 
-        const distinctDomains = await Payment.aggregate(domainsPipeline)
+        // TODO: DomainAdmin see all. For filters. Should see only his
+        // TODO: fix
         const distinctCompanies = await Payment.aggregate(realEstatesPipeline)
+        const distinctDomains = await Payment.aggregate(domainsPipeline)
 
         return res.status(200).json({
-          /* eslint-disable @typescript-eslint/ban-ts-comment */
+          // TODO: update Interface
           // @ts-ignore
-          currentCompaniesCount: new Set(companies).size,
-          currentDomainsCount: new Set(domains).size,
+          currentCompaniesCount: distinctCompanies.length,
+          currentDomainsCount: distinctDomains.length,
           domainsFilter: distinctDomains?.map(({ domainDetails }) => ({
             text: domainDetails.name,
             value: domainDetails._id,
@@ -210,7 +190,7 @@ export default async function handler(
           total,
         })
       } catch (error) {
-        return res.status(400).json({ success: false })
+        return res.status(400).json({ success: false, error: error.message })
       }
 
     case 'POST':
@@ -239,4 +219,43 @@ export default async function handler(
         return res.status(400).json({ success: false, message: error })
       }
   }
+}
+
+function filterOptions(options = {}, filterIds) {
+  const res = {
+    ...options,
+  } as any
+  const idsFromQueryFilter = (filterIds || '').split(',') || []
+  if (res.$in) {
+    res.$in = res.$in.filter((i) => idsFromQueryFilter.includes(i))
+    return res
+  }
+  res.$in = idsFromQueryFilter
+  return res
+}
+
+function filterPeriodOptions(args) {
+  const { year, quarter, month, day } = args
+  const filterByDateOptions = []
+  if (year) {
+    filterByDateOptions.push({
+      $eq: [{ $year: '$date' }, year],
+    })
+  }
+  if (quarter) {
+    filterByDateOptions.push({
+      $in: [{ $month: '$date' }, quarters[+quarter]],
+    })
+  }
+  if (month) {
+    filterByDateOptions.push({
+      $eq: [{ $month: '$date' }, month],
+    })
+  }
+  if (day) {
+    filterByDateOptions.push({
+      $eq: [{ $dayOfMonth: '$date' }, day],
+    })
+  }
+  return filterByDateOptions
 }
