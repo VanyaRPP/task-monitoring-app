@@ -1,15 +1,18 @@
 import React from 'react'
 import { Cascader } from 'antd'
+import s from '@components/UI/PaymentCascader/styled.module.scss'
 
 const PaymentCascader = ({ onChange }) => {
   return (
-    <Cascader
-      placeholder="Оберіть проміжок"
-      options={customOptions}
-      onChange={onChange}
-    />
-  )
-}
+       <div className={s.PaymentCascader}>
+      <Cascader
+        placeholder="Оберіть проміжок"
+        options={customOptions}
+        onChange={onChange}
+      />
+    </div>
+  );
+};
 
 const customOptions = [
   {
