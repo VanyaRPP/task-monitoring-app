@@ -71,14 +71,14 @@ export const authOptions: NextAuthOptions = {
       }),
       EmailProvider({
         server: {
-          host: process.env.EMAIL_SERVER_HOST,
-          port: process.env.EMAIL_SERVER_PORT,
+          host: process.env.NEXT_PUBLIC_EMAIL_SERVER_HOST,
+          port: process.env.NEXT_PUBLIC_EMAIL_SERVER_PORT,
           auth: {
-            user: process.env.EMAIL_SERVER_USER,
-            pass: process.env.EMAIL_SERVER_PASSWORD,
+            user: process.env.NEXT_PUBLIC_EMAIL_SERVER_USER,
+            pass: process.env.NEXT_PUBLIC_EMAIL_SERVER_PASSWORD,
           },
         },
-        from: process.env.EMAIL_FROM,
+        from: process.env.NEXT_PUBLIC_EMAIL_FROM,
         async sendVerificationRequest({
           identifier: email,
           url,
