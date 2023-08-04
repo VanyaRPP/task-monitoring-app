@@ -99,8 +99,8 @@ export const authOptions: NextAuthOptions = {
         clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
       }),
       GithubProvider({
-        clientId: process.env.NEXT_PUBLIC_GITHUB_ID,
-        clientSecret: process.env.NEXT_PUBLIC_GITHUB_SECRET,
+        clientId: process.env.GITHUB_ID,
+        clientSecret: process.env.GITHUB_SECRET,
       }),
       FacebookProvider({
         clientId: process.env.NEXT_PUBLIC_FACEBOOK_CLIENT_ID,
