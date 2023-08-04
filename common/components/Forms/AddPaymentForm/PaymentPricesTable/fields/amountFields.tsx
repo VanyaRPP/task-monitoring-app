@@ -13,7 +13,7 @@ export function AmountTotalAreaField({ record, edit }) {
   const streetId = Form.useWatch('street', form) || paymentData?.street
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
-  const { company, isLoading } = useCompany({ companyId, domainId, streetId, skip: edit })
+  const { company } = useCompany({ companyId, domainId, streetId, skip: edit })
 
   useEffect(() => {
     if (company?._id && company?.totalArea) {
