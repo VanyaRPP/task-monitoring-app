@@ -70,14 +70,14 @@ export const authOptions: NextAuthOptions = {
       }),
       EmailProvider({
         server: {
-          host: process.env.NEXT_PUBLIC_EMAIL_SERVER_HOST,
-          port: process.env.NEXT_PUBLIC_EMAIL_SERVER_PORT,
+          host: process.env.EMAIL_SERVER_HOST,
+          port: process.env.EMAIL_SERVER_PORT,
           auth: {
-            user: process.env.NEXT_PUBLIC_EMAIL_SERVER_USER,
-            pass: process.env.NEXT_PUBLIC_EMAIL_SERVER_PASSWORD,
+            user: process.env.EMAIL_SERVER_USER,
+            pass: process.env.EMAIL_SERVER_PASSWORD,
           },
         },
-        from: process.env.NEXT_PUBLIC_EMAIL_FROM,
+        from: process.env.EMAIL_FROM,
         async sendVerificationRequest({
           identifier: email,
           url,
@@ -95,16 +95,16 @@ export const authOptions: NextAuthOptions = {
         },
       }),
       GoogleProvider({
-        clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-        clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       }),
       GithubProvider({
         clientId: process.env.GITHUB_ID,
         clientSecret: process.env.GITHUB_SECRET,
       }),
       FacebookProvider({
-        clientId: process.env.NEXT_PUBLIC_FACEBOOK_CLIENT_ID,
-        clientSecret: process.env.NEXT_PUBLIC_FACEBOOK_CLIENT_SECRET,
+        clientId: process.env.FACEBOOK_CLIENT_ID,
+        clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
       }),
       // ...add more providers here
     ],
@@ -134,7 +134,7 @@ export const authOptions: NextAuthOptions = {
       verifyRequest: '/auth/verify-request', // (used for check email message)
       // newUser: '/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
     },
-    secret: process.env.NEXT_PUBLIC_NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET,
 }
 
 export default NextAuth(authOptions)
