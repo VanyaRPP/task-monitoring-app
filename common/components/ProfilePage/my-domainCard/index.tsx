@@ -55,7 +55,7 @@ const MyDomainsCard: React.FC = () => {
                 <strong>Пошта:</strong> {item.email}
               </p>
               <p>
-                <strong>Компанії: </strong>
+                <strong>Компанії:</strong>
                 {getDomainCompanies(item._id)}
               </p>
             </Card>

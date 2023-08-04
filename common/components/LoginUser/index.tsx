@@ -96,7 +96,7 @@ function SessionUser({ image }) {
             <>
               {user?.roles.length > 0 && (
                 <div>
-                  Роль:
+                  Роль:{` `}
                   {user?.roles?.map((item) => (
                     <Tag className={s.cardUserTag} key={item}>
                       {item}
@@ -141,7 +141,7 @@ function DomainsCompanies() {
     <>
       {domains.length > 0 && (
         <div>
-          Домени:
+          Домени:{` `}
           {domains.map((item) => (
             <Tag className={s.cardUserTag} key={item.name}>
               {item.name}
@@ -151,7 +151,7 @@ function DomainsCompanies() {
       )}
       {companies.length > 0 && (
         <div>
-          Компанії:
+          Компанії:{` `}
           {companies.map((item) => (
             <Tag className={s.cardUserTag} key={item.companyName}>
               {item.companyName}
