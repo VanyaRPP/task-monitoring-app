@@ -119,7 +119,7 @@ export const authOptions: NextAuthOptions = {
       }
     },
     async redirect({ url, baseUrl }) {
-      return 'https://google.com'
+      return baseUrl
     },
     async session({ session, user, token }) {
       return session
