@@ -34,7 +34,7 @@ function text({ url, host }) {
 
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
-  secret: process.env.NEXT_PUBLIC_SECRET,
+  secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: 'jwt',
   },
