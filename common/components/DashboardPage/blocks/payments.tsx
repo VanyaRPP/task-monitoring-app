@@ -1,4 +1,4 @@
-import React, { ReactElement, useState, useEffect, Fragment } from 'react'
+import React, { ReactElement, useState } from 'react'
 import { Alert, message, Pagination, Popconfirm, Table } from 'antd'
 import { Button } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
@@ -17,6 +17,22 @@ import { Tooltip } from 'antd'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
 import s from './style.module.scss'
+import { PERIOD_FILTR} from '@utils/constants'
+
+function getDateFilter(value) {
+  const [, year, period, number] = value || []
+  // TODO: add enums
+  if (period === PERIOD_FILTR.QUARTER) return { 
+  year,
+  quarter: number 
+}
+  if (period === PERIOD_FILTR.MONTH) return { 
+ year,
+month: number 
+
+}
+  if (period ===  PERIOD_FILTR.YEAR) return { year }
+}
 
 const PaymentsBlock = () => {
   const router = useRouter()
@@ -25,10 +41,13 @@ const PaymentsBlock = () => {
     query: { email },
   } = router
   const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
+  const [currentDateFilter, setCurrentDateFilter] = useState()
   const [pageData, setPageData] = useState({
     pageSize: pathname === AppRoutes.PAYMENT ? 10 : 5,
     currentPage: 1,
   })
+  const [filters, setFilters] = useState<any>()
+
   const {
     isFetching: currUserFetching,
     isLoading: currUserLoading,
@@ -46,6 +65,9 @@ const PaymentsBlock = () => {
       skip: (pageData.currentPage - 1) * pageData.pageSize,
       limit: pageData.pageSize,
       email: email as string,
+      ...getDateFilter(currentDateFilter),
+      companyIds: filters?.company || undefined,
+      domainIds: filters?.domain || undefined,
     },
     { skip: currUserLoading || !currUser }
   )
@@ -80,33 +102,7 @@ const PaymentsBlock = () => {
       ]
       : []
 
-  const columns = [
-    {
-      title: 'Домен',
-      dataIndex: 'domain',
-      // filters:
-      //   pathname === AppRoutes.PAYMENT
-      //     ? filter.domainsArray?.map((item) => ({
-      //         text: item || null,
-      //         value: item || null,
-      //       }))
-      //     : null,
-      // onFilter: (value, record) => record.domain.name === value,
-      render: (i) => i.name,
-    },
-    {
-      title: 'Компанія',
-      dataIndex: 'company',
-      // filters:
-      //   pathname === AppRoutes.PAYMENT
-      //     ? filter.companiesArray?.map((item) => ({
-      //         text: item || null,
-      //         value: item || null,
-      //       }))
-      //     : null,
-      // onFilter: (value, record) => record.company.companyName === value,
-      render: (i) => i?.companyName,
-    },
+  const columns: any = [
     {
       title: 'Дата',
       dataIndex: 'date',
@@ -198,7 +194,9 @@ const PaymentsBlock = () => {
     columns.unshift({
       title: 'Компанія',
       dataIndex: 'company',
-      render: (i) => i.companyName,
+      filters:
+        pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
+      render: (i) => i?.companyName,
     })
   }
 
@@ -206,6 +204,7 @@ const PaymentsBlock = () => {
     columns.unshift({
       title: 'Домен',
       dataIndex: 'domain',
+      filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
       render: (i) => i.name,
     })
   }
@@ -228,6 +227,11 @@ const PaymentsBlock = () => {
               </Table.Summary.Cell>)} 
             </Table.Summary.Row>
           )}
+          
+          onChange={(pagination, filters) => {
+            setFilters(filters)
+          }}
+
           bordered
           size="small"
           loading={
@@ -265,6 +269,7 @@ const PaymentsBlock = () => {
       title={
         <PaymentCardHeader
           closeEditModal={() => setCurrentPayment(null)}
+          setCurrentDateFilter={setCurrentDateFilter}
           currentPayment={currentPayment}
         />
       }

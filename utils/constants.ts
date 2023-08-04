@@ -28,6 +28,14 @@ export enum COLOR_THEME {
   LIGHT = 'light',
 }
 
+export enum PERIOD_FILTR {
+  QUARTER = 'quarter',
+  MONTH = 'month',
+   YEAR = 'year',
+
+}
+
+
 export enum Roles {
   USER = 'User',
   WORKER = 'Worker',

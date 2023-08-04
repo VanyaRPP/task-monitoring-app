@@ -1,24 +1,9 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Card, Radio } from 'antd'
 import s from '../style.module.scss'
-import {
-  useGetAllRealEstateQuery,
-  // useGetByRealEstateQuery,
-} from '@common/api/realestateApi/realestate.api'
-import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import { IUser } from 'common/modules/models/User'
-import { Roles } from '@utils/constants'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 
-interface Props {
-  user: IUser
-}
-
-const MyCompany: React.FC<Props> = ({ user }) => {
-  // const domainData = useGetDomainsQuery({}).data
-  // const domain: string = domainData && domainData[0]?._id
-  return null
-  // TODO: Filter by domains
+const MyCompany = () => {
   const { data = [], isLoading } = useGetAllRealEstateQuery({})
 
   return (
