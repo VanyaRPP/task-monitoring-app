@@ -52,8 +52,6 @@ const LoginUser: React.FC = () => {
 function SessionUser({ image }) {
   const { data: user } = useGetCurrentUserQuery()
   const [menuActive, setMenuActive] = useState(false)
-  const { data: domains = [] } = useGetDomainsQuery({})
-  const { data: companies = [] } = useGetAllRealEstateQuery({})
 
   return (
     <>
@@ -73,6 +71,7 @@ function SessionUser({ image }) {
           }
         />
       </div>
+
       <div
         onClick={() => setMenuActive(false)}
         className={classNames(s.Info, { [s.Active]: menuActive })}
@@ -105,26 +104,8 @@ function SessionUser({ image }) {
                   ))}
                 </div>
               )}
-              {domains.length > 0 && (
-                <div>
-                  Домени:
-                  {domains.map((item) => (
-                    <Tag className={s.cardUserTag} key={item.name}>
-                      {item.name}
-                    </Tag>
-                  ))}
-                </div>
-              )}
-              {companies.length > 0 && (
-                <div>
-                  Компанії:
-                  {companies.map((item) => (
-                    <Tag className={s.cardUserTag} key={item.companyName}>
-                      {item.companyName}
-                    </Tag>
-                  ))}
-                </div>
-              )}
+
+              {user && <DomainsCompanies />}
             </>
           )}
 
@@ -133,6 +114,7 @@ function SessionUser({ image }) {
               Панель адміна
             </Button>
           )}
+
           <div className={s.Buttons}>
             <Button
               type="link"
@@ -147,6 +129,36 @@ function SessionUser({ image }) {
           </div>
         </Card>
       </div>
+    </>
+  )
+}
+
+function DomainsCompanies() {
+  const { data: companies = [] } = useGetAllRealEstateQuery({})
+  const { data: domains = [] } = useGetDomainsQuery({})
+
+  return (
+    <>
+      {domains.length > 0 && (
+        <div>
+          Домени:
+          {domains.map((item) => (
+            <Tag className={s.cardUserTag} key={item.name}>
+              {item.name}
+            </Tag>
+          ))}
+        </div>
+      )}
+      {companies.length > 0 && (
+        <div>
+          Компанії:
+          {companies.map((item) => (
+            <Tag className={s.cardUserTag} key={item.companyName}>
+              {item.companyName}
+            </Tag>
+          ))}
+        </div>
+      )}
     </>
   )
 }
