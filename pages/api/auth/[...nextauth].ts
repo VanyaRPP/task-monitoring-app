@@ -34,7 +34,6 @@ function text({ url, host }) {
 
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
-  secret: process.env.NEXT_PUBLIC_NEXTAUTH_SECRET,
   session: {
     strategy: 'jwt',
   },
@@ -98,43 +97,44 @@ export const authOptions: NextAuthOptions = {
       GoogleProvider({
         clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
         clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
-    }),
-    GithubProvider({
-      clientId: process.env.NEXT_PUBLIC_GITHUB_ID,
-      clientSecret: process.env.NEXT_PUBLIC_GITHUB_SECRET,
-    }),
-    FacebookProvider({
-      clientId: process.env.NEXT_PUBLIC_FACEBOOK_CLIENT_ID,
-      clientSecret: process.env.NEXT_PUBLIC_FACEBOOK_CLIENT_SECRET,
-    }),
-    // ...add more providers here
-  ],
-  callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
-      const isAllowedToSignIn = true
-      if (isAllowedToSignIn) {
-        return true
-      } else {
-        return false
-      }
+      }),
+      GithubProvider({
+        clientId: process.env.NEXT_PUBLIC_GITHUB_ID,
+        clientSecret: process.env.NEXT_PUBLIC_GITHUB_SECRET,
+      }),
+      FacebookProvider({
+        clientId: process.env.NEXT_PUBLIC_FACEBOOK_CLIENT_ID,
+        clientSecret: process.env.NEXT_PUBLIC_FACEBOOK_CLIENT_SECRET,
+      }),
+      // ...add more providers here
+    ],
+    callbacks: {
+      async signIn({ user, account, profile, email, credentials }) {
+        const isAllowedToSignIn = true
+        if (isAllowedToSignIn) {
+          return true
+        } else {
+          return false
+        }
+      },
+      async redirect({ url, baseUrl }) {
+        return baseUrl
+      },
+      async session({ session, user, token }) {
+        return session
+      },
+      async jwt({ token, user, account, profile, isNewUser }) {
+        return token
+      },
     },
-    async redirect({ url, baseUrl }) {
-      return baseUrl
+    pages: {
+      signIn: '/auth/sigin',
+      error: '/auth/sigin', ///auth/error Error code passed in query string as ?error=
+      // signOut: '/auth/signout',
+      verifyRequest: '/auth/verify-request', // (used for check email message)
+      // newUser: '/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
     },
-    async session({ session, user, token }) {
-      return session
-    },
-    async jwt({ token, user, account, profile, isNewUser }) {
-      return token
-    },
-  },
-  pages: {
-    signIn: '/auth/sigin',
-    error: '/auth/sigin', ///auth/error Error code passed in query string as ?error=
-    // signOut: '/auth/signout',
-    verifyRequest: '/auth/verify-request', // (used for check email message)
-    // newUser: '/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
-  },
+    secret: process.env.NEXT_PUBLIC_NEXTAUTH_SECRET,
 }
 
 export default NextAuth(authOptions)
