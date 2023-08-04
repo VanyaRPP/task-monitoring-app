@@ -55,7 +55,10 @@
     color: #4096ff;
   }
 }
-
+.saldo {
+  text-align: center;
+  background-color: var(--backgroundColor);
+}
 .title {
   color: var(--primaryColor);
   font-weight: 400;

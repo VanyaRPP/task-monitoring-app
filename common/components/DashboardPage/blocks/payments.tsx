@@ -17,21 +17,21 @@ import { Tooltip } from 'antd'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
 import s from './style.module.scss'
-import { PERIOD_FILTR} from '@utils/constants'
+import { PERIOD_FILTR } from '@utils/constants'
 
 function getDateFilter(value) {
   const [, year, period, number] = value || []
   // TODO: add enums
-  if (period === PERIOD_FILTR.QUARTER) return { 
-  year,
-  quarter: number 
-}
-  if (period === PERIOD_FILTR.MONTH) return { 
- year,
-month: number 
+  if (period === PERIOD_FILTR.QUARTER) return {
+    year,
+    quarter: number
+  }
+  if (period === PERIOD_FILTR.MONTH) return {
+    year,
+    month: number
 
-}
-  if (period ===  PERIOD_FILTR.YEAR) return { year }
+  }
+  if (period === PERIOD_FILTR.YEAR) return { year }
 }
 
 const PaymentsBlock = () => {
@@ -91,15 +91,15 @@ const PaymentsBlock = () => {
   const paymentsPageColumns =
     router.pathname === AppRoutes.PAYMENT
       ? [
-          ...invoiceTypes.map((type) => ({
-            title: paymentsTitle[type],
-            dataIndex: 'invoice',
-            render: (invoice) => {
-              const item = invoice.find((item) => item.type === type)
-              return item ? item.sum : <span className={s.currency}>-</span>
-            },
-          })),
-        ]
+        ...invoiceTypes.map((type) => ({
+          title: paymentsTitle[type],
+          dataIndex: 'invoice',
+          render: (invoice) => {
+            const item = invoice.find((item) => item.type === type)
+            return item ? item.sum : <span className={s.currency}>-</span>
+          },
+        })),
+      ]
       : []
 
   const columns: any = [
@@ -144,24 +144,24 @@ const PaymentsBlock = () => {
     ...paymentsPageColumns,
     isGlobalAdmin
       ? {
-          title: '',
-          dataIndex: '',
-          width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
-          render: (_, payment: IExtendedPayment) => (
-            <div className={s.popconfirm}>
-              <Popconfirm
-                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                  payment?.date as unknown as string
-                )}?`}
-                onConfirm={() => handleDeletePayment(payment?._id)}
-                cancelText="Відміна"
-                disabled={deleteLoading}
-              >
-                <DeleteOutlined className={s.icon} />
-              </Popconfirm>
-            </div>
-          ),
-        }
+        title: '',
+        dataIndex: '',
+        width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
+        render: (_, payment: IExtendedPayment) => (
+          <div className={s.popconfirm}>
+            <Popconfirm
+              title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+                payment?.date as unknown as string
+              )}?`}
+              onConfirm={() => handleDeletePayment(payment?._id)}
+              cancelText="Відміна"
+              disabled={deleteLoading}
+            >
+              <DeleteOutlined className={s.icon} />
+            </Popconfirm>
+          </div>
+        ),
+      }
       : { width: '0' },
     {
       title: '',
@@ -209,6 +209,25 @@ const PaymentsBlock = () => {
     })
   }
 
+  const Summary = () => {
+    return (
+      payments?.data ? <>
+        <Table.Summary.Row className={s.saldo}>
+          {columns.slice(0, columns.length).map((item) =>
+            <Table.Summary.Cell index={1} key={item.dataIndex}>
+              {item.dataIndex === "debit" ? "Debit" : item.dataIndex === "credit" ? "Credit" : false}
+            </Table.Summary.Cell>)}
+        </Table.Summary.Row>
+
+        <Table.Summary.Row className={s.saldo}>
+          {columns.slice(1, columns.length).map((item) => <Table.Summary.Cell colSpan={item.dataIndex === "credit" ? 2 : 1} index={0} key={item.dataIndex}>
+            {item.dataIndex === "credit" ? "Saldo" : false}
+          </Table.Summary.Cell>)}
+        </Table.Summary.Row>
+      </> : null
+    )
+  }
+
   let content: ReactElement
 
   if (deleteError || paymentsError || currUserError) {
@@ -223,6 +242,7 @@ const PaymentsBlock = () => {
           onChange={(pagination, filters) => {
             setFilters(filters)
           }}
+          summary={() => (<Summary />)}
           bordered
           size="small"
           loading={
