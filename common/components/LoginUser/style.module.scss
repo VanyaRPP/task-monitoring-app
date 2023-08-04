@@ -72,7 +72,8 @@
 
 .Card {
   h2,
-  p {
+  p,
+  div {
     color: var(--textColor);
   }
 }
@@ -80,4 +81,11 @@
 .SignButtons {
   display: flex;
   flex-direction: row;
+}
+
+.cardUserTag {
+  background: transparent;
+  color: var(--textColor);
+  font: 1em sans-serif;
+  border: none;
 }

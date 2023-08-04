@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import Router from 'next/router'
-import { Skeleton, Avatar, Button, Card, Image } from 'antd'
+import { Skeleton, Avatar, Button, Card, Image, Tag } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import { signIn, signOut, useSession } from 'next-auth/react'
 import { AppRoutes, Roles } from '../../../utils/constants'
 import classNames from 'classnames'
 import s from './style.module.scss'
 import { useGetCurrentUserQuery } from 'common/api/userApi/user.api'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import router from 'next/router'
 
 const LoginUser: React.FC = () => {
@@ -50,6 +52,8 @@ const LoginUser: React.FC = () => {
 function SessionUser({ image }) {
   const { data: user } = useGetCurrentUserQuery()
   const [menuActive, setMenuActive] = useState(false)
+  const { data: domains = [] } = useGetDomainsQuery({})
+  const { data: companies = [] } = useGetAllRealEstateQuery({})
 
   return (
     <>
@@ -88,6 +92,41 @@ function SessionUser({ image }) {
 
           <h2>{user?.name}</h2>
           <p>{user?.email}</p>
+
+          {!user?.roles?.includes(Roles.GLOBAL_ADMIN) && (
+            <>
+              {user?.roles.length > 0 && (
+                <div>
+                  Роль:
+                  {user?.roles?.map((item) => (
+                    <Tag className={s.cardUserTag} key={item}>
+                      {item}
+                    </Tag>
+                  ))}
+                </div>
+              )}
+              {domains.length > 0 && (
+                <div>
+                  Домени:
+                  {domains.map((item) => (
+                    <Tag className={s.cardUserTag} key={item.name}>
+                      {item.name}
+                    </Tag>
+                  ))}
+                </div>
+              )}
+              {companies.length > 0 && (
+                <div>
+                  Компанії:
+                  {companies.map((item) => (
+                    <Tag className={s.cardUserTag} key={item.companyName}>
+                      {item.companyName}
+                    </Tag>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
 
           {user?.roles?.includes(Roles.GLOBAL_ADMIN) && (
             <Button type="link" onClick={() => Router.push(AppRoutes.ADMIN)}>
