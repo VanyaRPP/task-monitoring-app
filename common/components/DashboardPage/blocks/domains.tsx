@@ -55,7 +55,9 @@ const DomainsBlock = ({}) => {
             render: (_, domain: IExtendedDomain) => (
               <div className={s.popconfirm}>
                 <Popconfirm
-                  title={`Ви впевнені що хочете видалити нерухомість?`}
+                  title={`Ви впевнені що хочете видалити ${
+                    domain.name ?? 'цей домен'
+                  }?`}
                   onConfirm={() => handleDelete(domain?._id)}
                   cancelText="Відміна"
                   disabled={deleteLoading}
