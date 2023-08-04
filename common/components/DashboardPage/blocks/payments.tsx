@@ -69,15 +69,15 @@ const PaymentsBlock = () => {
   const paymentsPageColumns =
     router.pathname === AppRoutes.PAYMENT
       ? [
-          ...invoiceTypes.map((type) => ({
-            title: paymentsTitle[type],
-            dataIndex: 'invoice',
-            render: (invoice) => {
-              const item = invoice.find((item) => item.type === type)
-              return item ? item.sum : <span className={s.currency}>-</span>
-            },
-          })),
-        ]
+        ...invoiceTypes.map((type) => ({
+          title: paymentsTitle[type],
+          dataIndex: 'invoice',
+          render: (invoice) => {
+            const item = invoice.find((item) => item.type === type)
+            return item ? item.sum : <span className={s.currency}>-</span>
+          },
+        })),
+      ]
       : []
 
   const columns = [
@@ -148,24 +148,24 @@ const PaymentsBlock = () => {
     ...paymentsPageColumns,
     isGlobalAdmin
       ? {
-          title: '',
-          dataIndex: '',
-          width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
-          render: (_, payment: IExtendedPayment) => (
-            <div className={s.popconfirm}>
-              <Popconfirm
-                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                  payment?.date as unknown as string
-                )}?`}
-                onConfirm={() => handleDeletePayment(payment?._id)}
-                cancelText="Відміна"
-                disabled={deleteLoading}
-              >
-                <DeleteOutlined className={s.icon} />
-              </Popconfirm>
-            </div>
-          ),
-        }
+        title: '',
+        dataIndex: '',
+        width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
+        render: (_, payment: IExtendedPayment) => (
+          <div className={s.popconfirm}>
+            <Popconfirm
+              title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+                payment?.date as unknown as string
+              )}?`}
+              onConfirm={() => handleDeletePayment(payment?._id)}
+              cancelText="Відміна"
+              disabled={deleteLoading}
+            >
+              <DeleteOutlined className={s.icon} />
+            </Popconfirm>
+          </div>
+        ),
+      }
       : { width: '0' },
     {
       title: '',
@@ -221,6 +221,13 @@ const PaymentsBlock = () => {
           columns={columns}
           dataSource={payments?.data}
           pagination={false}
+          summary={() => (
+            <Table.Summary.Row className={s.saldo}>
+              {columns.slice(1).map((item) => <Table.Summary.Cell colSpan={item.dataIndex === "debit" ? 2 : 1} index={0} key={item.dataIndex}>
+                {item.dataIndex === "debit" ? "Saldo" : null}
+              </Table.Summary.Cell>)} 
+            </Table.Summary.Row>
+          )}
           bordered
           size="small"
           loading={
