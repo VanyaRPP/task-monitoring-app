@@ -12,34 +12,35 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isDomainAdmin, isUser, user } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isUser, user } = await getCurrentUser(
+    req,
+    res
+  )
 
   switch (req.method) {
     case 'GET':
       try {
         const options = {}
-        let domainsIds
 
-        if (isDomainAdmin) {
+        // one domain by id
+        if (req.query.domainId) {
+          options._id = { $in: [req.query.domainId] }
+        }
+        // all domains
+        else if (isGlobalAdmin) {
+          // just don't change options
+        }
+        // all domains where the user is administrator
+        else if (isDomainAdmin) {
           options.adminEmails = { $in: [user.email] }
         }
-
-        if (isUser) {
+        // all domains where the user is company administrator
+        else if (isUser) {
           const realEstates = await RealEstate.find({
             adminEmails: { $in: [user.email] },
           }).populate({ path: 'domain', select: 'name' })
 
-          domainsIds = realEstates.map((i) => i.domain._id)
-        }
-
-        if (req.query.domainId) {
-          domainsIds = domainsIds
-            ? domainsIds.filter((i) => i === req.query.domainId)
-            : [req.query.domainId]
-        }
-
-        if (domainsIds) {
-          options._id = { $in: domainsIds }
+          options._id = realEstates.map((i) => i.domain._id)
         }
 
         const domains = await Domain.find(options)
