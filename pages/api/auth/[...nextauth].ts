@@ -65,7 +65,7 @@ export const authOptions: NextAuthOptions = {
             
             return user
           } catch (error) {
-            return null
+            throw Error('There is an error ', error)
           }
         },
       }),
