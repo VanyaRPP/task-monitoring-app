@@ -1,3 +1,4 @@
+import { months } from 'moment'
 import {
   IAddPaymentResponse,
   IDeletePaymentResponse,
@@ -16,20 +17,50 @@ export const paymentApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getAllPayments: builder.query<
-      IExtendedPayment[],
-      { limit: number; email?: string }
+      IGetPaymentResponse,
+      {
+        limit: number
+        skip?: number
+        email?: string
+        year?: number
+        quarter?: number
+        month?: number
+        day?: number
+        domainIds?: string[]
+        companyIds?: string[]
+      }
     >({
-      query: ({ limit, email }) => {
+      query: ({
+        limit,
+        skip,
+        email,
+        year,
+        quarter,
+        month,
+        day,
+        domainIds,
+        companyIds,
+      }) => {
         return {
           url: `spacehub/payment`,
-          params: { limit, email },
+          params: {
+            limit,
+            skip,
+            email,
+            year,
+            quarter,
+            month,
+            day,
+            domainIds,
+            companyIds,
+          },
         }
       },
+
       providesTags: (response) =>
         response
-          ? response.map((item) => ({ type: 'Payment', id: item._id }))
+          ? response.data.map((item) => ({ type: 'Payment', id: item._id }))
           : [],
-      transformResponse: (response: IGetPaymentResponse) => response.data,
     }),
     addPayment: builder.mutation<IAddPaymentResponse, IPayment>({
       query(body) {

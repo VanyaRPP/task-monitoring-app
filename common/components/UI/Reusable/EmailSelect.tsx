@@ -14,19 +14,27 @@ export default function EmailSelect({ form }: EmailSelectProps) {
 
   useEffect(() => {
     if (data) {
-      const adminEmails = data.flatMap((domain) => domain.adminEmails)
+      const adminEmails = data.reduce((uniqueAdminEmails, domain) => {
+        const newAdminEmails = domain.adminEmails.filter(email => !uniqueAdminEmails.includes(email))
+        return [...uniqueAdminEmails, ...newAdminEmails]
+      }, [])
       formInstance.setFieldsValue({ adminEmails }) // Use form instance's setFieldsValue
     }
   }, [data]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Extract all admin email options from the data object
-  const adminEmailOptions = data?.flatMap((domain) => domain.adminEmails) || []
+  const adminEmailOptions = data?.reduce((uniqueAdminEmails, domain) => {
+    const newAdminEmails = domain.adminEmails.filter(email => !uniqueAdminEmails.includes(email))
+    return [...uniqueAdminEmails, ...newAdminEmails]
+  }, []) || []
 
   return (
     <Form.Item
       name="adminEmails"
       label="Адміністратори"
-      rules={validateField('email')}
+      rules={[
+        { required: true },
+        ...validateField('email'), // Use the imported validateField function for email validation
+      ]}
     >
       <Select
         mode="tags"

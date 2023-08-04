@@ -100,9 +100,12 @@ const columns = [
     dataIndex: 'address',
   },
   {
-    title: 'Адміністратори',
-    dataIndex: 'adminEmails',
-  },
+  title: 'Адміністратори',
+  dataIndex: 'adminEmails',
+  render: (adminEmails) => (
+    <span>{adminEmails.join(', ')}</span>
+  ),
+},
   {
     title: 'Опис',
     dataIndex: 'description',

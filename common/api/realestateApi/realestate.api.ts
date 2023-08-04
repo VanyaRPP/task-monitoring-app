@@ -34,6 +34,7 @@ export const realestateApi = createApi({
           : [],
       transformResponse: (response: IGetRealestateResponse) => response.data,
     }),
+
     addRealEstate: builder.mutation<IAddRealestateResponse, IRealestate>({
       query(body) {
         return {
