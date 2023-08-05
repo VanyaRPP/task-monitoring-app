@@ -242,7 +242,7 @@ const PaymentsBlock = () => {
           onChange={(pagination, filters) => {
             setFilters(filters)
           }}
-          summary={() => (<Summary />)}
+          summary={() => (router.pathname === AppRoutes.PAYMENT && <Summary />)}
           bordered
           size="small"
           loading={
