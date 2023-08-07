@@ -63,7 +63,8 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { isDomainAdmin, isUser, user } = await getCurrentUser(req, res)
+        const { isDomainAdmin, isUser, user, isGlobalAdmin } =
+          await getCurrentUser(req, res)
 
         const { companyIds, domainIds, email, limit, skip } = req.query
 
@@ -133,6 +134,17 @@ export default async function handler(
             $unwind: '$domainDetails',
           },
           {
+            $match: {
+              $expr: {
+                $cond: [
+                  { $eq: [isGlobalAdmin, true] },
+                  true,
+                  { $in: [user.email, '$domainDetails.adminEmails'] },
+                ],
+              },
+            },
+          },
+          {
             $project: {
               'domainDetails.name': 1,
               'domainDetails._id': 1,
@@ -156,6 +168,17 @@ export default async function handler(
           },
           {
             $unwind: '$companyDetails',
+          },
+          {
+            $match: {
+              $expr: {
+                $cond: [
+                  { $eq: [isGlobalAdmin, true] },
+                  true,
+                  { $in: [user.email, '$companyDetails.adminEmails'] },
+                ],
+              },
+            },
           },
           {
             $project: {
