@@ -1,5 +1,5 @@
 import { emailRegex } from './validators'
-const { expect, test, toBeTruthy, toBeFalsy } = require('@jest/globals')
+const { expect, test } = require('@jest/globals')
 
 describe('isValidValidation', () => {
   test('email is valid', () => {

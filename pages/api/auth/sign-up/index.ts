@@ -2,7 +2,7 @@
 // @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import bcrypt from 'bcrypt'
-import start, { Data } from 'pages/api/api.config'
+import start, { Data } from '@pages/api/api.config'
 import User from '@common/modules/models/User'
 import { saltRounds } from '@utils/constants'
 

@@ -2,7 +2,7 @@
 // @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
-import start, { Data } from 'pages/api/api.config'
+import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import Domain from '@common/modules/models/Domain'
 start()

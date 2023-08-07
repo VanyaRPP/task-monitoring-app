@@ -5,7 +5,7 @@ import RealEstate from '@common/modules/models/RealEstate'
 import initMiddleware from '@common/lib/initMiddleware'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import Payment from '@common/modules/models/Payment'
-import start, { Data } from 'pages/api/api.config'
+import start, { Data } from '@pages/api/api.config'
 import { getPaymentOptions } from '@utils/helpers'
 import Domain from '@common/modules/models/Domain'
 import { quarters } from '@utils/constants'
@@ -104,12 +104,10 @@ export default async function handler(
           $and: filterPeriodOptions(req.query),
         }
 
-        /* eslint-disable @typescript-eslint/ban-ts-comment */
-        // @ts-ignore
         const payments = await Payment.find(options)
           .sort({ date: -1 })
-          .skip(skip)
-          .limit(limit)
+          .skip(+skip)
+          .limit(+limit)
           .populate({ path: 'company', select: '_id companyName' })
           .populate({ path: 'street', select: '_id address city' })
           .populate({ path: 'domain', select: '_id name' })

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
-import start, { Data } from 'pages/api/api.config'
+import start, { Data } from '@pages/api/api.config'
 
 start()
 
@@ -18,7 +18,9 @@ export default async function handler(
 ) {
   switch (req.method) {
     case 'PATCH':
-      return res.status(400).json({ success: false, message: 'not implemented' })
+      return res
+        .status(400)
+        .json({ success: false, message: 'not implemented' })
       // try {
       //   await User.findById(req.query.id).then(async (user) => {
       //     const rating = averageNum(user?.feedback, 'grade').toFixed(1)
