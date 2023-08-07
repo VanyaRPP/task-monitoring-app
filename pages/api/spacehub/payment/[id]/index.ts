@@ -2,7 +2,7 @@
 // @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Payment from 'common/modules/models/Payment'
-import start, { Data } from 'pages/api/api.config'
+import start, { Data } from '@pages/api/api.config'
 start()
 
 export default async function handler(

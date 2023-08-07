@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
-import start, { Data } from 'pages/api/api.config'
+import start, { Data } from '@pages/api/api.config'
 import Street from '@common/modules/models/Street'
-import Domain from 'common/modules/models/Domain'
+import Domain from '@common/modules/models/Domain'
 import { getCurrentUser } from '@utils/getCurrentUser'
 
 start()

@@ -3,7 +3,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
 import RealEstate from '@common/modules/models/RealEstate'
-import start, { Data } from 'pages/api/api.config'
+import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 start()
 

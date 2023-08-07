@@ -2,7 +2,7 @@
 // @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Service from '@common/modules/models/Service'
-import start, { Data } from 'pages/api/api.config'
+import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 start()
 
