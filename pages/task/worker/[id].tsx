@@ -38,6 +38,7 @@ const WorkerTasks: React.FC = () => {
 
   useEffect(() => {
     setTaskList(dataSource)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

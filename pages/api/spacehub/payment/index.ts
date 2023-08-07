@@ -104,12 +104,10 @@ export default async function handler(
           $and: filterPeriodOptions(req.query),
         }
 
-        /* eslint-disable @typescript-eslint/ban-ts-comment */
-        // @ts-ignore
         const payments = await Payment.find(options)
           .sort({ date: -1 })
-          .skip(skip)
-          .limit(limit)
+          .skip(+skip)
+          .limit(+limit)
           .populate({ path: 'company', select: '_id companyName' })
           .populate({ path: 'street', select: '_id address city' })
           .populate({ path: 'domain', select: '_id name' })
