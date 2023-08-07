@@ -72,7 +72,8 @@
 
 .Card {
   h2,
-  p {
+  p,
+  div {
     color: var(--textColor);
   }
 }

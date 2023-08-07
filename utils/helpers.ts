@@ -3,8 +3,6 @@ import { FormInstance } from 'antd'
 import { ObjectId } from 'mongoose'
 import { Roles } from './constants'
 import { PaymentOptions } from './types'
-import { IService } from '@common/api/serviceApi/service.api.types'
-import { dateToYearMonthFormat } from '@common/assets/features/formatDate'
 
 export const firstTextToUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
@@ -78,13 +76,6 @@ export const getName = (name, obj) => {
     }
   })
   return key
-}
-
-export const getCurrentMonthService = (services: IService[]) => {
-  const filteredServices = services?.find(
-    (s) => dateToYearMonthFormat(s?.date) === dateToYearMonthFormat(new Date())
-  )
-  return filteredServices
 }
 
 export function numberToTextNumber(number) {
