@@ -1,4 +1,3 @@
-import type { NextApiRequest } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
 import User from '@common/modules/models/User'
