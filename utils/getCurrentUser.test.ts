@@ -1,7 +1,7 @@
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import User from '@common/modules/models/User'
 import { getServerSession } from 'next-auth'
-import { testUsersData } from '@utils/testUsers'
+import { testUsersData } from '@utils/testData'
 import { getCurrentUser } from '@utils/getCurrentUser'
 
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))

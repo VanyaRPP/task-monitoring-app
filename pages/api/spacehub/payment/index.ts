@@ -65,14 +65,13 @@ export default async function handler(
       try {
         const { isDomainAdmin, isUser, user, isGlobalAdmin } =
           await getCurrentUser(req, res)
-
         const { companyIds, domainIds, email, limit, skip } = req.query
 
-        const options = (await getPaymentOptions({
-          searchEmail: email,
-          userEmail: user.email,
-        })) as any
-
+        const options = {} as any
+        //   (await getPaymentOptions({
+        //   searchEmail: email,
+        //   userEmail: user.email,
+        // })) as any
         if (isDomainAdmin) {
           /* eslint-disable @typescript-eslint/ban-ts-comment */
           // @ts-ignore

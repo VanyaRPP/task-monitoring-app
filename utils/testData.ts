@@ -1,0 +1,166 @@
+import { Roles } from './constants'
+
+export const testUsersData = [
+  {
+    name: 'user',
+    email: 'user@example.com',
+    roles: [Roles.USER],
+  },
+  {
+    name: 'globalAdmin',
+    email: 'globalAdmin@example.com',
+    roles: [Roles.GLOBAL_ADMIN],
+  },
+  {
+    name: 'domainAdmin',
+    email: 'domainAdmin@example.com',
+    roles: [Roles.DOMAIN_ADMIN],
+  },
+]
+
+export const testPaymentsData = [
+  {
+    _id: '64932958ff4981c7363cebbf',
+    type: 'debit',
+    date: '2023-06-21T16:46:15.979+0000',
+    domain: '6493263bff4981c7363ceb5b',
+    street: '649324c0ff4981c7363ceb34',
+    company: '6493272cff4981c7363ceb85',
+    monthService: '64932922ff4981c7363ceb9d',
+    description: '',
+    invoice: [
+      {
+        type: 'maintenancePrice',
+        amount: 500,
+        price: 11,
+        sum: 5500,
+      },
+      {
+        type: 'placingPrice',
+        amount: 500,
+        price: 100,
+        sum: 50000,
+      },
+      {
+        type: 'electricityPrice',
+        lastAmount: 1,
+        amount: 23,
+        price: 7,
+        sum: 154,
+      },
+      {
+        type: 'waterPrice',
+        lastAmount: 1,
+        amount: 10,
+        price: 60,
+        sum: 540,
+      },
+    ],
+    generalSum: 56194,
+    invoiceNumber: 1,
+  },
+  {
+    _id: '6499a4e16d709875aa0d02da',
+    invoiceNumber: 2,
+    type: 'debit',
+    date: '2023-06-26T14:46:54.170+0000',
+    domain: '6494665488f76005bc1f7984',
+    street: '649324c0ff4981c7363ceb34',
+    company: '6499724952d330fcced867d0',
+    monthService: '6499847752d330fcced867f8',
+    description: '',
+    invoice: [
+      {
+        type: 'maintenancePrice',
+        amount: 123,
+        price: 10,
+        sum: 1230,
+      },
+      {
+        type: 'placingPrice',
+        amount: 123,
+        price: 12,
+        sum: 1476,
+      },
+      {
+        type: 'electricityPrice',
+        lastAmount: 1,
+        amount: 12,
+        price: 11,
+        sum: 121,
+      },
+      {
+        type: 'waterPrice',
+        lastAmount: 1,
+        amount: 21,
+        price: 12,
+        sum: 240,
+      },
+    ],
+    services: [],
+    provider: {
+      name: 'Pantera',
+      address: 'Мала Бердичівська',
+      bankInformation: 'hjjkkk',
+    },
+    reciever: {
+      companyName: 'pantera1',
+      adminEmails: ['mykola.ext@element.in'],
+      phone: '+380964402696',
+    },
+    generalSum: 3067,
+    __v: 0,
+  },
+  {
+    _id: '64a2a8e0156bef42e034946f',
+    invoiceNumber: 3,
+    type: 'debit',
+    date: '2023-07-03T10:54:21.128+0000',
+    domain: '64a29d55156bef42e03493e6',
+    street: '649324c0ff4981c7363ceb34',
+    company: '64a2a7f8156bef42e034944f',
+    monthService: '64a2a88f156bef42e0349458',
+    description: '',
+    invoice: [
+      {
+        type: 'maintenancePrice',
+        amount: 13,
+        price: 10,
+        sum: 130,
+      },
+      {
+        type: 'placingPrice',
+        amount: 13,
+        price: 12,
+        sum: 156,
+      },
+      {
+        type: 'electricityPrice',
+        lastAmount: 10,
+        amount: 12,
+        price: 13,
+        sum: 26,
+      },
+      {
+        type: 'waterPrice',
+        lastAmount: 10,
+        amount: 15,
+        price: 14,
+        sum: 70,
+      },
+    ],
+    services: [],
+    provider: {
+      name: 'testDomain',
+      address: 'Мала Бердичівська',
+      bankInformation: '123321567',
+    },
+    reciever: {
+      companyName: 'companyTest',
+      adminEmails: ['denys123@gmail.com'],
+      phone: '+380964402696',
+    },
+    generalSum: 382,
+    __v: 0,
+  },
+]
