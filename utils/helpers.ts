@@ -179,3 +179,15 @@ export const isAdminCheck = (roles) => {
     roles?.includes(role)
   )
 }
+
+/**
+ * костиль, щоб прибрати `__v` з документу `mongodb` і далі порівнювати
+ * отримані дані із тестовими
+ * @param data масив документів `mongo_object_response._doc`
+ * @returns масив документів без поля `__v`
+ */
+export const removeVersion = (data: any[]): any[] =>
+  data.map((obj) => {
+    const { __v, ...rest } = obj
+    return rest
+  })
