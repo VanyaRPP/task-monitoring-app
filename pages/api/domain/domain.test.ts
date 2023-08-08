@@ -1,44 +1,26 @@
-import { MongoMemoryServer } from 'mongodb-memory-server'
-import { getServerSession } from 'next-auth'
 import { expect } from '@jest/globals'
 import { ObjectId } from 'mongodb'
-import mongoose from 'mongoose'
+import { getServerSession } from 'next-auth'
 import handler from '.'
 
-import User from '@common/modules/models/User'
 import Domain from '@common/modules/models/Domain'
-import Street from '@common/modules/models/Street'
 import RealEstate from '@common/modules/models/RealEstate'
+import Street from '@common/modules/models/Street'
+import User from '@common/modules/models/User'
 import { Roles } from '@utils/constants'
+import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
 jest.mock('@pages/api/api.config', () => jest.fn())
 
-const server = new MongoMemoryServer()
-
-beforeAll(async () => {
-  await server.start()
-  await mongoose.connect(server.getUri(), {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  } as any)
-})
+setupTestEnvironment()
 
 beforeEach(async () => {
   await User.insertMany(Object.values(testUsersData))
   await (Street as any).insertMany(testStreetsData)
   await (Domain as any).insertMany(testDomainsData)
   await (RealEstate as any).insertMany(testRealEstatesData)
-})
-
-afterEach(async () => {
-  await mongoose.connection.dropDatabase()
-})
-
-afterAll(async () => {
-  await mongoose.disconnect()
-  await server.stop()
 })
 
 describe('Domains API - GET', () => {
