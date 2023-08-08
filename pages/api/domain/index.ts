@@ -34,7 +34,7 @@ export default async function handler(
 
         if (req.query.domainId) {
           domainsIds = domainsIds
-            ? domainsIds.filter((i) => i === req.query.domainId)
+            ? domainsIds.filter((i) => i.toString() === req.query.domainId)
             : [req.query.domainId]
         }
 
