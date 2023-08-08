@@ -9,6 +9,7 @@ import Street from '@common/modules/models/Street'
 import User from '@common/modules/models/User'
 import { Roles } from '@utils/constants'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
+import { removeVersion } from '@utils/helpers'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -24,12 +25,12 @@ beforeEach(async () => {
 })
 
 describe('Domains API - GET', () => {
-  it('load domains as GlobalAdmin with limit - success', async () => {
+  it('load domains as GlobalAdmin - success', async () => {
     await mockLoginAs(testUsersData.globalAdmin)
 
     const mockReq = {
       method: 'GET',
-      query: { limit: 2 },
+      query: {},
     } as any
     const mockRes = {
       status: jest.fn(() => mockRes),
@@ -44,7 +45,40 @@ describe('Domains API - GET', () => {
     }
 
     expect(response.status).toHaveBeenCalledWith(200)
-    expect(response.data).toHaveLength(2)
+
+    const received = removeVersion(response.data.map((domain) => domain._doc))
+    const expected = testDomainsData
+
+    expect(received).toEqual(expected)
+  })
+
+  it('load domains as GlobalAdmin with limit - success', async () => {
+    const limit = 2
+
+    await mockLoginAs(testUsersData.globalAdmin)
+
+    const mockReq = {
+      method: 'GET',
+      query: { limit },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = removeVersion(response.data.map((domain) => domain._doc))
+    const expected = testDomainsData.slice(0, limit)
+
+    expect(received).toEqual(expected)
   })
 
   it('load domains as DomainAdmin - success', async () => {
@@ -67,7 +101,13 @@ describe('Domains API - GET', () => {
     }
 
     expect(response.status).toHaveBeenCalledWith(200)
-    expect(response.data).toHaveLength(2)
+
+    const received = removeVersion(response.data.map((domain) => domain._doc))
+    const expected = testDomainsData.filter((domain) =>
+      domain.adminEmails.includes(testUsersData.domainAdmin.email)
+    )
+
+    expect(received).toEqual(expected)
   })
 
   it('load domains as User - success', async () => {
@@ -90,7 +130,17 @@ describe('Domains API - GET', () => {
     }
 
     expect(response.status).toHaveBeenCalledWith(200)
-    expect(response.data).toHaveLength(2)
+
+    const received = removeVersion(response.data.map((domain) => domain._doc))
+    const realEstates = testRealEstatesData.filter((realEstate) =>
+      realEstate.adminEmails.includes(testUsersData.user.email)
+    )
+    const domainIds = realEstates.map((realEstate) => realEstate.domain)
+    const expected = testDomainsData.filter((domain) =>
+      domainIds.includes(domain._id)
+    )
+
+    expect(received).toEqual(expected)
   })
 
   it('load domain as GlobalAdmin by domainId - success', async () => {
@@ -113,7 +163,11 @@ describe('Domains API - GET', () => {
     }
 
     expect(response.status).toHaveBeenCalledWith(200)
-    expect(response.data).toHaveLength(1)
+
+    const received = removeVersion(response.data.map((domain) => domain._doc))
+    const expected = [testDomainsData[0]]
+
+    expect(received).toEqual(expected)
   })
 
   it('load domain as DomainAdmin by domainId - success', async () => {
@@ -136,7 +190,11 @@ describe('Domains API - GET', () => {
     }
 
     expect(response.status).toHaveBeenCalledWith(200)
-    expect(response.data).toHaveLength(1)
+
+    const received = removeVersion(response.data.map((domain) => domain._doc))
+    const expected = [testDomainsData[0]]
+
+    expect(received).toEqual(expected)
   })
 
   it('load domain as User by domainId - success', async () => {
@@ -159,7 +217,11 @@ describe('Domains API - GET', () => {
     }
 
     expect(response.status).toHaveBeenCalledWith(200)
-    expect(response.data).toHaveLength(1)
+
+    const received = removeVersion(response.data.map((domain) => domain._doc))
+    const expected = [testDomainsData[0]]
+
+    expect(received).toEqual(expected)
   })
 
   it('load domain as DomainAdmin by domainId - restricted access', async () => {
@@ -220,13 +282,13 @@ const testUsersData = {
     roles: [Roles.USER],
   },
   domainAdmin: {
-    name: 'domain_admin',
-    email: 'domain_admin@example.com',
+    name: 'domainAdmin',
+    email: 'domainAdmin@example.com',
     roles: [Roles.DOMAIN_ADMIN],
   },
   globalAdmin: {
-    name: 'global_admin',
-    email: 'global_admin@example.com',
+    name: 'globalAdmin',
+    email: 'globalAdmin@example.com',
     roles: [Roles.GLOBAL_ADMIN],
   },
 }
