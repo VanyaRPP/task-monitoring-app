@@ -2,11 +2,11 @@ import { MongoMemoryServer } from 'mongodb-memory-server'
 import mongoose from 'mongoose'
 
 export const setupTestEnvironment = () => {
-  beforeAll(async () => {
-    const mongo = await MongoMemoryServer.create()
-    const mongoUri = mongo.getUri()
+  const server = new MongoMemoryServer()
 
-    await mongoose.connect(mongoUri, {
+  beforeAll(async () => {
+    await server.start()
+    await mongoose.connect(server.getUri(), {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     } as any)
@@ -18,5 +18,6 @@ export const setupTestEnvironment = () => {
 
   afterAll(async () => {
     await mongoose.disconnect()
+    await server.stop()
   })
 }
