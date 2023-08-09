@@ -73,9 +73,7 @@ export default async function handler(
         //   userEmail: user.email,
         // })) as any
         if (isDomainAdmin) {
-          /* eslint-disable @typescript-eslint/ban-ts-comment */
-          // @ts-ignore
-          const domains = await Domain.find({
+          const domains = await (Domain as any).find({
             adminEmails: { $in: [user.email] },
           })
           const domainsIds = domains.map((i) => i._id.toString())
@@ -83,9 +81,7 @@ export default async function handler(
         }
 
         if (isUser) {
-          /* eslint-disable @typescript-eslint/ban-ts-comment */
-          // @ts-ignore
-          const realEstates = await RealEstate.find({
+          const realEstates = await (RealEstate as any).find({
             adminEmails: { $in: [user.email] },
           })
           const realEstatesIds = realEstates.map((i) => i._id.toString())
@@ -104,7 +100,8 @@ export default async function handler(
           $and: filterPeriodOptions(req.query),
         }
 
-        const payments = await Payment.find(options)
+        const payments = await (Payment as any)
+          .find(options)
           .sort({ date: -1 })
           .skip(+skip)
           .limit(+limit)
@@ -210,6 +207,7 @@ export default async function handler(
           total,
         })
       } catch (error) {
+        console.error(error)
         return res.status(400).json({ success: false, error: error.message })
       }
 
@@ -241,7 +239,7 @@ export default async function handler(
   }
 }
 
-function filterOptions(options = {}, filterIds) {
+function filterOptions(options = {}, filterIds: any) {
   const res = {
     ...options,
   } as any

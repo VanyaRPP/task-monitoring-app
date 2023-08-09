@@ -1,166 +1,372 @@
+import { ObjectId } from 'mongodb'
 import { Roles } from './constants'
 
-export const testUsersData = [
-  {
+export const users = {
+  user: {
     name: 'user',
     email: 'user@example.com',
     roles: [Roles.USER],
   },
-  {
-    name: 'globalAdmin',
-    email: 'globalAdmin@example.com',
-    roles: [Roles.GLOBAL_ADMIN],
-  },
-  {
+  domainAdmin: {
     name: 'domainAdmin',
     email: 'domainAdmin@example.com',
     roles: [Roles.DOMAIN_ADMIN],
   },
+  globalAdmin: {
+    name: 'globalAdmin',
+    email: 'globalAdmin@example.com',
+    roles: [Roles.GLOBAL_ADMIN],
+  },
+}
+
+export const domains = [
+  {
+    _id: new ObjectId(),
+    area: [],
+    name: 'domain 0',
+    address: 'Domain_address_0',
+    adminEmails: [users.domainAdmin.email],
+    streets: [],
+    description: 'none',
+    bankInformation: 'none',
+    phone: '+381234567890',
+    email: 'domain_0@example.com',
+  },
+  {
+    _id: new ObjectId(),
+    area: [],
+    name: 'domain 1',
+    address: 'Domain_address_1',
+    adminEmails: [],
+    streets: [],
+    description: 'none',
+    bankInformation: 'none',
+    phone: '+381234567891',
+    email: 'domain_1@example.com',
+  },
+  {
+    _id: new ObjectId(),
+    area: [],
+    name: 'domain 2',
+    address: 'Domain_address_2',
+    adminEmails: [],
+    streets: [],
+    description: 'none',
+    bankInformation: 'none',
+    phone: '+381234567892',
+    email: 'domain_2@example.com',
+  },
+  {
+    _id: new ObjectId(),
+    area: [],
+    name: 'domain 3',
+    address: 'Domain_address_3',
+    adminEmails: [],
+    streets: [],
+    description: 'none',
+    bankInformation: 'none',
+    phone: '+381234567893',
+    email: 'domain_3@example.com',
+  },
+  {
+    _id: new ObjectId(),
+    area: [],
+    name: 'domain 4',
+    address: 'Domain_address_4',
+    adminEmails: [],
+    streets: [],
+    description: 'none',
+    bankInformation: 'none',
+    phone: '+381234567894',
+    email: 'domain_4@example.com',
+  },
+  {
+    _id: new ObjectId(),
+    area: [],
+    name: 'domain 5',
+    address: 'Domain_address_5',
+    adminEmails: [users.user.email, users.domainAdmin.email],
+    streets: [],
+    description: 'none',
+    bankInformation: 'none',
+    phone: '+381234567895',
+    email: 'domain_5@example.com',
+  },
 ]
 
-export const testPaymentsData = [
+export const streets = [
   {
-    _id: '64932958ff4981c7363cebbf',
+    _id: new ObjectId(),
+    address: 'street_0',
+    city: 'street_0_city',
+  },
+  {
+    _id: new ObjectId(),
+    address: 'street_1',
+    city: 'street_1_city',
+  },
+  {
+    _id: new ObjectId(),
+    address: 'street_2',
+    city: 'street_2_city',
+  },
+]
+
+export const realEstates = [
+  {
+    _id: new ObjectId(),
+    domain: domains[0]._id,
+    street: streets[0]._id,
+    companyName: 'company_0',
+    bankInformation: 'none',
+    agreement: 'none',
+    phone: '+381234567800',
+    adminEmails: [users.user.email],
+    pricePerMeter: 10,
+    servicePricePerMeter: 10,
+    totalArea: 10,
+    garbageCollector: 10,
+  },
+  {
+    _id: new ObjectId(),
+    domain: domains[1]._id,
+    street: streets[1]._id,
+    companyName: 'company_1',
+    bankInformation: 'none',
+    agreement: 'none',
+    phone: '+381234567801',
+    adminEmails: [users.user.email],
+    pricePerMeter: 10,
+    servicePricePerMeter: 10,
+    totalArea: 10,
+    garbageCollector: 10,
+  },
+  {
+    _id: new ObjectId(),
+    domain: domains[2]._id,
+    street: streets[2]._id,
+    companyName: 'company_2',
+    bankInformation: 'none',
+    agreement: 'none',
+    phone: '+381234567802',
+    adminEmails: [users.domainAdmin.email],
+    pricePerMeter: 10,
+    servicePricePerMeter: 10,
+    totalArea: 10,
+    garbageCollector: 10,
+  },
+]
+
+/*
+ * Test services Dates:
+ * 12.01.2020
+ * 19.06.2020
+ * 11.10.2020
+ * 17.04.2021
+ * 15.05.2021
+ * 10.08.2021
+ * 02.01.2022
+ * 13.03.2022
+ * 07.05.2023
+ * 01.07.2023
+ * 02.10.2023
+ */
+export const services = [
+  {
+    _id: new ObjectId(),
+    date: new Date(2020, 1, 12),
+    domain: domains[0]._id,
+    street: streets[0]._id,
+    rentPrice: 10,
+    electricityPrice: 10,
+    waterPrice: 10,
+    inflictionPrice: 1.1,
+    description: 'none',
+  },
+  {
+    _id: new ObjectId(),
+    date: new Date(2020, 6, 19),
+    domain: domains[1]._id,
+    street: streets[1]._id,
+    rentPrice: 20,
+    electricityPrice: 20,
+    waterPrice: 20,
+    inflictionPrice: 1.2,
+    description: 'none',
+  },
+  {
+    _id: new ObjectId(),
+    date: new Date(2020, 10, 11),
+    domain: domains[2]._id,
+    street: streets[2]._id,
+    rentPrice: 30,
+    electricityPrice: 30,
+    waterPrice: 30,
+    inflictionPrice: 1.3,
+    description: 'none',
+  },
+]
+
+/*
+ * Test payments Dates:
+ * 11.01.2020
+ * 18.06.2020
+ * 10.10.2020
+ * 16.04.2021
+ * 14.05.2021
+ * 09.08.2021
+ * 01.01.2022
+ * 12.03.2022
+ * 06.05.2023
+ * 31.06.2023
+ * 01.10.2023
+ */
+export const payments = [
+  {
+    _id: new ObjectId(),
+    invoiceNumber: 1,
     type: 'debit',
-    date: '2023-06-21T16:46:15.979+0000',
-    domain: '6493263bff4981c7363ceb5b',
-    street: '649324c0ff4981c7363ceb34',
-    company: '6493272cff4981c7363ceb85',
-    monthService: '64932922ff4981c7363ceb9d',
-    description: '',
+    date: new Date(2020, 1, 11),
+    domain: domains[0]._id,
+    street: streets[0]._id,
+    company: realEstates[0]._id,
+    monthService: services[0]._id,
+    description: 'none',
     invoice: [
       {
         type: 'maintenancePrice',
-        amount: 500,
-        price: 11,
-        sum: 5500,
+        amount: 10,
+        price: 10,
+        sum: 100,
       },
       {
         type: 'placingPrice',
-        amount: 500,
-        price: 100,
-        sum: 50000,
+        amount: 10,
+        price: 20,
+        sum: 200,
       },
       {
         type: 'electricityPrice',
-        lastAmount: 1,
-        amount: 23,
-        price: 7,
-        sum: 154,
+        amount: 10,
+        price: 30,
+        sum: 300,
       },
       {
         type: 'waterPrice',
-        lastAmount: 1,
         amount: 10,
-        price: 60,
-        sum: 540,
+        price: 40,
+        sum: 400,
       },
     ],
-    generalSum: 56194,
-    invoiceNumber: 1,
+    services: [],
+    // provider: {
+    //   name: 'provider_1',
+    //   address: 'address_of_provider_1',
+    //   bankInformation: 'none',
+    // },
+    // receiver: {
+    //   companyName: 'receiver_1',
+    //   admonEmails: [],
+    //   phone: '+3801234567891',
+    // },
+    generalSum: 1000,
   },
   {
-    _id: '6499a4e16d709875aa0d02da',
+    _id: new ObjectId(),
     invoiceNumber: 2,
     type: 'debit',
-    date: '2023-06-26T14:46:54.170+0000',
-    domain: '6494665488f76005bc1f7984',
-    street: '649324c0ff4981c7363ceb34',
-    company: '6499724952d330fcced867d0',
-    monthService: '6499847752d330fcced867f8',
-    description: '',
+    date: new Date(2020, 6, 18),
+    domain: domains[1]._id,
+    street: streets[1]._id,
+    company: realEstates[1]._id,
+    monthService: services[1]._id,
+    description: 'none',
     invoice: [
       {
         type: 'maintenancePrice',
-        amount: 123,
+        amount: 10,
         price: 10,
-        sum: 1230,
+        sum: 100,
       },
       {
         type: 'placingPrice',
-        amount: 123,
-        price: 12,
-        sum: 1476,
+        amount: 10,
+        price: 20,
+        sum: 200,
       },
       {
         type: 'electricityPrice',
-        lastAmount: 1,
-        amount: 12,
-        price: 11,
-        sum: 121,
+        amount: 10,
+        price: 30,
+        sum: 300,
       },
       {
         type: 'waterPrice',
-        lastAmount: 1,
-        amount: 21,
-        price: 12,
-        sum: 240,
+        amount: 10,
+        price: 40,
+        sum: 400,
       },
     ],
     services: [],
-    provider: {
-      name: 'Pantera',
-      address: 'Мала Бердичівська',
-      bankInformation: 'hjjkkk',
-    },
-    reciever: {
-      companyName: 'pantera1',
-      adminEmails: ['mykola.ext@element.in'],
-      phone: '+380964402696',
-    },
-    generalSum: 3067,
-    __v: 0,
+    // provider: {
+    //   name: 'provider_2',
+    //   address: 'address_of_provider_2',
+    //   bankInformation: 'none',
+    // },
+    // receiver: {
+    //   companyName: 'receiver_2',
+    //   admonEmails: [],
+    //   phone: '+3801234567892',
+    // },
+    generalSum: 1000,
   },
   {
-    _id: '64a2a8e0156bef42e034946f',
+    _id: new ObjectId(),
     invoiceNumber: 3,
     type: 'debit',
-    date: '2023-07-03T10:54:21.128+0000',
-    domain: '64a29d55156bef42e03493e6',
-    street: '649324c0ff4981c7363ceb34',
-    company: '64a2a7f8156bef42e034944f',
-    monthService: '64a2a88f156bef42e0349458',
-    description: '',
+    date: new Date(2020, 10, 10),
+    domain: domains[2]._id,
+    street: streets[2]._id,
+    company: realEstates[2]._id,
+    monthService: services[2]._id,
+    description: 'none',
     invoice: [
       {
         type: 'maintenancePrice',
-        amount: 13,
+        amount: 10,
         price: 10,
-        sum: 130,
+        sum: 100,
       },
       {
         type: 'placingPrice',
-        amount: 13,
-        price: 12,
-        sum: 156,
+        amount: 10,
+        price: 20,
+        sum: 200,
       },
       {
         type: 'electricityPrice',
-        lastAmount: 10,
-        amount: 12,
-        price: 13,
-        sum: 26,
+        amount: 10,
+        price: 30,
+        sum: 300,
       },
       {
         type: 'waterPrice',
-        lastAmount: 10,
-        amount: 15,
-        price: 14,
-        sum: 70,
+        amount: 10,
+        price: 40,
+        sum: 400,
       },
     ],
     services: [],
-    provider: {
-      name: 'testDomain',
-      address: 'Мала Бердичівська',
-      bankInformation: '123321567',
-    },
-    reciever: {
-      companyName: 'companyTest',
-      adminEmails: ['denys123@gmail.com'],
-      phone: '+380964402696',
-    },
-    generalSum: 382,
-    __v: 0,
+    // provider: {
+    //   name: 'provider_3',
+    //   address: 'address_of_provider_3',
+    //   bankInformation: 'none',
+    // },
+    // receiver: {
+    //   companyName: 'receiver_3',
+    //   admonEmails: [],
+    //   phone: '+3801234567893',
+    // },
+    generalSum: 1000,
   },
 ]
