@@ -211,20 +211,21 @@ const PaymentsBlock = () => {
 
   const Summary = () => {
     return (
-      payments?.data ? <>
-        <Table.Summary.Row className={s.saldo}>
-          {columns.slice(0, columns.length).map((item) =>
-            <Table.Summary.Cell index={1} key={item.dataIndex}>
+      router.pathname === AppRoutes.PAYMENT && payments?.data &&
+      <>
+        <Table.Summary.Row className={s.summ_item}>
+          {columns.map((item) =>
+            <Table.Summary.Cell index={0} key={item.dataIndex} colSpan={item.dataIndex === "" ? 2 : 1}>
               {item.dataIndex === "debit" ? "Debit" : item.dataIndex === "credit" ? "Credit" : false}
-            </Table.Summary.Cell>)}
+            </Table.Summary.Cell>
+          )}
         </Table.Summary.Row>
-
         <Table.Summary.Row className={s.saldo}>
-          {columns.slice(1, columns.length).map((item) => <Table.Summary.Cell colSpan={item.dataIndex === "credit" ? 2 : 1} index={0} key={item.dataIndex}>
-            {item.dataIndex === "credit" ? "Saldo" : false}
+          {columns.map((item) => <Table.Summary.Cell colSpan={item.dataIndex === "debit" ? 2 : 1} index={0} key={item.dataIndex}>
+            {item.dataIndex === "debit" ? "Saldo" : false}
           </Table.Summary.Cell>)}
         </Table.Summary.Row>
-      </> : null
+      </>
     )
   }
 
@@ -242,7 +243,8 @@ const PaymentsBlock = () => {
           onChange={(pagination, filters) => {
             setFilters(filters)
           }}
-          summary={() => (router.pathname === AppRoutes.PAYMENT && <Summary />)}
+          scroll={{ y: 800 }}
+          summary={() => <Table.Summary fixed><Summary /></Table.Summary>}
           bordered
           size="small"
           loading={
