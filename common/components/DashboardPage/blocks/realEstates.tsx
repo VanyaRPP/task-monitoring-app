@@ -12,7 +12,7 @@ import cn from 'classnames'
 import s from './style.module.scss'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
-import { createContext } from 'react'
+import { createContext, useState } from 'react'
 
 export const CompanyPageContext = createContext(
   {} as { domainId?: string; streetId?: string }
@@ -27,13 +27,14 @@ interface IRealEstate {
 interface IRealEstateColumns {
   title: string
   dataIndex: string
+  filters?: any
   render?: (i: any) => any
 }
 
 const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
   const router = useRouter()
   const { pathname } = router
-
+  const [filters, setFilters] = useState<any>()
   const {
     data: allRealEstate,
     isLoading: allRealEstateLoading,
@@ -42,7 +43,10 @@ const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
     limit: pathname === AppRoutes.REAL_ESTATE ? 200 : 5,
     domainId,
     streetId,
+    companyIds: filters?.company || undefined,
+    domainIds: filters?.domain || undefined,
   })
+
   const [deleteRealEstate, { isLoading: deleteLoading }] =
     useDeleteRealEstateMutation()
 
@@ -60,6 +64,10 @@ const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
   const columns: IRealEstateColumns[] = [
     {
       title: 'Назва компанії',
+      filters:
+        pathname === AppRoutes.REAL_ESTATE
+          ? allRealEstate?.realEstatesFilter
+          : null,
       dataIndex: 'companyName',
     },
     {
@@ -75,12 +83,10 @@ const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
       dataIndex: 'phone',
     },
     {
-  title: 'Адміністратори',
-  dataIndex: 'adminEmails',
-  render: (adminEmails) => (
-    <span>{adminEmails.join(', ')}</span>
-  ),
-},
+      title: 'Адміністратори',
+      dataIndex: 'adminEmails',
+      render: (adminEmails) => <span>{adminEmails.join(', ')}</span>,
+    },
     {
       title: 'Кількість метрів',
       dataIndex: 'totalArea',
@@ -104,6 +110,10 @@ const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
       {
         title: 'Домен',
         dataIndex: 'domain',
+        filters:
+          pathname === AppRoutes.REAL_ESTATE
+            ? allRealEstate?.domainsFilter
+            : null,
         render: (i) => i?.name,
       },
       {
@@ -139,7 +149,10 @@ const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
             ),
           },
         ]}
-        dataSource={allRealEstate}
+        dataSource={allRealEstate?.data}
+        onChange={(pagination, filters) => {
+          setFilters(filters)
+        }}
         pagination={false}
         bordered
         size="small"

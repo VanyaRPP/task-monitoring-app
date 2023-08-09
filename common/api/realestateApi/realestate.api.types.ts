@@ -1,4 +1,4 @@
-import { IDomain } from '@common/modules/models/Domain';
+import { IDomain } from '@common/modules/models/Domain'
 
 export type IRealestate = {
   domain: IDomain
@@ -24,11 +24,23 @@ export interface IAddRealestateResponse {
   data: IExtendedRealestate
 }
 
+interface IFilter {
+  text: string
+  value: string
+}
 export interface IGetRealestateResponse {
-  success: boolean
+  domainsFilter: IFilter[]
+  realEstatesFilter: IFilter[]
   data: IExtendedRealestate[]
+  success: boolean
+  total: number
 }
 
 export interface IDeleteRealestateResponse {
   success: boolean
+}
+
+export interface IGetRealestateCountResponse {
+  success: boolean
+  data: number
 }

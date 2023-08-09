@@ -48,7 +48,9 @@ const PaymentCardHeader = ({
                   Проплати
                   <SelectOutlined className={s.Icon} />
                 </Button>
-                  {location.pathname === AppRoutes.PAYMENT && <PaymentCascader onChange={setCurrentDateFilter} />}
+                {location.pathname === AppRoutes.PAYMENT && (
+                  <PaymentCascader onChange={setCurrentDateFilter} />
+                )}
               </>
             )}
             <Button type="link" onClick={() => setIsModalOpen(true)}>

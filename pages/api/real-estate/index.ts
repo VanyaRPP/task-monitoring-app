@@ -14,12 +14,11 @@ export default async function handler(
 ) {
   const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
     await getCurrentUser(req, res)
-
   switch (req.method) {
     case 'GET':
       try {
+        const { domainId, streetId, domainIds, companyIds } = req.query
         const options = {}
-        const { domainId, streetId } = req.query
         if (isGlobalAdmin && domainId && streetId) {
           options.domain = domainId
           options.street = streetId
@@ -37,6 +36,13 @@ export default async function handler(
           options.adminEmails = { $in: [user.email] }
         }
 
+        if (domainIds) {
+          options.domain = filterOptions(options?.domain, domainIds)
+        }
+
+        if (companyIds) {
+          options.company = filterOptions(options?.company, companyIds)
+        }
         const realEstates = await RealEstate.find(options)
           .sort({ data: -1 })
           .limit(req.query.limit)
@@ -45,8 +51,74 @@ export default async function handler(
             select: '_id name address bankInformation',
           })
           .populate({ path: 'street', select: '_id address city' })
-
-        return res.status(200).json({ success: true, data: realEstates })
+        const total = await RealEstate.countDocuments(options)
+        const domainsPipeline = [
+          {
+            $group: {
+              _id: '$domain',
+            },
+          },
+          {
+            $lookup: {
+              from: 'domains',
+              localField: '_id',
+              foreignField: '_id',
+              as: 'domainDetails',
+            },
+          },
+          {
+            $unwind: '$domainDetails',
+          },
+          {
+            $project: {
+              'domainDetails.name': 1,
+              'domainDetails._id': 1,
+            },
+          },
+        ]
+        const realEstatesPipeline = [
+          {
+            $group: {
+              _id: '$company',
+            },
+          },
+          {
+            $lookup: {
+              from: 'realestates',
+              localField: '_id',
+              foreignField: '_id',
+              as: 'companyDetails',
+            },
+          },
+          {
+            $unwind: '$companyDetails',
+          },
+          {
+            $project: {
+              'companyDetails.companyName': 1,
+              'companyDetails._id': 1,
+            },
+          },
+        ]
+        const distinctDomains = await RealEstate.aggregate(domainsPipeline)
+        const distinctCompanies = await RealEstate.aggregate(
+          realEstatesPipeline
+        )
+        return res.status(200).json({
+          currentCompaniesCount: distinctCompanies.length,
+          currentDomainsCount: distinctDomains.length,
+          realEstatesFilter: distinctCompanies?.map(({ companyDetails }) => ({
+            text: companyDetails.companyName,
+            value: companyDetails._id,
+          })),
+          domainsFilter: distinctDomains?.map(({ domainDetails }) => ({
+            text: domainDetails.name,
+            value: domainDetails._id,
+          })),
+          total,
+          success: true,
+          data: realEstates,
+        })
       } catch (error) {
         return res.status(400).json({ success: false, message: error })
       }
@@ -65,4 +137,16 @@ export default async function handler(
         return res.status(400).json({ success: false, message: error })
       }
   }
+}
+function filterOptions(options = {}, filterIds) {
+  const res = {
+    ...options,
+  } as any
+  const idsFromQueryFilter = (filterIds || '').split(',') || []
+  if (res.$in) {
+    res.$in = res.$in.filter((i) => idsFromQueryFilter.includes(i))
+    return res
+  }
+  res.$in = idsFromQueryFilter
+  return res
 }

@@ -4,6 +4,7 @@ import {
   IGetRealestateResponse,
   IExtendedRealestate,
   IRealestate,
+  IGetRealestateCountResponse,
 } from './realestate.api.types'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
@@ -15,24 +16,25 @@ export const realestateApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getAllRealEstate: builder.query<
-      IExtendedRealestate[],
+      IGetRealestateResponse,
       {
         limit?: number
         domainId?: string
         streetId?: string
+        domainIds?: string[]
+        companyIds?: string[]
       }
     >({
-      query: ({ limit, domainId, streetId }) => {
+      query: ({ limit, domainId, streetId, domainIds, companyIds }) => {
         return {
           url: `real-estate`,
-          params: { limit, domainId, streetId },
+          params: { limit, domainId, streetId, domainIds, companyIds },
         }
       },
       providesTags: (response) =>
         response
-          ? response.map((item) => ({ type: 'RealEstate', id: item._id }))
+          ? response.data.map((item) => ({ type: 'RealEstate', id: item._id }))
           : [],
-      transformResponse: (response: IGetRealestateResponse) => response.data,
     }),
 
     addRealEstate: builder.mutation<IAddRealestateResponse, IRealestate>({
@@ -57,6 +59,11 @@ export const realestateApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['RealEstate'] : []),
     }),
+    getRealEstateCount: builder.query<number, object>({
+      query: () => `real-estate/count`,
+      transformResponse: (response: IGetRealestateCountResponse) =>
+        response.data,
+    }),
   }),
 })
 
@@ -64,4 +71,5 @@ export const {
   useDeleteRealEstateMutation,
   useAddRealEstateMutation,
   useGetAllRealEstateQuery,
+  useGetRealEstateCountQuery,
 } = realestateApi

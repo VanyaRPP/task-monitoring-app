@@ -4,11 +4,7 @@ import useDomain from '@common/modules/hooks/useDomain'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
-export default function DomainsSelect({
-  form,
-}: {
-  form: any
-}) {
+export default function DomainsSelect({ form }: { form: any }) {
   // TODO: recheck
   // in preview mode we need to prevent all data fetching. only single
   const { domainId } = useCompanyPageContext()
