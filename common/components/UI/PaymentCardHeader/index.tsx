@@ -48,12 +48,23 @@ const PaymentCardHeader = ({
                   Проплати
                   <SelectOutlined className={s.Icon} />
                 </Button>
-                  {location.pathname === AppRoutes.PAYMENT && <PaymentCascader onChange={setCurrentDateFilter} />}
+                {location.pathname === AppRoutes.PAYMENT && (
+                  <PaymentCascader onChange={setCurrentDateFilter} />
+                )}
               </>
             )}
-            <Button type="link" onClick={() => setIsModalOpen(true)}>
-              <PlusOutlined /> Додати
-            </Button>
+            <div>
+              <Button
+                type="link"
+                onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
+              >
+                Інвойси <SelectOutlined className={s.Icon} />
+              </Button>
+
+              <Button type="link" onClick={() => setIsModalOpen(true)}>
+                <PlusOutlined /> Додати
+              </Button>
+            </div>
           </>
         ) : (
           currUser && (
