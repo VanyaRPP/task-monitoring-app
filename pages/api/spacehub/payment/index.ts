@@ -191,6 +191,7 @@ export default async function handler(
 
         return res.status(200).json({
           // TODO: update Interface
+          /* eslint-disable @typescript-eslint/ban-ts-comment */
           // @ts-ignore
           currentCompaniesCount: distinctCompanies.length,
           currentDomainsCount: distinctDomains.length,
@@ -207,7 +208,6 @@ export default async function handler(
           total,
         })
       } catch (error) {
-        console.error(error)
         return res.status(400).json({ success: false, error: error.message })
       }
 
