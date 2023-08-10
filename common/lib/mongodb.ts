@@ -26,7 +26,6 @@ if (process.env.NODE_ENV === 'development') {
   clientPromise = globalWithMongo._mongoClientPromise
 } else {
   client = new MongoClient(uri || '') //dell option
-  client.set("strictQuery", false);
   clientPromise = client.connect()
 }
 
