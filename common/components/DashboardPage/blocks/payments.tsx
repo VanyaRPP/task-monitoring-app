@@ -17,21 +17,22 @@ import { Tooltip } from 'antd'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
 import s from './style.module.scss'
-import { PERIOD_FILTR} from '@utils/constants'
+import { PERIOD_FILTR } from '@utils/constants'
 
 function getDateFilter(value) {
   const [, year, period, number] = value || []
   // TODO: add enums
-  if (period === PERIOD_FILTR.QUARTER) return { 
-  year,
-  quarter: number 
-}
-  if (period === PERIOD_FILTR.MONTH) return { 
- year,
-month: number 
-
-}
-  if (period ===  PERIOD_FILTR.YEAR) return { year }
+  if (period === PERIOD_FILTR.QUARTER)
+    return {
+      year,
+      quarter: number,
+    }
+  if (period === PERIOD_FILTR.MONTH)
+    return {
+      year,
+      month: number,
+    }
+  if (period === PERIOD_FILTR.YEAR) return { year }
 }
 
 const PaymentsBlock = () => {
@@ -209,6 +210,42 @@ const PaymentsBlock = () => {
     })
   }
 
+  const Summary = () => {
+    return (
+      router.pathname === AppRoutes.PAYMENT &&
+      payments?.data && (
+        <>
+          <Table.Summary.Row className={s.summ_item}>
+            {columns.map((item) => (
+              <Table.Summary.Cell
+                index={0}
+                key={item.dataIndex}
+                colSpan={item.dataIndex === '' ? 2 : 1}
+              >
+                {item.dataIndex === 'debit'
+                  ? 'Debit'
+                  : item.dataIndex === 'credit'
+                  ? 'Credit'
+                  : false}
+              </Table.Summary.Cell>
+            ))}
+          </Table.Summary.Row>
+          <Table.Summary.Row className={s.saldo}>
+            {columns.map((item) => (
+              <Table.Summary.Cell
+                colSpan={item.dataIndex === 'debit' ? 2 : 1}
+                index={0}
+                key={item.dataIndex}
+              >
+                {item.dataIndex === 'debit' ? 'Saldo' : false}
+              </Table.Summary.Cell>
+            ))}
+          </Table.Summary.Row>
+        </>
+      )
+    )
+  }
+
   let content: ReactElement
 
   if (deleteError || paymentsError || currUserError) {
@@ -223,6 +260,12 @@ const PaymentsBlock = () => {
           onChange={(pagination, filters) => {
             setFilters(filters)
           }}
+          scroll={{ y: 800 }}
+          summary={() => (
+            <Table.Summary fixed>
+              <Summary />
+            </Table.Summary>
+          )}
           bordered
           size="small"
           loading={
