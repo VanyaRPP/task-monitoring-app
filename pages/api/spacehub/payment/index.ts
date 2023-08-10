@@ -112,6 +112,44 @@ export default async function handler(
 
         const total = await Payment.countDocuments(options)
 
+        const GlobalSum = async () => {
+          const pipeline = [
+            {
+              $match: {
+                type: { $in: ["debit", "credit"] },
+              },
+            },
+            {
+              $group: {
+                _id: "$type",
+                totalSum: { $sum: "$generalSum" },
+              },
+            },
+          ];
+
+          const temp = await Payment.aggregate(pipeline);
+          const sum: object = {};
+          
+          for (const payment of temp) {
+            sum["total_" + payment._id] = payment.totalSum;
+          }
+
+          return sum;
+        };
+
+        const getSum = (array): object => {
+          let credit = 0
+          let debit = 0
+
+          for (const payment of array) {
+            payment.type === "debit" ? debit += payment.generalSum : credit += payment.generalSum;
+          }
+          return { debit: debit, credit: credit }
+        }
+
+
+        const totalPayments: object = getSum(payments)
+
         const domainsPipeline = [
           {
             $group: {
@@ -206,6 +244,8 @@ export default async function handler(
           data: payments,
           success: true,
           total,
+          totalPayments,
+          totalSum: await GlobalSum(),
         })
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })
