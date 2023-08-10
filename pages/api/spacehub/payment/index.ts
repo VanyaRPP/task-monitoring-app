@@ -61,7 +61,7 @@ export default async function handler(
 ) {
   switch (req.method) {
     case 'GET':
-      // try {
+      try {
         const { isDomainAdmin, isUser, user } = await getCurrentUser(req, res)
 
         const options = (await getPaymentOptions({
@@ -108,10 +108,9 @@ export default async function handler(
           data: payments,
           success: true,
         })
-      // } 
-      // catch (error) {
-      //   return res.status(400).json({ success: false, error })
-      // }
+      } catch (error) {
+        return res.status(400).json({ success: false })
+      }
 
     case 'POST':
       try {
