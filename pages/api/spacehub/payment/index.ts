@@ -109,7 +109,7 @@ export default async function handler(
           success: true,
         })
       } catch (error) {
-        return res.status(400).json({ success: false })
+        return res.status(406).json({ success: false })
       }
 
     case 'POST':
