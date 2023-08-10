@@ -85,7 +85,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     placingPrice: 'Розміщення',
     waterPrice: 'За водопостачання',
     electricityPrice: 'За електропостачання',
-    garbageCollectorPrice: 'За вивіз ТВП',
+    garbageCollectorPrice: 'За вивіз ТПВ',
     inflicionPrice: 'Індекс інфляції',
   }
 
@@ -159,7 +159,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
         },
         {
           id: 5,
-          Назва: `За вивіз ТВП (${date})`,
+          Назва: `За вивіз ТПВ (${date})`,
           Ціна: Number(newData?.garbageCollectorPrice?.price),
           Сума: Number(newData?.garbageCollectorPrice?.sum),
         },

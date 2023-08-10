@@ -12,7 +12,7 @@ import {
 import { FC, useEffect, useState } from 'react'
 import { ColumnProps } from 'antd/lib/table'
 import moment from 'moment'
-import { dataSource, IPaymentTableData } from '@utils/tableData'
+import { IPaymentTableData } from '@utils/tableData'
 import { ServiceType, paymentsTitle } from '@utils/constants'
 import { getName } from '@utils/helpers'
 import { validateField } from '@common/assets/features/validators'
@@ -35,7 +35,7 @@ import {
   MinusCircleOutlined,
   PlusOutlined,
 } from '@ant-design/icons'
-import { StringExpression } from 'mongoose'
+import { useCustomDataSource } from './useCustomDataSource'
 interface Props {
   form: FormInstance<any>
   edit: boolean
@@ -51,69 +51,15 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
   const { company } = useCompany({ companyId, domainId, streetId, skip: edit })
   const { service } = useService({ serviceId, domainId, streetId, skip: edit })
 
-  const [isModalOpen, setIsModalOpen] = useState(false)
-
-  const withGarbageCollector =
-    company?.garbageCollector > 0
-      ? [
-          ...dataSource,
-          {
-            id: dataSource.length + 1,
-            name: 'garbageCollectorPrice',
-            amount: 0,
-            price: 0,
-            sum: 0,
-          },
-        ]
-      : dataSource
-
-  const withAllFields =
-    service?.inflicionPrice > 0
-      ? [
-          ...withGarbageCollector,
-          {
-            id: withGarbageCollector.length + 1,
-            name: 'inflicionPrice',
-            price: 0,
-            sum: 0,
-          },
-        ]
-      : withGarbageCollector
-
-  const [customDataSource, setCustomDataSource] = useState(
-    paymentData
-      ? paymentData?.invoice?.map((item) => {
-          return {
-            id: paymentData.invoice.indexOf(item) + 1,
-            name: item.type,
-            ...item,
-          }
-        })
-      : withAllFields
-  )
-
-  const [customFieldName, setCustomFieldName] = useState('')
-
-  const addField = () => {
-    setCustomDataSource([
-      ...customDataSource,
-      {
-        id: customDataSource.length + 1,
-        name: customFieldName,
-        price: 0,
-        sum: 0,
-      },
-    ])
-    setIsModalOpen(false)
-    setCustomFieldName('')
-  }
-
-  // useEffect(() => {
-  //   // eslint-disable-next-line no-console
-  //   console.log('paymentData', paymentData)
-  //   // eslint-disable-next-line no-console
-  //   console.log('customDataSource', customDataSource)
-  // }, [paymentData, domainId])
+  const { customDataSource, addDataSource, removeDataSource } =
+    useCustomDataSource({
+      paymentData,
+      companyId,
+      serviceId,
+      domainId,
+      streetId,
+      edit,
+    } as any)
 
   const columns: ColumnProps<IPaymentTableData>[] = [
     {
@@ -216,13 +162,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
             title={`Ви впевнені що хочете видалити поле ${
               getName(record.name, paymentsTitle) || record.name
             }?`}
-            onConfirm={() => {
-              setCustomDataSource((prev) =>
-                prev.filter((item) => item.name !== record.name)
-              )
-              // eslint-disable-next-line no-console
-              console.log('customDataSource', customDataSource)
-            }}
+            onConfirm={() => removeDataSource(record.id)}
             cancelText="Відміна"
           >
             <MinusCircleOutlined className={s.icon} />
@@ -238,35 +178,11 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       <Table
         rowKey="id"
         columns={columns}
-        dataSource={customDataSource}
+        dataSource={customDataSource as IPaymentTableData[]}
         pagination={false}
         className={s.table}
       />
-      {!edit && (
-        <>
-          <div className={s.popconfirm}>
-            <Button
-              icon={<PlusOutlined />}
-              onClick={() => setIsModalOpen(true)}
-              className={s.addButton}
-            >
-              Додати поле
-            </Button>
-          </div>
-          <Modal
-            title="Додати поле"
-            open={isModalOpen}
-            onOk={addField}
-            onCancel={() => setIsModalOpen(false)}
-          >
-            <Input
-              placeholder="Назва послуги"
-              value={customFieldName}
-              onChange={(e) => setCustomFieldName(e.target.value)}
-            />
-          </Modal>
-        </>
-      )}
+      {!edit && <AddCustomField addDataSource={addDataSource} />}
     </>
   )
 }
@@ -278,6 +194,49 @@ const fields = {
   waterPrice: PriceWaterField,
   garbageCollectorPrice: PriceGarbageCollectorField,
   inflicionPrice: PriceInflicionField,
+}
+
+function AddCustomField({ addDataSource }) {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [customFieldName, setCustomFieldName] = useState('')
+
+  const addField = () => {
+    addDataSource({
+      name: customFieldName,
+      amount: 1,
+      id: 44,
+      price: 0,
+      sum: 0,
+    })
+    setIsModalOpen(false)
+    setCustomFieldName('')
+  }
+
+  return (
+    <>
+      <div className={s.popconfirm}>
+        <Button
+          icon={<PlusOutlined />}
+          onClick={() => setIsModalOpen(true)}
+          className={s.addButton}
+        >
+          Додати поле
+        </Button>
+      </div>
+      <Modal
+        title="Додати поле"
+        open={isModalOpen}
+        onOk={addField}
+        onCancel={() => setIsModalOpen(false)}
+      >
+        <Input
+          placeholder="Назва послуги"
+          value={customFieldName}
+          onChange={(e) => setCustomFieldName(e.target.value)}
+        />
+      </Modal>
+    </>
+  )
 }
 
 function PriceWrapper({ record, form, edit }) {
