@@ -10,12 +10,6 @@ interface Props {
 const PaymentTotal: FC<Props> = ({ form }) => {
   const [total, setTotal] = useState(0)
 
-  const maintenancePrice = Form.useWatch('maintenancePrice', form)
-  const placingPrice = Form.useWatch('placingPrice', form)
-  const electricityPrice = Form.useWatch('electricityPrice', form)
-  const waterPrice = Form.useWatch('waterPrice', form)
-  const garbageCollectorPrice = Form.useWatch('garbageCollectorPrice', form)
-  const inflicionPrice = Form.useWatch('inflicionPrice', form)
   const formValues = Form.useWatch([], form)
   const services = formValues ?
     Object.values(formValues)
@@ -31,12 +25,6 @@ const PaymentTotal: FC<Props> = ({ form }) => {
     setTotal(services)
     form.setFieldValue(Operations.Debit, total)
   }, [
-    maintenancePrice,
-    placingPrice,
-    electricityPrice,
-    waterPrice,
-    garbageCollectorPrice,
-    inflicionPrice,
     form,
     total,
     services
