@@ -180,7 +180,7 @@ export const services = [
     rentPrice: 10,
     electricityPrice: 10,
     waterPrice: 10,
-    inflictionPrice: 1.1,
+    inflicionPrice: 1.1,
     description: 'none',
   },
   {
@@ -191,7 +191,7 @@ export const services = [
     rentPrice: 20,
     electricityPrice: 20,
     waterPrice: 20,
-    inflictionPrice: 1.2,
+    inflicionPrice: 1.2,
     description: 'none',
   },
   {
@@ -202,7 +202,7 @@ export const services = [
     rentPrice: 30,
     electricityPrice: 30,
     waterPrice: 30,
-    inflictionPrice: 1.3,
+    inflicionPrice: 1.3,
     description: 'none',
   },
 ]
