@@ -9,6 +9,11 @@ import start, { Data } from '@pages/api/api.config'
 import { getPaymentOptions } from '@utils/helpers'
 import Domain from '@common/modules/models/Domain'
 import { quarters } from '@utils/constants'
+import {
+  getCreditDebitPipeline,
+  getRealEstatesPipeline,
+  getDomainsPipeline,
+} from './pipelines'
 
 start()
 
@@ -96,8 +101,11 @@ export default async function handler(
           options.company = filterOptions(options?.company, companyIds)
         }
 
-        options.$expr = {
-          $and: filterPeriodOptions(req.query),
+        const expr = filterPeriodOptions(req.query)
+        if (expr.length > 0) {
+          options.$expr = {
+            $and: expr,
+          }
         }
 
         const payments = await (Payment as any)
@@ -112,82 +120,19 @@ export default async function handler(
 
         const total = await Payment.countDocuments(options)
 
-        const domainsPipeline = [
-          {
-            $group: {
-              _id: '$domain',
-            },
-          },
-          {
-            $lookup: {
-              from: 'domains',
-              localField: '_id',
-              foreignField: '_id',
-              as: 'domainDetails',
-            },
-          },
-          {
-            $unwind: '$domainDetails',
-          },
-          {
-            $match: {
-              $expr: {
-                $cond: [
-                  { $eq: [isGlobalAdmin, true] },
-                  true,
-                  { $in: [user.email, '$domainDetails.adminEmails'] },
-                ],
-              },
-            },
-          },
-          {
-            $project: {
-              'domainDetails.name': 1,
-              'domainDetails._id': 1,
-            },
-          },
-        ]
-
-        const realEstatesPipeline = [
-          {
-            $group: {
-              _id: '$company',
-            },
-          },
-          {
-            $lookup: {
-              from: 'realestates',
-              localField: '_id',
-              foreignField: '_id',
-              as: 'companyDetails',
-            },
-          },
-          {
-            $unwind: '$companyDetails',
-          },
-          {
-            $match: {
-              $expr: {
-                $cond: [
-                  { $eq: [isGlobalAdmin, true] },
-                  true,
-                  { $in: [user.email, '$companyDetails.adminEmails'] },
-                ],
-              },
-            },
-          },
-          {
-            $project: {
-              'companyDetails.companyName': 1,
-              'companyDetails._id': 1,
-            },
-          },
-        ]
-
         // TODO: DomainAdmin see all. For filters. Should see only his
         // TODO: fix
+        const realEstatesPipeline = getRealEstatesPipeline(
+          isGlobalAdmin,
+          user.email
+        )
         const distinctCompanies = await Payment.aggregate(realEstatesPipeline)
+
+        const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
         const distinctDomains = await Payment.aggregate(domainsPipeline)
+
+        const creditDebitPipeline = getCreditDebitPipeline(options)
+        const totalPayments = await Payment.aggregate(creditDebitPipeline)
 
         return res.status(200).json({
           // TODO: update Interface
@@ -204,6 +149,10 @@ export default async function handler(
             value: companyDetails._id,
           })),
           data: payments,
+          totalPayments: totalPayments.reduce((acc, item) => {
+            acc[item._id] = item.totalSum
+            return acc
+          }, {}),
           success: true,
           total,
         })
