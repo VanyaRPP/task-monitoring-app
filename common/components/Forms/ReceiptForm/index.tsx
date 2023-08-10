@@ -5,7 +5,7 @@ import s from './style.module.scss'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useReactToPrint } from 'react-to-print'
 import { renderCurrency } from '@common/components/DashboardPage/blocks/payments'
-import { numberToTextNumber } from '@utils/helpers'
+import { filterInvoiceObject, numberToTextNumber } from '@utils/helpers'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import { dateToDayYearMonthFormat } from '@common/assets/features/formatDate'
 import useService from '@common/modules/hooks/useService'
@@ -85,19 +85,46 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     placingPrice: 'Розміщення',
     waterPrice: 'За водопостачання',
     electricityPrice: 'За електропостачання',
+    garbageCollectorPrice: 'За вивіз ТПВ',
+    inflicionPrice: 'Індекс інфляції',
   }
+
+  const filteredInvoice = filterInvoiceObject(newData)
 
   const tt: DataType[] = paymentData
     ? newData?.invoice.map((item) => {
-        return {
-          id: newData?.invoice.indexOf(item) + 1,
-          Назва: `${fieldNames[item.type]} (${date})`,
-          Кількість: +item.amount,
-          Ціна: +item.price,
-          Сума: +item.sum,
-        }
+      return item.amount
+        ? {
+            id: newData?.invoice.indexOf(item) + 1,
+            Назва: `${fieldNames[item.type] || item.type} (${date})`,
+            Кількість: +item.amount,
+            Ціна: +item.price,
+            Сума: +item.sum,
+          }
+        : {
+            id: newData?.invoice.indexOf(item) + 1,
+            Назва: `${fieldNames[item.type] || item.type} (${date})`,
+            Ціна: +item.price,
+            Сума: +item.sum,
+          }
       })
-    : [
+    : filteredInvoice.map((item) => {
+      return item.amount
+        ? {
+            id: filteredInvoice.indexOf(item) + 1,
+            Назва: `${fieldNames[item.type] || item.type} (${date})`,
+            Кількість: +item.amount,
+            Ціна: +item.price,
+            Сума: +item.sum,
+          }
+        : {
+            id: filteredInvoice.indexOf(item) + 1,
+            Назва: `${fieldNames[item.type] || item.type} (${date})`,
+            Ціна: item.price,
+            Сума: item.sum,
+          }
+    })
+    /*[
         {
           id: 1,
           Назва: `Утримання  (${date})`,
@@ -130,7 +157,19 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           Ціна: Number(newData?.electricityPrice?.price),
           Сума: Number(newData?.electricityPrice?.sum),
         },
-      ]
+        {
+          id: 5,
+          Назва: `За вивіз ТПВ (${date})`,
+          Ціна: Number(newData?.garbageCollectorPrice?.price),
+          Сума: Number(newData?.garbageCollectorPrice?.sum),
+        },
+        {
+          id: 6,
+          Назва: `Індекс інфляції (${date})`,
+          Ціна: Number(newData?.inflicionPrice?.price),
+          Сума: Number(newData?.inflicionPrice?.sum),
+        },
+      ]*/
 
   return (
     <>

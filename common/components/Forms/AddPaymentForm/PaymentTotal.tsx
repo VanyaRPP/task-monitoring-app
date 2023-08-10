@@ -10,26 +10,24 @@ interface Props {
 const PaymentTotal: FC<Props> = ({ form }) => {
   const [total, setTotal] = useState(0)
 
-  const maintenancePrice = Form.useWatch('maintenancePrice', form)
-  const placingPrice = Form.useWatch('placingPrice', form)
-  const electricityPrice = Form.useWatch('electricityPrice', form)
-  const waterPrice = Form.useWatch('waterPrice', form)
+  const formValues = Form.useWatch([], form)
+  const services = formValues ?
+    Object.values(formValues)
+      .filter((item) => typeof item === 'object')
+      .reduce((acc, val: any) => acc + (val.sum || 0), 0)
+    : 0
+
+
 
   useEffect(() => {
-    setTotal(
-      maintenancePrice?.sum +
-        placingPrice?.sum +
-        electricityPrice?.sum +
-        waterPrice?.sum
-    )
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    setTotal(services)
     form.setFieldValue(Operations.Debit, total)
   }, [
-    maintenancePrice,
-    placingPrice,
-    electricityPrice,
-    waterPrice,
     form,
     total,
+    services
   ])
 
   return (

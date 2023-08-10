@@ -217,3 +217,21 @@ export const unpopulate = (data: any[]): any[] => {
     return result
   })
 }
+
+  export function filterInvoiceObject(obj) {
+    const filtered = []
+
+    for (const key in obj) {
+      if (
+        typeof obj[key] === 'object' &&
+        obj[key].hasOwnProperty('sum')
+      ) {
+        filtered.push({
+          type: key,
+          ...obj[key],
+        })
+      }
+    }
+
+    return filtered
+  }
