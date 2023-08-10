@@ -255,7 +255,7 @@ function PriceWrapper({ record, form, edit }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      {<InputNumber disabled={edit} className={s.input} />}
+      <InputNumber disabled={edit} className={s.input} />
     </Form.Item>
   )
 }
