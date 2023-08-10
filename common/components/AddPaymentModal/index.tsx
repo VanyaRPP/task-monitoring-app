@@ -44,8 +44,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const provider = realEstate?.length
     && {
         name: realEstate[0]?.domain?.name,
-        address: realEstate[0]?.domain?.address,
-        bankInformation: realEstate[0]?.domain?.bankInformation,
+        // TODO: use description
       }
 
   const reciever = realEstate?.length
