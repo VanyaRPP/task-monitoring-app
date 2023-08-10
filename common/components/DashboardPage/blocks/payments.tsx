@@ -17,21 +17,22 @@ import { Tooltip } from 'antd'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
 import s from './style.module.scss'
-import { PERIOD_FILTR} from '@utils/constants'
+import { PERIOD_FILTR } from '@utils/constants'
 
 function getDateFilter(value) {
   const [, year, period, number] = value || []
   // TODO: add enums
-  if (period === PERIOD_FILTR.QUARTER) return { 
-  year,
-  quarter: number 
-}
-  if (period === PERIOD_FILTR.MONTH) return { 
- year,
-month: number 
-
-}
-  if (period ===  PERIOD_FILTR.YEAR) return { year }
+  if (period === PERIOD_FILTR.QUARTER)
+    return {
+      year,
+      quarter: number,
+    }
+  if (period === PERIOD_FILTR.MONTH)
+    return {
+      year,
+      month: number,
+    }
+  if (period === PERIOD_FILTR.YEAR) return { year }
 }
 
 const PaymentsBlock = () => {
