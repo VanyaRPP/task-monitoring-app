@@ -22,15 +22,16 @@ import { PERIOD_FILTR } from '@utils/constants'
 function getDateFilter(value) {
   const [, year, period, number] = value || []
   // TODO: add enums
-  if (period === PERIOD_FILTR.QUARTER) return {
-    year,
-    quarter: number
-  }
-  if (period === PERIOD_FILTR.MONTH) return {
-    year,
-    month: number
-
-  }
+  if (period === PERIOD_FILTR.QUARTER)
+    return {
+      year,
+      quarter: number,
+    }
+  if (period === PERIOD_FILTR.MONTH)
+    return {
+      year,
+      month: number,
+    }
   if (period === PERIOD_FILTR.YEAR) return { year }
 }
 
@@ -91,15 +92,15 @@ const PaymentsBlock = () => {
   const paymentsPageColumns =
     router.pathname === AppRoutes.PAYMENT
       ? [
-        ...invoiceTypes.map((type) => ({
-          title: paymentsTitle[type],
-          dataIndex: 'invoice',
-          render: (invoice) => {
-            const item = invoice.find((item) => item.type === type)
-            return item ? item.sum : <span className={s.currency}>-</span>
-          },
-        })),
-      ]
+          ...invoiceTypes.map((type) => ({
+            title: paymentsTitle[type],
+            dataIndex: 'invoice',
+            render: (invoice) => {
+              const item = invoice.find((item) => item.type === type)
+              return item ? item.sum : <span className={s.currency}>-</span>
+            },
+          })),
+        ]
       : []
 
   const columns: any = [
@@ -144,24 +145,24 @@ const PaymentsBlock = () => {
     ...paymentsPageColumns,
     isGlobalAdmin
       ? {
-        title: '',
-        dataIndex: '',
-        width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
-        render: (_, payment: IExtendedPayment) => (
-          <div className={s.popconfirm}>
-            <Popconfirm
-              title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                payment?.date as unknown as string
-              )}?`}
-              onConfirm={() => handleDeletePayment(payment?._id)}
-              cancelText="Відміна"
-              disabled={deleteLoading}
-            >
-              <DeleteOutlined className={s.icon} />
-            </Popconfirm>
-          </div>
-        ),
-      }
+          title: '',
+          dataIndex: '',
+          width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
+          render: (_, payment: IExtendedPayment) => (
+            <div className={s.popconfirm}>
+              <Popconfirm
+                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+                  payment?.date as unknown as string
+                )}?`}
+                onConfirm={() => handleDeletePayment(payment?._id)}
+                cancelText="Відміна"
+                disabled={deleteLoading}
+              >
+                <DeleteOutlined className={s.icon} />
+              </Popconfirm>
+            </div>
+          ),
+        }
       : { width: '0' },
     {
       title: '',
@@ -211,21 +212,37 @@ const PaymentsBlock = () => {
 
   const Summary = () => {
     return (
-      router.pathname === AppRoutes.PAYMENT && payments?.data &&
-      <>
-        <Table.Summary.Row className={s.summ_item}>
-          {columns.map((item) =>
-            <Table.Summary.Cell index={0} key={item.dataIndex} colSpan={item.dataIndex === "" ? 2 : 1}>
-              {item.dataIndex === "debit" ? "Debit" : item.dataIndex === "credit" ? "Credit" : false}
-            </Table.Summary.Cell>
-          )}
-        </Table.Summary.Row>
-        <Table.Summary.Row className={s.saldo}>
-          {columns.map((item) => <Table.Summary.Cell colSpan={item.dataIndex === "debit" ? 2 : 1} index={0} key={item.dataIndex}>
-            {item.dataIndex === "debit" ? "Saldo" : false}
-          </Table.Summary.Cell>)}
-        </Table.Summary.Row>
-      </>
+      router.pathname === AppRoutes.PAYMENT &&
+      payments?.data && (
+        <>
+          <Table.Summary.Row className={s.summ_item}>
+            {columns.map((item) => (
+              <Table.Summary.Cell
+                index={0}
+                key={item.dataIndex}
+                colSpan={item.dataIndex === '' ? 2 : 1}
+              >
+                {item.dataIndex === 'debit'
+                  ? 'Debit'
+                  : item.dataIndex === 'credit'
+                  ? 'Credit'
+                  : false}
+              </Table.Summary.Cell>
+            ))}
+          </Table.Summary.Row>
+          <Table.Summary.Row className={s.saldo}>
+            {columns.map((item) => (
+              <Table.Summary.Cell
+                colSpan={item.dataIndex === 'debit' ? 2 : 1}
+                index={0}
+                key={item.dataIndex}
+              >
+                {item.dataIndex === 'debit' ? 'Saldo' : false}
+              </Table.Summary.Cell>
+            ))}
+          </Table.Summary.Row>
+        </>
+      )
     )
   }
 
@@ -244,7 +261,11 @@ const PaymentsBlock = () => {
             setFilters(filters)
           }}
           scroll={{ y: 800 }}
-          summary={() => <Table.Summary fixed><Summary /></Table.Summary>}
+          summary={() => (
+            <Table.Summary fixed>
+              <Summary />
+            </Table.Summary>
+          )}
           bordered
           size="small"
           loading={
