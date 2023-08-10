@@ -44,13 +44,16 @@ export default async function handler(
             adminEmails: { $in: [user.email] },
           })
 
-          const domainsIds = domains
-            .map((i) => i._id)
-            .filter((id) => !domainId || id.toString() === domainId.toString())
-
-          options.domain = { $in: domainsIds }
-
-          if (streetId) options.street = streetId
+          if (domainId && streetId) {
+            const domainsIds = domains
+              .map((i) => i._id)
+              .filter((id) => id.toString() === domainId.toString())
+            options.domain = { $in: domainsIds }
+            options.street = streetId
+          } else {
+            const domainsIds = domains.map((i) => i._id)
+            options.domain = { $in: domainsIds }
+          }
         }
 
         if (isUser) {
