@@ -223,9 +223,9 @@ const PaymentsBlock = () => {
                 colSpan={item.dataIndex === '' ? 2 : 1}
               >
                 {item.dataIndex === 'debit'
-                  ? 'Debit'
+                  ? payments?.totalPayments?.debit || 0
                   : item.dataIndex === 'credit'
-                  ? 'Credit'
+                  ? payments?.totalPayments?.credit || 0
                   : false}
               </Table.Summary.Cell>
             ))}
@@ -237,7 +237,10 @@ const PaymentsBlock = () => {
                 index={0}
                 key={item.dataIndex}
               >
-                {item.dataIndex === 'debit' ? 'Saldo' : false}
+                {item.dataIndex === 'debit'
+                  ? (payments?.totalPayments?.debit || 0) -
+                    (payments?.totalPayments?.credit || 0)
+                  : false}
               </Table.Summary.Cell>
             ))}
           </Table.Summary.Row>
