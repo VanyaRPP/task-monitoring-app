@@ -53,18 +53,19 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const withGarbageCollector = company?.garbageCollector > 0
-    ? [
-        ...dataSource,
-        {
-          id: dataSource.length + 1,
-          name: 'garbageCollectorPrice',
-          amount: 0,
-          price: 0,
-          sum: 0,
-        },
-      ]
-    : dataSource
+  const withGarbageCollector =
+    company?.garbageCollector > 0
+      ? [
+          ...dataSource,
+          {
+            id: dataSource.length + 1,
+            name: 'garbageCollectorPrice',
+            amount: 0,
+            price: 0,
+            sum: 0,
+          },
+        ]
+      : dataSource
 
   const withAllFields =
     service?.inflicionPrice > 0
@@ -79,19 +80,19 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
         ]
       : withGarbageCollector
 
-    const [customDataSource, setCustomDataSource] = useState(
-      paymentData
-        ? paymentData?.invoice?.map((item) => {
-            return {
-              id: paymentData.invoice.indexOf(item) + 1,
-              name: item.type,
-              ...item,
-            }
-          })
-        : withAllFields
-    )
+  const [customDataSource, setCustomDataSource] = useState(
+    paymentData
+      ? paymentData?.invoice?.map((item) => {
+          return {
+            id: paymentData.invoice.indexOf(item) + 1,
+            name: item.type,
+            ...item,
+          }
+        })
+      : withAllFields
+  )
 
-    const [customFieldName, setCustomFieldName] = useState('')
+  const [customFieldName, setCustomFieldName] = useState('')
 
   const addField = () => {
     setCustomDataSource([
@@ -107,12 +108,12 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
     setCustomFieldName('')
   }
 
-  useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('paymentData', paymentData)
-    // eslint-disable-next-line no-console
-    console.log('customDataSource', customDataSource)
-  }, [paymentData, domainId])
+  // useEffect(() => {
+  //   // eslint-disable-next-line no-console
+  //   console.log('paymentData', paymentData)
+  //   // eslint-disable-next-line no-console
+  //   console.log('customDataSource', customDataSource)
+  // }, [paymentData, domainId])
 
   const columns: ColumnProps<IPaymentTableData>[] = [
     {
@@ -125,24 +126,26 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       dataIndex: 'name',
       width: 'max-content',
       ellipsis: true,
-      render: (name) => (
-        // TODO: use moment from helper (single access point)
-        // getFormattedDate
-        <Tooltip
-          title={`${getName(name, paymentsTitle)}(${moment(
-            service?.date
-          ).format('MMMM')})`}
-        >
-          <span className={s.rowText}>
-            {getName(name, paymentsTitle) || name}{' '}
-            <span className={s.month}>({getFormattedDate(service?.date)})</span>
-            {company?.servicePricePerMeter &&
-              getName(name, paymentsTitle) === 'Утримання' && (
+      render: (name) => {
+        const nameRes = getName(name, paymentsTitle)
+        return (
+          // TODO: use moment from helper (single access point)
+          // getFormattedDate
+          <Tooltip
+            title={`${nameRes}(${moment(service?.date).format('MMMM')})`}
+          >
+            <span className={s.rowText}>
+              {nameRes || name}{' '}
+              <span className={s.month}>
+                ({getFormattedDate(service?.date)})
+              </span>
+              {company?.servicePricePerMeter && nameRes === 'Утримання' && (
                 <span className={s.month}> індивідуальне</span>
               )}
-          </span>
-        </Tooltip>
-      ),
+            </span>
+          </Tooltip>
+        )
+      },
     },
     {
       title: 'К-сть',
@@ -182,14 +185,6 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       title: 'Ціна',
       dataIndex: 'price',
       render: (text, record) => {
-        const fields = {
-          maintenancePrice: PriceMaintainceField,
-          placingPrice: PricePlacingField,
-          electricityPrice: PriceElectricityField,
-          waterPrice: PriceWaterField,
-          garbageCollectorPrice: PriceGarbageCollectorField,
-          inflicionPrice: PriceInflicionField,
-        }
         if (record.name in fields) {
           const Component = fields[record.name]
           return <Component record={record} edit={edit} />
@@ -274,6 +269,15 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       )}
     </>
   )
+}
+
+const fields = {
+  maintenancePrice: PriceMaintainceField,
+  placingPrice: PricePlacingField,
+  electricityPrice: PriceElectricityField,
+  waterPrice: PriceWaterField,
+  garbageCollectorPrice: PriceGarbageCollectorField,
+  inflicionPrice: PriceInflicionField,
 }
 
 function PriceWrapper({ record, form, edit }) {
