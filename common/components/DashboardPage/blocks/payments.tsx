@@ -222,22 +222,23 @@ const PaymentsBlock = () => {
                 key={item.dataIndex}
                 colSpan={item.dataIndex === '' ? 2 : 1}
               >
-                {item.dataIndex === 'debit'
+                {item.dataIndex === Operations.Debit
                   ? payments?.totalPayments?.debit || 0
-                  : item.dataIndex === 'credit'
+                  : ''}
+                {item.dataIndex === Operations.Credit
                   ? payments?.totalPayments?.credit || 0
-                  : false}
+                  : ''}
               </Table.Summary.Cell>
             ))}
           </Table.Summary.Row>
           <Table.Summary.Row className={s.saldo}>
             {columns.map((item) => (
               <Table.Summary.Cell
-                colSpan={item.dataIndex === 'debit' ? 2 : 1}
+                colSpan={item.dataIndex === Operations.Debit ? 2 : 1}
                 index={0}
                 key={item.dataIndex}
               >
-                {item.dataIndex === 'debit'
+                {item.dataIndex === Operations.Debit
                   ? (payments?.totalPayments?.debit || 0) -
                     (payments?.totalPayments?.credit || 0)
                   : false}
@@ -260,7 +261,7 @@ const PaymentsBlock = () => {
           columns={columns}
           dataSource={payments?.data}
           pagination={false}
-          onChange={(pagination, filters) => {
+          onChange={(__, filters) => {
             setFilters(filters)
           }}
           scroll={{ y: 800 }}

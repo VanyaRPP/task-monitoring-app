@@ -42,7 +42,7 @@ export default async function handler(
           .limit(req.query.limit)
           .populate({
             path: 'domain',
-            select: '_id name address bankInformation',
+            select: '_id name description',
           })
           .populate({ path: 'street', select: '_id address city' })
 

@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
-import { Select, Form, FormInstance, Input, InputNumber } from 'antd'
+import { Select, Form, FormInstance, Input, InputNumber, Checkbox } from 'antd'
 import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
@@ -23,27 +23,12 @@ const RealEstateForm: FC<Props> = ({ form }) => {
         <Input placeholder="Опис" maxLength={256} className={s.formInput} />
       </Form.Item>
       <Form.Item
-        name="bankInformation"
-        label="Банківська інформація"
+        name="description"
+        label="Опис"
         rules={validateField('required')}
       >
-        <Input placeholder="Опис" maxLength={256} className={s.formInput} />
+        <Input.TextArea rows={4} placeholder="Опис" maxLength={512} className={s.formInput} />
       </Form.Item>
-      <Form.Item
-        name="agreement"
-        label="Договір"
-        rules={validateField('required')}
-      >
-        <Input placeholder="Опис" maxLength={256} className={s.formInput} />
-      </Form.Item>
-      <Form.Item name="phone" label="Телефон" rules={validateField('phone')}>
-        <Input
-          placeholder="Вкажіть значення"
-          maxLength={256}
-          className={s.formInput}
-        />
-      </Form.Item>
-      {/* TODO: validation */}
       <EmailSelect form={form} />
       <Form.Item
         name="totalArea"
@@ -59,14 +44,23 @@ const RealEstateForm: FC<Props> = ({ form }) => {
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
+      <Form.Item name="garbageCollector" label="Вивіз сміття">
+        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+      </Form.Item>
       <Form.Item
         name="servicePricePerMeter"
         label="Індивідуальне утримання за метр"
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item name="garbageCollector" label="Вивіз сміття">
+      <Form.Item name="rentPart" label="Частка загальної площі">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+      </Form.Item>
+      <Form.Item name="waterPart" label="Частка водопостачання">
+        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+      </Form.Item>
+      <Form.Item valuePropName="checked" name="inflicion" label="Індекс інфляції">
+        <Checkbox />
       </Form.Item>
     </Form>
   )

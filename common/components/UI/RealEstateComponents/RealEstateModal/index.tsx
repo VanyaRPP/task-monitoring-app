@@ -22,14 +22,15 @@ const RealEstateModal: FC<Props> = ({ isModalOpen, closeModal }) => {
       domain: formData.domain,
       street: formData.street,
       companyName: formData.companyName,
-      bankInformation: formData.bankInformation,
-      agreement: formData.agreement,
-      phone: formData.phone,
+      description: formData.description,
       adminEmails: formData.adminEmails,
       pricePerMeter: formData.pricePerMeter,
       servicePricePerMeter: formData.servicePricePerMeter,
       totalArea: formData.totalArea,
       garbageCollector: formData.garbageCollector,
+      rentPart: formData.rentPart,
+      inflicion: formData.inflicion,
+      waterPart: formData.waterPart,
     })
 
     if ('data' in response) {
