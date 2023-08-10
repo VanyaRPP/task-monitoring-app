@@ -48,7 +48,6 @@ export default async function handler(
 
         return res.status(200).json({ success: true, data: realEstates })
       } catch (error) {
-        console.log('aws req error', error)
         return res.status(400).json({ success: false, message: error, error })
       }
 

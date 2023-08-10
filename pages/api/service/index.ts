@@ -79,7 +79,6 @@ export default async function handler(
           data: services,
         })
       } catch (error) {
-        console.log('aws req error', error)
         return res.status(400).json({ success: false, message: error, error })
       }
 
