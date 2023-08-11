@@ -143,6 +143,9 @@ function useInitialValues() {
     water: paymentData?.invoice.find(
       (item) => item?.type === ServiceType.Water
     ),
+    waterPart: paymentData?.invoice.find(
+      (item) => item?.type === ServiceType.WaterPart
+    ),
     garbageCollector: paymentData?.invoice.find(
       (item) => item?.type === ServiceType.GarbageCollector
     ),
@@ -187,6 +190,9 @@ function useInitialValues() {
       lastAmount: invoices.water?.lastAmount,
       amount: invoices.water?.amount,
       price: invoices.water?.price,
+    },
+    [ServiceType.WaterPart]: {
+      price: invoices.waterPart?.price,
     },
     [ServiceType.GarbageCollector]: {
       price: invoices.garbageCollector?.price,
