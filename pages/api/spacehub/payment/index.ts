@@ -15,6 +15,7 @@ import {
   getDomainsPipeline,
 } from './pipelines'
 import Street from '@common/modules/models/Street'
+import Service from '@common/modules/models/Service'
 
 start()
 
@@ -71,6 +72,8 @@ export default async function handler(
       try {
         await (Domain as any).find({});
         await (Street as any).find({});
+        await (Service as any).find({});
+        await (RealEstate as any).find({});
 
         const { isDomainAdmin, isUser, user, isGlobalAdmin } =
         await getCurrentUser(req, res)
