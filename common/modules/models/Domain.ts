@@ -37,5 +37,5 @@ const DomainSchema = new Schema<IDomain>({
   email: { type: String, required: true },
 })
 
-const Domain = mongoose.models.Domain || mongoose.model('Domain', DomainSchema)
+const Domain = mongoose.model('Domain', DomainSchema)
 export default Domain
