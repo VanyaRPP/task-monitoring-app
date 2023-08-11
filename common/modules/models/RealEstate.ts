@@ -30,7 +30,6 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   inflicion: { type: Boolean, required: false, default: false },
 })
 
-const RealEstate =
-  mongoose.models.RealEstate || mongoose.model('RealEstate', RealEstateSchema)
+const RealEstate = mongoose.model('RealEstate', RealEstateSchema)
 
 export default RealEstate
