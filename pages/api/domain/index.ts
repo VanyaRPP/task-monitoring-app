@@ -5,6 +5,7 @@ import RealEstate from '@common/modules/models/RealEstate'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import start, { Data } from '@pages/api/api.config'
 import Domain from '@common/modules/models/Domain'
+import Street from '@common/modules/models/Street'
 
 start()
 
@@ -17,6 +18,9 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
+        await Domain.find({});
+        await Street.find({});
+        
         const options = {}
         let domainsIds
 
@@ -25,8 +29,7 @@ export default async function handler(
         }
 
         if (isUser) {
-          await Domain.find({});
-          
+
           const realEstates = await RealEstate.find({
             adminEmails: { $in: [user.email] },
           }).populate({ path: 'domain', select: 'name' })
