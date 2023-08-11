@@ -1,6 +1,7 @@
 import User from '@common/modules/models/User'
 import { FormInstance } from 'antd'
 import { ObjectId } from 'mongoose'
+import { ObjectId as MongoObjectId } from 'mongodb'
 import { Roles, ServiceType } from './constants'
 import { PaymentOptions } from './types'
 import moment from 'moment'
@@ -182,6 +183,43 @@ export const isAdminCheck = (roles) => {
   )
 }
 
+export function getPlainJsObjectFromMongoose(dataArray) { 
+  return dataArray.map(doc => {
+    const plainObject = {};
+    
+    for (const key in doc._doc) {
+      if (doc._doc.hasOwnProperty(key)) {
+        plainObject[key] = doc._doc[key];
+      }
+    }
+    
+    return plainObject;
+  });
+}
+
+export function composeFunctions(input, functions) {
+  return functions.reduce((result, func) => func(result), input);
+}
+
+export function convertObjectIdsToStrings(array) {
+  return array.map(obj => {
+    const newObj = {};
+  
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const value = obj[key];
+        if (value instanceof MongoObjectId) {
+          newObj[key] = value.toString();
+        } else {
+          newObj[key] = value;
+        }
+      }
+    }
+    
+    return newObj;
+  });
+}
+
 /**
  * Костиль, щоб прибрати `__v` з документу `mongodb` і далі порівнювати
  * отримані дані із тестовими
@@ -200,23 +238,19 @@ export const removeVersion = (data: any[]): any[] =>
  * @param {any[]} data масив документів `mongo_object_response`
  * @returns {any[]} масив документів без `populate`
  */
-export const unpopulate = (data: any[]): any[] => {
-  return data.map((obj) => {
-    const result = {}
-
+export const unpopulate = (arr: any[]): any[] => {
+  return arr.map((obj) => {
+    const newObj = {}
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
-        const value = obj[key]
-
-        if (typeof value === 'object' && value !== null && value['_id']) {
-          result[key] = value._id
+        if (obj[key] && obj[key]._id) {
+          newObj[key] = obj[key]._id.toString()
         } else {
-          result[key] = value
+          newObj[key] = obj[key]
         }
       }
     }
-
-    return result
+    return newObj
   })
 }
 
@@ -230,24 +264,24 @@ export const DateToFormattedMonth = (date?: Date): string => {
   return month[0].toUpperCase() + month.slice(1)
 }
 
-  export function filterInvoiceObject(obj) {
-    const filtered = []
-    const services: string[] = Object.values(ServiceType)
+export function filterInvoiceObject(obj) {
+  const filtered = []
+  const services: string[] = Object.values(ServiceType)
 
-    for (const key in obj) {
-      if (typeof obj[key] === 'object' && obj[key].hasOwnProperty('sum')) {
-        services.includes(key)
-          ? filtered.push({
-              type: key,
-              ...obj[key],
-            })
-          : filtered.push({
-              type: ServiceType.Custom,
-              name: key,
-              ...obj[key],
-            })
-      }
+  for (const key in obj) {
+    if (typeof obj[key] === 'object' && obj[key].hasOwnProperty('sum')) {
+      services.includes(key)
+        ? filtered.push({
+            type: key,
+            ...obj[key],
+          })
+        : filtered.push({
+            type: ServiceType.Custom,
+            name: key,
+            ...obj[key],
+          })
     }
+  }
 
   return filtered
 }
