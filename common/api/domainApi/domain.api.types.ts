@@ -1,12 +1,8 @@
 export interface IDomainModel {
   name: string
-  address: string
   adminEmails: [string]
   streets: string[]
   description: string
-  bankInformation: string
-  phone: string
-  email: string
 }
 
 export interface IExtendedDomain extends IDomainModel {

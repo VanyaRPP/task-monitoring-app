@@ -54,20 +54,6 @@ const WorkerForm: React.FC<PropsType> = ({
       name="form_in_modal"
       disabled={isFormDisabled}
     >
-      <Form.Item
-        name="tel"
-        label="Номер телефону"
-        normalize={allowOnlyNumbers}
-        rules={validateField('phone')}
-      >
-        <Input
-          addonBefore="+380"
-          style={{ width: '100%' }}
-          placeholder="Введіть номер телефону"
-          autoComplete="off"
-          className={s.Input}
-        />
-      </Form.Item>
       {!user?.address?.name ? (
         <Form.Item name="domain" label="Адреса">
           <PlacesAutocomplete

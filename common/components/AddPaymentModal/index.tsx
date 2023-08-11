@@ -54,14 +54,13 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   )
 
   const provider: IProvider = realEstate?.length && {
-    name: realEstate[0]?.domain?.name,
-    address: realEstate[0]?.street,
-    bankInformation: realEstate[0]?.domain?.bankInformation,
+    description: realEstate[0]?.domain?.description,
   }
 
   const reciever: IReciever = realEstate?.length && {
     companyName: realEstate[0]?.companyName,
     adminEmails: realEstate[0]?.adminEmails,
+    description: realEstate[0]?.description,
   }
 
   useEffect(() => {

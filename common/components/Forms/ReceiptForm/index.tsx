@@ -93,37 +93,37 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
 
   const tt: DataType[] = paymentData
     ? newData?.invoice.map((item) => {
-      return item.amount
-        ? {
-            id: newData?.invoice.indexOf(item) + 1,
-            Назва: `${fieldNames[item.type] || item.name} (${date})`,
-            Кількість: +item.amount,
-            Ціна: +item.price,
-            Сума: +item.sum,
-          }
-        : {
-            id: newData?.invoice.indexOf(item) + 1,
-            Назва: `${fieldNames[item.type] || item.name} (${date})`,
-            Ціна: +item.price,
-            Сума: +item.sum,
-          }
+        return item.amount
+          ? {
+              id: newData?.invoice.indexOf(item) + 1,
+              Назва: `${fieldNames[item.type] || item.name} (${date})`,
+              Кількість: +item.amount,
+              Ціна: +item.price,
+              Сума: +item.sum,
+            }
+          : {
+              id: newData?.invoice.indexOf(item) + 1,
+              Назва: `${fieldNames[item.type] || item.name} (${date})`,
+              Ціна: +item.price,
+              Сума: +item.sum,
+            }
       })
     : filteredInvoice.map((item) => {
-      return item.amount
-        ? {
-            id: filteredInvoice.indexOf(item) + 1,
-            Назва: `${fieldNames[item.type] || item.name} (${date})`,
-            Кількість: +item.amount,
-            Ціна: +item.price,
-            Сума: +item.sum,
-          }
-        : {
-            id: filteredInvoice.indexOf(item) + 1,
-            Назва: `${fieldNames[item.type] || item.name} (${date})`,
-            Ціна: item.price,
-            Сума: item.sum,
-          }
-    })
+        return item.amount
+          ? {
+              id: filteredInvoice.indexOf(item) + 1,
+              Назва: `${fieldNames[item.type] || item.name} (${date})`,
+              Кількість: +item.amount,
+              Ціна: +item.price,
+              Сума: +item.sum,
+            }
+          : {
+              id: filteredInvoice.indexOf(item) + 1,
+              Назва: `${fieldNames[item.type] || item.name} (${date})`,
+              Ціна: item.price,
+              Сума: item.sum,
+            }
+      })
 
   return (
     <>
@@ -141,9 +141,8 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
         <>
           <div className={s.providerInfo}>
             <div className={s.label}>Постачальник</div>
-            {/* TODO: ЗАМІНИТИ НА ОДНЕ ПОЛЕ description */}
             <div>
-              {provider?.name} <br />
+              {provider?.description} <br />
               <br />
             </div>
           </div>
@@ -151,13 +150,13 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.receiverInfo}>
             <div className={s.label}>Одержувач</div>
             <div>
+              {reciever?.description} <br />
               {reciever?.companyName} <br />
               {reciever?.adminEmails?.map((email) => (
                 <div key={email}>
                   {email} <br />
                 </div>
               ))}
-              {reciever?.phone}
             </div>
           </div>
         </>

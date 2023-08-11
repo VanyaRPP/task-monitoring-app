@@ -37,22 +37,10 @@ const MyDomainsCard: React.FC = () => {
               className={s.DomainMyCardInfo}
             >
               <p>
-                <strong>Адреса:</strong> {item.address}
-              </p>
-              <p>
                 <strong>Адміністратори:</strong> {item.adminEmails.join(', ')}
               </p>
               <p>
                 <strong>Опис:</strong> {item.description}
-              </p>
-              <p>
-                <strong>Отримувач:</strong> {item.bankInformation}
-              </p>
-              <p>
-                <strong>Телефон:</strong> {item.phone}
-              </p>
-              <p>
-                <strong>Пошта:</strong> {item.email}
               </p>
               <p>
                 <strong>Компанії:</strong>
