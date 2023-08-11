@@ -154,10 +154,10 @@ function useInitialValues() {
     ),
   }
 
-  const customFields = {}
-  invoices.custom?.forEach(item => {
-    customFields[item.name] = { price: item.price };
-  });
+  const customFields = invoices.custom?.reduce((acc, item) => {
+    acc[item.name] = { price: item.price }
+    return acc
+  }, {})
 
   const initialValues = {
     domain: paymentData?.domain?.name,
