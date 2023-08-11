@@ -1,7 +1,6 @@
 import User from '@common/modules/models/User'
 import { FormInstance } from 'antd'
 import { ObjectId } from 'mongoose'
-import { ObjectId as MongoObjectId } from 'mongodb'
 import { Roles, ServiceType } from './constants'
 import { PaymentOptions } from './types'
 import moment from 'moment'
@@ -199,25 +198,6 @@ export function getPlainJsObjectFromMongoose(dataArray) {
 
 export function composeFunctions(input, functions) {
   return functions.reduce((result, func) => func(result), input);
-}
-
-export function convertObjectIdsToStrings(array) {
-  return array.map(obj => {
-    const newObj = {};
-  
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        const value = obj[key];
-        if (value instanceof MongoObjectId) {
-          newObj[key] = value.toString();
-        } else {
-          newObj[key] = value;
-        }
-      }
-    }
-    
-    return newObj;
-  });
 }
 
 /**

@@ -6,7 +6,6 @@ import { mockLoginAs } from '@utils/mockLoginAs'
 import { domains, payments, realEstates, users } from '@utils/testData'
 import {
   getPlainJsObjectFromMongoose,
-  convertObjectIdsToStrings,
   composeFunctions,
   removeVersion,
   unpopulate,
@@ -46,7 +45,7 @@ describe('Payments API - GET', () => {
       removeVersion,
     ])
 
-    expect(received).toEqual(convertObjectIdsToStrings(payments))
+    expect(received).toEqual(payments)
   })
 
   it('load payments as GlobalAdmin with limit - success', async () => {
@@ -77,7 +76,7 @@ describe('Payments API - GET', () => {
       removeVersion,
     ])
 
-    expect(received).toEqual(convertObjectIdsToStrings(payments.slice(0, limit)))
+    expect(received).toEqual(payments.slice(0, limit))
   })
 
   it('load payments as DomainAdmin - success', async () => {
@@ -114,7 +113,7 @@ describe('Payments API - GET', () => {
           .adminEmails.includes(users.domainAdmin.email)
       )
 
-    expect(received).toEqual(convertObjectIdsToStrings(expected))
+    expect(received).toEqual(expected)
   })
 
   it('load payments as User - success', async () => {
@@ -151,7 +150,7 @@ describe('Payments API - GET', () => {
           .adminEmails.includes(users.user.email)
       )
 
-    expect(received).toEqual(convertObjectIdsToStrings(expected))
+    expect(received).toEqual(expected)
   })
 
   // it('load payments as GlobalAdmin by domainId - success', async () => {
