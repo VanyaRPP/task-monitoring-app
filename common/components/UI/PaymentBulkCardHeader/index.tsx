@@ -1,16 +1,18 @@
-import { SelectOutlined } from '@ant-design/icons'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
+
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
+// import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+
+import { SelectOutlined } from '@ant-design/icons'
+import { AutoDisableSelect } from '@common/components/UI/AutoDisableSelect'
 import { AppRoutes, Roles } from '@utils/constants'
-import { Button, Select } from 'antd'
-import { DefaultOptionType } from 'antd/lib/select'
-import moment from 'moment'
-import 'moment/locale/uk'
-import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { DateToFormattedMonth } from '@utils/helpers'
+import { Button } from 'antd'
+
 import s from './style.module.scss'
 
 const PaymentBulkCardHeader: React.FC = () => {
@@ -50,12 +52,12 @@ const PaymentBulkCardHeader: React.FC = () => {
     (domain) => domain._id === selectedDomain
   )?.streets
 
-  const { data: payments } = useGetAllPaymentsQuery({
-    companyIds: userCompanies?.map((company) => company._id),
-    domainIds: userDomains?.map((domain) => domain._id),
-    month: new Date(selectedDate).getMonth(),
-    limit: 10000,
-  })
+  // const { data: payments } = useGetAllPaymentsQuery({
+  //   companyIds: userCompanies?.map((company) => company._id),
+  //   domainIds: userDomains?.map((domain) => domain._id),
+  //   month: new Date(selectedDate).getMonth(),
+  //   limit: 10000,
+  // })
 
   const domainOptions = userDomains?.map((domain) => ({
     value: domain._id,
@@ -104,68 +106,41 @@ const PaymentBulkCardHeader: React.FC = () => {
         <SelectOutlined className={s.Icon} />
       </Button>
 
-      <ReusableSelect
-        placeholder="Домен"
-        options={domainOptions}
-        value={
-          domainOptions?.find((option) => option.value === selectedDomain)
-            ?.label
-        }
-        onSelect={(value) => setSelectedDomain(value)}
-      />
-      <ReusableSelect
-        placeholder="Вулиця"
-        options={streetOptions}
-        value={
-          streetOptions?.find((option) => option.value === selectedStreet)
-            ?.label
-        }
-        onSelect={(value) => setSelectedStreet(value)}
-      />
-      <ReusableSelect
-        placeholder="Послуги за місяць"
-        options={monthOptions}
-        value={monthOptions?.find((option) => option.value === selectedDate)}
-        onSelect={(value) => setSelectedDate(value)}
-      />
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <AutoDisableSelect
+          className={s.select}
+          placeholder="Домен"
+          options={domainOptions}
+          value={
+            domainOptions?.find((option) => option.value === selectedDomain)
+              ?.label
+          }
+          onSelect={(value) => setSelectedDomain(value)}
+        />
+        <AutoDisableSelect
+          className={s.select}
+          placeholder="Вулиця"
+          options={streetOptions}
+          value={
+            streetOptions?.find((option) => option.value === selectedStreet)
+              ?.label
+          }
+          onSelect={(value) => setSelectedStreet(value)}
+        />
+        <AutoDisableSelect
+          className={s.select}
+          placeholder="Послуги за місяць"
+          options={monthOptions}
+          value={monthOptions?.find((option) => option.value === selectedDate)}
+          onSelect={(value) => setSelectedDate(value)}
+        />
+      </div>
 
       <Button className={s.myPayments} type="link" onClick={() => {}}>
         Зберегти
       </Button>
     </div>
   )
-}
-
-// TODO: to separated UI file
-export interface Props {
-  placeholder?: string
-  options?: DefaultOptionType[]
-  value?: any
-  onSelect?: (value) => void
-}
-
-export const ReusableSelect: React.FC<Props> = (props) => {
-  return (
-    <Select
-      className={s.select}
-      placeholder={props.placeholder}
-      disabled={props.options?.length <= 1}
-      options={props.options}
-      value={props.value}
-      onSelect={props.onSelect}
-    />
-  )
-}
-
-// TODO: to helpers
-/**
- * Переводить `Date` в `string` місяця на українській і з великої літери
- * @param {Date} date дата
- * @returns форматований місяць
- */
-export const DateToFormattedMonth = (date?: Date): string => {
-  const month = moment(date).locale('uk').format('MMMM')
-  return month[0].toUpperCase() + month.slice(1)
 }
 
 export default PaymentBulkCardHeader

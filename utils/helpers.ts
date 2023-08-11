@@ -3,6 +3,8 @@ import { FormInstance } from 'antd'
 import { ObjectId } from 'mongoose'
 import { Roles } from './constants'
 import { PaymentOptions } from './types'
+import moment from 'moment'
+import 'moment/locale/uk'
 
 export const firstTextToUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
@@ -191,3 +193,13 @@ export const removeVersion = (data: any[]): any[] =>
     const { __v, ...rest } = obj
     return rest
   })
+
+/**
+ * Переводить `Date` в `string` місяця на українській і з великої літери
+ * @param {Date} date дата
+ * @returns форматований місяць
+ */
+export const DateToFormattedMonth = (date?: Date): string => {
+  const month = moment(date).locale('uk').format('MMMM')
+  return month[0].toUpperCase() + month.slice(1)
+}
