@@ -3,6 +3,8 @@ import { FormInstance } from 'antd'
 import { ObjectId } from 'mongoose'
 import { Roles } from './constants'
 import { PaymentOptions } from './types'
+import moment from 'moment'
+import 'moment/locale/uk'
 
 export const firstTextToUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
@@ -218,20 +220,27 @@ export const unpopulate = (data: any[]): any[] => {
   })
 }
 
-  export function filterInvoiceObject(obj) {
-    const filtered = []
+/**
+ * Переводить `Date` в `string` місяця на українській і з великої літери
+ * @param {Date} date дата
+ * @returns форматований місяць
+ */
+export const DateToFormattedMonth = (date?: Date): string => {
+  const month = moment(date).locale('uk').format('MMMM')
+  return month[0].toUpperCase() + month.slice(1)
+}
 
-    for (const key in obj) {
-      if (
-        typeof obj[key] === 'object' &&
-        obj[key].hasOwnProperty('sum')
-      ) {
-        filtered.push({
-          type: key,
-          ...obj[key],
-        })
-      }
+export function filterInvoiceObject(obj) {
+  const filtered = []
+
+  for (const key in obj) {
+    if (typeof obj[key] === 'object' && obj[key].hasOwnProperty('sum')) {
+      filtered.push({
+        type: key,
+        ...obj[key],
+      })
     }
-
-    return filtered
   }
+
+  return filtered
+}

@@ -21,7 +21,6 @@ export interface IProvider {
 export interface IReciever {
   companyName: string
   adminEmails: string[]
-  phone: string
 }
 
 export interface IPayment {

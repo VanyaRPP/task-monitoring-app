@@ -2,13 +2,23 @@ import {
   useAddPaymentMutation,
   useGetPaymentsCountQuery,
 } from '@common/api/paymentApi/payment.api'
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import {
+  IExtendedPayment,
+  IProvider,
+  IReciever,
+} from '@common/api/paymentApi/payment.api.types'
 import { Form, message, Modal, Tabs, TabsProps } from 'antd'
-import React, { FC, createContext, useContext, useEffect, useState } from 'react'
+import React, {
+  FC,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
-import { Operations, ServiceType } from '@utils/constants'
+import { Operations } from '@utils/constants'
 import { FormInstance } from 'antd/es/form/Form'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { filterInvoiceObject } from '@utils/helpers'
@@ -31,7 +41,9 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const { data: count = 0 } = useGetPaymentsCountQuery(undefined, { skip: edit })
+  const { data: count = 0 } = useGetPaymentsCountQuery(undefined, {
+    skip: edit,
+  })
   const { data: realEstate } = useGetAllRealEstateQuery(
     { domainId: currPayment?.domain as string, streetId: currPayment?.street },
     { skip: !currPayment?.street }
@@ -41,18 +53,16 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     getActiveTab(paymentData, edit)
   )
 
-  const provider = realEstate?.length
-    && {
-        name: realEstate[0]?.domain?.name,
-        // TODO: use description
-      }
+  const provider: IProvider = realEstate?.length && {
+    name: realEstate[0]?.domain?.name,
+    address: realEstate[0]?.street,
+    bankInformation: realEstate[0]?.domain?.bankInformation,
+  }
 
-  const reciever = realEstate?.length
-    && {
-        companyName: realEstate[0]?.companyName,
-        adminEmails: realEstate[0]?.adminEmails,
-        phone: realEstate[0]?.phone,
-      }
+  const reciever: IReciever = realEstate?.length && {
+    companyName: realEstate[0]?.companyName,
+    adminEmails: realEstate[0]?.adminEmails,
+  }
 
   useEffect(() => {
     if (currPayment?.street) {
@@ -63,7 +73,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
         invoiceNumber: count + 1,
       })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currPayment?.street])
 
   const handleSubmit = async () => {

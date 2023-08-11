@@ -1,4 +1,4 @@
-import { IDomain } from '@common/modules/models/Domain';
+import { IDomain } from '@common/modules/models/Domain'
 
 export type IRealestate = {
   domain: IDomain
