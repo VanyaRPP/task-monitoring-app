@@ -153,7 +153,6 @@ function useInitialValues() {
       (item) => item?.type === ServiceType.Custom
     ),
   }
-
   const customFields = invoices.custom?.reduce((acc, item) => {
     acc[item.name] = { price: item.price }
     return acc

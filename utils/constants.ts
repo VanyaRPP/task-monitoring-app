@@ -103,7 +103,7 @@ export enum ServiceType {
   GarbageCollector = 'garbageCollectorPrice',
   Inflicion = 'inflicionPrice',
   Custom = 'custom',
-  WaterPart = 'waterPart'
+  WaterPart = 'waterPart',
 }
 
 export const quarters = {
