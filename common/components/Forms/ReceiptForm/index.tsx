@@ -96,14 +96,14 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
       return item.amount
         ? {
             id: newData?.invoice.indexOf(item) + 1,
-            Назва: `${fieldNames[item.type] || item.type} (${date})`,
+            Назва: `${fieldNames[item.type] || item.name} (${date})`,
             Кількість: +item.amount,
             Ціна: +item.price,
             Сума: +item.sum,
           }
         : {
             id: newData?.invoice.indexOf(item) + 1,
-            Назва: `${fieldNames[item.type] || item.type} (${date})`,
+            Назва: `${fieldNames[item.type] || item.name} (${date})`,
             Ціна: +item.price,
             Сума: +item.sum,
           }
@@ -112,64 +112,18 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
       return item.amount
         ? {
             id: filteredInvoice.indexOf(item) + 1,
-            Назва: `${fieldNames[item.type] || item.type} (${date})`,
+            Назва: `${fieldNames[item.type] || item.name} (${date})`,
             Кількість: +item.amount,
             Ціна: +item.price,
             Сума: +item.sum,
           }
         : {
             id: filteredInvoice.indexOf(item) + 1,
-            Назва: `${fieldNames[item.type] || item.type} (${date})`,
+            Назва: `${fieldNames[item.type] || item.name} (${date})`,
             Ціна: item.price,
             Сума: item.sum,
           }
     })
-    /*[
-        {
-          id: 1,
-          Назва: `Утримання  (${date})`,
-          Кількість: Number(newData?.maintenancePrice?.amount),
-          Ціна: Number(newData?.maintenancePrice?.price),
-          Сума: Number(newData?.maintenancePrice?.sum),
-        },
-        {
-          id: 2,
-          Назва: `Розміщення  (${date})`,
-          Кількість: Number(newData?.placingPrice?.amount),
-          Ціна: Number(newData?.placingPrice?.price),
-          Сума: Number(newData?.placingPrice?.sum),
-        },
-        {
-          id: 3,
-          Назва: `За водопостачання (${date})`,
-          Кількість:
-            Number(newData?.waterPrice?.amount) -
-            Number(newData?.waterPrice?.lastAmount),
-          Ціна: Number(newData?.waterPrice?.price),
-          Сума: Number(newData?.waterPrice?.sum),
-        },
-        {
-          id: 4,
-          Назва: `За електропостачання (${date})`,
-          Кількість:
-            Number(newData?.electricityPrice?.amount) -
-            Number(newData?.electricityPrice?.lastAmount),
-          Ціна: Number(newData?.electricityPrice?.price),
-          Сума: Number(newData?.electricityPrice?.sum),
-        },
-        {
-          id: 5,
-          Назва: `За вивіз ТПВ (${date})`,
-          Ціна: Number(newData?.garbageCollectorPrice?.price),
-          Сума: Number(newData?.garbageCollectorPrice?.sum),
-        },
-        {
-          id: 6,
-          Назва: `Індекс інфляції (${date})`,
-          Ціна: Number(newData?.inflicionPrice?.price),
-          Сума: Number(newData?.inflicionPrice?.sum),
-        },
-      ]*/
 
   return (
     <>

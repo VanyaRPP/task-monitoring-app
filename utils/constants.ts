@@ -100,7 +100,8 @@ export enum ServiceType {
   Placing = 'placingPrice',
   Maintenance = 'maintenancePrice',
   GarbageCollector = 'garbageCollectorPrice',
-  Inflicion = 'inflicionPrice'
+  Inflicion = 'inflicionPrice',
+  Custom = 'custom'
 }
 
 export const quarters = {

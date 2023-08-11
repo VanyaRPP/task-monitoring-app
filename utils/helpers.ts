@@ -1,7 +1,7 @@
 import User from '@common/modules/models/User'
 import { FormInstance } from 'antd'
 import { ObjectId } from 'mongoose'
-import { Roles } from './constants'
+import { Roles, ServiceType } from './constants'
 import { PaymentOptions } from './types'
 import moment from 'moment'
 import 'moment/locale/uk'
@@ -230,17 +230,24 @@ export const DateToFormattedMonth = (date?: Date): string => {
   return month[0].toUpperCase() + month.slice(1)
 }
 
-export function filterInvoiceObject(obj) {
-  const filtered = []
+  export function filterInvoiceObject(obj) {
+    const filtered = []
+    const services: string[] = Object.values(ServiceType)
 
-  for (const key in obj) {
-    if (typeof obj[key] === 'object' && obj[key].hasOwnProperty('sum')) {
-      filtered.push({
-        type: key,
-        ...obj[key],
-      })
+    for (const key in obj) {
+      if (typeof obj[key] === 'object' && obj[key].hasOwnProperty('sum')) {
+        services.includes(key)
+          ? filtered.push({
+              type: key,
+              ...obj[key],
+            })
+          : filtered.push({
+              type: ServiceType.Custom,
+              name: key,
+              ...obj[key],
+            })
+      }
     }
-  }
 
   return filtered
 }

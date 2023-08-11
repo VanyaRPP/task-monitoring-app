@@ -6,6 +6,7 @@ import { IRealestate } from '../realestateApi/realestate.api.types'
 
 export interface IPaymentField {
   type: string
+  name?: string
   lastAmount?: number
   amount?: number
   price: number
