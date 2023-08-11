@@ -183,16 +183,42 @@ export const isAdminCheck = (roles) => {
 }
 
 /**
- * костиль, щоб прибрати `__v` з документу `mongodb` і далі порівнювати
+ * Костиль, щоб прибрати `__v` з документу `mongodb` і далі порівнювати
  * отримані дані із тестовими
- * @param data масив документів `mongo_object_response._doc`
- * @returns масив документів без поля `__v`
+ * @param {any[]} data масив документів `mongo_object_response._doc`
+ * @returns {any[]} масив документів без поля `__v`
  */
 export const removeVersion = (data: any[]): any[] =>
   data.map((obj) => {
     const { __v, ...rest } = obj
     return rest
   })
+
+/**
+ * Ще один костиль для тестів, щоб зробити `reverse populate` документу
+ * `mongodb` для подальшого порівняння із тестовими даними
+ * @param {any[]} data масив документів `mongo_object_response`
+ * @returns {any[]} масив документів без `populate`
+ */
+export const unpopulate = (data: any[]): any[] => {
+  return data.map((obj) => {
+    const result = {}
+
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const value = obj[key]
+
+        if (typeof value === 'object' && value !== null && value['_id']) {
+          result[key] = value._id
+        } else {
+          result[key] = value
+        }
+      }
+    }
+
+    return result
+  })
+}
 
 /**
  * Переводить `Date` в `string` місяця на українській і з великої літери
@@ -202,4 +228,19 @@ export const removeVersion = (data: any[]): any[] =>
 export const DateToFormattedMonth = (date?: Date): string => {
   const month = moment(date).locale('uk').format('MMMM')
   return month[0].toUpperCase() + month.slice(1)
+}
+
+export function filterInvoiceObject(obj) {
+  const filtered = []
+
+  for (const key in obj) {
+    if (typeof obj[key] === 'object' && obj[key].hasOwnProperty('sum')) {
+      filtered.push({
+        type: key,
+        ...obj[key],
+      })
+    }
+  }
+
+  return filtered
 }

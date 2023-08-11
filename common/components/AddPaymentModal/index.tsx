@@ -11,6 +11,7 @@ import s from './style.module.scss'
 import { Operations, ServiceType } from '@utils/constants'
 import { FormInstance } from 'antd/es/form/Form'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { filterInvoiceObject } from '@utils/helpers'
 
 interface Props {
   closeModal: VoidFunction
@@ -43,8 +44,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const provider = realEstate?.length
     && {
         name: realEstate[0]?.domain?.name,
-        address: realEstate[0]?.domain?.address,
-        bankInformation: realEstate[0]?.domain?.bankInformation,
+        // TODO: use description
       }
 
   const reciever = realEstate?.length
@@ -68,6 +68,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
+    const filteredInvoice = filterInvoiceObject(formData)
 
     const response = await addPayment({
       invoiceNumber: count + 1,
@@ -78,44 +79,10 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       company: formData.company,
       monthService: formData.monthService,
       description: formData.description ? formData.description : '',
-      generalSum: formData.credit
-        ? formData.credit
-        : formData.maintenancePrice.sum +
-          formData.placingPrice.sum +
-          formData.electricityPrice.sum +
-        formData.waterPrice.sum,
+      generalSum: filteredInvoice?.reduce((acc, val) => acc + val.sum, 0) || 0,
       provider,
       reciever,
-      invoice: formData.debit
-        ? [
-            {
-              type: ServiceType.Maintenance,
-              amount: formData.maintenancePrice.amount,
-              price: formData.maintenancePrice.price,
-              sum: formData.maintenancePrice.sum,
-            },
-            {
-              type: ServiceType.Placing,
-              amount: formData.placingPrice.amount,
-              price: formData.placingPrice.price,
-              sum: formData.placingPrice.sum,
-            },
-            {
-              type: ServiceType.Electricity,
-              lastAmount: formData.electricityPrice.lastAmount,
-              amount: formData.electricityPrice.amount,
-              price: formData.electricityPrice.price,
-              sum: formData.electricityPrice.sum,
-            },
-            {
-              type: ServiceType.Water,
-              lastAmount: formData.waterPrice.lastAmount,
-              amount: formData.waterPrice.amount,
-              price: formData.waterPrice.price,
-              sum: formData.waterPrice.sum,
-            },
-          ]
-        : [],
+      invoice: formData.debit ? filteredInvoice : [],
     })
 
     if ('data' in response) {

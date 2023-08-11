@@ -7,7 +7,7 @@ import { IRealestate } from '../realestateApi/realestate.api.types'
 export interface IPaymentField {
   type: string
   lastAmount?: number
-  amount: number
+  amount?: number
   price: number
   sum: number
 }
@@ -56,6 +56,7 @@ interface IFilter {
 }
 
 export interface IGetPaymentResponse {
+  totalPayments: { credit?: number; debit?: number }
   currentCompaniesCount: number
   currentDomainsCount: number
   domainsFilter: IFilter[]

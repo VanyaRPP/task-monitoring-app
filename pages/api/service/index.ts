@@ -43,16 +43,29 @@ export default async function handler(
           const domains = await Domain.find({
             adminEmails: { $in: [user.email] },
           })
-          const domainsIds = domains.map((i) => i._id)
-          options.domain = { $in: domainsIds }
+
+          if (domainId && streetId) {
+            const domainsIds = domains
+              .map((i) => i._id)
+              .filter((id) => id.toString() === domainId.toString())
+            options.domain = { $in: domainsIds }
+            options.street = streetId
+          } else {
+            const domainsIds = domains.map((i) => i._id)
+            options.domain = { $in: domainsIds }
+          }
         }
 
         if (isUser) {
-          const realEstates = await RealEstate.find({
-            adminEmails: { $in: [user.email] },
-          }).populate({ path: 'domain', select: '_id' })
-          const domainsIds = realEstates.map((i) => i.domain._id)
-          options.domain = { $in: domainsIds }
+          if (domainId || streetId) {
+            options.domain = []
+          } else {
+            const realEstates = await RealEstate.find({
+              adminEmails: { $in: [user.email] },
+            }).populate({ path: 'domain', select: '_id' })
+            const domainsIds = realEstates.map((i) => i.domain._id)
+            options.domain = { $in: domainsIds }
+          }
         }
 
         const services = await Service.find(options)

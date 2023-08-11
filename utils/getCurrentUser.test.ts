@@ -1,23 +1,19 @@
-import { setupTestEnvironment } from '@utils/setupTestEnvironment'
-import User from '@common/modules/models/User'
-import { getServerSession } from 'next-auth'
-import { testUsersData } from '@utils/testData'
+import { expect } from '@jest/globals'
 import { getCurrentUser } from '@utils/getCurrentUser'
+
+import { mockLoginAs } from '@utils/mockLoginAs'
+import { setupTestEnvironment } from '@utils/setupTestEnvironment'
+import { users } from '@utils/testData'
 
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/api.config', () => jest.fn())
 
-const { expect } = require('@jest/globals')
-
 setupTestEnvironment()
 
 describe('getCurrentUser', () => {
   it('Should Find and return User ', async () => {
-    await User.insertMany(testUsersData)
-    ;(getServerSession as any).mockResolvedValueOnce({
-      user: { email: 'user@example.com' },
-    })
+    await mockLoginAs(users.user)
 
     const { isDomainAdmin, isGlobalAdmin, isUser, user } = await getCurrentUser(
       {},
@@ -31,10 +27,7 @@ describe('getCurrentUser', () => {
   })
 
   it('Should Find and return GobalAdmin', async () => {
-    await User.insertMany(testUsersData)
-    ;(getServerSession as any).mockResolvedValueOnce({
-      user: { email: 'globalAdmin@example.com' },
-    })
+    await mockLoginAs(users.globalAdmin)
 
     const { isDomainAdmin, isGlobalAdmin, isUser, user } = await getCurrentUser(
       {},
@@ -48,10 +41,7 @@ describe('getCurrentUser', () => {
   })
 
   it('Should Find and return DomainAdmin', async () => {
-    await User.insertMany(testUsersData)
-    ;(getServerSession as any).mockResolvedValueOnce({
-      user: { email: 'domainAdmin@example.com' },
-    })
+    await mockLoginAs(users.domainAdmin)
 
     const { isDomainAdmin, isGlobalAdmin, isUser, user } = await getCurrentUser(
       {},
@@ -65,10 +55,8 @@ describe('getCurrentUser', () => {
   })
 
   it('Should throw Error, if user not exists', async () => {
-    await User.insertMany(testUsersData)
-    ;(getServerSession as any).mockResolvedValueOnce({
-      user: { email: 'emailNotExists@example.com' },
-    })
+    await mockLoginAs({ email: 'not_exist@example.com', roles: [] })
+
     try {
       await getCurrentUser({}, {})
     } catch (error) {
