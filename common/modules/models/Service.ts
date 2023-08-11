@@ -23,6 +23,7 @@ export const ServiceSchema = new Schema<IServiceModel>({
   description: { type: String, required: true },
 })
 
-const Service = mongoose.model('Service', ServiceSchema)
+const Service =
+  mongoose.models.Service || mongoose.model('Service', ServiceSchema)
 
 export default Service
