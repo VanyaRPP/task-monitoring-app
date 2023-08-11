@@ -72,16 +72,18 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       dataIndex: 'name',
       width: 'max-content',
       ellipsis: true,
-      render: (name) => {
+      render: (name, record) => {
         const nameRes = getName(name, paymentsTitle)
         return (
           // TODO: use moment from helper (single access point)
           // getFormattedDate
           <Tooltip
-            title={`${nameRes}(${moment(service?.date).format('MMMM')})`}
+            title={`${nameRes || record.name}(${moment(service?.date).format(
+              'MMMM'
+            )})`}
           >
             <span className={s.rowText}>
-              {nameRes || name}{' '}
+              {nameRes || record.name}{' '}
               <span className={s.month}>
                 ({getFormattedDate(service?.date)})
               </span>
@@ -202,6 +204,7 @@ function AddCustomField({ addDataSource }) {
 
   const addField = () => {
     addDataSource({
+      type: ServiceType.Custom,
       name: customFieldName,
       amount: 1,
       id: 44,

@@ -1,7 +1,7 @@
 import User from '@common/modules/models/User'
 import { FormInstance } from 'antd'
 import { ObjectId } from 'mongoose'
-import { Roles } from './constants'
+import { Roles, ServiceType } from './constants'
 import { PaymentOptions } from './types'
 
 export const firstTextToUpperCase = (text: string) =>
@@ -220,16 +220,23 @@ export const unpopulate = (data: any[]): any[] => {
 
   export function filterInvoiceObject(obj) {
     const filtered = []
+    const services: string[] = Object.values(ServiceType)
 
     for (const key in obj) {
       if (
         typeof obj[key] === 'object' &&
         obj[key].hasOwnProperty('sum')
       ) {
-        filtered.push({
-          type: key,
-          ...obj[key],
-        })
+        services.includes(key)
+          ? filtered.push({
+              type: key,
+              ...obj[key],
+            })
+          : filtered.push({
+            type: ServiceType.Custom,
+            name: key,
+              ...obj[key],
+            })
       }
     }
 

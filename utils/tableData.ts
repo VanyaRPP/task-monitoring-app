@@ -1,6 +1,7 @@
 export interface IPaymentTableData {
   id: number
   name: string
+  type?: string
   lastAmount?: number
   amount: number
   price: number

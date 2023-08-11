@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { IPaymentTableData, dataSource } from '@utils/tableData'
 import useCompany from '@common/modules/hooks/useCompany'
 // import useService from '@common/modules/hooks/useService'
-import { ServiceType } from '@utils/constants'
+import { ServiceType, paymentsTitle } from '@utils/constants'
 
 export function useCustomDataSource({
   paymentData,
@@ -29,7 +29,7 @@ export function useCustomDataSource({
 
   useEffect(() => {
     setDataSource(
-      refreshIndexes(paymentData?.invoice?.map((i) => ({ ...i, name: i.type })))
+      refreshIndexes(paymentData?.invoice?.map((i) => ({ ...i, name: paymentsTitle.hasOwnProperty(i.type) ? i.type : i.name })))
     )
   }, [paymentData?.invoice])
 

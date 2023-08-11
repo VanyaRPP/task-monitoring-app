@@ -149,7 +149,15 @@ function useInitialValues() {
     inflicion: paymentData?.invoice.find(
       (item) => item?.type === ServiceType.Inflicion
     ),
+    custom: paymentData?.invoice.filter(
+      (item) => item?.type === ServiceType.Custom
+    ),
   }
+
+  const customFields = {}
+  invoices.custom?.forEach(item => {
+    customFields[item.name] = { price: item.price };
+  });
 
   const initialValues = {
     domain: paymentData?.domain?.name,
@@ -187,6 +195,7 @@ function useInitialValues() {
     [ServiceType.Inflicion]: {
       price: invoices.inflicion?.price,
     },
+    ...customFields,
   }
 
   return initialValues
