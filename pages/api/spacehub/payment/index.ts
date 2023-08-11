@@ -5,9 +5,15 @@ import RealEstate from '@common/modules/models/RealEstate'
 import initMiddleware from '@common/lib/initMiddleware'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import Payment from '@common/modules/models/Payment'
-import start, { Data } from 'pages/api/api.config'
+import start, { Data } from '@pages/api/api.config'
 import { getPaymentOptions } from '@utils/helpers'
 import Domain from '@common/modules/models/Domain'
+import { quarters } from '@utils/constants'
+import {
+  getCreditDebitPipeline,
+  getRealEstatesPipeline,
+  getDomainsPipeline,
+} from './pipelines'
 
 start()
 
@@ -62,54 +68,96 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { isDomainAdmin, isUser, user } = await getCurrentUser(req, res)
+        const { isDomainAdmin, isUser, user, isGlobalAdmin } =
+          await getCurrentUser(req, res)
+        const { companyIds, domainIds, email, limit, skip } = req.query
 
-        const options = (await getPaymentOptions({
-          searchEmail: req.query.email,
-          userEmail: user.email,
-        })) as any
-
+        const options = {} as any
+        //   (await getPaymentOptions({
+        //   searchEmail: email,
+        //   userEmail: user.email,
+        // })) as any
         if (isDomainAdmin) {
-          /* eslint-disable @typescript-eslint/ban-ts-comment */
-          // @ts-ignore
-          const domains = await Domain.find({
+          const domains = await (Domain as any).find({
             adminEmails: { $in: [user.email] },
           })
-          const domainsIds = domains.map((i) => i._id)
+          const domainsIds = domains.map((i) => i._id.toString())
           options.domain = { $in: domainsIds }
         }
 
         if (isUser) {
-          /* eslint-disable @typescript-eslint/ban-ts-comment */
-          // @ts-ignore
-          const realEstates = await RealEstate.find({
+          const realEstates = await (RealEstate as any).find({
             adminEmails: { $in: [user.email] },
           })
-          const realEstatesIds = realEstates.map((i) => i._id)
+          const realEstatesIds = realEstates.map((i) => i._id.toString())
           options.company = { $in: realEstatesIds }
         }
 
-        /* eslint-disable @typescript-eslint/ban-ts-comment */
-        // @ts-ignore
-        const payments = await Payment.find(options)
+        if (domainIds) {
+          options.domain = filterOptions(options?.domain, domainIds)
+        }
+
+        if (companyIds) {
+          options.company = filterOptions(options?.company, companyIds)
+        }
+
+        const expr = filterPeriodOptions(req.query)
+        if (expr.length > 0) {
+          options.$expr = {
+            $and: expr,
+          }
+        }
+
+        const payments = await (Payment as any)
+          .find(options)
           .sort({ date: -1 })
-          .limit(req.query.limit)
+          .skip(+skip)
+          .limit(+limit)
           .populate({ path: 'company', select: '_id companyName' })
           .populate({ path: 'street', select: '_id address city' })
           .populate({ path: 'domain', select: '_id name' })
           .populate({ path: 'monthService', select: '_id date' })
 
+        const total = await Payment.countDocuments(options)
+
+        // TODO: DomainAdmin see all. For filters. Should see only his
+        // TODO: fix
+        const realEstatesPipeline = getRealEstatesPipeline(
+          isGlobalAdmin,
+          user.email
+        )
+        const distinctCompanies = await Payment.aggregate(realEstatesPipeline)
+
+        const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
+        const distinctDomains = await Payment.aggregate(domainsPipeline)
+
+        const creditDebitPipeline = getCreditDebitPipeline(options)
+        const totalPayments = await Payment.aggregate(creditDebitPipeline)
+
         return res.status(200).json({
-          // TODO: calc of all, not current
+          // TODO: update Interface
           /* eslint-disable @typescript-eslint/ban-ts-comment */
           // @ts-ignore
-          currentCompaniesCount: new Set(payments.map((item) => item.company._id)).size,
-          currentDomainsCount: new Set(payments.map((item) => item.domain._id)).size,
+          currentCompaniesCount: distinctCompanies.length,
+          currentDomainsCount: distinctDomains.length,
+          domainsFilter: distinctDomains?.map(({ domainDetails }) => ({
+            text: domainDetails.name,
+            value: domainDetails._id,
+          })),
+          realEstatesFilter: distinctCompanies?.map(({ companyDetails }) => ({
+            text: companyDetails.companyName,
+            value: companyDetails._id,
+          })),
           data: payments,
+          totalPayments: totalPayments.reduce((acc, item) => {
+            acc[item._id] = item.totalSum
+            return acc
+          }, {}),
           success: true,
+          total,
         })
       } catch (error) {
-        return res.status(400).json({ success: false })
+        return res.status(400).json({ success: false, error: error.message })
       }
 
     case 'POST':
@@ -138,4 +186,43 @@ export default async function handler(
         return res.status(400).json({ success: false, message: error })
       }
   }
+}
+
+function filterOptions(options = {}, filterIds: any) {
+  const res = {
+    ...options,
+  } as any
+  const idsFromQueryFilter = (filterIds || '').split(',') || []
+  if (res.$in) {
+    res.$in = res.$in.filter((i) => idsFromQueryFilter.includes(i))
+    return res
+  }
+  res.$in = idsFromQueryFilter
+  return res
+}
+
+function filterPeriodOptions(args) {
+  const { year, quarter, month, day } = args
+  const filterByDateOptions = []
+  if (year) {
+    filterByDateOptions.push({
+      $eq: [{ $year: '$date' }, year],
+    })
+  }
+  if (quarter) {
+    filterByDateOptions.push({
+      $in: [{ $month: '$date' }, quarters[+quarter]],
+    })
+  }
+  if (month) {
+    filterByDateOptions.push({
+      $eq: [{ $month: '$date' }, month],
+    })
+  }
+  if (day) {
+    filterByDateOptions.push({
+      $eq: [{ $dayOfMonth: '$date' }, day],
+    })
+  }
+  return filterByDateOptions
 }

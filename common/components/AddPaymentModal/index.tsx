@@ -2,15 +2,26 @@ import {
   useAddPaymentMutation,
   useGetPaymentsCountQuery,
 } from '@common/api/paymentApi/payment.api'
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import {
+  IExtendedPayment,
+  IProvider,
+  IReciever,
+} from '@common/api/paymentApi/payment.api.types'
 import { Form, message, Modal, Tabs, TabsProps } from 'antd'
-import React, { FC, createContext, useContext, useEffect, useState } from 'react'
+import React, {
+  FC,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
-import { Operations, ServiceType } from '@utils/constants'
+import { Operations } from '@utils/constants'
 import { FormInstance } from 'antd/es/form/Form'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { filterInvoiceObject } from '@utils/helpers'
 
 interface Props {
   closeModal: VoidFunction
@@ -30,9 +41,11 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const { data: count = 0 } = useGetPaymentsCountQuery(undefined, { skip: edit })
+  const { data: count = 0 } = useGetPaymentsCountQuery(undefined, {
+    skip: edit,
+  })
   const { data: realEstate } = useGetAllRealEstateQuery(
-    { domainId: currPayment?.domain, streetId: currPayment?.street },
+    { domainId: currPayment?.domain as string, streetId: currPayment?.street },
     { skip: !currPayment?.street }
   )
 
@@ -40,19 +53,16 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     getActiveTab(paymentData, edit)
   )
 
-  const provider = realEstate?.length
-    && {
-        name: realEstate[0]?.domain?.name,
-        address: realEstate[0]?.domain?.address,
-        bankInformation: realEstate[0]?.domain?.bankInformation,
-      }
+  const provider: IProvider = realEstate?.length && {
+    name: realEstate[0]?.domain?.name,
+    address: realEstate[0]?.street,
+    bankInformation: realEstate[0]?.domain?.bankInformation,
+  }
 
-  const reciever = realEstate?.length
-    && {
-        companyName: realEstate[0]?.companyName,
-        adminEmails: realEstate[0]?.adminEmails,
-        phone: realEstate[0]?.phone,
-      }
+  const reciever: IReciever = realEstate?.length && {
+    companyName: realEstate[0]?.companyName,
+    adminEmails: realEstate[0]?.adminEmails,
+  }
 
   useEffect(() => {
     if (currPayment?.street) {
@@ -63,11 +73,12 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
         invoiceNumber: count + 1,
       })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currPayment?.street])
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
+    const filteredInvoice = filterInvoiceObject(formData)
 
     const response = await addPayment({
       invoiceNumber: count + 1,
@@ -78,44 +89,10 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       company: formData.company,
       monthService: formData.monthService,
       description: formData.description ? formData.description : '',
-      generalSum: formData.credit
-        ? formData.credit
-        : formData.maintenancePrice.sum +
-          formData.placingPrice.sum +
-          formData.electricityPrice.sum +
-        formData.waterPrice.sum,
+      generalSum: filteredInvoice?.reduce((acc, val) => acc + val.sum, 0) || 0,
       provider,
       reciever,
-      invoice: formData.debit
-        ? [
-            {
-              type: ServiceType.Maintenance,
-              amount: formData.maintenancePrice.amount,
-              price: formData.maintenancePrice.price,
-              sum: formData.maintenancePrice.sum,
-            },
-            {
-              type: ServiceType.Placing,
-              amount: formData.placingPrice.amount,
-              price: formData.placingPrice.price,
-              sum: formData.placingPrice.sum,
-            },
-            {
-              type: ServiceType.Electricity,
-              lastAmount: formData.electricityPrice.lastAmount,
-              amount: formData.electricityPrice.amount,
-              price: formData.electricityPrice.price,
-              sum: formData.electricityPrice.sum,
-            },
-            {
-              type: ServiceType.Water,
-              lastAmount: formData.waterPrice.lastAmount,
-              amount: formData.waterPrice.amount,
-              price: formData.waterPrice.price,
-              sum: formData.waterPrice.sum,
-            },
-          ]
-        : [],
+      invoice: formData.debit ? filteredInvoice : [],
     })
 
     if ('data' in response) {

@@ -1,8 +1,18 @@
-import { Table, Tooltip, InputNumber, Form, FormInstance } from 'antd'
-import { FC, useEffect } from 'react'
+import {
+  Table,
+  Tooltip,
+  InputNumber,
+  Form,
+  FormInstance,
+  Popconfirm,
+  Button,
+  Modal,
+  Input,
+} from 'antd'
+import { FC, useEffect, useState } from 'react'
 import { ColumnProps } from 'antd/lib/table'
 import moment from 'moment'
-import { dataSource, IPaymentTableData } from '@utils/tableData'
+import { IPaymentTableData } from '@utils/tableData'
 import { ServiceType, paymentsTitle } from '@utils/constants'
 import { getName } from '@utils/helpers'
 import { validateField } from '@common/assets/features/validators'
@@ -11,6 +21,8 @@ import { getFormattedDate } from '@common/components/DashboardPage/blocks/servic
 import useService from '@common/modules/hooks/useService'
 import {
   PriceElectricityField,
+  PriceGarbageCollectorField,
+  PriceInflicionField,
   PriceMaintainceField,
   PricePlacingField,
   PriceWaterField,
@@ -18,6 +30,12 @@ import {
 import useCompany from '@common/modules/hooks/useCompany'
 import { AmountTotalAreaField } from './fields/amountFields'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
+import {
+  DeleteOutlined,
+  MinusCircleOutlined,
+  PlusOutlined,
+} from '@ant-design/icons'
+import { useCustomDataSource } from './useCustomDataSource'
 interface Props {
   form: FormInstance<any>
   edit: boolean
@@ -33,6 +51,16 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
   const { company } = useCompany({ companyId, domainId, streetId, skip: edit })
   const { service } = useService({ serviceId, domainId, streetId, skip: edit })
 
+  const { customDataSource, addDataSource, removeDataSource } =
+    useCustomDataSource({
+      paymentData,
+      companyId,
+      serviceId,
+      domainId,
+      streetId,
+      edit,
+    } as any)
+
   const columns: ColumnProps<IPaymentTableData>[] = [
     {
       title: '№',
@@ -44,24 +72,28 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       dataIndex: 'name',
       width: 'max-content',
       ellipsis: true,
-      render: (name) => (
-        // TODO: use moment from helper (single access point)
-        // getFormattedDate
-        <Tooltip
-          title={`${getName(name, paymentsTitle)}(${moment(
-            service?.date
-          ).format('MMMM')})`}
-        >
-          <span className={s.rowText}>
-            {getName(name, paymentsTitle)}{' '}
-            <span className={s.month}>({getFormattedDate(service?.date)})</span>
-            {company?.servicePricePerMeter &&
-              getName(name, paymentsTitle) === 'Утримання' && (
+      render: (name, record) => {
+        const nameRes = getName(name, paymentsTitle)
+        return (
+          // TODO: use moment from helper (single access point)
+          // getFormattedDate
+          <Tooltip
+            title={`${nameRes || record.name}(${moment(service?.date).format(
+              'MMMM'
+            )})`}
+          >
+            <span className={s.rowText}>
+              {nameRes || record.name}{' '}
+              <span className={s.month}>
+                ({getFormattedDate(service?.date)})
+              </span>
+              {company?.servicePricePerMeter && nameRes === 'Утримання' && (
                 <span className={s.month}> індивідуальне</span>
               )}
-          </span>
-        </Tooltip>
-      ),
+            </span>
+          </Tooltip>
+        )
+      },
     },
     {
       title: 'К-сть',
@@ -87,7 +119,12 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
               </Form.Item>
             </div>
           ) : (
-            <AmountTotalAreaField record={record} edit={edit} />
+            (record.name === ServiceType.Electricity ||
+              record.name === ServiceType.Water ||
+              record.name === ServiceType.Placing ||
+              record.name === ServiceType.Maintenance) && (
+              <AmountTotalAreaField record={record} edit={edit} />
+            )
           )}
         </>
       ),
@@ -96,12 +133,6 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       title: 'Ціна',
       dataIndex: 'price',
       render: (text, record) => {
-        const fields = {
-          maintenancePrice: PriceMaintainceField,
-          placingPrice: PricePlacingField,
-          electricityPrice: PriceElectricityField,
-          waterPrice: PriceWaterField,
-        }
         if (record.name in fields) {
           const Component = fields[record.name]
           return <Component record={record} edit={edit} />
@@ -118,14 +149,96 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
     },
   ]
 
+  if (!edit) {
+    columns.push({
+      title: (
+        <div className={s.popconfirm}>
+          <DeleteOutlined className={s.icon} />
+        </div>
+      ),
+      dataIndex: 'delete',
+      ellipsis: true,
+      render: (text, record) => (
+        <div className={s.popconfirm}>
+          <Popconfirm
+            title={`Ви впевнені що хочете видалити поле ${
+              getName(record.name, paymentsTitle) || record.name
+            }?`}
+            onConfirm={() => removeDataSource(record.id)}
+            cancelText="Відміна"
+          >
+            <MinusCircleOutlined className={s.icon} />
+          </Popconfirm>
+        </div>
+      ),
+      width: 80,
+    })
+  }
+
   return (
-    <Table
-      rowKey="id"
-      columns={columns}
-      dataSource={dataSource}
-      pagination={false}
-      className={s.table}
-    />
+    <>
+      <Table
+        rowKey="id"
+        columns={columns}
+        dataSource={customDataSource as IPaymentTableData[]}
+        pagination={false}
+        className={s.table}
+      />
+      {!edit && <AddCustomField addDataSource={addDataSource} />}
+    </>
+  )
+}
+
+const fields = {
+  maintenancePrice: PriceMaintainceField,
+  placingPrice: PricePlacingField,
+  electricityPrice: PriceElectricityField,
+  waterPrice: PriceWaterField,
+  garbageCollectorPrice: PriceGarbageCollectorField,
+  inflicionPrice: PriceInflicionField,
+}
+
+function AddCustomField({ addDataSource }) {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [customFieldName, setCustomFieldName] = useState('')
+
+  const addField = () => {
+    addDataSource({
+      type: ServiceType.Custom,
+      name: customFieldName,
+      amount: 1,
+      id: 44,
+      price: 0,
+      sum: 0,
+    })
+    setIsModalOpen(false)
+    setCustomFieldName('')
+  }
+
+  return (
+    <>
+      <div className={s.popconfirm}>
+        <Button
+          icon={<PlusOutlined />}
+          onClick={() => setIsModalOpen(true)}
+          className={s.addButton}
+        >
+          Додати поле
+        </Button>
+      </div>
+      <Modal
+        title="Додати поле"
+        open={isModalOpen}
+        onOk={addField}
+        onCancel={() => setIsModalOpen(false)}
+      >
+        <Input
+          placeholder="Назва послуги"
+          value={customFieldName}
+          onChange={(e) => setCustomFieldName(e.target.value)}
+        />
+      </Modal>
+    </>
   )
 }
 
@@ -145,7 +258,7 @@ function PriceWrapper({ record, form, edit }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={edit} className={s.input} />
+      {<InputNumber disabled={edit} className={s.input} />}
     </Form.Item>
   )
 }
@@ -184,6 +297,16 @@ function getRelationshipByRecordName(recordName) {
         // тестове значення повинно бути динамічне
         testValue: recordName,
       },
+      garbageCollectorPrice: {
+        fieldName: 'company',
+        valueName: 'garbageCollectorPrice',
+        testValue: recordName,
+      },
+      inflicionPrice: {
+        fieldName: 'monthService',
+        valueName: 'inflicionPrice',
+        testValue: recordName,
+      },
     }[recordName] || {}
   )
 }
@@ -214,6 +337,9 @@ function SumWrapper({ record, form }) {
       case ServiceType.Water: {
         const w = (obj?.amount - obj?.lastAmount) * obj?.price
         return +w.toFixed(1) || 0
+      }
+      default: {
+        return +obj?.price || 0
       }
     }
   }

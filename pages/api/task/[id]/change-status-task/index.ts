@@ -2,7 +2,7 @@
 // @ts-nocheck
 import { NextApiResponse, NextApiRequest } from 'next'
 import Task from 'common/modules/models/Task'
-import start, { Data } from 'pages/api/api.config'
+import start, { Data } from '@pages/api/api.config'
 
 start()
 

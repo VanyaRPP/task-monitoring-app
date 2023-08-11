@@ -7,8 +7,13 @@ import AddPaymentModal from '@common/components/AddPaymentModal'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import s from './style.module.scss'
 import { isAdminCheck } from '@utils/helpers'
+import PaymentCascader from '@common/components/UI/PaymentCascader/index'
 
-const PaymentCardHeader = ({ currentPayment, closeEditModal }) => {
+const PaymentCardHeader = ({
+  setCurrentDateFilter,
+  currentPayment,
+  closeEditModal,
+}) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -35,17 +40,31 @@ const PaymentCardHeader = ({ currentPayment, closeEditModal }) => {
                 className={s.title}
               >{`Оплата від користувача ${email}`}</span>
             ) : (
+              <>
+                <Button
+                  type="link"
+                  onClick={() => router.push(AppRoutes.PAYMENT)}
+                >
+                  Проплати
+                  <SelectOutlined className={s.Icon} />
+                </Button>
+                {location.pathname === AppRoutes.PAYMENT && (
+                  <PaymentCascader onChange={setCurrentDateFilter} />
+                )}
+              </>
+            )}
+            <div>
               <Button
                 type="link"
-                onClick={() => router.push(AppRoutes.PAYMENT)}
+                onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
               >
-                Проплати
-                <SelectOutlined className={s.Icon} />
+                Інвойси <SelectOutlined className={s.Icon} />
               </Button>
-            )}
-            <Button type="link" onClick={() => setIsModalOpen(true)}>
-              <PlusOutlined /> Додати
-            </Button>
+
+              <Button type="link" onClick={() => setIsModalOpen(true)}>
+                <PlusOutlined /> Додати
+              </Button>
+            </div>
           </>
         ) : (
           currUser && (

@@ -3,8 +3,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import RealEstate from '@common/modules/models/RealEstate'
 import { getCurrentUser } from '@utils/getCurrentUser'
-import start, { Data } from 'pages/api/api.config'
-import Domain from 'common/modules/models/Domain'
+import start, { Data } from '@pages/api/api.config'
+import Domain from '@common/modules/models/Domain'
 
 start()
 
@@ -34,7 +34,7 @@ export default async function handler(
 
         if (req.query.domainId) {
           domainsIds = domainsIds
-            ? domainsIds.filter((i) => i === req.query.domainId)
+            ? domainsIds.filter((i) => i.toString() === req.query.domainId)
             : [req.query.domainId]
         }
 

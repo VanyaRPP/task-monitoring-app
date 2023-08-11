@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
-import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
+import { Form, FormInstance, Input, InputNumber, Select, Button } from 'antd'
 import s from './style.module.scss'
 import { Operations, ServiceType } from '@utils/constants'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
@@ -143,11 +143,27 @@ function useInitialValues() {
     water: paymentData?.invoice.find(
       (item) => item?.type === ServiceType.Water
     ),
+    garbageCollector: paymentData?.invoice.find(
+      (item) => item?.type === ServiceType.GarbageCollector
+    ),
+    inflicion: paymentData?.invoice.find(
+      (item) => item?.type === ServiceType.Inflicion
+    ),
+    custom: paymentData?.invoice.filter(
+      (item) => item?.type === ServiceType.Custom
+    ),
   }
+
+  const customFields = {}
+  invoices.custom?.forEach(item => {
+    customFields[item.name] = { price: item.price };
+  });
 
   const initialValues = {
     domain: paymentData?.domain?.name,
-    street: paymentData?.street && `${paymentData.street.address} (м. ${paymentData.street.city})`,
+    street:
+      paymentData?.street &&
+      `${paymentData.street.address} (м. ${paymentData.street.city})`,
     monthService: getFormattedDate(paymentData?.monthService?.date),
     company: paymentData?.company.companyName,
     description: paymentData?.description,
@@ -173,6 +189,13 @@ function useInitialValues() {
       amount: invoices.water?.amount,
       price: invoices.water?.price,
     },
+    [ServiceType.GarbageCollector]: {
+      price: invoices.garbageCollector?.price,
+    },
+    [ServiceType.Inflicion]: {
+      price: invoices.inflicion?.price,
+    },
+    ...customFields,
   }
 
   return initialValues

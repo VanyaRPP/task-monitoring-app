@@ -1,10 +1,10 @@
 import User from '@common/modules/models/User'
 import { FormInstance } from 'antd'
 import { ObjectId } from 'mongoose'
-import { Roles } from './constants'
+import { Roles, ServiceType } from './constants'
 import { PaymentOptions } from './types'
-import { IService } from '@common/api/serviceApi/service.api.types'
-import { dateToYearMonthFormat } from '@common/assets/features/formatDate'
+import moment from 'moment'
+import 'moment/locale/uk'
 
 export const firstTextToUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
@@ -78,13 +78,6 @@ export const getName = (name, obj) => {
     }
   })
   return key
-}
-
-export const getCurrentMonthService = (services: IService[]) => {
-  const filteredServices = services?.find(
-    (s) => dateToYearMonthFormat(s?.date) === dateToYearMonthFormat(new Date())
-  )
-  return filteredServices
 }
 
 export function numberToTextNumber(number) {
@@ -187,4 +180,74 @@ export const isAdminCheck = (roles) => {
   return [Roles.GLOBAL_ADMIN, Roles.DOMAIN_ADMIN].some((role) =>
     roles?.includes(role)
   )
+}
+
+/**
+ * Костиль, щоб прибрати `__v` з документу `mongodb` і далі порівнювати
+ * отримані дані із тестовими
+ * @param {any[]} data масив документів `mongo_object_response._doc`
+ * @returns {any[]} масив документів без поля `__v`
+ */
+export const removeVersion = (data: any[]): any[] =>
+  data.map((obj) => {
+    const { __v, ...rest } = obj
+    return rest
+  })
+
+/**
+ * Ще один костиль для тестів, щоб зробити `reverse populate` документу
+ * `mongodb` для подальшого порівняння із тестовими даними
+ * @param {any[]} data масив документів `mongo_object_response`
+ * @returns {any[]} масив документів без `populate`
+ */
+export const unpopulate = (data: any[]): any[] => {
+  return data.map((obj) => {
+    const result = {}
+
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const value = obj[key]
+
+        if (typeof value === 'object' && value !== null && value['_id']) {
+          result[key] = value._id
+        } else {
+          result[key] = value
+        }
+      }
+    }
+
+    return result
+  })
+}
+
+/**
+ * Переводить `Date` в `string` місяця на українській і з великої літери
+ * @param {Date} date дата
+ * @returns форматований місяць
+ */
+export const DateToFormattedMonth = (date?: Date): string => {
+  const month = moment(date).locale('uk').format('MMMM')
+  return month[0].toUpperCase() + month.slice(1)
+}
+
+  export function filterInvoiceObject(obj) {
+    const filtered = []
+    const services: string[] = Object.values(ServiceType)
+
+    for (const key in obj) {
+      if (typeof obj[key] === 'object' && obj[key].hasOwnProperty('sum')) {
+        services.includes(key)
+          ? filtered.push({
+              type: key,
+              ...obj[key],
+            })
+          : filtered.push({
+              type: ServiceType.Custom,
+              name: key,
+              ...obj[key],
+            })
+      }
+    }
+
+  return filtered
 }

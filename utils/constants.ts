@@ -12,6 +12,7 @@ export enum AppRoutes {
   CATEGORY = '/category',
   DOMAIN = '/domain',
   PAYMENT = '/payment',
+  PAYMENT_BULK = '/payment/bulk',
   SERVICE = '/service',
   CUSTOMER = '/customer',
   REAL_ESTATE = '/real-estate',
@@ -26,6 +27,12 @@ export enum Operations {
 export enum COLOR_THEME {
   DARK = 'dark',
   LIGHT = 'light',
+}
+
+export enum PERIOD_FILTR {
+  QUARTER = 'quarter',
+  MONTH = 'month',
+  YEAR = 'year',
 }
 
 export enum Roles {
@@ -83,6 +90,8 @@ export const paymentsTitle = {
   placingPrice: 'Розміщення',
   electricityPrice: 'Електропостачання',
   waterPrice: 'Водопостачання',
+  garbageCollectorPrice: 'Вивіз ТПВ',
+  inflicionPrice: 'Індекс інфляції'
 }
 
 export enum ServiceType {
@@ -90,4 +99,14 @@ export enum ServiceType {
   Water = 'waterPrice',
   Placing = 'placingPrice',
   Maintenance = 'maintenancePrice',
+  GarbageCollector = 'garbageCollectorPrice',
+  Inflicion = 'inflicionPrice',
+  Custom = 'custom'
+}
+
+export const quarters = {
+  '1': [1, 2, 3],
+  '2': [4, 5, 6],
+  '3': [7, 8, 9],
+  '4': [10, 11, 12],
 }

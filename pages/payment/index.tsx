@@ -6,6 +6,7 @@ import { GetServerSideProps } from 'next'
 import { FC } from 'react'
 import PaymentsBlock from '@common/components/DashboardPage/blocks/payments'
 
+
 const Payments: FC = () => {
   return <PaymentsBlock />
 }
@@ -31,4 +32,5 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {},
   }
+  
 }

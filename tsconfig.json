@@ -16,7 +16,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "types": ["cypress"],
+    "types": ["node","cypress","jest"],
     "baseUrl": ".",
     "paths": {
       "@common/*": ["common/*"],

@@ -1,11 +1,14 @@
+import { IDomain } from '@common/modules/models/Domain'
 import { IUser } from './../../modules/models/User'
 import { IPaymentTableData } from '@utils/tableData'
 import { ObjectId } from 'mongoose'
+import { IRealestate } from '../realestateApi/realestate.api.types'
 
 export interface IPaymentField {
   type: string
+  name?: string
   lastAmount?: number
-  amount: number
+  amount?: number
   price: number
   sum: number
 }
@@ -19,16 +22,15 @@ export interface IProvider {
 export interface IReciever {
   companyName: string
   adminEmails: string[]
-  phone: string
 }
 
 export interface IPayment {
   invoiceNumber: number
   type: string
   date: Date
-  domain: string
+  domain: Partial<IDomain> | string
   street: string
-  company: string
+  company: Partial<IRealestate> | string
   monthService: string
   description?: string
   services?: IPaymentTableData[]
@@ -48,9 +50,20 @@ export interface IAddPaymentResponse {
   data: IExtendedPayment
 }
 
+interface IFilter {
+  text: string
+  value: string
+}
+
 export interface IGetPaymentResponse {
-  success: boolean
+  totalPayments: { credit?: number; debit?: number }
+  currentCompaniesCount: number
+  currentDomainsCount: number
+  domainsFilter: IFilter[]
+  realEstatesFilter: IFilter[]
   data: IExtendedPayment[]
+  success: boolean
+  total: number
 }
 
 export interface IDeletePaymentResponse {

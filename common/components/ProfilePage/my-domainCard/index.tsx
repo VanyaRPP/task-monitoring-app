@@ -1,28 +1,69 @@
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import { Radio, Card, Col, Row } from 'antd'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { Card, Col, Row } from 'antd'
 import React from 'react'
-import s from '../style.module.scss';
+import s from '../style.module.scss'
+import { Roles } from '@utils/constants'
 
 const MyDomainsCard: React.FC = () => {
-  const { data: domains = [], isLoading: domainsLoading } = useGetDomainsQuery({});
+  const { data: user } = useGetCurrentUserQuery()
+  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const { data: domains = [], isLoading: domainsLoading } = useGetDomainsQuery(
+    {},
+    { skip: isGlobalAdmin }
+  )
+  const { data: companies = [] } = useGetAllRealEstateQuery(
+    {},
+    { skip: isGlobalAdmin }
+  )
+
+  const getDomainCompanies = (domainId) =>
+    companies
+      .filter((companyItem) => companyItem.domain._id === domainId)
+      .map((item) => item.companyName)
+      .join(', ')
 
   return (
     <Row gutter={16}>
-      {domains.map((item, index) => (
+      {domains.map((item) => (
         <Col span={8} key={item.name}>
-          <Card loading={domainsLoading} title={`Домен ${index + 1}`} bordered={false} className={s.DomainMyCardInfo}>
-            <p><strong>Назва:</strong> {item.name}</p>
-            <p><strong>Адреса:</strong> {item.address}</p>
-            <p><strong>Адміністратори:</strong> {item.adminEmails.join(", ")}</p>     
-            <p><strong>Опис:</strong> {item.description}</p>
-            <p><strong>Отримувач:</strong> {item.bankInformation}</p>
-            <p><strong>Телефон:</strong> {item.phone}</p>
-            <p><strong>Пошта:</strong> {item.email}</p>
-          </Card>
+          <div className={s.CardInfo}>
+            {/* Wrap the Card component in a div */}
+            <Card
+              loading={domainsLoading}
+              title={item.name}
+              bordered={false}
+              className={s.DomainMyCardInfo}
+            >
+              <p>
+                <strong>Адреса:</strong> {item.address}
+              </p>
+              <p>
+                <strong>Адміністратори:</strong> {item.adminEmails.join(', ')}
+              </p>
+              <p>
+                <strong>Опис:</strong> {item.description}
+              </p>
+              <p>
+                <strong>Отримувач:</strong> {item.bankInformation}
+              </p>
+              <p>
+                <strong>Телефон:</strong> {item.phone}
+              </p>
+              <p>
+                <strong>Пошта:</strong> {item.email}
+              </p>
+              <p>
+                <strong>Компанії:</strong>
+                {getDomainCompanies(item._id)}
+              </p>
+            </Card>
+          </div>
         </Col>
       ))}
     </Row>
-  );
-};
+  )
+}
 
-export default MyDomainsCard;
+export default MyDomainsCard

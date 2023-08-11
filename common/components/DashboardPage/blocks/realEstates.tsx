@@ -7,7 +7,7 @@ import TableCard from '@common/components/UI/TableCard'
 import { AppRoutes } from '@utils/constants'
 import React, { FC, ReactElement, useContext } from 'react'
 import { useRouter } from 'next/router'
-import { Alert, Popconfirm, Table, message } from 'antd'
+import { Alert, Checkbox, Popconfirm, Table, message } from 'antd'
 import cn from 'classnames'
 import s from './style.module.scss'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
@@ -63,21 +63,15 @@ const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
       dataIndex: 'companyName',
     },
     {
-      title: 'Банківська інформація',
-      dataIndex: 'bankInformation',
-    },
-    {
-      title: 'Договір',
-      dataIndex: 'agreement',
-    },
-    {
-      title: 'Телефон',
-      dataIndex: 'phone',
-    },
-    {
       title: 'Адміністратори',
       dataIndex: 'adminEmails',
+      render: (adminEmails) => <span>{adminEmails.join(', ')}</span>,
     },
+    {
+      title: 'Опис',
+      dataIndex: 'description',
+    },
+    // TODO: enum
     {
       title: 'Кількість метрів',
       dataIndex: 'totalArea',
@@ -93,6 +87,19 @@ const RealEstateBlock: FC<IRealEstate> = ({ domainId, streetId }) => {
     {
       title: 'Вивіз сміття',
       dataIndex: 'garbageCollector',
+    },
+    {
+      title: 'Частка загальної площі',
+      dataIndex: 'rentPart',
+    },
+    {
+      title: 'Частка водопостачання',
+      dataIndex: 'waterPart',
+    },
+    {
+      title: 'Нарахування інд. інф.',
+      dataIndex: 'inflicion',
+      render: () => <Checkbox disabled />,
     },
   ]
 

@@ -1,17 +1,18 @@
-import { IDomain } from '@common/modules/models/Domain';
+import { IDomain } from '@common/modules/models/Domain'
 
 export type IRealestate = {
   domain: IDomain
   street: string
   companyName: string
-  bankInformation: string
-  agreement: string
-  phone: string
   adminEmails: string[]
   pricePerMeter: number
-  servicePricePerMeter: number
+  servicePricePerMeter?: number
   totalArea: number
-  garbageCollector: number
+  description: string
+  garbageCollector?: number
+  rentPart?: number
+  inflicion?: boolean
+  waterPart?: number
 }
 
 export interface IExtendedRealestate extends IRealestate {

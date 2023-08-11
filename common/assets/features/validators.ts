@@ -10,26 +10,35 @@ export const deleteExtraWhitespace = (value: string): string =>
     .replace(/[ ]+/g, ' ')
     .trimStart()
 
-//Validators
-
 export const emailRegex =
-  /^([a-zA-Z0-9_]{6,30})@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})(,\s*([a-zA-Z0-9_]{6,30})@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,}))*$/i
+  /^[a-zA-Z0-9_.]{6,30}@(?!.*\d)[a-zA-Z][a-zA-Z0-9.-]+\.[a-zA-Z]{2,3}$/i
+//Validators
 
 export const validateField = (name: string): Rule[] => {
   const required: Rule = {
     required: true,
     message: "Поле обов'язкове!",
   }
+
   const email: Rule = {
     validator(_, value) {
       // TODO: fix tests
       // emailRegex.test(value) fix case mykola.ext@gmail.com
-      if (value) {
-        return Promise.resolve()
+      if (!value) {
+        return Promise.resolve() // Allow empty value
       }
-      return Promise.reject(new Error('Введіть правильну електронну адресу!'))
+
+      const emails = Array.isArray(value) ? value : [value]
+      const invalidEmails = emails.filter((email) => !emailRegex.test(email))
+
+      if (invalidEmails.length > 0) {
+        return Promise.reject(new Error('Введіть правильну електронну адресу!'))
+      }
+
+      return Promise.resolve()
     },
   }
+
   const phone: Rule = {
     validator(_, value) {
       if (
@@ -142,6 +151,9 @@ export const validateField = (name: string): Rule[] => {
       return [required, rentPrice]
 
     case 'required':
+      return [required]
+
+    default:
       return [required]
   }
 }
