@@ -136,6 +136,9 @@ export function PriceInflicionField({ record, edit }) {
   const streetId = Form.useWatch('street', form) || paymentData?.street
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
+  const companyId = Form.useWatch('company', form) || paymentData?.company
+
+  const { company } = useCompany({ companyId, domainId, streetId, skip: edit })
 
   const { service, isLoading } = useService({
     serviceId,
@@ -146,7 +149,39 @@ export function PriceInflicionField({ record, edit }) {
 
   useEffect(() => {
     if (service?._id && service?.inflicionPrice) {
-      form.setFieldValue(fieldName, service.inflicionPrice)
+      form.setFieldValue(fieldName, (service.inflicionPrice * company.pricePerMeter))
+    }
+  }, [service?._id, service?.inflicionPrice]) //eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <Form.Item name={fieldName} rules={validateField('required')}>
+      <InputNumber disabled={edit} className={s.input} />
+    </Form.Item>
+  )
+}
+
+export function PriceWaterPartField({ record, edit }) {
+  const { paymentData, form } = usePaymentContext()
+  const fieldName = [record.name, 'price']
+
+  const domainId = Form.useWatch('domain', form) || paymentData?.domain
+  const streetId = Form.useWatch('street', form) || paymentData?.street
+  const serviceId =
+    Form.useWatch('monthService', form) || paymentData?.monthService
+  const companyId = Form.useWatch('company', form) || paymentData?.company
+
+  const { company } = useCompany({ companyId, domainId, streetId, skip: edit })
+
+  const { service, isLoading } = useService({
+    serviceId,
+    domainId,
+    streetId,
+    skip: edit,
+  })
+
+  useEffect(() => {
+    if (service?._id && service?.inflicionPrice) {
+      form.setFieldValue(fieldName, company.waterPart)
     }
   }, [service?._id, service?.inflicionPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 

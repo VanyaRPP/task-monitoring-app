@@ -143,6 +143,9 @@ function useInitialValues() {
     water: paymentData?.invoice.find(
       (item) => item?.type === ServiceType.Water
     ),
+    waterPart: paymentData?.invoice.find(
+      (item) => item?.type === ServiceType.WaterPart
+    ),
     garbageCollector: paymentData?.invoice.find(
       (item) => item?.type === ServiceType.GarbageCollector
     ),
@@ -153,11 +156,10 @@ function useInitialValues() {
       (item) => item?.type === ServiceType.Custom
     ),
   }
-
-  const customFields = {}
-  invoices.custom?.forEach(item => {
-    customFields[item.name] = { price: item.price };
-  });
+  const customFields = invoices.custom?.reduce((acc, item) => {
+    acc[item.name] = { price: item.price }
+    return acc
+  }, {})
 
   const initialValues = {
     domain: paymentData?.domain?.name,
@@ -188,6 +190,9 @@ function useInitialValues() {
       lastAmount: invoices.water?.lastAmount,
       amount: invoices.water?.amount,
       price: invoices.water?.price,
+    },
+    [ServiceType.WaterPart]: {
+      price: invoices.waterPart?.price,
     },
     [ServiceType.GarbageCollector]: {
       price: invoices.garbageCollector?.price,

@@ -26,6 +26,7 @@ import {
   PriceMaintainceField,
   PricePlacingField,
   PriceWaterField,
+  PriceWaterPartField,
 } from './fields/priceFields'
 import useCompany from '@common/modules/hooks/useCompany'
 import { AmountTotalAreaField } from './fields/amountFields'
@@ -87,7 +88,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
               <span className={s.month}>
                 ({getFormattedDate(service?.date)})
               </span>
-              {company?.servicePricePerMeter && nameRes === 'Утримання' && (
+              {!!company?.servicePricePerMeter && nameRes === 'Утримання' && (
                 <span className={s.month}> індивідуальне</span>
               )}
             </span>
@@ -196,6 +197,7 @@ const fields = {
   waterPrice: PriceWaterField,
   garbageCollectorPrice: PriceGarbageCollectorField,
   inflicionPrice: PriceInflicionField,
+  waterPart: PriceWaterPartField,
 }
 
 function AddCustomField({ addDataSource }) {
@@ -305,6 +307,11 @@ function getRelationshipByRecordName(recordName) {
       inflicionPrice: {
         fieldName: 'monthService',
         valueName: 'inflicionPrice',
+        testValue: recordName,
+      },
+      waterPart: {
+        fieldName: 'company',
+        valueName: 'waterPart',
         testValue: recordName,
       },
     }[recordName] || {}
