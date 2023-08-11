@@ -27,25 +27,12 @@ const columns = [
     dataIndex: 'companyName',
   },
   {
-    title: 'Адреса',
-    dataIndex: 'street',
-    render: (street) => street?.address,
-  },
-  {
-    title: 'Платник',
-    dataIndex: 'bankInformation',
-  },
-  {
-    title: 'Телефон',
-    dataIndex: 'phone',
-  },
-  {
     title: 'Адміністратори',
     dataIndex: 'adminEmails',
   },
   {
-    title: 'Договір',
-    dataIndex: 'agreement',
+    title: 'Опис',
+    dataIndex: 'description',
   },
 ]
 

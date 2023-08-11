@@ -12,6 +12,7 @@ export enum AppRoutes {
   CATEGORY = '/category',
   DOMAIN = '/domain',
   PAYMENT = '/payment',
+  PAYMENT_BULK = '/payment/bulk',
   SERVICE = '/service',
   CUSTOMER = '/customer',
   REAL_ESTATE = '/real-estate',
@@ -31,10 +32,8 @@ export enum COLOR_THEME {
 export enum PERIOD_FILTR {
   QUARTER = 'quarter',
   MONTH = 'month',
-   YEAR = 'year',
-
+  YEAR = 'year',
 }
-
 
 export enum Roles {
   USER = 'User',

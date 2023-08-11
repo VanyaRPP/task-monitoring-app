@@ -22,7 +22,6 @@ export interface IProvider {
 export interface IReciever {
   companyName: string
   adminEmails: string[]
-  phone: string
 }
 
 export interface IPayment {
@@ -57,6 +56,7 @@ interface IFilter {
 }
 
 export interface IGetPaymentResponse {
+  totalPayments: { credit?: number; debit?: number }
   currentCompaniesCount: number
   currentDomainsCount: number
   domainsFilter: IFilter[]

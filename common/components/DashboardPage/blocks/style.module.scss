@@ -55,7 +55,15 @@
     color: #4096ff;
   }
 }
-
+.summ_item,.saldo {
+  background-color: var(--backgroundColor);
+}
+.summ_item{
+  text-align: end;
+}
+.saldo{
+  text-align: center;
+}
 .title {
   color: var(--primaryColor);
   font-weight: 400;

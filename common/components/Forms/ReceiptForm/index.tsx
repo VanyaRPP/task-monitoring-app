@@ -141,15 +141,10 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
         <>
           <div className={s.providerInfo}>
             <div className={s.label}>Постачальник</div>
+            {/* TODO: ЗАМІНИТИ НА ОДНЕ ПОЛЕ description */}
             <div>
               {provider?.name} <br />
-              Адреса {provider?.address}
               <br />
-              Реєстраційний номер ... <br />є платником податку на прибуток на
-              загальних підставах <br />
-              <div className={s.info_adres__bold}>
-                {provider?.bankInformation}
-              </div>
             </div>
           </div>
 

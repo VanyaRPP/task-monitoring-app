@@ -112,15 +112,13 @@ export const streets = [
   },
 ]
 
+// TODO: fix tests
 export const realEstates = [
   {
     _id: new ObjectId(),
     domain: domains[0]._id,
     street: streets[0]._id,
     companyName: 'company_0',
-    bankInformation: 'none',
-    agreement: 'none',
-    phone: '+381234567800',
     adminEmails: [users.user.email],
     pricePerMeter: 10,
     servicePricePerMeter: 10,
@@ -132,9 +130,6 @@ export const realEstates = [
     domain: domains[1]._id,
     street: streets[1]._id,
     companyName: 'company_1',
-    bankInformation: 'none',
-    agreement: 'none',
-    phone: '+381234567801',
     adminEmails: [users.user.email],
     pricePerMeter: 10,
     servicePricePerMeter: 10,
@@ -146,9 +141,6 @@ export const realEstates = [
     domain: domains[2]._id,
     street: streets[2]._id,
     companyName: 'company_2',
-    bankInformation: 'none',
-    agreement: 'none',
-    phone: '+381234567802',
     adminEmails: [users.domainAdmin.email],
     pricePerMeter: 10,
     servicePricePerMeter: 10,
