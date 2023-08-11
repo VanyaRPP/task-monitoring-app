@@ -25,6 +25,8 @@ export default async function handler(
         }
 
         if (isUser) {
+          await Domain.find({});
+          
           const realEstates = await RealEstate.find({
             adminEmails: { $in: [user.email] },
           }).populate({ path: 'domain', select: 'name' })

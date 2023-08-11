@@ -68,6 +68,7 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
+
         const { isDomainAdmin, isUser, user, isGlobalAdmin } =
           await getCurrentUser(req, res)
         const { companyIds, domainIds, email, limit, skip } = req.query

@@ -17,8 +17,12 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
+        await Street.find({});
+
         const { domainId } = req.query
         if (domainId) {
+          await Street.find({});
+
           const domain = await Domain.findOne({ _id: domainId }).populate({
             path: 'streets',
             select: '_id address city',
@@ -38,7 +42,7 @@ export default async function handler(
           data: streets,
         })
       } catch (error) {
-        return res.status(400).json({ success: false, error: error.message })
+        return res.status(400).json({ success: false, error })
       }
 
     case 'POST':

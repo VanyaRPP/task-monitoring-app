@@ -6,6 +6,7 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import Service from '@common/modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
 import Domain from '@common/modules/models/Domain'
+import Street from '@common/modules/models/Street'
 
 start()
 
@@ -19,6 +20,9 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
+        await Domain.find({});
+        await Street.find({});
+        
         const options = {}
 
         const { domainId, streetId } = req.query
