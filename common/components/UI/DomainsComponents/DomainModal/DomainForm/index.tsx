@@ -18,13 +18,6 @@ const DomainForm: FC<Props> = ({ form }) => {
           className={s.formInput}
         />
       </Form.Item>
-      <Form.Item name="address" label="Адреса" rules={validateField('address')}>
-        <Input
-          placeholder="Пошук адреси"
-          maxLength={256}
-          className={s.formInput}
-        />
-      </Form.Item>
       <EmailSelect form={form} />
       <DomainStreets />
       <Form.Item
@@ -32,38 +25,11 @@ const DomainForm: FC<Props> = ({ form }) => {
         label="Опис"
         rules={validateField('required')}
       >
-        <Input
+        <Input.TextArea
           placeholder="Вкажіть значення"
-          maxLength={256}
           className={s.formInput}
-        />
-      </Form.Item>
-
-      <Form.Item
-        name="bankInformation"
-        label="Отримувач"
-        rules={validateField('required')}
-      >
-        <Input
-          placeholder="Отримувач рахунку"
-          maxLength={256}
-          className={s.formInput}
-        />
-      </Form.Item>
-
-      <Form.Item name="phone" label="Телефон" rules={validateField('phone')}>
-        <Input
-          placeholder="Вкажіть значення"
-          maxLength={256}
-          className={s.formInput}
-        />
-      </Form.Item>
-
-      <Form.Item name="email" label="Пошта" rules={validateField('email')}>
-        <Input
-          placeholder="Вкажіть значення"
-          maxLength={256}
-          className={s.formInput}
+          maxLength={512}
+          rows={4}
         />
       </Form.Item>
     </Form>

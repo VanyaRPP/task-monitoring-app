@@ -46,8 +46,24 @@ const DomainsBlock = ({}) => {
           ),
         }}
         columns={[
-          ...columns,
-          ...(router.pathname === AppRoutes.DOMAIN ? domainsPageColumns : []),
+          {
+            title: 'Назва',
+            dataIndex: 'name',
+          },
+          {
+            title: 'Адміністратори',
+            dataIndex: 'adminEmails',
+            render: (adminEmails) => <span>{adminEmails.join(', ')}</span>,
+          },
+          {
+            title: 'Опис',
+            dataIndex: 'description',
+            render: (text) => (
+              <Tooltip title={text}>
+                <QuestionCircleOutlined />
+              </Tooltip>
+            ),
+          },
           {
             title: '',
             dataIndex: '',
@@ -79,45 +95,4 @@ const DomainsBlock = ({}) => {
   )
 }
 
-const domainsPageColumns = [
-  {
-    title: 'Телефон',
-    dataIndex: 'phone',
-  },
-  {
-    title: 'Пошта',
-    dataIndex: 'email',
-  },
-]
-
-const columns = [
-  {
-    title: 'Назва',
-    dataIndex: 'name',
-  },
-  {
-    title: 'Адреса',
-    dataIndex: 'address',
-  },
-  {
-  title: 'Адміністратори',
-  dataIndex: 'adminEmails',
-  render: (adminEmails) => (
-    <span>{adminEmails.join(', ')}</span>
-  ),
-},
-  {
-    title: 'Опис',
-    dataIndex: 'description',
-    render: (text) => (
-      <Tooltip title={text}>
-        <QuestionCircleOutlined />
-      </Tooltip>
-    ),
-  },
-  {
-    title: 'Отримувач',
-    dataIndex: 'bankInformation',
-  },
-]
 export default DomainsBlock

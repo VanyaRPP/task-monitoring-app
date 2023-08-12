@@ -14,14 +14,13 @@ export interface IPaymentField {
 }
 
 export interface IProvider {
-  name: string
-  address: string
-  bankInformation: string
+  description: string
 }
 
 export interface IReciever {
   companyName: string
   adminEmails: string[]
+  description: string
 }
 
 export interface IPayment {

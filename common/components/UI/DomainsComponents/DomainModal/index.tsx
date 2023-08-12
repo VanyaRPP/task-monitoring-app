@@ -18,13 +18,9 @@ const DomainModal: FC<Props> = ({ isModalOpen, closeModal }) => {
 
     const response = await addDomainEstate({
       name: formData.name,
-      address: formData.address,
       adminEmails: formData.adminEmails,
       streets: formData.streets,
       description: formData.description,
-      bankInformation: formData.bankInformation,
-      phone: formData.phone,
-      email: formData.email,
     })
 
     if ('data' in response) {
