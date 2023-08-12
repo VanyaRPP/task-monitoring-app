@@ -8,13 +8,7 @@ import {
   IReciever,
 } from '@common/api/paymentApi/payment.api.types'
 import { Form, message, Modal, Tabs, TabsProps } from 'antd'
-import React, {
-  FC,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import React, { FC, createContext, useContext, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
@@ -44,36 +38,33 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const { data: count = 0 } = useGetPaymentsCountQuery(undefined, {
     skip: edit,
   })
+  const [activeTabKey, setActiveTabKey] = useState(
+    getActiveTab(paymentData, edit)
+  )
+
+  // const companyId = Form.useWatch('company', form)
+  // const { company } = useCompany({ companyId, domainId, streetId, skip: !companyId })
+  // console.log('companyId', companyId)
+  // TODO: replace with correct request from backend by id
+  // TODO: HOW TO SUBSCRIBE ON CORRECT realEstateId
   const { data: realEstate } = useGetAllRealEstateQuery(
     { domainId: currPayment?.domain as string, streetId: currPayment?.street },
     { skip: !currPayment?.street }
   )
 
-  const [activeTabKey, setActiveTabKey] = useState(
-    getActiveTab(paymentData, edit)
-  )
-
+  // TODO: bug here. if realestate by domain and by street have more than 1 item, always shows first realestate (company)
+  // TODO: HOW TO SUBSCRIBE ON CORRECT domainId
   const provider: IProvider = realEstate?.length && {
+    // TODO: after fixing useCompany - we will have correct domain info
     description: realEstate[0]?.domain?.description,
   }
 
+  // TODO: after fixing useCompany - we will have correct company info
   const reciever: IReciever = realEstate?.length && {
     companyName: realEstate[0]?.companyName,
     adminEmails: realEstate[0]?.adminEmails,
     description: realEstate[0]?.description,
   }
-
-  useEffect(() => {
-    if (currPayment?.street) {
-      setCurrPayment({
-        ...currPayment,
-        provider,
-        reciever,
-        invoiceNumber: count + 1,
-      })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currPayment?.street])
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
@@ -87,7 +78,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       street: formData.street,
       company: formData.company,
       monthService: formData.monthService,
-      description: formData.description ? formData.description : '',
+      description: formData.description || '',
       generalSum: filteredInvoice?.reduce((acc, val) => acc + val.sum, 0) || 0,
       provider,
       reciever,

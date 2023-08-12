@@ -1,7 +1,3 @@
-import {
-  allowOnlyNumbers,
-  validateField,
-} from '@common/assets/features/validators'
 import { PlacesAutocomplete } from '@common/components/PlacesAutocomplete'
 import { IAddress } from '@common/modules/models/Task'
 import { IUser } from '@common/modules/models/User'
@@ -11,7 +7,6 @@ import {
   SetStateAction,
   useCallback,
   useEffect,
-  useState,
 } from 'react'
 import s from './index.module.scss'
 
