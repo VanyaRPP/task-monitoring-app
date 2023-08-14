@@ -53,7 +53,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const dataToMap = paymentData
     ? newData?.invoice
     : filterInvoiceObject(newData)
-  
+
   const dataSourcePreview: DataType[] = dataToMap.map((item) =>
     item.amount
       ? {
@@ -135,8 +135,11 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.payFixed}>
             Всього на суму:
             <div className={s.payBold}>
-      {numberToTextNumber(newData?.generalSum ? newData?.generalSum : newData?.debit)} грн
-    </div>
+              {numberToTextNumber(
+                newData?.generalSum ? newData?.generalSum : newData?.debit
+              )}
+              &nbsp;грн
+            </div>
           </div>
           <div className={s.payFixed}>
             Загальна сума оплати:

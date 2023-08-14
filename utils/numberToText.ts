@@ -16,7 +16,7 @@ export function numberToTextNumber(number) {
       'триста',
       'чотириста',
       "п'ятсот",
-      'шість сотень',
+      'шістсот',
       'сімсот',
       'вісімсот',
       "дев'ятсот",
@@ -33,8 +33,8 @@ export function numberToTextNumber(number) {
       "дев'яносто",
     ],
     o = [
-      'один',
-      'два',
+      'одна',
+      'дві',
       'три',
       'чотири',
       "п'ять",
@@ -44,7 +44,7 @@ export function numberToTextNumber(number) {
       "дев'ять",
     ],
     p = [
-      'одиннадцять',
+      'одинадцять',
       'дванадцять',
       'тринадцять',
       'чотирнадцять',
@@ -52,7 +52,7 @@ export function numberToTextNumber(number) {
       'шістнадцять',
       'сімнадцять',
       'вісімнадцять',
-      "де'ятнадцять",
+      "дев'ятнадцять",
     ]
 
   const str = number.toString()
