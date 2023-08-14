@@ -78,12 +78,14 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       company: formData.company,
       monthService: formData.monthService,
       description: formData.description ? formData.description : '',
-      generalSum: formData.credit
-        ? formData.credit
-        : formData.maintenancePrice.sum +
-          formData.placingPrice.sum +
-          formData.electricityPrice.sum +
-        formData.waterPrice.sum,
+     generalSum: formData.credit
+  ? formData.credit
+  : (
+    (formData.maintenancePrice?.sum || 0) +
+    (formData.placingPrice?.sum || 0) +
+    (formData.electricityPrice?.sum || 0) +
+    (formData.waterPrice?.sum || 0)
+  ),
       provider,
       reciever,
       invoice: formData.debit
