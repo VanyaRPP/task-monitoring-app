@@ -42,35 +42,17 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, edit)
   )
-
   const companyId = Form.useWatch('company', form)
   const { company } = useCompany({ companyId, skip: !companyId })
-  // console.log('companyId', companyId)
-  // TODO: replace with correct request from backend by id
-  // TODO: HOW TO SUBSCRIBE ON CORRECT realEstateId
-  /*const { data: realEstate } = useGetAllRealEstateQuery(
-    { domainId: currPayment?.domain as string, streetId: currPayment?.street },
-    { skip: !currPayment?.street }
-  )*/
 
-  // TODO: bug here. if realestate by domain and by street have more than 1 item, always shows first realestate (company)
-  // TODO: HOW TO SUBSCRIBE ON CORRECT domainId
   const provider: IProvider = company && {
-    // TODO: after fixing useCompany - we will have correct domain info
     description: company?.domain?.description || '',
   }
-
-  // TODO: after fixing useCompany - we will have correct company info
   const reciever: IReciever = company && {
     companyName: company?.companyName,
     adminEmails: company?.adminEmails,
     description: company?.description,
   }
-
-  useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('company', company)
-  }, [company])
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
@@ -136,9 +118,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
                   if (values.operation === Operations.Credit) {
                     handleSubmit()
                   } else {
-                    setCurrPayment(values)
-                    // eslint-disable-next-line no-console
-                    console.log('values', values)
+                    setCurrPayment({ ...values, provider, reciever })
                     setActiveTabKey('2')
                   }
                 })

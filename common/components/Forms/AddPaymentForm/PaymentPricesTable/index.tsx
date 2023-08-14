@@ -57,8 +57,6 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       paymentData,
       companyId,
       serviceId,
-      domainId,
-      streetId,
       edit,
     } as any)
 

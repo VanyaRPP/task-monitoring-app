@@ -8,9 +8,7 @@ import { usePaymentContext } from '@common/components/AddPaymentModal'
 export function AmountTotalAreaField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'amount']
-
   const companyId = Form.useWatch('company', form) || paymentData?.company
-
   const { company } = useCompany({ companyId, skip: edit })
 
   useEffect(() => {

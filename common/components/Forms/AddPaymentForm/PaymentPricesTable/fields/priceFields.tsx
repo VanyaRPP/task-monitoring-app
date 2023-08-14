@@ -37,12 +37,9 @@ export function PriceMaintainceField({ record, edit }) {
 export function PricePlacingField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
-
-  const domainId = Form.useWatch('domain', form) || paymentData?.domain
-  const streetId = Form.useWatch('street', form) || paymentData?.street
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
-  const { company, isLoading } = useCompany({ companyId, skip: edit })
+  const { company } = useCompany({ companyId, skip: edit })
 
   useEffect(() => {
     if (company?._id && company?.pricePerMeter) {
@@ -66,7 +63,7 @@ export function PriceElectricityField({ record, edit }) {
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
 
-  const { service, isLoading } = useService({ serviceId, domainId, streetId, skip: edit })
+  const { service } = useService({ serviceId, domainId, streetId, skip: edit })
 
   useEffect(() => {
     if (service?._id && service?.electricityPrice) {
@@ -90,7 +87,12 @@ export function PriceWaterField({ record, edit }) {
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
 
-  const { service, isLoading } = useService({ serviceId, domainId, streetId, skip: edit })
+  const { service, isLoading } = useService({
+    serviceId,
+    domainId,
+    streetId,
+    skip: edit,
+  })
 
   useEffect(() => {
     if ((service?._id, service?.waterPrice)) {
@@ -108,9 +110,6 @@ export function PriceWaterField({ record, edit }) {
 export function PriceGarbageCollectorField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
-
-  const domainId = Form.useWatch('domain', form) || paymentData?.domain
-  const streetId = Form.useWatch('street', form) || paymentData?.street
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
   const { company } = useCompany({ companyId, skip: edit })
