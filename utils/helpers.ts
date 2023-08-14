@@ -182,22 +182,22 @@ export const isAdminCheck = (roles) => {
   )
 }
 
-export function getPlainJsObjectFromMongoose(dataArray) { 
-  return dataArray.map(doc => {
-    const plainObject = {};
-    
+export function getPlainJsObjectFromMongoose(dataArray) {
+  return dataArray.map((doc) => {
+    const plainObject = {}
+
     for (const key in doc._doc) {
       if (doc._doc.hasOwnProperty(key)) {
-        plainObject[key] = doc._doc[key];
+        plainObject[key] = doc._doc[key]
       }
     }
-    
-    return plainObject;
-  });
+
+    return plainObject
+  })
 }
 
 export function composeFunctions(input, functions) {
-  return functions.reduce((result, func) => func(result), input);
+  return functions.reduce((result, func) => func(result), input)
 }
 
 /**
@@ -235,12 +235,12 @@ export const unpopulate = (arr: any[]): any[] => {
 }
 
 /**
- * Переводить `Date` в `string` місяця на українській і з великої літери
- * @param {Date} date дата
+ * Переводить номер місяця в його назву на українській і з великої літери
+ * @param {number} index порядковий номер місяця
  * @returns форматований місяць
  */
-export const DateToFormattedMonth = (date?: Date): string => {
-  const month = moment(date).locale('uk').format('MMMM')
+export const NumberToFormattedMonth = (index?: number): string => {
+  const month = moment().month(index).locale('uk').format('MMMM')
   return month[0].toUpperCase() + month.slice(1)
 }
 
