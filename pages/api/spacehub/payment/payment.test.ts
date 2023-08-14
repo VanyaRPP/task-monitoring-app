@@ -4,7 +4,12 @@ import handler from '.'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { domains, payments, realEstates, users } from '@utils/testData'
-import { removeVersion, unpopulate } from '@utils/helpers'
+import {
+  getPlainJsObjectFromMongoose,
+  composeFunctions,
+  removeVersion,
+  unpopulate,
+} from '@utils/helpers'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -34,12 +39,13 @@ describe('Payments API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = unpopulate(
-      removeVersion(response.data.map((domain) => domain._doc))
-    )
-    const expected = payments.reverse()
+    const received = composeFunctions(response.data, [
+      getPlainJsObjectFromMongoose,
+      unpopulate,
+      removeVersion,
+    ])
 
-    expect(received).toEqual(expected)
+    expect(received).toEqual(payments)
   })
 
   it('load payments as GlobalAdmin with limit - success', async () => {
@@ -64,14 +70,13 @@ describe('Payments API - GET', () => {
     }
 
     expect(response.status).toHaveBeenCalledWith(200)
+    const received = composeFunctions(response.data, [
+      getPlainJsObjectFromMongoose,
+      unpopulate,
+      removeVersion,
+    ])
 
-    const received = unpopulate(
-      removeVersion(response.data.map((domain) => domain._doc))
-    )
-    // why no reverse? - idk...
-    const expected = payments.slice(0, limit)
-
-    expect(received).toEqual(expected)
+    expect(received).toEqual(payments.slice(0, limit))
   })
 
   it('load payments as DomainAdmin - success', async () => {
@@ -95,11 +100,13 @@ describe('Payments API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = unpopulate(
-      removeVersion(response.data.map((domain) => domain._doc))
-    )
+    const received = composeFunctions(response.data, [
+      getPlainJsObjectFromMongoose,
+      unpopulate,
+      removeVersion,
+    ])
+
     const expected = payments
-      .reverse()
       .filter((payment) =>
         domains
           .find((domain) => domain._id === payment.domain)
@@ -130,11 +137,13 @@ describe('Payments API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = unpopulate(
-      removeVersion(response.data.map((domain) => domain._doc))
-    )
+    const received = composeFunctions(response.data, [
+      getPlainJsObjectFromMongoose,
+      unpopulate,
+      removeVersion,
+    ])
+
     const expected = payments
-      .reverse()
       .filter((payment) =>
         realEstates
           .find((realEstate) => realEstate._id === payment.company)

@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongodb'
 import { Roles } from './constants'
 
 export const users = {
@@ -21,7 +20,7 @@ export const users = {
 
 export const domains = [
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d11",
     area: [],
     name: 'domain 0',
     address: 'Domain_address_0',
@@ -33,7 +32,7 @@ export const domains = [
     email: 'domain_0@example.com',
   },
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d12",
     area: [],
     name: 'domain 1',
     address: 'Domain_address_1',
@@ -45,7 +44,7 @@ export const domains = [
     email: 'domain_1@example.com',
   },
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d13",
     area: [],
     name: 'domain 2',
     address: 'Domain_address_2',
@@ -57,7 +56,7 @@ export const domains = [
     email: 'domain_2@example.com',
   },
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d14",
     area: [],
     name: 'domain 3',
     address: 'Domain_address_3',
@@ -69,7 +68,7 @@ export const domains = [
     email: 'domain_3@example.com',
   },
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d15",
     area: [],
     name: 'domain 4',
     address: 'Domain_address_4',
@@ -81,7 +80,7 @@ export const domains = [
     email: 'domain_4@example.com',
   },
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d16",
     area: [],
     name: 'domain 5',
     address: 'Domain_address_5',
@@ -96,17 +95,17 @@ export const domains = [
 
 export const streets = [
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d31",
     address: 'street_0',
     city: 'street_0_city',
   },
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d32",
     address: 'street_1',
     city: 'street_1_city',
   },
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d33",
     address: 'street_2',
     city: 'street_2_city',
   },
@@ -115,32 +114,35 @@ export const streets = [
 // TODO: fix tests
 export const realEstates = [
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d21",
     domain: domains[0]._id,
     street: streets[0]._id,
     companyName: 'company_0',
     adminEmails: [users.user.email],
     pricePerMeter: 10,
+    description: 'none',
     servicePricePerMeter: 10,
     totalArea: 10,
     garbageCollector: 10,
   },
   {
-    _id: new ObjectId(),
+    _id:"64d68421d9ba2fc8fea79d22",
     domain: domains[1]._id,
     street: streets[1]._id,
     companyName: 'company_1',
     adminEmails: [users.user.email],
     pricePerMeter: 10,
     servicePricePerMeter: 10,
+    description: 'none',
     totalArea: 10,
     garbageCollector: 10,
   },
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d23",
     domain: domains[2]._id,
     street: streets[2]._id,
     companyName: 'company_2',
+    description: 'none',
     adminEmails: [users.domainAdmin.email],
     pricePerMeter: 10,
     servicePricePerMeter: 10,
@@ -165,7 +167,7 @@ export const realEstates = [
  */
 export const services = [
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d51",
     date: new Date(2020, 1, 12),
     domain: domains[0]._id,
     street: streets[0]._id,
@@ -176,7 +178,7 @@ export const services = [
     description: 'none',
   },
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d52",
     date: new Date(2020, 6, 19),
     domain: domains[1]._id,
     street: streets[1]._id,
@@ -187,7 +189,7 @@ export const services = [
     description: 'none',
   },
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d53",
     date: new Date(2020, 10, 11),
     domain: domains[0]._id,
     street: streets[1]._id,
@@ -198,7 +200,7 @@ export const services = [
     description: 'none',
   },
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d54",
     date: new Date(2021, 4, 17),
     domain: domains[0]._id,
     street: streets[2]._id,
@@ -209,7 +211,7 @@ export const services = [
     description: 'none',
   },
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d55",
     date: new Date(2021, 5, 15),
     domain: domains[1]._id,
     street: streets[2]._id,
@@ -220,7 +222,7 @@ export const services = [
     description: 'none',
   },
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d56",
     date: new Date(2021, 8, 10),
     domain: domains[2]._id,
     street: streets[2]._id,
@@ -248,14 +250,14 @@ export const services = [
  */
 export const payments = [
   {
-    _id: new ObjectId(),
-    invoiceNumber: 1,
+    _id: "64d68421d9ba2fc8fea79d61",
+    invoiceNumber: 3,
     type: 'debit',
-    date: new Date(2020, 1, 11),
-    domain: domains[0]._id,
-    street: streets[0]._id,
-    company: realEstates[0]._id,
-    monthService: services[0]._id,
+    date: new Date(2020, 10, 10),
+    domain: domains[2]._id,
+    street: streets[2]._id,
+    company: realEstates[2]._id,
+    monthService: services[2]._id,
     description: 'none',
     invoice: [
       {
@@ -285,19 +287,19 @@ export const payments = [
     ],
     services: [],
     // provider: {
-    //   name: 'provider_1',
-    //   address: 'address_of_provider_1',
+    //   name: 'provider_3',
+    //   address: 'address_of_provider_3',
     //   bankInformation: 'none',
     // },
     // receiver: {
-    //   companyName: 'receiver_1',
+    //   companyName: 'receiver_3',
     //   admonEmails: [],
-    //   phone: '+3801234567891',
+    //   phone: '+3801234567893',
     // },
     generalSum: 1000,
   },
   {
-    _id: new ObjectId(),
+    _id: "64d68421d9ba2fc8fea79d62",
     invoiceNumber: 2,
     type: 'debit',
     date: new Date(2020, 6, 18),
@@ -346,14 +348,14 @@ export const payments = [
     generalSum: 1000,
   },
   {
-    _id: new ObjectId(),
-    invoiceNumber: 3,
+    _id: "64d68421d9ba2fc8fea79d63",
+    invoiceNumber: 1,
     type: 'debit',
-    date: new Date(2020, 10, 10),
-    domain: domains[2]._id,
-    street: streets[2]._id,
-    company: realEstates[2]._id,
-    monthService: services[2]._id,
+    date: new Date(2020, 1, 11),
+    domain: domains[0]._id,
+    street: streets[0]._id,
+    company: realEstates[0]._id,
+    monthService: services[0]._id,
     description: 'none',
     invoice: [
       {
@@ -383,14 +385,14 @@ export const payments = [
     ],
     services: [],
     // provider: {
-    //   name: 'provider_3',
-    //   address: 'address_of_provider_3',
+    //   name: 'provider_1',
+    //   address: 'address_of_provider_1',
     //   bankInformation: 'none',
     // },
     // receiver: {
-    //   companyName: 'receiver_3',
+    //   companyName: 'receiver_1',
     //   admonEmails: [],
-    //   phone: '+3801234567893',
+    //   phone: '+3801234567891',
     // },
     generalSum: 1000,
   },
