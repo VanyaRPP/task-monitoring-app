@@ -134,11 +134,8 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.payFixed}>
             Всього на суму:
             <div className={s.payBold}>
-              {numberToTextNumber(
-                newData?.generalSum ? newData?.generalSum : newData?.debit
-              )}{' '}
-              грн
-            </div>
+      {numberToTextNumber(newData?.generalSum ? newData?.generalSum : newData?.debit)} грн
+    </div>
           </div>
           <div className={s.payFixed}>
             Загальна сума оплати:
