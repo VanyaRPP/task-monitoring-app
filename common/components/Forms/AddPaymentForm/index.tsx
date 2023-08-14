@@ -20,10 +20,11 @@ interface Props {
   users?: any
 }
 
-const AddPaymentForm: FC<Props> = ({ edit }) => {
+const AddPaymentForm: FC<Props> = ({ edit, paymentData }) => {
   const { form } = usePaymentContext()
   const initialValues = useInitialValues()
-
+  
+  
   return (
     <Form
       initialValues={initialValues}
@@ -83,11 +84,23 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
       </Form.Item>
 
       <Form.Item
+        name="invoiceNumber"
+        label="№ інвойса"
+      >
+        <InputNumber
+          placeholder="Вкажіть № інвойса"
+          disabled={edit}
+          min={1}
+          className={s.inputNumber}
+        />
+      </Form.Item>
+
+      <Form.Item
         name="rentPeriod"
         label="Оплата від"
       >
         <DatePicker.RangePicker
-          defaultValue={[moment(), moment().add(1,"M")]}
+          defaultValue={[moment(), moment().add(1, "M")]}
           format="DD.MM.YYYY"
           disabled={edit}
           disabledDate={(start) => start <= moment().subtract(1, "d")}
