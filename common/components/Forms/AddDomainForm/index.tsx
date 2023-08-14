@@ -111,50 +111,6 @@ const AddDomainModal: React.FC<Props> = ({
       <Form.Item name="desription" label="Description">
         <Input.TextArea maxLength={250} />
       </Form.Item>
-      <Form.Item
-        name="area"
-        label="Polygon (Domain area)"
-        rules={[{ required: true }]}
-      >
-        <Map
-          isLoaded={isLoaded}
-          mapOptions={waypoints.length < 2 ? mapOptions : null}
-          setAddress={setAddress}
-        >
-          <Polygon
-            options={{
-              fillColor: 'green',
-              fillOpacity: 0.2,
-              strokeColor: 'green',
-              strokeOpacity: 0.75,
-              strokeWeight: 2,
-              strokePosition: 2,
-            }}
-            editable
-            draggable
-            path={waypoints}
-            onMouseUp={onEdit}
-            onDragEnd={onEdit}
-            onLoad={onLoad}
-            onUnmount={onUnmount}
-          />
-
-          {/* Template to output all domains, that already created */}
-          {/* {domains.map((item) => (
-            <Polygon
-              options={{
-                fillColor: 'red',
-                fillOpacity: 0.2,
-                strokeColor: 'red',
-                strokeOpacity: 0.75,
-                strokeWeight: 2,
-                strokePosition: 2,
-              }}
-              path={item.path}
-            />
-          ))} */}
-        </Map>
-      </Form.Item>
     </Form>
   )
 }

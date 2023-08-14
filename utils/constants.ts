@@ -91,7 +91,8 @@ export const paymentsTitle = {
   electricityPrice: 'Електропостачання',
   waterPrice: 'Водопостачання',
   garbageCollectorPrice: 'Вивіз ТПВ',
-  inflicionPrice: 'Індекс інфляції'
+  inflicionPrice: 'Індекс інфляції',
+  waterPart: 'Нарахування водопостачання'
 }
 
 export enum ServiceType {
@@ -101,7 +102,8 @@ export enum ServiceType {
   Maintenance = 'maintenancePrice',
   GarbageCollector = 'garbageCollectorPrice',
   Inflicion = 'inflicionPrice',
-  Custom = 'custom'
+  Custom = 'custom',
+  WaterPart = 'waterPart',
 }
 
 export const quarters = {
