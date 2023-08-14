@@ -13,8 +13,6 @@ export function useCustomDataSource({
   const [ds, setDataSource] = useState<IPaymentTableData[]>(dataSource)
   const { company } = useCompany({
     companyId,
-    domainId,
-    streetId,
     skip: edit,
   })
 
@@ -45,8 +43,11 @@ export function useCustomDataSource({
       setDataSource(prev => refreshIndexes([...prev, inflicion]))
     }
 
+    // eslint-disable-next-line no-console
+    console.log('company ds', company)
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [company?._id])
+  }, [company])
 
   const removeDataSource = (id) => {
     setDataSource((prev) =>

@@ -17,7 +17,7 @@ export function PriceMaintainceField({ record, edit }) {
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
   const { service } = useService({ serviceId, domainId, streetId, skip: edit })
-  const { company } = useCompany({ companyId, domainId, streetId, skip: edit })
+  const { company } = useCompany({ companyId, skip: edit })
 
   useEffect(() => {
     if (company?.servicePricePerMeter) {
@@ -42,7 +42,7 @@ export function PricePlacingField({ record, edit }) {
   const streetId = Form.useWatch('street', form) || paymentData?.street
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
-  const { company, isLoading } = useCompany({ companyId, domainId, streetId, skip: edit })
+  const { company, isLoading } = useCompany({ companyId, skip: edit })
 
   useEffect(() => {
     if (company?._id && company?.pricePerMeter) {
@@ -113,7 +113,7 @@ export function PriceGarbageCollectorField({ record, edit }) {
   const streetId = Form.useWatch('street', form) || paymentData?.street
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
-  const { company } = useCompany({ companyId, domainId, streetId, skip: edit })
+  const { company } = useCompany({ companyId, skip: edit })
 
   useEffect(() => {
     if (company?._id && company?.garbageCollector) {
@@ -138,7 +138,7 @@ export function PriceInflicionField({ record, edit }) {
     Form.useWatch('monthService', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
-  const { company } = useCompany({ companyId, domainId, streetId, skip: edit })
+  const { company } = useCompany({ companyId, skip: edit })
 
   const { service, isLoading } = useService({
     serviceId,
@@ -149,7 +149,10 @@ export function PriceInflicionField({ record, edit }) {
 
   useEffect(() => {
     if (service?._id && service?.inflicionPrice) {
-      form.setFieldValue(fieldName, (service.inflicionPrice * company.pricePerMeter))
+      form.setFieldValue(
+        fieldName,
+        service.inflicionPrice * company.pricePerMeter
+      )
     }
   }, [service?._id, service?.inflicionPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 
@@ -170,7 +173,7 @@ export function PriceWaterPartField({ record, edit }) {
     Form.useWatch('monthService', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
-  const { company } = useCompany({ companyId, domainId, streetId, skip: edit })
+  const { company } = useCompany({ companyId, skip: edit })
 
   const { service, isLoading } = useService({
     serviceId,
