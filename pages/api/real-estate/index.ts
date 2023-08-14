@@ -19,9 +19,6 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        await Domain.find({});
-        await Street.find({});
-        
         const options = {}
         const { domainId, streetId } = req.query
         if (isGlobalAdmin && domainId && streetId) {

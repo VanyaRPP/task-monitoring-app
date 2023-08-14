@@ -17,8 +17,6 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        await Street.find({});
-
         const { domainId } = req.query
         if (domainId) {
           
