@@ -87,7 +87,7 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
         label="Оплата від"
       >
         <DatePicker.RangePicker
-          defaultValue={[moment(), null]}
+          defaultValue={[moment(), moment().add(1,"m")]}
           format="DD.MM.YYYY"
           disabled={edit}
           disabledDate={(start) => start <= moment().subtract(1, "d")}
