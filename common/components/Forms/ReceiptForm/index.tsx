@@ -25,7 +25,6 @@ interface DataType {
 
 const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const newData = currPayment || paymentData
-
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -52,22 +51,22 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const dataToMap = paymentData
     ? newData?.invoice
     : filterInvoiceObject(newData)
-  
+
   const dataSourcePreview: DataType[] = dataToMap.map((item) =>
     item.amount
       ? {
-          id: newData?.invoice?.indexOf(item) + 1,
-          Назва: `${fieldNames[item.type] || item.name} (${date})`,
-          Кількість: +item.amount,
-          Ціна: +item.price,
-          Сума: +item.sum,
-        }
+        id: newData?.invoice?.indexOf(item) + 1,
+        Назва: `${fieldNames[item.type] || item.name} (${date})`,
+        Кількість: +item.amount,
+        Ціна: +item.price,
+        Сума: +item.sum,
+      }
       : {
-          id: newData?.invoice?.indexOf(item) + 1,
-          Назва: `${fieldNames[item.type] || item.name} (${date})`,
-          Ціна: +item.price,
-          Сума: +item.sum,
-        }
+        id: newData?.invoice?.indexOf(item) + 1,
+        Назва: `${fieldNames[item.type] || item.name} (${date})`,
+        Ціна: +item.price,
+        Сума: +item.sum,
+      }
   )
 
   return (
@@ -135,7 +134,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
             Всього на суму:
             <div className={s.payBold}>
               {numberToTextNumber(
-                newData?.generalSum ? newData?.generalSum : newData?.debit
+                newData?.generalSum ? newData?.generalSum : 0,newData?.type
               )}{' '}
               грн
             </div>
@@ -143,7 +142,7 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.payFixed}>
             Загальна сума оплати:
             <div className={s.payBoldSum}>
-              {newData?.generalSum ? newData?.generalSum : newData?.debit} грн
+              {newData?.generalSum} грн
             </div>
           </div>
 

@@ -80,18 +80,18 @@ export const getName = (name, obj) => {
   return key
 }
 
-export function numberToTextNumber(number) {
+export function numberToTextNumber(number, type) {
   const k = [
-      'одна тисяча',
-      'дві тисячі',
-      'три тисячі',
-      'чотири тисячі',
-      "п'ять тисяч",
-      'шість тисяч',
-      'сім тисяч',
-      'вісім тисяч',
-      "дев'ять тисяч",
-    ],
+    'одна тисяча',
+    'дві тисячі',
+    'три тисячі',
+    'чотири тисячі',
+    "п'ять тисяч",
+    'шість тисяч',
+    'сім тисяч',
+    'вісім тисяч',
+    "дев'ять тисяч",
+  ],
     h = [
       'сто',
       'двісті',
@@ -115,6 +115,7 @@ export function numberToTextNumber(number) {
       "дев'яносто",
     ],
     o = [
+      'нуль',
       'один',
       'два',
       'три',
@@ -137,15 +138,17 @@ export function numberToTextNumber(number) {
       "де'ятнадцять",
     ]
 
+  const outype = type === "debit" ? "(Дебіт)" : "(Кредит)"
   const str = number.toString()
   let out = ''
-  if (str.length == 1) return o[number - 1]
+  if (number == 0) return o[number]
+  if (str?.length == 1) return o[number]
   else if (str.length == 2) {
     if (str[0] == 1) out = p[parseInt(str[1]) - 1]
     else
       out =
         t[parseInt(str[0]) - 1] +
-        (str[1] != '0' ? ' ' + o[parseInt(str[1]) - 1] : '')
+        (str[1] != '0' ? ' ' + o[parseInt(str[1])] : '')
   } else if (str.length == 3) {
     if (str[1] == 1)
       out =
@@ -155,7 +158,7 @@ export function numberToTextNumber(number) {
       out =
         h[parseInt(str[0]) - 1] +
         (str[1] != '0' ? ' ' + t[parseInt(str[1]) - 1] : '') +
-        (str[2] != '0' ? ' ' + o[parseInt(str[2]) - 1] : '')
+        (str[2] != '0' ? ' ' + o[parseInt(str[2])] : '')
   } else if (str.length == 4) {
     if (str[2] == 1)
       out =
@@ -167,13 +170,13 @@ export function numberToTextNumber(number) {
         k[parseInt(str[0]) - 1] +
         (str[1] != '0' ? ' ' + h[parseInt(str[1]) - 1] : '') +
         (str[2] != '0' ? ' ' + t[parseInt(str[2]) - 1] : '') +
-        (str[3] != '0' ? ' ' + o[parseInt(str[3]) - 1] : '')
+        (str[3] != '0' ? ' ' + o[parseInt(str[3])] : '')
   }
 
   const arr = out.split('')
   arr[0] = typeof arr?.[0] === 'string' ? arr[0].toUpperCase() : ''
   out = arr.join('')
-  return out
+  return outype + out
 }
 
 export const isAdminCheck = (roles) => {
@@ -252,14 +255,14 @@ export function filterInvoiceObject(obj) {
     if (typeof obj[key] === 'object' && obj[key].hasOwnProperty('sum')) {
       services.includes(key)
         ? filtered.push({
-            type: key,
-            ...obj[key],
-          })
+          type: key,
+          ...obj[key],
+        })
         : filtered.push({
-            type: ServiceType.Custom,
-            name: key,
-            ...obj[key],
-          })
+          type: ServiceType.Custom,
+          name: key,
+          ...obj[key],
+        })
     }
   }
 

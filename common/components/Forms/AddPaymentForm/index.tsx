@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
-import { Form, FormInstance, Input, InputNumber, Select, Button } from 'antd'
+import { Form, FormInstance, Input, InputNumber, Select, Button, DatePicker } from 'antd'
 import s from './style.module.scss'
 import { Operations, ServiceType } from '@utils/constants'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
@@ -11,6 +11,7 @@ import PaymentPricesTable from './PaymentPricesTable'
 import MonthServiceSelect from './MonthServiceSelect'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
+import moment from 'moment'
 
 interface Props {
   form: FormInstance<any>
@@ -19,10 +20,11 @@ interface Props {
   users?: any
 }
 
-const AddPaymentForm: FC<Props> = ({ edit }) => {
+const AddPaymentForm: FC<Props> = ({ edit, paymentData }) => {
   const { form } = usePaymentContext()
   const initialValues = useInitialValues()
-
+  
+  
   return (
     <Form
       initialValues={initialValues}
@@ -79,6 +81,30 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
             Дебет (Реалізація)
           </Select.Option>
         </Select>
+      </Form.Item>
+
+      <Form.Item
+        name="invoiceNumber"
+        label="№ інвойса"
+      >
+        <InputNumber
+          placeholder="Вкажіть № інвойса"
+          disabled={edit}
+          min={1}
+          className={s.inputNumber}
+        />
+      </Form.Item>
+
+      <Form.Item
+        name="rentPeriod"
+        label="Оплата від"
+      >
+        <DatePicker.RangePicker
+          defaultValue={[moment(), moment().add(1, "M")]}
+          format="DD.MM.YYYY"
+          disabled={edit}
+          disabledDate={(start) => start <= moment().subtract(1, "d")}
+        />
       </Form.Item>
 
       <Form.Item
