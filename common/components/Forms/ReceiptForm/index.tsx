@@ -5,7 +5,8 @@ import s from './style.module.scss'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useReactToPrint } from 'react-to-print'
 import { renderCurrency } from '@common/components/DashboardPage/blocks/payments'
-import { filterInvoiceObject, numberToTextNumber } from '@utils/helpers'
+import { filterInvoiceObject } from '@utils/helpers'
+import { numberToTextNumber } from '@utils/numberToText'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import { dateToDayYearMonthFormat } from '@common/assets/features/formatDate'
 import useService from '@common/modules/hooks/useService'
@@ -134,9 +135,9 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
             Всього на суму:
             <div className={s.payBold}>
               {numberToTextNumber(
-                newData?.generalSum ? newData?.generalSum : 0,newData?.type
-              )}{' '}
-              грн
+                newData?.generalSum || newData?.debit
+              )}
+              &nbsp;грн
             </div>
           </div>
           <div className={s.payFixed}>
