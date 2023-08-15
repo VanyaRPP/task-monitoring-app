@@ -19,10 +19,14 @@ export default async function handler(
     case 'GET':
       try {
         const options = {}
-        const { domainId, streetId } = req.query
+        const { domainId, streetId, companyId } = req.query
         if (isGlobalAdmin && domainId && streetId) {
           options.domain = domainId
           options.street = streetId
+        }
+
+        if ((isGlobalAdmin || isDomainAdmin) && companyId) {
+          options._id = companyId
         }
 
         if (isDomainAdmin) {

@@ -1,25 +1,19 @@
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 
 interface IUseCompanyProps {
-  companyId?: any
-  domainId?: string
-  streetId?: any
+  companyId: any
   skip?: boolean
 }
 
-function useCompany({ companyId, domainId, streetId, skip }: IUseCompanyProps) {
-  // TODO: fix
-  // something with streetId
-  const strtId = streetId?._id || streetId
-  const { data: companies, isLoading } = useGetAllRealEstateQuery({
-    domainId,
-    streetId: strtId,
-  }, { skip })
-
-  // TODO: fix
-  // something with companyId
+function useCompany({ companyId, skip }: IUseCompanyProps) {
   const cmpnyId = companyId?._id || companyId
-  const company = companies?.find((i) => i._id === cmpnyId)
+  const { data: realEstates, isLoading } = useGetAllRealEstateQuery(
+    { companyId: cmpnyId },
+    { skip }
+  )
+
+  const company = realEstates ? realEstates[0] : null
+
   return { company, isLoading }
 }
 

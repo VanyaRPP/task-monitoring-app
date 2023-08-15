@@ -4,7 +4,7 @@ import React, { FC, ReactNode } from 'react'
 import s from './style.module.scss'
 
 interface Props {
-  children: ReactNode
+  children?: ReactNode
   title?: ReactNode
   className?: string
   style?: React.CSSProperties

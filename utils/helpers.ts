@@ -139,12 +139,12 @@ export const unpopulate = (arr: any[]): any[] => {
 }
 
 /**
- * Переводить `Date` в `string` місяця на українській і з великої літери
- * @param {Date} date дата
+ * Переводить номер місяця в його назву на українській і з великої літери
+ * @param {number} index порядковий номер місяця
  * @returns форматований місяць
  */
-export const DateToFormattedMonth = (date?: Date): string => {
-  const month = moment(date).locale('uk').format('MMMM')
+export const NumberToFormattedMonth = (index?: number): string => {
+  const month = moment().month(index).locale('uk').format('MMMM')
   return month[0].toUpperCase() + month.slice(1)
 }
 
@@ -156,14 +156,14 @@ export function filterInvoiceObject(obj) {
     if (typeof obj[key] === 'object' && obj[key].hasOwnProperty('sum')) {
       services.includes(key)
         ? filtered.push({
-            type: key,
-            ...obj[key],
-          })
+          type: key,
+          ...obj[key],
+        })
         : filtered.push({
-            type: ServiceType.Custom,
-            name: key,
-            ...obj[key],
-          })
+          type: ServiceType.Custom,
+          name: key,
+          ...obj[key],
+        })
     }
   }
 

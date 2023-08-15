@@ -8,7 +8,7 @@ import {
   IReciever,
 } from '@common/api/paymentApi/payment.api.types'
 import { Form, message, Modal, Tabs, TabsProps } from 'antd'
-import React, { FC, createContext, useContext, useState } from 'react'
+import React, { FC, createContext, useContext, useEffect, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
@@ -16,6 +16,7 @@ import { Operations } from '@utils/constants'
 import { FormInstance } from 'antd/es/form/Form'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { filterInvoiceObject } from '@utils/helpers'
+import useCompany from '@common/modules/hooks/useCompany'
 
 interface Props {
   closeModal: VoidFunction
@@ -41,29 +42,16 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, edit)
   )
+  const companyId = Form.useWatch('company', form)
+  const { company } = useCompany({ companyId, skip: !companyId })
 
-  // const companyId = Form.useWatch('company', form)
-  // const { company } = useCompany({ companyId, domainId, streetId, skip: !companyId })
-  // console.log('companyId', companyId)
-  // TODO: replace with correct request from backend by id
-  // TODO: HOW TO SUBSCRIBE ON CORRECT realEstateId
-  const { data: realEstate } = useGetAllRealEstateQuery(
-    { domainId: currPayment?.domain as string, streetId: currPayment?.street },
-    { skip: !currPayment?.street }
-  )
-
-  // TODO: bug here. if realestate by domain and by street have more than 1 item, always shows first realestate (company)
-  // TODO: HOW TO SUBSCRIBE ON CORRECT domainId
-  const provider: IProvider = realEstate?.length && {
-    // TODO: after fixing useCompany - we will have correct domain info
-    description: realEstate[0]?.domain?.description,
+  const provider: IProvider = company && {
+    description: company?.domain?.description || '',
   }
-
-  // TODO: after fixing useCompany - we will have correct company info
-  const reciever: IReciever = realEstate?.length && {
-    companyName: realEstate[0]?.companyName,
-    adminEmails: realEstate[0]?.adminEmails,
-    description: realEstate[0]?.description,
+  const reciever: IReciever = company && {
+    companyName: company?.companyName,
+    adminEmails: company?.adminEmails,
+    description: company?.description,
   }
 
   const handleSubmit = async () => {
@@ -130,7 +118,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
                   if (values.operation === Operations.Credit) {
                     handleSubmit()
                   } else {
-                    setCurrPayment(values)
+                    setCurrPayment({ ...values, provider, reciever })
                     setActiveTabKey('2')
                   }
                 })

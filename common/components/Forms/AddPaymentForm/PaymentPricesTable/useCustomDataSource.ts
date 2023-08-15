@@ -6,15 +6,11 @@ import { ServiceType, paymentsTitle } from '@utils/constants'
 export function useCustomDataSource({
   paymentData,
   companyId,
-  domainId,
-  streetId,
   edit,
 }) {
   const [ds, setDataSource] = useState<IPaymentTableData[]>(dataSource)
   const { company } = useCompany({
     companyId,
-    domainId,
-    streetId,
     skip: edit,
   })
 
@@ -44,9 +40,8 @@ export function useCustomDataSource({
       }
       setDataSource(prev => refreshIndexes([...prev, inflicion]))
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [company?._id])
+  }, [company])
 
   const removeDataSource = (id) => {
     setDataSource((prev) =>
