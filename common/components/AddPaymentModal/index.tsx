@@ -8,13 +8,12 @@ import {
   IReciever,
 } from '@common/api/paymentApi/payment.api.types'
 import { Form, message, Modal, Tabs, TabsProps } from 'antd'
-import React, { FC, createContext, useContext, useEffect, useState } from 'react'
+import React, { FC, createContext, useContext, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
 import { Operations } from '@utils/constants'
 import { FormInstance } from 'antd/es/form/Form'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { filterInvoiceObject } from '@utils/helpers'
 import useCompany from '@common/modules/hooks/useCompany'
 
@@ -28,6 +27,7 @@ export const PaymentContext = createContext(
   {} as {
     paymentData: any
     form: FormInstance
+    invoiceCount: number
   }
 )
 export const usePaymentContext = () => useContext(PaymentContext)
@@ -39,6 +39,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const { data: count = 0 } = useGetPaymentsCountQuery(undefined, {
     skip: edit,
   })
+  
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, edit)
   )
@@ -57,15 +58,16 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const handleSubmit = async () => {
     const formData = await form.validateFields()
     const filteredInvoice = filterInvoiceObject(formData)
-
+    // Todo: get RentPeroid 
     const response = await addPayment({
-      invoiceNumber: count + 1,
+      invoiceNumber: formData.invoiceNumber,
       type: formData.credit ? Operations.Credit : Operations.Debit,
       date: new Date(),
       domain: formData.domain,
       street: formData.street,
       company: formData.company,
       monthService: formData.monthService,
+      rentPeriod: formData.rentPeriod,
       description: formData.description || '',
       generalSum: filteredInvoice?.reduce((acc, val) => acc + val.sum, 0) || 0,
       provider,
@@ -87,7 +89,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       key: '1',
       label: 'Рахунок',
       children: (
-        <AddPaymentForm form={form} edit={edit} paymentData={paymentData} />
+        <AddPaymentForm form={form} edit={edit} paymentData={paymentData} invoiceCount={count}/>
       ),
     },
     {
@@ -105,6 +107,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       value={{
         paymentData,
         form,
+        invoiceCount:count
       }}
     >
       <Modal

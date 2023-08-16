@@ -31,6 +31,7 @@ export interface IPayment {
   street: string
   company: Partial<IRealestate> | string
   monthService: string
+  rentPeriod: []
   description?: string
   services?: IPaymentTableData[]
   invoice: IPaymentField[]

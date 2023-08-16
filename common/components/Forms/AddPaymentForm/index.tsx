@@ -18,13 +18,15 @@ interface Props {
   paymentData: any
   edit: boolean
   users?: any
+  invoiceCount?: number
 }
 
-const AddPaymentForm: FC<Props> = ({ edit, paymentData }) => {
+
+const AddPaymentForm: FC<Props> = ({ edit }) => {
   const { form } = usePaymentContext()
   const initialValues = useInitialValues()
-  
-  
+
+
   return (
     <Form
       initialValues={initialValues}
@@ -90,6 +92,7 @@ const AddPaymentForm: FC<Props> = ({ edit, paymentData }) => {
         <InputNumber
           placeholder="Вкажіть № інвойса"
           disabled={edit}
+          value={(initialValues.invoiceNumber)}
           min={1}
           className={s.inputNumber}
         />
@@ -100,10 +103,9 @@ const AddPaymentForm: FC<Props> = ({ edit, paymentData }) => {
         label="Оплата від"
       >
         <DatePicker.RangePicker
-          defaultValue={[moment(), moment().add(1, "M")]}
+          value={initialValues.rentPeriod}
           format="DD.MM.YYYY"
           disabled={edit}
-          disabledDate={(start) => start <= moment().subtract(1, "d")}
         />
       </Form.Item>
 
@@ -155,7 +157,7 @@ const AddPaymentForm: FC<Props> = ({ edit, paymentData }) => {
 }
 
 function useInitialValues() {
-  const { paymentData } = usePaymentContext()
+  const { paymentData, invoiceCount } = usePaymentContext()
   const invoices = {
     maintenance: paymentData?.invoice.find(
       (item) => item?.type === ServiceType.Maintenance
@@ -187,6 +189,7 @@ function useInitialValues() {
     return acc
   }, {})
 
+
   const initialValues = {
     domain: paymentData?.domain?.name,
     street:
@@ -198,6 +201,8 @@ function useInitialValues() {
     credit: paymentData?.credit,
     generalSum: paymentData?.paymentData,
     debit: paymentData?.debit,
+    rentPeriod: [moment(), moment().add(1, "M")],
+    invoiceNumber: (invoiceCount + 1),
     operation: paymentData ? paymentData.type : Operations.Credit,
     [ServiceType.Maintenance]: {
       amount: invoices.maintenance?.amount,

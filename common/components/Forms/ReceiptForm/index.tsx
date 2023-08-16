@@ -45,10 +45,6 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     ? getFormattedDate(paymentData?.monthService?.date)
     : getFormattedDate(service?.date)
 
-  const currentDate = newData?.date ? new Date(newData?.date) : new Date()
-  const expirationDate = newData?.date ? new Date(newData?.date) : new Date()
-  expirationDate.setDate(currentDate.getDate() + 5)
-
   const dataToMap = paymentData
     ? newData?.invoice
     : filterInvoiceObject(newData)
@@ -113,12 +109,12 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
 
           <div className={s.datecellDate}>
             Від &nbsp;
-            {dateToDayYearMonthFormat(currentDate)}
+            {newData?.rentPeriod ? newData?.rentPeriod[0]?.format("DD-MM-YYYY") : ""}
             &nbsp; року.
           </div>
           <div className={s.datecell}>
             Підлягає сплаті до &nbsp;
-            {dateToDayYearMonthFormat(expirationDate)}
+            {newData?.rentPeriod ? newData?.rentPeriod[1]?.format("DD-MM-YYYY") : ""}
             &nbsp; року.
           </div>
         </div>
