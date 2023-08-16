@@ -106,17 +106,14 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.datecellTitle}>
             INVOICE № INV-{newData.invoiceNumber}
           </div>
-
           <div className={s.datecellDate}>
             Від &nbsp;
-            {/* {newData?.invoiceCreationDate ? newData?.invoiceCreationDate[0]?.format("DD-MM-YYYY") : ""} */}
-            {newData?.invoiceCreationDate}
+            {newData?.invoiceCreationDate.format("DD.MM.YYYY")}
             &nbsp; року.
           </div>
           <div className={s.datecell}>
             Підлягає сплаті до &nbsp;
-            {/* {newData?.invoiceCreationDate ? newData?.rentPeriod[1]?.format("DD-MM-YYYY") : ""} */}
-            {newData?.invoiceCreationDate} + 5 &nbsp; року.
+            {newData?.invoiceCreationDate.add(5, "d").format("DD.MM.YYYY")}&nbsp; року.
           </div>
         </div>
         <div className={s.tableSum}>

@@ -3,6 +3,7 @@ import { IUser } from './../../modules/models/User'
 import { IPaymentTableData } from '@utils/tableData'
 import { ObjectId } from 'mongoose'
 import { IRealestate } from '../realestateApi/realestate.api.types'
+import { Moment } from 'moment'
 
 export interface IPaymentField {
   type: string

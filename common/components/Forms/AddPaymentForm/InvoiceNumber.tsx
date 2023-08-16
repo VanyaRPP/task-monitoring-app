@@ -1,6 +1,7 @@
 import { useGetPaymentsCountQuery } from '@common/api/paymentApi/payment.api'
 import { Form, InputNumber } from 'antd'
 import { useEffect } from 'react'
+import s from "./style.module.scss"
 
 export default function InvoiceNumber({ form, edit }) {
   const { data: invoiceNumber = 0 } = useGetPaymentsCountQuery(undefined, {

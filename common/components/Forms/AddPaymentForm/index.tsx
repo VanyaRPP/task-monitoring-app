@@ -18,7 +18,7 @@ import PaymentPricesTable from './PaymentPricesTable'
 import MonthServiceSelect from './MonthServiceSelect'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
-// import moment from 'moment'
+import moment from 'moment'
 import InvoiceNumber from './InvoiceNumber'
 
 interface Props {
@@ -39,6 +39,7 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
       layout="vertical"
       className={s.Form}
     >
+      
       {edit ? (
         <Form.Item name="domain" label="Домен">
           <Input disabled />
@@ -91,14 +92,13 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
       </Form.Item>
 
       <InvoiceNumber form={form} edit={edit} />
-
-      {/* <Form.Item name="invoiceCreationDate" label="Оплата від">
-        <DatePicker.RangePicker
-          // value={initialValues.rentPeriod}
+      <Form.Item name="invoiceCreationDate" label="Оплата від">
+        <DatePicker
+          value={moment(initialValues.invoiceCreationDate)}
           format="DD.MM.YYYY"
           disabled={edit}
         />
-      </Form.Item> */}
+      </Form.Item>
 
       <Form.Item
         shouldUpdate={(prevValues, currentValues) =>
@@ -190,9 +190,7 @@ function useInitialValues() {
     generalSum: paymentData?.paymentData,
     debit: paymentData?.debit,
     invoiceNumber: paymentData?.invoiceNumber,
-    invoiceCreationDate: Date.now(),
-    // TODO:
-    // invoiceCreationDate: [moment(), moment().add(1, 'M')],
+    invoiceCreationDate: moment(),
     operation: paymentData ? paymentData.type : Operations.Credit,
     [ServiceType.Maintenance]: {
       amount: invoices.maintenance?.amount,
