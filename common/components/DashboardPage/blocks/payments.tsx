@@ -1,5 +1,5 @@
 import React, { ReactElement, useState } from 'react'
-import { Alert, message, Pagination, Popconfirm, Table } from 'antd'
+import { Alert, message, Pagination, Popconfirm, Table, Tag } from 'antd'
 import { Button } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
@@ -194,7 +194,30 @@ const PaymentsBlock = () => {
 
   if (payments?.currentCompaniesCount > 1) {
     columns.unshift({
-      title: 'Компанія',
+      title: () => (
+        <>
+          {'Компанія'}
+          {filters?.company?.length
+            ? filters.company.map((company) => (
+                <Tag
+                  key={company}
+                  closable
+                  onClose={() =>
+                    setFilters({
+                      ...filters,
+                      company: filters.company.filter(
+                        (item) => item !== company
+                      ),
+                    })
+                  }
+                >
+                  {company}
+                </Tag>
+              ))
+            : 'Всі'}
+        </>
+      ),
+      width: 120,
       dataIndex: 'company',
       filters:
         pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
@@ -205,7 +228,28 @@ const PaymentsBlock = () => {
 
   if (payments?.currentDomainsCount > 1) {
     columns.unshift({
-      title: 'Домен',
+      title: () => (
+        <>
+          {'Домен'}
+          {filters?.domain?.length
+            ? filters.domain.map((domain) => (
+                <Tag
+                  key={domain}
+                  closable
+                  onClose={() =>
+                    setFilters({
+                      ...filters,
+                      domain: filters.domain.filter((item) => item !== domain),
+                    })
+                  }
+                >
+                  {domain}
+                </Tag>
+              ))
+            : 'Всі'}
+        </>
+      ),
+      width: 120,
       dataIndex: 'domain',
       filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
       filteredValue: filters?.domain || null,
