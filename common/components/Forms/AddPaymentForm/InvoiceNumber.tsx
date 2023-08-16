@@ -8,7 +8,9 @@ export default function InvoiceNumber({ form, edit }) {
   })
 
   useEffect(() => {
-    form.setFieldValue('invoiceNumber', invoiceNumber + 1)
+    if (!edit) { 
+      form.setFieldValue('invoiceNumber', invoiceNumber + 1)
+    }
   }, [invoiceNumber]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
@@ -19,7 +21,6 @@ export default function InvoiceNumber({ form, edit }) {
       <InputNumber
         placeholder="Вкажіть № інвойса"
         disabled={edit}
-        min={1}
       />
     </Form.Item>
   )

@@ -30,7 +30,7 @@ interface Props {
 
 const AddPaymentForm: FC<Props> = ({ edit }) => {
   const { form } = usePaymentContext()
-  const initialValues = useInitialValues({ edit })
+  const initialValues = useInitialValues()
 
   return (
     <Form
@@ -144,7 +144,7 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
   )
 }
 
-function useInitialValues({ edit }) {
+function useInitialValues() {
   const { paymentData } = usePaymentContext()
 
   const invoices = {
@@ -189,6 +189,7 @@ function useInitialValues({ edit }) {
     credit: paymentData?.credit,
     generalSum: paymentData?.paymentData,
     debit: paymentData?.debit,
+    invoiceNumber: paymentData?.invoiceNumber,
     invoiceCreationDate: Date.now(),
     // TODO:
     // invoiceCreationDate: [moment(), moment().add(1, 'M')],

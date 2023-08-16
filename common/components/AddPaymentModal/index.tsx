@@ -37,7 +37,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     getActiveTab(paymentData, edit)
   )
   const companyId = Form.useWatch('company', form)
-  const { company } = useCompany({ companyId, skip: !companyId })
+  const { company } = useCompany({ companyId, skip: !companyId || edit })
 
   const provider: IProvider = company && {
     description: company?.domain?.description || '',
