@@ -58,7 +58,6 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       street: formData.street,
       company: formData.company,
       monthService: formData.monthService,
-      // TODO: check
       invoiceCreationDate: formData.invoiceCreationDate,
       description: formData.description || '',
       generalSum: filteredInvoice?.reduce((acc, val) => acc + val.sum, 0) || 0,
