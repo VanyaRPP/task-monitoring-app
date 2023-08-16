@@ -27,7 +27,6 @@ export const PaymentContext = createContext(
   {} as {
     paymentData: any
     form: FormInstance
-    invoiceCount: number
   }
 )
 export const usePaymentContext = () => useContext(PaymentContext)
@@ -36,9 +35,6 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const { data: count = 0 } = useGetPaymentsCountQuery(undefined, {
-    skip: edit,
-  })
   
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, edit)
@@ -67,7 +63,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       street: formData.street,
       company: formData.company,
       monthService: formData.monthService,
-      rentPeriod: formData.rentPeriod,
+      invoiceCreationDate: formData.invoiceCreationDate,
       description: formData.description || '',
       generalSum: filteredInvoice?.reduce((acc, val) => acc + val.sum, 0) || 0,
       provider,
@@ -89,7 +85,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       key: '1',
       label: 'Рахунок',
       children: (
-        <AddPaymentForm form={form} edit={edit} paymentData={paymentData} invoiceCount={count}/>
+        <AddPaymentForm form={form} edit={edit} paymentData={paymentData} />
       ),
     },
     {
@@ -107,7 +103,6 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       value={{
         paymentData,
         form,
-        invoiceCount:count
       }}
     >
       <Modal

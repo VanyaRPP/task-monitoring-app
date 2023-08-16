@@ -1,6 +1,14 @@
-import React, { FC } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import { validateField } from '@common/assets/features/validators'
-import { Form, FormInstance, Input, InputNumber, Select, Button, DatePicker } from 'antd'
+import {
+  Form,
+  FormInstance,
+  Input,
+  InputNumber,
+  Select,
+  Button,
+  DatePicker,
+} from 'antd'
 import s from './style.module.scss'
 import { Operations, ServiceType } from '@utils/constants'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
@@ -12,23 +20,23 @@ import MonthServiceSelect from './MonthServiceSelect'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import moment from 'moment'
+import { useGetPaymentsCountQuery } from '@common/api/paymentApi/payment.api'
 
 interface Props {
   form: FormInstance<any>
   paymentData: any
   edit: boolean
   users?: any
-  invoiceCount?: number
 }
-
 
 const AddPaymentForm: FC<Props> = ({ edit }) => {
   const { form } = usePaymentContext()
-  const initialValues = useInitialValues()
-
+  const initialValues = useInitialValues({ edit })
+  console.log('initialValues.invoiceNumber', initialValues?.invoiceNumber)
 
   return (
     <Form
+      key={initialValues?.invoiceNumber + ''}
       initialValues={initialValues}
       form={form}
       layout="vertical"
@@ -85,25 +93,18 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
         </Select>
       </Form.Item>
 
-      <Form.Item
-        name="invoiceNumber"
-        label="№ інвойса"
-      >
+      <Form.Item name="invoiceNumber" label="№ інвойса">
         <InputNumber
           placeholder="Вкажіть № інвойса"
           disabled={edit}
-          value={(initialValues.invoiceNumber)}
-          min={1}
+          // min={1}
           className={s.inputNumber}
         />
       </Form.Item>
 
-      <Form.Item
-        name="rentPeriod"
-        label="Оплата від"
-      >
+      <Form.Item name="invoiceCreationDate" label="Оплата від">
         <DatePicker.RangePicker
-          value={initialValues.rentPeriod}
+          // value={initialValues.rentPeriod}
           format="DD.MM.YYYY"
           disabled={edit}
         />
@@ -143,10 +144,7 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
             </>
           ) : (
             <>
-              <PaymentPricesTable
-                edit={edit}
-                form={form}
-              />
+              <PaymentPricesTable edit={edit} form={form} />
               <PaymentTotal form={form} />
             </>
           )
@@ -156,8 +154,12 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
   )
 }
 
-function useInitialValues() {
-  const { paymentData, invoiceCount } = usePaymentContext()
+function useInitialValues({ edit }) {
+  const { data: invoiceNumber = 0 } = useGetPaymentsCountQuery(undefined, {
+    skip: edit,
+  })
+  const { paymentData } = usePaymentContext()
+
   const invoices = {
     maintenance: paymentData?.invoice.find(
       (item) => item?.type === ServiceType.Maintenance
@@ -189,7 +191,6 @@ function useInitialValues() {
     return acc
   }, {})
 
-
   const initialValues = {
     domain: paymentData?.domain?.name,
     street:
@@ -201,8 +202,9 @@ function useInitialValues() {
     credit: paymentData?.credit,
     generalSum: paymentData?.paymentData,
     debit: paymentData?.debit,
-    rentPeriod: [moment(), moment().add(1, "M")],
-    invoiceNumber: (invoiceCount + 1),
+    invoiceCreationDate: Date.now(),
+    // invoiceCreationDate: [moment(), moment().add(1, 'M')],
+    invoiceNumber: invoiceNumber + 1,
     operation: paymentData ? paymentData.type : Operations.Credit,
     [ServiceType.Maintenance]: {
       amount: invoices.maintenance?.amount,
@@ -234,6 +236,12 @@ function useInitialValues() {
     ...customFields,
   }
 
-  return initialValues
+  const [res, setValues] = useState(initialValues)
+  useEffect(() => {
+    setValues({ ...res, invoiceNumber: invoiceNumber + 1  })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [invoiceNumber])
+
+  return res
 }
 export default AddPaymentForm

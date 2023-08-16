@@ -52,18 +52,18 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const dataSourcePreview: DataType[] = dataToMap.map((item) =>
     item.amount
       ? {
-        id: newData?.invoice?.indexOf(item) + 1,
-        Назва: `${fieldNames[item.type] || item.name} (${date})`,
-        Кількість: +item.amount,
-        Ціна: +item.price,
-        Сума: +item.sum,
-      }
+          id: newData?.invoice?.indexOf(item) + 1,
+          Назва: `${fieldNames[item.type] || item.name} (${date})`,
+          Кількість: +item.amount,
+          Ціна: +item.price,
+          Сума: +item.sum,
+        }
       : {
-        id: newData?.invoice?.indexOf(item) + 1,
-        Назва: `${fieldNames[item.type] || item.name} (${date})`,
-        Ціна: +item.price,
-        Сума: +item.sum,
-      }
+          id: newData?.invoice?.indexOf(item) + 1,
+          Назва: `${fieldNames[item.type] || item.name} (${date})`,
+          Ціна: +item.price,
+          Сума: +item.sum,
+        }
   )
 
   return (
@@ -109,13 +109,14 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
 
           <div className={s.datecellDate}>
             Від &nbsp;
-            {newData?.rentPeriod ? newData?.rentPeriod[0]?.format("DD-MM-YYYY") : ""}
+            {/* {newData?.invoiceCreationDate ? newData?.invoiceCreationDate[0]?.format("DD-MM-YYYY") : ""} */}
+            {newData?.invoiceCreationDate}
             &nbsp; року.
           </div>
           <div className={s.datecell}>
             Підлягає сплаті до &nbsp;
-            {newData?.rentPeriod ? newData?.rentPeriod[1]?.format("DD-MM-YYYY") : ""}
-            &nbsp; року.
+            {/* {newData?.invoiceCreationDate ? newData?.rentPeriod[1]?.format("DD-MM-YYYY") : ""} */}
+            {newData?.invoiceCreationDate} + 5 &nbsp; року.
           </div>
         </div>
         <div className={s.tableSum}>
@@ -130,17 +131,13 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.payFixed}>
             Всього на суму:
             <div className={s.payBold}>
-              {numberToTextNumber(
-                newData?.generalSum || newData?.debit
-              )}
+              {numberToTextNumber(newData?.generalSum || newData?.debit)}
               &nbsp;грн
             </div>
           </div>
           <div className={s.payFixed}>
             Загальна сума оплати:
-            <div className={s.payBoldSum}>
-              {newData?.generalSum} грн
-            </div>
+            <div className={s.payBoldSum}>{newData?.generalSum} грн</div>
           </div>
 
           <div className={s.payFixed}>
