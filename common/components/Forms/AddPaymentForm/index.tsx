@@ -190,6 +190,7 @@ function useInitialValues() {
     generalSum: paymentData?.paymentData,
     debit: paymentData?.debit,
     invoiceNumber: paymentData?.invoiceNumber,
+    // TODO: check? Date.now() || new Date()
     invoiceCreationDate: moment(),
     operation: paymentData ? paymentData.type : Operations.Credit,
     [ServiceType.Maintenance]: {

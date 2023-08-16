@@ -18,6 +18,7 @@ interface Props {
 
 interface DataType {
   id: number
+  // TODO: українською? - тут щось не так.
   Назва: string
   Кількість: number
   Ціна: number

@@ -55,11 +55,11 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     const response = await addPayment({
       invoiceNumber: formData.invoiceNumber,
       type: formData.credit ? Operations.Credit : Operations.Debit,
-      date: new Date(),
       domain: formData.domain,
       street: formData.street,
       company: formData.company,
       monthService: formData.monthService,
+      // TODO: check
       invoiceCreationDate: formData.invoiceCreationDate,
       description: formData.description || '',
       generalSum: filteredInvoice?.reduce((acc, val) => acc + val.sum, 0) || 0,
