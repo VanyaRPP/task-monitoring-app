@@ -118,6 +118,7 @@ const getDefaultColumns = (
     children: [
       {
         title: 'За м²',
+        dataIndex: 'servicePricePerMeter',
         render: (_, obj) => obj.servicePricePerMeter || service?.rentPrice,
         editable: true,
       },
