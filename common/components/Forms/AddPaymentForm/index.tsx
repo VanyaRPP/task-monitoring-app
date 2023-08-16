@@ -1,13 +1,6 @@
 import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
-import {
-  Form,
-  FormInstance,
-  Input,
-  InputNumber,
-  Select,
-  DatePicker,
-} from 'antd'
+import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import s from './style.module.scss'
 import { Operations, ServiceType } from '@utils/constants'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
@@ -20,6 +13,7 @@ import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import moment from 'moment'
 import InvoiceNumber from './InvoiceNumber'
+import InvoiceCreationDate from './InvoiceCreationDate'
 
 interface Props {
   form: FormInstance<any>
@@ -39,7 +33,6 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
       layout="vertical"
       className={s.Form}
     >
-      
       {edit ? (
         <Form.Item name="domain" label="Домен">
           <Input disabled />
@@ -71,7 +64,7 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
       ) : (
         <CompanySelect form={form} />
       )}
-
+      {/* TODO: disable, while we don't have company  */}
       <Form.Item
         name="operation"
         label="Тип оплати"
@@ -92,13 +85,7 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
       </Form.Item>
 
       <InvoiceNumber form={form} edit={edit} />
-      <Form.Item name="invoiceCreationDate" label="Оплата від">
-        <DatePicker
-          value={moment(initialValues.invoiceCreationDate)}
-          format="DD.MM.YYYY"
-          disabled={edit}
-        />
-      </Form.Item>
+      <InvoiceCreationDate edit={edit} />
 
       <Form.Item
         shouldUpdate={(prevValues, currentValues) =>
@@ -178,6 +165,9 @@ function useInitialValues() {
     return acc
   }, {})
 
+  // TODO: add useEffect || useCallback ?
+  // currently we have few renders
+  // we need it only once. on didmount (first render)
   const initialValues = {
     domain: paymentData?.domain?.name,
     street:
@@ -190,8 +180,7 @@ function useInitialValues() {
     generalSum: paymentData?.paymentData,
     debit: paymentData?.debit,
     invoiceNumber: paymentData?.invoiceNumber,
-    // TODO: check? Date.now() || new Date()
-    invoiceCreationDate: moment(),
+    invoiceCreationDate: moment(paymentData?.invoiceCreationDate),
     operation: paymentData ? paymentData.type : Operations.Credit,
     [ServiceType.Maintenance]: {
       amount: invoices.maintenance?.amount,

@@ -51,7 +51,6 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const handleSubmit = async () => {
     const formData = await form.validateFields()
     const filteredInvoice = filterInvoiceObject(formData)
-    // Todo: get RentPeroid
     const response = await addPayment({
       invoiceNumber: formData.invoiceNumber,
       type: formData.credit ? Operations.Credit : Operations.Debit,
