@@ -13,7 +13,6 @@ export default function InvoiceNumber({ form, edit }) {
 
   return (
     <Form.Item
-      initialValue={invoiceNumber}
       name="invoiceNumber"
       label="№ інвойса"
     >
