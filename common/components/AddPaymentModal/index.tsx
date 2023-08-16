@@ -1,7 +1,4 @@
-import {
-  useAddPaymentMutation,
-  useGetPaymentsCountQuery,
-} from '@common/api/paymentApi/payment.api'
+import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
 import {
   IExtendedPayment,
   IProvider,
@@ -35,7 +32,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  
+
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, edit)
   )
@@ -54,7 +51,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const handleSubmit = async () => {
     const formData = await form.validateFields()
     const filteredInvoice = filterInvoiceObject(formData)
-    // Todo: get RentPeroid 
+    // Todo: get RentPeroid
     const response = await addPayment({
       invoiceNumber: formData.invoiceNumber,
       type: formData.credit ? Operations.Credit : Operations.Debit,

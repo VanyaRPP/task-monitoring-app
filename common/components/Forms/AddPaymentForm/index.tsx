@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react'
+import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import {
   Form,
@@ -6,7 +6,6 @@ import {
   Input,
   InputNumber,
   Select,
-  Button,
   DatePicker,
 } from 'antd'
 import s from './style.module.scss'
@@ -19,8 +18,8 @@ import PaymentPricesTable from './PaymentPricesTable'
 import MonthServiceSelect from './MonthServiceSelect'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
-import moment from 'moment'
-import { useGetPaymentsCountQuery } from '@common/api/paymentApi/payment.api'
+// import moment from 'moment'
+import InvoiceNumber from './InvoiceNumber'
 
 interface Props {
   form: FormInstance<any>
@@ -32,11 +31,9 @@ interface Props {
 const AddPaymentForm: FC<Props> = ({ edit }) => {
   const { form } = usePaymentContext()
   const initialValues = useInitialValues({ edit })
-  console.log('initialValues.invoiceNumber', initialValues?.invoiceNumber)
 
   return (
     <Form
-      key={initialValues?.invoiceNumber + ''}
       initialValues={initialValues}
       form={form}
       layout="vertical"
@@ -93,22 +90,15 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
         </Select>
       </Form.Item>
 
-      <Form.Item name="invoiceNumber" label="№ інвойса">
-        <InputNumber
-          placeholder="Вкажіть № інвойса"
-          disabled={edit}
-          // min={1}
-          className={s.inputNumber}
-        />
-      </Form.Item>
+      <InvoiceNumber form={form} edit={edit} />
 
-      <Form.Item name="invoiceCreationDate" label="Оплата від">
+      {/* <Form.Item name="invoiceCreationDate" label="Оплата від">
         <DatePicker.RangePicker
           // value={initialValues.rentPeriod}
           format="DD.MM.YYYY"
           disabled={edit}
         />
-      </Form.Item>
+      </Form.Item> */}
 
       <Form.Item
         shouldUpdate={(prevValues, currentValues) =>
@@ -155,9 +145,6 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
 }
 
 function useInitialValues({ edit }) {
-  const { data: invoiceNumber = 0 } = useGetPaymentsCountQuery(undefined, {
-    skip: edit,
-  })
   const { paymentData } = usePaymentContext()
 
   const invoices = {
@@ -203,8 +190,8 @@ function useInitialValues({ edit }) {
     generalSum: paymentData?.paymentData,
     debit: paymentData?.debit,
     invoiceCreationDate: Date.now(),
+    // TODO:
     // invoiceCreationDate: [moment(), moment().add(1, 'M')],
-    invoiceNumber: invoiceNumber + 1,
     operation: paymentData ? paymentData.type : Operations.Credit,
     [ServiceType.Maintenance]: {
       amount: invoices.maintenance?.amount,
@@ -235,13 +222,6 @@ function useInitialValues({ edit }) {
     },
     ...customFields,
   }
-
-  const [res, setValues] = useState(initialValues)
-  useEffect(() => {
-    setValues({ ...res, invoiceNumber: invoiceNumber + 1  })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [invoiceNumber])
-
-  return res
+  return initialValues
 }
 export default AddPaymentForm
