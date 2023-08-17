@@ -12,4 +12,25 @@
   .myPayments {
     margin-left: -16px;
   }
+  .firstBlock {
+    display: flex;
+    flex-direction: row;
+  }
+  .filtersTagsBlock {
+    display: flex;
+    flex-direction: column;
+  }
+  .filters {
+    display: flex;
+    flex-direction: row;
+    margin-left: 2rem;
+  }
+  .filtersTags {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 700px;
+  }
+  .Tag {
+    margin: .25rem 0 .25rem .5rem;
+  }
 }

@@ -197,6 +197,7 @@ const PaymentsBlock = () => {
       dataIndex: 'company',
       filters:
         pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
+      filteredValue: filters?.company || null,
       render: (i) => i?.companyName,
     })
   }
@@ -206,7 +207,8 @@ const PaymentsBlock = () => {
       title: 'Домен',
       dataIndex: 'domain',
       filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
-      // render: (i) => i.name,
+      filteredValue: filters?.domain || null,
+      render: (i) => i?.name,
     })
   }
 
@@ -309,6 +311,9 @@ const PaymentsBlock = () => {
           closeEditModal={() => setCurrentPayment(null)}
           setCurrentDateFilter={setCurrentDateFilter}
           currentPayment={currentPayment}
+          payments={payments}
+          filters={filters}
+          setFilters={setFilters}
         />
       }
       className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}
