@@ -1,4 +1,4 @@
-export function numberToTextNumber(number) {
+function numberToTextNumber(number) {
   const k = [
       'одна тисяча',
       'дві тисячі',
@@ -57,35 +57,36 @@ export function numberToTextNumber(number) {
 
   const str = number.toString()
   let out = ''
-  if (str.length == 1) return o[number - 1]
-  else if (str.length == 2) {
-    if (str[0] == 1) out = p[parseInt(str[1]) - 1]
+
+  if (str.length === 1) return o[number - 1]
+  else if (str.length === 2) {
+    if (parseInt(str[0]) === 1) out = p[parseInt(str[1]) - 1]
     else
       out =
         t[parseInt(str[0]) - 1] +
-        (str[1] != '0' ? ' ' + o[parseInt(str[1]) - 1] : '')
-  } else if (str.length == 3) {
-    if (str[1] == 1)
+        (str[1] !== '0' ? ' ' + o[parseInt(str[1]) - 1] : '')
+  } else if (str.length === 3) {
+    if (parseInt(str[1]) === 1)
       out =
         h[parseInt(str[0]) - 1] +
-        (str[1] != '0' ? ' ' + p[parseInt(str[2]) - 1] : '')
+        (str[1] !== '0' ? ' ' + p[parseInt(str[2]) - 1] : '')
     else
       out =
         h[parseInt(str[0]) - 1] +
-        (str[1] != '0' ? ' ' + t[parseInt(str[1]) - 1] : '') +
-        (str[2] != '0' ? ' ' + o[parseInt(str[2]) - 1] : '')
-  } else if (str.length == 4) {
-    if (str[2] == 1)
+        (str[1] !== '0' ? ' ' + t[parseInt(str[1]) - 1] : '') +
+        (str[2] !== '0' ? ' ' + o[parseInt(str[2]) - 1] : '')
+  } else if (str.length === 4) {
+    if (parseInt(str[2]) === 1)
       out =
         k[parseInt(str[0]) - 1] +
-        (str[1] != '0' ? ' ' + h[parseInt(str[1]) - 1] : '') +
-        (str[2] != '0' ? ' ' + p[parseInt(str[3]) - 1] : '')
+        (str[1] !== '0' ? ' ' + h[parseInt(str[1]) - 1] : '') +
+        (str[2] !== '0' ? ' ' + p[parseInt(str[3]) - 1] : '')
     else
       out =
         k[parseInt(str[0]) - 1] +
-        (str[1] != '0' ? ' ' + h[parseInt(str[1]) - 1] : '') +
-        (str[2] != '0' ? ' ' + t[parseInt(str[2]) - 1] : '') +
-        (str[3] != '0' ? ' ' + o[parseInt(str[3]) - 1] : '')
+        (str[1] !== '0' ? ' ' + h[parseInt(str[1]) - 1] : '') +
+        (str[2] !== '0' ? ' ' + t[parseInt(str[2]) - 1] : '') +
+        (str[3] !== '0' ? ' ' + o[parseInt(str[3]) - 1] : '')
   }
 
   const arr = out.split('')
@@ -93,3 +94,5 @@ export function numberToTextNumber(number) {
   out = arr.join('')
   return out
 }
+
+export default numberToTextNumber

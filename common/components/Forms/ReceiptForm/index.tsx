@@ -6,7 +6,7 @@ import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useReactToPrint } from 'react-to-print'
 import { renderCurrency } from '@common/components/DashboardPage/blocks/payments'
 import { filterInvoiceObject } from '@utils/helpers'
-import { numberToTextNumber } from '@utils/numberToText'
+import numberToTextNumber from '@utils/numberToTextNumber'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import { dateToDayYearMonthFormat } from '@common/assets/features/formatDate'
 import useService from '@common/modules/hooks/useService'
@@ -23,7 +23,7 @@ interface DataType {
   Назва: string
   Кількість: number
   Ціна: number
-  Сума: number
+  Сума: any
 }
 
 const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {

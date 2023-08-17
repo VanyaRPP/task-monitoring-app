@@ -206,7 +206,7 @@ const PaymentsBlock = () => {
       title: 'Домен',
       dataIndex: 'domain',
       filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
-      // render: (i) => i.name,
+      render: (i) => i?.name || 'N/A',
     })
   }
 

@@ -5,7 +5,13 @@ import {
   IReciever,
 } from '@common/api/paymentApi/payment.api.types'
 import { Form, message, Modal, Tabs, TabsProps } from 'antd'
-import React, { FC, createContext, useContext, useState } from 'react'
+import React, {
+  FC,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
@@ -51,6 +57,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const handleSubmit = async () => {
     const formData = await form.validateFields()
     const filteredInvoice = filterInvoiceObject(formData)
+
     const response = await addPayment({
       invoiceNumber: formData.invoiceNumber,
       type: formData.credit ? Operations.Credit : Operations.Debit,
@@ -60,7 +67,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       monthService: formData.monthService,
       invoiceCreationDate: formData.invoiceCreationDate,
       description: formData.description || '',
-      generalSum: filteredInvoice?.reduce((acc, val) => acc + val.sum, 0) || 0,
+      generalSum: filteredInvoice.reduce((acc, val) => acc + val?.sum, 0) || 0,
       provider,
       reciever,
       invoice: formData.debit ? filteredInvoice : [],

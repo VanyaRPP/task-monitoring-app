@@ -156,14 +156,15 @@ export function filterInvoiceObject(obj) {
     if (typeof obj[key] === 'object' && obj[key].hasOwnProperty('sum')) {
       services.includes(key)
         ? filtered.push({
-          type: key,
-          ...obj[key],
-        })
+            type: key,
+            ...obj[key],
+          })
         : filtered.push({
-          type: ServiceType.Custom,
-          name: key,
-          ...obj[key],
-        })
+            type: ServiceType.Custom,
+            name: key,
+            ...obj[key],
+          })
+    } else if (key === 'generalSum') {
     }
   }
 

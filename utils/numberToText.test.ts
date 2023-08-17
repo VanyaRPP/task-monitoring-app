@@ -1,6 +1,6 @@
 export {}
 import { expect } from '@jest/globals'
-import { numberToTextNumber } from '@utils/numberToText' // Update the path accordingly
+import numberToTextNumber from '@utils/numberToTextNumber' // Update the path accordingly
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 
 setupTestEnvironment()
