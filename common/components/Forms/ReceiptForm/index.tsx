@@ -1,4 +1,4 @@
-import React, { FC, useRef } from 'react'
+import React, { FC, useRef, useState, useEffect } from 'react'
 import { Button, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
@@ -130,7 +130,9 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           </div>
           <div className={s.payFixed}>
             Загальна сума оплати:
-            <div className={s.payBoldSum}>{newData?.generalSum} грн</div>
+            <div className={s.payBoldSum}>
+              {calculatedGeneralSum || newData?.debit} грн
+            </div>
           </div>
 
           <div className={s.payFixed}>
