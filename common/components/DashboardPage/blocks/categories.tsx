@@ -16,6 +16,7 @@ import TableCard from '@common/components/UI/TableCard'
 import s from './style.module.scss'
 
 const CategoriesBlock: FC = () => {
+  const session = useSession()
   const router = useRouter()
   const tasksResponse = useGetAllTaskQuery('')
   const tasks = tasksResponse?.data?.data

@@ -26,7 +26,7 @@ export interface IReciever {
 export interface IPayment {
   invoiceNumber: number
   type: string
-  invoiceCreationDate: Date
+  date: Date
   domain: Partial<IDomain> | string
   street: string
   company: Partial<IRealestate> | string

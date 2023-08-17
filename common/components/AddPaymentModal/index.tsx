@@ -1,4 +1,7 @@
-import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
+import {
+  useAddPaymentMutation,
+  useGetPaymentsCountQuery,
+} from '@common/api/paymentApi/payment.api'
 import {
   IExtendedPayment,
   IProvider,
@@ -17,6 +20,7 @@ import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
 import { Operations } from '@utils/constants'
 import { FormInstance } from 'antd/es/form/Form'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { filterInvoiceObject } from '@utils/helpers'
 import useCompany from '@common/modules/hooks/useCompany'
 
