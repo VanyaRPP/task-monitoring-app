@@ -2,17 +2,15 @@ import { QuestionCircleOutlined, SelectOutlined } from '@ant-design/icons'
 import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthServiceSelect'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
-import { useInvoicesPaymentContext } from '.'
+import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { AppRoutes } from '@utils/constants'
 import { Button, Form, Popover } from 'antd'
 import { useRouter } from 'next/router'
 import s from './style.module.scss'
 
-const Header = () => {
+const InvoicesHeader = () => {
   const router = useRouter()
   const { form } = useInvoicesPaymentContext()
-  // const streetId = Form.useWatch('street', form)
-  // const domainId = Form.useWatch('domain', form)
 
   return (
     <div className={s.tableHeader}>
@@ -40,35 +38,45 @@ const Header = () => {
 
 function MonthServiceGeneralInfo() {
   const { form } = useInvoicesPaymentContext()
-  const serviceId = Form.useWatch('service', form)
-  // console.log('serviceId', serviceId)
+
+  const serviceId = Form.useWatch('monthService', form)
 
   return (
-    <span>
+    <span style={{ display: 'flex', alignItems: 'center' }}>
       <MonthServiceSelect form={form} />
       {serviceId && (
-        <Popover content={<PopoverMonthService />} title="Послуги за місяць">
-          <QuestionCircleOutlined style={{ marginLeft: 8 }} />
+        <Popover
+          content={<PopoverMonthService serviceId={serviceId} />}
+          title="Послуги за місяць"
+        >
+          <QuestionCircleOutlined style={{ marginLeft: 16 }} />
         </Popover>
       )}
     </span>
   )
 }
 
-function PopoverMonthService() {
+function PopoverMonthService(serviceId: any) {
+  // const { service } = useService({ serviceId })
+
   return (
-    <ul>
-      asd
-      {/* {services
-    ?.filter((service) => moment(service.date).month() === monthNumber)
-    .map((service) => (
-      <li key={service._id}>
-        {moment(service.date).format('DD MMMM YYYY')} -{' '}
-        {service.description}
-      </li>
-    ))} */}
-    </ul>
+    <>
+      <strong>TODO:</strong> content
+    </>
   )
+
+  // return (
+  //   <ul>
+  //     {services
+  //       ?.filter((service) => moment(service.date).month() === monthNumber)
+  //       .map((service) => (
+  //         <li key={service._id}>
+  //           {moment(service.date).format('DD MMMM YYYY')} -{' '}
+  //           {service.description}
+  //         </li>
+  //       ))}
+  //   </ul>
+  // )
 }
 
-export default Header
+export default InvoicesHeader
