@@ -120,21 +120,17 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           />
         </div>
         <div className={s.payTable}>
-          <div className={s.payFixed}>
-            Всього на суму:
-            <div className={s.payBold}>
-              {numberToTextNumber(newData?.generalSum || newData?.debit)}
-              &nbsp;грн
-            </div>
-          </div>
+          <SumWithText data={newData} />
           <div className={s.payFixed}>
             Загальна сума оплати:
-            <div className={s.payBoldSum}>{newData?.generalSum} грн</div>
+            <div className={s.payBoldSum}>
+              {newData?.generalSum || newData?.debit} грн
+            </div>
           </div>
 
           <div className={s.payFixed}>
             {newData?.provider?.description?.split('\n')?.[0] || ''}
-            <div className={s.lineInner}>_______________________________</div>
+            <div className={s.lineInner}>________________</div>
           </div>
         </div>
 
@@ -154,6 +150,21 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
         Роздрукувати Документ
       </Button>
     </>
+  )
+}
+
+function SumWithText({ data }) {
+  const rest = numberToTextNumber(data?.generalSum || data?.debit)
+  return (
+    rest && (
+      <div className={s.payFixed}>
+        Всього на суму:
+        <div className={s.payBold}>
+          {rest}
+          &nbsp;грн
+        </div>
+      </div>
+    )
   )
 }
 
