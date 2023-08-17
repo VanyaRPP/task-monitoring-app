@@ -40,6 +40,7 @@ const PaymentsFilterTags = ({ filters, setFilters, payments }) => {
               {filters.company.map((company) => (
                 <Tag
                   key={company}
+                  className={s.Tag}
                   closable
                   onClose={() =>
                     setFilters({
