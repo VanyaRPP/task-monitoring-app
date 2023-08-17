@@ -67,7 +67,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       monthService: formData.monthService,
       invoiceCreationDate: formData.invoiceCreationDate,
       description: formData.description || '',
-      generalSum: filteredInvoice?.reduce((acc, val) => acc + val?.sum, 0) || 0,
+      generalSum: filteredInvoice.reduce((acc, val) => acc + val?.sum, 0) || 0,
       provider,
       reciever,
       invoice: formData.debit ? filteredInvoice : [],
