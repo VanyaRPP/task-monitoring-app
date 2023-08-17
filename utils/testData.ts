@@ -20,42 +20,42 @@ export const users = {
 
 export const domains = [
   {
-    _id: "64d68421d9ba2fc8fea79d11",
+    _id: '64d68421d9ba2fc8fea79d11',
     name: 'domain 0',
     adminEmails: [users.domainAdmin.email],
     streets: [],
     description: 'none',
   },
   {
-    _id: "64d68421d9ba2fc8fea79d12",
+    _id: '64d68421d9ba2fc8fea79d12',
     name: 'domain 1',
     adminEmails: [],
     streets: [],
     description: 'none',
   },
   {
-    _id: "64d68421d9ba2fc8fea79d13",
+    _id: '64d68421d9ba2fc8fea79d13',
     name: 'domain 2',
     adminEmails: [],
     streets: [],
     description: 'none',
   },
   {
-    _id: "64d68421d9ba2fc8fea79d14",
+    _id: '64d68421d9ba2fc8fea79d14',
     name: 'domain 3',
     adminEmails: [],
     streets: [],
     description: 'none',
   },
   {
-    _id: "64d68421d9ba2fc8fea79d15",
+    _id: '64d68421d9ba2fc8fea79d15',
     name: 'domain 4',
     adminEmails: [],
     streets: [],
     description: 'none',
   },
   {
-    _id: "64d68421d9ba2fc8fea79d16",
+    _id: '64d68421d9ba2fc8fea79d16',
     name: 'domain 5',
     adminEmails: [],
     streets: [],
@@ -65,26 +65,36 @@ export const domains = [
 
 export const streets = [
   {
-    _id: "64d68421d9ba2fc8fea79d31",
+    _id: '64d68421d9ba2fc8fea79d31',
     address: 'street_0',
     city: 'street_0_city',
   },
   {
-    _id: "64d68421d9ba2fc8fea79d32",
+    _id: '64d68421d9ba2fc8fea79d32',
     address: 'street_1',
     city: 'street_1_city',
   },
   {
-    _id: "64d68421d9ba2fc8fea79d33",
+    _id: '64d68421d9ba2fc8fea79d33',
     address: 'street_2',
     city: 'street_2_city',
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d34',
+    address: 'street_3',
+    city: 'street_3_city',
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d35',
+    address: 'street_4',
+    city: 'street_4_city',
   },
 ]
 
 // TODO: fix tests
 export const realEstates = [
   {
-    _id: "64d68421d9ba2fc8fea79d21",
+    _id: '64d68421d9ba2fc8fea79d21',
     domain: domains[0]._id,
     street: streets[0]._id,
     companyName: 'company_0',
@@ -93,10 +103,13 @@ export const realEstates = [
     description: 'none',
     servicePricePerMeter: 10,
     totalArea: 10,
-    garbageCollector: 10,
+    garbageCollector: 11,
+    waterPart: 0,
+    rentPart: 0,
+    inflicion: false,
   },
   {
-    _id:"64d68421d9ba2fc8fea79d22",
+    _id: '64d68421d9ba2fc8fea79d22',
     domain: domains[1]._id,
     street: streets[1]._id,
     companyName: 'company_1',
@@ -105,10 +118,13 @@ export const realEstates = [
     servicePricePerMeter: 10,
     description: 'none',
     totalArea: 10,
-    garbageCollector: 10,
+    garbageCollector: 12,
+    waterPart: 0,
+    rentPart: 0,
+    inflicion: false,
   },
   {
-    _id: "64d68421d9ba2fc8fea79d23",
+    _id: '64d68421d9ba2fc8fea79d23',
     domain: domains[2]._id,
     street: streets[2]._id,
     companyName: 'company_2',
@@ -117,7 +133,41 @@ export const realEstates = [
     pricePerMeter: 10,
     servicePricePerMeter: 10,
     totalArea: 10,
-    garbageCollector: 10,
+    garbageCollector: 13,
+    waterPart: 0,
+    rentPart: 0,
+    inflicion: false,
+  },
+
+  {
+    _id: '64d68421d9ba2fc8fea79d24',
+    domain: domains[3]._id,
+    street: streets[3]._id,
+    companyName: 'company_3',
+    adminEmails: [users.globalAdmin.email],
+    pricePerMeter: 10,
+    servicePricePerMeter: 10,
+    description: 'none',
+    totalArea: 10,
+    garbageCollector: 14,
+    waterPart: 0,
+    rentPart: 0,
+    inflicion: false,
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d25',
+    domain: domains[4]._id,
+    street: streets[4]._id,
+    companyName: 'company_4',
+    description: 'none',
+    adminEmails: [users.user.email],
+    pricePerMeter: 10,
+    servicePricePerMeter: 10,
+    totalArea: 10,
+    garbageCollector: 13,
+    waterPart: 0,
+    rentPart: 0,
+    inflicion: false,
   },
 ]
 
@@ -137,7 +187,7 @@ export const realEstates = [
  */
 export const services = [
   {
-    _id: "64d68421d9ba2fc8fea79d51",
+    _id: '64d68421d9ba2fc8fea79d51',
     date: new Date(2020, 1, 12),
     domain: domains[0]._id,
     street: streets[0]._id,
@@ -148,7 +198,7 @@ export const services = [
     description: 'none',
   },
   {
-    _id: "64d68421d9ba2fc8fea79d52",
+    _id: '64d68421d9ba2fc8fea79d52',
     date: new Date(2020, 6, 19),
     domain: domains[1]._id,
     street: streets[1]._id,
@@ -159,7 +209,7 @@ export const services = [
     description: 'none',
   },
   {
-    _id: "64d68421d9ba2fc8fea79d53",
+    _id: '64d68421d9ba2fc8fea79d53',
     date: new Date(2020, 10, 11),
     domain: domains[0]._id,
     street: streets[1]._id,
@@ -170,7 +220,7 @@ export const services = [
     description: 'none',
   },
   {
-    _id: "64d68421d9ba2fc8fea79d54",
+    _id: '64d68421d9ba2fc8fea79d54',
     date: new Date(2021, 4, 17),
     domain: domains[0]._id,
     street: streets[2]._id,
@@ -181,7 +231,7 @@ export const services = [
     description: 'none',
   },
   {
-    _id: "64d68421d9ba2fc8fea79d55",
+    _id: '64d68421d9ba2fc8fea79d55',
     date: new Date(2021, 5, 15),
     domain: domains[1]._id,
     street: streets[2]._id,
@@ -192,7 +242,7 @@ export const services = [
     description: 'none',
   },
   {
-    _id: "64d68421d9ba2fc8fea79d56",
+    _id: '64d68421d9ba2fc8fea79d56',
     date: new Date(2021, 8, 10),
     domain: domains[2]._id,
     street: streets[2]._id,
@@ -220,7 +270,7 @@ export const services = [
  */
 export const payments = [
   {
-    _id: "64d68421d9ba2fc8fea79d61",
+    _id: '64d68421d9ba2fc8fea79d61',
     invoiceNumber: 3,
     type: 'debit',
     date: new Date(2020, 10, 10),
@@ -267,7 +317,7 @@ export const payments = [
     generalSum: 1000,
   },
   {
-    _id: "64d68421d9ba2fc8fea79d62",
+    _id: '64d68421d9ba2fc8fea79d62',
     invoiceNumber: 2,
     type: 'debit',
     date: new Date(2020, 6, 18),
@@ -314,7 +364,7 @@ export const payments = [
     generalSum: 1000,
   },
   {
-    _id: "64d68421d9ba2fc8fea79d63",
+    _id: '64d68421d9ba2fc8fea79d63',
     invoiceNumber: 1,
     type: 'debit',
     date: new Date(2020, 1, 11),
