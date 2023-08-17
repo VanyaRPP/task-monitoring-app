@@ -8,7 +8,7 @@ import {
 export interface IPaymentModel {
   invoiceNumber: number
   type: string
-  invoiceCreationDate: Date
+  date: Date
   domain: ObjectId
   street: ObjectId
   company: ObjectId
@@ -24,7 +24,7 @@ export interface IPaymentModel {
 export const PaymentSchema = new Schema<IPaymentModel>({
   invoiceNumber: { type: Number, required: true },
   type: { type: String },
-  invoiceCreationDate: { type: Date, required: true, default: Date.now() },
+  date: { type: Date, required: true, default: Date.now() },
   domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
   street: { type: Schema.Types.ObjectId, ref: 'Street' },
   company: { type: Schema.Types.ObjectId, ref: 'RealEstate' },

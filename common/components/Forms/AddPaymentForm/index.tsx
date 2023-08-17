@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
-import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
+import { Form, FormInstance, Input, InputNumber, Select, Button, DatePicker } from 'antd'
 import s from './style.module.scss'
 import { Operations, ServiceType } from '@utils/constants'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
@@ -12,8 +12,6 @@ import MonthServiceSelect from './MonthServiceSelect'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import moment from 'moment'
-import InvoiceNumber from './InvoiceNumber'
-import InvoiceCreationDate from './InvoiceCreationDate'
 
 interface Props {
   form: FormInstance<any>
@@ -22,10 +20,11 @@ interface Props {
   users?: any
 }
 
-const AddPaymentForm: FC<Props> = ({ edit }) => {
+const AddPaymentForm: FC<Props> = ({ edit, paymentData }) => {
   const { form } = usePaymentContext()
   const initialValues = useInitialValues()
-
+  
+  
   return (
     <Form
       initialValues={initialValues}
@@ -64,7 +63,7 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
       ) : (
         <CompanySelect form={form} />
       )}
-      {/* TODO: disable, while we don't have company  */}
+
       <Form.Item
         name="operation"
         label="Тип оплати"
@@ -84,8 +83,29 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
         </Select>
       </Form.Item>
 
-      <InvoiceNumber form={form} edit={edit} />
-      <InvoiceCreationDate edit={edit} />
+      <Form.Item
+        name="invoiceNumber"
+        label="№ інвойса"
+      >
+        <InputNumber
+          placeholder="Вкажіть № інвойса"
+          disabled={edit}
+          min={1}
+          className={s.inputNumber}
+        />
+      </Form.Item>
+
+      <Form.Item
+        name="rentPeriod"
+        label="Оплата від"
+      >
+        <DatePicker.RangePicker
+          defaultValue={[moment(), moment().add(1, "M")]}
+          format="DD.MM.YYYY"
+          disabled={edit}
+          disabledDate={(start) => start <= moment().subtract(1, "d")}
+        />
+      </Form.Item>
 
       <Form.Item
         shouldUpdate={(prevValues, currentValues) =>
@@ -121,7 +141,10 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
             </>
           ) : (
             <>
-              <PaymentPricesTable edit={edit} form={form} />
+              <PaymentPricesTable
+                edit={edit}
+                form={form}
+              />
               <PaymentTotal form={form} />
             </>
           )
@@ -133,7 +156,6 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
 
 function useInitialValues() {
   const { paymentData } = usePaymentContext()
-
   const invoices = {
     maintenance: paymentData?.invoice.find(
       (item) => item?.type === ServiceType.Maintenance
@@ -165,9 +187,6 @@ function useInitialValues() {
     return acc
   }, {})
 
-  // TODO: add useEffect || useCallback ?
-  // currently we have few renders
-  // we need it only once. on didmount (first render)
   const initialValues = {
     domain: paymentData?.domain?.name,
     street:
@@ -179,8 +198,6 @@ function useInitialValues() {
     credit: paymentData?.credit,
     generalSum: paymentData?.paymentData,
     debit: paymentData?.debit,
-    invoiceNumber: paymentData?.invoiceNumber,
-    invoiceCreationDate: moment(paymentData?.invoiceCreationDate),
     operation: paymentData ? paymentData.type : Operations.Credit,
     [ServiceType.Maintenance]: {
       amount: invoices.maintenance?.amount,
@@ -211,6 +228,7 @@ function useInitialValues() {
     },
     ...customFields,
   }
+
   return initialValues
 }
 export default AddPaymentForm

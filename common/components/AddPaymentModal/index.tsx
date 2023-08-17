@@ -1,4 +1,7 @@
-import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
+import {
+  useAddPaymentMutation,
+  useGetPaymentsCountQuery,
+} from '@common/api/paymentApi/payment.api'
 import {
   IExtendedPayment,
   IProvider,
@@ -17,6 +20,7 @@ import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
 import { Operations } from '@utils/constants'
 import { FormInstance } from 'antd/es/form/Form'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { filterInvoiceObject } from '@utils/helpers'
 import useCompany from '@common/modules/hooks/useCompany'
 
@@ -38,12 +42,14 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-
+  const { data: count = 0 } = useGetPaymentsCountQuery(undefined, {
+    skip: edit,
+  })
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, edit)
   )
   const companyId = Form.useWatch('company', form)
-  const { company } = useCompany({ companyId, skip: !companyId || edit })
+  const { company } = useCompany({ companyId, skip: !companyId })
 
   const provider: IProvider = company && {
     description: company?.domain?.description || '',
@@ -59,15 +65,15 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     const filteredInvoice = filterInvoiceObject(formData)
 
     const response = await addPayment({
-      invoiceNumber: formData.invoiceNumber,
+      invoiceNumber: count + 1,
       type: formData.credit ? Operations.Credit : Operations.Debit,
+      date: new Date(),
       domain: formData.domain,
       street: formData.street,
       company: formData.company,
       monthService: formData.monthService,
-      invoiceCreationDate: formData.invoiceCreationDate,
       description: formData.description || '',
-      generalSum: filteredInvoice.reduce((acc, val) => acc + val?.sum, 0) || 0,
+      generalSum: calculatedGeneralSum, // Використовуємо обчислене значення
       provider,
       reciever,
       invoice: formData.debit ? filteredInvoice : [],
