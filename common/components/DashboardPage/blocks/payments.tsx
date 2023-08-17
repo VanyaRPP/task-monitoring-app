@@ -102,11 +102,11 @@ const PaymentsBlock = () => {
           })),
         ]
       : []
-
+  // TODO: add Interface
   const columns: any = [
     {
       title: 'Дата',
-      dataIndex: 'date',
+      dataIndex: 'invoiceCreationDate',
       ellipsis: true,
       render: dateToDefaultFormat,
     },
@@ -152,7 +152,7 @@ const PaymentsBlock = () => {
             <div className={s.popconfirm}>
               <Popconfirm
                 title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                  payment?.date as unknown as string
+                  payment?.invoiceCreationDate as unknown as string
                 )}?`}
                 onConfirm={() => handleDeletePayment(payment?._id)}
                 cancelText="Відміна"
@@ -250,7 +250,7 @@ const PaymentsBlock = () => {
       width: 120,
       dataIndex: 'domain',
       filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
-      render: (i) => i?.name,
+         render: (i) => i?.name,
     })
   }
 
