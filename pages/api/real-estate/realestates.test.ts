@@ -42,7 +42,7 @@ describe('RealEstate API - GET', () => {
       unpopulate,
       removeVersion,
     ])
-    // console.log(response.data)
+
     expect(received).toEqual(realEstates)
   })
 
@@ -72,11 +72,15 @@ describe('RealEstate API - GET', () => {
       removeVersion,
     ])
     // const domainS = domains.filter((domain)=> domain.adminEmails.includes(users.user.email))
-
+    // const expected = realEstates.filter((company) =>
+    //   domains
+    //     .find((domain) => domain._id === company.domain)
+    //     .adminEmails.includes(users.user.email)
+    // )
     const expected = realEstates.filter((company) =>
       company.adminEmails.includes(users.user.email)
     )
-    console.log(response.data)
+
     expect(received).toEqual(expected)
   })
 
@@ -111,7 +115,7 @@ describe('RealEstate API - GET', () => {
     expect(received).toEqual(realEstates.slice(0, limit))
   })
 
-  it('request from the GlobalAdmin by domainId - show that company', async () => {
+  it('request from the GlobalAdmin by domainId,streetId - show that company', async () => {
     await mockLoginAs(users.globalAdmin)
 
     const mockReq = {
@@ -140,9 +144,35 @@ describe('RealEstate API - GET', () => {
       removeVersion,
     ])
     const expected = [realEstates[3]]
-    console.log(response.data, expected)
+
     expect(received).toEqual(expected)
   })
+
+  //   it('request from the User by domainId and streetId - restricted access', async () => {
+  //     await mockLoginAs(users.user)
+
+  //     const mockReq = {
+  //       method: 'GET',
+  //       query: {
+  //         domainId: domains[0]._id.toString(),
+  //         streetId: streets[0]._id.toString(),
+  //       },
+  //     } as any
+  //     const mockRes = {
+  //       status: jest.fn(() => mockRes),
+  //       json: jest.fn(),
+  //     } as any
+
+  //     await handler(mockReq, mockRes)
+
+  //     const response = {
+  //       status: mockRes.status,
+  //       data: mockRes.json.mock.lastCall[0].data,
+  //     }
+  //     // console.log(response.data)
+  //     expect(response.status).toHaveBeenCalledWith(200)
+  //     expect(response.data).toHaveLength(0)
+  //   })
   // it('request from DomainAdmin - show DomainAdmin companies', async () => {
   //   await mockLoginAs(users.domainAdmin)//   const mockReq = {
   //     method: 'GET',
