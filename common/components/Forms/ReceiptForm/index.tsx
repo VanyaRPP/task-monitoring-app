@@ -10,6 +10,7 @@ import numberToTextNumber from '@utils/numberToTextNumber'
 import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import { dateToDayYearMonthFormat } from '@common/assets/features/formatDate'
 import useService from '@common/modules/hooks/useService'
+import moment from 'moment'
 
 interface Props {
   currPayment: IExtendedPayment
@@ -18,6 +19,7 @@ interface Props {
 
 interface DataType {
   id: number
+  // TODO: українською? - тут щось не так.
   Назва: string
   Кількість: number
   Ціна: number
@@ -41,37 +43,22 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     skip: !!paymentData,
   })
 
-  const date = paymentData
-    ? getFormattedDate(paymentData?.monthService?.date)
-    : getFormattedDate(service?.date)
-
-  const currentDate = newData?.date ? new Date(newData?.date) : new Date()
-  const expirationDate = newData?.date ? new Date(newData?.date) : new Date()
-  expirationDate.setDate(currentDate.getDate() + 5)
+  const date = getFormattedDate(
+    paymentData ? paymentData?.monthService?.date : service?.date
+  )
 
   const dataToMap = paymentData
     ? newData?.invoice
     : filterInvoiceObject(newData)
 
-  const dataSourcePreview: DataType[] = dataToMap.map((item) =>
-    item.amount
-      ? {
-          id: newData?.invoice?.indexOf(item) + 1,
-          Назва: `${fieldNames[item.type] || item.name} (${date})`,
-          Кількість: +item.amount,
-          Ціна: +item.price,
-          Сума: +item.sum,
-        }
-      : {
-          id: newData?.invoice?.indexOf(item) + 1,
-          Назва: `${fieldNames[item.type] || item.name} (${date})`,
-          Ціна: +item.price,
-          Сума: +item.sum,
-        }
-  )
-  console.log('calculatedGeneralSum', calculatedGeneralSum)
-  console.log('newData?.debit:', newData?.debit)
-  // console.log('newData:', newData)
+  const dataSourcePreview: DataType[] = dataToMap.map((item, index) => ({
+    id: index + 1,
+    Назва: `${fieldNames[item.type] || item.name} (${date})`,
+    Кількість: item.amount && +item.amount,
+    Ціна: +item.price,
+    Сума: +item.sum,
+  }))
+
   return (
     <>
       <div
@@ -112,16 +99,17 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.datecellTitle}>
             INVOICE № INV-{newData.invoiceNumber}
           </div>
-
           <div className={s.datecellDate}>
             Від &nbsp;
-            {dateToDayYearMonthFormat(currentDate)}
+            {moment(newData?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
             &nbsp; року.
           </div>
           <div className={s.datecell}>
             Підлягає сплаті до &nbsp;
-            {dateToDayYearMonthFormat(expirationDate)}
-            &nbsp; року.
+            {moment(newData?.invoiceCreationDate)
+              .add(5, 'd')
+              .format('DD.MM.YYYY')}
+            &nbsp; року
           </div>
         </div>
         <div className={s.tableSum}>
@@ -136,14 +124,13 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
           <div className={s.payFixed}>
             Всього на суму:
             <div className={s.payBold}>
-              {numberToTextNumber(calculatedGeneralSum || newData?.debit)} грн
+              {numberToTextNumber(newData?.generalSum || newData?.debit)}
+              &nbsp;грн
             </div>
           </div>
           <div className={s.payFixed}>
             Загальна сума оплати:
-            <div className={s.payBoldSum}>
-              {calculatedGeneralSum || newData?.debit} грн
-            </div>
+            <div className={s.payBoldSum}>{newData?.generalSum} грн</div>
           </div>
 
           <div className={s.payFixed}>
