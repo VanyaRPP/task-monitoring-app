@@ -12,6 +12,15 @@ export type Data = {
   // message?: string
 }
 
+export type PaymentData = Data & {
+  currentCompaniesCount?: number
+  currentDomainsCount?: number
+  domainsFilter?: { text: string; value: string }[]
+  realEstatesFilter?: { text: string; value: string }[]
+  totalPayments?: any
+  total?: number
+}
+
 const start = async () => {
   await dbConnect()
 }

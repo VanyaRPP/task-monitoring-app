@@ -1,6 +1,6 @@
 export {}
 import { expect } from '@jest/globals'
-import { numberToTextNumber } from '@utils/numberToText' // Update the path accordingly
+import numberToTextNumber from '@utils/numberToText'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 
 setupTestEnvironment()
@@ -20,7 +20,6 @@ describe('numberToTextNumber function', () => {
     expect(numberToTextNumber(75)).toBe("Сімдесят п'ять")
     expect(numberToTextNumber(89)).toBe("Вісімдесят дев'ять")
     expect(numberToTextNumber(92)).toBe("Дев'яносто дві")
-    // Додайте тестові перевірки для інших двозначних чисел
   })
 
   test('should convert three-digit numbers', () => {
@@ -33,7 +32,6 @@ describe('numberToTextNumber function', () => {
     expect(numberToTextNumber(319)).toBe("Триста дев'ятнадцять")
     expect(numberToTextNumber(487)).toBe('Чотириста вісімдесят сім')
     expect(numberToTextNumber(555)).toBe("П'ятсот п'ятдесят п'ять")
-    // Додайте тестові перевірки для інших трьохзначних чисел
   })
 
   test('should convert four-digit numbers', () => {
@@ -52,9 +50,11 @@ describe('numberToTextNumber function', () => {
     expect(numberToTextNumber(4444)).toBe(
       'Чотири тисячі чотириста сорок чотири'
     )
+    expect(numberToTextNumber(5123)).toBe("П'ять тисяч сто двадцять три")
+    expect(numberToTextNumber(6234)).toBe('Шість тисяч двісті тридцять чотири')
+    expect(numberToTextNumber(7345)).toBe("Сім тисяч триста сорок п'ять")
     expect(numberToTextNumber(8384)).toBe(
       'Вісім тисяч триста вісімдесят чотири'
     )
-    // Додайте тестові перевірки для інших чотирьохзначних чисел
   })
 })

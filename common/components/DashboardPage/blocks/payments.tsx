@@ -102,11 +102,11 @@ const PaymentsBlock = () => {
           })),
         ]
       : []
-
+  // TODO: add Interface
   const columns: any = [
     {
       title: 'Дата',
-      dataIndex: 'date',
+      dataIndex: 'invoiceCreationDate',
       ellipsis: true,
       render: dateToDefaultFormat,
     },
@@ -152,7 +152,7 @@ const PaymentsBlock = () => {
             <div className={s.popconfirm}>
               <Popconfirm
                 title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                  payment?.date as unknown as string
+                  payment?.invoiceCreationDate as unknown as string
                 )}?`}
                 onConfirm={() => handleDeletePayment(payment?._id)}
                 cancelText="Відміна"
@@ -197,6 +197,7 @@ const PaymentsBlock = () => {
       dataIndex: 'company',
       filters:
         pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
+      filteredValue: filters?.company || null,
       render: (i) => i?.companyName,
     })
   }
@@ -206,7 +207,8 @@ const PaymentsBlock = () => {
       title: 'Домен',
       dataIndex: 'domain',
       filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
-      render: (i) => i.name,
+      filteredValue: filters?.domain || null,
+      render: (i) => i?.name,
     })
   }
 
@@ -309,6 +311,9 @@ const PaymentsBlock = () => {
           closeEditModal={() => setCurrentPayment(null)}
           setCurrentDateFilter={setCurrentDateFilter}
           currentPayment={currentPayment}
+          payments={payments}
+          filters={filters}
+          setFilters={setFilters}
         />
       }
       className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}
