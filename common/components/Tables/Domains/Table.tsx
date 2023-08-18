@@ -1,5 +1,5 @@
 import { DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { Popconfirm, Table, Tooltip, message } from 'antd'
+import { Alert, Popconfirm, Table, Tooltip, message } from 'antd'
 import { useRouter } from 'next/router'
 import { ColumnType } from 'antd/lib/table'
 
@@ -11,11 +11,15 @@ import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import StreetsBlock from '@common/components/DashboardPage/blocks/streets'
 import { AppRoutes } from '@utils/constants'
 
-const DomainsTable: React.FC = () => {
+export interface Props {
+  domainId?: string
+}
+
+const DomainsTable: React.FC<Props> = ({ domainId }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.DOMAIN
 
-  const { data, isLoading } = useGetDomainsQuery({})
+  const { data, isLoading, isError } = useGetDomainsQuery({ domainId })
 
   const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
 
@@ -27,6 +31,8 @@ const DomainsTable: React.FC = () => {
       message.error('Помилка при видаленні')
     }
   }
+
+  if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
   return (
     <Table

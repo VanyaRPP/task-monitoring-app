@@ -1,11 +1,11 @@
 import { CloseCircleOutlined } from '@ant-design/icons'
-import { Form, Input, InputRef, Popconfirm, Table } from 'antd'
+import { Alert, Form, Input, InputRef, Popconfirm, Table } from 'antd'
+import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
 
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import useService from '@common/modules/hooks/useService'
-import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
 
 const InvoicesTable: React.FC = () => {
@@ -18,11 +18,14 @@ const InvoicesTable: React.FC = () => {
   const streetId = Form.useWatch('street', form)
   const serviceId = Form.useWatch('monthService', form)
 
-  const { data: companies, isLoading: isCompaniesLoading } =
-    useGetAllRealEstateQuery(
-      { domainId, streetId },
-      { skip: !domainId || !streetId }
-    )
+  const {
+    data: companies,
+    isLoading: isCompaniesLoading,
+    isError,
+  } = useGetAllRealEstateQuery(
+    { domainId, streetId },
+    { skip: !domainId || !streetId }
+  )
 
   const { service, isLoading: isServiceLoading } = useService({
     domainId,
@@ -68,33 +71,33 @@ const InvoicesTable: React.FC = () => {
     },
   }
 
-  const columns = getDefaultColumns(service, dataSource, handleDelete).map(
-    (column) => {
-      const newColumn = column
+  const columns = getDefaultColumns(service, handleDelete).map((column) => {
+    const newColumn = column
 
-      newColumn.children = newColumn.children?.map((children) => ({
-        ...children,
-        onCell: (record: DataType) => ({
-          record,
-          editable: children.editable,
-          dataIndex: children.dataIndex,
-          title: children.title,
-          handleSave,
-        }),
-      }))
+    newColumn.children = newColumn.children?.map((children) => ({
+      ...children,
+      onCell: (record: DataType) => ({
+        record,
+        editable: children.editable,
+        dataIndex: children.dataIndex,
+        title: children.title,
+        handleSave,
+      }),
+    }))
 
-      return {
-        ...newColumn,
-        onCell: (record: DataType) => ({
-          record,
-          editable: newColumn.editable,
-          dataIndex: newColumn.dataIndex,
-          title: newColumn.title,
-          handleSave,
-        }),
-      }
+    return {
+      ...newColumn,
+      onCell: (record: DataType) => ({
+        record,
+        editable: newColumn.editable,
+        dataIndex: newColumn.dataIndex,
+        title: newColumn.title,
+        handleSave,
+      }),
     }
-  )
+  })
+
+  if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
   return (
     <Table
@@ -122,13 +125,12 @@ export default InvoicesTable
 
 const getDefaultColumns = (
   service?: any,
-  dataSource?: any[],
   handleDelete?: (row: any) => void
 ): any[] => [
   {
+    fixed: 'left',
     title: 'Компанія',
     dataIndex: 'companyName',
-    fixed: 'left',
     width: 200,
   },
   {
@@ -141,14 +143,15 @@ const getDefaultColumns = (
       {
         title: 'За м²',
         dataIndex: 'servicePricePerMeter',
-        render: (_, obj) => obj.servicePricePerMeter || service?.rentPrice,
+        render: (_, company) =>
+          company.servicePricePerMeter || service?.rentPrice,
         editable: true,
       },
       {
         title: 'Загальне',
-        render: (_, obj) => {
-          const prioPrice = obj.servicePricePerMeter || service?.rentPrice
-          return prioPrice * obj.totalArea
+        render: (_, company) => {
+          const prioPrice = company.servicePricePerMeter || service?.rentPrice
+          return prioPrice * company.totalArea
         },
       },
     ],
@@ -163,7 +166,7 @@ const getDefaultColumns = (
       },
       {
         title: 'Загальне',
-        render: (_, obj) => obj.pricePerMeter * obj.totalArea,
+        render: (_, company) => company.pricePerMeter * company.totalArea,
       },
     ],
   },
@@ -172,9 +175,13 @@ const getDefaultColumns = (
     children: [
       {
         title: 'Стара',
+        dataIndex: 'old_elec',
+        editable: true,
       },
       {
         title: 'Нова',
+        dataIndex: 'new_elec',
+        editable: true,
       },
     ],
   },
@@ -183,38 +190,45 @@ const getDefaultColumns = (
     children: [
       {
         title: 'Стара',
+        dataIndex: 'old_water',
+        editable: true,
       },
       {
         title: 'Нова',
+        dataIndex: 'new_water',
+        editable: true,
       },
     ],
   },
   {
     title: 'Індекс інфляції',
+    dataIndex: 'tmp_1',
     editable: true,
   },
   {
     title: 'ТПВ',
+    dataIndex: 'tmp_2',
     editable: true,
   },
   {
     title: 'Знижка',
+    dataIndex: 'tmp_3',
     editable: true,
   },
   {
+    fixed: 'right',
     align: 'center',
     title: '',
-    render: (_, record: { key: React.Key }) =>
-      dataSource?.length >= 1 ? (
-        <Popconfirm
-          title="Видалити запис?"
-          onConfirm={() => handleDelete && handleDelete(record.key)}
-        >
-          <CloseCircleOutlined />
-        </Popconfirm>
-      ) : null,
-    fixed: 'right',
-    width: 48,
+    dataIndex: '',
+    width: 50,
+    render: (_, record: { key: React.Key }) => (
+      <Popconfirm
+        title="Видалити запис?"
+        onConfirm={() => handleDelete && handleDelete(record.key)}
+      >
+        <CloseCircleOutlined />
+      </Popconfirm>
+    ),
   },
 ]
 

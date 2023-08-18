@@ -2,10 +2,15 @@ import DomainsHeader from '@common/components/Tables/Domains/Header'
 import DomainsTable from '@common/components/Tables/Domains/Table'
 import TableCard from '@common/components/UI/TableCard'
 
-const DomainsBlock: React.FC = () => {
+export interface Props {
+  domainId?: string
+  showAddButton?: boolean
+}
+
+const DomainsBlock: React.FC<Props> = ({ domainId, showAddButton = false }) => {
   return (
-    <TableCard title={<DomainsHeader showAddButton />}>
-      <DomainsTable />
+    <TableCard title={<DomainsHeader showAddButton={showAddButton} />}>
+      <DomainsTable domainId={domainId} />
     </TableCard>
   )
 }

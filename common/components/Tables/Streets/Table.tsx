@@ -1,5 +1,5 @@
 import { DeleteOutlined } from '@ant-design/icons'
-import { Popconfirm, Table, message } from 'antd'
+import { Alert, Popconfirm, Table, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 
@@ -19,7 +19,7 @@ const StreetsTable: React.FC<Props> = ({ domainId }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.STREETS
 
-  const { data, isLoading } = useGetAllStreetsQuery({ domainId })
+  const { data, isLoading, isError } = useGetAllStreetsQuery({ domainId })
 
   const [deleteStreet, { isLoading: deleteLoading }] = useDeleteStreetMutation()
 
@@ -28,9 +28,11 @@ const StreetsTable: React.FC<Props> = ({ domainId }) => {
     if ('data' in response) {
       message.success('Видалено!')
     } else {
-      message.error('Помилка при видаленні вулиці')
+      message.error('Помилка при видаленні')
     }
   }
+
+  if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
   return (
     <Table
