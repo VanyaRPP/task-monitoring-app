@@ -32,11 +32,13 @@ const DomainsHeader: React.FC<Props> = ({ showAddButton = false }) => {
       </Button>
 
       {showAddButton && (
-        <Button type="link" onClick={openModal}>
-          <PlusOutlined /> Додати
-        </Button>
+        <>
+          <Button type="link" onClick={openModal}>
+            <PlusOutlined /> Додати
+          </Button>
+          <AddDomainModal isModalOpen={isModalOpen} closeModal={closeModal} />
+        </>
       )}
-      <AddDomainModal isModalOpen={isModalOpen} closeModal={closeModal} />
     </div>
   )
 }

@@ -1,4 +1,3 @@
-import React, { FC } from 'react'
 import DashboardHeader from '../DashboardHeader'
 import PaymentsBlock from './blocks/payments'
 import ServicesBlock from './blocks/services'
@@ -9,7 +8,7 @@ import { Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import StreetsBlock from './blocks/streets'
 
-const Dashboard: FC = () => {
+const Dashboard: React.FC = () => {
   const { data: userResponse } = useGetCurrentUserQuery()
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
 
@@ -24,15 +23,15 @@ const Dashboard: FC = () => {
               <StreetsBlock showAddButton />
             </div>
             <div className={s.GridItem}>
-              <DomainsBlock />
+              <DomainsBlock showAddButton />
             </div>
           </>
         )}
         <div className={s.GridItem}>
-          <RealEstateBlock />
+          <RealEstateBlock showAddButton />
         </div>
         <div className={s.GridItem}>
-          <ServicesBlock />
+          <ServicesBlock showAddButton />
         </div>
         <div className={s.GridItem}>
           <PaymentsBlock />

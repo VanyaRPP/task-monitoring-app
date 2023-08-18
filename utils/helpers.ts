@@ -80,7 +80,7 @@ export const getName = (name, obj) => {
   return key
 }
 
-export const isAdminCheck = (roles) => {
+export const isAdminCheck = (roles?: string[]): boolean => {
   return [Roles.GLOBAL_ADMIN, Roles.DOMAIN_ADMIN].some((role) =>
     roles?.includes(role)
   )
@@ -156,16 +156,22 @@ export function filterInvoiceObject(obj) {
     if (typeof obj[key] === 'object' && obj[key].hasOwnProperty('sum')) {
       services.includes(key)
         ? filtered.push({
-          type: key,
-          ...obj[key],
-        })
+            type: key,
+            ...obj[key],
+          })
         : filtered.push({
-          type: ServiceType.Custom,
-          name: key,
-          ...obj[key],
-        })
+            type: ServiceType.Custom,
+            name: key,
+            ...obj[key],
+          })
     }
   }
 
   return filtered
 }
+
+export const renderCurrency = (number: number): string =>
+  number ? new Intl.NumberFormat('en-EN').format(number) : '-'
+
+export const getFormattedDate = (data: Date): string =>
+  firstTextToUpperCase(moment(data).format('MMMM'))
