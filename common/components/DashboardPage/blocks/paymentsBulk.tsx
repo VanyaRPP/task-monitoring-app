@@ -1,5 +1,5 @@
-import InvoicesHeader from '@common/components/Tables/PaymentsBulk/InvoicesHeader'
-import InvoicesTable from '@common/components/Tables/PaymentsBulk/InvoicesTable'
+import InvoicesHeader from '@common/components/Tables/PaymentsBulk/Header'
+import InvoicesTable from '@common/components/Tables/PaymentsBulk/Table'
 import TableCard from '@common/components/UI/TableCard'
 import { FormInstance, Form } from 'antd'
 import { createContext, useContext } from 'react'

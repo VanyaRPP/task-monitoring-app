@@ -1,28 +1,36 @@
 import { CloseCircleOutlined } from '@ant-design/icons'
-import { Button, Form, Input, InputRef, Popconfirm, Table } from 'antd'
+import { Form, Input, InputRef, Popconfirm, Table } from 'antd'
 import { useEffect, useRef, useState } from 'react'
 
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import useService from '@common/modules/hooks/useService'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@utils/constants'
 
 const InvoicesTable: React.FC = () => {
+  const router = useRouter()
+  const isOnPage = router.pathname === AppRoutes.PAYMENT_BULK
+
   const { form } = useInvoicesPaymentContext()
 
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
   const serviceId = Form.useWatch('monthService', form)
 
-  const { data: companies } = useGetAllRealEstateQuery(
-    { domainId, streetId },
-    { skip: !domainId || !streetId }
-  )
+  const { data: companies, isLoading: isCompaniesLoading } =
+    useGetAllRealEstateQuery(
+      { domainId, streetId },
+      { skip: !domainId || !streetId }
+    )
 
-  const { service } = useService({
+  const { service, isLoading: isServiceLoading } = useService({
     domainId,
     streetId,
     serviceId,
   })
+
+  const isLoading = isCompaniesLoading || isServiceLoading
 
   const [dataSource, setDataSource] = useState([])
 
@@ -90,10 +98,22 @@ const InvoicesTable: React.FC = () => {
 
   return (
     <Table
+      rowKey="_id"
+      size="small"
+      pagination={
+        !isOnPage && {
+          responsive: false,
+          size: 'small',
+          pageSize: 8,
+          position: ['bottomCenter'],
+          hideOnSinglePage: true,
+        }
+      }
+      loading={isLoading}
+      columns={columns}
       components={components}
       dataSource={dataSource}
-      columns={columns}
-      bordered
+      scroll={{ x: 1500 }}
     />
   )
 }
@@ -104,10 +124,12 @@ const getDefaultColumns = (
   service?: any,
   dataSource?: any[],
   handleDelete?: (row: any) => void
-) => [
+): any[] => [
   {
     title: 'Компанія',
     dataIndex: 'companyName',
+    fixed: 'left',
+    width: 200,
   },
   {
     title: 'Площа (м²)',
@@ -180,6 +202,7 @@ const getDefaultColumns = (
     editable: true,
   },
   {
+    align: 'center',
     title: '',
     render: (_, record: { key: React.Key }) =>
       dataSource?.length >= 1 ? (
@@ -190,6 +213,8 @@ const getDefaultColumns = (
           <CloseCircleOutlined />
         </Popconfirm>
       ) : null,
+    fixed: 'right',
+    width: 48,
   },
 ]
 
