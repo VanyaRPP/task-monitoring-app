@@ -14,10 +14,9 @@ import { ColumnProps } from 'antd/lib/table'
 import moment from 'moment'
 import { IPaymentTableData } from '@utils/tableData'
 import { ServiceType, paymentsTitle } from '@utils/constants'
-import { getName } from '@utils/helpers'
+import { getFormattedDate, getName } from '@utils/helpers'
 import { validateField } from '@common/assets/features/validators'
 import s from './style.module.scss'
-import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import useService from '@common/modules/hooks/useService'
 import {
   PriceElectricityField,

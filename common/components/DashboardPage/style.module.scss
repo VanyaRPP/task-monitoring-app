@@ -1,23 +1,6 @@
 .DashboardGrid {
-  display: grid;
-  grid-template-rows: repeat(3, max-content);
-  grid-template-columns: repeat(2, 1fr);
-  grid-gap: 10px;
-
   .GridItem {
-    display: flex;
-  }
-
-  .GridItem:nth-child(3),
-  .GridItem:nth-child(4),
-  .GridItem:nth-child(5) {
-    grid-column: span 2;
-  }
-
-  @media (max-width: 1600px) {
-    .GridItem:nth-child(1),
-    .GridItem:nth-child(2) {
-      grid-column: span 2;
-    }
+    margin-bottom: 20px;
+    max-width: 99%;
   }
 }

@@ -10,10 +10,10 @@ import PaymentTotal from './PaymentTotal'
 import PaymentPricesTable from './PaymentPricesTable'
 import MonthServiceSelect from './MonthServiceSelect'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
-import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import moment from 'moment'
 import InvoiceNumber from './InvoiceNumber'
 import InvoiceCreationDate from './InvoiceCreationDate'
+import { getFormattedDate } from '@utils/helpers'
 
 interface Props {
   form: FormInstance<any>

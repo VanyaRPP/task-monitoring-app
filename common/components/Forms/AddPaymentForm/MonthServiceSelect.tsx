@@ -1,6 +1,6 @@
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { validateField } from '@common/assets/features/validators'
-import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
+import { getFormattedDate } from '@utils/helpers'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 

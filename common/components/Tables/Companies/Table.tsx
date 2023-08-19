@@ -1,5 +1,5 @@
 import { DeleteOutlined } from '@ant-design/icons'
-import { Alert, Checkbox, Popconfirm, Table, message } from 'antd'
+import { Alert, Checkbox, Popconfirm, Table, Tag, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 
@@ -8,7 +8,8 @@ import {
   useGetAllRealEstateQuery,
 } from '@common/api/realestateApi/realestate.api'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
-import { AppRoutes } from '@utils/constants'
+import { AppRoutes, Roles } from '@utils/constants'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 export interface Props {
   domainId?: string
@@ -18,6 +19,8 @@ export interface Props {
 const CompaniesTable: React.FC<Props> = ({ domainId, streetId }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.REAL_ESTATE
+
+  const { data: userResponse } = useGetCurrentUserQuery()
 
   const { data, isLoading, isError } = useGetAllRealEstateQuery({
     domainId,
@@ -36,6 +39,7 @@ const CompaniesTable: React.FC<Props> = ({ domainId, streetId }) => {
   }
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
+  const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   return (
     <Table
@@ -56,10 +60,11 @@ const CompaniesTable: React.FC<Props> = ({ domainId, streetId }) => {
         streetId,
         isLoading,
         handleDelete,
-        deleteLoading
+        deleteLoading,
+        isGlobalAdmin
       )}
       dataSource={data}
-      scroll={{ x: 2000 }}
+      scroll={{ x: 1500 }}
     />
   )
 }
@@ -69,7 +74,8 @@ const getDefaultColumns = (
   streetId?: string,
   isLoading?: boolean,
   handleDelete?: (...args: any) => void,
-  deleteLoading: boolean = false
+  deleteLoading?: boolean,
+  isGlobalAdmin?: boolean
 ): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {
@@ -77,12 +83,7 @@ const getDefaultColumns = (
       dataIndex: 'adminEmails',
       width: 250,
       render: (adminEmails) =>
-        adminEmails.map((email) => (
-          <>
-            <span>{email}</span>
-            <br />
-          </>
-        )),
+        adminEmails.map((email) => <Tag key={email}>{email}</Tag>),
     },
     {
       title: 'Опис',
@@ -120,7 +121,10 @@ const getDefaultColumns = (
       dataIndex: 'inflicion',
       render: () => <Checkbox disabled />,
     },
-    {
+  ]
+
+  if (isGlobalAdmin) {
+    columns.push({
       align: 'center',
       fixed: 'right',
       title: '',
@@ -136,8 +140,8 @@ const getDefaultColumns = (
           <DeleteOutlined />
         </Popconfirm>
       ),
-    },
-  ]
+    })
+  }
 
   if (!domainId && !streetId && !isLoading) {
     columns.unshift(

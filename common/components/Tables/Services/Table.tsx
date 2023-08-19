@@ -59,7 +59,7 @@ const ServicesTable: React.FC = () => {
 const getDefaultColumns = (
   isAdmin?: boolean,
   handleDelete?: (...args: any) => void,
-  deleteLoading: boolean = false
+  deleteLoading?: boolean
 ): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {

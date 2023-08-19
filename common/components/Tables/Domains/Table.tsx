@@ -1,5 +1,5 @@
 import { DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { Alert, Popconfirm, Table, Tooltip, message } from 'antd'
+import { Alert, Popconfirm, Table, Tag, Tooltip, message } from 'antd'
 import { useRouter } from 'next/router'
 import { ColumnType } from 'antd/lib/table'
 
@@ -62,7 +62,7 @@ const DomainsTable: React.FC<Props> = ({ domainId }) => {
 
 const getDefaultColumns = (
   handleDelete?: (...args: any) => void,
-  deleteLoading: boolean = false
+  deleteLoading?: boolean
 ): ColumnType<any>[] => [
   {
     fixed: 'left',
@@ -74,19 +74,13 @@ const getDefaultColumns = (
     title: 'Адміністратори',
     dataIndex: 'adminEmails',
     render: (adminEmails) =>
-      adminEmails.map((email) => (
-        <>
-          <span>{email}</span>
-          <br />
-        </>
-      )),
+      adminEmails.map((email) => <Tag key={email}>{email}</Tag>),
   },
   {
     align: 'center',
-    fixed: 'right',
     title: 'Опис',
     dataIndex: 'description',
-    width: 50,
+    width: 100,
     render: (text) => (
       <Tooltip title={text}>
         <QuestionCircleOutlined />
