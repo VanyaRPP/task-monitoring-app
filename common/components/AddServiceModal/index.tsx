@@ -1,15 +1,14 @@
 import { useAddServiceMutation } from '@common/api/serviceApi/service.api'
-import { objectWithoutKey } from '@common/assets/features/formDataHelpers'
-import { IUser } from '@common/modules/models/User'
 import { Form, message, Modal } from 'antd'
-import { useSession } from 'next-auth/react'
-import React, { FC } from 'react'
+import React, { FC, useEffect } from 'react'
 import AddServiceForm from '../Forms/AddServiceForm'
 import moment from 'moment'
+import { IExtendedService } from '@common/api/serviceApi/service.api.types'
 
 interface Props {
-  isModalOpen: boolean
+  edit: boolean
   closeModal: VoidFunction
+  currentService: IExtendedService
 }
 
 type FormData = {
@@ -23,7 +22,7 @@ type FormData = {
   description: string
 }
 
-const AddServiceModal: FC<Props> = ({ isModalOpen, closeModal }) => {
+const AddServiceModal: FC<Props> = ({ edit, closeModal, currentService }) => {
   const [form] = Form.useForm()
   const [addService, { isLoading }] = useAddServiceMutation()
 
@@ -39,7 +38,11 @@ const AddServiceModal: FC<Props> = ({ isModalOpen, closeModal }) => {
       waterPrice: formData.waterPrice,
       inflicionPrice: formData.inflicionPrice,
       description: formData.description,
+      serviceId: currentService._id
     })
+
+    // eslint-disable-next-line no-console
+    console.log('res', response)
     if ('data' in response) {
       form.resetFields()
       closeModal()
@@ -51,15 +54,15 @@ const AddServiceModal: FC<Props> = ({ isModalOpen, closeModal }) => {
 
   return (
     <Modal
-      open={isModalOpen}
+      open={true}
       title="Ціна на послуги в місяць"
       onOk={handleSubmit}
       onCancel={closeModal}
-      okText={'Додати'}
+      okText={edit ? 'Редагувати' : 'Додати'}
       cancelText={'Відміна'}
       confirmLoading={isLoading}
     >
-      <AddServiceForm form={form} />
+      <AddServiceForm form={form} edit={edit} currentService={currentService} />
     </Modal>
   )
 }

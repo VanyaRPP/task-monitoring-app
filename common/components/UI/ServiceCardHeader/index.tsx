@@ -6,12 +6,13 @@ import { useRouter } from 'next/router'
 import AddServiceModal from '@common/components/AddServiceModal'
 import s from './style.module.scss'
 
-const ServiceCardHeader = () => {
+const ServiceCardHeader = ({ setCurrentService, currentService }) => {
   const Router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const closeModal = () => {
     setIsModalOpen(false)
+    setCurrentService(null)
   }
 
   return (
@@ -23,7 +24,13 @@ const ServiceCardHeader = () => {
       <Button type="link" onClick={() => setIsModalOpen(true)}>
         <PlusOutlined /> Додати
       </Button>
-      <AddServiceModal isModalOpen={isModalOpen} closeModal={closeModal} />
+      {(isModalOpen || currentService) && (
+        <AddServiceModal
+          edit={!!currentService}
+          currentService={currentService}
+          closeModal={closeModal}
+        />
+      )}
     </div>
   )
 }

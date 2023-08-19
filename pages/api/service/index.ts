@@ -86,7 +86,15 @@ export default async function handler(
       try {
         if (isAdmin) {
           // TODO: body validation
-          const service = await Service.create(req.body)
+          const { serviceId, ...body } = req.body
+          if (serviceId) {
+            const service = await Service.updateOne(
+              { _id: serviceId },
+              { $set: body }
+            )
+            return res.status(200).json({ success: true, data: service })
+          }
+          const service = await Service.create(body)
           return res.status(200).json({ success: true, data: service })
         } else {
           return res
