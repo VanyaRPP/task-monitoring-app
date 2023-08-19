@@ -104,6 +104,14 @@ export function composeFunctions(input, functions) {
   return functions.reduce((result, func) => func(result), input)
 }
 
+export function parseReceived(data) { 
+  return composeFunctions(data, [
+    getPlainJsObjectFromMongoose,
+    unpopulate,
+    removeVersion,
+  ])
+}
+
 /**
  * Костиль, щоб прибрати `__v` з документу `mongodb` і далі порівнювати
  * отримані дані із тестовими

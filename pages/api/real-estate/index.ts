@@ -33,7 +33,7 @@ export default async function handler(
           const domains = await Domain.find({
             adminEmails: { $in: [user.email] },
           })
-          const domainsIds = domains.map((i) => i._id)
+          const domainsIds = domains.map((i) => i._id.toString())
           options.domain = { $in: domainsIds }
         }
 
