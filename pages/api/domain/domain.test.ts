@@ -2,10 +2,7 @@ import { expect } from '@jest/globals'
 import handler from '.'
 
 import {
-  removeVersion,
-  unpopulate,
-  getPlainJsObjectFromMongoose,
-  composeFunctions,
+  parseReceived
 } from '@utils/helpers'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
@@ -39,13 +36,7 @@ describe('Domains API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = composeFunctions(response.data, [
-      getPlainJsObjectFromMongoose,
-      unpopulate,
-      removeVersion,
-    ])
-
-    expect(received).toEqual(domains)
+    expect(parseReceived(response.data)).toEqual(domains)
   })
 
   it('load domains as GlobalAdmin with limit - success', async () => {
@@ -70,12 +61,8 @@ describe('Domains API - GET', () => {
     }
 
     expect(response.status).toHaveBeenCalledWith(200)
-    const received = composeFunctions(response.data, [
-      getPlainJsObjectFromMongoose,
-      unpopulate,
-      removeVersion,
-    ])
-
+    
+    const received = parseReceived(response.data)
     expect(received).toEqual(domains.slice(0, limit))
   })
 
@@ -100,11 +87,7 @@ describe('Domains API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = composeFunctions(response.data, [
-      getPlainJsObjectFromMongoose,
-      unpopulate,
-      removeVersion,
-    ])
+    const received = parseReceived(response.data)
     const expected = domains.filter((domain) =>
       domain.adminEmails.includes(users.domainAdmin.email)
     )
@@ -133,11 +116,7 @@ describe('Domains API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = composeFunctions(response.data, [
-      getPlainJsObjectFromMongoose,
-      unpopulate,
-      removeVersion,
-    ])
+    const received = parseReceived(response.data)
 
     const realestates = realEstates.filter((realEstate) =>
       realEstate.adminEmails.includes(users.user.email)
@@ -169,11 +148,7 @@ describe('Domains API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = composeFunctions(response.data, [
-      getPlainJsObjectFromMongoose,
-      unpopulate,
-      removeVersion,
-    ])
+    const received = parseReceived(response.data)
     const expected = [domains[0]]
 
     expect(received).toEqual(expected)
@@ -200,11 +175,7 @@ describe('Domains API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = composeFunctions(response.data, [
-      getPlainJsObjectFromMongoose,
-      unpopulate,
-      removeVersion,
-    ])
+    const received = parseReceived(response.data)
     const expected = [domains[0]]
 
     expect(received).toEqual(expected)
@@ -231,11 +202,7 @@ describe('Domains API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = composeFunctions(response.data, [
-      getPlainJsObjectFromMongoose,
-      unpopulate,
-      removeVersion,
-    ])
+    const received = parseReceived(response.data)
     const expected = [domains[0]]
 
     expect(received).toEqual(expected)
