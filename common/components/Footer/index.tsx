@@ -11,7 +11,9 @@ const Footer: FC<Props> = ({ style }) => {
   return (
     <Layout.Footer className={s.Footer} style={style}>
       <div className={s.Divider} />
-      <Logo />
+      <div className={s.Content}>
+        <Logo />
+      </div>
     </Layout.Footer>
   )
 }

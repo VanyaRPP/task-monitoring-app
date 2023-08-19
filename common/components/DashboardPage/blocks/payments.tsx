@@ -143,11 +143,29 @@ const PaymentsBlock = () => {
       dataIndex: 'description',
     },
     ...paymentsPageColumns,
+    {
+      fixed: 'right',
+      title: '',
+      width: 50,
+      render: (_, payment: IExtendedPayment) => (
+        <div className={s.eyelined}>
+          <Button
+            type="link"
+            onClick={() => {
+              setCurrentPayment(payment)
+            }}
+          >
+            <EyeOutlined className={s.eyelined} />
+          </Button>
+        </div>
+      ),
+    },
     isGlobalAdmin
       ? {
+          align: 'center',
+          fixed: 'right',
           title: '',
-          dataIndex: '',
-          width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
+          width: 50,
           render: (_, payment: IExtendedPayment) => (
             <div className={s.popconfirm}>
               <Popconfirm
@@ -164,23 +182,6 @@ const PaymentsBlock = () => {
           ),
         }
       : { width: '0' },
-    {
-      title: '',
-      dataIndex: '',
-      width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
-      render: (_, payment: IExtendedPayment) => (
-        <div className={s.eyelined}>
-          <Button
-            type="link"
-            onClick={() => {
-              setCurrentPayment(payment)
-            }}
-          >
-            <EyeOutlined className={s.eyelined} />
-          </Button>
-        </div>
-      ),
-    },
   ]
 
   if (isGlobalAdmin && !email) {

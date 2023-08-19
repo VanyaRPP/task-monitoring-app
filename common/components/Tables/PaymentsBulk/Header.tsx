@@ -1,26 +1,22 @@
 import { QuestionCircleOutlined, SelectOutlined } from '@ant-design/icons'
+import { Button, Form, Popover } from 'antd'
+import { useRouter } from 'next/router'
+
+import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthServiceSelect'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
-import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { AppRoutes } from '@utils/constants'
-import { Button, Form, Popover } from 'antd'
-import { useRouter } from 'next/router'
-import s from './style.module.scss'
 
 const InvoicesHeader = () => {
   const router = useRouter()
   const { form } = useInvoicesPaymentContext()
 
   return (
-    <div className={s.tableHeader}>
-      <Button
-        className={s.myPayments}
-        type="link"
-        onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
-      >
+    <>
+      <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT_BULK)}>
         Інвойси
-        <SelectOutlined className={s.Icon} />
+        <SelectOutlined />
       </Button>
 
       <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
@@ -29,10 +25,10 @@ const InvoicesHeader = () => {
         <MonthServiceGeneralInfo />
       </div>
 
-      <Button className={s.myPayments} type="link" onClick={() => {}}>
+      <Button type="link" onClick={() => {}}>
         Зберегти
       </Button>
-    </div>
+    </>
   )
 }
 
