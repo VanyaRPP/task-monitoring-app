@@ -27,7 +27,7 @@ const AddServiceModal: FC<Props> = ({ closeModal, currentService }) => {
   const edit = !!currentService
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
-
+	// TODO: for edit (update) we should use another method
     const response = await addService({
       domain: formData.domain,
       street: formData.street,
@@ -37,7 +37,7 @@ const AddServiceModal: FC<Props> = ({ closeModal, currentService }) => {
       waterPrice: formData.waterPrice,
       inflicionPrice: formData.inflicionPrice,
       description: formData.description,
-      serviceId: currentService._id
+      serviceId: currentService?._id
     })
 
     // eslint-disable-next-line no-console
