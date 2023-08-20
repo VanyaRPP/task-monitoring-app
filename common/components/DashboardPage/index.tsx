@@ -20,18 +20,18 @@ const Dashboard: React.FC = () => {
         {isGlobalAdmin && (
           <>
             <div className={s.GridItem}>
-              <StreetsBlock showAddButton />
+              <StreetsBlock />
             </div>
             <div className={s.GridItem}>
-              <DomainsBlock showAddButton />
+              <DomainsBlock />
             </div>
           </>
         )}
         <div className={s.GridItem}>
-          <RealEstateBlock showAddButton />
+          <RealEstateBlock />
         </div>
         <div className={s.GridItem}>
-          <ServicesBlock showAddButton />
+          <ServicesBlock />
         </div>
         <div className={s.GridItem}>
           <PaymentsBlock />

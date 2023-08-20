@@ -1,14 +1,15 @@
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import ServicesHeader from '@common/components/Tables/Services/Header'
 import ServicesTable from '@common/components/Tables/Services/Table'
 import TableCard from '@common/components/UI/TableCard'
+import { isAdminCheck } from '@utils/helpers'
 
-export interface Props {
-  showAddButton?: boolean
-}
 
-const ServicesBlock: React.FC<Props> = ({ showAddButton = false }) => {
+const ServicesBlock = () => {
+  const { data: user } = useGetCurrentUserQuery()
+  
   return (
-    <TableCard title={<ServicesHeader showAddButton={showAddButton} />}>
+    <TableCard title={<ServicesHeader showAddButton={isAdminCheck(user?.roles)} />}>
       <ServicesTable />
     </TableCard>
   )

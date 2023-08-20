@@ -9,6 +9,8 @@ export interface IService {
   waterPrice: number
   inflicionPrice: number
   description: string
+  serviceId?: string
+  body?: IService
 }
 
 export interface IExtendedService extends IService {

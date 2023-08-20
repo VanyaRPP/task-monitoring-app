@@ -64,7 +64,7 @@ const StreetsTable: React.FC<Props> = ({ domainId }) => {
 
 const getDefaultColumns = (
   handleDelete?: (streetId: string) => void,
-  deleteLoading: boolean = false
+  deleteLoading?: boolean
 ): ColumnType<any>[] => [
   {
     title: 'Місто',

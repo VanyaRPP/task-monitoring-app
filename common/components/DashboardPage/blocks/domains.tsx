@@ -4,12 +4,11 @@ import TableCard from '@common/components/UI/TableCard'
 
 export interface Props {
   domainId?: string
-  showAddButton?: boolean
 }
 
-const DomainsBlock: React.FC<Props> = ({ domainId, showAddButton = false }) => {
+const DomainsBlock: React.FC<Props> = ({ domainId }) => {
   return (
-    <TableCard title={<DomainsHeader showAddButton={showAddButton} />}>
+    <TableCard title={<DomainsHeader />}>
       <DomainsTable domainId={domainId} />
     </TableCard>
   )
