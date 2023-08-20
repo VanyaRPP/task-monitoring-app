@@ -35,7 +35,7 @@ const ServicesHeader: React.FC<Props> = ({ showAddButton = false }) => {
           <Button type="link" onClick={openModal}>
             <PlusOutlined /> Додати
           </Button>
-          <AddServiceModal isModalOpen={isModalOpen} closeModal={closeModal} />
+          {isModalOpen && <AddServiceModal closeModal={closeModal} />}
         </>
       )}
     </div>

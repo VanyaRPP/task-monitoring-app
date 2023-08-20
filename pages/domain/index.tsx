@@ -7,7 +7,7 @@ import { FC } from 'react'
 import DomainsBlock from '@common/components/DashboardPage/blocks/domains'
 
 const Domains: FC = () => {
-  return <DomainsBlock />
+  return <DomainsBlock showAddButton />
 }
 
 export default withAuthRedirect(Domains)

@@ -26,7 +26,6 @@ const ServiceCardHeader = ({ setCurrentService, currentService }) => {
       </Button>
       {(isModalOpen || currentService) && (
         <AddServiceModal
-          edit={!!currentService}
           currentService={currentService}
           closeModal={closeModal}
         />

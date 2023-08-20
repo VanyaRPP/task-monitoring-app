@@ -7,7 +7,7 @@ import { FC } from 'react'
 import StreetsBlock from '@common/components/DashboardPage/blocks/streets'
 
 const Streets: FC = () => {
-  return <StreetsBlock showAddButton />
+  return <StreetsBlock />
 }
 
 export default withAuthRedirect(Streets)

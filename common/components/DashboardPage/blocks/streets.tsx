@@ -4,10 +4,10 @@ import TableCard from '@common/components/UI/TableCard'
 
 const StreetsBlock: React.FC<{
   domainId?: string
-  showAddButton?: boolean
-}> = ({ domainId, showAddButton = false }) => {
+}> = ({ domainId }) => {
+  
   return (
-    <TableCard title={<StreetsHeader showAddButton={showAddButton} />}>
+    <TableCard title={<StreetsHeader showAddButton />}>
       <StreetsTable domainId={domainId} />
     </TableCard>
   )

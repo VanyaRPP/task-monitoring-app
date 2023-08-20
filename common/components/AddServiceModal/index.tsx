@@ -6,9 +6,8 @@ import moment from 'moment'
 import { IExtendedService } from '@common/api/serviceApi/service.api.types'
 
 interface Props {
-  edit: boolean
   closeModal: VoidFunction
-  currentService: IExtendedService
+  currentService?: IExtendedService
 }
 
 type FormData = {
@@ -22,10 +21,10 @@ type FormData = {
   description: string
 }
 
-const AddServiceModal: FC<Props> = ({ edit, closeModal, currentService }) => {
+const AddServiceModal: FC<Props> = ({ closeModal, currentService }) => {
   const [form] = Form.useForm()
   const [addService, { isLoading }] = useAddServiceMutation()
-
+  const edit = !!currentService
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
 
