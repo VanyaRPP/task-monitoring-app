@@ -1,12 +1,15 @@
 import { CloseCircleOutlined } from '@ant-design/icons'
-import { Alert, Form, Input, InputRef, Popconfirm, Table } from 'antd'
+import { Alert, Form, Popconfirm, Table } from 'antd'
 import { useRouter } from 'next/router'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import useService from '@common/modules/hooks/useService'
 import { AppRoutes } from '@utils/constants'
+
+import { EditableCell } from '@common/components/UI/EditableCell'
+import { EditableRow } from '@common/components/UI/EditableRow'
 
 const InvoicesTable: React.FC = () => {
   const router = useRouter()
@@ -41,6 +44,8 @@ const InvoicesTable: React.FC = () => {
     setDataSource(
       companies?.map((company, index) => ({
         key: index.toString(),
+        servicePricePerMeter:
+          company.servicePricePerMeter || service?.rentPrice,
         ...company,
       }))
     )
@@ -52,16 +57,12 @@ const InvoicesTable: React.FC = () => {
     // TODO: update on remote
   }
 
-  const handleSave = (row) => {
+  const handleSave = ({ record, value }) => {
     const newData = [...dataSource]
-    const index = newData.findIndex((item) => row.key === item.key)
+    const index = newData.findIndex((item) => record.key === item.key)
     const item = newData[index]
-    newData.splice(index, 1, {
-      ...item,
-      ...row,
-    })
+    newData.splice(index, 1, { ...item, ...value })
     setDataSource(newData)
-    // TODO: update on remote
   }
 
   const components = {
@@ -76,23 +77,25 @@ const InvoicesTable: React.FC = () => {
 
     newColumn.children = newColumn.children?.map((children) => ({
       ...children,
-      onCell: (record: DataType) => ({
+      onCell: (record) => ({
+        form,
         record,
         editable: children.editable,
         dataIndex: children.dataIndex,
         title: children.title,
-        handleSave,
+        onChange: handleSave,
       }),
     }))
 
     return {
       ...newColumn,
-      onCell: (record: DataType) => ({
+      onCell: (record) => ({
+        form,
         record,
         editable: newColumn.editable,
         dataIndex: newColumn.dataIndex,
         title: newColumn.title,
-        handleSave,
+        onChange: handleSave,
       }),
     }
   })
@@ -123,14 +126,6 @@ const InvoicesTable: React.FC = () => {
 
 export default InvoicesTable
 
-function FormAttribute({ value, name }) {
-  return (
-    <Form.Item initialValue={value} name={name}>
-      <Input />
-    </Form.Item>
-  )
-}
-
 const getDefaultColumns = (
   service?: any,
   handleDelete?: (row: any) => void
@@ -140,12 +135,10 @@ const getDefaultColumns = (
     title: 'Компанія',
     dataIndex: 'companyName',
     width: 200,
-    render: (value, obj) => <FormAttribute name={[obj.companyName, 'companyName']} value={value} />,
   },
   {
     title: 'Площа (м²)',
     dataIndex: 'totalArea',
-    render: (value, obj) => <FormAttribute name={[obj.companyName, 'totalArea']} value={value} />,
   },
   {
     title: 'Утримання',
@@ -241,81 +234,3 @@ const getDefaultColumns = (
     ),
   },
 ]
-
-export interface DataType {
-  key: React.Key
-  [key: string]: any
-}
-
-export interface EditableCellProps {
-  title: React.ReactNode
-  editable: boolean
-  children: React.ReactNode
-  dataIndex: string
-  record: any
-  handleSave: (record: any) => void
-}
-
-export const EditableCell: React.FC<EditableCellProps> = ({
-  title,
-  editable,
-  children,
-  dataIndex,
-  record,
-  handleSave,
-  ...restProps
-}) => {
-  const { form } = useInvoicesPaymentContext()
-
-  const [editing, setEditing] = useState(false)
-  const inputRef = useRef<InputRef>(null)
-
-  useEffect(() => {
-    if (editing) inputRef.current!.focus()
-  }, [editing])
-
-  const toggleEdit = () => {
-    setEditing(!editing)
-    form.setFieldsValue({ [dataIndex]: record[dataIndex] })
-  }
-
-  const save = async () => {
-    try {
-      const values = await form.validateFields()
-
-      toggleEdit()
-      handleSave({ ...record, ...values })
-    } catch (errInfo) {
-      console.log('Save failed:', errInfo)
-    }
-  }
-
-  return (
-    <td {...restProps}>
-      {editable ? (
-        editing ? (
-          <Form.Item name={dataIndex} style={{ margin: 0 }}>
-            <Input ref={inputRef} onPressEnter={save} onBlur={save} />
-          </Form.Item>
-        ) : (
-          // Костиль, але я нічого краще не придумав
-          // TODO: придумати щось краще
-          <Input value={children.toString().slice(1)} onClick={toggleEdit} />
-        )
-      ) : (
-        children
-      )}
-    </td>
-  )
-}
-
-export interface EditableRowProps {
-  index: number
-}
-
-export const EditableRow: React.FC<EditableRowProps> = ({
-  index,
-  ...props
-}) => {
-  return <tr {...props} />
-}

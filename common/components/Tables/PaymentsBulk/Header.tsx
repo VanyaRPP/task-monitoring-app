@@ -35,8 +35,7 @@ const InvoicesHeader = () => {
         type="link"
         onClick={async () => {
           const rest = await form.validateFields()
-          debugger
-          rest
+          console.log(rest)
         }}
       >
         Зберегти
