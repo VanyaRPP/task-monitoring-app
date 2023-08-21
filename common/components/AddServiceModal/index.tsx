@@ -39,8 +39,8 @@ const AddServiceModal: FC<Props> = ({ closeModal, currentService }) => {
       rentPrice: formData.rentPrice,
       electricityPrice: formData.electricityPrice,
       waterPrice: formData.waterPrice,
-      inflicionPrice: formData.inflicionPrice,
-      description: formData.description,
+      inflicionPrice: formData.inflicionPrice || 0,
+      description: formData.description || '',
     }
     const response = currentService
       ? await editService({

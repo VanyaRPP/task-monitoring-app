@@ -7,8 +7,8 @@ export interface IService {
   date: Date
   electricityPrice: number
   waterPrice: number
-  inflicionPrice: number
-  description: string
+  inflicionPrice?: number
+  description?: string
 }
 
 export interface IExtendedService extends IService {
