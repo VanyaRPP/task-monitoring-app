@@ -1,5 +1,5 @@
-import { DeleteOutlined } from '@ant-design/icons'
-import { Alert, Popconfirm, Table, Tooltip, message } from 'antd'
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
+import { Alert, Popconfirm, Table, Tooltip, message, Button } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 
@@ -12,7 +12,11 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import { getFormattedDate, renderCurrency } from '@utils/helpers'
 
-const ServicesTable: React.FC = () => {
+interface Props {
+  setCurrentService: (setvice: IExtendedService) => void
+}
+
+const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.REAL_ESTATE
 
@@ -49,7 +53,12 @@ const ServicesTable: React.FC = () => {
         }
       }
       loading={isLoading}
-      columns={getDefaultColumns(isGlobalAdmin, handleDelete, deleteLoading)}
+      columns={getDefaultColumns(
+        isGlobalAdmin,
+        handleDelete,
+        deleteLoading,
+        setCurrentService
+      )}
       dataSource={data}
       scroll={{ x: 1500 }}
     />
@@ -59,7 +68,8 @@ const ServicesTable: React.FC = () => {
 const getDefaultColumns = (
   isAdmin?: boolean,
   handleDelete?: (...args: any) => void,
-  deleteLoading?: boolean
+  deleteLoading?: boolean,
+  setCurrentService?: (service: IExtendedService) => void
 ): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {
@@ -116,24 +126,37 @@ const getDefaultColumns = (
   ]
 
   if (isAdmin) {
-    columns.push({
-      align: 'center',
-      fixed: 'right',
-      title: '',
-      width: 50,
-      render: (_, service: IExtendedService) => (
-        <Popconfirm
-          title={`Ви впевнені що хочете видалити послугу за місяць ${getFormattedDate(
-            service.date
-          )}?`}
-          onConfirm={() => handleDelete(service?._id)}
-          cancelText="Відміна"
-          disabled={deleteLoading}
-        >
-          <DeleteOutlined />
-        </Popconfirm>
-      ),
-    })
+    columns.push(
+      {
+        align: 'center',
+        fixed: 'right',
+        title: '',
+        width: 50,
+        render: (_, service: IExtendedService) => (
+          <Button type="link" onClick={() => setCurrentService(service)}>
+            <EditOutlined />
+          </Button>
+        ),
+      },
+      {
+        align: 'center',
+        fixed: 'right',
+        title: '',
+        width: 50,
+        render: (_, service: IExtendedService) => (
+          <Popconfirm
+            title={`Ви впевнені що хочете видалити послугу за місяць ${getFormattedDate(
+              service.date
+            )}?`}
+            onConfirm={() => handleDelete(service?._id)}
+            cancelText="Відміна"
+            disabled={deleteLoading}
+          >
+            <DeleteOutlined />
+          </Popconfirm>
+        ),
+      }
+    )
   }
 
   return columns
