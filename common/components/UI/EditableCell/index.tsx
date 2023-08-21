@@ -31,13 +31,17 @@ export const EditableCell: React.FC<EditableCellProps> = ({
 
   return (
     <td {...restProps}>
-      <Form.Item
-        initialValue={record?.[dataIndex]}
-        name={[record?.companyName, dataIndex]}
-        style={{ margin: 0 }}
-      >
-        {editable ? <Input onBlur={save} onPressEnter={save} /> : children}
-      </Form.Item>
+      {dataIndex ? (
+        <Form.Item
+          initialValue={record?.[dataIndex]}
+          name={[record?.companyName, dataIndex]}
+          style={{ margin: 0 }}
+        >
+          {editable ? <Input onBlur={save} onPressEnter={save} /> : children}
+        </Form.Item>
+      ) : (
+        children
+      )}
     </td>
   )
 }
