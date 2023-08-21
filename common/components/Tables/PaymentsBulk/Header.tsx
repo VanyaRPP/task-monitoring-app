@@ -13,7 +13,13 @@ const InvoicesHeader = () => {
   const { form } = useInvoicesPaymentContext()
 
   return (
-    <>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
       <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT_BULK)}>
         Інвойси
         <SelectOutlined />
@@ -25,10 +31,17 @@ const InvoicesHeader = () => {
         <MonthServiceGeneralInfo />
       </div>
 
-      <Button type="link" onClick={() => {}}>
+      <Button
+        type="link"
+        onClick={async () => {
+          const rest = await form.validateFields()
+          debugger
+          rest
+        }}
+      >
         Зберегти
       </Button>
-    </>
+    </div>
   )
 }
 
