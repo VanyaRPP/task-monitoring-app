@@ -138,7 +138,6 @@ export const realEstates = [
     rentPart: 0,
     inflicion: false,
   },
-
   {
     _id: '64d68421d9ba2fc8fea79d24',
     domain: domains[3]._id,
