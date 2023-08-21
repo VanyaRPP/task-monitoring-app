@@ -284,13 +284,13 @@ export const EditableCell: React.FC<EditableCellProps> = ({
     <td {...restProps}>
       {editable ? (
         editing ? (
-          <Form.Item name={dataIndex}>
+          <Form.Item name={dataIndex} style={{ margin: 0 }}>
             <Input ref={inputRef} onPressEnter={save} onBlur={save} />
           </Form.Item>
         ) : (
-          <div style={{ paddingRight: 24 }} onClick={toggleEdit}>
-            {children}
-          </div>
+          // Костиль, але я нічого краще не придумав
+          // TODO: придумати щось краще
+          <Input value={children.toString().slice(1)} onClick={toggleEdit} />
         )
       ) : (
         children
