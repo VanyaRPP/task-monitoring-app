@@ -1,4 +1,7 @@
-import { useAddServiceMutation } from '@common/api/serviceApi/service.api'
+import {
+  useAddServiceMutation,
+  useEditServiceMutation,
+} from '@common/api/serviceApi/service.api'
 import { Form, message, Modal } from 'antd'
 import React, { FC, useEffect } from 'react'
 import AddServiceForm from '../Forms/AddServiceForm'
@@ -23,31 +26,36 @@ type FormData = {
 
 const AddServiceModal: FC<Props> = ({ closeModal, currentService }) => {
   const [form] = Form.useForm()
-  const [addService, { isLoading }] = useAddServiceMutation()
+  const [addService, { isLoading: isAddingLoading }] = useAddServiceMutation()
+  const [editService, { isLoading: isEditingLoading }] =
+    useEditServiceMutation()
   const edit = !!currentService
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
-	// TODO: for edit (update) we should use another method
-    const response = await addService({
-      domain: formData.domain,
-      street: formData.street,
+    const serviceData = {
+      domain: currentService?.domain || formData.domain,
+      street: currentService?.street || formData.street,
       date: moment(formData.date).toDate(),
       rentPrice: formData.rentPrice,
       electricityPrice: formData.electricityPrice,
       waterPrice: formData.waterPrice,
       inflicionPrice: formData.inflicionPrice,
       description: formData.description,
-      serviceId: currentService?._id
-    })
+    }
+    const response = currentService
+      ? await editService({
+          _id: currentService?._id,
+          ...serviceData,
+        })
+      : await addService(serviceData)
 
-    // eslint-disable-next-line no-console
-    console.log('res', response)
     if ('data' in response) {
       form.resetFields()
       closeModal()
       message.success('Додано')
     } else {
-      message.error('Помилка при додаванні рахунку')
+      const action = currentService ? 'збереженні' : 'додаванні'
+      message.error(`Помилка при ${action} рахунку`)
     }
   }
 
@@ -57,9 +65,9 @@ const AddServiceModal: FC<Props> = ({ closeModal, currentService }) => {
       title="Ціна на послуги в місяць"
       onOk={handleSubmit}
       onCancel={closeModal}
-      okText={edit ? 'Редагувати' : 'Додати'}
+      okText={edit ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
-      confirmLoading={isLoading}
+      confirmLoading={isAddingLoading || isEditingLoading}
     >
       <AddServiceForm form={form} edit={edit} currentService={currentService} />
     </Modal>
