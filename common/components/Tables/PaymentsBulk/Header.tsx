@@ -31,7 +31,14 @@ const InvoicesHeader = () => {
         <MonthServiceGeneralInfo />
       </div>
 
-      <Button type="link" onClick={() => {}}>
+      <Button
+        type="link"
+        onClick={async () => {
+          const rest = await form.validateFields()
+          debugger
+          rest
+        }}
+      >
         Зберегти
       </Button>
     </div>

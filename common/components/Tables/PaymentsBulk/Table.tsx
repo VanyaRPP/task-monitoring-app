@@ -123,6 +123,14 @@ const InvoicesTable: React.FC = () => {
 
 export default InvoicesTable
 
+function FormAttribute({ value, name }) {
+  return (
+    <Form.Item initialValue={value} name={name}>
+      <Input />
+    </Form.Item>
+  )
+}
+
 const getDefaultColumns = (
   service?: any,
   handleDelete?: (row: any) => void
@@ -132,10 +140,12 @@ const getDefaultColumns = (
     title: 'Компанія',
     dataIndex: 'companyName',
     width: 200,
+    render: (value, obj) => <FormAttribute name={[obj.companyName, 'companyName']} value={value} />,
   },
   {
     title: 'Площа (м²)',
     dataIndex: 'totalArea',
+    render: (value, obj) => <FormAttribute name={[obj.companyName, 'totalArea']} value={value} />,
   },
   {
     title: 'Утримання',
