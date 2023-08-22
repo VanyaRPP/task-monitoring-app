@@ -12,20 +12,15 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  const { name, email, password } = req.body
   switch (req.method) {
     case 'POST':
       try {
-        const { name, email, password } = req.body
-        User.findOne({
-          email,
-        }).then((user) => {
-          if (user) {
-            return res.status(409).json({ success: false, error: 'User already exists!' })
-          }
-          else {
-            return res.status(201).json({ success: true })
-          }
-        })
+        const user = await User.findOne({ email })
+
+        if (user) {
+          return res.status(409).json({ success: false, error: 'User already exists!' })
+        }
 
         bcrypt.hash(password, saltRounds, async function (err, hash) {
           if (err) throw Error('Error: Encryption error!')
@@ -35,6 +30,8 @@ export default async function handler(
             password: hash,
           })
         })
+
+        return res.status(201).json({ success: true })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }
