@@ -5,7 +5,12 @@ export interface EditableCellProps {
   children?: React.ReactNode
   dataIndex: string
   record: any
-  onSave?: (...args) => void
+  onSave?: (
+    oldValue: { [key: string]: any },
+    newValue: { [key: string]: any },
+    record: any
+  ) => void
+  type: 'number' | 'string'
 }
 
 export const EditableCell: React.FC<EditableCellProps> = ({
@@ -14,8 +19,16 @@ export const EditableCell: React.FC<EditableCellProps> = ({
   dataIndex,
   record,
   onSave,
+  type,
   ...restProps
 }) => {
+  const handleSave = (event) => {
+    const oldValue = { [dataIndex]: record?.[dataIndex] }
+    const newValue = { [dataIndex]: event.target.value }
+
+    onSave && onSave(oldValue, newValue, record)
+  }
+
   return (
     <td {...restProps}>
       {dataIndex ? (
@@ -25,7 +38,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
           style={{ margin: 0 }}
         >
           {editable ? (
-            <Input onPressEnter={onSave} onBlur={onSave} />
+            <Input type={type} onPressEnter={handleSave} onBlur={handleSave} />
           ) : (
             children
           )}

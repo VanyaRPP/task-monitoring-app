@@ -11,9 +11,15 @@ import {
 export interface Props extends TableProps<any> {
   form: FormInstance
   columns?: EditableColumnType[]
+  onSave?: (...args: any) => void
 }
 
-const EditableTable: React.FC<Props> = ({ form, columns, ...restProps }) => {
+const EditableTable: React.FC<Props> = ({
+  form,
+  columns,
+  onSave,
+  ...restProps
+}) => {
   const components = {
     body: {
       row: EditableRow,
@@ -21,7 +27,7 @@ const EditableTable: React.FC<Props> = ({ form, columns, ...restProps }) => {
     },
   }
 
-  const editableColumns = transformColumnsToEditable(columns)
+  const editableColumns = transformColumnsToEditable(columns, onSave)
 
   return (
     <Table components={components} columns={editableColumns} {...restProps} />

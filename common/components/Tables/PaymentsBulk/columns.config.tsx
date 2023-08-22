@@ -23,6 +23,7 @@ export const getPaymentsBulkDefaultColumns = (
         dataIndex: 'servicePricePerMeter',
         render: (_, obj) => obj.servicePricePerMeter || service?.rentPrice,
         editable: true,
+        type: 'number',
       },
       {
         title: 'Загальне',
@@ -41,6 +42,7 @@ export const getPaymentsBulkDefaultColumns = (
         title: 'За м²',
         dataIndex: 'pricePerMeter',
         editable: true,
+        type: 'number',
       },
       {
         title: 'Загальне',
@@ -56,11 +58,13 @@ export const getPaymentsBulkDefaultColumns = (
         title: 'Стара',
         dataIndex: 'old_elec',
         editable: true,
+        type: 'number',
       },
       {
         title: 'Нова',
         dataIndex: 'new_elec',
         editable: true,
+        type: 'number',
       },
     ],
   },
@@ -71,11 +75,13 @@ export const getPaymentsBulkDefaultColumns = (
         title: 'Стара',
         dataIndex: 'old_water',
         editable: true,
+        type: 'number',
       },
       {
         title: 'Нова',
         dataIndex: 'new_water',
         editable: true,
+        type: 'number',
       },
     ],
   },
@@ -83,16 +89,19 @@ export const getPaymentsBulkDefaultColumns = (
     title: 'Індекс інфляції',
     dataIndex: 'tmp_1',
     editable: true,
+    type: 'number',
   },
   {
     title: 'ТПВ',
     dataIndex: 'tmp_2',
     editable: true,
+    type: 'number',
   },
   {
     title: 'Знижка',
     dataIndex: 'tmp_3',
     editable: true,
+    type: 'number',
   },
   {
     fixed: 'right',

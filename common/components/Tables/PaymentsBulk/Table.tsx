@@ -55,19 +55,22 @@ const InvoicesTable: React.FC = () => {
     // TODO: update on remote
   }
 
-  // const handleChange = (value) => {
-  //   const newData = [...dataSource]
-  //   const index = newData.findIndex((item) => item.key === value.key)
-  //   const item = newData[index]
-  //   newData.splice(index, 1, { ...item, ...value })
-  //   setDataSource(newData)
-  // }
+  const handleChange = (_, newValue, record) => {
+    console.log(record)
+
+    const newData = [...dataSource]
+    const index = newData.findIndex((item) => item.key === record.key)
+    const item = newData[index]
+    newData.splice(index, 1, { ...item, ...newValue })
+    setDataSource(newData)
+  }
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
   return (
     <EditableTable
       form={form}
+      onSave={handleChange}
       rowKey="_id"
       size="small"
       pagination={
