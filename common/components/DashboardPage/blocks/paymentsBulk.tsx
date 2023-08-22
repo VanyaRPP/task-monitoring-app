@@ -1,8 +1,9 @@
+import { Form, FormInstance } from 'antd'
+import { createContext, useContext } from 'react'
+
 import InvoicesHeader from '@common/components/Tables/PaymentsBulk/Header'
 import InvoicesTable from '@common/components/Tables/PaymentsBulk/Table'
 import TableCard from '@common/components/UI/TableCard'
-import { FormInstance, Form } from 'antd'
-import { createContext, useContext } from 'react'
 
 export const InvoicesPaymentContext = createContext(
   {} as {

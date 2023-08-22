@@ -57,13 +57,13 @@ const InvoicesTable: React.FC = () => {
     // TODO: update on remote
   }
 
-  const handleSave = ({ record, value }) => {
-    const newData = [...dataSource]
-    const index = newData.findIndex((item) => record.key === item.key)
-    const item = newData[index]
-    newData.splice(index, 1, { ...item, ...value })
-    setDataSource(newData)
-  }
+  // const handleChange = (value) => {
+  //   const newData = [...dataSource]
+  //   const index = newData.findIndex((item) => item.key === value.key)
+  //   const item = newData[index]
+  //   newData.splice(index, 1, { ...item, ...value })
+  //   setDataSource(newData)
+  // }
 
   const components = {
     body: {
@@ -72,33 +72,9 @@ const InvoicesTable: React.FC = () => {
     },
   }
 
-  const columns = getDefaultColumns(service, handleDelete).map((column) => {
-    const newColumn = column
-
-    newColumn.children = newColumn.children?.map((children) => ({
-      ...children,
-      onCell: (record) => ({
-        form,
-        record,
-        editable: children.editable,
-        dataIndex: children.dataIndex,
-        title: children.title,
-        onChange: handleSave,
-      }),
-    }))
-
-    return {
-      ...newColumn,
-      onCell: (record) => ({
-        form,
-        record,
-        editable: newColumn.editable,
-        dataIndex: newColumn.dataIndex,
-        title: newColumn.title,
-        onChange: handleSave,
-      }),
-    }
-  })
+  const columns = transformColumnsToEditable(
+    getDefaultColumns(service, handleDelete)
+  )
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
@@ -146,15 +122,15 @@ const getDefaultColumns = (
       {
         title: 'За м²',
         dataIndex: 'servicePricePerMeter',
-        render: (_, company) =>
-          company.servicePricePerMeter || service?.rentPrice,
+        render: (_, obj) => obj.servicePricePerMeter || service?.rentPrice,
         editable: true,
       },
       {
         title: 'Загальне',
-        render: (_, company) => {
-          const prioPrice = company.servicePricePerMeter || service?.rentPrice
-          return prioPrice * company.totalArea
+        dataIndex: 'servicePrice',
+        render: (_, obj) => {
+          const prioPrice = obj.servicePricePerMeter || service?.rentPrice
+          return prioPrice * obj.totalArea
         },
       },
     ],
@@ -169,7 +145,8 @@ const getDefaultColumns = (
       },
       {
         title: 'Загальне',
-        render: (_, company) => company.pricePerMeter * company.totalArea,
+        dataIndex: 'price',
+        render: (_, obj) => obj.pricePerMeter * obj.totalArea,
       },
     ],
   },
@@ -234,3 +211,21 @@ const getDefaultColumns = (
     ),
   },
 ]
+
+const getEditableColumn = (column) => ({
+  ...column,
+  onCell: (record) => ({
+    record,
+    editable: column.editable,
+    dataIndex: column.dataIndex,
+    title: column.title,
+  }),
+})
+
+const transformColumnsToEditable = (columns: any[]): any[] => {
+  return [...columns].map((column) =>
+    'children' in column
+      ? { ...column, children: transformColumnsToEditable(column.children) }
+      : getEditableColumn(column)
+  )
+}
