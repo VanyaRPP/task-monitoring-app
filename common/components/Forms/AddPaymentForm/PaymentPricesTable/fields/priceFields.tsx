@@ -54,7 +54,7 @@ export function PricePlacingField({ record, edit }) {
   )
 }
 
-export function PriceElectricityField({ record, edit }) {
+export function PriceElectricityField({ record, edit, previousInvoiceData }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
@@ -67,9 +67,14 @@ export function PriceElectricityField({ record, edit }) {
 
   useEffect(() => {
     if (service?._id && service?.electricityPrice) {
-      form.setFieldValue(fieldName, service.electricityPrice)
+      // Встановлюємо значення з попереднього інвойсу, якщо воно передане
+      const previousElectricityPrice = previousInvoiceData?.electricityPrice
+      form.setFieldValue(
+        fieldName,
+        previousElectricityPrice || service.electricityPrice
+      )
     }
-  }, [service?._id, service?.electricityPrice]) //eslint-disable-line react-hooks/exhaustive-deps
+  }, [service?._id, service?.electricityPrice, previousInvoiceData]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
@@ -77,7 +82,6 @@ export function PriceElectricityField({ record, edit }) {
     </Form.Item>
   )
 }
-
 export function PriceWaterField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']

@@ -24,7 +24,11 @@ interface DataType {
   Сума: number
 }
 
-const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
+const ReceiptForm: FC<Props> = ({
+  currPayment,
+  paymentData,
+  previousInvoiceData,
+}) => {
   const newData = currPayment || paymentData
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
@@ -57,6 +61,40 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     Сума: +item.sum,
   }))
 
+  function findLastInvoiceByNumber(dataToMap) {
+    if (dataToMap.length === 0) {
+      return null // Повертаємо null, якщо масив порожній
+    }
+
+    let lastInvoice = dataToMap[0] // Початкове значення останнього інвойсу
+    for (const invoice of dataToMap) {
+      if (invoice.invoiceNumber > lastInvoice.invoiceNumber) {
+        lastInvoice = invoice // Оновлюємо останній інвойс, якщо знайдено більший номер
+      }
+    }
+    return lastInvoice
+  }
+
+  // Знаходимо останній інвойс за номером
+  const lastInvoice = findLastInvoiceByNumber(dataToMap)
+
+  if (lastInvoice) {
+    // Отримуємо значення electricityPrice з останнього інвойсу
+    const electricityPrice = lastInvoice.electricityPrice
+
+    // Оновлюємо dataSourcePreview зі значенням electricityPrice
+    const updatedDataSourcePreview = dataSourcePreview.map((item) => {
+      return {
+        ...item,
+        electricityPrice,
+      }
+    })
+
+    // Оновлені дані зі значенням electricityPrice
+    console.log(updatedDataSourcePreview)
+  } else {
+    console.log('Масив dataToMap порожній')
+  }
   return (
     <>
       <div
