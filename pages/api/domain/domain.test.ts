@@ -1,9 +1,7 @@
 import { expect } from '@jest/globals'
 import handler from '.'
 
-import {
-  parseReceived
-} from '@utils/helpers'
+import { parseReceived } from '@utils/helpers'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { domains, realEstates, users } from '@utils/testData'
@@ -61,7 +59,7 @@ describe('Domains API - GET', () => {
     }
 
     expect(response.status).toHaveBeenCalledWith(200)
-    
+
     const received = parseReceived(response.data)
     expect(received).toEqual(domains.slice(0, limit))
   })

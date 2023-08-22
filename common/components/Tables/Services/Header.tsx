@@ -7,19 +7,29 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddServiceModal from '@common/components/AddServiceModal'
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
+import { IExtendedService } from '@common/api/serviceApi/service.api.types'
 
 export interface Props {
   showAddButton?: boolean
+  currentService?: IExtendedService
+  setCurrentService?: (service: IExtendedService) => void
 }
 
-const ServicesHeader: React.FC<Props> = ({ showAddButton = false }) => {
+const ServicesHeader: React.FC<Props> = ({
+  showAddButton = false,
+  currentService,
+  setCurrentService,
+}) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const { data: user } = useGetCurrentUserQuery()
 
   const openModal = () => setIsModalOpen(true)
-  const closeModal = () => setIsModalOpen(false)
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setCurrentService(null)
+  }
 
   if (router.query.email)
     return <span>Оплата від користувача {router.query.email}</span>
@@ -35,7 +45,12 @@ const ServicesHeader: React.FC<Props> = ({ showAddButton = false }) => {
           <Button type="link" onClick={openModal}>
             <PlusOutlined /> Додати
           </Button>
-          {isModalOpen && <AddServiceModal closeModal={closeModal} />}
+          {(isModalOpen || currentService) && (
+            <AddServiceModal
+              currentService={currentService}
+              closeModal={closeModal}
+            />
+          )}
         </>
       )}
     </div>

@@ -4,13 +4,14 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import Service from '@common/modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import { ObjectId } from 'mongodb'
 start()
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isDomainAdmin } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isAdmin, user } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'DELETE':
@@ -39,15 +40,23 @@ export default async function handler(
 
     case 'PATCH':
       try {
-        if (isGlobalAdmin || isDomainAdmin) {
-          // TODO: validation on allowed domain ID
-          const current = await Service.findById(req.query.id)
-          if (current) {
-            const service = await Service.updateOne(
-              { _id: req.query.id },
-              { $set: req.body }
-            )
+        if (isAdmin) {
+          if (isGlobalAdmin) {
+            await Service.findOneAndUpdate({ _id: req.query.id }, req.body)
             return res.status(200).json({ success: true })
+          } else {
+            const domains = await Domain.find({
+              adminEmails: { $in: [user.email] },
+            })
+            const domainIds = domains?.map((domain) => domain._id)
+            const validDomain = domainIds?.includes(req.body.domain._id)
+            if (validDomain) {
+              await Service.findOneAndUpdate({ _id: req.query.id }, req.body)
+              return res.status(200).json({ success: true })
+            }
+            return res
+              .status(400)
+              .json({ success: false, message: 'not allowed' })
           }
         } else {
           return res
