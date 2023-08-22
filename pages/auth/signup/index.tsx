@@ -62,11 +62,18 @@ const SignUpPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
         email: formData.email,
         password: formData.password,
       })
-      if ((response as any)?.data.success) {
-        message.success('Ви успішно зареєструвалися')
-        router.push(AppRoutes.AUTH_SIGN_IN)
+      // make a catching errors 
+      if ((response as any)?.data?.success) {
+        try {
+          message.success('Ви успішно зареєструвалися')
+        } catch (error) { 
+        }
+        // router.push(AppRoutes.AUTH_SIGN_IN)
       } else {
-        message.error('Помилка при реєстрації!')
+        // console.log(JSON.stringify(response))
+        ((response as any)?.error?.data?.error === "User already exists!") ?
+        message.error("Користувач з данною поштою вже існує!")
+        : message.error('Помилка при реєстрації!')
       }
     }
 

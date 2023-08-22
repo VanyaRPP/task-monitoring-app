@@ -18,7 +18,14 @@ export default async function handler(
         const { name, email, password } = req.body
         User.findOne({
           email,
-        }).then(() => new Error('Error: User is already exist!'))
+        }).then((user) => {
+          if (user) {
+            return res.status(409).json({ success: false, error: 'User already exists!' })
+          }
+          else if (!user) {
+            return res.status(201).json({ success: true })
+          }
+        })
 
         bcrypt.hash(password, saltRounds, async function (err, hash) {
           if (err) throw Error('Error: Encryption error!')
@@ -28,8 +35,6 @@ export default async function handler(
             password: hash,
           })
         })
-
-        return res.status(201).json({ success: true })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }
