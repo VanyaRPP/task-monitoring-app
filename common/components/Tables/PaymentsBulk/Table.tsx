@@ -1,12 +1,14 @@
 import { CloseCircleOutlined } from '@ant-design/icons'
-import { Alert, Form, Input, InputRef, Popconfirm, Table } from 'antd'
+import { Alert, Form, Input, Popconfirm, Table, Tooltip } from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/router'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import useService from '@common/modules/hooks/useService'
 import { AppRoutes } from '@utils/constants'
+import style from './paymentBulk.module.scss'
 
 const InvoicesTable: React.FC = () => {
   const router = useRouter()
@@ -52,50 +54,7 @@ const InvoicesTable: React.FC = () => {
     // TODO: update on remote
   }
 
-  const handleSave = (row) => {
-    const newData = [...dataSource]
-    const index = newData.findIndex((item) => row.key === item.key)
-    const item = newData[index]
-    newData.splice(index, 1, {
-      ...item,
-      ...row,
-    })
-    setDataSource(newData)
-    // TODO: update on remote
-  }
-
-  const components = {
-    body: {
-      row: EditableRow,
-      cell: EditableCell,
-    },
-  }
-
-  const columns = getDefaultColumns(service, handleDelete).map((column) => {
-    const newColumn = column
-
-    newColumn.children = newColumn.children?.map((children) => ({
-      ...children,
-      onCell: (record: DataType) => ({
-        record,
-        editable: children.editable,
-        dataIndex: children.dataIndex,
-        title: children.title,
-        handleSave,
-      }),
-    }))
-
-    return {
-      ...newColumn,
-      onCell: (record: DataType) => ({
-        record,
-        editable: newColumn.editable,
-        dataIndex: newColumn.dataIndex,
-        title: newColumn.title,
-        handleSave,
-      }),
-    }
-  })
+  const columns = getDefaultColumns(service, handleDelete)
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
@@ -114,8 +73,8 @@ const InvoicesTable: React.FC = () => {
       }
       loading={isLoading}
       columns={columns}
-      components={components}
-      dataSource={dataSource}
+      // TODO: blinking. add transitaion or delay before apearing
+      dataSource={serviceId && !isLoading ? dataSource : []}
       scroll={{ x: 1500 }}
     />
   )
@@ -123,10 +82,25 @@ const InvoicesTable: React.FC = () => {
 
 export default InvoicesTable
 
-function FormAttribute({ value, name }) {
+function FormAttribute({
+  disabled,
+  value,
+  name,
+}: {
+  disabled?: boolean
+  value: any
+  name: any
+}) {
+  const { form } = useInvoicesPaymentContext()
+
+  useEffect(() => {
+    form.setFieldValue(name, value)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value])
+
   return (
-    <Form.Item initialValue={value} name={name}>
-      <Input />
+    <Form.Item name={name}>
+      <Input disabled={disabled} />
     </Form.Item>
   )
 }
@@ -140,12 +114,23 @@ const getDefaultColumns = (
     title: 'Компанія',
     dataIndex: 'companyName',
     width: 200,
-    render: (value, obj) => <FormAttribute name={[obj.companyName, 'companyName']} value={value} />,
+    render: (value, obj) => (
+      <FormAttribute
+        disabled
+        name={['companies', obj.companyName, 'companyName']}
+        value={value}
+      />
+    ),
   },
   {
     title: 'Площа (м²)',
     dataIndex: 'totalArea',
-    render: (value, obj) => <FormAttribute name={[obj.companyName, 'totalArea']} value={value} />,
+    render: (value, obj) => (
+      <FormAttribute
+        name={['companies', obj.companyName, 'totalArea']}
+        value={value}
+      />
+    ),
   },
   {
     title: 'Утримання',
@@ -153,15 +138,32 @@ const getDefaultColumns = (
       {
         title: 'За м²',
         dataIndex: 'servicePricePerMeter',
-        render: (_, company) =>
-          company.servicePricePerMeter || service?.rentPrice,
-        editable: true,
+        render: (__, obj) => (
+          <div className={style.inlineRow}>
+            <FormAttribute
+              name={['companies', obj.companyName, 'maintenancePrice', 'price']}
+              value={obj.servicePricePerMeter || service?.rentPrice}
+            />
+            {obj.servicePricePerMeter && (
+              <Tooltip title="індивідуальне утримання, що передбачене договором">
+                <QuestionCircleOutlined />
+              </Tooltip>
+            )}
+          </div>
+        ),
       },
       {
         title: 'Загальне',
-        render: (_, company) => {
-          const prioPrice = company.servicePricePerMeter || service?.rentPrice
-          return prioPrice * company.totalArea
+        dataIndex: 'pricePerMeter',
+        render: (__, obj) => {
+          const prioPrice = obj.servicePricePerMeter || service?.rentPrice
+          return (
+            <FormAttribute
+              disabled
+              name={['companies', obj.companyName, 'maintenancePrice', 'sum']}
+              value={prioPrice * obj.totalArea}
+            />
+          )
         },
       },
     ],
@@ -172,11 +174,22 @@ const getDefaultColumns = (
       {
         title: 'За м²',
         dataIndex: 'pricePerMeter',
-        editable: true,
+        render: (__, obj) => (
+          <FormAttribute
+            name={['companies', obj.companyName, 'placingPrice', 'price']}
+            value={obj.pricePerMeter}
+          />
+        ),
       },
       {
         title: 'Загальне',
-        render: (_, company) => company.pricePerMeter * company.totalArea,
+        render: (__, obj) => (
+          <FormAttribute
+            disabled
+            name={['companies', obj.companyName, 'placingPrice', 'sum']}
+            value={obj.pricePerMeter * obj.totalArea}
+          />
+        ),
       },
     ],
   },
@@ -245,77 +258,4 @@ const getDefaultColumns = (
 export interface DataType {
   key: React.Key
   [key: string]: any
-}
-
-export interface EditableCellProps {
-  title: React.ReactNode
-  editable: boolean
-  children: React.ReactNode
-  dataIndex: string
-  record: any
-  handleSave: (record: any) => void
-}
-
-export const EditableCell: React.FC<EditableCellProps> = ({
-  title,
-  editable,
-  children,
-  dataIndex,
-  record,
-  handleSave,
-  ...restProps
-}) => {
-  const { form } = useInvoicesPaymentContext()
-
-  const [editing, setEditing] = useState(false)
-  const inputRef = useRef<InputRef>(null)
-
-  useEffect(() => {
-    if (editing) inputRef.current!.focus()
-  }, [editing])
-
-  const toggleEdit = () => {
-    setEditing(!editing)
-    form.setFieldsValue({ [dataIndex]: record[dataIndex] })
-  }
-
-  const save = async () => {
-    try {
-      const values = await form.validateFields()
-
-      toggleEdit()
-      handleSave({ ...record, ...values })
-    } catch (errInfo) {
-      console.log('Save failed:', errInfo)
-    }
-  }
-
-  return (
-    <td {...restProps}>
-      {editable ? (
-        editing ? (
-          <Form.Item name={dataIndex} style={{ margin: 0 }}>
-            <Input ref={inputRef} onPressEnter={save} onBlur={save} />
-          </Form.Item>
-        ) : (
-          // Костиль, але я нічого краще не придумав
-          // TODO: придумати щось краще
-          <Input value={children.toString().slice(1)} onClick={toggleEdit} />
-        )
-      ) : (
-        children
-      )}
-    </td>
-  )
-}
-
-export interface EditableRowProps {
-  index: number
-}
-
-export const EditableRow: React.FC<EditableRowProps> = ({
-  index,
-  ...props
-}) => {
-  return <tr {...props} />
 }
