@@ -26,12 +26,12 @@ export const getEditableColumn = (
 export const transformColumnsToEditable = (
   columns: EditableColumnType[]
 ): EditableColumnType[] =>
-  [...columns].map((column) =>
+  [...columns].map((column: EditableColumnType) =>
     'children' in column
       ? {
-          ...column,
+          ...Object(column),
           children: transformColumnsToEditable(
-            column.children as EditableColumnType[]
+            (column as any).children as EditableColumnType[]
           ),
         }
       : getEditableColumn(column)
