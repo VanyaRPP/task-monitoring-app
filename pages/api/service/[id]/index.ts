@@ -2,9 +2,9 @@
 // @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Service from '@common/modules/models/Service'
+import Domain from '@common/modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
-import { ObjectId } from 'mongodb'
 start()
 
 export default async function handler(
@@ -48,8 +48,9 @@ export default async function handler(
             const domains = await Domain.find({
               adminEmails: { $in: [user.email] },
             })
-            const domainIds = domains?.map((domain) => domain._id)
-            const validDomain = domainIds?.includes(req.body.domain._id)
+            const domainId = req.body.domain._id || req.body.domain
+            const domainIds = domains?.map((domain) => domain._id.toString())
+            const validDomain = domainIds?.includes(domainId)
             if (validDomain) {
               await Service.findOneAndUpdate({ _id: req.query.id }, req.body)
               return res.status(200).json({ success: true })
