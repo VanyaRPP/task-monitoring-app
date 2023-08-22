@@ -39,14 +39,17 @@ const InvoicesTable: React.FC = () => {
   const [dataSource, setDataSource] = useState([])
 
   useEffect(() => {
-    setDataSource(
-      companies?.map((company, index) => ({
-        key: index.toString(),
-        servicePricePerMeter:
-          company.servicePricePerMeter || service?.rentPrice,
-        ...company,
-      }))
-    )
+    const newData = companies?.map((company, index) => ({
+      key: index.toString(),
+      servicePricePerMeter: company.servicePricePerMeter || service?.rentPrice,
+      servicePrice:
+        (company.servicePricePerMeter || service?.rentPrice) *
+        company.totalArea,
+      price: company.pricePerMeter * company.totalArea,
+      ...company,
+    }))
+
+    setDataSource(newData)
   }, [companies])
 
   const handleDelete = (key: string) => {
@@ -56,12 +59,27 @@ const InvoicesTable: React.FC = () => {
   }
 
   const handleChange = (_, newValue, record) => {
-    console.log(record)
+    // оновлення полів із залежностями (утримання загальне та розміщення загальне)
+    if ('servicePricePerMeter' in newValue) {
+      const newServicePrice = newValue.servicePricePerMeter * record.totalArea
+      form.setFieldValue([record.companyName, 'servicePrice'], newServicePrice)
+    }
 
+    if ('pricePerMeter' in newValue) {
+      const newPrice = newValue.pricePerMeter * record.totalArea
+      form.setFieldValue([record.companyName, 'price'], newPrice)
+    }
+
+    // оновлення dataSource для таблиці (форма уже оновлена)
     const newData = [...dataSource]
-    const index = newData.findIndex((item) => item.key === record.key)
+    const index = newData.findIndex(
+      (item) => item.companyName === record.companyName
+    )
     const item = newData[index]
-    newData.splice(index, 1, { ...item, ...newValue })
+    newData.splice(index, 1, {
+      ...item,
+      ...form.getFieldValue(record.companyName),
+    })
     setDataSource(newData)
   }
 
