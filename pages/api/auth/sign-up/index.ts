@@ -22,7 +22,7 @@ export default async function handler(
           if (user) {
             return res.status(409).json({ success: false, error: 'User already exists!' })
           }
-          else if (!user) {
+          else {
             return res.status(201).json({ success: true })
           }
         })
