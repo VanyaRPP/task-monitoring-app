@@ -11,7 +11,7 @@ export const deleteExtraWhitespace = (value: string): string =>
     .trimStart()
 
 export const emailRegex =
-  /^[a-zA-Z0-9_.]{6,30}@(?!.*\d)[a-zA-Z][a-zA-Z0-9.-]+\.[a-zA-Z]{2,3}$/i
+  /^(?!\.)[a-zA-Z0-9_.]{6,64}@(?!.*\d)[a-zA-Z][a-zA-Z0-9.-]+\.[a-zA-Z]{2,3}$/i
 //Validators
 
 export const validateField = (name: string): Rule[] => {
