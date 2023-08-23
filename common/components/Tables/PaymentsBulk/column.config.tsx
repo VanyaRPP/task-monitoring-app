@@ -82,7 +82,6 @@ export const getDefaultColumns = (
         dataIndex: 'pricePerMeter',
         render: (value, record) => (
           <FormAttribute
-            // TODO: take from from hook. dont add as dependency
             name={['companies', record.companyName, 'placingPrice', 'price']}
             value={value}
           />
