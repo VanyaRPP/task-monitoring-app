@@ -195,6 +195,7 @@ export const services = [
     waterPrice: 10,
     inflicionPrice: 1.1,
     description: 'none',
+    waterPriceTotal: 0,
   },
   {
     _id: '64d68421d9ba2fc8fea79d52',
@@ -206,6 +207,7 @@ export const services = [
     waterPrice: 20,
     inflicionPrice: 1.2,
     description: 'none',
+    waterPriceTotal: 0,
   },
   {
     _id: '64d68421d9ba2fc8fea79d53',
@@ -217,6 +219,7 @@ export const services = [
     waterPrice: 30,
     inflicionPrice: 1.3,
     description: 'none',
+    waterPriceTotal: 0,
   },
   {
     _id: '64d68421d9ba2fc8fea79d54',
@@ -228,6 +231,7 @@ export const services = [
     waterPrice: 30,
     inflicionPrice: 1.3,
     description: 'none',
+    waterPriceTotal: 0,
   },
   {
     _id: '64d68421d9ba2fc8fea79d55',
@@ -239,6 +243,7 @@ export const services = [
     waterPrice: 30,
     inflicionPrice: 1.3,
     description: 'none',
+    waterPriceTotal: 0,
   },
   {
     _id: '64d68421d9ba2fc8fea79d56',
@@ -250,6 +255,7 @@ export const services = [
     waterPrice: 30,
     inflicionPrice: 1.3,
     description: 'none',
+    waterPriceTotal: 0,
   },
 ]
 
