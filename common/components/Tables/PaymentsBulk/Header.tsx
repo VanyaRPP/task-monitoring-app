@@ -7,7 +7,6 @@ import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthSer
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import { AppRoutes } from '@utils/constants'
-import useService from '@common/modules/hooks/useService'
 
 const InvoicesHeader = () => {
   const router = useRouter()
@@ -17,10 +16,8 @@ const InvoicesHeader = () => {
   const streetId = Form.useWatch('street', form)
   const serviceId = Form.useWatch('monthService', form)
 
-  const { service } = useService({ domainId, streetId, serviceId })
-
   const handleSave = async () => {
-    const invoices = await prepareInvoiceObjects(form, service)
+    const invoices = await prepareInvoiceObjects(form)
   }
 
   return (
@@ -94,15 +91,9 @@ function PopoverMonthService(serviceId: any) {
 
 export default InvoicesHeader
 
-const prepareInvoiceObjects = async (
-  form: FormInstance,
-  service: any
-): Promise<any[]> => {
+const prepareInvoiceObjects = async (form: FormInstance): Promise<any[]> => {
   const values = await form.validateFields()
   const invoices: any[] = Object.values(values.companies)
-
-  console.log(invoices)
-  console.log(service)
 
   return invoices.map((invoice) => ({
     maintenancePrice: {
