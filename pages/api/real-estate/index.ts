@@ -25,7 +25,7 @@ export default async function handler(
           options.street = streetId
         }
 
-        if ((isGlobalAdmin || isDomainAdmin) && companyId) {
+        if (companyId) {
           options._id = companyId
         }
 

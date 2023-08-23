@@ -16,11 +16,9 @@ const MainLayout: React.FC<Props> = ({ children }) => {
       </Head>
 
       <Layout className={s.Layout}>
-        <Layout className={s.Background}>
-          <Header />
-          <Layout.Content className={s.Content}>{children}</Layout.Content>
-          <Footer />
-        </Layout>
+        <Header />
+        <Layout.Content className={s.Content}>{children}</Layout.Content>
+        <Footer />
       </Layout>
     </>
   )

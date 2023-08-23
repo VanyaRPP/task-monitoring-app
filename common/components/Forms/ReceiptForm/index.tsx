@@ -29,7 +29,8 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
-    documentTitle: 'emp-data',
+    documentTitle:
+      newData.company.companyName + '-inv-' + newData.invoiceNumber,
   })
 
   // TODO: it is wrong to fetch all and to search

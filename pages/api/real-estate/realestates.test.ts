@@ -146,7 +146,6 @@ describe('RealEstate API - GET', () => {
     const expected = realEstates.filter((company) =>
       company.adminEmails.includes(users.user.email)
     )
-
     expect(response.status).toHaveBeenCalledWith(200)
     expect(received).toEqual(expected)
   })
@@ -175,6 +174,135 @@ describe('RealEstate API - GET', () => {
 
     const received = parseReceived(response.data)
     const expected = realEstates.filter((r) => r.domain === domains[0]._id)
+    expect(received).toEqual(expected)
+  })
+
+  it('request from User by companyId - success', async () => {
+    await mockLoginAs(users.user)
+    const mockReq = {
+      method: 'GET',
+      query: { companyId: realEstates[0]._id.toString() },
+    } as any
+
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = parseReceived(response.data)
+    const expected = [realEstates[0]]
+
+    expect(received).toEqual(expected)
+  })
+  it('request from User by not his companyId - error ', async () => {
+    await mockLoginAs(users.user)
+    const mockReq = {
+      method: 'GET',
+      // not his company. should fail
+      query: { companyId: realEstates[2]._id.toString() },
+    } as any
+
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = parseReceived(response.data)
+    const expected = []
+
+    expect(received).toEqual(expected)
+  })
+  it('request from DomainAdmin by not his companyId - error ', async () => {
+    await mockLoginAs(users.domainAdmin)
+    const mockReq = {
+      method: 'GET',
+      query: { companyId: realEstates[1]._id.toString() },
+    } as any
+
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = parseReceived(response.data)
+    const expected = []
+
+    expect(received).toEqual(expected)
+  })
+  it('request from DomainAdmin by companyId - success', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const mockReq = {
+      method: 'GET',
+      query: { companyId: realEstates[0]._id.toString() },
+    } as any
+
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = parseReceived(response.data)
+    const expected = [realEstates[0]]
+
+    expect(received).toEqual(expected)
+  })
+  it('request from the GlobalAdmin by companyId - success', async () => {
+    await mockLoginAs(users.globalAdmin)
+
+    const mockReq = {
+      method: 'GET',
+      query: { companyId: realEstates[3]._id.toString() },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+    const received = parseReceived(response.data)
+    const expected = [realEstates[3]]
+
     expect(received).toEqual(expected)
   })
 })

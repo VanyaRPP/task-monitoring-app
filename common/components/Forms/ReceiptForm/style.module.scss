@@ -8,6 +8,7 @@
     .info_adres__bold {
       font-weight: 700;
     }
+    font-family: Arial, Helvetica, sans-serif;
     display: flex;
   }
 
@@ -19,9 +20,10 @@
     .datecellDate {
       font-weight: 700;
     }
-    padding: 20px 0px;
+    padding: 6px 0px;
     font-size: 14px;
     display: flex;
+    font-family: Arial, Helvetica, sans-serif;
     flex-direction: column;
     align-items: center;
   }
@@ -46,18 +48,20 @@
     .lineInner {
       margin-left: 10px;
     }
-    padding: 20px 0px 0px 0px;
+    padding: 10px 0px 0px 0px;
     font-size: 16px;
+    font-family: Arial, Helvetica, sans-serif;
     display: flex;
     flex-direction: column;
   }
 
   .endInfo {
     .endInfobolt {
-      font-weight: 800;
+      font-weight: 700;
       margin-right: 20px;
     }
-    padding: 20px 0px;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 10px 0px;
     width: 800px;
     position: relative;
     display: flex;
