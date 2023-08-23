@@ -5,7 +5,6 @@ import FormAttribute from '@common/components/UI/FormAttribute'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 
 export const getDefaultColumns = (
-  form: FormInstance,
   service?: any,
   handleDelete?: (row: any) => void
 ): any[] => [
@@ -16,7 +15,6 @@ export const getDefaultColumns = (
     width: 200,
     render: (value, record) => (
       <FormAttribute
-        form={form}
         name={['companies', record.companyName, 'companyName']}
         value={value}
       />
@@ -29,8 +27,6 @@ export const getDefaultColumns = (
       <FormAttribute
         name={['companies', record.companyName, 'totalArea']}
         value={value}
-        // TODO: take from from hook. dont add as dependency
-        form={form}
         disabled
       />
     ),
@@ -44,7 +40,6 @@ export const getDefaultColumns = (
         render: (value, record) => (
           <>
             <FormAttribute
-              form={form}
               name={[
                 'companies',
                 record.companyName,
@@ -86,7 +81,6 @@ export const getDefaultColumns = (
         dataIndex: 'pricePerMeter',
         render: (value, record) => (
           <FormAttribute
-            form={form}
             // TODO: take from from hook. dont add as dependency
             name={['companies', record.companyName, 'placingPrice', 'price']}
             value={value}
@@ -110,7 +104,6 @@ export const getDefaultColumns = (
         dataIndex: 'old_elec',
         render: (value, record) => (
           <FormAttribute
-            form={form}
             name={[
               'companies',
               record.companyName,
@@ -126,7 +119,6 @@ export const getDefaultColumns = (
         dataIndex: 'new_elec',
         render: (value, record) => (
           <FormAttribute
-            form={form}
             name={[
               'companies',
               record.companyName,
@@ -154,7 +146,6 @@ export const getDefaultColumns = (
         dataIndex: 'old_water',
         render: (value, record) => (
           <FormAttribute
-            form={form}
             name={['companies', record.companyName, 'waterPrice', 'lastAmount']}
             value={value}
           />
@@ -165,7 +156,6 @@ export const getDefaultColumns = (
         dataIndex: 'new_water',
         render: (value, record) => (
           <FormAttribute
-            form={form}
             name={['companies', record.companyName, 'waterPrice', 'amount']}
             value={value}
           />
@@ -196,7 +186,6 @@ export const getDefaultColumns = (
         dataIndex: 'waterPart',
         render: (value, record) => (
           <FormAttribute
-            form={form}
             name={['companies', record.companyName, 'waterPart', 'price']}
             value={value}
           />
@@ -218,7 +207,6 @@ export const getDefaultColumns = (
       <FormAttribute
         name={['companies', record.companyName, 'inflicionPrice']}
         value={value}
-        form={form}
         disabled
       />
     ),
@@ -230,7 +218,6 @@ export const getDefaultColumns = (
       <FormAttribute
         name={['companies', record.companyName, 'garbageCollector']}
         value={value || 0}
-        form={form}
         disabled
       />
     ),
@@ -240,7 +227,6 @@ export const getDefaultColumns = (
     dataIndex: 'discount',
     render: (value, record) => (
       <FormAttribute
-        form={form}
         name={['companies', record.companyName, 'discount']}
         value={value}
       />
@@ -273,7 +259,6 @@ const PricePerMeterSum: React.FC<{ record: any }> = ({ record }) => {
   return (
     <FormAttribute
       disabled
-      form={form}
       name={[...baseName, 'sum']}
       value={pricePerMeter * record.totalArea}
     />
@@ -295,7 +280,6 @@ const WaterPartSum: React.FC<{ service?: any; record: any }> = ({
   return (
     <FormAttribute
       disabled
-      form={form}
       name={[...baseName, 'sum']}
       value={waterPart * service?.waterPriceTotal}
     />
@@ -319,7 +303,6 @@ const WaterPriceSum: React.FC<{ service?: any; record: any }> = ({
   return (
     <FormAttribute
       disabled
-      form={form}
       name={[...baseName, 'sum']}
       value={(newWater - oldWater) * service?.waterPrice}
     />
@@ -340,7 +323,6 @@ function ServicePriceSum({ service, record }) {
   return (
     <FormAttribute
       disabled
-      form={form}
       name={['companies', record.companyName, 'maintenancePrice', 'sum']}
       value={prioPrice * record.totalArea}
     />
@@ -369,7 +351,6 @@ function ElectricityPriceSum({ service, record }) {
     <FormAttribute
       name={['companies', record.companyName, 'electricityPrice', 'sum']}
       value={(newElec - oldElec) * service?.electricityPrice}
-      form={form}
       disabled
     />
   )

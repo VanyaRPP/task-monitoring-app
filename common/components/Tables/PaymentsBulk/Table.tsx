@@ -39,20 +39,7 @@ const InvoicesTable: React.FC = () => {
 
   useEffect(() => {
     if (!service || !companies) return setDataSource([])
-
-    const newData = companies.map((company) => ({
-      ...company,
-      old_elec: 0,
-      new_elec: 0,
-      sum_elec: 0,
-      old_water: 0,
-      new_water: 0,
-      sum_water: 0,
-      inflicionPrice: service.inflicionPrice,
-      discount: 0,
-    }))
-
-    setDataSource(newData)
+    setDataSource(companies)
   }, [companies, service])
 
   const handleDelete = (_id: string) => {
@@ -61,7 +48,7 @@ const InvoicesTable: React.FC = () => {
     // TODO: update on remote
   }
 
-  const columns = getDefaultColumns(form, service, handleDelete)
+  const columns = getDefaultColumns(service, handleDelete)
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
