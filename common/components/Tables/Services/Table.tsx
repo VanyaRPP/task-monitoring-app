@@ -109,6 +109,12 @@ const getDefaultColumns = (
       render: renderCurrency,
     },
     {
+      title: 'Всього водопостачання',
+      dataIndex: 'waterPriceTotal',
+      width: 200,
+      render: renderCurrency,
+    },
+    {
       title: (
         <Tooltip title="Індекс Інфляції">
           <span>Індекс</span>
@@ -133,7 +139,11 @@ const getDefaultColumns = (
         title: '',
         width: 50,
         render: (_, service: IExtendedService) => (
-          <Button type="link" onClick={() => setCurrentService(service)}>
+          <Button
+            style={{ padding: 0 }}
+            type="link"
+            onClick={() => setCurrentService(service)}
+          >
             <EditOutlined />
           </Button>
         ),

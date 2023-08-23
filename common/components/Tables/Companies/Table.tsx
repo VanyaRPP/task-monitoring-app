@@ -38,8 +38,14 @@ const CompaniesTable: React.FC<Props> = ({ domainId, streetId }) => {
     }
   }
 
-  if (isError) return <Alert message="Помилка" type="error" showIcon closable />
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
+
+  const tableWidth =
+    1800 +
+    (isGlobalAdmin ? 50 : 0) +
+    (!domainId && !streetId && !isLoading ? 400 : 0)
+
+  if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
   return (
     <Table
@@ -64,7 +70,7 @@ const CompaniesTable: React.FC<Props> = ({ domainId, streetId }) => {
         isGlobalAdmin
       )}
       dataSource={data}
-      scroll={{ x: 1500 }}
+      scroll={{ x: tableWidth }}
     />
   )
 }
@@ -148,11 +154,13 @@ const getDefaultColumns = (
       {
         title: 'Домен',
         dataIndex: 'domain',
+        width: 200,
         render: (i) => i?.name,
       },
       {
         title: 'Адреса',
         dataIndex: 'street',
+        width: 200,
         render: (i) => (
           <>
             {i?.address} (м. {i?.city})

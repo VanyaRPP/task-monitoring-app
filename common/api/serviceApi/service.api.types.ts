@@ -7,6 +7,7 @@ export interface IService {
   date: Date
   electricityPrice: number
   waterPrice: number
+  waterPriceTotal: number
   inflicionPrice?: number
   description?: string
 }
