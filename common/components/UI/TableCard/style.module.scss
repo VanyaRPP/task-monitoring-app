@@ -1,6 +1,8 @@
 .Card {
   overflow: hidden;
 
+  min-height: 300px;
+
   :global .ant-card-body {
     padding: 0;
   }
