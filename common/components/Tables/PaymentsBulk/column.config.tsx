@@ -1,13 +1,13 @@
 import { CloseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { Popconfirm, Tooltip, FormInstance } from 'antd'
+import { Popconfirm, Tooltip, FormInstance, Form } from 'antd'
 
 import FormAttribute from '@common/components/UI/FormAttribute'
+import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 
 export const getDefaultColumns = (
   form: FormInstance,
   service?: any,
-  handleDelete?: (row: any) => void,
-  handleChange?: (...args: any) => void
+  handleDelete?: (row: any) => void
 ): any[] => [
   {
     fixed: 'left',
@@ -27,9 +27,11 @@ export const getDefaultColumns = (
     dataIndex: 'totalArea',
     render: (value, record) => (
       <FormAttribute
-        form={form}
         name={['companies', record.companyName, 'totalArea']}
         value={value}
+        // TODO: take from from hook. dont add as dependency
+        form={form}
+        disabled
       />
     ),
   },
@@ -43,7 +45,6 @@ export const getDefaultColumns = (
           <>
             <FormAttribute
               form={form}
-              editable
               name={[
                 'companies',
                 record.companyName,
@@ -51,10 +52,6 @@ export const getDefaultColumns = (
                 'price',
               ]}
               value={value || service?.rentPrice}
-              onChange={(value) =>
-                handleChange &&
-                handleChange(value, record, 'servicePricePerMeter')
-              }
             />
 
             {record.servicePricePerMeter && (
@@ -75,21 +72,9 @@ export const getDefaultColumns = (
       {
         title: 'Загальне',
         dataIndex: 'servicePriceSum',
-        render: (__, record) => {
-          const prioPrice = record.servicePricePerMeter || service?.rentPrice
-          return (
-            <FormAttribute
-              form={form}
-              name={[
-                'companies',
-                record.companyName,
-                'maintenancePrice',
-                'sum',
-              ]}
-              value={prioPrice * record.totalArea}
-            />
-          )
-        },
+        render: (__, record) => (
+          <ServicePriceSum service={service} record={record} />
+        ),
       },
     ],
   },
@@ -102,12 +87,9 @@ export const getDefaultColumns = (
         render: (value, record) => (
           <FormAttribute
             form={form}
-            editable
+            // TODO: take from from hook. dont add as dependency
             name={['companies', record.companyName, 'placingPrice', 'price']}
             value={value}
-            onChange={(value) =>
-              handleChange && handleChange(value, record, 'pricePerMeter')
-            }
           />
         ),
       },
@@ -115,8 +97,11 @@ export const getDefaultColumns = (
         title: 'Загальне',
         dataIndex: 'priceSum',
         render: (__, record) => (
+          // TODO: Same aproach as ServicePriceSum
           <FormAttribute
+            disabled
             form={form}
+            // TODO: take from from hook. dont add as dependency
             name={['companies', record.companyName, 'placingPrice', 'sum']}
             value={record.pricePerMeter * record.totalArea}
           />
@@ -135,7 +120,6 @@ export const getDefaultColumns = (
         render: (value, record) => (
           <FormAttribute
             form={form}
-            editable
             name={[
               'companies',
               record.companyName,
@@ -143,9 +127,6 @@ export const getDefaultColumns = (
               'lastAmount',
             ]}
             value={value}
-            onChange={(value) =>
-              handleChange && handleChange(value, record, 'old_elec')
-            }
           />
         ),
       },
@@ -155,7 +136,6 @@ export const getDefaultColumns = (
         render: (value, record) => (
           <FormAttribute
             form={form}
-            editable
             name={[
               'companies',
               record.companyName,
@@ -163,9 +143,6 @@ export const getDefaultColumns = (
               'amount',
             ]}
             value={value}
-            onChange={(value) =>
-              handleChange && handleChange(value, record, 'new_elec')
-            }
           />
         ),
       },
@@ -173,13 +150,7 @@ export const getDefaultColumns = (
         title: 'Загальне',
         dataIndex: 'sum_elec',
         render: (__, record) => (
-          <FormAttribute
-            form={form}
-            name={['companies', record.companyName, 'electricityPrice', 'sum']}
-            value={
-              (record.new_elec - record.old_elec) * service?.electricityPrice
-            }
-          />
+          <ElectricityPriceSum service={service} record={record} />
         ),
       },
     ],
@@ -193,12 +164,8 @@ export const getDefaultColumns = (
         render: (value, record) => (
           <FormAttribute
             form={form}
-            editable
             name={['companies', record.companyName, 'waterPrice', 'lastAmount']}
             value={value}
-            onChange={(value) =>
-              handleChange && handleChange(value, record, 'old_water')
-            }
           />
         ),
       },
@@ -208,12 +175,8 @@ export const getDefaultColumns = (
         render: (value, record) => (
           <FormAttribute
             form={form}
-            editable
             name={['companies', record.companyName, 'waterPrice', 'amount']}
             value={value}
-            onChange={(value) =>
-              handleChange && handleChange(value, record, 'new_water')
-            }
           />
         ),
       },
@@ -221,7 +184,9 @@ export const getDefaultColumns = (
         title: 'Загальне',
         dataIndex: 'sum_water',
         render: (__, record) => (
+          // TODO: Same aproach as ElectricityPriceSum !!!
           <FormAttribute
+            disabled
             form={form}
             name={['companies', record.companyName, 'waterPrice', 'sum']}
             value={(record.new_water - record.old_water) * service?.waterPrice}
@@ -247,12 +212,8 @@ export const getDefaultColumns = (
         render: (value, record) => (
           <FormAttribute
             form={form}
-            editable
             name={['companies', record.companyName, 'waterPart', 'price']}
             value={value}
-            onChange={(value) =>
-              handleChange && handleChange(value, record, 'waterPart')
-            }
           />
         ),
       },
@@ -260,8 +221,10 @@ export const getDefaultColumns = (
         title: 'Загальне',
         dataIndex: 'sum_waterPart',
         render: (__, record) => (
+          // TODO: Same aproach as ServicePriceSum
           <FormAttribute
             form={form}
+            disabled
             name={['companies', record.companyName, 'waterPart', 'sum']}
             value={record.waterPart * service?.waterPriceTotal}
           />
@@ -274,10 +237,10 @@ export const getDefaultColumns = (
     dataIndex: 'inflicionPrice',
     render: (value, record) => (
       <FormAttribute
-        form={form}
-        editable
         name={['companies', record.companyName, 'inflicionPrice']}
         value={value}
+        form={form}
+        disabled
       />
     ),
   },
@@ -286,10 +249,10 @@ export const getDefaultColumns = (
     dataIndex: 'garbageCollector',
     render: (value, record) => (
       <FormAttribute
-        form={form}
-        editable
         name={['companies', record.companyName, 'garbageCollector']}
         value={value || 0}
+        form={form}
+        disabled
       />
     ),
   },
@@ -299,7 +262,6 @@ export const getDefaultColumns = (
     render: (value, record) => (
       <FormAttribute
         form={form}
-        editable
         name={['companies', record.companyName, 'discount']}
         value={value}
       />
@@ -319,3 +281,52 @@ export const getDefaultColumns = (
     ),
   },
 ]
+
+function ServicePriceSum({ service, record }) {
+  const { form } = useInvoicesPaymentContext()
+  const fieldName = [
+    'companies',
+    record.companyName,
+    'maintenancePrice',
+    'price',
+  ]
+  const servicePricePerMeter = Form.useWatch(fieldName, form)
+  const prioPrice = servicePricePerMeter || service?.rentPrice
+
+  return (
+    <FormAttribute
+      disabled
+      form={form}
+      name={['companies', record.companyName, 'maintenancePrice', 'sum']}
+      value={prioPrice * record.totalArea}
+    />
+  )
+}
+
+function ElectricityPriceSum({ service, record }) {
+  const { form } = useInvoicesPaymentContext()
+  // TODO: we will get old value from last invoice later
+  const newElecName = [
+    'companies',
+    record.companyName,
+    'electricityPrice',
+    'amount',
+  ]
+  const oldElecName = [
+    'companies',
+    record.companyName,
+    'electricityPrice',
+    'lastAmount',
+  ]
+  const newElec = Form.useWatch(newElecName, form)
+  const oldElec = Form.useWatch(oldElecName, form)
+
+  return (
+    <FormAttribute
+      name={['companies', record.companyName, 'electricityPrice', 'sum']}
+      value={(newElec - oldElec) * service?.electricityPrice}
+      form={form}
+      disabled
+    />
+  )
+}

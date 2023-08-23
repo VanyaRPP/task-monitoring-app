@@ -61,15 +61,7 @@ const InvoicesTable: React.FC = () => {
     // TODO: update on remote
   }
 
-  const handleChange = (value, record, dataIndex) => {
-    const newData = [...dataSource]
-    const index = newData.findIndex((item) => item._id === record._id)
-    const item = newData[index]
-    newData.splice(index, 1, { ...item, [dataIndex]: value })
-    setDataSource(newData)
-  }
-
-  const columns = getDefaultColumns(form, service, handleDelete, handleChange)
+  const columns = getDefaultColumns(form, service, handleDelete)
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 

@@ -6,22 +6,16 @@ const FormAttribute: React.FC<{
   form: FormInstance
   value: any
   name: NamePath
-  editable?: boolean
-  onChange?: (value: any) => void
-}> = ({ form, value, name, editable, onChange }) => {
+  disabled?: boolean
+}> = ({ form, value, name, disabled }) => {
   useEffect(() => {
     form.setFieldValue(name, value)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
-  const handleChange = () => onChange && onChange(form.getFieldValue(name))
-
   return (
-    <Form.Item initialValue={value} style={{ margin: 0 }} name={name}>
-      {editable ? (
-        <Input onBlur={handleChange} onPressEnter={handleChange} />
-      ) : (
-        value
-      )}
+    <Form.Item style={{ margin: 0 }} name={name}>
+      <Input disabled={disabled} />
     </Form.Item>
   )
 }
