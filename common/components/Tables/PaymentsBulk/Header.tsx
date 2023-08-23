@@ -101,6 +101,9 @@ const prepareInvoiceObjects = async (
   const values = await form.validateFields()
   const invoices: any[] = Object.values(values.companies)
 
+  console.log(invoices)
+  console.log(service)
+
   return invoices.map((invoice) => ({
     maintenancePrice: {
       amount: invoice.totalArea,
@@ -113,10 +116,11 @@ const prepareInvoiceObjects = async (
 
     electricityPrice: invoice.electricityPrice,
     waterPrice: invoice.waterPrice,
+    waterPart: invoice.waterPart,
 
     garbageCollectorPrice: {
-      price: invoice.garbageCollectorPrice,
-      sum: invoice.garbageCollectorPrice,
+      price: invoice.garbageCollector,
+      sum: invoice.garbageCollector,
     },
     inflictionPrice: {
       price: invoice.inflictionPrice,

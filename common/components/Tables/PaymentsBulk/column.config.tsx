@@ -270,7 +270,7 @@ export const getDefaultColumns = (
             <FormAttribute
               form={form}
               name={['companies', record.companyName, 'waterPart', 'sum']}
-              value={record.waterPart * service.waterPriceTotal}
+              value={record.waterPart * service?.waterPriceTotal}
             />
           ),
         },
@@ -278,24 +278,24 @@ export const getDefaultColumns = (
     },
     {
       title: 'Індекс інфляції',
-      dataIndex: 'inflictionPrice',
+      dataIndex: 'inflicionPrice',
       render: (value, record) => (
         <FormAttribute
           form={form}
           editable
-          name={['companies', record.companyName, 'inflictionPrice']}
+          name={['companies', record.companyName, 'inflicionPrice']}
           value={value}
         />
       ),
     },
     {
       title: 'ТПВ',
-      dataIndex: 'garbageCollectorPrice',
+      dataIndex: 'garbageCollectoPrice',
       render: (value, record) => (
         <FormAttribute
           form={form}
           editable
-          name={['companies', record.companyName, 'garbageCollectorPrice']}
+          name={['companies', record.companyName, 'garbageCollector']}
           value={value}
         />
       ),
