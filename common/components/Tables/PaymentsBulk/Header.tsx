@@ -67,7 +67,7 @@ function MonthServiceGeneralInfo() {
 }
 
 function PopoverMonthService(serviceId: any) {
-  // const { service } = useService({ serviceId })
+  // const { service } = ({ serviceId })
 
   return (
     <>

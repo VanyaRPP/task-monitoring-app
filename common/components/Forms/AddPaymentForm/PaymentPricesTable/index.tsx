@@ -49,7 +49,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
   const { company } = useCompany({ companyId, skip: edit })
-  const { service } = useService({ serviceId, domainId, streetId, skip: edit })
+  const { service } = useService({ serviceId, skip: edit })
 
   const { customDataSource, addDataSource, removeDataSource } =
     useCustomDataSource({

@@ -4,14 +4,13 @@ import useService from './useService'
 
 function useServiceCompanyDomain({ serviceId, companyId, domainId, streetId }) {
   const { company } = useCompany({
-    companyId, skip: !companyId
+    companyId,
+    skip: !companyId,
   })
 
   const { service } = useService({
     serviceId,
-    domainId,
-    streetId,
-    skip: !serviceId
+    skip: !serviceId,
   })
 
   const { data: domain } = useDomain({ domainId })

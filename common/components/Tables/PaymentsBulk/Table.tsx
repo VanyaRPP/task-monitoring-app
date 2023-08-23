@@ -27,11 +27,7 @@ const InvoicesTable: React.FC = () => {
     { skip: !domainId || !streetId }
   )
 
-  const { service, isLoading: isServiceLoading } = useService({
-    domainId,
-    streetId,
-    serviceId,
-  })
+  const { service, isLoading: isServiceLoading } = useService({ serviceId })
 
   const isLoading = isCompaniesLoading || isServiceLoading
 

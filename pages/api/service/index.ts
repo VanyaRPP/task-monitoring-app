@@ -21,10 +21,20 @@ export default async function handler(
       try {
         const options = {}
 
-        const { domainId, streetId } = req.query
+        const { domainId, streetId, serviceId } = req.query
         if (isGlobalAdmin && domainId && streetId) {
           options.domain = domainId
           options.street = streetId
+          const services = await Service.find(options).sort({ data: -1 })
+
+          return res.status(200).json({
+            success: true,
+            data: services,
+          })
+        }
+
+        if (isGlobalAdmin && serviceId) {
+          options._id = serviceId
           const services = await Service.find(options).sort({ data: -1 })
 
           return res.status(200).json({

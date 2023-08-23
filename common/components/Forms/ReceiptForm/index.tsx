@@ -37,8 +37,6 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   // TODO: we need to take this data from prev. page, without fetching here
   const { service } = useService({
     serviceId: newData?.monthService,
-    domainId: newData?.domain,
-    streetId: newData?.street,
     skip: !!paymentData,
   })
 
