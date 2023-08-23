@@ -139,7 +139,11 @@ const getDefaultColumns = (
         title: '',
         width: 50,
         render: (_, service: IExtendedService) => (
-          <Button type="link" onClick={() => setCurrentService(service)}>
+          <Button
+            style={{ padding: 0 }}
+            type="link"
+            onClick={() => setCurrentService(service)}
+          >
             <EditOutlined />
           </Button>
         ),
