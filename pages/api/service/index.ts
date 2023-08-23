@@ -21,11 +21,43 @@ export default async function handler(
       try {
         const options = {}
 
-        const { domainId, streetId } = req.query
+        const { domainId, streetId, serviceId } = req.query
         if (isGlobalAdmin && domainId && streetId) {
           options.domain = domainId
           options.street = streetId
           const services = await Service.find(options).sort({ data: -1 })
+
+          return res.status(200).json({
+            success: true,
+            data: services,
+          })
+        }
+
+        // TODO: refactor with logic. each case should be well separated
+        // Should I left all conditions and only one if for each role? 
+        // this way it will handle all conditions and will not return wrong service
+
+        // TODO: add tests
+        // admin can have each service without limitation
+        // globaladmin can take service which is realated to his domain
+        // user can take service which is related to his company which is ralated to domain
+        if (serviceId) {
+          options._id = serviceId
+          if (isDomainAdmin) {
+            const domains = await Domain.find({
+              adminEmails: { $in: [user.email] },
+            })
+            const domainsIds = domains.map((i) => i._id)
+            options.domain = { $in: domainsIds }
+          }
+          if (isUser) {
+            const realEstates = await RealEstate.find({
+              adminEmails: { $in: [user.email] },
+            }).populate({ path: 'domain', select: '_id' })
+            const domainsIds = realEstates.map((i) => i.domain._id)
+            options.domain = { $in: domainsIds }
+          }
+          const services = await Service.find(options)
 
           return res.status(200).json({
             success: true,

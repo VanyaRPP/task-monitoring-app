@@ -9,14 +9,11 @@ import { usePaymentContext } from '@common/components/AddPaymentModal'
 export function PriceMaintainceField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
-
-  const domainId = Form.useWatch('domain', form) || paymentData?.domain
-  const streetId = Form.useWatch('street', form) || paymentData?.street
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
-  const { service } = useService({ serviceId, domainId, streetId, skip: edit })
+  const { service } = useService({ serviceId, skip: edit })
   const { company } = useCompany({ companyId, skip: edit })
 
   useEffect(() => {
@@ -58,12 +55,10 @@ export function PriceElectricityField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
-  const domainId = Form.useWatch('domain', form) || paymentData?.domain
-  const streetId = Form.useWatch('street', form) || paymentData?.street
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
 
-  const { service } = useService({ serviceId, domainId, streetId, skip: edit })
+  const { service } = useService({ serviceId, skip: edit })
 
   useEffect(() => {
     if (service?._id && service?.electricityPrice) {
@@ -82,17 +77,10 @@ export function PriceWaterField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
-  const domainId = Form.useWatch('domain', form) || paymentData?.domain
-  const streetId = Form.useWatch('street', form) || paymentData?.street
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
 
-  const { service, isLoading } = useService({
-    serviceId,
-    domainId,
-    streetId,
-    skip: edit,
-  })
+  const { service } = useService({ serviceId, skip: edit })
 
   useEffect(() => {
     if ((service?._id, service?.waterPrice)) {
@@ -131,20 +119,12 @@ export function PriceInflicionField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
-  const domainId = Form.useWatch('domain', form) || paymentData?.domain
-  const streetId = Form.useWatch('street', form) || paymentData?.street
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
   const { company } = useCompany({ companyId, skip: edit })
-
-  const { service, isLoading } = useService({
-    serviceId,
-    domainId,
-    streetId,
-    skip: edit,
-  })
+  const { service } = useService({ serviceId, skip: edit })
 
   useEffect(() => {
     if (service?._id && service?.inflicionPrice) {
@@ -166,20 +146,12 @@ export function PriceWaterPartField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
-  const domainId = Form.useWatch('domain', form) || paymentData?.domain
-  const streetId = Form.useWatch('street', form) || paymentData?.street
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
   const { company } = useCompany({ companyId, skip: edit })
-
-  const { service, isLoading } = useService({
-    serviceId,
-    domainId,
-    streetId,
-    skip: edit,
-  })
+  const { service } = useService({ serviceId, skip: edit })
 
   useEffect(() => {
     if (service?._id && service?.inflicionPrice) {

@@ -33,12 +33,8 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
       newData.company.companyName + '-inv-' + newData.invoiceNumber,
   })
 
-  // TODO: it is wrong to fetch all and to search
-  // TODO: we need to take this data from prev. page, without fetching here
   const { service } = useService({
     serviceId: newData?.monthService,
-    domainId: newData?.domain,
-    streetId: newData?.street,
     skip: !!paymentData,
   })
 
