@@ -188,7 +188,7 @@ export const services = [
   {
     _id: '64d68421d9ba2fc8fea79d51',
     date: new Date(2020, 1, 12),
-    domain: domains[0]._id,
+    domain: domains[0]._id as any,
     street: streets[0]._id,
     rentPrice: 10,
     electricityPrice: 10,
@@ -199,7 +199,7 @@ export const services = [
   {
     _id: '64d68421d9ba2fc8fea79d52',
     date: new Date(2020, 6, 19),
-    domain: domains[1]._id,
+    domain: domains[1]._id as any,
     street: streets[1]._id,
     rentPrice: 20,
     electricityPrice: 20,

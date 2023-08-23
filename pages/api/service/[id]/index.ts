@@ -2,9 +2,9 @@
 // @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Service from '@common/modules/models/Service'
+import Domain from '@common/modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
-import { ObjectId } from 'mongodb'
 start()
 
 export default async function handler(
@@ -42,17 +42,25 @@ export default async function handler(
       try {
         if (isAdmin) {
           if (isGlobalAdmin) {
-            await Service.findOneAndUpdate({ _id: req.query.id }, req.body)
-            return res.status(200).json({ success: true })
+            const response = await Service.findOneAndUpdate(
+              { _id: req.query.id },
+              req.body,
+              { new: true }
+            )
+            return res.status(200).json({ success: true, data: response })
           } else {
             const domains = await Domain.find({
               adminEmails: { $in: [user.email] },
             })
-            const domainIds = domains?.map((domain) => domain._id)
+            const domainIds = domains?.map((domain) => domain._id.toString())
             const validDomain = domainIds?.includes(req.body.domain._id)
             if (validDomain) {
-              await Service.findOneAndUpdate({ _id: req.query.id }, req.body)
-              return res.status(200).json({ success: true })
+              const response = await Service.findOneAndUpdate(
+                { _id: req.query.id },
+                req.body,
+                { new: true }
+              )
+              return res.status(200).json({ success: true, data: response })
             }
             return res
               .status(400)
