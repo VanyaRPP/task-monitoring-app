@@ -109,6 +109,12 @@ const getDefaultColumns = (
       render: renderCurrency,
     },
     {
+      title: 'Всього водопостачання',
+      dataIndex: 'waterPriceTotal',
+      width: 200,
+      render: renderCurrency,
+    },
+    {
       title: (
         <Tooltip title="Індекс Інфляції">
           <span>Індекс</span>
