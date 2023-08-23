@@ -69,7 +69,7 @@ const InvoicesTable: React.FC = () => {
     setDataSource(newData)
   }
 
-  const columns = getDefaultColumns(service, handleDelete, handleChange)
+  const columns = getDefaultColumns(form, service, handleDelete, handleChange)
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
