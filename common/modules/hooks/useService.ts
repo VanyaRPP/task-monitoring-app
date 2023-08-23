@@ -12,7 +12,7 @@ function useService({ serviceId, skip }: IUseServiceProps) {
   )
   const service = services ? services[0] : null
 
-  return { service , isLoading }
+  return { service, isLoading }
 }
 
 export default useService
