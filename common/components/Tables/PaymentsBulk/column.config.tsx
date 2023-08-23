@@ -17,6 +17,7 @@ export const getDefaultColumns = (
       <FormAttribute
         name={['companies', record.companyName, 'companyName']}
         value={value}
+        disabled
       />
     ),
   },
