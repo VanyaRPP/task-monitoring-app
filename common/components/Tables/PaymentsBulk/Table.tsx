@@ -91,7 +91,7 @@ const InvoicesTable: React.FC = () => {
       columns={columns}
       // TODO: blinking. add transition or delay before apearing
       dataSource={dataSource}
-      scroll={{ x: 1500 }}
+      scroll={{ x: 2000 }}
     />
   )
 }

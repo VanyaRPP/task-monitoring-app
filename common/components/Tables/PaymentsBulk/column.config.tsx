@@ -238,6 +238,45 @@ export const getDefaultColumns = (
       ],
     },
     {
+      title: service ? (
+        <>
+          Вода (без лічильника)
+          <br />
+          Всього водопостачання: {service.waterPriceTotal}
+        </>
+      ) : (
+        'Вода (без лічильника)'
+      ),
+      children: [
+        {
+          title: 'Частка постачання',
+          dataIndex: 'waterPart',
+          render: (value, record) => (
+            <FormAttribute
+              form={form}
+              editable
+              name={['companies', record.companyName, 'waterPart', 'price']}
+              value={value}
+              onChange={(value) =>
+                handleChange && handleChange(value, record, 'waterPart')
+              }
+            />
+          ),
+        },
+        {
+          title: 'Загальне',
+          dataIndex: 'sum_waterPart',
+          render: (__, record) => (
+            <FormAttribute
+              form={form}
+              name={['companies', record.companyName, 'waterPart', 'sum']}
+              value={record.waterPart * service.waterPriceTotal}
+            />
+          ),
+        },
+      ],
+    },
+    {
       title: 'Індекс інфляції',
       dataIndex: 'inflictionPrice',
       render: (value, record) => (
