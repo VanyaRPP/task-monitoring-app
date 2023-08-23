@@ -43,7 +43,7 @@ export const getDefaultColumns = (
           title: (
             <>
               За м²
-              <Tooltip title="індивідуальне утримання, що передбачене договором">
+              <Tooltip title="Індивідуальне утримання, що передбачене договором">
                 <QuestionCircleOutlined style={{ marginLeft: 8 }} />
               </Tooltip>
             </>
@@ -120,7 +120,9 @@ export const getDefaultColumns = (
       ],
     },
     {
-      title: 'Електрика',
+      title: service
+        ? `Електрика: ${service.electricityPrice} грн/кВт`
+        : 'Електрика',
       children: [
         {
           title: 'Стара',
@@ -129,8 +131,16 @@ export const getDefaultColumns = (
             <FormAttribute
               form={form}
               editable
-              name={['companies', record.companyName, 'old_elec']}
+              name={[
+                'companies',
+                record.companyName,
+                'electricityPrice',
+                'lastAmount',
+              ]}
               value={value}
+              onChange={(value) =>
+                handleChange && handleChange(value, record, 'old_elec')
+              }
             />
           ),
         },
@@ -141,15 +151,41 @@ export const getDefaultColumns = (
             <FormAttribute
               form={form}
               editable
-              name={['companies', record.companyName, 'new_elec']}
+              name={[
+                'companies',
+                record.companyName,
+                'electricityPrice',
+                'amount',
+              ]}
               value={value}
+              onChange={(value) =>
+                handleChange && handleChange(value, record, 'new_elec')
+              }
+            />
+          ),
+        },
+        {
+          title: 'Загальне',
+          dataIndex: 'sum_elec',
+          render: (__, record) => (
+            <FormAttribute
+              form={form}
+              name={[
+                'companies',
+                record.companyName,
+                'electricityPrice',
+                'sum',
+              ]}
+              value={
+                (record.new_elec - record.old_elec) * service?.electricityPrice
+              }
             />
           ),
         },
       ],
     },
     {
-      title: 'Вода',
+      title: service ? `Вода: ${service.waterPrice} грн/м³` : 'Вода',
       children: [
         {
           title: 'Стара',
@@ -158,8 +194,16 @@ export const getDefaultColumns = (
             <FormAttribute
               form={form}
               editable
-              name={['companies', record.companyName, 'old_water']}
+              name={[
+                'companies',
+                record.companyName,
+                'waterPrice',
+                'lastAmount',
+              ]}
               value={value}
+              onChange={(value) =>
+                handleChange && handleChange(value, record, 'old_water')
+              }
             />
           ),
         },
@@ -170,8 +214,24 @@ export const getDefaultColumns = (
             <FormAttribute
               form={form}
               editable
-              name={['companies', record.companyName, 'new_water']}
+              name={['companies', record.companyName, 'waterPrice', 'amount']}
               value={value}
+              onChange={(value) =>
+                handleChange && handleChange(value, record, 'new_water')
+              }
+            />
+          ),
+        },
+        {
+          title: 'Загальне',
+          dataIndex: 'sum_water',
+          render: (__, record) => (
+            <FormAttribute
+              form={form}
+              name={['companies', record.companyName, 'waterPrice', 'sum']}
+              value={
+                (record.new_water - record.old_water) * service?.waterPrice
+              }
             />
           ),
         },
@@ -179,36 +239,36 @@ export const getDefaultColumns = (
     },
     {
       title: 'Індекс інфляції',
-      dataIndex: 'tmp_1',
+      dataIndex: 'inflictionPrice',
       render: (value, record) => (
         <FormAttribute
           form={form}
           editable
-          name={['companies', record.companyName, 'tmp_1']}
+          name={['companies', record.companyName, 'inflictionPrice']}
           value={value}
         />
       ),
     },
     {
       title: 'ТПВ',
-      dataIndex: 'tmp_2',
+      dataIndex: 'garbageCollectorPrice',
       render: (value, record) => (
         <FormAttribute
           form={form}
           editable
-          name={['companies', record.companyName, 'tmp_2']}
+          name={['companies', record.companyName, 'garbageCollectorPrice']}
           value={value}
         />
       ),
     },
     {
       title: 'Знижка',
-      dataIndex: 'tmp_3',
+      dataIndex: 'discount',
       render: (value, record) => (
         <FormAttribute
           form={form}
           editable
-          name={['companies', record.companyName, 'tmp_3']}
+          name={['companies', record.companyName, 'discount']}
           value={value}
         />
       ),

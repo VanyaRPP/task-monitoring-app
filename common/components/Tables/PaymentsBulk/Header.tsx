@@ -1,5 +1,5 @@
 import { QuestionCircleOutlined, SelectOutlined } from '@ant-design/icons'
-import { Button, Form, Popover } from 'antd'
+import { Button, Form, FormInstance, Popover } from 'antd'
 import { useRouter } from 'next/router'
 
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
@@ -7,10 +7,21 @@ import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthSer
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import { AppRoutes } from '@utils/constants'
+import useService from '@common/modules/hooks/useService'
 
 const InvoicesHeader = () => {
   const router = useRouter()
   const { form } = useInvoicesPaymentContext()
+
+  const domainId = Form.useWatch('domain', form)
+  const streetId = Form.useWatch('street', form)
+  const serviceId = Form.useWatch('monthService', form)
+
+  const { service } = useService({ domainId, streetId, serviceId })
+
+  const handleSave = async () => {
+    const invoices = await prepareInvoiceObjects(form, service)
+  }
 
   return (
     <div
@@ -31,14 +42,7 @@ const InvoicesHeader = () => {
         <MonthServiceGeneralInfo />
       </div>
 
-      <Button
-        type="link"
-        onClick={async () => {
-          const rest = await form.validateFields()
-          debugger
-          rest
-        }}
-      >
+      <Button type="link" onClick={handleSave}>
         Зберегти
       </Button>
     </div>
@@ -89,3 +93,35 @@ function PopoverMonthService(serviceId: any) {
 }
 
 export default InvoicesHeader
+
+const prepareInvoiceObjects = async (
+  form: FormInstance,
+  service: any
+): Promise<any[]> => {
+  const values = await form.validateFields()
+  const invoices: any[] = Object.values(values.companies)
+
+  return invoices.map((invoice) => ({
+    maintenancePrice: {
+      amount: invoice.totalArea,
+      ...invoice.maintenancePrice,
+    },
+    placingPrice: {
+      amount: invoice.totalArea,
+      ...invoice.placingPrice,
+    },
+
+    electricityPrice: invoice.electricityPrice,
+    waterPrice: invoice.waterPrice,
+
+    garbageCollectorPrice: {
+      price: invoice.garbageCollectorPrice,
+      sum: invoice.garbageCollectorPrice,
+    },
+    inflictionPrice: {
+      price: invoice.inflictionPrice,
+      sum: invoice.inflictionPrice,
+    },
+    // TODO: proper fields
+  }))
+}

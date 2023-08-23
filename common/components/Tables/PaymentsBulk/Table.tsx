@@ -40,7 +40,20 @@ const InvoicesTable: React.FC = () => {
   useEffect(() => {
     if (!service || !companies) return setDataSource([])
 
-    setDataSource(companies)
+    setDataSource(
+      companies.map((company) => ({
+        ...company,
+        old_elec: 0,
+        new_elec: 0,
+        sum_elec: 0,
+        old_water: 0,
+        new_water: 0,
+        sum_water: 0,
+        inflictionPrice: 0,
+        garbageCollectorPrice: 0,
+        discount: 0,
+      }))
+    )
   }, [companies, service])
 
   const handleDelete = (_id: string) => {
