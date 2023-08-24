@@ -211,6 +211,7 @@ function useInitialValues() {
     },
     ...customFields,
   }
+
   return initialValues
 }
 export default AddPaymentForm
