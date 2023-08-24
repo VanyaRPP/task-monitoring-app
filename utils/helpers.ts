@@ -104,7 +104,7 @@ export function composeFunctions(input, functions) {
   return functions.reduce((result, func) => func(result), input)
 }
 
-export function parseReceived(data) { 
+export function parseReceived(data) {
   return composeFunctions(data, [
     getPlainJsObjectFromMongoose,
     unpopulate,
@@ -181,5 +181,8 @@ export function filterInvoiceObject(obj) {
 export const renderCurrency = (number: number): string =>
   number ? new Intl.NumberFormat('en-EN').format(number) : '-'
 
-export const getFormattedDate = (data: Date): string =>
-  firstTextToUpperCase(moment(data).format('MMMM'))
+export const getFormattedDate = (data: Date): string => {
+  if (data) {
+    return firstTextToUpperCase(moment(data).format('MMMM'))
+  }
+}
