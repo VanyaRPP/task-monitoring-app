@@ -136,7 +136,6 @@ export const getDefaultColumns = (
         dataIndex: 'new_water',
         render: (value, record) => (
           <FormAttribute
-            disabled={record.waterPart}
             name={['companies', record.companyName, 'waterPrice', 'amount']}
             value={value || 0}
           />
@@ -163,13 +162,12 @@ export const getDefaultColumns = (
     ),
     children: [
       {
-        title: 'Частка постачання',
+        title: 'Частка постачання %',
         dataIndex: 'waterPart',
-        render: (value, record) => (
+        render: (__, record) => (
           <FormAttribute
-            disabled={!record.waterPart}
             name={['companies', record.companyName, 'waterPart', 'price']}
-            value={record.waterPart ? 0 : value}
+            value={record.waterPart || 0}
           />
         ),
       },
@@ -183,19 +181,14 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: 'Індекс інфляції',
+    // TODO: треба відобразити індекс інфляції за минулий місяць
+    // тайтл також стає компонентом. там ми фетчимо сервіс і тут же відображаємо правильний %
+    title: `Індекс інфляції за ${moment(service?.date)
+      .subtract(1, 'months')
+      .format('MMMM')}`,
     dataIndex: 'inflicionPrice',
     render: (__, record) => (
-      <>
-        <InflicionPrice service={service} record={record} />
-        {record.inflicion && service?.inflicionPrice && (
-          <StyledTooltip
-            title={`Інфляція за ${moment(service?.date)
-              .subtract(1, 'months')
-              .format('MMMM')}: ${service?.inflicionPrice}`}
-          />
-        )}
-      </>
+      <InflicionPrice service={service} record={record} />
     ),
   },
   {
@@ -245,10 +238,11 @@ const InflicionPrice: React.FC<{ service: any; record: any }> = ({
     form
   )
 
+  // TODO: вивчити формулу. потім ціна оренди береться із суми індексу інфляції і поточної оренди
   return (
     <FormAttribute
       name={['companies', record.companyName, 'inflicionPrice']}
-      value={record.inflicion ? rentPrice * service?.inflicionPrice : 0}
+      value={record.inflicion ? rentPrice * (service?.inflicionPrice / 100) : 0}
       disabled
     />
   )
@@ -266,13 +260,7 @@ const OldWater: React.FC<{ record: any }> = ({ record }) => {
   const invoice = paymentsResponse?.data?.[0]?.invoice
   const waterPrice = invoice?.find((item) => item.type === 'waterPrice')
 
-  return (
-    <FormAttribute
-      disabled={record.waterPart}
-      name={waterPriceName}
-      value={record.waterPart ? 0 : waterPrice?.amount || 0}
-    />
-  )
+  return <FormAttribute name={waterPriceName} value={waterPrice?.amount || 0} />
 }
 
 const OldElectricity: React.FC<{ record: any }> = ({ record }) => {
@@ -331,7 +319,7 @@ const WaterPartSum: React.FC<{ service: any; record: any }> = ({
     <FormAttribute
       disabled
       name={[...baseName, 'sum']}
-      value={waterPart * service?.waterPriceTotal}
+      value={(waterPart / 100) * service?.waterPriceTotal}
     />
   )
 }
