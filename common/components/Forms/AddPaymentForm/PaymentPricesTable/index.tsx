@@ -36,6 +36,7 @@ import {
   PlusOutlined,
 } from '@ant-design/icons'
 import { useCustomDataSource } from './useCustomDataSource'
+import DoubleInput from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/ReusableItem/ElectricityWaterItem'
 interface Props {
   form: FormInstance<any>
   edit: boolean
@@ -101,21 +102,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
         <>
           {record.name === ServiceType.Electricity ||
           record.name === ServiceType.Water ? (
-            <div className={s.doubleInputs}>
-              <Form.Item
-                name={[record.name, 'lastAmount']}
-                rules={validateField('required')}
-              >
-                <InputNumber disabled={edit} className={s.input} />
-              </Form.Item>
-
-              <Form.Item
-                name={[record.name, 'amount']}
-                rules={validateField('required')}
-              >
-                <InputNumber disabled={edit} className={s.input} />
-              </Form.Item>
-            </div>
+            <DoubleInput name={record.name} edit={edit} />
           ) : (
             (record.name === ServiceType.Electricity ||
               record.name === ServiceType.Water ||
