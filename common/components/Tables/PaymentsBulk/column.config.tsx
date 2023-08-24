@@ -4,6 +4,7 @@ import { Popconfirm, Tooltip, Form } from 'antd'
 import FormAttribute from '@common/components/UI/FormAttribute'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
+import moment from 'moment'
 
 export const getDefaultColumns = (
   service?: any,
@@ -52,16 +53,9 @@ export const getDefaultColumns = (
             />
 
             {record.servicePricePerMeter && (
-              <Tooltip title="Індивідуальне утримання, що передбачене договором">
-                <QuestionCircleOutlined
-                  style={{
-                    position: 'absolute',
-                    top: '50%',
-                    right: 0,
-                    transform: 'translate(-16px, -50%)',
-                  }}
-                />
-              </Tooltip>
+              <StyledTooltip
+                title={'Індивідуальне утримання, що передбачене договором'}
+              />
             )}
           </>
         ),
@@ -189,12 +183,17 @@ export const getDefaultColumns = (
   {
     title: 'Індекс інфляції',
     dataIndex: 'inflicionPrice',
-    render: (value, record) => (
-      <FormAttribute
-        name={['companies', record.companyName, 'inflicionPrice']}
-        value={value}
-        disabled
-      />
+    render: (__, record) => (
+      <>
+        <InflicionPrice service={service} record={record} />
+        {record.inflicion && service?.inflicionPrice && (
+          <StyledTooltip
+            title={`Інфляція за ${moment(service?.date)
+              .subtract(1, 'months')
+              .format('MMMM')}: ${service?.inflicionPrice}`}
+          />
+        )}
+      </>
     ),
   },
   {
@@ -233,13 +232,32 @@ export const getDefaultColumns = (
   },
 ]
 
+const InflicionPrice: React.FC<{ service: any; record: any }> = ({
+  service,
+  record,
+}) => {
+  const { form } = useInvoicesPaymentContext()
+
+  const rentPrice = Form.useWatch(
+    ['companies', record.companyName, 'placingPrice', 'price'],
+    form
+  )
+
+  return (
+    <FormAttribute
+      name={['companies', record.companyName, 'inflicionPrice']}
+      value={record.inflicion ? rentPrice * service?.inflicionPrice : 0}
+      disabled
+    />
+  )
+}
+
 const OldWater: React.FC<{ record: any }> = ({ record }) => {
   const baseName = ['companies', record.companyName, 'waterPrice']
 
   const waterPriceName = [...baseName, 'lastAmount']
 
   const { data: paymentsResponse } = useGetAllPaymentsQuery({
-    domainIds: record.domain._id,
     companyIds: record._id,
     limit: 1,
   })
@@ -255,7 +273,6 @@ const OldElectricity: React.FC<{ record: any }> = ({ record }) => {
   const electricityPriceName = [...baseName, 'lastAmount']
 
   const { data: paymentsResponse } = useGetAllPaymentsQuery({
-    domainIds: record.domain._id,
     companyIds: record._id,
     limit: 1,
   })
@@ -382,5 +399,22 @@ const ElectricityPriceSum: React.FC<{ service: any; record: any }> = ({
       }
       disabled
     />
+  )
+}
+
+const StyledTooltip: React.FC<{
+  title: React.ReactNode
+}> = ({ title }) => {
+  return (
+    <Tooltip title={title}>
+      <QuestionCircleOutlined
+        style={{
+          position: 'absolute',
+          top: '50%',
+          right: 0,
+          transform: 'translate(-16px, -50%)',
+        }}
+      />
+    </Tooltip>
   )
 }
