@@ -39,7 +39,7 @@ export default async function handler(
 
         // TODO: add tests
         // admin can have each service without limitation
-        // globaladmin can take service which is realated to his domain
+        // domainAdmin can take service which is realated to his domain
         // user can take service which is related to his company which is ralated to domain
         if (serviceId) {
           options._id = serviceId

@@ -20,21 +20,29 @@ export default async function handler(
       try {
         const options = {}
         const { domainId, streetId, companyId } = req.query
-        if (isGlobalAdmin && domainId && streetId) {
-          options.domain = domainId
-          options.street = streetId
-        }
 
-        if (companyId) {
-          options._id = companyId
-        }
+        if (domainId) options.domain = domainId
+        if (streetId) options.street = streetId
+        if (companyId) options._id = companyId
 
         if (isDomainAdmin) {
           const domains = await Domain.find({
             adminEmails: { $in: [user.email] },
           })
           const domainsIds = domains.map((i) => i._id.toString())
-          options.domain = { $in: domainsIds }
+          if (domainId) {
+            // TODO: add test. Domain admin can't fetch realEstate which is not belong to him
+            if (!domainsIds.includes(domainId)) {
+              return res
+                .status(400)
+                .json({
+                  success: false,
+                  message: 'not allowed to fetch such domainId',
+                })
+            }
+          } else {
+            options.domain = { $in: domainsIds }
+          }
         }
 
         if (isUser) {
