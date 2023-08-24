@@ -12,12 +12,10 @@ const InvoicesHeader = () => {
   const router = useRouter()
   const { form } = useInvoicesPaymentContext()
 
-  const domainId = Form.useWatch('domain', form)
-  const streetId = Form.useWatch('street', form)
-  const serviceId = Form.useWatch('monthService', form)
-
   const handleSave = async () => {
     const invoices = await prepareInvoiceObjects(form)
+    debugger
+    invoices
   }
 
   return (

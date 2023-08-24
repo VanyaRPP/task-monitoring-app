@@ -3,6 +3,11 @@ import { Popconfirm, Tooltip, FormInstance, Form } from 'antd'
 
 import FormAttribute from '@common/components/UI/FormAttribute'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
+import useService from '@common/modules/hooks/useService'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
+import moment from 'moment'
 
 export const getDefaultColumns = (
   service?: any,
@@ -102,17 +107,7 @@ export const getDefaultColumns = (
       {
         title: 'Стара',
         dataIndex: 'old_elec',
-        render: (value, record) => (
-          <FormAttribute
-            name={[
-              'companies',
-              record.companyName,
-              'electricityPrice',
-              'lastAmount',
-            ]}
-            value={value}
-          />
-        ),
+        render: (__, record) => <OldElectricity record={record} />,
       },
       {
         title: 'Нова',
@@ -125,7 +120,7 @@ export const getDefaultColumns = (
               'electricityPrice',
               'amount',
             ]}
-            value={value}
+            value={value || 0}
           />
         ),
       },
@@ -144,12 +139,7 @@ export const getDefaultColumns = (
       {
         title: 'Стара',
         dataIndex: 'old_water',
-        render: (value, record) => (
-          <FormAttribute
-            name={['companies', record.companyName, 'waterPrice', 'lastAmount']}
-            value={value}
-          />
-        ),
+        render: (__, record) => <OldWater record={record} />,
       },
       {
         title: 'Нова',
@@ -157,7 +147,7 @@ export const getDefaultColumns = (
         render: (value, record) => (
           <FormAttribute
             name={['companies', record.companyName, 'waterPrice', 'amount']}
-            value={value}
+            value={value || 0}
           />
         ),
       },
@@ -247,6 +237,54 @@ export const getDefaultColumns = (
   },
 ]
 
+const OldWater: React.FC<{ record: any }> = ({ record }) => {
+  const baseName = ['companies', record.companyName, 'waterPrice']
+
+  const waterPriceName = [...baseName, 'lastAmount']
+
+  // TODO: get correct payment
+  const { data: paymentsResponse } = useGetAllPaymentsQuery({
+    domainIds: record.domain._id,
+    companyIds: record._id,
+    limit: 1,
+  })
+  const invoice = paymentsResponse?.data?.[0]?.invoice
+  const waterPrice = invoice?.find((item) => item.type === 'waterPrice')
+
+  return (
+    <FormAttribute
+      disabled
+      name={waterPriceName}
+      value={waterPrice?.amount || 0}
+    />
+  )
+}
+
+const OldElectricity: React.FC<{ record: any }> = ({ record }) => {
+  const baseName = ['companies', record.companyName, 'electricityPrice']
+
+  const electricityPriceName = [...baseName, 'lastAmount']
+
+  // TODO: get correct payment
+  const { data: paymentsResponse } = useGetAllPaymentsQuery({
+    domainIds: record.domain._id,
+    companyIds: record._id,
+    limit: 1,
+  })
+  const invoice = paymentsResponse?.data?.[0]?.invoice
+  const electricityPrice = invoice?.find(
+    (item) => item.type === 'electricityPrice'
+  )
+
+  return (
+    <FormAttribute
+      disabled
+      name={electricityPriceName}
+      value={electricityPrice?.amount || 0}
+    />
+  )
+}
+
 const PricePerMeterSum: React.FC<{ record: any }> = ({ record }) => {
   const { form } = useInvoicesPaymentContext()
 
@@ -265,7 +303,7 @@ const PricePerMeterSum: React.FC<{ record: any }> = ({ record }) => {
   )
 }
 
-const WaterPartSum: React.FC<{ service?: any; record: any }> = ({
+const WaterPartSum: React.FC<{ service: any; record: any }> = ({
   service,
   record,
 }) => {
@@ -286,7 +324,7 @@ const WaterPartSum: React.FC<{ service?: any; record: any }> = ({
   )
 }
 
-const WaterPriceSum: React.FC<{ service?: any; record: any }> = ({
+const WaterPriceSum: React.FC<{ service: any; record: any }> = ({
   service,
   record,
 }) => {
