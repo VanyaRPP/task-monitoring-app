@@ -8,7 +8,7 @@ interface IUseServiceProps {
 function useService({ serviceId, skip }: IUseServiceProps) {
   const { data: services, isLoading } = useGetAllServicesQuery(
     { serviceId },
-    { skip }
+    { skip: !serviceId || skip }
   )
   const service = services ? services[0] : null
 
