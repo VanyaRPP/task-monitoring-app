@@ -75,6 +75,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
         return (
           // TODO: use moment from helper (single access point)
           // getFormattedDate
+
           <Tooltip
             title={`${nameRes || record.name}(${moment(service?.date).format(
               'MMMM'
@@ -142,7 +143,13 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       title: 'Сума',
       dataIndex: 'sum',
       ellipsis: true,
-      render: (text, record) => <SumWrapper record={record} form={form} />,
+      render: (text, record) => (
+        <SumWrapper
+          removeDataSource={removeDataSource}
+          record={record}
+          form={form}
+        />
+      ),
       width: 80,
     },
   ]
@@ -315,7 +322,7 @@ function getRelationshipByRecordName(recordName) {
   )
 }
 
-function SumWrapper({ record, form }) {
+function SumWrapper({ record, form, removeDataSource }) {
   // вся ця штука повинна бути також динамічна за прикладом компонента зверху.
   // ми повинні прописати умови прорахунку, за яким беруться значення
   // TODO: fix labels
@@ -348,6 +355,16 @@ function SumWrapper({ record, form }) {
     }
   }
   form.setFieldValue([record.name, 'sum'], getVal(record?.name, formFields))
+
+  useEffect(() => {
+    if (
+      getVal(record?.name, formFields) === 0 &&
+      record?.name === ServiceType.WaterPart
+    ) {
+      removeDataSource(record.id)
+    }
+  }, [formFields, record.id, record?.name, removeDataSource])
+
   return (
     <Form.Item name={[record?.name, 'sum']}>
       <h4 className={s.price}>{getVal(record?.name, formFields)} ₴</h4>
