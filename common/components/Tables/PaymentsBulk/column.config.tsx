@@ -1,10 +1,8 @@
 import { CloseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { Popconfirm, Tooltip, Form } from 'antd'
+import { Popconfirm, Tooltip, FormInstance, Form } from 'antd'
 
 import FormAttribute from '@common/components/UI/FormAttribute'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
-import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
-import moment from 'moment'
 
 export const getDefaultColumns = (
   service?: any,
@@ -53,9 +51,16 @@ export const getDefaultColumns = (
             />
 
             {record.servicePricePerMeter && (
-              <StyledTooltip
-                title={'Індивідуальне утримання, що передбачене договором'}
-              />
+              <Tooltip title="Індивідуальне утримання, що передбачене договором">
+                <QuestionCircleOutlined
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    right: 0,
+                    transform: 'translate(-16px, -50%)',
+                  }}
+                />
+              </Tooltip>
             )}
           </>
         ),
@@ -97,7 +102,17 @@ export const getDefaultColumns = (
       {
         title: 'Стара',
         dataIndex: 'old_elec',
-        render: (__, record) => <OldElectricity record={record} />,
+        render: (value, record) => (
+          <FormAttribute
+            name={[
+              'companies',
+              record.companyName,
+              'electricityPrice',
+              'lastAmount',
+            ]}
+            value={value}
+          />
+        ),
       },
       {
         title: 'Нова',
@@ -110,7 +125,7 @@ export const getDefaultColumns = (
               'electricityPrice',
               'amount',
             ]}
-            value={value || 0}
+            value={value}
           />
         ),
       },
@@ -129,7 +144,12 @@ export const getDefaultColumns = (
       {
         title: 'Стара',
         dataIndex: 'old_water',
-        render: (__, record) => <OldWater record={record} />,
+        render: (value, record) => (
+          <FormAttribute
+            name={['companies', record.companyName, 'waterPrice', 'lastAmount']}
+            value={value}
+          />
+        ),
       },
       {
         title: 'Нова',
@@ -137,7 +157,7 @@ export const getDefaultColumns = (
         render: (value, record) => (
           <FormAttribute
             name={['companies', record.companyName, 'waterPrice', 'amount']}
-            value={value || 0}
+            value={value}
           />
         ),
       },
@@ -162,12 +182,12 @@ export const getDefaultColumns = (
     ),
     children: [
       {
-        title: 'Частка постачання %',
+        title: 'Частка постачання',
         dataIndex: 'waterPart',
-        render: (__, record) => (
+        render: (value, record) => (
           <FormAttribute
             name={['companies', record.companyName, 'waterPart', 'price']}
-            value={record.waterPart || 0}
+            value={value}
           />
         ),
       },
@@ -181,14 +201,14 @@ export const getDefaultColumns = (
     ],
   },
   {
-    // TODO: треба відобразити індекс інфляції за минулий місяць
-    // тайтл також стає компонентом. там ми фетчимо сервіс і тут же відображаємо правильний %
-    title: `Індекс інфляції за ${moment(service?.date)
-      .subtract(1, 'months')
-      .format('MMMM')}`,
+    title: 'Індекс інфляції',
     dataIndex: 'inflicionPrice',
-    render: (__, record) => (
-      <InflicionPrice service={service} record={record} />
+    render: (value, record) => (
+      <FormAttribute
+        name={['companies', record.companyName, 'inflicionPrice']}
+        value={value}
+        disabled
+      />
     ),
   },
   {
@@ -208,7 +228,7 @@ export const getDefaultColumns = (
     render: (value, record) => (
       <FormAttribute
         name={['companies', record.companyName, 'discount']}
-        value={value || 0}
+        value={value}
       />
     ),
   },
@@ -226,64 +246,6 @@ export const getDefaultColumns = (
     ),
   },
 ]
-
-const InflicionPrice: React.FC<{ service: any; record: any }> = ({
-  service,
-  record,
-}) => {
-  const { form } = useInvoicesPaymentContext()
-
-  const rentPrice = Form.useWatch(
-    ['companies', record.companyName, 'placingPrice', 'price'],
-    form
-  )
-
-  // TODO: вивчити формулу. потім ціна оренди береться із суми індексу інфляції і поточної оренди
-  return (
-    <FormAttribute
-      name={['companies', record.companyName, 'inflicionPrice']}
-      value={record.inflicion ? rentPrice * (service?.inflicionPrice / 100) : 0}
-      disabled
-    />
-  )
-}
-
-const OldWater: React.FC<{ record: any }> = ({ record }) => {
-  const baseName = ['companies', record.companyName, 'waterPrice']
-
-  const waterPriceName = [...baseName, 'lastAmount']
-
-  const { data: paymentsResponse } = useGetAllPaymentsQuery({
-    companyIds: record._id,
-    limit: 1,
-  })
-  const invoice = paymentsResponse?.data?.[0]?.invoice
-  const waterPrice = invoice?.find((item) => item.type === 'waterPrice')
-
-  return <FormAttribute name={waterPriceName} value={waterPrice?.amount || 0} />
-}
-
-const OldElectricity: React.FC<{ record: any }> = ({ record }) => {
-  const baseName = ['companies', record.companyName, 'electricityPrice']
-
-  const electricityPriceName = [...baseName, 'lastAmount']
-
-  const { data: paymentsResponse } = useGetAllPaymentsQuery({
-    companyIds: record._id,
-    limit: 1,
-  })
-  const invoice = paymentsResponse?.data?.[0]?.invoice
-  const electricityPrice = invoice?.find(
-    (item) => item.type === 'electricityPrice'
-  )
-
-  return (
-    <FormAttribute
-      name={electricityPriceName}
-      value={electricityPrice?.amount || 0}
-    />
-  )
-}
 
 const PricePerMeterSum: React.FC<{ record: any }> = ({ record }) => {
   const { form } = useInvoicesPaymentContext()
@@ -303,7 +265,7 @@ const PricePerMeterSum: React.FC<{ record: any }> = ({ record }) => {
   )
 }
 
-const WaterPartSum: React.FC<{ service: any; record: any }> = ({
+const WaterPartSum: React.FC<{ service?: any; record: any }> = ({
   service,
   record,
 }) => {
@@ -319,12 +281,12 @@ const WaterPartSum: React.FC<{ service: any; record: any }> = ({
     <FormAttribute
       disabled
       name={[...baseName, 'sum']}
-      value={(waterPart / 100) * service?.waterPriceTotal}
+      value={waterPart * service?.waterPriceTotal}
     />
   )
 }
 
-const WaterPriceSum: React.FC<{ service: any; record: any }> = ({
+const WaterPriceSum: React.FC<{ service?: any; record: any }> = ({
   service,
   record,
 }) => {
@@ -342,75 +304,54 @@ const WaterPriceSum: React.FC<{ service: any; record: any }> = ({
     <FormAttribute
       disabled
       name={[...baseName, 'sum']}
-      value={newWater ? (newWater - oldWater) * service?.waterPrice : 0}
+      value={(newWater - oldWater) * service?.waterPrice}
     />
   )
 }
 
-const ServicePriceSum: React.FC<{ service: any; record: any }> = ({
-  service,
-  record,
-}) => {
+function ServicePriceSum({ service, record }) {
   const { form } = useInvoicesPaymentContext()
-
-  const baseName = ['companies', record.companyName, 'maintenancePrice']
-
-  const servicePricePerMeterName = [...baseName, 'price']
-
-  const servicePricePerMeter = Form.useWatch(servicePricePerMeterName, form)
+  const fieldName = [
+    'companies',
+    record.companyName,
+    'maintenancePrice',
+    'price',
+  ]
+  const servicePricePerMeter = Form.useWatch(fieldName, form)
   const prioPrice = servicePricePerMeter || service?.rentPrice
 
   return (
     <FormAttribute
       disabled
-      name={[...baseName, 'sum']}
+      name={['companies', record.companyName, 'maintenancePrice', 'sum']}
       value={prioPrice * record.totalArea}
     />
   )
 }
 
-const ElectricityPriceSum: React.FC<{ service: any; record: any }> = ({
-  service,
-  record,
-}) => {
+function ElectricityPriceSum({ service, record }) {
   const { form } = useInvoicesPaymentContext()
-
-  const baseName = ['companies', record.companyName, 'electricityPrice']
-
   // TODO: we will get old value from last invoice later
-  const newElectricityPriceName = [...baseName, 'amount']
-  const oldElectricityPriceName = [...baseName, 'lastAmount']
-
-  const oldElectricityPrice = Form.useWatch(oldElectricityPriceName, form)
-  const newElectricityPrice = Form.useWatch(newElectricityPriceName, form)
+  const newElecName = [
+    'companies',
+    record.companyName,
+    'electricityPrice',
+    'amount',
+  ]
+  const oldElecName = [
+    'companies',
+    record.companyName,
+    'electricityPrice',
+    'lastAmount',
+  ]
+  const newElec = Form.useWatch(newElecName, form)
+  const oldElec = Form.useWatch(oldElecName, form)
 
   return (
     <FormAttribute
-      name={[...baseName, 'sum']}
-      value={
-        newElectricityPrice
-          ? (newElectricityPrice - oldElectricityPrice) *
-            service?.electricityPrice
-          : 0
-      }
+      name={['companies', record.companyName, 'electricityPrice', 'sum']}
+      value={(newElec - oldElec) * service?.electricityPrice}
       disabled
     />
-  )
-}
-
-const StyledTooltip: React.FC<{
-  title: React.ReactNode
-}> = ({ title }) => {
-  return (
-    <Tooltip title={title}>
-      <QuestionCircleOutlined
-        style={{
-          position: 'absolute',
-          top: '50%',
-          right: 0,
-          transform: 'translate(-16px, -50%)',
-        }}
-      />
-    </Tooltip>
   )
 }

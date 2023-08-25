@@ -107,7 +107,6 @@ function useInitialValues(currentService) {
     rentPrice: currentService?.rentPrice,
     waterPrice: currentService?.waterPrice,
     description: currentService?.description,
-    waterPriceTotal: currentService?.waterPriceTotal,
   }
   return initialValues
 }
