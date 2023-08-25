@@ -2,13 +2,13 @@
 ## Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/task-monitoring-app.git
+git clone git@github.com:VanyaRPP/task-monitoring-app.git
 ```
 
 ## Step 2: Install Dependencies
 
 ```bash
-yarn install
+yarn
 ```
 
 ## Step 3: Start the Project
