@@ -192,16 +192,14 @@ const PaymentsBlock = () => {
     })
   }
 
-  if (payments?.currentCompaniesCount > 1) {
-    columns.unshift({
-      title: 'Компанія',
-      dataIndex: 'company',
-      filters:
-        pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
-      filteredValue: filters?.company || null,
-      render: (i) => i?.companyName,
-    })
-  }
+  columns.unshift({
+    title: 'Компанія',
+    dataIndex: 'company',
+    filters:
+      pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
+    filteredValue: filters?.company || null,
+    render: (i) => i?.companyName,
+  })
 
   if (payments?.currentDomainsCount > 1) {
     columns.unshift({
