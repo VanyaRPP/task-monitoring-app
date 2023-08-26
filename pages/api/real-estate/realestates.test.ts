@@ -119,7 +119,7 @@ describe('RealEstate API - GET', () => {
     expect(received).toEqual(expected)
   })
 
-  it('request from the User by domainId and streetId - ignore not allowed queries', async () => {
+  it('request from the User by domainId and streetId', async () => {
     await mockLoginAs(users.user)
 
     const mockReq = {

@@ -12,25 +12,7 @@ const InvoicesTable: React.FC = () => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.PAYMENT_BULK
 
-  const { form } = useInvoicesPaymentContext()
-
-  const domainId = Form.useWatch('domain', form)
-  const streetId = Form.useWatch('street', form)
-  const serviceId = Form.useWatch('monthService', form)
-
-  const {
-    data: companies,
-    isLoading: isCompaniesLoading,
-    isError,
-  } = useGetAllRealEstateQuery(
-    { domainId, streetId },
-    { skip: !domainId || !streetId }
-  )
-
-  const { service, isLoading: isServiceLoading } = useService({ serviceId })
-
-  const isLoading = isCompaniesLoading || isServiceLoading
-
+  const { companies, service, isLoading, isError } = useInvoicesPaymentContext()
   const [dataSource, setDataSource] = useState([])
 
   useEffect(() => {

@@ -1,8 +1,6 @@
 import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
 import {
   IExtendedPayment,
-  IProvider,
-  IReciever,
 } from '@common/api/paymentApi/payment.api.types'
 import { Form, message, Modal, Tabs, TabsProps } from 'antd'
 import React, { FC, createContext, useContext, useState } from 'react'
@@ -11,7 +9,7 @@ import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
 import { Operations } from '@utils/constants'
 import { FormInstance } from 'antd/es/form/Form'
-import { filterInvoiceObject } from '@utils/helpers'
+import { filterInvoiceObject, getPaymentProviderAndReciever } from '@utils/helpers'
 import useCompany from '@common/modules/hooks/useCompany'
 
 interface Props {
@@ -39,14 +37,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const companyId = Form.useWatch('company', form)
   const { company } = useCompany({ companyId, skip: !companyId || edit })
 
-  const provider: IProvider = company && {
-    description: company?.domain?.description || '',
-  }
-  const reciever: IReciever = company && {
-    companyName: company?.companyName,
-    adminEmails: company?.adminEmails,
-    description: company?.description,
-  }
+  const { provider, reciever } = getPaymentProviderAndReciever(company)
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
