@@ -9,7 +9,7 @@ import {
   Modal,
   Input,
 } from 'antd'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useState, useCallback } from 'react'
 import { ColumnProps } from 'antd/lib/table'
 import moment from 'moment'
 import { IPaymentTableData } from '@utils/tableData'
@@ -50,7 +50,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
 
   const { company } = useCompany({ companyId, skip: edit })
   const { service } = useService({ serviceId, skip: edit })
-
+  // console.log(service)
   const { customDataSource, addDataSource, removeDataSource } =
     useCustomDataSource({
       paymentData,
@@ -330,30 +330,47 @@ function SumWrapper({ record, form, removeDataSource }) {
   const formFields = Form.useWatch(record.name, form)
 
   // TODO: fix. such items should be "Clear function". Without side effect
+  const { paymentData } = usePaymentContext()
 
-  const getVal = (record, obj) => {
-    switch (record) {
-      case ServiceType.Maintenance: {
-        const m = obj?.amount * obj?.price
-        return +m.toFixed(1) || 0
+  const serviceId =
+    Form.useWatch('monthService', form) || paymentData?.monthService
+  const companyId = Form.useWatch('company', form) || paymentData?.company
+
+  const { company } = useCompany({ companyId })
+  const { service } = useService({ serviceId })
+
+  const getVal = useCallback(
+    (record, obj) => {
+      switch (record) {
+        case ServiceType.Maintenance: {
+          const m = obj?.amount * obj?.price
+          return +m.toFixed(1) || 0
+        }
+        case ServiceType.Placing: {
+          const p = obj?.amount * obj?.price
+          return +p.toFixed(1) || 0
+        }
+        case ServiceType.Electricity: {
+          const e = (obj?.amount - obj?.lastAmount) * obj?.price
+          return +e.toFixed(1) || 0
+        }
+        case ServiceType.Water: {
+          const w = (obj?.amount - obj?.lastAmount) * obj?.price
+          return +w.toFixed(1) || 0
+        }
+
+        case ServiceType.WaterPart: {
+          const wp = company?.waterPart * service?.waterPriceTotal
+          console.log(wp)
+          return +wp.toFixed(1) || 0
+        }
+        default: {
+          return +obj?.price || 0
+        }
       }
-      case ServiceType.Placing: {
-        const p = obj?.amount * obj?.price
-        return +p.toFixed(1) || 0
-      }
-      case ServiceType.Electricity: {
-        const e = (obj?.amount - obj?.lastAmount) * obj?.price
-        return +e.toFixed(1) || 0
-      }
-      case ServiceType.Water: {
-        const w = (obj?.amount - obj?.lastAmount) * obj?.price
-        return +w.toFixed(1) || 0
-      }
-      default: {
-        return +obj?.price || 0
-      }
-    }
-  }
+    },
+    [company?.waterPart, service?.waterPriceTotal]
+  )
   form.setFieldValue([record.name, 'sum'], getVal(record?.name, formFields))
 
   useEffect(() => {
@@ -363,7 +380,7 @@ function SumWrapper({ record, form, removeDataSource }) {
     ) {
       removeDataSource(record.id)
     }
-  }, [formFields, record.id, record?.name, removeDataSource])
+  }, [formFields, getVal, record.id, record?.name, removeDataSource])
 
   return (
     <Form.Item name={[record?.name, 'sum']}>
