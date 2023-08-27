@@ -24,7 +24,7 @@ const PaymentsFilterTags = ({ filters, setFilters, payments }) => {
                   {
                     payments?.domainsFilter?.find(
                       (item) => item.value === domain
-                    ).text
+                    )?.text
                   }
                 </Tag>
               ))}
@@ -56,7 +56,7 @@ const PaymentsFilterTags = ({ filters, setFilters, payments }) => {
                   {
                     payments?.realEstatesFilter?.find(
                       (item) => item.value === company
-                    ).text
+                    )?.text
                   }
                 </Tag>
               ))}

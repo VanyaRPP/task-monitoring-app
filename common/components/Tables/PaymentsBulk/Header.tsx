@@ -19,17 +19,18 @@ import {
 const InvoicesHeader = () => {
   const router = useRouter()
   const { form, companies, service } = useInvoicesPaymentContext()
-  const [addPayment, { isLoading }] = useAddPaymentMutation()
+  const [addPayment] = useAddPaymentMutation()
   const { data: invoiceNumber = 0 } = useGetPaymentsCountQuery({})
-
   const handleSave = async () => {
     const invoices = await prepareInvoiceObjects(form)
-    const filteredInvoices = filterInvoiceObject(invoices[0])
-
-    for (const company of companies) {
+    const filteredCompanies = companies.filter((i) => !!invoices[i.companyName])
+    for (const company of filteredCompanies) {
       const { provider, reciever } = getPaymentProviderAndReciever(company)
-
+      const filteredInvoices = filterInvoiceObject(
+        invoices[company.companyName]
+      )
       const response = await addPayment({
+        // TODO: use API from single invoice creation
         invoiceNumber: invoiceNumber + companies.indexOf(company) + 1,
         type: Operations.Debit,
         domain: service?.domain,
@@ -54,8 +55,6 @@ const InvoicesHeader = () => {
         )
       }
     }
-    //debugger
-    //invoices
     router.push(AppRoutes.PAYMENT)
   }
 
@@ -130,32 +129,33 @@ function PopoverMonthService(serviceId: any) {
 
 export default InvoicesHeader
 
-const prepareInvoiceObjects = async (form: FormInstance): Promise<any[]> => {
+const prepareInvoiceObjects = async (form: FormInstance): Promise<any> => {
   const values = await form.validateFields()
-  const invoices: any[] = Object.values(values.companies)
+  return Object.keys(values.companies).reduce((acc, key) => {
+    const invoice = values.companies[key]
+    acc[key] = {
+      maintenancePrice: {
+        amount: invoice.totalArea,
+        ...invoice.maintenancePrice,
+      },
+      placingPrice: {
+        amount: invoice.totalArea,
+        ...invoice.placingPrice,
+      },
 
-  return invoices.map((invoice) => ({
-    maintenancePrice: {
-      amount: invoice.totalArea,
-      ...invoice.maintenancePrice,
-    },
-    placingPrice: {
-      amount: invoice.totalArea,
-      ...invoice.placingPrice,
-    },
+      electricityPrice: invoice.electricityPrice,
+      waterPrice: invoice.waterPrice,
+      waterPart: invoice.waterPart,
 
-    electricityPrice: invoice.electricityPrice,
-    waterPrice: invoice.waterPrice,
-    waterPart: invoice.waterPart,
-
-    garbageCollectorPrice: {
-      price: invoice.garbageCollector,
-      sum: invoice.garbageCollector,
-    },
-    inflicionPrice: {
-      price: invoice.inflicionPrice,
-      sum: invoice.inflicionPrice,
-    },
-    // TODO: proper fields
-  }))
+      garbageCollectorPrice: {
+        price: invoice.garbageCollector,
+        sum: invoice.garbageCollector,
+      },
+      inflicionPrice: {
+        price: invoice.inflicionPrice,
+        sum: invoice.inflicionPrice,
+      },
+    }
+    return acc
+  }, {})
 }

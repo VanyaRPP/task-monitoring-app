@@ -17,3 +17,6 @@ export const disabledDate: RangePickerProps['disabledDate'] = (current) => {
 
 export const dateToDayYearMonthFormat = (date: Date): string =>
   moment(date).format('DD-MM-YYYY')
+
+export const dateToMonthYear = (date: Date): string =>
+  moment(date).format('MMMM YYYY')
