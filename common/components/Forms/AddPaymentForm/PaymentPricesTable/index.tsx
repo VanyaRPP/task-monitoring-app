@@ -26,6 +26,7 @@ import {
   PricePlacingField,
   PriceWaterField,
   PriceWaterPartField,
+  WaterPartInfo,
 } from './fields/priceFields'
 import useCompany from '@common/modules/hooks/useCompany'
 import { AmountTotalAreaField } from './fields/amountFields'
@@ -43,8 +44,7 @@ interface Props {
 
 const PaymentPricesTable: FC<Props> = ({ edit }) => {
   const { paymentData, form } = usePaymentContext()
-  const domainId = Form.useWatch('domain', form) || paymentData?.domain
-  const streetId = Form.useWatch('street', form) || paymentData?.street
+
   const serviceId = Form.useWatch('service', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
@@ -99,6 +99,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       width: '30%',
       render: (text, record) => (
         <>
+          {record.name === ServiceType.WaterPart && <WaterPartInfo edit={edit} />}
           {record.name === ServiceType.Electricity ||
           record.name === ServiceType.Water ? (
             <div className={s.doubleInputs}>
@@ -347,6 +348,7 @@ function SumWrapper({ record, form }) {
       }
     }
   }
+  // TODO: SOMETHING BAD HERE. THIS SHOULD BE INSIDE USEFFECT
   form.setFieldValue([record.name, 'sum'], getVal(record?.name, formFields))
   return (
     <Form.Item name={[record?.name, 'sum']}>
