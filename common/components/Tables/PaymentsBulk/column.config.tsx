@@ -90,7 +90,7 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: service
+    title: service?.electricityPrice
       ? `Електрика: ${service.electricityPrice} грн/кВт`
       : 'Електрика',
     children: [

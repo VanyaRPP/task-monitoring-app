@@ -20,6 +20,7 @@ import s from './style.module.scss'
 import useService from '@common/modules/hooks/useService'
 import {
   InflicionAmountInfo,
+  OldElectricity,
   PriceElectricityField,
   PriceGarbageCollectorField,
   PriceInflicionField,
@@ -102,8 +103,8 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
         <>
           {record.name === ServiceType.WaterPart && <WaterPartInfo edit={edit} />}
           {record.name === ServiceType.Inflicion && <InflicionAmountInfo edit={edit} />}
-          {record.name === ServiceType.Electricity ||
-          record.name === ServiceType.Water ? (
+          {record.name === ServiceType.Electricity && <OldElectricity record={record} edit={edit} />}
+          {record.name === ServiceType.Water ? (
             <div className={s.doubleInputs}>
               <Form.Item
                 name={[record.name, 'lastAmount']}
@@ -120,8 +121,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
               </Form.Item>
             </div>
           ) : (
-            (record.name === ServiceType.Electricity ||
-              record.name === ServiceType.Water ||
+            (
               record.name === ServiceType.Placing ||
               record.name === ServiceType.Maintenance) && (
               <AmountTotalAreaField record={record} edit={edit} />
