@@ -90,7 +90,7 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: service
+    title: service?.electricityPrice
       ? `Електрика: ${service.electricityPrice} грн/кВт`
       : 'Електрика',
     children: [
@@ -239,10 +239,15 @@ const InflicionPrice: React.FC<{ service: any; record: any }> = ({
   )
 
   // TODO: вивчити формулу. потім ціна оренди береться із суми індексу інфляції і поточної оренди
+  // БРАТИ ЦІНУ ОРЕНДИ З МИНУЛОГО ІНВОЙСУ
+  // подумати про хелпер з тестами
+  const percent = service?.inflicionPrice - 100
+  const inflicionAmount = ((rentPrice * percent) / 100).toFixed(2)
+
   return (
     <FormAttribute
       name={['companies', record.companyName, 'inflicionPrice']}
-      value={record.inflicion ? rentPrice * (service?.inflicionPrice / 100) : 0}
+      value={record.inflicion ? inflicionAmount : 0}
       disabled
     />
   )

@@ -125,7 +125,7 @@ const getDefaultColumns = (
       align: 'center',
       title: 'Нарахування інд. інф.',
       dataIndex: 'inflicion',
-      render: () => <Checkbox disabled />,
+      render: (value) => <Checkbox checked={value} disabled />,
     },
   ]
 
