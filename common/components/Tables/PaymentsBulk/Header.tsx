@@ -15,6 +15,7 @@ import {
   filterInvoiceObject,
   getPaymentProviderAndReciever,
 } from '@utils/helpers'
+import { IExtendedService } from '@common/api/serviceApi/service.api.types'
 
 const InvoicesHeader = () => {
   const router = useRouter()
@@ -22,8 +23,9 @@ const InvoicesHeader = () => {
   const [addPayment] = useAddPaymentMutation()
   const { data: invoiceNumber = 0 } = useGetPaymentsCountQuery({})
   const handleSave = async () => {
-    const invoices = await prepareInvoiceObjects(form)
+    const invoices = await prepareInvoiceObjects(form, service)
     const filteredCompanies = companies.filter((i) => !!invoices[i.companyName])
+
     for (const company of filteredCompanies) {
       const { provider, reciever } = getPaymentProviderAndReciever(company)
       const filteredInvoices = filterInvoiceObject(
@@ -40,7 +42,7 @@ const InvoicesHeader = () => {
         invoiceCreationDate: new Date(),
         description: '',
         generalSum:
-          filteredInvoices.reduce((acc, val) => acc + (val.sum || 0), 0) || 0,
+          filteredInvoices.reduce((acc, val) => acc + (+val.sum || 0), 0) || 0,
         provider,
         reciever,
         invoice: filteredInvoices,
@@ -49,13 +51,15 @@ const InvoicesHeader = () => {
       if ('data' in response) {
         form.resetFields()
         message.success(`Додано рахунок для компанії ${company?.companyName}`)
+        if (company === companies[companies.length - 1]) {
+          router.push(AppRoutes.PAYMENT)
+        }
       } else {
         message.error(
           `Помилка при додаванні рахунку для компанії ${company?.companyName}`
         )
       }
     }
-    router.push(AppRoutes.PAYMENT)
   }
 
   return (
@@ -129,7 +133,10 @@ function PopoverMonthService(serviceId: any) {
 
 export default InvoicesHeader
 
-const prepareInvoiceObjects = async (form: FormInstance): Promise<any> => {
+const prepareInvoiceObjects = async (
+  form: FormInstance,
+  service: IExtendedService
+): Promise<any> => {
   const values = await form.validateFields()
   return Object.keys(values.companies).reduce((acc, key) => {
     const invoice = values.companies[key]
@@ -143,8 +150,14 @@ const prepareInvoiceObjects = async (form: FormInstance): Promise<any> => {
         ...invoice.placingPrice,
       },
 
-      electricityPrice: invoice.electricityPrice,
-      waterPrice: invoice.waterPrice,
+      electricityPrice: {
+        ...invoice.electricityPrice,
+        price: service?.electricityPrice,
+      },
+      waterPrice: {
+        ...invoice.waterPrice,
+        price: service?.waterPrice,
+      },
       waterPart: invoice.waterPart,
 
       garbageCollectorPrice: {

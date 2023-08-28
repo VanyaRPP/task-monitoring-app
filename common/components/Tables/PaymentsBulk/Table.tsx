@@ -1,11 +1,9 @@
-import { Alert, Form, Table } from 'antd'
+import { Alert, Table } from 'antd'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { getDefaultColumns } from '@common/components/Tables/PaymentsBulk/column.config'
-import useService from '@common/modules/hooks/useService'
 import { AppRoutes } from '@utils/constants'
 
 const InvoicesTable: React.FC = () => {

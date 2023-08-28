@@ -242,7 +242,7 @@ const InflicionPrice: React.FC<{ service: any; record: any }> = ({
   return (
     <FormAttribute
       name={['companies', record.companyName, 'inflicionPrice']}
-      value={record.inflicion ? rentPrice * (service?.inflicionPrice / 100) : 0}
+      value={record.inflicion ? (rentPrice * (service?.inflicionPrice / 100)).toFixed(2) : 0}
       disabled
     />
   )

@@ -49,7 +49,10 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const dataSourcePreview: DataType[] = dataToMap.map((item, index) => ({
     id: index + 1,
     Назва: `${fieldNames[item.type] || item.name} (${date})`,
-    Кількість: item.amount && +item.amount,
+    Кількість:
+      item.lastAmount && item.amount
+        ? +item.amount - +item.lastAmount
+        : item.amount && +item.amount,
     Ціна: +item.price,
     Сума: +item.sum,
   }))
