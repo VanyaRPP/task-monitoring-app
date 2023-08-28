@@ -95,7 +95,9 @@ function FormAttributeForSingle({
   )?.amount
 
   useEffect(() => {
-    form.setFieldValue(lastAmountName, value)
+    if (!disabled) {
+      form.setFieldValue(lastAmountName, value)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
