@@ -164,5 +164,27 @@ describe('Payments API - GET', () => {
 })
 
 describe('Payments API - POST', () => {
-  // TODO: POST tests
+  it('POST payment as Global Admin - success', async () => {
+    await mockLoginAs(users.globalAdmin)
+    const { _id, ...data } = payments[0]
+
+    const mockReq = {
+      method: 'POST',
+      body: data,
+    } as any
+
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.data,
+    }
+
+    expect(response.status).toHaveBeenLastCalledWith(200)
+  })
 })
