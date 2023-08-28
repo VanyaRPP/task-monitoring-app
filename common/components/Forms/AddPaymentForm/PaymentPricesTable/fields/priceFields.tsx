@@ -126,12 +126,16 @@ export function PriceInflicionField({ record, edit }) {
   const { company } = useCompany({ companyId, skip: edit })
   const { service } = useService({ serviceId, skip: edit })
 
+  // TODO: вивчити формулу. потім ціна оренди береться із суми індексу інфляції і поточної оренди
+  // БРАТИ ЦІНУ ОРЕНДИ З МИНУЛОГО ІНВОЙСУ
+  // подумати про хелпер з тестами
+
   useEffect(() => {
-    if (service?._id && service?.inflicionPrice) {
-      form.setFieldValue(
-        fieldName,
-        service.inflicionPrice * company.pricePerMeter
-      )
+    if (service?._id && service?.inflicionPrice && company.inflicion) {
+      const rentPrice = company?.pricePerMeter * company?.totalArea
+      const percent = service?.inflicionPrice - 100
+      const inflicionAmount = ((rentPrice * percent) / 100).toFixed(2)
+      form.setFieldValue(fieldName, inflicionAmount)
     }
   }, [service?._id, service?.inflicionPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 
@@ -181,6 +185,26 @@ export function WaterPartInfo({ edit }) {
     <>
       {company?.waterPart && service?.waterPriceTotal
         ? company.waterPart + '% від суми ' + service?.waterPriceTotal
+        : null}
+    </>
+  )
+}
+
+export function InflicionAmountInfo({ edit }) {
+  const { paymentData, form } = usePaymentContext()
+  const serviceId =
+    Form.useWatch('monthService', form) || paymentData?.monthService
+  const companyId = Form.useWatch('company', form) || paymentData?.company
+  const { company } = useCompany({ companyId, skip: edit })
+  const { service } = useService({ serviceId, skip: edit })
+
+  const percent = (service?.inflicionPrice - 100).toFixed(2)
+  const rentPrice = company?.pricePerMeter * company?.totalArea
+
+  return (
+    <>
+      {company?.inflicion && service?.inflicionPrice
+        ? percent + '% інфляції від ' + rentPrice
         : null}
     </>
   )
