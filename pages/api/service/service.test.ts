@@ -290,7 +290,7 @@ describe('Service API - GET', () => {
 
     const mockReq = {
       method: 'GET',
-      query: { serviceId: services[0]._id },
+      query: { serviceId: services[5]._id },
     } as any
     const mockRes = {
       status: jest.fn(() => mockRes),
@@ -305,7 +305,7 @@ describe('Service API - GET', () => {
     }
 
     const received = parseReceived(response.data)
-    const expected = [services[0]]
+    const expected = [services[5]]
 
     expect(response.status).toHaveBeenCalledWith(200)
     expect(received).toEqual(expected)
@@ -339,7 +339,7 @@ describe('Service API - GET', () => {
 
     const mockReq = {
       method: 'GET',
-      query: { serviceId: services[0]._id },
+      query: { serviceId: services[5]._id },
     } as any
     const mockRes = {
       status: jest.fn(() => mockRes),
@@ -354,7 +354,7 @@ describe('Service API - GET', () => {
     }
 
     const received = parseReceived(response.data)
-    const expected = [services[0]]
+    const expected = [services[5]]
 
     expect(response.status).toHaveBeenCalledWith(200)
     expect(received).toEqual(expected)
@@ -365,7 +365,7 @@ describe('Service API - GET', () => {
 
     const mockReq = {
       method: 'GET',
-      query: { serviceId: services[5]._id },
+      query: { serviceId: services[0]._id },
     } as any
     const mockRes = {
       status: jest.fn(() => mockRes),

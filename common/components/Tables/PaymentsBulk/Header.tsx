@@ -1,21 +1,61 @@
 import { QuestionCircleOutlined, SelectOutlined } from '@ant-design/icons'
-import { Button, Form, FormInstance, Popover } from 'antd'
+import { Button, Form, FormInstance, Popover, message } from 'antd'
 import { useRouter } from 'next/router'
 
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthServiceSelect'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
-import { AppRoutes } from '@utils/constants'
+import { AppRoutes, Operations } from '@utils/constants'
+import {
+  useAddPaymentMutation,
+  useGetPaymentsCountQuery,
+} from '@common/api/paymentApi/payment.api'
+import {
+  filterInvoiceObject,
+  getPaymentProviderAndReciever,
+} from '@utils/helpers'
 
 const InvoicesHeader = () => {
   const router = useRouter()
-  const { form } = useInvoicesPaymentContext()
-
+  const { form, companies, service } = useInvoicesPaymentContext()
+  const [addPayment] = useAddPaymentMutation()
+  const { data: invoiceNumber = 0 } = useGetPaymentsCountQuery({})
   const handleSave = async () => {
     const invoices = await prepareInvoiceObjects(form)
-    debugger
-    invoices
+    const filteredCompanies = companies.filter((i) => !!invoices[i.companyName])
+    for (const company of filteredCompanies) {
+      const { provider, reciever } = getPaymentProviderAndReciever(company)
+      const filteredInvoices = filterInvoiceObject(
+        invoices[company.companyName]
+      )
+      const response = await addPayment({
+        // TODO: use API from single invoice creation
+        invoiceNumber: invoiceNumber + companies.indexOf(company) + 1,
+        type: Operations.Debit,
+        domain: service?.domain,
+        street: service?.street,
+        company: company?._id,
+        monthService: service?._id,
+        invoiceCreationDate: new Date(),
+        description: '',
+        generalSum:
+          filteredInvoices.reduce((acc, val) => acc + (val.sum || 0), 0) || 0,
+        provider,
+        reciever,
+        invoice: filteredInvoices,
+      })
+
+      if ('data' in response) {
+        form.resetFields()
+        message.success(`Додано рахунок для компанії ${company?.companyName}`)
+      } else {
+        message.error(
+          `Помилка при додаванні рахунку для компанії ${company?.companyName}`
+        )
+      }
+    }
+    router.push(AppRoutes.PAYMENT)
   }
 
   return (
@@ -89,32 +129,33 @@ function PopoverMonthService(serviceId: any) {
 
 export default InvoicesHeader
 
-const prepareInvoiceObjects = async (form: FormInstance): Promise<any[]> => {
+const prepareInvoiceObjects = async (form: FormInstance): Promise<any> => {
   const values = await form.validateFields()
-  const invoices: any[] = Object.values(values.companies)
+  return Object.keys(values.companies).reduce((acc, key) => {
+    const invoice = values.companies[key]
+    acc[key] = {
+      maintenancePrice: {
+        amount: invoice.totalArea,
+        ...invoice.maintenancePrice,
+      },
+      placingPrice: {
+        amount: invoice.totalArea,
+        ...invoice.placingPrice,
+      },
 
-  return invoices.map((invoice) => ({
-    maintenancePrice: {
-      amount: invoice.totalArea,
-      ...invoice.maintenancePrice,
-    },
-    placingPrice: {
-      amount: invoice.totalArea,
-      ...invoice.placingPrice,
-    },
+      electricityPrice: invoice.electricityPrice,
+      waterPrice: invoice.waterPrice,
+      waterPart: invoice.waterPart,
 
-    electricityPrice: invoice.electricityPrice,
-    waterPrice: invoice.waterPrice,
-    waterPart: invoice.waterPart,
-
-    garbageCollectorPrice: {
-      price: invoice.garbageCollector,
-      sum: invoice.garbageCollector,
-    },
-    inflictionPrice: {
-      price: invoice.inflictionPrice,
-      sum: invoice.inflictionPrice,
-    },
-    // TODO: proper fields
-  }))
+      garbageCollectorPrice: {
+        price: invoice.garbageCollector,
+        sum: invoice.garbageCollector,
+      },
+      inflicionPrice: {
+        price: invoice.inflicionPrice,
+        sum: invoice.inflicionPrice,
+      },
+    }
+    return acc
+  }, {})
 }

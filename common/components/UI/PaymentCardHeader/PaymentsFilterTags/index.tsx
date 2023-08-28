@@ -24,11 +24,13 @@ const PaymentsFilterTags = ({ filters, setFilters, payments }) => {
                   {
                     payments?.domainsFilter?.find(
                       (item) => item.value === domain
-                    ).text
+                    )?.text
                   }
                 </Tag>
               ))}
             </span>
+          ) : payments?.currentDomainsCount === 1 ? (
+            <SingleTag name={payments?.data?.[0]?.domain?.name} />
           ) : (
             ' Всі'
           )}
@@ -54,11 +56,13 @@ const PaymentsFilterTags = ({ filters, setFilters, payments }) => {
                   {
                     payments?.realEstatesFilter?.find(
                       (item) => item.value === company
-                    ).text
+                    )?.text
                   }
                 </Tag>
               ))}
             </div>
+          ) : payments?.currentCompaniesCount === 1 ? (
+            <SingleTag name={payments?.data?.[0]?.company?.companyName} />
           ) : (
             ' Всі'
           )}
@@ -66,6 +70,10 @@ const PaymentsFilterTags = ({ filters, setFilters, payments }) => {
       </div>
     </>
   )
+}
+
+function SingleTag({ name }) {
+  return name ? <Tag className={s.Tag}>{name}</Tag> : null
 }
 
 export default PaymentsFilterTags
