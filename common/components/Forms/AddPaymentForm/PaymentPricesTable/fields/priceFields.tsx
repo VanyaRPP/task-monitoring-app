@@ -5,7 +5,9 @@ import s from '../style.module.scss'
 import useCompany from '@common/modules/hooks/useCompany'
 import useService from '@common/modules/hooks/useService'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
-import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
+import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
+import { NamePath } from 'antd/lib/form/interface'
+import { ServiceType } from '@utils/constants'
 
 export function PriceMaintainceField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
@@ -53,36 +55,58 @@ export function PricePlacingField({ record, edit }) {
 }
 
 export function OldElectricity({ record, edit }) {
+  return (
+    <FormAttributeForSingle
+      lastAmountName={[record.name, 'lastAmount']}
+      invoicePropName={ServiceType.Electricity}
+      amountName={[record.name, 'amount']}
+      disabled={edit}
+    />
+  )
+}
+
+export function OldWater({ record, edit }) {
+  return (
+    <FormAttributeForSingle
+      lastAmountName={[record.name, 'lastAmount']}
+      amountName={[record.name, 'amount']}
+      invoicePropName={ServiceType.Water}
+      disabled={edit}
+    />
+  )
+}
+
+function FormAttributeForSingle({
+  invoicePropName,
+  lastAmountName,
+  amountName,
+  disabled,
+}: {
+  invoicePropName: string
+  lastAmountName: NamePath
+  amountName: NamePath
+  disabled?: boolean
+}) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
-  // TODO: useCompanyInvoice
-  const { data: paymentsResponse } = useGetAllPaymentsQuery(
-    { companyIds: [companyId], limit: 1 },
-    { skip: edit }
-  )
-  const invoice = paymentsResponse?.data?.[0]?.invoice
-  const electricityPrice = invoice?.find(
-    (item) => item.type === 'electricityPrice'
+  const { company } = useCompanyInvoice({ companyId, skip: disabled })
+  const value = company?.invoice?.find(
+    (item) => item.type === invoicePropName
   )?.amount
-  const lastAmountName = [record.name, 'lastAmount']
 
   useEffect(() => {
-    form.setFieldValue(lastAmountName, electricityPrice)
+    form.setFieldValue(lastAmountName, value)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [electricityPrice])
+  }, [value])
 
-  // TOOD: is it possible to use FormAttribute ?
   return (
     <div className={s.doubleInputs}>
       <Form.Item name={lastAmountName} rules={validateField('required')}>
-        <InputNumber disabled={edit} className={s.input} />
+        <InputNumber disabled={disabled} className={s.input} />
       </Form.Item>
 
-      <Form.Item
-        name={[record.name, 'amount']}
-        rules={validateField('required')}
-      >
-        <InputNumber disabled={edit} className={s.input} />
+      <Form.Item name={amountName} rules={validateField('required')}>
+        <InputNumber disabled={disabled} className={s.input} />
       </Form.Item>
     </div>
   )

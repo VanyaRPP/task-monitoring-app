@@ -382,7 +382,6 @@ const ElectricityPriceSum: React.FC<{ service: any; record: any }> = ({
 
   const baseName = ['companies', record.companyName, 'electricityPrice']
 
-  // TODO: we will get old value from last invoice later
   const newElectricityPriceName = [...baseName, 'amount']
   const oldElectricityPriceName = [...baseName, 'lastAmount']
 

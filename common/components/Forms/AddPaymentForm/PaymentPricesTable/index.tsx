@@ -21,6 +21,7 @@ import useService from '@common/modules/hooks/useService'
 import {
   InflicionAmountInfo,
   OldElectricity,
+  OldWater,
   PriceElectricityField,
   PriceGarbageCollectorField,
   PriceInflicionField,
@@ -101,31 +102,21 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       width: '30%',
       render: (text, record) => (
         <>
-          {record.name === ServiceType.WaterPart && <WaterPartInfo edit={edit} />}
-          {record.name === ServiceType.Inflicion && <InflicionAmountInfo edit={edit} />}
-          {record.name === ServiceType.Electricity && <OldElectricity record={record} edit={edit} />}
-          {record.name === ServiceType.Water ? (
-            <div className={s.doubleInputs}>
-              <Form.Item
-                name={[record.name, 'lastAmount']}
-                rules={validateField('required')}
-              >
-                <InputNumber disabled={edit} className={s.input} />
-              </Form.Item>
-
-              <Form.Item
-                name={[record.name, 'amount']}
-                rules={validateField('required')}
-              >
-                <InputNumber disabled={edit} className={s.input} />
-              </Form.Item>
-            </div>
-          ) : (
-            (
-              record.name === ServiceType.Placing ||
-              record.name === ServiceType.Maintenance) && (
-              <AmountTotalAreaField record={record} edit={edit} />
-            )
+          {record.name === ServiceType.WaterPart && (
+            <WaterPartInfo edit={edit} />
+          )}
+          {record.name === ServiceType.Inflicion && (
+            <InflicionAmountInfo edit={edit} />
+          )}
+          {record.name === ServiceType.Electricity && (
+            <OldElectricity record={record} edit={edit} />
+          )}
+          {record.name === ServiceType.Water && (
+            <OldWater record={record} edit={edit} />
+          )}
+          {(record.name === ServiceType.Placing ||
+            record.name === ServiceType.Maintenance) && (
+            <AmountTotalAreaField record={record} edit={edit} />
           )}
         </>
       ),
