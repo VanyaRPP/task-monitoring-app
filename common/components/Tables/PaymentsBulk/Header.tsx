@@ -9,7 +9,7 @@ import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import { AppRoutes, Operations } from '@utils/constants'
 import {
   useAddPaymentMutation,
-  useGetPaymentsCountQuery,
+  useGetPaymentNumberQuery,
 } from '@common/api/paymentApi/payment.api'
 import {
   filterInvoiceObject,
@@ -21,18 +21,20 @@ const InvoicesHeader = () => {
   const router = useRouter()
   const { form, companies, service } = useInvoicesPaymentContext()
   const [addPayment] = useAddPaymentMutation()
-  const { data: invoiceNumber = 0 } = useGetPaymentsCountQuery({})
+  const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
+
   const handleSave = async () => {
     const invoices = await prepareInvoiceObjects(form, service)
     const filteredCompanies = companies.filter((i) => !!invoices[i.companyName])
+
     for (const company of filteredCompanies) {
       const { provider, reciever } = getPaymentProviderAndReciever(company)
       const filteredInvoices = filterInvoiceObject(
         invoices[company.companyName]
       )
+
       const response = await addPayment({
-        // TODO: use API from single invoice creation
-        invoiceNumber: invoiceNumber + companies.indexOf(company) + 1,
+        invoiceNumber: newInvoiceNumber + companies.indexOf(company),
         type: Operations.Debit,
         domain: service?.domain,
         street: service?.street,
@@ -50,13 +52,15 @@ const InvoicesHeader = () => {
       if ('data' in response) {
         form.resetFields()
         message.success(`Додано рахунок для компанії ${company?.companyName}`)
+        if(company === companies[companies.indexOf(company)]) {
+          router.push(AppRoutes.PAYMENT)
+        }
       } else {
         message.error(
           `Помилка при додаванні рахунку для компанії ${company?.companyName}`
         )
       }
     }
-    router.push(AppRoutes.PAYMENT)
   }
 
   return (
