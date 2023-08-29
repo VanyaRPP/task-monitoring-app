@@ -85,3 +85,19 @@ export function getCreditDebitPipeline(options) {
     },
   ]
 }
+
+export function getMaxInvoiceNumber() {
+  return [
+      {
+        $group: {
+          _id: null,
+          maxNumber: { $max: '$invoiceNumber' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+    ]
+}

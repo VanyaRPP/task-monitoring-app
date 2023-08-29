@@ -6,6 +6,7 @@ import {
   IGetPaymentResponse,
   IGetPaymentsCountResponse,
   IPayment,
+  IPaymentsCount,
 } from './payment.api.types'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
@@ -84,7 +85,7 @@ export const paymentApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Payment'] : []),
     }),
-    getPaymentsCount: builder.query<number, object>({
+    getPaymentsCount: builder.query<IPaymentsCount, object>({
       query: () => `spacehub/payment/count`,
       transformResponse: (response: IGetPaymentsCountResponse) => response.data,
     }),

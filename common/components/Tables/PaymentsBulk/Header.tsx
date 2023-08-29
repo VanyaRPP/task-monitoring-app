@@ -21,7 +21,7 @@ const InvoicesHeader = () => {
   const router = useRouter()
   const { form, companies, service } = useInvoicesPaymentContext()
   const [addPayment] = useAddPaymentMutation()
-  const { data: invoiceNumber = 0 } = useGetPaymentsCountQuery({})
+  const { data: invoiceNumber } = useGetPaymentsCountQuery({})
   const handleSave = async () => {
     const invoices = await prepareInvoiceObjects(form, service)
     const filteredCompanies = companies.filter((i) => !!invoices[i.companyName])
@@ -30,9 +30,28 @@ const InvoicesHeader = () => {
       const filteredInvoices = filterInvoiceObject(
         invoices[company.companyName]
       )
-      const response = await addPayment({
+
+      // eslint-disable-next-line no-console
+      console.log('res', {
         // TODO: use API from single invoice creation
-        invoiceNumber: invoiceNumber + companies.indexOf(company) + 1,
+        invoiceNumber:
+          invoiceNumber?.maxInvoiceNumber + companies.indexOf(company) + 1,
+        type: Operations.Debit,
+        domain: service?.domain,
+        street: service?.street,
+        company: company?._id,
+        monthService: service?._id,
+        invoiceCreationDate: new Date(),
+        description: '',
+        generalSum:
+          filteredInvoices.reduce((acc, val) => acc + (+val.sum || 0), 0) || 0,
+        provider,
+        reciever,
+        invoice: filteredInvoices,
+      })
+      /*const response = await addPayment({
+        // TODO: use API from single invoice creation
+        invoiceNumber: invoiceNumber?.maxInvoiceNumber + companies.indexOf(company) + 1,
         type: Operations.Debit,
         domain: service?.domain,
         street: service?.street,
@@ -50,13 +69,15 @@ const InvoicesHeader = () => {
       if ('data' in response) {
         form.resetFields()
         message.success(`Додано рахунок для компанії ${company?.companyName}`)
+        if(company === companies[companies.indexOf(company)]) {
+          router.push(AppRoutes.PAYMENT)
+        }
       } else {
         message.error(
           `Помилка при додаванні рахунку для компанії ${company?.companyName}`
         )
-      }
+      }*/
     }
-    router.push(AppRoutes.PAYMENT)
   }
 
   return (
