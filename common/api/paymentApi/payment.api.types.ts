@@ -75,12 +75,7 @@ export interface IPayer {
   _id: ObjectId | string | IUser['_id']
 }
 
-export interface IPaymentsCount {
-  count: number
-  maxInvoiceNumber: number
-}
-
-export interface IGetPaymentsCountResponse {
+export interface IGetPaymentNumberResponse {
   success: boolean
-  data: IPaymentsCount
+  data: number
 }

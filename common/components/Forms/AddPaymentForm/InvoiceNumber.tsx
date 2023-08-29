@@ -1,18 +1,17 @@
-import { useGetPaymentsCountQuery } from '@common/api/paymentApi/payment.api'
+import { useGetPaymentNumberQuery } from '@common/api/paymentApi/payment.api'
 import { Form, InputNumber } from 'antd'
 import { useEffect } from 'react'
-import s from "./style.module.scss"
 
 export default function InvoiceNumber({ form, edit }) {
-  const { data: invoiceNumber } = useGetPaymentsCountQuery(undefined, {
+  const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery(undefined, {
     skip: edit,
   })
 
   useEffect(() => {
-    if (!edit) { 
-      form.setFieldValue('invoiceNumber', invoiceNumber?.maxInvoiceNumber + 1)
+    if (!edit) {
+      form.setFieldValue('invoiceNumber', newInvoiceNumber)
     }
-  }, [invoiceNumber]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [newInvoiceNumber]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item

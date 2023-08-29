@@ -9,7 +9,7 @@ import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import { AppRoutes, Operations } from '@utils/constants'
 import {
   useAddPaymentMutation,
-  useGetPaymentsCountQuery,
+  useGetPaymentNumberQuery,
 } from '@common/api/paymentApi/payment.api'
 import {
   filterInvoiceObject,
@@ -21,10 +21,12 @@ const InvoicesHeader = () => {
   const router = useRouter()
   const { form, companies, service } = useInvoicesPaymentContext()
   const [addPayment] = useAddPaymentMutation()
-  const { data: invoiceNumber } = useGetPaymentsCountQuery({})
+  const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
+
   const handleSave = async () => {
     const invoices = await prepareInvoiceObjects(form, service)
     const filteredCompanies = companies.filter((i) => !!invoices[i.companyName])
+
     for (const company of filteredCompanies) {
       const { provider, reciever } = getPaymentProviderAndReciever(company)
       const filteredInvoices = filterInvoiceObject(
@@ -32,8 +34,7 @@ const InvoicesHeader = () => {
       )
 
       const response = await addPayment({
-        // TODO: use API from single invoice creation
-        invoiceNumber: invoiceNumber?.maxInvoiceNumber + companies.indexOf(company) + 1,
+        invoiceNumber: newInvoiceNumber + companies.indexOf(company),
         type: Operations.Debit,
         domain: service?.domain,
         street: service?.street,
