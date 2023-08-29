@@ -130,6 +130,44 @@ describe('Payments API - GET', () => {
     expect(received).toEqual(expected)
   })
 
+  it('GET payments with domainId for domainAdmin success', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const mockReq = {
+      method: 'GET',
+      query: {
+        domainId: domains[1]._id.toString(),
+      },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = parseReceived(response.data)
+    const expected = payments.filter((payment)=> payment.domain === domains[1]._id.toString())
+    console.log(expected)
+    console.log("--------------------------------")
+    console.log(payments)
+    // const expected = payments
+      // .filter((payment) => payment.domain === mockReq.query)
+      // .filter((payment) =>
+      //   domains
+      //     .find((domain) => domain._id === payment.domain)
+      //     .adminEmails.includes(users.domainAdmin.email)
+      // )
+    // expect(received).toEqual(expected)
+  })
+
   // it('load payments as GlobalAdmin by domainId - success', async () => {
   //   await mockLoginAs(users.globalAdmin)
 
