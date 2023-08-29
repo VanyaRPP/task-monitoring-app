@@ -31,25 +31,7 @@ const InvoicesHeader = () => {
         invoices[company.companyName]
       )
 
-      // eslint-disable-next-line no-console
-      console.log('res', {
-        // TODO: use API from single invoice creation
-        invoiceNumber:
-          invoiceNumber?.maxInvoiceNumber + companies.indexOf(company) + 1,
-        type: Operations.Debit,
-        domain: service?.domain,
-        street: service?.street,
-        company: company?._id,
-        monthService: service?._id,
-        invoiceCreationDate: new Date(),
-        description: '',
-        generalSum:
-          filteredInvoices.reduce((acc, val) => acc + (+val.sum || 0), 0) || 0,
-        provider,
-        reciever,
-        invoice: filteredInvoices,
-      })
-      /*const response = await addPayment({
+      const response = await addPayment({
         // TODO: use API from single invoice creation
         invoiceNumber: invoiceNumber?.maxInvoiceNumber + companies.indexOf(company) + 1,
         type: Operations.Debit,
@@ -76,7 +58,7 @@ const InvoicesHeader = () => {
         message.error(
           `Помилка при додаванні рахунку для компанії ${company?.companyName}`
         )
-      }*/
+      }
     }
   }
 
