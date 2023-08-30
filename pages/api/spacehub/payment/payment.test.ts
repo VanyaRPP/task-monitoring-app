@@ -129,12 +129,13 @@ describe('Payments API - GET', () => {
 
     expect(received).toEqual(expected)
   })
-  it("Get payments by companyID for DomainAdmin",async ()=> {
-    await  mockLoginAs(users.domainAdmin)
+
+  it("Get payments by companyID for DomainAdmin", async () => {
+    await mockLoginAs(users.domainAdmin)
 
     const mockReq = {
       method: 'GET',
-      query: {companyID: realEstates[0]._id.toString()},
+      query: { companyID: realEstates[0]._id.toString() },
     } as any
     const mockRes = {
       status: jest.fn(() => mockRes),
@@ -147,43 +148,23 @@ describe('Payments API - GET', () => {
       status: mockRes.status,
       data: mockRes.json.mock.lastCall[0].data,
     }
+
     expect(response.status).toHaveBeenCalledWith(200)
 
     const recived = parseReceived(response.data)
-    const expected = payments.filter((payment)=>
-    payment.company === realEstates[0]._id.toString())
+    const expected = payments.filter((payment) =>
+      payment.company === realEstates[0]._id.toString())
+
     expect(recived).toEqual(expected)
   })
 
-  it("GET payments by year - 2022",async ()=>{
-
-    const mockReq = {
-      method: 'GET',
-      query: {year: 2022},
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
-
-    await handler(mockReq,mockRes)
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-    const recived = parseReceived(response.data)
-      const expected = payments.filter((payment) =>
-          payment.invoiceCreationDate.toString().slice(0,4) === mockReq.year)
-  })
-
-
-  it('GET payments with domainId for domainAdmin success', async () => {
+  it('GET payments by domainId for domainAdmin', async () => {
     await mockLoginAs(users.domainAdmin)
 
     const mockReq = {
       method: 'GET',
       query: {
-        domainId: domains[1]._id.toString(),
+        domainID: domains[0]._id.toString(),
       },
     } as any
     const mockRes = {
@@ -201,18 +182,31 @@ describe('Payments API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = parseReceived(response.data)
-    const expected = payments.filter((payment)=> payment.domain === domains[1]._id.toString())
-    console.log(expected)
-    console.log("--------------------------------")
-    console.log(payments)
-    // const expected = payments
-      // .filter((payment) => payment.domain === mockReq.query)
-      // .filter((payment) =>
-      //   domains
-      //     .find((domain) => domain._id === payment.domain)
-      //     .adminEmails.includes(users.domainAdmin.email)
-      // )
-    // expect(received).toEqual(expected)
+    const expected = payments.filter((payment) => payment.domain === domains[0]._id.toString())
+
+    expect(received).toEqual(expected)
+  })
+
+  it("GET payments by year - 2022", async () => {
+    mockLoginAs(users.globalAdmin)
+
+    const mockReq = {
+      method: 'GET',
+      query: {},
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+    const recived = parseReceived(response.data)
+    // to fininsh
   })
 
   // it('load payments as GlobalAdmin by domainId - success', async () => {
