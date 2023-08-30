@@ -130,7 +130,7 @@ describe('Payments API - GET', () => {
     expect(received).toEqual(expected)
   })
 
-  it("Get payments by companyID for DomainAdmin", async () => {
+  it("Get payments by companyID for DomainAdmin - success", async () => {
     await mockLoginAs(users.domainAdmin)
 
     const mockReq = {
@@ -153,12 +153,12 @@ describe('Payments API - GET', () => {
 
     const recived = parseReceived(response.data)
     const expected = payments.filter((payment) =>
-      payment.company === realEstates[0]._id.toString())
+      payment.company === mockReq.query.companyID)
 
     expect(recived).toEqual(expected)
   })
 
-  it('GET payments by domainId for domainAdmin', async () => {
+  it('GET payments by domainId for domainAdmin - success', async () => {
     await mockLoginAs(users.domainAdmin)
 
     const mockReq = {
@@ -182,32 +182,39 @@ describe('Payments API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = parseReceived(response.data)
-    const expected = payments.filter((payment) => payment.domain === domains[0]._id.toString())
+    const expected = payments.filter((payment) =>
+      payment.domain === mockReq.query.domainID)
 
     expect(received).toEqual(expected)
   })
 
-  it("GET payments by year - 2022", async () => {
-    mockLoginAs(users.globalAdmin)
+  // FINISH TEST FOR USER AND CREATE A PR
 
-    const mockReq = {
-      method: 'GET',
-      query: {},
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
+  // it("GET payments by year", async () => {
+  //   mockLoginAs(users.user)
 
-    await handler(mockReq, mockRes)
+  //   const mockReq = {
+  //     method: 'GET',
+  //     query: { year: 2020 },
+  //   } as any
+  //   const mockRes = {
+  //     status: jest.fn(() => mockRes),
+  //     json: jest.fn(),
+  //   } as any
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-    const recived = parseReceived(response.data)
-    // to fininsh
-  })
+  //   await handler(mockReq, mockRes)
+
+  //   const response = {
+  //     status: mockRes.status,
+  //     data: mockRes.json.mock.lastCall[0].data,
+  //   }
+
+  //   expect(response.status).toHaveBeenCalledWith(200)
+
+  //   const recived = parseReceived(response.data)
+  //   const expected = payments[2];
+  //   expect(recived).toEqual(expected)
+  // })
 
   // it('load payments as GlobalAdmin by domainId - success', async () => {
   //   await mockLoginAs(users.globalAdmin)
