@@ -103,7 +103,7 @@ describe('Payments API - GET', () => {
 
     const mockReq = {
       method: 'GET',
-      query: {},
+      query: {companyId: domains[0]._id.toString()},
     } as any
     const mockRes = {
       status: jest.fn(() => mockRes),
@@ -135,7 +135,7 @@ describe('Payments API - GET', () => {
 
     const mockReq = {
       method: 'GET',
-      query: { companyID: realEstates[0]._id.toString() },
+      query: { companyIds: realEstates[0]._id.toString() },
     } as any
     const mockRes = {
       status: jest.fn(() => mockRes),
@@ -151,11 +151,11 @@ describe('Payments API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const recived = parseReceived(response.data)
+    const received = parseReceived(response.data)
     const expected = payments.filter((payment) =>
-      payment.company === mockReq.query.companyID)
+      payment.company === realEstates[0]._id.toString())
 
-    expect(recived).toEqual(expected)
+    expect(received).toEqual(expected)
   })
 
   it('GET payments by domainId for domainAdmin - success', async () => {
@@ -164,7 +164,7 @@ describe('Payments API - GET', () => {
     const mockReq = {
       method: 'GET',
       query: {
-        domainID: domains[0]._id.toString(),
+        domainIds: domains[0]._id.toString(),
       },
     } as any
     const mockRes = {
@@ -183,11 +183,44 @@ describe('Payments API - GET', () => {
 
     const received = parseReceived(response.data)
     const expected = payments.filter((payment) =>
-      payment.domain === mockReq.query.domainID)
+      payment.domain === domains[0]._id.toString())
 
+      
     expect(received).toEqual(expected)
   })
 
+  it('GET payments by domainId for User - success', async () => {
+    await mockLoginAs(users.user)
+
+    const mockReq = {
+      method: 'GET',
+      query: {
+        domainIds: domains[1]._id.toString()
+      },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = parseReceived(response.data)
+    const expected = payments.filter((payment) => {
+      const domain = domains.filter((domain) => domain.adminEmails.includes(users.user.email))[0]
+      return payment.domain === domain._id
+    })
+    expect(received).toEqual(expected)
+  })
+
+  // IF DOMAIN INCLUDES USER EMAIL - RETURN A PAYMENT BY THIS DOMAINID
   // FINISH TEST FOR USER AND CREATE A PR
 
   // it("GET payments by year", async () => {
