@@ -130,6 +130,125 @@ describe('Payments API - GET', () => {
     expect(received).toEqual(expected)
   })
 
+  it("Get payments by companyID for DomainAdmin - success", async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const mockReq = {
+      method: 'GET',
+      query: { companyIds: realEstates[0]._id.toString() },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = parseReceived(response.data)
+    const expected = payments.filter((payment) =>
+      payment.company === realEstates[0]._id.toString())
+
+    expect(received).toEqual(expected)
+  })
+
+  it('GET payments by domainId for domainAdmin - success', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const mockReq = {
+      method: 'GET',
+      query: {
+        domainIds: domains[0]._id.toString(),
+      },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = parseReceived(response.data)
+    const expected = payments.filter((payment) =>
+      payment.domain === domains[0]._id.toString())
+
+      
+    expect(received).toEqual(expected)
+  })
+
+  it('GET payments by domainId for User - success', async () => {
+    await mockLoginAs(users.user)
+
+    const mockReq = {
+      method: 'GET',
+      query: {
+        domainIds: domains[1]._id.toString()
+      },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = parseReceived(response.data)
+    const expected = payments.filter((payment) => {
+      const domain = domains.find((domain) => domain.adminEmails.includes(users.user.email))
+      return payment.domain === domain?._id
+    })
+    expect(received).toEqual(expected)
+  })
+
+  // IF DOMAIN INCLUDES USER EMAIL - RETURN A PAYMENT BY THIS DOMAINID
+  // FINISH TEST FOR USER AND CREATE A PR
+
+  // it("GET payments by year", async () => {
+  //   mockLoginAs(users.user)
+
+  //   const mockReq = {
+  //     method: 'GET',
+  //     query: { year: 2020 },
+  //   } as any
+  //   const mockRes = {
+  //     status: jest.fn(() => mockRes),
+  //     json: jest.fn(),
+  //   } as any
+
+  //   await handler(mockReq, mockRes)
+
+  //   const response = {
+  //     status: mockRes.status,
+  //     data: mockRes.json.mock.lastCall[0].data,
+  //   }
+
+  //   expect(response.status).toHaveBeenCalledWith(200)
+
+  //   const recived = parseReceived(response.data)
+  //   const expected = payments[2];
+  //   expect(recived).toEqual(expected)
+  // })
+
   // it('load payments as GlobalAdmin by domainId - success', async () => {
   //   await mockLoginAs(users.globalAdmin)
 
