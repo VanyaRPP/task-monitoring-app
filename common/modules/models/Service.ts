@@ -8,6 +8,7 @@ export interface IServiceModel {
   date: Moment
   electricityPrice: number
   waterPrice: number
+  waterPriceTotal: number
   inflicionPrice: number
   description: string
 }
@@ -19,8 +20,9 @@ export const ServiceSchema = new Schema<IServiceModel>({
   rentPrice: { type: Number, required: true, default: 0 },
   electricityPrice: { type: Number, required: true, default: 0 },
   waterPrice: { type: Number, required: true, default: 0 },
-  inflicionPrice: { type: Number, required: true, default: 0 },
-  description: { type: String, required: true },
+  waterPriceTotal: { type: Number, required: true, default: 0 },
+  inflicionPrice: { type: Number, required: false, default: 0 },
+  description: { type: String, required: false, default: '' },
 })
 
 const Service =

@@ -1,18 +1,22 @@
 import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
 import React, { useState } from 'react'
 import { AppRoutes } from '@utils/constants'
-import { Button } from 'antd'
+import { Button, Tag } from 'antd'
 import { useRouter } from 'next/router'
 import AddPaymentModal from '@common/components/AddPaymentModal'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import s from './style.module.scss'
 import { isAdminCheck } from '@utils/helpers'
 import PaymentCascader from '@common/components/UI/PaymentCascader/index'
+import PaymentsFilterTags from './PaymentsFilterTags'
 
 const PaymentCardHeader = ({
   setCurrentDateFilter,
   currentPayment,
   closeEditModal,
+  payments,
+  filters,
+  setFilters,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -40,7 +44,7 @@ const PaymentCardHeader = ({
                 className={s.title}
               >{`Оплата від користувача ${email}`}</span>
             ) : (
-              <>
+              <div className={s.firstBlock}>
                 <Button
                   type="link"
                   onClick={() => router.push(AppRoutes.PAYMENT)}
@@ -49,9 +53,16 @@ const PaymentCardHeader = ({
                   <SelectOutlined className={s.Icon} />
                 </Button>
                 {location.pathname === AppRoutes.PAYMENT && (
-                  <PaymentCascader onChange={setCurrentDateFilter} />
+                  <>
+                    <PaymentCascader onChange={setCurrentDateFilter} />
+                    <PaymentsFilterTags
+                      filters={filters}
+                      setFilters={setFilters}
+                      payments={payments}
+                    />
+                  </>
                 )}
-              </>
+              </div>
             )}
             <div>
               <Button

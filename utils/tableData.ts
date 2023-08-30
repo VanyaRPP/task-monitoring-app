@@ -43,4 +43,11 @@ export const dataSource: IPaymentTableData[] = [
     price: 0,
     sum: 0,
   },
+  {
+    id: 5,
+    name: 'waterPart',
+    amount: 0,
+    price: 0,
+    sum: 0,
+  },
 ]

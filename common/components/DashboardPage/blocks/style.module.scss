@@ -55,13 +55,14 @@
     color: #4096ff;
   }
 }
-.summ_item,.saldo {
+.summ_item,
+.saldo {
   background-color: var(--backgroundColor);
 }
-.summ_item{
+.summ_item {
   text-align: end;
 }
-.saldo{
+.saldo {
   text-align: center;
 }
 .title {
@@ -69,14 +70,10 @@
   font-weight: 400;
 }
 .noScroll {
-  height: 100vh !important;
+  // 200px to compensate header and footer heights
+  min-height: calc(100vh - 200px) !important;
 }
-.StreetsBlockContainer {
-  height: 500px !important;
-  background-color: #4096ff;
-}
-
-.Pagination{
+.Pagination {
   display: flex;
   justify-content: center;
   margin: 25px 0;

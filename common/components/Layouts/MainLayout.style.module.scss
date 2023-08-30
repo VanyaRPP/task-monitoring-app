@@ -1,48 +1,35 @@
 .Layout {
-  min-height: 100%;
+  // compensate header height
+  padding-top: 64px;
+  // compensate footer height
+  padding-bottom: 62px;
+
   overflow-x: hidden;
   overflow-y: auto;
 
-  .Container {
-    padding: 0 80px;
-    margin-top: 74px;
-    margin-bottom: 87px;
-    transition: margin 0.2s;
+  min-height: 100vh;
 
-    @media (max-width: 889px) {
-      padding: 0 25px;
+  background: var(--backgroundColor);
+
+  .Content {
+    margin: 32px 80px;
+    padding: 32px;
+
+    @media (max-width: 800px) {
+      margin: 16px 40px;
+      padding: 16px;
     }
 
-    @media (max-width: 600px) {
-      padding: 0 10px;
-      margin-top: 74px;
-      margin-left: 0 !important;
+    @media (max-width: 400px) {
+      margin: 0;
+      padding: 0;
     }
 
-    .Foreground {
-      flex-direction: column;
-      min-height: calc(100vh - 156px);
-
-      @media (max-width: 768px) {
-        min-height: calc(100vh - 146px);
-      }
-      padding: 24px;
-    }
-    // .TouchBar {
-    //   visibility: hidden;
-    // }
+    background: var(--backgroundColorPrimary);
   }
 }
 
-.Background,
-.Foreground {
+.Layout,
+.Layout .Content {
   transition: background 0.5s;
-}
-
-.Background {
-  background: var(--backgroundColor) !important;
-}
-
-.Foreground {
-  background: var(--backgroundColorPrimary) !important;
 }

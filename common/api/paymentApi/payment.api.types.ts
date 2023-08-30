@@ -14,20 +14,19 @@ export interface IPaymentField {
 }
 
 export interface IProvider {
-  name: string
-  address: string
-  bankInformation: string
+  description: string
 }
 
 export interface IReciever {
   companyName: string
   adminEmails: string[]
+  description: string
 }
 
 export interface IPayment {
   invoiceNumber: number
   type: string
-  date: Date
+  invoiceCreationDate: Date
   domain: Partial<IDomain> | string
   street: string
   company: Partial<IRealestate> | string

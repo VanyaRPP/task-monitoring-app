@@ -14,7 +14,7 @@ const PaymentTotal: FC<Props> = ({ form }) => {
   const services = formValues ?
     Object.values(formValues)
       .filter((item) => typeof item === 'object')
-      .reduce((acc, val: any) => acc + (val.sum || 0), 0)
+      .reduce((acc, val: any) => acc + (val?.sum || 0), 0)
     : 0
 
 

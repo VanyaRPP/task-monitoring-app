@@ -1,7 +1,7 @@
 import { expect } from '@jest/globals'
 import handler from '.'
 
-import { removeVersion } from '@utils/helpers'
+import { parseReceived } from '@utils/helpers'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { domains, realEstates, users } from '@utils/testData'
@@ -34,10 +34,7 @@ describe('Domains API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = removeVersion(response.data.map((domain) => domain._doc))
-    const expected = domains
-
-    expect(received).toEqual(expected)
+    expect(parseReceived(response.data)).toEqual(domains)
   })
 
   it('load domains as GlobalAdmin with limit - success', async () => {
@@ -63,10 +60,8 @@ describe('Domains API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = removeVersion(response.data.map((domain) => domain._doc))
-    const expected = domains.slice(0, limit)
-
-    expect(received).toEqual(expected)
+    const received = parseReceived(response.data)
+    expect(received).toEqual(domains.slice(0, limit))
   })
 
   it('load domains as DomainAdmin - success', async () => {
@@ -90,7 +85,7 @@ describe('Domains API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = removeVersion(response.data.map((domain) => domain._doc))
+    const received = parseReceived(response.data)
     const expected = domains.filter((domain) =>
       domain.adminEmails.includes(users.domainAdmin.email)
     )
@@ -119,7 +114,8 @@ describe('Domains API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = removeVersion(response.data.map((domain) => domain._doc))
+    const received = parseReceived(response.data)
+
     const realestates = realEstates.filter((realEstate) =>
       realEstate.adminEmails.includes(users.user.email)
     )
@@ -150,7 +146,7 @@ describe('Domains API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = removeVersion(response.data.map((domain) => domain._doc))
+    const received = parseReceived(response.data)
     const expected = [domains[0]]
 
     expect(received).toEqual(expected)
@@ -177,7 +173,7 @@ describe('Domains API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = removeVersion(response.data.map((domain) => domain._doc))
+    const received = parseReceived(response.data)
     const expected = [domains[0]]
 
     expect(received).toEqual(expected)
@@ -204,7 +200,7 @@ describe('Domains API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = removeVersion(response.data.map((domain) => domain._doc))
+    const received = parseReceived(response.data)
     const expected = [domains[0]]
 
     expect(received).toEqual(expected)

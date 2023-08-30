@@ -1,6 +1,6 @@
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { validateField } from '@common/assets/features/validators'
-import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
+import { getFormattedDate } from '@utils/helpers'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
@@ -44,17 +44,6 @@ function MonthServiceDataFetcher({ domainId, streetId, form }) {
       label="Місяць"
     >
       <Select
-        filterSort={(optionA, optionB) =>
-          (optionA?.label ?? '')
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            ?.toLowerCase()
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            .localeCompare((optionB?.label ?? '').toLowerCase())
-        }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         filterOption={(input, option) => (option?.label ?? '').includes(input)}
         options={monthsServices?.map((i) => ({
           value: i._id,

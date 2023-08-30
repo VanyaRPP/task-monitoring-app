@@ -14,18 +14,22 @@ import { ColumnProps } from 'antd/lib/table'
 import moment from 'moment'
 import { IPaymentTableData } from '@utils/tableData'
 import { ServiceType, paymentsTitle } from '@utils/constants'
-import { getName } from '@utils/helpers'
+import { getFormattedDate, getName } from '@utils/helpers'
 import { validateField } from '@common/assets/features/validators'
 import s from './style.module.scss'
-import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
 import useService from '@common/modules/hooks/useService'
 import {
+  InflicionAmountInfo,
+  OldElectricity,
+  OldWater,
   PriceElectricityField,
   PriceGarbageCollectorField,
   PriceInflicionField,
   PriceMaintainceField,
   PricePlacingField,
   PriceWaterField,
+  PriceWaterPartField,
+  WaterPartInfo,
 } from './fields/priceFields'
 import useCompany from '@common/modules/hooks/useCompany'
 import { AmountTotalAreaField } from './fields/amountFields'
@@ -43,21 +47,18 @@ interface Props {
 
 const PaymentPricesTable: FC<Props> = ({ edit }) => {
   const { paymentData, form } = usePaymentContext()
-  const domainId = Form.useWatch('domain', form) || paymentData?.domain
-  const streetId = Form.useWatch('street', form) || paymentData?.street
+
   const serviceId = Form.useWatch('service', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
-  const { company } = useCompany({ companyId, domainId, streetId, skip: edit })
-  const { service } = useService({ serviceId, domainId, streetId, skip: edit })
+  const { company } = useCompany({ companyId, skip: edit })
+  const { service } = useService({ serviceId, skip: edit })
 
   const { customDataSource, addDataSource, removeDataSource } =
     useCustomDataSource({
       paymentData,
       companyId,
       serviceId,
-      domainId,
-      streetId,
       edit,
     } as any)
 
@@ -87,7 +88,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
               <span className={s.month}>
                 ({getFormattedDate(service?.date)})
               </span>
-              {company?.servicePricePerMeter && nameRes === 'Утримання' && (
+              {!!company?.servicePricePerMeter && nameRes === 'Утримання' && (
                 <span className={s.month}> індивідуальне</span>
               )}
             </span>
@@ -101,30 +102,21 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       width: '30%',
       render: (text, record) => (
         <>
-          {record.name === ServiceType.Electricity ||
-          record.name === ServiceType.Water ? (
-            <div className={s.doubleInputs}>
-              <Form.Item
-                name={[record.name, 'lastAmount']}
-                rules={validateField('required')}
-              >
-                <InputNumber disabled={edit} className={s.input} />
-              </Form.Item>
-
-              <Form.Item
-                name={[record.name, 'amount']}
-                rules={validateField('required')}
-              >
-                <InputNumber disabled={edit} className={s.input} />
-              </Form.Item>
-            </div>
-          ) : (
-            (record.name === ServiceType.Electricity ||
-              record.name === ServiceType.Water ||
-              record.name === ServiceType.Placing ||
-              record.name === ServiceType.Maintenance) && (
-              <AmountTotalAreaField record={record} edit={edit} />
-            )
+          {record.name === ServiceType.WaterPart && (
+            <WaterPartInfo edit={edit} />
+          )}
+          {record.name === ServiceType.Inflicion && (
+            <InflicionAmountInfo edit={edit} />
+          )}
+          {record.name === ServiceType.Electricity && (
+            <OldElectricity record={record} edit={edit} />
+          )}
+          {record.name === ServiceType.Water && (
+            <OldWater record={record} edit={edit} />
+          )}
+          {(record.name === ServiceType.Placing ||
+            record.name === ServiceType.Maintenance) && (
+            <AmountTotalAreaField record={record} edit={edit} />
           )}
         </>
       ),
@@ -196,6 +188,7 @@ const fields = {
   waterPrice: PriceWaterField,
   garbageCollectorPrice: PriceGarbageCollectorField,
   inflicionPrice: PriceInflicionField,
+  waterPart: PriceWaterPartField,
 }
 
 function AddCustomField({ addDataSource }) {
@@ -307,6 +300,11 @@ function getRelationshipByRecordName(recordName) {
         valueName: 'inflicionPrice',
         testValue: recordName,
       },
+      waterPart: {
+        fieldName: 'company',
+        valueName: 'waterPart',
+        testValue: recordName,
+      },
     }[recordName] || {}
   )
 }
@@ -343,6 +341,7 @@ function SumWrapper({ record, form }) {
       }
     }
   }
+  // TODO: SOMETHING BAD HERE. THIS SHOULD BE INSIDE USEFFECT
   form.setFieldValue([record.name, 'sum'], getVal(record?.name, formFields))
   return (
     <Form.Item name={[record?.name, 'sum']}>

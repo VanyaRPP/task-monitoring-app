@@ -7,7 +7,7 @@ import {
   useDeletePaymentMutation,
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
-import { dateToDefaultFormat } from '@common/assets/features/formatDate'
+import { dateToDefaultFormat, dateToMonthYear } from '@common/assets/features/formatDate'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
@@ -102,13 +102,17 @@ const PaymentsBlock = () => {
           })),
         ]
       : []
-
+  // TODO: add Interface
   const columns: any = [
     {
-      title: 'Дата',
-      dataIndex: 'date',
-      ellipsis: true,
+      title: 'Дата створення',
+      dataIndex: 'invoiceCreationDate',
       render: dateToDefaultFormat,
+    },
+    {
+      title: 'Місяць',
+      dataIndex: 'monthService',
+      render: (monthService) => dateToMonthYear(monthService?.date),
     },
     {
       title: (
@@ -143,31 +147,10 @@ const PaymentsBlock = () => {
       dataIndex: 'description',
     },
     ...paymentsPageColumns,
-    isGlobalAdmin
-      ? {
-          title: '',
-          dataIndex: '',
-          width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
-          render: (_, payment: IExtendedPayment) => (
-            <div className={s.popconfirm}>
-              <Popconfirm
-                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                  payment?.date as unknown as string
-                )}?`}
-                onConfirm={() => handleDeletePayment(payment?._id)}
-                cancelText="Відміна"
-                disabled={deleteLoading}
-              >
-                <DeleteOutlined className={s.icon} />
-              </Popconfirm>
-            </div>
-          ),
-        }
-      : { width: '0' },
     {
+      fixed: 'right',
       title: '',
-      dataIndex: '',
-      width: router.pathname === AppRoutes.PAYMENT ? '5%' : '10%',
+      width: 50,
       render: (_, payment: IExtendedPayment) => (
         <div className={s.eyelined}>
           <Button
@@ -181,6 +164,28 @@ const PaymentsBlock = () => {
         </div>
       ),
     },
+    isGlobalAdmin
+      ? {
+          align: 'center',
+          fixed: 'right',
+          title: '',
+          width: 50,
+          render: (_, payment: IExtendedPayment) => (
+            <div className={s.popconfirm}>
+              <Popconfirm
+                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+                  payment?.invoiceCreationDate as unknown as string
+                )}?`}
+                onConfirm={() => handleDeletePayment(payment?._id)}
+                cancelText="Відміна"
+                disabled={deleteLoading}
+              >
+                <DeleteOutlined className={s.icon} />
+              </Popconfirm>
+            </div>
+          ),
+        }
+      : { width: '0' },
   ]
 
   if (isGlobalAdmin && !email) {
@@ -191,22 +196,24 @@ const PaymentsBlock = () => {
     })
   }
 
-  if (payments?.currentCompaniesCount > 1) {
-    columns.unshift({
-      title: 'Компанія',
-      dataIndex: 'company',
-      filters:
-        pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
-      render: (i) => i?.companyName,
-    })
-  }
+  columns.unshift({
+    title: 'Компанія',
+    dataIndex: 'company',
+    fixed: 'left',
+    filters:
+      pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
+    filteredValue: filters?.company || null,
+    render: (i) => i?.companyName,
+  })
 
   if (payments?.currentDomainsCount > 1) {
     columns.unshift({
       title: 'Домен',
+      fixed: 'left',
       dataIndex: 'domain',
       filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
-      render: (i) => i.name,
+      filteredValue: filters?.domain || null,
+      render: (i) => i?.name,
     })
   }
 
@@ -264,7 +271,7 @@ const PaymentsBlock = () => {
           onChange={(__, filters) => {
             setFilters(filters)
           }}
-          scroll={{ y: 800 }}
+          scroll={{ x: 1800 }}
           summary={() => (
             <Table.Summary fixed>
               <Summary />
@@ -309,6 +316,9 @@ const PaymentsBlock = () => {
           closeEditModal={() => setCurrentPayment(null)}
           setCurrentDateFilter={setCurrentDateFilter}
           currentPayment={currentPayment}
+          payments={payments}
+          filters={filters}
+          setFilters={setFilters}
         />
       }
       className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}

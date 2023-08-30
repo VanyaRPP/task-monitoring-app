@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
-import { Form, FormInstance, Input, InputNumber, Select, Button } from 'antd'
+import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
 import s from './style.module.scss'
 import { Operations, ServiceType } from '@utils/constants'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
@@ -10,7 +10,10 @@ import PaymentTotal from './PaymentTotal'
 import PaymentPricesTable from './PaymentPricesTable'
 import MonthServiceSelect from './MonthServiceSelect'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
-import { getFormattedDate } from '@common/components/DashboardPage/blocks/services'
+import moment from 'moment'
+import InvoiceNumber from './InvoiceNumber'
+import InvoiceCreationDate from './InvoiceCreationDate'
+import { getFormattedDate } from '@utils/helpers'
 
 interface Props {
   form: FormInstance<any>
@@ -61,7 +64,7 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
       ) : (
         <CompanySelect form={form} />
       )}
-
+      {/* TODO: disable, while we don't have company  */}
       <Form.Item
         name="operation"
         label="Тип оплати"
@@ -80,6 +83,9 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
           </Select.Option>
         </Select>
       </Form.Item>
+
+      <InvoiceNumber form={form} edit={edit} />
+      <InvoiceCreationDate edit={edit} />
 
       <Form.Item
         shouldUpdate={(prevValues, currentValues) =>
@@ -115,10 +121,7 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
             </>
           ) : (
             <>
-              <PaymentPricesTable
-                edit={edit}
-                form={form}
-              />
+              <PaymentPricesTable edit={edit} form={form} />
               <PaymentTotal form={form} />
             </>
           )
@@ -130,6 +133,7 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
 
 function useInitialValues() {
   const { paymentData } = usePaymentContext()
+
   const invoices = {
     maintenance: paymentData?.invoice.find(
       (item) => item?.type === ServiceType.Maintenance
@@ -143,6 +147,9 @@ function useInitialValues() {
     water: paymentData?.invoice.find(
       (item) => item?.type === ServiceType.Water
     ),
+    waterPart: paymentData?.invoice.find(
+      (item) => item?.type === ServiceType.WaterPart
+    ),
     garbageCollector: paymentData?.invoice.find(
       (item) => item?.type === ServiceType.GarbageCollector
     ),
@@ -153,12 +160,14 @@ function useInitialValues() {
       (item) => item?.type === ServiceType.Custom
     ),
   }
+  const customFields = invoices.custom?.reduce((acc, item) => {
+    acc[item.name] = { price: item.price }
+    return acc
+  }, {})
 
-  const customFields = {}
-  invoices.custom?.forEach(item => {
-    customFields[item.name] = { price: item.price };
-  });
-
+  // TODO: add useEffect || useCallback ?
+  // currently we have few renders
+  // we need it only once. on didmount (first render)
   const initialValues = {
     domain: paymentData?.domain?.name,
     street:
@@ -170,6 +179,8 @@ function useInitialValues() {
     credit: paymentData?.credit,
     generalSum: paymentData?.paymentData,
     debit: paymentData?.debit,
+    invoiceNumber: paymentData?.invoiceNumber,
+    invoiceCreationDate: moment(paymentData?.invoiceCreationDate),
     operation: paymentData ? paymentData.type : Operations.Credit,
     [ServiceType.Maintenance]: {
       amount: invoices.maintenance?.amount,
@@ -188,6 +199,9 @@ function useInitialValues() {
       lastAmount: invoices.water?.lastAmount,
       amount: invoices.water?.amount,
       price: invoices.water?.price,
+    },
+    [ServiceType.WaterPart]: {
+      price: invoices.waterPart?.price,
     },
     [ServiceType.GarbageCollector]: {
       price: invoices.garbageCollector?.price,

@@ -4,12 +4,7 @@ import handler from '.'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { domains, payments, realEstates, users } from '@utils/testData'
-import {
-  getPlainJsObjectFromMongoose,
-  composeFunctions,
-  removeVersion,
-  unpopulate,
-} from '@utils/helpers'
+import { parseReceived } from '@utils/helpers'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -39,11 +34,7 @@ describe('Payments API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = composeFunctions(response.data, [
-      getPlainJsObjectFromMongoose,
-      unpopulate,
-      removeVersion,
-    ])
+    const received = parseReceived(response.data)
 
     expect(received).toEqual(payments)
   })
@@ -70,11 +61,7 @@ describe('Payments API - GET', () => {
     }
 
     expect(response.status).toHaveBeenCalledWith(200)
-    const received = composeFunctions(response.data, [
-      getPlainJsObjectFromMongoose,
-      unpopulate,
-      removeVersion,
-    ])
+    const received = parseReceived(response.data)
 
     expect(received).toEqual(payments.slice(0, limit))
   })
@@ -100,18 +87,13 @@ describe('Payments API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = composeFunctions(response.data, [
-      getPlainJsObjectFromMongoose,
-      unpopulate,
-      removeVersion,
-    ])
+    const received = parseReceived(response.data)
 
-    const expected = payments
-      .filter((payment) =>
-        domains
-          .find((domain) => domain._id === payment.domain)
-          .adminEmails.includes(users.domainAdmin.email)
-      )
+    const expected = payments.filter((payment) =>
+      domains
+        .find((domain) => domain._id === payment.domain)
+        .adminEmails.includes(users.domainAdmin.email)
+    )
 
     expect(received).toEqual(expected)
   })
@@ -137,18 +119,13 @@ describe('Payments API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
 
-    const received = composeFunctions(response.data, [
-      getPlainJsObjectFromMongoose,
-      unpopulate,
-      removeVersion,
-    ])
+    const received = parseReceived(response.data)
 
-    const expected = payments
-      .filter((payment) =>
-        realEstates
-          .find((realEstate) => realEstate._id === payment.company)
-          .adminEmails.includes(users.user.email)
-      )
+    const expected = payments.filter((payment) =>
+      realEstates
+        .find((realEstate) => realEstate._id === payment.company)
+        .adminEmails.includes(users.user.email)
+    )
 
     expect(received).toEqual(expected)
   })
@@ -187,5 +164,27 @@ describe('Payments API - GET', () => {
 })
 
 describe('Payments API - POST', () => {
-  // TODO: POST tests
+  it('POST payment as Global Admin - success', async () => {
+    await mockLoginAs(users.globalAdmin)
+    const { _id, ...data } = payments[0]
+
+    const mockReq = {
+      method: 'POST',
+      body: data,
+    } as any
+
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.data,
+    }
+
+    expect(response.status).toHaveBeenLastCalledWith(200)
+  })
 })

@@ -1,27 +1,16 @@
-import {
-  useAddPaymentMutation,
-  useGetPaymentsCountQuery,
-} from '@common/api/paymentApi/payment.api'
+import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
 import {
   IExtendedPayment,
-  IProvider,
-  IReciever,
 } from '@common/api/paymentApi/payment.api.types'
 import { Form, message, Modal, Tabs, TabsProps } from 'antd'
-import React, {
-  FC,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import React, { FC, createContext, useContext, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
 import { Operations } from '@utils/constants'
 import { FormInstance } from 'antd/es/form/Form'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
-import { filterInvoiceObject } from '@utils/helpers'
+import { filterInvoiceObject, getPaymentProviderAndReciever } from '@utils/helpers'
+import useCompany from '@common/modules/hooks/useCompany'
 
 interface Props {
   closeModal: VoidFunction
@@ -41,54 +30,27 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
   const [form] = Form.useForm()
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const { data: count = 0 } = useGetPaymentsCountQuery(undefined, {
-    skip: edit,
-  })
-  const { data: realEstate } = useGetAllRealEstateQuery(
-    { domainId: currPayment?.domain as string, streetId: currPayment?.street },
-    { skip: !currPayment?.street }
-  )
 
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, edit)
   )
+  const companyId = Form.useWatch('company', form)
+  const { company } = useCompany({ companyId, skip: !companyId || edit })
 
-  const provider: IProvider = realEstate?.length && {
-    name: realEstate[0]?.domain?.name,
-    address: realEstate[0]?.street,
-    bankInformation: realEstate[0]?.domain?.bankInformation,
-  }
-
-  const reciever: IReciever = realEstate?.length && {
-    companyName: realEstate[0]?.companyName,
-    adminEmails: realEstate[0]?.adminEmails,
-  }
-
-  useEffect(() => {
-    if (currPayment?.street) {
-      setCurrPayment({
-        ...currPayment,
-        provider,
-        reciever,
-        invoiceNumber: count + 1,
-      })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currPayment?.street])
+  const { provider, reciever } = getPaymentProviderAndReciever(company)
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
     const filteredInvoice = filterInvoiceObject(formData)
-
     const response = await addPayment({
-      invoiceNumber: count + 1,
+      invoiceNumber: formData.invoiceNumber,
       type: formData.credit ? Operations.Credit : Operations.Debit,
-      date: new Date(),
       domain: formData.domain,
       street: formData.street,
       company: formData.company,
       monthService: formData.monthService,
-      description: formData.description ? formData.description : '',
+      invoiceCreationDate: formData.invoiceCreationDate,
+      description: formData.description || '',
       generalSum: filteredInvoice?.reduce((acc, val) => acc + val.sum, 0) || 0,
       provider,
       reciever,
@@ -140,7 +102,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
                   if (values.operation === Operations.Credit) {
                     handleSubmit()
                   } else {
-                    setCurrPayment(values)
+                    setCurrPayment({ ...values, provider, reciever })
                     setActiveTabKey('2')
                   }
                 })

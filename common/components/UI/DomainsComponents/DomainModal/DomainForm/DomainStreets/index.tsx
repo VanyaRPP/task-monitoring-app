@@ -6,8 +6,6 @@ import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
 const DomainStreets: React.FC = () => {
   const { data: streets, isLoading } = useGetAllStreetsQuery({})
 
-  console.log(streets)
-
   return (
     <Form.Item
       name="streets"

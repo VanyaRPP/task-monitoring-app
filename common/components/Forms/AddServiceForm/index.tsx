@@ -1,22 +1,44 @@
-import React, { FC } from 'react'
+import React, { FC, useEffect } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, InputNumber } from 'antd'
 import { DatePicker } from 'antd'
 import s from './style.module.scss'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
+import { IExtendedService } from '@common/api/serviceApi/service.api.types'
+import moment from 'moment'
 
 interface Props {
   form: FormInstance<any>
+  edit: boolean
+  currentService: IExtendedService
 }
 
-const AddServiceForm: FC<Props> = ({ form }) => {
+const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
   const { MonthPicker } = DatePicker
+  const initialValues = useInitialValues(currentService)
 
   return (
-    <Form form={form} layout="vertical" className={s.Form}>
-      <DomainsSelect form={form} />
-      <AddressesSelect form={form} />
+    <Form
+      initialValues={initialValues}
+      form={form}
+      layout="vertical"
+      className={s.Form}
+    >
+      {edit ? (
+        <Form.Item name="domain" label="Домен">
+          <Input disabled />
+        </Form.Item>
+      ) : (
+        <DomainsSelect form={form} />
+      )}
+      {edit ? (
+        <Form.Item name="street" label="Адреса">
+          <Input disabled />
+        </Form.Item>
+      ) : (
+        <AddressesSelect form={form} />
+      )}
       <Form.Item
         name="date"
         label="Місяць та рік"
@@ -50,17 +72,16 @@ const AddServiceForm: FC<Props> = ({ form }) => {
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
-        name="inflicionPrice"
-        label="Індекс інфляції"
+        name="waterPriceTotal"
+        label="Всього водопостачання"
         rules={validateField('required')}
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item
-        name="description"
-        label="Опис"
-        rules={validateField('required')}
-      >
+      <Form.Item name="inflicionPrice" label="Індекс інфляції">
+        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+      </Form.Item>
+      <Form.Item name="description" label="Опис">
         <Input.TextArea
           placeholder="Введіть опис"
           maxLength={256}
@@ -69,6 +90,26 @@ const AddServiceForm: FC<Props> = ({ form }) => {
       </Form.Item>
     </Form>
   )
+}
+
+function useInitialValues(currentService) {
+  // TODO: add useEffect || useCallback ?
+  // currently we have few renders
+  // we need it only once. on didmount (first render)
+  const initialValues = {
+    domain: currentService?.domain?.name,
+    street:
+      currentService?.street &&
+      `${currentService.street.address} (м. ${currentService.street.city})`,
+    date: moment(currentService?.date),
+    electricityPrice: currentService?.electricityPrice,
+    inflicionPrice: currentService?.inflicionPrice,
+    rentPrice: currentService?.rentPrice,
+    waterPrice: currentService?.waterPrice,
+    description: currentService?.description,
+    waterPriceTotal: currentService?.waterPriceTotal,
+  }
+  return initialValues
 }
 
 export default AddServiceForm

@@ -5,7 +5,7 @@ import RealEstate from '@common/modules/models/RealEstate'
 import initMiddleware from '@common/lib/initMiddleware'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import Payment from '@common/modules/models/Payment'
-import start, { Data } from '@pages/api/api.config'
+import start, { PaymentData } from '@pages/api/api.config'
 import { getPaymentOptions } from '@utils/helpers'
 import Domain from '@common/modules/models/Domain'
 import { quarters } from '@utils/constants'
@@ -65,7 +65,7 @@ const postValidateBody = initMiddleware(
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse<PaymentData>
 ) {
   switch (req.method) {
     case 'GET':
@@ -117,7 +117,7 @@ export default async function handler(
 
         const payments = await (Payment as any)
           .find(options)
-          .sort({ date: -1 })
+          .sort({ invoiceCreationDate: -1 })
           .skip(+skip)
           .limit(+limit)
           .populate({ path: 'company', select: '_id companyName' })
@@ -142,9 +142,6 @@ export default async function handler(
         const totalPayments = await Payment.aggregate(creditDebitPipeline)
 
         return res.status(200).json({
-          // TODO: update Interface
-          /* eslint-disable @typescript-eslint/ban-ts-comment */
-          // @ts-ignore
           currentCompaniesCount: distinctCompanies.length,
           currentDomainsCount: distinctDomains.length,
           domainsFilter: distinctDomains?.map(({ domainDetails }) => ({

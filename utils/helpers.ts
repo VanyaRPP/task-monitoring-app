@@ -5,6 +5,7 @@ import { Roles, ServiceType } from './constants'
 import { PaymentOptions } from './types'
 import moment from 'moment'
 import 'moment/locale/uk'
+import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 
 export const firstTextToUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
@@ -80,124 +81,36 @@ export const getName = (name, obj) => {
   return key
 }
 
-export function numberToTextNumber(number) {
-  const k = [
-      'одна тисяча',
-      'дві тисячі',
-      'три тисячі',
-      'чотири тисячі',
-      "п'ять тисяч",
-      'шість тисяч',
-      'сім тисяч',
-      'вісім тисяч',
-      "дев'ять тисяч",
-    ],
-    h = [
-      'сто',
-      'двісті',
-      'триста',
-      'чотириста',
-      "п'ятсот",
-      'шість сотень',
-      'сімсот',
-      'вісімсот',
-      "дев'ятсот",
-    ],
-    t = [
-      '',
-      'двадцять',
-      'тридцять',
-      'сорок',
-      "п'ятдесят",
-      'шістдесят',
-      'сімдесят',
-      'вісімдесят',
-      "дев'яносто",
-    ],
-    o = [
-      'один',
-      'два',
-      'три',
-      'чотири',
-      "п'ять",
-      'шість',
-      'сім',
-      'вісім',
-      "дев'ять",
-    ],
-    p = [
-      'одиннадцять',
-      'дванадцять',
-      'тринадцять',
-      'чотирнадцять',
-      "п'ятнадцять",
-      'шістнадцять',
-      'сімнадцять',
-      'вісімнадцять',
-      "де'ятнадцять",
-    ]
-
-  const str = number.toString()
-  let out = ''
-  if (str.length == 1) return o[number - 1]
-  else if (str.length == 2) {
-    if (str[0] == 1) out = p[parseInt(str[1]) - 1]
-    else
-      out =
-        t[parseInt(str[0]) - 1] +
-        (str[1] != '0' ? ' ' + o[parseInt(str[1]) - 1] : '')
-  } else if (str.length == 3) {
-    if (str[1] == 1)
-      out =
-        h[parseInt(str[0]) - 1] +
-        (str[1] != '0' ? ' ' + p[parseInt(str[2]) - 1] : '')
-    else
-      out =
-        h[parseInt(str[0]) - 1] +
-        (str[1] != '0' ? ' ' + t[parseInt(str[1]) - 1] : '') +
-        (str[2] != '0' ? ' ' + o[parseInt(str[2]) - 1] : '')
-  } else if (str.length == 4) {
-    if (str[2] == 1)
-      out =
-        k[parseInt(str[0]) - 1] +
-        (str[1] != '0' ? ' ' + h[parseInt(str[1]) - 1] : '') +
-        (str[2] != '0' ? ' ' + p[parseInt(str[3]) - 1] : '')
-    else
-      out =
-        k[parseInt(str[0]) - 1] +
-        (str[1] != '0' ? ' ' + h[parseInt(str[1]) - 1] : '') +
-        (str[2] != '0' ? ' ' + t[parseInt(str[2]) - 1] : '') +
-        (str[3] != '0' ? ' ' + o[parseInt(str[3]) - 1] : '')
-  }
-
-  const arr = out.split('')
-  arr[0] = typeof arr?.[0] === 'string' ? arr[0].toUpperCase() : ''
-  out = arr.join('')
-  return out
-}
-
-export const isAdminCheck = (roles) => {
+export const isAdminCheck = (roles?: string[]): boolean => {
   return [Roles.GLOBAL_ADMIN, Roles.DOMAIN_ADMIN].some((role) =>
     roles?.includes(role)
   )
 }
 
-export function getPlainJsObjectFromMongoose(dataArray) { 
-  return dataArray.map(doc => {
-    const plainObject = {};
-    
+export function getPlainJsObjectFromMongoose(dataArray) {
+  return dataArray.map((doc) => {
+    const plainObject = {}
+
     for (const key in doc._doc) {
       if (doc._doc.hasOwnProperty(key)) {
-        plainObject[key] = doc._doc[key];
+        plainObject[key] = doc._doc[key]
       }
     }
-    
-    return plainObject;
-  });
+
+    return plainObject
+  })
 }
 
 export function composeFunctions(input, functions) {
-  return functions.reduce((result, func) => func(result), input);
+  return functions.reduce((result, func) => func(result), input)
+}
+
+export function parseReceived(data) {
+  return composeFunctions(data, [
+    getPlainJsObjectFromMongoose,
+    unpopulate,
+    removeVersion,
+  ])
 }
 
 /**
@@ -235,12 +148,12 @@ export const unpopulate = (arr: any[]): any[] => {
 }
 
 /**
- * Переводить `Date` в `string` місяця на українській і з великої літери
- * @param {Date} date дата
+ * Переводить номер місяця в його назву на українській і з великої літери
+ * @param {number} index порядковий номер місяця
  * @returns форматований місяць
  */
-export const DateToFormattedMonth = (date?: Date): string => {
-  const month = moment(date).locale('uk').format('MMMM')
+export const NumberToFormattedMonth = (index?: number): string => {
+  const month = moment().month(index).locale('uk').format('MMMM')
   return month[0].toUpperCase() + month.slice(1)
 }
 
@@ -264,4 +177,26 @@ export function filterInvoiceObject(obj) {
   }
 
   return filtered
+}
+
+export const renderCurrency = (number: number): string =>
+  number ? new Intl.NumberFormat('en-EN').format(number) : '-'
+
+export const getFormattedDate = (data: Date): string => {
+  if (data) {
+    return firstTextToUpperCase(moment(data).format('MMMM'))
+  }
+}
+
+export const getPaymentProviderAndReciever = (company) => {
+  const provider: IProvider = company && {
+    description: company?.domain?.description || '',
+  }
+  const reciever: IReciever = company && {
+    companyName: company?.companyName,
+    adminEmails: company?.adminEmails,
+    description: company?.description,
+  }
+
+  return { provider, reciever }
 }

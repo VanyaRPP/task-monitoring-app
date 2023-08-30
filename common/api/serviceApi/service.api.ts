@@ -17,12 +17,18 @@ export const serviceApi = createApi({
   endpoints: (builder) => ({
     getAllServices: builder.query<
       IExtendedService[],
-      { limit?: number; userId?: string; domainId?: string; streetId?: string }
+      {
+        limit?: number
+        userId?: string
+        domainId?: string
+        streetId?: string
+        serviceId?: string
+      }
     >({
-      query: ({ limit, userId, domainId, streetId }) => {
+      query: ({ limit, userId, domainId, streetId, serviceId }) => {
         return {
           url: `service`,
-          params: { limit, userId, domainId, streetId },
+          params: { limit, userId, domainId, streetId, serviceId },
         }
       },
       providesTags: (response) =>
@@ -61,6 +67,17 @@ export const serviceApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Service'] : []),
     }),
+    editService: builder.mutation<IExtendedService, Partial<IExtendedService>>({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `service/${_id}`,
+          method: 'PATCH',
+          body: body,
+        }
+      },
+      invalidatesTags: (response) => (response ? ['Service'] : []),
+    }),
   }),
 })
 
@@ -69,4 +86,5 @@ export const {
   useGetAllServicesQuery,
   useGetServicesAddressQuery,
   useDeleteServiceMutation,
+  useEditServiceMutation,
 } = serviceApi
