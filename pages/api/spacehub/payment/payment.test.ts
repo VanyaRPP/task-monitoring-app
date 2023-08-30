@@ -103,7 +103,7 @@ describe('Payments API - GET', () => {
 
     const mockReq = {
       method: 'GET',
-      query: {companyId: domains[0]._id.toString()},
+      query: {},
     } as any
     const mockRes = {
       status: jest.fn(() => mockRes),
@@ -214,8 +214,8 @@ describe('Payments API - GET', () => {
 
     const received = parseReceived(response.data)
     const expected = payments.filter((payment) => {
-      const domain = domains.filter((domain) => domain.adminEmails.includes(users.user.email))[0]
-      return payment.domain === domain._id
+      const domain = domains.find((domain) => domain.adminEmails.includes(users.user.email))
+      return payment.domain === domain?._id
     })
     expect(received).toEqual(expected)
   })
