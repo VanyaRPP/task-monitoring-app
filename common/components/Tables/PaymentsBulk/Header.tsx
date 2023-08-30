@@ -9,54 +9,45 @@ import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import { AppRoutes, Operations } from '@utils/constants'
 import {
   useAddPaymentMutation,
-  useGetPaymentsCountQuery,
+  useGetPaymentNumberQuery,
 } from '@common/api/paymentApi/payment.api'
 import {
   filterInvoiceObject,
   getPaymentProviderAndReciever,
 } from '@utils/helpers'
 import { IExtendedService } from '@common/api/serviceApi/service.api.types'
+import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 
 const InvoicesHeader = () => {
   const router = useRouter()
   const { form, companies, service } = useInvoicesPaymentContext()
   const [addPayment] = useAddPaymentMutation()
-  const { data: invoiceNumber = 0 } = useGetPaymentsCountQuery({})
+  const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
+
   const handleSave = async () => {
-    const invoices = await prepareInvoiceObjects(form, service)
-    const filteredCompanies = companies.filter((i) => !!invoices[i.companyName])
-    for (const company of filteredCompanies) {
-      const { provider, reciever } = getPaymentProviderAndReciever(company)
-      const filteredInvoices = filterInvoiceObject(
-        invoices[company.companyName]
-      )
-      const response = await addPayment({
-        // TODO: use API from single invoice creation
-        invoiceNumber: invoiceNumber + companies.indexOf(company) + 1,
-        type: Operations.Debit,
-        domain: service?.domain,
-        street: service?.street,
-        company: company?._id,
-        monthService: service?._id,
-        invoiceCreationDate: new Date(),
-        description: '',
-        generalSum:
-          filteredInvoices.reduce((acc, val) => acc + (+val.sum || 0), 0) || 0,
-        provider,
-        reciever,
-        invoice: filteredInvoices,
+    const invoices = await prepareInvoiceObjects(
+      form,
+      service,
+      companies,
+      newInvoiceNumber
+    )
+
+    const promises = invoices.map(addPayment)
+    await Promise.all(promises).then((responses) => {
+      const allSuccessful = responses.every((response) => response.data.success)
+
+      responses.forEach((response) => {
+        if (response.data.success) {
+          message.success(
+            `Додано рахунок для компанії ${response.data.data.reciever.companyName}`
+          )
+        } else {
+          message.error(`Помилка при додаванні рахунку для компанії`)
+        }
       })
 
-      if ('data' in response) {
-        form.resetFields()
-        message.success(`Додано рахунок для компанії ${company?.companyName}`)
-      } else {
-        message.error(
-          `Помилка при додаванні рахунку для компанії ${company?.companyName}`
-        )
-      }
-    }
-    router.push(AppRoutes.PAYMENT)
+      if (allSuccessful) router.push(AppRoutes.PAYMENT)
+    })
   }
 
   return (
@@ -132,12 +123,20 @@ export default InvoicesHeader
 
 const prepareInvoiceObjects = async (
   form: FormInstance,
-  service: IExtendedService
+  service: IExtendedService,
+  companies: IExtendedRealestate[],
+  newInvoiceNumber: number
 ): Promise<any> => {
   const values = await form.validateFields()
-  return Object.keys(values.companies).reduce((acc, key) => {
+
+  return Object.keys(values.companies).map((key, index) => {
     const invoice = values.companies[key]
-    acc[key] = {
+    const company = companies.find(
+      (company) => company.companyName === values.companies[key].companyName
+    )
+    const { provider, reciever } = getPaymentProviderAndReciever(company)
+
+    const filteredInvoice = filterInvoiceObject({
       maintenancePrice: {
         amount: invoice.totalArea,
         ...invoice.maintenancePrice,
@@ -165,7 +164,21 @@ const prepareInvoiceObjects = async (
         price: invoice.inflicionPrice,
         sum: invoice.inflicionPrice,
       },
+    })
+    return {
+      invoiceNumber: newInvoiceNumber + index,
+      type: Operations.Debit,
+      domain: service?.domain,
+      street: service?.street,
+      company: company?._id,
+      monthService: service?._id,
+      invoiceCreationDate: new Date(),
+      description: '',
+      generalSum:
+        filteredInvoice.reduce((acc, val) => acc + (+val.sum || 0), 0) || 0,
+      provider,
+      reciever,
+      invoice: filteredInvoice,
     }
-    return acc
-  }, {})
+  })
 }

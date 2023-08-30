@@ -112,7 +112,7 @@ const PaymentsBlock = () => {
     {
       title: 'Місяць',
       dataIndex: 'monthService',
-      render: (monthService) => dateToMonthYear(monthService?.date),
+      render: (monthService, obj) => dateToMonthYear(monthService?.date || obj.invoiceCreationDate),
     },
     {
       title: (
