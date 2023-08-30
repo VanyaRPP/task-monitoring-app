@@ -9,6 +9,7 @@ import { filterInvoiceObject, getFormattedDate } from '@utils/helpers'
 import numberToTextNumber from '@utils/numberToText'
 import useService from '@common/modules/hooks/useService'
 import moment from 'moment'
+import { ServiceType } from '@utils/constants'
 
 interface Props {
   currPayment: IExtendedPayment
@@ -38,17 +39,17 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     skip: !!paymentData,
   })
 
-  const date = getFormattedDate(
-    paymentData ? paymentData?.monthService?.date : service?.date
-  )
-
   const dataToMap = paymentData
     ? newData?.invoice
     : filterInvoiceObject(newData)
 
   const dataSourcePreview: DataType[] = dataToMap.map((item, index) => ({
     Кількість: item.lastAmount ? item.amount - item.lastAmount : item.amount,
-    Назва: `${fieldNames[item.type] || item.name} (${date})`,
+    Назва: `${fieldNames[item.type] || item.name} ${getDispalyedDate(
+      paymentData,
+      service?.date,
+      item.type
+    )}`,
     Ціна: +item.price,
     Сума: +item.sum,
     id: index + 1,
@@ -202,6 +203,16 @@ const fieldNames = {
   electricityPrice: 'За електропостачання',
   garbageCollectorPrice: 'За вивіз ТПВ',
   inflicionPrice: 'Індекс інфляції',
+}
+
+// TODO: move to helper
+export function getDispalyedDate(paymentData, serviceDate, itemType) {
+  const date = getFormattedDate(
+    paymentData
+      ? paymentData?.monthService?.date || paymentData.invoiceCreationDate
+      : serviceDate
+  )
+  return itemType !== ServiceType.Inflicion && date ? `(${date})` : ''
 }
 
 export default ReceiptForm
