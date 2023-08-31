@@ -1,47 +1,65 @@
-import { useAddDomainMutation } from '@common/api/domainApi/domain.api'
+import {
+  useAddDomainMutation,
+  useEditDomainMutation,
+} from '@common/api/domainApi/domain.api'
 import { Form, Modal, message } from 'antd'
 import React, { FC } from 'react'
-import { IDomainModel } from '@common/api/domainApi/domain.api.types'
+import {
+  IDomainModel,
+  IExtendedDomain,
+} from '@common/api/domainApi/domain.api.types'
 import DomainForm from './DomainForm'
 
 interface Props {
-  isModalOpen: boolean
+  currentDomain: IExtendedDomain
   closeModal: VoidFunction
 }
 
-const DomainModal: FC<Props> = ({ isModalOpen, closeModal }) => {
+const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
   const [form] = Form.useForm()
   const [addDomainEstate] = useAddDomainMutation()
+  const [editDomain] = useEditDomainMutation()
 
   const handleSubmit = async () => {
     const formData: IDomainModel = await form.validateFields()
 
-    const response = await addDomainEstate({
+    const domainData = {
       name: formData.name,
       adminEmails: formData.adminEmails,
-      streets: formData.streets,
+      streets: formData.streets.some((i: any) => i.value)
+        ? formData.streets.map((i: any) => i.value)
+        : formData.streets,
       description: formData.description,
-    })
+    }
+
+    const response = currentDomain
+      ? await editDomain({
+          _id: currentDomain?._id,
+          ...domainData,
+        })
+      : await addDomainEstate(domainData)
 
     if ('data' in response) {
       form.resetFields()
       closeModal()
-      message.success('Додано')
+      const action = currentDomain ? 'Збережено' : 'Додано'
+      message.success(action)
     } else {
-      message.error('Помилка при додаванні')
+      const action = currentDomain ? 'збереженні' : 'додаванні'
+      message.error(`Помилка при ${action} домену`)
     }
   }
 
   return (
     <Modal
-      open={isModalOpen}
+      open={true}
       title={'Домени'}
       onOk={handleSubmit}
       onCancel={closeModal}
-      okText={'Додати'}
+      okText={currentDomain ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
     >
-      <DomainForm form={form} />
+      <DomainForm form={form} currentDomain={currentDomain} />
     </Modal>
   )
 }
