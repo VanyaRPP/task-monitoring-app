@@ -25,6 +25,8 @@ interface Props {
 const AddPaymentForm: FC<Props> = ({ edit }) => {
   const { form } = usePaymentContext()
   const initialValues = useInitialValues()
+  const companyId = Form.useWatch('company', form)
+  const serviceId = Form.useWatch('service', form)
 
   return (
     <Form
@@ -121,7 +123,7 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
             </>
           ) : (
             <>
-              <PaymentPricesTable edit={edit} form={form} />
+              <PaymentPricesTable key={companyId + serviceId} edit={edit} form={form} />
               <PaymentTotal form={form} />
             </>
           )
