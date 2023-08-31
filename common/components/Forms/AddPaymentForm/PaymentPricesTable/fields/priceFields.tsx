@@ -170,6 +170,8 @@ export function PriceGarbageCollectorField({ record, edit }) {
   useEffect(() => {
     if (company?._id && company?.garbageCollector) {
       form.setFieldValue(fieldName, company.garbageCollector)
+    } else {
+      form.setFieldValue(fieldName, null)
     }
   }, [company?._id, company?.garbageCollector]) //eslint-disable-line react-hooks/exhaustive-deps
 
@@ -201,6 +203,8 @@ export function PriceInflicionField({ record, edit }) {
       const percent = service?.inflicionPrice - 100
       const inflicionAmount = ((rentPrice * percent) / 100).toFixed(2)
       form.setFieldValue(fieldName, inflicionAmount)
+    } else {
+      form.setFieldValue(fieldName, null)
     }
   }, [service?._id, service?.inflicionPrice, companyId]) //eslint-disable-line react-hooks/exhaustive-deps
 
@@ -228,6 +232,8 @@ export function PriceWaterPartField({ record, edit }) {
         fieldName,
         ((company.waterPart / 100) * service?.waterPriceTotal).toFixed(2)
       )
+    } else {
+      form.setFieldValue(fieldName, null)
     }
   }, [service?._id, company?._id]) //eslint-disable-line react-hooks/exhaustive-deps
 
