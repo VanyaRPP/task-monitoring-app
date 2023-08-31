@@ -99,7 +99,7 @@ function FormAttributeForSingle({
       form.setFieldValue(lastAmountName, value)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value])
+  }, [value, companyId])
 
   return (
     <div className={s.doubleInputs}>
@@ -120,6 +120,7 @@ export function PriceElectricityField({ record, edit }) {
 
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
+    const companyId = Form.useWatch('company', form) || paymentData?.company
 
   const { service } = useService({ serviceId, skip: edit })
 
@@ -127,7 +128,7 @@ export function PriceElectricityField({ record, edit }) {
     if (service?._id && service?.electricityPrice) {
       form.setFieldValue(fieldName, service.electricityPrice)
     }
-  }, [service?._id, service?.electricityPrice]) //eslint-disable-line react-hooks/exhaustive-deps
+  }, [service?._id, service?.electricityPrice, companyId]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
@@ -142,6 +143,7 @@ export function PriceWaterField({ record, edit }) {
 
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
+    const companyId = Form.useWatch('company', form) || paymentData?.company
 
   const { service } = useService({ serviceId, skip: edit })
 
@@ -149,7 +151,7 @@ export function PriceWaterField({ record, edit }) {
     if ((service?._id, service?.waterPrice)) {
       form.setFieldValue(fieldName, service.waterPrice)
     }
-  }, [service?._id, service?.waterPrice]) //eslint-disable-line react-hooks/exhaustive-deps
+  }, [service?._id, service?.waterPrice, companyId]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
@@ -200,7 +202,7 @@ export function PriceInflicionField({ record, edit }) {
       const inflicionAmount = ((rentPrice * percent) / 100).toFixed(2)
       form.setFieldValue(fieldName, inflicionAmount)
     }
-  }, [service?._id, service?.inflicionPrice]) //eslint-disable-line react-hooks/exhaustive-deps
+  }, [service?._id, service?.inflicionPrice, companyId]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
