@@ -11,14 +11,16 @@ import {
 } from 'antd'
 import { FC, useEffect, useState } from 'react'
 import { ColumnProps } from 'antd/lib/table'
-import moment from 'moment'
 import { IPaymentTableData } from '@utils/tableData'
 import { ServiceType, paymentsTitle } from '@utils/constants'
-import { getFormattedDate, getName } from '@utils/helpers'
+import { getName } from '@utils/helpers'
 import { validateField } from '@common/assets/features/validators'
 import s from './style.module.scss'
 import useService from '@common/modules/hooks/useService'
 import {
+  InflicionAmountInfo,
+  OldElectricity,
+  OldWater,
   PriceElectricityField,
   PriceGarbageCollectorField,
   PriceInflicionField,
@@ -26,6 +28,7 @@ import {
   PricePlacingField,
   PriceWaterField,
   PriceWaterPartField,
+  WaterPartInfo,
 } from './fields/priceFields'
 import useCompany from '@common/modules/hooks/useCompany'
 import { AmountTotalAreaField } from './fields/amountFields'
@@ -36,6 +39,7 @@ import {
   PlusOutlined,
 } from '@ant-design/icons'
 import { useCustomDataSource } from './useCustomDataSource'
+import { getDispalyedDate } from '../../ReceiptForm'
 interface Props {
   form: FormInstance<any>
   edit: boolean
@@ -43,8 +47,7 @@ interface Props {
 
 const PaymentPricesTable: FC<Props> = ({ edit }) => {
   const { paymentData, form } = usePaymentContext()
-  const domainId = Form.useWatch('domain', form) || paymentData?.domain
-  const streetId = Form.useWatch('street', form) || paymentData?.street
+
   const serviceId = Form.useWatch('service', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
@@ -63,28 +66,25 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
     {
       title: '№',
       dataIndex: 'id',
-      width: 50,
+      width: "5%",
     },
     {
       title: 'Назва',
       dataIndex: 'name',
-      width: 'max-content',
+      width: '30%',
       ellipsis: true,
       render: (name, record) => {
         const nameRes = getName(name, paymentsTitle)
+        const dateMonth = getDispalyedDate(
+          paymentData,
+          service?.date,
+          record.name
+        )
         return (
-          // TODO: use moment from helper (single access point)
-          // getFormattedDate
-          <Tooltip
-            title={`${nameRes || record.name}(${moment(service?.date).format(
-              'MMMM'
-            )})`}
-          >
+          <Tooltip title={`${nameRes || record.name} ${dateMonth}`}>
             <span className={s.rowText}>
               {nameRes || record.name}{' '}
-              <span className={s.month}>
-                ({getFormattedDate(service?.date)})
-              </span>
+              <span className={s.month}>{dateMonth}</span>
               {!!company?.servicePricePerMeter && nameRes === 'Утримання' && (
                 <span className={s.month}> індивідуальне</span>
               )}
@@ -99,30 +99,21 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       width: '30%',
       render: (text, record) => (
         <>
-          {record.name === ServiceType.Electricity ||
-          record.name === ServiceType.Water ? (
-            <div className={s.doubleInputs}>
-              <Form.Item
-                name={[record.name, 'lastAmount']}
-                rules={validateField('required')}
-              >
-                <InputNumber disabled={edit} className={s.input} />
-              </Form.Item>
-
-              <Form.Item
-                name={[record.name, 'amount']}
-                rules={validateField('required')}
-              >
-                <InputNumber disabled={edit} className={s.input} />
-              </Form.Item>
-            </div>
-          ) : (
-            (record.name === ServiceType.Electricity ||
-              record.name === ServiceType.Water ||
-              record.name === ServiceType.Placing ||
-              record.name === ServiceType.Maintenance) && (
-              <AmountTotalAreaField record={record} edit={edit} />
-            )
+          {record.name === ServiceType.WaterPart && (
+            <WaterPartInfo edit={edit} />
+          )}
+          {record.name === ServiceType.Inflicion && (
+            <InflicionAmountInfo edit={edit} />
+          )}
+          {record.name === ServiceType.Electricity && (
+            <OldElectricity record={record} edit={edit} />
+          )}
+          {record.name === ServiceType.Water && (
+            <OldWater record={record} edit={edit} />
+          )}
+          {(record.name === ServiceType.Placing ||
+            record.name === ServiceType.Maintenance) && (
+            <AmountTotalAreaField record={record} edit={edit} />
           )}
         </>
       ),
@@ -130,6 +121,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
     {
       title: 'Ціна',
       dataIndex: 'price',
+      width:'20%',
       render: (text, record) => {
         if (record.name in fields) {
           const Component = fields[record.name]
@@ -316,43 +308,43 @@ function getRelationshipByRecordName(recordName) {
 }
 
 function SumWrapper({ record, form }) {
-  // вся ця штука повинна бути також динамічна за прикладом компонента зверху.
-  // ми повинні прописати умови прорахунку, за яким беруться значення
-  // TODO: fix labels
-
   const formFields = Form.useWatch(record.name, form)
+  const valueToSet = getVal(record?.name, formFields) || record.sum
 
-  // TODO: fix. such items should be "Clear function". Without side effect
+  useEffect(() => {
+    form.setFieldValue([record.name, 'sum'], valueToSet)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [valueToSet])
 
-  const getVal = (record, obj) => {
-    switch (record) {
-      case ServiceType.Maintenance: {
-        const m = obj?.amount * obj?.price
-        return +m.toFixed(1) || 0
-      }
-      case ServiceType.Placing: {
-        const p = obj?.amount * obj?.price
-        return +p.toFixed(1) || 0
-      }
-      case ServiceType.Electricity: {
-        const e = (obj?.amount - obj?.lastAmount) * obj?.price
-        return +e.toFixed(1) || 0
-      }
-      case ServiceType.Water: {
-        const w = (obj?.amount - obj?.lastAmount) * obj?.price
-        return +w.toFixed(1) || 0
-      }
-      default: {
-        return +obj?.price || 0
-      }
-    }
-  }
-  form.setFieldValue([record.name, 'sum'], getVal(record?.name, formFields))
   return (
     <Form.Item name={[record?.name, 'sum']}>
-      <h4 className={s.price}>{getVal(record?.name, formFields)} ₴</h4>
+      <h4 className={s.price}>{valueToSet} ₴</h4>
     </Form.Item>
   )
+}
+
+const getVal = (record, obj) => {
+  switch (record) {
+    case ServiceType.Maintenance: {
+      const m = obj?.amount * obj?.price
+      return +m.toFixed(1) || 0
+    }
+    case ServiceType.Placing: {
+      const p = obj?.amount * obj?.price
+      return +p.toFixed(1) || 0
+    }
+    case ServiceType.Electricity: {
+      const e = (obj?.amount - obj?.lastAmount) * obj?.price
+      return +e.toFixed(1) || 0
+    }
+    case ServiceType.Water: {
+      const w = (obj?.amount - obj?.lastAmount) * obj?.price
+      return +w.toFixed(1) || 0
+    }
+    default: {
+      return +obj?.price || 0
+    }
+  }
 }
 
 export default PaymentPricesTable

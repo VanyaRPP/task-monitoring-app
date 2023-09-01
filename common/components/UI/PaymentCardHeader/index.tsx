@@ -9,6 +9,7 @@ import s from './style.module.scss'
 import { isAdminCheck } from '@utils/helpers'
 import PaymentCascader from '@common/components/UI/PaymentCascader/index'
 import PaymentsFilterTags from './PaymentsFilterTags'
+import ImportInvoices from './ImportInvoices'
 
 const PaymentCardHeader = ({
   setCurrentDateFilter,
@@ -65,13 +66,14 @@ const PaymentCardHeader = ({
               </div>
             )}
             <div>
+              {/* TODO: add admin permission */}
+              <ImportInvoices />
               <Button
                 type="link"
                 onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
               >
                 Інвойси <SelectOutlined className={s.Icon} />
               </Button>
-
               <Button type="link" onClick={() => setIsModalOpen(true)}>
                 <PlusOutlined /> Додати
               </Button>

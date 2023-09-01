@@ -95,7 +95,7 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: service
+    title: service?.electricityPrice
       ? `Електрика: ${service.electricityPrice} грн/кВт`
       : 'Електрика',
     children: [
@@ -247,6 +247,72 @@ export const getDefaultColumns = (
   },
 ]
 
+
+
+const InflicionPrice: React.FC<{ service: any; record: any }> = ({
+  service,
+  record,
+}) => {
+  const { form } = useInvoicesPaymentContext()
+
+  const rentPrice = Form.useWatch(
+    ['companies', record.companyName, 'placingPrice', 'price'],
+    form
+  )
+
+  // TODO: вивчити формулу. потім ціна оренди береться із суми індексу інфляції і поточної оренди
+  // БРАТИ ЦІНУ ОРЕНДИ З МИНУЛОГО ІНВОЙСУ
+  // подумати про хелпер з тестами
+  const percent = service?.inflicionPrice - 100
+  const inflicionAmount = ((rentPrice * percent) / 100).toFixed(2)
+
+  return (
+    <FormAttribute
+      name={['companies', record.companyName, 'inflicionPrice']}
+      value={record.inflicion ? inflicionAmount : 0}
+      disabled
+    />
+  )
+}
+
+const OldWater: React.FC<{ record: any }> = ({ record }) => {
+  const baseName = ['companies', record.companyName, 'waterPrice']
+
+  const waterPriceName = [...baseName, 'lastAmount']
+
+  const { data: paymentsResponse } = useGetAllPaymentsQuery({
+    companyIds: record._id,
+    limit: 1,
+  })
+  const invoice = paymentsResponse?.data?.[0]?.invoice
+  const waterPrice = invoice?.find((item) => item.type === 'waterPrice')
+
+  return <FormAttribute name={waterPriceName} value={waterPrice?.amount || 0} />
+}
+
+const OldElectricity: React.FC<{ record: any }> = ({ record }) => {
+  const baseName = ['companies', record.companyName, 'electricityPrice']
+
+  const electricityPriceName = [...baseName, 'lastAmount']
+
+  const { data: paymentsResponse } = useGetAllPaymentsQuery({
+    companyIds: record._id,
+    limit: 1,
+  })
+  const invoice = paymentsResponse?.data?.[0]?.invoice
+  const electricityPrice = invoice?.find(
+    (item) => item.type === 'electricityPrice'
+  )
+
+  return (
+    <FormAttribute
+      name={electricityPriceName}
+      value={electricityPrice?.amount || 0}
+    />
+  )
+}
+
+
 const PricePerMeterSum: React.FC<{ record: any }> = ({ record }) => {
   const { form } = useInvoicesPaymentContext()
 
@@ -331,21 +397,16 @@ function ServicePriceSum({ service, record }) {
 
 function ElectricityPriceSum({ service, record }) {
   const { form } = useInvoicesPaymentContext()
-  // TODO: we will get old value from last invoice later
-  const newElecName = [
-    'companies',
-    record.companyName,
-    'electricityPrice',
-    'amount',
-  ]
-  const oldElecName = [
-    'companies',
-    record.companyName,
-    'electricityPrice',
-    'lastAmount',
-  ]
-  const newElec = Form.useWatch(newElecName, form)
-  const oldElec = Form.useWatch(oldElecName, form)
+
+
+  const baseName = ['companies', record.companyName, 'electricityPrice']
+
+  const newElectricityPriceName = [...baseName, 'amount']
+  const oldElectricityPriceName = [...baseName, 'lastAmount']
+
+  const oldElectricityPrice = Form.useWatch(oldElectricityPriceName, form)
+  const newElectricityPrice = Form.useWatch(newElectricityPriceName, form)
+
 
   return (
     <FormAttribute

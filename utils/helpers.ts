@@ -5,6 +5,7 @@ import { Roles, ServiceType } from './constants'
 import { PaymentOptions } from './types'
 import moment from 'moment'
 import 'moment/locale/uk'
+import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 
 export const firstTextToUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
@@ -181,5 +182,22 @@ export function filterInvoiceObject(obj) {
 export const renderCurrency = (number: number): string =>
   number ? new Intl.NumberFormat('en-EN').format(number) : '-'
 
-export const getFormattedDate = (data: Date): string =>
-  firstTextToUpperCase(moment(data).format('MMMM'))
+export const getFormattedDate = (data: Date): string => {
+  if (data) {
+    return firstTextToUpperCase(moment(data).format('MMMM'))
+  }
+}
+
+export const getPaymentProviderAndReciever = (company) => {
+  const provider: IProvider = company && {
+    description: company?.domain?.description || '',
+  }
+  const reciever: IReciever = company && {
+    companyName: company?.companyName,
+    adminEmails: company?.adminEmails,
+    description: company?.description,
+  }
+
+  return { provider, reciever }
+}
+

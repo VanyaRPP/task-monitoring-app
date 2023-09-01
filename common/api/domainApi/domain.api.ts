@@ -21,7 +21,7 @@ export const domainApi = createApi({
       query: ({ limit, streetId, domainId }) => {
         return {
           url: `domain`,
-          method:"GET",
+          method: 'GET',
           params: { limit, streetId, domainId },
         }
       },
@@ -54,6 +54,17 @@ export const domainApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Domain'] : []),
     }),
+    editDomain: builder.mutation<IExtendedDomain, Partial<IExtendedDomain>>({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `domain/${_id}`,
+          method: 'PATCH',
+          body: body,
+        }
+      },
+      invalidatesTags: (response) => (response ? ['Domain'] : []),
+    }),
   }),
 })
 
@@ -61,4 +72,5 @@ export const {
   useGetDomainsQuery,
   useAddDomainMutation,
   useDeleteDomainMutation,
+  useEditDomainMutation,
 } = domainApi

@@ -7,7 +7,7 @@ import {
   useDeletePaymentMutation,
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
-import { dateToDefaultFormat } from '@common/assets/features/formatDate'
+import { dateToDefaultFormat, dateToMonthYear } from '@common/assets/features/formatDate'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
@@ -105,10 +105,14 @@ const PaymentsBlock = () => {
   // TODO: add Interface
   const columns: any = [
     {
-      title: 'Дата',
+      title: 'Дата створення',
       dataIndex: 'invoiceCreationDate',
-      ellipsis: true,
       render: dateToDefaultFormat,
+    },
+    {
+      title: 'Місяць',
+      dataIndex: 'monthService',
+      render: (monthService, obj) => dateToMonthYear(monthService?.date || obj.invoiceCreationDate),
     },
     {
       title: (
@@ -192,20 +196,20 @@ const PaymentsBlock = () => {
     })
   }
 
-  if (payments?.currentCompaniesCount > 1) {
-    columns.unshift({
-      title: 'Компанія',
-      dataIndex: 'company',
-      filters:
-        pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
-      filteredValue: filters?.company || null,
-      render: (i) => i?.companyName,
-    })
-  }
+  columns.unshift({
+    title: 'Компанія',
+    dataIndex: 'company',
+    fixed: 'left',
+    filters:
+      pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
+    filteredValue: filters?.company || null,
+    render: (i) => i?.companyName,
+  })
 
   if (payments?.currentDomainsCount > 1) {
     columns.unshift({
       title: 'Домен',
+      fixed: 'left',
       dataIndex: 'domain',
       filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
       filteredValue: filters?.domain || null,
@@ -267,7 +271,7 @@ const PaymentsBlock = () => {
           onChange={(__, filters) => {
             setFilters(filters)
           }}
-          scroll={{ y: 800 }}
+          scroll={{ x: 1800 }}
           summary={() => (
             <Table.Summary fixed>
               <Summary />

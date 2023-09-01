@@ -110,7 +110,7 @@ export default async function handler(
 
         const payments = await (Payment as any)
           .find(options)
-          .sort({ date: -1 })
+          .sort({ invoiceCreationDate: -1 })
           .skip(+skip)
           .limit(+limit)
           .populate({ path: 'company', select: '_id companyName' })

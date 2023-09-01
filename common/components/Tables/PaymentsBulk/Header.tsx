@@ -1,23 +1,58 @@
 import { QuestionCircleOutlined, SelectOutlined } from '@ant-design/icons'
-import { Button, Form, FormInstance, Popover } from 'antd'
+import { Button, Form, FormInstance, Popover, message } from 'antd'
 import { useRouter } from 'next/router'
 
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthServiceSelect'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
-import { AppRoutes } from '@utils/constants'
+import { AppRoutes, Operations } from '@utils/constants'
+import {
+  useAddPaymentMutation,
+  useGetPaymentNumberQuery,
+} from '@common/api/paymentApi/payment.api'
+import {
+  filterInvoiceObject,
+  getPaymentProviderAndReciever,
+} from '@utils/helpers'
+import { IExtendedService } from '@common/api/serviceApi/service.api.types'
+import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 
 const InvoicesHeader = () => {
   const router = useRouter()
-  const { form } = useInvoicesPaymentContext()
+  const { form, companies, service } = useInvoicesPaymentContext()
+  const [addPayment] = useAddPaymentMutation()
+  const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
 
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
   const serviceId = Form.useWatch('monthService', form)
 
   const handleSave = async () => {
-    const invoices = await prepareInvoiceObjects(form)
+
+    const invoices = await prepareInvoiceObjects(
+      form,
+      service,
+      companies,
+      newInvoiceNumber
+    )
+
+    const promises = invoices.map(addPayment)
+    await Promise.all(promises).then((responses) => {
+      const allSuccessful = responses.every((response) => response.data.success)
+
+      responses.forEach((response) => {
+        if (response.data.success) {
+          message.success(
+            `Додано рахунок для компанії ${response.data.data.reciever.companyName}`
+          )
+        } else {
+          message.error(`Помилка при додаванні рахунку для компанії`)
+        }
+      })
+
+      if (allSuccessful) router.push(AppRoutes.PAYMENT)
+    })
   }
 
   return (
@@ -91,32 +126,64 @@ function PopoverMonthService(serviceId: any) {
 
 export default InvoicesHeader
 
-const prepareInvoiceObjects = async (form: FormInstance): Promise<any[]> => {
+const prepareInvoiceObjects = async (
+  form: FormInstance,
+  service: IExtendedService,
+  companies: IExtendedRealestate[],
+  newInvoiceNumber: number
+): Promise<any> => {
   const values = await form.validateFields()
-  const invoices: any[] = Object.values(values.companies)
 
-  return invoices.map((invoice) => ({
-    maintenancePrice: {
-      amount: invoice.totalArea,
-      ...invoice.maintenancePrice,
-    },
-    placingPrice: {
-      amount: invoice.totalArea,
-      ...invoice.placingPrice,
-    },
+  return Object.keys(values.companies).map((key, index) => {
+    const invoice = values.companies[key]
+    const company = companies.find(
+      (company) => company.companyName === values.companies[key].companyName
+    )
+    const { provider, reciever } = getPaymentProviderAndReciever(company)
 
-    electricityPrice: invoice.electricityPrice,
-    waterPrice: invoice.waterPrice,
-    waterPart: invoice.waterPart,
+    const filteredInvoice = filterInvoiceObject({
+      maintenancePrice: {
+        amount: invoice.totalArea,
+        ...invoice.maintenancePrice,
+      },
+      placingPrice: {
+        amount: invoice.totalArea,
+        ...invoice.placingPrice,
+      },
 
-    garbageCollectorPrice: {
-      price: invoice.garbageCollector,
-      sum: invoice.garbageCollector,
-    },
-    inflictionPrice: {
-      price: invoice.inflictionPrice,
-      sum: invoice.inflictionPrice,
-    },
-    // TODO: proper fields
-  }))
+      electricityPrice: {
+        ...invoice.electricityPrice,
+        price: service?.electricityPrice,
+      },
+      waterPrice: {
+        ...invoice.waterPrice,
+        price: service?.waterPrice,
+      },
+      waterPart: invoice.waterPart,
+
+      garbageCollectorPrice: {
+        price: invoice.garbageCollector,
+        sum: invoice.garbageCollector,
+      },
+      inflicionPrice: {
+        price: invoice.inflicionPrice,
+        sum: invoice.inflicionPrice,
+      },
+    })
+    return {
+      invoiceNumber: newInvoiceNumber + index,
+      type: Operations.Debit,
+      domain: service?.domain,
+      street: service?.street,
+      company: company?._id,
+      monthService: service?._id,
+      invoiceCreationDate: new Date(),
+      description: '',
+      generalSum:
+        filteredInvoice.reduce((acc, val) => acc + (+val.sum || 0), 0) || 0,
+      provider,
+      reciever,
+      invoice: filteredInvoice,
+    }
+  })
 }

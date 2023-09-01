@@ -1,5 +1,9 @@
-import { DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { Alert, Popconfirm, Table, Tag, Tooltip, message } from 'antd'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons'
+import { Alert, Button, Popconfirm, Table, Tag, Tooltip, message } from 'antd'
 import { useRouter } from 'next/router'
 import { ColumnType } from 'antd/lib/table'
 
@@ -13,9 +17,10 @@ import { AppRoutes } from '@utils/constants'
 
 export interface Props {
   domainId?: string
+  setCurrentDomain?: (domain: IExtendedDomain) => void
 }
 
-const DomainsTable: React.FC<Props> = ({ domainId }) => {
+const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.DOMAIN
 
@@ -48,7 +53,7 @@ const DomainsTable: React.FC<Props> = ({ domainId }) => {
         }
       }
       loading={isLoading}
-      columns={getDefaultColumns(handleDelete, deleteLoading)}
+      columns={getDefaultColumns(handleDelete, deleteLoading, setCurrentDomain)}
       expandable={{
         expandedRowRender: ({ _id: domainId }) => (
           <StreetsBlock domainId={domainId} />
@@ -62,7 +67,8 @@ const DomainsTable: React.FC<Props> = ({ domainId }) => {
 
 const getDefaultColumns = (
   handleDelete?: (...args: any) => void,
-  deleteLoading?: boolean
+  deleteLoading?: boolean,
+  setCurrentDomain?: (domain: IExtendedDomain) => void
 ): ColumnType<any>[] => [
   {
     fixed: 'left',
@@ -85,6 +91,21 @@ const getDefaultColumns = (
       <Tooltip title={text}>
         <QuestionCircleOutlined />
       </Tooltip>
+    ),
+  },
+  {
+    align: 'center',
+    fixed: 'right',
+    title: '',
+    width: 50,
+    render: (_, domain: IExtendedDomain) => (
+      <Button
+        style={{ padding: 0 }}
+        type="link"
+        onClick={() => setCurrentDomain(domain)}
+      >
+        <EditOutlined />
+      </Button>
     ),
   },
   {

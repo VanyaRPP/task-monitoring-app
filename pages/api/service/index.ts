@@ -25,7 +25,7 @@ export default async function handler(
         if (isGlobalAdmin && domainId && streetId) {
           options.domain = domainId
           options.street = streetId
-          const services = await Service.find(options).sort({ data: -1 })
+          const services = await Service.find(options).sort({ date: -1 })
 
           return res.status(200).json({
             success: true,
@@ -57,7 +57,7 @@ export default async function handler(
             const domainsIds = realEstates.map((i) => i.domain._id)
             options.domain = { $in: domainsIds }
           }
-          const services = await Service.find(options)
+          const services = await Service.find(options).sort({ date: -1 })
 
           return res.status(200).json({
             success: true,
@@ -103,7 +103,7 @@ export default async function handler(
         const services = await Service.find(options)
           .populate({ path: 'domain', select: '_id name' })
           .populate({ path: 'street', select: '_id address city' })
-          .sort({ data: -1 })
+          .sort({ date: -1 })
           .limit(req.query.limit)
 
         return res.status(200).json({

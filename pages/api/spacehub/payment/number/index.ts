@@ -3,14 +3,16 @@
 import type { NextApiResponse } from 'next'
 import Payment from 'common/modules/models/Payment'
 import start, { Data } from '@pages/api/api.config'
+import { getMaxInvoiceNumber } from '../pipelines'
 start()
 
 export default async function handler(_, res: NextApiResponse<Data>) {
   try {
-    await Payment.countDocuments().then((count) => {
+    const maxInvoiceNumberPipeline = getMaxInvoiceNumber()
+    await Payment.aggregate(maxInvoiceNumberPipeline).then((invoiceNumber) => {
       return res.status(200).json({
         success: true,
-        data: count,
+        data: invoiceNumber[0]?.maxNumber + 1,
       })
     })
   } catch (error) {

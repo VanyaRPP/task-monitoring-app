@@ -256,6 +256,134 @@ describe('Service API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
     expect(response.data).toHaveLength(0)
   })
+
+
+  it('should load each service without limitation as GlobalAdmin by serviceId', async () => {
+    for (const service of services) {
+      await mockLoginAs(users.globalAdmin)
+
+      const mockReq = {
+        method: 'GET',
+        query: { serviceId: service._id },
+      } as any
+      const mockRes = {
+        status: jest.fn(() => mockRes),
+        json: jest.fn(),
+      } as any
+
+      await handler(mockReq, mockRes)
+
+      const response = {
+        status: mockRes.status,
+        data: mockRes.json.mock.lastCall[0].data,
+      }
+
+      const received = parseReceived(response.data)
+      const expected = [service]
+
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(received).toEqual(expected)
+    }
+  })
+
+  it('should load each service as DomainAdmin which is realated to his domain by serviceId', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const mockReq = {
+      method: 'GET',
+      query: { serviceId: services[5]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    const received = parseReceived(response.data)
+    const expected = [services[5]]
+
+    expect(response.status).toHaveBeenCalledWith(200)
+    expect(received).toEqual(expected)
+  })
+
+  it('should not load each service as DomainAdmin which is not realated to his domain by serviceId', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const mockReq = {
+      method: 'GET',
+      query: { serviceId: services[1]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+    expect(response.data).toEqual([])
+  })
+
+  it('should load service as User which is realated to his company which is ralated to domain by serviceId', async () => {
+    await mockLoginAs(users.user)
+
+    const mockReq = {
+      method: 'GET',
+      query: { serviceId: services[5]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    const received = parseReceived(response.data)
+    const expected = [services[5]]
+
+    expect(response.status).toHaveBeenCalledWith(200)
+    expect(received).toEqual(expected)
+  })
+
+  it('should not load service as User which is not realated to his company by serviceId', async () => {
+    await mockLoginAs(users.user)
+
+    const mockReq = {
+      method: 'GET',
+      query: { serviceId: services[0]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+    expect(response.data).toEqual([])
+  })
+
 })
 
 describe('Service API - POST', () => {
