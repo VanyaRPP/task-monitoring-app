@@ -1,6 +1,6 @@
 import { CloseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import { Popconfirm, Tooltip, FormInstance, Form } from 'antd'
-
+import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import FormAttribute from '@common/components/UI/FormAttribute'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 
@@ -247,8 +247,6 @@ export const getDefaultColumns = (
   },
 ]
 
-
-
 const InflicionPrice: React.FC<{ service: any; record: any }> = ({
   service,
   record,
@@ -311,7 +309,6 @@ const OldElectricity: React.FC<{ record: any }> = ({ record }) => {
     />
   )
 }
-
 
 const PricePerMeterSum: React.FC<{ record: any }> = ({ record }) => {
   const { form } = useInvoicesPaymentContext()
@@ -398,7 +395,6 @@ function ServicePriceSum({ service, record }) {
 function ElectricityPriceSum({ service, record }) {
   const { form } = useInvoicesPaymentContext()
 
-
   const baseName = ['companies', record.companyName, 'electricityPrice']
 
   const newElectricityPriceName = [...baseName, 'amount']
@@ -407,11 +403,12 @@ function ElectricityPriceSum({ service, record }) {
   const oldElectricityPrice = Form.useWatch(oldElectricityPriceName, form)
   const newElectricityPrice = Form.useWatch(newElectricityPriceName, form)
 
-
   return (
     <FormAttribute
       name={['companies', record.companyName, 'electricityPrice', 'sum']}
-      value={(newElec - oldElec) * service?.electricityPrice}
+      value={
+        (newElectricityPrice - oldElectricityPrice) * service?.electricityPrice
+      }
       disabled
     />
   )
