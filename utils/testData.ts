@@ -1,4 +1,5 @@
 import { Roles } from './constants'
+import { compareDates } from './helpers'
 
 export const users = {
   user: {
@@ -259,26 +260,100 @@ export const services = [
   },
 ]
 
-/*
- * Test payments Dates:
- * 11.01.2020
- * 18.06.2020
- * 10.10.2020
- * 16.04.2021
- * 14.05.2021
- * 09.08.2021
- * 01.01.2022
- * 12.03.2022
- * 06.05.2023
- * 31.06.2023
- * 01.10.2023
- */
+export const paymentsForDates = [
+  {
+    _id: '64f049bd9f13c122008369ad',
+    invoiceNumber: 10,
+    type: 'debit',
+    invoiceCreationDate: '2023-08-31T08:04:14.207Z',
+    domain: domains[0]._id,
+    street: streets[0]._id,
+    company: realEstates[0]._id,
+    description: '',
+    invoice: [],
+    generalSum: 99993,
+  },
+  {
+    _id: '64f047a89f13c12200836945',
+    invoiceNumber: 9,
+    type: 'debit',
+    invoiceCreationDate: '2023-08-31T07:55:21.728Z',
+    domain: domains[0]._id,
+    street: streets[0]._id,
+    company: realEstates[0]._id,
+    description: '',
+    invoice: [],
+    generalSum: 1387,
+  },
+  {
+    _id: '64f0462a9f13c12200836914',
+    invoiceNumber: 8,
+    type: 'debit',
+    invoiceCreationDate: '2023-08-31T07:48:56.012Z',
+    domain: domains[0]._id,
+    street: streets[0]._id,
+    company: realEstates[0]._id,
+    description: '',
+    invoice: [],
+    generalSum: 33580.25,
+  },
+  {
+    _id: '64f086673fcebe9d3ccfdacc',
+    invoiceNumber: 12,
+    type: 'debit',
+    invoiceCreationDate: '2023-08-30T12:24:02.069Z',
+    domain: domains[0]._id,
+    street: streets[0]._id,
+    company: realEstates[0]._id,
+    description: 'dsc',
+    invoice: [],
+    generalSum: 0,
+  },
+  {
+    _id: '64ee5a28d276c6c1938bd068',
+    invoiceNumber: 7,
+    type: 'debit',
+    invoiceCreationDate: '2023-07-01T00:00:00.000Z',
+    domain: domains[0]._id,
+    street: streets[0]._id,
+    company: realEstates[0]._id,
+    description: '',
+    invoice: [],
+    generalSum: 30017.13,
+  },
+  {
+    _id: '64ee5a28d276c6c1938bd065',
+    invoiceNumber: 6,
+    type: 'debit',
+    invoiceCreationDate: '2023-06-01T00:00:00.000Z',
+    domain: domains[0]._id,
+    street: streets[0]._id,
+    company: realEstates[0]._id,
+    description: '',
+    invoice: [],
+    generalSum: 28534.3,
+  },
+  {
+    _id: '64ee5a28d276c6c1938bd063',
+    invoiceNumber: 5,
+    type: 'debit',
+    invoiceCreationDate: '2023-05-01T00:00:00.000Z',
+    domain: domains[0]._id,
+    street: streets[0]._id,
+    company: realEstates[0]._id,
+    description: '',
+    invoice: [],
+    generalSum: 27207.77,
+  },
+]
+
+
 export const payments = [
   {
     _id: '64d68421d9ba2fc8fea79d61',
     invoiceNumber: 3,
     type: 'debit',
-    invoiceCreationDate: new Date(2020, 10, 10),
+    invoiceCreationDate: "2020-11-09T22:00:00.000Z",
     domain: domains[2]._id,
     street: streets[2]._id,
     company: realEstates[2]._id,
@@ -310,22 +385,13 @@ export const payments = [
         sum: 400,
       },
     ],
-    services: [],
-    // provider: {
-    //   description: 'provider_3',
-    // },
-    // receiver: {
-    //   companyName: 'receiver_3',
-    //   adminEmails: [],
-    //   description: '+3801234567893',
-    // },
     generalSum: 1000,
   },
   {
     _id: '64d68421d9ba2fc8fea79d62',
     invoiceNumber: 2,
     type: 'debit',
-    invoiceCreationDate: new Date(2020, 6, 18),
+    invoiceCreationDate: "2020-07-17T21:00:00.000Z",
     domain: domains[1]._id,
     street: streets[1]._id,
     company: realEstates[1]._id,
@@ -357,22 +423,13 @@ export const payments = [
         sum: 400,
       },
     ],
-    services: [],
-    // provider: {
-    //   description: 'provider_3',
-    // },
-    // receiver: {
-    //   companyName: 'receiver_3',
-    //   adminEmails: [],
-    //   description: '+3801234567893',
-    // },
     generalSum: 1000,
   },
   {
     _id: '64d68421d9ba2fc8fea79d63',
     invoiceNumber: 1,
     type: 'debit',
-    invoiceCreationDate: new Date(2020, 1, 11),
+    invoiceCreationDate: "2020-02-10T22:00:00.000Z",
     domain: domains[0]._id,
     street: streets[0]._id,
     company: realEstates[0]._id,
@@ -404,15 +461,7 @@ export const payments = [
         sum: 400,
       },
     ],
-    services: [],
-    // provider: {
-    //   description: 'provider_3',
-    // },
-    // receiver: {
-    //   companyName: 'receiver_3',
-    //   adminEmails: [],
-    //   description: '+3801234567893',
-    // },
     generalSum: 1000,
   },
-]
+  ...paymentsForDates,
+].sort((a, b) => compareDates(a.invoiceCreationDate, b.invoiceCreationDate))
