@@ -7,7 +7,10 @@ import {
   useDeletePaymentMutation,
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
-import { dateToDefaultFormat, dateToMonthYear } from '@common/assets/features/formatDate'
+import {
+  dateToDefaultFormat,
+  dateToMonthYear,
+} from '@common/assets/features/formatDate'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
@@ -112,7 +115,8 @@ const PaymentsBlock = () => {
     {
       title: 'Місяць',
       dataIndex: 'monthService',
-      render: (monthService, obj) => dateToMonthYear(monthService?.date || obj.invoiceCreationDate),
+      render: (monthService, obj) =>
+        dateToMonthYear(monthService?.date || obj.invoiceCreationDate),
     },
     {
       title: (
@@ -221,7 +225,7 @@ const PaymentsBlock = () => {
     return (
       router.pathname === AppRoutes.PAYMENT &&
       payments?.data && (
-        <>
+        <Table.Summary fixed>
           <Table.Summary.Row className={s.summ_item}>
             {columns.map((item) => (
               <Table.Summary.Cell
@@ -239,7 +243,7 @@ const PaymentsBlock = () => {
             ))}
           </Table.Summary.Row>
           <Table.Summary.Row className={s.saldo}>
-            {columns.map((item) => (
+            {columns.slice(0, columns.length - 1).map((item) => (
               <Table.Summary.Cell
                 colSpan={item.dataIndex === Operations.Debit ? 2 : 1}
                 index={0}
@@ -252,7 +256,7 @@ const PaymentsBlock = () => {
               </Table.Summary.Cell>
             ))}
           </Table.Summary.Row>
-        </>
+        </Table.Summary>
       )
     )
   }
@@ -272,11 +276,7 @@ const PaymentsBlock = () => {
             setFilters(filters)
           }}
           scroll={{ x: 1800 }}
-          summary={() => (
-            <Table.Summary fixed>
-              <Summary />
-            </Table.Summary>
-          )}
+          summary={() => <Summary />}
           bordered
           size="small"
           loading={
