@@ -272,7 +272,7 @@ describe('Payments API - GET', () => {
   //   expect(response.status).toHaveBeenCalledWith(200)
 
   //   const received = unpopulate(
-  //     removeVersion(response.data.map((domain) => domain._doc))
+  //     removeProps(response.data.map((domain) => domain._doc))
   //   )
   //   const expected = payments.find(
   //     (payment) => payment.domain === domains[0]._id

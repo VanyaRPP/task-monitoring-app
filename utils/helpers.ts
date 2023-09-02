@@ -129,10 +129,14 @@ export function compareDates(date1, date2) {
 }
 
 function formatDateToIsoString(data) {
-  return data.map((i) => ({
-    ...i,
-    invoiceCreationDate: new Date(i.invoiceCreationDate).toISOString(),
-  }))
+  return data.map((i) =>
+    i.invoiceCreationDate
+      ? {
+          ...i,
+          invoiceCreationDate: new Date(i.invoiceCreationDate).toISOString(),
+        }
+      : i
+  )
 }
 /**
  * Костиль, щоб прибрати `__v` з документу `mongodb` і далі порівнювати

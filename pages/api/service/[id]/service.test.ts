@@ -1,6 +1,6 @@
 import { expect } from '@jest/globals'
 import handler from '.'
-import { removeVersion, unpopulate } from '@utils/helpers'
+import { removeProps, unpopulate } from '@utils/helpers'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { services, users, domains } from '@utils/testData'
