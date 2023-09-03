@@ -1,8 +1,10 @@
 import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
 import CompanySelect from '@common/components/Forms/AddPaymentForm/CompanySelect'
+import JsonViewer from '@common/components/UI/JsonViewer'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import useCompany from '@common/modules/hooks/useCompany'
+import { Operations } from '@utils/constants'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { Button, Form, Input, Modal } from 'antd'
 
@@ -45,11 +47,7 @@ const ImportInvoicesModal = ({ closeModal }) => {
         <DomainsSelect form={form} />
         <AddressesSelect form={form} />
         <CompanySelect form={form} />
-        {/* TODO: add json viewer */}
-        {/* https://github.com/mac-s-g/react-json-view */}
-        <Form.Item name="json" label="Опис">
-          <Input.TextArea rows={20} />
-        </Form.Item>
+        <JsonViewer json={null} />
       </Form>
     </Modal>
   )
@@ -65,7 +63,7 @@ function prepareInvoiceObjects(
 
   const invoices = JSON.parse(formData.json).map((i, index) => ({
     invoiceNumber: index + 1,
-    type: 'debit',
+    type: Operations.Credit,
     invoiceCreationDate: new Date(i.monthService).toISOString(),
     domain: domainId,
     street: streetId,
