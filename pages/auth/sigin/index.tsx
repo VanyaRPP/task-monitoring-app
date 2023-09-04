@@ -30,39 +30,39 @@ type PropsType = {
 }
 
 const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
-  const [form] = useForm()
-  const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
-  const [credentials, setCredentials] = useState<Record<string, string>>({
-    email: '',
-    password: '',
-  })
+  // const [form] = useForm()
+  // const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
+  // const [credentials, setCredentials] = useState<Record<string, string>>({
+  //   email: '',
+  //   password: '',
+  // })
   const { error } = useRouter().query
   const [customError, setCustomError] = useState('')
-  const [storedValue, setValue] = useLocalStorage('login-type', null)
-  const [cardSide, setCardSide] = useState<boolean>(storedValue)
+  // const [storedValue, setValue] = useLocalStorage('login-type', null)
+  // const [cardSide, setCardSide] = useState<boolean>(storedValue)
 
-  const handleSideChange = () => {
-    setCardSide(!cardSide)
-    setValue(!cardSide)
-  }
+  // const handleSideChange = () => {
+  //   setCardSide(!cardSide)
+  //   setValue(!cardSide)
+  // }
 
   useEffect(() => {
     setCustomError(error && (errors[`${error}`] ?? errors.default))
   }, [error])
 
-  const handleChange = (target) => {
-    const { name, value } = target
-    setCredentials({ ...credentials, [name]: value })
-  }
+  // const handleChange = (target) => {
+  //   const { name, value } = target
+  //   setCredentials({ ...credentials, [name]: value })
+  // }
 
-  const handleSubmit = async () => {
-    setIsFormDisabled(true)
-    const formData = await form.validateFields()
-    await signIn('credentials', { ...formData })
+  // const handleSubmit = async () => {
+  //   setIsFormDisabled(true)
+  //   const formData = await form.validateFields()
+  //   await signIn('credentials', { ...formData })
 
-    form.resetFields()
-    setIsFormDisabled(false)
-  }
+  //   form.resetFields()
+  //   setIsFormDisabled(false)
+  // }
 
   return (
     <>
@@ -78,51 +78,59 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
 
       <h2 className={s.Header}>{config.titles.signInTitle}</h2>
 
-      <div className={s.Container}>
-        <div className={s.HalfBlock}>
-          <AuthCard
-            csrfToken={csrfToken}
-            form={form}
-            value={credentials}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            disabled={isFormDisabled}
-          />
-        </div>
+      {
+        process.env.NODE_ENV === 'development' ? (
+          <div className={s.Container}>
+            {Object.values(providers).map(
+              (provider: any) =>
+                provider?.name === 'GitHub' && (
+                  <SignInButton key={provider?.name} provider={provider} />
+                )
+            )}
+          </div>
+        ) : (
+          <div className={s.Container}>
+            {Object.values(providers).map(
+              (provider: any) =>
+                provider?.name === 'Google' && (
+                  <SignInButton key={provider?.name} provider={provider} />
+                )
+            )}
+          </div>
+        )
 
-        <div className={s.Divider} />
+        //     <div className={s.HalfBlock}>
+        //       <AuthCard
+        //         csrfToken={csrfToken}
+        //         form={form}
+        //         value={credentials}
+        //         onChange={handleChange}
+        //         onSubmit={handleSubmit}
+        //         disabled={isFormDisabled}
+        //       />
+        //     </div>
 
-        <div className={s.HalfBlock}>
-          <form
-            method="post"
-            action="/api/auth/signin/email"
-            className={s.Form}
-          >
-            <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-            <input
-              className={s.Input}
-              placeholder="Введіть електронну пошту"
-              type="email"
-              id="email"
-              name="email"
-            />
-            <Button className={s.Button} htmlType="submit" type="primary">
-              <MailOutlined style={{ fontSize: '1.2rem' }} />
-              <span onClick={handleSideChange}>Увійти з Email</span>
-            </Button>
-          </form>
-          <Divider className={s.DividerOr} plain>
-            Або
-          </Divider>
-          {Object.values(providers).map(
-            (provider: any) =>
-              provider?.name !== 'Email' &&
-              provider?.name !== 'Credentials' && (
-                <SignInButton key={provider?.name} provider={provider} />
-              )
-          )}
-        </div>
-      </div>
+        //     <div className={s.Divider} />
+
+        //     <div className={s.HalfBlock}>
+        //       <form
+        //         method="post"
+        //         action="/api/auth/signin/email"
+        //         className={s.Form}
+        //       >
+        //         <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+
+        //         <Button className={s.Button} htmlType="submit" type="primary">
+        //           <MailOutlined style={{ fontSize: '1.2rem' }} />
+        //           <span onClick={handleSideChange}>Увійти з Email</span>
+        //         </Button>
+        //       </form>
+        //       <Divider className={s.DividerOr} plain>
+        //         Або
+        //       </Divider>
+
+        //     </div>
+      }
     </>
   )
 }
