@@ -14,6 +14,7 @@ import moment from 'moment'
 import InvoiceNumber from './InvoiceNumber'
 import InvoiceCreationDate from './InvoiceCreationDate'
 import { getFormattedDate } from '@utils/helpers'
+import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
 
 interface Props {
   form: FormInstance<any>
@@ -66,25 +67,7 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
       ) : (
         <CompanySelect form={form} />
       )}
-      {/* TODO: disable, while we don't have company  */}
-      <Form.Item
-        name="operation"
-        label="Тип оплати"
-        rules={validateField('required')}
-      >
-        <Select
-          placeholder="Оберіть тип оплати"
-          className={s.Select}
-          disabled={edit && true}
-        >
-          <Select.Option value={Operations.Credit}>
-            Кредит (Оплата)
-          </Select.Option>
-          <Select.Option value={Operations.Debit}>
-            Дебет (Реалізація)
-          </Select.Option>
-        </Select>
-      </Form.Item>
+      <PaymentTypeSelect edit={!companyId || edit} />
 
       <InvoiceNumber form={form} edit={edit} />
       <InvoiceCreationDate edit={edit} />

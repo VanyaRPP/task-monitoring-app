@@ -12,7 +12,7 @@ export interface IPaymentModel {
   domain: ObjectId
   street: ObjectId
   company: ObjectId
-  monthService: ObjectId
+  monthService: ObjectId | string
   invoice: IPaymentField[]
   description?: string
   services?: IPaymentTableData[]
@@ -28,7 +28,7 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
   street: { type: Schema.Types.ObjectId, ref: 'Street' },
   company: { type: Schema.Types.ObjectId, ref: 'RealEstate' },
-  monthService: { type: Schema.Types.ObjectId, ref: 'Service' },
+  monthService: { type: Schema.Types.Mixed, ref: 'Service' },
   description: { type: String },
   invoice: { type: [Object] },
   services: { type: [Object] },

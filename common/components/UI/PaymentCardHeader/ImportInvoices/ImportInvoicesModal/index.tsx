@@ -1,12 +1,12 @@
 import { useAddPaymentMutation, useGetPaymentNumberQuery } from '@common/api/paymentApi/payment.api'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import { validateField } from '@common/assets/features/validators'
 import CompanySelect from '@common/components/Forms/AddPaymentForm/CompanySelect'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
+import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
 import useCompany from '@common/modules/hooks/useCompany'
 import { Operations } from '@utils/constants'
-import { getPaymentProviderAndReciever } from '@utils/helpers'
+import { getPaymentProviderAndReciever, importedPaymentDateToISOStringDate } from '@utils/helpers'
 import { Button, Form, Input, Modal, Select, message } from 'antd'
 import moment from 'moment'
 
@@ -66,22 +66,7 @@ const ImportInvoicesModal = ({ closeModal }) => {
         <DomainsSelect form={form} />
         <AddressesSelect form={form} />
         <CompanySelect form={form} />
-        <Form.Item
-          name="operation"
-          label="Тип оплати"
-          rules={validateField('required')}
-        >
-          <Select
-            placeholder="Оберіть тип оплати"
-          >
-            <Select.Option value={Operations.Credit}>
-              Кредит (Оплата)
-            </Select.Option>
-            <Select.Option value={Operations.Debit}>
-              Дебет (Реалізація)
-            </Select.Option>
-          </Select>
-        </Form.Item>
+        <PaymentTypeSelect/>
         <Form.Item name="json" label="Опис">
           <Input.TextArea rows={20} />
         </Form.Item>
@@ -101,20 +86,11 @@ function prepareInvoiceObjects(
   const invoices = JSON.parse(formData.json).map((i, index) => ({
     invoiceNumber: newInvoiceNumber + index,
     type: paymentMethod,
-    invoiceCreationDate: new Date(
-      moment(i.monthService, 'DD.MM.YYYY', true).format('YYYY-MM-DD')
-    ).toISOString(),
+    invoiceCreationDate: importedPaymentDateToISOStringDate(i.monthService),
     domain: domainId,
     street: streetId,
     company: companyId,
-    monthService:
-      services.find(
-        (service) =>
-          new Date(service.date).getMonth() ===
-          new Date(
-            moment(i.monthService, 'DD.MM.YYYY', true).format('YYYY-MM-DD')
-          ).getMonth()
-      ) || '64ea01ca1bf33e3a97b7f289',
+    monthService: i.monthService,
     invoice:
       paymentMethod === Operations.Debit
         ? [
