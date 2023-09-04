@@ -222,3 +222,9 @@ export const getPaymentProviderAndReciever = (company) => {
 
   return { provider, reciever }
 }
+
+export const importedPaymentDateToISOStringDate = (date) => {
+  return new Date(
+      moment(date, 'DD.MM.YYYY', true).format('YYYY-MM-DD')
+    ).toISOString()
+}
