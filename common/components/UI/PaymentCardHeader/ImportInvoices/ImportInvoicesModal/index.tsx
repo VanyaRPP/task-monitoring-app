@@ -1,5 +1,4 @@
 import { useAddPaymentMutation, useGetPaymentNumberQuery } from '@common/api/paymentApi/payment.api'
-import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import CompanySelect from '@common/components/Forms/AddPaymentForm/CompanySelect'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
@@ -7,8 +6,7 @@ import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
 import useCompany from '@common/modules/hooks/useCompany'
 import { Operations } from '@utils/constants'
 import { getPaymentProviderAndReciever, importedPaymentDateToISOStringDate } from '@utils/helpers'
-import { Button, Form, Input, Modal, Select, message } from 'antd'
-import moment from 'moment'
+import { Form, Input, Modal, message } from 'antd'
 
 const ImportInvoicesModal = ({ closeModal }) => {
   const [addPayment] = useAddPaymentMutation()
@@ -19,7 +17,6 @@ const ImportInvoicesModal = ({ closeModal }) => {
   const paymentMethod = Form.useWatch('operation', form)
   const { company } = useCompany({ companyId })
   const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
-  const { data: services } = useGetAllServicesQuery({ domainId, streetId })
 
   const handleSave = async () => {
     const values = await form.validateFields()
@@ -29,7 +26,6 @@ const ImportInvoicesModal = ({ closeModal }) => {
       streetId,
       companyId,
       company,
-      services,
       paymentMethod,
       newInvoiceNumber,
     })
@@ -79,7 +75,7 @@ export default ImportInvoicesModal
 
 function prepareInvoiceObjects(
   formData,
-  { domainId, streetId, companyId, company, services, paymentMethod, newInvoiceNumber }
+  { domainId, streetId, companyId, company, paymentMethod, newInvoiceNumber }
 ) {
   const { provider, reciever } = getPaymentProviderAndReciever(company)
 
@@ -90,7 +86,6 @@ function prepareInvoiceObjects(
     domain: domainId,
     street: streetId,
     company: companyId,
-    monthService: i.monthService,
     invoice:
       paymentMethod === Operations.Debit
         ? [
@@ -127,6 +122,6 @@ function prepareInvoiceObjects(
 }
 
 function parseStringToFloat(stringWithComma) {
-  const stringWithoutComma = stringWithComma.replace(',', '.')
-  return parseFloat(stringWithoutComma)
+  const stringWithoutComma = (stringWithComma || '').replace(',', '.')
+  return parseFloat(stringWithoutComma).toFixed(2)
 }
