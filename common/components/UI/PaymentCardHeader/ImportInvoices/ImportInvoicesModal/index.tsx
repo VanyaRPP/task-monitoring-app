@@ -122,6 +122,6 @@ function prepareInvoiceObjects(
 }
 
 function parseStringToFloat(stringWithComma) {
-  const stringWithoutComma = (stringWithComma || '').replace(',', '.')
+  const stringWithoutComma = (stringWithComma + '').replace(',', '.')
   return parseFloat(stringWithoutComma).toFixed(2)
 }
