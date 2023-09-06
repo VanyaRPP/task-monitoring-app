@@ -1,7 +1,7 @@
 import { expect } from '@jest/globals'
 import handler from '.'
 
-import { parseReceived, removeVersion, unpopulate } from '@utils/helpers'
+import { parseReceived, removeProps, unpopulate } from '@utils/helpers'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { domains, realEstates, services, streets, users } from '@utils/testData'
@@ -35,7 +35,7 @@ describe('Service API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = unpopulate(
-      removeVersion(response.data.map((service) => service._doc))
+      removeProps(response.data.map((service) => service._doc))
     )
     const expected = services
 
@@ -66,7 +66,7 @@ describe('Service API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = unpopulate(
-      removeVersion(response.data.map((service) => service._doc))
+      removeProps(response.data.map((service) => service._doc))
     )
     const expected = services.slice(0, limit)
 
@@ -95,7 +95,7 @@ describe('Service API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = unpopulate(
-      removeVersion(response.data.map((service) => service._doc))
+      removeProps(response.data.map((service) => service._doc))
     )
     const expected = services.filter((service) =>
       domains
@@ -128,7 +128,7 @@ describe('Service API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = unpopulate(
-      removeVersion(response.data.map((service) => service._doc))
+      removeProps(response.data.map((service) => service._doc))
     )
     const expected = services.filter((service) => {
       const userCompanies = realEstates.filter((realEstate) =>
@@ -165,7 +165,7 @@ describe('Service API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = unpopulate(
-      removeVersion(response.data.map((service) => service._doc))
+      removeProps(response.data.map((service) => service._doc))
     )
     const expected = services.filter(
       (service) =>
@@ -197,7 +197,7 @@ describe('Service API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = unpopulate(
-      removeVersion(response.data.map((service) => service._doc))
+      removeProps(response.data.map((service) => service._doc))
     )
     const expected = services.filter(
       (service) =>

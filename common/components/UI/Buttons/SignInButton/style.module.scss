@@ -1,9 +1,9 @@
 .Button {
-  margin: 5px;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding-left: 4rem;
+  padding-left: 5rem;
+  max-width: 300px;
   background: transparent !important;
   color: var(--textColor);
 }

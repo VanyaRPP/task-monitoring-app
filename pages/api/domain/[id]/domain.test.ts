@@ -1,10 +1,8 @@
 import { expect } from '@jest/globals'
 import handler from '.'
-import { removeProps, unpopulate } from '@utils/helpers'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { services, users, domains } from '@utils/testData'
-import { Roles } from '@utils/constants'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -12,15 +10,15 @@ jest.mock('@pages/api/api.config', () => jest.fn())
 
 setupTestEnvironment()
 
-describe('Service API - PATCH', () => {
-  it('should update services as GlobalAdmin', async () => {
+describe('Domain API - PATCH', () => {
+  it('should update domains as GlobalAdmin', async () => {
     await mockLoginAs(users.globalAdmin)
 
-    const updatedData = { ...services[0], description: 'updated' }
+    const updatedData = { ...domains[0], description: 'updated' }
 
     const mockReq = {
       method: 'PATCH',
-      query: { id: services[0]._id },
+      query: { id: domains[0]._id },
       body: updatedData,
     } as any
     const mockRes = {
@@ -39,18 +37,17 @@ describe('Service API - PATCH', () => {
     expect(response.data.description).toBe(updatedData.description)
   })
 
-  it('should update valid services as DomainAdmin', async () => {
+  it('should not update domains as DomainAdmin', async () => {
     await mockLoginAs(users.domainAdmin)
 
     const updatedData = {
-      ...services[0],
+      ...domains[0],
       description: 'updated',
-      domain: domains[0],
     }
 
     const mockReq = {
       method: 'PATCH',
-      query: { id: services[0]._id },
+      query: { id: domains[0]._id },
       body: updatedData,
     } as any
     const mockRes = {
@@ -61,78 +58,20 @@ describe('Service API - PATCH', () => {
     await handler(mockReq, mockRes)
 
     const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-    expect(response.data.description).toBe(updatedData.description)
-  })
-
-  it('should not update not valid services as DomainAdmin', async () => {
-    await mockLoginAs(users.domainAdmin)
-
-    const updatedData = {
-      ...services[1],
-      description: 'updated',
-      domain: domains[1],
-    }
-
-    const mockReq = {
-      method: 'PATCH',
-      query: { id: services[1]._id },
-      body: updatedData,
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
-
-    await handler(mockReq, mockRes)
-
-    const response = {
-      status: mockRes.status,
+      status: mockRes.status
     }
 
     expect(response.status).toHaveBeenCalledWith(400)
   })
 
-  it('should not update valid services with not valid domain as DomainAdmin', async () => {
-    await mockLoginAs(users.domainAdmin)
-
-    const updatedData = {
-      ...services[0],
-      description: 'updated',
-      domain: domains[1],
-    }
-
-    const mockReq = {
-      method: 'PATCH',
-      query: { id: services[0]._id },
-      body: updatedData,
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
-
-    await handler(mockReq, mockRes)
-
-    const response = {
-      status: mockRes.status,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(400)
-  })
-
-  it('should not update services as User', async () => {
+  it('should not update domains as User', async () => {
     await mockLoginAs(users.user)
 
-    const updatedData = { ...services[0], description: 'updated' }
+    const updatedData = { ...domains[0], description: 'updated' }
 
     const mockReq = {
       method: 'PATCH',
-      query: { id: services[0]._id },
+      query: { id: domains[0]._id },
       body: updatedData,
     } as any
     const mockRes = {
@@ -149,18 +88,18 @@ describe('Service API - PATCH', () => {
     expect(response.status).toHaveBeenCalledWith(400)
   })
 
-  it('should not update services with not valid fields as GlobalAdmin', async () => {
+  it('should not update domains with not valid fields as GlobalAdmin', async () => {
     await mockLoginAs(users.globalAdmin)
 
     const updatedData = {
-      ...services[0],
+      ...domains[0],
       description: 'updated',
       notValidField: 'notValidField',
     }
 
     const mockReq = {
       method: 'PATCH',
-      query: { id: services[0]._id },
+      query: { id: domains[0]._id },
       body: updatedData,
     } as any
     const mockRes = {

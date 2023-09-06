@@ -9,13 +9,25 @@ import { useState } from 'react'
 
 import AddDomainModal from '@common/components/UI/DomainsComponents/DomainModal'
 import { AppRoutes } from '@utils/constants'
+import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 
-const DomainsHeader = () => {
+export interface Props {
+  currentDomain?: IExtendedDomain
+  setCurrentDomain?: (domain: IExtendedDomain) => void
+}
+
+const DomainsHeader: React.FC<Props> = ({
+  currentDomain,
+  setCurrentDomain,
+}) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const openModal = () => setIsModalOpen(true)
-  const closeModal = () => setIsModalOpen(false)
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setCurrentDomain(null)
+  }
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -31,7 +43,12 @@ const DomainsHeader = () => {
         <Button type="link" onClick={openModal}>
           <PlusOutlined /> Додати
         </Button>
-        <AddDomainModal isModalOpen={isModalOpen} closeModal={closeModal} />
+        {(isModalOpen || currentDomain) && (
+          <AddDomainModal
+            currentDomain={currentDomain}
+            closeModal={closeModal}
+          />
+        )}
       </>
     </div>
   )

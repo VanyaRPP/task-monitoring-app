@@ -76,14 +76,10 @@ export default async function handler(
         await (RealEstate as any).find({});
 
         const { isDomainAdmin, isUser, user, isGlobalAdmin } =
-        await getCurrentUser(req, res)
-        const { companyIds, domainIds, email, limit, skip } = req.query
+          await getCurrentUser(req, res)
+        const { companyIds, domainIds, limit, skip } = req.query
 
         const options = {} as any
-        //   (await getPaymentOptions({
-        //   searchEmail: email,
-        //   userEmail: user.email,
-        // })) as any
         if (isDomainAdmin) {
           const domains = await (Domain as any).find({
             adminEmails: { $in: [user.email] },
@@ -210,22 +206,22 @@ function filterPeriodOptions(args) {
   const filterByDateOptions = []
   if (year) {
     filterByDateOptions.push({
-      $eq: [{ $year: '$date' }, year],
+      $eq: [{ $year: '$invoiceCreationDate' }, year],
     })
   }
   if (quarter) {
     filterByDateOptions.push({
-      $in: [{ $month: '$date' }, quarters[+quarter]],
+      $in: [{ $month: '$invoiceCreationDate' }, quarters[+quarter]],
     })
   }
   if (month) {
     filterByDateOptions.push({
-      $eq: [{ $month: '$date' }, month],
+      $eq: [{ $month: '$invoiceCreationDate' }, month],
     })
   }
   if (day) {
     filterByDateOptions.push({
-      $eq: [{ $dayOfMonth: '$date' }, day],
+      $eq: [{ $dayOfMonth: '$invoiceCreationDate' }, day],
     })
   }
   return filterByDateOptions

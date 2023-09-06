@@ -5,6 +5,7 @@ import { Roles, ServiceType } from './constants'
 import { PaymentOptions } from './types'
 import moment from 'moment'
 import 'moment/locale/uk'
+import _omit from 'lodash/omit'
 import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 
 export const firstTextToUpperCase = (text: string) =>
@@ -109,21 +110,42 @@ export function parseReceived(data) {
   return composeFunctions(data, [
     getPlainJsObjectFromMongoose,
     unpopulate,
-    removeVersion,
+    removeProps,
+    formatDateToIsoString,
   ])
 }
 
+export function compareDates(date1, date2) {
+  const dateA = new Date(date1)
+  const dateB = new Date(date2)
+
+  if (dateA > dateB) {
+    return -1
+  } else if (dateA < dateB) {
+    return 1
+  } else {
+    return 0
+  }
+}
+
+function formatDateToIsoString(data) {
+  return data.map((i) =>
+    i.invoiceCreationDate
+      ? {
+          ...i,
+          invoiceCreationDate: new Date(i.invoiceCreationDate).toISOString(),
+        }
+      : i
+  )
+}
 /**
  * Костиль, щоб прибрати `__v` з документу `mongodb` і далі порівнювати
  * отримані дані із тестовими
  * @param {any[]} data масив документів `mongo_object_response._doc`
  * @returns {any[]} масив документів без поля `__v`
  */
-export const removeVersion = (data: any[]): any[] =>
-  data.map((obj) => {
-    const { __v, ...rest } = obj
-    return rest
-  })
+export const removeProps = (data: any[], props = ['__v', 'services']): any[] =>
+  data.map((obj) => _omit(obj, props))
 
 /**
  * Ще один костиль для тестів, щоб зробити `reverse populate` документу
@@ -199,4 +221,10 @@ export const getPaymentProviderAndReciever = (company) => {
   }
 
   return { provider, reciever }
+}
+
+export const importedPaymentDateToISOStringDate = (date) => {
+  return new Date(
+      moment(date, 'DD.MM.YYYY', true).format('YYYY-MM-DD')
+    ).toISOString()
 }

@@ -36,5 +36,23 @@ export default async function handler(
       } catch (error) {
         return res.status(400).json({ success: false, error })
       }
+
+      case 'PATCH':
+      try {
+        if (isGlobalAdmin) {
+          const response = await Domain.findOneAndUpdate(
+            { _id: req.query.id },
+            req.body,
+            { new: true }
+          )
+          return res.status(200).json({ success: true, data: response })
+        } else {
+          return res
+            .status(400)
+            .json({ success: false, message: 'not allowed' })
+        }
+      } catch (error) {
+        return res.status(400).json({ success: false, error: error.message })
+      }
   }
 }
