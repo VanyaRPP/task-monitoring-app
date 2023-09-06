@@ -234,10 +234,10 @@ const PaymentsBlock = () => {
                 colSpan={item.dataIndex === '' ? 2 : 1}
               >
                 {item.dataIndex === Operations.Debit
-                  ? payments?.totalPayments?.debit || 0
+                  ? payments?.totalPayments?.debit?.toFixed(2) || 0
                   : ''}
                 {item.dataIndex === Operations.Credit
-                  ? payments?.totalPayments?.credit || 0
+                  ? payments?.totalPayments?.credit?.toFixed(2) || 0
                   : ''}
               </Table.Summary.Cell>
             ))}
@@ -250,8 +250,10 @@ const PaymentsBlock = () => {
                 key={item.dataIndex}
               >
                 {item.dataIndex === Operations.Debit
-                  ? (payments?.totalPayments?.debit || 0) -
-                    (payments?.totalPayments?.credit || 0)
+                  ? (
+                      (payments?.totalPayments?.debit || 0) -
+                      (payments?.totalPayments?.credit || 0)
+                    )?.toFixed(2)
                   : false}
               </Table.Summary.Cell>
             ))}
