@@ -5,16 +5,37 @@ import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
 import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
+import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 
 interface Props {
   form: FormInstance<any>
+  currentRealEstate: IExtendedRealestate
 }
 
-const RealEstateForm: FC<Props> = ({ form }) => {
+const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
+  const initialValues = useInitialValues(currentRealEstate)
+
   return (
-    <Form form={form} layout="vertical" className={s.Form}>
-      <DomainsSelect form={form} />
-      <AddressesSelect form={form} />
+    <Form
+      form={form}
+      layout="vertical"
+      className={s.Form}
+      initialValues={initialValues}
+    >
+      {currentRealEstate ? (
+        <Form.Item name="domain" label="Домен">
+          <Input disabled />
+        </Form.Item>
+      ) : (
+        <DomainsSelect form={form} />
+      )}
+      {currentRealEstate ? (
+        <Form.Item name="street" label="Адреса">
+          <Input disabled />
+        </Form.Item>
+      ) : (
+        <AddressesSelect form={form} />
+      )}
       <Form.Item
         name="companyName"
         label="Назва компанії"
@@ -27,7 +48,12 @@ const RealEstateForm: FC<Props> = ({ form }) => {
         label="Опис"
         rules={validateField('required')}
       >
-        <Input.TextArea rows={4} placeholder="Опис" maxLength={512} className={s.formInput} />
+        <Input.TextArea
+          rows={4}
+          placeholder="Опис"
+          maxLength={512}
+          className={s.formInput}
+        />
       </Form.Item>
       <EmailSelect form={form} />
       <Form.Item
@@ -59,11 +85,38 @@ const RealEstateForm: FC<Props> = ({ form }) => {
       <Form.Item name="waterPart" label="Частка водопостачання">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item valuePropName="checked" name="inflicion" label="Індекс інфляції">
+      <Form.Item
+        valuePropName="checked"
+        name="inflicion"
+        label="Індекс інфляції"
+      >
         <Checkbox />
       </Form.Item>
     </Form>
   )
+}
+
+function useInitialValues(currentRealEstate) {
+  // TODO: add useEffect || useCallback ?
+  // currently we have few renders
+  // we need it only once. on didmount (first render)
+  const initialValues = {
+    domain: currentRealEstate?.domain?.name,
+    street:
+      currentRealEstate?.street &&
+      `${currentRealEstate.street.address} (м. ${currentRealEstate.street.city})`,
+    companyName: currentRealEstate?.companyName,
+    description: currentRealEstate?.description,
+    adminEmails: currentRealEstate?.adminEmails,
+    pricePerMeter: currentRealEstate?.pricePerMeter,
+    servicePricePerMeter: currentRealEstate?.servicePricePerMeter,
+    totalArea: currentRealEstate?.totalArea,
+    garbageCollector: currentRealEstate?.garbageCollector,
+    rentPart: currentRealEstate?.rentPart,
+    inflicion: currentRealEstate?.inflicion,
+    waterPart: currentRealEstate?.waterPart,
+  }
+  return initialValues
 }
 
 export default RealEstateForm

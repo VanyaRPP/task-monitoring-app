@@ -1,5 +1,5 @@
-import { DeleteOutlined } from '@ant-design/icons'
-import { Alert, Checkbox, Popconfirm, Table, Tag, message } from 'antd'
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
+import { Alert, Button, Checkbox, Popconfirm, Table, Tag, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 
@@ -10,13 +10,19 @@ import {
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { AppRoutes, Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { isAdminCheck } from '@utils/helpers'
 
 export interface Props {
   domainId?: string
   streetId?: string
+  setCurrentRealEstate?: (realEstate: IExtendedRealestate) => void
 }
 
-const CompaniesTable: React.FC<Props> = ({ domainId, streetId }) => {
+const CompaniesTable: React.FC<Props> = ({
+  domainId,
+  streetId,
+  setCurrentRealEstate,
+}) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.REAL_ESTATE
 
@@ -39,6 +45,7 @@ const CompaniesTable: React.FC<Props> = ({ domainId, streetId }) => {
   }
 
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isAdmin = isAdminCheck(userResponse?.roles)
 
   const tableWidth =
     1800 +
@@ -66,8 +73,10 @@ const CompaniesTable: React.FC<Props> = ({ domainId, streetId }) => {
         streetId,
         isLoading,
         handleDelete,
+        setCurrentRealEstate,
         deleteLoading,
-        isGlobalAdmin
+        isGlobalAdmin,
+        isAdmin
       )}
       dataSource={data}
       scroll={{ x: tableWidth }}
@@ -80,8 +89,10 @@ const getDefaultColumns = (
   streetId?: string,
   isLoading?: boolean,
   handleDelete?: (...args: any) => void,
+  setCurrentRealEstate?: (realEstate: IExtendedRealestate) => void,
   deleteLoading?: boolean,
-  isGlobalAdmin?: boolean
+  isGlobalAdmin?: boolean,
+  isAdmin?: boolean
 ): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {
@@ -128,6 +139,24 @@ const getDefaultColumns = (
       render: (value) => <Checkbox checked={value} disabled />,
     },
   ]
+
+  if (isAdmin) {
+    columns.push({
+      align: 'center',
+      fixed: 'right',
+      title: '',
+      width: 50,
+      render: (_, realEstate: IExtendedRealestate) => (
+        <Button
+          style={{ padding: 0 }}
+          type="link"
+          onClick={() => setCurrentRealEstate(realEstate)}
+        >
+          <EditOutlined />
+        </Button>
+      ),
+    })
+  }
 
   if (isGlobalAdmin) {
     columns.push({

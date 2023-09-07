@@ -54,7 +54,8 @@ const AddServiceModal: FC<Props> = ({ closeModal, currentService }) => {
     if ('data' in response) {
       form.resetFields()
       closeModal()
-      message.success('Додано')
+      const action = currentService ? 'Збережено' : 'Додано'
+      message.success(action)
     } else {
       const action = currentService ? 'збереженні' : 'додаванні'
       message.error(`Помилка при ${action} рахунку`)

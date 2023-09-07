@@ -1,26 +1,32 @@
-import { useAddRealEstateMutation } from '@common/api/realestateApi/realestate.api'
+import {
+  useAddRealEstateMutation,
+  useEditRealEstateMutation,
+} from '@common/api/realestateApi/realestate.api'
 import RealEstateForm from './RealEstateForm'
 import { Form, Modal, message } from 'antd'
 import React, { FC } from 'react'
-import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import {
+  IExtendedRealestate,
+  IRealestate,
+} from '@common/api/realestateApi/realestate.api.types'
 // import AddServiceForm from '../Forms/AddServiceForm'
 // import moment from 'moment'
 
 interface Props {
-  isModalOpen: boolean
   closeModal: VoidFunction
+  currentRealEstate?: IExtendedRealestate
 }
 
-const RealEstateModal: FC<Props> = ({ isModalOpen, closeModal }) => {
+const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
   const [form] = Form.useForm()
   const [addRealEstate] = useAddRealEstateMutation()
+  const [editRealEstate] = useEditRealEstateMutation()
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
-
-    const response = await addRealEstate({
-      domain: formData.domain,
-      street: formData.street,
+    const realEstateData = {
+      domain: currentRealEstate?.domain || formData.domain,
+      street: currentRealEstate?.street || formData.street,
       companyName: formData.companyName,
       description: formData.description,
       adminEmails: formData.adminEmails,
@@ -31,28 +37,39 @@ const RealEstateModal: FC<Props> = ({ isModalOpen, closeModal }) => {
       rentPart: formData.rentPart,
       inflicion: formData.inflicion,
       waterPart: formData.waterPart,
-    })
+    }
+
+    const response = currentRealEstate
+      ? await editRealEstate({
+          _id: currentRealEstate?._id,
+          ...realEstateData,
+        })
+      : await addRealEstate(realEstateData)
 
     if ('data' in response) {
       form.resetFields()
       closeModal()
-      message.success('Додано')
+      const action = currentRealEstate ? 'Збережено' : 'Додано'
+      message.success(action)
     } else {
-      message.error('Помилка при додаванні')
+      const action = currentRealEstate ? 'збереженні' : 'додаванні'
+      message.error(`Помилка при ${action}`)
+      // eslint-disable-next-line no-console
+      console.log('res', response)
     }
   }
 
   return (
     <Modal
-      open={isModalOpen}
+      open={true}
       style={{ top: 20 }}
       title={"Об'єкти нерухомості"}
       onOk={handleSubmit}
       onCancel={closeModal}
-      okText={'Додати'}
+      okText={currentRealEstate ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
     >
-      <RealEstateForm form={form} />
+      <RealEstateForm form={form} currentRealEstate={currentRealEstate} />
     </Modal>
   )
 }
