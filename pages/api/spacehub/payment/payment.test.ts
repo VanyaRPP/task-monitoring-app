@@ -250,11 +250,11 @@ describe('Payments API - GET', () => {
 
     const recived = parseReceived(response.data)
 
-    response.data
-      .map((payment) => new Date(payment.invoiceCreationDate).getFullYear())
-      .every((item) => item === 2023)
+    const expected = payments.filter(
+      (payment) => new Date(payment.invoiceCreationDate).getFullYear() === 2023
+    )
 
-    expect(recived).toBeTruthy()
+    expect(recived).toEqual(expected)
   })
   it('GET payments by month', async () => {
     mockLoginAs(users.user)
@@ -280,11 +280,11 @@ describe('Payments API - GET', () => {
 
     const recived = parseReceived(response.data)
 
-    response.data
-      .map((payment) => new Date(payment.invoiceCreationDate).getMonth())
-      .every((item) => item === 1)
+    const expected = payments.filter(
+      (payment) => new Date(payment.invoiceCreationDate).getMonth() === 1
+    )
 
-    expect(recived).toBeTruthy()
+    expect(recived).toEqual(expected)
   })
   it('GET payments by quarter', async () => {
     mockLoginAs(users.user)
