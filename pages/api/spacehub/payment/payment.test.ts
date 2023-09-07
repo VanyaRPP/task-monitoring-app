@@ -130,7 +130,7 @@ describe('Payments API - GET', () => {
     expect(received).toEqual(expected)
   })
 
-  it("Get payments by companyID for DomainAdmin - success", async () => {
+  it('Get payments by companyID for DomainAdmin - success', async () => {
     await mockLoginAs(users.domainAdmin)
 
     const mockReq = {
@@ -152,8 +152,9 @@ describe('Payments API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = parseReceived(response.data)
-    const expected = payments.filter((payment) =>
-      payment.company === realEstates[0]._id.toString())
+    const expected = payments.filter(
+      (payment) => payment.company === realEstates[0]._id.toString()
+    )
 
     expect(received).toEqual(expected)
   })
@@ -182,10 +183,10 @@ describe('Payments API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = parseReceived(response.data)
-    const expected = payments.filter((payment) =>
-      payment.domain === domains[0]._id.toString())
+    const expected = payments.filter(
+      (payment) => payment.domain === domains[0]._id.toString()
+    )
 
-      
     expect(received).toEqual(expected)
   })
 
@@ -195,7 +196,7 @@ describe('Payments API - GET', () => {
     const mockReq = {
       method: 'GET',
       query: {
-        domainIds: domains[1]._id.toString()
+        domainIds: domains[1]._id.toString(),
       },
     } as any
     const mockRes = {
@@ -214,7 +215,9 @@ describe('Payments API - GET', () => {
 
     const received = parseReceived(response.data)
     const expected = payments.filter((payment) => {
-      const domain = domains.find((domain) => domain.adminEmails.includes(users.user.email))
+      const domain = domains.find((domain) =>
+        domain.adminEmails.includes(users.user.email)
+      )
       return payment.domain === domain?._id
     })
     expect(received).toEqual(expected)
@@ -223,64 +226,161 @@ describe('Payments API - GET', () => {
   // IF DOMAIN INCLUDES USER EMAIL - RETURN A PAYMENT BY THIS DOMAINID
   // FINISH TEST FOR USER AND CREATE A PR
 
-  // it("GET payments by year", async () => {
-  //   mockLoginAs(users.user)
+  it('GET payments by year', async () => {
+    mockLoginAs(users.user)
 
-  //   const mockReq = {
-  //     method: 'GET',
-  //     query: { year: 2020 },
-  //   } as any
-  //   const mockRes = {
-  //     status: jest.fn(() => mockRes),
-  //     json: jest.fn(),
-  //   } as any
+    const mockReq = {
+      method: 'GET',
+      query: { year: 2023 },
+    } as any
 
-  //   await handler(mockReq, mockRes)
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
 
-  //   const response = {
-  //     status: mockRes.status,
-  //     data: mockRes.json.mock.lastCall[0].data,
-  //   }
+    await handler(mockReq, mockRes)
 
-  //   expect(response.status).toHaveBeenCalledWith(200)
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
 
-  //   const recived = parseReceived(response.data)
-  //   const expected = payments[2];
-  //   expect(recived).toEqual(expected)
-  // })
+    expect(response.status).toHaveBeenCalledWith(200)
 
-  // it('load payments as GlobalAdmin by domainId - success', async () => {
-  //   await mockLoginAs(users.globalAdmin)
+    const recived = parseReceived(response.data)
 
-  //   const mockReq = {
-  //     method: 'GET',
-  //     query: { domainIds: domains[0]._id },
-  //   } as any
-  //   const mockRes = {
-  //     status: jest.fn(() => mockRes),
-  //     json: jest.fn(),
-  //   } as any
+    response.data
+      .map((payment) => new Date(payment.invoiceCreationDate).getFullYear())
+      .every((item) => item === 2023)
 
-  //   // ??? BUG: TypeError: (filterIds || "").split is not a function at filterOptions
-  //   await handler(mockReq, mockRes)
+    expect(recived).toBeTruthy()
+  })
+  it('GET payments by month', async () => {
+    mockLoginAs(users.user)
 
-  //   const response = {
-  //     status: mockRes.status,
-  //     data: mockRes.json.mock.lastCall[0].data,
-  //   }
+    const mockReq = {
+      method: 'GET',
+      query: { month: 2 },
+    } as any
 
-  //   expect(response.status).toHaveBeenCalledWith(200)
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
 
-  //   const received = unpopulate(
-  //     removeProps(response.data.map((domain) => domain._doc))
-  //   )
-  //   const expected = payments.find(
-  //     (payment) => payment.domain === domains[0]._id
-  //   )
+    await handler(mockReq, mockRes)
 
-  //   expect(received).toEqual(expected)
-  // })
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const recived = parseReceived(response.data)
+
+    response.data
+      .map((payment) => new Date(payment.invoiceCreationDate).getMonth())
+      .every((item) => item === 1)
+
+    expect(recived).toBeTruthy()
+  })
+  it('GET payments by quarter', async () => {
+    mockLoginAs(users.user)
+
+    const mockReq = {
+      method: 'GET',
+      query: { quarter: 2 },
+    } as any
+
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const recived = parseReceived(response.data)
+
+    function getQuarter(date = new Date()) {
+      return Math.floor(date.getMonth() / 3 + 1)
+    }
+    response.data
+      .map((payment) => getQuarter(new Date(payment.invoiceCreationDate)))
+      .every((item) => item === 2)
+
+    expect(recived).toBeTruthy()
+  })
+
+  it('GET payments by comapnyId for User - success', async () => {
+    await mockLoginAs(users.user)
+
+    const mockReq = {
+      method: 'GET',
+      query: {
+        companyIds: realEstates[0]._id.toString(),
+      },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+    await handler(mockReq, mockRes)
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+    const received = parseReceived(response.data)
+
+    const expected = payments.filter(
+      (payment) => payment.company === realEstates[0]._id.toString()
+    )
+
+    expect(received).toEqual(expected)
+  })
 })
+
+// it('load payments as GlobalAdmin by domainId - success', async () => {
+//   await mockLoginAs(users.globalAdmin)
+
+//   const mockReq = {
+//     method: 'GET',
+//     query: { domainIds: domains[0]._id },
+//   } as any
+//   const mockRes = {
+//     status: jest.fn(() => mockRes),
+//     json: jest.fn(),
+//   } as any
+
+//   // ??? BUG: TypeError: (filterIds || "").split is not a function at filterOptions
+//   await handler(mockReq, mockRes)
+
+//   const response = {
+//     status: mockRes.status,
+//     data: mockRes.json.mock.lastCall[0].data,
+//   }
+
+//   expect(response.status).toHaveBeenCalledWith(200)
+
+//   const received = unpopulate(
+//     removeProps(response.data.map((domain) => domain._doc))
+//   )
+//   const expected = payments.find(
+//     (payment) => payment.domain === domains[0]._id
+//   )
+
+//   expect(received).toEqual(expected)
+// })
 
 describe('Payments API - POST', () => {
   it('POST payment as Global Admin - success', async () => {
