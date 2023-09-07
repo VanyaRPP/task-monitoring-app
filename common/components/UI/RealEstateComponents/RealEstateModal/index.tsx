@@ -14,7 +14,7 @@ import {
 
 interface Props {
   closeModal: VoidFunction
-  currentRealEstate: IExtendedRealestate
+  currentRealEstate?: IExtendedRealestate
 }
 
 const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
