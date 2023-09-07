@@ -169,6 +169,21 @@ export const realEstates = [
     rentPart: 0,
     inflicion: false,
   },
+  {
+    _id: '64d68421d9ba2fc8fea79d26',
+    domain: domains[0]._id,
+    street: streets[0]._id,
+    companyName: 'company_5',
+    description: 'none',
+    adminEmails: [users.domainAdmin.email],
+    pricePerMeter: 10,
+    servicePricePerMeter: 10,
+    totalArea: 10,
+    garbageCollector: 13,
+    waterPart: 0,
+    rentPart: 0,
+    inflicion: false,
+  },
 ]
 
 /*
