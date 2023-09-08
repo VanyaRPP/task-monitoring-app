@@ -226,7 +226,7 @@ describe('Payments API - GET', () => {
   // IF DOMAIN INCLUDES USER EMAIL - RETURN A PAYMENT BY THIS DOMAINID
   // FINISH TEST FOR USER AND CREATE A PR
 
-  it('GET payments by year', async () => {
+  it('GET payments by year 2023', async () => {
     mockLoginAs(users.user)
 
     const mockReq = {
@@ -256,6 +256,38 @@ describe('Payments API - GET', () => {
 
     expect(recived).toEqual(expected)
   })
+
+  it('GET payments by year 2022', async () => {
+    mockLoginAs(users.user)
+
+    const mockReq = {
+      method: 'GET',
+      query: { year: 2022 },
+    } as any
+
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const recived = parseReceived(response.data)
+
+    const expected = payments.filter(
+      (payment) => new Date(payment.invoiceCreationDate).getFullYear() === 2022
+    )
+
+    expect(recived).toEqual(expected)
+  })
+
   it('GET payments by month', async () => {
     mockLoginAs(users.user)
 
