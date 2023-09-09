@@ -112,3 +112,75 @@ export const quarters = {
   '3': [7, 8, 9],
   '4': [10, 11, 12],
 }
+
+export const cascaderYears = ['2021', '2022', '2023']
+
+export const cascaderQuarters = [
+  {
+    label: ` І квартал`,
+    value: '1',
+  },
+  {
+    label: `ІІ квартал`,
+    value: '2',
+  },
+  {
+    label: `III квартал`,
+    value: '3',
+  },
+  {
+    label: `IV квартал`,
+    value: '4',
+  },
+]
+
+export const cascaderMonths = [
+  {
+    label: 'Січень',
+    value: '1',
+  },
+  {
+    label: 'Лютий',
+    value: '2',
+  },
+  {
+    label: 'Березень',
+    value: '3',
+  },
+  {
+    label: 'Квітень',
+    value: '4',
+  },
+  {
+    label: 'Травень',
+    value: '5',
+  },
+  {
+    label: 'Червень',
+    value: '6',
+  },
+  {
+    label: 'Липень',
+    value: '7',
+  },
+  {
+    label: 'Серпень',
+    value: '8',
+  },
+  {
+    label: 'Вересень',
+    value: '9',
+  },
+  {
+    label: 'Жовтень',
+    value: '10',
+  },
+  {
+    label: 'Листопад',
+    value: '11',
+  },
+  {
+    label: 'Грудень',
+    value: '12',
+  },
+]

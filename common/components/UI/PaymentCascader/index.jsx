@@ -1,6 +1,7 @@
 import React from 'react'
 import { Cascader } from 'antd'
 import s from '@components/UI/PaymentCascader/styled.module.scss'
+import { cascaderMonths, cascaderQuarters, cascaderYears } from '@utils/constants';
 
 const PaymentCascader = ({ onChange }) => {
   return (
@@ -18,10 +19,10 @@ const customOptions = [
   {
     label: 'Рік',
     value: 'year',
-    children: [
-      {
-        label: `2023`,
-        value: '2023',
+    children: cascaderYears.map((year) => {
+      return {
+        label: year,
+        value: year,
         children: [
           {
             label: 'Увесь рік',
@@ -30,82 +31,16 @@ const customOptions = [
           {
             label: 'Місяць',
             value: 'month',
-            children: [
-              {
-                label: 'Січень',
-                value: '1',
-              },
-              {
-                label: 'Лютий',
-                value: '2',
-              },
-              {
-                label: 'Березень',
-                value: '3',
-              },
-              {
-                label: 'Квітень',
-                value: '4',
-              },
-              {
-                label: 'Травень',
-                value: '5',
-              },
-              {
-                label: 'Червень',
-                value: '6',
-              },
-              {
-                label: 'Липень',
-                value: '7',
-              },
-              {
-                label: 'Серпень',
-                value: '8',
-              },
-              {
-                label: 'Вересень',
-                value: '9',
-              },
-              {
-                label: 'Жовтень',
-                value: '10',
-              },
-              {
-                label: 'Листопад',
-                value: '11',
-              },
-              {
-                label: 'Грудень',
-                value: '12',
-              },
-            ],
+            children: cascaderMonths,
           },
           {
             label: 'Квартал',
             value: 'quarter',
-            children: [
-              {
-                label: ` І квартал`,
-                value: '1',
-              },
-              {
-                label: `ІІ квартал`,
-                value: '2',
-              },
-              {
-                label: `III квартал`,
-                value: '3',
-              },
-              {
-                label: `IV квартал`,
-                value: '4',
-              },
-            ],
+            children: cascaderQuarters,
           },
         ],
-      },
-    ],
+      }
+    })
   },
 ]
 

@@ -21,7 +21,7 @@ const RealEstateCardHeader = () => {
   return (
     <div className={s.tableHeader}>
       <Button type="link" onClick={() => Router.push(AppRoutes.REAL_ESTATE)}>
-        Об'єкти нерухомості
+        Об&apos;єкти нерухомості
         <SelectOutlined className={s.Icon} />
       </Button>
 
@@ -30,7 +30,7 @@ const RealEstateCardHeader = () => {
           <PlusOutlined /> Додати
         </Button>
       )}
-      <RealEstateModal isModalOpen={isModalOpen} closeModal={closeModal} />
+      {isModalOpen && <RealEstateModal closeModal={closeModal} />}
     </div>
   )
 }

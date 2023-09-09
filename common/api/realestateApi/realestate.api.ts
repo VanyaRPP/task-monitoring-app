@@ -58,6 +58,20 @@ export const realestateApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['RealEstate'] : []),
     }),
+    editRealEstate: builder.mutation<
+      IExtendedRealestate,
+      Partial<IExtendedRealestate>
+    >({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `real-estate/${_id}`,
+          method: 'PATCH',
+          body: body,
+        }
+      },
+      invalidatesTags: (response) => (response ? ['RealEstate'] : []),
+    }),
   }),
 })
 
@@ -65,4 +79,5 @@ export const {
   useDeleteRealEstateMutation,
   useAddRealEstateMutation,
   useGetAllRealEstateQuery,
+  useEditRealEstateMutation,
 } = realestateApi
