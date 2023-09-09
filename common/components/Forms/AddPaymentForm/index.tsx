@@ -162,7 +162,7 @@ function useInitialValues() {
     company: paymentData?.company.companyName,
     description: paymentData?.description,
     credit: paymentData?.credit,
-    generalSum: paymentData?.paymentData,
+    generalSum: paymentData?.generalSum,
     debit: paymentData?.debit,
     invoiceNumber: paymentData?.invoiceNumber,
     invoiceCreationDate: moment(paymentData?.invoiceCreationDate),

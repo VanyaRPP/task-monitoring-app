@@ -1,7 +1,5 @@
 import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
-import {
-  IExtendedPayment,
-} from '@common/api/paymentApi/payment.api.types'
+import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { Form, message, Modal, Tabs, TabsProps } from 'antd'
 import React, { FC, createContext, useContext, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
@@ -9,12 +7,15 @@ import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
 import { Operations } from '@utils/constants'
 import { FormInstance } from 'antd/es/form/Form'
-import { filterInvoiceObject, getPaymentProviderAndReciever } from '@utils/helpers'
+import {
+  filterInvoiceObject,
+  getPaymentProviderAndReciever,
+} from '@utils/helpers'
 import useCompany from '@common/modules/hooks/useCompany'
 
 interface Props {
   closeModal: VoidFunction
-  paymentData?: object
+  paymentData?: any
   edit?: boolean
 }
 
@@ -74,15 +75,18 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
         <AddPaymentForm form={form} edit={edit} paymentData={paymentData} />
       ),
     },
-    {
+  ]
+
+  if (!edit || paymentData?.type === Operations.Debit) {
+    items.push({
       key: '2',
       label: 'Перегляд',
       disabled: !edit || !!(paymentData as unknown as any)?.credit,
       children: (
         <ReceiptForm currPayment={currPayment} paymentData={paymentData} />
       ),
-    },
-  ]
+    })
+  }
 
   return (
     <PaymentContext.Provider
@@ -130,7 +134,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
 }
 
 function getActiveTab(paymentData, edit) {
-  if (paymentData?.credit) return '1'
+  if (paymentData?.type === Operations.Credit) return '1'
   return edit ? '2' : '1'
 }
 
