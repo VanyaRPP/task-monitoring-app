@@ -110,13 +110,8 @@ const PaymentsBlock = () => {
     {
       title: 'Дата створення',
       dataIndex: 'invoiceCreationDate',
+      width: '140px',
       render: dateToDefaultFormat,
-    },
-    {
-      title: 'Місяць',
-      dataIndex: 'monthService',
-      render: (monthService, obj) =>
-        dateToMonthYear(monthService?.date || obj.invoiceCreationDate),
     },
     {
       title: (
@@ -147,8 +142,10 @@ const PaymentsBlock = () => {
       },
     },
     {
-      title: 'Опис',
-      dataIndex: 'description',
+      title: 'За місяць',
+      dataIndex: 'monthService',
+      render: (monthService, obj) =>
+        dateToMonthYear(monthService?.date || obj.invoiceCreationDate),
     },
     ...paymentsPageColumns,
     {
@@ -191,14 +188,6 @@ const PaymentsBlock = () => {
         }
       : { width: '0' },
   ]
-
-  if (isGlobalAdmin && !email) {
-    columns.unshift({
-      title: 'Вулиця',
-      dataIndex: 'street',
-      render: (i) => `${i?.address} (м. ${i?.city})`,
-    })
-  }
 
   columns.unshift({
     title: 'Компанія',
