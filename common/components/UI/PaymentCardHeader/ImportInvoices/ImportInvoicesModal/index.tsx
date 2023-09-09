@@ -62,7 +62,7 @@ const ImportInvoicesModal = ({ closeModal }) => {
         <DomainsSelect form={form} />
         <AddressesSelect form={form} />
         <CompanySelect form={form} />
-        <PaymentTypeSelect/>
+        <PaymentTypeSelect />
         <Form.Item name="json" label="Опис">
           <Input.TextArea rows={20} />
         </Form.Item>
@@ -86,42 +86,57 @@ function prepareInvoiceObjects(
     domain: domainId,
     street: streetId,
     company: companyId,
-    invoice:
-      paymentMethod === Operations.Debit
-        ? [
-            {
-              type: 'maintenancePrice',
-              sum: parseStringToFloat(i.maintenancePrice),
-            },
-            {
-              type: 'placingPrice',
-              sum: parseStringToFloat(i.placingPrice),
-            },
-            {
-              type: 'electricityPrice',
-              lastAmount: parseStringToFloat(i.electricityPriceLastAmount),
-              amount: parseStringToFloat(i.electricityPriceAmount),
-              price: parseStringToFloat(i.electricityPricePrice),
-              sum: parseStringToFloat(i.electricityPriceSum),
-            },
-            {
-              type: 'waterPrice',
-              sum: parseStringToFloat(i.waterPriceSum),
-            },
-            {
-              type: 'inflicionPrice',
-              sum: parseStringToFloat(i.inflicionPrice),
-            },
-          ]
-        : [],
+    invoice: paymentMethod === Operations.Debit ? getInvoiceInfo(i) : [],
     provider,
     reciever,
     generalSum: parseStringToFloat(i.generalSum.toString()),
   }))
+
   return invoices
 }
 
-function parseStringToFloat(stringWithComma) {
+// TODO: move to helper
+export function parseStringToFloat(stringWithComma) {
   const stringWithoutComma = (stringWithComma + '').replace(',', '.')
   return parseFloat(stringWithoutComma).toFixed(2)
+}
+
+function getInvoiceInfo(i) {
+  const res = [
+    {
+      type: 'maintenancePrice',
+      sum: parseStringToFloat(i.maintenancePrice),
+    },
+    {
+      type: 'placingPrice',
+      sum: parseStringToFloat(i.placingPrice),
+    },
+    {
+      type: 'electricityPrice',
+      lastAmount: parseStringToFloat(i.electricityPriceLastAmount),
+      amount: parseStringToFloat(i.electricityPriceAmount),
+      price: parseStringToFloat(i.electricityPricePrice),
+      sum: parseStringToFloat(i.electricityPriceSum),
+    },
+    {
+      type: 'waterPrice',
+      sum: parseStringToFloat(i.waterPriceSum),
+    },
+    {
+      type: 'inflicionPrice',
+      sum: parseStringToFloat(i.inflicionPrice),
+    },
+  ]
+
+  if (i.custom) { 
+    res.push({
+      type: 'custom',
+      sum: parseStringToFloat(i.custom),
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      name: 'Донарахування', 
+    })
+  }
+
+  return res
 }
