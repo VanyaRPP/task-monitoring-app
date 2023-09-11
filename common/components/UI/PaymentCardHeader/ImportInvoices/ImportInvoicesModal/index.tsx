@@ -1,15 +1,21 @@
-import { useAddPaymentMutation, useGetPaymentNumberQuery } from '@common/api/paymentApi/payment.api'
+import {
+  useAddPaymentMutation,
+  useGetPaymentNumberQuery,
+} from '@common/api/paymentApi/payment.api'
 import CompanySelect from '@common/components/Forms/AddPaymentForm/CompanySelect'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
 import useCompany from '@common/modules/hooks/useCompany'
 import { Operations } from '@utils/constants'
-import { getPaymentProviderAndReciever, importedPaymentDateToISOStringDate } from '@utils/helpers'
+import {
+  getPaymentProviderAndReciever,
+  importedPaymentDateToISOStringDate,
+} from '@utils/helpers'
 import { Form, Input, Modal, message } from 'antd'
 
 const ImportInvoicesModal = ({ closeModal }) => {
-  const [addPayment] = useAddPaymentMutation()
+  const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [form] = Form.useForm()
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
@@ -29,29 +35,32 @@ const ImportInvoicesModal = ({ closeModal }) => {
       paymentMethod,
       newInvoiceNumber,
     })
-
+    message.success(`Рахунків до імпорту: ${invoices.length}`)
     const promises = invoices.map(addPayment)
-    await Promise.all(promises).then((responses) => {
-      responses.forEach((response) => {
-        if (response?.data?.success) {
-          message.success(
-            `Додано рахунок для компанії ${response.data.data.reciever.companyName}`
-          )
-        } else {
-          message.error(`Помилка при додаванні рахунку для компанії`)
-        }
+    await Promise.all(promises)
+      .then((responses) => {
+        responses.forEach((response) => {
+          if (response?.data?.success) {
+            message.success(
+              `Додано рахунок для компанії ${response.data.data.reciever.companyName}`
+            )
+          } else {
+            message.error(`Помилка при додаванні рахунку для компанії`)
+          }
+        })
       })
-    })
+      .catch((err) => {
+        message.error(err?.message)
+      })
+    closeModal()
   }
 
   return (
     <Modal
       open={true}
       title="Імпорт інвойсів"
-      onOk={() => {
-        handleSave()
-        closeModal()
-      }}
+      onOk={handleSave}
+      confirmLoading={isLoading}
       onCancel={() => {
         closeModal()
       }}
@@ -128,13 +137,13 @@ function getInvoiceInfo(i) {
     },
   ]
 
-  if (i.custom) { 
+  if (i.custom) {
     res.push({
       type: 'custom',
       sum: parseStringToFloat(i.custom),
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      name: 'Донарахування', 
+      name: 'Донарахування',
     })
   }
 
