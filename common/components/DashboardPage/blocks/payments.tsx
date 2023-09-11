@@ -110,7 +110,7 @@ const PaymentsBlock = () => {
     {
       title: 'Дата створення',
       dataIndex: 'invoiceCreationDate',
-      width: '140px',
+      width: '155px',
       render: dateToDefaultFormat,
     },
     {
