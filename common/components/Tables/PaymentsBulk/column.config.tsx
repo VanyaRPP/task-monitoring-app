@@ -52,7 +52,7 @@ export const getDefaultColumns = (
               value={value || service?.rentPrice}
             />
 
-            {record.servicePricePerMeter && (
+            {!!record.servicePricePerMeter && (
               <StyledTooltip
                 title={'Індивідуальне утримання, що передбачене договором'}
               />

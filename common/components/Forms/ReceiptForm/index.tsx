@@ -31,7 +31,9 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle:
-      newData.company.companyName + '-inv-' + newData.invoiceNumber,
+      (newData.company.companyName || newData.reciever.companyName) +
+      '-inv-' +
+      newData.invoiceNumber,
   })
 
   const { service } = useService({
