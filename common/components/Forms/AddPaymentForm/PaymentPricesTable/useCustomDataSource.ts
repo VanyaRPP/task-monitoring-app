@@ -3,11 +3,7 @@ import { IPaymentTableData, dataSource } from '@utils/tableData'
 import useCompany from '@common/modules/hooks/useCompany'
 import { ServiceType, paymentsTitle } from '@utils/constants'
 
-export function useCustomDataSource({
-  paymentData,
-  companyId,
-  edit,
-}) {
+export function useCustomDataSource({ paymentData, companyId, edit }) {
   const [ds, setDataSource] = useState<IPaymentTableData[]>(dataSource)
   const { company } = useCompany({
     companyId,
@@ -16,11 +12,17 @@ export function useCustomDataSource({
 
   useEffect(() => {
     setDataSource(
-      refreshIndexes(paymentData?.invoice?.map((i) => ({ ...i, name: paymentsTitle.hasOwnProperty(i.type) ? i.type : i.name })))
+      refreshIndexes(
+        paymentData?.invoice?.map((i) => ({
+          ...i,
+          name: paymentsTitle.hasOwnProperty(i.type) ? i.type : i.name,
+        }))
+      )
     )
   }, [paymentData?.invoice])
 
   useEffect(() => {
+    const itemsToDisplay = []
     if (company?.garbageCollector) {
       const garbage = {
         name: ServiceType.GarbageCollector,
@@ -28,7 +30,7 @@ export function useCustomDataSource({
         price: 0,
         sum: 0,
       }
-      setDataSource(refreshIndexes([...dataSource, garbage]))
+      itemsToDisplay.push(garbage)
     }
     if (company?.discount) {
       const discount = {
@@ -37,7 +39,7 @@ export function useCustomDataSource({
         price: 0,
         sum: 0,
       }
-      setDataSource(prev => refreshIndexes([...prev, discount]))
+      itemsToDisplay.push(discount)
     }
     if (company?.inflicion) {
       const inflicion = {
@@ -47,7 +49,10 @@ export function useCustomDataSource({
         //TODO: value from service * company base rent
         sum: 0,
       }
-      setDataSource(prev => refreshIndexes([...prev, inflicion]))
+      itemsToDisplay.push(inflicion)
+    }
+    if (itemsToDisplay.length > 0) {
+      setDataSource(refreshIndexes([...dataSource, ...itemsToDisplay]))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [company])
