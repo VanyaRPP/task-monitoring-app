@@ -27,9 +27,8 @@ export function AmountTotalAreaField({ record, edit }) {
   )
 }
 
-export function AmountPlacingInflicionField({ edit }) {
+export function AmountPlacingInflicionField({ company, edit }) {
   const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ edit })
-
   return (
     <>
       {previousPlacingPrice}+{inflicionPrice}{' '}
@@ -56,5 +55,17 @@ export function useInflicionValues({ edit }) {
     (item) => item.type === ServiceType.Placing
   )?.sum
 
-  return { previousPlacingPrice, inflicionPrice }
+  // TODO: recheck. думаю, що треба буде фетчити навіть для прев"ю, бо колись буде едіт
+  const { company } = useCompany({
+    companyId,
+    skip: previousPlacingPrice !== undefined,
+  })
+
+  const value =
+    previousPlacingPrice ||
+    (company?.totalArea &&
+      company?.pricePerMeter &&
+      company?.totalArea * company?.pricePerMeter)
+
+  return { previousPlacingPrice: value, inflicionPrice }
 }
