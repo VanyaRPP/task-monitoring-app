@@ -25,7 +25,7 @@ const PaymentTotal: FC<Props> = ({ form }) => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     setTotal(services)
-    form.setFieldValue(Operations.Debit, total)
+    form.setFieldValue(Operations.Debit, total.toFixed(2))
   }, [form, total, services])
 
   return (

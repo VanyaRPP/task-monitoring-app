@@ -272,3 +272,23 @@ export function InflicionAmountInfo({ edit }) {
     </>
   )
 }
+
+export function PriceDiscountField({ record, edit }) {
+  const { paymentData, form } = usePaymentContext()
+  const fieldName = [record.name, 'price']
+
+  const companyId = Form.useWatch('company', form) || paymentData?.company
+  const { company } = useCompany({ companyId, skip: edit })
+
+  useEffect(() => {
+    if (company?.discount) {
+      form.setFieldValue(fieldName, company.discount)
+    }
+  }, [company?._id]) //eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <Form.Item name={fieldName} rules={validateField('required')}>
+      <InputNumber disabled={edit} className={s.input} />
+    </Form.Item>
+  )
+}

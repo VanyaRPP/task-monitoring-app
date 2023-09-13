@@ -85,6 +85,9 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
       <Form.Item name="waterPart" label="Частка водопостачання">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
+      <Form.Item name="discount" label="Знижка">
+        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+      </Form.Item>
       <Form.Item
         valuePropName="checked"
         name="inflicion"
@@ -115,6 +118,7 @@ function useInitialValues(currentRealEstate) {
     rentPart: currentRealEstate?.rentPart,
     inflicion: currentRealEstate?.inflicion,
     waterPart: currentRealEstate?.waterPart,
+    discount: currentRealEstate?.discount,
   }
   return initialValues
 }

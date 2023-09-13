@@ -66,7 +66,6 @@ const PaymentCardHeader = ({
               </div>
             )}
             <div>
-              {/* TODO: add admin permission */}
               <ImportInvoices />
               <Button
                 type="link"
