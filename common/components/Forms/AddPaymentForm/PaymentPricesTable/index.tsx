@@ -122,7 +122,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
           {/* PricePlacingField в приклад */}
           {record.name === ServiceType.Placing &&
             (company?.inflicion ? (
-              <AmountPlacingInflicionField edit={edit} />
+              <AmountPlacingInflicionField company={company} edit={edit} />
             ) : (
               <AmountTotalAreaField record={record} edit={edit} />
             ))}
@@ -146,7 +146,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       dataIndex: 'sum',
       ellipsis: true,
       render: (text, record) => <SumWrapper record={record} form={form} />,
-      width: 90,
+      width: 110,
     },
   ]
 
