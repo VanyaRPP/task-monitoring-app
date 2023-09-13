@@ -8,6 +8,7 @@ import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
 import { NamePath } from 'antd/lib/form/interface'
 import { ServiceType } from '@utils/constants'
+import { useInflicionValues } from './amountFields'
 
 export function PriceMaintainceField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
@@ -29,17 +30,26 @@ export function PriceMaintainceField({ record, edit }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={edit} className={s.input} />
+      <InputNumber disabled className={s.input} />
     </Form.Item>
   )
 }
 
 export function PricePlacingField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
-  const fieldName = [record.name, 'price']
   const companyId = Form.useWatch('company', form) || paymentData?.company
-
   const { company } = useCompany({ companyId, skip: edit })
+
+  return company?.inflicion ? (
+    <InflicionPricePlacingField record={record} edit={edit} />
+  ) : (
+    <DefaultPricePlacingField company={company} record={record} edit={edit} />
+  )
+}
+
+function DefaultPricePlacingField({ company, record, edit }) {
+  const { form } = usePaymentContext()
+  const fieldName = [record.name, 'price']
 
   useEffect(() => {
     if (company?._id && company?.pricePerMeter) {
@@ -49,7 +59,23 @@ export function PricePlacingField({ record, edit }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={edit} className={s.input} />
+      <InputNumber disabled className={s.input} />
+    </Form.Item>
+  )
+}
+
+function InflicionPricePlacingField({ record, edit }) {
+  const { form } = usePaymentContext()
+  const fieldName = [record.name, 'price']
+  const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ edit })
+
+  useEffect(() => {
+    form.setFieldValue(fieldName, +previousPlacingPrice + +inflicionPrice)
+  }, [previousPlacingPrice, inflicionPrice]) //eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <Form.Item name={fieldName} rules={validateField('required')}>
+      <InputNumber disabled className={s.input} />
     </Form.Item>
   )
 }
@@ -89,8 +115,8 @@ function FormAttributeForSingle({
 }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
-  const { company } = useCompanyInvoice({ companyId, skip: disabled })
-  const value = company?.invoice?.find(
+  const { lastInvoice } = useCompanyInvoice({ companyId, skip: disabled })
+  const value = lastInvoice?.invoice?.find(
     (item) => item.type === invoicePropName
   )?.amount
 
