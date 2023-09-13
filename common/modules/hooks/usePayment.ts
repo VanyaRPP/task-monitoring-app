@@ -10,6 +10,6 @@ export function useCompanyInvoice({ companyId, skip }: IUseCompanyProps) {
     { companyIds: [companyId], limit: 1 },
     { skip: skip }
   )
-  const company = paymentsResponse?.data?.[0]
-  return { company, isLoading }
+  const lastInvoice = paymentsResponse?.data?.[0]
+  return { lastInvoice, isLoading }
 }

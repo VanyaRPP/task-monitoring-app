@@ -1,9 +1,12 @@
-import { InputNumber, Form } from 'antd'
+import { InputNumber, Form, Tooltip } from 'antd'
 import { useEffect } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import s from '../style.module.scss'
 import useCompany from '@common/modules/hooks/useCompany'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
+import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
+import { ServiceType } from '@utils/constants'
+import { QuestionCircleOutlined } from '@ant-design/icons'
 
 export function AmountTotalAreaField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
@@ -19,7 +22,39 @@ export function AmountTotalAreaField({ record, edit }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={edit} className={s.input} />
+      <InputNumber disabled className={s.input} />
     </Form.Item>
   )
+}
+
+export function AmountPlacingInflicionField({ edit }) {
+  const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ edit })
+
+  return (
+    <>
+      {previousPlacingPrice}+{inflicionPrice}{' '}
+      <Tooltip
+        title={`Попередній місяць розміщення + індекс інфляції в цьому рахунку`}
+      >
+        <QuestionCircleOutlined />
+      </Tooltip>
+    </>
+  )
+}
+
+export function useInflicionValues({ edit }) {
+  const { paymentData, form } = usePaymentContext()
+  const companyId = Form.useWatch('company', form) || paymentData?.company
+  const inflicionValueFieldName = ['inflicionPrice', 'price']
+
+  // TODO: fix in preview mode default value instead of 'fix me in preview'
+  const inflicionPrice =
+    Form.useWatch(inflicionValueFieldName, form) ?? 'fix me in preview'
+
+  const { lastInvoice } = useCompanyInvoice({ companyId, skip: edit })
+  const previousPlacingPrice = lastInvoice?.invoice?.find(
+    (item) => item.type === ServiceType.Placing
+  )?.sum
+
+  return { previousPlacingPrice, inflicionPrice }
 }

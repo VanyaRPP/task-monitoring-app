@@ -32,7 +32,10 @@ import {
   WaterPartInfo,
 } from './fields/priceFields'
 import useCompany from '@common/modules/hooks/useCompany'
-import { AmountTotalAreaField } from './fields/amountFields'
+import {
+  AmountPlacingInflicionField,
+  AmountTotalAreaField,
+} from './fields/amountFields'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import {
   DeleteOutlined,
@@ -67,7 +70,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
     {
       title: '№',
       dataIndex: 'id',
-      width: "5%",
+      width: '5%',
     },
     {
       title: 'Назва',
@@ -112,17 +115,24 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
           {record.name === ServiceType.Water && (
             <OldWater record={record} edit={edit} />
           )}
-          {(record.name === ServiceType.Placing ||
-            record.name === ServiceType.Maintenance) && (
+          {record.name === ServiceType.Maintenance && (
             <AmountTotalAreaField record={record} edit={edit} />
           )}
+          {/* TODO: не гарний елс іф. треба засунути в один компонент і всю магію, що стосується цього компонента робити в ньому  */}
+          {/* PricePlacingField в приклад */}
+          {record.name === ServiceType.Placing &&
+            (company?.inflicion ? (
+              <AmountPlacingInflicionField edit={edit} />
+            ) : (
+              <AmountTotalAreaField record={record} edit={edit} />
+            ))}
         </>
       ),
     },
     {
       title: 'Ціна',
       dataIndex: 'price',
-      width:'20%',
+      width: '20%',
       render: (text, record) => {
         if (record.name in fields) {
           const Component = fields[record.name]
@@ -136,7 +146,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       dataIndex: 'sum',
       ellipsis: true,
       render: (text, record) => <SumWrapper record={record} form={form} />,
-      width: 80,
+      width: 90,
     },
   ]
 
@@ -188,7 +198,7 @@ const fields: any = {
   garbageCollectorPrice: PriceGarbageCollectorField,
   inflicionPrice: PriceInflicionField,
   waterPart: PriceWaterPartField,
-  discount: PriceDiscountField
+  discount: PriceDiscountField,
 }
 
 function AddCustomField({ addDataSource }) {
@@ -332,8 +342,10 @@ const getVal = (record, obj) => {
       return +m.toFixed(1) || 0
     }
     case ServiceType.Placing: {
-      const p = obj?.amount * obj?.price
-      return +p.toFixed(1) || 0
+      // TODO: тут теж може бути прикол Індекс інфляції. Фікс прев"ю. Частина 5
+      const p =
+        obj?.amount === undefined ? obj?.price : obj?.amount * obj?.price
+      return +p?.toFixed(1) || 0
     }
     case ServiceType.Electricity: {
       const e = (obj?.amount - obj?.lastAmount) * obj?.price
