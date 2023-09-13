@@ -30,6 +30,15 @@ export function useCustomDataSource({
       }
       setDataSource(refreshIndexes([...dataSource, garbage]))
     }
+    if (company?.discount) {
+      const discount = {
+        name: ServiceType.Discount,
+        amount: 0,
+        price: 0,
+        sum: 0,
+      }
+      setDataSource(prev => refreshIndexes([...prev, discount]))
+    }
     if (company?.inflicion) {
       const inflicion = {
         name: ServiceType.Inflicion,

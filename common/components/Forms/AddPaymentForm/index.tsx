@@ -141,6 +141,9 @@ function useInitialValues() {
     inflicion: paymentData?.invoice.find(
       (item) => item?.type === ServiceType.Inflicion
     ),
+    discount: paymentData?.invoice.find(
+      (item) => item?.type === ServiceType.Discount
+    ),
     custom: paymentData?.invoice.filter(
       (item) => item?.type === ServiceType.Custom
     ),
@@ -193,6 +196,9 @@ function useInitialValues() {
     },
     [ServiceType.Inflicion]: {
       price: invoices.inflicion?.price,
+    },
+    [ServiceType.Discount]: {
+      price: invoices.discount?.price,
     },
     ...customFields,
   }

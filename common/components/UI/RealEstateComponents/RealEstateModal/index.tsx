@@ -37,6 +37,7 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
       rentPart: formData.rentPart,
       inflicion: formData.inflicion,
       waterPart: formData.waterPart,
+      discount: formData.discount * -1,
     }
 
     const response = currentRealEstate
@@ -54,8 +55,6 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
     } else {
       const action = currentRealEstate ? 'збереженні' : 'додаванні'
       message.error(`Помилка при ${action}`)
-      // eslint-disable-next-line no-console
-      console.log('res', response)
     }
   }
 

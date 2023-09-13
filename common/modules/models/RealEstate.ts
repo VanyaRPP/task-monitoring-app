@@ -12,6 +12,7 @@ export interface IRealEstateModel {
   totalArea?: number
   rentPart?: number
   waterPart?: number
+  discount?: number
   inflicion?: boolean
 }
 
@@ -27,6 +28,7 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   garbageCollector: { type: Number, required: false, default: 0 },
   rentPart: { type: Number, required: true, default: 0 },
   waterPart: { type: Number, required: true, default: 0 },
+  discount: { type: Number, required: false, default: 0 },
   inflicion: { type: Boolean, required: false, default: false },
 })
 
