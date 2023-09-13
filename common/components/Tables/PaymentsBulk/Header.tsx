@@ -135,8 +135,7 @@ const prepareInvoiceObjects = async (
       (company) => company.companyName === values.companies[key].companyName
     )
     const { provider, reciever } = getPaymentProviderAndReciever(company)
-
-    const filteredInvoice = filterInvoiceObject({
+    const invoices: any = {
       maintenancePrice: {
         amount: invoice.totalArea,
         ...invoice.maintenancePrice,
@@ -164,7 +163,15 @@ const prepareInvoiceObjects = async (
         price: invoice.inflicionPrice,
         sum: invoice.inflicionPrice,
       },
-    })
+    }
+    if (invoice.discount < 0) {
+      invoices.discount = {
+        price: invoice.discount,
+        sum: invoice.discount,
+      }
+    }
+
+    const filteredInvoice = filterInvoiceObject(invoices)
     return {
       invoiceNumber: newInvoiceNumber + index,
       type: Operations.Debit,
@@ -175,7 +182,7 @@ const prepareInvoiceObjects = async (
       invoiceCreationDate: new Date(),
       description: '',
       generalSum:
-        filteredInvoice.reduce((acc, val) => acc + (+val.sum || 0), 0) || 0,
+        filteredInvoice.reduce((acc, val) => acc + (+val.sum || 0), 0).toFixed(2) || 0,
       provider,
       reciever,
       invoice: filteredInvoice,

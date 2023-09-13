@@ -21,6 +21,7 @@ import {
   InflicionAmountInfo,
   OldElectricity,
   OldWater,
+  PriceDiscountField,
   PriceElectricityField,
   PriceGarbageCollectorField,
   PriceInflicionField,
@@ -179,7 +180,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
   )
 }
 
-const fields = {
+const fields: any = {
   maintenancePrice: PriceMaintainceField,
   placingPrice: PricePlacingField,
   electricityPrice: PriceElectricityField,
@@ -187,6 +188,7 @@ const fields = {
   garbageCollectorPrice: PriceGarbageCollectorField,
   inflicionPrice: PriceInflicionField,
   waterPart: PriceWaterPartField,
+  discount: PriceDiscountField
 }
 
 function AddCustomField({ addDataSource }) {

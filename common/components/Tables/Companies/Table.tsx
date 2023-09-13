@@ -133,6 +133,10 @@ const getDefaultColumns = (
       dataIndex: 'waterPart',
     },
     {
+      title: 'Знижка',
+      dataIndex: 'discount',
+    },
+    {
       align: 'center',
       title: 'Нарахування інд. інф.',
       dataIndex: 'inflicion',
