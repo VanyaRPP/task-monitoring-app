@@ -118,6 +118,9 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
           {record.name === ServiceType.Maintenance && (
             <AmountTotalAreaField record={record} edit={edit} />
           )}
+          {record.name === ServiceType.GarbageCollector && (
+            <AmountTotalAreaField record={record} edit={edit} />
+          )}
           {/* TODO: не гарний елс іф. треба засунути в один компонент і всю магію, що стосується цього компонента робити в ньому  */}
           {/* PricePlacingField в приклад */}
           {record.name === ServiceType.Placing &&
@@ -354,6 +357,11 @@ const getVal = (record, obj) => {
     case ServiceType.Water: {
       const w = (obj?.amount - obj?.lastAmount) * obj?.price
       return +w.toFixed(1) || 0
+    }
+    case ServiceType.GarbageCollector: {
+      const g =
+        obj?.amount === undefined ? obj?.price : obj?.amount * obj?.price
+      return +g?.toFixed(1) || 0
     }
     default: {
       return +obj?.price || 0

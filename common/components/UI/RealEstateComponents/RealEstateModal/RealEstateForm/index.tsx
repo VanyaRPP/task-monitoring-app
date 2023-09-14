@@ -70,9 +70,6 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item name="garbageCollector" label="Вивіз сміття">
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
-      </Form.Item>
       <Form.Item
         name="servicePricePerMeter"
         label="Індивідуальне утримання за метр"
@@ -87,6 +84,15 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
       </Form.Item>
       <Form.Item name="discount" label="Знижка">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+      </Form.Item>
+      <Form.Item
+        valuePropName="checked"
+        name="garbageCollector"
+        label="Вивіз сміття"
+      >
+        <Checkbox.Group defaultValue={["a"]}>
+          <Checkbox value={"a"} />
+        </Checkbox.Group>
       </Form.Item>
       <Form.Item
         valuePropName="checked"

@@ -181,6 +181,36 @@ export const getDefaultColumns = (
     ],
   },
   {
+    title: service ? (
+      <>
+        Всього за вивезення ТПВ:
+        <br />
+        {service.garbageCollectorPrice} грн/м&sup2;{' '}
+      </>
+    ) : (
+      'Вивезення ТПВ'
+    ),
+    children: [
+      {
+        title: 'Загальна частка',
+        dataIndex: 'totalArea',
+        render: (__, record) => (
+          <FormAttribute
+            name={['companies', record.companyName, 'totalArea']}
+            value={record?.totalArea || 0}
+          />
+        ),
+      },
+      {
+        title: 'Загальне',
+        dataIndex: 'waterPart',
+        render: (__, record) => (
+          <GarbageCollectorPrice service={service} record={record} />
+        ),
+      },
+    ],
+  },
+  {
     // TODO: треба відобразити індекс інфляції за минулий місяць
     // тайтл також стає компонентом. там ми фетчимо сервіс і тут же відображаємо правильний %
     title: `Індекс інфляції за ${moment(service?.date)
@@ -189,17 +219,6 @@ export const getDefaultColumns = (
     dataIndex: 'inflicionPrice',
     render: (__, record) => (
       <InflicionPrice service={service} record={record} />
-    ),
-  },
-  {
-    title: 'ТПВ',
-    dataIndex: 'garbageCollector',
-    render: (value, record) => (
-      <FormAttribute
-        name={['companies', record.companyName, 'garbageCollector']}
-        value={value || 0}
-        disabled
-      />
     ),
   },
   {
@@ -248,6 +267,28 @@ const InflicionPrice: React.FC<{ service: any; record: any }> = ({
     <FormAttribute
       name={['companies', record.companyName, 'inflicionPrice']}
       value={record.inflicion ? inflicionAmount : 0}
+      disabled
+    />
+  )
+}
+
+const GarbageCollectorPrice: React.FC<{ service: any; record: any }> = ({
+  service,
+  record,
+}) => {
+  const { form } = useInvoicesPaymentContext()
+
+  const totalArea = Form.useWatch(
+    ['companies', record.companyName, 'totalArea'],
+    form
+  )
+
+  const garbageCollector = service?.garbageCollectorPrice * totalArea
+
+  return (
+    <FormAttribute
+      name={['companies', record.companyName, 'garbageCollectorPrice']}
+      value={record.garbageCollector ? garbageCollector : 0}
       disabled
     />
   )
