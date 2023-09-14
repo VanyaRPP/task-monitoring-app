@@ -72,9 +72,9 @@ export function useInflicionValues({ edit }) {
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const inflicionValueFieldName = ['inflicionPrice', 'price']
 
-  // TODO: fix in preview mode default value instead of 'fix me in preview'
+  // TODO: fix in preview mode
   const inflicionPrice =
-    Form.useWatch(inflicionValueFieldName, form) ?? 'fix me in preview'
+    Form.useWatch(inflicionValueFieldName, form) ?? ''
 
   const { lastInvoice } = useCompanyInvoice({ companyId, skip: edit })
   const previousPlacingPrice = lastInvoice?.invoice?.find(
