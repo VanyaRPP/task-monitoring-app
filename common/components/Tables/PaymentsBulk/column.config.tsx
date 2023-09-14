@@ -272,7 +272,7 @@ function useInflicionValues({ companyId, company, service }) {
       company?.totalArea * company?.pricePerMeter)
 
   const inflicionAmount = +getInflicionValue(value, service?.inflicionPrice)
-  return { previousPlacingPrice, inflicionAmount }
+  return { previousPlacingPrice: value, inflicionAmount }
 }
 
 const InflicionPrice: React.FC<{ service: any; record: any }> = ({
