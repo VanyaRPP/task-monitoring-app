@@ -139,7 +139,7 @@ export function PriceGarbageCollectorField({ record, edit }) {
     ) {
       form.setFieldValue(
         fieldName,
-        (service.garbageCollectorPrice / 100) * company.rentPart
+        ((service.garbageCollectorPrice / 100) * company.rentPart)?.toFixed(1)
       )
     }
   }, [service?._id, company?.garbageCollector]) //eslint-disable-line react-hooks/exhaustive-deps

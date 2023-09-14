@@ -69,6 +69,7 @@ export const getDefaultColumns = (
       },
     ],
   },
+  // TODO: підтянути формулу індексу інфляції з сінгл інвойса
   {
     title: 'Розміщення',
     children: [
@@ -88,6 +89,17 @@ export const getDefaultColumns = (
         render: (__, record) => <PricePerMeterSum record={record} />,
       },
     ],
+  },
+  {
+    // TODO: треба відобразити індекс інфляції за минулий місяць
+    // тайтл також стає компонентом. там ми фетчимо сервіс і тут же відображаємо правильний %
+    title: `Індекс інфляції за ${moment(service?.date)
+      .subtract(1, 'months')
+      .format('MMMM')}`,
+    dataIndex: 'inflicionPrice',
+    render: (__, record) => (
+      <InflicionPrice service={service} record={record} />
+    ),
   },
   {
     title: service?.electricityPrice
@@ -193,11 +205,17 @@ export const getDefaultColumns = (
     children: [
       {
         title: 'Загальна частка',
-        dataIndex: 'totalArea',
+        dataIndex: 'garbageCollectorPrice',
         render: (__, record) => (
           <FormAttribute
-            name={['companies', record.companyName, 'totalArea']}
-            value={record?.totalArea || 0}
+            name={[
+              'companies',
+              record.companyName,
+              'garbageCollector',
+              'amount',
+            ]}
+            value={record?.rentPart || 0}
+            disabled
           />
         ),
       },
@@ -209,17 +227,6 @@ export const getDefaultColumns = (
         ),
       },
     ],
-  },
-  {
-    // TODO: треба відобразити індекс інфляції за минулий місяць
-    // тайтл також стає компонентом. там ми фетчимо сервіс і тут же відображаємо правильний %
-    title: `Індекс інфляції за ${moment(service?.date)
-      .subtract(1, 'months')
-      .format('MMMM')}`,
-    dataIndex: 'inflicionPrice',
-    render: (__, record) => (
-      <InflicionPrice service={service} record={record} />
-    ),
   },
   {
     title: 'Знижка',
@@ -277,17 +284,16 @@ const GarbageCollectorPrice: React.FC<{ service: any; record: any }> = ({
   record,
 }) => {
   const { form } = useInvoicesPaymentContext()
-
-  const totalArea = Form.useWatch(
-    ['companies', record.companyName, 'totalArea'],
+  const rentPart = Form.useWatch(
+    ['companies', record.companyName, 'garbageCollector', 'amount'],
     form
   )
 
-  const garbageCollector = service?.garbageCollectorPrice * totalArea
+  const garbageCollector = (service?.garbageCollectorPrice / 100) * rentPart
 
   return (
     <FormAttribute
-      name={['companies', record.companyName, 'garbageCollectorPrice']}
+      name={['companies', record.companyName, 'garbageCollector', 'sum']}
       value={record.garbageCollector ? garbageCollector : 0}
       disabled
     />

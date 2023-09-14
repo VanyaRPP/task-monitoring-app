@@ -8,9 +8,9 @@ import {
   Modal,
   Input,
 } from 'antd'
-import { FC, useEffect, useState } from 'react'
+import { FC, useState } from 'react'
 import { ColumnProps } from 'antd/lib/table'
-import { IPaymentTableData } from '@utils/tableData'
+import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
 import { ServiceType, paymentsTitle } from '@utils/constants'
 import { getName } from '@utils/helpers'
 import s from './style.module.scss'
@@ -18,14 +18,16 @@ import useService from '@common/modules/hooks/useService'
 import useCompany from '@common/modules/hooks/useCompany'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import {
-  DeleteOutlined,
   MinusCircleOutlined,
+  DeleteOutlined,
   PlusOutlined,
 } from '@ant-design/icons'
 import { useCustomDataSource } from './useCustomDataSource'
 import { getDispalyedDate } from '../../ReceiptForm'
 import PriceComponent from './fields/PriceComponent'
 import AmountComponent from './fields/AmountComponent'
+import SumComponent from './fields/SumComponent'
+
 interface Props {
   form: FormInstance<any>
   edit: boolean
@@ -83,7 +85,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       title: 'К-сть',
       dataIndex: 'amount',
       width: '30%',
-      render: (text, record) => <AmountComponent record={record} edit={edit} />,
+      render: (__, record) => <AmountComponent record={record} edit={edit} />,
     },
     {
       title: 'Ціна',
@@ -95,7 +97,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       title: 'Сума',
       dataIndex: 'sum',
       ellipsis: true,
-      render: (text, record) => <SumWrapper record={record} form={form} />,
+      render: (__, record) => <SumComponent record={record} />,
       width: 110,
     },
   ]
@@ -182,53 +184,6 @@ function AddCustomField({ addDataSource }) {
       </Modal>
     </>
   )
-}
-
-function SumWrapper({ record, form }) {
-  const formFields = Form.useWatch(record.name, form)
-  const valueToSet = getVal(record?.name, formFields) || record.sum
-
-  useEffect(() => {
-    form.setFieldValue([record.name, 'sum'], valueToSet)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [valueToSet])
-
-  return (
-    <Form.Item name={[record?.name, 'sum']}>
-      <h4 className={s.price}>{valueToSet} ₴</h4>
-    </Form.Item>
-  )
-}
-
-const getVal = (record, obj) => {
-  switch (record) {
-    case ServiceType.Maintenance: {
-      const m = obj?.amount * obj?.price
-      return +m.toFixed(1) || 0
-    }
-    case ServiceType.Placing: {
-      // TODO: тут теж може бути прикол Індекс інфляції. Фікс прев"ю. Частина 5
-      const p =
-        obj?.amount === undefined ? obj?.price : obj?.amount * obj?.price
-      return +p?.toFixed(1) || 0
-    }
-    case ServiceType.Electricity: {
-      const e = (obj?.amount - obj?.lastAmount) * obj?.price
-      return +e.toFixed(1) || 0
-    }
-    case ServiceType.Water: {
-      const w = (obj?.amount - obj?.lastAmount) * obj?.price
-      return +w.toFixed(1) || 0
-    }
-    case ServiceType.GarbageCollector: {
-      const g =
-        obj?.amount === undefined ? obj?.price : obj?.amount * obj?.price
-      return +g?.toFixed(1) || 0
-    }
-    default: {
-      return +obj?.price || 0
-    }
-  }
 }
 
 export default PaymentPricesTable

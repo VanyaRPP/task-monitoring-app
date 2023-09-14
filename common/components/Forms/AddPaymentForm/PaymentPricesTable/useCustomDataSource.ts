@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
-import { IPaymentTableData, dataSource } from '@utils/tableData'
-import useCompany from '@common/modules/hooks/useCompany'
+import { IPaymentTableData, dataSource, electricityObj } from './tableData'
 import { ServiceType, paymentsTitle } from '@utils/constants'
+import useCompany from '@common/modules/hooks/useCompany'
+import { useEffect, useState } from 'react'
 
 export function useCustomDataSource({ paymentData, companyId, edit }) {
   const [ds, setDataSource] = useState<IPaymentTableData[]>(dataSource)
@@ -22,37 +22,24 @@ export function useCustomDataSource({ paymentData, companyId, edit }) {
   }, [paymentData?.invoice])
 
   useEffect(() => {
-    const itemsToDisplay = []
-    if (company?.garbageCollector) {
-      const garbage = {
-        name: ServiceType.GarbageCollector,
-        amount: 0,
-        price: 0,
-        sum: 0,
+    if (!paymentData?.invoice) {
+      const itemsToDisplay = []
+      if (company?.inflicion) {
+        itemsToDisplay.push({ name: ServiceType.Inflicion })
       }
-      itemsToDisplay.push(garbage)
-    }
-    if (company?.discount) {
-      const discount = {
-        name: ServiceType.Discount,
-        amount: 0,
-        price: 0,
-        sum: 0,
+      itemsToDisplay.push(electricityObj)
+      itemsToDisplay.push({
+        name: company?.waterPart ? ServiceType.WaterPart : ServiceType.Water,
+      })
+      if (company?.garbageCollector) {
+        itemsToDisplay.push({ name: ServiceType.GarbageCollector })
       }
-      itemsToDisplay.push(discount)
-    }
-    if (company?.inflicion) {
-      const inflicion = {
-        name: ServiceType.Inflicion,
-        amount: 0,
-        price: 0,
-        //TODO: value from service * company base rent
-        sum: 0,
+      if (company?.discount) {
+        itemsToDisplay.push({ name: ServiceType.Discount })
       }
-      itemsToDisplay.push(inflicion)
-    }
-    if (itemsToDisplay.length > 0) {
-      setDataSource(refreshIndexes([...dataSource, ...itemsToDisplay]))
+      if (itemsToDisplay.length > 0) {
+        setDataSource(refreshIndexes([...dataSource, ...itemsToDisplay]))
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [company])
