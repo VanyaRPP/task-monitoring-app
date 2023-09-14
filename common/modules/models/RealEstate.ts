@@ -29,7 +29,7 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   waterPart: { type: Number, required: true, default: 0 },
   discount: { type: Number, required: false, default: 0 },
   inflicion: { type: Boolean, required: false, default: false },
-  garbageCollector: { type: Boolean, required: false, default: true },
+  garbageCollector: { type: Boolean, required: false, default: false },
 })
 
 const RealEstate =

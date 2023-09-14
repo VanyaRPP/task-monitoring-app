@@ -90,9 +90,7 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
         name="garbageCollector"
         label="Вивіз сміття"
       >
-        <Checkbox.Group defaultValue={["a"]}>
-          <Checkbox value={"a"} />
-        </Checkbox.Group>
+        <Checkbox />
       </Form.Item>
       <Form.Item
         valuePropName="checked"
