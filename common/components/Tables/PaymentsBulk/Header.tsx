@@ -156,8 +156,9 @@ const prepareInvoiceObjects = async (
       waterPart: invoice.waterPart,
 
       garbageCollectorPrice: {
-        price: invoice.garbageCollector,
-        sum: invoice.garbageCollector,
+        amount: invoice.totalArea,
+        price: service?.garbageCollectorPrice,
+        sum: invoice.garbageCollectorPrice,
       },
       inflicionPrice: {
         price: invoice.inflicionPrice,

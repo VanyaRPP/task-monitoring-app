@@ -78,6 +78,9 @@ const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
+      <Form.Item name="garbageCollectorPrice" label="Вивіз сміття">
+        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+      </Form.Item>
       <Form.Item name="inflicionPrice" label="Індекс інфляції">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
@@ -108,6 +111,7 @@ function useInitialValues(currentService) {
     waterPrice: currentService?.waterPrice,
     description: currentService?.description,
     waterPriceTotal: currentService?.waterPriceTotal,
+    garbageCollectorPrice: currentService?.garbageCollectorPrice,
   }
   return initialValues
 }

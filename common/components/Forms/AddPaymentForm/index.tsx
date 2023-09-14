@@ -192,6 +192,7 @@ function useInitialValues() {
       price: invoices.waterPart?.price,
     },
     [ServiceType.GarbageCollector]: {
+      amount: invoices.garbageCollector?.amount,
       price: invoices.garbageCollector?.price,
     },
     [ServiceType.Inflicion]: {
