@@ -181,13 +181,13 @@ export function AmountInflicionField({ edit }) {
   const { company } = useCompany({ companyId, skip: edit })
   const { service } = useService({ serviceId, skip: edit })
 
-  const percent = (service?.inflicionPrice - 100).toFixed(2)
-  const rentPrice = company?.pricePerMeter * company?.totalArea
+  const { previousPlacingPrice } = useInflicionValues({ edit })
 
+  const percent = (service?.inflicionPrice - 100).toFixed(2)
   return (
     <>
       {company?.inflicion && service?.inflicionPrice
-        ? percent + '% від ' + rentPrice
+        ? percent + '% від ' + previousPlacingPrice
         : null}
     </>
   )

@@ -160,6 +160,7 @@ export function PriceInflicionField({ record, edit }) {
 
   const { company } = useCompany({ companyId, skip: edit })
   const { service } = useService({ serviceId, skip: edit })
+  const { previousPlacingPrice } = useInflicionValues({ edit })
 
   // TODO: вивчити формулу. потім ціна оренди береться із суми індексу інфляції і поточної оренди
   // БРАТИ ЦІНУ ОРЕНДИ З МИНУЛОГО ІНВОЙСУ
@@ -167,12 +168,11 @@ export function PriceInflicionField({ record, edit }) {
 
   useEffect(() => {
     if (service?._id && service?.inflicionPrice && company.inflicion) {
-      const rentPrice = company?.pricePerMeter * company?.totalArea
       const percent = service?.inflicionPrice - 100
-      const inflicionAmount = ((rentPrice * percent) / 100).toFixed(2)
+      const inflicionAmount = ((previousPlacingPrice * percent) / 100).toFixed(2)
       form.setFieldValue(fieldName, inflicionAmount)
     }
-  }, [service?._id, service?.inflicionPrice]) //eslint-disable-line react-hooks/exhaustive-deps
+  }, [service?._id, service?.inflicionPrice, previousPlacingPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
