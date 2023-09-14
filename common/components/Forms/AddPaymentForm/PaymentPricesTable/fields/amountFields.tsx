@@ -15,7 +15,7 @@ export function AmountPlacingField({ record, edit }) {
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const { company } = useCompany({ companyId, skip: edit })
   return company?.inflicion ? (
-    <AmountPlacingInflicionField company={company} edit={edit} />
+    <AmountPlacingInflicionField edit={edit} />
   ) : (
     <AmountTotalAreaField record={record} edit={edit} />
   )
