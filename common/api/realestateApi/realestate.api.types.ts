@@ -9,7 +9,7 @@ export type IRealestate = {
   servicePricePerMeter?: number
   totalArea: number
   description: string
-  garbageCollector?: number
+  garbageCollector?: boolean
   rentPart?: number
   inflicion?: boolean
   waterPart?: number

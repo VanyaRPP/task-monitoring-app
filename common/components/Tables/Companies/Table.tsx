@@ -121,10 +121,6 @@ const getDefaultColumns = (
       dataIndex: 'servicePricePerMeter',
     },
     {
-      title: 'Вивіз сміття',
-      dataIndex: 'garbageCollector',
-    },
-    {
       title: 'Частка загальної площі',
       dataIndex: 'rentPart',
     },
@@ -135,6 +131,12 @@ const getDefaultColumns = (
     {
       title: 'Знижка',
       dataIndex: 'discount',
+    },
+    {
+      align: 'center',
+      title: 'Вивіз сміття',
+      dataIndex: 'garbageCollector',
+      render: (value) => <Checkbox checked={value} disabled />,
     },
     {
       align: 'center',

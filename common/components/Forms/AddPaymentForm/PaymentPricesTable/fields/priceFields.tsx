@@ -188,14 +188,21 @@ export function PriceGarbageCollectorField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
   const companyId = Form.useWatch('company', form) || paymentData?.company
+  const serviceId =
+    Form.useWatch('monthService', form) || paymentData?.monthService
 
   const { company } = useCompany({ companyId, skip: edit })
+  const { service } = useService({ serviceId, skip: edit })
 
   useEffect(() => {
-    if (company?._id && company?.garbageCollector) {
-      form.setFieldValue(fieldName, company.garbageCollector)
+    if (
+      service?._id &&
+      company?.garbageCollector &&
+      service?.garbageCollectorPrice
+    ) {
+      form.setFieldValue(fieldName, service.garbageCollectorPrice)
     }
-  }, [company?._id, company?.garbageCollector]) //eslint-disable-line react-hooks/exhaustive-deps
+  }, [service?._id, service?.garbageCollectorPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>

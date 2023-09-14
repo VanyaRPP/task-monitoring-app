@@ -115,6 +115,12 @@ const getDefaultColumns = (
       render: renderCurrency,
     },
     {
+      title: 'Вивезення ТПВ',
+      dataIndex: 'garbageCollectorPrice',
+      width: 200,
+      render: renderCurrency,
+    },
+    {
       title: (
         <Tooltip title="Індекс Інфляції">
           <span>Індекс</span>
