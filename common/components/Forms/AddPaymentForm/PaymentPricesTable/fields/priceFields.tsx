@@ -6,6 +6,7 @@ import useCompany from '@common/modules/hooks/useCompany'
 import useService from '@common/modules/hooks/useService'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { useInflicionValues } from './amountFields'
+import { getInflicionValue } from '@utils/inflicion'
 
 export function PriceMaintainceField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
@@ -162,14 +163,12 @@ export function PriceInflicionField({ record, edit }) {
   const { service } = useService({ serviceId, skip: edit })
   const { previousPlacingPrice } = useInflicionValues({ edit })
 
-  // TODO: вивчити формулу. потім ціна оренди береться із суми індексу інфляції і поточної оренди
-  // БРАТИ ЦІНУ ОРЕНДИ З МИНУЛОГО ІНВОЙСУ
-  // подумати про хелпер з тестами
-
   useEffect(() => {
     if (service?._id && service?.inflicionPrice && company.inflicion) {
-      const percent = service?.inflicionPrice - 100
-      const inflicionAmount = ((previousPlacingPrice * percent) / 100).toFixed(2)
+      const inflicionAmount = getInflicionValue(
+        previousPlacingPrice,
+        service?.inflicionPrice
+      )
       form.setFieldValue(fieldName, inflicionAmount)
     }
   }, [service?._id, service?.inflicionPrice, previousPlacingPrice]) //eslint-disable-line react-hooks/exhaustive-deps

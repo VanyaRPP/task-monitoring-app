@@ -5,6 +5,9 @@ import FormAttribute from '@common/components/UI/FormAttribute'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import moment from 'moment'
+import { getInflicionValue } from '@utils/inflicion'
+import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
+import { ServiceType } from '@utils/constants'
 
 export const getDefaultColumns = (
   service?: any,
@@ -79,14 +82,17 @@ export const getDefaultColumns = (
         render: (value, record) => (
           <FormAttribute
             name={['companies', record.companyName, 'placingPrice', 'price']}
-            value={value}
+            value={record.inflicion ? 0 : value}
+            disabled={record.inflicion}
           />
         ),
       },
       {
         title: 'Загальне',
         dataIndex: 'priceSum',
-        render: (__, record) => <PricePerMeterSum record={record} />,
+        render: (__, record) => (
+          <PricePlacingField service={service} record={record} />
+        ),
       },
     ],
   },
@@ -95,7 +101,7 @@ export const getDefaultColumns = (
     // тайтл також стає компонентом. там ми фетчимо сервіс і тут же відображаємо правильний %
     title: `Індекс інфляції за ${moment(service?.date)
       .subtract(1, 'months')
-      .format('MMMM')}`,
+      .format('MMMM')} 101.5%`,
     dataIndex: 'inflicionPrice',
     render: (__, record) => (
       <InflicionPrice service={service} record={record} />
@@ -253,22 +259,31 @@ export const getDefaultColumns = (
   },
 ]
 
+function useInflicionValues({ companyId, company, service }) {
+  const { lastInvoice } = useCompanyInvoice({ companyId })
+  const previousPlacingPrice = lastInvoice?.invoice?.find(
+    (item) => item.type === ServiceType.Placing
+  )?.sum
+
+  const value =
+    previousPlacingPrice ||
+    (company?.totalArea &&
+      company?.pricePerMeter &&
+      company?.totalArea * company?.pricePerMeter)
+
+  const inflicionAmount = +getInflicionValue(value, service?.inflicionPrice)
+  return { previousPlacingPrice, inflicionAmount }
+}
+
 const InflicionPrice: React.FC<{ service: any; record: any }> = ({
   service,
   record,
 }) => {
-  const { form } = useInvoicesPaymentContext()
-
-  const rentPrice = Form.useWatch(
-    ['companies', record.companyName, 'placingPrice', 'price'],
-    form
-  )
-
-  // TODO: вивчити формулу. потім ціна оренди береться із суми індексу інфляції і поточної оренди
-  // БРАТИ ЦІНУ ОРЕНДИ З МИНУЛОГО ІНВОЙСУ
-  // подумати про хелпер з тестами
-  const percent = service?.inflicionPrice - 100
-  const inflicionAmount = ((rentPrice * percent) / 100).toFixed(2)
+  const { inflicionAmount } = useInflicionValues({
+    companyId: record._id,
+    company: record,
+    service,
+  })
 
   return (
     <FormAttribute
@@ -337,13 +352,39 @@ const OldElectricity: React.FC<{ record: any }> = ({ record }) => {
   )
 }
 
-const PricePerMeterSum: React.FC<{ record: any }> = ({ record }) => {
+function PricePlacingField({ service, record }) {
+  const baseName = ['companies', record.companyName, 'placingPrice']
+  return record?.inflicion ? (
+    <InflicionPricePlacingField
+      baseName={baseName}
+      service={service}
+      record={record}
+    />
+  ) : (
+    <PricePerMeterSum baseName={baseName} record={record} />
+  )
+}
+
+function InflicionPricePlacingField({ baseName, service, record }) {
+  const { previousPlacingPrice, inflicionAmount } = useInflicionValues({
+    companyId: record._id,
+    company: record,
+    service,
+  })
+
+  return (
+    <FormAttribute
+      disabled
+      name={[...baseName, 'sum']}
+      value={previousPlacingPrice + inflicionAmount}
+    />
+  )
+}
+
+function PricePerMeterSum({ baseName, record }) {
   const { form } = useInvoicesPaymentContext()
 
-  const baseName = ['companies', record.companyName, 'placingPrice']
-
   const pricePerMeterName = [...baseName, 'price']
-
   const pricePerMeter = Form.useWatch(pricePerMeterName, form)
 
   return (
