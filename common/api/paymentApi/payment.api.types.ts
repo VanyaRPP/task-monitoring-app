@@ -1,6 +1,6 @@
 import { IDomain } from '@common/modules/models/Domain'
 import { IUser } from './../../modules/models/User'
-import { IPaymentTableData } from '@utils/tableData'
+import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
 import { ObjectId } from 'mongoose'
 import { IRealestate } from '../realestateApi/realestate.api.types'
 

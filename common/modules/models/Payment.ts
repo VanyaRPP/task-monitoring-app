@@ -1,5 +1,5 @@
 import mongoose, { ObjectId, Schema } from 'mongoose'
-import { IPaymentTableData } from '@utils/tableData'
+import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
 import {
   IPaymentField,
   IProvider,

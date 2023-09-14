@@ -12,27 +12,26 @@ const PaymentTotal: FC<Props> = ({ form }) => {
   const [total, setTotal] = useState(0)
 
   const formValues = Form.useWatch([], form)
-  const services = formValues
+  const result = formValues
     ? Object.values(formValues)
         .filter((item) => typeof item === 'object')
         .reduce(
-          (acc: number, val: any) => acc + +parseStringToFloat(val?.sum || 0),
+          (acc: number, val: any) => acc + +val?.sum || 0,
           0
         )
     : 0
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    setTotal(services)
-    form.setFieldValue(Operations.Debit, total.toFixed(2))
-  }, [form, total, services])
+    const r = (result as number).toFixed(2) || 0
+    setTotal(r as number)
+    form.setFieldValue(Operations.Debit, r)
+  }, [form, result])
 
   return (
     <Form.Item name={Operations.Debit}>
       <div className={s.totalItem}>
         <p>Сума:</p>
-        <p>{total.toFixed(2)} ₴</p>
+        <p>{total} ₴</p>
       </div>
     </Form.Item>
   )
