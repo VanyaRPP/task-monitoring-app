@@ -4,6 +4,7 @@ import { Popconfirm, Tooltip, Form } from 'antd'
 import FormAttribute from '@common/components/UI/FormAttribute'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import moment from 'moment'
 import { getInflicionValue } from '@utils/inflicion'
 import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
@@ -14,47 +15,47 @@ export const getDefaultColumns = (
   service?: any,
   handleDelete?: (row: any) => void
 ): any[] => [
-  {
-    fixed: 'left',
-    title: 'Компанія',
-    dataIndex: 'companyName',
-    width: 200,
-    render: (value, record) => (
-      <FormAttribute
-        name={['companies', record.companyName, 'companyName']}
-        value={value}
-        disabled
-      />
-    ),
-  },
-  {
-    title: 'Площа (м²)',
-    dataIndex: 'totalArea',
-    render: (value, record) => (
-      <FormAttribute
-        name={['companies', record.companyName, 'totalArea']}
-        value={value}
-        disabled
-      />
-    ),
-  },
-  {
-    title: 'Утримання',
-    children: [
-      {
-        title: 'За м²',
-        dataIndex: 'servicePricePerMeter',
-        render: (value, record) => (
-          <>
-            <FormAttribute
-              name={[
-                'companies',
-                record.companyName,
-                'maintenancePrice',
-                'price',
-              ]}
-              value={value || service?.rentPrice}
-            />
+    {
+      fixed: 'left',
+      title: 'Компанія',
+      dataIndex: 'companyName',
+      width: 200,
+      render: (value, record) => (
+        <FormAttribute
+          name={['companies', record.companyName, 'companyName']}
+          value={value}
+          disabled
+        />
+      ),
+    },
+    {
+      title: 'Площа (м²)',
+      dataIndex: 'totalArea',
+      render: (value, record) => (
+        <FormAttribute
+          name={['companies', record.companyName, 'totalArea']}
+          value={value}
+          disabled
+        />
+      ),
+    },
+    {
+      title: 'Утримання',
+      children: [
+        {
+          title: 'За м²',
+          dataIndex: 'servicePricePerMeter',
+          render: (value, record) => (
+            <>
+              <FormAttribute
+                name={[
+                  'companies',
+                  record.companyName,
+                  'maintenancePrice',
+                  'price',
+                ]}
+                value={value || service?.rentPrice}
+              />
 
             {!!record.servicePricePerMeter && (
               <StyledTooltip
@@ -490,7 +491,7 @@ const ElectricityPriceSum: React.FC<{ service: any; record: any }> = ({
       value={
         newElectricityPrice
           ? (newElectricityPrice - oldElectricityPrice) *
-            service?.electricityPrice
+          service?.electricityPrice
           : 0
       }
       disabled
