@@ -94,12 +94,6 @@ export const getDefaultColumns = (
         render: (__, record) => (
           <>
             <PricePlacingField service={service} record={record} />
-            {}
-            <StyledTooltip
-              title={
-                'Попередній місяць розміщення + значення інфляції в цьому рахунку'
-              }
-            />
           </>
         ),
       },
@@ -382,11 +376,16 @@ function InflicionPricePlacingField({ baseName, service, record }) {
   })
 
   return (
-    <FormAttribute
-      disabled
-      name={[...baseName, 'sum']}
-      value={previousPlacingPrice + inflicionAmount}
-    />
+    <>
+      <FormAttribute
+        disabled
+        name={[...baseName, 'sum']}
+        value={previousPlacingPrice + inflicionAmount}
+      />
+      <StyledTooltip
+        title={`Попередній місяць розміщення + значення інфляції в цьому рахунку (${previousPlacingPrice} + ${inflicionAmount})`}
+      />
+    </>
   )
 }
 

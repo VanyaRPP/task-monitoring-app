@@ -97,6 +97,13 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
                   />
                 </span>
               )}
+            {paymentData?.company.inflicion &&
+              nameRes === paymentsTitle.maintenancePrice && (
+                <span className={s.rowText}>
+                  <br />
+                  <span className={s.month}>без врах.інд.інф </span>
+                </span>
+              )}
             {!!company?.inflicion &&
               nameRes === paymentsTitle.inflicionPrice && (
                 <span className={s.rowText}>
