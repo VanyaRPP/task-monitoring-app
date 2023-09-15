@@ -18,10 +18,27 @@ export default async function handler(
 
   switch (req.method) {
     case 'GET':
+      
       try {
         const options = {}
 
-        const { domainId, streetId, serviceId } = req.query
+        const { domainId, streetId, serviceId, date } = req.query
+        if (isGlobalAdmin && domainId && streetId && date) {
+          options.domain = domainId
+          options.street = streetId
+          const oneMonthBackDate = new Date(date)
+          oneMonthBackDate.setMonth(oneMonthBackDate.getMonth() - 1)
+          options.date = {
+            $lt: date,
+            $gte: oneMonthBackDate,
+          }
+          const services = await Service.find(options)
+
+          return res.status(200).json({
+            success: true,
+            data: services,
+          })
+        }
         if (isGlobalAdmin && domainId && streetId) {
           options.domain = domainId
           options.street = streetId
@@ -34,7 +51,7 @@ export default async function handler(
         }
 
         // TODO: refactor with logic. each case should be well separated
-        // Should I left all conditions and only one if for each role? 
+        // Should I left all conditions and only one if for each role?
         // this way it will handle all conditions and will not return wrong service
 
         // TODO: add tests

@@ -23,12 +23,13 @@ export const serviceApi = createApi({
         domainId?: string
         streetId?: string
         serviceId?: string
+        date?: string
       }
     >({
-      query: ({ limit, userId, domainId, streetId, serviceId }) => {
+      query: ({ limit, userId, domainId, streetId, serviceId, date }) => {
         return {
           url: `service`,
-          params: { limit, userId, domainId, streetId, serviceId },
+          params: { limit, userId, domainId, streetId, serviceId, date },
         }
       },
       providesTags: (response) =>

@@ -1,6 +1,5 @@
-import { CloseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { Popconfirm, Tooltip, Form } from 'antd'
-
+import { CloseCircleOutlined } from '@ant-design/icons'
+import { Popconfirm, Form } from 'antd'
 import FormAttribute from '@common/components/UI/FormAttribute'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
