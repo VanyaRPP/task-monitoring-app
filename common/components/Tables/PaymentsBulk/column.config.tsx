@@ -8,6 +8,7 @@ import moment from 'moment'
 import { getInflicionValue } from '@utils/inflicion'
 import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
 import { ServiceType } from '@utils/constants'
+import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
 
 export const getDefaultColumns = (
   service?: any,
@@ -91,7 +92,9 @@ export const getDefaultColumns = (
         title: 'Загальне',
         dataIndex: 'priceSum',
         render: (__, record) => (
-          <PricePlacingField service={service} record={record} />
+          <>
+            <PricePlacingField service={service} record={record} />
+          </>
         ),
       },
     ],
@@ -373,11 +376,16 @@ function InflicionPricePlacingField({ baseName, service, record }) {
   })
 
   return (
-    <FormAttribute
-      disabled
-      name={[...baseName, 'sum']}
-      value={previousPlacingPrice + inflicionAmount}
-    />
+    <>
+      <FormAttribute
+        disabled
+        name={[...baseName, 'sum']}
+        value={previousPlacingPrice + inflicionAmount}
+      />
+      <StyledTooltip
+        title={`Попередній місяць розміщення + значення інфляції в цьому рахунку (${previousPlacingPrice} + ${inflicionAmount})`}
+      />
+    </>
   )
 }
 
@@ -487,22 +495,5 @@ const ElectricityPriceSum: React.FC<{ service: any; record: any }> = ({
       }
       disabled
     />
-  )
-}
-
-const StyledTooltip: React.FC<{
-  title: React.ReactNode
-}> = ({ title }) => {
-  return (
-    <Tooltip title={title}>
-      <QuestionCircleOutlined
-        style={{
-          position: 'absolute',
-          top: '50%',
-          right: 0,
-          transform: 'translate(-16px, -50%)',
-        }}
-      />
-    </Tooltip>
   )
 }
