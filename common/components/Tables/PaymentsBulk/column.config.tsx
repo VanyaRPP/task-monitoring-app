@@ -157,6 +157,7 @@ export const getDefaultColumns = (
         dataIndex: 'new_water',
         render: (value, record) => (
           <FormAttribute
+            disabled={!!record.waterPart}
             name={['companies', record.companyName, 'waterPrice', 'amount']}
             value={value || 0}
           />
@@ -330,7 +331,13 @@ const OldWater: React.FC<{ record: any }> = ({ record }) => {
   const invoice = paymentsResponse?.data?.[0]?.invoice
   const waterPrice = invoice?.find((item) => item.type === 'waterPrice')
 
-  return <FormAttribute name={waterPriceName} value={waterPrice?.amount || 0} />
+  return (
+    <FormAttribute
+      disabled={!!record.waterPart}
+      name={waterPriceName}
+      value={waterPrice?.amount || 0}
+    />
+  )
 }
 
 const OldElectricity: React.FC<{ record: any }> = ({ record }) => {

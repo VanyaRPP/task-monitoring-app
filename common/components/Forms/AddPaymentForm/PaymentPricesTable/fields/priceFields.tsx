@@ -186,13 +186,13 @@ export function PriceWaterPartField({ record, edit }) {
 
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
-  const companyId = Form.useWatch('company', form) || paymentData?.company
+  const companyId = Form.useWatch('company', form)
 
   const { company } = useCompany({ companyId, skip: edit })
   const { service } = useService({ serviceId, skip: edit })
 
   useEffect(() => {
-    if (service?._id && company?.waterPart) {
+    if (!edit && service?._id && company?.waterPart) {
       form.setFieldValue(
         fieldName,
         ((company.waterPart / 100) * service?.waterPriceTotal).toFixed(2)
