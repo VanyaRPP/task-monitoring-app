@@ -116,7 +116,7 @@ export default async function handler(
           .sort({ invoiceCreationDate: -1 })
           .skip(+skip)
           .limit(+limit)
-          .populate({ path: 'company', select: '_id companyName' })
+          .populate({ path: 'company', select: '_id companyName inflicion' })
           .populate({ path: 'street', select: '_id address city' })
           .populate({ path: 'domain', select: '_id name' })
           .populate({ path: 'monthService', select: '_id date' })

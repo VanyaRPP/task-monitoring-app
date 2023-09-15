@@ -149,11 +149,6 @@ const prepareInvoiceObjects = async (
         ...invoice.electricityPrice,
         price: service?.electricityPrice,
       },
-      waterPrice: {
-        ...invoice.waterPrice,
-        price: service?.waterPrice,
-      },
-      waterPart: invoice.waterPart,
       garbageCollectorPrice: {
         amount: invoice.amount,
         sum: invoice.sum,
@@ -170,6 +165,15 @@ const prepareInvoiceObjects = async (
       }
     }
 
+    if (invoice.waterPart) {
+      invoices.waterPart = { sum: invoice.waterPart.sum }
+    } else {
+      invoices.waterPrice = {
+        ...invoice.waterPrice,
+        price: service?.waterPrice,
+      }
+    }
+
     const filteredInvoice = filterInvoiceObject(invoices)
     return {
       invoiceNumber: newInvoiceNumber + index,
@@ -181,7 +185,9 @@ const prepareInvoiceObjects = async (
       invoiceCreationDate: new Date(),
       description: '',
       generalSum:
-        filteredInvoice.reduce((acc, val) => acc + (+val.sum || 0), 0).toFixed(2) || 0,
+        filteredInvoice
+          .reduce((acc, val) => acc + (+val.sum || 0), 0)
+          .toFixed(2) || 0,
       provider,
       reciever,
       invoice: filteredInvoice,

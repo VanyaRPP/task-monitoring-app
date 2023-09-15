@@ -189,7 +189,7 @@ function useInitialValues() {
       price: invoices.water?.price,
     },
     [ServiceType.WaterPart]: {
-      price: invoices.waterPart?.price,
+      price: invoices.waterPart?.sum,
     },
     [ServiceType.GarbageCollector]: {
       amount: invoices.garbageCollector?.amount,
