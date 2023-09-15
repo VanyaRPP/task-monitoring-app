@@ -87,18 +87,15 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
                   )}
               </span>
             </Tooltip>
-            {!!company?.inflicion &&
-              nameRes === paymentsTitle.maintenancePrice && (
-                <span className={s.rowText}>
-                  <br />
-                  <span className={s.month}>без врах.інд.інф </span>
-                  <StyledTooltip
-                    title={maintenanceWithoutInflicionDescription}
-                  />
-                </span>
-              )}
+            {!!company?.inflicion && nameRes === paymentsTitle.placingPrice && (
+              <span className={s.rowText}>
+                <br />
+                <span className={s.month}>без врах.інд.інф </span>
+                <StyledTooltip title={maintenanceWithoutInflicionDescription} />
+              </span>
+            )}
             {paymentData?.company.inflicion &&
-              nameRes === paymentsTitle.maintenancePrice && (
+              nameRes === paymentsTitle.placingPrice && (
                 <span className={s.rowText}>
                   <br />
                   <span className={s.month}>без врах.інд.інф </span>
