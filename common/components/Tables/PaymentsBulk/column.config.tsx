@@ -4,6 +4,7 @@ import { Popconfirm, Tooltip, Form } from 'antd'
 import FormAttribute from '@common/components/UI/FormAttribute'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import moment from 'moment'
 import { getInflicionValue } from '@utils/inflicion'
 import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
@@ -73,7 +74,6 @@ export const getDefaultColumns = (
       },
     ],
   },
-  // TODO: підтянути формулу індексу інфляції з сінгл інвойса
   {
     title: 'Розміщення',
     children: [
@@ -83,32 +83,16 @@ export const getDefaultColumns = (
         render: (value, record) => (
           <FormAttribute
             name={['companies', record.companyName, 'placingPrice', 'price']}
-            value={record.inflicion ? 0 : value}
-            disabled={record.inflicion}
+            value={value}
           />
         ),
       },
       {
         title: 'Загальне',
         dataIndex: 'priceSum',
-        render: (__, record) => (
-          <>
-            <PricePlacingField service={service} record={record} />
-          </>
-        ),
+        render: (__, record) => <PricePerMeterSum record={record} />,
       },
     ],
-  },
-  {
-    // TODO: треба відобразити індекс інфляції за минулий місяць
-    // тайтл також стає компонентом. там ми фетчимо сервіс і тут же відображаємо правильний %
-    title: `Індекс інфляції за ${moment(service?.date)
-      .subtract(1, 'months')
-      .format('MMMM')} 101.5%`,
-    dataIndex: 'inflicionPrice',
-    render: (__, record) => (
-      <InflicionPrice service={service} record={record} />
-    ),
   },
   {
     title: service?.electricityPrice
@@ -202,40 +186,26 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: service ? (
-      <>
-        Всього за вивезення ТПВ:
-        <br />
-        {service.garbageCollectorPrice} грн/м&sup2;{' '}
-      </>
-    ) : (
-      'Вивезення ТПВ'
+    // TODO: треба відобразити індекс інфляції за минулий місяць
+    // тайтл також стає компонентом. там ми фетчимо сервіс і тут же відображаємо правильний %
+    title: `Індекс інфляції за ${moment(service?.date)
+      .subtract(1, 'months')
+      .format('MMMM')}`,
+    dataIndex: 'inflicionPrice',
+    render: (__, record) => (
+      <InflicionPrice service={service} record={record} />
     ),
-    children: [
-      {
-        title: 'Загальна частка',
-        dataIndex: 'garbageCollectorPrice',
-        render: (__, record) => (
-          <FormAttribute
-            name={[
-              'companies',
-              record.companyName,
-              'garbageCollector',
-              'amount',
-            ]}
-            value={record?.rentPart || 0}
-            disabled
-          />
-        ),
-      },
-      {
-        title: 'Загальне',
-        dataIndex: 'waterPart',
-        render: (__, record) => (
-          <GarbageCollectorPrice service={service} record={record} />
-        ),
-      },
-    ],
+  },
+  {
+    title: 'ТПВ',
+    dataIndex: 'garbageCollector',
+    render: (value, record) => (
+      <FormAttribute
+        name={['companies', record.companyName, 'garbageCollector']}
+        value={value || 0}
+        disabled
+      />
+    ),
   },
   {
     title: 'Знижка',
@@ -262,20 +232,27 @@ export const getDefaultColumns = (
   },
 ]
 
-function useInflicionValues({ companyId, company, service }) {
-  const { lastInvoice } = useCompanyInvoice({ companyId })
-  const previousPlacingPrice = lastInvoice?.invoice?.find(
-    (item) => item.type === ServiceType.Placing
-  )?.sum
+const InflicionIndex: React.FC<{ service: any }> = ({ service }) => {
+  const { form } = useInvoicesPaymentContext()
 
-  const value =
-    previousPlacingPrice ||
-    (company?.totalArea &&
-      company?.pricePerMeter &&
-      company?.totalArea * company?.pricePerMeter)
+  const selectedObj = { domainIds: form.getFieldValue("domain"), streetIds: form.getFieldValue("street") }
 
-  const inflicionAmount = +getInflicionValue(value, service?.inflicionPrice)
-  return { previousPlacingPrice: value, inflicionAmount }
+  const { data } = useGetAllServicesQuery({ domainId: selectedObj.domainIds, streetId: selectedObj.streetIds })
+
+  const previousMounth = data?.find((item) =>
+    moment(item?.date).format('MMMM') === moment(service?.date).subtract(1, 'months').format('MMMM')
+  )
+
+  return (
+    <>
+      {
+        `Індекс інфляції за
+          ${(service && previousMounth?.date ? moment(previousMounth?.date)?.format("MMMM") : "")}
+          ${(service && previousMounth?.inflicionPrice != undefined ?
+          (previousMounth?.inflicionPrice)?.toFixed(2) + "%" : "місяць")}`
+      }
+    </>
+  );
 }
 
 const InflicionPrice: React.FC<{ service: any; record: any }> = ({
@@ -490,7 +467,7 @@ const ElectricityPriceSum: React.FC<{ service: any; record: any }> = ({
       value={
         newElectricityPrice
           ? (newElectricityPrice - oldElectricityPrice) *
-            service?.electricityPrice
+          service?.electricityPrice
           : 0
       }
       disabled
