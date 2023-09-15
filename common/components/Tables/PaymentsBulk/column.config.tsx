@@ -4,228 +4,250 @@ import { Popconfirm, Tooltip, Form } from 'antd'
 import FormAttribute from '@common/components/UI/FormAttribute'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import moment from 'moment'
 
 export const getDefaultColumns = (
   service?: any,
   handleDelete?: (row: any) => void
 ): any[] => [
-  {
-    fixed: 'left',
-    title: 'Компанія',
-    dataIndex: 'companyName',
-    width: 200,
-    render: (value, record) => (
-      <FormAttribute
-        name={['companies', record.companyName, 'companyName']}
-        value={value}
-        disabled
-      />
-    ),
-  },
-  {
-    title: 'Площа (м²)',
-    dataIndex: 'totalArea',
-    render: (value, record) => (
-      <FormAttribute
-        name={['companies', record.companyName, 'totalArea']}
-        value={value}
-        disabled
-      />
-    ),
-  },
-  {
-    title: 'Утримання',
-    children: [
-      {
-        title: 'За м²',
-        dataIndex: 'servicePricePerMeter',
-        render: (value, record) => (
-          <>
+    {
+      fixed: 'left',
+      title: 'Компанія',
+      dataIndex: 'companyName',
+      width: 200,
+      render: (value, record) => (
+        <FormAttribute
+          name={['companies', record.companyName, 'companyName']}
+          value={value}
+          disabled
+        />
+      ),
+    },
+    {
+      title: 'Площа (м²)',
+      dataIndex: 'totalArea',
+      render: (value, record) => (
+        <FormAttribute
+          name={['companies', record.companyName, 'totalArea']}
+          value={value}
+          disabled
+        />
+      ),
+    },
+    {
+      title: 'Утримання',
+      children: [
+        {
+          title: 'За м²',
+          dataIndex: 'servicePricePerMeter',
+          render: (value, record) => (
+            <>
+              <FormAttribute
+                name={[
+                  'companies',
+                  record.companyName,
+                  'maintenancePrice',
+                  'price',
+                ]}
+                value={value || service?.rentPrice}
+              />
+
+              {!!record.servicePricePerMeter && (
+                <StyledTooltip
+                  title={'Індивідуальне утримання, що передбачене договором'}
+                />
+              )}
+            </>
+          ),
+        },
+        {
+          title: 'Загальне',
+          dataIndex: 'servicePriceSum',
+          render: (__, record) => (
+            <ServicePriceSum service={service} record={record} />
+          ),
+        },
+      ],
+    },
+    {
+      title: 'Розміщення',
+      children: [
+        {
+          title: 'За м²',
+          dataIndex: 'pricePerMeter',
+          render: (value, record) => (
+            <FormAttribute
+              name={['companies', record.companyName, 'placingPrice', 'price']}
+              value={value}
+            />
+          ),
+        },
+        {
+          title: 'Загальне',
+          dataIndex: 'priceSum',
+          render: (__, record) => <PricePerMeterSum record={record} />,
+        },
+      ],
+    },
+    {
+      title: service?.electricityPrice
+        ? `Електрика: ${service.electricityPrice} грн/кВт`
+        : 'Електрика',
+      children: [
+        {
+          title: 'Стара',
+          dataIndex: 'old_elec',
+          render: (__, record) => <OldElectricity record={record} />,
+        },
+        {
+          title: 'Нова',
+          dataIndex: 'new_elec',
+          render: (value, record) => (
             <FormAttribute
               name={[
                 'companies',
                 record.companyName,
-                'maintenancePrice',
-                'price',
+                'electricityPrice',
+                'amount',
               ]}
-              value={value || service?.rentPrice}
+              value={value || 0}
             />
+          ),
+        },
+        {
+          title: 'Загальне',
+          dataIndex: 'sum_elec',
+          render: (__, record) => (
+            <ElectricityPriceSum service={service} record={record} />
+          ),
+        },
+      ],
+    },
+    {
+      title: service ? `Вода: ${service.waterPrice} грн/м³` : 'Вода',
+      children: [
+        {
+          title: 'Стара',
+          dataIndex: 'old_water',
+          render: (__, record) => <OldWater record={record} />,
+        },
+        {
+          title: 'Нова',
+          dataIndex: 'new_water',
+          render: (value, record) => (
+            <FormAttribute
+              name={['companies', record.companyName, 'waterPrice', 'amount']}
+              value={value || 0}
+            />
+          ),
+        },
+        {
+          title: 'Загальне',
+          dataIndex: 'sum_water',
+          render: (__, record) => (
+            <WaterPriceSum service={service} record={record} />
+          ),
+        },
+      ],
+    },
+    {
+      title: service ? (
+        <>
+          Вода (без лічильника)
+          <br />
+          Всього водопостачання: {service.waterPriceTotal}
+        </>
+      ) : (
+        'Вода (без лічильника)'
+      ),
+      children: [
+        {
+          title: 'Частка постачання %',
+          dataIndex: 'waterPart',
+          render: (__, record) => (
+            <FormAttribute
+              name={['companies', record.companyName, 'waterPart', 'price']}
+              value={record.waterPart || 0}
+            />
+          ),
+        },
+        {
+          title: 'Загальне',
+          dataIndex: 'sum_waterPart',
+          render: (__, record) => (
+            <WaterPartSum service={service} record={record} />
+          ),
+        },
+      ],
+    },
+    {
+      // TODO: треба відобразити індекс інфляції за минулий місяць
+      // тайтл також стає компонентом. там ми фетчимо сервіс і тут же відображаємо правильний %
+      title: <InflicionIndex service={service}></InflicionIndex>,
+      dataIndex: 'inflicionPrice',
+      render: (__, record) => (
+        <InflicionPrice service={service} record={record} />
+      ),
+    },
+    {
+      title: 'ТПВ',
+      dataIndex: 'garbageCollector',
+      render: (value, record) => (
+        <FormAttribute
+          name={['companies', record.companyName, 'garbageCollector']}
+          value={value || 0}
+          disabled
+        />
+      ),
+    },
+    {
+      title: 'Знижка',
+      dataIndex: 'discount',
+      render: (value, record) => (
+        <FormAttribute
+          name={['companies', record.companyName, 'discount']}
+          value={value || 0}
+        />
+      ),
+    },
+    {
+      fixed: 'right',
+      align: 'center',
+      width: 50,
+      render: (_, record: { _id: string }) => (
+        <Popconfirm
+          title="Видалити запис?"
+          onConfirm={() => handleDelete && handleDelete(record._id)}
+        >
+          <CloseCircleOutlined />
+        </Popconfirm>
+      ),
+    },
+  ]
 
-            {!!record.servicePricePerMeter && (
-              <StyledTooltip
-                title={'Індивідуальне утримання, що передбачене договором'}
-              />
-            )}
-          </>
-        ),
-      },
+const InflicionIndex: React.FC<{ service: any }> = ({ service }) => {
+  const { form } = useInvoicesPaymentContext()
+
+  const selectedObj = { domainIds: form.getFieldValue("domain"), streetIds: form.getFieldValue("street") }
+
+  const { data } = useGetAllServicesQuery({ domainId: selectedObj.domainIds, streetId: selectedObj.streetIds })
+
+  const previousMounth = data?.find((item) =>
+    moment(item?.date).format('MMMM') === moment(service?.date).subtract(1, 'months').format('MMMM')
+  )
+
+  return (
+    <>
       {
-        title: 'Загальне',
-        dataIndex: 'servicePriceSum',
-        render: (__, record) => (
-          <ServicePriceSum service={service} record={record} />
-        ),
-      },
-    ],
-  },
-  {
-    title: 'Розміщення',
-    children: [
-      {
-        title: 'За м²',
-        dataIndex: 'pricePerMeter',
-        render: (value, record) => (
-          <FormAttribute
-            name={['companies', record.companyName, 'placingPrice', 'price']}
-            value={value}
-          />
-        ),
-      },
-      {
-        title: 'Загальне',
-        dataIndex: 'priceSum',
-        render: (__, record) => <PricePerMeterSum record={record} />,
-      },
-    ],
-  },
-  {
-    title: service?.electricityPrice
-      ? `Електрика: ${service.electricityPrice} грн/кВт`
-      : 'Електрика',
-    children: [
-      {
-        title: 'Стара',
-        dataIndex: 'old_elec',
-        render: (__, record) => <OldElectricity record={record} />,
-      },
-      {
-        title: 'Нова',
-        dataIndex: 'new_elec',
-        render: (value, record) => (
-          <FormAttribute
-            name={[
-              'companies',
-              record.companyName,
-              'electricityPrice',
-              'amount',
-            ]}
-            value={value || 0}
-          />
-        ),
-      },
-      {
-        title: 'Загальне',
-        dataIndex: 'sum_elec',
-        render: (__, record) => (
-          <ElectricityPriceSum service={service} record={record} />
-        ),
-      },
-    ],
-  },
-  {
-    title: service ? `Вода: ${service.waterPrice} грн/м³` : 'Вода',
-    children: [
-      {
-        title: 'Стара',
-        dataIndex: 'old_water',
-        render: (__, record) => <OldWater record={record} />,
-      },
-      {
-        title: 'Нова',
-        dataIndex: 'new_water',
-        render: (value, record) => (
-          <FormAttribute
-            name={['companies', record.companyName, 'waterPrice', 'amount']}
-            value={value || 0}
-          />
-        ),
-      },
-      {
-        title: 'Загальне',
-        dataIndex: 'sum_water',
-        render: (__, record) => (
-          <WaterPriceSum service={service} record={record} />
-        ),
-      },
-    ],
-  },
-  {
-    title: service ? (
-      <>
-        Вода (без лічильника)
-        <br />
-        Всього водопостачання: {service.waterPriceTotal}
-      </>
-    ) : (
-      'Вода (без лічильника)'
-    ),
-    children: [
-      {
-        title: 'Частка постачання %',
-        dataIndex: 'waterPart',
-        render: (__, record) => (
-          <FormAttribute
-            name={['companies', record.companyName, 'waterPart', 'price']}
-            value={record.waterPart || 0}
-          />
-        ),
-      },
-      {
-        title: 'Загальне',
-        dataIndex: 'sum_waterPart',
-        render: (__, record) => (
-          <WaterPartSum service={service} record={record} />
-        ),
-      },
-    ],
-  },
-  {
-    // TODO: треба відобразити індекс інфляції за минулий місяць
-    // тайтл також стає компонентом. там ми фетчимо сервіс і тут же відображаємо правильний %
-    title: `Індекс інфляції за ${moment(service?.date)
-      .subtract(1, 'months')
-      .format('MMMM')}`,
-    dataIndex: 'inflicionPrice',
-    render: (__, record) => (
-      <InflicionPrice service={service} record={record} />
-    ),
-  },
-  {
-    title: 'ТПВ',
-    dataIndex: 'garbageCollector',
-    render: (value, record) => (
-      <FormAttribute
-        name={['companies', record.companyName, 'garbageCollector']}
-        value={value || 0}
-        disabled
-      />
-    ),
-  },
-  {
-    title: 'Знижка',
-    dataIndex: 'discount',
-    render: (value, record) => (
-      <FormAttribute
-        name={['companies', record.companyName, 'discount']}
-        value={value || 0}
-      />
-    ),
-  },
-  {
-    fixed: 'right',
-    align: 'center',
-    width: 50,
-    render: (_, record: { _id: string }) => (
-      <Popconfirm
-        title="Видалити запис?"
-        onConfirm={() => handleDelete && handleDelete(record._id)}
-      >
-        <CloseCircleOutlined />
-      </Popconfirm>
-    ),
-  },
-]
+        `Індекс інфляції за
+          ${(service && previousMounth?.date ? moment(previousMounth?.date)?.format("MMMM") : "")}
+          ${(service && previousMounth?.inflicionPrice != undefined ?
+          (previousMounth?.inflicionPrice)?.toFixed(2) + "%" : "місяць")}`
+      }
+    </>
+  );
+}
 
 const InflicionPrice: React.FC<{ service: any; record: any }> = ({
   service,
@@ -394,7 +416,7 @@ const ElectricityPriceSum: React.FC<{ service: any; record: any }> = ({
       value={
         newElectricityPrice
           ? (newElectricityPrice - oldElectricityPrice) *
-            service?.electricityPrice
+          service?.electricityPrice
           : 0
       }
       disabled
