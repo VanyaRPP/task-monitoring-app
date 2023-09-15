@@ -293,7 +293,7 @@ const InflicionIndex: React.FC<{ service: any }> = ({ service }) => {
         `Індекс інфляції за
           ${(service && previousMounth?.date ? moment(previousMounth?.date)?.format("MMMM") : "")}
           ${(service && previousMounth?.inflicionPrice != undefined ?
-            (previousMounth?.inflicionPrice)?.toFixed(2) + "%" : "місяць")}`
+          (previousMounth?.inflicionPrice)?.toFixed(2) + "%" : "місяць")}`
       }
     </>
   );
