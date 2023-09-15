@@ -11,7 +11,12 @@ import {
 import { FC, useState } from 'react'
 import { ColumnProps } from 'antd/lib/table'
 import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
-import { ServiceType, paymentsTitle } from '@utils/constants'
+import {
+  ServiceType,
+  inflicionDescription,
+  maintenanceWithoutInflicionDescription,
+  paymentsTitle,
+} from '@utils/constants'
 import { getName } from '@utils/helpers'
 import s from './style.module.scss'
 import useService from '@common/modules/hooks/useService'
@@ -27,6 +32,7 @@ import { getDispalyedDate } from '../../ReceiptForm'
 import PriceComponent from './fields/PriceComponent'
 import AmountComponent from './fields/AmountComponent'
 import SumComponent from './fields/SumComponent'
+import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
 
 interface Props {
   form: FormInstance<any>
@@ -38,6 +44,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
 
   const serviceId = Form.useWatch('service', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
+  const inflicionPrice = Form.useWatch(['inflicionPrice', 'price'], form)
 
   const { company } = useCompany({ companyId, skip: edit })
   const { service } = useService({ serviceId, skip: edit })
@@ -69,15 +76,42 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
           record.name
         )
         return (
-          <Tooltip title={`${nameRes || record.name} ${dateMonth}`}>
-            <span className={s.rowText}>
-              {nameRes || record.name}{' '}
-              <span className={s.month}>{dateMonth}</span>
-              {!!company?.servicePricePerMeter && nameRes === 'Утримання' && (
-                <span className={s.month}> індивідуальне</span>
+          <>
+            <Tooltip title={`${nameRes || record.name} ${dateMonth}`}>
+              <span className={s.rowText}>
+                {nameRes || record.name}{' '}
+                <span className={s.month}>{dateMonth}</span>
+                {!!company?.servicePricePerMeter &&
+                  nameRes === paymentsTitle.maintenancePrice && (
+                    <span className={s.month}> індивідуальне</span>
+                  )}
+              </span>
+            </Tooltip>
+            {!!company?.inflicion &&
+              nameRes === paymentsTitle.maintenancePrice && (
+                <span className={s.rowText}>
+                  <br />
+                  <span className={s.month}>без врах.інд.інф </span>
+                  <StyledTooltip
+                    title={maintenanceWithoutInflicionDescription}
+                  />
+                </span>
               )}
-            </span>
-          </Tooltip>
+            {!!company?.inflicion &&
+              nameRes === paymentsTitle.inflicionPrice && (
+                <span className={s.rowText}>
+                  {+inflicionPrice <= 0 && (
+                    <>
+                      <br />
+                      <span className={s.month}>Спостерігається дефляція.</span>
+                      <br />
+                      <span className={s.month}>Значення незмінне</span>
+                    </>
+                  )}
+                  <StyledTooltip title={inflicionDescription} />
+                </span>
+              )}
+          </>
         )
       },
     },

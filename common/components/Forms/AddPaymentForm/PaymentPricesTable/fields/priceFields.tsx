@@ -169,7 +169,7 @@ export function PriceInflicionField({ record, edit }) {
         previousPlacingPrice,
         service?.inflicionPrice
       )
-      form.setFieldValue(fieldName, inflicionAmount)
+      form.setFieldValue(fieldName, +inflicionAmount > 0 ? inflicionAmount : 0)
     }
   }, [service?._id, service?.inflicionPrice, previousPlacingPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 
