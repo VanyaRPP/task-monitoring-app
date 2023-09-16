@@ -3,10 +3,10 @@ import { useEffect } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import s from '../style.module.scss'
 import useCompany from '@common/modules/hooks/useCompany'
-import useService from '@common/modules/hooks/useService'
+import useService, { usePreviousMonthService } from '@common/modules/hooks/useService'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { useInflicionValues } from './amountFields'
-import { getInflicionValue } from '@utils/inflicion'
+import { getInflicionValue } from '@utils/inflicionHelper'
 
 export function PriceMaintainceField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
@@ -161,13 +161,18 @@ export function PriceInflicionField({ record, edit }) {
 
   const { company } = useCompany({ companyId, skip: edit })
   const { service } = useService({ serviceId, skip: edit })
+  const { previousMonth } = usePreviousMonthService({
+    date: service?.date,
+    domainId: form.getFieldValue('domain'),
+    streetId: form.getFieldValue('street'),
+  })
   const { previousPlacingPrice } = useInflicionValues({ edit })
 
   useEffect(() => {
     if (service?._id && service?.inflicionPrice && company.inflicion) {
       const inflicionAmount = getInflicionValue(
         previousPlacingPrice,
-        service?.inflicionPrice
+        previousMonth?.inflicionPrice
       )
       form.setFieldValue(fieldName, +inflicionAmount > 0 ? inflicionAmount : 0)
     }

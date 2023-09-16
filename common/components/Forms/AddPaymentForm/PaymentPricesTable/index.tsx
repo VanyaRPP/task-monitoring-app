@@ -1,61 +1,24 @@
 import {
-  Table,
-  Tooltip,
-  Form,
-  FormInstance,
-  Popconfirm,
-  Button,
-  Modal,
-  Input,
-} from 'antd'
-import { FC, useState } from 'react'
-import { ColumnProps } from 'antd/lib/table'
-import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
-import {
-  ServiceType,
-  inflicionDescription,
-  maintenanceWithoutInflicionDescription,
-  paymentsTitle,
-} from '@utils/constants'
-import { getName } from '@utils/helpers'
-import s from './style.module.scss'
-import useService from '@common/modules/hooks/useService'
-import useCompany from '@common/modules/hooks/useCompany'
-import { usePaymentContext } from '@common/components/AddPaymentModal'
-import {
   MinusCircleOutlined,
   DeleteOutlined,
   PlusOutlined,
 } from '@ant-design/icons'
+import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
+import { Popconfirm, Button, Table, Modal, Input } from 'antd'
+import { ServiceType, paymentsTitle } from '@utils/constants'
+import { ColumnProps } from 'antd/lib/table'
+import { getName } from '@utils/helpers'
+import { useState } from 'react'
 import { useCustomDataSource } from './useCustomDataSource'
-import { getDispalyedDate } from '../../ReceiptForm'
-import PriceComponent from './fields/PriceComponent'
 import AmountComponent from './fields/AmountComponent'
+import PriceComponent from './fields/PriceComponent'
+import NameComponent from './fields/NameComponent'
 import SumComponent from './fields/SumComponent'
-import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
+import s from '../style.module.scss'
 
-interface Props {
-  form: FormInstance<any>
-  edit: boolean
-}
-
-const PaymentPricesTable: FC<Props> = ({ edit }) => {
-  const { paymentData, form } = usePaymentContext()
-
-  const serviceId = Form.useWatch('service', form) || paymentData?.monthService
-  const companyId = Form.useWatch('company', form) || paymentData?.company
-  const inflicionPrice = Form.useWatch(['inflicionPrice', 'price'], form)
-
-  const { company } = useCompany({ companyId, skip: edit })
-  const { service } = useService({ serviceId, skip: edit })
-
+function PaymentPricesTable({ edit }) {
   const { customDataSource, addDataSource, removeDataSource } =
-    useCustomDataSource({
-      paymentData,
-      companyId,
-      serviceId,
-      edit,
-    } as any)
+    useCustomDataSource({ edit })
 
   const columns: ColumnProps<IPaymentTableData>[] = [
     {
@@ -68,56 +31,7 @@ const PaymentPricesTable: FC<Props> = ({ edit }) => {
       dataIndex: 'name',
       width: '30%',
       ellipsis: true,
-      render: (name, record) => {
-        const nameRes = getName(name, paymentsTitle)
-        const dateMonth = getDispalyedDate(
-          paymentData,
-          service?.date,
-          record.name
-        )
-        return (
-          <>
-            <Tooltip title={`${nameRes || record.name} ${dateMonth}`}>
-              <span className={s.rowText}>
-                {nameRes || record.name}{' '}
-                <span className={s.month}>{dateMonth}</span>
-                {!!company?.servicePricePerMeter &&
-                  nameRes === paymentsTitle.maintenancePrice && (
-                    <span className={s.month}> індивідуальне</span>
-                  )}
-              </span>
-            </Tooltip>
-            {!!company?.inflicion && nameRes === paymentsTitle.placingPrice && (
-              <span className={s.rowText}>
-                <br />
-                <span className={s.month}>без врах.інд.інф </span>
-                <StyledTooltip title={maintenanceWithoutInflicionDescription} />
-              </span>
-            )}
-            {paymentData?.company.inflicion &&
-              nameRes === paymentsTitle.placingPrice && (
-                <span className={s.rowText}>
-                  <br />
-                  <span className={s.month}>без врах.інд.інф </span>
-                </span>
-              )}
-            {!!company?.inflicion &&
-              nameRes === paymentsTitle.inflicionPrice && (
-                <span className={s.rowText}>
-                  {+inflicionPrice <= 0 && (
-                    <>
-                      <br />
-                      <span className={s.month}>Спостерігається дефляція.</span>
-                      <br />
-                      <span className={s.month}>Значення незмінне</span>
-                    </>
-                  )}
-                  <StyledTooltip title={inflicionDescription} />
-                </span>
-              )}
-          </>
-        )
-      },
+      render: (__, record) => <NameComponent record={record} edit={edit} />,
     },
     {
       title: 'К-сть',

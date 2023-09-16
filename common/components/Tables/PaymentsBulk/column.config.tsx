@@ -1,15 +1,14 @@
-import { CloseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { Popconfirm, Tooltip, Form } from 'antd'
-
+import { CloseCircleOutlined } from '@ant-design/icons'
+import { Popconfirm, Form } from 'antd'
 import FormAttribute from '@common/components/UI/FormAttribute'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
-import moment from 'moment'
-import { getInflicionValue } from '@utils/inflicion'
+import { InflicionIndexTitle } from '@utils/inflicion'
 import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
 import { ServiceType } from '@utils/constants'
 import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
-import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import { usePreviousMonthService } from '@common/modules/hooks/useService'
+import { getInflicionValue } from '@utils/inflicionHelper'
 
 export const getDefaultColumns = (
   service?: any,
@@ -20,7 +19,7 @@ export const getDefaultColumns = (
     title: 'Компанія',
     dataIndex: 'companyName',
     width: 200,
-    render: (value, record) => (
+    render: (value: any, record: { companyName: string | number }) => (
       <FormAttribute
         name={['companies', record.companyName, 'companyName']}
         value={value}
@@ -31,7 +30,7 @@ export const getDefaultColumns = (
   {
     title: 'Площа (м²)',
     dataIndex: 'totalArea',
-    render: (value, record) => (
+    render: (value: any, record: { companyName: string | number }) => (
       <FormAttribute
         name={['companies', record.companyName, 'totalArea']}
         value={value}
@@ -45,7 +44,10 @@ export const getDefaultColumns = (
       {
         title: 'За м²',
         dataIndex: 'servicePricePerMeter',
-        render: (value, record) => (
+        render: (
+          __,
+          record: { companyName: string | number; servicePricePerMeter: any }
+        ) => (
           <>
             <FormAttribute
               name={[
@@ -54,7 +56,8 @@ export const getDefaultColumns = (
                 'maintenancePrice',
                 'price',
               ]}
-              value={value || service?.rentPrice}
+              value={record.servicePricePerMeter || service?.rentPrice}
+              disabled
             />
 
             {!!record.servicePricePerMeter && (
@@ -68,7 +71,7 @@ export const getDefaultColumns = (
       {
         title: 'Загальне',
         dataIndex: 'servicePriceSum',
-        render: (__, record) => (
+        render: (__: any, record: any) => (
           <ServicePriceSum service={service} record={record} />
         ),
       },
@@ -81,18 +84,21 @@ export const getDefaultColumns = (
       {
         title: 'За м²',
         dataIndex: 'pricePerMeter',
-        render: (value, record) => (
+        render: (
+          value: any,
+          record: { companyName: string | number; inflicion: boolean }
+        ) => (
           <FormAttribute
             name={['companies', record.companyName, 'placingPrice', 'price']}
             value={record.inflicion ? 0 : value}
-            disabled={record.inflicion}
+            disabled
           />
         ),
       },
       {
         title: 'Загальне',
         dataIndex: 'priceSum',
-        render: (__, record) => (
+        render: (__: any, record: any) => (
           <>
             <PricePlacingField service={service} record={record} />
           </>
@@ -101,9 +107,9 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: service ? <InflicionIndex service={service} /> : 'Індекс інфляції',
+    title: <InflicionIndexTitleLocal service={service} />,
     dataIndex: 'inflicionPrice',
-    render: (__, record) => (
+    render: (__: any, record: any) => (
       <InflicionPrice service={service} record={record} />
     ),
   },
@@ -115,12 +121,12 @@ export const getDefaultColumns = (
       {
         title: 'Стара',
         dataIndex: 'old_elec',
-        render: (__, record) => <OldElectricity record={record} />,
+        render: (__: any, record: any) => <OldElectricity record={record} />,
       },
       {
         title: 'Нова',
         dataIndex: 'new_elec',
-        render: (value, record) => (
+        render: (value: any, record: { companyName: string | number }) => (
           <FormAttribute
             name={[
               'companies',
@@ -135,7 +141,7 @@ export const getDefaultColumns = (
       {
         title: 'Загальне',
         dataIndex: 'sum_elec',
-        render: (__, record) => (
+        render: (__: any, record: any) => (
           <ElectricityPriceSum service={service} record={record} />
         ),
       },
@@ -147,12 +153,15 @@ export const getDefaultColumns = (
       {
         title: 'Стара',
         dataIndex: 'old_water',
-        render: (__, record) => <OldWater record={record} />,
+        render: (__: any, record: any) => <OldWater record={record} />,
       },
       {
         title: 'Нова',
         dataIndex: 'new_water',
-        render: (value, record) => (
+        render: (
+          value: any,
+          record: { waterPart: any; companyName: string | number }
+        ) => (
           <FormAttribute
             disabled={!!record.waterPart}
             name={['companies', record.companyName, 'waterPrice', 'amount']}
@@ -163,7 +172,7 @@ export const getDefaultColumns = (
       {
         title: 'Загальне',
         dataIndex: 'sum_water',
-        render: (__, record) => (
+        render: (__: any, record: any) => (
           <WaterPriceSum service={service} record={record} />
         ),
       },
@@ -183,17 +192,21 @@ export const getDefaultColumns = (
       {
         title: 'Частка постачання %',
         dataIndex: 'waterPart',
-        render: (__, record) => (
+        render: (
+          __: any,
+          record: { companyName: string | number; waterPart: any }
+        ) => (
           <FormAttribute
             name={['companies', record.companyName, 'waterPart', 'price']}
             value={record.waterPart || 0}
+            disabled
           />
         ),
       },
       {
         title: 'Загальне',
         dataIndex: 'sum_waterPart',
-        render: (__, record) => (
+        render: (__: any, record: any) => (
           <WaterPartSum service={service} record={record} />
         ),
       },
@@ -213,7 +226,10 @@ export const getDefaultColumns = (
       {
         title: 'Загальна частка',
         dataIndex: 'garbageCollectorPrice',
-        render: (__, record) => (
+        render: (
+          __: any,
+          record: { companyName: string | number; rentPart: any }
+        ) => (
           <FormAttribute
             name={[
               'companies',
@@ -229,7 +245,7 @@ export const getDefaultColumns = (
       {
         title: 'Загальне',
         dataIndex: 'waterPart',
-        render: (__, record) => (
+        render: (__: any, record: any) => (
           <GarbageCollectorPrice service={service} record={record} />
         ),
       },
@@ -238,7 +254,7 @@ export const getDefaultColumns = (
   {
     title: 'Знижка',
     dataIndex: 'discount',
-    render: (value, record) => (
+    render: (value: any, record: { companyName: string | number }) => (
       <FormAttribute
         name={['companies', record.companyName, 'discount']}
         value={value || 0}
@@ -249,7 +265,7 @@ export const getDefaultColumns = (
     fixed: 'right',
     align: 'center',
     width: 50,
-    render: (_, record: { _id: string }) => (
+    render: (_: any, record: { _id: string }) => (
       <Popconfirm
         title="Видалити запис?"
         onConfirm={() => handleDelete && handleDelete(record._id)}
@@ -262,6 +278,12 @@ export const getDefaultColumns = (
 
 function useInflicionValues({ companyId, company, service }) {
   const { lastInvoice } = useCompanyInvoice({ companyId })
+  const { form } = useInvoicesPaymentContext()
+  const { previousMonth } = usePreviousMonthService({
+    date: service?.date,
+    domainId: form.getFieldValue('domain'),
+    streetId: form.getFieldValue('street'),
+  })
   const previousPlacingPrice = lastInvoice?.invoice?.find(
     (item) => item.type === ServiceType.Placing
   )?.sum
@@ -272,7 +294,10 @@ function useInflicionValues({ companyId, company, service }) {
       company?.pricePerMeter &&
       company?.totalArea * company?.pricePerMeter)
 
-  const inflicionAmount = +getInflicionValue(value, service?.inflicionPrice)
+  const inflicionAmount = +getInflicionValue(
+    value,
+    previousMonth?.inflicionPrice
+  )
   return { previousPlacingPrice: value, inflicionAmount }
 }
 
@@ -387,7 +412,7 @@ function InflicionPricePlacingField({ baseName, service, record }) {
         value={previousPlacingPrice + inflicionAmount}
       />
       <StyledTooltip
-        title={`Попередній місяць розміщення + значення інфляції в цьому рахунку (${previousPlacingPrice} + ${inflicionAmount})`}
+        title={`Значення попереднього місяця + значення інфляції в цьому рахунку (${previousPlacingPrice} + ${inflicionAmount})`}
       />
     </>
   )
@@ -502,31 +527,12 @@ const ElectricityPriceSum: React.FC<{ service: any; record: any }> = ({
   )
 }
 
-function InflicionIndex({ service }) {
+function InflicionIndexTitleLocal({ service }) {
   const { form } = useInvoicesPaymentContext()
-  const lastMonth = moment(service?.date).subtract(1, 'month')
-  const { data } = useGetAllServicesQuery({
+  const { previousMonth } = usePreviousMonthService({
+    date: service?.date,
     domainId: form.getFieldValue('domain'),
     streetId: form.getFieldValue('street'),
-    month: lastMonth.month() + 1,
-    year: lastMonth.year(),
   })
-
-  const previousMounth = data?.[0]
-
-  return (
-    <>
-      {`Індекс інфляції
-          ${
-            previousMounth?.date
-              ? moment(previousMounth?.date)?.format('MMMM')
-              : ''
-          }
-          ${
-            previousMounth?.inflicionPrice !== undefined
-              ? previousMounth?.inflicionPrice?.toFixed(2) + '%'
-              : 'невідомий'
-          }`}
-    </>
-  )
+  return <InflicionIndexTitle previousMonth={previousMonth} />
 }

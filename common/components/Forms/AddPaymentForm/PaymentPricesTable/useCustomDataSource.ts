@@ -1,9 +1,14 @@
 import { IPaymentTableData, dataSource, electricityObj } from './tableData'
 import { ServiceType, paymentsTitle } from '@utils/constants'
+import { usePaymentContext } from '@common/components/AddPaymentModal'
 import useCompany from '@common/modules/hooks/useCompany'
 import { useEffect, useState } from 'react'
+import { Form } from 'antd'
 
-export function useCustomDataSource({ paymentData, companyId, edit }) {
+export function useCustomDataSource({ edit }) {
+  const { paymentData, form } = usePaymentContext()
+  const companyId = Form.useWatch('company', form) || paymentData?.company
+
   const [ds, setDataSource] = useState<IPaymentTableData[]>(dataSource)
   const { company } = useCompany({
     companyId,

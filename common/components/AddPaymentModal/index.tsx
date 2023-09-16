@@ -72,7 +72,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       key: '1',
       label: 'Рахунок',
       children: (
-        <AddPaymentForm form={form} edit={edit} paymentData={paymentData} />
+        <AddPaymentForm edit={edit} />
       ),
     },
   ]
