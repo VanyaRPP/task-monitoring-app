@@ -34,7 +34,7 @@ export default async function handler(
         }
 
         // TODO: refactor with logic. each case should be well separated
-        // Should I left all conditions and only one if for each role? 
+        // Should I left all conditions and only one if for each role?
         // this way it will handle all conditions and will not return wrong service
 
         // TODO: add tests
@@ -100,6 +100,11 @@ export default async function handler(
           }
         }
 
+        const expr = filterPeriodOptions(req.query)
+        if (expr.length > 0) {
+          options.$expr = { $and: expr }
+        }
+
         const services = await Service.find(options)
           .populate({ path: 'domain', select: '_id name' })
           .populate({ path: 'street', select: '_id address city' })
@@ -129,4 +134,16 @@ export default async function handler(
         return res.status(400).json({ success: false, message: error })
       }
   }
+}
+
+function filterPeriodOptions(args) {
+  const { year, month } = args
+  const filterByDateOptions = []
+  if (year) {
+    filterByDateOptions.push({ $eq: [{ $year: '$date' }, year] })
+  }
+  if (month) {
+    filterByDateOptions.push({ $eq: [{ $month: '$date' }, month] })
+  }
+  return filterByDateOptions
 }
