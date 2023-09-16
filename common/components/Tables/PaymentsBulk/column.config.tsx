@@ -44,7 +44,7 @@ export const getDefaultColumns = (
         title: 'За м²',
         dataIndex: 'servicePricePerMeter',
         render: (
-          value: any,
+          __,
           record: { companyName: string | number; servicePricePerMeter: any }
         ) => (
           <>
@@ -55,7 +55,8 @@ export const getDefaultColumns = (
                 'maintenancePrice',
                 'price',
               ]}
-              value={value || service?.rentPrice}
+              value={record.servicePricePerMeter || service?.rentPrice}
+              disabled
             />
 
             {!!record.servicePricePerMeter && (
@@ -89,7 +90,7 @@ export const getDefaultColumns = (
           <FormAttribute
             name={['companies', record.companyName, 'placingPrice', 'price']}
             value={record.inflicion ? 0 : value}
-            disabled={record.inflicion}
+            disabled
           />
         ),
       },
@@ -197,6 +198,7 @@ export const getDefaultColumns = (
           <FormAttribute
             name={['companies', record.companyName, 'waterPart', 'price']}
             value={record.waterPart || 0}
+            disabled
           />
         ),
       },
@@ -409,7 +411,7 @@ function InflicionPricePlacingField({ baseName, service, record }) {
         value={previousPlacingPrice + inflicionAmount}
       />
       <StyledTooltip
-        title={`Попередній місяць розміщення + значення інфляції в цьому рахунку (${previousPlacingPrice} + ${inflicionAmount})`}
+        title={`Значення попереднього місяця + значення інфляції в цьому рахунку (${previousPlacingPrice} + ${inflicionAmount})`}
       />
     </>
   )

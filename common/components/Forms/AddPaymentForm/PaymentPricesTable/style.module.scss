@@ -2,38 +2,24 @@
   color: #7e7e7e;
   font-size: 12px;
 }
-.table {
-  .doubleInputs {
-    .formItem {
-      margin: 0;
-    }
-    @media (min-width: 768px) {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 0.5rem;
-    }
+.doubleInputs {
+  .formItem {
+    margin: 0;
   }
+  @media (min-width: 768px) {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
 
-  .input {
-    width: 100%;
-  }
+.input {
+  width: 100%;
+}
 
-  .price {
-    padding-top: 0.5rem;
-  }
-
-  :global {
-    .ant-table-tbody > tr > td {
-      padding: 0.5rem;
-    }
-    .ant-form-item {
-      margin: 0.5rem;
-    }
-    .ant-table-cell-ellipsis {
-      white-space: normal;
-    }
-  }
+.price {
+  padding-top: 0.5rem;
 }
 
 .popconfirm {
@@ -41,6 +27,7 @@
   justify-content: center;
   align-items: center;
 }
+
 .icon {
   font-size: 14px;
 }

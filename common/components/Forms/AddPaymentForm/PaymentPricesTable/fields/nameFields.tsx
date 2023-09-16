@@ -15,8 +15,7 @@ export function NamePlacingField({ dateMonth, nameRes, company }) {
       Розміщення <div className={s.month}>{dateMonth}</div>
       {!!company?.inflicion && (
         <span className={s.rowText}>
-          <br />
-          <span className={s.month}>без врах.інд.інф </span>
+          <span className={s.month}>без врахування індексу інфляції </span>
           <StyledTooltip title={maintenanceWithoutInflicionDescription} />
         </span>
       )}
