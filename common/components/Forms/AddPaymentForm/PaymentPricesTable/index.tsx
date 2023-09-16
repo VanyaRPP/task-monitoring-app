@@ -1,23 +1,14 @@
 import {
-  Table,
-  Form,
-  FormInstance,
-  Popconfirm,
-  Button,
-  Modal,
-  Input,
-} from 'antd'
-import { FC, useState } from 'react'
-import { ColumnProps } from 'antd/lib/table'
-import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
-import { ServiceType, paymentsTitle } from '@utils/constants'
-import { getName } from '@utils/helpers'
-import { usePaymentContext } from '@common/components/AddPaymentModal'
-import {
   MinusCircleOutlined,
   DeleteOutlined,
   PlusOutlined,
 } from '@ant-design/icons'
+import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
+import { Popconfirm, Button, Table, Modal, Input } from 'antd'
+import { ServiceType, paymentsTitle } from '@utils/constants'
+import { ColumnProps } from 'antd/lib/table'
+import { getName } from '@utils/helpers'
+import { useState } from 'react'
 import { useCustomDataSource } from './useCustomDataSource'
 import AmountComponent from './fields/AmountComponent'
 import PriceComponent from './fields/PriceComponent'
@@ -25,23 +16,9 @@ import NameComponent from './fields/NameComponent'
 import SumComponent from './fields/SumComponent'
 import s from '../style.module.scss'
 
-interface Props {
-  form: FormInstance<any>
-  edit: boolean
-}
-
-const PaymentPricesTable: FC<Props> = ({ edit }) => {
-  const { paymentData, form } = usePaymentContext()
-  const serviceId = Form.useWatch('service', form) || paymentData?.monthService
-  const companyId = Form.useWatch('company', form) || paymentData?.company
-
+function PaymentPricesTable({ edit }) {
   const { customDataSource, addDataSource, removeDataSource } =
-    useCustomDataSource({
-      paymentData,
-      companyId,
-      serviceId,
-      edit,
-    } as any)
+    useCustomDataSource({ edit })
 
   const columns: ColumnProps<IPaymentTableData>[] = [
     {

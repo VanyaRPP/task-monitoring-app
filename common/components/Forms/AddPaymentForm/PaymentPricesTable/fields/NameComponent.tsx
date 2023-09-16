@@ -1,47 +1,49 @@
-import { ServiceType, paymentsTitle } from '@utils/constants'
+import { ServiceType } from '@utils/constants'
 import {
-  NameDiscountField,
-  NameElectricityField,
   NameGarbageCollectorField,
-  NameInflicionField,
+  NameElectricityField,
   NameMaintainceField,
+  NameInflicionField,
+  NameWaterPartField,
+  NameDiscountField,
   NamePlacingField,
   NameWaterField,
-  NameWaterPartField,
 } from './nameFields'
-import useService from '@common/modules/hooks/useService'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
-import { Form } from 'antd'
-import { getDispalyedDate } from '@common/components/Forms/ReceiptForm'
-import { getName } from '@utils/helpers'
 import useCompany from '@common/modules/hooks/useCompany'
+import useService from '@common/modules/hooks/useService'
+import { getFormattedDate } from '@utils/helpers'
+import { Form } from 'antd'
 
-const fields: any = {
-  [ServiceType.Maintenance]: NameMaintainceField,
-  [ServiceType.Placing]: NamePlacingField,
-  [ServiceType.Electricity]: NameElectricityField,
-  [ServiceType.Water]: NameWaterField,
+const fields = {
   [ServiceType.GarbageCollector]: NameGarbageCollectorField,
-  [ServiceType.Inflicion]: NameInflicionField,
+  [ServiceType.Electricity]: NameElectricityField,
+  [ServiceType.Maintenance]: NameMaintainceField,
   [ServiceType.WaterPart]: NameWaterPartField,
+  [ServiceType.Inflicion]: NameInflicionField,
   [ServiceType.Discount]: NameDiscountField,
+  [ServiceType.Placing]: NamePlacingField,
+  [ServiceType.Water]: NameWaterField,
 }
 
 export default function NameComponent({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
-  const serviceId = Form.useWatch('service', form) || paymentData?.monthService
-  const { service } = useService({ serviceId, skip: edit })
-  const nameRes = getName(record.name, paymentsTitle)
+  
+  const serviceId = Form.useWatch('monthService', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
+
+  const { service } = useService({ serviceId, skip: edit })
   const { company } = useCompany({ companyId, skip: edit })
 
   if (record.name in fields) {
-    const dateMonth = getDispalyedDate(paymentData, service?.date, record.name)
     const Component = fields[record.name]
     return (
       <Component
-        nameRes={nameRes || record.name}
-        dateMonth={dateMonth}
+        dateMonth={getFormattedDate(
+          paymentData?.monthService?.invoiceCreationDate ||
+            paymentData?.invoiceCreationDate ||
+            service?.date
+        )}
         company={company}
         edit={edit}
       />
@@ -50,12 +52,3 @@ export default function NameComponent({ record, edit }) {
 
   return record.name
 }
-
-//         return (
-//           <>
-//                 {!!company?.servicePricePerMeter &&
-//                   nameRes === paymentsTitle.maintenancePrice && (
-//                     <span className={s.month}> індивідуальне</span>
-//                   )}
-//           </>
-//         )
