@@ -19,7 +19,6 @@ function useService({ serviceId, skip }: IUseServiceProps) {
 export default useService
 
 export function usePreviousMonthService({ domainId, streetId, date }) {
-  // TODO: moment out of service. deprecated. replace
   const lastMonth = moment(date).subtract(1, 'month')
   const { data } = useGetAllServicesQuery(
     {

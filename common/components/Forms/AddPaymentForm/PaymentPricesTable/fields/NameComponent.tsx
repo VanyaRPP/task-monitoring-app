@@ -44,6 +44,7 @@ export default function NameComponent({ record, edit }) {
             paymentData?.invoiceCreationDate ||
             service?.date
         )}
+        service={service}
         company={company}
         edit={edit}
       />

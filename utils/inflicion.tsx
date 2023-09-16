@@ -1,23 +1,21 @@
 import { usePreviousMonthService } from '@common/modules/hooks/useService'
 import moment from 'moment'
 
-export function InflicionIndexTitle({ service, useHook }) {
-  const { form } = useHook()
-  const { previousMonth } = usePreviousMonthService({
-    date: service?.date,
-    domainId: form.getFieldValue('domain'),
-    streetId: form.getFieldValue('street'),
-  })
-
+export function InflicionIndexTitle({ previousMonth }) {
   return (
     <>
       Індекс інфляції
       {previousMonth && (
         <>
           {' '}
-          {previousMonth?.date
-            ? moment(previousMonth?.date)?.format('MMMM')
-            : ''}{' '}
+          {previousMonth?.date ? (
+            <>
+              <br />
+              <b>{moment(previousMonth?.date)?.format('MMMM')}</b>
+            </>
+          ) : (
+            ''
+          )}{' '}
           {previousMonth?.inflicionPrice !== undefined
             ? previousMonth?.inflicionPrice?.toFixed(2) + '%'
             : 'невідомий'}
@@ -26,7 +24,6 @@ export function InflicionIndexTitle({ service, useHook }) {
     </>
   )
 }
-
 
 export function getInflicionValue(mainSum, inflicionPrice) {
   const percent = inflicionPrice - 100

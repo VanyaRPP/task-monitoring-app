@@ -105,12 +105,7 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: (
-      <InflicionIndexTitle
-        useHook={useInvoicesPaymentContext}
-        service={service}
-      />
-    ),
+    title: <InflicionIndexTitleLocal service={service} />,
     dataIndex: 'inflicionPrice',
     render: (__: any, record: any) => (
       <InflicionPrice service={service} record={record} />
@@ -296,7 +291,10 @@ function useInflicionValues({ companyId, company, service }) {
       company?.pricePerMeter &&
       company?.totalArea * company?.pricePerMeter)
 
-  const inflicionAmount = +getInflicionValue(value, previousMonth?.inflicionPrice)
+  const inflicionAmount = +getInflicionValue(
+    value,
+    previousMonth?.inflicionPrice
+  )
   return { previousPlacingPrice: value, inflicionAmount }
 }
 
@@ -524,4 +522,14 @@ const ElectricityPriceSum: React.FC<{ service: any; record: any }> = ({
       disabled
     />
   )
+}
+
+function InflicionIndexTitleLocal({ service }) {
+  const { form } = useInvoicesPaymentContext()
+  const { previousMonth } = usePreviousMonthService({
+    date: service?.date,
+    domainId: form.getFieldValue('domain'),
+    streetId: form.getFieldValue('street'),
+  })
+  return <InflicionIndexTitle previousMonth={previousMonth} />
 }

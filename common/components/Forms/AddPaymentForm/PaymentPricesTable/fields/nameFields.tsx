@@ -1,12 +1,13 @@
-import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
-import s from '../style.module.scss'
 import {
-  inflicionDescription,
   maintenanceWithoutInflicionDescription,
+  inflicionDescription,
 } from '@utils/constants'
-import { Form } from 'antd'
+import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
+import { usePreviousMonthService } from '@common/modules/hooks/useService'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
-import useCompany from '@common/modules/hooks/useCompany'
+import { InflicionIndexTitle } from '@utils/inflicion'
+import { Form } from 'antd'
+import s from '../style.module.scss'
 
 export function NamePlacingField({ dateMonth, nameRes, company }) {
   return (
@@ -53,15 +54,17 @@ export function NameGarbageCollectorField({ dateMonth }) {
     </span>
   )
 }
-export function NameInflicionField({ dateMonth, edit }) {
-  const { paymentData, form } = usePaymentContext()
-  const companyId = Form.useWatch('company', form) || paymentData?.company
-  const { company } = useCompany({ companyId, skip: edit })
+export function NameInflicionField({ service, company }) {
+  const { form } = usePaymentContext()
   const inflicionPrice = Form.useWatch(['inflicionPrice', 'price'], form)
-
+  const { previousMonth } = usePreviousMonthService({
+    date: service?.date,
+    domainId: form.getFieldValue('domain'),
+    streetId: form.getFieldValue('street'),
+  })
   return (
     <span className={s.rowText}>
-      Індекс інфляції
+      <InflicionIndexTitle previousMonth={previousMonth} />
     
       {!!company?.inflicion && (
         <span className={s.rowText}>
