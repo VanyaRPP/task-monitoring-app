@@ -25,6 +25,12 @@ export default async function handler(
         if (isGlobalAdmin && domainId && streetId) {
           options.domain = domainId
           options.street = streetId
+
+          const expr = filterPeriodOptions(req.query)
+
+          if (expr.length > 0) {
+            options.$expr = { $and: expr }
+          }
           const services = await Service.find(options).sort({ date: -1 })
 
           return res.status(200).json({
@@ -98,11 +104,6 @@ export default async function handler(
             const domainsIds = realEstates.map((i) => i.domain._id)
             options.domain = { $in: domainsIds }
           }
-        }
-
-        const expr = filterPeriodOptions(req.query)
-        if (expr.length > 0) {
-          options.$expr = { $and: expr }
         }
 
         const services = await Service.find(options)

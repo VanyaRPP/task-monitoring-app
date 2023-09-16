@@ -9,6 +9,7 @@ import { getInflicionValue } from '@utils/inflicion'
 import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
 import { ServiceType } from '@utils/constants'
 import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 
 export const getDefaultColumns = (
   service?: any,
@@ -100,11 +101,7 @@ export const getDefaultColumns = (
     ],
   },
   {
-    // TODO: треба відобразити індекс інфляції за минулий місяць
-    // тайтл також стає компонентом. там ми фетчимо сервіс і тут же відображаємо правильний %
-    title: `Індекс інфляції за ${moment(service?.date)
-      .subtract(1, 'months')
-      .format('MMMM')} 101.5%`,
+    title: <InflicionIndex service={service} />,
     dataIndex: 'inflicionPrice',
     render: (__, record) => (
       <InflicionPrice service={service} record={record} />
@@ -502,5 +499,34 @@ const ElectricityPriceSum: React.FC<{ service: any; record: any }> = ({
       }
       disabled
     />
+  )
+}
+
+function InflicionIndex({ service }) {
+  const { form } = useInvoicesPaymentContext()
+  const lastMonth = moment(service?.date).subtract(1, 'month')
+  const { data } = useGetAllServicesQuery({
+    domainId: form.getFieldValue('domain'),
+    streetId: form.getFieldValue('street'),
+    month: lastMonth.month() + 1,
+    year: lastMonth.year(),
+  })
+
+  const previousMounth = data?.[0]
+
+  return (
+    <>
+      {`Індекс інфляції
+          ${
+            previousMounth?.date
+              ? moment(previousMounth?.date)?.format('MMMM')
+              : ''
+          }
+          ${
+            previousMounth?.inflicionPrice !== undefined
+              ? previousMounth?.inflicionPrice?.toFixed(2) + '%'
+              : 'невідомий'
+          }`}
+    </>
   )
 }
