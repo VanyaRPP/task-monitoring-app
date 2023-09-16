@@ -99,7 +99,9 @@ export default async function handler(
 
         const expr = filterPeriodOptions(req.query)
         if (expr.length > 0) {
-          options.$expr = { $and: expr }
+          options.$expr = {
+            $and: expr,
+          }
         }
 
         const payments = await (Payment as any)
