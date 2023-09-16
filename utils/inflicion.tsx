@@ -1,4 +1,3 @@
-import { usePreviousMonthService } from '@common/modules/hooks/useService'
 import moment from 'moment'
 
 export function InflicionIndexTitle({ previousMonth }) {
@@ -23,11 +22,4 @@ export function InflicionIndexTitle({ previousMonth }) {
       )}
     </>
   )
-}
-
-export function getInflicionValue(mainSum, inflicionPrice) {
-  const percent = inflicionPrice - 100
-  const inflicionValue = (mainSum * percent) / 100
-  if (inflicionValue < 0) return '0.00'
-  return inflicionValue.toFixed(2)
 }

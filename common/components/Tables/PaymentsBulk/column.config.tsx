@@ -3,11 +3,12 @@ import { Popconfirm, Form } from 'antd'
 import FormAttribute from '@common/components/UI/FormAttribute'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
-import { InflicionIndexTitle, getInflicionValue } from '@utils/inflicion'
+import { InflicionIndexTitle } from '@utils/inflicion'
 import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
 import { ServiceType } from '@utils/constants'
 import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
 import { usePreviousMonthService } from '@common/modules/hooks/useService'
+import { getInflicionValue } from '@utils/inflicionHelper'
 
 export const getDefaultColumns = (
   service?: any,

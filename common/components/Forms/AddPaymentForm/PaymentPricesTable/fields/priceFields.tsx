@@ -6,7 +6,7 @@ import useCompany from '@common/modules/hooks/useCompany'
 import useService, { usePreviousMonthService } from '@common/modules/hooks/useService'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { useInflicionValues } from './amountFields'
-import { getInflicionValue } from '@utils/inflicion'
+import { getInflicionValue } from '@utils/inflicionHelper'
 
 export function PriceMaintainceField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
