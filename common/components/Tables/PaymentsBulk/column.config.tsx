@@ -101,7 +101,7 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: <InflicionIndex service={service} />,
+    title: service ? <InflicionIndex service={service} /> : 'Індекс інфляції',
     dataIndex: 'inflicionPrice',
     render: (__, record) => (
       <InflicionPrice service={service} record={record} />
