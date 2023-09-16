@@ -29,6 +29,12 @@ export default async function handler(
         if (isGlobalAdmin && domainId && streetId) {
           options.domain = domainId
           options.street = streetId
+
+          const expr = filterPeriodOptions(req.query)
+
+          if (expr.length > 0) {
+            options.$expr = { $and: expr }
+          }
           const services = await Service.find(options).sort({ date: -1 })
 
           return res.status(200).json({
@@ -38,7 +44,7 @@ export default async function handler(
         }
 
         // TODO: refactor with logic. each case should be well separated
-        // Should I left all conditions and only one if for each role? 
+        // Should I left all conditions and only one if for each role?
         // this way it will handle all conditions and will not return wrong service
 
         // TODO: add tests
@@ -133,4 +139,16 @@ export default async function handler(
         return res.status(400).json({ success: false, message: error })
       }
   }
+}
+
+function filterPeriodOptions(args) {
+  const { year, month } = args
+  const filterByDateOptions = []
+  if (year) {
+    filterByDateOptions.push({ $eq: [{ $year: '$date' }, year] })
+  }
+  if (month) {
+    filterByDateOptions.push({ $eq: [{ $month: '$date' }, month] })
+  }
+  return filterByDateOptions
 }

@@ -1,14 +1,15 @@
-import { InputNumber, Form, Tooltip } from 'antd'
-import { useEffect } from 'react'
-import { validateField } from '@common/assets/features/validators'
-import s from '../style.module.scss'
-import useCompany from '@common/modules/hooks/useCompany'
+import { usePreviousMonthService } from '@common/modules/hooks/useService'
+import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
-import { ServiceType } from '@utils/constants'
-import { QuestionCircleOutlined } from '@ant-design/icons'
+import { validateField } from '@common/assets/features/validators'
+import useCompany from '@common/modules/hooks/useCompany'
 import useService from '@common/modules/hooks/useService'
 import { NamePath } from 'antd/lib/form/interface'
+import { ServiceType } from '@utils/constants'
+import { InputNumber, Form } from 'antd'
+import { useEffect } from 'react'
+import s from '../style.module.scss'
 
 export function AmountPlacingField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
@@ -45,11 +46,9 @@ function AmountPlacingInflicionField({ edit }) {
   return (
     <>
       {previousPlacingPrice}+{inflicionPrice}{' '}
-      <Tooltip
-        title={`Попередній місяць розміщення + індекс інфляції в цьому рахунку`}
-      >
-        <QuestionCircleOutlined />
-      </Tooltip>
+      <StyledTooltip
+        title={`Значення попереднього місяця + індекс інфляції в цьому рахунку`}
+      />
     </>
   )
 }
@@ -67,14 +66,15 @@ export function AmountGarbageCollectorField({ record, edit }) {
   }
 }
 
+// TODO: Could it be helper from @util ?
+// PaymentsBulk/column.config.tsx the same
 export function useInflicionValues({ edit }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const inflicionValueFieldName = ['inflicionPrice', 'price']
 
   // TODO: fix in preview mode
-  const inflicionPrice =
-    Form.useWatch(inflicionValueFieldName, form) ?? ''
+  const inflicionPrice = Form.useWatch(inflicionValueFieldName, form) ?? ''
 
   const { lastInvoice } = useCompanyInvoice({ companyId, skip: edit })
   const previousPlacingPrice = lastInvoice?.invoice?.find(
@@ -180,13 +180,18 @@ export function AmountInflicionField({ edit }) {
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const { company } = useCompany({ companyId, skip: edit })
   const { service } = useService({ serviceId, skip: edit })
+  const { previousMonth } = usePreviousMonthService({
+    date: service?.date,
+    domainId: form.getFieldValue('domain'),
+    streetId: form.getFieldValue('street'),
+  })
 
   const { previousPlacingPrice } = useInflicionValues({ edit })
 
-  const percent = (service?.inflicionPrice - 100).toFixed(2)
+  const percent = (previousMonth?.inflicionPrice - 100).toFixed(2)
   return (
     <>
-      {company?.inflicion && service?.inflicionPrice
+      {company?.inflicion && previousMonth?.inflicionPrice
         ? percent + '% від ' + previousPlacingPrice
         : null}
     </>

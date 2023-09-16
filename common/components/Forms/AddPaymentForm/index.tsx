@@ -1,6 +1,6 @@
-import React, { FC } from 'react'
+import React from 'react'
 import { validateField } from '@common/assets/features/validators'
-import { Form, FormInstance, Input, InputNumber, Select } from 'antd'
+import { Form, Input, InputNumber } from 'antd'
 import s from './style.module.scss'
 import { Operations, ServiceType } from '@utils/constants'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
@@ -16,18 +16,11 @@ import InvoiceCreationDate from './InvoiceCreationDate'
 import { getFormattedDate } from '@utils/helpers'
 import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
 
-interface Props {
-  form: FormInstance<any>
-  paymentData: any
-  edit: boolean
-  users?: any
-}
-
-const AddPaymentForm: FC<Props> = ({ edit }) => {
-  const { form } = usePaymentContext()
+function AddPaymentForm ({ edit }) {
   const initialValues = useInitialValues()
+  const { form } = usePaymentContext()
+  const serviceId = Form.useWatch('monthService', form)
   const companyId = Form.useWatch('company', form)
-  const serviceId = Form.useWatch('service', form)
 
   return (
     <Form
@@ -106,7 +99,7 @@ const AddPaymentForm: FC<Props> = ({ edit }) => {
             </>
           ) : (
             <>
-              <PaymentPricesTable key={companyId + serviceId} edit={edit} form={form} />
+              <PaymentPricesTable key={companyId + serviceId} edit={edit} />
               <PaymentTotal form={form} />
             </>
           )
