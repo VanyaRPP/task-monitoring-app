@@ -10,11 +10,9 @@ import { usePaymentContext } from '@common/components/AddPaymentModal'
 import useCompany from '@common/modules/hooks/useCompany'
 
 export function NamePlacingField({ dateMonth, nameRes, company }) {
-  const { paymentData } = usePaymentContext()
-
   return (
     <span className={s.rowText}>
-      {nameRes} <span className={s.month}>{dateMonth}</span>
+      Розміщення <span className={s.month}>{dateMonth}</span>
       {!!company?.inflicion && (
         <span className={s.rowText}>
           <br />
@@ -25,35 +23,38 @@ export function NamePlacingField({ dateMonth, nameRes, company }) {
     </span>
   )
 }
-export function NameMaintainceField({ dateMonth, nameRes }) {
+export function NameMaintainceField({ dateMonth, company }) {
   return (
     <span className={s.rowText}>
-      {nameRes} <span className={s.month}>{dateMonth}</span>
+      Утримання <span className={s.month}>{dateMonth}</span>
+      {!!company?.servicePricePerMeter && (
+        <span className={s.month}> індивідуальне</span>
+      )}
     </span>
   )
 }
-export function NameElectricityField({ dateMonth, nameRes }) {
+export function NameElectricityField({ dateMonth }) {
   return (
     <span className={s.rowText}>
-      {nameRes} <span className={s.month}>{dateMonth}</span>
+      Електропостачання <span className={s.month}>{dateMonth}</span>
     </span>
   )
 }
-export function NameWaterField({ dateMonth, nameRes }) {
+export function NameWaterField({ dateMonth }) {
   return (
     <span className={s.rowText}>
-      {nameRes} <span className={s.month}>{dateMonth}</span>
+      Водопостачання <span className={s.month}>{dateMonth}</span>
     </span>
   )
 }
-export function NameGarbageCollectorField({ dateMonth, nameRes }) {
+export function NameGarbageCollectorField({ dateMonth }) {
   return (
     <span className={s.rowText}>
-      {nameRes} <span className={s.month}>{dateMonth}</span>
+      Вивіз ТПВ <span className={s.month}>{dateMonth}</span>
     </span>
   )
 }
-export function NameInflicionField({ dateMonth, nameRes, edit }) {
+export function NameInflicionField({ dateMonth, edit }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const { company } = useCompany({ companyId, skip: edit })
@@ -61,8 +62,8 @@ export function NameInflicionField({ dateMonth, nameRes, edit }) {
   const inflicionPrice = 2
   return (
     <span className={s.rowText}>
-      {nameRes} <span className={s.month}>{dateMonth}</span>
-      {!!company?.inflicion && nameRes === paymentsTitle.inflicionPrice && (
+      Індекс інфляції <span className={s.month}>{dateMonth}</span>
+      {!!company?.inflicion && (
         <span className={s.rowText}>
           {+inflicionPrice <= 0 && (
             <>
@@ -78,18 +79,17 @@ export function NameInflicionField({ dateMonth, nameRes, edit }) {
     </span>
   )
 }
-export function NameWaterPartField({ dateMonth, nameRes }) {
+export function NameWaterPartField({ dateMonth }) {
   return (
     <span className={s.rowText}>
-      {nameRes} <span className={s.month}>{dateMonth}</span>
-      {/* {nameRes || record.name} <span className={s.month}>{dateMonth}</span> */}
+      Нарахування водопостачання <span className={s.month}>{dateMonth}</span>
     </span>
   )
 }
-export function NameDiscountField({ dateMonth, nameRes }) {
+export function NameDiscountField({ dateMonth }) {
   return (
     <span className={s.rowText}>
-      {nameRes} <span className={s.month}>{dateMonth}</span>
+      Знижка <span className={s.month}>{dateMonth}</span>
     </span>
   )
 }
