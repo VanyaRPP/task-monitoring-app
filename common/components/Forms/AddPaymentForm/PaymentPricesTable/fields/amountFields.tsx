@@ -67,6 +67,8 @@ export function AmountGarbageCollectorField({ record, edit }) {
   }
 }
 
+// TODO: Could it be helper from @util ?
+// PaymentsBulk/column.config.tsx the same 
 export function useInflicionValues({ edit }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company

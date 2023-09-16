@@ -1,4 +1,5 @@
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import moment from 'moment'
 
 interface IUseServiceProps {
   serviceId?: string
@@ -16,3 +17,19 @@ function useService({ serviceId, skip }: IUseServiceProps) {
 }
 
 export default useService
+
+export function usePreviousMonthService({ domainId, streetId, date }) {
+  // TODO: moment out of service. deprecated. replace
+  const lastMonth = moment(date).subtract(1, 'month')
+  const { data } = useGetAllServicesQuery(
+    {
+      month: lastMonth.month() + 1,
+      year: lastMonth.year(),
+      domainId,
+      streetId,
+    },
+    { skip: !domainId || !streetId || !date }
+  )
+
+  return { previousMonth: data?.[0] }
+}
