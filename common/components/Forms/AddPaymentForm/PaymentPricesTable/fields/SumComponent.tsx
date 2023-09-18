@@ -7,7 +7,7 @@ import s from '../style.module.scss'
 export default function SumComponent({ record }) {
   const { form } = usePaymentContext()
   const formFields = Form.useWatch(record.name, form)
-  const valueToSet = getVal(record?.name, formFields) || record.sum
+  const valueToSet = getVal(record?.name, formFields) || record.sum || 0
 
   useEffect(() => {
     form.setFieldValue([record.name, 'sum'], valueToSet)
@@ -44,7 +44,7 @@ const getVal = (record, obj) => {
     case ServiceType.GarbageCollector: {
       const g =
         obj?.amount === undefined ? obj?.price : obj?.amount * obj?.price
-      return  (+g || 0).toFixed(1) || 0
+      return (+g || 0).toFixed(1) || 0
     }
     default: {
       return (+obj?.price || 0).toFixed(1) || 0

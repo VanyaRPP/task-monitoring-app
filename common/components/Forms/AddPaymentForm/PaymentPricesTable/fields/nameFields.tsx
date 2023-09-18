@@ -96,3 +96,11 @@ export function NameDiscountField({ dateMonth }) {
     </span>
   )
 }
+
+export function NameCleaningField({ dateMonth }) {
+  return (
+    <span className={s.rowText}>
+      Прибирання <div className={s.month}>{dateMonth}</div>
+    </span>
+  )
+}

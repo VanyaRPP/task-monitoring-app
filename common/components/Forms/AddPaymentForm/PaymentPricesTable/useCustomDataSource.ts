@@ -39,6 +39,9 @@ export function useCustomDataSource({ edit }) {
       if (company?.garbageCollector) {
         itemsToDisplay.push({ name: ServiceType.GarbageCollector })
       }
+      if (company?.cleaning) {
+        itemsToDisplay.push({ name: ServiceType.Cleaning })
+      }
       if (company?.discount) {
         itemsToDisplay.push({ name: ServiceType.Discount })
       }

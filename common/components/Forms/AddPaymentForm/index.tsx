@@ -137,6 +137,9 @@ function useInitialValues() {
     discount: paymentData?.invoice.find(
       (item) => item?.type === ServiceType.Discount
     ),
+    cleaning: paymentData?.invoice.find(
+      (item) => item?.type === ServiceType.Cleaning
+    ),
     custom: paymentData?.invoice.filter(
       (item) => item?.type === ServiceType.Custom
     ),
@@ -193,6 +196,9 @@ function useInitialValues() {
     },
     [ServiceType.Discount]: {
       price: invoices.discount?.price,
+    },
+    [ServiceType.Cleaning]: {
+      price: invoices.cleaning?.price,
     },
     ...customFields,
   }

@@ -1,5 +1,6 @@
 import { QuestionCircleOutlined } from '@ant-design/icons'
 import { Tooltip } from 'antd'
+import s from './style.module.scss'
 
 const StyledTooltip: React.FC<{
   title: React.ReactNode
@@ -7,12 +8,7 @@ const StyledTooltip: React.FC<{
   return (
     <Tooltip title={title}>
       <QuestionCircleOutlined
-        style={{
-          position: 'absolute',
-          top: '50%',
-          right: 0,
-          transform: 'translate(-16px, -50%)',
-        }}
+        className={s.tooltipIcon}
       />
     </Tooltip>
   )
