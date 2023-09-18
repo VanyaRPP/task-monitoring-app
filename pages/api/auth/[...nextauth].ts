@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
@@ -46,76 +44,73 @@ export const authOptions: NextAuthOptions = {
     },
   },
   providers: [
-    CredentialsProvider({
-      name: 'Credentials',
-      credentials: {},
-      async authorize(credentials: ICredentials, req) {
-        try {
-          const user = await User.findOne({
-            email: credentials.email,
-          })
+    // CredentialsProvider({
+    //   name: 'Credentials',
+    //   credentials: {},
+    //   async authorize(credentials: ICredentials, req) {
+    //     try {
+    //       const user = await User.findOne({
+    //         email: credentials.email,
+    //       })
 
-          // encrypting and comparing password
-          const result = await bcrypt.compare(
-            credentials.password,
-            user.password
-          )
-          if (!result) return null
+    //       // encrypting and comparing password
+    //       const result = await bcrypt.compare(
+    //         credentials.password,
+    //         user.password
+    //       )
+    //       if (!result) return null
 
-          return user
-        } catch (error) {
-          return null
-        }
-      },
-    }),
-    EmailProvider({
-      server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: process.env.EMAIL_SERVER_PORT,
-        auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD,
-        },
-      },
-      from: process.env.EMAIL_FROM,
-      async sendVerificationRequest({
-        identifier: email,
-        url,
-        provider: { server, from },
-      }) {
-        const { host } = new URL(url)
-        const transport = nodemailer.createTransport(server)
-        await transport.sendMail({
-          to: email,
-          from,
-          subject: `Login to ${host}`,
-          text: text({ url, host }),
-          html: html({ url, host, email }),
-        })
-      },
-    }),
+    //       return user
+    //     } catch (error) {
+    //       return null
+    //     }
+    //   },
+    // }),
+    // EmailProvider({
+    //   server: {
+    //     host: process.env.EMAIL_SERVER_HOST,
+    //     port: process.env.EMAIL_SERVER_PORT,
+    //     auth: {
+    //       user: process.env.EMAIL_SERVER_USER,
+    //       pass: process.env.EMAIL_SERVER_PASSWORD,
+    //     },
+    //   },
+    //   from: process.env.EMAIL_FROM,
+    //   async sendVerificationRequest({
+    //     identifier: email,
+    //     url,
+    //     provider: { server, from },
+    //   }) {
+    //     const { host } = new URL(url)
+    //     const transport = nodemailer.createTransport(server)
+    //     await transport.sendMail({
+    //       to: email,
+    //       from,
+    //       subject: `Login to ${host}`,
+    //       text: text({ url, host }),
+    //       html: html({ url, host, email }),
+    //     })
+    //   },
+    // }),
     GoogleProvider({
+      allowDangerousEmailAccountLinking: true,
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
     GithubProvider({
+      allowDangerousEmailAccountLinking: true,
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
     }),
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-    }),
+    // FacebookProvider({
+    //   clientId: process.env.FACEBOOK_CLIENT_ID,
+    //   clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+    // }),
     // ...add more providers here
   ],
   callbacks: {
-    async signIn({ user, account, profile, email, credentials }) {
-      const isAllowedToSignIn = true
-      if (isAllowedToSignIn) {
-        return true
-      } else {
-        return false
-      }
+    async signIn() {
+      return true
     },
     async redirect({ url, baseUrl }) {
       return baseUrl
