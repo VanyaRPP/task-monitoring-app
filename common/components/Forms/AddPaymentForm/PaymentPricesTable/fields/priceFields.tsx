@@ -231,3 +231,23 @@ export function PriceDiscountField({ record, edit }) {
     </Form.Item>
   )
 }
+
+export function PriceCleaningField({ record, edit }) {
+  const { paymentData, form } = usePaymentContext()
+  const fieldName = [record.name, 'price']
+
+  const companyId = Form.useWatch('company', form) || paymentData?.company
+  const { company } = useCompany({ companyId, skip: edit })
+
+  useEffect(() => {
+    if (company?.cleaning) {
+      form.setFieldValue(fieldName, company.cleaning)
+    }
+  }, [company?._id]) //eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <Form.Item name={fieldName} rules={validateField('required')}>
+      <InputNumber disabled={edit} className={s.input} />
+    </Form.Item>
+  )
+}

@@ -252,6 +252,17 @@ export const getDefaultColumns = (
     ],
   },
   {
+    title: 'Прибирання',
+    dataIndex: 'cleaning',
+    render: (value: any, record: { companyName: string | number }) => (
+      <FormAttribute
+        name={['companies', record.companyName, 'cleaningPrice']}
+        value={value || 0}
+        disabled
+      />
+    ),
+  },
+  {
     title: 'Знижка',
     dataIndex: 'discount',
     render: (value: any, record: { companyName: string | number }) => (

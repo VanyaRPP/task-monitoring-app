@@ -205,6 +205,7 @@ const fieldNames = {
   electricityPrice: 'За електропостачання',
   garbageCollectorPrice: 'За вивіз ТПВ',
   inflicionPrice: 'Індекс інфляції',
+  cleaningPrice: 'Прибирання',
   discount: 'Знижка',
 }
 

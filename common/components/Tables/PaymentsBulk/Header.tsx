@@ -149,15 +149,26 @@ const prepareInvoiceObjects = async (
         ...invoice.electricityPrice,
         price: service?.electricityPrice,
       },
-      garbageCollectorPrice: {
-        amount: invoice.amount,
-        sum: invoice.sum,
-      },
       inflicionPrice: {
         price: invoice.inflicionPrice,
         sum: invoice.inflicionPrice,
       },
     }
+
+    if (invoice.garbageCollector.sum > 0) {
+      invoices.garbageCollectorPrice = {
+        amount: invoice.amount,
+        sum: invoice.sum,
+      }
+    }
+
+    if (invoice.cleaningPrice > 0) {
+      invoices.cleaningPrice = {
+        price: invoice.cleaningPrice,
+        sum: invoice.cleaningPrice,
+      }
+    }
+
     if (invoice.discount < 0) {
       invoices.discount = {
         price: invoice.discount,

@@ -14,6 +14,7 @@ export type IRealestate = {
   inflicion?: boolean
   waterPart?: number
   discount?: number
+  cleaning?: number
 }
 
 export interface IExtendedRealestate extends IRealestate {
