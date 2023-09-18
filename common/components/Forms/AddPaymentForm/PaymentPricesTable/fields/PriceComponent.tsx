@@ -7,6 +7,7 @@ import {
   PriceInflicionField,
   PriceWaterPartField,
   PriceDiscountField,
+  PriceCleaningField,
 } from './priceFields'
 import { ServiceType } from '@utils/constants'
 
@@ -18,6 +19,7 @@ const fields: any = {
   [ServiceType.GarbageCollector]: PriceGarbageCollectorField,
   [ServiceType.Inflicion]: PriceInflicionField,
   [ServiceType.WaterPart]: PriceWaterPartField,
+  [ServiceType.Cleaning]: PriceCleaningField,
   [ServiceType.Discount]: PriceDiscountField,
 }
 

@@ -129,6 +129,10 @@ const getDefaultColumns = (
       dataIndex: 'waterPart',
     },
     {
+      title: 'Прибирання',
+      dataIndex: 'cleaning',
+    },
+    {
       title: 'Знижка',
       dataIndex: 'discount',
     },

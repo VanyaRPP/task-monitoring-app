@@ -45,14 +45,16 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     const filteredInvoice = filterInvoiceObject(formData)
     const response = await addPayment({
       invoiceNumber: formData.invoiceNumber,
-      type: formData.credit ? Operations.Credit : Operations.Debit,
+      type: formData.operation,
       domain: formData.domain,
       street: formData.street,
       company: formData.company,
       monthService: formData.monthService,
       invoiceCreationDate: formData.invoiceCreationDate,
       description: formData.description || '',
-      generalSum: filteredInvoice?.reduce((acc, val) => acc + +val.sum, 0).toFixed(2) || 0,
+      generalSum: formData.operation === Operations.Credit
+        ? formData.generalSum
+        : filteredInvoice?.reduce((acc, val) => acc + +val.sum, 0).toFixed(2),
       provider,
       reciever,
       invoice: formData.debit ? filteredInvoice : [],
@@ -71,9 +73,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     {
       key: '1',
       label: 'Рахунок',
-      children: (
-        <AddPaymentForm edit={edit} />
-      ),
+      children: <AddPaymentForm edit={edit} />,
     },
   ]
 

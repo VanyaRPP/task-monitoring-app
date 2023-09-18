@@ -8,6 +8,7 @@ import {
   NameDiscountField,
   NamePlacingField,
   NameWaterField,
+  NameCleaningField,
 } from './nameFields'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import useCompany from '@common/modules/hooks/useCompany'
@@ -24,6 +25,7 @@ const fields = {
   [ServiceType.Discount]: NameDiscountField,
   [ServiceType.Placing]: NamePlacingField,
   [ServiceType.Water]: NameWaterField,
+  [ServiceType.Cleaning]: NameCleaningField,
 }
 
 export default function NameComponent({ record, edit }) {
