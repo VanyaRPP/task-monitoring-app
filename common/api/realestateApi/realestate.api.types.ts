@@ -29,6 +29,7 @@ export interface IAddRealestateResponse {
 
 export interface IGetRealestateResponse {
   success: boolean
+  total: number
   data: IExtendedRealestate[]
 }
 

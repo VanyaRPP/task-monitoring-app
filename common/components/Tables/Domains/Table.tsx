@@ -14,6 +14,7 @@ import {
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import StreetsBlock from '@common/components/DashboardPage/blocks/streets'
 import { AppRoutes } from '@utils/constants'
+import { useState } from 'react'
 
 export interface Props {
   domainId?: string
@@ -24,7 +25,9 @@ const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.DOMAIN
 
-  const { data, isLoading, isError } = useGetDomainsQuery({ domainId })
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
+  const { data: domainsData, isLoading, isError } = useGetDomainsQuery({ domainId, page: page, limit: isOnPage ? undefined : 5 })
 
   const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
 
@@ -47,7 +50,11 @@ const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
         !isOnPage && {
           responsive: false,
           size: 'small',
-          pageSize: 8,
+          total: domainsData?.total,
+          onChange: (page) => {
+            setPage(page)
+          },
+          pageSize: pageSize,
           position: ['bottomCenter'],
           hideOnSinglePage: true,
         }
@@ -59,7 +66,7 @@ const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
           <StreetsBlock domainId={domainId} />
         ),
       }}
-      dataSource={data}
+      dataSource={domainsData?.data}
       scroll={{ x: 600 }}
     />
   )

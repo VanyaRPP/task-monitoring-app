@@ -12,7 +12,7 @@ function useCompany({ companyId, skip }: IUseCompanyProps) {
     { skip }
   )
 
-  const company = realEstates ? realEstates[0] : null
+  const company = realEstates?.data ? realEstates.data[0] : null
 
   return { company, isLoading }
 }

@@ -12,8 +12,8 @@ export default function AddressesSelect({
 }) {
   const { streetId } = useCompanyPageContext()
   const domainId = Form.useWatch('domain', form)
-  const { data = [], isLoading } = useGetDomainsQuery({ domainId: domainId || undefined })
-  const domainObj = data.length > 0 ? data[0] : {} as IDomain
+  const { data: domains, isLoading } = useGetDomainsQuery({ domainId: domainId || undefined })
+  const domainObj = domains?.data.length > 0 ? domains.data[0] : {} as IDomain
   const temp = (domainObj?.streets as any[]) || [] // eslint-disable-line react-hooks/exhaustive-deps
   const singleStreet = streetId && temp.find((i) => i._id === streetId)
   const streets = singleStreet ? [singleStreet] : temp

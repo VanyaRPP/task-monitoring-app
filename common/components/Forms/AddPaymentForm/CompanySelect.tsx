@@ -32,10 +32,10 @@ function RealEstateDataFetcher({ domainId, streetId, form }) {
   }, [streetId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (companies?.length === 1) {
+    if (companies?.data?.length === 1) {
       form.setFieldValue('company', companies[0]._id)
     }
-  }, [companies?.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [companies?.data?.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item
@@ -56,13 +56,13 @@ function RealEstateDataFetcher({ domainId, streetId, form }) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         filterOption={(input, option) => (option?.label ?? '').includes(input)}
-        options={companies?.map((i) => ({
+        options={companies?.data?.map((i) => ({
           value: i._id,
           label: i.companyName,
         }))}
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={companies?.length === 1}
+        disabled={companies?.data?.length === 1}
         loading={isLoading}
         showSearch
       />

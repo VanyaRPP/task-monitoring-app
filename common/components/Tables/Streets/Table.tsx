@@ -22,7 +22,7 @@ const StreetsTable: React.FC<Props> = ({ domainId }) => {
   
   const [page, setPage] = useState(1);
   const pageSize = 5;
-  const { data: fetchedStreets, isLoading, isError } = useGetAllStreetsQuery({ domainId, page: page, limit: !isOnPage ? 5 : undefined })
+  const { data: fetchedStreets, isLoading, isError } = useGetAllStreetsQuery({ domainId, page: page, limit: isOnPage ? undefined : 5 })
   
   const [deleteStreet, { isLoading: deleteLoading }] = useDeleteStreetMutation()
 

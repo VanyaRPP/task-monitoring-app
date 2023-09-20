@@ -4,12 +4,12 @@ import s from '../style.module.scss'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 
 const MyCompany = () => {
-  const { data = [], isLoading } = useGetAllRealEstateQuery({})
+  const { data: realEstate, isLoading } = useGetAllRealEstateQuery({})
 
   return (
     <Card loading={isLoading} size="small" title="Мої компанії">
       <Radio.Group>
-        {data.map((item) => (
+        {realEstate?.data?.map((item) => (
           <Radio.Button
             className={s.companyName}
             value={item.companyName}

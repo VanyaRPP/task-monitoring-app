@@ -18,6 +18,7 @@ export interface IAddDomainResponse {
 export interface IGetDomainResponse {
   success: boolean
   data: IExtendedDomain[]
+  total: number
 }
 
 export interface IDeleteDomainResponse {

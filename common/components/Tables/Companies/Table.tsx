@@ -11,6 +11,7 @@ import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.ty
 import { AppRoutes, Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { isAdminCheck } from '@utils/helpers'
+import { useState } from 'react'
 
 export interface Props {
   domainId?: string
@@ -25,12 +26,15 @@ const CompaniesTable: React.FC<Props> = ({
 }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.REAL_ESTATE
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
 
   const { data: userResponse } = useGetCurrentUserQuery()
-
-  const { data, isLoading, isError } = useGetAllRealEstateQuery({
+  const { data: fetchedRealEstate, isLoading, isError } = useGetAllRealEstateQuery({
     domainId,
-    streetId,
+    streetId, 
+    page: page, 
+    limit: isOnPage ? undefined : 5
   })
   const [deleteRealEstate, { isLoading: deleteLoading }] =
     useDeleteRealEstateMutation()
@@ -62,7 +66,11 @@ const CompaniesTable: React.FC<Props> = ({
         !isOnPage && {
           responsive: false,
           size: 'small',
-          pageSize: 5,
+          total: fetchedRealEstate?.total,
+          onChange: (page) => {
+            setPage(page)
+          },
+          pageSize: pageSize,
           position: ['bottomCenter'],
           hideOnSinglePage: true,
         }
@@ -78,7 +86,7 @@ const CompaniesTable: React.FC<Props> = ({
         isGlobalAdmin,
         isAdmin
       )}
-      dataSource={data}
+      dataSource={fetchedRealEstate?.data}
       scroll={{ x: tableWidth }}
     />
   )

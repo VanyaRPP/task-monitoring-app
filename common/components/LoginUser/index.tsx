@@ -134,25 +134,25 @@ function SessionUser({ image }) {
 }
 
 function DomainsCompanies() {
-  const { data: companies = [] } = useGetAllRealEstateQuery({})
-  const { data: domains = [] } = useGetDomainsQuery({})
+  const { data: companies } = useGetAllRealEstateQuery({})
+  const { data: domains } = useGetDomainsQuery({})
 
   return (
     <>
-      {domains.length > 0 && (
+      {domains?.data.length > 0 && (
         <div>
           Домени:{` `}
-          {domains.map((item) => (
+          {domains?.data.map((item) => (
             <Tag className={s.cardUserTag} key={item.name}>
               {item.name}
             </Tag>
           ))}
         </div>
       )}
-      {companies.length > 0 && (
+      {companies?.data.length > 0 && (
         <div>
           Компанії:{` `}
-          {companies.map((item) => (
+          {companies?.data.map((item) => (
             <Tag className={s.cardUserTag} key={item.companyName}>
               {item.companyName}
             </Tag>

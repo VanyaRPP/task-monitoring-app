@@ -9,24 +9,24 @@ import { Roles } from '@utils/constants'
 const MyDomainsCard: React.FC = () => {
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
-  const { data: domains = [], isLoading: domainsLoading } = useGetDomainsQuery(
+  const { data: domains, isLoading: domainsLoading } = useGetDomainsQuery(
     {},
     { skip: isGlobalAdmin }
   )
-  const { data: companies = [] } = useGetAllRealEstateQuery(
+  const { data: companies } = useGetAllRealEstateQuery(
     {},
     { skip: isGlobalAdmin }
   )
 
   const getDomainCompanies = (domainId) =>
-    companies
+    companies?.data
       .filter((companyItem) => companyItem.domain._id === domainId)
       .map((item) => item.companyName)
       .join(', ')
 
   return (
     <Row gutter={16}>
-      {domains.map((item) => (
+      {domains?.data.map((item) => (
         <Col span={8} key={item.name}>
           <div className={s.CardInfo}>
             {/* Wrap the Card component in a div */}

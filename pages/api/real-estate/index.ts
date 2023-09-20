@@ -49,8 +49,10 @@ export default async function handler(
           options.adminEmails = { $in: [user.email] }
         }
 
+        const realEstatesTotal = await RealEstate.count(options)
         const realEstates = await RealEstate.find(options)
-          .sort({ data: -1 })
+          // .sort({ data: -1 })
+          .skip((req.query.page - 1) * req.query.limit)
           .limit(req.query.limit)
           .populate({
             path: 'domain',
@@ -58,7 +60,7 @@ export default async function handler(
           })
           .populate({ path: 'street', select: '_id address city' })
 
-        return res.status(200).json({ success: true, data: realEstates })
+        return res.status(200).json({ success: true, data: realEstates, total: realEstatesTotal })
       } catch (error) {
         return res.status(400).json({ success: false, message: error })
       }

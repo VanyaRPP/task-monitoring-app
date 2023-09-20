@@ -42,13 +42,15 @@ export default async function handler(
           options._id = { $in: domainsIds }
         }
 
+        const totalDomains = await Domain.count(options)
         const domains = await Domain.find(options)
+          .skip((req.query.page - 1) * req.query.limit)
           .limit(req.query.limit)
           .populate({
             path: 'streets',
             select: '_id address city',
           })
-        return res.status(200).json({ success: true, data: domains })
+        return res.status(200).json({ success: true, data: domains, total: totalDomains })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }

@@ -15,21 +15,21 @@ export const domainApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getDomains: builder.query<
-      IExtendedDomain[],
-      { limit?: number; streetId?: string; domainId?: string }
+      IGetDomainResponse,
+      { limit?: number; page?: number; streetId?: string; domainId?: string }
     >({
-      query: ({ limit, streetId, domainId }) => {
+      query: ({ limit, page, streetId, domainId }) => {
         return {
           url: `domain`,
           method: 'GET',
-          params: { limit, streetId, domainId },
+          params: { limit, page, streetId, domainId },
         }
       },
-      providesTags: (response) =>
+      providesTags: (response: IGetDomainResponse) =>
         response
-          ? response.map((item) => ({ type: 'Domain', id: item._id }))
+          ? response.data.map((item) => ({ type: 'Domain', id: item._id }))
           : [],
-      transformResponse: (response: IGetDomainResponse) => response.data,
+      // transformResponse: (response: IGetDomainResponse) => response.data,
     }),
     addDomain: builder.mutation<IAddDomainResponse, IDomainModel>({
       query(data) {
