@@ -1,5 +1,5 @@
 import { DeleteOutlined } from '@ant-design/icons'
-import { Alert, Popconfirm, Table, message } from 'antd'
+import { Alert, Popconfirm, Table, message, Pagination } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 
@@ -10,6 +10,7 @@ import {
 import { IStreet } from '@common/modules/models/Street'
 import { AppRoutes } from '@utils/constants'
 import RealEstateBlock from '@common/components/DashboardPage/blocks/realEstates'
+import { useState } from 'react'
 
 export interface Props {
   domainId?: string
@@ -18,9 +19,11 @@ export interface Props {
 const StreetsTable: React.FC<Props> = ({ domainId }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.STREETS
-
-  const { data, isLoading, isError } = useGetAllStreetsQuery({ domainId })
-
+  
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
+  const { data: fetchedStreets, isLoading, isError } = useGetAllStreetsQuery({ domainId, page: page, limit: !isOnPage ? 5 : undefined })
+  
   const [deleteStreet, { isLoading: deleteLoading }] = useDeleteStreetMutation()
 
   const handleDelete = async (id: string) => {
@@ -35,30 +38,34 @@ const StreetsTable: React.FC<Props> = ({ domainId }) => {
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
   return (
-    <Table
-      rowKey="_id"
-      size="small"
-      pagination={
-        !isOnPage && {
-          responsive: false,
-          size: 'small',
-          pageSize: 10,
-          position: ['bottomCenter'],
-          hideOnSinglePage: true,
+      <Table
+        rowKey="_id"
+        size="small"
+        pagination={
+          !isOnPage && {
+            responsive: false,
+            size: 'small',
+            total: fetchedStreets?.total,
+            onChange: (page) => {
+              setPage(page)
+            },
+            pageSize: pageSize,
+            position: ['bottomCenter'],
+            hideOnSinglePage: true,
+          }
         }
-      }
-      loading={isLoading}
-      columns={getDefaultColumns(handleDelete, deleteLoading)}
-      expandable={
-        domainId && {
-          expandedRowRender: (street) => (
-            <RealEstateBlock domainId={domainId} streetId={street._id} />
-          ),
+        loading={isLoading}
+        columns={getDefaultColumns(handleDelete, deleteLoading)}
+        expandable={
+          domainId && {
+            expandedRowRender: (street) => (
+              <RealEstateBlock domainId={domainId} streetId={street._id} />
+            ),
+          }
         }
-      }
-      dataSource={data}
-      scroll={{ x: 500 }}
-    />
+        dataSource={fetchedStreets?.data}
+        scroll={{ x: 500 }}
+      />
   )
 }
 

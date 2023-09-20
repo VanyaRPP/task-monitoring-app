@@ -26,7 +26,7 @@ const DomainStreets: React.FC = () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         filterOption={(input, option) => (option?.label ?? '').includes(input)}
-        options={streets?.map((i) => ({
+        options={streets?.data.map((i) => ({
           value: i._id,
           label: `${i.address} (м. ${i.city})`,
         }))}

@@ -17,28 +17,40 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { domainId } = req.query
+        const { domainId, limit, page = 1, } = req.query
         if (domainId) {
           const domain = await Domain.findOne({ _id: domainId }).populate({
             path: 'streets',
             select: '_id address city',
           })
 
+          const streets = domain?.streets || [] 
+            .sort({ data: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit)
+
           return res
             .status(200)
-            .json({ success: true, data: domain?.streets || [] })
+            .json({ 
+              success: true, 
+              data: streets,
+              total: (domain?.streets || [] ).length
+            })
         }
 
+        const totalStreets = await Street.count({});
         const streets = await Street.find({})
           .sort({ data: -1 })
-          .limit(req.query.limit)
+          .skip((page - 1) * limit)
+          .limit(limit)
 
         return res.status(200).json({
           success: true,
+          total: totalStreets,
           data: streets,
         })
       } catch (error) {
-        return res.status(400).json({ success: false })
+        return res.status(400).json({ success: false, error: `${error}` })
       }
 
     case 'POST':

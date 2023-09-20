@@ -13,21 +13,21 @@ export const streetApi = createApi({
       query: (id) => `/streets/${id}`,
       providesTags: (result) => ['Street'],
     }),
-    getAllStreets: builder.query<IStreet[], { domainId?: string }>({
-      query: ({ domainId }: { domainId?: string }) => {
+    getAllStreets: builder.query<AllStreetsQuery, { domainId?: string, limit?: number, page?: number }>({
+      query: ({ domainId, limit, page }: { domainId?: string, limit?: number, page?: number }) => {
         return {
           url: `streets`,
-          params: { domainId },
+          params: { domainId, limit, page },
         }
       },
-      providesTags: (response: IStreet[]) =>
+      providesTags: (response: AllStreetsQuery) =>
         response
-          ? response.map((item: IStreet) => ({
+          ? response.data.map((item: IStreet) => ({
               type: 'Street',
               id: item._id,
             }))
           : [],
-      transformResponse: (response: AllStreetsQuery) => response.data,
+      // transformResponse: (response: AllStreetsQuery) => response,
     }),
     addStreet: builder.mutation<IStreet, Partial<IStreet>>({
       query(body) {
