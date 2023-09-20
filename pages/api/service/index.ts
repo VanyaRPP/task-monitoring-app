@@ -31,11 +31,16 @@ export default async function handler(
           if (expr.length > 0) {
             options.$expr = { $and: expr }
           }
-          const services = await Service.find(options).sort({ date: -1 })
+          const servicesTotal = await Service.count(options)
+          const services = await Service.find(options)
+            .sort({ date: -1 })
+            .skip((req.query.page - 1) * req.query.limit)
+            .limit(req.query.limit)
 
           return res.status(200).json({
             success: true,
             data: services,
+            total: servicesTotal,
           })
         }
 
@@ -63,11 +68,16 @@ export default async function handler(
             const domainsIds = realEstates.map((i) => i.domain._id)
             options.domain = { $in: domainsIds }
           }
+          
+          const servicesTotal = await Service.count(options)
           const services = await Service.find(options).sort({ date: -1 })
+            .skip((req.query.page - 1) * req.query.limit)
+            .limit(req.query.limit)
 
           return res.status(200).json({
             success: true,
             data: services,
+            total: servicesTotal
           })
         }
 
@@ -105,16 +115,19 @@ export default async function handler(
             options.domain = { $in: domainsIds }
           }
         }
-
+        
+        const servicesTotal = await Service.count(options)
         const services = await Service.find(options)
           .populate({ path: 'domain', select: '_id name' })
           .populate({ path: 'street', select: '_id address city' })
           .sort({ date: -1 })
+          .skip((req.query.page - 1) * req.query.limit)
           .limit(req.query.limit)
 
         return res.status(200).json({
           success: true,
           data: services,
+          total: servicesTotal
         })
       } catch (error) {
         return res.status(400).json({ success: false, message: error })

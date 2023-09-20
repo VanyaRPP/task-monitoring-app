@@ -27,7 +27,7 @@ const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
 
   const [page, setPage] = useState(1);
   const pageSize = 5;
-  const { data: domainsData, isLoading, isError } = useGetDomainsQuery({ domainId, page: page, limit: isOnPage ? undefined : 5 })
+  const { data: domainsData, isLoading, isError } = useGetDomainsQuery({ domainId, page: page, limit: isOnPage ? undefined : pageSize })
 
   const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
 

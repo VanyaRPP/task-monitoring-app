@@ -11,6 +11,7 @@ import { IExtendedService } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import { getFormattedDate, renderCurrency } from '@utils/helpers'
+import { useState } from 'react'
 
 interface Props {
   setCurrentService: (setvice: IExtendedService) => void
@@ -18,9 +19,11 @@ interface Props {
 
 const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
   const router = useRouter()
-  const isOnPage = router.pathname === AppRoutes.REAL_ESTATE
+  const isOnPage = router.pathname === AppRoutes.SERVICE
 
-  const { data, isLoading, isError } = useGetAllServicesQuery({})
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
+  const { data: fetchedServices, isLoading, isError } = useGetAllServicesQuery({page: page, limit: isOnPage ? undefined : pageSize})
 
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -47,7 +50,11 @@ const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
         !isOnPage && {
           responsive: false,
           size: 'small',
-          pageSize: 8,
+          total: fetchedServices?.total,
+          onChange: (page) => {
+            setPage(page)
+          },
+          pageSize: pageSize,
           position: ['bottomCenter'],
           hideOnSinglePage: true,
         }
@@ -59,7 +66,7 @@ const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
         deleteLoading,
         setCurrentService
       )}
-      dataSource={data}
+      dataSource={fetchedServices?.data}
       scroll={{ x: 1500 }}
     />
   )

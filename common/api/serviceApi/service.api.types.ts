@@ -25,6 +25,7 @@ export interface IAddServiceResponse {
 
 export interface IGetServiceResponse {
   success: boolean
+  total: number
   data: IExtendedService[]
 }
 
