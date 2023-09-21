@@ -19,7 +19,7 @@ export default async function handler(
     case 'GET':
       try {
         const options = {}
-        const { domainId, streetId, companyId, limit } = req.query
+        const { domainId, streetId, companyId, limit = 0 } = req.query
 
         if (domainId) options.domain = domainId
         if (streetId) options.street = streetId
