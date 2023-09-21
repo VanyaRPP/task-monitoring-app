@@ -22,7 +22,7 @@ function AddPaymentForm({ paymentActions }) {
   const serviceId = Form.useWatch('monthService', form)
   const companyId = Form.useWatch('company', form)
   const operation = Form.useWatch('operation', form)
-  const { preview } = paymentActions
+  const { preview, edit } = paymentActions
 
   return (
     <Form
@@ -38,7 +38,7 @@ function AddPaymentForm({ paymentActions }) {
       <MonthServiceSelect form={form} />
 
       <CompanySelect form={form} />
-      <PaymentTypeSelect edit={!companyId || preview} />
+      <PaymentTypeSelect edit={!companyId || edit} />
 
       <InvoiceNumber form={form} paymentActions={paymentActions} />
       <InvoiceCreationDate edit={preview} />
