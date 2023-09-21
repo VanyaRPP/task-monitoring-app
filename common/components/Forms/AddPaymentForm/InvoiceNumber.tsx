@@ -2,13 +2,16 @@ import { useGetPaymentNumberQuery } from '@common/api/paymentApi/payment.api'
 import { Form, InputNumber } from 'antd'
 import { useEffect } from 'react'
 
-export default function InvoiceNumber({ form, edit }) {
+export default function InvoiceNumber({ form, paymentActions }) {
+  const paymentInCreation = Object.values(paymentActions).every(
+    (action) => action === false
+  )
   const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery(undefined, {
-    skip: edit,
+    skip: !paymentInCreation,
   })
 
   useEffect(() => {
-    if (!edit) {
+    if (paymentInCreation) {
       form.setFieldValue('invoiceNumber', newInvoiceNumber)
     }
   }, [newInvoiceNumber]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -20,7 +23,7 @@ export default function InvoiceNumber({ form, edit }) {
     >
       <InputNumber
         placeholder="Вкажіть № інвойса"
-        disabled={edit}
+        disabled={paymentActions.preview}
       />
     </Form.Item>
   )

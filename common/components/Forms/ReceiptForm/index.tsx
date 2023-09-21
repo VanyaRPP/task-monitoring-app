@@ -14,6 +14,7 @@ import { ServiceType } from '@utils/constants'
 interface Props {
   currPayment: IExtendedPayment
   paymentData: any
+  paymentActions: {preview: boolean, edit: boolean}
 }
 
 interface DataType {
@@ -25,27 +26,32 @@ interface DataType {
   Сума: number
 }
 
-const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
+const ReceiptForm: FC<Props> = ({
+  currPayment,
+  paymentData,
+  paymentActions,
+}) => {
+  const { preview } = paymentActions
   const newData = currPayment || paymentData
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle:
-      (newData.company.companyName || newData.reciever.companyName) +
+      (newData?.company?.companyName || newData?.reciever?.companyName) +
       '-inv-' +
       newData.invoiceNumber,
   })
 
   const { service } = useService({
     serviceId: newData?.monthService,
-    skip: !!paymentData,
+    skip: paymentActions.preview,
   })
 
-  const dataToMap = paymentData
-    ? newData?.invoice
+  const dataToMap = preview
+    ? paymentData?.invoice
     : filterInvoiceObject(newData)
 
-  const dataSourcePreview: DataType[] = dataToMap.map((item, index) => ({
+  const dataSourcePreview: DataType[] = dataToMap?.map((item, index) => ({
     Кількість: item.lastAmount ? item.amount - item.lastAmount : item.amount,
     Назва: `${fieldNames[item.type] || item.name} ${getDispalyedDate(
       paymentData,

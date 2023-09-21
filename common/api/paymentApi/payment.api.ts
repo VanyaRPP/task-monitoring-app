@@ -88,6 +88,17 @@ export const paymentApi = createApi({
       query: () => `spacehub/payment/number`,
       transformResponse: (response: IGetPaymentNumberResponse) => response.data,
     }),
+    editPayment: builder.mutation<IExtendedPayment, Partial<IExtendedPayment>>({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `spacehub/payment/${_id}`,
+          method: 'PATCH',
+          body: body,
+        }
+      },
+      invalidatesTags: (response) => (response ? ['Payment'] : []),
+    }),
   }),
 })
 
@@ -96,4 +107,5 @@ export const {
   useGetAllPaymentsQuery,
   useDeletePaymentMutation,
   useGetPaymentNumberQuery,
+  useEditPaymentMutation,
 } = paymentApi
