@@ -17,6 +17,7 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
+        const { limit = 0 } = req.query
         const options = {}
         let domainsIds
 
@@ -43,7 +44,7 @@ export default async function handler(
         }
 
         const domains = await Domain.find(options)
-          .limit(req.query.limit)
+          .limit(+limit)
           .populate({
             path: 'streets',
             select: '_id address city',

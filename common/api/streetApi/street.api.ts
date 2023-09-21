@@ -13,11 +13,11 @@ export const streetApi = createApi({
       query: (id) => `/streets/${id}`,
       providesTags: (result) => ['Street'],
     }),
-    getAllStreets: builder.query<IStreet[], { domainId?: string }>({
-      query: ({ domainId }: { domainId?: string }) => {
+    getAllStreets: builder.query<IStreet[], { domainId?: string, limit?: number }>({
+      query: ({ domainId, limit }: { domainId?: string, limit?: number }) => {
         return {
           url: `streets`,
-          params: { domainId },
+          params: { domainId, limit },
         }
       },
       providesTags: (response: IStreet[]) =>
