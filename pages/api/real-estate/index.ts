@@ -50,7 +50,6 @@ export default async function handler(
         }
 
         const realEstates = await RealEstate.find(options)
-          .sort({ data: -1 }) // response doesnt contain such field
           .limit(+limit)
           .populate({
             path: 'domain',
