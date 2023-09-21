@@ -9,7 +9,6 @@ import React, {
   createContext,
   useContext,
   useState,
-  useEffect,
 } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
@@ -21,7 +20,6 @@ import {
   getPaymentProviderAndReciever,
 } from '@utils/helpers'
 import useCompany from '@common/modules/hooks/useCompany'
-import { mongoose } from 'mongoose'
 
 interface Props {
   closeModal: VoidFunction
@@ -53,16 +51,9 @@ const AddPaymentModal: FC<Props> = ({
     getActiveTab(paymentData, preview)
   )
   const companyId = Form.useWatch('company', form)
-  const { company } = useCompany({ companyId, skip: !companyId || edit })
+  const { company } = useCompany({ companyId, skip: !companyId || preview })
 
   const { provider, reciever } = getPaymentProviderAndReciever(company)
-
-  useEffect(() => {
-    //eslint-disable-next-line no-console
-    console.log('company', company)
-    //eslint-disable-next-line no-console
-    console.log('companyId', companyId)
-  }, [company, companyId])
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
@@ -81,12 +72,6 @@ const AddPaymentModal: FC<Props> = ({
       reciever,
       invoice: formData.debit ? filteredInvoice : [],
     }
-    /*const response = edit
-      ? {
-          _id: paymentData?._id,
-          ...payment,
-        }
-      : payment*/
     const response = edit
       ? await editPayment({
           _id: paymentData?._id,
@@ -95,17 +80,14 @@ const AddPaymentModal: FC<Props> = ({
       : await addPayment(payment)
 
     if ('data' in response) {
+      const action = edit ? 'Збережено' : 'Додано'
       form.resetFields()
-      message.success('Додано')
+      message.success(action)
       closeModal()
     } else {
-      message.error('Помилка при додаванні рахунку')
+      const action = edit ? 'збереженні' : 'додаванні'
+      message.error(`Помилка при ${action} рахунку`)
     }
-
-    //eslint-disable-next-line no-console
-    console.log('formData', formData)
-    //eslint-disable-next-line no-console
-    console.log('res', response)
   }
 
   const items: TabsProps['items'] = []

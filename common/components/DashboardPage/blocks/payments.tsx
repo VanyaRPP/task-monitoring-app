@@ -205,19 +205,24 @@ const PaymentsBlock = () => {
       fixed: 'right',
       title: '',
       width: 50,
-      render: (_, payment: IExtendedPayment) => (
-        <div className={s.eyelined}>
-          <Button
-            type="link"
-            onClick={() => {
-              setCurrentPayment(payment)
-              setPaymentActions({ ...paymentActions, preview: true })
-            }}
-          >
-            <EyeOutlined className={s.eyelined} />
-          </Button>
-        </div>
-      ),
+      render: (_, payment: IExtendedPayment) => {
+
+        return payment?.type === Operations.Debit ? (
+          <div className={s.eyelined}>
+            <Button
+              type="link"
+              onClick={() => {
+                setCurrentPayment(payment)
+                setPaymentActions({ ...paymentActions, preview: true })
+              }}
+            >
+              <EyeOutlined className={s.eyelined} />
+            </Button>
+          </div>
+        ) : (
+            <></>
+        )
+      },
     },
     ...globalAdminColumns,
   ]

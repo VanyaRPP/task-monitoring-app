@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
-import Payment from 'common/modules/models/Payment'
+import Payment from '@common/modules/models/Payment'
+import Domain from '@common/modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 start()
@@ -11,7 +12,7 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
 
-  const { isAdmin, isGlobalAdmin } = await getCurrentUser(req, res)
+  const { isAdmin, isGlobalAdmin, user } = await getCurrentUser(req, res)
   
   switch (req.method) {
     case 'DELETE':

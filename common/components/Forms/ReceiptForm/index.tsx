@@ -1,4 +1,4 @@
-import React, { FC, useRef, useEffect } from 'react'
+import React, { FC, useRef } from 'react'
 import { Button, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
@@ -62,13 +62,6 @@ const ReceiptForm: FC<Props> = ({
     Сума: +item.sum,
     id: index + 1,
   }))
-
-  useEffect(() => {
-    //eslint-disable-next-line no-console
-    console.log('paymentData', paymentData)
-    //eslint-disable-next-line no-console
-    console.log('newData', newData)
-  }, [paymentData, newData])
 
   return (
     <>

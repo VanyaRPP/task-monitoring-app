@@ -21,6 +21,7 @@ function AddPaymentForm({ paymentActions }) {
   const { form } = usePaymentContext()
   const serviceId = Form.useWatch('monthService', form)
   const companyId = Form.useWatch('company', form)
+  const operation = Form.useWatch('operation', form)
   const { preview } = paymentActions
 
   return (
@@ -77,7 +78,7 @@ function AddPaymentForm({ paymentActions }) {
           ) : (
             <>
               <PaymentPricesTable
-                key={companyId + serviceId}
+                key={companyId + serviceId + operation}
                 paymentActions={paymentActions}
               />
               <PaymentTotal form={form} />
