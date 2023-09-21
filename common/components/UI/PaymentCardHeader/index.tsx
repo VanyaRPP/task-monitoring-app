@@ -14,6 +14,7 @@ import ImportInvoices from './ImportInvoices'
 const PaymentCardHeader = ({
   setCurrentDateFilter,
   currentPayment,
+  paymentActions,
   closeEditModal,
   payments,
   filters,
@@ -93,7 +94,7 @@ const PaymentCardHeader = ({
       </div>
       {(isModalOpen || currentPayment) && (
         <AddPaymentModal
-          edit={!!currentPayment}
+          paymentActions={paymentActions}
           paymentData={currentPayment}
           closeModal={closeModal}
         />

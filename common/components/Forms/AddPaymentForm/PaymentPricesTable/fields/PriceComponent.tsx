@@ -23,9 +23,9 @@ const fields: any = {
   [ServiceType.Discount]: PriceDiscountField,
 }
 
-export default function PriceComponent({ record, edit }) {
+export default function PriceComponent({ record, preview }) {
   if (record.name in fields) {
     const Component = fields[record.name]
-    return <Component record={record} edit={edit} />
+    return <Component record={record} preview={preview} />
   }
 }

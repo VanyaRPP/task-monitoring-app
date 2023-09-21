@@ -1,4 +1,4 @@
-import React, { FC, useRef } from 'react'
+import React, { FC, useRef, useEffect } from 'react'
 import { Button, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
@@ -14,6 +14,7 @@ import { ServiceType } from '@utils/constants'
 interface Props {
   currPayment: IExtendedPayment
   paymentData: any
+  paymentActions: {preview: boolean, edit: boolean}
 }
 
 interface DataType {
@@ -25,27 +26,32 @@ interface DataType {
   Сума: number
 }
 
-const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
+const ReceiptForm: FC<Props> = ({
+  currPayment,
+  paymentData,
+  paymentActions,
+}) => {
+  const { preview } = paymentActions
   const newData = currPayment || paymentData
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle:
-      (newData.company.companyName || newData.reciever.companyName) +
+      (newData?.company?.companyName || newData?.reciever?.companyName) +
       '-inv-' +
       newData.invoiceNumber,
   })
 
   const { service } = useService({
     serviceId: newData?.monthService,
-    skip: !!paymentData,
+    skip: paymentActions.preview,
   })
 
-  const dataToMap = paymentData
-    ? newData?.invoice
+  const dataToMap = preview
+    ? paymentData?.invoice
     : filterInvoiceObject(newData)
 
-  const dataSourcePreview: DataType[] = dataToMap.map((item, index) => ({
+  const dataSourcePreview: DataType[] = dataToMap?.map((item, index) => ({
     Кількість: item.lastAmount ? item.amount - item.lastAmount : item.amount,
     Назва: `${fieldNames[item.type] || item.name} ${getDispalyedDate(
       paymentData,
@@ -56,6 +62,13 @@ const ReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     Сума: +item.sum,
     id: index + 1,
   }))
+
+  useEffect(() => {
+    //eslint-disable-next-line no-console
+    console.log('paymentData', paymentData)
+    //eslint-disable-next-line no-console
+    console.log('newData', newData)
+  }, [paymentData, newData])
 
   return (
     <>

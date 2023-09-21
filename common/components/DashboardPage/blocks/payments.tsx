@@ -12,7 +12,7 @@ import {
   dateToMonthYear,
 } from '@common/assets/features/formatDate'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import { DeleteOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Operations, Roles, paymentsTitle } from '@utils/constants'
@@ -45,12 +45,21 @@ const PaymentsBlock = () => {
     query: { email },
   } = router
   const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
+  const [paymentActions, setPaymentActions] = useState({edit: false, preview: false})
   const [currentDateFilter, setCurrentDateFilter] = useState()
   const [pageData, setPageData] = useState({
     pageSize: pathname === AppRoutes.PAYMENT ? 10 : 5,
     currentPage: 1,
   })
   const [filters, setFilters] = useState<any>()
+
+  const closeEditModal = () => {
+    setCurrentPayment(null)
+    setPaymentActions({
+      edit: false,
+      preview: false
+    })
+  }
 
   const {
     isFetching: currUserFetching,
@@ -105,6 +114,50 @@ const PaymentsBlock = () => {
           })),
         ]
       : []
+
+  const globalAdminColumns = isGlobalAdmin
+    ? [
+        {
+          align: 'center',
+          fixed: 'right',
+          title: '',
+          width: 50,
+          render: (_, payment: IExtendedPayment) => (
+            <Button
+              style={{ padding: 0 }}
+              type="link"
+              onClick={() => {
+                setCurrentPayment(payment)
+                setPaymentActions({ ...paymentActions, edit: true })
+              }}
+            >
+              <EditOutlined className={s.icon} />
+            </Button>
+          ),
+        },
+        {
+          align: 'center',
+          fixed: 'right',
+          title: '',
+          width: 50,
+          render: (_, payment: IExtendedPayment) => (
+            <div className={s.popconfirm}>
+              <Popconfirm
+                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+                  payment?.invoiceCreationDate as unknown as string
+                )}?`}
+                onConfirm={() => handleDeletePayment(payment?._id)}
+                cancelText="Відміна"
+                disabled={deleteLoading}
+              >
+                <DeleteOutlined className={s.icon} />
+              </Popconfirm>
+            </div>
+          ),
+        },
+      ]
+    : []
+  
   // TODO: add Interface
   const columns: any = [
     {
@@ -158,6 +211,7 @@ const PaymentsBlock = () => {
             type="link"
             onClick={() => {
               setCurrentPayment(payment)
+              setPaymentActions({ ...paymentActions, preview: true })
             }}
           >
             <EyeOutlined className={s.eyelined} />
@@ -165,28 +219,7 @@ const PaymentsBlock = () => {
         </div>
       ),
     },
-    isGlobalAdmin
-      ? {
-          align: 'center',
-          fixed: 'right',
-          title: '',
-          width: 50,
-          render: (_, payment: IExtendedPayment) => (
-            <div className={s.popconfirm}>
-              <Popconfirm
-                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                  payment?.invoiceCreationDate as unknown as string
-                )}?`}
-                onConfirm={() => handleDeletePayment(payment?._id)}
-                cancelText="Відміна"
-                disabled={deleteLoading}
-              >
-                <DeleteOutlined className={s.icon} />
-              </Popconfirm>
-            </div>
-          ),
-        }
-      : { width: '0' },
+    ...globalAdminColumns,
   ]
 
   columns.unshift({
@@ -304,9 +337,10 @@ const PaymentsBlock = () => {
     <TableCard
       title={
         <PaymentCardHeader
-          closeEditModal={() => setCurrentPayment(null)}
+          closeEditModal={closeEditModal}
           setCurrentDateFilter={setCurrentDateFilter}
           currentPayment={currentPayment}
+          paymentActions={paymentActions}
           payments={payments}
           filters={filters}
           setFilters={setFilters}

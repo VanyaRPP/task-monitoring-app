@@ -3,20 +3,22 @@ import { useEffect } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import s from '../style.module.scss'
 import useCompany from '@common/modules/hooks/useCompany'
-import useService, { usePreviousMonthService } from '@common/modules/hooks/useService'
+import useService, {
+  usePreviousMonthService,
+} from '@common/modules/hooks/useService'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { useInflicionValues } from './amountFields'
 import { getInflicionValue } from '@utils/inflicionHelper'
 
-export function PriceMaintainceField({ record, edit }) {
+export function PriceMaintainceField({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
-  const { service } = useService({ serviceId, skip: edit })
-  const { company } = useCompany({ companyId, skip: edit })
+  const { service } = useService({ serviceId, skip: preview })
+  const { company } = useCompany({ companyId, skip: preview })
 
   useEffect(() => {
     if (company?.servicePricePerMeter) {
@@ -33,19 +35,19 @@ export function PriceMaintainceField({ record, edit }) {
   )
 }
 
-export function PricePlacingField({ record, edit }) {
+export function PricePlacingField({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
-  const { company } = useCompany({ companyId, skip: edit })
+  const { company } = useCompany({ companyId, skip: preview })
 
   return company?.inflicion ? (
-    <InflicionPricePlacingField record={record} edit={edit} />
+    <InflicionPricePlacingField record={record} preview={preview} />
   ) : (
-    <DefaultPricePlacingField company={company} record={record} edit={edit} />
+    <DefaultPricePlacingField company={company} record={record} />
   )
 }
 
-function DefaultPricePlacingField({ company, record, edit }) {
+function DefaultPricePlacingField({ company, record }) {
   const { form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
@@ -62,10 +64,10 @@ function DefaultPricePlacingField({ company, record, edit }) {
   )
 }
 
-function InflicionPricePlacingField({ record, edit }) {
+function InflicionPricePlacingField({ record, preview }) {
   const { form } = usePaymentContext()
   const fieldName = [record.name, 'price']
-  const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ edit })
+  const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ preview })
 
   useEffect(() => {
     form.setFieldValue(fieldName, +previousPlacingPrice + +inflicionPrice)
@@ -73,19 +75,19 @@ function InflicionPricePlacingField({ record, edit }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={edit} className={s.input} />
+      <InputNumber disabled={preview} className={s.input} />
     </Form.Item>
   )
 }
 
-export function PriceElectricityField({ record, edit }) {
+export function PriceElectricityField({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
 
-  const { service } = useService({ serviceId, skip: edit })
+  const { service } = useService({ serviceId, skip: preview })
 
   useEffect(() => {
     if (service?._id && service?.electricityPrice) {
@@ -95,19 +97,19 @@ export function PriceElectricityField({ record, edit }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={edit} className={s.input} />
+      <InputNumber disabled={preview} className={s.input} />
     </Form.Item>
   )
 }
 
-export function PriceWaterField({ record, edit }) {
+export function PriceWaterField({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
 
-  const { service } = useService({ serviceId, skip: edit })
+  const { service } = useService({ serviceId, skip: preview })
 
   useEffect(() => {
     if ((service?._id, service?.waterPrice)) {
@@ -117,20 +119,20 @@ export function PriceWaterField({ record, edit }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={edit} className={s.input} />
+      <InputNumber disabled={preview} className={s.input} />
     </Form.Item>
   )
 }
 
-export function PriceGarbageCollectorField({ record, edit }) {
+export function PriceGarbageCollectorField({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
 
-  const { company } = useCompany({ companyId, skip: edit })
-  const { service } = useService({ serviceId, skip: edit })
+  const { company } = useCompany({ companyId, skip: preview })
+  const { service } = useService({ serviceId, skip: preview })
 
   useEffect(() => {
     if (
@@ -146,12 +148,12 @@ export function PriceGarbageCollectorField({ record, edit }) {
   }, [service?._id, company?.garbageCollector]) //eslint-disable-line react-hooks/exhaustive-deps
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={edit} className={s.input} />
+      <InputNumber disabled={preview} className={s.input} />
     </Form.Item>
   )
 }
 
-export function PriceInflicionField({ record, edit }) {
+export function PriceInflicionField({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
@@ -159,14 +161,14 @@ export function PriceInflicionField({ record, edit }) {
     Form.useWatch('monthService', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
-  const { company } = useCompany({ companyId, skip: edit })
-  const { service } = useService({ serviceId, skip: edit })
+  const { company } = useCompany({ companyId, skip: preview })
+  const { service } = useService({ serviceId, skip: preview })
   const { previousMonth } = usePreviousMonthService({
     date: service?.date,
     domainId: form.getFieldValue('domain'),
     streetId: form.getFieldValue('street'),
   })
-  const { previousPlacingPrice } = useInflicionValues({ edit })
+  const { previousPlacingPrice } = useInflicionValues({ preview })
 
   useEffect(() => {
     if (service?._id && service?.inflicionPrice && company.inflicion) {
@@ -180,12 +182,12 @@ export function PriceInflicionField({ record, edit }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={edit} className={s.input} />
+      <InputNumber disabled={preview} className={s.input} />
     </Form.Item>
   )
 }
 
-export function PriceWaterPartField({ record, edit }) {
+export function PriceWaterPartField({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
@@ -193,11 +195,11 @@ export function PriceWaterPartField({ record, edit }) {
     Form.useWatch('monthService', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form)
 
-  const { company } = useCompany({ companyId, skip: edit })
-  const { service } = useService({ serviceId, skip: edit })
+  const { company } = useCompany({ companyId, skip: preview })
+  const { service } = useService({ serviceId, skip: preview })
 
   useEffect(() => {
-    if (!edit && service?._id && company?.waterPart) {
+    if (!preview && service?._id && company?.waterPart) {
       form.setFieldValue(
         fieldName,
         ((company.waterPart / 100) * service?.waterPriceTotal).toFixed(2)
@@ -207,17 +209,17 @@ export function PriceWaterPartField({ record, edit }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={edit} className={s.input} />
+      <InputNumber disabled={preview} className={s.input} />
     </Form.Item>
   )
 }
 
-export function PriceDiscountField({ record, edit }) {
+export function PriceDiscountField({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
   const companyId = Form.useWatch('company', form) || paymentData?.company
-  const { company } = useCompany({ companyId, skip: edit })
+  const { company } = useCompany({ companyId, skip: preview })
 
   useEffect(() => {
     if (company?.discount) {
@@ -227,17 +229,17 @@ export function PriceDiscountField({ record, edit }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={edit} className={s.input} />
+      <InputNumber disabled={preview} className={s.input} />
     </Form.Item>
   )
 }
 
-export function PriceCleaningField({ record, edit }) {
+export function PriceCleaningField({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
   const companyId = Form.useWatch('company', form) || paymentData?.company
-  const { company } = useCompany({ companyId, skip: edit })
+  const { company } = useCompany({ companyId, skip: preview })
 
   useEffect(() => {
     if (company?.cleaning) {
@@ -247,7 +249,7 @@ export function PriceCleaningField({ record, edit }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={edit} className={s.input} />
+      <InputNumber disabled={preview} className={s.input} />
     </Form.Item>
   )
 }

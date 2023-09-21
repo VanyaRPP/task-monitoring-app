@@ -1,7 +1,16 @@
-import { useAddPaymentMutation } from '@common/api/paymentApi/payment.api'
+import {
+  useAddPaymentMutation,
+  useEditPaymentMutation,
+} from '@common/api/paymentApi/payment.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { Form, message, Modal, Tabs, TabsProps } from 'antd'
-import React, { FC, createContext, useContext, useState } from 'react'
+import React, {
+  FC,
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+} from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
@@ -12,11 +21,12 @@ import {
   getPaymentProviderAndReciever,
 } from '@utils/helpers'
 import useCompany from '@common/modules/hooks/useCompany'
+import { mongoose } from 'mongoose'
 
 interface Props {
   closeModal: VoidFunction
   paymentData?: any
-  edit?: boolean
+  paymentActions?: { edit: boolean; preview: boolean }
 }
 
 export const PaymentContext = createContext(
@@ -27,23 +37,37 @@ export const PaymentContext = createContext(
 )
 export const usePaymentContext = () => useContext(PaymentContext)
 
-const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
+const AddPaymentModal: FC<Props> = ({
+  closeModal,
+  paymentData,
+  paymentActions,
+}) => {
   const [form] = Form.useForm()
-  const [addPayment, { isLoading }] = useAddPaymentMutation()
+  const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
+  const [editPayment, { isLoading: isEditingLoading }] =
+    useEditPaymentMutation()
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
+  const { preview, edit } = paymentActions
 
   const [activeTabKey, setActiveTabKey] = useState(
-    getActiveTab(paymentData, edit)
+    getActiveTab(paymentData, preview)
   )
   const companyId = Form.useWatch('company', form)
   const { company } = useCompany({ companyId, skip: !companyId || edit })
 
   const { provider, reciever } = getPaymentProviderAndReciever(company)
 
+  useEffect(() => {
+    //eslint-disable-next-line no-console
+    console.log('company', company)
+    //eslint-disable-next-line no-console
+    console.log('companyId', companyId)
+  }, [company, companyId])
+
   const handleSubmit = async () => {
     const formData = await form.validateFields()
     const filteredInvoice = filterInvoiceObject(formData)
-    const response = await addPayment({
+    const payment = {
       invoiceNumber: formData.invoiceNumber,
       type: formData.operation,
       domain: formData.domain,
@@ -52,13 +76,23 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       monthService: formData.monthService,
       invoiceCreationDate: formData.invoiceCreationDate,
       description: formData.description || '',
-      generalSum: formData.operation === Operations.Credit
-        ? formData.generalSum
-        : filteredInvoice?.reduce((acc, val) => acc + +val.sum, 0).toFixed(2),
+      generalSum: formData.generalSum || formData.debit,
       provider,
       reciever,
       invoice: formData.debit ? filteredInvoice : [],
-    })
+    }
+    /*const response = edit
+      ? {
+          _id: paymentData?._id,
+          ...payment,
+        }
+      : payment*/
+    const response = edit
+      ? await editPayment({
+          _id: paymentData?._id,
+          ...payment,
+        })
+      : await addPayment(payment)
 
     if ('data' in response) {
       form.resetFields()
@@ -67,23 +101,34 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
     } else {
       message.error('Помилка при додаванні рахунку')
     }
+
+    //eslint-disable-next-line no-console
+    console.log('formData', formData)
+    //eslint-disable-next-line no-console
+    console.log('res', response)
   }
 
-  const items: TabsProps['items'] = [
-    {
+  const items: TabsProps['items'] = []
+
+  if (!preview) {
+    items.push({
       key: '1',
       label: 'Рахунок',
-      children: <AddPaymentForm edit={edit} />,
-    },
-  ]
+      children: <AddPaymentForm paymentActions={paymentActions} />,
+    })
+  }
 
-  if (!edit || paymentData?.type === Operations.Debit) {
+  if (!preview || paymentData?.type === Operations.Debit) {
     items.push({
       key: '2',
       label: 'Перегляд',
-      disabled: !edit || !!(paymentData as unknown as any)?.credit,
+      disabled: !preview || !!(paymentData as unknown as any)?.credit,
       children: (
-        <ReceiptForm currPayment={currPayment} paymentData={paymentData} />
+        <ReceiptForm
+          currPayment={currPayment}
+          paymentData={paymentData}
+          paymentActions={paymentActions}
+        />
       ),
     })
   }
@@ -98,7 +143,7 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
       <Modal
         open={true}
         maskClosable={false}
-        title={!edit && 'Додавання рахунку'}
+        title={edit ? 'Редагування рахунку' : !preview && 'Додавання рахунку'}
         onOk={
           activeTabKey === '1'
             ? () => {
@@ -117,9 +162,9 @@ const AddPaymentModal: FC<Props> = ({ closeModal, paymentData, edit }) => {
           form.resetFields()
           closeModal()
         }}
-        okText={!edit && 'Додати'}
-        cancelText={edit ? 'Закрити' : 'Відміна'}
-        confirmLoading={isLoading}
+        okText={edit ? 'Зберегти' : !preview && 'Додати'}
+        cancelText={preview ? 'Закрити' : 'Відміна'}
+        confirmLoading={isAddingLoading || isEditingLoading}
         className={s.Modal}
         style={{ top: 20 }}
       >
