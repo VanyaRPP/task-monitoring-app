@@ -157,8 +157,8 @@ const prepareInvoiceObjects = async (
 
     if (invoice.garbageCollector.sum > 0) {
       invoices.garbageCollectorPrice = {
-        amount: invoice.amount,
-        sum: invoice.sum,
+        amount: invoice.garbageCollector.amount,
+        sum: invoice.garbageCollector.sum,
       }
     }
 
