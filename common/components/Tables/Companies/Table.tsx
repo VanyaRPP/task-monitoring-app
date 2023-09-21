@@ -31,6 +31,7 @@ const CompaniesTable: React.FC<Props> = ({
   const { data, isLoading, isError } = useGetAllRealEstateQuery({
     domainId,
     streetId,
+    limit: isOnPage ? 0 : 5
   })
   const [deleteRealEstate, { isLoading: deleteLoading }] =
     useDeleteRealEstateMutation()
@@ -60,10 +61,6 @@ const CompaniesTable: React.FC<Props> = ({
       size="small"
       pagination={
         !isOnPage && {
-          responsive: false,
-          size: 'small',
-          pageSize: 5,
-          position: ['bottomCenter'],
           hideOnSinglePage: true,
         }
       }
