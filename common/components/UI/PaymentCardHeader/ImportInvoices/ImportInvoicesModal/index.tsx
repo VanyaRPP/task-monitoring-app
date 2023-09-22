@@ -106,7 +106,7 @@ function prepareInvoiceObjects(
 
 // TODO: move to helper
 export function parseStringToFloat(stringWithComma) {
-  const stringWithoutComma = (stringWithComma + '').replace(',', '.')
+  const stringWithoutComma = (stringWithComma || 0 + '').replace(',', '.')
   return parseFloat(stringWithoutComma).toFixed(2)
 }
 
@@ -118,22 +118,22 @@ function getInvoiceInfo(i) {
     },
     {
       type: 'placingPrice',
-      sum: parseStringToFloat(i.placingPrice || 0),
+      sum: parseStringToFloat(i.placingPrice),
     },
     {
       type: 'electricityPrice',
-      lastAmount: parseStringToFloat(i.electricityPriceLastAmount) || null,
-      amount: parseStringToFloat(i.electricityPriceAmount) || null,
-      price: parseStringToFloat(i.electricityPricePrice) || null,
-      sum: parseStringToFloat(i.electricityPriceSum || 0),
+      lastAmount: parseStringToFloat(i.electricityPriceLastAmount),
+      amount: parseStringToFloat(i.electricityPriceAmount),
+      price: parseStringToFloat(i.electricityPricePrice),
+      sum: parseStringToFloat(i.electricityPriceSum),
     },
     {
       type: 'waterPrice',
-      sum: parseStringToFloat(i.waterPriceSum || 0),
+      sum: parseStringToFloat(i.waterPriceSum),
     },
     {
       type: 'inflicionPrice',
-      sum: parseStringToFloat(i.inflicionPrice || 0),
+      sum: parseStringToFloat(i.inflicionPrice),
     },
   ]
 
