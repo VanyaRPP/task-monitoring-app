@@ -24,7 +24,7 @@ const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.DOMAIN
 
-  const { data, isLoading, isError } = useGetDomainsQuery({ domainId })
+  const { data, isLoading, isError } = useGetDomainsQuery({ domainId, limit: isOnPage ? 0 : 5 })
 
   const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
 
@@ -43,15 +43,7 @@ const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
     <Table
       rowKey="_id"
       size="small"
-      pagination={
-        !isOnPage && {
-          responsive: false,
-          size: 'small',
-          pageSize: 8,
-          position: ['bottomCenter'],
-          hideOnSinglePage: true,
-        }
-      }
+      pagination={false}
       loading={isLoading}
       columns={getDefaultColumns(handleDelete, deleteLoading, setCurrentDomain)}
       expandable={{

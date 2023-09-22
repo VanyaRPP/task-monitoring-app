@@ -19,7 +19,7 @@ const StreetsTable: React.FC<Props> = ({ domainId }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.STREETS
 
-  const { data, isLoading, isError } = useGetAllStreetsQuery({ domainId })
+  const { data, isLoading, isError } = useGetAllStreetsQuery({ domainId, limit: isOnPage ? 0 : 5 })
 
   const [deleteStreet, { isLoading: deleteLoading }] = useDeleteStreetMutation()
 
@@ -38,15 +38,7 @@ const StreetsTable: React.FC<Props> = ({ domainId }) => {
     <Table
       rowKey="_id"
       size="small"
-      pagination={
-        !isOnPage && {
-          responsive: false,
-          size: 'small',
-          pageSize: 10,
-          position: ['bottomCenter'],
-          hideOnSinglePage: true,
-        }
-      }
+      pagination={false}
       loading={isLoading}
       columns={getDefaultColumns(handleDelete, deleteLoading)}
       expandable={
