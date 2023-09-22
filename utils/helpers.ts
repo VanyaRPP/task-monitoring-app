@@ -225,11 +225,13 @@ export const getPaymentProviderAndReciever = (company) => {
 
 export const importedPaymentDateToISOStringDate = (date) => {
   return new Date(
-      moment(date, 'DD.MM.YYYY', true).format('YYYY-MM-DD')
-    ).toISOString()
+    moment(date, 'DD.MM.YYYY', true).format('YYYY-MM-DD')
+  ).toISOString()
 }
 
 export function parseStringToFloat(stringWithComma) {
   const stringWithoutComma = ((stringWithComma || 0) + '').replace(',', '.')
-  return parseFloat(stringWithoutComma).toFixed(2)
+  return +stringWithoutComma
+    ? parseFloat(stringWithoutComma).toFixed(2)
+    : '0.00'
 }

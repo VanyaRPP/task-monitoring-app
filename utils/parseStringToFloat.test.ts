@@ -14,5 +14,8 @@ describe('Parse string to float', () => {
     expect(parseStringToFloat(undefined)).toBe('0.00')
     expect(parseStringToFloat(null)).toBe('0.00')
     expect(parseStringToFloat(NaN)).toBe('0.00')
+    expect(parseStringToFloat('asafs')).toBe('0.00')
+    expect(parseStringToFloat([])).toBe('0.00')
+    expect(parseStringToFloat({})).toBe('0.00')
   })
 })
