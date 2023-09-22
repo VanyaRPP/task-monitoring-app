@@ -17,15 +17,14 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        await Street.find({});
-
-        const { domainId } = req.query
+        const { domainId, limit = 0 } = req.query
         if (domainId) {
-          
-          const domain = await Domain.findOne({ _id: domainId }).populate({
-            path: 'streets',
-            select: '_id address city',
-          })
+          const domain = await Domain.findOne({ _id: domainId })
+            .populate({
+              path: 'streets',
+              select: '_id address city',
+              options: { limit: +limit }
+            })
 
           return res
             .status(200)
@@ -33,15 +32,14 @@ export default async function handler(
         }
 
         const streets = await Street.find({})
-          .sort({ data: -1 })
-          .limit(req.query.limit)
+          .limit(+limit)
 
         return res.status(200).json({
           success: true,
           data: streets,
         })
       } catch (error) {
-        return res.status(400).json({ success: false, error })
+        return res.status(400).json({ success: false })
       }
 
     case 'POST':

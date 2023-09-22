@@ -18,9 +18,9 @@ interface Props {
 
 const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
   const router = useRouter()
-  const isOnPage = router.pathname === AppRoutes.REAL_ESTATE
+  const isOnPage = router.pathname === AppRoutes.SERVICE
 
-  const { data, isLoading, isError } = useGetAllServicesQuery({})
+  const { data, isLoading, isError } = useGetAllServicesQuery({limit: isOnPage ? 0 : 5})
 
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -43,15 +43,7 @@ const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
     <Table
       rowKey="_id"
       size="small"
-      pagination={
-        !isOnPage && {
-          responsive: false,
-          size: 'small',
-          pageSize: 8,
-          position: ['bottomCenter'],
-          hideOnSinglePage: true,
-        }
-      }
+      pagination={false}
       loading={isLoading}
       columns={getDefaultColumns(
         isGlobalAdmin,

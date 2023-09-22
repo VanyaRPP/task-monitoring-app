@@ -18,9 +18,7 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        await Domain.find({});
-        await Street.find({});
-        
+        const { limit = 0 } = req.query
         const options = {}
         let domainsIds
 
@@ -29,7 +27,6 @@ export default async function handler(
         }
 
         if (isUser) {
-
           const realEstates = await RealEstate.find({
             adminEmails: { $in: [user.email] },
           }).populate({ path: 'domain', select: 'name' })
@@ -48,14 +45,14 @@ export default async function handler(
         }
 
         const domains = await Domain.find(options)
-          .limit(req.query.limit)
+          .limit(+limit)
           .populate({
             path: 'streets',
             select: '_id address city',
           })
         return res.status(200).json({ success: true, data: domains })
       } catch (error) {
-        return res.status(400).json({ success: false, error: error.message})
+        return res.status(400).json({ success: false, error: error })
       }
     case 'POST':
       try {

@@ -16,11 +16,13 @@ import InvoiceCreationDate from './InvoiceCreationDate'
 import { getFormattedDate } from '@utils/helpers'
 import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
 
-function AddPaymentForm ({ edit }) {
+function AddPaymentForm({ paymentActions }) {
   const initialValues = useInitialValues()
   const { form } = usePaymentContext()
   const serviceId = Form.useWatch('monthService', form)
   const companyId = Form.useWatch('company', form)
+  const operation = Form.useWatch('operation', form)
+  const { preview, edit } = paymentActions
 
   return (
     <Form
@@ -29,41 +31,17 @@ function AddPaymentForm ({ edit }) {
       layout="vertical"
       className={s.Form}
     >
-      {edit ? (
-        <Form.Item name="domain" label="Домен">
-          <Input disabled />
-        </Form.Item>
-      ) : (
-        <DomainsSelect form={form} />
-      )}
+      <DomainsSelect form={form} />
 
-      {edit ? (
-        <Form.Item name="street" label="Адреса">
-          <Input disabled />
-        </Form.Item>
-      ) : (
-        <AddressesSelect form={form} />
-      )}
+      <AddressesSelect form={form} />
 
-      {edit ? (
-        <Form.Item name="monthService" label="Місяць">
-          <Input disabled />
-        </Form.Item>
-      ) : (
-        <MonthServiceSelect form={form} />
-      )}
+      <MonthServiceSelect form={form} />
 
-      {edit ? (
-        <Form.Item name="company" label="Компанія">
-          <Input disabled />
-        </Form.Item>
-      ) : (
-        <CompanySelect form={form} />
-      )}
+      <CompanySelect form={form} />
       <PaymentTypeSelect edit={!companyId || edit} />
 
-      <InvoiceNumber form={form} edit={edit} />
-      <InvoiceCreationDate edit={edit} />
+      <InvoiceNumber form={form} paymentActions={paymentActions} />
+      <InvoiceCreationDate edit={preview} />
 
       <Form.Item
         shouldUpdate={(prevValues, currentValues) =>
@@ -81,7 +59,7 @@ function AddPaymentForm ({ edit }) {
               >
                 <InputNumber
                   placeholder="Вкажіть суму"
-                  disabled={edit}
+                  disabled={preview}
                   className={s.inputNumber}
                 />
               </Form.Item>
@@ -93,13 +71,16 @@ function AddPaymentForm ({ edit }) {
                 <Input.TextArea
                   placeholder="Введіть опис"
                   maxLength={256}
-                  disabled={edit && true}
+                  disabled={preview}
                 />
               </Form.Item>
             </>
           ) : (
             <>
-              <PaymentPricesTable key={companyId + serviceId} edit={edit} />
+              <PaymentPricesTable
+                key={companyId + serviceId + operation}
+                paymentActions={paymentActions}
+              />
               <PaymentTotal form={form} />
             </>
           )
@@ -153,12 +134,10 @@ function useInitialValues() {
   // currently we have few renders
   // we need it only once. on didmount (first render)
   const initialValues = {
-    domain: paymentData?.domain?.name,
-    street:
-      paymentData?.street &&
-      `${paymentData.street.address} (м. ${paymentData.street.city})`,
-    monthService: getFormattedDate(paymentData?.monthService?.date),
-    company: paymentData?.company.companyName,
+    domain: paymentData?.domain?._id,
+    street: paymentData?.street?._id,
+    monthService: paymentData?.monthService?._id,
+    company: paymentData?.company?._id,
     description: paymentData?.description,
     credit: paymentData?.credit,
     generalSum: paymentData?.generalSum,

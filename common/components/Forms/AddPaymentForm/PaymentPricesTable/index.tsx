@@ -16,9 +16,10 @@ import NameComponent from './fields/NameComponent'
 import SumComponent from './fields/SumComponent'
 import s from '../style.module.scss'
 
-function PaymentPricesTable({ edit }) {
+function PaymentPricesTable({ paymentActions }) {
+  const {preview, edit} = paymentActions
   const { customDataSource, addDataSource, removeDataSource } =
-    useCustomDataSource({ edit })
+    useCustomDataSource({ preview: paymentActions.preview })
 
   const columns: ColumnProps<IPaymentTableData>[] = [
     {
@@ -31,19 +32,28 @@ function PaymentPricesTable({ edit }) {
       dataIndex: 'name',
       width: '30%',
       ellipsis: true,
-      render: (__, record) => <NameComponent record={record} edit={edit} />,
+      render: (__, record) => (
+        <NameComponent record={record} preview={preview} />
+      ),
     },
     {
       title: 'К-сть',
       dataIndex: 'amount',
       width: '30%',
-      render: (__, record) => <AmountComponent record={record} edit={edit} />,
+      render: (__, record) => (
+        <AmountComponent record={record} preview={preview} edit={edit} />
+      ),
     },
     {
       title: 'Ціна',
       dataIndex: 'price',
       width: '20%',
-      render: (__, record) => <PriceComponent record={record} edit={edit} />,
+      render: (__, record) => (
+        <PriceComponent
+          record={record}
+          preview={preview}
+        />
+      ),
     },
     {
       title: 'Сума',
@@ -54,7 +64,7 @@ function PaymentPricesTable({ edit }) {
     },
   ]
 
-  if (!edit) {
+  if (!preview) {
     columns.push({
       title: (
         <div className={s.popconfirm}>
@@ -89,7 +99,7 @@ function PaymentPricesTable({ edit }) {
         pagination={false}
         className={s.table}
       />
-      {!edit && <AddCustomField addDataSource={addDataSource} />}
+      {!preview && <AddCustomField addDataSource={addDataSource} />}
     </>
   )
 }

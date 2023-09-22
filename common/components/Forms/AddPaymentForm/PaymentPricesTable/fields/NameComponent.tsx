@@ -28,14 +28,15 @@ const fields = {
   [ServiceType.Cleaning]: NameCleaningField,
 }
 
-export default function NameComponent({ record, edit }) {
+export default function NameComponent({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
-  
-  const serviceId = Form.useWatch('monthService', form) || paymentData?.monthService
+
+  const serviceId =
+    Form.useWatch('monthService', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
-  const { service } = useService({ serviceId, skip: edit })
-  const { company } = useCompany({ companyId, skip: edit })
+  const { service } = useService({ serviceId, skip: preview })
+  const { company } = useCompany({ companyId, skip: preview })
 
   if (record.name in fields) {
     const Component = fields[record.name]
@@ -48,7 +49,6 @@ export default function NameComponent({ record, edit }) {
         )}
         service={service}
         company={company}
-        edit={edit}
       />
     )
   }

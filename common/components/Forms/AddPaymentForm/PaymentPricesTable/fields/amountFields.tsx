@@ -11,22 +11,22 @@ import { InputNumber, Form } from 'antd'
 import { useEffect } from 'react'
 import s from '../style.module.scss'
 
-export function AmountPlacingField({ record, edit }) {
+export function AmountPlacingField({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
-  const { company } = useCompany({ companyId, skip: edit })
+  const { company } = useCompany({ companyId, skip: preview })
   return company?.inflicion ? (
-    <AmountPlacingInflicionField edit={edit} />
+    <AmountPlacingInflicionField preview={preview} />
   ) : (
-    <AmountTotalAreaField record={record} edit={edit} />
+    <AmountTotalAreaField record={record} preview={preview} />
   )
 }
 
-export function AmountTotalAreaField({ record, edit }) {
+export function AmountTotalAreaField({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'amount']
   const companyId = Form.useWatch('company', form) || paymentData?.company
-  const { company } = useCompany({ companyId, skip: edit })
+  const { company } = useCompany({ companyId, skip: preview })
 
   useEffect(() => {
     if (company?._id && company?.totalArea) {
@@ -34,15 +34,17 @@ export function AmountTotalAreaField({ record, edit }) {
     }
   }, [company?._id, company?.totalArea]) //eslint-disable-line react-hooks/exhaustive-deps
 
-  return (
+  return !company?.inflicion && record.name === ServiceType.Placing ? (
+    <></>
+  ) : (
     <Form.Item name={fieldName} rules={validateField('required')}>
       <InputNumber disabled className={s.input} />
     </Form.Item>
   )
 }
 
-function AmountPlacingInflicionField({ edit }) {
-  const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ edit })
+function AmountPlacingInflicionField({ preview }) {
+  const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ preview })
   return (
     <>
       {previousPlacingPrice}+{inflicionPrice}{' '}
@@ -53,14 +55,14 @@ function AmountPlacingInflicionField({ edit }) {
   )
 }
 
-export function AmountGarbageCollectorField({ record, edit }) {
+export function AmountGarbageCollectorField({ preview }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
 
-  const { company } = useCompany({ companyId, skip: edit })
-  const { service } = useService({ serviceId, skip: edit })
+  const { company } = useCompany({ companyId, skip: preview })
+  const { service } = useService({ serviceId, skip: preview })
   if (service?.garbageCollectorPrice && company.rentPart) {
     return `${company.rentPart}% від ${service?.garbageCollectorPrice}`
   }
@@ -68,7 +70,7 @@ export function AmountGarbageCollectorField({ record, edit }) {
 
 // TODO: Could it be helper from @util ?
 // PaymentsBulk/column.config.tsx the same
-export function useInflicionValues({ edit }) {
+export function useInflicionValues({ preview }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const inflicionValueFieldName = ['inflicionPrice', 'price']
@@ -76,7 +78,7 @@ export function useInflicionValues({ edit }) {
   // TODO: fix in preview mode
   const inflicionPrice = Form.useWatch(inflicionValueFieldName, form) ?? ''
 
-  const { lastInvoice } = useCompanyInvoice({ companyId, skip: edit })
+  const { lastInvoice } = useCompanyInvoice({ companyId, skip: preview })
   const previousPlacingPrice = lastInvoice?.invoice?.find(
     (item) => item.type === ServiceType.Placing
   )?.sum
@@ -96,24 +98,26 @@ export function useInflicionValues({ edit }) {
   return { previousPlacingPrice: value, inflicionPrice }
 }
 
-export function AmountElectricityField({ record, edit }) {
+export function AmountElectricityField({ record, preview, edit }) {
   return (
     <FormAttributeForSingle
       lastAmountName={[record.name, 'lastAmount']}
       invoicePropName={ServiceType.Electricity}
       amountName={[record.name, 'amount']}
-      disabled={edit}
+      disabled={preview}
+      edit={edit}
     />
   )
 }
 
-export function AmountWaterField({ record, edit }) {
+export function AmountWaterField({ record, preview, edit }) {
   return (
     <FormAttributeForSingle
       lastAmountName={[record.name, 'lastAmount']}
       amountName={[record.name, 'amount']}
       invoicePropName={ServiceType.Water}
-      disabled={edit}
+      disabled={preview}
+      edit={edit}
     />
   )
 }
@@ -123,11 +127,13 @@ function FormAttributeForSingle({
   lastAmountName,
   amountName,
   disabled,
+  edit
 }: {
   invoicePropName: string
   lastAmountName: NamePath
   amountName: NamePath
   disabled?: boolean
+  edit?: boolean
 }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
@@ -137,7 +143,7 @@ function FormAttributeForSingle({
   )?.amount
 
   useEffect(() => {
-    if (!disabled) {
+    if (!disabled && !edit) {
       form.setFieldValue(lastAmountName, value)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -156,13 +162,13 @@ function FormAttributeForSingle({
   )
 }
 
-export function AmountWaterPartField({ edit }) {
+export function AmountWaterPartField({ preview }) {
   const { paymentData, form } = usePaymentContext()
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
-  const { company } = useCompany({ companyId, skip: edit })
-  const { service } = useService({ serviceId, skip: edit })
+  const { company } = useCompany({ companyId, skip: preview })
+  const { service } = useService({ serviceId, skip: preview })
 
   return (
     <>
@@ -173,20 +179,20 @@ export function AmountWaterPartField({ edit }) {
   )
 }
 
-export function AmountInflicionField({ edit }) {
+export function AmountInflicionField({ preview }) {
   const { paymentData, form } = usePaymentContext()
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
-  const { company } = useCompany({ companyId, skip: edit })
-  const { service } = useService({ serviceId, skip: edit })
+  const { company } = useCompany({ companyId, skip: preview })
+  const { service } = useService({ serviceId, skip: preview })
   const { previousMonth } = usePreviousMonthService({
     date: service?.date,
     domainId: form.getFieldValue('domain'),
     streetId: form.getFieldValue('street'),
   })
 
-  const { previousPlacingPrice } = useInflicionValues({ edit })
+  const { previousPlacingPrice } = useInflicionValues({ preview })
 
   const percent = (previousMonth?.inflicionPrice - 100).toFixed(2)
   return (

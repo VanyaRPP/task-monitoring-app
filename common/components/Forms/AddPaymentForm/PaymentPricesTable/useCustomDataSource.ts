@@ -5,14 +5,14 @@ import useCompany from '@common/modules/hooks/useCompany'
 import { useEffect, useState } from 'react'
 import { Form } from 'antd'
 
-export function useCustomDataSource({ edit }) {
+export function useCustomDataSource({ preview }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
   const [ds, setDataSource] = useState<IPaymentTableData[]>(dataSource)
   const { company } = useCompany({
     companyId,
-    skip: edit,
+    skip: preview,
   })
 
   useEffect(() => {
