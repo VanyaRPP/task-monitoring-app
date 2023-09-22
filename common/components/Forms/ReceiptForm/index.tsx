@@ -52,7 +52,7 @@ const ReceiptForm: FC<Props> = ({
     : filterInvoiceObject(newData)
 
   const dataSourcePreview: DataType[] = dataToMap?.map((item, index) => ({
-    Кількість: item.lastAmount ? item.amount - item.lastAmount : item.amount,
+    Кількість: item.lastAmount ? item.amount - item.lastAmount || '' : item.amount || '',
     Назва: `${fieldNames[item.type] || item.name} ${getDispalyedDate(
       paymentData,
       service?.date,
