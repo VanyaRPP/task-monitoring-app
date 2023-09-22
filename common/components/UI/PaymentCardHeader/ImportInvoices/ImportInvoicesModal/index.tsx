@@ -122,9 +122,9 @@ function getInvoiceInfo(i) {
     },
     {
       type: 'electricityPrice',
-      lastAmount: parseStringToFloat(i.electricityPriceLastAmount || 0),
-      amount: parseStringToFloat(i.electricityPriceAmount || 0),
-      price: parseStringToFloat(i.electricityPricePrice || 0),
+      lastAmount: parseStringToFloat(i.electricityPriceLastAmount) || null,
+      amount: parseStringToFloat(i.electricityPriceAmount) || null,
+      price: parseStringToFloat(i.electricityPricePrice) || null,
       sum: parseStringToFloat(i.electricityPriceSum || 0),
     },
     {
