@@ -118,22 +118,22 @@ function getInvoiceInfo(i) {
     },
     {
       type: 'placingPrice',
-      sum: parseStringToFloat(i.placingPrice),
+      sum: parseStringToFloat(i.placingPrice || 0),
     },
     {
       type: 'electricityPrice',
-      lastAmount: parseStringToFloat(i.electricityPriceLastAmount),
-      amount: parseStringToFloat(i.electricityPriceAmount),
-      price: parseStringToFloat(i.electricityPricePrice),
-      sum: parseStringToFloat(i.electricityPriceSum),
+      lastAmount: parseStringToFloat(i.electricityPriceLastAmount || 0),
+      amount: parseStringToFloat(i.electricityPriceAmount || 0),
+      price: parseStringToFloat(i.electricityPricePrice || 0),
+      sum: parseStringToFloat(i.electricityPriceSum || 0),
     },
     {
       type: 'waterPrice',
-      sum: parseStringToFloat(i.waterPriceSum),
+      sum: parseStringToFloat(i.waterPriceSum || 0),
     },
     {
       type: 'inflicionPrice',
-      sum: parseStringToFloat(i.inflicionPrice),
+      sum: parseStringToFloat(i.inflicionPrice || 0),
     },
   ]
 
