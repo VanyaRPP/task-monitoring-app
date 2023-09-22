@@ -11,6 +11,7 @@ import { Operations } from '@utils/constants'
 import {
   getPaymentProviderAndReciever,
   importedPaymentDateToISOStringDate,
+  parseStringToFloat,
 } from '@utils/helpers'
 import { Form, Input, Modal, message } from 'antd'
 
@@ -102,12 +103,6 @@ function prepareInvoiceObjects(
   }))
 
   return invoices
-}
-
-// TODO: move to helper
-export function parseStringToFloat(stringWithComma) {
-  const stringWithoutComma = (stringWithComma || 0 + '').replace(',', '.')
-  return parseFloat(stringWithoutComma).toFixed(2)
 }
 
 function getInvoiceInfo(i) {

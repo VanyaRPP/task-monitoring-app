@@ -1,4 +1,4 @@
-import { parseStringToFloat } from '@common/components/UI/PaymentCardHeader/ImportInvoices/ImportInvoicesModal'
+import { parseStringToFloat } from '@utils/helpers'
 import React, { FC, useEffect, useState } from 'react'
 import { Operations } from '@utils/constants'
 import { Form, FormInstance } from 'antd'

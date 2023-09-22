@@ -228,3 +228,8 @@ export const importedPaymentDateToISOStringDate = (date) => {
       moment(date, 'DD.MM.YYYY', true).format('YYYY-MM-DD')
     ).toISOString()
 }
+
+export function parseStringToFloat(stringWithComma) {
+  const stringWithoutComma = ((stringWithComma || 0) + '').replace(',', '.')
+  return parseFloat(stringWithoutComma).toFixed(2)
+}
