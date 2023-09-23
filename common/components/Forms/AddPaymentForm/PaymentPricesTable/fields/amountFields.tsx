@@ -14,6 +14,12 @@ import s from '../style.module.scss'
 export function AmountPlacingField({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
+  const { company } = useCompany({ companyId, skip: edit })
+  const inflicion = paymentData?.invoice.find(
+    (i) => i.type === ServiceType.Inflicion
+  )
+  return company || inflicion ? (
+    <AmountPlacingInflicionField record={record} edit={edit} />
   const { company } = useCompany({ companyId, skip: preview })
   return company?.inflicion ? (
     <AmountPlacingInflicionField preview={preview} />
@@ -44,6 +50,20 @@ export function AmountTotalAreaField({ record, preview }) {
   )
 }
 
+function AmountPlacingInflicionField({ record, edit }) {
+  const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ edit })
+  const fieldName = [record.name, 'placingPrice']
+  const { form } = usePaymentContext()
+
+  edit
+    ? form.setFieldValue(
+        fieldName,
+        `${record?.placingPrice}` //view
+      )
+    : form.setFieldValue(
+        fieldName,
+        `${previousPlacingPrice}+${inflicionPrice}` //add
+      )
 function AmountPlacingInflicionField({ preview }) {
   const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ preview })
   return (
@@ -77,12 +97,7 @@ export function useInflicionValues({ preview }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const inflicionValueFieldName = ['inflicionPrice', 'price']
-
-  const inflicion = paymentData?.invoice.find(
-    (i) => i.type === ServiceType.Inflicion
-  )
-
-  // console.log("infliction", inflicion);
+  
   // TODO: fix in preview mode
   const inflicionPrice = Form.useWatch(inflicionValueFieldName, form) ?? ''
 
