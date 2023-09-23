@@ -15,7 +15,10 @@ export function AmountPlacingField({ record, edit }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const { company } = useCompany({ companyId, skip: edit })
-  return company?.inflicion ? (
+  const inflicion = paymentData?.invoice.find(
+    (i) => i.type === ServiceType.Inflicion
+  )
+  return company || inflicion ? (
     <AmountPlacingInflicionField record={record} edit={edit} />
   ) : (
     <AmountTotalAreaField record={record} edit={edit} />
@@ -28,7 +31,7 @@ export function AmountTotalAreaField({ record, edit }) {
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const { company } = useCompany({ companyId, skip: edit })
 
-  // previe mode for first page where u add a payment after use mykolas fixed and get previous values
+  
   useEffect(() => {
     if (company?._id && company?.totalArea) {
       form.setFieldValue(fieldName, company.totalArea)
@@ -45,20 +48,17 @@ export function AmountTotalAreaField({ record, edit }) {
 function AmountPlacingInflicionField({ record, edit }) {
   const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ edit })
   const fieldName = [record.name, 'placingPrice']
-  const { paymentData, form } = usePaymentContext()
-  // console.log(paymentData)
-  const inflictionField = { previousPlacingPrice, inflicionPrice }
-  // const inflictionField = `${previousPlacingPrice}+${inflicionPrice}${' '}`
+  const { form } = usePaymentContext()
 
-  useEffect(() => {
-    form.setFieldValue(
-      fieldName,
-      `${inflictionField.previousPlacingPrice}+${
-        inflictionField.inflicionPrice
-      }${' '}`
-    )
-  }, [previousPlacingPrice, inflicionPrice]) //eslint-disable-line react-hooks/exhaustive-deps
-
+  edit
+    ? form.setFieldValue(
+        fieldName,
+        `${record?.placingPrice}` //view
+      )
+    : form.setFieldValue(
+        fieldName,
+        `${previousPlacingPrice}+${inflicionPrice}` //add
+      )
   return (
     <div className={s.question_mark}>
       <Form.Item name={fieldName} rules={validateField('required')}>
@@ -90,12 +90,7 @@ export function useInflicionValues({ edit }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const inflicionValueFieldName = ['inflicionPrice', 'price']
-
-  const inflicion = paymentData?.invoice.find(
-    (i) => i.type === ServiceType.Inflicion
-  )
-
-  // console.log("infliction", inflicion);
+  
   // TODO: fix in preview mode
   const inflicionPrice = Form.useWatch(inflicionValueFieldName, form) ?? ''
 
