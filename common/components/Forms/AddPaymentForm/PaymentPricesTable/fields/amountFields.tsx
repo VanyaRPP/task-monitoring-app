@@ -28,6 +28,7 @@ export function AmountTotalAreaField({ record, preview }) {
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const { company } = useCompany({ companyId, skip: preview })
 
+  // previe mode for first page where u add a payment after use mykolas fixed and get previous values
   useEffect(() => {
     if (company?._id && company?.totalArea) {
       form.setFieldValue(fieldName, company.totalArea)
@@ -46,12 +47,14 @@ export function AmountTotalAreaField({ record, preview }) {
 function AmountPlacingInflicionField({ preview }) {
   const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ preview })
   return (
-    <>
-      {previousPlacingPrice}+{inflicionPrice}{' '}
+    <div className={s.question_mark}>
+      <Form.Item name={fieldName} rules={validateField('required')}>
+        <InputNumber disabled className={s.input} />
+      </Form.Item>
       <StyledTooltip
         title={`Значення попереднього місяця + індекс інфляції в цьому рахунку`}
       />
-    </>
+    </div>
   )
 }
 
@@ -75,6 +78,11 @@ export function useInflicionValues({ preview }) {
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const inflicionValueFieldName = ['inflicionPrice', 'price']
 
+  const inflicion = paymentData?.invoice.find(
+    (i) => i.type === ServiceType.Inflicion
+  )
+
+  // console.log("infliction", inflicion);
   // TODO: fix in preview mode
   const inflicionPrice = Form.useWatch(inflicionValueFieldName, form) ?? ''
 

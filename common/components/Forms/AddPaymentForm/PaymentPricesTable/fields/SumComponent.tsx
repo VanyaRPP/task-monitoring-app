@@ -31,7 +31,7 @@ const getVal = (record, obj) => {
       // TODO: тут теж може бути прикол Індекс інфляції. Фікс прев"ю. Частина 5
       const p =
         obj?.amount === undefined ? obj?.price : obj?.amount * obj?.price
-      return +p?.toFixed(1) || 0
+      return +p || 0
     }
     case ServiceType.Electricity: {
       const e = (obj?.amount - obj?.lastAmount) * obj?.price
