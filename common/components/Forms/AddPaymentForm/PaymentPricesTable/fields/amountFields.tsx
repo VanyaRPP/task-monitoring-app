@@ -14,15 +14,13 @@ import s from '../style.module.scss'
 export function AmountPlacingField({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
-  const { company } = useCompany({ companyId, skip: edit })
+  const { company } = useCompany({ companyId, skip: preview })
   const inflicion = paymentData?.invoice.find(
     (i) => i.type === ServiceType.Inflicion
   )
-  return company || inflicion ? (
-    <AmountPlacingInflicionField record={record} edit={edit} />
-  const { company } = useCompany({ companyId, skip: preview })
-  return company?.inflicion ? (
-    <AmountPlacingInflicionField preview={preview} />
+
+  return company?.inflicion || inflicion ? (
+    <AmountPlacingInflicionField preview={preview} record={record}/>
   ) : (
     <AmountTotalAreaField record={record} preview={preview} />
   )
@@ -50,22 +48,20 @@ export function AmountTotalAreaField({ record, preview }) {
   )
 }
 
-function AmountPlacingInflicionField({ record, edit }) {
-  const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ edit })
+function AmountPlacingInflicionField({ record, preview }) {
+  const { previousPlacingPrice, inflicionPrice } = useInflicionValues({
+    preview,
+  })
   const fieldName = [record.name, 'placingPrice']
   const { form } = usePaymentContext()
 
-  edit
-    ? form.setFieldValue(
-        fieldName,
-        `${record?.placingPrice}` //view
-      )
-    : form.setFieldValue(
-        fieldName,
-        `${previousPlacingPrice}+${inflicionPrice}` //add
-      )
-function AmountPlacingInflicionField({ preview }) {
-  const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ preview })
+  form.setFieldValue(
+    fieldName,
+    preview
+      ? `${record?.placingPrice}`
+      : `${previousPlacingPrice}+${inflicionPrice}`
+  ) //view && add
+
   return (
     <div className={s.question_mark}>
       <Form.Item name={fieldName} rules={validateField('required')}>
@@ -77,6 +73,7 @@ function AmountPlacingInflicionField({ preview }) {
     </div>
   )
 }
+
 
 export function AmountGarbageCollectorField({ preview }) {
   const { paymentData, form } = usePaymentContext()
