@@ -68,7 +68,7 @@ function InflicionPricePlacingField({ record, edit }) {
   const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ edit })
 
   useEffect(() => {
-    form.setFieldValue(fieldName, +previousPlacingPrice + +inflicionPrice)
+    form.setFieldValue(fieldName, (+previousPlacingPrice + +inflicionPrice).toFixed(1))
   }, [previousPlacingPrice, inflicionPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (

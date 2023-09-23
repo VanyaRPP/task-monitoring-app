@@ -16,7 +16,7 @@ export function AmountPlacingField({ record, edit }) {
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const { company } = useCompany({ companyId, skip: edit })
   return company?.inflicion ? (
-    <AmountPlacingInflicionField edit={edit} />
+    <AmountPlacingInflicionField record={record} edit={edit} />
   ) : (
     <AmountTotalAreaField record={record} edit={edit} />
   )
@@ -28,6 +28,7 @@ export function AmountTotalAreaField({ record, edit }) {
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const { company } = useCompany({ companyId, skip: edit })
 
+  // previe mode for first page where u add a payment after use mykolas fixed and get previous values
   useEffect(() => {
     if (company?._id && company?.totalArea) {
       form.setFieldValue(fieldName, company.totalArea)
@@ -41,15 +42,32 @@ export function AmountTotalAreaField({ record, edit }) {
   )
 }
 
-function AmountPlacingInflicionField({ edit }) {
+function AmountPlacingInflicionField({ record, edit }) {
   const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ edit })
+  const fieldName = [record.name, 'placingPrice']
+  const { paymentData, form } = usePaymentContext()
+  // console.log(paymentData)
+  const inflictionField = { previousPlacingPrice, inflicionPrice }
+  // const inflictionField = `${previousPlacingPrice}+${inflicionPrice}${' '}`
+
+  useEffect(() => {
+    form.setFieldValue(
+      fieldName,
+      `${inflictionField.previousPlacingPrice}+${
+        inflictionField.inflicionPrice
+      }${' '}`
+    )
+  }, [previousPlacingPrice, inflicionPrice]) //eslint-disable-line react-hooks/exhaustive-deps
+
   return (
-    <>
-      {previousPlacingPrice}+{inflicionPrice}{' '}
+    <div className={s.question_mark}>
+      <Form.Item name={fieldName} rules={validateField('required')}>
+        <InputNumber disabled className={s.input} />
+      </Form.Item>
       <StyledTooltip
         title={`Значення попереднього місяця + індекс інфляції в цьому рахунку`}
       />
-    </>
+    </div>
   )
 }
 
@@ -73,6 +91,11 @@ export function useInflicionValues({ edit }) {
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const inflicionValueFieldName = ['inflicionPrice', 'price']
 
+  const inflicion = paymentData?.invoice.find(
+    (i) => i.type === ServiceType.Inflicion
+  )
+
+  // console.log("infliction", inflicion);
   // TODO: fix in preview mode
   const inflicionPrice = Form.useWatch(inflicionValueFieldName, form) ?? ''
 
