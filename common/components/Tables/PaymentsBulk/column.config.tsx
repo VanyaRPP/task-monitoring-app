@@ -9,6 +9,8 @@ import { ServiceType } from '@utils/constants'
 import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
 import { usePreviousMonthService } from '@common/modules/hooks/useService'
 import { getInflicionValue } from '@utils/inflicionHelper'
+import Big from 'big.js'
+import { parseStringToFloat } from '@utils/helpers'
 
 export const getDefaultColumns = (
   service?: any,
@@ -456,11 +458,13 @@ const WaterPartSum: React.FC<{ service: any; record: any }> = ({
 
   const waterPart = Form.useWatch(waterPartName, form)
 
+  const waterTotalPrice = Big(parseStringToFloat(`${service?.waterPriceTotal}`))
+
   return (
     <FormAttribute
       disabled
       name={[...baseName, 'sum']}
-      value={(waterPart / 100) * service?.waterPriceTotal}
+      value={+(waterTotalPrice.mul(parseStringToFloat(`${waterPart / 100}`)).toFixed(2))}
     />
   )
 }
