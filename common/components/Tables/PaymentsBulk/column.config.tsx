@@ -421,7 +421,7 @@ function InflicionPricePlacingField({ baseName, service, record }) {
       <FormAttribute
         disabled
         name={[...baseName, 'sum']}
-        value={plusFloat(previousPlacingPrice.toExponential, inflicionAmount)}
+        value={plusFloat(previousPlacingPrice, inflicionAmount)}
       />
       <StyledTooltip
         title={`Значення попереднього місяця + значення інфляції в цьому рахунку (${previousPlacingPrice} + ${inflicionAmount})`}
