@@ -22,6 +22,7 @@ export const getDefaultColumns = (
     width: 200,
     render: (value: any, record: { companyName: string | number }) => (
       <FormAttribute
+        notNum
         name={['companies', record.companyName, 'companyName']}
         value={value}
         disabled
@@ -135,7 +136,7 @@ export const getDefaultColumns = (
               'electricityPrice',
               'amount',
             ]}
-            value={value || 0}
+            value={value}
           />
         ),
       },
@@ -166,7 +167,7 @@ export const getDefaultColumns = (
           <FormAttribute
             disabled={!!record.waterPart}
             name={['companies', record.companyName, 'waterPrice', 'amount']}
-            value={value || 0}
+            value={value}
           />
         ),
       },
@@ -199,7 +200,7 @@ export const getDefaultColumns = (
         ) => (
           <FormAttribute
             name={['companies', record.companyName, 'waterPart', 'price']}
-            value={record.waterPart || 0}
+            value={record.waterPart}
             disabled
           />
         ),
@@ -238,7 +239,7 @@ export const getDefaultColumns = (
               'garbageCollector',
               'amount',
             ]}
-            value={record?.rentPart || 0}
+            value={record?.rentPart}
             disabled
           />
         ),
@@ -258,7 +259,7 @@ export const getDefaultColumns = (
     render: (value: any, record: { companyName: string | number }) => (
       <FormAttribute
         name={['companies', record.companyName, 'cleaningPrice']}
-        value={value || 0}
+        value={value}
         disabled
       />
     ),
@@ -269,7 +270,7 @@ export const getDefaultColumns = (
     render: (value: any, record: { companyName: string | number }) => (
       <FormAttribute
         name={['companies', record.companyName, 'discount']}
-        value={value || 0}
+        value={value}
       />
     ),
   },
@@ -369,7 +370,7 @@ const OldWater: React.FC<{ record: any }> = ({ record }) => {
     <FormAttribute
       disabled={!!record.waterPart}
       name={waterPriceName}
-      value={waterPrice?.amount || 0}
+      value={waterPrice?.amount}
     />
   )
 }
@@ -391,7 +392,7 @@ const OldElectricity: React.FC<{ record: any }> = ({ record }) => {
   return (
     <FormAttribute
       name={electricityPriceName}
-      value={electricityPrice?.amount || 0}
+      value={electricityPrice?.amount}
     />
   )
 }
