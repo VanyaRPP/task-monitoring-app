@@ -15,8 +15,12 @@ export function AmountPlacingField({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const { company } = useCompany({ companyId, skip: preview })
-  return company?.inflicion ? (
-    <AmountPlacingInflicionField preview={preview} />
+  const inflicion = paymentData?.invoice.find(
+    (i) => i.type === ServiceType.Inflicion
+  )
+
+  return company?.inflicion || inflicion ? (
+    <AmountPlacingInflicionField preview={preview} record={record}/>
   ) : (
     <AmountTotalAreaField record={record} preview={preview} />
   )
@@ -28,6 +32,7 @@ export function AmountTotalAreaField({ record, preview }) {
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const { company } = useCompany({ companyId, skip: preview })
 
+  // previe mode for first page where u add a payment after use mykolas fixed and get previous values
   useEffect(() => {
     if (company?._id && company?.totalArea) {
       form.setFieldValue(fieldName, company.totalArea)
@@ -43,17 +48,32 @@ export function AmountTotalAreaField({ record, preview }) {
   )
 }
 
-function AmountPlacingInflicionField({ preview }) {
-  const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ preview })
+function AmountPlacingInflicionField({ record, preview }) {
+  const { previousPlacingPrice, inflicionPrice } = useInflicionValues({
+    preview,
+  })
+  const fieldName = [record.name, 'placingPrice']
+  const { form } = usePaymentContext()
+
+  form.setFieldValue(
+    fieldName,
+    preview
+      ? `${record?.placingPrice}`
+      : `${previousPlacingPrice}+${inflicionPrice}`
+  ) //view && add
+
   return (
-    <>
-      {previousPlacingPrice}+{inflicionPrice}{' '}
+    <div className={s.question_mark}>
+      <Form.Item name={fieldName} rules={validateField('required')}>
+        <InputNumber disabled className={s.input} />
+      </Form.Item>
       <StyledTooltip
         title={`Значення попереднього місяця + індекс інфляції в цьому рахунку`}
       />
-    </>
+    </div>
   )
 }
+
 
 export function AmountGarbageCollectorField({ preview }) {
   const { paymentData, form } = usePaymentContext()
@@ -74,7 +94,7 @@ export function useInflicionValues({ preview }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const inflicionValueFieldName = ['inflicionPrice', 'price']
-
+  
   // TODO: fix in preview mode
   const inflicionPrice = Form.useWatch(inflicionValueFieldName, form) ?? ''
 
