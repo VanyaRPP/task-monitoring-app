@@ -243,3 +243,10 @@ export function multiplyFloat(a, b) {
 
   return +bigA.mul(bigB).round(2, Big.roundDown).toNumber();
 }
+
+export function plusFloat(a, b) {
+  const bigA = Big(parseStringToFloat(`${a}`));
+  const bigB = Big(parseStringToFloat(`${b}`));
+
+  return +bigA.plus(bigB).round(2, Big.roundDown).toNumber();
+}

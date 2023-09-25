@@ -9,7 +9,7 @@ import { ServiceType } from '@utils/constants'
 import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
 import { usePreviousMonthService } from '@common/modules/hooks/useService'
 import { getInflicionValue } from '@utils/inflicionHelper'
-import { multiplyFloat } from '@utils/helpers'
+import { multiplyFloat, plusFloat } from '@utils/helpers'
 
 export const getDefaultColumns = (
   service?: any,
@@ -421,7 +421,7 @@ function InflicionPricePlacingField({ baseName, service, record }) {
       <FormAttribute
         disabled
         name={[...baseName, 'sum']}
-        value={previousPlacingPrice + inflicionAmount}
+        value={plusFloat(previousPlacingPrice.toExponential, inflicionAmount)}
       />
       <StyledTooltip
         title={`Значення попереднього місяця + значення інфляції в цьому рахунку (${previousPlacingPrice} + ${inflicionAmount})`}
