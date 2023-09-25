@@ -14,7 +14,7 @@ import { ServiceType } from '@utils/constants'
 interface Props {
   currPayment: IExtendedPayment
   paymentData: any
-  paymentActions: {preview: boolean, edit: boolean}
+  paymentActions: { preview: boolean, edit: boolean }
 }
 
 interface DataType {
