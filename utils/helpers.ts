@@ -7,6 +7,7 @@ import moment from 'moment'
 import 'moment/locale/uk'
 import _omit from 'lodash/omit'
 import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
+import Big from 'big.js'
 
 export const firstTextToUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
@@ -234,4 +235,18 @@ export function parseStringToFloat(stringWithComma) {
   return +stringWithoutComma
     ? parseFloat(stringWithoutComma).toFixed(2)
     : '0.00'
+}
+
+export function multiplyFloat(a, b) {
+  const bigA = Big(parseStringToFloat(`${a}`));
+  const bigB = Big(parseStringToFloat(`${b}`));
+
+  return +bigA.mul(bigB).round(2, Big.roundDown).toNumber();
+}
+
+export function plusFloat(a, b) {
+  const bigA = Big(parseStringToFloat(`${a}`));
+  const bigB = Big(parseStringToFloat(`${b}`));
+
+  return +bigA.plus(bigB).round(2, Big.roundDown).toNumber();
 }
