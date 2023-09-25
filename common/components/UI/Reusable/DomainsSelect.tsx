@@ -41,7 +41,7 @@ export default function DomainsSelect({
         filterOption={(input, option) => (option?.label ?? '').includes(input)}
         options={data?.map((i) => ({ value: i._id, label: i.name }))}
         optionFilterProp="children"
-        disabled={data?.length === 1}
+        disabled={isLoading || data?.length === 1}
         placeholder="Пошук домена"
         loading={isLoading}
         showSearch

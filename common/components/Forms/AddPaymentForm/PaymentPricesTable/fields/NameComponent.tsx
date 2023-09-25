@@ -30,10 +30,8 @@ const fields = {
 
 export default function NameComponent({ record, preview }) {
   const { paymentData, form } = usePaymentContext()
-
-  const serviceId =
-    Form.useWatch('monthService', form) || paymentData?.monthService
-  const companyId = Form.useWatch('company', form) || paymentData?.company
+  const serviceId = Form.useWatch('monthService', form)
+  const companyId = Form.useWatch('company', form)
 
   const { service } = useService({ serviceId, skip: preview })
   const { company } = useCompany({ companyId, skip: preview })
@@ -47,8 +45,9 @@ export default function NameComponent({ record, preview }) {
             paymentData?.invoiceCreationDate ||
             service?.date
         )}
-        service={service}
-        company={company}
+        service={service || paymentData?.monthService}
+        company={company || paymentData?.company}
+        preview={preview}
       />
     )
   }

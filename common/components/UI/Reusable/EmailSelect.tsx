@@ -38,6 +38,7 @@ export default function EmailSelect({ form }: EmailSelectProps) {
     >
       <Select
         mode="tags"
+        disabled={isLoading}
         placeholder="Пошти адмінів компанії"
         loading={isLoading}
         onSelect={() => {
