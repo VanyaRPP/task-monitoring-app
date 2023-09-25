@@ -45,7 +45,7 @@ export default function AddressesSelect({
         }
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={!domainId || streets?.length === 1}
+        disabled={isLoading || !domainId || streets?.length === 1}
         loading={isLoading}
         showSearch
       />

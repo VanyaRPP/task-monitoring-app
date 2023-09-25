@@ -9,14 +9,16 @@ import { InflicionIndexTitle } from '@utils/inflicion'
 import { Form } from 'antd'
 import s from '../style.module.scss'
 
-export function NamePlacingField({ dateMonth, nameRes, company }) {
+export function NamePlacingField({ dateMonth, company, preview }) {
   return (
     <span className={s.rowText}>
       Розміщення <div className={s.month}>{dateMonth}</div>
       {!!company?.inflicion && (
         <span className={s.rowText}>
           <span className={s.month}>без врахування індексу інфляції </span>
-          <StyledTooltip title={maintenanceWithoutInflicionDescription} />
+          {!preview && (
+            <StyledTooltip title={maintenanceWithoutInflicionDescription} />
+          )}
         </span>
       )}
     </span>
@@ -53,7 +55,7 @@ export function NameGarbageCollectorField({ dateMonth }) {
     </span>
   )
 }
-export function NameInflicionField({ service, company }) {
+export function NameInflicionField({ service, company, preview }) {
   const { form } = usePaymentContext()
   const inflicionPrice = Form.useWatch(['inflicionPrice', 'price'], form)
   const { previousMonth } = usePreviousMonthService({
@@ -61,10 +63,13 @@ export function NameInflicionField({ service, company }) {
     domainId: form.getFieldValue('domain'),
     streetId: form.getFieldValue('street'),
   })
+  // TODO:
+  // Розміщення за червень. Донарахування індексу інфляції 100.8%
+  // Де червень - це минулий місяць. не поточний. 
   return (
     <span className={s.rowText}>
       <InflicionIndexTitle previousMonth={previousMonth} />
-    
+
       {!!company?.inflicion && (
         <span className={s.rowText}>
           {+inflicionPrice <= 0 && (
@@ -75,7 +80,7 @@ export function NameInflicionField({ service, company }) {
               <span className={s.month}>Значення незмінне</span>
             </>
           )}
-          <StyledTooltip title={inflicionDescription} />
+          {!preview && <StyledTooltip title={inflicionDescription} />}
         </span>
       )}
     </span>
