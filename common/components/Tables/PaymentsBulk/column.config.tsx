@@ -9,6 +9,7 @@ import { ServiceType } from '@utils/constants'
 import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
 import { usePreviousMonthService } from '@common/modules/hooks/useService'
 import { getInflicionValue } from '@utils/inflicionHelper'
+import { multiplyFloat, plusFloat } from '@utils/helpers'
 
 export const getDefaultColumns = (
   service?: any,
@@ -303,7 +304,7 @@ function useInflicionValues({ companyId, company, service }) {
     previousPlacingPrice ||
     (company?.totalArea &&
       company?.pricePerMeter &&
-      company?.totalArea * company?.pricePerMeter)
+      multiplyFloat(company?.totalArea, company?.pricePerMeter))
 
   const inflicionAmount = +getInflicionValue(
     value,
@@ -341,7 +342,7 @@ const GarbageCollectorPrice: React.FC<{ service: any; record: any }> = ({
     form
   )
 
-  const garbageCollector = (service?.garbageCollectorPrice / 100) * rentPart
+  const garbageCollector = multiplyFloat((service?.garbageCollectorPrice / 100), rentPart)
 
   return (
     <FormAttribute
@@ -420,7 +421,7 @@ function InflicionPricePlacingField({ baseName, service, record }) {
       <FormAttribute
         disabled
         name={[...baseName, 'sum']}
-        value={previousPlacingPrice + inflicionAmount}
+        value={plusFloat(previousPlacingPrice, inflicionAmount)}
       />
       <StyledTooltip
         title={`Значення попереднього місяця + значення інфляції в цьому рахунку (${previousPlacingPrice} + ${inflicionAmount})`}
@@ -439,7 +440,7 @@ function PricePerMeterSum({ baseName, record }) {
     <FormAttribute
       disabled
       name={[...baseName, 'sum']}
-      value={pricePerMeter * record.totalArea}
+      value={multiplyFloat(pricePerMeter, record.totalArea)}
     />
   )
 }
@@ -460,7 +461,7 @@ const WaterPartSum: React.FC<{ service: any; record: any }> = ({
     <FormAttribute
       disabled
       name={[...baseName, 'sum']}
-      value={(waterPart / 100) * service?.waterPriceTotal}
+      value={multiplyFloat((waterPart / 100), service?.waterPriceTotal)}
     />
   )
 }
@@ -483,7 +484,7 @@ const WaterPriceSum: React.FC<{ service: any; record: any }> = ({
     <FormAttribute
       disabled
       name={[...baseName, 'sum']}
-      value={newWater ? (newWater - oldWater) * service?.waterPrice : 0}
+      value={newWater ? multiplyFloat((newWater - oldWater), service?.waterPrice) : 0}
     />
   )
 }
@@ -505,7 +506,7 @@ const ServicePriceSum: React.FC<{ service: any; record: any }> = ({
     <FormAttribute
       disabled
       name={[...baseName, 'sum']}
-      value={prioPrice * record.totalArea}
+      value={multiplyFloat(prioPrice, record.totalArea)}
     />
   )
 }
@@ -529,8 +530,8 @@ const ElectricityPriceSum: React.FC<{ service: any; record: any }> = ({
       name={[...baseName, 'sum']}
       value={
         newElectricityPrice
-          ? (newElectricityPrice - oldElectricityPrice) *
-            service?.electricityPrice
+          ? multiplyFloat((newElectricityPrice - oldElectricityPrice),
+            service?.electricityPrice)
           : 0
       }
       disabled
