@@ -51,12 +51,15 @@ function AmountPlacingInflicionField({ record, preview, edit }) {
   })
   const fieldName = [record.name, 'placingPrice']
   const { form } = usePaymentContext()
-  form.setFieldValue(
-    fieldName,
-    preview
-      ? `${record?.placingPrice}`
-      : `${previousPlacingPrice}+${inflicionPrice}`
-  ) //view && add
+  
+  if (!edit) {
+    form.setFieldValue(
+      fieldName,
+      preview
+        ? `${record?.placingPrice}`
+        : `${previousPlacingPrice}+${inflicionPrice}`
+    ) //view && add
+  } 
 
   return (
     <div className={s.question_mark}>
