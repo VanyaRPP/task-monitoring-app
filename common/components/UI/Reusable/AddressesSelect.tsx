@@ -7,8 +7,10 @@ import { useEffect } from 'react'
 
 export default function AddressesSelect({
   form,
+  edit
 }: {
-  form: any
+    form: any
+    edit?: boolean
 }) {
   const { streetId } = useCompanyPageContext()
   const domainId = Form.useWatch('domain', form)
@@ -45,7 +47,7 @@ export default function AddressesSelect({
         }
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={isLoading || !domainId || streets?.length === 1}
+        disabled={isLoading || !domainId || streets?.length === 1 || edit}
         loading={isLoading}
         showSearch
       />

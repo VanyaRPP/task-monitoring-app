@@ -8,6 +8,7 @@ import {
   PriceWaterPartField,
   PriceDiscountField,
   PriceCleaningField,
+  PriceCustomField,
 } from './priceFields'
 import { ServiceType } from '@utils/constants'
 
@@ -23,9 +24,12 @@ const fields: any = {
   [ServiceType.Discount]: PriceDiscountField,
 }
 
-export default function PriceComponent({ record, preview }) {
+export default function PriceComponent({ record, preview, edit }) {
+
   if (record.name in fields) {
     const Component = fields[record.name]
-    return <Component record={record} preview={preview} />
+    return <Component record={record} preview={preview} edit={edit} />
+  } else {
+    return <PriceCustomField record={record} />
   }
 }

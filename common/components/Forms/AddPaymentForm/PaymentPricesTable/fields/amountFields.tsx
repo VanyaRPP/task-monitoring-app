@@ -11,22 +11,21 @@ import { InputNumber, Form } from 'antd'
 import { useEffect } from 'react'
 import s from '../style.module.scss'
 
-export function AmountPlacingField({ record, preview }) {
+export function AmountPlacingField({ record, preview, edit }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const { company } = useCompany({ companyId, skip: preview })
   const inflicion = paymentData?.invoice.find(
     (i) => i.type === ServiceType.Inflicion
   )
-
   return company?.inflicion || inflicion ? (
-    <AmountPlacingInflicionField preview={preview} record={record}/>
+    <AmountPlacingInflicionField preview={preview} record={record} edit={edit} />
   ) : (
-    <AmountTotalAreaField record={record} preview={preview} />
+    <AmountTotalAreaField record={record} preview={preview} edit={edit} />
   )
 }
 
-export function AmountTotalAreaField({ record, preview }) {
+export function AmountTotalAreaField({ record, preview, edit }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'amount']
   const companyId = Form.useWatch('company', form) || paymentData?.company
@@ -34,33 +33,33 @@ export function AmountTotalAreaField({ record, preview }) {
 
   // previe mode for first page where u add a payment after use mykolas fixed and get previous values
   useEffect(() => {
-    if (company?._id && company?.totalArea) {
+    if (company?._id && company?.totalArea && !edit) {
       form.setFieldValue(fieldName, company.totalArea)
     }
   }, [company?._id, company?.totalArea]) //eslint-disable-line react-hooks/exhaustive-deps
 
-  return !company?.inflicion && record.name === ServiceType.Placing ? (
-    <></>
-  ) : (
-    <Form.Item name={fieldName} rules={validateField('required')}>
+  return (
+    <Form.Item name={fieldName} rules={!edit && validateField('required')}>
       <InputNumber disabled className={s.input} />
     </Form.Item>
   )
 }
 
-function AmountPlacingInflicionField({ record, preview }) {
+function AmountPlacingInflicionField({ record, preview, edit }) {
   const { previousPlacingPrice, inflicionPrice } = useInflicionValues({
     preview,
   })
   const fieldName = [record.name, 'placingPrice']
   const { form } = usePaymentContext()
-
-  form.setFieldValue(
-    fieldName,
-    preview
-      ? `${record?.placingPrice}`
-      : `${previousPlacingPrice}+${inflicionPrice}`
-  ) //view && add
+  
+  if (!edit) {
+    form.setFieldValue(
+      fieldName,
+      preview
+        ? `${record?.placingPrice}`
+        : `${previousPlacingPrice}+${inflicionPrice}`
+    ) //view && add
+  } 
 
   return (
     <div className={s.question_mark}>

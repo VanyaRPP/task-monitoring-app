@@ -45,7 +45,7 @@ const ReceiptForm: FC<Props> = ({
 
   const { service } = useService({
     serviceId: newData?.monthService,
-    skip: paymentActions.preview,
+    skip: paymentActions?.preview,
   })
 
   const dataToMap = preview

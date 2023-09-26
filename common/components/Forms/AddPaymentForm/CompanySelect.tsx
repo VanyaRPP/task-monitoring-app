@@ -4,7 +4,13 @@ import { validateField } from '@common/assets/features/validators'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
-export default function CompanySelect({ form }) {
+export default function CompanySelect({
+  form,
+  edit,
+}: {
+  form: any
+  edit?: boolean
+}) {
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
 
@@ -13,6 +19,7 @@ export default function CompanySelect({ form }) {
       domainId={domainId}
       streetId={streetId}
       form={form}
+      edit={edit}
     />
   ) : (
     <Form.Item label="Компанія">
@@ -21,7 +28,7 @@ export default function CompanySelect({ form }) {
   )
 }
 
-function RealEstateDataFetcher({ domainId, streetId, form }) {
+function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
   const { data: companies, isLoading } = useGetAllRealEstateQuery({
     domainId,
     streetId,
@@ -62,7 +69,7 @@ function RealEstateDataFetcher({ domainId, streetId, form }) {
         }))}
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={companies?.length === 1}
+        disabled={companies?.length === 1 || edit}
         loading={isLoading}
         showSearch
       />
