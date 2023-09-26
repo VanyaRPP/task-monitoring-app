@@ -4,7 +4,13 @@ import { getFormattedDate } from '@utils/helpers'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
-export default function MonthServiceSelect({ form }) {
+export default function MonthServiceSelect({
+  form,
+  edit,
+}: {
+  form: any
+  edit?: boolean
+}) {
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
 
@@ -13,6 +19,7 @@ export default function MonthServiceSelect({ form }) {
       domainId={domainId}
       streetId={streetId}
       form={form}
+      edit={edit}
     />
   ) : (
     <Form.Item label="Місяць">
@@ -21,7 +28,7 @@ export default function MonthServiceSelect({ form }) {
   )
 }
 
-function MonthServiceDataFetcher({ domainId, streetId, form }) {
+function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
   const { data: monthsServices, isLoading } = useGetAllServicesQuery({
     domainId,
     streetId,
@@ -39,7 +46,7 @@ function MonthServiceDataFetcher({ domainId, streetId, form }) {
 
   return (
     <Form.Item
-      rules={validateField('required')}
+      rules={!edit && validateField('required')}
       name="monthService"
       label="Місяць"
     >
@@ -51,7 +58,7 @@ function MonthServiceDataFetcher({ domainId, streetId, form }) {
         }))}
         optionFilterProp="children"
         placeholder="Місяць"
-        disabled={monthsServices?.length === 1}
+        disabled={monthsServices?.length === 1 || edit}
         loading={isLoading}
         showSearch
       />

@@ -6,8 +6,10 @@ import { useEffect } from 'react'
 
 export default function DomainsSelect({
   form,
+  edit
 }: {
   form: any
+  edit?: boolean
 }) {
   // TODO: recheck
   // in preview mode we need to prevent all data fetching. only single
@@ -41,7 +43,7 @@ export default function DomainsSelect({
         filterOption={(input, option) => (option?.label ?? '').includes(input)}
         options={data?.map((i) => ({ value: i._id, label: i.name }))}
         optionFilterProp="children"
-        disabled={data?.length === 1}
+        disabled={data?.length === 1 || edit}
         placeholder="Пошук домена"
         loading={isLoading}
         showSearch

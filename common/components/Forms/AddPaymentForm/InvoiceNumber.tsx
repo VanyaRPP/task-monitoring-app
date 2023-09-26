@@ -23,7 +23,7 @@ export default function InvoiceNumber({ form, paymentActions }) {
     >
       <InputNumber
         placeholder="Вкажіть № інвойса"
-        disabled={paymentActions.preview}
+        disabled={paymentActions?.preview}
       />
     </Form.Item>
   )
