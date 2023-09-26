@@ -63,21 +63,22 @@ export function NameInflicionField({ service, company, preview, domain, street }
     domainId: form.getFieldValue('domain') || domain?._id,
     streetId: form.getFieldValue('street') || street?._id,
   })
-  // TODO:
-  // Розміщення за червень. Донарахування індексу інфляції 100.8%
-  // Де червень - це минулий місяць. не поточний. 
   return (
     <span className={s.rowText}>
       <InflicionIndexTitle previousMonth={previousMonth} />
-    
       {!!company?.inflicion && (
         <span className={s.rowText}>
-          {+inflicionPrice <= 0 && (
+          {+inflicionPrice <= 0 ? (
             <>
               <br />
               <span className={s.month}>Спостерігається дефляція.</span>
               <br />
               <span className={s.month}>Значення незмінне</span>
+            </>
+          ) : (
+            <>
+              <br />
+              <span className={s.month}>донарахування</span>
             </>
           )}
           {!preview && <StyledTooltip title={inflicionDescription} />}
