@@ -55,13 +55,13 @@ export function NameGarbageCollectorField({ dateMonth }) {
     </span>
   )
 }
-export function NameInflicionField({ service, company, preview }) {
+export function NameInflicionField({ service, company, preview, domain, street }) {
   const { form } = usePaymentContext()
   const inflicionPrice = Form.useWatch(['inflicionPrice', 'price'], form)
   const { previousMonth } = usePreviousMonthService({
     date: service?.date,
-    domainId: form.getFieldValue('domain'),
-    streetId: form.getFieldValue('street'),
+    domainId: form.getFieldValue('domain') || domain?._id,
+    streetId: form.getFieldValue('street') || street?._id,
   })
   // TODO:
   // Розміщення за червень. Донарахування індексу інфляції 100.8%
@@ -69,7 +69,7 @@ export function NameInflicionField({ service, company, preview }) {
   return (
     <span className={s.rowText}>
       <InflicionIndexTitle previousMonth={previousMonth} />
-
+    
       {!!company?.inflicion && (
         <span className={s.rowText}>
           {+inflicionPrice <= 0 && (

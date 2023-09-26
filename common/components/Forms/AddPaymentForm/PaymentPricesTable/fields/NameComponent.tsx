@@ -47,6 +47,9 @@ export default function NameComponent({ record, preview }) {
         )}
         service={service || paymentData?.monthService}
         company={company || paymentData?.company}
+        domain={paymentData?.domain}
+        street={paymentData?.street}
+        
         preview={preview}
       />
     )
