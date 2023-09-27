@@ -10,20 +10,20 @@ import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { useInflicionValues } from './amountFields'
 import { getInflicionValue } from '@utils/inflicionHelper'
 
-export function PriceMaintainceField({ record, preview, edit }) {
+export function PriceMaintainceField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
-  const { service } = useService({ serviceId, skip: preview })
-  const { company } = useCompany({ companyId, skip: preview })
+  const { service } = useService({ serviceId })
+  const { company } = useCompany({ companyId })
 
   useEffect(() => {
-    if (company?.servicePricePerMeter && !edit) {
+    if (company?.servicePricePerMeter && !disabled) {
       form.setFieldValue(fieldName, company.servicePricePerMeter)
-    } else if (service?.rentPrice && !edit) {
+    } else if (service?.rentPrice && !disabled) {
       form.setFieldValue(fieldName, service.rentPrice)
     }
   }, [company?.servicePricePerMeter, service?.rentPrice]) //eslint-disable-line react-hooks/exhaustive-deps
@@ -35,24 +35,24 @@ export function PriceMaintainceField({ record, preview, edit }) {
   )
 }
 
-export function PricePlacingField({ record, preview, edit }) {
+export function PricePlacingField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
-  const { company } = useCompany({ companyId, skip: preview })
+  const { company } = useCompany({ companyId })
 
   return company?.inflicion ? (
-    <InflicionPricePlacingField record={record} preview={preview} edit={edit} />
+    <InflicionPricePlacingField record={record} disabled={disabled} />
   ) : (
-    <DefaultPricePlacingField company={company} record={record} edit={edit} />
+    <DefaultPricePlacingField company={company} record={record} disabled={disabled} />
   )
 }
 
-function DefaultPricePlacingField({ company, record, edit }) {
+function DefaultPricePlacingField({ company, record, disabled }) {
   const { form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
   useEffect(() => {
-    if (company?._id && company?.pricePerMeter && !edit) {
+    if (company?._id && company?.pricePerMeter && !disabled) {
       form.setFieldValue(fieldName, company.pricePerMeter)
     }
   }, [company?._id, company?.pricePerMeter]) //eslint-disable-line react-hooks/exhaustive-deps
@@ -64,84 +64,84 @@ function DefaultPricePlacingField({ company, record, edit }) {
   )
 }
 
-function InflicionPricePlacingField({ record, preview, edit }) {
+function InflicionPricePlacingField({ record, disabled }) {
   const { form } = usePaymentContext()
   const fieldName = [record.name, 'price']
-  const { previousPlacingPrice, inflicionPrice } = useInflicionValues({ preview })
+  const { previousPlacingPrice, inflicionPrice } = useInflicionValues()
 
   useEffect(() => {
-    if (!edit) {
+    if (!disabled) {
       form.setFieldValue(fieldName, (+previousPlacingPrice + +inflicionPrice).toFixed(1))
     }
   }, [previousPlacingPrice, inflicionPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={preview} className={s.input} />
+      <InputNumber className={s.input} />
     </Form.Item>
   )
 }
 
-export function PriceElectricityField({ record, preview, edit }) {
+export function PriceElectricityField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
 
-  const { service } = useService({ serviceId, skip: preview })
+  const { service } = useService({ serviceId })
 
   useEffect(() => {
-    if (service?._id && service?.electricityPrice && !edit) {
+    if (service?._id && service?.electricityPrice && !disabled) {
       form.setFieldValue(fieldName, service.electricityPrice)
     }
   }, [service?._id, service?.electricityPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={preview} className={s.input} />
+      <InputNumber className={s.input} />
     </Form.Item>
   )
 }
 
-export function PriceWaterField({ record, preview, edit }) {
+export function PriceWaterField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
 
-  const { service } = useService({ serviceId, skip: preview })
+  const { service } = useService({ serviceId })
 
   useEffect(() => {
-    if ((service?._id, service?.waterPrice) && !edit) {
+    if ((service?._id, service?.waterPrice) && !disabled) {
       form.setFieldValue(fieldName, service.waterPrice)
     }
   }, [service?._id, service?.waterPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={preview} className={s.input} />
+      <InputNumber className={s.input} />
     </Form.Item>
   )
 }
 
-export function PriceGarbageCollectorField({ record, preview, edit }) {
+export function PriceGarbageCollectorField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
 
-  const { company } = useCompany({ companyId, skip: preview })
-  const { service } = useService({ serviceId, skip: preview })
+  const { company } = useCompany({ companyId })
+  const { service } = useService({ serviceId })
 
   useEffect(() => {
     if (
       service?._id &&
       company?.garbageCollector &&
       service?.garbageCollectorPrice &&
-      !edit
+      !disabled
     ) {
       form.setFieldValue(
         fieldName,
@@ -151,12 +151,12 @@ export function PriceGarbageCollectorField({ record, preview, edit }) {
   }, [service?._id, company?.garbageCollector]) //eslint-disable-line react-hooks/exhaustive-deps
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={preview} className={s.input} />
+      <InputNumber className={s.input} />
     </Form.Item>
   )
 }
 
-export function PriceInflicionField({ record, preview, edit }) {
+export function PriceInflicionField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
@@ -164,17 +164,17 @@ export function PriceInflicionField({ record, preview, edit }) {
     Form.useWatch('monthService', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
-  const { company } = useCompany({ companyId, skip: preview })
-  const { service } = useService({ serviceId, skip: preview })
+  const { company } = useCompany({ companyId })
+  const { service } = useService({ serviceId })
   const { previousMonth } = usePreviousMonthService({
     date: service?.date,
     domainId: form.getFieldValue('domain'),
     streetId: form.getFieldValue('street'),
   })
-  const { previousPlacingPrice } = useInflicionValues({ preview })
+  const { previousPlacingPrice } = useInflicionValues()
 
   useEffect(() => {
-    if (service?._id && service?.inflicionPrice && company?.inflicion && !edit) {
+    if (service?._id && service?.inflicionPrice && company?.inflicion && !disabled) {
       const inflicionAmount = getInflicionValue(
         previousPlacingPrice,
         previousMonth?.inflicionPrice
@@ -185,12 +185,12 @@ export function PriceInflicionField({ record, preview, edit }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={preview} className={s.input} />
+      <InputNumber className={s.input} />
     </Form.Item>
   )
 }
 
-export function PriceWaterPartField({ record, preview, edit }) {
+export function PriceWaterPartField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
@@ -198,11 +198,11 @@ export function PriceWaterPartField({ record, preview, edit }) {
     Form.useWatch('monthService', form) || paymentData?.monthService
   const companyId = Form.useWatch('company', form)
 
-  const { company } = useCompany({ companyId, skip: preview })
-  const { service } = useService({ serviceId, skip: preview })
+  const { company } = useCompany({ companyId })
+  const { service } = useService({ serviceId })
 
   useEffect(() => {
-    if (!preview && service?._id && company?.waterPart && !edit) {
+    if (service?._id && company?.waterPart && !disabled) {
       form.setFieldValue(
         fieldName,
         ((company.waterPart / 100) * service?.waterPriceTotal).toFixed(2)
@@ -212,47 +212,47 @@ export function PriceWaterPartField({ record, preview, edit }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={preview} className={s.input} />
+      <InputNumber className={s.input} />
     </Form.Item>
   )
 }
 
-export function PriceDiscountField({ record, preview, edit }) {
+export function PriceDiscountField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
   const companyId = Form.useWatch('company', form) || paymentData?.company
-  const { company } = useCompany({ companyId, skip: preview })
+  const { company } = useCompany({ companyId })
 
   useEffect(() => {
-    if (company?.discount && !edit) {
+    if (company?.discount && !disabled) {
       form.setFieldValue(fieldName, company.discount)
     }
   }, [company?._id]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={preview} className={s.input} />
+      <InputNumber className={s.input} />
     </Form.Item>
   )
 }
 
-export function PriceCleaningField({ record, preview, edit }) {
+export function PriceCleaningField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
 
   const companyId = Form.useWatch('company', form) || paymentData?.company
-  const { company } = useCompany({ companyId, skip: preview })
+  const { company } = useCompany({ companyId })
 
   useEffect(() => {
-    if (company?.cleaning && !edit) {
+    if (company?.cleaning && !disabled) {
       form.setFieldValue(fieldName, company.cleaning)
     }
   }, [company?._id]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled={preview} className={s.input} />
+      <InputNumber className={s.input} />
     </Form.Item>
   )
 }
