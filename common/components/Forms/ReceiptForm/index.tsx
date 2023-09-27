@@ -59,7 +59,7 @@ const ReceiptForm: FC<Props> = ({
         : true
     )
     .map((item, index) => {
-      const itemName = item.type !== ServiceType.Custom ? item.type : item.name
+      const itemName = item.type === ServiceType.Custom ? item.name : item.type
 
       return {
         Кількість: item.lastAmount
