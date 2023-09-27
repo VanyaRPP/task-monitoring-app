@@ -41,7 +41,7 @@ function PaymentPricesTable({ paymentActions }) {
       dataIndex: 'amount',
       width: '30%',
       render: (__, record) => (
-        <AmountComponent record={record} preview={preview} edit={edit} />
+        <AmountComponent record={record} edit={edit} />
       ),
     },
     {
@@ -51,7 +51,6 @@ function PaymentPricesTable({ paymentActions }) {
       render: (__, record) => (
         <PriceComponent
           record={record}
-          preview={preview}
           edit={edit}
         />
       ),

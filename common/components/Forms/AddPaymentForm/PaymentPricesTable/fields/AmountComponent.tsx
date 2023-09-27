@@ -21,9 +21,9 @@ const fields: any = {
   [ServiceType.Discount]: AmountDiscountField,
 }
 
-export default function AmountComponent({ record, preview, edit }) {
+export default function AmountComponent({ record, edit }) {
   if (record.name in fields) {
     const Component = fields[record.name]
-    return <Component record={record} preview={preview} edit={edit} />
+    return <Component record={record} disabled={edit} />
   }
 }
