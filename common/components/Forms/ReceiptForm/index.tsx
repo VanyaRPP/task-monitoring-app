@@ -52,16 +52,7 @@ const ReceiptForm: FC<Props> = ({
     ? paymentData?.invoice
     : filterInvoiceObject(newData)
 
-  // UNKOMMENT FOR USE FIRST MONTH VALIDATION
-  // const { previousMonth } = usePreviousMonthService({
-  //   date: paymentData?.monthService.date,
-  //   domainId: paymentData?.domain._id,
-  //   streetId: paymentData?.street._id,
-  // })
-  
   const dataSourcePreview: DataType[] = dataToMap
-    // UNKOMMENT FOR USE FIRST MONTH VALIDATION
-    // ?.filter(item => item.type == ServiceType.Inflicion ? paymentData?.company?.inflicion && previousMonth || !paymentData : true)
     ?.filter(item => item.type == ServiceType.Inflicion ? paymentData?.company?.inflicion || !paymentData : true)
     .map((item, index) => ({
       Кількість: item.lastAmount
@@ -72,7 +63,6 @@ const ReceiptForm: FC<Props> = ({
       Сума: +item.sum,
       id: index + 1,
     }))
-
   return (
     <>
       <div

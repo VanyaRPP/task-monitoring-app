@@ -22,7 +22,7 @@ export function InflicionIndexTitle({ previousMonth }) {
       ) : (
         <>
           <br />
-          відсутній
+          за попередній місяць невідомий
         </>
       )}
     </>

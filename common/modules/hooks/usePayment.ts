@@ -28,14 +28,3 @@ export function useCompanyInvoice({ companyId, skip }: IUseCompanyProps) {
   })
   return { specifiedInvoice, lastInvoice, isLoading }
 }
-
-//TODO: Update to separate query
-
-export function useCompanyInvoiceByDate({ companyId, skip, month, year }: IUseCompanyByDateProps) {
-  const { data: paymentsResponse, isLoading } = useGetAllPaymentsQuery(
-    { companyIds: [companyId], limit: 10 },
-    { skip: skip || month < 1 || month > 12 }
-  )
-  const specifiedInvoice = paymentsResponse?.data?.find(item => moment((item?.monthService as any)?.date).format('M YYYY') == `${month} ${year}`)
-  return { specifiedInvoice, isLoading }
-}

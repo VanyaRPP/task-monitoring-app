@@ -14,7 +14,7 @@ export function useCustomDataSource({ preview }) {
     companyId,
     skip: preview,
   })
-
+  
   useEffect(() => {
     setDataSource(
       refreshIndexes(

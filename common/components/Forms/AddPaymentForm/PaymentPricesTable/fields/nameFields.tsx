@@ -9,8 +9,6 @@ import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { InflicionIndexTitle } from '@utils/inflicion'
 import { Form } from 'antd'
 import s from '../style.module.scss'
-import { useCompanyInvoice, useCompanyInvoiceByDate } from '@common/modules/hooks/usePayment'
-import moment from 'moment'
 
 export function NamePlacingField({ dateMonth, company, preview }) {
   return (
@@ -58,36 +56,36 @@ export function NameGarbageCollectorField({ dateMonth }) {
     </span>
   )
 }
-export function NameInflicionField({ company, preview, domain, street }) {
+export function NameInflicionField({ company, preview, domain, street, service }) {
   const { form, paymentData } = usePaymentContext()
   const inflicionPrice = Form.useWatch(['inflicionPrice', 'price'], form)
   const { previousMonth } = usePreviousMonthService({
-    date: paymentData?.monthService.date,
+    date: paymentData?.monthService.date || service?.date,
     domainId: form.getFieldValue('domain') || domain?._id,
     streetId: form.getFieldValue('street') || street?._id,
   })
-  // const {specifiedInvoice} = useCompanyInvoiceByDate({companyId: company._id, year: 2023, month: +moment(previousMonth?.date)?.format('M')})
-  // const inflicionPrice = specifiedInvoice?.invoice.find(item => item.type === ServiceType.Inflicion).price
 
   return (
     <span className={s.rowText}>
       <InflicionIndexTitle previousMonth={previousMonth} />
       {!!company?.inflicion && (
         <span className={s.rowText}>
-          {+inflicionPrice <= 0 || +previousMonth?.inflicionPrice <= 100 ? (
-            <>
-              <br />
-              <span className={s.month}>Спостерігається дефляція.</span>
-              <br />
-              <span className={s.month}>Значення незмінне</span>
-            </>
-          ) : (
-            <>
-              <br />
-              <span className={s.month}>донарахування</span>
-            </>
-          )}
-          {!preview && <StyledTooltip title={inflicionDescription} />}
+          {previousMonth && <>
+            {+inflicionPrice <= 0 || +previousMonth?.inflicionPrice <= 100 ? (
+              <>
+                <br />
+                <span className={s.month}>Спостерігається дефляція.</span>
+                <br />
+                <span className={s.month}>Значення незмінне</span>
+              </>
+            ) : (
+              <>
+                <br />
+                <span className={s.month}>донарахування</span>
+              </>
+            )}
+            {!preview && <StyledTooltip title={inflicionDescription} />}
+          </>}
         </span>
       )}
     </span>
