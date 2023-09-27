@@ -1,4 +1,4 @@
-import React, { FC, useRef } from 'react'
+import React, { FC, useEffect, useRef } from 'react'
 import { Button, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
@@ -7,7 +7,7 @@ import { useReactToPrint } from 'react-to-print'
 import { renderCurrency } from '@common/components/DashboardPage/blocks/payments'
 import { filterInvoiceObject, getFormattedDate } from '@utils/helpers'
 import numberToTextNumber from '@utils/numberToText'
-import useService from '@common/modules/hooks/useService'
+import useService, { usePreviousMonthService } from '@common/modules/hooks/useService'
 import moment from 'moment'
 import { ServiceType } from '@utils/constants'
 import NameComponent from '../AddPaymentForm/PaymentPricesTable/fields/NameComponent'
@@ -45,23 +45,24 @@ const ReceiptForm: FC<Props> = ({
 
   const { service } = useService({
     serviceId: newData?.monthService,
-    skip: paymentActions.preview,
+    skip: paymentActions?.preview,
   })
 
   const dataToMap = preview
     ? paymentData?.invoice
     : filterInvoiceObject(newData)
 
-  const dataSourcePreview: DataType[] = dataToMap?.map((item, index) => ({
-    Кількість: item.lastAmount
-      ? item.amount - item.lastAmount || ''
-      : item.amount || '',
-    Назва: <NameComponent record={{ name: item.type }} preview />,
-    Ціна: +item.price,
-    Сума: +item.sum,
-    id: index + 1,
-  }))
-
+  const dataSourcePreview: DataType[] = dataToMap
+    ?.filter(item => item.type == ServiceType.Inflicion ? paymentData?.company?.inflicion || !paymentData : true)
+    .map((item, index) => ({
+      Кількість: item.lastAmount
+        ? item.amount - item.lastAmount || ''
+        : item.amount || '',
+      Назва: <NameComponent record={{ name: item.type }} preview />,
+      Ціна: +item.price,
+      Сума: +item.sum,
+      id: index + 1,
+    }))
   return (
     <>
       <div

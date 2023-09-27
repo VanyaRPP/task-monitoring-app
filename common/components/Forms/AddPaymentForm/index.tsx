@@ -31,13 +31,13 @@ function AddPaymentForm({ paymentActions }) {
       layout="vertical"
       className={s.Form}
     >
-      <DomainsSelect form={form} />
+      <DomainsSelect form={form} edit={edit} />
 
-      <AddressesSelect form={form} />
+      <AddressesSelect form={form} edit={edit} />
 
-      <MonthServiceSelect form={form} />
+      <MonthServiceSelect form={form} edit={edit} />
 
-      <CompanySelect form={form} />
+      <CompanySelect form={form} edit={edit} />
       <PaymentTypeSelect edit={!companyId || edit} />
 
       <InvoiceNumber form={form} paymentActions={paymentActions} />
@@ -147,37 +147,37 @@ function useInitialValues() {
     operation: paymentData ? paymentData.type : Operations.Credit,
     [ServiceType.Maintenance]: {
       amount: invoices.maintenance?.amount,
-      price: invoices.maintenance?.price,
+      price: invoices.maintenance?.price || invoices.maintenance?.sum,
     },
     [ServiceType.Placing]: {
       amount: invoices.placing?.amount,
-      price: invoices.placing?.price,
+      price: invoices.placing?.price || invoices.placing?.sum,
     },
     [ServiceType.Electricity]: {
       lastAmount: invoices.electricity?.lastAmount,
       amount: invoices.electricity?.amount,
-      price: invoices.electricity?.price,
+      price: invoices.electricity?.price || invoices.electricity?.sum,
     },
     [ServiceType.Water]: {
       lastAmount: invoices.water?.lastAmount,
       amount: invoices.water?.amount,
-      price: invoices.water?.price,
+      price: invoices.water?.price// || invoices.water?.sum,
     },
     [ServiceType.WaterPart]: {
       price: invoices.waterPart?.sum,
     },
     [ServiceType.GarbageCollector]: {
       amount: invoices.garbageCollector?.amount,
-      price: invoices.garbageCollector?.price,
+      price: invoices.garbageCollector?.price || invoices.garbageCollector?.sum,
     },
     [ServiceType.Inflicion]: {
-      price: invoices.inflicion?.price,
+      price: invoices.inflicion?.price || invoices.inflicion?.sum,
     },
     [ServiceType.Discount]: {
-      price: invoices.discount?.price,
+      price: invoices.discount?.price || invoices.discount?.sum,
     },
     [ServiceType.Cleaning]: {
-      price: invoices.cleaning?.price,
+      price: invoices.cleaning?.price || invoices.cleaning?.sum,
     },
     ...customFields,
   }

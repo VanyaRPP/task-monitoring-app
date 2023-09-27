@@ -19,7 +19,7 @@ import s from '../style.module.scss'
 function PaymentPricesTable({ paymentActions }) {
   const {preview, edit} = paymentActions
   const { customDataSource, addDataSource, removeDataSource } =
-    useCustomDataSource({ preview: paymentActions.preview })
+    useCustomDataSource({ preview: paymentActions?.preview })
 
   const columns: ColumnProps<IPaymentTableData>[] = [
     {
@@ -41,7 +41,7 @@ function PaymentPricesTable({ paymentActions }) {
       dataIndex: 'amount',
       width: '30%',
       render: (__, record) => (
-        <AmountComponent record={record} preview={preview} edit={edit} />
+        <AmountComponent record={record} edit={edit} />
       ),
     },
     {
@@ -51,7 +51,7 @@ function PaymentPricesTable({ paymentActions }) {
       render: (__, record) => (
         <PriceComponent
           record={record}
-          preview={preview}
+          edit={edit}
         />
       ),
     },

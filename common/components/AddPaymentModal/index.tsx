@@ -4,12 +4,7 @@ import {
 } from '@common/api/paymentApi/payment.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { Form, message, Modal, Tabs, TabsProps } from 'antd'
-import React, {
-  FC,
-  createContext,
-  useContext,
-  useState,
-} from 'react'
+import React, { FC, createContext, useContext, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
@@ -150,11 +145,19 @@ const AddPaymentModal: FC<Props> = ({
         className={s.Modal}
         style={{ top: 20 }}
       >
-        <Tabs
-          activeKey={activeTabKey}
-          items={items}
-          onChange={setActiveTabKey}
-        />
+        {preview ? (
+          <ReceiptForm
+            currPayment={currPayment}
+            paymentData={paymentData}
+            paymentActions={paymentActions}
+          />
+        ) : (
+          <Tabs
+            activeKey={activeTabKey}
+            items={items}
+            onChange={setActiveTabKey}
+          />
+        )}
       </Modal>
     </PaymentContext.Provider>
   )
