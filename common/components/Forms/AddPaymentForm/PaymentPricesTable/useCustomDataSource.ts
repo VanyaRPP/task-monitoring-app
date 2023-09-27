@@ -18,7 +18,7 @@ export function useCustomDataSource({ preview }) {
   useEffect(() => {
     setDataSource(
       refreshIndexes(
-        paymentData?.invoice?.map((i) => ({
+        paymentData?.invoice?.filter(invoice => invoice.type === ServiceType.Inflicion ? paymentData?.company.inflicion || !paymentData : true).map((i) => ({
           ...i,
           name: paymentsTitle.hasOwnProperty(i.type) ? i.type : i.name,
         }))

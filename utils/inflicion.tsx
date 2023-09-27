@@ -4,7 +4,7 @@ export function InflicionIndexTitle({ previousMonth }) {
   return (
     <>
       Індекс інфляції
-      {previousMonth && (
+      {previousMonth ? (
         <>
           {' '}
           {previousMonth?.date ? (
@@ -18,6 +18,11 @@ export function InflicionIndexTitle({ previousMonth }) {
           {previousMonth?.inflicionPrice !== undefined
             ? previousMonth?.inflicionPrice?.toFixed(2) + '%'
             : 'невідомий'}
+        </>
+      ) : (
+        <>
+          <br />
+          відсутній
         </>
       )}
     </>

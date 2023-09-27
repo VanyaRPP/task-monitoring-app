@@ -41,7 +41,7 @@ export default function NameComponent({ record, preview }) {
     return (
       <Component
         dateMonth={getFormattedDate(
-          paymentData?.monthService?.invoiceCreationDate ||
+          paymentData?.monthService?.date ||
             paymentData?.invoiceCreationDate ||
             service?.date
         )}

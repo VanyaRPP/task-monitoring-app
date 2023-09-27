@@ -52,15 +52,17 @@ const ReceiptForm: FC<Props> = ({
     ? paymentData?.invoice
     : filterInvoiceObject(newData)
 
-    
-  const { previousMonth } = usePreviousMonthService({
-    date: paymentData?.invoiceCreationDate,
-    domainId: paymentData?.domain._id,
-    streetId: paymentData?.street._id,
-  })
-
+  // UNKOMMENT FOR USE FIRST MONTH VALIDATION
+  // const { previousMonth } = usePreviousMonthService({
+  //   date: paymentData?.monthService.date,
+  //   domainId: paymentData?.domain._id,
+  //   streetId: paymentData?.street._id,
+  // })
+  
   const dataSourcePreview: DataType[] = dataToMap
-    ?.filter(item => !(item.type == ServiceType.Inflicion && !previousMonth))
+    // UNKOMMENT FOR USE FIRST MONTH VALIDATION
+    // ?.filter(item => item.type == ServiceType.Inflicion ? paymentData?.company?.inflicion && previousMonth || !paymentData : true)
+    ?.filter(item => item.type == ServiceType.Inflicion ? paymentData?.company?.inflicion || !paymentData : true)
     .map((item, index) => ({
       Кількість: item.lastAmount
         ? item.amount - item.lastAmount || ''
