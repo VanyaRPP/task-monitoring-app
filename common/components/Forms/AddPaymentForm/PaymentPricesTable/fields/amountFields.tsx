@@ -19,7 +19,11 @@ export function AmountPlacingField({ record, disabled }) {
     (i) => i.type === ServiceType.Inflicion
   )
   return company?.inflicion || inflicion ? (
-    <AmountPlacingInflicionField record={record} disabled={disabled} />
+    <AmountPlacingInflicionField
+      record={record}
+      disabled={disabled}
+      infliction={inflicion}
+    />
   ) : (
     <AmountTotalAreaField record={record} disabled={disabled} />
   )
@@ -45,19 +49,29 @@ export function AmountTotalAreaField({ record, disabled }) {
   )
 }
 
-function AmountPlacingInflicionField({ record, disabled }) {
+function AmountPlacingInflicionField({ record, disabled, infliction }) {
   const { previousPlacingPrice, inflicionPrice } = useInflicionValues()
   const fieldName = [record.name, 'placingPrice']
-  const { form } = usePaymentContext()
-  
+  const { paymentData, form } = usePaymentContext()
+  const placing = paymentData?.invoice.find(
+    (i) => i.type === ServiceType.Placing
+  )
+
   if (!disabled) {
     form.setFieldValue(fieldName, `${previousPlacingPrice}+${inflicionPrice}`) //view && add
-  } 
+  }
 
   return (
     <div className={s.question_mark}>
-      <Form.Item name={fieldName} rules={validateField('required')}>
-        <InputNumber disabled className={s.input} />
+      <Form.Item
+        name={fieldName}
+        rules={!disabled && validateField('required')}
+      >
+        {!disabled ? (
+          <InputNumber disabled className={s.input} />
+        ) : (
+          <>{`${placing?.sum}+${infliction?.sum}`}</>
+        )}
       </Form.Item>
       <StyledTooltip
         title={`Значення попереднього місяця + індекс інфляції в цьому рахунку`}
@@ -65,7 +79,6 @@ function AmountPlacingInflicionField({ record, disabled }) {
     </div>
   )
 }
-
 
 export function AmountGarbageCollectorField() {
   const { paymentData, form } = usePaymentContext()
@@ -86,7 +99,7 @@ export function useInflicionValues() {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const inflicionValueFieldName = ['inflicionPrice', 'price']
-  
+
   // TODO: fix in preview mode
   const inflicionPrice = Form.useWatch(inflicionValueFieldName, form) ?? ''
 
@@ -136,7 +149,7 @@ function FormAttributeForSingle({
   invoicePropName,
   lastAmountName,
   amountName,
-  disabled
+  disabled,
 }: {
   invoicePropName: string
   lastAmountName: NamePath
