@@ -147,37 +147,37 @@ function useInitialValues() {
     operation: paymentData ? paymentData.type : Operations.Credit,
     [ServiceType.Maintenance]: {
       amount: invoices.maintenance?.amount,
-      price: invoices.maintenance?.price || invoices.maintenance?.sum,
+      price: getInvoiceItemPrice(invoices.maintenance),
     },
     [ServiceType.Placing]: {
       amount: invoices.placing?.amount,
-      price: invoices.placing?.price || invoices.placing?.sum,
+      price: getInvoiceItemPrice(invoices.placing),
     },
     [ServiceType.Electricity]: {
       lastAmount: invoices.electricity?.lastAmount,
       amount: invoices.electricity?.amount,
-      price: invoices.electricity?.price || invoices.electricity?.sum,
+      price: getInvoiceItemPrice(invoices.electricity),
     },
     [ServiceType.Water]: {
       lastAmount: invoices.water?.lastAmount,
       amount: invoices.water?.amount,
-      price: invoices.water?.price// || invoices.water?.sum,
+      price: getInvoiceItemPrice(invoices.water),
     },
     [ServiceType.WaterPart]: {
       price: invoices.waterPart?.sum,
     },
     [ServiceType.GarbageCollector]: {
       amount: invoices.garbageCollector?.amount,
-      price: invoices.garbageCollector?.price || invoices.garbageCollector?.sum,
+      price: getInvoiceItemPrice(invoices.garbageCollector),
     },
     [ServiceType.Inflicion]: {
-      price: invoices.inflicion?.price || invoices.inflicion?.sum,
+      price: getInvoiceItemPrice(invoices.inflicion),
     },
     [ServiceType.Discount]: {
-      price: invoices.discount?.price || invoices.discount?.sum,
+      price: getInvoiceItemPrice(invoices.discount),
     },
     [ServiceType.Cleaning]: {
-      price: invoices.cleaning?.price || invoices.cleaning?.sum,
+      price: getInvoiceItemPrice(invoices.cleaning),
     },
     ...customFields,
   }
@@ -185,3 +185,8 @@ function useInitialValues() {
   return initialValues
 }
 export default AddPaymentForm
+
+
+const getInvoiceItemPrice = (obj) => {
+  return obj?.price || obj?.sum
+}

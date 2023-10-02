@@ -60,7 +60,7 @@ export function NameInflicionField({ company, preview, domain, street, service }
   const { form, paymentData } = usePaymentContext()
   const inflicionPrice = Form.useWatch(['inflicionPrice', 'price'], form)
   const { previousMonth } = usePreviousMonthService({
-    date: paymentData?.monthService.date || service?.date,
+    date: paymentData?.monthService?.date || service?.date,
     domainId: form.getFieldValue('domain') || domain?._id,
     streetId: form.getFieldValue('street') || street?._id,
   })
