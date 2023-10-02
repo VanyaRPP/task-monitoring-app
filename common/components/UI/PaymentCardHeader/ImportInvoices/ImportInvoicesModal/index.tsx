@@ -96,7 +96,7 @@ function prepareInvoiceObjects(
     domain: domainId,
     street: streetId,
     company: companyId,
-    invoice: paymentMethod === Operations.Debit ? getInvoiceInfo(i) : [],
+    invoice: paymentMethod === Operations.Debit ? getInvoiceInfo(i, company) : [],
     provider,
     reciever,
     generalSum: parseStringToFloat(i.generalSum.toString()),
@@ -105,14 +105,21 @@ function prepareInvoiceObjects(
   return invoices
 }
 
-function getInvoiceInfo(i) {
+function getInvoiceInfo(i, company) {
   const res = [
     {
       type: 'maintenancePrice',
+      amount: company?.totalArea,
+      price: (
+        +parseStringToFloat(i.maintenancePrice) / company?.totalArea)
+          .toFixed(2),
       sum: parseStringToFloat(i.maintenancePrice),
     },
     {
       type: 'placingPrice',
+      amount: company?.totalArea,
+      price: (+parseStringToFloat(i.placingPrice) / company?.totalArea)
+        .toFixed(2),
       sum: parseStringToFloat(i.placingPrice),
     },
     {
@@ -126,11 +133,14 @@ function getInvoiceInfo(i) {
       type: 'waterPrice',
       sum: parseStringToFloat(i.waterPriceSum),
     },
-    {
+  ]
+
+  if (company?.inflicion) {
+    res.push({
       type: 'inflicionPrice',
       sum: parseStringToFloat(i.inflicionPrice),
-    },
-  ]
+    })
+  }
 
   if (i.custom) {
     res.push({
