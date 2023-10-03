@@ -53,8 +53,8 @@ function AmountPlacingInflicionField({ record, disabled, infliction }) {
   const { previousPlacingPrice, inflicionPrice } = useInflicionValues()
   const fieldName = [record.name, 'placingPrice']
   const { paymentData, form } = usePaymentContext()
-  const placing = paymentData?.invoice.find(
-    (i) => i.type === ServiceType.Placing
+  const placing = paymentData?.invoice?.find(
+    (i) => i?.type === ServiceType.Placing
   )
 
   if (!disabled) {
@@ -88,8 +88,8 @@ export function AmountGarbageCollectorField() {
 
   const { company } = useCompany({ companyId })
   const { service } = useService({ serviceId })
-  if (service?.garbageCollectorPrice && company.rentPart) {
-    return `${company.rentPart}% від ${service?.garbageCollectorPrice}`
+  if (service?.garbageCollectorPrice && company?.rentPart) {
+    return `${company?.rentPart}% від ${service?.garbageCollectorPrice}`
   }
 }
 
