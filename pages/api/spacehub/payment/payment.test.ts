@@ -324,29 +324,29 @@ describe('Payments API - GET', () => {
   })
 })
 
-it('load payments companies as DomainAdmin - success', async () => {
-    await mockLoginAs(users.domainAdmin)
+it('get valid distinctCompanies as DomainAdmin', async () => {
+  await mockLoginAs(users.domainAdmin)
 
-    const mockReq = {
-      method: 'GET',
-      query: {},
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
+  const mockReq = {
+    method: 'GET',
+    query: {},
+  } as any
+  const mockRes = {
+    status: jest.fn(() => mockRes),
+    json: jest.fn(),
+  } as any
 
   await handler(mockReq, mockRes)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-      realEstatesFilter: mockRes.json.mock.lastCall[0].realEstatesFilter,
-    }
+  const response = {
+    status: mockRes.status,
+    data: mockRes.json.mock.lastCall[0].data,
+    realEstatesFilter: mockRes.json.mock.lastCall[0].realEstatesFilter,
+  }
 
-    expect(response.status).toHaveBeenCalledWith(200)
-    expect(response.realEstatesFilter[0]).toHaveProperty('text')
-  })
+  expect(response.status).toHaveBeenCalledWith(200)
+  expect(response.realEstatesFilter[0].value.toString()).toEqual(realEstates[0]._id)
+})
 
 // it('load payments as GlobalAdmin by domainId - success', async () => {
 //   await mockLoginAs(users.globalAdmin)

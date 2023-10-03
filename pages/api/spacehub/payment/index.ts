@@ -116,16 +116,15 @@ export default async function handler(
 
         const total = await Payment.countDocuments(options)
 
-        // TODO: DomainAdmin see all. For filters. Should see only his
-        // TODO: fix
-        const realEstatesPipeline = getRealEstatesPipeline(
-          isGlobalAdmin,
-          user.email
-        )
-        const distinctCompanies = await Payment.aggregate(realEstatesPipeline)
-
         const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
         const distinctDomains = await Payment.aggregate(domainsPipeline)
+
+        const distinctedDomainsIds = distinctDomains.map((domain) => domain._id)
+        const realEstatesPipeline = getRealEstatesPipeline(
+          isGlobalAdmin,
+          distinctedDomainsIds
+        )
+        const distinctCompanies = await Payment.aggregate(realEstatesPipeline)
 
         const creditDebitPipeline = getCreditDebitPipeline(options)
         const totalPayments = await Payment.aggregate(creditDebitPipeline)

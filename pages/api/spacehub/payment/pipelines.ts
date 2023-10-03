@@ -36,7 +36,7 @@ export function getDomainsPipeline(isGlobalAdmin, email) {
   ]
 }
 
-export function getRealEstatesPipeline(isGlobalAdmin, email) {
+export function getRealEstatesPipeline(isGlobalAdmin, distinctedDomainsIds) {
   return [
     {
       $group: {
@@ -60,7 +60,9 @@ export function getRealEstatesPipeline(isGlobalAdmin, email) {
           $cond: [
             { $eq: [isGlobalAdmin, true] },
             true,
-            { $in: [email, '$companyDetails.adminEmails'] },
+            {
+              $in: ['$companyDetails.domain', distinctedDomainsIds],
+            },
           ],
         },
       },
