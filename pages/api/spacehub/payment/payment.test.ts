@@ -344,12 +344,6 @@ it('load payments companies as DomainAdmin - success', async () => {
       realEstatesFilter: mockRes.json.mock.lastCall[0].realEstatesFilter,
     }
 
-    const expected = payments.filter((payment) =>
-      domains
-        .find((domain) => domain._id === payment.domain)
-        .adminEmails.includes(users.domainAdmin.email)
-    )
-
     expect(response.status).toHaveBeenCalledWith(200)
     expect(response.realEstatesFilter[0]).toHaveProperty('text')
   })
