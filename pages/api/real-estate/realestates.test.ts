@@ -395,32 +395,32 @@ describe('RealEstate API - GET', () => {
   })
 
   it('request from User by domainId & streetId - don`t show not suitable companies', async () => {
-     await mockLoginAs(users.user)
+    await mockLoginAs(users.user)
 
-     const mockReq = {
-       method: 'GET',
-       query: {
-         domainId: domains[2]._id.toString(),
-         streetId: streets[2]._id.toString(),
-       },
-     } as any
+    const mockReq = {
+      method: 'GET',
+      query: {
+        domainId: domains[2]._id.toString(),
+        streetId: streets[2]._id.toString(),
+      },
+    } as any
 
-     const mockRes = {
-       status: jest.fn(() => mockRes),
-       json: jest.fn(),
-     } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
 
-     await handler(mockReq, mockRes)
+    await handler(mockReq, mockRes)
 
-     const response = {
-       status: mockRes.status,
-       data: mockRes.json.mock.lastCall[0].data,
-     }
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
 
-     const received = parseReceived(response.data)
-     const expected = realEstates[2]
+    const received = parseReceived(response.data)
+    const expected = realEstates[2]
 
-     expect(response.status).toHaveBeenCalledWith(200)
-     expect(received).toEqual([])
+    expect(response.status).toHaveBeenCalledWith(200)
+    expect(received).toEqual([])
   })
 })

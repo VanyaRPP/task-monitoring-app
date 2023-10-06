@@ -1,7 +1,7 @@
 import { Tag } from 'antd'
 import s from '../style.module.scss'
 
-const PaymentsFilterTags = ({ filters, setFilters, payments }) => {
+const FilterTags = ({ filters, setFilters, collection }) => {
   return (
     <>
       <div className={s.filtersTagsBlock}>
@@ -22,15 +22,16 @@ const PaymentsFilterTags = ({ filters, setFilters, payments }) => {
                   }
                 >
                   {
-                    payments?.domainsFilter?.find(
+                    collection?.domainsFilter?.find(
                       (item) => item.value === domain
                     )?.text
                   }
                 </Tag>
               ))}
             </span>
-          ) : payments?.currentDomainsCount === 1 ? (
-            <SingleTag name={payments?.data?.[0]?.domain?.name} />
+          ) : (collection?.currentDomainsCount ||
+              collection?.domainsFilter?.length) === 1 ? (
+            <SingleTag name={collection?.data?.[0]?.domain?.name} />
           ) : (
             ' Всі'
           )}
@@ -54,15 +55,21 @@ const PaymentsFilterTags = ({ filters, setFilters, payments }) => {
                   }
                 >
                   {
-                    payments?.realEstatesFilter?.find(
+                    collection?.realEstatesFilter?.find(
                       (item) => item.value === company
                     )?.text
                   }
                 </Tag>
               ))}
             </div>
-          ) : payments?.currentCompaniesCount === 1 ? (
-            <SingleTag name={payments?.data?.[0]?.company?.companyName} />
+          ) : (collection?.currentCompaniesCount ||
+              collection?.realEstatesFilter?.length) === 1 ? (
+            <SingleTag
+              name={
+                collection?.data?.[0]?.company?.companyName ||
+                collection?.data?.[0]?.companyName
+              }
+            />
           ) : (
             ' Всі'
           )}
@@ -76,4 +83,4 @@ function SingleTag({ name }) {
   return name ? <Tag className={s.Tag}>{name}</Tag> : null
 }
 
-export default PaymentsFilterTags
+export default FilterTags

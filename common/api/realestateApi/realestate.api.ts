@@ -15,25 +15,40 @@ export const realestateApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getAllRealEstate: builder.query<
-      IExtendedRealestate[],
+      IGetRealestateResponse,
       {
         limit?: number
         domainId?: string
         streetId?: string
         companyId?: string
+        domainIds?: string[]
+        companyIds?: string[]
       }
     >({
-      query: ({ limit, companyId, domainId, streetId }) => {
+      query: ({
+        limit,
+        companyId,
+        domainId,
+        streetId,
+        domainIds,
+        companyIds,
+      }) => {
         return {
           url: `real-estate`,
-          params: { limit, companyId, domainId, streetId },
+          params: {
+            limit,
+            companyId,
+            domainId,
+            streetId,
+            domainIds,
+            companyIds,
+          },
         }
       },
       providesTags: (response) =>
         response
-          ? response.map((item) => ({ type: 'RealEstate', id: item._id }))
+          ? response.data.map((item) => ({ type: 'RealEstate', id: item._id }))
           : [],
-      transformResponse: (response: IGetRealestateResponse) => response.data,
     }),
 
     addRealEstate: builder.mutation<IAddRealestateResponse, IRealestate>({

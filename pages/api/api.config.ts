@@ -12,7 +12,7 @@ export type Data = {
   // message?: string
 }
 
-export type PaymentData = Data & {
+export type ExtendedData = Data & {
   currentCompaniesCount?: number
   currentDomainsCount?: number
   domainsFilter?: { text: string; value: string }[]

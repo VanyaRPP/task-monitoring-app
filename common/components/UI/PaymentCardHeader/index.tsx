@@ -8,7 +8,7 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import s from './style.module.scss'
 import { isAdminCheck } from '@utils/helpers'
 import PaymentCascader from '@common/components/UI/PaymentCascader/index'
-import PaymentsFilterTags from './PaymentsFilterTags'
+import FilterTags from '../Reusable/FilterTags'
 import ImportInvoices from './ImportInvoices'
 
 const PaymentCardHeader = ({
@@ -57,10 +57,10 @@ const PaymentCardHeader = ({
                 {location.pathname === AppRoutes.PAYMENT && (
                   <>
                     <PaymentCascader onChange={setCurrentDateFilter} />
-                    <PaymentsFilterTags
+                    <FilterTags
                       filters={filters}
                       setFilters={setFilters}
-                      payments={payments}
+                      collection={payments}
                     />
                   </>
                 )}
