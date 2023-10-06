@@ -13,7 +13,7 @@ const OrganistaionsComponents = ({ domainId, streetId }) => {
     <div className={s.tableHeader}>
       <Table
         loading={isLoading}
-        dataSource={domainId && streetId ? realEstates : null}
+        dataSource={domainId && streetId ? realEstates?.data : null}
         columns={columns}
         pagination={false}
       />

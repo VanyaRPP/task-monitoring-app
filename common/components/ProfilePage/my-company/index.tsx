@@ -4,7 +4,8 @@ import s from '../style.module.scss'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 
 const MyCompany = () => {
-  const { data = [], isLoading } = useGetAllRealEstateQuery({})
+  const { data: realEstates, isLoading } = useGetAllRealEstateQuery({})
+  const data = realEstates?.data || []
 
   return (
     <Card loading={isLoading} size="small" title="Мої компанії">

@@ -134,8 +134,10 @@ function SessionUser({ image }) {
 }
 
 function DomainsCompanies() {
-  const { data: companies = [] } = useGetAllRealEstateQuery({})
+  const { data: realEstates } = useGetAllRealEstateQuery({})
   const { data: domains = [] } = useGetDomainsQuery({})
+
+  const companies = realEstates?.data || []
 
   return (
     <>

@@ -29,10 +29,12 @@ export default function CompanySelect({
 }
 
 function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
-  const { data: companies, isLoading } = useGetAllRealEstateQuery({
+  const { data: realEstates, isLoading } = useGetAllRealEstateQuery({
     domainId,
     streetId,
   })
+
+  const companies = realEstates?.data || []
 
   useEffect(() => {
     form.resetFields(['company'])
