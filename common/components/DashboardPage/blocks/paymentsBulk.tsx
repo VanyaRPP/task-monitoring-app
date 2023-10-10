@@ -43,7 +43,7 @@ const PaymentBulkBlock: React.FC = () => {
     <InvoicesPaymentContext.Provider
       value={{
         form,
-        companies,
+        companies: companies?.data,
         service,
         isLoading: isCompaniesLoading || isServiceLoading,
         isError

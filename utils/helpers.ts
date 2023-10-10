@@ -8,6 +8,8 @@ import 'moment/locale/uk'
 import _omit from 'lodash/omit'
 import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 import Big from 'big.js'
+import { getDomainsPipeline, getRealEstatesPipeline } from './pipelines'
+
 
 export const firstTextToUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
@@ -249,4 +251,32 @@ export function plusFloat(a, b) {
   const bigB = Big(parseStringToFloat(`${b}`));
 
   return +bigA.plus(bigB).round(2, Big.roundDown).toNumber();
+}
+
+export function filterOptions(options = {}, filterIds: any) {
+  const res = {
+    ...options,
+  } as any
+  const idsFromQueryFilter = (filterIds || '').split(',') || []
+  if (res.$in) {
+    res.$in = res.$in.filter((i) => idsFromQueryFilter.includes(i))
+    return res
+  }
+  res.$in = idsFromQueryFilter
+  return res
+}
+
+export async function getDistinctCompanyAndDomain({isGlobalAdmin, user, companyGroup, model}) {
+  const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
+  const distinctDomains = await model.aggregate(domainsPipeline)
+
+  const distinctedDomainsIds = distinctDomains.map((domain) => domain._id)
+  const realEstatesPipeline = getRealEstatesPipeline({
+    isGlobalAdmin,
+    distinctedDomainsIds,
+    group: companyGroup,
+  })
+  const distinctCompanies = await model.aggregate(realEstatesPipeline)
+
+  return { distinctDomains, distinctCompanies }
 }

@@ -3,36 +3,43 @@ import { Alert, Button, Checkbox, Popconfirm, Table, Tag, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 
+import { useDeleteRealEstateMutation } from '@common/api/realestateApi/realestate.api'
 import {
-  useDeleteRealEstateMutation,
-  useGetAllRealEstateQuery,
-} from '@common/api/realestateApi/realestate.api'
-import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
+  IExtendedRealestate,
+  IGetRealestateResponse,
+} from '@common/api/realestateApi/realestate.api.types'
 import { AppRoutes, Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { isAdminCheck } from '@utils/helpers'
+import { IFilter } from '@common/api/paymentApi/payment.api.types'
 
 export interface Props {
   domainId?: string
   streetId?: string
   setCurrentRealEstate?: (realEstate: IExtendedRealestate) => void
+  realEstates: IGetRealestateResponse
+  isLoading: boolean
+  isError: boolean
+  filters?: any
+  setFilters?: (filters: any) => void
 }
 
 const CompaniesTable: React.FC<Props> = ({
   domainId,
   streetId,
   setCurrentRealEstate,
+  realEstates,
+  isLoading,
+  isError,
+  filters,
+  setFilters,
 }) => {
   const router = useRouter()
-  const isOnPage = router.pathname === AppRoutes.REAL_ESTATE
+  const { pathname } = router
+  const isOnPage = pathname === AppRoutes.REAL_ESTATE
 
   const { data: userResponse } = useGetCurrentUserQuery()
 
-  const { data, isLoading, isError } = useGetAllRealEstateQuery({
-    domainId,
-    streetId,
-    limit: isOnPage ? 0 : 5
-  })
   const [deleteRealEstate, { isLoading: deleteLoading }] =
     useDeleteRealEstateMutation()
 
@@ -65,7 +72,7 @@ const CompaniesTable: React.FC<Props> = ({
         }
       }
       loading={isLoading}
-      columns={getDefaultColumns(
+      columns={getDefaultColumns({
         domainId,
         streetId,
         isLoading,
@@ -73,24 +80,51 @@ const CompaniesTable: React.FC<Props> = ({
         setCurrentRealEstate,
         deleteLoading,
         isGlobalAdmin,
-        isAdmin
-      )}
-      dataSource={data}
+        isAdmin,
+        domainsFilter: realEstates?.domainsFilter,
+        realEstatesFilter: realEstates?.realEstatesFilter,
+        filters,
+        pathname,
+      })}
+      dataSource={realEstates?.data}
       scroll={{ x: tableWidth }}
+      onChange={(__, filters) => {
+        setFilters({
+          domain: filters?.domain,
+          company: filters?.companyName,
+        })
+      }}
     />
   )
 }
 
-const getDefaultColumns = (
-  domainId?: string,
-  streetId?: string,
-  isLoading?: boolean,
-  handleDelete?: (...args: any) => void,
-  setCurrentRealEstate?: (realEstate: IExtendedRealestate) => void,
-  deleteLoading?: boolean,
-  isGlobalAdmin?: boolean,
+const getDefaultColumns = ({
+  domainId,
+  streetId,
+  isLoading,
+  handleDelete,
+  setCurrentRealEstate,
+  deleteLoading,
+  isGlobalAdmin,
+  isAdmin,
+  domainsFilter,
+  realEstatesFilter,
+  filters,
+  pathname,
+}: {
+  domainId?: string
+  streetId?: string
+  isLoading?: boolean
+  handleDelete?: (...args: any) => void
+  setCurrentRealEstate?: (realEstate: IExtendedRealestate) => void
+  deleteLoading?: boolean
+  isGlobalAdmin?: boolean
   isAdmin?: boolean
-): ColumnType<any>[] => {
+  domainsFilter?: IFilter[]
+  realEstatesFilter?: IFilter[]
+  filters?: any
+  pathname?: string
+}): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {
       title: 'Адміністратори',
@@ -185,33 +219,44 @@ const getDefaultColumns = (
     })
   }
 
-  if (!domainId && !streetId && !isLoading) {
-    columns.unshift(
-      {
-        title: 'Домен',
-        dataIndex: 'domain',
-        width: 200,
-        render: (i) => i?.name,
-      },
-      {
-        title: 'Адреса',
-        dataIndex: 'street',
-        width: 200,
-        render: (i) => (
-          <>
-            {i?.address} (м. {i?.city})
-          </>
-        ),
-      }
-    )
+  const domainColumn: any = {
+    title: 'Домен',
+    dataIndex: 'domain',
+    width: 200,
+    render: (i) => i?.name,
   }
 
-  columns.unshift({
+  const companyColumn: any = {
     fixed: 'left',
     title: 'Назва компанії',
     dataIndex: 'companyName',
     width: 200,
-  })
+  }
+
+  if (isAdmin) {
+    companyColumn.filters =
+      pathname === AppRoutes.REAL_ESTATE ? realEstatesFilter : null
+    companyColumn.filteredValue = filters?.company || null
+
+    domainColumn.filters =
+      pathname === AppRoutes.REAL_ESTATE ? domainsFilter : null
+    domainColumn.filteredValue = filters?.domain || null
+  }
+
+  if (!domainId && !streetId && !isLoading) {
+    columns.unshift(domainColumn, {
+      title: 'Адреса',
+      dataIndex: 'street',
+      width: 200,
+      render: (i) => (
+        <>
+          {i?.address} (м. {i?.city})
+        </>
+      ),
+    })
+  }
+
+  columns.unshift(companyColumn)
 
   return columns
 }

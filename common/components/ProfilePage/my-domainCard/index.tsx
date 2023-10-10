@@ -13,10 +13,11 @@ const MyDomainsCard: React.FC = () => {
     {},
     { skip: isGlobalAdmin }
   )
-  const { data: companies = [] } = useGetAllRealEstateQuery(
+  const { data: realEstates } = useGetAllRealEstateQuery(
     {},
     { skip: isGlobalAdmin }
   )
+  const companies = realEstates?.data || [] 
 
   const getDomainCompanies = (domainId) =>
     companies

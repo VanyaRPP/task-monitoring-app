@@ -5,17 +5,11 @@ import RealEstate from '@common/modules/models/RealEstate'
 import initMiddleware from '@common/lib/initMiddleware'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import Payment from '@common/modules/models/Payment'
-import start, { PaymentData } from '@pages/api/api.config'
-import { getPaymentOptions } from '@utils/helpers'
+import start, { ExtendedData } from '@pages/api/api.config'
+import { filterOptions, getDistinctCompanyAndDomain } from '@utils/helpers'
 import Domain from '@common/modules/models/Domain'
 import { quarters } from '@utils/constants'
-import {
-  getCreditDebitPipeline,
-  getRealEstatesPipeline,
-  getDomainsPipeline,
-} from './pipelines'
-import Street from '@common/modules/models/Street'
-import Service from '@common/modules/models/Service'
+import { getCreditDebitPipeline } from './pipelines'
 
 start()
 
@@ -65,16 +59,11 @@ const postValidateBody = initMiddleware(
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<PaymentData>
+  res: NextApiResponse<ExtendedData>
 ) {
   switch (req.method) {
     case 'GET':
       try {
-        await (Domain as any).find({});
-        await (Street as any).find({});
-        await (Service as any).find({});
-        await (RealEstate as any).find({});
-
         const { isDomainAdmin, isUser, user, isGlobalAdmin } =
           await getCurrentUser(req, res)
         const { companyIds, domainIds, limit, skip } = req.query
@@ -123,15 +112,13 @@ export default async function handler(
 
         const total = await Payment.countDocuments(options)
 
-        const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
-        const distinctDomains = await Payment.aggregate(domainsPipeline)
-
-        const distinctedDomainsIds = distinctDomains.map((domain) => domain._id)
-        const realEstatesPipeline = getRealEstatesPipeline(
-          isGlobalAdmin,
-          distinctedDomainsIds
-        )
-        const distinctCompanies = await Payment.aggregate(realEstatesPipeline)
+        const { distinctDomains, distinctCompanies } =
+          await getDistinctCompanyAndDomain({
+            isGlobalAdmin,
+            user,
+            companyGroup: 'company',
+            model: Payment,
+          })
 
         const creditDebitPipeline = getCreditDebitPipeline(options)
         const totalPayments = await Payment.aggregate(creditDebitPipeline)
@@ -185,19 +172,6 @@ export default async function handler(
         return res.status(400).json({ success: false, message: error })
       }
   }
-}
-
-function filterOptions(options = {}, filterIds: any) {
-  const res = {
-    ...options,
-  } as any
-  const idsFromQueryFilter = (filterIds || '').split(',') || []
-  if (res.$in) {
-    res.$in = res.$in.filter((i) => idsFromQueryFilter.includes(i))
-    return res
-  }
-  res.$in = idsFromQueryFilter
-  return res
 }
 
 function filterPeriodOptions(args) {

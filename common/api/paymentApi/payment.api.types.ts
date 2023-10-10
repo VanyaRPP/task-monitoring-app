@@ -49,7 +49,7 @@ export interface IAddPaymentResponse {
   data: IExtendedPayment
 }
 
-interface IFilter {
+export interface IFilter {
   text: string
   value: string
 }
