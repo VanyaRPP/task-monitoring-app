@@ -1,4 +1,5 @@
 import { IDomain } from '@common/modules/models/Domain'
+import { IFilter } from '../paymentApi/payment.api.types'
 
 export type IRealestate = {
   domain: IDomain
@@ -30,6 +31,8 @@ export interface IAddRealestateResponse {
 export interface IGetRealestateResponse {
   success: boolean
   data: IExtendedRealestate[]
+  domainsFilter: IFilter[]
+  realEstatesFilter: IFilter[]
 }
 
 export interface IDeleteRealestateResponse {
