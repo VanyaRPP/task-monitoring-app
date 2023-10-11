@@ -13,7 +13,7 @@ import { usePaymentContext } from '@common/components/AddPaymentModal'
 import moment from 'moment'
 import InvoiceNumber from './InvoiceNumber'
 import InvoiceCreationDate from './InvoiceCreationDate'
-import { getFormattedDate } from '@utils/helpers'
+import { getFormattedDate, getPreferredNumber } from '@utils/helpers'
 import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
 
 function AddPaymentForm({ paymentActions }) {
@@ -147,37 +147,37 @@ function useInitialValues() {
     operation: paymentData ? paymentData.type : Operations.Credit,
     [ServiceType.Maintenance]: {
       amount: invoices.maintenance?.amount,
-      price: getInvoiceItemPrice(invoices.maintenance),
+      price: getPreferredNumber([invoices.maintenance?.price, invoices.maintenance?.sum]),
     },
     [ServiceType.Placing]: {
       amount: invoices.placing?.amount,
-      price: getInvoiceItemPrice(invoices.placing),
+      price: getPreferredNumber([invoices.placing?.price, invoices.placing?.sum]),
     },
     [ServiceType.Electricity]: {
       lastAmount: invoices.electricity?.lastAmount,
       amount: invoices.electricity?.amount,
-      price: getInvoiceItemPrice(invoices.electricity),
+      price: getPreferredNumber([invoices.electricity?.price, invoices.electricity?.sum]),
     },
     [ServiceType.Water]: {
       lastAmount: invoices.water?.lastAmount,
       amount: invoices.water?.amount,
-      price: getInvoiceItemPrice(invoices.water),
+      price: getPreferredNumber([invoices.water?.price, invoices.water?.sum]),
     },
     [ServiceType.WaterPart]: {
       price: invoices.waterPart?.sum,
     },
     [ServiceType.GarbageCollector]: {
       amount: invoices.garbageCollector?.amount,
-      price: getInvoiceItemPrice(invoices.garbageCollector),
+      price: getPreferredNumber([invoices.garbageCollector?.price, invoices.garbageCollector?.sum]),
     },
     [ServiceType.Inflicion]: {
-      price: getInvoiceItemPrice(invoices.inflicion),
+      price: getPreferredNumber([invoices.inflicion?.price, invoices.inflicion?.sum]),
     },
     [ServiceType.Discount]: {
-      price: getInvoiceItemPrice(invoices.discount),
+      price: getPreferredNumber([invoices.discount?.price, invoices.discount?.sum]),
     },
     [ServiceType.Cleaning]: {
-      price: getInvoiceItemPrice(invoices.cleaning),
+      price: getPreferredNumber([invoices.cleaning?.price, invoices.cleaning?.sum]),
     },
     ...customFields,
   }
@@ -186,7 +186,3 @@ function useInitialValues() {
 }
 export default AddPaymentForm
 
-
-const getInvoiceItemPrice = (obj) => {
-  return obj?.price || obj?.sum
-}

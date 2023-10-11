@@ -280,3 +280,12 @@ export async function getDistinctCompanyAndDomain({isGlobalAdmin, user, companyG
 
   return { distinctDomains, distinctCompanies }
 }
+
+export function getPreferredNumber(numbers: number[], fallback: any = 0) {
+  for (let index = 0; index < numbers.length; index++) {
+    if(numbers[index]){
+      return +numbers[index]
+    } 
+  }
+  return fallback;
+}

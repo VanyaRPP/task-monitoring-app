@@ -3,12 +3,16 @@ import { ServiceType } from '@utils/constants'
 import { useEffect } from 'react'
 import { Form } from 'antd'
 import s from '../style.module.scss'
+import { getPreferredNumber } from '@utils/helpers'
 
 export default function SumComponent({ record }) {
   const { form } = usePaymentContext()
   const formFields = Form.useWatch(record.name, form)
-  const valueToSet = getVal(record?.name, formFields) || record.sum || 0
-
+  const valueToSet = getPreferredNumber([
+    record.sum,
+    getVal(record?.name, formFields)
+  ])
+  
   useEffect(() => {
     form.setFieldValue([record.name, 'sum'], valueToSet)
     // eslint-disable-next-line react-hooks/exhaustive-deps
