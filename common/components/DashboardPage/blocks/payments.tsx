@@ -45,7 +45,10 @@ const PaymentsBlock = () => {
     query: { email },
   } = router
   const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
-  const [paymentActions, setPaymentActions] = useState({edit: false, preview: false})
+  const [paymentActions, setPaymentActions] = useState({
+    edit: false,
+    preview: false,
+  })
   const [currentDateFilter, setCurrentDateFilter] = useState()
   const [pageData, setPageData] = useState({
     pageSize: pathname === AppRoutes.PAYMENT ? 10 : 5,
@@ -57,7 +60,7 @@ const PaymentsBlock = () => {
     setCurrentPayment(null)
     setPaymentActions({
       edit: false,
-      preview: false
+      preview: false,
     })
   }
 
@@ -109,7 +112,12 @@ const PaymentsBlock = () => {
             dataIndex: 'invoice',
             render: (invoice) => {
               const item = invoice.find((item) => item.type === type)
-              return item ? item.sum : <span className={s.currency}>-</span>
+              const sum = +item?.sum
+              return item ? (
+                sum?.toFixed(2) || '0.0'
+              ) : (
+                <span className={s.currency}>-</span>
+              )
             },
           })),
         ]
@@ -157,7 +165,7 @@ const PaymentsBlock = () => {
         },
       ]
     : []
-  
+
   // TODO: add Interface
   const columns: any = [
     {
@@ -206,7 +214,6 @@ const PaymentsBlock = () => {
       title: '',
       width: 50,
       render: (_, payment: IExtendedPayment) => {
-
         return payment?.type === Operations.Debit ? (
           <div className={s.eyelined}>
             <Button
@@ -220,7 +227,7 @@ const PaymentsBlock = () => {
             </Button>
           </div>
         ) : (
-            <></>
+          <></>
         )
       },
     },
