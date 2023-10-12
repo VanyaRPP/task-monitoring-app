@@ -233,6 +233,8 @@ export const importedPaymentDateToISOStringDate = (date) => {
 }
 
 export function parseStringToFloat(stringWithComma) {
+  // TODO: check for input string. is it ok
+  // cover by tests
   const stringWithoutComma = ((stringWithComma || 0) + '').replace(',', '.')
   return +stringWithoutComma
     ? parseFloat(stringWithoutComma).toFixed(2)

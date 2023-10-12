@@ -10,6 +10,7 @@ import { ServiceType } from '@utils/constants'
 import { InputNumber, Form } from 'antd'
 import { useEffect } from 'react'
 import s from '../style.module.scss'
+import { parseStringToFloat } from '@utils/helpers'
 
 export function AmountPlacingField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
@@ -165,7 +166,7 @@ function FormAttributeForSingle({
 
   useEffect(() => {
     if (!disabled) {
-      form.setFieldValue(lastAmountName, (+value || 0).toFixed(2))
+      form.setFieldValue(lastAmountName, parseStringToFloat(value))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
