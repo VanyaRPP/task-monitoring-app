@@ -23,6 +23,7 @@ const InvoicesHeader = () => {
   const { form, companies, service } = useInvoicesPaymentContext()
   const [addPayment] = useAddPaymentMutation()
   const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
+  console.log('comp', companies, service, newInvoiceNumber);
 
   const handleSave = async () => {
     const invoices = await prepareInvoiceObjects(
@@ -31,23 +32,24 @@ const InvoicesHeader = () => {
       companies,
       newInvoiceNumber
     )
+    console.log('result', invoices)
 
-    const promises = invoices.map(addPayment)
-    await Promise.all(promises).then((responses) => {
-      const allSuccessful = responses.every((response) => response.data.success)
+    // const promises = invoices.map(addPayment)
+    // await Promise.all(promises).then((responses) => {
+    //   const allSuccessful = responses.every((response) => response.data.success)
 
-      responses.forEach((response) => {
-        if (response.data.success) {
-          message.success(
-            `Додано рахунок для компанії ${response.data.data.reciever.companyName}`
-          )
-        } else {
-          message.error(`Помилка при додаванні рахунку для компанії`)
-        }
-      })
+    //   responses.forEach((response) => {
+    //     if (response.data.success) {
+    //       message.success(
+    //         `Додано рахунок для компанії ${response.data.data.reciever.companyName}`
+    //       )
+    //     } else {
+    //       message.error(`Помилка при додаванні рахунку для компанії`)
+    //     }
+    //   })
 
-      if (allSuccessful) router.push(AppRoutes.PAYMENT)
-    })
+    //   if (allSuccessful) router.push(AppRoutes.PAYMENT)
+    // })
   }
 
   return (
@@ -128,9 +130,10 @@ const prepareInvoiceObjects = async (
   newInvoiceNumber: number
 ): Promise<any> => {
   const values = await form.validateFields()
-
+  console.log('val', values)
   return Object.keys(values.companies).map((key, index) => {
     const invoice = values.companies[key]
+    console.log('invoice', invoice)
     const company = companies.find(
       (company) => company.companyName === values.companies[key].companyName
     )

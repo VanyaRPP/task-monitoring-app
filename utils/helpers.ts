@@ -281,26 +281,6 @@ export async function getDistinctCompanyAndDomain({isGlobalAdmin, user, companyG
   return { distinctDomains, distinctCompanies }
 }
 
-// export function convertToInvoicesObject(arr: { type: string, [key: string]: any }[]): { [key: string]: { [key: string]: any } } {
-//   const result: { [key: string]: { [key: string]: any } } = {};
-
-//   for (const item of arr) {
-//     const { type, ...rest } = item;
-//     const price = item.hasOwnProperty('price') ? item.price : item.sum;
-//     const amount = item.hasOwnProperty('amount') ? item.amount : 0;
-//     const lastAmount = item.hasOwnProperty('lastAmount') ? item.lastAmount : 0;
-//     result[type] = {
-//       ...rest,
-//       price,
-//       amount,
-//       lastAmount
-//     };
-//   }
-
-//   return result;
-// }
-
-
 export function convertToInvoicesObject(arr: { type: ServiceType, [key: string]: any }[]): { [key: string]: { [key: string]: any } } {
   const result: { [key: string]: { [key: string]: any } } = {};
 
