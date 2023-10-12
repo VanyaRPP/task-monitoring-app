@@ -18,7 +18,7 @@ export function AmountPlacingField({ record, disabled }) {
   const inflicion = paymentData?.invoice.find(
     (i) => i.type === ServiceType.Inflicion
   )
-  return company?.inflicion || inflicion ? (
+  return company?.inflicion || inflicion > 0 ? (
     <AmountPlacingInflicionField
       record={record}
       disabled={disabled}
@@ -70,7 +70,7 @@ function AmountPlacingInflicionField({ record, disabled, infliction }) {
         {!disabled ? (
           <InputNumber disabled className={s.input} />
         ) : (
-          <>{`${placing?.sum}+${infliction?.sum}`}</>
+          <>{`${placing?.sum}+${infliction?.sum || '0.0'}`}</>
         )}
       </Form.Item>
       <StyledTooltip
@@ -165,7 +165,7 @@ function FormAttributeForSingle({
 
   useEffect(() => {
     if (!disabled) {
-      form.setFieldValue(lastAmountName, value)
+      form.setFieldValue(lastAmountName, +value?.toFixed(2))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
