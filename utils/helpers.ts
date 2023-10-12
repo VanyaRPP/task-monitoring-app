@@ -280,3 +280,52 @@ export async function getDistinctCompanyAndDomain({isGlobalAdmin, user, companyG
 
   return { distinctDomains, distinctCompanies }
 }
+
+// export function convertToInvoicesObject(arr: { type: string, [key: string]: any }[]): { [key: string]: { [key: string]: any } } {
+//   const result: { [key: string]: { [key: string]: any } } = {};
+
+//   for (const item of arr) {
+//     const { type, ...rest } = item;
+//     const price = item.hasOwnProperty('price') ? item.price : item.sum;
+//     const amount = item.hasOwnProperty('amount') ? item.amount : 0;
+//     const lastAmount = item.hasOwnProperty('lastAmount') ? item.lastAmount : 0;
+//     result[type] = {
+//       ...rest,
+//       price,
+//       amount,
+//       lastAmount
+//     };
+//   }
+
+//   return result;
+// }
+
+
+export function convertToInvoicesObject(arr: { type: ServiceType, [key: string]: any }[]): { [key: string]: { [key: string]: any } } {
+  const result: { [key: string]: { [key: string]: any } } = {};
+
+  for (const item of arr) {
+    const { type, ...rest } = item;
+    let newObj: { [key: string]: any } = { ...rest };
+
+    if ([ServiceType.Maintenance, ServiceType.Placing, ServiceType.GarbageCollector].includes(type)) {
+      newObj = {
+        ...newObj,
+        amount: rest.hasOwnProperty('amount') ? rest.amount : 0,
+      };
+    }
+
+    if ([ServiceType.Electricity, ServiceType.Water].includes(type)) {
+      newObj = {
+        ...newObj,
+        amount: rest.hasOwnProperty('amount') ? rest.amount : 0,
+        lastAmount: rest.hasOwnProperty('lastAmount') ? rest.lastAmount : 0,
+      };
+    }
+
+    newObj.price = item.hasOwnProperty('price') ? item.price : item.sum;
+    result[type] = newObj;
+  }
+
+  return result;
+}
