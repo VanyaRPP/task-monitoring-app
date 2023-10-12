@@ -165,7 +165,7 @@ function FormAttributeForSingle({
 
   useEffect(() => {
     if (!disabled) {
-      form.setFieldValue(lastAmountName, +value?.toFixed(2))
+      form.setFieldValue(lastAmountName, (+value || 0).toFixed(2))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
@@ -215,7 +215,7 @@ export function AmountInflicionField() {
 
   const { previousPlacingPrice } = useInflicionValues()
 
-  const percent = (previousMonth?.inflicionPrice - 100).toFixed(2)
+  const percent = (previousMonth?.inflicionPrice - 100)?.toFixed(2)
   return (
     <>
       {company?.inflicion && previousMonth?.inflicionPrice

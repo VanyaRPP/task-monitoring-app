@@ -22,7 +22,7 @@ const PaymentTotal: FC<Props> = ({ form }) => {
     : 0
 
   useEffect(() => {
-    const r = (result as number).toFixed(2) || 0
+    const r = (result as number)?.toFixed(2) || 0
     setTotal(r as number)
     form.setFieldValue(Operations.Debit, r)
   }, [form, result])

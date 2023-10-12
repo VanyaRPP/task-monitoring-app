@@ -63,7 +63,7 @@ const ReceiptForm: FC<Props> = ({
 
       return {
         Кількість: item.lastAmount
-          ? (item.amount - item.lastAmount).toFixed(2) || ''
+          ? (item.amount - item.lastAmount)?.toFixed(2) || ''
           : item.amount || '',
         Назва: <NameComponent record={{ name: itemName }} preview />,
         Ціна: +item.price,
