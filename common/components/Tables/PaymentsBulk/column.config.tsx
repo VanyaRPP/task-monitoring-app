@@ -9,7 +9,7 @@ import { ServiceType } from '@utils/constants'
 import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
 import { usePreviousMonthService } from '@common/modules/hooks/useService'
 import { getInflicionValue } from '@utils/inflicionHelper'
-import { multiplyFloat, plusFloat } from '@utils/helpers'
+import { invoiceCoutWater, multiplyFloat, plusFloat } from '@utils/helpers'
 
 export const getDefaultColumns = (
   service?: any,
@@ -462,7 +462,7 @@ const WaterPartSum: React.FC<{ service: any; record: any }> = ({
     <FormAttribute
       disabled
       name={[...baseName, 'sum']}
-      value={multiplyFloat((waterPart / 100), service?.waterPriceTotal)}
+      value={invoiceCoutWater(waterPart, service)}
     />
   )
 }
