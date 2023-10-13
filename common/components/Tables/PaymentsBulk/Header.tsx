@@ -23,8 +23,6 @@ const InvoicesHeader = () => {
   const { form, companies, service } = useInvoicesPaymentContext()
   const [addPayment] = useAddPaymentMutation()
   const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
-  console.log('comp', companies, service, newInvoiceNumber);
-
   const handleSave = async () => {
     const invoices = await prepareInvoiceObjects(
       form,
@@ -32,24 +30,23 @@ const InvoicesHeader = () => {
       companies,
       newInvoiceNumber
     )
-    console.log('result', invoices)
 
-    // const promises = invoices.map(addPayment)
-    // await Promise.all(promises).then((responses) => {
-    //   const allSuccessful = responses.every((response) => response.data.success)
+    const promises = invoices.map(addPayment)
+    await Promise.all(promises).then((responses) => {
+      const allSuccessful = responses.every((response) => response.data.success)
 
-    //   responses.forEach((response) => {
-    //     if (response.data.success) {
-    //       message.success(
-    //         `Додано рахунок для компанії ${response.data.data.reciever.companyName}`
-    //       )
-    //     } else {
-    //       message.error(`Помилка при додаванні рахунку для компанії`)
-    //     }
-    //   })
+      responses.forEach((response) => {
+        if (response.data.success) {
+          message.success(
+            `Додано рахунок для компанії ${response.data.data.reciever.companyName}`
+          )
+        } else {
+          message.error(`Помилка при додаванні рахунку для компанії`)
+        }
+      })
 
-    //   if (allSuccessful) router.push(AppRoutes.PAYMENT)
-    // })
+      if (allSuccessful) router.push(AppRoutes.PAYMENT)
+    })
   }
 
   return (
@@ -123,6 +120,63 @@ function PopoverMonthService(serviceId: any) {
 
 export default InvoicesHeader
 
+const validateInvoice = (invoice, service) => {
+  const result: any = {
+    maintenancePrice: {
+      amount: invoice.totalArea,
+      ...invoice.maintenancePrice,
+    },
+    placingPrice: {
+      amount: invoice.totalArea,
+      ...invoice.placingPrice,
+    },
+
+    electricityPrice: {
+      ...invoice.electricityPrice,
+      price: service?.electricityPrice,
+    },
+    inflicionPrice: {
+      price: invoice.inflicionPrice,
+      sum: invoice.inflicionPrice,
+    },
+  }
+
+  if (invoice.garbageCollector.sum > 0) {
+    result.garbageCollectorPrice = {
+      amount: invoice.garbageCollector.amount,
+      sum: invoice.garbageCollector.sum,
+    }
+  }
+
+  if (invoice.cleaningPrice > 0) {
+    result.cleaningPrice = {
+      price: invoice.cleaningPrice,
+      sum: invoice.cleaningPrice,
+    }
+  }
+
+  if (invoice.discount < 0) {
+    result.discount = {
+      price: invoice.discount,
+      sum: invoice.discount,
+    }
+  }
+
+  if (invoice.waterPart) {
+    result.waterPart = { 
+      sum: invoice.waterPart.sum
+     }
+  } else {
+    result.waterPrice = {
+      ...invoice.waterPrice,
+      price: service?.waterPrice,
+    }
+  }
+
+  
+  return result;
+}
+
 const prepareInvoiceObjects = async (
   form: FormInstance,
   service: IExtendedService,
@@ -130,65 +184,15 @@ const prepareInvoiceObjects = async (
   newInvoiceNumber: number
 ): Promise<any> => {
   const values = await form.validateFields()
-  console.log('val', values)
   return Object.keys(values.companies).map((key, index) => {
     const invoice = values.companies[key]
-    console.log('invoice', invoice)
     const company = companies.find(
       (company) => company.companyName === values.companies[key].companyName
     )
     const { provider, reciever } = getPaymentProviderAndReciever(company)
-    const invoices: any = {
-      maintenancePrice: {
-        amount: invoice.totalArea,
-        ...invoice.maintenancePrice,
-      },
-      placingPrice: {
-        amount: invoice.totalArea,
-        ...invoice.placingPrice,
-      },
+  
 
-      electricityPrice: {
-        ...invoice.electricityPrice,
-        price: service?.electricityPrice,
-      },
-      inflicionPrice: {
-        price: invoice.inflicionPrice,
-        sum: invoice.inflicionPrice,
-      },
-    }
-
-    if (invoice.garbageCollector.sum > 0) {
-      invoices.garbageCollectorPrice = {
-        amount: invoice.garbageCollector.amount,
-        sum: invoice.garbageCollector.sum,
-      }
-    }
-
-    if (invoice.cleaningPrice > 0) {
-      invoices.cleaningPrice = {
-        price: invoice.cleaningPrice,
-        sum: invoice.cleaningPrice,
-      }
-    }
-
-    if (invoice.discount < 0) {
-      invoices.discount = {
-        price: invoice.discount,
-        sum: invoice.discount,
-      }
-    }
-
-    if (invoice.waterPart) {
-      invoices.waterPart = { sum: invoice.waterPart.sum }
-    } else {
-      invoices.waterPrice = {
-        ...invoice.waterPrice,
-        price: service?.waterPrice,
-      }
-    }
-
-    const filteredInvoice = filterInvoiceObject(invoices)
+    const filteredInvoice = filterInvoiceObject(validateInvoice(invoice, service))
     return {
       invoiceNumber: newInvoiceNumber + index,
       type: Operations.Debit,
@@ -199,7 +203,7 @@ const prepareInvoiceObjects = async (
       invoiceCreationDate: new Date(),
       description: '',
       generalSum:
-        filteredInvoice
+          filteredInvoice
           .reduce((acc, val) => acc + (+val.sum || 0), 0)
           .toFixed(2) || 0,
       provider,
@@ -208,3 +212,4 @@ const prepareInvoiceObjects = async (
     }
   })
 }
+

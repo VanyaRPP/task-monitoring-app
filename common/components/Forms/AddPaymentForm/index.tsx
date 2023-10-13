@@ -165,7 +165,7 @@ function useInitialValues() {
     invoiceNumber: paymentData?.invoiceNumber,
     invoiceCreationDate: moment(paymentData?.invoiceCreationDate),
     operation: paymentData ? paymentData.type : Operations.Credit,
-    ...convertToInvoicesObject(paymentData?.invoice),
+    ...convertToInvoicesObject(paymentData?.invoice || []),
     ...customFields,
   }
 
