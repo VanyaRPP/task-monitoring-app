@@ -9,285 +9,285 @@ import { ServiceType } from '@utils/constants'
 import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
 import { usePreviousMonthService } from '@common/modules/hooks/useService'
 import { getInflicionValue } from '@utils/inflicionHelper'
-import { multiplyFloat, plusFloat,invoiceCoutWater } from '@utils/helpers'
+import { multiplyFloat, plusFloat } from '@utils/helpers'
 
 export const getDefaultColumns = (
   service?: any,
   handleDelete?: (row: any) => void
 ): any[] => [
-    {
-      fixed: 'left',
-      title: 'Компанія',
-      dataIndex: 'companyName',
-      width: 200,
-      render: (value: any, record: { companyName: string | number }) => (
-        <FormAttribute
-          notNum
-          name={['companies', record.companyName, 'companyName']}
-          value={value}
-          disabled
-        />
-      ),
-    },
-    {
-      title: 'Площа (м²)',
-      dataIndex: 'totalArea',
-      render: (value: any, record: { companyName: string | number }) => (
-        <FormAttribute
-          name={['companies', record.companyName, 'totalArea']}
-          value={value}
-          disabled
-        />
-      ),
-    },
-    {
-      title: 'Утримання',
-      children: [
-        {
-          title: 'За м²',
-          dataIndex: 'servicePricePerMeter',
-          render: (
-            __,
-            record: { companyName: string | number; servicePricePerMeter: any }
-          ) => (
-            <>
-              <FormAttribute
-                name={[
-                  'companies',
-                  record.companyName,
-                  'maintenancePrice',
-                  'price',
-                ]}
-                value={record.servicePricePerMeter || service?.rentPrice}
-                disabled
-              />
+  {
+    fixed: 'left',
+    title: 'Компанія',
+    dataIndex: 'companyName',
+    width: 200,
+    render: (value: any, record: { companyName: string | number }) => (
+      <FormAttribute
+        notNum
+        name={['companies', record.companyName, 'companyName']}
+        value={value}
+        disabled
+      />
+    ),
+  },
+  {
+    title: 'Площа (м²)',
+    dataIndex: 'totalArea',
+    render: (value: any, record: { companyName: string | number }) => (
+      <FormAttribute
+        name={['companies', record.companyName, 'totalArea']}
+        value={value}
+        disabled
+      />
+    ),
+  },
+  {
+    title: 'Утримання',
+    children: [
+      {
+        title: 'За м²',
+        dataIndex: 'servicePricePerMeter',
+        render: (
+          __,
+          record: { companyName: string | number; servicePricePerMeter: any }
+        ) => (
+          <>
+            <FormAttribute
+              name={[
+                'companies',
+                record.companyName,
+                'maintenancePrice',
+                'price',
+              ]}
+              value={record.servicePricePerMeter || service?.rentPrice}
+              disabled
+            />
 
-              {!!record.servicePricePerMeter && (
-                <StyledTooltip
-                  title={'Індивідуальне утримання, що передбачене договором'}
-                />
-              )}
-            </>
-          ),
-        },
-        {
-          title: 'Загальне',
-          dataIndex: 'servicePriceSum',
-          render: (__: any, record: any) => (
-            <ServicePriceSum service={service} record={record} />
-          ),
-        },
-      ],
-    },
-    // TODO: підтянути формулу індексу інфляції з сінгл інвойса
-    {
-      title: 'Розміщення',
-      children: [
-        {
-          title: 'За м²',
-          dataIndex: 'pricePerMeter',
-          render: (
-            value: any,
-            record: { companyName: string | number; inflicion: boolean }
-          ) => (
-            <FormAttribute
-              name={['companies', record.companyName, 'placingPrice', 'price']}
-              value={record.inflicion ? 0 : value}
-              disabled
-            />
-          ),
-        },
-        {
-          title: 'Загальне',
-          dataIndex: 'priceSum',
-          render: (__: any, record: any) => (
-            <>
-              <PricePlacingField service={service} record={record} />
-            </>
-          ),
-        },
-      ],
-    },
-    {
-      title: <InflicionIndexTitleLocal service={service} />,
-      dataIndex: 'inflicionPrice',
-      render: (__: any, record: any) => (
-        <InflicionPrice service={service} record={record} />
-      ),
-    },
-    {
-      title: service?.electricityPrice
-        ? `Електрика: ${service.electricityPrice} грн/кВт`
-        : 'Електрика',
-      children: [
-        {
-          title: 'Стара',
-          dataIndex: 'old_elec',
-          render: (__: any, record: any) => <OldElectricity record={record} />,
-        },
-        {
-          title: 'Нова',
-          dataIndex: 'new_elec',
-          render: (value: any, record: { companyName: string | number }) => (
-            <FormAttribute
-              name={[
-                'companies',
-                record.companyName,
-                'electricityPrice',
-                'amount',
-              ]}
-              value={value}
-            />
-          ),
-        },
-        {
-          title: 'Загальне',
-          dataIndex: 'sum_elec',
-          render: (__: any, record: any) => (
-            <ElectricityPriceSum service={service} record={record} />
-          ),
-        },
-      ],
-    },
-    {
-      title: service ? `Вода: ${service.waterPrice} грн/м³` : 'Вода',
-      children: [
-        {
-          title: 'Стара',
-          dataIndex: 'old_water',
-          render: (__: any, record: any) => <OldWater record={record} />,
-        },
-        {
-          title: 'Нова',
-          dataIndex: 'new_water',
-          render: (
-            value: any,
-            record: { waterPart: any; companyName: string | number }
-          ) => (
-            <FormAttribute
-              disabled={!!record.waterPart}
-              name={['companies', record.companyName, 'waterPrice', 'amount']}
-              value={value}
-            />
-          ),
-        },
-        {
-          title: 'Загальне',
-          dataIndex: 'sum_water',
-          render: (__: any, record: any) => (
-            <WaterPriceSum service={service} record={record} />
-          ),
-        },
-      ],
-    },
-    {
-      title: service ? (
-        <>
-          Вода (без лічильника)
-          <br />
-          Всього водопостачання: {service.waterPriceTotal}
-        </>
-      ) : (
-        'Вода (без лічильника)'
-      ),
-      children: [
-        {
-          title: 'Частка постачання %',
-          dataIndex: 'waterPart',
-          render: (
-            __: any,
-            record: { companyName: string | number; waterPart: any }
-          ) => (
-            <FormAttribute
-              name={['companies', record.companyName, 'waterPart', 'price']}
-              value={record.waterPart}
-              disabled
-            />
-          ),
-        },
-        {
-          title: 'Загальне',
-          dataIndex: 'sum_waterPart',
-          render: (__: any, record: any) => (
-            <WaterPartSum service={service} record={record} />
-          ),
-        },
-      ],
-    },
-    {
-      title: service ? (
-        <>
-          Всього за вивезення ТПВ:
-          <br />
-          {service.garbageCollectorPrice} грн/м&sup2;{' '}
-        </>
-      ) : (
-        'Вивезення ТПВ'
-      ),
-      children: [
-        {
-          title: 'Загальна частка',
-          dataIndex: 'garbageCollectorPrice',
-          render: (
-            __: any,
-            record: { companyName: string | number; rentPart: any }
-          ) => (
-            <FormAttribute
-              name={[
-                'companies',
-                record.companyName,
-                'garbageCollector',
-                'amount',
-              ]}
-              value={record?.rentPart}
-              disabled
-            />
-          ),
-        },
-        {
-          title: 'Загальне',
-          dataIndex: 'waterPart',
-          render: (__: any, record: any) => (
-            <GarbageCollectorPrice service={service} record={record} />
-          ),
-        },
-      ],
-    },
-    {
-      title: 'Прибирання',
-      dataIndex: 'cleaning',
-      render: (value: any, record: { companyName: string | number }) => (
-        <FormAttribute
-          name={['companies', record.companyName, 'cleaningPrice']}
-          value={value}
-          disabled
-        />
-      ),
-    },
-    {
-      title: 'Знижка',
-      dataIndex: 'discount',
-      render: (value: any, record: { companyName: string | number }) => (
-        <FormAttribute
-          name={['companies', record.companyName, 'discount']}
-          value={value}
-        />
-      ),
-    },
-    {
-      fixed: 'right',
-      align: 'center',
-      width: 50,
-      render: (_: any, record: { _id: string }) => (
-        <Popconfirm
-          title="Видалити запис?"
-          onConfirm={() => handleDelete && handleDelete(record._id)}
-        >
-          <CloseCircleOutlined />
-        </Popconfirm>
-      ),
-    },
-  ]
+            {!!record.servicePricePerMeter && (
+              <StyledTooltip
+                title={'Індивідуальне утримання, що передбачене договором'}
+              />
+            )}
+          </>
+        ),
+      },
+      {
+        title: 'Загальне',
+        dataIndex: 'servicePriceSum',
+        render: (__: any, record: any) => (
+          <ServicePriceSum service={service} record={record} />
+        ),
+      },
+    ],
+  },
+  // TODO: підтянути формулу індексу інфляції з сінгл інвойса
+  {
+    title: 'Розміщення',
+    children: [
+      {
+        title: 'За м²',
+        dataIndex: 'pricePerMeter',
+        render: (
+          value: any,
+          record: { companyName: string | number; inflicion: boolean }
+        ) => (
+          <FormAttribute
+            name={['companies', record.companyName, 'placingPrice', 'price']}
+            value={record.inflicion ? 0 : value}
+            disabled
+          />
+        ),
+      },
+      {
+        title: 'Загальне',
+        dataIndex: 'priceSum',
+        render: (__: any, record: any) => (
+          <>
+            <PricePlacingField service={service} record={record} />
+          </>
+        ),
+      },
+    ],
+  },
+  {
+    title: <InflicionIndexTitleLocal service={service} />,
+    dataIndex: 'inflicionPrice',
+    render: (__: any, record: any) => (
+      <InflicionPrice service={service} record={record} />
+    ),
+  },
+  {
+    title: service?.electricityPrice
+      ? `Електрика: ${service.electricityPrice} грн/кВт`
+      : 'Електрика',
+    children: [
+      {
+        title: 'Стара',
+        dataIndex: 'old_elec',
+        render: (__: any, record: any) => <OldElectricity record={record} />,
+      },
+      {
+        title: 'Нова',
+        dataIndex: 'new_elec',
+        render: (value: any, record: { companyName: string | number }) => (
+          <FormAttribute
+            name={[
+              'companies',
+              record.companyName,
+              'electricityPrice',
+              'amount',
+            ]}
+            value={value}
+          />
+        ),
+      },
+      {
+        title: 'Загальне',
+        dataIndex: 'sum_elec',
+        render: (__: any, record: any) => (
+          <ElectricityPriceSum service={service} record={record} />
+        ),
+      },
+    ],
+  },
+  {
+    title: service ? `Вода: ${service.waterPrice} грн/м³` : 'Вода',
+    children: [
+      {
+        title: 'Стара',
+        dataIndex: 'old_water',
+        render: (__: any, record: any) => <OldWater record={record} />,
+      },
+      {
+        title: 'Нова',
+        dataIndex: 'new_water',
+        render: (
+          value: any,
+          record: { waterPart: any; companyName: string | number }
+        ) => (
+          <FormAttribute
+            disabled={!!record.waterPart}
+            name={['companies', record.companyName, 'waterPrice', 'amount']}
+            value={value}
+          />
+        ),
+      },
+      {
+        title: 'Загальне',
+        dataIndex: 'sum_water',
+        render: (__: any, record: any) => (
+          <WaterPriceSum service={service} record={record} />
+        ),
+      },
+    ],
+  },
+  {
+    title: service ? (
+      <>
+        Вода (без лічильника)
+        <br />
+        Всього водопостачання: {service.waterPriceTotal}
+      </>
+    ) : (
+      'Вода (без лічильника)'
+    ),
+    children: [
+      {
+        title: 'Частка постачання %',
+        dataIndex: 'waterPart',
+        render: (
+          __: any,
+          record: { companyName: string | number; waterPart: any }
+        ) => (
+          <FormAttribute
+            name={['companies', record.companyName, 'waterPart', 'price']}
+            value={record.waterPart}
+            disabled
+          />
+        ),
+      },
+      {
+        title: 'Загальне',
+        dataIndex: 'sum_waterPart',
+        render: (__: any, record: any) => (
+          <WaterPartSum service={service} record={record} />
+        ),
+      },
+    ],
+  },
+  {
+    title: service ? (
+      <>
+        Всього за вивезення ТПВ:
+        <br />
+        {service.garbageCollectorPrice} грн/м&sup2;{' '}
+      </>
+    ) : (
+      'Вивезення ТПВ'
+    ),
+    children: [
+      {
+        title: 'Загальна частка',
+        dataIndex: 'garbageCollectorPrice',
+        render: (
+          __: any,
+          record: { companyName: string | number; rentPart: any }
+        ) => (
+          <FormAttribute
+            name={[
+              'companies',
+              record.companyName,
+              'garbageCollector',
+              'amount',
+            ]}
+            value={record?.rentPart}
+            disabled
+          />
+        ),
+      },
+      {
+        title: 'Загальне',
+        dataIndex: 'waterPart',
+        render: (__: any, record: any) => (
+          <GarbageCollectorPrice service={service} record={record} />
+        ),
+      },
+    ],
+  },
+  {
+    title: 'Прибирання',
+    dataIndex: 'cleaning',
+    render: (value: any, record: { companyName: string | number }) => (
+      <FormAttribute
+        name={['companies', record.companyName, 'cleaningPrice']}
+        value={value}
+        disabled
+      />
+    ),
+  },
+  {
+    title: 'Знижка',
+    dataIndex: 'discount',
+    render: (value: any, record: { companyName: string | number }) => (
+      <FormAttribute
+        name={['companies', record.companyName, 'discount']}
+        value={value}
+      />
+    ),
+  },
+  {
+    fixed: 'right',
+    align: 'center',
+    width: 50,
+    render: (_: any, record: { _id: string }) => (
+      <Popconfirm
+        title="Видалити запис?"
+        onConfirm={() => handleDelete && handleDelete(record._id)}
+      >
+        <CloseCircleOutlined />
+      </Popconfirm>
+    ),
+  },
+]
 
 function useInflicionValues({ companyId, company, service }) {
   const { lastInvoice } = useCompanyInvoice({ companyId })
@@ -462,7 +462,7 @@ const WaterPartSum: React.FC<{ service: any; record: any }> = ({
     <FormAttribute
       disabled
       name={[...baseName, 'sum']}
-      value={invoiceCoutWater(waterPart, service)}
+      value={multiplyFloat((waterPart / 100), service?.waterPriceTotal)}
     />
   )
 }
@@ -480,7 +480,7 @@ const WaterPriceSum: React.FC<{ service: any; record: any }> = ({
 
   const oldWater = Form.useWatch(oldWaterName, form)
   const newWater = Form.useWatch(newWaterName, form)
-  
+
   return (
     <FormAttribute
       disabled
