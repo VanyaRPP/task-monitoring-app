@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import { Form, Input, InputNumber } from 'antd'
 import s from './style.module.scss'
@@ -13,12 +13,15 @@ import { usePaymentContext } from '@common/components/AddPaymentModal'
 import moment from 'moment'
 import InvoiceNumber from './InvoiceNumber'
 import InvoiceCreationDate from './InvoiceCreationDate'
-import { convertToInvoicesObject, filterInvoiceObject, getFormattedDate } from '@utils/helpers'
+import { convertToInvoicesObject } from '@utils/helpers'
 import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
 
 function AddPaymentForm({ paymentActions }) {
-  const initialValues = useInitialValues()
-  const { form } = usePaymentContext()
+  const { form, paymentData } = usePaymentContext()
+  const initialValues = useMemo(() => {
+    return getInitialValues(paymentData)
+  }, [paymentData])
+   
   const serviceId = Form.useWatch('monthService', form)
   const companyId = Form.useWatch('company', form)
   const operation = Form.useWatch('operation', form)
@@ -90,8 +93,7 @@ function AddPaymentForm({ paymentActions }) {
   )
 }
 
-function useInitialValues() {
-  const { paymentData } = usePaymentContext()
+function getInitialValues(paymentData) {
 
   const custom = paymentData?.invoice.filter(
       (item) => item?.type === ServiceType.Custom
@@ -106,54 +108,8 @@ function useInitialValues() {
   // currently we have few renders
   // we need it only once. on didmount (first render)
   // const initialValues = {
-  //   domain: paymentData?.domain?._id,
-  //   street: paymentData?.street?._id,
-  //   monthService: paymentData?.monthService?._id,
-  //   company: paymentData?.company?._id,
-  //   description: paymentData?.description,
-  //   credit: paymentData?.credit,
-  //   generalSum: paymentData?.generalSum,
-  //   debit: paymentData?.debit,
-  //   invoiceNumber: paymentData?.invoiceNumber,
-  //   invoiceCreationDate: moment(paymentData?.invoiceCreationDate),
-  //   operation: paymentData ? paymentData.type : Operations.Credit,
-  //   [ServiceType.Maintenance]: {
-  //     amount: invoices.maintenance?.amount,
-  //     price: +invoices.maintenance?.price,
-  //   },
-  //   [ServiceType.Placing]: {
-  //     amount: invoices.placing?.amount,
-  //     price: +invoices.placing?.price,
-  //   },
-  //   [ServiceType.Electricity]: {
-  //     lastAmount: invoices.electricity?.lastAmount,
-  //     amount: invoices.electricity?.amount,
-  //     price: +invoices.electricity?.price,
-  //   },
-  //   [ServiceType.Water]: {
-  //     lastAmount: invoices.water?.lastAmount,
-  //     amount: invoices.water?.amount,
-  //     price: +invoices.water?.price,
-  //   },
-  //   [ServiceType.WaterPart]: {
-  //     price: +invoices.waterPart?.sum,
-  //   },
-  //   [ServiceType.GarbageCollector]: {
-  //     amount: invoices.garbageCollector?.amount,
-  //     price: +invoices.garbageCollector?.price,
-  //   },
-  //   [ServiceType.Inflicion]: {
-  //     price: +invoices.inflicion?.sum,
-  //   },
-  //   [ServiceType.Discount]: {
-  //     price: +invoices.discount?.price,
-  //   },
-  //   [ServiceType.Cleaning]: {
-  //     price: +invoices.cleaning?.price,
-  //   },
-  //   ...customFields,
-  // }
-  const initialValues2 = {
+
+  const initialValues1 = {
     domain: paymentData?.domain?._id,
     street: paymentData?.street?._id,
     monthService: paymentData?.monthService?._id,
@@ -169,6 +125,6 @@ function useInitialValues() {
     ...customFields,
   }
 
-  return initialValues2
+  return initialValues1
 }
 export default AddPaymentForm
