@@ -109,7 +109,7 @@ function getInitialValues(paymentData) {
   // we need it only once. on didmount (first render)
   // const initialValues = {
 
-  const initialValues1 = {
+  const initialValues = {
     domain: paymentData?.domain?._id,
     street: paymentData?.street?._id,
     monthService: paymentData?.monthService?._id,
@@ -125,6 +125,6 @@ function getInitialValues(paymentData) {
     ...customFields,
   }
 
-  return initialValues1
+  return initialValues
 }
 export default AddPaymentForm
