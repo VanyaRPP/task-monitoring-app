@@ -104,11 +104,6 @@ function getInitialValues(paymentData) {
     return acc
   }, {})
 
-  // TODO: add useEffect || useCallback ?
-  // currently we have few renders
-  // we need it only once. on didmount (first render)
-  // const initialValues = {
-
   const initialValues = {
     domain: paymentData?.domain?._id,
     street: paymentData?.street?._id,
