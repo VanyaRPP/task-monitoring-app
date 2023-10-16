@@ -162,7 +162,7 @@ const validateInvoice = (invoice, service) => {
     }
   }
 
-  if (invoice.waterPart) {
+  if (invoice.waterPart && invoice.waterPart > 0) {
     result.waterPart = { 
       sum: invoice.waterPart.sum
      }
@@ -173,7 +173,6 @@ const validateInvoice = (invoice, service) => {
     }
   }
 
-  
   return result;
 }
 
