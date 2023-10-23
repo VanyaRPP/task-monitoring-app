@@ -131,6 +131,7 @@ function getInvoiceInfo(i, company) {
     },
     {
       type: 'waterPrice',
+      price: parseStringToFloat(i.waterPriceSum),
       sum: parseStringToFloat(i.waterPriceSum),
     },
   ]
@@ -138,6 +139,7 @@ function getInvoiceInfo(i, company) {
   if (company?.inflicion) {
     res.push({
       type: 'inflicionPrice',
+      price: '0',
       sum: parseStringToFloat(i.inflicionPrice),
     })
   }
