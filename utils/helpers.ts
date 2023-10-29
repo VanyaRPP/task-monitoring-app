@@ -287,3 +287,32 @@ export async function getDistinctCompanyAndDomain({ isGlobalAdmin, user, company
 export const invoiceCoutWater = (waterPart, service) => {
   return (waterPart && service ? ((waterPart / 100) * service?.waterPriceTotal).toFixed(2) : 0);
 }
+
+export function convertToInvoicesObject(arr: { type: ServiceType, [key: string]: any }[]): { [key: string]: { [key: string]: any } } {
+  const result: { [key: string]: { [key: string]: any } } = {};
+
+  for (const item of arr) {
+    const { type, ...rest } = item;
+    let newObj: { [key: string]: any } = { ...rest };
+
+    if ([ServiceType.Maintenance, ServiceType.Placing, ServiceType.GarbageCollector].includes(type)) {
+      newObj = {
+        ...newObj,
+        amount: rest.hasOwnProperty('amount') ? rest.amount : 0,
+      };
+    }
+
+    if ([ServiceType.Electricity, ServiceType.Water].includes(type)) {
+      newObj = {
+        ...newObj,
+        amount: rest.hasOwnProperty('amount') ? rest.amount : 0,
+        lastAmount: rest.hasOwnProperty('lastAmount') ? rest.lastAmount : 0,
+      };
+    }
+
+    newObj.price = item.hasOwnProperty('price') ? item.price : item.sum;
+    result[type] = newObj;
+  }
+
+  return result;
+}
