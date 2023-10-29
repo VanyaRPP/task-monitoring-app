@@ -9,6 +9,7 @@ import _omit from 'lodash/omit'
 import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 import Big from 'big.js'
 import { getDomainsPipeline, getRealEstatesPipeline } from './pipelines'
+import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 
 
 export const firstTextToUpperCase = (text: string) =>
@@ -135,9 +136,9 @@ function formatDateToIsoString(data) {
   return data.map((i) =>
     i.invoiceCreationDate
       ? {
-          ...i,
-          invoiceCreationDate: new Date(i.invoiceCreationDate).toISOString(),
-        }
+        ...i,
+        invoiceCreationDate: new Date(i.invoiceCreationDate).toISOString(),
+      }
       : i
   )
 }
@@ -190,14 +191,14 @@ export function filterInvoiceObject(obj) {
     if (typeof obj[key] === 'object' && obj[key].hasOwnProperty('sum')) {
       services.includes(key)
         ? filtered.push({
-            type: key,
-            ...obj[key],
-          })
+          type: key,
+          ...obj[key],
+        })
         : filtered.push({
-            type: ServiceType.Custom,
-            name: key,
-            ...obj[key],
-          })
+          type: ServiceType.Custom,
+          name: key,
+          ...obj[key],
+        })
     }
   }
 
@@ -268,7 +269,7 @@ export function filterOptions(options = {}, filterIds: any) {
   return res
 }
 
-export async function getDistinctCompanyAndDomain({isGlobalAdmin, user, companyGroup, model}) {
+export async function getDistinctCompanyAndDomain({ isGlobalAdmin, user, companyGroup, model }) {
   const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
   const distinctDomains = await model.aggregate(domainsPipeline)
 
@@ -281,6 +282,10 @@ export async function getDistinctCompanyAndDomain({isGlobalAdmin, user, companyG
   const distinctCompanies = await model.aggregate(realEstatesPipeline)
 
   return { distinctDomains, distinctCompanies }
+}
+
+export const invoiceCoutWater = (waterPart, service) => {
+  return (waterPart && service ? ((waterPart / 100) * service?.waterPriceTotal).toFixed(2) : 0);
 }
 
 export function convertToInvoicesObject(arr: { type: ServiceType, [key: string]: any }[]): { [key: string]: { [key: string]: any } } {

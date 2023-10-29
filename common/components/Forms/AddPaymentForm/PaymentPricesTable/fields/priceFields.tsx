@@ -9,6 +9,7 @@ import useService, {
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { useInflicionValues } from './amountFields'
 import { getInflicionValue } from '@utils/inflicionHelper'
+import { invoiceCoutWater } from '@utils/helpers'
 
 export function PriceMaintainceField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
@@ -205,7 +206,8 @@ export function PriceWaterPartField({ record, disabled }) {
     if (service?._id && company?.waterPart && !disabled) {
       form.setFieldValue(
         fieldName,
-        ((company.waterPart / 100) * service?.waterPriceTotal)?.toFixed(2)
+        // ((company.waterPart / 100) * service?.waterPriceTotal)?.toFixed(2)
+        (invoiceCoutWater(company?.waterPart, service))
       )
     }
   }, [service?._id, company?._id]) //eslint-disable-line react-hooks/exhaustive-deps
