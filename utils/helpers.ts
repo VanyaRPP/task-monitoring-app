@@ -205,8 +205,16 @@ export function filterInvoiceObject(obj) {
   return filtered
 }
 
-export const renderCurrency = (number: number): string =>
-  number ? new Intl.NumberFormat('en-EN').format(number) : '-'
+// export const renderCurrency = (number: number): string =>
+//   number ? new Intl.NumberFormat('en-EN').format(number) : '-'
+
+export const renderCurrency = (number: any): string => {
+  if (!isNaN(number)) {
+    return new Intl.NumberFormat('en-US').format(number);
+  } else {
+    return '-';
+  }
+};
 
 export const getFormattedDate = (data: Date): string => {
   if (data) {

@@ -21,6 +21,7 @@ import { useRouter } from 'next/router'
 import cn from 'classnames'
 import s from './style.module.scss'
 import { PERIOD_FILTR } from '@utils/constants'
+import { renderCurrency } from '@utils/helpers'
 
 function getDateFilter(value) {
   const [, year, period, number] = value || []
@@ -112,12 +113,9 @@ const PaymentsBlock = () => {
             dataIndex: 'invoice',
             render: (invoice) => {
               const item = invoice.find((item) => item.type === type)
-              const sum = +item?.sum
-              return item ? (
-                sum?.toFixed(2) || '0.0'
-              ) : (
-                <span className={s.currency}>-</span>
-              )
+              const sum = +(item?.sum || item?.price)
+              const currency = renderCurrency(sum?.toFixed(2)); 
+              return <span className={currency === '-' ? s.currency : ''}>{currency}</span>
             },
           })),
         ]
@@ -362,15 +360,6 @@ const PaymentsBlock = () => {
     >
       {content}
     </TableCard>
-  )
-}
-
-// TODO: move to common helpers
-export function renderCurrency(number) {
-  return (
-    <div className={s.currency}>
-      {number ? new Intl.NumberFormat('en-EN').format(number) : '-'}
-    </div>
   )
 }
 
