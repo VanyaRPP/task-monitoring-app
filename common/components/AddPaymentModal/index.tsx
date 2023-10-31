@@ -3,7 +3,7 @@ import {
   useEditPaymentMutation,
 } from '@common/api/paymentApi/payment.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import { Form, message, Modal, Tabs, TabsProps } from 'antd'
+import { Form, message, Tabs, TabsProps } from 'antd'
 import React, { FC, createContext, useContext, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
@@ -15,6 +15,7 @@ import {
   getPaymentProviderAndReciever,
 } from '@utils/helpers'
 import useCompany from '@common/modules/hooks/useCompany'
+import ModalWindow from '../UI/ModalWindow'
 
 interface Props {
   closeModal: VoidFunction
@@ -117,9 +118,7 @@ const AddPaymentModal: FC<Props> = ({
         form,
       }}
     >
-      <Modal
-        open={true}
-        maskClosable={false}
+      <ModalWindow
         title={edit ? 'Редагування рахунку' : !preview && 'Додавання рахунку'}
         onOk={
           activeTabKey === '1'
@@ -158,7 +157,7 @@ const AddPaymentModal: FC<Props> = ({
             onChange={setActiveTabKey}
           />
         )}
-      </Modal>
+      </ModalWindow>
     </PaymentContext.Provider>
   )
 }

@@ -144,7 +144,7 @@ const CompetitionCard: React.FC<{
       ) : null}
       <ModalWindow
         title="Подати заявку"
-        isModalVisible={isModalVisible}
+        open={isModalVisible}
         onCancel={onCancelModal}
         onOk={onSubmitModal}
         okText="Додати"

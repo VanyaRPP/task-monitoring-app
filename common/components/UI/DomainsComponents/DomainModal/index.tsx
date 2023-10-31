@@ -9,6 +9,7 @@ import {
   IExtendedDomain,
 } from '@common/api/domainApi/domain.api.types'
 import DomainForm from './DomainForm'
+import ModalWindow from '../../ModalWindow'
 
 interface Props {
   currentDomain: IExtendedDomain
@@ -51,7 +52,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
   }
 
   return (
-    <Modal
+    <ModalWindow
       open={true}
       title={'Домени'}
       onOk={handleSubmit}
@@ -60,7 +61,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
       cancelText={'Відміна'}
     >
       <DomainForm form={form} currentDomain={currentDomain} />
-    </Modal>
+    </ModalWindow>
   )
 }
 

@@ -2,11 +2,12 @@ import {
   useAddServiceMutation,
   useEditServiceMutation,
 } from '@common/api/serviceApi/service.api'
-import { Form, message, Modal } from 'antd'
-import React, { FC, useEffect } from 'react'
+import { Form, message } from 'antd'
+import React, { FC } from 'react'
 import AddServiceForm from '../Forms/AddServiceForm'
 import moment from 'moment'
 import { IExtendedService } from '@common/api/serviceApi/service.api.types'
+import ModalWindow from '../UI/ModalWindow'
 
 interface Props {
   closeModal: VoidFunction
@@ -65,17 +66,19 @@ const AddServiceModal: FC<Props> = ({ closeModal, currentService }) => {
   }
 
   return (
-    <Modal
-      open={true}
+    <ModalWindow
       title="Ціна на послуги в місяць"
       onOk={handleSubmit}
-      onCancel={closeModal}
+      onCancel={() => {
+        form.resetFields()
+        closeModal()
+      }}
       okText={edit ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
       confirmLoading={isAddingLoading || isEditingLoading}
     >
       <AddServiceForm form={form} edit={edit} currentService={currentService} />
-    </Modal>
+    </ModalWindow>
   )
 }
 

@@ -11,7 +11,6 @@ import {
   useGetUserByIdQuery,
 } from '../../api/userApi/user.api'
 import s from './style.module.scss'
-import ModalWindow from '../UI/ModalWindow'
 import ModalNoFooter from '../UI/ModalNoFooter'
 import EndTask from '../EndTask'
 import AddFeedbackForm from '../Forms/AddFeedbackForm'

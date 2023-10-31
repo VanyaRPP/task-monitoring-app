@@ -72,7 +72,7 @@ const AdminPageCategories: React.FC = () => {
         />
         <ModalWindow
           title={!id ? 'Додати категорію' : 'Змінити категорію'}
-          isModalVisible={isModalVisible}
+          open={isModalVisible}
           onCancel={onCancelModal}
           onOk={!id ? onSubmitModal : onSubmitEditModal}
           okText={!id ? 'Додати' : 'Змінити'}
