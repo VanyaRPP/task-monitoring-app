@@ -99,7 +99,7 @@ const FeedbacksCard: React.FC<Props> = ({
           )}
           <ModalWindow
             title={`Залиште відгук про ${user?.name}`}
-            isModalVisible={isModalVisible}
+            open={isModalVisible}
             onCancel={onCancelModal}
             onOk={onSubmitModal}
             okText="Залишити відгук"

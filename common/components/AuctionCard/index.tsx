@@ -71,7 +71,7 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
     >
       <ModalWindow
         title="Подати заявку в пропозиції"
-        isModalVisible={isModalVisible}
+        open={isModalVisible}
         onCancel={onCancelModal}
         onOk={onSubmiModal}
         okText="Подати заявку"

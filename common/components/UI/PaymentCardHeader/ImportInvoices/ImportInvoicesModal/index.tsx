@@ -3,6 +3,7 @@ import {
   useGetPaymentNumberQuery,
 } from '@common/api/paymentApi/payment.api'
 import CompanySelect from '@common/components/Forms/AddPaymentForm/CompanySelect'
+import ModalWindow from '@common/components/UI/ModalWindow'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
@@ -57,14 +58,11 @@ const ImportInvoicesModal = ({ closeModal }) => {
   }
 
   return (
-    <Modal
-      open={true}
+    <ModalWindow
       title="Імпорт інвойсів"
       onOk={handleSave}
       confirmLoading={isLoading}
-      onCancel={() => {
-        closeModal()
-      }}
+      onCancel={closeModal}
       okText="Імпортувати"
       cancelText={'Закрити'}
     >
@@ -77,7 +75,7 @@ const ImportInvoicesModal = ({ closeModal }) => {
           <Input.TextArea rows={20} />
         </Form.Item>
       </Form>
-    </Modal>
+    </ModalWindow>
   )
 }
 

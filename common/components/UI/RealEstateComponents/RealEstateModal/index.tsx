@@ -9,6 +9,7 @@ import {
   IExtendedRealestate,
   IRealestate,
 } from '@common/api/realestateApi/realestate.api.types'
+import ModalWindow from '../../ModalWindow'
 // import AddServiceForm from '../Forms/AddServiceForm'
 // import moment from 'moment'
 
@@ -60,8 +61,7 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
   }
 
   return (
-    <Modal
-      open={true}
+    <ModalWindow
       style={{ top: 20 }}
       title={"Об'єкти нерухомості"}
       onOk={handleSubmit}
@@ -70,7 +70,7 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
       cancelText={'Відміна'}
     >
       <RealEstateForm form={form} currentRealEstate={currentRealEstate} />
-    </Modal>
+    </ModalWindow>
   )
 }
 
