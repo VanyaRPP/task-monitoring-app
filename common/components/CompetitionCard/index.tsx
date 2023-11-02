@@ -11,7 +11,7 @@ import {
 } from 'antd'
 import Column from 'antd/lib/table/Column'
 import Meta from 'antd/lib/card/Meta'
-import ModalWindow from '../UI/ModalWindow/index'
+import Modal from '../UI/ModalWindow/index'
 import { ITask, ITaskExecutors } from 'common/modules/models/Task'
 import CompetitionForm from '../Forms/CompetitionForm/index'
 import {
@@ -142,7 +142,7 @@ const CompetitionCard: React.FC<{
           taskStatus={task?.status}
         />
       ) : null}
-      <ModalWindow
+      <Modal
         title="Подати заявку"
         open={isModalVisible}
         onCancel={onCancelModal}
@@ -155,7 +155,7 @@ const CompetitionCard: React.FC<{
           form={form}
           task={task}
         />
-      </ModalWindow>
+      </Modal>
       <Table key="competition" dataSource={executors} pagination={false}>
         <Column
           title="Майстри"

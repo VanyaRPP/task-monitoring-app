@@ -4,7 +4,7 @@ import React, { FC } from 'react'
 import { IStreet } from '@common/modules/models/Street'
 import { useAddStreetMutation } from '@common/api/streetApi/street.api'
 import AddStreetForm from '../Forms/AddStreetForm'
-import ModalWindow from '../UI/ModalWindow'
+import Modal from '../UI/ModalWindow'
 
 interface Props {
   closeModal: VoidFunction
@@ -31,7 +31,7 @@ const AddStreetModal: FC<Props> = ({ closeModal, edit }) => {
   }
 
   return (
-    <ModalWindow
+    <Modal
       title={!edit && 'Додавання вулиці'}
       onOk={handleSubmit}
       onCancel={() => {
@@ -43,7 +43,7 @@ const AddStreetModal: FC<Props> = ({ closeModal, edit }) => {
       confirmLoading={isLoading}
     >
       <AddStreetForm form={form} />
-    </ModalWindow>
+    </Modal>
   )
 }
 

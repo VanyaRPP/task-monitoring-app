@@ -15,7 +15,7 @@ import {
   getPaymentProviderAndReciever,
 } from '@utils/helpers'
 import useCompany from '@common/modules/hooks/useCompany'
-import ModalWindow from '../UI/ModalWindow'
+import Modal from '../UI/ModalWindow'
 
 interface Props {
   closeModal: VoidFunction
@@ -118,7 +118,7 @@ const AddPaymentModal: FC<Props> = ({
         form,
       }}
     >
-      <ModalWindow
+      <Modal
         title={edit ? 'Редагування рахунку' : !preview && 'Додавання рахунку'}
         onOk={
           activeTabKey === '1'
@@ -157,7 +157,7 @@ const AddPaymentModal: FC<Props> = ({
             onChange={setActiveTabKey}
           />
         )}
-      </ModalWindow>
+      </Modal>
     </PaymentContext.Provider>
   )
 }

@@ -1,4 +1,4 @@
-import { Modal } from 'antd'
+import { Modal as AntModal } from 'antd'
 import s from './style.module.scss'
 
 interface Props {
@@ -16,7 +16,7 @@ interface Props {
   title: string
 }
 
-const ModalWindow: React.FC<Props> = ({
+const Modal: React.FC<Props> = ({
   children,
   onCancel,
   onOk,
@@ -31,14 +31,14 @@ const ModalWindow: React.FC<Props> = ({
   open = true,
 }) => {
   return (
-    <Modal
+    <AntModal
       confirmLoading={confirmLoading}  
       open={open}
       maskClosable={!maskClickIgnore}
       title={title}
       // footer={footer}
       onCancel={() => {
-        Modal.confirm({
+        AntModal.confirm({
           title: 'Ви впевнені, що хочете закрити форму?',
           content: 'Введені вами дані не будуть збережені',
           onOk: onCancel,
@@ -53,8 +53,8 @@ const ModalWindow: React.FC<Props> = ({
       style={style}
     >
       {children}
-    </Modal>
+    </AntModal>
   )
 }
 
-export default ModalWindow
+export default Modal;

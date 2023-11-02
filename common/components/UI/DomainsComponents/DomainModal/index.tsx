@@ -2,14 +2,14 @@ import {
   useAddDomainMutation,
   useEditDomainMutation,
 } from '@common/api/domainApi/domain.api'
-import { Form, Modal, message } from 'antd'
+import { Form, message } from 'antd'
 import React, { FC } from 'react'
 import {
   IDomainModel,
   IExtendedDomain,
 } from '@common/api/domainApi/domain.api.types'
 import DomainForm from './DomainForm'
-import ModalWindow from '../../ModalWindow'
+import Modal from '../../ModalWindow'
 
 interface Props {
   currentDomain: IExtendedDomain
@@ -52,7 +52,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
   }
 
   return (
-    <ModalWindow
+    <Modal
       open={true}
       title={'Домени'}
       onOk={handleSubmit}
@@ -61,7 +61,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
       cancelText={'Відміна'}
     >
       <DomainForm form={form} currentDomain={currentDomain} />
-    </ModalWindow>
+    </Modal>
   )
 }
 

@@ -1,5 +1,5 @@
 import { useJsApiLoader } from '@react-google-maps/api'
-import { Modal, DatePicker, Form, Input, Select, Tooltip } from 'antd'
+import { DatePicker, Form, Input, Select, Tooltip } from 'antd'
 import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import { centerTownGeoCode, Roles } from 'utils/constants'
@@ -16,7 +16,7 @@ import { useGetAllCategoriesQuery } from '@common/api/categoriesApi/category.api
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { useAddTaskMutation } from '@common/api/taskApi/task.api'
 import { IAddress } from '@common/modules/models/Task'
-import ModalWindow from '../UI/ModalWindow'
+import Modal from '../UI/ModalWindow'
 
 type FormData = {
   category?: string
@@ -103,7 +103,7 @@ const AddTaskModal: React.FC<PropsType> = ({
   }, [address])
 
   return (
-    <ModalWindow
+    <Modal
       open={isModalVisible}
       title="Створити завдання"
       okText="Створити"
@@ -194,7 +194,7 @@ const AddTaskModal: React.FC<PropsType> = ({
           />
         </Form.Item>
       </Form>
-    </ModalWindow>
+    </Modal>
   )
 }
 
