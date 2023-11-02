@@ -15,7 +15,7 @@ import PriceComponent from './fields/PriceComponent'
 import NameComponent from './fields/NameComponent'
 import SumComponent from './fields/SumComponent'
 import s from '../style.module.scss'
-import ModalWindow from '@common/components/UI/ModalWindow'
+import Modal from '@common/components/UI/ModalWindow'
 
 function PaymentPricesTable({ paymentActions }) {
   const {preview, edit} = paymentActions
@@ -133,7 +133,7 @@ function AddCustomField({ addDataSource }) {
           Додати поле
         </Button>
       </div>
-      <ModalWindow
+      <Modal
         title="Додати поле"
         open={isModalOpen}
         onOk={addField}
@@ -144,7 +144,7 @@ function AddCustomField({ addDataSource }) {
           value={customFieldName}
           onChange={(e) => setCustomFieldName(e.target.value)}
         />
-      </ModalWindow>
+      </Modal>
     </>
   )
 }

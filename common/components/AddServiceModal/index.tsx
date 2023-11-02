@@ -7,7 +7,7 @@ import React, { FC } from 'react'
 import AddServiceForm from '../Forms/AddServiceForm'
 import moment from 'moment'
 import { IExtendedService } from '@common/api/serviceApi/service.api.types'
-import ModalWindow from '../UI/ModalWindow'
+import Modal from '../UI/ModalWindow'
 
 interface Props {
   closeModal: VoidFunction
@@ -66,7 +66,7 @@ const AddServiceModal: FC<Props> = ({ closeModal, currentService }) => {
   }
 
   return (
-    <ModalWindow
+    <Modal
       title="Ціна на послуги в місяць"
       onOk={handleSubmit}
       onCancel={() => {
@@ -78,7 +78,7 @@ const AddServiceModal: FC<Props> = ({ closeModal, currentService }) => {
       confirmLoading={isAddingLoading || isEditingLoading}
     >
       <AddServiceForm form={form} edit={edit} currentService={currentService} />
-    </ModalWindow>
+    </Modal>
   )
 }
 

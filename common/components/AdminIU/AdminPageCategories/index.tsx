@@ -8,7 +8,7 @@ import {
 import { ICategory } from 'common/modules/models/Category'
 import AddCategoryForm from '../../Forms/AddCategoryForm'
 import Categories from '../../Categories'
-import ModalWindow from '../../UI/ModalWindow'
+import Modal from '../../UI/ModalWindow'
 import s from './style.module.scss'
 import useDebounce from '../../../modules/hooks/useDebounce'
 import { deleteExtraWhitespace } from '../../../assets/features/validators'
@@ -70,7 +70,7 @@ const AdminPageCategories: React.FC = () => {
           icon={<PlusOutlined />}
           onClick={() => setIsModalVisible(true)}
         />
-        <ModalWindow
+        <Modal
           title={!id ? 'Додати категорію' : 'Змінити категорію'}
           open={isModalVisible}
           onCancel={onCancelModal}
@@ -83,7 +83,7 @@ const AdminPageCategories: React.FC = () => {
             form={form}
             id={id}
           />
-        </ModalWindow>
+        </Modal>
       </div>
       <Categories nameFilter={debounced} handleEdit={handleEdit} />
     </>
