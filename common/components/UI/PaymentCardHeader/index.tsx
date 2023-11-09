@@ -1,7 +1,7 @@
-import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
+import { PlusOutlined, SelectOutlined, DeleteOutlined } from '@ant-design/icons'
 import React, { useState } from 'react'
 import { AppRoutes } from '@utils/constants'
-import { Button, Tag } from 'antd'
+import { Button, message } from 'antd'
 import { useRouter } from 'next/router'
 import AddPaymentModal from '@common/components/AddPaymentModal'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
@@ -10,6 +10,10 @@ import { isAdminCheck } from '@utils/helpers'
 import PaymentCascader from '@common/components/UI/PaymentCascader/index'
 import FilterTags from '../Reusable/FilterTags'
 import ImportInvoices from './ImportInvoices'
+import { useDeleteMultiplePaymentsMutation } from '@common/api/paymentApi/payment.api'
+import { useAppSelector } from '@common/modules/store/hooks'
+import Modal from 'antd/lib/modal/Modal'
+import { dateToDefaultFormat } from '@common/assets/features/formatDate'
 
 const PaymentCardHeader = ({
   setCurrentDateFilter,
@@ -26,6 +30,7 @@ const PaymentCardHeader = ({
   const { data: currUser } = useGetCurrentUserQuery()
 
   const {
+    pathname,
     query: { email },
   } = router
 
@@ -35,6 +40,32 @@ const PaymentCardHeader = ({
   }
 
   const isAdmin = isAdminCheck(currUser?.roles)
+  const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
+  useDeleteMultiplePaymentsMutation()
+  const { paymentsDeleteItems } = useAppSelector((state) => state.selectionsReducer)
+
+  const handleDeletePayments = async () => {
+    (Modal as any).confirm({
+      title: 'Ви впевнені, що хочете видалити обрані проплати?',
+      cancelText: 'Ні',
+      okText: 'Так',
+      content: <>
+        {paymentsDeleteItems.map((item, index) => 
+          <div key={index}>
+            {index+1}. {item.domain}, {item.company}, {dateToDefaultFormat(item.date)}
+          </div>
+        )}
+      </>,
+      onOk: async () => {
+        const response = await deletePayment(paymentsDeleteItems.map(item => item.id))
+        if ('data' in response) {
+          message.success('Видалено!')
+        } else {
+          message.error('Помилка при видаленні рахунків')
+        }
+      },
+    })
+  }
 
   return (
     <>
@@ -77,6 +108,9 @@ const PaymentCardHeader = ({
               <Button type="link" onClick={() => setIsModalOpen(true)}>
                 <PlusOutlined /> Додати
               </Button>
+              {isAdmin && pathname === AppRoutes.PAYMENT && <Button type="link" onClick={() => handleDeletePayments()} disabled={paymentsDeleteItems.length == 0}>
+                <DeleteOutlined /> Видалити
+              </Button>}
             </div>
           </>
         ) : (

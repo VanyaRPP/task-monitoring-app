@@ -84,6 +84,19 @@ export const paymentApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Payment'] : []),
     }),
+    deleteMultiplePayments: builder.mutation<
+      IDeletePaymentResponse,
+      IExtendedPayment['_id'][]
+    >({
+      query(ids) {
+        return {
+          url: 'spacehub/payment/multiple',
+          method: 'DELETE',
+          body: { ids },
+        };
+      },
+      invalidatesTags: (response) => (response ? ['Payment'] : []),
+    }),
     getPaymentNumber: builder.query<number, object>({
       query: () => `spacehub/payment/number`,
       transformResponse: (response: IGetPaymentNumberResponse) => response.data,
@@ -106,6 +119,7 @@ export const {
   useAddPaymentMutation,
   useGetAllPaymentsQuery,
   useDeletePaymentMutation,
+  useDeleteMultiplePaymentsMutation,
   useGetPaymentNumberQuery,
   useEditPaymentMutation,
 } = paymentApi
