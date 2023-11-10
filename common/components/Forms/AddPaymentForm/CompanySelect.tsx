@@ -23,7 +23,7 @@ export default function CompanySelect({
     />
   ) : (
     <Form.Item label="Компанія">
-      <Select placeholder="Оберіть орендодавеця та адресу" disabled />
+      <Select placeholder="Оберіть орендодавця та адресу" disabled />
     </Form.Item>
   )
 }

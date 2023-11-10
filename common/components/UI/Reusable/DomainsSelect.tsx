@@ -44,7 +44,7 @@ export default function DomainsSelect({
         options={data?.map((i) => ({ value: i._id, label: i.name }))}
         optionFilterProp="children"
         disabled={isLoading || data?.length === 1 || edit}
-        placeholder="Пошук орендодавеця"
+        placeholder="Пошук орендодавця"
         loading={isLoading}
         showSearch
       />
