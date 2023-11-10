@@ -143,7 +143,7 @@ function DomainsCompanies() {
     <>
       {domains.length > 0 && (
         <div>
-          Домени:{` `}
+          Орендодавеці:{` `}
           {domains.map((item) => (
             <Tag className={s.cardUserTag} key={item.name}>
               {item.name}

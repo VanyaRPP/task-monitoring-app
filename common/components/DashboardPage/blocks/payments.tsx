@@ -244,7 +244,7 @@ const PaymentsBlock = () => {
 
   if (payments?.currentDomainsCount > 1) {
     columns.unshift({
-      title: 'Домен',
+      title: 'Орендодавець',
       fixed: 'left',
       dataIndex: 'domain',
       filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
