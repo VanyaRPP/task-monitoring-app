@@ -6,7 +6,7 @@ const FilterTags = ({ filters, setFilters, collection }) => {
     <>
       <div className={s.filtersTagsBlock}>
         <div className={s.filters}>
-          Домени:
+        Надавачі послуг:
           {filters?.domain?.length ? (
             <span className={s.filtersTags}>
               {filters.domain.map((domain) => (

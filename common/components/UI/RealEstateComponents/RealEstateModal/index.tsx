@@ -63,7 +63,7 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
   return (
     <Modal
       style={{ top: 20 }}
-      title={"Об'єкти нерухомості"}
+      title={"Компанії"}
       onOk={handleSubmit}
       onCancel={closeModal}
       okText={currentRealEstate ? 'Зберегти' : 'Додати'}

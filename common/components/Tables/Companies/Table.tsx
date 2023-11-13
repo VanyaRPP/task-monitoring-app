@@ -220,7 +220,7 @@ const getDefaultColumns = ({
   }
 
   const domainColumn: any = {
-    title: 'Домен',
+    title: 'Надавач послуг',
     dataIndex: 'domain',
     width: 200,
     render: (i) => i?.name,

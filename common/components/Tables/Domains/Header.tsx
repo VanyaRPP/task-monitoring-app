@@ -32,9 +32,9 @@ const DomainsHeader: React.FC<Props> = ({
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
       <Button type="link" onClick={() => router.push(AppRoutes.DOMAIN)}>
-        Домени
+        Надавачі послуг
         <SelectOutlined />
-        <Tooltip title="Домени - це організації та компанії, що здійснюють управління та мають під собою менші компанії та об'єкти нерухомості. Управляються адміністраторами">
+        <Tooltip title="Надавачі послуг - це організації та компанії, що здійснюють управління та мають під собою менші компанії та об'єкти нерухомості. Управляються адміністраторами">
           <QuestionCircleOutlined />
         </Tooltip>
       </Button>

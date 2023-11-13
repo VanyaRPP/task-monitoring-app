@@ -26,13 +26,13 @@ const AddStreetModal: FC<Props> = ({ closeModal, edit }) => {
       message.success('Додано')
       closeModal()
     } else {
-      message.error('Помилка при додаванні вулиці')
+      message.error('Помилка при додаванні адреси')
     }
   }
 
   return (
     <Modal
-      title={!edit && 'Додавання вулиці'}
+      title={!edit && 'Додавання адреси'}
       onOk={handleSubmit}
       onCancel={() => {
         form.resetFields()

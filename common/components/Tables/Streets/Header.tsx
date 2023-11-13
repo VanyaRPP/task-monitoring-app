@@ -25,7 +25,7 @@ const StreetsHeader: React.FC<Props> = ({ showAddButton = false }) => {
           router.push(AppRoutes.STREETS)
         }}
       >
-        Вулиці
+        Адреси
         <SelectOutlined />
       </Button>
 
