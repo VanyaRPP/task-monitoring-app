@@ -51,7 +51,7 @@ const PaymentCardHeader = ({
                   type="link"
                   onClick={() => router.push(AppRoutes.PAYMENT)}
                 >
-                  Проплати
+                  Платежі
                   <SelectOutlined className={s.Icon} />
                 </Button>
                 {location.pathname === AppRoutes.PAYMENT && (

@@ -47,7 +47,7 @@ const CompaniesHeader: React.FC<Props> = ({
     <div className={s.headerBlock}>
       <div className={s.firstBlock}>
         <Button type="link" onClick={() => router.push(AppRoutes.REAL_ESTATE)}>
-          Об&apos;єкти нерухомості
+          Компанії
           <SelectOutlined />
         </Button>
 

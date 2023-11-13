@@ -21,7 +21,7 @@ const RealEstateCardHeader = () => {
   return (
     <div className={s.tableHeader}>
       <Button type="link" onClick={() => Router.push(AppRoutes.REAL_ESTATE)}>
-        Об&apos;єкти нерухомості
+        Компанії
         <SelectOutlined className={s.Icon} />
       </Button>
 
