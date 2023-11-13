@@ -47,14 +47,14 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
       message.success(action)
     } else {
       const action = currentDomain ? 'збереженні' : 'додаванні'
-      message.error(`Помилка при ${action} орендодавця`)
+      message.error(`Помилка при ${action} надавача послуг`)
     }
   }
 
   return (
     <Modal
       open={true}
-      title={'Орендодавці'}
+      title={'Надавачі послуг'}
       onOk={handleSubmit}
       onCancel={closeModal}
       okText={currentDomain ? 'Зберегти' : 'Додати'}

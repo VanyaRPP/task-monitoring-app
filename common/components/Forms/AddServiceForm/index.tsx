@@ -26,7 +26,7 @@ const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
       className={s.Form}
     >
       {edit ? (
-        <Form.Item name="domain" label="Орендодавець">
+        <Form.Item name="domain" label="Надавач послуг">
           <Input disabled />
         </Form.Item>
       ) : (

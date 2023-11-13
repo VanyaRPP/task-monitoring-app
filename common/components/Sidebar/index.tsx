@@ -87,7 +87,7 @@ const Sidebar: React.FC<Props> = ({ collapsed, setCollapsed }) => {
           <p>{bestMaster.about}</p>
         </Panel>
 
-        <Panel header="Найкращий орендодавець" key="2" className={s.RateBlock}>
+        <Panel header="Найкращий надавач послуг" key="2" className={s.RateBlock}>
           <div className={s.InfoBlock}>
             <span className={s.Title}>{bestDomain.name}</span>
             <span>

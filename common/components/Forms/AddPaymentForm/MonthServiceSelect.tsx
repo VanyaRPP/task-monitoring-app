@@ -23,7 +23,7 @@ export default function MonthServiceSelect({
     />
   ) : (
     <Form.Item label="Місяць">
-      <Select placeholder="Оберіть орендодавця та адресу" disabled />
+      <Select placeholder="Оберіть надавача послуг та адресу" disabled />
     </Form.Item>
   )
 }

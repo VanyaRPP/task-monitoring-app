@@ -23,7 +23,7 @@ export default function DomainsSelect({
   }, [data?.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <Form.Item name="domain" label="Орендодавець" rules={validateField('required')}>
+    <Form.Item name="domain" label="Надавач послуг" rules={validateField('required')}>
       <Select
         onSelect={() => {
           // TODO: check if this should be inside street component
@@ -44,7 +44,7 @@ export default function DomainsSelect({
         options={data?.map((i) => ({ value: i._id, label: i.name }))}
         optionFilterProp="children"
         disabled={isLoading || data?.length === 1 || edit}
-        placeholder="Пошук орендодавця"
+        placeholder="Пошук надавача послуг"
         loading={isLoading}
         showSearch
       />

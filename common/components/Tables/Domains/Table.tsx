@@ -108,7 +108,7 @@ const getDefaultColumns = (
     width: 50,
     render: (_, domain: IExtendedDomain) => (
       <Popconfirm
-        title={`Ви впевнені що хочете видалити ${domain.name ?? 'цей орендодавець'}?`}
+        title={`Ви впевнені що хочете видалити ${domain.name ?? 'цей надавач послуг'}?`}
         onConfirm={() => handleDelete(domain?._id)}
         cancelText="Відміна"
         disabled={deleteLoading}

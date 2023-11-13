@@ -23,7 +23,7 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
       initialValues={initialValues}
     >
       {currentRealEstate ? (
-        <Form.Item name="domain" label="Орендодавець">
+        <Form.Item name="domain" label="Надавач послуг">
           <Input disabled />
         </Form.Item>
       ) : (
