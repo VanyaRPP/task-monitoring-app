@@ -11,7 +11,6 @@ import PaymentCascader from '@common/components/UI/PaymentCascader/index'
 import FilterTags from '../Reusable/FilterTags'
 import ImportInvoices from './ImportInvoices'
 import { useDeleteMultiplePaymentsMutation } from '@common/api/paymentApi/payment.api'
-import { useAppSelector } from '@common/modules/store/hooks'
 import Modal from 'antd/lib/modal/Modal'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
 
@@ -20,6 +19,7 @@ const PaymentCardHeader = ({
   currentPayment,
   paymentActions,
   closeEditModal,
+  paymentsDeleteItems,
   payments,
   filters,
   setFilters,
@@ -40,9 +40,7 @@ const PaymentCardHeader = ({
   }
 
   const isAdmin = isAdminCheck(currUser?.roles)
-  const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
-  useDeleteMultiplePaymentsMutation()
-  const { paymentsDeleteItems } = useAppSelector((state) => state.selectionsReducer)
+  const [deletePayment] = useDeleteMultiplePaymentsMutation()
 
   const handleDeletePayments = async () => {
     (Modal as any).confirm({
