@@ -7,7 +7,6 @@ import AddPaymentModal from '@common/components/AddPaymentModal'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import s from './style.module.scss'
 import { isAdminCheck } from '@utils/helpers'
-import PaymentCascader from '@common/components/UI/PaymentCascader/index'
 import FilterTags from '../Reusable/FilterTags'
 import ImportInvoices from './ImportInvoices'
 import { useDeleteMultiplePaymentsMutation } from '@common/api/paymentApi/payment.api'
@@ -87,11 +86,11 @@ const PaymentCardHeader = ({
                 </Button>
                 {location.pathname === AppRoutes.PAYMENT && (
                   <>
-                    <PaymentCascader onChange={setCurrentDateFilter} />
                     <FilterTags
                       filters={filters}
                       setFilters={setFilters}
                       collection={payments}
+                      setCurrentDateFilter={setCurrentDateFilter}
                     />
                   </>
                 )}

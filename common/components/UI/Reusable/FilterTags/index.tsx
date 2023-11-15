@@ -1,9 +1,11 @@
 import { Tag } from 'antd'
 import s from '../style.module.scss'
+import FilterCascader from '@common/components/UI/PaymentCascader/index'
 
-const FilterTags = ({ filters, setFilters, collection }) => {
+const FilterTags = ({ filters, setFilters, collection, setCurrentDateFilter }) => {
   return (
     <>
+    <FilterCascader onChange={setCurrentDateFilter} />
       <div className={s.filtersTagsBlock}>
         <div className={s.filters}>
         Надавачі послуг:
