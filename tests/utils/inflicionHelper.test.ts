@@ -1,4 +1,4 @@
-import { getInflicionValue } from './inflicionHelper'
+import { getInflicionValue } from '../../utils/inflicionHelper'
 import { expect } from '@jest/globals'
 
 describe('getInflicionValue', () => {

@@ -1,5 +1,5 @@
 import { expect } from '@jest/globals'
-import { parseStringToFloat } from './helpers'
+import { parseStringToFloat } from '../../utils/helpers'
 
 describe('Parse string to float', () => {
   test('default calculation', () => {

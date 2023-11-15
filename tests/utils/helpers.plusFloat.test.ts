@@ -1,5 +1,5 @@
 import { expect } from '@jest/globals'
-import { plusFloat } from './helpers'
+import { plusFloat } from '../../utils/helpers'
 
 describe('Multiply float numbers and format result to .xx', () => {
   test('default calculation', () => {

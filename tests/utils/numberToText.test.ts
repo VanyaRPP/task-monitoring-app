@@ -13,6 +13,8 @@ describe('numberToTextNumber function', () => {
 
   test('should convert two-digit numbers', () => {
     expect(numberToTextNumber(11)).toBe('Одинадцять')
+    expect(numberToTextNumber(20)).toBe('Двадцять');
+    expect(numberToTextNumber(24)).toBe("Двадцять чотири");
     expect(numberToTextNumber(25)).toBe("Двадцять п'ять")
     expect(numberToTextNumber(37)).toBe('Тридцять сім')
     expect(numberToTextNumber(44)).toBe('Сорок чотири')
@@ -29,9 +31,14 @@ describe('numberToTextNumber function', () => {
     expect(numberToTextNumber(147)).toBe('Сто сорок сім')
     expect(numberToTextNumber(176)).toBe('Сто сімдесят шість')
     expect(numberToTextNumber(232)).toBe('Двісті тридцять дві')
+    expect(numberToTextNumber(300)).toBe('Триста')
+    expect(numberToTextNumber(301)).toBe('Триста одна')
+    expect(numberToTextNumber(313)).toBe('Триста тринадцять')
     expect(numberToTextNumber(319)).toBe("Триста дев'ятнадцять")
+    expect(numberToTextNumber(407)).toBe('Чотириста сім')
     expect(numberToTextNumber(487)).toBe('Чотириста вісімдесят сім')
     expect(numberToTextNumber(555)).toBe("П'ятсот п'ятдесят п'ять")
+    expect(numberToTextNumber(620)).toBe('Шістсот двадцять')
   })
 
   test('should convert four-digit numbers', () => {
@@ -47,14 +54,24 @@ describe('numberToTextNumber function', () => {
     expect(numberToTextNumber(3954)).toBe(
       "Три тисячі дев'ятсот п'ятдесят чотири"
     )
+    expect(numberToTextNumber(4000)).toBe('Чотири тисячі');
+    expect(numberToTextNumber(4123)).toBe('Чотири тисячі сто двадцять три');
     expect(numberToTextNumber(4444)).toBe(
       'Чотири тисячі чотириста сорок чотири'
     )
+    expect(numberToTextNumber(5023)).toBe("П'ять тисяч двадцять три")
     expect(numberToTextNumber(5123)).toBe("П'ять тисяч сто двадцять три")
+    expect(numberToTextNumber(5234)).toBe("П'ять тисяч двісті тридцять чотири");
     expect(numberToTextNumber(6234)).toBe('Шість тисяч двісті тридцять чотири')
+    expect(numberToTextNumber(6204)).toBe('Шість тисяч двісті чотири')
+    expect(numberToTextNumber(7005)).toBe("Сім тисяч п'ять")
     expect(numberToTextNumber(7345)).toBe("Сім тисяч триста сорок п'ять")
     expect(numberToTextNumber(8384)).toBe(
       'Вісім тисяч триста вісімдесят чотири'
     )
   })
+  test('should handle edge cases', () => {
+    expect(numberToTextNumber(0)).toBe('');
+    expect(numberToTextNumber(10000)).toBe('');
+  });
 })

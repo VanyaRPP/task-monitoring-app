@@ -1,8 +1,9 @@
 module.exports = {
-  testMatch: ['**/*.test.ts'],
+  testMatch: ['**/*.test.ts', '**/*.test.tsx'],
+  testEnvironment: 'jsdom',
   testPathIgnorePatterns: ['/node_modules/'], // Ignore the node_modules directory
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.(ts|tsx)$': 'esbuild-jest',
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
@@ -10,6 +11,6 @@ module.exports = {
     '^@pages/(.*)$': '<rootDir>/pages/$1',
     '^@common/(.*)$': '<rootDir>/common/$1',
   },
-  moduleFileExtensions: ['ts', 'js'], //  file extensions
+  moduleFileExtensions: ['ts', 'tsx', 'js'], //  file extensions
 }
 export {}
