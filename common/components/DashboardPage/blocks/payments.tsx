@@ -149,11 +149,13 @@ const PaymentsBlock = () => {
           render: (_, payment: IExtendedPayment) => (
             <div className={s.popconfirm}>
               <Popconfirm
+              className={s.customPopoverButtons}
                 title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
                   payment?.invoiceCreationDate as unknown as string
                 )}?`}
                 onConfirm={() => handleDeletePayment(payment?._id)}
-                cancelText="Відміна"
+                okText="Видалити"
+                cancelText="Ні"
                 disabled={deleteLoading}
               >
                 <DeleteOutlined className={s.icon} />
