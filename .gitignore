@@ -36,3 +36,6 @@ yarn-error.log*
 *.tsbuildinfo
 
 /pages/api-doc.tsx
+
+# cypress
+/cypress/cypress.json

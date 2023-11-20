@@ -1,0 +1,30 @@
+[
+  {
+    "name": "next-auth.state",
+    "value": "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..L623cHrn7_6Zaqy_.Wr8rBpZG7InqvMQCRO9bw3qSqc-Qr4RNakbyyhUJMmLXdVIA2lLBQzxPEun4vnM_DXCIICS223ifUziWI1EvP47udVpdJ4_5zeFA13GCoapyx4vajc3He9n5wKQXzmQddZwu6RqQZqdAcrjXXMtOsfCH3RvFixQmgPq4QYMOizERD_QWwGY.LRNdNvXWLyIw2guow0Tdnw",
+    "path": "/",
+    "secure": false,
+    "httpOnly": true,
+    "expiry": 1700496809.507008,
+    "domain": "localhost",
+    "sameSite": "lax"
+  },
+  {
+    "name": "next-auth.csrf-token",
+    "value": "eb9a12e94f773930d91345cb7d4416a8a522a0d167ef4f1001fce1fa4fa3958c%7C10f914469e3d3e7a0868d442ddeafe8ee40e91b95efdd1fda5a34624a5edfc86",
+    "path": "/",
+    "secure": false,
+    "httpOnly": true,
+    "domain": "localhost",
+    "sameSite": "lax"
+  },
+  {
+    "name": "next-auth.callback-url",
+    "value": "http%3A%2F%2Flocalhost%3A3000",
+    "path": "/",
+    "secure": false,
+    "httpOnly": true,
+    "domain": "localhost",
+    "sameSite": "lax"
+  }
+]

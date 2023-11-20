@@ -3656,6 +3656,11 @@ dompurify@=2.3.10:
   resolved "https://registry.npmjs.org/dompurify/-/dompurify-2.3.10.tgz"
   integrity sha512-o7Fg/AgC7p/XpKjf/+RC3Ok6k4St5F7Q6q6+Nnm3p2zGWioAY6dh0CbbuwOhH2UcSzKsdniE/YnE2/92JcsA+g==
 
+dotenv@^16.3.1:
+  version "16.3.1"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.3.1.tgz#369034de7d7e5b120972693352a3bf112172cc3e"
+  integrity sha512-IPzF4w4/Rd94bA9imS68tZBaYyBWSCE47V1RGuMrB94iyTOIEwRmVL2x/4An+6mETpLrKJ5hQkB8W4kFAadeIQ==
+
 drange@^1.0.2:
   version "1.1.1"
   resolved "https://registry.npmjs.org/drange/-/drange-1.1.1.tgz"
