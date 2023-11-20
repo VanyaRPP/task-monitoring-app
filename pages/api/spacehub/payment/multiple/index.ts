@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Payment from '@common/modules/models/Payment'
 import start, { ExtendedData } from '@pages/api/api.config'
+import { getCurrentUser } from '@utils/getCurrentUser'
 
 start()
 
@@ -11,7 +12,11 @@ export default async function handler(
   switch (req.method) {
     case 'DELETE':
       try {
+        const { isDomainAdmin, isUser, user, isGlobalAdmin } =
+        await getCurrentUser(req, res)
         const { ids } = req.body;
+        if(!isGlobalAdmin && !isDomainAdmin)
+          throw new Error('Deletion requires specific role.');
 
         if (!ids || !Array.isArray(ids) || ids.length === 0) {
           return res.status(400).json({
