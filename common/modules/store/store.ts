@@ -4,7 +4,6 @@ import { userApi } from '../../api/userApi/user.api'
 import { taskApi } from '../../api/taskApi/task.api'
 import { domainApi } from '../../api/domainApi/domain.api'
 import themeReducer from './reducers/ThemeSlice'
-import selectionsReducer from './reducers/SelectionsSlice'
 import { notificationApi } from '@common/api/notificationApi/notification.api'
 import { paymentApi } from '@common/api/paymentApi/payment.api'
 import { serviceApi } from '@common/api/serviceApi/service.api'
@@ -24,7 +23,6 @@ export const store = configureStore({
     [notificationApi.reducerPath]: notificationApi.reducer,
     [realestateApi.reducerPath]: realestateApi.reducer,
     themeReducer,
-    selectionsReducer,
     [streetApi.reducerPath]: streetApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
