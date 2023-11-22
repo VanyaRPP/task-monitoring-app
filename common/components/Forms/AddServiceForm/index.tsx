@@ -52,28 +52,28 @@ const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
       </Form.Item>
       <Form.Item
         name="rentPrice"
-        label="Утримання приміщень"
+        label="Утримання приміщень (грн/1м²)"
         rules={validateField('required')}
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="electricityPrice"
-        label="Електроенергія"
+        label="Електроенергія (грн/1кВт)"
         rules={validateField('electricityPrice')}
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="waterPrice"
-        label="Водопостачання"
+        label="Водопостачання (грн/1м³)"
         rules={validateField('required')}
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="waterPriceTotal"
-        label="Всього водопостачання"
+        label="Всього водопостачання (грн/1м³)"
         rules={validateField('required')}
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
@@ -82,6 +82,9 @@ const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item name="inflicionPrice" label="Індекс інфляції">
+        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+      </Form.Item>
+      <Form.Item name="accrualPrice" label="Нарахування МЗК">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item name="description" label="Опис">
@@ -112,6 +115,8 @@ function useInitialValues(currentService) {
     description: currentService?.description,
     waterPriceTotal: currentService?.waterPriceTotal,
     garbageCollectorPrice: currentService?.garbageCollectorPrice,
+    accrualPrice: currentService?.accrualPrice,
+
   }
   return initialValues
 }
