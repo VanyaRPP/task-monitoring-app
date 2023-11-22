@@ -331,7 +331,7 @@ const PaymentsBlock = () => {
     content = (
       <>
         <Table
-          rowSelection={isAdminCheck(currUser?.roles) && pathname === AppRoutes.PAYMENT ? rowSelection : null}
+          rowSelection={currUser?.roles?.includes(Roles.GLOBAL_ADMIN) && pathname === AppRoutes.PAYMENT ? rowSelection : null}
           columns={columns}
           dataSource={payments?.data}
           pagination={false}

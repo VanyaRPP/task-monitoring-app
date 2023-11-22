@@ -1,6 +1,6 @@
 import { PlusOutlined, SelectOutlined, DeleteOutlined } from '@ant-design/icons'
 import React, { useState } from 'react'
-import { AppRoutes } from '@utils/constants'
+import { AppRoutes, Roles } from '@utils/constants'
 import { Button, message } from 'antd'
 import { useRouter } from 'next/router'
 import AddPaymentModal from '@common/components/AddPaymentModal'
@@ -39,6 +39,7 @@ const PaymentCardHeader = ({
     closeEditModal()
   }
 
+  const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isAdmin = isAdminCheck(currUser?.roles)
   const [deletePayment] = useDeleteMultiplePaymentsMutation()
 
@@ -106,7 +107,7 @@ const PaymentCardHeader = ({
               <Button type="link" onClick={() => setIsModalOpen(true)}>
                 <PlusOutlined /> Додати
               </Button>
-              {isAdmin && pathname === AppRoutes.PAYMENT && <Button type="link" onClick={() => handleDeletePayments()} disabled={paymentsDeleteItems.length == 0}>
+              {isGlobalAdmin && pathname === AppRoutes.PAYMENT && <Button type="link" onClick={() => handleDeletePayments()} disabled={paymentsDeleteItems.length == 0}>
                 <DeleteOutlined /> Видалити
               </Button>}
             </div>
