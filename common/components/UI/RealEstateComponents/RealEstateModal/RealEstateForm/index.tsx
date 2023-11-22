@@ -58,34 +58,34 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
       <EmailSelect form={form} />
       <Form.Item
         name="totalArea"
-        label="Кількість метрів"
+        label="Площа (м²)"
         rules={validateField('required')}
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="pricePerMeter"
-        label="Ціна за метр"
+        label="Ціна (грн/м²)"
         rules={validateField('required')}
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="servicePricePerMeter"
-        label="Індивідуальне утримання за метр"
+        label="Індивідуальне утримання (грн/м²)"
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item name="rentPart" label="Частка загальної площі">
+      <Form.Item name="rentPart" label="Частка загальної площі (%)">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item name="waterPart" label="Частка водопостачання">
+      <Form.Item name="waterPart" label="Частка водопостачання (%)">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item name="cleaning" label="Прибирання">
+      <Form.Item name="cleaning" label="Прибирання (грн)">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item name="discount" label="Знижка">
+      <Form.Item name="discount" label="Знижка (%)">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
