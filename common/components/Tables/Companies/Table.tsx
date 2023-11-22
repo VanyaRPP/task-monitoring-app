@@ -179,6 +179,12 @@ const getDefaultColumns = ({
       dataIndex: 'inflicion',
       render: (value) => <Checkbox checked={value} disabled />,
     },
+    {
+      align: 'center',
+      title: 'Нарахування МЗК',
+      dataIndex: 'accrual',
+      render: (value) => <Checkbox checked={value} disabled />,
+    },
   ]
 
   if (isAdmin) {
