@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Form, message, Modal, Tabs, TabsProps } from 'antd'
-import React, { FC, useState } from 'react'
+import { Form, message } from 'antd'
+import React, { FC } from 'react'
 import { IStreet } from '@common/modules/models/Street'
 import { useAddStreetMutation } from '@common/api/streetApi/street.api'
 import AddStreetForm from '../Forms/AddStreetForm'
+import Modal from '../UI/ModalWindow'
 
 interface Props {
   closeModal: VoidFunction
@@ -25,15 +26,13 @@ const AddStreetModal: FC<Props> = ({ closeModal, edit }) => {
       message.success('Додано')
       closeModal()
     } else {
-      message.error('Помилка при додаванні вулиці')
+      message.error('Помилка при додаванні адреси')
     }
   }
 
   return (
     <Modal
-      open={true}
-      maskClosable={false}
-      title={!edit && 'Додавання вулиці'}
+      title={!edit && 'Додавання адреси'}
       onOk={handleSubmit}
       onCancel={() => {
         form.resetFields()

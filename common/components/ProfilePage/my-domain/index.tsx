@@ -6,7 +6,7 @@ const MyDomain: React.FC = () => {
   const { data: domains = [], isLoading } = useGetDomainsQuery({})
 
   return (
-    <Card loading={isLoading} size="small" title="Мої домени">
+    <Card loading={isLoading} size="small" title="Мої надавачі послуг">
       <Radio.Group>
         {domains.map((item) => (
           <Radio.Button value={item.name} key={item.name}>

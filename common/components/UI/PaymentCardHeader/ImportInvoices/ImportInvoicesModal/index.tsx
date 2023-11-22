@@ -3,6 +3,7 @@ import {
   useGetPaymentNumberQuery,
 } from '@common/api/paymentApi/payment.api'
 import CompanySelect from '@common/components/Forms/AddPaymentForm/CompanySelect'
+import Modal from '@common/components/UI/ModalWindow'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
@@ -13,7 +14,7 @@ import {
   importedPaymentDateToISOStringDate,
   parseStringToFloat,
 } from '@utils/helpers'
-import { Form, Input, Modal, message } from 'antd'
+import { Form, Input, message } from 'antd'
 
 const ImportInvoicesModal = ({ closeModal }) => {
   const [addPayment, { isLoading }] = useAddPaymentMutation()
@@ -58,13 +59,10 @@ const ImportInvoicesModal = ({ closeModal }) => {
 
   return (
     <Modal
-      open={true}
       title="Імпорт інвойсів"
       onOk={handleSave}
       confirmLoading={isLoading}
-      onCancel={() => {
-        closeModal()
-      }}
+      onCancel={closeModal}
       okText="Імпортувати"
       cancelText={'Закрити'}
     >

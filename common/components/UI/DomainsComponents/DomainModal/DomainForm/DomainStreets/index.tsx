@@ -9,7 +9,7 @@ const DomainStreets: React.FC = () => {
   return (
     <Form.Item
       name="streets"
-      label="Закріплені вулиці"
+      label="Закріплені адреси"
       rules={validateField('required')}
     >
       <Select

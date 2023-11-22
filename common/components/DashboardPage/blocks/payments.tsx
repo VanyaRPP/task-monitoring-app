@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react'
+import React, { createContext, ReactElement, useContext, useEffect, useState } from 'react'
 import { Alert, message, Pagination, Popconfirm, Table } from 'antd'
 import { Button } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
@@ -21,7 +21,9 @@ import { useRouter } from 'next/router'
 import cn from 'classnames'
 import s from './style.module.scss'
 import { PERIOD_FILTR } from '@utils/constants'
-import { renderCurrency } from '@utils/helpers'
+import { isAdminCheck, renderCurrency } from '@utils/helpers'
+import { useAppDispatch, useAppSelector } from '@common/modules/store/hooks'
+import { selectionsSlice } from '@common/modules/store/reducers/SelectionsSlice'
 
 function getDateFilter(value) {
   const [, year, period, number] = value || []
@@ -38,7 +40,6 @@ function getDateFilter(value) {
     }
   if (period === PERIOD_FILTR.YEAR) return { year }
 }
-
 const PaymentsBlock = () => {
   const router = useRouter()
   const {
@@ -91,7 +92,6 @@ const PaymentsBlock = () => {
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
-
   const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   const handleDeletePayment = async (id: string) => {
@@ -149,11 +149,13 @@ const PaymentsBlock = () => {
           render: (_, payment: IExtendedPayment) => (
             <div className={s.popconfirm}>
               <Popconfirm
+                id="popconfirm_custom"
                 title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
                   payment?.invoiceCreationDate as unknown as string
                 )}?`}
                 onConfirm={() => handleDeletePayment(payment?._id)}
-                cancelText="Відміна"
+                okText="Видалити"
+                cancelText="Ні"
                 disabled={deleteLoading}
               >
                 <DeleteOutlined className={s.icon} />
@@ -244,7 +246,7 @@ const PaymentsBlock = () => {
 
   if (payments?.currentDomainsCount > 1) {
     columns.unshift({
-      title: 'Домен',
+      title: 'Надавач послуг',
       fixed: 'left',
       dataIndex: 'domain',
       filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
@@ -297,12 +299,36 @@ const PaymentsBlock = () => {
 
   let content: ReactElement
 
+  const { paymentsDeleteItems } = useAppSelector((state) => state.selectionsReducer)
+  const dispatch = useAppDispatch();
+  const {setPaymentsDeleteIds} = selectionsSlice.actions
+
+  const onSelectChange = (newSelectedRowKeys: string[], additionalInfo) => {
+    const updatedData = additionalInfo.map(item => {
+      console.log(additionalInfo)
+      return {
+      id: item?._id,
+      date: item?.monthService?.date,
+      domain: item?.domain?.name,
+      company: item?.company?.companyName,
+    }})
+
+    dispatch(setPaymentsDeleteIds(updatedData))
+  };
+
+  const rowSelection = {
+    selectedRowKeys: paymentsDeleteItems.map(item => item.id),
+    defaultSelectedRowKeys: paymentsDeleteItems.map(item => item.id),
+    onChange: onSelectChange,
+  };
+
   if (deleteError || paymentsError || currUserError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
   } else {
     content = (
       <>
         <Table
+          rowSelection={isAdminCheck(currUser?.roles) && pathname === AppRoutes.PAYMENT ? rowSelection : null}
           columns={columns}
           dataSource={payments?.data}
           pagination={false}
@@ -344,22 +370,24 @@ const PaymentsBlock = () => {
   }
 
   return (
-    <TableCard
-      title={
-        <PaymentCardHeader
-          closeEditModal={closeEditModal}
-          setCurrentDateFilter={setCurrentDateFilter}
-          currentPayment={currentPayment}
-          paymentActions={paymentActions}
-          payments={payments}
-          filters={filters}
-          setFilters={setFilters}
-        />
-      }
-      className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}
-    >
-      {content}
-    </TableCard>
+    // <PaymentRemoveProvider>
+      <TableCard
+        title={
+          <PaymentCardHeader
+            closeEditModal={closeEditModal}
+            setCurrentDateFilter={setCurrentDateFilter}
+            currentPayment={currentPayment}
+            paymentActions={paymentActions}
+            payments={payments}
+            filters={filters}
+            setFilters={setFilters}
+          />
+        }
+        className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}
+      >
+        {content}
+      </TableCard>
+    // </PaymentRemoveProvider>
   )
 }
 

@@ -23,7 +23,7 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
       initialValues={initialValues}
     >
       {currentRealEstate ? (
-        <Form.Item name="domain" label="Домен">
+        <Form.Item name="domain" label="Надавач послуг">
           <Input disabled />
         </Form.Item>
       ) : (
@@ -102,6 +102,13 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
       >
         <Checkbox />
       </Form.Item>
+      <Form.Item
+        valuePropName="checked"
+        name="accrual"
+        label="Нарахування МЗК"
+      >
+        <Checkbox />
+      </Form.Item>
     </Form>
   )
 }
@@ -127,6 +134,7 @@ function useInitialValues(currentRealEstate) {
     waterPart: currentRealEstate?.waterPart,
     discount: currentRealEstate?.discount,
     cleaning: currentRealEstate?.cleaning,
+    accrual: currentRealEstate?.accrual,
   }
   return initialValues
 }

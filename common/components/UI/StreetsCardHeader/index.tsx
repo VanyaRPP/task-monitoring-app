@@ -29,7 +29,7 @@ const StreetsCardHeader: React.FC<StreetsCardHeaderProps> = ({
             router.push(AppRoutes.STREETS)
           }}
         >
-          Вулиці
+          Адреси
           <SelectOutlined className={s.Icon} />
         </Button>
         {showAddButton && (

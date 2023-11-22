@@ -2,13 +2,14 @@ import {
   useAddDomainMutation,
   useEditDomainMutation,
 } from '@common/api/domainApi/domain.api'
-import { Form, Modal, message } from 'antd'
+import { Form, message } from 'antd'
 import React, { FC } from 'react'
 import {
   IDomainModel,
   IExtendedDomain,
 } from '@common/api/domainApi/domain.api.types'
 import DomainForm from './DomainForm'
+import Modal from '../../ModalWindow'
 
 interface Props {
   currentDomain: IExtendedDomain
@@ -46,14 +47,14 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
       message.success(action)
     } else {
       const action = currentDomain ? 'збереженні' : 'додаванні'
-      message.error(`Помилка при ${action} домену`)
+      message.error(`Помилка при ${action} надавача послуг`)
     }
   }
 
   return (
     <Modal
       open={true}
-      title={'Домени'}
+      title={'Надавачі послуг'}
       onOk={handleSubmit}
       onCancel={closeModal}
       okText={currentDomain ? 'Зберегти' : 'Додати'}

@@ -3,12 +3,13 @@ import {
   useEditRealEstateMutation,
 } from '@common/api/realestateApi/realestate.api'
 import RealEstateForm from './RealEstateForm'
-import { Form, Modal, message } from 'antd'
+import { Form, message } from 'antd'
 import React, { FC } from 'react'
 import {
   IExtendedRealestate,
   IRealestate,
 } from '@common/api/realestateApi/realestate.api.types'
+import Modal from '../../ModalWindow'
 // import AddServiceForm from '../Forms/AddServiceForm'
 // import moment from 'moment'
 
@@ -61,9 +62,8 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
 
   return (
     <Modal
-      open={true}
       style={{ top: 20 }}
-      title={"Об'єкти нерухомості"}
+      title={"Компанії"}
       onOk={handleSubmit}
       onCancel={closeModal}
       okText={currentRealEstate ? 'Зберегти' : 'Додати'}

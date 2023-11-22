@@ -179,6 +179,12 @@ const getDefaultColumns = ({
       dataIndex: 'inflicion',
       render: (value) => <Checkbox checked={value} disabled />,
     },
+    {
+      align: 'center',
+      title: 'Нарахування МЗК',
+      dataIndex: 'accrual',
+      render: (value) => <Checkbox checked={value} disabled />,
+    },
   ]
 
   if (isAdmin) {
@@ -220,7 +226,7 @@ const getDefaultColumns = ({
   }
 
   const domainColumn: any = {
-    title: 'Домен',
+    title: 'Надавач послуг',
     dataIndex: 'domain',
     width: 200,
     render: (i) => i?.name,
