@@ -32,6 +32,7 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
       description: formData.description,
       adminEmails: formData.adminEmails,
       pricePerMeter: formData.pricePerMeter,
+      publicElectricUtility: formData.publicElectricUtility,
       servicePricePerMeter: formData.servicePricePerMeter,
       totalArea: formData.totalArea,
       garbageCollector: formData.garbageCollector,

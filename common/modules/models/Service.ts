@@ -10,6 +10,7 @@ export interface IServiceModel {
   waterPrice: number
   waterPriceTotal: number
   garbageCollectorPrice: number
+  publicElectricUtilityPrice: number
   inflicionPrice: number
   description: string
 }
@@ -23,6 +24,7 @@ export const ServiceSchema = new Schema<IServiceModel>({
   waterPrice: { type: Number, required: true, default: 0 },
   waterPriceTotal: { type: Number, required: true, default: 0 },
   garbageCollectorPrice: { type: Number, required: false, default: 0 },
+  publicElectricUtilityPrice: { type: Number, required: false, default: 0 },
   inflicionPrice: { type: Number, required: false, default: 0 },
   description: { type: String, required: false, default: '' },
 })

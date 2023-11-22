@@ -1,5 +1,3 @@
-import { ObjectId } from 'mongoose'
-
 export interface IService {
   domain: string
   street: string
@@ -9,6 +7,7 @@ export interface IService {
   waterPrice: number
   waterPriceTotal: number
   garbageCollectorPrice?: number
+  publicElectricUtilityPrice?: number
   inflicionPrice?: number
   description?: string
 }

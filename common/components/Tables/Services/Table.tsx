@@ -52,7 +52,7 @@ const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
         setCurrentService
       )}
       dataSource={data}
-      scroll={{ x: 1500 }}
+      scroll={{ x: 1700 }}
     />
   )
 }
@@ -109,6 +109,12 @@ const getDefaultColumns = (
     {
       title: 'Вивезення ТПВ',
       dataIndex: 'garbageCollectorPrice',
+      width: 200,
+      render: renderCurrency,
+    },
+    {
+      title: 'МЗК',
+      dataIndex: 'publicElectricUtilityPrice',
       width: 200,
       render: renderCurrency,
     },
