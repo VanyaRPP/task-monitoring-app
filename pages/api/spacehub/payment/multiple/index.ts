@@ -15,8 +15,13 @@ export default async function handler(
         const { isDomainAdmin, isUser, user, isGlobalAdmin } =
         await getCurrentUser(req, res)
         const { ids } = req.body;
-        if(!isGlobalAdmin && !isDomainAdmin)
-          throw new Error('Deletion requires specific role.');
+        
+        // TODO: ability to delete multiple payments by DomainAdmin
+        if(!isGlobalAdmin)
+          return res.status(400).json({
+            success: false,
+            data: 'Deletion requires Global Admin role',
+          });
 
         if (!ids || !Array.isArray(ids) || ids.length === 0) {
           return res.status(400).json({

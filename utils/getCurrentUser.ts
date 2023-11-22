@@ -6,9 +6,7 @@ import { isAdminCheck } from './helpers'
 
 export async function getCurrentUser(req, res) {
   const session = await getServerSession(req, res, authOptions)
-  console.log('sess', session)
   const user = await User.findOne({ email: session?.user?.email })
-  console.log('user', user)
   if (!user) {
     throw new Error('no user found')
   }
