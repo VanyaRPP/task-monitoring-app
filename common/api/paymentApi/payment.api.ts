@@ -8,6 +8,7 @@ import {
   IPayment,
 } from './payment.api.types'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { Operations } from '@utils/constants'
 
 export const paymentApi = createApi({
   reducerPath: 'paymentApi',
@@ -21,6 +22,7 @@ export const paymentApi = createApi({
       {
         limit: number
         skip?: number
+        type?: Operations
         email?: string
         year?: number
         quarter?: number
@@ -34,6 +36,7 @@ export const paymentApi = createApi({
         limit,
         skip,
         email,
+        type,
         year,
         quarter,
         month,
@@ -45,6 +48,7 @@ export const paymentApi = createApi({
           url: `spacehub/payment`,
           params: {
             limit,
+            type,
             skip,
             email,
             year,

@@ -5,7 +5,7 @@ import { useInvoicesPaymentContext } from '@common/components/DashboardPage/bloc
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { InflicionIndexTitle } from '@utils/inflicion'
 import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
-import { ServiceType } from '@utils/constants'
+import { Operations, ServiceType } from '@utils/constants'
 import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
 import { usePreviousMonthService } from '@common/modules/hooks/useService'
 import { getInflicionValue } from '@utils/inflicionHelper'
@@ -420,6 +420,7 @@ const OldWater: React.FC<{ record: any }> = ({ record }) => {
 
   const { data: paymentsResponse } = useGetAllPaymentsQuery({
     companyIds: record._id,
+    type: Operations.Debit,
     limit: 1,
   })
   const invoice = paymentsResponse?.data?.[0]?.invoice
@@ -441,6 +442,7 @@ const OldElectricity: React.FC<{ record: any }> = ({ record }) => {
 
   const { data: paymentsResponse } = useGetAllPaymentsQuery({
     companyIds: record._id,
+    type: Operations.Debit,
     limit: 1,
   })
   const invoice = paymentsResponse?.data?.[0]?.invoice
