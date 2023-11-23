@@ -141,6 +141,13 @@ const validateInvoice = (invoice, service) => {
     },
   }
 
+  if (invoice.garbageCollector.sum > 0) {
+    result.garbageCollectorPrice = {
+      amount: invoice.garbageCollector.amount,
+      sum: invoice.garbageCollector.sum,
+    }
+  }
+
   if (invoice.publicElectricUtility.sum > 0) {
     result.publicElectricUtilityPrice = {
       amount: invoice.publicElectricUtility.amount,
