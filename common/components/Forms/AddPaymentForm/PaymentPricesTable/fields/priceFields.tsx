@@ -157,6 +157,36 @@ export function PriceGarbageCollectorField({ record, disabled }) {
   )
 }
 
+export function PriceElectricUtilityField ({ record, disabled }) {
+  const { paymentData, form } = usePaymentContext()
+  const fieldName = [record.name, 'price']
+  const companyId = Form.useWatch('company', form) || paymentData?.company
+  const serviceId =
+    Form.useWatch('monthService', form) || paymentData?.monthService
+
+  const { company } = useCompany({ companyId })
+  const { service } = useService({ serviceId })
+
+  useEffect(() => {
+    if (
+      service?._id &&
+      company?.publicElectricUtility &&
+      service?.publicElectricUtilityPrice &&
+      !disabled
+    ) {
+      form.setFieldValue(
+        fieldName,
+        ((service.publicElectricUtilityPrice / 100) * company.rentPart)?.toFixed(1)
+      )
+    }
+  }, [service?._id, company?.publicElectricUtility]) //eslint-disable-line react-hooks/exhaustive-deps
+  return (
+    <Form.Item name={fieldName} rules={validateField('required')}>
+      <InputNumber className={s.input} />
+    </Form.Item>
+  )
+}
+
 export function PriceInflicionField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']

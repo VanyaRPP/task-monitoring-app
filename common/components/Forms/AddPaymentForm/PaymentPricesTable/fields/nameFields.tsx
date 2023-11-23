@@ -49,6 +49,13 @@ export function NameWaterField({ dateMonth }) {
     </span>
   )
 }
+export function PublicElectricUtilityField({ dateMonth }) {
+  return (
+    <span className={s.rowText}>
+      МЗК електрика <div className={s.month}>{dateMonth}</div>
+    </span>
+  )
+}
 export function NameGarbageCollectorField({ dateMonth }) {
   return (
     <span className={s.rowText}>
