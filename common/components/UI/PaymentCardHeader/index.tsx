@@ -1,6 +1,6 @@
 import { PlusOutlined, SelectOutlined, DeleteOutlined } from '@ant-design/icons'
 import React, { useState } from 'react'
-import { AppRoutes } from '@utils/constants'
+import { AppRoutes, Roles } from '@utils/constants'
 import { Button, message } from 'antd'
 import { useRouter } from 'next/router'
 import AddPaymentModal from '@common/components/AddPaymentModal'
@@ -11,7 +11,6 @@ import PaymentCascader from '@common/components/UI/PaymentCascader/index'
 import FilterTags from '../Reusable/FilterTags'
 import ImportInvoices from './ImportInvoices'
 import { useDeleteMultiplePaymentsMutation } from '@common/api/paymentApi/payment.api'
-import { useAppSelector } from '@common/modules/store/hooks'
 import Modal from 'antd/lib/modal/Modal'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
 
@@ -20,6 +19,7 @@ const PaymentCardHeader = ({
   currentPayment,
   paymentActions,
   closeEditModal,
+  paymentsDeleteItems,
   payments,
   filters,
   setFilters,
@@ -39,10 +39,9 @@ const PaymentCardHeader = ({
     closeEditModal()
   }
 
+  const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isAdmin = isAdminCheck(currUser?.roles)
-  const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
-  useDeleteMultiplePaymentsMutation()
-  const { paymentsDeleteItems } = useAppSelector((state) => state.selectionsReducer)
+  const [deletePayment] = useDeleteMultiplePaymentsMutation()
 
   const handleDeletePayments = async () => {
     (Modal as any).confirm({
@@ -108,7 +107,7 @@ const PaymentCardHeader = ({
               <Button type="link" onClick={() => setIsModalOpen(true)}>
                 <PlusOutlined /> Додати
               </Button>
-              {isAdmin && pathname === AppRoutes.PAYMENT && <Button type="link" onClick={() => handleDeletePayments()} disabled={paymentsDeleteItems.length == 0}>
+              {isGlobalAdmin && pathname === AppRoutes.PAYMENT && <Button type="link" onClick={() => handleDeletePayments()} disabled={paymentsDeleteItems.length == 0}>
                 <DeleteOutlined /> Видалити
               </Button>}
             </div>

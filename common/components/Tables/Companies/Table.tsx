@@ -182,7 +182,7 @@ const getDefaultColumns = ({
     {
       align: 'center',
       title: 'Нарахування МЗК',
-      dataIndex: 'accrual',
+      dataIndex: 'publicElectricUtility',
       render: (value) => <Checkbox checked={value} disabled />,
     },
   ]

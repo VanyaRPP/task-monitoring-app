@@ -7,6 +7,7 @@ export type IRealestate = {
   companyName: string
   adminEmails: string[]
   pricePerMeter: number
+  publicElectricUtility?: number
   servicePricePerMeter?: number
   totalArea: number
   description: string

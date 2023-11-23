@@ -9,6 +9,7 @@ import {
   PriceDiscountField,
   PriceCleaningField,
   PriceCustomField,
+  PriceElectricUtilityField,
 } from './priceFields'
 import { ServiceType } from '@utils/constants'
 
@@ -22,6 +23,7 @@ const fields: any = {
   [ServiceType.WaterPart]: PriceWaterPartField,
   [ServiceType.Cleaning]: PriceCleaningField,
   [ServiceType.Discount]: PriceDiscountField,
+  [ServiceType.ElectricUtility]: PriceElectricUtilityField,
 }
 
 export default function PriceComponent({ record, edit }) {

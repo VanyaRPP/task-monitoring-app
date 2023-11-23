@@ -1,4 +1,4 @@
-import React, { createContext, ReactElement, useContext, useEffect, useState } from 'react'
+import React, { ReactElement, useState } from 'react'
 import { Alert, message, Pagination, Popconfirm, Table } from 'antd'
 import { Button } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
@@ -22,8 +22,14 @@ import cn from 'classnames'
 import s from './style.module.scss'
 import { PERIOD_FILTR } from '@utils/constants'
 import { isAdminCheck, renderCurrency } from '@utils/helpers'
-import { useAppDispatch, useAppSelector } from '@common/modules/store/hooks'
-import { selectionsSlice } from '@common/modules/store/reducers/SelectionsSlice'
+
+interface PaymentDeleteItem {
+  id: string,
+  date: string,
+  domain: string,
+  company: string,
+}
+
 
 function getDateFilter(value) {
   const [, year, period, number] = value || []
@@ -299,27 +305,24 @@ const PaymentsBlock = () => {
 
   let content: ReactElement
 
-  const { paymentsDeleteItems } = useAppSelector((state) => state.selectionsReducer)
-  const dispatch = useAppDispatch();
-  const {setPaymentsDeleteIds} = selectionsSlice.actions
+  const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<PaymentDeleteItem[]>([])
 
-  const onSelectChange = (newSelectedRowKeys: string[], additionalInfo) => {
-    const updatedData = additionalInfo.map(item => {
-      console.log(additionalInfo)
-      return {
-      id: item?._id,
-      date: item?.monthService?.date,
-      domain: item?.domain?.name,
-      company: item?.company?.companyName,
-    }})
-
-    dispatch(setPaymentsDeleteIds(updatedData))
-  };
+  const onSelect = (a, selected, rows) => {
+    if(selected)
+      setPaymentsDeleteItems([...paymentsDeleteItems, {
+        id: a?._id,
+        date: a?.monthService?.date,
+        domain: a?.domain?.name,
+        company: a?.company?.companyName,
+      }])
+    else
+      setPaymentsDeleteItems(paymentsDeleteItems.filter((item) => item.id != a?._id))
+  }
 
   const rowSelection = {
     selectedRowKeys: paymentsDeleteItems.map(item => item.id),
     defaultSelectedRowKeys: paymentsDeleteItems.map(item => item.id),
-    onChange: onSelectChange,
+    onSelect: onSelect
   };
 
   if (deleteError || paymentsError || currUserError) {
@@ -328,7 +331,7 @@ const PaymentsBlock = () => {
     content = (
       <>
         <Table
-          rowSelection={isAdminCheck(currUser?.roles) && pathname === AppRoutes.PAYMENT ? rowSelection : null}
+          rowSelection={currUser?.roles?.includes(Roles.GLOBAL_ADMIN) && pathname === AppRoutes.PAYMENT ? rowSelection : null}
           columns={columns}
           dataSource={payments?.data}
           pagination={false}
@@ -374,6 +377,7 @@ const PaymentsBlock = () => {
       <TableCard
         title={
           <PaymentCardHeader
+            paymentsDeleteItems={paymentsDeleteItems}
             closeEditModal={closeEditModal}
             setCurrentDateFilter={setCurrentDateFilter}
             currentPayment={currentPayment}
