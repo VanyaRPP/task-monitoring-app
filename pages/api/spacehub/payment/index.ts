@@ -66,7 +66,7 @@ export default async function handler(
       try {
         const { isDomainAdmin, isUser, user, isGlobalAdmin } =
           await getCurrentUser(req, res)
-        const { companyIds, domainIds, limit, skip } = req.query
+        const { companyIds, domainIds, limit, skip, type } = req.query
 
         const options = {} as any
         if (isDomainAdmin) {
@@ -98,6 +98,10 @@ export default async function handler(
           options.$expr = {
             $and: expr,
           }
+        }
+
+        if (type) {
+          options.type = type
         }
 
         const payments = await (Payment as any)
