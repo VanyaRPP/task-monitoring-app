@@ -14,13 +14,54 @@ const ChartComponent:React.FC = () => {
   const [companyNames, setCompanyNames] = useState<string[]>([]);
   const [colorsArray, setColorsArray] = useState<string[]>([]);
   const chartRef = useRef<HTMLCanvasElement | null>(null);
-  const isGlobalAdmin = userResponse?.roles?.includes(Roles.DOMAIN_ADMIN)
-  const isUser = userResponse?.roles?.includes(Roles.USER)
-  
+  // const isGlobalAdmin = userResponse?.roles?.includes(Roles.DOMAIN_ADMIN)
+  // const isUser = userResponse?.roles?.includes(Roles.USER)
+  const realEstates = {data:[
+    {
+      totalArea:570.7,
+       companyName:'Прайм'
+    },
+    {
+      totalArea:216,
+       companyName:'Чорна'
+    },
+    {
+      totalArea:53.5,
+       companyName:'Олімп'
+    },
+    {
+      totalArea:109.2,
+       companyName:'Крістіна'
+    },
+    {
+      totalArea:110,
+       companyName:'Бізон'
+    },
+    {
+      totalArea:67,
+       companyName:'Шишка'
+    },
+    {
+      totalArea:33.9,
+       companyName:'Ігор'
+    },
+    {
+      totalArea:124,
+       companyName:'Спейс хаб'
+    },
+    {
+      totalArea:353.35,
+       companyName:'Пантера'
+    },
+    {
+      totalArea:214.3,
+       companyName:'Шептієва'
+    }
+]}
 
-  const {
-    data: realEstates,
-  } = useGetAllRealEstateQuery({})
+  // const {
+  //   data: realEstates,
+  // } = useGetAllRealEstateQuery({})
 
  
 
@@ -76,11 +117,12 @@ const ChartComponent:React.FC = () => {
 
     if (realEstates) {
       createData();
-      
 
     }
     console.log(realEstates)
-  }, [realEstates]);
+  }, [
+    // realEstates
+  ]);
 
   useEffect(() => {
     let myChart: Chart<"bar" | "line" | "doughnut", number[], string> | null = null;
@@ -100,7 +142,7 @@ const ChartComponent:React.FC = () => {
               labels: companyNames,
               datasets: [
                 {
-                  label: 'Відсоток арендованої площі',
+                  label: 'Частка площі',
                   data: rentParts,
                   backgroundColor: colorsArray,
                   borderColor: colorsArray,
@@ -113,7 +155,17 @@ const ChartComponent:React.FC = () => {
               maintainAspectRatio: false,
               plugins: {
                 legend: {
-                  position: 'right', // Задаємо позицію легенди справа
+                  position: 'right',
+                },
+                title: {
+                  display: true,
+                  text: 'Займані площі',
+                  font: {
+                    size: 24,
+                    family: "'Arial', sans-serif",
+                    weight: 'bold',
+                  },
+                  color: '#722ed1', 
                 },
               },
             },
@@ -137,12 +189,14 @@ const ChartComponent:React.FC = () => {
 
       resizeObserver.disconnect();
     };
-  }, [realEstates, rentParts, companyNames, colorsArray]);
+  }, [
+    // realEstates,
+     rentParts, companyNames, colorsArray]);
 
   return (
-    <div style={{ position: 'relative', width: '400px', height: '400px', marginLeft:'20px'}}>
-      <canvas ref={chartRef} style={{ width: '100%', height: '100%' }} />
-    </div>
+  <div style={{ position: 'relative', width: '400px', height: '400px', marginLeft: 'auto', marginRight: 'auto', marginTop: '20px' }}>
+    <canvas ref={chartRef} style={{ width: '100%', height: '100%' }} />
+  </div>
   );
 };
 
