@@ -37,8 +37,12 @@ const getVal = (record, obj) => {
       return +e.toFixed(1) || 0
     }
     case ServiceType.Water: {
-      const w = (obj?.amount - obj?.lastAmount) * obj?.price
-      return +w.toFixed(1) || 0
+      const w = obj?.amount === undefined ? obj?.price : (obj?.amount - obj?.lastAmount) * obj?.price
+      return (+w || 0).toFixed(1)|| 0
+    }
+    case ServiceType.WaterPart: {
+      const w = obj?.amount === undefined ? obj?.price : (obj?.amount - obj?.lastAmount) * obj?.price
+      return (+w || 0).toFixed(1)|| 0
     }
     case ServiceType.GarbageCollector: {
       const g =

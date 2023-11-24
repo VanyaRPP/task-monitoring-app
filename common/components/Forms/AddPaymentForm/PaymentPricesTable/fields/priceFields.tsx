@@ -233,10 +233,9 @@ export function PriceWaterPartField({ record, disabled }) {
   const { service } = useService({ serviceId })
 
   useEffect(() => {
-    if (service?._id && company?.waterPart && !disabled) {
+    if (service?._id && company?.waterPart) {
       form.setFieldValue(
         fieldName,
-        // ((company.waterPart / 100) * service?.waterPriceTotal)?.toFixed(2)
         (invoiceCoutWater(company?.waterPart, service))
       )
     }

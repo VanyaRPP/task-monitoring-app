@@ -169,8 +169,9 @@ const validateInvoice = (invoice, service) => {
     }
   }
 
-  if (invoice.waterPart && invoice.waterPart > 0) {
+  if (invoice.waterPart && invoice.waterPart.sum > 0) {
     result.waterPart = { 
+      price: invoice.waterPart.price,
       sum: invoice.waterPart.sum
      }
   } else {
