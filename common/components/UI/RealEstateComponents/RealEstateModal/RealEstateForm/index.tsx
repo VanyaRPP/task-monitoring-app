@@ -76,16 +76,16 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item name="rentPart" label="Частка загальної площі (%)">
+      <Form.Item name="rentPart" label="Частка загальної площі">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item name="waterPart" label="Частка водопостачання (%)">
+      <Form.Item name="waterPart" label="Частка водопостачання">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item name="cleaning" label="Прибирання (грн)">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item name="discount" label="Знижка (%)">
+      <Form.Item name="discount" label="Знижка">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
