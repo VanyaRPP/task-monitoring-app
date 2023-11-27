@@ -1,6 +1,7 @@
 import DashboardHeader from '../DashboardHeader'
 import PaymentsBlock from './blocks/payments'
 import ServicesBlock from './blocks/services'
+import CompaniesAreaChart from './blocks/сompaniesAreaChart'
 import s from './style.module.scss'
 import RealEstateBlock from './blocks/realEstates'
 import DomainsBlock from './blocks/domains'
@@ -27,6 +28,10 @@ const Dashboard: React.FC = () => {
             </div>
           </>
         )}
+        {!isGlobalAdmin && (
+            <CompaniesAreaChart/>
+        )}
+
         <div className={s.GridItem}>
           <RealEstateBlock />
         </div>
