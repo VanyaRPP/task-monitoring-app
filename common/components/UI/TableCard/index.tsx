@@ -1,6 +1,5 @@
 import { Card } from 'antd'
 import classNames from 'classnames'
-import Graphic from '../../../components/UI/TableCard'
 
 import s from './style.module.scss'
 
