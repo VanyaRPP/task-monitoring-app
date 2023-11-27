@@ -1,0 +1,13 @@
+.chartContainer{
+    margin-bottom: 20px;
+    max-width: 99%;
+    position: relative; 
+    width: 400px; 
+    height: 400px; 
+    margin-left: auto; 
+    margin-right: auto; 
+    margin-top:20px;
+    .chart{ 
+        width: 100%; 
+        height: 100%; }
+}
