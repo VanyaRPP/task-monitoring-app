@@ -1,25 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import Chart from '@common/components/Chart';
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api';
+import React, { useEffect, useState } from 'react'
+import Chart from '@common/components/Chart'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 // import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 // import { Roles } from '@utils/constants'
 import { useRouter } from 'next/router'
-import { AppRoutes, realValues } from '@utils/constants'
+import { AppRoutes } from '@utils/constants'
+import {realValues} from './mock.data'
 
-const CompaniesAreaChart:React.FC = () => {
+const CompaniesAreaChart: React.FC = () => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.REAL_ESTATE
   const { data: userResponse } = useGetCurrentUserQuery()
-  const [rentParts, setRentParts] = useState<number[]>([]);
-  const [companyNames, setCompanyNames] = useState<string[]>([]);
+  const [rentParts, setRentParts] = useState<number[]>([])
+  const [companyNames, setCompanyNames] = useState<string[]>([])
+  const chartTitle: string = 'Займані площі'
+  const chartElementTitle: string = 'Частка площі'
+
   // const isGlobalAdmin = userResponse?.roles?.includes(Roles.DOMAIN_ADMIN)
   // const isUser = userResponse?.roles?.includes(Roles.USER)
-  
+
   // const {
   //   data: realEstates,
   // } = useGetAllRealEstateQuery({})
-
- 
 
   // const {
   //   data: realEstates,
@@ -29,25 +31,28 @@ const CompaniesAreaChart:React.FC = () => {
   // })
 
   const createData = () => {
-    const rentParts: number[] = [];
-    const companyNames: string[] = [];
+    const rentParts: number[] = []
+    const companyNames: string[] = []
     for (const element of realValues.data) {
       rentParts.push(element.totalArea)
       companyNames.push(element.companyName)
     }
-    setRentParts(rentParts);
-    setCompanyNames(companyNames);
-  };
-
+    setRentParts(rentParts)
+    setCompanyNames(companyNames)
+  }
 
   useEffect(() => {
     createData()
-   }, [realValues])
-
+  }, [realValues])
 
   return (
-    <Chart names={companyNames} values={rentParts} />
-  );
-};
+    <Chart
+      names={companyNames}
+      values={rentParts}
+      chartTitle={chartTitle}
+      chartElementTitle={chartElementTitle}
+    />
+  )
+}
 
-export default CompaniesAreaChart;
+export default CompaniesAreaChart
