@@ -12,52 +12,54 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ExtendedData>
 ) {
-  const { isUser,isDomainAdmin, isGlobalAdmin, user } =
-    await getCurrentUser(req, res);
+  const { isUser, isDomainAdmin, isGlobalAdmin, user } = await getCurrentUser(
+    req,
+    res
+  )
 
   switch (req.method) {
     case 'GET':
       try {
-        const { limit = 0 } = req.query;
+        const { limit = 0 } = req.query
 
-        if(isGlobalAdmin){
-          const realEstates = await RealEstate.find({ })
+        if (isGlobalAdmin) {
+          const realEstates = await RealEstate.find({})
             .limit(+limit)
-            .select('totalArea companyName -_id');
-            if (realEstates.length === 0) {
-              return res.status(400).json({
-                success: false,
-                message: 'There are no companies yet',
-              })
-            }
-        return res.status(200).json({ success: true, data: realEstates });
+            .select('totalArea companyName -_id')
+          if (realEstates.length === 0) {
+            return res.status(400).json({
+              success: false,
+              message: 'There are no companies yet',
+            })
+          }
+          return res.status(200).json({ success: true, data: realEstates })
         }
-        if(isDomainAdmin){
-        const {_id} = await Domain.findOne({
-          adminEmails: { $in: [user.email] },
-        }).select('domain._id')
-        if (!_id) {
-          return res.status(400).json({
-            success: false,
-            message: "You are not a domain",
-          })
-        }
+        if (isDomainAdmin) {
+          const { _id } = await Domain.findOne({
+            adminEmails: { $in: [user.email] },
+          }).select('domain._id')
+          if (!_id) {
+            return res.status(400).json({
+              success: false,
+              message: 'You are not a domain',
+            })
+          }
           const realEstates = await RealEstate.find({
             domain: { $in: [_id.toString()] },
           })
             .limit(+limit)
-            .select('totalArea companyName -_id');
-            if (realEstates.length === 0) {
-              return res.status(400).json({
-                success: false,
-                message: 'This domain has no associated companies.',
-              })
-            }
-        return res.status(200).json({ success: true, data: realEstates });
+            .select('totalArea companyName -_id')
+          if (realEstates.length === 0) {
+            return res.status(400).json({
+              success: false,
+              message: 'This domain has no associated companies.',
+            })
+          }
+          return res.status(200).json({ success: true, data: realEstates })
         }
 
-        if(isUser){
-          const {domain} = await RealEstate.findOne({
+        if (isUser) {
+          const { domain } = await RealEstate.findOne({
             adminEmails: { $in: [user.email] },
           }).select('domain')
           if (!domain) {
@@ -66,22 +68,22 @@ export default async function handler(
               message: "You don't have a domain",
             })
           }
-            const realEstates = await RealEstate.find({
-              domain: { $in: [domain.toString()] },
+          const realEstates = await RealEstate.find({
+            domain: { $in: [domain.toString()] },
+          })
+            .limit(+limit)
+            .select('totalArea companyName -_id')
+          if (realEstates.length === 0) {
+            return res.status(400).json({
+              success: false,
+              message: 'The domain has no associated companies.',
             })
-              .limit(+limit)
-              .select('totalArea companyName -_id');
-              if (realEstates.length === 0) {
-                return res.status(400).json({
-                  success: false,
-                  message: 'The domain has no associated companies.',
-                })
-              }
-          return res.status(200).json({ success: true, data: realEstates });
           }
-        } catch (error) {
-        console.log(error);
-        return res.status(400).json({ success: false, message: error });
+          return res.status(200).json({ success: true, data: realEstates })
+        }
+      } catch (error) {
+        console.log(error)
+        return res.status(400).json({ success: false, message: error })
       }
   }
 }
