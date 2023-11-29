@@ -2,7 +2,7 @@ import User from '@common/modules/models/User'
 import { FormInstance } from 'antd'
 import { ObjectId } from 'mongoose'
 import { Roles, ServiceType } from './constants'
-import { PaymentOptions } from './types'
+import { PaymentOptions, InputItem, OutputData } from './types'
 import moment from 'moment'
 import 'moment/locale/uk'
 import _omit from 'lodash/omit'
@@ -10,7 +10,6 @@ import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 import Big from 'big.js'
 import { getDomainsPipeline, getRealEstatesPipeline } from './pipelines'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
-
 
 export const firstTextToUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
@@ -136,9 +135,9 @@ function formatDateToIsoString(data) {
   return data.map((i) =>
     i.invoiceCreationDate
       ? {
-        ...i,
-        invoiceCreationDate: new Date(i.invoiceCreationDate).toISOString(),
-      }
+          ...i,
+          invoiceCreationDate: new Date(i.invoiceCreationDate).toISOString(),
+        }
       : i
   )
 }
@@ -191,14 +190,14 @@ export function filterInvoiceObject(obj) {
     if (typeof obj[key] === 'object' && obj[key].hasOwnProperty('sum')) {
       services.includes(key)
         ? filtered.push({
-          type: key,
-          ...obj[key],
-        })
+            type: key,
+            ...obj[key],
+          })
         : filtered.push({
-          type: ServiceType.Custom,
-          name: key,
-          ...obj[key],
-        })
+            type: ServiceType.Custom,
+            name: key,
+            ...obj[key],
+          })
     }
   }
 
@@ -210,11 +209,11 @@ export function filterInvoiceObject(obj) {
 
 export const renderCurrency = (number: any): string => {
   if (!isNaN(number)) {
-    return new Intl.NumberFormat('en-US').format(number);
+    return new Intl.NumberFormat('en-US').format(number)
   } else {
-    return '-';
+    return '-'
   }
-};
+}
 
 export const getFormattedDate = (data: Date): string => {
   if (data) {
@@ -251,17 +250,17 @@ export function parseStringToFloat(stringWithComma) {
 }
 
 export function multiplyFloat(a, b) {
-  const bigA = Big(parseStringToFloat(`${a}`));
-  const bigB = Big(parseStringToFloat(`${b}`));
+  const bigA = Big(parseStringToFloat(`${a}`))
+  const bigB = Big(parseStringToFloat(`${b}`))
 
-  return +bigA.mul(bigB).round(2, Big.roundDown).toNumber();
+  return +bigA.mul(bigB).round(2, Big.roundDown).toNumber()
 }
 
 export function plusFloat(a, b) {
-  const bigA = Big(parseStringToFloat(`${a}`));
-  const bigB = Big(parseStringToFloat(`${b}`));
+  const bigA = Big(parseStringToFloat(`${a}`))
+  const bigB = Big(parseStringToFloat(`${b}`))
 
-  return +bigA.plus(bigB).round(2, Big.roundDown).toNumber();
+  return +bigA.plus(bigB).round(2, Big.roundDown).toNumber()
 }
 
 export function filterOptions(options = {}, filterIds: any) {
@@ -277,7 +276,12 @@ export function filterOptions(options = {}, filterIds: any) {
   return res
 }
 
-export async function getDistinctCompanyAndDomain({ isGlobalAdmin, user, companyGroup, model }) {
+export async function getDistinctCompanyAndDomain({
+  isGlobalAdmin,
+  user,
+  companyGroup,
+  model,
+}) {
   const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
   const distinctDomains = await model.aggregate(domainsPipeline)
 
@@ -293,21 +297,31 @@ export async function getDistinctCompanyAndDomain({ isGlobalAdmin, user, company
 }
 
 export const invoiceCoutWater = (waterPart, service) => {
-  return (waterPart && service ? ((waterPart / 100) * service?.waterPriceTotal).toFixed(2) : 0);
+  return waterPart && service
+    ? ((waterPart / 100) * service?.waterPriceTotal).toFixed(2)
+    : 0
 }
 
-export function convertToInvoicesObject(arr: { type: ServiceType, [key: string]: any }[]): { [key: string]: { [key: string]: any } } {
-  const result: { [key: string]: { [key: string]: any } } = {};
+export function convertToInvoicesObject(
+  arr: { type: ServiceType; [key: string]: any }[]
+): { [key: string]: { [key: string]: any } } {
+  const result: { [key: string]: { [key: string]: any } } = {}
 
   for (const item of arr) {
-    const { type, ...rest } = item;
-    let newObj: { [key: string]: any } = { ...rest };
+    const { type, ...rest } = item
+    let newObj: { [key: string]: any } = { ...rest }
 
-    if ([ServiceType.Maintenance, ServiceType.Placing, ServiceType.GarbageCollector].includes(type)) {
+    if (
+      [
+        ServiceType.Maintenance,
+        ServiceType.Placing,
+        ServiceType.GarbageCollector,
+      ].includes(type)
+    ) {
       newObj = {
         ...newObj,
         amount: rest.hasOwnProperty('amount') ? rest.amount : 0,
-      };
+      }
     }
 
     if ([ServiceType.Electricity, ServiceType.Water].includes(type)) {
@@ -315,12 +329,45 @@ export function convertToInvoicesObject(arr: { type: ServiceType, [key: string]:
         ...newObj,
         amount: rest.hasOwnProperty('amount') ? rest.amount : 0,
         lastAmount: rest.hasOwnProperty('lastAmount') ? rest.lastAmount : 0,
-      };
+      }
     }
 
-    newObj.price = item.hasOwnProperty('price') ? item.price : item.sum;
-    result[type] = newObj;
+    newObj.price = item.hasOwnProperty('price') ? item.price : item.sum
+    result[type] = newObj
   }
 
-  return result;
+  return result
+}
+
+export function processInputData(input: InputItem[]): OutputData {
+  const result: OutputData = {
+    companyNames: [],
+    totalAreas: [],
+    totalArea: 0,
+    areasPercentage: [],
+  }
+
+  const groupedData: Record<string, number[]> = {}
+
+  input.forEach(({ companyName, totalArea }) => {
+    if (!groupedData[companyName]) {
+      groupedData[companyName] = []
+      result.companyNames.push(companyName)
+    }
+
+    groupedData[companyName].push(totalArea)
+    result.totalArea += totalArea
+  })
+
+  result.companyNames.forEach((companyName) => {
+    const areas = groupedData[companyName]
+    const totalAreaPercentage = areas.reduce(
+      (acc, area) => acc + (area / result.totalArea) * 100,
+      0
+    )
+    result.totalAreas.push(areas.reduce((acc, area) => acc + area, 0))
+    result.areasPercentage.push(Number(totalAreaPercentage.toFixed(2)))
+  })
+
+  return result
 }
