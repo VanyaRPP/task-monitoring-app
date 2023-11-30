@@ -7,62 +7,61 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import start, { ExtendedData } from '@pages/api/api.config'
 
 start()
-// ми робимо квері по домейнІд
-// api/domain/areas/[id]
-async function getDataMapping(
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<ExtendedData>
+) {
+  const { user } = await getCurrentUser(req, res)
+
+  switch (req.method) {
+    case 'GET':
+      try {
+        await getRoleValidate(user.roles[0], req.query.id, user.email)
+        // **виймаємо всі компанії за цим доменом
+        // це означає, що беремо наступну фукнцію вийняти всі компанії по домену (який пройшов валідацію для ролей)
+        const realEstates = await getCompanies(req.query.id)
+        // готуємо дані, які будемо повертати
+        const formatedRealEstates = await getCompaniesFormattedData(realEstates)
+        return res
+          .status(200)
+          .json({ success: true, data: formatedRealEstates })
+      } catch (error) {
+        console.log(error)
+        return res.status(400).json({ success: false, message: error.message })
+      }
+  }
+}
+async function getRoleValidate(
   role: string,
   domainId: string,
   userEmail: string
 ) {
   switch (role) {
     case 'GlobalAdmin':
-    //для глобал адміна умови немає. якщо пройшли валідацію на глобал адміна ми беремо домейн ід і
-    // ->виймаємо всі компанії за цим доменом
+      //для глобал адміна умови немає.
+      break
     case 'DomainAdmin':
-      //для домейн адміна є умова.
-      // ми беремо з квері ід
-      // робимо в файндОне по домейнІд з куері доменів
-      const domainObject = await Domain.findById(domainId)
-      // якщо знаходить
-      // ->виймаємо всі компанії за цим доменом
-      // якщо не знаходить - кидаємо помилку, що у домейн адміна немає прав перевіряти цей домейн
+      const domainObject = await Domain.findOne({
+        _id: domainId,
+        adminEmails: userEmail,
+      })
       if (!domainObject) {
         throw new Error(
           'In the domain admin does not have the rights to check this domain'
         )
       }
-      //в такому випадку немає перевірки чи має цей домен доступ до домену з квері чи ні.
-      //просто перевіряємо чи існує такий взагалі, тому пропоную такий варік
-      // if(domainObject.adminEmails.find(element => element === userEmail)!==userEmail){
-      //   throw new Error('In the domain admin does not have the rights to check this domain')
-      // }
       break
     case 'User':
-      // для юзера є умова
-      // ми беремо з квері ід домену
-      // робимо в файндОне по домейнІд з куері по компаніям
       const { domain } = await RealEstate.findOne({
-        domain: { $in: [domainId] },
+        adminEmails: { $in: [userEmail] },
       })
-      // знайшли компанію
-      // перевіряємо чи компанія має цей домен
-      // якщо знаходить
-      // ->виймаємо всі компанії за цим доменом
-      // якщо не знаходить - кидаємо помилку, що у домейн адміна немає прав перевіряти цей домейн
-      if (!domain) {
+
+      if (domain.toString() !== domainId) {
         throw new Error(
           'In the domain admin does not have the rights to check this domain'
         )
       }
-      //аякщо юзер написав http://localhost:3000/api/domain/areas/ід від іншого не свого домену?
-      // то потрібно шукати домен по імейлу, а потім порівнювати якщо з квері сбігається з цим то все круто пропоную цей код нижче
-      // const {domain} = await RealEstate.findOne({
-      //   adminEmails: { $in: [userEmail] },
-      // })
-
-      // if(domain.toString()!==domainId){
-      //   throw new Error('In the domain admin does not have the rights to check this domain')
-      // }
       break
     default:
       break
@@ -80,59 +79,35 @@ async function getCompanies(domainId: string) {
   return realEstates
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<ExtendedData>
-) {
-  const { user } = await getCurrentUser(req, res)
-
-  switch (req.method) {
-    case 'GET':
-      try {
-        await getDataMapping(user.roles[0], req.query.id, user.email, user.id)
-        // **виймаємо всі компанії за цим доменом
-        // це означає, що беремо наступну фукнцію вийняти всі компанії по домену (який пройшов валідацію для ролей)
-        const realEstates = await getCompanies(req.query.id)
-        // готуємо дані, які будемо повертати
-        const formatedRealEstates = await getCompaniesFormattedData(realEstates)
-        return res
-          .status(200)
-          .json({ success: true, data: formatedRealEstates })
-      } catch (error) {
-        console.log(error)
-        return res.status(400).json({ success: false, message: error.message })
-      }
-  }
-}
-
 export function getCompaniesFormattedData(realEstates) {
   const result = {
-    companyNames: [],
-    totalAreas: [],
+    companies: {
+      companyNames: [],
+      totalAreas: [],
+      areasPercentage: [],
+    },
     totalArea: 0,
-    areasPercentage: [],
   }
-
-  const groupedData: Record<string, number[]> = {}
-
   realEstates.forEach(({ companyName, totalArea }) => {
-    if (!groupedData[companyName]) {
-      groupedData[companyName] = []
-      result.companyNames.push(companyName)
+    //Перевіряємо чи є така компанія
+    const index = result.companies.companyNames.indexOf(companyName)
+    if (index !== -1) {
+      //Якщо є то досумовуємо площу
+      result.companies.totalAreas[index] += totalArea
+      result.totalArea += totalArea
+    } else {
+      //Якщо ні то закидуємо нову
+      result.companies.companyNames.push(companyName)
+      result.companies.totalAreas.push(totalArea)
+      result.totalArea += totalArea
     }
-    groupedData[companyName].push(totalArea)
-    result.totalArea += totalArea
   })
-
-  result.companyNames.forEach((companyName) => {
-    const areas = groupedData[companyName]
-    const totalAreaPercentage = areas.reduce(
-      (acc, area) => acc + (area / result.totalArea) * 100,
-      0
-    )
-    result.totalAreas.push(areas.reduce((acc, area) => acc + area, 0))
-    result.areasPercentage.push(Number(totalAreaPercentage.toFixed(2)))
+  //Після того як ми вирахували загальну площу, можемо нарахувати проценти
+  result.companies.totalAreas.forEach((companyArea) => {
+    //Вираховуємо кожен відсоток площі компанії від суми площ
+    const currentAreaPercent: number = (companyArea / result.totalArea) * 100
+    //Зберігаємо цей відсоток скорочуючи до двох знаків після коми
+    result.companies.areasPercentage.push(Number(currentAreaPercent.toFixed(2)))
   })
-
   return result
 }
