@@ -52,28 +52,28 @@ const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
       </Form.Item>
       <Form.Item
         name="rentPrice"
-        label="Утримання приміщень (грн/1м²)"
+        label="Утримання приміщень (грн/м²)"
         rules={validateField('required')}
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="electricityPrice"
-        label="Електроенергія (грн/1кВт)"
+        label="Електроенергія (грн/кВт)"
         rules={validateField('electricityPrice')}
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="waterPrice"
-        label="Водопостачання (грн/1м³)"
+        label="Водопостачання (грн/м³)"
         rules={validateField('required')}
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="waterPriceTotal"
-        label="Всього водопостачання (грн/1м³)"
+        label="Всього водопостачання (грн/м³)"
         rules={validateField('required')}
       >
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
