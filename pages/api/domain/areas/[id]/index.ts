@@ -13,6 +13,7 @@ export default async function handler(
   res: NextApiResponse<ExtendedData>
 ) {
   const { user } = await getCurrentUser(req, res)
+  console.log(user.roles[0], req.query.id, user.email)
 
   switch (req.method) {
     case 'GET':
@@ -62,7 +63,7 @@ async function getRoleValidate(
       }
       break
     default:
-      break
+      throw new Error('You are not autorized')
   }
 }
 
