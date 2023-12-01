@@ -12,6 +12,11 @@ export const users = {
     email: 'domainAdmin@example.com',
     roles: [Roles.DOMAIN_ADMIN],
   },
+  domainAdmin2: {
+    name: 'domainAdmin2',
+    email: 'domainAdmin2@example.com',
+    roles: [Roles.DOMAIN_ADMIN],
+  },
   globalAdmin: {
     name: 'globalAdmin',
     email: 'globalAdmin@example.com',
@@ -59,6 +64,13 @@ export const domains = [
     _id: '64d68421d9ba2fc8fea79d16',
     name: 'domain 5',
     adminEmails: [],
+    streets: [],
+    description: 'none',
+  },
+  {
+    _id: '64e725c7a62fdf2d22b84c4a',
+    name: 'domain 6',
+    adminEmails: [users.domainAdmin2.email],
     streets: [],
     description: 'none',
   },

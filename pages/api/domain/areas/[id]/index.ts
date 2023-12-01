@@ -18,10 +18,7 @@ export default async function handler(
     case 'GET':
       try {
         await getRoleValidate(user.roles[0], req.query.id, user.email)
-        // **виймаємо всі компанії за цим доменом
-        // це означає, що беремо наступну фукнцію вийняти всі компанії по домену (який пройшов валідацію для ролей)
         const realEstates = await getCompanies(req.query.id)
-        // готуємо дані, які будемо повертати
         const formatedRealEstates = await getCompaniesFormattedData(realEstates)
         return res
           .status(200)
@@ -32,6 +29,7 @@ export default async function handler(
       }
   }
 }
+
 async function getRoleValidate(
   role: string,
   domainId: string,
