@@ -38,20 +38,10 @@ async function getCompanies(domainId: string) {
 
 export function getCompaniesFormattedData(realEstates) {
   const result = {
-    companies: {
-      companyNames: [],
-      totalAreas: [],
-      areasPercentage: [],
-    },
+    companies: realEstates,
     totalArea: 0,
   }
   result.totalArea = realEstates.reduce((sum, item) => item.totalArea + sum, 0)
-  realEstates.forEach(({ companyName, totalArea, rentPart }) => {
-    result.companies.companyNames.push(companyName)
-    result.companies.totalAreas.push(totalArea)
-    result.companies.areasPercentage.push(rentPart)
-  })
-
   return result
 }
 
