@@ -11,7 +11,7 @@ jest.mock('@pages/api/api.config', () => jest.fn())
 setupTestEnvironment()
 
 describe('GetCompanyAreas', () => {
-  it('GlobalAdmin Success', async () => {
+  it('GlobalAdmin can receive companies with areas -  success', async () => {
     await mockLoginAs(users.globalAdmin)
     const mockReq = {
       method: 'GET',
@@ -34,7 +34,7 @@ describe('GetCompanyAreas', () => {
     })
   })
 
-  it('GlobalAdmin Fail(Domain dont have any company)', async () => {
+  it('GlobalAdmin cant receive any companies', async () => {
     // Поверне помилку тому що queri.id не має компаній
     await mockLoginAs(users.globalAdmin)
     const mockReq = {
@@ -51,7 +51,7 @@ describe('GetCompanyAreas', () => {
     expect(mockRes.status).toHaveBeenCalledWith(400)
     expect(responseData.message).toBe('There are no companies yet')
   })
-  it('DomainAdmin Success', async () => {
+  it('DomainAdmin can receive companies with areas -  success', async () => {
     await mockLoginAs(users.domainAdmin)
     const mockReq = {
       method: 'GET',
@@ -73,7 +73,7 @@ describe('GetCompanyAreas', () => {
       totalArea: 20
     })
   })
-  it('DomainAdmin Fail(DomeinId of other domein)', async () => {
+  it('DomainAdmin cant receive companies from other domain', async () => {
     // Поверне помилку тому що queri.id від іншого Домену і він не пройде перевірку валідатору
     await mockLoginAs(users.domainAdmin)
     const mockReq = {
@@ -93,7 +93,7 @@ describe('GetCompanyAreas', () => {
     )
   })
 
-  it('DomainAdmin Fail(Domain dont have any company)', async () => {
+  it('DomainAdmin cant receive companies because it does not have any company', async () => {
     // Поверне помилку тому що queri.id не має компаній
     await mockLoginAs(users.domainAdmin2)
     const mockReq = {
@@ -111,7 +111,7 @@ describe('GetCompanyAreas', () => {
     expect(responseData.message).toBe('There are no companies yet')
   })
 
-  it('User Success', async () => {
+  it('User can receive companies with areas -  success', async () => {
     await mockLoginAs(users.user)
     const mockReq = {
       method: 'GET',
@@ -134,7 +134,7 @@ describe('GetCompanyAreas', () => {
     })
   })
 
-  it('User Fail(domain not found)', async () => {
+  it('User cant receive companies because the entered DomainId was not found', async () => {
     await mockLoginAs(users.user2)
     const mockReq = {
       method: 'GET',
@@ -152,7 +152,7 @@ describe('GetCompanyAreas', () => {
       'Domain not found.'
     )
   })
-  it('User Fail(Wrong domainId)', async () => {
+  it('User cant receive companies because they entered an incorrect DomainId', async () => {
     // Поверне помилку тому що queri.id від іншого домену
     await mockLoginAs(users.user)
     const mockReq = {
@@ -171,7 +171,7 @@ describe('GetCompanyAreas', () => {
       'You do not have the rights to connect to this Domain.'
     )
   })
-  it('noRoleUser Fail', async () => {
+  it('noRoleUser cant receive company data without having a role', async () => {
     // Поверне помилку тому що юзер без ролі
     await mockLoginAs(users.noRoleUser)
     const mockReq = {
