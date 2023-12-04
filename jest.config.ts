@@ -1,5 +1,3 @@
-const dotenv = require('dotenv');
-dotenv.config();
 module.exports = {
   testMatch: ['**/*.test.ts'],
   testPathIgnorePatterns: ['/node_modules/'], // Ignore the node_modules directory
