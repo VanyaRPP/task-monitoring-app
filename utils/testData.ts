@@ -7,6 +7,11 @@ export const users = {
     email: 'user@example.com',
     roles: [Roles.USER],
   },
+  user2: {
+    name: 'user',
+    email: 'user@example2.com',
+    roles: [Roles.USER],
+  },
   noRoleUser: {
     name: 'noRoleUser',
     email: 'noRoleUser@example.com',

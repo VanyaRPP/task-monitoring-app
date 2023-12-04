@@ -133,6 +133,25 @@ describe('GetCompanyAreas', () => {
       totalArea: 20
     })
   })
+
+  it('User Fail(domain not found)', async () => {
+    await mockLoginAs(users.user2)
+    const mockReq = {
+      method: 'GET',
+      query: { id: '64d68421d9ba2fc8fea79d11' },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+    const responseData = await mockRes.json.mock.calls[0][0]
+    expect(mockRes.status).toHaveBeenCalledWith(400)
+    expect(responseData.message).toBe(
+      'Domain not found.'
+    )
+  })
   it('User Fail(Wrong domainId)', async () => {
     // Поверне помилку тому що queri.id від іншого домену
     await mockLoginAs(users.user)
