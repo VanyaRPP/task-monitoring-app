@@ -3,7 +3,7 @@
 import type { NextApiRequest, NextApiResponse, NextApiHandler } from 'next'
 import RealEstate from '@common/modules/models/RealEstate'
 import start, { ExtendedData } from '@pages/api/api.config'
-import {withValidation} from './validator'
+import { withValidation } from './validator'
 
 start()
 
@@ -43,13 +43,13 @@ export function getCompaniesFormattedData(realEstates) {
       totalAreas: [],
       areasPercentage: [],
     },
-    totalArea : 0 
+    totalArea: 0,
   }
-  result.totalArea = realEstates.reduce((sum, item) => item.totalArea + sum, 0) 
+  result.totalArea = realEstates.reduce((sum, item) => item.totalArea + sum, 0)
   realEstates.forEach(({ companyName, totalArea, rentPart }) => {
-      result.companies.companyNames.push(companyName)
-      result.companies.totalAreas.push(totalArea)
-      result.companies.areasPercentage.push(rentPart)
+    result.companies.companyNames.push(companyName)
+    result.companies.totalAreas.push(totalArea)
+    result.companies.areasPercentage.push(rentPart)
   })
 
   return result
