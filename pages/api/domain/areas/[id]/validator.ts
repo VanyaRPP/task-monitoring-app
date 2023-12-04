@@ -23,14 +23,13 @@ export function withValidation(handler: NextApiHandler) {
           }
           break
         case 'User':
-          const { domain } = await RealEstate.findOne({
+          const estateObject = await RealEstate.findOne({
             adminEmails: { $in: [user.email] },
           })
-          if (!domain) {
-            throw new Error('You do not have any Domain.')
+          if (!estateObject) {
+            throw new Error('Domain not found.')
           }
-
-          if (domain.toString() !== request.query.id) {
+          if (estateObject.domain.toString() !== request.query.id) {
             throw new Error(
               'You do not have the rights to connect to this Domain.'
             )
