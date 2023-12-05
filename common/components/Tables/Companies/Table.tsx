@@ -136,53 +136,71 @@ const getDefaultColumns = ({
     {
       title: 'Опис',
       dataIndex: 'description',
-      width: 350,
+      width: 300,
     },
     // TODO: enum
     {
       title: 'Площа (м²)',
       dataIndex: 'totalArea',
+      width: 120,
+      align: 'center',
+
     },
     {
       title: 'Ціна (грн/м²)',
       dataIndex: 'pricePerMeter',
+      width: 120,
+      align: 'center',
     },
     {
       title: 'Індивідуальне утримання (грн/м²)',
       dataIndex: 'servicePricePerMeter',
+      width: 200,
+      align: 'center',
     },
     {
       title: 'Частка загальної площі',
       dataIndex: 'rentPart',
+      width: 180,
+      align: 'center',
     },
     {
       title: 'Частка водопостачання',
       dataIndex: 'waterPart',
+      width: 180,
+      align: 'center',
     },
     {
       title: 'Прибирання (грн)',
       dataIndex: 'cleaning',
+      width: 150,
+      align: 'center',
     },
     {
       title: 'Знижка',
       dataIndex: 'discount',
+      width: 150,
+      align: 'center',
     },
     {
       align: 'center',
       title: 'Вивіз сміття',
       dataIndex: 'garbageCollector',
+      width: 150,
       render: (value) => <Checkbox checked={value} disabled />,
     },
     {
       align: 'center',
       title: 'Нарахування інд. інф.',
       dataIndex: 'inflicion',
+      width: 170,
       render: (value) => <Checkbox checked={value} disabled />,
     },
     {
       align: 'center',
       title: 'Нарахування МЗК',
       dataIndex: 'publicElectricUtility',
+      width: 170,
       render: (value) => <Checkbox checked={value} disabled />,
     },
   ]
