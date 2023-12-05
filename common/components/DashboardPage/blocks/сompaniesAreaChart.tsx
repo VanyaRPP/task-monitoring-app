@@ -1,39 +1,31 @@
 import React, { useEffect, useState } from 'react'
-import Chart from '@common/components/Chart'
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-// import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
-// import { Roles } from '@utils/constants'
 import { useRouter } from 'next/router'
-import { AppRoutes } from '@utils/constants'
-import {realValues} from './mock.data'
+import Chart from '@common/components/Chart'
+import { useGetAreasQuery } from '@common/api/areasApi/areas.api'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 const CompaniesAreaChart: React.FC = () => {
   const router = useRouter()
-  const isOnPage = router.pathname === AppRoutes.REAL_ESTATE
-  const { data: userResponse } = useGetCurrentUserQuery()
   const [rentParts, setRentParts] = useState<number[]>([])
   const [companyNames, setCompanyNames] = useState<string[]>([])
   const chartTitle: string = 'Займані площі'
   const chartElementTitle: string = 'Частка площі'
 
-  // const isGlobalAdmin = userResponse?.roles?.includes(Roles.DOMAIN_ADMIN)
-  // const isUser = userResponse?.roles?.includes(Roles.USER)
-
-  // const {
-  //   data: realEstates,
-  // } = useGetAllRealEstateQuery({})
-
-  // const {
-  //   data: realEstates,
-  // } = useGetAllRealEstateQuery({
-  //   domainId: realEstate.domainsFilter[0].value,
-  //   limit: isOnPage ? 0 : 5,
-  // })
+  const { data: domains } = useGetDomainsQuery({})
+  const { data: userResponse } = useGetCurrentUserQuery()
+  const userDomain = domains?.find((domain) =>
+    domain.adminEmails.includes(userResponse.email)
+  )
+  const { data: areasData } = useGetAreasQuery({
+    domainId: userDomain?._id,
+  })
 
   const createData = () => {
     const rentParts: number[] = []
     const companyNames: string[] = []
-    for (const element of realValues.data) {
+    const { companies } = areasData
+    for (const element of companies) {
       rentParts.push(element.totalArea)
       companyNames.push(element.companyName)
     }
@@ -42,8 +34,10 @@ const CompaniesAreaChart: React.FC = () => {
   }
 
   useEffect(() => {
-    createData()
-  }, [realValues])
+    if (areasData) {
+      createData()
+    }
+  }, [areasData, domains])
 
   return (
     <Chart

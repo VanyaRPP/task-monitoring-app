@@ -1,5 +1,6 @@
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 import { categoryApi } from '../../api/categoriesApi/category.api'
+import { areasApi } from '../../api/areasApi/areas.api'
 import { userApi } from '../../api/userApi/user.api'
 import { taskApi } from '../../api/taskApi/task.api'
 import { domainApi } from '../../api/domainApi/domain.api'
@@ -14,6 +15,7 @@ import { streetApi } from '@common/api/streetApi/street.api'
 export const store = configureStore({
   reducer: {
     [categoryApi.reducerPath]: categoryApi.reducer,
+    [areasApi.reducerPath]: areasApi.reducer,
     [userApi.reducerPath]: userApi.reducer,
     [taskApi.reducerPath]: taskApi.reducer,
     [domainApi.reducerPath]: domainApi.reducer,
@@ -27,6 +29,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
+      .concat(areasApi.middleware)
       .concat(userApi.middleware)
       .concat(taskApi.middleware)
       .concat(categoryApi.middleware)

@@ -16,8 +16,8 @@ const Dashboard: React.FC = () => {
   return (
     <>
       <DashboardHeader />
-
       <div className={s.DashboardGrid}>
+        <CompaniesAreaChart />
         {isGlobalAdmin && (
           <>
             <div className={s.GridItem}>
@@ -28,10 +28,6 @@ const Dashboard: React.FC = () => {
             </div>
           </>
         )}
-        {!isGlobalAdmin && (
-            <CompaniesAreaChart/>
-        )}
-
         <div className={s.GridItem}>
           <RealEstateBlock />
         </div>

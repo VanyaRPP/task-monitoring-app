@@ -15,6 +15,7 @@
     "prettier": "prettier --check --ignore-path .gitignore .",
     "prettier:fix": "prettier --write --ignore-path .gitignore .",
     "format": "npm run prettier:fix && npm run lint:fix",
+    "format-changed": "git diff --name-only --cached | grep '\\.js$' | xargs prettier --write",
     "prepare": "husky install"
   },
   "dependencies": {
