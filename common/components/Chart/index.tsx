@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from 'react'
 import Chart from 'chart.js/auto'
-import { calculatePercentage, generateColorsArray } from '@utils/helpers'
+import { generateColorsArray } from '@utils/helpers'
 import s from './style.module.scss'
-import { IExtendedAreas } from '@common/api/domainApi/domain.api.types'
+import { companyAreas } from '@common/api/domainApi/domain.api.types'
 
 const ChartComponent: React.FC<{
-  dataSources: IExtendedAreas
+  dataSources: companyAreas[]
   chartTitle: string
   chartElementTitle: string
 }> = ({ dataSources, chartTitle, chartElementTitle }) => {
@@ -19,11 +19,12 @@ const ChartComponent: React.FC<{
       myChartRef.current = new Chart<'pie', number[], string>(ctx, {
         type: 'pie',
         data: {
-          labels: dataSources?.companies.map(company => company.companyName),
+          labels: dataSources?.map(company => company.companyName),
           datasets: [
             {
-              data: dataSources?.companies.map(company => company.rentPart),
-              backgroundColor: generateColorsArray(dataSources?.companies.length),
+              label: chartElementTitle,
+              data: dataSources?.map(company => company.rentPart),
+              backgroundColor: generateColorsArray(dataSources?.length),
               borderWidth: 2,
             },
           ],

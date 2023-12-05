@@ -6,13 +6,13 @@ const CompaniesAreaChart: React.FC = () => {
   const chartTitle: string = 'Займані площі'
   const chartElementTitle: string = 'Частка площі'
 
-  const { data: domains } = useGetDomainsQuery({})
+  const { data: domains } = useGetDomainsQuery({limit:1})
   const { data: areasData } = useGetAreasQuery({
     domainId: domains?.[0]?._id,
   })
   return (
     <Chart
-      dataSources={areasData}
+      dataSources={areasData?.companies}
       chartTitle={chartTitle}
       chartElementTitle={chartElementTitle}
     />
