@@ -5,6 +5,8 @@ import {
   IDeleteDomainResponse,
   IAddDomainResponse,
   IGetDomainResponse,
+  IExtendedAreas,
+  IGetAreasResponse,
 } from './domain.api.types'
 
 export const domainApi = createApi({
@@ -65,10 +67,20 @@ export const domainApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Domain'] : []),
     }),
+    getAreas: builder.query<IExtendedAreas, { domainId?: string }>({
+      query: ({ domainId }) => ({
+        url: `domain/areas/${domainId}`,
+        method: 'GET',
+      }),
+      providesTags: (result, error, { domainId }) => [{ type: 'IDomain', id: domainId || '' }],
+      transformResponse: (response: IGetAreasResponse) => response.data,
+    }),
+    
   }),
 })
 
 export const {
+  useGetAreasQuery,
   useGetDomainsQuery,
   useAddDomainMutation,
   useDeleteDomainMutation,

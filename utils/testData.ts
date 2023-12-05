@@ -7,9 +7,24 @@ export const users = {
     email: 'user@example.com',
     roles: [Roles.USER],
   },
+  user2: {
+    name: 'user',
+    email: 'user@example2.com',
+    roles: [Roles.USER],
+  },
+  noRoleUser: {
+    name: 'noRoleUser',
+    email: 'noRoleUser@example.com',
+    roles: [],
+  },
   domainAdmin: {
     name: 'domainAdmin',
     email: 'domainAdmin@example.com',
+    roles: [Roles.DOMAIN_ADMIN],
+  },
+  domainAdmin2: {
+    name: 'domainAdmin2',
+    email: 'domainAdmin2@example.com',
     roles: [Roles.DOMAIN_ADMIN],
   },
   globalAdmin: {
@@ -62,6 +77,13 @@ export const domains = [
     streets: [],
     description: 'none',
   },
+  {
+    _id: '64e725c7a62fdf2d22b84c4a',
+    name: 'domain 6',
+    adminEmails: [users.domainAdmin2.email],
+    streets: [],
+    description: 'none',
+  },
 ]
 
 export const streets = [
@@ -108,7 +130,7 @@ export const realEstates = [
     garbageCollector: true,
     publicElectricUtility: false,
     waterPart: 0,
-    rentPart: 0,
+    rentPart: 25,
     inflicion: false,
   },
   {
@@ -159,7 +181,7 @@ export const realEstates = [
     garbageCollector: true,
     publicElectricUtility: false,
     waterPart: 0,
-    rentPart: 0,
+    rentPart: 45,
     inflicion: false,
   },
   {
@@ -194,6 +216,23 @@ export const realEstates = [
     publicElectricUtility: false,
     waterPart: 0,
     rentPart: 0,
+    inflicion: false,
+  },
+  {
+    _id: '64e66d436d57a8640543dda4',
+    domain: domains[3]._id,
+    street: streets[3]._id,
+    companyName: 'company_5',
+    description: 'none',
+    adminEmails: [users.globalAdmin.email],
+    pricePerMeter: 10,
+    servicePricePerMeter: 10,
+    totalArea: 10,
+    discount: 0,
+    garbageCollector: true,
+    publicElectricUtility: false,
+    waterPart: 0,
+    rentPart: 50,
     inflicion: false,
   },
 ]

@@ -140,15 +140,15 @@ const getDefaultColumns = ({
     },
     // TODO: enum
     {
-      title: 'Кількість метрів',
+      title: 'Площа (м²)',
       dataIndex: 'totalArea',
     },
     {
-      title: 'Ціна за метр',
+      title: 'Ціна (грн/м²)',
       dataIndex: 'pricePerMeter',
     },
     {
-      title: 'Індивідуальне утримання за метр',
+      title: 'Індивідуальне утримання (грн/м²)',
       dataIndex: 'servicePricePerMeter',
     },
     {
@@ -160,7 +160,7 @@ const getDefaultColumns = ({
       dataIndex: 'waterPart',
     },
     {
-      title: 'Прибирання',
+      title: 'Прибирання (грн)',
       dataIndex: 'cleaning',
     },
     {
