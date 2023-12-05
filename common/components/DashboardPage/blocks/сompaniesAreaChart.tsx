@@ -11,7 +11,7 @@ const CompaniesAreaChart: React.FC = () => {
     domainId: domains?.[0]?._id,
     
   }, {
-    skip: !domains,
+    skip: !domains?.[0]?._id,
   })
 
   return (
