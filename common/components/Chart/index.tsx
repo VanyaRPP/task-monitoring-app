@@ -3,9 +3,13 @@ import Chart from 'chart.js/auto'
 import { generateColorsArray } from '@utils/helpers'
 import s from './style.module.scss'
 import { companyAreas } from '@common/api/domainApi/domain.api.types'
+type dataSources = {
+  label: string,
+  value: number
+}
 
 const ChartComponent: React.FC<{
-  dataSources: companyAreas[]
+  dataSources: dataSources[]
   chartTitle: string
   chartElementTitle: string
 }> = ({ dataSources, chartTitle, chartElementTitle }) => {
@@ -19,11 +23,11 @@ const ChartComponent: React.FC<{
       myChartRef.current = new Chart<'pie', number[], string>(ctx, {
         type: 'pie',
         data: {
-          labels: dataSources?.map(company => company.companyName),
+          labels: dataSources?.map(i => i.label),
           datasets: [
             {
               label: chartElementTitle,
-              data: dataSources?.map(company => company.rentPart),
+              data: dataSources?.map(i => i.value),
               backgroundColor: generateColorsArray(dataSources?.length),
               borderWidth: 2,
             },

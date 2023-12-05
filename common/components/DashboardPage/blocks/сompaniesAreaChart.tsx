@@ -12,7 +12,7 @@ const CompaniesAreaChart: React.FC = () => {
   })
   return (
     <Chart
-      dataSources={areasData?.companies}
+      dataSources={areasData?.companies?.map(i => ({label: i.companyName, value: i.rentPart}))}
       chartTitle={chartTitle}
       chartElementTitle={chartElementTitle}
     />
