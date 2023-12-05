@@ -1,30 +1,34 @@
 import React, { useEffect, useRef } from 'react'
 import Chart from 'chart.js/auto'
-import { calculatePercentage, generateColorsArray } from '@utils/helpers'
+import { generateColorsArray } from '@utils/helpers'
 import s from './style.module.scss'
+import { companyAreas } from '@common/api/domainApi/domain.api.types'
+type dataSources = {
+  label: string,
+  value: number
+}
 
 const ChartComponent: React.FC<{
-  names: string[]
-  values: number[]
+  dataSources: dataSources[]
   chartTitle: string
   chartElementTitle: string
-}> = ({ names, values, chartTitle, chartElementTitle }) => {
+}> = ({ dataSources, chartTitle, chartElementTitle }) => {
   const chartRef = useRef<HTMLCanvasElement | null>(null)
-  const myChartRef = useRef<Chart<'doughnut', number[], string> | null>(null)
+  const myChartRef = useRef<Chart<'pie', number[], string> | null>(null)
 
   const createChart = () => {
     if (chartRef.current) {
       const ctx = chartRef.current.getContext('2d')
       myChartRef.current?.destroy()
-      myChartRef.current = new Chart<'doughnut', number[], string>(ctx, {
-        type: 'doughnut',
+      myChartRef.current = new Chart<'pie', number[], string>(ctx, {
+        type: 'pie',
         data: {
-          labels: names,
+          labels: dataSources?.map(i => i.label),
           datasets: [
             {
               label: chartElementTitle,
-              data: calculatePercentage(values),
-              backgroundColor: generateColorsArray(values.length),
+              data: dataSources?.map(i => i.value),
+              backgroundColor: generateColorsArray(dataSources?.length),
               borderWidth: 2,
             },
           ],
@@ -65,7 +69,7 @@ const ChartComponent: React.FC<{
     return () => {
       resizeObserver.disconnect()
     }
-  }, [names, values])
+  }, [dataSources])
 
   return (
     <div className={s.chartContainer}>
