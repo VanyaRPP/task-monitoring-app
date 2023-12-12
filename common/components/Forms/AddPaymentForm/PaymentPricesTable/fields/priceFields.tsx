@@ -209,7 +209,7 @@ export function PriceInflicionField({ record, disabled }) {
       const inflicionAmount = getInflicionValue(
         previousPlacingPrice,
         previousMonth?.inflicionPrice
-        ) 
+      ) 
       form.setFieldValue(fieldName, +inflicionAmount > 0 ? inflicionAmount : 0)
     }
   }, [service?._id, service?.inflicionPrice, previousPlacingPrice, previousMonth]) //eslint-disable-line react-hooks/exhaustive-deps

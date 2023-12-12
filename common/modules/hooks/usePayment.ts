@@ -9,8 +9,8 @@ interface IUseCompanyProps {
 
 export function useCompanyInvoice({ companyId, skip, type=Operations.Debit }: IUseCompanyProps) {
   const { data: paymentsResponse, isLoading } = useGetAllPaymentsQuery(
-    { companyIds: [companyId], limit: 1, type: type },
-    { skip: !!!companyId || skip }
+    { companyIds: [companyId], limit: 1, type },
+    { skip: !companyId || skip }
   )
   const lastInvoice = paymentsResponse?.data?.[0]
   return { lastInvoice, isLoading }
