@@ -205,14 +205,14 @@ export function PriceInflicionField({ record, disabled }) {
   const { previousPlacingPrice } = useInflicionValues()
 
   useEffect(() => {
-    if (service?._id && service?.inflicionPrice && company?.inflicion && !disabled) {
+    if (service?._id && company?.inflicion && !disabled) {
       const inflicionAmount = getInflicionValue(
         previousPlacingPrice,
         previousMonth?.inflicionPrice
       )
       form.setFieldValue(fieldName, +inflicionAmount > 0 ? inflicionAmount : 0)
     }
-  }, [service?._id, service?.inflicionPrice, previousPlacingPrice]) //eslint-disable-line react-hooks/exhaustive-deps
+  }, [service?._id, previousPlacingPrice, previousMonth?.date]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
