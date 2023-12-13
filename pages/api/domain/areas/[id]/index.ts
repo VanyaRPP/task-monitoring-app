@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import type { NextApiRequest, NextApiResponse, NextApiHandler } from 'next'
 import RealEstate from '@common/modules/models/RealEstate'
 import start, { ExtendedData } from '@pages/api/api.config'
@@ -25,7 +23,7 @@ async function handler(
   }
 }
 
-async function getCompanies(domainId: string) {
+async function getCompanies(domainId: string | string[]) {
   const realEstates = await RealEstate.find({
     domain: { $in: [domainId] },
   }).select('totalArea companyName rentPart -_id')

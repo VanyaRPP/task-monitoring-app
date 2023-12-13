@@ -9,7 +9,7 @@ export type Data = {
   data?: any
   success: boolean
   error?: any
-  // message?: string
+  message?: string
 }
 
 export type ExtendedData = Data & {

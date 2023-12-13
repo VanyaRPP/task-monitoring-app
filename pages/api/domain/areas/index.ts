@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import RealEstate from '@common/modules/models/RealEstate'
 import start, { ExtendedData } from '@pages/api/api.config'
