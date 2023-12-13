@@ -17,6 +17,7 @@ export enum AppRoutes {
   CUSTOMER = '/customer',
   REAL_ESTATE = '/real-estate',
   STREETS = '/streets',
+  PAYMENTS_CHARTS = '/payments-chart',
 }
 
 export enum Operations {
