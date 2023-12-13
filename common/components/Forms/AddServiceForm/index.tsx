@@ -91,7 +91,7 @@ const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
         <Input.TextArea
           placeholder="Введіть опис"
           maxLength={256}
-          className={s.formInput}
+          className={s.textArea}
         />
       </Form.Item>
     </Form>
