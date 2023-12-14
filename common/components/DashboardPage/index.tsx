@@ -8,6 +8,7 @@ import DomainsBlock from './blocks/domains'
 import { Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import StreetsBlock from './blocks/streets'
+import PaymentsChart from './blocks/paymentsChart'
 
 const Dashboard: React.FC = () => {
   const { data: userResponse } = useGetCurrentUserQuery()
@@ -19,6 +20,9 @@ const Dashboard: React.FC = () => {
       <div className={s.DashboardGrid}>
         <div className={s.GridItem}>
           <CompaniesAreaChart />
+        </div>
+        <div className={s.GridItem}>
+          <PaymentsChart />
         </div>
         {isGlobalAdmin && (
           <>

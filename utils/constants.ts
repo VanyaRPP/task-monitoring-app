@@ -18,6 +18,7 @@ export enum AppRoutes {
   CUSTOMER = '/customer',
   REAL_ESTATE = '/real-estate',
   STREETS = '/streets',
+  PAYMENTS_CHARTS = '/payments-chart',
 }
 
 export enum Operations {
@@ -97,6 +98,8 @@ export const paymentsTitle = {
   waterPart: 'Нарахування водопостачання',
   discount: 'Знижка',
   cleaningPrice: 'Прибирання',
+  generalSum: 'Загальна сума',
+  custom: 'Додаткові витрати',
 }
 
 export enum ServiceType {
