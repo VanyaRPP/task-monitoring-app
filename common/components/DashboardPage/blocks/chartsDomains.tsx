@@ -1,5 +1,5 @@
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import ChartRoutHeader from '@common/components/Tables/CompaniesAreaChart/ChartRoutHeader'
+import ChartRoutHeader from '@common/components/Tables/CompaniesAreaChart/ChartRouteHeader'
 import DomainsTable from '@common/components/Tables/Domains/Table'
 import TableCard from '@common/components/UI/TableCard'
 import { useState } from 'react'

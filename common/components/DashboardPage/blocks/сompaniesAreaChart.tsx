@@ -18,7 +18,7 @@ const CompaniesAreaChart: React.FC = () => {
   const { data: domains } = useGetDomainsQuery({})
   const { data: areasData } = useGetAreasQuery(
     {
-      domainId: domainId,
+      domainId,
     },
     {
       skip: !domainId,
