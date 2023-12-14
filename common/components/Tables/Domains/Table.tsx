@@ -22,9 +22,14 @@ export interface Props {
 
 const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
   const router = useRouter()
-  const isOnPage = router.pathname === AppRoutes.DOMAIN || router.pathname === AppRoutes.CHART_AREAS
+  const isOnPage =
+    router.pathname === AppRoutes.DOMAIN ||
+    router.pathname === AppRoutes.CHART_AREAS
 
-  const { data, isLoading, isError } = useGetDomainsQuery({ domainId, limit: isOnPage ? 0 : 5 })
+  const { data, isLoading, isError } = useGetDomainsQuery({
+    domainId,
+    limit: isOnPage ? 0 : 5,
+  })
 
   const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
 
@@ -108,7 +113,9 @@ const getDefaultColumns = (
     width: 50,
     render: (_, domain: IExtendedDomain) => (
       <Popconfirm
-        title={`Ви впевнені що хочете видалити ${domain.name ?? 'цей надавач послуг'}?`}
+        title={`Ви впевнені що хочете видалити ${
+          domain.name ?? 'цей надавач послуг'
+        }?`}
         onConfirm={() => handleDelete(domain?._id)}
         cancelText="Відміна"
         disabled={deleteLoading}

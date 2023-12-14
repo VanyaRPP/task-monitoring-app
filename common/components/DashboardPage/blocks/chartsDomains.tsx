@@ -12,7 +12,7 @@ const ChartDomainBlock: React.FC<Props> = ({ domainId }) => {
   const [currentDomain, setCurrentDomain] = useState<IExtendedDomain>(null)
 
   return (
-    <TableCard title={<ChartRoutHeader/>}>
+    <TableCard title={<ChartRoutHeader />}>
       <DomainsTable domainId={domainId} setCurrentDomain={setCurrentDomain} />
     </TableCard>
   )
