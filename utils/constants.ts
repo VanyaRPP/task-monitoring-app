@@ -97,6 +97,8 @@ export const paymentsTitle = {
   waterPart: 'Нарахування водопостачання',
   discount: 'Знижка',
   cleaningPrice: 'Прибирання',
+  generalSum: 'Загальна сума',
+  custom: 'Додаткові витрати',
 }
 
 export enum ServiceType {
