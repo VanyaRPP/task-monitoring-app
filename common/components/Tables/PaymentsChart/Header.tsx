@@ -31,7 +31,7 @@ const PaymentsChartHeader: React.FC<Props> = ({ paymentsLimit, setPaymentsLimit 
             value: value,
             label: value,
           }))}
-          onChange={(value) => setPaymentsLimit(value)}
+          onChange={setPaymentsLimit}
           defaultValue={paymentsLimit}
         />
       )}

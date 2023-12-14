@@ -4,8 +4,22 @@ import React, { useState } from 'react'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { AppRoutes, Operations } from '@utils/constants'
 import dynamic from 'next/dynamic'
-import { dateToDayYearMonthFormat } from '@common/assets/features/formatDate'
 import { useRouter } from 'next/router'
+import { getPaymentsChartData } from '@utils/helpers'
+
+const getChartConfig = (data) => {
+  return {
+    data,
+    xField: 'date',
+    yField: 'value',
+    seriesField: 'category',
+    legend: { size: true },
+    colorField: 'category',
+    xAxis: {
+      type: 'time',
+    },
+  } as any
+}
 
 const PaymentsChart = () => {
   const Line = dynamic(
@@ -15,42 +29,24 @@ const PaymentsChart = () => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.PAYMENTS_CHARTS
   const [paymentsLimit, setPaymentsLimit] = useState(isOnPage ? 10 : 5)
-  const { data: payments, isLoading } = useGetAllPaymentsQuery({
+  const { data: payments } = useGetAllPaymentsQuery({
     limit: paymentsLimit,
     type: Operations.Debit,
   })
+  const filterValues = [
+    'generalSum',
+    'electricityPrice',
+    'waterPrice',
+    'waterPart',
+    'maintenancePrice',
+    'publicElectricUtilityPrice',
+  ]
 
-  const data = payments
-    ? payments?.data?.flatMap((payment) => [
-        ...payment?.invoice?.map((item) => ({
-          date: dateToDayYearMonthFormat(payment?.invoiceCreationDate),
-          value: +item.sum,
-          category: item.type,
-        })),
-        {
-          date: dateToDayYearMonthFormat(payment?.invoiceCreationDate),
-          value: +payment?.generalSum,
-          category: 'generalSum',
-        },
-      ])
-    : []
+  const data = getPaymentsChartData({
+    data: payments?.data,
+    filterValues,
+  })
 
-  const config = {
-    data,
-    xField: 'date',
-    yField: 'value',
-    seriesField: 'category',
-    xAxis: {
-      type: 'time',
-    },
-    yAxis: {
-      label: {
-        formatter: (v) =>
-          `${v}`.replace(/\d{1,3}(?=(\d{3})+$)/g, (s) => `${s},`),
-      },
-    },
-  } as any
-  
   return (
     <TableCard
       title={
@@ -60,7 +56,7 @@ const PaymentsChart = () => {
         />
       }
     >
-      <Line {...config} />
+      <Line {...getChartConfig(data)} />
     </TableCard>
   )
 }
