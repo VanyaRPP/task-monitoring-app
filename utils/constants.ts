@@ -89,11 +89,11 @@ export const saltRounds = 10
 export const paymentsTitle = {
   maintenancePrice: 'Утримання',
   placingPrice: 'Розміщення',
+  inflicionPrice: 'Індекс інфляції',
   electricityPrice: 'Електропостачання',
   publicElectricUtilityPrice: "МЗК",
   waterPrice: 'Водопостачання',
   garbageCollectorPrice: 'Вивіз ТПВ',
-  inflicionPrice: 'Індекс інфляції',
   waterPart: 'Нарахування водопостачання',
   discount: 'Знижка',
   cleaningPrice: 'Прибирання',
