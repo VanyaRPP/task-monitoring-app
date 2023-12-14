@@ -92,7 +92,7 @@ const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
           placeholder="Введіть опис"
           autoSize={{ minRows: 2, maxRows: 5 }}
           maxLength={256}
-          className={s.textArea}
+          className={s.formInput}
         />
       </Form.Item>
     </Form>
