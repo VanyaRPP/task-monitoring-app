@@ -11,6 +11,7 @@ export enum AppRoutes {
   PREMIUM = '/premium',
   CATEGORY = '/category',
   DOMAIN = '/domain',
+  CHART_AREAS = '/areas',
   PAYMENT = '/payment',
   PAYMENT_BULK = '/payment/bulk',
   SERVICE = '/service',

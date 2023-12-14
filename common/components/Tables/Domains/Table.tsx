@@ -22,7 +22,7 @@ export interface Props {
 
 const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
   const router = useRouter()
-  const isOnPage = router.pathname === AppRoutes.DOMAIN
+  const isOnPage = router.pathname === AppRoutes.DOMAIN || router.pathname === AppRoutes.CHART_AREAS
 
   const { data, isLoading, isError } = useGetDomainsQuery({ domainId, limit: isOnPage ? 0 : 5 })
 
