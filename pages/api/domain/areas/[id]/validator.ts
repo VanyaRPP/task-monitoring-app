@@ -9,7 +9,6 @@ export function withValidation(handler: NextApiHandler) {
     try {
       switch (user.roles[0]) {
         case 'GlobalAdmin':
-          //для глобал адміна умови немає.
           break
         case 'DomainAdmin':
           const domainObject = await Domain.findOne({
@@ -18,25 +17,25 @@ export function withValidation(handler: NextApiHandler) {
           })
           if (!domainObject) {
             throw new Error(
-              'You do not have the rights to connect to this Domain.'
+              'You do not have access to use this domain'
             )
           }
           break
         case 'User':
           const estateObject = await RealEstate.findOne({
             adminEmails: { $in: [user.email] },
+            
           })
           if (!estateObject) {
-            throw new Error('Domain not found.')
+            throw new Error('You do not have a real estate object')
           }
           if (estateObject.domain.toString() !== request.query.id) {
             throw new Error(
-              'You do not have the rights to connect to this Domain.'
+              'You do not have access to use this domain'
             )
           }
           break
         default:
-          //якщо ролі немає то поверне цю помилку
           throw new Error('You are not autorized')
       }
       return handler(request, response)
