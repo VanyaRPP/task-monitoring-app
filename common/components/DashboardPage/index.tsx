@@ -8,7 +8,7 @@ import DomainsBlock from './blocks/domains'
 import { Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import StreetsBlock from './blocks/streets'
-import PaymentsChart from './blocks/paymentsChart'
+import PaymentsChart from './blocks/PaymentsChart/paymentsChart'
 
 const Dashboard: React.FC = () => {
   const { data: userResponse } = useGetCurrentUserQuery()
