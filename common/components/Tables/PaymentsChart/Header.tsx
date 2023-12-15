@@ -3,16 +3,25 @@ import { Button, Select } from 'antd'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
 import s from './style.module.scss'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { isAdminCheck } from '@utils/helpers'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 
 interface Props {
   paymentsLimit: number,
   setPaymentsLimit: (paymentsLimit: number) => void,
+  setCompanyId: (companyId: string) => void,
 }
 
-const PaymentsChartHeader: React.FC<Props> = ({ paymentsLimit, setPaymentsLimit }) => {
+const PaymentsChartHeader: React.FC<Props> = ({ paymentsLimit, setPaymentsLimit, setCompanyId}) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.PAYMENTS_CHARTS
   const options = [10, 20, 30, 40, 50]
+  const { data: user } = useGetCurrentUserQuery()
+  const { data: realEstates } = useGetAllRealEstateQuery({ })
+  
+  // TODO: do we need it?
+  // setCompanyId(realEstates?.data[0]._id)
 
   return (
     <div className={s.chartBlock}>
@@ -33,6 +42,14 @@ const PaymentsChartHeader: React.FC<Props> = ({ paymentsLimit, setPaymentsLimit 
           }))}
           onChange={setPaymentsLimit}
           defaultValue={paymentsLimit}
+        />
+      )}
+      {isAdminCheck(user?.roles) && (
+        <Select
+          options={realEstates?.data?.map(i => ({ value: i._id, label: i.companyName }))}
+          defaultValue={realEstates?.data[0]._id}
+          className={s.companySelector}
+          onChange={setCompanyId}
         />
       )}
     </div>
