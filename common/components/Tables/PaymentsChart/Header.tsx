@@ -5,16 +5,13 @@ import { AppRoutes } from '@utils/constants'
 import s from './style.module.scss'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { isAdminCheck } from '@utils/helpers'
-import {
-  useGetDomainsQuery,
-} from '@common/api/domainApi/domain.api'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 
 interface Props {
   paymentsLimit: number,
   setPaymentsLimit: (paymentsLimit: number) => void,
   selectValues: Array<{ label: string; value: string }>,
-  setCompanyId: (domainId: string) => void,
+  setCompanyId: (companyId: string) => void,
 }
 
 const PaymentsChartHeader: React.FC<Props> = ({ paymentsLimit, setPaymentsLimit, selectValues, setCompanyId}) => {
@@ -22,9 +19,10 @@ const PaymentsChartHeader: React.FC<Props> = ({ paymentsLimit, setPaymentsLimit,
   const isOnPage = router.pathname === AppRoutes.PAYMENTS_CHARTS
   const options = [10, 20, 30, 40, 50]
   const { data: user } = useGetCurrentUserQuery()
-  const { data: domains } = useGetDomainsQuery({})
-  const { data: realEstates } = useGetAllRealEstateQuery({ domainId: domains?.[0]._id })
-  setCompanyId(realEstates?.data[0]._id)
+  const { data: realEstates } = useGetAllRealEstateQuery({ })
+  
+  // TODO: do we need it?
+  // setCompanyId(realEstates?.data[0]._id)
 
   return (
     <div className={s.chartBlock}>
