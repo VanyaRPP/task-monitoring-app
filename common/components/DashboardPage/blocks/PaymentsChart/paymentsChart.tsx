@@ -19,6 +19,7 @@ const PaymentsChart = () => {
     limit: paymentsLimit,
     type: Operations.Debit,
   })
+  const chartData = { ...chartConfig, data: getPaymentsChartData(payments?.data) } as any
   return (
     <TableCard
       title={
@@ -28,7 +29,7 @@ const PaymentsChart = () => {
         />
       }
     >
-      <Line {...chartConfig} data={getPaymentsChartData(payments?.data)} />
+      <Line {...chartData} />
     </TableCard>
   )
 }
