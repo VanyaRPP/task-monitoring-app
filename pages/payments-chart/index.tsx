@@ -4,7 +4,7 @@ import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { GetServerSideProps } from 'next'
 import { FC } from 'react'
-import PaymentsChart from '@common/components/DashboardPage/blocks/paymentsChart'
+import PaymentsChart from '@common/components/DashboardPage/blocks/PaymentsChart/paymentsChart'
 
 const Chart: FC = () => {
   return <PaymentsChart />

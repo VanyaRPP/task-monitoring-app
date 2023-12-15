@@ -1,16 +1,14 @@
 import User from '@common/modules/models/User'
 import { FormInstance } from 'antd'
 import { ObjectId } from 'mongoose'
-import { Roles, ServiceType, paymentsTitle } from './constants'
+import { Roles, ServiceType } from './constants'
 import { PaymentOptions } from './types'
 import moment from 'moment'
 import 'moment/locale/uk'
 import _omit from 'lodash/omit'
-import { IExtendedPayment, IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
+import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 import Big from 'big.js'
 import { getDomainsPipeline, getRealEstatesPipeline } from './pipelines'
-import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
-import { dateToDayYearMonthFormat } from '@common/assets/features/formatDate'
 
 export const firstTextToUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
@@ -373,43 +371,4 @@ export function generateColorsArray(length: number): string[] {
   return initialColors
 }
 
-export const getPaymentsChartData = ({
-  data,
-  filterValues,
-}: {
-  data: IExtendedPayment[]
-  filterValues?: string[]
-}) => {
-  const compareDates = (a: any, b: any) => {
-    const dateA = new Date(a.date.split('-').reverse().join('-'));
-    const dateB = new Date(b.date.split('-').reverse().join('-'));
-  
-    return dateA.getTime() - dateB.getTime();
-  };
 
-  const preparedData = data
-    ? [...data]?.reverse()?.flatMap((payment) => {
-      const date = (payment?.monthService as any)?.date || payment?.invoiceCreationDate
-
-        const mappedValues = payment?.invoice
-          ?.filter((invoice) => filterValues.includes(invoice?.type))
-          .map((item) => ({
-            date: dateToDayYearMonthFormat(date),
-            value: +item.sum,
-            category: paymentsTitle[item.type],
-          }))
-
-        const generalSumValue = filterValues?.includes('generalSum') && {
-          date: dateToDayYearMonthFormat(date),
-          value: +payment?.generalSum,
-          category: paymentsTitle['generalSum'],
-        }
-
-        return [
-          ...(mappedValues || []),
-          ...(generalSumValue ? [generalSumValue] : []),
-        ]
-      })
-    : []
-  return preparedData.sort(compareDates)
-}
