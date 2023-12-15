@@ -37,10 +37,6 @@ const PaymentsChart = () => {
         <PaymentsChartHeader
           paymentsLimit={paymentsLimit}
           setPaymentsLimit={setPaymentsLimit}
-          selectValues={payments?.realEstatesFilter.map((item) => ({
-            label: item.text,
-            value: item.value,
-          }))}
           setCompanyId={setCompanyId}
         />
       }

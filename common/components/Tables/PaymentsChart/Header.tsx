@@ -10,11 +10,10 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 interface Props {
   paymentsLimit: number,
   setPaymentsLimit: (paymentsLimit: number) => void,
-  selectValues: Array<{ label: string; value: string }>,
   setCompanyId: (companyId: string) => void,
 }
 
-const PaymentsChartHeader: React.FC<Props> = ({ paymentsLimit, setPaymentsLimit, selectValues, setCompanyId}) => {
+const PaymentsChartHeader: React.FC<Props> = ({ paymentsLimit, setPaymentsLimit, setCompanyId}) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.PAYMENTS_CHARTS
   const options = [10, 20, 30, 40, 50]
@@ -47,10 +46,10 @@ const PaymentsChartHeader: React.FC<Props> = ({ paymentsLimit, setPaymentsLimit,
       )}
       {isAdminCheck(user?.roles) && (
         <Select
+          options={realEstates?.data?.map(i => ({ value: i._id, label: i.companyName }))}
           defaultValue={realEstates?.data[0]._id}
           className={s.companySelector}
           onChange={setCompanyId}
-          options={selectValues}
         />
       )}
     </div>
