@@ -5,21 +5,7 @@ import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { AppRoutes, Operations } from '@utils/constants'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
-import { getPaymentsChartData } from '@utils/helpers'
-
-const getChartConfig = (data) => {
-  return {
-    data,
-    xField: 'date',
-    yField: 'value',
-    seriesField: 'category',
-    legend: { size: true },
-    colorField: 'category',
-    xAxis: {
-      type: 'time',
-    },
-  } as any
-}
+import { chartConfig, getPaymentsChartData } from './paymentsChartHelper'
 
 const PaymentsChart = () => {
   const Line = dynamic(
@@ -33,20 +19,7 @@ const PaymentsChart = () => {
     limit: paymentsLimit,
     type: Operations.Debit,
   })
-  const filterValues = [
-    'generalSum',
-    'electricityPrice',
-    'waterPrice',
-    'waterPart',
-    'maintenancePrice',
-    'publicElectricUtilityPrice',
-  ]
-
-  const data = getPaymentsChartData({
-    data: payments?.data,
-    filterValues,
-  })
-
+  const chartData = { ...chartConfig, data: getPaymentsChartData(payments?.data) } as any
   return (
     <TableCard
       title={
@@ -56,7 +29,7 @@ const PaymentsChart = () => {
         />
       }
     >
-      <Line {...getChartConfig(data)} />
+      <Line {...chartData} />
     </TableCard>
   )
 }
