@@ -4,9 +4,9 @@ import { ServiceType, paymentsTitle } from "@utils/constants";
 
 export const getPaymentsChartData = (data: IExtendedPayment[]) => {
   const preparedData = data
-  
     ? [...data]?.reverse()?.flatMap((payment) => {
       const date = (payment?.monthService as any)?.date || payment?.invoiceCreationDate
+      
         const mappedValues = payment?.invoice
           .filter(item => filterValues.includes(item.type as ServiceType))
           .map(item => {

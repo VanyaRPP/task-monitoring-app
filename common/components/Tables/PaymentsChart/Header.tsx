@@ -3,24 +3,28 @@ import { Button, Select } from 'antd'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
 import s from './style.module.scss'
-import { Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { isAdminCheck } from '@utils/helpers'
+import {
+  useGetDomainsQuery,
+} from '@common/api/domainApi/domain.api'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 
 interface Props {
   paymentsLimit: number,
   setPaymentsLimit: (paymentsLimit: number) => void,
   selectValues: Array<{ label: string; value: string }>,
   setCompanyId: (domainId: string) => void,
-  companyName: string
 }
 
-const PaymentsChartHeader: React.FC<Props> = ({ paymentsLimit, setPaymentsLimit, selectValues, setCompanyId, companyName }) => {
+const PaymentsChartHeader: React.FC<Props> = ({ paymentsLimit, setPaymentsLimit, selectValues, setCompanyId}) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.PAYMENTS_CHARTS
   const options = [10, 20, 30, 40, 50]
-  const { data: userResponse } = useGetCurrentUserQuery()
-  const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
-  const isDomainAdmin = userResponse?.roles?.includes(Roles.DOMAIN_ADMIN)
+  const { data: user } = useGetCurrentUserQuery()
+  const { data: domains } = useGetDomainsQuery({})
+  const { data: realEstates } = useGetAllRealEstateQuery({ domainId: domains?.[0]._id })
+  setCompanyId(realEstates?.data[0]._id)
 
   return (
     <div className={s.chartBlock}>
@@ -43,9 +47,9 @@ const PaymentsChartHeader: React.FC<Props> = ({ paymentsLimit, setPaymentsLimit,
           defaultValue={paymentsLimit}
         />
       )}
-      {(isGlobalAdmin || isDomainAdmin) && (
+      {isAdminCheck(user?.roles) && (
         <Select
-          defaultValue={companyName}
+          defaultValue={realEstates?.data[0]._id}
           className={s.companySelector}
           onChange={setCompanyId}
           options={selectValues}
