@@ -22,7 +22,7 @@ const Dashboard: React.FC = () => {
           <CompaniesAreaChart />
         </div>
         <div className={s.GridItem}>
-          <PaymentsChart/>
+          <PaymentsChart />
         </div>
         {isGlobalAdmin && (
           <>
