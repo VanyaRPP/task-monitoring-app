@@ -1,23 +1,32 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Chart from '@common/components/Chart'
+import TableCard from '@common/components/UI/TableCard'
 import { useGetDomainsQuery, useGetAreasQuery } from '@common/api/domainApi/domain.api'
+import CompaniesAreaChartHeader from '@common/components/Tables/CompaniesAreaChart/Header'
 
 const CompaniesAreaChart: React.FC = () => {
-  const chartTitle: string = 'Займані площі'
-  const chartElementTitle: string = 'Частка площі'
+  const chartElementTitle = 'Частка площі'
 
-  const { data: domains } = useGetDomainsQuery({limit:1})
+  const { data: domains } = useGetDomainsQuery({})
+  const [domainId, setDomainId] = useState<string>()
+  useEffect(() => {
+    if(domains && domains.length > 0) {
+      setDomainId(domains[0]._id)
+    }
+  },[domains])
   const { data: areasData } = useGetAreasQuery({
-    domainId: domains?.[0]?._id,
+    domainId: domainId,
   }, {
-    skip: !domains?.[0]?._id,
+    skip: !domainId,
   })
   return (
-    <Chart
-      dataSources={areasData?.companies?.map(i => ({label: i.companyName, value: i.rentPart}))}
-      chartTitle={chartTitle}
-      chartElementTitle={chartElementTitle}
-    />
+    <TableCard title={<CompaniesAreaChartHeader setDomainId={setDomainId}/>}>
+      <Chart
+        dataSources={areasData?.companies?.map(i => ({label: i.companyName, value: i.rentPart}))}
+        chartTitle={undefined}
+        chartElementTitle={chartElementTitle}
+      />
+    </TableCard>
   )
 }
 
