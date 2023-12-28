@@ -20,7 +20,9 @@ const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.SERVICE
 
-  const { data, isLoading, isError } = useGetAllServicesQuery({limit: isOnPage ? 0 : 5})
+  const { data, isLoading, isError } = useGetAllServicesQuery({
+    limit: isOnPage ? 0 : 5,
+  })
 
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -54,6 +56,14 @@ const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
       dataSource={data}
       scroll={{ x: 1700 }}
     />
+  )
+}
+
+const renderTooltip = (text: string) => {
+  return (
+    <Tooltip title={text} placement="bottomRight">
+      <span>{text}</span>
+    </Tooltip>
   )
 }
 
@@ -132,6 +142,7 @@ const getDefaultColumns = (
       dataIndex: 'description',
       key: 'description',
       ellipsis: true,
+      render: renderTooltip,
     },
   ]
 
