@@ -9,7 +9,7 @@ import {
   NamePlacingField,
   NameWaterField,
   NameCleaningField,
-  PublicElectricUtilityField,
+  // PublicElectricUtilityField,
 } from './nameFields'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import useCompany from '@common/modules/hooks/useCompany'
@@ -26,7 +26,7 @@ const fields = {
   [ServiceType.Discount]: NameDiscountField,
   [ServiceType.Placing]: NamePlacingField,
   [ServiceType.Water]: NameWaterField,
-  [ServiceType.ElectricUtility]: PublicElectricUtilityField,
+  // [ServiceType.ElectricUtility]: PublicElectricUtilityField,
   [ServiceType.Cleaning]: NameCleaningField,
 }
 
@@ -51,7 +51,6 @@ export default function NameComponent({ record, preview }) {
         company={company || paymentData?.company}
         domain={paymentData?.domain}
         street={paymentData?.street}
-        
         preview={preview}
       />
     )

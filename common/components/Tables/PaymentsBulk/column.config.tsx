@@ -283,15 +283,15 @@ export const getDefaultColumns = (
   //         />
   //       ),
   //     },
-      {
-        title: 'Загальне',
-        dataIndex: 'publicElectricUtilityPrice',
-        render: (__: any, record: any) => (
-          <PublicElectricUtilityPrice service={service} record={record} />
-        ),
-      },
-    ],
-  },
+  //     {
+  //       title: 'Загальне',
+  //       dataIndex: 'publicElectricUtilityPrice',
+  //       render: (__: any, record: any) => (
+  //         <PublicElectricUtilityPrice service={service} record={record} />
+  //       ),
+  //     },
+  //   ],
+  // },
   {
     title: 'Прибирання',
     dataIndex: 'cleaning',
