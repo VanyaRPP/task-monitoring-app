@@ -91,7 +91,7 @@ export const paymentsTitle = {
   placingPrice: 'Розміщення',
   inflicionPrice: 'Індекс інфляції',
   electricityPrice: 'Електропостачання',
-  publicElectricUtilityPrice: "МЗК",
+  // publicElectricUtilityPrice: "МЗК",
   waterPrice: 'Водопостачання',
   garbageCollectorPrice: 'Вивіз ТПВ',
   waterPart: 'Нарахування водопостачання',
