@@ -3,3 +3,9 @@
     margin-right: 2rem;
   }
 }
+
+.tsWrapper {
+  @media (max-width: 430px) {
+    transform: rotate(90deg);
+  }
+}

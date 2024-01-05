@@ -2,20 +2,21 @@ import mongoose, { Schema, ObjectId } from 'mongoose'
 import { IGeoCode } from './Task'
 
 export interface IDomain {
-  _id: ObjectId
+  _id: ObjectId | string
   name: string
-  creator?: ObjectId | string
-  tasks?: [ObjectId | string]
-  users?: [ObjectId | string]
-  area: IGeoCode[]
+  adminEmails: [string]
+  streets: [ObjectId]
+  description: string
 }
 
 const DomainSchema = new Schema<IDomain>({
   name: { type: String, required: true },
-  creator: { type: String },
-  tasks: { type: String },
-  users: { type: String },
-  area: [{ type: Object }],
+  adminEmails: { type: [String], required: true },
+  streets: {
+    type: [{ type: Schema.Types.ObjectId, ref: 'Street' }],
+    required: true,
+  },
+  description: { type: String, required: true },
 })
 
 const Domain = mongoose.models.Domain || mongoose.model('Domain', DomainSchema)

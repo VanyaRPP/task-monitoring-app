@@ -1,49 +1,47 @@
-import React, { useState } from 'react'
-import Orders from './blocks/orders'
-import Masters from './blocks/masters'
-import Domains from './blocks/domains'
-import { Button } from 'antd'
-import AddTaskModal from '../AddTaskModal'
+import DashboardHeader from '../DashboardHeader'
+import PaymentsBlock from './blocks/payments'
+import ServicesBlock from './blocks/services'
+import CompaniesAreaChart from './blocks/сompaniesAreaChart'
 import s from './style.module.scss'
-import Tasks from './blocks/tasks'
-import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
-import { useSession } from 'next-auth/react'
-import CategoriesBlock from './blocks/categories'
-import { TaskButton } from '../UI/Buttons'
+import RealEstateBlock from './blocks/realEstates'
+import DomainsBlock from './blocks/domains'
+import { Roles } from '@utils/constants'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import StreetsBlock from './blocks/streets'
+import PaymentsChart from './blocks/PaymentsChart/paymentsChart'
 
 const Dashboard: React.FC = () => {
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
-  const session = useSession()
-  const userResponse = useGetUserByEmailQuery(session?.data?.user?.email)
-  const userRole = userResponse?.data?.data?.role
+  const { data: userResponse } = useGetCurrentUserQuery()
+  const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   return (
     <>
-      <div className={s.Header}>
-        <h1>Дошка</h1>
-        <div>
-          <Button
-            ghost
-            type="primary"
-            onClick={() => setIsModalVisible(!isModalVisible)}
-          >
-            Створити завдання
-          </Button>
-          <TaskButton />
+      <DashboardHeader />
+      <div className={s.DashboardGrid}>
+        <CompaniesAreaChart />
+        <div className={s.GridItem}>
+          <PaymentsChart/>
+        </div>
+        {isGlobalAdmin && (
+          <>
+            <div className={s.GridItem}>
+              <StreetsBlock />
+            </div>
+            <div className={s.GridItem}>
+              <DomainsBlock />
+            </div>
+          </>
+        )}
+        <div className={s.GridItem}>
+          <RealEstateBlock />
+        </div>
+        <div className={s.GridItem}>
+          <ServicesBlock />
+        </div>
+        <div className={s.GridItem}>
+          <PaymentsBlock />
         </div>
       </div>
-
-      <div className={s.Container}>
-        {userRole !== 'User' ? <Tasks style={`${s.Card} ${s.Orders}`} /> : null}
-        <Orders style={`${s.Card} ${s.Orders}`} />
-        <CategoriesBlock style={`${s.Card} ${s.Orders}`} />
-        {/* <Masters style={`${s.Card} ${s.Masters}`} />
-        <Domains style={`${s.Card} ${s.Domains}`} /> */}
-      </div>
-      <AddTaskModal
-        isModalVisible={isModalVisible}
-        setIsModalVisible={setIsModalVisible}
-      />
     </>
   )
 }

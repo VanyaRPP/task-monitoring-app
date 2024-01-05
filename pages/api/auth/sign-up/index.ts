@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import bcrypt from 'bcrypt'
-import start, { Data } from 'pages/api/api.config'
+import start, { Data } from '@pages/api/api.config'
 import User from '@common/modules/models/User'
 import { saltRounds } from '@utils/constants'
 
@@ -10,13 +12,15 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  const { name, email, password } = req.body
   switch (req.method) {
     case 'POST':
       try {
-        const { name, email, password } = req.body
-        User.findOne({
-          email,
-        }).then(() => new Error('Error: User is already exist!'))
+        const user = await User.findOne({ email })
+
+        if (user) {
+          return res.status(409).json({ success: false, error: 'User already exists!' })
+        }
 
         bcrypt.hash(password, saltRounds, async function (err, hash) {
           if (err) throw Error('Error: Encryption error!')

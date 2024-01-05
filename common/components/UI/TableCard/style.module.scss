@@ -1,0 +1,18 @@
+.Card {
+  overflow: hidden;
+
+  min-height: 300px;
+
+  :global .ant-card-body {
+    padding: 0;
+  }
+
+  // nested tables wrong position fix
+  :global
+    .ant-table.ant-table-small
+    .ant-table-tbody
+    .ant-table-wrapper:only-child
+    .ant-table {
+    margin: 0;
+  }
+}

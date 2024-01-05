@@ -7,7 +7,7 @@ const config = {
       'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos, culpa.',
   },
   bestDomain: {
-    name: 'Найкращий домен',
+    name: 'Найкращий надавач послуг',
     // address: 'Zhytomyr city, Mala Berdichivska street, 17',
     address: 'вул. Мала Бердичівська 17, Житомир',
     rate: 4,

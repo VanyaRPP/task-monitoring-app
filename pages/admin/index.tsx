@@ -4,7 +4,6 @@ import { authOptions } from '../api/auth/[...nextauth]'
 import AdminPageCategories from 'common/components/AdminIU/AdminPageCategories'
 import AdminPageClients from 'common/components/AdminIU/AdminPageClients'
 import AdminPageTasks from 'common/components/AdminIU/AdminPageTasks'
-import AdminPageDomains from 'common/components/AdminIU/AdminPageDomains'
 import s from './style.module.scss'
 import { Roles } from '../../utils/constants'
 
@@ -22,13 +21,9 @@ const AdminPage: React.FC = () => {
       <TabPane tab="Завдання" key="3">
         <AdminPageTasks />
       </TabPane>
-      <TabPane tab="Домени" key="4">
-        <AdminPageDomains />
-      </TabPane>
     </Tabs>
   )
 }
-
 export default AdminPage
 
 export async function getServerSideProps(context) {
@@ -42,9 +37,9 @@ export async function getServerSideProps(context) {
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/email/${session?.user?.email}`
   )
   const data = await response.json()
-  const role = data?.data?.role
+  const roles = data?.data?.roles
 
-  if (role !== Roles.ADMIN) {
+  if (!roles?.includes(Roles.GLOBAL_ADMIN)) {
     return {
       redirect: {
         destination: '/',

@@ -12,12 +12,12 @@ interface Props {
 
 const UserInfo: React.FC<Props> = ({ user }) => {
   const Actions = [
-    <Button key="edit" ghost type="primary">
-      <EditOutlined />
-    </Button>,
-    <Button key="delete" ghost type="primary">
-      <DeleteOutlined />
-    </Button>,
+    // <Button key="edit" ghost type="primary">
+    //   <EditOutlined />
+    // </Button>,
+    // <Button key="delete" ghost type="primary">
+    //   <DeleteOutlined />
+    // </Button>,
   ]
   return (
     <Card className={s.Card} actions={Actions}>

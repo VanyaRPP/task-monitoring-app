@@ -2,8 +2,9 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Production
 
-heroku
-https://taskmonitoringapp.herokuapp.com/
+```bash
+git clone git@github.com:VanyaRPP/task-monitoring-app.git
+```
 
 ## Production
 
@@ -20,7 +21,7 @@ npm run dev
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Step 3: Start the Project
 
 You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
 

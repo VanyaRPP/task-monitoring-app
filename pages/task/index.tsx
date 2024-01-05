@@ -20,34 +20,14 @@ const Tasks: React.FC = () => {
   const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
   const user = userData?.data
 
-  // useEffect(() => {
-  //   setValue('task-view', TaskView.CARD)
-  // }, [taskView])
-
   return (
     <>
       <TaskViewer tasks={tasks} />
-      {/* <Filter tasks={tasks} /> */}
       {tasks && tasks.length !== 0 ? (
-        <div className={s.TasksList}>
-          {/* {tasks &&
-            [...tasks].reverse().map((task: ITask, index) => {
-              // {task?.status == 'Completed' ? null : return <CardOneTask key={index} task={task} />}
-              return task?.status == 'completed' ? null : (
-                <CardOneTask key={index} task={task} />
-                )
-              // return <CardOneTask key={index} task={task} />
-            })} */}
-          {/* {tasks.map((task) => {
-            return <CardOneTask key={task._id} task={task} />
-          })} */}
-        </div>
+        <div className={s.TasksList}></div>
       ) : (
         <Empty description="Немає даних" />
       )}
-      {/* {tasks?.map((task) => {
-        return <ListOneTask task={tasks} />
-      })} */}
     </>
   )
 }

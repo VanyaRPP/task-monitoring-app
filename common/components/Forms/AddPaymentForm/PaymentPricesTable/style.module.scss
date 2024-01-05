@@ -1,0 +1,44 @@
+.month {
+  color: #7e7e7e;
+  font-size: 12px;
+}
+.doubleInputs {
+  .formItem {
+    margin: 0;
+  }
+  @media (min-width: 768px) {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+.input {
+  width: 100%;
+}
+
+.question_mark {
+  span {
+    top: 37.5% !important;
+    right: 5px !important;
+  }
+}
+
+.price {
+  padding-top: 0.5rem;
+}
+
+.popconfirm {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon {
+  font-size: 14px;
+}
+
+.addButton {
+  margin-top: 1rem;
+}

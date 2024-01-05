@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Card, Table, Button, Form, Avatar, Empty } from 'antd'
 import s from './style.module.scss'
 
-import ModalWindow from '../UI/ModalWindow/index'
+import Modal from '../UI/ModalWindow'
 import ApplyAuctionForm from '../ApplyAuctionForm/index'
 import {
   useGetUserByEmailQuery,
@@ -69,16 +69,16 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
         </Button>
       }
     >
-      <ModalWindow
+      <Modal
         title="Подати заявку в пропозиції"
-        isModalVisible={isModalVisible}
+        open={isModalVisible}
         onCancel={onCancelModal}
         onOk={onSubmiModal}
         okText="Подати заявку"
         cancelText="Скасувати"
       >
         <ApplyAuctionForm isFormDisabled={isFormDisabled} form={form} />
-      </ModalWindow>
+      </Modal>
       {taskExecutors && taskExecutors.length !== 0 ? (
         <Table dataSource={taskExecutors} pagination={false}>
           <Column

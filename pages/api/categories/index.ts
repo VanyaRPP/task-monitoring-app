@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Category from 'common/modules/models/Category'
-import start, { Data } from 'pages/api/api.config'
+import start, { Data } from '@pages/api/api.config'
 
 start()
 
@@ -12,7 +14,7 @@ export default async function handler(
     case 'GET':
       try {
         const categories = await Category.find({})
-        return res.status(201).json({ success: true, data: categories })
+        return res.status(200).json({ success: true, data: categories })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }

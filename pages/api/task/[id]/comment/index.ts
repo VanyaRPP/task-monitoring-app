@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Task from 'common/modules/models/Task'
-import start, { Data } from 'pages/api/api.config'
+import start, { Data } from '@pages/api/api.config'
 
 start()
 
@@ -18,7 +20,7 @@ export default async function handler(
               comment: [...(task.comment ?? []), ...req.body?.comment],
             }
           )
-          return res.status(201).json({ success: true, data: updatedTask })
+          return res.status(200).json({ success: true, data: updatedTask })
         })
       } catch (error) {
         return res.status(400).json({ success: false, data: error.message })
@@ -35,7 +37,7 @@ export default async function handler(
               ),
             }
           )
-          return res.status(400).json({ success: true, data: updatedTask })
+          return res.status(200).json({ success: true, data: updatedTask })
         })
       } catch (error) {
         return res.status(400).json({ success: false, data: error.message })

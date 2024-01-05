@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { FC, useMemo, useState } from 'react'
 import { Card, Table, Input, Button } from 'antd'
 import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
 import Router, { useRouter } from 'next/router'
@@ -8,14 +8,14 @@ import {
   useGetAllCategoriesQuery,
   useGetCategoryByIdQuery,
 } from '../../../api/categoriesApi/category.api'
-import s from './style.module.scss'
 import StatusTag from '../../UI/StatusTag'
 import TaskInCategory from '../../../../pages/task/category/[id]'
 import { getCount } from '../../../../utils/helpers'
 import { SelectOutlined } from '@ant-design/icons'
+import TableCard from '@common/components/UI/TableCard'
+import s from './style.module.scss'
 
-const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
-  const session = useSession()
+const CategoriesBlock: FC = () => {
   const router = useRouter()
   const tasksResponse = useGetAllTaskQuery('')
   const tasks = tasksResponse?.data?.data
@@ -40,15 +40,12 @@ const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
   ]
 
   return (
-    <Card
-      className={style}
+    <TableCard
       title={
         <Button type="link" onClick={() => Router.push(AppRoutes.CATEGORY)}>
-          Категорії
-          <SelectOutlined className={s.Icon} />
+          Категорії <SelectOutlined />
         </Button>
       }
-      style={{ flex: '1.5' }}
     >
       <Table
         className={s.Table}
@@ -57,6 +54,7 @@ const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
         showHeader={true}
         dataSource={categories}
         columns={columns}
+        size="small"
         pagination={{
           responsive: false,
           size: 'small',
@@ -71,7 +69,7 @@ const CategoriesBlock: React.FC<{ style: string }> = ({ style }) => {
           }
         }}
       />
-    </Card>
+    </TableCard>
   )
 }
 

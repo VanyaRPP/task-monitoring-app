@@ -1,0 +1,35 @@
+.NotificationWrapper {
+  width: 100%;
+  .header {
+    display: flex;
+    align-content: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-bottom: 3px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    .title {
+      font-weight: 500;
+    }
+    .controls {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.5rem;
+
+      div {
+        font-size: 0.6rem;
+        font-weight: 600;
+      }
+      div:first-child:hover {
+        text-decoration: underline;
+        cursor: pointer;
+      }
+      div:last-child:hover {
+        text-decoration: underline;
+        cursor: pointer;
+      }
+    }
+  }
+  .body {
+    padding: 10px;
+  }
+}

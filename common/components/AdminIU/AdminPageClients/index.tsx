@@ -3,13 +3,13 @@ import { useGetAllUsersQuery } from 'common/api/userApi/user.api'
 import { useState } from 'react'
 import Users from './UsersList'
 import s from './style.module.scss'
+import { Roles } from 'utils/constants'
 
 const { TabPane } = Tabs
 
 const AdminPageClients: React.FC = () => {
   const [active, setActive] = useState('1')
-  const { data } = useGetAllUsersQuery('')
-  const allClients = data?.data
+  const { data } = useGetAllUsersQuery()
 
   return (
     <Tabs
@@ -27,21 +27,23 @@ const AdminPageClients: React.FC = () => {
       }`}
     >
       <TabPane tab="Замовники" key="1" className={s.Users}>
-        {allClients && (
+        {data && (
           <Users
-            users={allClients.filter((client) => client.role === 'User')}
+            users={data.filter((client) => client.roles?.includes(Roles.USER))}
           />
         )}
       </TabPane>
       <TabPane tab="Майстри" key="2" className={s.Workers}>
-        {allClients && (
+        {data && (
           <Users
-            users={allClients.filter((client) => client.role === 'Worker')}
+            users={data.filter((client) =>
+              client.roles?.includes(Roles.WORKER)
+            )}
           />
         )}
       </TabPane>
       <TabPane tab="Преміум" key="3" className={s.Premium}>
-        {allClients && <Users users={[] /* TODO: filter users by premium */} />}
+        {data && <Users users={[] /* TODO: filter users by premium */} />}
       </TabPane>
     </Tabs>
   )

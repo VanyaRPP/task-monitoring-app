@@ -10,7 +10,6 @@ const Logo: React.FC = () => {
       <div className={s.All}>
         {/* <LogoCircle className={s.Logo} /> */}
         <NewLogo className={s.Logo} />
-        <h1 className={s.Title}>КОМУНАЛЬНИК</h1>
       </div>
     </Link>
   )

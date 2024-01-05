@@ -1,0 +1,29 @@
+.Form {
+  .inputNumber {
+    width: 100%;
+  }
+  .SelectBlock {
+    p {
+      margin-bottom: 0.5rem;
+    }
+    .Select {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+  }
+  .priceItem {
+    margin: 0;
+  }
+  .totalItem {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 1rem;
+    font-size: 1rem;
+    margin-top: 1rem;
+    p {
+      font-weight: bold;
+    }
+  }
+}

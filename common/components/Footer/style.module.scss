@@ -1,22 +1,20 @@
 @import 'styles/variables.scss';
 
 .Footer {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 0 50px;
-  background: transparent;
+  position: fixed;
+  bottom: 0;
+  z-index: 1000;
 
-  transition: margin 0.2s;
+  width: 100%;
+  padding: 0;
 
-  @media (max-width: 889px) {
-    padding: 0 25px;
-  }
+  background: var(--backgroundColorPrimary);
+  transition: background 0.5s;
 
-  @media (max-width: 600px) {
-    padding: 0 10px;
-    margin-left: 0 !important;
+  .Content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 

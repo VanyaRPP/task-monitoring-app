@@ -11,7 +11,6 @@ import {
   useGetUserByIdQuery,
 } from '../../api/userApi/user.api'
 import s from './style.module.scss'
-import ModalWindow from '../UI/ModalWindow'
 import ModalNoFooter from '../UI/ModalNoFooter'
 import EndTask from '../EndTask'
 import AddFeedbackForm from '../Forms/AddFeedbackForm'
@@ -70,7 +69,7 @@ const CompetitionWorkerCard: FC<Props> = ({
       _id: user?._id,
       feedback: [
         {
-          id: sessionUser?.data?._id,
+          id: sessionUser?.data?._id as string,
           text: formData?.text,
           grade: formData?.grade,
         },

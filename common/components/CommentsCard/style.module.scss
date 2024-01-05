@@ -12,7 +12,7 @@
   // @media (max-width: 1600px) {
   //   width: 100%;
   // }
-
+  border-radius: 20px 20px 0 0;
   min-height: 400px;
   max-height: 750px;
   position: relative;
@@ -52,7 +52,7 @@
     .List {
       background-color: transparent !important;
       // overflow: hidden;
-      overflow-y: scroll;
+      overflow-y: hidden;
     }
     .List ul {
       max-height: calc(750px - 64px - 64px);
@@ -178,7 +178,7 @@
     transition: background 0.5s, color 0.2s, border 0.2s;
     color: var(--textColor);
     background-color: var(--backgroundColorPrimary);
-    border-color: transparent !important;
+    border-color: #88888830 !important;
     &:hover {
       border-color: var(--primaryColor) !important;
     }
@@ -196,10 +196,6 @@
     border: 0;
     border-bottom-right-radius: 20px;
   }
-}
-
-.Block {
-  border: 1px solid blue;
 }
 
 .Card {

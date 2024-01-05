@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { PlusOutlined } from '@ant-design/icons'
 import { Empty, Card, List, Button, Form, Rate } from 'antd'
 import { IFeedback, IUser } from 'common/modules/models/User'
-import ModalWindow from 'common/components/UI/ModalWindow'
+import Modal from 'common/components/UI/ModalWindow'
 import AddFeedbackForm from 'common/components/Forms/AddFeedbackForm'
 import Feedback from './feedback'
 import {
@@ -71,7 +71,7 @@ const FeedbacksCard: React.FC<Props> = ({
       _id: user?._id,
       feedback: [
         {
-          id: sessionUser?.data?._id,
+          id: sessionUser?.data?._id as string,
           text: formData?.text,
           grade: formData?.grade ?? 1,
         },
@@ -97,16 +97,16 @@ const FeedbacksCard: React.FC<Props> = ({
               onClick={() => setIsModalVisible(true)}
             />
           )}
-          <ModalWindow
+          <Modal
             title={`Залиште відгук про ${user?.name}`}
-            isModalVisible={isModalVisible}
+            open={isModalVisible}
             onCancel={onCancelModal}
             onOk={onSubmitModal}
             okText="Залишити відгук"
             cancelText="Скасувати"
           >
             <AddFeedbackForm isFormDisabled={isFormDisabled} form={form} />
-          </ModalWindow>
+          </Modal>
         </span>
       }
       extra={<Rate tooltips={RateDescription} disabled value={userRate} />}

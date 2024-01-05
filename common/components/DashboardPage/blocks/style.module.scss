@@ -1,4 +1,10 @@
+.currency {
+  float: right;
+}
+
 .Table {
+  max-height: max-content;
+  cursor: pointer;
   button {
     color: var(--textColor);
   }
@@ -17,7 +23,58 @@
     }
   }
 }
-
-.Icon {
+.block {
+  display: flex;
+  justify-content: space-between;
+}
+.popconfirm {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.icon {
   font-size: 14px;
+}
+.eyelined {
+  display: flex;
+  align-items: center;
+  display: flex;
+  align-items: center;
+  height: 9px;
+  width: 9px;
+}
+.spin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.payer {
+  color: #1677ff !important;
+  &:hover {
+    color: #4096ff;
+  }
+}
+.summ_item,
+.saldo {
+  background-color: var(--backgroundColor);
+}
+.summ_item {
+  text-align: end;
+}
+.saldo {
+  text-align: center;
+}
+.title {
+  color: var(--primaryColor);
+  font-weight: 400;
+}
+.noScroll {
+  // 200px to compensate header and footer heights
+  min-height: calc(100vh - 200px) !important;
+}
+.Pagination {
+  display: flex;
+  justify-content: center;
+  margin: 25px 0;
 }

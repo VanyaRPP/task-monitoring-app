@@ -4,7 +4,7 @@
   text-align: center;
   font-size: calc(30px + (20 + 20 * 0.7) * ((100vw - 320px) / 1400));
   margin: 0;
-  margin-bottom: 2rem;
+  margin-bottom: 40px;
   transition: color 0.5s;
   color: var(--primaryColor);
 }
@@ -21,9 +21,20 @@
     flex-direction: column;
     gap: 40px;
   }
+  :global {
+    .ant-form-item label {
+      color: var(--textColor);
+    }
+    .ant-input {
+      background-color: var(--backgroundColorElements);
+      color: #858f96;
+    }
+  }
 }
 
 .HalfBlock {
+  box-shadow: 0 2px 10px -7px var(--textColor);
+  border-color: #88888830;
   display: flex;
   flex-direction: column;
   justify-content: center;

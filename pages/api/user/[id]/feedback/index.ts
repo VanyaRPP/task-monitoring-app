@@ -1,15 +1,16 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
-import User from 'common/modules/models/User'
-import start, { Data } from 'pages/api/api.config'
+import start, { Data } from '@pages/api/api.config'
 
 start()
 
-function averageNum(arr, keyName) {
-  return (
-    arr.reduce((sum, a) => sum + (keyName === undefined ? a : +a[keyName]), 0) /
-    arr.length
-  )
-}
+// function averageNum(arr, keyName) {
+//   return (
+//     arr.reduce((sum, a) => sum + (keyName === undefined ? a : +a[keyName]), 0) /
+//     arr.length
+//   )
+// }
 
 export default async function handler(
   req: NextApiRequest,
@@ -17,21 +18,24 @@ export default async function handler(
 ) {
   switch (req.method) {
     case 'PATCH':
-      try {
-        await User.findById(req.query.id).then(async (user) => {
-          const rating = averageNum(user?.feedback, 'grade')
-          const updatedUser = await User.findOneAndUpdate(
-            { _id: user._id },
-            {
-              feedback: [...(user.feedback ?? []), ...req.body?.feedback],
-              rating: rating || 0,
-            }
-          )
-          return res.status(201).json({ success: true, data: updatedUser })
-        })
-      } catch (error) {
-        return res.status(400).json({ success: false, data: error.message })
-      }
+      return res
+        .status(400)
+        .json({ success: false, message: 'not implemented' })
+      // try {
+      //   await User.findById(req.query.id).then(async (user) => {
+      //     const rating = averageNum(user?.feedback, 'grade').toFixed(1)
+      //     const updatedUser = await User.findOneAndUpdate(
+      //       { _id: user._id },
+      //       {
+      //         feedback: [...(user.feedback ?? []), ...req.body?.feedback],
+      //         rating: rating || 0,
+      //       }
+      //     )
+      //     return res.status(200).json({ success: true, data: updatedUser })
+      //   })
+      // } catch (error) {
+      //   return res.status(400).json({ success: false, data: error.message })
+      // }
       break
   }
 }

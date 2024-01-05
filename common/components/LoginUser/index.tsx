@@ -1,34 +1,57 @@
 import { useState } from 'react'
 import Router from 'next/router'
-import { Avatar, Button, Card, Image } from 'antd'
+import { Skeleton, Avatar, Button, Card, Image, Tag } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import { signIn, signOut, useSession } from 'next-auth/react'
-import { AppRoutes } from '../../../utils/constants'
+import { AppRoutes, Roles } from '../../../utils/constants'
 import classNames from 'classnames'
 import s from './style.module.scss'
-import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
+import { useGetCurrentUserQuery } from 'common/api/userApi/user.api'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import router from 'next/router'
 
 const LoginUser: React.FC = () => {
+  const { data: session, status } = useSession()
+
+  if (session?.user) return <SessionUser image={session?.user?.image} />
+
+  const isLoading = status === 'loading'
+  return (
+    <div className={s.SignButtons}>
+      {isLoading ? (
+        <div className={s.SkeletonAvatar}>
+          <Skeleton.Avatar />
+        </div>
+      ) : (
+        <>
+          <Button
+            onClick={() => signIn()}
+            ghost
+            type="primary"
+            className={s.Button}
+          >
+            Увійти
+          </Button>
+          <Button
+            onClick={() => {
+              router.push(AppRoutes.AUTH_SIGN_UP)
+            }}
+            ghost
+            type="primary"
+            className={s.Button}
+          >
+            Зареєструватися
+          </Button>
+        </>
+      )}
+    </div>
+  )
+}
+
+function SessionUser({ image }) {
+  const { data: user } = useGetCurrentUserQuery()
   const [menuActive, setMenuActive] = useState(false)
-
-  const { data: session } = useSession()
-  const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const user = data?.data
-
-  if (!session?.user) {
-    return (
-      <>
-        <Button
-          onClick={() => signIn()}
-          ghost
-          type="primary"
-          className={s.Button}
-        >
-          Увійти
-        </Button>
-      </>
-    )
-  }
 
   return (
     <>
@@ -40,7 +63,7 @@ const LoginUser: React.FC = () => {
           icon={<UserOutlined />}
           src={
             <Image
-              src={session?.user?.image || undefined}
+              src={image || undefined}
               preview={false}
               style={{ width: 32 }}
               alt="UserImg"
@@ -48,6 +71,7 @@ const LoginUser: React.FC = () => {
           }
         />
       </div>
+
       <div
         onClick={() => setMenuActive(false)}
         className={classNames(s.Info, { [s.Active]: menuActive })}
@@ -58,20 +82,39 @@ const LoginUser: React.FC = () => {
             icon={<UserOutlined />}
             src={
               <Image
-                src={session?.user?.image || undefined}
+                src={user?.image || undefined}
                 preview={false}
                 alt="UserImg"
               />
             }
           />
 
-          <h2>{session?.user?.name}</h2>
-          <p>{session?.user?.email}</p>
-          {user?.role === 'Admin' && (
+          <h2>{user?.name}</h2>
+          <p>{user?.email}</p>
+
+          {!user?.roles?.includes(Roles.GLOBAL_ADMIN) && (
+            <>
+              {user?.roles.length > 0 && (
+                <div>
+                  Роль:{` `}
+                  {user?.roles?.map((item) => (
+                    <Tag className={s.cardUserTag} key={item}>
+                      {item}
+                    </Tag>
+                  ))}
+                </div>
+              )}
+
+              {user && <DomainsCompanies />}
+            </>
+          )}
+
+          {user?.roles?.includes(Roles.GLOBAL_ADMIN) && (
             <Button type="link" onClick={() => Router.push(AppRoutes.ADMIN)}>
               Панель адміна
             </Button>
           )}
+
           <div className={s.Buttons}>
             <Button
               type="link"
@@ -86,6 +129,38 @@ const LoginUser: React.FC = () => {
           </div>
         </Card>
       </div>
+    </>
+  )
+}
+
+function DomainsCompanies() {
+  const { data: realEstates } = useGetAllRealEstateQuery({})
+  const { data: domains = [] } = useGetDomainsQuery({})
+
+  const companies = realEstates?.data || []
+
+  return (
+    <>
+      {domains.length > 0 && (
+        <div>
+          Надавачі послуг:{` `}
+          {domains.map((item) => (
+            <Tag className={s.cardUserTag} key={item.name}>
+              {item.name}
+            </Tag>
+          ))}
+        </div>
+      )}
+      {companies.length > 0 && (
+        <div>
+          Компанії:{` `}
+          {companies.map((item) => (
+            <Tag className={s.cardUserTag} key={item.companyName}>
+              {item.companyName}
+            </Tag>
+          ))}
+        </div>
+      )}
     </>
   )
 }

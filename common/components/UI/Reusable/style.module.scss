@@ -1,0 +1,24 @@
+.tooltipIcon {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translate(-16px, -50%);
+}
+
+.filtersTagsBlock {
+  display: flex;
+  flex-direction: column;
+}
+.filters {
+  display: flex;
+  flex-direction: row;
+  margin-left: 2rem;
+}
+.filtersTags {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 700px;
+}
+.Tag {
+  margin: 0.25rem 0 0.25rem 0.5rem;
+}

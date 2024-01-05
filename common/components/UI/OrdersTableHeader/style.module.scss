@@ -1,0 +1,11 @@
+.TableHeader {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.Buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-inline: 1rem;
+}

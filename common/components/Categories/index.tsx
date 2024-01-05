@@ -24,7 +24,7 @@ const Categories: React.FC<{
 
   const { data: session } = useSession()
   const { data } = useGetUserByEmailQuery(`${session?.user?.email}`)
-  const role = data?.data?.role
+  const roles = data?.data?.roles
 
   useEffect(() => {
     setCategories(
@@ -41,17 +41,18 @@ const Categories: React.FC<{
       renderItem={(category) => (
         <List.Item
           className={s.Category}
-          actions={[
-            <Button
-              className={s.Buttons}
-              key="info"
-              type="primary"
-              onClick={() => ''}
-            >
-              Інформація
-            </Button>,
-          ].concat(
-            role === Roles.ADMIN
+          actions={
+            //   [
+            //   <Button
+            //     className={s.Buttons}
+            //     key="info"
+            //     type="primary"
+            //     onClick={() => ''}
+            //   >
+            //     Інформація
+            //   </Button>,
+            // ].concat(
+            roles?.includes(Roles.GLOBAL_ADMIN)
               ? [
                   <DeleteButton
                     key="delete"
@@ -63,7 +64,8 @@ const Categories: React.FC<{
                   />,
                 ]
               : []
-          )}
+            // )
+          }
         >
           <Skeleton title={false} loading={false} active>
             <List.Item.Meta

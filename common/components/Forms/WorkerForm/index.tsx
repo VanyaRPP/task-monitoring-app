@@ -1,7 +1,3 @@
-import {
-  allowOnlyNumbers,
-  validateField,
-} from '@common/assets/features/validators'
 import { PlacesAutocomplete } from '@common/components/PlacesAutocomplete'
 import { IAddress } from '@common/modules/models/Task'
 import { IUser } from '@common/modules/models/User'
@@ -11,7 +7,6 @@ import {
   SetStateAction,
   useCallback,
   useEffect,
-  useState,
 } from 'react'
 import s from './index.module.scss'
 
@@ -54,18 +49,6 @@ const WorkerForm: React.FC<PropsType> = ({
       name="form_in_modal"
       disabled={isFormDisabled}
     >
-      <Form.Item
-        name="tel"
-        label="Номер телефону"
-        normalize={allowOnlyNumbers}
-        rules={validateField('phone')}
-      >
-        <Input
-          addonBefore="+380"
-          style={{ width: '100%' }}
-          placeholder="Введіть номер телефону"
-        />
-      </Form.Item>
       {!user?.address?.name ? (
         <Form.Item name="domain" label="Адреса">
           <PlacesAutocomplete

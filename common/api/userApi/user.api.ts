@@ -19,7 +19,7 @@ export const userApi = createApi({
       },
       invalidatesTags: ['User'],
     }),
-    getUserByEmail: builder.query<BaseQuery, string>({
+    getUserByEmail: builder.query<BaseQuery, string | string[]>({
       query: (email) => `user/email/${email}`,
       providesTags: (result) => ['User'],
     }),
@@ -27,17 +27,19 @@ export const userApi = createApi({
       query: (id) => `user/${id}`,
       providesTags: (result) => ['User'],
     }),
-    updateUserRole: builder.mutation<IUser, Partial<IUser>>({
-      query(data) {
-        const { email, ...body } = data
-        return {
-          url: `user/email/${email}?role=${body.role}`,
-          method: 'PATCH',
-          body,
-        }
-      },
-      invalidatesTags: ['User'],
-    }),
+    // updateUserRole: builder.mutation<IUser, Partial<IUser>>({
+    //   query(data) {
+    //     const { email, ...body } = data
+    //     return {
+    //       url: `user/email/${email}?roles=${body.roles}`,
+    //       method: 'PATCH',
+    //       body,
+    //     }
+    //   },
+    //   invalidatesTags: ['User'],
+    // }),
+
+    // TODO: fix. user can update only himself
     updateUser: builder.mutation<IUser, Partial<IUser>>({
       query(data) {
         const { _id, ...body } = data
@@ -49,9 +51,15 @@ export const userApi = createApi({
       },
       invalidatesTags: ['User'],
     }),
-    getAllUsers: builder.query<AllUsersQuery, string>({
+    getAllUsers: builder.query<IUser[], void>({
       query: () => '/user',
       providesTags: (result) => ['User'],
+      transformResponse: (response: AllUsersQuery) => response.data,
+    }),
+    getCurrentUser: builder.query<IUser, void>({
+      query: () => '/user/current',
+      providesTags: (result) => ['User'],
+      transformResponse: (response: BaseQuery) => response.data,
     }),
     addFeedback: builder.mutation<IUser, Partial<IUser>>({
       query(data) {
@@ -71,7 +79,8 @@ export const {
   useSignUpMutation,
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
-  useUpdateUserRoleMutation,
+  useGetCurrentUserQuery,
+  // useUpdateUserRoleMutation,
   useUpdateUserMutation,
   useGetAllUsersQuery,
   useAddFeedbackMutation,

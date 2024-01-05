@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import { ITask } from './../../../common/modules/models/Task'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import Task from 'common/modules/models/Task'

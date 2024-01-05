@@ -2,16 +2,13 @@ import React, { useEffect, useState } from 'react'
 import { Card, Table, Input, Avatar } from 'antd'
 import useDebounce from 'common/modules/hooks/useDebounce'
 import { masters as config } from 'common/lib/dashboard.config'
-
-interface Props {
-  style?: string
-}
+import TableCard from '@common/components/UI/TableCard'
 
 function removeDublicates(data) {
   return data.filter((value, index) => data.indexOf(value) === index)
 }
 
-const Masters: React.FC<Props> = ({ style }) => {
+const Masters = () => {
   const [data, setData] = useState(config)
   const [search, setSearch] = useState({ name: '' })
   const debounced = useDebounce<{ name: string }>(search)
@@ -86,9 +83,9 @@ const Masters: React.FC<Props> = ({ style }) => {
   ]
 
   return (
-    <Card className={style} title="Майстри" style={{ flex: '1.5' }}>
+    <TableCard title="Майстри">
       <Table dataSource={data} columns={columns} pagination={false} />
-    </Card>
+    </TableCard>
   )
 }
 
