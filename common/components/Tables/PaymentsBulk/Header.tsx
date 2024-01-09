@@ -64,7 +64,12 @@ const InvoicesHeader = () => {
 
       <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
         <DomainsSelect form={form} />
-        <AddressesSelect form={form} />
+        <div style={{ width: '250px' }}>
+          <AddressesSelect
+            form={form}
+            dropdownStyle={{ minWidth: 'max-content' }}
+          />
+        </div>
         <MonthServiceGeneralInfo />
       </div>
 
@@ -170,10 +175,10 @@ const validateInvoice = (invoice, service) => {
   }
 
   if (invoice.waterPart && invoice.waterPart.sum > 0) {
-    result.waterPart = { 
+    result.waterPart = {
       price: invoice.waterPart.price,
-      sum: invoice.waterPart.sum
-     }
+      sum: invoice.waterPart.sum,
+    }
   } else {
     result.waterPrice = {
       ...invoice.waterPrice,
@@ -181,7 +186,7 @@ const validateInvoice = (invoice, service) => {
     }
   }
 
-  return result;
+  return result
 }
 
 const prepareInvoiceObjects = async (
@@ -197,9 +202,10 @@ const prepareInvoiceObjects = async (
       (company) => company.companyName === values.companies[key].companyName
     )
     const { provider, reciever } = getPaymentProviderAndReciever(company)
-  
 
-    const filteredInvoice = filterInvoiceObject(validateInvoice(invoice, service))
+    const filteredInvoice = filterInvoiceObject(
+      validateInvoice(invoice, service)
+    )
     return {
       invoiceNumber: newInvoiceNumber + index,
       type: Operations.Debit,
@@ -210,7 +216,7 @@ const prepareInvoiceObjects = async (
       invoiceCreationDate: new Date(),
       description: '',
       generalSum:
-          filteredInvoice
+        filteredInvoice
           .reduce((acc, val) => acc + (+val.sum || 0), 0)
           .toFixed(2) || 0,
       provider,
@@ -219,4 +225,3 @@ const prepareInvoiceObjects = async (
     }
   })
 }
-
