@@ -198,8 +198,8 @@ function FormAttributeForSingle({
 
 export function AmountWaterPartField() {
   const { paymentData, form } = usePaymentContext()
-  const serviceId =
-    Form.useWatch('monthService', form) || paymentData?.monthService
+  const serviceIdRaw = Form.useWatch('monthService', form) || paymentData?.monthService;
+  const serviceId = typeof serviceIdRaw === 'object' ? serviceIdRaw._id : serviceIdRaw;
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const { company } = useCompany({ companyId })
   const { service } = useService({ serviceId })
