@@ -20,7 +20,9 @@ const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.SERVICE
 
-  const { data, isLoading, isError } = useGetAllServicesQuery({limit: isOnPage ? 0 : 5})
+  const { data, isLoading, isError } = useGetAllServicesQuery({
+    limit: isOnPage ? 0 : 5,
+  })
 
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -112,12 +114,12 @@ const getDefaultColumns = (
       width: 200,
       render: renderCurrency,
     },
-    {
-      title: 'МЗК',
-      dataIndex: 'publicElectricUtilityPrice',
-      width: 200,
-      render: renderCurrency,
-    },
+    // {
+    //   title: 'МЗК',
+    //   dataIndex: 'publicElectricUtilityPrice',
+    //   width: 200,
+    //   render: renderCurrency,
+    // },
     {
       title: (
         <Tooltip title="Індекс Інфляції">
