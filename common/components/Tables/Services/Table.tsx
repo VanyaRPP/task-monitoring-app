@@ -59,6 +59,14 @@ const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
   )
 }
 
+const renderTooltip = (text: string) => {
+  return (
+    <Tooltip title={text} placement="bottomRight">
+      <span>{text}</span>
+    </Tooltip>
+  )
+}
+
 const getDefaultColumns = (
   isAdmin?: boolean,
   handleDelete?: (...args: any) => void,
@@ -134,6 +142,7 @@ const getDefaultColumns = (
       dataIndex: 'description',
       key: 'description',
       ellipsis: true,
+      render: renderTooltip,
     },
   ]
 
