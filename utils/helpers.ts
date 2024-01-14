@@ -370,5 +370,3 @@ export function generateColorsArray(length: number): string[] {
   }
   return initialColors
 }
-
-

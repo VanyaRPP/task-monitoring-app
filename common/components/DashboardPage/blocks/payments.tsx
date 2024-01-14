@@ -24,12 +24,11 @@ import { PERIOD_FILTR } from '@utils/constants'
 import { isAdminCheck, renderCurrency } from '@utils/helpers'
 
 interface PaymentDeleteItem {
-  id: string,
-  date: string,
-  domain: string,
-  company: string,
+  id: string
+  date: string
+  domain: string
+  company: string
 }
-
 
 function getDateFilter(value) {
   const [, year, period, number] = value || []
@@ -120,8 +119,12 @@ const PaymentsBlock = () => {
             render: (invoice) => {
               const item = invoice.find((item) => item.type === type)
               const sum = +(item?.sum || item?.price)
-              const currency = renderCurrency(sum?.toFixed(2)); 
-              return <span className={currency === '-' ? s.currency : ''}>{currency}</span>
+              const currency = renderCurrency(sum?.toFixed(2))
+              return (
+                <span className={currency === '-' ? s.currency : ''}>
+                  {currency}
+                </span>
+              )
             },
           })),
         ]
@@ -267,46 +270,48 @@ const PaymentsBlock = () => {
       payments?.data && (
         <Table.Summary fixed>
           <Table.Summary.Row className={s.summ_item}>
-            {columns.map((item, index) => { 
+            {columns.map((item, index) => {
               let dataindex
               currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
-              ? dataindex=columns[index-1]?.dataIndex
-              : dataindex=item.dataIndex
-              return(
-              <Table.Summary.Cell
-                index={0}
-                key={item.dataIndex}
-                colSpan={item.dataIndex === '' ? 2 : 1}
-              >
-                {dataindex === Operations.Debit
-                  ? payments?.totalPayments?.debit?.toFixed(2) || 0
-                  : ''}
-                {dataindex === Operations.Credit
-                  ? payments?.totalPayments?.credit?.toFixed(2) || 0
-                  : ''}
-              </Table.Summary.Cell>
-            )})}
+                ? (dataindex = columns[index - 1]?.dataIndex)
+                : (dataindex = item.dataIndex)
+              return (
+                <Table.Summary.Cell
+                  index={0}
+                  key={item.dataIndex}
+                  colSpan={item.dataIndex === '' ? 2 : 1}
+                >
+                  {dataindex === Operations.Debit
+                    ? payments?.totalPayments?.debit?.toFixed(2) || 0
+                    : ''}
+                  {dataindex === Operations.Credit
+                    ? payments?.totalPayments?.credit?.toFixed(2) || 0
+                    : ''}
+                </Table.Summary.Cell>
+              )
+            })}
           </Table.Summary.Row>
           <Table.Summary.Row className={s.saldo}>
-            {columns.slice(0, columns.length - 1).map((item, index) => { 
+            {columns.slice(0, columns.length - 1).map((item, index) => {
               let dataindex
               currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
-              ? dataindex=columns[index-1]?.dataIndex 
-              : dataindex=item.dataIndex
-              return (              <Table.Summary.Cell
-                colSpan={item.dataIndex === Operations.Debit ? 2 : 1}
-                index={0}
-                key={item.dataIndex}
-              >
-                {dataindex === Operations.Debit
-                  ? (
-                      (payments?.totalPayments?.debit || 0) -
-                      (payments?.totalPayments?.credit || 0)
-                    )?.toFixed(2)
-                  : false}
-              </Table.Summary.Cell>)
-
-              })}
+                ? (dataindex = columns[index - 1]?.dataIndex)
+                : (dataindex = item.dataIndex)
+              return (
+                <Table.Summary.Cell
+                  colSpan={item.dataIndex === Operations.Debit ? 2 : 1}
+                  index={0}
+                  key={item.dataIndex}
+                >
+                  {dataindex === Operations.Debit
+                    ? (
+                        (payments?.totalPayments?.debit || 0) -
+                        (payments?.totalPayments?.credit || 0)
+                      )?.toFixed(2)
+                    : false}
+                </Table.Summary.Cell>
+              )
+            })}
           </Table.Summary.Row>
         </Table.Summary>
       )
@@ -315,25 +320,32 @@ const PaymentsBlock = () => {
 
   let content: ReactElement
 
-  const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<PaymentDeleteItem[]>([])
+  const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
+    PaymentDeleteItem[]
+  >([])
 
   const onSelect = (a, selected, rows) => {
-    if(selected)
-      setPaymentsDeleteItems([...paymentsDeleteItems, {
-        id: a?._id,
-        date: a?.monthService?.date,
-        domain: a?.domain?.name,
-        company: a?.company?.companyName,
-      }])
+    if (selected)
+      setPaymentsDeleteItems([
+        ...paymentsDeleteItems,
+        {
+          id: a?._id,
+          date: a?.monthService?.date,
+          domain: a?.domain?.name,
+          company: a?.company?.companyName,
+        },
+      ])
     else
-      setPaymentsDeleteItems(paymentsDeleteItems.filter((item) => item.id != a?._id))
+      setPaymentsDeleteItems(
+        paymentsDeleteItems.filter((item) => item.id != a?._id)
+      )
   }
 
   const rowSelection = {
-    selectedRowKeys: paymentsDeleteItems.map(item => item.id),
-    defaultSelectedRowKeys: paymentsDeleteItems.map(item => item.id),
-    onSelect: onSelect
-  };
+    selectedRowKeys: paymentsDeleteItems.map((item) => item.id),
+    defaultSelectedRowKeys: paymentsDeleteItems.map((item) => item.id),
+    onSelect: onSelect,
+  }
 
   if (deleteError || paymentsError || currUserError) {
     content = <Alert message="Помилка" type="error" showIcon closable />
@@ -341,7 +353,12 @@ const PaymentsBlock = () => {
     content = (
       <>
         <Table
-          rowSelection={currUser?.roles?.includes(Roles.GLOBAL_ADMIN) && pathname === AppRoutes.PAYMENT ? rowSelection : null}
+          rowSelection={
+            currUser?.roles?.includes(Roles.GLOBAL_ADMIN) &&
+            pathname === AppRoutes.PAYMENT
+              ? rowSelection
+              : null
+          }
           columns={columns}
           dataSource={payments?.data}
           pagination={false}
@@ -384,23 +401,23 @@ const PaymentsBlock = () => {
 
   return (
     // <PaymentRemoveProvider>
-      <TableCard
-        title={
-          <PaymentCardHeader
-            paymentsDeleteItems={paymentsDeleteItems}
-            closeEditModal={closeEditModal}
-            setCurrentDateFilter={setCurrentDateFilter}
-            currentPayment={currentPayment}
-            paymentActions={paymentActions}
-            payments={payments}
-            filters={filters}
-            setFilters={setFilters}
-          />
-        }
-        className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}
-      >
-        {content}
-      </TableCard>
+    <TableCard
+      title={
+        <PaymentCardHeader
+          paymentsDeleteItems={paymentsDeleteItems}
+          closeEditModal={closeEditModal}
+          setCurrentDateFilter={setCurrentDateFilter}
+          currentPayment={currentPayment}
+          paymentActions={paymentActions}
+          payments={payments}
+          filters={filters}
+          setFilters={setFilters}
+        />
+      }
+      className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}
+    >
+      {content}
+    </TableCard>
     // </PaymentRemoveProvider>
   )
 }
