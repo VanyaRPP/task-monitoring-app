@@ -1,7 +1,7 @@
 import { PlusOutlined, SelectOutlined, DeleteOutlined } from '@ant-design/icons'
 import React, { useState } from 'react'
 import { AppRoutes, Roles } from '@utils/constants'
-import { Button, message } from 'antd'
+import { Button, Table, message } from 'antd'
 import { useRouter } from 'next/router'
 import AddPaymentModal from '@common/components/AddPaymentModal'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
@@ -13,6 +13,22 @@ import ImportInvoices from './ImportInvoices'
 import { useDeleteMultiplePaymentsMutation } from '@common/api/paymentApi/payment.api'
 import Modal from 'antd/lib/modal/Modal'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
+
+const columns: any = [
+  {
+    title: 'Надавач поcлуг',
+    dataIndex: 'domain',
+  },
+  {
+    title: 'Компанія',
+    dataIndex: 'company',
+  },
+  {
+    title: 'Дата створення платежу',
+    dataIndex: 'date',
+    render: dateToDefaultFormat,
+  },
+]
 
 const PaymentCardHeader = ({
   setCurrentDateFilter,
@@ -44,19 +60,25 @@ const PaymentCardHeader = ({
   const [deletePayment] = useDeleteMultiplePaymentsMutation()
 
   const handleDeletePayments = async () => {
-    (Modal as any).confirm({
+    ;(Modal as any).confirm({
       title: 'Ви впевнені, що хочете видалити обрані проплати?',
       cancelText: 'Ні',
       okText: 'Так',
-      content: <>
-        {paymentsDeleteItems.map((item, index) => 
-          <div key={index}>
-            {index+1}. {item.domain}, {item.company}, {dateToDefaultFormat(item.date)}
-          </div>
-        )}
-      </>,
+      width: 600,
+      content: (
+        <Table
+          columns={columns}
+          dataSource={paymentsDeleteItems}
+          pagination={false}
+          bordered
+          size="small"
+          rowKey="_id"
+        />
+      ),
       onOk: async () => {
-        const response = await deletePayment(paymentsDeleteItems.map(item => item.id))
+        const response = await deletePayment(
+          paymentsDeleteItems.map((item) => item.id)
+        )
         if ('data' in response) {
           message.success('Видалено!')
         } else {
@@ -107,9 +129,15 @@ const PaymentCardHeader = ({
               <Button type="link" onClick={() => setIsModalOpen(true)}>
                 <PlusOutlined /> Додати
               </Button>
-              {isGlobalAdmin && pathname === AppRoutes.PAYMENT && <Button type="link" onClick={() => handleDeletePayments()} disabled={paymentsDeleteItems.length == 0}>
-                <DeleteOutlined /> Видалити
-              </Button>}
+              {isGlobalAdmin && pathname === AppRoutes.PAYMENT && (
+                <Button
+                  type="link"
+                  onClick={() => handleDeletePayments()}
+                  disabled={paymentsDeleteItems.length == 0}
+                >
+                  <DeleteOutlined /> Видалити
+                </Button>
+              )}
             </div>
           </>
         ) : (
