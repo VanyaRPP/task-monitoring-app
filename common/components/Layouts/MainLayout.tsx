@@ -12,7 +12,7 @@ const MainLayout: React.FC<Props> = ({ children }) => {
   return (
     <>
       <Head>
-        <title>Task-monitoring-app</title>
+        <title>Персональний кабінет</title>
       </Head>
 
       <Layout className={s.Layout}>

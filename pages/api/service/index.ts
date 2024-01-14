@@ -6,6 +6,7 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import Service from '@common/modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
 import Domain from '@common/modules/models/Domain'
+import Street from '@common/modules/models/Street'
 
 start()
 
@@ -19,6 +20,9 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
+        await Domain.find({});
+        await Street.find({});
+        
         const options = {}
 
         const { domainId, streetId, serviceId, limit = 0 } = req.query
@@ -117,7 +121,7 @@ export default async function handler(
           data: services,
         })
       } catch (error) {
-        return res.status(400).json({ success: false, message: error })
+        return res.status(400).json({ success: false, error: error.message})
       }
 
     case 'POST':
