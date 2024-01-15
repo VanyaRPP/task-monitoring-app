@@ -316,17 +316,21 @@ const PaymentsBlock = () => {
   let content: ReactElement
 
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<PaymentDeleteItem[]>([])
-
+  const [selectedPayments, setSelectedPayments] = useState<IExtendedPayment[]>([])
   const onSelect = (a, selected, rows) => {
-    if(selected)
+    if(selected){
       setPaymentsDeleteItems([...paymentsDeleteItems, {
         id: a?._id,
         date: a?.monthService?.date,
         domain: a?.domain?.name,
         company: a?.company?.companyName,
       }])
-    else
+      setSelectedPayments([...selectedPayments, a])
+    }
+    else{
       setPaymentsDeleteItems(paymentsDeleteItems.filter((item) => item.id != a?._id))
+      setSelectedPayments(selectedPayments.filter((item) => item.invoiceNumber !== a?.invoiceNumber))
+    }
   }
 
   const rowSelection = {
@@ -395,6 +399,7 @@ const PaymentsBlock = () => {
             payments={payments}
             filters={filters}
             setFilters={setFilters}
+            selectedPayments={selectedPayments}
           />
         }
         className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}
