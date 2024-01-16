@@ -185,28 +185,6 @@ export const extendedPaymentsSort: IExtendedPayment[] = [
 
 export const extendedPaymentForTestForCorrectValue: IExtendedPayment[] = [
   {
-    _id: '3',
-    _v: 1,
-    invoiceNumber: 3,
-    type: 'publicElectricUtilityPrice',
-    invoiceCreationDate: new Date('2023-12-07'),
-    domain: 'Test_Domain',
-    street: 'Klosovskogo',
-    company: 'Test Company',
-    monthService: '6501beaceab61c2d11fecd87',
-    invoice: [
-      { type: 'Service A', price: 42.5, sum: 42.5 },
-      { type: 'Service B', price: 42.5, sum: 42.5 },
-    ],
-    provider: { description: 'description' },
-    reciever: {
-      companyName: 'Test',
-      adminEmails: ['admin@test.com'],
-      description: 'Description',
-    },
-    generalSum: 85,
-  },
-  {
     _id: '8',
     _v: 1,
     invoiceNumber: 8,

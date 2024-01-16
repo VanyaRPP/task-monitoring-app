@@ -45,9 +45,7 @@ export function useCustomDataSource({ preview }) {
       if (company?.discount) {
         itemsToDisplay.push({ name: ServiceType.Discount })
       }
-      if (company?.publicElectricUtility) {
-        itemsToDisplay.push({ name: ServiceType.ElectricUtility })
-      }
+      // }
       if (itemsToDisplay.length > 0) {
         setDataSource(refreshIndexes([...dataSource, ...itemsToDisplay]))
       }

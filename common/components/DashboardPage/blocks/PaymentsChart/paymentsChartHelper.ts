@@ -44,7 +44,6 @@ const filterValues = [
   ServiceType.Placing,
   ServiceType.Inflicion,
   ServiceType.Electricity,
-  ServiceType.ElectricUtility,
   ServiceType.GarbageCollector,
   ServiceType.Water,
   ServiceType.WaterPart,

@@ -195,13 +195,6 @@ const getDefaultColumns = ({
       width: 170,
       render: (value) => <Checkbox checked={value} disabled />,
     },
-    // {
-    //   align: 'center',
-    //   title: 'Нарахування МЗК',
-    //   dataIndex: 'publicElectricUtility',
-    //   width: 170,
-    //   render: (value) => <Checkbox checked={value} disabled />,
-    // },
   ]
 
   if (isAdmin) {

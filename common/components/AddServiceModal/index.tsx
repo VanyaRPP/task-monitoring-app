@@ -23,7 +23,6 @@ type FormData = {
   waterPrice: number
   waterPriceTotal: number
   garbageCollectorPrice: number
-  publicElectricUtilityPrice: number
   inflicionPrice: number
   description: string
 }
@@ -45,7 +44,6 @@ const AddServiceModal: FC<Props> = ({ closeModal, currentService }) => {
       waterPrice: formData.waterPrice,
       waterPriceTotal: formData.waterPriceTotal,
       garbageCollectorPrice: formData.garbageCollectorPrice || 0,
-      publicElectricUtilityPrice: formData.publicElectricUtilityPrice || 0,
       inflicionPrice: formData.inflicionPrice || 0,
       description: formData.description || '',
     }
