@@ -1,8 +1,6 @@
 import {
   maintenanceWithoutInflicionDescription,
   inflicionDescription,
-  publicElectricUtilityDescription,
-  ServiceType,
 } from '@utils/constants'
 import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
 import useService, {
@@ -52,14 +50,7 @@ export function NameWaterField({ dateMonth }) {
     </span>
   )
 }
-// export function PublicElectricUtilityField({ dateMonth, preview }) {
-//   return (
-//     <span className={s.rowText}>
-//       МЗК електрика <div className={s.month}>{dateMonth}</div>
-//       {!preview && <StyledTooltip title={publicElectricUtilityDescription} />}
-//     </span>
-//   )
-// }
+
 export function NameGarbageCollectorField({ dateMonth }) {
   return (
     <span className={s.rowText}>

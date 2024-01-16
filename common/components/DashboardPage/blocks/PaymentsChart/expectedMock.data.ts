@@ -36,11 +36,6 @@ export const expectedResultData = [
 
   export const expectedDataForTestForCorrectValue = [
     {
-      date: '07-12-2023',
-      value: 85,
-      category: 'Загальна сума',
-    },
-    {
       date: '08-12-2023',
       value: 60,
       category: 'Загальна сума',
