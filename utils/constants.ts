@@ -120,7 +120,7 @@ export const quarters = {
   '4': [10, 11, 12],
 }
 
-export const cascaderYears = ['2021', '2022', '2023']
+export const cascaderYears = ['2021', '2022', '2023', '2024']
 
 export const cascaderQuarters = [
   {
