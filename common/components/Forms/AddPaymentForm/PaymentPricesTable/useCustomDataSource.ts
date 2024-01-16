@@ -28,6 +28,7 @@ export function useCustomDataSource({ preview }) {
 
   useEffect(() => {
     if (!paymentData?.invoice) {
+      const itemsToDisplay = []
       if (company?.inflicion) {
         itemsToDisplay.push({ name: ServiceType.Inflicion })
       }
