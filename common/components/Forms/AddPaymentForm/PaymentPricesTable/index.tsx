@@ -4,7 +4,7 @@ import {
   PlusOutlined,
 } from '@ant-design/icons'
 import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
-import { Popconfirm, Button, Table, Input } from 'antd'
+import {Popconfirm, Button, Table, Input, Form} from 'antd'
 import { ServiceType, paymentsTitle } from '@utils/constants'
 import { ColumnProps } from 'antd/lib/table'
 import { getName } from '@utils/helpers'
@@ -106,6 +106,7 @@ function PaymentPricesTable({ paymentActions }) {
 }
 
 function AddCustomField({ addDataSource }) {
+  const [form] = Form.useForm()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [customFieldName, setCustomFieldName] = useState('')
 
@@ -137,6 +138,7 @@ function AddCustomField({ addDataSource }) {
         title="Додати поле"
         open={isModalOpen}
         onOk={addField}
+        changesForm={() => form.isFieldsTouched()}
         onCancel={() => setIsModalOpen(false)}
       >
         <Input

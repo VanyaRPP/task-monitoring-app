@@ -145,6 +145,7 @@ const CompetitionCard: React.FC<{
       <Modal
         title="Подати заявку"
         open={isModalVisible}
+        changesForm={() => form.isFieldsTouched()}
         onCancel={onCancelModal}
         onOk={onSubmitModal}
         okText="Додати"
