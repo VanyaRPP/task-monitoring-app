@@ -122,12 +122,6 @@ const getDefaultColumns = (
       width: 200,
       render: renderCurrency,
     },
-    // {
-    //   title: 'МЗК',
-    //   dataIndex: 'publicElectricUtilityPrice',
-    //   width: 200,
-    //   render: renderCurrency,
-    // },
     {
       title: (
         <Tooltip title="Індекс Інфляції">

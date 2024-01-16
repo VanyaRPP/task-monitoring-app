@@ -153,13 +153,6 @@ const validateInvoice = (invoice, service) => {
     }
   }
 
-  if (invoice.publicElectricUtility.sum > 0) {
-    result.publicElectricUtilityPrice = {
-      amount: invoice.publicElectricUtility.amount,
-      sum: invoice.publicElectricUtility.sum,
-    }
-  }
-
   if (invoice.cleaningPrice > 0) {
     result.cleaningPrice = {
       price: invoice.cleaningPrice,

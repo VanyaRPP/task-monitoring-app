@@ -8,7 +8,6 @@ import {
   AmountWaterField,
   AmountWaterPartField,
   AmountDiscountField,
-  AmountElectricUtility,
 } from './amountFields'
 
 const fields: any = {
@@ -20,7 +19,6 @@ const fields: any = {
   [ServiceType.Inflicion]: AmountInflicionField,
   [ServiceType.WaterPart]: AmountWaterPartField,
   [ServiceType.Discount]: AmountDiscountField,
-  [ServiceType.ElectricUtility]: AmountElectricUtility,
 }
 
 export default function AmountComponent({ record, edit }) {

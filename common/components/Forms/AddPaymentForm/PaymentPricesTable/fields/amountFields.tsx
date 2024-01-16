@@ -81,19 +81,6 @@ function AmountPlacingInflicionField({ record, disabled, infliction }) {
   )
 }
 
-export function AmountElectricUtility() {
-  const { paymentData, form } = usePaymentContext()
-  const companyId = Form.useWatch('company', form) || paymentData?.company
-  const serviceId =
-    Form.useWatch('monthService', form) || paymentData?.monthService
-
-  const { company } = useCompany({ companyId })
-  const { service } = useService({ serviceId })
-  if (service?.publicElectricUtilityPrice && company?.rentPart) {
-    return `${company?.rentPart}% від ${service?.publicElectricUtilityPrice}`
-  }
-}
-
 export function AmountGarbageCollectorField() {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company

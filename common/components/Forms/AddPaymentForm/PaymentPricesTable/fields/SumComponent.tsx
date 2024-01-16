@@ -49,11 +49,6 @@ const getVal = (record, obj) => {
         obj?.amount === undefined ? obj?.price : obj?.amount * obj?.price
       return (+g || 0).toFixed(1) || 0
     }
-    case ServiceType.ElectricUtility: {
-      const g =
-        obj?.amount === undefined ? obj?.price : obj?.amount * obj?.price
-      return (+g || 0).toFixed(1) || 0
-    }
     default: {
       return (+obj?.price || 0).toFixed(1) || 0
     }
