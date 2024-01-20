@@ -9,7 +9,7 @@ import start, { ExtendedData } from '@pages/api/api.config'
 import { filterOptions, getDistinctCompanyAndDomain } from '@utils/helpers'
 import Domain from '@common/modules/models/Domain'
 import { quarters } from '@utils/constants'
-import { getCreditDebitPipeline } from './pipelines'
+import { getCreditDebitPipeline, getInvoicesTotalPipeline, getTotalGeneralSumPipeline } from './pipelines'
 
 start()
 
@@ -127,6 +127,14 @@ export default async function handler(
         const creditDebitPipeline = getCreditDebitPipeline(options)
         const totalPayments = await Payment.aggregate(creditDebitPipeline)
 
+        const invoicesPipeline = getInvoicesTotalPipeline(options)
+        const totalInvoices = await Payment.aggregate(invoicesPipeline)
+
+        const genralSumPipeline = getTotalGeneralSumPipeline(options)
+        const totalGeneralSum = await Payment.aggregate(genralSumPipeline)
+
+        const totalPaymentsData = [...totalPayments, ...totalInvoices, ...totalGeneralSum]
+
         return res.status(200).json({
           currentCompaniesCount: distinctCompanies.length,
           currentDomainsCount: distinctDomains.length,
@@ -139,7 +147,7 @@ export default async function handler(
             value: companyDetails._id,
           })),
           data: payments,
-          totalPayments: totalPayments.reduce((acc, item) => {
+          totalPayments: totalPaymentsData.reduce((acc, item) => {
             acc[item._id] = item.totalSum
             return acc
           }, {}),
