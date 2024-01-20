@@ -23,6 +23,18 @@ export enum AppRoutes {
 export enum Operations {
   Credit = 'credit',
   Debit = 'debit',
+  Discount = 'discount',
+  MaintenancePrice = 'maintenancePrice',
+  InflicionPrice = 'inflicionPrice',
+  WaterPart = 'waterPart',
+  ElectricityPrice = 'electricityPrice',
+  GarbageCollectorPrice = 'garbageCollectorPrice',
+  CleaningPrice = 'cleaningPrice',
+  WaterPrice = 'waterPrice',
+  Custom = 'custom',
+  PublicElectricUtilityPrice = 'publicElectricUtilityPrice',
+  PlacingPrice = 'placingPrice',
+  GeneralSum = 'generalSum'
 }
 
 export enum COLOR_THEME {
