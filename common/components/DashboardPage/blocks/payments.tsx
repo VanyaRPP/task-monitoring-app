@@ -119,26 +119,24 @@ const PaymentsBlock = () => {
     }
   }
 
-  const invoiceTypes = Object.keys(paymentsTitle)
+  const invoiceTypes = Object.entries(paymentsTitle)
 
   const paymentsPageColumns =
     router.pathname === AppRoutes.PAYMENT
-      ? [
-          ...invoiceTypes.map((type) => ({
-            title: paymentsTitle[type],
-            dataIndex: 'invoice',
-            render: (invoice) => {
-              const item = invoice.find((item) => item.type === type)
-              const sum = +(item?.sum || item?.price)
-              const currency = renderCurrency(sum?.toFixed(2))
-              return (
-                <span className={currency === '-' ? s.currency : ''}>
-                  {currency}
-                </span>
-              )
-            },
-          })),
-        ]
+      ? invoiceTypes.map(([type, title]) => ({
+          title,
+          dataIndex: type,
+          render: (_, payment) => {
+            const item = payment.invoice.find((item) => item.type === type)
+            const sum = +(item?.sum || item?.price || payment.generalSum)
+            const currency = renderCurrency(sum?.toFixed(2))
+            return (
+              <span className={currency === '-' ? s.currency : ''}>
+                {currency}
+              </span>
+            )
+          },
+        }))
       : []
 
   const globalAdminColumns = isGlobalAdmin
@@ -298,6 +296,41 @@ const PaymentsBlock = () => {
                   {dataindex === Operations.Credit
                     ? payments?.totalPayments?.credit?.toFixed(2) || 0
                     : ''}
+                  {dataindex === Operations.MaintenancePrice
+                    ? payments?.totalPayments?.maintenancePrice?.toFixed(2) || 0
+                    : ''}
+                  {dataindex === Operations.PlacingPrice
+                    ? payments?.totalPayments?.placingPrice?.toFixed(2) || 0
+                    : ''}
+                  {dataindex === Operations.InflicionPrice
+                    ? payments?.totalPayments?.inflicionPrice?.toFixed(2) || 0
+                    : ''}
+                  {dataindex === Operations.ElectricityPrice
+                    ? payments?.totalPayments?.electricityPrice?.toFixed(2) || 0
+                    : ''}
+                  {dataindex === Operations.WaterPrice
+                    ? payments?.totalPayments?.waterPrice?.toFixed(2) || 0
+                    : ''}
+                  {dataindex === Operations.GarbageCollectorPrice
+                    ? payments?.totalPayments?.garbageCollectorPrice?.toFixed(
+                        2
+                      ) || 0
+                    : ''}
+                  {dataindex === Operations.WaterPart
+                    ? payments?.totalPayments?.waterPart?.toFixed(2) || 0
+                    : ''}
+                  {dataindex === Operations.GeneralSum
+                    ? payments?.totalPayments?.generalSum?.toFixed(2) || 0
+                    : ''}
+                  {dataindex === Operations.CleaningPrice
+                    ? payments?.totalPayments?.cleaningPrice?.toFixed(2) || 0
+                    : ''}
+                  {dataindex === Operations.Discount
+                    ? payments?.totalPayments?.discount?.toFixed(2) || 0
+                    : ''}
+                  {dataindex === Operations.Custom
+                    ? payments?.totalPayments?.custom?.toFixed(2) || 0
+                    : ''}
                 </Table.Summary.Cell>
               )
             })}
@@ -308,9 +341,18 @@ const PaymentsBlock = () => {
               currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
                 ? (dataindex = columns[index - 1]?.dataIndex)
                 : (dataindex = item.dataIndex)
+
+              const colSpan = isGlobalAdmin
+                ? item.dataIndex === Operations.Credit
+                  ? 2
+                  : 1
+                : item.dataIndex === Operations.Debit
+                ? 2
+                : 1
+
               return (
                 <Table.Summary.Cell
-                  colSpan={item.dataIndex === Operations.Debit ? 2 : 1}
+                  colSpan={colSpan}
                   index={0}
                   key={item.dataIndex}
                 >
