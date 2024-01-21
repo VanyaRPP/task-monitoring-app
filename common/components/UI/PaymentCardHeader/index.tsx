@@ -1,7 +1,7 @@
 import { PlusOutlined, SelectOutlined, DeleteOutlined } from '@ant-design/icons'
 import React, { useState } from 'react'
 import { AppRoutes, Roles } from '@utils/constants'
-import { Button, Table, message } from 'antd'
+import {Button, Table, message, Cascader} from 'antd'
 import { useRouter } from 'next/router'
 import AddPaymentModal from '@common/components/AddPaymentModal'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
@@ -13,6 +13,7 @@ import ImportInvoices from './ImportInvoices'
 import { useDeleteMultiplePaymentsMutation } from '@common/api/paymentApi/payment.api'
 import Modal from 'antd/lib/modal/Modal'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
+import CascaderForDebitAndCredit from '@components/UI/PaymentCascader/CascaderForDebitAndCredit/index'
 
 const columns: any = [
   {
@@ -32,6 +33,7 @@ const columns: any = [
 
 const PaymentCardHeader = ({
   setCurrentDateFilter,
+  setCurrentTypeOperation,
   currentPayment,
   paymentActions,
   closeEditModal,
@@ -109,6 +111,7 @@ const PaymentCardHeader = ({
                 {location.pathname === AppRoutes.PAYMENT && (
                   <>
                     <PaymentCascader onChange={setCurrentDateFilter} />
+                    <CascaderForDebitAndCredit onChange={setCurrentTypeOperation} />
                     <FilterTags
                       filters={filters}
                       setFilters={setFilters}

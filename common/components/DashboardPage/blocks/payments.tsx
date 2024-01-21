@@ -45,6 +45,19 @@ function getDateFilter(value) {
     }
   if (period === PERIOD_FILTR.YEAR) return { year }
 }
+
+function getTypeOperation(value) {
+    const [type] = value || []
+  if ( type === Operations.Debit)
+    return {
+      type,
+    }
+  if ( type === Operations.Credit)
+  return {
+    type,
+  }
+}
+
 const PaymentsBlock = () => {
   const router = useRouter()
   const {
@@ -57,6 +70,7 @@ const PaymentsBlock = () => {
     preview: false,
   })
   const [currentDateFilter, setCurrentDateFilter] = useState()
+  const [currentTypeOperation, setCurrentTypeOperation] = useState()
   const [pageData, setPageData] = useState({
     pageSize: pathname === AppRoutes.PAYMENT ? 10 : 5,
     currentPage: 1,
@@ -89,6 +103,7 @@ const PaymentsBlock = () => {
       limit: pageData.pageSize,
       email: email as string,
       ...getDateFilter(currentDateFilter),
+      ...getTypeOperation(currentTypeOperation),
       companyIds: filters?.company || undefined,
       domainIds: filters?.domain || undefined,
     },
@@ -407,6 +422,7 @@ const PaymentsBlock = () => {
           paymentsDeleteItems={paymentsDeleteItems}
           closeEditModal={closeEditModal}
           setCurrentDateFilter={setCurrentDateFilter}
+          setCurrentTypeOperation={setCurrentTypeOperation}
           currentPayment={currentPayment}
           paymentActions={paymentActions}
           payments={payments}
