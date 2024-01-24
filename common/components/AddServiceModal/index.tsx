@@ -69,6 +69,7 @@ const AddServiceModal: FC<Props> = ({ closeModal, currentService }) => {
     <Modal
       title="Ціна на послуги в місяць"
       onOk={handleSubmit}
+      changesForm={() => form.isFieldsTouched()}
       onCancel={() => {
         form.resetFields()
         closeModal()

@@ -34,6 +34,7 @@ const AddStreetModal: FC<Props> = ({ closeModal, edit }) => {
     <Modal
       title={!edit && 'Додавання адреси'}
       onOk={handleSubmit}
+      changesForm={() => form.isFieldsTouched()}
       onCancel={() => {
         form.resetFields()
         closeModal()

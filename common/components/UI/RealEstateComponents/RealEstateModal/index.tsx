@@ -65,6 +65,7 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
       style={{ top: 20 }}
       title={"Компанії"}
       onOk={handleSubmit}
+      changesForm={() => form.isFieldsTouched()}
       onCancel={closeModal}
       okText={currentRealEstate ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
