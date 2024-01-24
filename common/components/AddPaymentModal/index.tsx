@@ -134,6 +134,7 @@ const AddPaymentModal: FC<Props> = ({
               }
             : handleSubmit
         }
+        changesForm={() => form.isFieldsTouched()}
         onCancel={() => {
           form.resetFields()
           closeModal()

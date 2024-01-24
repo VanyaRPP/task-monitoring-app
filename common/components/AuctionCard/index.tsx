@@ -73,6 +73,7 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
         title="Подати заявку в пропозиції"
         open={isModalVisible}
         onCancel={onCancelModal}
+        changesForm={() => form.isFieldsTouched()}
         onOk={onSubmiModal}
         okText="Подати заявку"
         cancelText="Скасувати"

@@ -107,6 +107,7 @@ const AddTaskModal: React.FC<PropsType> = ({
       open={isModalVisible}
       title="Створити завдання"
       okText="Створити"
+      changesForm={() => form.isFieldsTouched()}
       cancelText="Скасувати"
       onCancel={onCancel}
       onOk={onSubmit}

@@ -62,6 +62,7 @@ const ImportInvoicesModal = ({ closeModal }) => {
       title="Імпорт інвойсів"
       onOk={handleSave}
       confirmLoading={isLoading}
+      changesForm={() => form.isFieldsTouched()}
       onCancel={closeModal}
       okText="Імпортувати"
       cancelText={'Закрити'}
