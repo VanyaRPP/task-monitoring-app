@@ -47,14 +47,10 @@ function getDateFilter(value) {
 }
 
 function getTypeOperation(value) {
-    const [type] = value || []
-  if ( type === Operations.Debit)
+  if (value) {
     return {
-      type,
+        type: value === Operations.Debit ? Operations.Debit : Operations.Credit,
     }
-  if ( type === Operations.Credit)
-  return {
-    type,
   }
 }
 
