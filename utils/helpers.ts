@@ -370,3 +370,22 @@ export function generateColorsArray(length: number): string[] {
   }
   return initialColors
 }
+
+export function getFilterForAddress(streetDatas) {
+  const filterData = streetDatas.map(({ streetData }) => ({
+    text: `${streetData.address} (м. ${streetData.city})`,
+    value: streetData._id,
+  }))
+
+  const uniqueTextsSet = new Set()
+
+  const uniqueFilter = filterData.filter(({ text }) => {
+    if (!uniqueTextsSet.has(text)) {
+      uniqueTextsSet.add(text)
+      return true
+    }
+    return false
+  })
+
+  return uniqueFilter
+}
