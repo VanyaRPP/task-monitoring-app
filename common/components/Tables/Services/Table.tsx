@@ -3,26 +3,34 @@ import { Alert, Popconfirm, Table, Tooltip, message, Button } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 
+import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import {
-  useDeleteServiceMutation,
-  useGetAllServicesQuery,
-} from '@common/api/serviceApi/service.api'
-import { IExtendedService } from '@common/api/serviceApi/service.api.types'
+  IExtendedService,
+  IGetServiceResponse,
+} from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import { getFormattedDate, renderCurrency } from '@utils/helpers'
-
+import { IFilter } from '@common/api/paymentApi/payment.api.types'
 interface Props {
   setCurrentService: (setvice: IExtendedService) => void
+  services: IGetServiceResponse
+  isLoading?: boolean
+  isError?: boolean
+  filter?: any
+  setFilter?: (filters: any) => void
 }
 
-const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
+const ServicesTable: React.FC<Props> = ({
+  setCurrentService,
+  services,
+  isLoading,
+  isError,
+  filter,
+  setFilter,
+}) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.SERVICE
-
-  const { data, isLoading, isError } = useGetAllServicesQuery({
-    limit: isOnPage ? 0 : 5,
-  })
 
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -51,10 +59,16 @@ const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
         isGlobalAdmin,
         handleDelete,
         deleteLoading,
-        setCurrentService
+        setCurrentService,
+        services?.addressFilter,
+        filter,
+        isOnPage
       )}
-      dataSource={data}
+      dataSource={services?.data}
       scroll={{ x: 1700 }}
+      onChange={(__, filter) => {
+        setFilter(filter)
+      }}
     />
   )
 }
@@ -71,7 +85,10 @@ const getDefaultColumns = (
   isAdmin?: boolean,
   handleDelete?: (...args: any) => void,
   deleteLoading?: boolean,
-  setCurrentService?: (service: IExtendedService) => void
+  setCurrentService?: (service: IExtendedService) => void,
+  filters?: IFilter[],
+  filter?: any,
+  isOnPage?: boolean
 ): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {
@@ -84,6 +101,8 @@ const getDefaultColumns = (
     {
       title: 'Адреса',
       dataIndex: 'street',
+      filters: isOnPage ? filters : null,
+      filteredValue: filter?.street || null,
       render: (i) => `${i?.address} (м. ${i?.city})`,
     },
     {
