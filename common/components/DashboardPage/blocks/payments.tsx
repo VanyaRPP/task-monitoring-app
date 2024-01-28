@@ -54,6 +54,14 @@ function getTypeOperation(value) {
   }
 }
 
+function getStreetFilter(value) {
+    if (value) {
+        return {
+        streetId: value,
+        }
+    }
+}
+
 const PaymentsBlock = () => {
   const router = useRouter()
   const {
@@ -67,6 +75,7 @@ const PaymentsBlock = () => {
   })
   const [currentDateFilter, setCurrentDateFilter] = useState()
   const [currentTypeOperation, setCurrentTypeOperation] = useState()
+  const [currentStreetFilter, setCurrentStreetFilter] = useState()
   const [pageData, setPageData] = useState({
     pageSize: pathname === AppRoutes.PAYMENT ? 10 : 5,
     currentPage: 1,
@@ -100,6 +109,7 @@ const PaymentsBlock = () => {
       email: email as string,
       ...getDateFilter(currentDateFilter),
       ...getTypeOperation(currentTypeOperation),
+      ...getStreetFilter(currentStreetFilter),
       companyIds: filters?.company || undefined,
       domainIds: filters?.domain || undefined,
     },
@@ -419,6 +429,7 @@ const PaymentsBlock = () => {
           closeEditModal={closeEditModal}
           setCurrentDateFilter={setCurrentDateFilter}
           setCurrentTypeOperation={setCurrentTypeOperation}
+          setCurrentStreetFilter={setCurrentStreetFilter}
           currentPayment={currentPayment}
           paymentActions={paymentActions}
           payments={payments}
