@@ -1,30 +1,32 @@
-import React, {useEffect, useState} from "react"
+import React from 'react'
 import {Select} from "antd"
-import {useGetCurrentUserQuery} from '@common/api/userApi/user.api'
-import {isAdminCheck} from "@utils/helpers";
-import {useGetAllStreetsQuery} from "@common/api/streetApi/street.api";
-import s from "@components/DomainSelector/style.module.scss";
 
-const StreetsSelector = ({ onChange, payments }) => {
-    const { data: streets } = useGetAllStreetsQuery({
-        domainId: payments?.domain?._id,
-    });
+import s from "@components/StreetsSelector/style.module.scss";
+
+const StreetsSelector = ({filters, setFilters, streets}) => {
+    const options = streets?.map((street) => {
+        return {
+            label: street.text,
+            value: street.value,
+        }
+    })
 
     return (
-        <Select
-            placeholder="Оберіть вулицю"
-            value={payments?.street?._id}
-            allowClear
-            className={s.domainSelector}
-            onChange={onChange}
-        >
-            {streets?.map((street) => (
-                <Select.Option key={street._id} value={street._id}>
-                    м.{street.city}, {street.address}
-                </Select.Option>
-            ))}
-        </Select>
-    );
-};
+        <div className={s.streetDiv}>
+            <Select
+                className={s.streetSelector}
+                placeholder="Виберіть вулицю"
+                onChange={(value) => {
+                    setFilters(
+                        {street: value}
+                    )
+                }}
+                allowClear
+                options={options}
+            >
+            </Select>
+        </div>
+    )
+}
 
-export default StreetsSelector;
+export default StreetsSelector

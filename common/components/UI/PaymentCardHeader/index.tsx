@@ -35,12 +35,12 @@ const columns: any = [
 const PaymentCardHeader = ({
   setCurrentDateFilter,
   setCurrentTypeOperation,
-  setCurrentStreetFilter,
   currentPayment,
   paymentActions,
   closeEditModal,
   paymentsDeleteItems,
   payments,
+  streets,
   filters,
   setFilters,
 }) => {
@@ -114,7 +114,7 @@ const PaymentCardHeader = ({
                   <>
                     <PaymentCascader onChange={setCurrentDateFilter} />
                     <SelectForDebitAndCredit onChange={setCurrentTypeOperation} />
-                    <StreetsSelector onChange={setCurrentStreetFilter} payments={payments} />
+                    <StreetsSelector filters={filters} setFilters={setFilters} streets={streets} />
                     <FilterTags
                       filters={filters}
                       setFilters={setFilters}

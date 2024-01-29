@@ -60,6 +60,7 @@ export interface IGetPaymentResponse {
   currentDomainsCount: number
   domainsFilter: IFilter[]
   realEstatesFilter: IFilter[]
+  addressFilter: IFilter[]
   data: IExtendedPayment[]
   success: boolean
   total: number
