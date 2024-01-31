@@ -56,7 +56,8 @@ const ServicesHeader: React.FC<Props> = ({
               setFilters={setFilter}
               collection={services}
             />
-          </>
+
+            </>
         )}
       </div>
       {showAddButton && isAdminCheck(user?.roles) && (

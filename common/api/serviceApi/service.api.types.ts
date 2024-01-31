@@ -27,6 +27,7 @@ export interface IGetServiceResponse {
   success: boolean
   data: IExtendedService[]
   addressFilter: IFilter[]
+  domainFilter: IFilter[]
 }
 
 export interface IDeleteServiceResponse {

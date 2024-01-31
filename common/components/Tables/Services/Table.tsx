@@ -48,7 +48,6 @@ const ServicesTable: React.FC<Props> = ({
   }
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
-
   return (
     <Table
       rowKey="_id"
@@ -61,6 +60,7 @@ const ServicesTable: React.FC<Props> = ({
         deleteLoading,
         setCurrentService,
         services?.addressFilter,
+        services?.domainFilter,
         filter,
         isOnPage
       )}
@@ -86,7 +86,8 @@ const getDefaultColumns = (
   handleDelete?: (...args: any) => void,
   deleteLoading?: boolean,
   setCurrentService?: (service: IExtendedService) => void,
-  filters?: IFilter[],
+  addressFilter?: IFilter[],
+  domainFilter?: IFilter[],
   filter?: any,
   isOnPage?: boolean
 ): ColumnType<any>[] => {
@@ -95,13 +96,15 @@ const getDefaultColumns = (
       fixed: 'left',
       title: 'Надавач послуг',
       dataIndex: 'domain',
+      filters: isOnPage ? domainFilter : null,
+      filteredValue: filter?.domain || null,
       width: 200,
       render: (i) => i?.name,
     },
     {
       title: 'Адреса',
       dataIndex: 'street',
-      filters: isOnPage ? filters : null,
+      filters: isOnPage ? addressFilter : null,
       filteredValue: filter?.street || null,
       render: (i) => `${i?.address} (м. ${i?.city})`,
     },

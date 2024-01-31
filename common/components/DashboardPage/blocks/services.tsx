@@ -23,6 +23,7 @@ const ServicesBlock = () => {
   } = useGetAllServicesQuery({
     limit: isOnPage ? 0 : 5,
     streetId: filter?.street || undefined,
+    domainId: filter?.domain || undefined,
   })
 
   return (
