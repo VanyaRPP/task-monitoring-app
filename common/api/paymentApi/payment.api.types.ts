@@ -55,7 +55,21 @@ export interface IFilter {
 }
 
 export interface IGetPaymentResponse {
-  totalPayments: { credit?: number; debit?: number }
+  totalPayments: {
+    generalSum?: number
+    credit?: number
+    debit?: number
+    maintenancePrice?: number
+    inflicionPrice?: number
+    discount?: number
+    waterPart?: number
+    electricityPrice?: number
+    garbageCollectorPrice?: number
+    cleaningPrice?: number
+    waterPrice?: number
+    custom?: number
+    placingPrice?: number
+  }
   currentCompaniesCount: number
   currentDomainsCount: number
   domainsFilter: IFilter[]
