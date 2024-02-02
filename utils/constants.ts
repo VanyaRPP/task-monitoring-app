@@ -37,6 +37,11 @@ export enum Operations {
   GeneralSum = 'generalSum'
 }
 
+export enum ColumnsRoleView {
+  GlobalAdmin = 1,
+  User = 2
+}
+
 export enum COLOR_THEME {
   DARK = 'dark',
   LIGHT = 'light',

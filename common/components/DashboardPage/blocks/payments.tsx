@@ -15,7 +15,7 @@ import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { AppRoutes, Operations, Roles, paymentsTitle } from '@utils/constants'
+import { AppRoutes, Operations, Roles, paymentsTitle, ColumnsRoleView } from '@utils/constants'
 import { Tooltip } from 'antd'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
@@ -274,81 +274,45 @@ const PaymentsBlock = () => {
   }
 
   const Summary = () => {
+    const getFormattedValue = (dataIndex) => {
+      const value = payments?.totalPayments?.[dataIndex] || 0
+      return value !== 0 ? value.toFixed(2) : ''
+    }
+
     return (
       router.pathname === AppRoutes.PAYMENT &&
       payments?.data && (
-        <Table.Summary fixed>
+        <Table.Summary>
           <Table.Summary.Row className={s.summ_item}>
             {columns.map((item, index) => {
-              let dataindex
-              currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
-                ? (dataindex = columns[index - 1]?.dataIndex)
-                : (dataindex = item.dataIndex)
+              const dataindex = isGlobalAdmin
+                ? columns[index - 1]?.dataIndex
+                : item.dataIndex
+
               return (
                 <Table.Summary.Cell
                   index={0}
                   key={item.dataIndex}
                   colSpan={item.dataIndex === '' ? 2 : 1}
                 >
-                  {dataindex === Operations.Debit
-                    ? payments?.totalPayments?.debit?.toFixed(2) || 0
-                    : ''}
-                  {dataindex === Operations.Credit
-                    ? payments?.totalPayments?.credit?.toFixed(2) || 0
-                    : ''}
-                  {dataindex === Operations.MaintenancePrice
-                    ? payments?.totalPayments?.maintenancePrice?.toFixed(2) || 0
-                    : ''}
-                  {dataindex === Operations.PlacingPrice
-                    ? payments?.totalPayments?.placingPrice?.toFixed(2) || 0
-                    : ''}
-                  {dataindex === Operations.InflicionPrice
-                    ? payments?.totalPayments?.inflicionPrice?.toFixed(2) || 0
-                    : ''}
-                  {dataindex === Operations.ElectricityPrice
-                    ? payments?.totalPayments?.electricityPrice?.toFixed(2) || 0
-                    : ''}
-                  {dataindex === Operations.WaterPrice
-                    ? payments?.totalPayments?.waterPrice?.toFixed(2) || 0
-                    : ''}
-                  {dataindex === Operations.GarbageCollectorPrice
-                    ? payments?.totalPayments?.garbageCollectorPrice?.toFixed(
-                        2
-                      ) || 0
-                    : ''}
-                  {dataindex === Operations.WaterPart
-                    ? payments?.totalPayments?.waterPart?.toFixed(2) || 0
-                    : ''}
-                  {dataindex === Operations.GeneralSum
-                    ? payments?.totalPayments?.generalSum?.toFixed(2) || 0
-                    : ''}
-                  {dataindex === Operations.CleaningPrice
-                    ? payments?.totalPayments?.cleaningPrice?.toFixed(2) || 0
-                    : ''}
-                  {dataindex === Operations.Discount
-                    ? payments?.totalPayments?.discount?.toFixed(2) || 0
-                    : ''}
-                  {dataindex === Operations.Custom
-                    ? payments?.totalPayments?.custom?.toFixed(2) || 0
-                    : ''}
+                  {getFormattedValue(dataindex)}
                 </Table.Summary.Cell>
               )
             })}
           </Table.Summary.Row>
           <Table.Summary.Row className={s.saldo}>
             {columns.slice(0, columns.length - 1).map((item, index) => {
-              let dataindex
-              currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
-                ? (dataindex = columns[index - 1]?.dataIndex)
-                : (dataindex = item.dataIndex)
+              const dataindex = isGlobalAdmin
+                ? columns[index - 1]?.dataIndex
+                : item.dataIndex
 
               const colSpan = isGlobalAdmin
                 ? item.dataIndex === Operations.Credit
-                  ? 2
-                  : 1
+                  ? ColumnsRoleView.User
+                  : ColumnsRoleView.GlobalAdmin
                 : item.dataIndex === Operations.Debit
-                ? 2
-                : 1
+                ? ColumnsRoleView.User
+                : ColumnsRoleView.GlobalAdmin
 
               return (
                 <Table.Summary.Cell
