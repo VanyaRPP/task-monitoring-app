@@ -68,7 +68,6 @@ export interface IGetPaymentResponse {
     cleaningPrice?: number
     waterPrice?: number
     custom?: number
-    publicElectricUtilityPrice?: number
     placingPrice?: number
   }
   currentCompaniesCount: number

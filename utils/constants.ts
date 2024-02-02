@@ -32,7 +32,6 @@ export enum Operations {
   CleaningPrice = 'cleaningPrice',
   WaterPrice = 'waterPrice',
   Custom = 'custom',
-  PublicElectricUtilityPrice = 'publicElectricUtilityPrice',
   PlacingPrice = 'placingPrice',
   GeneralSum = 'generalSum'
 }
