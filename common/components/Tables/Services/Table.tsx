@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import { Alert, Popconfirm, Table, Tooltip, message, Button } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
@@ -14,9 +14,23 @@ import { getFormattedDate, renderCurrency } from '@utils/helpers'
 
 interface Props {
   setCurrentService: (setvice: IExtendedService) => void
+  setServiceActions: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+      preview: boolean
+    }>
+  >
+  serviceActions: {
+    edit: boolean
+    preview: boolean
+  }
 }
 
-const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
+const ServicesTable: React.FC<Props> = ({
+  setCurrentService,
+  setServiceActions,
+  serviceActions,
+}) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.SERVICE
 
@@ -51,7 +65,9 @@ const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
         isGlobalAdmin,
         handleDelete,
         deleteLoading,
-        setCurrentService
+        setCurrentService,
+        setServiceActions,
+        serviceActions
       )}
       dataSource={data}
       scroll={{ x: 1700 }}
@@ -71,7 +87,17 @@ const getDefaultColumns = (
   isAdmin?: boolean,
   handleDelete?: (...args: any) => void,
   deleteLoading?: boolean,
-  setCurrentService?: (service: IExtendedService) => void
+  setCurrentService?: (service: IExtendedService) => void,
+  setServiceActions?: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+      preview: boolean
+    }>
+  >,
+  serviceActions?: {
+    edit: boolean
+    preview: boolean
+  }
 ): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {
@@ -138,6 +164,24 @@ const getDefaultColumns = (
       ellipsis: true,
       render: renderTooltip,
     },
+    {
+      align: 'center',
+      fixed: 'right',
+      title: '',
+      width: 50,
+      render: (_, service: IExtendedService) => (
+        <Button
+          style={{ padding: 0 }}
+          type="link"
+          onClick={() => {
+            setCurrentService(service)
+            setServiceActions({ ...serviceActions, preview: true })
+          }}
+        >
+          <EyeOutlined />
+        </Button>
+      ),
+    },
   ]
 
   if (isAdmin) {
@@ -151,7 +195,10 @@ const getDefaultColumns = (
           <Button
             style={{ padding: 0 }}
             type="link"
-            onClick={() => setCurrentService(service)}
+            onClick={() => {
+              setCurrentService(service)
+              setServiceActions({ ...serviceActions, edit: true })
+            }}
           >
             <EditOutlined />
           </Button>
@@ -180,4 +227,5 @@ const getDefaultColumns = (
 
   return columns
 }
+
 export default ServicesTable
