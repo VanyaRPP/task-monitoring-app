@@ -13,12 +13,24 @@ export interface Props {
   showAddButton?: boolean
   currentService?: IExtendedService
   setCurrentService?: (service: IExtendedService) => void
+  serviceActions?: {
+    edit: boolean
+    preview: boolean
+  }
+  setServiceActions: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+      preview: boolean
+    }>
+  >
 }
 
 const ServicesHeader: React.FC<Props> = ({
   showAddButton = false,
   currentService,
   setCurrentService,
+  serviceActions,
+  setServiceActions,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -29,6 +41,10 @@ const ServicesHeader: React.FC<Props> = ({
   const closeModal = () => {
     setIsModalOpen(false)
     setCurrentService(null)
+    setServiceActions({
+      edit: false,
+      preview: false,
+    })
   }
 
   if (router.query.email)
@@ -45,13 +61,14 @@ const ServicesHeader: React.FC<Props> = ({
           <Button type="link" onClick={openModal}>
             <PlusOutlined /> Додати
           </Button>
-          {(isModalOpen || currentService) && (
-            <AddServiceModal
-              currentService={currentService}
-              closeModal={closeModal}
-            />
-          )}
         </>
+      )}
+      {(isModalOpen || currentService) && (
+        <AddServiceModal
+          currentService={currentService}
+          closeModal={closeModal}
+          serviceActions={serviceActions}
+        />
       )}
     </div>
   )
