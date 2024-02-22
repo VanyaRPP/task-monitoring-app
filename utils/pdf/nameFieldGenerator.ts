@@ -163,6 +163,12 @@ async function GenerateInflicionField(paymentData) {
 `
 }
 
+interface Options {
+  domain: any
+  street: any
+  $expr?: any
+}
+
 async function getPreviousMonthService({ domainId, streetId, date }) {
   try {
     const lastMonth = moment(date).subtract(1, 'month')
@@ -174,7 +180,10 @@ async function getPreviousMonthService({ domainId, streetId, date }) {
       year: lastMonth.year(),
     }
 
-    const options = {}
+    const options: Options = {
+      domain: null,
+      street: null,
+    }
     const limit = 0
     if (domainId && streetId) {
       options.domain = domainId
