@@ -1,4 +1,9 @@
-import { PlusOutlined, SelectOutlined, DeleteOutlined } from '@ant-design/icons'
+import {
+  PlusOutlined,
+  SelectOutlined,
+  DeleteOutlined,
+  DownloadOutlined,
+} from '@ant-design/icons'
 import React, { useState } from 'react'
 import { AppRoutes, Roles } from '@utils/constants'
 import { Button, Table, message } from 'antd'
@@ -10,9 +15,17 @@ import { isAdminCheck } from '@utils/helpers'
 import PaymentCascader from '@common/components/UI/PaymentCascader/index'
 import FilterTags from '../Reusable/FilterTags'
 import ImportInvoices from './ImportInvoices'
-import { useDeleteMultiplePaymentsMutation } from '@common/api/paymentApi/payment.api'
+import {
+  useDeleteMultiplePaymentsMutation,
+  useGeneratePdfMutation ,
+} from '@common/api/paymentApi/payment.api'
 import Modal from 'antd/lib/modal/Modal'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
+import {
+  IGeneratePaymentPDF,
+  IGeneratePaymentPDFResponce,
+} from '@common/api/paymentApi/payment.api.types'
+import { saveAs } from 'file-saver'
 import SelectForDebitAndCredit from '@components/UI/PaymentSelect/index'
 import StreetsSelector from "@components/StreetsSelector";
 
@@ -32,6 +45,7 @@ const columns: any = [
   },
 ]
 
+
 const PaymentCardHeader = ({
   setCurrentDateFilter,
   setCurrentTypeOperation,
@@ -43,6 +57,7 @@ const PaymentCardHeader = ({
   streets,
   filters,
   setFilters,
+  selectedPayments,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -68,16 +83,15 @@ const PaymentCardHeader = ({
       title: 'Ви впевнені, що хочете видалити обрані проплати?',
       cancelText: 'Ні',
       okText: 'Так',
-      width: 600,
       content: (
-        <Table
-          columns={columns}
-          dataSource={paymentsDeleteItems}
-          pagination={false}
-          bordered
-          size="small"
-          rowKey="_id"
-        />
+        <>
+          {paymentsDeleteItems.map((item, index) => (
+            <div key={index}>
+              {index + 1}. {item.domain}, {item.company},{' '}
+              {dateToDefaultFormat(item.date)}
+            </div>
+          ))}
+        </>
       ),
       onOk: async () => {
         const response = await deletePayment(
@@ -90,6 +104,32 @@ const PaymentCardHeader = ({
         }
       },
     })
+  }
+
+  const [generatePdf] = useGeneratePdfMutation();
+
+  const handleGeneratePdf = async () => {
+    try {
+      const response = await generatePdf({
+        payments: selectedPayments
+      });
+  
+      if ('data' in response) {
+        const { data } = response
+  
+        if (data) {
+          const buffer = Buffer.from(data.buffer);
+          const blob = new Blob([buffer], { type: `application/${data.fileExtension}` })
+  
+          saveAs(blob, `${data.fileName}.${data.fileExtension}`)
+        }
+  
+      } else {
+        message.error('Сталася помилка під час генерації PDF')
+      }
+    } catch (error) {
+      message.error('Сталася несподівана помилка під час генерації PDF')
+    }
   }
 
   return (
@@ -135,6 +175,13 @@ const PaymentCardHeader = ({
               <Button type="link" onClick={() => setIsModalOpen(true)}>
                 <PlusOutlined /> Додати
               </Button>
+              {isAdmin &&
+                pathname === AppRoutes.PAYMENT &&
+                selectedPayments.length > 0 && (
+                  <Button type="link" onClick={() => handleGeneratePdf()}>
+                    Завантажити рахунки <DownloadOutlined />
+                  </Button>
+                )}
               {isGlobalAdmin && pathname === AppRoutes.PAYMENT && (
                 <Button
                   type="link"

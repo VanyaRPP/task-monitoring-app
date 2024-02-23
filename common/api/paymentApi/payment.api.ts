@@ -6,6 +6,8 @@ import {
   IGetPaymentResponse,
   IGetPaymentNumberResponse,
   IPayment,
+  IGeneratePaymentPDF,
+  IGeneratePaymentPDFResponce,
 } from './payment.api.types'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { Operations } from '@utils/constants'
@@ -119,6 +121,16 @@ export const paymentApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Payment'] : []),
     }),
+    generatePdf: builder.mutation<
+      IGeneratePaymentPDFResponce,
+      IGeneratePaymentPDF
+    >({
+      query: (body) => ({
+        url: 'spacehub/payment/generatePdf',
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
 })
 
@@ -129,4 +141,5 @@ export const {
   useDeleteMultiplePaymentsMutation,
   useGetPaymentNumberQuery,
   useEditPaymentMutation,
+  useGeneratePdfMutation,
 } = paymentApi
