@@ -102,6 +102,7 @@ const PaymentsBlock = () => {
       ...getTypeOperation(currentTypeOperation),
       companyIds: filters?.company || undefined,
       domainIds: filters?.domain || undefined,
+      streetIds: filters?.street || undefined,
     },
     { skip: currUserLoading || !currUser }
   )
@@ -427,6 +428,7 @@ const PaymentsBlock = () => {
           setCurrentTypeOperation={setCurrentTypeOperation}
           currentPayment={currentPayment}
           paymentActions={paymentActions}
+          streets={payments?.addressFilter}
           payments={payments}
           filters={filters}
           setFilters={setFilters}

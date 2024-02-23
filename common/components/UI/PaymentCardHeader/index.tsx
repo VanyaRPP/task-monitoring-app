@@ -14,6 +14,7 @@ import { useDeleteMultiplePaymentsMutation } from '@common/api/paymentApi/paymen
 import Modal from 'antd/lib/modal/Modal'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
 import SelectForDebitAndCredit from '@components/UI/PaymentSelect/index'
+import StreetsSelector from "@components/StreetsSelector";
 
 const columns: any = [
   {
@@ -39,6 +40,7 @@ const PaymentCardHeader = ({
   closeEditModal,
   paymentsDeleteItems,
   payments,
+  streets,
   filters,
   setFilters,
 }) => {
@@ -112,6 +114,7 @@ const PaymentCardHeader = ({
                   <>
                     <PaymentCascader onChange={setCurrentDateFilter} />
                     <SelectForDebitAndCredit onChange={setCurrentTypeOperation} />
+                    <StreetsSelector filters={filters} setFilters={setFilters} streets={streets} />
                     <FilterTags
                       filters={filters}
                       setFilters={setFilters}

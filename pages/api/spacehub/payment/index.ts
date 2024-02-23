@@ -6,10 +6,11 @@ import initMiddleware from '@common/lib/initMiddleware'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import Payment from '@common/modules/models/Payment'
 import start, { ExtendedData } from '@pages/api/api.config'
-import { filterOptions, getDistinctCompanyAndDomain } from '@utils/helpers'
+import { filterOptions, getDistinctCompanyAndDomain, getFilterForAddress } from '@utils/helpers'
 import Domain from '@common/modules/models/Domain'
 import { quarters } from '@utils/constants'
 import { getCreditDebitPipeline, getInvoicesTotalPipeline, getTotalGeneralSumPipeline } from './pipelines'
+import {getStreetsPipeline} from "@utils/pipelines"
 
 start()
 
@@ -66,7 +67,7 @@ export default async function handler(
       try {
         const { isDomainAdmin, isUser, user, isGlobalAdmin } =
           await getCurrentUser(req, res)
-        const { companyIds, domainIds, limit, skip, type } = req.query
+        const { streetIds, companyIds, domainIds, limit, skip, type } = req.query
 
         const options = {} as any
         if (isDomainAdmin) {
@@ -93,6 +94,10 @@ export default async function handler(
           options.company = filterOptions(options?.company, companyIds)
         }
 
+        if (streetIds) {
+          options.street = filterOptions(options?.street, streetIds)
+        }
+
         const expr = filterPeriodOptions(req.query)
         if (expr.length > 0) {
           options.$expr = {
@@ -113,6 +118,11 @@ export default async function handler(
           .populate({ path: 'street', select: '_id address city' })
           .populate({ path: 'domain', select: '_id name' })
           .populate({ path: 'monthService', select: '_id date' })
+
+        const streetsPipeline = getStreetsPipeline(isGlobalAdmin, options.domain)
+
+        const streets = await Payment.aggregate(streetsPipeline)
+        const addressFilter = getFilterForAddress(streets)
 
         const total = await Payment.countDocuments(options)
 
@@ -146,6 +156,7 @@ export default async function handler(
             text: companyDetails.companyName,
             value: companyDetails._id,
           })),
+          addressFilter: addressFilter,
           data: payments,
           totalPayments: totalPaymentsData.reduce((acc, item) => {
             acc[item._id] = item.totalSum
