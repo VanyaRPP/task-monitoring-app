@@ -94,3 +94,13 @@ export interface IGetPaymentNumberResponse {
   success: boolean
   data: number
 }
+
+export interface IGeneratePaymentPDF {
+  payments: IExtendedPayment[],
+}
+
+export interface IGeneratePaymentPDFResponce {
+  buffer: Buffer
+  fileName: string
+  fileExtension: string
+}
