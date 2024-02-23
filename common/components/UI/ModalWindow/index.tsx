@@ -1,4 +1,4 @@
-import { Modal as AntModal } from 'antd'
+import { Modal as AntModal, ButtonProps } from 'antd'
 import s from './style.module.scss'
 
 interface Props {
@@ -13,6 +13,7 @@ interface Props {
   maskClickIgnore?: boolean
   style?: React.CSSProperties
   open?: boolean
+  okButtonProps?: ButtonProps 
   // footer: any
   title: string
 }
@@ -30,6 +31,7 @@ const Modal: React.FC<Props> = ({
   style,
   // footer,
   title,
+  okButtonProps,
   open = true,
 }) => {
 
@@ -59,6 +61,7 @@ const Modal: React.FC<Props> = ({
       cancelText={cancelText}
       className={className ? className : s.Modal}
       style={style}
+      okButtonProps={okButtonProps}
     >
       {children}
     </AntModal>
