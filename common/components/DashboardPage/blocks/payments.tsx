@@ -361,8 +361,17 @@ const PaymentsBlock = () => {
 
   const rowSelection = {
     selectedRowKeys: paymentsDeleteItems.map((item) => item.id),
-    defaultSelectedRowKeys: paymentsDeleteItems.map((item) => item.id),
-    onSelect: onSelect,
+    onChange: (selectedRowKeys, selectedRows) => {
+      setPaymentsDeleteItems(
+        selectedRows.map((item) => ({
+          id: item._id,
+          date: item.monthService?.date,
+          domain: item.domain?.name,
+          company: item.company?.companyName,
+        }))
+      )
+    },
+    onSelect: onSelect
   }
 
   if (deleteError || paymentsError || currUserError) {
