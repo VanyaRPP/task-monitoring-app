@@ -79,3 +79,40 @@ export function getRealEstatesPipeline({
     },
   ]
 }
+
+export function getStreetsPipeline(isGlobalAdmin, domains) {
+  const pipeline = [
+    {
+      $match: {},
+    },
+    {
+      $lookup: {
+        from: 'streets',
+        localField: 'street',
+        foreignField: '_id',
+        as: 'streetData',
+      },
+    },
+    {
+      $unwind: '$streetData',
+    },
+    {
+      $project: {
+        'streetData.address': 1,
+        'streetData.city': 1,
+        'streetData._id': 1,
+      },
+    },
+  ]
+
+  if (!isGlobalAdmin) {
+    const matchStage = {
+      $match: {
+        $or: [{ domain: domains }],
+      },
+    }
+    pipeline.unshift(matchStage)
+  }
+
+  return pipeline
+}

@@ -17,6 +17,7 @@ export type ExtendedData = Data & {
   currentDomainsCount?: number
   domainsFilter?: { text: string; value: string }[]
   realEstatesFilter?: { text: string; value: string }[]
+  addressFilter?: { text: string; value: string }[]
   totalPayments?: any
   total?: number
 }

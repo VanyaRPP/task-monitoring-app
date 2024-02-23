@@ -8,7 +8,7 @@ import 'moment/locale/uk'
 import _omit from 'lodash/omit'
 import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 import Big from 'big.js'
-import { getDomainsPipeline, getRealEstatesPipeline } from './pipelines'
+import {getDomainsPipeline, getRealEstatesPipeline, getStreetsPipeline} from './pipelines'
 
 export const firstTextToUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
@@ -369,4 +369,23 @@ export function generateColorsArray(length: number): string[] {
     initialColors = [...initialColors, ...additionalColors]
   }
   return initialColors
+}
+
+export function getFilterForAddress(streetDatas) {
+  const filterData = streetDatas.map(({ streetData }) => ({
+    text: `${streetData.address} (м. ${streetData.city})`,
+    value: streetData._id,
+  }))
+
+  const uniqueTextsSet = new Set()
+
+  const uniqueFilter = filterData.filter(({ text }) => {
+    if (!uniqueTextsSet.has(text)) {
+      uniqueTextsSet.add(text)
+      return true
+    }
+    return false
+  })
+
+  return uniqueFilter
 }
