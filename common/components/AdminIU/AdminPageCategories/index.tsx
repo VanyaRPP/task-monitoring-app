@@ -74,6 +74,7 @@ const AdminPageCategories: React.FC = () => {
           title={!id ? 'Додати категорію' : 'Змінити категорію'}
           open={isModalVisible}
           onCancel={onCancelModal}
+          changesForm={() => form.isFieldsTouched()}
           onOk={!id ? onSubmitModal : onSubmitEditModal}
           okText={!id ? 'Додати' : 'Змінити'}
           cancelText="Скасувати"

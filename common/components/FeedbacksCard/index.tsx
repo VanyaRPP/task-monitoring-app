@@ -100,6 +100,7 @@ const FeedbacksCard: React.FC<Props> = ({
           <Modal
             title={`Залиште відгук про ${user?.name}`}
             open={isModalVisible}
+            changesForm={() => form.isFieldsTouched()}
             onCancel={onCancelModal}
             onOk={onSubmitModal}
             okText="Залишити відгук"

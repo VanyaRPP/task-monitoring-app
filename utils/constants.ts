@@ -23,6 +23,22 @@ export enum AppRoutes {
 export enum Operations {
   Credit = 'credit',
   Debit = 'debit',
+  Discount = 'discount',
+  MaintenancePrice = 'maintenancePrice',
+  InflicionPrice = 'inflicionPrice',
+  WaterPart = 'waterPart',
+  ElectricityPrice = 'electricityPrice',
+  GarbageCollectorPrice = 'garbageCollectorPrice',
+  CleaningPrice = 'cleaningPrice',
+  WaterPrice = 'waterPrice',
+  Custom = 'custom',
+  PlacingPrice = 'placingPrice',
+  GeneralSum = 'generalSum'
+}
+
+export enum ColumnsRoleView {
+  GlobalAdmin = 1,
+  User = 2
 }
 
 export enum COLOR_THEME {
@@ -96,7 +112,6 @@ export const paymentsTitle = {
   waterPart: 'Нарахування водопостачання',
   discount: 'Знижка',
   cleaningPrice: 'Прибирання',
-  generalSum: 'Загальна сума',
   custom: 'Додаткові витрати',
 }
 
