@@ -1,11 +1,11 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import RealEstate from '@common/modules/models/RealEstate'
-import { getCurrentUser } from '@utils/getCurrentUser'
-import start, { ExtendedData } from '@pages/api/api.config'
 import Domain from '@common/modules/models/Domain'
+import RealEstate from '@common/modules/models/RealEstate'
+import start, { ExtendedData } from '@pages/api/api.config'
+import { getCurrentUser } from '@utils/getCurrentUser'
 import { filterOptions, getDistinctCompanyAndDomain } from '@utils/helpers'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
 
@@ -67,10 +67,10 @@ export default async function handler(
           .limit(+limit)
           .populate({
             path: 'domain',
-            select: '_id name description',
+            select: '_id name description, adminEmails',
           })
           .populate({ path: 'street', select: '_id address city' })
-        
+
         const { distinctDomains, distinctCompanies } =
           await getDistinctCompanyAndDomain({
             isGlobalAdmin,
@@ -78,7 +78,6 @@ export default async function handler(
             companyGroup: '_id',
             model: RealEstate,
           })
-        
 
         return res.status(200).json({
           domainsFilter: distinctDomains?.map(({ domainDetails }) => ({
