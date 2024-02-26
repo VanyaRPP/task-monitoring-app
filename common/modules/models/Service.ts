@@ -28,6 +28,6 @@ export const ServiceSchema = new Schema<IServiceModel>({
 })
 
 const Service =
-  mongoose.models.Service || mongoose.model('Service', ServiceSchema)
+  mongoose.models?.Service || mongoose.model('Service', ServiceSchema)
 
 export default Service

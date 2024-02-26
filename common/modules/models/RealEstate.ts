@@ -35,6 +35,6 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
 })
 
 const RealEstate =
-  mongoose.models.RealEstate || mongoose.model('RealEstate', RealEstateSchema)
+  mongoose.models?.RealEstate || mongoose.model('RealEstate', RealEstateSchema)
 
 export default RealEstate

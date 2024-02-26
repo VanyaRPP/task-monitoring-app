@@ -1,5 +1,5 @@
-import { IUser } from './User'
 import mongoose, { ObjectId, Schema } from 'mongoose'
+import { IUser } from './User'
 
 export interface ICustomerModel {
   customer: ObjectId | IUser
@@ -16,6 +16,6 @@ export const CustomerSchema = new Schema<ICustomerModel>({
 })
 
 const Customer =
-  mongoose.models.Customer || mongoose.model('Customer', CustomerSchema)
+  mongoose.models?.Customer || mongoose.model('Customer', CustomerSchema)
 
 export default Customer

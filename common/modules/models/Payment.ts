@@ -1,10 +1,10 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
-import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
 import {
   IPaymentField,
   IProvider,
   IReciever,
 } from '@common/api/paymentApi/payment.api.types'
+import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
+import mongoose, { ObjectId, Schema } from 'mongoose'
 export interface IPaymentModel {
   invoiceNumber: number
   type: string
@@ -38,6 +38,6 @@ export const PaymentSchema = new Schema<IPaymentModel>({
 })
 
 const Payment =
-  mongoose.models.Payment || mongoose.model('Payment', PaymentSchema)
+  mongoose.models?.Payment || mongoose.model('Payment', PaymentSchema)
 
 export default Payment
