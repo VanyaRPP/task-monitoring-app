@@ -33,3 +33,7 @@ export interface IDeleteServiceResponse {
   data: string
   success: boolean
 }
+
+export interface IServiceFilter {
+  street: string
+}
