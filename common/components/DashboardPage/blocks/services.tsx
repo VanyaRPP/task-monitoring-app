@@ -9,6 +9,10 @@ import { IExtendedService } from '@common/api/serviceApi/service.api.types'
 const ServicesBlock = () => {
   const { data: user } = useGetCurrentUserQuery()
   const [currentService, setCurrentService] = useState<IExtendedService>(null)
+  const [serviceActions, setServiceActions] = useState({
+    edit: false,
+    preview: false,
+  })
 
   return (
     <TableCard
@@ -17,10 +21,16 @@ const ServicesBlock = () => {
           showAddButton={isAdminCheck(user?.roles)}
           currentService={currentService}
           setCurrentService={setCurrentService}
+          serviceActions={serviceActions}
+          setServiceActions={setServiceActions}
         />
       }
     >
-      <ServicesTable setCurrentService={setCurrentService} />
+      <ServicesTable
+        setCurrentService={setCurrentService}
+        setServiceActions={setServiceActions}
+        serviceActions={serviceActions}
+      />
     </TableCard>
   )
 }
