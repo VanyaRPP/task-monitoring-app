@@ -8,11 +8,12 @@ import { IExtendedService } from '@common/api/serviceApi/service.api.types'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import { IServiceFilter } from '@common/api/serviceApi/service.api.types'
 
 const ServicesBlock = () => {
   const { data: user } = useGetCurrentUserQuery()
   const [currentService, setCurrentService] = useState<IExtendedService>(null)
-  const [filter, setFilter] = useState<any>()
+  const [filter, setFilter] = useState<IServiceFilter>()
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.SERVICE
 
