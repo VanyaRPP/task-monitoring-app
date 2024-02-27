@@ -29,8 +29,8 @@ const FilterTags = ({ filters, setFilters, collection }) => {
                 </Tag>
               ))}
             </span>
-          ) : (collection?.currentDomainsCount ||
-              Array.isArray(collection?.domainsFilter)) === 1 ? (
+          ) : collection?.currentDomainsCount ||
+            collection?.domainsFilter?.length === 1 ? (
             <SingleTag name={collection?.data?.[0]?.domain?.name} />
           ) : (
             ' Всі'
