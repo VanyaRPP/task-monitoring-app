@@ -3,17 +3,17 @@ import { Alert, Popconfirm, Table, Tooltip, message, Button } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 
+import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import {
-  useDeleteServiceMutation,
-  useGetAllServicesQuery,
-} from '@common/api/serviceApi/service.api'
-import { IExtendedService } from '@common/api/serviceApi/service.api.types'
+  IExtendedService,
+  IGetServiceResponse,
+} from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import { getFormattedDate, renderCurrency } from '@utils/helpers'
-
+import { IFilter } from '@common/api/paymentApi/payment.api.types'
 interface Props {
-  setCurrentService: (setvice: IExtendedService) => void
+  setCurrentService: (setvice: IExtendedService) => void,
   setServiceActions: React.Dispatch<
     React.SetStateAction<{
       edit: boolean
@@ -23,20 +23,26 @@ interface Props {
   serviceActions: {
     edit: boolean
     preview: boolean
-  }
+  },
+  services: IGetServiceResponse
+  isLoading?: boolean
+  isError?: boolean
+  filter?: any
+  setFilter?: (filters: any) => void
 }
 
 const ServicesTable: React.FC<Props> = ({
   setCurrentService,
   setServiceActions,
   serviceActions,
+  services,
+  isLoading,
+  isError,
+  filter,
+  setFilter,
 }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.SERVICE
-
-  const { data, isLoading, isError } = useGetAllServicesQuery({
-    limit: isOnPage ? 0 : 5,
-  })
 
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -67,10 +73,16 @@ const ServicesTable: React.FC<Props> = ({
         deleteLoading,
         setCurrentService,
         setServiceActions,
-        serviceActions
+        serviceActions,
+        services?.addressFilter,
+        filter,
+        isOnPage
       )}
-      dataSource={data}
+      dataSource={services?.data}
       scroll={{ x: 1700 }}
+      onChange={(__, filter) => {
+        setFilter(filter)
+      }}
     />
   )
 }
@@ -97,7 +109,10 @@ const getDefaultColumns = (
   serviceActions?: {
     edit: boolean
     preview: boolean
-  }
+  },
+  filters?: IFilter[],
+  filter?: any,
+  isOnPage?: boolean
 ): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {
@@ -110,6 +125,8 @@ const getDefaultColumns = (
     {
       title: 'Адреса',
       dataIndex: 'street',
+      filters: isOnPage ? filters : null,
+      filteredValue: filter?.street || null,
       render: (i) => `${i?.address} (м. ${i?.city})`,
     },
     {
