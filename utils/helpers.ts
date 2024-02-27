@@ -8,7 +8,11 @@ import 'moment/locale/uk'
 import _omit from 'lodash/omit'
 import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 import Big from 'big.js'
-import {getDomainsPipeline, getRealEstatesPipeline, getStreetsPipeline} from './pipelines'
+import {
+  getDomainsPipeline,
+  getRealEstatesPipeline,
+  getStreetsPipeline,
+} from './pipelines'
 
 export const firstTextToUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
