@@ -33,6 +33,7 @@ export interface IGetRealestateResponse {
   data: IExtendedRealestate[]
   domainsFilter: IFilter[]
   realEstatesFilter: IFilter[]
+  streetsFilter: IFilter[]
 }
 
 export interface IDeleteRealestateResponse {

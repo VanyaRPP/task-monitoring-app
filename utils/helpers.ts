@@ -1,6 +1,6 @@
-import User from '@common/modules/models/User'
+import User, { IUser } from '@common/modules/models/User'
 import { FormInstance } from 'antd'
-import { ObjectId } from 'mongoose'
+import mongoose, { ObjectId } from 'mongoose'
 import { Roles, ServiceType } from './constants'
 import { PaymentOptions } from './types'
 import moment from 'moment'
@@ -8,7 +8,11 @@ import 'moment/locale/uk'
 import _omit from 'lodash/omit'
 import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 import Big from 'big.js'
-import {getDomainsPipeline, getRealEstatesPipeline, getStreetsPipeline} from './pipelines'
+import {
+  getDomainsPipeline,
+  getRealEstatesPipeline,
+  getStreetsPipeline,
+} from './pipelines'
 
 export const firstTextToUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
@@ -273,6 +277,24 @@ export function filterOptions(options = {}, filterIds: any) {
   }
   res.$in = idsFromQueryFilter
   return res
+}
+
+export async function getDistinctStreets({
+  user,
+  model,
+}: {
+  user: IUser
+  model: mongoose.Model<any>
+}): Promise<{ _id: mongoose.ObjectId; streetData: any }[] | undefined> {
+  // TODO: group of user roles helpers maybe? Such as isGlobalAdmin(user: IUser): boolean
+  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
+  const distinctDomains = await model.aggregate(domainsPipeline)
+  const streetsPipeline = getStreetsPipeline(
+    isGlobalAdmin,
+    distinctDomains.map((domain) => domain._id)
+  )
+  return await model.aggregate(streetsPipeline)
 }
 
 export async function getDistinctCompanyAndDomain({
