@@ -6,8 +6,8 @@ const FilterTags = ({ filters, setFilters, collection }) => {
     <>
       <div className={s.filtersTagsBlock}>
         <div className={s.filters}>
-        Надавачі послуг:
-          {filters?.domain?.length ? (
+          Надавачі послуг:
+          {Array.isArray(filters?.domain) && filters.domain.length ? (
             <span className={s.filtersTags}>
               {filters.domain.map((domain) => (
                 <Tag
@@ -30,7 +30,7 @@ const FilterTags = ({ filters, setFilters, collection }) => {
               ))}
             </span>
           ) : (collection?.currentDomainsCount ||
-              collection?.domainsFilter?.length) === 1 ? (
+              Array.isArray(collection?.domainsFilter)) === 1 ? (
             <SingleTag name={collection?.data?.[0]?.domain?.name} />
           ) : (
             ' Всі'
@@ -38,7 +38,7 @@ const FilterTags = ({ filters, setFilters, collection }) => {
         </div>
         <div className={s.filters}>
           Компанії:
-          {filters?.company?.length ? (
+          {Array.isArray(filters?.company) && filters.company.length ? (
             <div className={s.filtersTags}>
               {filters.company.map((company) => (
                 <Tag
