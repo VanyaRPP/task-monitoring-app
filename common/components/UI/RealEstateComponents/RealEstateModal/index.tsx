@@ -42,6 +42,7 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
       cleaning: formData.cleaning,
     }
 
+    
     const response = currentRealEstate
       ? await editRealEstate({
           _id: currentRealEstate?._id,
