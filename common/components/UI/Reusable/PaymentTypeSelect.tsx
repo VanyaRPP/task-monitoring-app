@@ -9,7 +9,7 @@ const PaymentTypeSelect = ({ edit }: { edit?: boolean }) => {
       label="Тип оплати"
       rules={validateField('required')}
     >
-      <Select placeholder="Оберіть тип оплати" disabled={edit}>
+      <Select placeholder="Оберіть тип оплати"> {/*disabled={!edit}*/}
         <Select.Option value={Operations.Credit}>Кредит (Оплата)</Select.Option>
         <Select.Option value={Operations.Debit}>
           Дебет (Реалізація)

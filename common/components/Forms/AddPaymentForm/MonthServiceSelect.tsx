@@ -39,7 +39,7 @@ function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
   }, [streetId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (monthsServices?.length === 1) {
+    if (monthsServices?.length > 0) {
       form.setFieldValue('monthService', monthsServices[0]._id)
     }
   }, [monthsServices?.length]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -58,7 +58,7 @@ function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
         }))}
         optionFilterProp="children"
         placeholder="Місяць"
-        disabled={monthsServices?.length === 1 || edit}
+        // disabled={monthsServices?.length === 1 || !edit}
         loading={isLoading}
         showSearch
       />
