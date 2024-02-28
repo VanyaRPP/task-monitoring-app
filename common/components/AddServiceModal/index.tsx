@@ -8,10 +8,15 @@ import AddServiceForm from '../Forms/AddServiceForm'
 import moment from 'moment'
 import { IExtendedService } from '@common/api/serviceApi/service.api.types'
 import Modal from '../UI/ModalWindow'
+import PreviewServiceForm from '../Forms/PreviewServiceForm'
 
 interface Props {
   closeModal: VoidFunction
   currentService?: IExtendedService
+  serviceActions?: {
+    edit: boolean
+    preview: boolean
+  }
 }
 
 type FormData = {
@@ -23,17 +28,20 @@ type FormData = {
   waterPrice: number
   waterPriceTotal: number
   garbageCollectorPrice: number
-  publicElectricUtilityPrice: number
   inflicionPrice: number
   description: string
 }
 
-const AddServiceModal: FC<Props> = ({ closeModal, currentService }) => {
+const AddServiceModal: FC<Props> = ({
+  closeModal,
+  currentService,
+  serviceActions,
+}) => {
   const [form] = Form.useForm()
   const [addService, { isLoading: isAddingLoading }] = useAddServiceMutation()
   const [editService, { isLoading: isEditingLoading }] =
     useEditServiceMutation()
-  const edit = !!currentService
+  const { edit, preview } = serviceActions
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
     const serviceData = {
@@ -45,7 +53,6 @@ const AddServiceModal: FC<Props> = ({ closeModal, currentService }) => {
       waterPrice: formData.waterPrice,
       waterPriceTotal: formData.waterPriceTotal,
       garbageCollectorPrice: formData.garbageCollectorPrice || 0,
-      publicElectricUtilityPrice: formData.publicElectricUtilityPrice || 0,
       inflicionPrice: formData.inflicionPrice || 0,
       description: formData.description || '',
     }
@@ -71,15 +78,25 @@ const AddServiceModal: FC<Props> = ({ closeModal, currentService }) => {
     <Modal
       title="Ціна на послуги в місяць"
       onOk={handleSubmit}
+      changesForm={() => form.isFieldsTouched()}
       onCancel={() => {
         form.resetFields()
         closeModal()
       }}
-      okText={edit ? 'Зберегти' : 'Додати'}
-      cancelText={'Відміна'}
+      okText={edit ? 'Зберегти' : !preview && 'Додати'}
+      okButtonProps={{ style: { display: preview ? 'none' : 'inline' } }}
+      cancelText={preview ? 'Закрити' : 'Відміна'}
       confirmLoading={isAddingLoading || isEditingLoading}
     >
-      <AddServiceForm form={form} edit={edit} currentService={currentService} />
+      {preview ? (
+        <PreviewServiceForm form={form} currentService={currentService} />
+      ) : (
+        <AddServiceForm
+          form={form}
+          edit={edit}
+          currentService={currentService}
+        />
+      )}
     </Modal>
   )
 }

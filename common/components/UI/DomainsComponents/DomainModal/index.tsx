@@ -56,6 +56,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
       open={true}
       title={'Надавачі послуг'}
       onOk={handleSubmit}
+      changesForm={() => form.isFieldsTouched()}
       onCancel={closeModal}
       okText={currentDomain ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}

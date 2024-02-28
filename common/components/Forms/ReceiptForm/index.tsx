@@ -4,12 +4,17 @@ import type { ColumnsType } from 'antd/es/table'
 import s from './style.module.scss'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useReactToPrint } from 'react-to-print'
-import { filterInvoiceObject, getFormattedDate, renderCurrency } from '@utils/helpers'
+import {
+  filterInvoiceObject,
+  getFormattedDate,
+  renderCurrency,
+} from '@utils/helpers'
 import numberToTextNumber from '@utils/numberToText'
 import useService from '@common/modules/hooks/useService'
 import moment from 'moment'
 import { ServiceType } from '@utils/constants'
 import NameComponent from '../AddPaymentForm/PaymentPricesTable/fields/NameComponent'
+import AmountComponent from '../AddPaymentForm/PaymentPricesTable/fields/AmountComponent'
 
 interface Props {
   currPayment: IExtendedPayment
@@ -58,19 +63,25 @@ const ReceiptForm: FC<Props> = ({
         : true
     )
     .map((item, index) => {
-      const itemName = item?.type === ServiceType.Custom ? item?.name : item?.type
+      const itemName =
+        item?.type === ServiceType.Custom ? item?.name : item?.type
+      const isWaterPart = itemName === 'waterPart'
 
       return {
-        Кількість: item.lastAmount
-          ? (item.amount - item.lastAmount)?.toFixed(2) || ''
-          : item.amount || '',
+        Кількість: isWaterPart ? (
+          <AmountComponent record={{ name: itemName }} edit={true} />
+        ) : item.lastAmount ? (
+          (item.amount - item.lastAmount)?.toFixed(2) || ''
+        ) : (
+          item.amount || ''
+        ),
         Назва: <NameComponent record={{ name: itemName }} preview />,
         Ціна: +item.price,
         Сума: +item.sum,
         id: index + 1,
       }
     })
-  
+
   return (
     <>
       <div

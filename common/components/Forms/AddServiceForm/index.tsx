@@ -7,6 +7,7 @@ import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import { IExtendedService } from '@common/api/serviceApi/service.api.types'
 import moment from 'moment'
+import useInitialValues from '@common/modules/hooks/useInitialValues'
 
 interface Props {
   form: FormInstance<any>
@@ -84,9 +85,6 @@ const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
       <Form.Item name="inflicionPrice" label="Індекс інфляції">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item name="publicElectricUtilityPrice" label="Нарахування МЗК">
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
-      </Form.Item>
       <Form.Item name="description" label="Опис">
         <Input.TextArea
           placeholder="Введіть опис"
@@ -97,29 +95,6 @@ const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
       </Form.Item>
     </Form>
   )
-}
-
-function useInitialValues(currentService) {
-  // TODO: add useEffect || useCallback ?
-  // currently we have few renders
-  // we need it only once. on didmount (first render)
-  const initialValues = {
-    domain: currentService?.domain?.name,
-    street:
-      currentService?.street &&
-      `${currentService.street.address} (м. ${currentService.street.city})`,
-    date: moment(currentService?.date),
-    electricityPrice: currentService?.electricityPrice,
-    inflicionPrice: currentService?.inflicionPrice,
-    rentPrice: currentService?.rentPrice,
-    waterPrice: currentService?.waterPrice,
-    description: currentService?.description,
-    waterPriceTotal: currentService?.waterPriceTotal,
-    garbageCollectorPrice: currentService?.garbageCollectorPrice,
-    publicElectricUtilityPrice: currentService?.publicElectricUtilityPrice,
-
-  }
-  return initialValues
 }
 
 export default AddServiceForm

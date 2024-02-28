@@ -32,7 +32,6 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
       description: formData.description,
       adminEmails: formData.adminEmails,
       pricePerMeter: formData.pricePerMeter,
-      publicElectricUtility: formData.publicElectricUtility,
       servicePricePerMeter: formData.servicePricePerMeter,
       totalArea: formData.totalArea,
       garbageCollector: formData.garbageCollector,
@@ -66,6 +65,7 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
       style={{ top: 20 }}
       title={"Компанії"}
       onOk={handleSubmit}
+      changesForm={() => form.isFieldsTouched()}
       onCancel={closeModal}
       okText={currentRealEstate ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}

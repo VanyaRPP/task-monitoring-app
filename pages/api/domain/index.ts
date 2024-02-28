@@ -5,6 +5,7 @@ import RealEstate from '@common/modules/models/RealEstate'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import start, { Data } from '@pages/api/api.config'
 import Domain from '@common/modules/models/Domain'
+import Street from '@common/modules/models/Street'
 
 start()
 

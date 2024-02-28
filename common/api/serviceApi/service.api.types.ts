@@ -1,3 +1,5 @@
+import { IFilter } from '../paymentApi/payment.api.types'
+
 export interface IService {
   domain: string
   street: string
@@ -7,7 +9,6 @@ export interface IService {
   waterPrice: number
   waterPriceTotal: number
   garbageCollectorPrice?: number
-  publicElectricUtilityPrice?: number
   inflicionPrice?: number
   description?: string
 }
@@ -25,9 +26,16 @@ export interface IAddServiceResponse {
 export interface IGetServiceResponse {
   success: boolean
   data: IExtendedService[]
+  addressFilter: IFilter[]
+  domainFilter: IFilter[]
 }
 
 export interface IDeleteServiceResponse {
   data: string
   success: boolean
+}
+
+export interface IServiceFilter {
+  street: string
+  domain: string
 }

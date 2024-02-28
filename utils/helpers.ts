@@ -8,7 +8,11 @@ import 'moment/locale/uk'
 import _omit from 'lodash/omit'
 import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 import Big from 'big.js'
-import { getDomainsPipeline, getRealEstatesPipeline } from './pipelines'
+import {
+  getDomainsPipeline,
+  getRealEstatesPipeline,
+  getStreetsPipeline,
+} from './pipelines'
 
 export const firstTextToUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
@@ -214,9 +218,12 @@ export const renderCurrency = (number: any): string => {
   }
 }
 
-export const getFormattedDate = (data: Date): string => {
+export const getFormattedDate = (
+  data: Date,
+  format: string = 'MMMM'
+): string => {
   if (data) {
-    return firstTextToUpperCase(moment(data).format('MMMM'))
+    return firstTextToUpperCase(moment(data).format(format))
   }
 }
 
@@ -371,4 +378,30 @@ export function generateColorsArray(length: number): string[] {
   return initialColors
 }
 
+export function getFilterForAddress(streetDatas) {
+  const filterData = streetDatas.map(({ streetData }) => ({
+    text: `${streetData.address} (м. ${streetData.city})`,
+    value: streetData._id,
+  }))
 
+  const uniqueTextsSet = new Set()
+
+  const uniqueFilter = filterData.filter(({ text }) => {
+    if (!uniqueTextsSet.has(text)) {
+      uniqueTextsSet.add(text)
+      return true
+    }
+    return false
+  })
+
+  return uniqueFilter
+}
+
+export function getFilterForDomain(domains) {
+  const filterData = domains.map(({ domainDetails }) => ({
+    text: domainDetails.name,
+    value: domainDetails._id,
+  }))
+
+  return filterData
+}
