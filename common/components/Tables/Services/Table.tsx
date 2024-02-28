@@ -74,7 +74,9 @@ const ServicesTable: React.FC<Props> = ({
         services?.addressFilter,
         services?.domainFilter,
         filter,
-        isOnPage
+        isOnPage,
+        setServiceActions,
+        serviceActions,
       )}
       dataSource={services?.data}
       scroll={{ x: 1700 }}
