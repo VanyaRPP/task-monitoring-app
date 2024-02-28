@@ -1,4 +1,4 @@
-import { IFilter } from "../paymentApi/payment.api.types"
+import { IFilter } from '../paymentApi/payment.api.types'
 
 export interface IService {
   domain: string
@@ -27,6 +27,7 @@ export interface IGetServiceResponse {
   success: boolean
   data: IExtendedService[]
   addressFilter: IFilter[]
+  domainFilter: IFilter[]
 }
 
 export interface IDeleteServiceResponse {
@@ -36,4 +37,5 @@ export interface IDeleteServiceResponse {
 
 export interface IServiceFilter {
   street: string
+  domain: string
 }

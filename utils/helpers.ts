@@ -393,3 +393,12 @@ export function getFilterForAddress(streetDatas) {
 
   return uniqueFilter
 }
+
+export function getFilterForDomain(domains) {
+  const filterData = domains.map(({ domainDetails }) => ({
+    text: domainDetails.name,
+    value: domainDetails._id,
+  }))
+
+  return filterData
+}
