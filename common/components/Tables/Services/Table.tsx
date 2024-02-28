@@ -139,7 +139,7 @@ const getDefaultColumns = (
       title: 'Місяць',
       dataIndex: 'date',
       width: 100,
-      render: getFormattedDate,
+      render: (date) => getFormattedDate(date),
     },
     {
       title: 'Утримання',
