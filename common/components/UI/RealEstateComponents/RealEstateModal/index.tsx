@@ -38,7 +38,7 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
       rentPart: formData.rentPart,
       inflicion: formData.inflicion,
       waterPart: formData.waterPart,
-      discount: formData.discount * -1,
+      discount: formData.discount > 0 ? formData.discount * -1 : formData.discount,
       cleaning: formData.cleaning,
     }
 
