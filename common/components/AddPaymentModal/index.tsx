@@ -1,4 +1,3 @@
-import { useEmailMutation } from '@common/api/emailApi/email.api'
 import {
   useAddPaymentMutation,
   useEditPaymentMutation,
@@ -10,7 +9,6 @@ import {
   filterInvoiceObject,
   getPaymentProviderAndReciever,
 } from '@utils/helpers'
-import { generateHtmlFromThemplate } from '@utils/pdf/pdfThemplate'
 import { Form, Tabs, TabsProps, message } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
 import { FC, createContext, useContext, useState } from 'react'
@@ -39,7 +37,6 @@ const AddPaymentModal: FC<Props> = ({
   paymentActions,
 }) => {
   const [form] = Form.useForm()
-  const [sendEmail] = useEmailMutation()
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
     useEditPaymentMutation()
@@ -70,7 +67,7 @@ const AddPaymentModal: FC<Props> = ({
       reciever,
       invoice: formData.debit ? filteredInvoice : [],
     }
-    
+
     const response = edit
       ? await editPayment({
           _id: paymentData?._id,
@@ -81,20 +78,6 @@ const AddPaymentModal: FC<Props> = ({
     if ('data' in response) {
       const action = edit ? 'Збережено' : 'Додано'
       form.resetFields()
-
-      if (!edit) {
-        generateHtmlFromThemplate(payment)
-          .then((html) =>
-            sendEmail({
-              to: company.domain.adminEmails,
-              subject: 'Payment',
-              text: `You have received a new payment from ${company.domain.name}`,
-              html: html,
-            })
-          )
-          .catch(console.error)
-      }
-
       message.success(action)
       closeModal()
     } else {
