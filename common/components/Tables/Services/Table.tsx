@@ -13,7 +13,6 @@ import { AppRoutes, Roles } from '@utils/constants'
 import { getFormattedDate, renderCurrency } from '@utils/helpers'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 interface Props {
-  setCurrentService: (setvice: IExtendedService) => void,
   setServiceActions: React.Dispatch<
     React.SetStateAction<{
       edit: boolean
@@ -24,6 +23,7 @@ interface Props {
     edit: boolean
     preview: boolean
   },
+  setCurrentService: (setvice: IExtendedService) => void
   services: IGetServiceResponse
   isLoading?: boolean
   isError?: boolean
@@ -60,7 +60,6 @@ const ServicesTable: React.FC<Props> = ({
   }
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
-
   return (
     <Table
       rowKey="_id"
@@ -72,9 +71,8 @@ const ServicesTable: React.FC<Props> = ({
         handleDelete,
         deleteLoading,
         setCurrentService,
-        setServiceActions,
-        serviceActions,
         services?.addressFilter,
+        services?.domainFilter,
         filter,
         isOnPage
       )}
@@ -100,6 +98,12 @@ const getDefaultColumns = (
   handleDelete?: (...args: any) => void,
   deleteLoading?: boolean,
   setCurrentService?: (service: IExtendedService) => void,
+  addressFilter?,
+  domainFilter?,
+  // filters?: IFilter[],
+  filter?: any,
+  isOnPage?: boolean,
+
   setServiceActions?: React.Dispatch<
     React.SetStateAction<{
       edit: boolean
@@ -110,22 +114,22 @@ const getDefaultColumns = (
     edit: boolean
     preview: boolean
   },
-  filters?: IFilter[],
-  filter?: any,
-  isOnPage?: boolean
 ): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {
       fixed: 'left',
       title: 'Надавач послуг',
       dataIndex: 'domain',
+      filters: isOnPage ? domainFilter : null,
+      filteredValue: filter?.domain || null,
       width: 200,
       render: (i) => i?.name,
     },
     {
       title: 'Адреса',
       dataIndex: 'street',
-      filters: isOnPage ? filters : null,
+      // filters: isOnPage ? filters : null,
+      filters: isOnPage ? addressFilter : null,
       filteredValue: filter?.street || null,
       render: (i) => `${i?.address} (м. ${i?.city})`,
     },

@@ -6,9 +6,13 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import Service from '@common/modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
 import Domain from '@common/modules/models/Domain'
-import Street from '@common/modules/models/Street'
-import { filterOptions, getFilterForAddress } from '@utils/helpers'
-import { getStreetsPipeline } from '@utils/pipelines'
+
+import {
+  filterOptions,
+  getFilterForAddress,
+  getFilterForDomain,
+} from '@utils/helpers'
+import { getDomainsPipeline, getStreetsPipeline } from '@utils/pipelines'
 
 start()
 
@@ -25,24 +29,6 @@ export default async function handler(
         const options = {}
 
         const { domainId, streetId, serviceId, limit = 0 } = req.query
-        if (isGlobalAdmin && domainId && streetId) {
-          options.domain = domainId
-          options.street = streetId
-
-          const expr = filterPeriodOptions(req.query)
-
-          if (expr.length > 0) {
-            options.$expr = { $and: expr }
-          }
-          const services = await Service.find(options)
-            .sort({ date: -1 })
-            .limit(+limit)
-
-          return res.status(200).json({
-            success: true,
-            data: services,
-          })
-        }
 
         // TODO: refactor with logic. each case should be well separated
         // Should I left all conditions and only one if for each role?
@@ -117,6 +103,9 @@ export default async function handler(
           options.street = filterOptions(options?.street, streetId)
         }
 
+        if (domainId) {
+          options.domain = filterOptions(options?.domain, domainId)
+        }
         const services = await Service.find(options)
           .sort({ date: -1 })
           .limit(+limit)
@@ -128,6 +117,11 @@ export default async function handler(
           options.domain
         )
 
+        const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
+
+        const domains = await Service.aggregate(domainsPipeline)
+        const filterDomains = getFilterForDomain(domains)
+
         const streets = await Service.aggregate(streetsPipeline)
         const filterStreets = getFilterForAddress(streets)
 
@@ -135,6 +129,7 @@ export default async function handler(
           success: true,
           data: services,
           addressFilter: filterStreets,
+          domainFilter: filterDomains,
         })
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })
