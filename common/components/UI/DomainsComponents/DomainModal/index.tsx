@@ -18,7 +18,7 @@ interface Props {
 
 const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
   const [form] = Form.useForm()
-  let errorType = ('')
+   let errorType = ('')
   const [addDomainEstate] = useAddDomainMutation()
   const [editDomain] = useEditDomainMutation()
 
