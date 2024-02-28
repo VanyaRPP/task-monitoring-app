@@ -6,7 +6,13 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import Service from '@common/modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
 import Domain from '@common/modules/models/Domain'
-import Street from '@common/modules/models/Street'
+
+import {
+  filterOptions,
+  getFilterForAddress,
+  getFilterForDomain,
+} from '@utils/helpers'
+import { getDomainsPipeline, getStreetsPipeline } from '@utils/pipelines'
 
 start()
 
@@ -20,26 +26,9 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        
         const options = {}
 
         const { domainId, streetId, serviceId, limit = 0 } = req.query
-        if (isGlobalAdmin && domainId && streetId) {
-          options.domain = domainId
-          options.street = streetId
-
-          const expr = filterPeriodOptions(req.query)
-
-          if (expr.length > 0) {
-            options.$expr = { $and: expr }
-          }
-          const services = await Service.find(options).sort({ date: -1 }).limit(+limit)
-
-          return res.status(200).json({
-            success: true,
-            data: services,
-          })
-        }
 
         // TODO: refactor with logic. each case should be well separated
         // Should I left all conditions and only one if for each role?
@@ -65,7 +54,9 @@ export default async function handler(
             const domainsIds = realEstates.map((i) => i.domain._id)
             options.domain = { $in: domainsIds }
           }
-          const services = await Service.find(options).sort({ date: -1 }).limit(+limit)
+          const services = await Service.find(options)
+            .sort({ date: -1 })
+            .limit(+limit)
 
           return res.status(200).json({
             success: true,
@@ -108,18 +99,40 @@ export default async function handler(
           }
         }
 
+        if (streetId) {
+          options.street = filterOptions(options?.street, streetId)
+        }
+
+        if (domainId) {
+          options.domain = filterOptions(options?.domain, domainId)
+        }
         const services = await Service.find(options)
           .sort({ date: -1 })
           .limit(+limit)
           .populate({ path: 'domain', select: '_id name' })
           .populate({ path: 'street', select: '_id address city' })
 
+        const streetsPipeline = getStreetsPipeline(
+          isGlobalAdmin,
+          options.domain
+        )
+
+        const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
+
+        const domains = await Service.aggregate(domainsPipeline)
+        const filterDomains = getFilterForDomain(domains)
+
+        const streets = await Service.aggregate(streetsPipeline)
+        const filterStreets = getFilterForAddress(streets)
+
         return res.status(200).json({
           success: true,
           data: services,
+          addressFilter: filterStreets,
+          domainFilter: filterDomains,
         })
       } catch (error) {
-        return res.status(400).json({ success: false, error: error.message})
+        return res.status(400).json({ success: false, error: error.message })
       }
 
     case 'POST':

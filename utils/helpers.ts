@@ -218,9 +218,12 @@ export const renderCurrency = (number: any): string => {
   }
 }
 
-export const getFormattedDate = (data: Date): string => {
+export const getFormattedDate = (
+  data: Date,
+  format: string = 'MMMM'
+): string => {
   if (data) {
-    return firstTextToUpperCase(moment(data).format('MMMM'))
+    return firstTextToUpperCase(moment(data).format(format))
   }
 }
 
@@ -410,4 +413,13 @@ export function getFilterForAddress(streetDatas) {
   })
 
   return uniqueFilter
+}
+
+export function getFilterForDomain(domains) {
+  const filterData = domains.map(({ domainDetails }) => ({
+    text: domainDetails.name,
+    value: domainDetails._id,
+  }))
+
+  return filterData
 }
