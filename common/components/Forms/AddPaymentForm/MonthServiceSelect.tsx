@@ -54,7 +54,7 @@ function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
         filterOption={(input, option) => (option?.label ?? '').includes(input)}
         options={(monthsServices?.data || []).map((i) => ({
           value: i._id,
-          label: getFormattedDate(i.date),
+          label: getFormattedDate(i.date, 'MMMM YYYY'),
         }))}
         optionFilterProp="children"
         placeholder="Місяць"

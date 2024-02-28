@@ -218,9 +218,12 @@ export const renderCurrency = (number: any): string => {
   }
 }
 
-export const getFormattedDate = (data: Date): string => {
+export const getFormattedDate = (
+  data: Date,
+  format: string = 'MMMM'
+): string => {
   if (data) {
-    return firstTextToUpperCase(moment(data).format('MMMM'))
+    return firstTextToUpperCase(moment(data).format(format))
   }
 }
 
