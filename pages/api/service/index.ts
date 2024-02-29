@@ -31,6 +31,7 @@ export default async function handler(
         const { domainId, streetId, serviceId, limit = 0 } = req.query
 
         // TODO: refactor with logic. each case should be well separated
+
         // Should I left all conditions and only one if for each role?
         // this way it will handle all conditions and will not return wrong service
 
