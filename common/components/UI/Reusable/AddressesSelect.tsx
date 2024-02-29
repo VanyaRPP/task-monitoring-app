@@ -3,33 +3,28 @@ import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { validateField } from '@common/assets/features/validators'
 import { IDomain } from '@common/modules/models/Domain'
 import { Form, Select } from 'antd'
-import { CSSProperties, useEffect } from 'react'
+import { useEffect } from 'react'
 
 export default function AddressesSelect({
   form,
-  edit,
-  dropdownStyle,
+  edit
 }: {
-  form: any
-  edit?: boolean
-  dropdownStyle?: CSSProperties
+    form: any
+    edit?: boolean
 }) {
   const { streetId } = useCompanyPageContext()
   const domainId = Form.useWatch('domain', form)
-  const { data = [], isLoading } = useGetDomainsQuery({
-    domainId: domainId || undefined,
-  })
-  const domainObj = data.length > 0 ? data[0] : ({} as IDomain)
+  const { data = [], isLoading } = useGetDomainsQuery({ domainId: domainId || undefined })
+  const domainObj = data.length > 0 ? data[0] : {} as IDomain
   const temp = (domainObj?.streets as any[]) || [] // eslint-disable-line react-hooks/exhaustive-deps
   const singleStreet = streetId && temp.find((i) => i._id === streetId)
   const streets = singleStreet ? [singleStreet] : temp
 
   useEffect(() => {
-    if (streets?.length === 1) {
+    if (streets?.length > 0) {
       form.setFieldValue('street', streets[0]._id)
     }
-  }, [streets?.length]) // eslint-disable-line react-hooks/exhaustive-deps
-
+  })//, [streets] 
   return (
     <Form.Item name="street" label="Адреса" rules={validateField('required')}>
       <Select
@@ -51,10 +46,9 @@ export default function AddressesSelect({
         }
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={isLoading || !domainId || streets?.length === 1 || edit}
+        disabled={isLoading || !domainId || streets?.length == 0 || edit}
         loading={isLoading}
         showSearch
-        dropdownStyle={dropdownStyle}
       />
     </Form.Item>
   )
