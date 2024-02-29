@@ -143,27 +143,27 @@ const PaymentCardHeader = ({
     }
 
     selectedPayments.forEach((invoice: IPayment) => {
+      const dateDefaultFormat = dateToDefaultFormat(
+        (invoice.monthService as any)?.date // TODO: proper typing
+      )
+
       generateHtmlFromThemplate(invoice)
         .then(async (html) => {
           const response = await sendEmail({
             to: invoice.reciever.adminEmails,
-            subject: 'Оплата',
+            subject: `Оплата від ${dateDefaultFormat}`,
             text: `Ви отримали новий рахунок від "${
-              (invoice.domain as any)?.name // TODO: proper typing
-            }" за ${dateToDefaultFormat(
-              (invoice.monthService as any)?.date // TODO: proper typing
-            )}`,
+              typeof invoice.domain === 'string'
+                ? invoice.domain
+                : invoice.domain?.name
+            }" за ${dateDefaultFormat}`,
             html: html,
           })
 
           if ('data' in response) {
             // TODO: change the invoice status to prevent multiple emails being sent with the same invoice
             message.success(
-              `Рахунок для "${
-                invoice.reciever.companyName
-              }" за ${dateToDefaultFormat(
-                (invoice.monthService as any)?.date // TODO: proper typing
-              )} надіслано`
+              `Рахунок для "${invoice.reciever.companyName}" за ${dateDefaultFormat} надіслано`
             )
           } else if ('error' in response) {
             throw response.error
@@ -173,11 +173,7 @@ const PaymentCardHeader = ({
         })
         .catch((error) => {
           message.error(
-            `Не вдалося надіслати рахунок для "${
-              invoice.reciever.companyName
-            }" за ${dateToDefaultFormat(
-              (invoice.monthService as any)?.date // TODO: proper typing
-            )}`
+            `Не вдалося надіслати рахунок для "${invoice.reciever.companyName}" за ${dateDefaultFormat}`
           )
           console.error(error)
         })
