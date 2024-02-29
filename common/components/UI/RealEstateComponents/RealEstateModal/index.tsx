@@ -40,6 +40,7 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
       waterPart: formData.waterPart,
       discount: formData.discount > 0 ? formData.discount * -1 : formData.discount,
       cleaning: formData.cleaning,
+      
     }
 
     const response = currentRealEstate
