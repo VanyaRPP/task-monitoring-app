@@ -25,7 +25,7 @@ export default function AddressesSelect({
   const streets = singleStreet ? [singleStreet] : temp
 
   useEffect(() => {
-    if (streets?.length > 1) {
+    if (streets?.length > 0) {
       form.setFieldValue('street', streets[0]._id)
     }
   }, [streets?.length]) // eslint-disable-line react-hooks/exhaustive-deps
