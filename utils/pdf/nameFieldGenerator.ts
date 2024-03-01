@@ -91,6 +91,7 @@ async function generateCleaningField(dateMonth: string) {
     </span>`
 }
 
+
 async function GenerateInflicionField(paymentData) {
   const domainId = paymentData?.domain?._id
   const streetId = paymentData?.street?._id
@@ -101,6 +102,8 @@ async function GenerateInflicionField(paymentData) {
     streetId: streetId,
     date: date,
   })
+  
+  console.log(services)
 
   const inflicionPriceObject = paymentData.invoice.find(
     (item) => item.type === 'inflicionPrice'
@@ -108,6 +111,7 @@ async function GenerateInflicionField(paymentData) {
   const inflicionPrice = inflicionPriceObject.price
 
   const previousMonth = services?.[0]
+  console.log(previousMonth)
 
   const inflicionIndexTitle = previousMonth
     ? `

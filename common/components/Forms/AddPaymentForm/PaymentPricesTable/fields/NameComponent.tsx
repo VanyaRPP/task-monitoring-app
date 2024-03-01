@@ -37,7 +37,7 @@ export default function NameComponent({ record, preview }) {
   const { company } = useCompany({ companyId, skip: preview })
 
   if (record.name in fields) {
-    const Component = fields[record.name]
+    const Component = fields[record.name] 
     return (
       <Component
         dateMonth={getFormattedDate(

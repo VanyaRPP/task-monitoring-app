@@ -16,10 +16,18 @@ import NameComponent from './fields/NameComponent'
 import SumComponent from './fields/SumComponent'
 import s from '../style.module.scss'
 import Modal from '@common/components/UI/ModalWindow'
+import useService, { usePreviousMonthService, } from '@common/modules/hooks/useService'
+import { usePaymentContext } from '@common/components/AddPaymentModal'
 
 function PaymentPricesTable({ paymentActions }) {
+  const { form, paymentData } = usePaymentContext()
+  const { previousMonth } = usePreviousMonthService({
+    date: paymentData?.monthService?.date || null,
+    domainId: form.getFieldValue('domain') || null,
+    streetId: form.getFieldValue('street') || null,
+  })
   const {preview, edit} = paymentActions
-  const { customDataSource, addDataSource, removeDataSource } =
+  let { customDataSource, addDataSource, removeDataSource } =
     useCustomDataSource({ preview: paymentActions?.preview })
 
   const columns: ColumnProps<IPaymentTableData>[] = [
@@ -64,7 +72,14 @@ function PaymentPricesTable({ paymentActions }) {
       width: 110,
     },
   ]
-
+  /////////////////////
+  if (!previousMonth) {
+    customDataSource = customDataSource.filter(item => item.name !== 'inflicionPrice')
+    customDataSource.forEach((item, index) => {
+      item.id = index + 1
+    })
+  }
+  /////////////////////
   if (!preview) {
     columns.push({
       title: (
