@@ -3,19 +3,19 @@ import {
   useEditPaymentMutation,
 } from '@common/api/paymentApi/payment.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import { Form, message, Tabs, TabsProps } from 'antd'
-import React, { FC, createContext, useContext, useState } from 'react'
-import AddPaymentForm from '../Forms/AddPaymentForm'
-import ReceiptForm from '../Forms/ReceiptForm'
-import s from './style.module.scss'
+import useCompany from '@common/modules/hooks/useCompany'
 import { Operations } from '@utils/constants'
-import { FormInstance } from 'antd/es/form/Form'
 import {
   filterInvoiceObject,
   getPaymentProviderAndReciever,
 } from '@utils/helpers'
-import useCompany from '@common/modules/hooks/useCompany'
+import { Form, Tabs, TabsProps, message } from 'antd'
+import { FormInstance } from 'antd/es/form/Form'
+import { FC, createContext, useContext, useState } from 'react'
+import AddPaymentForm from '../Forms/AddPaymentForm'
+import ReceiptForm from '../Forms/ReceiptForm'
 import Modal from '../UI/ModalWindow'
+import s from './style.module.scss'
 
 interface Props {
   closeModal: VoidFunction
@@ -48,7 +48,6 @@ const AddPaymentModal: FC<Props> = ({
   )
   const companyId = Form.useWatch('company', form)
   const { company } = useCompany({ companyId, skip: !companyId || preview })
-
   const { provider, reciever } = getPaymentProviderAndReciever(company)
 
   const handleSubmit = async () => {
@@ -68,6 +67,7 @@ const AddPaymentModal: FC<Props> = ({
       reciever,
       invoice: formData.debit ? filteredInvoice : [],
     }
+
     const response = edit
       ? await editPayment({
           _id: paymentData?._id,

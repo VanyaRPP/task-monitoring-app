@@ -1,4 +1,4 @@
-import mongoose, { Schema, ObjectId } from 'mongoose'
+import mongoose, { ObjectId, Schema } from 'mongoose'
 import { TaskStatuses } from 'utils/constants'
 
 export interface ITask {
@@ -86,5 +86,5 @@ const TaskSchema = new Schema<ITaskModel>({
   executant: { type: Schema.Types.ObjectId },
 })
 
-const Task = mongoose.models.Task || mongoose.model('Task', TaskSchema)
+const Task = mongoose.models?.Task || mongoose.model('Task', TaskSchema)
 export default Task

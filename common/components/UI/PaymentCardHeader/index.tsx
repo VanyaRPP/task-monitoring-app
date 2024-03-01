@@ -3,6 +3,7 @@ import {
   SelectOutlined,
   DeleteOutlined,
   DownloadOutlined,
+  SendOutlined,
 } from '@ant-design/icons'
 import React, { useState } from 'react'
 import { AppRoutes, Roles } from '@utils/constants'
@@ -17,17 +18,20 @@ import FilterTags from '../Reusable/FilterTags'
 import ImportInvoices from './ImportInvoices'
 import {
   useDeleteMultiplePaymentsMutation,
-  useGeneratePdfMutation ,
+  useGeneratePdfMutation,
 } from '@common/api/paymentApi/payment.api'
 import Modal from 'antd/lib/modal/Modal'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
 import {
   IGeneratePaymentPDF,
   IGeneratePaymentPDFResponce,
+  IPayment,
 } from '@common/api/paymentApi/payment.api.types'
 import { saveAs } from 'file-saver'
 import SelectForDebitAndCredit from '@components/UI/PaymentSelect/index'
-import StreetsSelector from "@components/StreetsSelector";
+import StreetsSelector from '@components/StreetsSelector'
+import { generateHtmlFromThemplate } from '@utils/pdf/pdfThemplate'
+import { useEmailMutation } from '@common/api/emailApi/email.api'
 
 const columns: any = [
   {
@@ -45,7 +49,6 @@ const columns: any = [
   },
 ]
 
-
 const PaymentCardHeader = ({
   setCurrentDateFilter,
   setCurrentTypeOperation,
@@ -60,6 +63,7 @@ const PaymentCardHeader = ({
   selectedPayments,
 }) => {
   const router = useRouter()
+  const [sendEmail] = useEmailMutation()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const { data: currUser } = useGetCurrentUserQuery()
@@ -106,30 +110,74 @@ const PaymentCardHeader = ({
     })
   }
 
-  const [generatePdf] = useGeneratePdfMutation();
+  const [generatePdf] = useGeneratePdfMutation()
 
   const handleGeneratePdf = async () => {
     try {
       const response = await generatePdf({
-        payments: selectedPayments
-      });
-  
+        payments: selectedPayments,
+      })
+
       if ('data' in response) {
         const { data } = response
-  
+
         if (data) {
-          const buffer = Buffer.from(data.buffer);
-          const blob = new Blob([buffer], { type: `application/${data.fileExtension}` })
-  
+          const buffer = Buffer.from(data.buffer)
+          const blob = new Blob([buffer], {
+            type: `application/${data.fileExtension}`,
+          })
+
           saveAs(blob, `${data.fileName}.${data.fileExtension}`)
         }
-  
       } else {
         message.error('Сталася помилка під час генерації PDF')
       }
     } catch (error) {
       message.error('Сталася несподівана помилка під час генерації PDF')
     }
+  }
+
+  const handleSendToMail = async () => {
+    if (!selectedPayments) {
+      return message.warn('Виберіть проплати, щоб надіслати їх')
+    }
+
+    selectedPayments.forEach((invoice: IPayment) => {
+      const dateDefaultFormat = dateToDefaultFormat(
+        (invoice.monthService as any)?.date // TODO: proper typing
+      )
+
+      generateHtmlFromThemplate(invoice)
+        .then(async (html) => {
+          const response = await sendEmail({
+            to: invoice.reciever.adminEmails,
+            subject: `Оплата від ${dateDefaultFormat}`,
+            text: `Ви отримали новий рахунок від "${
+              typeof invoice.domain === 'string'
+                ? invoice.domain
+                : invoice.domain?.name
+            }" за ${dateDefaultFormat}`,
+            html: html,
+          })
+
+          if ('data' in response) {
+            // TODO: change the invoice status to prevent multiple emails being sent with the same invoice
+            message.success(
+              `Рахунок для "${invoice.reciever.companyName}" за ${dateDefaultFormat} надіслано`
+            )
+          } else if ('error' in response) {
+            throw response.error
+          } else {
+            throw new Error('Unexpected response')
+          }
+        })
+        .catch((error) => {
+          message.error(
+            `Не вдалося надіслати рахунок для "${invoice.reciever.companyName}" за ${dateDefaultFormat}`
+          )
+          console.error(error)
+        })
+    })
   }
 
   return (
@@ -153,8 +201,14 @@ const PaymentCardHeader = ({
                 {location.pathname === AppRoutes.PAYMENT && (
                   <>
                     <PaymentCascader onChange={setCurrentDateFilter} />
-                    <SelectForDebitAndCredit onChange={setCurrentTypeOperation} />
-                    <StreetsSelector filters={filters} setFilters={setFilters} streets={streets} />
+                    <SelectForDebitAndCredit
+                      onChange={setCurrentTypeOperation}
+                    />
+                    <StreetsSelector
+                      filters={filters}
+                      setFilters={setFilters}
+                      streets={streets}
+                    />
                     <FilterTags
                       filters={filters}
                       setFilters={setFilters}
@@ -178,14 +232,21 @@ const PaymentCardHeader = ({
               {isAdmin &&
                 pathname === AppRoutes.PAYMENT &&
                 selectedPayments.length > 0 && (
-                  <Button type="link" onClick={() => handleGeneratePdf()}>
+                  <Button type="link" onClick={handleGeneratePdf}>
                     Завантажити рахунки <DownloadOutlined />
+                  </Button>
+                )}
+              {isAdmin &&
+                pathname === AppRoutes.PAYMENT &&
+                selectedPayments.length > 0 && (
+                  <Button type="link" onClick={handleSendToMail}>
+                    Відправити рахунки <SendOutlined />
                   </Button>
                 )}
               {isGlobalAdmin && pathname === AppRoutes.PAYMENT && (
                 <Button
                   type="link"
-                  onClick={() => handleDeletePayments()}
+                  onClick={handleDeletePayments}
                   disabled={paymentsDeleteItems.length == 0}
                 >
                   <DeleteOutlined /> Видалити

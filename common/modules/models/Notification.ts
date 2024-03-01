@@ -18,6 +18,6 @@ const NotificationSchema = new Schema<INotification>({
 })
 
 const Notification =
-  mongoose.models.Notification ||
+  mongoose.models?.Notification ||
   mongoose.model('Notification', NotificationSchema)
 export default Notification

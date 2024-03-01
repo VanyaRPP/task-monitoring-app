@@ -14,5 +14,5 @@ const CallBackSchema = new Schema<ICallback>({
 })
 
 const CallBack =
-  mongoose.models.Category || mongoose.model('CallBack', CallBackSchema)
+  mongoose.models?.Category || mongoose.model('CallBack', CallBackSchema)
 export default CallBack

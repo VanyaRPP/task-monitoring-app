@@ -15,7 +15,13 @@ import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { AppRoutes, Operations, Roles, paymentsTitle, ColumnsRoleView } from '@utils/constants'
+import {
+  AppRoutes,
+  Operations,
+  Roles,
+  paymentsTitle,
+  ColumnsRoleView,
+} from '@utils/constants'
 import { Tooltip } from 'antd'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
@@ -49,7 +55,7 @@ function getDateFilter(value) {
 function getTypeOperation(value) {
   if (value) {
     return {
-        type: value === Operations.Debit ? Operations.Debit : Operations.Credit,
+      type: value === Operations.Debit ? Operations.Debit : Operations.Credit,
     }
   }
 }
@@ -338,21 +344,35 @@ const PaymentsBlock = () => {
 
   let content: ReactElement
 
-  const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<PaymentDeleteItem[]>([])
-  const [selectedPayments, setSelectedPayments] = useState<IExtendedPayment[]>([])
+  const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
+    PaymentDeleteItem[]
+  >([])
+  const [selectedPayments, setSelectedPayments] = useState<IExtendedPayment[]>(
+    []
+  )
   const onSelect = (a, selected, rows) => {
-    if(selected){
-      setPaymentsDeleteItems([...paymentsDeleteItems, {
-        id: a?._id,
-        date: a?.monthService?.date,
-        domain: a?.domain?.name,
-        company: a?.company?.companyName,
-      }])
+    // BUG: значення {selectedPayments} не обнуляються після видалення обраних проплат
+    // BUG: після вибору двох проплат та зняття вибору із однієї, значення {selectedPayments} обнуляються
+    if (selected) {
+      setPaymentsDeleteItems([
+        ...paymentsDeleteItems,
+        {
+          id: a?._id,
+          date: a?.monthService?.date,
+          domain: a?.domain?.name,
+          company: a?.company?.companyName,
+        },
+      ])
       setSelectedPayments([...selectedPayments, a])
-    }
-    else{
-      setPaymentsDeleteItems(paymentsDeleteItems.filter((item) => item.id != a?._id))
-      setSelectedPayments(selectedPayments.filter((item) => item.invoiceNumber !== a?.invoiceNumber))
+    } else {
+      setPaymentsDeleteItems(
+        paymentsDeleteItems.filter((item) => item.id != a?._id)
+      )
+      setSelectedPayments(
+        selectedPayments.filter(
+          (item) => item.invoiceNumber !== a?.invoiceNumber
+        )
+      )
     }
   }
 
@@ -368,7 +388,7 @@ const PaymentsBlock = () => {
         }))
       )
     },
-    onSelect: onSelect
+    onSelect: onSelect,
   }
 
   if (deleteError || paymentsError || currUserError) {
