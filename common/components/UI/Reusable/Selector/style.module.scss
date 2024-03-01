@@ -1,0 +1,10 @@
+.Selector {
+  min-width: 200px;
+  width: 100%;
+  height: 32px;
+
+  :global(.ant-select-selector) {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}

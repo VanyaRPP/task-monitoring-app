@@ -92,6 +92,7 @@ const CompaniesTable: React.FC<Props> = ({
         setFilters({
           domain: filters?.domain,
           company: filters?.companyName,
+          address: filters?.address,
         })
       }}
     />

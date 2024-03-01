@@ -13,6 +13,9 @@ import {
 } from '@common/api/realestateApi/realestate.api.types'
 import FilterTags from '@common/components/UI/Reusable/FilterTags'
 import s from './style.module.scss'
+import DomainFilterSelector from '@common/components/UI/Reusable/FilterSelectors/DomainFilterSelecter'
+import CompanyFilterSelector from '@common/components/UI/Reusable/FilterSelectors/CompanyFilterSelector'
+import StreetFilterSelector from '@common/components/UI/Reusable/FilterSelectors/StreetFilterSelector'
 
 export interface Props {
   showAddButton?: boolean
@@ -51,8 +54,25 @@ const CompaniesHeader: React.FC<Props> = ({
           <SelectOutlined />
         </Button>
 
-        {router.pathname === AppRoutes.REAL_ESTATE && isAdmin &&  (
+        {router.pathname === AppRoutes.REAL_ESTATE && isAdmin && (
           <>
+            <DomainFilterSelector
+              filters={filters}
+              setFilters={setFilters}
+              domainsFilter={realEstates?.domainsFilter}
+            />
+            <StreetFilterSelector
+              style={{ marginLeft: '1rem' }}
+              filters={filters}
+              setFilters={setFilters}
+              streetsFilter={realEstates?.streetsFilter}
+            />
+            <CompanyFilterSelector
+              style={{ marginLeft: '1rem' }}
+              filters={filters}
+              setFilters={setFilters}
+              companiesFilter={realEstates?.realEstatesFilter}
+            />
             <FilterTags
               filters={filters}
               setFilters={setFilters}
