@@ -51,7 +51,7 @@ const PreviewServiceForm: FC<Props> = ({ form, currentService }) => {
           disabled
         />
       </Form.Item>
-      <Form.Item name="waterPriceTotal" label="Всього водопостачання (грн/м³)">
+      <Form.Item name="waterPriceTotal" label="Всього водопостачання">
         <Input
           className={s.formInput}
           disabled
