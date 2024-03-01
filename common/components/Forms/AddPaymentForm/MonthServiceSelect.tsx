@@ -58,7 +58,7 @@ function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
         }))}
         optionFilterProp="children"
         placeholder="Місяць"
-        // disabled={monthsServices?.data?.length === 1 || edit}
+        disabled={edit}
         loading={isLoading}
         showSearch
       />
