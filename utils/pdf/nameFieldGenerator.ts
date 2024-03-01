@@ -102,8 +102,7 @@ async function GenerateInflicionField(paymentData) {
     streetId: streetId,
     date: date,
   })
-  
-  console.log(services)
+
 
   const inflicionPriceObject = paymentData.invoice.find(
     (item) => item.type === 'inflicionPrice'
