@@ -34,7 +34,6 @@ export default async function handler(
         } = req.query
 
         if (domainId) options.domain = domainId
-        if (streetId) options.street = streetId
         if (companyId) options._id = companyId
 
         if (domainIds) {
@@ -43,6 +42,9 @@ export default async function handler(
 
         if (companyIds) {
           options._id = filterOptions(options?._id, companyIds)
+        }
+        if (streetId) {
+          options.street = filterOptions(options?.street, streetId)
         }
 
         if (isDomainAdmin) {

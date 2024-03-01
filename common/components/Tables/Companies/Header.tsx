@@ -15,7 +15,7 @@ import FilterTags from '@common/components/UI/Reusable/FilterTags'
 import s from './style.module.scss'
 import DomainFilterSelector from '@common/components/UI/Reusable/FilterSelectors/DomainFilterSelecter'
 import CompanyFilterSelector from '@common/components/UI/Reusable/FilterSelectors/CompanyFilterSelector'
-// import StreetFilterSelector from '@common/components/UI/Reusable/FilterSelectors/StreetFilterSelector'
+import StreetFilterSelector from '@common/components/UI/Reusable/FilterSelectors/StreetFilterSelector'
 
 export interface Props {
   showAddButton?: boolean
@@ -61,13 +61,12 @@ const CompaniesHeader: React.FC<Props> = ({
               setFilters={setFilters}
               domainsFilter={realEstates?.domainsFilter}
             />
-            {/* Possible streets-based filters support */}
-            {/* <StreetFilterSelector
+            <StreetFilterSelector
               style={{ marginLeft: '1rem' }}
               filters={filters}
               setFilters={setFilters}
               streetsFilter={realEstates?.streetsFilter}
-            /> */}
+            />
             <CompanyFilterSelector
               style={{ marginLeft: '1rem' }}
               filters={filters}
