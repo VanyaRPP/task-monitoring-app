@@ -5,7 +5,6 @@ import RealEstate from '@common/modules/models/RealEstate'
 import start, { ExtendedData } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import Domain from '@common/modules/models/Domain'
 import {
   filterOptions,
   getDistinctCompanyAndDomain,
