@@ -73,14 +73,12 @@ function PaymentPricesTable({ paymentActions }) {
     },
   ]
 
-  /////////////////////
   if (!previousMonth) {
     customDataSource = customDataSource.filter(item => item.name !== 'inflicionPrice')
     customDataSource.forEach((item, index) => {
       item.id = index + 1
     })
   }
-  /////////////////////
 
   if (!preview) {
     columns.push({
