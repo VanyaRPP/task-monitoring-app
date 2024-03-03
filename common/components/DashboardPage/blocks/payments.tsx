@@ -352,13 +352,15 @@ const PaymentsBlock = () => {
     }
     else{
       setPaymentsDeleteItems(paymentsDeleteItems.filter((item) => item.id != a?._id))
-      setSelectedPayments(selectedPayments.filter((item) => item.invoiceNumber !== a?.invoiceNumber))
+      setSelectedPayments(selectedPayments.filter((item) => item._id !== a?._id))
     }
   }
 
   const rowSelection = {
     selectedRowKeys: paymentsDeleteItems.map((item) => item.id),
+    preserveSelectedRowKeys: true,
     onChange: (selectedRowKeys, selectedRows) => {
+      setSelectedPayments(selectedRows)
       setPaymentsDeleteItems(
         selectedRows.map((item) => ({
           id: item._id,
@@ -439,6 +441,8 @@ const PaymentsBlock = () => {
           filters={filters}
           setFilters={setFilters}
           selectedPayments={selectedPayments}
+          setSelectedPayments={setSelectedPayments}
+          setPaymentsDeleteItems={setPaymentsDeleteItems}
         />
       }
       className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}

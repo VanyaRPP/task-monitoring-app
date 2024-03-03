@@ -58,6 +58,8 @@ const PaymentCardHeader = ({
   filters,
   setFilters,
   selectedPayments,
+  setPaymentsDeleteItems,
+  setSelectedPayments
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -98,6 +100,8 @@ const PaymentCardHeader = ({
           paymentsDeleteItems.map((item) => item.id)
         )
         if ('data' in response) {
+          setPaymentsDeleteItems([])
+          setSelectedPayments([])
           message.success('Видалено!')
         } else {
           message.error('Помилка при видаленні рахунків')
@@ -164,7 +168,7 @@ const PaymentCardHeader = ({
                 )}
               </div>
             )}
-            <div>
+            <div className={s.secondBlock}>
               <ImportInvoices />
               <Button
                 type="link"
