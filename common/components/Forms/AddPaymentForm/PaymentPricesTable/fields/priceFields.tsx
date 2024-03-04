@@ -31,7 +31,7 @@ export function PriceMaintainceField({ record, disabled }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled className={s.input} />
+      <InputNumber className={s.input} />
     </Form.Item>
   )
 }
@@ -44,7 +44,11 @@ export function PricePlacingField({ record, disabled }) {
   return company?.inflicion ? (
     <InflicionPricePlacingField record={record} disabled={disabled} />
   ) : (
-    <DefaultPricePlacingField company={company} record={record} disabled={disabled} />
+    <DefaultPricePlacingField
+      company={company}
+      record={record}
+      disabled={disabled}
+    />
   )
 }
 
@@ -60,7 +64,7 @@ function DefaultPricePlacingField({ company, record, disabled }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled className={s.input} />
+      <InputNumber className={s.input} />
     </Form.Item>
   )
 }
@@ -72,7 +76,10 @@ function InflicionPricePlacingField({ record, disabled }) {
 
   useEffect(() => {
     if (!disabled) {
-      form.setFieldValue(fieldName, (+previousPlacingPrice + +inflicionPrice).toFixed(1))
+      form.setFieldValue(
+        fieldName,
+        (+previousPlacingPrice + +inflicionPrice).toFixed(1)
+      )
     }
   }, [previousPlacingPrice, inflicionPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 
@@ -206,7 +213,7 @@ export function PriceWaterPartField({ record, disabled }) {
     if (service?._id && company?.waterPart) {
       form.setFieldValue(
         fieldName,
-        (invoiceCoutWater(company?.waterPart, service))
+        invoiceCoutWater(company?.waterPart, service)
       )
     }
   }, [service?._id, company?._id]) //eslint-disable-line react-hooks/exhaustive-deps
