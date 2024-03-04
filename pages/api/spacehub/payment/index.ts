@@ -11,6 +11,8 @@ import Domain from '@common/modules/models/Domain'
 import { quarters } from '@utils/constants'
 import { getCreditDebitPipeline, getInvoicesTotalPipeline, getTotalGeneralSumPipeline } from './pipelines'
 import {getStreetsPipeline} from "@utils/pipelines"
+import path from 'path'
+import fs from 'fs'
 
 start()
 
@@ -177,6 +179,11 @@ export default async function handler(
           await postValidateBody(req, res)
           /* eslint-disable @typescript-eslint/ban-ts-comment */
           // @ts-ignore
+
+          const file  = req.body.photoURL[0]
+          const fileName = file.name
+          req.body.photoURL = fileName
+
           const payment = await Payment.create(req.body)
           return res.status(200).json({ success: true, data: payment })
         } else {

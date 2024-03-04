@@ -18,6 +18,7 @@ export interface IPaymentModel {
   services?: IPaymentTableData[]
   provider: IProvider
   reciever: IReciever
+  photoURL?: string
   generalSum: number
 }
 
@@ -34,6 +35,7 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   services: { type: [Object] },
   provider: { type: Object },
   reciever: { type: Object },
+  photoURL: { type: String },
   generalSum: { type: Number },
 })
 

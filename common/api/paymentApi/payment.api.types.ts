@@ -36,6 +36,7 @@ export interface IPayment {
   invoice: IPaymentField[]
   provider: IProvider
   reciever: IReciever
+  photoURL?: string
   generalSum: number
 }
 

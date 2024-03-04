@@ -67,7 +67,10 @@ const AddPaymentModal: FC<Props> = ({
       provider,
       reciever,
       invoice: formData.debit ? filteredInvoice : [],
+      photoURL: formData.photoURL,
     }
+
+    console.log('payment', payment)
     const response = edit
       ? await editPayment({
           _id: paymentData?._id,
