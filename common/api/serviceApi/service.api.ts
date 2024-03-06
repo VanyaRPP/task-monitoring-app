@@ -16,7 +16,7 @@ export const serviceApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getAllServices: builder.query<
-      IGetServiceResponse,
+      IExtendedService[],
       {
         limit?: number
         userId?: string
@@ -43,8 +43,9 @@ export const serviceApi = createApi({
       },
       providesTags: (response) =>
         response
-          ? response.data.map((item) => ({ type: 'Service', id: item._id }))
+          ? response.map((item) => ({ type: 'Service', id: item._id }))
           : [],
+      transformResponse: (response: IGetServiceResponse) => response.data,
     }),
     getServicesAddress: builder.query({
       query: () => {
