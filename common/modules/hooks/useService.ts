@@ -29,6 +29,5 @@ export function usePreviousMonthService({ domainId, streetId, date }) {
     },
     { skip: !domainId || !streetId || !date }
   )
-  console.log('penis', data)
   return { previousMonth: data?.[0] }
 }
