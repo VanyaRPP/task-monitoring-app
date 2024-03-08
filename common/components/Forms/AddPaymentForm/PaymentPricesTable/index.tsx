@@ -8,7 +8,7 @@ import {Popconfirm, Button, Table, Input, Form} from 'antd'
 import { ServiceType, paymentsTitle } from '@utils/constants'
 import { ColumnProps } from 'antd/lib/table'
 import { getName } from '@utils/helpers'
-import { useState } from 'react'
+import { useState} from 'react'
 import { useCustomDataSource } from './useCustomDataSource'
 import AmountComponent from './fields/AmountComponent'
 import PriceComponent from './fields/PriceComponent'
@@ -16,10 +16,19 @@ import NameComponent from './fields/NameComponent'
 import SumComponent from './fields/SumComponent'
 import s from '../style.module.scss'
 import Modal from '@common/components/UI/ModalWindow'
+import { usePaymentContext } from '@common/components/AddPaymentModal'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 
 function PaymentPricesTable({ paymentActions }) {
+  const { form, paymentData } = usePaymentContext()
+  const domainId = Form.useWatch('domain', form)
+  const streetId = Form.useWatch('street', form)
+  const { data: monthsServices, isLoading } = useGetAllServicesQuery({
+    domainId,
+    streetId,
+  })
   const {preview, edit} = paymentActions
-  const { customDataSource, addDataSource, removeDataSource } =
+  let { customDataSource, addDataSource, removeDataSource } =
     useCustomDataSource({ preview: paymentActions?.preview })
 
   const columns: ColumnProps<IPaymentTableData>[] = [
@@ -64,6 +73,13 @@ function PaymentPricesTable({ paymentActions }) {
       width: 110,
     },
   ]
+
+  if (monthsServices?.data?.length <= 1) {
+    customDataSource = customDataSource.filter(item => item.name !== 'inflicionPrice')
+    customDataSource.forEach((item, index) => {
+      item.id = index + 1
+    })
+  }
 
   if (!preview) {
     columns.push({
@@ -123,7 +139,7 @@ function AddCustomField({ addDataSource }) {
     setCustomFieldName('')
   }
 
-  return (
+return (
     <>
       <div className={s.popconfirm}>
         <Button
