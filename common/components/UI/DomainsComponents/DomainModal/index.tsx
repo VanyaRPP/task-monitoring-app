@@ -17,6 +17,7 @@ interface Props {
 }
 
 const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
+  let errorType = ''
   const [form] = Form.useForm()
   const [addDomainEstate] = useAddDomainMutation()
   const [editDomain] = useEditDomainMutation()
@@ -33,6 +34,12 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
       description: formData.description,
     }
 
+    if(!formData.streets.some((i: any) => i.value))
+      errorType='adress'
+  // else if
+    else 
+      errorType = ''
+
     const response = currentDomain
       ? await editDomain({
           _id: currentDomain?._id,
@@ -40,16 +47,21 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
         })
       : await addDomainEstate(domainData)
 
-    if ('data' in response) {
-      form.resetFields()
-      closeModal()
-      const action = currentDomain ? 'Збережено' : 'Додано'
-      message.success(action)
-    } else {
-      const action = currentDomain ? 'збереженні' : 'додаванні'
-      message.error(`Помилка при ${action} надавача послуг`)
+      if ('data' in response) {
+        form.resetFields()
+        closeModal()
+        const action = currentDomain ? 'Збережено' : 'Додано'
+        message.success(action)
+        console.log(domainData.streets)
+      } else { 
+        const action = currentDomain ? 'збереженні' : 'додаванні'
+        if(errorType === 'adress') 
+          message.error(`Адреса не знайдена`)
+        // else if
+        else 
+          message.error(`Помилка при ${action} надавача послуг`)
+      }
     }
-  }
 
   return (
     <Modal
