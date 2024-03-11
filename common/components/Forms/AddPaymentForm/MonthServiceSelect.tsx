@@ -39,8 +39,8 @@ function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
   }, [streetId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (monthsServices?.data.length === 1) {
-      form.setFieldValue('monthService', monthsServices[0]._id)
+    if (monthsServices?.data?.length === 1) {
+      form.setFieldValue('monthService', monthsServices.data[0]._id)
     }
   }, [monthsServices?.data.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -54,11 +54,11 @@ function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
         filterOption={(input, option) => (option?.label ?? '').includes(input)}
         options={monthsServices?.data.map((i) => ({
           value: i._id,
-          label: getFormattedDate(i.date),
+          label: getFormattedDate(i.date, 'MMMM YYYY'),
         }))}
         optionFilterProp="children"
         placeholder="Місяць"
-        disabled={monthsServices?.data.length === 1 || edit}
+        disabled={monthsServices?.data?.length === 1 || edit}
         loading={isLoading}
         showSearch
       />
