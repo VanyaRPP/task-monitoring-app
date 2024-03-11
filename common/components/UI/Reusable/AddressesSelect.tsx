@@ -25,10 +25,10 @@ export default function AddressesSelect({
   const streets = singleStreet ? [singleStreet] : temp
 
   useEffect(() => {
-    if (streets?.length === 1) {
+    if (streets?.length > 0) {
       form.setFieldValue('street', streets[0]._id)
     }
-  }, [streets?.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [streets]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name="street" label="Адреса" rules={validateField('required')}>
@@ -51,7 +51,7 @@ export default function AddressesSelect({
         }
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={isLoading || !domainId || streets?.length === 1 || edit}
+        disabled={isLoading || !domainId || streets?.length == 1 || edit}
         loading={isLoading}
         showSearch
         dropdownStyle={dropdownStyle}
