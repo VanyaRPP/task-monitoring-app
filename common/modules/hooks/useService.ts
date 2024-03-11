@@ -11,7 +11,7 @@ function useService({ serviceId, skip }: IUseServiceProps) {
     { serviceId },
     { skip: !serviceId || skip }
   )
-  const service = services ? services[0] : null
+  const service = services?.data ? services?.data[0] : null
 
   return { service, isLoading }
 }
@@ -29,6 +29,5 @@ export function usePreviousMonthService({ domainId, streetId, date }) {
     },
     { skip: !domainId || !streetId || !date }
   )
-
   return { previousMonth: data?.[0] }
 }

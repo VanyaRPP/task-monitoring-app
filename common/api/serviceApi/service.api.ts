@@ -41,10 +41,11 @@ export const serviceApi = createApi({
           params: { limit, userId, domainId, streetId, serviceId, year, month },
         }
       },
-      providesTags: (response) =>
-        response
+      providesTags: (response: IGetServiceResponse) =>
+        response?.data
           ? response.data.map((item) => ({ type: 'Service', id: item._id }))
           : [],
+      // transformResponse: (response: any) => response.data,
     }),
     getServicesAddress: builder.query({
       query: () => {
