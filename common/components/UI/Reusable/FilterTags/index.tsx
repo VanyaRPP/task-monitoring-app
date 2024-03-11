@@ -2,6 +2,7 @@ import { Tag } from 'antd'
 import s from '../style.module.scss'
 
 const FilterTags = ({ filters, setFilters, collection }) => {
+  
   return (
     <>
       <div className={s.filtersTagsBlock}>
@@ -29,7 +30,7 @@ const FilterTags = ({ filters, setFilters, collection }) => {
                 </Tag>
               ))}
             </span>
-          ) : collection?.currentDomainsCount ||
+          ) : collection?.currentDomainsCount &&
             collection?.domainsFilter?.length === 1 ? (
             <SingleTag name={collection?.data?.[0]?.domain?.name} />
           ) : (
