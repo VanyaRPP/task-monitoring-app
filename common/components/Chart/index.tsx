@@ -57,6 +57,7 @@ const ChartComponent: React.FC<{
   }
 
   useEffect(() => {
+    if (!chartRef.current) return;
     createChart()
     const resizeObserver = new ResizeObserver(() => {
       if (myChartRef.current) {
@@ -73,7 +74,9 @@ const ChartComponent: React.FC<{
 
   return (
     <div className={s.chartContainer}>
-      <canvas ref={chartRef} className={s.chart} />
+      { dataSources?.every(item => item.value === 0) 
+      ? "Усі займані площі домену дорівнюють нулю"
+      : <canvas ref={chartRef} className={s.chart} /> }
     </div>
   )
 }
