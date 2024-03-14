@@ -32,6 +32,11 @@ import SelectForDebitAndCredit from '@components/UI/PaymentSelect/index'
 import StreetsSelector from '@components/StreetsSelector'
 import { generateHtmlFromThemplate } from '@utils/pdf/pdfThemplate'
 import { useEmailMutation } from '@common/api/emailApi/email.api'
+import { IDomain } from '@common/modules/models/Domain'
+import {
+  IExtendedRealestate,
+  IRealestate,
+} from '@common/api/realestateApi/realestate.api.types'
 
 const columns: any = [
   {
@@ -142,42 +147,50 @@ const PaymentCardHeader = ({
       return message.warn('Виберіть проплати, щоб надіслати їх')
     }
 
-    selectedPayments.forEach((invoice: IPayment) => {
+    selectedPayments.forEach(async (payment: IPayment) => {
       const dateDefaultFormat = dateToDefaultFormat(
-        (invoice.monthService as any)?.date // TODO: proper typing
+        (payment.monthService as any)?.date // TODO: proper typing
       )
+      try {
+        const domain = payment.domain as IDomain
+        const company = payment.company as IExtendedRealestate
 
-      generateHtmlFromThemplate(invoice)
-        .then(async (html) => {
-          const response = await sendEmail({
-            to: invoice.reciever.adminEmails,
-            subject: `Оплата від ${dateDefaultFormat}`,
-            text: `Ви отримали новий рахунок від "${
-              typeof invoice.domain === 'string'
-                ? invoice.domain
-                : invoice.domain?.name
-            }" за ${dateDefaultFormat}`,
-            html: html,
-          })
+        if (!domain || !company) {
+          throw new Error('unknown comapy and/or domain')
+        }
 
-          if ('data' in response) {
-            // TODO: change the invoice status to prevent multiple emails being sent with the same invoice
-            message.success(
-              `Рахунок для "${invoice.reciever.companyName}" за ${dateDefaultFormat} надіслано`
-            )
-          } else if ('error' in response) {
-            throw response.error
-          } else {
-            throw new Error('Unexpected response')
-          }
+        const response = await sendEmail({
+          domainId: domain._id.toString(),
+          companyId: company._id.toString(),
+          to: payment.reciever.adminEmails,
+          subject: `Оплата від ${dateDefaultFormat}`,
+          text: `Ви отримали новий рахунок від "${
+            typeof payment.domain === 'string'
+              ? payment.domain
+              : payment.domain?.name
+          }" за ${dateDefaultFormat}`,
+          html: await generateHtmlFromThemplate(payment),
         })
-        .catch((error) => {
-          message.error(
-            `Не вдалося надіслати рахунок для "${invoice.reciever.companyName}" за ${dateDefaultFormat}`
+
+        if ('data' in response) {
+          // TODO: change the invoice status to prevent multiple emails being sent with the same invoice
+          message.success(
+            `Рахунок для "${payment.reciever.companyName}" за ${dateDefaultFormat} надіслано`
           )
-          console.error(error)
-        })
+        } else if ('error' in response) {
+          throw response.error
+        } else {
+          throw new Error('Unexpected response')
+        }
+      } catch (error) {
+        message.error(
+          `Не вдалося надіслати рахунок для "${payment.reciever.companyName}" за ${dateDefaultFormat}`
+        )
+        console.error(error)
+      }
     })
+
+    // })
   }
 
   return (

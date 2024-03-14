@@ -1,4 +1,6 @@
 export interface IEmailModel {
+  domainId: string
+  companyId: string
   from?: string
   to?: string | string[]
   subject?: string
