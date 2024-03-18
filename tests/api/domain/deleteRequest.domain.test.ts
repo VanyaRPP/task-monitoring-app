@@ -1,24 +1,31 @@
 import { expect } from '@jest/globals'
 import handler from '../../../pages/api/domain/[id]/index'
-
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
-import { users, domains } from '@utils/testData'
-import {mockLoginAs} from "@utils/mockLoginAs"
+import { users } from '@utils/testData'
+import {getCurrentUser} from "@utils/getCurrentUser";
+import Domain from "@common/modules/models/Domain";
 
-jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
-jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
 jest.mock('@pages/api/api.config', () => jest.fn())
+jest.mock('@utils/getCurrentUser', () => ({ getCurrentUser: jest.fn() }))
 
 setupTestEnvironment()
 
 describe('Domain API - DELETE', () => {
     it('should delete domain as GlobalAdmin - success', async () => {
-        await mockLoginAs(users.globalAdmin)
+        const testId ='64d68421d9ba2fc8fea79a11'
+        ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: true })
+        await (Domain as any).create(
+            {
+                _id: testId,
+                name: 'domain 0',
+                adminEmails: [users.domainAdmin.email],
+                streets: [],
+                description: 'none',
+            }
+        )
 
-        const mockReq = {
-            method: 'DELETE',
-            query: { id: domains[0]._id },
-        } as any
+
+        const mockReq = { method: 'DELETE', query: { id: testId } } as any
         const mockRes = {
             status: jest.fn(() => mockRes),
             json: jest.fn(),
@@ -26,22 +33,26 @@ describe('Domain API - DELETE', () => {
 
         await handler(mockReq, mockRes)
 
-        const response = {
-            status: mockRes.status,
-            data: mockRes.json.mock.lastCall[0].data,
-        }
-
-        expect(response.status).toHaveBeenCalledWith(200)
-        expect(response.data).toBe('Domain ' + domains[0]._id + ' was deleted')
+        expect(mockRes.status).toHaveBeenCalledWith(200)
+        expect(mockRes.json).toHaveBeenCalledWith({
+            success: true,
+            data: `Domain ${testId} was deleted`,
+        })
     })
     it('should show message domain not found as GlobalAdmin - success', async () => {
-        const testId = '64d68421d9ba2fc8fea79d79'
-        await mockLoginAs(users.globalAdmin)
+        const testId ='64d68421d9ba2fc8fea79a11'
+        ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: true })
+        await (Domain as any).create(
+            {
+                _id: '64d68421d9ba2fc8fea79c11',
+                name: 'domain 0',
+                adminEmails: [users.domainAdmin.email],
+                streets: [],
+                description: 'none',
+            }
+        )
 
-        const mockReq = {
-            method: 'DELETE',
-            query: { id: testId },
-        } as any
+        const mockReq = { method: 'DELETE', query: { id: testId } } as any
         const mockRes = {
             status: jest.fn(() => mockRes),
             json: jest.fn(),
@@ -49,13 +60,11 @@ describe('Domain API - DELETE', () => {
 
         await handler(mockReq, mockRes)
 
-        const response = {
-            status: mockRes.status,
-            data: mockRes.json.mock.lastCall[0].data,
-        }
-
-        expect(response.status).toHaveBeenCalledWith(400)
-        expect(response.data).toBe('Domain ' + testId + ' was not found')
+        expect(mockRes.status).toHaveBeenCalledWith(400)
+        expect(mockRes.json).toHaveBeenCalledWith({
+            success: false,
+            data: `Domain ${testId} was not found`,
+        })
     })
 })
 
