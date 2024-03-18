@@ -44,4 +44,31 @@ describe('Domain API - POST', () => {
         )
 
     })
+    it('should not create a new domain because it already exists', async () => {
+        const mockReq = {
+            method: 'POST',
+            body: {
+                name: 'domain 0',
+                adminEmails: [users.domainAdmin.email],
+                streets: [],
+                description: 'none',
+            },
+        } as any
+        const mockRes = {
+                status: jest.fn(() => mockRes),
+                json: jest.fn(),
+            } as any
+
+        ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: true })
+
+        await handler(mockReq, mockRes)
+
+        expect(mockRes.status).toHaveBeenCalledWith(400)
+        expect(mockRes.json).toHaveBeenCalledWith(
+            expect.objectContaining({
+                success: false,
+                error: 'Домен з такими даними вже існує'
+            })
+        )
+    })
 })
