@@ -66,7 +66,7 @@ function AmountPlacingInflicionField({ record, disabled, inflicion }) {
   return (
     <div className={s.PlacingInflicion}>
       <p>
-        {placing?.sum}+{inflicion?.sum || '0.0'}
+        {previousPlacingPrice}{placing?.sum}+{inflicion?.sum || '0.0'}
       </p>
       <StyledTooltip
         title={`Значення попереднього місяця + індекс інфляції в цьому рахунку`}
