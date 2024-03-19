@@ -15,7 +15,7 @@ import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { AppRoutes, Operations, Roles, paymentsTitle } from '@utils/constants'
+import { AppRoutes, Operations, Roles, paymentsTitle, ColumnsRoleView } from '@utils/constants'
 import { Tooltip } from 'antd'
 import { useRouter } from 'next/router'
 import cn from 'classnames'
@@ -102,6 +102,7 @@ const PaymentsBlock = () => {
       ...getTypeOperation(currentTypeOperation),
       companyIds: filters?.company || undefined,
       domainIds: filters?.domain || undefined,
+      streetIds: filters?.street || undefined,
     },
     { skip: currUserLoading || !currUser }
   )
@@ -119,26 +120,24 @@ const PaymentsBlock = () => {
     }
   }
 
-  const invoiceTypes = Object.keys(paymentsTitle)
+  const invoiceTypes = Object.entries(paymentsTitle)
 
   const paymentsPageColumns =
     router.pathname === AppRoutes.PAYMENT
-      ? [
-          ...invoiceTypes.map((type) => ({
-            title: paymentsTitle[type],
-            dataIndex: 'invoice',
-            render: (invoice) => {
-              const item = invoice.find((item) => item.type === type)
-              const sum = +(item?.sum || item?.price)
-              const currency = renderCurrency(sum?.toFixed(2))
-              return (
-                <span className={currency === '-' ? s.currency : ''}>
-                  {currency}
-                </span>
-              )
-            },
-          })),
-        ]
+      ? invoiceTypes.map(([type, title]) => ({
+          title,
+          dataIndex: type,
+          render: (_, payment) => {
+            const item = payment.invoice.find((item) => item.type === type)
+            const sum = +(item?.sum || item?.price || payment.generalSum)
+            const currency = renderCurrency(sum?.toFixed(2))
+            return (
+              <span className={currency === '-' ? s.currency : ''}>
+                {currency}
+              </span>
+            )
+          },
+        }))
       : []
 
   const globalAdminColumns = isGlobalAdmin
@@ -276,41 +275,49 @@ const PaymentsBlock = () => {
   }
 
   const Summary = () => {
+    const getFormattedValue = (dataIndex) => {
+      const value = payments?.totalPayments?.[dataIndex] || 0
+      return value !== 0 ? value.toFixed(2) : ''
+    }
+
     return (
       router.pathname === AppRoutes.PAYMENT &&
       payments?.data && (
-        <Table.Summary fixed>
+        <Table.Summary>
           <Table.Summary.Row className={s.summ_item}>
             {columns.map((item, index) => {
-              let dataindex
-              currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
-                ? (dataindex = columns[index - 1]?.dataIndex)
-                : (dataindex = item.dataIndex)
+              const dataindex = isGlobalAdmin
+                ? columns[index - 1]?.dataIndex
+                : item.dataIndex
+
               return (
                 <Table.Summary.Cell
                   index={0}
                   key={item.dataIndex}
                   colSpan={item.dataIndex === '' ? 2 : 1}
                 >
-                  {dataindex === Operations.Debit
-                    ? payments?.totalPayments?.debit?.toFixed(2) || 0
-                    : ''}
-                  {dataindex === Operations.Credit
-                    ? payments?.totalPayments?.credit?.toFixed(2) || 0
-                    : ''}
+                  {getFormattedValue(dataindex)}
                 </Table.Summary.Cell>
               )
             })}
           </Table.Summary.Row>
           <Table.Summary.Row className={s.saldo}>
             {columns.slice(0, columns.length - 1).map((item, index) => {
-              let dataindex
-              currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
-                ? (dataindex = columns[index - 1]?.dataIndex)
-                : (dataindex = item.dataIndex)
+              const dataindex = isGlobalAdmin
+                ? columns[index - 1]?.dataIndex
+                : item.dataIndex
+
+              const colSpan = isGlobalAdmin
+                ? item.dataIndex === Operations.Credit
+                  ? ColumnsRoleView.User
+                  : ColumnsRoleView.GlobalAdmin
+                : item.dataIndex === Operations.Debit
+                ? ColumnsRoleView.User
+                : ColumnsRoleView.GlobalAdmin
+
               return (
                 <Table.Summary.Cell
-                  colSpan={item.dataIndex === Operations.Debit ? 2 : 1}
+                  colSpan={colSpan}
                   index={0}
                   key={item.dataIndex}
                 >
@@ -331,31 +338,39 @@ const PaymentsBlock = () => {
 
   let content: ReactElement
 
-  const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
-    PaymentDeleteItem[]
-  >([])
-
+  const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<PaymentDeleteItem[]>([])
+  const [selectedPayments, setSelectedPayments] = useState<IExtendedPayment[]>([])
   const onSelect = (a, selected, rows) => {
-    if (selected)
-      setPaymentsDeleteItems([
-        ...paymentsDeleteItems,
-        {
-          id: a?._id,
-          date: a?.monthService?.date,
-          domain: a?.domain?.name,
-          company: a?.company?.companyName,
-        },
-      ])
-    else
-      setPaymentsDeleteItems(
-        paymentsDeleteItems.filter((item) => item.id != a?._id)
-      )
+    if(selected){
+      setPaymentsDeleteItems([...paymentsDeleteItems, {
+        id: a?._id,
+        date: a?.monthService?.date,
+        domain: a?.domain?.name,
+        company: a?.company?.companyName,
+      }])
+      setSelectedPayments([...selectedPayments, a])
+    }
+    else{
+      setPaymentsDeleteItems(paymentsDeleteItems.filter((item) => item.id != a?._id))
+      setSelectedPayments(selectedPayments.filter((item) => item._id !== a?._id))
+    }
   }
 
   const rowSelection = {
     selectedRowKeys: paymentsDeleteItems.map((item) => item.id),
-    defaultSelectedRowKeys: paymentsDeleteItems.map((item) => item.id),
-    onSelect: onSelect,
+    preserveSelectedRowKeys: true,
+    onChange: (selectedRowKeys, selectedRows) => {
+      setSelectedPayments(selectedRows)
+      setPaymentsDeleteItems(
+        selectedRows.map((item) => ({
+          id: item._id,
+          date: item.monthService?.date,
+          domain: item.domain?.name,
+          company: item.company?.companyName,
+        }))
+      )
+    },
+    onSelect: onSelect
   }
 
   if (deleteError || paymentsError || currUserError) {
@@ -421,9 +436,13 @@ const PaymentsBlock = () => {
           setCurrentTypeOperation={setCurrentTypeOperation}
           currentPayment={currentPayment}
           paymentActions={paymentActions}
+          streets={payments?.addressFilter}
           payments={payments}
           filters={filters}
           setFilters={setFilters}
+          selectedPayments={selectedPayments}
+          setSelectedPayments={setSelectedPayments}
+          setPaymentsDeleteItems={setPaymentsDeleteItems}
         />
       }
       className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}

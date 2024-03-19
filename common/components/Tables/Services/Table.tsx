@@ -1,28 +1,48 @@
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import { Alert, Popconfirm, Table, Tooltip, message, Button } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 
+import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import {
-  useDeleteServiceMutation,
-  useGetAllServicesQuery,
-} from '@common/api/serviceApi/service.api'
-import { IExtendedService } from '@common/api/serviceApi/service.api.types'
+  IExtendedService,
+  IGetServiceResponse,
+} from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import { getFormattedDate, renderCurrency } from '@utils/helpers'
-
+import { IFilter } from '@common/api/paymentApi/payment.api.types'
 interface Props {
+  setServiceActions: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+      preview: boolean
+    }>
+  >
+  serviceActions: {
+    edit: boolean
+    preview: boolean
+  },
   setCurrentService: (setvice: IExtendedService) => void
+  services: IGetServiceResponse
+  isLoading?: boolean
+  isError?: boolean
+  filter?: any
+  setFilter?: (filters: any) => void
 }
 
-const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
+const ServicesTable: React.FC<Props> = ({
+  setCurrentService,
+  setServiceActions,
+  serviceActions,
+  services,
+  isLoading,
+  isError,
+  filter,
+  setFilter,
+}) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.SERVICE
-
-  const { data, isLoading, isError } = useGetAllServicesQuery({
-    limit: isOnPage ? 0 : 5,
-  })
 
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -40,7 +60,6 @@ const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
   }
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
-
   return (
     <Table
       rowKey="_id"
@@ -51,10 +70,19 @@ const ServicesTable: React.FC<Props> = ({ setCurrentService }) => {
         isGlobalAdmin,
         handleDelete,
         deleteLoading,
-        setCurrentService
+        setCurrentService,
+        services?.addressFilter,
+        services?.domainFilter,
+        filter,
+        isOnPage,
+        setServiceActions,
+        serviceActions,
       )}
-      dataSource={data}
+      dataSource={services?.data}
       scroll={{ x: 1700 }}
+      onChange={(__, filter) => {
+        setFilter(filter)
+      }}
     />
   )
 }
@@ -71,26 +99,47 @@ const getDefaultColumns = (
   isAdmin?: boolean,
   handleDelete?: (...args: any) => void,
   deleteLoading?: boolean,
-  setCurrentService?: (service: IExtendedService) => void
+  setCurrentService?: (service: IExtendedService) => void,
+  addressFilter?,
+  domainFilter?,
+  // filters?: IFilter[],
+  filter?: any,
+  isOnPage?: boolean,
+
+  setServiceActions?: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+      preview: boolean
+    }>
+  >,
+  serviceActions?: {
+    edit: boolean
+    preview: boolean
+  },
 ): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {
       fixed: 'left',
       title: 'Надавач послуг',
       dataIndex: 'domain',
+      filters: isOnPage ? domainFilter : null,
+      filteredValue: filter?.domain || null,
       width: 200,
       render: (i) => i?.name,
     },
     {
       title: 'Адреса',
       dataIndex: 'street',
+      // filters: isOnPage ? filters : null,
+      filters: isOnPage ? addressFilter : null,
+      filteredValue: filter?.street || null,
       render: (i) => `${i?.address} (м. ${i?.city})`,
     },
     {
       title: 'Місяць',
       dataIndex: 'date',
       width: 100,
-      render: getFormattedDate,
+      render: (date) => getFormattedDate(date),
     },
     {
       title: 'Утримання',
@@ -138,6 +187,24 @@ const getDefaultColumns = (
       ellipsis: true,
       render: renderTooltip,
     },
+    {
+      align: 'center',
+      fixed: 'right',
+      title: '',
+      width: 50,
+      render: (_, service: IExtendedService) => (
+        <Button
+          style={{ padding: 0 }}
+          type="link"
+          onClick={() => {
+            setCurrentService(service)
+            setServiceActions({ ...serviceActions, preview: true })
+          }}
+        >
+          <EyeOutlined />
+        </Button>
+      ),
+    },
   ]
 
   if (isAdmin) {
@@ -151,7 +218,10 @@ const getDefaultColumns = (
           <Button
             style={{ padding: 0 }}
             type="link"
-            onClick={() => setCurrentService(service)}
+            onClick={() => {
+              setCurrentService(service)
+              setServiceActions({ ...serviceActions, edit: true })
+            }}
           >
             <EditOutlined />
           </Button>
@@ -180,4 +250,5 @@ const getDefaultColumns = (
 
   return columns
 }
+
 export default ServicesTable

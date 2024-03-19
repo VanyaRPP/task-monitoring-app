@@ -19,7 +19,7 @@ export const realestateApi = createApi({
       {
         limit?: number
         domainId?: string
-        streetId?: string
+        streetId?: string[]
         companyId?: string
         domainIds?: string[]
         companyIds?: string[]

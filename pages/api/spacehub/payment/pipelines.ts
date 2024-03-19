@@ -25,3 +25,35 @@ export function getMaxInvoiceNumber() {
       },
     ]
 }
+
+export function getInvoicesTotalPipeline(options){
+  return [
+    { $match: options },
+    {
+      $unwind: "$invoice"
+    },
+    {
+      $addFields: {
+        "invoice.sum": { $toDouble: "$invoice.sum" }
+      }
+    },
+    {
+      $group: {
+        _id: "$invoice.type",
+        totalSum: { $sum: "$invoice.sum" }
+      }
+    },
+  ]
+}
+
+export function getTotalGeneralSumPipeline(options){
+  return [
+    { $match: options },
+    {
+      $group: {
+        _id: "generalSum",
+        totalSum: { $sum: "$generalSum" }
+      }
+    }
+  ]
+}
