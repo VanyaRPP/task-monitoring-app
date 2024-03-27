@@ -129,7 +129,7 @@ const PaymentsBlock = () => {
           dataIndex: type,
           render: (_, payment) => {
             const item = payment.invoice.find((item) => item.type === type)
-            const sum = +(item?.sum || item?.price || payment.generalSum)
+            const sum = +(item?.sum || item?.price)
             const currency = renderCurrency(sum?.toFixed(2))
             return (
               <span className={currency === '-' ? s.currency : ''}>
