@@ -30,5 +30,5 @@ export function usePreviousMonthService({ domainId, streetId, date }) {
     },
     { skip: !domainId || !streetId || !date }
   )
-  return { previousMonth: data?.[0] }
+  return { previousMonth: data?.data?.[0] }
 }

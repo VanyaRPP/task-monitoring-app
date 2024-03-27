@@ -62,11 +62,13 @@ function AmountPlacingInflicionField({ record, disabled, inflicion }) {
   if (!disabled) {
     form.setFieldValue(fieldName, `${previousPlacingPrice}+${inflicionPrice}`) //view && add
   }
+  const previewPrice = typeof inflicion?.price === 'string' ? +inflicion?.price : inflicion?.price
+  const value = (previewPrice || +inflicionPrice || 0).toFixed(2)
 
   return (
     <div className={s.PlacingInflicion}>
       <p>
-        {previousPlacingPrice}{placing?.sum}+{inflicion?.sum || '0.0'}
+        {previousPlacingPrice}+{value}
       </p>
       <StyledTooltip
         title={`Значення попереднього місяця + індекс інфляції в цьому рахунку`}
