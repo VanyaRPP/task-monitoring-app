@@ -7,13 +7,6 @@ import Service from '@common/modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
 import Domain from '@common/modules/models/Domain'
 
-import {
-  filterOptions,
-  getFilterForAddress,
-  getFilterForDomain,
-} from '@utils/helpers'
-import { getDomainsPipeline, getStreetsPipeline } from '@utils/pipelines'
-
 start()
 
 export default async function handler(
@@ -26,111 +19,74 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const options = {}
-
         const { domainId, streetId, serviceId, limit = 0 } = req.query
 
-        // TODO: refactor with logic. each case should be well separated
-        // Should I left all conditions and only one if for each role?
-        // this way it will handle all conditions and will not return wrong service
-
-        // TODO: add tests
-        // admin can have each service without limitation
-        // domainAdmin can take service which is realated to his domain
-        // user can take service which is related to his company which is ralated to domain
-        if (serviceId) {
-          options._id = serviceId
-          if (isDomainAdmin) {
-            const domains = await Domain.find({
-              adminEmails: { $in: [user.email] },
-            })
-            const domainsIds = domains.map((i) => i._id)
-            options.domain = { $in: domainsIds }
-          }
-          if (isUser) {
-            const realEstates = await RealEstate.find({
-              adminEmails: { $in: [user.email] },
-            }).populate({ path: 'domain', select: '_id' })
-            const domainsIds = realEstates.map((i) => i.domain._id)
-            options.domain = { $in: domainsIds }
-          }
-          const services = await Service.find(options)
-            .sort({ date: -1 })
-            .limit(+limit)
-
-          return res.status(200).json({
-            success: true,
-            data: services,
-          })
+        const options = {
+          domain: { $in: domainId },
+          street: { $in: streetId },
+          _id: serviceId,
         }
 
+        if (!serviceId) delete options._id
+        if (!streetId) delete options.street
+        if (!domainId) delete options.domain
+
         if (isGlobalAdmin) {
-          if (req.query.email) {
-            options.email = req.query.email
-          }
+          const services = await Service.find(options)
+            .limit(+limit)
+            .populate('domain')
+            .populate('street')
+
+          return res.status(200).json({ success: true, data: services })
         }
 
         if (isDomainAdmin) {
-          const domains = await Domain.find({
-            adminEmails: { $in: [user.email] },
-          })
+          const domains = await Domain.find(
+            options.domain
+              ? {
+                  _id: options.domain,
+                  adminEmails: { $in: [user.email] },
+                }
+              : { adminEmails: { $in: [user.email] } }
+          )
 
-          if (domainId && streetId) {
-            const domainsIds = domains
-              .map((i) => i._id)
-              .filter((id) => id.toString() === domainId.toString())
-            options.domain = { $in: domainsIds }
-            options.street = streetId
-          } else {
-            const domainsIds = domains.map((i) => i._id)
-            options.domain = { $in: domainsIds }
+          if (domains) {
+            options.domain = { $in: domains.map(({ _id }) => _id) }
+
+            const services = await Service.find(options)
+              .limit(+limit)
+              .populate('domain')
+              .populate('street')
+
+            return res.status(200).json({ success: true, data: services })
           }
         }
 
         if (isUser) {
-          if (domainId || streetId) {
-            options.domain = []
-          } else {
-            const realEstates = await RealEstate.find({
-              adminEmails: { $in: [user.email] },
-            }).populate({ path: 'domain', select: '_id' })
-            const domainsIds = realEstates.map((i) => i.domain._id)
-            options.domain = { $in: domainsIds }
+          const companies = await RealEstate.find(
+            options.domain
+              ? {
+                  domain: options.domain,
+                  adminEmails: { $in: [user.email] },
+                }
+              : {
+                  adminEmails: { $in: [user.email] },
+                }
+          )
+
+          if (companies) {
+            options.domain = { $in: companies.map(({ domain }) => domain) }
+
+            const services = await Service.find(options)
+              .limit(+limit)
+              .populate('domain')
+              .populate('street')
+
+            return res.status(200).json({ success: true, data: services })
           }
         }
 
-        if (streetId) {
-          options.street = filterOptions(options?.street, streetId)
-        }
-
-        if (domainId) {
-          options.domain = filterOptions(options?.domain, domainId)
-        }
-        const services = await Service.find(options)
-          .sort({ date: -1 })
-          .limit(+limit)
-          .populate({ path: 'domain', select: '_id name' })
-          .populate({ path: 'street', select: '_id address city' })
-
-        const streetsPipeline = getStreetsPipeline(
-          isGlobalAdmin,
-          options.domain
-        )
-
-        const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
-
-        const domains = await Service.aggregate(domainsPipeline)
-        const filterDomains = getFilterForDomain(domains)
-
-        const streets = await Service.aggregate(streetsPipeline)
-        const filterStreets = getFilterForAddress(streets)
-
-        return res.status(200).json({
-          success: true,
-          data: services,
-          addressFilter: filterStreets,
-          domainFilter: filterDomains,
-        })
+        return res.status(200).json({ success: false, data: [] })
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })
       }

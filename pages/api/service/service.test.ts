@@ -239,7 +239,7 @@ describe('Service API - GET', () => {
 
     const mockReq = {
       method: 'GET',
-      query: { domainId: domains[0]._id, streetId: streets[0]._id },
+      query: { domainId: domains[2]._id, streetId: streets[2]._id },
     } as any
     const mockRes = {
       status: jest.fn(() => mockRes),
