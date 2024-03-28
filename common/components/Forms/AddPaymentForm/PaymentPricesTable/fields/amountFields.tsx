@@ -8,7 +8,7 @@ import useService from '@common/modules/hooks/useService'
 import { NamePath } from 'antd/lib/form/interface'
 import { ServiceType } from '@utils/constants'
 import { InputNumber, Form } from 'antd'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import s from '../style.module.scss'
 import { parseStringToFloat } from '@utils/helpers'
 
@@ -52,12 +52,9 @@ export function AmountTotalAreaField({ record, disabled }) {
 }
 
 function AmountPlacingInflicionField({ record, disabled, inflicion }) {
-  const { previousPlacingPrice, inflicionPrice } = useInflicionValues()
+  const { previousPlacingPrice, inflicionPrice } = useInflicionValues(disabled)
   const fieldName = [record.name, 'placingPrice']
-  const { paymentData, form } = usePaymentContext()
-  const placing = paymentData?.invoice?.find(
-    (i) => i?.type === ServiceType.Placing
-  )
+  const { form } = usePaymentContext()
 
   if (!disabled) {
     form.setFieldValue(fieldName, `${previousPlacingPrice}+${inflicionPrice}`) //view && add
@@ -91,12 +88,12 @@ export function AmountGarbageCollectorField() {
 
 // TODO: Could it be helper from @util ?
 // PaymentsBulk/column.config.tsx the same
-export function useInflicionValues() {
+export function useInflicionValues(isEdit?: boolean) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const inflicionValueFieldName = ['inflicionPrice', 'price']
 
-  // TODO: fix in preview mode
+  // TODO: fix in edit mode
   const inflicionPrice = Form.useWatch(inflicionValueFieldName, form) ?? ''
 
   const { lastInvoice } = useCompanyInvoice({ companyId })
@@ -116,7 +113,10 @@ export function useInflicionValues() {
       company?.pricePerMeter &&
       company?.totalArea * company?.pricePerMeter)
 
-  return { previousPlacingPrice: value, inflicionPrice }
+  const [defaultPrevPrice] = useState(+value - inflicionPrice)
+  const prevPrice = isEdit ? defaultPrevPrice : value
+
+  return { previousPlacingPrice: prevPrice, inflicionPrice }
 }
 
 export function AmountElectricityField({ record, disabled }) {
