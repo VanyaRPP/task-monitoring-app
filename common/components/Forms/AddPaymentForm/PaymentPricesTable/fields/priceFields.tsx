@@ -69,18 +69,16 @@ function DefaultPricePlacingField({ company, record, disabled }) {
   )
 }
 
-function InflicionPricePlacingField({ record, disabled }) {
+function InflicionPricePlacingField({ record, disabled: isEdit }) {
   const { form } = usePaymentContext()
   const fieldName = [record.name, 'price']
-  const { previousPlacingPrice, inflicionPrice } = useInflicionValues()
+  const { previousPlacingPrice, inflicionPrice } = useInflicionValues(isEdit)
 
   useEffect(() => {
-    if (!disabled) {
-      form.setFieldValue(
-        fieldName,
-        (+previousPlacingPrice + +inflicionPrice).toFixed(1)
-      )
-    }
+    form.setFieldValue(
+      fieldName,
+      (+previousPlacingPrice + +inflicionPrice).toFixed(1)
+    )
   }, [previousPlacingPrice, inflicionPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
