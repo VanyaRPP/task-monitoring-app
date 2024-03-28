@@ -17,19 +17,42 @@ export default async function handler(
   switch (req.method) {
     case 'DELETE':
       try {
-        await Payment.findByIdAndRemove(req.query.id).then((payment) => {
-          if (payment) {
-            return res.status(200).json({
-              success: true,
-              data: 'Payment ' + req.query.id + ' was deleted',
-            })
-          } else {
-            return res.status(400).json({
-              success: false,
-              data: 'Payment ' + req.query.id + ' was not found',
-            })
+        if (!isDomainAdmin && !isGlobalAdmin) {
+          throw new Error('not allowed')
+        }
+
+        if (isDomainAdmin) {
+          const payment = await Payment.findById(req.query.id)
+          const domain = await Domain.findById(payment.domain)
+
+          if (!domain) {
+            throw new Error('unknown domain')
           }
-        })
+
+          if (!domain.adminEmails.includes(user.email)) {
+            throw new Error('uncontrolled domain')
+          }
+
+          const deleted = await Payment.findByIdAndRemove(req.query.id)
+
+          if (!deleted) {
+            throw new Error('failed to delete')
+          }
+
+          return res.status(200).json({ success: true, data: deleted })
+        }
+
+        if (isGlobalAdmin) {
+          const deleted = await Payment.findByIdAndRemove(req.query.id)
+
+          if (!deleted) {
+            throw new Error('failed to delete')
+          }
+
+          return res.status(200).json({ success: true, data: deleted })
+        }
+
+        throw new Error('unexpected response')
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }
