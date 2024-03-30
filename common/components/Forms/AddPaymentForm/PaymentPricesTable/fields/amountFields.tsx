@@ -11,10 +11,11 @@ import { InputNumber, Form } from 'antd'
 import { useEffect, useState } from 'react'
 import s from '../style.module.scss'
 import { parseStringToFloat } from '@utils/helpers'
+import { getPreviousMonth } from '@common/assets/features/formatDate'
 
 export function AmountPlacingField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
-  const companyId = Form.useWatch('company', form) || paymentData?.company
+  const companyId = Form.useWatch('company', form) || paymentData?.company?._id
   const { company } = useCompany({ companyId })
   const inflicion = paymentData?.invoice.find(
     (i) => i.type === ServiceType.Inflicion
@@ -34,7 +35,7 @@ export function AmountPlacingField({ record, disabled }) {
 export function AmountTotalAreaField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'amount']
-  const companyId = Form.useWatch('company', form) || paymentData?.company
+  const companyId = Form.useWatch('company', form) || paymentData?.company?._id
   const { company } = useCompany({ companyId })
 
   // previe mode for first page where u add a payment after use mykolas fixed and get previous values
@@ -52,7 +53,7 @@ export function AmountTotalAreaField({ record, disabled }) {
 }
 
 function AmountPlacingInflicionField({ record, disabled, inflicion }) {
-  const { previousPlacingPrice, inflicionPrice } = useInflicionValues(disabled)
+  const { previousPlacingPrice, inflicionPrice } = useInflicionValues()
   const fieldName = [record.name, 'placingPrice']
   const { form } = usePaymentContext()
 
@@ -76,9 +77,9 @@ function AmountPlacingInflicionField({ record, disabled, inflicion }) {
 
 export function AmountGarbageCollectorField() {
   const { paymentData, form } = usePaymentContext()
-  const companyId = Form.useWatch('company', form) || paymentData?.company
+  const companyId = Form.useWatch('company', form) || paymentData?.company?._id
   const serviceId =
-    Form.useWatch('monthService', form) || paymentData?.monthService
+    Form.useWatch('monthService', form) || paymentData?.monthService?._id
   const { company } = useCompany({ companyId })
   const { service } = useService({ serviceId })
   if (service?.garbageCollectorPrice && company?.rentPart) {
@@ -88,35 +89,47 @@ export function AmountGarbageCollectorField() {
 
 // TODO: Could it be helper from @util ?
 // PaymentsBulk/column.config.tsx the same
-export function useInflicionValues(isEdit?: boolean) {
+export function useInflicionValues() {
   const { paymentData, form } = usePaymentContext()
-  const companyId = Form.useWatch('company', form) || paymentData?.company
+  const companyId = Form.useWatch('company', form) || paymentData?.company?._id
   const inflicionValueFieldName = ['inflicionPrice', 'price']
 
   // TODO: fix in edit mode
   const inflicionPrice = Form.useWatch(inflicionValueFieldName, form) ?? ''
 
+  const previousPlacingPrice = usePrevPlacingPrice({ companyId })
+  const defaultPlacingPrice = useDefaultPlacingPrice({ previousPlacingPrice, companyId })
+  const value = previousPlacingPrice || defaultPlacingPrice
+
+
+  // const [defaultPrevPrice] = useState(+value - inflicionPrice)
+  // const prevPrice = isEdit ? defaultPrevPrice : value
+
+  return { previousPlacingPrice: value, inflicionPrice }
+}
+
+const usePrevPlacingPrice = ({ companyId }: { companyId: string; }) => {
+  // const { paymentData } = usePaymentContext()
+  // const { month, year } = getPreviousMonth(paymentData?.monthService?.date)
+  // const { lastInvoice } = useCompanyInvoice({ companyId, month, year })
+  // TODO: DATA EDITING NOT WORKING
   const { lastInvoice } = useCompanyInvoice({ companyId })
   const previousPlacingPrice = lastInvoice?.invoice?.find(
     (item) => item.type === ServiceType.Placing
   )?.sum
+  return previousPlacingPrice
+}
 
-  // TODO: recheck. думаю, що треба буде фетчити навіть для прев"ю, бо колись буде едіт
+const useDefaultPlacingPrice = ({ previousPlacingPrice, companyId }: { previousPlacingPrice?: number; companyId: string; }) => {
+  // function used if it is first invoice and there is no info about prev pricing
   const { company } = useCompany({
     companyId,
-    skip: previousPlacingPrice !== undefined,
+    skip: previousPlacingPrice !== undefined || !companyId,
   })
+  const defaultPlacingPrice = company?.totalArea && company?.pricePerMeter &&
+    company?.totalArea * company?.pricePerMeter
 
-  const value =
-    previousPlacingPrice ||
-    (company?.totalArea &&
-      company?.pricePerMeter &&
-      company?.totalArea * company?.pricePerMeter)
-
-  const [defaultPrevPrice] = useState(+value - inflicionPrice)
-  const prevPrice = isEdit ? defaultPrevPrice : value
-
-  return { previousPlacingPrice: prevPrice, inflicionPrice }
+  return defaultPlacingPrice
 }
 
 export function AmountElectricityField({ record, disabled }) {
@@ -153,7 +166,9 @@ function FormAttributeForSingle({
   disabled?: boolean
 }) {
   const { paymentData, form } = usePaymentContext()
-  const companyId = Form.useWatch('company', form) || paymentData?.company
+  const companyId = Form.useWatch('company', form) || paymentData?.company?._id
+  // const { month, year } = getPreviousMonth(paymentData?.monthService?.date)
+  // const { lastInvoice } = useCompanyInvoice({ companyId, month, year })
   const { lastInvoice } = useCompanyInvoice({ companyId })
   const value = lastInvoice?.invoice?.find(
     (item) => item.type === invoicePropName
@@ -182,10 +197,10 @@ function FormAttributeForSingle({
 export function AmountWaterPartField() {
   const { paymentData, form } = usePaymentContext()
   const serviceIdRaw =
-    Form.useWatch('monthService', form) || paymentData?.monthService
+    Form.useWatch('monthService', form) || paymentData?.monthService?._id
   const serviceId =
     typeof serviceIdRaw === 'object' ? serviceIdRaw._id : serviceIdRaw
-  const companyId = Form.useWatch('company', form) || paymentData?.company
+  const companyId = Form.useWatch('company', form) || paymentData?.company?._id
   const { company } = useCompany({ companyId })
   const { service } = useService({ serviceId })
 
@@ -201,8 +216,8 @@ export function AmountWaterPartField() {
 export function AmountInflicionField() {
   const { paymentData, form } = usePaymentContext()
   const serviceId =
-    Form.useWatch('monthService', form) || paymentData?.monthService
-  const companyId = Form.useWatch('company', form) || paymentData?.company
+    Form.useWatch('monthService', form) || paymentData?.monthService?._id
+  const companyId = Form.useWatch('company', form) || paymentData?.company?._id
   const { company } = useCompany({ companyId })
   const { service } = useService({ serviceId })
   const { previousMonth } = usePreviousMonthService({

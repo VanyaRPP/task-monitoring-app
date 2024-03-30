@@ -15,7 +15,7 @@ export function PriceMaintainceField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
   const serviceId =
-    Form.useWatch('monthService', form) || paymentData?.monthService
+    Form.useWatch('monthService', form) || paymentData?.monthService?._id
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
   const { service } = useService({ serviceId })
@@ -72,7 +72,7 @@ function DefaultPricePlacingField({ company, record, disabled }) {
 function InflicionPricePlacingField({ record, disabled: isEdit }) {
   const { form } = usePaymentContext()
   const fieldName = [record.name, 'price']
-  const { previousPlacingPrice, inflicionPrice } = useInflicionValues(isEdit)
+  const { previousPlacingPrice, inflicionPrice } = useInflicionValues()
 
   useEffect(() => {
     form.setFieldValue(
@@ -93,7 +93,7 @@ export function PriceElectricityField({ record, disabled }) {
   const fieldName = [record.name, 'price']
 
   const serviceId =
-    Form.useWatch('monthService', form) || paymentData?.monthService
+    Form.useWatch('monthService', form) || paymentData?.monthService?._id
 
   const { service } = useService({ serviceId })
 
@@ -115,7 +115,7 @@ export function PriceWaterField({ record, disabled }) {
   const fieldName = [record.name, 'price']
 
   const serviceId =
-    Form.useWatch('monthService', form) || paymentData?.monthService
+    Form.useWatch('monthService', form) || paymentData?.monthService?._id
 
   const { service } = useService({ serviceId })
 
@@ -137,7 +137,7 @@ export function PriceGarbageCollectorField({ record, disabled }) {
   const fieldName = [record.name, 'price']
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const serviceId =
-    Form.useWatch('monthService', form) || paymentData?.monthService
+    Form.useWatch('monthService', form) || paymentData?.monthService?._id
 
   const { company } = useCompany({ companyId })
   const { service } = useService({ serviceId })
@@ -167,7 +167,7 @@ export function PriceInflicionField({ record, disabled }) {
   const fieldName = [record.name, 'price']
 
   const serviceId =
-    Form.useWatch('monthService', form) || paymentData?.monthService
+    Form.useWatch('monthService', form) || paymentData?.monthService?._id
   const companyId = Form.useWatch('company', form) || paymentData?.company
 
   const { company } = useCompany({ companyId })
@@ -201,7 +201,7 @@ export function PriceWaterPartField({ record, disabled }) {
   const fieldName = [record.name, 'price']
 
   const serviceId =
-    Form.useWatch('monthService', form) || paymentData?.monthService
+    Form.useWatch('monthService', form) || paymentData?.monthService?._id
   const companyId = Form.useWatch('company', form)
 
   const { company } = useCompany({ companyId })
