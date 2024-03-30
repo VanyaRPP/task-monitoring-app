@@ -11,66 +11,42 @@ import { InputNumber, Form } from 'antd'
 import { useEffect, useState } from 'react'
 import s from '../style.module.scss'
 import { parseStringToFloat } from '@utils/helpers'
-import { getPreviousMonth } from '@common/assets/features/formatDate'
+// import { getPreviousMonth } from '@common/assets/features/formatDate'
 
-export function AmountPlacingField({ record, disabled }) {
-  const { paymentData, form } = usePaymentContext()
-  const companyId = Form.useWatch('company', form) || paymentData?.company?._id
-  const { company } = useCompany({ companyId })
-  const inflicion = paymentData?.invoice.find(
-    (i) => i.type === ServiceType.Inflicion
-  )
-
-  return company?.inflicion || inflicion > 0 ? (
+export function AmountPlacingField({ company, record, disabled }) {
+  return company?.inflicion ? (
     <AmountPlacingInflicionField
       record={record}
-      disabled={disabled}
-      inflicion={inflicion}
+      // inflicion={inflicion}
+      inflicion={0}
     />
   ) : (
-    <AmountTotalAreaField record={record} disabled={disabled} />
+    <AmountTotalAreaField record={record} />
   )
 }
 
-export function AmountTotalAreaField({ record, disabled }) {
-  const { paymentData, form } = usePaymentContext()
-  const fieldName = [record.name, 'amount']
-  const companyId = Form.useWatch('company', form) || paymentData?.company?._id
-  const { company } = useCompany({ companyId })
-
-  // previe mode for first page where u add a payment after use mykolas fixed and get previous values
-  useEffect(() => {
-    if (company?._id && company?.totalArea && !disabled) {
-      form.setFieldValue(fieldName, company.totalArea)
-    }
-  }, [company?._id, company?.totalArea]) //eslint-disable-line react-hooks/exhaustive-deps
-
+export function AmountTotalAreaField({ record }) {
   return (
-    <Form.Item name={fieldName} rules={!disabled && validateField('required')}>
+    <Form.Item name={[record.name, 'amount']}>
       <InputNumber className={s.input} />
     </Form.Item>
   )
 }
 
-function AmountPlacingInflicionField({ record, disabled, inflicion }) {
-  const { previousPlacingPrice, inflicionPrice } = useInflicionValues()
-  const fieldName = [record.name, 'placingPrice']
-  const { form } = usePaymentContext()
+function AmountPlacingInflicionField({ record, inflicion }) {
+  // TODO: test inflicionPrice
+  const { inflicionPrice } = useInflicionValues()
+  const { previousPlacingPrice } = record
 
-  if (!disabled) {
-    form.setFieldValue(fieldName, `${previousPlacingPrice}+${inflicionPrice}`) //view && add
-  }
-  const previewPrice = typeof inflicion?.price === 'string' ? +inflicion?.price : inflicion?.price
-  const value = (previewPrice || +inflicionPrice || 0).toFixed(2)
+  const inflicionValue = typeof inflicion?.price === 'string' ? +inflicion?.price : inflicion?.price
+  const value = (inflicionValue || +inflicionPrice || 0).toFixed(2)
 
   return (
     <div className={s.PlacingInflicion}>
       <p>
         {previousPlacingPrice}+{value}
       </p>
-      <StyledTooltip
-        title={`Значення попереднього місяця + індекс інфляції в цьому рахунку`}
-      />
+      <StyledTooltip title={`Значення попереднього місяця + індекс інфляції в цьому рахунку`} />
     </div>
   )
 }
@@ -90,46 +66,11 @@ export function AmountGarbageCollectorField() {
 // TODO: Could it be helper from @util ?
 // PaymentsBulk/column.config.tsx the same
 export function useInflicionValues() {
-  const { paymentData, form } = usePaymentContext()
-  const companyId = Form.useWatch('company', form) || paymentData?.company?._id
+  const { form } = usePaymentContext()
   const inflicionValueFieldName = ['inflicionPrice', 'price']
-
-  // TODO: fix in edit mode
   const inflicionPrice = Form.useWatch(inflicionValueFieldName, form) ?? ''
 
-  const previousPlacingPrice = usePrevPlacingPrice({ companyId })
-  const defaultPlacingPrice = useDefaultPlacingPrice({ previousPlacingPrice, companyId })
-  const value = previousPlacingPrice || defaultPlacingPrice
-
-
-  // const [defaultPrevPrice] = useState(+value - inflicionPrice)
-  // const prevPrice = isEdit ? defaultPrevPrice : value
-
-  return { previousPlacingPrice: value, inflicionPrice }
-}
-
-const usePrevPlacingPrice = ({ companyId }: { companyId: string; }) => {
-  // const { paymentData } = usePaymentContext()
-  // const { month, year } = getPreviousMonth(paymentData?.monthService?.date)
-  // const { lastInvoice } = useCompanyInvoice({ companyId, month, year })
-  // TODO: DATA EDITING NOT WORKING
-  const { lastInvoice } = useCompanyInvoice({ companyId })
-  const previousPlacingPrice = lastInvoice?.invoice?.find(
-    (item) => item.type === ServiceType.Placing
-  )?.sum
-  return previousPlacingPrice
-}
-
-const useDefaultPlacingPrice = ({ previousPlacingPrice, companyId }: { previousPlacingPrice?: number; companyId: string; }) => {
-  // function used if it is first invoice and there is no info about prev pricing
-  const { company } = useCompany({
-    companyId,
-    skip: previousPlacingPrice !== undefined || !companyId,
-  })
-  const defaultPlacingPrice = company?.totalArea && company?.pricePerMeter &&
-    company?.totalArea * company?.pricePerMeter
-
-  return defaultPlacingPrice
+  return { inflicionPrice }
 }
 
 export function AmountElectricityField({ record, disabled }) {
@@ -226,7 +167,9 @@ export function AmountInflicionField() {
     streetId: form.getFieldValue('street'),
   })
 
-  const { previousPlacingPrice } = useInflicionValues()
+  // const { previousPlacingPrice } = record
+  // TODO: wip
+  const previousPlacingPrice = 'wip'
 
   const percent = (previousMonth?.inflicionPrice - 100)?.toFixed(2)
   return (

@@ -24,6 +24,6 @@ const fields: any = {
 export default function AmountComponent({ record, edit }) {
   if (record.name in fields) {
     const Component = fields[record.name]
-    return <Component record={record} disabled={edit} />
+    return <Component company={record.company} record={record} disabled={edit} />
   }
 }

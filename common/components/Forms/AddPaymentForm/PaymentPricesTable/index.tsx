@@ -4,7 +4,7 @@ import {
   PlusOutlined,
 } from '@ant-design/icons'
 import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
-import {Popconfirm, Button, Table, Input, Form} from 'antd'
+import { Popconfirm, Button, Table, Input, Form } from 'antd'
 import { ServiceType, paymentsTitle } from '@utils/constants'
 import { ColumnProps } from 'antd/lib/table'
 import { getName } from '@utils/helpers'
@@ -18,9 +18,9 @@ import s from '../style.module.scss'
 import Modal from '@common/components/UI/ModalWindow'
 
 function PaymentPricesTable({ paymentActions }) {
-  const {preview, edit} = paymentActions
+  const { preview, edit } = paymentActions
   const { customDataSource, addDataSource, removeDataSource } =
-    useCustomDataSource({ preview: paymentActions?.preview })
+    useCustomDataSource({ preview })
 
   const columns: ColumnProps<IPaymentTableData>[] = [
     {
@@ -77,9 +77,8 @@ function PaymentPricesTable({ paymentActions }) {
       render: (text, record) => (
         <div className={s.popconfirm}>
           <Popconfirm
-            title={`Ви впевнені що хочете видалити поле ${
-              getName(record.name, paymentsTitle) || record.name
-            }?`}
+            title={`Ви впевнені що хочете видалити поле ${getName(record.name, paymentsTitle) || record.name
+              }?`}
             onConfirm={() => removeDataSource(record.id)}
             cancelText="Відміна"
           >

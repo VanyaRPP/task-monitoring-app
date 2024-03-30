@@ -12,67 +12,27 @@ import { getInflicionValue } from '@utils/inflicionHelper'
 import { invoiceCoutWater } from '@utils/helpers'
 
 export function PriceMaintainceField({ record, disabled }) {
-  const { paymentData, form } = usePaymentContext()
-  const fieldName = [record.name, 'price']
-  const serviceId =
-    Form.useWatch('monthService', form) || paymentData?.monthService?._id
-  const companyId = Form.useWatch('company', form) || paymentData?.company
-
-  const { service } = useService({ serviceId })
-  const { company } = useCompany({ companyId })
-
-  useEffect(() => {
-    if (company?.servicePricePerMeter && !disabled) {
-      form.setFieldValue(fieldName, company.servicePricePerMeter)
-    } else if (service?.rentPrice && !disabled) {
-      form.setFieldValue(fieldName, service.rentPrice)
-    }
-  }, [company?.servicePricePerMeter, service?.rentPrice]) //eslint-disable-line react-hooks/exhaustive-deps
-
   return (
-    <Form.Item name={fieldName} rules={validateField('required')}>
+    <Form.Item name={[record.name, 'price']} rules={validateField('required')}>
       <InputNumber className={s.input} />
     </Form.Item>
   )
 }
 
-export function PricePlacingField({ record, disabled }) {
-  const { paymentData, form } = usePaymentContext()
-  const companyId = Form.useWatch('company', form) || paymentData?.company
-  const { company } = useCompany({ companyId })
-
-  return company?.inflicion ? (
-    <InflicionPricePlacingField record={record} disabled={disabled} />
-  ) : (
-    <DefaultPricePlacingField
-      company={company}
-      record={record}
-      disabled={disabled}
-    />
-  )
-}
-
-function DefaultPricePlacingField({ company, record, disabled }) {
-  const { form } = usePaymentContext()
-  const fieldName = [record.name, 'price']
-
-  useEffect(() => {
-    if (company?._id && company?.pricePerMeter && !disabled) {
-      form.setFieldValue(fieldName, company.pricePerMeter)
-    }
-  }, [company?._id, company?.pricePerMeter]) //eslint-disable-line react-hooks/exhaustive-deps
-
-  return (
-    <Form.Item name={fieldName} rules={validateField('required')}>
+export function PricePlacingField({ record }) {
+  const { company } = record
+  return company?.inflicion ? <InflicionPricePlacingField record={record} /> : (
+    <Form.Item name={[record.name, 'price']} rules={validateField('required')}>
       <InputNumber className={s.input} />
     </Form.Item>
   )
 }
 
-function InflicionPricePlacingField({ record, disabled: isEdit }) {
+function InflicionPricePlacingField({ record }) {
   const { form } = usePaymentContext()
   const fieldName = [record.name, 'price']
-  const { previousPlacingPrice, inflicionPrice } = useInflicionValues()
+  const { previousPlacingPrice } = record
+  const { inflicionPrice } = useInflicionValues()
 
   useEffect(() => {
     form.setFieldValue(

@@ -21,7 +21,7 @@ function AddPaymentForm({ paymentActions }) {
   const initialValues = useMemo(() => {
     return getInitialValues(paymentData)
   }, [paymentData])
-   
+
   const serviceId = Form.useWatch('monthService', form)
   const companyId = Form.useWatch('company', form)
   const operation = Form.useWatch('operation', form)
@@ -96,9 +96,9 @@ function AddPaymentForm({ paymentActions }) {
 function getInitialValues(paymentData) {
 
   const custom = paymentData?.invoice.filter(
-      (item) => item?.type === ServiceType.Custom
-    )
-    
+    (item) => item?.type === ServiceType.Custom
+  )
+
   const customFields = custom?.reduce((acc, item) => {
     acc[item.name] = { price: item.price }
     return acc
