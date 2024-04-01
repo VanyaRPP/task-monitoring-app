@@ -13,8 +13,12 @@ import { usePaymentContext } from '@common/components/AddPaymentModal'
 import moment from 'moment'
 import InvoiceNumber from './InvoiceNumber'
 import InvoiceCreationDate from './InvoiceCreationDate'
-import { convertToInvoicesObject } from '@utils/helpers'
+import { convertToInvoicesObject, getFormattedDate } from '@utils/helpers'
 import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
+import useCompany from '@common/modules/hooks/useCompany'
+import useService from '@common/modules/hooks/useService'
+import { getPreviousMonth } from '@common/assets/features/formatDate'
+import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
 
 function AddPaymentForm({ paymentActions }) {
   const { form, paymentData } = usePaymentContext()
@@ -116,10 +120,14 @@ function getInitialValues(paymentData) {
     invoiceNumber: paymentData?.invoiceNumber,
     invoiceCreationDate: moment(paymentData?.invoiceCreationDate),
     operation: paymentData ? paymentData.type : Operations.Credit,
+    // TODO: remove from here
+    // Invoice information should be applied here
+    // AddPaymentForm/PaymentPricesTable/index.tsx
     ...convertToInvoicesObject(paymentData?.invoice || []),
     ...customFields,
   }
 
   return initialValues
 }
+
 export default AddPaymentForm

@@ -3,7 +3,7 @@ import {
   inflicionDescription,
 } from '@utils/constants'
 import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
-import useService, {
+import {
   usePreviousMonthService,
 } from '@common/modules/hooks/useService'
 import { usePaymentContext } from '@common/components/AddPaymentModal'

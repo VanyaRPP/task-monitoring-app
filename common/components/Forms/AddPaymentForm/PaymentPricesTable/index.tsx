@@ -8,7 +8,7 @@ import { Popconfirm, Button, Table, Input, Form } from 'antd'
 import { ServiceType, paymentsTitle } from '@utils/constants'
 import { ColumnProps } from 'antd/lib/table'
 import { getName } from '@utils/helpers'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useCustomDataSource } from './useCustomDataSource'
 import AmountComponent from './fields/AmountComponent'
 import PriceComponent from './fields/PriceComponent'
@@ -16,11 +16,26 @@ import NameComponent from './fields/NameComponent'
 import SumComponent from './fields/SumComponent'
 import s from '../style.module.scss'
 import Modal from '@common/components/UI/ModalWindow'
+import { usePaymentContext } from '@common/components/AddPaymentModal'
 
 function PaymentPricesTable({ paymentActions }) {
   const { preview, edit } = paymentActions
   const { customDataSource, addDataSource, removeDataSource } =
     useCustomDataSource({ preview })
+  const { form } = usePaymentContext()
+
+  useEffect(() => {
+    form.setFieldsValue({
+      // TODO: move to separate helper, getMainenancePrice
+      maintenancePrice: {
+        amount: 12312,
+        price: 10
+      },
+      placingPrice: {
+        amount: 11
+      }
+    })
+  }, [])
 
   const columns: ColumnProps<IPaymentTableData>[] = [
     {

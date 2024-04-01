@@ -21,10 +21,6 @@ import {
 } from '@common/api/paymentApi/payment.api'
 import Modal from 'antd/lib/modal/Modal'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
-import {
-  IGeneratePaymentPDF,
-  IGeneratePaymentPDFResponce,
-} from '@common/api/paymentApi/payment.api.types'
 import { saveAs } from 'file-saver'
 import SelectForDebitAndCredit from '@components/UI/PaymentSelect/index'
 import StreetsSelector from "@components/StreetsSelector";
