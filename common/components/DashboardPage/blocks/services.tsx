@@ -4,14 +4,17 @@ import ServicesHeader from '@common/components/Tables/Services/Header'
 import ServicesTable from '@common/components/Tables/Services/Table'
 import TableCard from '@common/components/UI/TableCard'
 import { isAdminCheck } from '@utils/helpers'
-import {IExtendedService, IServiceFilter} from '@common/api/serviceApi/service.api.types'
+import {
+  IService,
+  IServiceFilter,
+} from '@common/api/serviceApi/service.api.types'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 
 const ServicesBlock = () => {
   const { data: user } = useGetCurrentUserQuery()
-  const [currentService, setCurrentService] = useState<IExtendedService>(null)
+  const [currentService, setCurrentService] = useState<IService>(null)
   const [serviceActions, setServiceActions] = useState({
     edit: false,
     preview: false,
@@ -29,7 +32,6 @@ const ServicesBlock = () => {
     streetId: filter?.street || undefined,
     domainId: filter?.domain || undefined,
   })
-
 
   return (
     <TableCard

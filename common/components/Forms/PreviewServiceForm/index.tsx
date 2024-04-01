@@ -1,12 +1,12 @@
 import React, { FC } from 'react'
-import { IExtendedService } from '@common/api/serviceApi/service.api.types'
+import { IService } from '@common/api/serviceApi/service.api.types'
 import { DatePicker, Form, FormInstance, Input } from 'antd'
 import s from './style.module.scss'
 import useInitialValues from '@common/modules/hooks/useInitialValues'
 
 interface Props {
   form: FormInstance<any>
-  currentService: IExtendedService
+  currentService: IService
 }
 
 const PreviewServiceForm: FC<Props> = ({ form, currentService }) => {
@@ -27,47 +27,25 @@ const PreviewServiceForm: FC<Props> = ({ form, currentService }) => {
         <Input disabled />
       </Form.Item>
       <Form.Item name="date" label="Місяць та рік">
-        <MonthPicker
-          format="MMMM YYYY"
-          className={s.formInput}
-          disabled
-        />
+        <MonthPicker format="MMMM YYYY" className={s.formInput} disabled />
       </Form.Item>
       <Form.Item name="rentPrice" label="Утримання приміщень (грн/м²)">
-        <Input
-          className={s.formInput}
-          disabled
-        />
+        <Input className={s.formInput} disabled />
       </Form.Item>
       <Form.Item name="electricityPrice" label="Електроенергія (грн/кВт)">
-        <Input
-          className={s.formInput}
-          disabled
-        />
+        <Input className={s.formInput} disabled />
       </Form.Item>
       <Form.Item name="waterPrice" label="Водопостачання (грн/м³)">
-        <Input
-          className={s.formInput}
-          disabled
-        />
+        <Input className={s.formInput} disabled />
       </Form.Item>
       <Form.Item name="waterPriceTotal" label="Всього водопостачання">
-        <Input
-          className={s.formInput}
-          disabled
-        />
+        <Input className={s.formInput} disabled />
       </Form.Item>
       <Form.Item name="garbageCollectorPrice" label="Вивіз сміття">
-        <Input
-          className={s.formInput}
-          disabled
-        />
+        <Input className={s.formInput} disabled />
       </Form.Item>
       <Form.Item name="inflicionPrice" label="Індекс інфляції">
-        <Input
-          className={s.formInput}
-          disabled
-        />
+        <Input className={s.formInput} disabled />
       </Form.Item>
       <Form.Item name="description" label="Опис">
         <Input.TextArea

@@ -1,8 +1,12 @@
+import { IDomain } from '@common/modules/models/Domain'
 import { IFilter } from '../paymentApi/payment.api.types'
+import { IStreet } from '@common/modules/models/Street'
+import mongoose from 'mongoose'
 
 export interface IService {
-  domain: string
-  street: string
+  _id: mongoose.Types.ObjectId
+  domain: IDomain
+  street: IStreet
   rentPrice: number
   date: Date
   electricityPrice: number
@@ -13,19 +17,14 @@ export interface IService {
   description?: string
 }
 
-export interface IExtendedService extends IService {
-  _id: string
-  _v: number
-}
-
 export interface IAddServiceResponse {
   success: boolean
-  data: IExtendedService
+  data: IService
 }
 
 export interface IGetServiceResponse {
   success: boolean
-  data: IExtendedService[]
+  data: IService[]
   addressFilter: IFilter[]
   domainFilter: IFilter[]
 }

@@ -6,13 +6,13 @@ import { Form, message } from 'antd'
 import React, { FC } from 'react'
 import AddServiceForm from '../Forms/AddServiceForm'
 import moment from 'moment'
-import { IExtendedService } from '@common/api/serviceApi/service.api.types'
+import { IService } from '@common/api/serviceApi/service.api.types'
 import Modal from '../UI/ModalWindow'
 import PreviewServiceForm from '../Forms/PreviewServiceForm'
 
 interface Props {
   closeModal: VoidFunction
-  currentService?: IExtendedService
+  currentService?: IService
   serviceActions?: {
     edit: boolean
     preview: boolean

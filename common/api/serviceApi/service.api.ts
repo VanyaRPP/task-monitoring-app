@@ -1,7 +1,7 @@
 import {
   IAddServiceResponse,
   IDeleteServiceResponse,
-  IExtendedService,
+  IService,
   IGetServiceResponse,
   IService,
 } from './service.api.types'
@@ -65,10 +65,7 @@ export const serviceApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Service'] : []),
     }),
-    deleteService: builder.mutation<
-      IDeleteServiceResponse,
-      IExtendedService['_id']
-    >({
+    deleteService: builder.mutation<IDeleteServiceResponse, IService['_id']>({
       query(id) {
         return {
           url: `service/${id}`,
@@ -77,7 +74,7 @@ export const serviceApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Service'] : []),
     }),
-    editService: builder.mutation<IExtendedService, Partial<IExtendedService>>({
+    editService: builder.mutation<IService, Partial<IService>>({
       query(data) {
         const { _id, ...body } = data
         return {
