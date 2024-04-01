@@ -86,7 +86,8 @@ function AddPaymentForm({ paymentActions }) {
             <>
               <PaymentPricesTable
                 key={companyId + serviceId + operation}
-                paymentActions={paymentActions}
+                // paymentActions={paymentActions}
+                edit={!paymentActions.preview}
               />
               <PaymentTotal form={form} />
             </>
@@ -98,7 +99,6 @@ function AddPaymentForm({ paymentActions }) {
 }
 
 function getInitialValues(paymentData) {
-
   const custom = paymentData?.invoice.filter(
     (item) => item?.type === ServiceType.Custom
   )

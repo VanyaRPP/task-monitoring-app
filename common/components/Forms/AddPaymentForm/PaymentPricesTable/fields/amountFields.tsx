@@ -19,9 +19,10 @@ export function AmountPlacingField({ company, record, disabled }) {
       record={record}
       // inflicion={inflicion}
       inflicion={0}
+      disabled={!!disabled}
     />
   ) : (
-    <AmountTotalAreaField record={record} />
+    <AmountTotalAreaField record={record} disabled={!!disabled} />
   )
 }
 
@@ -38,7 +39,8 @@ function AmountPlacingInflicionField({ record, inflicion }) {
   const { inflicionPrice } = useInflicionValues()
   const { previousPlacingPrice } = record
 
-  const inflicionValue = typeof inflicion?.price === 'string' ? +inflicion?.price : inflicion?.price
+  const inflicionValue =
+    typeof inflicion?.price === 'string' ? +inflicion?.price : inflicion?.price
   const value = (inflicionValue || +inflicionPrice || 0).toFixed(2)
 
   return (
@@ -46,21 +48,31 @@ function AmountPlacingInflicionField({ record, inflicion }) {
       <p>
         {previousPlacingPrice}+{value}
       </p>
-      <StyledTooltip title={`Значення попереднього місяця + індекс інфляції в цьому рахунку`} />
+      <StyledTooltip
+        title={`Значення попереднього місяця + індекс інфляції в цьому рахунку`}
+      />
     </div>
   )
 }
 
-export function AmountGarbageCollectorField() {
-  const { paymentData, form } = usePaymentContext()
-  const companyId = Form.useWatch('company', form) || paymentData?.company?._id
-  const serviceId =
-    Form.useWatch('monthService', form) || paymentData?.monthService?._id
-  const { company } = useCompany({ companyId })
-  const { service } = useService({ serviceId })
-  if (service?.garbageCollectorPrice && company?.rentPart) {
-    return `${company?.rentPart}% від ${service?.garbageCollectorPrice}`
-  }
+export function AmountGarbageCollectorField({ company, record, edit }) {
+  // const { paymentData, form } = usePaymentContext()
+  // const companyId = Form.useWatch('company', form) || paymentData?.company?._id
+  // const serviceId =
+  //   Form.useWatch('monthService', form) || paymentData?.monthService?._id
+  // const { company } = useCompany({ companyId })
+  // const { service } = useService({ serviceId })
+  // if (service?.garbageCollectorPrice && company?.rentPart) {
+  //   return `${company?.rentPart}% від ${service?.garbageCollectorPrice}`
+  // }
+
+  // console.log({
+  //   company,
+  //   record,
+  //   edit,
+  // })
+
+  return <>Garbage</>
 }
 
 // TODO: Could it be helper from @util ?

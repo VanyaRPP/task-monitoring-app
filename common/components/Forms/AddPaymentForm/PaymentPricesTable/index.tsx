@@ -1,105 +1,140 @@
-import {
-  MinusCircleOutlined,
-  DeleteOutlined,
-  PlusOutlined,
-} from '@ant-design/icons'
-import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
-import { Popconfirm, Button, Table, Input, Form } from 'antd'
-import { ServiceType, paymentsTitle } from '@utils/constants'
-import { ColumnProps } from 'antd/lib/table'
-import { getName } from '@utils/helpers'
-import { useEffect, useState } from 'react'
-import { useCustomDataSource } from './useCustomDataSource'
-import AmountComponent from './fields/AmountComponent'
-import PriceComponent from './fields/PriceComponent'
-import NameComponent from './fields/NameComponent'
-import SumComponent from './fields/SumComponent'
-import s from '../style.module.scss'
-import Modal from '@common/components/UI/ModalWindow'
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
+import Modal from '@common/components/UI/ModalWindow'
+import { ServiceType, paymentsTitle } from '@utils/constants'
+import { getName } from '@utils/helpers'
+import { Button, Form, Input, Popconfirm, Table } from 'antd'
+import { ColumnProps } from 'antd/lib/table'
+import { useEffect, useState } from 'react'
+import s from '../style.module.scss'
+import { AmountComponent } from './fields/AmountComponent'
+import { NameComponent } from './fields/NameComponent'
+import { PriceComponent } from './fields/PriceComponent'
+import { SumComponent } from './fields/SumComponent'
+import { usePaymentData } from './useCustomDataSource'
 
-function PaymentPricesTable({ paymentActions }) {
-  const { preview, edit } = paymentActions
-  const { customDataSource, addDataSource, removeDataSource } =
-    useCustomDataSource({ preview })
+export interface Invoice {
+  name: string
+  title?: JSX.Element
+  editable?: boolean
+  data: {
+    amount?: number
+    price?: number
+    sum?: number
+  }
+}
+
+function PaymentPricesTable({ edit }) {
   const { form } = usePaymentContext()
+  const { company, service, prevService } = usePaymentData({
+    form,
+  })
+
+  const [data, setData] = useState<Invoice[]>([])
+
+  const addDataSource = (dataSource: any) => {
+    setData([
+      ...data,
+      {
+        name:
+          'name' in dataSource
+            ? dataSource.name
+            : 'type' in dataSource
+            ? dataSource.type
+            : 'unknown',
+        editable: true,
+        data: {
+          amount: 'amount' in dataSource ? dataSource.amount : 0,
+          price: 'price' in dataSource ? dataSource.price : 0,
+        },
+      },
+    ])
+  }
+  const removeDataSource = (name: string) => {
+    setData(
+      data.filter(({ name }) => name.toLowerCase() !== name.toLowerCase())
+    )
+  }
 
   useEffect(() => {
-    form.setFieldsValue({
-      // TODO: move to separate helper, getMainenancePrice
-      maintenancePrice: {
-        amount: 12312,
-        price: 10
+    // TODO: prepare and update all math-based-data here
+    setData([
+      {
+        name: 'maintenancePrice',
+        title: <>Обслуговування</>,
+        editable: true,
+        data: {
+          amount: 1231,
+          price: 10,
+        },
       },
-      placingPrice: {
-        amount: 11
-      }
-    })
-  }, [])
+      {
+        name: 'placingPrice',
+        title: <>Розміщення</>,
+        data: {
+          amount: 11,
+          price: 50,
+        },
+      },
+    ])
+  }, [setData, company, service, prevService])
 
-  const columns: ColumnProps<IPaymentTableData>[] = [
+  useEffect(() => {
+    data.forEach((record) => {
+      const keys = Object.keys(record.data)
+      keys.forEach((key) =>
+        form.setFieldValue([record.name, key], record.data[key])
+      )
+    })
+  }, [data, form])
+
+  const columns: ColumnProps<Invoice>[] = [
     {
       title: '№',
-      dataIndex: 'id',
+      dataIndex: '_id',
       width: '5%',
+      render: (_, __, index) => index + 1,
     },
     {
       title: 'Назва',
       dataIndex: 'name',
       width: '30%',
       ellipsis: true,
-      render: (__, record) => (
-        <NameComponent record={record} preview={preview} />
-      ),
+      render: (_, record) => <NameComponent record={record} />,
     },
     {
       title: 'К-сть',
       dataIndex: 'amount',
       width: '30%',
-      render: (__, record) => (
-        <AmountComponent record={record} edit={edit} />
-      ),
+      render: (_, record) => <AmountComponent record={record} edit={edit} />,
     },
     {
       title: 'Ціна',
       dataIndex: 'price',
       width: '20%',
-      render: (__, record) => (
-        <PriceComponent
-          record={record}
-          edit={edit}
-        />
-      ),
+      render: (_, record) => <PriceComponent record={record} edit={edit} />,
     },
     {
       title: 'Сума',
       dataIndex: 'sum',
       ellipsis: true,
-      render: (__, record) => <SumComponent record={record} />,
+      render: (_, record) => <SumComponent record={record} />,
       width: 110,
     },
   ]
 
-  if (!preview) {
+  if (edit) {
     columns.push({
-      title: (
-        <div className={s.popconfirm}>
-          <DeleteOutlined className={s.icon} />
-        </div>
-      ),
-      dataIndex: 'delete',
-      ellipsis: true,
-      render: (text, record) => (
-        <div className={s.popconfirm}>
-          <Popconfirm
-            title={`Ви впевнені що хочете видалити поле ${getName(record.name, paymentsTitle) || record.name
-              }?`}
-            onConfirm={() => removeDataSource(record.id)}
-            cancelText="Відміна"
-          >
-            <MinusCircleOutlined className={s.icon} />
-          </Popconfirm>
-        </div>
+      render: (_, record) => (
+        <Popconfirm
+          title={`Ви впевнені що хочете видалити ${
+            getName(record.name, paymentsTitle) || record.name
+          }?`}
+          onConfirm={() => removeDataSource(record.name)}
+          cancelText="Відміна"
+        >
+          <MinusCircleOutlined className={s.icon} />
+        </Popconfirm>
       ),
       width: 80,
     })
@@ -110,11 +145,11 @@ function PaymentPricesTable({ paymentActions }) {
       <Table
         rowKey="id"
         columns={columns}
-        dataSource={customDataSource as IPaymentTableData[]}
+        dataSource={data}
         pagination={false}
         className={s.table}
       />
-      {!preview && <AddCustomField addDataSource={addDataSource} />}
+      {edit && <AddCustomField addDataSource={addDataSource} />}
     </>
   )
 }

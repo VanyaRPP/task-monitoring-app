@@ -1,35 +1,17 @@
-import {
-  PriceMaintainceField,
-  PricePlacingField,
-  PriceElectricityField,
-  PriceWaterField,
-  PriceGarbageCollectorField,
-  PriceInflicionField,
-  PriceWaterPartField,
-  PriceDiscountField,
-  PriceCleaningField,
-  PriceCustomField,
-} from './priceFields'
-import { ServiceType } from '@utils/constants'
+import { Invoice } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable'
+import { Form, Input } from 'antd'
 
-const fields: any = {
-  [ServiceType.Maintenance]: PriceMaintainceField,
-  [ServiceType.Placing]: PricePlacingField,
-  [ServiceType.Electricity]: PriceElectricityField,
-  [ServiceType.Water]: PriceWaterField,
-  [ServiceType.GarbageCollector]: PriceGarbageCollectorField,
-  [ServiceType.Inflicion]: PriceInflicionField,
-  [ServiceType.WaterPart]: PriceWaterPartField,
-  [ServiceType.Cleaning]: PriceCleaningField,
-  [ServiceType.Discount]: PriceDiscountField,
-}
-
-export default function PriceComponent({ record, edit }) {
-
-  if (record.name in fields) {
-    const Component = fields[record.name]
-    return <Component record={record} disabled={edit} />
-  } else {
-    return <PriceCustomField record={record} />
-  }
+export const PriceComponent: React.FC<{ record: Invoice; edit?: boolean }> = ({
+  record,
+  edit,
+}) => {
+  return (
+    <Form.Item name={[record.name, 'price']}>
+      {record.editable ? (
+        <Input disabled={!edit} value={record.data.price} />
+      ) : (
+        record.data.price + 'грн'
+      )}
+    </Form.Item>
+  )
 }
