@@ -1,30 +1,28 @@
-import { IPaymentTableData, electricityObj } from './tableData'
-import { ServiceType, paymentsTitle } from '@utils/constants'
-import { usePaymentContext } from '@common/components/AddPaymentModal'
-import useCompany from '@common/modules/hooks/useCompany'
-import { useEffect, useState } from 'react'
-import { Form } from 'antd'
-import useService from '@common/modules/hooks/useService'
-import { getFormattedDate } from '@utils/helpers'
-import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
-import { getPreviousMonth } from '@common/assets/features/formatDate'
-import { IService } from '@common/api/serviceApi/service.api.types'
-import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import { IService } from '@common/api/serviceApi/service.api.types'
+import useCompany from '@common/modules/hooks/useCompany'
+// import { usePayment } from '@common/modules/hooks/usePayment'
+import useService from '@common/modules/hooks/useService'
+import { Form } from 'antd'
 
 export function usePaymentData({ form }): {
   company?: IRealestate
   service?: IService
   prevService?: IService
+  prevPayment?: IPayment
 } {
+  // const paymentId = Form.useWatch('payment', form)
   const companyId = Form.useWatch('company', form)
   const serviceId = Form.useWatch('monthService', form)
 
   const { company } = useCompany({ companyId })
   const { service } = useService({ serviceId })
   const { service: prevService } = usePrevService({ serviceId })
+  // const { payment: prevPayment } = usePrevPayment({ paymentId })
 
-  return { company, service, prevService }
+  return { company, service, prevService, prevPayment: null }
 }
 
 export function usePrevService({
@@ -48,96 +46,24 @@ export function usePrevService({
   return { service: prevService }
 }
 
-// export function useCustomDataSource({ preview }) {
-//   const { paymentData, form } = usePaymentContext()
-
-//   const [dataSource, setDataSource] = useState<IPaymentTableData[]>([])
-
-//   const { company, service, prevService } = usePaymentData({ form })
-
-//   useEffect(() => {
-//     setDataSource(paymentData?.invoice)
-//   }, [setDataSource, paymentData?.invoice])
-
-//   useEffect(() => {
-//     if (!paymentData?.invoice) {
-//       return
-//     }
-
-//     const itemsToDisplay = []
-
-//     if (company?.inflicion) {
-//       itemsToDisplay.push({ name: ServiceType.Inflicion })
-//     }
-//     itemsToDisplay.push(electricityObj)
-//     itemsToDisplay.push({
-//       name: company?.waterPart ? ServiceType.WaterPart : ServiceType.Water,
-//     })
-//     if (company?.garbageCollector) {
-//       itemsToDisplay.push({ name: ServiceType.GarbageCollector })
-//     }
-//     if (company?.cleaning) {
-//       itemsToDisplay.push({ name: ServiceType.Cleaning })
-//     }
-//     if (company?.discount) {
-//       itemsToDisplay.push({ name: ServiceType.Discount })
-//     }
-
-//     if (itemsToDisplay.length > 0) {
-//       setDataSource([...dataSource, ...itemsToDisplay])
-//     }
-
-//     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, [setDataSource, company, service, prevService])
-
-//   const removeDataSource = (name) => {
-//     setDataSource(dataSource.filter((item) => item.name !== name))
-//   }
-
-//   const addDataSource = (newObj) => {
-//     setDataSource([...dataSource, newObj])
-//   }
-
-//   return {
-//     customDataSource: dataSource,
-//     removeDataSource,
-//     addDataSource,
-//   }
-// }
-
-// const useDateMonth = (preview) => {
-//   const { paymentData, form } = usePaymentContext()
-//   const serviceId = Form.useWatch('monthService', form) || paymentData?.service
-//   const { service } = useService({ serviceId, skip: preview })
-//   return getFormattedDate(
-//     paymentData?.monthService?.date ||
-//       paymentData?.invoiceCreationDate ||
-//       service?.date
-//   )
-// }
-
-// // TODO: add ts
-// const usePrevPlacingPrice = ({
-//   companyId,
-//   company,
-//   service,
+// export function usePrevPayment({
+//   paymentId,
+//   skip,
 // }: {
-//   companyId: string
-//   company: any
-//   service: any
-// }) => {
-//   // TODO: fix. Still prev invoice is wrong
-//   // issue in invoice creation date, but we needs acutally prev invoice
-//   const { month, year } = getPreviousMonth(service?.date)
-//   const { lastInvoice } = useCompanyInvoice({ companyId, month, year })
+//   paymentId: string
+//   skip?: boolean
+// }): { payment?: IPayment } {
+//   const { payment } = usePayment({ paymentId, skip })
 
-//   const previousPlacingPrice = lastInvoice?.invoice?.find(
-//     (item) => item.type === ServiceType.Placing
-//   )?.sum
-//   const defaultPlacingPrice =
-//     company?.totalArea &&
-//     company?.pricePerMeter &&
-//     company?.totalArea * company?.pricePerMeter
+//   const { data } = useGetAllPaymentsQuery({
+//     companyIds: [(payment?.company as IExtendedRealestate)?._id.toString()],
+//     domainIds: [(payment?.domain as IDomain)?._id.toString()],
+//     year: new Date(payment?.invoiceCreationDate).getFullYear(),
+//     month: new Date(payment?.invoiceCreationDate).getMonth() - 1,
+//     limit: 1,
+//   })
 
-//   return previousPlacingPrice || defaultPlacingPrice
+//   const prevPayment = data?.data?.length ? data?.data?.[0] : null
+
+//   return { payment: prevPayment }
 // }

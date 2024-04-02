@@ -1,14 +1,28 @@
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { Invoice } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable'
 import { Form } from 'antd'
+import { useEffect } from 'react'
 
 export const SumComponent: React.FC<{ record: Invoice }> = ({ record }) => {
+  const baseName = ['invoice', record.type]
   const { form } = usePaymentContext()
 
-  const amount = Form.useWatch([record.name, 'amount'], form)
-  const price = Form.useWatch([record.name, 'price'], form)
+  const lastAmount = Form.useWatch([...baseName, 'lastAmount'], form)
+  const amount = Form.useWatch([...baseName, 'amount'], form)
+  const price = Form.useWatch([...baseName, 'price'], form)
 
-  return <Form.Item name={[record.name, 'sum']}>{amount * price}грн</Form.Item>
+  const amountDiff =
+    !amount && !lastAmount ? 1 : lastAmount ? amount - lastAmount : amount
+
+  useEffect(() => {
+    form.setFieldValue([...baseName, 'sum'], amountDiff * price)
+  }, [amountDiff, price, form, record.type])
+
+  return (
+    <Form.Item name={[...baseName, 'sum']}>
+      <>{(amountDiff * price || 0).toFixed(2)} грн</>
+    </Form.Item>
+  )
 }
 
 // const getVal = (record, obj) => {

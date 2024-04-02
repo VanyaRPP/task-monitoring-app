@@ -1,93 +1,103 @@
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
+import { IPayment } from '@common/api/paymentApi/payment.api.types'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { IService } from '@common/api/serviceApi/service.api.types'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
-import Modal from '@common/components/UI/ModalWindow'
-import { ServiceType, paymentsTitle } from '@utils/constants'
-import { getName } from '@utils/helpers'
-import { Button, Form, Input, Popconfirm, Table } from 'antd'
+import { usePaymentData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/useCustomDataSource'
+import { Form, Table } from 'antd'
 import { ColumnProps } from 'antd/lib/table'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import s from '../style.module.scss'
 import { AmountComponent } from './fields/AmountComponent'
 import { NameComponent } from './fields/NameComponent'
 import { PriceComponent } from './fields/PriceComponent'
 import { SumComponent } from './fields/SumComponent'
-import { usePaymentData } from './useCustomDataSource'
 
 export interface Invoice {
-  name: string
-  title?: JSX.Element
-  editable?: boolean
-  data: {
-    amount?: number
-    price?: number
-    sum?: number
-  }
+  name?: string
+  type: string
+  lastAmount?: number
+  amount?: number
+  price?: number
+  sum?: number
+  company?: IRealestate
+  payment?: IPayment
+  prevPayment?: IPayment
+  service?: IService
+  prevService?: IService
 }
 
-function PaymentPricesTable({ edit }) {
-  const { form } = usePaymentContext()
-  const { company, service, prevService } = usePaymentData({
-    form,
-  })
+export interface PaymentPricesTableProps {
+  edit?: boolean
+}
+
+const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({ edit }) => {
+  const { form, paymentData } = usePaymentContext()
+
+  // const { service } = useService({ serviceId })
+  // const { service: prevService } = usePrevService({ serviceId })
+  // const { lastInvoice: payment } = useCompanyInvoice({ companyId })
+  // const { lastInvoice: prevPayment } = useCompanyInvoice({
+  //   companyId,
+  //   year: new Date(payment?.invoiceCreationDate).getFullYear(),
+  //   month: new Date(payment?.invoiceCreationDate).getMonth() - 1,
+  // })
+
+  const { company, service, prevService } = usePaymentData({ form })
 
   const [data, setData] = useState<Invoice[]>([])
 
-  const addDataSource = (dataSource: any) => {
-    setData([
-      ...data,
-      {
-        name:
-          'name' in dataSource
-            ? dataSource.name
-            : 'type' in dataSource
-            ? dataSource.type
-            : 'unknown',
-        editable: true,
-        data: {
-          amount: 'amount' in dataSource ? dataSource.amount : 0,
-          price: 'price' in dataSource ? dataSource.price : 0,
-        },
-      },
-    ])
-  }
-  const removeDataSource = (name: string) => {
+  // const addDataSource = (invoice: Invoice) => {
+  //   setData([...data, { ...invoice, company, service, prevService }])
+  // }
+  // const removeDataSource = (name: string) => {
+  //   setData(data.filter((invoice) => invoice.name !== name))
+  // }
+
+  const invoices = Form.useWatch('invoice', form)
+
+  useEffect(() => {
     setData(
-      data.filter(({ name }) => name.toLowerCase() !== name.toLowerCase())
+      Object.entries(invoices || {}).map((entry: [string, any]) => ({
+        type: entry[0],
+        ...entry[1],
+        company,
+        service,
+        prevService,
+      }))
     )
-  }
+  }, [invoices, setData])
 
   useEffect(() => {
-    // TODO: prepare and update all math-based-data here
-    setData([
-      {
-        name: 'maintenancePrice',
-        title: <>Обслуговування</>,
-        editable: true,
-        data: {
-          amount: 1231,
-          price: 10,
-        },
-      },
-      {
-        name: 'placingPrice',
-        title: <>Розміщення</>,
-        data: {
-          amount: 11,
-          price: 50,
-        },
-      },
-    ])
-  }, [setData, company, service, prevService])
-
-  useEffect(() => {
-    data.forEach((record) => {
-      const keys = Object.keys(record.data)
-      keys.forEach((key) =>
-        form.setFieldValue([record.name, key], record.data[key])
+    if (paymentData) {
+      setData(
+        paymentData?.invoice?.map((invoice) => ({
+          ...invoice,
+          name: invoice.name || invoice.type,
+          company,
+          service,
+          prevService,
+        })) || []
       )
-    })
-  }, [data, form])
+    } else {
+      // TODO: prepare base data template for NEW payments
+    }
+  }, [paymentData, setData])
 
+  return (
+    <>
+      <Table
+        rowKey="type"
+        columns={getDefaultColumns({ edit })}
+        dataSource={data}
+        pagination={false}
+        className={s.table}
+      />
+      {/* {edit && <AddCustomDataSource addDataSource={addDataSource} />} */}
+    </>
+  )
+}
+
+function getDefaultColumns({ edit }): ColumnProps<Invoice>[] {
   const columns: ColumnProps<Invoice>[] = [
     {
       title: '№',
@@ -123,81 +133,24 @@ function PaymentPricesTable({ edit }) {
     },
   ]
 
-  if (edit) {
-    columns.push({
-      render: (_, record) => (
-        <Popconfirm
-          title={`Ви впевнені що хочете видалити ${
-            getName(record.name, paymentsTitle) || record.name
-          }?`}
-          onConfirm={() => removeDataSource(record.name)}
-          cancelText="Відміна"
-        >
-          <MinusCircleOutlined className={s.icon} />
-        </Popconfirm>
-      ),
-      width: 80,
-    })
-  }
+  // if (edit) {
+  //   columns.push({
+  //     render: (_, record) => (
+  //       <Popconfirm
+  //         title={`Ви впевнені що хочете видалити ${
+  //           getName(record.name, paymentsTitle) || record.name
+  //         }?`}
+  //         onConfirm={() => removeDataSource(record.name)}
+  //         cancelText="Відміна"
+  //       >
+  //         <MinusCircleOutlined className={s.icon} />
+  //       </Popconfirm>
+  //     ),
+  //     width: 80,
+  //   })
+  // }
 
-  return (
-    <>
-      <Table
-        rowKey="id"
-        columns={columns}
-        dataSource={data}
-        pagination={false}
-        className={s.table}
-      />
-      {edit && <AddCustomField addDataSource={addDataSource} />}
-    </>
-  )
-}
-
-function AddCustomField({ addDataSource }) {
-  const [form] = Form.useForm()
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [customFieldName, setCustomFieldName] = useState('')
-
-  const addField = () => {
-    addDataSource({
-      type: ServiceType.Custom,
-      name: customFieldName,
-      amount: 1,
-      id: 44,
-      price: 0,
-      sum: 0,
-    })
-    setIsModalOpen(false)
-    setCustomFieldName('')
-  }
-
-  return (
-    <>
-      <div className={s.popconfirm}>
-        <Button
-          icon={<PlusOutlined />}
-          onClick={() => setIsModalOpen(true)}
-          className={s.addButton}
-        >
-          Додати поле
-        </Button>
-      </div>
-      <Modal
-        title="Додати поле"
-        open={isModalOpen}
-        onOk={addField}
-        changesForm={() => form.isFieldsTouched()}
-        onCancel={() => setIsModalOpen(false)}
-      >
-        <Input
-          placeholder="Назва послуги"
-          value={customFieldName}
-          onChange={(e) => setCustomFieldName(e.target.value)}
-        />
-      </Modal>
-    </>
-  )
+  return columns
 }
 
 export default PaymentPricesTable

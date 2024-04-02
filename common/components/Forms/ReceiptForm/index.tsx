@@ -1,20 +1,11 @@
-import React, { FC, useRef } from 'react'
-import { Button, Table } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
-import s from './style.module.scss'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import { useReactToPrint } from 'react-to-print'
-import {
-  filterInvoiceObject,
-  getFormattedDate,
-  renderCurrency,
-} from '@utils/helpers'
+import PaymentPricesTable from '@common/components/Forms/AddPaymentForm/PaymentPricesTable'
 import numberToTextNumber from '@utils/numberToText'
-import useService from '@common/modules/hooks/useService'
+import { Button } from 'antd'
 import moment from 'moment'
-import { ServiceType } from '@utils/constants'
-import NameComponent from '../AddPaymentForm/PaymentPricesTable/fields/NameComponent'
-import AmountComponent from '../AddPaymentForm/PaymentPricesTable/fields/AmountComponent'
+import { FC, useRef } from 'react'
+import { useReactToPrint } from 'react-to-print'
+import s from './style.module.scss'
 
 interface Props {
   currPayment: IExtendedPayment
@@ -22,21 +13,21 @@ interface Props {
   paymentActions: { preview: boolean; edit: boolean }
 }
 
-interface DataType {
-  id: number
-  // TODO: українською? - тут щось не так.
-  Назва: string
-  Кількість: number
-  Ціна: number
-  Сума: number
-}
+// interface DataType {
+//   id: number
+//   // TODO: українською? - тут щось не так.
+//   Назва: string
+//   Кількість: number
+//   Ціна: number
+//   Сума: number
+// }
 
 const ReceiptForm: FC<Props> = ({
   currPayment,
   paymentData,
   paymentActions,
 }) => {
-  const { preview } = paymentActions
+  // const { preview } = paymentActions
   const newData = currPayment || paymentData
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
@@ -47,40 +38,40 @@ const ReceiptForm: FC<Props> = ({
       newData.invoiceNumber,
   })
 
-  const { service } = useService({
-    serviceId: newData?.monthService,
-    skip: paymentActions?.preview,
-  })
+  // const { service } = useService({
+  //   serviceId: newData?.monthService,
+  //   skip: paymentActions?.preview,
+  // })
 
-  const dataToMap = preview
-    ? paymentData?.invoice
-    : filterInvoiceObject(newData)
+  // const dataToMap = preview
+  //   ? paymentData?.invoice
+  //   : filterInvoiceObject(newData)
 
-  const dataSourcePreview: DataType[] = dataToMap
-    ?.filter((item) =>
-      item.type == ServiceType.Inflicion
-        ? paymentData?.company?.inflicion || !paymentData
-        : true
-    )
-    .map((item, index) => {
-      const itemName =
-        item?.type === ServiceType.Custom ? item?.name : item?.type
-      const isWaterPart = itemName === 'waterPart'
+  // const dataSourcePreview: DataType[] = dataToMap
+  //   ?.filter((item) =>
+  //     item.type == ServiceType.Inflicion
+  //       ? paymentData?.company?.inflicion || !paymentData
+  //       : true
+  //   )
+  //   .map((item, index) => {
+  //     const itemName =
+  //       item?.type === ServiceType.Custom ? item?.name : item?.type
+  //     const isWaterPart = itemName === 'waterPart'
 
-      return {
-        Кількість: isWaterPart ? (
-          <AmountComponent record={{ name: itemName }} edit={true} />
-        ) : item.lastAmount ? (
-          (item.amount - item.lastAmount)?.toFixed(2) || ''
-        ) : (
-          item.amount || ''
-        ),
-        Назва: <NameComponent record={{ name: itemName }} preview />,
-        Ціна: +item.price,
-        Сума: +item.sum,
-        id: index + 1,
-      }
-    })
+  //     return {
+  //       Кількість: isWaterPart ? (
+  //         <AmountComponent record={{ name: itemName }} edit={true} />
+  //       ) : item.lastAmount ? (
+  //         (item.amount - item.lastAmount)?.toFixed(2) || ''
+  //       ) : (
+  //         item.amount || ''
+  //       ),
+  //       Назва: <NameComponent record={{ name: itemName }} preview />,
+  //       Ціна: +item.price,
+  //       Сума: +item.sum,
+  //       id: index + 1,
+  //     }
+  //   })
 
   return (
     <>
@@ -136,12 +127,13 @@ const ReceiptForm: FC<Props> = ({
           </div>
         </div>
         <div className={s.tableSum}>
-          <Table
+          {/* <Table
             columns={columns}
             dataSource={dataSourcePreview}
             size="small"
             pagination={false}
-          />
+          /> */}
+          <PaymentPricesTable edit={false} />
         </div>
         <div className={s.payTable}>
           <SumWithText data={newData} />
@@ -192,34 +184,34 @@ function SumWithText({ data }) {
   )
 }
 
-const columns: ColumnsType<DataType> = [
-  {
-    title: '№',
-    dataIndex: 'id',
-    width: '10%',
-  },
-  {
-    title: 'Назва',
-    dataIndex: 'Назва',
-    width: '30%',
-  },
-  {
-    title: 'Кількість',
-    dataIndex: 'Кількість',
-    width: '15%',
-  },
-  {
-    title: 'Ціна',
-    dataIndex: 'Ціна',
-    width: '15%',
-    render: renderCurrency,
-  },
-  {
-    title: 'Сума',
-    dataIndex: 'Сума',
-    width: '15%',
-    render: renderCurrency,
-  },
-]
+// const columns: ColumnsType<DataType> = [
+//   {
+//     title: '№',
+//     dataIndex: 'id',
+//     width: '10%',
+//   },
+//   {
+//     title: 'Назва',
+//     dataIndex: 'Назва',
+//     width: '30%',
+//   },
+//   {
+//     title: 'Кількість',
+//     dataIndex: 'Кількість',
+//     width: '15%',
+//   },
+//   {
+//     title: 'Ціна',
+//     dataIndex: 'Ціна',
+//     width: '15%',
+//     render: renderCurrency,
+//   },
+//   {
+//     title: 'Сума',
+//     dataIndex: 'Сума',
+//     width: '15%',
+//     render: renderCurrency,
+//   },
+// ]
 
 export default ReceiptForm
