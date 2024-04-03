@@ -1,12 +1,25 @@
 import { IDomain } from '@common/modules/models/Domain'
-import { IFilter } from '../paymentApi/payment.api.types'
 import { IStreet } from '@common/modules/models/Street'
-import mongoose from 'mongoose'
+import { IFilter } from '../paymentApi/payment.api.types'
+
+export interface IAddServiceRequest {
+  _id?: string
+  domain: string
+  street: string
+  rentPrice: number
+  date: Date
+  electricityPrice: number
+  waterPrice: number
+  waterPriceTotal: number
+  garbageCollectorPrice?: number
+  inflicionPrice?: number
+  description?: string
+}
 
 export interface IService {
-  _id: mongoose.Types.ObjectId
-  domain: IDomain
-  street: IStreet
+  _id: string
+  domain: Partial<IDomain>
+  street: Partial<IStreet>
   rentPrice: number
   date: Date
   electricityPrice: number

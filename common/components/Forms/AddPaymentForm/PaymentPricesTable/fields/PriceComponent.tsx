@@ -1,27 +1,36 @@
-import { usePaymentContext } from '@common/components/AddPaymentModal'
-import { Invoice } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable'
-import { Form, Input } from 'antd'
+import { ServiceType } from '@utils/constants'
+import { Invoice } from '..'
+import {
+  Cleaning,
+  Custom,
+  Discount,
+  Electricity,
+  GarbageCollector,
+  Inflicion,
+  Maintenance,
+  Placing,
+  Water,
+  WaterPart,
+} from './price'
 
-export const PriceComponent: React.FC<{ record: Invoice; edit?: boolean }> = ({
-  record,
-  edit,
-}) => {
-  const baseName = ['invoice', record.type]
-  const { form } = usePaymentContext()
-  const price = Form.useWatch([...baseName, 'price'], form)
+const components = {
+  [ServiceType.Cleaning]: Cleaning,
+  [ServiceType.Custom]: Custom,
+  [ServiceType.Discount]: Discount,
+  [ServiceType.Electricity]: Electricity,
+  [ServiceType.GarbageCollector]: GarbageCollector,
+  [ServiceType.Inflicion]: Inflicion,
+  [ServiceType.Maintenance]: Maintenance,
+  [ServiceType.Placing]: Placing,
+  [ServiceType.Water]: Water,
+  [ServiceType.WaterPart]: WaterPart,
+}
 
-  return (
-    <Form.Item
-      name={[...baseName, 'price']}
-      initialValue={record.price}
-      // check for possible UI BUG: `edit: false` and initial value is `undefined | null`
-      rules={[{ required: true, message: 'Required' }]}
-    >
-      {edit ? (
-        <Input type="number" />
-      ) : (
-        <>{!price || isNaN(price) ? 0 : Number(price).toFixed(2)} грн</>
-      )}
-    </Form.Item>
-  )
+export const PriceComponent: React.FC<{
+  record: Invoice
+  edit?: boolean
+}> = ({ record, edit = false }) => {
+  if (record.type in components) {
+    return components[record.type]({ record, edit })
+  }
 }

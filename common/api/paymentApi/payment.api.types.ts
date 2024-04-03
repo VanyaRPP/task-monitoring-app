@@ -1,8 +1,9 @@
-import { IDomain } from '@common/modules/models/Domain'
-import { IUser } from './../../modules/models/User'
 import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
+import { IDomain } from '@common/modules/models/Domain'
+import { IStreet } from '@common/modules/models/Street'
 import { ObjectId } from 'mongoose'
 import { IRealestate } from '../realestateApi/realestate.api.types'
+import { IUser } from './../../modules/models/User'
 
 export interface IPaymentField {
   type: string
@@ -28,7 +29,7 @@ export interface IPayment {
   type: string
   invoiceCreationDate: Date
   domain: Partial<IDomain> | string
-  street: string
+  street: Partial<IStreet> | string
   company: Partial<IRealestate> | string
   monthService: string
   description?: string
@@ -96,7 +97,7 @@ export interface IGetPaymentNumberResponse {
 }
 
 export interface IGeneratePaymentPDF {
-  payments: IExtendedPayment[],
+  payments: IExtendedPayment[]
 }
 
 export interface IGeneratePaymentPDFResponce {

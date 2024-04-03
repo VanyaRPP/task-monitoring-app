@@ -1,7 +1,6 @@
 import { Operations } from '@utils/constants'
 import { Form, FormInstance } from 'antd'
 import { FC, useEffect } from 'react'
-import s from './style.module.scss'
 
 interface Props {
   form: FormInstance<any>
@@ -20,10 +19,18 @@ const PaymentTotal: FC<Props> = ({ form }) => {
   }, [invoices, form])
 
   return (
-    <Form.Item name={Operations.Debit} initialValue={0}>
-      <div className={s.totalItem}>
-        <p>Сума: {total?.toFixed(2)} ₴</p>
-      </div>
+    <Form.Item
+      style={{
+        display: 'flex',
+        justifyContent: 'flex-end',
+        fontWeight: 'bold',
+        fontSize: 20,
+        marginTop: '1rem',
+      }}
+      name={Operations.Debit}
+      initialValue={0}
+    >
+      Сума: {total?.toFixed(2)} ₴
     </Form.Item>
   )
 }

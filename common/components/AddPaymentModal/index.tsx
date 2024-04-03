@@ -1,6 +1,11 @@
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import useCompany from '@common/modules/hooks/useCompany'
-import { Operations, ServiceType } from '@utils/constants'
+import {
+  IExtendedPayment,
+  IPayment,
+} from '@common/api/paymentApi/payment.api.types'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { IService } from '@common/api/serviceApi/service.api.types'
+import { usePaymentData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/useCustomDataSource'
+import { Operations } from '@utils/constants'
 import {
   convertToInvoicesObject,
   getPaymentProviderAndReciever,
@@ -20,13 +25,25 @@ interface Props {
   paymentActions?: { edit: boolean; preview: boolean }
 }
 
-export const PaymentContext = createContext(
-  {} as {
-    paymentData: any
-    form: FormInstance
-  }
-)
-export const usePaymentContext = () => useContext(PaymentContext)
+export interface IPaymentContext {
+  payment: IPayment
+  prevPayment: IPayment
+  service: IService
+  prevService: IService
+  company: IRealestate
+  form: FormInstance
+}
+
+export const PaymentContext = createContext<IPaymentContext>({
+  payment: null,
+  prevPayment: null,
+  service: null,
+  prevService: null,
+  company: null,
+  form: null,
+})
+export const usePaymentContext = () =>
+  useContext<IPaymentContext>(PaymentContext)
 
 const AddPaymentModal: FC<Props> = ({
   closeModal,
@@ -34,6 +51,9 @@ const AddPaymentModal: FC<Props> = ({
   paymentActions,
 }) => {
   const [form] = Form.useForm()
+
+  const { company, service, prevService, payment, prevPayment } =
+    usePaymentData({ form })
 
   // const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   // const [editPayment, { isLoading: isEditingLoading }] =
@@ -45,8 +65,8 @@ const AddPaymentModal: FC<Props> = ({
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)
   )
-  const companyId = Form.useWatch('company', form)
-  const { company } = useCompany({ companyId, skip: !companyId || preview })
+  // const companyId = Form.useWatch('company', form)
+  // const { company } = useCompany({ companyId, skip: !companyId || preview })
 
   const { provider, reciever } = getPaymentProviderAndReciever(company)
 
@@ -124,7 +144,11 @@ const AddPaymentModal: FC<Props> = ({
   return (
     <PaymentContext.Provider
       value={{
-        paymentData,
+        company,
+        service,
+        prevService,
+        payment,
+        prevPayment,
         form,
       }}
     >
@@ -178,16 +202,7 @@ function getActiveTab(paymentData, edit) {
 }
 
 function getInitialValues(paymentData) {
-  const custom = paymentData?.invoice.filter(
-    (item) => item?.type === ServiceType.Custom
-  )
-
-  const customFields = custom?.reduce((acc, item) => {
-    acc[item.name] = { price: item.price }
-    return acc
-  }, {})
-
-  const initialValues = {
+  return {
     domain: paymentData?.domain?._id,
     street: paymentData?.street?._id,
     monthService: paymentData?.monthService?._id,
@@ -199,14 +214,8 @@ function getInitialValues(paymentData) {
     invoiceNumber: paymentData?.invoiceNumber,
     invoiceCreationDate: moment(paymentData?.invoiceCreationDate),
     operation: paymentData ? paymentData.type : Operations.Credit,
-    // TODO: remove from here
-    // Invoice information should be applied here
-    // AddPaymentForm/PaymentPricesTable/index.tsx
-    ...convertToInvoicesObject(paymentData?.invoice || []),
-    ...customFields,
+    invoice: convertToInvoicesObject(paymentData?.invoice || []),
   }
-
-  return initialValues
 }
 
 export default AddPaymentModal

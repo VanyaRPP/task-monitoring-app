@@ -13,21 +13,11 @@ interface Props {
   paymentActions: { preview: boolean; edit: boolean }
 }
 
-// interface DataType {
-//   id: number
-//   // TODO: українською? - тут щось не так.
-//   Назва: string
-//   Кількість: number
-//   Ціна: number
-//   Сума: number
-// }
-
 const ReceiptForm: FC<Props> = ({
   currPayment,
   paymentData,
   paymentActions,
 }) => {
-  // const { preview } = paymentActions
   const newData = currPayment || paymentData
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
@@ -37,41 +27,6 @@ const ReceiptForm: FC<Props> = ({
       '-inv-' +
       newData.invoiceNumber,
   })
-
-  // const { service } = useService({
-  //   serviceId: newData?.monthService,
-  //   skip: paymentActions?.preview,
-  // })
-
-  // const dataToMap = preview
-  //   ? paymentData?.invoice
-  //   : filterInvoiceObject(newData)
-
-  // const dataSourcePreview: DataType[] = dataToMap
-  //   ?.filter((item) =>
-  //     item.type == ServiceType.Inflicion
-  //       ? paymentData?.company?.inflicion || !paymentData
-  //       : true
-  //   )
-  //   .map((item, index) => {
-  //     const itemName =
-  //       item?.type === ServiceType.Custom ? item?.name : item?.type
-  //     const isWaterPart = itemName === 'waterPart'
-
-  //     return {
-  //       Кількість: isWaterPart ? (
-  //         <AmountComponent record={{ name: itemName }} edit={true} />
-  //       ) : item.lastAmount ? (
-  //         (item.amount - item.lastAmount)?.toFixed(2) || ''
-  //       ) : (
-  //         item.amount || ''
-  //       ),
-  //       Назва: <NameComponent record={{ name: itemName }} preview />,
-  //       Ціна: +item.price,
-  //       Сума: +item.sum,
-  //       id: index + 1,
-  //     }
-  //   })
 
   return (
     <>
@@ -127,12 +82,6 @@ const ReceiptForm: FC<Props> = ({
           </div>
         </div>
         <div className={s.tableSum}>
-          {/* <Table
-            columns={columns}
-            dataSource={dataSourcePreview}
-            size="small"
-            pagination={false}
-          /> */}
           <PaymentPricesTable edit={false} />
         </div>
         <div className={s.payTable}>
@@ -140,7 +89,7 @@ const ReceiptForm: FC<Props> = ({
           <div className={s.payFixed}>
             Загальна сума оплати:
             <div className={s.payBoldSum}>
-              {newData?.generalSum || newData?.debit} грн
+              {(+newData?.generalSum || +newData?.debit).toFixed(2)} грн
             </div>
           </div>
 
@@ -183,35 +132,5 @@ function SumWithText({ data }) {
     )
   )
 }
-
-// const columns: ColumnsType<DataType> = [
-//   {
-//     title: '№',
-//     dataIndex: 'id',
-//     width: '10%',
-//   },
-//   {
-//     title: 'Назва',
-//     dataIndex: 'Назва',
-//     width: '30%',
-//   },
-//   {
-//     title: 'Кількість',
-//     dataIndex: 'Кількість',
-//     width: '15%',
-//   },
-//   {
-//     title: 'Ціна',
-//     dataIndex: 'Ціна',
-//     width: '15%',
-//     render: renderCurrency,
-//   },
-//   {
-//     title: 'Сума',
-//     dataIndex: 'Сума',
-//     width: '15%',
-//     render: renderCurrency,
-//   },
-// ]
 
 export default ReceiptForm

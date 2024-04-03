@@ -1,16 +1,24 @@
-import validateMiddleware from '@common/lib/validateMiddleware'
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { check, validationResult } from 'express-validator'
-import RealEstate from '@common/modules/models/RealEstate'
 import initMiddleware from '@common/lib/initMiddleware'
-import { getCurrentUser } from '@utils/getCurrentUser'
-import Payment from '@common/modules/models/Payment'
-import start, { ExtendedData } from '@pages/api/api.config'
-import { filterOptions, getDistinctCompanyAndDomain, getFilterForAddress } from '@utils/helpers'
+import validateMiddleware from '@common/lib/validateMiddleware'
 import Domain from '@common/modules/models/Domain'
+import Payment from '@common/modules/models/Payment'
+import RealEstate from '@common/modules/models/RealEstate'
+import start, { ExtendedData } from '@pages/api/api.config'
 import { quarters } from '@utils/constants'
-import { getCreditDebitPipeline, getInvoicesTotalPipeline, getTotalGeneralSumPipeline } from './pipelines'
-import {getStreetsPipeline} from "@utils/pipelines"
+import { getCurrentUser } from '@utils/getCurrentUser'
+import {
+  filterOptions,
+  getDistinctCompanyAndDomain,
+  getFilterForAddress,
+} from '@utils/helpers'
+import { getStreetsPipeline } from '@utils/pipelines'
+import { check, validationResult } from 'express-validator'
+import type { NextApiRequest, NextApiResponse } from 'next'
+import {
+  getCreditDebitPipeline,
+  getInvoicesTotalPipeline,
+  getTotalGeneralSumPipeline,
+} from './pipelines'
 
 start()
 
@@ -67,7 +75,26 @@ export default async function handler(
       try {
         const { isDomainAdmin, isUser, user, isGlobalAdmin } =
           await getCurrentUser(req, res)
-        const { streetIds, companyIds, domainIds, limit, skip, type } = req.query
+        const {
+          paymentId,
+          streetIds,
+          companyIds,
+          domainIds,
+          limit,
+          skip,
+          type,
+        } = req.query
+
+        // TODO: rebuild THIS
+        if (paymentId) {
+          const payment = await Payment.findById(paymentId)
+            .populate('company')
+            .populate('street')
+            .populate('domain')
+            .populate('monthService')
+
+          return res.status(200).json({ success: true, data: payment })
+        }
 
         const options = {} as any
         if (isDomainAdmin) {
@@ -109,17 +136,23 @@ export default async function handler(
           options.type = type
         }
 
-        const payments = await (Payment as any)
-          .find(options)
+        const payments = await Payment.find(options)
           .sort({ invoiceCreationDate: -1 })
           .skip(+skip)
           .limit(+limit)
-          .populate({ path: 'company', select: '_id companyName inflicion' })
-          .populate({ path: 'street', select: '_id address city' })
-          .populate({ path: 'domain', select: '_id name' })
-          .populate({ path: 'monthService', select: '_id date' })
+          .populate('company')
+          .populate('street')
+          .populate('domain')
+          .populate('monthService')
+        // .populate({ path: 'company', select: '_id companyName inflicion' })
+        // .populate({ path: 'street', select: '_id address city' })
+        // .populate({ path: 'domain', select: '_id name' })
+        // .populate({ path: 'monthService', select: '_id date' })
 
-        const streetsPipeline = getStreetsPipeline(isGlobalAdmin, options.domain)
+        const streetsPipeline = getStreetsPipeline(
+          isGlobalAdmin,
+          options.domain
+        )
 
         const streets = await Payment.aggregate(streetsPipeline)
         const addressFilter = getFilterForAddress(streets)
@@ -143,7 +176,11 @@ export default async function handler(
         const genralSumPipeline = getTotalGeneralSumPipeline(options)
         const totalGeneralSum = await Payment.aggregate(genralSumPipeline)
 
-        const totalPaymentsData = [...totalPayments, ...totalInvoices, ...totalGeneralSum]
+        const totalPaymentsData = [
+          ...totalPayments,
+          ...totalInvoices,
+          ...totalGeneralSum,
+        ]
 
         return res.status(200).json({
           currentCompaniesCount: distinctCompanies.length,
