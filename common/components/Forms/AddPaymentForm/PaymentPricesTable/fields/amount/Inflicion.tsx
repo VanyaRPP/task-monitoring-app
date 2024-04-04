@@ -1,23 +1,23 @@
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { ServiceType } from '@utils/constants'
 import { Invoice } from '../..'
-import { Amount } from '../../fields/amount'
 
-const Inflicion: React.FC<{ record: Invoice; edit?: boolean }> = ({
-  record,
-  edit,
-}) => {
+const Inflicion: React.FC<{
+  record: Invoice
+  edit?: boolean
+  preview?: boolean
+}> = ({ record, edit, preview }) => {
   const { company, payment, prevPayment } = usePaymentContext()
 
-  // TODO: handle case when THIS payments if first, so `prevPayment === undefined`
-  if (company?.inflicion) {
-    const prevPlacing =
-      prevPayment?.invoice.find(
-        (invoice) => invoice.type === ServiceType.Placing
-      )?.sum || 0
-    const inflicion =
-      payment?.invoice.find((invoice) => invoice.type === ServiceType.Inflicion)
-        ?.sum - 100 || 0
+  if (company?.inflicion && payment?.invoice && prevPayment?.invoice) {
+    const prevPlacingInvoice = prevPayment.invoice.find(
+      (invoice) => invoice.type === ServiceType.Placing
+    )
+    const inflicionInvoice = payment.invoice.find(
+      (invoice) => invoice.type === ServiceType.Inflicion
+    )
+    const prevPlacing = prevPlacingInvoice?.sum || 0
+    const inflicion = inflicionInvoice?.price - 100 || 0
 
     return (
       <>
@@ -25,8 +25,6 @@ const Inflicion: React.FC<{ record: Invoice; edit?: boolean }> = ({
       </>
     )
   }
-
-  return <Amount record={record} edit={edit} />
 }
 
 export default Inflicion

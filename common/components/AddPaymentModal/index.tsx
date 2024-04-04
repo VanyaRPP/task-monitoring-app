@@ -5,15 +5,12 @@ import {
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { usePaymentData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/useCustomDataSource'
-import { Operations } from '@utils/constants'
-import {
-  convertToInvoicesObject,
-  getPaymentProviderAndReciever,
-} from '@utils/helpers'
+import { Operations, ServiceType } from '@utils/constants'
+import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { Form, Tabs, TabsProps } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
 import moment from 'moment'
-import { FC, createContext, useContext, useState } from 'react'
+import { FC, createContext, useContext, useEffect, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import Modal from '../UI/ModalWindow'
@@ -65,8 +62,6 @@ const AddPaymentModal: FC<Props> = ({
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)
   )
-  // const companyId = Form.useWatch('company', form)
-  // const { company } = useCompany({ companyId, skip: !companyId || preview })
 
   const { provider, reciever } = getPaymentProviderAndReciever(company)
 
@@ -141,6 +136,68 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
+  useEffect(() => {
+    if (payment) {
+      // console.debug('payment', payment)
+
+      const invoices = payment.invoice.map((invoice) => ({
+        ...invoice,
+        name: invoice.name || invoice.type,
+      }))
+
+      form.setFieldValue('invoice', invoices)
+    } else if (service) {
+      // console.debug('service', service)
+
+      const invoices = []
+
+      if (ServiceType.Electricity in service) {
+        invoices.push({
+          name: ServiceType.Electricity,
+          type: ServiceType.Electricity,
+          amount: 0,
+          lastAmount: 0,
+          price: service[ServiceType.Electricity],
+        })
+      }
+
+      if (ServiceType.Maintenance in service) {
+        invoices.push({
+          name: ServiceType.Maintenance,
+          type: ServiceType.Maintenance,
+          amount: 0,
+          lastAmount: 0,
+          price: service[ServiceType.Maintenance],
+        })
+      }
+
+      if (ServiceType.Water in service) {
+        invoices.push({
+          name: ServiceType.Water,
+          type: ServiceType.Water,
+          amount: 0,
+          lastAmount: 0,
+          price: service[ServiceType.Water],
+        })
+      }
+
+      if (ServiceType.Inflicion in service) {
+        invoices.push({
+          name: ServiceType.Inflicion,
+          type: ServiceType.Inflicion,
+          price: service[ServiceType.Inflicion],
+        })
+      }
+
+      form.setFieldValue('invoice', invoices)
+    } else {
+      // console.log('clear')
+
+      // just in case
+      form.setFieldsValue({ invoice: [] })
+    }
+  }, [form, payment, service])
+
   return (
     <PaymentContext.Provider
       value={{
@@ -185,6 +242,7 @@ const AddPaymentModal: FC<Props> = ({
           layout="vertical"
           className={s.Form}
         >
+          <Form.Item name="payment" noStyle />
           <Tabs
             activeKey={activeTabKey}
             items={items}
@@ -201,8 +259,10 @@ function getActiveTab(paymentData, edit) {
   return edit ? '2' : '1'
 }
 
+// TODO: check types to pass (paymentData: IPayment)
 function getInitialValues(paymentData) {
   return {
+    payment: paymentData?._id,
     domain: paymentData?.domain?._id,
     street: paymentData?.street?._id,
     monthService: paymentData?.monthService?._id,
@@ -214,7 +274,6 @@ function getInitialValues(paymentData) {
     invoiceNumber: paymentData?.invoiceNumber,
     invoiceCreationDate: moment(paymentData?.invoiceCreationDate),
     operation: paymentData ? paymentData.type : Operations.Credit,
-    invoice: convertToInvoicesObject(paymentData?.invoice || []),
   }
 }
 

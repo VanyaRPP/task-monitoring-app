@@ -1,16 +1,22 @@
 import { usePaymentContext } from '@common/components/AddPaymentModal'
+import { useEffect } from 'react'
 import { Invoice } from '../..'
-import { Price } from '../../fields/price'
+import { Price } from './'
 
-const Water: React.FC<{ record: Invoice; edit?: boolean }> = ({
-  record,
-  edit,
-}) => {
-  const { service } = usePaymentContext()
+const Water: React.FC<{
+  record: Invoice
+  edit?: boolean
+  preview?: boolean
+}> = ({ record, edit, preview }) => {
+  const { form, service } = usePaymentContext()
 
-  return (
-    <Price record={record} edit={edit} initialValue={service?.waterPrice} />
-  )
+  useEffect(() => {
+    if (!edit && service?.waterPrice) {
+      form.setFieldValue(['invoice', record.key, 'price'], service.waterPrice)
+    }
+  }, [edit, form, service])
+
+  return <Price record={record} preview={preview} />
 }
 
 export default Water

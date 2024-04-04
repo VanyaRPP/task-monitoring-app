@@ -1,12 +1,12 @@
-import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
 import { IDomain } from '@common/modules/models/Domain'
 import { IStreet } from '@common/modules/models/Street'
+import { ServiceType } from '@utils/constants'
 import { ObjectId } from 'mongoose'
 import { IRealestate } from '../realestateApi/realestate.api.types'
 import { IUser } from './../../modules/models/User'
 
 export interface IPaymentField {
-  type: string
+  type: ServiceType | string
   name?: string
   lastAmount?: number
   amount?: number
@@ -33,7 +33,6 @@ export interface IPayment {
   company: Partial<IRealestate> | string
   monthService: string
   description?: string
-  services?: IPaymentTableData[]
   invoice: IPaymentField[]
   provider: IProvider
   reciever: IReciever

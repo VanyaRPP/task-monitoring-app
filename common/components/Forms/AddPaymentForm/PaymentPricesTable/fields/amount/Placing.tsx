@@ -2,24 +2,29 @@ import { QuestionCircleOutlined } from '@ant-design/icons'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { ServiceType } from '@utils/constants'
 import { Form, Tooltip } from 'antd'
+import { useMemo } from 'react'
 import { Invoice } from '../..'
-import { Amount } from '../../fields/amount'
 
-const Placing: React.FC<{ record: Invoice; edit?: boolean }> = ({
-  record,
-  edit,
-}) => {
+const Placing: React.FC<{
+  record: Invoice
+  edit?: boolean
+  preview?: boolean
+}> = ({ record, edit, preview }) => {
   const { form, company, prevPayment } = usePaymentContext()
 
-  const inflicionName = ['invoice', ServiceType.Inflicion, 'price']
-  const inflicionPrice = Form.useWatch(inflicionName, form)
+  const invoice = Form.useWatch('invoice', form)
+  const inflicion = useMemo(() => {
+    const inflicionInvoice = invoice?.find(
+      (inv: Invoice) => inv.type === ServiceType.Inflicion
+    )
+    return inflicionInvoice?.price || 0
+  }, [invoice])
 
-  if (company?.inflicion) {
+  if (company?.inflicion && prevPayment?.invoice) {
     const prevPlacing =
-      prevPayment?.invoice?.find(
+      prevPayment.invoice?.find(
         (invoice) => invoice.type === ServiceType.Placing
       )?.sum || 0
-    const inflicion = inflicionPrice || 0
 
     return (
       <Tooltip
@@ -30,8 +35,6 @@ const Placing: React.FC<{ record: Invoice; edit?: boolean }> = ({
       </Tooltip>
     )
   }
-
-  return <Amount record={record} edit={edit} />
 }
 
 export default Placing

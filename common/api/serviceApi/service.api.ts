@@ -1,5 +1,4 @@
 import {
-  IAddServiceRequest,
   IAddServiceResponse,
   IDeleteServiceResponse,
   IGetServiceResponse,
@@ -55,7 +54,13 @@ export const serviceApi = createApi({
       },
       transformResponse: (response: IGetServiceResponse) => response.data,
     }),
-    addService: builder.mutation<IAddServiceResponse, IAddServiceRequest>({
+    addService: builder.mutation<
+      IAddServiceResponse,
+      Omit<IService, '_id' | 'domain' | 'street'> & {
+        domain: string
+        street: string
+      }
+    >({
       query(body) {
         return {
           url: `service`,
@@ -74,7 +79,13 @@ export const serviceApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Service'] : []),
     }),
-    editService: builder.mutation<IService, IAddServiceRequest>({
+    editService: builder.mutation<
+      IService,
+      Omit<IService, 'domain' | 'street'> & {
+        domain: string
+        street: string
+      }
+    >({
       query(data) {
         const { _id, ...body } = data
         return {

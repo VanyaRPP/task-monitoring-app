@@ -1,11 +1,11 @@
 import { Invoice } from '../..'
 
-const Cleaning: React.FC<{
+const Unknown: React.FC<{
   record: Invoice
   edit?: boolean
   preview?: boolean
 }> = ({ record, edit, preview }) => {
-  return <>Прибирання</>
+  return <>Unknown</>
 }
 
-export default Cleaning
+export default Unknown

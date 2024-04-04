@@ -2,20 +2,6 @@ import { IDomain } from '@common/modules/models/Domain'
 import { IStreet } from '@common/modules/models/Street'
 import { IFilter } from '../paymentApi/payment.api.types'
 
-export interface IAddServiceRequest {
-  _id?: string
-  domain: string
-  street: string
-  rentPrice: number
-  date: Date
-  electricityPrice: number
-  waterPrice: number
-  waterPriceTotal: number
-  garbageCollectorPrice?: number
-  inflicionPrice?: number
-  description?: string
-}
-
 export interface IService {
   _id: string
   domain: Partial<IDomain>

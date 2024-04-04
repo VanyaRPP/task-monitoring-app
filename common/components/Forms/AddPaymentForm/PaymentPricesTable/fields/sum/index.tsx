@@ -11,31 +11,26 @@ export { default as GarbageCollector } from './GarbageCollector'
 export { default as Inflicion } from './Inflicion'
 export { default as Maintenance } from './Maintenance'
 export { default as Placing } from './Placing'
+export { default as Unknown } from './Unknown'
 export { default as Water } from './Water'
 export { default as WaterPart } from './WaterPart'
 
-export const Sum: React.FC<{ record: Invoice }> = ({ record }) => {
+export const Sum: React.FC<{
+  record: Invoice
+}> = ({ record }) => {
   const { form } = usePaymentContext()
 
-  const lastAmountName = ['invoice', record.name, 'lastAmount']
-  const lastAmount = Form.useWatch(lastAmountName, form)
-
-  const amountName = ['invoice', record.name, 'amount']
-  const amount = Form.useWatch(amountName, form)
-
-  const priceName = ['invoice', record.name, 'price']
-  const price = Form.useWatch(priceName, form)
-
-  const amountDiff =
-    !amount && !lastAmount ? 1 : lastAmount ? amount - lastAmount : amount
+  const { lastAmount, amount, price } = record
 
   useEffect(() => {
-    form.setFieldValue(['invoice', record.name, 'sum'], amountDiff * price)
-  }, [amountDiff, price, form])
+    const quantity: number = !!amount
+      ? !!lastAmount
+        ? +amount - +lastAmount
+        : +amount
+      : 1
 
-  return (
-    <Form.Item name={['invoice', record.name, 'sum']}>
-      <>{(amountDiff * price || 0).toFixed(2)} грн</>
-    </Form.Item>
-  )
+    form.setFieldValue(['invoice', record.key, 'sum'], quantity * +price || 0)
+  }, [lastAmount, amount, price])
+
+  return <Form.Item>{(+record.sum).toFixed(2)} грн</Form.Item>
 }

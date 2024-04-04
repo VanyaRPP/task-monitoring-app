@@ -1,4 +1,3 @@
-import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { Invoice } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable'
 import { Form, Input } from 'antd'
 
@@ -15,28 +14,19 @@ export { default as WaterPart } from './WaterPart'
 
 export const Amount: React.FC<{
   record: Invoice
-  edit?: boolean
+  preview?: boolean
   last?: Boolean
-}> = ({ record, edit, last }) => {
+}> = ({ record, preview, last }) => {
   const type = !last ? 'amount' : 'lastAmount'
-  const { form } = usePaymentContext()
-  const value = Form.useWatch(['invoice', record.name, type], form)
 
   return (
     <Form.Item
-      name={['invoice', record.name, type]}
-      initialValue={
-        !!record[type] && !isNaN(record[type]) ? Number(record[type]) : 0
-      }
+      name={[record.key, type]}
       style={{ flex: 1 }}
       // check for possible UI BUG: `edit: false` and initial value is `undefined | null`
       rules={[{ required: true, message: 'Required' }]}
     >
-      {edit ? (
-        <Input type="number" />
-      ) : (
-        (!value || isNaN(value) ? 0 : Number(value)).toFixed(2)
-      )}
+      {!preview ? <Input type="number" /> : (+record[type]).toFixed(2)}
     </Form.Item>
   )
 }

@@ -1,8 +1,10 @@
 import { Invoice } from '../..'
-import { Sum } from '../../fields/sum'
+import { Sum } from './'
 
-const Discount: React.FC<{ record: Invoice }> = ({ record }) => {
+const Custom: React.FC<{
+  record: Invoice
+}> = ({ record }) => {
   return <Sum record={record} />
 }
 
-export default Discount
+export default Custom

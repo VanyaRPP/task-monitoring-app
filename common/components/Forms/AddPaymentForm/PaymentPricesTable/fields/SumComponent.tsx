@@ -1,5 +1,5 @@
 import { ServiceType } from '@utils/constants'
-import { Invoice } from '..'
+import { Invoice } from '../../PaymentPricesTable'
 import {
   Cleaning,
   Custom,
@@ -29,9 +29,8 @@ const components = {
 export const SumComponent: React.FC<{
   record: Invoice
 }> = ({ record }) => {
-  if (record.type in components) {
+  if (record && record.type in components) {
     return components[record.type]({ record })
   }
-
-  return <>0.00 грн</>
+  // return <Unknown record={record} preview={preview} />
 }

@@ -1,14 +1,15 @@
 import { Invoice } from '../..'
-import { Amount } from '../../fields/amount'
+import { Amount } from './'
 
-const Water: React.FC<{ record: Invoice; edit?: boolean }> = ({
-  record,
-  edit,
-}) => {
+const Water: React.FC<{
+  record: Invoice
+  edit?: boolean
+  preview?: boolean
+}> = ({ record, edit, preview }) => {
   return (
     <div style={{ display: 'flex', gap: 8 }}>
-      <Amount record={record} edit={edit} last />
-      <Amount record={record} edit={edit} />
+      <Amount record={record} preview={preview} last />
+      <Amount record={record} preview={preview} />
     </div>
   )
 }

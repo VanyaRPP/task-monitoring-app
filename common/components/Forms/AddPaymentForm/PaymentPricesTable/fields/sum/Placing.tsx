@@ -4,24 +4,26 @@ import { Form } from 'antd'
 import { useEffect } from 'react'
 import { Invoice } from '../..'
 
-const Placing: React.FC<{ record: Invoice }> = ({ record }) => {
+// TODO: case without inflicion
+const Placing: React.FC<{
+  record: Invoice
+}> = ({ record }) => {
   const { form } = usePaymentContext()
 
-  const priceName = ['invoice', record.name, 'price']
-  const price = Form.useWatch(priceName, form)
+  const { price, sum } = record
 
-  const inflicionName = ['invoice', ServiceType.Inflicion, 'price']
-  const inflicion = Form.useWatch(inflicionName, form)
+  const invoice = Form.useWatch('invoice', form)
 
   useEffect(() => {
-    form.setFieldValue(['invoice', record.name, 'sum'], +price + +inflicion)
-  }, [inflicion, price, form])
+    const inflicionInvoice = invoice?.find(
+      (inv: Invoice) => inv.type === ServiceType.Inflicion
+    )
+    const inflicion = inflicionInvoice?.sum || 0
 
-  return (
-    <Form.Item name={['invoice', record.name, 'sum']}>
-      <>{(+price + +inflicion || 0).toFixed(2)} грн</>
-    </Form.Item>
-  )
+    form.setFieldValue(['invoice', record.key, 'sum'], +price + +inflicion || 0)
+  }, [form, price, invoice])
+
+  return <Form.Item>{(+sum || 0).toFixed(2)} грн</Form.Item>
 }
 
 export default Placing

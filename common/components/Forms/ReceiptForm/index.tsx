@@ -82,7 +82,7 @@ const ReceiptForm: FC<Props> = ({
           </div>
         </div>
         <div className={s.tableSum}>
-          <PaymentPricesTable edit={false} />
+          <PaymentPricesTable edit={!!currPayment} preview={true} />
         </div>
         <div className={s.payTable}>
           <SumWithText data={newData} />

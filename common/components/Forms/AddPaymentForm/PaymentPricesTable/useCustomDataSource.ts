@@ -1,5 +1,11 @@
-import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
-import { IPayment } from '@common/api/paymentApi/payment.api.types'
+import {
+  useGetAllPaymentsQuery,
+  useGetPaymentQuery,
+} from '@common/api/paymentApi/payment.api'
+import {
+  IExtendedPayment,
+  IPayment,
+} from '@common/api/paymentApi/payment.api.types'
 import {
   IExtendedRealestate,
   IRealestate,
@@ -19,25 +25,19 @@ export function usePaymentData({ form }): {
   payment?: IPayment
   prevPayment?: IPayment
 } {
-  const streetId = Form.useWatch('street', form)
-  const domainId = Form.useWatch('domain', form)
+  const paymentId = Form.useWatch('payment', form)
   const companyId = Form.useWatch('company', form)
   const serviceId = Form.useWatch('monthService', form)
 
   // console.debug('usePaymentData INPUTS', {
-  //   streetId,
-  //   domainId,
+  //   paymentId,
   //   companyId,
   //   serviceId,
   // })
 
   const { company } = useCompany({ companyId })
   const { service, prevService } = usePrevService({ serviceId })
-  const { payment, prevPayment } = usePrevPayment({
-    streetId,
-    domainId,
-    companyId,
-  })
+  const { payment, prevPayment } = usePrevPayment({ paymentId })
 
   // console.debug('usePaymentData OUTPUTS', {
   //   company,
@@ -72,32 +72,20 @@ export function usePrevService({
 }
 
 export function usePrevPayment({
-  companyId,
-  domainId,
-  streetId,
+  paymentId,
   skip,
 }: {
-  companyId: string
-  domainId: string
-  streetId: string
+  paymentId: string
   skip?: boolean
 }): { payment?: IPayment; prevPayment?: IPayment } {
   // TODO: usePayment
-  const { data: currData } = useGetAllPaymentsQuery(
-    {
-      // TODO: fix getting payment for wrong company based only on domain and street
-      companyIds: [companyId],
-      streetIds: [streetId],
-      domainIds: [domainId],
-      // TODO: fix year/month query handling on API
-      // year: new Date().getFullYear(),
-      // month: new Date().getMonth() - 1,
-      limit: 1,
-    },
-    { skip }
-  )
+  const { data: currData } = useGetPaymentQuery<{
+    data: { data: IExtendedPayment; success: boolean }
+  }>(paymentId, {
+    skip,
+  })
 
-  const payment = currData?.data?.length ? currData?.data?.[0] : null
+  const payment: IPayment = currData?.data
 
   const { data: prevData } = useGetAllPaymentsQuery(
     {
@@ -105,9 +93,8 @@ export function usePrevPayment({
       companyIds: [(payment?.company as IExtendedRealestate)?._id.toString()],
       domainIds: [(payment?.domain as IDomain)?._id.toString()],
       streetIds: [(payment?.street as IStreet)?._id.toString()],
-      // TODO: fix year/month query handling on API
-      // year: new Date(payment?.invoiceCreationDate).getFullYear(),
-      // month: new Date(payment?.invoiceCreationDate).getMonth() - 1,
+      year: new Date(payment?.invoiceCreationDate).getFullYear(),
+      month: new Date(payment?.invoiceCreationDate).getMonth(),
       limit: 1,
     },
     { skip }

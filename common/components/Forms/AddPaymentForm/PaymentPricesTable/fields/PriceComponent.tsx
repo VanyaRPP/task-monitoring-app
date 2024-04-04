@@ -29,8 +29,10 @@ const components = {
 export const PriceComponent: React.FC<{
   record: Invoice
   edit?: boolean
-}> = ({ record, edit = false }) => {
-  if (record.type in components) {
-    return components[record.type]({ record, edit })
+  preview?: boolean
+}> = ({ record, edit = false, preview = false }) => {
+  if (record && record.type in components) {
+    return components[record.type]({ record, edit, preview })
   }
+  // return <Unknown record={record} edit={edit} preview={preview} />
 }

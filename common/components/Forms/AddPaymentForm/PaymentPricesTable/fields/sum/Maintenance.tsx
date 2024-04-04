@@ -1,7 +1,9 @@
 import { Invoice } from '../..'
-import { Sum } from '../../fields/sum'
+import { Sum } from './'
 
-const Maintenance: React.FC<{ record: Invoice }> = ({ record }) => {
+const Maintenance: React.FC<{
+  record: Invoice
+}> = ({ record }) => {
   return <Sum record={record} />
 }
 

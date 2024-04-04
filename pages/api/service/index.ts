@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
+import Domain from '@common/modules/models/Domain'
 import RealEstate from '@common/modules/models/RealEstate'
-import { getCurrentUser } from '@utils/getCurrentUser'
 import Service from '@common/modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
-import Domain from '@common/modules/models/Domain'
+import { getCurrentUser } from '@utils/getCurrentUser'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
 
@@ -26,15 +26,16 @@ export default async function handler(
           street: { $in: streetId },
           _id: serviceId,
           date: {
-            $gte: new Date(year, month, 1, 0, 0, 0), // first second of provided YY.MM
-            $lt: new Date(year, +month + 1, 0, 23, 59, 59, 999), // last second of provided YY.MM
+            $gte: new Date(+year, +month, 1, 0, 0, 0), // first second of provided YY.MM
+            $lt: new Date(+year, +month + 1, 0, 23, 59, 59, 999), // last second of provided YY.MM
           },
         }
 
         if (!serviceId) delete options._id
         if (!streetId) delete options.street
         if (!domainId) delete options.domain
-        if (!year || !month || isNaN(year) || isNaN(month)) delete options.date
+        if (!year || !month || isNaN(+year) || isNaN(+month))
+          delete options.date
 
         if (isGlobalAdmin) {
           const services = await Service.find(options)
