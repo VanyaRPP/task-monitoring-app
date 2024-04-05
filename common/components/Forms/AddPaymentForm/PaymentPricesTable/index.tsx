@@ -24,12 +24,10 @@ export interface PaymentPricesTableProps {
 }
 
 /**
- * @param edit describes that table is in EDITING mode (initial payment exist so no reason to collect initial data from service and company)
  * @param preview describes that table is in PREVIEW mode
  * @param loading describes that table is loading
  */
 const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
-  edit,
   preview,
   loading,
 }) => {
@@ -76,7 +74,6 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
                       ...getFieldValue(['invoice', record.name]),
                       key: record.name,
                     }}
-                    edit={edit}
                     preview={preview}
                   />
                 )}
@@ -94,7 +91,6 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
                       ...getFieldValue(['invoice', record.name]),
                       key: record.name,
                     }}
-                    edit={edit}
                     preview={preview}
                   />
                 )}
@@ -112,7 +108,6 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
                       ...getFieldValue(['invoice', record.name]),
                       key: record.name,
                     }}
-                    edit={edit}
                     preview={preview}
                   />
                 )}

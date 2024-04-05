@@ -3,9 +3,8 @@ import { Invoice } from '../..'
 
 const WaterPart: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
+}> = ({ record, preview }) => {
   const { company, service } = usePaymentContext()
 
   if (company?.waterPart && service?.waterPriceTotal) {

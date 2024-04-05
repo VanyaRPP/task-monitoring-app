@@ -7,9 +7,8 @@ import { Invoice } from '../..'
 
 const Placing: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
+}> = ({ record, preview }) => {
   const { form, company, prevPayment } = usePaymentContext()
 
   const invoice = Form.useWatch('invoice', form)

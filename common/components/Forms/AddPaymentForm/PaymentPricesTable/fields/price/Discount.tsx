@@ -5,16 +5,15 @@ import { Price } from './'
 
 const Discount: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
-  const { form, company } = usePaymentContext()
+}> = ({ record, preview }) => {
+  const { form, payment, company } = usePaymentContext()
 
   useEffect(() => {
-    if (!edit && company?.discount) {
+    if (!!payment && company?.discount) {
       form.setFieldValue(['invoice', record.key, 'price'], company.discount)
     }
-  }, [edit, form, company])
+  }, [form, payment, company])
 
   return <Price record={record} preview={preview} />
 }

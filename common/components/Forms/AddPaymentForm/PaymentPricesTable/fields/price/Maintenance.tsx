@@ -3,9 +3,8 @@ import { Price } from './'
 
 const Maintenance: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
+}> = ({ record, preview }) => {
   return <Price record={record} preview={preview} />
 }
 

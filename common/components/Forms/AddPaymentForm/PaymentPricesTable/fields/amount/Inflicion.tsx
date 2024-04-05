@@ -4,9 +4,8 @@ import { Invoice } from '../..'
 
 const Inflicion: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
+}> = ({ record, preview }) => {
   const { company, payment, prevPayment } = usePaymentContext()
 
   if (company?.inflicion && payment?.invoice && prevPayment?.invoice) {

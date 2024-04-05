@@ -6,14 +6,14 @@ import { Price } from './'
 
 const Inflicion: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
-  const { form, company, prevService, prevPayment } = usePaymentContext()
+}> = ({ record, preview }) => {
+  const { form, payment, company, prevService, prevPayment } =
+    usePaymentContext()
 
   useEffect(() => {
     if (
-      !edit &&
+      !!payment &&
       company?.inflicion &&
       prevPayment?.invoice &&
       prevService?.inflicionPrice
@@ -29,7 +29,7 @@ const Inflicion: React.FC<{
         Math.max((+prevPlacing * (+inflicion - 100)) / 100, 0)
       )
     }
-  }, [edit, form, company, prevService, prevPayment])
+  }, [form, payment, company, prevService, prevPayment])
 
   return <Price record={record} preview={preview} />
 }

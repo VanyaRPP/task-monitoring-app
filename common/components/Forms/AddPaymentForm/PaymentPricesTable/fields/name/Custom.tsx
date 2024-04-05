@@ -3,9 +3,8 @@ import { Invoice } from '../..'
 
 const Custom: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
+}> = ({ record, preview }) => {
   return (
     <Form.Item
       name={[record.key, 'name']}

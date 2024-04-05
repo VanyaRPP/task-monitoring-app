@@ -30,7 +30,7 @@ const PaymentTotal: FC<Props> = ({ form }) => {
       name={Operations.Debit}
       initialValue={0}
     >
-      Сума: {(+total)?.toFixed(2)} ₴
+      <>Сума: {(+total)?.toFixed(2)} ₴</>
     </Form.Item>
   )
 }

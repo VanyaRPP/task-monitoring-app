@@ -32,5 +32,5 @@ export const SumComponent: React.FC<{
   if (record && record.type in components) {
     return components[record.type]({ record })
   }
-  // return <Unknown record={record} preview={preview} />
+  // return <Unknown record={record} />
 }

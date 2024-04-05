@@ -1,11 +1,11 @@
+import { Form } from 'antd'
 import { Invoice } from '../..'
 
 const Unknown: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
-  return <>Unknown</>
+}> = ({ record, preview }) => {
+  return <Form.Item>Unknown</Form.Item>
 }
 
 export default Unknown

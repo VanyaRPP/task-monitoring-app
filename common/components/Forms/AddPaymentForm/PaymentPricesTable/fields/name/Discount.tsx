@@ -1,11 +1,11 @@
+import { Form } from 'antd'
 import { Invoice } from '../..'
 
 const Discount: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
-  return <>Знижка</>
+}> = ({ record, preview }) => {
+  return <Form.Item>Знижка</Form.Item>
 }
 
 export default Discount

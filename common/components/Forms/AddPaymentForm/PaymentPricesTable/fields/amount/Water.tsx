@@ -3,9 +3,8 @@ import { Amount } from './'
 
 const Water: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
+}> = ({ record, preview }) => {
   return (
     <div style={{ display: 'flex', gap: 8 }}>
       <Amount record={record} preview={preview} last />

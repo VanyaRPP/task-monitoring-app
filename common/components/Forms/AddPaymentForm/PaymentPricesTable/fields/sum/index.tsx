@@ -32,5 +32,9 @@ export const Sum: React.FC<{
     form.setFieldValue(['invoice', record.key, 'sum'], quantity * +price || 0)
   }, [lastAmount, amount, price])
 
-  return <Form.Item>{(+record.sum).toFixed(2)} грн</Form.Item>
+  return (
+    <Form.Item>
+      <>{(+record.sum).toFixed(2)} грн</>
+    </Form.Item>
+  )
 }

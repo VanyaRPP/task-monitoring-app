@@ -242,7 +242,11 @@ const AddPaymentModal: FC<Props> = ({
           layout="vertical"
           className={s.Form}
         >
-          <Form.Item name="payment" noStyle />
+          {/* TODO: prevent `Warning: [antd: Form.Item] `name` is only used for validate React element. If you are using Form.Item as layout display, please remove `name` instead.` */}
+          {/* Used to virually pass paymentId into form */}
+          {/* Without THIS `form.getFieldValue('payment')` stays `undefined` */}
+          <Form.Item name="payment" style={{ display: 'none' }} />
+
           <Tabs
             activeKey={activeTabKey}
             items={items}

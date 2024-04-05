@@ -1,11 +1,11 @@
+import { Form } from 'antd'
 import { Invoice } from '../..'
 
 const Water: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
-  return <>Водопостачання</>
+}> = ({ record, preview }) => {
+  return <Form.Item>Водопостачання</Form.Item>
 }
 
 export default Water

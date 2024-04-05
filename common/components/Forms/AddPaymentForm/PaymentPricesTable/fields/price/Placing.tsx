@@ -6,13 +6,12 @@ import { Price } from './'
 
 const Placing: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
-  const { form, company, prevPayment } = usePaymentContext()
+}> = ({ record, preview }) => {
+  const { form, payment, company, prevPayment } = usePaymentContext()
 
   useEffect(() => {
-    if (!edit && company?.inflicion && prevPayment?.invoice) {
+    if (!!payment && company?.inflicion && prevPayment?.invoice) {
       const prevPlacingInvoice = prevPayment.invoice.find(
         (invoice) => invoice.type === ServiceType.Placing
       )
@@ -20,7 +19,7 @@ const Placing: React.FC<{
 
       form.setFieldValue(['invoice', record.key, 'price'], prevPlacing)
     }
-  }, [edit, form, company, prevPayment])
+  }, [form, payment, company, prevPayment])
 
   return <Price record={record} preview={preview} />
 }

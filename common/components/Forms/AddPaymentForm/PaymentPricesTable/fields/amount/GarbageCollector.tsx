@@ -3,9 +3,8 @@ import { Invoice } from '../..'
 
 const GarbageCollector: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
+}> = ({ record, preview }) => {
   const { company, service } = usePaymentContext()
 
   if (service?.garbageCollectorPrice && company?.rentPart) {

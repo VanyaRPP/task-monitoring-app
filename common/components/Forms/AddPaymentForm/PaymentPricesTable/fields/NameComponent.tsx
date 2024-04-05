@@ -10,7 +10,7 @@ import {
   Maintenance,
   Placing,
   Water,
-  WaterPart
+  WaterPart,
 } from './name'
 
 const components = {
@@ -28,11 +28,10 @@ const components = {
 
 export const NameComponent: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit = false, preview = false }) => {
+}> = ({ record, preview = false }) => {
   if (record && record.type in components) {
-    return components[record.type]({ record, edit, preview })
+    return components[record.type]({ record, preview })
   }
-  // return <Unknown record={record} edit={edit} preview={preview} />
+  // return <Unknown record={record} preview={preview} />
 }

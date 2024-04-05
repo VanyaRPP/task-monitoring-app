@@ -5,19 +5,18 @@ import { Price } from './'
 
 const Electricity: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
-  const { form, service } = usePaymentContext()
+}> = ({ record, preview }) => {
+  const { form, payment, service } = usePaymentContext()
 
   useEffect(() => {
-    if (!edit && service?.electricityPrice) {
+    if (!!payment && service?.electricityPrice) {
       form.setFieldValue(
         ['invoice', record.key, 'price'],
         service.electricityPrice
       )
     }
-  }, [edit && form, service])
+  }, [form, payment, service])
 
   return <Price record={record} preview={preview} />
 }

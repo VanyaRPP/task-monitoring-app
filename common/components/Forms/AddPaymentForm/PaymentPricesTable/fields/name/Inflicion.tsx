@@ -1,11 +1,11 @@
+import { Form } from 'antd'
 import { Invoice } from '../..'
 
 const Inflicion: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
-  return <>Індекс інфляції</>
+}> = ({ record, preview }) => {
+  return <Form.Item>Індекс інфляції</Form.Item>
 }
 
 export default Inflicion

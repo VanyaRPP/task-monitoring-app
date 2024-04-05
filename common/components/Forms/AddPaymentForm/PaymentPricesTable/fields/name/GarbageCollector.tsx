@@ -1,11 +1,11 @@
+import { Form } from 'antd'
 import { Invoice } from '../..'
 
 const GarbageCollector: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
-  return <>Вивіз ТПВ</>
+}> = ({ record, preview }) => {
+  return <Form.Item>Вивіз ТПВ</Form.Item>
 }
 
 export default GarbageCollector

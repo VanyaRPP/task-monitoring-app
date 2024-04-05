@@ -1,11 +1,11 @@
+import { Form } from 'antd'
 import { Invoice } from '../..'
 
 const Cleaning: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
-  return <>Прибирання</>
+}> = ({ record, preview }) => {
+  return <Form.Item>Прибирання</Form.Item>
 }
 
 export default Cleaning

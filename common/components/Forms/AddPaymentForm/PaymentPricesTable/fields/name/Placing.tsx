@@ -1,11 +1,11 @@
+import { Form } from 'antd'
 import { Invoice } from '../..'
 
 const Placing: React.FC<{
   record: Invoice
-  edit?: boolean
   preview?: boolean
-}> = ({ record, edit, preview }) => {
-  return <>Розміщення</>
+}> = ({ record, preview }) => {
+  return <Form.Item>Розміщення</Form.Item>
 }
 
 export default Placing
