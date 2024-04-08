@@ -1,4 +1,8 @@
 import {
+  useAddPaymentMutation,
+  useEditPaymentMutation,
+} from '@common/api/paymentApi/payment.api'
+import {
   IExtendedPayment,
   IPayment,
 } from '@common/api/paymentApi/payment.api.types'
@@ -7,7 +11,7 @@ import { IService } from '@common/api/serviceApi/service.api.types'
 import { usePaymentData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/useCustomDataSource'
 import { Operations, ServiceType } from '@utils/constants'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
-import { Form, Tabs, TabsProps } from 'antd'
+import { Form, Tabs, TabsProps, message } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
 import moment from 'moment'
 import { FC, createContext, useContext, useEffect, useState } from 'react'
@@ -52,9 +56,9 @@ const AddPaymentModal: FC<Props> = ({
   const { company, service, prevService, payment, prevPayment } =
     usePaymentData({ form })
 
-  // const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
-  // const [editPayment, { isLoading: isEditingLoading }] =
-  //   useEditPaymentMutation()
+  const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
+  const [editPayment, { isLoading: isEditingLoading }] =
+    useEditPaymentMutation()
 
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
   const { preview, edit } = paymentActions
@@ -68,47 +72,37 @@ const AddPaymentModal: FC<Props> = ({
   const handleSubmit = async () => {
     const formData = await form.validateFields()
 
-    console.log(formData)
+    const payment = {
+      invoiceNumber: formData.invoiceNumber,
+      type: formData.operation,
+      domain: formData.domain,
+      street: formData.street,
+      company: formData.company,
+      monthService: formData.monthService,
+      invoiceCreationDate: formData.invoiceCreationDate,
+      description: formData.description || '',
+      generalSum: formData.generalSum || formData.debit,
+      provider,
+      reciever,
+      invoice: formData.debit ? formData.invoice : [],
+    }
 
-    // const types = Object.keys(formData.invoice || {})
-    // const invoices = types.map((type) => ({
-    //   type: type.startsWith(ServiceType.Custom) ? ServiceType.Custom : type,
-    //   ...formData?.invoice[type],
-    // }))
+    const response = edit
+      ? await editPayment({
+          _id: paymentData?._id,
+          ...payment,
+        })
+      : await addPayment(payment)
 
-    // const payment = {
-    //   invoiceNumber: formData.invoiceNumber,
-    //   type: formData.operation,
-    //   domain: formData.domain,
-    //   street: formData.street,
-    //   company: formData.company,
-    //   monthService: formData.monthService,
-    //   invoiceCreationDate: formData.invoiceCreationDate,
-    //   description: formData.description || '',
-    //   generalSum: formData.generalSum || formData.debit,
-    //   provider,
-    //   reciever,
-    //   invoice: formData.debit ? invoices : [],
-    // }
-
-    // console.log(payment)
-
-    // const response = edit
-    //   ? await editPayment({
-    //       _id: paymentData?._id,
-    //       ...payment,
-    //     })
-    //   : await addPayment(payment)
-
-    // if ('data' in response) {
-    //   const action = edit ? 'Збережено' : 'Додано'
-    //   form.resetFields()
-    //   message.success(action)
-    //   closeModal()
-    // } else {
-    //   const action = edit ? 'збереженні' : 'додаванні'
-    //   message.error(`Помилка при ${action} рахунку`)
-    // }
+    if ('data' in response) {
+      const action = edit ? 'Збережено' : 'Додано'
+      form.resetFields()
+      message.success(action)
+      closeModal()
+    } else {
+      const action = edit ? 'збереженні' : 'додаванні'
+      message.error(`Помилка при ${action} рахунку`)
+    }
   }
 
   const items: TabsProps['items'] = []
@@ -232,7 +226,7 @@ const AddPaymentModal: FC<Props> = ({
         }}
         okText={edit ? 'Зберегти' : !preview && 'Додати'}
         cancelText={preview ? 'Закрити' : 'Відміна'}
-        // confirmLoading={isAddingLoading || isEditingLoading}
+        confirmLoading={isAddingLoading || isEditingLoading}
         className={s.Modal}
         style={{ top: 20 }}
       >
