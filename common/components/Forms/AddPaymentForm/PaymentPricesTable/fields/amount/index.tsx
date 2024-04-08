@@ -25,6 +25,7 @@ export const Amount: React.FC<{
       style={{ flex: 1 }}
       // check for possible UI BUG: `edit: false` and initial value is `undefined | null`
       rules={[{ required: true, message: 'Required' }]}
+      noStyle={preview}
     >
       {!preview ? <Input type="number" /> : (+record[type]).toFixed(2)}
     </Form.Item>

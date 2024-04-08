@@ -5,7 +5,7 @@ const Electricity: React.FC<{
   record: Invoice
   preview?: boolean
 }> = ({ record, preview }) => {
-  return <Form.Item>Електропостачання</Form.Item>
+  return <Form.Item noStyle={preview}>Електропостачання</Form.Item>
 }
 
 export default Electricity

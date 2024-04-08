@@ -5,7 +5,7 @@ const Discount: React.FC<{
   record: Invoice
   preview?: boolean
 }> = ({ record, preview }) => {
-  return <Form.Item>Знижка</Form.Item>
+  return <Form.Item noStyle={preview}>Знижка</Form.Item>
 }
 
 export default Discount

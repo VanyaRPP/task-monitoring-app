@@ -5,7 +5,7 @@ const Cleaning: React.FC<{
   record: Invoice
   preview?: boolean
 }> = ({ record, preview }) => {
-  return <Form.Item>Прибирання</Form.Item>
+  return <Form.Item noStyle={preview}>Прибирання</Form.Item>
 }
 
 export default Cleaning

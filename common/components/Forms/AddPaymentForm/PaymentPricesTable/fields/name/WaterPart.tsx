@@ -5,7 +5,7 @@ const WaterPart: React.FC<{
   record: Invoice
   preview?: boolean
 }> = ({ record, preview }) => {
-  return <Form.Item>Частка одопостачання</Form.Item>
+  return <Form.Item noStyle={preview}>Частка одопостачання</Form.Item>
 }
 
 export default WaterPart

@@ -5,7 +5,7 @@ const Maintenance: React.FC<{
   record: Invoice
   preview?: boolean
 }> = ({ record, preview }) => {
-  return <Form.Item>Утримання</Form.Item>
+  return <Form.Item noStyle={preview}>Утримання</Form.Item>
 }
 
 export default Maintenance

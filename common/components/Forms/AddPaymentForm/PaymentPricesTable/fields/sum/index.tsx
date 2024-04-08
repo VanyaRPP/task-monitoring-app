@@ -33,7 +33,7 @@ export const Sum: React.FC<{
   }, [lastAmount, amount, price])
 
   return (
-    <Form.Item>
+    <Form.Item noStyle>
       <>{(+record.sum).toFixed(2)} грн</>
     </Form.Item>
   )
