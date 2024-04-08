@@ -60,7 +60,6 @@ const CompaniesTable: React.FC<Props> = ({
     (!domainId && !streetId && !isLoading ? 400 : 0)
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
-  console.log(domainId)
 
   return (
     <Table
