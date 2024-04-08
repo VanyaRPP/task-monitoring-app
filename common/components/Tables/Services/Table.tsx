@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, EyeOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import { Alert, Popconfirm, Table, Tooltip, message, Button } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
@@ -89,8 +89,8 @@ const ServicesTable: React.FC<Props> = ({
 
 const renderTooltip = (text: string) => {
   return (
-    <Tooltip title={text} placement="bottomRight">
-      <span>{text}</span>
+    <Tooltip title={text} placement="top">
+      <QuestionCircleOutlined />
     </Tooltip>
   )
 }
@@ -185,6 +185,8 @@ const getDefaultColumns = (
       dataIndex: 'description',
       key: 'description',
       ellipsis: true,
+      width: 100,
+      align: 'center',
       render: renderTooltip,
     },
     {
