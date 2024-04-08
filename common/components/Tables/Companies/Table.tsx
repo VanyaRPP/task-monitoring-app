@@ -1,8 +1,7 @@
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
-import { Alert, Button, Checkbox, Popconfirm, Table, Tag, message } from 'antd'
+import { DeleteOutlined, EditOutlined, QuestionCircleOutlined, } from '@ant-design/icons'
+import { Alert, Button, Checkbox, Popconfirm, Table, Tag, message, Tooltip } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
-
 import { useDeleteRealEstateMutation } from '@common/api/realestateApi/realestate.api'
 import {
   IExtendedRealestate,
@@ -61,6 +60,7 @@ const CompaniesTable: React.FC<Props> = ({
     (!domainId && !streetId && !isLoading ? 400 : 0)
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
+  console.log(domainId)
 
   return (
     <Table
@@ -96,6 +96,14 @@ const CompaniesTable: React.FC<Props> = ({
         })
       }}
     />
+  )
+}
+
+const renderTooltip = (text: string) => {
+  return (
+    <Tooltip title={text} placement="top">
+      <QuestionCircleOutlined />
+    </Tooltip>
   )
 }
 
@@ -137,7 +145,10 @@ const getDefaultColumns = ({
     {
       title: 'Опис',
       dataIndex: 'description',
-      width: 300,
+      width: 100,
+      ellipsis: true,
+      align: 'center',
+      render: renderTooltip,
     },
     // TODO: enum
     {
