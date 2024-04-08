@@ -25,6 +25,14 @@ const Placing: React.FC<{
         (invoice) => invoice.type === ServiceType.Placing
       )?.sum || 0
 
+    if (preview) {
+      return (
+        <>
+          {(+prevPlacing).toFixed(2)} + {(+inflicion).toFixed(2)}
+        </>
+      )
+    }
+
     return (
       <Tooltip
         title={`Значення попереднього місяця + індекс інфляції в цьому рахунку`}

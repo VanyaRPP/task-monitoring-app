@@ -32,7 +32,6 @@ export const paymentApi = createApi({
         domainIds?: string[]
         companyIds?: string[]
         streetIds?: string[]
-        paymentId?: string
       }
     >({
       query: ({
@@ -47,7 +46,6 @@ export const paymentApi = createApi({
         domainIds,
         companyIds,
         streetIds,
-        paymentId,
       }) => {
         return {
           url: `spacehub/payment`,
@@ -63,7 +61,6 @@ export const paymentApi = createApi({
             domainIds,
             companyIds,
             streetIds,
-            paymentId,
           },
         }
       },

@@ -6,17 +6,14 @@ const Inflicion: React.FC<{
   record: Invoice
   preview?: boolean
 }> = ({ record, preview }) => {
-  const { company, payment, prevPayment } = usePaymentContext()
+  const { company, service, prevPayment } = usePaymentContext()
 
-  if (company?.inflicion && payment?.invoice && prevPayment?.invoice) {
+  if (company?.inflicion && prevPayment?.invoice && service) {
     const prevPlacingInvoice = prevPayment.invoice.find(
       (invoice) => invoice.type === ServiceType.Placing
     )
-    const inflicionInvoice = payment.invoice.find(
-      (invoice) => invoice.type === ServiceType.Inflicion
-    )
     const prevPlacing = prevPlacingInvoice?.sum || 0
-    const inflicion = inflicionInvoice?.price - 100 || 0
+    const inflicion = service.inflicionPrice - 100 || 0
 
     return (
       <>

@@ -1,11 +1,10 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
-import { AmountComponent } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/fields/AmountComponent'
-import { NameComponent } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/fields/NameComponent'
-import { PriceComponent } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/fields/PriceComponent'
-import { SumComponent } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/fields/SumComponent'
 import { ServiceType } from '@utils/constants'
 import { Button, Form, Table } from 'antd'
-import React from 'react'
+import { AmountComponent } from './fields/AmountComponent'
+import { NameComponent } from './fields/NameComponent'
+import { PriceComponent } from './fields/PriceComponent'
+import { SumComponent } from './fields/SumComponent'
 
 export interface Invoice {
   key?: string
@@ -18,7 +17,6 @@ export interface Invoice {
 }
 
 export interface PaymentPricesTableProps {
-  edit?: boolean
   preview?: boolean
   loading?: boolean
 }

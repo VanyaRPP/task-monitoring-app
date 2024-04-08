@@ -75,26 +75,8 @@ export default async function handler(
       try {
         const { isDomainAdmin, isUser, user, isGlobalAdmin } =
           await getCurrentUser(req, res)
-        const {
-          paymentId,
-          streetIds,
-          companyIds,
-          domainIds,
-          limit,
-          skip,
-          type,
-        } = req.query
-
-        // TODO: rebuild THIS
-        if (paymentId) {
-          const payment = await Payment.findById(paymentId)
-            .populate('company')
-            .populate('street')
-            .populate('domain')
-            .populate('monthService')
-
-          return res.status(200).json({ success: true, data: payment })
-        }
+        const { streetIds, companyIds, domainIds, limit, skip, type } =
+          req.query
 
         const options = {} as any
         if (isDomainAdmin) {
@@ -144,10 +126,6 @@ export default async function handler(
           .populate('street')
           .populate('domain')
           .populate('monthService')
-        // .populate({ path: 'company', select: '_id companyName inflicion' })
-        // .populate({ path: 'street', select: '_id address city' })
-        // .populate({ path: 'domain', select: '_id name' })
-        // .populate({ path: 'monthService', select: '_id date' })
 
         const streetsPipeline = getStreetsPipeline(
           isGlobalAdmin,

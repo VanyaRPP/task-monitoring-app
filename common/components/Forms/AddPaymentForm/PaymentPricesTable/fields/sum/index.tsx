@@ -1,7 +1,7 @@
 import { usePaymentContext } from '@common/components/AddPaymentModal'
-import { Invoice } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable'
 import { Form } from 'antd'
 import { useEffect } from 'react'
+import { Invoice } from '../..'
 
 export { default as Cleaning } from './Cleaning'
 export { default as Custom } from './Custom'
@@ -23,18 +23,19 @@ export const Sum: React.FC<{
   const { lastAmount, amount, price } = record
 
   useEffect(() => {
-    const quantity: number = !!amount
-      ? !!lastAmount
-        ? +amount - +lastAmount
-        : +amount
-      : 1
+    const quantity: number =
+      'amount' in record
+        ? 'lastAmount' in record
+          ? +amount - +lastAmount
+          : +amount
+        : 1
 
     form.setFieldValue(['invoice', record.key, 'sum'], quantity * +price || 0)
   }, [lastAmount, amount, price])
 
   return (
     <Form.Item noStyle>
-      <>{(+record.sum).toFixed(2)} грн</>
+      <>{('sum' in record ? +record.sum : +record.price).toFixed(2)} грн</>
     </Form.Item>
   )
 }

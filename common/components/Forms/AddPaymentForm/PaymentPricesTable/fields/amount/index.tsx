@@ -1,5 +1,5 @@
-import { Invoice } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable'
 import { Form, Input } from 'antd'
+import { Invoice } from '../..'
 
 export { default as Cleaning } from './Cleaning'
 export { default as Custom } from './Custom'
@@ -22,10 +22,8 @@ export const Amount: React.FC<{
   return (
     <Form.Item
       name={[record.key, type]}
-      style={{ flex: 1 }}
-      // check for possible UI BUG: `edit: false` and initial value is `undefined | null`
+      style={{ flex: 1, marginBottom: preview ? 0 : 24 }}
       rules={[{ required: true, message: 'Required' }]}
-      noStyle={preview}
     >
       {!preview ? <Input type="number" /> : (+record[type]).toFixed(2)}
     </Form.Item>

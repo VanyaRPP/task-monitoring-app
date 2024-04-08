@@ -8,7 +8,7 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
-import { usePaymentData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/useCustomDataSource'
+import { usePaymentData } from '@common/modules/hooks/usePaymentData'
 import { Operations, ServiceType } from '@utils/constants'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { Form, Tabs, TabsProps, message } from 'antd'
@@ -54,7 +54,7 @@ const AddPaymentModal: FC<Props> = ({
   const [form] = Form.useForm()
 
   const { company, service, prevService, payment, prevPayment } =
-    usePaymentData({ form })
+    usePaymentData({ form, paymentData })
 
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
@@ -68,6 +68,17 @@ const AddPaymentModal: FC<Props> = ({
   )
 
   const { provider, reciever } = getPaymentProviderAndReciever(company)
+
+  const handleOk = () => {
+    form.validateFields().then((values) => {
+      if (values.operation === Operations.Credit) {
+        handleSubmit()
+      } else {
+        setCurrPayment({ ...values, provider, reciever })
+        setActiveTabKey('2')
+      }
+    })
+  }
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
@@ -131,66 +142,10 @@ const AddPaymentModal: FC<Props> = ({
   }
 
   useEffect(() => {
-    if (payment) {
-      // console.debug('payment', payment)
-
-      const invoices = payment.invoice.map((invoice) => ({
-        ...invoice,
-        name: invoice.name || invoice.type,
-      }))
-
-      form.setFieldValue('invoice', invoices)
-    } else if (service) {
-      // console.debug('service', service)
-
-      const invoices = []
-
-      if (ServiceType.Electricity in service) {
-        invoices.push({
-          name: ServiceType.Electricity,
-          type: ServiceType.Electricity,
-          amount: 0,
-          lastAmount: 0,
-          price: service[ServiceType.Electricity],
-        })
-      }
-
-      if (ServiceType.Maintenance in service) {
-        invoices.push({
-          name: ServiceType.Maintenance,
-          type: ServiceType.Maintenance,
-          amount: 0,
-          lastAmount: 0,
-          price: service[ServiceType.Maintenance],
-        })
-      }
-
-      if (ServiceType.Water in service) {
-        invoices.push({
-          name: ServiceType.Water,
-          type: ServiceType.Water,
-          amount: 0,
-          lastAmount: 0,
-          price: service[ServiceType.Water],
-        })
-      }
-
-      if (ServiceType.Inflicion in service) {
-        invoices.push({
-          name: ServiceType.Inflicion,
-          type: ServiceType.Inflicion,
-          price: service[ServiceType.Inflicion],
-        })
-      }
-
-      form.setFieldValue('invoice', invoices)
-    } else {
-      // console.log('clear')
-
-      // just in case
-      form.setFieldsValue({ invoice: [] })
-    }
-  }, [form, payment, service])
+    form.setFieldsValue({
+      invoice: getInvoices({ company, payment, prevPayment, service }),
+    })
+  }, [form, company, payment, prevPayment, service])
 
   return (
     <PaymentContext.Provider
@@ -205,20 +160,7 @@ const AddPaymentModal: FC<Props> = ({
     >
       <Modal
         title={edit ? 'Редагування рахунку' : !preview && 'Додавання рахунку'}
-        onOk={
-          activeTabKey === '1'
-            ? () => {
-                form.validateFields().then((values) => {
-                  if (values.operation === Operations.Credit) {
-                    handleSubmit()
-                  } else {
-                    setCurrPayment({ ...values, provider, reciever })
-                    setActiveTabKey('2')
-                  }
-                })
-              }
-            : handleSubmit
-        }
+        onOk={activeTabKey === '1' ? handleOk : handleSubmit}
         changesForm={() => form.isFieldsTouched()}
         onCancel={() => {
           form.resetFields()
@@ -273,6 +215,126 @@ function getInitialValues(paymentData) {
     invoiceCreationDate: moment(paymentData?.invoiceCreationDate),
     operation: paymentData ? paymentData.type : Operations.Credit,
   }
+}
+
+const getInvoices = ({ company, service, payment, prevPayment }) => {
+  if (payment) {
+    return getPaymentInvoices(payment)
+  }
+
+  if (service && company) {
+    return getCompanyAndServiceInvoices(company, prevPayment, service)
+  }
+
+  return []
+}
+
+const getPaymentInvoices = (payment) => {
+  return payment.invoice.map((invoice) => ({
+    ...invoice,
+    name: invoice.name || invoice.type,
+  }))
+}
+
+/**
+ * maybe move all calculations to components directly and leave only condition of invoices to be displayed?
+ * @example
+ * if (company?.pricePerMeter && company?.rentPart) {
+ *   invoices.push({ type: ServiceType.Maintenance })
+ * } // price, sum, etc should be calculated in individual components
+ * if (company?.discount) {
+ *   invoices.push({ type: ServiceType.Discount })
+ * } // price, sum, etc should be calculated in individual components
+ * if (ServiceType.Electricity in service) {
+ *   invoices.push({ type: ServiceType.Electricity })
+ * } // price, sum, etc should be calculated in individual components
+ */
+const getCompanyAndServiceInvoices = (company, prevPayment, service) => {
+  const invoices = []
+
+  if (company?.pricePerMeter && company?.rentPart) {
+    invoices.push({
+      type: ServiceType.Maintenance,
+      amount: company?.rentPart || 0,
+      price: company?.pricePerMeter,
+    })
+  }
+
+  if (company?.inflicion && ServiceType.Inflicion in service) {
+    const prevPlacing = prevPayment?.invoice?.find(
+      (invoice) => invoice.type === ServiceType.Placing
+    )
+    invoices.push({
+      type: ServiceType.Placing,
+      price:
+        (prevPlacing?.sum || 0) +
+        ((service[ServiceType.Inflicion] - 100) / 100) *
+          (prevPlacing?.sum || 0),
+    })
+
+    invoices.push({
+      type: ServiceType.Inflicion,
+      price:
+        ((service[ServiceType.Inflicion] - 100) / 100) *
+        (prevPlacing?.sum || 0),
+    })
+  } else {
+    const prevPlacing = prevPayment?.invoice?.find(
+      (invoice) => invoice.type === ServiceType.Placing
+    )
+    invoices.push({ type: ServiceType.Placing, price: prevPlacing?.sum || 0 })
+  }
+
+  if (ServiceType.Electricity in service) {
+    const prevElectricity = prevPayment?.invoice?.find(
+      (invoice) => invoice.type === ServiceType.Electricity
+    )
+    invoices.push({
+      type: ServiceType.Electricity,
+      amount: prevElectricity?.amount || 0,
+      lastAmount: prevElectricity?.amount || 0,
+      price: service[ServiceType.Electricity],
+    })
+  }
+
+  if (ServiceType.Water in service) {
+    if (company?.waterPart) {
+      invoices.push({
+        type: ServiceType.WaterPart,
+        price: (service[ServiceType.Water] * company?.waterPart) / 100,
+      })
+    } else {
+      const prevWater = prevPayment?.invoice?.find(
+        (invoice) => invoice.type === ServiceType.Water
+      )
+      invoices.push({
+        type: ServiceType.Water,
+        amount: prevWater?.amount || 0,
+        lastAmount: prevWater?.amount || 0,
+        price: service[ServiceType.Water],
+      })
+    }
+  }
+
+  if (ServiceType.GarbageCollector in service && company?.garbageCollector) {
+    invoices.push({
+      type: ServiceType.GarbageCollector,
+      price:
+        (service[ServiceType.GarbageCollector] *
+          company?.servicePricePerMeter) /
+        100,
+    })
+  }
+
+  if (company?.cleaning) {
+    invoices.push({ type: ServiceType.Cleaning, price: company.cleaning })
+  }
+
+  if (company?.discount) {
+    invoices.push({ type: ServiceType.Discount, price: company.discount })
+  }
+
+  return invoices
 }
 
 export default AddPaymentModal

@@ -53,7 +53,7 @@ function AddPaymentForm({ paymentActions }) {
         </>
       ) : (
         <>
-          <PaymentPricesTable preview={preview} edit={edit} />
+          <PaymentPricesTable preview={preview} />
           <PaymentTotal form={form} />
         </>
       )}
