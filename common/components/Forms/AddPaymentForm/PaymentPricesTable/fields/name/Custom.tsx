@@ -10,8 +10,9 @@ const Custom: React.FC<{
       name={[record.key, 'name']}
       // TODO: NoDuplicates rule
       rules={[{ required: true, message: 'Required' }]}
+      noStyle={preview}
     >
-      {!preview ? <Input /> : record.key}
+      {!preview ? <Input /> : record.name}
     </Form.Item>
   )
 }
