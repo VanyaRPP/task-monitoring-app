@@ -89,6 +89,7 @@ describe('RealEstate API - GET', () => {
     expect(received).toEqual(realEstates.slice(0, limit))
   })
 
+  // TODO: FIX IT
   it('request from the GlobalAdmin by domainId, streetId - show that company', async () => {
     await mockLoginAs(users.globalAdmin)
 
@@ -114,7 +115,11 @@ describe('RealEstate API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
     const received = parseReceived(response.data)
-    const expected = [realEstates[3]]
+    const expected = realEstates.filter(
+        (company) =>
+            company.domain === domains[3]._id.toString() &&
+            company.street === streets[3]._id.toString()
+        )
 
     expect(received).toEqual(expected)
   })

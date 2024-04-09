@@ -23,6 +23,22 @@ export enum AppRoutes {
 export enum Operations {
   Credit = 'credit',
   Debit = 'debit',
+  Discount = 'discount',
+  MaintenancePrice = 'maintenancePrice',
+  InflicionPrice = 'inflicionPrice',
+  WaterPart = 'waterPart',
+  ElectricityPrice = 'electricityPrice',
+  GarbageCollectorPrice = 'garbageCollectorPrice',
+  CleaningPrice = 'cleaningPrice',
+  WaterPrice = 'waterPrice',
+  Custom = 'custom',
+  PlacingPrice = 'placingPrice',
+  GeneralSum = 'generalSum'
+}
+
+export enum ColumnsRoleView {
+  GlobalAdmin = 1,
+  User = 2
 }
 
 export enum COLOR_THEME {
@@ -91,19 +107,16 @@ export const paymentsTitle = {
   placingPrice: 'Розміщення',
   inflicionPrice: 'Індекс інфляції',
   electricityPrice: 'Електропостачання',
-  publicElectricUtilityPrice: "МЗК",
   waterPrice: 'Водопостачання',
   garbageCollectorPrice: 'Вивіз ТПВ',
   waterPart: 'Нарахування водопостачання',
   discount: 'Знижка',
   cleaningPrice: 'Прибирання',
-  generalSum: 'Загальна сума',
   custom: 'Додаткові витрати',
 }
 
 export enum ServiceType {
   Electricity = 'electricityPrice',
-  ElectricUtility = 'publicElectricUtilityPrice',
   Water = 'waterPrice',
   Placing = 'placingPrice',
   Maintenance = 'maintenancePrice',
@@ -122,7 +135,7 @@ export const quarters = {
   '4': [10, 11, 12],
 }
 
-export const cascaderYears = ['2021', '2022', '2023']
+export const cascaderYears = ['2021', '2022', '2023', '2024']
 
 export const cascaderQuarters = [
   {
@@ -211,10 +224,3 @@ export const inflicionDescription = `
 Згідно з п. 13 Методики № 786 розмір орендної плати за кожний наступний місяць визначається шляхом коригування розміру місячної орендної плати за попередній місяць на індекс інфляції за поточний місяць.
 Тож для того щоб визначити розмір орендної плати за кожний наступний місяць оренди, необхідно розмір орендної плати за попередній місяць помножити на індекс інфляції за поточний місяць.
 При цьому зверніть увагу: такий механізм розрахунку застосовується незалежно від розміру індексу інфляції, тобто незалежно від того, перевищує ця величина 100 % чи ні, адже ніяких виключень та додаткових вимог з цього приводу чинне законодавство не містить.`
-
-export const publicElectricUtilityDescription = `Місця Загального Користування Електрика:
-Ця цифра включає в себе:
-Втрати трансформаторної підстанції: Втрати, пов'язані із забезпеченням вашого приміщення електроенергією та його перетворенням.
-Втрати в лініях передачі: Втрати електроенергії під час транспортування до вашого приміщення.
-Реактивна електроенергія: Енергія, яка не використовується для виробництва, але все одно втрачається під час передачі.
-Як розраховано: Дана цифра розподіляється між орендарями пропорційно займаній корисній площі.`

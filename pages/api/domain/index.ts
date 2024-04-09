@@ -5,6 +5,7 @@ import RealEstate from '@common/modules/models/RealEstate'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import start, { Data } from '@pages/api/api.config'
 import Domain from '@common/modules/models/Domain'
+import Street from '@common/modules/models/Street'
 
 start()
 
@@ -43,19 +44,28 @@ export default async function handler(
           options._id = { $in: domainsIds }
         }
 
-        const domains = await Domain.find(options)
-          .limit(+limit)
-          .populate({
-            path: 'streets',
-            select: '_id address city',
-          })
+        const domains = await Domain.find(options).limit(+limit).populate({
+          path: 'streets',
+          select: '_id address city',
+        })
         return res.status(200).json({ success: true, data: domains })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }
     case 'POST':
       try {
-        // TODO body validation
+        const { name, streets } = req.body
+
+        const existingDomain = await Domain.findOne({
+          name,
+          streets: { $all: streets }
+        })
+        if (existingDomain) {
+          return res
+            .status(400)
+            .json({ success: false, error: 'Домен з такими даними вже існує' })
+        }
+
         await Domain.create(req.body)
           .then((domain) => {
             return res.status(201).json({ success: true, data: domain })

@@ -92,6 +92,7 @@ const CompaniesTable: React.FC<Props> = ({
         setFilters({
           domain: filters?.domain,
           company: filters?.companyName,
+          address: filters?.address,
         })
       }}
     />
@@ -192,13 +193,6 @@ const getDefaultColumns = ({
       align: 'center',
       title: 'Нарахування інд. інф.',
       dataIndex: 'inflicion',
-      width: 170,
-      render: (value) => <Checkbox checked={value} disabled />,
-    },
-    {
-      align: 'center',
-      title: 'Нарахування МЗК',
-      dataIndex: 'publicElectricUtility',
       width: 170,
       render: (value) => <Checkbox checked={value} disabled />,
     },

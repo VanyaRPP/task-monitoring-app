@@ -1,11 +1,11 @@
 import {
   maintenanceWithoutInflicionDescription,
   inflicionDescription,
-  publicElectricUtilityDescription,
-  ServiceType,
 } from '@utils/constants'
 import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
-import useService, { usePreviousMonthService } from '@common/modules/hooks/useService'
+import useService, {
+  usePreviousMonthService,
+} from '@common/modules/hooks/useService'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { InflicionIndexTitle } from '@utils/inflicion'
 import { Form } from 'antd'
@@ -50,14 +50,7 @@ export function NameWaterField({ dateMonth }) {
     </span>
   )
 }
-export function PublicElectricUtilityField({ dateMonth, preview }) {
-  return (
-    <span className={s.rowText}>
-      МЗК електрика <div className={s.month}>{dateMonth}</div>
-      {!preview && <StyledTooltip title={publicElectricUtilityDescription} />}
-    </span>
-  )
-}
+
 export function NameGarbageCollectorField({ dateMonth }) {
   return (
     <span className={s.rowText}>
@@ -65,7 +58,13 @@ export function NameGarbageCollectorField({ dateMonth }) {
     </span>
   )
 }
-export function NameInflicionField({ company, preview, domain, street, service }) {
+export function NameInflicionField({
+  company,
+  preview,
+  domain,
+  street,
+  service,
+}) {
   const { form, paymentData } = usePaymentContext()
   const inflicionPrice = Form.useWatch(['inflicionPrice', 'price'], form)
   const { previousMonth } = usePreviousMonthService({
@@ -79,22 +78,24 @@ export function NameInflicionField({ company, preview, domain, street, service }
       <InflicionIndexTitle previousMonth={previousMonth} />
       {!!company?.inflicion && (
         <span className={s.rowText}>
-          {previousMonth && <>
-            {+inflicionPrice <= 0 || +previousMonth?.inflicionPrice <= 100 ? (
-              <>
-                <br />
-                <span className={s.month}>Спостерігається дефляція.</span>
-                <br />
-                <span className={s.month}>Значення незмінне</span>
-              </>
-            ) : (
-              <>
-                <br />
-                <span className={s.month}>донарахування</span>
-              </>
-            )}
-            {!preview && <StyledTooltip title={inflicionDescription} />}
-          </>}
+          {previousMonth && (
+            <>
+              {+inflicionPrice <= 0 || +previousMonth?.inflicionPrice <= 100 ? (
+                <>
+                  <br />
+                  <span className={s.month}>Спостерігається дефляція.</span>
+                  <br />
+                  <span className={s.month}>Значення незмінне</span>
+                </>
+              ) : (
+                <>
+                  <br />
+                  <span className={s.month}>донарахування</span>
+                </>
+              )}
+              {!preview && <StyledTooltip title={inflicionDescription} />}
+            </>
+          )}
         </span>
       )}
     </span>

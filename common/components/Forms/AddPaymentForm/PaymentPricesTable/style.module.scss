@@ -42,3 +42,16 @@
 .addButton {
   margin-top: 1rem;
 }
+
+.PlacingInflicion {
+  position: absolute;
+  width: 100%;
+  top: 20.5%;
+  height: 32px;
+  display: flex;
+  align-items: center;
+
+  p {
+    margin: 0;
+  }
+}

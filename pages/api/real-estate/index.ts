@@ -5,7 +5,11 @@ import RealEstate from '@common/modules/models/RealEstate'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import start, { ExtendedData } from '@pages/api/api.config'
 import Domain from '@common/modules/models/Domain'
-import { filterOptions, getDistinctCompanyAndDomain } from '@utils/helpers'
+import {
+  filterOptions,
+  getDistinctCompanyAndDomain,
+  getDistinctStreets,
+} from '@utils/helpers'
 
 start()
 
@@ -30,7 +34,6 @@ export default async function handler(
         } = req.query
 
         if (domainId) options.domain = domainId
-        if (streetId) options.street = streetId
         if (companyId) options._id = companyId
 
         if (domainIds) {
@@ -39,6 +42,9 @@ export default async function handler(
 
         if (companyIds) {
           options._id = filterOptions(options?._id, companyIds)
+        }
+        if (streetId) {
+          options.street = filterOptions(options?.street, streetId)
         }
 
         if (isDomainAdmin) {
@@ -70,7 +76,7 @@ export default async function handler(
             select: '_id name description',
           })
           .populate({ path: 'street', select: '_id address city' })
-        
+
         const { distinctDomains, distinctCompanies } =
           await getDistinctCompanyAndDomain({
             isGlobalAdmin,
@@ -78,7 +84,23 @@ export default async function handler(
             companyGroup: '_id',
             model: RealEstate,
           })
-        
+
+        const distinctStreets = await getDistinctStreets({
+          user,
+          model: RealEstate,
+        })
+
+        const filteredStreets = distinctStreets
+          // parse to regular IStreet
+          ?.map((street) => street.streetData as IStreet)
+          // remove dublicates
+          .filter(
+            (street, index, streets) =>
+              index ===
+              streets.findIndex(
+                (s) => s._id.toString() === street._id.toString()
+              )
+          )
 
         return res.status(200).json({
           domainsFilter: distinctDomains?.map(({ domainDetails }) => ({
@@ -88,6 +110,10 @@ export default async function handler(
           realEstatesFilter: distinctCompanies?.map(({ companyDetails }) => ({
             text: companyDetails.companyName,
             value: companyDetails._id,
+          })),
+          streetsFilter: filteredStreets?.map((street) => ({
+            text: `${street.address}, м.${street.city}`,
+            value: street._id,
           })),
           data: realEstates,
           success: true,
