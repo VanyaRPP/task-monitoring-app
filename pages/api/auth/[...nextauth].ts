@@ -29,6 +29,7 @@ function text({ url, host }) {
   return `Login to ${host}\n${url}\n\n`
 }
 
+
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
   secret: process.env.NEXTAUTH_SECRET,

@@ -8,7 +8,7 @@ import useService from '@common/modules/hooks/useService'
 import { NamePath } from 'antd/lib/form/interface'
 import { ServiceType } from '@utils/constants'
 import { InputNumber, Form } from 'antd'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import s from '../style.module.scss'
 import { parseStringToFloat } from '@utils/helpers'
 
@@ -19,11 +19,12 @@ export function AmountPlacingField({ record, disabled }) {
   const inflicion = paymentData?.invoice.find(
     (i) => i.type === ServiceType.Inflicion
   )
+
   return company?.inflicion || inflicion > 0 ? (
     <AmountPlacingInflicionField
       record={record}
       disabled={disabled}
-      infliction={inflicion}
+      inflicion={inflicion}
     />
   ) : (
     <AmountTotalAreaField record={record} disabled={disabled} />
@@ -45,35 +46,27 @@ export function AmountTotalAreaField({ record, disabled }) {
 
   return (
     <Form.Item name={fieldName} rules={!disabled && validateField('required')}>
-      <InputNumber disabled className={s.input} />
+      <InputNumber className={s.input} />
     </Form.Item>
   )
 }
 
-function AmountPlacingInflicionField({ record, disabled, infliction }) {
-  const { previousPlacingPrice, inflicionPrice } = useInflicionValues()
+function AmountPlacingInflicionField({ record, disabled, inflicion }) {
+  const { previousPlacingPrice, inflicionPrice } = useInflicionValues(disabled)
   const fieldName = [record.name, 'placingPrice']
-  const { paymentData, form } = usePaymentContext()
-  const placing = paymentData?.invoice?.find(
-    (i) => i?.type === ServiceType.Placing
-  )
+  const { form } = usePaymentContext()
 
   if (!disabled) {
     form.setFieldValue(fieldName, `${previousPlacingPrice}+${inflicionPrice}`) //view && add
   }
+  const previewPrice = typeof inflicion?.price === 'string' ? +inflicion?.price : inflicion?.price
+  const value = (previewPrice || +inflicionPrice || 0).toFixed(2)
 
   return (
-    <div className={s.question_mark}>
-      <Form.Item
-        name={fieldName}
-        rules={!disabled && validateField('required')}
-      >
-        {!disabled ? (
-          <InputNumber disabled className={s.input} />
-        ) : (
-          <>{`${placing?.sum}+${infliction?.sum || '0.0'}`}</>
-        )}
-      </Form.Item>
+    <div className={s.PlacingInflicion}>
+      <p>
+        {previousPlacingPrice}+{value}
+      </p>
       <StyledTooltip
         title={`Значення попереднього місяця + індекс інфляції в цьому рахунку`}
       />
@@ -81,26 +74,13 @@ function AmountPlacingInflicionField({ record, disabled, infliction }) {
   )
 }
 
-export function AmountElectricUtility() {
-  const { paymentData, form } = usePaymentContext()
-  const companyId = Form.useWatch('company', form) || paymentData?.company
-  const serviceId =
-    Form.useWatch('monthService', form) || paymentData?.monthService
-
-  const { company } = useCompany({ companyId })
-  const { service } = useService({ serviceId })
-  if (service?.publicElectricUtilityPrice && company?.rentPart) {
-    return `${company?.rentPart}% від ${service?.publicElectricUtilityPrice}`
-  }
-}
-
 export function AmountGarbageCollectorField() {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const serviceId =
     Form.useWatch('monthService', form) || paymentData?.monthService
-    const { company } = useCompany({ companyId })
-    const { service } = useService({ serviceId })
+  const { company } = useCompany({ companyId })
+  const { service } = useService({ serviceId })
   if (service?.garbageCollectorPrice && company?.rentPart) {
     return `${company?.rentPart}% від ${service?.garbageCollectorPrice}`
   }
@@ -108,12 +88,12 @@ export function AmountGarbageCollectorField() {
 
 // TODO: Could it be helper from @util ?
 // PaymentsBulk/column.config.tsx the same
-export function useInflicionValues() {
+export function useInflicionValues(isEdit?: boolean) {
   const { paymentData, form } = usePaymentContext()
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const inflicionValueFieldName = ['inflicionPrice', 'price']
 
-  // TODO: fix in preview mode
+  // TODO: fix in edit mode
   const inflicionPrice = Form.useWatch(inflicionValueFieldName, form) ?? ''
 
   const { lastInvoice } = useCompanyInvoice({ companyId })
@@ -133,7 +113,10 @@ export function useInflicionValues() {
       company?.pricePerMeter &&
       company?.totalArea * company?.pricePerMeter)
 
-  return { previousPlacingPrice: value, inflicionPrice }
+  const [defaultPrevPrice] = useState(+value - inflicionPrice)
+  const prevPrice = isEdit ? defaultPrevPrice : value
+
+  return { previousPlacingPrice: prevPrice, inflicionPrice }
 }
 
 export function AmountElectricityField({ record, disabled }) {
@@ -198,8 +181,10 @@ function FormAttributeForSingle({
 
 export function AmountWaterPartField() {
   const { paymentData, form } = usePaymentContext()
-  const serviceId =
+  const serviceIdRaw =
     Form.useWatch('monthService', form) || paymentData?.monthService
+  const serviceId =
+    typeof serviceIdRaw === 'object' ? serviceIdRaw._id : serviceIdRaw
   const companyId = Form.useWatch('company', form) || paymentData?.company
   const { company } = useCompany({ companyId })
   const { service } = useService({ serviceId })

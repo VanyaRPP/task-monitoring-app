@@ -89,7 +89,7 @@ describe('GetCompanyAreas', () => {
     const responseData = await mockRes.json.mock.calls[0][0]
     expect(mockRes.status).toHaveBeenCalledWith(400)
     expect(responseData.message).toBe(
-      'You do not have the rights to connect to this Domain.'
+      'You do not have access to use this domain'
     )
   })
 
@@ -148,9 +148,7 @@ describe('GetCompanyAreas', () => {
     await handler(mockReq, mockRes)
     const responseData = await mockRes.json.mock.calls[0][0]
     expect(mockRes.status).toHaveBeenCalledWith(400)
-    expect(responseData.message).toBe(
-      'Domain not found.'
-    )
+    expect(responseData.message).toBe('You do not have a real estate object')
   })
   it('User cant receive companies because they entered an incorrect DomainId', async () => {
     // Поверне помилку тому що queri.id від іншого домену
@@ -167,9 +165,7 @@ describe('GetCompanyAreas', () => {
     await handler(mockReq, mockRes)
     const responseData = await mockRes.json.mock.calls[0][0]
     expect(mockRes.status).toHaveBeenCalledWith(400)
-    expect(responseData.message).toBe(
-      'You do not have the rights to connect to this Domain.'
-    )
+    expect(responseData.message).toBe('You do not have access to use this domain')
   })
   it('noRoleUser cant receive company data without having a role', async () => {
     // Поверне помилку тому що юзер без ролі

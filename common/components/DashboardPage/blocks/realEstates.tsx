@@ -36,10 +36,10 @@ const RealEstateBlock: React.FC<Props> = ({
     isError,
   } = useGetAllRealEstateQuery({
     domainId,
-    streetId,
     limit: isOnPage ? 0 : 5,
     companyIds: filters?.company || undefined,
     domainIds: filters?.domain || undefined,
+    streetId: filters?.street || undefined
   })
   
   return (

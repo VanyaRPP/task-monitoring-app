@@ -32,14 +32,13 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
       description: formData.description,
       adminEmails: formData.adminEmails,
       pricePerMeter: formData.pricePerMeter,
-      publicElectricUtility: formData.publicElectricUtility,
       servicePricePerMeter: formData.servicePricePerMeter,
       totalArea: formData.totalArea,
       garbageCollector: formData.garbageCollector,
       rentPart: formData.rentPart,
       inflicion: formData.inflicion,
       waterPart: formData.waterPart,
-      discount: formData.discount * -1,
+      discount: formData.discount > 0 ? formData.discount * -1 : formData.discount,
       cleaning: formData.cleaning,
     }
 
@@ -66,6 +65,7 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
       style={{ top: 20 }}
       title={"Компанії"}
       onOk={handleSubmit}
+      changesForm={() => form.isFieldsTouched()}
       onCancel={closeModal}
       okText={currentRealEstate ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}

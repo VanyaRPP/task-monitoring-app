@@ -16,6 +16,11 @@
     display: flex;
     flex-direction: row;
   }
+  .secondBlock {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
   .filtersTagsBlock {
     display: flex;
     flex-direction: column;

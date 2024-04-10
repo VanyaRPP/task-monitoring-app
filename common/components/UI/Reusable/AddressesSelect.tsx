@@ -3,19 +3,23 @@ import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { validateField } from '@common/assets/features/validators'
 import { IDomain } from '@common/modules/models/Domain'
 import { Form, Select } from 'antd'
-import { useEffect } from 'react'
+import { CSSProperties, useEffect } from 'react'
 
 export default function AddressesSelect({
   form,
-  edit
+  edit,
+  dropdownStyle,
 }: {
-    form: any
-    edit?: boolean
+  form: any
+  edit?: boolean
+  dropdownStyle?: CSSProperties
 }) {
   const { streetId } = useCompanyPageContext()
   const domainId = Form.useWatch('domain', form)
-  const { data = [], isLoading } = useGetDomainsQuery({ domainId: domainId || undefined })
-  const domainObj = data.length > 0 ? data[0] : {} as IDomain
+  const { data = [], isLoading } = useGetDomainsQuery({
+    domainId: domainId || undefined,
+  })
+  const domainObj = data.length > 0 ? data[0] : ({} as IDomain)
   const temp = (domainObj?.streets as any[]) || [] // eslint-disable-line react-hooks/exhaustive-deps
   const singleStreet = streetId && temp.find((i) => i._id === streetId)
   const streets = singleStreet ? [singleStreet] : temp
@@ -38,7 +42,7 @@ export default function AddressesSelect({
             // @ts-ignore
             .localeCompare((optionB?.label ?? '').toLowerCase())
         }
-        filterOption={(input, option) => (option?.label ?? '').includes(input)}
+        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
         options={
           streets?.map((i) => ({
             value: i._id,
@@ -50,6 +54,7 @@ export default function AddressesSelect({
         disabled={isLoading || !domainId || streets?.length === 1 || edit}
         loading={isLoading}
         showSearch
+        dropdownStyle={dropdownStyle}
       />
     </Form.Item>
   )

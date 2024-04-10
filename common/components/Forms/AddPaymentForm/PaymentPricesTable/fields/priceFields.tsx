@@ -31,7 +31,7 @@ export function PriceMaintainceField({ record, disabled }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled className={s.input} />
+      <InputNumber className={s.input} />
     </Form.Item>
   )
 }
@@ -44,7 +44,11 @@ export function PricePlacingField({ record, disabled }) {
   return company?.inflicion ? (
     <InflicionPricePlacingField record={record} disabled={disabled} />
   ) : (
-    <DefaultPricePlacingField company={company} record={record} disabled={disabled} />
+    <DefaultPricePlacingField
+      company={company}
+      record={record}
+      disabled={disabled}
+    />
   )
 }
 
@@ -60,20 +64,21 @@ function DefaultPricePlacingField({ company, record, disabled }) {
 
   return (
     <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber disabled className={s.input} />
+      <InputNumber className={s.input} />
     </Form.Item>
   )
 }
 
-function InflicionPricePlacingField({ record, disabled }) {
+function InflicionPricePlacingField({ record, disabled: isEdit }) {
   const { form } = usePaymentContext()
   const fieldName = [record.name, 'price']
-  const { previousPlacingPrice, inflicionPrice } = useInflicionValues()
+  const { previousPlacingPrice, inflicionPrice } = useInflicionValues(isEdit)
 
   useEffect(() => {
-    if (!disabled) {
-      form.setFieldValue(fieldName, (+previousPlacingPrice + +inflicionPrice).toFixed(1))
-    }
+    form.setFieldValue(
+      fieldName,
+      (+previousPlacingPrice + +inflicionPrice).toFixed(1)
+    )
   }, [previousPlacingPrice, inflicionPrice]) //eslint-disable-line react-hooks/exhaustive-deps
 
   return (
@@ -157,36 +162,6 @@ export function PriceGarbageCollectorField({ record, disabled }) {
   )
 }
 
-export function PriceElectricUtilityField ({ record, disabled }) {
-  const { paymentData, form } = usePaymentContext()
-  const fieldName = [record.name, 'price']
-  const companyId = Form.useWatch('company', form) || paymentData?.company
-  const serviceId =
-    Form.useWatch('monthService', form) || paymentData?.monthService
-
-  const { company } = useCompany({ companyId })
-  const { service } = useService({ serviceId })
-
-  useEffect(() => {
-    if (
-      service?._id &&
-      company?.publicElectricUtility &&
-      service?.publicElectricUtilityPrice &&
-      !disabled
-    ) {
-      form.setFieldValue(
-        fieldName,
-        ((service.publicElectricUtilityPrice / 100) * company.rentPart)?.toFixed(1)
-      )
-    }
-  }, [service?._id, company?.publicElectricUtility]) //eslint-disable-line react-hooks/exhaustive-deps
-  return (
-    <Form.Item name={fieldName} rules={validateField('required')}>
-      <InputNumber className={s.input} />
-    </Form.Item>
-  )
-}
-
 export function PriceInflicionField({ record, disabled }) {
   const { paymentData, form } = usePaymentContext()
   const fieldName = [record.name, 'price']
@@ -236,7 +211,7 @@ export function PriceWaterPartField({ record, disabled }) {
     if (service?._id && company?.waterPart) {
       form.setFieldValue(
         fieldName,
-        (invoiceCoutWater(company?.waterPart, service))
+        invoiceCoutWater(company?.waterPart, service)
       )
     }
   }, [service?._id, company?._id]) //eslint-disable-line react-hooks/exhaustive-deps

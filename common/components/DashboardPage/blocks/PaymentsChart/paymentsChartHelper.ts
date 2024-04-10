@@ -17,16 +17,8 @@ export const getPaymentsChartData = (data: IExtendedPayment[]) => {
               category: paymentsTitle[itemType] ,
             }
           })
-
-        const generalSumValue = {
-          date: dateToDayYearMonthFormat(date),
-          value: +payment?.generalSum,
-          category: paymentsTitle.generalSum,
-        }
-
         return [
           ...(mappedValues),
-          ...([generalSumValue]),
         ]
       })
     : []
@@ -44,7 +36,6 @@ const filterValues = [
   ServiceType.Placing,
   ServiceType.Inflicion,
   ServiceType.Electricity,
-  ServiceType.ElectricUtility,
   ServiceType.GarbageCollector,
   ServiceType.Water,
   ServiceType.WaterPart,

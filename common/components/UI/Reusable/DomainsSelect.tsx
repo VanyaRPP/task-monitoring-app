@@ -40,7 +40,7 @@ export default function DomainsSelect({
         }
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        filterOption={(input, option) => (option?.label ?? '').includes(input)}
+        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
         options={data?.map((i) => ({ value: i._id, label: i.name }))}
         optionFilterProp="children"
         disabled={isLoading || data?.length === 1 || edit}

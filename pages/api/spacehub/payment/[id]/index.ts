@@ -5,68 +5,86 @@ import Payment from '@common/modules/models/Payment'
 import Domain from '@common/modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+
 start()
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  const { isGlobalAdmin, isDomainAdmin, user } = await getCurrentUser(req, res)
 
-  const { isAdmin, isGlobalAdmin, user } = await getCurrentUser(req, res)
-  
   switch (req.method) {
     case 'DELETE':
       try {
-        await Payment.findByIdAndRemove(req.query.id).then((payment) => {
-          if (payment) {
-            return res.status(200).json({
-              success: true,
-              data: 'Payment ' + req.query.id + ' was deleted',
-            })
-          } else {
-            return res.status(400).json({
-              success: false,
-              data: 'Payment ' + req.query.id + ' was not found',
-            })
+        if (!isDomainAdmin && !isGlobalAdmin) {
+          throw new Error('not allowed')
+        }
+
+        if (isDomainAdmin) {
+          const payment = await Payment.findById(req.query.id)
+          const domain = await Domain.findById(payment.domain)
+
+          if (!domain) {
+            throw new Error('unknown domain')
           }
-        })
+
+          if (!domain.adminEmails.includes(user.email)) {
+            throw new Error('uncontrolled domain')
+          }
+
+          const deleted = await Payment.findByIdAndRemove(req.query.id)
+
+          if (!deleted) {
+            throw new Error('failed to delete')
+          }
+
+          return res.status(200).json({ success: true, data: deleted })
+        }
+
+        if (isGlobalAdmin) {
+          const deleted = await Payment.findByIdAndRemove(req.query.id)
+
+          if (!deleted) {
+            throw new Error('failed to delete')
+          }
+
+          return res.status(200).json({ success: true, data: deleted })
+        }
+
+        throw new Error('unexpected response')
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
       }
 
     case 'PATCH':
       try {
-        if (isAdmin) {
-          if (isGlobalAdmin) {
+        if (isDomainAdmin) {
+          const domain = await Domain.findOne({
+            _id: req.body.domain,
+            adminEmails: { $in: [user.email] },
+          })
+
+          if (domain) {
             const response = await Payment.findOneAndUpdate(
               { _id: req.query.id },
               req.body,
               { new: true }
             )
             return res.status(200).json({ success: true, data: response })
-          } else {
-            const domains = await Domain.find({
-              adminEmails: { $in: [user.email] },
-            })
-            const domainIds = domains?.map((domain) => domain._id.toString())
-            const validDomain = domainIds?.includes(req.body.domain._id)
-            if (validDomain) {
-              const response = await Payment.findOneAndUpdate(
-                { _id: req.query.id },
-                req.body,
-                { new: true }
-              )
-              return res.status(200).json({ success: true, data: response })
-            }
-            return res
-              .status(400)
-              .json({ success: false, message: 'not allowed' })
           }
-        } else {
-          return res
-            .status(400)
-            .json({ success: false, message: 'not allowed' })
         }
+
+        if (isGlobalAdmin) {
+          const response = await Payment.findOneAndUpdate(
+            { _id: req.query.id },
+            req.body,
+            { new: true }
+          )
+          return res.status(200).json({ success: true, data: response })
+        }
+
+        return res.status(400).json({ success: false, message: 'not allowed' })
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })
       }
