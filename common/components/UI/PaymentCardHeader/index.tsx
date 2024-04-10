@@ -186,11 +186,11 @@ const PaymentCardHeader = ({
                     Завантажити рахунки <DownloadOutlined />
                   </Button>
                 )}
-              {isGlobalAdmin && pathname === AppRoutes.PAYMENT && (
+              {isGlobalAdmin && pathname === AppRoutes.PAYMENT &&
+              selectedPayments.length > 0 && (
                 <Button
                   type="link"
                   onClick={() => handleDeletePayments()}
-                  disabled={paymentsDeleteItems.length == 0}
                 >
                   <DeleteOutlined /> Видалити
                 </Button>
