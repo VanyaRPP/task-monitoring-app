@@ -31,7 +31,6 @@ export interface IPaymentContext {
   payment: IPayment
   prevPayment: IPayment
   service: IService
-  prevService: IService
   company: IRealestate
   form: FormInstance
 }
@@ -40,7 +39,6 @@ export const PaymentContext = createContext<IPaymentContext>({
   payment: null,
   prevPayment: null,
   service: null,
-  prevService: null,
   company: null,
   form: null,
 })
@@ -54,8 +52,10 @@ const AddPaymentModal: FC<Props> = ({
 }) => {
   const [form] = Form.useForm()
 
-  const { company, service, prevService, payment, prevPayment } =
-    usePaymentData({ form, paymentData })
+  const { company, service, payment, prevPayment } = usePaymentData({
+    form,
+    paymentData,
+  })
 
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
@@ -153,7 +153,6 @@ const AddPaymentModal: FC<Props> = ({
       value={{
         company,
         service,
-        prevService,
         payment,
         prevPayment,
         form,
