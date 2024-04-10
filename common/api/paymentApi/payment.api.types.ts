@@ -1,3 +1,4 @@
+import { IService } from '@common/api/serviceApi/service.api.types'
 import { IDomain } from '@common/modules/models/Domain'
 import { IStreet } from '@common/modules/models/Street'
 import { ServiceType } from '@utils/constants'
@@ -31,7 +32,7 @@ export interface IPayment {
   domain: Partial<IDomain> | string
   street: Partial<IStreet> | string
   company: Partial<IRealestate> | string
-  monthService: string
+  monthService: Partial<IService> | string
   description?: string
   invoice: IPaymentField[]
   provider: IProvider

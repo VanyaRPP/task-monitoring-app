@@ -19,13 +19,17 @@ export const Amount: React.FC<{
 }> = ({ record, preview, last }) => {
   const type = !last ? 'amount' : 'lastAmount'
 
+  if (preview) {
+    return <span style={{ flex: 1 }}>{(+record[type]).toFixed(2)}</span>
+  }
+
   return (
     <Form.Item
       name={[record.key, type]}
-      style={{ flex: 1, marginBottom: preview ? 0 : 24 }}
+      style={{ flex: 1 }}
       rules={[{ required: true, message: 'Required' }]}
     >
-      {!preview ? <Input type="number" /> : (+record[type]).toFixed(2)}
+      <Input type="number" />
     </Form.Item>
   )
 }

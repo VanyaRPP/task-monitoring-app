@@ -297,7 +297,7 @@ const PaymentsBlock = () => {
       router.pathname === AppRoutes.PAYMENT &&
       payments?.data && (
         <Table.Summary>
-          <Table.Summary.Row className={s.summ_item} key={'summ'}>
+          <Table.Summary.Row className={s.summ_item}>
             {columns.map((item, index) => {
               const dataindex = isGlobalAdmin
                 ? columns[index - 1]?.dataIndex
@@ -314,7 +314,7 @@ const PaymentsBlock = () => {
               )
             })}
           </Table.Summary.Row>
-          <Table.Summary.Row className={s.saldo} key={'saldo'}>
+          <Table.Summary.Row className={s.saldo}>
             {columns.slice(0, columns.length - 1).map((item, index) => {
               const dataindex = isGlobalAdmin
                 ? columns[index - 1]?.dataIndex

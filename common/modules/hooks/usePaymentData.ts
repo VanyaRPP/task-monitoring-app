@@ -30,13 +30,13 @@ export function usePaymentData({ form, paymentData }: IUsePaymentDataProps): {
 
   const { company: companyData } = useCompany({
     companyId,
-    skip: !!paymentData, // editing
+    skip: !companyId || !!paymentData,
   })
   const company = paymentData ? paymentData.company : companyData
 
   const { service: serviceData } = useService({
     serviceId,
-    skip: !!paymentData, // editing
+    skip: !serviceId || !!paymentData,
   })
   const service = paymentData ? paymentData.monthService : serviceData
 
@@ -47,7 +47,7 @@ export function usePaymentData({ form, paymentData }: IUsePaymentDataProps): {
       year: new Date(service?.date).getFullYear(),
       month: new Date(service?.date).getMonth() - 1,
     },
-    { skip: !!paymentData } // editing
+    { skip: !service }
   )
   const prevService = prevServiceData?.data?.length
     ? prevServiceData?.data?.[0]
@@ -55,17 +55,15 @@ export function usePaymentData({ form, paymentData }: IUsePaymentDataProps): {
 
   const { data: prevPaymentData } = useGetAllPaymentsQuery(
     {
-      companyIds: [
-        paymentData ? paymentData.company?._id?.toString() : companyId,
-      ],
-      domainIds: [paymentData ? paymentData.domain?._id?.toString() : domainId],
-      streetIds: [paymentData ? paymentData.street?._id?.toString() : streetId],
+      companyIds: [companyId],
+      domainIds: [domainId],
+      streetIds: [streetId],
       year: new Date(prevService?.date).getFullYear(),
       // use month index instead of number maybe? not 1-12, but 0-11
       month: new Date(prevService?.date).getMonth() + 1,
       limit: 1,
     },
-    { skip: !!paymentData } // editing
+    { skip: !prevService || !companyId || !domainId || !streetId }
   )
 
   const prevPayment = prevPaymentData?.data?.length

@@ -17,15 +17,15 @@ export const Price: React.FC<{
   record: Invoice
   preview?: boolean
 }> = ({ record, preview }) => {
+  if (preview) {
+    return <span>{(+record.price || 0).toFixed(2)}</span>
+  }
   return (
     <Form.Item
       name={[record.key, 'price']}
-      style={{ flex: 1 }}
-      // check for possible UI BUG: `edit: false` and initial value is `undefined | null`
       rules={[{ required: true, message: 'Required' }]}
-      noStyle={preview}
     >
-      {!preview ? <Input type="number" /> : (+record.price || 0).toFixed(2)}
+      <Input type="number" />
     </Form.Item>
   )
 }

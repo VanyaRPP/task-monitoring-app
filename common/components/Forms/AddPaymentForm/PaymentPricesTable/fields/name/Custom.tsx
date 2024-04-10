@@ -5,14 +5,17 @@ const Custom: React.FC<{
   record: Invoice
   preview?: boolean
 }> = ({ record, preview }) => {
+  if (preview) {
+    return <>{record.name}</>
+  }
+
   return (
     <Form.Item
       name={[record.key, 'name']}
       // TODO: NoDuplicates rule
       rules={[{ required: true, message: 'Required' }]}
-      noStyle={preview}
     >
-      {!preview ? <Input /> : record.name}
+      <Input />
     </Form.Item>
   )
 }

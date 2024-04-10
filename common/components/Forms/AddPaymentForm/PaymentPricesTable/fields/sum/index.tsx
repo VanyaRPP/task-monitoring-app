@@ -1,5 +1,4 @@
 import { usePaymentContext } from '@common/components/AddPaymentModal'
-import { Form } from 'antd'
 import { useEffect } from 'react'
 import { Invoice } from '../..'
 
@@ -33,9 +32,5 @@ export const Sum: React.FC<{
     form.setFieldValue(['invoice', record.key, 'sum'], quantity * +price || 0)
   }, [lastAmount, amount, price])
 
-  return (
-    <Form.Item noStyle>
-      <>{('sum' in record ? +record.sum : +record.price).toFixed(2)} грн</>
-    </Form.Item>
-  )
+  return <>{('sum' in record ? +record.sum : +record.price).toFixed(2)} грн</>
 }

@@ -8,6 +8,7 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import { Invoice } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable'
 import { usePaymentData } from '@common/modules/hooks/usePaymentData'
 import { Operations, ServiceType } from '@utils/constants'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
@@ -143,7 +144,7 @@ const AddPaymentModal: FC<Props> = ({
 
   useEffect(() => {
     form.setFieldsValue({
-      invoice: getInvoices({ company, payment, prevPayment, service }),
+      invoice: getInvoices({ company, service, payment, prevPayment }),
     })
   }, [form, company, payment, prevPayment, service])
 
@@ -173,16 +174,35 @@ const AddPaymentModal: FC<Props> = ({
         style={{ top: 20 }}
       >
         <Form
-          initialValues={getInitialValues(paymentData)}
+          initialValues={{
+            // TODO: fix payment typing globally to not be `domain: Partial<IDomain> | string` but `Partial<IDomain>` instead
+            // esling-disable-next-line
+            // @ts-ignore
+            domain: payment?.domain?._id,
+            // TODO: fix payment typing globally to not be `domain: Partial<IStreet> | string` but `Partial<IStreet>` instead
+            // esling-disable-next-line
+            // @ts-ignore
+            street: payment?.street?._id,
+            // TODO: fix payment typing globally to not be `domain: Partial<IService> | string` but `Partial<IService>` instead
+            // esling-disable-next-line
+            // @ts-ignore
+            monthService: payment?.monthService?._id,
+            // TODO: fix payment typing globally to not be `domain: Partial<IRealestate> | string` but `Partial<IRealestate>` instead
+            // TODO: ???rename IRealestate to ICompany maybe, what the realestate means actually???
+            // esling-disable-next-line
+            // @ts-ignore
+            company: payment?.company?._id,
+            description: payment?.description,
+            generalSum: payment?.generalSum,
+            invoiceNumber: payment?.invoiceNumber,
+            // TODO: new Date() instead of moment() - now cause "date.clone is not a function"
+            invoiceCreationDate: moment(payment?.invoiceCreationDate),
+            operation: payment?.type || Operations.Credit,
+          }}
           form={form}
           layout="vertical"
           className={s.Form}
         >
-          {/* TODO: prevent `Warning: [antd: Form.Item] `name` is only used for validate React element. If you are using Form.Item as layout display, please remove `name` instead.` */}
-          {/* Used to virually pass paymentId into form */}
-          {/* Without THIS `form.getFieldValue('payment')` stays `undefined` */}
-          <Form.Item name="payment" style={{ display: 'none' }} />
-
           <Tabs
             activeKey={activeTabKey}
             items={items}
@@ -197,24 +217,6 @@ const AddPaymentModal: FC<Props> = ({
 function getActiveTab(paymentData, edit) {
   if (paymentData?.type === Operations.Credit) return '1'
   return edit ? '2' : '1'
-}
-
-// TODO: check types to pass (paymentData: IPayment)
-function getInitialValues(paymentData) {
-  return {
-    payment: paymentData?._id,
-    domain: paymentData?.domain?._id,
-    street: paymentData?.street?._id,
-    monthService: paymentData?.monthService?._id,
-    company: paymentData?.company?._id,
-    description: paymentData?.description,
-    credit: paymentData?.credit,
-    generalSum: paymentData?.generalSum,
-    debit: paymentData?.debit,
-    invoiceNumber: paymentData?.invoiceNumber,
-    invoiceCreationDate: moment(paymentData?.invoiceCreationDate),
-    operation: paymentData ? paymentData.type : Operations.Credit,
-  }
 }
 
 const getInvoices = ({ company, service, payment, prevPayment }) => {
@@ -252,6 +254,12 @@ const getPaymentInvoices = (payment) => {
 const getCompanyAndServiceInvoices = (company, prevPayment, service) => {
   const invoices = []
 
+  const prevInvoicesCollection =
+    prevPayment?.invoice?.reduce((acc, invoice) => {
+      acc[invoice.type] = invoice
+      return acc
+    }, {} as { [key in ServiceType]: Invoice }) || {}
+
   if (company?.pricePerMeter && company?.rentPart) {
     invoices.push({
       type: ServiceType.Maintenance,
@@ -261,34 +269,26 @@ const getCompanyAndServiceInvoices = (company, prevPayment, service) => {
   }
 
   if (company?.inflicion && ServiceType.Inflicion in service) {
-    const prevPlacing = prevPayment?.invoice?.find(
-      (invoice) => invoice.type === ServiceType.Placing
-    )
+    const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
+    const inflicionIndex = service[ServiceType.Inflicion] - 100
+    const inflicionPrice = (inflicionIndex / 100) * (prevPlacing?.sum || 0)
+
     invoices.push({
       type: ServiceType.Placing,
-      price:
-        (prevPlacing?.sum || 0) +
-        ((service[ServiceType.Inflicion] - 100) / 100) *
-          (prevPlacing?.sum || 0),
+      price: (prevPlacing?.sum || 0) + inflicionPrice,
     })
 
     invoices.push({
       type: ServiceType.Inflicion,
-      price:
-        ((service[ServiceType.Inflicion] - 100) / 100) *
-        (prevPlacing?.sum || 0),
+      price: inflicionPrice,
     })
   } else {
-    const prevPlacing = prevPayment?.invoice?.find(
-      (invoice) => invoice.type === ServiceType.Placing
-    )
+    const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
     invoices.push({ type: ServiceType.Placing, price: prevPlacing?.sum || 0 })
   }
 
   if (ServiceType.Electricity in service) {
-    const prevElectricity = prevPayment?.invoice?.find(
-      (invoice) => invoice.type === ServiceType.Electricity
-    )
+    const prevElectricity = prevInvoicesCollection[ServiceType.Electricity]
     invoices.push({
       type: ServiceType.Electricity,
       amount: prevElectricity?.amount || 0,
@@ -304,9 +304,7 @@ const getCompanyAndServiceInvoices = (company, prevPayment, service) => {
         price: (service[ServiceType.Water] * company?.waterPart) / 100,
       })
     } else {
-      const prevWater = prevPayment?.invoice?.find(
-        (invoice) => invoice.type === ServiceType.Water
-      )
+      const prevWater = prevInvoicesCollection[ServiceType.Water]
       invoices.push({
         type: ServiceType.Water,
         amount: prevWater?.amount || 0,
