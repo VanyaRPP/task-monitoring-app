@@ -1,5 +1,5 @@
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { ServiceType } from '@utils/constants'
-import { Invoice } from '../../PaymentPricesTable'
 import {
   Cleaning,
   Custom,
@@ -27,7 +27,7 @@ const components = {
 }
 
 export const SumComponent: React.FC<{
-  record: Invoice
+  record: IPaymentField & { key: string }
 }> = ({ record }) => {
   if (record && record.type in components) {
     return components[record.type]({ record })

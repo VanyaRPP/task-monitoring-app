@@ -1,9 +1,8 @@
-import { Invoice } from '../..'
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { Sum } from './'
 
-// TODO: case without inflicion
 const Placing: React.FC<{
-  record: Invoice
+  record: IPaymentField & { key: string }
 }> = ({ record }) => {
   return <Sum record={record} />
 }

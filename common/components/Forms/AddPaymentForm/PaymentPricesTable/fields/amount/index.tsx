@@ -1,5 +1,5 @@
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { Form, Input } from 'antd'
-import { Invoice } from '../..'
 
 export { default as Cleaning } from './Cleaning'
 export { default as Custom } from './Custom'
@@ -13,7 +13,7 @@ export { default as Water } from './Water'
 export { default as WaterPart } from './WaterPart'
 
 export const Amount: React.FC<{
-  record: Invoice
+  record: IPaymentField & { key: string }
   preview?: boolean
   last?: Boolean
 }> = ({ record, preview, last }) => {

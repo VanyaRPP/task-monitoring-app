@@ -8,9 +8,9 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
-import { Invoice } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable'
 import { usePaymentData } from '@common/modules/hooks/usePaymentData'
-import { Operations, ServiceType } from '@utils/constants'
+import { Operations } from '@utils/constants'
+import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { Form, Tabs, TabsProps, message } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
@@ -216,122 +216,6 @@ const AddPaymentModal: FC<Props> = ({
 function getActiveTab(paymentData, edit) {
   if (paymentData?.type === Operations.Credit) return '1'
   return edit ? '2' : '1'
-}
-
-const getInvoices = ({ company, service, payment, prevPayment }) => {
-  if (payment) {
-    return getPaymentInvoices(payment)
-  }
-
-  if (service && company) {
-    return getCompanyAndServiceInvoices(company, prevPayment, service)
-  }
-
-  return []
-}
-
-const getPaymentInvoices = (payment) => {
-  return payment.invoice.map((invoice) => ({
-    ...invoice,
-    name: invoice.name || invoice.type,
-  }))
-}
-
-/**
- * maybe move all calculations to components directly and leave only condition of invoices to be displayed?
- * @example
- * if (company?.pricePerMeter && company?.rentPart) {
- *   invoices.push({ type: ServiceType.Maintenance })
- * } // price, sum, etc should be calculated in individual components
- * if (company?.discount) {
- *   invoices.push({ type: ServiceType.Discount })
- * } // price, sum, etc should be calculated in individual components
- * if (ServiceType.Electricity in service) {
- *   invoices.push({ type: ServiceType.Electricity })
- * } // price, sum, etc should be calculated in individual components
- */
-const getCompanyAndServiceInvoices = (company, prevPayment, service) => {
-  const invoices = []
-
-  const prevInvoicesCollection =
-    prevPayment?.invoice?.reduce((acc, invoice) => {
-      acc[invoice.type] = invoice
-      return acc
-    }, {} as { [key in ServiceType]: Invoice }) || {}
-
-  if (company?.pricePerMeter && company?.rentPart) {
-    invoices.push({
-      type: ServiceType.Maintenance,
-      amount: company?.rentPart || 0,
-      price: company?.pricePerMeter,
-    })
-  }
-
-  if (company?.inflicion && ServiceType.Inflicion in service) {
-    const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
-    const inflicionIndex = service[ServiceType.Inflicion] - 100
-    const inflicionPrice = (inflicionIndex / 100) * (prevPlacing?.sum || 0)
-
-    invoices.push({
-      type: ServiceType.Placing,
-      price: (prevPlacing?.sum || 0) + inflicionPrice,
-    })
-
-    invoices.push({
-      type: ServiceType.Inflicion,
-      price: inflicionPrice,
-    })
-  } else {
-    const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
-    invoices.push({ type: ServiceType.Placing, price: prevPlacing?.sum || 0 })
-  }
-
-  if (ServiceType.Electricity in service) {
-    const prevElectricity = prevInvoicesCollection[ServiceType.Electricity]
-    invoices.push({
-      type: ServiceType.Electricity,
-      amount: prevElectricity?.amount || 0,
-      lastAmount: prevElectricity?.amount || 0,
-      price: service[ServiceType.Electricity],
-    })
-  }
-
-  if (ServiceType.Water in service) {
-    if (company?.waterPart) {
-      invoices.push({
-        type: ServiceType.WaterPart,
-        price: (service[ServiceType.Water] * company?.waterPart) / 100,
-      })
-    } else {
-      const prevWater = prevInvoicesCollection[ServiceType.Water]
-      invoices.push({
-        type: ServiceType.Water,
-        amount: prevWater?.amount || 0,
-        lastAmount: prevWater?.amount || 0,
-        price: service[ServiceType.Water],
-      })
-    }
-  }
-
-  if (ServiceType.GarbageCollector in service && company?.garbageCollector) {
-    invoices.push({
-      type: ServiceType.GarbageCollector,
-      price:
-        (service[ServiceType.GarbageCollector] *
-          company?.servicePricePerMeter) /
-        100,
-    })
-  }
-
-  if (company?.cleaning) {
-    invoices.push({ type: ServiceType.Cleaning, price: company.cleaning })
-  }
-
-  if (company?.discount) {
-    invoices.push({ type: ServiceType.Discount, price: company.discount })
-  }
-
-  return invoices
 }
 
 export default AddPaymentModal

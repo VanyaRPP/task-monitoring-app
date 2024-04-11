@@ -6,16 +6,6 @@ import { NameComponent } from './fields/NameComponent'
 import { PriceComponent } from './fields/PriceComponent'
 import { SumComponent } from './fields/SumComponent'
 
-export interface Invoice {
-  key?: string
-  name?: string
-  type: ServiceType
-  lastAmount?: number
-  amount?: number
-  price: number
-  sum?: number
-}
-
 export interface PaymentPricesTableProps {
   preview?: boolean
   loading?: boolean

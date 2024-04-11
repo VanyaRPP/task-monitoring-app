@@ -1,12 +1,12 @@
 import { QuestionCircleOutlined } from '@ant-design/icons'
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { ServiceType } from '@utils/constants'
 import { Form, Tooltip } from 'antd'
 import { useMemo } from 'react'
-import { Invoice } from '../..'
 
 const Placing: React.FC<{
-  record: Invoice
+  record: IPaymentField & { key: string }
   preview?: boolean
 }> = ({ record, preview }) => {
   const { form, company, prevPayment } = usePaymentContext()
@@ -14,7 +14,7 @@ const Placing: React.FC<{
   const invoice = Form.useWatch('invoice', form)
   const inflicion = useMemo(() => {
     const inflicionInvoice = invoice?.find(
-      (inv: Invoice) => inv.type === ServiceType.Inflicion
+      (inv: IPaymentField) => inv.type === ServiceType.Inflicion
     )
     return inflicionInvoice?.price || 0
   }, [invoice])

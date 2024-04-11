@@ -1,5 +1,5 @@
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { ServiceType } from '@utils/constants'
-import { Invoice } from '..'
 import {
   Cleaning,
   Custom,
@@ -27,7 +27,7 @@ const components = {
 }
 
 export const NameComponent: React.FC<{
-  record: Invoice
+  record: IPaymentField & { key: string }
   preview?: boolean
 }> = ({ record, preview = false }) => {
   if (record && record.type in components) {

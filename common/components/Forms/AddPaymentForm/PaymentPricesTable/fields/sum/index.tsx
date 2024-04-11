@@ -1,6 +1,6 @@
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { useEffect } from 'react'
-import { Invoice } from '../..'
 
 export { default as Cleaning } from './Cleaning'
 export { default as Custom } from './Custom'
@@ -15,7 +15,7 @@ export { default as Water } from './Water'
 export { default as WaterPart } from './WaterPart'
 
 export const Sum: React.FC<{
-  record: Invoice
+  record: IPaymentField & { key: string }
 }> = ({ record }) => {
   const { form } = usePaymentContext()
 
@@ -32,5 +32,5 @@ export const Sum: React.FC<{
     form.setFieldValue(['invoice', record.key, 'sum'], quantity * +price || 0)
   }, [lastAmount, amount, price])
 
-  return <>{('sum' in record ? +record.sum : +record.price).toFixed(2)} грн</>
+  return <>{(+record.sum).toFixed(2)} грн</>
 }

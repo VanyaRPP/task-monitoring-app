@@ -1,8 +1,8 @@
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
-import { Invoice } from '../..'
 
 const WaterPart: React.FC<{
-  record: Invoice
+  record: IPaymentField & { key: string }
   preview?: boolean
 }> = ({ record, preview }) => {
   const { company, service } = usePaymentContext()

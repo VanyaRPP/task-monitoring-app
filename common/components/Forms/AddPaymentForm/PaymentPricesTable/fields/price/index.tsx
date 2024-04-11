@@ -1,5 +1,5 @@
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { Form, Input } from 'antd'
-import { Invoice } from '../..'
 
 export { default as Cleaning } from './Cleaning'
 export { default as Custom } from './Custom'
@@ -14,12 +14,13 @@ export { default as Water } from './Water'
 export { default as WaterPart } from './WaterPart'
 
 export const Price: React.FC<{
-  record: Invoice
+  record: IPaymentField & { key: string }
   preview?: boolean
 }> = ({ record, preview }) => {
   if (preview) {
     return <span>{(+record.price || 0).toFixed(2)}</span>
   }
+
   return (
     <Form.Item
       name={[record.key, 'price']}

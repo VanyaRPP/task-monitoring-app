@@ -1,9 +1,9 @@
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { ServiceType } from '@utils/constants'
-import { Invoice } from '../..'
 
 const Inflicion: React.FC<{
-  record: Invoice
+  record: IPaymentField & { key: string }
   preview?: boolean
 }> = ({ record, preview }) => {
   const { company, service, prevPayment } = usePaymentContext()

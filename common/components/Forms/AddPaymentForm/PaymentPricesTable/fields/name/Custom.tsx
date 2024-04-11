@@ -1,8 +1,8 @@
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { Form, Input } from 'antd'
-import { Invoice } from '../..'
 
 const Custom: React.FC<{
-  record: Invoice
+  record: IPaymentField & { key: string }
   preview?: boolean
 }> = ({ record, preview }) => {
   if (preview) {
