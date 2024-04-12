@@ -42,7 +42,7 @@ export default function AddressesSelect({
             // @ts-ignore
             .localeCompare((optionB?.label ?? '').toLowerCase())
         }
-        filterOption={(input, option) => (option?.label ?? '').includes(input)}
+        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
         options={
           streets?.map((i) => ({
             value: i._id,
