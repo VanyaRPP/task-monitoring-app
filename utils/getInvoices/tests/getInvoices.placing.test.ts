@@ -74,8 +74,7 @@ describe('getInvoices - PLACING', () => {
     })
 
     const targetPrice =
-      prevPayment.invoice[0].sum +
-      ((service.inflicionPrice - 100) / 100) * prevPayment.invoice[0].sum
+      (service.inflicionPrice / 100) * prevPayment.invoice[0].sum
 
     expect(invoices).toContainEqual({
       type: ServiceType.Placing,

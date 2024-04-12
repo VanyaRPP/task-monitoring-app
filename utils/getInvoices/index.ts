@@ -126,9 +126,8 @@ export const getPlacingInvoice = ({
   const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
 
   if (service && ServiceType.Inflicion in service && company?.inflicion) {
-    const inflicionIndex = service[ServiceType.Inflicion] - 100
-    const inflicionPrice = (inflicionIndex / 100) * (+prevPlacing?.sum || 0)
-    const price = (+prevPlacing?.sum || 0) + inflicionPrice
+    const inflicionIndex = service[ServiceType.Inflicion] / 100
+    const price = (+prevPlacing?.sum || 0) * inflicionIndex
 
     return {
       type: ServiceType.Placing,
