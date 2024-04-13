@@ -28,7 +28,7 @@ export default function AddressesSelect({
     if (streets?.length === 1) {
       form.setFieldValue('street', streets[0]._id)
     }
-  }, [streets?.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [streets?.length, domainId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name="street" label="Адреса" rules={validateField('required')}>
