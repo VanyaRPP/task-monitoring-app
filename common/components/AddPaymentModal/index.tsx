@@ -175,20 +175,20 @@ const AddPaymentModal: FC<Props> = ({
         <Form
           initialValues={{
             // TODO: fix payment typing globally to not be `domain: Partial<IDomain> | string` but `Partial<IDomain>` instead
-            // esling-disable-next-line
+            // eslint-disable-next-line
             // @ts-ignore
             domain: payment?.domain?._id,
             // TODO: fix payment typing globally to not be `domain: Partial<IStreet> | string` but `Partial<IStreet>` instead
-            // esling-disable-next-line
+            // eslint-disable-next-line
             // @ts-ignore
             street: payment?.street?._id,
             // TODO: fix payment typing globally to not be `domain: Partial<IService> | string` but `Partial<IService>` instead
-            // esling-disable-next-line
+            // eslint-disable-next-line
             // @ts-ignore
             monthService: payment?.monthService?._id,
             // TODO: fix payment typing globally to not be `domain: Partial<IRealestate> | string` but `Partial<IRealestate>` instead
             // TODO: ???rename IRealestate to ICompany maybe, what the realestate means actually???
-            // esling-disable-next-line
+            // eslint-disable-next-line
             // @ts-ignore
             company: payment?.company?._id,
             description: payment?.description,
