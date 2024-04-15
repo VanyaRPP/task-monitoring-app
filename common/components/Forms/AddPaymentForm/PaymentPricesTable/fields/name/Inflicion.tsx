@@ -12,35 +12,29 @@ const Inflicion: React.FC<{
 }> = ({ record, preview }) => {
   const { company, service, prevPayment } = usePaymentContext()
 
-  const label = prevPayment?.monthService ? (
-    <span className={s.Sub}>
-      {/* eslint-disable-next-line */}
-      {/* @ts-ignore */}
-      {getFormattedDate(prevPayment.monthService.date)}{' '}
-      {(service?.inflicionPrice || 100).toFixed(2)}%
-    </span>
-  ) : null
-
   return (
     <div className={s.Cell}>
       Індекс інфляції
-      {preview && label ? (
-        label
-      ) : (
-        <Tooltip className={s.Tooltip} title={inflicionDescription}>
-          {label} <QuestionCircleOutlined />
+      {company?.inflicion && prevPayment?.monthService && (
+        <Tooltip className={s.Tooltip} title={!preview && inflicionDescription}>
+          <span className={s.Sub}>
+            {/* eslint-disable-next-line */}
+            {/* @ts-ignore */}
+            {getFormattedDate(prevPayment.monthService.date)}{' '}
+            {(service?.inflicionPrice || 100).toFixed(2)}%
+          </span>
+          {!preview && <QuestionCircleOutlined />}
         </Tooltip>
       )}
-      <span className={s.Sub}>
-        {company?.inflicion &&
-          (!service || +service.inflicionPrice === 0
-            ? 'Значення незмінне'
-            : +service.inflicionPrice < 100
+      {company?.inflicion && prevPayment?.monthService && (
+        <span className={s.Sub}>
+          {+service?.inflicionPrice < 100
             ? 'Спостерігається дефляція'
-            : +service.inflicionPrice > 100
+            : +service?.inflicionPrice > 100
             ? 'Донарахування'
-            : null)}
-      </span>
+            : 'Значення незмінне'}
+        </span>
+      )}
     </div>
   )
 }
