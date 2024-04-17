@@ -1,39 +1,38 @@
-import { parseStringToFloat } from '@utils/helpers'
-import React, { FC, useEffect, useState } from 'react'
 import { Operations } from '@utils/constants'
 import { Form, FormInstance } from 'antd'
-import s from './style.module.scss'
+import { FC, useEffect } from 'react'
 
 interface Props {
   form: FormInstance<any>
 }
 
 const PaymentTotal: FC<Props> = ({ form }) => {
-  const [total, setTotal] = useState(0)
-
-  const formValues = Form.useWatch([], form)
-  const result = formValues
-    ? Object.values(formValues)
-        .filter((item) => typeof item === 'object')
-        .reduce(
-          (acc: number, val: any) => acc + +val?.sum || 0,
-          0
-        )
-    : 0
+  const invoices = Form.useWatch(['invoice'], form)
+  const total = Form.useWatch(Operations.Debit, form)
 
   useEffect(() => {
-    const r = (result as number)?.toFixed(2) || 0
-    setTotal(r as number)
-    form.setFieldValue(Operations.Debit, r)
-  }, [form, result])
+    const newTotal = Object.entries<{ sum: number }>(invoices || []).reduce(
+      (totalSum: number, invoice) => totalSum + (invoice[1].sum || 0),
+      0
+    )
+    form.setFieldValue(Operations.Debit, newTotal)
+  }, [invoices, form])
 
   return (
-    <Form.Item name={Operations.Debit}>
-      <div className={s.totalItem}>
-        <p>Сума:</p>
-        <p>{total} ₴</p>
-      </div>
+    <Form.Item
+      style={{
+        display: 'flex',
+        justifyContent: 'flex-end',
+        fontWeight: 'bold',
+        fontSize: 20,
+        marginTop: '1rem',
+      }}
+      name={Operations.Debit}
+      initialValue={0}
+    >
+      <>Сума: {(+total)?.toFixed(2)} ₴</>
     </Form.Item>
   )
 }
+
 export default PaymentTotal

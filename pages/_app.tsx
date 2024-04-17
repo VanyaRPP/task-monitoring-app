@@ -9,7 +9,10 @@ import { store } from '../common/modules/store/store'
 import NextNProgress from 'nextjs-progressbar'
 import MainLayout from '../common/components/Layouts/MainLayout'
 
-export default function MyApp({Component, pageProps: { session, ...pageProps }}) {
+export default function MyApp({
+  Component,
+  pageProps: { session, ...pageProps },
+}) {
   return (
     <SessionProvider session={session}>
       <Provider store={store}>

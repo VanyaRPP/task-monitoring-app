@@ -1,42 +1,37 @@
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { ServiceType } from '@utils/constants'
 import {
-  NameGarbageCollectorField,
-  NameElectricityField,
-  NameMaintainceField,
-  NameInflicionField,
-  NameWaterPartField,
-  NameDiscountField,
-  NamePlacingField,
-  NameWaterField,
-  NameCleaningField,
-} from './nameFields'
+  Cleaning,
+  Custom,
+  Discount,
+  Electricity,
+  GarbageCollector,
+  Inflicion,
+  Maintenance,
+  Placing,
+  Water,
+  WaterPart,
+} from './name'
 
-const fields = {
-  [ServiceType.GarbageCollector]: NameGarbageCollectorField,
-  [ServiceType.Electricity]: NameElectricityField,
-  [ServiceType.Maintenance]: NameMaintainceField,
-  [ServiceType.WaterPart]: NameWaterPartField,
-  [ServiceType.Inflicion]: NameInflicionField,
-  [ServiceType.Discount]: NameDiscountField,
-  [ServiceType.Placing]: NamePlacingField,
-  [ServiceType.Water]: NameWaterField,
-  [ServiceType.Cleaning]: NameCleaningField,
+const components = {
+  [ServiceType.Cleaning]: Cleaning,
+  [ServiceType.Custom]: Custom,
+  [ServiceType.Discount]: Discount,
+  [ServiceType.Electricity]: Electricity,
+  [ServiceType.GarbageCollector]: GarbageCollector,
+  [ServiceType.Inflicion]: Inflicion,
+  [ServiceType.Maintenance]: Maintenance,
+  [ServiceType.Placing]: Placing,
+  [ServiceType.Water]: Water,
+  [ServiceType.WaterPart]: WaterPart,
 }
 
-export default function NameComponent({ record, preview }) {
-  if (record.name in fields) {
-    const Component = fields[record.name]
-    return (
-      <Component
-        dateMonth={record.dateMonth}
-        company={record.company}
-        service={record.service}
-        // domain={paymentData?.domain}
-        // street={paymentData?.street}
-        preview={preview}
-      />
-    )
+export const NameComponent: React.FC<{
+  record: IPaymentField & { key: string }
+  preview?: boolean
+}> = ({ record, preview = false }) => {
+  if (record && record.type in components) {
+    return components[record.type]({ record, preview })
   }
-
-  return record.name
+  // return <Unknown record={record} preview={preview} />
 }

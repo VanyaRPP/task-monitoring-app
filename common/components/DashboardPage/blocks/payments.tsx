@@ -1,33 +1,38 @@
-import React, { ReactElement, useState } from 'react'
-import { Alert, message, Pagination, Popconfirm, Table } from 'antd'
-import { Button } from 'antd'
-import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
-import TableCard from '@common/components/UI/TableCard'
+import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import {
   useDeletePaymentMutation,
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
+import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import {
   dateToDefaultFormat,
   dateToMonthYear,
 } from '@common/assets/features/formatDate'
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
-import { EyeOutlined } from '@ant-design/icons'
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
+import TableCard from '@common/components/UI/TableCard'
 import {
   AppRoutes,
+  ColumnsRoleView,
   Operations,
+  PERIOD_FILTR,
   Roles,
   paymentsTitle,
-  ColumnsRoleView,
 } from '@utils/constants'
-import { Tooltip } from 'antd'
-import { useRouter } from 'next/router'
+import { renderCurrency } from '@utils/helpers'
+import {
+  Alert,
+  Button,
+  Pagination,
+  Popconfirm,
+  Table,
+  Tooltip,
+  message,
+} from 'antd'
 import cn from 'classnames'
+import { useRouter } from 'next/router'
+import { ReactElement, useState } from 'react'
 import s from './style.module.scss'
-import { PERIOD_FILTR } from '@utils/constants'
-import { isAdminCheck, renderCurrency } from '@utils/helpers'
 
 interface PaymentDeleteItem {
   id: string
@@ -301,7 +306,7 @@ const PaymentsBlock = () => {
               return (
                 <Table.Summary.Cell
                   index={0}
-                  key={item.dataIndex}
+                  key={index}
                   colSpan={item.dataIndex === '' ? 2 : 1}
                 >
                   {getFormattedValue(dataindex)}
@@ -324,11 +329,7 @@ const PaymentsBlock = () => {
                 : ColumnsRoleView.GlobalAdmin
 
               return (
-                <Table.Summary.Cell
-                  colSpan={colSpan}
-                  index={0}
-                  key={item.dataIndex}
-                >
+                <Table.Summary.Cell colSpan={colSpan} index={0} key={index}>
                   {dataindex === Operations.Debit
                     ? (
                         (payments?.totalPayments?.debit || 0) -

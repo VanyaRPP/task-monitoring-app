@@ -7,24 +7,24 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddServiceModal from '@common/components/AddServiceModal'
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
-import { IExtendedService } from '@common/api/serviceApi/service.api.types'
+import { IService } from '@common/api/serviceApi/service.api.types'
 import AddressesFilterTags from '@common/components/UI/Reusable/AddressesFilterTags'
 import s from './style.module.scss'
 
 export interface Props {
   showAddButton?: boolean
-  currentService?: IExtendedService
-  setCurrentService?: (service: IExtendedService) => void
+  currentService?: IService
+  setCurrentService?: (service: IService) => void
   serviceActions?: {
     edit: boolean
     preview: boolean
-  },
+  }
   setServiceActions: React.Dispatch<
     React.SetStateAction<{
       edit: boolean
       preview: boolean
     }>
-  >,
+  >
   filter?: any
   setFilter?: (filters: any) => void
   services?: any
