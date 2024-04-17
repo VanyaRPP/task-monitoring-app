@@ -5,14 +5,14 @@ import { DatePicker } from 'antd'
 import s from './style.module.scss'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
-import { IExtendedService } from '@common/api/serviceApi/service.api.types'
+import { IService } from '@common/api/serviceApi/service.api.types'
 import moment from 'moment'
 import useInitialValues from '@common/modules/hooks/useInitialValues'
 
 interface Props {
   form: FormInstance<any>
   edit: boolean
-  currentService: IExtendedService
+  currentService: IService
 }
 
 const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {

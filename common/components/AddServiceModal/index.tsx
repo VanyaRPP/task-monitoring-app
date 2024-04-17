@@ -2,17 +2,17 @@ import {
   useAddServiceMutation,
   useEditServiceMutation,
 } from '@common/api/serviceApi/service.api'
+import { IService } from '@common/api/serviceApi/service.api.types'
 import { Form, message } from 'antd'
-import React, { FC } from 'react'
-import AddServiceForm from '../Forms/AddServiceForm'
 import moment from 'moment'
-import { IExtendedService } from '@common/api/serviceApi/service.api.types'
-import Modal from '../UI/ModalWindow'
+import { FC } from 'react'
+import AddServiceForm from '../Forms/AddServiceForm'
 import PreviewServiceForm from '../Forms/PreviewServiceForm'
+import Modal from '../UI/ModalWindow'
 
 interface Props {
   closeModal: VoidFunction
-  currentService?: IExtendedService
+  currentService?: IService
   serviceActions?: {
     edit: boolean
     preview: boolean
@@ -45,8 +45,8 @@ const AddServiceModal: FC<Props> = ({
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
     const serviceData = {
-      domain: currentService?.domain || formData.domain,
-      street: currentService?.street || formData.street,
+      domain: currentService?.domain?._id?.toString() || formData.domain,
+      street: currentService?.street?._id?.toString() || formData.street,
       date: moment(formData.date).toDate(),
       rentPrice: formData.rentPrice,
       electricityPrice: formData.electricityPrice,
@@ -58,7 +58,7 @@ const AddServiceModal: FC<Props> = ({
     }
     const response = currentService
       ? await editService({
-          _id: currentService?._id,
+          _id: currentService?._id?.toString(),
           ...serviceData,
         })
       : await addService(serviceData)

@@ -15,7 +15,7 @@ import {
   filterInvoiceObject,
   getPaymentProviderAndReciever,
 } from '@utils/helpers'
-import { IExtendedService } from '@common/api/serviceApi/service.api.types'
+import { IService } from '@common/api/serviceApi/service.api.types'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 
 const InvoicesHeader = () => {
@@ -184,7 +184,7 @@ const validateInvoice = (invoice, service) => {
 
 const prepareInvoiceObjects = async (
   form: FormInstance,
-  service: IExtendedService,
+  service: IService,
   companies: IExtendedRealestate[],
   newInvoiceNumber: number
 ): Promise<any> => {

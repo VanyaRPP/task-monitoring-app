@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 
 import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import {
-  IExtendedService,
+  IService,
   IGetServiceResponse,
 } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
@@ -22,8 +22,8 @@ interface Props {
   serviceActions: {
     edit: boolean
     preview: boolean
-  },
-  setCurrentService: (setvice: IExtendedService) => void
+  }
+  setCurrentService: (setvice: IService) => void
   services: IGetServiceResponse
   isLoading?: boolean
   isError?: boolean
@@ -76,7 +76,7 @@ const ServicesTable: React.FC<Props> = ({
         filter,
         isOnPage,
         setServiceActions,
-        serviceActions,
+        serviceActions
       )}
       dataSource={services?.data}
       scroll={{ x: 1700 }}
@@ -99,7 +99,7 @@ const getDefaultColumns = (
   isAdmin?: boolean,
   handleDelete?: (...args: any) => void,
   deleteLoading?: boolean,
-  setCurrentService?: (service: IExtendedService) => void,
+  setCurrentService?: (service: IService) => void,
   addressFilter?,
   domainFilter?,
   // filters?: IFilter[],
@@ -115,7 +115,7 @@ const getDefaultColumns = (
   serviceActions?: {
     edit: boolean
     preview: boolean
-  },
+  }
 ): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {
@@ -194,7 +194,7 @@ const getDefaultColumns = (
       fixed: 'right',
       title: '',
       width: 50,
-      render: (_, service: IExtendedService) => (
+      render: (_, service: IService) => (
         <Button
           style={{ padding: 0 }}
           type="link"
@@ -216,7 +216,7 @@ const getDefaultColumns = (
         fixed: 'right',
         title: '',
         width: 50,
-        render: (_, service: IExtendedService) => (
+        render: (_, service: IService) => (
           <Button
             style={{ padding: 0 }}
             type="link"
@@ -234,7 +234,7 @@ const getDefaultColumns = (
         fixed: 'right',
         title: '',
         width: 50,
-        render: (_, service: IExtendedService) => (
+        render: (_, service: IService) => (
           <Popconfirm
             title={`Ви впевнені що хочете видалити послугу за місяць ${getFormattedDate(
               service.date

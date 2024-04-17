@@ -1,8 +1,11 @@
+import { IDomain } from '@common/modules/models/Domain'
+import { IStreet } from '@common/modules/models/Street'
 import { IFilter } from '../paymentApi/payment.api.types'
 
 export interface IService {
-  domain: string
-  street: string
+  _id: string
+  domain: Partial<IDomain>
+  street: Partial<IStreet>
   rentPrice: number
   date: Date
   electricityPrice: number
@@ -13,19 +16,14 @@ export interface IService {
   description?: string
 }
 
-export interface IExtendedService extends IService {
-  _id: string
-  _v: number
-}
-
 export interface IAddServiceResponse {
   success: boolean
-  data: IExtendedService
+  data: IService
 }
 
 export interface IGetServiceResponse {
   success: boolean
-  data: IExtendedService[]
+  data: IService[]
   addressFilter: IFilter[]
   domainFilter: IFilter[]
 }

@@ -1,6 +1,6 @@
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
-import { IExtendedService } from '@common/api/serviceApi/service.api.types'
+import { IService } from '@common/api/serviceApi/service.api.types'
 import InvoicesHeader from '@common/components/Tables/PaymentsBulk/Header'
 import InvoicesTable from '@common/components/Tables/PaymentsBulk/Table'
 import TableCard from '@common/components/UI/TableCard'
@@ -10,10 +10,10 @@ import { createContext, useContext } from 'react'
 
 export const InvoicesPaymentContext = createContext(
   {} as {
-    form: FormInstance,
-    companies: IExtendedRealestate[],
-    service: IExtendedService,
-    isLoading: boolean,
+    form: FormInstance
+    companies: IExtendedRealestate[]
+    service: IService
+    isLoading: boolean
     isError: boolean
   }
 )
@@ -46,7 +46,7 @@ const PaymentBulkBlock: React.FC = () => {
         companies: companies?.data,
         service,
         isLoading: isCompaniesLoading || isServiceLoading,
-        isError
+        isError,
       }}
     >
       <Form form={form} layout="vertical">
