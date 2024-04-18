@@ -7,12 +7,12 @@ const Maintenance: React.FC<{
   record: IPaymentField & { key: string }
   preview?: boolean
 }> = ({ record, preview }) => {
-	return (
-	<div className={s.Cell}>
+  return (
+    <div className={s.Cell}>
       Утримання
       <span className={s.Sub}>{getFormattedDate(service?.date)}</span>
     </div>
-	)
+  )
 }
 
 export default Maintenance
