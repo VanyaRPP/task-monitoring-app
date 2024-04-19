@@ -8,7 +8,6 @@ const Discount: React.FC<{
   preview?: boolean
 }> = ({ record, preview }) => {
   const { service } = usePaymentContext()
-
   return (
     <div className={s.Cell}>
       Знижка
