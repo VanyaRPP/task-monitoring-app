@@ -1,14 +1,15 @@
-import { months } from 'moment'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { Operations } from '@utils/constants'
 import {
   IAddPaymentResponse,
   IDeletePaymentResponse,
   IExtendedPayment,
-  IGetPaymentResponse,
+  IGeneratePaymentPDF,
+  IGeneratePaymentPDFResponce,
   IGetPaymentNumberResponse,
+  IGetPaymentResponse,
   IPayment,
 } from './payment.api.types'
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { Operations } from '@utils/constants'
 
 export const paymentApi = createApi({
   reducerPath: 'paymentApi',
@@ -30,6 +31,7 @@ export const paymentApi = createApi({
         day?: number
         domainIds?: string[]
         companyIds?: string[]
+        streetIds?: string[]
       }
     >({
       query: ({
@@ -43,6 +45,7 @@ export const paymentApi = createApi({
         day,
         domainIds,
         companyIds,
+        streetIds,
       }) => {
         return {
           url: `spacehub/payment`,
@@ -57,6 +60,7 @@ export const paymentApi = createApi({
             day,
             domainIds,
             companyIds,
+            streetIds,
           },
         }
       },
@@ -65,6 +69,9 @@ export const paymentApi = createApi({
         response
           ? response.data.map((item) => ({ type: 'Payment', id: item._id }))
           : [],
+    }),
+    getPayment: builder.query<IGetPaymentResponse, string>({
+      query: (id) => `spacehub/payment/${id}`,
     }),
     addPayment: builder.mutation<IAddPaymentResponse, IPayment>({
       query(body) {
@@ -97,7 +104,7 @@ export const paymentApi = createApi({
           url: 'spacehub/payment/multiple',
           method: 'DELETE',
           body: { ids },
-        };
+        }
       },
       invalidatesTags: (response) => (response ? ['Payment'] : []),
     }),
@@ -116,14 +123,26 @@ export const paymentApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Payment'] : []),
     }),
+    generatePdf: builder.mutation<
+      IGeneratePaymentPDFResponce,
+      IGeneratePaymentPDF
+    >({
+      query: (body) => ({
+        url: 'spacehub/payment/generatePdf',
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
 })
 
 export const {
   useAddPaymentMutation,
   useGetAllPaymentsQuery,
+  useGetPaymentQuery,
   useDeletePaymentMutation,
   useDeleteMultiplePaymentsMutation,
   useGetPaymentNumberQuery,
   useEditPaymentMutation,
+  useGeneratePdfMutation,
 } = paymentApi

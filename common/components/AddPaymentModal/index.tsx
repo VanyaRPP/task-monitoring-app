@@ -2,20 +2,24 @@ import {
   useAddPaymentMutation,
   useEditPaymentMutation,
 } from '@common/api/paymentApi/payment.api'
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import { Form, message, Tabs, TabsProps } from 'antd'
-import React, { FC, createContext, useContext, useState } from 'react'
+import {
+  IExtendedPayment,
+  IPayment,
+} from '@common/api/paymentApi/payment.api.types'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { IService } from '@common/api/serviceApi/service.api.types'
+import { usePaymentData } from '@common/modules/hooks/usePaymentData'
+import { Operations } from '@utils/constants'
+import { getInvoices } from '@utils/getInvoices'
+import { getPaymentProviderAndReciever } from '@utils/helpers'
+import { Form, Tabs, TabsProps, message } from 'antd'
+import { FormInstance } from 'antd/es/form/Form'
+import moment from 'moment'
+import { FC, createContext, useContext, useEffect, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
-import s from './style.module.scss'
-import { Operations } from '@utils/constants'
-import { FormInstance } from 'antd/es/form/Form'
-import {
-  filterInvoiceObject,
-  getPaymentProviderAndReciever,
-} from '@utils/helpers'
-import useCompany from '@common/modules/hooks/useCompany'
 import Modal from '../UI/ModalWindow'
+import s from './style.module.scss'
 
 interface Props {
   closeModal: VoidFunction
@@ -23,13 +27,23 @@ interface Props {
   paymentActions?: { edit: boolean; preview: boolean }
 }
 
-export const PaymentContext = createContext(
-  {} as {
-    paymentData: any
-    form: FormInstance
-  }
-)
-export const usePaymentContext = () => useContext(PaymentContext)
+export interface IPaymentContext {
+  payment: IPayment
+  prevPayment: IPayment
+  service: IService
+  company: IRealestate
+  form: FormInstance
+}
+
+export const PaymentContext = createContext<IPaymentContext>({
+  payment: null,
+  prevPayment: null,
+  service: null,
+  company: null,
+  form: null,
+})
+export const usePaymentContext = () =>
+  useContext<IPaymentContext>(PaymentContext)
 
 const AddPaymentModal: FC<Props> = ({
   closeModal,
@@ -37,23 +51,39 @@ const AddPaymentModal: FC<Props> = ({
   paymentActions,
 }) => {
   const [form] = Form.useForm()
+
+  const { company, service, payment, prevPayment } = usePaymentData({
+    form,
+    paymentData,
+  })
+
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
     useEditPaymentMutation()
+
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
   const { preview, edit } = paymentActions
 
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)
   )
-  const companyId = Form.useWatch('company', form)
-  const { company } = useCompany({ companyId, skip: !companyId || preview })
 
   const { provider, reciever } = getPaymentProviderAndReciever(company)
 
+  const handleOk = () => {
+    form.validateFields().then((values) => {
+      if (values.operation === Operations.Credit) {
+        handleSubmit()
+      } else {
+        setCurrPayment({ ...values, provider, reciever })
+        setActiveTabKey('2')
+      }
+    })
+  }
+
   const handleSubmit = async () => {
     const formData = await form.validateFields()
-    const filteredInvoice = filterInvoiceObject(formData)
+
     const payment = {
       invoiceNumber: formData.invoiceNumber,
       type: formData.operation,
@@ -66,8 +96,9 @@ const AddPaymentModal: FC<Props> = ({
       generalSum: formData.generalSum || formData.debit,
       provider,
       reciever,
-      invoice: formData.debit ? filteredInvoice : [],
+      invoice: formData.debit ? formData.invoice : [],
     }
+
     const response = edit
       ? await editPayment({
           _id: paymentData?._id,
@@ -111,29 +142,26 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
+  useEffect(() => {
+    form.setFieldsValue({
+      invoice: getInvoices({ company, service, payment, prevPayment }),
+    })
+  }, [form, company, payment, prevPayment, service])
+
   return (
     <PaymentContext.Provider
       value={{
-        paymentData,
+        company,
+        service,
+        payment,
+        prevPayment,
         form,
       }}
     >
       <Modal
         title={edit ? 'Редагування рахунку' : !preview && 'Додавання рахунку'}
-        onOk={
-          activeTabKey === '1'
-            ? () => {
-                form.validateFields().then((values) => {
-                  if (values.operation === Operations.Credit) {
-                    handleSubmit()
-                  } else {
-                    setCurrPayment({ ...values, provider, reciever })
-                    setActiveTabKey('2')
-                  }
-                })
-              }
-            : handleSubmit
-        }
+        onOk={activeTabKey === '1' ? handleOk : handleSubmit}
+        changesForm={() => form.isFieldsTouched()}
         onCancel={() => {
           form.resetFields()
           closeModal()
@@ -144,19 +172,42 @@ const AddPaymentModal: FC<Props> = ({
         className={s.Modal}
         style={{ top: 20 }}
       >
-        {preview ? (
-          <ReceiptForm
-            currPayment={currPayment}
-            paymentData={paymentData}
-            paymentActions={paymentActions}
-          />
-        ) : (
+        <Form
+          initialValues={{
+            // TODO: fix payment typing globally to not be `domain: Partial<IDomain> | string` but `Partial<IDomain>` instead
+            // eslint-disable-next-line
+            // @ts-ignore
+            domain: payment?.domain?._id,
+            // TODO: fix payment typing globally to not be `domain: Partial<IStreet> | string` but `Partial<IStreet>` instead
+            // eslint-disable-next-line
+            // @ts-ignore
+            street: payment?.street?._id,
+            // TODO: fix payment typing globally to not be `domain: Partial<IService> | string` but `Partial<IService>` instead
+            // eslint-disable-next-line
+            // @ts-ignore
+            monthService: payment?.monthService?._id,
+            // TODO: fix payment typing globally to not be `domain: Partial<IRealestate> | string` but `Partial<IRealestate>` instead
+            // TODO: ???rename IRealestate to ICompany maybe, what the realestate means actually???
+            // eslint-disable-next-line
+            // @ts-ignore
+            company: payment?.company?._id,
+            description: payment?.description,
+            generalSum: payment?.generalSum,
+            invoiceNumber: payment?.invoiceNumber,
+            // TODO: new Date() instead of moment() - now cause "date.clone is not a function"
+            invoiceCreationDate: moment(payment?.invoiceCreationDate),
+            operation: payment?.type || Operations.Credit,
+          }}
+          form={form}
+          layout="vertical"
+          className={s.Form}
+        >
           <Tabs
             activeKey={activeTabKey}
             items={items}
             onChange={setActiveTabKey}
           />
-        )}
+        </Form>
       </Modal>
     </PaymentContext.Provider>
   )

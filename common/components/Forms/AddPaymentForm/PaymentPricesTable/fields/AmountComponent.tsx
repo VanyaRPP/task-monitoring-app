@@ -1,31 +1,37 @@
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { ServiceType } from '@utils/constants'
 import {
-  AmountGarbageCollectorField,
-  AmountTotalAreaField,
-  AmountPlacingField,
-  AmountInflicionField,
-  AmountElectricityField,
-  AmountWaterField,
-  AmountWaterPartField,
-  AmountDiscountField,
-  AmountElectricUtility,
-} from './amountFields'
+  Cleaning,
+  Custom,
+  Discount,
+  Electricity,
+  GarbageCollector,
+  Inflicion,
+  Maintenance,
+  Placing,
+  Water,
+  WaterPart,
+} from './amount'
 
-const fields: any = {
-  [ServiceType.Maintenance]: AmountTotalAreaField,
-  [ServiceType.Placing]: AmountPlacingField,
-  [ServiceType.Electricity]: AmountElectricityField,
-  [ServiceType.Water]: AmountWaterField,
-  [ServiceType.GarbageCollector]: AmountGarbageCollectorField,
-  [ServiceType.Inflicion]: AmountInflicionField,
-  [ServiceType.WaterPart]: AmountWaterPartField,
-  [ServiceType.Discount]: AmountDiscountField,
-  [ServiceType.ElectricUtility]: AmountElectricUtility,
+const components = {
+  [ServiceType.Cleaning]: Cleaning,
+  [ServiceType.Custom]: Custom,
+  [ServiceType.Discount]: Discount,
+  [ServiceType.Electricity]: Electricity,
+  [ServiceType.GarbageCollector]: GarbageCollector,
+  [ServiceType.Inflicion]: Inflicion,
+  [ServiceType.Maintenance]: Maintenance,
+  [ServiceType.Placing]: Placing,
+  [ServiceType.Water]: Water,
+  [ServiceType.WaterPart]: WaterPart,
 }
 
-export default function AmountComponent({ record, edit }) {
-  if (record.name in fields) {
-    const Component = fields[record.name]
-    return <Component record={record} disabled={edit} />
+export const AmountComponent: React.FC<{
+  record: IPaymentField & { key: string }
+  preview?: boolean
+}> = ({ record, preview = false }) => {
+  if (record && record.type in components) {
+    return components[record.type]({ record, preview })
   }
+  // return <Unknown record={record} preview={preview} />
 }

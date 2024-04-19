@@ -15,7 +15,6 @@ export interface IRealEstateModel {
   discount?: number
   inflicion?: boolean
   garbageCollector?: boolean
-  publicElectricUtility?: boolean
 }
 
 export const RealEstateSchema = new Schema<IRealEstateModel>({
@@ -33,7 +32,6 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   discount: { type: Number, required: false, default: 0 },
   inflicion: { type: Boolean, required: false, default: false },
   garbageCollector: { type: Boolean, required: false, default: false },
-  publicElectricUtility: { type: Boolean, required: false, default: false },
 })
 
 const RealEstate =

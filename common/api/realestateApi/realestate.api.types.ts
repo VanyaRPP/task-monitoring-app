@@ -7,7 +7,6 @@ export type IRealestate = {
   companyName: string
   adminEmails: string[]
   pricePerMeter: number
-  publicElectricUtility?: number
   servicePricePerMeter?: number
   totalArea: number
   description: string
@@ -34,6 +33,7 @@ export interface IGetRealestateResponse {
   data: IExtendedRealestate[]
   domainsFilter: IFilter[]
   realEstatesFilter: IFilter[]
+  streetsFilter: IFilter[]
 }
 
 export interface IDeleteRealestateResponse {

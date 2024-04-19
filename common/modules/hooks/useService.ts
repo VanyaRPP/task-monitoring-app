@@ -11,7 +11,8 @@ function useService({ serviceId, skip }: IUseServiceProps) {
     { serviceId },
     { skip: !serviceId || skip }
   )
-  const service = services ? services[0] : null
+
+  const service = !!services && !!services.data ? services.data[0] : null
 
   return { service, isLoading }
 }
@@ -19,6 +20,7 @@ function useService({ serviceId, skip }: IUseServiceProps) {
 export default useService
 
 export function usePreviousMonthService({ domainId, streetId, date }) {
+  // TODO: getPreviousMonth from utils
   const lastMonth = moment(date).subtract(1, 'month')
   const { data } = useGetAllServicesQuery(
     {
@@ -29,6 +31,5 @@ export function usePreviousMonthService({ domainId, streetId, date }) {
     },
     { skip: !domainId || !streetId || !date }
   )
-
-  return { previousMonth: data?.[0] }
+  return { previousMonth: data?.data?.[0] }
 }

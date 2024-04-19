@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
+import Domain from '@common/modules/models/Domain'
 import RealEstate from '@common/modules/models/RealEstate'
-import { getCurrentUser } from '@utils/getCurrentUser'
 import Service from '@common/modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
-import Domain from '@common/modules/models/Domain'
+import { getCurrentUser } from '@utils/getCurrentUser'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
 
@@ -19,105 +19,82 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const options = {}
+        const { limit, domainId, streetId, serviceId, year, month } = req.query
 
-        const { domainId, streetId, serviceId, limit = 0 } = req.query
-        if (isGlobalAdmin && domainId && streetId) {
-          options.domain = domainId
-          options.street = streetId
-
-          const expr = filterPeriodOptions(req.query)
-
-          if (expr.length > 0) {
-            options.$expr = { $and: expr }
-          }
-          const services = await Service.find(options).sort({ date: -1 }).limit(+limit)
-
-          return res.status(200).json({
-            success: true,
-            data: services,
-          })
+        const options = {
+          domain: { $in: domainId },
+          street: { $in: streetId },
+          _id: serviceId,
+          date: {
+            $gte: new Date(+year, +month, 1, 0, 0, 0), // first second of provided YY.MM
+            $lt: new Date(+year, +month + 1, 0, 23, 59, 59, 999), // last second of provided YY.MM
+          },
         }
 
-        // TODO: refactor with logic. each case should be well separated
-        // Should I left all conditions and only one if for each role?
-        // this way it will handle all conditions and will not return wrong service
-
-        // TODO: add tests
-        // admin can have each service without limitation
-        // domainAdmin can take service which is realated to his domain
-        // user can take service which is related to his company which is ralated to domain
-        if (serviceId) {
-          options._id = serviceId
-          if (isDomainAdmin) {
-            const domains = await Domain.find({
-              adminEmails: { $in: [user.email] },
-            })
-            const domainsIds = domains.map((i) => i._id)
-            options.domain = { $in: domainsIds }
-          }
-          if (isUser) {
-            const realEstates = await RealEstate.find({
-              adminEmails: { $in: [user.email] },
-            }).populate({ path: 'domain', select: '_id' })
-            const domainsIds = realEstates.map((i) => i.domain._id)
-            options.domain = { $in: domainsIds }
-          }
-          const services = await Service.find(options).sort({ date: -1 }).limit(+limit)
-
-          return res.status(200).json({
-            success: true,
-            data: services,
-          })
-        }
+        if (!serviceId) delete options._id
+        if (!streetId) delete options.street
+        if (!domainId) delete options.domain
+        if (!year || !month || isNaN(+year) || isNaN(+month))
+          delete options.date
 
         if (isGlobalAdmin) {
-          if (req.query.email) {
-            options.email = req.query.email
-          }
+          const services = await Service.find(options)
+            .limit(+limit)
+            .populate('domain')
+            .populate('street')
+
+          return res.status(200).json({ success: true, data: services })
         }
 
         if (isDomainAdmin) {
-          const domains = await Domain.find({
-            adminEmails: { $in: [user.email] },
-          })
+          const domains = await Domain.find(
+            options.domain
+              ? {
+                  _id: options.domain,
+                  adminEmails: { $in: [user.email] },
+                }
+              : { adminEmails: { $in: [user.email] } }
+          )
 
-          if (domainId && streetId) {
-            const domainsIds = domains
-              .map((i) => i._id)
-              .filter((id) => id.toString() === domainId.toString())
-            options.domain = { $in: domainsIds }
-            options.street = streetId
-          } else {
-            const domainsIds = domains.map((i) => i._id)
-            options.domain = { $in: domainsIds }
+          if (domains) {
+            options.domain = { $in: domains.map(({ _id }) => _id) }
+
+            const services = await Service.find(options)
+              .limit(+limit)
+              .populate('domain')
+              .populate('street')
+
+            return res.status(200).json({ success: true, data: services })
           }
         }
 
         if (isUser) {
-          if (domainId || streetId) {
-            options.domain = []
-          } else {
-            const realEstates = await RealEstate.find({
-              adminEmails: { $in: [user.email] },
-            }).populate({ path: 'domain', select: '_id' })
-            const domainsIds = realEstates.map((i) => i.domain._id)
-            options.domain = { $in: domainsIds }
+          const companies = await RealEstate.find(
+            options.domain
+              ? {
+                  domain: options.domain,
+                  adminEmails: { $in: [user.email] },
+                }
+              : {
+                  adminEmails: { $in: [user.email] },
+                }
+          )
+
+          if (companies) {
+            options.domain = { $in: companies.map(({ domain }) => domain) }
+
+            const services = await Service.find(options)
+              .limit(+limit)
+              .populate('domain')
+              .populate('street')
+
+            return res.status(200).json({ success: true, data: services })
           }
         }
 
-        const services = await Service.find(options)
-          .sort({ date: -1 })
-          .limit(+limit)
-          .populate({ path: 'domain', select: '_id name' })
-          .populate({ path: 'street', select: '_id address city' })
-
-        return res.status(200).json({
-          success: true,
-          data: services,
-        })
+        return res.status(200).json({ success: false, data: [] })
       } catch (error) {
-        return res.status(400).json({ success: false, message: error })
+        return res.status(400).json({ success: false, error: error.message })
       }
 
     case 'POST':
