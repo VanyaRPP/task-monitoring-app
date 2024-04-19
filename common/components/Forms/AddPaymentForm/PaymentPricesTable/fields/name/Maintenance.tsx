@@ -7,6 +7,7 @@ const Maintenance: React.FC<{
   record: IPaymentField & { key: string }
   preview?: boolean
 }> = ({ record, preview }) => {
+  const { service } = usePaymentContext()
   return (
     <div className={s.Cell}>
       Утримання
