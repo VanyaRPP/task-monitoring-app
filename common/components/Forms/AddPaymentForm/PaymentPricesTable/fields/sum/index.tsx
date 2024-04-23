@@ -22,15 +22,22 @@ export const Sum: React.FC<{
   const { lastAmount, amount, price } = record
 
   useEffect(() => {
-    const quantity: number =
-      'amount' in record
-        ? 'lastAmount' in record
-          ? +amount - +lastAmount
-          : +amount
-        : 1
+    const quantity: number = !isNaN(record.amount)
+      ? !isNaN(record.lastAmount)
+        ? +amount - +lastAmount
+        : +amount
+      : 1
 
     form.setFieldValue(['invoice', record.key, 'sum'], quantity * +price || 0)
-  }, [lastAmount, amount, price])
+  }, [
+    form,
+    lastAmount,
+    amount,
+    price,
+    record.key,
+    record.amount,
+    record.lastAmount,
+  ])
 
   return <>{(+record.sum).toFixed(2)} грн</>
 }

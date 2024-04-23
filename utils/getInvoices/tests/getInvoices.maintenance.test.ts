@@ -7,20 +7,19 @@ import { getInvoices } from '@utils/getInvoices'
 
 describe('getInvoices - MAINTENANCE', () => {
   it('should load Maintenance from payment', () => {
-    const company: Partial<IRealestate> = {}
-    const service: Partial<IService> = {}
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
     const payment: Partial<IPayment> = {
       invoice: [
         {
           type: ServiceType.Maintenance,
-          lastAmount: 0,
           amount: 10,
           price: 100,
           sum: 100,
         },
       ],
     }
-    const prevPayment: Partial<IPayment> = {}
+    const prevPayment: Partial<IPayment> = null
 
     const invoices = getInvoices({
       company,
@@ -37,9 +36,9 @@ describe('getInvoices - MAINTENANCE', () => {
       rentPart: 10,
       pricePerMeter: 15,
     }
-    const service: Partial<IService> = {}
-    const payment: Partial<IPayment> = {}
-    const prevPayment: Partial<IPayment> = {}
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = null
+    const prevPayment: Partial<IPayment> = null
 
     const invoices = getInvoices({
       company,
@@ -56,11 +55,79 @@ describe('getInvoices - MAINTENANCE', () => {
     })
   })
 
-  it('should load Maintenance from company without rent', () => {
-    const company: Partial<IRealestate> = {}
-    const service: Partial<IService> = {}
-    const payment: Partial<IPayment> = {}
-    const prevPayment: Partial<IPayment> = {}
+  it('should load Maintenance from payment when price = 0, sum = some_value', () => {
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = {
+      invoice: [
+        {
+          type: ServiceType.Maintenance,
+          amount: 10,
+          price: 0,
+          sum: 100,
+        },
+      ],
+    }
+    const prevPayment: Partial<IPayment> = null
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
+    })
+
+    expect(invoices).toContainEqual({
+      type: ServiceType.Maintenance,
+      amount: payment.invoice[0].amount,
+      price: payment.invoice[0].sum,
+      sum: payment.invoice[0].sum,
+    })
+  })
+
+  it('should NOT load Maintenance from company without rent', () => {
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = null
+    const prevPayment: Partial<IPayment> = null
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
+    })
+
+    expect(invoices).not.toContainEqual(
+      expect.objectContaining({ type: ServiceType.Maintenance })
+    )
+  })
+
+  it('should NOT load Maintenance from payment without maintenance', () => {
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = {
+      invoice: [],
+    }
+    const prevPayment: Partial<IPayment> = null
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
+    })
+
+    expect(invoices).not.toContainEqual(
+      expect.objectContaining({ type: ServiceType.Maintenance })
+    )
+  })
+
+  it('should NOT load Maintenance without props', () => {
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = null
+    const prevPayment: Partial<IPayment> = null
 
     const invoices = getInvoices({
       company,

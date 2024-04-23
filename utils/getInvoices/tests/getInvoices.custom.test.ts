@@ -7,29 +7,25 @@ import { getInvoices } from '@utils/getInvoices'
 
 describe('getInvoices - CUSTOM', () => {
   it('should load Custom from payment', () => {
-    const company: Partial<IRealestate> = {}
-    const service: Partial<IService> = {}
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
     const payment: Partial<IPayment> = {
       invoice: [
         {
           name: 'Custom - 1',
           type: ServiceType.Custom,
-          lastAmount: 0,
-          amount: 10,
           price: 100,
           sum: 100,
         },
         {
           name: 'Custom - 2',
           type: ServiceType.Custom,
-          lastAmount: 0,
-          amount: 20,
           price: 200,
           sum: 200,
         },
       ],
     }
-    const prevPayment: Partial<IPayment> = {}
+    const prevPayment: Partial<IPayment> = null
 
     const invoices = getInvoices({
       company,
@@ -39,5 +35,81 @@ describe('getInvoices - CUSTOM', () => {
     })
 
     expect(invoices).toEqual(expect.arrayContaining(payment.invoice))
+  })
+
+  it('should load Custom from payment when price = 0, sum = some_value', () => {
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = {
+      invoice: [
+        {
+          name: 'Custom - 1',
+          type: ServiceType.Custom,
+          price: 0,
+          sum: 100,
+        },
+        {
+          name: 'Custom - 2',
+          type: ServiceType.Custom,
+          price: 0,
+          sum: 200,
+        },
+      ],
+    }
+    const prevPayment: Partial<IPayment> = null
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
+    })
+
+    expect(invoices).toEqual(
+      expect.arrayContaining(
+        payment.invoice.map((invoice) => ({
+          ...invoice,
+          price: invoice.price || invoice.sum,
+        }))
+      )
+    )
+  })
+
+  it('should NOT load Custom without payment', () => {
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = null
+    const prevPayment: Partial<IPayment> = null
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
+    })
+
+    expect(invoices).not.toContainEqual(
+      expect.objectContaining({ type: ServiceType.Custom })
+    )
+  })
+
+  it('should NOT load Custom from payment without customs', () => {
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = {
+      invoice: [],
+    }
+    const prevPayment: Partial<IPayment> = null
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
+    })
+
+    expect(invoices).not.toContainEqual(
+      expect.objectContaining({ type: ServiceType.Custom })
+    )
   })
 })

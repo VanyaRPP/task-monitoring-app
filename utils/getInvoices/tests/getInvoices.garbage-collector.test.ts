@@ -7,20 +7,18 @@ import { getInvoices } from '@utils/getInvoices'
 
 describe('getInvoices - GARBAGE-COLLECTOR', () => {
   it('should load GarbageCollector from payment', () => {
-    const company: Partial<IRealestate> = {}
-    const service: Partial<IService> = {}
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
     const payment: Partial<IPayment> = {
       invoice: [
         {
           type: ServiceType.GarbageCollector,
-          lastAmount: 0,
-          amount: 10,
           price: 100,
           sum: 100,
         },
       ],
     }
-    const prevPayment: Partial<IPayment> = {}
+    const prevPayment: Partial<IPayment> = null
 
     const invoices = getInvoices({
       company,
@@ -30,26 +28,6 @@ describe('getInvoices - GARBAGE-COLLECTOR', () => {
     })
 
     expect(invoices).toContainEqual(payment.invoice[0])
-  })
-
-  it('should NOT load GarbageCollector from company without garbageCollector', () => {
-    const company: Partial<IRealestate> = {}
-    const service: Partial<IService> = {
-      garbageCollectorPrice: 123,
-    }
-    const payment: Partial<IPayment> = {}
-    const prevPayment: Partial<IPayment> = {}
-
-    const invoices = getInvoices({
-      company,
-      service,
-      payment,
-      prevPayment,
-    })
-
-    expect(invoices).not.toContainEqual(
-      expect.objectContaining({ type: ServiceType.GarbageCollector })
-    )
   })
 
   it('should load GarbageCollector from company with garbageCollector', () => {
@@ -78,5 +56,91 @@ describe('getInvoices - GARBAGE-COLLECTOR', () => {
       price: targetPrice,
       sum: targetPrice,
     })
+  })
+
+  it('should load GarbageCollector from payment when price = 0, sum = some_value', () => {
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = {
+      invoice: [
+        {
+          type: ServiceType.GarbageCollector,
+          price: 0,
+          sum: 110,
+        },
+      ],
+    }
+    const prevPayment: Partial<IPayment> = null
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
+    })
+
+    expect(invoices).toContainEqual({
+      type: ServiceType.GarbageCollector,
+      price: payment.invoice[0].sum,
+      sum: payment.invoice[0].sum,
+    })
+  })
+
+  it('should NOT load GarbageCollector from company without garbageCollector', () => {
+    const company: Partial<IRealestate> = {}
+    const service: Partial<IService> = {
+      garbageCollectorPrice: 123,
+    }
+    const payment: Partial<IPayment> = {}
+    const prevPayment: Partial<IPayment> = {}
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
+    })
+
+    expect(invoices).not.toContainEqual(
+      expect.objectContaining({ type: ServiceType.GarbageCollector })
+    )
+  })
+
+  it('should NOT load GarbageCollector from payment without garbageCollector', () => {
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = {
+      invoice: [],
+    }
+    const prevPayment: Partial<IPayment> = null
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
+    })
+
+    expect(invoices).not.toContainEqual(
+      expect.objectContaining({ type: ServiceType.GarbageCollector })
+    )
+  })
+
+  it('should NOT load GarbageCollector without props', () => {
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = null
+    const prevPayment: Partial<IPayment> = null
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
+    })
+
+    expect(invoices).not.toContainEqual(
+      expect.objectContaining({ type: ServiceType.GarbageCollector })
+    )
   })
 })
