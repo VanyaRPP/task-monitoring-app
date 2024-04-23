@@ -1,11 +1,13 @@
+import { IService } from '@common/api/serviceApi/service.api.types'
 import { IDomain } from '@common/modules/models/Domain'
-import { IUser } from './../../modules/models/User'
-import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
+import { IStreet } from '@common/modules/models/Street'
+import { ServiceType } from '@utils/constants'
 import { ObjectId } from 'mongoose'
 import { IRealestate } from '../realestateApi/realestate.api.types'
+import { IUser } from './../../modules/models/User'
 
 export interface IPaymentField {
-  type: string
+  type: ServiceType | string
   name?: string
   lastAmount?: number
   amount?: number
@@ -28,11 +30,10 @@ export interface IPayment {
   type: string
   invoiceCreationDate: Date
   domain: Partial<IDomain> | string
-  street: string
+  street: Partial<IStreet> | string
   company: Partial<IRealestate> | string
-  monthService: string
+  monthService: Partial<IService> | string
   description?: string
-  services?: IPaymentTableData[]
   invoice: IPaymentField[]
   provider: IProvider
   reciever: IReciever
@@ -96,7 +97,7 @@ export interface IGetPaymentNumberResponse {
 }
 
 export interface IGeneratePaymentPDF {
-  payments: IExtendedPayment[],
+  payments: IExtendedPayment[]
 }
 
 export interface IGeneratePaymentPDFResponce {

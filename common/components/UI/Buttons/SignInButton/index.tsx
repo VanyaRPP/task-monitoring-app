@@ -16,7 +16,12 @@ const Icons = {
 
 const SingInBtn: FC<Props> = ({ provider }) => {
   return (
-    <Button className={s.Button} onClick={() => signIn(provider?.id)} block>
+    <Button
+      className={s.Button}
+      data-e2e={provider?.name}
+      onClick={() => signIn(provider?.id)}
+      block
+    >
       <span style={{ fontSize: '1.2rem' }}>
         {Icons[provider?.name.toLowerCase()]}
       </span>

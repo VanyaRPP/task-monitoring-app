@@ -1,20 +1,20 @@
+import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 import User, { IUser } from '@common/modules/models/User'
 import { FormInstance } from 'antd'
-import mongoose, { ObjectId } from 'mongoose'
-import { Roles, ServiceType } from './constants'
-import { PaymentOptions } from './types'
+import Big from 'big.js'
+import _omit from 'lodash/omit'
 import moment from 'moment'
 import 'moment/locale/uk'
-import _omit from 'lodash/omit'
-import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
-import Big from 'big.js'
+import mongoose, { ObjectId } from 'mongoose'
+import { Roles, ServiceType } from './constants'
 import {
   getDomainsPipeline,
   getRealEstatesPipeline,
   getStreetsPipeline,
 } from './pipelines'
+import { PaymentOptions } from './types'
 
-export const firstTextToUpperCase = (text: string) =>
+export const toFirstUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
 
 export const getCount = (tasks: any, name: string) => {
@@ -218,12 +218,9 @@ export const renderCurrency = (number: any): string => {
   }
 }
 
-export const getFormattedDate = (
-  data: Date,
-  format = 'MMMM'
-): string => {
+export const getFormattedDate = (data: Date, format = 'MMMM'): string => {
   if (data) {
-    return firstTextToUpperCase(moment(data).format(format))
+    return toFirstUpperCase(moment(data).format(format))
   }
 }
 

@@ -1,0 +1,17 @@
+.Cell {
+  display: flex;
+  flex-direction: column;
+
+  .Sub {
+    color: gray;
+    font-size: 0.9em;
+  }
+
+  .Tooltip {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+  }
+}

@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import Payment from '@common/modules/models/Payment'
+import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import Domain from '@common/modules/models/Domain'
+import Payment from '@common/modules/models/Payment'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
 
@@ -12,9 +13,49 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isDomainAdmin, user } = await getCurrentUser(req, res)
+  const { isDomainAdmin, isUser, isGlobalAdmin, user } = await getCurrentUser(
+    req,
+    res
+  )
 
   switch (req.method) {
+    case 'GET':
+      try {
+        if (!req.query.id) throw new Error("'id' is not provided")
+
+        const payment: IPayment = await Payment.findById(req.query.id)
+          .populate('domain')
+          .populate('company')
+          .populate('street')
+          .populate('monthService')
+
+        if (isGlobalAdmin) {
+          return res.status(200).json({ success: true, data: payment })
+        }
+
+        if (isDomainAdmin) {
+          if (payment.domain.adminEmails.includes(user.email)) {
+            return res.status(200).json({
+              success: true,
+              data: payment,
+            })
+          }
+        }
+
+        if (isUser) {
+          if (payment.company.adminEmails.includes(user.email)) {
+            return res.status(200).json({
+              success: true,
+              data: payment,
+            })
+          }
+        }
+
+        return res.status(200).json({ success: false, data: {} })
+      } catch (error) {
+        return res.status(400).json({ success: false, error: error })
+      }
+
     case 'DELETE':
       try {
         if (!isDomainAdmin && !isGlobalAdmin) {

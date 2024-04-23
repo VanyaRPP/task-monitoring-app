@@ -20,6 +20,7 @@ function useService({ serviceId, skip }: IUseServiceProps) {
 export default useService
 
 export function usePreviousMonthService({ domainId, streetId, date }) {
+  // TODO: getPreviousMonth from utils
   const lastMonth = moment(date).subtract(1, 'month')
   const { data } = useGetAllServicesQuery(
     {

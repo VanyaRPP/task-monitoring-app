@@ -163,6 +163,7 @@ interface Options {
 
 async function getPreviousMonthService({ domainId, streetId, date }) {
   try {
+    // TODO: getPreviousMonth from utils
     const lastMonth = moment(date).subtract(1, 'month')
     const month = lastMonth.month() + 1
     const defaultOption = {

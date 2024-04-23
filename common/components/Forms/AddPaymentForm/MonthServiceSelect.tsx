@@ -51,7 +51,7 @@ function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
       label="Місяць"
     >
       <Select
-        filterOption={(input, option) => (option?.label ?? '').includes(input)}
+        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
         options={monthsServices?.data.map((i) => ({
           value: i._id,
           label: getFormattedDate(i.date, 'MMMM YYYY'),

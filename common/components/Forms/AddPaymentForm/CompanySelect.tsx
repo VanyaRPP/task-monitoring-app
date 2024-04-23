@@ -64,7 +64,7 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
         }
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        filterOption={(input, option) => (option?.label ?? '').includes(input)}
+        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
         options={companies?.map((i) => ({
           value: i._id,
           label: i.companyName,

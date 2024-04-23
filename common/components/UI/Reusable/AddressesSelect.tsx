@@ -28,7 +28,7 @@ export default function AddressesSelect({
     if (streets?.length === 1) {
       form.setFieldValue('street', streets[0]._id)
     }
-  }, [streets?.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [form, streets]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Form.Item name="street" label="Адреса" rules={validateField('required')}>
@@ -42,7 +42,7 @@ export default function AddressesSelect({
             // @ts-ignore
             .localeCompare((optionB?.label ?? '').toLowerCase())
         }
-        filterOption={(input, option) => (option?.label ?? '').includes(input)}
+        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
         options={
           streets?.map((i) => ({
             value: i._id,

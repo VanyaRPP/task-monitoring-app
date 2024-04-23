@@ -20,3 +20,10 @@ export const dateToDayYearMonthFormat = (date: Date): string =>
 
 export const dateToMonthYear = (date: Date): string =>
   moment(date).format('MMMM YYYY')
+
+export const getPreviousMonth = (date?: string) => {
+  const currentInvoiceDate = moment(date).subtract(1, 'month')
+  const month = currentInvoiceDate.month() + 1
+  const year = currentInvoiceDate.year()
+  return { month, year }
+}
