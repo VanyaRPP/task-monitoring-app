@@ -94,14 +94,30 @@ export default async function handler(
             },
             adminEmail: { $in: [user.email] },
           },
+          street: {
+            _id: {
+              $in:
+                typeof streetIds === 'string'
+                  ? [streetIds]
+                  : streetIds?.map((id) => id.toString()),
+            },
+            adminEmail: { $in: [user.email] },
+          },
+          type : type,
         }
 
         if (!isDomainAdmin) {
           delete options.domain.adminEmail
         }
+
+        if (!streetIds) {
+          delete options.street
+        }
+
         if (!domainIds) {
           delete options.domain._id
         }
+
         if (!options.domain.adminEmail && !options.domain._id) {
           delete options.domain
         }
@@ -109,11 +125,21 @@ export default async function handler(
         if (!isUser) {
           delete options.company.adminEmail
         }
+
         if (!companyIds) {
           delete options.company._id
         }
+
         if (!options.company.adminEmail && !options.company._id) {
           delete options.company
+        }
+
+        // if (!options.street.adminEmail && !options.street._id) {
+        //   delete options.street
+        // }
+
+        if (!type) {
+          delete options.type
         }
 
         // if (isDomainAdmin) {
