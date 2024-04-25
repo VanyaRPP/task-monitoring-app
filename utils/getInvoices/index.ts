@@ -99,8 +99,19 @@ export const getMaintenanceInvoice = ({
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (ServiceType.Maintenance in currInvoicesCollection) {
-    return currInvoicesCollection[ServiceType.Maintenance]
+  if (Object.keys(currInvoicesCollection).length > 0) {
+    if (!currInvoicesCollection[ServiceType.Maintenance]) {
+      return
+    }
+
+    const invoice = currInvoicesCollection[ServiceType.Maintenance]
+
+    return {
+      type: invoice.type,
+      price: invoice.price,
+      amount: invoice.amount,
+      sum: invoice.sum,
+    }
   }
 
   if (company?.pricePerMeter && company?.rentPart) {
@@ -119,8 +130,18 @@ export const getPlacingInvoice = ({
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (ServiceType.Placing in currInvoicesCollection) {
-    return currInvoicesCollection[ServiceType.Placing]
+  if (Object.keys(currInvoicesCollection).length > 0) {
+    if (!currInvoicesCollection[ServiceType.Placing]) {
+      return
+    }
+
+    const invoice = currInvoicesCollection[ServiceType.Placing]
+
+    return {
+      type: invoice.type,
+      price: invoice.sum,
+      sum: invoice.sum,
+    }
   }
 
   const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
@@ -149,8 +170,18 @@ export const getInflicionInvoice = ({
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (ServiceType.Inflicion in currInvoicesCollection) {
-    return currInvoicesCollection[ServiceType.Inflicion]
+  if (Object.keys(currInvoicesCollection).length > 0) {
+    if (!currInvoicesCollection[ServiceType.Inflicion]) {
+      return
+    }
+
+    const invoice = currInvoicesCollection[ServiceType.Inflicion]
+
+    return {
+      type: invoice.type,
+      price: invoice.sum,
+      sum: invoice.sum,
+    }
   }
 
   if (service && ServiceType.Inflicion in service && company?.inflicion) {
@@ -172,8 +203,20 @@ export const getElectricityInvoice = ({
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (ServiceType.Electricity in currInvoicesCollection) {
-    return currInvoicesCollection[ServiceType.Electricity]
+  if (Object.keys(currInvoicesCollection).length > 0) {
+    if (!currInvoicesCollection[ServiceType.Electricity]) {
+      return
+    }
+
+    const invoice = currInvoicesCollection[ServiceType.Electricity]
+
+    return {
+      type: invoice.type,
+      price: invoice.price,
+      amount: invoice.amount,
+      lastAmount: invoice.lastAmount,
+      sum: invoice.sum,
+    }
   }
 
   if (service && ServiceType.Electricity in service) {
@@ -195,8 +238,18 @@ export const getWaterPartInvoice = ({
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (ServiceType.WaterPart in currInvoicesCollection) {
-    return currInvoicesCollection[ServiceType.WaterPart]
+  if (Object.keys(currInvoicesCollection).length > 0) {
+    if (!currInvoicesCollection[ServiceType.WaterPart]) {
+      return
+    }
+
+    const invoice = currInvoicesCollection[ServiceType.WaterPart]
+
+    return {
+      type: invoice.type,
+      price: invoice.sum,
+      sum: invoice.sum,
+    }
   }
 
   if (service && ServiceType.Water in service && company?.waterPart) {
@@ -215,8 +268,20 @@ export const getWaterInvoice = ({
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (ServiceType.Water in currInvoicesCollection) {
-    return currInvoicesCollection[ServiceType.Water]
+  if (Object.keys(currInvoicesCollection).length > 0) {
+    if (!currInvoicesCollection[ServiceType.Water]) {
+      return
+    }
+
+    const invoice = currInvoicesCollection[ServiceType.Water]
+
+    return {
+      type: invoice.type,
+      price: invoice.price,
+      amount: invoice.amount,
+      lastAmount: invoice.lastAmount,
+      sum: invoice.sum,
+    }
   }
 
   if (service && ServiceType.Water in service && !company?.waterPart) {
@@ -238,8 +303,18 @@ export const getGarbageCollectorInvoice = ({
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (ServiceType.GarbageCollector in currInvoicesCollection) {
-    return currInvoicesCollection[ServiceType.GarbageCollector]
+  if (Object.keys(currInvoicesCollection).length > 0) {
+    if (!currInvoicesCollection[ServiceType.GarbageCollector]) {
+      return
+    }
+
+    const invoice = currInvoicesCollection[ServiceType.GarbageCollector]
+
+    return {
+      type: invoice.type,
+      price: invoice.sum,
+      sum: invoice.sum,
+    }
   }
 
   if (
@@ -265,8 +340,18 @@ export const getCleaningInvoice = ({
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (ServiceType.Cleaning in currInvoicesCollection) {
-    return currInvoicesCollection[ServiceType.Cleaning]
+  if (Object.keys(currInvoicesCollection).length > 0) {
+    if (!currInvoicesCollection[ServiceType.Cleaning]) {
+      return
+    }
+
+    const invoice = currInvoicesCollection[ServiceType.Cleaning]
+
+    return {
+      type: invoice.type,
+      price: invoice.sum,
+      sum: invoice.sum,
+    }
   }
 
   if (company?.cleaning) {
@@ -284,8 +369,18 @@ export const getDiscountInvoice = ({
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (ServiceType.Discount in currInvoicesCollection) {
-    return currInvoicesCollection[ServiceType.Discount]
+  if (Object.keys(currInvoicesCollection).length > 0) {
+    if (!currInvoicesCollection[ServiceType.Discount]) {
+      return
+    }
+
+    const invoice = currInvoicesCollection[ServiceType.Discount]
+
+    return {
+      type: invoice.type,
+      price: invoice.sum,
+      sum: invoice.sum,
+    }
   }
 
   if (company?.discount) {
@@ -303,7 +398,12 @@ export const getCustomInvoices = ({
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): Array<IPaymentField> => {
-  return Object.values(currInvoicesCollection).filter(
-    (invoice: IPaymentField) => invoice.type === ServiceType.Custom
-  )
+  return Object.values(currInvoicesCollection)
+    .filter((invoice: IPaymentField) => invoice.type === ServiceType.Custom)
+    .map((invoice) => ({
+      name: invoice.name,
+      type: invoice.type,
+      price: invoice.sum,
+      sum: invoice.sum,
+    }))
 }
