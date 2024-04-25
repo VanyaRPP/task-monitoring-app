@@ -243,13 +243,23 @@ export const importedPaymentDateToISOStringDate = (date) => {
   ).toISOString()
 }
 
-export function parseStringToFloat(stringWithComma) {
-  // TODO: check for input string. is it ok
-  // cover by tests
-  const stringWithoutComma = ((stringWithComma || 0) + '').replace(',', '.')
-  return +stringWithoutComma
-    ? parseFloat(stringWithoutComma).toFixed(2)
-    : '0.00'
+/**
+ * Parses string to float
+ * @param str - string to be parsed into float
+ * @returns float string on success or '0' on error
+ */
+export function parseStringToFloat(str: string | number | any): string {
+  try {
+    const num = Number(str.toString().replace(',', '.'))
+
+    if (isNaN(num) || num === null) {
+      throw new Error('NaN')
+    }
+
+    return (Math.round(num * 100) / 100).toString()
+  } catch {
+    return '0'
+  }
 }
 
 export function multiplyFloat(a, b) {
