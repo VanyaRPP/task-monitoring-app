@@ -1,5 +1,6 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
+import { parseStringToFloat } from '@utils/helpers'
 
 const GarbageCollector: React.FC<{
   record: IPaymentField & { key: string }
@@ -10,7 +11,8 @@ const GarbageCollector: React.FC<{
   if (service?.garbageCollectorPrice && company?.rentPart) {
     return (
       <>
-        {company.rentPart}% від {service.garbageCollectorPrice}
+        {parseStringToFloat(company.rentPart)}% від{' '}
+        {parseStringToFloat(service.garbageCollectorPrice)}
       </>
     )
   }
