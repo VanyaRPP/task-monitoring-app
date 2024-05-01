@@ -55,36 +55,6 @@ describe('getInvoices - MAINTENANCE', () => {
     })
   })
 
-  it('should load Maintenance from payment when price = 0, sum = some_value', () => {
-    const company: Partial<IRealestate> = null
-    const service: Partial<IService> = null
-    const payment: Partial<IPayment> = {
-      invoice: [
-        {
-          type: ServiceType.Maintenance,
-          amount: 10,
-          price: 0,
-          sum: 100,
-        },
-      ],
-    }
-    const prevPayment: Partial<IPayment> = null
-
-    const invoices = getInvoices({
-      company,
-      service,
-      payment,
-      prevPayment,
-    })
-
-    expect(invoices).toContainEqual({
-      type: ServiceType.Maintenance,
-      amount: payment.invoice[0].amount,
-      price: payment.invoice[0].sum,
-      sum: payment.invoice[0].sum,
-    })
-  })
-
   it('should NOT load Maintenance from company without rent', () => {
     const company: Partial<IRealestate> = null
     const service: Partial<IService> = null

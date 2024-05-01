@@ -108,7 +108,7 @@ export const getMaintenanceInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.price || invoice.sum,
+      price: invoice.price,
       amount: invoice.amount,
       sum: invoice.sum,
     }
@@ -144,7 +144,7 @@ export const getPlacingInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.price || invoice.sum,
+      price: invoice.sum,
       sum: invoice.sum,
     }
   }
@@ -190,7 +190,7 @@ export const getInflicionInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.price || invoice.sum,
+      price: invoice.sum,
       sum: invoice.sum,
     }
   }
@@ -227,7 +227,7 @@ export const getElectricityInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.price || invoice.sum,
+      price: invoice.price,
       amount: invoice.amount,
       lastAmount: invoice.lastAmount,
       sum: invoice.sum,
@@ -262,7 +262,7 @@ export const getWaterPartInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.price || invoice.sum,
+      price: invoice.sum,
       sum: invoice.sum,
     }
   }
@@ -297,7 +297,7 @@ export const getWaterInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.price || invoice.sum,
+      price: invoice.price,
       amount: invoice.amount,
       lastAmount: invoice.lastAmount,
       sum: invoice.sum,
@@ -337,7 +337,7 @@ export const getGarbageCollectorInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.price || invoice.sum,
+      price: invoice.sum,
       sum: invoice.sum,
     }
   }
@@ -373,7 +373,7 @@ export const getCleaningInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.price || invoice.sum,
+      price: invoice.sum,
       sum: invoice.sum,
     }
   }
@@ -402,7 +402,7 @@ export const getDiscountInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.price || invoice.sum,
+      price: invoice.sum,
       sum: invoice.sum,
     }
   }
@@ -427,7 +427,7 @@ export const getCustomInvoices = ({
     .map((invoice) => ({
       name: invoice.name,
       type: invoice.type,
-      price: invoice.price || invoice.sum,
+      price: invoice.sum,
       sum: invoice.sum,
     }))
 }

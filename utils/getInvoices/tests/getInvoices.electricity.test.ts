@@ -90,38 +90,6 @@ describe('getInvoices - ELECTRICITY', () => {
     })
   })
 
-  it('should load Electricity from payment when price = 0, sum = some_value', () => {
-    const company: Partial<IRealestate> = null
-    const service: Partial<IService> = null
-    const payment: Partial<IPayment> = {
-      invoice: [
-        {
-          type: ServiceType.Electricity,
-          amount: 12,
-          lastAmount: 1,
-          price: 0,
-          sum: 110,
-        },
-      ],
-    }
-    const prevPayment: Partial<IPayment> = null
-
-    const invoices = getInvoices({
-      company,
-      service,
-      payment,
-      prevPayment,
-    })
-
-    expect(invoices).toContainEqual({
-      type: ServiceType.Electricity,
-      amount: payment.invoice[0].amount,
-      lastAmount: payment.invoice[0].lastAmount,
-      price: payment.invoice[0].sum,
-      sum: payment.invoice[0].sum,
-    })
-  })
-
   it('should NOT load Electricity from service without electricity', () => {
     const company: Partial<IRealestate> = {}
     const service: Partial<IService> = {

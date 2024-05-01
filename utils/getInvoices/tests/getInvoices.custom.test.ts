@@ -37,7 +37,7 @@ describe('getInvoices - CUSTOM', () => {
     expect(invoices).toEqual(expect.arrayContaining(payment.invoice))
   })
 
-  it('should load Custom from payment when price = 0, sum = some_value', () => {
+  it('should load Custom price from payment as sum', () => {
     const company: Partial<IRealestate> = null
     const service: Partial<IService> = null
     const payment: Partial<IPayment> = {
@@ -69,7 +69,7 @@ describe('getInvoices - CUSTOM', () => {
       expect.arrayContaining(
         payment.invoice.map((invoice) => ({
           ...invoice,
-          price: invoice.price || invoice.sum,
+          price: invoice.sum,
         }))
       )
     )

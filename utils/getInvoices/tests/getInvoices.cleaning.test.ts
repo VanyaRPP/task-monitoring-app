@@ -52,7 +52,7 @@ describe('getInvoices - CLEANING', () => {
     })
   })
 
-  it('should load Cleaning from payment when price = 0, sum = some_value', () => {
+  it('should load Cleaning price from payment as sum', () => {
     const company: Partial<IRealestate> = null
     const service: Partial<IService> = null
     const payment: Partial<IPayment> = {

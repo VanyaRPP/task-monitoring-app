@@ -56,7 +56,7 @@ describe('getInvoices - WATER-PART', () => {
     })
   })
 
-  it('should load WaterPart from payment when price = 0, sum = some_value', () => {
+  it('should load WaterPart price from payment as sum', () => {
     const company: Partial<IRealestate> = null
     const service: Partial<IService> = null
     const payment: Partial<IPayment> = {

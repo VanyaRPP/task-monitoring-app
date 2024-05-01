@@ -81,7 +81,7 @@ describe('getInvoices - PLACING', () => {
     })
   })
 
-  it('should load Placing from payment when price = 0, sum = some_value', () => {
+  it('should load Placing price from payment as sum', () => {
     const company: Partial<IRealestate> = null
     const service: Partial<IService> = null
     const payment: Partial<IPayment> = {

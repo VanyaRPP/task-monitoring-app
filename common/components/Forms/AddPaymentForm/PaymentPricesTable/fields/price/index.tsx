@@ -1,4 +1,5 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
+import { parseStringToFloat } from '@utils/helpers'
 import { Form, Input } from 'antd'
 
 export { default as Cleaning } from './Cleaning'
@@ -18,7 +19,7 @@ export const Price: React.FC<{
   preview?: boolean
 }> = ({ record, preview }) => {
   if (preview) {
-    return <span>{(+record.price || 0).toFixed(2)}</span>
+    return <span>{parseStringToFloat(record.price)}</span>
   }
 
   return (
