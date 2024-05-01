@@ -12,7 +12,7 @@ import { Operations } from '@utils/constants'
 import {
   getPaymentProviderAndReciever,
   importedPaymentDateToISOStringDate,
-  parseStringToFloat,
+  toRoundFixed,
 } from '@utils/helpers'
 import { Form, Input, message } from 'antd'
 
@@ -95,10 +95,11 @@ function prepareInvoiceObjects(
     domain: domainId,
     street: streetId,
     company: companyId,
-    invoice: paymentMethod === Operations.Debit ? getInvoiceInfo(i, company) : [],
+    invoice:
+      paymentMethod === Operations.Debit ? getInvoiceInfo(i, company) : [],
     provider,
     reciever,
-    generalSum: parseStringToFloat(i.generalSum.toString()),
+    generalSum: toRoundFixed(i.generalSum.toString()),
   }))
 
   return invoices
@@ -109,29 +110,28 @@ function getInvoiceInfo(i, company) {
     {
       type: 'maintenancePrice',
       amount: company?.totalArea,
-      price: (
-        +parseStringToFloat(i.maintenancePrice) / company?.totalArea)
-          .toFixed(2),
-      sum: parseStringToFloat(i.maintenancePrice),
+      price: (+toRoundFixed(i.maintenancePrice) / company?.totalArea).toFixed(
+        2
+      ),
+      sum: toRoundFixed(i.maintenancePrice),
     },
     {
       type: 'placingPrice',
       amount: company?.totalArea,
-      price: (+parseStringToFloat(i.placingPrice) / company?.totalArea)
-        .toFixed(2),
-      sum: parseStringToFloat(i.placingPrice),
+      price: (+toRoundFixed(i.placingPrice) / company?.totalArea).toFixed(2),
+      sum: toRoundFixed(i.placingPrice),
     },
     {
       type: 'electricityPrice',
-      lastAmount: parseStringToFloat(i.electricityPriceLastAmount),
-      amount: parseStringToFloat(i.electricityPriceAmount),
-      price: parseStringToFloat(i.electricityPricePrice),
-      sum: parseStringToFloat(i.electricityPriceSum),
+      lastAmount: toRoundFixed(i.electricityPriceLastAmount),
+      amount: toRoundFixed(i.electricityPriceAmount),
+      price: toRoundFixed(i.electricityPricePrice),
+      sum: toRoundFixed(i.electricityPriceSum),
     },
     {
       type: 'waterPrice',
-      price: parseStringToFloat(i.waterPriceSum),
-      sum: parseStringToFloat(i.waterPriceSum),
+      price: toRoundFixed(i.waterPriceSum),
+      sum: toRoundFixed(i.waterPriceSum),
     },
   ]
 
@@ -139,14 +139,14 @@ function getInvoiceInfo(i, company) {
     res.push({
       type: 'inflicionPrice',
       price: '0',
-      sum: parseStringToFloat(i.inflicionPrice),
+      sum: toRoundFixed(i.inflicionPrice),
     })
   }
 
   if (i.custom) {
     res.push({
       type: 'custom',
-      sum: parseStringToFloat(i.custom),
+      sum: toRoundFixed(i.custom),
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       name: 'Донарахування',

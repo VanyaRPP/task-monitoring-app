@@ -1,7 +1,7 @@
-import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next'
-import { getCurrentUser } from '@utils/getCurrentUser'
 import Domain from '@common/modules/models/Domain'
 import RealEstate from '@common/modules/models/RealEstate'
+import { getCurrentUser } from '@utils/getCurrentUser'
+import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next'
 
 export function withValidation(handler: NextApiHandler) {
   return async function (request: NextApiRequest, response: NextApiResponse) {
@@ -16,23 +16,18 @@ export function withValidation(handler: NextApiHandler) {
             adminEmails: user.email,
           })
           if (!domainObject) {
-            throw new Error(
-              'You do not have access to use this domain'
-            )
+            throw new Error('You do not have access to use this domain')
           }
           break
         case 'User':
           const estateObject = await RealEstate.findOne({
             adminEmails: { $in: [user.email] },
-            
           })
           if (!estateObject) {
             throw new Error('You do not have a real estate object')
           }
           if (estateObject.domain.toString() !== request.query.id) {
-            throw new Error(
-              'You do not have access to use this domain'
-            )
+            throw new Error('You do not have access to use this domain')
           }
           break
         default:

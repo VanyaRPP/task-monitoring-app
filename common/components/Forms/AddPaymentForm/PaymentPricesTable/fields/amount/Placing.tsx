@@ -2,7 +2,6 @@ import { QuestionCircleOutlined } from '@ant-design/icons'
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { ServiceType } from '@utils/constants'
-import { parseStringToFloat } from '@utils/helpers'
 import { Form, Tooltip } from 'antd'
 import { useMemo } from 'react'
 
@@ -28,8 +27,8 @@ const Placing: React.FC<{
 
     const label = (
       <>
-        {parseStringToFloat(prevPlacing)} {(+inflicion || 0) < 0 ? '-' : '+'}{' '}
-        {parseStringToFloat(Math.abs(+inflicion || 0))}
+        {prevPlacing.toRoundFixed()} {(+inflicion || 0) < 0 ? '-' : '+'}{' '}
+        {Math.abs(+inflicion || 0).toRoundFixed()}
       </>
     )
 

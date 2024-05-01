@@ -1,6 +1,5 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
-import { parseStringToFloat } from '@utils/helpers'
 
 const WaterPart: React.FC<{
   record: IPaymentField & { key: string }
@@ -11,8 +10,8 @@ const WaterPart: React.FC<{
   if (company?.waterPart && service?.waterPriceTotal) {
     return (
       <>
-        {parseStringToFloat(company.waterPart)}% від{' '}
-        {parseStringToFloat(service.waterPriceTotal)}
+        {company.waterPart.toRoundFixed()}% від{' '}
+        {service.waterPriceTotal.toRoundFixed()}
       </>
     )
   }
