@@ -8,6 +8,7 @@ import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import moment from 'moment'
 import useInitialValues from '@common/modules/hooks/useInitialValues'
+import { usePreviousMonthService } from '@common/modules/hooks/useService'
 
 interface Props {
   form: FormInstance<any>
@@ -18,6 +19,7 @@ interface Props {
 const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
   const { MonthPicker } = DatePicker
   const initialValues = useInitialValues(currentService)
+  console.log(initialValues)
 
   return (
     <Form
@@ -56,7 +58,15 @@ const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
         label="Утримання приміщень (грн/м²)"
         rules={validateField('required')}
       >
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+        {edit ? 
+        (<InputNumber placeholder="Вкажіть значення" className={s.formInput} />)
+        : (<InputNumber placeholder="Вкажіть значення" className={s.formInput} value={
+          usePreviousMonthService({
+          date: form.getFieldValue('data'),
+          domainId: form.getFieldValue('domain'),
+          streetId: form.getFieldValue('street'),
+        }).previousMonth?.inflicionPrice} />)
+      }
       </Form.Item>
       <Form.Item
         name="electricityPrice"

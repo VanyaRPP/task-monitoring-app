@@ -13,41 +13,33 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isDomainAdmin, isUser, user } = await getCurrentUser(req, res)
+  const { isDomainAdmin, isGlobalAdmin, isUser, user } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'GET':
       try {
-        const { limit = 0 } = req.query
+        const { limit = 0, domainId } = req.query
         const options = {}
-        let domainsIds
-
+        
         if (isDomainAdmin) {
           options.adminEmails = { $in: [user.email] }
         }
 
         if (isUser) {
-          const realEstates = await RealEstate.find({
-            adminEmails: { $in: [user.email] },
-          }).populate({ path: 'domain', select: 'name' })
-
-          domainsIds = realEstates.map((i) => i.domain._id)
+          return res.status(200).json({ success: true, data: [] })
         }
 
-        if (req.query.domainId) {
-          domainsIds = domainsIds
-            ? domainsIds.filter((i) => i.toString() === req.query.domainId)
-            : [req.query.domainId]
-        }
-
-        if (domainsIds) {
-          options._id = { $in: domainsIds }
+        if (domainId) {
+          options._id = { $in: domainId }
         }
 
         const domains = await Domain.find(options).limit(+limit).populate({
           path: 'streets',
           select: '_id address city',
         })
+        if (isGlobalAdmin && limit>0) {
+          console.log(domains)
+        }
         return res.status(200).json({ success: true, data: domains })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
