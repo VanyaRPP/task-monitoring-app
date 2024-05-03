@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import RealEstate from '@common/modules/models/RealEstate'
-import { getCurrentUser } from '@utils/getCurrentUser'
-import start, { Data } from '@pages/api/api.config'
 import Domain from '@common/modules/models/Domain'
-import Street from '@common/modules/models/Street'
+import start, { Data } from '@pages/api/api.config'
+import { getCurrentUser } from '@utils/getCurrentUser'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
 
@@ -13,33 +11,36 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isDomainAdmin, isGlobalAdmin, isUser, user } = await getCurrentUser(req, res)
+  const { isDomainAdmin, isGlobalAdmin, user } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'GET':
       try {
-        const { limit = 0, domainId } = req.query
-        const options = {}
-        
-        if (isDomainAdmin) {
-          options.adminEmails = { $in: [user.email] }
-        }
+        const { limit = 0, domainId = [], streetId = [] } = req.query
 
-        if (isUser) {
+        const domainIds = typeof domainId === 'string' ? [domainId] : domainId
+        const streetIds = typeof streetId === 'string' ? [streetId] : streetId
+
+        const options = {}
+
+        if (!isDomainAdmin && !isGlobalAdmin) {
           return res.status(200).json({ success: true, data: [] })
         }
 
-        if (domainId) {
-          options._id = { $in: domainId }
+        if (isDomainAdmin) {
+          options.adminEmails = user.email
         }
 
-        const domains = await Domain.find(options).limit(+limit).populate({
-          path: 'streets',
-          select: '_id address city',
-        })
-        if (isGlobalAdmin && limit>0) {
-          console.log(domains)
+        if (domainIds?.length > 0) {
+          options._id = { $in: domainIds }
         }
+
+        if (streetIds?.length > 0) {
+          options.streets = streetIds
+        }
+
+        const domains = await Domain.find(options).limit(+limit)
+
         return res.status(200).json({ success: true, data: domains })
       } catch (error) {
         return res.status(400).json({ success: false, error: error })
@@ -50,7 +51,7 @@ export default async function handler(
 
         const existingDomain = await Domain.findOne({
           name,
-          streets: { $all: streets }
+          streets: { $all: streets },
         })
         if (existingDomain) {
           return res
