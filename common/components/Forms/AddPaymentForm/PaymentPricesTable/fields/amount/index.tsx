@@ -1,4 +1,5 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
+import { toRoundFixed } from '@utils/helpers'
 import { Form, Input } from 'antd'
 
 export { default as Cleaning } from './Cleaning'
@@ -21,7 +22,7 @@ export const Amount: React.FC<{
   const type = !last ? 'amount' : 'lastAmount'
 
   if (preview) {
-    return <span style={{ flex: 1 }}>{record[type].toRoundFixed()}</span>
+    return <span style={{ flex: 1 }}>{toRoundFixed(record[type])}</span>
   }
 
   return (

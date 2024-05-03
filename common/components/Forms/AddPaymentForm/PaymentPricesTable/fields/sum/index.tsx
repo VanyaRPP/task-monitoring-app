@@ -1,5 +1,6 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
+import { toRoundFixed } from '@utils/helpers'
 import { useEffect } from 'react'
 
 export { default as Cleaning } from './Cleaning'
@@ -39,5 +40,5 @@ export const Sum: React.FC<{
     record.lastAmount,
   ])
 
-  return <>{record.sum.toRoundFixed()} грн</>
+  return <>{toRoundFixed(record.sum)} грн</>
 }

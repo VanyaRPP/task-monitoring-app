@@ -1,5 +1,6 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { ServiceType } from '@utils/constants'
+import { toRoundFixed } from '@utils/helpers'
 import { Form, Input } from 'antd'
 
 export { default as Cleaning } from './Cleaning'
@@ -20,7 +21,7 @@ export const Price: React.FC<{
   rules?: any[]
 }> = ({ record, preview, rules = [] }) => {
   if (preview) {
-    return <span>{record.price.toRoundFixed()}</span>
+    return <span>{toRoundFixed(record.price)}</span>
   }
 
   return (

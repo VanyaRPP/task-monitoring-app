@@ -1,5 +1,6 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
+import { toRoundFixed } from '@utils/helpers'
 
 const WaterPart: React.FC<{
   record: IPaymentField & { key: string }
@@ -10,8 +11,8 @@ const WaterPart: React.FC<{
   if (company?.waterPart && service?.waterPriceTotal) {
     return (
       <>
-        {company.waterPart.toRoundFixed()}% від{' '}
-        {service.waterPriceTotal.toRoundFixed()}
+        {toRoundFixed(company.waterPart)}% від{' '}
+        {toRoundFixed(service.waterPriceTotal)}
       </>
     )
   }

@@ -267,15 +267,6 @@ export function toRoundFixed(value: string | number | any, length = 2): string {
   }
 }
 
-// some overengineered stuff right there
-Number.prototype.toRoundFixed = function (length) {
-  return toRoundFixed(this, length)
-}
-// some overengineered stuff right there
-String.prototype.toRoundFixed = function (length) {
-  return toRoundFixed(this, length)
-}
-
 export function multiplyFloat(a, b) {
   const bigA = Big(toRoundFixed(`${a}`))
   const bigB = Big(toRoundFixed(`${b}`))
