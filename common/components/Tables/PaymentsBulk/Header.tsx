@@ -2,21 +2,21 @@ import { QuestionCircleOutlined, SelectOutlined } from '@ant-design/icons'
 import { Button, Form, FormInstance, Popover, message } from 'antd'
 import { useRouter } from 'next/router'
 
+import {
+  useAddPaymentMutation,
+  useGetPaymentNumberQuery,
+} from '@common/api/paymentApi/payment.api'
+import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { IService } from '@common/api/serviceApi/service.api.types'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthServiceSelect'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import { AppRoutes, Operations } from '@utils/constants'
 import {
-  useAddPaymentMutation,
-  useGetPaymentNumberQuery,
-} from '@common/api/paymentApi/payment.api'
-import {
   filterInvoiceObject,
   getPaymentProviderAndReciever,
 } from '@utils/helpers'
-import { IService } from '@common/api/serviceApi/service.api.types'
-import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 
 const InvoicesHeader = () => {
   const router = useRouter()
@@ -87,7 +87,10 @@ function MonthServiceGeneralInfo() {
 
   return (
     <span style={{ display: 'flex', alignItems: 'center' }}>
-      <MonthServiceSelect form={form} />
+      <div style={{ minWidth: '120px' }}>
+        <MonthServiceSelect form={form} />
+      </div>
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}></div>
       {serviceId && (
         <Popover
           content={<PopoverMonthService serviceId={serviceId} />}
