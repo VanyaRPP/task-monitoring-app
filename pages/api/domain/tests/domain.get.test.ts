@@ -3,7 +3,7 @@ import handler from '../index'
 
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
-import { domains, users } from '@utils/testData'
+import { domains, users, streets } from '@utils/testData'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -236,6 +236,90 @@ describe('Domain API - GET', () => {
     const mockReq = {
       method: 'GET',
       query: { domainId: domains[0]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = parseReceived(response.data)
+    expect(received).toEqual([])
+  })
+
+  it('should load Domain as GlobalAdmin with street', async () => {
+    await mockLoginAs(users.globalAdmin)
+
+    const mockReq = {
+      method: 'GET',
+      query: { streetId: streets[0]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = parseReceived(response.data)
+    const domain = domains.filter(
+      (domain) =>
+        domain.streets.includes(streets[0]._id)
+    )
+    expect(received).toEqual(domain)
+  })
+
+  it('should load Domain as DomainAdmin with street', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const mockReq = {
+      method: 'GET',
+      query: { streetId: streets[0]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = parseReceived(response.data)
+    const domain = domains.filter(
+      (domain) =>
+        domain.streets.includes(streets[0]._id) &&
+        domain.adminEmails.includes('domainAdmin@example.com')
+    )
+    expect(received).toEqual(domain)
+  })
+
+  it('should not load Domain as User with street', async () => {
+    await mockLoginAs(users.user)
+
+    const mockReq = {
+      method: 'GET',
+      query: { streetId: streets[0]._id },
     } as any
     const mockRes = {
       status: jest.fn(() => mockRes),
