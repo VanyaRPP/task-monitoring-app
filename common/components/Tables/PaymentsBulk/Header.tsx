@@ -90,7 +90,6 @@ function MonthServiceGeneralInfo() {
       <div style={{ minWidth: '120px' }}>
         <MonthServiceSelect form={form} />
       </div>
-      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}></div>
       {serviceId && (
         <Popover
           content={<PopoverMonthService serviceId={serviceId} />}
