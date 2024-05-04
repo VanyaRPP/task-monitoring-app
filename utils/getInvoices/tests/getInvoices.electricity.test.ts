@@ -90,7 +90,45 @@ describe('getInvoices - ELECTRICITY', () => {
     })
   })
 
-  it('should NOT load Electricity', () => {
+  it('should NOT load Electricity from service without electricity', () => {
+    const company: Partial<IRealestate> = {}
+    const service: Partial<IService> = {
+      electricityPrice: null,
+    }
+    const payment: Partial<IPayment> = {}
+    const prevPayment: Partial<IPayment> = {}
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
+    })
+
+    expect(invoices).not.toContainEqual(
+      expect.objectContaining({ type: ServiceType.Electricity })
+    )
+  })
+
+  it('should NOT load Electricity from payment without electricity', () => {
+    const company: Partial<IRealestate> = {}
+    const service: Partial<IService> = {}
+    const payment: Partial<IPayment> = {}
+    const prevPayment: Partial<IPayment> = {}
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
+    })
+
+    expect(invoices).not.toContainEqual(
+      expect.objectContaining({ type: ServiceType.Electricity })
+    )
+  })
+
+  it('should NOT load Electricity without props', () => {
     const company: Partial<IRealestate> = {}
     const service: Partial<IService> = {}
     const payment: Partial<IPayment> = {}
