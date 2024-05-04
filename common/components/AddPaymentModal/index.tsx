@@ -171,6 +171,7 @@ const AddPaymentModal: FC<Props> = ({
         confirmLoading={isAddingLoading || isEditingLoading}
         className={s.Modal}
         style={{ top: 20 }}
+        preview={preview}
       >
         <Form
           initialValues={{
