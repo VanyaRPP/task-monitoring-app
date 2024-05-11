@@ -86,7 +86,6 @@ const PaymentCardHeader = ({
                 </Button>
                 {location.pathname === AppRoutes.PAYMENT && (
                   <>
-                    <PaymentCascader onChange={setCurrentDateFilter} />
                     <FilterTags
                       filters={filters}
                       setFilters={setFilters}
