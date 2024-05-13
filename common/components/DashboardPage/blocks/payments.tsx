@@ -183,6 +183,50 @@ const PaymentsBlock = () => {
         }))
       : []
 
+  const globalAdminColumns: ColumnsType<any> = isGlobalAdmin
+    ? [
+        {
+          align: 'center',
+          fixed: 'right',
+          title: '',
+          width: 50,
+          render: (_, payment: IExtendedPayment) => (
+            <Button
+              style={{ padding: 0 }}
+              type="link"
+              onClick={() => {
+                setCurrentPayment(payment)
+                setPaymentActions({ ...paymentActions, edit: true })
+              }}
+            >
+              <EditOutlined className={s.icon} />
+            </Button>
+          ),
+        },
+        {
+          align: 'center',
+          fixed: 'right',
+          title: '',
+          width: 50,
+          render: (_, payment: IExtendedPayment) => (
+            <div className={s.popconfirm}>
+              <Popconfirm
+                id="popconfirm_custom"
+                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+                  payment?.invoiceCreationDate as unknown as string
+                )}?`}
+                onConfirm={() => handleDeletePayment(payment?._id)}
+                okText="Видалити"
+                cancelText="Ні"
+                disabled={deleteLoading}
+              >
+                <DeleteOutlined className={s.icon} />
+              </Popconfirm>
+            </div>
+          ),
+        },
+      ]
+    : []
   const adminColumns =
     isGlobalAdmin || isDomainAdmin
       ? [
@@ -362,6 +406,10 @@ const PaymentsBlock = () => {
     })
   }
 
+  const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
+    PaymentDeleteItem[]
+  >([])
+
   const Summary = () => {
     const getFormattedValue = (dataIndex) => {
       const value = payments?.totalPayments?.[dataIndex] || 0
@@ -429,6 +477,20 @@ const PaymentsBlock = () => {
     []
   )
   const onSelect = (a, selected, rows) => {
+    if (selected)
+      setPaymentsDeleteItems([
+        ...paymentsDeleteItems,
+        {
+          id: a?._id,
+          date: a?.monthService?.date,
+          domain: a?.domain?.name,
+          company: a?.company?.companyName,
+        },
+      ])
+    else
+      setPaymentsDeleteItems(
+        paymentsDeleteItems.filter((item) => item.id != a?._id)
+      )
     if (selected) {
       setPaymentsDeleteItems([
         ...paymentsDeleteItems,
@@ -451,6 +513,32 @@ const PaymentsBlock = () => {
   }
 
   const rowSelection = {
+    selectedRowKeys: paymentsDeleteItems.map((item) => item.id),
+    defaultSelectedRowKeys: paymentsDeleteItems.map((item) => item.id),
+    onSelect: onSelect,
+  }
+
+  const content =
+    deleteError || paymentsError || currUserError ? (
+      <Alert message="Помилка" type="error" showIcon closable />
+    ) : (
+      <PaymentTableContent
+        path={pathname}
+        payments={payments}
+        columns={columns}
+        currUser={currUser}
+        rowSelection={rowSelection}
+        loadings={{
+          currUserLoading,
+          currUserFetching,
+          paymentsLoading,
+          paymentsFetching,
+        }}
+        setPageData={setPageData}
+        pageData={pageData}
+        setFilters={setFilters}
+      />
+    )
     selectedRowKeys: paymentsDeleteItems.map((item) => item.id),
     preserveSelectedRowKeys: true,
     onChange: (selectedRowKeys, selectedRows) => {
