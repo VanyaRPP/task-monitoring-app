@@ -1,14 +1,14 @@
-import validateMiddleware from '@common/lib/validateMiddleware'
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { check, validationResult } from 'express-validator'
-import RealEstate from '@common/modules/models/RealEstate'
 import initMiddleware from '@common/lib/initMiddleware'
-import { getCurrentUser } from '@utils/getCurrentUser'
-import Payment from '@common/modules/models/Payment'
-import start, { ExtendedData } from '@pages/api/api.config'
-import { filterOptions, getDistinctCompanyAndDomain } from '@utils/helpers'
+import validateMiddleware from '@common/lib/validateMiddleware'
 import Domain from '@common/modules/models/Domain'
+import Payment from '@common/modules/models/Payment'
+import RealEstate from '@common/modules/models/RealEstate'
+import start, { ExtendedData } from '@pages/api/api.config'
 import { quarters } from '@utils/constants'
+import { getCurrentUser } from '@utils/getCurrentUser'
+import { filterOptions, getDistinctCompanyAndDomain } from '@utils/helpers'
+import { check, validationResult } from 'express-validator'
+import type { NextApiRequest, NextApiResponse } from 'next'
 import { getCreditDebitPipeline } from './pipelines'
 
 start()
@@ -130,6 +130,7 @@ export default async function handler(
         return res.status(200).json({
           currentCompaniesCount: distinctCompanies.length,
           currentDomainsCount: distinctDomains.length,
+          // TODO: DATE FILTERS (LOGIC FROM useDatesFilter)
           domainsFilter: distinctDomains?.map(({ domainDetails }) => ({
             text: domainDetails.name,
             value: domainDetails._id,
