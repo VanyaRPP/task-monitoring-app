@@ -52,7 +52,7 @@ export interface IAddPaymentResponse {
 
 export interface IFilter {
   text: string
-  value: string
+  value: string | number
 }
 
 export interface IGetPaymentResponse {

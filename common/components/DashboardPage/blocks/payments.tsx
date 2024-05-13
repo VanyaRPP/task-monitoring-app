@@ -5,9 +5,7 @@ import {
 } from '@common/api/paymentApi/payment.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import {
-  dateToDefaultFormat
-} from '@common/assets/features/formatDate'
+import { dateToDefaultFormat } from '@common/assets/features/formatDate'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
 import {
@@ -53,7 +51,15 @@ function getDateFilter(value) {
       year,
       month: number,
     }
-  if (period === PERIOD_FILTR.YEAR) return {year}
+  if (period === PERIOD_FILTR.YEAR) return { year }
+}
+
+function getTypeOperation(value) {
+  if (value) {
+    return {
+      type: value === Operations.Debit ? Operations.Debit : Operations.Credit,
+    }
+  }
 }
 
 function getTypeOperation(value) {
@@ -68,7 +74,7 @@ const PaymentsBlock = () => {
   const router = useRouter()
   const {
     pathname,
-    query: {email},
+    query: { email },
   } = router
 
   const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
@@ -84,7 +90,7 @@ const PaymentsBlock = () => {
     currentPage: 1,
   })
 
-  const [filters, setFilters] = useState<Record<string, any>>({});
+  const [filters, setFilters] = useState<Record<string, any>>({})
 
   const closeEditModal = () => {
     setCurrentPayment(null)
@@ -117,27 +123,33 @@ const PaymentsBlock = () => {
       domainIds: filters?.domain || undefined,
       streetIds: filters?.street || undefined,
     },
-    {skip: currUserLoading || !currUser}
+    { skip: currUserLoading || !currUser }
   )
 
-  const yearsSet = new Set(payments?.data.filter(payment => payment.invoiceCreationDate).map((payment) => new Date(payment.invoiceCreationDate).getFullYear()));
+  const yearsSet = new Set(
+    payments?.data
+      .filter((payment) => payment.invoiceCreationDate)
+      .map((payment) => new Date(payment.invoiceCreationDate).getFullYear())
+  )
 
-  const yearsArray = Array.from(yearsSet);
-  const yearsFilter = yearsArray.map((year) => ({text: year.toString(), value: year}));
-
+  const yearsArray = Array.from(yearsSet)
+  const yearsFilter = yearsArray.map((year) => ({
+    text: year.toString(),
+    value: year,
+  }))
 
   const monthsSet = new Set(
     payments?.data
       .filter((payment) => payment.invoiceCreationDate)
       .map((payment) => new Date(payment.invoiceCreationDate).getMonth() + 1)
-  );
-  const monthsArray = Array.from(monthsSet);
+  )
+  const monthsArray = Array.from(monthsSet)
   const monthsFilter = monthsArray.map((month) => ({
-    text: new Date(0, month - 1).toLocaleString("default", {month: "long"}),
+    text: new Date(0, month - 1).toLocaleString('default', { month: 'long' }),
     value: month,
   }))
 
-  const [deletePayment, {isLoading: deleteLoading, isError: deleteError}] =
+  const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
   const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = currUser?.roles?.includes(Roles.DOMAIN_ADMIN)
@@ -217,7 +229,6 @@ const PaymentsBlock = () => {
         ]
       : []
 
-
   // TODO: add Interface
   const columns: ColumnsType<IExtendedPayment> = [
     {
@@ -257,23 +268,27 @@ const PaymentsBlock = () => {
     {
       title: 'За місяць',
       dataIndex: 'month',
-      filters: monthsFilter.map((option) => ({text: option.text, value: option.value})),
+      filters: monthsFilter,
       filteredValue: filters?.month || null,
       onFilter: (value, record) => {
-        const recordMonth = new Date(record.invoiceCreationDate).getMonth() + 1;
+        const recordMonth = new Date(record.invoiceCreationDate).getMonth() + 1
         return recordMonth === value
       },
       render: (monthService, obj) =>
-        new Date(monthService?.date || obj.invoiceCreationDate).toLocaleString("default", {month: "long"})
+        new Date(monthService?.date || obj.invoiceCreationDate).toLocaleString(
+          'default',
+          { month: 'long' }
+        ),
     },
     {
       title: 'За рік',
       dataIndex: 'year',
-      filters: yearsFilter.map((option) => ({text: option.text, value: option.value})),
+      filters: yearsFilter,
       filteredValue: filters?.year || null,
-      onFilter: (value, record) => new Date(record.invoiceCreationDate).getFullYear() === value,
+      onFilter: (value, record) =>
+        new Date(record.invoiceCreationDate).getFullYear() === value,
       render: (monthService, obj) =>
-        new Date(monthService?.date || obj.invoiceCreationDate).getFullYear()
+        new Date(monthService?.date || obj.invoiceCreationDate).getFullYear(),
     },
     ...paymentsPageColumns,
     {
@@ -287,10 +302,10 @@ const PaymentsBlock = () => {
               type="link"
               onClick={() => {
                 setCurrentPayment(payment)
-                setPaymentActions({...paymentActions, preview: true})
+                setPaymentActions({ ...paymentActions, preview: true })
               }}
             >
-              <EyeOutlined className={s.eyelined}/>
+              <EyeOutlined className={s.eyelined} />
             </Button>
           </div>
         ) : (
