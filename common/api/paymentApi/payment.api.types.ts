@@ -73,6 +73,11 @@ export interface IGetPaymentResponse {
   }
   currentCompaniesCount: number
   currentDomainsCount: number
+  dateFilters: {
+    years: number[]
+    quartes: number[] // ?????
+    months: number[]
+  }
   domainsFilter: IFilter[]
   realEstatesFilter: IFilter[]
   addressFilter: IFilter[]
