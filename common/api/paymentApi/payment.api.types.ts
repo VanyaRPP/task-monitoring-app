@@ -1,8 +1,8 @@
-import { IDomain } from '@common/modules/models/Domain'
-import { IUser } from './../../modules/models/User'
 import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
+import { IDomain } from '@common/modules/models/Domain'
 import { ObjectId } from 'mongoose'
 import { IRealestate } from '../realestateApi/realestate.api.types'
+import { IUser } from './../../modules/models/User'
 
 export interface IPaymentField {
   type: string
@@ -58,6 +58,11 @@ export interface IGetPaymentResponse {
   totalPayments: { credit?: number; debit?: number }
   currentCompaniesCount: number
   currentDomainsCount: number
+  dateFilters: {
+    years: number[]
+    quartes: number[] // ?????
+    months: number[]
+  }
   domainsFilter: IFilter[]
   realEstatesFilter: IFilter[]
   data: IExtendedPayment[]
