@@ -1,4 +1,4 @@
-import React, {ReactElement, useState} from 'react'
+import React, {ReactElement, useEffect, useState} from 'react'
 import {Alert, message, Pagination, Popconfirm, Table} from 'antd'
 import {Button} from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
@@ -21,6 +21,7 @@ import {PERIOD_FILTR} from '@utils/constants'
 import {isAdminCheck, renderCurrency} from '@utils/helpers'
 import PaymentTableContent from "@components/DashboardPage/blocks/paymentComponents/PaymentTableContent";
 import {ColumnsType} from "antd/es/table";
+import usePaymentDateFilters from "@common/modules/hooks/usePaymentDateFilters";
 
 interface PaymentDeleteItem {
   id: string,
@@ -99,22 +100,11 @@ const PaymentsBlock = () => {
     {skip: currUserLoading || !currUser}
   )
 
-  const yearsSet = new Set(payments?.data.filter(payment => payment.invoiceCreationDate).map((payment) => new Date(payment.invoiceCreationDate).getFullYear()));
+  const {yearsFilter, monthsFilter, setPayments} = usePaymentDateFilters((payments))
 
-  const yearsArray = Array.from(yearsSet);
-  const yearsFilter = yearsArray.map((year) => ({text: year.toString(), value: year}));
-
-
-  const monthsSet = new Set(
-    payments?.data
-      .filter((payment) => payment.invoiceCreationDate)
-      .map((payment) => new Date(payment.invoiceCreationDate).getMonth() + 1)
-  );
-  const monthsArray = Array.from(monthsSet);
-  const monthsFilter = monthsArray.map((month) => ({
-    text: new Date(0, month - 1).toLocaleString("default", {month: "long"}),
-    value: month,
-  }))
+  useEffect(() => {
+    setPayments(payments)
+  }, [payments]);
 
   const [deletePayment, {isLoading: deleteLoading, isError: deleteError}] =
     useDeletePaymentMutation()
@@ -232,7 +222,7 @@ const PaymentsBlock = () => {
     {
       title: 'За місяць',
       dataIndex: 'month',
-      filters: monthsFilter.map((option) => ({text: option.text, value: option.value})),
+      filters: monthsFilter,
       filteredValue: filters?.month || null,
       onFilter: (value, record) => {
         const recordMonth = new Date(record.invoiceCreationDate).getMonth() + 1;
@@ -244,7 +234,7 @@ const PaymentsBlock = () => {
     {
       title: 'За рік',
       dataIndex: 'year',
-      filters: yearsFilter.map((option) => ({text: option.text, value: option.value})),
+      filters: yearsFilter,
       filteredValue: filters?.year || null,
       onFilter: (value, record) => new Date(record.invoiceCreationDate).getFullYear() === value,
       render: (monthService, obj) =>
