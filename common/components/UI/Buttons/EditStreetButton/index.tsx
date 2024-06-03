@@ -4,8 +4,7 @@ import { IStreet } from '@common/modules/models/Street'
 import { Button, ButtonProps } from 'antd'
 import { useState } from 'react'
 
-export interface EditStreetButtonProps
-  extends Omit<ButtonProps, 'onClick' | 'disabled'> {
+export interface EditStreetButtonProps extends Omit<ButtonProps, 'onClick'> {
   street?: IStreet['_id']
   editable?: boolean
 }
@@ -15,7 +14,7 @@ export interface EditStreetButtonProps
  *
  * @param street - editing street id (leave empty to create new street)
  * @param editable - describes is form read-only or can be edited and is button enabled (default - `true`)
- * @param ...props - rest of `antd#Button` props except `onClick` and `disabled` (use `editable` rather then `disabled`)
+ * @param ...props - rest of `antd#Button` props except `onClick`
  */
 export const EditStreetButton: React.FC<EditStreetButtonProps> = ({
   street: streetId,
@@ -27,12 +26,7 @@ export const EditStreetButton: React.FC<EditStreetButtonProps> = ({
 
   return (
     <>
-      <Button
-        type="dashed"
-        onClick={() => setOpen(true)}
-        disabled={!editable}
-        {...props}
-      >
+      <Button type="dashed" onClick={() => setOpen(true)} {...props}>
         {children}
       </Button>
 
