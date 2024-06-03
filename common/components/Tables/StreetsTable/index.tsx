@@ -25,10 +25,12 @@ export const StreetsTable: React.FC<StreetsTableProps> = ({
 }) => {
   const { data: user } = useGetCurrentUserQuery()
 
-  const isGlobalAdmin = useMemo(
-    () => user?.roles?.includes(Roles.GLOBAL_ADMIN),
-    [user]
-  )
+  const isGlobalAdmin = useMemo(() => {
+    return user?.roles?.includes(Roles.GLOBAL_ADMIN)
+  }, [user])
+  const isDomainAdmin = useMemo(() => {
+    return user?.roles?.includes(Roles.DOMAIN_ADMIN)
+  }, [user])
 
   const [selected, setSelected] = useState<string[]>(_selected)
   const [page, setPage] = useState<number>(1)
@@ -114,7 +116,7 @@ export const StreetsTable: React.FC<StreetsTableProps> = ({
             {isGlobalAdmin ? <EditFilled /> : <EyeFilled />}
           </EditStreetButton>
         ),
-        hidden: !editable,
+        hidden: !editable || (!isDomainAdmin && !isGlobalAdmin),
       },
       {
         align: 'center',
@@ -134,7 +136,7 @@ export const StreetsTable: React.FC<StreetsTableProps> = ({
         hidden: !editable || !isGlobalAdmin,
       },
     ].filter((column) => !column.hidden)
-  }, [editable, filter, handleDelete, isGlobalAdmin, streets])
+  }, [editable, filter, handleDelete, isDomainAdmin, isGlobalAdmin, streets])
 
   return (
     <Table
