@@ -1,6 +1,6 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
-import { parseStringToFloat } from '@utils/helpers'
+import { toRoundFixed } from '@utils/helpers'
 import { useEffect } from 'react'
 
 export { default as Cleaning } from './Cleaning'
@@ -40,5 +40,5 @@ export const Sum: React.FC<{
     record.lastAmount,
   ])
 
-  return <>{parseStringToFloat(record.sum)} грн</>
+  return <>{toRoundFixed(record.sum)} грн</>
 }

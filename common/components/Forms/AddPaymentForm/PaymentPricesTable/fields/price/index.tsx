@@ -1,5 +1,6 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
-import { parseStringToFloat } from '@utils/helpers'
+import { ServiceType } from '@utils/constants'
+import { toRoundFixed } from '@utils/helpers'
 import { Form, Input } from 'antd'
 
 export { default as Cleaning } from './Cleaning'
@@ -17,15 +18,36 @@ export { default as WaterPart } from './WaterPart'
 export const Price: React.FC<{
   record: IPaymentField & { key: string }
   preview?: boolean
-}> = ({ record, preview }) => {
+  rules?: any[]
+}> = ({ record, preview, rules = [] }) => {
   if (preview) {
-    return <span>{parseStringToFloat(record.price)}</span>
+    return <span>{toRoundFixed(record.price)}</span>
   }
 
   return (
     <Form.Item
       name={[record.key, 'price']}
-      rules={[{ required: true, message: 'Required' }]}
+      rules={[
+        {
+          validator: (_, value) => {
+            if (isNaN(value) || value === null || !value) {
+              return Promise.reject(new Error('Required'))
+            }
+
+            if (record.type !== ServiceType.Discount && value < 0) {
+              return Promise.reject(new Error('Не менше 0'))
+            }
+
+            if (record.type === ServiceType.Discount && value > 0) {
+              return Promise.reject(new Error('Не більше 0'))
+            }
+
+            return Promise.resolve()
+          },
+        },
+        ,
+        ...rules,
+      ]}
     >
       <Input type="number" />
     </Form.Item>

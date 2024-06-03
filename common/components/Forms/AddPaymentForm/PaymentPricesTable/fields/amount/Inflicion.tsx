@@ -1,7 +1,7 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { ServiceType } from '@utils/constants'
-import { parseStringToFloat } from '@utils/helpers'
+import { toRoundFixed } from '@utils/helpers'
 
 const Inflicion: React.FC<{
   record: IPaymentField & { key: string }
@@ -18,7 +18,7 @@ const Inflicion: React.FC<{
 
     return (
       <>
-        {parseStringToFloat(inflicion)}% від {parseStringToFloat(prevPlacing)}
+        {toRoundFixed(inflicion)}% від {toRoundFixed(prevPlacing)}
       </>
     )
   }
