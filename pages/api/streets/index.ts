@@ -1,3 +1,4 @@
+import Domain from '@common/modules/models/Domain'
 import Street from '@common/modules/models/Street'
 import start from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
@@ -11,7 +12,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { isGlobalAdmin } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, user } = await getCurrentUser(req, res)
 
   if (req.method === 'GET') {
     try {
@@ -20,11 +21,36 @@ export default async function handler(
       const options: FilterQuery<typeof Street> = {}
 
       if (domainId) {
-        options.domain = {
-          $in:
-            typeof domainId === 'string'
-              ? domainId.split(',').map((id) => decodeURIComponent(id))
-              : domainId.map((id) => decodeURIComponent(id)),
+        if (!isGlobalAdmin && !isDomainAdmin) {
+          return res
+            .status(403)
+            .json({ error: 'restricted access to filter by domain' })
+        }
+
+        const domains = await Domain.find({
+          _id: {
+            $in:
+              typeof domainId === 'string'
+                ? domainId.split(',').map((id) => decodeURIComponent(id))
+                : domainId.map((id) => decodeURIComponent(id)),
+          },
+        }).populate('streets')
+
+        if (
+          !isGlobalAdmin &&
+          domains.find(({ adminEmails }) => !adminEmails.includes(user.email))
+        ) {
+          return res.status(403).json({
+            error: 'restricted access to filter by domain not related to user',
+          })
+        }
+
+        const streetsIds = domains
+          .map(({ streets }) => streets.map(({ _id }) => _id.toString()))
+          .flat()
+
+        if (domains) {
+          options._id = { $in: streetsIds }
         }
       }
 
@@ -69,28 +95,28 @@ export default async function handler(
         total,
       })
     } catch (error) {
-      return res.status(500).send(error)
+      return res.status(500).json({ error })
     }
   } else if (req.method === 'POST') {
     try {
       if (!isGlobalAdmin) {
-        return res.status(403).send('restricted access')
+        return res.status(403).json({ error: 'restricted access' })
       }
 
       if (!req.body) {
-        return res.status(400).send('unhandled body')
+        return res.status(400).json({ error: 'unhandled body' })
       }
 
       // TODO: body validation
       const street = await Street.create(req.body)
 
       if (!street) {
-        return res.status(422).send('unable to create street')
+        return res.status(422).json({ error: 'unable to create street' })
       }
 
       return res.status(200).json(street)
     } catch (error) {
-      return res.status(500).send(error)
+      return res.status(500).json({ error })
     }
   }
 }
