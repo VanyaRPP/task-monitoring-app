@@ -117,7 +117,7 @@ const City: React.FC<EditFormItemProps> = ({
           prefix="м."
         />
       ) : (
-        <Form.Item noStyle>м.{city}</Form.Item>
+        <Form.Item noStyle>м. {city}</Form.Item>
       )}
     </Form.Item>
   )
@@ -152,7 +152,7 @@ const Address: React.FC<EditFormItemProps> = ({
           prefix="вул."
         />
       ) : (
-        <Form.Item noStyle>вул.{address}</Form.Item>
+        <Form.Item noStyle>вул. {address}</Form.Item>
       )}
     </Form.Item>
   )
