@@ -1,13 +1,10 @@
 import initMiddleware from '@common/lib/initMiddleware'
 import validateMiddleware from '@common/lib/validateMiddleware'
-import Domain from '@common/modules/models/Domain'
 import Payment from '@common/modules/models/Payment'
-import RealEstate from '@common/modules/models/RealEstate'
 import start, { ExtendedData } from '@pages/api/api.config'
 import { quarters } from '@utils/constants'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import {
-  filterOptions,
   getDistinctCompanyAndDomain,
   getFilterForAddress,
 } from '@utils/helpers'
@@ -78,45 +75,111 @@ export default async function handler(
         const { streetIds, companyIds, domainIds, limit, skip, type } =
           req.query
 
-        const options = {} as any
-        if (isDomainAdmin) {
-          const domains = await (Domain as any).find({
-            adminEmails: { $in: [user.email] },
-          })
-          const domainsIds = domains.map((i) => i._id.toString())
-          options.domain = { $in: domainsIds }
+        const options = {
+          domain: {
+            _id: {
+              $in:
+                typeof domainIds === 'string'
+                  ? [domainIds]
+                  : domainIds?.map((id) => id.toString()),
+            },
+            adminEmail: { $in: [user.email] },
+          },
+          company: {
+            _id: {
+              $in:
+                typeof companyIds === 'string'
+                  ? [companyIds]
+                  : companyIds?.map((id) => id.toString()),
+            },
+            adminEmail: { $in: [user.email] },
+          },
+          street: {
+            _id: {
+              $in:
+                typeof streetIds === 'string'
+                  ? [streetIds]
+                  : streetIds?.map((id) => id.toString()),
+            },
+            adminEmail: { $in: [user.email] },
+          },
+          type : type,
         }
 
-        if (isUser) {
-          const realEstates = await (RealEstate as any).find({
-            adminEmails: { $in: [user.email] },
-          })
-          const realEstatesIds = realEstates.map((i) => i._id.toString())
-          options.company = { $in: realEstatesIds }
+        if (!isDomainAdmin) {
+          delete options.domain.adminEmail
         }
 
-        if (domainIds) {
-          options.domain = filterOptions(options?.domain, domainIds)
+        if (!streetIds) {
+          delete options.street
         }
 
-        if (companyIds) {
-          options.company = filterOptions(options?.company, companyIds)
+        if (!domainIds) {
+          delete options.domain._id
         }
 
-        if (streetIds) {
-          options.street = filterOptions(options?.street, streetIds)
+        if (!options.domain.adminEmail && !options.domain._id) {
+          delete options.domain
         }
 
-        const expr = filterPeriodOptions(req.query)
-        if (expr.length > 0) {
-          options.$expr = {
-            $and: expr,
-          }
+        if (!isUser) {
+          delete options.company.adminEmail
         }
 
-        if (type) {
-          options.type = type
+        if (!companyIds) {
+          delete options.company._id
         }
+
+        if (!options.company.adminEmail && !options.company._id) {
+          delete options.company
+        }
+
+        // if (!options.street.adminEmail && !options.street._id) {
+        //   delete options.street
+        // }
+
+        if (!type) {
+          delete options.type
+        }
+
+        // if (isDomainAdmin) {
+        //   const domains = await (Domain as any).find({
+        //     adminEmails: { $in: [user.email] },
+        //   })
+        //   const domainsIds = domains.map((i) => i._id.toString())
+        //   options.domain = { $in: domainsIds }
+        // }
+
+        // if (isUser) {
+        //   const realEstates = await (RealEstate as any).find({
+        //     adminEmails: { $in: [user.email] },
+        //   })
+        //   const realEstatesIds = realEstates.map((i) => i._id.toString())
+        //   options.company = { $in: realEstatesIds }
+        // }
+
+        // if (domainIds) {
+        //   options.domain = filterOptions(options?.domain, domainIds)
+        // }
+
+        // if (companyIds) {
+        //   options.company = filterOptions(options?.company, companyIds)
+        // }
+
+        // if (streetIds) {
+        //   options.street = filterOptions(options?.street, streetIds)
+        // }
+
+        // const expr = filterPeriodOptions(req.query)
+        // if (expr.length > 0) {
+        //   options.$expr = {
+        //     $and: expr,
+        //   }
+        // }
+
+        // if (type) {
+        //   options.type = type
+        // }
 
         const payments = await Payment.find(options)
           .sort({ invoiceCreationDate: -1 })

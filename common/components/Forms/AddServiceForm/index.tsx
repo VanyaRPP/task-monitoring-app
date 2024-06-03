@@ -5,7 +5,7 @@ import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import useInitialValues from '@common/modules/hooks/useInitialValues'
 import { usePreviousMonthService } from '@common/modules/hooks/useService'
 import { DatePicker, Form, FormInstance, Input, InputNumber } from 'antd'
-import { FC, useEffect } from 'react'
+import { useEffect } from 'react'
 import s from './style.module.scss'
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
   currentService: IService
 }
 
-const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
+const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
   const { MonthPicker } = DatePicker
   const initialValues = useInitialValues(currentService)
 
@@ -95,7 +95,21 @@ const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
         label="Утримання приміщень (грн/м²)"
         rules={validateField('required')}
       >
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+        {edit ? (
+          <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+        ) : (
+          <InputNumber
+            placeholder="Вкажіть значення"
+            className={s.formInput}
+            value={
+              usePreviousMonthService({
+                date: form.getFieldValue('data'),
+                domainId: form.getFieldValue('domain'),
+                streetId: form.getFieldValue('street'),
+              }).previousMonth?.inflicionPrice
+            }
+          />
+        )}
       </Form.Item>
       <Form.Item
         name="electricityPrice"
