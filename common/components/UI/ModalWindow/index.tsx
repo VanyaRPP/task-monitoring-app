@@ -16,6 +16,7 @@ interface Props {
   okButtonProps?: ButtonProps 
   // footer: any
   title: string
+  preview?: boolean 
 }
 
 const Modal: React.FC<Props> = ({
@@ -33,10 +34,16 @@ const Modal: React.FC<Props> = ({
   title,
   okButtonProps,
   open = true,
+  preview = false,
 }) => {
 
   const handleCancel = () => {
-    if (changesForm()) {
+    const isSingleTabAndViewMode = changesForm() && open && preview;
+
+    if(isSingleTabAndViewMode){
+      onCancel();
+    }
+    else {
       AntModal.confirm({
         title: 'Ви впевнені, що хочете вийти?',
         content: 'Всі незбережені дані будуть втрачені',
@@ -44,8 +51,6 @@ const Modal: React.FC<Props> = ({
         cancelText: 'Ні',
         onOk: onCancel,
       })
-    } else {
-      onCancel()
     }
   }
 

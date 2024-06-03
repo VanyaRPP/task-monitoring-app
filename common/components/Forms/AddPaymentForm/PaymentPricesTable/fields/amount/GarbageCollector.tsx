@@ -1,6 +1,6 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
-import { parseStringToFloat } from '@utils/helpers'
+import { toRoundFixed } from '@utils/helpers'
 
 const GarbageCollector: React.FC<{
   record: IPaymentField & { key: string }
@@ -11,8 +11,8 @@ const GarbageCollector: React.FC<{
   if (service?.garbageCollectorPrice && company?.rentPart) {
     return (
       <>
-        {parseStringToFloat(company.rentPart)}% від{' '}
-        {parseStringToFloat(service.garbageCollectorPrice)}
+        {toRoundFixed(company.rentPart)}% від{' '}
+        {toRoundFixed(service.garbageCollectorPrice)}
       </>
     )
   }

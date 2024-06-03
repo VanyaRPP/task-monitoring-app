@@ -34,19 +34,47 @@ export const users = {
   },
 }
 
+export const streets = [
+  {
+    _id: '64d68421d9ba2fc8fea79d31',
+    address: 'street_0',
+    city: 'street_0_city',
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d32',
+    address: 'street_1',
+    city: 'street_1_city',
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d33',
+    address: 'street_2',
+    city: 'street_2_city',
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d34',
+    address: 'street_3',
+    city: 'street_3_city',
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d35',
+    address: 'street_4',
+    city: 'street_4_city',
+  },
+]
+
 export const domains = [
   {
     _id: '64d68421d9ba2fc8fea79d11',
     name: 'domain 0',
     adminEmails: [users.domainAdmin.email],
-    streets: [],
+    streets: [streets[0]._id],
     description: 'none',
   },
   {
     _id: '64d68421d9ba2fc8fea79d12',
     name: 'domain 1',
     adminEmails: [users.user.email],
-    streets: [],
+    streets: [streets[1]._id],
     description: 'none',
   },
   {
@@ -83,34 +111,6 @@ export const domains = [
     adminEmails: [users.domainAdmin2.email],
     streets: [],
     description: 'none',
-  },
-]
-
-export const streets = [
-  {
-    _id: '64d68421d9ba2fc8fea79d31',
-    address: 'street_0',
-    city: 'street_0_city',
-  },
-  {
-    _id: '64d68421d9ba2fc8fea79d32',
-    address: 'street_1',
-    city: 'street_1_city',
-  },
-  {
-    _id: '64d68421d9ba2fc8fea79d33',
-    address: 'street_2',
-    city: 'street_2_city',
-  },
-  {
-    _id: '64d68421d9ba2fc8fea79d34',
-    address: 'street_3',
-    city: 'street_3_city',
-  },
-  {
-    _id: '64d68421d9ba2fc8fea79d35',
-    address: 'street_4',
-    city: 'street_4_city',
   },
 ]
 

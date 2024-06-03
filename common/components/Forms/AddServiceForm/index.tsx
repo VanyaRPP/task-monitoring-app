@@ -1,13 +1,12 @@
-import React, { FC, useEffect } from 'react'
+import { IService } from '@common/api/serviceApi/service.api.types'
 import { validateField } from '@common/assets/features/validators'
-import { Form, FormInstance, Input, InputNumber } from 'antd'
-import { DatePicker } from 'antd'
-import s from './style.module.scss'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
-import { IService } from '@common/api/serviceApi/service.api.types'
-import moment from 'moment'
 import useInitialValues from '@common/modules/hooks/useInitialValues'
+import { usePreviousMonthService } from '@common/modules/hooks/useService'
+import { DatePicker, Form, FormInstance, Input, InputNumber } from 'antd'
+import { useEffect } from 'react'
+import s from './style.module.scss'
 
 interface Props {
   form: FormInstance<any>
@@ -15,9 +14,49 @@ interface Props {
   currentService: IService
 }
 
-const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
+const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
   const { MonthPicker } = DatePicker
   const initialValues = useInitialValues(currentService)
+
+  const date = Form.useWatch('date', form)
+  const domain = Form.useWatch('domain', form)
+  const street = Form.useWatch('street', form)
+
+  const { previousMonth } = usePreviousMonthService({
+    date,
+    domainId: domain,
+    streetId: street,
+  })
+
+  useEffect(() => {
+    if (!previousMonth) {
+      form.setFieldsValue({
+        rentPrice: 0,
+        electricityPrice: 0,
+        waterPrice: 0,
+        waterPriceTotal: 0,
+        garbageCollectorPrice: 0,
+        inflicionPrice: 0,
+      })
+      return
+    }
+    const {
+      rentPrice,
+      electricityPrice,
+      waterPrice,
+      waterPriceTotal,
+      garbageCollectorPrice,
+      inflicionPrice,
+    } = previousMonth
+    form.setFieldsValue({
+      rentPrice,
+      electricityPrice,
+      waterPrice,
+      waterPriceTotal,
+      garbageCollectorPrice,
+      inflicionPrice,
+    })
+  }, [previousMonth, form])
 
   return (
     <Form
@@ -56,7 +95,21 @@ const AddServiceForm: FC<Props> = ({ form, edit, currentService }) => {
         label="Утримання приміщень (грн/м²)"
         rules={validateField('required')}
       >
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+        {edit ? (
+          <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+        ) : (
+          <InputNumber
+            placeholder="Вкажіть значення"
+            className={s.formInput}
+            value={
+              usePreviousMonthService({
+                date: form.getFieldValue('data'),
+                domainId: form.getFieldValue('domain'),
+                streetId: form.getFieldValue('street'),
+              }).previousMonth?.inflicionPrice
+            }
+          />
+        )}
       </Form.Item>
       <Form.Item
         name="electricityPrice"

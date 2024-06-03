@@ -212,7 +212,9 @@ export function filterInvoiceObject(obj) {
 
 export const renderCurrency = (number: any): string => {
   if (!isNaN(number)) {
-    return new Intl.NumberFormat('en-US').format(number)
+    return new Intl.NumberFormat('en-US').format(
+      Number(toRoundFixed(number.toString()))
+    )
   } else {
     return '-'
   }
@@ -244,34 +246,37 @@ export const importedPaymentDateToISOStringDate = (date) => {
 }
 
 /**
- * Parses string to float
- * @param str - string to be parsed into float
+ * Parses string to float in x.xx format
+ * @param value - string to be parsed into float
+ * @param length - count of digits after comma
  * @returns float string on success or '0' on error
  */
-export function parseStringToFloat(str: string | number | any): string {
+export function toRoundFixed(value: string | number | any, length = 2): string {
   try {
-    const num = Number(str.toString().replace(',', '.'))
+    const num = Number(value.toString().replace(',', '.'))
 
     if (isNaN(num) || num === null) {
       throw new Error('NaN')
     }
 
-    return (Math.round(num * 100) / 100).toString()
+    const multiplier = Number('1' + Array.from({ length }).fill('0').join(''))
+
+    return (Math.round(num * multiplier) / multiplier).toString()
   } catch {
     return '0'
   }
 }
 
 export function multiplyFloat(a, b) {
-  const bigA = Big(parseStringToFloat(`${a}`))
-  const bigB = Big(parseStringToFloat(`${b}`))
+  const bigA = Big(toRoundFixed(`${a}`))
+  const bigB = Big(toRoundFixed(`${b}`))
 
   return +bigA.mul(bigB).round(2, Big.roundDown).toNumber()
 }
 
 export function plusFloat(a, b) {
-  const bigA = Big(parseStringToFloat(`${a}`))
-  const bigB = Big(parseStringToFloat(`${b}`))
+  const bigA = Big(toRoundFixed(`${a}`))
+  const bigB = Big(toRoundFixed(`${b}`))
 
   return +bigA.plus(bigB).round(2, Big.roundDown).toNumber()
 }
