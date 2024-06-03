@@ -1,33 +1,31 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { toCleanObject } from '@utils/toCleanObject'
 import { ObjectId } from 'mongoose'
-import { AllStreetsQuery, IStreet, BaseQuery } from './street.api.types'
+import {
+  GetStreetsQueryRequest,
+  GetStreetsQueryResponse,
+  IStreet,
+} from './street.api.types'
 
 export const streetApi = createApi({
   reducerPath: 'streetApi',
-  tagTypes: ['Street', 'IStreet'],
+  tagTypes: ['Street'],
   refetchOnFocus: true,
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getStreetById: builder.query<BaseQuery, string>({
+    getStreet: builder.query<IStreet, string>({
       query: (id) => `/streets/${id}`,
-      providesTags: (result) => ['Street'],
+      providesTags: ['Street'],
     }),
-    getAllStreets: builder.query<IStreet[], { domainId?: string, limit?: number }>({
-      query: ({ domainId, limit }: { domainId?: string, limit?: number }) => {
+    getStreets: builder.query<GetStreetsQueryResponse, GetStreetsQueryRequest>({
+      query: (query) => {
         return {
           url: `streets`,
-          params: { domainId, limit },
+          params: toCleanObject(query),
         }
       },
-      providesTags: (response: IStreet[]) =>
-        response
-          ? response.map((item: IStreet) => ({
-              type: 'Street',
-              id: item._id,
-            }))
-          : [],
-      transformResponse: (response: AllStreetsQuery) => response.data,
+      providesTags: ['Street'],
     }),
     addStreet: builder.mutation<IStreet, Partial<IStreet>>({
       query(body) {
@@ -35,15 +33,6 @@ export const streetApi = createApi({
           url: `streets`,
           method: 'POST',
           body,
-        }
-      },
-      invalidatesTags: ['Street'],
-    }),
-    deleteStreet: builder.mutation<{ success: boolean; id: ObjectId }, string>({
-      query(id) {
-        return {
-          url: `streets/${id}`,
-          method: 'DELETE',
         }
       },
       invalidatesTags: ['Street'],
@@ -59,13 +48,22 @@ export const streetApi = createApi({
       },
       invalidatesTags: ['Street'],
     }),
+    deleteStreet: builder.mutation<{ success: boolean; id: ObjectId }, string>({
+      query(id) {
+        return {
+          url: `streets/${id}`,
+          method: 'DELETE',
+        }
+      },
+      invalidatesTags: ['Street'],
+    }),
   }),
 })
 
 export const {
-  useGetAllStreetsQuery,
+  useGetStreetQuery,
+  useGetStreetsQuery,
   useAddStreetMutation,
-  useDeleteStreetMutation,
   useEditStreetMutation,
-  useGetStreetByIdQuery,
+  useDeleteStreetMutation,
 } = streetApi

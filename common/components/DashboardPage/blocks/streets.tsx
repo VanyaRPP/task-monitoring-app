@@ -1,16 +1,9 @@
-import StreetsHeader from '@common/components/Tables/Streets/Header'
-import StreetsTable from '@common/components/Tables/Streets/Table'
-import TableCard from '@common/components/UI/TableCard'
+import { StreetsTable } from '@common/components/Tables/StreetsTable'
 
 const StreetsBlock: React.FC<{
   domainId?: string
 }> = ({ domainId }) => {
-  
-  return (
-    <TableCard title={<StreetsHeader showAddButton />}>
-      <StreetsTable domainId={domainId} />
-    </TableCard>
-  )
+  return <StreetsTable domain={domainId} />
 }
 
 export default StreetsBlock
