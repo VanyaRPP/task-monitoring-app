@@ -40,7 +40,7 @@ export const EditStreetModal: React.FC<EditStreetModalProps> = ({
   }, [form, onCancel])
 
   const handleOk = useCallback(() => {
-    if (!changed) {
+    if (!changed || !streetId) {
       return handleOkSubmit()
     }
 
@@ -51,7 +51,7 @@ export const EditStreetModal: React.FC<EditStreetModalProps> = ({
       cancelText: 'Ні',
       onOk: handleOkSubmit,
     })
-  }, [changed, handleOkSubmit])
+  }, [changed, streetId, handleOkSubmit])
 
   const handleCancel = useCallback(() => {
     if (!changed) {
@@ -82,7 +82,13 @@ export const EditStreetModal: React.FC<EditStreetModalProps> = ({
       onCancel={handleCancel}
       destroyOnClose={destroyOnClose}
       title={
-        title ? title : streetId ? 'Редагування адреси' : 'Додавання адреси'
+        title
+          ? title
+          : !editable
+          ? 'Перегляд адреси'
+          : streetId
+          ? 'Редагування адреси'
+          : 'Додавання адреси'
       }
       {...props}
     >
