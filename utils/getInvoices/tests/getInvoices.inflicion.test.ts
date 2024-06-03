@@ -61,6 +61,34 @@ describe('getInvoices - INFLICION', () => {
     })
   })
 
+  it('should load Inflicion price from payment as sum', () => {
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = {
+      invoice: [
+        {
+          type: ServiceType.Inflicion,
+          price: 0,
+          sum: 110,
+        },
+      ],
+    }
+    const prevPayment: Partial<IPayment> = null
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
+    })
+
+    expect(invoices).toContainEqual({
+      type: ServiceType.Inflicion,
+      price: payment.invoice[0].sum,
+      sum: payment.invoice[0].sum,
+    })
+  })
+
   it('should NOT load Inflicion from company without inflicion', () => {
     const company: Partial<IRealestate> = {}
     const service: Partial<IService> = {

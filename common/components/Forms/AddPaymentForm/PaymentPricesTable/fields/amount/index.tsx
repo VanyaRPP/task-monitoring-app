@@ -1,4 +1,5 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
+import { parseStringToFloat } from '@utils/helpers'
 import { Form, Input } from 'antd'
 
 export { default as Cleaning } from './Cleaning'
@@ -15,12 +16,12 @@ export { default as WaterPart } from './WaterPart'
 export const Amount: React.FC<{
   record: IPaymentField & { key: string }
   preview?: boolean
-  last?: Boolean
+  last?: boolean
 }> = ({ record, preview, last }) => {
   const type = !last ? 'amount' : 'lastAmount'
 
   if (preview) {
-    return <span style={{ flex: 1 }}>{(+record[type]).toFixed(2)}</span>
+    return <span style={{ flex: 1 }}>{parseStringToFloat(record[type])}</span>
   }
 
   return (
