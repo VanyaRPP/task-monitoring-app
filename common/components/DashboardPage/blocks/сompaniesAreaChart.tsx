@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react'
-import Chart from '@common/components/Chart'
-import TableCard from '@common/components/UI/TableCard'
 import {
-  useGetDomainsQuery,
   useGetAreasQuery,
+  useGetDomainsQuery,
 } from '@common/api/domainApi/domain.api'
+import Chart from '@common/components/Chart'
 import CompaniesAreaChartHeader from '@common/components/Tables/CompaniesAreaChart/Header'
+import TableCard from '@common/components/UI/TableCard'
+import React, { useEffect, useState } from 'react'
 
 const CompaniesAreaChart: React.FC = () => {
   const chartElementTitle = 'Частка площі'
@@ -13,8 +13,8 @@ const CompaniesAreaChart: React.FC = () => {
   const { data: domains } = useGetDomainsQuery({})
   const [domainId, setDomainId] = useState<string>()
   useEffect(() => {
-    if (domains && domains.length > 0) {
-      setDomainId(domains[0]._id)
+    if (domains && domains?.data.length > 0) {
+      setDomainId(domains.data[0]._id)
     }
   }, [domains])
   const { data: areasData } = useGetAreasQuery(
@@ -28,7 +28,10 @@ const CompaniesAreaChart: React.FC = () => {
   return (
     <TableCard
       title={
-        <CompaniesAreaChartHeader domains={domains} setDomainId={setDomainId} />
+        <CompaniesAreaChartHeader
+          domains={domains?.data}
+          setDomainId={setDomainId}
+        />
       }
     >
       <Chart

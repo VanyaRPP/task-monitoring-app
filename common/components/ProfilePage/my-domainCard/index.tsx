@@ -1,15 +1,15 @@
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { Roles } from '@utils/constants'
 import { Card, Col, Row } from 'antd'
 import React from 'react'
 import s from '../style.module.scss'
-import { Roles } from '@utils/constants'
 
 const MyDomainsCard: React.FC = () => {
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
-  const { data: domains = [], isLoading: domainsLoading } = useGetDomainsQuery(
+  const { data: domains, isLoading: domainsLoading } = useGetDomainsQuery(
     {},
     { skip: isGlobalAdmin }
   )
@@ -17,7 +17,7 @@ const MyDomainsCard: React.FC = () => {
     {},
     { skip: isGlobalAdmin }
   )
-  const companies = realEstates?.data || [] 
+  const companies = realEstates?.data || []
 
   const getDomainCompanies = (domainId) =>
     companies
@@ -27,7 +27,7 @@ const MyDomainsCard: React.FC = () => {
 
   return (
     <Row gutter={16}>
-      {domains.map((item) => (
+      {domains?.data.map((item) => (
         <Col span={8} key={item.name}>
           <div className={s.CardInfo}>
             {/* Wrap the Card component in a div */}

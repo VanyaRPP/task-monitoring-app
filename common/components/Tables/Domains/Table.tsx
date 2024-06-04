@@ -40,10 +40,6 @@ const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
     }
   }
 
-  console.log(data)
-
-  return <></>
-
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
   return (
@@ -58,7 +54,7 @@ const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
           <StreetsBlock domainId={domainId} />
         ),
       }}
-      dataSource={data}
+      dataSource={data?.data}
       scroll={{ x: 600 }}
     />
   )

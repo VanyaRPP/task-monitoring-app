@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import { validateField } from '@common/assets/features/validators'
 import { Form, Select } from 'antd'
 import { useForm } from 'antd/lib/form/Form'
-import { validateField } from '@common/assets/features/validators'
-import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import { useEffect } from 'react'
 
 interface EmailSelectProps {
   form: any
@@ -14,18 +14,23 @@ export default function EmailSelect({ form }: EmailSelectProps) {
 
   useEffect(() => {
     if (data) {
-      const adminEmails = data.reduce((uniqueAdminEmails, domain) => {
-        const newAdminEmails = domain.adminEmails.filter(email => !uniqueAdminEmails.includes(email))
+      const adminEmails = data.data.reduce((uniqueAdminEmails, domain) => {
+        const newAdminEmails = domain.adminEmails.filter(
+          (email) => !uniqueAdminEmails.includes(email)
+        )
         return [...uniqueAdminEmails, ...newAdminEmails]
       }, [])
       formInstance.setFieldsValue({ adminEmails }) // Use form instance's setFieldsValue
     }
   }, [data]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const adminEmailOptions = data?.reduce((uniqueAdminEmails, domain) => {
-    const newAdminEmails = domain.adminEmails.filter(email => !uniqueAdminEmails.includes(email))
-    return [...uniqueAdminEmails, ...newAdminEmails]
-  }, []) || []
+  const adminEmailOptions =
+    data?.data.reduce((uniqueAdminEmails, domain) => {
+      const newAdminEmails = domain.adminEmails.filter(
+        (email) => !uniqueAdminEmails.includes(email)
+      )
+      return [...uniqueAdminEmails, ...newAdminEmails]
+    }, []) || []
 
   return (
     <Form.Item
