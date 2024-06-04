@@ -1,58 +1,84 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { authOptions } from '@pages/api/auth/[...nextauth]'
-import start, { Data } from '@pages/api/api.config'
-import { getCurrentUser } from '@utils/getCurrentUser'
 import Domain from '@common/modules/models/Domain'
+import RealEstate from '@common/modules/models/RealEstate'
+import start from '@pages/api/api.config'
+import { getCurrentUser } from '@utils/getCurrentUser'
+import type { NextApiRequest, NextApiResponse } from 'next'
 start()
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse
 ) {
-  const { isGlobalAdmin } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isUser, user } = await getCurrentUser(
+    req,
+    res
+  )
 
-  if (!isGlobalAdmin) {
-    return res.status(400).json({ success: false, message: 'not allowed' })
-  }
+  if (req.method === 'GET') {
+    try {
+      const { id } = req.query
 
-  switch (req.method) {
-    case 'DELETE':
-      try {
-        await Domain.findByIdAndRemove(req.query.id).then((domain) => {
-          if (domain) {
-            return res.status(200).json({
-              success: true,
-              data: 'Domain ' + req.query.id + ' was deleted',
-            })
-          } else {
-            return res.status(400).json({
-              success: false,
-              data: 'Domain ' + req.query.id + ' was not found',
-            })
-          }
-        })
-      } catch (error) {
-        return res.status(400).json({ success: false, error })
+      const domain = await Domain.findById(id).populate('streets')
+
+      if (!domain) {
+        return res.status(404).json({ error: 'not found' })
       }
 
-      case 'PATCH':
-      try {
-        if (isGlobalAdmin) {
-          const response = await Domain.findOneAndUpdate(
-            { _id: req.query.id },
-            req.body,
-            { new: true }
-          )
-          return res.status(200).json({ success: true, data: response })
-        } else {
-          return res
-            .status(400)
-            .json({ success: false, message: 'not allowed' })
+      if (isGlobalAdmin) {
+      } else if (isDomainAdmin) {
+        if (!domain.adminEmails.includes(user.email)) {
+          return res.status(403).json({ error: 'not allowed' })
         }
-      } catch (error) {
-        return res.status(400).json({ success: false, error: error.message })
+      } else if (isUser) {
+        const company = await RealEstate.find({
+          adminEmails: user.email,
+          domain: domain._id,
+        })
+
+        if (!company) {
+          return res.status(403).json({ error: 'not allowed' })
+        }
       }
+
+      return res.status(200).json(domain)
+    } catch (error) {
+      return res.status(500).json({ error })
+    }
+  } else if (req.method === 'DELETE') {
+    try {
+      if (!isGlobalAdmin) {
+        return res.status(403).json({ error: 'not allowed' })
+      }
+
+      const domain = await Domain.findByIdAndRemove(req.query.id)
+
+      if (!domain) {
+        return res.status(404).json({ error: 'not found' })
+      }
+
+      // TODO: proper HTTP status
+      return res.status(200).json(domain)
+    } catch (error) {
+      return res.status(500).json({ error })
+    }
+  } else if (req.method === 'PATCH') {
+    try {
+      if (!isGlobalAdmin) {
+        return res.status(403).json({ error: 'not allowed' })
+      }
+
+      const domain = await Domain.findByIdAndUpdate(req.query.id, req.body, {
+        new: true,
+      })
+
+      if (!domain) {
+        return res.status(404).json({ error: 'not found' })
+      }
+
+      // TODO: proper HTTP status
+      return res.status(200).json(domain)
+    } catch (error) {
+      return res.status(500).json({ error })
+    }
   }
 }

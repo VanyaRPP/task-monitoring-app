@@ -1,23 +1,37 @@
-export interface IDomainModel {
-  name: string
-  adminEmails: [string]
-  streets: string[]
-  description: string
+import { IDomain } from '@common/modules/models/Domain'
+import { IFilter } from '@common/modules/models/Filter'
+
+export type BaseGetQueryRequest = {
+  limit?: number
+  skip?: number
 }
 
-export interface IExtendedDomain extends IDomainModel {
-  _id: string
-  _v: number
+export type GetDomainsQueryRequest =
+  | (BaseGetQueryRequest & {
+      domainId?: string[] | string
+      name?: string[] | string
+      streetId?: string[] | string
+      adminEmail?: string[] | string
+    })
+  | undefined
+export type GetDomainsQueryResponse = {
+  data: IDomain[]
+  filter: {
+    name: IFilter[]
+    streets: IFilter[]
+    adminEmails: IFilter[]
+  }
+  total: number
 }
 
 export interface IAddDomainResponse {
   success: boolean
-  data: IExtendedDomain
+  data: IDomain
 }
 
 export interface IGetDomainResponse {
   success: boolean
-  data: IExtendedDomain[]
+  data: IDomain[]
 }
 
 export interface IDeleteDomainResponse {

@@ -1,15 +1,14 @@
-import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
-import { Form, FormInstance, Input, Select } from 'antd'
-import s from './style.module.scss'
-import DomainStreets from './DomainStreets'
 import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
-import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import { IStreet } from '@common/modules/models/Street'
+import { IDomain } from '@common/modules/models/Domain'
+import { Form, FormInstance, Input } from 'antd'
+import { FC } from 'react'
+import DomainStreets from './DomainStreets'
+import s from './style.module.scss'
 
 interface Props {
   form: FormInstance<any>
-  currentDomain: IExtendedDomain
+  currentDomain: IDomain
 }
 const DomainForm: FC<Props> = ({ form, currentDomain }) => {
   const initialValues = useInitialValues(currentDomain)
@@ -45,7 +44,7 @@ const DomainForm: FC<Props> = ({ form, currentDomain }) => {
   )
 }
 
-function useInitialValues(currentDomain: IExtendedDomain) {
+function useInitialValues(currentDomain: IDomain) {
   // TODO: add useEffect || useCallback ?
   // currently we have few renders
   // we need it only once. on didmount (first render)

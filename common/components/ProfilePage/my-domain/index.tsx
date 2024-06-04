@@ -1,14 +1,14 @@
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import { Radio, Card } from 'antd'
+import { Card, Radio } from 'antd'
 import React from 'react'
 
 const MyDomain: React.FC = () => {
-  const { data: domains = [], isLoading } = useGetDomainsQuery({})
+  const { data: domains, isLoading } = useGetDomainsQuery({})
 
   return (
     <Card loading={isLoading} size="small" title="Мої надавачі послуг">
       <Radio.Group>
-        {domains.map((item) => (
+        {domains?.data.map((item) => (
           <Radio.Button value={item.name} key={item.name}>
             {item.name}
           </Radio.Button>

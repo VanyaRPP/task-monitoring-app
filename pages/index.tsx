@@ -1,23 +1,29 @@
-import { unstable_getServerSession } from 'next-auth'
-import { authOptions } from './api/auth/[...nextauth]'
+import Dashboard from '@common/components/Dashboard'
+import HomePage from '@common/components/HomePage/index'
+import { authOptions } from '@pages/api/auth/[...nextauth]'
+import { Space } from 'antd'
 import { GetServerSideProps } from 'next'
-import HomePage from '../common/components/HomePage/index'
-import DashboardPage from '../common/components/DashboardPage'
+import { getServerSession } from 'next-auth'
 
 const Home: React.FC<{
   isAuth: boolean
 }> = ({ isAuth }) => {
-  return isAuth ? <DashboardPage /> : <HomePage />
+  if (!isAuth) {
+    return <HomePage />
+  }
+
+  return (
+    <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Dashboard.Streets />
+      <Dashboard.Domains />
+    </Space>
+  )
 }
 
 export default Home
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

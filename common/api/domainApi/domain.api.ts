@@ -1,12 +1,10 @@
+import { IDomain } from '@common/modules/models/Domain'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { toCleanObject } from '@utils/toCleanObject'
 import {
-  IDomainModel,
-  IExtendedDomain,
-  IDeleteDomainResponse,
-  IAddDomainResponse,
-  IGetDomainResponse,
+  GetDomainsQueryRequest,
+  GetDomainsQueryResponse,
   IExtendedAreas,
-  IGetAreasResponse,
 } from './domain.api.types'
 
 export const domainApi = createApi({
@@ -16,24 +14,26 @@ export const domainApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getDomains: builder.query<
-      IExtendedDomain[],
-      { limit?: number; streetId?: string; domainId?: string }
-    >({
-      query: ({ limit, streetId, domainId }) => {
+    getDomain: builder.query<IDomain, string | undefined>({
+      query: (id) => {
+        return {
+          url: `domain/${id}`,
+          method: 'GET',
+        }
+      },
+      providesTags: ['Domain'],
+    }),
+    getDomains: builder.query<GetDomainsQueryResponse, GetDomainsQueryRequest>({
+      query: (query) => {
         return {
           url: `domain`,
           method: 'GET',
-          params: { limit, streetId, domainId },
+          params: toCleanObject(query),
         }
       },
-      providesTags: (response) =>
-        response
-          ? response.map((item) => ({ type: 'Domain', id: item._id }))
-          : [],
-      transformResponse: (response: IGetDomainResponse) => response.data,
+      providesTags: ['Domain'],
     }),
-    addDomain: builder.mutation<IAddDomainResponse, IDomainModel>({
+    addDomain: builder.mutation<IDomain, Omit<IDomain, '_id'>>({
       query(data) {
         const { ...body } = data
         return {
@@ -44,19 +44,16 @@ export const domainApi = createApi({
       },
       invalidatesTags: ['Domain'],
     }),
-    deleteDomain: builder.mutation<
-      IDeleteDomainResponse,
-      IExtendedDomain['_id']
-    >({
+    deleteDomain: builder.mutation<IDomain, IDomain['_id']>({
       query(id) {
         return {
           url: `domain/${id}`,
           method: 'DELETE',
         }
       },
-      invalidatesTags: (response) => (response ? ['Domain'] : []),
+      invalidatesTags: ['Domain'],
     }),
-    editDomain: builder.mutation<IExtendedDomain, Partial<IExtendedDomain>>({
+    editDomain: builder.mutation<IDomain, Partial<IDomain>>({
       query(data) {
         const { _id, ...body } = data
         return {
@@ -65,22 +62,21 @@ export const domainApi = createApi({
           body: body,
         }
       },
-      invalidatesTags: (response) => (response ? ['Domain'] : []),
+      invalidatesTags: ['Domain'],
     }),
     getAreas: builder.query<IExtendedAreas, { domainId?: string }>({
       query: ({ domainId }) => ({
         url: `domain/areas/${domainId}`,
         method: 'GET',
       }),
-      providesTags: (result, error, { domainId }) => [{ type: 'IDomain', id: domainId || '' }],
-      transformResponse: (response: IGetAreasResponse) => response.data,
+      providesTags: ['Domain'],
     }),
-    
   }),
 })
 
 export const {
   useGetAreasQuery,
+  useGetDomainQuery,
   useGetDomainsQuery,
   useAddDomainMutation,
   useDeleteDomainMutation,

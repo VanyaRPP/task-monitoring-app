@@ -1,10 +1,10 @@
-import React from 'react'
+import { useGetStreetsQuery } from '@common/api/streetApi/street.api'
 import { validateField } from '@common/assets/features/validators'
-import { Select, Form } from 'antd'
-import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
+import { Form, Select } from 'antd'
+import React from 'react'
 
 const DomainStreets: React.FC = () => {
-  const { data: streets, isLoading } = useGetAllStreetsQuery({})
+  const { data: streets, isLoading } = useGetStreetsQuery({})
 
   return (
     <Form.Item
@@ -26,7 +26,7 @@ const DomainStreets: React.FC = () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         filterOption={(input, option) => (option?.label ?? '').includes(input)}
-        options={streets?.map((i) => ({
+        options={streets?.data.map((i) => ({
           value: i._id,
           label: `${i.address} (м. ${i.city})`,
         }))}
