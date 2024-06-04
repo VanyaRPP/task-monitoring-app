@@ -1,9 +1,12 @@
+import {
+  GetDomainsQueryRequest,
+  GetDomainsQueryResponse,
+} from '@common/api/domainApi/domain.api.types'
 import { expect } from '@jest/globals'
-import handler from '../index'
-
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
-import { domains, users, streets } from '@utils/testData'
+import { domains, realEstates, users } from '@utils/testData'
+import handler from '..'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -12,336 +15,276 @@ jest.mock('@pages/api/api.config', () => jest.fn())
 setupTestEnvironment()
 
 describe('Domain API - GET', () => {
-  it('should load Domain as GlobalAdmin', async () => {
-    await mockLoginAs(users.globalAdmin)
-
-    const mockReq = {
-      method: 'GET',
-      query: {},
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
-
-    await handler(mockReq, mockRes)
-
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-
-    const received = parseReceived(response.data)
-
-    expect(received).toEqual(domains)
-  })
-
-  it('should load Domain as GlobalAdmin with limit', async () => {
-    await mockLoginAs(users.globalAdmin)
-
-    const mockReq = {
-      method: 'GET',
-      query: { limit: 2 },
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
-
-    await handler(mockReq, mockRes)
-
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-
-    const received = parseReceived(response.data)
-    const domain = domains.slice(0, 2)
-    expect(received).toEqual(domain)
-  })
-
-  it('should load Domain as GlobalAdmin with domainId', async () => {
-    await mockLoginAs(users.globalAdmin)
-
-    const mockReq = {
-      method: 'GET',
-      query: { domainId: domains[0]._id },
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
-
-    await handler(mockReq, mockRes)
-
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-
-    const received = parseReceived(response.data)
-    const domain = domains.filter((domain) =>
-      domain._id.includes(domains[0]._id)
+  // TODO: move to testData.ts as user.role.domains
+  const userDomains = domains.filter(({ _id }) =>
+    realEstates.find(
+      ({ domain, adminEmails }) =>
+        domain === _id && adminEmails.includes(users.user.email)
     )
-    expect(received).toEqual(domain)
-  })
-
-  it('should load Domain as DomainAdmin', async () => {
-    await mockLoginAs(users.domainAdmin)
-
-    const mockReq = {
-      method: 'GET',
-      query: {},
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
-
-    await handler(mockReq, mockRes)
-
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-
-    const received = parseReceived(response.data)
-    const domain = domains.filter((domain) =>
-      domain.adminEmails.includes('domainAdmin@example.com')
-    )
-    expect(received).toEqual(domain)
-  })
-
-  it('should load Domain as DomainAdmin with limit', async () => {
-    await mockLoginAs(users.domainAdmin)
-
-    const mockReq = {
-      method: 'GET',
-      query: { limit: 2 },
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
-
-    await handler(mockReq, mockRes)
-
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-
-    const received = parseReceived(response.data)
-    const domain = domains
-      .filter((domain) =>
-        domain.adminEmails.includes('domainAdmin@example.com')
+  )
+  const notUserDomains = domains.filter(
+    ({ _id }) =>
+      !realEstates.find(
+        ({ domain, adminEmails }) =>
+          domain === _id && adminEmails.includes(users.user.email)
       )
-      .slice(0, 2)
-    expect(received).toEqual(domain)
+  )
+  const domainAdminDomains = domains.filter(({ adminEmails }) =>
+    adminEmails.includes(users.domainAdmin.email)
+  )
+  const notDomainAdminDomains = domains.filter(
+    ({ adminEmails }) => !adminEmails.includes(users.domainAdmin.email)
+  )
+
+  describe('query: {}', () => {
+    it('should load Domains as GlobalAdmin', async () => {
+      await mockLoginAs(users.globalAdmin)
+
+      const response = await getDomainsQuery({})
+
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual(domains)
+    })
+    it('should load Domains as DomainAdmin', async () => {
+      await mockLoginAs(users.domainAdmin)
+
+      const response = await getDomainsQuery({})
+
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual(domainAdminDomains)
+    })
+    it('should load Domains as User', async () => {
+      await mockLoginAs(users.user)
+
+      const response = await getDomainsQuery({})
+
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual(userDomains)
+    })
   })
 
-  it('should load Domain as DomainAdmin with domainId', async () => {
-    await mockLoginAs(users.domainAdmin)
+  describe('query: { limit }', () => {
+    it('should load Domains with limit as GlobalAdmin', async () => {
+      await mockLoginAs(users.globalAdmin)
 
-    const mockReq = {
-      method: 'GET',
-      query: { domainId: domains[0]._id },
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
+      const response = await getDomainsQuery({
+        limit: 3,
+      })
 
-    await handler(mockReq, mockRes)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual(domains.slice(0, 3))
+    })
+    it('should load Domains with limit as DomainAdmin', async () => {
+      await mockLoginAs(users.domainAdmin)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
+      const response = await getDomainsQuery({
+        limit: 3,
+      })
 
-    expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual(domainAdminDomains.slice(0, 3))
+    })
+    it('should load Domains with limit as User', async () => {
+      await mockLoginAs(users.user)
 
-    const received = parseReceived(response.data)
-    const domain = domains.filter(
-      (domain) =>
-        domain._id.includes(domains[0]._id) &&
-        domain.adminEmails.includes('domainAdmin@example.com')
-    )
-    expect(received).toEqual(domain)
+      const response = await getDomainsQuery({
+        limit: 3,
+      })
+
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual(userDomains.slice(0, 3))
+    })
   })
 
-  it('should not load Domain as User', async () => {
-    await mockLoginAs(users.user)
+  describe('query: { skip }', () => {
+    it('should load Domains with skip as GlobalAdmin', async () => {
+      await mockLoginAs(users.globalAdmin)
 
-    const mockReq = {
-      method: 'GET',
-      query: {},
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
+      const response = await getDomainsQuery({
+        skip: 1,
+      })
 
-    await handler(mockReq, mockRes)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual(domains.slice(1))
+    })
+    it('should load Domains with skip as DomainAdmin', async () => {
+      await mockLoginAs(users.domainAdmin)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
+      const response = await getDomainsQuery({
+        skip: 1,
+      })
 
-    expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual(domainAdminDomains.slice(1))
+    })
+    it('should load Domains with skip as User', async () => {
+      await mockLoginAs(users.user)
 
-    const received = parseReceived(response.data)
-    expect(received).toEqual([])
+      const response = await getDomainsQuery({
+        skip: 1,
+      })
+
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual(userDomains.slice(1))
+    })
   })
 
-  it('should not load Domain as User with limit', async () => {
-    await mockLoginAs(users.user)
+  describe('query: { limit, skip }', () => {
+    it('should load Domains with limit and skip as GlobalAdmin', async () => {
+      await mockLoginAs(users.globalAdmin)
 
-    const mockReq = {
-      method: 'GET',
-      query: { limit: 2 },
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
+      const response = await getDomainsQuery({
+        limit: 3,
+        skip: 1,
+      })
 
-    await handler(mockReq, mockRes)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual(domains.slice(1, 4))
+    })
+    it('should load Domains with limit and skip as DomainAdmin', async () => {
+      await mockLoginAs(users.domainAdmin)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
+      const response = await getDomainsQuery({
+        limit: 3,
+        skip: 1,
+      })
 
-    expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual(domainAdminDomains.slice(1, 4))
+    })
+    it('should load Domains with limit and skip as User', async () => {
+      await mockLoginAs(users.user)
 
-    const received = parseReceived(response.data)
-    expect(received).toEqual([])
+      const response = await getDomainsQuery({
+        limit: 3,
+        skip: 1,
+      })
+
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual(userDomains.slice(1, 4))
+    })
   })
 
-  it('should not load Domain as User with domainId', async () => {
-    await mockLoginAs(users.user)
+  describe('query: { domainId } when single domainId provided', () => {
+    it('should load Domains with domainId as GlobalAdmin', async () => {
+      await mockLoginAs(users.globalAdmin)
 
-    const mockReq = {
-      method: 'GET',
-      query: { domainId: domains[0]._id },
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
+      const response = await getDomainsQuery({
+        domainId: domains[0]._id,
+      })
 
-    await handler(mockReq, mockRes)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual([domains[0]])
+    })
+    it('should load Domains with domainId as DomainAdmin if domainId is related to user', async () => {
+      await mockLoginAs(users.domainAdmin)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
+      const response = await getDomainsQuery({
+        domainId: domainAdminDomains[0]._id,
+      })
 
-    expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual([domainAdminDomains[0]])
+    })
+    it('should load Domains with domainId as User if domainId is related to user company', async () => {
+      await mockLoginAs(users.user)
 
-    const received = parseReceived(response.data)
-    expect(received).toEqual([])
+      const response = await getDomainsQuery({
+        domainId: userDomains[0]._id,
+      })
+
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual([userDomains[0]])
+    })
+    it('should NOT load Domains with domainId as DomainAdmin if domainId is NOT related to user', async () => {
+      await mockLoginAs(users.domainAdmin)
+
+      const response = await getDomainsQuery({
+        domainId: notDomainAdminDomains[0]._id,
+      })
+
+      expect(response.status).toHaveBeenCalledWith(403)
+    })
+    it('should NOT load Domains with domainId as User if domainId is NOT related to user company', async () => {
+      await mockLoginAs(users.user)
+
+      const response = await getDomainsQuery({
+        domainId: notUserDomains[0]._id,
+      })
+
+      expect(response.status).toHaveBeenCalledWith(403)
+    })
   })
 
-  it('should load Domain as GlobalAdmin with street', async () => {
-    await mockLoginAs(users.globalAdmin)
+  describe("query: { domainId } when multiple domainId's provided", () => {
+    it("should load Domains with domainId's as GlobalAdmin", async () => {
+      await mockLoginAs(users.globalAdmin)
 
-    const mockReq = {
-      method: 'GET',
-      query: { streetId: streets[0]._id },
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
+      const response = await getDomainsQuery({
+        domainId: domains.slice(0, 3).map(({ _id }) => _id),
+      })
 
-    await handler(mockReq, mockRes)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual(domains.slice(0, 3))
+    })
+    it("should load Domains with domainId's as DomainAdmin", async () => {
+      await mockLoginAs(users.domainAdmin)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
+      const response = await getDomainsQuery({
+        domainId: domainAdminDomains.slice(0, 3).map(({ _id }) => _id),
+      })
 
-    expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual(domainAdminDomains.slice(0, 3))
+    })
+    it("should load Domains with domainId's as User", async () => {
+      await mockLoginAs(users.user)
 
-    const received = parseReceived(response.data)
-    const domain = domains.filter(
-      (domain) =>
-        domain.streets.includes(streets[0]._id)
-    )
-    expect(received).toEqual(domain)
-  })
+      const response = await getDomainsQuery({
+        domainId: userDomains.slice(0, 3).map(({ _id }) => _id),
+      })
 
-  it('should load Domain as DomainAdmin with street', async () => {
-    await mockLoginAs(users.domainAdmin)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.data).toEqual(userDomains.slice(0, 3))
+    })
+    it("should NOT load Domains with domainId's as DomainAdmin if domainId is NOT related to user", async () => {
+      await mockLoginAs(users.domainAdmin)
 
-    const mockReq = {
-      method: 'GET',
-      query: { streetId: streets[0]._id },
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
+      const response = await getDomainsQuery({
+        domainId: notDomainAdminDomains.slice(0, 3).map(({ _id }) => _id),
+      })
 
-    await handler(mockReq, mockRes)
+      expect(response.status).toHaveBeenCalledWith(403)
+    })
+    it("should NOT load Domains with domainId's as User if domainId is NOT related to user company", async () => {
+      await mockLoginAs(users.user)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
+      const response = await getDomainsQuery({
+        domainId: notUserDomains.slice(0, 3).map(({ _id }) => _id),
+      })
 
-    expect(response.status).toHaveBeenCalledWith(200)
-
-    const received = parseReceived(response.data)
-    const domain = domains.filter(
-      (domain) =>
-        domain.streets.includes(streets[0]._id) &&
-        domain.adminEmails.includes('domainAdmin@example.com')
-    )
-    expect(received).toEqual(domain)
-  })
-
-  it('should not load Domain as User with street', async () => {
-    await mockLoginAs(users.user)
-
-    const mockReq = {
-      method: 'GET',
-      query: { streetId: streets[0]._id },
-    } as any
-    const mockRes = {
-      status: jest.fn(() => mockRes),
-      json: jest.fn(),
-    } as any
-
-    await handler(mockReq, mockRes)
-
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-
-    const received = parseReceived(response.data)
-    expect(received).toEqual([])
+      expect(response.status).toHaveBeenCalledWith(403)
+    })
   })
 })
 
+async function getDomainsQuery(query: GetDomainsQueryRequest): Promise<{
+  status: number
+  data: GetDomainsQueryResponse
+}> {
+  const mockReq = { method: 'GET', query } as any
+  const mockRes = { status: jest.fn(() => mockRes), json: jest.fn() } as any
+
+  await handler(mockReq, mockRes)
+
+  return {
+    status: mockRes.status,
+    data: parseReceived(mockRes.json.mock.lastCall[0].data),
+  }
+}
+
 function parseReceived(data: any) {
-  return data.map(({ _doc: domain }) => {
+  return data?.map(({ _doc: domain }) => {
     const { __v, _id, streets, ...rest } = domain
 
     return {
