@@ -15,6 +15,7 @@ const Home: React.FC<{
   return (
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
       <Dashboard.Streets />
+      <Dashboard.Domains />
     </Space>
   )
 }

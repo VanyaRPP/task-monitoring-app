@@ -4,27 +4,30 @@ import {
   QuestionCircleOutlined,
 } from '@ant-design/icons'
 import { Alert, Button, Popconfirm, Table, Tag, Tooltip, message } from 'antd'
-import { useRouter } from 'next/router'
 import { ColumnType } from 'antd/lib/table'
+import { useRouter } from 'next/router'
 
 import {
   useDeleteDomainMutation,
   useGetDomainsQuery,
 } from '@common/api/domainApi/domain.api'
-import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import StreetsBlock from '@common/components/DashboardPage/blocks/streets'
+import { IDomain } from '@common/modules/models/Domain'
 import { AppRoutes } from '@utils/constants'
 
 export interface Props {
   domainId?: string
-  setCurrentDomain?: (domain: IExtendedDomain) => void
+  setCurrentDomain?: (domain: IDomain) => void
 }
 
 const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.DOMAIN
 
-  const { data, isLoading, isError } = useGetDomainsQuery({ domainId, limit: isOnPage ? 0 : 5 })
+  const { data, isLoading, isError } = useGetDomainsQuery({
+    domainId,
+    limit: isOnPage ? 0 : 5,
+  })
 
   const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
 
@@ -36,6 +39,10 @@ const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
       message.error('Помилка при видаленні')
     }
   }
+
+  console.log(data)
+
+  return <></>
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
@@ -60,7 +67,7 @@ const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
 const getDefaultColumns = (
   handleDelete?: (...args: any) => void,
   deleteLoading?: boolean,
-  setCurrentDomain?: (domain: IExtendedDomain) => void
+  setCurrentDomain?: (domain: IDomain) => void
 ): ColumnType<any>[] => [
   {
     fixed: 'left',
@@ -90,7 +97,7 @@ const getDefaultColumns = (
     fixed: 'right',
     title: '',
     width: 50,
-    render: (_, domain: IExtendedDomain) => (
+    render: (_, domain: IDomain) => (
       <Button
         style={{ padding: 0 }}
         type="link"
@@ -106,9 +113,11 @@ const getDefaultColumns = (
     title: '',
     dataIndex: '',
     width: 50,
-    render: (_, domain: IExtendedDomain) => (
+    render: (_, domain: IDomain) => (
       <Popconfirm
-        title={`Ви впевнені що хочете видалити ${domain.name ?? 'цей надавач послуг'}?`}
+        title={`Ви впевнені що хочете видалити ${
+          domain.name ?? 'цей надавач послуг'
+        }?`}
         onConfirm={() => handleDelete(domain?._id)}
         cancelText="Відміна"
         disabled={deleteLoading}

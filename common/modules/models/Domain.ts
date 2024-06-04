@@ -1,11 +1,11 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import { IStreet } from '@common/modules/models/Street'
+import mongoose, { Schema } from 'mongoose'
 
-export interface IDomain {
-  _id: ObjectId | string
+export interface IDomain extends mongoose.Document {
   name: string
-  adminEmails: [string]
-  streets: [ObjectId]
-  description: string
+  adminEmails: string[]
+  streets: IStreet[]
+  description?: string
 }
 
 const DomainSchema = new Schema<IDomain>({
@@ -15,11 +15,11 @@ const DomainSchema = new Schema<IDomain>({
     type: [{ type: Schema.Types.ObjectId, ref: 'Street' }],
     required: true,
   },
-  description: { type: String, required: true },
+  description: { type: String, required: false },
 })
 
 const Domain =
-  (mongoose.models?.Domain as mongoose.Model<IDomain>) ||
+  (mongoose.models.Domain as mongoose.Model<IDomain>) ||
   mongoose.model('Domain', DomainSchema)
 
 export default Domain

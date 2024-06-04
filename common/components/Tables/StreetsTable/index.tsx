@@ -91,8 +91,6 @@ export const StreetsTable: React.FC<StreetsTableProps> = ({
         dataIndex: 'city',
         filterSearch: editable,
         filters: editable ? streets?.filter.city : null,
-        onFilter: (_, record: IStreet) =>
-          editable && filter.city?.includes(record.city),
         filteredValue: editable ? filter.city : null,
       },
       {
@@ -100,8 +98,6 @@ export const StreetsTable: React.FC<StreetsTableProps> = ({
         dataIndex: 'address',
         filterSearch: editable,
         filters: editable ? streets?.filter.address : null,
-        onFilter: (_, record: IStreet) =>
-          editable && filter.address?.includes(record.address),
         filteredValue: editable ? filter.address : null,
       },
       {

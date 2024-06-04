@@ -3,6 +3,7 @@ import Street from '@common/modules/models/Street'
 import start from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { getMongoCount } from '@utils/getMongoCount'
+import { toFilters } from '@utils/toFilters'
 import { FilterQuery } from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -78,15 +79,10 @@ export default async function handler(
         .limit(+limit)
 
       const filter = {
-        city: (await Street.distinct('city', options)).map((city) => ({
-          text: city,
-          value: city,
-        })),
-        address: (await Street.distinct('address', options)).map((address) => ({
-          text: address,
-          value: address,
-        })),
+        city: toFilters(await Street.distinct('city', options)),
+        address: toFilters(await Street.distinct('address', options)),
       }
+
       const total = await getMongoCount(Street, { ...options, ...filters })
 
       return res.status(200).json({

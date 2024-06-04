@@ -1,24 +1,27 @@
-import { EditStreetForm } from '@common/components/Forms/EditStreetForm'
+import { EditDomainForm } from '@common/components/Forms/EditDomainForm'
 import { EditModalProps } from '@common/components/Modals'
-import { IStreet } from '@common/modules/models/Street'
+import { IDomain } from '@common/modules/models/Domain'
 import { Form, Modal } from 'antd'
 import { useCallback, useState } from 'react'
 
-export interface EditStreetModalProps extends EditModalProps {
-  street?: IStreet['_id']
+export interface EditDomainModalProps extends EditModalProps {
+  domain?: IDomain['_id']
+  streets?: IDomain['_id'][]
 }
 
 /**
- * Create/edit street modal window with wrapped `EditStreetForm`
+ * Create/edit domain modal window with wrapped `EditDomainForm`
  *
- * @param street - editing street id (leave empty to create new street)
+ * @param domain - editing domain id (leave empty to create new domain)
+ * @param streets - default street id's
  * @param editable - describes is form read-only or can be edited (default - `true`)
  * @param onOk - callback executed on successfull form submit
  * @param onCancel - callback executed on modal cancel
  * @param ...props - rest of `antd#Modal` props
  */
-export const EditStreetModal: React.FC<EditStreetModalProps> = ({
-  street: streetId,
+export const EditDomainModal: React.FC<EditDomainModalProps> = ({
+  domain: domainId,
+  streets: streetsIds,
   editable = true,
   onOk,
   onCancel,
@@ -42,7 +45,7 @@ export const EditStreetModal: React.FC<EditStreetModalProps> = ({
   }, [form, onCancel])
 
   const handleOk = useCallback(() => {
-    if (!changed || !streetId) {
+    if (!changed || !domainId) {
       return handleOkSubmit()
     }
 
@@ -53,7 +56,7 @@ export const EditStreetModal: React.FC<EditStreetModalProps> = ({
       cancelText: 'Ні',
       onOk: handleOkSubmit,
     })
-  }, [changed, streetId, handleOkSubmit])
+  }, [changed, domainId, handleOkSubmit])
 
   const handleCancel = useCallback(() => {
     if (!changed) {
@@ -87,18 +90,19 @@ export const EditStreetModal: React.FC<EditStreetModalProps> = ({
         title
           ? title
           : !editable
-          ? 'Перегляд адреси'
-          : streetId
-          ? 'Редагування адреси'
-          : 'Створення адреси'
+          ? 'Перегляд надавача послуг'
+          : domainId
+          ? 'Редагування надавача послуг'
+          : 'Створення надавача послуг'
       }
       okButtonProps={!editable ? { style: { display: 'none' } } : okButtonProps}
       cancelText={!editable ? 'Закрити' : cancelText}
       {...props}
     >
-      <EditStreetForm
+      <EditDomainForm
         form={form}
-        street={streetId}
+        domain={domainId}
+        streets={streetsIds}
         editable={editable}
         onChange={handleChange}
         onFinish={handleFinish}

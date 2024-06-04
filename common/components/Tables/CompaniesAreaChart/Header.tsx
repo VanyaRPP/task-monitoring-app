@@ -1,13 +1,13 @@
+import DomainSelector from '@common/components/DomainSelector'
+import { IDomain } from '@common/modules/models/Domain'
 import { Typography } from 'antd'
 import s from './style.module.scss'
-import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import DomainSelector from '@common/components/DomainSelector'
 
 const { Text } = Typography
 
 interface Props {
   setDomainId: (domainId: string) => void
-  domains: IExtendedDomain[]
+  domains: IDomain[]
 }
 
 const CompaniesAreaChartHeader: React.FC<Props> = ({

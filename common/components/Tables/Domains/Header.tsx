@@ -8,12 +8,12 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 
 import AddDomainModal from '@common/components/UI/DomainsComponents/DomainModal'
+import { IDomain } from '@common/modules/models/Domain'
 import { AppRoutes } from '@utils/constants'
-import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 
 export interface Props {
-  currentDomain?: IExtendedDomain
-  setCurrentDomain?: (domain: IExtendedDomain) => void
+  currentDomain?: IDomain
+  setCurrentDomain?: (domain: IDomain) => void
 }
 
 const DomainsHeader: React.FC<Props> = ({
