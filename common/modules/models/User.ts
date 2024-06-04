@@ -1,9 +1,9 @@
-import { IAddress } from 'common/modules/models/Task'
-import { ITask } from './Task'
+import { ICustomer } from '@common/api/customerApi/customer.api.types'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import { IAddress } from 'common/modules/models/Task'
 import mongoose, { ObjectId, Schema } from 'mongoose'
-import { ICustomer } from '@common/api/customerApi/customer.api.types'
+import { ITask } from './Task'
 
 export interface IUser {
   _id?: ObjectId | string

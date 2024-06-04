@@ -1,5 +1,5 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
-import { parseStringToFloat } from '@utils/helpers'
+import { toRoundFixed } from '@utils/helpers'
 import { Form, Input } from 'antd'
 
 export { default as Cleaning } from './Cleaning'
@@ -17,18 +17,38 @@ export const Amount: React.FC<{
   record: IPaymentField & { key: string }
   preview?: boolean
   last?: boolean
-}> = ({ record, preview, last }) => {
+  rules?: any[]
+}> = ({ record, preview, last, rules = [] }) => {
   const type = !last ? 'amount' : 'lastAmount'
 
   if (preview) {
-    return <span style={{ flex: 1 }}>{parseStringToFloat(record[type])}</span>
+    return <span style={{ flex: 1 }}>{toRoundFixed(record[type])}</span>
   }
 
   return (
     <Form.Item
       name={[record.key, type]}
       style={{ flex: 1 }}
-      rules={[{ required: true, message: 'Required' }]}
+      rules={[
+        {
+          validator: (_, value) => {
+            if (isNaN(value) || value === null || !value) {
+              return Promise.reject(new Error('Required'))
+            }
+
+            if (type === 'lastAmount' && value < 0) {
+              return Promise.reject(new Error('Не менше 0'))
+            }
+
+            if (type !== 'lastAmount' && value <= 0) {
+              return Promise.reject(new Error('Більше 0'))
+            }
+
+            return Promise.resolve()
+          },
+        },
+        ...rules,
+      ]}
     >
       <Input type="number" />
     </Form.Item>

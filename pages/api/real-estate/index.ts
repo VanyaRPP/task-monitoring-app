@@ -6,7 +6,6 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import start, { ExtendedData } from '@pages/api/api.config'
 import Domain from '@common/modules/models/Domain'
 import {
-  filterOptions,
   getDistinctCompanyAndDomain,
   getDistinctStreets,
 } from '@utils/helpers'
@@ -25,49 +24,55 @@ export default async function handler(
       try {
         const options = {}
         const {
-          companyIds,
-          domainIds,
+          companyId,
           domainId,
           streetId,
-          companyId,
           limit = 0,
         } = req.query
 
-        if (domainId) options.domain = domainId
-        if (companyId) options._id = companyId
+        if (companyId) options._id = { $in: companyId }
 
-        if (domainIds) {
-          options.domain = filterOptions(options?.domain, domainIds)
-        }
+        if (streetId) options.street = { $in: streetId }
 
-        if (companyIds) {
-          options._id = filterOptions(options?._id, companyIds)
-        }
-        if (streetId) {
-          options.street = filterOptions(options?.street, streetId)
-        }
+        if (isUser) options.adminEmails = { $in: [user.email] }
 
         if (isDomainAdmin) {
-          const domains = await Domain.find({
+          const domains = await (Domain as any).find({
             adminEmails: { $in: [user.email] },
           })
-          const domainsIds = domains.map((i) => i._id.toString())
+
+          const domainIds = domains.map((i) => i._id.toString())
+
           if (domainId) {
-            // TODO: add test. Domain admin can't fetch realEstate which is not belong to him
-            if (!domainsIds.includes(domainId)) {
-              return res.status(400).json({
-                success: false,
-                message: 'not allowed to fetch such domainId',
-              })
+            options.domain = {
+              $in: domainId.filter((id) => domainIds.includes(id)),
             }
-          } else {
-            options.domain = { $in: domainsIds }
+          } else if (domainIds) {
+            options.domain = { $in: domainIds }
           }
         }
 
-        if (isUser) {
-          options.adminEmails = { $in: [user.email] }
-        }
+        // if (companyId) options._id = { $in: companyId }
+
+        // if (streetId) options.street = { $in: streetId }
+
+        // if (isUser) options.$or = [{ adminEmails: user.email }]
+
+        // if (isDomainAdmin) {
+        //   const domains = await (Domain as any).find({
+        //     adminEmails: user.email,
+        //   })
+
+        //   const domainIds = domains.map((i) => i._id.toString())
+
+        //   if (domainId) {
+        //     options.$or.push({
+        //       $in: domainId.filter((id) => domainIds.includes(id)),
+        //     })
+        //   } else if (domainIds) {
+        //     options.domain = { $in: domainIds }
+        //   }
+        // }
 
         const realEstates = await RealEstate.find(options)
           .limit(+limit)

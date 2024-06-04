@@ -1,11 +1,11 @@
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import {
-  IDeleteRealestateResponse,
   IAddRealestateResponse,
-  IGetRealestateResponse,
+  IDeleteRealestateResponse,
   IExtendedRealestate,
+  IGetRealestateResponse,
   IRealestate,
 } from './realestate.api.types'
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export const realestateApi = createApi({
   reducerPath: 'realestateApi',
@@ -18,21 +18,12 @@ export const realestateApi = createApi({
       IGetRealestateResponse,
       {
         limit?: number
-        domainId?: string
-        streetId?: string[]
-        companyId?: string
-        domainIds?: string[]
-        companyIds?: string[]
+        domainId?: string[] | string
+        streetId?: string[] | string
+        companyId?: string[] | string
       }
     >({
-      query: ({
-        limit,
-        companyId,
-        domainId,
-        streetId,
-        domainIds,
-        companyIds,
-      }) => {
+      query: ({ limit, companyId, domainId, streetId }) => {
         return {
           url: `real-estate`,
           params: {
@@ -40,8 +31,6 @@ export const realestateApi = createApi({
             companyId,
             domainId,
             streetId,
-            domainIds,
-            companyIds,
           },
         }
       },
