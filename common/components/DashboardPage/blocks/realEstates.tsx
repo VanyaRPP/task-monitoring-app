@@ -1,9 +1,9 @@
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
-import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { useGetRealEstatesQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import CompaniesHeader from '@common/components/Tables/Companies/Header'
 import CompaniesTable from '@common/components/Tables/Companies/Table'
 import TableCard from '@common/components/UI/TableCard'
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import { useRouter } from 'next/router'
@@ -24,15 +24,14 @@ const RealEstateBlock: React.FC<Props> = ({ domainId, streetId }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.REAL_ESTATE
   const { data: user } = useGetCurrentUserQuery()
-  const [currentRealEstate, setCurrentRealEstate] =
-    useState<IExtendedRealestate>(null)
+  const [currentRealEstate, setCurrentRealEstate] = useState<IRealEstate>(null)
   const [filters, setFilters] = useState<any>()
 
   const {
     data: realEstates,
     isLoading,
     isError,
-  } = useGetAllRealEstateQuery({
+  } = useGetRealEstatesQuery({
     domainId: domainId || filters?.domain || undefined,
     companyId: filters?.company || undefined,
     streetId: filters?.street || undefined,

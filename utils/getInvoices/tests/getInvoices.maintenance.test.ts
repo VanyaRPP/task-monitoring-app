@@ -1,13 +1,13 @@
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { expect } from '@jest/globals'
 import { ServiceType } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 
 describe('getInvoices - MAINTENANCE', () => {
   it('should load Maintenance from payment', () => {
-    const company: Partial<IRealestate> = {}
+    const company: Partial<IRealEstate> = {}
     const service: Partial<IService> = {}
     const payment: Partial<IPayment> = {
       invoice: [
@@ -33,7 +33,7 @@ describe('getInvoices - MAINTENANCE', () => {
   })
 
   it('should load Maintenance from company with rent', () => {
-    const company: Partial<IRealestate> = {
+    const company: Partial<IRealEstate> = {
       rentPart: 10,
       pricePerMeter: 15,
     }
@@ -57,7 +57,7 @@ describe('getInvoices - MAINTENANCE', () => {
   })
 
   it('should NOT load Maintenance from company without rent', () => {
-    const company: Partial<IRealestate> = null
+    const company: Partial<IRealEstate> = null
     const service: Partial<IService> = null
     const payment: Partial<IPayment> = null
     const prevPayment: Partial<IPayment> = null
@@ -75,7 +75,7 @@ describe('getInvoices - MAINTENANCE', () => {
   })
 
   it('should NOT load Maintenance from payment without maintenance', () => {
-    const company: Partial<IRealestate> = null
+    const company: Partial<IRealEstate> = null
     const service: Partial<IService> = null
     const payment: Partial<IPayment> = {
       invoice: [],
@@ -95,7 +95,7 @@ describe('getInvoices - MAINTENANCE', () => {
   })
 
   it('should NOT load Maintenance without props', () => {
-    const company: Partial<IRealestate> = null
+    const company: Partial<IRealEstate> = null
     const service: Partial<IService> = null
     const payment: Partial<IPayment> = null
     const prevPayment: Partial<IPayment> = null

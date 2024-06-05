@@ -1,10 +1,11 @@
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { toCleanObject } from '@utils/toCleanObject'
 import {
+  GetCompaniesQueryRequest,
+  GetCompaniesQueryResponse,
   IAddRealestateResponse,
   IDeleteRealestateResponse,
-  IExtendedRealestate,
-  IGetRealestateResponse,
-  IRealestate,
 } from './realestate.api.types'
 
 export const realestateApi = createApi({
@@ -14,33 +15,23 @@ export const realestateApi = createApi({
   tagTypes: ['RealEstate'],
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getAllRealEstate: builder.query<
-      IGetRealestateResponse,
-      {
-        limit?: number
-        domainId?: string[] | string
-        streetId?: string[] | string
-        companyId?: string[] | string
-      }
+    getRealEstates: builder.query<
+      GetCompaniesQueryResponse,
+      GetCompaniesQueryRequest
     >({
-      query: ({ limit, companyId, domainId, streetId }) => {
+      query: (query) => {
         return {
           url: `real-estate`,
-          params: {
-            limit,
-            companyId,
-            domainId,
-            streetId,
-          },
+          params: toCleanObject(query),
         }
       },
-      providesTags: (response) =>
-        response
-          ? response.data.map((item) => ({ type: 'RealEstate', id: item._id }))
-          : [],
+      providesTags: ['RealEstate'],
     }),
-
-    addRealEstate: builder.mutation<IAddRealestateResponse, IRealestate>({
+    getRealEstate: builder.query<IRealEstate, string>({
+      query: (id) => `real-estate/${id}`,
+      providesTags: ['RealEstate'],
+    }),
+    addRealEstate: builder.mutation<IAddRealestateResponse, IRealEstate>({
       query(body) {
         return {
           url: `real-estate`,
@@ -52,7 +43,7 @@ export const realestateApi = createApi({
     }),
     deleteRealEstate: builder.mutation<
       IDeleteRealestateResponse,
-      IExtendedRealestate['_id']
+      IRealEstate['_id']
     >({
       query(id) {
         return {
@@ -62,10 +53,7 @@ export const realestateApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['RealEstate'] : []),
     }),
-    editRealEstate: builder.mutation<
-      IExtendedRealestate,
-      Partial<IExtendedRealestate>
-    >({
+    editRealEstate: builder.mutation<IRealEstate, Partial<IRealEstate>>({
       query(data) {
         const { _id, ...body } = data
         return {
@@ -82,6 +70,7 @@ export const realestateApi = createApi({
 export const {
   useDeleteRealEstateMutation,
   useAddRealEstateMutation,
-  useGetAllRealEstateQuery,
+  useGetRealEstatesQuery,
+  useGetRealEstateQuery,
   useEditRealEstateMutation,
 } = realestateApi

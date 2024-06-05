@@ -2,8 +2,8 @@ import {
   IPayment,
   IPaymentField,
 } from '@common/api/paymentApi/payment.api.types'
-import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { ServiceType } from '@utils/constants'
 
 export type InvoicesCollection = {
@@ -11,14 +11,14 @@ export type InvoicesCollection = {
 }
 
 export interface IGetInvoiceProps {
-  company: Partial<IRealestate>
+  company: Partial<IRealEstate>
   service: Partial<IService>
   payment: Partial<IPayment>
   prevPayment: Partial<IPayment>
 }
 
 export interface IGetInvoiceByTypeProps {
-  company: Partial<IRealestate>
+  company: Partial<IRealEstate>
   service: Partial<IService>
   currInvoicesCollection: InvoicesCollection
   prevInvoicesCollection: InvoicesCollection

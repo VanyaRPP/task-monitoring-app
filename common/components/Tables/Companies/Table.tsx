@@ -1,21 +1,32 @@
-import { DeleteOutlined, EditOutlined, QuestionCircleOutlined, } from '@ant-design/icons'
-import { Alert, Button, Checkbox, Popconfirm, Table, Tag, message, Tooltip } from 'antd'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons'
+import { IFilter } from '@common/api/paymentApi/payment.api.types'
+import { useDeleteRealEstateMutation } from '@common/api/realestateApi/realestate.api'
+import { IGetRealestateResponse } from '@common/api/realestateApi/realestate.api.types'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { IRealEstate } from '@common/modules/models/RealEstate'
+import { AppRoutes, Roles } from '@utils/constants'
+import { isAdminCheck } from '@utils/helpers'
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Popconfirm,
+  Table,
+  Tag,
+  Tooltip,
+  message,
+} from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
-import { useDeleteRealEstateMutation } from '@common/api/realestateApi/realestate.api'
-import {
-  IExtendedRealestate,
-  IGetRealestateResponse,
-} from '@common/api/realestateApi/realestate.api.types'
-import { AppRoutes, Roles } from '@utils/constants'
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { isAdminCheck } from '@utils/helpers'
-import { IFilter } from '@common/api/paymentApi/payment.api.types'
 
 export interface Props {
   domainId?: string
   streetId?: string
-  setCurrentRealEstate?: (realEstate: IExtendedRealestate) => void
+  setCurrentRealEstate?: (realEstate: IRealEstate) => void
   realEstates: IGetRealestateResponse
   isLoading: boolean
   isError: boolean
@@ -124,7 +135,7 @@ const getDefaultColumns = ({
   streetId?: string
   isLoading?: boolean
   handleDelete?: (...args: any) => void
-  setCurrentRealEstate?: (realEstate: IExtendedRealestate) => void
+  setCurrentRealEstate?: (realEstate: IRealEstate) => void
   deleteLoading?: boolean
   isGlobalAdmin?: boolean
   isAdmin?: boolean
@@ -214,7 +225,7 @@ const getDefaultColumns = ({
       fixed: 'right',
       title: '',
       width: 50,
-      render: (_, realEstate: IExtendedRealestate) => (
+      render: (_, realEstate: IRealEstate) => (
         <Button
           style={{ padding: 0 }}
           type="link"
@@ -233,7 +244,7 @@ const getDefaultColumns = ({
       title: '',
       dataIndex: '',
       width: 50,
-      render: (_, realEstate: IExtendedRealestate) => (
+      render: (_, realEstate: IRealEstate) => (
         <Popconfirm
           title={`Ви впевнені що хочете видалити нерухомість?`}
           onConfirm={() => handleDelete(realEstate?._id)}

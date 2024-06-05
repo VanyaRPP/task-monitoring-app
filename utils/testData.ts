@@ -216,7 +216,7 @@ export const realEstates = [
     _id: '64e66d436d57a8640543dda4',
     domain: domains[3]._id,
     street: streets[3]._id,
-    companyName: 'company_5',
+    companyName: 'company_6',
     description: 'none',
     adminEmails: [users.globalAdmin.email],
     pricePerMeter: 10,

@@ -1,13 +1,13 @@
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { expect } from '@jest/globals'
 import { ServiceType } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 
 describe('getInvoices - DISCOUNT', () => {
   it('should load Discount from payment', () => {
-    const company: Partial<IRealestate> = {}
+    const company: Partial<IRealEstate> = {}
     const service: Partial<IService> = {}
     const payment: Partial<IPayment> = {
       invoice: [
@@ -33,7 +33,7 @@ describe('getInvoices - DISCOUNT', () => {
   })
 
   it('should load Discount from company with discount', () => {
-    const company: Partial<IRealestate> = {
+    const company: Partial<IRealEstate> = {
       discount: -3000,
     }
     const service: Partial<IService> = null
@@ -55,7 +55,7 @@ describe('getInvoices - DISCOUNT', () => {
   })
 
   it('should load Discount price from payment as sum', () => {
-    const company: Partial<IRealestate> = null
+    const company: Partial<IRealEstate> = null
     const service: Partial<IService> = null
     const payment: Partial<IPayment> = {
       invoice: [
@@ -83,7 +83,7 @@ describe('getInvoices - DISCOUNT', () => {
   })
 
   it('should NOT load Discount from company without discount', () => {
-    const company: Partial<IRealestate> = {}
+    const company: Partial<IRealEstate> = {}
     const service: Partial<IService> = {}
     const payment: Partial<IPayment> = {}
     const prevPayment: Partial<IPayment> = {}
@@ -101,7 +101,7 @@ describe('getInvoices - DISCOUNT', () => {
   })
 
   it('should load Discount from company with discount', () => {
-    const company: Partial<IRealestate> = {
+    const company: Partial<IRealEstate> = {
       discount: -3000,
     }
     const service: Partial<IService> = {}

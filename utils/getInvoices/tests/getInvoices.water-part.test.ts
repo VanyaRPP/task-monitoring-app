@@ -1,5 +1,5 @@
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { IRealEstate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { expect } from '@jest/globals'
 import { ServiceType } from '@utils/constants'
@@ -7,7 +7,7 @@ import { getInvoices } from '@utils/getInvoices'
 
 describe('getInvoices - WATER-PART', () => {
   it('should load WaterPart from payment', () => {
-    const company: Partial<IRealestate> = {}
+    const company: Partial<IRealEstate> = {}
     const service: Partial<IService> = {}
     const payment: Partial<IPayment> = {
       invoice: [
@@ -33,7 +33,7 @@ describe('getInvoices - WATER-PART', () => {
   })
 
   it('should load WaterPart from company with waterPart', () => {
-    const company: Partial<IRealestate> = {
+    const company: Partial<IRealEstate> = {
       waterPart: 20,
     }
     const service: Partial<IService> = {
@@ -59,7 +59,7 @@ describe('getInvoices - WATER-PART', () => {
   })
 
   it('should load WaterPart price from payment as sum', () => {
-    const company: Partial<IRealestate> = null
+    const company: Partial<IRealEstate> = null
     const service: Partial<IService> = null
     const payment: Partial<IPayment> = {
       invoice: [
@@ -87,7 +87,7 @@ describe('getInvoices - WATER-PART', () => {
   })
 
   it('should NOT load WaterPart from company without waterPart', () => {
-    const company: Partial<IRealestate> = {}
+    const company: Partial<IRealEstate> = {}
     const service: Partial<IService> = {
       waterPrice: 123,
     }

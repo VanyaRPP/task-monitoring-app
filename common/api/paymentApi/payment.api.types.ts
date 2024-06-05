@@ -1,9 +1,9 @@
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { IDomain } from '@common/modules/models/Domain'
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { IStreet } from '@common/modules/models/Street'
 import { ServiceType } from '@utils/constants'
 import { ObjectId } from 'mongoose'
-import { IRealestate } from '../realestateApi/realestate.api.types'
 import { IUser } from './../../modules/models/User'
 
 export interface IPaymentField {
@@ -31,7 +31,7 @@ export interface IPayment {
   invoiceCreationDate: Date
   domain: Partial<IDomain> | string
   street: Partial<IStreet> | string
-  company: Partial<IRealestate> | string
+  company: Partial<IRealEstate> | string
   monthService: Partial<IService> | string
   description?: string
   invoice: IPaymentField[]

@@ -1,144 +1,207 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import RealEstate from '@common/modules/models/RealEstate'
-import { getCurrentUser } from '@utils/getCurrentUser'
-import start, { ExtendedData } from '@pages/api/api.config'
 import Domain from '@common/modules/models/Domain'
-import {
-  getDistinctCompanyAndDomain,
-  getDistinctStreets,
-} from '@utils/helpers'
+import RealEstate from '@common/modules/models/RealEstate'
+import Street from '@common/modules/models/Street'
+import start from '@pages/api/api.config'
+import { getCurrentUser } from '@utils/getCurrentUser'
+import { getMongoCount } from '@utils/getMongoCount'
+import { toFilters } from '@utils/toFilters'
+import { FilterQuery } from 'mongoose'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ExtendedData>
+  res: NextApiResponse
 ) {
-  const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
-    await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isUser, user } = await getCurrentUser(
+    req,
+    res
+  )
 
-  switch (req.method) {
-    case 'GET':
-      try {
-        const options = {}
-        const {
-          companyId,
-          domainId,
-          streetId,
-          limit = 0,
-        } = req.query
+  if (req.method === 'GET') {
+    try {
+      const {
+        companyId,
+        domainId,
+        streetId,
+        name,
+        adminEmail,
+        limit = 0,
+        skip = 0,
+      } = req.query
 
-        if (companyId) options._id = { $in: companyId }
+      const companiesIds: string[] | null = companyId
+        ? typeof companyId === 'string'
+          ? companyId.split(',').map((id) => decodeURIComponent(id))
+          : companyId.map((id) => decodeURIComponent(id))
+        : null
+      const domainsIds: string[] | null = domainId
+        ? typeof domainId === 'string'
+          ? domainId.split(',').map((id) => decodeURIComponent(id))
+          : domainId.map((id) => decodeURIComponent(id))
+        : null
+      const names: string[] | null = name
+        ? typeof name === 'string'
+          ? name.split(',').map((id) => decodeURIComponent(id))
+          : name.map((id) => decodeURIComponent(id))
+        : null
+      const streetsIds: string[] | null = streetId
+        ? typeof streetId === 'string'
+          ? streetId.split(',').map((id) => decodeURIComponent(id))
+          : streetId.map((id) => decodeURIComponent(id))
+        : null
+      const adminsEmails: string[] | null = adminEmail
+        ? typeof adminEmail === 'string'
+          ? adminEmail.split(',').map((id) => decodeURIComponent(id))
+          : adminEmail.map((id) => decodeURIComponent(id))
+        : null
 
-        if (streetId) options.street = { $in: streetId }
+      const options: FilterQuery<typeof Domain> = {}
+      const filters: FilterQuery<typeof Domain> = {}
 
-        if (isUser) options.adminEmails = { $in: [user.email] }
+      if (isGlobalAdmin) {
+        // GlobalAdmin security restrictions
+      } else if (isDomainAdmin) {
+        // DomainAdmin security restrictions
+        const relatedDomainsIds = [
+          ...(await Domain.distinct('_id', { adminEmails: user.email })).map(
+            (id) => id.toString()
+          ),
+          ...(
+            await RealEstate.distinct('domain', { adminEmails: user.email })
+          ).map((id) => id.toString()),
+        ]
 
-        if (isDomainAdmin) {
-          const domains = await (Domain as any).find({
-            adminEmails: { $in: [user.email] },
+        if (
+          domainsIds?.filter((id) => !relatedDomainsIds.includes(id)).length
+        ) {
+          return res.status(403).json({
+            error: 'restricte access to filter by domainId not related to you',
           })
-
-          const domainIds = domains.map((i) => i._id.toString())
-
-          if (domainId) {
-            options.domain = {
-              $in: domainId.filter((id) => domainIds.includes(id)),
-            }
-          } else if (domainIds) {
-            options.domain = { $in: domainIds }
-          }
         }
 
-        // if (companyId) options._id = { $in: companyId }
-
-        // if (streetId) options.street = { $in: streetId }
-
-        // if (isUser) options.$or = [{ adminEmails: user.email }]
-
-        // if (isDomainAdmin) {
-        //   const domains = await (Domain as any).find({
-        //     adminEmails: user.email,
-        //   })
-
-        //   const domainIds = domains.map((i) => i._id.toString())
-
-        //   if (domainId) {
-        //     options.$or.push({
-        //       $in: domainId.filter((id) => domainIds.includes(id)),
-        //     })
-        //   } else if (domainIds) {
-        //     options.domain = { $in: domainIds }
-        //   }
-        // }
-
-        const realEstates = await RealEstate.find(options)
-          .limit(+limit)
-          .populate({
-            path: 'domain',
-            select: '_id name description',
+        const relatedCompaniesIds = (
+          await RealEstate.distinct('_id', {
+            $or: [
+              { adminEmails: user.email },
+              { domain: { $in: relatedDomainsIds } },
+            ],
           })
-          .populate({ path: 'street', select: '_id address city' })
+        ).map((id) => id.toString())
 
-        const { distinctDomains, distinctCompanies } =
-          await getDistinctCompanyAndDomain({
-            isGlobalAdmin,
-            user,
-            companyGroup: '_id',
-            model: RealEstate,
+        if (
+          companiesIds?.filter((id) => !relatedCompaniesIds.includes(id)).length
+        ) {
+          return res.status(403).json({
+            error: 'restricte access to filter by companyId not related to you',
           })
-
-        const distinctStreets = await getDistinctStreets({
-          user,
-          model: RealEstate,
-        })
-
-        const filteredStreets = distinctStreets
-          // parse to regular IStreet
-          ?.map((street) => street.streetData as IStreet)
-          // remove dublicates
-          .filter(
-            (street, index, streets) =>
-              index ===
-              streets.findIndex(
-                (s) => s._id.toString() === street._id.toString()
-              )
-          )
-
-        return res.status(200).json({
-          domainsFilter: distinctDomains?.map(({ domainDetails }) => ({
-            text: domainDetails.name,
-            value: domainDetails._id,
-          })),
-          realEstatesFilter: distinctCompanies?.map(({ companyDetails }) => ({
-            text: companyDetails.companyName,
-            value: companyDetails._id,
-          })),
-          streetsFilter: filteredStreets?.map((street) => ({
-            text: `${street.address}, м.${street.city}`,
-            value: street._id,
-          })),
-          data: realEstates,
-          success: true,
-        })
-      } catch (error) {
-        return res.status(400).json({ success: false, message: error })
-      }
-
-    case 'POST':
-      try {
-        if (!isAdmin) {
-          return res
-            .status(400)
-            .json({ success: false, message: 'not allowed' })
         }
-        // TODO: body validation
-        const realEstate = await RealEstate.create(req.body)
-        return res.status(200).json({ success: true, data: realEstate })
-      } catch (error) {
-        return res.status(400).json({ success: false, message: error })
+
+        options._id = { $in: relatedCompaniesIds }
+      } else if (isUser) {
+        // User security restrictions
+        const relatedCompanies = await RealEstate.find({
+          adminEmails: user.email,
+        })
+
+        const relatedCompaniesIds = relatedCompanies.map(({ _id }) =>
+          _id.toString()
+        )
+
+        if (
+          companiesIds?.filter((id) => !relatedCompaniesIds.includes(id)).length
+        ) {
+          return res.status(403).json({
+            error: 'restricte access to filter by companyId not related to you',
+          })
+        }
+
+        const relatedDomainsIds = relatedCompanies.map(({ domain }) =>
+          domain.toString()
+        )
+
+        if (
+          domainsIds?.filter((id) => !relatedDomainsIds.includes(id)).length
+        ) {
+          return res.status(403).json({
+            error:
+              'restricte access to filter by domainId not related to your company',
+          })
+        }
+
+        options._id = { $in: relatedCompaniesIds }
       }
+
+      if (companiesIds) {
+        filters._id = { $in: companiesIds }
+      }
+      if (domainsIds) {
+        filters.domain = { $in: domainsIds }
+      }
+      if (names) {
+        filters.name = { $in: names }
+      }
+      if (streetsIds) {
+        filters.street = { $in: streetsIds }
+      }
+      if (adminsEmails) {
+        filters.adminEmails = { $in: adminsEmails }
+      }
+
+      const companies = await RealEstate.find({ $and: [options, filters] })
+        .skip(+skip)
+        .limit(+limit)
+        .populate('street')
+        .populate('domain')
+
+      const filter = {
+        name: toFilters(await RealEstate.distinct('name', options)),
+        domain: toFilters(
+          await Domain.find({
+            _id: { $in: await RealEstate.distinct('domain', options) },
+          }),
+          '_id',
+          'name'
+        ),
+        street: toFilters(
+          await Street.find({
+            _id: { $in: await RealEstate.distinct('street', options) },
+          }),
+          '_id',
+          (street) => `вул. ${street.address} (м. ${street.city})`
+        ),
+        adminEmails: toFilters(
+          await RealEstate.distinct('adminEmails', options)
+        ),
+      }
+
+      const total = await getMongoCount(RealEstate, {})
+
+      return res.status(200).json({ data: companies, filter, total })
+    } catch (error) {
+      return res.status(500).json({ error })
+    }
+  } else if (req.method === 'POST') {
+    try {
+      const { name, streets } = req.body
+
+      const existingDomain = await Domain.findOne({
+        name,
+        streets: { $all: streets },
+      })
+
+      if (existingDomain) {
+        return res
+          .status(400)
+          .json({ error: 'Домен з такими даними вже існує' })
+      }
+
+      const domain = await Domain.create(req.body)
+
+      return res.status(201).json(domain)
+    } catch (error) {
+      return res.status(500).json({ error: error })
+    }
   }
 }

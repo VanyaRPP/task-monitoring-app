@@ -1,9 +1,9 @@
-import React from 'react'
-import { Select } from 'antd'
-import s from './style.module.scss'
+import { useGetRealEstatesQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { isAdminCheck } from '@utils/helpers'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { Select } from 'antd'
+import React from 'react'
+import s from './style.module.scss'
 
 interface Props {
   setCompanyId: (companyId: string) => void
@@ -11,7 +11,7 @@ interface Props {
 
 const PaymentsSelector: React.FC<Props> = ({ setCompanyId }) => {
   const { data: user } = useGetCurrentUserQuery()
-  const { data: realEstates } = useGetAllRealEstateQuery({})
+  const { data: realEstates } = useGetRealEstatesQuery({})
 
   if (isAdminCheck(user?.roles) && realEstates?.data.length > 1) {
     const options = realEstates?.data.map((item) => ({

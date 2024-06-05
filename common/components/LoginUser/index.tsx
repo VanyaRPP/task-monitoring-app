@@ -1,6 +1,6 @@
 import { UserOutlined } from '@ant-design/icons'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { useGetRealEstatesQuery } from '@common/api/realestateApi/realestate.api'
 import { Avatar, Button, Card, Image, Skeleton, Tag } from 'antd'
 import classNames from 'classnames'
 import { useGetCurrentUserQuery } from 'common/api/userApi/user.api'
@@ -133,7 +133,7 @@ function SessionUser({ image }) {
 }
 
 function DomainsCompanies() {
-  const { data: realEstates } = useGetAllRealEstateQuery({})
+  const { data: realEstates } = useGetRealEstatesQuery({})
   const { data: domains } = useGetDomainsQuery({})
 
   const companies = realEstates?.data || []

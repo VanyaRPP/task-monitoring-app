@@ -1,10 +1,12 @@
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import { IDomain } from '@common/modules/models/Domain'
+import { IStreet } from '@common/modules/models/Street'
+import mongoose, { Schema } from 'mongoose'
 
-export interface IRealEstateModel {
-  domain: ObjectId
-  street: ObjectId
+export interface IRealEstate extends mongoose.Document {
+  domain: IDomain
+  street: IStreet
   companyName: string
-  description: string
+  description?: string
   adminEmails: string[]
   pricePerMeter: number
   servicePricePerMeter?: number
@@ -17,12 +19,12 @@ export interface IRealEstateModel {
   garbageCollector?: boolean
 }
 
-export const RealEstateSchema = new Schema<IRealEstateModel>({
-  domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
-  street: { type: Schema.Types.ObjectId, ref: 'Street' },
+export const RealEstateSchema = new Schema<IRealEstate>({
+  domain: { type: Schema.Types.ObjectId, ref: 'Domain', required: true },
+  street: { type: Schema.Types.ObjectId, ref: 'Street', required: true },
   companyName: { type: String, required: true },
-  description: { type: String, required: true },
-  adminEmails: { type: [String], required: true },
+  description: { type: String, required: false },
+  adminEmails: { type: [String], required: true, default: [] },
   pricePerMeter: { type: Number, required: true, default: 0 },
   servicePricePerMeter: { type: Number, required: false },
   totalArea: { type: Number, required: true, default: 0 },
@@ -35,7 +37,7 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
 })
 
 const RealEstate =
-  (mongoose.models?.RealEstate as mongoose.Model<IRealEstateModel>) ||
+  (mongoose.models.RealEstate as mongoose.Model<IRealEstate>) ||
   mongoose.model('RealEstate', RealEstateSchema)
 
 export default RealEstate
