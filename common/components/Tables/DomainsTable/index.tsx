@@ -22,11 +22,14 @@ export interface DomainsTableProps extends TableProps {
 }
 
 export const DomainsTable: React.FC<DomainsTableProps> = ({
-  streets: streetsIds,
+  streets: streetsIds = [],
   selected: _selected = [],
   onSelect,
   onDelete,
   editable = false,
+  expandable = false,
+  filterable = false,
+  selectable = false,
   ...props
 }) => {
   const { data: user } = useGetCurrentUserQuery()
@@ -40,9 +43,9 @@ export const DomainsTable: React.FC<DomainsTableProps> = ({
 
   const [selected, setSelected] = useState<string[]>(_selected)
   const [page, setPage] = useState<number>(1)
-  const [pageSize, setPageSize] = useState<number>(editable ? 10 : 5)
+  const [pageSize, setPageSize] = useState<number>(filterable ? 10 : 5)
   const [filter, setFilter] = useState<Record<string, any>>({
-    streets: streetsIds || null,
+    streets: streetsIds,
   })
 
   const { data: domains, isLoading: isDomainsLoading } = useGetDomainsQuery({
@@ -111,7 +114,7 @@ export const DomainsTable: React.FC<DomainsTableProps> = ({
             name
           ),
         // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
-        ...(editable && {
+        ...(filterable && {
           filterSearch: true,
           filters: domains?.filter.name,
           filteredValue: filter.name,
@@ -130,7 +133,7 @@ export const DomainsTable: React.FC<DomainsTableProps> = ({
           </>
         ),
         // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
-        ...(editable && {
+        ...(filterable && {
           filterSearch: true,
           filters: domains?.filter.streets,
           filteredValue: filter.streets,
@@ -147,7 +150,7 @@ export const DomainsTable: React.FC<DomainsTableProps> = ({
           </>
         ),
         // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
-        ...(editable && {
+        ...(filterable && {
           filterSearch: true,
           filters: domains?.filter.adminEmails,
           filteredValue: filter.adminEmails,
@@ -185,14 +188,22 @@ export const DomainsTable: React.FC<DomainsTableProps> = ({
         hidden: !editable || !isGlobalAdmin,
       },
     ].filter((column) => !column.hidden)
-  }, [editable, filter, handleDelete, isDomainAdmin, isGlobalAdmin, domains])
+  }, [
+    editable,
+    filterable,
+    filter,
+    handleDelete,
+    isDomainAdmin,
+    isGlobalAdmin,
+    domains,
+  ])
 
   return (
     <Table
       rowKey="_id"
       size="small"
       pagination={
-        editable && {
+        filterable && {
           total: domains?.total,
           current: page,
           pageSize: pageSize,
@@ -202,14 +213,17 @@ export const DomainsTable: React.FC<DomainsTableProps> = ({
         }
       }
       rowSelection={
-        editable && {
+        selectable && {
           fixed: 'left',
           type: 'checkbox',
           selectedRowKeys: selected,
           onChange: handleSelect,
         }
       }
-      // expandable={editable && {}}
+      // expandable={{
+      //   rowExpandable: (record) => expandable,
+      //   expandedRowRender: (record) => <></>,
+      // }}
       onChange={(_, filters) => setFilter(filters)}
       loading={isDomainsLoading}
       // BUG: antd v4.x issue, optional columns and columnsType fixed in antd v5.x

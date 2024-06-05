@@ -91,6 +91,9 @@ export const Streets: React.FC<DashboardStreetsProps> = ({
       <StreetsTable
         domain={domainId}
         editable={router.pathname === AppRoutes.STREETS}
+        selectable={router.pathname === AppRoutes.STREETS}
+        filterable={router.pathname === AppRoutes.STREETS}
+        expandable
         selected={selected}
         onSelect={(streets) => setSelected(streets)}
       />
