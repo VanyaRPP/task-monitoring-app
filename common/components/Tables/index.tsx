@@ -1,8 +1,13 @@
 export interface TableProps {
+  editable?: boolean
+  expandable?: boolean
+  filterable?: boolean
+  selectable?: boolean
+
   selected?: string[]
   onSelect?: (items: string[]) => void
   onDelete?: (item: string) => void
-  editable?: boolean
+
   className?: string
   style?: React.CSSProperties
 }

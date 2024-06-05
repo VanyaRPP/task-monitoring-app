@@ -1,12 +1,14 @@
 import {
   DeleteOutlined,
   LeftOutlined,
+  MergeCellsOutlined,
   PlusOutlined,
   RightOutlined,
 } from '@ant-design/icons'
 import { useDeleteStreetMutation } from '@common/api/streetApi/street.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { StreetsTable } from '@common/components/Tables/StreetsTable'
+import { EditDomainButton } from '@common/components/UI/Buttons/EditDomainButton'
 import { EditStreetButton } from '@common/components/UI/Buttons/EditStreetButton'
 import { AppRoutes, Roles } from '@utils/constants'
 import { Button, Popconfirm, Space, message } from 'antd'
@@ -59,6 +61,12 @@ export const Streets: React.FC<DashboardStreetsProps> = ({
           </EditStreetButton>
         )}
 
+        {isGlobalAdmin && !!selected.length && (
+          <EditDomainButton streets={selected} type="link">
+            <MergeCellsOutlined /> Групувати
+          </EditDomainButton>
+        )}
+
         {router.pathname !== AppRoutes.STREETS && (
           <Button type="link" onClick={() => router.push(AppRoutes.STREETS)}>
             Вулиці
@@ -83,6 +91,9 @@ export const Streets: React.FC<DashboardStreetsProps> = ({
       <StreetsTable
         domain={domainId}
         editable={router.pathname === AppRoutes.STREETS}
+        selectable={router.pathname === AppRoutes.STREETS}
+        filterable={router.pathname === AppRoutes.STREETS}
+        expandable
         selected={selected}
         onSelect={(streets) => setSelected(streets)}
       />

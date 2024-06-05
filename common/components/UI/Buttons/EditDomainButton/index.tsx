@@ -37,6 +37,7 @@ export const EditDomainButton: React.FC<EditDomainButtonProps> = ({
       <EditDomainModal
         open={open}
         domain={domainId}
+        streets={streetsIds}
         editable={editable}
         onOk={() => setOpen(false)}
         onCancel={() => setOpen(false)}

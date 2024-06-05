@@ -5,6 +5,7 @@ import {
 } from '@common/api/streetApi/street.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { TableProps } from '@common/components/Tables'
+import { DomainsTable } from '@common/components/Tables/DomainsTable'
 import { EditStreetButton } from '@common/components/UI/Buttons/EditStreetButton'
 import { IStreet } from '@common/modules/models/Street'
 import { Roles } from '@utils/constants'
@@ -21,6 +22,9 @@ export const StreetsTable: React.FC<StreetsTableProps> = ({
   onSelect,
   onDelete,
   editable = false,
+  expandable = false,
+  filterable = false,
+  selectable = false,
   ...props
 }) => {
   const { data: user } = useGetCurrentUserQuery()
@@ -34,7 +38,7 @@ export const StreetsTable: React.FC<StreetsTableProps> = ({
 
   const [selected, setSelected] = useState<string[]>(_selected)
   const [page, setPage] = useState<number>(1)
-  const [pageSize, setPageSize] = useState<number>(editable ? 10 : 5)
+  const [pageSize, setPageSize] = useState<number>(filterable ? 10 : 5)
   const [filter, setFilter] = useState<Record<string, any>>({})
 
   const { data: streets, isLoading: isStreetsLoading } = useGetStreetsQuery({
@@ -80,7 +84,7 @@ export const StreetsTable: React.FC<StreetsTableProps> = ({
   )
 
   useEffect(() => {
-    setSelected(_selected)
+    setSelected(_selected || [])
   }, [_selected])
 
   const columns = useMemo(() => {
@@ -89,30 +93,33 @@ export const StreetsTable: React.FC<StreetsTableProps> = ({
         title: 'Місто',
         width: '25%',
         dataIndex: 'city',
-        filterSearch: editable,
-        filters: editable ? streets?.filter.city : null,
-        filteredValue: editable ? filter.city : null,
+        // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
+        ...(filterable && {
+          filterSearch: true,
+          filters: streets?.filter.city,
+          filteredValue: filter.city,
+        }),
       },
       {
         title: 'Вулиця',
         dataIndex: 'address',
-        filterSearch: editable,
-        filters: editable ? streets?.filter.address : null,
-        filteredValue: editable ? filter.address : null,
+        // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
+        ...(filterable && {
+          filterSearch: true,
+          filters: streets?.filter.address,
+          filteredValue: filter.address,
+        }),
       },
       {
         align: 'center',
         fixed: 'right',
         width: 64,
         render: (_, street: IStreet) => (
-          <EditStreetButton
-            street={street._id}
-            editable={editable && isGlobalAdmin}
-          >
+          <EditStreetButton street={street._id} editable={isGlobalAdmin}>
             {isGlobalAdmin ? <EditFilled /> : <EyeFilled />}
           </EditStreetButton>
         ),
-        hidden: !editable || (!isDomainAdmin && !isGlobalAdmin),
+        hidden: !editable,
       },
       {
         align: 'center',
@@ -132,14 +139,14 @@ export const StreetsTable: React.FC<StreetsTableProps> = ({
         hidden: !editable || !isGlobalAdmin,
       },
     ].filter((column) => !column.hidden)
-  }, [editable, filter, handleDelete, isDomainAdmin, isGlobalAdmin, streets])
+  }, [editable, filterable, filter, handleDelete, isGlobalAdmin, streets])
 
   return (
     <Table
       rowKey="_id"
       size="small"
       pagination={
-        editable && {
+        filterable && {
           total: streets?.total,
           current: page,
           pageSize: pageSize,
@@ -149,20 +156,17 @@ export const StreetsTable: React.FC<StreetsTableProps> = ({
         }
       }
       rowSelection={
-        editable && {
+        selectable && {
           fixed: 'left',
           type: 'checkbox',
           selectedRowKeys: selected,
           onChange: handleSelect,
         }
       }
-      expandable={
-        editable &&
-        {
-          // TODO: update domains table to pass `street?: IStreet['_id]` into props and render THIS street domains
-          // expandedRowRender: (street) => <DomainsTable street={street._id} />,
-        }
-      }
+      expandable={{
+        rowExpandable: (record) => expandable,
+        expandedRowRender: (record) => <DomainsTable streets={[record._id]} />,
+      }}
       onChange={(_, filters) => setFilter(filters)}
       loading={isStreetsLoading}
       // BUG: antd v4.x issue, optional columns and columnsType fixed in antd v5.x
