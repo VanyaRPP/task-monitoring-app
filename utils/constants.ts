@@ -33,12 +33,12 @@ export enum Operations {
   WaterPrice = 'waterPrice',
   Custom = 'custom',
   PlacingPrice = 'placingPrice',
-  GeneralSum = 'generalSum'
+  GeneralSum = 'generalSum',
 }
 
 export enum ColumnsRoleView {
   GlobalAdmin = 1,
-  User = 2
+  User = 2,
 }
 
 export enum COLOR_THEME {
@@ -224,3 +224,9 @@ export const inflicionDescription = `
 Згідно з п. 13 Методики № 786 розмір орендної плати за кожний наступний місяць визначається шляхом коригування розміру місячної орендної плати за попередній місяць на індекс інфляції за поточний місяць.
 Тож для того щоб визначити розмір орендної плати за кожний наступний місяць оренди, необхідно розмір орендної плати за попередній місяць помножити на індекс інфляції за поточний місяць.
 При цьому зверніть увагу: такий механізм розрахунку застосовується незалежно від розміру індексу інфляції, тобто незалежно від того, перевищує ця величина 100 % чи ні, адже ніяких виключень та додаткових вимог з цього приводу чинне законодавство не містить.`
+
+export enum Constants {
+  DomainsDefinition = `Надавачі послуг - це організації та компанії, що здійснюють управління та мають під собою менші компанії та об'єкти нерухомості. Управляються адміністраторами`,
+  InflicionDescription = inflicionDescription,
+  MaintenanceWithoutInflicionDescription = maintenanceWithoutInflicionDescription,
+}

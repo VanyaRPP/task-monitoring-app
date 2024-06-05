@@ -1,4 +1,9 @@
-import { DeleteFilled, EditFilled, EyeFilled } from '@ant-design/icons'
+import {
+  DeleteFilled,
+  EditFilled,
+  EyeFilled,
+  QuestionCircleOutlined,
+} from '@ant-design/icons'
 import {
   useDeleteDomainMutation,
   useGetDomainsQuery,
@@ -8,8 +13,8 @@ import { TableProps } from '@common/components/Tables'
 import { EditDomainButton } from '@common/components/UI/Buttons/EditDomainButton'
 import { IDomain } from '@common/modules/models/Domain'
 import { IStreet } from '@common/modules/models/Street'
-import { Roles } from '@utils/constants'
-import { Button, Popconfirm, Table, Tag, message } from 'antd'
+import { Constants, Roles } from '@utils/constants'
+import { Button, Popconfirm, Table, Tag, Tooltip, message } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export interface DomainsTableProps extends TableProps {
@@ -90,12 +95,27 @@ export const DomainsTable: React.FC<DomainsTableProps> = ({
   const columns = useMemo(() => {
     return [
       {
-        title: 'Надавач послуг',
+        title: (
+          <Tooltip title={Constants.DomainsDefinition}>
+            Надавач послуг <QuestionCircleOutlined />
+          </Tooltip>
+        ),
         width: '250px',
         dataIndex: 'name',
-        filterSearch: editable,
-        filters: editable ? domains?.filter.name : null,
-        filteredValue: editable ? filter.name : null,
+        render: (name: string, record: IDomain) =>
+          record.description ? (
+            <Tooltip title={record.description}>
+              <QuestionCircleOutlined /> {name}
+            </Tooltip>
+          ) : (
+            name
+          ),
+        // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
+        ...(editable && {
+          filterSearch: true,
+          filters: domains?.filter.name,
+          filteredValue: filter.name,
+        }),
       },
       {
         title: 'Вулиці',
@@ -109,9 +129,12 @@ export const DomainsTable: React.FC<DomainsTableProps> = ({
             ))}
           </>
         ),
-        filterSearch: editable,
-        filters: editable ? domains?.filter.streets : null,
-        filteredValue: editable ? filter.streets : null,
+        // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
+        ...(editable && {
+          filterSearch: true,
+          filters: domains?.filter.streets,
+          filteredValue: filter.streets,
+        }),
       },
       {
         title: 'Представники',
@@ -123,9 +146,12 @@ export const DomainsTable: React.FC<DomainsTableProps> = ({
             ))}
           </>
         ),
-        filterSearch: editable,
-        filters: editable ? domains?.filter.adminEmails : null,
-        filteredValue: editable ? filter.adminEmails : null,
+        // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
+        ...(editable && {
+          filterSearch: true,
+          filters: domains?.filter.adminEmails,
+          filteredValue: filter.adminEmails,
+        }),
       },
       {
         align: 'center',
@@ -134,12 +160,12 @@ export const DomainsTable: React.FC<DomainsTableProps> = ({
         render: (_, domain: IDomain) => (
           <EditDomainButton
             domain={domain._id}
-            editable={editable && (isDomainAdmin || isGlobalAdmin)}
+            editable={isDomainAdmin || isGlobalAdmin}
           >
             {isDomainAdmin || isGlobalAdmin ? <EditFilled /> : <EyeFilled />}
           </EditDomainButton>
         ),
-        hidden: !editable || (!isDomainAdmin && !isGlobalAdmin),
+        hidden: !editable,
       },
       {
         align: 'center',
@@ -183,13 +209,7 @@ export const DomainsTable: React.FC<DomainsTableProps> = ({
           onChange: handleSelect,
         }
       }
-      expandable={
-        editable &&
-        {
-          // TODO: update domains table to pass `domain?: IDomain['_id]` into props and render THIS domain domains
-          // expandedRowRender: (domain) => <DomainsTable domain={domain._id} />,
-        }
-      }
+      // expandable={editable && {}}
       onChange={(_, filters) => setFilter(filters)}
       loading={isDomainsLoading}
       // BUG: antd v4.x issue, optional columns and columnsType fixed in antd v5.x
