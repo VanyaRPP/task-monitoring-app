@@ -51,6 +51,7 @@
     "puppeteer": "^21.7.0",
     "react": "18.1.0",
     "react-bootstrap": "^2.7.4",
+    "react-cool-onclickoutside": "^1.7.0",
     "react-dom": "18.1.0",
     "react-pdf": "^6.2.2",
     "react-redux": "^8.0.2",
