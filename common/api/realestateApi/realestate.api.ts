@@ -4,8 +4,6 @@ import { toCleanObject } from '@utils/toCleanObject'
 import {
   GetCompaniesQueryRequest,
   GetCompaniesQueryResponse,
-  IAddRealestateResponse,
-  IDeleteRealestateResponse,
 } from './realestate.api.types'
 
 export const realestateApi = createApi({
@@ -31,7 +29,7 @@ export const realestateApi = createApi({
       query: (id) => `real-estate/${id}`,
       providesTags: ['RealEstate'],
     }),
-    addRealEstate: builder.mutation<IAddRealestateResponse, IRealEstate>({
+    addRealEstate: builder.mutation<IRealEstate, Partial<IRealEstate>>({
       query(body) {
         return {
           url: `real-estate`,
@@ -41,10 +39,7 @@ export const realestateApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['RealEstate'] : []),
     }),
-    deleteRealEstate: builder.mutation<
-      IDeleteRealestateResponse,
-      IRealEstate['_id']
-    >({
+    deleteRealEstate: builder.mutation<IRealEstate, IRealEstate['_id']>({
       query(id) {
         return {
           url: `real-estate/${id}`,

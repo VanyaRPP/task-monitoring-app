@@ -25,7 +25,7 @@ export default async function handler(
         companyId,
         domainId,
         streetId,
-        name,
+        companyName,
         adminEmail,
         limit = 0,
         skip = 0,
@@ -41,10 +41,10 @@ export default async function handler(
           ? domainId.split(',').map((id) => decodeURIComponent(id))
           : domainId.map((id) => decodeURIComponent(id))
         : null
-      const names: string[] | null = name
-        ? typeof name === 'string'
-          ? name.split(',').map((id) => decodeURIComponent(id))
-          : name.map((id) => decodeURIComponent(id))
+      const companiesNames: string[] | null = companyName
+        ? typeof companyName === 'string'
+          ? companyName.split(',').map((id) => decodeURIComponent(id))
+          : companyName.map((id) => decodeURIComponent(id))
         : null
       const streetsIds: string[] | null = streetId
         ? typeof streetId === 'string'
@@ -139,8 +139,8 @@ export default async function handler(
       if (domainsIds) {
         filters.domain = { $in: domainsIds }
       }
-      if (names) {
-        filters.name = { $in: names }
+      if (companiesNames) {
+        filters.companyName = { $in: companiesNames }
       }
       if (streetsIds) {
         filters.street = { $in: streetsIds }
@@ -156,7 +156,9 @@ export default async function handler(
         .populate('domain')
 
       const filter = {
-        name: toFilters(await RealEstate.distinct('name', options)),
+        companyName: toFilters(
+          await RealEstate.distinct('companyName', options)
+        ),
         domain: toFilters(
           await Domain.find({
             _id: { $in: await RealEstate.distinct('domain', options) },

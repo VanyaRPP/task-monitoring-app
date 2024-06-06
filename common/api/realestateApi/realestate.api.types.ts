@@ -11,14 +11,14 @@ export type GetCompaniesQueryRequest =
       companyId?: string[] | string
       streetId?: string[] | string
       domainId?: string[] | string
-      name?: string[] | string
+      companyName?: string[] | string
       adminEmail?: string[] | string
     })
   | undefined
 export type GetCompaniesQueryResponse = {
   data: IRealEstate[]
   filter: {
-    name: IFilter[]
+    companyName: IFilter[]
     domain: IFilter[]
     street: IFilter[]
     adminEmails: IFilter[]
