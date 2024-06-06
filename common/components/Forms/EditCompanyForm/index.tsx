@@ -1,19 +1,19 @@
-import {
-  useGetDomainQuery,
-  useGetDomainsQuery,
-} from '@common/api/domainApi/domain.api'
+import { useGetDomainQuery } from '@common/api/domainApi/domain.api'
 import {
   useAddRealEstateMutation,
   useEditRealEstateMutation,
   useGetRealEstateQuery,
-  useGetRealEstatesQuery,
 } from '@common/api/realestateApi/realestate.api'
+import { useGetStreetQuery } from '@common/api/streetApi/street.api'
 import {
-  useGetStreetQuery,
-  useGetStreetsQuery,
-} from '@common/api/streetApi/street.api'
-import { EditFormItemProps, EditFormProps } from '@common/components/Forms'
+  EditFormAttributeProps,
+  EditFormItem,
+  EditFormProps,
+} from '@common/components/Forms'
 import { Loading } from '@common/components/UI/Loading'
+import { CompanyAdminSelect } from '@common/components/UI/Selectors/CompanyAdminSelect'
+import { DomainSelect } from '@common/components/UI/Selectors/DomainSelect'
+import { StreetSelect } from '@common/components/UI/Selectors/StreetSelect'
 import { IDomain } from '@common/modules/models/Domain'
 import { IRealEstate } from '@common/modules/models/RealEstate'
 import { IStreet } from '@common/modules/models/Street'
@@ -23,7 +23,6 @@ import {
   Form,
   FormInstance,
   Input,
-  Select,
   Tag,
   message,
 } from 'antd'
@@ -120,14 +119,23 @@ export const EditCompanyForm: React.FC<EditCompanyFormProps> = ({
       {...props}
     >
       <CompanyName form={form} loading={isLoading} editable={editable} />
+      {!editable && <Divider style={{ margin: '8px 0' }} />}
       <Description form={form} loading={isLoading} editable={editable} />
+      {!editable && <Divider style={{ margin: '8px 0' }} />}
       <AdminEmails form={form} loading={isLoading} editable={editable} />
+      {!editable && <Divider style={{ margin: '8px 0' }} />}
       <Domain form={form} loading={isLoading} editable={editable} />
+      {!editable && <Divider style={{ margin: '8px 0' }} />}
       <Street form={form} loading={isLoading} editable={editable} />
+      {!editable && <Divider style={{ margin: '8px 0' }} />}
       <Maintenance form={form} loading={isLoading} editable={editable} />
+      {!editable && <Divider style={{ margin: '8px 0' }} />}
       <Part form={form} loading={isLoading} editable={editable} />
+      {!editable && <Divider style={{ margin: '8px 0' }} />}
       <Cleaning form={form} loading={isLoading} editable={editable} />
+      {!editable && <Divider style={{ margin: '8px 0' }} />}
       <Discount form={form} loading={isLoading} editable={editable} />
+      {!editable && <Divider style={{ margin: '8px 0' }} />}
       <InflicionAndGarbageCollector
         form={form}
         loading={isLoading}
@@ -137,7 +145,7 @@ export const EditCompanyForm: React.FC<EditCompanyFormProps> = ({
   )
 }
 
-const CompanyName: React.FC<EditFormItemProps> = ({
+const CompanyName: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,
@@ -146,23 +154,23 @@ const CompanyName: React.FC<EditFormItemProps> = ({
   const companyName = Form.useWatch('companyName', form)
 
   return (
-    <Form.Item
+    <EditFormItem
       label="Назва"
       name="companyName"
-      rules={[{ required: true, message: `Поле "Назва" обов'язкове` }]}
+      rules={[{ required: true, message: `Поле обов'язкове` }]}
+      loading={loading}
+      noStyle={!editable}
     >
-      <Loading loading={loading}>
-        {editable ? (
-          <Input placeholder="Введіть назву" disabled={disabled} />
-        ) : (
-          companyName
-        )}
-      </Loading>
-    </Form.Item>
+      {editable ? (
+        <Input placeholder="Введіть назву..." disabled={disabled} />
+      ) : (
+        companyName
+      )}
+    </EditFormItem>
   )
 }
 
-const Description: React.FC<EditFormItemProps> = ({
+const Description: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,
@@ -171,23 +179,26 @@ const Description: React.FC<EditFormItemProps> = ({
   const description = Form.useWatch('description', form)
 
   return (
-    <Form.Item label="Опис" name="description">
-      <Loading loading={loading}>
-        {editable ? (
-          <Input.TextArea
-            rows={3}
-            placeholder="Введіть опис"
-            disabled={disabled}
-          />
-        ) : (
-          description
-        )}
-      </Loading>
-    </Form.Item>
+    <EditFormItem
+      label="Опис"
+      name="description"
+      loading={loading}
+      noStyle={!editable}
+    >
+      {editable ? (
+        <Input.TextArea
+          rows={3}
+          placeholder="Введіть опис..."
+          disabled={disabled}
+        />
+      ) : (
+        description
+      )}
+    </EditFormItem>
   )
 }
 
-const AdminEmails: React.FC<EditFormItemProps> = ({
+const AdminEmails: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,
@@ -195,42 +206,27 @@ const AdminEmails: React.FC<EditFormItemProps> = ({
 }) => {
   const adminEmails: string[] | undefined = Form.useWatch('adminEmails', form)
 
-  const { data: allCompanies, isLoading: isAllCompaniesLoading } =
-    useGetRealEstatesQuery({})
-
   return (
-    <Form.Item
+    <EditFormItem
       label="Адреси представників"
       name="adminEmails"
-      rules={[
-        { required: true, message: `Поле "Адреси представників" обов'язкове` },
-      ]}
+      rules={[{ required: true, message: `Поле обов'язкове` }]}
+      loading={loading}
+      noStyle={!editable}
+      required
     >
-      <Loading loading={loading}>
-        {editable ? (
-          <Select
-            mode="tags"
-            placeholder="Оберіть елекронні адреси"
-            disabled={disabled}
-            loading={isAllCompaniesLoading}
-            showSearch
-            allowClear
-            optionFilterProp="text"
-            options={allCompanies?.filter.adminEmails}
-          />
-        ) : (
-          <Form.Item noStyle>
-            {adminEmails?.map((adminEmail) => (
-              <Tag key={adminEmail}>{adminEmail}</Tag>
-            ))}
-          </Form.Item>
-        )}
-      </Loading>
-    </Form.Item>
+      {editable ? (
+        <CompanyAdminSelect mode="tags" disabled={disabled} />
+      ) : (
+        adminEmails?.map((adminEmail) => (
+          <Tag key={adminEmail}>{adminEmail}</Tag>
+        ))
+      )}
+    </EditFormItem>
   )
 }
 
-const Domain: React.FC<EditFormItemProps> = ({
+const Domain: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,
@@ -241,39 +237,27 @@ const Domain: React.FC<EditFormItemProps> = ({
 
   const { data: domain, isLoading: isDomainLoading } = useGetDomainQuery(
     domainId,
-    { skip: !domainId }
+    { skip: !domainId || editable }
   )
-  const { data: domains, isLoading: isDomainsLoading } = useGetDomainsQuery({})
-
   return (
-    <Form.Item
+    <EditFormItem
       label="Надавач послуг"
       name="domain"
-      rules={[{ required: true, message: `Поле "Надавач послуг" обов'язкове` }]}
+      rules={[{ required: true, message: `Поле обов'язкове` }]}
+      loading={loading}
+      noStyle={!editable}
+      required
     >
-      <Loading loading={loading}>
-        {editable ? (
-          <Select
-            placeholder="Оберіть надавача послуг"
-            loading={isDomainsLoading}
-            disabled={disabled || !!streetId}
-            showSearch
-            allowClear
-            optionFilterProp="label"
-            options={domains?.data.map(({ _id, name }) => ({
-              label: name,
-              value: _id,
-            }))}
-          />
-        ) : (
-          <Loading loading={isDomainLoading}>{domain?.name}</Loading>
-        )}
-      </Loading>
-    </Form.Item>
+      {editable ? (
+        <DomainSelect street={streetId} disabled={disabled} />
+      ) : (
+        <Loading loading={isDomainLoading}>{domain?.name}</Loading>
+      )}
+    </EditFormItem>
   )
 }
 
-const Street: React.FC<EditFormItemProps> = ({
+const Street: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,
@@ -284,43 +268,34 @@ const Street: React.FC<EditFormItemProps> = ({
 
   const { data: street, isLoading: isStreetLoading } = useGetStreetQuery(
     streetId,
-    { skip: !streetId }
+    { skip: !streetId || editable }
   )
-  const { data: streets, isLoading: isStreetsLoading } = useGetStreetsQuery({
-    domainId,
-  })
+
+  useEffect(() => {
+    if (!domainId) form.setFieldValue('street', null)
+  }, [form, domainId])
 
   return (
-    <Form.Item
+    <EditFormItem
       label="Адреса"
       name="street"
-      rules={[{ required: true, message: `Поле "Адреса" обов'язкове` }]}
+      rules={[{ required: true, message: `Поле обов'язкове` }]}
+      loading={loading}
+      noStyle={!editable}
+      required
     >
-      <Loading loading={loading}>
-        {editable ? (
-          <Select
-            placeholder="Оберіть адресу"
-            loading={isStreetsLoading}
-            disabled={disabled || !domainId}
-            showSearch
-            allowClear
-            optionFilterProp="label"
-            options={streets?.data.map((street) => ({
-              label: `вул. ${street.address} (м. ${street.city})`,
-              value: street._id,
-            }))}
-          />
-        ) : (
-          <Loading loading={isStreetLoading}>
-            вул. {street.address} (м. {street.city})
-          </Loading>
-        )}
-      </Loading>
-    </Form.Item>
+      {editable ? (
+        <StreetSelect domain={domainId} disabled={disabled || !domainId} />
+      ) : (
+        <Loading loading={isStreetLoading}>
+          вул. {street?.address} (м. {street?.city})
+        </Loading>
+      )}
+    </EditFormItem>
   )
 }
 
-const Maintenance: React.FC<EditFormItemProps> = ({
+const Maintenance: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,
@@ -336,69 +311,77 @@ const Maintenance: React.FC<EditFormItemProps> = ({
   return (
     <Form.Item label="Утримання" style={{ margin: 0 }}>
       <div
-        style={{
-          width: '100%',
-          display: 'flex',
-          flexWrap: 'nowrap',
-          gap: 8,
-        }}
+        style={{ width: '100%', display: 'flex', flexWrap: 'nowrap', gap: 8 }}
       >
-        <Form.Item
+        <EditFormItem
           style={{ flex: 1 }}
-          name="pricePerMeter"
           label="Ціна (грн/м²)"
-          rules={[{ required: true, message: `Поле "Ціна" обов'язкове` }]}
+          name="pricePerMeter"
+          rules={[{ required: true, message: `Поле обов'язкове` }]}
+          loading={loading}
+          noStyle={!editable}
+          required
         >
-          <Loading loading={loading}>
-            {editable ? (
-              <Input
-                type="number"
-                placeholder="Вкажіть значення"
-                disabled={disabled}
-              />
-            ) : (
-              pricePerMeter
-            )}
-          </Loading>
-        </Form.Item>
-        {!editable && <Divider type="vertical" style={{ height: 64 }} />}
-        <Form.Item style={{ flex: 1 }} name="totalArea" label="Площа (м²)">
-          <Loading loading={loading}>
-            {editable ? (
-              <Input
-                type="number"
-                placeholder="Вкажіть значення"
-                disabled={disabled}
-              />
-            ) : (
-              totalArea
-            )}
-          </Loading>
-        </Form.Item>
-        {!editable && <Divider type="vertical" style={{ height: 64 }} />}
-        <Form.Item
+          {editable ? (
+            <Input
+              type="number"
+              placeholder="Вкажіть значення..."
+              disabled={disabled}
+            />
+          ) : (
+            pricePerMeter
+          )}
+        </EditFormItem>
+
+        {!editable && (
+          <Divider type="vertical" style={{ height: 64, margin: '0 8px' }} />
+        )}
+
+        <EditFormItem
           style={{ flex: 1 }}
-          name="servicePricePerMeter"
-          label="Сервіс (грн/м²)"
+          label="Площа (м²)"
+          name="totalArea"
+          loading={loading}
+          noStyle={!editable}
         >
-          <Loading loading={loading}>
-            {editable ? (
-              <Input
-                type="number"
-                placeholder="Вкажіть значення"
-                disabled={disabled}
-              />
-            ) : (
-              servicePricePerMeter
-            )}
-          </Loading>
-        </Form.Item>
+          {editable ? (
+            <Input
+              type="number"
+              placeholder="Вкажіть значення..."
+              disabled={disabled}
+            />
+          ) : (
+            totalArea
+          )}
+        </EditFormItem>
+
+        {!editable && (
+          <Divider type="vertical" style={{ height: 64, margin: '0 8px' }} />
+        )}
+
+        <EditFormItem
+          style={{ flex: 1 }}
+          label="Сервіс (грн/м²)"
+          name="servicePricePerMeter"
+          loading={loading}
+          noStyle={!editable}
+        >
+          {editable ? (
+            <Input
+              type="number"
+              placeholder="Вкажіть значення..."
+              disabled={disabled}
+            />
+          ) : (
+            servicePricePerMeter
+          )}
+        </EditFormItem>
       </div>
     </Form.Item>
   )
 }
 
-const Part: React.FC<EditFormItemProps> = ({
+const Part: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,
@@ -417,38 +400,51 @@ const Part: React.FC<EditFormItemProps> = ({
           gap: 8,
         }}
       >
-        <Form.Item style={{ flex: 1 }} name="rentPart" label="Загальної площі">
-          <Loading loading={loading}>
-            {editable ? (
-              <Input
-                type="number"
-                placeholder="Вкажіть значення"
-                disabled={disabled}
-              />
-            ) : (
-              rentPart
-            )}
-          </Loading>
-        </Form.Item>
-        <Form.Item style={{ flex: 1 }} name="waterPart" label="Водопостачання">
-          <Loading loading={loading}>
-            {editable ? (
-              <Input
-                type="number"
-                placeholder="Вкажіть значення"
-                disabled={disabled}
-              />
-            ) : (
-              waterPart
-            )}
-          </Loading>
-        </Form.Item>
+        <EditFormItem
+          style={{ flex: 1 }}
+          label="Загальної площі"
+          name="rentPart"
+          loading={loading}
+          noStyle={!editable}
+        >
+          {editable ? (
+            <Input
+              type="number"
+              placeholder="Вкажіть значення..."
+              disabled={disabled}
+            />
+          ) : (
+            rentPart
+          )}
+        </EditFormItem>
+
+        {!editable && (
+          <Divider type="vertical" style={{ height: 64, margin: '0 8px' }} />
+        )}
+
+        <EditFormItem
+          style={{ flex: 1 }}
+          label="Водопостачання"
+          name="waterPart"
+          loading={loading}
+          noStyle={!editable}
+        >
+          {editable ? (
+            <Input
+              type="number"
+              placeholder="Вкажіть значення..."
+              disabled={disabled}
+            />
+          ) : (
+            waterPart
+          )}
+        </EditFormItem>
       </div>
     </Form.Item>
   )
 }
 
-const Cleaning: React.FC<EditFormItemProps> = ({
+const Cleaning: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,
@@ -457,23 +453,26 @@ const Cleaning: React.FC<EditFormItemProps> = ({
   const cleaning: number | undefined = Form.useWatch('cleaning', form)
 
   return (
-    <Form.Item label="Прибирання (грн)" name="cleaning">
-      <Loading loading={loading}>
-        {editable ? (
-          <Input
-            type="number"
-            placeholder="Вкажіть значення"
-            disabled={disabled}
-          />
-        ) : (
-          cleaning
-        )}
-      </Loading>
-    </Form.Item>
+    <EditFormItem
+      label="Прибирання (грн)"
+      name="cleaning"
+      loading={loading}
+      noStyle={!editable}
+    >
+      {editable ? (
+        <Input
+          type="number"
+          placeholder="Вкажіть значення..."
+          disabled={disabled}
+        />
+      ) : (
+        cleaning
+      )}
+    </EditFormItem>
   )
 }
 
-const Discount: React.FC<EditFormItemProps> = ({
+const Discount: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,
@@ -482,7 +481,7 @@ const Discount: React.FC<EditFormItemProps> = ({
   const discount: number | undefined = Form.useWatch('discount', form)
 
   return (
-    <Form.Item
+    <EditFormItem
       label="Знижка (грн)"
       name="discount"
       rules={[
@@ -495,24 +494,24 @@ const Discount: React.FC<EditFormItemProps> = ({
           },
         },
       ]}
+      loading={loading}
+      noStyle={!editable}
     >
-      <Loading loading={loading}>
-        {editable ? (
-          <Input
-            type="number"
-            placeholder="Вкажіть значення"
-            disabled={disabled}
-            max={0}
-          />
-        ) : (
-          discount
-        )}
-      </Loading>
-    </Form.Item>
+      {editable ? (
+        <Input
+          type="number"
+          placeholder="Вкажіть значення"
+          disabled={disabled}
+          max={0}
+        />
+      ) : (
+        discount
+      )}
+    </EditFormItem>
   )
 }
 
-const InflicionAndGarbageCollector: React.FC<EditFormItemProps> = ({
+const InflicionAndGarbageCollector: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,
@@ -527,26 +526,31 @@ const InflicionAndGarbageCollector: React.FC<EditFormItemProps> = ({
         gap: 8,
       }}
     >
-      <Form.Item
+      <EditFormItem
         style={{ flex: 1 }}
         label="Вивіз ТПВ"
         name="garbageCollector"
         valuePropName="checked"
+        loading={loading}
+        noStyle={!editable}
       >
-        <Loading loading={loading}>
-          <Checkbox disabled={disabled || !editable} />
-        </Loading>
-      </Form.Item>
-      <Form.Item
+        <Checkbox disabled={disabled || !editable} />
+      </EditFormItem>
+
+      {!editable && (
+        <Divider type="vertical" style={{ height: 64, margin: '0 8px' }} />
+      )}
+
+      <EditFormItem
         style={{ flex: 1 }}
         label="Інфляція"
         name="inflicion"
         valuePropName="checked"
+        loading={loading}
+        noStyle={!editable}
       >
-        <Loading loading={loading}>
-          <Checkbox disabled={disabled || !editable} />
-        </Loading>
-      </Form.Item>
+        <Checkbox disabled={disabled || !editable} />
+      </EditFormItem>
     </div>
   )
 }

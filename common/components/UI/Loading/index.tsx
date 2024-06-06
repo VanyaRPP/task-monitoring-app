@@ -12,5 +12,5 @@ export const Loading: React.FC<LoadingProps> = ({
   children,
   ...props
 }) => {
-  return <div {...props}>{loading ? <Spin /> : children}</div>
+  return loading ? <Spin {...props} /> : <>{children}</>
 }

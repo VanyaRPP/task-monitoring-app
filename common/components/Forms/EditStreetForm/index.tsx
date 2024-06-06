@@ -3,7 +3,7 @@ import {
   useEditStreetMutation,
   useGetStreetQuery,
 } from '@common/api/streetApi/street.api'
-import { EditFormItemProps, EditFormProps } from '@common/components/Forms'
+import { EditFormAttributeProps, EditFormProps } from '@common/components/Forms'
 import { IStreet } from '@common/modules/models/Street'
 import { Form, FormInstance, Input, Spin, message } from 'antd'
 import { useCallback, useEffect } from 'react'
@@ -93,7 +93,7 @@ export const EditStreetForm: React.FC<EditStreetFormProps> = ({
   )
 }
 
-const City: React.FC<EditFormItemProps> = ({
+const City: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,
@@ -128,7 +128,7 @@ const City: React.FC<EditFormItemProps> = ({
     </Form.Item>
   )
 }
-const Address: React.FC<EditFormItemProps> = ({
+const Address: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,
