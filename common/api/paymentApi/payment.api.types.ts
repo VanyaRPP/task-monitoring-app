@@ -75,6 +75,8 @@ export interface IGetPaymentResponse {
   currentDomainsCount: number
   domainsFilter: IFilter[]
   realEstatesFilter: IFilter[]
+  monthFilter: IFilter[]
+  yearFilter: IFilter[]
   addressFilter: IFilter[]
   data: IExtendedPayment[]
   success: boolean

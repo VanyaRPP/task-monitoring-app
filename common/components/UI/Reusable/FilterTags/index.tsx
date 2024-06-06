@@ -7,7 +7,7 @@ const FilterTags = ({ filters, setFilters, collection }) => {
       <div className={s.filtersTagsBlock}>
         <div className={s.filters}>
           Надавачі послуг:
-          {Array.isArray(filters?.domain) && filters.domain.length ? (
+          {filters?.domain?.length ? (
             <span className={s.filtersTags}>
               {filters.domain.map((domain) => (
                 <Tag
@@ -29,8 +29,8 @@ const FilterTags = ({ filters, setFilters, collection }) => {
                 </Tag>
               ))}
             </span>
-          ) : collection?.currentDomainsCount &&
-            collection?.domainsFilter?.length === 1 ? (
+          ) : (collection?.currentDomainsCount ||
+            collection?.domainsFilter?.length) === 1 ? (
             <SingleTag name={collection?.data?.[0]?.domain?.name} />
           ) : (
             ' Всі'
@@ -38,7 +38,7 @@ const FilterTags = ({ filters, setFilters, collection }) => {
         </div>
         <div className={s.filters}>
           Компанії:
-          {Array.isArray(filters?.company) && filters.company.length ? (
+          {filters?.company?.length ? (
             <div className={s.filtersTags}>
               {filters.company.map((company) => (
                 <Tag
@@ -63,13 +63,63 @@ const FilterTags = ({ filters, setFilters, collection }) => {
               ))}
             </div>
           ) : (collection?.currentCompaniesCount ||
-              collection?.realEstatesFilter?.length) === 1 ? (
+            collection?.realEstatesFilter?.length) === 1 ? (
             <SingleTag
               name={
                 collection?.data?.[0]?.company?.companyName ||
                 collection?.data?.[0]?.companyName
               }
             />
+          ) : (
+            ' Всі'
+          )}
+        </div>
+
+        <div className={s.filters}>
+          Місяць:
+          {filters?.month?.length ? (
+            <div className={s.filtersTags}>
+              {filters.month.map((month) => (
+                <Tag
+                  key={month}
+                  className={s.Tag}
+                  closable
+                  onClose={() =>
+                    setFilters({
+                      ...filters,
+                      month: filters.month.filter((item) => item !== month),
+                    })
+                  }
+                >
+                  {new Date(0, month - 1).toLocaleString("default", {month: "long"})}
+                </Tag>
+              ))}
+            </div>
+          ) : (
+            ' Всі'
+          )}
+        </div>
+
+        <div className={s.filters}>
+          Рік:
+          {filters?.year?.length ? (
+            <div className={s.filtersTags}>
+              {filters.year.map((year) => (
+                <Tag
+                  key={year}
+                  className={s.Tag}
+                  closable
+                  onClose={() =>
+                    setFilters({
+                      ...filters,
+                      year: filters.year.filter((item) => item !== year),
+                    })
+                  }
+                >
+                  {year}
+                </Tag>
+              ))}
+            </div>
           ) : (
             ' Всі'
           )}

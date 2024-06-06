@@ -5,33 +5,17 @@ import {
 } from '@common/api/paymentApi/payment.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import {
-  dateToDefaultFormat,
-  dateToMonthYear,
-} from '@common/assets/features/formatDate'
+import { dateToDefaultFormat } from '@common/assets/features/formatDate'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
-import {
-  AppRoutes,
-  ColumnsRoleView,
-  Operations,
-  PERIOD_FILTR,
-  Roles,
-  paymentsTitle,
-} from '@utils/constants'
-import { renderCurrency } from '@utils/helpers'
-import {
-  Alert,
-  Button,
-  Pagination,
-  Popconfirm,
-  Table,
-  Tooltip,
-  message,
-} from 'antd'
+import PaymentTableContent from '@components/DashboardPage/blocks/paymentComponents/PaymentTableContent'
+import { AppRoutes, Operations, Roles, paymentsTitle } from '@utils/constants'
+import { NumberToFormattedMonth, renderCurrency } from '@utils/helpers'
+import { Alert, Button, Popconfirm, Tooltip, message } from 'antd'
+import { ColumnsType } from 'antd/es/table'
 import cn from 'classnames'
 import { useRouter } from 'next/router'
-import { ReactElement, useState } from 'react'
+import { useEffect, useState } from 'react'
 import s from './style.module.scss'
 
 interface PaymentDeleteItem {
@@ -41,29 +25,21 @@ interface PaymentDeleteItem {
   company: string
 }
 
-function getDateFilter(value) {
-  const [, year, period, number] = value || []
-  // TODO: add enums
-  if (period === PERIOD_FILTR.QUARTER)
-    return {
-      year,
-      quarter: number,
-    }
-  if (period === PERIOD_FILTR.MONTH)
-    return {
-      year,
-      month: number,
-    }
-  if (period === PERIOD_FILTR.YEAR) return { year }
-}
-
-function getTypeOperation(value) {
-  if (value) {
-    return {
-      type: value === Operations.Debit ? Operations.Debit : Operations.Credit,
-    }
-  }
-}
+// function getDateFilter(value) {
+//   const [, year, period, number] = value || []
+//   // TODO: add enums
+//   if (period === PERIOD_FILTR.QUARTER)
+//     return {
+//       year,
+//       quarter: number,
+//     }
+//   if (period === PERIOD_FILTR.MONTH)
+//     return {
+//       year,
+//       month: number,
+//     }
+//   if (period === PERIOD_FILTR.YEAR) return { year }
+// }
 
 const PaymentsBlock = () => {
   const router = useRouter()
@@ -71,18 +47,21 @@ const PaymentsBlock = () => {
     pathname,
     query: { email },
   } = router
+
   const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
   const [paymentActions, setPaymentActions] = useState({
     edit: false,
     preview: false,
   })
-  const [currentDateFilter, setCurrentDateFilter] = useState()
-  const [currentTypeOperation, setCurrentTypeOperation] = useState()
+
   const [pageData, setPageData] = useState({
     pageSize: pathname === AppRoutes.PAYMENT ? 10 : 5,
     currentPage: 1,
   })
-  const [filters, setFilters] = useState<any>()
+
+  const [filters, setFilters] = useState<Record<string, any>>({})
+
+
 
   const closeEditModal = () => {
     setCurrentPayment(null)
@@ -109,19 +88,18 @@ const PaymentsBlock = () => {
       skip: (pageData.currentPage - 1) * pageData.pageSize,
       limit: pageData.pageSize,
       email: email as string,
-      ...getDateFilter(currentDateFilter),
-      ...getTypeOperation(currentTypeOperation),
+      month: filters?.month || undefined,
+      year: filters?.year || undefined,
       companyIds: filters?.company || undefined,
       domainIds: filters?.domain || undefined,
-      streetIds: filters?.street || undefined,
     },
     { skip: currUserLoading || !currUser }
   )
 
+
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
   const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
-  const isDomainAdmin = currUser?.roles?.includes(Roles.DOMAIN_ADMIN)
 
   const handleDeletePayment = async (id: string) => {
     const response = await deletePayment(id)
@@ -132,74 +110,74 @@ const PaymentsBlock = () => {
     }
   }
 
-  const invoiceTypes = Object.entries(paymentsTitle)
+  const invoiceTypes = Object.keys(paymentsTitle)
 
-  const paymentsPageColumns =
+  const paymentsPageColumns: ColumnsType<any> =
     router.pathname === AppRoutes.PAYMENT
-      ? invoiceTypes.map(([type, title]) => ({
-          title,
-          dataIndex: type,
-          render: (_, payment) => {
-            const item = payment.invoice.find((item) => item.type === type)
-            const sum = +(item?.sum || item?.price)
-            const currency = renderCurrency(sum?.toFixed(2))
-            return (
-              <span className={currency === '-' ? s.currency : ''}>
-                {currency}
-              </span>
-            )
-          },
-        }))
-      : []
-
-  const adminColumns =
-    isGlobalAdmin || isDomainAdmin
       ? [
-          {
-            align: 'center',
-            fixed: 'right',
-            title: '',
-            width: 50,
-            render: (_, payment: IExtendedPayment) => (
-              <Button
-                style={{ padding: 0 }}
-                type="link"
-                onClick={() => {
-                  setCurrentPayment(payment)
-                  setPaymentActions({ ...paymentActions, edit: true })
-                }}
-              >
-                <EditOutlined className={s.icon} />
-              </Button>
-            ),
-          },
-          {
-            align: 'center',
-            fixed: 'right',
-            title: '',
-            width: 50,
-            render: (_, payment: IExtendedPayment) => (
-              <div className={s.popconfirm}>
-                <Popconfirm
-                  id="popconfirm_custom"
-                  title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                    payment?.invoiceCreationDate as unknown as string
-                  )}?`}
-                  onConfirm={() => handleDeletePayment(payment?._id)}
-                  okText="Видалити"
-                  cancelText="Ні"
-                  disabled={deleteLoading}
-                >
-                  <DeleteOutlined className={s.icon} />
-                </Popconfirm>
-              </div>
-            ),
-          },
+          ...invoiceTypes.map((type) => ({
+            title: paymentsTitle[type],
+            dataIndex: type,
+            render: (_, record) => {
+              const item = record.invoice.find((item) => item.type === type)
+              const sum = +(item?.sum || item?.price)
+              const currency = renderCurrency(sum?.toFixed(2))
+              return (
+                <span className={currency === '-' ? s.currency : ''}>
+                  {currency}
+                </span>
+              )
+            },
+          })),
         ]
       : []
 
-  // TODO: add Interface
-  const columns: any = [
+  const globalAdminColumns: ColumnsType<any> = isGlobalAdmin
+    ? [
+        {
+          align: 'center',
+          fixed: 'right',
+          title: '',
+          width: 50,
+          render: (_, payment: IExtendedPayment) => (
+            <Button
+              style={{ padding: 0 }}
+              type="link"
+              onClick={() => {
+                setCurrentPayment(payment)
+                setPaymentActions({ ...paymentActions, edit: true })
+              }}
+            >
+              <EditOutlined className={s.icon} />
+            </Button>
+          ),
+        },
+        {
+          align: 'center',
+          fixed: 'right',
+          title: '',
+          width: 50,
+          render: (_, payment: IExtendedPayment) => (
+            <div className={s.popconfirm}>
+              <Popconfirm
+                id="popconfirm_custom"
+                title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+                  payment?.invoiceCreationDate as unknown as string
+                )}?`}
+                onConfirm={() => handleDeletePayment(payment?._id)}
+                okText="Видалити"
+                cancelText="Ні"
+                disabled={deleteLoading}
+              >
+                <DeleteOutlined className={s.icon} />
+              </Popconfirm>
+            </div>
+          ),
+        },
+      ]
+    : []
+
+  const columns: ColumnsType<IExtendedPayment> = [
     {
       title: 'Дата створення',
       dataIndex: 'invoiceCreationDate',
@@ -236,9 +214,23 @@ const PaymentsBlock = () => {
     },
     {
       title: 'За місяць',
-      dataIndex: 'monthService',
+      dataIndex: 'month',
+      filters:
+          pathname === AppRoutes.PAYMENT ? payments?.monthFilter : null,
+      filteredValue: filters?.month || null,
       render: (monthService, obj) =>
-        dateToMonthYear(monthService?.date || obj.invoiceCreationDate),
+        NumberToFormattedMonth(
+          new Date(monthService?.date || obj.invoiceCreationDate).getMonth()
+        ),
+    },
+    {
+      title: 'За рік',
+      dataIndex: 'year',
+      filters:
+          pathname === AppRoutes.PAYMENT ? payments?.yearFilter : null,
+      filteredValue: filters?.year || null,
+      render: (monthService, obj) =>
+        new Date(monthService?.date || obj.invoiceCreationDate).getFullYear(),
     },
     ...paymentsPageColumns,
     {
@@ -263,7 +255,7 @@ const PaymentsBlock = () => {
         )
       },
     },
-    ...adminColumns,
+    ...globalAdminColumns,
   ]
 
   columns.unshift({
@@ -287,74 +279,12 @@ const PaymentsBlock = () => {
     })
   }
 
-  const Summary = () => {
-    const getFormattedValue = (dataIndex) => {
-      const value = payments?.totalPayments?.[dataIndex] || 0
-      return value !== 0 ? value.toFixed(2) : ''
-    }
-
-    return (
-      router.pathname === AppRoutes.PAYMENT &&
-      payments?.data && (
-        <Table.Summary>
-          <Table.Summary.Row className={s.summ_item}>
-            {columns.map((item, index) => {
-              const dataindex = isGlobalAdmin
-                ? columns[index - 1]?.dataIndex
-                : item.dataIndex
-
-              return (
-                <Table.Summary.Cell
-                  index={0}
-                  key={index}
-                  colSpan={item.dataIndex === '' ? 2 : 1}
-                >
-                  {getFormattedValue(dataindex)}
-                </Table.Summary.Cell>
-              )
-            })}
-          </Table.Summary.Row>
-          <Table.Summary.Row className={s.saldo}>
-            {columns.slice(0, columns.length - 1).map((item, index) => {
-              const dataindex = isGlobalAdmin
-                ? columns[index - 1]?.dataIndex
-                : item.dataIndex
-
-              const colSpan = isGlobalAdmin
-                ? item.dataIndex === Operations.Credit
-                  ? ColumnsRoleView.User
-                  : ColumnsRoleView.GlobalAdmin
-                : item.dataIndex === Operations.Debit
-                ? ColumnsRoleView.User
-                : ColumnsRoleView.GlobalAdmin
-
-              return (
-                <Table.Summary.Cell colSpan={colSpan} index={0} key={index}>
-                  {dataindex === Operations.Debit
-                    ? (
-                        (payments?.totalPayments?.debit || 0) -
-                        (payments?.totalPayments?.credit || 0)
-                      )?.toFixed(2)
-                    : false}
-                </Table.Summary.Cell>
-              )
-            })}
-          </Table.Summary.Row>
-        </Table.Summary>
-      )
-    )
-  }
-
-  let content: ReactElement
-
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
     PaymentDeleteItem[]
   >([])
-  const [selectedPayments, setSelectedPayments] = useState<IExtendedPayment[]>(
-    []
-  )
+
   const onSelect = (a, selected, rows) => {
-    if (selected) {
+    if (selected)
       setPaymentsDeleteItems([
         ...paymentsDeleteItems,
         {
@@ -364,85 +294,39 @@ const PaymentsBlock = () => {
           company: a?.company?.companyName,
         },
       ])
-      setSelectedPayments([...selectedPayments, a])
-    } else {
+    else
       setPaymentsDeleteItems(
         paymentsDeleteItems.filter((item) => item.id != a?._id)
       )
-      setSelectedPayments(
-        selectedPayments.filter((item) => item._id !== a?._id)
-      )
-    }
   }
 
   const rowSelection = {
     selectedRowKeys: paymentsDeleteItems.map((item) => item.id),
-    preserveSelectedRowKeys: true,
-    onChange: (selectedRowKeys, selectedRows) => {
-      setSelectedPayments(selectedRows)
-      setPaymentsDeleteItems(
-        selectedRows.map((item) => ({
-          id: item._id,
-          date: item.monthService?.date,
-          domain: item.domain?.name,
-          company: item.company?.companyName,
-        }))
-      )
-    },
+    defaultSelectedRowKeys: paymentsDeleteItems.map((item) => item.id),
     onSelect: onSelect,
   }
 
-  if (deleteError || paymentsError || currUserError) {
-    content = <Alert message="Помилка" type="error" showIcon closable />
-  } else {
-    content = (
-      <>
-        <Table
-          rowSelection={
-            currUser?.roles?.includes(Roles.GLOBAL_ADMIN) &&
-            pathname === AppRoutes.PAYMENT
-              ? rowSelection
-              : null
-          }
-          columns={columns}
-          dataSource={payments?.data}
-          pagination={false}
-          onChange={(__, filters) => {
-            setFilters(filters)
-          }}
-          scroll={{ x: 1800 }}
-          summary={() => <Summary />}
-          bordered
-          size="small"
-          loading={
-            currUserLoading ||
-            currUserFetching ||
-            paymentsLoading ||
-            paymentsFetching
-          }
-          rowKey="_id"
-        />
-
-        {router.pathname === AppRoutes.PAYMENT &&
-          !paymentsLoading &&
-          !currUserLoading && (
-            <Pagination
-              className={s.Pagination}
-              pageSize={pageData.pageSize}
-              total={payments?.total}
-              showSizeChanger
-              pageSizeOptions={[10, 30, 50]}
-              onChange={(currentPage) => {
-                setPageData((ps) => ({ ...ps, currentPage }))
-              }}
-              onShowSizeChange={(__, pageSize) => {
-                setPageData((ps) => ({ ...ps, pageSize, currentPage: 1 }))
-              }}
-            />
-          )}
-      </>
+  const content =
+    deleteError || paymentsError || currUserError ? (
+      <Alert message="Помилка" type="error" showIcon closable />
+    ) : (
+      <PaymentTableContent
+        path={pathname}
+        payments={payments}
+        columns={columns}
+        currUser={currUser}
+        rowSelection={rowSelection}
+        loadings={{
+          currUserLoading,
+          currUserFetching,
+          paymentsLoading,
+          paymentsFetching,
+        }}
+        setPageData={setPageData}
+        pageData={pageData}
+        setFilters={setFilters}
+      />
     )
-  }
 
   return (
     // <PaymentRemoveProvider>
@@ -451,17 +335,11 @@ const PaymentsBlock = () => {
         <PaymentCardHeader
           paymentsDeleteItems={paymentsDeleteItems}
           closeEditModal={closeEditModal}
-          setCurrentDateFilter={setCurrentDateFilter}
-          setCurrentTypeOperation={setCurrentTypeOperation}
           currentPayment={currentPayment}
           paymentActions={paymentActions}
-          streets={payments?.addressFilter}
           payments={payments}
           filters={filters}
           setFilters={setFilters}
-          selectedPayments={selectedPayments}
-          setSelectedPayments={setSelectedPayments}
-          setPaymentsDeleteItems={setPaymentsDeleteItems}
         />
       }
       className={cn({ [s.noScroll]: pathname === AppRoutes.PAYMENT })}
