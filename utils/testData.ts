@@ -34,19 +34,47 @@ export const users = {
   },
 }
 
+export const streets = [
+  {
+    _id: '64d68421d9ba2fc8fea79d31',
+    address: 'street_0',
+    city: 'street_0_city',
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d32',
+    address: 'street_1',
+    city: 'street_1_city',
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d33',
+    address: 'street_2',
+    city: 'street_2_city',
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d34',
+    address: 'street_3',
+    city: 'street_3_city',
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d35',
+    address: 'street_4',
+    city: 'street_4_city',
+  },
+]
+
 export const domains = [
   {
     _id: '64d68421d9ba2fc8fea79d11',
     name: 'domain 0',
     adminEmails: [users.domainAdmin.email],
-    streets: [],
+    streets: [streets[0]._id],
     description: 'none',
   },
   {
     _id: '64d68421d9ba2fc8fea79d12',
     name: 'domain 1',
     adminEmails: [users.user.email],
-    streets: [],
+    streets: [streets[1]._id],
     description: 'none',
   },
   {
@@ -86,34 +114,6 @@ export const domains = [
   },
 ]
 
-export const streets = [
-  {
-    _id: '64d68421d9ba2fc8fea79d31',
-    address: 'street_0',
-    city: 'street_0_city',
-  },
-  {
-    _id: '64d68421d9ba2fc8fea79d32',
-    address: 'street_1',
-    city: 'street_1_city',
-  },
-  {
-    _id: '64d68421d9ba2fc8fea79d33',
-    address: 'street_2',
-    city: 'street_2_city',
-  },
-  {
-    _id: '64d68421d9ba2fc8fea79d34',
-    address: 'street_3',
-    city: 'street_3_city',
-  },
-  {
-    _id: '64d68421d9ba2fc8fea79d35',
-    address: 'street_4',
-    city: 'street_4_city',
-  },
-]
-
 // TODO: fix tests
 export const realEstates = [
   {
@@ -128,7 +128,6 @@ export const realEstates = [
     totalArea: 10,
     discount: 0,
     garbageCollector: true,
-    publicElectricUtility: false,
     waterPart: 0,
     rentPart: 25,
     inflicion: false,
@@ -145,7 +144,6 @@ export const realEstates = [
     totalArea: 10,
     discount: 0,
     garbageCollector: true,
-    publicElectricUtility: false,
     waterPart: 0,
     rentPart: 0,
     inflicion: false,
@@ -162,7 +160,6 @@ export const realEstates = [
     totalArea: 10,
     discount: 0,
     garbageCollector: true,
-    publicElectricUtility: false,
     waterPart: 0,
     rentPart: 0,
     inflicion: false,
@@ -179,7 +176,6 @@ export const realEstates = [
     totalArea: 10,
     discount: 0,
     garbageCollector: true,
-    publicElectricUtility: false,
     waterPart: 0,
     rentPart: 45,
     inflicion: false,
@@ -196,7 +192,6 @@ export const realEstates = [
     totalArea: 10,
     discount: 0,
     garbageCollector: true,
-    publicElectricUtility: false,
     waterPart: 0,
     rentPart: 0,
     inflicion: false,
@@ -213,7 +208,6 @@ export const realEstates = [
     totalArea: 10,
     discount: 0,
     garbageCollector: true,
-    publicElectricUtility: false,
     waterPart: 0,
     rentPart: 0,
     inflicion: false,
@@ -230,7 +224,6 @@ export const realEstates = [
     totalArea: 10,
     discount: 0,
     garbageCollector: true,
-    publicElectricUtility: false,
     waterPart: 0,
     rentPart: 50,
     inflicion: false,
@@ -260,7 +253,6 @@ export const services = [
     rentPrice: 30,
     electricityPrice: 30,
     garbageCollectorPrice: 0,
-    publicElectricUtilityPrice: 0,
     waterPrice: 30,
     inflicionPrice: 1.3,
     description: 'none',
@@ -274,7 +266,6 @@ export const services = [
     rentPrice: 30,
     electricityPrice: 30,
     garbageCollectorPrice: 0,
-    publicElectricUtilityPrice: 0,
     waterPrice: 30,
     inflicionPrice: 1.3,
     description: 'none',
@@ -288,7 +279,6 @@ export const services = [
     rentPrice: 30,
     electricityPrice: 30,
     garbageCollectorPrice: 0,
-    publicElectricUtilityPrice: 0,
     waterPrice: 30,
     inflicionPrice: 1.3,
     description: 'none',
@@ -302,7 +292,6 @@ export const services = [
     rentPrice: 30,
     electricityPrice: 30,
     garbageCollectorPrice: 0,
-    publicElectricUtilityPrice: 0,
     waterPrice: 30,
     inflicionPrice: 1.3,
     description: 'none',
@@ -316,7 +305,6 @@ export const services = [
     rentPrice: 20,
     electricityPrice: 20,
     garbageCollectorPrice: 0,
-    publicElectricUtilityPrice: 0,
     waterPrice: 20,
     inflicionPrice: 1.2,
     description: 'none',
@@ -330,7 +318,6 @@ export const services = [
     rentPrice: 10,
     electricityPrice: 10,
     garbageCollectorPrice: 0,
-    publicElectricUtilityPrice: 0,
     waterPrice: 10,
     inflicionPrice: 1.1,
     description: 'none',

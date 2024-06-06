@@ -1,7 +1,6 @@
 import {
   IAddServiceResponse,
   IDeleteServiceResponse,
-  IExtendedService,
   IGetServiceResponse,
   IService,
 } from './service.api.types'
@@ -16,7 +15,7 @@ export const serviceApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getAllServices: builder.query<
-      IExtendedService[],
+      IGetServiceResponse,
       {
         limit?: number
         userId?: string
@@ -41,11 +40,11 @@ export const serviceApi = createApi({
           params: { limit, userId, domainId, streetId, serviceId, year, month },
         }
       },
-      providesTags: (response) =>
-        response
-          ? response.map((item) => ({ type: 'Service', id: item._id }))
+      providesTags: (response: IGetServiceResponse) =>
+        response?.data
+          ? response.data.map((item) => ({ type: 'Service', id: item._id }))
           : [],
-      transformResponse: (response: IGetServiceResponse) => response.data,
+      // transformResponse: (response: any) => response.data,
     }),
     getServicesAddress: builder.query({
       query: () => {
@@ -55,7 +54,13 @@ export const serviceApi = createApi({
       },
       transformResponse: (response: IGetServiceResponse) => response.data,
     }),
-    addService: builder.mutation<IAddServiceResponse, IService>({
+    addService: builder.mutation<
+      IAddServiceResponse,
+      Omit<IService, '_id' | 'domain' | 'street'> & {
+        domain: string
+        street: string
+      }
+    >({
       query(body) {
         return {
           url: `service`,
@@ -65,10 +70,7 @@ export const serviceApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Service'] : []),
     }),
-    deleteService: builder.mutation<
-      IDeleteServiceResponse,
-      IExtendedService['_id']
-    >({
+    deleteService: builder.mutation<IDeleteServiceResponse, IService['_id']>({
       query(id) {
         return {
           url: `service/${id}`,
@@ -77,7 +79,13 @@ export const serviceApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Service'] : []),
     }),
-    editService: builder.mutation<IExtendedService, Partial<IExtendedService>>({
+    editService: builder.mutation<
+      IService,
+      Omit<IService, 'domain' | 'street'> & {
+        domain: string
+        street: string
+      }
+    >({
       query(data) {
         const { _id, ...body } = data
         return {

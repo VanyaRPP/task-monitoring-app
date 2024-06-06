@@ -18,9 +18,11 @@ const Dashboard: React.FC = () => {
     <>
       <DashboardHeader />
       <div className={s.DashboardGrid}>
-        <CompaniesAreaChart />
         <div className={s.GridItem}>
-          <PaymentsChart/>
+          <CompaniesAreaChart />
+        </div>
+        <div className={s.GridItem}>
+          <PaymentsChart />
         </div>
         {isGlobalAdmin && (
           <>

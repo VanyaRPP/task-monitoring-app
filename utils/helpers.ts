@@ -1,16 +1,20 @@
-import User from '@common/modules/models/User'
+import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
+import User, { IUser } from '@common/modules/models/User'
 import { FormInstance } from 'antd'
-import { ObjectId } from 'mongoose'
-import { Roles, ServiceType } from './constants'
-import { PaymentOptions } from './types'
+import Big from 'big.js'
+import _omit from 'lodash/omit'
 import moment from 'moment'
 import 'moment/locale/uk'
-import _omit from 'lodash/omit'
-import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
-import Big from 'big.js'
-import { getDomainsPipeline, getRealEstatesPipeline } from './pipelines'
+import mongoose, { ObjectId } from 'mongoose'
+import { Roles, ServiceType } from './constants'
+import {
+  getDomainsPipeline,
+  getRealEstatesPipeline,
+  getStreetsPipeline,
+} from './pipelines'
+import { PaymentOptions } from './types'
 
-export const firstTextToUpperCase = (text: string) =>
+export const toFirstUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)
 
 export const getCount = (tasks: any, name: string) => {
@@ -208,15 +212,17 @@ export function filterInvoiceObject(obj) {
 
 export const renderCurrency = (number: any): string => {
   if (!isNaN(number)) {
-    return new Intl.NumberFormat('en-US').format(number)
+    return new Intl.NumberFormat('en-US').format(
+      Number(toRoundFixed(number.toString()))
+    )
   } else {
     return '-'
   }
 }
 
-export const getFormattedDate = (data: Date): string => {
+export const getFormattedDate = (data: Date, format = 'MMMM'): string => {
   if (data) {
-    return firstTextToUpperCase(moment(data).format('MMMM'))
+    return toFirstUpperCase(moment(data).format(format))
   }
 }
 
@@ -239,25 +245,38 @@ export const importedPaymentDateToISOStringDate = (date) => {
   ).toISOString()
 }
 
-export function parseStringToFloat(stringWithComma) {
-  // TODO: check for input string. is it ok
-  // cover by tests
-  const stringWithoutComma = ((stringWithComma || 0) + '').replace(',', '.')
-  return +stringWithoutComma
-    ? parseFloat(stringWithoutComma).toFixed(2)
-    : '0.00'
+/**
+ * Parses string to float in x.xx format
+ * @param value - string to be parsed into float
+ * @param length - count of digits after comma
+ * @returns float string on success or '0' on error
+ */
+export function toRoundFixed(value: string | number | any, length = 2): string {
+  try {
+    const num = Number(value.toString().replace(',', '.'))
+
+    if (isNaN(num) || num === null) {
+      throw new Error('NaN')
+    }
+
+    const multiplier = Number('1' + Array.from({ length }).fill('0').join(''))
+
+    return (Math.round(num * multiplier) / multiplier).toString()
+  } catch {
+    return '0'
+  }
 }
 
 export function multiplyFloat(a, b) {
-  const bigA = Big(parseStringToFloat(`${a}`))
-  const bigB = Big(parseStringToFloat(`${b}`))
+  const bigA = Big(toRoundFixed(`${a}`))
+  const bigB = Big(toRoundFixed(`${b}`))
 
   return +bigA.mul(bigB).round(2, Big.roundDown).toNumber()
 }
 
 export function plusFloat(a, b) {
-  const bigA = Big(parseStringToFloat(`${a}`))
-  const bigB = Big(parseStringToFloat(`${b}`))
+  const bigA = Big(toRoundFixed(`${a}`))
+  const bigB = Big(toRoundFixed(`${b}`))
 
   return +bigA.plus(bigB).round(2, Big.roundDown).toNumber()
 }
@@ -273,6 +292,24 @@ export function filterOptions(options = {}, filterIds: any) {
   }
   res.$in = idsFromQueryFilter
   return res
+}
+
+export async function getDistinctStreets({
+  user,
+  model,
+}: {
+  user: IUser
+  model: mongoose.Model<any>
+}): Promise<{ _id: mongoose.ObjectId; streetData: any }[] | undefined> {
+  // TODO: group of user roles helpers maybe? Such as isGlobalAdmin(user: IUser): boolean
+  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
+  const distinctDomains = await model.aggregate(domainsPipeline)
+  const streetsPipeline = getStreetsPipeline(
+    isGlobalAdmin,
+    distinctDomains.map((domain) => domain._id)
+  )
+  return await model.aggregate(streetsPipeline)
 }
 
 export async function getDistinctCompanyAndDomain({
@@ -371,4 +408,30 @@ export function generateColorsArray(length: number): string[] {
   return initialColors
 }
 
+export function getFilterForAddress(streetDatas) {
+  const filterData = streetDatas.map(({ streetData }) => ({
+    text: `${streetData.address} (м. ${streetData.city})`,
+    value: streetData._id,
+  }))
 
+  const uniqueTextsSet = new Set()
+
+  const uniqueFilter = filterData.filter(({ text }) => {
+    if (!uniqueTextsSet.has(text)) {
+      uniqueTextsSet.add(text)
+      return true
+    }
+    return false
+  })
+
+  return uniqueFilter
+}
+
+export function getFilterForDomain(domains) {
+  const filterData = domains.map(({ domainDetails }) => ({
+    text: domainDetails.name,
+    value: domainDetails._id,
+  }))
+
+  return filterData
+}

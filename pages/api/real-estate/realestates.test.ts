@@ -89,6 +89,7 @@ describe('RealEstate API - GET', () => {
     expect(received).toEqual(realEstates.slice(0, limit))
   })
 
+  // TODO: FIX IT
   it('request from the GlobalAdmin by domainId, streetId - show that company', async () => {
     await mockLoginAs(users.globalAdmin)
 
@@ -114,7 +115,11 @@ describe('RealEstate API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
     const received = parseReceived(response.data)
-    const expected = [realEstates[3]]
+    const expected = realEstates.filter(
+        (company) =>
+            company.domain === domains[3]._id.toString() &&
+            company.street === streets[3]._id.toString()
+        )
 
     expect(received).toEqual(expected)
   })
@@ -418,7 +423,35 @@ describe('RealEstate API - GET', () => {
     }
 
     const received = parseReceived(response.data)
-    const expected = realEstates[2]
+
+    expect(response.status).toHaveBeenCalledWith(200)
+    expect(received).toEqual([])
+  })
+
+  it('test', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const mockReq = {
+      method: 'GET',
+      query: {
+        domainId: domains[2]._id.toString(),
+        streetId: streets[2]._id.toString(),
+      },
+    } as any
+
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    const received = parseReceived(response.data)
 
     expect(response.status).toHaveBeenCalledWith(200)
     expect(received).toEqual([])

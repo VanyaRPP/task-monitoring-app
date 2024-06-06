@@ -254,45 +254,6 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: service ? (
-      <>
-        Всього за МЗК:
-        <br />
-        {service.publicElectricUtilityPrice} грн
-      </>
-    ) : (
-      'МЗК'
-    ),
-    children: [
-      {
-        title: 'Загальна частка',
-        dataIndex: 'publicElectricUtilityPart',
-        render: (
-          __: any,
-          record: { companyName: string | number; rentPart: any }
-        ) => (
-          <FormAttribute
-            name={[
-              'companies',
-              record.companyName,
-              'publicElectricUtility',
-              'amount',
-            ]}
-            value={record?.rentPart}
-            disabled
-          />
-        ),
-      },
-      {
-        title: 'Загальне',
-        dataIndex: 'publicElectricUtilityPrice',
-        render: (__: any, record: any) => (
-          <PublicElectricUtilityPrice service={service} record={record} />
-        ),
-      },
-    ],
-  },
-  {
     title: 'Прибирання',
     dataIndex: 'cleaning',
     render: (value: any, record: { companyName: string | number }) => (
@@ -382,32 +343,15 @@ const GarbageCollectorPrice: React.FC<{ service: any; record: any }> = ({
     form
   )
 
-  const garbageCollector = multiplyFloat((service?.garbageCollectorPrice / 100), rentPart)
+  const garbageCollector = multiplyFloat(
+    service?.garbageCollectorPrice / 100,
+    rentPart
+  )
 
   return (
     <FormAttribute
       name={['companies', record.companyName, 'garbageCollector', 'sum']}
       value={record.garbageCollector ? garbageCollector : 0}
-      disabled
-    />
-  )
-}
-const PublicElectricUtilityPrice: React.FC<{ service: any; record: any }> = ({
-  service,
-  record,
-}) => {
-  const { form } = useInvoicesPaymentContext()
-  const rentPart = Form.useWatch(
-    ['companies', record.companyName, 'publicElectricUtility', 'amount'],
-    form
-  )
-
-  const publicElectricUtility = multiplyFloat((service?.publicElectricUtilityPrice / 100), rentPart)
-
-  return (
-    <FormAttribute
-      name={['companies', record.companyName, 'publicElectricUtility', 'sum']}
-      value={record.publicElectricUtility ? publicElectricUtility : 0}
       disabled
     />
   )
@@ -546,7 +490,9 @@ const WaterPriceSum: React.FC<{ service: any; record: any }> = ({
     <FormAttribute
       disabled
       name={[...baseName, 'sum']}
-      value={newWater ? multiplyFloat((newWater - oldWater), service?.waterPrice) : 0}
+      value={
+        newWater ? multiplyFloat(newWater - oldWater, service?.waterPrice) : 0
+      }
     />
   )
 }
@@ -592,8 +538,10 @@ const ElectricityPriceSum: React.FC<{ service: any; record: any }> = ({
       name={[...baseName, 'sum']}
       value={
         newElectricityPrice
-          ? multiplyFloat((newElectricityPrice - oldElectricityPrice),
-            service?.electricityPrice)
+          ? multiplyFloat(
+              newElectricityPrice - oldElectricityPrice,
+              service?.electricityPrice
+            )
           : 0
       }
       disabled

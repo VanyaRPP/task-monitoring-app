@@ -1,8 +1,7 @@
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
-import { Alert, Button, Checkbox, Popconfirm, Table, Tag, message } from 'antd'
+import { DeleteOutlined, EditOutlined, QuestionCircleOutlined, } from '@ant-design/icons'
+import { Alert, Button, Checkbox, Popconfirm, Table, Tag, message, Tooltip } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
-
 import { useDeleteRealEstateMutation } from '@common/api/realestateApi/realestate.api'
 import {
   IExtendedRealestate,
@@ -92,9 +91,18 @@ const CompaniesTable: React.FC<Props> = ({
         setFilters({
           domain: filters?.domain,
           company: filters?.companyName,
+          address: filters?.address,
         })
       }}
     />
+  )
+}
+
+const renderTooltip = (text: string) => {
+  return (
+    <Tooltip title={text} placement="top">
+      <QuestionCircleOutlined />
+    </Tooltip>
   )
 }
 
@@ -136,7 +144,10 @@ const getDefaultColumns = ({
     {
       title: 'Опис',
       dataIndex: 'description',
-      width: 300,
+      width: 100,
+      ellipsis: true,
+      align: 'center',
+      render: renderTooltip,
     },
     // TODO: enum
     {
@@ -192,13 +203,6 @@ const getDefaultColumns = ({
       align: 'center',
       title: 'Нарахування інд. інф.',
       dataIndex: 'inflicion',
-      width: 170,
-      render: (value) => <Checkbox checked={value} disabled />,
-    },
-    {
-      align: 'center',
-      title: 'Нарахування МЗК',
-      dataIndex: 'publicElectricUtility',
       width: 170,
       render: (value) => <Checkbox checked={value} disabled />,
     },

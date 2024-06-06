@@ -4,7 +4,7 @@ import {
   useGetTaskByIdQuery,
   useGetAllTaskQuery,
 } from '../../../api/taskApi/task.api'
-import { firstTextToUpperCase } from '../../../../utils/helpers'
+import { toFirstUpperCase } from '../../../../utils/helpers'
 import {
   useGetUserByEmailQuery,
   useGetUserByIdQuery,

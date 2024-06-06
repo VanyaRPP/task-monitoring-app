@@ -1,5 +1,4 @@
-import mongoose, { Schema, ObjectId } from 'mongoose'
-import { IGeoCode } from './Task'
+import mongoose, { ObjectId, Schema } from 'mongoose'
 
 export interface IDomain {
   _id: ObjectId | string
@@ -19,5 +18,8 @@ const DomainSchema = new Schema<IDomain>({
   description: { type: String, required: true },
 })
 
-const Domain = mongoose.models.Domain || mongoose.model('Domain', DomainSchema)
+const Domain =
+  (mongoose.models?.Domain as mongoose.Model<IDomain>) ||
+  mongoose.model('Domain', DomainSchema)
+
 export default Domain
