@@ -57,8 +57,8 @@ export default async function handler(
           : adminEmail.map((id) => decodeURIComponent(id))
         : null
 
-      const options: FilterQuery<typeof Domain> = {}
-      const filters: FilterQuery<typeof Domain> = {}
+      const options: FilterQuery<typeof RealEstate> = {}
+      const filters: FilterQuery<typeof RealEstate> = {}
 
       if (isGlobalAdmin) {
         // GlobalAdmin security restrictions
@@ -178,7 +178,9 @@ export default async function handler(
         ),
       }
 
-      const total = await getMongoCount(RealEstate, {})
+      const total = await getMongoCount(RealEstate, {
+        $and: [options, filters],
+      })
 
       return res.status(200).json({ data: companies, filter, total })
     } catch (error) {
@@ -186,22 +188,9 @@ export default async function handler(
     }
   } else if (req.method === 'POST') {
     try {
-      const { name, streets } = req.body
+      const company = await RealEstate.create(req.body)
 
-      const existingDomain = await Domain.findOne({
-        name,
-        streets: { $all: streets },
-      })
-
-      if (existingDomain) {
-        return res
-          .status(400)
-          .json({ error: 'Домен з такими даними вже існує' })
-      }
-
-      const domain = await Domain.create(req.body)
-
-      return res.status(201).json(domain)
+      return res.status(201).json(company)
     } catch (error) {
       return res.status(500).json({ error: error })
     }

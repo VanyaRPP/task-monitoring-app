@@ -134,7 +134,7 @@ export const CompaniesTable: React.FC<CompaniesTableProps> = ({
         title: 'Надавач послуг',
         width: '250px',
         dataIndex: 'domain',
-        render: (domain: IDomain) => domain.name,
+        render: (domain: IDomain) => domain?.name,
         // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
         ...(filterable && {
           filterSearch: true,
@@ -148,7 +148,7 @@ export const CompaniesTable: React.FC<CompaniesTableProps> = ({
         dataIndex: 'street',
         render: (street: IStreet) => (
           <>
-            вул. {street.address} (м. {street.city})
+            вул. {street?.address} (м. {street?.city})
           </>
         ),
         // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
@@ -160,7 +160,7 @@ export const CompaniesTable: React.FC<CompaniesTableProps> = ({
       },
       {
         title: 'Представники',
-        width: '400px',
+        width: '250px',
         dataIndex: 'adminEmails',
         render: (adminEmails: string[]) => (
           <>
@@ -235,8 +235,10 @@ export const CompaniesTable: React.FC<CompaniesTableProps> = ({
         width: 64,
         render: (_, company: IRealEstate) => (
           <EditCompanyButton
-            company={company._id}
-            editable={isGlobalAdmin || company.adminEmails.includes(user.email)}
+            company={company?._id}
+            editable={
+              isGlobalAdmin || company?.adminEmails.includes(user?.email)
+            }
           >
             {isGlobalAdmin || isGlobalAdmin ? <EditFilled /> : <EyeFilled />}
           </EditCompanyButton>
@@ -249,15 +251,15 @@ export const CompaniesTable: React.FC<CompaniesTableProps> = ({
         width: 64,
         render: (_, company: IRealEstate) => (
           <Popconfirm
-            title="Ви впевнені що хочете видалити надавача послуг?"
-            onConfirm={() => handleDelete(company._id)}
+            title="Ви впевнені що хочете видалити компанію?"
+            onConfirm={() => handleDelete(company?._id)}
             placement="topLeft"
           >
             <Button
               type="dashed"
               danger
               disabled={
-                !isGlobalAdmin && !company.adminEmails.includes(user.email)
+                !isGlobalAdmin && !company.adminEmails.includes(user?.email)
               }
             >
               <DeleteFilled />
@@ -275,7 +277,7 @@ export const CompaniesTable: React.FC<CompaniesTableProps> = ({
     handleDelete,
     isGlobalAdmin,
     companies,
-    user.email,
+    user,
   ])
 
   return (
@@ -311,7 +313,7 @@ export const CompaniesTable: React.FC<CompaniesTableProps> = ({
       // @ts-ignore
       columns={columns}
       dataSource={companies?.data}
-      scroll={{ x: extended ? 2000 : 1200 }}
+      scroll={{ x: extended ? 2400 : 1200 }}
       {...props}
     />
   )
