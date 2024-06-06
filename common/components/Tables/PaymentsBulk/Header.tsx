@@ -6,12 +6,12 @@ import {
   useAddPaymentMutation,
   useGetPaymentNumberQuery,
 } from '@common/api/paymentApi/payment.api'
-import { IRealEstate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthServiceSelect'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { AppRoutes, Operations } from '@utils/constants'
 import {
   filterInvoiceObject,
