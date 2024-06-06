@@ -65,6 +65,8 @@ export interface IGetPaymentResponse {
   }
   domainsFilter: IFilter[]
   realEstatesFilter: IFilter[]
+  yearFilter: IFilter[]
+  monthFilter: IFilter[]
   data: IExtendedPayment[]
   success: boolean
   total: number

@@ -1,14 +1,14 @@
-import initMiddleware from '@common/lib/initMiddleware'
 import validateMiddleware from '@common/lib/validateMiddleware'
-import Domain from '@common/modules/models/Domain'
-import Payment from '@common/modules/models/Payment'
-import RealEstate from '@common/modules/models/RealEstate'
-import start, { ExtendedData } from '@pages/api/api.config'
-import { quarters } from '@utils/constants'
-import { getCurrentUser } from '@utils/getCurrentUser'
-import { filterOptions, getDistinctCompanyAndDomain } from '@utils/helpers'
-import { check, validationResult } from 'express-validator'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { check, validationResult } from 'express-validator'
+import RealEstate from '@common/modules/models/RealEstate'
+import initMiddleware from '@common/lib/initMiddleware'
+import { getCurrentUser } from '@utils/getCurrentUser'
+import Payment from '@common/modules/models/Payment'
+import start, { ExtendedData } from '@pages/api/api.config'
+import { filterOptions, getDistinctCompanyAndDomain } from '@utils/helpers'
+import Domain from '@common/modules/models/Domain'
+import { quarters } from '@utils/constants'
 import { getCreditDebitPipeline } from './pipelines'
 
 start()
@@ -59,7 +59,7 @@ const postValidateBody = initMiddleware(
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ExtendedData>
+  res: NextApiResponse
 ) {
   switch (req.method) {
     case 'GET':
@@ -124,13 +124,35 @@ export default async function handler(
             model: Payment,
           })
 
+
+        const dates = await Payment.distinct("invoiceCreationDate")
+
+        const years = Array.from(
+            new Set(
+                dates
+                    .map((item) => new Date(item).getFullYear())
+            )
+        ).map((year) => ({ text: year.toString(), value: year }))
+
+        const months = Array.from(
+            new Set(
+                dates
+                    .map(
+                        (item) => new Date(item).getMonth() + 1
+                    )
+            )
+        ).map((month) => ({
+          text: new Date(0, month - 1).toLocaleString('default', { month: 'long' }),
+          value: month,
+        }))
+
+
         const creditDebitPipeline = getCreditDebitPipeline(options)
         const totalPayments = await Payment.aggregate(creditDebitPipeline)
 
         return res.status(200).json({
           currentCompaniesCount: distinctCompanies.length,
           currentDomainsCount: distinctDomains.length,
-          // TODO: DATE FILTERS (LOGIC FROM useDatesFilter)
           domainsFilter: distinctDomains?.map(({ domainDetails }) => ({
             text: domainDetails.name,
             value: domainDetails._id,
@@ -139,6 +161,8 @@ export default async function handler(
             text: companyDetails.companyName,
             value: companyDetails._id,
           })),
+          monthFilter: months,
+          yearFilter: years,
           data: payments,
           totalPayments: totalPayments.reduce((acc, item) => {
             acc[item._id] = item.totalSum

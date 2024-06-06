@@ -62,7 +62,7 @@ const PaymentsBlock = () => {
 
   const [filters, setFilters] = useState<Record<string, any>>({})
 
-  console.log(filters)
+
 
   const closeEditModal = () => {
     setCurrentPayment(null)
@@ -97,15 +97,6 @@ const PaymentsBlock = () => {
     { skip: currUserLoading || !currUser }
   )
 
-  const [dates, setDates] = useState<Date[]>([])
-
-  useEffect(() => {
-    setDates(
-      payments?.data?.map(({ invoiceCreationDate }) => invoiceCreationDate)
-    )
-  }, [payments?.data])
-
-  const { yearsFilter, monthsFilter } = useDatesFilters(dates)
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
@@ -225,12 +216,9 @@ const PaymentsBlock = () => {
     {
       title: 'За місяць',
       dataIndex: 'month',
-      filters: monthsFilter,
+      filters:
+          pathname === AppRoutes.PAYMENT ? payments?.monthFilter : null,
       filteredValue: filters?.month || null,
-      // onFilter: (value, record) => {
-      //   const recordMonth = new Date(record.invoiceCreationDate).getMonth() + 1
-      //   return recordMonth === value
-      // },
       render: (monthService, obj) =>
         NumberToFormattedMonth(
           new Date(monthService?.date || obj.invoiceCreationDate).getMonth()
@@ -239,10 +227,9 @@ const PaymentsBlock = () => {
     {
       title: 'За рік',
       dataIndex: 'year',
-      filters: yearsFilter,
+      filters:
+          pathname === AppRoutes.PAYMENT ? payments?.yearFilter : null,
       filteredValue: filters?.year || null,
-      // onFilter: (value, record) =>
-      //   new Date(record.invoiceCreationDate).getFullYear() === value,
       render: (monthService, obj) =>
         new Date(monthService?.date || obj.invoiceCreationDate).getFullYear(),
     },
