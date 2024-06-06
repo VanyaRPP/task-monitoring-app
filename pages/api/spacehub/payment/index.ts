@@ -3,7 +3,7 @@ import validateMiddleware from '@common/lib/validateMiddleware'
 import Domain from '@common/modules/models/Domain'
 import Payment from '@common/modules/models/Payment'
 import RealEstate from '@common/modules/models/RealEstate'
-import start, { ExtendedData } from '@pages/api/api.config'
+import start from '@pages/api/api.config'
 import {
   getCreditDebitPipeline,
   getInvoicesTotalPipeline,
@@ -68,7 +68,7 @@ const postValidateBody = initMiddleware(
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ExtendedData>
+  res: NextApiResponse
 ) {
   const { isUser, isDomainAdmin, isGlobalAdmin, isAdmin, user } =
     await getCurrentUser(req, res)

@@ -312,7 +312,8 @@ const PaymentsBlock = () => {
     {
       title: 'За місяць',
       dataIndex: 'month',
-      filters: monthsFilter,
+      filters:
+          pathname === AppRoutes.PAYMENT ? payments?.monthFilter : null,
       filteredValue: filters?.month || null,
       onFilter: (value, record) => {
         const recordMonth = new Date(record.invoiceCreationDate).getMonth() + 1
@@ -327,7 +328,8 @@ const PaymentsBlock = () => {
     {
       title: 'За рік',
       dataIndex: 'year',
-      filters: yearsFilter,
+      filters:
+          pathname === AppRoutes.PAYMENT ? payments?.yearFilter : null,
       filteredValue: filters?.year || null,
       onFilter: (value, record) =>
         new Date(record.invoiceCreationDate).getFullYear() === value,
