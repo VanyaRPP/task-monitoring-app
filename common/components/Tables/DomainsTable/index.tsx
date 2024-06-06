@@ -10,6 +10,7 @@ import {
 } from '@common/api/domainApi/domain.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { TableProps } from '@common/components/Tables'
+import { CompaniesTable } from '@common/components/Tables/CompaniesTable'
 import { EditDomainButton } from '@common/components/UI/Buttons/EditDomainButton'
 import { IDomain } from '@common/modules/models/Domain'
 import { IStreet } from '@common/modules/models/Street'
@@ -27,6 +28,7 @@ export const DomainsTable: React.FC<DomainsTableProps> = ({
   onSelect,
   onDelete,
   editable = false,
+  extended = false,
   expandable = false,
   filterable = false,
   selectable = false,
@@ -185,7 +187,7 @@ export const DomainsTable: React.FC<DomainsTableProps> = ({
             </Button>
           </Popconfirm>
         ),
-        hidden: !editable || !isGlobalAdmin,
+        hidden: !editable || (!isDomainAdmin && !isGlobalAdmin),
       },
     ].filter((column) => !column.hidden)
   }, [
@@ -220,10 +222,10 @@ export const DomainsTable: React.FC<DomainsTableProps> = ({
           onChange: handleSelect,
         }
       }
-      // expandable={{
-      //   rowExpandable: (record) => expandable,
-      //   expandedRowRender: (record) => <></>,
-      // }}
+      expandable={{
+        rowExpandable: (record) => expandable,
+        expandedRowRender: (record) => <CompaniesTable domain={record._id} />,
+      }}
       onChange={(_, filters) => setFilter(filters)}
       loading={isDomainsLoading}
       // BUG: antd v4.x issue, optional columns and columnsType fixed in antd v5.x

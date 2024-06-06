@@ -93,6 +93,7 @@ export const EditDomainForm: React.FC<EditDomainFormProps> = ({
       initialValues={{ streets: streetsIds }}
       form={form}
       layout="vertical"
+      requiredMark={editable}
       {...props}
     >
       <Name form={form} loading={isLoading} editable={editable} />

@@ -79,7 +79,13 @@ export const EditStreetForm: React.FC<EditStreetFormProps> = ({
   }, [form, streetId, street])
 
   return (
-    <Form onFinish={handleFinish} form={form} layout="vertical" {...props}>
+    <Form
+      onFinish={handleFinish}
+      form={form}
+      layout="vertical"
+      requiredMark={editable}
+      {...props}
+    >
       <City form={form} loading={isLoading} editable={editable} />
       <Address form={form} loading={isLoading} editable={editable} />
       {/* TODO: building number in separated field maybe? */}
