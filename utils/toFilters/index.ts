@@ -1,4 +1,5 @@
 import { IFilter } from '@common/modules/models/Filter'
+import { FilterQuery } from 'mongoose'
 
 /**
  * Generates a set of filters from an array of objects or strings.
@@ -21,7 +22,7 @@ export function toFilters(array: string[]): Array<IFilter>
  */
 export function toFilters<T, K extends keyof T>(
   array: T[],
-  valueKey: K | ((item: T) => any),
+  valueKey?: K | ((item: T) => any),
   textKey?: K | ((item: T) => any)
 ): Array<IFilter>
 
@@ -57,4 +58,57 @@ export function toFilters<T, K extends keyof T>(
   } catch (error) {
     return []
   }
+}
+
+export type PeriodOptions = {
+  year?: number | string | (number | string)[]
+  quarter?: number | string | (number | string)[]
+  month?: number | string | (number | string)[]
+  day?: number | string | (number | string)[]
+}
+
+/**
+ * Generates a set of period filters from an mongoose options.
+ *
+ * @template T - The type of the mongoose model.
+ *
+ * @param key - The key of field filter will be applied to.
+ * @param options - The `PeriodOptions` representing `year`, `quarter`, `month`, `day` periods.
+ * @returns An `FilterQuery` set that can be used to filter mongoose request with `$and` keyword.
+ */
+export function toPeriodFiltersQuery<T>(
+  key: keyof T & string,
+  options: PeriodOptions
+): FilterQuery<T> | null {
+  const filters: FilterQuery<T>[] = []
+
+  if (options.year) {
+    filters.push({ [key]: { $eq: new Date(options.year.toString()) } })
+  }
+
+  if (options.quarter) {
+    const quarters = {
+      1: [1, 2, 3],
+      2: [4, 5, 6],
+      3: [7, 8, 9],
+      4: [10, 11, 12],
+    }
+
+    const quarterValues = Array.isArray(options.quarter)
+      ? options.quarter.map(Number)
+      : [Number(options.quarter)]
+    const months = quarterValues.flatMap((quarter) => quarters[quarter])
+
+    filters.push({ [key]: { $in: months } })
+  }
+
+  if (options.month) {
+    filters.push({ [key]: { $eq: new Date(options.month.toString()) } })
+  }
+
+  if (options.day) {
+    filters.push({ [key]: { $eq: new Date(options.day.toString()) } })
+  }
+
+  return filters.length ? { $and: filters } : null
 }
