@@ -1,10 +1,11 @@
+import { toCleanObject } from '@utils/toCleanObject'
 import {
-  IAddServiceResponse,
-  IDeleteServiceResponse,
+  GetServicesQueryRequest,
+  GetServicesQueryResponse,
   IGetServiceResponse,
-  IService,
 } from './service.api.types'
 
+import { IService } from '@common/modules/models/Service'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export const serviceApi = createApi({
@@ -14,37 +15,21 @@ export const serviceApi = createApi({
   tagTypes: ['Service'],
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getAllServices: builder.query<
-      IGetServiceResponse,
-      {
-        limit?: number
-        userId?: string
-        domainId?: string
-        streetId?: string
-        serviceId?: string
-        year?: number
-        month?: number
-      }
+    getServices: builder.query<
+      GetServicesQueryResponse,
+      GetServicesQueryRequest
     >({
-      query: ({
-        limit,
-        userId,
-        domainId,
-        streetId,
-        serviceId,
-        year,
-        month,
-      }) => {
+      query: (query) => {
         return {
           url: `service`,
-          params: { limit, userId, domainId, streetId, serviceId, year, month },
+          ...(query && { params: toCleanObject(query) }),
         }
       },
-      providesTags: (response: IGetServiceResponse) =>
-        response?.data
-          ? response.data.map((item) => ({ type: 'Service', id: item._id }))
-          : [],
-      // transformResponse: (response: any) => response.data,
+      providesTags: ['Service'],
+    }),
+    getService: builder.query<IService, string>({
+      query: (id) => `service/${id}`,
+      providesTags: ['Service'],
     }),
     getServicesAddress: builder.query({
       query: () => {
@@ -54,13 +39,7 @@ export const serviceApi = createApi({
       },
       transformResponse: (response: IGetServiceResponse) => response.data,
     }),
-    addService: builder.mutation<
-      IAddServiceResponse,
-      Omit<IService, '_id' | 'domain' | 'street'> & {
-        domain: string
-        street: string
-      }
-    >({
+    addService: builder.mutation<IService, Partial<IService>>({
       query(body) {
         return {
           url: `service`,
@@ -70,22 +49,16 @@ export const serviceApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Service'] : []),
     }),
-    deleteService: builder.mutation<IDeleteServiceResponse, IService['_id']>({
+    deleteService: builder.mutation<IService, IService['_id']>({
       query(id) {
         return {
           url: `service/${id}`,
           method: 'DELETE',
         }
       },
-      invalidatesTags: (response) => (response ? ['Service'] : []),
+      invalidatesTags: ['Service'],
     }),
-    editService: builder.mutation<
-      IService,
-      Omit<IService, 'domain' | 'street'> & {
-        domain: string
-        street: string
-      }
-    >({
+    editService: builder.mutation<IService, Partial<IService>>({
       query(data) {
         const { _id, ...body } = data
         return {
@@ -94,14 +67,15 @@ export const serviceApi = createApi({
           body: body,
         }
       },
-      invalidatesTags: (response) => (response ? ['Service'] : []),
+      invalidatesTags: ['Service'],
     }),
   }),
 })
 
 export const {
   useAddServiceMutation,
-  useGetAllServicesQuery,
+  useGetServicesQuery,
+  useGetServiceQuery,
   useGetServicesAddressQuery,
   useDeleteServiceMutation,
   useEditServiceMutation,
