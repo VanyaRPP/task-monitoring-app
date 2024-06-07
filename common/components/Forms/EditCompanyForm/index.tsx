@@ -17,19 +17,10 @@ import { StreetSelect } from '@common/components/UI/Selectors/StreetSelect'
 import { IDomain } from '@common/modules/models/Domain'
 import { IRealEstate } from '@common/modules/models/RealEstate'
 import { IStreet } from '@common/modules/models/Street'
-import {
-  Checkbox,
-  Divider,
-  Form,
-  FormInstance,
-  Input,
-  Tag,
-  message,
-} from 'antd'
+import { Checkbox, Divider, Form, Input, Tag, message } from 'antd'
 import { useCallback, useEffect } from 'react'
 
 export interface EditCompanyFormProps extends EditFormProps<IRealEstate> {
-  form?: FormInstance
   company?: IRealEstate['_id']
   street?: IStreet['_id']
   domain?: IDomain['_id']

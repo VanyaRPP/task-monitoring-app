@@ -8,11 +8,10 @@ import { useGetStreetsQuery } from '@common/api/streetApi/street.api'
 import { EditFormAttributeProps, EditFormProps } from '@common/components/Forms'
 import { IDomain } from '@common/modules/models/Domain'
 import { IStreet } from '@common/modules/models/Street'
-import { Form, FormInstance, Input, Select, Spin, Tag, message } from 'antd'
+import { Form, Input, Select, Spin, Tag, message } from 'antd'
 import { useCallback, useEffect } from 'react'
 
 export interface EditDomainFormProps extends EditFormProps<IDomain> {
-  form?: FormInstance
   domain?: IDomain['_id']
   streets?: IStreet['_id'][]
 }
