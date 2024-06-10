@@ -1,7 +1,5 @@
-import {
-  GetServicesQueryRequest,
-  IService,
-} from '@common/api/serviceApi/service.api.types'
+import { GetServicesQueryRequest } from '@common/api/serviceApi/service.api.types'
+import { IService } from '@common/modules/models/Service'
 import { expect } from '@jest/globals'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'

@@ -1,6 +1,6 @@
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { IRealEstate } from '@common/api/realestateApi/realestate.api.types'
-import { IService } from '@common/api/serviceApi/service.api.types'
+import { IService } from '@common/modules/models/Service'
 import { expect } from '@jest/globals'
 import { ServiceType } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'

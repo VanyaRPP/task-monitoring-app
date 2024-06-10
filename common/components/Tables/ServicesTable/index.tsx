@@ -1,4 +1,9 @@
-import { DeleteFilled, EditFilled, EyeFilled } from '@ant-design/icons'
+import {
+  DeleteFilled,
+  EditFilled,
+  EyeFilled,
+  QuestionCircleOutlined,
+} from '@ant-design/icons'
 import {
   useDeleteServiceMutation,
   useGetServicesQuery,
@@ -10,8 +15,8 @@ import { IDomain } from '@common/modules/models/Domain'
 import { IService } from '@common/modules/models/Service'
 import { IStreet } from '@common/modules/models/Street'
 import { Roles } from '@utils/constants'
-import { NumberToFormattedMonth } from '@utils/helpers'
-import { Button, Popconfirm, Table } from 'antd'
+import { NumberToFormattedMonth, renderCurrency } from '@utils/helpers'
+import { Button, Popconfirm, Table, Tooltip } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export interface ServicesTableProps extends TableProps {
@@ -49,8 +54,6 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
     domain: domainId,
   })
 
-  console.log(filter)
-
   const { data: services, isLoading: isServicesLoading } = useGetServicesQuery({
     streetId: filter.street,
     domainId: filter.domain,
@@ -65,6 +68,7 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
     async (id: string) => {
       const response = await deleteService(id)
 
+      // TODO: proper Service types
       // if ('data' in response) {
       //   message.success('Послугу успішно видалено!')
       //   onDelete?.(response.data.id.toString())
@@ -104,6 +108,7 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
       {
         title: 'Надавач послуг',
         dataIndex: 'domain',
+        width: 200,
         render: (domain: IDomain) => domain?.name,
         // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
         ...(filterable && {
@@ -115,6 +120,7 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
       {
         title: 'Вулиця',
         dataIndex: 'street',
+        width: 300,
         render: (street: IStreet) =>
           `вул. ${street?.address} (м. ${street?.city})`,
         // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
@@ -149,7 +155,61 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
           filteredValue: filter.year,
         }),
       },
-      // TODO: extended with prices
+      {
+        title: 'Утримання',
+        dataIndex: 'rentPrice',
+        width: 100,
+        render: renderCurrency,
+        hidden: !extended,
+      },
+      {
+        title: 'Електрика',
+        dataIndex: 'electricityPrice',
+        width: 100,
+        render: renderCurrency,
+        hidden: !extended,
+      },
+      {
+        title: 'Вода',
+        dataIndex: 'waterPrice',
+        width: 100,
+        render: renderCurrency,
+        hidden: !extended,
+      },
+      {
+        title: 'Вода???',
+        dataIndex: 'waterPriceTotal',
+        width: 100,
+        render: renderCurrency,
+        hidden: !extended,
+      },
+      {
+        title: 'Вивіз ТПВ',
+        dataIndex: 'garbageCollectorPrice',
+        width: 100,
+        render: renderCurrency,
+        hidden: !extended,
+      },
+      {
+        title: (
+          <Tooltip title="Індекс Інфляції">
+            <QuestionCircleOutlined /> Індекс
+          </Tooltip>
+        ),
+
+        dataIndex: 'inflicionPrice',
+        width: 100,
+        hidden: !extended,
+      },
+      {
+        title: 'Опис',
+        dataIndex: 'description',
+        width: 200,
+        ellipsis: true,
+        render: (description) => (
+          <Tooltip title={description}>{description}</Tooltip>
+        ),
+      },
       {
         align: 'center',
         fixed: 'right',
@@ -184,6 +244,7 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
     ].filter((column) => !column.hidden)
   }, [
     editable,
+    extended,
     filterable,
     filter,
     handleDelete,
@@ -227,7 +288,7 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
       // @ts-ignore
       columns={columns}
       dataSource={services?.data}
-      scroll={{ x: extended ? 2000 : 800 }}
+      scroll={{ x: extended ? 1600 : 800 }}
       {...props}
     />
   )

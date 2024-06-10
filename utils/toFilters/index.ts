@@ -67,6 +67,7 @@ export type PeriodOptions = {
   day?: number | string | (number | string)[]
 }
 
+// TODO: proper period function to cteate mongodb period filter requiest
 /**
  * Generates a set of period filters from an mongoose options.
  *
@@ -82,33 +83,33 @@ export function toPeriodFiltersQuery<T>(
 ): FilterQuery<T> | null {
   const filters: FilterQuery<T>[] = []
 
-  if (options.year) {
-    filters.push({ [key]: { $eq: new Date(options.year.toString()) } })
-  }
+  // if (options.year) {
+  //   filters.push({ [key]: { $eq: new Date(options.year.toString()) } })
+  // }
 
-  if (options.quarter) {
-    const quarters = {
-      1: [1, 2, 3],
-      2: [4, 5, 6],
-      3: [7, 8, 9],
-      4: [10, 11, 12],
-    }
+  // if (options.quarter) {
+  //   const quarters = {
+  //     1: [1, 2, 3],
+  //     2: [4, 5, 6],
+  //     3: [7, 8, 9],
+  //     4: [10, 11, 12],
+  //   }
 
-    const quarterValues = Array.isArray(options.quarter)
-      ? options.quarter.map(Number)
-      : [Number(options.quarter)]
-    const months = quarterValues.flatMap((quarter) => quarters[quarter])
+  //   const quarterValues = Array.isArray(options.quarter)
+  //     ? options.quarter.map(Number)
+  //     : [Number(options.quarter)]
+  //   const months = quarterValues.flatMap((quarter) => quarters[quarter])
 
-    filters.push({ [key]: { $in: months } })
-  }
+  //   filters.push({ [key]: { $in: months } })
+  // }
 
-  if (options.month) {
-    filters.push({ [key]: { $eq: new Date(options.month.toString()) } })
-  }
+  // if (options.month) {
+  //   filters.push({ [key]: { $eq: new Date(options.month.toString()) } })
+  // }
 
-  if (options.day) {
-    filters.push({ [key]: { $eq: new Date(options.day.toString()) } })
-  }
+  // if (options.day) {
+  //   filters.push({ [key]: { $eq: new Date(options.day.toString()) } })
+  // }
 
   return filters.length ? { $and: filters } : null
 }

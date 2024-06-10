@@ -28,8 +28,7 @@ export default async function handler(
         return res.status(404).json({ error: 'not found' })
       }
 
-      if (isGlobalAdmin) {
-      } else if (isDomainAdmin) {
+      if (isDomainAdmin) {
         if (!service.domain.adminEmails.includes(user.email)) {
           return res.status(403).json({ error: 'not allowed' })
         }
