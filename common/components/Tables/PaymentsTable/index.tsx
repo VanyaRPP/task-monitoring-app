@@ -1,32 +1,36 @@
+import { DeleteFilled, EditFilled, EyeFilled } from '@ant-design/icons'
 import {
-  DeleteFilled,
-  EditFilled,
-  EyeFilled,
-  QuestionCircleOutlined,
-} from '@ant-design/icons'
-import {
-  useDeleteServiceMutation,
-  useGetServicesQuery,
-} from '@common/api/serviceApi/service.api'
+  useDeletePaymentMutation,
+  useGetPaymentsQuery,
+} from '@common/api/paymentApi/payment.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { TableProps } from '@common/components/Tables'
+import { EditPaymentButton } from '@common/components/UI/Buttons/EditPaymentButton'
 import { EditServiceButton } from '@common/components/UI/Buttons/EditServiceButton'
 import { IDomain } from '@common/modules/models/Domain'
+import { IPayment } from '@common/modules/models/Payment'
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { IService } from '@common/modules/models/Service'
 import { IStreet } from '@common/modules/models/Street'
 import { Roles } from '@utils/constants'
 import { NumberToFormattedMonth, renderCurrency } from '@utils/helpers'
-import { Button, Popconfirm, Table, Tooltip } from 'antd'
+import { Button, Popconfirm, Table, Tag, Tooltip } from 'antd'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-export interface ServicesTableProps extends TableProps {
+export interface PaymentsTableProps extends TableProps {
   domain?: IDomain['_id']
   street?: IStreet['_id']
+  company?: IRealEstate['_id']
+  service?: IService['_id']
+  type?: IPayment['type']
 }
 
-export const ServicesTable: React.FC<ServicesTableProps> = ({
+export const PaymentsTable: React.FC<PaymentsTableProps> = ({
   domain: domainId = [],
   street: streetId = [],
+  company: companyId = [],
+  service: serviceId = [],
+  type,
   selected: _selected = [],
   onSelect,
   onDelete,
@@ -50,25 +54,31 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
   const [page, setPage] = useState<number>(1)
   const [pageSize, setPageSize] = useState<number>(filterable ? 10 : 5)
   const [filter, setFilter] = useState<Record<string, any>>({
-    street: streetId,
     domain: domainId,
+    street: streetId,
+    company: companyId,
+    monthService: serviceId,
+    type,
   })
 
-  const { data: services, isLoading: isServicesLoading } = useGetServicesQuery({
-    streetId: filter.street,
+  const { data: payments, isLoading: isPaymentsLoading } = useGetPaymentsQuery({
     domainId: filter.domain,
+    streetId: filter.street,
+    companyId: filter.company,
+    serviceId: filter.monthService,
+    type: filter.type,
     month: filter.month,
     year: filter.year,
     limit: pageSize,
     skip: (page - 1) * pageSize,
   })
-  const [deleteService] = useDeleteServiceMutation()
+  const [deletePayment] = useDeletePaymentMutation()
 
   const handleDelete = useCallback(
     async (id: string) => {
-      const response = await deleteService(id)
+      const response = await deletePayment(id)
 
-      // TODO: proper Service types
+      // TODO: proper Payment types
       // if ('data' in response) {
       //   message.success('Послугу успішно видалено!')
       //   onDelete?.(response.data.id.toString())
@@ -76,7 +86,7 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
       //   message.error('При видаленні послуги сталася помилка')
       // }
     },
-    [onDelete, deleteService]
+    [onDelete, deletePayment]
   )
 
   const handlePagination = useCallback(
@@ -92,9 +102,9 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
   )
 
   const handleSelect = useCallback(
-    (services: string[]) => {
-      setSelected(services)
-      onSelect?.(services)
+    (payments: string[]) => {
+      setSelected(payments)
+      onSelect?.(payments)
     },
     [onSelect]
   )
@@ -113,9 +123,10 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
         // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
         ...(filterable && {
           filterSearch: true,
-          filters: services?.filter.domain,
+          filters: payments?.filter.domain,
           filteredValue: filter.domain,
         }),
+        hidden: !extended,
       },
       {
         title: 'Вулиця',
@@ -126,20 +137,89 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
         // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
         ...(filterable && {
           filterSearch: true,
-          filters: services?.filter.street,
+          filters: payments?.filter.street,
           filteredValue: filter.street,
         }),
+        hidden: !extended,
+      },
+      {
+        title: 'Компанія',
+        dataIndex: 'company',
+        width: 200,
+        render: (company: IRealEstate) => company?.companyName,
+        // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
+        ...(filterable && {
+          filterSearch: true,
+          filters: payments?.filter.company,
+          filteredValue: filter.company,
+        }),
+      },
+      {
+        title: 'Послуга',
+        dataIndex: 'monthService',
+        width: 100,
+        render: (service: IService) => (
+          <EditServiceButton
+            type="dashed"
+            editable={isGlobalAdmin}
+            service={service?._id}
+          >
+            {isGlobalAdmin ? <EditFilled /> : <EyeFilled />}
+          </EditServiceButton>
+        ),
+        // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
+        // TODO: proper filter by service
+        // ...(filterable && {
+        //   filterSearch: true,
+        //   filters: payments?.filter.monthService,
+        //   filteredValue: filter.monthService,
+        // }),
+      },
+      {
+        title: 'Тип',
+        dataIndex: 'type',
+        width: 80,
+        render: (type: IPayment['type']) => (
+          <Tag color={type === 'debit' ? 'red' : 'blue'}>{type}</Tag>
+        ),
+        // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
+        ...(filterable && {
+          filterSearch: true,
+          filters: payments?.filter.type,
+          filteredValue: filter.type,
+        }),
+      },
+      {
+        title: 'Статус',
+        // TODO: implement this
+        dataIndex: 'status',
+        width: 100,
+        // TODO: proper typing (almost the same as .type)
+        render: (status: any) => <Tag color="orange">TODO</Tag>,
+        // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
+        // TODO: implement status filtering (the same as .type)
+        // ...(filterable && {
+        //   filterSearch: true,
+        //   filters: payments?.filter.status,
+        //   filteredValue: filter.status,
+        // }),
+      },
+      {
+        title: 'Сума',
+        dataIndex: 'generalSum',
+        width: 100,
+        render: renderCurrency,
       },
       {
         title: 'Місяць',
         width: 120,
         dataIndex: 'month',
-        render: (_, { date }: IService) =>
-          NumberToFormattedMonth(new Date(date).getMonth() + 1),
+        render: (_, { invoiceCreationDate }: IPayment) =>
+          NumberToFormattedMonth(new Date(invoiceCreationDate).getMonth() + 1),
         // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
         ...(filterable && {
           filterSearch: true,
-          filters: services?.filter.month,
+          filters: payments?.filter.month,
           filteredValue: filter.month,
         }),
       },
@@ -147,59 +227,14 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
         title: 'Рік',
         width: 100,
         dataIndex: 'year',
-        render: (_, { date }: IService) => new Date(date).getFullYear(),
+        render: (_, { invoiceCreationDate }: IPayment) =>
+          new Date(invoiceCreationDate).getFullYear(),
         // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
         ...(filterable && {
           filterSearch: true,
-          filters: services?.filter.year,
+          filters: payments?.filter.year,
           filteredValue: filter.year,
         }),
-      },
-      {
-        title: 'Утримання',
-        dataIndex: 'rentPrice',
-        width: 100,
-        render: renderCurrency,
-        hidden: !extended,
-      },
-      {
-        title: 'Електрика',
-        dataIndex: 'electricityPrice',
-        width: 100,
-        render: renderCurrency,
-        hidden: !extended,
-      },
-      {
-        title: 'Вода',
-        dataIndex: 'waterPrice',
-        width: 100,
-        render: renderCurrency,
-        hidden: !extended,
-      },
-      {
-        title: 'Вода???',
-        dataIndex: 'waterPriceTotal',
-        width: 100,
-        render: renderCurrency,
-        hidden: !extended,
-      },
-      {
-        title: 'Вивіз ТПВ',
-        dataIndex: 'garbageCollectorPrice',
-        width: 100,
-        render: renderCurrency,
-        hidden: !extended,
-      },
-      {
-        title: (
-          <Tooltip title="Індекс Інфляції">
-            <QuestionCircleOutlined /> Індекс
-          </Tooltip>
-        ),
-
-        dataIndex: 'inflicionPrice',
-        width: 100,
-        hidden: !extended,
       },
       {
         title: 'Опис',
@@ -214,13 +249,13 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
         align: 'center',
         fixed: 'right',
         width: 64,
-        render: (_, service: IService) => (
-          <EditServiceButton
-            service={service._id}
+        render: (_, payment: IPayment) => (
+          <EditPaymentButton
+            payment={payment._id}
             editable={isDomainAdmin || isGlobalAdmin}
           >
             {isDomainAdmin || isGlobalAdmin ? <EditFilled /> : <EyeFilled />}
-          </EditServiceButton>
+          </EditPaymentButton>
         ),
         hidden: !editable,
       },
@@ -228,10 +263,10 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
         align: 'center',
         fixed: 'right',
         width: 64,
-        render: (_, service: IService) => (
+        render: (_, payment: IPayment) => (
           <Popconfirm
-            title="Ви впевнені що хочете видалити послугу?"
-            onConfirm={() => handleDelete(service._id)}
+            title="Ви впевнені що хочете видалити проплату?"
+            onConfirm={() => handleDelete(payment._id)}
             placement="topLeft"
           >
             <Button type="dashed" danger>
@@ -250,7 +285,7 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
     handleDelete,
     isDomainAdmin,
     isGlobalAdmin,
-    services,
+    payments,
   ])
 
   return (
@@ -259,7 +294,7 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
       size="small"
       pagination={
         filterable && {
-          total: services?.total,
+          total: payments?.total,
           current: page,
           pageSize: pageSize,
           showSizeChanger: true,
@@ -278,17 +313,17 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
       expandable={
         {
           // rowExpandable: (record) => expandable,
-          // expandedRowRender: (record) => <PaymentsTable service={record._id} />,
+          // expandedRowRender: (record) => <></>,
         }
       }
       onChange={(_, filters) => setFilter(filters)}
-      loading={isServicesLoading}
+      loading={isPaymentsLoading}
       // BUG: antd v4.x issue, optional columns and columnsType fixed in antd v5.x
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       columns={columns}
-      dataSource={services?.data}
-      scroll={{ x: extended ? 1600 : 800 }}
+      dataSource={payments?.data}
+      scroll={{ x: extended ? 1200 : 600 }}
       {...props}
     />
   )

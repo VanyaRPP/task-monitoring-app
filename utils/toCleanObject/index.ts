@@ -1,30 +1,37 @@
 /**
  * Recursively removes all properties with `null` or `undefined` values from an object or array.
+ * Also removes empty objects and arrays.
  *
  * @param obj - The object or array to clean.
- * @returns A new object or array with `null` and `undefined` values removed, or `null` if the input was falsy.
+ * @returns A new object or array with `null`, `undefined`, and empty values removed, or `null` if the input was falsy.
  */
 export function toCleanObject<T = unknown>(obj: T): Partial<T> | null {
-  if (obj === undefined && obj === null) {
+  if (obj === undefined || obj === null) {
     return null
   }
 
   if (Array.isArray(obj)) {
-    return obj
+    const cleanedArray = obj
       .map((item) => toCleanObject(item))
-      .filter((item) => item !== undefined && item !== null) as unknown as T
+      .filter((item) => item !== undefined && item !== null)
+
+    return cleanedArray.length > 0 ? (cleanedArray as unknown as T) : null
   }
 
-  if (typeof obj === 'object') {
-    return Object.keys(obj).reduce((acc: Partial<T>, key) => {
+  if (typeof obj === 'object' && obj !== null) {
+    const cleanedObject = Object.keys(obj).reduce((acc: Partial<T>, key) => {
       const value = obj[key]
 
-      if (value !== undefined && value !== null) {
-        acc[key] = toCleanObject(value)
+      const cleanedValue = toCleanObject(value)
+
+      if (cleanedValue !== undefined && cleanedValue !== null) {
+        acc[key] = cleanedValue
       }
 
       return acc
     }, {})
+
+    return Object.keys(cleanedObject).length > 0 ? cleanedObject : null
   }
 
   return obj

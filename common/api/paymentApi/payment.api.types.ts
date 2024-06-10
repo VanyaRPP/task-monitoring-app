@@ -1,10 +1,39 @@
-import { IDomain } from '@common/modules/models/Domain'
-import { IRealEstate } from '@common/modules/models/RealEstate'
-import { IService } from '@common/modules/models/Service'
-import { IStreet } from '@common/modules/models/Street'
+import { IFilter } from '@common/modules/models/Filter'
+import { IPayment } from '@common/modules/models/Payment'
 import { ServiceType } from '@utils/constants'
 import { ObjectId } from 'mongoose'
 import { IUser } from './../../modules/models/User'
+
+type BaseGetPaymentsQueryRequest = {
+  paymentId?: string[] | string
+  domainId?: string[] | string
+  streetId?: string[] | string
+  companyId?: string[] | string
+  serviceId?: string[] | string
+  type?: 'debit' | 'credit' | ('debit' | 'credit')[]
+  month?: number[] | number
+  year?: number[] | number
+  limit?: number
+  skip?: number
+}
+export type GetPaymentsQueryRequest =
+  | BaseGetPaymentsQueryRequest
+  | undefined
+  | void
+
+export type GetPaymentsQueryResponse = {
+  data: IPayment[]
+  filter: {
+    domain: IFilter[]
+    street: IFilter[]
+    company: IFilter[]
+    monthService: IFilter[]
+    type: IFilter[]
+    month: IFilter[]
+    year: IFilter[]
+  }
+  total: number
+}
 
 export interface IPaymentField {
   type: ServiceType | string
@@ -25,34 +54,9 @@ export interface IReciever {
   description: string
 }
 
-export interface IPayment {
-  invoiceNumber: number
-  type: string
-  invoiceCreationDate: Date
-  domain: Partial<IDomain> | string
-  street: Partial<IStreet> | string
-  company: Partial<IRealEstate> | string
-  monthService: Partial<IService> | string
-  description?: string
-  invoice: IPaymentField[]
-  provider: IProvider
-  reciever: IReciever
-  generalSum: number
-}
-
-export interface IExtendedPayment extends IPayment {
-  _id: string
-  _v: number
-}
-
 export interface IAddPaymentResponse {
   success: boolean
-  data: IExtendedPayment
-}
-
-export interface IFilter {
-  text: string
-  value: string
+  data: IPayment
 }
 
 export interface IGetPaymentResponse {
@@ -76,7 +80,7 @@ export interface IGetPaymentResponse {
   domainsFilter: IFilter[]
   realEstatesFilter: IFilter[]
   addressFilter: IFilter[]
-  data: IExtendedPayment[]
+  data: IPayment[]
   success: boolean
   total: number
 }
@@ -97,7 +101,7 @@ export interface IGetPaymentNumberResponse {
 }
 
 export interface IGeneratePaymentPDF {
-  payments: IExtendedPayment[]
+  payments: IPayment[]
 }
 
 export interface IGeneratePaymentPDFResponce {

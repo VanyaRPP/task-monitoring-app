@@ -18,6 +18,7 @@ const Home: React.FC<{
       <Dashboard.Domains />
       <Dashboard.Companies />
       <Dashboard.Services />
+      <Dashboard.Payments />
     </Space>
   )
 }

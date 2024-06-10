@@ -11,10 +11,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isDomainAdmin, isAdmin, user } = await getCurrentUser(
-    req,
-    res
-  )
+  const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
+    await getCurrentUser(req, res)
 
   if (req.method === 'GET') {
     try {
