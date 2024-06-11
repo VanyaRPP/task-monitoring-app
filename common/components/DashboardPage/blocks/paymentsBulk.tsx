@@ -1,10 +1,10 @@
 import { useGetRealEstatesQuery } from '@common/api/realestateApi/realestate.api'
-import { IService } from '@common/api/serviceApi/service.api.types'
 import InvoicesHeader from '@common/components/Tables/PaymentsBulk/Header'
 import InvoicesTable from '@common/components/Tables/PaymentsBulk/Table'
 import TableCard from '@common/components/UI/TableCard'
 import useService from '@common/modules/hooks/useService'
 import { IRealEstate } from '@common/modules/models/RealEstate'
+import { IService } from '@common/modules/models/Service'
 import { Form, FormInstance } from 'antd'
 import { createContext, useContext } from 'react'
 

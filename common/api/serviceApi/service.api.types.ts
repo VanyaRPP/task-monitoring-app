@@ -1,19 +1,29 @@
-import { IDomain } from '@common/modules/models/Domain'
-import { IStreet } from '@common/modules/models/Street'
+import { IService } from '@common/modules/models/Service'
 import { IFilter } from '../paymentApi/payment.api.types'
 
-export interface IService {
-  _id: string
-  domain: Partial<IDomain>
-  street: Partial<IStreet>
-  rentPrice: number
-  date: Date
-  electricityPrice: number
-  waterPrice: number
-  waterPriceTotal: number
-  garbageCollectorPrice?: number
-  inflicionPrice?: number
-  description?: string
+type BaseGetServicesQueryRequest = {
+  serviceId?: string[] | string
+  domainId?: string[] | string
+  streetId?: string[] | string
+  month?: number[] | number
+  year?: number[] | number
+  limit?: number
+  skip?: number
+}
+export type GetServicesQueryRequest =
+  | BaseGetServicesQueryRequest
+  | undefined
+  | void
+
+export type GetServicesQueryResponse = {
+  data: IService[]
+  filter: {
+    street: IFilter[]
+    domain: IFilter[]
+    month: IFilter[]
+    year: IFilter[]
+  }
+  total: number
 }
 
 export interface IAddServiceResponse {

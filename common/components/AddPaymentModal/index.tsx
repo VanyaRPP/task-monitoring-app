@@ -6,9 +6,9 @@ import {
   IExtendedPayment,
   IPayment,
 } from '@common/api/paymentApi/payment.api.types'
-import { IService } from '@common/api/serviceApi/service.api.types'
 import { usePaymentData } from '@common/modules/hooks/usePaymentData'
 import { IRealEstate } from '@common/modules/models/RealEstate'
+import { IService } from '@common/modules/models/Service'
 import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'

@@ -2,8 +2,8 @@ import {
   IPayment,
   IPaymentField,
 } from '@common/api/paymentApi/payment.api.types'
-import { IService } from '@common/api/serviceApi/service.api.types'
 import { IRealEstate } from '@common/modules/models/RealEstate'
+import { IService } from '@common/modules/models/Service'
 import { ServiceType } from '@utils/constants'
 
 export type InvoicesCollection = {

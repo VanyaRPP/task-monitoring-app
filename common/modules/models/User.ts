@@ -1,6 +1,6 @@
 import { ICustomer } from '@common/api/customerApi/customer.api.types'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import { IService } from '@common/api/serviceApi/service.api.types'
+import { IService } from '@common/modules/models/Service'
 import { IAddress } from 'common/modules/models/Task'
 import mongoose, { ObjectId, Schema } from 'mongoose'
 import { ITask } from './Task'

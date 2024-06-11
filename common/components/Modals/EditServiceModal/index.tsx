@@ -1,32 +1,32 @@
-import { EditCompanyForm } from '@common/components/Forms/EditCompanyForm'
+import { EditServiceForm } from '@common/components/Forms/EditServiceForm'
 import { EditModalProps } from '@common/components/Modals'
 import { IDomain } from '@common/modules/models/Domain'
-import { IRealEstate } from '@common/modules/models/RealEstate'
+import { IService } from '@common/modules/models/Service'
 import { IStreet } from '@common/modules/models/Street'
 import { Form, Modal } from 'antd'
 import { useCallback, useState } from 'react'
 
-export interface EditCompanyModalProps extends EditModalProps {
-  company?: IRealEstate['_id']
-  street?: IStreet['_id']
+export interface EditServiceModalProps extends EditModalProps {
+  service?: IService['_id']
   domain?: IDomain['_id']
+  street?: IStreet['_id']
 }
 
 /**
- * Create/edit company modal window with wrapped `EditCompanyForm`
+ * Create/edit service modal window with wrapped `EditServiceForm`
  *
- * @param company - editing company id (leave empty to create new company)
- * @param street - default street id
+ * @param service - editing service id (leave empty to create new service)
  * @param domain - default domain id
+ * @param street - default street id
  * @param editable - describes is form read-only or can be edited (default - `true`)
  * @param onOk - callback executed on successfull form submit
  * @param onCancel - callback executed on modal cancel
  * @param ...props - rest of `antd#Modal` props
  */
-export const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
-  company: companyId,
-  street: streetId,
+export const EditServiceModal: React.FC<EditServiceModalProps> = ({
+  service: serviceId,
   domain: domainId,
+  street: streetId,
   editable = true,
   onOk,
   onCancel,
@@ -50,7 +50,7 @@ export const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
   }, [form, onCancel])
 
   const handleOk = useCallback(() => {
-    if (!changed || !companyId) {
+    if (!changed || !serviceId) {
       return handleOkSubmit()
     }
 
@@ -61,7 +61,7 @@ export const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
       cancelText: 'Ні',
       onOk: handleOkSubmit,
     })
-  }, [changed, companyId, handleOkSubmit])
+  }, [changed, serviceId, handleOkSubmit])
 
   const handleCancel = useCallback(() => {
     if (!changed) {
@@ -95,20 +95,20 @@ export const EditCompanyModal: React.FC<EditCompanyModalProps> = ({
         title
           ? title
           : !editable
-          ? 'Перегляд компанії'
-          : companyId
-          ? 'Редагування компанії'
-          : 'Створення компанії'
+          ? 'Перегляд послуги'
+          : serviceId
+          ? 'Редагування послуги'
+          : 'Створення послуги'
       }
       okButtonProps={!editable ? { style: { display: 'none' } } : okButtonProps}
       cancelText={!editable ? 'Закрити' : cancelText}
       {...props}
     >
-      <EditCompanyForm
+      <EditServiceForm
         form={form}
-        company={companyId}
-        street={streetId}
+        service={serviceId}
         domain={domainId}
+        street={streetId}
         editable={editable}
         onChange={handleChange}
         onFinish={handleFinish}

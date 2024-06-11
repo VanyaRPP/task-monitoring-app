@@ -1,6 +1,6 @@
-import { IService } from '@common/api/serviceApi/service.api.types'
 import { IDomain } from '@common/modules/models/Domain'
 import { IRealEstate } from '@common/modules/models/RealEstate'
+import { IService } from '@common/modules/models/Service'
 import { IStreet } from '@common/modules/models/Street'
 import { ServiceType } from '@utils/constants'
 import { ObjectId } from 'mongoose'

@@ -1,17 +1,46 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import Service from '@common/modules/models/Service'
 import Domain from '@common/modules/models/Domain'
+import Service from '@common/modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import type { NextApiRequest, NextApiResponse } from 'next'
 start()
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isAdmin, user } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isAdmin, user } = await getCurrentUser(
+    req,
+    res
+  )
+
+  if (req.method === 'GET') {
+    try {
+      const { id } = req.query
+
+      const service = await Service.findById(id)
+        .populate('street')
+        .populate('domain')
+
+      if (!service) {
+        return res.status(404).json({ error: 'not found' })
+      }
+
+      if (isDomainAdmin) {
+        if (!service.domain.adminEmails.includes(user.email)) {
+          return res.status(403).json({ error: 'not allowed' })
+        }
+      } else if (isUser) {
+        return res.status(403).json({ error: 'not allowed' })
+      }
+
+      return res.status(200).json(service)
+    } catch (error) {
+      return res.status(500).json({ error })
+    }
+  }
 
   switch (req.method) {
     case 'DELETE':

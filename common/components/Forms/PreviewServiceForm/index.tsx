@@ -1,8 +1,8 @@
-import React, { FC } from 'react'
-import { IService } from '@common/api/serviceApi/service.api.types'
-import { DatePicker, Form, FormInstance, Input } from 'antd'
-import s from './style.module.scss'
 import useInitialValues from '@common/modules/hooks/useInitialValues'
+import { IService } from '@common/modules/models/Service'
+import { DatePicker, Form, FormInstance, Input } from 'antd'
+import { FC } from 'react'
+import s from './style.module.scss'
 
 interface Props {
   form: FormInstance<any>

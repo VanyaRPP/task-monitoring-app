@@ -1,4 +1,4 @@
-import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import { useGetServicesQuery } from '@common/api/serviceApi/service.api'
 import { validateField } from '@common/assets/features/validators'
 import { getFormattedDate } from '@utils/helpers'
 import { Form, Select } from 'antd'
@@ -29,7 +29,7 @@ export default function MonthServiceSelect({
 }
 
 function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
-  const { data: monthsServices, isLoading } = useGetAllServicesQuery({
+  const { data: monthsServices, isLoading } = useGetServicesQuery({
     domainId,
     streetId,
   })
@@ -51,7 +51,9 @@ function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
       label="Місяць"
     >
       <Select
-        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+        filterOption={(input, option) =>
+          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+        }
         options={monthsServices?.data.map((i) => ({
           value: i._id,
           label: getFormattedDate(i.date, 'MMMM YYYY'),

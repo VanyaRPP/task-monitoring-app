@@ -1,6 +1,10 @@
 import { Roles } from './constants'
 import { compareDates } from './helpers'
 
+function sortById(services: any) {
+  return services?.sort((a, b) => a._id.localeCompare(b._id))
+}
+
 export const users = {
   user: {
     name: 'user',
@@ -34,7 +38,7 @@ export const users = {
   },
 }
 
-export const streets = [
+export const streets = sortById([
   {
     _id: '64d68421d9ba2fc8fea79d31',
     address: 'street_0',
@@ -60,9 +64,9 @@ export const streets = [
     address: 'street_4',
     city: 'street_4_city',
   },
-]
+])
 
-export const domains = [
+export const domains = sortById([
   {
     _id: '64d68421d9ba2fc8fea79d11',
     name: 'domain 0',
@@ -112,10 +116,10 @@ export const domains = [
     streets: [],
     description: 'none',
   },
-]
+])
 
 // TODO: fix tests
-export const realEstates = [
+export const realEstates = sortById([
   {
     _id: '64d68421d9ba2fc8fea79d21',
     domain: domains[0]._id,
@@ -228,7 +232,7 @@ export const realEstates = [
     rentPart: 50,
     inflicion: false,
   },
-]
+])
 
 /*
  * Test services Dates:
@@ -244,10 +248,10 @@ export const realEstates = [
  * 01.07.2023
  * 02.10.2023
  */
-export const services = [
+export const services = sortById([
   {
     _id: '64d68421d9ba2fc8fea79d56',
-    date: new Date(2021, 8, 10),
+    date: new Date(2021, 8, 10).toISOString(),
     domain: domains[2]._id,
     street: streets[2]._id,
     rentPrice: 30,
@@ -260,7 +264,7 @@ export const services = [
   },
   {
     _id: '64d68421d9ba2fc8fea79d55',
-    date: new Date(2021, 5, 15),
+    date: new Date(2021, 5, 15).toISOString(),
     domain: domains[1]._id,
     street: streets[2]._id,
     rentPrice: 30,
@@ -273,7 +277,7 @@ export const services = [
   },
   {
     _id: '64d68421d9ba2fc8fea79d54',
-    date: new Date(2021, 4, 17),
+    date: new Date(2021, 4, 17).toISOString(),
     domain: domains[0]._id,
     street: streets[2]._id,
     rentPrice: 30,
@@ -286,7 +290,7 @@ export const services = [
   },
   {
     _id: '64d68421d9ba2fc8fea79d53',
-    date: new Date(2020, 10, 11),
+    date: new Date(2020, 10, 11).toISOString(),
     domain: domains[0]._id,
     street: streets[1]._id,
     rentPrice: 30,
@@ -299,7 +303,7 @@ export const services = [
   },
   {
     _id: '64d68421d9ba2fc8fea79d52',
-    date: new Date(2020, 6, 19),
+    date: new Date(2020, 6, 19).toISOString(),
     domain: domains[1]._id as any,
     street: streets[1]._id,
     rentPrice: 20,
@@ -312,7 +316,7 @@ export const services = [
   },
   {
     _id: '64d68421d9ba2fc8fea79d51',
-    date: new Date(2020, 1, 12),
+    date: new Date(2020, 1, 12).toISOString(),
     domain: domains[0]._id as any,
     street: streets[0]._id,
     rentPrice: 10,
@@ -323,9 +327,9 @@ export const services = [
     description: 'none',
     waterPriceTotal: 0,
   },
-]
+])
 
-export const paymentsForDates = [
+export const paymentsForDates = sortById([
   {
     _id: '64f049bd9f13c122008369ad',
     invoiceNumber: 10,
@@ -410,7 +414,7 @@ export const paymentsForDates = [
     invoice: [],
     generalSum: 27207.77,
   },
-]
+])
 
 export const payments = [
   {

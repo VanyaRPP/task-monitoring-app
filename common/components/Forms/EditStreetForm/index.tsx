@@ -5,11 +5,10 @@ import {
 } from '@common/api/streetApi/street.api'
 import { EditFormAttributeProps, EditFormProps } from '@common/components/Forms'
 import { IStreet } from '@common/modules/models/Street'
-import { Form, FormInstance, Input, Spin, message } from 'antd'
+import { Form, Input, Spin, message } from 'antd'
 import { useCallback, useEffect } from 'react'
 
 export interface EditStreetFormProps extends EditFormProps<IStreet> {
-  form?: FormInstance
   street?: IStreet['_id']
 }
 

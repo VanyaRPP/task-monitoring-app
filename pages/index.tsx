@@ -17,6 +17,7 @@ const Home: React.FC<{
       <Dashboard.Streets />
       <Dashboard.Domains />
       <Dashboard.Companies />
+      <Dashboard.Services />
     </Space>
   )
 }

@@ -1,5 +1,5 @@
-import { IStreet } from '@common/modules/models/Street'
 import mongoose, { Schema } from 'mongoose'
+import { IStreet } from './Street'
 
 export interface IDomain extends mongoose.Document {
   name: string

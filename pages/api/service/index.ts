@@ -1,127 +1,118 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
 import Domain from '@common/modules/models/Domain'
-import RealEstate from '@common/modules/models/RealEstate'
 import Service from '@common/modules/models/Service'
-import start, { Data } from '@pages/api/api.config'
-import { getCurrentUser } from '@utils/getCurrentUser'
+import Street from '@common/modules/models/Street'
+import start from '@pages/api/api.config'
+import { getMongoCount } from '@utils/getMongoCount'
+import { getRelatedDomains, getRelatedServices } from '@utils/getRelated'
+import { getCurrentUserData } from '@utils/getUserData'
+import { NumberToFormattedMonth } from '@utils/helpers'
+import { toFilters } from '@utils/toFilters'
+import { toQuery } from '@utils/toQuery'
+import { FilterQuery } from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse
 ) {
-  const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
-    await getCurrentUser(req, res)
+  const user = await getCurrentUserData(req, res)
 
-  switch (req.method) {
-    case 'GET':
-      try {
-        const { limit, domainId, streetId, serviceId, year, month } = req.query
+  if (!user) {
+    return res.status(401).json({ error: 'unauthorized user' })
+  }
 
-        const options = {
-          domain: { $in: domainId },
-          street: { $in: streetId },
-          _id: serviceId,
-          date: {
-            $gte: new Date(+year, +month, 1, 0, 0, 0), // first second of provided YY.MM
-            $lt: new Date(+year, +month + 1, 0, 23, 59, 59, 999), // last second of provided YY.MM
-          },
-        }
+  if (req.method === 'GET') {
+    try {
+      const {
+        serviceId: _serviceId,
+        domainId: _domainId,
+        streetId: _streetId,
+        year,
+        month,
+        limit = 0,
+        skip = 0,
+      } = req.query
 
-        if (!serviceId) delete options._id
-        if (!streetId) delete options.street
-        if (!domainId) delete options.domain
-        if (!year || !month || isNaN(+year) || isNaN(+month))
-          delete options.date
+      const serviceId = toQuery(_serviceId)
+      const domainId = toQuery(_domainId)
+      const streetId = toQuery(_streetId)
 
-        if (isGlobalAdmin) {
-          const services = await Service.find(options)
-            .limit(+limit)
-            .populate('domain')
-            .populate('street')
+      // TODO: fix this function to actually make filter by period possible
+      // const period = toPeriodFiltersQuery<typeof Service>('date', {
+      //   year: toQuery(year),
+      //   month: toQuery(month),
+      // })
 
-          return res.status(200).json({ success: true, data: services })
-        }
+      const options: FilterQuery<typeof Service> = {}
+      const filters: FilterQuery<typeof Service> = {}
 
-        if (isDomainAdmin) {
-          const domains = await Domain.find(
-            options.domain
-              ? {
-                  _id: options.domain,
-                  adminEmails: { $in: [user.email] },
-                }
-              : { adminEmails: { $in: [user.email] } }
-          )
+      options._id = { $in: await getRelatedServices(req, res, user) }
+      options.domain = { $in: await getRelatedDomains(req, res, user) }
 
-          if (domains) {
-            options.domain = { $in: domains.map(({ _id }) => _id) }
+      // TODO: fix test data to properly distribute streets security
+      // options.street = { $in: await getRelatedStreets(req, res, user) }
 
-            const services = await Service.find(options)
-              .limit(+limit)
-              .populate('domain')
-              .populate('street')
+      if (serviceId) {
+        filters._id = { $in: serviceId }
+      }
+      if (domainId) {
+        filters.domain = { $in: domainId }
+      }
+      if (streetId) {
+        filters.street = { $in: streetId }
+      }
+      // if (period) {
+      //   filters.$expr = { $and: period }
+      // }
 
-            return res.status(200).json({ success: true, data: services })
-          }
-        }
+      const services = await Service.find({ $and: [options, filters] })
+        .skip(+skip)
+        .limit(+limit)
+        .populate('street')
+        .populate('domain')
 
-        if (isUser) {
-          const companies = await RealEstate.find(
-            options.domain
-              ? {
-                  domain: options.domain,
-                  adminEmails: { $in: [user.email] },
-                }
-              : {
-                  adminEmails: { $in: [user.email] },
-                }
-          )
-
-          if (companies) {
-            options.domain = { $in: companies.map(({ domain }) => domain) }
-
-            const services = await Service.find(options)
-              .limit(+limit)
-              .populate('domain')
-              .populate('street')
-
-            return res.status(200).json({ success: true, data: services })
-          }
-        }
-
-        return res.status(200).json({ success: false, data: [] })
-      } catch (error) {
-        return res.status(400).json({ success: false, error: error.message })
+      const filter = {
+        domain: toFilters(
+          await Domain.find({
+            _id: { $in: await Service.distinct('domain', options) },
+          }),
+          '_id',
+          'name'
+        ),
+        street: toFilters(
+          await Street.find({
+            _id: { $in: await Service.distinct('street', options) },
+          }),
+          '_id',
+          (street) => `вул. ${street.address} (м. ${street.city})`
+        ),
+        month: toFilters(
+          await Service.distinct('date', options),
+          (date) => new Date(date).getMonth() + 1,
+          (date) => NumberToFormattedMonth(new Date(date).getMonth() + 1)
+        ),
+        year: toFilters(await Service.distinct('date', options), (date) =>
+          new Date(date).getFullYear()
+        ),
       }
 
-    case 'POST':
-      try {
-        if (isAdmin) {
-          // TODO: body validation
-          const service = await Service.create(req.body)
-          return res.status(200).json({ success: true, data: service })
-        } else {
-          return res
-            .status(400)
-            .json({ success: false, message: 'not allowed' })
-        }
-      } catch (error) {
-        return res.status(400).json({ success: false, message: error })
-      }
-  }
-}
+      const total = await getMongoCount(Service, {
+        $and: [options, filters],
+      })
 
-function filterPeriodOptions(args) {
-  const { year, month } = args
-  const filterByDateOptions = []
-  if (year) {
-    filterByDateOptions.push({ $eq: [{ $year: '$date' }, year] })
+      return res.status(200).json({ data: services, filter, total })
+    } catch (error) {
+      return res.status(500).json({ error })
+    }
+  } else if (req.method === 'POST') {
+    try {
+      const service = await Service.create(req.body)
+
+      return res.status(201).json(service)
+    } catch (error) {
+      return res.status(500).json({ error: error })
+    }
   }
-  if (month) {
-    filterByDateOptions.push({ $eq: [{ $month: '$date' }, month] })
-  }
-  return filterByDateOptions
 }

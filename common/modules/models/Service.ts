@@ -1,20 +1,21 @@
-import { Moment } from 'moment'
-import mongoose, { ObjectId, Schema } from 'mongoose'
+import { IDomain } from '@common/modules/models/Domain'
+import { IStreet } from '@common/modules/models/Street'
+import mongoose, { Schema } from 'mongoose'
 
-export interface IServiceModel {
-  domain: ObjectId
-  street: ObjectId
+export interface IService extends mongoose.Document {
+  domain: IDomain
+  street: IStreet
   rentPrice: number
-  date: Moment
+  date: Date
   electricityPrice: number
   waterPrice: number
   waterPriceTotal: number
-  garbageCollectorPrice: number
-  inflicionPrice: number
-  description: string
+  garbageCollectorPrice?: number
+  inflicionPrice?: number
+  description?: string
 }
 
-export const ServiceSchema = new Schema<IServiceModel>({
+export const ServiceSchema = new Schema<IService>({
   date: { type: Date, required: true },
   domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
   street: { type: Schema.Types.ObjectId, ref: 'Street' },
@@ -24,11 +25,11 @@ export const ServiceSchema = new Schema<IServiceModel>({
   waterPriceTotal: { type: Number, required: true, default: 0 },
   garbageCollectorPrice: { type: Number, required: false, default: 0 },
   inflicionPrice: { type: Number, required: false, default: 0 },
-  description: { type: String, required: false, default: '' },
+  description: { type: String, required: false },
 })
 
 const Service =
-  (mongoose.models.Service as mongoose.Model<IServiceModel>) ||
+  (mongoose.models.Service as mongoose.Model<IService>) ||
   mongoose.model('Service', ServiceSchema)
 
 export default Service

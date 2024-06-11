@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose'
+
 export interface IStreet extends mongoose.Document {
   address: string
   city: string
