@@ -70,7 +70,7 @@ export default async function handler(
           })
         }
 
-        options.adminEmails = user.email
+        options._id = { $in: relatedDomainsIds }
       } else if (isUser) {
         const relatedDomainsIds = (
           await RealEstate.distinct('domain', {

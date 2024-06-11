@@ -22,6 +22,7 @@ export const StreetsTable: React.FC<StreetsTableProps> = ({
   onSelect,
   onDelete,
   editable = false,
+  extended = false,
   expandable = false,
   filterable = false,
   selectable = false,

@@ -5,7 +5,7 @@ import {
   useGetDomainsQuery,
 } from '@common/api/domainApi/domain.api'
 import { useGetStreetsQuery } from '@common/api/streetApi/street.api'
-import { EditFormItemProps, EditFormProps } from '@common/components/Forms'
+import { EditFormAttributeProps, EditFormProps } from '@common/components/Forms'
 import { IDomain } from '@common/modules/models/Domain'
 import { IStreet } from '@common/modules/models/Street'
 import { Form, FormInstance, Input, Select, Spin, Tag, message } from 'antd'
@@ -93,6 +93,7 @@ export const EditDomainForm: React.FC<EditDomainFormProps> = ({
       initialValues={{ streets: streetsIds }}
       form={form}
       layout="vertical"
+      requiredMark={editable}
       {...props}
     >
       <Name form={form} loading={isLoading} editable={editable} />
@@ -103,7 +104,7 @@ export const EditDomainForm: React.FC<EditDomainFormProps> = ({
   )
 }
 
-const Name: React.FC<EditFormItemProps> = ({
+const Name: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,
@@ -129,7 +130,7 @@ const Name: React.FC<EditFormItemProps> = ({
   )
 }
 
-const Description: React.FC<EditFormItemProps> = ({
+const Description: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,
@@ -154,7 +155,7 @@ const Description: React.FC<EditFormItemProps> = ({
   )
 }
 
-const AdminEmails: React.FC<EditFormItemProps> = ({
+const AdminEmails: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,
@@ -198,7 +199,7 @@ const AdminEmails: React.FC<EditFormItemProps> = ({
   )
 }
 
-const Streets: React.FC<EditFormItemProps> = ({
+const Streets: React.FC<EditFormAttributeProps> = ({
   form,
   loading,
   disabled,

@@ -1,10 +1,9 @@
-import React from 'react'
+import { useGetRealEstatesQuery } from '@common/api/realestateApi/realestate.api'
 import { Card, Radio } from 'antd'
 import s from '../style.module.scss'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 
 const MyCompany = () => {
-  const { data: realEstates, isLoading } = useGetAllRealEstateQuery({})
+  const { data: realEstates, isLoading } = useGetRealEstatesQuery({})
   const data = realEstates?.data || []
 
   return (

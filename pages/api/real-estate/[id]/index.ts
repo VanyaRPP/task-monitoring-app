@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { authOptions } from '@pages/api/auth/[...nextauth]'
-import RealEstate from '@common/modules/models/RealEstate'
 import Domain from '@common/modules/models/Domain'
+import RealEstate from '@common/modules/models/RealEstate'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import type { NextApiRequest, NextApiResponse } from 'next'
 start()
 
 export default async function handler(
@@ -14,10 +13,42 @@ export default async function handler(
 ) {
   const { user, isGlobalAdmin, isAdmin } = await getCurrentUser(req, res)
 
+  if (req.method === 'GET') {
+    try {
+      const { id } = req.query
+
+      const company = await RealEstate.findById(id)
+        .populate('street')
+        .populate('domain')
+
+      if (!company) {
+        return res.status(404).json({ error: 'not found' })
+      }
+
+      if (isGlobalAdmin) {
+      } else if (isDomainAdmin) {
+        if (
+          !company.domain.adminEmails.includes(user.email) &&
+          !company.adminEmails.includes(user.email)
+        ) {
+          return res.status(403).json({ error: 'not allowed' })
+        }
+      } else if (isUser) {
+        if (!company.adminEmails.includes(user.email)) {
+          return res.status(403).json({ error: 'not allowed' })
+        }
+      }
+
+      return res.status(200).json(company)
+    } catch (error) {
+      return res.status(500).json({ error })
+    }
+  }
+
   switch (req.method) {
     case 'DELETE':
       try {
-        if(isGlobalAdmin) {
+        if (isGlobalAdmin) {
           await RealEstate.findByIdAndRemove(req.query.id).then(
             (realEstate) => {
               if (realEstate) {

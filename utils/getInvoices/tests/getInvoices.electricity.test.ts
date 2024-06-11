@@ -1,13 +1,13 @@
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { expect } from '@jest/globals'
 import { ServiceType } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 
 describe('getInvoices - ELECTRICITY', () => {
   it('should load Electricity from payment', () => {
-    const company: Partial<IRealestate> = {}
+    const company: Partial<IRealEstate> = {}
     const service: Partial<IService> = {}
     const payment: Partial<IPayment> = {
       invoice: [
@@ -33,7 +33,7 @@ describe('getInvoices - ELECTRICITY', () => {
   })
 
   it('should load Electricity from company', () => {
-    const company: Partial<IRealestate> = {}
+    const company: Partial<IRealEstate> = {}
     const service: Partial<IService> = {
       electricityPrice: 123,
     }
@@ -57,7 +57,7 @@ describe('getInvoices - ELECTRICITY', () => {
   })
 
   it('should load Electricity with amount from company', () => {
-    const company: Partial<IRealestate> = {}
+    const company: Partial<IRealEstate> = {}
     const service: Partial<IService> = {
       electricityPrice: 123,
     }
@@ -91,7 +91,7 @@ describe('getInvoices - ELECTRICITY', () => {
   })
 
   it('should NOT load Electricity from service without electricity', () => {
-    const company: Partial<IRealestate> = {}
+    const company: Partial<IRealEstate> = {}
     const service: Partial<IService> = {
       electricityPrice: null,
     }
@@ -111,7 +111,7 @@ describe('getInvoices - ELECTRICITY', () => {
   })
 
   it('should NOT load Electricity from payment without electricity', () => {
-    const company: Partial<IRealestate> = {}
+    const company: Partial<IRealEstate> = {}
     const service: Partial<IService> = {}
     const payment: Partial<IPayment> = {}
     const prevPayment: Partial<IPayment> = {}
@@ -129,7 +129,7 @@ describe('getInvoices - ELECTRICITY', () => {
   })
 
   it('should NOT load Electricity without props', () => {
-    const company: Partial<IRealestate> = {}
+    const company: Partial<IRealEstate> = {}
     const service: Partial<IService> = {}
     const payment: Partial<IPayment> = {}
     const prevPayment: Partial<IPayment> = {}

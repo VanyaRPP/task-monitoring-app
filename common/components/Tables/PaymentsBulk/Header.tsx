@@ -6,12 +6,12 @@ import {
   useAddPaymentMutation,
   useGetPaymentNumberQuery,
 } from '@common/api/paymentApi/payment.api'
-import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthServiceSelect'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { AppRoutes, Operations } from '@utils/constants'
 import {
   filterInvoiceObject,
@@ -187,7 +187,7 @@ const validateInvoice = (invoice, service) => {
 const prepareInvoiceObjects = async (
   form: FormInstance,
   service: IService,
-  companies: IExtendedRealestate[],
+  companies: IRealEstate[],
   newInvoiceNumber: number
 ): Promise<any> => {
   const values = await form.validateFields()

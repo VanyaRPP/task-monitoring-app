@@ -1,5 +1,5 @@
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { useGetRealEstatesQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { Roles } from '@utils/constants'
 import { Card, Col, Row } from 'antd'
@@ -13,7 +13,7 @@ const MyDomainsCard: React.FC = () => {
     {},
     { skip: isGlobalAdmin }
   )
-  const { data: realEstates } = useGetAllRealEstateQuery(
+  const { data: realEstates } = useGetRealEstatesQuery(
     {},
     { skip: isGlobalAdmin }
   )

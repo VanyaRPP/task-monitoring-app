@@ -1,5 +1,6 @@
 export interface TableProps {
   editable?: boolean
+  extended?: boolean
   expandable?: boolean
   filterable?: boolean
   selectable?: boolean

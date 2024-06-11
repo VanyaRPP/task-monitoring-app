@@ -4,10 +4,10 @@
 
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import useCompany from '@common/modules/hooks/useCompany'
 import useService from '@common/modules/hooks/useService'
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { Form, FormInstance } from 'antd'
 
 export interface IUsePaymentDataProps {
@@ -16,7 +16,7 @@ export interface IUsePaymentDataProps {
 }
 
 export function usePaymentData({ form, paymentData }: IUsePaymentDataProps): {
-  company?: IRealestate
+  company?: IRealEstate
   service?: IService
   prevService?: IService
   payment?: IPayment

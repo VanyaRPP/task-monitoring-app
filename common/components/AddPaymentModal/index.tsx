@@ -6,9 +6,9 @@ import {
   IExtendedPayment,
   IPayment,
 } from '@common/api/paymentApi/payment.api.types'
-import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { usePaymentData } from '@common/modules/hooks/usePaymentData'
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
@@ -31,7 +31,7 @@ export interface IPaymentContext {
   payment: IPayment
   prevPayment: IPayment
   service: IService
-  company: IRealestate
+  company: IRealEstate
   form: FormInstance
 }
 
@@ -187,8 +187,8 @@ const AddPaymentModal: FC<Props> = ({
             // eslint-disable-next-line
             // @ts-ignore
             monthService: payment?.monthService?._id,
-            // TODO: fix payment typing globally to not be `domain: Partial<IRealestate> | string` but `Partial<IRealestate>` instead
-            // TODO: ???rename IRealestate to ICompany maybe, what the realestate means actually???
+            // TODO: fix payment typing globally to not be `domain: Partial<IRealEstate> | string` but `Partial<IRealEstate>` instead
+            // TODO: ???rename IRealEstate to ICompany maybe, what the realestate means actually???
             // eslint-disable-next-line
             // @ts-ignore
             company: payment?.company?._id,

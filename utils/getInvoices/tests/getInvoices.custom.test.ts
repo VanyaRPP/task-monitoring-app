@@ -1,13 +1,13 @@
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { expect } from '@jest/globals'
 import { ServiceType } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 
 describe('getInvoices - CUSTOM', () => {
   it('should load Custom from payment', () => {
-    const company: Partial<IRealestate> = {}
+    const company: Partial<IRealEstate> = {}
     const service: Partial<IService> = {}
     const payment: Partial<IPayment> = {
       invoice: [
@@ -42,7 +42,7 @@ describe('getInvoices - CUSTOM', () => {
   })
 
   it('should load Custom price from payment as sum', () => {
-    const company: Partial<IRealestate> = null
+    const company: Partial<IRealEstate> = null
     const service: Partial<IService> = null
     const payment: Partial<IPayment> = {
       invoice: [
@@ -80,7 +80,7 @@ describe('getInvoices - CUSTOM', () => {
   })
 
   it('should NOT load Custom without payment', () => {
-    const company: Partial<IRealestate> = null
+    const company: Partial<IRealEstate> = null
     const service: Partial<IService> = null
     const payment: Partial<IPayment> = null
     const prevPayment: Partial<IPayment> = null
@@ -98,7 +98,7 @@ describe('getInvoices - CUSTOM', () => {
   })
 
   it('should NOT load Custom from payment without customs', () => {
-    const company: Partial<IRealestate> = null
+    const company: Partial<IRealEstate> = null
     const service: Partial<IService> = null
     const payment: Partial<IPayment> = {
       invoice: [],

@@ -2,20 +2,17 @@ import {
   useAddRealEstateMutation,
   useEditRealEstateMutation,
 } from '@common/api/realestateApi/realestate.api'
-import RealEstateForm from './RealEstateForm'
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { Form, message } from 'antd'
-import React, { FC } from 'react'
-import {
-  IExtendedRealestate,
-  IRealestate,
-} from '@common/api/realestateApi/realestate.api.types'
+import { FC } from 'react'
 import Modal from '../../ModalWindow'
+import RealEstateForm from './RealEstateForm'
 // import AddServiceForm from '../Forms/AddServiceForm'
 // import moment from 'moment'
 
 interface Props {
   closeModal: VoidFunction
-  currentRealEstate?: IExtendedRealestate
+  currentRealEstate?: IRealEstate
 }
 
 const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
@@ -24,7 +21,7 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
   const [editRealEstate] = useEditRealEstateMutation()
 
   const handleSubmit = async () => {
-    const formData: IRealestate = await form.validateFields()
+    const formData: IRealEstate = await form.validateFields()
     const realEstateData = {
       domain: currentRealEstate?.domain || formData.domain,
       street: currentRealEstate?.street || formData.street,
@@ -38,7 +35,8 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
       rentPart: formData.rentPart,
       inflicion: formData.inflicion,
       waterPart: formData.waterPart,
-      discount: formData.discount > 0 ? formData.discount * -1 : formData.discount,
+      discount:
+        formData.discount > 0 ? formData.discount * -1 : formData.discount,
       cleaning: formData.cleaning,
     }
 
@@ -63,7 +61,7 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
   return (
     <Modal
       style={{ top: 20 }}
-      title={"Компанії"}
+      title={'Компанії'}
       onOk={handleSubmit}
       changesForm={() => form.isFieldsTouched()}
       onCancel={closeModal}

@@ -15,13 +15,7 @@ import { Button, Popconfirm, Space, message } from 'antd'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
 
-export interface DashboardStreetsProps {
-  domain?: string
-}
-
-export const Streets: React.FC<DashboardStreetsProps> = ({
-  domain: domainId,
-}) => {
+export const Streets: React.FC = () => {
   const router = useRouter()
 
   const { data: user } = useGetCurrentUserQuery()
@@ -89,13 +83,13 @@ export const Streets: React.FC<DashboardStreetsProps> = ({
       </Space>
 
       <StreetsTable
-        domain={domainId}
         editable={router.pathname === AppRoutes.STREETS}
+        extended={router.pathname === AppRoutes.STREETS}
         selectable={router.pathname === AppRoutes.STREETS}
         filterable={router.pathname === AppRoutes.STREETS}
         expandable
         selected={selected}
-        onSelect={(streets) => setSelected(streets)}
+        onSelect={setSelected}
       />
     </Space>
   )

@@ -1,13 +1,13 @@
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { expect } from '@jest/globals'
 import { ServiceType } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 
 describe('getInvoices - INFLICION', () => {
   it('should load Inflicion from payment', () => {
-    const company: Partial<IRealestate> = {}
+    const company: Partial<IRealEstate> = {}
     const service: Partial<IService> = {}
     const payment: Partial<IPayment> = {
       invoice: [
@@ -33,7 +33,7 @@ describe('getInvoices - INFLICION', () => {
   })
 
   it('should load Inflicion from company with inflicion', () => {
-    const company: Partial<IRealestate> = {
+    const company: Partial<IRealEstate> = {
       inflicion: true,
     }
     const service: Partial<IService> = {
@@ -62,7 +62,7 @@ describe('getInvoices - INFLICION', () => {
   })
 
   it('should load Inflicion price from payment as sum', () => {
-    const company: Partial<IRealestate> = null
+    const company: Partial<IRealEstate> = null
     const service: Partial<IService> = null
     const payment: Partial<IPayment> = {
       invoice: [
@@ -90,7 +90,7 @@ describe('getInvoices - INFLICION', () => {
   })
 
   it('should NOT load Inflicion from company without inflicion', () => {
-    const company: Partial<IRealestate> = {}
+    const company: Partial<IRealEstate> = {}
     const service: Partial<IService> = {
       inflicionPrice: 101,
     }

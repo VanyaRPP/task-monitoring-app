@@ -1,10 +1,9 @@
-import React from 'react'
-import s from './style.module.scss'
+import { useGetRealEstatesQuery } from '@common/api/realestateApi/realestate.api'
 import { Table } from 'antd'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import s from './style.module.scss'
 
 const OrganistaionsComponents = ({ domainId, streetId }) => {
-  const { data: realEstates, isLoading } = useGetAllRealEstateQuery({
+  const { data: realEstates, isLoading } = useGetRealEstatesQuery({
     domainId,
     streetId,
   })

@@ -1,4 +1,4 @@
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { useGetRealEstatesQuery } from '@common/api/realestateApi/realestate.api'
 
 interface IUseCompanyProps {
   companyId: any
@@ -7,7 +7,7 @@ interface IUseCompanyProps {
 
 function useCompany({ companyId, skip }: IUseCompanyProps) {
   const cmpnyId = companyId?._id || companyId
-  const { data: realEstates, isLoading } = useGetAllRealEstateQuery(
+  const { data: realEstates, isLoading } = useGetRealEstatesQuery(
     { companyId: cmpnyId },
     { skip }
   )

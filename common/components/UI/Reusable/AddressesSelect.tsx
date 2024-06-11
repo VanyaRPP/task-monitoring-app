@@ -1,6 +1,5 @@
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { validateField } from '@common/assets/features/validators'
-import { useCompanyPageContext } from '@common/components/DashboardPage/blocks/realEstates'
 import { IDomain } from '@common/modules/models/Domain'
 import { Form, Select } from 'antd'
 import { CSSProperties, useEffect } from 'react'
@@ -14,7 +13,7 @@ export default function AddressesSelect({
   edit?: boolean
   dropdownStyle?: CSSProperties
 }) {
-  const { streetId } = useCompanyPageContext()
+  const streetId = null
   const domainId = Form.useWatch('domain', form)
   const { data, isLoading } = useGetDomainsQuery({
     domainId: domainId || undefined,

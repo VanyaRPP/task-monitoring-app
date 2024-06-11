@@ -8,19 +8,12 @@ import { useDeleteDomainMutation } from '@common/api/domainApi/domain.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { DomainsTable } from '@common/components/Tables/DomainsTable'
 import { EditDomainButton } from '@common/components/UI/Buttons/EditDomainButton'
-import { IStreet } from '@common/modules/models/Street'
 import { AppRoutes, Roles } from '@utils/constants'
 import { Button, Popconfirm, Space, message } from 'antd'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
 
-export interface DashboardDomainsProps {
-  streets?: IStreet['_id'][]
-}
-
-export const Domains: React.FC<DashboardDomainsProps> = ({
-  streets: streetsIds,
-}) => {
+export const Domains: React.FC = () => {
   const router = useRouter()
 
   const { data: user } = useGetCurrentUserQuery()
@@ -82,13 +75,13 @@ export const Domains: React.FC<DashboardDomainsProps> = ({
       </Space>
 
       <DomainsTable
-        streets={streetsIds}
         editable={router.pathname === AppRoutes.DOMAIN}
+        extended={router.pathname === AppRoutes.DOMAIN}
         selectable={router.pathname === AppRoutes.DOMAIN}
         filterable={router.pathname === AppRoutes.DOMAIN}
         expandable
         selected={selected}
-        onSelect={(domains) => setSelected(domains)}
+        onSelect={setSelected}
       />
     </Space>
   )

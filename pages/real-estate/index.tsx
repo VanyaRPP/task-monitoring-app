@@ -1,18 +1,17 @@
-import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
-import { AppRoutes } from '../../utils/constants'
-import { unstable_getServerSession } from 'next-auth'
-import { authOptions } from '../api/auth/[...nextauth]'
+import Dashboard from '@common/components/Dashboard'
 import { GetServerSideProps } from 'next'
-import RealEstateBlock from '@common/components/DashboardPage/blocks/realEstates'
+import { getServerSession } from 'next-auth'
+import { AppRoutes } from '../../utils/constants'
+import { authOptions } from '../api/auth/[...nextauth]'
 
-export default withAuthRedirect(RealEstateBlock)
+const CompaniesPage: React.FC = () => {
+  return <Dashboard.Companies />
+}
+
+export default CompaniesPage
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

@@ -16,6 +16,7 @@ const Home: React.FC<{
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
       <Dashboard.Streets />
       <Dashboard.Domains />
+      <Dashboard.Companies />
     </Space>
   )
 }

@@ -1,36 +1,39 @@
-import { IDomain } from '@common/modules/models/Domain'
+import { IRealEstate } from '@common/modules/models/RealEstate'
 import { IFilter } from '../paymentApi/payment.api.types'
 
-export type IRealestate = {
-  domain: IDomain
-  street: string
-  companyName: string
-  adminEmails: string[]
-  pricePerMeter: number
-  servicePricePerMeter?: number
-  totalArea: number
-  description: string
-  garbageCollector?: boolean
-  rentPart?: number
-  inflicion?: boolean
-  waterPart?: number
-  discount?: number
-  cleaning?: number
+export type BaseGetQueryRequest = {
+  limit?: number
+  skip?: number
 }
 
-export interface IExtendedRealestate extends IRealestate {
-  _id: string
-  _v: number
+export type GetCompaniesQueryRequest =
+  | (BaseGetQueryRequest & {
+      companyId?: string[] | string
+      streetId?: string[] | string
+      domainId?: string[] | string
+      companyName?: string[] | string
+      adminEmail?: string[] | string
+    })
+  | undefined
+export type GetCompaniesQueryResponse = {
+  data: IRealEstate[]
+  filter: {
+    companyName: IFilter[]
+    domain: IFilter[]
+    street: IFilter[]
+    adminEmails: IFilter[]
+  }
+  total: number
 }
 
 export interface IAddRealestateResponse {
   success: boolean
-  data: IExtendedRealestate
+  data: IRealEstate
 }
 
 export interface IGetRealestateResponse {
   success: boolean
-  data: IExtendedRealestate[]
+  data: IRealEstate[]
   domainsFilter: IFilter[]
   realEstatesFilter: IFilter[]
   streetsFilter: IFilter[]
