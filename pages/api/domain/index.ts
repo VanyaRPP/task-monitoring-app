@@ -39,7 +39,7 @@ export default async function handler(
           options.streets = streetIds
         }
 
-        const domains = await Domain.find(options).limit(+limit)
+        const domains = await Domain.find(options).limit(+limit).populate('streets')
 
         return res.status(200).json({ success: true, data: domains })
       } catch (error) {
