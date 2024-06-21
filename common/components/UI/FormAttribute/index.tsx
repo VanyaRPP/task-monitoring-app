@@ -13,9 +13,8 @@ const FormAttribute: React.FC<{
   const { form }: { form: FormInstance } = useInvoicesPaymentContext()
 
   useEffect(() => {
-    form.setFieldValue(name, notNum ? value : toRoundFixed(value.toString()))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value])
+    form.setFieldValue(name, notNum ? value : toRoundFixed(value?.toString()))
+  }, [form, name, notNum, value])
 
   return (
     <Form.Item style={{ margin: 0 }} name={name}>
