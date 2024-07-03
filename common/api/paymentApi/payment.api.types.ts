@@ -37,6 +37,7 @@ export interface IPayment {
   provider: IProvider
   reciever: IReciever
   generalSum: number
+  status: 'draft' | 'sent'
 }
 
 export interface IExtendedPayment extends IPayment {

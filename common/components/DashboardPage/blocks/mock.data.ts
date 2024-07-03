@@ -67,6 +67,7 @@ export const extendedPayment: IExtendedPayment[] = [
       description: 'Description',
     },
     generalSum: 50,
+    status: 'draft',
   },
   {
     _id: '2',
@@ -89,6 +90,7 @@ export const extendedPayment: IExtendedPayment[] = [
       description: 'Description',
     },
     generalSum: 60,
+    status: 'draft',
   },
   {
     _id: '4',
@@ -111,6 +113,7 @@ export const extendedPayment: IExtendedPayment[] = [
       description: 'Description',
     },
     generalSum: 20,
+    status: 'draft',
   },
 ]
 
@@ -136,6 +139,7 @@ export const extendedPaymentsSort: IExtendedPayment[] = [
       description: 'Description',
     },
     generalSum: 89,
+    status: 'draft',
   },
   {
     _id: '6',
@@ -158,6 +162,7 @@ export const extendedPaymentsSort: IExtendedPayment[] = [
       description: 'Description',
     },
     generalSum: 120,
+    status: 'draft',
   },
   {
     _id: '7',
@@ -180,6 +185,7 @@ export const extendedPaymentsSort: IExtendedPayment[] = [
       description: 'Description',
     },
     generalSum: 213,
+    status: 'draft',
   },
 ]
 
@@ -205,5 +211,6 @@ export const extendedPaymentForTestForCorrectValue: IExtendedPayment[] = [
       description: 'Description',
     },
     generalSum: 60,
+    status: 'draft',
   },
 ]

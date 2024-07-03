@@ -19,6 +19,7 @@ export interface IPaymentModel {
   provider: IProvider
   reciever: IReciever
   generalSum: number
+  status: 'draft' | 'sent'
 }
 
 export const PaymentSchema = new Schema<IPaymentModel>({
@@ -35,6 +36,7 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   provider: { type: Object },
   reciever: { type: Object },
   generalSum: { type: Number },
+  status: { type: String, default: 'draft' },
 })
 
 const Payment =

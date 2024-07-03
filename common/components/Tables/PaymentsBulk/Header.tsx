@@ -215,6 +215,7 @@ const prepareInvoiceObjects = async (
       provider,
       reciever,
       invoice: filteredInvoice,
+      sendMail: false,
     }
   })
 }
