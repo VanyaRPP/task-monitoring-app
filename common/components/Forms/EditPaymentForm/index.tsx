@@ -3,6 +3,7 @@ import {
   useAddPaymentMutation,
   useEditPaymentMutation,
   useGetPaymentQuery,
+  useGetPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
 import { useGetRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetServiceQuery } from '@common/api/serviceApi/service.api'
@@ -13,6 +14,10 @@ import {
   EditFormItem,
   EditFormProps,
 } from '@common/components/Forms'
+import {
+  EditInvoicesTable,
+  InvoiceType,
+} from '@common/components/Tables/EditInvoicesTable'
 import { DividedSpace } from '@common/components/UI/DividedSpace'
 import { Loading } from '@common/components/UI/Loading'
 import { CompanySelect } from '@common/components/UI/Selectors/CompanySelect'
@@ -24,8 +29,10 @@ import { IPayment } from '@common/modules/models/Payment'
 import { IRealEstate } from '@common/modules/models/RealEstate'
 import { IService } from '@common/modules/models/Service'
 import { IStreet } from '@common/modules/models/Street'
-import { Form, Input, Tabs, message } from 'antd'
-import React, { useCallback, useEffect, useMemo } from 'react'
+import { getInvoices } from '@utils/getInvoices'
+import { Form, FormInstance, Input, message, Tabs } from 'antd'
+import moment from 'moment'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 export interface EditPaymentFormProps extends EditFormProps<IPayment> {
   payment?: IPayment['_id']
@@ -33,6 +40,50 @@ export interface EditPaymentFormProps extends EditFormProps<IPayment> {
   street?: IStreet['_id']
   company?: IRealEstate['_id']
   service?: IService['_id']
+}
+
+export const useInvoice = ({
+  payment,
+  service,
+  company,
+  prevPayment,
+}: {
+  payment?: IPayment
+  service?: IService
+  company?: IRealEstate
+  prevPayment?: IPayment
+}): InvoiceType[] => {
+  const invoices = useMemo(() => {
+    return getInvoices({ payment, service, company, prevPayment })
+  }, [payment, service, company, prevPayment])
+  return invoices
+}
+
+export const usePaymentFormData = (
+  form: FormInstance
+): {
+  service: IService
+  company: IRealEstate
+  prevPayment: IPayment
+} => {
+  const domainId = Form.useWatch('domain', form)
+  const serviceId = Form.useWatch('monthService', form)
+  const companyId = Form.useWatch('company', form)
+
+  const { data: service } = useGetServiceQuery(serviceId, { skip: !serviceId })
+  const { data: company } = useGetRealEstateQuery(companyId, {
+    skip: !companyId,
+  })
+
+  const { data: prevPayments } = useGetPaymentsQuery(
+    { companyId, domainId, month: moment(service?.date).month() - 1 },
+    { skip: !service }
+  )
+  const prevPayment = useMemo(() => {
+    return prevPayments?.data?.length ? prevPayments.data[0] : null
+  }, [prevPayments])
+
+  return { service, company, prevPayment }
 }
 
 /**
@@ -56,15 +107,16 @@ export const EditPaymentForm: React.FC<EditPaymentFormProps> = ({
   street: streetId,
   company: companyId,
   service: serviceId,
-  editable = true,
+  // editable = true,
   onFinish,
   onFinishFailed,
   ...props
 }) => {
-  // const editable = false
+  const [editable, setEditable] = useState(true)
 
   const [form] = Form.useForm(_form)
 
+  const { service, company, prevPayment } = usePaymentFormData(form)
   const { data: payment, isLoading: isPaymentLoading } = useGetPaymentQuery(
     paymentId,
     { skip: !paymentId }
@@ -102,8 +154,10 @@ export const EditPaymentForm: React.FC<EditPaymentFormProps> = ({
     [paymentId, payment, onFinish, onFinishFailed, editPayment, addPayment]
   )
 
+  const invoice = useInvoice({ payment, service, company, prevPayment })
+
   useEffect(() => {
-    if (paymentId && payment) {
+    if (payment) {
       form.setFieldsValue({
         ...payment,
         domain: payment?.domain?._id,
@@ -114,7 +168,15 @@ export const EditPaymentForm: React.FC<EditPaymentFormProps> = ({
     } else {
       form.resetFields()
     }
-  }, [form, paymentId, payment])
+  }, [form, payment])
+
+  useEffect(() => {
+    if (invoice) {
+      form.setFieldsValue({
+        invoice,
+      })
+    }
+  }, [form, invoice])
 
   return (
     <Form
@@ -305,32 +367,16 @@ const Prices: React.FC<EditFormAttributeProps> = ({
 }) => {
   const type: 'debit' | 'credit' = Form.useWatch('type', form) || 'debit'
 
-  if (!editable && type === 'debit') {
-    return (
-      <Debit
-        form={form}
-        loading={loading}
-        editable={editable}
-        disabled={disabled}
-      />
-    )
-  }
-
-  if (!editable && type === 'credit') {
-    return (
-      <Credit
-        form={form}
-        loading={loading}
-        editable={editable}
-        disabled={disabled}
-      />
-    )
-  }
-
   return (
     <Form.Item name="type" noStyle>
       <Tabs defaultActiveKey={type}>
-        <Tabs.TabPane tab="Дебет" tabKey="debit" key="debit">
+        <Tabs.TabPane
+          tab="Дебет"
+          tabKey="debit"
+          key="debit"
+          disabled={!editable || disabled}
+          forceRender
+        >
           <Debit
             form={form}
             loading={loading}
@@ -338,7 +384,13 @@ const Prices: React.FC<EditFormAttributeProps> = ({
             disabled={disabled}
           />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="Кредит" tabKey="credit" key="credit">
+        <Tabs.TabPane
+          tab="Кредит"
+          tabKey="credit"
+          key="credit"
+          disabled={!editable || disabled}
+          forceRender
+        >
           <Credit
             form={form}
             loading={loading}
@@ -383,19 +435,12 @@ const Debit: React.FC<EditFormAttributeProps> = ({
   editable,
 }) => {
   return (
-    <EditFormItem
-      label="Дебет"
-      rules={[{ required: true, message: `Поле обов'язкове` }]}
+    <EditInvoicesTable
+      form={form}
       loading={loading}
-      noStyle={!editable}
-      required
-    >
-      {/* TODO: make PaymentPricesTable analog */}
-      {/* <PaymentPricesTable loading={loading} preview={!editable || disabled} /> */}
-      <Form.List name="invoice">
-        {(fields, { add, remove, move }) => <></>}
-      </Form.List>
-    </EditFormItem>
+      editable={editable}
+      disabled={disabled}
+    />
   )
 }
 

@@ -47,6 +47,8 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
   const [form] = Form.useForm()
   const [changed, setChanged] = useState<boolean>(false)
 
+  const type = Form.useWatch('type', form)
+
   const handleOkSubmit = useCallback(() => {
     form.submit()
   }, [form])
@@ -110,6 +112,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
       }
       okButtonProps={!editable ? { style: { display: 'none' } } : okButtonProps}
       cancelText={!editable ? 'Закрити' : cancelText}
+      style={type !== 'credit' && { minWidth: 800 }}
       {...props}
     >
       <EditPaymentForm

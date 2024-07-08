@@ -139,7 +139,11 @@ export default async function handler(
         $and: [options, filters],
       })
 
-      return res.status(200).json({ data: payments, filter, total })
+      return res.status(200).json({
+        data: payments,
+        filter,
+        total,
+      })
     } catch (error) {
       return res.status(500).json({ error })
     }

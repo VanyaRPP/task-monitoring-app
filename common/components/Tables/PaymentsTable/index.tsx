@@ -116,6 +116,18 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const columns = useMemo(() => {
     return [
       {
+        title: 'Компанія',
+        dataIndex: 'company',
+        width: 200,
+        render: (company: IRealEstate) => company?.companyName,
+        // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
+        ...(filterable && {
+          filterSearch: true,
+          filters: payments?.filter.company,
+          filteredValue: filter.company,
+        }),
+      },
+      {
         title: 'Надавач послуг',
         dataIndex: 'domain',
         width: 200,
@@ -126,7 +138,6 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
           filters: payments?.filter.domain,
           filteredValue: filter.domain,
         }),
-        hidden: !extended,
       },
       {
         title: 'Вулиця',
@@ -141,18 +152,6 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
           filteredValue: filter.street,
         }),
         hidden: !extended,
-      },
-      {
-        title: 'Компанія',
-        dataIndex: 'company',
-        width: 200,
-        render: (company: IRealEstate) => company?.companyName,
-        // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
-        ...(filterable && {
-          filterSearch: true,
-          filters: payments?.filter.company,
-          filteredValue: filter.company,
-        }),
       },
       {
         title: 'Послуга',
@@ -174,13 +173,16 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({
         //   filters: payments?.filter.monthService,
         //   filteredValue: filter.monthService,
         // }),
+        hidden: !editable || !extended,
       },
       {
         title: 'Тип',
         dataIndex: 'type',
         width: 80,
         render: (type: IPayment['type']) => (
-          <Tag color={type === 'debit' ? 'red' : 'blue'}>{type}</Tag>
+          <Tag color={type === 'debit' ? 'purple' : 'blue'}>
+            {type === 'debit' ? 'Дебет' : 'Кредит'}
+          </Tag>
         ),
         // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
         ...(filterable && {

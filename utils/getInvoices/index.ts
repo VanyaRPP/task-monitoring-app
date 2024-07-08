@@ -1,27 +1,27 @@
-import {
-  IPayment,
-  IPaymentField,
-} from '@common/api/paymentApi/payment.api.types'
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
+import { IPayment } from '@common/modules/models/Payment'
 import { IRealEstate } from '@common/modules/models/RealEstate'
 import { IService } from '@common/modules/models/Service'
 import { ServiceType } from '@utils/constants'
+import { toRoundFixed } from '@utils/helpers'
 
 export type InvoicesCollection = {
   [key in ServiceType | string]?: IPaymentField
 }
 
 export interface IGetInvoiceProps {
-  company: Partial<IRealEstate>
-  service: Partial<IService>
-  payment: Partial<IPayment>
-  prevPayment: Partial<IPayment>
+  company?: Partial<IRealEstate>
+  service?: Partial<IService>
+  prevService?: Partial<IService>
+  payment?: Partial<IPayment>
+  prevPayment?: Partial<IPayment>
 }
 
 export interface IGetInvoiceByTypeProps {
-  company: Partial<IRealEstate>
-  service: Partial<IService>
-  currInvoicesCollection: InvoicesCollection
-  prevInvoicesCollection: InvoicesCollection
+  company?: Partial<IRealEstate>
+  service?: Partial<IService>
+  currInvoicesCollection?: InvoicesCollection
+  prevInvoicesCollection?: InvoicesCollection
 }
 
 /**
@@ -39,6 +39,7 @@ export interface IGetInvoiceByTypeProps {
  *
  * @param company - represents Company
  * @param service - represents Service
+ * @param prevService - represents Service from previous month
  * @param payment - represents Payment
  * @param prevPayment - represents Payment from previous month
  * @returns array of invoices for provided props
@@ -46,6 +47,7 @@ export interface IGetInvoiceByTypeProps {
 export const getInvoices = ({
   company,
   service,
+  prevService,
   payment,
   prevPayment,
 }: IGetInvoiceProps): Array<IPaymentField> => {
@@ -90,7 +92,18 @@ export const getInvoices = ({
     }),
   ]
 
-  return invoices.filter((invoice) => invoice)
+  return invoices
+    .filter((invoice) => invoice)
+    .map((invoice) => ({
+      type: invoice.type,
+      name: invoice.name,
+      price: Number(toRoundFixed(invoice.price)),
+      amount: invoice.amount ? Number(toRoundFixed(invoice.amount)) : undefined,
+      lastAmount: invoice.lastAmount
+        ? Number(toRoundFixed(invoice.lastAmount))
+        : undefined,
+      sum: Number(toRoundFixed(invoice.sum)),
+    }))
 }
 
 export const getMaintenanceInvoice = ({
@@ -157,10 +170,12 @@ export const getPlacingInvoice = ({
     }
   }
 
-  return {
-    type: ServiceType.Placing,
-    price: +prevPlacing?.sum || 0,
-    sum: +prevPlacing?.sum || 0,
+  if (prevPlacing) {
+    return {
+      type: ServiceType.Placing,
+      price: +prevPlacing?.sum || 0,
+      sum: +prevPlacing?.sum || 0,
+    }
   }
 }
 
