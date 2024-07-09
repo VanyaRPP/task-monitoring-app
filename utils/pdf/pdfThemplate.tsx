@@ -1,12 +1,10 @@
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { IPayment } from '@common/modules/models/Payment'
 import moment from 'moment'
-import { renderCurrency } from '../helpers'
 import { ServiceType } from '../constants'
+import { renderCurrency } from '../helpers'
 import nameField from './nameFieldGenerator'
 
-export async function generateHtmlFromThemplate(
-  paymentData: IExtendedPayment | any
-) {
+export async function generateHtmlFromThemplate(paymentData: IPayment) {
   const dataToMap = paymentData?.invoice
 
   const dataForTable = await generateDataForTable(dataToMap, paymentData)
@@ -158,7 +156,7 @@ export async function generateHtmlFromThemplate(
         </table>
         <div class="summary">
           <div>Загальна сума до оплати: <b>${
-            paymentData?.generalSum || paymentData?.debit
+            paymentData?.generalSum
           } грн</b></div>
           <div>${
             paymentData?.provider?.description?.split('\n')?.[0] || ''

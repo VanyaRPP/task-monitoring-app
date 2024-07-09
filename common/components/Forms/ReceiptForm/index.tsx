@@ -1,5 +1,5 @@
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import PaymentPricesTable from '@common/components/Forms/AddPaymentForm/PaymentPricesTable'
+import { IPayment } from '@common/modules/models/Payment'
 import numberToTextNumber from '@utils/numberToText'
 import { Button } from 'antd'
 import moment from 'moment'
@@ -8,7 +8,7 @@ import { useReactToPrint } from 'react-to-print'
 import s from './style.module.scss'
 
 interface Props {
-  currPayment: IExtendedPayment
+  currPayment: IPayment
   paymentData: any
   paymentActions: { preview: boolean; edit: boolean }
 }

@@ -1,9 +1,6 @@
-import {
-  IExtendedPayment,
-  IGeneratePaymentPDF,
-} from '@common/api/paymentApi/payment.api.types'
-import { NextApiRequest, NextApiResponse } from 'next'
+import { IGeneratePaymentPDF } from '@common/api/paymentApi/payment.api.types'
 import { generatePdf, generateZip } from '@utils/pdf/bufferGenerators'
+import { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(
   req: NextApiRequest,
@@ -39,7 +36,7 @@ export default async function handler(
           )
 
           const response = {
-            fileName:  `invoices-${new Date().toISOString()}`,
+            fileName: `invoices-${new Date().toISOString()}`,
             fileExtension: 'zip',
             buffer: zipBuffer,
           }

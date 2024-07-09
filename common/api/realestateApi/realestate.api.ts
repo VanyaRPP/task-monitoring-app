@@ -20,7 +20,7 @@ export const realestateApi = createApi({
       query: (query) => {
         return {
           url: `real-estate`,
-          params: toCleanObject(query),
+          ...(query && { params: toCleanObject(query) }),
         }
       },
       providesTags: ['RealEstate'],

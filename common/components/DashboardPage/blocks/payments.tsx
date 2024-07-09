@@ -1,9 +1,8 @@
 import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import {
   useDeletePaymentMutation,
-  useGetAllPaymentsQuery,
+  useGetPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import {
   dateToDefaultFormat,
@@ -11,9 +10,9 @@ import {
 } from '@common/assets/features/formatDate'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
+import { IPayment } from '@common/modules/models/Payment'
 import {
   AppRoutes,
-  ColumnsRoleView,
   Operations,
   PERIOD_FILTR,
   Roles,
@@ -71,7 +70,7 @@ const PaymentsBlock = () => {
     pathname,
     query: { email },
   } = router
-  const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
+  const [currentPayment, setCurrentPayment] = useState<IPayment>(null)
   const [paymentActions, setPaymentActions] = useState({
     edit: false,
     preview: false,
@@ -104,16 +103,16 @@ const PaymentsBlock = () => {
     isLoading: paymentsLoading,
     isError: paymentsError,
     data: payments,
-  } = useGetAllPaymentsQuery(
+  } = useGetPaymentsQuery(
     {
       skip: (pageData.currentPage - 1) * pageData.pageSize,
       limit: pageData.pageSize,
-      email: email as string,
-      ...getDateFilter(currentDateFilter),
-      ...getTypeOperation(currentTypeOperation),
-      companyIds: filters?.company || undefined,
-      domainIds: filters?.domain || undefined,
-      streetIds: filters?.street || undefined,
+      // email: email as string,
+      // ...getDateFilter(currentDateFilter),
+      // ...getTypeOperation(currentTypeOperation),
+      companyId: filters?.company || undefined,
+      domainId: filters?.domain || undefined,
+      streetId: filters?.street || undefined,
     },
     { skip: currUserLoading || !currUser }
   )
@@ -160,7 +159,7 @@ const PaymentsBlock = () => {
             fixed: 'right',
             title: '',
             width: 50,
-            render: (_, payment: IExtendedPayment) => (
+            render: (_, payment: IPayment) => (
               <Button
                 style={{ padding: 0 }}
                 type="link"
@@ -178,7 +177,7 @@ const PaymentsBlock = () => {
             fixed: 'right',
             title: '',
             width: 50,
-            render: (_, payment: IExtendedPayment) => (
+            render: (_, payment: IPayment) => (
               <div className={s.popconfirm}>
                 <Popconfirm
                   id="popconfirm_custom"
@@ -213,7 +212,7 @@ const PaymentsBlock = () => {
         </Tooltip>
       ),
       dataIndex: 'debit',
-      render: (_, payment: IExtendedPayment) => {
+      render: (_, payment: IPayment) => {
         if (payment.type === Operations.Debit) {
           return renderCurrency(payment.generalSum)
         }
@@ -227,7 +226,7 @@ const PaymentsBlock = () => {
         </Tooltip>
       ),
       dataIndex: 'credit',
-      render: (_, payment: IExtendedPayment) => {
+      render: (_, payment: IPayment) => {
         if (payment.type === Operations.Credit) {
           return renderCurrency(payment.generalSum)
         }
@@ -245,7 +244,7 @@ const PaymentsBlock = () => {
       fixed: 'right',
       title: '',
       width: 50,
-      render: (_, payment: IExtendedPayment) => {
+      render: (_, payment: IPayment) => {
         return payment?.type === Operations.Debit ? (
           <div className={s.eyelined}>
             <Button
@@ -270,26 +269,23 @@ const PaymentsBlock = () => {
     title: 'Компанія',
     dataIndex: 'company',
     fixed: 'left',
-    filters:
-      pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
+    filters: pathname === AppRoutes.PAYMENT ? payments?.filter.company : null,
     filteredValue: filters?.company || null,
     render: (i) => i?.companyName,
   })
 
-  if (payments?.currentDomainsCount > 1) {
-    columns.unshift({
-      title: 'Надавач послуг',
-      fixed: 'left',
-      dataIndex: 'domain',
-      filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
-      filteredValue: filters?.domain || null,
-      render: (i) => i?.name,
-    })
-  }
+  columns.unshift({
+    title: 'Надавач послуг',
+    fixed: 'left',
+    dataIndex: 'domain',
+    filters: pathname === AppRoutes.PAYMENT ? payments?.filter.domain : null,
+    filteredValue: filters?.domain || null,
+    render: (i) => i?.name,
+  })
 
   const Summary = () => {
     const getFormattedValue = (dataIndex) => {
-      const value = payments?.totalPayments?.[dataIndex] || 0
+      const value = payments?.total?.[dataIndex] || 0
       return value !== 0 ? value.toFixed(2) : ''
     }
 
@@ -314,7 +310,7 @@ const PaymentsBlock = () => {
               )
             })}
           </Table.Summary.Row>
-          <Table.Summary.Row className={s.saldo}>
+          {/* <Table.Summary.Row className={s.saldo}>
             {columns.slice(0, columns.length - 1).map((item, index) => {
               const dataindex = isGlobalAdmin
                 ? columns[index - 1]?.dataIndex
@@ -332,14 +328,14 @@ const PaymentsBlock = () => {
                 <Table.Summary.Cell colSpan={colSpan} index={0} key={index}>
                   {dataindex === Operations.Debit
                     ? (
-                        (payments?.totalPayments?.debit || 0) -
-                        (payments?.totalPayments?.credit || 0)
+                        (payments?.total?.debit || 0) -
+                        (payments?.total?.credit || 0)
                       )?.toFixed(2)
                     : false}
                 </Table.Summary.Cell>
               )
             })}
-          </Table.Summary.Row>
+          </Table.Summary.Row> */}
         </Table.Summary>
       )
     )
@@ -350,9 +346,7 @@ const PaymentsBlock = () => {
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
     PaymentDeleteItem[]
   >([])
-  const [selectedPayments, setSelectedPayments] = useState<IExtendedPayment[]>(
-    []
-  )
+  const [selectedPayments, setSelectedPayments] = useState<IPayment[]>([])
   const onSelect = (a, selected, rows) => {
     if (selected) {
       setPaymentsDeleteItems([
@@ -455,7 +449,7 @@ const PaymentsBlock = () => {
           setCurrentTypeOperation={setCurrentTypeOperation}
           currentPayment={currentPayment}
           paymentActions={paymentActions}
-          streets={payments?.addressFilter}
+          streets={payments?.filter.street}
           payments={payments}
           filters={filters}
           setFilters={setFilters}
