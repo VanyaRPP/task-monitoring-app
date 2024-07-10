@@ -5,6 +5,7 @@
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import useCompany from '@common/modules/hooks/useCompany'
 import useService from '@common/modules/hooks/useService'
@@ -39,14 +40,25 @@ export function usePaymentData({ form, paymentData }: IUsePaymentDataProps): {
   })
   const service = paymentData ? paymentData.monthService : serviceData
 
+  const { data: prevServiceData } = useGetAllServicesQuery(
+    {
+      domainId,
+      streetId,
+      year: new Date(service?.date).getFullYear(),
+      month: new Date(service?.date).getMonth(),
+    },
+    { skip: !service || !domainId || !streetId }
+  )
+  const prevService = prevServiceData?.data?.length
+    ? prevServiceData.data[0]
+    : null
+
   const { data: prevPaymentData } = useGetAllPaymentsQuery(
     {
       companyIds: [companyId],
       domainIds: [domainId],
       streetIds: [streetId],
-      year: new Date(service?.date).getFullYear(),
-      // use month index instead of number maybe? not 1-12, but 0-11
-      month: new Date(service?.date).getMonth(),
+      serviceIds: [prevService?._id],
       limit: 1,
     },
     { skip: !service || !companyId || !domainId || !streetId }
@@ -56,5 +68,5 @@ export function usePaymentData({ form, paymentData }: IUsePaymentDataProps): {
     ? prevPaymentData?.data?.[0]
     : null
 
-  return { company, service, payment: paymentData, prevPayment }
+  return { company, service, payment: paymentData, prevService, prevPayment }
 }
