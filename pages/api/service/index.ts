@@ -26,10 +26,8 @@ export default async function handler(
           street: { $in: streetId },
           _id: serviceId,
           date: {
-            $gte: new Date(`${year}-${month?.toString().padStart(2, '0')}-01`),
-            $lt: new Date(
-              `${year}-${(+month + 1)?.toString().padStart(2, '0')}-01`
-            ),
+            $gte: new Date(+year, +month, 1, 0, 0, 0), // first second of provided YY.MM
+            $lt: new Date(+year, +month + 1, 0, 23, 59, 59, 999), // last second of provided YY.MM
           },
         }
 

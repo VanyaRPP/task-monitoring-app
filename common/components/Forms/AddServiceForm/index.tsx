@@ -95,21 +95,7 @@ const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
         label="Утримання приміщень (грн/м²)"
         rules={validateField('required')}
       >
-        {edit ? (
-          <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
-        ) : (
-          <InputNumber
-            placeholder="Вкажіть значення"
-            className={s.formInput}
-            value={
-              usePreviousMonthService({
-                date: form.getFieldValue('data'),
-                domainId: form.getFieldValue('domain'),
-                streetId: form.getFieldValue('street'),
-              }).previousMonth?.inflicionPrice
-            }
-          />
-        )}
+        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="electricityPrice"

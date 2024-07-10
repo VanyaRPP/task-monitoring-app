@@ -23,7 +23,7 @@ export function usePreviousMonthService({ domainId, streetId, date }) {
   const lastMonth = moment(date).subtract(1, 'month')
   const { data } = useGetAllServicesQuery(
     {
-      month: lastMonth.month() + 1,
+      month: lastMonth.month(),
       year: lastMonth.year(),
       domainId,
       streetId,

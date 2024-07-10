@@ -19,7 +19,7 @@ export const getDefaultColumns = (
     fixed: 'left',
     title: 'Компанія',
     dataIndex: 'companyName',
-    width: 200,
+    width: 150,
     render: (value: any, record: { companyName: string | number }) => (
       <FormAttribute
         notNum
@@ -30,8 +30,9 @@ export const getDefaultColumns = (
     ),
   },
   {
-    title: 'Площа (м²)',
+    title: 'Площа, м²',
     dataIndex: 'totalArea',
+    width: 110,
     render: (value: any, record: { companyName: string | number }) => (
       <FormAttribute
         name={['companies', record.companyName, 'totalArea']}
@@ -46,6 +47,7 @@ export const getDefaultColumns = (
       {
         title: 'За м²',
         dataIndex: 'servicePricePerMeter',
+        width: 110,
         render: (
           __,
           record: { companyName: string | number; servicePricePerMeter: any }
@@ -73,6 +75,7 @@ export const getDefaultColumns = (
       {
         title: 'Загальне',
         dataIndex: 'servicePriceSum',
+        width: 110,
         render: (__: any, record: any) => (
           <ServicePriceSum service={service} record={record} />
         ),
@@ -86,6 +89,7 @@ export const getDefaultColumns = (
       {
         title: 'За м²',
         dataIndex: 'pricePerMeter',
+        width: 110,
         render: (
           value: any,
           record: { companyName: string | number; inflicion: boolean }
@@ -100,6 +104,7 @@ export const getDefaultColumns = (
       {
         title: 'Загальне',
         dataIndex: 'priceSum',
+        width: 110,
         render: (__: any, record: any) => (
           <>
             <PricePlacingField service={service} record={record} />
@@ -111,6 +116,7 @@ export const getDefaultColumns = (
   {
     title: <InflicionIndexTitleLocal service={service} />,
     dataIndex: 'inflicionPrice',
+    width: 110,
     render: (__: any, record: any) => (
       <InflicionPrice service={service} record={record} />
     ),
@@ -123,11 +129,13 @@ export const getDefaultColumns = (
       {
         title: 'Стара',
         dataIndex: 'old_elec',
+        width: 110,
         render: (__: any, record: any) => <OldElectricity record={record} />,
       },
       {
         title: 'Нова',
         dataIndex: 'new_elec',
+        width: 110,
         render: (value: any, record: { companyName: string | number }) => (
           <FormAttribute
             name={[
@@ -143,6 +151,7 @@ export const getDefaultColumns = (
       {
         title: 'Загальне',
         dataIndex: 'sum_elec',
+        width: 110,
         render: (__: any, record: any) => (
           <ElectricityPriceSum service={service} record={record} />
         ),
@@ -155,11 +164,13 @@ export const getDefaultColumns = (
       {
         title: 'Стара',
         dataIndex: 'old_water',
+        width: 110,
         render: (__: any, record: any) => <OldWater record={record} />,
       },
       {
         title: 'Нова',
         dataIndex: 'new_water',
+        width: 110,
         render: (
           value: any,
           record: { waterPart: any; companyName: string | number }
@@ -174,6 +185,7 @@ export const getDefaultColumns = (
       {
         title: 'Загальне',
         dataIndex: 'sum_water',
+        width: 110,
         render: (__: any, record: any) => (
           <WaterPriceSum service={service} record={record} />
         ),
@@ -192,8 +204,9 @@ export const getDefaultColumns = (
     ),
     children: [
       {
-        title: 'Частка постачання %',
+        title: 'Частка, %',
         dataIndex: 'waterPart',
+        width: 110,
         render: (
           __: any,
           record: { companyName: string | number; waterPart: any }
@@ -208,6 +221,7 @@ export const getDefaultColumns = (
       {
         title: 'Загальне',
         dataIndex: 'sum_waterPart',
+        width: 110,
         render: (__: any, record: any) => (
           <WaterPartSum service={service} record={record} />
         ),
@@ -226,8 +240,9 @@ export const getDefaultColumns = (
     ),
     children: [
       {
-        title: 'Загальна частка',
+        title: 'Частка, %',
         dataIndex: 'garbageCollectorPrice',
+        width: 110,
         render: (
           __: any,
           record: { companyName: string | number; rentPart: any }
@@ -247,6 +262,7 @@ export const getDefaultColumns = (
       {
         title: 'Загальне',
         dataIndex: 'waterPart',
+        width: 110,
         render: (__: any, record: any) => (
           <GarbageCollectorPrice service={service} record={record} />
         ),
@@ -256,6 +272,7 @@ export const getDefaultColumns = (
   {
     title: 'Прибирання',
     dataIndex: 'cleaning',
+    width: 110,
     render: (value: any, record: { companyName: string | number }) => (
       <FormAttribute
         name={['companies', record.companyName, 'cleaningPrice']}
@@ -267,6 +284,7 @@ export const getDefaultColumns = (
   {
     title: 'Знижка',
     dataIndex: 'discount',
+    width: 110,
     render: (value: any, record: { companyName: string | number }) => (
       <FormAttribute
         name={['companies', record.companyName, 'discount']}
