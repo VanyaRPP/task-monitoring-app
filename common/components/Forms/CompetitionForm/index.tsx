@@ -6,6 +6,8 @@ import {
 } from '../../../assets/features/validators'
 import { disabledDate } from '../../../assets/features/formatDate'
 import moment from 'moment'
+import dayjs from 'dayjs'
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import { RangePickerProps } from 'antd/lib/date-picker'
 import { ITask } from '../../../modules/models/Task'
 
@@ -51,8 +53,8 @@ const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form, task }) => {
           getPopupContainer={() => document.getElementById('competitionForm')}
           disabledDate={(current) =>
             !current ||
-            current < moment().locale('uk').startOf('day') ||
-            current.isSameOrAfter(moment(task?.deadline).add(1, 'day'))
+            current < dayjs().locale('uk').startOf('day') ||
+            current.isSameOrAfter(dayjs(task?.deadline).add(1, 'day'))
           }
         />
       </Form.Item>
