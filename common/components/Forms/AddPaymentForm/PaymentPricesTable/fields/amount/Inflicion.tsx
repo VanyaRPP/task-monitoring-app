@@ -14,7 +14,7 @@ const Inflicion: React.FC<{
       (invoice) => invoice.type === ServiceType.Placing
     )
     const prevPlacing = prevPlacingInvoice?.sum || 0
-    const inflicion = service.inflicionPrice - 100 || 0
+    const inflicion = service.inflicionPrice / 100 || 0
 
     return (
       <>

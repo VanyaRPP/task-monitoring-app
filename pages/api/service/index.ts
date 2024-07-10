@@ -26,15 +26,17 @@ export default async function handler(
           street: { $in: streetId },
           _id: serviceId,
           date: {
-            $gte: new Date(+year, +month, 1, 0, 0, 0), // first second of provided YY.MM
-            $lt: new Date(+year, +month + 1, 0, 23, 59, 59, 999), // last second of provided YY.MM
+            $gte: new Date(`${year}-${month?.toString().padStart(2, '0')}-01`),
+            $lt: new Date(
+              `${year}-${(+month + 1)?.toString().padStart(2, '0')}-01`
+            ),
           },
         }
 
         if (!serviceId) delete options._id
         if (!streetId) delete options.street
         if (!domainId) delete options.domain
-        if (!year || !month || isNaN(+year) || isNaN(+month))
+        if (!year || !month || isNaN(Number(year)) || isNaN(Number(month)))
           delete options.date
 
         if (isGlobalAdmin) {

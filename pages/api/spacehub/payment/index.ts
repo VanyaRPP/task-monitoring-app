@@ -75,7 +75,15 @@ export default async function handler(
 
   if (req.method === 'GET') {
     try {
-      const { streetIds, companyIds, domainIds, limit, skip, type } = req.query
+      const {
+        streetIds,
+        companyIds,
+        domainIds,
+        serviceIds,
+        limit,
+        skip,
+        type,
+      } = req.query
 
       const companiesIds: string[] | null = companyIds
         ? typeof companyIds === 'string'
@@ -91,6 +99,11 @@ export default async function handler(
         ? typeof domainIds === 'string'
           ? domainIds.split(',').map((id) => decodeURIComponent(id))
           : domainIds.map((id) => decodeURIComponent(id))
+        : null
+      const servicesIds: string[] | null = serviceIds
+        ? typeof serviceIds === 'string'
+          ? serviceIds.split(',').map((id) => decodeURIComponent(id))
+          : serviceIds.map((id) => decodeURIComponent(id))
         : null
 
       const options: FilterQuery<typeof Payment> = {}
@@ -157,6 +170,10 @@ export default async function handler(
 
       if (type) {
         options.type = type
+      }
+      // TODO: add security
+      if (servicesIds) {
+        options.monthService = { $in: servicesIds }
       }
 
       const expr = filterPeriodOptions(req.query)

@@ -23,6 +23,7 @@ const InvoicesHeader = () => {
   const { form, companies, service } = useInvoicesPaymentContext()
   const [addPayment] = useAddPaymentMutation()
   const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
+
   const handleSave = async () => {
     const invoices = await prepareInvoiceObjects(
       form,
@@ -31,22 +32,20 @@ const InvoicesHeader = () => {
       newInvoiceNumber
     )
 
-    const promises = invoices.map(addPayment)
-    await Promise.all(promises).then((responses) => {
-      const allSuccessful = responses.every((response) => response.data.success)
+    const responses = await Promise.all(invoices.map(addPayment))
+    const allSuccessful = responses.every((response) => response.data?.success)
 
-      responses.forEach((response) => {
-        if (response.data.success) {
-          message.success(
-            `Додано рахунок для компанії ${response.data.data.reciever.companyName}`
-          )
-        } else {
-          message.error(`Помилка при додаванні рахунку для компанії`)
-        }
-      })
-
-      if (allSuccessful) router.push(AppRoutes.PAYMENT)
+    responses.forEach((response) => {
+      if (response.data?.success) {
+        message.success(
+          `Додано рахунок для компанії ${response.data?.data.reciever.companyName}`
+        )
+      } else {
+        message.error(`Помилка при додаванні рахунку для компанії`)
+      }
     })
+
+    if (allSuccessful) router.push(AppRoutes.PAYMENT)
   }
 
   return (
