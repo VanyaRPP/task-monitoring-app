@@ -45,7 +45,6 @@ export const Price: React.FC<{
             return Promise.resolve()
           },
         },
-        ,
         ...rules,
       ]}
     >
