@@ -435,3 +435,7 @@ export function getFilterForDomain(domains) {
 
   return filterData
 }
+
+export function sortById(data: any) {
+  return data?.sort((a: any, b: any) => a._id.localeCompare(b._id))
+}
