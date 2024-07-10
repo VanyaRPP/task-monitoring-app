@@ -1,14 +1,11 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import RealEstate from '@common/modules/models/RealEstate'
-import { getCurrentUser } from '@utils/getCurrentUser'
-import start, { ExtendedData } from '@pages/api/api.config'
 import Domain from '@common/modules/models/Domain'
-import {
-  getDistinctCompanyAndDomain,
-  getDistinctStreets,
-} from '@utils/helpers'
+import RealEstate from '@common/modules/models/RealEstate'
+import { IStreet } from '@common/modules/models/Street'
+import start, { ExtendedData } from '@pages/api/api.config'
+import { getCurrentUser } from '@utils/getCurrentUser'
+import { getDistinctCompanyAndDomain, getDistinctStreets } from '@utils/helpers'
+import { FilterQuery } from 'mongoose'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
 
@@ -22,65 +19,56 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const options = {}
-        const {
-          companyId,
-          domainId,
-          streetId,
-          limit = 0,
-        } = req.query
+        const { companyId, domainId, streetId, limit = 0 } = req.query
 
-        if (companyId) options._id = { $in: companyId }
+        const companiesIds: string[] | null = companyId
+          ? typeof companyId === 'string'
+            ? companyId.split(',').map((id) => decodeURIComponent(id))
+            : companyId.map((id) => decodeURIComponent(id))
+          : null
+        const domainsIds: string[] | null = domainId
+          ? typeof domainId === 'string'
+            ? domainId.split(',').map((id) => decodeURIComponent(id))
+            : domainId.map((id) => decodeURIComponent(id))
+          : null
+        const streetsIds: string[] | null = streetId
+          ? typeof streetId === 'string'
+            ? streetId.split(',').map((id) => decodeURIComponent(id))
+            : streetId.map((id) => decodeURIComponent(id))
+          : null
 
-        if (streetId) options.street = { $in: streetId }
-
-        if (isUser) options.adminEmails = { $in: [user.email] }
-
-        if (isDomainAdmin) {
-          const domains = await (Domain as any).find({
-            adminEmails: { $in: [user.email] },
-          })
-
-          const domainIds = domains.map((i) => i._id.toString())
-
-          if (domainId) {
-            options.domain = {
-              $in: domainId.filter((id) => domainIds.includes(id)),
-            }
-          } else if (domainIds) {
-            options.domain = { $in: domainIds }
-          }
+        /**
+         * request data filters
+         */
+        const filters: FilterQuery<typeof RealEstate> = {
+          ...(!!companiesIds?.length && { _id: { $in: companiesIds } }),
+          ...(!!domainsIds?.length && { domain: { $in: domainsIds } }),
+          ...(!!streetsIds?.length && { street: { $in: streetsIds } }),
         }
 
-        // if (companyId) options._id = { $in: companyId }
+        /**
+         * access restrictions
+         */
+        const options: FilterQuery<typeof RealEstate> = {}
 
-        // if (streetId) options.street = { $in: streetId }
-
-        // if (isUser) options.$or = [{ adminEmails: user.email }]
-
-        // if (isDomainAdmin) {
-        //   const domains = await (Domain as any).find({
-        //     adminEmails: user.email,
-        //   })
-
-        //   const domainIds = domains.map((i) => i._id.toString())
-
-        //   if (domainId) {
-        //     options.$or.push({
-        //       $in: domainId.filter((id) => domainIds.includes(id)),
-        //     })
-        //   } else if (domainIds) {
-        //     options.domain = { $in: domainIds }
-        //   }
-        // }
-
-        const realEstates = await RealEstate.find(options)
-          .limit(+limit)
-          .populate({
-            path: 'domain',
-            select: '_id name description',
+        if (isGlobalAdmin) {
+        } else if (isDomainAdmin) {
+          const domains = await Domain.distinct('_id', {
+            adminEmails: user.email,
           })
-          .populate({ path: 'street', select: '_id address city' })
+
+          options.$or = [
+            { domain: { $in: domains.map((id) => id.toString()) } },
+            { adminEmails: user.email },
+          ]
+        } else if (isUser) {
+          options.adminEmails = user.email
+        }
+
+        const realEstates = await RealEstate.find({ $and: [options, filters] })
+          .limit(+limit)
+          .populate('domain')
+          .populate('street')
 
         const { distinctDomains, distinctCompanies } =
           await getDistinctCompanyAndDomain({
@@ -116,6 +104,8 @@ export default async function handler(
             text: companyDetails.companyName,
             value: companyDetails._id,
           })),
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           streetsFilter: filteredStreets?.map((street) => ({
             text: `${street.address}, м.${street.city}`,
             value: street._id,
@@ -124,20 +114,28 @@ export default async function handler(
           success: true,
         })
       } catch (error) {
-        return res.status(400).json({ success: false, message: error })
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        return res.status(500).json({ success: false, message: error })
       }
 
     case 'POST':
       try {
         if (!isAdmin) {
-          return res
-            .status(400)
-            .json({ success: false, message: 'not allowed' })
+          return (
+            res
+              .status(400)
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              .json({ success: false, message: 'not allowed' })
+          )
         }
         // TODO: body validation
         const realEstate = await RealEstate.create(req.body)
         return res.status(200).json({ success: true, data: realEstate })
       } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         return res.status(400).json({ success: false, message: error })
       }
   }
