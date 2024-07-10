@@ -7,20 +7,18 @@ import { getInvoices } from '@utils/getInvoices'
 
 describe('getInvoices - PLACING', () => {
   it('should load Placing from payment', () => {
-    const company: Partial<IRealestate> = {}
-    const service: Partial<IService> = {}
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
     const payment: Partial<IPayment> = {
       invoice: [
         {
           type: ServiceType.Placing,
-          lastAmount: 0,
-          amount: 10,
           price: 100,
           sum: 100,
         },
       ],
     }
-    const prevPayment: Partial<IPayment> = {}
+    const prevPayment: Partial<IPayment> = null
 
     const invoices = getInvoices({
       company,
@@ -35,7 +33,7 @@ describe('getInvoices - PLACING', () => {
   it('should load Placing from company without inflicion', () => {
     const company: Partial<IRealestate> = {}
     const service: Partial<IService> = {}
-    const payment: Partial<IPayment> = {}
+    const payment: Partial<IPayment> = null
     const prevPayment: Partial<IPayment> = {
       invoice: [{ type: ServiceType.Placing, price: 100, sum: 100 }],
     }
@@ -61,7 +59,7 @@ describe('getInvoices - PLACING', () => {
     const service: Partial<IService> = {
       inflicionPrice: 101,
     }
-    const payment: Partial<IPayment> = {}
+    const payment: Partial<IPayment> = null
     const prevPayment: Partial<IPayment> = {
       invoice: [{ type: ServiceType.Placing, price: 100, sum: 100 }],
     }

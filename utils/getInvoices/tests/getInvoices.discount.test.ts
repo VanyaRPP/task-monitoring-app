@@ -7,20 +7,18 @@ import { getInvoices } from '@utils/getInvoices'
 
 describe('getInvoices - DISCOUNT', () => {
   it('should load Discount from payment', () => {
-    const company: Partial<IRealestate> = {}
-    const service: Partial<IService> = {}
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
     const payment: Partial<IPayment> = {
       invoice: [
         {
           type: ServiceType.Discount,
-          lastAmount: 0,
-          amount: 10,
           price: 100,
           sum: 100,
         },
       ],
     }
-    const prevPayment: Partial<IPayment> = {}
+    const prevPayment: Partial<IPayment> = null
 
     const invoices = getInvoices({
       company,
@@ -83,10 +81,12 @@ describe('getInvoices - DISCOUNT', () => {
   })
 
   it('should NOT load Discount from company without discount', () => {
-    const company: Partial<IRealestate> = {}
-    const service: Partial<IService> = {}
-    const payment: Partial<IPayment> = {}
-    const prevPayment: Partial<IPayment> = {}
+    const company: Partial<IRealestate> = {
+      discount: null,
+    }
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = null
+    const prevPayment: Partial<IPayment> = null
 
     const invoices = getInvoices({
       company,
@@ -100,13 +100,13 @@ describe('getInvoices - DISCOUNT', () => {
     )
   })
 
-  it('should load Discount from company with discount', () => {
-    const company: Partial<IRealestate> = {
-      discount: -3000,
+  it('should NOT load Discount from payment without discount', () => {
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = {
+      invoice: [],
     }
-    const service: Partial<IService> = {}
-    const payment: Partial<IPayment> = {}
-    const prevPayment: Partial<IPayment> = {}
+    const prevPayment: Partial<IPayment> = null
 
     const invoices = getInvoices({
       company,
@@ -115,10 +115,26 @@ describe('getInvoices - DISCOUNT', () => {
       prevPayment,
     })
 
-    expect(invoices).toContainEqual({
-      type: ServiceType.Discount,
-      price: company.discount,
-      sum: company.discount,
+    expect(invoices).not.toContainEqual(
+      expect.objectContaining({ type: ServiceType.Discount })
+    )
+  })
+
+  it('should NOT load Discount without props', () => {
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = null
+    const prevPayment: Partial<IPayment> = null
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
     })
+
+    expect(invoices).not.toContainEqual(
+      expect.objectContaining({ type: ServiceType.Discount })
+    )
   })
 })

@@ -7,29 +7,25 @@ import { getInvoices } from '@utils/getInvoices'
 
 describe('getInvoices - CUSTOM', () => {
   it('should load Custom from payment', () => {
-    const company: Partial<IRealestate> = {}
-    const service: Partial<IService> = {}
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
     const payment: Partial<IPayment> = {
       invoice: [
         {
           name: 'Custom - 1',
           type: ServiceType.Custom,
-          lastAmount: 0,
-          amount: 10,
           price: 100,
           sum: 100,
         },
         {
           name: 'Custom - 2',
           type: ServiceType.Custom,
-          lastAmount: 0,
-          amount: 20,
           price: 200,
           sum: 200,
         },
       ],
     }
-    const prevPayment: Partial<IPayment> = {}
+    const prevPayment: Partial<IPayment> = null
 
     const invoices = getInvoices({
       company,

@@ -11,15 +11,15 @@ export type InvoicesCollection = {
 }
 
 export interface IGetInvoiceProps {
-  company: Partial<IRealestate>
-  service: Partial<IService>
-  payment: Partial<IPayment>
-  prevPayment: Partial<IPayment>
+  company?: Partial<IRealestate>
+  service?: Partial<IService>
+  payment?: Partial<IPayment>
+  prevPayment?: Partial<IPayment>
 }
 
 export interface IGetInvoiceByTypeProps {
-  company: Partial<IRealestate>
-  service: Partial<IService>
+  company?: Partial<IRealestate>
+  service?: Partial<IService>
   currInvoicesCollection: InvoicesCollection
   prevInvoicesCollection: InvoicesCollection
 }
@@ -114,7 +114,12 @@ export const getMaintenanceInvoice = ({
     }
   }
 
-  if (company?.pricePerMeter && company?.rentPart) {
+  if (
+    company?.pricePerMeter &&
+    !isNaN(company.pricePerMeter) &&
+    company?.rentPart &&
+    !isNaN(company.rentPart)
+  ) {
     return {
       type: ServiceType.Maintenance,
       amount: company.rentPart,
@@ -146,21 +151,27 @@ export const getPlacingInvoice = ({
 
   const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
 
-  if (service && ServiceType.Inflicion in service && company?.inflicion) {
-    const inflicionIndex = service[ServiceType.Inflicion] / 100
+  if (
+    service?.inflicionPrice &&
+    !isNaN(service.inflicionPrice) &&
+    company?.inflicion
+  ) {
+    const inflicionIndex = service.inflicionPrice / 100
     const price = (+prevPlacing?.sum || 0) * inflicionIndex
 
     return {
       type: ServiceType.Placing,
-      price: price,
+      price: price || prevPlacing?.sum,
       sum: price,
     }
   }
 
-  return {
-    type: ServiceType.Placing,
-    price: +prevPlacing?.sum || 0,
-    sum: +prevPlacing?.sum || 0,
+  if (company && service) {
+    return {
+      type: ServiceType.Placing,
+      price: +prevPlacing?.sum || 0,
+      sum: +prevPlacing?.sum || 0,
+    }
   }
 }
 
@@ -184,9 +195,13 @@ export const getInflicionInvoice = ({
     }
   }
 
-  if (service && ServiceType.Inflicion in service && company?.inflicion) {
+  if (
+    service?.inflicionPrice &&
+    !isNaN(service.inflicionPrice) &&
+    company?.inflicion
+  ) {
     const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
-    const inflicionIndex = service[ServiceType.Inflicion] - 100
+    const inflicionIndex = service.inflicionPrice - 100
     const inflicionPrice = (inflicionIndex / 100) * (+prevPlacing?.sum || 0)
 
     return {
@@ -219,14 +234,14 @@ export const getElectricityInvoice = ({
     }
   }
 
-  if (service && ServiceType.Electricity in service) {
+  if (service?.electricityPrice && !isNaN(service.electricityPrice)) {
     const prevElectricity = prevInvoicesCollection[ServiceType.Electricity]
 
     return {
       type: ServiceType.Electricity,
       amount: +prevElectricity?.amount || 0,
       lastAmount: +prevElectricity?.amount || 0,
-      price: service[ServiceType.Electricity],
+      price: service.electricityPrice,
       sum: 0,
     }
   }
@@ -252,8 +267,13 @@ export const getWaterPartInvoice = ({
     }
   }
 
-  if (service && ServiceType.Water in service && company?.waterPart) {
-    const price = (service[ServiceType.Water] * company.waterPart) / 100
+  if (
+    service?.waterPrice &&
+    !isNaN(service.waterPrice) &&
+    company?.waterPart &&
+    !isNaN(company.waterPart)
+  ) {
+    const price = (service.waterPrice * company.waterPart) / 100
     return {
       type: ServiceType.WaterPart,
       price: price,
@@ -284,14 +304,19 @@ export const getWaterInvoice = ({
     }
   }
 
-  if (service && ServiceType.Water in service && !company?.waterPart) {
+  if (
+    service?.waterPrice &&
+    !isNaN(service.waterPrice) &&
+    !company?.waterPart &&
+    isNaN(company?.waterPart)
+  ) {
     const prevWater = prevInvoicesCollection[ServiceType.Water]
 
     return {
       type: ServiceType.Water,
       amount: +prevWater?.amount || 0,
       lastAmount: +prevWater?.amount || 0,
-      price: service[ServiceType.Water],
+      price: service.waterPrice,
       sum: 0,
     }
   }
@@ -318,13 +343,12 @@ export const getGarbageCollectorInvoice = ({
   }
 
   if (
-    service &&
-    ServiceType.GarbageCollector in service &&
+    service?.garbageCollectorPrice &&
+    !isNaN(service.garbageCollectorPrice) &&
     company?.garbageCollector
   ) {
     const price =
-      (service[ServiceType.GarbageCollector] * company?.servicePricePerMeter) /
-      100
+      (service.garbageCollectorPrice * company?.servicePricePerMeter) / 100
 
     return {
       type: ServiceType.GarbageCollector,
@@ -354,7 +378,7 @@ export const getCleaningInvoice = ({
     }
   }
 
-  if (company?.cleaning) {
+  if (company?.cleaning && !isNaN(company.cleaning)) {
     return {
       type: ServiceType.Cleaning,
       price: company.cleaning,
@@ -383,7 +407,7 @@ export const getDiscountInvoice = ({
     }
   }
 
-  if (company?.discount) {
+  if (company?.discount && !isNaN(company.discount)) {
     return {
       type: ServiceType.Discount,
       price: company.discount,

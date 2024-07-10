@@ -7,20 +7,18 @@ import { getInvoices } from '@utils/getInvoices'
 
 describe('getInvoices - INFLICION', () => {
   it('should load Inflicion from payment', () => {
-    const company: Partial<IRealestate> = {}
-    const service: Partial<IService> = {}
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
     const payment: Partial<IPayment> = {
       invoice: [
         {
           type: ServiceType.Inflicion,
-          lastAmount: 0,
-          amount: 10,
           price: 100,
           sum: 100,
         },
       ],
     }
-    const prevPayment: Partial<IPayment> = {}
+    const prevPayment: Partial<IPayment> = null
 
     const invoices = getInvoices({
       company,
@@ -39,7 +37,7 @@ describe('getInvoices - INFLICION', () => {
     const service: Partial<IService> = {
       inflicionPrice: 101,
     }
-    const payment: Partial<IPayment> = {}
+    const payment: Partial<IPayment> = null
     const prevPayment: Partial<IPayment> = {
       invoice: [{ type: ServiceType.Placing, price: 100, sum: 100 }],
     }
@@ -90,12 +88,52 @@ describe('getInvoices - INFLICION', () => {
   })
 
   it('should NOT load Inflicion from company without inflicion', () => {
-    const company: Partial<IRealestate> = {}
+    const company: Partial<IRealestate> = {
+      inflicion: false,
+    }
     const service: Partial<IService> = {
       inflicionPrice: 101,
     }
-    const payment: Partial<IPayment> = {}
-    const prevPayment: Partial<IPayment> = {}
+    const payment: Partial<IPayment> = null
+    const prevPayment: Partial<IPayment> = null
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
+    })
+
+    expect(invoices).not.toContainEqual(
+      expect.objectContaining({ type: ServiceType.Inflicion })
+    )
+  })
+
+  it('should NOT load Inflicion from payment without inflicion', () => {
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = {
+      invoice: [],
+    }
+    const prevPayment: Partial<IPayment> = null
+
+    const invoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevPayment,
+    })
+
+    expect(invoices).not.toContainEqual(
+      expect.objectContaining({ type: ServiceType.Inflicion })
+    )
+  })
+
+  it('should NOT load Inflicion without props', () => {
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
+    const payment: Partial<IPayment> = null
+    const prevPayment: Partial<IPayment> = null
 
     const invoices = getInvoices({
       company,

@@ -7,8 +7,8 @@ import { getInvoices } from '@utils/getInvoices'
 
 describe('getInvoices - ELECTRICITY', () => {
   it('should load Electricity from payment', () => {
-    const company: Partial<IRealestate> = {}
-    const service: Partial<IService> = {}
+    const company: Partial<IRealestate> = null
+    const service: Partial<IService> = null
     const payment: Partial<IPayment> = {
       invoice: [
         {
@@ -20,7 +20,7 @@ describe('getInvoices - ELECTRICITY', () => {
         },
       ],
     }
-    const prevPayment: Partial<IPayment> = {}
+    const prevPayment: Partial<IPayment> = null
 
     const invoices = getInvoices({
       company,
@@ -32,13 +32,13 @@ describe('getInvoices - ELECTRICITY', () => {
     expect(invoices).toContainEqual(payment.invoice[0])
   })
 
-  it('should load Electricity from company', () => {
-    const company: Partial<IRealestate> = {}
+  it('should load Electricity from service', () => {
+    const company: Partial<IRealestate> = null
     const service: Partial<IService> = {
       electricityPrice: 123,
     }
-    const payment: Partial<IPayment> = {}
-    const prevPayment: Partial<IPayment> = {}
+    const payment: Partial<IPayment> = null
+    const prevPayment: Partial<IPayment> = null
 
     const invoices = getInvoices({
       company,
@@ -56,12 +56,12 @@ describe('getInvoices - ELECTRICITY', () => {
     })
   })
 
-  it('should load Electricity with amount from company', () => {
-    const company: Partial<IRealestate> = {}
+  it('should load Electricity with previous month from service and prevPayment', () => {
+    const company: Partial<IRealestate> = null
     const service: Partial<IService> = {
       electricityPrice: 123,
     }
-    const payment: Partial<IPayment> = {}
+    const payment: Partial<IPayment> = null
     const prevPayment: Partial<IPayment> = {
       invoice: [
         {
