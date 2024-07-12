@@ -273,8 +273,24 @@ const PaymentsBlock = () => {
     filters:
       pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
     filteredValue: filters?.company || null,
-    render: (i) => i?.companyName,
-  })
+    render: (i) => {
+      if (currUser?.roles?.includes(Roles.GLOBAL_ADMIN || Roles.DOMAIN_ADMIN)) {
+        return (
+          <a
+            style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
+            onClick={() => {
+              console.log("awdawd", i)
+              setFilters({ ...filters, company: [i?._id] })
+            }}
+          >
+            {i?.companyName}
+          </a>
+        );
+      } else {
+        return i?.companyName;
+      }
+    },
+  });
 
   if (payments?.currentDomainsCount > 1) {
     columns.unshift({
