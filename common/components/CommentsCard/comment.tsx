@@ -1,4 +1,4 @@
-import { Comment as CommentAntd } from 'antd'
+import { Comment as CommentAntd } from '@ant-design/compatible'
 import { useGetUserByIdQuery } from 'common/api/userApi/user.api'
 import { IComment } from 'common/modules/models/Task'
 import { useSession } from 'next-auth/react'
