@@ -5,17 +5,43 @@ import { useState } from 'react'
 
 import AddStreetModal from '@common/components/AddStreetModal'
 import { AppRoutes } from '@utils/constants'
+import { IStreet } from '@common/api/streetApi/street.api.types'
 
 export interface Props {
   showAddButton?: boolean
+  currentStreet?: IStreet
+  setCurrentStreet?: (service: IStreet) => void
+  streetActions?: {
+    edit: boolean
+    preview: boolean
+  }
+  setStreetActions: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+      preview: boolean
+    }>
+  >
 }
 
-const StreetsHeader: React.FC<Props> = ({ showAddButton = false }) => {
+const StreetsHeader: React.FC<Props> = ({
+  showAddButton = false,
+  currentStreet,
+  setCurrentStreet,
+  streetActions,
+  setStreetActions,
+}) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const openModal = () => setIsModalOpen(true)
-  const closeModal = () => setIsModalOpen(false)
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setCurrentStreet(null)
+    setStreetActions({
+      edit: false,
+      preview: false,
+    })
+  }
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -34,7 +60,13 @@ const StreetsHeader: React.FC<Props> = ({ showAddButton = false }) => {
           <PlusOutlined /> Додати
         </Button>
       )}
-      {isModalOpen && <AddStreetModal closeModal={closeModal} />}
+      {(isModalOpen || currentStreet) && (
+        <AddStreetModal
+          currentStreet={currentStreet}
+          closeModal={closeModal}
+          streetActions={streetActions}
+        />
+      )}
     </div>
   )
 }

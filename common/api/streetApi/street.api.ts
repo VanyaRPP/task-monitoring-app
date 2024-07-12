@@ -1,6 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { ObjectId } from 'mongoose'
-import { AllStreetsQuery, IStreet, BaseQuery } from './street.api.types'
+import {
+  AllStreetsQuery,
+  IStreet,
+  BaseQuery,
+  IGetStreetResponse,
+} from './street.api.types'
 
 export const streetApi = createApi({
   reducerPath: 'streetApi',
@@ -13,21 +18,24 @@ export const streetApi = createApi({
       query: (id) => `/streets/${id}`,
       providesTags: (result) => ['Street'],
     }),
-    getAllStreets: builder.query<IStreet[], { domainId?: string, limit?: number }>({
-      query: ({ domainId, limit }: { domainId?: string, limit?: number }) => {
+    getAllStreets: builder.query<
+      IGetStreetResponse,
+      { domainId?: string; limit?: number }
+    >({
+      query: ({ domainId, limit }: { domainId?: string; limit?: number }) => {
         return {
           url: `streets`,
           params: { domainId, limit },
         }
       },
-      providesTags: (response: IStreet[]) =>
-        response
-          ? response.map((item: IStreet) => ({
+      providesTags: (response: IGetStreetResponse) =>
+        response.data
+          ? response.data.map((item: IStreet) => ({
               type: 'Street',
               id: item._id,
             }))
           : [],
-      transformResponse: (response: AllStreetsQuery) => response.data,
+      // transformResponse: (response: AllStreetsQuery) => response.data,
     }),
     addStreet: builder.mutation<IStreet, Partial<IStreet>>({
       query(body) {
