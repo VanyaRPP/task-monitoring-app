@@ -36,7 +36,7 @@ export const getDefaultColumns = (
     render: (value: any, record: { companyName: string | number }) => (
       <FormAttribute
         name={['companies', record.companyName, 'totalArea']}
-        value={value}
+        value={Math.max(0, value)}
         disabled
       />
     ),
@@ -60,7 +60,10 @@ export const getDefaultColumns = (
                 'maintenancePrice',
                 'price',
               ]}
-              value={record.servicePricePerMeter || service?.rentPrice}
+              value={Math.max(
+                0,
+                record.servicePricePerMeter || service?.rentPrice
+              )}
               disabled
             />
 
@@ -82,7 +85,6 @@ export const getDefaultColumns = (
       },
     ],
   },
-  // TODO: підтянути формулу індексу інфляції з сінгл інвойса
   {
     title: 'Розміщення',
     children: [
@@ -96,7 +98,7 @@ export const getDefaultColumns = (
         ) => (
           <FormAttribute
             name={['companies', record.companyName, 'placingPrice', 'price']}
-            value={record.inflicion ? 0 : value}
+            value={Math.max(0, record.inflicion ? 0 : value)}
             disabled
           />
         ),
@@ -114,7 +116,7 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: <InflicionIndexTitleLocal service={service} />,
+    title: <InflicionIndexTitle service={service} />,
     dataIndex: 'inflicionPrice',
     width: 110,
     render: (__: any, record: any) => (
@@ -144,7 +146,7 @@ export const getDefaultColumns = (
               'electricityPrice',
               'amount',
             ]}
-            value={value}
+            value={Math.max(0, value)}
           />
         ),
       },
@@ -178,7 +180,7 @@ export const getDefaultColumns = (
           <FormAttribute
             disabled={!!record.waterPart}
             name={['companies', record.companyName, 'waterPrice', 'amount']}
-            value={value}
+            value={Math.max(0, value)}
           />
         ),
       },
@@ -213,7 +215,7 @@ export const getDefaultColumns = (
         ) => (
           <FormAttribute
             name={['companies', record.companyName, 'waterPart', 'price']}
-            value={record.waterPart}
+            value={Math.max(0, record.waterPart)}
             disabled
           />
         ),
@@ -254,7 +256,7 @@ export const getDefaultColumns = (
               'garbageCollector',
               'amount',
             ]}
-            value={record?.rentPart}
+            value={Math.max(0, record?.rentPart)}
             disabled
           />
         ),
@@ -276,7 +278,7 @@ export const getDefaultColumns = (
     render: (value: any, record: { companyName: string | number }) => (
       <FormAttribute
         name={['companies', record.companyName, 'cleaningPrice']}
-        value={value}
+        value={Math.max(0, value)}
         disabled
       />
     ),
@@ -288,18 +290,21 @@ export const getDefaultColumns = (
     render: (value: any, record: { companyName: string | number }) => (
       <FormAttribute
         name={['companies', record.companyName, 'discount']}
-        value={value}
+        value={Math.max(0, value)}
       />
     ),
   },
   {
+    title: '',
+    key: 'action',
     fixed: 'right',
-    align: 'center',
-    width: 50,
-    render: (_: any, record: { _id: string }) => (
+    width: 30,
+    render: (__: any, record: any) => (
       <Popconfirm
-        title="Видалити запис?"
-        onConfirm={() => handleDelete && handleDelete(record._id)}
+        title="Ви впевнені, що хочете видалити компанію?"
+        onConfirm={() => handleDelete && handleDelete(record.companyName)}
+        okText="Так"
+        cancelText="Ні"
       >
         <CloseCircleOutlined />
       </Popconfirm>
