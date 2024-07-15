@@ -14,8 +14,8 @@ const StreetsHeader: React.FC<Props> = ({ showAddButton = false }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const openModal = () => setIsModalOpen(true)
   const closeModal = () => setIsModalOpen(false)
+  const openModal = () => setIsModalOpen(true)
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>

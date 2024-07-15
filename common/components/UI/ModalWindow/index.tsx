@@ -13,10 +13,10 @@ interface Props {
   maskClickIgnore?: boolean
   style?: React.CSSProperties
   open?: boolean
-  okButtonProps?: ButtonProps 
+  okButtonProps?: ButtonProps
   // footer: any
   title: string
-  preview?: boolean 
+  preview?: boolean
 }
 
 const Modal: React.FC<Props> = ({
@@ -34,16 +34,14 @@ const Modal: React.FC<Props> = ({
   title,
   okButtonProps,
   open = true,
-  preview = false,
+  preview,
 }) => {
-
   const handleCancel = () => {
-    const isSingleTabAndViewMode = changesForm() && open && preview;
+    const isSingleTabAndViewMode = changesForm() && open && preview
 
-    if(isSingleTabAndViewMode){
-      onCancel();
-    }
-    else {
+    if (isSingleTabAndViewMode || preview) {
+      onCancel()
+    } else {
       AntModal.confirm({
         title: 'Ви впевнені, що хочете вийти?',
         content: 'Всі незбережені дані будуть втрачені',
@@ -55,7 +53,7 @@ const Modal: React.FC<Props> = ({
   }
 
   return (
-      <AntModal
+    <AntModal
       confirmLoading={confirmLoading}
       open={open}
       maskClosable={!maskClickIgnore}
@@ -73,4 +71,4 @@ const Modal: React.FC<Props> = ({
   )
 }
 
-export default Modal;
+export default Modal

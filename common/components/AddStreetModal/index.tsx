@@ -5,21 +5,31 @@ import { IStreet } from '@common/modules/models/Street'
 import { useAddStreetMutation } from '@common/api/streetApi/street.api'
 import AddStreetForm from '../Forms/AddStreetForm'
 import Modal from '../UI/ModalWindow'
+import PreviewStreetForm from '../Forms/PreviewStreetForm'
 
 interface Props {
   closeModal: VoidFunction
-  edit?: boolean
+  streetActions?: {
+    edit: boolean
+    preview: boolean
+  }
+  currentStreet?: IStreet
 }
 
-const AddStreetModal: FC<Props> = ({ closeModal, edit }) => {
+const AddStreetModal: FC<Props> = ({
+  closeModal,
+  streetActions,
+  currentStreet,
+}) => {
   const [form] = Form.useForm()
   const [addStreet, { isLoading }] = useAddStreetMutation()
 
+  const { edit, preview } = streetActions || {}
   const handleSubmit = async () => {
     const formData: IStreet = await form.validateFields()
     const response = await addStreet({
-      address: formData.address,
       city: formData.city,
+      address: formData.address,
     })
     if ('data' in response) {
       form.resetFields()
@@ -42,8 +52,17 @@ const AddStreetModal: FC<Props> = ({ closeModal, edit }) => {
       okText={!edit && 'Додати'}
       cancelText={edit ? 'Закрити' : 'Відміна'}
       confirmLoading={isLoading}
+      preview={preview}
     >
-      <AddStreetForm form={form} />
+      {preview ? (
+        <PreviewStreetForm
+          form={form}
+          city={currentStreet.city}
+          address={currentStreet.address}
+        />
+      ) : (
+        <AddStreetForm form={form} />
+      )}
     </Modal>
   )
 }
