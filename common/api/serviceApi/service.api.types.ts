@@ -22,7 +22,6 @@ export interface IAddServiceResponse {
 }
 
 export interface IGetServiceResponse {
-  length: number
   success: boolean
   data: IService[]
   addressFilter: IFilter[]

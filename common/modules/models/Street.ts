@@ -1,7 +1,9 @@
 import mongoose, { Schema } from 'mongoose'
-export interface IStreet extends mongoose.Document {
+export interface IStreet {
   address: string
   city: string
+  _id?: string
+  _v: number
 }
 
 const StreetSchema = new Schema<IStreet>({

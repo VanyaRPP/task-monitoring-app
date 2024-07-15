@@ -5,25 +5,16 @@ import { IStreet } from '@common/modules/models/Street'
 import { useAddStreetMutation } from '@common/api/streetApi/street.api'
 import AddStreetForm from '../Forms/AddStreetForm'
 import Modal from '../UI/ModalWindow'
-import PreviewStreetForm from '../Forms/PreviewStreetForm'
 
 interface Props {
   closeModal: VoidFunction
-  currentStreet?: IStreet
-  streetActions?: {
-    edit: boolean
-    preview: boolean
-  }
+  edit?: boolean
 }
 
-const AddStreetModal: FC<Props> = ({
-  closeModal,
-  streetActions,
-  currentStreet,
-}) => {
+const AddStreetModal: FC<Props> = ({ closeModal, edit }) => {
   const [form] = Form.useForm()
   const [addStreet, { isLoading }] = useAddStreetMutation()
-  const { edit, preview } = streetActions
+
   const handleSubmit = async () => {
     const formData: IStreet = await form.validateFields()
     const response = await addStreet({
@@ -42,22 +33,17 @@ const AddStreetModal: FC<Props> = ({
   return (
     <Modal
       title={!edit && 'Додавання адреси'}
-      onOk={!preview ? handleSubmit : undefined}
+      onOk={handleSubmit}
       changesForm={() => form.isFieldsTouched()}
       onCancel={() => {
         form.resetFields()
         closeModal()
       }}
-      okText={!edit && !preview ? 'Додати' : undefined}
-      cancelText={preview || edit ? 'Закрити' : 'Відміна'}
+      okText={!edit && 'Додати'}
+      cancelText={edit ? 'Закрити' : 'Відміна'}
       confirmLoading={isLoading}
-      preview={preview}
     >
-      {preview ? (
-        <PreviewStreetForm form={form} currentStreet={currentStreet} />
-      ) : (
-        <AddStreetForm form={form} />
-      )}
+      <AddStreetForm form={form} />
     </Modal>
   )
 }
