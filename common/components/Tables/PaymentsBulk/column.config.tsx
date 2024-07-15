@@ -295,14 +295,13 @@ export const getDefaultColumns = (
     ),
   },
   {
-    title: '',
     key: 'action',
     fixed: 'right',
     width: 30,
-    render: (__: any, record: any) => (
+    render: (_: any, record: { _id: string }) => (
       <Popconfirm
         title="Ви впевнені, що хочете видалити компанію?"
-        onConfirm={() => handleDelete && handleDelete(record.companyName)}
+        onConfirm={() => handleDelete && handleDelete(record._id)}
         okText="Так"
         cancelText="Ні"
       >
