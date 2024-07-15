@@ -8,6 +8,8 @@ import { isAdminCheck } from '@utils/helpers'
 import { useRouter } from 'next/router'
 import { chartConfig, getPaymentsChartData } from './paymentsChartHelper'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { Empty } from 'antd'
+import s from './style.module.scss'
 
 const PaymentsChart = () => {
   const Line = dynamic(
@@ -16,20 +18,31 @@ const PaymentsChart = () => {
   )
   const router = useRouter()
   const { data: user } = useGetCurrentUserQuery()
-  const isAdmin = isAdminCheck(user?.roles) 
+  const isAdmin = isAdminCheck(user?.roles)
   const isOnPage = router.pathname === AppRoutes.PAYMENTS_CHARTS
   const [companyId, setCompanyId] = useState<string>()
   const [paymentsLimit, setPaymentsLimit] = useState(isOnPage ? 10 : 5)
 
-  const { data: payments } = useGetAllPaymentsQuery({
-    limit: paymentsLimit,
-    type: Operations.Debit,
-    companyIds: isAdmin && companyId ? [companyId] : undefined
-  },
-  {
-    skip: isAdmin && !companyId,
-  })
-  const chartData = { ...chartConfig, data: getPaymentsChartData(payments?.data) } as any
+  const {
+    data: payments,
+    isLoading,
+    isError,
+  } = useGetAllPaymentsQuery(
+    {
+      limit: paymentsLimit,
+      type: Operations.Debit,
+      companyIds: isAdmin && companyId ? [companyId] : undefined,
+    },
+    {
+      skip: isAdmin && !companyId,
+    }
+  )
+  const chartData = {
+    ...chartConfig,
+    data: getPaymentsChartData(payments?.data),
+  } as any
+
+  const canShowChart = !isLoading && !isError && payments?.data?.length > 0
 
   return (
     <TableCard
@@ -38,10 +51,17 @@ const PaymentsChart = () => {
           paymentsLimit={paymentsLimit}
           setPaymentsLimit={setPaymentsLimit}
           setCompanyId={setCompanyId}
+          canShowChart={canShowChart}
         />
       }
     >
-      <Line {...chartData} />
+      <div className={s.centerContent}>
+        {canShowChart ? (
+          <Line {...chartData} />
+        ) : (
+          <Empty description="Неможливо відобразити графік" />
+        )}
+      </div>
     </TableCard>
   )
 }
