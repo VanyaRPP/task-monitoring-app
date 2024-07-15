@@ -26,6 +26,10 @@ const AddStreetModal: FC<Props> = ({
 
   const { edit, preview } = streetActions || {}
   const handleSubmit = async () => {
+    if (preview) {
+      closeModal()
+      return
+    }
     const formData: IStreet = await form.validateFields()
     const response = await addStreet({
       city: formData.city,
@@ -49,10 +53,11 @@ const AddStreetModal: FC<Props> = ({
         form.resetFields()
         closeModal()
       }}
-      okText={!edit && 'Додати'}
-      cancelText={edit ? 'Закрити' : 'Відміна'}
+      okText={preview ? 'Закрити' : 'Додати'}
+      cancelText={preview ? '' : edit ? 'Закрити' : 'Відміна'}
       confirmLoading={isLoading}
       preview={preview}
+      cancelButtonProps={preview ? { disabled: true } : {}}
     >
       {preview ? (
         <PreviewStreetForm

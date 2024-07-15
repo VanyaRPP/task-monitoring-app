@@ -16,6 +16,7 @@ interface Props {
   okButtonProps?: ButtonProps
   title: string
   preview?: boolean
+  cancelButtonProps?: ButtonProps
 }
 
 const Modal: React.FC<Props> = ({
@@ -33,6 +34,7 @@ const Modal: React.FC<Props> = ({
   okButtonProps,
   open = true,
   preview,
+  cancelButtonProps,
 }) => {
   const handleCancel = () => {
     const isSingleTabAndViewMode = changesForm() && open && preview
@@ -63,6 +65,9 @@ const Modal: React.FC<Props> = ({
       className={className ? className : s.Modal}
       style={style}
       okButtonProps={okButtonProps}
+      cancelButtonProps={
+        preview ? { style: { display: 'none' } } : cancelButtonProps
+      }
     >
       {children}
     </AntModal>
