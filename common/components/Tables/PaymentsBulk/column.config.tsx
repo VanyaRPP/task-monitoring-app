@@ -116,7 +116,7 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: <InflicionIndexTitle service={service} />,
+    title: <InflicionIndexTitleLocal service={service} />,
     dataIndex: 'inflicionPrice',
     width: 110,
     render: (__: any, record: any) => (
