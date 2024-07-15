@@ -1,5 +1,3 @@
-import moment from 'moment'
-
 function useInitialStreetValues(city, address) {
   // TODO: add useEffect || useCallback ?
   // currently we have few renders

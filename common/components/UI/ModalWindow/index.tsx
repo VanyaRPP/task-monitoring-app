@@ -14,7 +14,6 @@ interface Props {
   style?: React.CSSProperties
   open?: boolean
   okButtonProps?: ButtonProps
-  // footer: any
   title: string
   preview?: boolean
 }
@@ -30,7 +29,6 @@ const Modal: React.FC<Props> = ({
   className,
   maskClickIgnore,
   style,
-  // footer,
   title,
   okButtonProps,
   open = true,
