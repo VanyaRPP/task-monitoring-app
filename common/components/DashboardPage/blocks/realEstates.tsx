@@ -38,6 +38,9 @@ const RealEstateBlock: React.FC<Props> = ({ domainId, streetId }) => {
     streetId: filters?.street || undefined,
     limit: isOnPage ? 0 : 5,
   })
+  const [realEstateActions, setRealEstateActions] = useState({
+    edit: false,
+  })
 
   return (
     <TableCard
@@ -49,6 +52,8 @@ const RealEstateBlock: React.FC<Props> = ({ domainId, streetId }) => {
           realEstates={realEstates}
           filters={filters}
           setFilters={setFilters}
+          realEstateActions={realEstateActions}
+          setRealEstateActions={setRealEstateActions}
         />
       }
     >
@@ -61,6 +66,8 @@ const RealEstateBlock: React.FC<Props> = ({ domainId, streetId }) => {
         isError={isError}
         filters={filters}
         setFilters={setFilters}
+        realEstateActions={realEstateActions}
+        setRealEstateActions={setRealEstateActions}
       />
     </TableCard>
   )
