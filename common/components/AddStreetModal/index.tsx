@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Form, message } from 'antd'
-import React, { FC } from 'react'
+import React, { FC, useEffect } from 'react'
 import { IStreet } from '@common/modules/models/Street'
 import { useAddStreetMutation } from '@common/api/streetApi/street.api'
 import AddStreetForm from '../Forms/AddStreetForm'
 import Modal from '../UI/ModalWindow'
-import PreviewStreetForm from '../Forms/PreviewStreetForm'
 
 interface Props {
   closeModal: VoidFunction
@@ -23,7 +22,6 @@ const AddStreetModal: FC<Props> = ({
 }) => {
   const [form] = Form.useForm()
   const [addStreet, { isLoading }] = useAddStreetMutation()
-
   const { edit, preview } = streetActions || {}
   const handleSubmit = async () => {
     if (preview) {
@@ -44,9 +42,21 @@ const AddStreetModal: FC<Props> = ({
     }
   }
 
+  const getTitle = () => {
+    if (edit) return 'Редагування адреси'
+    if (preview) return 'Перегляд адреси'
+    return 'Додавання адреси'
+  }
+
+  const editable = preview || edit
+
+  useEffect(() => {
+    form.setFieldsValue(currentStreet)
+  }, [form, currentStreet])
+
   return (
     <Modal
-      title={!edit && 'Додавання адреси'}
+      title={getTitle()}
       onOk={handleSubmit}
       changesForm={() => form.isFieldsTouched()}
       onCancel={() => {
@@ -59,15 +69,7 @@ const AddStreetModal: FC<Props> = ({
       preview={preview}
       cancelButtonProps={preview ? { disabled: true } : {}}
     >
-      {preview ? (
-        <PreviewStreetForm
-          form={form}
-          city={currentStreet.city}
-          address={currentStreet.address}
-        />
-      ) : (
-        <AddStreetForm form={form} />
-      )}
+      <AddStreetForm form={form} editable={editable} />
     </Modal>
   )
 }
