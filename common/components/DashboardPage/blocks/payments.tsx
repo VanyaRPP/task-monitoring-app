@@ -275,22 +275,25 @@ const PaymentsBlock = () => {
     filteredValue: filters?.company || null,
     render: (i) => {
       if (currUser?.roles?.includes(Roles.GLOBAL_ADMIN || Roles.DOMAIN_ADMIN)) {
-        return (
-          <a
-            style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
-            onClick={() => {
-              console.log("awdawd", i)
-              setFilters({ ...filters, company: [i?._id] })
-            }}
-          >
-            {i?.companyName}
-          </a>
-        );
+        if (pathname === AppRoutes.PAYMENT) {
+          return (
+            <a
+              style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
+              onClick={() => {
+                setFilters({ ...filters, company: [i?._id] })
+              }}
+            >
+              {i?.companyName}
+            </a>
+          );
+        } else {
+          return i?.companyName;
+        }
       } else {
         return i?.companyName;
       }
     },
-  });
+  })
 
   if (payments?.currentDomainsCount > 1) {
     columns.unshift({
