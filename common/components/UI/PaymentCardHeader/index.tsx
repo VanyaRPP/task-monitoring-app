@@ -17,13 +17,13 @@ import FilterTags from '../Reusable/FilterTags'
 import ImportInvoices from './ImportInvoices'
 import {
   useDeleteMultiplePaymentsMutation,
-  useGeneratePdfMutation ,
+  useGeneratePdfMutation,
 } from '@common/api/paymentApi/payment.api'
 import Modal from 'antd/lib/modal/Modal'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
 import { saveAs } from 'file-saver'
 import SelectForDebitAndCredit from '@components/UI/PaymentSelect/index'
-import StreetsSelector from "@components/StreetsSelector";
+import StreetsSelector from '@components/StreetsSelector'
 
 const columns: any = [
   {
@@ -41,7 +41,6 @@ const columns: any = [
   },
 ]
 
-
 const PaymentCardHeader = ({
   setCurrentDateFilter,
   setCurrentTypeOperation,
@@ -55,7 +54,7 @@ const PaymentCardHeader = ({
   setFilters,
   selectedPayments,
   setPaymentsDeleteItems,
-  setSelectedPayments
+  setSelectedPayments,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -106,24 +105,25 @@ const PaymentCardHeader = ({
     })
   }
 
-  const [generatePdf] = useGeneratePdfMutation();
+  const [generatePdf] = useGeneratePdfMutation()
 
   const handleGeneratePdf = async () => {
     try {
       const response = await generatePdf({
-        payments: selectedPayments
-      });
-  
+        payments: selectedPayments,
+      })
+
       if ('data' in response) {
         const { data } = response
-  
+
         if (data) {
-          const buffer = Buffer.from(data.buffer);
-          const blob = new Blob([buffer], { type: `application/${data.fileExtension}` })
-  
+          const buffer = Buffer.from(data.buffer)
+          const blob = new Blob([buffer], {
+            type: `application/${data.fileExtension}`,
+          })
+
           saveAs(blob, `${data.fileName}.${data.fileExtension}`)
         }
-  
       } else {
         message.error('Сталася помилка під час генерації PDF')
       }
@@ -153,8 +153,14 @@ const PaymentCardHeader = ({
                 {location.pathname === AppRoutes.PAYMENT && (
                   <>
                     <PaymentCascader onChange={setCurrentDateFilter} />
-                    <SelectForDebitAndCredit onChange={setCurrentTypeOperation} />
-                    <StreetsSelector filters={filters} setFilters={setFilters} streets={streets} />
+                    <SelectForDebitAndCredit
+                      onChange={setCurrentTypeOperation}
+                    />
+                    <StreetsSelector
+                      filters={filters}
+                      setFilters={setFilters}
+                      streets={streets}
+                    />
                     <FilterTags
                       filters={filters}
                       setFilters={setFilters}
@@ -182,15 +188,13 @@ const PaymentCardHeader = ({
                     Завантажити рахунки <DownloadOutlined />
                   </Button>
                 )}
-              {isGlobalAdmin && pathname === AppRoutes.PAYMENT &&
-              selectedPayments.length > 0 && (
-                <Button
-                  type="link"
-                  onClick={() => handleDeletePayments()}
-                >
-                  <DeleteOutlined /> Видалити
-                </Button>
-              )}
+              {isGlobalAdmin &&
+                pathname === AppRoutes.PAYMENT &&
+                selectedPayments.length > 0 && (
+                  <Button type="link" onClick={() => handleDeletePayments()}>
+                    <DeleteOutlined /> Видалити
+                  </Button>
+                )}
             </div>
           </>
         ) : (
