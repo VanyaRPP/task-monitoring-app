@@ -48,7 +48,7 @@ const AddStreetModal: FC<Props> = ({
     return 'Додавання адреси'
   }
 
-  const editable = preview || edit
+  const editable = edit || !preview
 
   useEffect(() => {
     form.setFieldsValue(currentStreet)

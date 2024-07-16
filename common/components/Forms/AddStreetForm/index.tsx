@@ -21,7 +21,7 @@ const AddStreetForm: FC<Props> = ({ form, editable }) => {
           placeholder="Введіть місто"
           maxLength={256}
           className={s.formInput}
-          disabled={editable}
+          disabled={!editable}
         />
       </Form.Item>
       <Form.Item
@@ -34,7 +34,7 @@ const AddStreetForm: FC<Props> = ({ form, editable }) => {
           placeholder="Введіть адресу"
           maxLength={256}
           className={s.formInput}
-          disabled={editable}
+          disabled={!editable}
         />
       </Form.Item>
     </Form>
