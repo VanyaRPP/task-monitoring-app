@@ -9,12 +9,14 @@ interface Props {
   paymentsLimit: number
   setPaymentsLimit: (paymentsLimit: number) => void
   setCompanyId: (companyId: string) => void
+  canShowChart: boolean
 }
 
 const PaymentsChartHeader: React.FC<Props> = ({
   paymentsLimit,
   setPaymentsLimit,
   setCompanyId,
+  canShowChart,
 }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.PAYMENTS_CHARTS
