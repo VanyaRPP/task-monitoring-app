@@ -17,7 +17,15 @@ const StreetsBlock: React.FC<{
   })
 
   return (
-    <TableCard title={<StreetsHeader showAddButton />}>
+    <TableCard
+      title={
+        <StreetsHeader
+          showAddButton
+          streetActions={streetActions}
+          setStreetActions={setStreetActions}
+        />
+      }
+    >
       <StreetsTable
         domainId={domainId}
         setCurrentStreet={setCurrentStreet}

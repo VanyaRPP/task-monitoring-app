@@ -60,7 +60,7 @@ const StreetsTable: React.FC<Props> = ({
   const closeModal = () => setIsModalOpen(false)
   const openModal = (street) => {
     setIsModalOpen(true),
-      setStreetActions({ ...streetActions, preview: true }),
+      setStreetActions({ ...streetActions, preview: true, edit: false }),
       setCurrentStreet(street)
   }
 

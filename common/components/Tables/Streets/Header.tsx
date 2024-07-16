@@ -8,14 +8,31 @@ import { AppRoutes } from '@utils/constants'
 
 export interface Props {
   showAddButton?: boolean
+  streetActions: {
+    edit: boolean
+    preview: boolean
+  }
+  setStreetActions: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+      preview: boolean
+    }>
+  >
 }
 
-const StreetsHeader: React.FC<Props> = ({ showAddButton = false }) => {
+const StreetsHeader: React.FC<Props> = ({
+  showAddButton = false,
+  streetActions,
+  setStreetActions,
+}) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const closeModal = () => setIsModalOpen(false)
-  const openModal = () => setIsModalOpen(true)
+  const openModal = () => {
+    setIsModalOpen(true),
+      setStreetActions({ ...streetActions, preview: false, edit: true })
+  }
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -34,7 +51,9 @@ const StreetsHeader: React.FC<Props> = ({ showAddButton = false }) => {
           <PlusOutlined /> Додати
         </Button>
       )}
-      {isModalOpen && <AddStreetModal closeModal={closeModal} />}
+      {isModalOpen && (
+        <AddStreetModal closeModal={closeModal} streetActions={streetActions} />
+      )}
     </div>
   )
 }

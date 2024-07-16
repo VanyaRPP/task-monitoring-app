@@ -48,12 +48,10 @@ const AddStreetModal: FC<Props> = ({
     return 'Додавання адреси'
   }
 
-  const editable = edit || !preview
-
   useEffect(() => {
     form.setFieldsValue(currentStreet)
   }, [form, currentStreet])
-
+  console.log(edit)
   return (
     <Modal
       title={getTitle()}
@@ -69,7 +67,7 @@ const AddStreetModal: FC<Props> = ({
       preview={preview}
       cancelButtonProps={preview ? { disabled: true } : {}}
     >
-      <AddStreetForm form={form} editable={editable} />
+      <AddStreetForm form={form} editable={edit} />
     </Modal>
   )
 }
