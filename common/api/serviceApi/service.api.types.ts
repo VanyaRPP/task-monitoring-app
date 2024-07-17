@@ -36,4 +36,6 @@ export interface IDeleteServiceResponse {
 export interface IServiceFilter {
   street: string
   domain: string
+  months: number
+  year: number
 }

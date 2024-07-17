@@ -1,17 +1,24 @@
-import { DeleteOutlined, EditOutlined, EyeOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { Alert, Popconfirm, Table, Tooltip, message, Button } from 'antd'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons'
+import { Alert, Button, Popconfirm, Table, Tooltip, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 
+import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import {
-  IService,
   IGetServiceResponse,
+  IService,
 } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { dateToYear } from '@common/assets/features/formatDate'
 import { AppRoutes, Roles } from '@utils/constants'
 import { getFormattedDate, renderCurrency } from '@utils/helpers'
-import { IFilter } from '@common/api/paymentApi/payment.api.types'
+
 interface Props {
   setServiceActions: React.Dispatch<
     React.SetStateAction<{
@@ -43,6 +50,7 @@ const ServicesTable: React.FC<Props> = ({
 }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.SERVICE
+  console.log(services)
 
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -100,8 +108,8 @@ const getDefaultColumns = (
   handleDelete?: (...args: any) => void,
   deleteLoading?: boolean,
   setCurrentService?: (service: IService) => void,
-  addressFilter?,
-  domainFilter?,
+  addressFilter?: IFilter[],
+  domainFilter?: IFilter[],
   // filters?: IFilter[],
   filter?: any,
   isOnPage?: boolean,
@@ -122,16 +130,56 @@ const getDefaultColumns = (
       fixed: 'left',
       title: 'Надавач послуг',
       dataIndex: 'domain',
-      filters: isOnPage ? domainFilter : null,
+      filters: isOnPage
+        ? [
+            {
+              text: 'DomainName0',
+              value: '64e71fd2b786a87e8eafb2ce',
+            },
+            {
+              text: 'hello1',
+              value: 'world1',
+            },
+          ]
+        : null,
       filteredValue: filter?.domain || null,
       width: 200,
       render: (i) => i?.name,
     },
     {
+      title: 'Рік',
+      dataIndex: 'date',
+      filters: isOnPage
+        ? [
+            {
+              text: '2023',
+              value: '2023',
+            },
+            {
+              text: '2024',
+              value: '2024',
+            },
+          ]
+        : null,
+      filteredValue: filter?.date || null,
+      width: 200,
+      render: (date) => dateToYear(date),
+    },
+    {
       title: 'Адреса',
       dataIndex: 'street',
-      // filters: isOnPage ? filters : null,
-      filters: isOnPage ? addressFilter : null,
+      filters: isOnPage
+        ? [
+            {
+              text: 'street1',
+              value: '64e725a9a62fdf2d22b84c45',
+            },
+            {
+              text: 'hello1',
+              value: 'world1',
+            },
+          ]
+        : null,
       filteredValue: filter?.street || null,
       render: (i) => `${i?.address} (м. ${i?.city})`,
     },

@@ -18,8 +18,13 @@ export const disabledDate: RangePickerProps['disabledDate'] = (current) => {
 export const dateToDayYearMonthFormat = (date: Date): string =>
   moment(date).format('DD-MM-YYYY')
 
+
+
 export const dateToMonthYear = (date: Date): string =>
   moment(date).format('MMMM YYYY')
+
+  export const dateToYear = (date: Date): string =>
+  moment(date).format('YYYY')
 
 export const getPreviousMonth = (date?: string) => {
   const currentInvoiceDate = moment(date).subtract(1, 'month')
