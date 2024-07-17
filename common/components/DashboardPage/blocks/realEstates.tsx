@@ -35,7 +35,7 @@ const RealEstateBlock: React.FC<Props> = ({ domainId, streetId }) => {
   } = useGetAllRealEstateQuery({
     domainId: domainId || filters?.domain || undefined,
     companyId: filters?.company || undefined,
-    streetId: filters?.street || undefined,
+    streetId: streetId || filters?.street || undefined,
     limit: isOnPage ? 0 : 5,
   })
 
