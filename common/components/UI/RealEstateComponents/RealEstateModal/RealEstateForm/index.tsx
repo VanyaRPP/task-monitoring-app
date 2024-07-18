@@ -37,7 +37,7 @@ const RealEstateForm: FC<Props> = ({
       <Form.Item
         name="companyName"
         label="Назва компанії"
-        rules={validateField('required')}
+        rules={editable && validateField('required')}
       >
         <Input
           placeholder="Назва компанії"

@@ -97,6 +97,7 @@ const RealEstateModal: FC<Props> = ({
       onCancel={closeModal}
       okText={currentRealEstate ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
+      okButtonProps={{ style: { display: !editable ? 'none' : 'inline' } }}
       preview={!editable}
     >
       <RealEstateForm
