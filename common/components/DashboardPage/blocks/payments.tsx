@@ -294,7 +294,7 @@ const PaymentsBlock = () => {
       }
     },
   })
-
+  console.log(payments)
   if (payments?.currentDomainsCount > 1) {
     columns.unshift({
       title: 'Надавач послуг',

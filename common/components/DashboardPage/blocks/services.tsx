@@ -28,7 +28,7 @@ const ServicesBlock = () => {
     isLoading,
     isError,
   } = useGetAllServicesQuery({
-    limit: isOnPage ? 0 : 5,
+    limit: isOnPage ? 5 : 5,
     streetId: filter?.street || undefined,
     domainId: filter?.domain || undefined,
   })

@@ -130,18 +130,7 @@ const getDefaultColumns = (
       fixed: 'left',
       title: 'Надавач послуг',
       dataIndex: 'domain',
-      filters: isOnPage
-        ? [
-            {
-              text: 'DomainName0',
-              value: '64e71fd2b786a87e8eafb2ce',
-            },
-            {
-              text: 'hello1',
-              value: 'world1',
-            },
-          ]
-        : null,
+      filters: isOnPage ? domainFilter : null,
       filteredValue: filter?.domain || null,
       width: 200,
       render: (i) => i?.name,
@@ -149,6 +138,7 @@ const getDefaultColumns = (
     {
       title: 'Рік',
       dataIndex: 'date',
+      width: 100,
       filters: isOnPage
         ? [
             {
@@ -162,24 +152,12 @@ const getDefaultColumns = (
           ]
         : null,
       filteredValue: filter?.date || null,
-      width: 200,
       render: (date) => dateToYear(date),
     },
     {
       title: 'Адреса',
       dataIndex: 'street',
-      filters: isOnPage
-        ? [
-            {
-              text: 'street1',
-              value: '64e725a9a62fdf2d22b84c45',
-            },
-            {
-              text: 'hello1',
-              value: 'world1',
-            },
-          ]
-        : null,
+      filters: isOnPage ? addressFilter : null,
       filteredValue: filter?.street || null,
       render: (i) => `${i?.address} (м. ${i?.city})`,
     },
