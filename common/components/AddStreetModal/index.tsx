@@ -51,7 +51,7 @@ const AddStreetModal: FC<Props> = ({
   useEffect(() => {
     form.setFieldsValue(currentStreet)
   }, [form, currentStreet])
-  console.log(edit)
+
   return (
     <Modal
       title={getTitle()}
@@ -61,11 +61,10 @@ const AddStreetModal: FC<Props> = ({
         form.resetFields()
         closeModal()
       }}
-      okText={preview ? 'Закрити' : 'Додати'}
-      cancelText={preview ? '' : edit ? 'Закрити' : 'Відміна'}
+      cancelText="Закрити"
+      okText={preview ? '' : edit ? 'Створити' : 'Зберегти'}
       confirmLoading={isLoading}
       preview={preview}
-      cancelButtonProps={preview ? { disabled: true } : {}}
     >
       <AddStreetForm form={form} editable={edit} />
     </Modal>

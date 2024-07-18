@@ -1,5 +1,7 @@
 import { Modal as AntModal, ButtonProps } from 'antd'
 import s from './style.module.scss'
+import { Form } from 'antd'
+import { useState } from 'react'
 
 interface Props {
   children: React.ReactNode
@@ -16,7 +18,6 @@ interface Props {
   okButtonProps?: ButtonProps
   title: string
   preview?: boolean
-  cancelButtonProps?: ButtonProps
 }
 
 const Modal: React.FC<Props> = ({
@@ -34,14 +35,11 @@ const Modal: React.FC<Props> = ({
   okButtonProps,
   open = true,
   preview,
-  cancelButtonProps,
 }) => {
   const handleCancel = () => {
-    const isSingleTabAndViewMode = changesForm() && open && preview
-
-    if (isSingleTabAndViewMode || preview) {
+    if (preview) {
       onCancel()
-    } else {
+    } else if (changesForm()) {
       AntModal.confirm({
         title: 'Ви впевнені, що хочете вийти?',
         content: 'Всі незбережені дані будуть втрачені',
@@ -49,6 +47,8 @@ const Modal: React.FC<Props> = ({
         cancelText: 'Ні',
         onOk: onCancel,
       })
+    } else {
+      onCancel()
     }
   }
 
@@ -60,14 +60,11 @@ const Modal: React.FC<Props> = ({
       title={title}
       onCancel={handleCancel}
       onOk={onOk}
-      okText={okText}
       cancelText={cancelText}
+      okText={okText}
       className={className ? className : s.Modal}
       style={style}
       okButtonProps={okButtonProps}
-      cancelButtonProps={
-        preview ? { style: { display: 'none' } } : cancelButtonProps
-      }
     >
       {children}
     </AntModal>
