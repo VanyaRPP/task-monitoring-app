@@ -81,6 +81,7 @@ const ServicesTable: React.FC<Props> = ({
         setCurrentService,
         services?.addressFilter,
         services?.domainFilter,
+        services?.yearFilter,
         filter,
         isOnPage,
         setServiceActions,
@@ -110,6 +111,7 @@ const getDefaultColumns = (
   setCurrentService?: (service: IService) => void,
   addressFilter?: IFilter[],
   domainFilter?: IFilter[],
+  yearFilter?: IFilter[],
   // filters?: IFilter[],
   filter?: any,
   isOnPage?: boolean,
@@ -139,18 +141,7 @@ const getDefaultColumns = (
       title: 'Рік',
       dataIndex: 'date',
       width: 100,
-      filters: isOnPage
-        ? [
-            {
-              text: '2023',
-              value: '2023',
-            },
-            {
-              text: '2024',
-              value: '2024',
-            },
-          ]
-        : null,
+      filters: isOnPage ? yearFilter : null,
       filteredValue: filter?.date || null,
       render: (date) => dateToYear(date),
     },

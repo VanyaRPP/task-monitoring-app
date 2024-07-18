@@ -7,6 +7,7 @@ import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { FilterQuery } from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { dateToYear } from '@common/assets/features/formatDate'
 
 start()
 
@@ -19,12 +20,12 @@ export default async function handler(
 
   const createDomainFilter = (data) => {
     const domainFilter = []
-
+    
     data.map((serviceInfo) => {
-      if(!domainFilter.some(domain => domain.value.toString() === serviceInfo.domain._id.toString())) {
+      if(serviceInfo?.domain?._id && !domainFilter.some(domain => domain?.value.toString() === serviceInfo?.domain?._id.toString())) {
         domainFilter.push({
-          text: serviceInfo.domain.name.toString(),
-          value: serviceInfo.domain._id.toString(),
+          text: serviceInfo?.domain.name.toString(),
+          value: serviceInfo?.domain._id.toString(),
         })
       }
     })
@@ -35,14 +36,28 @@ export default async function handler(
     const addressFilter = []
 
     data.map((serviceInfo) => {
-      if(!addressFilter.some(address => address.value.toString() === serviceInfo.street._id.toString())) {
+      if(serviceInfo?.street?._id && !addressFilter.some(address => address.value.toString() === serviceInfo?.street?._id.toString())) {
         addressFilter.push({
-          text: `${serviceInfo.street.address.toString()} (м. ${serviceInfo.street.city.toString()})`,
+          text: `${serviceInfo?.street?.address.toString()} (м. ${serviceInfo?.street?.city.toString()})`,
           value: serviceInfo.street._id.toString(),
         })
       }
     })
     return addressFilter
+  }
+
+  const createYearFilter = (data) => {
+    const yearFilter = []
+
+    data.map((serviceInfo) => {
+      if(serviceInfo?.date && !yearFilter.some(address => address.value.toString() === dateToYear(serviceInfo?.date))) {
+        yearFilter.push({
+          text: `${dateToYear(serviceInfo?.date)}`,
+          value: dateToYear(serviceInfo?.date),
+        })
+      }
+    })
+    return yearFilter
   }
 
   switch (req.method) {
@@ -106,13 +121,11 @@ export default async function handler(
             //     $lt: new Date(+year, +month + 1, 0, 23, 59, 59, 999), // last second of provided YY.MM
             //   },
             // }
-            // console.log(options.domain.$in)
     
     
             // if (!servicesIds) delete options._id
             // if (!streetsIds) delete options.street
             // if (!domainsIds) delete options.domain
-            // console.log(options)
             // if (!year  !month  isNaN(Number(year)) || isNaN(Number(month)))
             //   delete options.date
     
@@ -122,12 +135,13 @@ export default async function handler(
                 .skip(+skip)
                 .populate('domain')
                 .populate('street')
-              // console.log(createDomainFilter(data))
+              // console.log(createYearFilter(data))
               return res.status(200).json({ 
                 success: true,
                 data: data,
                 domainFilter: createDomainFilter(data),
                 addressFilter: createAddressFilter(data),
+                yearFilter: createYearFilter(data),
                 })
             }
     

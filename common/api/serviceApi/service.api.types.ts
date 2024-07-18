@@ -26,6 +26,7 @@ export interface IGetServiceResponse {
   data: IService[]
   addressFilter: IFilter[]
   domainFilter: IFilter[]
+  yearFilter: IFilter[]
 }
 
 export interface IDeleteServiceResponse {
