@@ -8,31 +8,22 @@ import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
 interface Props {
   form: FormInstance<any>
   editable?: boolean
-  disabled?: boolean
 }
 
-const DomainForm: FC<Props> = ({ form, editable = true, disabled = false }) => {
-
-  const nameValue = Form.useWatch('name', form)
-  const descriptionValue = Form.useWatch('description', form)
-
+const DomainForm: FC<Props> = ({ form, editable = true }) => {
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      className={s.Form}
-    >
-      <Form.Item name="name" label="Назва" rules={editable && validateField('required')}>
-        {editable ? (
-          <Input
-            placeholder="Вкажіть значення"
-            maxLength={256}
-            className={s.formInput}
-            disabled={disabled}
-          />
-        ) : (
-          <div>{nameValue}</div>
-        )}
+    <Form form={form} layout="vertical" className={s.Form}>
+      <Form.Item
+        name="name"
+        label="Назва"
+        rules={editable && validateField('required')}
+      >
+        <Input
+          placeholder="Вкажіть значення"
+          maxLength={256}
+          className={s.formInput}
+          disabled={!editable}
+        />
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} />
       <DomainStreets disabled={!editable} />
@@ -41,17 +32,13 @@ const DomainForm: FC<Props> = ({ form, editable = true, disabled = false }) => {
         label="Опис"
         rules={editable && validateField('required')}
       >
-        {editable ? (
-          <Input.TextArea
-            placeholder="Вкажіть значення"
-            className={s.formInput}
-            maxLength={512}
-            rows={4}
-            disabled={disabled}
-          />
-        ) : (
-          <div>{descriptionValue}</div>
-        )}
+        <Input.TextArea
+          placeholder="Вкажіть значення"
+          className={s.formInput}
+          maxLength={512}
+          rows={4}
+          disabled={!editable}
+        />
       </Form.Item>
     </Form>
   )
