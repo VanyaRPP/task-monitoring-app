@@ -19,7 +19,12 @@ const RealEstateForm: FC<Props> = ({
   editable = true,
 }) => {
   return (
-    <Form form={form} layout="vertical" className={s.Form}>
+    <Form
+      form={form}
+      requiredMark={editable}
+      layout="vertical"
+      className={s.Form}
+    >
       {currentRealEstate ? (
         <Form.Item name="domain" label="Надавач послуг">
           <Input disabled />
@@ -37,7 +42,7 @@ const RealEstateForm: FC<Props> = ({
       <Form.Item
         name="companyName"
         label="Назва компанії"
-        rules={editable && validateField('required')}
+        rules={validateField('required')}
       >
         <Input
           placeholder="Назва компанії"
@@ -49,7 +54,7 @@ const RealEstateForm: FC<Props> = ({
       <Form.Item
         name="description"
         label="Опис"
-        rules={editable && validateField('required')}
+        rules={validateField('required')}
       >
         <Input.TextArea
           rows={4}
@@ -63,7 +68,7 @@ const RealEstateForm: FC<Props> = ({
       <Form.Item
         name="totalArea"
         label="Площа (м²)"
-        rules={editable && validateField('required')}
+        rules={validateField('required')}
       >
         <InputNumber
           placeholder="Вкажіть значення"
@@ -74,7 +79,7 @@ const RealEstateForm: FC<Props> = ({
       <Form.Item
         name="pricePerMeter"
         label="Ціна (грн/м²)"
-        rules={editable && validateField('required')}
+        rules={validateField('required')}
       >
         <InputNumber
           placeholder="Вкажіть значення"

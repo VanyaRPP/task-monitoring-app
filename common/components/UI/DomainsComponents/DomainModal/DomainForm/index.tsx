@@ -12,11 +12,16 @@ interface Props {
 
 const DomainForm: FC<Props> = ({ form, editable = true }) => {
   return (
-    <Form form={form} layout="vertical" className={s.Form}>
+    <Form
+      form={form}
+      requiredMark={editable}
+      layout="vertical"
+      className={s.Form}
+    >
       <Form.Item
         name="name"
         label="Назва"
-        rules={editable && validateField('required')}
+        rules={validateField('required')}
       >
         <Input
           placeholder="Вкажіть значення"
@@ -30,7 +35,7 @@ const DomainForm: FC<Props> = ({ form, editable = true }) => {
       <Form.Item
         name="description"
         label="Опис"
-        rules={editable && validateField('required')}
+        rules={validateField('required')}
       >
         <Input.TextArea
           placeholder="Вкажіть значення"
