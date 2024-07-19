@@ -1,6 +1,6 @@
 import withAuthRedirect from "@components/HOC/withAuthRedirect";
 import {FC} from "react";
-import PriceList from "@components/Invoices/PriceList";
+import PriceList from "common/components/Forms/AddPaymentForm/PriceList";
 
 
 const Invoices: FC = () => {

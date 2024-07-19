@@ -129,6 +129,13 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
+  if (payment)
+    items.push({
+      key: '3',
+      label: 'Акт',
+      children: <PriceList data={payment} />,
+    })
+
   if (!preview || paymentData?.type === Operations.Debit) {
     items.push({
       key: '2',
