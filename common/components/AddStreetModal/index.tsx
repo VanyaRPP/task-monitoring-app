@@ -56,7 +56,7 @@ const AddStreetModal: FC<Props> = ({
     <Modal
       title={getTitle()}
       onOk={handleSubmit}
-      changesForm={() => form.isFieldsTouched()}
+      changesForm={() => !preview && form.isFieldsTouched()}
       onCancel={() => {
         form.resetFields()
         closeModal()

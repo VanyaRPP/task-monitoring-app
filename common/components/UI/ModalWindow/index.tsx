@@ -37,9 +37,7 @@ const Modal: React.FC<Props> = ({
   preview,
 }) => {
   const handleCancel = () => {
-    if (preview) {
-      onCancel()
-    } else if (changesForm()) {
+    if (changesForm()) {
       AntModal.confirm({
         title: 'Ви впевнені, що хочете вийти?',
         content: 'Всі незбережені дані будуть втрачені',
