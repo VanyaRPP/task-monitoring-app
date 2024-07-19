@@ -1,5 +1,5 @@
-import { DeleteOutlined } from '@ant-design/icons'
-import { Alert, Popconfirm, Table, message } from 'antd'
+import { DeleteOutlined, EyeOutlined } from '@ant-design/icons'
+import { Alert, Button, Popconfirm, Table, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 
@@ -7,19 +7,42 @@ import {
   useDeleteStreetMutation,
   useGetAllStreetsQuery,
 } from '@common/api/streetApi/street.api'
-import { IStreet } from '@common/modules/models/Street'
 import { AppRoutes } from '@utils/constants'
 import RealEstateBlock from '@common/components/DashboardPage/blocks/realEstates'
+import { IStreet } from '@common/api/streetApi/street.api.types'
+import AddStreetModal from '@common/components/AddStreetModal'
+import { useState } from 'react'
 
 export interface Props {
   domainId?: string
+  setStreetActions: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+      preview: boolean
+    }>
+  >
+  streetActions: {
+    edit: boolean
+    preview: boolean
+  }
+  setCurrentStreet: (street: IStreet) => void
+  currentStreet?: IStreet
 }
 
-const StreetsTable: React.FC<Props> = ({ domainId }) => {
+const StreetsTable: React.FC<Props> = ({
+  domainId,
+  setCurrentStreet,
+  setStreetActions,
+  streetActions,
+  currentStreet,
+}) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.STREETS
 
-  const { data, isLoading, isError } = useGetAllStreetsQuery({ domainId, limit: isOnPage ? 0 : 5 })
+  const { data, isLoading, isError } = useGetAllStreetsQuery({
+    domainId,
+    limit: isOnPage ? 0 : 5,
+  })
 
   const [deleteStreet, { isLoading: deleteLoading }] = useDeleteStreetMutation()
 
@@ -32,31 +55,50 @@ const StreetsTable: React.FC<Props> = ({ domainId }) => {
     }
   }
 
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const closeModal = () => setIsModalOpen(false)
+  const openModal = (street) => {
+    setIsModalOpen(true),
+      setStreetActions({ ...streetActions, preview: true, edit: false }),
+      setCurrentStreet(street)
+  }
+
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
   return (
-    <Table
-      rowKey="_id"
-      size="small"
-      pagination={false}
-      loading={isLoading}
-      columns={getDefaultColumns(handleDelete, deleteLoading)}
-      expandable={
-        domainId && {
-          expandedRowRender: (street) => (
-            <RealEstateBlock domainId={domainId} streetId={street._id} />
-          ),
+    <>
+      <Table
+        rowKey="_id"
+        size="small"
+        pagination={false}
+        loading={isLoading}
+        columns={getDefaultColumns(handleDelete, deleteLoading, openModal)}
+        expandable={
+          domainId && {
+            expandedRowRender: (street) => (
+              <RealEstateBlock domainId={domainId} streetId={street._id} />
+            ),
+          }
         }
-      }
-      dataSource={data}
-      scroll={{ x: 500 }}
-    />
+        dataSource={data}
+        scroll={{ x: 500 }}
+      />
+      {isModalOpen && (
+        <AddStreetModal
+          closeModal={closeModal}
+          streetActions={streetActions}
+          currentStreet={currentStreet}
+        />
+      )}
+    </>
   )
 }
 
 const getDefaultColumns = (
   handleDelete?: (streetId: string) => void,
-  deleteLoading?: boolean
+  deleteLoading?: boolean,
+  openModal?: (street: IStreet) => void
 ): ColumnType<any>[] => [
   {
     title: 'Місто',
@@ -66,6 +108,21 @@ const getDefaultColumns = (
   {
     title: 'Вулиця',
     dataIndex: 'address',
+  },
+  {
+    align: 'center',
+    fixed: 'right',
+    title: '',
+    width: 50,
+    render: (_, street: IStreet) => (
+      <Button
+        style={{ padding: 0 }}
+        type="link"
+        onClick={() => openModal(street)}
+      >
+        <EyeOutlined />
+      </Button>
+    ),
   },
   {
     align: 'center',

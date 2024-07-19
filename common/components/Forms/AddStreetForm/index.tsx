@@ -5,9 +5,10 @@ import s from './style.module.scss'
 
 interface Props {
   form: FormInstance<any>
+  editable?: boolean
 }
 
-const AddStreetForm: FC<Props> = ({ form }) => {
+const AddStreetForm: FC<Props> = ({ form, editable }) => {
   return (
     <Form form={form} layout="vertical" className={s.Form}>
       <Form.Item
@@ -20,6 +21,7 @@ const AddStreetForm: FC<Props> = ({ form }) => {
           placeholder="Введіть місто"
           maxLength={256}
           className={s.formInput}
+          disabled={!editable}
         />
       </Form.Item>
       <Form.Item
@@ -32,6 +34,7 @@ const AddStreetForm: FC<Props> = ({ form }) => {
           placeholder="Введіть адресу"
           maxLength={256}
           className={s.formInput}
+          disabled={!editable}
         />
       </Form.Item>
     </Form>

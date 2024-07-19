@@ -1,5 +1,7 @@
 import { Modal as AntModal, ButtonProps } from 'antd'
 import s from './style.module.scss'
+import { Form } from 'antd'
+import { useState } from 'react'
 
 interface Props {
   children: React.ReactNode
@@ -13,10 +15,9 @@ interface Props {
   maskClickIgnore?: boolean
   style?: React.CSSProperties
   open?: boolean
-  okButtonProps?: ButtonProps 
-  // footer: any
+  okButtonProps?: ButtonProps
   title: string
-  preview?: boolean 
+  preview?: boolean
 }
 
 const Modal: React.FC<Props> = ({
@@ -30,20 +31,13 @@ const Modal: React.FC<Props> = ({
   className,
   maskClickIgnore,
   style,
-  // footer,
   title,
   okButtonProps,
   open = true,
-  preview = false,
+  preview,
 }) => {
-
   const handleCancel = () => {
-    const isSingleTabAndViewMode = changesForm() && open && preview;
-
-    if(isSingleTabAndViewMode){
-      onCancel();
-    }
-    else {
+    if (changesForm()) {
       AntModal.confirm({
         title: 'Ви впевнені, що хочете вийти?',
         content: 'Всі незбережені дані будуть втрачені',
@@ -51,19 +45,21 @@ const Modal: React.FC<Props> = ({
         cancelText: 'Ні',
         onOk: onCancel,
       })
+    } else {
+      onCancel()
     }
   }
 
   return (
-      <AntModal
+    <AntModal
       confirmLoading={confirmLoading}
       open={open}
       maskClosable={!maskClickIgnore}
       title={title}
       onCancel={handleCancel}
       onOk={onOk}
-      okText={okText}
       cancelText={cancelText}
+      okText={okText}
       className={className ? className : s.Modal}
       style={style}
       okButtonProps={okButtonProps}
@@ -73,4 +69,4 @@ const Modal: React.FC<Props> = ({
   )
 }
 
-export default Modal;
+export default Modal
