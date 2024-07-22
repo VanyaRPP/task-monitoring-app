@@ -62,7 +62,7 @@ const AddStreetModal: FC<Props> = ({
         closeModal()
       }}
       cancelText="Закрити"
-      okText={preview ? '' : edit ? 'Створити' : 'Зберегти'}
+      okText={edit ? 'Створити' : 'Зберегти'}
       confirmLoading={isLoading}
       preview={preview}
       okButtonProps={{ style: { ...(!edit && { display: 'none' }) } }}
