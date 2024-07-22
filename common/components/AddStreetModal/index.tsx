@@ -65,6 +65,7 @@ const AddStreetModal: FC<Props> = ({
       okText={preview ? '' : edit ? 'Створити' : 'Зберегти'}
       confirmLoading={isLoading}
       preview={preview}
+      okButtonProps={{ style: { ...(!edit && { display: 'none' }) } }}
     >
       <AddStreetForm form={form} editable={edit} />
     </Modal>
