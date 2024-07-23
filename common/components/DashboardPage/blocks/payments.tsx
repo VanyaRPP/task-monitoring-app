@@ -274,17 +274,19 @@ const PaymentsBlock = () => {
       pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
     filteredValue: filters?.company || null,
     render: (i) => {
-      if (currUser?.roles?.includes(Roles.GLOBAL_ADMIN || Roles.DOMAIN_ADMIN)) {
+      if (isGlobalAdmin || isDomainAdmin) {
         if (pathname === AppRoutes.PAYMENT) {
           return (
-            <a
-              style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
-              onClick={() => {
-                setFilters({ ...filters, company: [i?._id] })
-              }}
-            >
-              {i?.companyName}
-            </a>
+            <Tooltip title="Додати в фільтри">
+              <a
+                style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
+                onClick={() => {
+                  setFilters({ ...filters, company: [i?._id] })
+                }}
+              >
+                {i?.companyName}
+              </a>
+            </Tooltip>
           );
         } else {
           return i?.companyName;
