@@ -10,12 +10,11 @@ import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { usePaymentData } from '@common/modules/hooks/usePaymentData'
 import { Operations } from '@utils/constants'
-import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { Form, Tabs, TabsProps, message } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
 import moment from 'moment'
-import { FC, createContext, useContext, useEffect, useState } from 'react'
+import { FC, createContext, useContext, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import Modal from '../UI/ModalWindow'
@@ -145,11 +144,11 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
-  useEffect(() => {
-    form.setFieldsValue({
-      invoice: getInvoices({ company, service, payment, prevPayment }),
-    })
-  }, [form, company, payment, prevPayment, service])
+  // useEffect(() => {
+  //   form.setFieldsValue({
+  //     invoice: getInvoices({ company, service, payment, prevPayment }),
+  //   })
+  // }, [form, company, payment, prevPayment, service])
 
   return (
     <PaymentContext.Provider

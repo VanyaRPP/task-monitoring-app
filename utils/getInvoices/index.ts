@@ -5,6 +5,7 @@ import {
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { ServiceType } from '@utils/constants'
+import { toRoundFixed } from '@utils/helpers'
 
 export type InvoicesCollection = {
   [key in ServiceType | string]?: IPaymentField
@@ -49,6 +50,14 @@ export const getInvoices = ({
   payment,
   prevPayment,
 }: IGetInvoiceProps): Array<IPaymentField> => {
+  if (!company && !service && !payment) {
+    return []
+  }
+
+  if (!payment && (!company || !service)) {
+    return []
+  }
+
   const currInvoicesCollection =
     payment?.invoice?.reduce((acc, invoice) => {
       acc[invoice.name || invoice.type] = invoice
@@ -108,9 +117,9 @@ export const getMaintenanceInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.price,
-      amount: invoice.amount,
-      sum: invoice.sum,
+      amount: +toRoundFixed(invoice.amount),
+      price: +toRoundFixed(invoice.price),
+      sum: +toRoundFixed(invoice.sum || invoice.price * invoice.amount),
     }
   }
 
@@ -122,9 +131,11 @@ export const getMaintenanceInvoice = ({
   ) {
     return {
       type: ServiceType.Maintenance,
-      amount: company.rentPart,
-      price: company.pricePerMeter,
-      sum: company.rentPart * company.pricePerMeter,
+      amount: +toRoundFixed(company.totalArea),
+      price: +toRoundFixed(company.pricePerMeter || service.rentPrice),
+      sum: +toRoundFixed(
+        company.totalArea * company.pricePerMeter || service.rentPrice
+      ),
     }
   }
 }
@@ -144,34 +155,37 @@ export const getPlacingInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.sum,
-      sum: invoice.sum,
+      amount: +toRoundFixed(invoice.amount),
+      price: +toRoundFixed(invoice.price),
+      sum: +toRoundFixed(invoice.sum || invoice.price * invoice.amount),
     }
   }
-
-  const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
 
   if (
     service?.inflicionPrice &&
     !isNaN(service.inflicionPrice) &&
     company?.inflicion
   ) {
-    const inflicionIndex = service.inflicionPrice / 100
-    const price = (+prevPlacing?.sum || 0) * inflicionIndex
+    const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
+    const price =
+      (prevPlacing?.sum ||
+        company.totalArea * (company.pricePerMeter || service.rentPrice)) *
+      (service.inflicionPrice / 100)
 
     return {
       type: ServiceType.Placing,
-      price: price || prevPlacing?.sum,
-      sum: price,
+      price: +toRoundFixed(price),
+      sum: +toRoundFixed(price),
     }
   }
 
-  if (company && service) {
-    return {
-      type: ServiceType.Placing,
-      price: +prevPlacing?.sum || 0,
-      sum: +prevPlacing?.sum || 0,
-    }
+  return {
+    type: ServiceType.Placing,
+    amount: +toRoundFixed(company?.totalArea),
+    price: +toRoundFixed(company?.pricePerMeter || service?.rentPrice),
+    sum: +toRoundFixed(
+      company.totalArea * company.pricePerMeter || service.rentPrice
+    ),
   }
 }
 
@@ -190,8 +204,8 @@ export const getInflicionInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.sum,
-      sum: invoice.sum,
+      price: +toRoundFixed(invoice.sum || invoice.price),
+      sum: +toRoundFixed(invoice.sum || invoice.price),
     }
   }
 
@@ -201,13 +215,15 @@ export const getInflicionInvoice = ({
     company?.inflicion
   ) {
     const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
-    const inflicionIndex = service.inflicionPrice - 100
-    const inflicionPrice = (inflicionIndex / 100) * (+prevPlacing?.sum || 0)
+    const price =
+      (prevPlacing?.sum ||
+        company.totalArea * (company.pricePerMeter || service.rentPrice)) *
+      (Math.max(service.inflicionPrice - 100, 0) / 100)
 
     return {
       type: ServiceType.Inflicion,
-      price: inflicionPrice,
-      sum: inflicionPrice,
+      price: +toRoundFixed(price),
+      sum: +toRoundFixed(price),
     }
   }
 }
@@ -227,10 +243,12 @@ export const getElectricityInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.price,
-      amount: invoice.amount,
-      lastAmount: invoice.lastAmount,
-      sum: invoice.sum,
+      price: +toRoundFixed(invoice.price),
+      amount: +toRoundFixed(invoice.amount),
+      lastAmount: +toRoundFixed(invoice.lastAmount),
+      sum: +toRoundFixed(
+        invoice.sum || invoice.price * (invoice.amount - invoice.lastAmount)
+      ),
     }
   }
 
@@ -239,9 +257,9 @@ export const getElectricityInvoice = ({
 
     return {
       type: ServiceType.Electricity,
-      amount: +prevElectricity?.amount || 0,
-      lastAmount: +prevElectricity?.amount || 0,
-      price: service.electricityPrice,
+      amount: +toRoundFixed(prevElectricity?.amount),
+      lastAmount: +toRoundFixed(prevElectricity?.amount),
+      price: +toRoundFixed(service.electricityPrice),
       sum: 0,
     }
   }
@@ -262,8 +280,8 @@ export const getWaterPartInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.sum,
-      sum: invoice.sum,
+      price: +toRoundFixed(invoice.sum || invoice.price),
+      sum: +toRoundFixed(invoice.sum || invoice.price),
     }
   }
 
@@ -273,11 +291,12 @@ export const getWaterPartInvoice = ({
     company?.waterPart &&
     !isNaN(company.waterPart)
   ) {
-    const price = (service.waterPrice * company.waterPart) / 100
+    const price = service.waterPrice * (company.waterPart / 100)
+
     return {
       type: ServiceType.WaterPart,
-      price: price,
-      sum: price,
+      price: +toRoundFixed(price),
+      sum: +toRoundFixed(price),
     }
   }
 }
@@ -297,10 +316,12 @@ export const getWaterInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.price,
-      amount: invoice.amount,
-      lastAmount: invoice.lastAmount,
-      sum: invoice.sum,
+      price: +toRoundFixed(invoice.price),
+      amount: +toRoundFixed(invoice.amount),
+      lastAmount: +toRoundFixed(invoice.lastAmount),
+      sum: +toRoundFixed(
+        invoice.sum || invoice.price * (invoice.amount - invoice.lastAmount)
+      ),
     }
   }
 
@@ -314,9 +335,9 @@ export const getWaterInvoice = ({
 
     return {
       type: ServiceType.Water,
-      amount: +prevWater?.amount || 0,
-      lastAmount: +prevWater?.amount || 0,
-      price: service.waterPrice,
+      amount: +toRoundFixed(prevWater?.amount),
+      lastAmount: +toRoundFixed(prevWater?.amount),
+      price: +toRoundFixed(service.waterPrice),
       sum: 0,
     }
   }
@@ -337,8 +358,8 @@ export const getGarbageCollectorInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.sum,
-      sum: invoice.sum,
+      price: +toRoundFixed(invoice.sum || invoice.price),
+      sum: +toRoundFixed(invoice.sum || invoice.price),
     }
   }
 
@@ -352,8 +373,8 @@ export const getGarbageCollectorInvoice = ({
 
     return {
       type: ServiceType.GarbageCollector,
-      price: price,
-      sum: price,
+      price: +toRoundFixed(price),
+      sum: +toRoundFixed(price),
     }
   }
 }
@@ -373,16 +394,16 @@ export const getCleaningInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.sum,
-      sum: invoice.sum,
+      price: +toRoundFixed(invoice.sum || invoice.price),
+      sum: +toRoundFixed(invoice.sum || invoice.price),
     }
   }
 
   if (company?.cleaning && !isNaN(company.cleaning)) {
     return {
       type: ServiceType.Cleaning,
-      price: company.cleaning,
-      sum: company.cleaning,
+      price: +toRoundFixed(company.cleaning),
+      sum: +toRoundFixed(company.cleaning),
     }
   }
 }
@@ -402,16 +423,16 @@ export const getDiscountInvoice = ({
 
     return {
       type: invoice.type,
-      price: invoice.sum,
-      sum: invoice.sum,
+      price: +toRoundFixed(invoice.sum || invoice.price),
+      sum: +toRoundFixed(invoice.sum || invoice.price),
     }
   }
 
   if (company?.discount && !isNaN(company.discount)) {
     return {
       type: ServiceType.Discount,
-      price: company.discount,
-      sum: company.discount,
+      price: +toRoundFixed(company.discount),
+      sum: +toRoundFixed(company.discount),
     }
   }
 }
@@ -427,7 +448,7 @@ export const getCustomInvoices = ({
     .map((invoice) => ({
       name: invoice.name,
       type: invoice.type,
-      price: invoice.sum,
-      sum: invoice.sum,
+      price: +toRoundFixed(invoice.sum || invoice.price),
+      sum: +toRoundFixed(invoice.sum || invoice.price),
     }))
 }
