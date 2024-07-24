@@ -1,15 +1,14 @@
-import { useState } from 'react'
-import Router from 'next/router'
-import { Skeleton, Avatar, Button, Card, Image, Tag } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
-import { signIn, signOut, useSession } from 'next-auth/react'
-import { AppRoutes, Roles } from '../../../utils/constants'
-import classNames from 'classnames'
-import s from './style.module.scss'
-import { useGetCurrentUserQuery } from 'common/api/userApi/user.api'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
-import router from 'next/router'
+import { AppRoutes, Roles } from '@utils/constants'
+import { Avatar, Button, Card, Image, Skeleton, Tag } from 'antd'
+import classNames from 'classnames'
+import { useGetCurrentUserQuery } from 'common/api/userApi/user.api'
+import { signIn, signOut, useSession } from 'next-auth/react'
+import { default as Router, default as router } from 'next/router'
+import { useState } from 'react'
+import s from './style.module.scss'
 
 const LoginUser: React.FC = () => {
   const { data: session, status } = useSession()

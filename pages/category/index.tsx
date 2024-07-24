@@ -1,13 +1,13 @@
-import { Empty, List } from 'antd'
-import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
-import { AppRoutes } from '../../utils/constants'
-import { unstable_getServerSession } from 'next-auth'
-import { authOptions } from '../api/auth/[...nextauth]'
+import { AppRoutes } from '@utils/constants'
+import { getCount } from '@utils/helpers'
+import { List } from 'antd'
 import { GetServerSideProps } from 'next'
-import s from './style.module.scss'
+import { unstable_getServerSession } from 'next-auth'
 import { useGetAllCategoriesQuery } from '../../common/api/categoriesApi/category.api'
 import { useGetAllTaskQuery } from '../../common/api/taskApi/task.api'
-import { getCount } from '../../utils/helpers'
+import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
+import { authOptions } from '../api/auth/[...nextauth]'
+import s from './style.module.scss'
 
 const CategoriesPage: React.FC = () => {
   const { data: categoriesData } = useGetAllCategoriesQuery('')

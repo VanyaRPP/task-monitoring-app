@@ -1,9 +1,9 @@
-import React from 'react'
-import { Select } from 'antd'
-import s from './style.module.scss'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { isAdminCheck } from '@utils/helpers'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { Select } from 'antd'
+import React from 'react'
+import s from './style.module.scss'
 
 interface Props {
   setCompanyId: (companyId: string) => void

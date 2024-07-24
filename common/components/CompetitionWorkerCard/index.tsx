@@ -1,24 +1,19 @@
-import React, { FC, useState } from 'react'
-import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  UserOutlined,
-} from '@ant-design/icons'
-import { Avatar, Button, Card, Form, Image, Alert } from 'antd'
+import { UserOutlined } from '@ant-design/icons'
+import { TaskStatuses } from '@utils/constants'
+import { Alert, Avatar, Button, Card, Form, Image } from 'antd'
+import { useSession } from 'next-auth/react'
+import { FC, useState } from 'react'
 import {
   useAddFeedbackMutation,
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
 } from '../../api/userApi/user.api'
-import s from './style.module.scss'
-import ModalNoFooter from '../UI/ModalNoFooter'
-import EndTask from '../EndTask'
-import AddFeedbackForm from '../Forms/AddFeedbackForm'
-import { useSession } from 'next-auth/react'
 import { IFeedback } from '../../modules/models/User'
-import { TaskStatuses } from '../../../utils/constants'
+import AddFeedbackForm from '../Forms/AddFeedbackForm'
+import ModalNoFooter from '../UI/ModalNoFooter'
 import RateStars from '../UI/RateStars'
 import Steper from '../UI/Steper'
+import s from './style.module.scss'
 // import ConfirmTask from '../Forms/ConfirmTask'
 
 interface Props {

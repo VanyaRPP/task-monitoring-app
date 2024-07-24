@@ -1,24 +1,15 @@
-import React, { useMemo, useState } from 'react'
-import { Card, Table, Input, Button } from 'antd'
-import {
-  useGetTaskByIdQuery,
-  useGetAllTaskQuery,
-} from '../../../api/taskApi/task.api'
-import { toFirstUpperCase } from '../../../../utils/helpers'
-import {
-  useGetUserByEmailQuery,
-  useGetUserByIdQuery,
-} from '../../../api/userApi/user.api'
-import moment from 'moment'
-import Router, { useRouter } from 'next/router'
-import { AppRoutes, TaskStatuses } from '../../../../utils/constants'
-import { useSession } from 'next-auth/react'
-import MicroInfoProfile from '../../MicroInfoProfile'
-import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.api'
-import StatusTag from '../../UI/StatusTag'
 import { SelectOutlined } from '@ant-design/icons'
-import TableCard from '@common/components/UI/TableCard'
 import { TaskButton } from '@common/components/UI/Buttons'
+import TableCard from '@common/components/UI/TableCard'
+import { AppRoutes, TaskStatuses } from '@utils/constants'
+import { Button, Table } from 'antd'
+import moment from 'moment'
+import { useSession } from 'next-auth/react'
+import Router, { useRouter } from 'next/router'
+import { useMemo, useState } from 'react'
+import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
+import { useGetUserByEmailQuery } from '../../../api/userApi/user.api'
+import StatusTag from '../../UI/StatusTag'
 import s from '../style.module.scss'
 
 const Tasks = () => {

@@ -1,10 +1,9 @@
-import React, { useEffect, useRef } from 'react'
-import Chart from 'chart.js/auto'
 import { generateColorsArray } from '@utils/helpers'
+import Chart from 'chart.js/auto'
+import React, { useEffect, useRef } from 'react'
 import s from './style.module.scss'
-import { companyAreas } from '@common/api/domainApi/domain.api.types'
 type dataSources = {
-  label: string,
+  label: string
   value: number
 }
 
@@ -23,11 +22,11 @@ const ChartComponent: React.FC<{
       myChartRef.current = new Chart<'pie', number[], string>(ctx, {
         type: 'pie',
         data: {
-          labels: dataSources?.map(i => i.label),
+          labels: dataSources?.map((i) => i.label),
           datasets: [
             {
               label: chartElementTitle,
-              data: dataSources?.map(i => i.value),
+              data: dataSources?.map((i) => i.value),
               backgroundColor: generateColorsArray(dataSources?.length),
               borderWidth: 2,
             },
@@ -57,7 +56,7 @@ const ChartComponent: React.FC<{
   }
 
   useEffect(() => {
-    if (!chartRef.current) return;
+    if (!chartRef.current) return
     createChart()
     const resizeObserver = new ResizeObserver(() => {
       if (myChartRef.current) {
@@ -74,9 +73,11 @@ const ChartComponent: React.FC<{
 
   return (
     <div className={s.chartContainer}>
-      { dataSources?.every(item => item.value === 0) 
-      ? "Усі займані площі домену дорівнюють нулю"
-      : <canvas ref={chartRef} className={s.chart} /> }
+      {dataSources?.every((item) => item.value === 0) ? (
+        'Усі займані площі домену дорівнюють нулю'
+      ) : (
+        <canvas ref={chartRef} className={s.chart} />
+      )}
     </div>
   )
 }

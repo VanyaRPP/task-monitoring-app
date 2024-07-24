@@ -1,6 +1,6 @@
+import { TaskStatuses } from '@utils/constants'
 import { Empty, Radio } from 'antd'
 import { useEffect, useState } from 'react'
-import { TaskStatuses } from '../../../../utils/constants'
 import { ITask } from '../../../modules/models/Task'
 import CardOneTask from '../../CardOneTask'
 import s from './style.module.scss'

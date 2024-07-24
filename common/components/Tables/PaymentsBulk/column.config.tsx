@@ -1,15 +1,15 @@
 import { CloseCircleOutlined } from '@ant-design/icons'
-import { Popconfirm, Form } from 'antd'
-import FormAttribute from '@common/components/UI/FormAttribute'
-import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
-import { InflicionIndexTitle } from '@utils/inflicion'
-import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
-import { Operations, ServiceType } from '@utils/constants'
+import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
+import FormAttribute from '@common/components/UI/FormAttribute'
 import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
+import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
 import { usePreviousMonthService } from '@common/modules/hooks/useService'
-import { getInflicionValue } from '@utils/inflicionHelper'
+import { Operations, ServiceType } from '@utils/constants'
 import { invoiceCoutWater, multiplyFloat, plusFloat } from '@utils/helpers'
+import { InflicionIndexTitle } from '@utils/inflicion'
+import { getInflicionValue } from '@utils/inflicionHelper'
+import { Form, Popconfirm } from 'antd'
 
 export const getDefaultColumns = (
   service?: any,

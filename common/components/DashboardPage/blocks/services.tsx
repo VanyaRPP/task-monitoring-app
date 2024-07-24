@@ -1,16 +1,16 @@
-import { useState } from 'react'
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import ServicesHeader from '@common/components/Tables/Services/Header'
-import ServicesTable from '@common/components/Tables/Services/Table'
-import TableCard from '@common/components/UI/TableCard'
-import { isAdminCheck } from '@utils/helpers'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import {
   IService,
   IServiceFilter,
 } from '@common/api/serviceApi/service.api.types'
-import { useRouter } from 'next/router'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import ServicesHeader from '@common/components/Tables/Services/Header'
+import ServicesTable from '@common/components/Tables/Services/Table'
+import TableCard from '@common/components/UI/TableCard'
 import { AppRoutes } from '@utils/constants'
-import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import { isAdminCheck } from '@utils/helpers'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
 
 const ServicesBlock = () => {
   const { data: user } = useGetCurrentUserQuery()

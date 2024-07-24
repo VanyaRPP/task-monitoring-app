@@ -1,32 +1,31 @@
-import { useState } from 'react'
-import { useSession } from 'next-auth/react'
+import { QuestionCircleOutlined } from '@ant-design/icons'
 import {
-  Card,
-  notification,
-  Table,
-  Button,
-  Form,
   Avatar,
+  Button,
+  Card,
+  Form,
+  notification,
   Popconfirm,
+  Table,
 } from 'antd'
-import Column from 'antd/lib/table/Column'
 import Meta from 'antd/lib/card/Meta'
-import Modal from '../UI/ModalWindow/index'
-import { ITask, ITaskExecutors } from 'common/modules/models/Task'
-import CompetitionForm from '../Forms/CompetitionForm/index'
+import Column from 'antd/lib/table/Column'
 import {
   useAcceptWorkerMutation,
   useAddTaskExecutorMutation,
 } from 'common/api/taskApi/task.api'
+import { ITask, ITaskExecutors } from 'common/modules/models/Task'
+import { useSession } from 'next-auth/react'
+import { useState } from 'react'
 import {
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
 } from '../../api/userApi/user.api'
-import s from './style.module.scss'
-import { QuestionCircleOutlined } from '@ant-design/icons'
-import UserLink from '../UserLink'
 import CompetitionWorkerCard from '../CompetitionWorkerCard'
-import { TaskStatuses } from '../../../utils/constants'
+import CompetitionForm from '../Forms/CompetitionForm/index'
+import Modal from '../UI/ModalWindow/index'
+import UserLink from '../UserLink'
+import s from './style.module.scss'
 
 export const Executor = ({ executor, type }) => {
   const { data } = useGetUserByIdQuery(`${executor.workerid}`)

@@ -1,11 +1,10 @@
-import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
-import { AppRoutes } from '../../utils/constants'
-import { unstable_getServerSession } from 'next-auth'
-import { authOptions } from '../api/auth/[...nextauth]'
-import { GetServerSideProps } from 'next'
-import { FC } from 'react'
 import PaymentsBlock from '@common/components/DashboardPage/blocks/payments'
-
+import { AppRoutes } from '@utils/constants'
+import { GetServerSideProps } from 'next'
+import { unstable_getServerSession } from 'next-auth'
+import { FC } from 'react'
+import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
+import { authOptions } from '../api/auth/[...nextauth]'
 
 const Payments: FC = () => {
   return <PaymentsBlock />
@@ -32,5 +31,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {},
   }
-  
 }

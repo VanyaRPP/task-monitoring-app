@@ -3,16 +3,13 @@ import {
   FireOutlined,
   InfoOutlined,
 } from '@ant-design/icons'
-import { Badge, Button, Card, Table } from 'antd'
+import { AppRoutes, TaskStatuses } from '@utils/constants'
+import { getFormattedAddress } from '@utils/helpers'
+import { Badge, Button, Card } from 'antd'
 import classNames from 'classnames'
 import moment from 'moment'
-import Router, { useRouter } from 'next/router'
-import { AppRoutes, TaskStatuses } from '../../../utils/constants'
-import { getFormattedAddress } from '../../../utils/helpers'
-import {
-  dateToDefaultFormat,
-  isDeadlineExpired,
-} from '../../assets/features/formatDate'
+import Router from 'next/router'
+import { dateToDefaultFormat } from '../../assets/features/formatDate'
 import { ITask } from '../../modules/models/Task'
 import StatusTag from '../UI/StatusTag'
 import s from './style.module.scss'

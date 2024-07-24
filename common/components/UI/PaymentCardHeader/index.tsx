@@ -1,29 +1,29 @@
 import {
-  PlusOutlined,
-  SelectOutlined,
   DeleteOutlined,
   DownloadOutlined,
+  PlusOutlined,
+  SelectOutlined,
 } from '@ant-design/icons'
-import React, { useState } from 'react'
-import { AppRoutes, Roles } from '@utils/constants'
-import { Button, Table, message } from 'antd'
-import { useRouter } from 'next/router'
-import AddPaymentModal from '@common/components/AddPaymentModal'
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import s from './style.module.scss'
-import { isAdminCheck } from '@utils/helpers'
-import PaymentCascader from '@common/components/UI/PaymentCascader/index'
-import FilterTags from '../Reusable/FilterTags'
-import ImportInvoices from './ImportInvoices'
 import {
   useDeleteMultiplePaymentsMutation,
   useGeneratePdfMutation,
 } from '@common/api/paymentApi/payment.api'
-import Modal from 'antd/lib/modal/Modal'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { dateToDefaultFormat } from '@common/assets/features/formatDate'
-import { saveAs } from 'file-saver'
-import SelectForDebitAndCredit from '@components/UI/PaymentSelect/index'
+import AddPaymentModal from '@common/components/AddPaymentModal'
+import PaymentCascader from '@common/components/UI/PaymentCascader/index'
 import StreetsSelector from '@components/StreetsSelector'
+import SelectForDebitAndCredit from '@components/UI/PaymentSelect/index'
+import { AppRoutes, Roles } from '@utils/constants'
+import { isAdminCheck } from '@utils/helpers'
+import { Button, message } from 'antd'
+import Modal from 'antd/lib/modal/Modal'
+import { saveAs } from 'file-saver'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
+import FilterTags from '../Reusable/FilterTags'
+import ImportInvoices from './ImportInvoices'
+import s from './style.module.scss'
 
 const columns: any = [
   {

@@ -6,13 +6,13 @@ import _omit from 'lodash/omit'
 import moment from 'moment'
 import 'moment/locale/uk'
 import mongoose, { ObjectId } from 'mongoose'
-import { Roles, ServiceType } from './constants'
+import { Roles, ServiceType } from '../constants'
 import {
   getDomainsPipeline,
   getRealEstatesPipeline,
   getStreetsPipeline,
-} from './pipelines'
-import { PaymentOptions } from './types'
+} from '../pipelines'
+import { PaymentOptions } from '../types'
 
 export const toFirstUpperCase = (text: string) =>
   text[0].toUpperCase() + text.slice(1)

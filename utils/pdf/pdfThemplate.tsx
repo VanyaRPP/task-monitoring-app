@@ -1,6 +1,6 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { renderCurrency } from '@utils/helpers'
 import moment from 'moment'
-import { renderCurrency } from '../helpers'
 import { ServiceType } from '../constants'
 import nameField from './nameFieldGenerator'
 

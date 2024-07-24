@@ -1,18 +1,12 @@
-import React, { FC, useMemo, useState } from 'react'
-import { Card, Table, Input, Button } from 'antd'
-import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
-import Router, { useRouter } from 'next/router'
-import { AppRoutes, TaskStatuses } from '../../../../utils/constants'
-import { useSession } from 'next-auth/react'
-import {
-  useGetAllCategoriesQuery,
-  useGetCategoryByIdQuery,
-} from '../../../api/categoriesApi/category.api'
-import StatusTag from '../../UI/StatusTag'
-import TaskInCategory from '../../../../pages/task/category/[id]'
-import { getCount } from '../../../../utils/helpers'
 import { SelectOutlined } from '@ant-design/icons'
 import TableCard from '@common/components/UI/TableCard'
+import { AppRoutes } from '@utils/constants'
+import { getCount } from '@utils/helpers'
+import { Button, Table } from 'antd'
+import Router, { useRouter } from 'next/router'
+import { FC } from 'react'
+import { useGetAllCategoriesQuery } from '../../../api/categoriesApi/category.api'
+import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
 import s from './style.module.scss'
 
 const CategoriesBlock: FC = () => {

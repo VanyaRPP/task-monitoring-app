@@ -279,7 +279,11 @@ const PaymentsBlock = () => {
           return (
             <Tooltip title="Додати в фільтри">
               <a
-                style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
+                style={{
+                  cursor: 'pointer',
+                  color: 'blue',
+                  textDecoration: 'underline',
+                }}
                 onClick={() => {
                   setFilters({ ...filters, company: [i?._id] })
                 }}
@@ -287,12 +291,12 @@ const PaymentsBlock = () => {
                 {i?.companyName}
               </a>
             </Tooltip>
-          );
+          )
         } else {
-          return i?.companyName;
+          return i?.companyName
         }
       } else {
-        return i?.companyName;
+        return i?.companyName
       }
     },
   })

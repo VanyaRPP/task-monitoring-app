@@ -1,8 +1,8 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@pages/api/auth/[...nextauth]'
 import User from '@common/modules/models/User'
+import { authOptions } from '@pages/api/auth/[...nextauth]'
+import { isAdminCheck } from '@utils/helpers'
+import { getServerSession } from 'next-auth'
 import { Roles } from './constants'
-import { isAdminCheck } from './helpers'
 
 export async function getCurrentUser(req, res) {
   const session = await getServerSession(req, res, authOptions)

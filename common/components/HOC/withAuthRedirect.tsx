@@ -1,6 +1,6 @@
+import { AppRoutes } from '@utils/constants'
 import { useSession } from 'next-auth/react'
 import Router from 'next/router'
-import { AppRoutes } from '../../../utils/constants'
 import Preloader from '../UI/Buttons/Preloader'
 
 const withAuthRedirect = (Component: React.ComponentType) => {

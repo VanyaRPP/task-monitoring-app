@@ -1,9 +1,9 @@
-import { setupTestEnvironment } from '@utils/setupTestEnvironment'
-import handler from './index'
 import { expect } from '@jest/globals'
 import { parseReceived } from '@utils/helpers'
-import { users, realEstates, domains, streets } from '@utils/testData'
 import { mockLoginAs } from '@utils/mockLoginAs'
+import { setupTestEnvironment } from '@utils/setupTestEnvironment'
+import { domains, realEstates, streets, users } from '@utils/testData'
+import handler from './index'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -116,10 +116,10 @@ describe('RealEstate API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
     const received = parseReceived(response.data)
     const expected = realEstates.filter(
-        (company) =>
-            company.domain === domains[3]._id.toString() &&
-            company.street === streets[3]._id.toString()
-        )
+      (company) =>
+        company.domain === domains[3]._id.toString() &&
+        company.street === streets[3]._id.toString()
+    )
 
     expect(received).toEqual(expected)
   })
