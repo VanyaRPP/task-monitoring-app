@@ -46,17 +46,16 @@ function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
 
   return (
     <Form.Item
-      rules={!edit && validateField('required')}
+      rules={validateField('required')}
       name="monthService"
       label="Місяць"
     >
       <Select
-        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
         options={monthsServices?.data.map((i) => ({
           value: i._id,
           label: getFormattedDate(i.date, 'MMMM YYYY'),
         }))}
-        optionFilterProp="children"
+        optionFilterProp="label"
         placeholder="Місяць"
         disabled={monthsServices?.data?.length === 1 || edit}
         loading={isLoading}
