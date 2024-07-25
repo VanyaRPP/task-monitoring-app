@@ -8,7 +8,7 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
-import { usePaymentData } from '@common/modules/hooks/usePaymentData'
+import { usePaymentFormData } from '@common/modules/hooks/usePaymentData'
 import { Operations } from '@utils/constants'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { Form, Tabs, TabsProps, message } from 'antd'
@@ -54,10 +54,7 @@ const AddPaymentModal: FC<Props> = ({
   const [form] = Form.useForm()
 
   const { company, service, prevService, payment, prevPayment } =
-    usePaymentData({
-      form,
-      paymentData,
-    })
+    usePaymentFormData(form, paymentData)
 
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
