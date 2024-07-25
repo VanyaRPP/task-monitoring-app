@@ -3,10 +3,11 @@ import { validateField } from '@common/assets/features/validators'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import useInitialValues from '@common/modules/hooks/useInitialValues'
-import { usePreviousMonthService } from '@common/modules/hooks/useService'
 import { DatePicker, Form, FormInstance, Input, InputNumber } from 'antd'
 import { useEffect } from 'react'
 import s from './style.module.scss'
+import dayjs from 'dayjs'
+import { usePreviousMonthService } from '@common/modules/hooks/useService'
 
 interface Props {
   form: FormInstance<any>
@@ -17,6 +18,12 @@ interface Props {
 const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
   const { MonthPicker } = DatePicker
   const initialValues = useInitialValues(currentService)
+
+  useEffect(() => {
+    form.setFieldsValue({
+      date: dayjs(),
+    })
+  }, [])
 
   const date = Form.useWatch('date', form)
   const domain = Form.useWatch('domain', form)
