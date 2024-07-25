@@ -1,6 +1,6 @@
 import { dateToMonthYear } from '@common/assets/features/formatDate'
 import validator from '@common/assets/features/validators'
-import { usePaymentFormData } from '@common/components/Forms/AddPaymentForm'
+import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { InvoiceComponentProps } from '@common/components/Tables/EditInvoiceTable'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import { Form, Input, Space, Typography } from 'antd'
@@ -17,7 +17,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   const value = Form.useWatch(['invoice', ...name, 'name'], form)
   const type = Form.useWatch(['invoice', ...name, 'type'], form)
 
-  const { service } = usePaymentFormData(form)
+  const { service } = usePaymentContext()
 
   if (!editable) {
     return (

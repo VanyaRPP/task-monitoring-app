@@ -1,6 +1,6 @@
 import { dateToMonthYear } from '@common/assets/features/formatDate'
 import validator from '@common/assets/features/validators'
-import { usePaymentFormData } from '@common/components/Forms/AddPaymentForm'
+import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { InvoiceComponentProps } from '@common/components/Tables/EditInvoiceTable'
 import { ServiceType } from '@utils/constants'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
@@ -13,7 +13,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service } = usePaymentFormData(form)
+  const { service } = usePaymentContext()
 
   return (
     <Space direction="vertical" size={0}>
@@ -33,7 +33,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
 
-  const { service, company, prevPayment } = usePaymentFormData(form)
+  const { service, company, prevPayment } = usePaymentContext()
 
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
 
@@ -89,7 +89,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
 
-  const { company } = usePaymentFormData(form)
+  const { company } = usePaymentContext()
 
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
@@ -130,7 +130,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
 
-  const { company } = usePaymentFormData(form)
+  const { company } = usePaymentContext()
 
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)

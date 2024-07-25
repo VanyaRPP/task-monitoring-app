@@ -1,6 +1,6 @@
 import { dateToMonthYear } from '@common/assets/features/formatDate'
 import validator from '@common/assets/features/validators'
-import { usePaymentFormData } from '@common/components/Forms/AddPaymentForm'
+import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { InvoiceComponentProps } from '@common/components/Tables/EditInvoiceTable'
 import { DividedSpace } from '@common/components/UI/DividedSpace'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
@@ -13,7 +13,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service } = usePaymentFormData(form)
+  const { service } = usePaymentContext()
 
   return (
     <Space direction="vertical" size={0}>

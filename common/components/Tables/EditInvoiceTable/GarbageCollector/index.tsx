@@ -1,6 +1,6 @@
 import { dateToMonthYear } from '@common/assets/features/formatDate'
 import validator from '@common/assets/features/validators'
-import { usePaymentFormData } from '@common/components/Forms/AddPaymentForm'
+import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { InvoiceComponentProps } from '@common/components/Tables/EditInvoiceTable'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import { Form, Input, Space, Typography } from 'antd'
@@ -12,7 +12,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service } = usePaymentFormData(form)
+  const { service } = usePaymentContext()
 
   return (
     <Space direction="vertical" size={0}>
@@ -30,7 +30,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service, company } = usePaymentFormData(form)
+  const { service, company } = usePaymentContext()
 
   if (service?.garbageCollectorPrice && company?.rentPart) {
     return (
