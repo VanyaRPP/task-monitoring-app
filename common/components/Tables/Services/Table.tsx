@@ -1,4 +1,9 @@
-import { DeleteOutlined, EditOutlined, EyeOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons'
 import { Alert, Popconfirm, Table, Tooltip, message, Button } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
