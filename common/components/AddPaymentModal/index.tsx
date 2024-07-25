@@ -14,7 +14,7 @@ import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { Form, Tabs, TabsProps, message } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { FC, createContext, useContext, useEffect, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
@@ -200,7 +200,7 @@ const AddPaymentModal: FC<Props> = ({
             generalSum: payment?.generalSum,
             invoiceNumber: payment?.invoiceNumber,
             // TODO: new Date() instead of moment() - now cause "date.clone is not a function"
-            invoiceCreationDate: moment(payment?.invoiceCreationDate),
+            invoiceCreationDate: dayjs(payment?.invoiceCreationDate),
             operation: payment?.type || Operations.Credit,
           }}
           form={form}

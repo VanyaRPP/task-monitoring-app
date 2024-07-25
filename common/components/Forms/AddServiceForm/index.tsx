@@ -3,10 +3,10 @@ import { validateField } from '@common/assets/features/validators'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import useInitialValues from '@common/modules/hooks/useInitialValues'
-import { usePreviousMonthService } from '@common/modules/hooks/useService'
 import { DatePicker, Form, FormInstance, Input, InputNumber } from 'antd'
 import { useEffect } from 'react'
 import s from './style.module.scss'
+import dayjs from 'dayjs'
 
 interface Props {
   form: FormInstance<any>
@@ -18,45 +18,11 @@ const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
   const { MonthPicker } = DatePicker
   const initialValues = useInitialValues(currentService)
 
-  const date = Form.useWatch('date', form)
-  const domain = Form.useWatch('domain', form)
-  const street = Form.useWatch('street', form)
-
-  const { previousMonth } = usePreviousMonthService({
-    date,
-    domainId: domain,
-    streetId: street,
-  })
-
   useEffect(() => {
-    if (!previousMonth) {
-      form.setFieldsValue({
-        rentPrice: 0,
-        electricityPrice: 0,
-        waterPrice: 0,
-        waterPriceTotal: 0,
-        garbageCollectorPrice: 0,
-        inflicionPrice: 0,
-      })
-      return
-    }
-    const {
-      rentPrice,
-      electricityPrice,
-      waterPrice,
-      waterPriceTotal,
-      garbageCollectorPrice,
-      inflicionPrice,
-    } = previousMonth
     form.setFieldsValue({
-      rentPrice,
-      electricityPrice,
-      waterPrice,
-      waterPriceTotal,
-      garbageCollectorPrice,
-      inflicionPrice,
+      date: dayjs(),
     })
-  }, [previousMonth, form])
+  }, [])
 
   return (
     <Form
