@@ -184,7 +184,7 @@ export const getPlacingInvoice = ({
     amount: +toRoundFixed(company?.totalArea),
     price: +toRoundFixed(company?.pricePerMeter || service?.rentPrice),
     sum: +toRoundFixed(
-      company.totalArea * company.pricePerMeter || service.rentPrice
+      company?.totalArea * company?.pricePerMeter || service?.rentPrice
     ),
   }
 }
