@@ -1,8 +1,8 @@
 import { useAddPaymentMutation, useGetPaymentNumberQuery } from '@common/api/paymentApi/payment.api'
 import CompanySelect from '@common/components/Forms/AddPaymentForm/CompanySelect'
 import Modal from '@common/components/UI/ModalWindow'
-import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
+import { FormDomainSelect } from '@common/components/UI/Selects/DomainSelect'
 import { FormStreetSelect } from '@common/components/UI/Selects/StreetSelect'
 import useCompany from '@common/modules/hooks/useCompany'
 import { Operations } from '@utils/constants'
@@ -65,7 +65,7 @@ const ImportInvoicesModal = ({ closeModal }) => {
       cancelText={'Закрити'}
     >
       <Form form={form}>
-        <DomainsSelect form={form} />
+        <FormDomainSelect form={form} />
         <FormStreetSelect form={form} />
         <CompanySelect form={form} />
         <PaymentTypeSelect />

@@ -1,6 +1,6 @@
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { validateField } from '@common/assets/features/validators'
-import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
+import { FormDomainSelect } from '@common/components/UI/Selects/DomainSelect'
 import { FormStreetSelect } from '@common/components/UI/Selects/StreetSelect'
 import useInitialValues from '@common/modules/hooks/useInitialValues'
 import { usePreviousMonthService } from '@common/modules/hooks/useService'
@@ -65,7 +65,7 @@ const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
           <Input disabled />
         </Form.Item>
       ) : (
-        <DomainsSelect form={form} />
+        <FormDomainSelect form={form} />
       )}
       {edit ? (
         <Form.Item name="street" label="Адреса">
