@@ -1,11 +1,11 @@
-import React, { FC } from 'react'
+import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { validateField } from '@common/assets/features/validators'
-import { Select, Form, FormInstance, Input, InputNumber, Checkbox } from 'antd'
-import AddressesSelect from '../../../Reusable/AddressesSelect'
+import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
+import { FormStreetSelect } from '@common/components/UI/Selects/StreetSelect'
+import { Checkbox, Form, FormInstance, Input, InputNumber } from 'antd'
+import { FC } from 'react'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
-import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
-import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 
 interface Props {
   form: FormInstance<any>
@@ -16,12 +16,7 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
   const initialValues = useInitialValues(currentRealEstate)
 
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      className={s.Form}
-      initialValues={initialValues}
-    >
+    <Form form={form} layout="vertical" className={s.Form} initialValues={initialValues}>
       {currentRealEstate ? (
         <Form.Item name="domain" label="Надавач послуг">
           <Input disabled />
@@ -34,46 +29,22 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
           <Input disabled />
         </Form.Item>
       ) : (
-        <AddressesSelect form={form} />
+        <FormStreetSelect form={form} />
       )}
-      <Form.Item
-        name="companyName"
-        label="Назва компанії"
-        rules={validateField('required')}
-      >
+      <Form.Item name="companyName" label="Назва компанії" rules={validateField('required')}>
         <Input placeholder="Опис" maxLength={256} className={s.formInput} />
       </Form.Item>
-      <Form.Item
-        name="description"
-        label="Опис"
-        rules={validateField('required')}
-      >
-        <Input.TextArea
-          rows={4}
-          placeholder="Опис"
-          maxLength={512}
-          className={s.formInput}
-        />
+      <Form.Item name="description" label="Опис" rules={validateField('required')}>
+        <Input.TextArea rows={4} placeholder="Опис" maxLength={512} className={s.formInput} />
       </Form.Item>
       <EmailSelect form={form} />
-      <Form.Item
-        name="totalArea"
-        label="Площа (м²)"
-        rules={validateField('required')}
-      >
+      <Form.Item name="totalArea" label="Площа (м²)" rules={validateField('required')}>
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item
-        name="pricePerMeter"
-        label="Ціна (грн/м²)"
-        rules={validateField('required')}
-      >
+      <Form.Item name="pricePerMeter" label="Ціна (грн/м²)" rules={validateField('required')}>
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item
-        name="servicePricePerMeter"
-        label="Індивідуальне утримання (грн/м²)"
-      >
+      <Form.Item name="servicePricePerMeter" label="Індивідуальне утримання (грн/м²)">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
       <Form.Item name="rentPart" label="Частка загальної площі">
@@ -88,18 +59,10 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
       <Form.Item name="discount" label="Знижка">
         <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
       </Form.Item>
-      <Form.Item
-        valuePropName="checked"
-        name="garbageCollector"
-        label="Вивіз сміття"
-      >
+      <Form.Item valuePropName="checked" name="garbageCollector" label="Вивіз сміття">
         <Checkbox />
       </Form.Item>
-      <Form.Item
-        valuePropName="checked"
-        name="inflicion"
-        label="Індекс інфляції"
-      >
+      <Form.Item valuePropName="checked" name="inflicion" label="Індекс інфляції">
         <Checkbox />
       </Form.Item>
     </Form>

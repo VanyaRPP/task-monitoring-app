@@ -1,12 +1,9 @@
-import {
-  useAddPaymentMutation,
-  useGetPaymentNumberQuery,
-} from '@common/api/paymentApi/payment.api'
+import { useAddPaymentMutation, useGetPaymentNumberQuery } from '@common/api/paymentApi/payment.api'
 import CompanySelect from '@common/components/Forms/AddPaymentForm/CompanySelect'
 import Modal from '@common/components/UI/ModalWindow'
-import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
+import { FormStreetSelect } from '@common/components/UI/Selects/StreetSelect'
 import useCompany from '@common/modules/hooks/useCompany'
 import { Operations } from '@utils/constants'
 import {
@@ -69,7 +66,7 @@ const ImportInvoicesModal = ({ closeModal }) => {
     >
       <Form form={form}>
         <DomainsSelect form={form} />
-        <AddressesSelect form={form} />
+        <FormStreetSelect form={form} />
         <CompanySelect form={form} />
         <PaymentTypeSelect />
         <Form.Item name="json" label="Опис">
@@ -95,8 +92,7 @@ function prepareInvoiceObjects(
     domain: domainId,
     street: streetId,
     company: companyId,
-    invoice:
-      paymentMethod === Operations.Debit ? getInvoiceInfo(i, company) : [],
+    invoice: paymentMethod === Operations.Debit ? getInvoiceInfo(i, company) : [],
     provider,
     reciever,
     generalSum: toRoundFixed(i.generalSum.toString()),
@@ -110,9 +106,7 @@ function getInvoiceInfo(i, company) {
     {
       type: 'maintenancePrice',
       amount: company?.totalArea,
-      price: (+toRoundFixed(i.maintenancePrice) / company?.totalArea).toFixed(
-        2
-      ),
+      price: (+toRoundFixed(i.maintenancePrice) / company?.totalArea).toFixed(2),
       sum: toRoundFixed(i.maintenancePrice),
     },
     {

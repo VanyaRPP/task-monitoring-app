@@ -1,11 +1,6 @@
-export interface IDomainModel {
-  name: string
-  adminEmails: [string]
-  streets: string[]
-  description: string
-}
+import { IDomain } from '@common/modules/models/Domain'
 
-export interface IExtendedDomain extends IDomainModel {
+export interface IExtendedDomain extends IDomain {
   _id: string
   _v: number
 }

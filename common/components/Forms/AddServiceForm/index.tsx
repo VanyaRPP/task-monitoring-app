@@ -1,7 +1,7 @@
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { validateField } from '@common/assets/features/validators'
-import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
+import { FormStreetSelect } from '@common/components/UI/Selects/StreetSelect'
 import useInitialValues from '@common/modules/hooks/useInitialValues'
 import { usePreviousMonthService } from '@common/modules/hooks/useService'
 import { DatePicker, Form, FormInstance, Input, InputNumber } from 'antd'
@@ -59,12 +59,7 @@ const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
   }, [previousMonth, form])
 
   return (
-    <Form
-      initialValues={initialValues}
-      form={form}
-      layout="vertical"
-      className={s.Form}
-    >
+    <Form initialValues={initialValues} form={form} layout="vertical" className={s.Form}>
       {edit ? (
         <Form.Item name="domain" label="Надавач послуг">
           <Input disabled />
@@ -77,18 +72,10 @@ const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
           <Input disabled />
         </Form.Item>
       ) : (
-        <AddressesSelect form={form} />
+        <FormStreetSelect form={form} />
       )}
-      <Form.Item
-        name="date"
-        label="Місяць та рік"
-        rules={validateField('required')}
-      >
-        <MonthPicker
-          format="MMMM YYYY"
-          placeholder="Оберіть місяць"
-          className={s.formInput}
-        />
+      <Form.Item name="date" label="Місяць та рік" rules={validateField('required')}>
+        <MonthPicker format="MMMM YYYY" placeholder="Оберіть місяць" className={s.formInput} />
       </Form.Item>
       <Form.Item
         name="rentPrice"

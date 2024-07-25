@@ -1,12 +1,12 @@
+import { IDomain } from '@common/modules/models/Domain'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import {
-  IDomainModel,
-  IExtendedDomain,
-  IDeleteDomainResponse,
   IAddDomainResponse,
-  IGetDomainResponse,
+  IDeleteDomainResponse,
   IExtendedAreas,
+  IExtendedDomain,
   IGetAreasResponse,
+  IGetDomainResponse,
 } from './domain.api.types'
 
 export const domainApi = createApi({
@@ -33,7 +33,7 @@ export const domainApi = createApi({
           : [],
       transformResponse: (response: IGetDomainResponse) => response.data,
     }),
-    addDomain: builder.mutation<IAddDomainResponse, IDomainModel>({
+    addDomain: builder.mutation<IAddDomainResponse, Omit<IDomain, '_id'>>({
       query(data) {
         const { ...body } = data
         return {
@@ -72,10 +72,11 @@ export const domainApi = createApi({
         url: `domain/areas/${domainId}`,
         method: 'GET',
       }),
-      providesTags: (result, error, { domainId }) => [{ type: 'IDomain', id: domainId || '' }],
+      providesTags: (result, error, { domainId }) => [
+        { type: 'IDomain', id: domainId || '' },
+      ],
       transformResponse: (response: IGetAreasResponse) => response.data,
     }),
-    
   }),
 })
 

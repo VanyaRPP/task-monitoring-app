@@ -1,22 +1,16 @@
 import { QuestionCircleOutlined, SelectOutlined } from '@ant-design/icons'
-import { Button, Form, FormInstance, Popover, message } from 'antd'
+import { Button, Form, FormInstance, Popover, Space, message } from 'antd'
 import { useRouter } from 'next/router'
 
-import {
-  useAddPaymentMutation,
-  useGetPaymentNumberQuery,
-} from '@common/api/paymentApi/payment.api'
+import { useAddPaymentMutation, useGetPaymentNumberQuery } from '@common/api/paymentApi/payment.api'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthServiceSelect'
-import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
+import { FormStreetSelect } from '@common/components/UI/Selects/StreetSelect'
 import { AppRoutes, Operations } from '@utils/constants'
-import {
-  filterInvoiceObject,
-  getPaymentProviderAndReciever,
-} from '@utils/helpers'
+import { filterInvoiceObject, getPaymentProviderAndReciever } from '@utils/helpers'
 
 const InvoicesHeader = () => {
   const router = useRouter()
@@ -25,21 +19,14 @@ const InvoicesHeader = () => {
   const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
 
   const handleSave = async () => {
-    const invoices = await prepareInvoiceObjects(
-      form,
-      service,
-      companies,
-      newInvoiceNumber
-    )
+    const invoices = await prepareInvoiceObjects(form, service, companies, newInvoiceNumber)
 
     const responses = await Promise.all(invoices.map(addPayment))
     const allSuccessful = responses.every((response) => response.data?.success)
 
     responses.forEach((response) => {
       if (response.data?.success) {
-        message.success(
-          `Додано рахунок для компанії ${response.data?.data.reciever.companyName}`
-        )
+        message.success(`Додано рахунок для компанії ${response.data?.data.reciever.companyName}`)
       } else {
         message.error(`Помилка при додаванні рахунку для компанії`)
       }
@@ -61,16 +48,11 @@ const InvoicesHeader = () => {
         <SelectOutlined />
       </Button>
 
-      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+      <Space>
         <DomainsSelect form={form} />
-        <div style={{ width: '250px' }}>
-          <AddressesSelect
-            form={form}
-            dropdownStyle={{ minWidth: 'max-content' }}
-          />
-        </div>
+        <FormStreetSelect form={form} />
         <MonthServiceGeneralInfo />
-      </div>
+      </Space>
 
       <Button type="link" onClick={handleSave}>
         Зберегти
@@ -90,10 +72,7 @@ function MonthServiceGeneralInfo() {
         <MonthServiceSelect form={form} />
       </div>
       {serviceId && (
-        <Popover
-          content={<PopoverMonthService serviceId={serviceId} />}
-          title="Послуги за місяць"
-        >
+        <Popover content={<PopoverMonthService serviceId={serviceId} />} title="Послуги за місяць">
           <QuestionCircleOutlined style={{ marginLeft: 16 }} />
         </Popover>
       )}
@@ -197,9 +176,7 @@ const prepareInvoiceObjects = async (
     )
     const { provider, reciever } = getPaymentProviderAndReciever(company)
 
-    const filteredInvoice = filterInvoiceObject(
-      validateInvoice(invoice, service)
-    )
+    const filteredInvoice = filterInvoiceObject(validateInvoice(invoice, service))
     return {
       invoiceNumber: newInvoiceNumber + index,
       type: Operations.Debit,
@@ -209,10 +186,7 @@ const prepareInvoiceObjects = async (
       monthService: service?._id,
       invoiceCreationDate: new Date(),
       description: '',
-      generalSum:
-        filteredInvoice
-          .reduce((acc, val) => acc + (+val.sum || 0), 0)
-          .toFixed(2) || 0,
+      generalSum: filteredInvoice.reduce((acc, val) => acc + (+val.sum || 0), 0).toFixed(2) || 0,
       provider,
       reciever,
       invoice: filteredInvoice,
