@@ -1,10 +1,10 @@
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { validateField } from '@common/assets/features/validators'
 import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
+import { FormDomainSelect } from '@common/components/UI/Selects/DomainSelect'
 import { FormStreetSelect } from '@common/components/UI/Selects/StreetSelect'
 import { Checkbox, Form, FormInstance, Input, InputNumber } from 'antd'
 import { FC } from 'react'
-import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
 
 interface Props {
@@ -22,7 +22,7 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
           <Input disabled />
         </Form.Item>
       ) : (
-        <DomainsSelect form={form} />
+        <FormDomainSelect form={form} />
       )}
       {currentRealEstate ? (
         <Form.Item name="street" label="Адреса">

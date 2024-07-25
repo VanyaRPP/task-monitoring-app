@@ -7,7 +7,7 @@ import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.ty
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthServiceSelect'
-import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
+import { FormDomainSelect } from '@common/components/UI/Selects/DomainSelect'
 import { FormStreetSelect } from '@common/components/UI/Selects/StreetSelect'
 import { AppRoutes, Operations } from '@utils/constants'
 import { filterInvoiceObject, getPaymentProviderAndReciever } from '@utils/helpers'
@@ -49,7 +49,7 @@ const InvoicesHeader = () => {
       </Button>
 
       <Space>
-        <DomainsSelect form={form} />
+        <FormDomainSelect form={form} />
         <FormStreetSelect form={form} />
         <MonthServiceGeneralInfo />
       </Space>

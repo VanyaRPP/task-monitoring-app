@@ -1,7 +1,7 @@
 import { validateField } from '@common/assets/features/validators'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
-import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
+import { FormDomainSelect } from '@common/components/UI/Selects/DomainSelect'
 import { FormStreetSelect } from '@common/components/UI/Selects/StreetSelect'
 import { Operations } from '@utils/constants'
 import { Form, Input, InputNumber } from 'antd'
@@ -22,8 +22,7 @@ function AddPaymentForm({ paymentActions }) {
 
   return (
     <>
-      <DomainsSelect form={form} edit={edit} />
-
+      <FormDomainSelect form={form} />
       <FormStreetSelect form={form} />
 
       <MonthServiceSelect form={form} edit={edit} />
