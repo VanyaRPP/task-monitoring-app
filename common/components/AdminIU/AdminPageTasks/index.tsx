@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react'
-import useDebounce from 'common/modules/hooks/useDebounce'
-import { Button, Input } from 'antd'
-import { useGetAllTaskQuery } from 'common/api/taskApi/task.api'
 import { PlusOutlined } from '@ant-design/icons'
+import { deleteExtraWhitespace } from '@assets/features/validators'
+import { useGetAllTaskQuery } from '@common/api/taskApi/task.api'
+import useDebounce from '@modules/hooks/useDebounce'
+import { Button, Input } from 'antd'
+import { useEffect, useState } from 'react'
 import AddTaskModal from '../../AddTaskModal/index'
 import TasksList from './TasksList'
 import s from './style.module.scss'
-import { deleteExtraWhitespace } from '../../../assets/features/validators'
 
 const AdminPageTasks: React.FC = () => {
   const { data } = useGetAllTaskQuery('')

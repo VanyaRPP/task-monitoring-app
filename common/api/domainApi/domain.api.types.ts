@@ -3,6 +3,30 @@ export interface IDomainModel {
   adminEmails: [string]
   streets: string[]
   description: string
+  mfo: string
+  iban: string
+  rnokpp: string
+  IEName: string
+  domainBankToken: IDomainBankToken[]
+  customServices: ICustomService[]
+}
+
+export interface ICustomService {
+  groupName: string
+  services: string[]
+}
+export interface IDomainService {
+  name: string
+  price: number
+}
+
+export interface IDomainBankToken {
+  acc?: string
+  token: string
+  shortToken: string
+  tokenName: string
+  confidant: string[]
+  name: string
 }
 
 export interface IExtendedDomain extends IDomainModel {
@@ -18,6 +42,11 @@ export interface IAddDomainResponse {
 export interface IGetDomainResponse {
   success: boolean
   data: IExtendedDomain[]
+}
+
+export interface IGetDomainByPkResponse {
+  success: boolean
+  data: IExtendedDomain
 }
 
 export interface IDeleteDomainResponse {

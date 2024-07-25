@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import Task from 'common/modules/models/Task'
+import Task from '@modules/models/Task'
 import start, { Data } from '@pages/api/api.config'
-import { TaskStatuses } from '../../../../../utils/constants'
+import { TaskStatuses } from '@utils/constants'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
 

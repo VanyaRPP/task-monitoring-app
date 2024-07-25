@@ -52,7 +52,7 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, SetValue<T>] {
 
   useEffect(() => {
     setStoredValue(readValue())
-  }, [])
+  }, [readValue])
 
   return [storedValue, setValue]
 }

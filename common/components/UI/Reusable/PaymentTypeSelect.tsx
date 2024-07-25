@@ -1,6 +1,6 @@
-import { Form, Select } from 'antd'
-import { validateField } from '@common/assets/features/validators'
+import { validateField } from '@assets/features/validators'
 import { Operations } from '@utils/constants'
+import { Form, Select } from 'antd'
 
 const PaymentTypeSelect = ({ edit }: { edit?: boolean }) => {
   return (
@@ -9,7 +9,7 @@ const PaymentTypeSelect = ({ edit }: { edit?: boolean }) => {
       label="Тип оплати"
       rules={validateField('required')}
     >
-      <Select placeholder="Оберіть тип оплати" disabled={edit}>
+      <Select placeholder="Оберіть тип оплати">
         <Select.Option value={Operations.Credit}>Кредит (Оплата)</Select.Option>
         <Select.Option value={Operations.Debit}>
           Дебет (Реалізація)

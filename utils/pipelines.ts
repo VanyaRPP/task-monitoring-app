@@ -1,5 +1,32 @@
-export function getDomainsPipeline(isGlobalAdmin, email) {
+export function getDomainsPipeline(
+  isGlobalAdmin,
+  email,
+  filteredCompanys = null,
+  filteredStreets = null
+) {
   return [
+    {
+      $match: {
+        $expr: {
+          $cond: [
+            { $eq: [filteredCompanys, null] },
+            true,
+            { $in: ['$_id', filteredCompanys] },
+          ],
+        },
+      },
+    },
+    {
+      $match: {
+        $expr: {
+          $cond: [
+            { $eq: [filteredStreets, null] },
+            true,
+            { $in: ['$street', filteredStreets] },
+          ],
+        },
+      },
+    },
     {
       $group: {
         _id: '$domain',
@@ -39,9 +66,11 @@ export function getDomainsPipeline(isGlobalAdmin, email) {
 export function getRealEstatesPipeline({
   isGlobalAdmin,
   distinctedDomainsIds,
+  distinctedStreetsIds,
   group,
+  archived,
 }) {
-  return [
+  const pipeline: any[] = [
     {
       $group: {
         _id: `$${group}`,
@@ -61,29 +90,65 @@ export function getRealEstatesPipeline({
     {
       $match: {
         $expr: {
+          $and: [
+            { $in: ['$companyDetails.domain', distinctedDomainsIds] },
+            { $in: ['$companyDetails.street', distinctedStreetsIds] },
+          ],
+        },
+      },
+    },
+  ]
+
+  if (archived === true || archived === 'true') {
+    pipeline.push({
+      $match: { 'companyDetails.archived': true },
+    })
+  }
+  if (archived === false || archived === 'false') {
+    pipeline.push({
+      $match: { 'companyDetails.archived': { $ne: true } },
+    })
+  }
+
+  pipeline.push({
+    $project: {
+      'companyDetails.companyName': 1,
+      'companyDetails._id': 1,
+      'companyDetails.archived': 1,
+    },
+  })
+
+  return pipeline
+}
+
+export function getStreetsPipeline(
+  isGlobalAdmin,
+  domains,
+  filteredCompanys = null,
+  filteredDomains = null
+) {
+  const pipeline = [
+    {
+      $match: {
+        $expr: {
           $cond: [
-            { $eq: [isGlobalAdmin, true] },
+            { $eq: [filteredCompanys, null] },
             true,
-            {
-              $in: ['$companyDetails.domain', distinctedDomainsIds],
-            },
+            { $in: ['$_id', filteredCompanys] },
           ],
         },
       },
     },
     {
-      $project: {
-        'companyDetails.companyName': 1,
-        'companyDetails._id': 1,
+      $match: {
+        $expr: {
+          $cond: [
+            { $eq: [filteredDomains, null] },
+            true,
+            { $in: ['$domain', filteredDomains] },
+          ],
+        },
       },
-    },
-  ]
-}
-
-export function getStreetsPipeline(isGlobalAdmin, domains) {
-  const pipeline = [
-    {
-      $match: {},
     },
     {
       $lookup: {
@@ -104,15 +169,6 @@ export function getStreetsPipeline(isGlobalAdmin, domains) {
       },
     },
   ]
-
-  if (!isGlobalAdmin) {
-    const matchStage = {
-      $match: {
-        $or: [{ domain: domains }],
-      },
-    }
-    pipeline.unshift(matchStage)
-  }
 
   return pipeline
 }

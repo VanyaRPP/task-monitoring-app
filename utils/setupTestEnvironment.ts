@@ -1,12 +1,13 @@
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import mongoose from 'mongoose'
 
-import Domain from '@common/modules/models/Domain'
-import Payment from '@common/modules/models/Payment'
-import RealEstate from '@common/modules/models/RealEstate'
-import Service from '@common/modules/models/Service'
-import Street from '@common/modules/models/Street'
-import User from '@common/modules/models/User'
+import Domain from '@modules/models/Domain'
+import Payment from '@modules/models/Payment'
+import RealEstate from '@modules/models/RealEstate'
+import Service from '@modules/models/Service'
+import Street from '@modules/models/Street'
+import User from '@modules/models/User'
+import Profit from '@modules/models/Profit'
 
 import {
   domains,
@@ -15,6 +16,7 @@ import {
   services,
   streets,
   users,
+  profits,
 } from '@utils/testData'
 
 export const setupTestEnvironment = () => {
@@ -37,6 +39,7 @@ export const setupTestEnvironment = () => {
     await (RealEstate as any).insertMany(realEstates)
     await (Service as any).insertMany(services)
     await (Payment as any).insertMany(payments)
+    await (Profit as any).insertMany(profits)
   })
 
   afterEach(async () => {

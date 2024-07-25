@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import bcrypt from 'bcrypt'
+import User from '@modules/models/User'
 import start, { Data } from '@pages/api/api.config'
-import User from '@common/modules/models/User'
 import { saltRounds } from '@utils/constants'
+import bcrypt from 'bcrypt'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
 
@@ -19,7 +19,9 @@ export default async function handler(
         const user = await User.findOne({ email })
 
         if (user) {
-          return res.status(409).json({ success: false, error: 'User already exists!' })
+          return res
+            .status(409)
+            .json({ success: false, error: 'User already exists!' })
         }
 
         bcrypt.hash(password, saltRounds, async function (err, hash) {

@@ -1,18 +1,24 @@
-import { Form, FormInstance, Input } from 'antd'
-import { useEffect } from 'react'
-import { useGetCategoryByIdQuery } from '../../../api/categoriesApi/category.api'
 import {
   deleteExtraWhitespace,
   validateField,
-} from '../../../assets/features/validators'
+} from '@assets/features/validators'
+import { Form, FormInstance, Input } from 'antd'
+import { useEffect } from 'react'
+import { useGetCategoryByIdQuery } from '../../../api/categoriesApi/category.api'
 
 type PropsType = {
   isFormDisabled: boolean
   form: FormInstance
   id: string
+  setIsValueChanged: (value: boolean) => void
 }
 
-const AddCategoryForm: React.FC<PropsType> = ({ isFormDisabled, form, id }) => {
+const AddCategoryForm: React.FC<PropsType> = ({
+  isFormDisabled,
+  form,
+  id,
+  setIsValueChanged,
+}) => {
   const { data } = useGetCategoryByIdQuery(id)
 
   useEffect(() => {
@@ -30,6 +36,7 @@ const AddCategoryForm: React.FC<PropsType> = ({ isFormDisabled, form, id }) => {
       layout="vertical"
       name="form_in_modal"
       disabled={isFormDisabled}
+      onValuesChange={() => setIsValueChanged(true)}
     >
       <Form.Item
         name="name"

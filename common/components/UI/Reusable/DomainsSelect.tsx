@@ -1,53 +1,66 @@
-import { validateField } from '@common/assets/features/validators'
-import { useCompanyPageContext } from '@common/components/DashboardPage/blocks/realEstates'
-import useDomain from '@common/modules/hooks/useDomain'
-import { Form, Select } from 'antd'
-import { useEffect } from 'react'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import { validateField } from '@assets/features/validators'
+import { Form, FormInstance, Select } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
-export default function DomainsSelect({
-  form,
-  edit
-}: {
-  form: any
+export interface DomainsSelectProps {
+  form: FormInstance
   edit?: boolean
-}) {
-  // TODO: recheck
-  // in preview mode we need to prevent all data fetching. only single
-  const { domainId } = useCompanyPageContext()
-  const { data, isLoading } = useDomain({ domainId })
+  disabled?: boolean
+  currentProfit?: any
+}
+
+const DomainsSelect: React.FC<DomainsSelectProps> = ({
+  form,
+  edit,
+  disabled,
+  currentProfit,
+}) => {
+  const [domains, setDomains] = useState([])
+  const {
+    data: fetchedDomains = [],
+    isLoading: isDomainsLoading,
+    isError: isDomainsError,
+  } = useGetDomainsQuery({})
 
   useEffect(() => {
-    if (data?.length === 1) {
-      form.setFieldValue('domain', data[0]._id)
+    if (fetchedDomains.length) {
+      setDomains(fetchedDomains)
     }
-  }, [data?.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchedDomains])
+
+  const options = useMemo(() => {
+    return domains.map((i) => ({
+      value: i._id,
+      label: i.name,
+    }))
+  }, [domains])
+
+  useEffect(() => {
+    if (!edit && options.length === 1) {
+      form.setFieldsValue({ domain: options[0].value })
+    }
+  }, [form, options, edit])
 
   return (
-    <Form.Item name="domain" label="Надавач послуг" rules={validateField('required')}>
+    <Form.Item
+      name="domain"
+      label="Надавач послуг"
+      rules={!disabled && !currentProfit ? validateField('required') : []}
+    >
       <Select
-        onSelect={() => {
-          // TODO: check if this should be inside street component
-          form.resetFields(['street'])
-        }}
-        filterSort={(optionA, optionB) =>
-          (optionA?.label ?? '')
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            ?.toLowerCase()
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            .localeCompare((optionB?.label ?? '')?.toLowerCase())
-        }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        filterOption={(input, option) => (option?.label ?? '').includes(input)}
-        options={data?.map((i) => ({ value: i._id, label: i.name }))}
-        optionFilterProp="children"
-        disabled={isLoading || data?.length === 1 || edit}
+        options={options}
+        optionFilterProp="label"
         placeholder="Пошук надавача послуг"
-        loading={isLoading}
+        status={isDomainsError && 'error'}
+        loading={isDomainsLoading}
+        disabled={disabled ?? (isDomainsLoading || domains.length === 1)}
+        allowClear
         showSearch
       />
     </Form.Item>
   )
 }
+
+export default DomainsSelect

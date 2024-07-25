@@ -38,10 +38,7 @@
 .eyelined {
   display: flex;
   align-items: center;
-  display: flex;
-  align-items: center;
-  height: 9px;
-  width: 9px;
+  justify-content: center;
 }
 .spin {
   display: flex;
@@ -55,10 +52,7 @@
     color: #4096ff;
   }
 }
-.summ_item,
-.saldo {
-  background-color: var(--backgroundColor);
-}
+
 .summ_item {
   text-align: end;
 }

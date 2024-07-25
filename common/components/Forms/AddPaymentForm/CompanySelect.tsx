@@ -1,50 +1,56 @@
-// TODO: Move to reusable folder same level as DomainsSelect
+import { validateField } from '@assets/features/validators'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
-import { validateField } from '@common/assets/features/validators'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
-export default function CompanySelect({
-  form,
-  edit,
-}: {
+interface Props {
   form: any
   edit?: boolean
-}) {
+  company?: string | Partial<IRealestate>
+}
+
+export default function CompanySelect({ form, edit, company }: Props) {
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
+  const month = Form.useWatch('monthService', form)
 
-  return domainId && streetId ? (
+  const isDisabled = !domainId || !streetId || !month
+
+  return isDisabled ? (
+    <Form.Item label="Компанія">
+      <Select placeholder="Оберіть надавача послуг та адресу" disabled />
+    </Form.Item>
+  ) : (
     <RealEstateDataFetcher
       domainId={domainId}
       streetId={streetId}
       form={form}
       edit={edit}
+      company={company}
     />
-  ) : (
-    <Form.Item label="Компанія">
-      <Select placeholder="Оберіть надавача послуг та адресу" disabled />
-    </Form.Item>
   )
 }
 
-function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
-  const { data: realEstates, isLoading } = useGetAllRealEstateQuery({
-    domainId,
-    streetId,
-  })
-
-  const companies = realEstates?.data || []
-
-  useEffect(() => {
-    form.resetFields(['company'])
-  }, [streetId]) // eslint-disable-line react-hooks/exhaustive-deps
+function RealEstateDataFetcher({ domainId, streetId, form, edit, company }) {
+  const { data: { data: companies } = { data: [] }, isLoading } =
+    useGetAllRealEstateQuery({
+      domainId,
+      streetId,
+    })
 
   useEffect(() => {
-    if (companies?.length === 1) {
-      form.setFieldValue('company', companies[0]._id)
+    if (!edit) {
+      if (companies?.length === 1) {
+        form.setFieldValue('company', companies[0]._id)
+      } else if (companies?.length > 0 && company) {
+        const companyId = typeof company === 'object' ? company._id : company
+        if (form.getFieldValue('company') !== companyId) {
+          form.setFieldValue('company', companyId)
+        }
+      }
     }
-  }, [companies?.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [companies, company, edit, form])
 
   return (
     <Form.Item
@@ -54,6 +60,7 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
     >
       <Select
         filterSort={(optionA, optionB) =>
+          // TODO: invistagate ts-ignore issue
           (optionA?.label ?? '')
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
@@ -64,14 +71,17 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
         }
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        filterOption={(input, option) => (option?.label ?? '').includes(input)}
+
+        filterOption={(input, option) =>
+          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+        }
         options={companies?.map((i) => ({
           value: i._id,
           label: i.companyName,
         }))}
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={companies?.length === 1 || edit}
+        disabled={companies?.length === 1 || isLoading}
         loading={isLoading}
         showSearch
       />

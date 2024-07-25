@@ -1,5 +1,5 @@
+import { TaskStatuses } from '@utils/constants'
 import mongoose, { ObjectId, Schema } from 'mongoose'
-import { TaskStatuses } from 'utils/constants'
 
 export interface ITask {
   _id?: string

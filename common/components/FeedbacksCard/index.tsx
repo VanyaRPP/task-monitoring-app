@@ -1,17 +1,16 @@
-import { useState, useEffect } from 'react'
 import { PlusOutlined } from '@ant-design/icons'
-import { Empty, Card, List, Button, Form, Rate } from 'antd'
-import { IFeedback, IUser } from 'common/modules/models/User'
-import Modal from 'common/components/UI/ModalWindow'
-import AddFeedbackForm from 'common/components/Forms/AddFeedbackForm'
-import Feedback from './feedback'
 import {
-  useGetUserByEmailQuery,
   useAddFeedbackMutation,
-} from 'common/api/userApi/user.api'
+  useGetUserByEmailQuery,
+} from '@common/api/userApi/user.api'
+import AddFeedbackForm from '@components/Forms/AddFeedbackForm'
+import Modal from '@components/UI/ModalWindow'
+import { IFeedback, IUser } from '@modules/models/User'
+import { Button, Card, Empty, Form, List, Rate } from 'antd'
 import { useSession } from 'next-auth/react'
+import { useState } from 'react'
+import Feedback from './feedback'
 import s from './style.module.scss'
-import { feedbacks } from '../../lib/task.config'
 
 // const RateDescription = ['Terrible', 'Bad', 'Normal', 'Good', 'Wonderful']
 const RateDescription = ['Жахливо', 'Погано', 'Нормально', 'Добре', 'Прекрасно']
@@ -45,7 +44,7 @@ const FeedbacksCard: React.FC<Props> = ({
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
   const [form] = Form.useForm()
-
+  const [isValueChanged, setIsValueChanged] = useState(false)
   const [addFeedback] = useAddFeedbackMutation()
 
   const Reset = () => {
@@ -100,13 +99,17 @@ const FeedbacksCard: React.FC<Props> = ({
           <Modal
             title={`Залиште відгук про ${user?.name}`}
             open={isModalVisible}
-            changesForm={() => form.isFieldsTouched()}
+            changed={() => isValueChanged}
             onCancel={onCancelModal}
             onOk={onSubmitModal}
             okText="Залишити відгук"
             cancelText="Скасувати"
           >
-            <AddFeedbackForm isFormDisabled={isFormDisabled} form={form} />
+            <AddFeedbackForm
+              isFormDisabled={isFormDisabled}
+              form={form}
+              setIsValueChanged={setIsValueChanged}
+            />
           </Modal>
         </span>
       }

@@ -1,0 +1,125 @@
+import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons'
+import { GlassButton, GlassInput } from '@components/UI/GlassUI'
+import { Form, message, Divider } from 'antd'
+import { signIn } from 'next-auth/react'
+import config from '@utils/config'
+import { Typography } from 'antd'
+import { useState } from 'react'
+
+const { Text, Link } = Typography
+
+const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
+  const [form] = Form.useForm()
+  const [isLogin, setIsLogin] = useState(false)
+
+  const handleSubmit = async (values: {
+    name: string
+    email: string
+    password: string
+    authType: string
+  }) => {
+    const result = await signIn('credentials', {
+      redirect: true,
+      name: values?.name,
+      email: values?.email,
+      password: values?.password,
+      authType: isLogin ? 'registration' : 'signIn',
+      // csrfToken: csrfToken,
+    })
+    if (result?.error) {
+      message.error(result?.error)
+    } else {
+      message.success('Успішний вхід')
+    }
+  }
+
+  return (
+    <>
+      <Typography.Title level={1}>
+        {isLogin ? config.titles.signUpTitle : config.titles.signInTitle}
+      </Typography.Title>
+
+      <Divider />
+
+      <Form
+        form={form}
+        name="signin"
+        onFinish={handleSubmit}
+        layout="vertical"
+        initialValues={{ email: '', password: '' }}
+      >
+        {isLogin && (
+          <Form.Item
+            label="Ім'я"
+            name="name"
+            rules={[{ required: true, message: `Введіть ваше ім'я!` }]}
+          >
+            <GlassInput
+              data-e2e="sauthFormName"
+              placeholder="name"
+              prefix={<UserOutlined className="auth-icon" />}
+            />
+          </Form.Item>
+        )}
+
+        <Form.Item
+          label="Пошта"
+          name="email"
+          rules={[
+            { required: true, message: 'Введіть ваш email!' },
+            { type: 'email', message: 'Введіть коректний email!' },
+          ]}
+        >
+          <GlassInput
+            size="large"
+            data-e2e="authFormEmail"
+            type="text"
+            placeholder="email"
+            prefix={<MailOutlined className="auth-icon" />}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Пароль"
+          name="password"
+          rules={[{ required: true, message: 'Введіть ваш пароль!' }]}
+        >
+          <GlassInput.Password
+            size="large"
+            data-e2e="authFormPassword"
+            placeholder="******"
+            prefix={<LockOutlined className="auth-icon" />}
+          />
+        </Form.Item>
+
+        <Form.Item>
+          <GlassButton
+            size="large"
+            data-e2e="authFormSubmit"
+            type="primary"
+            htmlType="submit"
+            block
+          >
+            {isLogin ? 'Реєстрація' : 'Вхід'}
+          </GlassButton>
+        </Form.Item>
+
+        <span
+          style={{
+            display: 'flex',
+            gap: '1rem',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Text>{isLogin ? 'Вже маєте акаунт?' : 'Немаєте акаунту?'}</Text>
+          <Link onClick={() => setIsLogin(!isLogin)}>
+            {isLogin ? 'Ввійти' : 'Зареєструватись'}
+          </Link>
+        </span>
+        <Divider>or</Divider>
+      </Form>
+    </>
+  )
+}
+
+export default SignInForm

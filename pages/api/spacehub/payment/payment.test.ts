@@ -1,10 +1,9 @@
 import { expect } from '@jest/globals'
 import handler from '.'
-
-import { setupTestEnvironment } from '@utils/setupTestEnvironment'
-import { mockLoginAs } from '@utils/mockLoginAs'
-import { domains, payments, realEstates, users } from '@utils/testData'
 import { parseReceived } from '@utils/helpers'
+import { mockLoginAs } from '@utils/mockLoginAs'
+import { setupTestEnvironment } from '@utils/setupTestEnvironment'
+import { domains, payments, realEstates, users } from '@utils/testData'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -227,15 +226,15 @@ describe('Payments API - GET', () => {
   // FINISH TEST FOR USER AND CREATE A PR
 
   getPaymentsByYearTest(2023)
-  
+
   getPaymentsByYearTest(2022)
 
   it('GET payments by month', async () => {
-    mockLoginAs(users.user)
+    await mockLoginAs(users.user)
 
     const mockReq = {
       method: 'GET',
-      query: { month: 2 },
+      query: { month: '2' },
     } as any
 
     const mockRes = {
@@ -261,7 +260,7 @@ describe('Payments API - GET', () => {
     expect(recived).toEqual(expected)
   })
   it('GET payments by quarter', async () => {
-    mockLoginAs(users.user)
+    await mockLoginAs(users.user)
 
     const mockReq = {
       method: 'GET',
@@ -338,14 +337,59 @@ it('get valid distinctCompanies as DomainAdmin', async () => {
 
   await handler(mockReq, mockRes)
 
+  const lastCall = mockRes.json.mock.lastCall[0]
+
   const response = {
     status: mockRes.status,
-    data: mockRes.json.mock.lastCall[0].data,
-    realEstatesFilter: mockRes.json.mock.lastCall[0].realEstatesFilter,
+    data: lastCall.data,
+    currentCompaniesCount: lastCall.currentCompaniesCount,
+    currentDomainsCount: lastCall.currentDomainsCount,
   }
 
   expect(response.status).toHaveBeenCalledWith(200)
-  expect(response.realEstatesFilter[0].value.toString()).toEqual(realEstates[0]._id)
+
+  const visiblePaymentsForDomainAdmin = payments.filter((payment) =>
+    domains
+      .find((domain) => domain._id === payment.domain)
+      ?.adminEmails.includes(users.domainAdmin.email)
+  )
+
+  const distinctCompanyIds = Array.from(
+    new Set(visiblePaymentsForDomainAdmin.map((p) => p.company.toString()))
+  )
+  const distinctDomainIds = Array.from(
+    new Set(visiblePaymentsForDomainAdmin.map((p) => p.domain.toString()))
+  )
+
+  expect(response.currentCompaniesCount).toBe(distinctCompanyIds.length)
+  expect(response.currentDomainsCount).toBe(distinctDomainIds.length)
+})
+it('difference between debit and credit', async () => {
+  await mockLoginAs(users.globalAdmin)
+
+  const mockReq = {
+    method: 'GET',
+    query: {},
+  } as any
+
+  const mockRes = {
+    status: jest.fn(() => mockRes),
+    json: jest.fn(),
+  } as any
+
+  await handler(mockReq, mockRes)
+
+  const { totalPayments } = mockRes.json.mock.lastCall[0] || {}
+
+  expect(mockRes.status).toHaveBeenCalledWith(200)
+
+  const debit = totalPayments?.debit || 0
+  const credit = totalPayments?.credit || 0
+
+  const calculatedDifference = Number((debit - credit).toFixed(2))
+
+  expect(typeof calculatedDifference).toBe('number')
+  expect(calculatedDifference).toBeCloseTo(debit - credit, 2)
 })
 
 // it('load payments as GlobalAdmin by domainId - success', async () => {
@@ -408,7 +452,7 @@ describe('Payments API - POST', () => {
 
 function getPaymentsByYearTest(year) {
   it(`GET payments by year ${year}`, async () => {
-    mockLoginAs(users.user)
+    await mockLoginAs(users.user)
 
     const mockReq = {
       method: 'GET',

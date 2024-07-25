@@ -1,23 +1,32 @@
-import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
-import { AppRoutes } from '../../utils/constants'
-import { unstable_getServerSession } from 'next-auth'
-import { authOptions } from '../api/auth/[...nextauth]'
+import StreetsBlock from '@components/DashboardPage/blocks/streets'
+import withAuthRedirect from '@components/HOC/withAuthRedirect'
+import MainLayout from '@components/Layouts/Main'
+import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
-import { FC } from 'react'
-import StreetsBlock from '@common/components/DashboardPage/blocks/streets'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '../api/auth/[...nextauth]'
+import Head from 'next/head'
 
-const Streets: FC = () => {
-  return <StreetsBlock />
-}
-
-export default withAuthRedirect(Streets)
+export default withAuthRedirect(() => {
+  return (
+    <>
+      <Head>
+        <title>Вулиці</title>
+      </Head>
+      <MainLayout
+        path={[
+          { title: 'Панель управління', path: AppRoutes.INDEX },
+          { title: 'Вулиці', path: AppRoutes.STREETS },
+        ]}
+      >
+        <StreetsBlock />
+      </MainLayout>
+    </>
+  )
+})
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

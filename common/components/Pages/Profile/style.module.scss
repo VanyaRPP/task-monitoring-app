@@ -1,0 +1,60 @@
+.User {
+  height: calc(266px + 72px);
+
+  .Background {
+    overflow: hidden;
+
+    :global(.ant-card-body) {
+      height: 256px;
+      position: relative;
+      padding: 0;
+    }
+
+    .Image {
+      object-fit: cover;
+      filter: blur(16px);
+    }
+  }
+
+  .Content {
+    height: 144px;
+    margin: -72px 16px 16px 16px;
+  }
+}
+
+.CardRepresentative {
+  width: 400px;
+}
+
+.CardUserInformation {
+  flex: 1;
+  min-height: 395px;
+}
+
+.CardUserInformation :global(.ant-form-item-label > label) {
+  font-size: 18px !important;
+  margin-bottom: 8px !important;
+}
+
+.CardUserInformation :global(.ant-form-item) {
+  margin-bottom: 24px !important;
+}
+
+.CardUserInformation :global(.ant-input) {
+  height: 42px;
+  font-size: 18px;
+  padding: 8px 12px;
+}
+
+.ButtonSave {
+  padding: 19px;
+}
+
+.tag {
+  margin: 0;
+  cursor: pointer;
+}
+
+.tag:hover {
+  background-color: rgba(243, 178, 234, 0.938);
+}

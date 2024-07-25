@@ -1,90 +1,44 @@
+import { compareDates } from '@utils/helpers'
 import { Roles } from './constants'
-import { compareDates } from './helpers'
 
 export const users = {
   user: {
     name: 'user',
     email: 'user@example.com',
     roles: [Roles.USER],
+    isWorker: false,
   },
   user2: {
     name: 'user',
     email: 'user@example2.com',
     roles: [Roles.USER],
+    isWorker: false,
   },
   noRoleUser: {
     name: 'noRoleUser',
     email: 'noRoleUser@example.com',
     roles: [],
+    isWorker: false,
   },
   domainAdmin: {
     name: 'domainAdmin',
     email: 'domainAdmin@example.com',
     roles: [Roles.DOMAIN_ADMIN],
+    isWorker: false,
   },
   domainAdmin2: {
     name: 'domainAdmin2',
     email: 'domainAdmin2@example.com',
     roles: [Roles.DOMAIN_ADMIN],
+    isWorker: false,
   },
   globalAdmin: {
     name: 'globalAdmin',
     email: 'globalAdmin@example.com',
     roles: [Roles.GLOBAL_ADMIN],
+    isWorker: false,
   },
 }
-
-export const domains = [
-  {
-    _id: '64d68421d9ba2fc8fea79d11',
-    name: 'domain 0',
-    adminEmails: [users.domainAdmin.email],
-    streets: [],
-    description: 'none',
-  },
-  {
-    _id: '64d68421d9ba2fc8fea79d12',
-    name: 'domain 1',
-    adminEmails: [users.user.email],
-    streets: [],
-    description: 'none',
-  },
-  {
-    _id: '64d68421d9ba2fc8fea79d13',
-    name: 'domain 2',
-    adminEmails: [],
-    streets: [],
-    description: 'none',
-  },
-  {
-    _id: '64d68421d9ba2fc8fea79d14',
-    name: 'domain 3',
-    adminEmails: [],
-    streets: [],
-    description: 'none',
-  },
-  {
-    _id: '64d68421d9ba2fc8fea79d15',
-    name: 'domain 4',
-    adminEmails: [],
-    streets: [],
-    description: 'none',
-  },
-  {
-    _id: '64d68421d9ba2fc8fea79d16',
-    name: 'domain 5',
-    adminEmails: [],
-    streets: [],
-    description: 'none',
-  },
-  {
-    _id: '64e725c7a62fdf2d22b84c4a',
-    name: 'domain 6',
-    adminEmails: [users.domainAdmin2.email],
-    streets: [],
-    description: 'none',
-  },
-]
 
 export const streets = [
   {
@@ -114,6 +68,79 @@ export const streets = [
   },
 ]
 
+export const domains = [
+  {
+    _id: '64d68421d9ba2fc8fea79d11',
+    name: 'domain 0',
+    adminEmails: [users.domainAdmin.email],
+    streets: [streets[0]._id],
+    description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d12',
+    name: 'domain 1',
+    adminEmails: [users.user.email],
+    streets: [streets[1]._id],
+    description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d13',
+    name: 'domain 2',
+    adminEmails: [],
+    streets: [],
+    description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d14',
+    name: 'domain 3',
+    adminEmails: [],
+    streets: [],
+    description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d15',
+    name: 'domain 4',
+    adminEmails: [],
+    streets: [],
+    description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d16',
+    name: 'domain 5',
+    adminEmails: [],
+    streets: [],
+    description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
+  },
+  {
+    _id: '64e725c7a62fdf2d22b84c4a',
+    name: 'domain 6',
+    adminEmails: [users.domainAdmin2.email],
+    streets: [],
+    description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
+  },
+]
+
 // TODO: fix tests
 export const realEstates = [
   {
@@ -131,6 +158,7 @@ export const realEstates = [
     waterPart: 0,
     rentPart: 25,
     inflicion: false,
+    archived: true,
   },
   {
     _id: '64d68421d9ba2fc8fea79d22',
@@ -147,6 +175,7 @@ export const realEstates = [
     waterPart: 0,
     rentPart: 0,
     inflicion: false,
+    archived: false,
   },
   {
     _id: '64d68421d9ba2fc8fea79d23',
@@ -163,6 +192,7 @@ export const realEstates = [
     waterPart: 0,
     rentPart: 0,
     inflicion: false,
+    archived: true,
   },
   {
     _id: '64d68421d9ba2fc8fea79d24',
@@ -179,6 +209,7 @@ export const realEstates = [
     waterPart: 0,
     rentPart: 45,
     inflicion: false,
+    archived: false,
   },
   {
     _id: '64d68421d9ba2fc8fea79d25',
@@ -195,6 +226,7 @@ export const realEstates = [
     waterPart: 0,
     rentPart: 0,
     inflicion: false,
+    archived: false,
   },
   {
     _id: '64d68421d9ba2fc8fea79d26',
@@ -211,6 +243,7 @@ export const realEstates = [
     waterPart: 0,
     rentPart: 0,
     inflicion: false,
+    archived: true,
   },
   {
     _id: '64e66d436d57a8640543dda4',
@@ -227,6 +260,7 @@ export const realEstates = [
     waterPart: 0,
     rentPart: 50,
     inflicion: false,
+    archived: false,
   },
 ]
 
@@ -312,7 +346,7 @@ export const services = [
   },
   {
     _id: '64d68421d9ba2fc8fea79d51',
-    date: new Date(2020, 1, 12),
+    date: new Date(2019, 1, 12),
     domain: domains[0]._id as any,
     street: streets[0]._id,
     rentPrice: 10,
@@ -414,6 +448,44 @@ export const paymentsForDates = [
 
 export const payments = [
   {
+    _id: '64d68421d9ba2fc8fea79d51',
+    invoiceNumber: 3,
+    type: 'debit',
+    invoiceCreationDate: '2020-11-09T22:00:00.000Z',
+    domain: domains[2]._id,
+    street: streets[2]._id,
+    company: realEstates[2]._id,
+    monthService: services[2]._id,
+    description: 'none',
+    invoice: [
+      {
+        type: 'maintenancePrice',
+        amount: 10,
+        price: 10,
+        sum: 100,
+      },
+      {
+        type: 'placingPrice',
+        amount: 10,
+        price: 20,
+        sum: 200,
+      },
+      {
+        type: 'electricityPrice',
+        amount: 10,
+        price: 30,
+        sum: 300,
+      },
+      {
+        type: 'waterPrice',
+        amount: 10,
+        price: 40,
+        sum: 400,
+      },
+    ],
+    generalSum: 1000,
+  },
+  {
     _id: '64d68421d9ba2fc8fea79d61',
     invoiceNumber: 3,
     type: 'debit',
@@ -454,40 +526,40 @@ export const payments = [
   {
     _id: '64d68421d9ba2fc8fea79d62',
     invoiceNumber: 2,
-    type: 'debit',
-    invoiceCreationDate: '2020-07-17T21:00:00.000Z',
+    type: 'credit',
+    invoiceCreationDate: '2020-08-18T21:00:00.000Z',
     domain: domains[1]._id,
     street: streets[1]._id,
     company: realEstates[1]._id,
-    monthService: services[1]._id,
+    monthService: services[2]._id,
     description: 'none',
     invoice: [
       {
         type: 'maintenancePrice',
-        amount: 10,
+        amount: 11,
         price: 10,
-        sum: 100,
+        sum: 110,
       },
       {
         type: 'placingPrice',
-        amount: 10,
+        amount: 12,
         price: 20,
-        sum: 200,
+        sum: 240,
       },
       {
         type: 'electricityPrice',
-        amount: 10,
+        amount: 15,
         price: 30,
-        sum: 300,
+        sum: 450,
       },
       {
         type: 'waterPrice',
-        amount: 10,
+        amount: 20,
         price: 40,
-        sum: 400,
+        sum: 800,
       },
     ],
-    generalSum: 1000,
+    generalSum: 1600,
   },
   {
     _id: '64d68421d9ba2fc8fea79d63',
@@ -529,3 +601,83 @@ export const payments = [
   },
   ...paymentsForDates,
 ].sort((a, b) => compareDates(a.invoiceCreationDate, b.invoiceCreationDate))
+
+export const paymentsCredit = [
+  {
+    _id: '64d68421d9ba2fc8fea79d63',
+    invoiceNumber: 1,
+    type: 'credit',
+    invoiceCreationDate: '2020-02-10T22:00:00.000Z',
+    domain: domains[0]._id,
+    street: streets[0]._id,
+    company: realEstates[0]._id,
+    monthService: services[0]._id,
+    description: 'none',
+    invoice: [
+      {
+        type: 'maintenancePrice',
+        amount: -10,
+        price: -10,
+        sum: -100,
+      },
+      {
+        type: 'placingPrice',
+        amount: -10,
+        price: -20,
+        sum: -200,
+      },
+      {
+        type: 'electricityPrice',
+        amount: -10,
+        price: -30,
+        sum: -300,
+      },
+      {
+        type: 'waterPrice',
+        amount: -10,
+        price: -40,
+        sum: -400,
+      },
+    ],
+    generalSum: -1000,
+  },
+]
+
+export const profits = [
+  {
+    _id: '64d68421d9ba2fc8fea79d61',
+    domain: domains[0]._id,
+    payment: payments[0]?._id || null,
+    createdBy: null,
+    amount: 200,
+    type: 'credit' as const,
+    categories: [],
+    description: 'Initial credit',
+    invoiceNumber: '80',
+    date: new Date('2024-12-01T00:00:00.000Z'),
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d64',
+    domain: domains[1]._id,
+    payment: null,
+    createdBy: null,
+    amount: 80,
+    type: 'debit' as const,
+    categories: ['late_fee'],
+    description: 'Service fee debit',
+    invoiceNumber: '79',
+    date: new Date('2025-01-05T00:00:00.000Z'),
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d62',
+    domain: domains[2]._id,
+    payment: null,
+    createdBy: null,
+    amount: 50,
+    type: 'credit' as const,
+    categories: [],
+    description: 'Domain 1 bonus',
+    invoiceNumber: '81',
+    date: new Date('2025-02-10T00:00:00.000Z'),
+  },
+].sort((a, b) => compareDates(a.date, b.date))

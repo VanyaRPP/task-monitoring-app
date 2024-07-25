@@ -1,9 +1,9 @@
+import { useGetAllUsersQuery } from '@common/api/userApi/user.api'
+import { Roles } from '@utils/constants'
 import { Tabs } from 'antd'
-import { useGetAllUsersQuery } from 'common/api/userApi/user.api'
 import { useState } from 'react'
 import Users from './UsersList'
 import s from './style.module.scss'
-import { Roles } from 'utils/constants'
 
 const { TabPane } = Tabs
 

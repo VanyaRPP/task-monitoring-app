@@ -1,4 +1,4 @@
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 function useInitialValues(currentService) {
   // TODO: add useEffect || useCallback ?
@@ -9,7 +9,7 @@ function useInitialValues(currentService) {
     street:
       currentService?.street &&
       `${currentService.street.address} (м. ${currentService.street.city})`,
-    date: moment(currentService?.date),
+    date: dayjs(currentService?.date),
     electricityPrice: currentService?.electricityPrice,
     inflicionPrice: currentService?.inflicionPrice,
     rentPrice: currentService?.rentPrice,
@@ -17,6 +17,11 @@ function useInitialValues(currentService) {
     description: currentService?.description,
     waterPriceTotal: currentService?.waterPriceTotal,
     garbageCollectorPrice: currentService?.garbageCollectorPrice,
+    customServices: currentService.customServices,
+    losses: currentService?.losses,
+    consumedElectricity: currentService?.consumedElectricity || null,
+    generalElectricity: currentService?.generalElectricity || null,
+    isVAT: currentService?.isVAT || true,
   }
   return initialValues
 }

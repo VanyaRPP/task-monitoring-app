@@ -1,9 +1,9 @@
-import React from 'react'
-import { Form, FormInstance, Input } from 'antd'
 import {
   deleteExtraWhitespace,
   validateField,
-} from '../../../assets/features/validators'
+} from '@assets/features/validators'
+import { Form, FormInstance, Input } from 'antd'
+import React from 'react'
 
 interface Props {
   isFormDisabled: boolean

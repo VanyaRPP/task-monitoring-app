@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import FeedbacksCard from '@components/FeedbacksCard'
+import UserInfo from '@components/UserCard'
+import { IUser } from '@modules/models/User'
 import { List } from 'antd'
-import UserInfo from 'common/components/UserCard'
-import { IUser } from 'common/modules/models/User'
-import FeedbacksCard from 'common/components/FeedbacksCard'
+import React, { useState } from 'react'
 import s from './style.module.scss'
 
 interface Props {

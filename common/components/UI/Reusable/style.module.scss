@@ -6,6 +6,7 @@
 }
 
 .filtersTagsBlock {
+  gap: 4px;
   display: flex;
   flex-direction: column;
 }
@@ -13,6 +14,7 @@
   display: flex;
   flex-direction: row;
   margin-left: 2rem;
+  max-height: 40px;
 }
 .filtersTags {
   display: flex;
@@ -20,5 +22,13 @@
   max-width: 700px;
 }
 .Tag {
-  margin: 0.25rem 0 0.25rem 0.5rem;
+  margin-left: 8px;
+  margin-right: 0;
+
+  // font-size: 11px;
+  // margin: 0.25rem 0 0.2rem 0.5rem;
+}
+
+.allTag {
+  margin-left: 8px;
 }

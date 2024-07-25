@@ -1,7 +1,7 @@
-import Service from '@common/modules/models/Service'
+import { getFormattedDate } from '@assets/features/formatDate'
+import Service from '@modules/models/Service'
 import { ServiceType } from '@utils/constants'
-import { getFormattedDate } from '@utils/helpers'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 export default async function nameField(invoiceType, paymentData) {
   const paymentDate =
@@ -114,7 +114,7 @@ async function GenerateInflicionField(paymentData) {
     <small>
       ${
         previousMonth.date
-          ? `<br /><b>${moment(previousMonth.date).format('MMMM')}</b>`
+          ? `<br /><b>${dayjs(previousMonth.date).format('MMMM')}</b>`
           : ''
       }
       ${
@@ -163,7 +163,8 @@ interface Options {
 
 async function getPreviousMonthService({ domainId, streetId, date }) {
   try {
-    const lastMonth = moment(date).subtract(1, 'month')
+    // TODO: getPreviousMonth from utils
+    const lastMonth = dayjs(date).subtract(1, 'month')
     const month = lastMonth.month() + 1
     const defaultOption = {
       domainId,

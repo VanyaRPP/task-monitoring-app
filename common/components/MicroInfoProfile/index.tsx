@@ -9,8 +9,7 @@ interface Props {
   id: ObjectId | string
 }
 const MicroInfoProfile: FC<Props> = ({ id }) => {
-  const { data } = useGetUserByIdQuery(`${id}`)
-  const user = data?.data
+  const { data: user } = useGetUserByIdQuery(`${id}`)
   return (
     <div className={s.microDiv}>
       <Avatar

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiResponse } from 'next'
-import Payment from 'common/modules/models/Payment'
+import Payment from '@modules/models/Payment'
 import start, { Data } from '@pages/api/api.config'
+import type { NextApiResponse } from 'next'
 import { getMaxInvoiceNumber } from '../pipelines'
 start()
 

@@ -1,4 +1,4 @@
-import { Selector } from '@common/components/UI/Reusable/Selector'
+import { Selector } from '@components/UI/Reusable/Selector'
 
 export interface IDomainFilterSelectorOption {
   text?: string

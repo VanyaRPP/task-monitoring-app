@@ -1,30 +1,55 @@
 import {
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons'
 import { Alert, Button, Popconfirm, Table, Tag, Tooltip, message } from 'antd'
-import { useRouter } from 'next/router'
 import { ColumnType } from 'antd/lib/table'
+import { useRouter } from 'next/router'
 
 import {
   useDeleteDomainMutation,
   useGetDomainsQuery,
 } from '@common/api/domainApi/domain.api'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import StreetsBlock from '@common/components/DashboardPage/blocks/streets'
+import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import { AppRoutes } from '@utils/constants'
+import { useEffect } from 'react'
 
 export interface Props {
   domainId?: string
   setCurrentDomain?: (domain: IExtendedDomain) => void
+  setDomainActions: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+    }>
+  >
+  domainActions: {
+    edit: boolean
+  }
+  setDomainsLength: React.Dispatch<React.SetStateAction<number | null>>
 }
 
-const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
+const DomainsTable: React.FC<Props> = ({
+  domainId,
+  setCurrentDomain,
+  setDomainActions,
+  setDomainsLength,
+}) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.DOMAIN
 
-  const { data, isLoading, isError } = useGetDomainsQuery({ domainId, limit: isOnPage ? 0 : 5 })
+  const { data, isLoading, isError } = useGetDomainsQuery({
+    domainId,
+    limit: isOnPage ? 0 : 5,
+  })
+
+  useEffect(() => {
+    if (!isLoading) {
+      setDomainsLength(data?.length)
+    }
+  }, [data, isLoading])
 
   const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
 
@@ -42,10 +67,14 @@ const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
   return (
     <Table
       rowKey="_id"
-      size="small"
       pagination={false}
       loading={isLoading}
-      columns={getDefaultColumns(handleDelete, deleteLoading, setCurrentDomain)}
+      columns={getDefaultColumns(
+        handleDelete,
+        deleteLoading,
+        setCurrentDomain,
+        setDomainActions
+      )}
       expandable={{
         expandedRowRender: ({ _id: domainId }) => (
           <StreetsBlock domainId={domainId} />
@@ -60,7 +89,12 @@ const DomainsTable: React.FC<Props> = ({ domainId, setCurrentDomain }) => {
 const getDefaultColumns = (
   handleDelete?: (...args: any) => void,
   deleteLoading?: boolean,
-  setCurrentDomain?: (domain: IExtendedDomain) => void
+  setCurrentDomain?: (domain: IExtendedDomain) => void,
+  setDomainActions?: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+    }>
+  >
 ): ColumnType<any>[] => [
   {
     fixed: 'left',
@@ -79,10 +113,31 @@ const getDefaultColumns = (
     title: 'Опис',
     dataIndex: 'description',
     width: 100,
-    render: (text) => (
-      <Tooltip title={text}>
-        <QuestionCircleOutlined />
-      </Tooltip>
+     render: (text) => (
+    <Tooltip
+      title={<div style={{ whiteSpace: 'pre-line', maxWidth: 300 }}>{text}</div>}
+      overlayStyle={{ maxWidth: 800 }}
+    >
+      <QuestionCircleOutlined />
+    </Tooltip>
+  ),
+  },
+  {
+    align: 'center',
+    fixed: 'right',
+    title: '',
+    width: 50,
+    render: (_, domain: IExtendedDomain) => (
+      <Button
+        style={{ padding: 0 }}
+        type="link"
+        onClick={() => {
+          setCurrentDomain(domain)
+          setDomainActions({ edit: false })
+        }}
+      >
+        <EyeOutlined />
+      </Button>
     ),
   },
   {
@@ -94,7 +149,10 @@ const getDefaultColumns = (
       <Button
         style={{ padding: 0 }}
         type="link"
-        onClick={() => setCurrentDomain(domain)}
+        onClick={() => {
+          setCurrentDomain(domain)
+          setDomainActions({ edit: true })
+        }}
       >
         <EditOutlined />
       </Button>
@@ -108,7 +166,9 @@ const getDefaultColumns = (
     width: 50,
     render: (_, domain: IExtendedDomain) => (
       <Popconfirm
-        title={`Ви впевнені що хочете видалити ${domain.name ?? 'цей надавач послуг'}?`}
+        title={`Ви впевнені що хочете видалити ${
+          domain.name ?? 'цей надавач послуг'
+        }?`}
         onConfirm={() => handleDelete(domain?._id)}
         cancelText="Відміна"
         disabled={deleteLoading}

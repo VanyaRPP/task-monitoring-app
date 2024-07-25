@@ -1,19 +1,36 @@
+// API imports
+import { bankApi } from '@common/api/bankApi/bank.api'
+import { mockBankApi } from '@common/api/bankApi/mockBank.api'
+import { categoryApi } from '@common/api/categoriesApi/category.api'
 import { customerApi } from '@common/api/customerApi/customer.api'
-import { emailApi } from '@common/api/emailApi/email.api'
+import { customServicesApi } from '@common/api/customServicesApi/customServices.api'
+import { debtorsApi } from '@common/api/debtorsApi/debtors.api'
+import { domainApi } from '@common/api/domainApi/domain.api'
+import { FeatureFlagApi } from '@common/api/featureFlagsApi/featureFlag.api'
+import { filterApi } from '@common/api/filterApi/filter.api'
 import { notificationApi } from '@common/api/notificationApi/notification.api'
 import { paymentApi } from '@common/api/paymentApi/payment.api'
+import { profitApi } from '@common/api/profitsApi/profits.api'
 import { realestateApi } from '@common/api/realestateApi/realestate.api'
 import { serviceApi } from '@common/api/serviceApi/service.api'
 import { streetApi } from '@common/api/streetApi/street.api'
+import { taskApi } from '@common/api/taskApi/task.api'
+import { userApi } from '@common/api/userApi/user.api'
+
+// Redux slices
+import sidebarReducer from '@modules/store/sidebarSlice'
+import themeReducer from '@modules/store/themeSlice'
+import paymentsReducer from '@modules/store/paymentsSlice'
+import floatButtonReducer from '@modules/store/floatButtonSlice'
+import profitPageReducer from '@modules/store/profitPageSlice'
+import bankReducer from '@modules/store/bankSlice'
+
+// Redux Toolkit imports
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
-import { categoryApi } from '../../api/categoriesApi/category.api'
-import { domainApi } from '../../api/domainApi/domain.api'
-import { taskApi } from '../../api/taskApi/task.api'
-import { userApi } from '../../api/userApi/user.api'
-import themeReducer from './reducers/ThemeSlice'
 
 export const store = configureStore({
   reducer: {
+    [filterApi.reducerPath]: filterApi.reducer,
     [categoryApi.reducerPath]: categoryApi.reducer,
     [userApi.reducerPath]: userApi.reducer,
     [taskApi.reducerPath]: taskApi.reducer,
@@ -21,14 +38,33 @@ export const store = configureStore({
     [paymentApi.reducerPath]: paymentApi.reducer,
     [serviceApi.reducerPath]: serviceApi.reducer,
     [customerApi.reducerPath]: customerApi.reducer,
+    [customServicesApi.reducerPath]: customServicesApi.reducer,
     [notificationApi.reducerPath]: notificationApi.reducer,
     [realestateApi.reducerPath]: realestateApi.reducer,
+    [profitApi.reducerPath]: profitApi.reducer,
     [streetApi.reducerPath]: streetApi.reducer,
-    [emailApi.reducerPath]: emailApi.reducer,
-    themeReducer,
+    [bankApi.reducerPath]: bankApi.reducer,
+    [debtorsApi.reducerPath]: debtorsApi.reducer,
+    [mockBankApi.reducerPath]: mockBankApi.reducer,
+    [FeatureFlagApi.reducerPath]: FeatureFlagApi.reducer,
+
+    sidebar: sidebarReducer,
+    theme: themeReducer,
+    payments: paymentsReducer,
+    floatButtons: floatButtonReducer,
+    profitPage: profitPageReducer,
+    bank: bankReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware()
+    getDefaultMiddleware({
+      serializableCheck: {
+        //Ignore the path where you're storing React elements/functions
+        //TODO: rewrite logic floatButtons to react context
+        ignoredPaths: ['floatButtons.buttons'],
+        ignoredActions: ['floatButtons/addButton', 'floatButtons/removeButton'],
+      },
+    })
+      .concat(filterApi.middleware)
       .concat(userApi.middleware)
       .concat(taskApi.middleware)
       .concat(categoryApi.middleware)
@@ -36,10 +72,15 @@ export const store = configureStore({
       .concat(paymentApi.middleware)
       .concat(serviceApi.middleware)
       .concat(customerApi.middleware)
+      .concat(customServicesApi.middleware)
       .concat(notificationApi.middleware)
       .concat(realestateApi.middleware)
       .concat(streetApi.middleware)
-      .concat(emailApi.middleware),
+      .concat(bankApi.middleware)
+      .concat(mockBankApi.middleware)
+      .concat(debtorsApi.middleware)
+      .concat(FeatureFlagApi.middleware)
+      .concat(profitApi.middleware),
 })
 
 export type AppDispatch = typeof store.dispatch

@@ -1,34 +1,28 @@
-import '../styles/globals.scss'
-import '@styles/antd-override.scss'
-import { ConfigProvider, Empty } from 'antd'
-import ukUA from 'antd/lib/locale/uk_UA'
-import type { AppProps } from 'next/app'
-import { SessionProvider } from 'next-auth/react'
-import { Provider } from 'react-redux'
-import { store } from '../common/modules/store/store'
+import { Providers_pages } from '@components/Providers'
 import NextNProgress from 'nextjs-progressbar'
-import MainLayout from '../common/components/Layouts/MainLayout'
+import Head from 'next/head'
+import { appWithTranslation } from 'next-i18next'
+import dayjs from 'dayjs'
+import 'dayjs/locale/uk'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
+dayjs.extend(localizedFormat)
+dayjs.locale('uk')
 
-export default function MyApp({Component, pageProps: { session, ...pageProps }}) {
+import '../common/lib/i18n.ts'
+
+import '@styles/globals.scss'
+import '@styles/reset.scss'
+
+function MyApp({ Component, pageProps }) {
   return (
-    <SessionProvider session={session}>
-      <Provider store={store}>
-        <MainLayout>
-          <NextNProgress
-            color="var(--primaryColor)"
-            height={2}
-            showOnShallow={false}
-          />
-          <ConfigProvider
-            renderEmpty={() => (
-              <Empty description={false} image={Empty.PRESENTED_IMAGE_SIMPLE} />
-            )}
-            locale={ukUA}
-          >
-            <Component {...pageProps} />
-          </ConfigProvider>
-        </MainLayout>
-      </Provider>
-    </SessionProvider>
+    <Providers_pages pageProps={pageProps}>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+      <NextNProgress height={2} showOnShallow={false} />
+      <Component {...pageProps} />
+    </Providers_pages>
   )
 }
+
+export default appWithTranslation(MyApp)

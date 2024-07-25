@@ -1,5 +1,5 @@
-import { IAddress, IGeoCode } from 'common/modules/models/Task'
-import IPlusCode, { LocationType } from 'common/lib/plusTypes.types'
+import IPlusCode, { LocationType } from '@common/lib/plusTypes.types'
+import { IAddress, IGeoCode } from '@modules/models/Task'
 import { useCallback, useState } from 'react'
 
 const useGoogleQueries = () => {

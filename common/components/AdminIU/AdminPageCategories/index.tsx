@@ -1,22 +1,23 @@
-import { useCallback, useState } from 'react'
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Form, Input } from 'antd'
+import { deleteExtraWhitespace } from '@assets/features/validators'
 import {
   useAddCategoryMutation,
   useEditCategoryMutation,
-} from 'common/api/categoriesApi/category.api'
-import { ICategory } from 'common/modules/models/Category'
-import AddCategoryForm from '../../Forms/AddCategoryForm'
+} from '@common/api/categoriesApi/category.api'
+import Modal from '@components/UI/ModalWindow'
+import useDebounce from '@modules/hooks/useDebounce'
+import { ICategory } from '@modules/models/Category'
+import { Button, Form, Input } from 'antd'
+import { useCallback, useState } from 'react'
 import Categories from '../../Categories'
-import Modal from '../../UI/ModalWindow'
+import AddCategoryForm from '../../Forms/AddCategoryForm'
 import s from './style.module.scss'
-import useDebounce from '../../../modules/hooks/useDebounce'
-import { deleteExtraWhitespace } from '../../../assets/features/validators'
 
 const AdminPageCategories: React.FC = () => {
   const { Search } = Input
 
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
@@ -74,7 +75,7 @@ const AdminPageCategories: React.FC = () => {
           title={!id ? 'Додати категорію' : 'Змінити категорію'}
           open={isModalVisible}
           onCancel={onCancelModal}
-          changesForm={() => form.isFieldsTouched()}
+          changed={() => isValueChanged}
           onOk={!id ? onSubmitModal : onSubmitEditModal}
           okText={!id ? 'Додати' : 'Змінити'}
           cancelText="Скасувати"
@@ -83,6 +84,7 @@ const AdminPageCategories: React.FC = () => {
             isFormDisabled={isFormDisabled}
             form={form}
             id={id}
+            setIsValueChanged={setIsValueChanged}
           />
         </Modal>
       </div>

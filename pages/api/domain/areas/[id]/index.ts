@@ -1,8 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse, NextApiHandler } from 'next'
-import RealEstate from '@common/modules/models/RealEstate'
+import RealEstate from '@modules/models/RealEstate'
 import start, { ExtendedData } from '@pages/api/api.config'
+import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next'
 import { withValidation } from './validator'
 
 start()

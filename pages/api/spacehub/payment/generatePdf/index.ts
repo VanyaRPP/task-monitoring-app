@@ -39,7 +39,7 @@ export default async function handler(
           )
 
           const response = {
-            fileName:  `invoices-${new Date().toISOString()}`,
+            fileName: `invoices-${new Date().toISOString()}`,
             fileExtension: 'zip',
             buffer: zipBuffer,
           }

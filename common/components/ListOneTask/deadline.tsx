@@ -1,6 +1,6 @@
 import { FieldTimeOutlined, FireOutlined } from '@ant-design/icons'
 import classNames from 'classnames'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import s from './style.module.scss'
 
 interface Props {
@@ -8,8 +8,8 @@ interface Props {
 }
 
 const ListItemDeadline: React.FC<Props> = ({ deadline }) => {
-  const taskDeadline = moment(deadline).format('DD-MM hh:mm')
-  const dateDiff = moment(deadline).diff(moment(new Date()), 'days')
+  const taskDeadline = dayjs(deadline).format('DD-MM hh:mm')
+  const dateDiff = dayjs(deadline).diff(dayjs(new Date()), 'days')
   return (
     <>
       <p

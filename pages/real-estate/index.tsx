@@ -1,18 +1,36 @@
-import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
-import { AppRoutes } from '../../utils/constants'
-import { unstable_getServerSession } from 'next-auth'
-import { authOptions } from '../api/auth/[...nextauth]'
+import MainLayout from '@common/components/Layouts/Main'
+import RealEstateBlock from '@components/DashboardPage/blocks/realEstates'
+import withAuthRedirect from '@components/HOC/withAuthRedirect'
+import { AppRoutes, Roles } from '@utils/constants'
 import { GetServerSideProps } from 'next'
-import RealEstateBlock from '@common/components/DashboardPage/blocks/realEstates'
+import { getServerSession } from 'next-auth'
 
-export default withAuthRedirect(RealEstateBlock)
+import { authOptions } from '../api/auth/[...nextauth]'
+import Head from 'next/head'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+
+export default withAuthRedirect(() => {
+  const { data: userResponse } = useGetCurrentUserQuery()
+  const isUser = userResponse?.roles?.includes(Roles.USER)
+  return (
+    <>
+      <Head>
+        <title>{isUser ? 'Мої компанії' : 'Компанії'}</title>
+      </Head>
+      <MainLayout
+        path={[
+          { title: 'Панель управління', path: AppRoutes.INDEX },
+          { title: 'Компанії', path: AppRoutes.REAL_ESTATE },
+        ]}
+      >
+        <RealEstateBlock />
+      </MainLayout>
+    </>
+  )
+})
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

@@ -1,8 +1,8 @@
-import React from 'react'
-import { Card, Button, Avatar, Image } from 'antd'
-import { EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons'
-import { IUser } from 'common/modules/models/User'
+import { UserOutlined } from '@ant-design/icons'
+import { IUser } from '@modules/models/User'
+import { Avatar, Card, Image } from 'antd'
 import Meta from 'antd/lib/card/Meta'
+import React from 'react'
 
 import s from './style.module.scss'
 

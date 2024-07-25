@@ -1,34 +1,117 @@
-import React, { FC } from 'react'
-import { validateField } from '@common/assets/features/validators'
-import { Select, Form, FormInstance, Input, InputNumber, Checkbox } from 'antd'
+/* eslint-disable @typescript-eslint/no-empty-function */
+import { validateField } from '@assets/features/validators'
+import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
+import EmailSelect from '@components/UI/Reusable/EmailSelect'
+import {
+  Button,
+  Card,
+  Checkbox,
+  Flex,
+  Form,
+  FormInstance,
+  Input,
+  InputNumber,
+  Select,
+  Typography,
+} from 'antd'
+import { FC, useEffect } from 'react'
 import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
-import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
-import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
+import { IDomain } from '@modules/models/Domain'
+import { inputNumberParser } from '@utils/helpers'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import DomainsServices from '@components/UI/DomainsComponents/DomainModal/DomainForm/DomainsServices'
+import CustomServicesCard from '../../../CustomServicesCard'
 
 interface Props {
   form: FormInstance<any>
-  currentRealEstate: IExtendedRealestate
+  currentRealEstate?: IExtendedRealestate
+  editable?: boolean
+  setIsValueChanged: (value: boolean) => void
+  customServices?: any[]
 }
 
-const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
-  const initialValues = useInitialValues(currentRealEstate)
+const RealEstateForm: FC<Props> = ({
+  form,
+  currentRealEstate,
+  editable = true,
+  setIsValueChanged,
+  customServices = [],
+}) => {
+  // const domainId = Form.useWatch('domain', form)|| currentRealEstate?.domain?._id
+  const domainId = currentRealEstate?.domain?._id
+  const streetId = currentRealEstate?.street?._id
+  const {
+    data: domain = {} as IDomain,
+    isLoading: isDomainLoading,
+    isError: isDomainError,
+  } = useGetDomainByPkQuery(
+    { domainId: domainId || currentRealEstate?.domain?._id },
+    { skip: !domainId && !currentRealEstate?.domain?._id }
+  )
+
+  const { data: servicesData } = useGetAllServicesQuery({
+    domainId: domain?._id || currentRealEstate?.domain?._id,
+  })
+  const services = servicesData?.data
+
+  useEffect(() => {
+    if (services) {
+      const servicesWithEnabled = services.map((service) => ({
+        ...service,
+        enabled: true,
+      }))
+
+      form.setFieldsValue({
+        ...form.getFieldsValue(),
+        services: servicesWithEnabled,
+        discount: currentRealEstate?.discount || 0,
+      })
+    }
+  }, [services, currentRealEstate, form])
+
+  const isServiceExistById = (serviceId: string) => {
+    if (!domain?.customServices?.length) return false
+
+    return domain.customServices.some((group) =>
+      group.services?.includes(serviceId)
+    )
+  }
+
+  const isServiceExist = (value: string) => {
+    if (!domain?._id || !services || !services?.length) return false
+    const existedValues = services.map((x) => !!x[value])
+    return existedValues.includes(true)
+  }
+
+  const latestGarbageService = [...(services ?? [])]
+    .filter(
+      (s) =>
+        s.garbageCollectorPrice &&
+        s.garbageCollectorPrice > 0 &&
+        String(s.domain?._id) === String(domainId) &&
+        String(s.street?._id) === String(streetId)
+    )
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+
+  const isMeterBasedServiceExist =
+    isServiceExistById('677d414283b6ef93c6b8ea2c') ||
+    isServiceExistById('682dd48d9665126611c81950')
 
   return (
     <Form
       form={form}
+      requiredMark={editable}
       layout="vertical"
       className={s.Form}
-      initialValues={initialValues}
+      onValuesChange={() => setIsValueChanged(true)}
     >
-      {currentRealEstate ? (
-        <Form.Item name="domain" label="Надавач послуг">
-          <Input disabled />
-        </Form.Item>
-      ) : (
-        <DomainsSelect form={form} />
-      )}
+      <DomainsSelect
+        form={form}
+        disabled={!!currentRealEstate}
+      />
       {currentRealEstate ? (
         <Form.Item name="street" label="Адреса">
           <Input disabled />
@@ -41,7 +124,12 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
         label="Назва компанії"
         rules={validateField('required')}
       >
-        <Input placeholder="Опис" maxLength={256} className={s.formInput} />
+        <Input
+          placeholder="Назва компанії"
+          maxLength={256}
+          className={s.formInput}
+          disabled={!editable}
+        />
       </Form.Item>
       <Form.Item
         name="description"
@@ -53,82 +141,92 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
           placeholder="Опис"
           maxLength={512}
           className={s.formInput}
+          disabled={!editable}
         />
       </Form.Item>
-      <EmailSelect form={form} />
+
       <Form.Item
-        name="totalArea"
-        label="Площа (м²)"
+        name="currency"
+        label="Валюта"
         rules={validateField('required')}
       >
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+        <Select
+          placeholder="Оберіть валюту"
+          className={s.formInput}
+          disabled={!editable}
+        >
+          <Select.Option value="UAH">UAH</Select.Option>
+          <Select.Option value="USD">USD</Select.Option>
+          <Select.Option value="EUR">EUR</Select.Option>
+        </Select>
       </Form.Item>
-      <Form.Item
-        name="pricePerMeter"
-        label="Ціна (грн/м²)"
-        rules={validateField('required')}
-      >
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+      <EmailSelect form={form} disabled={!editable} required={false} />
+      <Form.Item name="discount" label="Знижка" rules={validateField('number')}>
+        <InputNumber
+          min={0}
+          max={100}
+          precision={2}
+          formatter={(value) => `${value}`}
+          placeholder="Вкажіть знижку"
+          className={s.formInput}
+          disabled={!editable}
+          style={{ width: '100%' }}
+        />
       </Form.Item>
-      <Form.Item
-        name="servicePricePerMeter"
-        label="Індивідуальне утримання (грн/м²)"
-      >
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
-      </Form.Item>
-      <Form.Item name="rentPart" label="Частка загальної площі">
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
-      </Form.Item>
-      <Form.Item name="waterPart" label="Частка водопостачання">
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
-      </Form.Item>
-      <Form.Item name="cleaning" label="Прибирання (грн)">
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
-      </Form.Item>
-      <Form.Item name="discount" label="Знижка">
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
-      </Form.Item>
+
+      {isMeterBasedServiceExist && (
+        <>
+          <Form.Item
+            name="totalArea"
+            label="Площа (м²)"
+            rules={validateField('required')}
+          >
+            <InputNumber
+              parser={inputNumberParser}
+              placeholder="Вкажіть значення"
+              className={s.formInput}
+              disabled={!editable}
+            />
+          </Form.Item>
+          <Form.Item
+            name="pricePerMeter"
+            label="Ціна (грн/м²)"
+            rules={validateField('required')}
+          >
+            <InputNumber
+              parser={inputNumberParser}
+              placeholder="Вкажіть значення"
+              className={s.formInput}
+              disabled={!editable}
+            />
+          </Form.Item>
+        </>
+      )}
+      <CustomServicesCard
+        form={form}
+        disabled={!editable}
+        allCustomServices={customServices}
+      />
+
       <Form.Item
         valuePropName="checked"
         name="garbageCollector"
         label="Вивіз сміття"
       >
-        <Checkbox />
+        <Checkbox disabled={!editable} />
       </Form.Item>
-      <Form.Item
-        valuePropName="checked"
-        name="inflicion"
-        label="Індекс інфляції"
-      >
-        <Checkbox />
-      </Form.Item>
+
+      {isServiceExist('inflicionPrice') && (
+        <Form.Item
+          valuePropName="checked"
+          name="inflicion"
+          label="Індекс інфляції"
+        >
+          <Checkbox disabled={!editable} />
+        </Form.Item>
+      )}
     </Form>
   )
-}
-
-function useInitialValues(currentRealEstate) {
-  // TODO: add useEffect || useCallback ?
-  // currently we have few renders
-  // we need it only once. on didmount (first render)
-  const initialValues = {
-    domain: currentRealEstate?.domain?.name,
-    street:
-      currentRealEstate?.street &&
-      `${currentRealEstate.street.address} (м. ${currentRealEstate.street.city})`,
-    companyName: currentRealEstate?.companyName,
-    description: currentRealEstate?.description,
-    adminEmails: currentRealEstate?.adminEmails,
-    pricePerMeter: currentRealEstate?.pricePerMeter,
-    servicePricePerMeter: currentRealEstate?.servicePricePerMeter,
-    totalArea: currentRealEstate?.totalArea,
-    garbageCollector: currentRealEstate?.garbageCollector,
-    rentPart: currentRealEstate?.rentPart,
-    inflicion: currentRealEstate?.inflicion,
-    waterPart: currentRealEstate?.waterPart,
-    discount: currentRealEstate?.discount,
-    cleaning: currentRealEstate?.cleaning,
-  }
-  return initialValues
 }
 
 export default RealEstateForm

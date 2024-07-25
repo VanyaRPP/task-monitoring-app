@@ -1,24 +1,19 @@
-import React, { FC, useState } from 'react'
-import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  UserOutlined,
-} from '@ant-design/icons'
-import { Avatar, Button, Card, Form, Image, Alert } from 'antd'
+import { UserOutlined } from '@ant-design/icons'
+import ModalNoFooter from '@components/UI/ModalNoFooter'
+import RateStars from '@components/UI/RateStars'
+import Steper from '@components/UI/Steper'
+import { IFeedback } from '@modules/models/User'
+import { TaskStatuses } from '@utils/constants'
+import { Alert, Avatar, Button, Card, Form, Image } from 'antd'
+import { useSession } from 'next-auth/react'
+import { FC, useState } from 'react'
 import {
   useAddFeedbackMutation,
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
 } from '../../api/userApi/user.api'
-import s from './style.module.scss'
-import ModalNoFooter from '../UI/ModalNoFooter'
-import EndTask from '../EndTask'
 import AddFeedbackForm from '../Forms/AddFeedbackForm'
-import { useSession } from 'next-auth/react'
-import { IFeedback } from '../../modules/models/User'
-import { TaskStatuses } from '../../../utils/constants'
-import RateStars from '../UI/RateStars'
-import Steper from '../UI/Steper'
+import s from './style.module.scss'
 // import ConfirmTask from '../Forms/ConfirmTask'
 
 interface Props {
@@ -44,8 +39,7 @@ const CompetitionWorkerCard: FC<Props> = ({
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
 
   const [form] = Form.useForm()
-  const { data } = useGetUserByIdQuery(_id)
-  const user = data?.data
+  const { data: user } = useGetUserByIdQuery(_id)
   const desc = ['Жахливо', 'Погано', 'Нормально', 'Добре', 'Прекрасно']
 
   const Reset = () => {

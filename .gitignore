@@ -1,4 +1,5 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+.idea
 
 # dependencies
 /node_modules
@@ -7,6 +8,11 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+playwright/.auth
 
 # next.js
 /.next/
@@ -15,9 +21,13 @@
 # production
 /build
 
-# misc
-.DS_Store
-*.pem
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# local env files
+.env
+.env.local
 
 # debug
 npm-debug.log*
@@ -25,14 +35,20 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# local env files
-.env
-.env.local
-
 # vercel
 .vercel
 
-# typescript
-*.tsbuildinfo
+# misc
+.DS_Store
+*.pem
 
+# IDEs and editors
+.idea
+.vscode
+
+# specific files
 /pages/api-doc.tsx
+
+# PWA build artifacts
+/public/sw.js
+/public/workbox-*.js

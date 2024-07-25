@@ -1,21 +1,27 @@
-import { unstable_getServerSession } from 'next-auth'
-import { authOptions } from '../api/auth/[...nextauth]'
-import { AppRoutes } from '../../utils/constants'
+import MainLayout from '@common/components/Layouts/Main'
+import withAuthRedirect from '@components/HOC/withAuthRedirect'
+import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
-import ProfilePage from '../../common/components/ProfilePage'
+import { getServerSession } from 'next-auth'
+import { ProfilePage } from '@components/Pages/Profile'
+import { authOptions } from '../api/auth/[...nextauth]'
+import Head from 'next/head'
 
-const Profile: React.FC = () => {
-  return <ProfilePage />
-}
-
-export default Profile
+export default withAuthRedirect(() => {
+  return (
+    <>
+      <Head>
+        <title>Профіль</title>
+      </Head>
+      <MainLayout path={[{ title: 'Профіль', path: AppRoutes.PROFILE }]}>
+        <ProfilePage />
+      </MainLayout>
+    </>
+  )
+})
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

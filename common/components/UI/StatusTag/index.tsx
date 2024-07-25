@@ -6,9 +6,9 @@ import {
   PlusCircleOutlined,
   SyncOutlined,
 } from '@ant-design/icons'
-import { Divider, Tag } from 'antd'
+import { TaskStatuses } from '@utils/constants'
+import { Tag } from 'antd'
 import { FC, ReactElement } from 'react'
-import { TaskStatuses } from '../../../../utils/constants'
 import s from './style.module.scss'
 
 interface Props {

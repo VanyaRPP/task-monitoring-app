@@ -1,15 +1,15 @@
-import React, { FC, useMemo, useState } from 'react'
-import { Table, Input, ConfigProvider } from 'antd'
+import OrdersTableHeader from '@components/UI/OrdersTableHeader'
+import StatusTag from '@components/UI/StatusTag'
+import TableCard from '@components/UI/TableCard'
+import { AppRoutes, TaskStatuses } from '@utils/constants'
+import { Input, Table } from 'antd'
+import dayjs from 'dayjs'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/router'
+import { FC, useMemo, useState } from 'react'
 import { useGetAllTaskQuery } from '../../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../../api/userApi/user.api'
-import moment from 'moment'
-import { useRouter } from 'next/router'
-import { AppRoutes, TaskStatuses } from '../../../../utils/constants'
-import { useSession } from 'next-auth/react'
 import MicroInfoProfile from '../../MicroInfoProfile'
-import StatusTag from '../../UI/StatusTag'
-import TableCard from '@common/components/UI/TableCard'
-import OrdersTableHeader from '@common/components/UI/OrdersTableHeader'
 import s from './style.module.scss'
 
 const Orders: FC = () => {
@@ -67,7 +67,7 @@ const Orders: FC = () => {
       width: '20%',
       ellipsis: true,
       sorter: (a, b) => Date.parse(a?.deadline) - Date.parse(b?.deadline),
-      render: (text) => moment(text).format('DD-MM hh:mm'),
+      render: (text) => dayjs(text).format('DD-MM hh:mm'),
     },
     {
       title: 'Статус',

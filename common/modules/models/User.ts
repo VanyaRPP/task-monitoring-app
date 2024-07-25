@@ -1,9 +1,10 @@
-import { IAddress } from 'common/modules/models/Task'
-import { ITask } from './Task'
+import { ICustomer } from '@common/api/customerApi/customer.api.types'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import { IAddress } from '@modules/models/Task'
 import mongoose, { ObjectId, Schema } from 'mongoose'
-import { ICustomer } from '@common/api/customerApi/customer.api.types'
+import { ITask } from './Task'
+import { normalizeRoles } from '@utils/roles'
 
 export interface IUser {
   _id?: ObjectId | string
@@ -28,6 +29,98 @@ export interface IFeedback {
   text: string
 }
 
+export interface IPermissions {
+  isGlobalAdmin: boolean
+  isDomainAdmin: boolean
+  isUser: boolean
+  isAdmin: boolean
+}
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Feedback:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: "64c2ab3d4f2e4c7b1f8a1234"
+ *         grade:
+ *           type: integer
+ *           format: int32
+ *           example: 5
+ *         text:
+ *           type: string
+ *           example: "Great work!"
+ *
+ *     Address:
+ *       type: object
+ *       description: Address object structure (customize as needed)
+ *
+ *     User:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           example: "64c2ab3d4f2e4c7b1f8a5678"
+ *         name:
+ *           type: string
+ *           example: "John Doe"
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: "john@example.com"
+ *         image:
+ *           type: string
+ *           format: uri
+ *           example: "https://avatars.githubusercontent.com/u/583231?v=4"
+ *         roles:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["User"]
+ *         tasks:
+ *           type: array
+ *           items:
+ *             type: string
+ *             description: ObjectId string referencing Task
+ *           example: ["64c2ab3d4f2e4c7b1f8a9999"]
+ *         payments:
+ *           type: array
+ *           items:
+ *             type: string
+ *             description: ObjectId string referencing Payment
+ *         services:
+ *           type: array
+ *           items:
+ *             type: string
+ *             description: ObjectId string referencing Service
+ *         customers:
+ *           type: array
+ *           items:
+ *             type: string
+ *             description: ObjectId string referencing Customer
+ *         rating:
+ *           type: number
+ *           example: 4.5
+ *         feedback:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Feedback'
+ *         isWorker:
+ *           type: boolean
+ *           example: false
+ *         tel:
+ *           type: string
+ *           example: "+1234567890"
+ *         address:
+ *           $ref: '#/components/schemas/Address'
+ *         password:
+ *           type: string
+ *           description: Hashed password (not returned by API)
+ *           example: "hashed_password_string"
+ */
 const UserSchema = new mongoose.Schema<IUser>({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -47,6 +140,34 @@ const UserSchema = new mongoose.Schema<IUser>({
   address: { type: Object },
   password: { type: String },
 })
+UserSchema.pre('validate', function (next) {
+  this.roles = normalizeRoles(this.roles)
+  next()
+})
+
+UserSchema.pre(
+  ['findOneAndUpdate', 'updateOne', 'updateMany'],
+  function (next) {
+    const update: any = this.getUpdate() || {}
+
+    const incoming = update?.roles ?? update?.$set?.roles ?? update?.$set?.role
+
+    if (incoming !== undefined) {
+      const normalized = normalizeRoles(incoming)
+
+      if (update.roles !== undefined) update.roles = normalized
+      if (update.$set?.roles !== undefined) update.$set.roles = normalized
+      if (update.$set?.role !== undefined) {
+        update.$set.roles = normalized
+        delete update.$set.role
+      }
+
+      this.setUpdate(update)
+    }
+
+    next()
+  }
+)
 
 const User =
   (mongoose?.models?.User as mongoose.Model<IUser>) ||

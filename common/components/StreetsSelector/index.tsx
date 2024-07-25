@@ -1,32 +1,48 @@
-import React from 'react'
-import {Select} from "antd"
+import { Select } from 'antd'
+import { IFilter } from '@common/api/paymentApi/payment.api.types'
 
-import s from "@components/StreetsSelector/style.module.scss";
+interface StreetsSelectorProps {
+  streets: IFilter[]
+  filters?: Record<string, any>
+  setFilters: (f: Record<string, any>) => void
+  className?: string
+  [key: string]: any
+}
 
-const StreetsSelector = ({filters, setFilters, streets}) => {
-    const options = streets?.map((street) => {
-        return {
-            label: street.text,
-            value: street.value,
-        }
-    })
+const StreetsSelector: React.FC<StreetsSelectorProps> = ({
+  streets,
+  filters = {},
+  setFilters,
+  className,
+  ...props
+}) => {
+  const options = [...streets]
+    .sort((a, b) => a.text.localeCompare(b.text))
+    .map((street) => ({
+      label: street.text,
+      value: String(street.value),
+    }))
 
-    return (
-        <div className={s.streetDiv}>
-            <Select
-                className={s.streetSelector}
-                placeholder="Виберіть вулицю"
-                onChange={(value) => {
-                    setFilters(
-                        {street: value}
-                    )
-                }}
-                allowClear
-                options={options}
-            >
-            </Select>
-        </div>
-    )
+  return (
+    <Select
+      placeholder="Виберіть вулицю"
+      value={filters?.street}
+      onChange={(value) =>
+        setFilters({
+          ...filters,
+          street: value,
+        })
+      }
+      style={{
+        minWidth: 250,
+      }}
+      allowClear
+      className={className}
+      options={options}
+      dropdownStyle={{ width: 'max-content' }}
+      {...props}
+    />
+  )
 }
 
 export default StreetsSelector

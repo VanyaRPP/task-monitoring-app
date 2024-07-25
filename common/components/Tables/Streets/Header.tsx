@@ -3,38 +3,67 @@ import { Button } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 
-import AddStreetModal from '@common/components/AddStreetModal'
+import { usePermissions } from '@utils/helpers'
+
+import AddStreetModal from '@components/AddStreetModal'
 import { AppRoutes } from '@utils/constants'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 export interface Props {
   showAddButton?: boolean
+  streetActions: {
+    edit: boolean
+    preview: boolean
+  }
+  setStreetActions: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+      preview: boolean
+    }>
+  >
+  enableStreetsHeaderButton?: boolean
 }
 
-const StreetsHeader: React.FC<Props> = ({ showAddButton = false }) => {
+const StreetsHeader: React.FC<Props> = ({
+  showAddButton = false,
+  streetActions,
+  setStreetActions,
+  enableStreetsHeaderButton,
+}) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const openModal = () => setIsModalOpen(true)
   const closeModal = () => setIsModalOpen(false)
+  const openModal = () => {
+    setIsModalOpen(true),
+      setStreetActions({ ...streetActions, preview: false, edit: false })
+  }
+
+  const { data: userResponse } = useGetCurrentUserQuery()
+
+  const UserRoles = usePermissions(userResponse)
+  const isAdmin = UserRoles?.isGlobalAdmin || UserRoles?.isDomainAdmin
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
       <Button
         type="link"
         onClick={() => {
-          router.push(AppRoutes.STREETS)
+          enableStreetsHeaderButton && router.push(AppRoutes.STREETS)
         }}
       >
         Адреси
         <SelectOutlined />
       </Button>
 
-      {showAddButton && (
+      {showAddButton && isAdmin && (
         <Button type="link" onClick={openModal}>
           <PlusOutlined /> Додати
         </Button>
       )}
-      {isModalOpen && <AddStreetModal closeModal={closeModal} />}
+      {isModalOpen && (
+        <AddStreetModal closeModal={closeModal} streetActions={streetActions} />
+      )}
     </div>
   )
 }

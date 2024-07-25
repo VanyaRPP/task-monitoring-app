@@ -1,0 +1,13 @@
+{
+  "title": "Bank Transactions",
+  "errorTitle": "Loading Error",
+  "errorDescription": "Failed to load the list of domains. Please try again later.",
+  "noDomains": "No Available Domains",
+  "noDomainsDescription": "You have no domains with bank data or the data hasn't loaded yet.",
+  "domainErrorTitle": "Error",
+  "domainErrorDescription": "Failed to load domain data.",
+  "balanceErrorTitle": "No Balance",
+  "balanceErrorDescription": "This domain has no balance or an error occurred while fetching the balance.",
+  "tokenOrAccMissingTitle": "Missing Token or Account",
+  "tokenOrAccMissingDescription": "Could not retrieve token or account for transactions."
+}

@@ -1,8 +1,13 @@
+import { IDomain } from '@modules/models/Domain'
+import { IStreet } from '@modules/models/Street'
 import { IFilter } from '../paymentApi/payment.api.types'
+import { ObjectId } from 'mongoose'
+import { ServiceType } from '@utils/constants'
 
 export interface IService {
-  domain: string
-  street: string
+  _id: string
+  domain: Partial<IDomain>
+  street: Partial<IStreet>
   rentPrice: number
   date: Date
   electricityPrice: number
@@ -11,23 +16,31 @@ export interface IService {
   garbageCollectorPrice?: number
   inflicionPrice?: number
   description?: string
-}
-
-export interface IExtendedService extends IService {
-  _id: string
-  _v: number
+  customServices?: {
+    _id: ObjectId
+    label: string
+    fieldName: string
+    price: number
+  }[]
+  losses?: number
+  consumedElectricity?: number
+  generalElectricity?: number
+  isVAT?: boolean
 }
 
 export interface IAddServiceResponse {
   success: boolean
-  data: IExtendedService
+  data: IService
 }
 
 export interface IGetServiceResponse {
   success: boolean
-  data: IExtendedService[]
+  data: IService[]
   addressFilter: IFilter[]
   domainFilter: IFilter[]
+  yearFilter: IFilter[]
+  monthFilter: IFilter[]
+  total: number
 }
 
 export interface IDeleteServiceResponse {
@@ -38,4 +51,6 @@ export interface IDeleteServiceResponse {
 export interface IServiceFilter {
   street: string
   domain: string
+  month: number
+  year: number
 }

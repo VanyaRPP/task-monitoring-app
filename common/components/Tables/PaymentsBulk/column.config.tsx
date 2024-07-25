@@ -1,560 +1,888 @@
-import { CloseCircleOutlined } from '@ant-design/icons'
-import { Popconfirm, Form } from 'antd'
-import FormAttribute from '@common/components/UI/FormAttribute'
+import { CloseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { dateToMonth } from '@common/assets/features/formatDate'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
-import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
-import { InflicionIndexTitle } from '@utils/inflicion'
-import { useCompanyInvoice } from '@common/modules/hooks/usePayment'
-import { Operations, ServiceType } from '@utils/constants'
-import StyledTooltip from '@common/components/UI/Reusable/StyledTooltip'
-import { usePreviousMonthService } from '@common/modules/hooks/useService'
-import { getInflicionValue } from '@utils/inflicionHelper'
-import { invoiceCoutWater, multiplyFloat, plusFloat } from '@utils/helpers'
+import { ServiceType } from '@utils/constants'
+import { inputNumberParser, toRoundFixed } from '@utils/helpers'
+import validator from '@utils/validator'
+import {
+  Form,
+  Input,
+  InputNumber,
+  Popconfirm,
+  Space,
+  TableColumnsType,
+  Tooltip,
+  Typography,
+} from 'antd'
+import { useEffect, useMemo } from 'react'
 
 export const getDefaultColumns = (
-  service?: any,
-  handleDelete?: (row: any) => void
-): any[] => [
+  remove: (index: number) => void,
+  _allowedServices: any,
+  losses?: number,
+  extraColumns: TableColumnsType = []
+): TableColumnsType => [
   {
     fixed: 'left',
     title: 'Компанія',
-    dataIndex: 'companyName',
-    width: 200,
-    render: (value: any, record: { companyName: string | number }) => (
-      <FormAttribute
-        notNum
-        name={['companies', record.companyName, 'companyName']}
-        value={value}
-        disabled
-      />
-    ),
+    width: 250,
+    render: (_, { name }: { name: number }) => <CompanyName name={name} />,
   },
   {
-    title: 'Площа (м²)',
-    dataIndex: 'totalArea',
-    render: (value: any, record: { companyName: string | number }) => (
-      <FormAttribute
-        name={['companies', record.companyName, 'totalArea']}
-        value={value}
-        disabled
-      />
-    ),
+    title: 'Площа, м²',
+    width: 160,
+    render: (_, { name }: { name: number }) => <TotalArea name={name} />,
   },
-  {
-    title: 'Утримання',
-    children: [
-      {
-        title: 'За м²',
-        dataIndex: 'servicePricePerMeter',
-        render: (
-          __,
-          record: { companyName: string | number; servicePricePerMeter: any }
-        ) => (
-          <>
-            <FormAttribute
-              name={[
-                'companies',
-                record.companyName,
-                'maintenancePrice',
-                'price',
-              ]}
-              value={record.servicePricePerMeter || service?.rentPrice}
-              disabled
-            />
-
-            {!!record.servicePricePerMeter && (
-              <StyledTooltip
-                title={'Індивідуальне утримання, що передбачене договором'}
-              />
-            )}
-          </>
-        ),
+  _allowedServices.some((inv) => inv?.fieldName === 'rentPrice')
+    && {
+        title: 'Утримання',
+        children: [
+          {
+            title: 'За м²',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <MaintenancePrice name={name} />
+            ),
+          },
+          {
+            title: 'Загальне',
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <MaintenanceSum name={name} />
+            ),
+          },
+        ],
       },
-      {
-        title: 'Загальне',
-        dataIndex: 'servicePriceSum',
-        render: (__: any, record: any) => (
-          <ServicePriceSum service={service} record={record} />
-        ),
+  _allowedServices.some((inv) => inv?.fieldName === 'placingPrice')
+    && {
+        title: 'Розміщення',
+        children: [
+          {
+            title: 'За м²',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <PlacingPrice name={name} />
+            ),
+          },
+          {
+            title: 'Загальне',
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <PlacingSum name={name} />
+            ),
+          },
+        ],
       },
-    ],
-  },
-  // TODO: підтянути формулу індексу інфляції з сінгл інвойса
-  {
-    title: 'Розміщення',
-    children: [
-      {
-        title: 'За м²',
-        dataIndex: 'pricePerMeter',
-        render: (
-          value: any,
-          record: { companyName: string | number; inflicion: boolean }
-        ) => (
-          <FormAttribute
-            name={['companies', record.companyName, 'placingPrice', 'price']}
-            value={record.inflicion ? 0 : value}
-            disabled
-          />
-        ),
+  _allowedServices.some((inv) => inv?.fieldName === 'inflicionPrice')
+    && {
+        title: <InflicionTitle />,
+        width: 200,
+        render: (_, { name }: { name: number }) => <InflicionSum name={name} />,
       },
-      {
-        title: 'Загальне',
-        dataIndex: 'priceSum',
-        render: (__: any, record: any) => (
-          <>
-            <PricePlacingField service={service} record={record} />
-          </>
-        ),
+  _allowedServices.some((inv) => inv?.fieldName === 'electricityPrice')
+    && {
+        title: losses
+          ? `Електропостачання + Втрати ${losses}%`
+          : 'Електропостачання',
+        children: [
+          {
+            title: 'Стара',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <ElectricityAmount name={name} last />
+            ),
+          },
+          {
+            title: 'Нова',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <ElectricityAmount name={name} />
+            ),
+          },
+          {
+            title: 'Втрати',
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <LossElectricityPrice name={name} />
+            ),
+          },
+          {
+            title: '',
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <LossElectricitySum name={name} />
+            ),
+          },
+          {
+            title: <ElectricitySumTitle />,
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <ElectricitySum name={name} />
+            ),
+          },
+        ],
       },
-    ],
-  },
-  {
-    title: <InflicionIndexTitleLocal service={service} />,
-    dataIndex: 'inflicionPrice',
-    render: (__: any, record: any) => (
-      <InflicionPrice service={service} record={record} />
-    ),
-  },
-  {
-    title: service?.electricityPrice
-      ? `Електрика: ${service.electricityPrice} грн/кВт`
-      : 'Електрика',
-    children: [
-      {
-        title: 'Стара',
-        dataIndex: 'old_elec',
-        render: (__: any, record: any) => <OldElectricity record={record} />,
+  _allowedServices.some((inv) => inv?.fieldName === 'waterPrice')
+    && {
+        title: 'Водопостачання',
+        children: [
+          {
+            title: 'Стара',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <WaterAmount name={name} last />
+            ),
+          },
+          {
+            title: 'Нова',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <WaterAmount name={name} />
+            ),
+          },
+          {
+            title: <WaterSumTitle />,
+            width: 200,
+            render: (_, { name }: { name: number }) => <WaterSum name={name} />,
+          },
+        ],
       },
-      {
-        title: 'Нова',
-        dataIndex: 'new_elec',
-        render: (value: any, record: { companyName: string | number }) => (
-          <FormAttribute
-            name={[
-              'companies',
-              record.companyName,
-              'electricityPrice',
-              'amount',
-            ]}
-            value={value}
-          />
-        ),
+  _allowedServices.some((inv) => inv?.fieldName === 'waterPartAmount')
+    && {
+        title: 'Водопостачання без лічильника',
+        children: [
+          {
+            title: 'Частка, %',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <WaterPartAmount name={name} />
+            ),
+          },
+          {
+            title: <WaterPartSumTitle />,
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <WaterPartSum name={name} />
+            ),
+          },
+        ],
       },
-      {
-        title: 'Загальне',
-        dataIndex: 'sum_elec',
-        render: (__: any, record: any) => (
-          <ElectricityPriceSum service={service} record={record} />
-        ),
+  _allowedServices.some((inv) => inv?.fieldName === 'GarbageCollectorAmount')
+    && {
+        title: 'Вивіз ТПВ',
+        children: [
+          {
+            title: 'Частка, %',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <GarbageCollectorAmount name={name} />
+            ),
+          },
+          {
+            title: <GarbageCollectorSumTitle />,
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <GarbageCollectorSum name={name} />
+            ),
+          },
+        ],
       },
-    ],
-  },
-  {
-    title: service ? `Вода: ${service.waterPrice} грн/м³` : 'Вода',
-    children: [
-      {
-        title: 'Стара',
-        dataIndex: 'old_water',
-        render: (__: any, record: any) => <OldWater record={record} />,
+  _allowedServices.some((inv) => inv?.fieldName === 'Cleaning')
+    && {
+        title: 'Прибирання',
+        width: 200,
+        render: (_, { name }: { name: number }) => <Cleaning name={name} />,
       },
-      {
-        title: 'Нова',
-        dataIndex: 'new_water',
-        render: (
-          value: any,
-          record: { waterPart: any; companyName: string | number }
-        ) => (
-          <FormAttribute
-            disabled={!!record.waterPart}
-            name={['companies', record.companyName, 'waterPrice', 'amount']}
-            value={value}
-          />
-        ),
-      },
-      {
-        title: 'Загальне',
-        dataIndex: 'sum_water',
-        render: (__: any, record: any) => (
-          <WaterPriceSum service={service} record={record} />
-        ),
-      },
-    ],
-  },
-  {
-    title: service ? (
-      <>
-        Вода (без лічильника)
-        <br />
-        Всього водопостачання: {service.waterPriceTotal}
-      </>
-    ) : (
-      'Вода (без лічильника)'
-    ),
-    children: [
-      {
-        title: 'Частка постачання %',
-        dataIndex: 'waterPart',
-        render: (
-          __: any,
-          record: { companyName: string | number; waterPart: any }
-        ) => (
-          <FormAttribute
-            name={['companies', record.companyName, 'waterPart', 'price']}
-            value={record.waterPart}
-            disabled
-          />
-        ),
-      },
-      {
-        title: 'Загальне',
-        dataIndex: 'sum_waterPart',
-        render: (__: any, record: any) => (
-          <WaterPartSum service={service} record={record} />
-        ),
-      },
-    ],
-  },
-  {
-    title: service ? (
-      <>
-        Всього за вивезення ТПВ:
-        <br />
-        {service.garbageCollectorPrice} грн/м&sup2;{' '}
-      </>
-    ) : (
-      'Вивезення ТПВ'
-    ),
-    children: [
-      {
-        title: 'Загальна частка',
-        dataIndex: 'garbageCollectorPrice',
-        render: (
-          __: any,
-          record: { companyName: string | number; rentPart: any }
-        ) => (
-          <FormAttribute
-            name={[
-              'companies',
-              record.companyName,
-              'garbageCollector',
-              'amount',
-            ]}
-            value={record?.rentPart}
-            disabled
-          />
-        ),
-      },
-      {
-        title: 'Загальне',
-        dataIndex: 'waterPart',
-        render: (__: any, record: any) => (
-          <GarbageCollectorPrice service={service} record={record} />
-        ),
-      },
-    ],
-  },
-  {
-    title: 'Прибирання',
-    dataIndex: 'cleaning',
-    render: (value: any, record: { companyName: string | number }) => (
-      <FormAttribute
-        name={['companies', record.companyName, 'cleaningPrice']}
-        value={value}
-        disabled
-      />
-    ),
-  },
   {
     title: 'Знижка',
-    dataIndex: 'discount',
-    render: (value: any, record: { companyName: string | number }) => (
-      <FormAttribute
-        name={['companies', record.companyName, 'discount']}
-        value={value}
-      />
-    ),
+    width: 200,
+    render: (_, { name }: { name: number }) => <Discount name={name} />,
   },
+  ...extraColumns,
   {
     fixed: 'right',
     align: 'center',
-    width: 50,
-    render: (_: any, record: { _id: string }) => (
+    width: 48,
+    render: (_, { name }: { name: number }) => (
       <Popconfirm
-        title="Видалити запис?"
-        onConfirm={() => handleDelete && handleDelete(record._id)}
+        title="Ви впевнені, що хочете видалити запис?"
+        okText="Так"
+        cancelText="Ні"
+        onConfirm={() => remove(name)}
       >
         <CloseCircleOutlined />
       </Popconfirm>
     ),
   },
-]
+].filter(Boolean) as TableColumnsType
 
-function useInflicionValues({ companyId, company, service }) {
-  const { lastInvoice } = useCompanyInvoice({ companyId })
+const CompanyName: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
-  const { previousMonth } = usePreviousMonthService({
-    date: service?.date,
-    domainId: form.getFieldValue('domain'),
-    streetId: form.getFieldValue('street'),
-  })
-  const previousPlacingPrice = lastInvoice?.invoice?.find(
-    (item) => item.type === ServiceType.Placing
-  )?.sum
-
-  const value =
-    previousPlacingPrice ||
-    (company?.totalArea &&
-      company?.pricePerMeter &&
-      multiplyFloat(company?.totalArea, company?.pricePerMeter))
-
-  const inflicionAmount = +getInflicionValue(
-    value,
-    previousMonth?.inflicionPrice
+  const companyName: string | undefined = Form.useWatch(
+    ['payments', name, 'company', 'companyName'],
+    form
   )
-  return { previousPlacingPrice: value, inflicionAmount }
+  return <Typography.Text>{companyName}</Typography.Text>
 }
 
-const InflicionPrice: React.FC<{ service: any; record: any }> = ({
-  service,
-  record,
-}) => {
-  const { inflicionAmount } = useInflicionValues({
-    companyId: record._id,
-    company: record,
-    service,
-  })
+const usePrevPayment = (name: number): IExtendedPayment => {
+  const { form, prevService, prevPayments } = useInvoicesPaymentContext()
 
-  return (
-    <FormAttribute
-      name={['companies', record.companyName, 'inflicionPrice']}
-      value={record.inflicion ? inflicionAmount : 0}
-      disabled
-    />
-  )
-}
-
-const GarbageCollectorPrice: React.FC<{ service: any; record: any }> = ({
-  service,
-  record,
-}) => {
-  const { form } = useInvoicesPaymentContext()
-  const rentPart = Form.useWatch(
-    ['companies', record.companyName, 'garbageCollector', 'amount'],
+  const companyId: string | undefined = Form.useWatch(
+    ['payments', name, 'company', '_id'],
     form
   )
 
-  const garbageCollector = multiplyFloat(
-    service?.garbageCollectorPrice / 100,
-    rentPart
+  return useMemo(() => {
+    return prevPayments?.find(
+      (prevPayment) =>
+        // eslint-disable-next-line
+        // @ts-ignore
+        prevPayment?.company?._id === companyId &&
+        // eslint-disable-next-line
+        // @ts-ignore
+        prevPayment?.monthService?._id === prevService?._id &&
+        // eslint-disable-next-line
+        // @ts-ignore
+        prevPayment?.street?._id === prevService?.street?._id &&
+        // eslint-disable-next-line
+        // @ts-ignore
+        prevPayment?.domain?._id === prevService?.domain?._id
+    )
+  }, [prevPayments, companyId, prevService])
+}
+
+const useInflicionValues = (
+  name: number
+): {
+  previousPlacingPrice: number
+  inflicionAmount: number
+} => {
+  const { form, service, prevPayments, prevService } =
+    useInvoicesPaymentContext()
+
+  const company: IRealestate | undefined = Form.useWatch(
+    ['payments', name, 'company'],
+    form
   )
 
+  const prevPayment = prevPayments.find(
+    // TODO: fix typing of IPayment and IExtendedPayment
+    // eslint-disable-next-line
+    // @ts-ignore
+    (payment) => payment.company?._id === company?._id
+  )
+
+  const previousPlacingPrice = useMemo(() => {
+    return (
+      prevPayment?.invoice?.find((item) => item.type === ServiceType.Placing)
+        ?.sum ||
+      company?.totalArea * (company?.pricePerMeter || service?.rentPrice)
+    )
+  }, [prevPayment, company, service])
+
+  const inflicionAmount = useMemo(() => {
+    return (
+      previousPlacingPrice *
+      (((prevService?.inflicionPrice || 100) - 100) / 100)
+    )
+  }, [previousPlacingPrice, prevService])
+
+  return {
+    previousPlacingPrice,
+    inflicionAmount: inflicionAmount < 0 ? 0 : inflicionAmount,
+  }
+}
+
+const LossElectricitySum: React.FC<{ name: number }> = ({ name }) => {
+  const { form, service } = useInvoicesPaymentContext()
+  const lastAmount: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Electricity, 'lastAmount'],
+      form
+    ) ?? 0
+  const amount: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Electricity, 'amount'],
+      form
+    ) ?? 0
   return (
-    <FormAttribute
-      name={['companies', record.companyName, 'garbageCollector', 'sum']}
-      value={record.garbageCollector ? garbageCollector : 0}
-      disabled
-    />
+    <Space>
+      {service?.losses && amount > 0 && (
+        <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
+          {(
+            amount -
+            lastAmount +
+            (amount - lastAmount) * (service?.losses / 100)
+          ).toFixed(2)}{' '}
+          кВт
+        </Typography.Text>
+      )}
+    </Space>
   )
 }
 
-const OldWater: React.FC<{ record: any }> = ({ record }) => {
-  const baseName = ['companies', record.companyName, 'waterPrice']
-
-  const waterPriceName = [...baseName, 'lastAmount']
-
-  const { data: paymentsResponse } = useGetAllPaymentsQuery({
-    companyIds: record._id,
-    type: Operations.Debit,
-    limit: 1,
-  })
-  const invoice = paymentsResponse?.data?.[0]?.invoice
-  const waterPrice = invoice?.find((item) => item.type === 'waterPrice')
-
+const LossElectricityPrice: React.FC<{ name: number }> = ({ name }) => {
+  const { form, service } = useInvoicesPaymentContext()
+  // const test = Form.useWatch(['service', name], form)
+  const lastAmount: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Electricity, 'lastAmount'],
+      form
+    ) ?? 0
+  const amount: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Electricity, 'amount'],
+      form
+    ) ?? 0
   return (
-    <FormAttribute
-      disabled={!!record.waterPart}
-      name={waterPriceName}
-      value={waterPrice?.amount}
-    />
+    <Space>
+      {service?.losses && amount > 0 && (
+        <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
+          {amount - lastAmount} + ({service?.losses}%)
+        </Typography.Text>
+      )}
+    </Space>
   )
 }
 
-const OldElectricity: React.FC<{ record: any }> = ({ record }) => {
-  const baseName = ['companies', record.companyName, 'electricityPrice']
+const TotalArea: React.FC<{ name: number }> = ({ name }) => {
+  const { form } = useInvoicesPaymentContext()
+  const totalArea: number =
+    Form.useWatch(['payments', name, 'company', 'totalArea'], form) ?? 0
+  return <Typography.Text>{totalArea}</Typography.Text>
+}
 
-  const electricityPriceName = [...baseName, 'lastAmount']
+const MaintenancePrice: React.FC<{ name: number }> = ({ name }) => {
+  const { form } = useInvoicesPaymentContext()
 
-  const { data: paymentsResponse } = useGetAllPaymentsQuery({
-    companyIds: record._id,
-    type: Operations.Debit,
-    limit: 1,
-  })
-  const invoice = paymentsResponse?.data?.[0]?.invoice
-  const electricityPrice = invoice?.find(
-    (item) => item.type === 'electricityPrice'
-  )
+  const servicePricePerMeter: number =
+    Form.useWatch(
+      ['payments', name, 'company', 'servicePricePerMeter'],
+      form
+    ) ?? 0
 
   return (
-    <FormAttribute
-      name={electricityPriceName}
-      value={electricityPrice?.amount}
-    />
+    <Tooltip
+      title={
+        !!servicePricePerMeter &&
+        'Індивідуальне утримання, що передбачене договором'
+      }
+    >
+      <Form.Item
+        name={[name, 'invoice', ServiceType.Maintenance, 'price']}
+        style={{ margin: 0 }}
+        rules={[validator.required(), validator.min(0)]}
+      >
+        <InputNumber
+          style={{ width: 'auto' }}
+          parser={inputNumberParser}
+          suffix={!!servicePricePerMeter && <QuestionCircleOutlined />}
+        />
+      </Form.Item>
+    </Tooltip>
+  )
+}
+const MaintenanceSum: React.FC<{ name: number }> = ({ name }) => {
+  const { form } = useInvoicesPaymentContext()
+
+  const totalArea: number =
+    Form.useWatch(['payments', name, 'company', 'totalArea'], form) ?? 0
+  const price: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Maintenance, 'price'],
+      form
+    ) ?? 0
+
+  useEffect(() => {
+    form.setFieldValue(
+      ['payments', name, 'invoice', ServiceType.Maintenance, 'sum'],
+      +toRoundFixed(+totalArea * +price)
+    )
+  }, [form, name, totalArea, price])
+
+  return (
+    <Form.Item
+      name={[name, 'invoice', ServiceType.Maintenance, 'sum']}
+      style={{ margin: 0 }}
+      rules={[validator.required(), validator.min(0)]}
+    >
+      <Input type="number" disabled />
+    </Form.Item>
   )
 }
 
-function PricePlacingField({ service, record }) {
-  const baseName = ['companies', record.companyName, 'placingPrice']
-  return record?.inflicion ? (
-    <InflicionPricePlacingField
-      baseName={baseName}
-      service={service}
-      record={record}
-    />
+const PlacingPrice: React.FC<{ name: number }> = ({ name }) => {
+  const { form } = useInvoicesPaymentContext()
+
+  const inflicion: boolean =
+    Form.useWatch(['payments', name, 'company', 'inflicion'], form) ?? false
+
+  return inflicion ? (
+    <Tooltip title="Нарахуванян відбувається згідно з ростом інфляції">
+      Інфляційне нархування <QuestionCircleOutlined />
+    </Tooltip>
   ) : (
-    <PricePerMeterSum baseName={baseName} record={record} />
+    <Form.Item
+      name={[name, 'invoice', ServiceType.Placing, 'price']}
+      style={{ margin: 0 }}
+      rules={[validator.required(), validator.min(0)]}
+    >
+      <InputNumber parser={inputNumberParser} style={{ width: 'auto' }} />
+    </Form.Item>
   )
 }
-
-function InflicionPricePlacingField({ baseName, service, record }) {
-  const { previousPlacingPrice, inflicionAmount } = useInflicionValues({
-    companyId: record._id,
-    company: record,
-    service,
-  })
-
-  return (
-    <>
-      <FormAttribute
-        disabled
-        name={[...baseName, 'sum']}
-        value={plusFloat(previousPlacingPrice, inflicionAmount)}
-      />
-      <StyledTooltip
-        title={`Значення попереднього місяця + значення інфляції в цьому рахунку (${previousPlacingPrice} + ${inflicionAmount})`}
-      />
-    </>
-  )
-}
-
-function PricePerMeterSum({ baseName, record }) {
+const PlacingSum: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
 
-  const pricePerMeterName = [...baseName, 'price']
-  const pricePerMeter = Form.useWatch(pricePerMeterName, form)
+  const { previousPlacingPrice, inflicionAmount } = useInflicionValues(name)
+
+  const inflicion: boolean =
+    Form.useWatch(['payments', name, 'company', 'inflicion'], form) ?? false
+  const totalArea: number =
+    Form.useWatch(['payments', name, 'company', 'totalArea'], form) ?? 0
+  const price: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Placing, 'price'],
+      form
+    ) ?? 0
+
+  useEffect(() => {
+    form.setFieldValue(
+      ['payments', name, 'invoice', ServiceType.Placing, 'sum'],
+      +toRoundFixed(inflicion ? price : price * totalArea)
+    )
+  }, [form, name, price, inflicion, totalArea])
 
   return (
-    <FormAttribute
-      disabled
-      name={[...baseName, 'sum']}
-      value={multiplyFloat(pricePerMeter, record.totalArea)}
-    />
-  )
-}
-
-const WaterPartSum: React.FC<{ service: any; record: any }> = ({
-  service,
-  record,
-}) => {
-  const { form } = useInvoicesPaymentContext()
-
-  const baseName = ['companies', record.companyName, 'waterPart']
-
-  const waterPartName = [...baseName, 'price']
-
-  const waterPart = Form.useWatch(waterPartName, form)
-
-  return (
-    <FormAttribute
-      disabled
-      name={[...baseName, 'sum']}
-      value={invoiceCoutWater(waterPart, service)}
-    />
-  )
-}
-
-const WaterPriceSum: React.FC<{ service: any; record: any }> = ({
-  service,
-  record,
-}) => {
-  const { form } = useInvoicesPaymentContext()
-
-  const baseName = ['companies', record.companyName, 'waterPrice']
-
-  const oldWaterName = [...baseName, 'lastAmount']
-  const newWaterName = [...baseName, 'amount']
-
-  const oldWater = Form.useWatch(oldWaterName, form)
-  const newWater = Form.useWatch(newWaterName, form)
-
-  return (
-    <FormAttribute
-      disabled
-      name={[...baseName, 'sum']}
-      value={
-        newWater ? multiplyFloat(newWater - oldWater, service?.waterPrice) : 0
+    <Tooltip
+      title={
+        inflicion &&
+        `Значення попереднього місяця + значення інфляції в цьому рахунку (${toRoundFixed(
+          previousPlacingPrice
+        )} + ${toRoundFixed(inflicionAmount)})`
       }
-    />
+    >
+      <Form.Item
+        name={[name, 'invoice', ServiceType.Placing, 'sum']}
+        style={{ margin: 0 }}
+        rules={[validator.required(), validator.min(0)]}
+      >
+        <InputNumber
+          parser={inputNumberParser}
+          suffix={inflicion && <QuestionCircleOutlined />}
+          style={{ width: 'auto' }}
+          disabled={!inflicion}
+        />
+      </Form.Item>
+    </Tooltip>
   )
 }
 
-const ServicePriceSum: React.FC<{ service: any; record: any }> = ({
-  service,
-  record,
+const InflicionTitle: React.FC = () => {
+  const { prevService } = useInvoicesPaymentContext()
+
+  return (
+    <Space direction="vertical" size={0}>
+      <Typography.Text>Індекс інфляції</Typography.Text>
+      {prevService?.inflicionPrice ? (
+        <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
+          {toRoundFixed(prevService.inflicionPrice)}% за{' '}
+          {dateToMonth(prevService.date)}
+        </Typography.Text>
+      ) : (
+        <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
+          за {dateToMonth(prevService?.date)} невідомий
+        </Typography.Text>
+      )}
+    </Space>
+  )
+}
+const InflicionSum: React.FC<{ name: number }> = ({ name }) => {
+  const { form } = useInvoicesPaymentContext()
+
+  const inflicion: boolean =
+    Form.useWatch(['payments', name, 'company', 'inflicion'], form) ?? false
+  const price: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Inflicion, 'price'],
+      form
+    ) ?? 0
+
+  useEffect(() => {
+    if (inflicion) {
+      form.setFieldValue(
+        ['payments', name, 'invoice', ServiceType.Inflicion, 'sum'],
+        +toRoundFixed(price)
+      )
+    }
+  }, [form, name, price, inflicion])
+
+  if (inflicion) {
+    return (
+      <Form.Item
+        name={[name, 'invoice', ServiceType.Inflicion, 'price']}
+        style={{ margin: 0 }}
+        rules={[validator.required(), validator.min(0)]}
+      >
+        <Input type="number" disabled />
+      </Form.Item>
+    )
+  }
+}
+
+const ElectricitySumTitle: React.FC = () => {
+  const { service } = useInvoicesPaymentContext()
+
+  return (
+    <Space>
+      <Typography.Text>Загальне</Typography.Text>
+      {!!service?.electricityPrice && (
+        <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
+          {toRoundFixed(service.electricityPrice)} грн/кВт
+        </Typography.Text>
+      )}
+    </Space>
+  )
+}
+const ElectricityAmount: React.FC<{ name: number; last?: boolean }> = ({
+  name,
+  last = false,
+}) => {
+  return (
+    <Form.Item
+      name={[
+        name,
+        'invoice',
+        ServiceType.Electricity,
+        last ? 'lastAmount' : 'amount',
+      ]}
+      style={{ margin: 0 }}
+      rules={[validator.required(), validator.min(0)]}
+    >
+      <InputNumber parser={inputNumberParser} style={{ width: 'auto' }} />
+    </Form.Item>
+  )
+}
+const ElectricitySum: React.FC<{ name: number }> = ({ name }) => {
+  const { form, service } = useInvoicesPaymentContext()
+
+  const lastAmount: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Electricity, 'lastAmount'],
+      form
+    ) ?? 0
+  const amount: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Electricity, 'amount'],
+      form
+    ) ?? 0
+  const costAmount = amount - lastAmount
+  const loss = costAmount + costAmount * (service?.losses / 100)
+
+  useEffect(() => {
+    const price = service?.electricityPrice ?? 0
+    const sum =
+      service?.losses > 0
+        ? +toRoundFixed(loss * +price.toFixed(2))
+        : +toRoundFixed((+amount - +lastAmount) * price)
+
+    form.setFieldValue(
+      ['payments', name, 'invoice', ServiceType.Electricity, 'sum'],
+      sum
+    )
+  }, [form, name, amount, lastAmount, service])
+
+  return (
+    <Form.Item
+      name={[name, 'invoice', ServiceType.Electricity, 'sum']}
+      style={{ margin: 0 }}
+      rules={[validator.required(), validator.min(0)]}
+    >
+      <Input type="number" disabled />
+    </Form.Item>
+  )
+}
+
+const WaterSumTitle: React.FC = () => {
+  const { service } = useInvoicesPaymentContext()
+
+  return (
+    <Space>
+      <Typography.Text>Загальне</Typography.Text>
+      {!!service?.waterPrice && (
+        <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
+          {toRoundFixed(service.waterPrice)} грн/м<sup>3</sup>
+        </Typography.Text>
+      )}
+    </Space>
+  )
+}
+const WaterAmount: React.FC<{ name: number; last?: boolean }> = ({
+  name,
+  last = false,
 }) => {
   const { form } = useInvoicesPaymentContext()
 
-  const baseName = ['companies', record.companyName, 'maintenancePrice']
+  const waterPart: number =
+    Form.useWatch(['payments', name, 'company', 'waterPart'], form) ?? 0
 
-  const servicePricePerMeterName = [...baseName, 'price']
+  if (!waterPart) {
+    return (
+      <Form.Item
+        name={[
+          name,
+          'invoice',
+          ServiceType.Water,
+          last ? 'lastAmount' : 'amount',
+        ]}
+        style={{ margin: 0 }}
+        rules={[validator.required(), validator.min(0)]}
+      >
+        <InputNumber parser={inputNumberParser} />
+      </Form.Item>
+    )
+  }
+}
+const WaterSum: React.FC<{ name: number }> = ({ name }) => {
+  const { form, service } = useInvoicesPaymentContext()
 
-  const servicePricePerMeter = Form.useWatch(servicePricePerMeterName, form)
-  const prioPrice = servicePricePerMeter || service?.rentPrice
+  const lastAmount: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Water, 'lastAmount'],
+      form
+    ) ?? 0
+  const amount: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Water, 'amount'],
+      form
+    ) ?? 0
 
-  return (
-    <FormAttribute
-      disabled
-      name={[...baseName, 'sum']}
-      value={multiplyFloat(prioPrice, record.totalArea)}
-    />
-  )
+  const waterPart: number =
+    Form.useWatch(['payments', name, 'company', 'waterPart'], form) ?? 0
+
+  useEffect(() => {
+    if (!waterPart) {
+      const price = service?.waterPrice ?? 0
+      const sum = +toRoundFixed((+amount - +lastAmount) * price)
+
+      form.setFieldValue(
+        ['payments', name, 'invoice', ServiceType.Water, 'sum'],
+        sum
+      )
+    }
+  }, [form, name, amount, lastAmount, service, waterPart])
+
+  if (!waterPart) {
+    return (
+      <Form.Item
+        name={[name, 'invoice', ServiceType.Water, 'sum']}
+        style={{ margin: 0 }}
+        rules={[validator.required(), validator.min(0)]}
+      >
+        <Input type="number" disabled />
+      </Form.Item>
+    )
+  }
 }
 
-const ElectricityPriceSum: React.FC<{ service: any; record: any }> = ({
-  service,
-  record,
-}) => {
-  const { form } = useInvoicesPaymentContext()
-
-  const baseName = ['companies', record.companyName, 'electricityPrice']
-
-  const newElectricityPriceName = [...baseName, 'amount']
-  const oldElectricityPriceName = [...baseName, 'lastAmount']
-
-  const oldElectricityPrice = Form.useWatch(oldElectricityPriceName, form)
-  const newElectricityPrice = Form.useWatch(newElectricityPriceName, form)
+const WaterPartSumTitle: React.FC = () => {
+  const { service } = useInvoicesPaymentContext()
 
   return (
-    <FormAttribute
-      name={[...baseName, 'sum']}
-      value={
-        newElectricityPrice
-          ? multiplyFloat(
-              newElectricityPrice - oldElectricityPrice,
-              service?.electricityPrice
-            )
-          : 0
-      }
-      disabled
-    />
+    <Space>
+      <Typography.Text>Загальне</Typography.Text>
+      {!!service?.waterPrice && (
+        <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
+          {toRoundFixed(service.waterPriceTotal)} грн
+        </Typography.Text>
+      )}
+    </Space>
   )
 }
-
-function InflicionIndexTitleLocal({ service }) {
+const WaterPartAmount: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
-  const { previousMonth } = usePreviousMonthService({
-    date: service?.date,
-    domainId: form.getFieldValue('domain'),
-    streetId: form.getFieldValue('street'),
-  })
-  return <InflicionIndexTitle previousMonth={previousMonth} />
+
+  const waterPart: number =
+    Form.useWatch(['payments', name, 'company', 'waterPart'], form) ?? 0
+
+  if (waterPart) {
+    return (
+      <Form.Item
+        name={[name, 'company', 'waterPart']}
+        style={{ margin: 0 }}
+        rules={[validator.required(), validator.min(0)]}
+      >
+        <Input type="number" disabled />
+      </Form.Item>
+    )
+  }
+}
+const WaterPartSum: React.FC<{ name: number }> = ({ name }) => {
+  const { form } = useInvoicesPaymentContext()
+
+  const waterPart: number =
+    Form.useWatch(['payments', name, 'company', 'waterPart'], form) ?? 0
+
+  const price: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.WaterPart, 'price'],
+      form
+    ) ?? 0
+
+  useEffect(() => {
+    if (waterPart) {
+      const sum = +toRoundFixed(price ?? 0)
+      form.setFieldValue(
+        ['payments', name, 'invoice', ServiceType.WaterPart, 'sum'],
+        sum
+      )
+    }
+  }, [form, name, price, waterPart])
+
+  if (waterPart) {
+    return (
+      <Form.Item
+        name={[name, 'invoice', ServiceType.WaterPart, 'price']}
+        style={{ margin: 0 }}
+        rules={[validator.required(), validator.min(0)]}
+      >
+        <InputNumber parser={inputNumberParser} />
+      </Form.Item>
+    )
+  }
+}
+
+const GarbageCollectorSumTitle: React.FC = () => {
+  const { service } = useInvoicesPaymentContext()
+
+  return (
+    <Space>
+      <Typography.Text>Загальне</Typography.Text>
+      {!!service?.waterPrice && (
+        <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
+          {toRoundFixed(service.garbageCollectorPrice)} грн
+        </Typography.Text>
+      )}
+    </Space>
+  )
+}
+const GarbageCollectorAmount: React.FC<{ name: number }> = ({ name }) => {
+  const { form } = useInvoicesPaymentContext()
+
+  const garbageCollector: boolean =
+    Form.useWatch(['payments', name, 'company', 'garbageCollector'], form) ??
+    false
+
+  if (garbageCollector) {
+    return (
+      <Form.Item
+        name={[name, 'company', 'rentPart']}
+        style={{ margin: 0 }}
+        rules={[validator.required(), validator.min(0)]}
+      >
+        <Input type="number" disabled />
+      </Form.Item>
+    )
+  }
+}
+const GarbageCollectorSum: React.FC<{ name: number }> = ({ name }) => {
+  const { form } = useInvoicesPaymentContext()
+
+  const garbageCollector: boolean =
+    Form.useWatch(['payments', name, 'company', 'garbageCollector'], form) ??
+    false
+
+  const price: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.GarbageCollector, 'price'],
+      form
+    ) ?? 0
+
+  useEffect(() => {
+    if (garbageCollector) {
+      const sum = +toRoundFixed(price ?? 0)
+      form.setFieldValue(
+        ['payments', name, 'invoice', ServiceType.GarbageCollector, 'sum'],
+        sum
+      )
+    }
+  }, [form, name, price, garbageCollector])
+
+  if (garbageCollector) {
+    return (
+      <Form.Item
+        name={[name, 'invoice', ServiceType.GarbageCollector, 'price']}
+        style={{ margin: 0 }}
+        rules={[validator.required(), validator.min(0)]}
+      >
+        <InputNumber parser={inputNumberParser} />
+      </Form.Item>
+    )
+  }
+}
+
+const Cleaning: React.FC<{ name: number }> = ({ name }) => {
+  const { form } = useInvoicesPaymentContext()
+
+  const cleaning: boolean =
+    Form.useWatch(['payments', name, 'company', 'cleaning'], form) ?? false
+
+  const price: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Cleaning, 'price'],
+      form
+    ) ?? 0
+
+  useEffect(() => {
+    if (cleaning) {
+      const sum = +toRoundFixed(price ?? 0)
+      form.setFieldValue(
+        ['payments', name, 'invoice', ServiceType.Cleaning, 'sum'],
+        sum
+      )
+    }
+  }, [form, name, price, cleaning])
+
+  if (cleaning) {
+    return (
+      <Form.Item
+        name={[name, 'invoice', ServiceType.Cleaning, 'price']}
+        style={{ margin: 0 }}
+        rules={[validator.required(), validator.min(0)]}
+      >
+        <InputNumber parser={inputNumberParser} style={{ width: 'auto' }} />
+      </Form.Item>
+    )
+  }
+}
+
+const Discount: React.FC<{ name: number }> = ({ name }) => {
+  const { form } = useInvoicesPaymentContext()
+
+  const price: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Discount, 'price'],
+      form
+    ) ?? 0
+
+  useEffect(() => {
+    const sum = +toRoundFixed(price ?? 0)
+    form.setFieldValue(
+      ['payments', name, 'invoice', ServiceType.Discount, 'sum'],
+      sum
+    )
+  }, [form, name, price])
+
+  return (
+    <Form.Item
+      name={[name, 'invoice', ServiceType.Discount, 'price']}
+      style={{ margin: 0 }}
+      rules={[validator.required(), validator.max(0)]}
+    >
+      <InputNumber parser={inputNumberParser} style={{ width: 'auto' }} />
+    </Form.Item>
+  )
 }

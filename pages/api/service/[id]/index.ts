@@ -1,22 +1,25 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import Service from '@common/modules/models/Service'
-import Domain from '@common/modules/models/Domain'
+import Domain from '@modules/models/Domain'
+import Service from '@modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import type { NextApiRequest, NextApiResponse } from 'next'
 start()
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isAdmin, user } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isAdmin, user } = await getCurrentUser(
+    req,
+    res
+  )
 
   switch (req.method) {
     case 'DELETE':
       try {
-        if (!isGlobalAdmin) {
+        if (!isAdmin) {
           return res
             .status(400)
             .json({ success: false, message: 'not allowed' })
@@ -40,7 +43,7 @@ export default async function handler(
 
     case 'PATCH':
       try {
-        if (isAdmin) {
+        if (isGlobalAdmin || isDomainAdmin) {
           if (isGlobalAdmin) {
             const response = await Service.findOneAndUpdate(
               { _id: req.query.id },
@@ -53,7 +56,7 @@ export default async function handler(
               adminEmails: { $in: [user.email] },
             })
             const domainIds = domains?.map((domain) => domain._id.toString())
-            const validDomain = domainIds?.includes(req.body.domain._id)
+            const validDomain = domainIds?.includes(req.body.domain)
             if (validDomain) {
               const response = await Service.findOneAndUpdate(
                 { _id: req.query.id },

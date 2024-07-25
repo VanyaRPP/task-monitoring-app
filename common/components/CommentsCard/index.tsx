@@ -1,15 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
 import { SendOutlined } from '@ant-design/icons'
-import { Card, List, Button, Input, Empty } from 'antd'
-import Comment from './comment'
-import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
+import { deleteExtraWhitespace } from '@assets/features/validators'
 import {
-  useGetTaskByIdQuery,
   useAddCommentMutation,
-} from 'common/api/taskApi/task.api'
+  useGetTaskByIdQuery,
+} from '@common/api/taskApi/task.api'
+import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
+import { Button, Card, Empty, Input, List } from 'antd'
 import { useSession } from 'next-auth/react'
+import { useRef, useState } from 'react'
+import Comment from './comment'
 import s from './style.module.scss'
-import { deleteExtraWhitespace } from '../../assets/features/validators'
 
 interface Props {
   taskId: any

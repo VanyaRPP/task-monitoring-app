@@ -7,26 +7,50 @@ import { Button, Tooltip } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 
-import AddDomainModal from '@common/components/UI/DomainsComponents/DomainModal'
-import { AppRoutes } from '@utils/constants'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import AddDomainModal from '@components/UI/DomainsComponents/DomainModal'
+import { AppRoutes } from '@utils/constants'
+import { Roles } from '@utils/constants'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 export interface Props {
   currentDomain?: IExtendedDomain
   setCurrentDomain?: (domain: IExtendedDomain) => void
+  setDomainActions: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+    }>
+  >
+  domainActions: {
+    edit: boolean
+  }
 }
 
 const DomainsHeader: React.FC<Props> = ({
   currentDomain,
   setCurrentDomain,
+  domainActions,
+  setDomainActions,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { data: userResponse } = useGetCurrentUserQuery()
+  const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isDomainAdmin = userResponse?.roles?.includes(Roles.DOMAIN_ADMIN)
+  const isAdmin = isGlobalAdmin || isDomainAdmin
 
-  const openModal = () => setIsModalOpen(true)
+  const openModal = () => {
+    setCurrentDomain(null)
+    setDomainActions({ edit: true })
+    setIsModalOpen(true)
+  }
+
   const closeModal = () => {
     setIsModalOpen(false)
     setCurrentDomain(null)
+    setDomainActions({
+      edit: false,
+    })
   }
 
   return (
@@ -40,13 +64,16 @@ const DomainsHeader: React.FC<Props> = ({
       </Button>
 
       <>
-        <Button type="link" onClick={openModal}>
-          <PlusOutlined /> Додати
-        </Button>
+        {isAdmin && (
+          <Button type="link" onClick={openModal}>
+            <PlusOutlined /> Додати
+          </Button>
+        )}
         {(isModalOpen || currentDomain) && (
           <AddDomainModal
             currentDomain={currentDomain}
             closeModal={closeModal}
+            editable={domainActions.edit}
           />
         )}
       </>

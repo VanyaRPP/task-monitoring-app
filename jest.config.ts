@@ -1,17 +1,28 @@
-const dotenv = require('dotenv');
-dotenv.config();
-module.exports = {
-  testMatch: ['**/*.test.ts'],
-  testPathIgnorePatterns: ['/node_modules/'], // Ignore the node_modules directory
-  transform: {
-    '^.+\\.ts$': 'ts-jest',
+import type { Config } from 'jest'
+import { pathsToModuleNameMapper } from 'ts-jest'
+import { compilerOptions } from './tsconfig.json'
+
+const config: Config = {
+  preset: 'ts-jest',
+  testMatch: ['**/*.test.ts', '**/*.test.tsx'],
+  testPathIgnorePatterns: ['/node_modules/', '/.next/'],
+  testEnvironment: 'jsdom',
+
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.jest.json',
+    },
   },
+
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-    '^@utils/(.*)$': '<rootDir>/utils/$1',
-    '^@pages/(.*)$': '<rootDir>/pages/$1',
-    '^@common/(.*)$': '<rootDir>/common/$1',
+    ...pathsToModuleNameMapper(compilerOptions.paths, {
+      prefix: '<rootDir>/',
+    }),
+    '\\.(css|scss|sass)$': 'identity-obj-proxy',
   },
-  moduleFileExtensions: ['ts', 'js'], //  file extensions
+
+  moduleFileExtensions: ['ts', 'tsx', 'js'],
 }
-export {}
+export default config

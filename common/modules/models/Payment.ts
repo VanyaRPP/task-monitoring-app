@@ -1,10 +1,11 @@
 import {
   IPaymentField,
+  IPaymentTransactions,
   IProvider,
   IReciever,
 } from '@common/api/paymentApi/payment.api.types'
-import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
 import mongoose, { ObjectId, Schema } from 'mongoose'
+
 export interface IPaymentModel {
   invoiceNumber: number
   type: string
@@ -15,10 +16,12 @@ export interface IPaymentModel {
   monthService: ObjectId | string
   invoice: IPaymentField[]
   description?: string
-  services?: IPaymentTableData[]
   provider: IProvider
   reciever: IReciever
   generalSum: number
+  status: 'draft' | 'sent'
+  transaction?: IPaymentTransactions
+  losses?: number
 }
 
 export const PaymentSchema = new Schema<IPaymentModel>({
@@ -31,13 +34,16 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   monthService: { type: Schema.Types.Mixed, ref: 'Service' },
   description: { type: String },
   invoice: { type: [Object] },
-  services: { type: [Object] },
   provider: { type: Object },
   reciever: { type: Object },
   generalSum: { type: Number },
+  status: { type: String, default: 'draft' },
+  transaction: { type: Object },
+  losses: { type: Number },
 })
 
 const Payment =
-  mongoose.models?.Payment || mongoose.model('Payment', PaymentSchema)
+  (mongoose.models?.Payment as mongoose.Model<IPaymentModel>) ||
+  mongoose.model('Payment', PaymentSchema)
 
 export default Payment

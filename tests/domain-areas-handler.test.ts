@@ -28,9 +28,9 @@ describe('GetCompanyAreas', () => {
     expect(responseData.data).toMatchObject({
       companies: [
         { companyName: 'company_3', totalArea: 10, rentPart: 45 },
-        { companyName: 'company_5', totalArea: 10, rentPart: 50 }
+        { companyName: 'company_5', totalArea: 10, rentPart: 50 },
       ],
-      totalArea: 20
+      totalArea: 20,
     })
   })
 
@@ -68,9 +68,9 @@ describe('GetCompanyAreas', () => {
     expect(responseData.data).toMatchObject({
       companies: [
         { companyName: 'company_0', totalArea: 10, rentPart: 25 },
-        { companyName: 'company_5', totalArea: 10, rentPart: 0 }
+        { companyName: 'company_5', totalArea: 10, rentPart: 0 },
       ],
-      totalArea: 20
+      totalArea: 20,
     })
   })
   it('DomainAdmin cant receive companies from other domain', async () => {
@@ -128,9 +128,9 @@ describe('GetCompanyAreas', () => {
     expect(responseData.data).toMatchObject({
       companies: [
         { companyName: 'company_0', totalArea: 10, rentPart: 25 },
-        { companyName: 'company_5', totalArea: 10, rentPart: 0 }
+        { companyName: 'company_5', totalArea: 10, rentPart: 0 },
       ],
-      totalArea: 20
+      totalArea: 20,
     })
   })
 
@@ -165,7 +165,9 @@ describe('GetCompanyAreas', () => {
     await handler(mockReq, mockRes)
     const responseData = await mockRes.json.mock.calls[0][0]
     expect(mockRes.status).toHaveBeenCalledWith(400)
-    expect(responseData.message).toBe('You do not have access to use this domain')
+    expect(responseData.message).toBe(
+      'You do not have access to use this domain'
+    )
   })
   it('noRoleUser cant receive company data without having a role', async () => {
     // Поверне помилку тому що юзер без ролі

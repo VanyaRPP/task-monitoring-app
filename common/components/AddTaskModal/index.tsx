@@ -1,22 +1,22 @@
-import { useJsApiLoader } from '@react-google-maps/api'
-import { DatePicker, Form, Input, Select, Tooltip } from 'antd'
-import { useSession } from 'next-auth/react'
-import { useCallback, useEffect, useState, useMemo } from 'react'
-import { centerTownGeoCode, Roles } from 'utils/constants'
+import { disabledDate } from '@assets/features/formatDate'
 import {
   deleteExtraWhitespace,
   validateField,
-} from '../../assets/features/validators'
+} from '@assets/features/validators'
+import { useGetAllCategoriesQuery } from '@common/api/categoriesApi/category.api'
+import { useAddTaskMutation } from '@common/api/taskApi/task.api'
+import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
+import CustomTooltip from '@components/UI/CustomTooltip'
+import Modal from '@components/UI/ModalWindow'
+import { IAddress } from '@modules/models/Task'
+import { useJsApiLoader } from '@react-google-maps/api'
+import { centerTownGeoCode, Roles } from '@utils/constants'
+import { DatePicker, Form, Input, Select, Tooltip } from 'antd'
+import { useSession } from 'next-auth/react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Map from '../Map'
 import { PlacesAutocomplete } from '../PlacesAutocomplete'
-import CustomTooltip from '../UI/CustomTooltip'
 import s from './style.module.scss'
-import { disabledDate } from '../../assets/features/formatDate'
-import { useGetAllCategoriesQuery } from '@common/api/categoriesApi/category.api'
-import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
-import { useAddTaskMutation } from '@common/api/taskApi/task.api'
-import { IAddress } from '@common/modules/models/Task'
-import Modal from '../UI/ModalWindow'
 
 type FormData = {
   category?: string
@@ -50,6 +50,7 @@ const AddTaskModal: React.FC<PropsType> = ({
   })
 
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
 
   const [addTask] = useAddTaskMutation()
   const { data: session } = useSession()
@@ -107,7 +108,7 @@ const AddTaskModal: React.FC<PropsType> = ({
       open={isModalVisible}
       title="Створити завдання"
       okText="Створити"
-      changesForm={() => form.isFieldsTouched()}
+      changed={() => isValueChanged}
       cancelText="Скасувати"
       onCancel={onCancel}
       onOk={onSubmit}
@@ -120,6 +121,7 @@ const AddTaskModal: React.FC<PropsType> = ({
         layout="vertical"
         name="form_in_modal"
         disabled={formDisabled}
+        onValuesChange={() => setIsValueChanged(true)}
       >
         {userData?.data?.roles?.includes(Roles.GLOBAL_ADMIN) && (
           <Form.Item

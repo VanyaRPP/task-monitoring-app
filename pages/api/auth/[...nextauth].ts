@@ -1,16 +1,13 @@
+import clientPromise from '@common/lib/mongodb'
+import { MongoDBAdapter } from '@next-auth/mongodb-adapter'
+import jwt from 'jsonwebtoken'
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
-import FacebookProvider from 'next-auth/providers/facebook'
-import EmailProvider from 'next-auth/providers/email'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { MongoDBAdapter } from '@next-auth/mongodb-adapter'
-import jwt from 'jsonwebtoken'
+import User from '@modules/models/User'
 import bcrypt from 'bcrypt'
-import nodemailer from 'nodemailer'
-import clientPromise from '@common/lib/mongodb'
-import User from '@common/modules/models/User'
-import { ICredentials } from '@common/lib/credentials.types'
+import { saltRounds } from '@utils/constants'
 
 function html({ url, host, email }) {
   const escapedEmail = `${email.replace(/\./g, '&#8203;.')}`
@@ -29,7 +26,6 @@ function text({ url, host }) {
   return `Login to ${host}\n${url}\n\n`
 }
 
-
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),
   secret: process.env.NEXTAUTH_SECRET,
@@ -45,28 +41,52 @@ export const authOptions: NextAuthOptions = {
     },
   },
   providers: [
-    // CredentialsProvider({
-    //   name: 'Credentials',
-    //   credentials: {},
-    //   async authorize(credentials: ICredentials, req) {
-    //     try {
-    //       const user = await User.findOne({
-    //         email: credentials.email,
-    //       })
+    CredentialsProvider({
+      name: 'Credentials',
 
-    //       // encrypting and comparing password
-    //       const result = await bcrypt.compare(
-    //         credentials.password,
-    //         user.password
-    //       )
-    //       if (!result) return null
+      credentials: {
+        name: { label: 'Name', type: 'text' },
+        email: { label: 'Email', type: 'text' },
+        password: { label: 'Password', type: 'password' },
+        authType: { label: 'Auth Type', type: 'text' },
+      },
+      async authorize(credentials, req) {
+        try {
+          const user = await User.findOne({ email: credentials.email })
 
-    //       return user
-    //     } catch (error) {
-    //       return null
-    //     }
-    //   },
-    // }),
+          if (credentials.authType === 'signIn') {
+            if (
+              user &&
+              (await bcrypt.compare(credentials.password, user.password))
+            ) {
+              return {
+                id: user._id.toString(),
+                name: user.name,
+                email: user.email,
+              }
+            }
+          } else {
+            if (user) return null
+
+            const hash = await bcrypt.hash(credentials.password, saltRounds)
+            const newUser = await User.create({
+              name: credentials.name,
+              email: credentials.email,
+              password: hash,
+            })
+            return {
+              id: newUser._id.toString(),
+              name: newUser.name,
+              email: newUser.email,
+            }
+          }
+
+          return null
+        } catch (error) {
+          return null
+        }
+      },
+    }),
     // EmailProvider({
     //   server: {
     //     host: process.env.EMAIL_SERVER_HOST,
@@ -124,8 +144,8 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: '/auth/sigin',
-    error: '/auth/sigin', ///auth/error Error code passed in query string as ?error=
+    // signIn: '/auth/signin',
+    // error: '/auth/signin', ///auth/error Error code passed in query string as ?error=
     // signOut: '/auth/signout',
     verifyRequest: '/auth/verify-request', // (used for check email message)
     // newUser: '/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)

@@ -1,12 +1,12 @@
+import useGoogleQueries from '@modules/hooks/useGoogleQueries'
+import { Input } from 'antd'
+import { useEffect } from 'react'
+import useOnclickOutside from 'react-cool-onclickoutside'
 import usePlacesAutocomplete, {
   getGeocode,
   getLatLng,
 } from 'use-places-autocomplete'
-import useOnclickOutside from 'react-cool-onclickoutside'
-import { useEffect } from 'react'
-import { Input } from 'antd'
 import s from './style.module.scss'
-import useGoogleQueries from '@common/modules/hooks/useGoogleQueries'
 
 export const PlacesAutocomplete = ({
   isLoaded,
@@ -40,10 +40,8 @@ export const PlacesAutocomplete = ({
     () => {
       setValue(description, false)
       clearSuggestions()
-      //console.log('📍 Adr: ', description)
       getGeocode({ address: description }).then((results) => {
         const { lat, lng } = getLatLng(results[0])
-        //console.log('📍 Coordinates: ', { lat, lng })
         setAddress({ name: description, geoCode: { lat, lng } })
       })
     }
@@ -77,13 +75,13 @@ export const PlacesAutocomplete = ({
       setValue(address?.name)
       setAddress({ ...addressObj, name: address?.name })
     }
-  }, [address?.name])
+  }, [setValue, address?.name, addressObj, setAddress])
 
   useEffect(() => {
     if (addressObj?.geoCode) {
       getAddress(addressObj?.geoCode)
     }
-  }, [addressObj?.geoCode])
+  }, [getAddress, addressObj?.geoCode])
 
   return (
     <div ref={ref}>

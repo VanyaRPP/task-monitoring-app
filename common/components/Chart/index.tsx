@@ -1,63 +1,74 @@
-import React, { useEffect, useRef } from 'react'
-import Chart from 'chart.js/auto'
 import { generateColorsArray } from '@utils/helpers'
+import Chart from 'chart.js/auto'
+import React, { useEffect, useRef } from 'react'
 import s from './style.module.scss'
-import { companyAreas } from '@common/api/domainApi/domain.api.types'
+import { theme } from 'antd'
 type dataSources = {
-  label: string,
-  value: number
+  label: string
+  value: {
+    part: number
+    area: number
+  }
+  color?: string
 }
 
 const ChartComponent: React.FC<{
   dataSources: dataSources[]
   chartTitle: string
-  chartElementTitle: string
-}> = ({ dataSources, chartTitle, chartElementTitle }) => {
+  domainName: string
+}> = ({ dataSources, chartTitle, domainName }) => {
   const chartRef = useRef<HTMLCanvasElement | null>(null)
   const myChartRef = useRef<Chart<'pie', number[], string> | null>(null)
+  const { token } = theme.useToken()
 
-  const createChart = () => {
-    if (chartRef.current) {
-      const ctx = chartRef.current.getContext('2d')
-      myChartRef.current?.destroy()
-      myChartRef.current = new Chart<'pie', number[], string>(ctx, {
-        type: 'pie',
-        data: {
-          labels: dataSources?.map(i => i.label),
-          datasets: [
-            {
-              label: chartElementTitle,
-              data: dataSources?.map(i => i.value),
-              backgroundColor: generateColorsArray(dataSources?.length),
-              borderWidth: 2,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'right',
-            },
-            title: {
-              display: true,
-              text: chartTitle,
-              font: {
-                size: 24,
-                family: "'Arial', sans-serif",
-                weight: 'bold',
+  useEffect(() => {
+    if (!chartRef.current) return
+
+    const ctx = chartRef.current.getContext('2d')
+    myChartRef.current?.destroy()
+    myChartRef.current = new Chart<'pie', number[], string>(ctx, {
+      type: 'pie',
+      data: {
+        labels: dataSources?.map((i) => i.label),
+        datasets: [
+          {
+            data: dataSources?.map((i) => i?.value?.part),
+            backgroundColor: dataSources?.map(
+              (item, index) =>
+                item.color || generateColorsArray(dataSources?.length)[index]
+            ),
+            borderColor: token.colorBgContainer,
+            borderWidth: 2,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+          },
+          tooltip: {
+            callbacks: {
+              label: function (tooltipItem) {
+                return `${
+                  domainName !== tooltipItem.label
+                    ? 'Частка площі'
+                    : 'Незайнята площа'
+                } ${dataSources[tooltipItem.dataIndex]?.value?.area.toFixed(
+                  2
+                )} м²`
               },
-              color: '#722ed1',
+              footer: function (tooltipItems) {
+                return `${tooltipItems[0].parsed.toFixed(2)}%`
+              },
             },
           },
         },
-      })
-    }
-  }
+      },
+    })
 
-  useEffect(() => {
-    createChart()
     const resizeObserver = new ResizeObserver(() => {
       if (myChartRef.current) {
         myChartRef.current.resize()
@@ -69,11 +80,15 @@ const ChartComponent: React.FC<{
     return () => {
       resizeObserver.disconnect()
     }
-  }, [dataSources])
+  }, [chartRef, dataSources, chartTitle, token])
 
   return (
     <div className={s.chartContainer}>
-      <canvas ref={chartRef} className={s.chart} />
+      {dataSources?.find((item) => item?.value?.part !== 0) ? (
+        <canvas ref={chartRef} className={s.chart} />
+      ) : (
+        'Усі займані площі домену дорівнюють нулю'
+      )}
     </div>
   )
 }

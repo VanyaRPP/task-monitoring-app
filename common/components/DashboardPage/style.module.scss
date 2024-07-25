@@ -1,6 +1,67 @@
-.DashboardGrid {
-  .GridItem {
-    margin-bottom: 20px;
-    max-width: 99%;
-  }
+.gridItem {
+  position: relative;
+} 
+.gridItem:hover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.1);
+  pointer-events: none;
 }
+
+.gridItem:hover .deleteIcon {
+  opacity: 1;
+}
+
+.wrapper {
+  width: 100%;
+}
+
+.filterWrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  top: 90px;
+  position: sticky;
+  z-index: 1000;
+  padding: 15px 25px 15px 15px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+}
+.toolbar.light {
+  background: #fff;
+  color: #000;
+  border: 1px solid #d9d9d9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.toolbar.dark {
+  background: #141414;
+  color: #fff;
+  border: 1px solid #333;
+}
+.buttonsBlock {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.divider {
+  width: 1px;
+  height: 23px;
+  background: #555;
+  margin-right: 25px;
+  margin-top: 5px;
+}
+

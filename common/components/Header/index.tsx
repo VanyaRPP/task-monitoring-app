@@ -1,6 +1,6 @@
+import ThemeSwitcher from '@components/UI/ThemeSwitcher'
 import { Layout } from 'antd'
 import LoginUser from '../LoginUser'
-import ThemeSwitcher from '../UI/ThemeSwitcher'
 import Logo from '../Logo'
 import s from './style.module.scss'
 

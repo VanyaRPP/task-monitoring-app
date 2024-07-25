@@ -1,67 +1,78 @@
+import { getFormattedDate } from '@assets/features/formatDate'
+import { validateField } from '@assets/features/validators'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import { validateField } from '@common/assets/features/validators'
-import { getFormattedDate } from '@utils/helpers'
-import { Form, Select } from 'antd'
-import { useEffect } from 'react'
+import { Form, FormInstance, Select } from 'antd'
+import { useEffect, useMemo } from 'react'
 
-export default function MonthServiceSelect({
-  form,
-  edit,
-}: {
-  form: any
+export interface MonthServiceSelectProps {
+  form: FormInstance
   edit?: boolean
-}) {
-  const domainId = Form.useWatch('domain', form)
-  const streetId = Form.useWatch('street', form)
-
-  return domainId && streetId ? (
-    <MonthServiceDataFetcher
-      domainId={domainId}
-      streetId={streetId}
-      form={form}
-      edit={edit}
-    />
-  ) : (
-    <Form.Item label="Місяць">
-      <Select placeholder="Оберіть надавача послуг та адресу" disabled />
-    </Form.Item>
-  )
 }
 
-function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
-  const { data: monthsServices, isLoading } = useGetAllServicesQuery({
-    domainId,
-    streetId,
-  })
+const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
+  form,
+  edit,
+}) => {
+  const streetId: string = Form.useWatch('street', form)
+  const domainId: string = Form.useWatch('domain', form)
+  const serviceId: string = Form.useWatch('service', form)
+
+  const {
+    data: { data: services } = { data: [] },
+    isLoading: isServicesLoading,
+    isError: isServicesError,
+  } = useGetAllServicesQuery(
+    {
+      domainId,
+      streetId,
+    },
+    { skip: !domainId || !streetId }
+  )
+
+  const options = useMemo(() => {
+    return services.map((i) => ({
+      value: i._id,
+      label: getFormattedDate(i.date, 'MMMM YYYY'),
+    }))
+  }, [services])
 
   useEffect(() => {
-    form.resetFields(['monthService'])
-  }, [streetId]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (monthsServices && monthsServices.data?.length === 1) {
-      form.setFieldValue('monthService', monthsServices.data[0]._id)
+    if (!edit) {
+      if (options.length === 1) {
+        form.setFieldsValue({ monthService: options[0].value })
+      } else if (
+        !serviceId ||
+        !options.some((option) => option.value === serviceId)
+      ) {
+        form.setFieldsValue({ monthService: options[0]?.value })
+      }
     }
-  }, [monthsServices?.data?.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [form, options, serviceId, edit])
 
   return (
     <Form.Item
-      rules={!edit && validateField('required')}
       name="monthService"
       label="Місяць"
+      rules={validateField('required')}
     >
       <Select
-        filterOption={(input, option) => (option?.label ?? '').includes(input)}
-        options={(monthsServices?.data || []).map((i) => ({
-          value: i._id,
-          label: getFormattedDate(i.date, 'MMMM YYYY'),
-        }))}
-        optionFilterProp="children"
+        options={options}
+        optionFilterProp="label"
         placeholder="Місяць"
-        disabled={monthsServices?.data?.length === 1 || edit}
-        loading={isLoading}
+        status={isServicesError && 'error'}
+        loading={isServicesLoading}
+        disabled={
+          options.length === 0 ||
+          isServicesLoading ||
+          services.length === 1 ||
+          !streetId ||
+          !domainId
+        }
+        allowClear
         showSearch
       />
     </Form.Item>
   )
 }
+
+export default MonthServiceSelect

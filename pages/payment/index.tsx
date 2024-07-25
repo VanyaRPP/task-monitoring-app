@@ -1,24 +1,39 @@
-import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
-import { AppRoutes } from '../../utils/constants'
-import { unstable_getServerSession } from 'next-auth'
-import { authOptions } from '../api/auth/[...nextauth]'
-import { GetServerSideProps } from 'next'
-import { FC } from 'react'
 import PaymentsBlock from '@common/components/DashboardPage/blocks/payments'
+import MainLayout from '@common/components/Layouts/Main'
+import { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
+import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
+import { AppRoutes, Roles } from '@utils/constants'
+import { authOptions } from '../api/auth/[...nextauth]'
+import Head from 'next/head'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import FullScreenWrapper from '@components/UI/fullScreenTableWrapper/fullScreenTableWrapper'
 
+export default withAuthRedirect(() => {
+  const { data: userResponse } = useGetCurrentUserQuery()
+  const isUser = userResponse?.roles?.includes(Roles.USER)
 
-const Payments: FC = () => {
-  return <PaymentsBlock />
-}
-
-export default withAuthRedirect(Payments)
+  return (
+    <>
+      <Head>
+        <title>{isUser ? 'Мої платежі' : 'Платежі'}</title>
+      </Head>
+      <MainLayout
+        path={[
+          { title: 'Панель управління', path: AppRoutes.INDEX },
+          { title: 'Платежі', path: AppRoutes.PAYMENT },
+        ]}
+      >
+        <FullScreenWrapper unicKey="payments">
+          <PaymentsBlock />
+        </FullScreenWrapper>
+      </MainLayout>
+    </>
+  )
+})
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {
@@ -32,5 +47,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {},
   }
-  
 }

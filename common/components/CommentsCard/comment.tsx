@@ -1,12 +1,13 @@
-import { Comment as CommentAntd } from 'antd'
-import { useGetUserByIdQuery } from 'common/api/userApi/user.api'
-import { IComment } from 'common/modules/models/Task'
-import { useSession } from 'next-auth/react'
-import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
+import { Comment as CommentAntd } from '@ant-design/compatible'
+import {
+  useGetUserByEmailQuery,
+  useGetUserByIdQuery,
+} from '@common/api/userApi/user.api'
+import { IComment } from '@modules/models/Task'
 import classNames from 'classnames'
-import moment from 'moment'
-import s from './style.module.scss'
+import { useSession } from 'next-auth/react'
 import UserLink from '../UserLink'
+import s from './style.module.scss'
 
 const Comment: React.FC<{ comment: IComment; taskId: string }> = ({
   comment,
@@ -16,8 +17,7 @@ const Comment: React.FC<{ comment: IComment; taskId: string }> = ({
     session?.data?.user?.email
   )
 
-  const { data } = useGetUserByIdQuery(comment.id)
-  const user = data?.data
+  const { data: user } = useGetUserByIdQuery(comment.id)
 
   return (
     <>
@@ -28,7 +28,7 @@ const Comment: React.FC<{ comment: IComment; taskId: string }> = ({
         author={user ? <UserLink user={user} /> : 'Власника не знайдено'}
         avatar={user?.image || undefined}
         content={<p className={s.Description}>{comment?.text}</p>}
-        datetime={moment(comment?.datetime).fromNow()}
+        // datetime={dayjs(comment?.datetime).fromNow()}
       />
     </>
   )

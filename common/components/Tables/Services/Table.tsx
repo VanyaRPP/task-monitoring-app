@@ -1,17 +1,27 @@
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
-import { Alert, Popconfirm, Table, Tooltip, message, Button } from 'antd'
-import { ColumnType } from 'antd/lib/table'
-import { useRouter } from 'next/router'
-
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons'
+import { getFormattedDate } from '@assets/features/formatDate'
+import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import {
-  IExtendedService,
   IGetServiceResponse,
+  IService,
 } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { AppRoutes, Roles } from '@utils/constants'
-import { getFormattedDate, renderCurrency } from '@utils/helpers'
-import { IFilter } from '@common/api/paymentApi/payment.api.types'
+import { dateToYear } from '@common/assets/features/formatDate'
+import { AppRoutes, Roles, ServiceName } from '@utils/constants'
+import { isAdminCheck, renderCurrency } from '@utils/helpers'
+import { Alert, Button, Popconfirm, Table, Tooltip, message } from 'antd'
+import { ColumnType } from 'antd/lib/table'
+import { customServiceForm } from 'e2e/common/customServiceForm'
+import { useRouter } from 'next/router'
+import React from 'react'
+import { useCallback, useState } from 'react'
+
 interface Props {
   setServiceActions: React.Dispatch<
     React.SetStateAction<{
@@ -22,13 +32,19 @@ interface Props {
   serviceActions: {
     edit: boolean
     preview: boolean
-  },
-  setCurrentService: (setvice: IExtendedService) => void
+  }
+  setCurrentService: (service: IService) => void
   services: IGetServiceResponse
   isLoading?: boolean
   isError?: boolean
   filter?: any
   setFilter?: (filters: any) => void
+  setSelectedServices?: (service: IService[]) => void
+  customServices?: { _id: string; name: string }[]
+  user: any
+  domainsFilter: any
+  streetsFilter: any
+  dateFilters: any
 }
 
 const ServicesTable: React.FC<Props> = ({
@@ -40,57 +56,105 @@ const ServicesTable: React.FC<Props> = ({
   isError,
   filter,
   setFilter,
+  setSelectedServices,
+  customServices,
+  user,
+  domainsFilter,
+  streetsFilter,
+  dateFilters,
 }) => {
   const router = useRouter()
-  const isOnPage = router.pathname === AppRoutes.SERVICE
-
-  const { data: user } = useGetCurrentUserQuery()
-  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const { pathname } = router
+  const [pageData, setPageData] = useState({
+    pageSize: pathname === AppRoutes.SERVICE ? 10 : 5,
+    currentPage: 1,
+  })
+  const isOnPage = pathname === AppRoutes.SERVICE
 
   const [deleteService, { isLoading: deleteLoading }] =
     useDeleteServiceMutation()
 
-  const handleDelete = async (id: string) => {
-    const response = await deleteService(id)
-    if ('data' in response) {
-      message.success('Видалено!')
-    } else {
-      message.error('Помилка при видаленні')
-    }
-  }
+  const handleDelete = useCallback(
+    async (id: string) => {
+      const response = await deleteService(id)
+      if ('data' in response) {
+        message.success('Видалено!')
+      } else {
+        message.error('Помилка при видаленні')
+      }
+    },
+    [deleteService]
+  )
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
+
+  const handlePagination = (pagination) => {
+    setPageData({
+      pageSize: pagination.pageSize,
+      currentPage: pagination.current,
+    })
+  }
+
+  const filteredCustomServices = customServices?.filter(
+    (custom) =>
+      !services?.data.some((service) =>
+        service.customServices?.some((s) => String(s._id) === custom._id)
+      )
+  )
+
   return (
-    <Table
-      rowKey="_id"
-      size="small"
-      pagination={false}
-      loading={isLoading}
-      columns={getDefaultColumns(
-        isGlobalAdmin,
-        handleDelete,
-        deleteLoading,
-        setCurrentService,
-        services?.addressFilter,
-        services?.domainFilter,
-        filter,
-        isOnPage,
-        setServiceActions,
-        serviceActions,
-      )}
-      dataSource={services?.data}
-      scroll={{ x: 1700 }}
-      onChange={(__, filter) => {
-        setFilter(filter)
-      }}
-    />
+    <>
+      <Table
+        rowKey="_id"
+        rowSelection={
+          isAdminCheck(user?.roles) &&
+          router.pathname === AppRoutes.SERVICE && {
+            onChange: (_, selectedRows) => {
+              setSelectedServices(selectedRows)
+            },
+          }
+        }
+        pagination={
+          (router.pathname === AppRoutes.SERVICE ||
+            router.pathname === AppRoutes.SEP_DOMAIN) && {
+            total: services?.total,
+            current: pageData.currentPage,
+            showSizeChanger: true,
+            pageSizeOptions: [10, 20, 50],
+            position: ['bottomCenter'],
+            onChange: handlePagination,
+          }
+        }
+        loading={isLoading}
+        columns={getDefaultColumns(
+          isAdminCheck(user?.roles),
+          handleDelete,
+          deleteLoading,
+          setCurrentService,
+          streetsFilter?.streetsFilter,
+          domainsFilter?.domainsFilter,
+          dateFilters?.yearFilter,
+          dateFilters?.monthFilter,
+          filter,
+          isOnPage,
+          setServiceActions,
+          serviceActions,
+          filteredCustomServices
+        )}
+        dataSource={services?.data}
+        scroll={{ x: 1750 }}
+        onChange={(__, filter) => {
+          setFilter(filter)
+        }}
+      />
+    </>
   )
 }
 
 const renderTooltip = (text: string) => {
   return (
-    <Tooltip title={text} placement="bottomRight">
-      <span>{text}</span>
+    <Tooltip title={text} placement="top">
+      <QuestionCircleOutlined />
     </Tooltip>
   )
 }
@@ -99,13 +163,13 @@ const getDefaultColumns = (
   isAdmin?: boolean,
   handleDelete?: (...args: any) => void,
   deleteLoading?: boolean,
-  setCurrentService?: (service: IExtendedService) => void,
-  addressFilter?,
-  domainFilter?,
-  // filters?: IFilter[],
+  setCurrentService?: (service: IService) => void,
+  addressFilter?: IFilter[],
+  domainFilter?: IFilter[],
+  yearFilter?: IFilter[],
+  monthFilter?: IFilter[],
   filter?: any,
   isOnPage?: boolean,
-
   setServiceActions?: React.Dispatch<
     React.SetStateAction<{
       edit: boolean
@@ -116,75 +180,106 @@ const getDefaultColumns = (
     edit: boolean
     preview: boolean
   },
+  customServices?: { _id: string; name: string }[]
 ): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {
       fixed: 'left',
       title: 'Надавач послуг',
       dataIndex: 'domain',
+      width: 180,
       filters: isOnPage ? domainFilter : null,
       filteredValue: filter?.domain || null,
-      width: 200,
       render: (i) => i?.name,
+      filterSearch: true,
+    },
+    {
+      title: 'Рік',
+      dataIndex: 'year',
+      width: 120,
+      filters: isOnPage ? yearFilter : null,
+      filteredValue: filter?.year || null,
+      render: (_, record: IService) => dateToYear(record.date),
+      filterSearch: true,
     },
     {
       title: 'Адреса',
       dataIndex: 'street',
-      // filters: isOnPage ? filters : null,
+      width: 250,
       filters: isOnPage ? addressFilter : null,
       filteredValue: filter?.street || null,
       render: (i) => `${i?.address} (м. ${i?.city})`,
+      filterSearch: true,
     },
     {
       title: 'Місяць',
-      dataIndex: 'date',
-      width: 100,
-      render: (date) => getFormattedDate(date),
+      dataIndex: 'month',
+      width: 120,
+      filters: isOnPage ? monthFilter : null,
+      filteredValue: filter?.month || null,
+      render: (_, record: IService) => getFormattedDate(record.date),
+      filterSearch: true,
     },
     {
-      title: 'Утримання',
+      title: ServiceName.maintenancePrice,
       dataIndex: 'rentPrice',
-      width: 100,
+      width: 120,
+      ellipsis: true,
       render: renderCurrency,
+      sorter: isOnPage
+        ? (a, b) => a.maintenancePrice - b.maintenancePrice
+        : null,
     },
     {
-      title: 'Електрика',
+      title: ServiceName.electricityPrice,
       dataIndex: 'electricityPrice',
-      width: 100,
+      width: 120,
+      ellipsis: true,
       render: renderCurrency,
+      sorter: isOnPage
+        ? (a, b) => a.electricityPrice - b.electricityPrice
+        : null,
     },
     {
-      title: 'Вода',
+      title: ServiceName.waterPrice,
       dataIndex: 'waterPrice',
-      width: 100,
+      width: 120,
+      ellipsis: true,
       render: renderCurrency,
+      sorter: isOnPage ? (a, b) => a.waterPrice - b.waterPrice : null,
     },
     {
-      title: 'Всього водопостачання',
+      title: ServiceName.waterPart,
       dataIndex: 'waterPriceTotal',
-      width: 200,
+      width: 120,
+      ellipsis: true,
       render: renderCurrency,
+      sorter: isOnPage ? (a, b) => a.waterPart - b.waterPart : null,
     },
     {
-      title: 'Вивезення ТПВ',
+      title: ServiceName.garbageCollectorPrice,
       dataIndex: 'garbageCollectorPrice',
-      width: 200,
+      width: 120,
+      ellipsis: true,
       render: renderCurrency,
+      sorter: isOnPage
+        ? (a, b) => a.garbageCollectorPrice - b.garbageCollectorPrice
+        : null,
     },
     {
-      title: (
-        <Tooltip title="Індекс Інфляції">
-          <span>Індекс</span>
-        </Tooltip>
-      ),
-      width: 100,
+      title: ServiceName.inflicionPrice,
+      width: 120,
+      ellipsis: true,
       dataIndex: 'inflicionPrice',
+      sorter: isOnPage ? (a, b) => a.inflicionPrice - b.inflicionPrice : null,
     },
     {
       title: 'Опис',
       dataIndex: 'description',
       key: 'description',
       ellipsis: true,
+      width: 100,
+      align: 'center',
       render: renderTooltip,
     },
     {
@@ -192,7 +287,7 @@ const getDefaultColumns = (
       fixed: 'right',
       title: '',
       width: 50,
-      render: (_, service: IExtendedService) => (
+      render: (_, service: IService) => (
         <Button
           style={{ padding: 0 }}
           type="link"
@@ -207,6 +302,23 @@ const getDefaultColumns = (
     },
   ]
 
+  if (customServices?.length) {
+    customServices.forEach((custom) => {
+      columns.splice(columns.length - 2, 0, {
+        title: custom.name,
+        dataIndex: custom._id,
+        width: 120,
+        ellipsis: true,
+        render: (_, record: IService) => {
+          const match = record.customServices?.find(
+            (s) => String(s._id) === String(custom._id)
+          )
+          return match ? renderCurrency(match.price) : '-'
+        },
+      })
+    })
+  }
+
   if (isAdmin) {
     columns.push(
       {
@@ -214,7 +326,7 @@ const getDefaultColumns = (
         fixed: 'right',
         title: '',
         width: 50,
-        render: (_, service: IExtendedService) => (
+        render: (_, service: IService) => (
           <Button
             style={{ padding: 0 }}
             type="link"
@@ -232,7 +344,7 @@ const getDefaultColumns = (
         fixed: 'right',
         title: '',
         width: 50,
-        render: (_, service: IExtendedService) => (
+        render: (_, service: IService) => (
           <Popconfirm
             title={`Ви впевнені що хочете видалити послугу за місяць ${getFormattedDate(
               service.date
@@ -251,4 +363,4 @@ const getDefaultColumns = (
   return columns
 }
 
-export default ServicesTable
+export default React.memo(ServicesTable)

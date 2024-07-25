@@ -1,0 +1,867 @@
+import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
+import User, { IUser } from '@modules/models/User'
+import RealEstate from '@modules/models/RealEstate'
+import Domain from '@modules/models/Domain'
+import { FormInstance } from 'antd'
+import Big from 'big.js'
+import dayjs from 'dayjs'
+import 'dayjs/locale/uk'
+import mongoose, { ObjectId } from 'mongoose'
+import { CURRENCY_MAP, Roles, defaultServices, ServiceType } from '../constants'
+import {
+  getDomainsPipeline,
+  getRealEstatesPipeline,
+  getStreetsPipeline,
+} from '../pipelines'
+import { PaymentOptions } from '../types'
+import { IPermissions } from '@modules/models/User'
+import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
+import { AppRoutes, Operations } from '@utils/constants'
+import { useState, useEffect } from 'react'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+
+export const toFirstUpperCase = (text: string) => {
+  return text ? text[0].toUpperCase() + text.slice(1) : ''
+}
+
+export const getCount = (tasks: any, name: string) => {
+  return tasks?.filter((task) => task?.category == name)
+}
+export const getModifiedObjectOfFormInstance = (
+  form: FormInstance<any>,
+  values: { name: string; value: any }[]
+) => {
+  const fields = form.getFieldsValue()
+  values.map((item) => Object.assign(fields, { [item.name]: item.value }))
+  return fields
+}
+
+export const getFormattedAddress = (address: string) => {
+  if (address) {
+    const addressChunks = address.split(',')
+    if (
+      addressChunks[0].includes('вулиця') ||
+      addressChunks[0].includes('вул') ||
+      addressChunks[0].includes('улица')
+    ) {
+      if (
+        parseInt(addressChunks[1]) &&
+        parseInt(addressChunks[1]) === parseInt(addressChunks[1])
+      ) {
+        return `${addressChunks[0]}, ${addressChunks[1]}`
+      }
+      return addressChunks[0]
+    } else return addressChunks.join(', ')
+  }
+}
+
+export const getPaymentOptions = async ({
+  searchEmail,
+  userEmail,
+}: PaymentOptions) => {
+  const options: { payer?: string | ObjectId } = {}
+  // searching for original user
+  const user = await User.findOne({ email: userEmail })
+
+  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
+
+  if (isGlobalAdmin) {
+    if (searchEmail) {
+      // 1. admin looking for someone items
+      const searchUser = await User.findOne({ email: searchEmail })
+      // TODO: what if user not exists? if (!searchUser) {}
+
+      options.payer = searchUser._id
+      return options
+    }
+
+    // 2. admin looking for all items
+    return options
+  }
+
+  // 3. user can see only his items
+  options.payer = user._id
+
+  return options
+}
+
+export const getName = (name, obj) => {
+  let key = null
+  Object.entries(obj).forEach(([field, value]) => {
+    if (name === field) {
+      key = value
+    }
+  })
+  return key
+}
+
+export const isAdminCheck = (roles?: string[]): boolean => {
+  return [Roles.GLOBAL_ADMIN, Roles.DOMAIN_ADMIN].some((role) =>
+    roles?.includes(role)
+  )
+}
+
+export function getPlainJsObjectFromMongoose(dataArray) {
+  return dataArray.map((doc) => {
+    const plainObject = {}
+
+    for (const key in doc._doc) {
+      if (doc._doc.hasOwnProperty(key)) {
+        plainObject[key] = doc._doc[key]
+      }
+    }
+
+    return plainObject
+  })
+}
+
+export function composeFunctions(input, functions) {
+  return functions.reduce((result, func) => func(result), input)
+}
+
+export function parseReceived(data) {
+  return composeFunctions(data, [
+    getPlainJsObjectFromMongoose,
+    unpopulate,
+    removeProps,
+    formatDateToIsoString,
+  ])
+}
+
+export function compareDates(date1, date2) {
+  const dateA = new Date(date1)
+  const dateB = new Date(date2)
+
+  if (dateA > dateB) {
+    return -1
+  } else if (dateA < dateB) {
+    return 1
+  } else {
+    return 0
+  }
+}
+
+function formatDateToIsoString(data) {
+  return data.map((i) =>
+    i.invoiceCreationDate
+      ? {
+          ...i,
+          invoiceCreationDate: new Date(i.invoiceCreationDate).toISOString(),
+        }
+      : i
+  )
+}
+
+/**
+ * Omits specified properties from an object.
+ *
+ * @param {Record<string, any>} obj - The object to omit properties from.
+ * @param {string[]} props - The list of property names to omit.
+ * @returns {Record<string, any>} - A new object without the omitted properties.
+ */
+export const omit = (
+  obj: Record<string, any>,
+  props: string[]
+): Record<string, any> => {
+  return Object.keys(obj).reduce((result, key) => {
+    if (!props.includes(key)) {
+      result[key] = obj[key]
+    }
+    return result
+  }, {} as Record<string, any>)
+}
+
+/**
+ * Костиль, щоб прибрати `__v` з документу `mongodb` і далі порівнювати
+ * отримані дані із тестовими
+ * @param {any[]} data масив документів `mongo_object_response._doc`
+ * @returns {any[]} масив документів без поля `__v`
+ */
+export const removeProps = (data: any[], props = ['__v', 'services']): any[] =>
+  data.map((obj) => omit(obj, props))
+
+/**
+ * Ще один костиль для тестів, щоб зробити `reverse populate` документу
+ * `mongodb` для подальшого порівняння із тестовими даними
+ * @param {any[]} data масив документів `mongo_object_response`
+ * @returns {any[]} масив документів без `populate`
+ */
+export const unpopulate = (arr: any[]): any[] => {
+  return arr.map((obj) => {
+    const newObj = {}
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        if (obj[key] && obj[key]._id) {
+          newObj[key] = obj[key]._id.toString()
+        } else {
+          newObj[key] = obj[key]
+        }
+      }
+    }
+    return newObj
+  })
+}
+
+export function filterInvoiceObject(obj) {
+  const filtered = []
+  const services: string[] = Object.values(ServiceType)
+
+  for (const key in obj) {
+    if (typeof obj[key] === 'object' && obj[key].hasOwnProperty('sum')) {
+      services.includes(key)
+        ? filtered.push({
+            type: key,
+            ...obj[key],
+          })
+        : filtered.push({
+            type: ServiceType.Custom,
+            name: key,
+            ...obj[key],
+          })
+    }
+  }
+
+  return filtered
+}
+
+// export const renderCurrency = (number: number): string =>
+//   number ? new Intl.NumberFormat('en-EN').format(number) : '-'
+
+export const renderCurrency = (number: any): string => {
+  if (number == null || isNaN(number)) {
+    return '-'
+  }
+  return new Intl.NumberFormat('en-US').format(
+    Number(toRoundFixed(number.toString()))
+  )
+}
+
+export const renderPrice = (value?: unknown): string => {
+  if (typeof value !== 'number' || !isFinite(value)) {
+    return '-'
+  }
+  return renderCurrency(value)
+}
+
+export const formatDateDMY = (date: string) => {
+  return dayjs(date).format('DD-MM-YYYY')
+}
+
+export const getDefaultStartDate = (): string => {
+  const date = dayjs().subtract(3, 'month')
+
+  return formatDateDMY(date.toString())
+}
+
+const monthsUaGenitiveCapitalized = [
+  'Січня',
+  'Лютого',
+  'Березня',
+  'Квітня',
+  'Травня',
+  'Червня',
+  'Липня',
+  'Серпня',
+  'Вересня',
+  'Жовтня',
+  'Листопада',
+  'Грудня',
+]
+
+/**
+ * Форматує дату в формат: 20 Червня 2025
+ * з використанням родового відмінка і великої літери
+ */
+export const formatDateWithGenitiveMonthCapitalized = (
+  date: dayjs.Dayjs | Date
+): string => {
+  const d = dayjs(date)
+  return `${d.date()} ${monthsUaGenitiveCapitalized[d.month()]} ${d.year()}`
+}
+
+export const invoiceCSFilter = (invoices) => {
+  const excludedFields = [
+    'waterPart',
+    'waterPrice',
+    'waterPriceTotal',
+    'inflicionPrice',
+    'rentPrice',
+    'cleaningPrice',
+    'electricityPrice',
+    'garbageCollectorPrice',
+    'placingPrice',
+    'rentPart',
+  ]
+
+  return invoices.filter(
+    (invoice) => !excludedFields.includes(invoice.fieldName)
+  )
+}
+
+export const getPaymentProviderAndReciever = (company) => {
+  const provider: IProvider = company && {
+    description: company?.domain?.description || '',
+  }
+  const reciever: IReciever = company && {
+    companyName: company?.companyName,
+    adminEmails: company?.adminEmails,
+    description: company?.description,
+  }
+
+  return { provider, reciever }
+}
+
+export const importedPaymentDateToISOStringDate = (date) => {
+  return new Date(
+    dayjs(date, 'DD.MM.YYYY', true).format('YYYY-MM-DD')
+  ).toISOString()
+}
+
+/**
+ * Parses string to float in x.xx format
+ * @param value - string to be parsed into float
+ * @param length - count of digits after comma
+ * @returns float string on success or '0' on error
+ */
+export function toRoundFixed(value: string | number | any, length = 2): string {
+  try {
+    const num = Number(value.toString().replace(',', '.'))
+
+    if (isNaN(num) || num === null) {
+      throw new Error('NaN')
+    }
+
+    const multiplier = Number('1' + Array.from({ length }).fill('0').join(''))
+
+    return (Math.round(num * multiplier) / multiplier).toString()
+  } catch {
+    return '0'
+  }
+}
+
+export function currencyWithUnit(
+  value: number | string,
+  company?: IRealestate,
+  unit?: string
+) {
+  const currency = company?.currency ?? 'UAH'
+  const label = CURRENCY_MAP[currency]?.label ?? 'грн'
+
+  return `${value} ${label}${unit ? `/${unit}` : ''}`
+}
+
+export const normalizeCurrency = (currency?: string): 'UAH' | 'USD' | 'EUR' => {
+  const normalizedCurrency = currency?.toUpperCase()
+
+  if (normalizedCurrency === 'USD' || normalizedCurrency === 'EUR') {
+    return normalizedCurrency
+  }
+
+  return 'UAH'
+}
+
+export const getCurrencyShortLabel = (currency?: string): string => {
+  const normalizedCurrency = normalizeCurrency(currency)
+
+  return {
+    UAH: 'грн',
+    USD: 'USD',
+    EUR: 'EUR',
+  }[normalizedCurrency]
+}
+
+export const getCurrencySymbol = (currency?: string): string => {
+  const normalizedCurrency = normalizeCurrency(currency)
+
+  return {
+    UAH: '₴',
+    USD: '$',
+    EUR: '€',
+  }[normalizedCurrency]
+}
+
+export const getCurrencyNames = (
+  currency?: string
+): { major: string; minor: string } => {
+  const normalizedCurrency = normalizeCurrency(currency)
+
+  return {
+    UAH: { major: 'гривень', minor: 'копійок' },
+    USD: { major: 'доларів', minor: 'центів' },
+    EUR: { major: 'євро', minor: 'центів' },
+  }[normalizedCurrency]
+}
+
+
+export function multiplyFloat(a, b) {
+  const bigA = Big(toRoundFixed(`${a}`))
+  const bigB = Big(toRoundFixed(`${b}`))
+
+  return +bigA.mul(bigB).round(2, Big.roundDown).toNumber()
+}
+
+export function plusFloat(a, b) {
+  const bigA = Big(toRoundFixed(`${a}`))
+  const bigB = Big(toRoundFixed(`${b}`))
+
+  return +bigA.plus(bigB).round(2, Big.roundDown).toNumber()
+}
+
+export function filterOptions(options = {}, filterIds: any) {
+  const res = {
+    ...options,
+  } as any
+  const idsFromQueryFilter = (filterIds || '').split(',') || []
+  if (res.$in) {
+    res.$in = res.$in.filter((i) => idsFromQueryFilter.includes(i))
+    return res
+  }
+  res.$in = idsFromQueryFilter
+  return res
+}
+
+export async function getDistinctStreets({
+  user,
+  model,
+  filters: { filteredCompanys = null, filteredDomains = null },
+}: {
+  user: IUser
+  model: mongoose.Model<any>
+  filters: { filteredCompanys?: any; filteredDomains?: any }
+}): Promise<{ _id: mongoose.ObjectId; streetData: any }[] | undefined> {
+  // TODO: group of user roles helpers maybe? Such as isGlobalAdmin(user: IUser): boolean
+  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
+  const distinctDomains = await model.aggregate(domainsPipeline)
+  const streetsPipeline = getStreetsPipeline(
+    isGlobalAdmin,
+    distinctDomains.map((domain) => domain._id),
+    filteredCompanys,
+    filteredDomains
+  )
+  return await model.aggregate(streetsPipeline)
+}
+
+export async function getDistinctCompanyAndDomain({
+  isGlobalAdmin,
+  user,
+  companyGroup,
+  model,
+  filters: {
+    filteredCompanys = null,
+    filteredStreets = null,
+    filteredDomains = null,
+    archived = null,
+  },
+}) {
+  const domainsPipeline = getDomainsPipeline(
+    isGlobalAdmin,
+    user.email,
+    filteredCompanys,
+    filteredStreets
+  )
+  const streetsPipeline = getStreetsPipeline(isGlobalAdmin, user.email)
+
+  const distinctDomains = await model.aggregate(domainsPipeline)
+  const distinctStreets = await model.aggregate(streetsPipeline)
+
+  const distinctedDomainsIds =
+    filteredDomains === null
+      ? distinctDomains.map((domain) => domain._id)
+      : filteredDomains
+  const distinctedStreetsIds =
+    filteredStreets === null
+      ? distinctStreets.map((street) => street.streetData._id)
+      : filteredStreets
+
+  const realEstatesPipeline = getRealEstatesPipeline({
+    isGlobalAdmin,
+    distinctedDomainsIds,
+    distinctedStreetsIds,
+    group: companyGroup,
+    archived,
+  })
+  const distinctCompanies = await model.aggregate(realEstatesPipeline)
+
+  return { distinctDomains, distinctCompanies }
+}
+
+export const invoiceCoutWater = (waterPart, service) => {
+  return waterPart && service
+    ? ((waterPart / 100) * service?.waterPriceTotal).toFixed(2)
+    : 0
+}
+
+export function convertToInvoicesObject(
+  arr: { type: ServiceType; [key: string]: any }[]
+): { [key: string]: { [key: string]: any } } {
+  const result: { [key: string]: { [key: string]: any } } = {}
+
+  for (const item of arr) {
+    const { type, ...rest } = item
+    let newObj: { [key: string]: any } = { ...rest }
+
+    if (
+      [
+        ServiceType.Maintenance,
+        ServiceType.Placing,
+        ServiceType.GarbageCollector,
+      ].includes(type)
+    ) {
+      newObj = {
+        ...newObj,
+        amount: rest.hasOwnProperty('amount') ? rest.amount : 0,
+      }
+    }
+
+    if ([ServiceType.Electricity, ServiceType.Water].includes(type)) {
+      newObj = {
+        ...newObj,
+        amount: rest.hasOwnProperty('amount') ? rest.amount : 0,
+        lastAmount: rest.hasOwnProperty('lastAmount') ? rest.lastAmount : 0,
+      }
+    }
+
+    newObj.price = item.hasOwnProperty('price') ? item.price : item.sum
+    result[type] = newObj
+  }
+
+  return result
+}
+
+export function getRandomColor(): string {
+  const letters = '0123456789ABCDEF'
+  let color = '#'
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)]
+  }
+  return color
+}
+
+export function calculatePercentage(values: number[]): number[] {
+  const totalArea = values.reduce((sum, element) => sum + element, 0)
+  return values.map((element) => (element / totalArea) * 100)
+}
+
+export function generateColorsArray(length: number): string[] {
+  let initialColors: string[] = [
+    '#b4e4fc',
+    '#e4fcb4',
+    '#fcb4b4',
+    '#fcd8b4',
+    '#d8b4fc',
+  ]
+  if (length <= 5) {
+    initialColors = initialColors.slice(0, length)
+  } else {
+    const additionalColors = Array.from({ length: length - 5 }, () =>
+      getRandomColor()
+    )
+    initialColors = [...initialColors, ...additionalColors]
+  }
+  return initialColors
+}
+
+export function getFilterForAddress(streetDatas) {
+  const filterData = streetDatas.map(({ streetData }) => ({
+    text: `${streetData.address} (м. ${streetData.city})`,
+    value: streetData._id,
+  }))
+
+  const uniqueTextsSet = new Set()
+
+  const uniqueFilter = filterData.filter(({ text }) => {
+    if (!uniqueTextsSet.has(text)) {
+      uniqueTextsSet.add(text)
+      return true
+    }
+    return false
+  })
+
+  return uniqueFilter
+}
+
+export function getFilterForDomain(domains) {
+  const filterData = domains.map(({ domainDetails }) => ({
+    text: domainDetails.name,
+    value: domainDetails._id,
+  }))
+
+  return filterData
+}
+
+export function sortById(data: any) {
+  return data?.sort((a: any, b: any) => a._id.localeCompare(b._id))
+}
+
+/**
+ * Transforms the input into an array.
+ *
+ * @template T
+ * @param {any} input The input to be transformed. Can be of any type.
+ * @returns {T[]} An array containing the input elements. If input is already an array, it returns the input. If input is null or undefined, it returns an empty array.
+ */
+export function toArray<T = unknown>(input: any): T[] {
+  if (input === undefined || input === null) {
+    return []
+  }
+
+  if (Array.isArray(input)) {
+    return input
+  }
+
+  return [input]
+}
+
+/**
+ * Checks if the given value is empty.
+ *
+ * A value is considered empty if it is:
+ * - `undefined`
+ * - `null`
+ * - an empty `array`
+ * - an empty `string`
+ * - an `object` with no own properties
+ *
+ * @template T The type of the value.
+ * @param {T} value The value to check.
+ * @returns {boolean} `true` if the value is empty, otherwise `false`.
+ */
+export const isEmpty = <T = unknown>(value: T): boolean => {
+  return (
+    value === undefined ||
+    value === null ||
+    (Array.isArray(value) && value.length === 0) ||
+    (typeof value === 'string' && value.length === 0) ||
+    (typeof value === 'object' && Object.keys(value).length === 0)
+  )
+}
+
+/**
+ * Checks if two values are deeply equal. Performs a deep comparison between two values to determine if they are equivalent.
+ *
+ * @param {any} a The first value to compare.
+ * @param {any} b The second value to compare.
+ * @returns {boolean} `true` if the values are deeply equal, otherwise `false`.
+ */
+export const isEqual = (a: any, b: any): boolean => {
+  if (a === b) {
+    return true
+  }
+
+  if (typeof a !== typeof b || a === null || b === null) {
+    return false
+  }
+
+  if (typeof a === 'object' && typeof b === 'object') {
+    if (Array.isArray(a) !== Array.isArray(b)) {
+      return false
+    }
+
+    if (Array.isArray(a) && Array.isArray(b)) {
+      if (a.length !== b.length) {
+        return false
+      }
+      return a.every((item, index) => isEqual(item, b[index]))
+    }
+
+    const keysA = Object.keys(a)
+    const keysB = Object.keys(b)
+
+    if (keysA.length !== keysB.length) {
+      return false
+    }
+
+    return keysA.every((key) => isEqual((a as any)[key], (b as any)[key]))
+  }
+
+  return false
+}
+
+/**
+ * Generates a timestamp string in the format HH:MM:SS.mmm.
+ *
+ * @param {Date} [date=new Date()] - The date object to format. Defaults to the current date and time if not provided.
+ * @returns {string} The formatted timestamp string.
+ */
+export const toTimestamp = (date: Date = new Date()): string => {
+  const HH = date.getHours().toString().padStart(2, '0')
+  const MM = date.getMinutes().toString().padStart(2, '0')
+  const SS = date.getSeconds().toString().padStart(2, '0')
+  const mmm = date.getMilliseconds().toString().padStart(3, '0')
+  return `${HH}:${MM}:${SS}.${mmm}`
+}
+
+export const inputNumberParser = (value: string | undefined) => {
+  if (!value) return null
+
+  const cleanString = value
+    .replace(/(\s|,{2,})/g, '')
+    .replace(/,(?=\d{3})/g, '')
+
+  const formattedString = cleanString.replace(',', '.')
+  const result = parseFloat(formattedString)
+
+  return isNaN(result) ? null : result
+}
+
+// DOMAIN ADMIN HELPER
+export async function isDomainAdmin(user?: IUser): Promise<boolean> {
+  if (!user || !user.email) {
+    return false
+  }
+
+  try {
+    const domain = await RealEstate.findOne({ adminEmails: user.email })
+    return !!domain
+  } catch (error) {
+    console.error(error)
+    return false
+  }
+}
+
+export async function getDomainAdminDomains(
+  userEmail: string
+): Promise<string[]> {
+  try {
+    const domains = await Domain.find({
+      adminEmails: userEmail,
+    })
+    return domains.map((domain) => domain._id.toString())
+  } catch (error) {
+    console.error(error)
+    return []
+  }
+}
+// GLOBAL ADMIN HELPER
+
+export function isGlobalAdmin(user?: IUser): boolean {
+  if (!user || !user.roles) {
+    return false
+  }
+
+  return user.roles.includes('GlobalAdmin')
+}
+
+export function formatDateFilterForQuery(raw?: string[]) {
+  if (!raw?.length) return {}
+  const numbers = raw
+    .map((v) => {
+      const leading = parseInt(v, 10)
+      if (!isNaN(leading)) {
+        const m = v.match(/-(\d+)\s*$/)
+        if (m) {
+          return [leading, parseInt(m[1], 10)]
+        }
+        return [leading]
+      }
+      const n = Number(v)
+      return isNaN(n) ? [] : [n]
+    })
+    .flat()
+    .filter((n) => !isNaN(n)) as number[]
+  const [year, ...months] = numbers
+  const query: any = {}
+  if (year != null) {
+    query.year = year
+  }
+  if (months.length === 1) {
+    query.month = months[0]
+  } else if (months.length > 1) {
+    query.month = months
+  }
+  return query
+}
+export function getTypeOperation(value?: string) {
+  if (value === Operations.Debit) {
+    return { type: Operations.Debit }
+  } else if (value === Operations.Credit) {
+    return { type: Operations.Credit }
+  }
+  return {}
+}
+
+// usePermissions
+
+export function usePermissions(user?: IUser): IPermissions | null {
+  const [permissions, setPermissions] = useState<IPermissions | null>(null)
+
+  const { data: userData, isLoading } = useGetUserByEmailQuery(user?.email)
+
+  const isGlobalAdminUser = isGlobalAdmin(user)
+  const isDomainAdminUser = user?.roles.includes('DomainAdmin')
+
+  const isAdmin = isGlobalAdminUser || isDomainAdminUser
+
+  useEffect(() => {
+    if (!isLoading && userData) {
+      setPermissions({
+        isGlobalAdmin: isGlobalAdminUser,
+        isDomainAdmin: isDomainAdminUser,
+        isUser: !!userData,
+        isAdmin,
+      })
+    } else if (!isLoading && !userData) {
+      setPermissions({
+        isGlobalAdmin: false,
+        isDomainAdmin: false,
+        isUser: false,
+        isAdmin: false,
+      })
+    }
+  }, [isLoading, userData, isGlobalAdminUser, isDomainAdminUser])
+
+  return permissions
+}
+
+export function calculatePermissions(userDate: any, user: IUser) {
+  const isGlobalAdminUser = isGlobalAdmin(user)
+  const isDomainAdminUser = user?.roles.includes('DomainAdmin')
+  
+  const isAdmin = isGlobalAdminUser || isDomainAdminUser
+
+  if (!userDate) {
+    return {
+      isGlobalAdmin: false,
+      isDomainAdmin: false,
+      isUser: false,
+      isAdmin: false,
+    }
+  }
+  
+  return {
+    isGlobalAdmin: isGlobalAdminUser,
+    isDomainAdmin: isDomainAdminUser,
+    isUser: true,
+    isAdmin,
+  }
+}
+
+export function formatDebt(amount: number): string {
+  if (amount === 0) return '0.00'
+  if (amount > 0 && amount < 0.01) {
+    const roundedUp = Math.ceil(amount * 10000) / 10000 * 100
+    return roundedUp.toFixed(2)
+  }
+  return amount.toFixed(2)
+}
+
+export const getDebtorTooltipColor = (debtor: {
+  totalDebt: number
+}): string => {
+  if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
+    return 'gray'
+  } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
+    return 'yellow'
+  } else if (debtor.totalDebt >= 20000) {
+    return 'red'
+  }
+  return undefined
+}
+export const defaultServicesSet = new Set(defaultServices)
+
+export const isProtectedService = (id?: string): boolean => {
+
+  if (!id) return false
+  return defaultServicesSet.has(id)
+}

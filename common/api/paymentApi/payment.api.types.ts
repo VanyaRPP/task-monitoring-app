@@ -1,16 +1,22 @@
-import { IDomain } from '@common/modules/models/Domain'
-import { IUser } from './../../modules/models/User'
-import { IPaymentTableData } from '@common/components/Forms/AddPaymentForm/PaymentPricesTable/tableData'
+import { IService } from '@common/api/serviceApi/service.api.types'
+import { IDomain } from '@modules/models/Domain'
+import { IStreet } from '@modules/models/Street'
+import { IUser } from '@modules/models/User'
+import { ServiceType } from '@utils/constants'
 import { ObjectId } from 'mongoose'
 import { IRealestate } from '../realestateApi/realestate.api.types'
 
 export interface IPaymentField {
-  type: string
+  type: ServiceType | string
   name?: string
+  isIndividual?: boolean
+  serviceId?: string
   lastAmount?: number
+  losses?: number
   amount?: number
   price: number
   sum: number
+  fieldName?: string
 }
 
 export interface IProvider {
@@ -27,19 +33,28 @@ export interface IPayment {
   invoiceNumber: number
   type: string
   invoiceCreationDate: Date
-  domain: Partial<IDomain> | string
-  street: string
+  domain: Partial<IDomain> | any
+  street: Partial<IStreet> | string
   company: Partial<IRealestate> | string
-  monthService: string
+  monthService: Partial<IService> | string
   description?: string
-  services?: IPaymentTableData[]
   invoice: IPaymentField[]
   provider: IProvider
   reciever: IReciever
   generalSum: number
+  status: 'draft' | 'sent'
+  transaction?: IPaymentTransactions
+  losses?: number
 }
 
 export interface IExtendedPayment extends IPayment {
+  someUniqueField?: string
+  _id: string
+  _v: number
+}
+
+export interface IExtendedCostPayment extends ICostPayment {
+  someUniqueField?: string
   _id: string
   _v: number
 }
@@ -49,9 +64,14 @@ export interface IAddPaymentResponse {
   data: IExtendedPayment
 }
 
+export interface IAddCostPaymentResponse {
+  success: boolean
+  data: IExtendedCostPayment
+}
+
 export interface IFilter {
   text: string
-  value: string
+  value: any
 }
 
 export interface IGetPaymentResponse {
@@ -96,11 +116,82 @@ export interface IGetPaymentNumberResponse {
 }
 
 export interface IGeneratePaymentPDF {
-  payments: IExtendedPayment[],
+  payments: IExtendedPayment[]
 }
 
 export interface IGeneratePaymentPDFResponce {
   buffer: Buffer
   fileName: string
   fileExtension: string
+}
+
+export interface IGetCostPaymentResponse {
+  success: boolean
+  date: string
+  totalGeneralSumCredit: number
+  totalGeneralSumDebit: number
+  paymentsByType: {
+    credit: ICostPayment[]
+    debit: ICostPayment[]
+  }
+  data: any
+}
+
+export interface ICostPayment {
+  date: Date
+  sum: number
+  description: string
+}
+
+export interface IGeneratePaymentExcel {
+  payments: IExtendedPayment[]
+}
+
+export interface IGeneratePaymentExcelResponce {
+  buffer: {
+    data: Buffer
+  }
+  fileName: string
+  fileExtension: string
+}
+
+export interface IPaymentTransactions {
+  AUT_CNTR_ACC: string
+  AUT_CNTR_NAM: string
+  AUT_CNTR_MFO: string
+  Description: string
+}
+
+export interface IPaymentInvoiceSnapshot {
+  invoiceNumber: number
+  invoiceCreationDate: Date
+  invoice: IPaymentField[]
+  provider: IProvider
+  reciever: IReciever
+  generalSum: number
+  description?: string
+  type: string
+}
+
+export interface IPaymentChangeLog {
+  _id: string
+  paymentId: string
+  date: string
+  reason?: string
+  actorId?: string
+  actorEmail?: string
+  invoiceData: IPaymentInvoiceSnapshot
+}
+
+export interface IGetPaymentChangeLogsResponse {
+  success: boolean
+  data: IPaymentChangeLog[]
+}
+
+export interface ICreatePaymentChangeLogResponse {
+  success: boolean
+  data: IPaymentChangeLog
+}
+export interface IDeletePaymentChangeLogResponse {
+  success: boolean
 }

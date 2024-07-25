@@ -2,29 +2,109 @@ import {
   useAddRealEstateMutation,
   useEditRealEstateMutation,
 } from '@common/api/realestateApi/realestate.api'
-import RealEstateForm from './RealEstateForm'
-import { Form, message } from 'antd'
-import React, { FC } from 'react'
+import React, { FC, useEffect, useState, useRef, useMemo } from 'react'
 import {
   IExtendedRealestate,
   IRealestate,
 } from '@common/api/realestateApi/realestate.api.types'
+import { Form, message } from 'antd'
 import Modal from '../../ModalWindow'
-// import AddServiceForm from '../Forms/AddServiceForm'
-// import moment from 'moment'
+import RealEstateForm from './RealEstateForm'
+import { IDomain } from '@modules/models/Domain'
+import {
+  useGetCustomServicesQuery,
+  useGetCustomServicesByDomainQuery,
+} from '@common/api/customServicesApi/customServices.api'
 
-interface Props {
-  closeModal: VoidFunction
-  currentRealEstate?: IExtendedRealestate
+const getEntityId = (value?: { _id?: string } | string) => {
+  if (!value) return ''
+  return typeof value === 'string' ? value : value._id || ''
 }
 
-const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
+interface Props {
+  chosenRealEstate: { domain: string }
+  closeModal: VoidFunction
+  currentRealEstate?: IExtendedRealestate
+  editable?: boolean
+}
+
+const RealEstateModal: FC<Props> = ({
+  chosenRealEstate,
+  closeModal,
+  currentRealEstate,
+  editable,
+}) => {
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
+  const initializedRef = useRef(false)
   const [addRealEstate] = useAddRealEstateMutation()
   const [editRealEstate] = useEditRealEstateMutation()
+  const domainId = Form.useWatch('domain', form)
+  const currentDomainId = getEntityId(currentRealEstate?.domain) || domainId
+  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
+    { domainId: currentDomainId },
+    { skip: !currentDomainId }
+  )
+
+  const domainCustomServices = useMemo(() => {
+    return (
+      customDomainServices?.data?.flatMap((group) =>
+        Array.isArray(group?.services)
+          ? group.services.map((s) => ({
+              _id: s._id,
+              label: s.name,
+              fieldName: s.fieldName,
+              price: 0,
+            }))
+          : []
+      ) || []
+    )
+  }, [customDomainServices])
+
+  useEffect(() => {
+    if (initializedRef.current) return
+    if (!currentDomainId) return
+
+    form.setFieldsValue({
+      domain:
+        chosenRealEstate?.domain ||
+        getEntityId(currentRealEstate?.domain) ||
+        currentDomainId,
+      street:
+        currentRealEstate?.street &&
+        `${currentRealEstate.street.address} (м. ${currentRealEstate.street.city})`,
+      companyName: currentRealEstate?.companyName || '',
+      description: currentRealEstate?.description || '',
+      adminEmails: currentRealEstate?.adminEmails || [],
+      pricePerMeter: currentRealEstate?.pricePerMeter || 0,
+      servicePricePerMeter: currentRealEstate?.servicePricePerMeter || 0,
+      totalArea: currentRealEstate?.totalArea || 0,
+      currency: currentRealEstate?.currency || 'UAH',
+      garbageCollector: currentRealEstate?.garbageCollector || false,
+      archived: currentRealEstate?.archived || false,
+      rentPart: currentRealEstate?.rentPart || 0,
+      inflicion: currentRealEstate?.inflicion || false,
+      waterPart: currentRealEstate?.waterPart || 0,
+      discount: currentRealEstate?.discount || 0,
+      cleaning: currentRealEstate?.cleaning || 0,
+      services: currentRealEstate?.services || [],
+      customServices:
+        currentRealEstate?.customServices?.length > 0
+          ? currentRealEstate.customServices
+          : [],
+    })
+
+    initializedRef.current = true
+  }, [currentDomainId, chosenRealEstate?.domain, currentRealEstate, form])
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
+
+    const filteredCustomServices =
+      formData.customServices?.filter(
+        (s) => typeof s.price === 'number' && s.price > 0
+      ) || []
+
     const realEstateData = {
       domain: currentRealEstate?.domain || formData.domain,
       street: currentRealEstate?.street || formData.street,
@@ -32,14 +112,30 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
       description: formData.description,
       adminEmails: formData.adminEmails,
       pricePerMeter: formData.pricePerMeter,
-      servicePricePerMeter: formData.servicePricePerMeter,
       totalArea: formData.totalArea,
+      currency: formData.currency,
       garbageCollector: formData.garbageCollector,
-      rentPart: formData.rentPart,
+      archived: formData.archived,
       inflicion: formData.inflicion,
-      waterPart: formData.waterPart,
-      discount: formData.discount > 0 ? formData.discount * -1 : formData.discount,
-      cleaning: formData.cleaning,
+      discount:
+        formData.discount > 0 ? formData.discount * -1 : formData.discount,
+      services: formData.services,
+      servicePricePerMeter:
+        formData.customServices?.find((c) => c.fieldName === 'rentPrice')
+          ?.price ?? formData.servicePricePerMeter,
+      rentPart:
+        formData.customServices?.find(
+          (custom) => custom.fieldName === 'rentPart'
+        )?.price ?? formData.rentPart,
+      waterPart:
+        formData.customServices?.find(
+          (custom) => custom.fieldName === 'waterPart'
+        )?.price ?? formData.waterPart,
+      cleaning:
+        formData.customServices?.find(
+          (custom) => custom.fieldName === 'cleaningPrice'
+        )?.price ?? formData.cleaning,
+      customServices: filteredCustomServices,
     }
 
     const response = currentRealEstate
@@ -63,14 +159,22 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
   return (
     <Modal
       style={{ top: 20 }}
-      title={"Компанії"}
+      title={'Компанії'}
       onOk={handleSubmit}
-      changesForm={() => form.isFieldsTouched()}
+      changed={() => isValueChanged}
       onCancel={closeModal}
       okText={currentRealEstate ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
+      okButtonProps={{ style: { ...(!editable && { display: 'none' }) } }}
+      preview={!editable}
     >
-      <RealEstateForm form={form} currentRealEstate={currentRealEstate} />
+      <RealEstateForm
+        form={form}
+        currentRealEstate={currentRealEstate}
+        editable={editable}
+        setIsValueChanged={setIsValueChanged}
+        customServices={domainCustomServices}
+      />
     </Modal>
   )
 }

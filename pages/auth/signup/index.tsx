@@ -1,24 +1,20 @@
-import { useEffect, useState } from 'react'
+import SignInButton from '@common/components/UI/Buttons/SignInButton'
+import config from '@utils/config'
+import { AppRoutes, errors } from '@utils/constants'
+import { Alert } from 'antd'
+import { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
+import { BuiltInProviderType } from 'next-auth/providers'
 import {
   ClientSafeProvider,
   getCsrfToken,
   getProviders,
   LiteralUnion,
-  signIn,
 } from 'next-auth/react'
-import { Alert, message } from 'antd'
-import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import { AppRoutes, errors } from '@utils/constants'
-import SignInButton from '@common/components/UI/Buttons/SignInButton'
-import s from './style.module.scss'
-import { BuiltInProviderType } from 'next-auth/providers'
+import { useEffect, useState } from 'react'
 import { authOptions } from '../../api/auth/[...nextauth]'
-import { unstable_getServerSession } from 'next-auth'
-import { useForm } from 'antd/lib/form/Form'
-import AuthCard from '@common/components/AuthCard'
-import config from '@utils/config'
-import { useSignUpMutation } from '@common/api/userApi/user.api'
+import s from './style.module.scss'
 
 type PropsType = {
   providers: Record<
@@ -29,52 +25,12 @@ type PropsType = {
 }
 
 const SignUpPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
-  // const router = useRouter()
-  // const [form] = useForm()
-  // const [signUp] = useSignUpMutation()
-  // const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
-  // const [credentials, setCredentials] = useState<Record<string, string>>({
-  //   name: '',
-  //   email: '',
-  //   password: '',
-  //   confirmPassword: '',
-  // })
   const { error } = useRouter().query
   const [customError, setCustomError] = useState('')
 
   useEffect(() => {
     setCustomError(error && (errors[`${error}`] ?? errors.default))
   }, [error])
-
-  // const handleChange = (target) => {
-  //   const { name, value } = target
-  //   setCredentials({ ...credentials, [name]: value })
-  // }
-
-  // const handleSubmit = async () => {
-  //   setIsFormDisabled(true)
-  //   const formData = await form.validateFields()
-  //   if (credentials.password !== credentials.confirmPassword) {
-  //     setCustomError(config.errors.comparePasswordError)
-  //   } else {
-  //     const response = await signUp({
-  //       name: formData.name,
-  //       email: formData.email,
-  //       password: formData.password,
-  //     })
-  //     if ((response as any)?.data?.success) {
-  //       message.success('Ви успішно зареєструвалися')
-  //       router.push(AppRoutes.AUTH_SIGN_IN)
-  //     } else {
-  //       ;(response as any)?.error?.data?.error === 'User already exists!'
-  //         ? message.error('Користувач з данною поштою вже існує!')
-  //         : message.error('Помилка при реєстрації!')
-  //     }
-  //   }
-
-  //   form.resetFields()
-  //   setIsFormDisabled(false)
-  // }
 
   return (
     <>
@@ -92,7 +48,7 @@ const SignUpPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
 
       {process.env.NODE_ENV === 'development' ? (
         <div className={s.Container}>
-          {Object.values(providers).map(
+          {Object.values(providers)?.map(
             (provider: any) =>
               provider?.name === 'GitHub' && (
                 <SignInButton key={provider?.name} provider={provider} />
@@ -109,31 +65,6 @@ const SignUpPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
           )}
         </div>
       )}
-      {/* <div className={s.Container}>
-        <div className={s.HalfBlock}>
-          <AuthCard
-            form={form}
-            value={credentials}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            isSignUp
-            disabled={isFormDisabled}
-          />
-        </div>
-
-        <div className={s.Divider} />
-
-        <div className={s.HalfBlock}>
-          {Object.values(providers).map(
-            (provider: any) =>
-              provider?.name !== 'Email' &&
-              provider?.name !== 'Credentials' && 
-              (
-                <SignInButton key={provider?.name} provider={provider} />
-              )
-          )}
-        </div>
-      </div> */}
     </>
   )
 }
@@ -141,11 +72,7 @@ const SignUpPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
 export default SignUpPage
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (session) {
     return {

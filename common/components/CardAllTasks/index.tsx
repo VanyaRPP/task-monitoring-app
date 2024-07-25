@@ -1,4 +1,4 @@
-import { ITask } from '@common/modules/models/Task'
+import { ITask } from '@modules/models/Task'
 import CardOneTask from '../CardOneTask'
 import s from './style.module.scss'
 

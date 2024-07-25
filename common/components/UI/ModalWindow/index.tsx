@@ -3,7 +3,7 @@ import s from './style.module.scss'
 
 interface Props {
   children: React.ReactNode
-  changesForm: () => boolean
+  changed: () => boolean
   onCancel: () => void
   onOk: () => void
   okText?: string
@@ -13,14 +13,15 @@ interface Props {
   maskClickIgnore?: boolean
   style?: React.CSSProperties
   open?: boolean
-  okButtonProps?: ButtonProps 
-  // footer: any
+  okButtonProps?: ButtonProps
   title: string
+  preview?: boolean
+  destroyOnHidden?: boolean
 }
 
 const Modal: React.FC<Props> = ({
   children,
-  changesForm,
+  changed,
   onCancel,
   onOk,
   okText,
@@ -29,15 +30,17 @@ const Modal: React.FC<Props> = ({
   className,
   maskClickIgnore,
   style,
-  // footer,
   title,
   okButtonProps,
   open = true,
+  preview,
+  destroyOnHidden = false, ...props
 }) => {
+  const [modal, context] = AntModal.useModal()
 
   const handleCancel = () => {
-    if (changesForm()) {
-      AntModal.confirm({
+    if (changed()) {
+      modal.confirm({
         title: 'Ви впевнені, що хочете вийти?',
         content: 'Всі незбережені дані будуть втрачені',
         okText: 'Так',
@@ -50,22 +53,27 @@ const Modal: React.FC<Props> = ({
   }
 
   return (
+    <>
       <AntModal
-      confirmLoading={confirmLoading}
-      open={open}
-      maskClosable={!maskClickIgnore}
-      title={title}
-      onCancel={handleCancel}
-      onOk={onOk}
-      okText={okText}
-      cancelText={cancelText}
-      className={className ? className : s.Modal}
-      style={style}
-      okButtonProps={okButtonProps}
-    >
-      {children}
-    </AntModal>
+        confirmLoading={confirmLoading}
+        open={open}
+        maskClosable={!maskClickIgnore}
+        title={title}
+        onCancel={handleCancel}
+        onOk={onOk}
+        cancelText={cancelText}
+        okText={okText}
+        className={className ? className : s.Modal}
+        style={style}
+        okButtonProps={okButtonProps}
+        {...props}
+        destroyOnHidden={destroyOnHidden}
+      >
+        {children}
+      </AntModal>
+      {context}
+    </>
   )
 }
 
-export default Modal;
+export default Modal

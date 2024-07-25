@@ -1,10 +1,8 @@
 import { expect } from '@jest/globals'
-import handler from '.'
-import { removeProps, unpopulate } from '@utils/helpers'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
-import { payments, users, domains } from '@utils/testData'
-import { Roles } from '@utils/constants'
+import { domains, payments, users } from '@utils/testData'
+import handler from '.'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -177,5 +175,119 @@ describe('Payment API - PATCH', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
     expect(response.data.notValidField).toBe(undefined)
+  })
+})
+
+describe('Payment API - DELETE', () => {
+  it('should delete payments as GlobalAdmin - success', async () => {
+    await mockLoginAs(users.globalAdmin)
+
+    const mockReq = {
+      method: 'DELETE',
+      query: { id: payments[0]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+    expect(response.data._id.toString()).toBe(payments[0]._id.toString())
+  })
+
+  it('should delete payments as DomainAdmin - success', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const mockReq = {
+      method: 'DELETE',
+      query: { id: payments[0]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+    expect(response.data._id.toString()).toBe(payments[0]._id.toString())
+  })
+
+  it('should NOT delete payments as User - restricted access', async () => {
+    await mockLoginAs(users.user)
+
+    const mockReq = {
+      method: 'DELETE',
+      query: { id: payments[0]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(400)
+  })
+
+  it('should NOT delete payments as NoRole - restricted access', async () => {
+    await mockLoginAs(users.noRoleUser)
+
+    const mockReq = {
+      method: 'DELETE',
+      query: { id: payments[2]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(400)
+  })
+
+  it('should NOT delete payments as DomainAdmin of another domain - restricted access', async () => {
+    await mockLoginAs(users.user)
+
+    const mockReq = {
+      method: 'DELETE',
+      query: { id: payments[2]._id },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(400)
   })
 })

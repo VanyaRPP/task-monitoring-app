@@ -7,6 +7,7 @@ import {
   IGetDomainResponse,
   IExtendedAreas,
   IGetAreasResponse,
+  IGetDomainByPkResponse,
 } from './domain.api.types'
 
 export const domainApi = createApi({
@@ -33,9 +34,21 @@ export const domainApi = createApi({
           : [],
       transformResponse: (response: IGetDomainResponse) => response.data,
     }),
+    getDomainsByAdmin: builder.query<IExtendedDomain[], void>({
+      query: () => ({
+        url: `domain/admin`,
+        method: 'GET',
+      }),
+      providesTags: (response) =>
+        response
+          ? response.map((item) => ({ type: 'Domain', id: item._id }))
+          : [],
+      transformResponse: (response: IGetDomainResponse) => response.data,
+    }),
     addDomain: builder.mutation<IAddDomainResponse, IDomainModel>({
       query(data) {
         const { ...body } = data
+
         return {
           url: 'domain',
           method: 'POST',
@@ -72,10 +85,21 @@ export const domainApi = createApi({
         url: `domain/areas/${domainId}`,
         method: 'GET',
       }),
-      providesTags: (result, error, { domainId }) => [{ type: 'IDomain', id: domainId || '' }],
+      providesTags: (result, error, { domainId }) => [
+        { type: 'IDomain', id: domainId || '' },
+      ],
       transformResponse: (response: IGetAreasResponse) => response.data,
     }),
-    
+    getDomainByPk: builder.query<IExtendedDomain, { domainId?: string }>({
+      query: ({ domainId }) => ({
+        url: `domain/${domainId}`,
+        method: 'GET',
+      }),
+      providesTags: (result, error, { domainId }) => [
+        { type: 'Domain', id: domainId },
+      ],
+      transformResponse: (response: IGetDomainByPkResponse) => response.data,
+    }),
   }),
 })
 
@@ -85,4 +109,6 @@ export const {
   useAddDomainMutation,
   useDeleteDomainMutation,
   useEditDomainMutation,
+  useGetDomainByPkQuery,
+  useGetDomainsByAdminQuery,
 } = domainApi

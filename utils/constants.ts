@@ -1,10 +1,12 @@
 export enum AppRoutes {
   INDEX = '/',
+  TABLES = '/dashboard/tables',
   DASHBOARD = '/dashboard',
   PROFILE = '/profile',
+  ADMIN_PANEL = '/admin-panel',
   TASK = '/task',
   AUTH = '/auth',
-  AUTH_SIGN_IN = '/auth/sigin',
+  AUTH_SIGN_IN = '/auth/signin',
   AUTH_SIGN_UP = '/auth/signup',
   CONTACTS = '/contacts',
   ADMIN = '/admin',
@@ -13,32 +15,24 @@ export enum AppRoutes {
   DOMAIN = '/domain',
   PAYMENT = '/payment',
   PAYMENT_BULK = '/payment/bulk',
+  PAYMENT_CHART = '/payment/chart',
   SERVICE = '/service',
   CUSTOMER = '/customer',
   REAL_ESTATE = '/real-estate',
   STREETS = '/streets',
-  PAYMENTS_CHARTS = '/payments-chart',
+  BANK = '/bank',
+  SEP_DOMAIN = '/sepdomain',
+  PROFIT = '/profit',
 }
 
 export enum Operations {
   Credit = 'credit',
   Debit = 'debit',
-  Discount = 'discount',
-  MaintenancePrice = 'maintenancePrice',
-  InflicionPrice = 'inflicionPrice',
-  WaterPart = 'waterPart',
-  ElectricityPrice = 'electricityPrice',
-  GarbageCollectorPrice = 'garbageCollectorPrice',
-  CleaningPrice = 'cleaningPrice',
-  WaterPrice = 'waterPrice',
-  Custom = 'custom',
-  PlacingPrice = 'placingPrice',
-  GeneralSum = 'generalSum'
 }
 
 export enum ColumnsRoleView {
   GlobalAdmin = 1,
-  User = 2
+  User = 2,
 }
 
 export enum COLOR_THEME {
@@ -102,17 +96,17 @@ export enum TaskView {
 }
 export const saltRounds = 10
 
-export const paymentsTitle = {
-  maintenancePrice: 'Утримання',
-  placingPrice: 'Розміщення',
-  inflicionPrice: 'Індекс інфляції',
-  electricityPrice: 'Електропостачання',
-  waterPrice: 'Водопостачання',
-  garbageCollectorPrice: 'Вивіз ТПВ',
-  waterPart: 'Нарахування водопостачання',
-  discount: 'Знижка',
-  cleaningPrice: 'Прибирання',
-  custom: 'Додаткові витрати',
+export enum ServiceName {
+  placingPrice = 'Розміщення',
+  maintenancePrice = 'Утримання',
+  inflicionPrice = 'Індекс інфляції',
+  electricityPrice = 'Електропостачання',
+  waterPrice = 'Водопостачання',
+  garbageCollectorPrice = 'Вивіз ТПВ',
+  waterPart = 'Водонарахування',
+  discount = 'Знижка',
+  cleaningPrice = 'Прибирання',
+  custom = 'Додаткові витрати',
 }
 
 export enum ServiceType {
@@ -135,7 +129,17 @@ export const quarters = {
   '4': [10, 11, 12],
 }
 
-export const cascaderYears = ['2021', '2022', '2023', '2024']
+export const cascaderYears = (() => {
+  const currentYear = new Date().getFullYear()
+  const startYear = 2021
+  const years: string[] = []
+
+  for (let year = startYear; year <= currentYear; year++) {
+    years.push(year.toString())
+  }
+
+  return years
+})()
 
 export const cascaderQuarters = [
   {
@@ -154,6 +158,19 @@ export const cascaderQuarters = [
     label: `IV квартал`,
     value: '4',
   },
+]
+
+export const defaultServices = [
+  '677d414283b6ef93c6b8ea2c', // Утримання приміщень (грн/м²)
+  '68156d2cf520914e5e1ad87c', // Електропостачання
+  '68156cdbf520914e5e1ad877', // Водопостачання (грн/м³)
+  '6816bca1e26e39a785fd7a0d', // Всього Водопостачання (грн/м³)
+  '68156d58f520914e5e1ad881', // Вивіз сміття
+  '677d434c83b6ef93c6b8ea3a', // Прибирання (грн)
+  '68230f76a51fddf0ae165d77', // Інфляція
+  '682dd48d9665126611c81950', // Розміщення
+  '677d412483b6ef93c6b8e9fa', // Частка водопостачання
+  '677d437c83b6ef93c6b8ea50', // Частка загальної площі
 ]
 
 export const cascaderMonths = [
@@ -224,3 +241,9 @@ export const inflicionDescription = `
 Згідно з п. 13 Методики № 786 розмір орендної плати за кожний наступний місяць визначається шляхом коригування розміру місячної орендної плати за попередній місяць на індекс інфляції за поточний місяць.
 Тож для того щоб визначити розмір орендної плати за кожний наступний місяць оренди, необхідно розмір орендної плати за попередній місяць помножити на індекс інфляції за поточний місяць.
 При цьому зверніть увагу: такий механізм розрахунку застосовується незалежно від розміру індексу інфляції, тобто незалежно від того, перевищує ця величина 100 % чи ні, адже ніяких виключень та додаткових вимог з цього приводу чинне законодавство не містить.`
+
+export const CURRENCY_MAP = {
+  UAH: { label: 'грн' },
+  USD: { label: 'USD' },
+  EUR: { label: 'EUR' },
+} as const

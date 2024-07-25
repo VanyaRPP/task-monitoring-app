@@ -1,28 +1,58 @@
 .Header {
-  display: none;
-  text-align: center;
-  font-size: 16px;
-  transition: color 0.5s;
-  color: var(--primaryColor);
+  margin: 2rem 2rem 1rem;
+  padding: 2rem;
+  position: sticky;
 
-  @media (min-width: 425px) {
-    display: block;
-  }
-}
-
-.Komunalnik {
-  font-size: 64px;
-  text-align: center;
-  transition: color 0.5s;
-  color: var(--primaryColor);
-  letter-spacing: 3px;
-  margin-bottom: -0.1em;
-  font-weight: 700;
-}
-
-.Title {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row; // default for desktop
+
+  z-index: 60;
+
+  // Glassmorphism effect
+  background: rgba(100, 42, 181, 0.28);
+  border-radius: 50px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8.4px);
+  -webkit-backdrop-filter: blur(8.4px);
+  border: 1px solid rgba(100, 42, 181, 0.43);
+
+  .Logo {
+    display: flex;
+    align-items: center;
+    font-size: calc(12px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
+    color: var(--primaryColor);
+    transition: color 0.5s;
+
+    @media (max-width: 425px) {
+      font-size: calc(
+        12px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440)
+      ) !important;
+    }
+  }
+
+  .Menu {
+    display: flex;
+    align-items: center;
+    gap: 1rem; // optional spacing between Logo and Menu
+    font-size: calc(12px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
+    color: var(--primaryColor);
+    transition: color 0.5s;
+
+    @media (max-width: 425px) {
+      font-size: calc(
+        12px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440)
+      ) !important;
+    }
+  }
+
+  // Responsive change
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem; // optional spacing between Logo and Menu
+    align-items: flex-start; // or center if you'd like it centered
+  }
 }
 
 .HeaderMobile {
@@ -38,25 +68,6 @@
   }
 }
 
-.Smaller1 {
-  margin-top: 0;
-
-  @media (min-width: 320px) {
-    margin-bottom: -0.75rem;
-    letter-spacing: 2px;
-    font-size: calc(12px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
-  }
-}
-
-.Smaller2 {
-  margin-top: 0;
-
-  @media (min-width: 320px) {
-    letter-spacing: 2px;
-    font-size: calc(11px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
-  }
-}
-
 .Name {
   display: block;
   padding: 0 1rem;
@@ -67,6 +78,7 @@
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
+  padding: 2rem;
 }
 
 .HalfBlock {
@@ -84,22 +96,15 @@
 .Buttons {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 0;
-  gap: 1rem;
+  align-items: center;
+
+  gap: 0.7rem;
 
   @media (max-width: 600px) {
     gap: 0.5rem;
   }
 
-  @media (min-width: 1440px) {
-    margin-left: 50%;
-    margin-top: -2rem;
-    margin-bottom: 1rem;
-  }
-
   button {
-    max-width: 180px;
     width: 100%;
     height: 50px;
     font-size: 18px;
@@ -125,6 +130,7 @@
     margin: 10px 0;
     padding: 10px 10px;
   }
+
   @media (max-width: 600px) {
     padding: 10px 0;
     font-size: 12px;
@@ -135,17 +141,21 @@
     width: 120%;
     padding-top: 0.5rem;
   }
+
   @media (min-width: 1440px) {
     width: 100%;
     padding-top: 0.5rem;
   }
+
   @media (min-width: 2560px) {
     max-width: 1000px;
     width: 100%;
   }
+
   @media (width: 320px) {
     line-height: 1em;
   }
+
   span {
     font-weight: 500;
   }
@@ -153,12 +163,12 @@
 
 .Image {
   position: relative;
-  width: 72%;
-  height: 72%;
+  width: 100%;
+  height: 100%;
 
-  @media (min-width: 600px) and (max-width: 768px) {
-    width: 52%;
-  }
+  // @media (min-width: 600px) and (max-width: 768px) {
+  //   width: 52%;
+  // }
 
   > *:first-of-type {
     position: absolute !important;
@@ -166,9 +176,6 @@
     > * {
       animation: floater 10s ease-in-out infinite;
       z-index: 2;
-
-      // transition: filter 0.5s;
-      // filter: drop-shadow(2mm 2mm 20px var(--textColor));
     }
   }
 
@@ -176,9 +183,6 @@
     > * {
       animation: floater 10s ease-in-out 0.5s infinite;
       z-index: 1;
-
-      // transition: filter 0.5s;
-      // filter: drop-shadow(1mm 1mm 10px var(--textColor));
     }
   }
 
@@ -195,14 +199,66 @@
 
 @keyframes floater {
   0% {
-    transform: translateY(-5%);
+    transform: translateY(-30%);
   }
 
   50% {
-    transform: translateY(8%);
+    transform: translateY(1%);
   }
 
   100% {
-    transform: translateY(-5%);
+    transform: translateY(-30%);
+  }
+}
+
+.TextGlassCard {
+  // Glassmorphism effect
+  background: rgba(100, 42, 181, 0.28);
+  border-radius: 50px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8.4px);
+  -webkit-backdrop-filter: blur(8.4px);
+  border: 1px solid rgba(100, 42, 181, 0.43);
+
+  padding: 2rem;
+  text-align: center;
+  text-align: center;
+  z-index: 60;
+}
+
+.cardPage {
+  position: fixed;
+  bottom: 1;
+  right: 1;
+  z-index: 100000;
+  pointer-events: none;
+  width: 50%;
+
+  transform: translate(5%, 15%);
+  transform-origin: bottom right;
+
+  perspective: 900px;
+  overflow: visible;
+
+  @media (min-width: 768px) and (max-width: 1199px) {
+    position: relative;
+    bottom: 1rem;
+    margin: 0 auto;
+    transform-origin: center bottom;
+    transform: scale(0.8) translate(15%);
+  }
+
+  @media (max-width: 480px) {
+    position: relative;
+    transform-origin: center bottom;
+    transform: scale(0.55) translate(15%, -55%);
+  }
+
+  @media (min-width: 1200px) {
+    position: relative;
+    bottom: 1rem;
+    right: 1rem;
+    transform: scale(0.9) translate(5%);
+    transform-origin: bottom right;
   }
 }

@@ -1,22 +1,29 @@
-import { months } from 'moment'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { Operations } from '@utils/constants'
 import {
   IAddPaymentResponse,
   IDeletePaymentResponse,
   IExtendedPayment,
-  IGetPaymentResponse,
-  IGetPaymentNumberResponse,
-  IPayment,
   IGeneratePaymentPDF,
   IGeneratePaymentPDFResponce,
+  IGetPaymentNumberResponse,
+  IGetPaymentResponse,
+  IPayment,
+  IGetCostPaymentResponse,
+  IGeneratePaymentExcel,
+  IGeneratePaymentExcelResponce,
+  IAddCostPaymentResponse,
+  ICostPayment,
+  IGetPaymentChangeLogsResponse,
+  ICreatePaymentChangeLogResponse,
 } from './payment.api.types'
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { Operations } from '@utils/constants'
+import { ITransaction } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
 
 export const paymentApi = createApi({
   reducerPath: 'paymentApi',
   refetchOnFocus: true,
   refetchOnReconnect: true,
-  tagTypes: ['Payment'],
+  tagTypes: ['Payment', 'Profit'],
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getAllPayments: builder.query<
@@ -28,11 +35,13 @@ export const paymentApi = createApi({
         email?: string
         year?: number
         quarter?: number
-        month?: number
+        month?: number | number[]
         day?: number
         domainIds?: string[]
         companyIds?: string[]
         streetIds?: string[]
+        serviceIds?: string[]
+        dateField?: 'invoiceCreationDate' | 'date'
       }
     >({
       query: ({
@@ -47,6 +56,7 @@ export const paymentApi = createApi({
         domainIds,
         companyIds,
         streetIds,
+        serviceIds,
       }) => {
         return {
           url: `spacehub/payment`,
@@ -62,6 +72,7 @@ export const paymentApi = createApi({
             domainIds,
             companyIds,
             streetIds,
+            serviceIds,
           },
         }
       },
@@ -71,6 +82,15 @@ export const paymentApi = createApi({
           ? response.data.map((item) => ({ type: 'Payment', id: item._id }))
           : [],
     }),
+    getPayment: builder.query<IGetPaymentResponse, string>({
+      query: (id) => `spacehub/payment/${id}`,
+    }),
+    getCostPayment: builder.query<IGetCostPaymentResponse, void>({
+      query: () => ({
+        url: `profit`,
+      }),
+      providesTags: (result) => (result ? ['Profit'] : []),
+    }),
     addPayment: builder.mutation<IAddPaymentResponse, IPayment>({
       query(body) {
         return {
@@ -79,7 +99,16 @@ export const paymentApi = createApi({
           body,
         }
       },
-      invalidatesTags: (response) => (response ? ['Payment'] : []),
+      invalidatesTags: (response) => (response ? ['Payment', 'Profit'] : []),
+    }),
+    addCostPayment: builder.mutation<IAddCostPaymentResponse, ICostPayment>({
+      query(body) {
+        return {
+          url: `profit`,
+          method: 'POST',
+          body,
+        }
+      },
     }),
     deletePayment: builder.mutation<
       IDeletePaymentResponse,
@@ -102,7 +131,7 @@ export const paymentApi = createApi({
           url: 'spacehub/payment/multiple',
           method: 'DELETE',
           body: { ids },
-        };
+        }
       },
       invalidatesTags: (response) => (response ? ['Payment'] : []),
     }),
@@ -131,15 +160,48 @@ export const paymentApi = createApi({
         body,
       }),
     }),
+    generateExcel: builder.mutation<
+      IGeneratePaymentExcelResponce,
+      IGeneratePaymentExcel
+    >({
+      query: (body) => ({
+        url: 'spacehub/payment/generateExcel',
+        method: 'POST',
+        body,
+      }),
+    }),
+    getPaymentChangeLogs: builder.query<IGetPaymentChangeLogsResponse, string>({
+      query: (paymentId) => `spacehub/payment/${paymentId}/change-log`,
+      providesTags: (res, err, paymentId) =>
+        res ? [{ type: 'Payment', id: paymentId }] : [],
+    }),
+
+    createPaymentChangeLog: builder.mutation<
+      ICreatePaymentChangeLogResponse,
+      { paymentId: string; invoiceData: any; reason?: string }
+    >({
+      query: ({ paymentId, ...body }) => ({
+        url: `spacehub/payment/${paymentId}/change-log`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: (res, err, args) =>
+        res ? [{ type: 'Payment', id: args.paymentId }] : [],
+    }),
   }),
 })
-
 export const {
+  useGetPaymentChangeLogsQuery,
+  useCreatePaymentChangeLogMutation,
   useAddPaymentMutation,
   useGetAllPaymentsQuery,
+  useGetPaymentQuery,
   useDeletePaymentMutation,
   useDeleteMultiplePaymentsMutation,
   useGetPaymentNumberQuery,
   useEditPaymentMutation,
   useGeneratePdfMutation,
+  useGetCostPaymentQuery,
+  useAddCostPaymentMutation,
+  useGenerateExcelMutation,
 } = paymentApi

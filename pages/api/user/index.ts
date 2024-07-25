@@ -1,7 +1,7 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import User from 'common/modules/models/User'
+import User from '@modules/models/User'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
 

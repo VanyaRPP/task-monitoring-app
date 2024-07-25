@@ -1,0 +1,19 @@
+# Ignore public folder
+public/
+
+# Ignore node_modules
+node_modules/
+
+# Ignore build outputs
+.next/
+out/
+build/
+dist/
+
+# Ignore generated files
+*.min.js
+*.min.css
+
+# Ignore config files
+next.config.js
+next-i18next.config.js

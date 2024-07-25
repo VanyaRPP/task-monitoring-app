@@ -1,23 +1,47 @@
-import { unstable_getServerSession } from 'next-auth'
-import { authOptions } from './api/auth/[...nextauth]'
+import MainLayout from '@common/components/Layouts/Main'
+import { useScrollToTop } from '@modules/hooks/useScrollToTop'
+import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
-import HomePage from '../common/components/HomePage/index'
+import { getServerSession } from 'next-auth'
+import Head from 'next/head'
 import DashboardPage from '../common/components/DashboardPage'
+import DashboardLanding from '../common/components/Pages/DashboardLanding'
+import HomePage from '../common/components/HomePage/index'
+import { authOptions } from './api/auth/[...nextauth]'
 
 const Home: React.FC<{
   isAuth: boolean
 }> = ({ isAuth }) => {
-  return isAuth ? <DashboardPage /> : <HomePage />
+  const { handleNavigateHome } = useScrollToTop()
+  return (
+    <>
+      <Head>
+        <title>
+          {isAuth ? 'Персональний кабінет' : 'Комуналка в E-ORENDA'}
+        </title>
+      </Head>
+      {isAuth ? (
+        <MainLayout
+          path={[{ title: 'Панель управління', path: AppRoutes.INDEX }]}
+          onPathClick={(path) => {
+            if (path === AppRoutes.INDEX) handleNavigateHome()
+          }}
+        >
+          <DashboardLanding /> 
+        </MainLayout>
+      ) : (
+        <MainLayout simple>
+          <HomePage /> 
+        </MainLayout>
+      )}
+    </>
+  )
 }
 
 export default Home
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

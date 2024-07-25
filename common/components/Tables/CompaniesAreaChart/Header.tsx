@@ -1,23 +1,20 @@
+import DomainSelector from '@components/DomainSelector'
 import { Typography } from 'antd'
 import s from './style.module.scss'
-import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import DomainSelector from '@common/components/DomainSelector'
 
 const { Text } = Typography
 
 interface Props {
   setDomainId: (domainId: string) => void
-  domains: IExtendedDomain[]
 }
 
-const CompaniesAreaChartHeader: React.FC<Props> = ({
-  setDomainId,
-  domains,
-}) => {
+const CompaniesAreaChartHeader: React.FC<Props> = ({ setDomainId }) => {
   return (
-    <div className={s.chartBlock}>
+    <div className={s.chartBlock} style={{ gap: 8 }}>
       <Text>Займані площі</Text>
-      <DomainSelector domains={domains} setDomainId={setDomainId} />
+      <div style={{ width: 200 }}>
+        <DomainSelector onSelect={(domainId) => setDomainId(domainId)} />
+      </div>
     </div>
   )
 }

@@ -1,11 +1,8 @@
+import { TaskStatuses } from '@utils/constants'
 import { Button, message, Steps } from 'antd'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
-import { TaskStatuses } from '../../../../utils/constants'
-import {
-  useChangeTaskStatusMutation,
-  useGetAllTaskQuery,
-} from '../../../api/taskApi/task.api'
+import { useChangeTaskStatusMutation } from '../../../api/taskApi/task.api'
 import ConfirmTask from '../../Forms/ConfirmTask'
 import s from './style.module.scss'
 

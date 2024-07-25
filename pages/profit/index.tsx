@@ -1,0 +1,47 @@
+import MainLayout from '@common/components/Layouts/Main'
+import ProfitPayment from '@components/DashboardPage/ProfitPayment/ProfitPayment'
+import withAuthRedirect from '@components/HOC/withAuthRedirect'
+import ProfitPage from '@components/Pages/ProfiitPage'
+import { authOptions } from '@pages/api/auth/[...nextauth]'
+import { AppRoutes } from '@utils/constants'
+import { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
+
+import Head from 'next/head'
+
+export default withAuthRedirect(() => {
+  return (
+    <>
+      <Head>
+        <title>Прибутки</title>
+      </Head>
+
+      <MainLayout
+        path={[
+          { title: 'Платежі', path: AppRoutes.PAYMENT },
+          { title: 'Прибутки', path: AppRoutes.PROFIT },
+        ]}
+      >
+        {/* <ProfitPayment /> */}
+        <ProfitPage />
+      </MainLayout>
+    </>
+  )
+})
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getServerSession(context.req, context.res, authOptions)
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: AppRoutes.AUTH_SIGN_IN,
+        permanent: false,
+      },
+    }
+  }
+
+  return {
+    props: {},
+  }
+}

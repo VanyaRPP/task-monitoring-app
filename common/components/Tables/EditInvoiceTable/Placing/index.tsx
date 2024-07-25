@@ -1,0 +1,279 @@
+import { ReloadOutlined } from '@ant-design/icons'
+import { dateToMonthYear } from '@assets/features/formatDate'
+import { usePaymentContext } from '@components/AddPaymentModal'
+import {
+  InvoiceComponentProps,
+  InvoiceType,
+} from '@components/Tables/EditInvoiceTable'
+import { ServiceType } from '@utils/constants'
+import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
+import validator from '@utils/validator'
+import { Button, Flex, Form, Input, Space, Tooltip, Typography } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
+import UpdateInvoiceButton from '../UpdateInvoiceButton'
+
+export const Name: React.FC<InvoiceComponentProps> = ({
+  form,
+  name: _name,
+  editable,
+  disabled,
+}) => {
+  const { company, service } = usePaymentContext()
+  const name = useMemo(() => toArray<string>(_name), [_name])
+
+  return (
+    <Space
+      direction="horizontal"
+      style={{ justifyContent: 'space-between', width: '100%' }}
+    >
+      <Space direction="vertical" size={0}>
+        <Typography.Text>Розміщення</Typography.Text>
+        {company?.inflicion && (
+          <Typography.Text type="secondary" style={{ fontSize: '0.9rem' }}>
+            (без врах. інд. інф.)
+          </Typography.Text>
+        )}
+        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+          {toFirstUpperCase(dateToMonthYear(service?.date))}
+        </Typography.Text>
+      </Space>
+      {editable && (
+        <UpdateInvoiceButton
+          form={form!}
+          name={name}
+          serviceType={ServiceType.Placing}
+          disabled={disabled}
+        />
+      )}
+    </Space>
+  )
+}
+
+export const Amount: React.FC<InvoiceComponentProps> = ({
+  form,
+  name: _name,
+  editable,
+  disabled,
+}) => {
+  const name = useMemo(() => toArray<string>(_name), [_name])
+  const { company, prevService, prevPayment } = usePaymentContext()
+
+  const [snapshotPrice, setSnapshotPrice] = useState<number | null>(null)
+  const [changed, setChanged] = useState<boolean>(false)
+
+  const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
+  const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+
+  const inflicionInvoice = useMemo(() => {
+    return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
+  }, [invoices])
+
+  const prevPlacingInvoice = useMemo(() => {
+    return prevPayment?.invoice.find(
+      (invoice) => invoice.type === ServiceType.Placing
+    )
+  }, [prevPayment])
+
+  const rentPrice = useMemo(() => {
+    if (typeof prevPlacingInvoice?.sum === 'number') {
+      return prevPlacingInvoice.sum
+    }
+    const area = company?.totalArea ?? 1
+    const pricePerMeter = company?.pricePerMeter ?? prevService?.rentPrice ?? 0
+    return area * pricePerMeter
+  }, [prevPlacingInvoice, company, prevService])
+
+  const calculatedInitialPrice = useMemo(() => {
+    return +toRoundFixed(rentPrice + (inflicionInvoice?.sum ?? 0))
+  }, [rentPrice, inflicionInvoice])
+
+  const isInitial = useMemo(() => {
+    return toRoundFixed(price) === toRoundFixed(calculatedInitialPrice)
+  }, [price, calculatedInitialPrice])
+
+  if (company?.inflicion && !prevService?.inflicionPrice) {
+    return <span>Інфляція за попередній місяць невідома</span>
+  }
+
+  if (company?.inflicion) {
+    return (
+      <Flex justify="space-between" align="center">
+        {(editable || (!editable && isInitial)) && (
+          <Typography.Text delete={!isInitial}>
+            {currencyWithUnit(toRoundFixed(rentPrice), company)} +{' '}
+            {currencyWithUnit(toRoundFixed(inflicionInvoice?.sum), company)} ={' '}
+          </Typography.Text>
+        )}
+        {editable && !isInitial && (
+          <Tooltip title="Відновити початкове значення">
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                Promise.resolve().then(() => {
+                  form.setFieldValue(
+                    ['invoice', ...name, 'price'],
+                    calculatedInitialPrice
+                  )
+                  setSnapshotPrice(calculatedInitialPrice)
+                  setChanged(false)
+                  form.setFieldValue(['invoiceMeta', 'changed'], false)
+                })
+              }}
+            />
+          </Tooltip>
+        )}
+      </Flex>
+    )
+  }
+
+  if (!editable) {
+    return (
+      <span>
+        {toRoundFixed(amount)} м<sup>2</sup>
+      </span>
+    )
+  }
+
+  return (
+    <Form.Item
+      name={[...name, 'amount']}
+      rules={[validator.required()]}
+      style={{ margin: 0 }}
+    >
+      <Input
+        type="number"
+        placeholder="Значення..."
+        disabled={disabled}
+        suffix={
+          <span>
+            м<sup>2</sup>
+          </span>
+        }
+      />
+    </Form.Item>
+  )
+}
+
+export const Price: React.FC<InvoiceComponentProps> = ({
+  form,
+  name: _name,
+  editable,
+  disabled,
+}) => {
+  const name = useMemo(() => toArray<string>(_name), [_name])
+  const { company, prevService, prevPayment } = usePaymentContext()
+  const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
+  const watchedPrice = Form.useWatch(['invoice', ...name, 'price'], form)
+  const changed = Form.useWatch(['invoiceMeta', 'changed'], form) ?? false
+  const inflicionInvoice = useMemo(() => {
+    return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
+  }, [invoices])
+
+  const prevPlacingInvoice = useMemo(() => {
+    return prevPayment?.invoice.find(
+      (invoice) => invoice.type === ServiceType.Placing
+    )
+  }, [prevPayment])
+
+  const rentPrice = useMemo(() => {
+    if (typeof prevPlacingInvoice?.sum === 'number') {
+      return prevPlacingInvoice.sum
+    }
+    const area = company?.totalArea ?? 1
+    const pricePerMeter = company?.pricePerMeter ?? prevService?.rentPrice ?? 0
+    return area * pricePerMeter
+  }, [prevPlacingInvoice, company, prevService])
+
+  const calculatedInitialPrice = useMemo(() => {
+    return +toRoundFixed(rentPrice + (inflicionInvoice?.sum ?? 0))
+  }, [rentPrice, inflicionInvoice])
+
+  useEffect(() => {
+    if (
+      company?.inflicion &&
+      editable &&
+      !changed &&
+      inflicionInvoice?.sum !== undefined
+    ) {
+      Promise.resolve().then(() => {
+        form.setFieldValue(
+          ['invoice', ...name, 'price'],
+          calculatedInitialPrice
+        )
+      })
+    }
+  }, [
+    company,
+    editable,
+    changed,
+    inflicionInvoice?.sum,
+    calculatedInitialPrice,
+    form,
+    name,
+  ])
+
+  const suffix = useMemo(() => {
+    return company?.inflicion ? (
+      <span>{currencyWithUnit('', company)}</span>
+    ) : (
+      <span>
+        {currencyWithUnit('', company)}/м<sup>2</sup>
+      </span>
+    )
+  }, [company])
+
+  if (!editable) {
+    return (
+      <span>
+        {toRoundFixed(watchedPrice)} {suffix}
+      </span>
+    )
+  }
+
+  return (
+    <Form.Item
+      name={[...name, 'price']}
+      rules={[validator.required()]}
+      style={{ margin: 0 }}
+    >
+      <Input
+        type="number"
+        placeholder="Значення..."
+        disabled={disabled}
+        suffix={suffix}
+        value={watchedPrice}
+        onChange={() => {
+          form.setFieldValue(['invoiceMeta', 'changed'], true)
+        }}
+      />
+    </Form.Item>
+  )
+}
+
+export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
+  const name = useMemo(() => toArray<string>(_name), [_name])
+  const { company } = usePaymentContext()
+
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
+  const sum = Form.useWatch(['invoice', ...name, 'sum'], form)
+
+  useEffect(() => {
+    form.setFieldValue(
+      ['invoice', ...name, 'sum'],
+      company?.inflicion ? +price : +price * +amount
+    )
+  }, [form, name, price, amount, company])
+
+  return <strong>{currencyWithUnit(toRoundFixed(sum), company)}</strong>
+}
+
+const Placing = {
+  Name,
+  Amount,
+  Price,
+  Sum,
+}
+
+export default Placing

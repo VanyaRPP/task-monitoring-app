@@ -1,15 +1,12 @@
-import { List, Avatar, Image, Rate } from 'antd'
-import { useGetUserByIdQuery } from 'common/api/userApi/user.api'
 import { UserOutlined } from '@ant-design/icons'
-import { IFeedback } from 'common/modules/models/User'
+import { useGetUserByIdQuery } from '@common/api/userApi/user.api'
+import RateStars from '@components/UI/RateStars'
+import { IFeedback } from '@modules/models/User'
+import { Avatar, Image } from 'antd'
 import s from './style.module.scss'
-import UserLink from '../UserLink'
-import RateStars from '../UI/RateStars'
 
 const DrawerFeedback: React.FC<{ feedback: IFeedback }> = ({ feedback }) => {
-  const { data } = useGetUserByIdQuery(feedback.id)
-  const user = data?.data
-
+  const { data: user } = useGetUserByIdQuery(feedback.id)
   return (
     <>
       <div className={s.UserInfo}>

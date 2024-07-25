@@ -1,35 +1,37 @@
-import {
-  PriceMaintainceField,
-  PricePlacingField,
-  PriceElectricityField,
-  PriceWaterField,
-  PriceGarbageCollectorField,
-  PriceInflicionField,
-  PriceWaterPartField,
-  PriceDiscountField,
-  PriceCleaningField,
-  PriceCustomField,
-} from './priceFields'
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { ServiceType } from '@utils/constants'
+import {
+  Cleaning,
+  Custom,
+  Discount,
+  Electricity,
+  GarbageCollector,
+  Inflicion,
+  Maintenance,
+  Placing,
+  Water,
+  WaterPart,
+} from './price'
 
-const fields: any = {
-  [ServiceType.Maintenance]: PriceMaintainceField,
-  [ServiceType.Placing]: PricePlacingField,
-  [ServiceType.Electricity]: PriceElectricityField,
-  [ServiceType.Water]: PriceWaterField,
-  [ServiceType.GarbageCollector]: PriceGarbageCollectorField,
-  [ServiceType.Inflicion]: PriceInflicionField,
-  [ServiceType.WaterPart]: PriceWaterPartField,
-  [ServiceType.Cleaning]: PriceCleaningField,
-  [ServiceType.Discount]: PriceDiscountField,
+const components = {
+  [ServiceType.Cleaning]: Cleaning,
+  [ServiceType.Custom]: Custom,
+  [ServiceType.Discount]: Discount,
+  [ServiceType.Electricity]: Electricity,
+  [ServiceType.GarbageCollector]: GarbageCollector,
+  [ServiceType.Inflicion]: Inflicion,
+  [ServiceType.Maintenance]: Maintenance,
+  [ServiceType.Placing]: Placing,
+  [ServiceType.Water]: Water,
+  [ServiceType.WaterPart]: WaterPart,
 }
 
-export default function PriceComponent({ record, edit }) {
-
-  if (record.name in fields) {
-    const Component = fields[record.name]
-    return <Component record={record} disabled={edit} />
-  } else {
-    return <PriceCustomField record={record} />
+export const PriceComponent: React.FC<{
+  record: IPaymentField & { key: string }
+  preview?: boolean
+}> = ({ record, preview = false }) => {
+  if (record && record.type in components) {
+    return components[record.type]({ record, preview })
   }
+  // return <Unknown record={record} preview={preview} />
 }

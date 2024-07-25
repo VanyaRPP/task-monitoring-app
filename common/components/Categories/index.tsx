@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react'
-import { Button, List, Skeleton } from 'antd'
-import Link from 'next/link'
 import {
   useDeleteCategoryMutation,
   useGetAllCategoriesQuery,
-} from 'common/api/categoriesApi/category.api'
-import { AppRoutes, Roles } from 'utils/constants'
+} from '@common/api/categoriesApi/category.api'
+import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
+import { EditButton } from '@components/UI/Buttons'
+import DeleteButton from '@components/UI/Buttons/DeleteButton'
+import { Roles } from '@utils/constants'
+import { List, Skeleton } from 'antd'
 import { useSession } from 'next-auth/react'
-import { useGetUserByEmailQuery } from 'common/api/userApi/user.api'
-import DeleteButton from '../UI/Buttons/DeleteButton'
+import React, { useEffect, useState } from 'react'
 import s from './style.module.scss'
-import { EditButton } from '../UI/Buttons'
 
 const Categories: React.FC<{
   nameFilter: string

@@ -1,6 +1,5 @@
-import React from 'react'
+import { TaskStatuses } from '@utils/constants'
 import { useSession } from 'next-auth/react'
-import { TaskStatuses } from '../../../utils/constants'
 import { useGetAllTaskQuery } from '../../api/taskApi/task.api'
 import { useGetUserByEmailQuery } from '../../api/userApi/user.api'
 

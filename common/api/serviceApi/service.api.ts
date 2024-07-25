@@ -1,7 +1,6 @@
 import {
   IAddServiceResponse,
   IDeleteServiceResponse,
-  IExtendedService,
   IGetServiceResponse,
   IService,
 } from './service.api.types'
@@ -41,10 +40,12 @@ export const serviceApi = createApi({
           params: { limit, userId, domainId, streetId, serviceId, year, month },
         }
       },
-      providesTags: (response) =>
-        response
-          ? response.data.map((item) => ({ type: 'Service', id: item._id }))
-          : [],
+      providesTags: (response: IGetServiceResponse) => [
+        'Service',
+        ...(response?.data
+          ? response.data.map((item) => ({ type: 'Service' as const, id: item._id }))
+          : []),
+      ],
     }),
     getServicesAddress: builder.query({
       query: () => {
@@ -54,7 +55,13 @@ export const serviceApi = createApi({
       },
       transformResponse: (response: IGetServiceResponse) => response.data,
     }),
-    addService: builder.mutation<IAddServiceResponse, IService>({
+    addService: builder.mutation<
+      IAddServiceResponse,
+      Omit<IService, '_id' | 'domain' | 'street'> & {
+        domain: string
+        street: string
+      }
+    >({
       query(body) {
         return {
           url: `service`,
@@ -64,19 +71,22 @@ export const serviceApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Service'] : []),
     }),
-    deleteService: builder.mutation<
-      IDeleteServiceResponse,
-      IExtendedService['_id']
-    >({
+    deleteService: builder.mutation<IDeleteServiceResponse, IService['_id']>({
       query(id) {
         return {
           url: `service/${id}`,
           method: 'DELETE',
         }
       },
-      invalidatesTags: (response) => (response ? ['Service'] : []),
+      invalidatesTags: (result, error, id) => [{ type: 'Service', id }],
     }),
-    editService: builder.mutation<IExtendedService, Partial<IExtendedService>>({
+    editService: builder.mutation<
+      IService,
+      Omit<IService, 'domain' | 'street'> & {
+        domain: string
+        street: string
+      }
+    >({
       query(data) {
         const { _id, ...body } = data
         return {
@@ -85,7 +95,7 @@ export const serviceApi = createApi({
           body: body,
         }
       },
-      invalidatesTags: (response) => (response ? ['Service'] : []),
+      invalidatesTags: (result) => result ? [{ type: 'Service', id: result._id }] : [],
     }),
   }),
 })

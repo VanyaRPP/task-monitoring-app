@@ -1,38 +1,32 @@
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import {
-  IDeleteRealestateResponse,
   IAddRealestateResponse,
-  IGetRealestateResponse,
+  IDeleteRealestateResponse,
+  IExtendedArchive,
   IExtendedRealestate,
+  IGetRealestateResponse,
   IRealestate,
 } from './realestate.api.types'
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export const realestateApi = createApi({
   reducerPath: 'realestateApi',
   refetchOnFocus: true,
   refetchOnReconnect: true,
-  tagTypes: ['RealEstate'],
+  tagTypes: ['RealEstate', 'ArchivedApi'],
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getAllRealEstate: builder.query<
       IGetRealestateResponse,
       {
         limit?: number
-        domainId?: string
-        streetId?: string[]
-        companyId?: string
-        domainIds?: string[]
-        companyIds?: string[]
+        domainId?: string[] | string
+        streetId?: string[] | string
+        companyId?: string[] | string
+        services?: string[] | string
+        archived?: boolean
       }
     >({
-      query: ({
-        limit,
-        companyId,
-        domainId,
-        streetId,
-        domainIds,
-        companyIds,
-      }) => {
+      query: ({ limit, companyId, domainId, streetId, archived, services }) => {
         return {
           url: `real-estate`,
           params: {
@@ -40,14 +34,17 @@ export const realestateApi = createApi({
             companyId,
             domainId,
             streetId,
-            domainIds,
-            companyIds,
+            archived,
+            services,
           },
         }
       },
       providesTags: (response) =>
         response
-          ? response.data.map((item) => ({ type: 'RealEstate', id: item._id }))
+          ? response.data.flatMap((item) => [
+              { type: 'RealEstate', id: item._id },
+              { type: 'ArchivedApi', id: item._id },
+            ])
           : [],
     }),
 
@@ -87,6 +84,20 @@ export const realestateApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['RealEstate'] : []),
     }),
+    updateArchivedItem: builder.mutation<
+      IExtendedArchive,
+      Partial<IExtendedArchive>
+    >({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `archived/${_id}`,
+          method: 'PATCH',
+          body: body,
+        }
+      },
+      invalidatesTags: (response) => (response ? ['ArchivedApi'] : []),
+    }),
   }),
 })
 
@@ -95,4 +106,5 @@ export const {
   useAddRealEstateMutation,
   useGetAllRealEstateQuery,
   useEditRealEstateMutation,
+  useUpdateArchivedItemMutation,
 } = realestateApi

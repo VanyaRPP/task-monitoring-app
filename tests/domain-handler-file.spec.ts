@@ -1,10 +1,6 @@
-import { NextApiRequest, NextApiResponse } from 'next'
-import Domain from 'common/modules/models/Domain'
+import Domain from '@modules/models/Domain'
 import { getCurrentUser } from '@utils/getCurrentUser'
-
 import { NextApiRequest, NextApiResponse } from 'next'
-import Domain from 'common/modules/models/Domain'
-import { getCurrentUser } from '@utils/getCurrentUser'
 
 export default async function handler(
   req: NextApiRequest,

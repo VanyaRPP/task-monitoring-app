@@ -1,9 +1,12 @@
 .headerBlock {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
-.firstBlock {
+.firstBlock,
+.secondBlock {
   display: flex;
   flex-direction: row;
+  align-items: center;
 }

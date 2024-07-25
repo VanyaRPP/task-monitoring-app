@@ -1,9 +1,9 @@
 import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
-import React, { FC, useState } from 'react'
+import AddServiceModal from '@components/AddServiceModal'
 import { AppRoutes } from '@utils/constants'
 import { Button } from 'antd'
 import { useRouter } from 'next/router'
-import AddServiceModal from '@common/components/AddServiceModal'
+import { useState } from 'react'
 import s from './style.module.scss'
 
 const ServiceCardHeader = ({ setCurrentService, currentService }) => {

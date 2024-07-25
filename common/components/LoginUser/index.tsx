@@ -1,15 +1,15 @@
-import { useState } from 'react'
-import Router from 'next/router'
-import { Skeleton, Avatar, Button, Card, Image, Tag } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
-import { signIn, signOut, useSession } from 'next-auth/react'
-import { AppRoutes, Roles } from '../../../utils/constants'
-import classNames from 'classnames'
-import s from './style.module.scss'
-import { useGetCurrentUserQuery } from 'common/api/userApi/user.api'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
-import router from 'next/router'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { AppRoutes, Roles } from '@utils/constants'
+import { Avatar, Button, Card, Skeleton, Tag } from 'antd'
+import classNames from 'classnames'
+import { signIn, signOut, useSession } from 'next-auth/react'
+import NextImage from 'next/image'
+import { default as Router, default as router } from 'next/router'
+import { useState } from 'react'
+import s from './style.module.scss'
 
 const LoginUser: React.FC = () => {
   const { data: session, status } = useSession()
@@ -61,12 +61,13 @@ function SessionUser({ image }) {
       >
         <Avatar
           icon={<UserOutlined />}
+          size={32}
           src={
-            <Image
+            <NextImage
               src={image || undefined}
-              preview={false}
-              style={{ width: 32 }}
-              alt="UserImg"
+              width={32}
+              height={32}
+              alt="avatar"
             />
           }
         />
@@ -78,13 +79,14 @@ function SessionUser({ image }) {
       >
         <Card onClick={(e) => e.stopPropagation()} className={s.Card}>
           <Avatar
-            size={100}
             icon={<UserOutlined />}
+            size={100}
             src={
-              <Image
+              <NextImage
                 src={user?.image || undefined}
-                preview={false}
-                alt="UserImg"
+                width={100}
+                height={100}
+                alt="avatar"
               />
             }
           />

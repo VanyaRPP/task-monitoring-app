@@ -1,4 +1,5 @@
 import mongoose, { ObjectId, Schema } from 'mongoose'
+import { IDomainService } from './Domain'
 
 export interface IRealEstateModel {
   domain: ObjectId
@@ -9,12 +10,22 @@ export interface IRealEstateModel {
   pricePerMeter: number
   servicePricePerMeter?: number
   totalArea?: number
+  currency?: string
   rentPart?: number
   waterPart?: number
   cleaning?: number
   discount?: number
   inflicion?: boolean
   garbageCollector?: boolean
+  archived?: boolean
+  services: IDomainService[]
+  customServices?: ICustomService[]
+}
+interface ICustomService {
+  _id: ObjectId
+  fieldName: string
+  label: string
+  price: number
 }
 
 export const RealEstateSchema = new Schema<IRealEstateModel>({
@@ -26,15 +37,31 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   pricePerMeter: { type: Number, required: true, default: 0 },
   servicePricePerMeter: { type: Number, required: false },
   totalArea: { type: Number, required: true, default: 0 },
+  currency: { type: String, required: false, default: 'UAH' },
   rentPart: { type: Number, required: true, default: 0 },
   waterPart: { type: Number, required: true, default: 0 },
-  cleaning: { type: Number, required: false, defailt: 0 },
+  cleaning: { type: Number, required: false, default: 0 },
   discount: { type: Number, required: false, default: 0 },
   inflicion: { type: Boolean, required: false, default: false },
   garbageCollector: { type: Boolean, required: false, default: false },
+  archived: { type: Boolean, required: false, default: false },
+  services: { type: [Object] },
+  customServices: {
+    type: [
+      {
+        _id: { type: Schema.Types.ObjectId, ref: 'CustomService' },
+        label: { type: String, required: true },
+        fieldName: { type: String, required: true },
+        price: { type: Number, required: true },
+      },
+    ],
+    required: false,
+    default: [],
+  },
 })
 
 const RealEstate =
-  mongoose.models?.RealEstate || mongoose.model('RealEstate', RealEstateSchema)
+  (mongoose.models?.RealEstate as mongoose.Model<IRealEstateModel>) ||
+  mongoose.model('RealEstate', RealEstateSchema)
 
 export default RealEstate

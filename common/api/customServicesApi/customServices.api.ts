@@ -1,0 +1,82 @@
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import {
+  IGetCustomServicesResponse,
+  IGetCustomDomainServicesResponse,
+  IGetCustomServicesRequest,
+  IGetCustomServicesByDomainRequest,
+  ICreateCustomServiceRequest,
+  ICreateCustomServiceResponse,
+  IDeleteCustomServiceResponse,
+  IDeleteCustomServiceRequest,
+  IExtendedCustomService,
+} from './customServices.api.types'
+
+export const customServicesApi = createApi({
+  reducerPath: 'customServicesApi',
+  baseQuery: fetchBaseQuery({ baseUrl: '/api/' }),
+  tagTypes: ['CustomService'],
+  endpoints: (builder) => ({
+    getCustomServices: builder.query<
+      IGetCustomServicesResponse,
+      IGetCustomServicesRequest
+    >({
+      query: ({ _id }) => ({
+        url: 'custom-services',
+        method: 'GET',
+        params: { _id },
+      }),
+      providesTags: ['CustomService'],
+    }),
+    getCustomServicesByDomain: builder.query<
+      IGetCustomDomainServicesResponse,
+      IGetCustomServicesByDomainRequest
+    >({
+      query: ({ domainId }) => ({
+        url: 'custom-services/domain',
+        params: { domainId },
+      }),
+      providesTags: ['CustomService'],
+    }),
+    createCustomService: builder.mutation<
+      ICreateCustomServiceResponse,
+      ICreateCustomServiceRequest
+    >({
+      query: (body) => ({
+        url: 'custom-services',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['CustomService'],
+    }),
+    deleteCustomService: builder.mutation<
+      IDeleteCustomServiceResponse,
+      IDeleteCustomServiceRequest
+    >({
+      query: ({ id }) => ({
+        url: 'custom-services',
+        method: 'DELETE',
+        params: { id },
+      }),
+      invalidatesTags: ['CustomService'],
+    }),
+    editCustomService: builder.mutation<
+      IExtendedCustomService,
+      Partial<IExtendedCustomService>
+    >({
+      query: ({ _id, ...body }) => ({
+        url: `custom-services/${_id}`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: ['CustomService'],
+    }),
+  }),
+})
+
+export const {
+  useGetCustomServicesQuery,
+  useGetCustomServicesByDomainQuery,
+  useCreateCustomServiceMutation,
+  useDeleteCustomServiceMutation,
+  useEditCustomServiceMutation,
+} = customServicesApi

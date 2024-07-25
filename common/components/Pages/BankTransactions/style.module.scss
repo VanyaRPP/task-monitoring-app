@@ -1,0 +1,17 @@
+.tableHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1;
+  padding-bottom: 1rem;
+  gap: 0.5rem;
+
+  .tabBar {
+    max-width: 40%; //TODO: rework this component 40% of the screen
+  }
+  .filterWrapper {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+}

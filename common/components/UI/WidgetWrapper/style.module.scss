@@ -1,0 +1,15 @@
+.inner {
+  position: relative;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+.mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  cursor: move;
+  z-index: 1000;
+}

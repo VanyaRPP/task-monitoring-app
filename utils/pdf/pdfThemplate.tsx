@@ -1,7 +1,7 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import moment from 'moment'
-import { renderCurrency } from '../helpers'
+import dayjs from 'dayjs'
 import { ServiceType } from '../constants'
+import { renderCurrency } from '../helpers'
 import nameField from './nameFieldGenerator'
 
 export async function generateHtmlFromThemplate(
@@ -134,10 +134,10 @@ export async function generateHtmlFromThemplate(
   
           <div class="invoice-title">
             <h1>INVOICE № INV-${paymentData.invoiceNumber}</h1>
-            <b>Від ${moment(paymentData?.invoiceCreationDate)?.format?.(
+            <b>Від ${dayjs(paymentData?.invoiceCreationDate)?.format?.(
               'DD.MM.YYYY'
             )} року.</b>
-            <p>Підлягає сплаті до ${moment(paymentData?.invoiceCreationDate)
+            <p>Підлягає сплаті до ${dayjs(paymentData?.invoiceCreationDate)
               .add(5, 'd')
               .format('DD.MM.YYYY')} року</p>
           </div>
@@ -163,24 +163,27 @@ export async function generateHtmlFromThemplate(
           <div>${
             paymentData?.provider?.description?.split('\n')?.[0] || ''
           }&nbsp; ________________</div>
-          <div class="note">
-            <div class="note__title">
-              <p><b>Примітка:</b></p>
-            </div>
-            <div class="note__description">
-              <p>*Ціна за комунальні послуги вказана з урахуванням ПДВ.</p>
-              <p>
-                ** Ціни на комунальні послуги виставляють компанії-постачальники,
-                відповідно їх ціна може змінюватись у будь-який час в
-                односторонньму порядку компанією-постачальником.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </body>
   </html>
   `
+}
+
+{
+  /* <div class="note">   // deleted text
+  <div class="note__title">
+    <p><b>Примітка:</b></p>
+  </div>
+  <div class="note__description">
+    <p>*Ціна за комунальні послуги вказана з урахуванням ПДВ.</p>
+    <p>
+      ** Ціни на комунальні послуги виставляють компанії-постачальники,
+      відповідно їх ціна може змінюватись у будь-який час в
+      односторонньму порядку компанією-постачальником.
+    </p>
+  </div>
+</div> */
 }
 
 async function generateDataForTable(dataToMap, paymentData) {

@@ -1,62 +1,75 @@
+import React, { useMemo, useState, useEffect } from 'react'
 import {
-  PlusOutlined,
-  SelectOutlined,
   DeleteOutlined,
   DownloadOutlined,
-  SendOutlined,
+  FilterOutlined,
+  PlusOutlined,
+  SelectOutlined,
+  ExportOutlined,
+  InfoCircleOutlined,
+  UpOutlined,
+  MenuOutlined,
 } from '@ant-design/icons'
-import React, { useState } from 'react'
-import { AppRoutes, Roles } from '@utils/constants'
-import { Button, Table, message } from 'antd'
-import { useRouter } from 'next/router'
-import AddPaymentModal from '@common/components/AddPaymentModal'
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import s from './style.module.scss'
-import { isAdminCheck } from '@utils/helpers'
-import PaymentCascader from '@common/components/UI/PaymentCascader/index'
-import FilterTags from '../Reusable/FilterTags'
-import ImportInvoices from './ImportInvoices'
+import { dateToDefaultFormat } from '@assets/features/formatDate'
 import {
   useDeleteMultiplePaymentsMutation,
   useGeneratePdfMutation,
+  useGenerateExcelMutation,
 } from '@common/api/paymentApi/payment.api'
-import Modal from 'antd/lib/modal/Modal'
-import { dateToDefaultFormat } from '@common/assets/features/formatDate'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import AddPaymentModal from '@components/AddPaymentModal'
+import ImportInvoices from '@components/UI/PaymentCardHeader/ImportInvoices'
+import { AppRoutes, Roles, ServiceName } from '@utils/constants'
+import { isAdminCheck } from '@utils/helpers'
 import {
-  IGeneratePaymentPDF,
-  IGeneratePaymentPDFResponce,
-  IPayment,
-} from '@common/api/paymentApi/payment.api.types'
+  Button,
+  Checkbox,
+  Flex,
+  Select,
+  SelectProps,
+  Typography,
+  message,
+  Tooltip,
+  Collapse,
+  Modal,
+  Divider,
+  theme,
+  Drawer,
+  Grid,
+} from 'antd'
 import { saveAs } from 'file-saver'
-import SelectForDebitAndCredit from '@components/UI/PaymentSelect/index'
-import StreetsSelector from '@components/StreetsSelector'
-import { generateHtmlFromThemplate } from '@utils/pdf/pdfThemplate'
-import { useEmailMutation } from '@common/api/emailApi/email.api'
-import { IDomain } from '@common/modules/models/Domain'
-import {
-  IExtendedRealestate,
-  IRealestate,
-} from '@common/api/realestateApi/realestate.api.types'
+import { useRouter } from 'next/router'
+import { shouldOpenModal } from '@utils/shouldOpenModal'
+import PaymentCardLabel from './PaymentCardLabel'
+import type { CollapseProps } from 'antd'
+import styles from './styles.module.scss'
+const { useBreakpoint } = Grid
 
-const columns: any = [
-  {
-    title: 'Надавач поcлуг',
-    dataIndex: 'domain',
-  },
-  {
-    title: 'Компанія',
-    dataIndex: 'company',
-  },
-  {
-    title: 'Дата створення платежу',
-    dataIndex: 'date',
-    render: dateToDefaultFormat,
-  },
-]
+export interface PaymentCardHeaderProps {
+  onDeleteClick?: () => void
+  setCurrentDateFilter: (val: any) => void
+  currentPayment: any
+  paymentActions: { edit: boolean; preview: boolean }
+  closeEditModal: () => void
+  paymentsDeleteItems: any[]
+  payments: any
+  streets: any
+  filters: any
+  setFilters: (filters: any) => void
+  selectedPayments: any[]
+  setPaymentsDeleteItems: (items: any[]) => void
+  setSelectedPayments: (payments: any[]) => void
+  enablePaymentsButton: boolean
+  onColumnsSelect: (selected: string[]) => void
+  domainFilter?: any
+  realEstatesFilter?: any
+  singleCompany?: string
+  singleDomain?: string
+  isDashboard?: boolean
+}
 
-const PaymentCardHeader = ({
+const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   setCurrentDateFilter,
-  setCurrentTypeOperation,
   currentPayment,
   paymentActions,
   closeEditModal,
@@ -66,17 +79,24 @@ const PaymentCardHeader = ({
   filters,
   setFilters,
   selectedPayments,
+  setPaymentsDeleteItems,
+  setSelectedPayments,
+  enablePaymentsButton,
+  onColumnsSelect,
+  domainFilter,
+  realEstatesFilter,
+  singleCompany,
+  singleDomain,
+  isDashboard,
+  onDeleteClick
 }) => {
   const router = useRouter()
-  const [sendEmail] = useEmailMutation()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [drawerVisible, setDrawerVisible] = useState(false)
+  const screens = useBreakpoint()
 
   const { data: currUser } = useGetCurrentUserQuery()
-
-  const {
-    pathname,
-    query: { email },
-  } = router
+  const { pathname } = router
 
   const closeModal = () => {
     setIsModalOpen(false)
@@ -86,48 +106,36 @@ const PaymentCardHeader = ({
   const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isAdmin = isAdminCheck(currUser?.roles)
   const [deletePayment] = useDeleteMultiplePaymentsMutation()
+  const [generateExcel] = useGenerateExcelMutation()
+  const [generatePdf] = useGeneratePdfMutation()
+  const { token } = theme.useToken()
 
-  const handleDeletePayments = async () => {
-    ;(Modal as any).confirm({
-      title: 'Ви впевнені, що хочете видалити обрані проплати?',
-      cancelText: 'Ні',
-      okText: 'Так',
-      content: (
-        <>
-          {paymentsDeleteItems.map((item, index) => (
-            <div key={index}>
-              {index + 1}. {item.domain}, {item.company},{' '}
-              {dateToDefaultFormat(item.date)}
-            </div>
-          ))}
-        </>
-      ),
-      onOk: async () => {
-        const response = await deletePayment(
-          paymentsDeleteItems.map((item) => item.id)
-        )
-        if ('data' in response) {
-          message.success('Видалено!')
-        } else {
-          message.error('Помилка при видаленні рахунків')
-        }
-      },
-    })
+  const handleExportExcel = async () => {
+    try {
+      const response = await generateExcel({ payments: selectedPayments })
+      const blob = new Blob([new Uint8Array(response.data.buffer?.data)], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+      saveAs(blob, `payments.xlsx`)
+    } catch (error) {
+      console.error('Error:', error)
+    }
   }
 
-  const [generatePdf] = useGeneratePdfMutation()
+ 
 
   const handleGeneratePdf = async () => {
     try {
-      const response = await generatePdf({
-        payments: selectedPayments,
-      })
-
+      const response = await generatePdf({ payments: selectedPayments })
       if ('data' in response) {
         const { data } = response
-
         if (data) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore
           const buffer = Buffer.from(data.buffer)
+
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore
           const blob = new Blob([buffer], {
             type: `application/${data.fileExtension}`,
           })
@@ -141,154 +149,276 @@ const PaymentCardHeader = ({
       message.error('Сталася несподівана помилка під час генерації PDF')
     }
   }
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-  const handleSendToMail = async () => {
-    if (!selectedPayments) {
-      return message.warn('Виберіть проплати, щоб надіслати їх')
-    }
+  const selectedCompany =
+    filters?.company?.length === 1 ? filters.company[0] : undefined
 
-    selectedPayments.forEach(async (payment: IPayment) => {
-      const dateDefaultFormat = dateToDefaultFormat(
-        (payment.monthService as any)?.date // TODO: proper typing
-      )
-      try {
-        const domain = payment.domain as IDomain
-        const company = payment.company as IExtendedRealestate
+  const infoTooltip = useMemo(() => {
+    const texts: string[] = []
+    if (singleDomain) texts.push(`Надавач послуг: ${singleDomain}`)
+    if (singleCompany) texts.push(`Компанія: ${singleCompany}`)
+    return texts.join('\n')
+  }, [singleDomain, singleCompany])
 
-        if (!domain || !company) {
-          throw new Error('unknown comapy and/or domain')
-        }
+  const { preview, edit } = paymentActions
 
-        const response = await sendEmail({
-          domainId: domain._id.toString(),
-          companyId: company._id.toString(),
-          to: payment.reciever.adminEmails,
-          subject: `Оплата від ${dateDefaultFormat}`,
-          text: `Ви отримали новий рахунок від "${
-            typeof payment.domain === 'string'
-              ? payment.domain
-              : payment.domain?.name
-          }" за ${dateDefaultFormat}`,
-          html: await generateHtmlFromThemplate(payment),
-        })
-
-        if ('data' in response) {
-          // TODO: change the invoice status to prevent multiple emails being sent with the same invoice
-          message.success(
-            `Рахунок для "${payment.reciever.companyName}" за ${dateDefaultFormat} надіслано`
-          )
-        } else if ('error' in response) {
-          throw response.error
-        } else {
-          throw new Error('Unexpected response')
-        }
-      } catch (error) {
-        message.error(
-          `Не вдалося надіслати рахунок для "${payment.reciever.companyName}" за ${dateDefaultFormat}`
-        )
-        console.error(error)
-      }
-    })
-
-    // })
+  if (!isAdmin && !isGlobalAdmin) {
+    return (
+      <>
+        <div style={{ marginBottom: '10px', marginTop: '10px' }}>
+          <PaymentCardLabel
+            enablePaymentsButton={enablePaymentsButton}
+            onColumnsSelect={onColumnsSelect}
+            setCurrentDateFilter={setCurrentDateFilter}
+            setFilters={setFilters}
+            streets={streets}
+            filters={filters}
+            domainFilter={domainFilter}
+            realEstatesFilter={realEstatesFilter}
+            isAdmin={false}
+          />
+        </div>
+        {preview && currentPayment && (
+          <AddPaymentModal
+            paymentActions={{ preview: true, edit: false }}
+            paymentData={currentPayment}
+            closeModal={closeEditModal}
+          />
+        )}
+      </>
+    )
   }
 
-  return (
-    <>
-      <div className={s.tableHeader}>
-        {isAdmin ? (
-          <>
-            {email ? (
-              <span
-                className={s.title}
-              >{`Оплата від користувача ${email}`}</span>
-            ) : (
-              <div className={s.firstBlock}>
-                <Button
-                  type="link"
-                  onClick={() => router.push(AppRoutes.PAYMENT)}
-                >
-                  Платежі
-                  <SelectOutlined className={s.Icon} />
-                </Button>
-                {location.pathname === AppRoutes.PAYMENT && (
-                  <>
-                    <PaymentCascader onChange={setCurrentDateFilter} />
-                    <SelectForDebitAndCredit
-                      onChange={setCurrentTypeOperation}
-                    />
-                    <StreetsSelector
-                      filters={filters}
-                      setFilters={setFilters}
-                      streets={streets}
-                    />
-                    <FilterTags
-                      filters={filters}
-                      setFilters={setFilters}
-                      collection={payments}
-                    />
-                  </>
-                )}
-              </div>
+  const panelStyle: React.CSSProperties = { border: 'none' }
+
+  const label = (
+    <PaymentCardLabel
+      enablePaymentsButton={enablePaymentsButton}
+      onColumnsSelect={onColumnsSelect}
+      setCurrentDateFilter={setCurrentDateFilter}
+      setFilters={setFilters}
+      streets={streets}
+      filters={filters}
+      domainFilter={domainFilter}
+      realEstatesFilter={realEstatesFilter}
+      isAdmin={isAdmin}
+      className={styles.select}
+    />
+  )
+
+  const getItems = (
+    panelStyle: React.CSSProperties
+  ): CollapseProps['items'] => [
+    {
+      key: '1',
+      label,
+      style: panelStyle,
+      collapsible: 'icon',
+      forceRender: true,
+      children: (
+        <>
+          <Divider className={styles.Divider} />
+          <Flex className={styles.flexButtonContainer} align="center">
+            {infoTooltip && (
+              <Tooltip title={infoTooltip}>
+                <InfoCircleOutlined
+                  style={{ marginRight: 16, color: 'rgba(0,0,0,0.45)' }}
+                />
+              </Tooltip>
             )}
-            <div>
-              <ImportInvoices />
+            {isAdmin &&
+              pathname === AppRoutes.PAYMENT &&
+              selectedPayments.length > 0 && (
+                <Button type="link" onClick={handleExportExcel}>
+                  Export to Excel <ExportOutlined />
+                </Button>
+              )}
+            {isAdmin && <ImportInvoices />}
+            {isAdmin && (
               <Button
                 type="link"
                 onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
               >
-                Інвойси <SelectOutlined className={s.Icon} />
+                Інвойси <SelectOutlined />
               </Button>
+            )}
+            {isAdmin && (
               <Button type="link" onClick={() => setIsModalOpen(true)}>
                 <PlusOutlined /> Додати
               </Button>
-              {isAdmin &&
-                pathname === AppRoutes.PAYMENT &&
-                selectedPayments.length > 0 && (
-                  <Button type="link" onClick={handleGeneratePdf}>
-                    Завантажити рахунки <DownloadOutlined />
-                  </Button>
-                )}
-              {isAdmin &&
-                pathname === AppRoutes.PAYMENT &&
-                selectedPayments.length > 0 && (
-                  <Button type="link" onClick={handleSendToMail}>
-                    Відправити рахунки <SendOutlined />
-                  </Button>
-                )}
-              {isGlobalAdmin && pathname === AppRoutes.PAYMENT && (
-                <Button
-                  type="link"
-                  onClick={handleDeletePayments}
-                  disabled={paymentsDeleteItems.length == 0}
-                >
+            )}
+            {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
+              <AddPaymentModal
+                paymentActions={
+                  !isAdmin ? { edit: false, preview: true } : paymentActions
+                }
+                paymentData={currentPayment}
+                preselectedCompany={selectedCompany}
+                closeModal={closeModal}
+              />
+            )}
+            {isAdmin &&
+              pathname === AppRoutes.PAYMENT &&
+              selectedPayments.length > 0 && (
+                <Button type="link" onClick={handleGeneratePdf}>
+                  Завантажити рахунки <DownloadOutlined />
+                </Button>
+              )}
+            {isAdmin &&
+              pathname === AppRoutes.PAYMENT &&
+              selectedPayments.length > 0 && (
+                <Button type="link" onClick={onDeleteClick}>
                   <DeleteOutlined /> Видалити
                 </Button>
               )}
-            </div>
-          </>
-        ) : (
-          currUser && (
+          </Flex>
+        </>
+      ),
+    },
+  ]
+  if (isDashboard) {
+    return (
+      <>
+        <Flex justify="space-between" align="center" style={{ margin: 0 }}>
+          <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT)}>
+            Платежі
+            <SelectOutlined />
+          </Button>
+          <Flex gap={8} wrap="wrap">
+            <ImportInvoices />
             <Button
-              className={s.myPayments}
               type="link"
-              onClick={() => router.push(AppRoutes.PAYMENT)}
+              icon={<SelectOutlined />}
+              onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
             >
-              Мої оплати
-              <SelectOutlined className={s.Icon} />
+              Інвойси
             </Button>
-          )
+            <Button
+              type="link"
+              icon={<PlusOutlined />}
+              onClick={() => setIsModalOpen(true)}
+            >
+              Додати
+            </Button>
+          </Flex>
+        </Flex>
+        {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
+          <AddPaymentModal
+            paymentActions={
+              !isAdmin ? { edit: false, preview: true } : paymentActions
+            }
+            paymentData={currentPayment}
+            preselectedCompany={selectedCompany}
+            closeModal={closeModal}
+          />
         )}
-      </div>
-      {(isModalOpen || currentPayment) && (
-        <AddPaymentModal
-          paymentActions={paymentActions}
-          paymentData={currentPayment}
-          closeModal={closeModal}
-        />
+      </>
+    )
+  }
+
+  return (
+    <Collapse
+      className={styles.customCollapse}
+      bordered={false}
+      defaultActiveKey={[]}
+      expandIcon={({ isActive }) => (
+        <Tooltip title="Додаткові дії">
+          <UpOutlined
+            rotate={isActive ? 0 : 180}
+            className={styles.collapseButton}
+          />
+        </Tooltip>
       )}
-    </>
+      expandIconPosition="right"
+      items={getItems(panelStyle)}
+      ghost
+    />
   )
 }
 
+interface ColumnSelectProps {
+  onSelect?: (selected: string[]) => void
+  style?: React.CSSProperties
+  className?: string
+}
+
+const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, ...props }) => {
+  const [selected, setSelected] = useState<string[]>([])
+
+  const handleSelect = (value: string[]) => {
+    setSelected(value)
+    localStorage.setItem('payments_columns', JSON.stringify(value))
+  }
+
+  const handleCheckAll = (index = 0) => {
+    if (selected.length === Object.keys(ServiceName).length) {
+      setSelected([])
+      localStorage.setItem('payments_columns', JSON.stringify([]))
+    } else {
+      const newSelected = options[index].options?.map(({ value }) => value)
+      setSelected(newSelected)
+      localStorage.setItem('payments_columns', JSON.stringify(newSelected))
+    }
+  }
+
+  useEffect(() => {
+    setSelected(JSON.parse(localStorage.getItem('payments_columns') ?? '[]'))
+  }, [])
+
+  useEffect(() => {
+    onSelect?.(selected)
+  }, [onSelect, selected])
+
+  useEffect(() => {
+    const savedColumns = JSON.parse(
+      localStorage.getItem('payments_columns') ?? '[]'
+    )
+
+    if (!savedColumns.includes('placingPrice')) {
+      savedColumns.push('placingPrice')
+      localStorage.setItem('payments_columns', JSON.stringify(savedColumns))
+    }
+
+    setSelected(savedColumns)
+  }, [])
+  const options: SelectProps['options'] = [
+    {
+      label: (
+        <Checkbox
+          onClick={() => handleCheckAll(0)}
+          indeterminate={
+            selected.length > 0 &&
+            selected.length < Object.keys(ServiceName).length
+          }
+          checked={Object.keys(ServiceName).length === selected.length}
+        >
+          <Typography.Text type="secondary">Комунальні</Typography.Text>
+        </Checkbox>
+      ),
+      options: Object.entries(ServiceName).map(([value, label]) => ({
+        value,
+        label,
+      })),
+    },
+  ]
+
+  return (
+    <Select
+      mode="multiple"
+      placeholder="Оберіть послуги"
+      value={selected}
+      onChange={handleSelect}
+      options={options}
+      maxTagCount={1}
+      allowClear
+      showSearch
+      optionFilterProp="label"
+      suffixIcon={<FilterOutlined />}
+      {...props}
+    />
+  )
+}
+
+export { ColumnSelect }
 export default PaymentCardHeader

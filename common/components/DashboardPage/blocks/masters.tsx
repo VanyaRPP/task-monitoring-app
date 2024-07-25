@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
-import { Card, Table, Input, Avatar } from 'antd'
-import useDebounce from 'common/modules/hooks/useDebounce'
-import { masters as config } from 'common/lib/dashboard.config'
-import TableCard from '@common/components/UI/TableCard'
+import { masters as config } from '@common/lib/dashboard.config'
+import TableCard from '@components/UI/TableCard'
+import useDebounce from '@modules/hooks/useDebounce'
+import { Avatar, Input, Table } from 'antd'
+import { useEffect, useState } from 'react'
 
 function removeDublicates(data) {
   return data.filter((value, index) => data.indexOf(value) === index)

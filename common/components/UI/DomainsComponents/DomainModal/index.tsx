@@ -1,28 +1,76 @@
 import {
   useAddDomainMutation,
   useEditDomainMutation,
+  useGetDomainsQuery,
 } from '@common/api/domainApi/domain.api'
 import { Form, message } from 'antd'
-import React, { FC } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import {
-  IDomainModel,
   IExtendedDomain,
 } from '@common/api/domainApi/domain.api.types'
 import DomainForm from './DomainForm'
 import Modal from '../../ModalWindow'
+import { defaultServices } from '@utils/constants'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 interface Props {
   currentDomain: IExtendedDomain
   closeModal: VoidFunction
+  editable: boolean
 }
 
-const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
+const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
   const [addDomainEstate] = useAddDomainMutation()
   const [editDomain] = useEditDomainMutation()
+  const { data: domains } = useGetDomainsQuery({})
+  const { data: user } = useGetCurrentUserQuery()
+
+  useEffect(() => {
+    const initialValues = {
+      name: currentDomain?.name || '',
+      adminEmails: currentDomain?.adminEmails || (user?.email ?  [user.email] : []),
+      streets:
+        currentDomain?.streets.map((i: any) => ({
+          value: i._id,
+          label: `${i.address} (м. ${i.city})`,
+        })) || [],
+      description: currentDomain?.description || '',
+      IEName: currentDomain?.IEName || '',
+      domainBankToken: currentDomain?.domainBankToken || '',
+      mfo: currentDomain?.mfo || '',
+      rnokpp: currentDomain?.rnokpp || '',
+      iban: currentDomain?.iban || '',
+      customServices: currentDomain?.customServices || [
+        {
+          groupName: 'Стандартні послуги',
+          services: defaultServices,
+        },
+      ],
+    }
+    form.setFieldsValue(initialValues)
+  }, [currentDomain, form, user])
 
   const handleSubmit = async () => {
-    const formData: IDomainModel = await form.validateFields()
+    const formData = await form.validateFields()
+
+    if (
+      !currentDomain &&
+      domains?.some((domain) => domain.name === formData.name)
+    ) {
+      message.error({
+        content:
+          'Помилка при додаванні надавача послуг!  Домен з такою назвою вже існує!',
+        duration: 4,
+        style: {
+          marginTop: '20vh',
+          fontSize: '2rem',
+          zIndex: 9999,
+        },
+      })
+      return
+    }
 
     const domainData = {
       name: formData.name,
@@ -31,6 +79,12 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
         ? formData.streets.map((i: any) => i.value)
         : formData.streets,
       description: formData.description,
+      IEName: formData.IEName,
+      domainBankToken: formData.domainBankToken || [],
+      mfo: formData.mfo,
+      rnokpp: formData.rnokpp,
+      iban: formData.iban,
+      customServices: formData.customServices,
     }
 
     const response = currentDomain
@@ -41,8 +95,8 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
       : await addDomainEstate(domainData)
 
     if ('data' in response) {
-      form.resetFields()
       closeModal()
+      form.resetFields()
       const action = currentDomain ? 'Збережено' : 'Додано'
       message.success(action)
     } else {
@@ -56,12 +110,19 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
       open={true}
       title={'Надавачі послуг'}
       onOk={handleSubmit}
-      changesForm={() => form.isFieldsTouched()}
+      changed={() => isValueChanged}
       onCancel={closeModal}
       okText={currentDomain ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
+      okButtonProps={{ style: { ...(!editable && { display: 'none' }) } }}
+      preview={!editable}
     >
-      <DomainForm form={form} currentDomain={currentDomain} />
+      <DomainForm
+        form={form}
+        editable={editable}
+        setIsValueChanged={setIsValueChanged}
+        domainId={currentDomain?._id}
+      />
     </Modal>
   )
 }

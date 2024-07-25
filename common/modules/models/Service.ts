@@ -1,17 +1,26 @@
-import { Moment } from 'moment'
 import mongoose, { ObjectId, Schema } from 'mongoose'
 
 export interface IServiceModel {
   domain: ObjectId
   street: ObjectId
   rentPrice: number
-  date: Moment
+  date: Date
   electricityPrice: number
   waterPrice: number
   waterPriceTotal: number
   garbageCollectorPrice: number
   inflicionPrice: number
   description: string
+  customServices: {
+    _id: ObjectId
+    label: string
+    fieldName: string
+    price: number
+  }[]
+  losses?: number
+  consumedElectricity?: number
+  generalElectricity?: number
+  isVAT?: boolean
 }
 
 export const ServiceSchema = new Schema<IServiceModel>({
@@ -25,9 +34,26 @@ export const ServiceSchema = new Schema<IServiceModel>({
   garbageCollectorPrice: { type: Number, required: false, default: 0 },
   inflicionPrice: { type: Number, required: false, default: 0 },
   description: { type: String, required: false, default: '' },
+  customServices: {
+    type: [
+      {
+        _id: { type: Schema.Types.ObjectId, ref: 'CustomService' },
+        label: { type: String, required: true },
+        fieldName: { type: String, required: true },
+        price: { type: Number, required: true },
+      },
+    ],
+    required: false,
+    default: [],
+  },
+  losses: { type: Number, required: false, default: 0 },
+  consumedElectricity: { type: Number, required: false, default: null },
+  generalElectricity: { type: Number, required: false, default: null },
+  isVAT: { type: Boolean, required: false, default: true },
 })
 
 const Service =
-  mongoose.models?.Service || mongoose.model('Service', ServiceSchema)
+  (mongoose.models.Service as mongoose.Model<IServiceModel>) ||
+  mongoose.model('Service', ServiceSchema)
 
 export default Service

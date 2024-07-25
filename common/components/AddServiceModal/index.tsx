@@ -2,17 +2,18 @@ import {
   useAddServiceMutation,
   useEditServiceMutation,
 } from '@common/api/serviceApi/service.api'
+import { IService } from '@common/api/serviceApi/service.api.types'
+import Modal from '@components/UI/ModalWindow'
 import { Form, message } from 'antd'
-import React, { FC } from 'react'
+import dayjs from 'dayjs'
+import { FC, useState } from 'react'
 import AddServiceForm from '../Forms/AddServiceForm'
-import moment from 'moment'
-import { IExtendedService } from '@common/api/serviceApi/service.api.types'
-import Modal from '../UI/ModalWindow'
 import PreviewServiceForm from '../Forms/PreviewServiceForm'
+import { ObjectId } from 'mongoose'
 
 interface Props {
   closeModal: VoidFunction
-  currentService?: IExtendedService
+  currentService?: IService
   serviceActions?: {
     edit: boolean
     preview: boolean
@@ -30,6 +31,16 @@ type FormData = {
   garbageCollectorPrice: number
   inflicionPrice: number
   description: string
+  customServices: {
+    _id: ObjectId
+    label: string
+    fieldName: string
+    price: number
+  }[]
+  losses: number
+  consumedElectricity?: number
+  generalElectricity?: number
+  isVAT?: boolean
 }
 
 const AddServiceModal: FC<Props> = ({
@@ -38,27 +49,52 @@ const AddServiceModal: FC<Props> = ({
   serviceActions,
 }) => {
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
   const [addService, { isLoading: isAddingLoading }] = useAddServiceMutation()
   const [editService, { isLoading: isEditingLoading }] =
     useEditServiceMutation()
   const { edit, preview } = serviceActions
+
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
     const serviceData = {
-      domain: currentService?.domain || formData.domain,
-      street: currentService?.street || formData.street,
-      date: moment(formData.date).toDate(),
-      rentPrice: formData.rentPrice,
-      electricityPrice: formData.electricityPrice,
-      waterPrice: formData.waterPrice,
-      waterPriceTotal: formData.waterPriceTotal,
-      garbageCollectorPrice: formData.garbageCollectorPrice || 0,
-      inflicionPrice: formData.inflicionPrice || 0,
-      description: formData.description || '',
+      domain: currentService?.domain?._id?.toString() || formData.domain,
+      street: currentService?.street?._id?.toString() || formData.street,
+      date: dayjs(formData.date).toDate(),
+      rentPrice:
+        formData.customServices?.find((c) => c.fieldName === 'rentPrice')
+          ?.price ?? formData?.rentPrice,
+      electricityPrice:
+        formData?.customServices?.find(
+          (c) => c.fieldName === 'electricityPrice'
+        )?.price ?? formData?.electricityPrice,
+      waterPrice:
+        formData?.customServices?.find((c) => c.fieldName === 'waterPrice')
+          ?.price ?? formData?.waterPrice,
+      waterPriceTotal:
+        formData?.customServices?.find((c) => c.fieldName === 'waterPriceTotal')
+          ?.price ?? formData?.waterPriceTotal,
+      garbageCollectorPrice:
+        formData?.customServices?.find(
+          (c) => c.fieldName === 'garbageCollectorPrice'
+        )?.price ||
+        formData?.garbageCollectorPrice ||
+        0,
+      inflicionPrice:
+        formData?.customServices?.find((c) => c.fieldName === 'inflicionPrice')
+          ?.price ||
+        formData?.inflicionPrice ||
+        0,
+      description: formData?.description || '',
+      customServices: formData?.customServices || [],
+      losses: formData?.losses || null,
+      consumedElectricity: formData?.consumedElectricity || null,
+      generalElectricity: formData?.generalElectricity || null,
+      isVAT: formData?.isVAT || true,
     }
     const response = currentService
       ? await editService({
-          _id: currentService?._id,
+          _id: currentService?._id?.toString(),
           ...serviceData,
         })
       : await addService(serviceData)
@@ -78,13 +114,13 @@ const AddServiceModal: FC<Props> = ({
     <Modal
       title="Ціна на послуги в місяць"
       onOk={handleSubmit}
-      changesForm={() => form.isFieldsTouched()}
+      changed={() => isValueChanged}
       onCancel={() => {
         form.resetFields()
         closeModal()
       }}
       okText={edit ? 'Зберегти' : !preview && 'Додати'}
-      okButtonProps={{ style: { display: preview ? 'none' : 'inline' } }}
+      okButtonProps={{ style: { ...(preview && { display: 'none' }) } }}
       cancelText={preview ? 'Закрити' : 'Відміна'}
       confirmLoading={isAddingLoading || isEditingLoading}
     >
@@ -95,6 +131,7 @@ const AddServiceModal: FC<Props> = ({
           form={form}
           edit={edit}
           currentService={currentService}
+          setIsValueChanged={setIsValueChanged}
         />
       )}
     </Modal>

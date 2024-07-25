@@ -1,0 +1,35 @@
+.Form {
+  .formInput {
+    width: 100%;
+  }
+  .SelectBlock {
+    p {
+      margin-bottom: 0.5rem;
+    }
+    .Select {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+  }
+  .PriceItem {
+    margin: 0;
+  }
+}
+
+.createdByWrapper {
+  display: block;
+  margin-top: 2.5rem;
+}
+
+.createdByName {
+  color: #9f82f0;
+  font-weight: 600;
+}
+.createdByNameAutomatic {
+  color: #9f82f0;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+.createdByEmail {
+  color: #9f82f0;
+}

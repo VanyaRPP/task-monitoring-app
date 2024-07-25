@@ -1,125 +1,158 @@
-import React, { useMemo } from 'react'
-import { validateField } from '@common/assets/features/validators'
-import { Form, Input, InputNumber } from 'antd'
-import s from './style.module.scss'
-import { Operations, ServiceType } from '@utils/constants'
-import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
-import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
+import { validateField } from '@assets/features/validators'
+import { IPayment } from '@common/api/paymentApi/payment.api.types'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { IService } from '@common/api/serviceApi/service.api.types'
+import { usePaymentContext } from '@components/AddPaymentModal'
+import { InvoiceType } from '@components/Tables/EditInvoiceTable'
+import AddressesSelect from '@components/UI/Reusable/AddressesSelect'
+import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
+import PaymentTypeSelect from '@components/UI/Reusable/PaymentTypeSelect'
+import { Operations } from '@utils/constants'
+import { getInvoices } from '@utils/getInvoices'
+import { Form, Input, InputNumber, Select } from 'antd'
+import { useMemo, useState, useEffect } from 'react'
 import CompanySelect from './CompanySelect'
-import PaymentTotal from './PaymentTotal'
-import PaymentPricesTable from './PaymentPricesTable'
-import MonthServiceSelect from './MonthServiceSelect'
-import { usePaymentContext } from '@common/components/AddPaymentModal'
-import moment from 'moment'
-import InvoiceNumber from './InvoiceNumber'
 import InvoiceCreationDate from './InvoiceCreationDate'
-import { convertToInvoicesObject } from '@utils/helpers'
-import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
+import InvoiceNumber from './InvoiceNumber'
+import MonthServiceSelect from './MonthServiceSelect'
+import PaymentPricesTable from './PaymentPricesTable'
+import PaymentTotal from './PaymentTotal'
+import { inputNumberParser } from '@utils/helpers'
+import type { ChangelogOption } from '@components/AddPaymentModal/changelog/types'
 
-function AddPaymentForm({ paymentActions }) {
-  const { form, paymentData } = usePaymentContext()
-  const initialValues = useMemo(() => {
-    return getInitialValues(paymentData)
-  }, [paymentData])
-   
-  const serviceId = Form.useWatch('monthService', form)
+type AddPaymentFormProps = {
+  paymentActions: { preview: boolean; edit: boolean; create?: boolean }
+  changelogOptions?: ChangelogOption[]
+  changelogLoading?: boolean
+}
+
+export const useInvoice = ({
+  payment,
+  service,
+  company,
+  prevService,
+  prevPayment,
+}: {
+  payment?: IPayment
+  service?: IService
+  company?: IRealestate
+  prevService?: IService
+  prevPayment?: IPayment
+}): Omit<InvoiceType, 'sum'>[] => {
+  const invoices = useMemo(() => {
+    return getInvoices({ payment, service, company, prevService, prevPayment })
+  }, [payment, service, company, prevService, prevPayment])
+  return invoices
+}
+
+function AddPaymentForm({
+  paymentActions,
+  changelogOptions = [],
+  changelogLoading,
+}: AddPaymentFormProps) {
+  const { preview, edit } = paymentActions
+  const selectedActions = { preview, edit }
+
+  const { form, payment, service, company, prevService, prevPayment } =
+    usePaymentContext()
+
+  const [streetHasService, setStreetHasService] = useState(false)
   const companyId = Form.useWatch('company', form)
   const operation = Form.useWatch('operation', form)
-  const { preview, edit } = paymentActions
+  const changelogId = Form.useWatch('changelogId', form)
 
+  useEffect(() => {
+    if (!changelogId) return
+    
+    const exists = changelogOptions.some(opt => opt.value === changelogId)
+    if (!exists) {
+      form.setFieldValue('changelogId', undefined)
+    }
+  }, [changelogOptions, changelogId, form])
+
+  useInvoice({
+    payment,
+    service,
+    company,
+    prevService,
+    prevPayment,
+  })
+  const showCurrentVersionBtn = !!changelogId
+  
+  
+  const showChangelog = changelogOptions.length > 0
   return (
-    <Form
-      initialValues={initialValues}
-      form={form}
-      layout="vertical"
-      className={s.Form}
-    >
+    <>
       <DomainsSelect form={form} edit={edit} />
-
-      <AddressesSelect form={form} edit={edit} />
-
+      <AddressesSelect
+        form={form}
+        edit={edit}
+        onStreetHasServiceChange={setStreetHasService}
+        street={company?.street?._id}
+      />
       <MonthServiceSelect form={form} edit={edit} />
-
-      <CompanySelect form={form} edit={edit} />
+      <CompanySelect form={form} edit={edit} company={payment?.company} />
       <PaymentTypeSelect edit={!companyId || edit} />
-
-      <InvoiceNumber form={form} paymentActions={paymentActions} />
+      <InvoiceNumber form={form} paymentActions={selectedActions} />
       <InvoiceCreationDate edit={preview} />
+      
+    {showChangelog && (
+      <div>
+        <Form.Item
+          name="changelogId"
+          label="Історія змін"
+          tooltip="Попередні версії рахунку. Зберігаються автоматично після кожного редагування."
+          style={{ width: 320 }}
+        >
+          <Select
+            allowClear
+            placeholder="Оберіть версію рахунку"
+            options={changelogOptions}
+            optionLabelProp="shortLabel"
+            loading={changelogLoading}
+            disabled={preview}
+            notFoundContent={
+              changelogLoading ? 'Завантаження...' : 'Історії змін ще немає'
+            }
+          />
+        </Form.Item>
+      </div>
+    )}
 
-      <Form.Item
-        shouldUpdate={(prevValues, currentValues) =>
-          prevValues.operation !== currentValues.operation
-        }
-        className={s.priceItem}
-      >
-        {({ getFieldValue }) =>
-          getFieldValue('operation') === Operations.Credit ? (
-            <>
-              <Form.Item
-                name="generalSum"
-                label="Сума"
-                rules={validateField('paymentPrice')}
-              >
-                <InputNumber
-                  placeholder="Вкажіть суму"
-                  disabled={preview}
-                  className={s.inputNumber}
-                />
-              </Form.Item>
-              <Form.Item
-                name="description"
-                label="Опис"
-                rules={validateField('required')}
-              >
-                <Input.TextArea
-                  placeholder="Введіть опис"
-                  maxLength={256}
-                  disabled={preview}
-                />
-              </Form.Item>
-            </>
-          ) : (
-            <>
-              <PaymentPricesTable
-                key={companyId + serviceId + operation}
-                paymentActions={paymentActions}
-              />
-              <PaymentTotal form={form} />
-            </>
-          )
-        }
-      </Form.Item>
-    </Form>
+      {operation === Operations.Credit ? (
+        <>
+          <Form.Item
+            name="generalSum"
+            label="Сума"
+            rules={validateField('paymentPrice')}
+          >
+            <InputNumber
+              parser={inputNumberParser}
+              style={{ minWidth: '166px' }}
+              placeholder="Вкажіть суму"
+              disabled={preview}
+            />
+          </Form.Item>
+          <Form.Item
+            name="description"
+            label="Опис"
+            rules={validateField('required')}
+          >
+            <Input.TextArea
+              placeholder="Введіть опис"
+              maxLength={256}
+              disabled={preview}
+            />
+          </Form.Item>
+        </>
+      ) : (
+        <>
+          <PaymentPricesTable preview={preview} service={service} />
+          <PaymentTotal form={form} />
+        </>
+      )}
+    </>
   )
 }
 
-function getInitialValues(paymentData) {
-
-  const custom = paymentData?.invoice.filter(
-      (item) => item?.type === ServiceType.Custom
-    )
-    
-  const customFields = custom?.reduce((acc, item) => {
-    acc[item.name] = { price: item.price }
-    return acc
-  }, {})
-
-  const initialValues = {
-    domain: paymentData?.domain?._id,
-    street: paymentData?.street?._id,
-    monthService: paymentData?.monthService?._id,
-    company: paymentData?.company?._id,
-    description: paymentData?.description,
-    credit: paymentData?.credit,
-    generalSum: paymentData?.generalSum,
-    debit: paymentData?.debit,
-    invoiceNumber: paymentData?.invoiceNumber,
-    invoiceCreationDate: moment(paymentData?.invoiceCreationDate),
-    operation: paymentData ? paymentData.type : Operations.Credit,
-    ...convertToInvoicesObject(paymentData?.invoice || []),
-    ...customFields,
-  }
-
-  return initialValues
-}
 export default AddPaymentForm

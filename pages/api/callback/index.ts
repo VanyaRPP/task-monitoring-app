@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
+import CallBack from '@modules/models/Callback'
 import start, { Data } from '@pages/api/api.config'
-import CallBack from '../../../common/modules/models/Callback'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
 

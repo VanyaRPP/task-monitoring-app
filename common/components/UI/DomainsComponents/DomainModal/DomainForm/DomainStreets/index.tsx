@@ -1,9 +1,14 @@
-import React from 'react'
-import { validateField } from '@common/assets/features/validators'
-import { Select, Form } from 'antd'
+import { validateField } from '@assets/features/validators'
 import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
+import { Form, Select } from 'antd'
+import React from 'react'
+import { useForm } from 'antd/lib/form/Form'
 
-const DomainStreets: React.FC = () => {
+interface DomainStreetsProps {
+  disabled?: boolean
+}
+
+const DomainStreets: React.FC<DomainStreetsProps> = ({ disabled = false }) => {
   const { data: streets, isLoading } = useGetAllStreetsQuery({})
 
   return (
@@ -13,28 +18,24 @@ const DomainStreets: React.FC = () => {
       rules={validateField('required')}
     >
       <Select
-        mode="tags"
-        filterSort={(optionA, optionB) =>
-          (optionA?.label ?? '')
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            ?.toLowerCase()
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            .localeCompare((optionB?.label ?? '').toLowerCase())
-        }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        filterOption={(input, option) => (option?.label ?? '').includes(input)}
         options={streets?.map((i) => ({
           value: i._id,
           label: `${i.address} (м. ${i.city})`,
         }))}
-        optionFilterProp="children"
+        mode="multiple"
+        showSearch
+        disabled={isLoading || disabled}
         placeholder="Пошук адреси"
         loading={isLoading}
-        showSearch
-      />
+        filterSort={(optionA, optionB) =>
+          (optionA?.label ?? '')
+            .toLowerCase()
+            .localeCompare((optionB?.label ?? '').toLowerCase())
+        }
+        filterOption={(input, option) =>
+          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+        }
+      ></Select>
     </Form.Item>
   )
 }

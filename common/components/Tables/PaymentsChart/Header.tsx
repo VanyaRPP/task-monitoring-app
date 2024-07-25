@@ -1,23 +1,25 @@
 import { SelectOutlined } from '@ant-design/icons'
+import PaymentsSelector from '@components/PaymentSelector'
+import { AppRoutes } from '@utils/constants'
 import { Button, Select } from 'antd'
 import { useRouter } from 'next/router'
-import { AppRoutes } from '@utils/constants'
 import s from './style.module.scss'
-import PaymentsSelector from '@common/components/PaymentSelector'
 
 interface Props {
   paymentsLimit: number
   setPaymentsLimit: (paymentsLimit: number) => void
   setCompanyId: (companyId: string) => void
+  canShowChart: boolean
 }
 
 const PaymentsChartHeader: React.FC<Props> = ({
   paymentsLimit,
   setPaymentsLimit,
   setCompanyId,
+  canShowChart,
 }) => {
   const router = useRouter()
-  const isOnPage = router.pathname === AppRoutes.PAYMENTS_CHARTS
+  const isOnPage = router.pathname === AppRoutes.PAYMENT_CHART
   const options = [10, 20, 30, 40, 50]
 
   return (
@@ -25,7 +27,7 @@ const PaymentsChartHeader: React.FC<Props> = ({
       <Button
         type="link"
         onClick={() => {
-          router.push(AppRoutes.PAYMENTS_CHARTS)
+          router.push(AppRoutes.PAYMENT_CHART)
         }}
       >
         Графіки платежів

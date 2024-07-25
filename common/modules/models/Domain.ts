@@ -1,11 +1,36 @@
 import mongoose, { ObjectId, Schema } from 'mongoose'
 
 export interface IDomain {
-  _id: ObjectId | string
+  _id: string
   name: string
   adminEmails: [string]
   streets: [ObjectId]
   description: string
+  mfo: string
+  iban: string
+  rnokpp: string
+  IEName: string
+  domainBankToken: IDomainBankToken[]
+  domainServices: string[]
+  customServices: ICustomService[]
+}
+
+export interface ICustomService {
+  groupName: string
+  services: string[]
+}
+
+export interface IDomainService {
+  name: string
+  price: number
+  enabled: boolean
+}
+
+export interface IDomainBankToken {
+  token: string
+  shortToken: string
+  tokenName: string
+  confidant: string[]
 }
 
 const DomainSchema = new Schema<IDomain>({
@@ -16,7 +41,21 @@ const DomainSchema = new Schema<IDomain>({
     required: true,
   },
   description: { type: String, required: true },
+  mfo: { type: String, required: false },
+  iban: { type: String, required: false },
+  rnokpp: { type: String, required: false },
+  IEName: { type: String, required: false },
+  domainBankToken: { type: [Object] },
+  domainServices: { type: [Object] },
+  customServices: [
+    {
+      groupName: { type: String, required: true },
+      services: [{ type: String, required: true }],
+    },
+  ],
 })
 
-const Domain = mongoose.models?.Domain || mongoose.model('Domain', DomainSchema)
+const Domain =
+  (mongoose.models?.Domain as mongoose.Model<IDomain>) ||
+  mongoose.model('Domain', DomainSchema)
 export default Domain

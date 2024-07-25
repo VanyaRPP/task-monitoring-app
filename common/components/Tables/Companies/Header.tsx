@@ -1,29 +1,44 @@
 import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
-import { Button } from 'antd'
+import { Button, Space, Segmented, Select } from 'antd'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
-
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import RealEstateModal from '@common/components/UI/RealEstateComponents/RealEstateModal'
-import { AppRoutes, Roles } from '@utils/constants'
-import { isAdminCheck } from '@utils/helpers'
+import { Dispatch, SetStateAction, useState } from 'react'
 import {
   IExtendedRealestate,
   IGetRealestateResponse,
 } from '@common/api/realestateApi/realestate.api.types'
-import FilterTags from '@common/components/UI/Reusable/FilterTags'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import RealEstateModal from '@components/UI/RealEstateComponents/RealEstateModal'
+import {
+  CompanyFilterTags,
+  DomainFilterTags,
+} from '@components/UI/Reusable/FilterTags'
+import { AppRoutes } from '@utils/constants'
+import { isAdminCheck } from '@utils/helpers'
 import s from './style.module.scss'
-import DomainFilterSelector from '@common/components/UI/Reusable/FilterSelectors/DomainFilterSelecter'
-import CompanyFilterSelector from '@common/components/UI/Reusable/FilterSelectors/CompanyFilterSelector'
-import StreetFilterSelector from '@common/components/UI/Reusable/FilterSelectors/StreetFilterSelector'
+import {
+  useGetDomainFiltersQuery,
+  useGetRealEstateFiltersQuery,
+} from '@common/api/filterApi/filter.api'
+import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
 
 export interface Props {
   showAddButton?: boolean
+  isSingleCompanyByData?: boolean
   currentRealEstate?: IExtendedRealestate
   setCurrentRealEstate?: (realEstate: IExtendedRealestate) => void
   filters?: any
   setFilters?: (filters: any) => void
+  setIsArchive?: Dispatch<SetStateAction<boolean>>
   realEstates?: IGetRealestateResponse
+  setRealEstateActions: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+    }>
+  >
+  realEstateActions: {
+    edit: boolean
+  }
+  enableRealEstateButton?: true | false
 }
 
 const CompaniesHeader: React.FC<Props> = ({
@@ -32,54 +47,111 @@ const CompaniesHeader: React.FC<Props> = ({
   setCurrentRealEstate,
   filters,
   setFilters,
-  realEstates,
+  setRealEstateActions,
+  realEstateActions,
+  enableRealEstateButton,
+  setIsArchive,
+  isSingleCompanyByData,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  const { data: customServicesResponse } = useGetCustomServicesQuery({})
+  const customServices = customServicesResponse?.data || []
+  
   const { data: user } = useGetCurrentUserQuery()
   const isAdmin = isAdminCheck(user?.roles)
 
-  const openModal = () => setIsModalOpen(true)
+  const openModal = () => {
+    setIsModalOpen(true)
+    setCurrentRealEstate(null)
+    setRealEstateActions({ edit: true })
+  }
   const closeModal = () => {
     setIsModalOpen(false)
     setCurrentRealEstate(null)
+    setRealEstateActions({ edit: false })
   }
+  const handleArchiveToggle = (value: boolean) => {
+    setIsArchive(value)
+  }
+
+  const { data: realEstateData } = useGetRealEstateFiltersQuery({
+    streets: filters?.street,
+    domains: filters?.domain,
+  })
+  const { data: domainData } = useGetDomainFiltersQuery({
+    streets: filters?.street,
+    realEstates: filters?.company,
+  })
+
+  const handleServicesChange = (values: string[]) => {
+  setFilters((prev: any) => ({
+    ...prev,
+    services: values,
+  }))
+}
 
   return (
     <div className={s.headerBlock}>
       <div className={s.firstBlock}>
-        <Button type="link" onClick={() => router.push(AppRoutes.REAL_ESTATE)}>
+        <Button
+          type="link"
+          onClick={() => {
+            if (enableRealEstateButton) {
+              router.push(AppRoutes.REAL_ESTATE)
+            }
+          }}
+        >
           Компанії
           <SelectOutlined />
         </Button>
 
         {router.pathname === AppRoutes.REAL_ESTATE && isAdmin && (
-          <>
-            <DomainFilterSelector
+          <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
+            <DomainFilterTags
+              collection={domainData?.domainsFilter}
               filters={filters}
               setFilters={setFilters}
-              domainsFilter={realEstates?.domainsFilter}
             />
-            <StreetFilterSelector
-              style={{ marginLeft: '1rem' }}
+
+            <CompanyFilterTags
+              collection={realEstateData?.realEstatesFilter}
               filters={filters}
               setFilters={setFilters}
-              streetsFilter={realEstates?.streetsFilter}
             />
-            <CompanyFilterSelector
-              style={{ marginLeft: '1rem' }}
-              filters={filters}
-              setFilters={setFilters}
-              companiesFilter={realEstates?.realEstatesFilter}
-            />
-            <FilterTags
-              filters={filters}
-              setFilters={setFilters}
-              collection={realEstates}
-            />
-          </>
+          </Space>
         )}
+      <div style={{ position: 'absolute', left: 400,}}>
+      <Select
+        mode="multiple"
+        allowClear
+        placeholder="Фільтр послуг"
+        style={{ width: "250px" }}
+        value={filters?.services || []}
+        onChange={handleServicesChange}
+        maxTagCount="responsive"
+      >
+        {customServices.length > 0 && (
+        <Select.OptGroup label="Кастомні">
+          {customServices.map((service) => (
+            <Select.Option key={service._id} value={service._id}>
+              {service.name}
+            </Select.Option>
+        ))}
+        </Select.OptGroup>
+      )}
+    </Select>
+    </div>  
+      </div>
+      <div className={s.segmented}>
+        <Segmented
+          options={[
+            { label: 'Неархівовані', value: false },
+            { label: 'Архівовані', value: true },
+          ]}
+          onChange={handleArchiveToggle}
+        />
       </div>
 
       {showAddButton && isAdmin && (
@@ -90,7 +162,11 @@ const CompaniesHeader: React.FC<Props> = ({
           {(isModalOpen || currentRealEstate) && (
             <RealEstateModal
               closeModal={closeModal}
+              chosenRealEstate={
+                filters?.domain ? { domain: filters?.domain[0] } : null
+              }
               currentRealEstate={currentRealEstate}
+              editable={realEstateActions.edit}
             />
           )}
         </>

@@ -1,5 +1,5 @@
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 interface IUseServiceProps {
   serviceId?: string
@@ -11,7 +11,8 @@ function useService({ serviceId, skip }: IUseServiceProps) {
     { serviceId },
     { skip: !serviceId || skip }
   )
-  const service = services ? services[0] : null
+
+  const service = !!services && !!services.data ? services.data[0] : null
 
   return { service, isLoading }
 }
@@ -19,16 +20,15 @@ function useService({ serviceId, skip }: IUseServiceProps) {
 export default useService
 
 export function usePreviousMonthService({ domainId, streetId, date }) {
-  const lastMonth = moment(date).subtract(1, 'month')
+  const lastMonth = dayjs(date).subtract(1, 'month')
   const { data } = useGetAllServicesQuery(
     {
-      month: lastMonth.month() + 1,
+      month: lastMonth.month(),
       year: lastMonth.year(),
       domainId,
       streetId,
     },
     { skip: !domainId || !streetId || !date }
   )
-
-  return { previousMonth: data?.[0] }
+  return { previousMonth: data?.data?.[0] }
 }

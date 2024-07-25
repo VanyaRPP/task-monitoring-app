@@ -2,23 +2,25 @@ import {
   useAddPaymentMutation,
   useGetPaymentNumberQuery,
 } from '@common/api/paymentApi/payment.api'
-import CompanySelect from '@common/components/Forms/AddPaymentForm/CompanySelect'
-import Modal from '@common/components/UI/ModalWindow'
-import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
-import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
-import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
-import useCompany from '@common/modules/hooks/useCompany'
+import CompanySelect from '@components/Forms/AddPaymentForm/CompanySelect'
+import Modal from '@components/UI/ModalWindow'
+import AddressesSelect from '@components/UI/Reusable/AddressesSelect'
+import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
+import PaymentTypeSelect from '@components/UI/Reusable/PaymentTypeSelect'
+import useCompany from '@modules/hooks/useCompany'
 import { Operations } from '@utils/constants'
 import {
   getPaymentProviderAndReciever,
   importedPaymentDateToISOStringDate,
-  parseStringToFloat,
+  toRoundFixed,
 } from '@utils/helpers'
 import { Form, Input, message } from 'antd'
+import { useState } from 'react'
 
 const ImportInvoicesModal = ({ closeModal }) => {
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
   const companyId = Form.useWatch('company', form)
@@ -62,12 +64,12 @@ const ImportInvoicesModal = ({ closeModal }) => {
       title="Імпорт інвойсів"
       onOk={handleSave}
       confirmLoading={isLoading}
-      changesForm={() => form.isFieldsTouched()}
+      changed={() => isValueChanged}
       onCancel={closeModal}
       okText="Імпортувати"
       cancelText={'Закрити'}
     >
-      <Form form={form}>
+      <Form form={form} onValuesChange={() => setIsValueChanged(true)}>
         <DomainsSelect form={form} />
         <AddressesSelect form={form} />
         <CompanySelect form={form} />
@@ -95,10 +97,11 @@ function prepareInvoiceObjects(
     domain: domainId,
     street: streetId,
     company: companyId,
-    invoice: paymentMethod === Operations.Debit ? getInvoiceInfo(i, company) : [],
+    invoice:
+      paymentMethod === Operations.Debit ? getInvoiceInfo(i, company) : [],
     provider,
     reciever,
-    generalSum: parseStringToFloat(i.generalSum.toString()),
+    generalSum: toRoundFixed(i.generalSum.toString()),
   }))
 
   return invoices
@@ -109,29 +112,28 @@ function getInvoiceInfo(i, company) {
     {
       type: 'maintenancePrice',
       amount: company?.totalArea,
-      price: (
-        +parseStringToFloat(i.maintenancePrice) / company?.totalArea)
-          .toFixed(2),
-      sum: parseStringToFloat(i.maintenancePrice),
+      price: (+toRoundFixed(i.maintenancePrice) / company?.totalArea).toFixed(
+        2
+      ),
+      sum: toRoundFixed(i.maintenancePrice),
     },
     {
       type: 'placingPrice',
       amount: company?.totalArea,
-      price: (+parseStringToFloat(i.placingPrice) / company?.totalArea)
-        .toFixed(2),
-      sum: parseStringToFloat(i.placingPrice),
+      price: (+toRoundFixed(i.placingPrice) / company?.totalArea).toFixed(2),
+      sum: toRoundFixed(i.placingPrice),
     },
     {
       type: 'electricityPrice',
-      lastAmount: parseStringToFloat(i.electricityPriceLastAmount),
-      amount: parseStringToFloat(i.electricityPriceAmount),
-      price: parseStringToFloat(i.electricityPricePrice),
-      sum: parseStringToFloat(i.electricityPriceSum),
+      lastAmount: toRoundFixed(i.electricityPriceLastAmount),
+      amount: toRoundFixed(i.electricityPriceAmount),
+      price: toRoundFixed(i.electricityPricePrice),
+      sum: toRoundFixed(i.electricityPriceSum),
     },
     {
       type: 'waterPrice',
-      price: parseStringToFloat(i.waterPriceSum),
-      sum: parseStringToFloat(i.waterPriceSum),
+      price: toRoundFixed(i.waterPriceSum),
+      sum: toRoundFixed(i.waterPriceSum),
     },
   ]
 
@@ -139,14 +141,14 @@ function getInvoiceInfo(i, company) {
     res.push({
       type: 'inflicionPrice',
       price: '0',
-      sum: parseStringToFloat(i.inflicionPrice),
+      sum: toRoundFixed(i.inflicionPrice),
     })
   }
 
   if (i.custom) {
     res.push({
       type: 'custom',
-      sum: parseStringToFloat(i.custom),
+      sum: toRoundFixed(i.custom),
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       name: 'Донарахування',
