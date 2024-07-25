@@ -1,15 +1,10 @@
-import {
-  useAddDomainMutation,
-  useEditDomainMutation,
-} from '@common/api/domainApi/domain.api'
+import { useAddDomainMutation, useEditDomainMutation } from '@common/api/domainApi/domain.api'
+import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import { IDomain } from '@common/modules/models/Domain'
 import { Form, message } from 'antd'
-import React, { FC } from 'react'
-import {
-  IDomainModel,
-  IExtendedDomain,
-} from '@common/api/domainApi/domain.api.types'
-import DomainForm from './DomainForm'
+import { FC } from 'react'
 import Modal from '../../ModalWindow'
+import DomainForm from './DomainForm'
 
 interface Props {
   currentDomain: IExtendedDomain
@@ -22,7 +17,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
   const [editDomain] = useEditDomainMutation()
 
   const handleSubmit = async () => {
-    const formData: IDomainModel = await form.validateFields()
+    const formData: Omit<IDomain, '_id'> = await form.validateFields()
 
     const domainData = {
       name: formData.name,
@@ -37,8 +32,8 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
       ? await editDomain({
           _id: currentDomain?._id,
           ...domainData,
-        })
-      : await addDomainEstate(domainData)
+        } as IDomain)
+      : await addDomainEstate(domainData as IDomain)
 
     if ('data' in response) {
       form.resetFields()
