@@ -16,6 +16,7 @@ import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import Modal from '../UI/ModalWindow'
 import s from './style.module.scss'
+import { IPayment } from '@common/api/paymentApi/payment.api.types' 
 
 interface Props {
   closeModal: VoidFunction
@@ -53,7 +54,7 @@ const AddPaymentModal: FC<Props> = ({
   const handleSubmit = async () => {
     const formData = await form.validateFields()
     const filteredInvoice = filterInvoiceObject(formData)
-    const payment = {
+    const payment:IPayment = {
       invoiceNumber: formData.invoiceNumber,
       type: formData.operation,
       domain: formData.domain,
@@ -66,6 +67,7 @@ const AddPaymentModal: FC<Props> = ({
       provider,
       reciever,
       invoice: formData.debit ? filteredInvoice : [],
+      status: 'draft',
     }
 
     const response = edit

@@ -1,16 +1,19 @@
 import React, { ReactElement, useState } from 'react'
-import { Alert, message, Pagination, Popconfirm, Table } from 'antd'
+import { Alert, message, Pagination, Popconfirm, Table, Tag } from 'antd'
 import { Button } from 'antd'
 import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
 import TableCard from '@common/components/UI/TableCard'
 import {
   useDeletePaymentMutation,
+  useEditPaymentMutation,
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
 import {
   dateToDefaultFormat,
   dateToMonthYear,
 } from '@common/assets/features/formatDate'
+import { generateHtmlFromThemplate } from '@utils/pdf/pdfThemplate'
+import { useEmailMutation } from '@common/api/emailApi/email.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import { EyeOutlined } from '@ant-design/icons'
@@ -62,6 +65,7 @@ function getTypeOperation(value) {
 
 const PaymentsBlock = () => {
   const router = useRouter()
+  const [updatePayment] = useEditPaymentMutation()
   const {
     pathname,
     query: { email },
@@ -78,6 +82,8 @@ const PaymentsBlock = () => {
     currentPage: 1,
   })
   const [filters, setFilters] = useState<any>()
+  const [sendEmail] = useEmailMutation()
+  const [statusSend, setStatusSend] = useState('Draft')
 
   const closeEditModal = () => {
     setCurrentPayment(null)
@@ -112,6 +118,44 @@ const PaymentsBlock = () => {
     },
     { skip: currUserLoading || !currUser }
   )
+
+  const sendMail = async (payment) => {
+    // const dateDefaultFormat = dateToDefaultFormat(
+    //   (payment.monthService as any)?.date
+    // )
+    if(payment) {
+      updatePayment({...payment, status: 'sent'})
+    }
+    // generateHtmlFromThemplate(payment)
+    //   .then(async (html) => {
+    //     const response = await sendEmail({
+    //       to: payment.reciever.adminEmails,
+    //       subject: `Оплата від ${dateDefaultFormat}`,
+    //       text: `Ви отримали новий рахунок від "${
+    //         typeof payment.domain === 'string'
+    //           ? payment.domain
+    //           : payment.domain?.name
+    //       }" за ${dateDefaultFormat}`,
+    //       html: html,
+    //     })
+
+    //     if ('data' in response) {
+    //       message.success(
+    //         `Рахунок для "${payment.reciever.companyName}" за ${dateDefaultFormat} надіслано`
+    //       )
+    //     } else if ('error' in response) {
+    //       throw response.error
+    //     } else {
+    //       throw new Error('Unexpected response')
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     message.error(
+    //       `Не вдалося надіслати рахунок для "${payment.reciever.companyName}" за ${dateDefaultFormat}`
+    //     )
+    //     console.error(`Error: ${JSON.stringify(error, null, 2)}`)
+    //   })
+  }
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
@@ -169,6 +213,19 @@ const PaymentsBlock = () => {
         {
           align: 'center',
           fixed: 'right',
+          title: 'Статус',
+          width: '85px',
+          render: (_, payment: IExtendedPayment) => (
+            <Tag color={payment?.status === 'sent' ? '#8957e5' : '#484f58'}>
+              {payment?.status === 'sent'
+              ? 'Надiслано' 
+              : 'Чорнетка'
+            }</Tag>
+          ),
+        },
+        {
+          align: 'center',
+          fixed: 'right',
           title: '',
           width: 50,
           render: (_, payment: IExtendedPayment) => (
@@ -193,6 +250,20 @@ const PaymentsBlock = () => {
 
   // TODO: add Interface
   const columns: any = [
+    {
+      title: '',
+      dataIndex: 'send',
+      width: '113px',
+      render: (_, payment: IExtendedPayment) => {
+        return (
+        <Tooltip title={payment?.status === 'sent' ? 'Платеж надiслано' : ""}>
+          <Button type='default' disabled={payment?.status === 'sent'} onClick={() => {sendMail(payment)}}>
+              Надiслати
+          </Button>
+        </Tooltip>
+        )
+      }
+    },
     {
       title: 'Дата створення',
       dataIndex: 'invoiceCreationDate',
@@ -263,6 +334,7 @@ const PaymentsBlock = () => {
     title: 'Компанія',
     dataIndex: 'company',
     fixed: 'left',
+    width: '100px',
     filters:
       pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
     filteredValue: filters?.company || null,
@@ -274,6 +346,7 @@ const PaymentsBlock = () => {
       title: 'Надавач послуг',
       fixed: 'left',
       dataIndex: 'domain',
+      width: '150px',
       filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
       filteredValue: filters?.domain || null,
       render: (i) => i?.name,
