@@ -4,7 +4,7 @@ import {
 } from '@common/api/serviceApi/service.api'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { Form, message } from 'antd'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { FC } from 'react'
 import AddServiceForm from '../Forms/AddServiceForm'
 import PreviewServiceForm from '../Forms/PreviewServiceForm'
@@ -47,7 +47,7 @@ const AddServiceModal: FC<Props> = ({
     const serviceData = {
       domain: currentService?.domain?._id?.toString() || formData.domain,
       street: currentService?.street?._id?.toString() || formData.street,
-      date: moment(formData.date).toDate(),
+      date: dayjs(formData.date).toDate(),
       rentPrice: formData.rentPrice,
       electricityPrice: formData.electricityPrice,
       waterPrice: formData.waterPrice,
