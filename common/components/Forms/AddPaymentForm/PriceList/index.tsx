@@ -1,15 +1,9 @@
-import React, {CSSProperties, FC, useEffect, useState} from 'react';
-import {DataType} from "csstype";
+import React, {FC, useEffect, useState} from 'react';
 import {ColumnsType} from "antd/es/table";
-import {Form, Table} from "antd";
+import {Table} from "antd";
 import styles from "./styles.module.scss"
-// import {data} from "./data"
-import {usePaymentData} from "@common/modules/hooks/usePaymentData";
-import {getInvoices} from "@utils/getInvoices";
-import {useGetAllPaymentsQuery} from "@common/api/paymentApi/payment.api";
 import {IPayment, IPaymentField} from "@common/api/paymentApi/payment.api.types";
-import {paymentsTitle, ServiceType} from "@utils/constants";
-import numberToWords from "@components/Forms/AddPaymentForm/PriceList/numberToWords";
+import {paymentsTitle} from "@utils/constants";
 
 interface InvoicesTableData extends IPaymentField {
   number: number,
@@ -54,11 +48,10 @@ const columns: ColumnsType<InvoicesTableData> = [
 ];
 
 
-const PriceList: FC<{data: IPayment}> = ({data}) => {
+const PriceList: FC<{ data: IPayment }> = ({data}) => {
   const [payment, setPayment] = useState(data)
   const [totalSum, setTotalSum] = useState(0)
-  const [totalIntSumWords, setTotalIntSumWords] = useState(numberToWords(0))
-  const [totalFractionSumWords, setTotalFractionSumWords] = useState(numberToWords(0))
+  const [totalFractionSum, setTotalFractionSum] = useState(0)
 
 
   const getModifiedInvoices = () => {
@@ -75,17 +68,13 @@ const PriceList: FC<{data: IPayment}> = ({data}) => {
   }, [payment]);
 
   useEffect(() => {
-    const numberStr = totalSum.toFixed(2).toString()
-    const numbersSplit = numberStr.split('.')
-    setTotalIntSumWords(numberToWords(Number(numbersSplit[0])))
-    setTotalFractionSumWords(numberToWords(numbersSplit.length > 1 ? Number(numbersSplit[1]) : 0))
+    const splitSum = totalSum.toFixed(2).split('.')
+    setTotalFractionSum(Number(splitSum[1]))
   }, [totalSum]);
 
   useEffect(() => {
     setPayment(data)
   }, [data]);
-
-  console.log(payment)
 
   return (
     <>
@@ -145,9 +134,10 @@ const PriceList: FC<{data: IPayment}> = ({data}) => {
       <div className={styles.container}>
         <div className={styles.contentSection}>
           <div>
-            Загальна вартість робіт (послуг) склала без ПДВ {totalIntSumWords} гривень {totalFractionSumWords} копійок, ПДВ
-            Нуль гривень 00 копійок, загальна вартість робіт (послуг) із
-            ПДВ {totalIntSumWords} гривень {totalFractionSumWords} копійок.
+            Загальна вартість робіт (послуг) склала без ПДВ {totalSum.toFixed(0)} гривень {totalFractionSum} копійок,
+            ПДВ
+            0 гривень 00 копійок, загальна вартість робіт (послуг) із
+            ПДВ {totalSum.toFixed(0)} гривень {totalFractionSum} копійок.
             <br/>
             Замовник претензій по об&apos;єму, якості та строкам виконання робіт (надання послуг) не має.
           </div>
@@ -157,7 +147,7 @@ const PriceList: FC<{data: IPayment}> = ({data}) => {
         <div className={styles.signaturesSection}>
           <div className={styles.signatureBlock}>
             <div>
-              <b>Від Виконавця*</b><br/>
+              <b>Від Виконавця</b><br/>
               <br/>
               <hr/>
               <b>{(new Date(payment.invoiceCreationDate)).toLocaleDateString()}</b> <br/>

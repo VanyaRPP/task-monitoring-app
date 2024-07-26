@@ -54,6 +54,10 @@ const AddPaymentModal: FC<Props> = ({
 }) => {
   const [form] = Form.useForm()
 
+  const { company, service, payment, prevPayment } = usePaymentData({
+    form,
+    paymentData,
+  })
   const { company, service, prevService, payment, prevPayment } =
     usePaymentFormData(form, paymentData)
 
@@ -153,6 +157,10 @@ const AddPaymentModal: FC<Props> = ({
 
   // pure cringy useEffect to fill table on preview mode
   useEffect(() => {
+    form.setFieldsValue({
+      invoice: getInvoices({ company, service, payment, prevPayment }),
+    })
+  }, [form, company, payment, prevPayment, service])
     if (paymentActions.preview) {
       form.setFieldsValue({
         invoice: getInvoices({ company, service, payment, prevPayment }),
