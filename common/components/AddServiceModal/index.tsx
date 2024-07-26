@@ -73,7 +73,7 @@ const AddServiceModal: FC<Props> = ({
       message.error(`Помилка при ${action} рахунку`)
     }
   }
-  console.log(form.getFieldsValue)
+
   return (
     <Modal
       title="Ціна на послуги в місяць"
