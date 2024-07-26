@@ -1,18 +1,30 @@
+import RealEstateBlock from '@common/components/DashboardPage/blocks/realEstates'
+import MainLayout from '@common/components/Layouts/Main'
+import { Typography } from 'antd'
+import { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
 import { AppRoutes } from '../../utils/constants'
-import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
-import { GetServerSideProps } from 'next'
-import RealEstateBlock from '@common/components/DashboardPage/blocks/realEstates'
 
-export default withAuthRedirect(RealEstateBlock)
+export default withAuthRedirect(() => {
+  return (
+    <MainLayout
+      path={[
+        { title: 'Dashboard', path: AppRoutes.INDEX },
+        { title: 'Companies', path: AppRoutes.REAL_ESTATE },
+      ]}
+    >
+      <Typography.Title level={3} style={{ marginTop: '0.5rem' }}>
+        Companies
+      </Typography.Title>
+      <RealEstateBlock />
+    </MainLayout>
+  )
+})
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

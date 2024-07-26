@@ -1,24 +1,30 @@
+import PaymentsBlock from '@common/components/DashboardPage/blocks/payments'
+import MainLayout from '@common/components/Layouts/Main'
+import { Typography } from 'antd'
+import { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
 import { AppRoutes } from '../../utils/constants'
-import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
-import { GetServerSideProps } from 'next'
-import { FC } from 'react'
-import PaymentsBlock from '@common/components/DashboardPage/blocks/payments'
 
-
-const Payments: FC = () => {
-  return <PaymentsBlock />
-}
-
-export default withAuthRedirect(Payments)
+export default withAuthRedirect(() => {
+  return (
+    <MainLayout
+      path={[
+        { title: 'Dashboard', path: AppRoutes.INDEX },
+        { title: 'Payments', path: AppRoutes.PAYMENT },
+      ]}
+    >
+      <Typography.Title level={3} style={{ marginTop: '0.5rem' }}>
+        Payments
+      </Typography.Title>
+      <PaymentsBlock />
+    </MainLayout>
+  )
+})
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {
@@ -32,5 +38,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {},
   }
-  
 }

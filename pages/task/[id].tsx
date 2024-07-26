@@ -1,13 +1,13 @@
-import { useRouter } from 'next/router'
-import { AppRoutes } from '../../utils/constants'
-import { unstable_getServerSession } from 'next-auth'
-import { authOptions } from '../api/auth/[...nextauth]'
-import { GetServerSideProps } from 'next'
-import TaskCard from 'common/components/TaskCard'
-import CommentsCard from 'common/components/CommentsCard'
 import { useGetTaskByIdQuery } from 'common/api/taskApi/task.api'
-import s from './style.module.scss'
+import CommentsCard from 'common/components/CommentsCard'
+import TaskCard from 'common/components/TaskCard'
+import { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
+import { useRouter } from 'next/router'
 import CompetitionCard from '../../common/components/CompetitionCard'
+import { AppRoutes } from '../../utils/constants'
+import { authOptions } from '../api/auth/[...nextauth]'
+import s from './style.module.scss'
 
 const Task: React.FC = () => {
   const router = useRouter()
@@ -30,11 +30,7 @@ const Task: React.FC = () => {
 export default Task
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

@@ -1,23 +1,30 @@
+import StreetsBlock from '@common/components/DashboardPage/blocks/streets'
+import MainLayout from '@common/components/Layouts/Main'
+import { Typography } from 'antd'
+import { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
 import { AppRoutes } from '../../utils/constants'
-import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
-import { GetServerSideProps } from 'next'
-import { FC } from 'react'
-import StreetsBlock from '@common/components/DashboardPage/blocks/streets'
 
-const Streets: FC = () => {
-  return <StreetsBlock />
-}
-
-export default withAuthRedirect(Streets)
+export default withAuthRedirect(() => {
+  return (
+    <MainLayout
+      path={[
+        { title: 'Dashboard', path: AppRoutes.INDEX },
+        { title: 'Streets', path: AppRoutes.STREETS },
+      ]}
+    >
+      <Typography.Title level={3} style={{ marginTop: '0.5rem' }}>
+        Streets
+      </Typography.Title>
+      <StreetsBlock />
+    </MainLayout>
+  )
+})
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

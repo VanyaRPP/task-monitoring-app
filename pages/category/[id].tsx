@@ -1,12 +1,12 @@
 import { GetServerSideProps } from 'next'
-import { unstable_getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { useGetCategoryByIdQuery } from '../../common/api/categoriesApi/category.api'
 import { useGetAllTaskQuery } from '../../common/api/taskApi/task.api'
+import Filter from '../../common/components/UI/Filtration'
 import { AppRoutes } from '../../utils/constants'
 import { authOptions } from '../api/auth/[...nextauth]'
-import Filter from '../../common/components/UI/Filtration'
 
 const Category: React.FC = () => {
   const tasksResponse = useGetAllTaskQuery('')
@@ -31,11 +31,7 @@ const Category: React.FC = () => {
 export default Category
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

@@ -1,23 +1,30 @@
+import ServicesBlock from '@common/components/DashboardPage/blocks/services'
+import MainLayout from '@common/components/Layouts/Main'
+import { Typography } from 'antd'
+import { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
 import { AppRoutes } from '../../utils/constants'
-import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
-import { GetServerSideProps } from 'next'
-import { FC } from 'react'
-import ServicesBlock from '@common/components/DashboardPage/blocks/services'
 
-const Services: FC = () => {
-  return <ServicesBlock />
-}
-
-export default withAuthRedirect(Services)
+export default withAuthRedirect(() => {
+  return (
+    <MainLayout
+      path={[
+        { title: 'Dashboard', path: AppRoutes.INDEX },
+        { title: 'Services', path: AppRoutes.SERVICE },
+      ]}
+    >
+      <Typography.Title level={3} style={{ marginTop: '0.5rem' }}>
+        Services
+      </Typography.Title>
+      <ServicesBlock />
+    </MainLayout>
+  )
+})
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

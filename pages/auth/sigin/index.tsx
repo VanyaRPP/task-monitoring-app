@@ -1,25 +1,20 @@
-import { useEffect, useState } from 'react'
+import SignInButton from '@common/components/UI/Buttons/SignInButton'
+import config from '@utils/config'
+import { AppRoutes, errors } from '@utils/constants'
+import { Alert } from 'antd'
+import { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
+import { BuiltInProviderType } from 'next-auth/providers'
 import {
   ClientSafeProvider,
   getCsrfToken,
   getProviders,
   LiteralUnion,
-  signIn,
 } from 'next-auth/react'
-import { Alert, Button, Divider } from 'antd'
-import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import { AppRoutes, errors } from '@utils/constants'
-import SignInButton from '@common/components/UI/Buttons/SignInButton'
-import s from './style.module.scss'
-import { BuiltInProviderType } from 'next-auth/providers'
+import { useEffect, useState } from 'react'
 import { authOptions } from '../../api/auth/[...nextauth]'
-import { unstable_getServerSession } from 'next-auth'
-import { useForm } from 'antd/lib/form/Form'
-import AuthCard from '@common/components/AuthCard'
-import config from '@utils/config'
-import useLocalStorage from '@common/modules/hooks/useLocalStorage'
-import { MailOutlined } from '@ant-design/icons'
+import s from './style.module.scss'
 
 type PropsType = {
   providers: Record<
@@ -138,11 +133,7 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
 export default SignInPage
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (session) {
     return {

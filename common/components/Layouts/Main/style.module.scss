@@ -1,0 +1,28 @@
+.Layout {
+  width: 100vw;
+  height: 100vh;
+}
+
+.Sidebar {
+  position: sticky !important;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 100vh;
+  z-index: 1000;
+}
+
+.Header {
+  position: sticky !important;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1000;
+  border-bottom: 1px solid #00000010; // TODO: border color from antd theme
+}
+
+.Wrapper {
+  margin: 24px;
+}
