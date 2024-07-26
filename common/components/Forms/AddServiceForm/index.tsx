@@ -18,12 +18,13 @@ interface Props {
 const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
   const { MonthPicker } = DatePicker
   const initialValues = useInitialValues(currentService)
+  console.log(currentService)
 
   useEffect(() => {
-    form.setFieldsValue({
-      date: dayjs(),
-    })
-  }, [])
+    if (currentService) {
+      form.setFieldsValue(initialValues)
+    }
+  }, [currentService, form, initialValues])
 
   const serviceData = {
     domain: currentService?.domain?._id?.toString(),
@@ -31,8 +32,6 @@ const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
   }
 
   const date = Form.useWatch('date', form)
-  const domain = Form.useWatch('domain', form)
-  const street = Form.useWatch('street', form)
 
   const { previousMonth } = usePreviousMonthService({
     date,
