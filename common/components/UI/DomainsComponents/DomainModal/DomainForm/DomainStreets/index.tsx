@@ -14,7 +14,7 @@ const DomainStreets: React.FC<DomainStreetsProps> = ({ disabled = false }) => {
     <Form.Item
       name="streets"
       label="Закріплені адреси"
-      rules={!disabled && validateField('required')}
+      rules={validateField('required')}
     >
       <Select
         mode="tags"

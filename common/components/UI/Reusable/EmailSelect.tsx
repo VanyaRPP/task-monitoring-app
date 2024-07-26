@@ -33,7 +33,7 @@ export default function EmailSelect({ form, disabled = false }: EmailSelectProps
     <Form.Item
       name="adminEmails"
       label="Адміністратори"
-      rules={!disabled && [
+      rules={[
         { required: true },
         ...validateField('email'), // Use the imported validateField function for email validation
       ]}
