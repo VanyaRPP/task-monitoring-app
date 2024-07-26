@@ -107,7 +107,11 @@ export const Price: React.FC<InvoiceComponentProps> = ({
         type="number"
         placeholder="Значення..."
         disabled={disabled}
-        suffix="грн"
+        suffix={
+          <>
+            грн/м<sup>3</sup>
+          </>
+        }
       />
     </Form.Item>
   )

@@ -16,7 +16,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
 
   return (
     <Space direction="vertical" size={0}>
-      <Typography.Text>Електропостачання</Typography.Text>
+      <Typography.Text>Вивіз ТПВ</Typography.Text>
       <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
         {toFirstUpperCase(dateToMonthYear(service?.date))}
       </Typography.Text>

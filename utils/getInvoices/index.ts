@@ -118,8 +118,8 @@ export const getMaintenanceInvoice = ({
     return {
       type: invoice.type,
       amount: +toRoundFixed(invoice.amount),
-      price: +toRoundFixed(invoice.price),
-      sum: +toRoundFixed(invoice.sum || invoice.price * invoice.amount),
+      price: +toRoundFixed(+invoice.price),
+      sum: +toRoundFixed(+invoice.sum || +invoice.price * +invoice.amount),
     }
   }
 
@@ -155,9 +155,9 @@ export const getPlacingInvoice = ({
 
     return {
       type: invoice.type,
-      amount: +toRoundFixed(invoice.amount),
-      price: +toRoundFixed(invoice.price),
-      sum: +toRoundFixed(invoice.sum || invoice.price * invoice.amount),
+      amount: +toRoundFixed(+invoice.amount),
+      price: +toRoundFixed(+invoice.price || +invoice.sum),
+      sum: +toRoundFixed(+invoice.sum || +invoice.price * +invoice.amount),
     }
   }
 
@@ -204,8 +204,8 @@ export const getInflicionInvoice = ({
 
     return {
       type: invoice.type,
-      price: +toRoundFixed(invoice.sum || invoice.price),
-      sum: +toRoundFixed(invoice.sum || invoice.price),
+      price: +toRoundFixed(+invoice.sum || +invoice.price),
+      sum: +toRoundFixed(+invoice.sum || +invoice.price),
     }
   }
 
@@ -243,11 +243,11 @@ export const getElectricityInvoice = ({
 
     return {
       type: invoice.type,
-      price: +toRoundFixed(invoice.price),
-      amount: +toRoundFixed(invoice.amount),
-      lastAmount: +toRoundFixed(invoice.lastAmount),
+      price: +toRoundFixed(+invoice.price),
+      amount: +toRoundFixed(+invoice.amount),
+      lastAmount: +toRoundFixed(+invoice.lastAmount),
       sum: +toRoundFixed(
-        invoice.sum || invoice.price * (invoice.amount - invoice.lastAmount)
+        +invoice.sum || +invoice.price * (+invoice.amount - +invoice.lastAmount)
       ),
     }
   }
@@ -280,8 +280,8 @@ export const getWaterPartInvoice = ({
 
     return {
       type: invoice.type,
-      price: +toRoundFixed(invoice.sum || invoice.price),
-      sum: +toRoundFixed(invoice.sum || invoice.price),
+      price: +toRoundFixed(+invoice.sum || +invoice.price),
+      sum: +toRoundFixed(+invoice.sum || +invoice.price),
     }
   }
 
@@ -316,11 +316,11 @@ export const getWaterInvoice = ({
 
     return {
       type: invoice.type,
-      price: +toRoundFixed(invoice.price),
-      amount: +toRoundFixed(invoice.amount),
-      lastAmount: +toRoundFixed(invoice.lastAmount),
+      price: +toRoundFixed(+invoice.price),
+      amount: +toRoundFixed(+invoice.amount),
+      lastAmount: +toRoundFixed(+invoice.lastAmount),
       sum: +toRoundFixed(
-        invoice.sum || invoice.price * (invoice.amount - invoice.lastAmount)
+        +invoice.sum || +invoice.price * (+invoice.amount - +invoice.lastAmount)
       ),
     }
   }
@@ -358,8 +358,8 @@ export const getGarbageCollectorInvoice = ({
 
     return {
       type: invoice.type,
-      price: +toRoundFixed(invoice.sum || invoice.price),
-      sum: +toRoundFixed(invoice.sum || invoice.price),
+      price: +toRoundFixed(+invoice.sum || +invoice.price),
+      sum: +toRoundFixed(+invoice.sum || +invoice.price),
     }
   }
 
@@ -394,8 +394,8 @@ export const getCleaningInvoice = ({
 
     return {
       type: invoice.type,
-      price: +toRoundFixed(invoice.sum || invoice.price),
-      sum: +toRoundFixed(invoice.sum || invoice.price),
+      price: +toRoundFixed(+invoice.sum || +invoice.price),
+      sum: +toRoundFixed(+invoice.sum || +invoice.price),
     }
   }
 
@@ -423,8 +423,8 @@ export const getDiscountInvoice = ({
 
     return {
       type: invoice.type,
-      price: +toRoundFixed(invoice.sum || invoice.price),
-      sum: +toRoundFixed(invoice.sum || invoice.price),
+      price: +toRoundFixed(+invoice.sum || +invoice.price),
+      sum: +toRoundFixed(+invoice.sum || +invoice.price),
     }
   }
 
@@ -448,7 +448,7 @@ export const getCustomInvoices = ({
     .map((invoice) => ({
       name: invoice.name,
       type: invoice.type,
-      price: +toRoundFixed(invoice.sum || invoice.price),
-      sum: +toRoundFixed(invoice.sum || invoice.price),
+      price: +toRoundFixed(+invoice.sum || +invoice.price),
+      sum: +toRoundFixed(+invoice.sum || +invoice.price),
     }))
 }

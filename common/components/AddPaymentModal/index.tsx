@@ -10,6 +10,7 @@ import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { usePaymentFormData } from '@common/modules/hooks/usePaymentData'
 import { Operations } from '@utils/constants'
+import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { Form, Tabs, TabsProps, message } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
@@ -95,7 +96,9 @@ const AddPaymentModal: FC<Props> = ({
       generalSum: formData.generalSum || formData.debit,
       provider,
       reciever,
-      invoice: formData.debit ? formData.invoice : [],
+      invoice: formData.debit
+        ? formData.invoice.filter((invoice) => +invoice.sum !== 0)
+        : [],
     }
 
     const response = edit
@@ -141,11 +144,14 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
-  // useEffect(() => {
-  //   form.setFieldsValue({
-  //     invoice: getInvoices({ company, service, payment, prevPayment }),
-  //   })
-  // }, [form, company, payment, prevPayment, service])
+  // pure cringy useEffect to fill table on preview mode
+  useEffect(() => {
+    if (paymentActions.preview) {
+      form.setFieldsValue({
+        invoice: getInvoices({ company, service, payment, prevPayment }),
+      })
+    }
+  }, [form, company, payment, prevPayment, service, paymentActions])
 
   return (
     <PaymentContext.Provider
