@@ -25,14 +25,19 @@ const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
     })
   }, [])
 
+  const serviceData = {
+    domain: currentService?.domain?._id?.toString(),
+    street: currentService?.street?._id?.toString(),
+  }
+
   const date = Form.useWatch('date', form)
   const domain = Form.useWatch('domain', form)
   const street = Form.useWatch('street', form)
 
   const { previousMonth } = usePreviousMonthService({
     date,
-    domainId: domain,
-    streetId: street,
+    domainId: serviceData.domain,
+    streetId: serviceData.street,
   })
 
   useEffect(() => {
