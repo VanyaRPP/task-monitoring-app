@@ -1,9 +1,9 @@
 import { dateToMonthYear } from '@common/assets/features/formatDate'
-import validator from '@common/assets/features/validators'
 import { usePaymentContext } from '@common/components/AddPaymentModal'
 import { InvoiceComponentProps } from '@common/components/Tables/EditInvoiceTable'
 import { ServiceType } from '@utils/constants'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
+import validator from '@utils/validator'
 import { Form, Input, Space, Typography } from 'antd'
 import { useEffect, useMemo } from 'react'
 
