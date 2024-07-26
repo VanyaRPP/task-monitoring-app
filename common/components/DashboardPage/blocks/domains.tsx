@@ -10,10 +10,27 @@ export interface Props {
 
 const DomainsBlock: React.FC<Props> = ({ domainId }) => {
   const [currentDomain, setCurrentDomain] = useState<IExtendedDomain>(null)
+  const [domainActions, setDomainActions] = useState({
+    edit: false,
+  })
 
   return (
-    <TableCard title={<DomainsHeader currentDomain={currentDomain} setCurrentDomain={setCurrentDomain} />}>
-      <DomainsTable domainId={domainId} setCurrentDomain={setCurrentDomain} />
+    <TableCard
+      title={
+        <DomainsHeader
+          currentDomain={currentDomain}
+          setCurrentDomain={setCurrentDomain}
+          setDomainActions={setDomainActions}
+          domainActions={domainActions}
+        />
+      }
+    >
+      <DomainsTable
+        domainId={domainId}
+        setCurrentDomain={setCurrentDomain}
+        setDomainActions={setDomainActions}
+        domainActions={domainActions}
+      />
     </TableCard>
   )
 }

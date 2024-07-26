@@ -3,7 +3,11 @@ import { validateField } from '@common/assets/features/validators'
 import { Select, Form } from 'antd'
 import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
 
-const DomainStreets: React.FC = () => {
+interface DomainStreetsProps {
+  disabled?: boolean
+}
+
+const DomainStreets: React.FC<DomainStreetsProps> = ({ disabled = false }) => {
   const { data: streets, isLoading } = useGetAllStreetsQuery({})
 
   return (
@@ -16,16 +20,12 @@ const DomainStreets: React.FC = () => {
         mode="tags"
         filterSort={(optionA, optionB) =>
           (optionA?.label ?? '')
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            ?.toLowerCase()
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
+            .toLowerCase()
             .localeCompare((optionB?.label ?? '').toLowerCase())
         }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        filterOption={(input, option) => (option?.label ?? '').includes(input)}
+        filterOption={(input, option) =>
+          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+        }
         options={streets?.map((i) => ({
           value: i._id,
           label: `${i.address} (м. ${i.city})`,
@@ -34,6 +34,7 @@ const DomainStreets: React.FC = () => {
         placeholder="Пошук адреси"
         loading={isLoading}
         showSearch
+        disabled={disabled}
       />
     </Form.Item>
   )

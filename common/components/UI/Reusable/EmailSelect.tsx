@@ -6,9 +6,11 @@ import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 
 interface EmailSelectProps {
   form: any
+  disabled?: boolean
 }
 
-export default function EmailSelect({ form }: EmailSelectProps) {
+
+export default function EmailSelect({ form, disabled = false }: EmailSelectProps) {
   const { data, isLoading } = useGetDomainsQuery({})
   const [formInstance] = useForm() // Access the form instance
 
@@ -38,7 +40,7 @@ export default function EmailSelect({ form }: EmailSelectProps) {
     >
       <Select
         mode="tags"
-        disabled={isLoading}
+        disabled={isLoading || disabled}
         placeholder="Пошти адмінів компанії"
         loading={isLoading}
         onSelect={() => {

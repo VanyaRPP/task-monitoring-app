@@ -1,9 +1,10 @@
 import { IDomain } from '@common/modules/models/Domain'
 import { IFilter } from '../paymentApi/payment.api.types'
+import { IStreet } from '../streetApi/street.api.types'
 
 export type IRealestate = {
   domain: IDomain
-  street: string
+  street: IStreet
   companyName: string
   adminEmails: string[]
   pricePerMeter: number

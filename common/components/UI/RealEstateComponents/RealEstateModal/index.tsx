@@ -4,7 +4,7 @@ import {
 } from '@common/api/realestateApi/realestate.api'
 import RealEstateForm from './RealEstateForm'
 import { Form, message } from 'antd'
-import React, { FC } from 'react'
+import React, { FC, useEffect } from 'react'
 import {
   IExtendedRealestate,
   IRealestate,
@@ -16,12 +16,39 @@ import Modal from '../../ModalWindow'
 interface Props {
   closeModal: VoidFunction
   currentRealEstate?: IExtendedRealestate
+  editable?: boolean
 }
 
-const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
+const RealEstateModal: FC<Props> = ({
+  closeModal,
+  currentRealEstate,
+  editable,
+}) => {
   const [form] = Form.useForm()
   const [addRealEstate] = useAddRealEstateMutation()
   const [editRealEstate] = useEditRealEstateMutation()
+
+  useEffect(() => {
+    const initialValues = {
+      domain: currentRealEstate?.domain?.name,
+      street:
+        currentRealEstate?.street &&
+        `${currentRealEstate.street.address} (м. ${currentRealEstate.street.city})`,
+      companyName: currentRealEstate?.companyName || '',
+      description: currentRealEstate?.description || '',
+      adminEmails: currentRealEstate?.adminEmails || [],
+      pricePerMeter: currentRealEstate?.pricePerMeter || 0,
+      servicePricePerMeter: currentRealEstate?.servicePricePerMeter || 0,
+      totalArea: currentRealEstate?.totalArea || 0,
+      garbageCollector: currentRealEstate?.garbageCollector || false,
+      rentPart: currentRealEstate?.rentPart || 0,
+      inflicion: currentRealEstate?.inflicion || false,
+      waterPart: currentRealEstate?.waterPart || 0,
+      discount: currentRealEstate?.discount || 0,
+      cleaning: currentRealEstate?.cleaning || 0,
+    }
+    form.setFieldsValue(initialValues)
+  }, [currentRealEstate, form])
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
@@ -38,7 +65,8 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
       rentPart: formData.rentPart,
       inflicion: formData.inflicion,
       waterPart: formData.waterPart,
-      discount: formData.discount > 0 ? formData.discount * -1 : formData.discount,
+      discount:
+        formData.discount > 0 ? formData.discount * -1 : formData.discount,
       cleaning: formData.cleaning,
     }
 
@@ -63,14 +91,20 @@ const RealEstateModal: FC<Props> = ({ closeModal, currentRealEstate }) => {
   return (
     <Modal
       style={{ top: 20 }}
-      title={"Компанії"}
+      title={'Компанії'}
       onOk={handleSubmit}
       changesForm={() => form.isFieldsTouched()}
       onCancel={closeModal}
       okText={currentRealEstate ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
+      okButtonProps={{ style: { ...(!editable && { display: 'none' }) } }}
+      preview={!editable}
     >
-      <RealEstateForm form={form} currentRealEstate={currentRealEstate} />
+      <RealEstateForm
+        form={form}
+        currentRealEstate={currentRealEstate}
+        editable={editable}
+      />
     </Modal>
   )
 }
