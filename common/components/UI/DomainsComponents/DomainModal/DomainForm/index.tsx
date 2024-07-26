@@ -1,25 +1,25 @@
-import React, { FC } from 'react'
-import { validateField } from '@common/assets/features/validators'
-import { Form, FormInstance, Input, Select } from 'antd'
-import s from './style.module.scss'
-import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import { IStreet } from '@common/modules/models/Street'
+import { validateField } from '@common/assets/features/validators'
+import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
 import { FormStreetSelect } from '@common/components/UI/Selects/StreetSelect'
+import { Form, FormInstance, Input } from 'antd'
+import { useMemo } from 'react'
+import s from './style.module.scss'
 
-interface Props {
-  form: FormInstance<any>
+interface DomainFormProps {
+  form: FormInstance
   currentDomain: IExtendedDomain
 }
-const DomainForm: FC<Props> = ({ form, currentDomain }) => {
+const DomainForm: React.FC<DomainFormProps> = ({ form, currentDomain }) => {
   const initialValues = useInitialValues(currentDomain)
+
   return (
     <Form form={form} layout="vertical" className={s.Form} initialValues={initialValues}>
       <Form.Item name="name" label="Назва" rules={validateField('description')}>
         <Input placeholder="Вкажіть значення" maxLength={256} className={s.formInput} />
       </Form.Item>
       <EmailSelect form={form} />
-      <FormStreetSelect form={form} selectProps={{ multiple: true }} />
+      <FormStreetSelect mode="multiple" />
       <Form.Item name="description" label="Опис" rules={validateField('required')}>
         <Input.TextArea
           placeholder="Вкажіть значення"
@@ -32,20 +32,14 @@ const DomainForm: FC<Props> = ({ form, currentDomain }) => {
   )
 }
 
-function useInitialValues(currentDomain: IExtendedDomain) {
-  // TODO: add useEffect || useCallback ?
-  // currently we have few renders
-  // we need it only once. on didmount (first render)
-  const initialValues = {
-    name: currentDomain?.name,
-    adminEmails: currentDomain?.adminEmails,
-    streets: currentDomain?.streets.map((i: any) => ({
-      value: i._id,
-      label: `${i.address} (м. ${i.city})`,
-    })),
-    description: currentDomain?.description,
-  }
-  return initialValues
-}
+const useInitialValues = (currentDomain: IExtendedDomain) =>
+  useMemo(() => {
+    return {
+      name: currentDomain?.name,
+      adminEmails: currentDomain?.adminEmails,
+      streets: currentDomain?.streets.map(({ _id }) => _id),
+      description: currentDomain?.description,
+    }
+  }, [currentDomain])
 
 export default DomainForm
