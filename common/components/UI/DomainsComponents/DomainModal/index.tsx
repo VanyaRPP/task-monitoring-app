@@ -26,10 +26,11 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
     const initialValues = {
       name: currentDomain?.name || '',
       adminEmails: currentDomain?.adminEmails || [],
-      streets: currentDomain?.streets.map((i: any) => ({
-        value: i._id,
-        label: `${i.address} (м. ${i.city})`,
-      })) || [],
+      streets:
+        currentDomain?.streets.map((i: any) => ({
+          value: i._id,
+          label: `${i.address} (м. ${i.city})`,
+        })) || [],
       description: currentDomain?.description || '',
     }
     form.setFieldsValue(initialValues)
@@ -74,7 +75,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       onCancel={closeModal}
       okText={currentDomain ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
-      okButtonProps={{ style: { display: !editable ? 'none' : 'inline' } }}
+      okButtonProps={{ style: { ...(!editable && { display: 'none' }) } }}
       preview={!editable}
     >
       <DomainForm form={form} editable={editable} />
