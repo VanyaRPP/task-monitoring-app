@@ -98,28 +98,10 @@ export const usePaymentFormData = (
         domainIds: [domainId],
         streetIds: [streetId],
         serviceIds: [prevService?._id],
-        // month:
-        // moment(payment?.invoiceCreationDate || service?.date).month() - 1,
-        // year: moment(payment?.invoiceCreationDate || service?.date).year(),
         limit: 1,
       },
       { skip: !prevService }
     )
-
-  console.debug({
-    domainId,
-    serviceId,
-    streetId,
-    companyId,
-  })
-
-  console.debug({
-    service: serviceId ? service : null,
-    company: companyId ? company : null,
-    payment: domainId && serviceId && streetId && companyId ? payment : null,
-    prevPayment: domainId && service && companyId ? prevPayment : null,
-    prevService: domainId && streetId ? prevService : null,
-  })
 
   return {
     service: serviceId ? service : null,
