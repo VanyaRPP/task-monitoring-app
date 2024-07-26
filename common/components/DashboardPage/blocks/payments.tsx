@@ -278,19 +278,23 @@ const PaymentsBlock = () => {
         if (pathname === AppRoutes.PAYMENT) {
           return (
             <a
-              style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
+              style={{
+                cursor: 'pointer',
+                color: 'blue',
+                textDecoration: 'underline',
+              }}
               onClick={() => {
                 setFilters({ ...filters, company: [i?._id] })
               }}
             >
               {i?.companyName}
             </a>
-          );
+          )
         } else {
-          return i?.companyName;
+          return i?.companyName
         }
       } else {
-        return i?.companyName;
+        return i?.companyName
       }
     },
   })

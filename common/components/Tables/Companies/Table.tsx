@@ -1,4 +1,8 @@
-import { DeleteOutlined, EditOutlined, QuestionCircleOutlined, } from '@ant-design/icons'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import { useDeleteRealEstateMutation } from '@common/api/realestateApi/realestate.api'
 import {
@@ -8,7 +12,16 @@ import {
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
-import { Alert, Button, Checkbox, Popconfirm, Table, Tag, Tooltip, message } from 'antd'
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Popconfirm,
+  Table,
+  Tag,
+  Tooltip,
+  message,
+} from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 

@@ -27,6 +27,7 @@ export interface IGetServiceResponse {
   addressFilter: IFilter[]
   domainFilter: IFilter[]
   yearFilter: IFilter[]
+  monthFilter: IFilter[]
 }
 
 export interface IDeleteServiceResponse {
@@ -37,6 +38,6 @@ export interface IDeleteServiceResponse {
 export interface IServiceFilter {
   street: string
   domain: string
-  months: number
+  month: number
   year: number
 }

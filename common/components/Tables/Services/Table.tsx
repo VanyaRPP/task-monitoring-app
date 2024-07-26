@@ -30,7 +30,7 @@ interface Props {
     edit: boolean
     preview: boolean
   }
-  setCurrentService: (setvice: IService) => void
+  setCurrentService: (service: IService) => void
   services: IGetServiceResponse
   isLoading?: boolean
   isError?: boolean
@@ -49,8 +49,8 @@ const ServicesTable: React.FC<Props> = ({
   setFilter,
 }) => {
   const router = useRouter()
-  const isOnPage = router.pathname === AppRoutes.SERVICE
-  console.log(services)
+  const { pathname } = router
+  const isOnPage = pathname === AppRoutes.SERVICE
 
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -68,31 +68,46 @@ const ServicesTable: React.FC<Props> = ({
   }
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
+
+  // const [pageData, setPageData] = useState({
+  //   pageSize: 10,
+  //   currentPage: 1,
+  // })
+
+  // const handleTableChange = (pagination) => {
+  //   setPageData({
+  //     pageSize: pagination.pageSize,
+  //     currentPage: pagination.current,
+  //   })
+  // }
+
   return (
-    <Table
-      rowKey="_id"
-      size="small"
-      pagination={false}
-      loading={isLoading}
-      columns={getDefaultColumns(
-        isGlobalAdmin,
-        handleDelete,
-        deleteLoading,
-        setCurrentService,
-        services?.addressFilter,
-        services?.domainFilter,
-        services?.yearFilter,
-        filter,
-        isOnPage,
-        setServiceActions,
-        serviceActions
-      )}
-      dataSource={services?.data}
-      scroll={{ x: 1700 }}
-      onChange={(__, filter) => {
-        setFilter(filter)
-      }}
-    />
+    <>
+      <Table
+        rowKey="_id"
+        pagination={false}
+        loading={isLoading}
+        columns={getDefaultColumns(
+          isGlobalAdmin,
+          handleDelete,
+          deleteLoading,
+          setCurrentService,
+          services?.addressFilter,
+          services?.domainFilter,
+          services?.yearFilter,
+          services?.monthFilter,
+          filter,
+          isOnPage,
+          setServiceActions,
+          serviceActions
+        )}
+        dataSource={services?.data}
+        scroll={{ x: 1700 }}
+        onChange={(__, filter) => {
+          setFilter(filter)
+        }}
+      />
+    </>
   )
 }
 
@@ -112,10 +127,9 @@ const getDefaultColumns = (
   addressFilter?: IFilter[],
   domainFilter?: IFilter[],
   yearFilter?: IFilter[],
-  // filters?: IFilter[],
+  monthFilter?: IFilter[],
   filter?: any,
   isOnPage?: boolean,
-
   setServiceActions?: React.Dispatch<
     React.SetStateAction<{
       edit: boolean
@@ -155,7 +169,7 @@ const getDefaultColumns = (
     {
       title: 'Місяць',
       dataIndex: 'date',
-      width: 100,
+      width: 105,
       render: (date) => getFormattedDate(date),
     },
     {
