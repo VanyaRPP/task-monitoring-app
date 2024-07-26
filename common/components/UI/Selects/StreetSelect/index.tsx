@@ -8,6 +8,7 @@ import React, { useEffect, useMemo } from 'react'
 export interface StreetSelectProps extends Omit<SelectProps, 'options' | 'mode'> {
   mode?: 'multiple' | undefined // remove 'tags' mode
   domain?: IDomain['_id']
+  multiple?: boolean
 }
 
 /**
