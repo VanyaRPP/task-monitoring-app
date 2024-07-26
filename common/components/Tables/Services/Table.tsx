@@ -18,6 +18,7 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { dateToYear } from '@common/assets/features/formatDate'
 import { AppRoutes, Roles } from '@utils/constants'
 import { getFormattedDate, renderCurrency } from '@utils/helpers'
+import { useState } from 'react'
 
 interface Props {
   setServiceActions: React.Dispatch<
@@ -50,6 +51,10 @@ const ServicesTable: React.FC<Props> = ({
 }) => {
   const router = useRouter()
   const { pathname } = router
+  const [pageData, setPageData] = useState({
+    pageSize: pathname === AppRoutes.SERVICE ? 10 : 5,
+    currentPage: 1,
+  })
   const isOnPage = pathname === AppRoutes.SERVICE
 
   const { data: user } = useGetCurrentUserQuery()
@@ -69,23 +74,28 @@ const ServicesTable: React.FC<Props> = ({
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
-  // const [pageData, setPageData] = useState({
-  //   pageSize: 10,
-  //   currentPage: 1,
-  // })
-
-  // const handleTableChange = (pagination) => {
-  //   setPageData({
-  //     pageSize: pagination.pageSize,
-  //     currentPage: pagination.current,
-  //   })
-  // }
+  const handlePagination = (pagination) => {
+    setPageData({
+      pageSize: pagination.pageSize,
+      currentPage: pagination.current,
+    })
+  }
 
   return (
     <>
       <Table
         rowKey="_id"
-        pagination={false}
+        pagination={
+          isOnPage && {
+            total: services?.total,
+            current: pageData.currentPage,
+            pageSize: pageData.pageSize,
+            showSizeChanger: true,
+            pageSizeOptions: [10, 20, 50],
+            position: ['bottomCenter'],
+            onChange: handlePagination,
+          }
+        }
         loading={isLoading}
         columns={getDefaultColumns(
           isGlobalAdmin,

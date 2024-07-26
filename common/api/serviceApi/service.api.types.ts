@@ -14,6 +14,7 @@ export interface IService {
   garbageCollectorPrice?: number
   inflicionPrice?: number
   description?: string
+  
 }
 
 export interface IAddServiceResponse {
@@ -28,6 +29,7 @@ export interface IGetServiceResponse {
   domainFilter: IFilter[]
   yearFilter: IFilter[]
   monthFilter: IFilter[]
+  total: number
 }
 
 export interface IDeleteServiceResponse {
