@@ -7,6 +7,7 @@ import { useEffect, useMemo } from 'react'
 
 export interface StreetSelectProps extends Omit<SelectProps, 'options'> {
   domain?: IDomain['_id']
+  multiple?: boolean
 }
 
 /**
@@ -15,7 +16,11 @@ export interface StreetSelectProps extends Omit<SelectProps, 'options'> {
  * @param domain The domain ID for fetching streets
  * @param ...props Rest of default `antd#Select` component props (omit `options`)
  */
-export const StreetSelect: React.FC<StreetSelectProps> = ({ domain: domainId, ...props }) => {
+export const StreetSelect: React.FC<StreetSelectProps> = ({
+  domain: domainId,
+  multiple = false,
+  ...props
+}) => {
   const { data: streets, isLoading } = useGetAllStreetsQuery({ domainId })
 
   const options: SelectProps['options'] = useMemo(() => {
@@ -29,6 +34,7 @@ export const StreetSelect: React.FC<StreetSelectProps> = ({ domain: domainId, ..
 
   return (
     <Select
+      mode={multiple ? 'multiple' : undefined}
       options={options}
       allowClear
       showSearch

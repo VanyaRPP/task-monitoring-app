@@ -2,10 +2,10 @@ import React, { FC } from 'react'
 import { validateField } from '@common/assets/features/validators'
 import { Form, FormInstance, Input, Select } from 'antd'
 import s from './style.module.scss'
-import DomainStreets from './DomainStreets'
 import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { IStreet } from '@common/modules/models/Street'
+import { FormStreetSelect } from '@common/components/UI/Selects/StreetSelect'
 
 interface Props {
   form: FormInstance<any>
@@ -14,26 +14,13 @@ interface Props {
 const DomainForm: FC<Props> = ({ form, currentDomain }) => {
   const initialValues = useInitialValues(currentDomain)
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      className={s.Form}
-      initialValues={initialValues}
-    >
+    <Form form={form} layout="vertical" className={s.Form} initialValues={initialValues}>
       <Form.Item name="name" label="Назва" rules={validateField('description')}>
-        <Input
-          placeholder="Вкажіть значення"
-          maxLength={256}
-          className={s.formInput}
-        />
+        <Input placeholder="Вкажіть значення" maxLength={256} className={s.formInput} />
       </Form.Item>
       <EmailSelect form={form} />
-      <DomainStreets />
-      <Form.Item
-        name="description"
-        label="Опис"
-        rules={validateField('required')}
-      >
+      <FormStreetSelect form={form} selectProps={{ multiple: true }} />
+      <Form.Item name="description" label="Опис" rules={validateField('required')}>
         <Input.TextArea
           placeholder="Вкажіть значення"
           className={s.formInput}
