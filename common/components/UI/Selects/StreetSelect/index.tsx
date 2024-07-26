@@ -3,9 +3,10 @@ import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
 import { validateField } from '@common/assets/features/validators'
 import { IDomain } from '@common/modules/models/Domain'
 import { Form, FormInstance, FormItemProps, Select, SelectProps } from 'antd'
-import { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 
-export interface StreetSelectProps extends Omit<SelectProps, 'options'> {
+export interface StreetSelectProps extends Omit<SelectProps, 'options' | 'mode'> {
+  mode?: 'multiple' | undefined // remove 'tags' mode
   domain?: IDomain['_id']
 }
 
@@ -15,7 +16,7 @@ export interface StreetSelectProps extends Omit<SelectProps, 'options'> {
  * @param domain The domain ID for fetching streets
  * @param ...props Rest of default `antd#Select` component props (omit `options`)
  */
-export const StreetSelect: React.FC<StreetSelectProps> = ({ domain: domainId, ...props }) => {
+export const StreetSelect: React.FC<StreetSelectProps> = ({ domain: domainId, mode, ...props }) => {
   const { data: streets, isLoading } = useGetAllStreetsQuery({ domainId })
 
   const options: SelectProps['options'] = useMemo(() => {
@@ -29,11 +30,12 @@ export const StreetSelect: React.FC<StreetSelectProps> = ({ domain: domainId, ..
 
   return (
     <Select
+      mode={mode}
       options={options}
       allowClear
       showSearch
       optionFilterProp="label"
-      placeholder="Оберіть вулицю"
+      placeholder={mode === 'multiple' ? 'Оберіть вулиці' : 'Оберіть вулицю'}
       loading={isLoading}
       labelRender={({ label }) => label ?? 'Loading...'}
       {...props}
@@ -41,9 +43,10 @@ export const StreetSelect: React.FC<StreetSelectProps> = ({ domain: domainId, ..
   )
 }
 
-export interface FormStreetSelectProps extends Omit<FormItemProps, 'name'> {
+export interface FormStreetSelectProps
+  extends Omit<FormItemProps, 'name' | 'children'>,
+    Omit<StreetSelectProps, 'domain' | 'status' | 'children'> {
   form?: FormInstance
-  selectProps?: Omit<StreetSelectProps, 'domain'>
 }
 
 /**
@@ -53,11 +56,15 @@ export interface FormStreetSelectProps extends Omit<FormItemProps, 'name'> {
  * @param selectProps The props will be transfered to inner `StreetSelect` component
  * @param ...props Rest of default `antd#Form.Item` component props (omit `name`)
  */
-export const FormStreetSelect: React.FC<FormStreetSelectProps> = ({
-  form: _form,
-  selectProps,
-  ...props
-}) => {
+export const FormStreetSelect: React.FC<FormStreetSelectProps> = ({ mode, ...props }) => {
+  if (mode === 'multiple') {
+    return <FormMultipleStreetsSelect {...props} />
+  } else {
+    return <FormSingleStreetSelect {...props} />
+  }
+}
+
+const FormSingleStreetSelect: React.FC<FormStreetSelectProps> = ({ form: _form, ...props }) => {
   const [form] = Form.useForm(_form)
 
   const domainId: string | undefined = Form.useWatch('domain', form)
@@ -81,7 +88,43 @@ export const FormStreetSelect: React.FC<FormStreetSelectProps> = ({
       <StreetSelect
         domain={domainId}
         disabled={domainId && domain?.streets.length === 1}
-        {...selectProps}
+        {...props}
+        status={props.status === 'warning' ? 'warning' : props.status === 'error' ? 'error' : ''}
+      />
+    </Form.Item>
+  )
+}
+
+const FormMultipleStreetsSelect: React.FC<FormStreetSelectProps> = ({ form: _form, ...props }) => {
+  const [form] = Form.useForm(_form)
+
+  const domainId: string | undefined = Form.useWatch('domain', form)
+  const streetsIds: string[] | undefined = Form.useWatch('streets', form)
+
+  const { data: { 0: domain } = { 0: null } } = useGetDomainsQuery(
+    { domainId, limit: 1 },
+    { skip: !domainId }
+  )
+
+  useEffect(() => {
+    if (domainId && domain?.streets.length === 1) {
+      form.setFieldValue('streets', domain?.streets[0]._id)
+    } else if (domainId) {
+      form.setFieldValue(
+        'streets',
+        domain?.streets.filter((street) => streetsIds?.includes(street._id)) ?? []
+      )
+    }
+  }, [form, streetsIds, domain, domainId])
+
+  return (
+    <Form.Item name="streets" label="Адреси" rules={validateField('required')} {...props}>
+      <StreetSelect
+        mode="multiple"
+        domain={domainId}
+        disabled={domainId && domain?.streets.length === 1}
+        {...props}
+        status={props.status === 'warning' ? 'warning' : props.status === 'error' ? 'error' : ''}
       />
     </Form.Item>
   )

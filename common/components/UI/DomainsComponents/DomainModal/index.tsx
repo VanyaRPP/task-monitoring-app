@@ -22,9 +22,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
     const domainData = {
       name: formData.name,
       adminEmails: formData.adminEmails,
-      streets: formData.streets.some((i: any) => i.value)
-        ? formData.streets.map((i: any) => i.value)
-        : formData.streets,
+      streets: formData.streets,
       description: formData.description,
     }
 
