@@ -12,7 +12,6 @@
   background: var(--backgroundColor);
 
   .Content {
-    margin: 32px 80px;
     padding: 32px;
 
     @media (max-width: 800px) {
@@ -24,8 +23,6 @@
       margin: 0;
       padding: 0;
     }
-
-    background: var(--backgroundColorPrimary);
   }
 }
 
