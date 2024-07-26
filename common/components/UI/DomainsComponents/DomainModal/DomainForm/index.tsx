@@ -3,14 +3,14 @@ import { validateField } from '@common/assets/features/validators'
 import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
 import { FormStreetSelect } from '@common/components/UI/Selects/StreetSelect'
 import { Form, FormInstance, Input } from 'antd'
-import { FC, useMemo } from 'react'
+import { useMemo } from 'react'
 import s from './style.module.scss'
 
-interface Props {
-  form: FormInstance<any>
+interface DomainFormProps {
+  form: FormInstance
   currentDomain: IExtendedDomain
 }
-const DomainForm: FC<Props> = ({ form, currentDomain }) => {
+const DomainForm: React.FC<DomainFormProps> = ({ form, currentDomain }) => {
   const initialValues = useInitialValues(currentDomain)
 
   return (
