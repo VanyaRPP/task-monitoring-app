@@ -2,9 +2,8 @@ import { IService } from '@common/api/serviceApi/service.api.types'
 import { validateField } from '@common/assets/features/validators'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
-import useInitialValues from '@common/modules/hooks/useInitialValues'
 import { DatePicker, Form, FormInstance, Input, InputNumber } from 'antd'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import s from './style.module.scss'
 import dayjs from 'dayjs'
 import { usePreviousMonthService } from '@common/modules/hooks/useService'
@@ -17,18 +16,36 @@ interface Props {
 
 const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
   const { MonthPicker } = DatePicker
-  const initialValues = useInitialValues(currentService)
-  console.log(currentService)
+  const [initialValues, setInitialValues] = useState<any>({})
 
   useEffect(() => {
     if (currentService) {
-      form.setFieldsValue(initialValues)
+      const newInitialValues = {
+        domain: currentService?.domain?.name || '',
+        street:
+          (currentService?.street &&
+            `${currentService.street.address} (м. ${currentService.street.city})`) ||
+          '',
+        date: currentService?.date ? dayjs(currentService?.date) : null,
+        electricityPrice: currentService?.electricityPrice || 0,
+        inflicionPrice: currentService?.inflicionPrice || 0,
+        rentPrice: currentService?.rentPrice || 0,
+        waterPrice: currentService?.waterPrice || 0,
+        description: currentService?.description || '',
+        waterPriceTotal: currentService?.waterPriceTotal || 0,
+        garbageCollectorPrice: currentService?.garbageCollectorPrice || 0,
+        domainId: currentService?.domain?._id?.toString() || '',
+        streetId: currentService?.street?._id?.toString() || '',
+      }
+
+      setInitialValues(newInitialValues)
+      form.setFieldsValue(newInitialValues)
     }
-  }, [currentService, form, initialValues])
+  }, [currentService, form])
 
   const serviceData = {
-    domain: currentService?.domain?._id?.toString(),
-    street: currentService?.street?._id?.toString(),
+    domain: initialValues.domainId,
+    street: initialValues.streetId,
   }
 
   const date = Form.useWatch('date', form)
@@ -40,33 +57,36 @@ const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
   })
 
   useEffect(() => {
-    if (!previousMonth) {
+    if (serviceData.domain && serviceData.street) {
+      if (!previousMonth) {
+        form.setFieldsValue({
+          rentPrice: 0,
+          electricityPrice: 0,
+          waterPrice: 0,
+          waterPriceTotal: 0,
+          garbageCollectorPrice: 0,
+          inflicionPrice: 0,
+        })
+        return
+      }
+
+      const {
+        rentPrice,
+        electricityPrice,
+        waterPrice,
+        waterPriceTotal,
+        garbageCollectorPrice,
+        inflicionPrice,
+      } = previousMonth
       form.setFieldsValue({
-        rentPrice: 0,
-        electricityPrice: 0,
-        waterPrice: 0,
-        waterPriceTotal: 0,
-        garbageCollectorPrice: 0,
-        inflicionPrice: 0,
+        rentPrice,
+        electricityPrice,
+        waterPrice,
+        waterPriceTotal,
+        garbageCollectorPrice,
+        inflicionPrice,
       })
-      return
     }
-    const {
-      rentPrice,
-      electricityPrice,
-      waterPrice,
-      waterPriceTotal,
-      garbageCollectorPrice,
-      inflicionPrice,
-    } = previousMonth
-    form.setFieldsValue({
-      rentPrice,
-      electricityPrice,
-      waterPrice,
-      waterPriceTotal,
-      garbageCollectorPrice,
-      inflicionPrice,
-    })
   }, [previousMonth, form])
 
   return (
