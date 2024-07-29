@@ -8,7 +8,8 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
-import { usePaymentFormData } from '@common/modules/hooks/usePaymentData'
+import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
+import { usePaymentData } from '@common/modules/hooks/usePaymentData'
 import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
@@ -54,12 +55,11 @@ const AddPaymentModal: FC<Props> = ({
 }) => {
   const [form] = Form.useForm()
 
-  const { company, service, payment, prevPayment } = usePaymentData({
-    form,
-    paymentData,
-  })
-  const { company, service, prevService, payment, prevPayment } =
-    usePaymentFormData(form, paymentData)
+  const { company, service, payment, prevService, prevPayment } =
+    usePaymentData({
+      form,
+      paymentData,
+    })
 
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
@@ -133,13 +133,6 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
-  if (payment)
-    items.push({
-      key: '3',
-      label: 'Акт',
-      children: <PriceList data={payment} />,
-    })
-
   if (!preview || paymentData?.type === Operations.Debit) {
     items.push({
       key: '2',
@@ -155,12 +148,16 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
+  if (payment) {
+    items.push({
+      key: '3',
+      label: 'Акт',
+      children: <PriceList data={payment} />,
+    })
+  }
+
   // pure cringy useEffect to fill table on preview mode
   useEffect(() => {
-    form.setFieldsValue({
-      invoice: getInvoices({ company, service, payment, prevPayment }),
-    })
-  }, [form, company, payment, prevPayment, service])
     if (paymentActions.preview) {
       form.setFieldsValue({
         invoice: getInvoices({ company, service, payment, prevPayment }),
