@@ -2,11 +2,11 @@ import { IService } from '@common/api/serviceApi/service.api.types'
 import { validateField } from '@common/assets/features/validators'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
-import { DatePicker, Form, FormInstance, Input, InputNumber } from 'antd'
-import { useEffect, useState } from 'react'
-import s from './style.module.scss'
-import dayjs from 'dayjs'
 import { usePreviousMonthService } from '@common/modules/hooks/useService'
+import { DatePicker, Form, FormInstance, Input, InputNumber } from 'antd'
+import dayjs from 'dayjs'
+import { useEffect } from 'react'
+import s from './style.module.scss'
 
 interface Props {
   form: FormInstance<any>
@@ -16,100 +16,50 @@ interface Props {
 
 const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
   const { MonthPicker } = DatePicker
-  const [initialValues, setInitialValues] = useState<any>({})
-
-  useEffect(() => {
-    if (currentService) {
-      const newInitialValues = {
-        domain: currentService?.domain?.name || '',
-        street:
-          (currentService?.street &&
-            `${currentService.street.address} (м. ${currentService.street.city})`) ||
-          '',
-        date: currentService?.date ? dayjs(currentService?.date) : null,
-        electricityPrice: currentService?.electricityPrice || 0,
-        inflicionPrice: currentService?.inflicionPrice || 0,
-        rentPrice: currentService?.rentPrice || 0,
-        waterPrice: currentService?.waterPrice || 0,
-        description: currentService?.description || '',
-        waterPriceTotal: currentService?.waterPriceTotal || 0,
-        garbageCollectorPrice: currentService?.garbageCollectorPrice || 0,
-        domainId: currentService?.domain?._id?.toString() || '',
-        streetId: currentService?.street?._id?.toString() || '',
-      }
-
-      setInitialValues(newInitialValues)
-      form.setFieldsValue(newInitialValues)
-    }
-  }, [currentService, form])
-
-  const serviceData = {
-    domain: initialValues.domainId,
-    street: initialValues.streetId,
-  }
 
   const date = Form.useWatch('date', form)
+  const domainId = Form.useWatch('domain', form)
+  const streetId = Form.useWatch('street', form)
 
   const { previousMonth } = usePreviousMonthService({
     date,
-    domainId: serviceData.domain,
-    streetId: serviceData.street,
+    domainId,
+    streetId,
   })
 
   useEffect(() => {
-    if (serviceData.domain && serviceData.street) {
-      if (!previousMonth) {
-        form.setFieldsValue({
-          rentPrice: 0,
-          electricityPrice: 0,
-          waterPrice: 0,
-          waterPriceTotal: 0,
-          garbageCollectorPrice: 0,
-          inflicionPrice: 0,
-        })
-        return
-      }
-
-      const {
-        rentPrice,
-        electricityPrice,
-        waterPrice,
-        waterPriceTotal,
-        garbageCollectorPrice,
-        inflicionPrice,
-      } = previousMonth
-      form.setFieldsValue({
-        rentPrice,
-        electricityPrice,
-        waterPrice,
-        waterPriceTotal,
-        garbageCollectorPrice,
-        inflicionPrice,
-      })
-    }
-  }, [previousMonth, form])
+    form.setFieldsValue({
+      electricityPrice:
+        currentService?.electricityPrice ??
+        previousMonth?.electricityPrice ??
+        0,
+      inflicionPrice:
+        currentService?.inflicionPrice ?? previousMonth?.inflicionPrice ?? 0,
+      rentPrice: currentService?.rentPrice ?? previousMonth?.rentPrice ?? 0,
+      waterPrice: currentService?.waterPrice ?? previousMonth?.waterPrice ?? 0,
+      waterPriceTotal:
+        currentService?.waterPriceTotal ?? previousMonth?.waterPriceTotal ?? 0,
+      garbageCollectorPrice:
+        currentService?.garbageCollectorPrice ??
+        previousMonth?.garbageCollectorPrice ??
+        0,
+    })
+  }, [form, currentService, previousMonth])
 
   return (
     <Form
-      initialValues={initialValues}
       form={form}
       layout="vertical"
       className={s.Form}
+      initialValues={{
+        domain: currentService?.domain?._id,
+        street: currentService?.street?._id,
+        date: dayjs(currentService?.date),
+        description: currentService?.description,
+      }}
     >
-      {edit ? (
-        <Form.Item name="domain" label="Надавач послуг">
-          <Input disabled />
-        </Form.Item>
-      ) : (
-        <DomainsSelect form={form} />
-      )}
-      {edit ? (
-        <Form.Item name="street" label="Адреса">
-          <Input disabled />
-        </Form.Item>
-      ) : (
-        <AddressesSelect form={form} />
-      )}
+      <DomainsSelect form={form} edit={edit} />
+      <AddressesSelect form={form} edit={edit} />
       <Form.Item
         name="date"
         label="Місяць та рік"
@@ -158,7 +108,10 @@ const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
       <Form.Item name="description" label="Опис">
         <Input.TextArea
           placeholder="Введіть опис"
-          autoSize={{ minRows: 2, maxRows: 5 }}
+          autoSize={{
+            minRows: 2,
+            maxRows: 5,
+          }}
           maxLength={256}
           className={s.formInput}
         />
