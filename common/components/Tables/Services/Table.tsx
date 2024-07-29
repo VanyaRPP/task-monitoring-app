@@ -56,6 +56,7 @@ const ServicesTable: React.FC<Props> = ({
     currentPage: 1,
   })
   const isOnPage = pathname === AppRoutes.SERVICE
+  console.log(services)
 
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -166,7 +167,7 @@ const getDefaultColumns = (
       dataIndex: 'date',
       width: 100,
       filters: isOnPage ? yearFilter : null,
-      filteredValue: filter?.date || null,
+      filteredValue: filter?.year || null,
       render: (date) => dateToYear(date),
     },
     {
@@ -180,6 +181,8 @@ const getDefaultColumns = (
       title: 'Місяць',
       dataIndex: 'date',
       width: 105,
+      filters: isOnPage ? monthFilter : null,
+      filteredValue: filter?.month || null,
       render: (date) => getFormattedDate(date),
     },
     {
