@@ -8,7 +8,7 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
-import { usePaymentData } from '@common/modules/hooks/usePaymentData'
+import { usePaymentFormData } from '@common/modules/hooks/usePaymentData'
 import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
@@ -55,10 +55,7 @@ const AddPaymentModal: FC<Props> = ({
   const [form] = Form.useForm()
 
   const { company, service, prevService, payment, prevPayment } =
-    usePaymentData({
-      form,
-      paymentData,
-    })
+    usePaymentFormData(form, paymentData)
 
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
@@ -99,7 +96,9 @@ const AddPaymentModal: FC<Props> = ({
       generalSum: formData.generalSum || formData.debit,
       provider,
       reciever,
-      invoice: formData.debit ? formData.invoice : [],
+      invoice: formData.debit
+        ? formData.invoice.filter((invoice) => +invoice.sum !== 0)
+        : [],
     }
 
     const response = edit
@@ -145,11 +144,14 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
+  // pure cringy useEffect to fill table on preview mode
   useEffect(() => {
-    form.setFieldsValue({
-      invoice: getInvoices({ company, service, payment, prevPayment }),
-    })
-  }, [form, company, payment, prevPayment, service])
+    if (paymentActions.preview) {
+      form.setFieldsValue({
+        invoice: getInvoices({ company, service, payment, prevPayment }),
+      })
+    }
+  }, [form, company, payment, prevPayment, service, paymentActions])
 
   return (
     <PaymentContext.Provider

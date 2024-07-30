@@ -9,18 +9,21 @@ import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.ty
 
 interface Props {
   form: FormInstance<any>
-  currentRealEstate: IExtendedRealestate
+  currentRealEstate?: IExtendedRealestate
+  editable?: boolean
 }
 
-const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
-  const initialValues = useInitialValues(currentRealEstate)
-
+const RealEstateForm: FC<Props> = ({
+  form,
+  currentRealEstate,
+  editable = true,
+}) => {
   return (
     <Form
       form={form}
+      requiredMark={editable}
       layout="vertical"
       className={s.Form}
-      initialValues={initialValues}
     >
       {currentRealEstate ? (
         <Form.Item name="domain" label="Надавач послуг">
@@ -41,7 +44,12 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
         label="Назва компанії"
         rules={validateField('required')}
       >
-        <Input placeholder="Опис" maxLength={256} className={s.formInput} />
+        <Input
+          placeholder="Назва компанії"
+          maxLength={256}
+          className={s.formInput}
+          disabled={!editable}
+        />
       </Form.Item>
       <Form.Item
         name="description"
@@ -53,82 +61,86 @@ const RealEstateForm: FC<Props> = ({ form, currentRealEstate }) => {
           placeholder="Опис"
           maxLength={512}
           className={s.formInput}
+          disabled={!editable}
         />
       </Form.Item>
-      <EmailSelect form={form} />
+      <EmailSelect form={form} disabled={!editable} />
       <Form.Item
         name="totalArea"
         label="Площа (м²)"
         rules={validateField('required')}
       >
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+        <InputNumber
+          placeholder="Вкажіть значення"
+          className={s.formInput}
+          disabled={!editable}
+        />
       </Form.Item>
       <Form.Item
         name="pricePerMeter"
         label="Ціна (грн/м²)"
         rules={validateField('required')}
       >
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+        <InputNumber
+          placeholder="Вкажіть значення"
+          className={s.formInput}
+          disabled={!editable}
+        />
       </Form.Item>
       <Form.Item
         name="servicePricePerMeter"
         label="Індивідуальне утримання (грн/м²)"
       >
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+        <InputNumber
+          placeholder="Вкажіть значення"
+          className={s.formInput}
+          disabled={!editable}
+        />
       </Form.Item>
       <Form.Item name="rentPart" label="Частка загальної площі">
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+        <InputNumber
+          placeholder="Вкажіть значення"
+          className={s.formInput}
+          disabled={!editable}
+        />
       </Form.Item>
       <Form.Item name="waterPart" label="Частка водопостачання">
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+        <InputNumber
+          placeholder="Вкажіть значення"
+          className={s.formInput}
+          disabled={!editable}
+        />
       </Form.Item>
       <Form.Item name="cleaning" label="Прибирання (грн)">
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+        <InputNumber
+          placeholder="Вкажіть значення"
+          className={s.formInput}
+          disabled={!editable}
+        />
       </Form.Item>
       <Form.Item name="discount" label="Знижка">
-        <InputNumber placeholder="Вкажіть значення" className={s.formInput} />
+        <InputNumber
+          placeholder="Вкажіть значення"
+          className={s.formInput}
+          disabled={!editable}
+        />
       </Form.Item>
       <Form.Item
         valuePropName="checked"
         name="garbageCollector"
         label="Вивіз сміття"
       >
-        <Checkbox />
+        <Checkbox disabled={!editable} />
       </Form.Item>
       <Form.Item
         valuePropName="checked"
         name="inflicion"
         label="Індекс інфляції"
       >
-        <Checkbox />
+        <Checkbox disabled={!editable} />
       </Form.Item>
     </Form>
   )
-}
-
-function useInitialValues(currentRealEstate) {
-  // TODO: add useEffect || useCallback ?
-  // currently we have few renders
-  // we need it only once. on didmount (first render)
-  const initialValues = {
-    domain: currentRealEstate?.domain?.name,
-    street:
-      currentRealEstate?.street &&
-      `${currentRealEstate.street.address} (м. ${currentRealEstate.street.city})`,
-    companyName: currentRealEstate?.companyName,
-    description: currentRealEstate?.description,
-    adminEmails: currentRealEstate?.adminEmails,
-    pricePerMeter: currentRealEstate?.pricePerMeter,
-    servicePricePerMeter: currentRealEstate?.servicePricePerMeter,
-    totalArea: currentRealEstate?.totalArea,
-    garbageCollector: currentRealEstate?.garbageCollector,
-    rentPart: currentRealEstate?.rentPart,
-    inflicion: currentRealEstate?.inflicion,
-    waterPart: currentRealEstate?.waterPart,
-    discount: currentRealEstate?.discount,
-    cleaning: currentRealEstate?.cleaning,
-  }
-  return initialValues
 }
 
 export default RealEstateForm

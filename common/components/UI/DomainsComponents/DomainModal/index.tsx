@@ -3,7 +3,7 @@ import {
   useEditDomainMutation,
 } from '@common/api/domainApi/domain.api'
 import { Form, message } from 'antd'
-import React, { FC } from 'react'
+import React, { FC, useEffect } from 'react'
 import {
   IDomainModel,
   IExtendedDomain,
@@ -14,12 +14,27 @@ import Modal from '../../ModalWindow'
 interface Props {
   currentDomain: IExtendedDomain
   closeModal: VoidFunction
+  editable: boolean
 }
 
-const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
+const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
   const [form] = Form.useForm()
   const [addDomainEstate] = useAddDomainMutation()
   const [editDomain] = useEditDomainMutation()
+
+  useEffect(() => {
+    const initialValues = {
+      name: currentDomain?.name || '',
+      adminEmails: currentDomain?.adminEmails || [],
+      streets:
+        currentDomain?.streets.map((i: any) => ({
+          value: i._id,
+          label: `${i.address} (м. ${i.city})`,
+        })) || [],
+      description: currentDomain?.description || '',
+    }
+    form.setFieldsValue(initialValues)
+  }, [currentDomain, form])
 
   const handleSubmit = async () => {
     const formData: IDomainModel = await form.validateFields()
@@ -60,8 +75,10 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal }) => {
       onCancel={closeModal}
       okText={currentDomain ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
+      okButtonProps={{ style: { ...(!editable && { display: 'none' }) } }}
+      preview={!editable}
     >
-      <DomainForm form={form} currentDomain={currentDomain} />
+      <DomainForm form={form} editable={editable} />
     </Modal>
   )
 }

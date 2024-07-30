@@ -14,19 +14,37 @@ import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 export interface Props {
   currentDomain?: IExtendedDomain
   setCurrentDomain?: (domain: IExtendedDomain) => void
+  setDomainActions: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+    }>
+  >
+  domainActions: {
+    edit: boolean
+  }
 }
 
 const DomainsHeader: React.FC<Props> = ({
   currentDomain,
   setCurrentDomain,
+  domainActions,
+  setDomainActions,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const openModal = () => setIsModalOpen(true)
+  const openModal = () => {
+    setCurrentDomain(null)
+    setDomainActions({ edit: true })
+    setIsModalOpen(true)
+  }
+
   const closeModal = () => {
     setIsModalOpen(false)
     setCurrentDomain(null)
+    setDomainActions({
+      edit: false,
+    })
   }
 
   return (
@@ -47,6 +65,7 @@ const DomainsHeader: React.FC<Props> = ({
           <AddDomainModal
             currentDomain={currentDomain}
             closeModal={closeModal}
+            editable={domainActions.edit}
           />
         )}
       </>

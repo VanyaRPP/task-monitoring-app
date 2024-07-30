@@ -14,6 +14,11 @@ import {
 import dayjs from 'dayjs'
 import { useEffect } from 'react'
 import s from './style.module.scss'
+import 'dayjs/locale/uk'
+import ukUA from 'antd/lib/locale/uk_UA'
+
+dayjs.locale('uk')
+
 
 interface Props {
   form: FormInstance<any>
@@ -54,6 +59,7 @@ const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
   }, [form, currentService, previousMonth])
 
   return (
+<ConfigProvider locale={ukUA}>
     <Form
       form={form}
       layout="vertical"
@@ -124,6 +130,7 @@ const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
         />
       </Form.Item>
     </Form>
+    </ConfigProvider>
   )
 }
 
