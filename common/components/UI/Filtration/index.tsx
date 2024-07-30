@@ -26,7 +26,7 @@ const Filter: React.FC<Props> = ({ tasks }) => {
 
   useEffect(() => {
     setTaskList(tasks)
-  }, [])
+  }, [tasks])
 
   return (
     <>

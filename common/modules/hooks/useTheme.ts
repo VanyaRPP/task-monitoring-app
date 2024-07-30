@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
-import { ConfigProvider } from 'antd'
-import { useAppDispatch } from '../store/hooks'
 import { themeSlice } from '@common/modules/store/reducers/ThemeSlice'
+import { ConfigProvider } from 'antd'
+import { useEffect, useState } from 'react'
 import { COLOR_THEME } from 'utils/constants'
 import themes from '../../lib/themes.config'
+import { useAppDispatch } from '../store/hooks'
 
 function getDefaultTheme() {
   if (typeof window !== 'undefined') {
@@ -48,7 +48,7 @@ export default function useTheme(value: string = getDefaultTheme()) {
     for (const key in themes[theme]) {
       document.documentElement.style.setProperty(`--${key}`, themes[theme][key])
     } // custom css variables
-  }, [theme])
+  }, [theme, changeTheme, dispatch])
 
   return [theme, setTheme] as const
 }
