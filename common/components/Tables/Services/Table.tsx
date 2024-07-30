@@ -56,7 +56,6 @@ const ServicesTable: React.FC<Props> = ({
     currentPage: 1,
   })
   const isOnPage = pathname === AppRoutes.SERVICE
-  console.log(services)
 
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -164,11 +163,11 @@ const getDefaultColumns = (
     },
     {
       title: 'Рік',
-      dataIndex: 'date',
+      dataIndex: 'year',
       width: 100,
       filters: isOnPage ? yearFilter : null,
       filteredValue: filter?.year || null,
-      render: (date) => dateToYear(date),
+      render: (_, record: IService) => dateToYear(record.date),
     },
     {
       title: 'Адреса',
@@ -179,11 +178,11 @@ const getDefaultColumns = (
     },
     {
       title: 'Місяць',
-      dataIndex: 'date',
+      dataIndex: 'month',
       width: 105,
       filters: isOnPage ? monthFilter : null,
       filteredValue: filter?.month || null,
-      render: (date) => getFormattedDate(date),
+      render: (_, record: IService) => getFormattedDate(record.date),
     },
     {
       title: 'Утримання',
