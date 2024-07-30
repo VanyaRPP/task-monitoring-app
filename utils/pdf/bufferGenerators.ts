@@ -12,7 +12,7 @@ export async function generatePdf(payment: IExtendedPayment): Promise<Buffer> {
   await page.setContent(html)
 
   const pdfBuffer = await page.pdf({
-    format: 'A4',
+    format: 'a4',
     printBackground: true,
   })
 
