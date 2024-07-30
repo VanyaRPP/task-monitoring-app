@@ -16,7 +16,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "types": ["node", "cypress", "jest"],
+    "types": ["node", "jest"],
     "baseUrl": ".",
     "paths": {
       "@common/*": ["common/*"],
@@ -37,8 +37,7 @@
     "common/components/withPrivateRoute.jsx",
     "custom.d.ts",
     "pages/api-doc.js",
-    "common/components/PlacesAutocomplete/index.jsx",
-    "cypress/e2e/testForTest/firstTest.cy.js"
+    "common/components/PlacesAutocomplete/index.jsx"
   ],
   "exclude": ["node_modules"]
 }
