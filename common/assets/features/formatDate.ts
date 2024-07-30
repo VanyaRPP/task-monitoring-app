@@ -1,4 +1,4 @@
-import { RangePickerProps } from 'antd/lib/date-picker'
+import { DatePickerProps } from 'antd'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
 
@@ -13,7 +13,7 @@ export const isDeadlineExpired = (deadline: string): boolean =>
 export const dateToPick = (deadline: string): boolean =>
   dayjs().isAfter(dayjs(deadline))
 
-export const disabledDate: RangePickerProps['disabledDate'] = (current) => {
+export const disabledDate: DatePickerProps['disabledDate'] = (current) => {
   return current && current < dayjs().startOf('day')
 }
 

@@ -3,7 +3,7 @@
     "allowSyntheticDefaultImports": true,
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "typeRoots": ["./node_modules/@types"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -16,7 +16,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "types": ["node","cypress","jest"],
+    "types": ["node", "cypress", "jest"],
     "baseUrl": ".",
     "paths": {
       "@common/*": ["common/*"],

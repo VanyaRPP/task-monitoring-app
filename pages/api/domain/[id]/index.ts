@@ -37,7 +37,7 @@ export default async function handler(
         return res.status(400).json({ success: false, error })
       }
 
-      case 'PATCH':
+    case 'PATCH':
       try {
         if (isGlobalAdmin) {
           const response = await Domain.findOneAndUpdate(

@@ -19,20 +19,18 @@ export default async function handler(
       try {
         const { domainId, limit = 0 } = req.query
         if (domainId) {
-          const domain = await Domain.findOne({ _id: domainId })
-            .populate({
-              path: 'streets',
-              select: '_id address city',
-              options: { limit: +limit }
-            })
+          const domain = await Domain.findOne({ _id: domainId }).populate({
+            path: 'streets',
+            select: '_id address city',
+            options: { limit: +limit },
+          })
 
           return res
             .status(200)
             .json({ success: true, data: domain?.streets || [] })
         }
 
-        const streets = await Street.find({})
-          .limit(+limit)
+        const streets = await Street.find({}).limit(+limit)
 
         return res.status(200).json({
           success: true,

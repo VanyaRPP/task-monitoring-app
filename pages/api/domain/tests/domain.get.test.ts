@@ -277,9 +277,8 @@ describe('Domain API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = parseReceived(response.data)
-    const domain = domains.filter(
-      (domain) =>
-        domain.streets.includes(streets[0]._id)
+    const domain = domains.filter((domain) =>
+      domain.streets.includes(streets[0]._id)
     )
     expect(received).toEqual(domain)
   })

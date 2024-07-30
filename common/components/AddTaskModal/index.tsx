@@ -1,8 +1,13 @@
+import { useGetAllCategoriesQuery } from '@common/api/categoriesApi/category.api'
+import { useAddTaskMutation } from '@common/api/taskApi/task.api'
+import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
+import { IAddress } from '@common/modules/models/Task'
 import { useJsApiLoader } from '@react-google-maps/api'
 import { DatePicker, Form, Input, Select, Tooltip } from 'antd'
 import { useSession } from 'next-auth/react'
-import { useCallback, useEffect, useState, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { centerTownGeoCode, Roles } from 'utils/constants'
+import { disabledDate } from '../../assets/features/formatDate'
 import {
   deleteExtraWhitespace,
   validateField,
@@ -10,13 +15,8 @@ import {
 import Map from '../Map'
 import { PlacesAutocomplete } from '../PlacesAutocomplete'
 import CustomTooltip from '../UI/CustomTooltip'
-import s from './style.module.scss'
-import { disabledDate } from '../../assets/features/formatDate'
-import { useGetAllCategoriesQuery } from '@common/api/categoriesApi/category.api'
-import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
-import { useAddTaskMutation } from '@common/api/taskApi/task.api'
-import { IAddress } from '@common/modules/models/Task'
 import Modal from '../UI/ModalWindow'
+import s from './style.module.scss'
 
 type FormData = {
   category?: string

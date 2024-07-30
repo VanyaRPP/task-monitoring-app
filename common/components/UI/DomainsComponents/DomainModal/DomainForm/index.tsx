@@ -18,11 +18,7 @@ const DomainForm: FC<Props> = ({ form, editable = true }) => {
       layout="vertical"
       className={s.Form}
     >
-      <Form.Item
-        name="name"
-        label="Назва"
-        rules={validateField('required')}
-      >
+      <Form.Item name="name" label="Назва" rules={validateField('required')}>
         <Input
           placeholder="Вкажіть значення"
           maxLength={256}

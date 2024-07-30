@@ -19,7 +19,9 @@ export default async function handler(
         const user = await User.findOne({ email })
 
         if (user) {
-          return res.status(409).json({ success: false, error: 'User already exists!' })
+          return res
+            .status(409)
+            .json({ success: false, error: 'User already exists!' })
         }
 
         bcrypt.hash(password, saltRounds, async function (err, hash) {

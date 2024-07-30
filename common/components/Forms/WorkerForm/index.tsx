@@ -2,12 +2,7 @@ import { PlacesAutocomplete } from '@common/components/PlacesAutocomplete'
 import { IAddress } from '@common/modules/models/Task'
 import { IUser } from '@common/modules/models/User'
 import { Form, FormInstance, Input } from 'antd'
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-} from 'react'
+import { Dispatch, SetStateAction, useCallback, useEffect } from 'react'
 import s from './index.module.scss'
 
 type PropsType = {

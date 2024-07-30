@@ -17,7 +17,7 @@ export default async function handler(
   switch (req.method) {
     case 'DELETE':
       try {
-        if(isGlobalAdmin) {
+        if (isGlobalAdmin) {
           await RealEstate.findByIdAndRemove(req.query.id).then(
             (realEstate) => {
               if (realEstate) {

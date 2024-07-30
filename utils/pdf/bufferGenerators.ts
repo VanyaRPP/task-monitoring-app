@@ -1,10 +1,10 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import archiver from 'archiver'
 import puppeteer from 'puppeteer'
 import { generateHtmlFromThemplate } from './pdfThemplate'
-import archiver from 'archiver'
 
 export async function generatePdf(payment: IExtendedPayment): Promise<Buffer> {
-  const browser = await puppeteer.launch({ headless: 'new' })
+  const browser = await puppeteer.launch({ headless: true })
   const page = await browser.newPage()
 
   const html = await generateHtmlFromThemplate(payment)
@@ -21,7 +21,9 @@ export async function generatePdf(payment: IExtendedPayment): Promise<Buffer> {
   return pdfBuffer
 }
 
-export async function generateZip(payments: IExtendedPayment[]): Promise<Buffer> {
+export async function generateZip(
+  payments: IExtendedPayment[]
+): Promise<Buffer> {
   const archive = archiver('zip', { zlib: { level: 9 } })
 
   const promises = payments.map(async (payment, index) => {

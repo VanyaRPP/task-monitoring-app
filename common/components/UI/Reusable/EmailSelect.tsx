@@ -9,25 +9,32 @@ interface EmailSelectProps {
   disabled?: boolean
 }
 
-
-export default function EmailSelect({ form, disabled = false }: EmailSelectProps) {
+export default function EmailSelect({
+  form,
+  disabled = false,
+}: EmailSelectProps) {
   const { data, isLoading } = useGetDomainsQuery({})
   const [formInstance] = useForm() // Access the form instance
 
   useEffect(() => {
     if (data) {
       const adminEmails = data.reduce((uniqueAdminEmails, domain) => {
-        const newAdminEmails = domain.adminEmails.filter(email => !uniqueAdminEmails.includes(email))
+        const newAdminEmails = domain.adminEmails.filter(
+          (email) => !uniqueAdminEmails.includes(email)
+        )
         return [...uniqueAdminEmails, ...newAdminEmails]
       }, [])
       formInstance.setFieldsValue({ adminEmails }) // Use form instance's setFieldsValue
     }
   }, [data]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const adminEmailOptions = data?.reduce((uniqueAdminEmails, domain) => {
-    const newAdminEmails = domain.adminEmails.filter(email => !uniqueAdminEmails.includes(email))
-    return [...uniqueAdminEmails, ...newAdminEmails]
-  }, []) || []
+  const adminEmailOptions =
+    data?.reduce((uniqueAdminEmails, domain) => {
+      const newAdminEmails = domain.adminEmails.filter(
+        (email) => !uniqueAdminEmails.includes(email)
+      )
+      return [...uniqueAdminEmails, ...newAdminEmails]
+    }, []) || []
 
   return (
     <Form.Item

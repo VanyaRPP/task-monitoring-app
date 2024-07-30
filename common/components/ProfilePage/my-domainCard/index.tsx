@@ -17,7 +17,7 @@ const MyDomainsCard: React.FC = () => {
     {},
     { skip: isGlobalAdmin }
   )
-  const companies = realEstates?.data || [] 
+  const companies = realEstates?.data || []
 
   const getDomainCompanies = (domainId) =>
     companies

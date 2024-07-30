@@ -24,6 +24,8 @@ describe('getPaymentsChartData', () => {
     expect(getPaymentsChartData(extendedPaymentsSort)).toEqual(
       expectedResultDataForTestBySort
     )
-    expect(getPaymentsChartData(extendedPaymentForTestForCorrectValue)).toEqual(expectedDataForTestForCorrectValue)
+    expect(getPaymentsChartData(extendedPaymentForTestForCorrectValue)).toEqual(
+      expectedDataForTestForCorrectValue
+    )
   })
 })
