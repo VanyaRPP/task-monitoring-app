@@ -5,7 +5,7 @@ import InvoicesHeader from '@common/components/Tables/PaymentsBulk/Header'
 import InvoicesTable from '@common/components/Tables/PaymentsBulk/Table'
 import TableCard from '@common/components/UI/TableCard'
 import useService from '@common/modules/hooks/useService'
-import { FormInstance, Form } from 'antd'
+import { Form, FormInstance } from 'antd'
 import { createContext, useContext } from 'react'
 
 export const InvoicesPaymentContext = createContext(
@@ -29,7 +29,7 @@ const PaymentBulkBlock: React.FC = () => {
   const serviceId = Form.useWatch('monthService', form)
 
   const {
-    data: companies,
+    data: { data: companies } = { data: [] },
     isLoading: isCompaniesLoading,
     isError,
   } = useGetAllRealEstateQuery(
@@ -43,7 +43,7 @@ const PaymentBulkBlock: React.FC = () => {
     <InvoicesPaymentContext.Provider
       value={{
         form,
-        companies: companies?.data,
+        companies,
         service,
         isLoading: isCompaniesLoading || isServiceLoading,
         isError,
