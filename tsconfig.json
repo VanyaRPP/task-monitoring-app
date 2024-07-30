@@ -24,7 +24,6 @@
       "@styles/*": ["styles/*"],
       "@pages/*": ["pages/*"],
       "@components/*": ["common/components/*"],
-      "@queries/*": ["common/api/*"],
       "@assets/*": ["common/assets/*"],
       "@modules/*": ["common/modules/*"],
       "@lib/*": ["common/lib/*"]
@@ -34,9 +33,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "common/components/withPrivateRoute.jsx",
     "custom.d.ts",
-    "pages/api-doc.js",
     "common/components/PlacesAutocomplete/index.jsx"
   ],
   "exclude": ["node_modules"]
