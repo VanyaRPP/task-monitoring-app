@@ -1,17 +1,25 @@
-const dotenv = require('dotenv')
+import dotenv from 'dotenv'
+import type { Config } from 'jest'
+
 dotenv.config()
-module.exports = {
+
+const config: Config = {
   testMatch: ['**/*.test.ts'],
-  testPathIgnorePatterns: ['/node_modules/'], // Ignore the node_modules directory
+  testPathIgnorePatterns: ['/node_modules/'],
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
     '^@utils/(.*)$': '<rootDir>/utils/$1',
     '^@pages/(.*)$': '<rootDir>/pages/$1',
     '^@common/(.*)$': '<rootDir>/common/$1',
   },
-  moduleFileExtensions: ['ts', 'js'], //  file extensions
+  moduleFileExtensions: ['ts', 'js'],
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.json',
+    },
+  },
 }
-export {}
+
+export default config

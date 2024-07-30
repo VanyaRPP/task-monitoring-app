@@ -24,10 +24,10 @@
       "@styles/*": ["styles/*"],
       "@pages/*": ["pages/*"],
       "@components/*": ["common/components/*"],
-      "@queries/*": ["common/api"],
-      "@assets/*": ["common/assets"],
-      "@modules/*": ["common/modules"],
-      "@lib/*": ["common/lib"]
+      "@queries/*": ["common/api/*"],
+      "@assets/*": ["common/assets/*"],
+      "@modules/*": ["common/modules/*"],
+      "@lib/*": ["common/lib/*"]
     }
   },
   "include": [
