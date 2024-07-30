@@ -6,7 +6,7 @@ import { ITask } from '@modules/models/Task'
 import { AppRoutes } from '@utils/constants'
 import { Button } from 'antd'
 import { GetServerSideProps } from 'next'
-import { unstable_getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { useMemo, useState } from 'react'
 import { authOptions } from '../../api/auth/[...nextauth]'
@@ -52,11 +52,7 @@ const UserTasks: React.FC = () => {
 export default UserTasks
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

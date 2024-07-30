@@ -4,7 +4,7 @@ import CompetitionCard from '@components/CompetitionCard'
 import TaskCard from '@components/TaskCard'
 import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
-import { unstable_getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth'
 import { useRouter } from 'next/router'
 import { authOptions } from '../api/auth/[...nextauth]'
 import s from './style.module.scss'
@@ -30,11 +30,7 @@ const Task: React.FC = () => {
 export default Task
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

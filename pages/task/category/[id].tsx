@@ -1,7 +1,7 @@
 import { useGetCategoryByIdQuery } from '@common/api/categoriesApi/category.api'
 import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
-import { unstable_getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth'
 import { useRouter } from 'next/router'
 import { authOptions } from '../../api/auth/[...nextauth]'
 
@@ -17,11 +17,7 @@ const TaskInCategory = () => {
 export default TaskInCategory
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

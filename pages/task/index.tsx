@@ -6,7 +6,7 @@ import { ITask } from '@modules/models/Task'
 import { AppRoutes } from '@utils/constants'
 import { Empty } from 'antd'
 import { GetServerSideProps } from 'next'
-import { unstable_getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { authOptions } from '../api/auth/[...nextauth]'
 import s from './style.module.scss'
@@ -35,11 +35,7 @@ const Tasks: React.FC = () => {
 export default withAuthRedirect(Tasks)
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {
