@@ -1,4 +1,4 @@
-import { disabledDate } from '@common/assets/features/formatDate'
+import { disabledDate } from '@assets/features/formatDate'
 import {
   DatePicker,
   Form,

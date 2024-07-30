@@ -1,3 +1,4 @@
+import { IAddress, IGeoCode } from '@modules/models/Task'
 import { useJsApiLoader } from '@react-google-maps/api'
 import { Form, FormInstance, Input } from 'antd'
 import {
@@ -8,7 +9,6 @@ import {
   useRef,
   useState,
 } from 'react'
-import { IAddress, IGeoCode } from '../../../modules/models/Task'
 
 interface Props {
   isFormDisabled: boolean

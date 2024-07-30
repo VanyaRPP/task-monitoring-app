@@ -1,5 +1,5 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import PaymentPricesTable from '@common/components/Forms/AddPaymentForm/PaymentPricesTable'
+import PaymentPricesTable from '@components/Forms/AddPaymentForm/PaymentPricesTable'
 import numberToTextNumber from '@utils/numberToText'
 import { Button } from 'antd'
 import moment from 'moment'

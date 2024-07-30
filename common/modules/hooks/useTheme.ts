@@ -1,7 +1,7 @@
-import { themeSlice } from '@common/modules/store/reducers/ThemeSlice'
+import { themeSlice } from '@modules/store/reducers/ThemeSlice'
+import { COLOR_THEME } from '@utils/constants'
 import { ConfigProvider } from 'antd'
 import { useEffect, useState } from 'react'
-import { COLOR_THEME } from 'utils/constants'
 import themes from '../../lib/themes.config'
 import { useAppDispatch } from '../store/hooks'
 

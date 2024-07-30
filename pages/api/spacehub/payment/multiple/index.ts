@@ -1,7 +1,7 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
-import Payment from '@common/modules/models/Payment'
+import Payment from '@modules/models/Payment'
 import start, { ExtendedData } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
 

@@ -1,4 +1,4 @@
-import Service from '@common/modules/models/Service'
+import Service from '@modules/models/Service'
 import { ServiceType } from '@utils/constants'
 import { getFormattedDate } from '@utils/helpers'
 import moment from 'moment'

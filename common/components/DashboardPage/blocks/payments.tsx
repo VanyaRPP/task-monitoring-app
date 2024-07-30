@@ -1,16 +1,16 @@
 import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import {
+  dateToDefaultFormat,
+  dateToMonthYear,
+} from '@assets/features/formatDate'
+import {
   useDeletePaymentMutation,
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import {
-  dateToDefaultFormat,
-  dateToMonthYear,
-} from '@common/assets/features/formatDate'
-import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
-import TableCard from '@common/components/UI/TableCard'
+import PaymentCardHeader from '@components/UI/PaymentCardHeader'
+import TableCard from '@components/UI/TableCard'
 import {
   AppRoutes,
   ColumnsRoleView,

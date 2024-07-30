@@ -3,12 +3,12 @@ import { Button } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 
+import { IService } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import AddServiceModal from '@common/components/AddServiceModal'
+import AddServiceModal from '@components/AddServiceModal'
+import AddressesFilterTags from '@components/UI/Reusable/AddressesFilterTags'
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
-import { IService } from '@common/api/serviceApi/service.api.types'
-import AddressesFilterTags from '@common/components/UI/Reusable/AddressesFilterTags'
 import s from './style.module.scss'
 
 export interface Props {

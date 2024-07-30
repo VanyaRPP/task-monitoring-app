@@ -1,5 +1,5 @@
+import { dateToDayYearMonthFormat } from '@assets/features/formatDate'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import { dateToDayYearMonthFormat } from '@common/assets/features/formatDate'
 import { ServiceType, paymentsTitle } from '@utils/constants'
 
 export const getPaymentsChartData = (data: IExtendedPayment[]) => {

@@ -1,4 +1,3 @@
-import React from 'react'
 import s from '@components/UI/PaymentSelect/styled.module.scss'
 import { Operations } from '@utils/constants'
 import { Select } from 'antd'

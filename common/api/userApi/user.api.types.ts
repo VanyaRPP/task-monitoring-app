@@ -1,5 +1,5 @@
-import { IUser } from 'common/modules/models/User'
-export type { IUser } from 'common/modules/models/User'
+import { IUser } from '@modules/models/User'
+export type { IUser } from '@modules/models/User'
 
 export interface BaseQuery {
   success: boolean

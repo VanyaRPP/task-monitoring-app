@@ -1,6 +1,6 @@
 import { QuestionCircleOutlined } from '@ant-design/icons'
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
-import { usePaymentContext } from '@common/components/AddPaymentModal'
+import { usePaymentContext } from '@components/AddPaymentModal'
 import { inflicionDescription } from '@utils/constants'
 import { getFormattedDate } from '@utils/helpers'
 import { Tooltip } from 'antd'

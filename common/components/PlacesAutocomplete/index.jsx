@@ -1,4 +1,4 @@
-import useGoogleQueries from '@common/modules/hooks/useGoogleQueries'
+import useGoogleQueries from '@modules/hooks/useGoogleQueries'
 import { Input } from 'antd'
 import { useEffect } from 'react'
 import useOnclickOutside from 'react-cool-onclickoutside'

@@ -1,8 +1,8 @@
+import { validateField } from '@assets/features/validators'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import { validateField } from '@common/assets/features/validators'
-import { useCompanyPageContext } from '@common/components/DashboardPage/blocks/realEstates'
-import { IDomain } from '@common/modules/models/Domain'
-import { IStreet } from '@common/modules/models/Street'
+import { useCompanyPageContext } from '@components/DashboardPage/blocks/realEstates'
+import { IDomain } from '@modules/models/Domain'
+import { IStreet } from '@modules/models/Street'
 import { Form, Select } from 'antd'
 import { CSSProperties, useEffect, useMemo } from 'react'
 

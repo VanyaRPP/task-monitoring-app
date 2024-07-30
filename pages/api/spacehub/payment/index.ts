@@ -1,8 +1,8 @@
 import initMiddleware from '@common/lib/initMiddleware'
 import validateMiddleware from '@common/lib/validateMiddleware'
-import Domain from '@common/modules/models/Domain'
-import Payment from '@common/modules/models/Payment'
-import RealEstate from '@common/modules/models/RealEstate'
+import Domain from '@modules/models/Domain'
+import Payment from '@modules/models/Payment'
+import RealEstate from '@modules/models/RealEstate'
 import start, { ExtendedData } from '@pages/api/api.config'
 import {
   getCreditDebitPipeline,

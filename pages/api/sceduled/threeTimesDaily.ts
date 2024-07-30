@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
+import Notification, { INotification } from '@modules/models/Notification'
+import moment from 'moment'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start from '../api.config'
-import moment from 'moment'
-import Notification, {
-  INotification,
-} from '@common/modules/models/Notification'
 
 start()
 

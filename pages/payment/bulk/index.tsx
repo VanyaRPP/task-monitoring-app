@@ -1,5 +1,5 @@
-import PaymentBulkBlock from '@common/components/DashboardPage/blocks/paymentsBulk'
-import withAuthRedirect from '@common/components/HOC/withAuthRedirect'
+import PaymentBulkBlock from '@components/DashboardPage/blocks/paymentsBulk'
+import withAuthRedirect from '@components/HOC/withAuthRedirect'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
 import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'

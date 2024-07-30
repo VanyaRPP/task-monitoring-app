@@ -1,8 +1,8 @@
+import DashboardPage from '@components/DashboardPage'
+import HomePage from '@components/HomePage/index'
+import { GetServerSideProps } from 'next'
 import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from './api/auth/[...nextauth]'
-import { GetServerSideProps } from 'next'
-import HomePage from '../common/components/HomePage/index'
-import DashboardPage from '../common/components/DashboardPage'
 
 const Home: React.FC<{
   isAuth: boolean

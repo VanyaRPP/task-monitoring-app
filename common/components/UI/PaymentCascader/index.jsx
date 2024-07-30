@@ -1,11 +1,10 @@
-import React from 'react'
-import { Cascader } from 'antd'
 import s from '@components/UI/PaymentCascader/styled.module.scss'
 import {
   cascaderMonths,
   cascaderQuarters,
   cascaderYears,
 } from '@utils/constants'
+import { Cascader } from 'antd'
 
 const PaymentCascader = ({ onChange }) => {
   return (

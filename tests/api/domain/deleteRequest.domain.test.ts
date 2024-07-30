@@ -1,9 +1,9 @@
 import { expect } from '@jest/globals'
-import handler from '../../../pages/api/domain/[id]/index'
+import Domain from '@modules/models/Domain'
+import handler from '@pages/api/domain/[id]/index'
+import { getCurrentUser } from '@utils/getCurrentUser'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { users } from '@utils/testData'
-import { getCurrentUser } from '@utils/getCurrentUser'
-import Domain from '@common/modules/models/Domain'
 
 jest.mock('@pages/api/api.config', () => jest.fn())
 jest.mock('@utils/getCurrentUser', () => ({ getCurrentUser: jest.fn() }))

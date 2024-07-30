@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { authOptions } from '@pages/api/auth/[...nextauth]'
-import RealEstate from '@common/modules/models/RealEstate'
-import Domain from '@common/modules/models/Domain'
+import Domain from '@modules/models/Domain'
+import RealEstate from '@modules/models/RealEstate'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import type { NextApiRequest, NextApiResponse } from 'next'
 start()
 
 export default async function handler(

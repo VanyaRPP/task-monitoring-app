@@ -1,5 +1,5 @@
 import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
-import User, { IUser } from '@common/modules/models/User'
+import User, { IUser } from '@modules/models/User'
 import { FormInstance } from 'antd'
 import Big from 'big.js'
 import _omit from 'lodash/omit'

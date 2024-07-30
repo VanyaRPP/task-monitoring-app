@@ -1,6 +1,6 @@
-import handler from '../../../pages/api/domain/index'
-import { setupTestEnvironment } from '@utils/setupTestEnvironment'
+import handler from '@pages/api/domain/index'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { users } from '@utils/testData'
 
 const { expect } = require('@jest/globals')

@@ -1,6 +1,6 @@
-import { validateField } from '@common/assets/features/validators'
-import { useCompanyPageContext } from '@common/components/DashboardPage/blocks/realEstates'
-import useDomain from '@common/modules/hooks/useDomain'
+import { validateField } from '@assets/features/validators'
+import { useCompanyPageContext } from '@components/DashboardPage/blocks/realEstates'
+import useDomain from '@modules/hooks/useDomain'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 

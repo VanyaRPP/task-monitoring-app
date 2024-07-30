@@ -1,8 +1,8 @@
+import { validateField } from '@assets/features/validators'
 import { IService } from '@common/api/serviceApi/service.api.types'
-import { validateField } from '@common/assets/features/validators'
-import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
-import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
-import { usePreviousMonthService } from '@common/modules/hooks/useService'
+import AddressesSelect from '@components/UI/Reusable/AddressesSelect'
+import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
+import { usePreviousMonthService } from '@modules/hooks/useService'
 import {
   ConfigProvider,
   DatePicker,
@@ -11,11 +11,11 @@ import {
   Input,
   InputNumber,
 } from 'antd'
+import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs from 'dayjs'
+import 'dayjs/locale/uk'
 import { useEffect } from 'react'
 import s from './style.module.scss'
-import 'dayjs/locale/uk'
-import ukUA from 'antd/lib/locale/uk_UA'
 
 dayjs.locale('uk')
 

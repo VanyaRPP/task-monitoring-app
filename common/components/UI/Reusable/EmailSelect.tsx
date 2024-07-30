@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
+import { validateField } from '@assets/features/validators'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { Form, Select } from 'antd'
 import { useForm } from 'antd/lib/form/Form'
-import { validateField } from '@common/assets/features/validators'
-import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import { useEffect } from 'react'
 
 interface EmailSelectProps {
   form: any

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import Domain from '@common/modules/models/Domain'
-import RealEstate from '@common/modules/models/RealEstate'
-import Service from '@common/modules/models/Service'
+import Domain from '@modules/models/Domain'
+import RealEstate from '@modules/models/RealEstate'
+import Service from '@modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'

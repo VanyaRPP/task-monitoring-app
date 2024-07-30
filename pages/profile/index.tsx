@@ -1,8 +1,8 @@
+import ProfilePage from '@components/ProfilePage'
+import { AppRoutes } from '@utils/constants'
+import { GetServerSideProps } from 'next'
 import { unstable_getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
-import { AppRoutes } from '../../utils/constants'
-import { GetServerSideProps } from 'next'
-import ProfilePage from '../../common/components/ProfilePage'
 
 const Profile: React.FC = () => {
   return <ProfilePage />

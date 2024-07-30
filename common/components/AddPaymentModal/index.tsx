@@ -8,7 +8,8 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
-import { usePaymentFormData } from '@common/modules/hooks/usePaymentData'
+import Modal from '@components/UI/ModalWindow'
+import { usePaymentFormData } from '@modules/hooks/usePaymentData'
 import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
@@ -18,7 +19,6 @@ import dayjs from 'dayjs'
 import { FC, createContext, useContext, useEffect, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
-import Modal from '../UI/ModalWindow'
 import s from './style.module.scss'
 
 interface Props {

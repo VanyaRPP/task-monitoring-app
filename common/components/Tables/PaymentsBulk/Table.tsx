@@ -2,8 +2,8 @@ import { Alert, Table } from 'antd'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
-import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
-import { getDefaultColumns } from '@common/components/Tables/PaymentsBulk/column.config'
+import { useInvoicesPaymentContext } from '@components/DashboardPage/blocks/paymentsBulk'
+import { getDefaultColumns } from '@components/Tables/PaymentsBulk/column.config'
 import { AppRoutes } from '@utils/constants'
 
 const InvoicesTable: React.FC = () => {

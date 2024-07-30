@@ -1,5 +1,5 @@
-import { ICallback } from './../../modules/models/Callback'
-export type { ICallback } from 'common/modules/models/Callback'
+import { ICallback } from '@modules/models/Callback'
+export type { ICallback } from '@modules/models/Callback'
 
 export interface AllCallbackQuery {
   success: boolean

@@ -1,15 +1,10 @@
-import MailOutlined from '@ant-design/icons/lib/icons/MailOutlined'
-import LoginOutlined from '@ant-design/icons/lib/icons/LoginOutlined'
-import { Button, Form, FormInstance, Input } from 'antd'
+import { validateField } from '@assets/features/validators'
+import useLocalStorage from '@modules/hooks/useLocalStorage'
 import config from '@utils/config'
-import s from './index.module.scss'
-import { useState } from 'react'
-import useLocalStorage from '@common/modules/hooks/useLocalStorage'
-import { validateField } from '@common/assets/features/validators'
-import { LogoutOutlined } from '@ant-design/icons'
-import { AppRoutes } from '@utils/constants'
+import { Button, Form, FormInstance, Input } from 'antd'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
+import { useState } from 'react'
+import s from './index.module.scss'
 
 const AuthCard = ({
   disabled,
