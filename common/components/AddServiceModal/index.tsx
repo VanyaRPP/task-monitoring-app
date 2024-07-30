@@ -84,7 +84,7 @@ const AddServiceModal: FC<Props> = ({
         closeModal()
       }}
       okText={edit ? 'Зберегти' : !preview && 'Додати'}
-      okButtonProps={{ style: { display: preview ? 'none' : 'inline' } }}
+      okButtonProps={{ style: { ...(preview && { display: 'none' }) } }}
       cancelText={preview ? 'Закрити' : 'Відміна'}
       confirmLoading={isAddingLoading || isEditingLoading}
     >
