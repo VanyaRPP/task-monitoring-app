@@ -25,16 +25,8 @@ export default async function handler(
   const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
     await getCurrentUser(req, res)
 
-  const domainFilters = (data, filters) => {
-    const domainFilter = []
-
-    filters.map((filter) => {
-      data?.domain?._id.find(domain => domain._id === filter)
-    })
-  }
-
-  const createDomainFilter = async () => {
-    return await Service.aggregate([
+  const getDomainFilter = async () => {
+    return Service.aggregate([
       {
         $group: {
           _id: "$domain",
@@ -60,47 +52,71 @@ export default async function handler(
       }]).exec()
   }
 
-  const createAddressFilter = (data) => {
-    const addressFilter = []
-
-    data.map((serviceInfo) => {
-      if(serviceInfo?.street?._id && !addressFilter.some(address => address.value.toString() === serviceInfo?.street?._id.toString())) {
-        addressFilter.push({
-          text: `${serviceInfo?.street?.address.toString()} (м. ${serviceInfo?.street?.city.toString()})`,
-          value: serviceInfo.street._id.toString(),
-        })
-      }
-    })
-    return addressFilter
+  const getAddressFilter = async () => {
+    return Service.aggregate([
+      {
+        $group: {
+          _id: "$street",
+        }
+      },
+      {
+        $lookup: {
+          from: 'streets',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'addressDetails',
+        }
+      },
+      {
+        $unwind: '$addressDetails'
+      },
+      {
+        $project: {
+          _id: 0,
+          text: {
+            $concat: ['$addressDetails.address' , ' (м. ', '$addressDetails.city', ')']
+          },
+          value: '$_id'
+        }
+      }]).exec()
   }
 
-  const createYearFilter = (data) => {
-    const yearFilter = []
-
-    data.map((serviceInfo) => {
-      if(serviceInfo?.date && !yearFilter.some(date => date.value.toString() === dateToYear(serviceInfo?.date))) {
-        yearFilter.push({
-          text: `${dateToYear(serviceInfo?.date)}`,
-          value: dateToYear(serviceInfo?.date),
-        })
-      }
-    })
-    return yearFilter
+  const getYearFilter = async () => {
+    return Service.aggregate([
+      {
+        $group: {
+          _id: { $year: "$date" },
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          text: { $toString: "$_id" },
+          value: "$_id"
+        }
+      }]).exec()
   }
 
-  const createMonthFilter = (data) => {
-    const monthFilter = []
-
-    data.map((serviceInfo) => {
-      if(serviceInfo?.date && !monthFilter.some(date => date.value.toString() === getFormattedDate(serviceInfo?.date))) {
-        monthFilter.push({
-          text: `${getFormattedDate(serviceInfo?.date)}`,
-          value: getFormattedDate(serviceInfo?.date),
-        })
+  const getMonthFilter = async (): Promise<{ text: string; value: number }[]> => {
+    const results = await Service.aggregate([
+      {
+        $group: {
+          _id: { $month: "$date" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          month: "$_id"
+        }
       }
-    })
-    return monthFilter
-  }
+    ]).exec();
+  
+    return results.map(result => ({
+      text: getFormattedDate(new Date(2024, result.month - 1)),
+      value: result.month
+    }));
+  };
 
   switch (req.method) {
     case 'GET':
@@ -182,38 +198,17 @@ export default async function handler(
                 .populate('domain')
                 .populate('street')
               // const uniques = domainFilters(data, await Service.distinct('domain', options).populate('domain'))
-              const uniques = await Service.aggregate([
-                {
-                  $group: {
-                    _id: "$domain",
-                  }
-                },
-                {
-                  $lookup: {
-                    from: 'domains',
-                    localField: '_id',
-                    foreignField: '_id',
-                    as: 'domainDetails',
-                  }
-                },
-                {
-                  $unwind: '$domainDetails'
-                },
-                {
-                  $project: {
-                    _id: 0,
-                    text: '$domainDetails.name',
-                    value: '$_id'
-                  }
-                }]).exec();
+                const domainFilter = await getDomainFilter()
+                const addressFilter = await getAddressFilter()
+                const yearFilter = await getYearFilter()
+                const monthFilter = await getMonthFilter()
               return res.status(200).json({ 
                 success: true,
                 data: data,
-                domainFilter: uniques,
-                addressFilter: createAddressFilter(data),
-                yearFilter: createYearFilter(data),
-                monthFilter: createMonthFilter(data),
-                test: uniques,
+                domainFilter: domainFilter,
+                addressFilter: addressFilter,
+                yearFilter: yearFilter,
+                monthFilter: monthFilter,
                 })
           } catch (error) {
             return res.status(400).json({ success: false, error: error.message })

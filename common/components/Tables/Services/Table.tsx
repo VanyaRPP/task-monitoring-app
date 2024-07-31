@@ -56,6 +56,7 @@ const ServicesTable: React.FC<Props> = ({
     currentPage: 1,
   })
   const isOnPage = pathname === AppRoutes.SERVICE
+  console.log(services)
 
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
