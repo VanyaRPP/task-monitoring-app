@@ -94,6 +94,11 @@ export default async function handler(
           text: { $toString: "$_id" },
           value: "$_id"
         }
+      },
+      {
+        $sort: {
+          text: 1
+        }
       }]).exec()
   }
 
@@ -108,6 +113,11 @@ export default async function handler(
         $project: {
           _id: 0,
           month: "$_id"
+        }
+      },
+      {
+        $sort: {
+          month: 1
         }
       }
     ]).exec();
@@ -160,14 +170,14 @@ export default async function handler(
               filters._id = { $in: servicesIds }
             }
 
-            if (year && !isNaN(Number(year))) {
-              if (!filters.$expr) filters.$expr = { $and: [] };
-              filters.$expr.$and.push({ $eq: [{ $year: "$date" }, +year] });
+            if (year && year !== 'null') {
+              const yearArray = year.split(',').map(y => Number(y.trim())).filter(y => !isNaN(y));
+              filters.$expr = { $in: [{ $year: "$date" }, yearArray] };
             }
           
-            if (month && !isNaN(Number(month))) {
-              if (!filters.$expr) filters.$expr = { $and: [] };
-              filters.$expr.$and.push({ $eq: [{ $month: "$date" }, +month] });
+            if (month && month !== 'null') {
+              const monthArray = month.split(',').map(m => Number(m.trim())).filter(m => !isNaN(m));
+              filters.$expr = { $in: [{ $month: "$date" }, monthArray] };
             }
     
             if (isDomainAdmin) {
