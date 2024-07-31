@@ -22,6 +22,7 @@ export default function InvoiceNumber({ form, paymentActions }) {
       label="№ інвойса"
     >
       <InputNumber
+        style={{ minWidth: '166px' }}
         placeholder="Вкажіть № інвойса"
         disabled={paymentActions?.preview}
       />

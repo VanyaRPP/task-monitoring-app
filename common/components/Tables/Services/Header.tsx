@@ -77,7 +77,7 @@ const ServicesHeader: React.FC<Props> = ({
       </div>
       {showAddButton && isAdminCheck(user?.roles) && (
         <>
-          <Button type="link" onClick={openModal}>
+          <Button className={s.firstBlock} type="link" onClick={openModal}>
             <PlusOutlined /> Додати
           </Button>
         </>
