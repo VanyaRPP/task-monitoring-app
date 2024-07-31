@@ -160,6 +160,7 @@ const getDefaultColumns = (
       filteredValue: filter?.domain || null,
       width: 200,
       render: (i) => i?.name,
+      filterSearch: true,
     },
     {
       title: 'Рік',
@@ -168,6 +169,7 @@ const getDefaultColumns = (
       filters: isOnPage ? yearFilter : null,
       filteredValue: filter?.year || null,
       render: (_, record: IService) => dateToYear(record.date),
+      filterSearch: true,
     },
     {
       title: 'Адреса',
@@ -175,6 +177,7 @@ const getDefaultColumns = (
       filters: isOnPage ? addressFilter : null,
       filteredValue: filter?.street || null,
       render: (i) => `${i?.address} (м. ${i?.city})`,
+      filterSearch: true,
     },
     {
       title: 'Місяць',
@@ -183,6 +186,7 @@ const getDefaultColumns = (
       filters: isOnPage ? monthFilter : null,
       filteredValue: filter?.month || null,
       render: (_, record: IService) => getFormattedDate(record.date),
+      filterSearch: true,
     },
     {
       title: 'Утримання',
