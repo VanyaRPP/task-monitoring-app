@@ -236,6 +236,7 @@ const PaymentsBlock = () => {
     },
     {
       title: 'За місяць',
+      width: 130,
       dataIndex: 'monthService',
       render: (monthService, obj) =>
         dateToMonthYear(monthService?.date || obj.invoiceCreationDate),
