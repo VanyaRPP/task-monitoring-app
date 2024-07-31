@@ -171,13 +171,15 @@ export default async function handler(
             }
 
             if (year && year !== 'null') {
-              const yearArray = year.split(',').map(y => Number(y.trim())).filter(y => !isNaN(y));
-              filters.$expr = { $in: [{ $year: "$date" }, yearArray] };
+              filters.$expr = filters.$expr || {};
+              filters.$expr.$and = filters.$expr.$and || [];
+              filters.$expr.$and.push({ $in: [{ $year: "$date" }, year.split(',').map(y => Number(y.trim())).filter(y => !isNaN(y))] });
             }
           
             if (month && month !== 'null') {
-              const monthArray = month.split(',').map(m => Number(m.trim())).filter(m => !isNaN(m));
-              filters.$expr = { $in: [{ $month: "$date" }, monthArray] };
+              filters.$expr = filters.$expr || {};
+              filters.$expr.$and = filters.$expr.$and || [];
+              filters.$expr.$and.push({ $in: [{ $month: "$date" }, month.split(',').map(m => Number(m.trim())).filter(m => !isNaN(m))] });
             }
     
             if (isDomainAdmin) {
