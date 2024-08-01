@@ -2,7 +2,6 @@ import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 import User, { IUser } from '@modules/models/User'
 import { FormInstance } from 'antd'
 import Big from 'big.js'
-import _omit from 'lodash/omit'
 import moment from 'moment'
 import 'moment/locale/uk'
 import mongoose, { ObjectId } from 'mongoose'
@@ -144,6 +143,26 @@ function formatDateToIsoString(data) {
       : i
   )
 }
+
+/**
+ * Omits specified properties from an object.
+ *
+ * @param {Record<string, any>} obj - The object to omit properties from.
+ * @param {string[]} props - The list of property names to omit.
+ * @returns {Record<string, any>} - A new object without the omitted properties.
+ */
+export const omit = (
+  obj: Record<string, any>,
+  props: string[]
+): Record<string, any> => {
+  return Object.keys(obj).reduce((result, key) => {
+    if (!props.includes(key)) {
+      result[key] = obj[key]
+    }
+    return result
+  }, {} as Record<string, any>)
+}
+
 /**
  * Костиль, щоб прибрати `__v` з документу `mongodb` і далі порівнювати
  * отримані дані із тестовими
@@ -151,7 +170,7 @@ function formatDateToIsoString(data) {
  * @returns {any[]} масив документів без поля `__v`
  */
 export const removeProps = (data: any[], props = ['__v', 'services']): any[] =>
-  data.map((obj) => _omit(obj, props))
+  data.map((obj) => omit(obj, props))
 
 /**
  * Ще один костиль для тестів, щоб зробити `reverse populate` документу
@@ -173,16 +192,6 @@ export const unpopulate = (arr: any[]): any[] => {
     }
     return newObj
   })
-}
-
-/**
- * Переводить номер місяця в його назву на українській і з великої літери
- * @param {number} index порядковий номер місяця
- * @returns форматований місяць
- */
-export const NumberToFormattedMonth = (index?: number): string => {
-  const month = moment().month(index).locale('uk').format('MMMM')
-  return month[0].toUpperCase() + month.slice(1)
 }
 
 export function filterInvoiceObject(obj) {
