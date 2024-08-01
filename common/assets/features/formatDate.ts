@@ -1,7 +1,9 @@
 import { RangePickerProps } from 'antd/lib/date-picker'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
 
+dayjs.extend(localizedFormat)
 dayjs.locale('uk')
 
 export const dateToDefaultFormat = (deadline: string): string =>
@@ -22,6 +24,8 @@ export const dateToDayYearMonthFormat = (date: Date): string =>
 
 export const dateToMonthYear = (date: Date): string =>
   dayjs(date).format('MMMM YYYY')
+
+export const dateToMonth = (date: Date): string => dayjs(date).format('MMMM')
 
 export const getPreviousMonth = (date?: string) => {
   const currentInvoiceDate = dayjs(date).subtract(1, 'month')
