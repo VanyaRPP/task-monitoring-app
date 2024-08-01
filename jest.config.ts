@@ -1,19 +1,21 @@
-import dotenv from 'dotenv'
 import type { Config } from 'jest'
-
-dotenv.config()
+import { pathsToModuleNameMapper } from 'ts-jest'
+import { compilerOptions } from './tsconfig.json'
 
 const config: Config = {
   testMatch: ['**/*.test.ts'],
-  testPathIgnorePatterns: ['/node_modules/'],
+  testPathIgnorePatterns: ['/node_modules/', '/.next/'],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts?$': [
+      'ts-jest',
+      {
+        tsconfig: 'tsconfig.json',
+      },
+    ],
   },
-  moduleNameMapper: {
-    '^@utils/(.*)$': '<rootDir>/utils/$1',
-    '^@pages/(.*)$': '<rootDir>/pages/$1',
-    '^@common/(.*)$': '<rootDir>/common/$1',
-  },
+  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
+    prefix: '<rootDir>/',
+  }),
   moduleFileExtensions: ['ts', 'js'],
 }
 
