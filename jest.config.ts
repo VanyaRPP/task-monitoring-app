@@ -15,11 +15,6 @@ const config: Config = {
     '^@common/(.*)$': '<rootDir>/common/$1',
   },
   moduleFileExtensions: ['ts', 'js'],
-  globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.json',
-    },
-  },
 }
 
 export default config
