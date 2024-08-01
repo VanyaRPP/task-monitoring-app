@@ -1,9 +1,9 @@
-import { setupTestEnvironment } from '@utils/setupTestEnvironment'
+import Domain from '@modules/models/Domain'
+import Street from '@modules/models/Street'
+import handler from '@pages/api/streets/index'
 import { getCurrentUser } from '@utils/getCurrentUser'
-import Domain from '@common/modules/models/Domain'
-import Street from '@common/modules/models/Street'
-import handler from '../../../pages/api/streets/index'
-import { testStreetsData, testDomainsData } from './mockData'
+import { setupTestEnvironment } from '@utils/setupTestEnvironment'
+import { testDomainsData, testStreetsData } from './mockData'
 
 jest.mock('@pages/api/api.config', () => jest.fn())
 jest.mock('@utils/getCurrentUser', () => ({ getCurrentUser: jest.fn() }))

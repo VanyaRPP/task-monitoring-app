@@ -1,13 +1,13 @@
-import React from 'react'
 import { UserOutlined } from '@ant-design/icons'
-import { Avatar, Card, Image } from 'antd'
-import RoleSwitcher from 'common/components/UI/roleSwitcher'
-import s from './style.module.scss'
-import { useGetCurrentUserQuery } from '../../api/userApi/user.api'
-import MyDomain from './my-domain'
-import MyCompany from './my-company'
-import MyDomainsCard from './my-domainCard'
+import RoleSwitcher from '@components/UI/roleSwitcher'
 import { Roles } from '@utils/constants'
+import { Avatar, Card, Image } from 'antd'
+import React from 'react'
+import { useGetCurrentUserQuery } from '../../api/userApi/user.api'
+import MyCompany from './my-company'
+import MyDomain from './my-domain'
+import MyDomainsCard from './my-domainCard'
+import s from './style.module.scss'
 
 const ProfilePage: React.FC = () => {
   const { data: user, isLoading: userLoading } = useGetCurrentUserQuery()

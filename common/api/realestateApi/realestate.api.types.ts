@@ -1,4 +1,4 @@
-import { IDomain } from '@common/modules/models/Domain'
+import { IDomain } from '@modules/models/Domain'
 import { IFilter } from '../paymentApi/payment.api.types'
 import { IStreet } from '../streetApi/street.api.types'
 

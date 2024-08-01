@@ -12,48 +12,48 @@ export function getCreditDebitPipeline(options) {
 
 export function getMaxInvoiceNumber() {
   return [
-      {
-        $group: {
-          _id: null,
-          maxNumber: { $max: '$invoiceNumber' },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-        },
-      },
-    ]
-}
-
-export function getInvoicesTotalPipeline(options){
-  return [
-    { $match: options },
-    {
-      $unwind: "$invoice"
-    },
-    {
-      $addFields: {
-        "invoice.sum": { $toDouble: "$invoice.sum" }
-      }
-    },
     {
       $group: {
-        _id: "$invoice.type",
-        totalSum: { $sum: "$invoice.sum" }
-      }
+        _id: null,
+        maxNumber: { $max: '$invoiceNumber' },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+      },
     },
   ]
 }
 
-export function getTotalGeneralSumPipeline(options){
+export function getInvoicesTotalPipeline(options) {
+  return [
+    { $match: options },
+    {
+      $unwind: '$invoice',
+    },
+    {
+      $addFields: {
+        'invoice.sum': { $toDouble: '$invoice.sum' },
+      },
+    },
+    {
+      $group: {
+        _id: '$invoice.type',
+        totalSum: { $sum: '$invoice.sum' },
+      },
+    },
+  ]
+}
+
+export function getTotalGeneralSumPipeline(options) {
   return [
     { $match: options },
     {
       $group: {
-        _id: "generalSum",
-        totalSum: { $sum: "$generalSum" }
-      }
-    }
+        _id: 'generalSum',
+        totalSum: { $sum: '$generalSum' },
+      },
+    },
   ]
 }

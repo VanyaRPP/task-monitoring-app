@@ -1,11 +1,11 @@
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
-import InvoicesHeader from '@common/components/Tables/PaymentsBulk/Header'
-import InvoicesTable from '@common/components/Tables/PaymentsBulk/Table'
-import TableCard from '@common/components/UI/TableCard'
-import useService from '@common/modules/hooks/useService'
-import { FormInstance, Form } from 'antd'
+import InvoicesHeader from '@components/Tables/PaymentsBulk/Header'
+import InvoicesTable from '@components/Tables/PaymentsBulk/Table'
+import TableCard from '@components/UI/TableCard'
+import useService from '@modules/hooks/useService'
+import { Form, FormInstance } from 'antd'
 import { createContext, useContext } from 'react'
 
 export const InvoicesPaymentContext = createContext(

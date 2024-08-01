@@ -1,4 +1,4 @@
-import { IAddress } from '@common/modules/models/Task'
+import { IAddress } from '@modules/models/Task'
 
 export interface IProfileData {
   email: string

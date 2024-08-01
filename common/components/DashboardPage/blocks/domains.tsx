@@ -1,7 +1,7 @@
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import DomainsHeader from '@common/components/Tables/Domains/Header'
-import DomainsTable from '@common/components/Tables/Domains/Table'
-import TableCard from '@common/components/UI/TableCard'
+import DomainsHeader from '@components/Tables/Domains/Header'
+import DomainsTable from '@components/Tables/Domains/Table'
+import TableCard from '@components/UI/TableCard'
 import { useState } from 'react'
 
 export interface Props {

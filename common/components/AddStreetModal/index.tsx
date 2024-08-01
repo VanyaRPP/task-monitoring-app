@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Form, message } from 'antd'
-import React, { FC, useEffect } from 'react'
-import { IStreet } from '@common/modules/models/Street'
 import { useAddStreetMutation } from '@common/api/streetApi/street.api'
+import Modal from '@components/UI/ModalWindow'
+import { IStreet } from '@modules/models/Street'
+import { Form, message } from 'antd'
+import { FC, useEffect } from 'react'
 import AddStreetForm from '../Forms/AddStreetForm'
-import Modal from '../UI/ModalWindow'
 
 interface Props {
   closeModal: VoidFunction

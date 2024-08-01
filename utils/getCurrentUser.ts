@@ -1,6 +1,6 @@
-import { getServerSession } from 'next-auth'
+import User from '@modules/models/User'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
-import User from '@common/modules/models/User'
+import { getServerSession } from 'next-auth'
 import { Roles } from './constants'
 import { isAdminCheck } from './helpers'
 

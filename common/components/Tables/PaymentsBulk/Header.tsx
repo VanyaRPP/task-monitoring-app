@@ -8,10 +8,10 @@ import {
 } from '@common/api/paymentApi/payment.api'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
-import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
-import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthServiceSelect'
-import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
-import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
+import { useInvoicesPaymentContext } from '@components/DashboardPage/blocks/paymentsBulk'
+import MonthServiceSelect from '@components/Forms/AddPaymentForm/MonthServiceSelect'
+import AddressesSelect from '@components/UI/Reusable/AddressesSelect'
+import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
 import { AppRoutes, Operations } from '@utils/constants'
 import {
   filterInvoiceObject,
@@ -113,10 +113,10 @@ function PopoverMonthService(serviceId: any) {
   // return (
   //   <ul>
   //     {services
-  //       ?.filter((service) => moment(service.date).month() === monthNumber)
+  //       ?.filter((service) => dayjs(service.date).month() === monthNumber)
   //       .map((service) => (
   //         <li key={service._id}>
-  //           {moment(service.date).format('DD MMMM YYYY')} -{' '}
+  //           {dayjs(service.date).format('DD MMMM YYYY')} -{' '}
   //           {service.description}
   //         </li>
   //       ))}

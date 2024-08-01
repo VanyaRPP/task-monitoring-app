@@ -1,10 +1,10 @@
-import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
-import { AppRoutes } from '../../utils/constants'
-import { unstable_getServerSession } from 'next-auth'
-import { authOptions } from '../api/auth/[...nextauth]'
+import StreetsBlock from '@components/DashboardPage/blocks/streets'
+import withAuthRedirect from '@components/HOC/withAuthRedirect'
+import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
 import { FC } from 'react'
-import StreetsBlock from '@common/components/DashboardPage/blocks/streets'
+import { authOptions } from '../api/auth/[...nextauth]'
 
 const Streets: FC = () => {
   return <StreetsBlock />
@@ -13,11 +13,7 @@ const Streets: FC = () => {
 export default withAuthRedirect(Streets)
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

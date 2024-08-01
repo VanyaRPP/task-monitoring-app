@@ -1,26 +1,20 @@
 import { UserOutlined } from '@ant-design/icons'
-import {
-  useGetAllUsersQuery,
-  useGetUserByIdQuery,
-} from '@common/api/userApi/user.api'
+import { IUser } from '@modules/models/User'
 import { AppRoutes } from '@utils/constants'
 import {
   Avatar,
   Button,
   Card,
+  Collapse,
   Divider,
   Drawer,
-  Image,
-  Rate,
-  Collapse,
-  List,
   Empty,
+  Image,
+  List,
+  Rate,
 } from 'antd'
 import Router from 'next/router'
 import { useState } from 'react'
-import { IFeedback, IUser } from '../../modules/models/User'
-import Feedback from '../FeedbacksCard/feedback'
-import RateStars from '../UI/RateStars'
 import DrawerFeedback from './drawerFeedback'
 import s from './style.module.scss'
 
