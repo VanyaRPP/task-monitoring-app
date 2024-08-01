@@ -1,10 +1,10 @@
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { Card, Col, Row } from 'antd'
-import React from 'react'
-import s from '../style.module.scss'
 import { Roles } from '@utils/constants'
+import { Card, Col, Row } from 'antd'
+import React, { useCallback } from 'react'
+import s from '../style.module.scss'
 
 const MyDomainsCard: React.FC = () => {
   const { data: user } = useGetCurrentUserQuery()
@@ -13,17 +13,20 @@ const MyDomainsCard: React.FC = () => {
     {},
     { skip: isGlobalAdmin }
   )
-  const { data: realEstates } = useGetAllRealEstateQuery(
+  const { data: { data: companies } = { data: [] } } = useGetAllRealEstateQuery(
     {},
     { skip: isGlobalAdmin }
   )
-  const companies = realEstates?.data || []
 
-  const getDomainCompanies = (domainId) =>
-    companies
-      .filter((companyItem) => companyItem.domain._id === domainId)
-      .map((item) => item.companyName)
-      .join(', ')
+  const getDomainCompanies = useCallback(
+    (domainId: string) => {
+      return companies
+        .filter((company) => company.domain?._id === domainId)
+        .map(({ companyName }) => companyName)
+        .join(', ')
+    },
+    [companies]
+  )
 
   return (
     <Row gutter={16}>
@@ -44,8 +47,7 @@ const MyDomainsCard: React.FC = () => {
                 <strong>Опис:</strong> {item.description}
               </p>
               <p>
-                <strong>Компанії:</strong>
-                {getDomainCompanies(item._id)}
+                <strong>Компанії:</strong> {getDomainCompanies(item._id)}
               </p>
             </Card>
           </div>

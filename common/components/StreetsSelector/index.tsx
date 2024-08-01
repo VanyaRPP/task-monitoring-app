@@ -1,4 +1,3 @@
-import React from 'react'
 import { Select } from 'antd'
 
 import s from '@components/StreetsSelector/style.module.scss'
@@ -14,6 +13,7 @@ const StreetsSelector = ({ filters, setFilters, streets }) => {
   return (
     <div className={s.streetDiv}>
       <Select
+        dropdownStyle={{ width: 'max-content' }}
         className={s.streetSelector}
         placeholder="Виберіть вулицю"
         onChange={(value) => {

@@ -19,6 +19,7 @@ export default function InvoiceNumber({ form, paymentActions }) {
   return (
     <Form.Item name="invoiceNumber" label="№ інвойса">
       <InputNumber
+        style={{ minWidth: '166px' }}
         placeholder="Вкажіть № інвойса"
         disabled={paymentActions?.preview}
       />

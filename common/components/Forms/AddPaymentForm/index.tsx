@@ -66,7 +66,7 @@ function AddPaymentForm({ paymentActions }) {
             label="Сума"
             rules={validateField('paymentPrice')}
           >
-            <InputNumber placeholder="Вкажіть суму" disabled={preview} />
+            <InputNumber style={{ minWidth: '166px' }} placeholder="Вкажіть суму" disabled={preview} />
           </Form.Item>
           <Form.Item
             name="description"
