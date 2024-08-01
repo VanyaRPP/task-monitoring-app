@@ -5,15 +5,15 @@ import {
   QuestionCircleOutlined,
 } from '@ant-design/icons'
 import { Alert, Button, Popconfirm, Table, Tag, Tooltip, message } from 'antd'
-import { useRouter } from 'next/router'
 import { ColumnType } from 'antd/lib/table'
+import { useRouter } from 'next/router'
 
 import {
   useDeleteDomainMutation,
   useGetDomainsQuery,
 } from '@common/api/domainApi/domain.api'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import StreetsBlock from '@common/components/DashboardPage/blocks/streets'
+import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import { AppRoutes } from '@utils/constants'
 
 export interface Props {

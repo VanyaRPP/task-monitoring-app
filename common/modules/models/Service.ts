@@ -1,11 +1,10 @@
-import { Moment } from 'moment'
 import mongoose, { ObjectId, Schema } from 'mongoose'
 
 export interface IServiceModel {
   domain: ObjectId
   street: ObjectId
   rentPrice: number
-  date: Moment
+  date: Date
   electricityPrice: number
   waterPrice: number
   waterPriceTotal: number

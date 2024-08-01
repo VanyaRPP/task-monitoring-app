@@ -3,12 +3,12 @@ import {
   useEditServiceMutation,
 } from '@common/api/serviceApi/service.api'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import Modal from '@components/UI/ModalWindow'
 import { Form, message } from 'antd'
 import dayjs from 'dayjs'
 import { FC } from 'react'
 import AddServiceForm from '../Forms/AddServiceForm'
 import PreviewServiceForm from '../Forms/PreviewServiceForm'
-import Modal from '../UI/ModalWindow'
 
 interface Props {
   closeModal: VoidFunction
@@ -84,7 +84,7 @@ const AddServiceModal: FC<Props> = ({
         closeModal()
       }}
       okText={edit ? 'Зберегти' : !preview && 'Додати'}
-      okButtonProps={{ style: { display: preview ? 'none' : 'inline' } }}
+      okButtonProps={{ style: { ...(preview && { display: 'none' }) } }}
       cancelText={preview ? 'Закрити' : 'Відміна'}
       confirmLoading={isAddingLoading || isEditingLoading}
     >

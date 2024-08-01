@@ -1,4 +1,5 @@
-import { RangePickerProps } from 'antd/lib/date-picker'
+import { toFirstUpperCase } from '@utils/helpers'
+import { DatePickerProps } from 'antd'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
@@ -15,7 +16,7 @@ export const isDeadlineExpired = (deadline: string): boolean =>
 export const dateToPick = (deadline: string): boolean =>
   dayjs().isAfter(dayjs(deadline))
 
-export const disabledDate: RangePickerProps['disabledDate'] = (current) => {
+export const disabledDate: DatePickerProps['disabledDate'] = (current) => {
   return current && current < dayjs().startOf('day')
 }
 
@@ -32,4 +33,8 @@ export const getPreviousMonth = (date?: string) => {
   const month = currentInvoiceDate.month() + 1
   const year = currentInvoiceDate.year()
   return { month, year }
+}
+
+export const getFormattedDate = (date: Date, format = 'MMMM'): string => {
+  return toFirstUpperCase(dayjs(date).format(format))
 }

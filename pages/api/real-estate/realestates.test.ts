@@ -116,10 +116,10 @@ describe('RealEstate API - GET', () => {
     expect(response.status).toHaveBeenCalledWith(200)
     const received = parseReceived(response.data)
     const expected = realEstates.filter(
-        (company) =>
-            company.domain === domains[3]._id.toString() &&
-            company.street === streets[3]._id.toString()
-        )
+      (company) =>
+        company.domain === domains[3]._id.toString() &&
+        company.street === streets[3]._id.toString()
+    )
 
     expect(received).toEqual(expected)
   })

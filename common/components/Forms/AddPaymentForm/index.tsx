@@ -1,12 +1,12 @@
+import { validateField } from '@assets/features/validators'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
-import { validateField } from '@common/assets/features/validators'
-import { usePaymentContext } from '@common/components/AddPaymentModal'
-import { InvoiceType } from '@common/components/Tables/EditInvoiceTable'
-import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
-import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
-import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
+import { usePaymentContext } from '@components/AddPaymentModal'
+import { InvoiceType } from '@components/Tables/EditInvoiceTable'
+import AddressesSelect from '@components/UI/Reusable/AddressesSelect'
+import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
+import PaymentTypeSelect from '@components/UI/Reusable/PaymentTypeSelect'
 import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { Form, Input, InputNumber } from 'antd'
@@ -66,7 +66,7 @@ function AddPaymentForm({ paymentActions }) {
             label="Сума"
             rules={validateField('paymentPrice')}
           >
-            <InputNumber placeholder="Вкажіть суму" disabled={preview} />
+            <InputNumber style={{ minWidth: '166px' }} placeholder="Вкажіть суму" disabled={preview} />
           </Form.Item>
           <Form.Item
             name="description"

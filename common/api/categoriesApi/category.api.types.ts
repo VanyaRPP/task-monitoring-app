@@ -1,5 +1,5 @@
-import { ICategory } from 'common/modules/models/Category'
-export type { ICategory } from 'common/modules/models/Category'
+import { ICategory } from '@modules/models/Category'
+export type { ICategory } from '@modules/models/Category'
 
 export interface AllCategoriesQuery {
   success: boolean

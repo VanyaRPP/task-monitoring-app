@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import Notification from '@common/modules/models/Notification'
+import Notification from '@modules/models/Notification'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from '../api.config'
 
