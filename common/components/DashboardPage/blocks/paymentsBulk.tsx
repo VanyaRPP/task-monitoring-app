@@ -1,10 +1,11 @@
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import InvoicesHeader from '@common/components/Tables/PaymentsBulk/Header'
 import InvoicesTable from '@common/components/Tables/PaymentsBulk/Table'
 import TableCard from '@common/components/UI/TableCard'
-import useService from '@common/modules/hooks/useService'
 import { Form, FormInstance } from 'antd'
 import { createContext, useContext } from 'react'
 
@@ -24,29 +25,36 @@ export const useInvoicesPaymentContext = () =>
 const PaymentBulkBlock: React.FC = () => {
   const [form] = Form.useForm()
 
-  const domainId = Form.useWatch('domain', form)
-  const streetId = Form.useWatch('street', form)
-  const serviceId = Form.useWatch('monthService', form)
+  const domainId: string | undefined = Form.useWatch('domain', form)
+  const streetId: string | undefined = Form.useWatch('street', form)
+  const serviceId: string | undefined = Form.useWatch('monthService', form)
+
+  const { data: { 0: domain } = [null], isLoading: isDomainLoading } =
+    useGetDomainsQuery({ domainId }, { skip: !domainId })
 
   const {
     data: { data: companies } = { data: [] },
     isLoading: isCompaniesLoading,
-    isError,
+    isError: isCompaniesError,
   } = useGetAllRealEstateQuery(
     { domainId, streetId },
     { skip: !domainId || !streetId }
   )
 
-  const { service, isLoading: isServiceLoading } = useService({ serviceId })
+  const {
+    data: { data: { 0: service } } = { data: [null] },
+    isLoading: isServiceLoading,
+    isError: isServiceError,
+  } = useGetAllServicesQuery({ serviceId, limit: 1 }, { skip: !serviceId })
 
   return (
     <InvoicesPaymentContext.Provider
       value={{
         form,
-        companies,
-        service,
+        companies: domainId && streetId ? companies : [],
+        service: serviceId === service?._id ? service : undefined,
         isLoading: isCompaniesLoading || isServiceLoading,
-        isError,
+        isError: isCompaniesError || isServiceError,
       }}
     >
       <Form form={form} layout="vertical">

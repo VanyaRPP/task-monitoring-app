@@ -1,28 +1,29 @@
 import { Alert, Form, Table } from 'antd'
-import { useEffect } from 'react'
 
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { getDefaultColumns } from '@common/components/Tables/PaymentsBulk/column.config'
 import { AppRoutes } from '@utils/constants'
 import { useRouter } from 'next/router'
+import { useEffect } from 'react'
 
 const InvoicesTable: React.FC = () => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.PAYMENT_BULK
 
-  const { form, companies, service, isLoading, isError } =
-    useInvoicesPaymentContext()
+  const { form, companies, isLoading, isError } = useInvoicesPaymentContext()
 
   useEffect(() => {
-    if (service) {
-      form.setFieldsValue({ companies })
-    }
-  }, [form, companies, service])
+    form.setFieldsValue({
+      payments: companies?.map((company) => {
+        return { company }
+      }),
+    })
+  }, [form, companies])
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
   return (
-    <Form.List name="companies">
+    <Form.List name="payments">
       {(fields, { remove }) => (
         <Table
           rowKey="name"
