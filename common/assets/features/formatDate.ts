@@ -26,6 +26,8 @@ export const dateToDayYearMonthFormat = (date: Date): string =>
 export const dateToMonthYear = (date: Date): string =>
   dayjs(date).format('MMMM YYYY')
 
+export const dateToMonth = (date: Date): string => dayjs(date).format('MMMM')
+
 export const getPreviousMonth = (date?: string) => {
   const currentInvoiceDate = dayjs(date).subtract(1, 'month')
   const month = currentInvoiceDate.month() + 1

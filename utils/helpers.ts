@@ -527,3 +527,17 @@ export const isEqual = (a: any, b: any): boolean => {
 
   return false
 }
+
+/**
+ * Generates a timestamp string in the format HH:MM:SS.mmm.
+ *
+ * @param {Date} [date=new Date()] - The date object to format. Defaults to the current date and time if not provided.
+ * @returns {string} The formatted timestamp string.
+ */
+export const toTimestamp = (date: Date = new Date()): string => {
+  const HH = date.getHours().toString().padStart(2, '0')
+  const MM = date.getMinutes().toString().padStart(2, '0')
+  const SS = date.getSeconds().toString().padStart(2, '0')
+  const mmm = date.getMilliseconds().toString().padStart(3, '0')
+  return `${HH}:${MM}:${SS}.${mmm}`
+}
