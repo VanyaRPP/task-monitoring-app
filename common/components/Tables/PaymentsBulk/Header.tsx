@@ -1,4 +1,4 @@
-import { QuestionCircleOutlined, SelectOutlined } from '@ant-design/icons'
+import { SelectOutlined } from '@ant-design/icons'
 import {
   useAddPaymentMutation,
   useGetPaymentNumberQuery,
@@ -10,7 +10,7 @@ import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import { AppRoutes, Operations } from '@utils/constants'
 import { getPaymentProviderAndReciever, toRoundFixed } from '@utils/helpers'
-import { Button, Form, message, Popover } from 'antd'
+import { Button, message } from 'antd'
 import { useRouter } from 'next/router'
 
 const InvoicesHeader = () => {
@@ -27,6 +27,17 @@ const InvoicesHeader = () => {
         companies?.find(({ _id }) => payment.company?._id === _id)
       )
 
+      const invoice = Object.values(payment.invoice || {}).filter(
+        ({ sum }) => sum
+      )
+
+      const generalSum = invoice.reduce(
+        (acc: number, invoice: IPaymentField) => {
+          return acc + (+invoice.sum || 0)
+        },
+        0
+      )
+
       return {
         invoiceNumber: newInvoiceNumber + index,
         type: Operations.Debit,
@@ -36,15 +47,10 @@ const InvoicesHeader = () => {
         monthService: service?._id,
         invoiceCreationDate: new Date(),
         description: '',
-        generalSum: +toRoundFixed(
-          Object.values(payment.invoice || {}).reduce(
-            (acc: number, invoice: IPaymentField) => acc + (+invoice.sum || 0),
-            0
-          )
-        ),
+        generalSum: +toRoundFixed(generalSum),
         provider,
         reciever,
-        invoice: Object.values(payment.invoice || {}),
+        invoice,
       }
     })
 
@@ -96,21 +102,21 @@ const InvoicesHeader = () => {
 function MonthServiceGeneralInfo() {
   const { form } = useInvoicesPaymentContext()
 
-  const serviceId = Form.useWatch('monthService', form)
+  // const serviceId = Form.useWatch('monthService', form)
 
   return (
     <span style={{ display: 'flex', alignItems: 'center' }}>
       <div style={{ minWidth: '120px' }}>
         <MonthServiceSelect form={form} />
       </div>
-      {serviceId && (
+      {/* {serviceId && (
         <Popover
-          // content={<PopoverMonthService serviceId={serviceId} />}
+          content={<PopoverMonthService serviceId={serviceId} />}
           title="Послуги за місяць"
         >
           <QuestionCircleOutlined style={{ marginLeft: 16 }} />
         </Popover>
-      )}
+      )} */}
     </span>
   )
 }
