@@ -191,35 +191,29 @@ const usePrevPayment = (name: number): IExtendedPayment => {
     ['payments', name, 'company', '_id'],
     form
   )
-  const {
-    data: { data: { 0: prevService } = { data: [null] } } = {
-      data: { 0: null },
-    },
-  } = useGetAllServicesQuery(
-    {
-      streetId: service?.street?._id,
-      domainId: service?.domain?._id,
-      month: dayjs(service?.date).month() - 1,
-      year: dayjs(service?.date).year(),
-      limit: 1,
-    },
-    { skip: !service }
-  )
+  const { data: { data: { 0: prevService } } = { data: [null] } } =
+    useGetAllServicesQuery(
+      {
+        streetId: service?.street?._id,
+        domainId: service?.domain?._id,
+        month: dayjs(service?.date).month() - 1,
+        year: dayjs(service?.date).year(),
+        limit: 1,
+      },
+      { skip: !service }
+    )
 
-  const {
-    data: { data: { 0: prevPayment } = { data: [null] } } = {
-      data: { 0: null },
-    },
-  } = useGetAllPaymentsQuery(
-    {
-      companyIds: [companyId],
-      domainIds: [service?.domain?._id],
-      streetIds: [service?.street?._id],
-      serviceIds: [prevService?._id],
-      limit: 1,
-    },
-    { skip: !prevService }
-  )
+  const { data: { data: { 0: prevPayment } } = { data: [null] } } =
+    useGetAllPaymentsQuery(
+      {
+        companyIds: [companyId],
+        domainIds: [service?.domain?._id],
+        streetIds: [service?.street?._id],
+        serviceIds: [prevService?._id],
+        limit: 1,
+      },
+      { skip: !prevService }
+    )
 
   return prevPayment
 }
