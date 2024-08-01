@@ -5,7 +5,6 @@ import {
 } from '@common/api/userApi/user.api'
 import { IComment } from '@modules/models/Task'
 import classNames from 'classnames'
-import moment from 'moment'
 import { useSession } from 'next-auth/react'
 import UserLink from '../UserLink'
 import s from './style.module.scss'
@@ -30,7 +29,7 @@ const Comment: React.FC<{ comment: IComment; taskId: string }> = ({
         author={user ? <UserLink user={user} /> : 'Власника не знайдено'}
         avatar={user?.image || undefined}
         content={<p className={s.Description}>{comment?.text}</p>}
-        datetime={moment(comment?.datetime).fromNow()}
+        // datetime={dayjs(comment?.datetime).fromNow()}
       />
     </>
   )

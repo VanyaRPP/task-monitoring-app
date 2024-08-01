@@ -1,3 +1,4 @@
+import { toFirstUpperCase } from '@utils/helpers'
 import { DatePickerProps } from 'antd'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
@@ -30,4 +31,8 @@ export const getPreviousMonth = (date?: string) => {
   const month = currentInvoiceDate.month() + 1
   const year = currentInvoiceDate.year()
   return { month, year }
+}
+
+export const getFormattedDate = (date: Date, format = 'MMMM'): string => {
+  return toFirstUpperCase(dayjs(date).format(format))
 }

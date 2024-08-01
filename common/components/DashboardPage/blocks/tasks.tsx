@@ -4,7 +4,7 @@ import StatusTag from '@components/UI/StatusTag'
 import TableCard from '@components/UI/TableCard'
 import { AppRoutes, TaskStatuses } from '@utils/constants'
 import { Button, Table } from 'antd'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { useSession } from 'next-auth/react'
 import Router, { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
@@ -67,7 +67,7 @@ const Tasks = () => {
       width: '20%',
       ellipsis: true,
       sorter: (a, b) => Date.parse(a?.deadline) - Date.parse(b?.deadline),
-      render: (date) => moment(date).format('DD-MM hh:mm'),
+      render: (date) => dayjs(date).format('DD-MM hh:mm'),
     },
     {
       title: 'Категорія',

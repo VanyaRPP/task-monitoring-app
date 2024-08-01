@@ -2,7 +2,7 @@
 // @ts-nocheck
 import Task, { ITask } from '@modules/models/Task'
 import { TaskStatuses } from '@utils/constants'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start from '../api.config'
 
@@ -21,7 +21,7 @@ export default async function handler(
           task?.status !== TaskStatuses.ARCHIVED
         ) {
           if (
-            moment(task?.deadline).isBefore(Date.now()) &&
+            dayjs(task?.deadline).isBefore(Date.now()) &&
             task?.status !== TaskStatuses.EXPIRED
           ) {
             await Task.findOneAndUpdate(
@@ -31,7 +31,7 @@ export default async function handler(
               }
             )
           }
-          if (moment(task?.deadline).add(3, 'days').isBefore(Date.now())) {
+          if (dayjs(task?.deadline).add(3, 'days').isBefore(Date.now())) {
             await Task.findOneAndUpdate(
               { _id: task._id },
               {

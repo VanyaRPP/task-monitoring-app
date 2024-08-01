@@ -201,7 +201,6 @@ const AddPaymentModal: FC<Props> = ({
             description: payment?.description,
             generalSum: payment?.generalSum,
             invoiceNumber: payment?.invoiceNumber,
-            // TODO: new Date() instead of moment() - now cause "date.clone is not a function"
             invoiceCreationDate: dayjs(payment?.invoiceCreationDate),
             operation: payment?.type || Operations.Credit,
           }}

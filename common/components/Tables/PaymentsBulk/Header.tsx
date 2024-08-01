@@ -113,10 +113,10 @@ function PopoverMonthService(serviceId: any) {
   // return (
   //   <ul>
   //     {services
-  //       ?.filter((service) => moment(service.date).month() === monthNumber)
+  //       ?.filter((service) => dayjs(service.date).month() === monthNumber)
   //       .map((service) => (
   //         <li key={service._id}>
-  //           {moment(service.date).format('DD MMMM YYYY')} -{' '}
+  //           {dayjs(service.date).format('DD MMMM YYYY')} -{' '}
   //           {service.description}
   //         </li>
   //       ))}

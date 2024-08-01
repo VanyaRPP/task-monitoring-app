@@ -1,6 +1,6 @@
+import { getFormattedDate } from '@assets/features/formatDate'
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { usePaymentContext } from '@components/AddPaymentModal'
-import { getFormattedDate } from '@utils/helpers'
 import s from './style.module.scss'
 
 const Maintenance: React.FC<{

@@ -2,8 +2,8 @@ import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 import User, { IUser } from '@modules/models/User'
 import { FormInstance } from 'antd'
 import Big from 'big.js'
-import moment from 'moment'
-import 'moment/locale/uk'
+import dayjs from 'dayjs'
+import 'dayjs/locale/uk'
 import mongoose, { ObjectId } from 'mongoose'
 import { Roles, ServiceType } from './constants'
 import {
@@ -13,8 +13,9 @@ import {
 } from './pipelines'
 import { PaymentOptions } from './types'
 
-export const toFirstUpperCase = (text: string) =>
-  text[0].toUpperCase() + text.slice(1)
+export const toFirstUpperCase = (text: string) => {
+  return text ? text[0].toUpperCase() + text.slice(1) : ''
+}
 
 export const getCount = (tasks: any, name: string) => {
   return tasks?.filter((task) => task?.category == name)
@@ -229,12 +230,6 @@ export const renderCurrency = (number: any): string => {
   }
 }
 
-export const getFormattedDate = (data: Date, format = 'MMMM'): string => {
-  if (data) {
-    return toFirstUpperCase(moment(data).format(format))
-  }
-}
-
 export const getPaymentProviderAndReciever = (company) => {
   const provider: IProvider = company && {
     description: company?.domain?.description || '',
@@ -250,7 +245,7 @@ export const getPaymentProviderAndReciever = (company) => {
 
 export const importedPaymentDateToISOStringDate = (date) => {
   return new Date(
-    moment(date, 'DD.MM.YYYY', true).format('YYYY-MM-DD')
+    dayjs(date, 'DD.MM.YYYY', true).format('YYYY-MM-DD')
   ).toISOString()
 }
 

@@ -11,7 +11,7 @@ import { InfoWindow, Marker, useJsApiLoader } from '@react-google-maps/api'
 import { getFormattedAddress } from '@utils/helpers'
 import { Avatar, Button, Card } from 'antd'
 import classNames from 'classnames'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
@@ -64,8 +64,8 @@ const TaskCard = ({ taskId, task }) => {
 
   const url = `https://maps.google.com/?q=${lat},${lng}`
   const [activeMarker, setActiveMarker] = useState(null)
-  const taskDeadline = moment(task?.deadline)
-  const currentDate = moment(new Date())
+  const taskDeadline = dayjs(task?.deadline)
+  const currentDate = dayjs(new Date())
   const differ = taskDeadline.diff(currentDate, 'days')
 
   return (

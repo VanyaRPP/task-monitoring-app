@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import Notification, { INotification } from '@modules/models/Notification'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start from '../api.config'
 
@@ -14,8 +14,8 @@ export default async function handler(
   try {
     const notifications = await Notification.find({})
     notifications.map(async (notification: INotification) => {
-      const dateOfCreating = moment(notification.timestamp)
-      const currentDay = moment(new Date())
+      const dateOfCreating = dayjs(notification.timestamp)
+      const currentDay = dayjs(new Date())
       if (dateOfCreating.add(2, 'days').isAfter(currentDay)) {
         await Notification.findOneAndRemove({ _id: notification._id })
       }
