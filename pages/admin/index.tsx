@@ -1,11 +1,11 @@
+import AdminPageCategories from '@components/AdminIU/AdminPageCategories'
+import AdminPageClients from '@components/AdminIU/AdminPageClients'
+import AdminPageTasks from '@components/AdminIU/AdminPageTasks'
+import { Roles } from '@utils/constants'
 import { Tabs } from 'antd'
-import { unstable_getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
-import AdminPageCategories from 'common/components/AdminIU/AdminPageCategories'
-import AdminPageClients from 'common/components/AdminIU/AdminPageClients'
-import AdminPageTasks from 'common/components/AdminIU/AdminPageTasks'
 import s from './style.module.scss'
-import { Roles } from '../../utils/constants'
 
 const { TabPane } = Tabs
 
@@ -27,11 +27,7 @@ const AdminPage: React.FC = () => {
 export default AdminPage
 
 export async function getServerSideProps(context) {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/email/${session?.user?.email}`

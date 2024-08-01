@@ -1,6 +1,6 @@
-import { getCurrentUser } from '@utils/getCurrentUser'
-import Street from '@common/modules/models/Street'
+import Street from '@modules/models/Street'
 import handler from '@pages/api/streets/[id]'
+import { getCurrentUser } from '@utils/getCurrentUser'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 
 jest.mock('@pages/api/api.config', () => jest.fn())

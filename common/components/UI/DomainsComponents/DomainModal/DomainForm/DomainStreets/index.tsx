@@ -1,7 +1,7 @@
-import React from 'react'
-import { validateField } from '@common/assets/features/validators'
-import { Select, Form } from 'antd'
+import { validateField } from '@assets/features/validators'
 import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
+import { Form, Select } from 'antd'
+import React from 'react'
 
 interface DomainStreetsProps {
   disabled?: boolean

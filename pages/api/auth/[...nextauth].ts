@@ -1,16 +1,9 @@
+import clientPromise from '@common/lib/mongodb'
+import { MongoDBAdapter } from '@next-auth/mongodb-adapter'
+import jwt from 'jsonwebtoken'
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
-import FacebookProvider from 'next-auth/providers/facebook'
-import EmailProvider from 'next-auth/providers/email'
-import CredentialsProvider from 'next-auth/providers/credentials'
-import { MongoDBAdapter } from '@next-auth/mongodb-adapter'
-import jwt from 'jsonwebtoken'
-import bcrypt from 'bcrypt'
-import nodemailer from 'nodemailer'
-import clientPromise from '@common/lib/mongodb'
-import User from '@common/modules/models/User'
-import { ICredentials } from '@common/lib/credentials.types'
 
 function html({ url, host, email }) {
   const escapedEmail = `${email.replace(/\./g, '&#8203;.')}`
@@ -28,7 +21,6 @@ function html({ url, host, email }) {
 function text({ url, host }) {
   return `Login to ${host}\n${url}\n\n`
 }
-
 
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise),

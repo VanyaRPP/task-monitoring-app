@@ -7,10 +7,10 @@ import {
   useDeleteStreetMutation,
   useGetAllStreetsQuery,
 } from '@common/api/streetApi/street.api'
-import { AppRoutes } from '@utils/constants'
-import RealEstateBlock from '@common/components/DashboardPage/blocks/realEstates'
 import { IStreet } from '@common/api/streetApi/street.api.types'
-import AddStreetModal from '@common/components/AddStreetModal'
+import AddStreetModal from '@components/AddStreetModal'
+import RealEstateBlock from '@components/DashboardPage/blocks/realEstates'
+import { AppRoutes } from '@utils/constants'
 import { useState } from 'react'
 
 export interface Props {

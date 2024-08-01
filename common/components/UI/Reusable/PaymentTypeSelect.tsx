@@ -1,6 +1,6 @@
-import { Form, Select } from 'antd'
-import { validateField } from '@common/assets/features/validators'
+import { validateField } from '@assets/features/validators'
 import { Operations } from '@utils/constants'
+import { Form, Select } from 'antd'
 
 const PaymentTypeSelect = ({ edit }: { edit?: boolean }) => {
   return (

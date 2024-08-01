@@ -1,17 +1,22 @@
-const dotenv = require('dotenv');
-dotenv.config();
-module.exports = {
+import type { Config } from 'jest'
+import { pathsToModuleNameMapper } from 'ts-jest'
+import { compilerOptions } from './tsconfig.json'
+
+const config: Config = {
   testMatch: ['**/*.test.ts'],
-  testPathIgnorePatterns: ['/node_modules/'], // Ignore the node_modules directory
+  testPathIgnorePatterns: ['/node_modules/', '/.next/'],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts?$': [
+      'ts-jest',
+      {
+        tsconfig: 'tsconfig.json',
+      },
+    ],
   },
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-    '^@utils/(.*)$': '<rootDir>/utils/$1',
-    '^@pages/(.*)$': '<rootDir>/pages/$1',
-    '^@common/(.*)$': '<rootDir>/common/$1',
-  },
-  moduleFileExtensions: ['ts', 'js'], //  file extensions
+  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
+    prefix: '<rootDir>/',
+  }),
+  moduleFileExtensions: ['ts', 'js'],
 }
-export {}
+
+export default config

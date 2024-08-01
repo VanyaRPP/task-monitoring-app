@@ -1,11 +1,11 @@
+import { ICreateTask, ITask, ITaskExecutors } from '@modules/models/Task'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { ObjectId } from 'mongoose'
-import { ICreateTask, ITask, ITaskExecutors } from 'common/modules/models/Task'
 import {
   AllTasksQuery,
-  TaskQuery,
-  IDeleteQuery,
   IAcceptQuery,
+  IDeleteQuery,
+  TaskQuery,
 } from './task.api.types'
 
 export const taskApi = createApi({

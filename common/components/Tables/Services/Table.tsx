@@ -4,19 +4,19 @@ import {
   EyeOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons'
-import { Alert, Popconfirm, Table, Tooltip, message, Button } from 'antd'
+import { Alert, Button, Popconfirm, Table, Tooltip, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 
+import { getFormattedDate } from '@assets/features/formatDate'
 import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import {
-  IService,
   IGetServiceResponse,
+  IService,
 } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
-import { getFormattedDate, renderCurrency } from '@utils/helpers'
-import { IFilter } from '@common/api/paymentApi/payment.api.types'
+import { renderCurrency } from '@utils/helpers'
 interface Props {
   setServiceActions: React.Dispatch<
     React.SetStateAction<{

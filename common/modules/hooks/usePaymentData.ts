@@ -7,12 +7,12 @@ import {
 } from '@common/api/realestateApi/realestate.api.types'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { IService } from '@common/api/serviceApi/service.api.types'
-import useCompany from '@common/modules/hooks/useCompany'
-import useService from '@common/modules/hooks/useService'
-import { IDomain } from '@common/modules/models/Domain'
-import { IStreet } from '@common/modules/models/Street'
+import useCompany from '@modules/hooks/useCompany'
+import useService from '@modules/hooks/useService'
+import { IDomain } from '@modules/models/Domain'
+import { IStreet } from '@modules/models/Street'
 import { Form, FormInstance } from 'antd'
-import moment from 'moment'
+import dayjs from 'dayjs'
 
 export interface IUsePaymentDataProps {
   form: FormInstance
@@ -64,8 +64,8 @@ export const usePaymentFormData = (
       {
         streetId: service?.street._id || streetId,
         domainId: service?.domain._id || domainId,
-        month: moment(service?.date).month() - 1,
-        year: moment(service?.date).year(),
+        month: dayjs(service?.date).month() - 1,
+        year: dayjs(service?.date).year(),
         limit: 1,
       },
       { skip: !service && (!streetId || !domainId) }

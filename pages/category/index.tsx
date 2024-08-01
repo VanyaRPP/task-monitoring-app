@@ -1,13 +1,13 @@
-import { Empty, List } from 'antd'
-import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
-import { AppRoutes } from '../../utils/constants'
-import { unstable_getServerSession } from 'next-auth'
-import { authOptions } from '../api/auth/[...nextauth]'
+import { useGetAllCategoriesQuery } from '@common/api/categoriesApi/category.api'
+import { useGetAllTaskQuery } from '@common/api/taskApi/task.api'
+import withAuthRedirect from '@components/HOC/withAuthRedirect'
+import { AppRoutes } from '@utils/constants'
+import { getCount } from '@utils/helpers'
+import { List } from 'antd'
 import { GetServerSideProps } from 'next'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '../api/auth/[...nextauth]'
 import s from './style.module.scss'
-import { useGetAllCategoriesQuery } from '../../common/api/categoriesApi/category.api'
-import { useGetAllTaskQuery } from '../../common/api/taskApi/task.api'
-import { getCount } from '../../utils/helpers'
 
 const CategoriesPage: React.FC = () => {
   const { data: categoriesData } = useGetAllCategoriesQuery('')
@@ -38,11 +38,7 @@ const CategoriesPage: React.FC = () => {
 export default withAuthRedirect(CategoriesPage)
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await unstable_getServerSession(
-    context.req,
-    context.res,
-    authOptions
-  )
+  const session = await getServerSession(context.req, context.res, authOptions)
 
   if (!session) {
     return {

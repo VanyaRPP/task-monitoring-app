@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react'
-import Chart from '@common/components/Chart'
-import TableCard from '@common/components/UI/TableCard'
 import {
-  useGetDomainsQuery,
   useGetAreasQuery,
+  useGetDomainsQuery,
 } from '@common/api/domainApi/domain.api'
-import CompaniesAreaChartHeader from '@common/components/Tables/CompaniesAreaChart/Header'
+import Chart from '@components/Chart'
+import CompaniesAreaChartHeader from '@components/Tables/CompaniesAreaChart/Header'
+import TableCard from '@components/UI/TableCard'
+import React, { useEffect, useState } from 'react'
 
 const CompaniesAreaChart: React.FC = () => {
   const chartElementTitle = 'Частка площі'
