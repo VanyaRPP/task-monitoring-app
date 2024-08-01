@@ -19,14 +19,15 @@
     "types": ["node", "jest"],
     "baseUrl": ".",
     "paths": {
-      "@common/*": ["common/*"],
+      "@public/*": ["public/*"],
       "@utils/*": ["utils/*"],
       "@styles/*": ["styles/*"],
       "@pages/*": ["pages/*"],
       "@components/*": ["common/components/*"],
       "@assets/*": ["common/assets/*"],
       "@modules/*": ["common/modules/*"],
-      "@lib/*": ["common/lib/*"]
+      "@lib/*": ["common/lib/*"],
+      "@common/*": ["common/*"]
     }
   },
   "include": [
