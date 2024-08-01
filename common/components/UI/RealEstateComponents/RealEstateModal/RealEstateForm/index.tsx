@@ -11,12 +11,14 @@ interface Props {
   form: FormInstance<any>
   currentRealEstate?: IExtendedRealestate
   editable?: boolean
+  setIsValueChanged: (value: boolean) => void
 }
 
 const RealEstateForm: FC<Props> = ({
   form,
   currentRealEstate,
   editable = true,
+  setIsValueChanged,
 }) => {
   return (
     <Form
@@ -24,6 +26,7 @@ const RealEstateForm: FC<Props> = ({
       requiredMark={editable}
       layout="vertical"
       className={s.Form}
+      onValuesChange={() => setIsValueChanged(true)}
     >
       {currentRealEstate ? (
         <Form.Item name="domain" label="Надавач послуг">

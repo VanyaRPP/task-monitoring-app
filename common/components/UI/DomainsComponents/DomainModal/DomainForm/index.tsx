@@ -8,21 +8,23 @@ import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
 interface Props {
   form: FormInstance<any>
   editable?: boolean
+  setIsValueChanged: (value: boolean) => void
 }
 
-const DomainForm: FC<Props> = ({ form, editable = true }) => {
+const DomainForm: FC<Props> = ({
+  form,
+  editable = true,
+  setIsValueChanged,
+}) => {
   return (
     <Form
       form={form}
       requiredMark={editable}
       layout="vertical"
       className={s.Form}
+      onValuesChange={() => setIsValueChanged(true)}
     >
-      <Form.Item
-        name="name"
-        label="Назва"
-        rules={validateField('required')}
-      >
+      <Form.Item name="name" label="Назва" rules={validateField('required')}>
         <Input
           placeholder="Вкажіть значення"
           maxLength={256}

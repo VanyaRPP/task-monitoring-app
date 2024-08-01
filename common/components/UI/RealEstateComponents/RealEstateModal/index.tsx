@@ -4,7 +4,7 @@ import {
 } from '@common/api/realestateApi/realestate.api'
 import RealEstateForm from './RealEstateForm'
 import { Form, message } from 'antd'
-import React, { FC, useEffect } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import {
   IExtendedRealestate,
   IRealestate,
@@ -25,6 +25,7 @@ const RealEstateModal: FC<Props> = ({
   editable,
 }) => {
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
   const [addRealEstate] = useAddRealEstateMutation()
   const [editRealEstate] = useEditRealEstateMutation()
 
@@ -93,7 +94,7 @@ const RealEstateModal: FC<Props> = ({
       style={{ top: 20 }}
       title={'Компанії'}
       onOk={handleSubmit}
-      changesForm={() => form.isFieldsTouched()}
+      changed={() => isValueChanged}
       onCancel={closeModal}
       okText={currentRealEstate ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
@@ -104,6 +105,7 @@ const RealEstateModal: FC<Props> = ({
         form={form}
         currentRealEstate={currentRealEstate}
         editable={editable}
+        setIsValueChanged={setIsValueChanged}
       />
     </Modal>
   )
