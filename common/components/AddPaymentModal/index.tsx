@@ -53,6 +53,7 @@ const AddPaymentModal: FC<Props> = ({
   paymentActions,
 }) => {
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
 
   const { company, service, prevService, payment, prevPayment } =
     usePaymentFormData(form, paymentData)
@@ -167,7 +168,7 @@ const AddPaymentModal: FC<Props> = ({
       <Modal
         title={edit ? 'Редагування рахунку' : !preview && 'Додавання рахунку'}
         onOk={activeTabKey === '1' ? handleOk : handleSubmit}
-        changesForm={() => form.isFieldsTouched()}
+        changesForm={() => isValueChanged && form.isFieldsTouched()}
         onCancel={() => {
           form.resetFields()
           closeModal()
@@ -208,6 +209,7 @@ const AddPaymentModal: FC<Props> = ({
           form={form}
           layout="vertical"
           className={s.Form}
+          onValuesChange={() => setIsValueChanged(true)}
         >
           <Tabs
             activeKey={activeTabKey}
