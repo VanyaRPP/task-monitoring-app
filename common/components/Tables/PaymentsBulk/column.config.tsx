@@ -1,8 +1,5 @@
 import { CloseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
-import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { dateToMonth } from '@common/assets/features/formatDate'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { ServiceType } from '@utils/constants'
@@ -17,7 +14,6 @@ import {
   Tooltip,
   Typography,
 } from 'antd'
-import dayjs from 'dayjs'
 import { useEffect, useMemo } from 'react'
 
 export const getDefaultColumns = (
@@ -184,53 +180,25 @@ export const getDefaultColumns = (
   },
 ]
 
-const usePrevPayment = (name: number): IExtendedPayment => {
-  const { form, service } = useInvoicesPaymentContext()
-
-  const companyId: string | undefined = Form.useWatch(
-    ['payments', name, 'company', '_id'],
-    form
-  )
-  const { data: { data: { 0: prevService } } = { data: [null] } } =
-    useGetAllServicesQuery(
-      {
-        streetId: service?.street?._id,
-        domainId: service?.domain?._id,
-        month: dayjs(service?.date).month() - 1,
-        year: dayjs(service?.date).year(),
-        limit: 1,
-      },
-      { skip: !service }
-    )
-
-  const { data: { data: { 0: prevPayment } } = { data: [null] } } =
-    useGetAllPaymentsQuery(
-      {
-        companyIds: [companyId],
-        domainIds: [service?.domain?._id],
-        streetIds: [service?.street?._id],
-        serviceIds: [prevService?._id],
-        limit: 1,
-      },
-      { skip: !prevService }
-    )
-
-  return prevPayment
-}
-
 const useInflicionValues = (
   name: number
 ): {
   previousPlacingPrice: number
   inflicionAmount: number
 } => {
-  const { form, service } = useInvoicesPaymentContext()
+  const { form, service, prevPayments } = useInvoicesPaymentContext()
 
   const company: IRealestate | undefined = Form.useWatch(
     ['payments', name, 'company'],
     form
   )
-  const prevPayment = usePrevPayment(name)
+
+  const prevPayment = prevPayments.find(
+    // TODO: fix typing of IPayment and IExtendedPayment
+    // eslint-disable-next-line
+    // @ts-ignore
+    (payment) => payment.company?._id === company?._id
+  )
 
   const previousPlacingPrice = useMemo(() => {
     return (
