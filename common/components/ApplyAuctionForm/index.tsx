@@ -12,9 +12,14 @@ type PropsType = {
   isFormDisabled: boolean
   form: FormInstance
   // task: ITask
+  setIsValueChanged: (value: boolean) => void
 }
 
-const ApplyAuctionForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
+const ApplyAuctionForm: React.FC<PropsType> = ({
+  isFormDisabled,
+  form,
+  setIsValueChanged,
+}) => {
   const { Option } = Select
 
   const suffixSelector = (
@@ -31,6 +36,7 @@ const ApplyAuctionForm: React.FC<PropsType> = ({ isFormDisabled, form }) => {
       layout="vertical"
       name="form_in_modal"
       disabled={isFormDisabled}
+      onValuesChange={() => setIsValueChanged(true)}
     >
       <Form.Item
         name="price"

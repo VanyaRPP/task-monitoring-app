@@ -11,9 +11,16 @@ interface Props {
   isFormDisabled: boolean
   form: FormInstance
   task: ITask
+
+  setIsValueChanged: (value: boolean) => void
 }
 
-const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form, task }) => {
+const CompetitionForm: React.FC<Props> = ({
+  isFormDisabled,
+  form,
+  task,
+  setIsValueChanged,
+}) => {
   return (
     <Form
       form={form}
@@ -22,6 +29,7 @@ const CompetitionForm: React.FC<Props> = ({ isFormDisabled, form, task }) => {
       layout="vertical"
       name="form_in_modal"
       disabled={isFormDisabled}
+      onValuesChange={() => setIsValueChanged(true)}
     >
       <Form.Item
         normalize={allowOnlyNumbers}

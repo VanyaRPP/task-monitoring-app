@@ -6,11 +6,17 @@ import s from './style.module.scss'
 interface Props {
   form: FormInstance<any>
   editable?: boolean
+  setIsValueChanged: (value: boolean) => void
 }
 
-const AddStreetForm: FC<Props> = ({ form, editable }) => {
+const AddStreetForm: FC<Props> = ({ form, editable, setIsValueChanged }) => {
   return (
-    <Form form={form} layout="vertical" className={s.Form}>
+    <Form
+      form={form}
+      layout="vertical"
+      className={s.Form}
+      onValuesChange={() => setIsValueChanged(true)}
+    >
       <Form.Item
         required
         name="city"
