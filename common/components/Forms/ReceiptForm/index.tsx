@@ -44,7 +44,7 @@ const ReceiptForm: FC<Props> = ({
         <>
           <div className={s.providerInfo}>
             <div className={s.label}>Постачальник</div>
-            <pre>
+            <pre className={s.preLabel}>
               {newData?.provider?.description} <br />
               <br />
             </pre>
@@ -52,7 +52,7 @@ const ReceiptForm: FC<Props> = ({
 
           <div className={s.receiverInfo}>
             <div className={s.label}>Одержувач</div>
-            <pre>
+            <pre className={s.preLabel}>
               {newData?.reciever?.description} <br />
               {newData?.reciever?.companyName} <br />
               {newData?.reciever?.adminEmails?.map((email) => (
@@ -66,31 +66,28 @@ const ReceiptForm: FC<Props> = ({
 
         <div className={s.providerInvoice}>
           <div className={s.datecellTitle}>
-            INVOICE № INV-{newData.invoiceNumber}
+          РАХУНОК № {newData.invoiceNumber}
           </div>
           <div className={s.datecellDate}>
             Від &nbsp;
             {moment(newData?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
             &nbsp; року.
           </div>
-          <div className={s.datecell}>
-            Підлягає сплаті до &nbsp;
-            {moment(newData?.invoiceCreationDate)
-              .add(5, 'd')
-              .format('DD.MM.YYYY')}
-            &nbsp; року
-          </div>
         </div>
         <div className={s.tableSum}>
           <PaymentPricesTable preview />
         </div>
         <div className={s.payTable}>
-          <SumWithText data={newData} />
+          {/* <SumWithText data={newData} /> */}
           <div className={s.payFixed}>
             Загальна сума оплати:
             <div className={s.payBoldSum}>
               {(+newData?.generalSum || +newData?.debit).toFixed(2)} грн
             </div>
+          </div>
+
+          <div>
+            Призначення платежу: За послуги згідно рахунку
           </div>
 
           <div className={s.payFixed}>
