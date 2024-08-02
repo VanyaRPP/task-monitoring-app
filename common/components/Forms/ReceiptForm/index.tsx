@@ -1,8 +1,8 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import PaymentPricesTable from '@common/components/Forms/AddPaymentForm/PaymentPricesTable'
+import PaymentPricesTable from '@components/Forms/AddPaymentForm/PaymentPricesTable'
 import numberToTextNumber from '@utils/numberToText'
 import { Button } from 'antd'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import s from './style.module.scss'
@@ -70,8 +70,15 @@ const ReceiptForm: FC<Props> = ({
           </div>
           <div className={s.datecellDate}>
             Від &nbsp;
-            {moment(newData?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
+            {dayjs(newData?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
             &nbsp; року.
+          </div>
+          <div className={s.datecell}>
+            Підлягає сплаті до &nbsp;
+            {dayjs(newData?.invoiceCreationDate)
+              .add(5, 'd')
+              .format('DD.MM.YYYY')}
+            &nbsp; року
           </div>
         </div>
         <div className={s.tableSum}>

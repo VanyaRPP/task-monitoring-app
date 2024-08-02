@@ -1,4 +1,4 @@
-import { IUser } from './../../modules/models/User'
+import { IUser } from '@modules/models/User'
 import { ObjectId } from 'mongoose'
 
 export interface ICustomer {

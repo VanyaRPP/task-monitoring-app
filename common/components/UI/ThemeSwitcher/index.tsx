@@ -1,9 +1,9 @@
-import React from 'react'
-import { Switch } from 'antd'
-import { BulbOutlined, BulbFilled } from '@ant-design/icons'
-import useTheme from 'common/modules/hooks/useTheme'
-import s from './style.module.scss'
+import { BulbFilled, BulbOutlined } from '@ant-design/icons'
+import useTheme from '@modules/hooks/useTheme'
 import { COLOR_THEME } from '@utils/constants'
+import { Switch } from 'antd'
+import React from 'react'
+import s from './style.module.scss'
 
 const ThemeSwitcher: React.FC = () => {
   const [theme, setTheme] = useTheme()

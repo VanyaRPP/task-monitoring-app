@@ -3,12 +3,12 @@ import {
   useEditServiceMutation,
 } from '@common/api/serviceApi/service.api'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import Modal from '@components/UI/ModalWindow'
 import { Form, message } from 'antd'
 import dayjs from 'dayjs'
-import { FC } from 'react'
+import { FC, useState } from 'react'
 import AddServiceForm from '../Forms/AddServiceForm'
 import PreviewServiceForm from '../Forms/PreviewServiceForm'
-import Modal from '../UI/ModalWindow'
 
 interface Props {
   closeModal: VoidFunction
@@ -38,6 +38,7 @@ const AddServiceModal: FC<Props> = ({
   serviceActions,
 }) => {
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
   const [addService, { isLoading: isAddingLoading }] = useAddServiceMutation()
   const [editService, { isLoading: isEditingLoading }] =
     useEditServiceMutation()
@@ -78,7 +79,7 @@ const AddServiceModal: FC<Props> = ({
     <Modal
       title="Ціна на послуги в місяць"
       onOk={handleSubmit}
-      changesForm={() => form.isFieldsTouched()}
+      changed={() => isValueChanged}
       onCancel={() => {
         form.resetFields()
         closeModal()
@@ -95,6 +96,7 @@ const AddServiceModal: FC<Props> = ({
           form={form}
           edit={edit}
           currentService={currentService}
+          setIsValueChanged={setIsValueChanged}
         />
       )}
     </Modal>

@@ -1,5 +1,5 @@
-import { IStreet } from '@common/modules/models/Street'
-export type { IStreet } from 'common/modules/models/Street'
+import { IStreet } from '@modules/models/Street'
+export type { IStreet } from '@modules/models/Street'
 
 export interface AllStreetsQuery {
   success: boolean

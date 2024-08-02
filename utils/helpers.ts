@@ -1,10 +1,9 @@
 import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
-import User, { IUser } from '@common/modules/models/User'
+import User, { IUser } from '@modules/models/User'
 import { FormInstance } from 'antd'
 import Big from 'big.js'
-import _omit from 'lodash/omit'
-import moment from 'moment'
-import 'moment/locale/uk'
+import dayjs from 'dayjs'
+import 'dayjs/locale/uk'
 import mongoose, { ObjectId } from 'mongoose'
 import { Roles, ServiceType } from './constants'
 import {
@@ -14,8 +13,9 @@ import {
 } from './pipelines'
 import { PaymentOptions } from './types'
 
-export const toFirstUpperCase = (text: string) =>
-  text[0].toUpperCase() + text.slice(1)
+export const toFirstUpperCase = (text: string) => {
+  return text ? text[0].toUpperCase() + text.slice(1) : ''
+}
 
 export const getCount = (tasks: any, name: string) => {
   return tasks?.filter((task) => task?.category == name)
@@ -144,6 +144,26 @@ function formatDateToIsoString(data) {
       : i
   )
 }
+
+/**
+ * Omits specified properties from an object.
+ *
+ * @param {Record<string, any>} obj - The object to omit properties from.
+ * @param {string[]} props - The list of property names to omit.
+ * @returns {Record<string, any>} - A new object without the omitted properties.
+ */
+export const omit = (
+  obj: Record<string, any>,
+  props: string[]
+): Record<string, any> => {
+  return Object.keys(obj).reduce((result, key) => {
+    if (!props.includes(key)) {
+      result[key] = obj[key]
+    }
+    return result
+  }, {} as Record<string, any>)
+}
+
 /**
  * Костиль, щоб прибрати `__v` з документу `mongodb` і далі порівнювати
  * отримані дані із тестовими
@@ -151,7 +171,7 @@ function formatDateToIsoString(data) {
  * @returns {any[]} масив документів без поля `__v`
  */
 export const removeProps = (data: any[], props = ['__v', 'services']): any[] =>
-  data.map((obj) => _omit(obj, props))
+  data.map((obj) => omit(obj, props))
 
 /**
  * Ще один костиль для тестів, щоб зробити `reverse populate` документу
@@ -173,16 +193,6 @@ export const unpopulate = (arr: any[]): any[] => {
     }
     return newObj
   })
-}
-
-/**
- * Переводить номер місяця в його назву на українській і з великої літери
- * @param {number} index порядковий номер місяця
- * @returns форматований місяць
- */
-export const NumberToFormattedMonth = (index?: number): string => {
-  const month = moment().month(index).locale('uk').format('MMMM')
-  return month[0].toUpperCase() + month.slice(1)
 }
 
 export function filterInvoiceObject(obj) {
@@ -220,12 +230,6 @@ export const renderCurrency = (number: any): string => {
   }
 }
 
-export const getFormattedDate = (data: Date, format = 'MMMM'): string => {
-  if (data) {
-    return toFirstUpperCase(moment(data).format(format))
-  }
-}
-
 export const getPaymentProviderAndReciever = (company) => {
   const provider: IProvider = company && {
     description: company?.domain?.description || '',
@@ -241,7 +245,7 @@ export const getPaymentProviderAndReciever = (company) => {
 
 export const importedPaymentDateToISOStringDate = (date) => {
   return new Date(
-    moment(date, 'DD.MM.YYYY', true).format('YYYY-MM-DD')
+    dayjs(date, 'DD.MM.YYYY', true).format('YYYY-MM-DD')
   ).toISOString()
 }
 
@@ -522,4 +526,18 @@ export const isEqual = (a: any, b: any): boolean => {
   }
 
   return false
+}
+
+/**
+ * Generates a timestamp string in the format HH:MM:SS.mmm.
+ *
+ * @param {Date} [date=new Date()] - The date object to format. Defaults to the current date and time if not provided.
+ * @returns {string} The formatted timestamp string.
+ */
+export const toTimestamp = (date: Date = new Date()): string => {
+  const HH = date.getHours().toString().padStart(2, '0')
+  const MM = date.getMinutes().toString().padStart(2, '0')
+  const SS = date.getSeconds().toString().padStart(2, '0')
+  const mmm = date.getMilliseconds().toString().padStart(3, '0')
+  return `${HH}:${MM}:${SS}.${mmm}`
 }

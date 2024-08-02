@@ -7,12 +7,12 @@ import {
   MailOutlined,
   PhoneOutlined,
 } from '@ant-design/icons'
-import { Button, Form, Input } from 'antd'
 import {
   deleteExtraWhitespace,
   validateField,
-} from '../../common/assets/features/validators'
-import { useAddCallbackMutation } from '../../common/api/callbackApi/callback.api'
+} from '@assets/features/validators'
+import { useAddCallbackMutation } from '@common/api/callbackApi/callback.api'
+import { Button, Form, Input } from 'antd'
 import s from './style.module.scss'
 
 const ContactsPage: React.FC = () => {

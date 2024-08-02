@@ -4,23 +4,22 @@ import {
   FireOutlined,
   UserOutlined,
 } from '@ant-design/icons'
+import { dateToDefaultFormat } from '@assets/features/formatDate'
+import DeleteButton from '@components/UI/Buttons/DeleteButton'
+import StatusTag from '@components/UI/StatusTag'
+import { InfoWindow, Marker, useJsApiLoader } from '@react-google-maps/api'
+import { getFormattedAddress } from '@utils/helpers'
 import { Avatar, Button, Card } from 'antd'
+import classNames from 'classnames'
+import dayjs from 'dayjs'
 import { useSession } from 'next-auth/react'
-import React, { useMemo, useState } from 'react'
+import { useRouter } from 'next/router'
+import { useMemo, useState } from 'react'
 import { useDeleteTaskMutation } from '../../api/taskApi/task.api'
 import { useGetUserByIdQuery } from '../../api/userApi/user.api'
-import DeleteButton from '../UI/Buttons/DeleteButton'
-import { dateToDefaultFormat } from '../../assets/features/formatDate'
-import { useRouter } from 'next/router'
-import { AppRoutes } from 'utils/constants'
-import s from './style.module.scss'
-import { InfoWindow, Marker, useJsApiLoader } from '@react-google-maps/api'
 import Map from '../Map'
 import UserLink from '../UserLink'
-import StatusTag from '../UI/StatusTag'
-import { getFormattedAddress } from '../../../utils/helpers'
-import moment from 'moment'
-import classNames from 'classnames'
+import s from './style.module.scss'
 
 const TaskCard = ({ taskId, task }) => {
   const router = useRouter()
@@ -65,8 +64,8 @@ const TaskCard = ({ taskId, task }) => {
 
   const url = `https://maps.google.com/?q=${lat},${lng}`
   const [activeMarker, setActiveMarker] = useState(null)
-  const taskDeadline = moment(task?.deadline)
-  const currentDate = moment(new Date())
+  const taskDeadline = dayjs(task?.deadline)
+  const currentDate = dayjs(new Date())
   const differ = taskDeadline.diff(currentDate, 'days')
 
   return (

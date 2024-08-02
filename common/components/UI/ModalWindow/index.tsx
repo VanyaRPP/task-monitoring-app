@@ -1,11 +1,9 @@
 import { Modal as AntModal, ButtonProps } from 'antd'
 import s from './style.module.scss'
-import { Form } from 'antd'
-import { useState } from 'react'
 
 interface Props {
   children: React.ReactNode
-  changesForm: () => boolean
+  changed: () => boolean
   onCancel: () => void
   onOk: () => void
   okText?: string
@@ -22,7 +20,7 @@ interface Props {
 
 const Modal: React.FC<Props> = ({
   children,
-  changesForm,
+  changed,
   onCancel,
   onOk,
   okText,
@@ -37,7 +35,7 @@ const Modal: React.FC<Props> = ({
   preview,
 }) => {
   const handleCancel = () => {
-    if (changesForm()) {
+    if (changed()) {
       AntModal.confirm({
         title: 'Ви впевнені, що хочете вийти?',
         content: 'Всі незбережені дані будуть втрачені',

@@ -1,6 +1,6 @@
-import { useRouter } from 'next/router'
-import { AppRoutes } from '../../../utils/constants'
+import { AppRoutes } from '@utils/constants'
 import { Button } from 'antd'
+import { useRouter } from 'next/router'
 import s from './style.module.scss'
 
 const Verify: React.FC = () => {

@@ -3,7 +3,7 @@
     "allowSyntheticDefaultImports": true,
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "typeRoots": ["./node_modules/@types"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -16,29 +16,26 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "types": ["node","cypress","jest"],
+    "types": ["node", "jest"],
     "baseUrl": ".",
     "paths": {
-      "@common/*": ["common/*"],
+      "@public/*": ["public/*"],
       "@utils/*": ["utils/*"],
       "@styles/*": ["styles/*"],
       "@pages/*": ["pages/*"],
       "@components/*": ["common/components/*"],
-      "@queries/*": ["common/api"],
-      "@assets/*": ["common/assets"],
-      "@modules/*": ["common/modules"],
-      "@lib/*": ["common/lib"]
+      "@assets/*": ["common/assets/*"],
+      "@modules/*": ["common/modules/*"],
+      "@lib/*": ["common/lib/*"],
+      "@common/*": ["common/*"]
     }
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "common/components/withPrivateRoute.jsx",
     "custom.d.ts",
-    "pages/api-doc.js",
-    "common/components/PlacesAutocomplete/index.jsx",
-    "cypress/e2e/testForTest/firstTest.cy.js"
+    "common/components/PlacesAutocomplete/index.jsx"
   ],
   "exclude": ["node_modules"]
 }

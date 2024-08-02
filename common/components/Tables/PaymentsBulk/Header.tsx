@@ -1,22 +1,17 @@
-import { QuestionCircleOutlined, SelectOutlined } from '@ant-design/icons'
-import { Button, Form, FormInstance, Popover, message } from 'antd'
-import { useRouter } from 'next/router'
-
+import { SelectOutlined } from '@ant-design/icons'
 import {
   useAddPaymentMutation,
   useGetPaymentNumberQuery,
 } from '@common/api/paymentApi/payment.api'
-import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
-import { IService } from '@common/api/serviceApi/service.api.types'
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import MonthServiceSelect from '@common/components/Forms/AddPaymentForm/MonthServiceSelect'
 import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import { AppRoutes, Operations } from '@utils/constants'
-import {
-  filterInvoiceObject,
-  getPaymentProviderAndReciever,
-} from '@utils/helpers'
+import { getPaymentProviderAndReciever, toRoundFixed } from '@utils/helpers'
+import { Button, message } from 'antd'
+import { useRouter } from 'next/router'
 
 const InvoicesHeader = () => {
   const router = useRouter()
@@ -25,14 +20,41 @@ const InvoicesHeader = () => {
   const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
 
   const handleSave = async () => {
-    const invoices = await prepareInvoiceObjects(
-      form,
-      service,
-      companies,
-      newInvoiceNumber
-    )
+    const values = await form.validateFields()
 
-    const responses = await Promise.all(invoices.map(addPayment))
+    const payments = values.payments?.map((payment, index) => {
+      const { provider, reciever } = getPaymentProviderAndReciever(
+        companies?.find(({ _id }) => payment.company?._id === _id)
+      )
+
+      const invoice = Object.values(payment.invoice || {}).filter(
+        ({ sum }) => sum
+      )
+
+      const generalSum = invoice.reduce(
+        (acc: number, invoice: IPaymentField) => {
+          return acc + (+invoice.sum || 0)
+        },
+        0
+      )
+
+      return {
+        invoiceNumber: newInvoiceNumber + index,
+        type: Operations.Debit,
+        domain: service?.domain?._id,
+        street: service?.street?._id,
+        company: payment.company?._id,
+        monthService: service?._id,
+        invoiceCreationDate: new Date(),
+        description: '',
+        generalSum: +toRoundFixed(generalSum),
+        provider,
+        reciever,
+        invoice,
+      }
+    })
+
+    const responses = await Promise.all(payments.map(addPayment))
     const allSuccessful = responses.every((response) => response.data?.success)
 
     responses.forEach((response) => {
@@ -63,12 +85,10 @@ const InvoicesHeader = () => {
 
       <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
         <DomainsSelect form={form} />
-        <div style={{ width: '250px' }}>
-          <AddressesSelect
-            form={form}
-            dropdownStyle={{ minWidth: 'max-content' }}
-          />
-        </div>
+        <AddressesSelect
+          form={form}
+          dropdownStyle={{ minWidth: 'max-content' }}
+        />
         <MonthServiceGeneralInfo />
       </div>
 
@@ -82,140 +102,23 @@ const InvoicesHeader = () => {
 function MonthServiceGeneralInfo() {
   const { form } = useInvoicesPaymentContext()
 
-  const serviceId = Form.useWatch('monthService', form)
+  // const serviceId = Form.useWatch('monthService', form)
 
   return (
     <span style={{ display: 'flex', alignItems: 'center' }}>
       <div style={{ minWidth: '120px' }}>
         <MonthServiceSelect form={form} />
       </div>
-      {serviceId && (
+      {/* {serviceId && (
         <Popover
           content={<PopoverMonthService serviceId={serviceId} />}
           title="Послуги за місяць"
         >
           <QuestionCircleOutlined style={{ marginLeft: 16 }} />
         </Popover>
-      )}
+      )} */}
     </span>
   )
 }
 
-function PopoverMonthService(serviceId: any) {
-  // const { service } = ({ serviceId })
-
-  return (
-    <>
-      <strong>TODO:</strong> content
-    </>
-  )
-
-  // return (
-  //   <ul>
-  //     {services
-  //       ?.filter((service) => moment(service.date).month() === monthNumber)
-  //       .map((service) => (
-  //         <li key={service._id}>
-  //           {moment(service.date).format('DD MMMM YYYY')} -{' '}
-  //           {service.description}
-  //         </li>
-  //       ))}
-  //   </ul>
-  // )
-}
-
 export default InvoicesHeader
-
-const validateInvoice = (invoice, service) => {
-  const result: any = {
-    maintenancePrice: {
-      amount: invoice.totalArea,
-      ...invoice.maintenancePrice,
-    },
-    placingPrice: {
-      amount: invoice.totalArea,
-      ...invoice.placingPrice,
-    },
-
-    electricityPrice: {
-      ...invoice.electricityPrice,
-      price: service?.electricityPrice,
-    },
-    inflicionPrice: {
-      price: invoice.inflicionPrice,
-      sum: invoice.inflicionPrice,
-    },
-  }
-
-  if (invoice.garbageCollector.sum > 0) {
-    result.garbageCollectorPrice = {
-      amount: invoice.garbageCollector.amount,
-      sum: invoice.garbageCollector.sum,
-    }
-  }
-
-  if (invoice.cleaningPrice > 0) {
-    result.cleaningPrice = {
-      price: invoice.cleaningPrice,
-      sum: invoice.cleaningPrice,
-    }
-  }
-
-  if (invoice.discount < 0) {
-    result.discount = {
-      price: invoice.discount,
-      sum: invoice.discount,
-    }
-  }
-
-  if (invoice.waterPart && invoice.waterPart.sum > 0) {
-    result.waterPart = {
-      price: invoice.waterPart.price,
-      sum: invoice.waterPart.sum,
-    }
-  } else {
-    result.waterPrice = {
-      ...invoice.waterPrice,
-      price: service?.waterPrice,
-    }
-  }
-
-  return result
-}
-
-const prepareInvoiceObjects = async (
-  form: FormInstance,
-  service: IService,
-  companies: IExtendedRealestate[],
-  newInvoiceNumber: number
-): Promise<any> => {
-  const values = await form.validateFields()
-  return Object.keys(values.companies).map((key, index) => {
-    const invoice = values.companies[key]
-    const company = companies.find(
-      (company) => company.companyName === values.companies[key].companyName
-    )
-    const { provider, reciever } = getPaymentProviderAndReciever(company)
-
-    const filteredInvoice = filterInvoiceObject(
-      validateInvoice(invoice, service)
-    )
-    return {
-      invoiceNumber: newInvoiceNumber + index,
-      type: Operations.Debit,
-      domain: service?.domain,
-      street: service?.street,
-      company: company?._id,
-      monthService: service?._id,
-      invoiceCreationDate: new Date(),
-      description: '',
-      generalSum:
-        filteredInvoice
-          .reduce((acc, val) => acc + (+val.sum || 0), 0)
-          .toFixed(2) || 0,
-      provider,
-      reciever,
-      invoice: filteredInvoice,
-    }
-  })
-}

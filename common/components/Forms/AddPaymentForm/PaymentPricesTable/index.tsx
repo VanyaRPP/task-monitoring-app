@@ -1,5 +1,5 @@
-import { usePaymentContext } from '@common/components/AddPaymentModal'
-import { EditInvoicesTable_unstable } from '@common/components/Tables/EditInvoiceTable'
+import { usePaymentContext } from '@components/AddPaymentModal'
+import { EditInvoicesTable_unstable } from '@components/Tables/EditInvoiceTable'
 
 export interface PaymentPricesTableProps {
   preview?: boolean

@@ -1,10 +1,10 @@
 import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
-import AddTaskModal from '@common/components/AddTaskModal'
-import { IUser } from '@common/modules/models/User'
+import AddTaskModal from '@components/AddTaskModal'
+import { IUser } from '@modules/models/User'
 import { AppRoutes } from '@utils/constants'
 import { Button } from 'antd'
 import { useRouter } from 'next/router'
-import React, { FC, useState } from 'react'
+import { FC, useState } from 'react'
 import s from './style.module.scss'
 
 interface Props {
