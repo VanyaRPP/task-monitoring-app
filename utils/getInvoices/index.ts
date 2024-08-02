@@ -272,12 +272,12 @@ export const getWaterPartInvoice = ({
   }
 
   if (
-    !isEmpty(service?.waterPrice) &&
-    !isNaN(service.waterPrice) &&
+    !isEmpty(service?.waterPriceTotal) &&
+    !isNaN(service.waterPriceTotal) &&
     !isEmpty(company?.waterPart) &&
     !isNaN(company?.waterPart)
   ) {
-    const price = service.waterPrice * (company.waterPart / 100)
+    const price = service.waterPriceTotal * (company.waterPart / 100)
 
     return {
       type: ServiceType.WaterPart,
