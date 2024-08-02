@@ -1,5 +1,5 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
-import { usePaymentContext } from '@common/components/AddPaymentModal'
+import { usePaymentContext } from '@components/AddPaymentModal'
 import { toRoundFixed } from '@utils/helpers'
 
 const GarbageCollector: React.FC<{

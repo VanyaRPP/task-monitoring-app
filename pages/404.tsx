@@ -1,6 +1,6 @@
-import { Result, Button } from 'antd'
+import { AppRoutes } from '@utils/constants'
+import { Button, Result } from 'antd'
 import Router from 'next/router'
-import { AppRoutes } from '../utils/constants'
 
 const style = {
   color: 'var(--textColor)',

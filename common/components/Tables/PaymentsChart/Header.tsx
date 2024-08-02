@@ -1,9 +1,9 @@
 import { SelectOutlined } from '@ant-design/icons'
+import PaymentsSelector from '@components/PaymentSelector'
+import { AppRoutes } from '@utils/constants'
 import { Button, Select } from 'antd'
 import { useRouter } from 'next/router'
-import { AppRoutes } from '@utils/constants'
 import s from './style.module.scss'
-import PaymentsSelector from '@common/components/PaymentSelector'
 
 interface Props {
   paymentsLimit: number

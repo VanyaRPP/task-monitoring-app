@@ -1,13 +1,14 @@
-import React from 'react'
 import { UserOutlined } from '@ant-design/icons'
-import { Avatar, Card, Image } from 'antd'
-import RoleSwitcher from 'common/components/UI/roleSwitcher'
-import s from './style.module.scss'
-import { useGetCurrentUserQuery } from '../../api/userApi/user.api'
-import MyDomain from './my-domain'
-import MyCompany from './my-company'
-import MyDomainsCard from './my-domainCard'
+import RoleSwitcher from '@components/UI/roleSwitcher'
 import { Roles } from '@utils/constants'
+import { Avatar, Card } from 'antd'
+import NextImage from 'next/image'
+import React from 'react'
+import { useGetCurrentUserQuery } from '../../api/userApi/user.api'
+import MyCompany from './my-company'
+import MyDomain from './my-domain'
+import MyDomainsCard from './my-domainCard'
+import s from './style.module.scss'
 
 const ProfilePage: React.FC = () => {
   const { data: user, isLoading: userLoading } = useGetCurrentUserQuery()
@@ -20,7 +21,15 @@ const ProfilePage: React.FC = () => {
           <div className={s.Avatar}>
             <Avatar
               icon={<UserOutlined />}
-              src={<Image src={user?.image || undefined} alt="User" />}
+              size={280}
+              src={
+                <NextImage
+                  src={user?.image || undefined}
+                  width={280}
+                  height={280}
+                  alt="avatar"
+                />
+              }
             />
           </div>
           <div className={s.Info}>

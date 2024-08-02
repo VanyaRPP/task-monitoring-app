@@ -2,12 +2,12 @@ import {
   useAddPaymentMutation,
   useGetPaymentNumberQuery,
 } from '@common/api/paymentApi/payment.api'
-import CompanySelect from '@common/components/Forms/AddPaymentForm/CompanySelect'
-import Modal from '@common/components/UI/ModalWindow'
-import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
-import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
-import PaymentTypeSelect from '@common/components/UI/Reusable/PaymentTypeSelect'
-import useCompany from '@common/modules/hooks/useCompany'
+import CompanySelect from '@components/Forms/AddPaymentForm/CompanySelect'
+import Modal from '@components/UI/ModalWindow'
+import AddressesSelect from '@components/UI/Reusable/AddressesSelect'
+import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
+import PaymentTypeSelect from '@components/UI/Reusable/PaymentTypeSelect'
+import useCompany from '@modules/hooks/useCompany'
 import { Operations } from '@utils/constants'
 import {
   getPaymentProviderAndReciever,

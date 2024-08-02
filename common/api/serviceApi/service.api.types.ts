@@ -1,5 +1,5 @@
-import { IDomain } from '@common/modules/models/Domain'
-import { IStreet } from '@common/modules/models/Street'
+import { IDomain } from '@modules/models/Domain'
+import { IStreet } from '@modules/models/Street'
 import { IFilter } from '../paymentApi/payment.api.types'
 
 export interface IService {

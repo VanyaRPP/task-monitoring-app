@@ -1,17 +1,16 @@
-import { useState, useEffect } from 'react'
 import { PlusOutlined } from '@ant-design/icons'
-import { Empty, Card, List, Button, Form, Rate } from 'antd'
-import { IFeedback, IUser } from 'common/modules/models/User'
-import Modal from 'common/components/UI/ModalWindow'
-import AddFeedbackForm from 'common/components/Forms/AddFeedbackForm'
-import Feedback from './feedback'
 import {
-  useGetUserByEmailQuery,
   useAddFeedbackMutation,
-} from 'common/api/userApi/user.api'
+  useGetUserByEmailQuery,
+} from '@common/api/userApi/user.api'
+import AddFeedbackForm from '@components/Forms/AddFeedbackForm'
+import Modal from '@components/UI/ModalWindow'
+import { IFeedback, IUser } from '@modules/models/User'
+import { Button, Card, Empty, Form, List, Rate } from 'antd'
 import { useSession } from 'next-auth/react'
+import { useState } from 'react'
+import Feedback from './feedback'
 import s from './style.module.scss'
-import { feedbacks } from '../../lib/task.config'
 
 // const RateDescription = ['Terrible', 'Bad', 'Normal', 'Good', 'Wonderful']
 const RateDescription = ['Жахливо', 'Погано', 'Нормально', 'Добре', 'Прекрасно']

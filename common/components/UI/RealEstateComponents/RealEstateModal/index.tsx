@@ -2,16 +2,14 @@ import {
   useAddRealEstateMutation,
   useEditRealEstateMutation,
 } from '@common/api/realestateApi/realestate.api'
-import RealEstateForm from './RealEstateForm'
-import { Form, message } from 'antd'
 import React, { FC, useEffect, useState } from 'react'
 import {
   IExtendedRealestate,
   IRealestate,
 } from '@common/api/realestateApi/realestate.api.types'
+import { Form, message } from 'antd'
 import Modal from '../../ModalWindow'
-// import AddServiceForm from '../Forms/AddServiceForm'
-// import moment from 'moment'
+import RealEstateForm from './RealEstateForm'
 
 interface Props {
   closeModal: VoidFunction

@@ -1,10 +1,10 @@
-import { Form, FormInstance, Input } from 'antd'
-import { useEffect } from 'react'
-import { useGetCategoryByIdQuery } from '../../../api/categoriesApi/category.api'
 import {
   deleteExtraWhitespace,
   validateField,
-} from '../../../assets/features/validators'
+} from '@assets/features/validators'
+import { Form, FormInstance, Input } from 'antd'
+import { useEffect } from 'react'
+import { useGetCategoryByIdQuery } from '../../../api/categoriesApi/category.api'
 
 type PropsType = {
   isFormDisabled: boolean

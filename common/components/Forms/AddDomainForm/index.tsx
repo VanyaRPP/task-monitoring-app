@@ -1,18 +1,14 @@
+import { IAddress, IGeoCode } from '@modules/models/Task'
 import { useJsApiLoader } from '@react-google-maps/api'
-import { Form, Input, FormInstance } from 'antd'
+import { Form, FormInstance, Input } from 'antd'
 import {
-  useCallback,
-  useState,
-  useMemo,
-  useRef,
-  useEffect,
   Dispatch,
   SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
 } from 'react'
-import { centerTownGeoCode } from 'utils/constants'
-import Map from '../../Map'
-import { Polygon } from '@react-google-maps/api'
-import { IAddress, IGeoCode } from '../../../modules/models/Task'
 
 interface Props {
   isFormDisabled: boolean
@@ -36,13 +32,6 @@ const AddDomainModal: React.FC<Props> = ({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     libraries,
   })
-
-  const mapOptions = useMemo(() => {
-    return {
-      geoCode: centerTownGeoCode,
-      zoom: 12,
-    }
-  }, [waypoints])
 
   // Define refs for Polygon instance and listeners
   const polygonRef = useRef(null)
@@ -75,21 +64,13 @@ const AddDomainModal: React.FC<Props> = ({
     [onEdit]
   )
 
-  // Clean up refs
-  const onUnmount = useCallback(() => {
-    listenersRef.current.forEach((lis) => lis.remove())
-    polygonRef.current = null
-    setWaypoints([])
-    setAddress(null)
-  }, [])
-
   const check = useCallback(() => {
     if (!address && Object.keys(address).length <= 0) {
       return
     }
-    setWaypoints([...waypoints, address?.geoCode])
+    setWaypoints((waypoints) => [...waypoints, address?.geoCode])
     setAddress(null)
-  }, [address])
+  }, [address, setWaypoints])
 
   useEffect(() => {
     if (address) {

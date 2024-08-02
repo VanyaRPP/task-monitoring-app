@@ -1,3 +1,4 @@
+import { disabledDate } from '@assets/features/formatDate'
 import {
   DatePicker,
   Form,
@@ -6,10 +7,6 @@ import {
   InputNumber,
   Select,
 } from 'antd'
-import { RangePickerProps } from 'antd/lib/date-picker'
-import moment from 'moment'
-import { ITask } from '../../modules/models/Task'
-import { isDeadlineExpired } from '../../assets/features/formatDate'
 
 type PropsType = {
   isFormDisabled: boolean
@@ -24,9 +21,6 @@ const ApplyAuctionForm: React.FC<PropsType> = ({
   setIsValueChanged,
 }) => {
   const { Option } = Select
-  const disabledDate: RangePickerProps['disabledDate'] = (current) => {
-    return current && current < moment().startOf('day')
-  }
 
   const suffixSelector = (
     <Form.Item name="suffix" noStyle>

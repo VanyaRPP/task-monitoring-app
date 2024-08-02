@@ -1,11 +1,11 @@
-import React, { FC } from 'react'
-import { validateField } from '@common/assets/features/validators'
-import { Select, Form, FormInstance, Input, InputNumber, Checkbox } from 'antd'
+import { validateField } from '@assets/features/validators'
+import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
+import EmailSelect from '@components/UI/Reusable/EmailSelect'
+import { Checkbox, Form, FormInstance, Input, InputNumber } from 'antd'
+import { FC } from 'react'
 import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
-import EmailSelect from '@common/components/UI/Reusable/EmailSelect'
-import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 
 interface Props {
   form: FormInstance<any>
