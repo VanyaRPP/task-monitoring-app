@@ -38,6 +38,7 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
 
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
 
   const { data: session } = useSession()
   const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
@@ -73,12 +74,16 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
         title="Подати заявку в пропозиції"
         open={isModalVisible}
         onCancel={onCancelModal}
-        changesForm={() => form.isFieldsTouched()}
+        changed={() => isValueChanged}
         onOk={onSubmiModal}
         okText="Подати заявку"
         cancelText="Скасувати"
       >
-        <ApplyAuctionForm isFormDisabled={isFormDisabled} form={form} />
+        <ApplyAuctionForm
+          isFormDisabled={isFormDisabled}
+          form={form}
+          setIsValueChanged={setIsValueChanged}
+        />
       </Modal>
       {taskExecutors && taskExecutors.length !== 0 ? (
         <Table dataSource={taskExecutors} pagination={false}>

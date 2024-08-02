@@ -23,9 +23,15 @@ interface Props {
   form: FormInstance<any>
   edit: boolean
   currentService: IService
+  setIsValueChanged: (value: boolean) => void
 }
 
-const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
+const AddServiceForm: React.FC<Props> = ({
+  form,
+  edit,
+  currentService,
+  setIsValueChanged,
+}) => {
   const { MonthPicker } = DatePicker
 
   const date = Form.useWatch('date', form)
@@ -69,6 +75,7 @@ const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
           date: dayjs(currentService?.date),
           description: currentService?.description,
         }}
+        onValuesChange={() => setIsValueChanged(true)}
       >
         <DomainsSelect form={form} edit={edit} />
         <AddressesSelect form={form} edit={edit} />

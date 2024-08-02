@@ -66,6 +66,7 @@ const CompetitionCard: React.FC<{
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
 
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
 
   const { data: session } = useSession()
   const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
@@ -144,7 +145,7 @@ const CompetitionCard: React.FC<{
       <Modal
         title="Подати заявку"
         open={isModalVisible}
-        changesForm={() => form.isFieldsTouched()}
+        changed={() => isValueChanged}
         onCancel={onCancelModal}
         onOk={onSubmitModal}
         okText="Додати"
@@ -154,6 +155,7 @@ const CompetitionCard: React.FC<{
           isFormDisabled={isFormDisabled}
           form={form}
           task={task}
+          setIsValueChanged={setIsValueChanged}
         />
       </Modal>
       <Table key="competition" dataSource={executors} pagination={false}>
