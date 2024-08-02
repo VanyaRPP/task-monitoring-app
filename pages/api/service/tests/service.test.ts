@@ -385,7 +385,7 @@ describe('Service API - GET', () => {
 
   it('should load services as GlobalAdmin with limit and year', async () => {
     const limit = 2
-    const year = 2020
+    const year = '2020'
 
     await mockLoginAs(users.globalAdmin)
 
@@ -410,7 +410,9 @@ describe('Service API - GET', () => {
     const received = unpopulate(
       removeProps(response.data.map((service) => service._doc))
     )
-    const expected = [services[3], services[4]]
+    const expected = services.filter(service => {
+      return service.date.getFullYear() === 2020
+    }).slice(0, limit);
 
     expect(received).toEqual(expected)
   })
@@ -418,7 +420,7 @@ describe('Service API - GET', () => {
   it('should load services as DomainAdmin with limit and year', async () => {
     await mockLoginAs(users.domainAdmin)
     const limit = 1
-    const year = 2020
+    const year = '2020'
 
     const mockReq = {
       method: 'GET',
@@ -455,7 +457,7 @@ describe('Service API - GET', () => {
     await mockLoginAs(users.user)
 
     const limit = 2
-    const year = 2020
+    const year = '2020'
 
     const mockReq = {
       method: 'GET',
@@ -477,13 +479,15 @@ describe('Service API - GET', () => {
     const received = unpopulate(
       removeProps(response.data.map((service) => service._doc))
     )
-    const expected = [services[3], services[4]]
+    const expected = services.filter(service => {
+      return service.date.getFullYear() === 2020
+    }).slice(0, limit);
 
     expect(received).toEqual(expected)
   })
 
   it('should load services as GlobalAdmin with year', async () => {
-    const year = 2019
+    const year = '2019, 2020'
 
     await mockLoginAs(users.globalAdmin)
 
@@ -508,7 +512,9 @@ describe('Service API - GET', () => {
     const received = unpopulate(
       removeProps(response.data.map((service) => service._doc))
     )
-    const expected = [services[5]]
+    const expected = services.filter(service => {
+      return service.date.getFullYear() === 2019 || service.date.getFullYear() === 2020
+    });
 
     expect(received).toEqual(expected)
   })

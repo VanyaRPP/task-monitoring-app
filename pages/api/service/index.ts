@@ -9,14 +9,10 @@ import { FilterQuery } from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { dateToYear } from '@common/assets/features/formatDate'
 import { uniq } from 'lodash'
+import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import { getFormattedDate } from '@utils/helpers'
 
 start()
-
-export interface IFilter {
-  value: any
-  lable: string
-}
 
 export default async function handler(
   req: NextApiRequest,
@@ -73,9 +69,7 @@ export default async function handler(
       {
         $project: {
           _id: 0,
-          text: {
-            $concat: ['$addressDetails.address' , ' (м. ', '$addressDetails.city', ')']
-          },
+          text: '$addressDetails.address (м. ${addressDetails.city})',
           value: '$_id'
         }
       }]).exec()
@@ -209,7 +203,6 @@ export default async function handler(
                 .skip(+skip)
                 .populate('domain')
                 .populate('street')
-              // const uniques = domainFilters(data, await Service.distinct('domain', options).populate('domain'))
                 const domainFilter = await getDomainFilter()
                 const addressFilter = await getAddressFilter()
                 const yearFilter = await getYearFilter()
