@@ -15,10 +15,12 @@ import {
   toRoundFixed,
 } from '@utils/helpers'
 import { Form, Input, message } from 'antd'
+import { useState } from 'react'
 
 const ImportInvoicesModal = ({ closeModal }) => {
   const [addPayment, { isLoading }] = useAddPaymentMutation()
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
   const companyId = Form.useWatch('company', form)
@@ -62,12 +64,12 @@ const ImportInvoicesModal = ({ closeModal }) => {
       title="Імпорт інвойсів"
       onOk={handleSave}
       confirmLoading={isLoading}
-      changesForm={() => form.isFieldsTouched()}
+      changed={() => isValueChanged}
       onCancel={closeModal}
       okText="Імпортувати"
       cancelText={'Закрити'}
     >
-      <Form form={form}>
+      <Form form={form} onValuesChange={() => setIsValueChanged(true)}>
         <DomainsSelect form={form} />
         <AddressesSelect form={form} />
         <CompanySelect form={form} />

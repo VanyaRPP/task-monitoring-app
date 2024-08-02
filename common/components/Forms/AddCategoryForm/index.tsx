@@ -10,9 +10,15 @@ type PropsType = {
   isFormDisabled: boolean
   form: FormInstance
   id: string
+  setIsValueChanged: (value: boolean) => void
 }
 
-const AddCategoryForm: React.FC<PropsType> = ({ isFormDisabled, form, id }) => {
+const AddCategoryForm: React.FC<PropsType> = ({
+  isFormDisabled,
+  form,
+  id,
+  setIsValueChanged,
+}) => {
   const { data } = useGetCategoryByIdQuery(id)
 
   useEffect(() => {
@@ -30,6 +36,7 @@ const AddCategoryForm: React.FC<PropsType> = ({ isFormDisabled, form, id }) => {
       layout="vertical"
       name="form_in_modal"
       disabled={isFormDisabled}
+      onValuesChange={() => setIsValueChanged(true)}
     >
       <Form.Item
         name="name"

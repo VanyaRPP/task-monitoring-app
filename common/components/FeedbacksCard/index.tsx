@@ -45,7 +45,7 @@ const FeedbacksCard: React.FC<Props> = ({
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
   const [form] = Form.useForm()
-
+  const [isValueChanged, setIsValueChanged] = useState(false)
   const [addFeedback] = useAddFeedbackMutation()
 
   const Reset = () => {
@@ -100,13 +100,17 @@ const FeedbacksCard: React.FC<Props> = ({
           <Modal
             title={`Залиште відгук про ${user?.name}`}
             open={isModalVisible}
-            changesForm={() => form.isFieldsTouched()}
+            changed={() => isValueChanged}
             onCancel={onCancelModal}
             onOk={onSubmitModal}
             okText="Залишити відгук"
             cancelText="Скасувати"
           >
-            <AddFeedbackForm isFormDisabled={isFormDisabled} form={form} />
+            <AddFeedbackForm
+              isFormDisabled={isFormDisabled}
+              form={form}
+              setIsValueChanged={setIsValueChanged}
+            />
           </Modal>
         </span>
       }
