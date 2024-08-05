@@ -56,7 +56,7 @@ export default function AddressesSelect({
         }
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={isLoading || !domainId || streets?.length === 1 || edit}
+        disabled={isLoading || streets?.length === 1 || edit}
         loading={isLoading}
         showSearch
         dropdownStyle={dropdownStyle}

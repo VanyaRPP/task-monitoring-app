@@ -31,8 +31,9 @@ const ServicesBlock = () => {
     limit: isOnPage ? 0 : 5,
     streetId: filter?.street || undefined,
     domainId: filter?.domain || undefined,
+    year: filter?.year,
+    month: filter?.month,
   })
-
   return (
     <TableCard
       title={
