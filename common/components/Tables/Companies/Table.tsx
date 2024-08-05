@@ -14,16 +14,16 @@ import {
   message,
   Tooltip,
 } from 'antd'
-import { ColumnType } from 'antd/lib/table'
-import { useRouter } from 'next/router'
 import { useDeleteRealEstateMutation } from '@common/api/realestateApi/realestate.api'
 import {
   IExtendedRealestate,
   IGetRealestateResponse,
 } from '@common/api/realestateApi/realestate.api.types'
-import { AppRoutes, Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
+import { ColumnType } from 'antd/lib/table'
+import { useRouter } from 'next/router'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 
 export interface Props {
