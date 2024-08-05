@@ -1,16 +1,16 @@
 import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import {
+  dateToDefaultFormat,
+  dateToMonthYear,
+} from '@assets/features/formatDate'
+import {
   useDeletePaymentMutation,
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import {
-  dateToDefaultFormat,
-  dateToMonthYear,
-} from '@common/assets/features/formatDate'
-import PaymentCardHeader from '@common/components/UI/PaymentCardHeader'
-import TableCard from '@common/components/UI/TableCard'
+import PaymentCardHeader from '@components/UI/PaymentCardHeader'
+import TableCard from '@components/UI/TableCard'
 import {
   AppRoutes,
   ColumnsRoleView,
@@ -236,6 +236,7 @@ const PaymentsBlock = () => {
     },
     {
       title: 'За місяць',
+      width: 130,
       dataIndex: 'monthService',
       render: (monthService, obj) =>
         dateToMonthYear(monthService?.date || obj.invoiceCreationDate),
@@ -274,21 +275,23 @@ const PaymentsBlock = () => {
       pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
     filteredValue: filters?.company || null,
     render: (i) => {
-      if (currUser?.roles?.includes(Roles.GLOBAL_ADMIN || Roles.DOMAIN_ADMIN)) {
+      if (isGlobalAdmin || isDomainAdmin) {
         if (pathname === AppRoutes.PAYMENT) {
           return (
-            <a
-              style={{
-                cursor: 'pointer',
-                color: 'blue',
-                textDecoration: 'underline',
-              }}
-              onClick={() => {
-                setFilters({ ...filters, company: [i?._id] })
-              }}
-            >
-              {i?.companyName}
-            </a>
+            <Tooltip title="Додати в фільтри">
+              <a
+                style={{
+                  cursor: 'pointer',
+                  color: 'blue',
+                  textDecoration: 'underline',
+                }}
+                onClick={() => {
+                  setFilters({ ...filters, company: [i?._id] })
+                }}
+              >
+                {i?.companyName}
+              </a>
+            </Tooltip>
           )
         } else {
           return i?.companyName

@@ -1,7 +1,7 @@
 import mongoose, { ObjectId, Schema } from 'mongoose'
 
 export interface IDomain {
-  _id: ObjectId | string
+  _id: string
   name: string
   adminEmails: [string]
   streets: [ObjectId]

@@ -1,18 +1,18 @@
+import { Avatar, Button, Card, Empty, Form, Table } from 'antd'
 import { useState } from 'react'
-import { Card, Table, Button, Form, Avatar, Empty } from 'antd'
 import s from './style.module.scss'
 
-import Modal from '../UI/ModalWindow'
-import ApplyAuctionForm from '../ApplyAuctionForm/index'
+import { useAddTaskExecutorMutation } from '@common/api/taskApi/task.api'
+import Modal from '@components/UI/ModalWindow'
+import { ITaskExecutors } from '@modules/models/Task'
+import Meta from 'antd/lib/card/Meta'
+import Column from 'antd/lib/table/Column'
+import { useSession } from 'next-auth/react'
 import {
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
 } from '../../api/userApi/user.api'
-import Column from 'antd/lib/table/Column'
-import { ITaskExecutors } from '../../modules/models/Task'
-import Meta from 'antd/lib/card/Meta'
-import { useAddTaskExecutorMutation } from 'common/api/taskApi/task.api'
-import { useSession } from 'next-auth/react'
+import ApplyAuctionForm from '../ApplyAuctionForm/index'
 
 export const Executor = ({ executor, type }) => {
   const { data } = useGetUserByIdQuery(`${executor.workerid}`)
@@ -38,6 +38,7 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
 
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
 
   const { data: session } = useSession()
   const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
@@ -73,12 +74,16 @@ const AuctionCard = ({ taskId, taskExecutors }) => {
         title="Подати заявку в пропозиції"
         open={isModalVisible}
         onCancel={onCancelModal}
-        changesForm={() => form.isFieldsTouched()}
+        changed={() => isValueChanged}
         onOk={onSubmiModal}
         okText="Подати заявку"
         cancelText="Скасувати"
       >
-        <ApplyAuctionForm isFormDisabled={isFormDisabled} form={form} />
+        <ApplyAuctionForm
+          isFormDisabled={isFormDisabled}
+          form={form}
+          setIsValueChanged={setIsValueChanged}
+        />
       </Modal>
       {taskExecutors && taskExecutors.length !== 0 ? (
         <Table dataSource={taskExecutors} pagination={false}>

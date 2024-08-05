@@ -1,34 +1,45 @@
-import { RangePickerProps } from 'antd/lib/date-picker'
-import moment from 'moment'
-import 'moment/locale/uk'
+import { toFirstUpperCase } from '@utils/helpers'
+import { DatePickerProps } from 'antd'
+import dayjs from 'dayjs'
+import 'dayjs/locale/uk'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
+
+dayjs.extend(localizedFormat)
+dayjs.locale('uk')
 
 export const dateToDefaultFormat = (deadline: string): string =>
-  moment(deadline).locale('uk').format('LL')
+  dayjs(deadline).format('LL')
 
 export const isDeadlineExpired = (deadline: string): boolean =>
-  moment().locale('uk').isAfter(moment(deadline), 'day')
+  dayjs().isAfter(dayjs(deadline), 'day')
 
 export const dateToPick = (deadline: string): boolean =>
-  moment().locale('uk').isAfter(moment(deadline))
+  dayjs().isAfter(dayjs(deadline))
 
-export const disabledDate: RangePickerProps['disabledDate'] = (current) => {
-  return current && current < moment().locale('uk').startOf('day')
+export const disabledDate: DatePickerProps['disabledDate'] = (current) => {
+  return current && current < dayjs().startOf('day')
 }
 
 export const dateToDayYearMonthFormat = (date: Date): string =>
-  moment(date).format('DD-MM-YYYY')
+  dayjs(date).format('DD-MM-YYYY')
 
 
 
 export const dateToMonthYear = (date: Date): string =>
-  moment(date).format('MMMM YYYY')
+  dayjs(date).format('MMMM YYYY')
+
+export const dateToMonth = (date: Date): string => dayjs(date).format('MMMM')
 
   export const dateToYear = (date: Date): string =>
-  moment(date).format('YYYY')
+  dayjs(date).format('YYYY')
 
 export const getPreviousMonth = (date?: string) => {
-  const currentInvoiceDate = moment(date).subtract(1, 'month')
+  const currentInvoiceDate = dayjs(date).subtract(1, 'month')
   const month = currentInvoiceDate.month() + 1
   const year = currentInvoiceDate.year()
   return { month, year }
+}
+
+export const getFormattedDate = (date: Date, format = 'MMMM'): string => {
+  return toFirstUpperCase(dayjs(date).format(format))
 }

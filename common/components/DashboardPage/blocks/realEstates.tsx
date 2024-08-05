@@ -1,9 +1,9 @@
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import CompaniesHeader from '@common/components/Tables/Companies/Header'
-import CompaniesTable from '@common/components/Tables/Companies/Table'
-import TableCard from '@common/components/UI/TableCard'
+import CompaniesHeader from '@components/Tables/Companies/Header'
+import CompaniesTable from '@components/Tables/Companies/Table'
+import TableCard from '@components/UI/TableCard'
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import { useRouter } from 'next/router'
@@ -38,6 +38,9 @@ const RealEstateBlock: React.FC<Props> = ({ domainId, streetId }) => {
     streetId: streetId || filters?.street || undefined,
     limit: isOnPage ? 0 : 5,
   })
+  const [realEstateActions, setRealEstateActions] = useState({
+    edit: false,
+  })
 
   return (
     <TableCard
@@ -49,6 +52,8 @@ const RealEstateBlock: React.FC<Props> = ({ domainId, streetId }) => {
           realEstates={realEstates}
           filters={filters}
           setFilters={setFilters}
+          realEstateActions={realEstateActions}
+          setRealEstateActions={setRealEstateActions}
         />
       }
     >
@@ -61,6 +66,8 @@ const RealEstateBlock: React.FC<Props> = ({ domainId, streetId }) => {
         isError={isError}
         filters={filters}
         setFilters={setFilters}
+        realEstateActions={realEstateActions}
+        setRealEstateActions={setRealEstateActions}
       />
     </TableCard>
   )

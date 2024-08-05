@@ -33,12 +33,12 @@ export enum Operations {
   WaterPrice = 'waterPrice',
   Custom = 'custom',
   PlacingPrice = 'placingPrice',
-  GeneralSum = 'generalSum'
+  GeneralSum = 'generalSum',
 }
 
 export enum ColumnsRoleView {
   GlobalAdmin = 1,
-  User = 2
+  User = 2,
 }
 
 export enum COLOR_THEME {

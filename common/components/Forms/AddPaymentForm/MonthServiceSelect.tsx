@@ -1,6 +1,6 @@
+import { getFormattedDate } from '@assets/features/formatDate'
+import { validateField } from '@assets/features/validators'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import { validateField } from '@common/assets/features/validators'
-import { getFormattedDate } from '@utils/helpers'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
@@ -46,17 +46,16 @@ function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
 
   return (
     <Form.Item
-      rules={!edit && validateField('required')}
+      rules={validateField('required')}
       name="monthService"
       label="Місяць"
     >
       <Select
-        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
         options={monthsServices?.data.map((i) => ({
           value: i._id,
           label: getFormattedDate(i.date, 'MMMM YYYY'),
         }))}
-        optionFilterProp="children"
+        optionFilterProp="label"
         placeholder="Місяць"
         disabled={monthsServices?.data?.length === 1 || edit}
         loading={isLoading}

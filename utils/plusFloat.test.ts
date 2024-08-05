@@ -4,7 +4,7 @@ import { plusFloat } from './helpers'
 describe('Multiply float numbers and format result to .xx', () => {
   test('default calculation', () => {
     expect(plusFloat(0.1, 0.2)).toBe(0.3)
-    expect(plusFloat((1/2), 0.2)).toBe(0.7)
+    expect(plusFloat(1 / 2, 0.2)).toBe(0.7)
     expect(plusFloat('0.144', '0.2')).toBe(0.34)
     expect(plusFloat('0.144', 0.2)).toBe(0.34)
     //format

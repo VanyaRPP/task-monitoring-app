@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import Domain from '@common/modules/models/Domain'
-import Payment from '@common/modules/models/Payment'
+import Domain from '@modules/models/Domain'
+import Payment from '@modules/models/Payment'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'

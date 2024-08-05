@@ -227,7 +227,7 @@ describe('Payments API - GET', () => {
   // FINISH TEST FOR USER AND CREATE A PR
 
   getPaymentsByYearTest(2023)
-  
+
   getPaymentsByYearTest(2022)
 
   it('GET payments by month', async () => {
@@ -345,7 +345,9 @@ it('get valid distinctCompanies as DomainAdmin', async () => {
   }
 
   expect(response.status).toHaveBeenCalledWith(200)
-  expect(response.realEstatesFilter[0].value.toString()).toEqual(realEstates[0]._id)
+  expect(response.realEstatesFilter[0].value.toString()).toEqual(
+    realEstates[0]._id
+  )
 })
 
 // it('load payments as GlobalAdmin by domainId - success', async () => {

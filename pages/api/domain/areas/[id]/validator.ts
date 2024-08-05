@@ -1,5 +1,5 @@
-import Domain from '@common/modules/models/Domain'
-import RealEstate from '@common/modules/models/RealEstate'
+import Domain from '@modules/models/Domain'
+import RealEstate from '@modules/models/RealEstate'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next'
 

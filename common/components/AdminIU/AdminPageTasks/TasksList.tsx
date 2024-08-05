@@ -1,9 +1,8 @@
-import React, { useState } from 'react'
+import TaskCard from '@components/TaskCard/index'
+import { ITask } from '@modules/models/Task'
 import { Empty, List } from 'antd'
-import { ITask } from 'common/modules/models/Task'
-import TaskCard from 'common/components/TaskCard/index'
+import React, { useState } from 'react'
 import s from './style.module.scss'
-import { useGetTaskByIdQuery } from '../../../api/taskApi/task.api'
 
 interface Props {
   tasks: ITask[]
