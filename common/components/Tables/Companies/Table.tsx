@@ -4,16 +4,7 @@ import {
   EyeOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons'
-import {
-  Alert,
-  Button,
-  Checkbox,
-  Popconfirm,
-  Table,
-  Tag,
-  message,
-  Tooltip,
-} from 'antd'
+import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import { useDeleteRealEstateMutation } from '@common/api/realestateApi/realestate.api'
 import {
   IExtendedRealestate,
@@ -22,9 +13,18 @@ import {
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
+import {
+  Alert,
+  Button,
+  Checkbox,
+  message,
+  Popconfirm,
+  Table,
+  Tag,
+  Tooltip,
+} from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
-import { IFilter } from '@common/api/paymentApi/payment.api.types'
 
 export interface Props {
   domainId?: string

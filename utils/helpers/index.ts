@@ -5,13 +5,13 @@ import Big from 'big.js'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
 import mongoose, { ObjectId } from 'mongoose'
-import { Roles, ServiceType } from './constants'
+import { Roles, ServiceType } from '../constants'
 import {
   getDomainsPipeline,
   getRealEstatesPipeline,
   getStreetsPipeline,
-} from './pipelines'
-import { PaymentOptions } from './types'
+} from '../pipelines'
+import { PaymentOptions } from '../types'
 
 export const toFirstUpperCase = (text: string) => {
   return text ? text[0].toUpperCase() + text.slice(1) : ''

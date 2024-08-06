@@ -1,9 +1,9 @@
-import React from 'react'
-import { Select } from 'antd'
-import s from './style.module.scss'
-import { isAdminCheck } from '@utils/helpers'
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { isAdminCheck } from '@utils/helpers'
+import { Select } from 'antd'
+import React from 'react'
+import s from './style.module.scss'
 
 interface Props {
   setDomainId: (domainId: string) => void

@@ -1,5 +1,5 @@
 import { expect } from '@jest/globals'
-import { toRoundFixed } from './helpers'
+import { toRoundFixed } from '..'
 
 describe('Parse string to float', () => {
   it('Handle 0 string values', () => {
