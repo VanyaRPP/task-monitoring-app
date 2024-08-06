@@ -2,10 +2,11 @@ import { validateField } from '@assets/features/validators'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
 import { Checkbox, Form, FormInstance, Input, InputNumber } from 'antd'
-import { FC } from 'react'
+import { FC,useEffect, useState } from 'react'
 import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
+import { useSession } from 'next-auth/react'
 
 interface Props {
   form: FormInstance<any>
@@ -20,6 +21,17 @@ const RealEstateForm: FC<Props> = ({
   editable = true,
   setIsValueChanged,
 }) => {
+  const { data: session } = useSession()
+  const [initialValue, setInitial] = useState<{ [key: string]: any }>({
+    adminEmails: [],
+  })
+  useEffect(() => {
+    if(session?.user.email){
+      setInitial({
+        adminEmails: [session?.user.email],
+      })
+    }
+  }, [form])
   return (
     <Form
       form={form}
@@ -67,7 +79,7 @@ const RealEstateForm: FC<Props> = ({
           disabled={!editable}
         />
       </Form.Item>
-      <EmailSelect form={form} disabled={!editable} />
+      <EmailSelect form={form} disabled={!editable} initialValue={initialValue.adminEmails}/>
       <Form.Item
         name="totalArea"
         label="Площа (м²)"

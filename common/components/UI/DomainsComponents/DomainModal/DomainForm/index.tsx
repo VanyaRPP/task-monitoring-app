@@ -1,9 +1,11 @@
 import { validateField } from '@assets/features/validators'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
 import { Form, FormInstance, Input } from 'antd'
-import { FC } from 'react'
+import { FC, useEffect, useState } from 'react'
 import DomainStreets from './DomainStreets'
 import s from './style.module.scss'
+import { useSession } from 'next-auth/react'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 interface Props {
   form: FormInstance<any>
@@ -16,6 +18,18 @@ const DomainForm: FC<Props> = ({
   editable = true,
   setIsValueChanged,
 }) => {
+  const { data: session } = useSession()
+  const { data: user } = useGetCurrentUserQuery()
+  const [initialValue, setInitial] = useState<{ [key: string]: any }>({
+    adminEmails: [],
+  })
+  useEffect(() => {
+    if(session?.user.email && user.roles.includes("DomainAdmin")){
+      setInitial({
+        adminEmails: [session?.user.email],
+      })
+    }
+  }, [form])
   return (
     <Form
       form={form}
@@ -32,7 +46,7 @@ const DomainForm: FC<Props> = ({
           disabled={!editable}
         />
       </Form.Item>
-      <EmailSelect form={form} disabled={!editable} />
+      <EmailSelect form={form} disabled={!editable} initialValue={initialValue.adminEmails}/>
       <DomainStreets disabled={!editable} />
       <Form.Item
         name="description"

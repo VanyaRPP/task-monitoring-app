@@ -7,11 +7,13 @@ import { useEffect } from 'react'
 interface EmailSelectProps {
   form: any
   disabled?: boolean
+  initialValue?: string[]
 }
 
 export default function EmailSelect({
   form,
   disabled = false,
+  initialValue = [],
 }: EmailSelectProps) {
   const { data, isLoading } = useGetDomainsQuery({})
   const [formInstance] = useForm() // Access the form instance
@@ -27,6 +29,10 @@ export default function EmailSelect({
       formInstance.setFieldsValue({ adminEmails }) // Use form instance's setFieldsValue
     }
   }, [data]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    form.setFieldsValue({ adminEmails: initialValue })
+  }, [initialValue])
 
   const adminEmailOptions =
     data?.reduce((uniqueAdminEmails, domain) => {
