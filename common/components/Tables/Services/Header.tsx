@@ -5,8 +5,8 @@ import { useState } from 'react'
 
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import AddServiceModal from '@common/components/AddServiceModal'
-import AddressesFilterTags from '@common/components/UI/Reusable/AddressesFilterTags'
+import AddServiceModal from '@components/AddServiceModal'
+import AddressesFilterTags from '@components/UI/Reusable/AddressesFilterTags'
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import s from './style.module.scss'
@@ -77,7 +77,7 @@ const ServicesHeader: React.FC<Props> = ({
       </div>
       {showAddButton && isAdminCheck(user?.roles) && (
         <>
-          <Button type="link" onClick={openModal}>
+          <Button className={s.firstBlock} type="link" onClick={openModal}>
             <PlusOutlined /> Додати
           </Button>
         </>

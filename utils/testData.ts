@@ -312,7 +312,7 @@ export const services = [
   },
   {
     _id: '64d68421d9ba2fc8fea79d51',
-    date: new Date(2020, 1, 12),
+    date: new Date(2019, 1, 12),
     domain: domains[0]._id as any,
     street: streets[0]._id,
     rentPrice: 10,

@@ -1,5 +1,11 @@
 import { QuestionCircleOutlined } from '@ant-design/icons'
 import {
+  useAcceptWorkerMutation,
+  useAddTaskExecutorMutation,
+} from '@common/api/taskApi/task.api'
+import Modal from '@components/UI/ModalWindow/index'
+import { ITask, ITaskExecutors } from '@modules/models/Task'
+import {
   Avatar,
   Button,
   Card,
@@ -10,11 +16,6 @@ import {
 } from 'antd'
 import Meta from 'antd/lib/card/Meta'
 import Column from 'antd/lib/table/Column'
-import {
-  useAcceptWorkerMutation,
-  useAddTaskExecutorMutation,
-} from 'common/api/taskApi/task.api'
-import { ITask, ITaskExecutors } from 'common/modules/models/Task'
 import { useSession } from 'next-auth/react'
 import { useState } from 'react'
 import {
@@ -23,7 +24,6 @@ import {
 } from '../../api/userApi/user.api'
 import CompetitionWorkerCard from '../CompetitionWorkerCard'
 import CompetitionForm from '../Forms/CompetitionForm/index'
-import Modal from '../UI/ModalWindow/index'
 import UserLink from '../UserLink'
 import s from './style.module.scss'
 
@@ -66,6 +66,7 @@ const CompetitionCard: React.FC<{
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
 
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
 
   const { data: session } = useSession()
   const { data: userData } = useGetUserByEmailQuery(`${session?.user?.email}`)
@@ -144,7 +145,7 @@ const CompetitionCard: React.FC<{
       <Modal
         title="Подати заявку"
         open={isModalVisible}
-        changesForm={() => form.isFieldsTouched()}
+        changed={() => isValueChanged}
         onCancel={onCancelModal}
         onOk={onSubmitModal}
         okText="Додати"
@@ -154,6 +155,7 @@ const CompetitionCard: React.FC<{
           isFormDisabled={isFormDisabled}
           form={form}
           task={task}
+          setIsValueChanged={setIsValueChanged}
         />
       </Modal>
       <Table key="competition" dataSource={executors} pagination={false}>

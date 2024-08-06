@@ -1,5 +1,5 @@
 import { SelectOutlined } from '@ant-design/icons'
-import TableCard from '@common/components/UI/TableCard'
+import TableCard from '@components/UI/TableCard'
 import { AppRoutes } from '@utils/constants'
 import { getCount } from '@utils/helpers'
 import { Button, Table } from 'antd'

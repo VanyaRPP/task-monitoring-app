@@ -1,5 +1,5 @@
 import { expect } from '@jest/globals'
-import handler from '../../../pages/api/domain/index'
+import handler from '@pages/api/domain/index'
 
 import { parseReceived } from '@utils/helpers'
 import { mockLoginAs } from '@utils/mockLoginAs'

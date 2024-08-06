@@ -1,10 +1,10 @@
-import HomePageTitle from '@common/assets/svg/homePageTitle'
+import cityImg1 from '@assets/images/city.png'
+import cityImg2 from '@assets/images/city2.png'
+import HomePageTitle from '@assets/svg/homePageTitle'
 import { AppRoutes } from '@utils/constants'
 import { Button } from 'antd'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import cityImg1 from '../../assets/images/city.png'
-import cityImg2 from '../../assets/images/city2.png'
 import s from './style.module.scss'
 
 const HomePage: React.FC = () => {

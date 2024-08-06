@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
+import Task from '@modules/models/Task'
 import start, { Data } from '@pages/api/api.config'
 import { TaskStatuses } from '@utils/constants'
-import Task from 'common/modules/models/Task'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()

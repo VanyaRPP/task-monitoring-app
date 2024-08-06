@@ -1,8 +1,6 @@
-import initMiddleware from '@common/lib/initMiddleware'
-import validateMiddleware from '@common/lib/validateMiddleware'
-import Domain from '@common/modules/models/Domain'
-import Payment from '@common/modules/models/Payment'
-import RealEstate from '@common/modules/models/RealEstate'
+import Domain from '@modules/models/Domain'
+import Payment from '@modules/models/Payment'
+import RealEstate from '@modules/models/RealEstate'
 import start, { ExtendedData } from '@pages/api/api.config'
 import {
   getCreditDebitPipeline,
@@ -16,55 +14,10 @@ import {
   getFilterForAddress,
 } from '@utils/helpers'
 import { getStreetsPipeline } from '@utils/pipelines'
-import { check, validationResult } from 'express-validator'
 import { FilterQuery } from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
-
-const postValidateBody = initMiddleware(
-  validateMiddleware(
-    [
-      check('date'),
-      check(
-        'credit',
-        'Сума кредита повинна бути цілим значенням в межах [1, 200000]'
-      ).optional(),
-      check(
-        'debit',
-        'Сума дебита повинна бути цілим значенням в межах [1, 200000]'
-      )
-        .isFloat({ min: 0, max: 200000 })
-        .optional(),
-      check(
-        'maintenance.sum',
-        'Сума за утримання повинна бути в межах [1, 200000]' // TODO: Change on valid range
-      )
-        .isFloat({ min: 0, max: 200000 })
-        .optional(),
-      check(
-        'placing.sum',
-        'Сума за розміщення повинна бути в межах [1, 200000]' // TODO: Change on valid range
-      )
-        .isFloat({ min: 0, max: 200000 })
-        .optional(),
-      check(
-        'electricity.sum',
-        'Сума за електропостачання повинна бути в межах [1, 200000]' // TODO: Change on valid range
-      )
-        .isFloat({ min: 0, max: 200000 })
-        .optional(),
-      check(
-        'water.sum',
-        'Сума за водопостачання повинна бути в межах [1, 200000]' // TODO: Change on valid range
-      )
-        .isFloat({ min: 0, max: 200000 })
-        .optional(),
-      check('description').trim(),
-    ],
-    validationResult
-  )
-)
 
 export default async function handler(
   req: NextApiRequest,
@@ -248,7 +201,6 @@ export default async function handler(
   } else if (req.method === 'POST') {
     try {
       if (isAdmin) {
-        await postValidateBody(req, res)
         /* eslint-disable @typescript-eslint/ban-ts-comment */
         // @ts-ignore
         const payment = await Payment.create(req.body)

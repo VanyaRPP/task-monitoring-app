@@ -1,6 +1,7 @@
 import {
   DeleteOutlined,
   EditOutlined,
+  EyeOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
@@ -34,6 +35,14 @@ export interface Props {
   isError: boolean
   filters?: any
   setFilters?: (filters: any) => void
+  setRealEstateActions: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+    }>
+  >
+  realEstateActions: {
+    edit: boolean
+  }
 }
 
 const CompaniesTable: React.FC<Props> = ({
@@ -45,6 +54,8 @@ const CompaniesTable: React.FC<Props> = ({
   isError,
   filters,
   setFilters,
+  setRealEstateActions,
+  realEstateActions,
 }) => {
   const router = useRouter()
   const { pathname } = router
@@ -97,6 +108,7 @@ const CompaniesTable: React.FC<Props> = ({
         realEstatesFilter: realEstates?.realEstatesFilter,
         filters,
         pathname,
+        setRealEstateActions,
       })}
       dataSource={realEstates?.data}
       scroll={{ x: tableWidth }}
@@ -132,6 +144,7 @@ const getDefaultColumns = ({
   realEstatesFilter,
   filters,
   pathname,
+  setRealEstateActions,
 }: {
   domainId?: string
   streetId?: string
@@ -145,6 +158,11 @@ const getDefaultColumns = ({
   realEstatesFilter?: IFilter[]
   filters?: any
   pathname?: string
+  setRealEstateActions: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+    }>
+  >
 }): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {
@@ -219,6 +237,24 @@ const getDefaultColumns = ({
       width: 170,
       render: (value) => <Checkbox checked={value} disabled />,
     },
+    {
+      align: 'center',
+      fixed: 'right',
+      title: '',
+      width: 50,
+      render: (_, realEstate: IExtendedRealestate) => (
+        <Button
+          style={{ padding: 0 }}
+          type="link"
+          onClick={() => {
+            setCurrentRealEstate(realEstate)
+            setRealEstateActions({ edit: false })
+          }}
+        >
+          <EyeOutlined />
+        </Button>
+      ),
+    },
   ]
 
   if (isAdmin) {
@@ -231,7 +267,10 @@ const getDefaultColumns = ({
         <Button
           style={{ padding: 0 }}
           type="link"
-          onClick={() => setCurrentRealEstate(realEstate)}
+          onClick={() => {
+            setCurrentRealEstate(realEstate)
+            setRealEstateActions({ edit: true })
+          }}
         >
           <EditOutlined />
         </Button>

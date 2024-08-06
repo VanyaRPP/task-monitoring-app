@@ -17,11 +17,9 @@ export default function InvoiceNumber({ form, paymentActions }) {
   }, [newInvoiceNumber]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <Form.Item
-      name="invoiceNumber"
-      label="№ інвойса"
-    >
+    <Form.Item name="invoiceNumber" label="№ інвойса">
       <InputNumber
+        style={{ minWidth: '166px' }}
         placeholder="Вкажіть № інвойса"
         disabled={paymentActions?.preview}
       />

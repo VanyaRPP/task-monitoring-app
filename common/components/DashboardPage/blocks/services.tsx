@@ -4,9 +4,9 @@ import {
   IServiceFilter,
 } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import ServicesHeader from '@common/components/Tables/Services/Header'
-import ServicesTable from '@common/components/Tables/Services/Table'
-import TableCard from '@common/components/UI/TableCard'
+import ServicesHeader from '@components/Tables/Services/Header'
+import ServicesTable from '@components/Tables/Services/Table'
+import TableCard from '@components/UI/TableCard'
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import { useRouter } from 'next/router'
@@ -31,8 +31,9 @@ const ServicesBlock = () => {
     limit: isOnPage ? 0 : 5,
     streetId: filter?.street || undefined,
     domainId: filter?.domain || undefined,
+    year: filter?.year,
+    month: filter?.month,
   })
-
   return (
     <TableCard
       title={

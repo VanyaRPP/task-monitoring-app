@@ -4,42 +4,25 @@ import {
   PlusOutlined,
   SelectOutlined,
 } from '@ant-design/icons'
+import { dateToDefaultFormat } from '@assets/features/formatDate'
 import {
   useDeleteMultiplePaymentsMutation,
   useGeneratePdfMutation,
 } from '@common/api/paymentApi/payment.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { dateToDefaultFormat } from '@common/assets/features/formatDate'
-import AddPaymentModal from '@common/components/AddPaymentModal'
-import PaymentCascader from '@common/components/UI/PaymentCascader/index'
+import AddPaymentModal from '@components/AddPaymentModal'
 import StreetsSelector from '@components/StreetsSelector'
-import SelectForDebitAndCredit from '@components/UI/PaymentSelect/index'
+import ImportInvoices from '@components/UI/PaymentCardHeader/ImportInvoices'
+import PaymentCascader from '@components/UI/PaymentCascader/index'
+import SelectForDebitAndCredit from '@components/UI/PaymentSelect'
+import FilterTags from '@components/UI/Reusable/FilterTags'
 import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
-import { Button, message } from 'antd'
+import { Button, Flex, Space, message } from 'antd'
 import Modal from 'antd/lib/modal/Modal'
 import { saveAs } from 'file-saver'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import FilterTags from '../Reusable/FilterTags'
-import ImportInvoices from './ImportInvoices'
-import s from './style.module.scss'
-
-const columns: any = [
-  {
-    title: 'Надавач поcлуг',
-    dataIndex: 'domain',
-  },
-  {
-    title: 'Компанія',
-    dataIndex: 'company',
-  },
-  {
-    title: 'Дата створення платежу',
-    dataIndex: 'date',
-    render: dateToDefaultFormat,
-  },
-]
 
 const PaymentCardHeader = ({
   setCurrentDateFilter,
@@ -61,10 +44,7 @@ const PaymentCardHeader = ({
 
   const { data: currUser } = useGetCurrentUserQuery()
 
-  const {
-    pathname,
-    query: { email },
-  } = router
+  const { pathname } = router
 
   const closeModal = () => {
     setIsModalOpen(false)
@@ -132,93 +112,76 @@ const PaymentCardHeader = ({
     }
   }
 
-  return (
-    <>
-      <div className={s.tableHeader}>
-        {isAdmin ? (
-          <>
-            {email ? (
-              <span
-                className={s.title}
-              >{`Оплата від користувача ${email}`}</span>
-            ) : (
-              <div className={s.firstBlock}>
-                <Button
-                  type="link"
-                  onClick={() => router.push(AppRoutes.PAYMENT)}
-                >
-                  Платежі
-                  <SelectOutlined className={s.Icon} />
-                </Button>
-                {location.pathname === AppRoutes.PAYMENT && (
-                  <>
-                    <PaymentCascader onChange={setCurrentDateFilter} />
-                    <SelectForDebitAndCredit
-                      onChange={setCurrentTypeOperation}
-                    />
-                    <StreetsSelector
-                      filters={filters}
-                      setFilters={setFilters}
-                      streets={streets}
-                    />
-                    <FilterTags
-                      filters={filters}
-                      setFilters={setFilters}
-                      collection={payments}
-                    />
-                  </>
-                )}
-              </div>
+  if (!isAdmin && currUser) {
+    return (
+      <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT)}>
+        Мої оплати
+        <SelectOutlined />
+      </Button>
+    )
+  }
+
+  if (isAdmin) {
+    return (
+      <Flex justify="space-between">
+        <Space>
+          <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT)}>
+            Платежі
+            <SelectOutlined />
+          </Button>
+          {location.pathname === AppRoutes.PAYMENT && (
+            <Space>
+              <PaymentCascader onChange={setCurrentDateFilter} />
+              <SelectForDebitAndCredit onChange={setCurrentTypeOperation} />
+              <StreetsSelector
+                filters={filters}
+                setFilters={setFilters}
+                streets={streets}
+              />
+              <FilterTags
+                filters={filters}
+                setFilters={setFilters}
+                collection={payments}
+              />
+            </Space>
+          )}
+        </Space>
+        <Flex wrap align="center" justify="flex-end">
+          <ImportInvoices />
+          <Button
+            type="link"
+            onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
+          >
+            Інвойси <SelectOutlined />
+          </Button>
+          <Button type="link" onClick={() => setIsModalOpen(true)}>
+            <PlusOutlined /> Додати
+          </Button>
+          {(isModalOpen || currentPayment) && (
+            <AddPaymentModal
+              paymentActions={paymentActions}
+              paymentData={currentPayment}
+              closeModal={closeModal}
+            />
+          )}
+          {isAdmin &&
+            pathname === AppRoutes.PAYMENT &&
+            selectedPayments.length > 0 && (
+              <Button type="link" onClick={() => handleGeneratePdf()}>
+                Завантажити рахунки <DownloadOutlined />
+              </Button>
             )}
-            <div className={s.secondBlock}>
-              <ImportInvoices />
-              <Button
-                type="link"
-                onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
-              >
-                Інвойси <SelectOutlined className={s.Icon} />
+          {isGlobalAdmin &&
+            pathname === AppRoutes.PAYMENT &&
+            selectedPayments.length > 0 && (
+              <Button type="link" onClick={() => handleDeletePayments()}>
+                <DeleteOutlined /> Видалити
               </Button>
-              <Button type="link" onClick={() => setIsModalOpen(true)}>
-                <PlusOutlined /> Додати
-              </Button>
-              {isAdmin &&
-                pathname === AppRoutes.PAYMENT &&
-                selectedPayments.length > 0 && (
-                  <Button type="link" onClick={() => handleGeneratePdf()}>
-                    Завантажити рахунки <DownloadOutlined />
-                  </Button>
-                )}
-              {isGlobalAdmin &&
-                pathname === AppRoutes.PAYMENT &&
-                selectedPayments.length > 0 && (
-                  <Button type="link" onClick={() => handleDeletePayments()}>
-                    <DeleteOutlined /> Видалити
-                  </Button>
-                )}
-            </div>
-          </>
-        ) : (
-          currUser && (
-            <Button
-              className={s.myPayments}
-              type="link"
-              onClick={() => router.push(AppRoutes.PAYMENT)}
-            >
-              Мої оплати
-              <SelectOutlined className={s.Icon} />
-            </Button>
-          )
-        )}
-      </div>
-      {(isModalOpen || currentPayment) && (
-        <AddPaymentModal
-          paymentActions={paymentActions}
-          paymentData={currentPayment}
-          closeModal={closeModal}
-        />
-      )}
-    </>
-  )
+            )}
+        </Flex>
+      </Flex>
+    )
+  }
 }
 
 export default PaymentCardHeader

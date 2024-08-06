@@ -1,9 +1,8 @@
-import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
 import { IStreet } from '@common/api/streetApi/street.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import StreetsHeader from '@common/components/Tables/Streets/Header'
-import StreetsTable from '@common/components/Tables/Streets/Table'
-import TableCard from '@common/components/UI/TableCard'
+import StreetsHeader from '@components/Tables/Streets/Header'
+import StreetsTable from '@components/Tables/Streets/Table'
+import TableCard from '@components/UI/TableCard'
 import { useState } from 'react'
 
 const StreetsBlock: React.FC<{

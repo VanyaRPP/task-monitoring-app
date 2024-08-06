@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { authOptions } from '@pages/api/auth/[...nextauth]'
+import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
-import Domain from '@common/modules/models/Domain'
+import type { NextApiRequest, NextApiResponse } from 'next'
 start()
 
 export default async function handler(
@@ -37,7 +36,7 @@ export default async function handler(
         return res.status(400).json({ success: false, error })
       }
 
-      case 'PATCH':
+    case 'PATCH':
       try {
         if (isGlobalAdmin) {
           const response = await Domain.findOneAndUpdate(

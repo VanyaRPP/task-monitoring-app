@@ -1,7 +1,7 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import { renderCurrency } from '@utils/helpers'
-import moment from 'moment'
+import dayjs from 'dayjs'
 import { ServiceType } from '../constants'
+import { renderCurrency } from '../helpers'
 import nameField from './nameFieldGenerator'
 
 export async function generateHtmlFromThemplate(
@@ -134,10 +134,10 @@ export async function generateHtmlFromThemplate(
   
           <div class="invoice-title">
             <h1>INVOICE № INV-${paymentData.invoiceNumber}</h1>
-            <b>Від ${moment(paymentData?.invoiceCreationDate)?.format?.(
+            <b>Від ${dayjs(paymentData?.invoiceCreationDate)?.format?.(
               'DD.MM.YYYY'
             )} року.</b>
-            <p>Підлягає сплаті до ${moment(paymentData?.invoiceCreationDate)
+            <p>Підлягає сплаті до ${dayjs(paymentData?.invoiceCreationDate)
               .add(5, 'd')
               .format('DD.MM.YYYY')} року</p>
           </div>

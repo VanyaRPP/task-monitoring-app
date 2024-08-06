@@ -3,7 +3,7 @@ import { Button } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 
-import AddStreetModal from '@common/components/AddStreetModal'
+import AddStreetModal from '@components/AddStreetModal'
 import { AppRoutes } from '@utils/constants'
 
 export interface Props {

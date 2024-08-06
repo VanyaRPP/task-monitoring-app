@@ -1,4 +1,8 @@
 import { UserOutlined } from '@ant-design/icons'
+import ModalNoFooter from '@components/UI/ModalNoFooter'
+import RateStars from '@components/UI/RateStars'
+import Steper from '@components/UI/Steper'
+import { IFeedback } from '@modules/models/User'
 import { TaskStatuses } from '@utils/constants'
 import { Alert, Avatar, Button, Card, Form, Image } from 'antd'
 import { useSession } from 'next-auth/react'
@@ -8,11 +12,7 @@ import {
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
 } from '../../api/userApi/user.api'
-import { IFeedback } from '../../modules/models/User'
 import AddFeedbackForm from '../Forms/AddFeedbackForm'
-import ModalNoFooter from '../UI/ModalNoFooter'
-import RateStars from '../UI/RateStars'
-import Steper from '../UI/Steper'
 import s from './style.module.scss'
 // import ConfirmTask from '../Forms/ConfirmTask'
 

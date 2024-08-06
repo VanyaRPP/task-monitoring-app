@@ -1,8 +1,8 @@
+import StatusTag from '@components/UI/StatusTag'
+import { ITask } from '@modules/models/Task'
 import { AppRoutes } from '@utils/constants'
 import { Table } from 'antd'
 import { useRouter } from 'next/router'
-import { ITask } from '../../modules/models/Task'
-import StatusTag from '../UI/StatusTag'
 import ListItemDeadline from './deadline'
 import s from './style.module.scss'
 

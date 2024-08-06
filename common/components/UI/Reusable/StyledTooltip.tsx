@@ -7,9 +7,7 @@ const StyledTooltip: React.FC<{
 }> = ({ title }) => {
   return (
     <Tooltip title={title}>
-      <QuestionCircleOutlined
-        className={s.tooltipIcon}
-      />
+      <QuestionCircleOutlined className={s.tooltipIcon} />
     </Tooltip>
   )
 }

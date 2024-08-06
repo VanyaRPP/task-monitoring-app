@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Form, message } from 'antd'
-import React, { FC, useEffect } from 'react'
-import { IStreet } from '@common/modules/models/Street'
+import React, { FC, useEffect, useState } from 'react'
 import { useAddStreetMutation } from '@common/api/streetApi/street.api'
+import Modal from '@components/UI/ModalWindow'
+import { IStreet } from '@modules/models/Street'
+import { Form, message } from 'antd'
+
 import AddStreetForm from '../Forms/AddStreetForm'
-import Modal from '../UI/ModalWindow'
 
 interface Props {
   closeModal: VoidFunction
@@ -21,6 +22,7 @@ const AddStreetModal: FC<Props> = ({
   currentStreet,
 }) => {
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
   const [addStreet, { isLoading }] = useAddStreetMutation()
   const { edit, preview } = streetActions || {}
   const handleSubmit = async () => {
@@ -56,7 +58,7 @@ const AddStreetModal: FC<Props> = ({
     <Modal
       title={getTitle()}
       onOk={handleSubmit}
-      changesForm={() => !preview && form.isFieldsTouched()}
+      changed={() => isValueChanged}
       onCancel={() => {
         form.resetFields()
         closeModal()
@@ -67,7 +69,11 @@ const AddStreetModal: FC<Props> = ({
       preview={preview}
       okButtonProps={{ style: { ...(!edit && { display: 'none' }) } }}
     >
-      <AddStreetForm form={form} editable={edit} />
+      <AddStreetForm
+        form={form}
+        editable={edit}
+        setIsValueChanged={setIsValueChanged}
+      />
     </Modal>
   )
 }

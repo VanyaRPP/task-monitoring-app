@@ -1,11 +1,12 @@
 import { UserOutlined } from '@ant-design/icons'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
-import { Avatar, Button, Card, Image, Skeleton, Tag } from 'antd'
+import { Avatar, Button, Card, Skeleton, Tag } from 'antd'
 import classNames from 'classnames'
-import { useGetCurrentUserQuery } from 'common/api/userApi/user.api'
 import { signIn, signOut, useSession } from 'next-auth/react'
+import NextImage from 'next/image'
 import { default as Router, default as router } from 'next/router'
 import { useState } from 'react'
 import s from './style.module.scss'
@@ -60,12 +61,13 @@ function SessionUser({ image }) {
       >
         <Avatar
           icon={<UserOutlined />}
+          size={32}
           src={
-            <Image
+            <NextImage
               src={image || undefined}
-              preview={false}
-              style={{ width: 32 }}
-              alt="UserImg"
+              width={32}
+              height={32}
+              alt="avatar"
             />
           }
         />
@@ -77,13 +79,14 @@ function SessionUser({ image }) {
       >
         <Card onClick={(e) => e.stopPropagation()} className={s.Card}>
           <Avatar
-            size={100}
             icon={<UserOutlined />}
+            size={100}
             src={
-              <Image
+              <NextImage
                 src={user?.image || undefined}
-                preview={false}
-                alt="UserImg"
+                width={100}
+                height={100}
+                alt="avatar"
               />
             }
           />

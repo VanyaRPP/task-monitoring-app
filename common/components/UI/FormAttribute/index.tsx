@@ -1,4 +1,4 @@
-import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
+import { useInvoicesPaymentContext } from '@components/DashboardPage/blocks/paymentsBulk'
 import { toRoundFixed } from '@utils/helpers'
 import { Form, FormInstance, Input } from 'antd'
 import { NamePath } from 'antd/lib/form/interface'

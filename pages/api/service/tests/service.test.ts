@@ -1,5 +1,5 @@
 import { expect } from '@jest/globals'
-import handler from '.'
+import handler from '..'
 
 import { parseReceived, removeProps, unpopulate } from '@utils/helpers'
 import { mockLoginAs } from '@utils/mockLoginAs'
@@ -381,6 +381,142 @@ describe('Service API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
     expect(response.data).toEqual([])
+  })
+
+  it('should load services as GlobalAdmin with limit and year', async () => {
+    const limit = 2
+    const year = '2020'
+
+    await mockLoginAs(users.globalAdmin)
+
+    const mockReq = {
+      method: 'GET',
+      query: { limit, year },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = unpopulate(
+      removeProps(response.data.map((service) => service._doc))
+    )
+    const expected = services.filter(service => {
+      return service.date.getFullYear() === 2020
+    }).slice(0, limit);
+
+    expect(received).toEqual(expected)
+  })
+
+  it('should load services as DomainAdmin with limit and year', async () => {
+    await mockLoginAs(users.domainAdmin)
+    const limit = 1
+    const year = '2020'
+
+    const mockReq = {
+      method: 'GET',
+      query: {limit, year},
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = unpopulate(
+      removeProps(response.data.map((service) => service._doc))
+    )
+    const expected = services.filter((service) =>
+      domains
+        .find((domain) => domain._id === service.domain)
+        .adminEmails.includes(users.domainAdmin.email) &&
+      new Date(service.date).getFullYear() === 2020
+    )
+
+    expect(received).toEqual(expected)
+  })
+
+  it('should load services as User with limit and year', async () => {
+    await mockLoginAs(users.user)
+
+    const limit = 2
+    const year = '2020'
+
+    const mockReq = {
+      method: 'GET',
+      query: {year, limit},
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+    const received = unpopulate(
+      removeProps(response.data.map((service) => service._doc))
+    )
+    const expected = services.filter(service => {
+      return service.date.getFullYear() === 2020
+    }).slice(0, limit);
+
+    expect(received).toEqual(expected)
+  })
+
+  it('should load services as GlobalAdmin with year', async () => {
+    const year = '2019, 2020'
+
+    await mockLoginAs(users.globalAdmin)
+
+    const mockReq = {
+      method: 'GET',
+      query: { year },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      status: mockRes.status,
+      data: mockRes.json.mock.lastCall[0].data,
+    }
+
+    expect(response.status).toHaveBeenCalledWith(200)
+
+    const received = unpopulate(
+      removeProps(response.data.map((service) => service._doc))
+    )
+    const expected = services.filter(service => {
+      return service.date.getFullYear() === 2019 || service.date.getFullYear() === 2020
+    });
+
+    expect(received).toEqual(expected)
   })
 })
 
