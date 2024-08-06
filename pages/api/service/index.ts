@@ -67,7 +67,9 @@ export default async function handler(
       {
         $project: {
           _id: 0,
-          text: '$addressDetails.address (м. ${addressDetails.city})',
+          text: {
+            $concat: ['$addressDetails.address' , ' (м. ', '$addressDetails.city', ')']
+          },
           value: '$_id',
         },
       },
