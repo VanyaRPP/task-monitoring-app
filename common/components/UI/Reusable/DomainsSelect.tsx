@@ -29,7 +29,7 @@ export default function DomainsSelect({
       rules={validateField('required')}
     >
       <Select
-        onSelect={() => {
+        onChange={() => {
           // TODO: check if this should be inside street component
           form.resetFields(['street'])
         }}
