@@ -425,8 +425,9 @@ const PaymentsBlock = () => {
       <>
         <Table
           rowSelection={
-            currUser?.roles?.includes(Roles.GLOBAL_ADMIN) &&
-            pathname === AppRoutes.PAYMENT
+            currUser?.roles?.includes(Roles.GLOBAL_ADMIN) ||
+            (currUser?.roles?.includes(Roles.DOMAIN_ADMIN) &&
+              pathname === AppRoutes.PAYMENT)
               ? rowSelection
               : null
           }
