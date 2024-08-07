@@ -13,7 +13,6 @@ import PaymentCardHeader from '@components/UI/PaymentCardHeader'
 import TableCard from '@components/UI/TableCard'
 import {
   AppRoutes,
-  ColumnsRoleView,
   Operations,
   PERIOD_FILTR,
   Roles,
@@ -324,44 +323,27 @@ const PaymentsBlock = () => {
       payments?.data && (
         <Table.Summary>
           <Table.Summary.Row className={s.summ_item}>
-            {columns.map((item, index) => {
-              const dataindex = isGlobalAdmin
-                ? columns[index - 1]?.dataIndex
-                : item.dataIndex
-
-              return (
-                <Table.Summary.Cell
-                  index={0}
-                  key={index}
-                  colSpan={item.dataIndex === '' ? 2 : 1}
-                >
-                  {getFormattedValue(dataindex)}
-                </Table.Summary.Cell>
-              )
-            })}
+            {columns.map((item, index) => (
+              <Table.Summary.Cell index={index} key={index}>
+                {getFormattedValue(item.dataIndex)}
+              </Table.Summary.Cell>
+            ))}
           </Table.Summary.Row>
           <Table.Summary.Row className={s.saldo}>
-            {columns.slice(0, columns.length - 1).map((item, index) => {
-              const dataindex = isGlobalAdmin
-                ? columns[index - 1]?.dataIndex
-                : item.dataIndex
+            {columns.map((item, index) => {
+              // Render Debit + Credit column ans span = 2
+              const colSpan = item.dataIndex === Operations.Debit ? 2 : 1
 
-              const colSpan = isGlobalAdmin
-                ? item.dataIndex === Operations.Credit
-                  ? ColumnsRoleView.User
-                  : ColumnsRoleView.GlobalAdmin
-                : item.dataIndex === Operations.Debit
-                ? ColumnsRoleView.User
-                : ColumnsRoleView.GlobalAdmin
+              // Hide Debit + Credit column duplicate
+              if (item.dataIndex === Operations.Credit) return
 
               return (
-                <Table.Summary.Cell colSpan={colSpan} index={0} key={index}>
-                  {dataindex === Operations.Debit
-                    ? (
-                        (payments?.totalPayments?.debit || 0) -
-                        (payments?.totalPayments?.credit || 0)
-                      )?.toFixed(2)
-                    : false}
+                <Table.Summary.Cell index={index} key={index} colSpan={colSpan}>
+                  {item.dataIndex === Operations.Debit &&
+                    (
+                      (payments?.totalPayments?.debit || 0) -
+                      (payments?.totalPayments?.credit || 0)
+                    )?.toFixed(2)}
                 </Table.Summary.Cell>
               )
             })}
