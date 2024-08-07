@@ -1,7 +1,7 @@
-import { SunFilled } from '@ant-design/icons'
 import { Avatar } from '@components/UI/Avatar'
 import { Breadcrumb, BreadcrumbPath } from '@components/UI/Breadcrumb'
-import { Button, Flex, Layout } from 'antd'
+import ThemeSwitcher from '@components/UI/ThemeSwitcher'
+import { Flex, Layout } from 'antd'
 import classNames from 'classnames'
 import styles from './style.module.scss'
 
@@ -25,7 +25,7 @@ export const Header: React.FC<HeaderProps> = ({ className, style, path }) => {
       >
         <Breadcrumb path={path} />
         <Flex gap={8} align="center">
-          <Button icon={<SunFilled />} size="large" shape="circle" />
+          <ThemeSwitcher />
           <Avatar />
         </Flex>
       </Flex>

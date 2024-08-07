@@ -1,5 +1,5 @@
 import { AppRoutes } from '@utils/constants'
-import { Layout, Menu, SiderProps } from 'antd'
+import { Layout, Menu, SiderProps, Typography } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import styles from './style.module.scss'
@@ -17,11 +17,9 @@ export const Sidebar: React.FC<Omit<SiderProps, 'children'>> = (props) => {
       collapsed={collapsed}
       {...props}
     >
-      {collapsed ? (
-        <div className={styles.Logo}>[LOGO]</div>
-      ) : (
-        <div className={styles.Logo}>[LOGO] E-ORENDA</div>
-      )}
+      <Typography.Text className={styles.Logo}>
+        {collapsed ? '[LOGO]' : '[LOGO] E-ORENDA'}
+      </Typography.Text>
       <Menu
         selectedKeys={[router.asPath]}
         defaultOpenKeys={[
