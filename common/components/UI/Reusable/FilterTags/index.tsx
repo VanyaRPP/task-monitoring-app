@@ -63,7 +63,7 @@ const FilterTags = ({ filters, setFilters, collection }) => {
               ))}
             </div>
           ) : (collection?.currentCompaniesCount ||
-              collection?.realEstatesFilter?.length) === 1 ? (
+            collection?.realEstatesFilter?.length) === 1 ? (
             <SingleTag
               name={
                 collection?.data?.[0]?.company?.companyName ||
