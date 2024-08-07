@@ -372,7 +372,9 @@ const PlacingSum: React.FC<{ name: number }> = ({ name }) => {
     <Tooltip
       title={
         inflicion &&
-        `Значення попереднього місяця + значення інфляції в цьому рахунку (${previousPlacingPrice} + ${inflicionAmount})`
+        `Значення попереднього місяця + значення інфляції в цьому рахунку (${toRoundFixed(
+          previousPlacingPrice
+        )} + ${toRoundFixed(inflicionAmount)})`
       }
     >
       <Form.Item
