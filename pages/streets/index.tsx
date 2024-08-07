@@ -1,11 +1,10 @@
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import withAuthRedirect from '@components/HOC/withAuthRedirect'
+import MainLayout from '@components/Layouts/Main'
 import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
-import MainLayout from '@common/components/Layouts/Main'
-import { Typography } from 'antd'
 
 export default withAuthRedirect(() => {
   return (
@@ -15,9 +14,6 @@ export default withAuthRedirect(() => {
         { title: 'Streets', path: AppRoutes.STREETS },
       ]}
     >
-      <Typography.Title level={3} style={{ marginTop: '0.5rem' }}>
-        Streets
-      </Typography.Title>
       <StreetsBlock />
     </MainLayout>
   )
