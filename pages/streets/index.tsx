@@ -1,11 +1,11 @@
-import StreetsBlock from '@common/components/DashboardPage/blocks/streets'
-import MainLayout from '@common/components/Layouts/Main'
-import { Typography } from 'antd'
+import StreetsBlock from '@components/DashboardPage/blocks/streets'
+import withAuthRedirect from '@components/HOC/withAuthRedirect'
+import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
-import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
-import { AppRoutes } from '../../utils/constants'
 import { authOptions } from '../api/auth/[...nextauth]'
+import MainLayout from '@common/components/Layouts/Main'
+import { Typography } from 'antd'
 
 export default withAuthRedirect(() => {
   return (

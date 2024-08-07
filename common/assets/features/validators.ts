@@ -1,4 +1,4 @@
-import { Rule } from 'antd/lib/form'
+import { FormRule as Rule } from 'antd'
 
 //Normalizers
 export const allowOnlyNumbers = (value: string): string =>

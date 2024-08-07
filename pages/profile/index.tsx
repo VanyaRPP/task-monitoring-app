@@ -1,10 +1,10 @@
-import withAuthRedirect from '@common/components/HOC/withAuthRedirect'
-import MainLayout from '@common/components/Layouts/Main'
+import ProfilePage from '@components/ProfilePage'
+import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
-import ProfilePage from '../../common/components/ProfilePage'
-import { AppRoutes } from '../../utils/constants'
 import { authOptions } from '../api/auth/[...nextauth]'
+import withAuthRedirect from '@common/components/HOC/withAuthRedirect'
+import MainLayout from '@common/components/Layouts/Main'
 
 export default withAuthRedirect(() => {
   return (

@@ -1,10 +1,11 @@
-import RealEstateBlock from '@common/components/DashboardPage/blocks/realEstates'
 import MainLayout from '@common/components/Layouts/Main'
+import RealEstateBlock from '@components/DashboardPage/blocks/realEstates'
+import withAuthRedirect from '@components/HOC/withAuthRedirect'
+import { AppRoutes } from '@utils/constants'
 import { Typography } from 'antd'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
-import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
-import { AppRoutes } from '../../utils/constants'
+
 import { authOptions } from '../api/auth/[...nextauth]'
 
 export default withAuthRedirect(() => {

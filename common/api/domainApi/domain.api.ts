@@ -72,10 +72,11 @@ export const domainApi = createApi({
         url: `domain/areas/${domainId}`,
         method: 'GET',
       }),
-      providesTags: (result, error, { domainId }) => [{ type: 'IDomain', id: domainId || '' }],
+      providesTags: (result, error, { domainId }) => [
+        { type: 'IDomain', id: domainId || '' },
+      ],
       transformResponse: (response: IGetAreasResponse) => response.data,
     }),
-    
   }),
 })
 

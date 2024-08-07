@@ -1,5 +1,5 @@
-import { IDomain } from '@common/modules/models/Domain'
-import { IStreet } from '@common/modules/models/Street'
+import { IDomain } from '@modules/models/Domain'
+import { IStreet } from '@modules/models/Street'
 import { IFilter } from '../paymentApi/payment.api.types'
 
 export interface IService {
@@ -14,6 +14,7 @@ export interface IService {
   garbageCollectorPrice?: number
   inflicionPrice?: number
   description?: string
+  
 }
 
 export interface IAddServiceResponse {
@@ -26,6 +27,9 @@ export interface IGetServiceResponse {
   data: IService[]
   addressFilter: IFilter[]
   domainFilter: IFilter[]
+  yearFilter: IFilter[]
+  monthFilter: IFilter[]
+  total: number
 }
 
 export interface IDeleteServiceResponse {
@@ -36,4 +40,6 @@ export interface IDeleteServiceResponse {
 export interface IServiceFilter {
   street: string
   domain: string
+  month: number
+  year: number
 }

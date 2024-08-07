@@ -1,11 +1,12 @@
-import DomainsBlock from '@common/components/DashboardPage/blocks/domains'
-import MainLayout from '@common/components/Layouts/Main'
-import { Typography } from 'antd'
+import DomainsBlock from '@components/DashboardPage/blocks/domains'
+import withAuthRedirect from '@components/HOC/withAuthRedirect'
+import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
-import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
-import { AppRoutes } from '../../utils/constants'
+import { FC } from 'react'
 import { authOptions } from '../api/auth/[...nextauth]'
+import MainLayout from '@common/components/Layouts/Main'
+import { Typography } from 'antd'
 
 export default withAuthRedirect(() => {
   return (

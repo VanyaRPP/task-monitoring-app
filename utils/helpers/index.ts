@@ -1,21 +1,21 @@
 import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
-import User, { IUser } from '@common/modules/models/User'
+import User, { IUser } from '@modules/models/User'
 import { FormInstance } from 'antd'
 import Big from 'big.js'
-import _omit from 'lodash/omit'
-import moment from 'moment'
-import 'moment/locale/uk'
+import dayjs from 'dayjs'
+import 'dayjs/locale/uk'
 import mongoose, { ObjectId } from 'mongoose'
-import { Roles, ServiceType } from './constants'
+import { Roles, ServiceType } from '../constants'
 import {
   getDomainsPipeline,
   getRealEstatesPipeline,
   getStreetsPipeline,
-} from './pipelines'
-import { PaymentOptions } from './types'
+} from '../pipelines'
+import { PaymentOptions } from '../types'
 
-export const toFirstUpperCase = (text: string) =>
-  text[0].toUpperCase() + text.slice(1)
+export const toFirstUpperCase = (text: string) => {
+  return text ? text[0].toUpperCase() + text.slice(1) : ''
+}
 
 export const getCount = (tasks: any, name: string) => {
   return tasks?.filter((task) => task?.category == name)
@@ -144,6 +144,26 @@ function formatDateToIsoString(data) {
       : i
   )
 }
+
+/**
+ * Omits specified properties from an object.
+ *
+ * @param {Record<string, any>} obj - The object to omit properties from.
+ * @param {string[]} props - The list of property names to omit.
+ * @returns {Record<string, any>} - A new object without the omitted properties.
+ */
+export const omit = (
+  obj: Record<string, any>,
+  props: string[]
+): Record<string, any> => {
+  return Object.keys(obj).reduce((result, key) => {
+    if (!props.includes(key)) {
+      result[key] = obj[key]
+    }
+    return result
+  }, {} as Record<string, any>)
+}
+
 /**
  * Костиль, щоб прибрати `__v` з документу `mongodb` і далі порівнювати
  * отримані дані із тестовими
@@ -151,7 +171,7 @@ function formatDateToIsoString(data) {
  * @returns {any[]} масив документів без поля `__v`
  */
 export const removeProps = (data: any[], props = ['__v', 'services']): any[] =>
-  data.map((obj) => _omit(obj, props))
+  data.map((obj) => omit(obj, props))
 
 /**
  * Ще один костиль для тестів, щоб зробити `reverse populate` документу
@@ -173,16 +193,6 @@ export const unpopulate = (arr: any[]): any[] => {
     }
     return newObj
   })
-}
-
-/**
- * Переводить номер місяця в його назву на українській і з великої літери
- * @param {number} index порядковий номер місяця
- * @returns форматований місяць
- */
-export const NumberToFormattedMonth = (index?: number): string => {
-  const month = moment().month(index).locale('uk').format('MMMM')
-  return month[0].toUpperCase() + month.slice(1)
 }
 
 export function filterInvoiceObject(obj) {
@@ -220,12 +230,6 @@ export const renderCurrency = (number: any): string => {
   }
 }
 
-export const getFormattedDate = (data: Date, format = 'MMMM'): string => {
-  if (data) {
-    return toFirstUpperCase(moment(data).format(format))
-  }
-}
-
 export const getPaymentProviderAndReciever = (company) => {
   const provider: IProvider = company && {
     description: company?.domain?.description || '',
@@ -241,7 +245,7 @@ export const getPaymentProviderAndReciever = (company) => {
 
 export const importedPaymentDateToISOStringDate = (date) => {
   return new Date(
-    moment(date, 'DD.MM.YYYY', true).format('YYYY-MM-DD')
+    dayjs(date, 'DD.MM.YYYY', true).format('YYYY-MM-DD')
   ).toISOString()
 }
 
@@ -438,4 +442,102 @@ export function getFilterForDomain(domains) {
 
 export function sortById(data: any) {
   return data?.sort((a: any, b: any) => a._id.localeCompare(b._id))
+}
+
+/**
+ * Transforms the input into an array.
+ *
+ * @template T
+ * @param {any} input The input to be transformed. Can be of any type.
+ * @returns {T[]} An array containing the input elements. If input is already an array, it returns the input. If input is null or undefined, it returns an empty array.
+ */
+export function toArray<T = unknown>(input: any): T[] {
+  if (input === undefined || input === null) {
+    return []
+  }
+
+  if (Array.isArray(input)) {
+    return input
+  }
+
+  return [input]
+}
+
+/**
+ * Checks if the given value is empty.
+ *
+ * A value is considered empty if it is:
+ * - `undefined`
+ * - `null`
+ * - an empty `array`
+ * - an empty `string`
+ * - an `object` with no own properties
+ *
+ * @template T The type of the value.
+ * @param {T} value The value to check.
+ * @returns {boolean} `true` if the value is empty, otherwise `false`.
+ */
+export const isEmpty = <T = unknown>(value: T): boolean => {
+  return (
+    value === undefined ||
+    value === null ||
+    (Array.isArray(value) && value.length === 0) ||
+    (typeof value === 'string' && value.length === 0) ||
+    (typeof value === 'object' && Object.keys(value).length === 0)
+  )
+}
+
+/**
+ * Checks if two values are deeply equal. Performs a deep comparison between two values to determine if they are equivalent.
+ *
+ * @param {any} a The first value to compare.
+ * @param {any} b The second value to compare.
+ * @returns {boolean} `true` if the values are deeply equal, otherwise `false`.
+ */
+export const isEqual = (a: any, b: any): boolean => {
+  if (a === b) {
+    return true
+  }
+
+  if (typeof a !== typeof b || a === null || b === null) {
+    return false
+  }
+
+  if (typeof a === 'object' && typeof b === 'object') {
+    if (Array.isArray(a) !== Array.isArray(b)) {
+      return false
+    }
+
+    if (Array.isArray(a) && Array.isArray(b)) {
+      if (a.length !== b.length) {
+        return false
+      }
+      return a.every((item, index) => isEqual(item, b[index]))
+    }
+
+    const keysA = Object.keys(a)
+    const keysB = Object.keys(b)
+
+    if (keysA.length !== keysB.length) {
+      return false
+    }
+
+    return keysA.every((key) => isEqual((a as any)[key], (b as any)[key]))
+  }
+
+  return false
+}
+
+/**
+ * Generates a timestamp string in the format HH:MM:SS.mmm.
+ *
+ * @param {Date} [date=new Date()] - The date object to format. Defaults to the current date and time if not provided.
+ * @returns {string} The formatted timestamp string.
+ */
+export const toTimestamp = (date: Date = new Date()): string => {
+  const HH = date.getHours().toString().padStart(2, '0')
+  const MM = date.getMinutes().toString().padStart(2, '0')
+  const SS = date.getSeconds().toString().padStart(2, '0')
+  const mmm = date.getMilliseconds().toString().padStart(3, '0')
+  return `${HH}:${MM}:${SS}.${mmm}`
 }

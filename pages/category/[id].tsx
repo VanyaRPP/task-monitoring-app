@@ -1,12 +1,12 @@
+import { useGetCategoryByIdQuery } from '@common/api/categoriesApi/category.api'
+import { useGetAllTaskQuery } from '@common/api/taskApi/task.api'
+import Filter from '@components/UI/Filtration'
+import { authOptions } from '@pages/api/auth/[...nextauth]'
+import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
-import { useGetCategoryByIdQuery } from '../../common/api/categoriesApi/category.api'
-import { useGetAllTaskQuery } from '../../common/api/taskApi/task.api'
-import Filter from '../../common/components/UI/Filtration'
-import { AppRoutes } from '../../utils/constants'
-import { authOptions } from '../api/auth/[...nextauth]'
 
 const Category: React.FC = () => {
   const tasksResponse = useGetAllTaskQuery('')

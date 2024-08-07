@@ -1,12 +1,12 @@
-import { validateField } from '@common/assets/features/validators'
-import { useCompanyPageContext } from '@common/components/DashboardPage/blocks/realEstates'
-import useDomain from '@common/modules/hooks/useDomain'
+import { validateField } from '@assets/features/validators'
+import { useCompanyPageContext } from '@components/DashboardPage/blocks/realEstates'
+import useDomain from '@modules/hooks/useDomain'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
 export default function DomainsSelect({
   form,
-  edit
+  edit,
 }: {
   form: any
   edit?: boolean
@@ -23,9 +23,13 @@ export default function DomainsSelect({
   }, [data?.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <Form.Item name="domain" label="Надавач послуг" rules={validateField('required')}>
+    <Form.Item
+      name="domain"
+      label="Надавач послуг"
+      rules={validateField('required')}
+    >
       <Select
-        onSelect={() => {
+        onChange={() => {
           // TODO: check if this should be inside street component
           form.resetFields(['street'])
         }}
@@ -40,7 +44,9 @@ export default function DomainsSelect({
         }
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+        filterOption={(input, option) =>
+          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+        }
         options={data?.map((i) => ({ value: i._id, label: i.name }))}
         optionFilterProp="children"
         disabled={isLoading || data?.length === 1 || edit}

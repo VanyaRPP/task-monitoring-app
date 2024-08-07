@@ -1,16 +1,30 @@
-import { DeleteOutlined, EditOutlined, QuestionCircleOutlined, } from '@ant-design/icons'
-import { Alert, Button, Checkbox, Popconfirm, Table, Tag, message, Tooltip } from 'antd'
-import { ColumnType } from 'antd/lib/table'
-import { useRouter } from 'next/router'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons'
+import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import { useDeleteRealEstateMutation } from '@common/api/realestateApi/realestate.api'
 import {
   IExtendedRealestate,
   IGetRealestateResponse,
 } from '@common/api/realestateApi/realestate.api.types'
-import { AppRoutes, Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
-import { IFilter } from '@common/api/paymentApi/payment.api.types'
+import {
+  Alert,
+  Button,
+  Checkbox,
+  message,
+  Popconfirm,
+  Table,
+  Tag,
+  Tooltip,
+} from 'antd'
+import { ColumnType } from 'antd/lib/table'
+import { useRouter } from 'next/router'
 
 export interface Props {
   domainId?: string
@@ -21,6 +35,14 @@ export interface Props {
   isError: boolean
   filters?: any
   setFilters?: (filters: any) => void
+  setRealEstateActions: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+    }>
+  >
+  realEstateActions: {
+    edit: boolean
+  }
 }
 
 const CompaniesTable: React.FC<Props> = ({
@@ -32,6 +54,8 @@ const CompaniesTable: React.FC<Props> = ({
   isError,
   filters,
   setFilters,
+  setRealEstateActions,
+  realEstateActions,
 }) => {
   const router = useRouter()
   const { pathname } = router
@@ -84,6 +108,7 @@ const CompaniesTable: React.FC<Props> = ({
         realEstatesFilter: realEstates?.realEstatesFilter,
         filters,
         pathname,
+        setRealEstateActions,
       })}
       dataSource={realEstates?.data}
       scroll={{ x: tableWidth }}
@@ -119,6 +144,7 @@ const getDefaultColumns = ({
   realEstatesFilter,
   filters,
   pathname,
+  setRealEstateActions,
 }: {
   domainId?: string
   streetId?: string
@@ -132,6 +158,11 @@ const getDefaultColumns = ({
   realEstatesFilter?: IFilter[]
   filters?: any
   pathname?: string
+  setRealEstateActions: React.Dispatch<
+    React.SetStateAction<{
+      edit: boolean
+    }>
+  >
 }): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {
@@ -206,6 +237,24 @@ const getDefaultColumns = ({
       width: 170,
       render: (value) => <Checkbox checked={value} disabled />,
     },
+    {
+      align: 'center',
+      fixed: 'right',
+      title: '',
+      width: 50,
+      render: (_, realEstate: IExtendedRealestate) => (
+        <Button
+          style={{ padding: 0 }}
+          type="link"
+          onClick={() => {
+            setCurrentRealEstate(realEstate)
+            setRealEstateActions({ edit: false })
+          }}
+        >
+          <EyeOutlined />
+        </Button>
+      ),
+    },
   ]
 
   if (isAdmin) {
@@ -218,7 +267,10 @@ const getDefaultColumns = ({
         <Button
           style={{ padding: 0 }}
           type="link"
-          onClick={() => setCurrentRealEstate(realEstate)}
+          onClick={() => {
+            setCurrentRealEstate(realEstate)
+            setRealEstateActions({ edit: true })
+          }}
         >
           <EditOutlined />
         </Button>

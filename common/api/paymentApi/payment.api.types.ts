@@ -1,10 +1,10 @@
 import { IService } from '@common/api/serviceApi/service.api.types'
-import { IDomain } from '@common/modules/models/Domain'
-import { IStreet } from '@common/modules/models/Street'
+import { IDomain } from '@modules/models/Domain'
+import { IStreet } from '@modules/models/Street'
+import { IUser } from '@modules/models/User'
 import { ServiceType } from '@utils/constants'
 import { ObjectId } from 'mongoose'
 import { IRealestate } from '../realestateApi/realestate.api.types'
-import { IUser } from './../../modules/models/User'
 
 export interface IPaymentField {
   type: ServiceType | string
@@ -52,7 +52,7 @@ export interface IAddPaymentResponse {
 
 export interface IFilter {
   text: string
-  value: string
+  value: any
 }
 
 export interface IGetPaymentResponse {

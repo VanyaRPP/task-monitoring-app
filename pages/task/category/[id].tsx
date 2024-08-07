@@ -1,8 +1,8 @@
+import { useGetCategoryByIdQuery } from '@common/api/categoriesApi/category.api'
+import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { useRouter } from 'next/router'
-import { useGetCategoryByIdQuery } from '../../../common/api/categoriesApi/category.api'
-import { AppRoutes } from '../../../utils/constants'
 import { authOptions } from '../../api/auth/[...nextauth]'
 
 const TaskInCategory = () => {
