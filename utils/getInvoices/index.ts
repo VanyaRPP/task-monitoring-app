@@ -378,16 +378,22 @@ export const getCleaningInvoice = ({
 
     return {
       type: invoice.type,
-      price: +toRoundFixed(+invoice.sum || +invoice.price),
-      sum: +toRoundFixed(+invoice.sum || +invoice.price),
+      price: +toRoundFixed(+invoice.price),
+      sum: +toRoundFixed(
+        +invoice.sum || +invoice.price * (+invoice.amount - +invoice.lastAmount)
+      ),
     }
   }
 
-  if (!isEmpty(company?.cleaning) && !isNaN(company.cleaning)) {
+  if (
+    !isEmpty(service?.cleaning) && !isNaN(service?.cleaning) &&
+    (!company?.cleaning || isNaN(company?.cleaning))
+  ) {
+
     return {
       type: ServiceType.Cleaning,
-      price: +toRoundFixed(company.cleaning),
-      sum: +toRoundFixed(company.cleaning),
+      price: +toRoundFixed(service.cleaning),
+      sum: 0,
     }
   }
 }
