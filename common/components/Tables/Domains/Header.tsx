@@ -7,9 +7,9 @@ import { Button, Tooltip } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 
-import AddDomainModal from '@common/components/UI/DomainsComponents/DomainModal'
-import { AppRoutes } from '@utils/constants'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import AddDomainModal from '@components/UI/DomainsComponents/DomainModal'
+import { AppRoutes } from '@utils/constants'
 
 export interface Props {
   currentDomain?: IExtendedDomain

@@ -1,19 +1,22 @@
-import React from 'react'
-import { Cascader } from 'antd'
 import s from '@components/UI/PaymentCascader/styled.module.scss'
-import { cascaderMonths, cascaderQuarters, cascaderYears } from '@utils/constants';
+import {
+  cascaderMonths,
+  cascaderQuarters,
+  cascaderYears,
+} from '@utils/constants'
+import { Cascader } from 'antd'
 
 const PaymentCascader = ({ onChange }) => {
   return (
-       <div className={s.PaymentCascader}>
+    <div className={s.PaymentCascader}>
       <Cascader
         placeholder="Оберіть проміжок"
         options={customOptions}
         onChange={onChange}
       />
     </div>
-  );
-};
+  )
+}
 
 const customOptions = [
   {
@@ -40,7 +43,7 @@ const customOptions = [
           },
         ],
       }
-    })
+    }),
   },
 ]
 

@@ -1,6 +1,6 @@
 // TODO: Move to reusable folder same level as DomainsSelect
+import { validateField } from '@assets/features/validators'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
-import { validateField } from '@common/assets/features/validators'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
@@ -64,7 +64,9 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
         }
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+        filterOption={(input, option) =>
+          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+        }
         options={companies?.map((i) => ({
           value: i._id,
           label: i.companyName,

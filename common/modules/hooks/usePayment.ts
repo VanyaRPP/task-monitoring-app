@@ -9,7 +9,13 @@ interface IUseCompanyProps {
   year?: number
 }
 
-export function useCompanyInvoice({ companyId, month, year, skip, type=Operations.Debit }: IUseCompanyProps) {
+export function useCompanyInvoice({
+  companyId,
+  month,
+  year,
+  skip,
+  type = Operations.Debit,
+}: IUseCompanyProps) {
   const { data: paymentsResponse, isLoading } = useGetAllPaymentsQuery(
     { companyIds: [companyId], month, year, limit: 1, type },
     { skip: !companyId || skip }

@@ -4,19 +4,22 @@ import {
   EyeOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons'
-import { Alert, Popconfirm, Table, Tooltip, message, Button } from 'antd'
-import { ColumnType } from 'antd/lib/table'
-import { useRouter } from 'next/router'
-
+import { getFormattedDate } from '@assets/features/formatDate'
+import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import {
-  IService,
   IGetServiceResponse,
+  IService,
 } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { dateToYear } from '@common/assets/features/formatDate'
 import { AppRoutes, Roles } from '@utils/constants'
-import { getFormattedDate, renderCurrency } from '@utils/helpers'
-import { IFilter } from '@common/api/paymentApi/payment.api.types'
+import { renderCurrency } from '@utils/helpers'
+import { Alert, Button, Popconfirm, Table, Tooltip, message } from 'antd'
+import { ColumnType } from 'antd/lib/table'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
+
 interface Props {
   setServiceActions: React.Dispatch<
     React.SetStateAction<{
@@ -28,7 +31,7 @@ interface Props {
     edit: boolean
     preview: boolean
   }
-  setCurrentService: (setvice: IService) => void
+  setCurrentService: (service: IService) => void
   services: IGetServiceResponse
   isLoading?: boolean
   isError?: boolean
@@ -47,7 +50,12 @@ const ServicesTable: React.FC<Props> = ({
   setFilter,
 }) => {
   const router = useRouter()
-  const isOnPage = router.pathname === AppRoutes.SERVICE
+  const { pathname } = router
+  const [pageData, setPageData] = useState({
+    pageSize: pathname === AppRoutes.SERVICE ? 10 : 5,
+    currentPage: 1,
+  })
+  const isOnPage = pathname === AppRoutes.SERVICE
 
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -65,30 +73,51 @@ const ServicesTable: React.FC<Props> = ({
   }
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
+
+  const handlePagination = (pagination) => {
+    setPageData({
+      pageSize: pagination.pageSize,
+      currentPage: pagination.current,
+    })
+  }
+
   return (
-    <Table
-      rowKey="_id"
-      size="small"
-      pagination={false}
-      loading={isLoading}
-      columns={getDefaultColumns(
-        isGlobalAdmin,
-        handleDelete,
-        deleteLoading,
-        setCurrentService,
-        services?.addressFilter,
-        services?.domainFilter,
-        filter,
-        isOnPage,
-        setServiceActions,
-        serviceActions
-      )}
-      dataSource={services?.data}
-      scroll={{ x: 1700 }}
-      onChange={(__, filter) => {
-        setFilter(filter)
-      }}
-    />
+    <>
+      <Table
+        rowKey="_id"
+        pagination={
+          isOnPage && {
+            total: services?.total,
+            current: pageData.currentPage,
+            pageSize: pageData.pageSize,
+            showSizeChanger: true,
+            pageSizeOptions: [10, 20, 50],
+            position: ['bottomCenter'],
+            onChange: handlePagination,
+          }
+        }
+        loading={isLoading}
+        columns={getDefaultColumns(
+          isGlobalAdmin,
+          handleDelete,
+          deleteLoading,
+          setCurrentService,
+          services?.addressFilter,
+          services?.domainFilter,
+          services?.yearFilter,
+          services?.monthFilter,
+          filter,
+          isOnPage,
+          setServiceActions,
+          serviceActions
+        )}
+        dataSource={services?.data}
+        scroll={{ x: 1700 }}
+        onChange={(__, filter) => {
+          setFilter(filter)
+        }}
+      />
+    </>
   )
 }
 
@@ -105,12 +134,12 @@ const getDefaultColumns = (
   handleDelete?: (...args: any) => void,
   deleteLoading?: boolean,
   setCurrentService?: (service: IService) => void,
-  addressFilter?,
-  domainFilter?,
-  // filters?: IFilter[],
+  addressFilter?: IFilter[],
+  domainFilter?: IFilter[],
+  yearFilter?: IFilter[],
+  monthFilter?: IFilter[],
   filter?: any,
   isOnPage?: boolean,
-
   setServiceActions?: React.Dispatch<
     React.SetStateAction<{
       edit: boolean
@@ -131,20 +160,33 @@ const getDefaultColumns = (
       filteredValue: filter?.domain || null,
       width: 200,
       render: (i) => i?.name,
+      filterSearch: true,
+    },
+    {
+      title: 'Рік',
+      dataIndex: 'year',
+      width: 100,
+      filters: isOnPage ? yearFilter : null,
+      filteredValue: filter?.year || null,
+      render: (_, record: IService) => dateToYear(record.date),
+      filterSearch: true,
     },
     {
       title: 'Адреса',
       dataIndex: 'street',
-      // filters: isOnPage ? filters : null,
       filters: isOnPage ? addressFilter : null,
       filteredValue: filter?.street || null,
       render: (i) => `${i?.address} (м. ${i?.city})`,
+      filterSearch: true,
     },
     {
       title: 'Місяць',
-      dataIndex: 'date',
-      width: 100,
-      render: (date) => getFormattedDate(date),
+      dataIndex: 'month',
+      width: 105,
+      filters: isOnPage ? monthFilter : null,
+      filteredValue: filter?.month || null,
+      render: (_, record: IService) => getFormattedDate(record.date),
+      filterSearch: true,
     },
     {
       title: 'Утримання',

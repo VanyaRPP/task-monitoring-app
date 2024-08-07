@@ -3,7 +3,7 @@ import {
   useEditDomainMutation,
 } from '@common/api/domainApi/domain.api'
 import { Form, message } from 'antd'
-import React, { FC, useEffect } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import {
   IDomainModel,
   IExtendedDomain,
@@ -19,6 +19,7 @@ interface Props {
 
 const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
   const [addDomainEstate] = useAddDomainMutation()
   const [editDomain] = useEditDomainMutation()
 
@@ -71,14 +72,18 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       open={true}
       title={'Надавачі послуг'}
       onOk={handleSubmit}
-      changesForm={() => form.isFieldsTouched()}
+      changed={() => isValueChanged}
       onCancel={closeModal}
       okText={currentDomain ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
       okButtonProps={{ style: { ...(!editable && { display: 'none' }) } }}
       preview={!editable}
     >
-      <DomainForm form={form} editable={editable} />
+      <DomainForm
+        form={form}
+        editable={editable}
+        setIsValueChanged={setIsValueChanged}
+      />
     </Modal>
   )
 }

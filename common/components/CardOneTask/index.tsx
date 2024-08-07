@@ -3,18 +3,15 @@ import {
   FireOutlined,
   InfoOutlined,
 } from '@ant-design/icons'
-import { Badge, Button, Card, Table } from 'antd'
+import { dateToDefaultFormat } from '@assets/features/formatDate'
+import StatusTag from '@components/UI/StatusTag'
+import { ITask } from '@modules/models/Task'
+import { AppRoutes, TaskStatuses } from '@utils/constants'
+import { getFormattedAddress } from '@utils/helpers'
+import { Badge, Button, Card } from 'antd'
 import classNames from 'classnames'
-import moment from 'moment'
-import Router, { useRouter } from 'next/router'
-import { AppRoutes, TaskStatuses } from '../../../utils/constants'
-import { getFormattedAddress } from '../../../utils/helpers'
-import {
-  dateToDefaultFormat,
-  isDeadlineExpired,
-} from '../../assets/features/formatDate'
-import { ITask } from '../../modules/models/Task'
-import StatusTag from '../UI/StatusTag'
+import dayjs from 'dayjs'
+import Router from 'next/router'
 import s from './style.module.scss'
 
 interface Props {
@@ -23,7 +20,7 @@ interface Props {
 
 const CardOneTask: React.FC<Props> = ({ task }) => {
   const deadline = task?.deadline
-  const dateDiff = moment(deadline).diff(moment(new Date()), 'days')
+  const dateDiff = dayjs(deadline).diff(dayjs(new Date()), 'days')
 
   return (
     <Card

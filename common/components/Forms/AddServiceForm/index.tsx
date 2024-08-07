@@ -1,8 +1,8 @@
+import { validateField } from '@assets/features/validators'
 import { IService } from '@common/api/serviceApi/service.api.types'
-import { validateField } from '@common/assets/features/validators'
-import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
-import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
-import useInitialValues from '@common/modules/hooks/useInitialValues'
+import AddressesSelect from '@components/UI/Reusable/AddressesSelect'
+import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
+import { usePreviousMonthService } from '@modules/hooks/useService'
 import {
   ConfigProvider,
   DatePicker,
@@ -11,12 +11,11 @@ import {
   Input,
   InputNumber,
 } from 'antd'
+import ukUA from 'antd/lib/locale/uk_UA'
+import dayjs from 'dayjs'
+import 'dayjs/locale/uk'
 import { useEffect } from 'react'
 import s from './style.module.scss'
-import dayjs from 'dayjs'
-import { usePreviousMonthService } from '@common/modules/hooks/useService'
-import 'dayjs/locale/uk'
-import ukUA from 'antd/lib/locale/uk_UA'
 
 dayjs.locale('uk')
 
@@ -24,80 +23,62 @@ interface Props {
   form: FormInstance<any>
   edit: boolean
   currentService: IService
+  setIsValueChanged: (value: boolean) => void
 }
 
-const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
+const AddServiceForm: React.FC<Props> = ({
+  form,
+  edit,
+  currentService,
+  setIsValueChanged,
+}) => {
   const { MonthPicker } = DatePicker
-  const initialValues = useInitialValues(currentService)
-
-  useEffect(() => {
-    form.setFieldsValue({
-      date: dayjs(),
-    })
-  }, [])
 
   const date = Form.useWatch('date', form)
-  const domain = Form.useWatch('domain', form)
-  const street = Form.useWatch('street', form)
+  const domainId = Form.useWatch('domain', form)
+  const streetId = Form.useWatch('street', form)
 
   const { previousMonth } = usePreviousMonthService({
     date,
-    domainId: domain,
-    streetId: street,
+    domainId,
+    streetId,
   })
 
   useEffect(() => {
-    if (!previousMonth) {
-      form.setFieldsValue({
-        rentPrice: 0,
-        electricityPrice: 0,
-        waterPrice: 0,
-        waterPriceTotal: 0,
-        garbageCollectorPrice: 0,
-        inflicionPrice: 0,
-      })
-      return
-    }
-    const {
-      rentPrice,
-      electricityPrice,
-      waterPrice,
-      waterPriceTotal,
-      garbageCollectorPrice,
-      inflicionPrice,
-    } = previousMonth
     form.setFieldsValue({
-      rentPrice,
-      electricityPrice,
-      waterPrice,
-      waterPriceTotal,
-      garbageCollectorPrice,
-      inflicionPrice,
+      electricityPrice:
+        currentService?.electricityPrice ??
+        previousMonth?.electricityPrice ??
+        0,
+      inflicionPrice:
+        currentService?.inflicionPrice ?? previousMonth?.inflicionPrice ?? 0,
+      rentPrice: currentService?.rentPrice ?? previousMonth?.rentPrice ?? 0,
+      waterPrice: currentService?.waterPrice ?? previousMonth?.waterPrice ?? 0,
+      waterPriceTotal:
+        currentService?.waterPriceTotal ?? previousMonth?.waterPriceTotal ?? 0,
+      garbageCollectorPrice:
+        currentService?.garbageCollectorPrice ??
+        previousMonth?.garbageCollectorPrice ??
+        0,
     })
-  }, [previousMonth, form])
+  }, [form, currentService, previousMonth])
 
   return (
     <ConfigProvider locale={ukUA}>
       <Form
-        initialValues={initialValues}
         form={form}
         layout="vertical"
         className={s.Form}
+        initialValues={{
+          domain: currentService?.domain?._id,
+          street: currentService?.street?._id,
+          date: dayjs(currentService?.date),
+          description: currentService?.description,
+        }}
+        onValuesChange={() => setIsValueChanged(true)}
       >
-        {edit ? (
-          <Form.Item name="domain" label="Надавач послуг">
-            <Input disabled />
-          </Form.Item>
-        ) : (
-          <DomainsSelect form={form} />
-        )}
-        {edit ? (
-          <Form.Item name="street" label="Адреса">
-            <Input disabled />
-          </Form.Item>
-        ) : (
-          <AddressesSelect form={form} />
-        )}
+        <DomainsSelect form={form} edit={edit} />
+        <AddressesSelect form={form} edit={edit} />
         <Form.Item
           name="date"
           label="Місяць та рік"
@@ -146,7 +127,10 @@ const AddServiceForm: React.FC<Props> = ({ form, edit, currentService }) => {
         <Form.Item name="description" label="Опис">
           <Input.TextArea
             placeholder="Введіть опис"
-            autoSize={{ minRows: 2, maxRows: 5 }}
+            autoSize={{
+              minRows: 2,
+              maxRows: 5,
+            }}
             maxLength={256}
             className={s.formInput}
           />

@@ -1,16 +1,22 @@
-import React, { FC } from 'react'
-import { validateField } from '@common/assets/features/validators'
+import { validateField } from '@assets/features/validators'
 import { Form, FormInstance, Input } from 'antd'
+import { FC } from 'react'
 import s from './style.module.scss'
 
 interface Props {
   form: FormInstance<any>
   editable?: boolean
+  setIsValueChanged: (value: boolean) => void
 }
 
-const AddStreetForm: FC<Props> = ({ form, editable }) => {
+const AddStreetForm: FC<Props> = ({ form, editable, setIsValueChanged }) => {
   return (
-    <Form form={form} layout="vertical" className={s.Form}>
+    <Form
+      form={form}
+      layout="vertical"
+      className={s.Form}
+      onValuesChange={() => setIsValueChanged(true)}
+    >
       <Form.Item
         required
         name="city"

@@ -9,7 +9,8 @@ import {
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
-import { usePaymentData } from '@common/modules/hooks/usePaymentData'
+import Modal from '@components/UI/ModalWindow'
+import { usePaymentData } from '@modules/hooks/usePaymentData'
 import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
@@ -19,7 +20,6 @@ import dayjs from 'dayjs'
 import { FC, createContext, useContext, useEffect, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
-import Modal from '../UI/ModalWindow'
 import s from './style.module.scss'
 
 interface Props {
@@ -54,6 +54,7 @@ const AddPaymentModal: FC<Props> = ({
   paymentActions,
 }) => {
   const [form] = Form.useForm()
+  const [isValueChanged, setIsValueChanged] = useState(false)
 
   const { company, service, payment, prevService, prevPayment } =
     usePaymentData({
@@ -179,7 +180,7 @@ const AddPaymentModal: FC<Props> = ({
       <Modal
         title={edit ? 'Редагування рахунку' : !preview && 'Додавання рахунку'}
         onOk={activeTabKey === '1' ? handleOk : handleSubmit}
-        changesForm={() => form.isFieldsTouched()}
+        changed={() => isValueChanged}
         onCancel={() => {
           form.resetFields()
           closeModal()
@@ -213,13 +214,13 @@ const AddPaymentModal: FC<Props> = ({
             description: payment?.description,
             generalSum: payment?.generalSum,
             invoiceNumber: payment?.invoiceNumber,
-            // TODO: new Date() instead of moment() - now cause "date.clone is not a function"
             invoiceCreationDate: dayjs(payment?.invoiceCreationDate),
             operation: payment?.type || Operations.Credit,
           }}
           form={form}
           layout="vertical"
           className={s.Form}
+          onValuesChange={() => setIsValueChanged(true)}
         >
           <Tabs
             activeKey={activeTabKey}

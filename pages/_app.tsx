@@ -1,13 +1,13 @@
+import MainLayout from '@components/Layouts/MainLayout'
+import { store } from '@modules/store/store'
 import '@styles//globals.scss'
 import '@styles/antd-override.scss'
-import MainLayout from '../common/components/Layouts/MainLayout'
 import { ConfigProvider, Empty, theme as antTheme } from 'antd'
-import { store } from '../common/modules/store/store'
-import { SessionProvider } from 'next-auth/react'
-import { lightTheme } from '../theme/themeConfig'
-import NextNProgress from 'nextjs-progressbar'
 import ukUA from 'antd/lib/locale/uk_UA'
+import { SessionProvider } from 'next-auth/react'
+import NextNProgress from 'nextjs-progressbar'
 import { Provider } from 'react-redux'
+import { lightTheme } from '../theme/themeConfig'
 
 export default function MyApp({
   Component,

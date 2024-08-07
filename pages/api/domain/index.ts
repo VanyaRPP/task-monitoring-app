@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import Domain from '@common/modules/models/Domain'
+import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -39,7 +39,9 @@ export default async function handler(
           options.streets = streetIds
         }
 
-        const domains = await Domain.find(options).limit(+limit).populate('streets')
+        const domains = await Domain.find(options)
+          .limit(+limit)
+          .populate('streets')
 
         return res.status(200).json({ success: true, data: domains })
       } catch (error) {

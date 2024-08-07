@@ -4,21 +4,21 @@ import {
   PlusOutlined,
   SelectOutlined,
 } from '@ant-design/icons'
+import { dateToDefaultFormat } from '@assets/features/formatDate'
 import {
   useDeleteMultiplePaymentsMutation,
   useGeneratePdfMutation,
 } from '@common/api/paymentApi/payment.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { dateToDefaultFormat } from '@common/assets/features/formatDate'
-import AddPaymentModal from '@common/components/AddPaymentModal'
-import StreetsSelector from '@common/components/StreetsSelector'
-import ImportInvoices from '@common/components/UI/PaymentCardHeader/ImportInvoices'
-import PaymentCascader from '@common/components/UI/PaymentCascader/index'
-import SelectForDebitAndCredit from '@common/components/UI/PaymentSelect'
-import FilterTags from '@common/components/UI/Reusable/FilterTags'
+import AddPaymentModal from '@components/AddPaymentModal'
+import StreetsSelector from '@components/StreetsSelector'
+import ImportInvoices from '@components/UI/PaymentCardHeader/ImportInvoices'
+import PaymentCascader from '@components/UI/PaymentCascader/index'
+import SelectForDebitAndCredit from '@components/UI/PaymentSelect'
+import FilterTags from '@components/UI/Reusable/FilterTags'
 import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
-import { Button, Flex, message, Space } from 'antd'
+import { Button, Flex, Space, message } from 'antd'
 import Modal from 'antd/lib/modal/Modal'
 import { saveAs } from 'file-saver'
 import { useRouter } from 'next/router'

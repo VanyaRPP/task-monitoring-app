@@ -1,9 +1,10 @@
-import { useCompanyPageContext } from '@common/components/DashboardPage/blocks/realEstates'
+import { validateField } from '@assets/features/validators'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import { validateField } from '@common/assets/features/validators'
-import { IDomain } from '@common/modules/models/Domain'
+import { useCompanyPageContext } from '@components/DashboardPage/blocks/realEstates'
+import { IDomain } from '@modules/models/Domain'
+import { IStreet } from '@modules/models/Street'
 import { Form, Select } from 'antd'
-import { CSSProperties, useEffect } from 'react'
+import { CSSProperties, useEffect, useMemo } from 'react'
 
 export default function AddressesSelect({
   form,
@@ -21,14 +22,22 @@ export default function AddressesSelect({
   })
   const domainObj = data.length > 0 ? data[0] : ({} as IDomain)
   const temp = (domainObj?.streets as any[]) || [] // eslint-disable-line react-hooks/exhaustive-deps
-  const singleStreet = streetId && temp.find((i) => i._id === streetId)
-  const streets = singleStreet ? [singleStreet] : temp
+  const streets = useMemo<IStreet[]>(() => {
+    return temp
+  }, [temp])
+
 
   useEffect(() => {
     if (streets?.length === 1) {
       form.setFieldValue('street', streets[0]._id)
+    } else {
+      form.setFieldValue('street', undefined)
     }
   }, [form, streets]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(()=>{
+    form.setFieldValue('street', streetId)
+  },[form, streetId])
 
   return (
     <Form.Item name="street" label="Адреса" rules={validateField('required')}>
@@ -42,7 +51,9 @@ export default function AddressesSelect({
             // @ts-ignore
             .localeCompare((optionB?.label ?? '').toLowerCase())
         }
-        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+        filterOption={(input, option) =>
+          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+        }
         options={
           streets?.map((i) => ({
             value: i._id,

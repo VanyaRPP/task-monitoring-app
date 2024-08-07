@@ -1,6 +1,6 @@
+import { ITask } from '@modules/models/Task'
 import { ObjectId } from 'mongoose'
-import { ITask } from 'common/modules/models/Task'
-export type { ITask } from 'common/modules/models/Task'
+export type { ITask } from '@modules/models/Task'
 
 export interface IAcceptQuery {
   taskId: ObjectId | string
