@@ -8,8 +8,9 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
 import Modal from '@components/UI/ModalWindow'
-import { usePaymentFormData } from '@modules/hooks/usePaymentData'
+import { usePaymentData } from '@modules/hooks/usePaymentData'
 import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
@@ -55,8 +56,11 @@ const AddPaymentModal: FC<Props> = ({
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
 
-  const { company, service, prevService, payment, prevPayment } =
-    usePaymentFormData(form, paymentData)
+  const { company, service, payment, prevService, prevPayment } =
+    usePaymentData({
+      form,
+      paymentData,
+    })
 
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
@@ -142,6 +146,14 @@ const AddPaymentModal: FC<Props> = ({
           paymentActions={paymentActions}
         />
       ),
+    })
+  }
+
+  if (payment) {
+    items.push({
+      key: '3',
+      label: 'Акт',
+      children: <PriceList data={payment} />,
     })
   }
 
