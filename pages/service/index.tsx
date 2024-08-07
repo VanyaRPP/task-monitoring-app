@@ -2,7 +2,6 @@ import MainLayout from '@common/components/Layouts/Main'
 import ServicesBlock from '@components/DashboardPage/blocks/services'
 import withAuthRedirect from '@components/HOC/withAuthRedirect'
 import { AppRoutes } from '@utils/constants'
-import { Typography } from 'antd'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
@@ -15,9 +14,6 @@ export default withAuthRedirect(() => {
         { title: 'Services', path: AppRoutes.SERVICE },
       ]}
     >
-      <Typography.Title level={3} style={{ marginTop: '0.5rem' }}>
-        Services
-      </Typography.Title>
       <ServicesBlock />
     </MainLayout>
   )

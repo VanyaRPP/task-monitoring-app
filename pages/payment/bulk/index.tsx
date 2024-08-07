@@ -3,7 +3,6 @@ import PaymentBulkBlock from '@components/DashboardPage/blocks/paymentsBulk'
 import withAuthRedirect from '@components/HOC/withAuthRedirect'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
 import { AppRoutes } from '@utils/constants'
-import { Typography } from 'antd'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 
@@ -16,9 +15,6 @@ export default withAuthRedirect(() => {
         { title: 'Bulk', path: AppRoutes.PAYMENT_BULK },
       ]}
     >
-      <Typography.Title level={3} style={{ marginTop: '0.5rem' }}>
-        Payments bulk
-      </Typography.Title>
       <PaymentBulkBlock />
     </MainLayout>
   )

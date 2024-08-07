@@ -1,4 +1,4 @@
-import { Layout } from 'antd'
+import { Flex, Layout } from 'antd'
 import classNames from 'classnames'
 import styles from './style.module.scss'
 
@@ -13,7 +13,9 @@ export const Footer: React.FC<FooterProps> = ({ className, style }) => {
       style={style}
       className={classNames(styles.Footer, className)}
     >
-      E-ORENDA ©{new Date().getFullYear()} Create by SPACEHUB
+      <Flex align="center" style={{ height: '100%' }}>
+        E-ORENDA ©{new Date().getFullYear()} Created by SPACEHUB
+      </Flex>
     </Layout.Footer>
   )
 }

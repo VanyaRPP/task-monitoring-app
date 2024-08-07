@@ -2,7 +2,6 @@ import MainLayout from '@common/components/Layouts/Main'
 import RealEstateBlock from '@components/DashboardPage/blocks/realEstates'
 import withAuthRedirect from '@components/HOC/withAuthRedirect'
 import { AppRoutes } from '@utils/constants'
-import { Typography } from 'antd'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 
@@ -16,9 +15,6 @@ export default withAuthRedirect(() => {
         { title: 'Companies', path: AppRoutes.REAL_ESTATE },
       ]}
     >
-      <Typography.Title level={3} style={{ marginTop: '0.5rem' }}>
-        Companies
-      </Typography.Title>
       <RealEstateBlock />
     </MainLayout>
   )

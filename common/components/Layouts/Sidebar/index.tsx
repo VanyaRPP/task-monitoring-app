@@ -1,23 +1,38 @@
 import { AppRoutes } from '@utils/constants'
 import { Layout, Menu, SiderProps } from 'antd'
 import { useRouter } from 'next/router'
+import { useState } from 'react'
 import styles from './style.module.scss'
 
 export const Sidebar: React.FC<Omit<SiderProps, 'children'>> = (props) => {
   const router = useRouter()
 
-  // TODO: redux based collapse (to save collapse state between pages)
+  // TODO: redux-based collapsed (to save collapse state between pages)
+  const [collapsed, setCollapsed] = useState<boolean>(false)
 
   return (
-    <Layout.Sider theme="light" {...props}>
-      <div className={styles.Logo}>[LOGO] E-ORENDA</div>
+    <Layout.Sider
+      theme="light"
+      onCollapse={() => setCollapsed(!collapsed)}
+      collapsed={collapsed}
+      {...props}
+    >
+      {collapsed ? (
+        <div className={styles.Logo}>[LOGO]</div>
+      ) : (
+        <div className={styles.Logo}>[LOGO] E-ORENDA</div>
+      )}
       <Menu
         selectedKeys={[router.asPath]}
-        defaultOpenKeys={['user', 'dashboard']}
+        defaultOpenKeys={[
+          'user_submenu',
+          'dashboard_submenu',
+          'payments_submenu',
+        ]}
         mode="inline"
         items={[
           {
-            key: 'user',
+            key: 'user_submenu',
             type: 'submenu',
             label: 'User',
             children: [
@@ -36,7 +51,7 @@ export const Sidebar: React.FC<Omit<SiderProps, 'children'>> = (props) => {
             ],
           },
           {
-            key: 'dashboard',
+            key: 'dashboard_submenu',
             type: 'submenu',
             label: 'Dashboard',
             children: [
@@ -88,6 +103,12 @@ export const Sidebar: React.FC<Omit<SiderProps, 'children'>> = (props) => {
                 type: 'item',
                 label: 'Bulk',
                 onClick: () => router.push(AppRoutes.PAYMENT_BULK),
+              },
+              {
+                key: AppRoutes.PAYMENT_CHART,
+                type: 'item',
+                label: 'Chart',
+                onClick: () => router.push(AppRoutes.PAYMENT_CHART),
               },
             ],
           },

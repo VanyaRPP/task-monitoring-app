@@ -33,21 +33,19 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ path, ...props }) => {
     <AntdBreadcrumb
       className={styles.Breadcrumb}
       items={[{ title: <HomeOutlined /> }, ...paths]}
-      itemRender={(item) => {
-        if (item.onClick) {
-          return (
-            <Button
-              type="text"
-              onClick={item.onClick}
-              style={{ paddingInline: 4, marginInline: -4 }}
-            >
-              {item.title}
-            </Button>
-          )
-        }
-
-        return item.title
-      }}
+      itemRender={(item) =>
+        item.onClick ? (
+          <Button
+            type="text"
+            onClick={item.onClick}
+            style={{ paddingInline: 4, marginInline: -4 }}
+          >
+            {item.title}
+          </Button>
+        ) : (
+          item.title
+        )
+      }
       {...props}
     />
   )

@@ -1,14 +1,13 @@
-import DashboardHeader from '../DashboardHeader'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { Roles } from '@utils/constants'
+import DomainsBlock from './blocks/domains'
 import PaymentsBlock from './blocks/payments'
+import PaymentsChart from './blocks/PaymentsChart/paymentsChart'
+import RealEstateBlock from './blocks/realEstates'
 import ServicesBlock from './blocks/services'
+import StreetsBlock from './blocks/streets'
 import CompaniesAreaChart from './blocks/сompaniesAreaChart'
 import s from './style.module.scss'
-import RealEstateBlock from './blocks/realEstates'
-import DomainsBlock from './blocks/domains'
-import { Roles } from '@utils/constants'
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import StreetsBlock from './blocks/streets'
-import PaymentsChart from './blocks/PaymentsChart/paymentsChart'
 
 const Dashboard: React.FC = () => {
   const { data: userResponse } = useGetCurrentUserQuery()
@@ -16,7 +15,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <>
-      <DashboardHeader />
+      {/* <DashboardHeader /> */}
       <div className={s.DashboardGrid}>
         <div className={s.GridItem}>
           <CompaniesAreaChart />

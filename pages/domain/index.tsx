@@ -1,12 +1,10 @@
+import MainLayout from '@common/components/Layouts/Main'
 import DomainsBlock from '@components/DashboardPage/blocks/domains'
 import withAuthRedirect from '@components/HOC/withAuthRedirect'
 import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
-import { FC } from 'react'
 import { authOptions } from '../api/auth/[...nextauth]'
-import MainLayout from '@common/components/Layouts/Main'
-import { Typography } from 'antd'
 
 export default withAuthRedirect(() => {
   return (
@@ -16,9 +14,6 @@ export default withAuthRedirect(() => {
         { title: 'Domains', path: AppRoutes.DOMAIN },
       ]}
     >
-      <Typography.Title level={3} style={{ marginTop: '0.5rem' }}>
-        Domains
-      </Typography.Title>
       <DomainsBlock />
     </MainLayout>
   )

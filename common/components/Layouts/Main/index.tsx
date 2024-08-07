@@ -1,8 +1,8 @@
-import { Footer } from '@common/components/Layouts/Footer'
-import { Header } from '@common/components/Layouts/Header'
-import { Sidebar } from '@common/components/Layouts/Sidebar'
-import { Breadcrumb, BreadcrumbPath } from '@common/components/UI/Breadcrumb'
-import { Layout, Space } from 'antd'
+import { Footer } from '@components/Layouts/Footer'
+import { Header } from '@components/Layouts/Header'
+import { Sidebar } from '@components/Layouts/Sidebar'
+import { BreadcrumbPath } from '@components/UI/Breadcrumb'
+import { Layout } from 'antd'
 import styles from './style.module.scss'
 
 export interface MainLayoutProps {
@@ -15,16 +15,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, path }) => {
     <Layout>
       <Sidebar collapsible className={styles.Sidebar} />
       <Layout>
-        <Header className={styles.Header} />
+        <Header className={styles.Header} path={path} />
         <Layout className={styles.Wrapper}>
-          <Space direction="vertical">
-            <Breadcrumb path={path} />
-            <Layout.Content className={styles.Content}>
-              {children}
-            </Layout.Content>
-          </Space>
+          <Layout.Content className={styles.Content}>{children}</Layout.Content>
         </Layout>
-        <Footer />
+        <Footer className={styles.Footer} />
       </Layout>
     </Layout>
   )

@@ -26,3 +26,13 @@
 .Wrapper {
   margin: 24px;
 }
+
+.Content {
+  padding: 0;
+  margin: 0;
+}
+
+.Footer {
+  border-top: 1px solid #00000010; // TODO: border color from antd theme
+  height: 48px;
+}

@@ -1,16 +1,24 @@
 import PaymentsChart from '@components/DashboardPage/blocks/PaymentsChart/paymentsChart'
 import withAuthRedirect from '@components/HOC/withAuthRedirect'
+import MainLayout from '@components/Layouts/Main'
+import { authOptions } from '@pages/api/auth/[...nextauth]'
 import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
-import { FC } from 'react'
-import { authOptions } from '../api/auth/[...nextauth]'
 
-const Chart: FC = () => {
-  return <PaymentsChart />
-}
-
-export default withAuthRedirect(Chart)
+export default withAuthRedirect(() => {
+  return (
+    <MainLayout
+      path={[
+        { title: 'Dashboard', path: AppRoutes.INDEX },
+        { title: 'Payments', path: AppRoutes.PAYMENT },
+        { title: 'Chart', path: AppRoutes.PAYMENT_CHART },
+      ]}
+    >
+      <PaymentsChart />
+    </MainLayout>
+  )
+})
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions)

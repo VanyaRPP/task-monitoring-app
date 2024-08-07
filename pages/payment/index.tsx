@@ -1,6 +1,5 @@
 import PaymentsBlock from '@common/components/DashboardPage/blocks/payments'
 import MainLayout from '@common/components/Layouts/Main'
-import { Typography } from 'antd'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
@@ -15,9 +14,6 @@ export default withAuthRedirect(() => {
         { title: 'Payments', path: AppRoutes.PAYMENT },
       ]}
     >
-      <Typography.Title level={3} style={{ marginTop: '0.5rem' }}>
-        Payments
-      </Typography.Title>
       <PaymentsBlock />
     </MainLayout>
   )
