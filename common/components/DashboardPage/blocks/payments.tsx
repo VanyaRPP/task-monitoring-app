@@ -323,22 +323,26 @@ const PaymentsBlock = () => {
       payments?.data && (
         <Table.Summary>
           <Table.Summary.Row className={s.summ_item}>
+            <Table.Summary.Cell index={0} key="empty"></Table.Summary.Cell>
             {columns.map((item, index) => (
-              <Table.Summary.Cell index={index} key={index}>
+              <Table.Summary.Cell index={index + 1} key={index}>
                 {getFormattedValue(item.dataIndex)}
               </Table.Summary.Cell>
             ))}
           </Table.Summary.Row>
           <Table.Summary.Row className={s.saldo}>
+            <Table.Summary.Cell index={0} key="empty"></Table.Summary.Cell>
             {columns.map((item, index) => {
-              // Render Debit + Credit column ans span = 2
               const colSpan = item.dataIndex === Operations.Debit ? 2 : 1
 
-              // Hide Debit + Credit column duplicate
-              if (item.dataIndex === Operations.Credit) return
+              if (item.dataIndex === Operations.Credit) return null
 
               return (
-                <Table.Summary.Cell index={index} key={index} colSpan={colSpan}>
+                <Table.Summary.Cell
+                  index={index + 1}
+                  key={index}
+                  colSpan={colSpan}
+                >
                   {item.dataIndex === Operations.Debit &&
                     (
                       (payments?.totalPayments?.debit || 0) -
