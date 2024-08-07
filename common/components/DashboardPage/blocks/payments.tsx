@@ -25,12 +25,13 @@ import {
   Pagination,
   Popconfirm,
   Table,
+  TableColumnType,
   Tooltip,
   message,
 } from 'antd'
 import cn from 'classnames'
 import { useRouter } from 'next/router'
-import { ReactElement, useState } from 'react'
+import { ReactElement, useCallback, useMemo, useState } from 'react'
 import s from './style.module.scss'
 
 interface PaymentDeleteItem {
@@ -122,132 +123,131 @@ const PaymentsBlock = () => {
   const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = currUser?.roles?.includes(Roles.DOMAIN_ADMIN)
 
-  const handleDeletePayment = async (id: string) => {
-    const response = await deletePayment(id)
-    if ('data' in response) {
-      message.success('Видалено!')
-    } else {
-      message.error('Помилка при видаленні рахунку')
-    }
-  }
+  const handleDeletePayment = useCallback(
+    async (id: string) => {
+      const response = await deletePayment(id)
+      if ('data' in response) {
+        message.success('Видалено!')
+      } else {
+        message.error('Помилка при видаленні рахунку')
+      }
+    },
+    [deletePayment]
+  )
 
   const invoiceTypes = Object.entries(paymentsTitle)
 
-  const paymentsPageColumns =
-    router.pathname === AppRoutes.PAYMENT
-      ? invoiceTypes.map(([type, title]) => ({
-          title,
-          dataIndex: type,
-          render: (_, payment) => {
-            const item = payment.invoice.find((item) => item.type === type)
-            const sum = +(item?.sum || item?.price)
-            const currency = renderCurrency(sum?.toFixed(2))
+  const columns: TableColumnType<any>[] = useMemo(() => {
+    return [
+      {
+        title: 'Надавач послуг',
+        fixed: 'left',
+        dataIndex: 'domain',
+        filters:
+          router.pathname === AppRoutes.PAYMENT
+            ? payments?.domainsFilter
+            : null,
+        filteredValue: filters?.domain || null,
+        render: (i) => i?.name,
+        hidden: payments?.currentDomainsCount <= 1,
+      },
+      {
+        title: 'Компанія',
+        dataIndex: 'company',
+        fixed: 'left',
+        filters:
+          router.pathname === AppRoutes.PAYMENT
+            ? payments?.realEstatesFilter
+            : null,
+        filteredValue: filters?.company || null,
+        render: (i) => {
+          if (
+            (isGlobalAdmin || isDomainAdmin) &&
+            router.pathname === AppRoutes.PAYMENT
+          ) {
             return (
-              <span className={currency === '-' ? s.currency : ''}>
-                {currency}
-              </span>
-            )
-          },
-        }))
-      : []
-
-  const adminColumns =
-    isGlobalAdmin || isDomainAdmin
-      ? [
-          {
-            align: 'center',
-            fixed: 'right',
-            title: '',
-            width: 50,
-            render: (_, payment: IExtendedPayment) => (
-              <Button
-                style={{ padding: 0 }}
-                type="link"
-                onClick={() => {
-                  setCurrentPayment(payment)
-                  setPaymentActions({ ...paymentActions, edit: true })
-                }}
-              >
-                <EditOutlined className={s.icon} />
-              </Button>
-            ),
-          },
-          {
-            align: 'center',
-            fixed: 'right',
-            title: '',
-            width: 50,
-            render: (_, payment: IExtendedPayment) => (
-              <div className={s.popconfirm}>
-                <Popconfirm
-                  id="popconfirm_custom"
-                  title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                    payment?.invoiceCreationDate as unknown as string
-                  )}?`}
-                  onConfirm={() => handleDeletePayment(payment?._id)}
-                  okText="Видалити"
-                  cancelText="Ні"
-                  disabled={deleteLoading}
+              <Tooltip title="Додати в фільтри">
+                <a
+                  style={{
+                    cursor: 'pointer',
+                    color: 'blue',
+                    textDecoration: 'underline',
+                  }}
+                  onClick={() => {
+                    setFilters({ ...filters, company: [i?._id] })
+                  }}
                 >
-                  <DeleteOutlined className={s.icon} />
-                </Popconfirm>
-              </div>
-            ),
-          },
-        ]
-      : []
-
-  // TODO: add Interface
-  const columns: any = [
-    {
-      title: 'Дата створення',
-      dataIndex: 'invoiceCreationDate',
-      width: '155px',
-      render: dateToDefaultFormat,
-    },
-    {
-      title: (
-        <Tooltip title="Дебет (Реалізація)">
-          <span>Дебет</span>
-        </Tooltip>
-      ),
-      dataIndex: 'debit',
-      render: (_, payment: IExtendedPayment) => {
-        if (payment.type === Operations.Debit) {
-          return renderCurrency(payment.generalSum)
-        }
-        return <span className={s.currency}>-</span>
+                  {i?.companyName}
+                </a>
+              </Tooltip>
+            )
+          } else {
+            return i?.companyName
+          }
+        },
       },
-    },
-    {
-      title: (
-        <Tooltip title="Кредит (Оплата)">
-          <span>Кредит</span>
-        </Tooltip>
-      ),
-      dataIndex: 'credit',
-      render: (_, payment: IExtendedPayment) => {
-        if (payment.type === Operations.Credit) {
-          return renderCurrency(payment.generalSum)
-        }
-        return <span className={s.currency}>-</span>
+      {
+        title: 'Дата створення',
+        dataIndex: 'invoiceCreationDate',
+        width: '155px',
+        render: dateToDefaultFormat,
       },
-    },
-    {
-      title: 'За місяць',
-      width: 130,
-      dataIndex: 'monthService',
-      render: (monthService, obj) =>
-        dateToMonthYear(monthService?.date || obj.invoiceCreationDate),
-    },
-    ...paymentsPageColumns,
-    {
-      fixed: 'right',
-      title: '',
-      width: 50,
-      render: (_, payment: IExtendedPayment) => {
-        return payment?.type === Operations.Debit ? (
-          <div className={s.eyelined}>
+      {
+        title: (
+          <Tooltip title="Дебет (Реалізація)">
+            <span>Дебет</span>
+          </Tooltip>
+        ),
+        dataIndex: 'debit',
+        render: (_, payment: IExtendedPayment) => {
+          if (payment.type === Operations.Debit) {
+            return renderCurrency(payment.generalSum)
+          }
+          return <span className={s.currency}>-</span>
+        },
+      },
+      {
+        title: (
+          <Tooltip title="Кредит (Оплата)">
+            <span>Кредит</span>
+          </Tooltip>
+        ),
+        dataIndex: 'credit',
+        render: (_, payment: IExtendedPayment) => {
+          if (payment.type === Operations.Credit) {
+            return renderCurrency(payment.generalSum)
+          }
+          return <span className={s.currency}>-</span>
+        },
+      },
+      {
+        title: 'За місяць',
+        width: 130,
+        dataIndex: 'monthService',
+        render: (monthService, obj) =>
+          dateToMonthYear(monthService?.date || obj.invoiceCreationDate),
+      },
+      ...invoiceTypes.map(([type, title]) => ({
+        title,
+        dataIndex: type,
+        render: (_, payment) => {
+          const item = payment.invoice.find((item) => item.type === type)
+          const sum = +(item?.sum || item?.price)
+          const currency = renderCurrency(sum?.toFixed(2))
+          return (
+            <span className={currency === '-' ? s.currency : ''}>
+              {currency}
+            </span>
+          )
+        },
+        hidden: router.pathname !== AppRoutes.PAYMENT,
+      })),
+      {
+        fixed: 'right',
+        title: '',
+        width: 50,
+        render: (_, payment: IExtendedPayment) =>
+          payment?.type === Operations.Debit && (
             <Button
               type="link"
               onClick={() => {
@@ -257,60 +257,61 @@ const PaymentsBlock = () => {
             >
               <EyeOutlined className={s.eyelined} />
             </Button>
-          </div>
-        ) : (
-          <></>
-        )
+          ),
       },
-    },
-    ...adminColumns,
-  ]
-
-  columns.unshift({
-    title: 'Компанія',
-    dataIndex: 'company',
-    fixed: 'left',
-    filters:
-      pathname === AppRoutes.PAYMENT ? payments?.realEstatesFilter : null,
-    filteredValue: filters?.company || null,
-    render: (i) => {
-      if (isGlobalAdmin || isDomainAdmin) {
-        if (pathname === AppRoutes.PAYMENT) {
-          return (
-            <Tooltip title="Додати в фільтри">
-              <a
-                style={{
-                  cursor: 'pointer',
-                  color: 'blue',
-                  textDecoration: 'underline',
-                }}
-                onClick={() => {
-                  setFilters({ ...filters, company: [i?._id] })
-                }}
-              >
-                {i?.companyName}
-              </a>
-            </Tooltip>
-          )
-        } else {
-          return i?.companyName
-        }
-      } else {
-        return i?.companyName
-      }
-    },
-  })
-
-  if (payments?.currentDomainsCount > 1) {
-    columns.unshift({
-      title: 'Надавач послуг',
-      fixed: 'left',
-      dataIndex: 'domain',
-      filters: pathname === AppRoutes.PAYMENT ? payments?.domainsFilter : null,
-      filteredValue: filters?.domain || null,
-      render: (i) => i?.name,
-    })
-  }
+      {
+        align: 'center',
+        fixed: 'right',
+        title: '',
+        width: 50,
+        render: (_, payment: IExtendedPayment) => (
+          <Button
+            style={{ padding: 0 }}
+            type="link"
+            onClick={() => {
+              setCurrentPayment(payment)
+              setPaymentActions({ ...paymentActions, edit: true })
+            }}
+          >
+            <EditOutlined className={s.icon} />
+          </Button>
+        ),
+        hidden: !isDomainAdmin && !isGlobalAdmin,
+      },
+      {
+        align: 'center',
+        fixed: 'right',
+        title: '',
+        width: 50,
+        render: (_, payment: IExtendedPayment) => (
+          <Popconfirm
+            id="popconfirm_custom"
+            title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+              payment?.invoiceCreationDate as unknown as string
+            )}?`}
+            onConfirm={() => handleDeletePayment(payment?._id)}
+            okText="Видалити"
+            cancelText="Ні"
+            disabled={deleteLoading}
+          >
+            <DeleteOutlined className={s.icon} />
+          </Popconfirm>
+        ),
+        hidden: !isDomainAdmin && !isGlobalAdmin,
+      },
+    ].filter(({ hidden }) => !hidden) as TableColumnType<any>[]
+  }, [
+    isDomainAdmin,
+    isGlobalAdmin,
+    router,
+    invoiceTypes,
+    handleDeletePayment,
+    paymentActions,
+    deleteLoading,
+    filters,
+    setFilters,
+    payments,
+  ])
 
   const Summary = () => {
     const getFormattedValue = (dataIndex) => {
@@ -323,27 +324,25 @@ const PaymentsBlock = () => {
       payments?.data && (
         <Table.Summary>
           <Table.Summary.Row className={s.summ_item}>
-            <Table.Summary.Cell index={0} key="empty"></Table.Summary.Cell>
             {columns.map((item, index) => (
-              <Table.Summary.Cell index={index + 1} key={index}>
+              <Table.Summary.Cell index={index} key={index}>
                 {getFormattedValue(item.dataIndex)}
               </Table.Summary.Cell>
             ))}
           </Table.Summary.Row>
           <Table.Summary.Row className={s.saldo}>
-            <Table.Summary.Cell index={0} key="empty"></Table.Summary.Cell>
             {columns.map((item, index) => {
-              const colSpan = item.dataIndex === Operations.Debit ? 2 : 1
-
-              if (item.dataIndex === Operations.Credit) return null
+              if (item.dataIndex === Operations.Debit) {
+                return
+              }
 
               return (
                 <Table.Summary.Cell
-                  index={index + 1}
+                  index={index}
                   key={index}
-                  colSpan={colSpan}
+                  colSpan={item.dataIndex === Operations.Credit ? 2 : 1}
                 >
-                  {item.dataIndex === Operations.Debit &&
+                  {item.dataIndex === Operations.Credit &&
                     (
                       (payments?.totalPayments?.debit || 0) -
                       (payments?.totalPayments?.credit || 0)
@@ -411,9 +410,8 @@ const PaymentsBlock = () => {
       <>
         <Table
           rowSelection={
-            currUser?.roles?.includes(Roles.GLOBAL_ADMIN) ||
-            (currUser?.roles?.includes(Roles.DOMAIN_ADMIN) &&
-              pathname === AppRoutes.PAYMENT)
+            currUser?.roles?.includes(Roles.GLOBAL_ADMIN) &&
+            pathname === AppRoutes.PAYMENT
               ? rowSelection
               : null
           }
