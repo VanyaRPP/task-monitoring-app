@@ -85,6 +85,85 @@ describe('getInvoices - cleaning', () => {
     })
   })
 
+  describe('props: { service }', () => {
+    it('should NOT load when service = null', () => {
+      const service: Partial<IService> = null
+
+      const invoices = getInvoices({
+        service,
+      })
+
+      expect(invoices).not.toContainEqual({
+        type: ServiceType.Cleaning,
+      })
+    })
+    it('should NOT load when service = { ...: 10 }', () => {
+      const service: Partial<IService> = {
+        rentPrice: 10,
+      }
+
+      const invoices = getInvoices({
+        service,
+      })
+
+      expect(invoices).not.toContainEqual({
+        type: ServiceType.Cleaning,
+      })
+    })
+    it('should NOT load when service = { ...: 0 }', () => {
+      const service: Partial<IService> = {
+        rentPrice: 0,
+      }
+
+      const invoices = getInvoices({
+        service,
+      })
+
+      expect(invoices).not.toContainEqual({
+        type: ServiceType.Cleaning,
+      })
+    })
+    it('should NOT load when service = { ...: NaN }', () => {
+      const service: Partial<IService> = {
+        rentPrice: NaN,
+      }
+
+      const invoices = getInvoices({
+        service,
+      })
+
+      expect(invoices).not.toContainEqual({
+        type: ServiceType.Cleaning,
+      })
+    })
+    it('should NOT load when service = { ...: null }', () => {
+      const service: Partial<IService> = {
+        rentPrice: null,
+      }
+
+      const invoices = getInvoices({
+        service,
+      })
+
+      expect(invoices).not.toContainEqual({
+        type: ServiceType.Cleaning,
+      })
+    })
+    it('should NOT load when service = { ...: undefined }', () => {
+      const service: Partial<IService> = {
+        rentPrice: undefined,
+      }
+
+      const invoices = getInvoices({
+        service,
+      })
+
+      expect(invoices).not.toContainEqual({
+        type: ServiceType.Cleaning,
+      })
+    })
+  })
+
   describe('props: { service, company, prevPayment }', () => {
     it('should NOT load when service = null, company = null, prevPayment = null', () => {
       const service: Partial<IService> = null
