@@ -1,36 +1,33 @@
-import React from 'react'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { IDomain } from '@modules/models/Domain'
 import { Select } from 'antd'
-import s from './style.module.scss'
-import { isAdminCheck } from '@utils/helpers'
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import React, { useMemo } from 'react'
 
-interface Props {
-  setDomainId: (domainId: string) => void
-  domains: IExtendedDomain[]
-}
+const DomainSelector: React.FC<{
+  onSelect?: (domainId: IDomain['_id']) => void
+}> = ({ onSelect }) => {
+  // TODO: replace with isolated domains filter api later
+  const { data: { domainsFilter } = { domainsFilter: [] } } =
+    useGetAllRealEstateQuery({})
 
-const DomainSelector: React.FC<Props> = ({ setDomainId, domains }) => {
-  const { data: user } = useGetCurrentUserQuery()
-
-  if (isAdminCheck(user?.roles) && domains?.length > 1) {
-    const options = domains.map((domain) => ({
-      value: domain._id,
-      label: domain.name,
+  const options = useMemo(() => {
+    return domainsFilter.map(({ value, text }) => ({
+      value,
+      label: text,
     }))
+  }, [domainsFilter])
 
-    const defaultValue = domains[0]._id
-
-    return (
-      <Select
-        options={options}
-        defaultValue={defaultValue}
-        className={s.domainSelector}
-        onChange={setDomainId}
-      />
-    )
-  }
-  return null
+  return (
+    <Select
+      allowClear
+      showSearch
+      optionFilterProp="label"
+      options={options}
+      onSelect={(value) => onSelect?.(value)}
+      style={{ width: '100%' }}
+      placeholder="Оберіть домен"
+    />
+  )
 }
 
 export default DomainSelector

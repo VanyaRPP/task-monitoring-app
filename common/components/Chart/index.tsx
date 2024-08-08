@@ -2,10 +2,10 @@ import { generateColorsArray } from '@utils/helpers'
 import Chart from 'chart.js/auto'
 import React, { useEffect, useRef } from 'react'
 import s from './style.module.scss'
-import {Spin} from "antd";
 type dataSources = {
   label: string
   value: number
+  color?: string
 }
 
 const ChartComponent: React.FC<{
@@ -29,7 +29,11 @@ const ChartComponent: React.FC<{
           {
             label: chartElementTitle,
             data: dataSources?.map((i) => i.value),
-            backgroundColor: generateColorsArray(dataSources?.length),
+            backgroundColor: dataSources?.map(
+              (item, index) =>
+                item.color || generateColorsArray(dataSources?.length)[index]
+            ),
+
             borderWidth: 2,
           },
         ],
@@ -67,10 +71,6 @@ const ChartComponent: React.FC<{
       resizeObserver.disconnect()
     }
   }, [chartRef, dataSources, chartTitle, chartElementTitle])
-
-  if (!dataSources){
-    return <div className={s.loading}><Spin size={'large'}/></div>
-  }
 
   return (
     <div className={s.chartContainer}>

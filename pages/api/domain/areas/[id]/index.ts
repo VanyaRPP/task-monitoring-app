@@ -16,12 +16,19 @@ async function handler(
       try {
         const realEstates = await getCompanies(req.query.id)
         const formatedRealEstates = await getCompaniesFormattedData(realEstates)
+        console.log(formatedRealEstates)
         return res
           .status(200)
           .json({ success: true, data: formatedRealEstates })
       } catch (error) {
         return res.status(400).json({ success: false, message: error.message })
       }
+  }
+
+  if(req.method === "GET"){
+    const companies = await RealEstate.find({domain: {$in: [req.query.id]}}).select(["_id", "companyName", "rentPart", "totalArea"])
+    console.log(companies)
+    return res.status(200).json({ success: true, data: companies })
   }
 }
 
