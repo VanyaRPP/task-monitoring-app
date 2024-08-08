@@ -68,7 +68,12 @@ export default async function handler(
         $project: {
           _id: 0,
           text: {
-            $concat: ['$addressDetails.address' , ' (м. ', '$addressDetails.city', ')']
+            $concat: [
+              '$addressDetails.address',
+              ' (м. ',
+              '$addressDetails.city',
+              ')',
+            ],
           },
           value: '$_id',
         },
@@ -220,6 +225,7 @@ export default async function handler(
         }
 
         const data = await Service.find({ $and: [options, filters] })
+          .sort({ date: -1 })
           .limit(+limit)
           .skip(+skip)
           .populate('domain')
