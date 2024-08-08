@@ -236,7 +236,7 @@ describe('getInvoices - cleaning', () => {
       expect(invoices).toContainEqual({
         type: ServiceType.Cleaning,
         price: 10,
-        sum: 0,
+        sum: 10,
       })
     })
     it('should load when service = { ... }, company = { cleaning: 0 }', () => {

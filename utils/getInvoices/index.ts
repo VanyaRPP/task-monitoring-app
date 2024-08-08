@@ -378,7 +378,7 @@ export const getCleaningInvoice = ({
 
     return {
       type: invoice.type,
-      price: +toRoundFixed(+invoice.price),
+      price: +toRoundFixed(+invoice.price || +invoice.sum),
       sum: +toRoundFixed(+invoice.sum || +invoice.price),
     }
   }
@@ -388,7 +388,7 @@ export const getCleaningInvoice = ({
     return {
       type: ServiceType.Cleaning,
       price: +toRoundFixed(company?.cleaning),
-      sum: 0,
+      sum: +toRoundFixed(company.cleaning),
     }
   }
 }
