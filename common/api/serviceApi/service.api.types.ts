@@ -13,7 +13,6 @@ export interface IService {
   waterPriceTotal: number
   garbageCollectorPrice?: number
   inflicionPrice?: number
-  cleaning?: number
   description?: string
 }
 
