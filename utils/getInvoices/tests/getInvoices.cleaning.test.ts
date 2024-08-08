@@ -239,6 +239,25 @@ describe('getInvoices - cleaning', () => {
         sum: 0,
       })
     })
+    it('should load when service = { ... }, company = { cleaning: 0 }', () => {
+      const service: Partial<IService> = {
+        rentPrice: 10,
+      }
+      const company: Partial<IRealestate> = {
+        cleaning: 0,
+      }
+    
+      const invoices = getInvoices({
+        service,
+        company,
+      })
+    
+      expect(invoices).toContainEqual({
+        type: ServiceType.Cleaning,
+        price: 0,
+        sum: 0,
+      })
+    })
   })
 
   describe('props: { payment }', () => {
