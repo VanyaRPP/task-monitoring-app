@@ -1,3 +1,5 @@
+'use client'
+
 import { RootState } from '@modules/store/store'
 import { setTheme as _setTheme, Theme } from '@modules/store/themeSlice'
 import { useCallback, useEffect } from 'react'

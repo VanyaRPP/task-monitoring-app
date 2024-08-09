@@ -1,3 +1,5 @@
+'use client'
+
 import { Footer } from '@components/Layouts/Footer'
 import { Header } from '@components/Layouts/Header'
 import { Sidebar } from '@components/Layouts/Sidebar'
@@ -12,7 +14,7 @@ export interface MainLayoutProps {
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children, path }) => {
   return (
-    <Layout>
+    <Layout hasSider>
       <Sidebar collapsible className={styles.Sidebar} />
       <Layout>
         <Header className={styles.Header} path={path} />

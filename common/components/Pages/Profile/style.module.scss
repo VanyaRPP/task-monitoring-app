@@ -1,0 +1,20 @@
+.User {
+  height: calc(256px + 72px);
+
+  .Background {
+    height: 256px;
+    overflow: hidden;
+
+    .Image {
+      filter: blur(16px);
+    }
+
+    :global(.ant-card-body) {
+      padding: 0;
+    }
+  }
+  .Content {
+    height: 144px;
+    margin: -72px 16px 16px 16px;
+  }
+}

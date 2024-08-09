@@ -1,3 +1,5 @@
+'use client'
+
 import { UserOutlined } from '@ant-design/icons'
 import { Profile } from '@components/UI/Profile'
 import { isEmpty } from '@utils/helpers'
@@ -39,7 +41,7 @@ export const Avatar: React.FC<AvatarProps> = ({
 
   useEffect(() => {
     if (!isEmpty(_open)) {
-      setOpen(_open)
+      setOpen(!!_open)
     }
   }, [_open, setOpen])
 

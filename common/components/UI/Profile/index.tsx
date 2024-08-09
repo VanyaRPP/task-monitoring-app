@@ -1,8 +1,10 @@
+'use client'
+
 import { LoginOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { Tags } from '@components/UI/Tags'
-import { Roles } from '@utils/constants'
+import { AppRoutes, Roles } from '@utils/constants'
 import {
   Avatar,
   Button,
@@ -15,6 +17,7 @@ import {
 } from 'antd'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useMemo } from 'react'
 import styles from './style.module.scss'
 
@@ -95,7 +98,7 @@ export const Profile: React.FC = () => {
                   <Tag
                     key={index}
                     bordered={false}
-                    color="red"
+                    color="purple"
                     style={{ margin: 0 }}
                   >
                     {domain}
@@ -122,9 +125,11 @@ export const Profile: React.FC = () => {
 
         <Space direction="vertical" style={{ width: '100%' }}>
           {!!session?.user && (
-            <Button block icon={<UserOutlined />}>
-              Profile
-            </Button>
+            <Link href={AppRoutes.PROFILE}>
+              <Button block icon={<UserOutlined />}>
+                Profile
+              </Button>
+            </Link>
           )}
           <Button
             type="primary"

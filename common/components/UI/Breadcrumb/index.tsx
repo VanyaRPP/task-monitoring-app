@@ -1,10 +1,12 @@
+'use client'
+
 import { HomeOutlined } from '@ant-design/icons'
 import {
   Breadcrumb as AntdBreadcrumb,
   BreadcrumbProps as AntdBreadcrumbProps,
   Button,
 } from 'antd'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import { useMemo } from 'react'
 import styles from './style.module.scss'
 
@@ -24,7 +26,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ path, ...props }) => {
     return (
       path?.map((item) => ({
         title: item.title,
-        ...(item.path && { onClick: () => router.push(item.path) }),
+        ...(!!item.path && { onClick: () => router.push(item.path!) }),
       })) ?? []
     )
   }, [router, path])

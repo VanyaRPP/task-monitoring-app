@@ -8,6 +8,7 @@ import { serviceApi } from '@common/api/serviceApi/service.api'
 import { streetApi } from '@common/api/streetApi/street.api'
 import { taskApi } from '@common/api/taskApi/task.api'
 import { userApi } from '@common/api/userApi/user.api'
+import sidebarReducer from '@modules/store/sidebarSlice'
 import themeReducer from '@modules/store/themeSlice'
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 
@@ -23,6 +24,7 @@ export const store = configureStore({
     [notificationApi.reducerPath]: notificationApi.reducer,
     [realestateApi.reducerPath]: realestateApi.reducer,
     [streetApi.reducerPath]: streetApi.reducer,
+    sidebar: sidebarReducer,
     theme: themeReducer,
   },
   middleware: (getDefaultMiddleware) =>
