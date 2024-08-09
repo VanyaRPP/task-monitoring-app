@@ -383,11 +383,10 @@ export const getCleaningInvoice = ({
     }
   }
 
-  if (company?.cleaning || !isNaN(company?.cleaning)) {
-
+  if (!isEmpty(company?.cleaning) && !isNaN(company.cleaning)) {
     return {
       type: ServiceType.Cleaning,
-      price: +toRoundFixed(company?.cleaning),
+      price: +toRoundFixed(company.cleaning),
       sum: +toRoundFixed(company.cleaning),
     }
   }
