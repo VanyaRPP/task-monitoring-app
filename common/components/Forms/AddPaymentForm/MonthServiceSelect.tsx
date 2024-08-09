@@ -29,20 +29,20 @@ export default function MonthServiceSelect({
 }
 
 function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
-  const { data: monthsServices, isLoading } = useGetAllServicesQuery({
+  const { data: { data: services } = { data: [] }, isLoading } = useGetAllServicesQuery({
     domainId,
     streetId,
   })
 
   useEffect(() => {
-    form.resetFields(['monthService'])
-  }, [streetId]) // eslint-disable-line react-hooks/exhaustive-deps
+    form.setFieldValue('monthService', undefined)
+  }, [form, streetId])
 
   useEffect(() => {
-    if (monthsServices?.data?.length === 1) {
-      form.setFieldValue('monthService', monthsServices.data[0]._id)
+    if (services.length === 1) {
+      form.setFieldValue('monthService', services[0]._id)
     }
-  }, [monthsServices?.data.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [services.length]) 
 
   return (
     <Form.Item
@@ -51,13 +51,13 @@ function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
       label="Місяць"
     >
       <Select
-        options={monthsServices?.data.map((i) => ({
+        options={services.map((i) => ({
           value: i._id,
           label: getFormattedDate(i.date, 'MMMM YYYY'),
         }))}
         optionFilterProp="label"
         placeholder="Місяць"
-        disabled={monthsServices?.data?.length === 1 || edit}
+        disabled={services.length === 1 || edit || isLoading} 
         loading={isLoading}
         showSearch
       />
