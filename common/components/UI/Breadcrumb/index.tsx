@@ -26,7 +26,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ path, ...props }) => {
     return (
       path?.map((item) => ({
         title: item.title,
-        ...(!!item.path && { onClick: () => router.push(item.path!) }),
+        ...(!!item.path && { onClick: () => router.push(item.path) }),
       })) ?? []
     )
   }, [router, path])
