@@ -1,7 +1,7 @@
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { IDomain } from '@modules/models/Domain'
 import { Select } from 'antd'
-import React, { useMemo } from 'react'
+import React, {useEffect, useMemo, useState} from 'react'
 
 const DomainSelector: React.FC<{
   onSelect?: (domainId: IDomain['_id']) => void
@@ -17,14 +17,26 @@ const DomainSelector: React.FC<{
     }))
   }, [domainsFilter])
 
+  const [currentValue, setCurrentValue] = useState(options.length ? options[0].value : undefined)
+
+
+  useEffect(() => {
+    if (!options.length)
+      return
+    setCurrentValue(options[0].value)
+  }, [options.length]);
+
   return (
     <Select
       allowClear
       showSearch
       optionFilterProp="label"
       options={options}
-      value={options.length ? options[0].value : undefined}
-      onSelect={(value) => onSelect?.(value)}
+      value={currentValue}
+      onSelect={(value) => {
+        setCurrentValue(value)
+        return onSelect?.(value)
+      }}
       style={{ width: '100%' }}
       placeholder="Оберіть домен"
       defaultActiveFirstOption={true}
