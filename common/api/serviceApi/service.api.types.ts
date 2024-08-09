@@ -14,7 +14,6 @@ export interface IService {
   garbageCollectorPrice?: number
   inflicionPrice?: number
   description?: string
-  
 }
 
 export interface IAddServiceResponse {

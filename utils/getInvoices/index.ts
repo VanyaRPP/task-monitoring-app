@@ -378,7 +378,7 @@ export const getCleaningInvoice = ({
 
     return {
       type: invoice.type,
-      price: +toRoundFixed(+invoice.sum || +invoice.price),
+      price: +toRoundFixed(+invoice.price || +invoice.sum),
       sum: +toRoundFixed(+invoice.sum || +invoice.price),
     }
   }
