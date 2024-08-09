@@ -41,16 +41,13 @@ export const Profile: React.FC = () => {
     <div className={styles.Profile}>
       <div
         className={styles.Background}
-        style={{ backgroundColor: token.colorPrimary }}
+        style={{ backgroundColor: token.colorPrimaryBg }}
       />
       <Space direction="vertical" size="large" style={{ width: 320 }}>
         <Flex justify="center" style={{ marginTop: 28 }}>
           <Avatar
             size={88}
             icon={<UserOutlined />}
-            style={{
-              border: `4px solid ${token.colorPrimaryBg}`,
-            }}
             src={
               session?.user?.image ? (
                 <Image

@@ -20,6 +20,11 @@ export const ThemeProvider: React.FC<{
     <ConfigProvider
       theme={{
         algorithm,
+        token: {
+          colorPrimary: '#722ed1',
+          colorInfo: '#722ed1',
+          fontSize: 16,
+        },
         components: {
           Layout: {
             footerBg: token.colorBgContainer,
