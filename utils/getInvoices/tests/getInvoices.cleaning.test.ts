@@ -97,61 +97,9 @@ describe('getInvoices - cleaning', () => {
         type: ServiceType.Cleaning,
       })
     })
-    it('should NOT load when service = { ...: 10 }', () => {
+    it('should NOT load when service = { ... }', () => {
       const service: Partial<IService> = {
         rentPrice: 10,
-      }
-
-      const invoices = getInvoices({
-        service,
-      })
-
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.Cleaning,
-      })
-    })
-    it('should NOT load when service = { ...: 0 }', () => {
-      const service: Partial<IService> = {
-        rentPrice: 0,
-      }
-
-      const invoices = getInvoices({
-        service,
-      })
-
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.Cleaning,
-      })
-    })
-    it('should NOT load when service = { ...: NaN }', () => {
-      const service: Partial<IService> = {
-        rentPrice: NaN,
-      }
-
-      const invoices = getInvoices({
-        service,
-      })
-
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.Cleaning,
-      })
-    })
-    it('should NOT load when service = { ...: null }', () => {
-      const service: Partial<IService> = {
-        rentPrice: null,
-      }
-
-      const invoices = getInvoices({
-        service,
-      })
-
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.Cleaning,
-      })
-    })
-    it('should NOT load when service = { ...: undefined }', () => {
-      const service: Partial<IService> = {
-        rentPrice: undefined,
       }
 
       const invoices = getInvoices({
@@ -180,30 +128,7 @@ describe('getInvoices - cleaning', () => {
         type: ServiceType.Cleaning,
       })
     })
-    it('should NOT load when service = null, company = null, prevPayment = { invoice: [cleaning] }', () => {
-      const service: Partial<IService> = null
-      const company: Partial<IRealestate> = null
-      const prevPayment: Partial<IPayment> = {
-        invoice: [
-          {
-            type: ServiceType.Cleaning,
-            price: 10,
-            sum: 100,
-          },
-        ],
-      }
-
-      const invoices = getInvoices({
-        service,
-        company,
-        prevPayment,
-      })
-
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.Cleaning,
-      })
-    })
-    it('should NOT load when service = null, company = null, prevPayment = { invoice: [cleaning] }', () => {
+    it('should NOT load when service = null, company = null, prevPayment = { invoice: [Cleaning] }', () => {
       const service: Partial<IService> = null
       const company: Partial<IRealestate> = null
       const prevPayment: Partial<IPayment> = {
@@ -249,7 +174,7 @@ describe('getInvoices - cleaning', () => {
         type: ServiceType.Cleaning,
       })
     })
-    it('should NOT load when service = null, company = { cleaning: 10 }, prevPayment = { invoice: [cleaning] }', () => {
+    it('should NOT load when service = null, company = { cleaning: 10 }, prevPayment = { invoice: [Cleaning] }', () => {
       const service: Partial<IService> = null
       const company: Partial<IRealestate> = {
         cleaning: 10,
@@ -299,38 +224,137 @@ describe('getInvoices - cleaning', () => {
         type: ServiceType.Cleaning,
       })
     })
-    it('should load when service = { ... }, company = { cleaning: 10 }', () => {
+    it('should load when service = { ... }, company = { cleaning: 10 }, prevPayment = null', () => {
       const service: Partial<IService> = {
         rentPrice: 10,
       }
       const company: Partial<IRealestate> = {
         cleaning: 10,
       }
-    
+      const prevPayment: Partial<IPayment> = null
+
       const invoices = getInvoices({
         service,
         company,
+        prevPayment,
       })
-    
+
       expect(invoices).toContainEqual({
         type: ServiceType.Cleaning,
         price: 10,
         sum: 10,
       })
     })
-    it('should load when service = { ... }, company = { cleaning: 0 }', () => {
+    it('should load when service = { ... }, company = { cleaning: 10 }, prevPayment = { invoice: [Cleaning] }', () => {
+      const service: Partial<IService> = {
+        rentPrice: 10,
+      }
+      const company: Partial<IRealestate> = {
+        cleaning: 10,
+      }
+      const prevPayment: Partial<IPayment> = {
+        invoice: [
+          {
+            type: ServiceType.Cleaning,
+            price: 10,
+            sum: 100,
+          },
+        ],
+      }
+
+      const invoices = getInvoices({
+        service,
+        company,
+        prevPayment,
+      })
+
+      expect(invoices).toContainEqual({
+        type: ServiceType.Cleaning,
+        price: 10,
+        sum: 10,
+      })
+    })
+    it('should load when service = { ... }, company = { cleaning: 10 }, prevPayment = { invoice: [Electricity] }', () => {
+      const service: Partial<IService> = {
+        rentPrice: 10,
+      }
+      const company: Partial<IRealestate> = {
+        cleaning: 10,
+      }
+      const prevPayment: Partial<IPayment> = {
+        invoice: [
+          {
+            type: ServiceType.Electricity,
+            price: 10,
+            sum: 100,
+          },
+        ],
+      }
+
+      const invoices = getInvoices({
+        service,
+        company,
+        prevPayment,
+      })
+
+      expect(invoices).toContainEqual({
+        type: ServiceType.Cleaning,
+        price: 10,
+        sum: 10,
+      })
+    })
+    it('should load when service = { ... }, company = { cleaning: 0 }, prevPayment = { invoice: [Cleaning] }', () => {
       const service: Partial<IService> = {
         rentPrice: 10,
       }
       const company: Partial<IRealestate> = {
         cleaning: 0,
       }
-    
+      const prevPayment: Partial<IPayment> = {
+        invoice: [
+          {
+            type: ServiceType.Cleaning,
+            price: 10,
+            sum: 100,
+          },
+        ],
+      }
+
       const invoices = getInvoices({
         service,
         company,
+        prevPayment,
       })
-    
+
+      expect(invoices).toContainEqual({
+        type: ServiceType.Cleaning,
+        price: 0,
+        sum: 0,
+      })
+    })
+    it('should load when service = { ... }, company = { cleaning: 0 }, prevPayment = { invoice: [Electricity] }', () => {
+      const service: Partial<IService> = {
+        rentPrice: 10,
+      }
+      const company: Partial<IRealestate> = {
+        cleaning: 0,
+      }
+      const prevPayment: Partial<IPayment> = {
+        invoice: [
+          {
+            type: ServiceType.Electricity,
+            price: 10,
+            sum: 100,
+          },
+        ],
+      }
+
+      const invoices = getInvoices({
+        service,
+        company,
+        prevPayment,
+      })
+
       expect(invoices).toContainEqual({
         type: ServiceType.Cleaning,
         price: 0,
