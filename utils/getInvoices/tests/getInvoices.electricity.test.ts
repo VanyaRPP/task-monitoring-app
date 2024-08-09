@@ -521,7 +521,7 @@ describe('getInvoices - ELECTRICITY', () => {
         sum: 10,
       })
     })
-    it('should load when service = null, company = null, payment = { invoice: [Electricity] }', () => {
+    it('should load when service = { electricityPrice: 10 }, company = null, payment = { invoice: [Electricity] }', () => {
       const service: Partial<IService> = {
         electricityPrice: 10,
       }
