@@ -23,9 +23,11 @@ const DomainSelector: React.FC<{
       showSearch
       optionFilterProp="label"
       options={options}
+      value={options.length ? options[0].value : undefined}
       onSelect={(value) => onSelect?.(value)}
       style={{ width: '100%' }}
       placeholder="Оберіть домен"
+      defaultActiveFirstOption={true}
     />
   )
 }
