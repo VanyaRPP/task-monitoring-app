@@ -29,22 +29,20 @@ export default function CompanySelect({
 }
 
 function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
-  const { data: realEstates, isLoading } = useGetAllRealEstateQuery({
+  const { data: { data: companies } = { data: [] }, isLoading } = useGetAllRealEstateQuery({
     domainId,
     streetId,
   })
-
-  const companies = realEstates?.data || []
-
+  
   useEffect(() => {
-    form.resetFields(['company'])
-  }, [streetId]) // eslint-disable-line react-hooks/exhaustive-deps
+    form.setFieldValue('company', undefined)
+  }, [form, streetId])
 
   useEffect(() => {
     if (companies?.length === 1) {
       form.setFieldValue('company', companies[0]._id)
     }
-  }, [companies?.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [form, companies])
 
   return (
     <Form.Item
@@ -73,7 +71,7 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
         }))}
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={companies?.length === 1 || edit}
+        disabled={companies?.length === 1 || edit || isLoading}
         loading={isLoading}
         showSearch
       />
