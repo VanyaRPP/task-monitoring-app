@@ -246,7 +246,7 @@ export const getElectricityInvoice = ({
       amount: +toRoundFixed(prevElectricity?.amount),
       lastAmount: +toRoundFixed(prevElectricity?.amount),
       price: +toRoundFixed(service.electricityPrice),
-      sum: 0,
+      sum: +toRoundFixed(service.electricityPrice),
     }
   }
 }
