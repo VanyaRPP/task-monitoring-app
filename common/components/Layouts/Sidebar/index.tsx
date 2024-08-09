@@ -1,38 +1,46 @@
+'use client'
+
+import {
+  DollarOutlined,
+  LineChartOutlined,
+  UserOutlined,
+} from '@ant-design/icons'
+import useSidebar from '@modules/hooks/useSidebar'
 import { AppRoutes } from '@utils/constants'
 import { Layout, Menu, SiderProps, Typography } from 'antd'
-import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import styles from './style.module.scss'
 
 export const Sidebar: React.FC<Omit<SiderProps, 'children'>> = (props) => {
   const router = useRouter()
+  const pathname = usePathname()
 
-  // TODO: redux-based collapsed (to save collapse state between pages)
-  const [collapsed, setCollapsed] = useState<boolean>(false)
+  const { collapsed, toggleCollapsed } = useSidebar()
 
   return (
     <Layout.Sider
       theme="light"
-      onCollapse={() => setCollapsed(!collapsed)}
       collapsed={collapsed}
+      onCollapse={() => toggleCollapsed()}
       {...props}
     >
       <Typography.Text className={styles.Logo}>
         {collapsed ? '[LOGO]' : '[LOGO] E-ORENDA'}
       </Typography.Text>
       <Menu
-        selectedKeys={[router.asPath]}
-        defaultOpenKeys={[
-          'user_submenu',
-          'dashboard_submenu',
-          'payments_submenu',
-        ]}
+        selectedKeys={pathname ? [pathname] : []}
+        defaultOpenKeys={
+          !collapsed
+            ? ['user_submenu', 'dashboard_submenu', 'payments_submenu']
+            : []
+        }
         mode="inline"
         items={[
           {
             key: 'user_submenu',
             type: 'submenu',
             label: 'User',
+            icon: <UserOutlined />,
             children: [
               {
                 key: AppRoutes.DASHBOARD,
@@ -52,6 +60,7 @@ export const Sidebar: React.FC<Omit<SiderProps, 'children'>> = (props) => {
             key: 'dashboard_submenu',
             type: 'submenu',
             label: 'Dashboard',
+            icon: <LineChartOutlined />,
             children: [
               {
                 key: AppRoutes.INDEX,
@@ -89,6 +98,7 @@ export const Sidebar: React.FC<Omit<SiderProps, 'children'>> = (props) => {
             key: 'payments_submenu',
             type: 'submenu',
             label: 'Payments',
+            icon: <DollarOutlined />,
             children: [
               {
                 key: AppRoutes.PAYMENT,
