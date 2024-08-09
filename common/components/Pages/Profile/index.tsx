@@ -34,7 +34,11 @@ const V2: React.FC = () => {
   }, [user])
 
   return (
-    <Space direction="vertical" style={{ width: '100%', position: 'relative' }}>
+    <Space
+      direction="vertical"
+      style={{ width: '100%', position: 'relative' }}
+      size="middle"
+    >
       {!!session?.user && (
         <div className={styles.User}>
           <Card className={styles.Background}>
@@ -66,7 +70,7 @@ const V2: React.FC = () => {
           </Card>
         </div>
       )}
-      <Flex gap={8}>
+      <Flex gap={16}>
         <Card title="Member" style={{ width: '400px' }}>
           <Divider orientation="left" style={{ marginTop: 0 }}>
             <Typography.Text type="secondary">Domains</Typography.Text>
