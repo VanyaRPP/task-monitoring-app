@@ -1,16 +1,23 @@
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import withAuthRedirect from '@components/HOC/withAuthRedirect'
+import MainLayout from '@components/Layouts/Main'
 import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
-import { FC } from 'react'
 import { authOptions } from '../api/auth/[...nextauth]'
 
-const Streets: FC = () => {
-  return <StreetsBlock />
-}
-
-export default withAuthRedirect(Streets)
+export default withAuthRedirect(() => {
+  return (
+    <MainLayout
+      path={[
+        { title: 'Панель управління', path: AppRoutes.INDEX },
+        { title: 'Вулиці', path: AppRoutes.STREETS },
+      ]}
+    >
+      <StreetsBlock />
+    </MainLayout>
+  )
+})
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions)

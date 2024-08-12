@@ -1,15 +1,16 @@
-import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
-import { categoryApi } from '../../api/categoriesApi/category.api'
-import { userApi } from '../../api/userApi/user.api'
-import { taskApi } from '../../api/taskApi/task.api'
-import { domainApi } from '../../api/domainApi/domain.api'
-import themeReducer from './reducers/ThemeSlice'
+import { categoryApi } from '@common/api/categoriesApi/category.api'
+import { customerApi } from '@common/api/customerApi/customer.api'
+import { domainApi } from '@common/api/domainApi/domain.api'
 import { notificationApi } from '@common/api/notificationApi/notification.api'
 import { paymentApi } from '@common/api/paymentApi/payment.api'
-import { serviceApi } from '@common/api/serviceApi/service.api'
-import { customerApi } from '@common/api/customerApi/customer.api'
 import { realestateApi } from '@common/api/realestateApi/realestate.api'
+import { serviceApi } from '@common/api/serviceApi/service.api'
 import { streetApi } from '@common/api/streetApi/street.api'
+import { taskApi } from '@common/api/taskApi/task.api'
+import { userApi } from '@common/api/userApi/user.api'
+import sidebarReducer from '@modules/store/sidebarSlice'
+import themeReducer from '@modules/store/themeSlice'
+import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 
 export const store = configureStore({
   reducer: {
@@ -22,8 +23,9 @@ export const store = configureStore({
     [customerApi.reducerPath]: customerApi.reducer,
     [notificationApi.reducerPath]: notificationApi.reducer,
     [realestateApi.reducerPath]: realestateApi.reducer,
-    themeReducer,
     [streetApi.reducerPath]: streetApi.reducer,
+    sidebar: sidebarReducer,
+    theme: themeReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()

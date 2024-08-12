@@ -13,11 +13,11 @@ export enum AppRoutes {
   DOMAIN = '/domain',
   PAYMENT = '/payment',
   PAYMENT_BULK = '/payment/bulk',
+  PAYMENT_CHART = '/payment/chart',
   SERVICE = '/service',
   CUSTOMER = '/customer',
   REAL_ESTATE = '/real-estate',
   STREETS = '/streets',
-  PAYMENTS_CHARTS = '/payments-chart',
 }
 
 export enum Operations {
