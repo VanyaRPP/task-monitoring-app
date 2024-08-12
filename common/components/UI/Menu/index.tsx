@@ -66,6 +66,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
             type: 'item',
             label: 'Вулиці',
             onClick: () => router.push(AppRoutes.STREETS),
+            hidden: !isGlobalAdmin,
           },
           {
             key: AppRoutes.DOMAIN,
@@ -85,7 +86,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
             label: 'Послуги',
             onClick: () => router.push(AppRoutes.SERVICE),
           },
-        ],
+        ].filter(({ hidden }) => !hidden),
       },
       {
         key: 'payments_submenu',
@@ -104,7 +105,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
             type: 'item',
             label: 'Bulk',
             onClick: () => router.push(AppRoutes.PAYMENT_BULK),
-            hidden: true,
+            hidden: !isGlobalAdmin,
           },
           {
             key: AppRoutes.PAYMENT_CHART,

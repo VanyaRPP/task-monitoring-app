@@ -119,7 +119,7 @@ const PaymentCardHeader = ({
           {isAdmin ? 'Платежі' : 'Мої оплати'}
           <SelectOutlined />
         </Button>
-        {location.pathname === AppRoutes.PAYMENT && (
+        {pathname === AppRoutes.PAYMENT && (
           <Space>
             <PaymentCascader onChange={setCurrentDateFilter} />
             <SelectForDebitAndCredit onChange={setCurrentTypeOperation} />
