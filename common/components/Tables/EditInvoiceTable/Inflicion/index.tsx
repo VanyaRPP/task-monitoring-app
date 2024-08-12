@@ -61,7 +61,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   }
 
   if (company?.inflicion && !prevService?.inflicionPrice) {
-    return 'Інфляція за попередній місяць невідома'
+    return <>Інфляція за попередній місяць невідома</>
   }
 }
 
