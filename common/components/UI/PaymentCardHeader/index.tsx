@@ -112,76 +112,71 @@ const PaymentCardHeader = ({
     }
   }
 
-  if (!isAdmin && currUser) {
-    return (
-      <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT)}>
-        Мої оплати
-        <SelectOutlined />
-      </Button>
-    )
-  }
-
-  if (isAdmin) {
-    return (
-      <Flex justify="space-between">
-        <Space>
-          <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT)}>
-            Платежі
-            <SelectOutlined />
-          </Button>
-          {location.pathname === AppRoutes.PAYMENT && (
-            <Space>
-              <PaymentCascader onChange={setCurrentDateFilter} />
-              <SelectForDebitAndCredit onChange={setCurrentTypeOperation} />
-              <StreetsSelector
-                filters={filters}
-                setFilters={setFilters}
-                streets={streets}
-              />
-              <FilterTags
-                filters={filters}
-                setFilters={setFilters}
-                collection={payments}
-              />
-            </Space>
-          )}
-        </Space>
-        <Flex wrap align="center" justify="flex-end">
-          <ImportInvoices />
+  return (
+    <Flex justify="space-between">
+      <Space>
+        <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT)}>
+          {isAdmin ? 'Платежі' : 'Мої оплати'}
+          <SelectOutlined />
+        </Button>
+        {location.pathname === AppRoutes.PAYMENT && (
+          <Space>
+            <PaymentCascader onChange={setCurrentDateFilter} />
+            <SelectForDebitAndCredit onChange={setCurrentTypeOperation} />
+            <StreetsSelector
+              filters={filters}
+              setFilters={setFilters}
+              streets={streets}
+            />
+            <FilterTags
+              filters={filters}
+              setFilters={setFilters}
+              collection={payments}
+            />
+          </Space>
+        )}
+      </Space>
+      <Flex wrap align="center" justify="flex-end">
+        {isAdmin && <ImportInvoices />}
+        {isAdmin && (
           <Button
             type="link"
             onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
           >
             Інвойси <SelectOutlined />
           </Button>
+        )}
+        {isAdmin && (
           <Button type="link" onClick={() => setIsModalOpen(true)}>
             <PlusOutlined /> Додати
           </Button>
-          {(isModalOpen || currentPayment) && (
-            <AddPaymentModal
-              paymentActions={paymentActions}
-              paymentData={currentPayment}
-              closeModal={closeModal}
-            />
+        )}
+        {(isModalOpen || currentPayment) && (
+          <AddPaymentModal
+            paymentActions={
+              !isAdmin ? { edit: false, preview: true } : paymentActions
+            }
+            paymentData={currentPayment}
+            closeModal={closeModal}
+          />
+        )}
+        {isAdmin &&
+          pathname === AppRoutes.PAYMENT &&
+          selectedPayments.length > 0 && (
+            <Button type="link" onClick={() => handleGeneratePdf()}>
+              Завантажити рахунки <DownloadOutlined />
+            </Button>
           )}
-          {isAdmin &&
-            pathname === AppRoutes.PAYMENT &&
-            selectedPayments.length > 0 && (
-              <Button type="link" onClick={() => handleGeneratePdf()}>
-                Завантажити рахунки <DownloadOutlined />
-              </Button>
-            )}
-          {isGlobalAdmin &&
-            pathname === AppRoutes.PAYMENT &&
-            selectedPayments.length > 0 && (
-              <Button type="link" onClick={() => handleDeletePayments()}>
-                <DeleteOutlined /> Видалити
-              </Button>
-            )}
-        </Flex>
+        {isGlobalAdmin &&
+          pathname === AppRoutes.PAYMENT &&
+          selectedPayments.length > 0 && (
+            <Button type="link" onClick={() => handleDeletePayments()}>
+              <DeleteOutlined /> Видалити
+            </Button>
+          )}
       </Flex>
-    )
-  }
+    </Flex>
+  )
 }
 
 export default PaymentCardHeader
