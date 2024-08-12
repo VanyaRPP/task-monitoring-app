@@ -1,10 +1,11 @@
+import { QuestionCircleOutlined } from '@ant-design/icons'
 import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { ServiceType } from '@utils/constants'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography } from 'antd'
+import { Form, Input, Space, Tooltip, Typography } from 'antd'
 import { useEffect, useMemo } from 'react'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
@@ -13,11 +14,21 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service } = usePaymentContext()
+  const { service, prevService } = usePaymentContext()
 
   return (
     <Space direction="vertical" size={0}>
-      <Typography.Text>Інфляція</Typography.Text>
+      <Tooltip
+        title={
+          prevService?.inflicionPrice &&
+          `У попередньому місяці становила ${prevService?.inflicionPrice}%`
+        }
+        placement="topLeft"
+      >
+        <Typography.Text>
+          Інфляція <QuestionCircleOutlined />
+        </Typography.Text>
+      </Tooltip>
       <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
         {toFirstUpperCase(dateToMonthYear(service?.date))}
       </Typography.Text>
@@ -31,19 +42,19 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service, company, prevPayment } = usePaymentContext()
+  const { service, company, prevService, prevPayment } = usePaymentContext()
 
-  if (company?.inflicion && service?.inflicionPrice) {
+  if (company?.inflicion && prevService?.inflicionPrice) {
     const prevPlacingInvoice = prevPayment?.invoice.find(
       (invoice) => invoice.type === ServiceType.Placing
     )
     const rentPrice =
       prevPlacingInvoice?.sum ||
-      company.totalArea * (company.pricePerMeter || service.rentPrice)
+      company.totalArea * (company.pricePerMeter || prevService.rentPrice)
 
     return (
       <span>
-        {toRoundFixed(Math.max(service.inflicionPrice - 100, 0))}% від{' '}
+        {toRoundFixed(Math.max(prevService.inflicionPrice - 100, 0))}% від{' '}
         {toRoundFixed(rentPrice)} грн
       </span>
     )
