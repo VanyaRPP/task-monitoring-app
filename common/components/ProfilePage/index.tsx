@@ -1,3 +1,5 @@
+'use client'
+
 import { UserOutlined } from '@ant-design/icons'
 import RoleSwitcher from '@components/UI/roleSwitcher'
 import { Roles } from '@utils/constants'

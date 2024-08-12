@@ -19,7 +19,7 @@ const PaymentsChartHeader: React.FC<Props> = ({
   canShowChart,
 }) => {
   const router = useRouter()
-  const isOnPage = router.pathname === AppRoutes.PAYMENTS_CHARTS
+  const isOnPage = router.pathname === AppRoutes.PAYMENT_CHART
   const options = [10, 20, 30, 40, 50]
 
   return (
@@ -27,7 +27,7 @@ const PaymentsChartHeader: React.FC<Props> = ({
       <Button
         type="link"
         onClick={() => {
-          router.push(AppRoutes.PAYMENTS_CHARTS)
+          router.push(AppRoutes.PAYMENT_CHART)
         }}
       >
         Графіки платежів

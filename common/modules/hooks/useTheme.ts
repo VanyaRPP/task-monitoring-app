@@ -1,54 +1,39 @@
-import { themeSlice } from '@modules/store/reducers/ThemeSlice'
-import { COLOR_THEME } from '@utils/constants'
-import { ConfigProvider } from 'antd'
-import { useEffect, useState } from 'react'
-import themes from '../../lib/themes.config'
-import { useAppDispatch } from '../store/hooks'
+'use client'
 
-function getDefaultTheme() {
-  if (typeof window !== 'undefined') {
-    const localValue = JSON.parse(localStorage.getItem('theme')) || ''
-    if (localValue) {
-      const browserColor = COLOR_THEME[localValue.toUpperCase()]
-      if (browserColor) {
-        return browserColor // local storage color
-      }
-    }
-    const isDarkColorScheme = window.matchMedia?.(
-      '(prefers-color-scheme: dark)'
-    ).matches
+import { RootState } from '@modules/store/store'
+import { setTheme as _setTheme, Theme } from '@modules/store/themeSlice'
+import { useCallback, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
-    return isDarkColorScheme ? COLOR_THEME.DARK : COLOR_THEME.LIGHT // system prefer color
-  }
-
-  return COLOR_THEME.LIGHT // default color
+const getInitialTheme = (): Theme => {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light'
 }
 
-export default function useTheme(value: string = getDefaultTheme()) {
-  const [theme, setTheme] = useState(value)
+const useTheme = (): [Theme, (theme: Theme) => void] => {
+  const theme = useSelector((state: RootState) => state.theme)
+  const dispatch = useDispatch()
 
-  const { changeTheme } = themeSlice.actions
-  const dispatch = useAppDispatch()
+  const setTheme = useCallback(
+    (theme: Theme) => {
+      localStorage.setItem('theme', theme)
+      dispatch(_setTheme(theme))
+    },
+    [dispatch]
+  )
 
   useEffect(() => {
-    if (!themes[theme]) return
+    const _theme = localStorage.getItem('theme') as Theme
 
-    // save
-    dispatch(changeTheme(theme))
-    localStorage.setItem('theme', JSON.stringify(theme))
+    if (_theme) {
+      dispatch(_setTheme(_theme))
+    } else {
+      setTheme(getInitialTheme())
+    }
+  }, [dispatch, setTheme])
 
-    //use
-    ConfigProvider.config({
-      theme: {
-        primaryColor: themes[theme].primaryColor,
-      },
-    })
-
-    // antd
-    for (const key in themes[theme]) {
-      document.documentElement.style.setProperty(`--${key}`, themes[theme][key])
-    } // custom css variables
-  }, [theme, changeTheme, dispatch])
-
-  return [theme, setTheme] as const
+  return [theme, setTheme]
 }
+
+export default useTheme

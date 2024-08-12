@@ -1,0 +1,19 @@
+.Profile {
+  width: 320px;
+}
+
+.Background {
+  content: '';
+  width: calc(100% + 12px);
+  margin: -6px -6px 6px -6px;
+  height: 88px;
+  border-radius: 6px;
+}
+
+.AvatarWrapper {
+  margin-top: -56px;
+
+  .Avatar {
+    margin-bottom: 16px;
+  }
+}

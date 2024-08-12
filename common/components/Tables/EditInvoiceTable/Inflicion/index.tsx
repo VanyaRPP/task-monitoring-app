@@ -26,7 +26,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
         placement="topLeft"
       >
         <Typography.Text>
-          Інфляція <QuestionCircleOutlined />
+          Інфляція {!!prevService?.inflicionPrice && <QuestionCircleOutlined />}
         </Typography.Text>
       </Tooltip>
       <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
@@ -58,6 +58,10 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
         {toRoundFixed(rentPrice)} грн
       </span>
     )
+  }
+
+  if (company?.inflicion && !prevService?.inflicionPrice) {
+    return <>Інфляція за попередній місяць невідома</>
   }
 }
 
