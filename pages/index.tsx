@@ -1,13 +1,21 @@
-import DashboardPage from '@components/DashboardPage'
-import HomePage from '@components/HomePage/index'
+import MainLayout from '@common/components/Layouts/Main'
+import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
+import DashboardPage from '../common/components/DashboardPage'
+import HomePage from '../common/components/HomePage/index'
 import { authOptions } from './api/auth/[...nextauth]'
 
 const Home: React.FC<{
   isAuth: boolean
 }> = ({ isAuth }) => {
-  return isAuth ? <DashboardPage /> : <HomePage />
+  return isAuth ? (
+    <MainLayout path={[{ title: 'Панель управління', path: AppRoutes.INDEX }]}>
+      <DashboardPage />
+    </MainLayout>
+  ) : (
+    <HomePage />
+  )
 }
 
 export default Home

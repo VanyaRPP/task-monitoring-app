@@ -1,5 +1,6 @@
 import { IAddress, IGeoCode } from '@modules/models/Task'
 import { useAppSelector } from '@modules/store/hooks'
+import { RootState } from '@modules/store/store'
 import { GoogleMap, Marker } from '@react-google-maps/api'
 import { COLOR_THEME } from '@utils/constants'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -40,7 +41,7 @@ const Map = ({
   mapOptions: IMapOptions
   setAddress?: React.Dispatch<React.SetStateAction<IAddress>>
 }) => {
-  const { theme } = useAppSelector((state) => state.themeReducer)
+  const theme = useAppSelector((state: RootState) => state.theme)
 
   const mapRef = useRef(undefined)
   const [isMounted, setIsMounted] = useState<boolean>(false)

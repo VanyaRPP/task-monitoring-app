@@ -1,16 +1,23 @@
+import MainLayout from '@common/components/Layouts/Main'
 import DomainsBlock from '@components/DashboardPage/blocks/domains'
 import withAuthRedirect from '@components/HOC/withAuthRedirect'
 import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
-import { FC } from 'react'
 import { authOptions } from '../api/auth/[...nextauth]'
 
-const Domains: FC = () => {
-  return <DomainsBlock />
-}
-
-export default withAuthRedirect(Domains)
+export default withAuthRedirect(() => {
+  return (
+    <MainLayout
+      path={[
+        { title: 'Панель управління', path: AppRoutes.INDEX },
+        { title: 'Надавачі послуг', path: AppRoutes.DOMAIN },
+      ]}
+    >
+      <DomainsBlock />
+    </MainLayout>
+  )
+})
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions)

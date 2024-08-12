@@ -1,4 +1,4 @@
-import SignInButton from '@components/UI/Buttons/SignInButton'
+import SignInButton from '@common/components/UI/Buttons/SignInButton'
 import config from '@utils/config'
 import { AppRoutes, errors } from '@utils/constants'
 import { Alert } from 'antd'
