@@ -130,13 +130,15 @@ export const getMaintenanceInvoice = ({
     !isNaN(company?.totalArea) &&
     (!isNaN(company?.servicePricePerMeter) || !isNaN(service?.rentPrice))
   ) {
+    const rentPrice = !isEmpty(company.servicePricePerMeter)
+      ? company.servicePricePerMeter
+      : service.rentPrice
+
     return {
       type: ServiceType.Maintenance,
       amount: +toRoundFixed(company.totalArea),
-      price: +toRoundFixed(company.servicePricePerMeter || service.rentPrice),
-      sum: +toRoundFixed(
-        company.totalArea * (company.servicePricePerMeter || service.rentPrice)
-      ),
+      price: +toRoundFixed(rentPrice),
+      sum: +toRoundFixed(company.totalArea * rentPrice),
     }
   }
 }
@@ -163,11 +165,14 @@ export const getPlacingInvoice = ({
     }
   }
 
+  const rentPrice = !isEmpty(company?.pricePerMeter)
+    ? company?.pricePerMeter
+    : service?.rentPrice
+
   if (company?.inflicion) {
     const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
     const price =
-      (prevPlacing?.sum ||
-        company.totalArea * (company.pricePerMeter || service?.rentPrice)) *
+      (prevPlacing?.sum || company.totalArea * rentPrice) *
       ((prevService?.inflicionPrice || 100) / 100)
 
     return {
@@ -180,10 +185,8 @@ export const getPlacingInvoice = ({
   return {
     type: ServiceType.Placing,
     amount: +toRoundFixed(company?.totalArea),
-    price: +toRoundFixed(company?.pricePerMeter || service?.rentPrice),
-    sum: +toRoundFixed(
-      company?.totalArea * company?.pricePerMeter || service?.rentPrice
-    ),
+    price: +toRoundFixed(rentPrice),
+    sum: +toRoundFixed(company?.totalArea * rentPrice),
   }
 }
 
@@ -210,9 +213,12 @@ export const getInflicionInvoice = ({
 
   if (!isNaN(prevService?.inflicionPrice) && company?.inflicion) {
     const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
+    const rentPrice = !isEmpty(company?.pricePerMeter)
+      ? company?.pricePerMeter
+      : service?.rentPrice
+
     const price =
-      (prevPlacing?.sum ||
-        company.totalArea * (company.pricePerMeter || service.rentPrice)) *
+      (prevPlacing?.sum || company.totalArea * rentPrice) *
       (Math.max(prevService?.inflicionPrice - 100, 0) / 100)
 
     return {
