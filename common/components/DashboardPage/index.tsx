@@ -13,6 +13,7 @@ import PaymentsChart from './blocks/PaymentsChart/paymentsChart'
 const Dashboard: React.FC = () => {
   const { data: userResponse } = useGetCurrentUserQuery()
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isDomainAdmin = userResponse?.roles?.includes(Roles.DOMAIN_ADMIN)
 
   return (
     <>
@@ -24,7 +25,7 @@ const Dashboard: React.FC = () => {
         <div className={s.GridItem}>
           <PaymentsChart />
         </div>
-        {isGlobalAdmin && (
+        {(isGlobalAdmin || isDomainAdmin) && (
           <>
             <div className={s.GridItem}>
               <StreetsBlock />

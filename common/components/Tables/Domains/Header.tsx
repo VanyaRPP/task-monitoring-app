@@ -10,6 +10,8 @@ import { useState } from 'react'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import AddDomainModal from '@components/UI/DomainsComponents/DomainModal'
 import { AppRoutes } from '@utils/constants'
+import { Roles } from '@utils/constants'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 export interface Props {
   currentDomain?: IExtendedDomain
@@ -32,6 +34,8 @@ const DomainsHeader: React.FC<Props> = ({
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { data: userResponse } = useGetCurrentUserQuery()
+  const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   const openModal = () => {
     setCurrentDomain(null)
@@ -58,9 +62,11 @@ const DomainsHeader: React.FC<Props> = ({
       </Button>
 
       <>
-        <Button type="link" onClick={openModal}>
-          <PlusOutlined /> Додати
-        </Button>
+        {isGlobalAdmin && (
+          <Button type="link" onClick={openModal}>
+            <PlusOutlined /> Додати
+          </Button>
+        )}
         {(isModalOpen || currentDomain) && (
           <AddDomainModal
             currentDomain={currentDomain}
