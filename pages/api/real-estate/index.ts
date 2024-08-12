@@ -1,9 +1,8 @@
 import Domain from '@modules/models/Domain'
 import RealEstate from '@modules/models/RealEstate'
-import { IStreet } from '@modules/models/Street'
-import start, { ExtendedData } from '@pages/api/api.config'
+import Street, { IStreet } from '@modules/models/Street'
+import start from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
-import { getDistinctCompanyAndDomain, getDistinctStreets } from '@utils/helpers'
 import { FilterQuery } from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -11,7 +10,7 @@ start()
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ExtendedData>
+  res: NextApiResponse
 ) {
   const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
     await getCurrentUser(req, res)
@@ -70,45 +69,36 @@ export default async function handler(
           .populate('domain')
           .populate('street')
 
-        const { distinctDomains, distinctCompanies } =
-          await getDistinctCompanyAndDomain({
-            isGlobalAdmin,
-            user,
-            companyGroup: '_id',
-            model: RealEstate,
-          })
+        const distinctStreets = await RealEstate.distinct('street', options)
 
-        const distinctStreets = await getDistinctStreets({
-          user,
-          model: RealEstate,
-        })
-
-        const filteredStreets = distinctStreets
-          // parse to regular IStreet
-          ?.map((street) => street.streetData as IStreet)
-          // remove dublicates
-          .filter(
-            (street, index, streets) =>
-              index ===
-              streets.findIndex(
-                (s) => s._id.toString() === street._id.toString()
-              )
-          )
+        const [relatedDomains, relatedCompanies, relatedStreets] =
+          await Promise.all([
+            Domain.find({
+              $or: [
+                { streets: { $in: distinctStreets } },
+                { adminEmails: user.email },
+              ],
+            }).select(['name', '_id']),
+            RealEstate.find(options).select(['companyName', '_id']),
+            Street.find({ _id: { $in: distinctStreets } }).select([
+              'address',
+              'city',
+              '_id',
+            ]),
+          ])
 
         return res.status(200).json({
-          domainsFilter: distinctDomains?.map(({ domainDetails }) => ({
-            text: domainDetails.name,
-            value: domainDetails._id,
+          domainsFilter: relatedDomains?.map((domain) => ({
+            text: domain.name,
+            value: domain._id.toString(),
           })),
-          realEstatesFilter: distinctCompanies?.map(({ companyDetails }) => ({
-            text: companyDetails.companyName,
-            value: companyDetails._id,
+          realEstatesFilter: relatedCompanies?.map((company) => ({
+            text: company.companyName,
+            value: company._id.toString(),
           })),
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          streetsFilter: filteredStreets?.map((street) => ({
-            text: `${street.address}, м.${street.city}`,
-            value: street._id,
+          streetsFilter: relatedStreets?.map((street) => ({
+            text: `${street.address} (м.${street.city})`,
+            value: street._id.toString(),
           })),
           data: realEstates,
           success: true,
