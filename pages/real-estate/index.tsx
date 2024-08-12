@@ -11,8 +11,8 @@ export default withAuthRedirect(() => {
   return (
     <MainLayout
       path={[
-        { title: 'Dashboard', path: AppRoutes.INDEX },
-        { title: 'Companies', path: AppRoutes.REAL_ESTATE },
+        { title: 'Панель управління', path: AppRoutes.INDEX },
+        { title: 'Компанії', path: AppRoutes.REAL_ESTATE },
       ]}
     >
       <RealEstateBlock />

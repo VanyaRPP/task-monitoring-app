@@ -10,7 +10,7 @@ const Home: React.FC<{
   isAuth: boolean
 }> = ({ isAuth }) => {
   return isAuth ? (
-    <MainLayout path={[{ title: 'Dashboard', path: AppRoutes.INDEX }]}>
+    <MainLayout path={[{ title: 'Панель управління', path: AppRoutes.INDEX }]}>
       <DashboardPage />
     </MainLayout>
   ) : (

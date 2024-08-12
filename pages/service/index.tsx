@@ -10,8 +10,8 @@ export default withAuthRedirect(() => {
   return (
     <MainLayout
       path={[
-        { title: 'Dashboard', path: AppRoutes.INDEX },
-        { title: 'Services', path: AppRoutes.SERVICE },
+        { title: 'Панель управління', path: AppRoutes.INDEX },
+        { title: 'Послуги', path: AppRoutes.SERVICE },
       ]}
     >
       <ServicesBlock />

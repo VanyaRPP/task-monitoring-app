@@ -10,8 +10,8 @@ export default withAuthRedirect(() => {
   return (
     <MainLayout
       path={[
-        { title: 'Dashboard', path: AppRoutes.INDEX },
-        { title: 'Streets', path: AppRoutes.STREETS },
+        { title: 'Панель управління', path: AppRoutes.INDEX },
+        { title: 'Вулиці', path: AppRoutes.STREETS },
       ]}
     >
       <StreetsBlock />

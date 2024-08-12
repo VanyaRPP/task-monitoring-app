@@ -4,5 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+  overflow: hidden;
   border-bottom: 1px solid #00000010; // TODO: border color from antd theme
 }

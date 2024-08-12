@@ -9,12 +9,7 @@ import { authOptions } from '../api/auth/[...nextauth]'
 
 export default withAuthRedirect(() => {
   return (
-    <MainLayout
-      path={[
-        { title: 'Dashboard', path: AppRoutes.INDEX },
-        { title: 'Profile', path: AppRoutes.PROFILE },
-      ]}
-    >
+    <MainLayout path={[{ title: 'Профіль', path: AppRoutes.PROFILE }]}>
       <ProfilePage />
     </MainLayout>
   )

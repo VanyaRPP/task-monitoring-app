@@ -10,8 +10,8 @@ export default withAuthRedirect(() => {
   return (
     <MainLayout
       path={[
-        { title: 'Dashboard', path: AppRoutes.INDEX },
-        { title: 'Payments', path: AppRoutes.PAYMENT },
+        { title: 'Панель управління', path: AppRoutes.INDEX },
+        { title: 'Платежі', path: AppRoutes.PAYMENT },
       ]}
     >
       <PaymentsBlock />

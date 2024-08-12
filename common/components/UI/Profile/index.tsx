@@ -15,7 +15,7 @@ import {
   theme,
   Typography,
 } from 'antd'
-import { useSession } from 'next-auth/react'
+import { signIn, signOut, useSession } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useMemo } from 'react'
@@ -46,88 +46,98 @@ export const Profile: React.FC = () => {
         className={styles.Background}
         style={{ backgroundColor: token.colorPrimaryBg }}
       />
-      <Space direction="vertical" size="large" style={{ width: 320 }}>
-        <Flex justify="center" style={{ marginTop: 28 }}>
+      {!!session?.user && (
+        <Flex justify="center" className={styles.AvatarWrapper}>
           <Avatar
-            size={88}
+            size={100}
             icon={<UserOutlined />}
+            className={styles.Avatar}
             src={
-              session?.user?.image ? (
+              session.user.image ? (
                 <Image
                   src={session.user.image}
-                  width={80}
-                  height={80}
+                  width={100}
+                  height={100}
                   alt="user"
                 />
               ) : null
             }
           />
         </Flex>
+      )}
 
-        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-          <Flex justify="center" align="center" gap={8} wrap>
-            <Typography.Text strong style={{ fontSize: '1.25rem' }}>
-              {session?.user?.name}
-            </Typography.Text>
+      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        {!!session?.user && (
+          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <Flex justify="center" align="center" gap={8} wrap>
+              <Typography.Text strong style={{ fontSize: '1.25rem' }}>
+                {session?.user?.name}
+              </Typography.Text>
 
-            {!!user?.roles && (
-              <Tags wrap align="center" justify="center" items={user?.roles} />
+              {!!user?.roles && (
+                <Tags
+                  wrap
+                  align="center"
+                  justify="center"
+                  items={user?.roles}
+                />
+              )}
+            </Flex>
+
+            <Divider style={{ margin: 0 }} />
+
+            <Flex justify="center">
+              <Typography.Text type="secondary">
+                {session?.user?.email}
+              </Typography.Text>
+            </Flex>
+
+            {isDomainAdmin && (
+              <Space direction="vertical" style={{ width: '100%' }}>
+                <Tags
+                  title={
+                    <Typography.Text strong style={{ fontSize: '0.9rem' }}>
+                      Надавачі послуг:
+                    </Typography.Text>
+                  }
+                  wrap
+                  align="center"
+                  items={domains.map(({ text }) => text as string)}
+                  render={(domain, index) => (
+                    <Tag
+                      key={index}
+                      bordered={false}
+                      color="purple"
+                      style={{ margin: 0 }}
+                    >
+                      {domain}
+                    </Tag>
+                  )}
+                />
+              </Space>
             )}
-          </Flex>
-
-          <Divider style={{ margin: 0 }} />
-
-          <Flex justify="center">
-            <Typography.Text type="secondary">
-              {session?.user?.email}
-            </Typography.Text>
-          </Flex>
-
-          {isDomainAdmin && (
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <Tags
-                title={
-                  <Typography.Text strong style={{ fontSize: '0.9rem' }}>
-                    Domains:
-                  </Typography.Text>
-                }
-                wrap
-                align="center"
-                items={domains.map(({ text }) => text as string)}
-                render={(domain, index) => (
-                  <Tag
-                    key={index}
-                    bordered={false}
-                    color="purple"
-                    style={{ margin: 0 }}
-                  >
-                    {domain}
-                  </Tag>
-                )}
-              />
-            </Space>
-          )}
-          {!isGlobalAdmin && (
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <Tags
-                title={
-                  <Typography.Text strong style={{ fontSize: '0.9rem' }}>
-                    Companies:
-                  </Typography.Text>
-                }
-                wrap
-                align="center"
-                items={companies.map(({ text }) => text as string)}
-              />
-            </Space>
-          )}
-        </Space>
+            {!isGlobalAdmin && (
+              <Space direction="vertical" style={{ width: '100%' }}>
+                <Tags
+                  title={
+                    <Typography.Text strong style={{ fontSize: '0.9rem' }}>
+                      Компанії:
+                    </Typography.Text>
+                  }
+                  wrap
+                  align="center"
+                  items={companies.map(({ text }) => text as string)}
+                />
+              </Space>
+            )}
+          </Space>
+        )}
 
         <Space direction="vertical" style={{ width: '100%' }}>
           {!!session?.user && (
             <Link href={AppRoutes.PROFILE}>
               <Button block icon={<UserOutlined />}>
-                Profile
+                Профіль
               </Button>
             </Link>
           )}
@@ -135,8 +145,9 @@ export const Profile: React.FC = () => {
             type="primary"
             block
             icon={session?.user ? <LogoutOutlined /> : <LoginOutlined />}
+            onClick={() => (session?.user ? signOut() : signIn())}
           >
-            {session?.user ? 'Log out' : 'Log in'}
+            {session?.user ? 'Вийти' : 'Увійти'}
           </Button>
         </Space>
       </Space>

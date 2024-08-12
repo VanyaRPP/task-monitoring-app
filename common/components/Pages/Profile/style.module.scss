@@ -2,15 +2,17 @@
   height: calc(256px + 72px);
 
   .Background {
-    height: 256px;
     overflow: hidden;
 
-    .Image {
-      filter: blur(16px);
+    :global(.ant-card-body) {
+      height: 256px;
+      position: relative;
+      padding: 0;
     }
 
-    :global(.ant-card-body) {
-      padding: 0;
+    .Image {
+      object-fit: cover;
+      filter: blur(16px);
     }
   }
   .Content {

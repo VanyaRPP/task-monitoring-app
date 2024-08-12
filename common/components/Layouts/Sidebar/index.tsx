@@ -1,126 +1,39 @@
 'use client'
 
-import {
-  DollarOutlined,
-  LineChartOutlined,
-  UserOutlined,
-} from '@ant-design/icons'
+import { LogoIcon } from '@assets/icon/Logo'
+import { Menu } from '@components/UI/Menu'
 import useSidebar from '@modules/hooks/useSidebar'
 import { AppRoutes } from '@utils/constants'
-import { Layout, Menu, SiderProps, Typography } from 'antd'
-import { usePathname, useRouter } from 'next/navigation'
+import { Layout, SiderProps, theme, Typography } from 'antd'
+import Link from 'next/link'
 import styles from './style.module.scss'
 
 export const Sidebar: React.FC<Omit<SiderProps, 'children'>> = (props) => {
-  const router = useRouter()
-  const pathname = usePathname()
-
+  const { token } = theme.useToken()
   const { collapsed, toggleCollapsed } = useSidebar()
 
   return (
     <Layout.Sider
       theme="light"
       collapsed={collapsed}
+      width={240}
       onCollapse={() => toggleCollapsed()}
       {...props}
     >
-      <Typography.Text className={styles.Logo}>
-        {collapsed ? '[LOGO]' : '[LOGO] E-ORENDA'}
-      </Typography.Text>
+      <Link href={AppRoutes.INDEX} className={styles.Logo}>
+        <LogoIcon style={{ fontSize: 40, color: token.colorPrimary }} />
+        {!collapsed && (
+          <Typography.Title level={4} style={{ margin: 0, textWrap: 'nowrap' }}>
+            E-ORENDA
+          </Typography.Title>
+        )}
+      </Link>
       <Menu
-        selectedKeys={pathname ? [pathname] : []}
         defaultOpenKeys={
           !collapsed
             ? ['user_submenu', 'dashboard_submenu', 'payments_submenu']
             : []
         }
-        mode="inline"
-        items={[
-          {
-            key: 'user_submenu',
-            type: 'submenu',
-            label: 'User',
-            icon: <UserOutlined />,
-            children: [
-              {
-                key: AppRoutes.DASHBOARD,
-                type: 'item',
-                label: 'Dashboard',
-                onClick: () => router.push(AppRoutes.DASHBOARD),
-              },
-              {
-                key: AppRoutes.PROFILE,
-                type: 'item',
-                label: 'Profile',
-                onClick: () => router.push(AppRoutes.PROFILE),
-              },
-            ],
-          },
-          {
-            key: 'dashboard_submenu',
-            type: 'submenu',
-            label: 'Dashboard',
-            icon: <LineChartOutlined />,
-            children: [
-              {
-                key: AppRoutes.INDEX,
-                type: 'item',
-                label: 'Home',
-                onClick: () => router.push(AppRoutes.INDEX),
-              },
-              {
-                key: AppRoutes.STREETS,
-                type: 'item',
-                label: 'Streets',
-                onClick: () => router.push(AppRoutes.STREETS),
-              },
-              {
-                key: AppRoutes.DOMAIN,
-                type: 'item',
-                label: 'Domains',
-                onClick: () => router.push(AppRoutes.DOMAIN),
-              },
-              {
-                key: AppRoutes.REAL_ESTATE,
-                type: 'item',
-                label: 'Companies',
-                onClick: () => router.push(AppRoutes.REAL_ESTATE),
-              },
-              {
-                key: AppRoutes.SERVICE,
-                type: 'item',
-                label: 'Services',
-                onClick: () => router.push(AppRoutes.SERVICE),
-              },
-            ],
-          },
-          {
-            key: 'payments_submenu',
-            type: 'submenu',
-            label: 'Payments',
-            icon: <DollarOutlined />,
-            children: [
-              {
-                key: AppRoutes.PAYMENT,
-                type: 'item',
-                label: 'Payments',
-                onClick: () => router.push(AppRoutes.PAYMENT),
-              },
-              {
-                key: AppRoutes.PAYMENT_BULK,
-                type: 'item',
-                label: 'Bulk',
-                onClick: () => router.push(AppRoutes.PAYMENT_BULK),
-              },
-              {
-                key: AppRoutes.PAYMENT_CHART,
-                type: 'item',
-                label: 'Chart',
-                onClick: () => router.push(AppRoutes.PAYMENT_CHART),
-              },
-            ],
-          },
-        ]}
       />
     </Layout.Sider>
   )
