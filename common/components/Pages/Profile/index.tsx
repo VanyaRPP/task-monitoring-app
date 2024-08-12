@@ -68,7 +68,7 @@ export const ProfilePage: React.FC = () => {
         </div>
       )}
       <Flex gap={16}>
-        <Card title="Представник" style={{ width: '400px' }}>
+        <Card title="Взаємодії" style={{ width: '400px' }}>
           <Divider orientation="left" style={{ marginTop: 0 }}>
             <Typography.Text type="secondary">Надавачі послуг</Typography.Text>
           </Divider>

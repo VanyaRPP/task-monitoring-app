@@ -97,7 +97,7 @@ export const Profile: React.FC = () => {
                 <Tags
                   title={
                     <Typography.Text strong style={{ fontSize: '0.9rem' }}>
-                      Надавачі послуг:
+                      Мої надавачі послуг:
                     </Typography.Text>
                   }
                   wrap
@@ -121,7 +121,7 @@ export const Profile: React.FC = () => {
                 <Tags
                   title={
                     <Typography.Text strong style={{ fontSize: '0.9rem' }}>
-                      Компанії:
+                      {!isDomainAdmin ? 'Мої компанії:' : 'Компанії'}
                     </Typography.Text>
                   }
                   wrap
