@@ -15,12 +15,14 @@ export interface IGetInvoiceProps {
   company?: Partial<IRealestate>
   service?: Partial<IService>
   payment?: Partial<IPayment>
+  prevService?: Partial<IService>
   prevPayment?: Partial<IPayment>
 }
 
 export interface IGetInvoiceByTypeProps {
   company?: Partial<IRealestate>
   service?: Partial<IService>
+  prevService?: Partial<IService>
   currInvoicesCollection: InvoicesCollection
   prevInvoicesCollection: InvoicesCollection
 }
@@ -41,6 +43,7 @@ export interface IGetInvoiceByTypeProps {
  * @param company - represents Company
  * @param service - represents Service
  * @param payment - represents Payment
+ * @param prevService - represents Service from previous month
  * @param prevPayment - represents Payment from previous month
  * @returns array of invoices for provided props
  */
@@ -48,6 +51,7 @@ export const getInvoices = ({
   company,
   service,
   payment,
+  prevService,
   prevPayment,
 }: IGetInvoiceProps): Array<IPaymentField> => {
   if ((isEmpty(company) || isEmpty(service)) && isEmpty(payment)) {
@@ -83,6 +87,7 @@ export const getInvoices = ({
       getInvoiceByType({
         company,
         service,
+        prevService,
         currInvoicesCollection,
         prevInvoicesCollection,
       })
@@ -90,6 +95,7 @@ export const getInvoices = ({
     ...getCustomInvoices({
       company,
       service,
+      prevService,
       currInvoicesCollection,
       prevInvoicesCollection,
     }),
@@ -101,6 +107,7 @@ export const getInvoices = ({
 export const getMaintenanceInvoice = ({
   company,
   service,
+  prevService,
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
@@ -137,6 +144,7 @@ export const getMaintenanceInvoice = ({
 export const getPlacingInvoice = ({
   company,
   service,
+  prevService,
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
@@ -160,7 +168,7 @@ export const getPlacingInvoice = ({
     const price =
       (prevPlacing?.sum ||
         company.totalArea * (company.pricePerMeter || service?.rentPrice)) *
-      ((service?.inflicionPrice || 100) / 100)
+      ((prevService?.inflicionPrice || 100) / 100)
 
     return {
       type: ServiceType.Placing,
@@ -182,6 +190,7 @@ export const getPlacingInvoice = ({
 export const getInflicionInvoice = ({
   company,
   service,
+  prevService,
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
@@ -199,12 +208,12 @@ export const getInflicionInvoice = ({
     }
   }
 
-  if (!isNaN(service?.inflicionPrice) && company?.inflicion) {
+  if (!isNaN(prevService?.inflicionPrice) && company?.inflicion) {
     const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
     const price =
       (prevPlacing?.sum ||
         company.totalArea * (company.pricePerMeter || service.rentPrice)) *
-      (Math.max(service.inflicionPrice - 100, 0) / 100)
+      (Math.max(prevService?.inflicionPrice - 100, 0) / 100)
 
     return {
       type: ServiceType.Inflicion,
@@ -217,6 +226,7 @@ export const getInflicionInvoice = ({
 export const getElectricityInvoice = ({
   company,
   service,
+  prevService,
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
@@ -238,7 +248,7 @@ export const getElectricityInvoice = ({
     }
   }
 
-  if (!isNaN(service?.electricityPrice)) {
+  if (!isEmpty(service?.electricityPrice)) {
     const prevElectricity = prevInvoicesCollection[ServiceType.Electricity]
 
     return {
@@ -254,6 +264,7 @@ export const getElectricityInvoice = ({
 export const getWaterPartInvoice = ({
   company,
   service,
+  prevService,
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
@@ -290,6 +301,7 @@ export const getWaterPartInvoice = ({
 export const getWaterInvoice = ({
   company,
   service,
+  prevService,
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
@@ -331,6 +343,7 @@ export const getWaterInvoice = ({
 export const getGarbageCollectorInvoice = ({
   company,
   service,
+  prevService,
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
@@ -366,6 +379,7 @@ export const getGarbageCollectorInvoice = ({
 export const getCleaningInvoice = ({
   company,
   service,
+  prevService,
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
@@ -395,6 +409,7 @@ export const getCleaningInvoice = ({
 export const getDiscountInvoice = ({
   company,
   service,
+  prevService,
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
@@ -422,6 +437,7 @@ export const getDiscountInvoice = ({
 export const getCustomInvoices = ({
   company,
   service,
+  prevService,
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): Array<IPaymentField> => {
