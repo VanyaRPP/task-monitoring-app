@@ -18,7 +18,7 @@ const Dashboard: React.FC = () => {
       <CompaniesAreaChart />
       <PaymentsChart />
       {isGlobalAdmin && <StreetsBlock />}
-      {isGlobalAdmin && <DomainsBlock />}
+      <DomainsBlock />
       <RealEstateBlock />
       <ServicesBlock />
       <PaymentsBlock />
