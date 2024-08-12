@@ -1,8 +1,6 @@
 import { CloseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
-import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { dateToMonth } from '@common/assets/features/formatDate'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { ServiceType } from '@utils/constants'
@@ -17,7 +15,6 @@ import {
   Tooltip,
   Typography,
 } from 'antd'
-import dayjs from 'dayjs'
 import { useEffect, useMemo } from 'react'
 
 export const getDefaultColumns = (
@@ -185,37 +182,30 @@ export const getDefaultColumns = (
 ]
 
 const usePrevPayment = (name: number): IExtendedPayment => {
-  const { form, service } = useInvoicesPaymentContext()
+  const { form, prevService, prevPayments } = useInvoicesPaymentContext()
 
   const companyId: string | undefined = Form.useWatch(
     ['payments', name, 'company', '_id'],
     form
   )
-  const { data: { data: { 0: prevService } } = { data: [null] } } =
-    useGetAllServicesQuery(
-      {
-        streetId: service?.street?._id,
-        domainId: service?.domain?._id,
-        month: dayjs(service?.date).month() - 1,
-        year: dayjs(service?.date).year(),
-        limit: 1,
-      },
-      { skip: !service }
-    )
 
-  const { data: { data: { 0: prevPayment } } = { data: [null] } } =
-    useGetAllPaymentsQuery(
-      {
-        companyIds: [companyId],
-        domainIds: [service?.domain?._id],
-        streetIds: [service?.street?._id],
-        serviceIds: [prevService?._id],
-        limit: 1,
-      },
-      { skip: !prevService }
+  return useMemo(() => {
+    return prevPayments?.find(
+      (prevPayment) =>
+        // eslint-disable-next-line
+        // @ts-ignore
+        prevPayment?.company?._id === companyId &&
+        // eslint-disable-next-line
+        // @ts-ignore
+        prevPayment?.monthService?._id === prevService?._id &&
+        // eslint-disable-next-line
+        // @ts-ignore
+        prevPayment?.street?._id === prevService?.street?._id &&
+        // eslint-disable-next-line
+        // @ts-ignore
+        prevPayment?.domain?._id === prevService?.domain?._id
     )
-
-  return prevPayment
+  }, [prevPayments, companyId, prevService])
 }
 
 const useInflicionValues = (
@@ -224,7 +214,7 @@ const useInflicionValues = (
   previousPlacingPrice: number
   inflicionAmount: number
 } => {
-  const { form, service } = useInvoicesPaymentContext()
+  const { form, service, prevService } = useInvoicesPaymentContext()
 
   const company: IRealestate | undefined = Form.useWatch(
     ['payments', name, 'company'],
@@ -242,9 +232,10 @@ const useInflicionValues = (
 
   const inflicionAmount = useMemo(() => {
     return (
-      previousPlacingPrice * (((service?.inflicionPrice || 100) - 100) / 100)
+      previousPlacingPrice *
+      (((prevService?.inflicionPrice || 100) - 100) / 100)
     )
-  }, [previousPlacingPrice, service])
+  }, [previousPlacingPrice, prevService])
 
   return {
     previousPlacingPrice,
@@ -333,7 +324,7 @@ const PlacingPrice: React.FC<{ name: number }> = ({ name }) => {
     Form.useWatch(['payments', name, 'company', 'inflicion'], form) ?? false
 
   return inflicion ? (
-    <Tooltip title="Нарахуванян відбувається згідно з ростом інфляції в цьому місяці">
+    <Tooltip title="Нарахуванян відбувається згідно з ростом інфляції">
       Інфляційне нархування <QuestionCircleOutlined />
     </Tooltip>
   ) : (
@@ -372,7 +363,9 @@ const PlacingSum: React.FC<{ name: number }> = ({ name }) => {
     <Tooltip
       title={
         inflicion &&
-        `Значення попереднього місяця + значення інфляції в цьому рахунку (${previousPlacingPrice} + ${inflicionAmount})`
+        `Значення попереднього місяця + значення інфляції в цьому рахунку (${toRoundFixed(
+          previousPlacingPrice
+        )} + ${toRoundFixed(inflicionAmount)})`
       }
     >
       <Form.Item
@@ -391,18 +384,19 @@ const PlacingSum: React.FC<{ name: number }> = ({ name }) => {
 }
 
 const InflicionTitle: React.FC = () => {
-  const { service } = useInvoicesPaymentContext()
+  const { prevService } = useInvoicesPaymentContext()
 
   return (
     <Space direction="vertical" size={0}>
       <Typography.Text>Індекс інфляції</Typography.Text>
-      {service?.inflicionPrice ? (
+      {prevService?.inflicionPrice ? (
         <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
-          {toRoundFixed(service.inflicionPrice)}% за {dateToMonth(service.date)}
+          {toRoundFixed(prevService.inflicionPrice)}% за{' '}
+          {dateToMonth(prevService.date)}
         </Typography.Text>
       ) : (
         <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
-          за {dateToMonth(service?.date)} невідомий
+          за {dateToMonth(prevService?.date)} невідомий
         </Typography.Text>
       )}
     </Space>

@@ -33,11 +33,11 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
 
-  const { service, company, prevPayment } = usePaymentContext()
+  const { service, company, prevService, prevPayment } = usePaymentContext()
 
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
 
-  if (company?.inflicion && !service?.inflicionPrice) {
+  if (company?.inflicion && !prevService?.inflicionPrice) {
     return <span>Інфляція за попередній місяць невідома</span>
   }
 
@@ -51,8 +51,8 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 
     return (
       <span>
-        {toRoundFixed(service.inflicionPrice)}% від {toRoundFixed(rentPrice)}{' '}
-        грн
+        {toRoundFixed(prevService.inflicionPrice)}% від{' '}
+        {toRoundFixed(rentPrice)} грн
       </span>
     )
   }

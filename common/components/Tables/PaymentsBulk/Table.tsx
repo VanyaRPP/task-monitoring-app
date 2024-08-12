@@ -1,6 +1,6 @@
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { getDefaultColumns } from '@common/components/Tables/PaymentsBulk/column.config'
-import { AppRoutes } from '@utils/constants'
+import { AppRoutes, Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { Alert, Form, Table } from 'antd'
 import { useRouter } from 'next/router'
@@ -10,8 +10,15 @@ const InvoicesTable: React.FC = () => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.PAYMENT_BULK
 
-  const { form, service, companies, prevPayments, isLoading, isError } =
-    useInvoicesPaymentContext()
+  const {
+    form,
+    service,
+    companies,
+    prevPayments,
+    prevService,
+    isLoading,
+    isError,
+  } = useInvoicesPaymentContext()
 
   useEffect(() => {
     if (!companies || companies.length === 0 || !service) {
@@ -21,18 +28,23 @@ const InvoicesTable: React.FC = () => {
     form.setFieldsValue({
       payments: companies?.map((company) => {
         const prevPayment = prevPayments?.find(
-          // TODO: fix typing of IPayment and IExtendedPayment
-          // eslint-disable-next-line
-          // @ts-ignore
-          (payment) => payment.company?._id === company._id
+          (payment) =>
+            // TODO: fix typing of IPayment and IExtendedPayment
+            // eslint-disable-next-line
+            // @ts-ignore
+            payment.company?._id === company._id &&
+            payment.type === Operations.Debit
         )
-        const invoice = getInvoices({ company, service, prevPayment }).reduce(
-          (acc, invoice) => {
-            acc[invoice.name || invoice.type] = invoice
-            return acc
-          },
-          {}
-        )
+
+        const invoice = getInvoices({
+          company,
+          service,
+          prevService,
+          prevPayment,
+        }).reduce((acc, invoice) => {
+          acc[invoice.name || invoice.type] = invoice
+          return acc
+        }, {})
 
         return {
           company,
@@ -40,7 +52,7 @@ const InvoicesTable: React.FC = () => {
         }
       }),
     })
-  }, [form, service, companies, prevPayments])
+  }, [form, service, companies, prevService, prevPayments])
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
@@ -50,15 +62,7 @@ const InvoicesTable: React.FC = () => {
         <Table
           rowKey="name"
           size="small"
-          pagination={
-            !isOnPage && {
-              responsive: false,
-              size: 'small',
-              pageSize: 8,
-              position: ['bottomCenter'],
-              hideOnSinglePage: true,
-            }
-          }
+          pagination={false}
           loading={isLoading}
           columns={getDefaultColumns(remove)}
           dataSource={fields}
