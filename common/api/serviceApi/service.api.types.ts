@@ -26,6 +26,9 @@ export interface IGetServiceResponse {
   data: IService[]
   addressFilter: IFilter[]
   domainFilter: IFilter[]
+  yearFilter: IFilter[]
+  monthFilter: IFilter[]
+  total: number
 }
 
 export interface IDeleteServiceResponse {
@@ -36,4 +39,6 @@ export interface IDeleteServiceResponse {
 export interface IServiceFilter {
   street: string
   domain: string
+  month: number
+  year: number
 }

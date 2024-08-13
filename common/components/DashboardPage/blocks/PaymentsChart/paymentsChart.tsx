@@ -19,7 +19,7 @@ const PaymentsChart = () => {
   const router = useRouter()
   const { data: user } = useGetCurrentUserQuery()
   const isAdmin = isAdminCheck(user?.roles)
-  const isOnPage = router.pathname === AppRoutes.PAYMENTS_CHARTS
+  const isOnPage = router.pathname === AppRoutes.PAYMENT_CHART
   const [companyId, setCompanyId] = useState<string>()
   const [paymentsLimit, setPaymentsLimit] = useState(isOnPage ? 10 : 5)
 

@@ -4,7 +4,11 @@
   min-height: 300px;
 
   :global .ant-card-body {
-    padding: 0;
+    padding: 0 !important;
+
+    tr > * {
+      border-radius: 0 !important;
+    }
   }
 
   // nested tables wrong position fix

@@ -1,12 +1,12 @@
 import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
-import React, { FC, useState } from 'react'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes } from '@utils/constants'
+import { isAdminCheck } from '@utils/helpers'
 import { Button } from 'antd'
 import { useRouter } from 'next/router'
-import s from './style.module.scss'
+import { useState } from 'react'
 import RealEstateModal from '../RealEstateModal'
-import { isAdminCheck } from '@utils/helpers'
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import s from './style.module.scss'
 
 const RealEstateCardHeader = () => {
   const Router = useRouter()

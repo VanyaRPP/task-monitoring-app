@@ -1,0 +1,33 @@
+.container {
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.approvalSection {
+  width: 45%;
+  text-align: left;
+}
+
+.titleSection {
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.contentSection {
+  margin-top: 20px;
+}
+
+.signaturesSection {
+  display: flex;
+  justify-content: space-between;
+}
+
+.signatureBlock {
+  width: 45%;
+  text-align: left;
+}

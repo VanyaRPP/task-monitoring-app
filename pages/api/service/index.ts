@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
+import { getFormattedDate } from '@common/assets/features/formatDate'
 import Domain from '@modules/models/Domain'
 import RealEstate from '@modules/models/RealEstate'
 import Service from '@modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import { FilterQuery } from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
@@ -16,83 +18,230 @@ export default async function handler(
   const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
     await getCurrentUser(req, res)
 
+  const getDomainFilter = async () => {
+    return Service.aggregate([
+      {
+        $group: {
+          _id: '$domain',
+        },
+      },
+      {
+        $lookup: {
+          from: 'domains',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'domainDetails',
+        },
+      },
+      {
+        $unwind: '$domainDetails',
+      },
+      {
+        $project: {
+          _id: 0,
+          text: '$domainDetails.name',
+          value: '$_id',
+        },
+      },
+    ]).exec()
+  }
+
+  const getAddressFilter = async () => {
+    return Service.aggregate([
+      {
+        $group: {
+          _id: '$street',
+        },
+      },
+      {
+        $lookup: {
+          from: 'streets',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'addressDetails',
+        },
+      },
+      {
+        $unwind: '$addressDetails',
+      },
+      {
+        $project: {
+          _id: 0,
+          text: {
+            $concat: [
+              '$addressDetails.address',
+              ' (м. ',
+              '$addressDetails.city',
+              ')',
+            ],
+          },
+          value: '$_id',
+        },
+      },
+    ]).exec()
+  }
+
+  const getYearFilter = async () => {
+    return Service.aggregate([
+      {
+        $group: {
+          _id: { $year: '$date' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          text: { $toString: '$_id' },
+          value: '$_id',
+        },
+      },
+      {
+        $sort: {
+          text: 1,
+        },
+      },
+    ]).exec()
+  }
+
+  const getMonthFilter = async (): Promise<
+    { text: string; value: number }[]
+  > => {
+    const results = await Service.aggregate([
+      {
+        $group: {
+          _id: { $month: '$date' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          month: '$_id',
+        },
+      },
+      {
+        $sort: {
+          month: 1,
+        },
+      },
+    ]).exec()
+
+    return results.map((result) => ({
+      text: getFormattedDate(new Date(2024, result.month - 1)),
+      value: result.month,
+    }))
+  }
+
   switch (req.method) {
     case 'GET':
       try {
-        const { limit, domainId, streetId, serviceId, year, month } = req.query
+        const { limit, skip, domainId, streetId, serviceId, year, month } =
+          req.query
 
-        const options = {
-          domain: { $in: domainId },
-          street: { $in: streetId },
-          _id: serviceId,
-          date: {
-            $gte: new Date(+year, +month, 1, 0, 0, 0), // first second of provided YY.MM
-            $lt: new Date(+year, +month + 1, 0, 23, 59, 59, 999), // last second of provided YY.MM
-          },
+        if (!isUser && !isDomainAdmin && !isGlobalAdmin) {
+          return res.status(200).json({ success: false, data: [] })
         }
 
-        if (!serviceId) delete options._id
-        if (!streetId) delete options.street
-        if (!domainId) delete options.domain
-        if (!year || !month || isNaN(Number(year)) || isNaN(Number(month)))
-          delete options.date
+        const streetsIds: string[] | null = streetId
+          ? typeof streetId === 'string'
+            ? streetId.split(',').map((id) => decodeURIComponent(id))
+            : streetId.map((id) => decodeURIComponent(id))
+          : null
 
-        if (isGlobalAdmin) {
-          const services = await Service.find(options)
-            .limit(+limit)
-            .populate('domain')
-            .populate('street')
+        const domainsIds: string[] | null = domainId
+          ? typeof domainId === 'string'
+            ? domainId.split(',').map((id) => decodeURIComponent(id))
+            : domainId.map((id) => decodeURIComponent(id))
+          : null
 
-          return res.status(200).json({ success: true, data: services })
+        const servicesIds: string[] | null = serviceId
+          ? typeof serviceId === 'string'
+            ? serviceId.split(',').map((id) => decodeURIComponent(id))
+            : serviceId.map((id) => decodeURIComponent(id))
+          : null
+
+        const options: FilterQuery<typeof Service> = {}
+        const filters: FilterQuery<typeof Service> = {}
+
+        if (domainsIds) {
+          filters.domain = { $in: domainsIds }
+        }
+
+        if (streetsIds) {
+          filters.street = { $in: streetsIds }
+        }
+
+        if (servicesIds) {
+          filters._id = { $in: servicesIds }
+        }
+
+        if (year && year !== 'null') {
+          filters.$expr = filters.$expr || {}
+          filters.$expr.$and = filters.$expr.$and || []
+          filters.$expr.$and.push({
+            $in: [
+              { $year: '$date' },
+              year
+                .split(',')
+                .map((y) => Number(y.trim()))
+                .filter((y) => !isNaN(y)),
+            ],
+          })
+        }
+
+        if (month && month !== 'null') {
+          filters.$expr = filters.$expr || {}
+          filters.$expr.$and = filters.$expr.$and || []
+          filters.$expr.$and.push({
+            $in: [
+              { $month: '$date' },
+              month
+                .split(',')
+                .map((m) => Number(m.trim()))
+                .filter((m) => !isNaN(m)),
+            ],
+          })
         }
 
         if (isDomainAdmin) {
-          const domains = await Domain.find(
-            options.domain
-              ? {
-                  _id: options.domain,
-                  adminEmails: { $in: [user.email] },
-                }
-              : { adminEmails: { $in: [user.email] } }
-          )
+          const domains = await Domain.find({
+            ...(filters.domain ? { _id: filters.domain } : {}),
+            adminEmails: { $in: [user.email] },
+          })
 
           if (domains) {
             options.domain = { $in: domains.map(({ _id }) => _id) }
-
-            const services = await Service.find(options)
-              .limit(+limit)
-              .populate('domain')
-              .populate('street')
-
-            return res.status(200).json({ success: true, data: services })
           }
         }
 
         if (isUser) {
-          const companies = await RealEstate.find(
-            options.domain
-              ? {
-                  domain: options.domain,
-                  adminEmails: { $in: [user.email] },
-                }
-              : {
-                  adminEmails: { $in: [user.email] },
-                }
-          )
+          const companies = await RealEstate.find({
+            ...(filters.domain ? { domain: filters.domain } : {}),
+            adminEmails: { $in: [user.email] },
+          })
 
           if (companies) {
             options.domain = { $in: companies.map(({ domain }) => domain) }
-
-            const services = await Service.find(options)
-              .limit(+limit)
-              .populate('domain')
-              .populate('street')
-
-            return res.status(200).json({ success: true, data: services })
           }
         }
 
-        return res.status(200).json({ success: false, data: [] })
+        const data = await Service.find({ $and: [options, filters] })
+          .sort({ date: -1 })
+          .limit(+limit)
+          .skip(+skip)
+          .populate('domain')
+          .populate('street')
+        const domainFilter = await getDomainFilter()
+        const addressFilter = await getAddressFilter()
+        const yearFilter = await getYearFilter()
+        const monthFilter = await getMonthFilter()
+        return res.status(200).json({
+          success: true,
+          data: data,
+          domainFilter: domainFilter,
+          addressFilter: addressFilter,
+          yearFilter: yearFilter,
+          monthFilter: monthFilter,
+        })
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })
       }

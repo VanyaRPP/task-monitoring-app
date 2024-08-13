@@ -1,6 +1,7 @@
 import cityImg1 from '@assets/images/city.png'
 import cityImg2 from '@assets/images/city2.png'
 import HomePageTitle from '@assets/svg/homePageTitle'
+import { Avatar } from '@components/UI/Avatar'
 import { AppRoutes } from '@utils/constants'
 import { Button } from 'antd'
 import Image from 'next/image'
@@ -14,6 +15,8 @@ const HomePage: React.FC = () => {
       <div className={s.Title}>
         <HomePageTitle />
       </div>
+
+      <Avatar />
 
       <div className={s.Container}>
         <div className={s.HalfBlock}>

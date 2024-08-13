@@ -22,28 +22,37 @@ export const useInvoice = ({
   payment,
   service,
   company,
+  prevService,
   prevPayment,
 }: {
   payment?: IPayment
   service?: IService
   company?: IRealestate
+  prevService?: IService
   prevPayment?: IPayment
 }): Omit<InvoiceType, 'sum'>[] => {
   const invoices = useMemo(() => {
-    return getInvoices({ payment, service, company, prevPayment })
-  }, [payment, service, company, prevPayment])
+    return getInvoices({ payment, service, company, prevService, prevPayment })
+  }, [payment, service, company, prevService, prevPayment])
   return invoices
 }
 
 function AddPaymentForm({ paymentActions }) {
   const { preview, edit } = paymentActions
 
-  const { form, payment, service, company, prevPayment } = usePaymentContext()
+  const { form, payment, service, company, prevService, prevPayment } =
+    usePaymentContext()
 
   const companyId = Form.useWatch('company', form)
   const operation = Form.useWatch('operation', form)
 
-  const invoice = useInvoice({ payment, service, company, prevPayment })
+  const invoice = useInvoice({
+    payment,
+    service,
+    company,
+    prevService,
+    prevPayment,
+  })
 
   useEffect(() => {
     form.setFieldsValue({ invoice })
@@ -66,7 +75,11 @@ function AddPaymentForm({ paymentActions }) {
             label="Сума"
             rules={validateField('paymentPrice')}
           >
-            <InputNumber style={{ minWidth: '166px' }} placeholder="Вкажіть суму" disabled={preview} />
+            <InputNumber
+              style={{ minWidth: '166px' }}
+              placeholder="Вкажіть суму"
+              disabled={preview}
+            />
           </Form.Item>
           <Form.Item
             name="description"

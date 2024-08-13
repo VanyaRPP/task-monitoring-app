@@ -1,7 +1,11 @@
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { IDomain } from '@modules/models/Domain'
-import { Select } from 'antd'
 import React, {useEffect, useMemo, useState} from 'react'
+import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { isAdminCheck } from '@utils/helpers'
+import { Select } from 'antd'
+import s from './style.module.scss'
 
 const DomainSelector: React.FC<{
   onSelect?: (domainId: IDomain['_id']) => void

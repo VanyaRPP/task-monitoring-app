@@ -7,6 +7,7 @@ import { IService } from '@common/api/serviceApi/service.api.types'
 import InvoicesHeader from '@common/components/Tables/PaymentsBulk/Header'
 import InvoicesTable from '@common/components/Tables/PaymentsBulk/Table'
 import TableCard from '@common/components/UI/TableCard'
+import { Operations } from '@utils/constants'
 import { Form, FormInstance } from 'antd'
 import dayjs from 'dayjs'
 import { createContext, useContext } from 'react'
@@ -65,7 +66,7 @@ const PaymentBulkBlock: React.FC = () => {
     {
       streetId,
       domainId,
-      month: dayjs(service?.date).month() - 1,
+      month: dayjs(service?.date).month(),
       year: dayjs(service?.date).year(),
       limit: 1,
     },
@@ -81,6 +82,7 @@ const PaymentBulkBlock: React.FC = () => {
       streetIds: [streetId],
       domainIds: [domainId],
       serviceIds: [prevService?._id],
+      type: Operations.Debit,
       limit: companies?.length,
     },
     { skip: !serviceId || !domainId || !streetId || !prevService || !companies }

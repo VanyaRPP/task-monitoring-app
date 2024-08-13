@@ -22,16 +22,22 @@ export default function AddressesSelect({
   })
   const domainObj = data.length > 0 ? data[0] : ({} as IDomain)
   const temp = (domainObj?.streets as any[]) || [] // eslint-disable-line react-hooks/exhaustive-deps
-  const singleStreet = streetId && temp.find((i) => i._id === streetId)
   const streets = useMemo<IStreet[]>(() => {
-    return singleStreet ? [singleStreet] : temp
-  }, [singleStreet, temp])
+    return temp
+  }, [temp])
+
 
   useEffect(() => {
     if (streets?.length === 1) {
       form.setFieldValue('street', streets[0]._id)
+    } else {
+      form.setFieldValue('street', undefined)
     }
   }, [form, streets]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(()=>{
+    form.setFieldValue('street', streetId)
+  },[form, streetId])
 
   return (
     <Form.Item name="street" label="Адреса" rules={validateField('required')}>

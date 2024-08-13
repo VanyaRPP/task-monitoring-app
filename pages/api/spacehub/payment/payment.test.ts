@@ -1,10 +1,10 @@
 import { expect } from '@jest/globals'
 import handler from '.'
 
-import { setupTestEnvironment } from '@utils/setupTestEnvironment'
-import { mockLoginAs } from '@utils/mockLoginAs'
-import { domains, payments, realEstates, users } from '@utils/testData'
 import { parseReceived } from '@utils/helpers'
+import { mockLoginAs } from '@utils/mockLoginAs'
+import { setupTestEnvironment } from '@utils/setupTestEnvironment'
+import { domains, payments, realEstates, users } from '@utils/testData'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))

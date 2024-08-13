@@ -1,7 +1,7 @@
 import Domain from '@modules/models/Domain'
 import Payment from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
-import start, { ExtendedData } from '@pages/api/api.config'
+import start from '@pages/api/api.config'
 import {
   getCreditDebitPipeline,
   getInvoicesTotalPipeline,
@@ -21,7 +21,7 @@ start()
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ExtendedData>
+  res: NextApiResponse
 ) {
   const { isUser, isDomainAdmin, isGlobalAdmin, isAdmin, user } =
     await getCurrentUser(req, res)
