@@ -29,6 +29,13 @@ export const Menu: React.FC<MenuProps> = (props) => {
   const items = useMemo<AntdMenuProps['items']>(() => {
     return [
       {
+        key: 'bank',
+        type: 'submenu',
+        icon: <UserOutlined />,
+        label: 'BAnk',
+        onClick: () => router.push(AppRoutes.BANKTEST),
+      },
+      {
         key: 'user_submenu',
         type: 'submenu',
         label: session?.user?.name || 'Мої',

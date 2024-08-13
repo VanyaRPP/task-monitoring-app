@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "test": "jest",
+    "test:watch": "jest --watch",
     "lint": "npm run lint:fix && npm run lint:check",
     "lint:check": "eslint \"./**/*.{js,jsx,ts,tsx,json}\"",
     "lint:fix": "eslint --fix \"./**/*.{js,jsx,ts,tsx,json}\"",
