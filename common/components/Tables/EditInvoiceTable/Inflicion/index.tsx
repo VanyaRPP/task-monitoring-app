@@ -21,7 +21,9 @@ export const Name: React.FC<InvoiceComponentProps> = ({
       <Tooltip
         title={
           prevService?.inflicionPrice &&
-          `У попередньому місяці становила ${prevService?.inflicionPrice}%`
+          `За ${dateToMonthYear(prevService?.date)} становить ${
+            prevService?.inflicionPrice
+          }%`
         }
         placement="topLeft"
       >

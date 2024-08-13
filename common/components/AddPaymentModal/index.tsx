@@ -158,10 +158,24 @@ const AddPaymentModal: FC<Props> = ({
   useEffect(() => {
     if (paymentActions.preview) {
       form.setFieldsValue({
-        invoice: getInvoices({ company, service, payment, prevPayment }),
+        invoice: getInvoices({
+          company,
+          service,
+          payment,
+          prevService,
+          prevPayment,
+        }),
       })
     }
-  }, [form, company, payment, prevPayment, service, paymentActions])
+  }, [
+    form,
+    company,
+    payment,
+    prevService,
+    prevPayment,
+    service,
+    paymentActions,
+  ])
 
   return (
     <PaymentContext.Provider
