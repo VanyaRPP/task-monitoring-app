@@ -1,3 +1,4 @@
+export {}
 // Example
 // import FetchHttpClient from '@utils/FetchHttpClient/FetchHttpClient'
 // import PrivatBankApiAdapter from './PrivatBankApiAdapter'
