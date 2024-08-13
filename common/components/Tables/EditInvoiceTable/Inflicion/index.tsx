@@ -1,11 +1,10 @@
-import { QuestionCircleOutlined } from '@ant-design/icons'
 import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { ServiceType } from '@utils/constants'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Tooltip, Typography } from 'antd'
+import { Form, Input, Space, Typography } from 'antd'
 import { useEffect, useMemo } from 'react'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
@@ -18,21 +17,14 @@ export const Name: React.FC<InvoiceComponentProps> = ({
 
   return (
     <Space direction="vertical" size={0}>
-      <Tooltip
-        title={
-          prevService?.inflicionPrice &&
-          `За ${dateToMonthYear(prevService?.date)} становить ${
-            prevService?.inflicionPrice
-          }%`
-        }
-        placement="topLeft"
-      >
-        <Typography.Text>
-          Інфляція {!!prevService?.inflicionPrice && <QuestionCircleOutlined />}
-        </Typography.Text>
-      </Tooltip>
+      <Typography.Text>Інфляція</Typography.Text>
+      <Typography.Text type="secondary">
+        {prevService?.inflicionPrice > 100
+          ? '(донарах. інд. інф.)'
+          : '(незмінна)'}
+      </Typography.Text>
       <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-        {toFirstUpperCase(dateToMonthYear(service?.date))}
+        {toFirstUpperCase(dateToMonthYear(prevService?.date))}
       </Typography.Text>
     </Space>
   )

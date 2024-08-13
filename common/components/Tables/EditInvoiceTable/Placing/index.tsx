@@ -1,6 +1,9 @@
 import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
-import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
+import {
+  InvoiceComponentProps,
+  InvoiceType,
+} from '@components/Tables/EditInvoiceTable'
 import { ServiceType } from '@utils/constants'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
@@ -13,11 +16,16 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service } = usePaymentContext()
+  const { company, service } = usePaymentContext()
 
   return (
     <Space direction="vertical" size={0}>
       <Typography.Text>Розміщення</Typography.Text>
+      {company?.inflicion && (
+        <Typography.Text type="secondary">
+          (без врах. інд. інф.)
+        </Typography.Text>
+      )}
       <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
         {toFirstUpperCase(dateToMonthYear(service?.date))}
       </Typography.Text>
@@ -37,6 +45,11 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
 
+  const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
+  const inflicion: InvoiceType | undefined = useMemo(() => {
+    return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
+  }, [invoices])
+
   if (company?.inflicion && !prevService?.inflicionPrice) {
     return <span>Інфляція за попередній місяць невідома</span>
   }
@@ -45,14 +58,14 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
     const prevPlacingInvoice = prevPayment?.invoice.find(
       (invoice) => invoice.type === ServiceType.Placing
     )
+
     const rentPrice =
       prevPlacingInvoice?.sum ||
       company.totalArea * (company.pricePerMeter || service.rentPrice)
 
     return (
       <span>
-        {toRoundFixed(prevService.inflicionPrice)}% від{' '}
-        {toRoundFixed(rentPrice)} грн
+        {toRoundFixed(rentPrice)} грн + {toRoundFixed(inflicion?.sum)} грн
       </span>
     )
   }
