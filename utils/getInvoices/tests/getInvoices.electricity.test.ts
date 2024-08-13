@@ -212,11 +212,11 @@ describe('getInvoices - ELECTRICITY', () => {
         type: ServiceType.Electricity,
       })
     })
-    it('should NOT load when payment = { invoice: [Electricity] }', () => {
+    it('should NOT load when payment = { invoice: [Cleaning] }', () => {
       const payment: Partial<IPayment> = {
         invoice: [
           {
-            type: ServiceType.Electricity,
+            type: ServiceType.Cleaning,
             price: 10,
             sum: 100,
           },
@@ -228,7 +228,7 @@ describe('getInvoices - ELECTRICITY', () => {
       })
 
       expect(invoices).not.toContainEqual({
-        type: ServiceType.Cleaning,
+        type: ServiceType.Electricity,
       })
     })
     it('should load when payment = { invoice: [Electricity] }', () => {
@@ -403,7 +403,7 @@ describe('getInvoices - ELECTRICITY', () => {
         amount: 0,
         lastAmount: 0,
         price: 10,
-        sum: 10,
+        sum: 0,
       })
     })
 
@@ -437,7 +437,7 @@ describe('getInvoices - ELECTRICITY', () => {
         amount: 12,
         lastAmount: 12,
         price: 10,
-        sum: 10,
+        sum: 0,
       })
     })
 
@@ -471,7 +471,7 @@ describe('getInvoices - ELECTRICITY', () => {
         amount: 0,
         lastAmount: 0,
         price: 10,
-        sum: 10,
+        sum: 0,
       })
     })
   })
