@@ -1,72 +1,58 @@
 import { validateField } from '@assets/features/validators'
-import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import { useCompanyPageContext } from '@components/DashboardPage/blocks/realEstates'
-import { IDomain } from '@modules/models/Domain'
-import { IStreet } from '@modules/models/Street'
-import { Form, Select } from 'antd'
+import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
+import { Form, FormInstance, Select } from 'antd'
 import { CSSProperties, useEffect, useMemo } from 'react'
 
-export default function AddressesSelect({
+export interface AddressesSelectProps {
+  form: FormInstance
+  edit?: boolean
+  dropdownStyle?: CSSProperties
+}
+
+const AddressesSelect: React.FC<AddressesSelectProps> = ({
   form,
   edit,
   dropdownStyle,
-}: {
-  form: any
-  edit?: boolean
-  dropdownStyle?: CSSProperties
-}) {
-  const { streetId } = useCompanyPageContext()
-  const domainId = Form.useWatch('domain', form)
-  const { data = [], isLoading } = useGetDomainsQuery({
-    domainId: domainId || undefined,
-  })
-  const domainObj = data.length > 0 ? data[0] : ({} as IDomain)
-  const temp = (domainObj?.streets as any[]) || [] // eslint-disable-line react-hooks/exhaustive-deps
-  const streets = useMemo<IStreet[]>(() => {
-    return temp
-  }, [temp])
+}) => {
+  const streetId: string = Form.useWatch('street', form)
+  const domainId: string = Form.useWatch('domain', form)
 
+  const {
+    data: streets = [],
+    isLoading: isStreetsLoading,
+    isError: isStreetsError,
+  } = useGetAllStreetsQuery({ domainId })
+
+  const options = useMemo(() => {
+    return streets.map((i) => ({
+      value: i._id,
+      label: `${i.address} (м. ${i.city})`,
+    }))
+  }, [streets])
 
   useEffect(() => {
-    if (streets?.length === 1) {
-      form.setFieldValue('street', streets[0]._id)
-    } else {
-      form.setFieldValue('street', undefined)
+    if (!edit && options.length === 1) {
+      form.setFieldsValue({ street: options[0].value })
+    } else if (!edit && !options.some((option) => option.value === streetId)) {
+      form.setFieldsValue({ street: undefined })
     }
-  }, [form, streets]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(()=>{
-    form.setFieldValue('street', streetId)
-  },[form, streetId])
+  }, [form, options, streetId, edit])
 
   return (
     <Form.Item name="street" label="Адреса" rules={validateField('required')}>
       <Select
-        filterSort={(optionA, optionB) =>
-          (optionA?.label ?? '')
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            ?.toLowerCase()
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            .localeCompare((optionB?.label ?? '').toLowerCase())
-        }
-        filterOption={(input, option) =>
-          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-        }
-        options={
-          streets?.map((i) => ({
-            value: i._id,
-            label: `${i.address} (м. ${i.city})`,
-          })) || []
-        }
-        optionFilterProp="children"
+        options={options}
+        optionFilterProp="label"
         placeholder="Пошук адреси"
-        disabled={isLoading || !domainId || streets?.length === 1 || edit}
-        loading={isLoading}
-        showSearch
+        status={isStreetsError && 'error'}
+        loading={isStreetsLoading}
+        disabled={isStreetsLoading || streets.length === 1 || !domainId || edit}
         dropdownStyle={dropdownStyle}
+        allowClear
+        showSearch
       />
     </Form.Item>
   )
 }
+
+export default AddressesSelect

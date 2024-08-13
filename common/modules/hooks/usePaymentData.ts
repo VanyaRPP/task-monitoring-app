@@ -118,28 +118,34 @@ export function usePaymentFormData(
   payment?: IPayment | null
   prevPayment?: IPayment | null
 } {
-  const domainId = Form.useWatch('domain', form)
-  const companyId = Form.useWatch('company', form)
-  const streetId = Form.useWatch('street', form)
-  const serviceId = Form.useWatch('monthService', form)
+  const domainId: string | undefined =
+    // eslint-disable-next-line
+    // @ts-ignore
+    Form.useWatch('domain', form) || paymentData?.domain?._id
+  const companyId: string | undefined =
+    // eslint-disable-next-line
+    // @ts-ignore
+    Form.useWatch('company', form) || paymentData?.company?._id
+  const streetId: string | undefined =
+    // eslint-disable-next-line
+    // @ts-ignore
+    Form.useWatch('street', form) || paymentData?.street?._id
+  const serviceId: string | undefined =
+    // eslint-disable-next-line
+    // @ts-ignore
+    Form.useWatch('monthService', form) || paymentData?.monthService?._id
 
   const { data: { data: { 0: company } } = { data: [null] } } =
-    useGetAllRealEstateQuery(
-      { companyId, limit: 1 },
-      { skip: !companyId || !!paymentData }
-    )
+    useGetAllRealEstateQuery({ companyId, limit: 1 }, { skip: !companyId })
 
   const { data: { data: { 0: service } } = { data: [null] } } =
-    useGetAllServicesQuery(
-      { serviceId, limit: 1 },
-      { skip: !serviceId || !domainId || !streetId || !!paymentData }
-    )
+    useGetAllServicesQuery({ serviceId, limit: 1 }, { skip: !serviceId })
 
   const { data: { data: { 0: prevService } } = { data: [null] } } =
     useGetAllServicesQuery(
       {
-        streetId,
-        domainId,
+        streetId: service?.street?._id,
+        domainId: service?.domain?._id,
         // eslint-disable-next-line
         // @ts-ignore
         month: dayjs(service?.date).month(),
@@ -148,7 +154,7 @@ export function usePaymentFormData(
         year: dayjs(service?.date).year(),
         limit: 1,
       },
-      { skip: !serviceId || !domainId || !streetId || !service }
+      { skip: !serviceId || !service }
     )
 
   const { data: { data: { 0: prevPayment } } = { data: [null] } } =
@@ -162,24 +168,17 @@ export function usePaymentFormData(
         limit: 1,
       },
       {
-        skip:
-          !serviceId || !domainId || !streetId || !prevService || !companyId,
+        skip: !prevService || !companyId || !streetId || !domainId,
       }
     )
 
   return {
-    // eslint-disable-next-line
-    // @ts-ignore
-    company: companyId ? company : paymentData?.company,
-    // eslint-disable-next-line
-    // @ts-ignore
-    service:
-      serviceId && domainId && streetId ? service : paymentData?.monthService,
+    company: !!companyId ? company : null,
+    service: !!serviceId ? service : null,
     payment: paymentData,
-    prevService:
-      serviceId && domainId && streetId && service ? prevService : null,
+    prevService: !!serviceId && !!service ? prevService : null,
     prevPayment:
-      serviceId && domainId && streetId && !!prevService && companyId
+      !!prevService && !!companyId && !!streetId && !!domainId
         ? prevPayment
         : null,
   }

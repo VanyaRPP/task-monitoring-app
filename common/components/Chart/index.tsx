@@ -5,6 +5,7 @@ import s from './style.module.scss'
 type dataSources = {
   label: string
   value: number
+  color?: string
 }
 
 const ChartComponent: React.FC<{
@@ -28,7 +29,11 @@ const ChartComponent: React.FC<{
           {
             label: chartElementTitle,
             data: dataSources?.map((i) => i.value),
-            backgroundColor: generateColorsArray(dataSources?.length),
+            backgroundColor: dataSources?.map(
+              (item, index) =>
+                item.color || generateColorsArray(dataSources?.length)[index]
+            ),
+
             borderWidth: 2,
           },
         ],
