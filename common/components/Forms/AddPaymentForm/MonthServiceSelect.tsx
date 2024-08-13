@@ -1,66 +1,70 @@
 import { getFormattedDate } from '@assets/features/formatDate'
 import { validateField } from '@assets/features/validators'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import { Form, Select } from 'antd'
-import { useEffect } from 'react'
+import { Form, FormInstance, Select } from 'antd'
+import { useEffect, useMemo } from 'react'
 
-export default function MonthServiceSelect({
-  form,
-  edit,
-}: {
-  form: any
+export interface MonthServiceSelectProps {
+  form: FormInstance
   edit?: boolean
-}) {
-  const domainId = Form.useWatch('domain', form)
-  const streetId = Form.useWatch('street', form)
-
-  return domainId && streetId ? (
-    <MonthServiceDataFetcher
-      domainId={domainId}
-      streetId={streetId}
-      form={form}
-      edit={edit}
-    />
-  ) : (
-    <Form.Item label="Місяць">
-      <Select placeholder="Оберіть надавача послуг та адресу" disabled />
-    </Form.Item>
-  )
 }
 
-function MonthServiceDataFetcher({ domainId, streetId, form, edit }) {
-  const { data: { data: services } = { data: [] }, isLoading } = useGetAllServicesQuery({
+const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
+  form,
+  edit,
+}) => {
+  const streetId: string = Form.useWatch('street', form)
+  const domainId: string = Form.useWatch('domain', form)
+  const serviceId: string = Form.useWatch('service', form)
+
+  const {
+    data: { data: services } = { data: [] },
+    isLoading: isServicesLoading,
+    isError: isServicesError,
+  } = useGetAllServicesQuery({
     domainId,
     streetId,
   })
 
-  useEffect(() => {
-    form.setFieldValue('monthService', undefined)
-  }, [form, streetId])
+  const options = useMemo(() => {
+    return services.map((i) => ({
+      value: i._id,
+      label: getFormattedDate(i.date, 'MMMM YYYY'),
+    }))
+  }, [services])
 
   useEffect(() => {
-    if (services.length === 1) {
-      form.setFieldValue('monthService', services[0]._id)
+    if (!edit && options.length === 1) {
+      form.setFieldsValue({ monthService: options[0].value })
+    } else if (!edit && !options.some((option) => option.value === serviceId)) {
+      form.setFieldsValue({ monthService: undefined })
     }
-  }, [services.length]) 
+  }, [form, options, serviceId, edit])
 
   return (
     <Form.Item
-      rules={validateField('required')}
       name="monthService"
       label="Місяць"
+      rules={validateField('required')}
     >
       <Select
-        options={services.map((i) => ({
-          value: i._id,
-          label: getFormattedDate(i.date, 'MMMM YYYY'),
-        }))}
+        options={options}
         optionFilterProp="label"
         placeholder="Місяць"
-        disabled={services.length === 1 || edit || isLoading} 
-        loading={isLoading}
+        status={isServicesError && 'error'}
+        loading={isServicesLoading}
+        disabled={
+          isServicesLoading ||
+          services.length === 1 ||
+          !streetId ||
+          !domainId ||
+          edit
+        }
+        allowClear
         showSearch
       />
     </Form.Item>
   )
 }
+
+export default MonthServiceSelect
