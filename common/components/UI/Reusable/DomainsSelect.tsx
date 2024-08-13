@@ -1,26 +1,32 @@
 import { validateField } from '@assets/features/validators'
-import { useCompanyPageContext } from '@components/DashboardPage/blocks/realEstates'
-import useDomain from '@modules/hooks/useDomain'
-import { Form, Select } from 'antd'
-import { useEffect } from 'react'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import { Form, FormInstance, Select } from 'antd'
+import { useEffect, useMemo } from 'react'
 
-export default function DomainsSelect({
-  form,
-  edit,
-}: {
-  form: any
+export interface DomainsSelectProps {
+  form: FormInstance
   edit?: boolean
-}) {
-  // TODO: recheck
-  // in preview mode we need to prevent all data fetching. only single
-  const { domainId } = useCompanyPageContext()
-  const { data, isLoading } = useDomain({ domainId })
+}
+
+const DomainsSelect: React.FC<DomainsSelectProps> = ({ form, edit }) => {
+  const {
+    data: domains = [],
+    isLoading: isDomainsLoading,
+    isError: isDomainsError,
+  } = useGetDomainsQuery({})
+
+  const options = useMemo(() => {
+    return domains.map((i) => ({
+      value: i._id,
+      label: i.name,
+    }))
+  }, [domains])
 
   useEffect(() => {
-    if (data?.length === 1) {
-      form.setFieldValue('domain', data[0]._id)
+    if (!edit && options.length === 1) {
+      form.setFieldsValue({ domain: options[0].value })
     }
-  }, [data?.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [form, options, edit])
 
   return (
     <Form.Item
@@ -29,31 +35,17 @@ export default function DomainsSelect({
       rules={validateField('required')}
     >
       <Select
-        onChange={() => {
-          // TODO: check if this should be inside street component
-          form.resetFields(['street'])
-        }}
-        filterSort={(optionA, optionB) =>
-          (optionA?.label ?? '')
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            ?.toLowerCase()
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            .localeCompare((optionB?.label ?? '')?.toLowerCase())
-        }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        filterOption={(input, option) =>
-          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-        }
-        options={data?.map((i) => ({ value: i._id, label: i.name }))}
-        optionFilterProp="children"
-        disabled={isLoading || data?.length === 1 || edit}
+        options={options}
+        optionFilterProp="label"
         placeholder="Пошук надавача послуг"
-        loading={isLoading}
+        status={isDomainsError && 'error'}
+        loading={isDomainsLoading}
+        disabled={isDomainsLoading || domains.length === 1 || edit}
+        allowClear
         showSearch
       />
     </Form.Item>
   )
 }
+
+export default DomainsSelect
