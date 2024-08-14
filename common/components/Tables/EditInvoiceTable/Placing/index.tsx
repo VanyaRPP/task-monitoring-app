@@ -67,7 +67,8 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 
   const isInitial = useMemo(() => {
     return (
-      toRoundFixed(price) === toRoundFixed(rentPrice + inflicionInvoice?.sum)
+      toRoundFixed(price) ===
+      toRoundFixed(Number(rentPrice) + Number(inflicionInvoice?.sum))
     )
   }, [price, rentPrice, inflicionInvoice])
 
