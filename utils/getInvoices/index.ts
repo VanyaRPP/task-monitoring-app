@@ -426,11 +426,12 @@ export const getDiscountInvoice = ({
       sum: +toRoundFixed(+invoice.sum || +invoice.price),
     }
   }
-
-  return {
-    type: ServiceType.Discount,
-    price: +toRoundFixed(company?.discount),
-    sum: +toRoundFixed(company?.discount),
+  if (!isEmpty(company?.discount) && !isNaN(company.discount)) {
+    return {
+      type: ServiceType.Discount,
+      price: +toRoundFixed(company?.discount),
+      sum: +toRoundFixed(company?.discount),
+    }
   }
 }
 
