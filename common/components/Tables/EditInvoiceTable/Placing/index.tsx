@@ -8,7 +8,7 @@ import { ServiceType } from '@utils/constants'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 import { Form, Input, Space, Typography } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -102,9 +102,30 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
 
-  const { company } = usePaymentContext()
+  const [changed, setChanged] = useState<boolean>(false)
+  const { company, prevPayment } = usePaymentContext()
 
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
+
+  const inflicionInvoice: InvoiceType | undefined = useMemo(() => {
+    return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
+  }, [invoices])
+
+  useEffect(() => {
+    if (!company?.inflicion || changed) {
+      return
+    }
+
+    const prevPlacingInvoice = prevPayment?.invoice.find(
+      (invoice) => invoice.type === ServiceType.Placing
+    )
+
+    form.setFieldValue(
+      ['invoice', ...name, 'price'],
+      +toRoundFixed(inflicionInvoice?.sum + prevPlacingInvoice?.sum)
+    )
+  }, [form, name, prevPayment, company, inflicionInvoice, changed])
 
   const suffix = useMemo(() => {
     return company?.inflicion ? (
@@ -135,6 +156,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
         placeholder="Значення..."
         disabled={disabled}
         suffix={suffix}
+        onChange={() => setChanged(true)}
       />
     </Form.Item>
   )

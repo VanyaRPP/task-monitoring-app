@@ -13,15 +13,17 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service, prevService } = usePaymentContext()
+  const name = useMemo(() => toArray<string>(_name), [_name])
+
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+
+  const { prevService } = usePaymentContext()
 
   return (
     <Space direction="vertical" size={0}>
       <Typography.Text>Інфляція</Typography.Text>
       <Typography.Text type="secondary">
-        {prevService?.inflicionPrice > 100
-          ? '(донарах. інд. інф.)'
-          : '(незмінна)'}
+        {price > 0 ? '(донарах. інд. інф.)' : '(незмінна)'}
       </Typography.Text>
       <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
         {toFirstUpperCase(dateToMonthYear(prevService?.date))}
