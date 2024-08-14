@@ -69,9 +69,11 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   if (company?.inflicion && prevService?.inflicionPrice) {
     return (
       <Flex justify="space-between" align="center">
-        <Typography.Text delete={!isInitial}>
-          {toRoundFixed(inflicion)}% від {toRoundFixed(rentPrice)} грн
-        </Typography.Text>
+        {(editable || (!editable && isInitial)) && (
+          <Typography.Text delete={!isInitial}>
+            {toRoundFixed(inflicion)}% від {toRoundFixed(rentPrice)} грн
+          </Typography.Text>
+        )}
         {!isInitial && editable && (
           <Tooltip title="Відновити початкове значення">
             <Button
