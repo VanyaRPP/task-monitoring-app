@@ -61,7 +61,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   const rentPrice = useMemo(() => {
     return (
       prevPlacingInvoice?.sum ||
-      company.totalArea * (company.pricePerMeter || prevService.rentPrice)
+      company?.totalArea * (company?.pricePerMeter || prevService?.rentPrice)
     )
   }, [prevPlacingInvoice, company, prevService])
 
@@ -143,20 +143,30 @@ export const Price: React.FC<InvoiceComponentProps> = ({
     return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
   }, [invoices])
 
+  const prevPlacingInvoice = useMemo(() => {
+    return prevPayment?.invoice.find(
+      (invoice) => invoice.type === ServiceType.Placing
+    )
+  }, [prevPayment])
+
   useEffect(() => {
     if (!company?.inflicion || changed || !editable) {
       return
     }
 
-    const prevPlacingInvoice = prevPayment?.invoice.find(
-      (invoice) => invoice.type === ServiceType.Placing
-    )
-
     form.setFieldValue(
       ['invoice', ...name, 'price'],
       +toRoundFixed(inflicionInvoice?.sum + prevPlacingInvoice?.sum)
     )
-  }, [form, name, prevPayment, company, inflicionInvoice, changed, editable])
+  }, [
+    form,
+    name,
+    company,
+    inflicionInvoice,
+    prevPlacingInvoice,
+    changed,
+    editable,
+  ])
 
   const suffix = useMemo(() => {
     return company?.inflicion ? (

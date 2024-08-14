@@ -14,9 +14,9 @@ describe('getInvoices - WATER-PART', () => {
         service,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when service = { waterPriceTotal: 10 }', () => {
       const service: Partial<IService> = {
@@ -27,9 +27,9 @@ describe('getInvoices - WATER-PART', () => {
         service,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when service = { waterPriceTotal: 0 }', () => {
       const service: Partial<IService> = {
@@ -40,9 +40,9 @@ describe('getInvoices - WATER-PART', () => {
         service,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when service = { waterPriceTotal: NaN }', () => {
       const service: Partial<IService> = {
@@ -53,9 +53,9 @@ describe('getInvoices - WATER-PART', () => {
         service,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when service = { waterPriceTotal: null }', () => {
       const service: Partial<IService> = {
@@ -66,9 +66,9 @@ describe('getInvoices - WATER-PART', () => {
         service,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when service = { waterPriceTotal: undefined }', () => {
       const service: Partial<IService> = {
@@ -79,9 +79,9 @@ describe('getInvoices - WATER-PART', () => {
         service,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
   })
 
@@ -93,9 +93,9 @@ describe('getInvoices - WATER-PART', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when company = { waterPart: 10 }', () => {
       const company: Partial<IRealestate> = {
@@ -106,9 +106,9 @@ describe('getInvoices - WATER-PART', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when company = { waterPart: 0 }', () => {
       const company: Partial<IRealestate> = {
@@ -119,9 +119,9 @@ describe('getInvoices - WATER-PART', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when company = { waterPart: NaN }', () => {
       const company: Partial<IRealestate> = {
@@ -132,9 +132,9 @@ describe('getInvoices - WATER-PART', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when company = { waterPart: null }', () => {
       const company: Partial<IRealestate> = {
@@ -145,9 +145,9 @@ describe('getInvoices - WATER-PART', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when company = { waterPart: undefined }', () => {
       const company: Partial<IRealestate> = {
@@ -158,9 +158,9 @@ describe('getInvoices - WATER-PART', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
   })
 
@@ -174,11 +174,11 @@ describe('getInvoices - WATER-PART', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
-    it('should NOT load when service = { waterPriceTotal: 10 }, company = { waterPart: 10 }', () => {
+    it('should load when service = { waterPriceTotal: 10 }, company = { waterPart: 10 }', () => {
       const service: Partial<IService> = {
         waterPriceTotal: 10,
       }
@@ -191,11 +191,11 @@ describe('getInvoices - WATER-PART', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
-    it('should NOT load when service = { waterPriceTotal: 0 }, company = { waterPart: 0 }', () => {
+    it('should load when service = { waterPriceTotal: 0 }, company = { waterPart: 0 }', () => {
       const service: Partial<IService> = {
         waterPriceTotal: 0,
       }
@@ -208,9 +208,9 @@ describe('getInvoices - WATER-PART', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when service = { waterPriceTotal: 10 }, company = null', () => {
       const service: Partial<IService> = {
@@ -223,9 +223,9 @@ describe('getInvoices - WATER-PART', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when service = { waterPriceTotal: 10 }, company = { ... }', () => {
       const service: Partial<IService> = {
@@ -240,9 +240,43 @@ describe('getInvoices - WATER-PART', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
+    })
+    it('should load when service = { waterPriceTotal: 10 }, company = { waterPart: 10 }', () => {
+      const service: Partial<IService> = {
+        waterPriceTotal: 10,
+      }
+      const company: Partial<IRealestate> = {
+        waterPart: 10,
+      }
+
+      const invoices = getInvoices({
+        service,
+        company,
       })
+
+      expect(invoices).toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
+    })
+    it('should load when service = { waterPriceTotal: 0 }, company = { waterPart: 0 }', () => {
+      const service: Partial<IService> = {
+        waterPriceTotal: 0,
+      }
+      const company: Partial<IRealestate> = {
+        waterPart: 0,
+      }
+
+      const invoices = getInvoices({
+        service,
+        company,
+      })
+
+      expect(invoices).toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should load when service = { waterPriceTotal: 10 }, company = { waterPart: 0 }', () => {
       const service: Partial<IService> = {
@@ -295,9 +329,9 @@ describe('getInvoices - WATER-PART', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when service = { waterPriceTotal: 10 }, company = { waterPart: undefined }', () => {
       const service: Partial<IService> = {
@@ -312,9 +346,9 @@ describe('getInvoices - WATER-PART', () => {
         company,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
   })
 
@@ -330,9 +364,9 @@ describe('getInvoices - WATER-PART', () => {
         prevPayment,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when service = null, company = null, prevPayment = { invoice: [WaterPart] }', () => {
       const service: Partial<IService> = null
@@ -353,9 +387,9 @@ describe('getInvoices - WATER-PART', () => {
         prevPayment,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when service = { waterPriceTotal: 10 }, company = null, prevPayment = { invoice: [WaterPart] }', () => {
       const service: Partial<IService> = {
@@ -378,9 +412,9 @@ describe('getInvoices - WATER-PART', () => {
         prevPayment,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when service = { waterPriceTotal: 10 }, company = null, prevPayment = { invoice: [Electricity] }', () => {
       const service: Partial<IService> = {
@@ -405,9 +439,9 @@ describe('getInvoices - WATER-PART', () => {
         prevPayment,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should load when service = { waterPriceTotal: 10 }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }', () => {
       const service: Partial<IService> = {
@@ -492,9 +526,9 @@ describe('getInvoices - WATER-PART', () => {
         prevPayment,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
   })
 
@@ -506,9 +540,9 @@ describe('getInvoices - WATER-PART', () => {
         payment,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when payment = { invoice: null }', () => {
       const payment: Partial<IPayment> = {
@@ -519,9 +553,9 @@ describe('getInvoices - WATER-PART', () => {
         payment,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when payment = { invoice: [] }', () => {
       const payment: Partial<IPayment> = {
@@ -532,9 +566,9 @@ describe('getInvoices - WATER-PART', () => {
         payment,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should NOT load when payment = { invoice: [Electricity] }', () => {
       const payment: Partial<IPayment> = {
@@ -553,9 +587,9 @@ describe('getInvoices - WATER-PART', () => {
         payment,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should load when payment = { invoice: [WaterPart] }', () => {
       const payment: Partial<IPayment> = {
@@ -620,9 +654,9 @@ describe('getInvoices - WATER-PART', () => {
         payment,
       })
 
-      expect(invoices).not.toContainEqual({
-        type: ServiceType.WaterPart,
-      })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.WaterPart })
+      )
     })
     it('should load when service = null, company = null, payment = { invoice: [WaterPart] }', () => {
       const service: Partial<IService> = null
