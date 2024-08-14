@@ -8,7 +8,7 @@ import { isEqual } from '@utils/helpers'
 import { message, Select, SelectProps, Tag } from 'antd'
 import { useCallback, useEffect, useState } from 'react'
 
-export type RolesSelectorProps = Omit<SelectProps, 'options' | 'mode'>
+export type RolesSelectorProps = Omit<SelectProps, 'options' | 'mode' | 'value'>
 
 const options = [
   {
@@ -22,7 +22,10 @@ const options = [
   },
 ]
 
-export const RolesSelector: React.FC<RolesSelectorProps> = ({ ...props }) => {
+export const RolesSelector: React.FC<RolesSelectorProps> = ({
+  onChange,
+  ...props
+}) => {
   const { data: user } = useGetCurrentUserQuery()
   const [updateUser] = useUpdateUserMutation()
 
@@ -48,6 +51,14 @@ export const RolesSelector: React.FC<RolesSelectorProps> = ({ ...props }) => {
     [user, updateUser]
   )
 
+  const handleChange = useCallback(
+    (value: Roles[], option: { value: Roles }) => {
+      setValue(value)
+      onChange?.(value, option)
+    },
+    [onChange]
+  )
+
   useEffect(() => {
     handleUpdate(debouncedValue)
   }, [debouncedValue, handleUpdate])
@@ -61,7 +72,7 @@ export const RolesSelector: React.FC<RolesSelectorProps> = ({ ...props }) => {
       mode="multiple"
       options={options}
       value={value}
-      onChange={setValue}
+      onChange={handleChange}
       placeholder="Roles..."
       showSearch
       optionFilterProp="label"
