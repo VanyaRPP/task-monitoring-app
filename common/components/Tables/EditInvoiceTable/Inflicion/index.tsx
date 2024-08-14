@@ -54,12 +54,12 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   const rentPrice = useMemo(() => {
     return (
       prevPlacingInvoice?.sum ||
-      company.totalArea * (company.pricePerMeter || prevService.rentPrice)
+      company?.totalArea * (company?.pricePerMeter || prevService?.rentPrice)
     )
   }, [prevPlacingInvoice, company, prevService])
 
   const inflicion = useMemo(() => {
-    return Math.max(prevService.inflicionPrice - 100, 0)
+    return Math.max(prevService?.inflicionPrice - 100, 0)
   }, [prevService])
 
   const isInitial = useMemo(() => {
