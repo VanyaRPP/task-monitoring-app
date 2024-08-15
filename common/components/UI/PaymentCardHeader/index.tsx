@@ -14,7 +14,6 @@ import AddPaymentModal from '@components/AddPaymentModal'
 import StreetsSelector from '@components/StreetsSelector'
 import ImportInvoices from '@components/UI/PaymentCardHeader/ImportInvoices'
 import PaymentCascader from '@components/UI/PaymentCascader/index'
-import SelectForDebitAndCredit from '@components/UI/PaymentSelect'
 import FilterTags from '@components/UI/Reusable/FilterTags'
 import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
@@ -122,7 +121,6 @@ const PaymentCardHeader = ({
         {pathname === AppRoutes.PAYMENT && (
           <Space>
             <PaymentCascader onChange={setCurrentDateFilter} />
-            <SelectForDebitAndCredit onChange={setCurrentTypeOperation} />
             <StreetsSelector
               filters={filters}
               setFilters={setFilters}

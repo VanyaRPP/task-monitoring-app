@@ -1,4 +1,4 @@
-import { Tag } from 'antd'
+import { Tag, Typography } from 'antd'
 import s from '../style.module.scss'
 
 const FilterTags = ({ filters, setFilters, collection }) => {
@@ -6,7 +6,7 @@ const FilterTags = ({ filters, setFilters, collection }) => {
     <>
       <div className={s.filtersTagsBlock}>
         <div className={s.filters}>
-          Надавачі послуг:
+          <Typography.Text>Надавачі послуг:</Typography.Text>
           {Array.isArray(filters?.domain) && filters.domain.length ? (
             <span className={s.filtersTags}>
               {filters.domain.map((domain) => (
@@ -33,11 +33,11 @@ const FilterTags = ({ filters, setFilters, collection }) => {
             collection?.domainsFilter?.length === 1 ? (
             <SingleTag name={collection?.data?.[0]?.domain?.name} />
           ) : (
-            ' Всі'
+            <Typography.Text className={s.allTag}>Всі</Typography.Text>
           )}
         </div>
         <div className={s.filters}>
-          Компанії:
+          <Typography.Text>Компанії:</Typography.Text>
           {Array.isArray(filters?.company) && filters.company.length ? (
             <div className={s.filtersTags}>
               {filters.company.map((company) => (
@@ -63,7 +63,7 @@ const FilterTags = ({ filters, setFilters, collection }) => {
               ))}
             </div>
           ) : (collection?.currentCompaniesCount ||
-            collection?.realEstatesFilter?.length) === 1 ? (
+              collection?.realEstatesFilter?.length) === 1 ? (
             <SingleTag
               name={
                 collection?.data?.[0]?.company?.companyName ||
@@ -71,7 +71,7 @@ const FilterTags = ({ filters, setFilters, collection }) => {
               }
             />
           ) : (
-            ' Всі'
+            <Typography.Text className={s.allTag}>Всі</Typography.Text>
           )}
         </div>
       </div>

@@ -27,12 +27,14 @@ import {
   Table,
   TableColumnType,
   Tooltip,
+  Typography,
   message,
 } from 'antd'
 import cn from 'classnames'
 import { useRouter } from 'next/router'
 import { ReactElement, useCallback, useMemo, useState } from 'react'
 import s from './style.module.scss'
+import { toFirstUpperCase } from '@utils/helpers'
 
 interface PaymentDeleteItem {
   id: string
@@ -114,6 +116,7 @@ const PaymentsBlock = () => {
       companyIds: filters?.company || undefined,
       domainIds: filters?.domain || undefined,
       streetIds: filters?.street || undefined,
+      type: filters?.type || undefined,
     },
     { skip: currUserLoading || !currUser }
   )
@@ -137,10 +140,32 @@ const PaymentsBlock = () => {
 
   const invoiceTypes = Object.entries(paymentsTitle)
 
+  // const SelectForDebitAndCredit = ({ onChange }) => {
+  //   return (
+  //     <div className={s.PaymentSelect}>
+  //       <Select options={customOptions} onChange={onChange} allowClear />
+  //     </div>
+  //   )
+  // }
+
+  // const customOptions = [
+  //   {
+  //     label: 'Дебет',
+  //     value: Operations.Debit,
+  //   },
+  //   {
+  //     label: 'Кредит',
+  //     value: Operations.Credit,
+  //   },
+  // ]
+
+  console.log(filters)
+
   const columns: TableColumnType<any>[] = useMemo(() => {
     return [
       {
         title: 'Надавач послуг',
+        width: 160,
         fixed: 'left',
         dataIndex: 'domain',
         filters:
@@ -155,6 +180,7 @@ const PaymentsBlock = () => {
         title: 'Компанія',
         dataIndex: 'company',
         fixed: 'left',
+        width: 160,
         filters:
           router.pathname === AppRoutes.PAYMENT
             ? payments?.realEstatesFilter
@@ -167,18 +193,13 @@ const PaymentsBlock = () => {
           ) {
             return (
               <Tooltip title="Додати в фільтри">
-                <a
-                  style={{
-                    cursor: 'pointer',
-                    color: 'blue',
-                    textDecoration: 'underline',
-                  }}
+                <Typography.Link
                   onClick={() => {
                     setFilters({ ...filters, company: [i?._id] })
                   }}
                 >
                   {i?.companyName}
-                </a>
+                </Typography.Link>
               </Tooltip>
             )
           } else {
@@ -193,39 +214,60 @@ const PaymentsBlock = () => {
         render: dateToDefaultFormat,
       },
       {
-        title: (
-          <Tooltip title="Дебет (Реалізація)">
-            <span>Дебет</span>
-          </Tooltip>
-        ),
-        dataIndex: 'debit',
-        render: (_, payment: IExtendedPayment) => {
-          if (payment.type === Operations.Debit) {
-            return renderCurrency(payment.generalSum)
-          }
-          return <span className={s.currency}>-</span>
-        },
-      },
-      {
-        title: (
-          <Tooltip title="Кредит (Оплата)">
-            <span>Кредит</span>
-          </Tooltip>
-        ),
-        dataIndex: 'credit',
-        render: (_, payment: IExtendedPayment) => {
-          if (payment.type === Operations.Credit) {
-            return renderCurrency(payment.generalSum)
-          }
-          return <span className={s.currency}>-</span>
-        },
+        title: <span>Тип</span>,
+        dataIndex: 'type',
+        filters: [
+          {
+            text: 'Кредит (Оплата)',
+            value: Operations.Credit,
+          },
+          {
+            text: 'Дебет (Реалізація)',
+            value: Operations.Debit,
+          },
+        ],
+        // onFilter: (value, record) => record.type === value,
+        filteredValue: filters?.type || null,
+
+        children: [
+          {
+            title: (
+              <Tooltip title="Дебет (Реалізація)">
+                <span>Дебет</span>
+              </Tooltip>
+            ),
+            dataIndex: 'debit',
+            render: (_, payment: IExtendedPayment) => {
+              if (payment.type === Operations.Debit) {
+                return renderCurrency(payment.generalSum)
+              }
+              return <span className={s.currency}>-</span>
+            },
+          },
+          {
+            title: (
+              <Tooltip title="Кредит (Оплата)">
+                <span>Кредит</span>
+              </Tooltip>
+            ),
+            dataIndex: 'credit',
+            render: (_, payment: IExtendedPayment) => {
+              if (payment.type === Operations.Credit) {
+                return renderCurrency(payment.generalSum)
+              }
+              return <span className={s.currency}>-</span>
+            },
+          },
+        ],
       },
       {
         title: 'За місяць',
         width: 130,
         dataIndex: 'monthService',
         render: (monthService, obj) =>
-          dateToMonthYear(monthService?.date || obj.invoiceCreationDate),
+          toFirstUpperCase(
+            dateToMonthYear(monthService?.date || obj.invoiceCreationDate)
+          ),
       },
       ...invoiceTypes.map(([type, title]) => ({
         title,
@@ -249,14 +291,13 @@ const PaymentsBlock = () => {
         render: (_, payment: IExtendedPayment) =>
           payment?.type === Operations.Debit && (
             <Button
+              icon={<EyeOutlined />}
               type="link"
               onClick={() => {
                 setCurrentPayment(payment)
                 setPaymentActions({ ...paymentActions, preview: true })
               }}
-            >
-              <EyeOutlined className={s.eyelined} />
-            </Button>
+            />
           ),
       },
       {
@@ -266,15 +307,13 @@ const PaymentsBlock = () => {
         width: 50,
         render: (_, payment: IExtendedPayment) => (
           <Button
-            style={{ padding: 0 }}
+            icon={<EditOutlined />}
             type="link"
             onClick={() => {
               setCurrentPayment(payment)
               setPaymentActions({ ...paymentActions, edit: true })
             }}
-          >
-            <EditOutlined className={s.icon} />
-          </Button>
+          />
         ),
         hidden: !isDomainAdmin && !isGlobalAdmin,
       },
@@ -294,7 +333,7 @@ const PaymentsBlock = () => {
             cancelText="Ні"
             disabled={deleteLoading}
           >
-            <DeleteOutlined className={s.icon} />
+            <Button type='text' icon={<DeleteOutlined />} />
           </Popconfirm>
         ),
         hidden: !isDomainAdmin && !isGlobalAdmin,
