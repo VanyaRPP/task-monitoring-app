@@ -153,6 +153,7 @@ const PaymentsBlock = () => {
         filteredValue: filters?.domain || null,
         render: (i) => i?.name,
         hidden: payments?.currentDomainsCount <= 1,
+        filterSearch: true,
       },
       {
         title: 'Компанія',
@@ -164,6 +165,7 @@ const PaymentsBlock = () => {
             ? payments?.realEstatesFilter
             : null,
         filteredValue: filters?.company || null,
+        filterSearch: true,
         render: (i) => {
           if (
             (isGlobalAdmin || isDomainAdmin) &&
@@ -205,6 +207,7 @@ const PaymentsBlock = () => {
           },
         ],
         filteredValue: filters?.type || null,
+        filterMultiple: false,
 
         children: [
           {
