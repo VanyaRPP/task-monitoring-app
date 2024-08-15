@@ -14,7 +14,10 @@ import AddPaymentModal from '@components/AddPaymentModal'
 import StreetsSelector from '@components/StreetsSelector'
 import ImportInvoices from '@components/UI/PaymentCardHeader/ImportInvoices'
 import PaymentCascader from '@components/UI/PaymentCascader/index'
-import FilterTags from '@components/UI/Reusable/FilterTags'
+import {
+  CompanyFilterTags,
+  DomainFilterTags,
+} from '@components/UI/Reusable/FilterTags'
 import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import { Button, Flex, Space, message } from 'antd'
@@ -126,11 +129,18 @@ const PaymentCardHeader = ({
               setFilters={setFilters}
               streets={streets}
             />
-            <FilterTags
-              filters={filters}
-              setFilters={setFilters}
-              collection={payments}
-            />
+            <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
+              <DomainFilterTags
+                collection={payments?.domainsFilter}
+                filters={filters}
+                setFilters={setFilters}
+              />
+              <CompanyFilterTags
+                collection={payments?.realEstatesFilter}
+                filters={filters}
+                setFilters={setFilters}
+              />
+            </Space>
           </Space>
         )}
       </Space>

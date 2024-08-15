@@ -24,7 +24,7 @@ export const Tags = <T,>({
   const [collapsed, setCollapsed] = useState<boolean>(true)
 
   const items = useMemo(() => {
-    return collapsed ? _items.slice(0, size) : _items
+    return (collapsed ? _items?.slice(0, size) : _items) || []
   }, [_items, size, collapsed])
 
   const handleClick = useCallback(() => {

@@ -1,12 +1,15 @@
 import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
-import { Button } from 'antd'
+import { Button, Space } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddServiceModal from '@components/AddServiceModal'
-import AddressesFilterTags from '@components/UI/Reusable/AddressesFilterTags'
+import {
+  DomainFilterTags,
+  StreetFilterTags,
+} from '@components/UI/Reusable/FilterTags'
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import s from './style.module.scss'
@@ -66,13 +69,18 @@ const ServicesHeader: React.FC<Props> = ({
         </Button>
 
         {router.pathname === AppRoutes.SERVICE && (
-          <>
-            <AddressesFilterTags
-              filter={filter}
+          <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
+            <DomainFilterTags
+              collection={services?.domainFilter}
+              filters={filter}
               setFilters={setFilter}
-              collection={services}
             />
-          </>
+            <StreetFilterTags
+              collection={services?.addressFilter}
+              filters={filter}
+              setFilters={setFilter}
+            />
+          </Space>
         )}
       </div>
       {showAddButton && isAdminCheck(user?.roles) && (

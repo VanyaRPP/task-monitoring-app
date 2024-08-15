@@ -1,7 +1,12 @@
+import { IFilter } from '@common/api/paymentApi/payment.api.types'
+import { Tags, TagsProps } from '@components/UI/Tags'
 import { Tag, Typography } from 'antd'
 import s from '../style.module.scss'
 
-const FilterTags = ({ filters, setFilters, collection }) => {
+/**
+ * @deprecated use universal `FilterTags` instead
+ */
+const _FilterTags = ({ filters, setFilters, collection }) => {
   return (
     <>
       <div className={s.filtersTagsBlock}>
@@ -83,4 +88,38 @@ function SingleTag({ name }) {
   return name ? <Tag className={s.Tag}>{name}</Tag> : null
 }
 
-export default FilterTags
+export default _FilterTags
+
+export const FilterTags: React.FC<{
+  title?: React.ReactNode
+  items?: IFilter[]
+  closable?: boolean
+  onClose?: (item: IFilter, index: number, items: IFilter[]) => void
+  color?: TagsProps['color']
+}> = ({ title, items, closable = true, onClose, color }) => (
+  <Tags
+    items={items}
+    title={title}
+    size={1}
+    wrap
+    render={(item, index, _items) => (
+      <Tag
+        key={item.value}
+        closable={closable}
+        onClose={(e) => {
+          e.preventDefault()
+          onClose?.(item, index, _items)
+        }}
+        color={color}
+        bordered={false}
+        style={{ margin: 0, fontWeight: 'normal' }}
+      >
+        {item.text}
+      </Tag>
+    )}
+  />
+)
+
+export { CompanyFilterTags } from './CompanyFilterTags'
+export { DomainFilterTags } from './DomainFilterTags'
+export { StreetFilterTags } from './StreetFilterTags'
