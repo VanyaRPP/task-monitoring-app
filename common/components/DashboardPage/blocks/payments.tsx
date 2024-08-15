@@ -18,7 +18,7 @@ import {
   Roles,
   paymentsTitle,
 } from '@utils/constants'
-import { renderCurrency } from '@utils/helpers'
+import { renderCurrency, toFirstUpperCase } from '@utils/helpers'
 import {
   Alert,
   Button,
@@ -34,7 +34,6 @@ import cn from 'classnames'
 import { useRouter } from 'next/router'
 import { ReactElement, useCallback, useMemo, useState } from 'react'
 import s from './style.module.scss'
-import { toFirstUpperCase } from '@utils/helpers'
 
 interface PaymentDeleteItem {
   id: string
@@ -140,27 +139,6 @@ const PaymentsBlock = () => {
 
   const invoiceTypes = Object.entries(paymentsTitle)
 
-  // const SelectForDebitAndCredit = ({ onChange }) => {
-  //   return (
-  //     <div className={s.PaymentSelect}>
-  //       <Select options={customOptions} onChange={onChange} allowClear />
-  //     </div>
-  //   )
-  // }
-
-  // const customOptions = [
-  //   {
-  //     label: 'Дебет',
-  //     value: Operations.Debit,
-  //   },
-  //   {
-  //     label: 'Кредит',
-  //     value: Operations.Credit,
-  //   },
-  // ]
-
-  console.log(filters)
-
   const columns: TableColumnType<any>[] = useMemo(() => {
     return [
       {
@@ -226,7 +204,6 @@ const PaymentsBlock = () => {
             value: Operations.Debit,
           },
         ],
-        // onFilter: (value, record) => record.type === value,
         filteredValue: filters?.type || null,
 
         children: [
@@ -333,7 +310,7 @@ const PaymentsBlock = () => {
             cancelText="Ні"
             disabled={deleteLoading}
           >
-            <Button type='text' icon={<DeleteOutlined />} />
+            <Button type="text" icon={<DeleteOutlined />} />
           </Popconfirm>
         ),
         hidden: !isDomainAdmin && !isGlobalAdmin,
