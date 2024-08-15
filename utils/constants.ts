@@ -109,7 +109,7 @@ export const paymentsTitle = {
   electricityPrice: 'Електропостачання',
   waterPrice: 'Водопостачання',
   garbageCollectorPrice: 'Вивіз ТПВ',
-  waterPart: 'Нарахування водопостачання',
+  waterPart: 'Водонарахування',
   discount: 'Знижка',
   cleaningPrice: 'Прибирання',
   custom: 'Додаткові витрати',

@@ -83,6 +83,7 @@ const PaymentsBlock = () => {
     pageSize: pathname === AppRoutes.PAYMENT ? 10 : 5,
     currentPage: 1,
   })
+
   const [filters, setFilters] = useState<any>()
 
   const closeEditModal = () => {
@@ -143,23 +144,40 @@ const PaymentsBlock = () => {
     return [
       {
         title: 'Надавач послуг',
-        width: 160,
-        fixed: 'left',
+        // fixed: 'left',
         dataIndex: 'domain',
         filters:
           router.pathname === AppRoutes.PAYMENT
             ? payments?.domainsFilter
             : null,
         filteredValue: filters?.domain || null,
-        render: (i) => i?.name,
+        render: (i) => {
+          if (
+            (isGlobalAdmin || isDomainAdmin) &&
+            router.pathname === AppRoutes.PAYMENT
+          ) {
+            return (
+              <Tooltip title="Додати в фільтри">
+                <Typography.Link
+                  onClick={() => {
+                    setFilters({ ...filters, domain: [i?._id] })
+                  }}
+                >
+                  {i?.name}
+                </Typography.Link>
+              </Tooltip>
+            )
+          } else {
+            return i?.name
+          }
+        },
         hidden: payments?.currentDomainsCount <= 1,
         filterSearch: true,
       },
       {
         title: 'Компанія',
         dataIndex: 'company',
-        fixed: 'left',
-        width: 160,
+        // fixed: 'left',
         filters:
           router.pathname === AppRoutes.PAYMENT
             ? payments?.realEstatesFilter
@@ -190,25 +208,27 @@ const PaymentsBlock = () => {
       {
         title: 'Дата створення',
         dataIndex: 'invoiceCreationDate',
-        width: '155px',
         render: dateToDefaultFormat,
+        width: 150,
       },
       {
         title: <span>Тип</span>,
         dataIndex: 'type',
-        filters: [
-          {
-            text: 'Кредит (Оплата)',
-            value: Operations.Credit,
-          },
-          {
-            text: 'Дебет (Реалізація)',
-            value: Operations.Debit,
-          },
-        ],
+        filters:
+          pathname === AppRoutes.PAYMENT
+            ? [
+                {
+                  text: 'Кредит (Оплата)',
+                  value: Operations.Credit,
+                },
+                {
+                  text: 'Дебет (Реалізація)',
+                  value: Operations.Debit,
+                },
+              ]
+            : null,
         filteredValue: filters?.type || null,
         filterMultiple: false,
-
         children: [
           {
             title: (
@@ -217,6 +237,7 @@ const PaymentsBlock = () => {
               </Tooltip>
             ),
             dataIndex: 'debit',
+            width: 120,
             render: (_, payment: IExtendedPayment) => {
               if (payment.type === Operations.Debit) {
                 return renderCurrency(payment.generalSum)
@@ -231,6 +252,7 @@ const PaymentsBlock = () => {
               </Tooltip>
             ),
             dataIndex: 'credit',
+            width: 120,
             render: (_, payment: IExtendedPayment) => {
               if (payment.type === Operations.Credit) {
                 return renderCurrency(payment.generalSum)
@@ -242,8 +264,8 @@ const PaymentsBlock = () => {
       },
       {
         title: 'За місяць',
-        width: 130,
         dataIndex: 'monthService',
+        width: 150,
         render: (monthService, obj) =>
           toFirstUpperCase(
             dateToMonthYear(monthService?.date || obj.invoiceCreationDate)
@@ -251,6 +273,8 @@ const PaymentsBlock = () => {
       },
       ...invoiceTypes.map(([type, title]) => ({
         title,
+        width: 120,
+        ellipsis: true,
         dataIndex: type,
         render: (_, payment) => {
           const item = payment.invoice.find((item) => item.type === type)
@@ -440,7 +464,7 @@ const PaymentsBlock = () => {
           onChange={(__, filters) => {
             setFilters(filters)
           }}
-          scroll={{ x: 1800 }}
+          scroll={{ x: pathname === AppRoutes.PAYMENT ? 2300 : 1100 }}
           summary={() => <Summary />}
           bordered
           size="small"
