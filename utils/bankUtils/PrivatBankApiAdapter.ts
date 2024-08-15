@@ -1,7 +1,7 @@
 import FetchHttpClient from '../FetchHttpClient/FetchHttpClient'
 
 interface AdapterConfigT {
-  userAgent: string
+  userAgent?: string
   token: string
 }
 
@@ -20,7 +20,7 @@ class PrivatBankApiAdapter {
     return {
       'User-Agent': this.userAgent,
       token: this.token,
-      'Content-Type': 'application/json;charset=cp1251',
+      'Content-Type': 'application/json',
     }
   }
 
@@ -108,9 +108,8 @@ class PrivatBankApiAdapter {
     )
   }
 
-  async getFinalTransactions(acc: string, followId?: string, limit = 20) {
+  async getFinalTransactions(acc?: string, followId?: string, limit = 20) {
     const searchParams = new URLSearchParams({
-      acc,
       limit: limit.toString(),
     })
 
@@ -140,6 +139,11 @@ class PrivatBankApiAdapter {
       },
       searchParams
     )
+  }
+  async getBankDates() {
+    return this.httpClient.get('statements/settings', {
+      headers: this.getDefaultHeaders(),
+    })
   }
 }
 
