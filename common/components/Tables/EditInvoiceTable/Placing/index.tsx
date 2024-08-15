@@ -137,36 +137,36 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   const { company, prevPayment } = usePaymentContext()
 
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
-  const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
+  // const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
 
-  const inflicionInvoice: InvoiceType | undefined = useMemo(() => {
-    return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
-  }, [invoices])
+  // const inflicionInvoice: InvoiceType | undefined = useMemo(() => {
+  //   return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
+  // }, [invoices])
 
-  const prevPlacingInvoice = useMemo(() => {
-    return prevPayment?.invoice.find(
-      (invoice) => invoice.type === ServiceType.Placing
-    )
-  }, [prevPayment])
+  // const prevPlacingInvoice = useMemo(() => {
+  //   return prevPayment?.invoice.find(
+  //     (invoice) => invoice.type === ServiceType.Placing
+  //   )
+  // }, [prevPayment])
 
-  useEffect(() => {
-    if (!company?.inflicion || changed || !editable) {
-      return
-    }
+  // useEffect(() => {
+  //   if (!company?.inflicion || changed || !editable) {
+  //     return
+  //   }
 
-    form.setFieldValue(
-      ['invoice', ...name, 'price'],
-      +toRoundFixed(inflicionInvoice?.sum + prevPlacingInvoice?.sum)
-    )
-  }, [
-    form,
-    name,
-    company,
-    inflicionInvoice,
-    prevPlacingInvoice,
-    changed,
-    editable,
-  ])
+  //   form.setFieldValue(
+  //     ['invoice', ...name, 'price'],
+  //     +toRoundFixed(inflicionInvoice?.sum + prevPlacingInvoice?.sum)
+  //   )
+  // }, [
+  //   form,
+  //   name,
+  //   company,
+  //   inflicionInvoice,
+  //   prevPlacingInvoice,
+  //   changed,
+  //   editable,
+  // ])
 
   const suffix = useMemo(() => {
     return company?.inflicion ? (
