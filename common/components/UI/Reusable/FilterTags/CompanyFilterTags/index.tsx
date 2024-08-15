@@ -1,5 +1,5 @@
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
-import { FilterTags } from '@components/UI/Reusable/FilterTags'
+import FilterTags from '@components/UI/Reusable/FilterTags'
 import { Typography } from 'antd'
 
 export const CompanyFilterTags: React.FC<{

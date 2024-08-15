@@ -4,12 +4,39 @@ import { useCallback, useMemo, useState } from 'react'
 
 export interface TagsProps<T = unknown>
   extends Omit<FlexProps, 'children' | 'title'> {
+  /**
+   * The array of items to be displayed as tags.
+   */
   items?: T[]
+
+  /**
+   * The maximum number of items to display before collapsing.
+   */
   size?: number
+
+  /**
+   * Function to render each item as a React node.
+   */
   render?: (item: T, index: number, items: T[]) => React.ReactNode
+
+  /**
+   * The title or label to display before the tags.
+   */
   title?: React.ReactNode
+
+  /**
+   * The placeholder to display when there are no items.
+   */
+  placeholder?: React.ReactNode
 }
 
+/**
+ * Displays a list of items as tags with a collapsible feature.
+ *
+ * @template T The type of the items to render.
+ * @param props The properties for the `Tags` component.
+ * @returns The list of items as tags with a collapsible feature.
+ */
 export const Tags = <T,>({
   items: _items = [],
   size = 5,
@@ -19,6 +46,7 @@ export const Tags = <T,>({
     </Tag>
   ),
   title,
+  placeholder = null,
   ...rest
 }: TagsProps<T>) => {
   const [collapsed, setCollapsed] = useState<boolean>(true)
@@ -35,10 +63,12 @@ export const Tags = <T,>({
     <Flex gap={8} {...rest}>
       {title}
 
-      {items.map((item, index) => render(item, index, items))}
+      {items.length > 0
+        ? items.map((item, index) => render(item, index, items))
+        : placeholder}
 
       {_items.length > size && (
-        <Tooltip title={collapsed ? 'Show all' : 'Collapse'}>
+        <Tooltip title={collapsed ? 'Показати всі' : 'Приховати'}>
           <Button size="small" onClick={handleClick}>
             <Flex align="center" style={{ fontSize: '0.75rem' }}>
               {collapsed ? (
