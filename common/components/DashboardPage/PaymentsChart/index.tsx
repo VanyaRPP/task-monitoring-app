@@ -3,7 +3,7 @@ import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { usePaymentsChartConfig } from '@components/DashboardPage/PaymentsChart/hooks/usePaymentChartConfig'
+import { usePaymentsChartConfig } from '@components/DashboardPage/PaymentsChart/hooks/usePaymentsChartConfig'
 import { usePaymentsChartData } from '@components/DashboardPage/PaymentsChart/hooks/usePaymentsChartData'
 import { AppRoutes, Operations, Roles } from '@utils/constants'
 import {
@@ -62,8 +62,8 @@ const PaymentsChart: React.FC<{
     }
   )
 
-  const chartData = usePaymentsChartData(payments)
-  const chartConfig = usePaymentsChartConfig()
+  const chartData: any = usePaymentsChartData(payments)
+  const chartConfig: any = usePaymentsChartConfig()
 
   const isValid = useMemo(() => {
     return (
