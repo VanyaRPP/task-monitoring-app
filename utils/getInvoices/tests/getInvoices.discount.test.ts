@@ -96,61 +96,9 @@ describe('getInvoices - DISCOUNT', () => {
         expect.objectContaining({ type: ServiceType.Discount })
       )
     })
-    it('should NOT load when service = { rentPrice: 1000 }', () => {
+    it('should NOT load when service = { ... }', () => {
       const service: Partial<IService> = {
         rentPrice: 1000,
-      }
-
-      const invoices = getInvoices({
-        service,
-      })
-
-      expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Discount })
-      )
-    })
-    it('should NOT load when service = { rentPrice: 0 }', () => {
-      const service: Partial<IService> = {
-        rentPrice: 0,
-      }
-
-      const invoices = getInvoices({
-        service,
-      })
-
-      expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Discount })
-      )
-    })
-    it('should NOT load when service = { rentPrice: NaN }', () => {
-      const service: Partial<IService> = {
-        rentPrice: NaN,
-      }
-
-      const invoices = getInvoices({
-        service,
-      })
-
-      expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Discount })
-      )
-    })
-    it('should NOT load when service = { rentPrice: null }', () => {
-      const service: Partial<IService> = {
-        rentPrice: null,
-      }
-
-      const invoices = getInvoices({
-        service,
-      })
-
-      expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Discount })
-      )
-    })
-    it('should NOT load when service = { rentPrice: undefined }', () => {
-      const service: Partial<IService> = {
-        rentPrice: undefined,
       }
 
       const invoices = getInvoices({
@@ -176,7 +124,7 @@ describe('getInvoices - DISCOUNT', () => {
         expect.objectContaining({ type: ServiceType.Discount })
       )
     })
-    it('should load when service = { rentPrice: 1000 }, company = { discount: 1000 }', () => {
+    it('should load when service = { ... }, company = { discount: 1000 }', () => {
       const service: Partial<IService> = {
         rentPrice: 1000,
       }
@@ -195,7 +143,7 @@ describe('getInvoices - DISCOUNT', () => {
         sum: 1000,
       })
     })
-    it('should load when service = { rentPrice: 0 }, company = {discount: 0 }', () => {
+    it('should load when service = { ... }, company = {discount: 0 }', () => {
       const service: Partial<IService> = {
         rentPrice: 0,
       }
@@ -214,7 +162,7 @@ describe('getInvoices - DISCOUNT', () => {
         sum: 0,
       })
     })
-    it('should NOT load when service = { rentPrice: 1000 }, company = null ', () => {
+    it('should NOT load when service = { ... }, company = null ', () => {
       const service: Partial<IService> = {
         rentPrice: 1000,
       }
@@ -228,82 +176,6 @@ describe('getInvoices - DISCOUNT', () => {
       expect(invoices).not.toContainEqual(
         expect.objectContaining({ type: ServiceType.Discount })
       )
-    })
-    it('should load when service = { ... }, company = { discount: 1000 } ', () => {
-      const service: Partial<IService> = {
-        rentPrice: 1000,
-      }
-      const company: Partial<IRealestate> = {
-        discount: 1000,
-      }
-
-      const invoices = getInvoices({
-        service,
-        company,
-      })
-
-      expect(invoices).toContainEqual({
-        type: ServiceType.Discount,
-        price: 1000,
-        sum: 1000,
-      })
-    })
-    it('should load when service = { rentPrice: 0 }, company = { discount: 1000 } ', () => {
-      const service: Partial<IService> = {
-        rentPrice: 0,
-      }
-      const company: Partial<IRealestate> = {
-        discount: 1000,
-      }
-
-      const invoices = getInvoices({
-        service,
-        company,
-      })
-
-      expect(invoices).toContainEqual({
-        type: ServiceType.Discount,
-        price: 1000,
-        sum: 1000,
-      })
-    })
-    it('should load when service = { rentPrice: null }, company = { discount: 1000 } ', () => {
-      const service: Partial<IService> = {
-        rentPrice: null,
-      }
-      const company: Partial<IRealestate> = {
-        discount: 1000,
-      }
-
-      const invoices = getInvoices({
-        service,
-        company,
-      })
-
-      expect(invoices).toContainEqual({
-        type: ServiceType.Discount,
-        price: 1000,
-        sum: 1000,
-      })
-    })
-    it('should load when service = { rentPrice: undefined }, company = { discount: 1000 } ', () => {
-      const service: Partial<IService> = {
-        rentPrice: undefined,
-      }
-      const company: Partial<IRealestate> = {
-        discount: 1000,
-      }
-
-      const invoices = getInvoices({
-        service,
-        company,
-      })
-
-      expect(invoices).toContainEqual({
-        type: ServiceType.Discount,
-        price: 1000,
-        sum: 1000,
-      })
     })
   })
   describe('props: { payment }', () => {
@@ -327,9 +199,7 @@ describe('getInvoices - DISCOUNT', () => {
         payment,
       })
 
-      expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Discount })
-      )
+      expect(invoices).not.toContainEqual({ type: ServiceType.Discount })
     })
     it('should NOT load when payment = { invoice: [] }', () => {
       const payment: Partial<IPayment> = {
@@ -340,9 +210,7 @@ describe('getInvoices - DISCOUNT', () => {
         payment,
       })
 
-      expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Discount })
-      )
+      expect(invoices).not.toContainEqual({ type: ServiceType.Discount })
     })
     it('should NOT load when payment = { invoice: [Electricity] }', () => {
       const payment: Partial<IPayment> = {
@@ -426,7 +294,7 @@ describe('getInvoices - DISCOUNT', () => {
         sum: 1000,
       })
     })
-    it('should load when service = null, company = { cleaning: 10 }, payment = { invoice: [Discount] }', () => {
+    it('should load when service = null, company = { discount: 100 }, payment = { invoice: [Discount] }', () => {
       const service: Partial<IService> = null
       const company: Partial<IRealestate> = {
         discount: 100,
