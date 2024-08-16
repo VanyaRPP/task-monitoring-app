@@ -16,10 +16,10 @@ const Dashboard: React.FC = () => {
   return (
     <Space direction="vertical" size="middle" style={{ width: '100%' }}>
       <Row gutter={[16, 16]}>
-        <Col xl={24} xxl={8}>
+        <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={8}>
           <CompaniesAreaChart />
         </Col>
-        <Col xl={24} xxl={16}>
+        <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={16}>
           <PaymentsChart style={{ height: '100%' }} />
         </Col>
       </Row>
