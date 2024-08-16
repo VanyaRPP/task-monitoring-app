@@ -28,13 +28,24 @@ export function getMaxInvoiceNumber() {
 
 export function getInvoicesTotalPipeline(options) {
   return [
-    { $match: options },
+    { $match: { ...options, type: 'debit' } },
     {
       $unwind: '$invoice',
     },
     {
       $addFields: {
-        'invoice.sum': { $toDouble: '$invoice.sum' },
+        'invoice.sum': {
+          $cond: {
+            if: {
+              $or: [
+                { $eq: [{ $type: '$invoice.sum' }, 'string'] },
+                { $not: { $isNumber: '$invoice.sum' } },
+              ],
+            },
+            then: 0,
+            else: { $toDouble: '$invoice.sum' },
+          },
+        },
       },
     },
     {
