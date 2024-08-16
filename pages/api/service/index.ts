@@ -128,7 +128,7 @@ export default async function handler(
         const distinctStreets = await Service.distinct('street', options)
         const distinctDomains = await Service.distinct('domain', options)
 
-        const [relatedDomains, relatedStreets, relatedDates] =
+        const [relatedDomains, relatedStreets, relatedYears, relatedMonths] =
           await Promise.all([
             Domain.find({ _id: { $in: distinctDomains } }).select([
               'name',
@@ -139,25 +139,23 @@ export default async function handler(
               'city',
               '_id',
             ]),
+            Service.distinct('date', options).then(
+              (dates) => [
+                ...new Set(dates.map((date) => new Date(date).getFullYear())),
+              ]
+            ),
+            Service.aggregate([
+              { $match: options },
+              { $group: { _id: { month: { $month: '$date' } } } },
+              { $sort: { '_id.month': 1 } },
+            ]).then((results) => [
+              ...new Set(results.map((result) => result._id.month)),
+            ])
           ])
-
-        const distinctYears = await Service.distinct('date', options).then(
-          (dates) => [
-            ...new Set(dates.map((date) => new Date(date).getFullYear())),
-          ]
-        )
-
-        const distinctMonths = await Service.aggregate([
-          { $match: options },
-          { $group: { _id: { month: { $month: '$date' } } } },
-          { $sort: { '_id.month': 1 } },
-        ]).then((results) => [
-          ...new Set(results.map((result) => result._id.month)),
-        ])
 
         const monthFilter = () => {
           const date = new Date()
-          return distinctMonths.map((item) => {
+          return relatedMonths.map((item) => {
             date.setMonth(item - 1)
             return { value: item, text: getFormattedDate(date) }
           })
@@ -174,7 +172,7 @@ export default async function handler(
             value: item._id,
             text: `${item.address} (м. ${item.city})`,
           })),
-          yearFilter: distinctYears.map((item) => ({
+          yearFilter: relatedYears.map((item) => ({
             value: item,
             text: item.toString(),
           })),
