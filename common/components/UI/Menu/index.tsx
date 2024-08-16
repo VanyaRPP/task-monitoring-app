@@ -103,9 +103,9 @@ export const Menu: React.FC<MenuProps> = (props) => {
           {
             key: AppRoutes.PAYMENT_BULK,
             type: 'item',
-            label: 'Bulk',
+            label: 'Створення рахунків',
             onClick: () => router.push(AppRoutes.PAYMENT_BULK),
-            hidden: !isGlobalAdmin,
+            hidden: !isGlobalAdmin && !isDomainAdmin,
           },
           {
             key: AppRoutes.PAYMENT_CHART,
