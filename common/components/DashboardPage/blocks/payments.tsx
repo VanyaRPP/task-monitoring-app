@@ -52,6 +52,21 @@ const typeFilters = [
   },
 ]
 
+const getSummaryColumns = (
+  columns: TableColumnType<any>[] = [],
+  index = 0
+): Array<{ column: TableColumnType<any>; index: number }> => {
+  let count = index
+  return columns?.reduce((cells, column: any) => {
+    if (column.children) {
+      const nested = getSummaryColumns(column.children, count)
+      count += column.children.length
+      return [...cells, ...nested]
+    }
+    return [...cells, { column, index: count++ }]
+  }, [])
+}
+
 function getDateFilter(value) {
   const [, year, period, number] = value || []
   // TODO: add enums
@@ -169,7 +184,7 @@ const PaymentsBlock = () => {
           ) : (
             domain?.name
           ),
-        hidden: payments?.domainsFilter?.length <= 0,
+        hidden: payments?.domainsFilter?.length <= 1,
       },
       {
         title: 'Компанія',
@@ -195,13 +210,13 @@ const PaymentsBlock = () => {
           ) : (
             company?.companyName
           ),
-        hidden: payments?.realEstatesFilter?.length <= 0,
+        hidden: payments?.realEstatesFilter?.length <= 1,
       },
       {
         title: 'Дата створення',
         dataIndex: 'invoiceCreationDate',
         render: dateToDefaultFormat,
-        width: 150,
+        width: 170,
       },
       {
         title: 'Тип',
@@ -356,6 +371,8 @@ const PaymentsBlock = () => {
     }
   }
 
+  const summaryColumns = useMemo(() => getSummaryColumns(columns), [columns])
+
   return (
     <TableCard
       title={
@@ -415,25 +432,43 @@ const PaymentsBlock = () => {
           onChange={(_, filters) => {
             setFilters(filters)
           }}
-          scroll={{ x: router.pathname === AppRoutes.PAYMENT ? 2300 : 1100 }}
+          scroll={{
+            x:
+              (router.pathname === AppRoutes.PAYMENT ? 2300 : 1100) -
+              (payments?.realEstatesFilter?.length <= 1 ? 200 : 0) -
+              (payments?.domainsFilter?.length <= 1 ? 200 : 0),
+          }}
           summary={() => (
             <Table.Summary>
               <Table.Summary.Row>
-                {columns.map((column, index) =>
-                  (column as any).children ? (
-                    <>
-                      <Table.Summary.Cell index={index} align="center">
-                        {toRoundFixed(payments?.totalPayments?.debit)}
-                      </Table.Summary.Cell>
-                      <Table.Summary.Cell index={index} align="center">
-                        {toRoundFixed(payments?.totalPayments?.credit)}
-                      </Table.Summary.Cell>
-                    </>
+                {summaryColumns.map(({ column, index }) =>
+                  column.dataIndex === 'debit' ? (
+                    <Table.Summary.Cell
+                      key={index}
+                      index={index}
+                      align="center"
+                    >
+                      {renderCurrency(
+                        toRoundFixed(payments?.totalPayments?.debit)
+                      )}
+                    </Table.Summary.Cell>
+                  ) : column.dataIndex === 'credit' ? (
+                    <Table.Summary.Cell
+                      key={index}
+                      index={index}
+                      align="center"
+                    >
+                      {renderCurrency(
+                        toRoundFixed(payments?.totalPayments?.credit)
+                      )}
+                    </Table.Summary.Cell>
                   ) : (
                     <Table.Summary.Cell key={index} index={index}>
                       {Object.values(ServiceType).includes(column.dataIndex)
-                        ? toRoundFixed(
-                            payments?.totalPayments?.[column.dataIndex]
+                        ? renderCurrency(
+                            toRoundFixed(
+                              payments?.totalPayments?.[column.dataIndex]
+                            )
                           )
                         : null}
                     </Table.Summary.Cell>
@@ -441,21 +476,25 @@ const PaymentsBlock = () => {
                 )}
               </Table.Summary.Row>
               <Table.Summary.Row>
-                {columns.map((column, index) => (
-                  <Table.Summary.Cell
-                    key={index}
-                    index={index}
-                    colSpan={(column as any).children?.length}
-                    align="center"
-                  >
-                    {column.dataIndex === 'type'
-                      ? toRoundFixed(
-                          Number(payments?.totalPayments?.debit || 0) -
-                            Number(payments?.totalPayments?.credit || 0)
-                        )
-                      : null}
-                  </Table.Summary.Cell>
-                ))}
+                {summaryColumns.map(({ column, index }) =>
+                  column.dataIndex !== 'credit' ? (
+                    <Table.Summary.Cell
+                      key={index}
+                      index={index}
+                      colSpan={column.dataIndex === 'debit' ? 2 : 1}
+                      align="center"
+                    >
+                      {column.dataIndex === 'debit'
+                        ? renderCurrency(
+                            toRoundFixed(
+                              Number(payments?.totalPayments?.debit || 0) -
+                                Number(payments?.totalPayments?.credit || 0)
+                            )
+                          )
+                        : null}
+                    </Table.Summary.Cell>
+                  ) : null
+                )}
               </Table.Summary.Row>
             </Table.Summary>
           )}
