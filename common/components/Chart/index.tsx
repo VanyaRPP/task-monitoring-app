@@ -45,16 +45,6 @@ const ChartComponent: React.FC<{
           legend: {
             position: 'right',
           },
-          title: {
-            display: true,
-            text: chartTitle,
-            font: {
-              size: 24,
-              family: "'Arial', sans-serif",
-              weight: 'bold',
-            },
-            color: '#722ed1',
-          },
         },
       },
     })
