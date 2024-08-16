@@ -12,7 +12,7 @@ export default withAuthRedirect(() => {
       path={[
         { title: 'Панель управління', path: AppRoutes.INDEX },
         { title: 'Платежі', path: AppRoutes.PAYMENT },
-        { title: 'Масове створення', path: AppRoutes.PAYMENT_BULK },
+        { title: 'Створення рахунків', path: AppRoutes.PAYMENT_BULK },
       ]}
     >
       <PaymentBulkBlock />
