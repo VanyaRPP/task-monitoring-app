@@ -3,13 +3,14 @@ import start from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
+
 start()
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { user } = await getCurrentUser(req, res)
+  const {user, isGlobalAdmin} = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'GET':
@@ -22,7 +23,7 @@ export default async function handler(
       }
     case 'PATCH':
       try {
-        if (req.query.id !== user?._id.toString()) {
+        if (req.query.id !== user?._id.toString() && !isGlobalAdmin) {
           return res
             .status(400)
             .json({ success: false, message: 'not allowed' })
@@ -32,6 +33,14 @@ export default async function handler(
           return res
             .status(400)
             .json({ success: false, message: 'only for developers' })
+        }
+
+        if (user.email !== req.body.email) {
+          return res.status(400).json({ success: false, message: 'email cannot be changed' })
+        }
+
+        if (req.body.roles && !isGlobalAdmin) {
+          return res.status(400).json({ success: false, message: 'you can`t change roles' })
         }
 
         const updatedUser = await User.updateOne(

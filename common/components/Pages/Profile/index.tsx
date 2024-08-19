@@ -8,6 +8,7 @@ import { Avatar, Card, Divider, Flex, Space, Spin, Tag, Typography } from 'antd'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import styles from './style.module.scss'
+import { AddProfileEditForm } from './AddProfileEditForm'
 
 export const ProfilePage: React.FC = () => {
   const { data: session } = useSession()
@@ -42,7 +43,7 @@ export const ProfilePage: React.FC = () => {
             <Card.Meta
               title={
                 <Typography.Title level={1} style={{ margin: 0 }}>
-                  {session.user.name || 'My profile'}
+                  {user?.name || 'My profile'}
                 </Typography.Title>
               }
               description={<Tags items={user?.roles} />}
@@ -108,7 +109,8 @@ export const ProfilePage: React.FC = () => {
         </Card>
         {/* TODO: Profile edit form */}
         <Card title="Інформація користувача" style={{ flex: 1 }}>
-          <Spin>Можливість редагування профілю вже в процесі розробки ^_^</Spin>
+          {/* <Spin>Можливість редагування профілю вже в процесі розробки ^_^</Spin> */}
+          <AddProfileEditForm />
           {/* <Form>
             <Typography.Text editable>description</Typography.Text>
             <Divider />
