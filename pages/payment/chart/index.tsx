@@ -1,4 +1,4 @@
-import PaymentsChart from '@components/DashboardPage/blocks/PaymentsChart/paymentsChart'
+import PaymentsChart from '@components/DashboardPage/PaymentsChart'
 import withAuthRedirect from '@components/HOC/withAuthRedirect'
 import MainLayout from '@components/Layouts/Main'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
