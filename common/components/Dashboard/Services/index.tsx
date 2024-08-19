@@ -45,7 +45,7 @@ export const Services: React.FC = () => {
     <Space direction="vertical" style={{ width: '100%' }}>
       <Space style={{ width: '100%' }}>
         {router.pathname === AppRoutes.SERVICE && (
-          <Button type="link" onClick={() => router.push(AppRoutes.INDEX)}>
+          <Button type="link" onClick={() => router.back()}>
             <LeftOutlined />
             Назад
           </Button>

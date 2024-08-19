@@ -2,11 +2,8 @@ import {
   useAddPaymentMutation,
   useEditPaymentMutation,
 } from '@common/api/paymentApi/payment.api'
-import {
-  IExtendedPayment,
-  IPayment,
-} from '@common/api/paymentApi/payment.api.types'
 import { usePaymentData } from '@common/modules/hooks/usePaymentData'
+import { IPayment } from '@common/modules/models/Payment'
 import { IRealEstate } from '@common/modules/models/RealEstate'
 import { IService } from '@common/modules/models/Service'
 import { Operations } from '@utils/constants'
@@ -61,7 +58,7 @@ const AddPaymentModal: FC<Props> = ({
   const [editPayment, { isLoading: isEditingLoading }] =
     useEditPaymentMutation()
 
-  const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
+  const [currPayment, setCurrPayment] = useState<IPayment>()
   const { preview, edit } = paymentActions
 
   const [activeTabKey, setActiveTabKey] = useState(

@@ -435,3 +435,22 @@ export function getFilterForDomain(domains) {
 
   return filterData
 }
+
+/**
+ * Transforms the input into an array.
+ *
+ * @template T
+ * @param {any} input The input to be transformed. Can be of any type.
+ * @returns {T[]} An array containing the input elements. If input is already an array, it returns the input. If input is null or undefined, it returns an empty array.
+ */
+export function toArray<T = unknown>(input: any): T[] {
+  if (input === undefined || input === null) {
+    return []
+  }
+
+  if (Array.isArray(input)) {
+    return input
+  }
+
+  return [input]
+}

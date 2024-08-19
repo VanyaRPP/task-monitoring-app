@@ -62,7 +62,7 @@ export const CompaniesTable: React.FC<CompaniesTableProps> = ({
 
   const { data: companies, isLoading: isCompaniesLoading } =
     useGetRealEstatesQuery({
-      companyName: filter.companyName,
+      name: filter.name,
       streetId: filter.street,
       domainId: filter.domain,
       adminEmail: filter.adminEmails,
@@ -126,8 +126,8 @@ export const CompaniesTable: React.FC<CompaniesTableProps> = ({
         // BUG: Warning: [antd: Table] Columns should all contain `filteredValue` or not contain `filteredValue`.
         ...(filterable && {
           filterSearch: true,
-          filters: companies?.filter.companyName,
-          filteredValue: filter.companyName,
+          filters: companies?.filter.name,
+          filteredValue: filter.name,
         }),
       },
       {

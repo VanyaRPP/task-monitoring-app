@@ -132,7 +132,7 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({
       },
       {
         title: 'Місяць',
-        width: 150,
+        width: 120,
         dataIndex: 'month',
         render: (_, { date }: IService) =>
           NumberToFormattedMonth(new Date(date).getMonth() + 1),

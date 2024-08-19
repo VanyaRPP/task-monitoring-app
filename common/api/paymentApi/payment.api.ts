@@ -1,14 +1,13 @@
+import { IPayment } from '@common/modules/models/Payment'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { Operations } from '@utils/constants'
+import { toCleanObject } from '@utils/toCleanObject'
 import {
-  IAddPaymentResponse,
+  GetPaymentsQueryRequest,
+  GetPaymentsQueryResponse,
   IDeletePaymentResponse,
-  IExtendedPayment,
   IGeneratePaymentPDF,
   IGeneratePaymentPDFResponce,
   IGetPaymentNumberResponse,
-  IGetPaymentResponse,
-  IPayment,
 } from './payment.api.types'
 
 export const paymentApi = createApi({
@@ -18,62 +17,23 @@ export const paymentApi = createApi({
   tagTypes: ['Payment'],
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getAllPayments: builder.query<
-      IGetPaymentResponse,
-      {
-        limit: number
-        skip?: number
-        type?: Operations
-        email?: string
-        year?: number
-        quarter?: number
-        month?: number
-        day?: number
-        domainIds?: string[]
-        companyIds?: string[]
-        streetIds?: string[]
-      }
+    getPayments: builder.query<
+      GetPaymentsQueryResponse,
+      GetPaymentsQueryRequest
     >({
-      query: ({
-        limit,
-        skip,
-        email,
-        type,
-        year,
-        quarter,
-        month,
-        day,
-        domainIds,
-        companyIds,
-        streetIds,
-      }) => {
+      query: (query) => {
         return {
           url: `spacehub/payment`,
-          params: {
-            limit,
-            type,
-            skip,
-            email,
-            year,
-            quarter,
-            month,
-            day,
-            domainIds,
-            companyIds,
-            streetIds,
-          },
+          ...(query && { params: toCleanObject(query) }),
         }
       },
-
-      providesTags: (response) =>
-        response
-          ? response.data.map((item) => ({ type: 'Payment', id: item._id }))
-          : [],
+      providesTags: ['Payment'],
     }),
-    getPayment: builder.query<IGetPaymentResponse, string>({
+    getPayment: builder.query<IPayment, string>({
       query: (id) => `spacehub/payment/${id}`,
+      providesTags: ['Payment'],
     }),
-    addPayment: builder.mutation<IAddPaymentResponse, IPayment>({
+    addPayment: builder.mutation<IPayment, Partial<IPayment>>({
       query(body) {
         return {
           url: `spacehub/payment`,
@@ -81,23 +41,20 @@ export const paymentApi = createApi({
           body,
         }
       },
-      invalidatesTags: (response) => (response ? ['Payment'] : []),
+      invalidatesTags: ['Payment'],
     }),
-    deletePayment: builder.mutation<
-      IDeletePaymentResponse,
-      IExtendedPayment['_id']
-    >({
+    deletePayment: builder.mutation<IDeletePaymentResponse, IPayment['_id']>({
       query(id) {
         return {
           url: `spacehub/payment/${id}`,
           method: 'DELETE',
         }
       },
-      invalidatesTags: (response) => (response ? ['Payment'] : []),
+      invalidatesTags: ['Payment'],
     }),
     deleteMultiplePayments: builder.mutation<
       IDeletePaymentResponse,
-      IExtendedPayment['_id'][]
+      IPayment['_id'][]
     >({
       query(ids) {
         return {
@@ -106,13 +63,13 @@ export const paymentApi = createApi({
           body: { ids },
         }
       },
-      invalidatesTags: (response) => (response ? ['Payment'] : []),
+      invalidatesTags: ['Payment'],
     }),
     getPaymentNumber: builder.query<number, object>({
       query: () => `spacehub/payment/number`,
       transformResponse: (response: IGetPaymentNumberResponse) => response.data,
     }),
-    editPayment: builder.mutation<IExtendedPayment, Partial<IExtendedPayment>>({
+    editPayment: builder.mutation<IPayment, Partial<IPayment>>({
       query(data) {
         const { _id, ...body } = data
         return {
@@ -121,7 +78,7 @@ export const paymentApi = createApi({
           body: body,
         }
       },
-      invalidatesTags: (response) => (response ? ['Payment'] : []),
+      invalidatesTags: ['Payment'],
     }),
     generatePdf: builder.mutation<
       IGeneratePaymentPDFResponce,
@@ -138,7 +95,7 @@ export const paymentApi = createApi({
 
 export const {
   useAddPaymentMutation,
-  useGetAllPaymentsQuery,
+  useGetPaymentsQuery,
   useGetPaymentQuery,
   useDeletePaymentMutation,
   useDeleteMultiplePaymentsMutation,

@@ -1,28 +1,33 @@
+import { IFilter } from '@common/modules/models/Filter'
 import { IRealEstate } from '@common/modules/models/RealEstate'
-import { IFilter } from '../paymentApi/payment.api.types'
 
 export type BaseGetQueryRequest = {
   limit?: number
   skip?: number
 }
 
+export type BaseGetCompaniesQueryRequest = {
+  companyId?: string[] | string
+  name?: string[] | string
+  streetId?: string[] | string
+  domainId?: string[] | string
+  adminEmail?: string[] | string
+}
+
+export type CompaniesFilter = {
+  name: IFilter[]
+  street: IFilter[]
+  domain: IFilter[]
+  adminEmails: IFilter[]
+}
+
 export type GetCompaniesQueryRequest =
-  | (BaseGetQueryRequest & {
-      companyId?: string[] | string
-      streetId?: string[] | string
-      domainId?: string[] | string
-      companyName?: string[] | string
-      adminEmail?: string[] | string
-    })
+  | (BaseGetQueryRequest & BaseGetCompaniesQueryRequest)
   | undefined
+  | void
 export type GetCompaniesQueryResponse = {
   data: IRealEstate[]
-  filter: {
-    companyName: IFilter[]
-    domain: IFilter[]
-    street: IFilter[]
-    adminEmails: IFilter[]
-  }
+  filter: CompaniesFilter
   total: number
 }
 

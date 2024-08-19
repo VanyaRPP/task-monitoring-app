@@ -25,7 +25,7 @@ export default async function handler(
         companyId,
         domainId,
         streetId,
-        companyName,
+        name,
         adminEmail,
         limit = 0,
         skip = 0,
@@ -36,15 +36,15 @@ export default async function handler(
           ? companyId.split(',').map((id) => decodeURIComponent(id))
           : companyId.map((id) => decodeURIComponent(id))
         : null
+      const names: string[] | null = name
+        ? typeof name === 'string'
+          ? name.split(',').map((id) => decodeURIComponent(id))
+          : name.map((id) => decodeURIComponent(id))
+        : null
       const domainsIds: string[] | null = domainId
         ? typeof domainId === 'string'
           ? domainId.split(',').map((id) => decodeURIComponent(id))
           : domainId.map((id) => decodeURIComponent(id))
-        : null
-      const companiesNames: string[] | null = companyName
-        ? typeof companyName === 'string'
-          ? companyName.split(',').map((id) => decodeURIComponent(id))
-          : companyName.map((id) => decodeURIComponent(id))
         : null
       const streetsIds: string[] | null = streetId
         ? typeof streetId === 'string'
@@ -136,11 +136,11 @@ export default async function handler(
       if (companiesIds) {
         filters._id = { $in: companiesIds }
       }
+      if (names) {
+        filters.companyName = { $in: names }
+      }
       if (domainsIds) {
         filters.domain = { $in: domainsIds }
-      }
-      if (companiesNames) {
-        filters.companyName = { $in: companiesNames }
       }
       if (streetsIds) {
         filters.street = { $in: streetsIds }
@@ -156,9 +156,7 @@ export default async function handler(
         .populate('domain')
 
       const filter = {
-        companyName: toFilters(
-          await RealEstate.distinct('companyName', options)
-        ),
+        name: toFilters(await RealEstate.distinct('companyName', options)),
         domain: toFilters(
           await Domain.find({
             _id: { $in: await RealEstate.distinct('domain', options) },

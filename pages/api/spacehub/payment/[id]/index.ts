@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import Domain from '@common/modules/models/Domain'
 import Payment from '@common/modules/models/Payment'
 import start, { Data } from '@pages/api/api.config'
@@ -13,48 +12,79 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isDomainAdmin, isUser, isGlobalAdmin, user } = await getCurrentUser(
-    req,
-    res
-  )
+  const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
+    await getCurrentUser(req, res)
+
+  if (req.method === 'GET') {
+    try {
+      const { id } = req.query
+
+      const payment = await Payment.findById(id)
+        .populate('domain')
+        .populate('company')
+        .populate('street')
+        .populate('monthService')
+
+      if (!payment) {
+        return res.status(404).json({ error: 'not found' })
+      }
+
+      if (isDomainAdmin) {
+        if (
+          !payment.domain.adminEmails.includes(user.email) &&
+          !payment.company.adminEmails.includes(user.email)
+        ) {
+          return res.status(403).json({ error: 'not allowed' })
+        }
+      } else if (isUser) {
+        if (!payment.company.adminEmails.includes(user.email)) {
+          return res.status(403).json({ error: 'not allowed' })
+        }
+      }
+
+      return res.status(200).json(payment)
+    } catch (error) {
+      return res.status(500).json({ error })
+    }
+  }
 
   switch (req.method) {
-    case 'GET':
-      try {
-        if (!req.query.id) throw new Error("'id' is not provided")
+    // case 'GET':
+    //   try {
+    //     if (!req.query.id) throw new Error("'id' is not provided")
 
-        const payment: IPayment = await Payment.findById(req.query.id)
-          .populate('domain')
-          .populate('company')
-          .populate('street')
-          .populate('monthService')
+    //     const payment: IPayment = await Payment.findById(req.query.id)
+    //       .populate('domain')
+    //       .populate('company')
+    //       .populate('street')
+    //       .populate('monthService')
 
-        if (isGlobalAdmin) {
-          return res.status(200).json({ success: true, data: payment })
-        }
+    //     if (isGlobalAdmin) {
+    //       return res.status(200).json({ success: true, data: payment })
+    //     }
 
-        if (isDomainAdmin) {
-          if (payment.domain.adminEmails.includes(user.email)) {
-            return res.status(200).json({
-              success: true,
-              data: payment,
-            })
-          }
-        }
+    //     if (isDomainAdmin) {
+    //       if (payment.domain.adminEmails.includes(user.email)) {
+    //         return res.status(200).json({
+    //           success: true,
+    //           data: payment,
+    //         })
+    //       }
+    //     }
 
-        if (isUser) {
-          if (payment.company.adminEmails.includes(user.email)) {
-            return res.status(200).json({
-              success: true,
-              data: payment,
-            })
-          }
-        }
+    //     if (isUser) {
+    //       if (payment.company.adminEmails.includes(user.email)) {
+    //         return res.status(200).json({
+    //           success: true,
+    //           data: payment,
+    //         })
+    //       }
+    //     }
 
-        return res.status(200).json({ success: false, data: {} })
-      } catch (error) {
-        return res.status(400).json({ success: false, error: error })
-      }
+    //     return res.status(200).json({ success: false, data: {} })
+    //   } catch (error) {
+    //     return res.status(400).json({ success: false, error: error })
+    //   }
 
     case 'DELETE':
       try {

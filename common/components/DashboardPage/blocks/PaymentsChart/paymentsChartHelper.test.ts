@@ -1,17 +1,15 @@
 import { expect } from '@jest/globals'
-import { getPaymentsChartData } from './paymentsChartHelper'
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import { ServiceType } from '@utils/constants'
 import {
   extendedPayment,
-  extendedPaymentsSort,
   extendedPaymentForTestForCorrectValue,
+  extendedPaymentsSort,
 } from '../mock.data'
 import {
+  expectedDataForTestForCorrectValue,
   expectedResultData,
   expectedResultDataForTestBySort,
-  expectedDataForTestForCorrectValue,
 } from './expectedMock.data'
+import { getPaymentsChartData } from './paymentsChartHelper'
 
 describe('getPaymentsChartData', () => {
   it('should return empty array', () => {
@@ -24,6 +22,8 @@ describe('getPaymentsChartData', () => {
     expect(getPaymentsChartData(extendedPaymentsSort)).toEqual(
       expectedResultDataForTestBySort
     )
-    expect(getPaymentsChartData(extendedPaymentForTestForCorrectValue)).toEqual(expectedDataForTestForCorrectValue)
+    expect(getPaymentsChartData(extendedPaymentForTestForCorrectValue)).toEqual(
+      expectedDataForTestForCorrectValue
+    )
   })
 })

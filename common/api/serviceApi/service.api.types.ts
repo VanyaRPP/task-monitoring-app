@@ -1,5 +1,5 @@
+import { IFilter } from '@common/modules/models/Filter'
 import { IService } from '@common/modules/models/Service'
-import { IFilter } from '../paymentApi/payment.api.types'
 
 type BaseGetServicesQueryRequest = {
   serviceId?: string[] | string
