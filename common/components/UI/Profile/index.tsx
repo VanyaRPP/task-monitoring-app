@@ -3,6 +3,7 @@
 import { LoginOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { RolesSelector } from '@components/UI/RolesSelector'
 import { Tags } from '@components/UI/Tags'
 import { AppRoutes, Roles } from '@utils/constants'
 import {
@@ -74,12 +75,15 @@ export const Profile: React.FC = () => {
                 {session?.user?.name}
               </Typography.Text>
 
-              {!!user?.roles && (
+              {process.env.NODE_ENV === 'development' ? (
+                <RolesSelector style={{ minWidth: 100 }} />
+              ) : (
                 <Tags
                   wrap
                   align="center"
                   justify="center"
                   items={user?.roles}
+                  size={1}
                 />
               )}
             </Flex>
