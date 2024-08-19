@@ -8,6 +8,13 @@ import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { FilterQuery } from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import {
+  getDistinctCompanyAndDomain,
+  getDistinctStreets,
+  getFilterForAddress,
+  getFormattedAddress,
+} from '@utils/helpers'
+import Street from '@modules/models/Street'
 
 start()
 
@@ -17,119 +24,6 @@ export default async function handler(
 ) {
   const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
     await getCurrentUser(req, res)
-
-  const getDomainFilter = async () => {
-    return Service.aggregate([
-      {
-        $group: {
-          _id: '$domain',
-        },
-      },
-      {
-        $lookup: {
-          from: 'domains',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'domainDetails',
-        },
-      },
-      {
-        $unwind: '$domainDetails',
-      },
-      {
-        $project: {
-          _id: 0,
-          text: '$domainDetails.name',
-          value: '$_id',
-        },
-      },
-    ]).exec()
-  }
-
-  const getAddressFilter = async () => {
-    return Service.aggregate([
-      {
-        $group: {
-          _id: '$street',
-        },
-      },
-      {
-        $lookup: {
-          from: 'streets',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'addressDetails',
-        },
-      },
-      {
-        $unwind: '$addressDetails',
-      },
-      {
-        $project: {
-          _id: 0,
-          text: {
-            $concat: [
-              '$addressDetails.address',
-              ' (м. ',
-              '$addressDetails.city',
-              ')',
-            ],
-          },
-          value: '$_id',
-        },
-      },
-    ]).exec()
-  }
-
-  const getYearFilter = async () => {
-    return Service.aggregate([
-      {
-        $group: {
-          _id: { $year: '$date' },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          text: { $toString: '$_id' },
-          value: '$_id',
-        },
-      },
-      {
-        $sort: {
-          text: 1,
-        },
-      },
-    ]).exec()
-  }
-
-  const getMonthFilter = async (): Promise<
-    { text: string; value: number }[]
-  > => {
-    const results = await Service.aggregate([
-      {
-        $group: {
-          _id: { $month: '$date' },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          month: '$_id',
-        },
-      },
-      {
-        $sort: {
-          month: 1,
-        },
-      },
-    ]).exec()
-
-    return results.map((result) => ({
-      text: getFormattedDate(new Date(2024, result.month - 1)),
-      value: result.month,
-    }))
-  }
 
   switch (req.method) {
     case 'GET':
@@ -230,17 +124,59 @@ export default async function handler(
           .skip(+skip)
           .populate('domain')
           .populate('street')
-        const domainFilter = await getDomainFilter()
-        const addressFilter = await getAddressFilter()
-        const yearFilter = await getYearFilter()
-        const monthFilter = await getMonthFilter()
+
+        const distinctStreets = await Service.distinct('street', options)
+        const distinctDomains = await Service.distinct('domain', options)
+
+        const [relatedDomains, relatedStreets, relatedYears, relatedMonths] =
+          await Promise.all([
+            Domain.find({ _id: { $in: distinctDomains } }).select([
+              'name',
+              '_id',
+            ]),
+            Street.find({ _id: { $in: distinctStreets } }).select([
+              'address',
+              'city',
+              '_id',
+            ]),
+            Service.distinct('date', options).then(
+              (dates) => [
+                ...new Set(dates.map((date) => new Date(date).getFullYear())),
+              ]
+            ),
+            Service.aggregate([
+              { $match: options },
+              { $group: { _id: { month: { $month: '$date' } } } },
+              { $sort: { '_id.month': 1 } },
+            ]).then((results) => [
+              ...new Set(results.map((result) => result._id.month)),
+            ])
+          ])
+
+        const monthFilter = () => {
+          const date = new Date()
+          return relatedMonths.map((item) => {
+            date.setMonth(item - 1)
+            return { value: item, text: getFormattedDate(date) }
+          })
+        }
+
         return res.status(200).json({
           success: true,
           data: data,
-          domainFilter: domainFilter,
-          addressFilter: addressFilter,
-          yearFilter: yearFilter,
-          monthFilter: monthFilter,
+          domainFilter: relatedDomains.map((item) => ({
+            text: item.name,
+            value: item._id,
+          })),
+          addressFilter: relatedStreets.map((item) => ({
+            value: item._id,
+            text: `${item.address} (м. ${item.city})`,
+          })),
+          yearFilter: relatedYears.map((item) => ({
+            value: item,
+            text: item.toString(),
+          })),
+          monthFilter: monthFilter(),
         })
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })
@@ -261,16 +197,4 @@ export default async function handler(
         return res.status(400).json({ success: false, message: error })
       }
   }
-}
-
-function filterPeriodOptions(args) {
-  const { year, month } = args
-  const filterByDateOptions = []
-  if (year) {
-    filterByDateOptions.push({ $eq: [{ $year: '$date' }, year] })
-  }
-  if (month) {
-    filterByDateOptions.push({ $eq: [{ $month: '$date' }, month] })
-  }
-  return filterByDateOptions
 }

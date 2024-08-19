@@ -1,16 +1,14 @@
 import { expect } from '@jest/globals'
-import { getPaymentsChartData } from './paymentsChartHelper'
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import { ServiceType } from '@utils/constants'
 import {
   extendedPayment,
-  extendedPaymentsSort,
   extendedPaymentForTestForCorrectValue,
-} from '../mock.data'
+  extendedPaymentsSort,
+} from '../../blocks/mock.data'
+import { getPaymentsChartData } from '../utils/paymentsChartHelper'
 import {
+  expectedDataForTestForCorrectValue,
   expectedResultData,
   expectedResultDataForTestBySort,
-  expectedDataForTestForCorrectValue,
 } from './expectedMock.data'
 
 describe('getPaymentsChartData', () => {
