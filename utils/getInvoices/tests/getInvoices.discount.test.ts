@@ -199,7 +199,9 @@ describe('getInvoices - DISCOUNT', () => {
         payment,
       })
 
-      expect(invoices).not.toContainEqual({ type: ServiceType.Discount })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.Discount })
+      )
     })
     it('should NOT load when payment = { invoice: [] }', () => {
       const payment: Partial<IPayment> = {
@@ -210,7 +212,9 @@ describe('getInvoices - DISCOUNT', () => {
         payment,
       })
 
-      expect(invoices).not.toContainEqual({ type: ServiceType.Discount })
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.Discount })
+      )
     })
     it('should NOT load when payment = { invoice: [Electricity] }', () => {
       const payment: Partial<IPayment> = {

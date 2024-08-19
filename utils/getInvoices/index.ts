@@ -54,7 +54,10 @@ export const getInvoices = ({
   prevService,
   prevPayment,
 }: IGetInvoiceProps): Array<IPaymentField> => {
-  if ((isEmpty(company) || isEmpty(service)) && isEmpty(payment)) {
+  if (
+    (isEmpty(company) || isEmpty(service)) &&
+    (isEmpty(payment) || isEmpty(payment?.invoice))
+  ) {
     return []
   }
 
@@ -426,6 +429,7 @@ export const getDiscountInvoice = ({
       sum: +toRoundFixed(+invoice.sum || +invoice.price),
     }
   }
+
   return {
     type: ServiceType.Discount,
     price: +toRoundFixed(company?.discount),
