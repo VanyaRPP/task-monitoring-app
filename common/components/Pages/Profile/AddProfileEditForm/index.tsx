@@ -37,7 +37,7 @@ export const AddProfileEditForm = () => {
           <Input />
         </Form.Item>
         <Form.Item label="Пошта" name="email">
-          <Input disabled onChange={handleEmailChange} />
+          <Input disabled />
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" loading={isUpdating}>
