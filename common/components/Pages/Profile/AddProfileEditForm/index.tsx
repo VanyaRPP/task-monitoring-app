@@ -8,15 +8,6 @@ export const AddProfileEditForm = () => {
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
   const [form] = Form.useForm()
 
-  const handleEmailChange = (e) => {
-    if (e.target.value !== user.email) {
-      message.error("Змінювати email не можна!")
-      form.setFieldsValue({ email: user.email })
-    }
-  }
-  console.log(user)
-
-
   const handleSubmit = async (values) => {
     try {
       const response = await updateUser({_id:user._id, ...values})
