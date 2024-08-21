@@ -23,17 +23,6 @@ export enum AppRoutes {
 export enum Operations {
   Credit = 'credit',
   Debit = 'debit',
-  Discount = 'discount',
-  MaintenancePrice = 'maintenancePrice',
-  InflicionPrice = 'inflicionPrice',
-  WaterPart = 'waterPart',
-  ElectricityPrice = 'electricityPrice',
-  GarbageCollectorPrice = 'garbageCollectorPrice',
-  CleaningPrice = 'cleaningPrice',
-  WaterPrice = 'waterPrice',
-  Custom = 'custom',
-  PlacingPrice = 'placingPrice',
-  GeneralSum = 'generalSum',
 }
 
 export enum ColumnsRoleView {
@@ -102,17 +91,17 @@ export enum TaskView {
 }
 export const saltRounds = 10
 
-export const paymentsTitle = {
-  maintenancePrice: 'Утримання',
-  placingPrice: 'Розміщення',
-  inflicionPrice: 'Індекс інфляції',
-  electricityPrice: 'Електропостачання',
-  waterPrice: 'Водопостачання',
-  garbageCollectorPrice: 'Вивіз ТПВ',
-  waterPart: 'Водонарахування',
-  discount: 'Знижка',
-  cleaningPrice: 'Прибирання',
-  custom: 'Додаткові витрати',
+export enum ServiceName {
+  maintenancePrice = 'Утримання',
+  placingPrice = 'Розміщення',
+  inflicionPrice = 'Індекс інфляції',
+  electricityPrice = 'Електропостачання',
+  waterPrice = 'Водопостачання',
+  garbageCollectorPrice = 'Вивіз ТПВ',
+  waterPart = 'Водонарахування',
+  discount = 'Знижка',
+  cleaningPrice = 'Прибирання',
+  custom = 'Додаткові витрати',
 }
 
 export enum ServiceType {

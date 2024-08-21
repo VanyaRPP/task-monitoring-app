@@ -17,8 +17,8 @@ import {
   Operations,
   PERIOD_FILTR,
   Roles,
+  ServiceName,
   ServiceType,
-  paymentsTitle,
 } from '@utils/constants'
 import { renderCurrency, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import {
@@ -260,78 +260,67 @@ const PaymentsBlock = () => {
         title: 'За місяць',
         dataIndex: 'monthService',
         width: 150,
-        render: (monthService: IService, obj) => {
-          enum ServiceNames {
-            RentPrice = 'Утримання',
-            ElectricityPrice = 'Електрика',
-            WaterPrice = 'Вода',
-            WaterPriceTotal = 'Всього водопостачання',
-            GarbageCollectorPrice = 'Вивезення ТПВ',
-            InflicionPrice = 'Індекс',
-          }
-          return (
-            <Popover
-              content={
-                <List
-                  size="small"
-                  dataSource={[
-                    {
-                      label: ServiceNames.RentPrice,
-                      value: monthService?.rentPrice,
-                    },
-                    {
-                      label: ServiceNames.ElectricityPrice,
-                      value: monthService.electricityPrice,
-                    },
-                    {
-                      label: ServiceNames.WaterPrice,
-                      value: monthService.waterPrice,
-                    },
-                    {
-                      label: ServiceNames.WaterPriceTotal,
-                      value: monthService.waterPriceTotal,
-                    },
-                    {
-                      label: ServiceNames.GarbageCollectorPrice,
-                      value: monthService.garbageCollectorPrice,
-                    },
-                    {
-                      label: ServiceNames.InflicionPrice,
-                      value: monthService.inflicionPrice,
-                    },
-                  ]}
-                  renderItem={(item) => (
-                    <List.Item>
-                      <Flex
-                        justify="space-between"
-                        gap={16}
-                        style={{ width: '100%' }}
-                      >
-                        <Typography.Text strong>{item.label}</Typography.Text>
-                        <Typography.Text>{item.value}</Typography.Text>
-                      </Flex>
-                    </List.Item>
-                  )}
-                />
-              }
-            >
-              <Button
-                block
-                style={{
-                  border: 'none',
-                  backgroundColor: token.colorFillSecondary,
-                }}
-              >
-                {toFirstUpperCase(
-                  dateToMonthYear(monthService?.date || obj.invoiceCreationDate)
+        render: (monthService: IService, obj) => (
+          <Popover
+            content={
+              <List
+                size="small"
+                dataSource={[
+                  {
+                    label: ServiceName.maintenancePrice,
+                    value: monthService?.rentPrice,
+                  },
+                  {
+                    label: ServiceName.electricityPrice,
+                    value: monthService.electricityPrice,
+                  },
+                  {
+                    label: ServiceName.waterPrice,
+                    value: monthService.waterPrice,
+                  },
+                  {
+                    label: ServiceName.waterPart,
+                    value: monthService.waterPriceTotal,
+                  },
+                  {
+                    label: ServiceName.garbageCollectorPrice,
+                    value: monthService.garbageCollectorPrice,
+                  },
+                  {
+                    label: ServiceName.inflicionPrice,
+                    value: monthService.inflicionPrice,
+                  },
+                ]}
+                renderItem={(item) => (
+                  <List.Item>
+                    <Flex
+                      justify="space-between"
+                      gap={16}
+                      style={{ width: '100%' }}
+                    >
+                      <Typography.Text strong>{item.label}</Typography.Text>
+                      <Typography.Text>{item.value}</Typography.Text>
+                    </Flex>
+                  </List.Item>
                 )}
-              </Button>
-            </Popover>
-          )
-        },
+              />
+            }
+          >
+            <Button
+              block
+              style={{
+                border: 'none',
+                backgroundColor: token.colorFillSecondary,
+              }}
+            >
+              {toFirstUpperCase(
+                dateToMonthYear(monthService?.date || obj.invoiceCreationDate)
+              )}
+            </Button>
+          </Popover>
+        ),
       },
-
-      ...Object.entries(paymentsTitle).map(([type, title]) => ({
+      ...Object.entries(ServiceName).map(([type, title]) => ({
         title,
         width: 120,
         ellipsis: true,
