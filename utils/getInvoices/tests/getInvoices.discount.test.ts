@@ -143,7 +143,7 @@ describe('getInvoices - DISCOUNT', () => {
         sum: 1000,
       })
     })
-    it('should load when service = { ... }, company = {discount: 0 }', () => {
+    it('should load when service = { ... }, company = { discount: 0 }', () => {
       const service: Partial<IService> = {
         rentPrice: 0,
       }
