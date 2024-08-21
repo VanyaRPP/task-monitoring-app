@@ -17,11 +17,11 @@ import {
   Alert,
   Button,
   Checkbox,
-  message,
   Popconfirm,
   Table,
   Tag,
   Tooltip,
+  message,
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
@@ -303,6 +303,7 @@ const getDefaultColumns = ({
     dataIndex: 'domain',
     width: 200,
     render: (i) => i?.name,
+    hidden: domainsFilter?.length <= 1,
   }
 
   const companyColumn: any = {

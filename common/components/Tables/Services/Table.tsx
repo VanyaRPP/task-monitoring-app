@@ -13,7 +13,7 @@ import {
 } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { dateToYear } from '@common/assets/features/formatDate'
-import { AppRoutes, Roles } from '@utils/constants'
+import { AppRoutes, Roles, ServiceName } from '@utils/constants'
 import { renderCurrency } from '@utils/helpers'
 import { Alert, Button, Popconfirm, Table, Tooltip, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
@@ -112,7 +112,7 @@ const ServicesTable: React.FC<Props> = ({
           serviceActions
         )}
         dataSource={services?.data}
-        scroll={{ x: 1700 }}
+        scroll={{ x: 1750 }}
         onChange={(__, filter) => {
           setFilter(filter)
         }}
@@ -158,14 +158,13 @@ const getDefaultColumns = (
       dataIndex: 'domain',
       filters: isOnPage ? domainFilter : null,
       filteredValue: filter?.domain || null,
-      width: 200,
       render: (i) => i?.name,
       filterSearch: true,
     },
     {
       title: 'Рік',
       dataIndex: 'year',
-      width: 100,
+      width: 120,
       filters: isOnPage ? yearFilter : null,
       filteredValue: filter?.year || null,
       render: (_, record: IService) => dateToYear(record.date),
@@ -182,49 +181,51 @@ const getDefaultColumns = (
     {
       title: 'Місяць',
       dataIndex: 'month',
-      width: 105,
+      width: 120,
       filters: isOnPage ? monthFilter : null,
       filteredValue: filter?.month || null,
       render: (_, record: IService) => getFormattedDate(record.date),
       filterSearch: true,
     },
     {
-      title: 'Утримання',
+      title: ServiceName.maintenancePrice,
       dataIndex: 'rentPrice',
-      width: 100,
+      width: 120,
+      ellipsis: true,
       render: renderCurrency,
     },
     {
-      title: 'Електрика',
+      title: ServiceName.electricityPrice,
       dataIndex: 'electricityPrice',
-      width: 100,
+      width: 120,
+      ellipsis: true,
       render: renderCurrency,
     },
     {
-      title: 'Вода',
+      title: ServiceName.waterPrice,
       dataIndex: 'waterPrice',
-      width: 100,
+      width: 120,
+      ellipsis: true,
       render: renderCurrency,
     },
     {
-      title: 'Всього водопостачання',
+      title: ServiceName.waterPart,
       dataIndex: 'waterPriceTotal',
-      width: 200,
+      width: 120,
+      ellipsis: true,
       render: renderCurrency,
     },
     {
-      title: 'Вивезення ТПВ',
+      title: ServiceName.garbageCollectorPrice,
       dataIndex: 'garbageCollectorPrice',
-      width: 200,
+      width: 120,
+      ellipsis: true,
       render: renderCurrency,
     },
     {
-      title: (
-        <Tooltip title="Індекс Інфляції">
-          <span>Індекс</span>
-        </Tooltip>
-      ),
-      width: 100,
+      title: ServiceName.inflicionPrice,
+      width: 120,
+      ellipsis: true,
       dataIndex: 'inflicionPrice',
     },
     {

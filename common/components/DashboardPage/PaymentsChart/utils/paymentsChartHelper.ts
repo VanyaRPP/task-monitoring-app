@@ -1,6 +1,6 @@
 import { dateToDayYearMonthFormat } from '@assets/features/formatDate'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import { ServiceType, paymentsTitle } from '@utils/constants'
+import { ServiceName, ServiceType } from '@utils/constants'
 import { toRoundFixed } from '@utils/helpers'
 
 export const getPaymentsChartData = (data: IExtendedPayment[]) => {
@@ -21,7 +21,7 @@ export const getPaymentsChartData = (data: IExtendedPayment[]) => {
             return {
               date: dateToDayYearMonthFormat(date),
               value: +toRoundFixed(item.sum),
-              category: paymentsTitle[itemType],
+              category: ServiceName[itemType],
             }
           })
         return [...mappedValues]

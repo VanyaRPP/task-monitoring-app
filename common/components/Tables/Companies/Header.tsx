@@ -1,4 +1,4 @@
-import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
+import { PlusOutlined } from '@ant-design/icons'
 import { Button, Space } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
@@ -69,16 +69,17 @@ const CompaniesHeader: React.FC<Props> = ({
       <div className={s.firstBlock}>
         <Button type="link" onClick={() => router.push(AppRoutes.REAL_ESTATE)}>
           Компанії
-          <SelectOutlined />
         </Button>
 
         {router.pathname === AppRoutes.REAL_ESTATE && isAdmin && (
           <Space>
-            <DomainFilterSelector
-              filters={filters}
-              setFilters={setFilters}
-              domainsFilter={realEstates?.domainsFilter}
-            />
+            {realEstates?.domainsFilter?.length > 1 && (
+              <DomainFilterSelector
+                filters={filters}
+                setFilters={setFilters}
+                domainsFilter={realEstates?.domainsFilter}
+              />
+            )}
             <StreetFilterSelector
               filters={filters}
               setFilters={setFilters}
