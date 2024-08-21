@@ -8,6 +8,7 @@ import {
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { IService } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import PaymentCardHeader from '@components/UI/PaymentCardHeader'
 import TableCard from '@components/UI/TableCard'
@@ -23,12 +24,16 @@ import { renderCurrency, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import {
   Alert,
   Button,
+  Flex,
+  List,
   Popconfirm,
+  Popover,
   Table,
   TableColumnType,
   Tooltip,
   Typography,
   message,
+  theme,
 } from 'antd'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
@@ -114,6 +119,8 @@ const PaymentsBlock = () => {
       preview: false,
     })
   }
+
+  const { token } = theme.useToken()
 
   const {
     isFetching: currUserFetching,
@@ -253,11 +260,77 @@ const PaymentsBlock = () => {
         title: 'За місяць',
         dataIndex: 'monthService',
         width: 150,
-        render: (monthService, obj) =>
-          toFirstUpperCase(
-            dateToMonthYear(monthService?.date || obj.invoiceCreationDate)
-          ),
+        render: (monthService: IService, obj) => {
+          enum ServiceNames {
+            RentPrice = 'Утримання',
+            ElectricityPrice = 'Електрика',
+            WaterPrice = 'Вода',
+            WaterPriceTotal = 'Всього водопостачання',
+            GarbageCollectorPrice = 'Вивезення ТПВ',
+            InflicionPrice = 'Індекс',
+          }
+          return (
+            <Popover
+              content={
+                <List
+                  size="small"
+                  dataSource={[
+                    {
+                      label: ServiceNames.RentPrice,
+                      value: monthService?.rentPrice,
+                    },
+                    {
+                      label: ServiceNames.ElectricityPrice,
+                      value: monthService.electricityPrice,
+                    },
+                    {
+                      label: ServiceNames.WaterPrice,
+                      value: monthService.waterPrice,
+                    },
+                    {
+                      label: ServiceNames.WaterPriceTotal,
+                      value: monthService.waterPriceTotal,
+                    },
+                    {
+                      label: ServiceNames.GarbageCollectorPrice,
+                      value: monthService.garbageCollectorPrice,
+                    },
+                    {
+                      label: ServiceNames.InflicionPrice,
+                      value: monthService.inflicionPrice,
+                    },
+                  ]}
+                  renderItem={(item) => (
+                    <List.Item>
+                      <Flex
+                        justify="space-between"
+                        gap={16}
+                        style={{ width: '100%' }}
+                      >
+                        <Typography.Text strong>{item.label}</Typography.Text>
+                        <Typography.Text>{item.value}</Typography.Text>
+                      </Flex>
+                    </List.Item>
+                  )}
+                />
+              }
+            >
+              <Button
+                block
+                style={{
+                  border: 'none',
+                  backgroundColor: token.colorFillSecondary,
+                }}
+              >
+                {toFirstUpperCase(
+                  dateToMonthYear(monthService?.date || obj.invoiceCreationDate)
+                )}
+              </Button>
+            </Popover>
+          )
+        },
       },
+
       ...Object.entries(paymentsTitle).map(([type, title]) => ({
         title,
         width: 120,
@@ -340,6 +413,7 @@ const PaymentsBlock = () => {
     deleteLoading,
     filters,
     setFilters,
+    token,
   ])
 
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
