@@ -325,5 +325,34 @@ describe('getInvoices - DISCOUNT', () => {
         sum: 1000,
       })
     })
+    it('should load when service = { ... }, company = { discount: 100 }, payment = { invoice: [Discount] }', () => {
+      const service: Partial<IService> = {
+        rentPrice: 0,
+      }
+      const company: Partial<IRealestate> = {
+        discount: 100,
+      }
+      const payment: Partial<IPayment> = {
+        invoice: [
+          {
+            type: ServiceType.Discount,
+            price: 1000,
+            sum: 1000,
+          },
+        ],
+      }
+
+      const invoices = getInvoices({
+        service,
+        company,
+        payment,
+      })
+
+      expect(invoices).toContainEqual({
+        type: ServiceType.Discount,
+        price: 1000,
+        sum: 1000,
+      })
+    })
   })
 })
