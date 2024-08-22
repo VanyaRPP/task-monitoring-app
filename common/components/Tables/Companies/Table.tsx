@@ -241,21 +241,18 @@ const getDefaultColumns = ({
       render: (value) => <Checkbox checked={value} disabled />,
     },
     {
-      align: 'center',
       fixed: 'right',
       title: '',
       width: 50,
       render: (_, realEstate: IExtendedRealestate) => (
         <Button
-          style={{ padding: 0 }}
+          icon={<EyeOutlined />}
           type="link"
           onClick={() => {
             setCurrentRealEstate(realEstate)
             setRealEstateActions({ edit: false })
           }}
-        >
-          <EyeOutlined />
-        </Button>
+        />
       ),
     },
   ]
@@ -268,15 +265,13 @@ const getDefaultColumns = ({
       width: 50,
       render: (_, realEstate: IExtendedRealestate) => (
         <Button
-          style={{ padding: 0 }}
+          icon={<EditOutlined />}
           type="link"
           onClick={() => {
             setCurrentRealEstate(realEstate)
             setRealEstateActions({ edit: true })
           }}
-        >
-          <EditOutlined />
-        </Button>
+        />
       ),
     })
   }
@@ -290,12 +285,14 @@ const getDefaultColumns = ({
       width: 50,
       render: (_, realEstate: IExtendedRealestate) => (
         <Popconfirm
+          id="popconfirm_custom"
           title={`Ви впевнені що хочете видалити нерухомість?`}
           onConfirm={() => handleDelete(realEstate?._id)}
-          cancelText="Відміна"
+          okText="Видалити"
+          cancelText="Ні"
           disabled={deleteLoading}
         >
-          <DeleteOutlined />
+          <Button type="text" icon={<DeleteOutlined />} />
         </Popconfirm>
       ),
     })
