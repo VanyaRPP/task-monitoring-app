@@ -28,24 +28,8 @@ const StreetFilterSelector: React.FC<IStreetFilterSelectorProps> = (props) => {
       onSelect={(value) =>
         props.setFilters({ ...props.filters, street: [value] })
       }
-      // Possible multiselect support
-      // onSelect={(value) =>
-      //   props.setFilters({
-      //     ...props.filters,
-      //     street: Array.isArray(props.filters?.street)
-      //       ? [...props.filters.street, value]
-      //       : [value],
-      //   })
-      // }
-      // onDeselect={(value) =>
-      //   props.setFilters({
-      //     ...props.filters,
-      //     street: props.filters?.street?.filter((street) => street !== value),
-      //   })
-      // }
       onClear={() => props.setFilters({ ...props.filters, street: undefined })}
       options={props.streetsFilter?.map((option) => ({
-        // .label instead of .text (antd renders .value if .label is not presented)
         label: option.label || option.text || option.value,
         value: option.value,
       }))}
