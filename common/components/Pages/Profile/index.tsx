@@ -3,12 +3,13 @@
 import { UserOutlined } from '@ant-design/icons'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { UsersTable } from '@components/Tables/UsersTable'
 import { Tags } from '@components/UI/Tags'
-import { Avatar, Card, Divider, Flex, Space, Spin, Tag, Typography } from 'antd'
+import { Avatar, Card, Divider, Flex, Space, Tag, Typography } from 'antd'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
-import styles from './style.module.scss'
 import { AddProfileEditForm } from './AddProfileEditForm'
+import styles from './style.module.scss'
 
 export const ProfilePage: React.FC = () => {
   const { data: session } = useSession()
@@ -118,7 +119,10 @@ export const ProfilePage: React.FC = () => {
         </Card>
       </Flex>
 
-      {/* TODO: users table for globalAdmin */}
+      {/* TODO: isGlobalAdmin */}
+      <Card title="Користувачі">
+        <UsersTable />
+      </Card>
     </Space>
   )
 }
