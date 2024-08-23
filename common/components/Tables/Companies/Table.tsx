@@ -105,6 +105,7 @@ const CompaniesTable: React.FC<Props> = ({
         isGlobalAdmin,
         isAdmin,
         domainsFilter: realEstates?.domainsFilter,
+        streetsFilter: realEstates?.streetsFilter,
         realEstatesFilter: realEstates?.realEstatesFilter,
         filters,
         pathname,
@@ -116,7 +117,7 @@ const CompaniesTable: React.FC<Props> = ({
         setFilters({
           domain: filters?.domain,
           company: filters?.companyName,
-          address: filters?.address,
+          street: filters?.street,
         })
       }}
     />
@@ -141,6 +142,7 @@ const getDefaultColumns = ({
   isGlobalAdmin,
   isAdmin,
   domainsFilter,
+  streetsFilter,
   realEstatesFilter,
   filters,
   pathname,
@@ -156,6 +158,7 @@ const getDefaultColumns = ({
   isAdmin?: boolean
   domainsFilter?: IFilter[]
   realEstatesFilter?: IFilter[]
+  streetsFilter: IFilter[]
   filters?: any
   pathname?: string
   setRealEstateActions: React.Dispatch<
@@ -238,21 +241,18 @@ const getDefaultColumns = ({
       render: (value) => <Checkbox checked={value} disabled />,
     },
     {
-      align: 'center',
       fixed: 'right',
       title: '',
       width: 50,
       render: (_, realEstate: IExtendedRealestate) => (
         <Button
-          style={{ padding: 0 }}
+          icon={<EyeOutlined />}
           type="link"
           onClick={() => {
             setCurrentRealEstate(realEstate)
             setRealEstateActions({ edit: false })
           }}
-        >
-          <EyeOutlined />
-        </Button>
+        />
       ),
     },
   ]
@@ -265,15 +265,13 @@ const getDefaultColumns = ({
       width: 50,
       render: (_, realEstate: IExtendedRealestate) => (
         <Button
-          style={{ padding: 0 }}
+          icon={<EditOutlined />}
           type="link"
           onClick={() => {
             setCurrentRealEstate(realEstate)
             setRealEstateActions({ edit: true })
           }}
-        >
-          <EditOutlined />
-        </Button>
+        />
       ),
     })
   }
@@ -287,12 +285,14 @@ const getDefaultColumns = ({
       width: 50,
       render: (_, realEstate: IExtendedRealestate) => (
         <Popconfirm
+          id="popconfirm_custom"
           title={`Ви впевнені що хочете видалити нерухомість?`}
           onConfirm={() => handleDelete(realEstate?._id)}
-          cancelText="Відміна"
+          okText="Видалити"
+          cancelText="Ні"
           disabled={deleteLoading}
         >
-          <DeleteOutlined />
+          <Button type="text" icon={<DeleteOutlined />} />
         </Popconfirm>
       ),
     })
@@ -313,6 +313,17 @@ const getDefaultColumns = ({
     width: 200,
   }
 
+  const streetColumn: any = {
+    title: 'Адреса',
+    dataIndex: 'street',
+    width: 200,
+    render: (i) => (
+      <>
+        {i?.address} (м. {i?.city})
+      </>
+    ),
+  }
+
   if (isAdmin) {
     companyColumn.filters =
       pathname === AppRoutes.REAL_ESTATE ? realEstatesFilter : null
@@ -321,20 +332,15 @@ const getDefaultColumns = ({
     domainColumn.filters =
       pathname === AppRoutes.REAL_ESTATE ? domainsFilter : null
     domainColumn.filteredValue = filters?.domain || null
+
+    streetColumn.filters =
+      pathname === AppRoutes.REAL_ESTATE ? streetsFilter : null
+    streetColumn.filteredValue = filters?.street || null
   }
 
-  if (!domainId && !streetId && !isLoading) {
-    columns.unshift(domainColumn, {
-      title: 'Адреса',
-      dataIndex: 'street',
-      width: 200,
-      render: (i) => (
-        <>
-          {i?.address} (м. {i?.city})
-        </>
-      ),
-    })
-  }
+  columns.unshift(streetColumn)
+
+  columns.unshift(domainColumn)
 
   columns.unshift(companyColumn)
 
