@@ -212,7 +212,7 @@ export const getInflicionInvoice = ({
     const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
     const price =
       (prevPlacing?.sum ||
-        company.totalArea * (company.pricePerMeter || service.rentPrice)) *
+        company.totalArea * (company.pricePerMeter || service.rentPrice || 0)) *
       (Math.max(prevService?.inflicionPrice - 100, 0) / 100)
 
     return {
