@@ -208,7 +208,14 @@ export const getInflicionInvoice = ({
     }
   }
 
-  if (!isNaN(prevService?.inflicionPrice) && company?.inflicion) {
+  if (company?.inflicion) {
+    if (isEmpty(prevService?.inflicionPrice)) {
+      return {
+        type: ServiceType.Inflicion,
+        price: 0,
+        sum: 0,
+      }
+    }
     const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
     const price =
       (prevPlacing?.sum ||
