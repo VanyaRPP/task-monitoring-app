@@ -859,6 +859,7 @@ describe('getInvoices - INFLICION', () => {
 
     it('should load when service = { inflicionPrice: 110, rentPrice: 90 }, company = { inflicion: true, totalArea: 70 }, prevService = { inflicionPrice: 110 } prevPayment = { invoice: [Inflicion] }', () => {
       const service: Partial<IService> = {
+        inflicionPrice: 110,
         rentPrice: 90,
       }
       const company: Partial<IRealestate> = {
@@ -889,6 +890,42 @@ describe('getInvoices - INFLICION', () => {
         type: ServiceType.Inflicion,
         price: 630,
         sum: 630,
+      })
+    })
+
+    it('should load when service = { inflicionPrice: 110, rentPrice: 90 }, company = { inflicion: true, totalArea: 70 }, prevService = { inflicionPrice: 110 } prevPayment = { invoice: [Placing] }', () => {
+      const service: Partial<IService> = {
+        inflicionPrice: 110,
+        rentPrice: 90,
+      }
+      const company: Partial<IRealestate> = {
+        inflicion: true,
+        totalArea: 70,
+      }
+      const prevService: Partial<IService> = {
+        inflicionPrice: 110,
+      }
+      const prevPayment: Partial<IPayment> = {
+        invoice: [
+          {
+            type: ServiceType.Placing,
+            price: 630,
+            sum: 630,
+          },
+        ],
+      }
+
+      const invoices = getInvoices({
+        service,
+        company,
+        prevService,
+        prevPayment,
+      })
+
+      expect(invoices).toContainEqual({
+        type: ServiceType.Inflicion,
+        price: 63,
+        sum: 63,
       })
     })
   })
