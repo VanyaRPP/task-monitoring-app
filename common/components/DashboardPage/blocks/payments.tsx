@@ -434,7 +434,14 @@ const PaymentsBlock = () => {
     }
   }
 
-  const summaryColumns = useMemo(() => getSummaryColumns(columns), [columns])
+  const summaryColumns = useMemo(() => {
+    return getSummaryColumns(
+      currUser?.roles?.includes(Roles.GLOBAL_ADMIN) &&
+        router.pathname === AppRoutes.PAYMENT
+        ? [{}, ...columns]
+        : columns
+    )
+  }, [columns, currUser, router])
 
   return (
     <TableCard
