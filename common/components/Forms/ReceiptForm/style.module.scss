@@ -5,7 +5,7 @@
       width: 110px;
       font-size: 14px;
     }
-    .preLabel{
+    .preLabel {
       vertical-align: top;
       margin-top: 0;
     }
@@ -57,6 +57,7 @@
     font-family: Arial, Helvetica, sans-serif;
     display: flex;
     flex-direction: column;
+    gap: 0.5rem;
   }
 
   .endInfo {
