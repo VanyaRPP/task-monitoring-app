@@ -272,23 +272,23 @@ const PaymentsBlock = () => {
                   },
                   {
                     label: ServiceName.electricityPrice,
-                    value: monthService.electricityPrice,
+                    value: monthService?.electricityPrice,
                   },
                   {
                     label: ServiceName.waterPrice,
-                    value: monthService.waterPrice,
+                    value: monthService?.waterPrice,
                   },
                   {
                     label: ServiceName.waterPart,
-                    value: monthService.waterPriceTotal,
+                    value: monthService?.waterPriceTotal,
                   },
                   {
                     label: ServiceName.garbageCollectorPrice,
-                    value: monthService.garbageCollectorPrice,
+                    value: monthService?.garbageCollectorPrice,
                   },
                   {
                     label: ServiceName.inflicionPrice,
-                    value: monthService.inflicionPrice,
+                    value: monthService?.inflicionPrice,
                   },
                 ]}
                 renderItem={(item) => (
