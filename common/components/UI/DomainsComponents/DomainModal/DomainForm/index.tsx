@@ -17,16 +17,6 @@ const DomainForm: FC<Props> = ({
   editable = true,
   setIsValueChanged,
 }) => {
-  const options = [
-    {
-      value: 'FOP',
-      label: 'FOP',
-    },
-    {
-      value: 'TOV',
-      label: 'TOV',
-    },
-  ]
   return (
     <Form
       form={form}
@@ -45,7 +35,7 @@ const DomainForm: FC<Props> = ({
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} />
       <DomainStreets disabled={!editable} />
-      <DomainInfo editable={editable} />
+      <DomainInfo editable={editable} form={form} />
     </Form>
   )
 }

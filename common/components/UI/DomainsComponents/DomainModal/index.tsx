@@ -33,12 +33,18 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
           label: `${i.address} (м. ${i.city})`,
         })) || [],
       description: currentDomain?.description || '',
+      IEName: currentDomain?.IEName || '',
+      domainBankToken: currentDomain?.domainBankToken || '',
+      mfo: currentDomain?.mfo || '',
+      rnokpp: currentDomain?.rnokpp || '',
+      iban: currentDomain?.iban || '',
     }
     form.setFieldsValue(initialValues)
   }, [currentDomain, form])
 
   const handleSubmit = async () => {
     const formData: IDomainModel = await form.validateFields()
+    console.log('formData', formData)
 
     const domainData = {
       name: formData.name,
@@ -47,7 +53,14 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
         ? formData.streets.map((i: any) => i.value)
         : formData.streets,
       description: formData.description,
+      IEName: formData.IEName,
+      domainBankToken: formData.domainBankToken,
+      mfo: formData.mfo,
+      rnokpp: formData.rnokpp,
+      iban: formData.iban,
     }
+
+    console.log('asdd', domainData)
 
     const response = currentDomain
       ? await editDomain({

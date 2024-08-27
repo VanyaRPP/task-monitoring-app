@@ -61,6 +61,8 @@ export default async function handler(
             .json({ success: false, error: 'Домен з такими даними вже існує' })
         }
 
+        console.log('dsf', req.body)
+
         await Domain.create(req.body)
           .then((domain) => {
             return res.status(201).json({ success: true, data: domain })
