@@ -386,7 +386,7 @@ describe('getInvoices - MAINTENANCE', () => {
         expect.objectContaining({ type: ServiceType.Maintenance })
       )
     })
-    it('should load when service = { rentPrice: 10 }, company = { totalArea: 10 }, payment = { invoice: [Electricity] }', () => {
+    it('should NOT load when service = { rentPrice: 10 }, company = { totalArea: 10 }, payment = { invoice: [Electricity] }', () => {
       const service: Partial<IService> = {
         rentPrice: 10,
       }
