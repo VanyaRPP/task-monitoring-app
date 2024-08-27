@@ -5,15 +5,18 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { UsersTable } from '@components/Tables/UsersTable'
 import { Tags } from '@components/UI/Tags'
-import { Avatar, Card, Divider, Flex, Space, Tag, Typography } from 'antd'
+import { Form, Avatar, Button, Card, Divider, Flex, Space, Tag, Typography } from 'antd'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
-import { AddProfileEditForm } from './AddProfileEditForm'
 import styles from './style.module.scss'
+import { EditUserForm } from '../../Forms/EditUserForm'
+import { Roles } from '@utils/constants'
 
-export const ProfilePage: React.FC = () => {
+export const ProfilePage: React.FC = () => {  
+  const [form] = Form.useForm();
   const { data: session } = useSession()
   const { data: user } = useGetCurrentUserQuery()
+  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   const {
     data: { domainsFilter: domains, realEstatesFilter: companies } = {
@@ -108,21 +111,17 @@ export const ProfilePage: React.FC = () => {
             )}
           />
         </Card>
-        {/* TODO: Profile edit form */}
         <Card title="Інформація користувача" style={{ flex: 1 }}>
-          {/* <Spin>Можливість редагування профілю вже в процесі розробки ^_^</Spin> */}
-          <AddProfileEditForm />
-          {/* <Form>
-            <Typography.Text editable>description</Typography.Text>
-            <Divider />
-          </Form> */}
+          <EditUserForm userId={`${user?._id}`} form={form}/>
+          <Button onClick={form.submit}>Зберегти</Button>
         </Card>
       </Flex>
 
-      {/* TODO: isGlobalAdmin */}
-      <Card title="Користувачі">
-        <UsersTable />
-      </Card>
+      {isGlobalAdmin && 
+        <Card title="Користувачі">
+          <UsersTable />
+        </Card>
+      }
     </Space>
   )
 }
