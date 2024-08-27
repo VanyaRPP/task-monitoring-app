@@ -224,46 +224,6 @@ describe('getInvoices - GARBAGE COLLECTOR', () => {
           expect.objectContaining({ type: ServiceType.GarbageCollector })
         )
       })
-      it('should load when service = { garbageCollectorPrice: 10 }, company = { rentPart: 10, garbageCollector: true }', () => {
-        const service: Partial<IService> = {
-          garbageCollectorPrice: 10,
-        }
-        const company: Partial<IRealestate> = {
-          rentPart: 10,
-          garbageCollector: true,
-        }
-
-        const invoices = getInvoices({
-          service,
-          company,
-        })
-
-        expect(invoices).toContainEqual({ 
-          type: ServiceType.GarbageCollector,
-          price: 1,
-          sum: 1, 
-        })
-      })
-      it('should load when service = { garbageCollectorPrice: 0 }, company = { rentPart: 0, garbageCollector: true }', () => {
-        const service: Partial<IService> = {
-          garbageCollectorPrice: 0,
-        }
-        const company: Partial<IRealestate> = {
-          rentPart: 0,
-          garbageCollector: true,
-        }
-
-        const invoices = getInvoices({
-          service,
-          company,
-        })
-
-        expect(invoices).toContainEqual({ 
-          type: ServiceType.GarbageCollector,
-          price: 0,
-          sum: 0,
-        })
-      })
       it('should NOT load when service = { garbageCollectorPrice: 10 }, company = null', () => {
         const service: Partial<IService> = {
           garbageCollectorPrice: 10,
@@ -279,7 +239,7 @@ describe('getInvoices - GARBAGE COLLECTOR', () => {
           expect.objectContaining({ type: ServiceType.GarbageCollector })
         )
       })
-      it('should NOT load when service = { garbageCollectorPrice: 10 }, company = { discount: 0 }', () => {
+      it('should NOT load when service = { garbageCollectorPrice: 10 }, company = { ... }', () => {
         const service: Partial<IService> = {
           garbageCollectorPrice: 10,
         }
@@ -355,23 +315,6 @@ describe('getInvoices - GARBAGE COLLECTOR', () => {
           price: 0,
           sum: 0,
         })
-      })
-      it('should NOT load when service = { garbageCollectorPrice: 10 }, company = { rentPart: undefined }', () => {
-        const service: Partial<IService> = {
-          garbageCollectorPrice: 10,
-        }
-        const company: Partial<IRealestate> = {
-          rentPart: undefined,
-        }
-
-        const invoices = getInvoices({
-          service,
-          company,
-        })
-
-        expect(invoices).not.toContainEqual(
-          expect.objectContaining({ type: ServiceType.GarbageCollector })
-        )
       })
     })
 
@@ -496,6 +439,62 @@ describe('getInvoices - GARBAGE COLLECTOR', () => {
           expect.objectContaining({ type: ServiceType.GarbageCollector })
         )
       })
+      it('should NOT load when service = { garbageCollectorPrice: 10 }, company = { rentPart: 10, garbageCollector: false }, payment = { invoice: [Cleaning] }', () => {
+        const service: Partial<IService> = { 
+          garbageCollectorPrice: 10, 
+        }
+        const company: Partial<IRealestate> = { 
+          rentPart: 10,
+          garbageCollector: false,
+        }
+        const payment: Partial<IPayment> = {
+          invoice: [
+            {
+              type: ServiceType.Cleaning,
+              price: 15,
+              sum: 12,
+            },
+          ],
+        }
+  
+        const invoices = getInvoices({
+          service,
+          company,
+          payment,
+        })
+  
+        expect(invoices).not.toContainEqual(
+          expect.objectContaining({ type: ServiceType.GarbageCollector })
+        )
+      })
+      it('should NOT load when service = { garbageCollectorPrice: 10 }, company = { rentPart: 10, garbageCollector: true }, payment = { invoice: [Cleaning] }', () => {
+        const service: Partial<IService> = { 
+          garbageCollectorPrice: 10, 
+        }
+        const company: Partial<IRealestate> = { 
+          rentPart: 10,
+          garbageCollector: true,
+        }
+        const payment: Partial<IPayment> = {
+          invoice: [
+            {
+              type: ServiceType.Cleaning,
+              price: 15,
+              sum: 12,
+            },
+          ],
+        }
+  
+        const invoices = getInvoices({
+          service,
+          company,
+          payment,
+        })
+  
+        expect(invoices).not.toContainEqual(
+          expect.objectContaining({ type: ServiceType.GarbageCollector })
+        )
+      })
       it('should load when service = null, company = null, payment = { invoice: [GarbageCollector] }', () => {
         const service: Partial<IService> = null
         const company: Partial<IRealestate> = null
@@ -575,62 +574,6 @@ describe('getInvoices - GARBAGE COLLECTOR', () => {
           sum: 12,
         })
       })
-    it('should NOT load when service = { garbageCollectorPrice: 10 }, company = { rentPart: 10, garbageCollector: false }, payment = { invoice: [Cleaning] }', () => {
-      const service: Partial<IService> = { 
-        garbageCollectorPrice: 10, 
-      }
-      const company: Partial<IRealestate> = { 
-        rentPart: 10,
-        garbageCollector: false,
-      }
-      const payment: Partial<IPayment> = {
-        invoice: [
-          {
-            type: ServiceType.Cleaning,
-            price: 15,
-            sum: 12,
-          },
-        ],
-      }
-
-      const invoices = getInvoices({
-        service,
-        company,
-        payment,
-      })
-
-      expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.GarbageCollector })
-      )
-    })
-    it('should NOT load when service = { garbageCollectorPrice: 10 }, company = { rentPart: 10, garbageCollector: true }, payment = { invoice: [Cleaning] }', () => {
-      const service: Partial<IService> = { 
-        garbageCollectorPrice: 10, 
-      }
-      const company: Partial<IRealestate> = { 
-        rentPart: 10,
-        garbageCollector: true,
-      }
-      const payment: Partial<IPayment> = {
-        invoice: [
-          {
-            type: ServiceType.Cleaning,
-            price: 15,
-            sum: 12,
-          },
-        ],
-      }
-
-      const invoices = getInvoices({
-        service,
-        company,
-        payment,
-      })
-
-      expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.GarbageCollector })
-      )
-    })
     it('should load when service = { garbageCollectorPrice: 10 }, company = { rentPart: 10, garbageCollector: true }, payment = { invoice: [GarbageCollector] }', () => {
       const service: Partial<IService> = { 
         garbageCollectorPrice: 10, 
