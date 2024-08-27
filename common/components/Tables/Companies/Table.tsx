@@ -304,6 +304,7 @@ const getDefaultColumns = ({
     width: 200,
     render: (i) => i?.name,
     hidden: domainsFilter?.length <= 1,
+    filterSearch: true,
   }
 
   const companyColumn: any = {
@@ -311,12 +312,14 @@ const getDefaultColumns = ({
     title: 'Назва компанії',
     dataIndex: 'companyName',
     width: 200,
+    filterSearch: true,
   }
 
   const streetColumn: any = {
     title: 'Адреса',
     dataIndex: 'street',
     width: 200,
+    filterSearch: true,
     render: (i) => (
       <>
         {i?.address} (м. {i?.city})
