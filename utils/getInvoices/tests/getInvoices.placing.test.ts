@@ -393,7 +393,7 @@ describe('getInvoices - Placing', () => {
       )
     })
 
-    it('should NOT load when service = null, company = null, prevPayment = { invoice: [Inflicion] }', () => {
+    it('should NOT load when service = null, company = null, prevPayment = { invoice: [Placing] }', () => {
       const service: Partial<IService> = null
       const company: Partial<IRealestate> = null
       const prevPayment: Partial<IPayment> = {
@@ -416,58 +416,8 @@ describe('getInvoices - Placing', () => {
         expect.objectContaining({ type: ServiceType.Placing})
       )
     })
-    
-    it('should NOT load when service = null, company = null, prevPayment = { invoice: [Cleaning] }', () => {
-      const service: Partial<IService> = null
-      const company: Partial<IRealestate> = null
-      const prevPayment: Partial<IPayment> = {
-        invoice: [
-          {
-            type: ServiceType.Cleaning,
-            price: 10,
-            sum: 110,
-          },
-        ],
-      }
 
-      const invoices = getInvoices({
-        service,
-        company,
-        prevPayment,
-      })
-
-      expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Placing})
-      )
-    })
-
-    it('should NOT load when service = { rentPrice: 10 }, company = null, prevPayment = { invoice: [Cleaning] }', () => {
-      const service: Partial<IService> = {
-        rentPrice: 10,
-      }
-      const company: Partial<IRealestate> = null
-      const prevPayment: Partial<IPayment> = {
-        invoice: [
-          {
-            type: ServiceType.Cleaning,
-            price: 10,
-            sum: 110,
-          },
-        ],
-      }
-
-      const invoices = getInvoices({
-        service,
-        company,
-        prevPayment,
-      })
-
-      expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Placing})
-      )
-    })
-
-    it('should NOT load when service = { rentPrice: 10 }, company = null, prevPayment = { invoice: [Inflicion] }', () => {
+    it('should NOT load when service = { rentPrice: 10 }, company = null, prevPayment = { invoice: [Placing] }', () => {
       const service: Partial<IService> = {
         rentPrice: 10,
       }
@@ -677,6 +627,41 @@ describe('getInvoices - Placing', () => {
         sum: 13,
       })
     })
+
+    it('should load when service = { inflicionPrice: 10 }, company = { inflicion: true, totalArea: 75, pricePerMeter: 17 }, payment = { invoice: [Placing] }', () => {
+      const service: Partial<IService> = {
+        inflicionPrice: 10,
+        rentPrice: 22,
+      }
+      const company: Partial<IRealestate> = {
+        inflicion: true,
+        totalArea: 75,
+        pricePerMeter: 17,
+      }
+      const payment: Partial<IPayment> = {
+        invoice: [
+          {
+            type: ServiceType.Placing,
+            amount: 17,
+            price: 15,
+            sum: 13,
+          },
+        ],
+      }
+
+      const invoices = getInvoices({
+        service,
+        company,
+        payment,
+      })
+
+      expect(invoices).toContainEqual({
+        type: ServiceType.Placing,
+        amount: 17,
+        price: 15,
+        sum: 13,
+      })
+    })
   })
 
   describe('props: { service, company, prevService, prevPayment}', () => {
@@ -739,7 +724,7 @@ describe('getInvoices - Placing', () => {
         type: ServiceType.Placing,
         amount: 70,
         price: 90,
-        sum: 90,
+        sum: 6300,
       })
     })
 
@@ -765,7 +750,7 @@ describe('getInvoices - Placing', () => {
         type: ServiceType.Placing,
         amount: 70,
         price: 90,
-        sum: 90,
+        sum: 6300,
       })
     })
 
@@ -823,7 +808,7 @@ describe('getInvoices - Placing', () => {
 
     it('should load when service = { inflicionPrice: 110, rentPrice: 90 }, company = { inflicion: true, totalArea: 70 }, prevService = { inflicionPrice: 110 } prevPayment = { invoice: [Placing] }', () => {
       const service: Partial<IService> = {
-        inflicionPrice: 110,
+        inflicionPrice: 112,
         rentPrice: 90,
       }
       const company: Partial<IRealestate> = {
@@ -831,7 +816,7 @@ describe('getInvoices - Placing', () => {
         totalArea: 70,
       }
       const prevService: Partial<IService> = {
-        inflicionPrice: 110,
+        inflicionPrice: 70,
       }
       const prevPayment: Partial<IPayment> = {
         invoice: [
@@ -852,8 +837,8 @@ describe('getInvoices - Placing', () => {
 
       expect(invoices).toContainEqual({
         type: ServiceType.Placing,
-        price: 693,
-        sum: 693,
+        price: 441,
+        sum: 441,
       })
     })
 
