@@ -18,7 +18,7 @@ describe('getInvoices - CUSTOM', () => {
         expect.objectContaining({ type: ServiceType.Custom })
       )
     })
-    it('should NOT load when company = { discount: { ... } }', () => {
+    it('should NOT load when company = { ... }', () => {
       const company: Partial<IRealestate> = {
         discount: 1000,
       }
@@ -44,7 +44,7 @@ describe('getInvoices - CUSTOM', () => {
         expect.objectContaining({ type: ServiceType.Custom })
       )
     })
-    it('should NOT load when service = { rentPrice: { ... } }', () => {
+    it('should NOT load when service = { ... }', () => {
       const service: Partial<IService> = {
         rentPrice: 0,
       }
