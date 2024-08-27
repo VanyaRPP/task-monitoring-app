@@ -493,7 +493,8 @@ const PaymentsBlock = () => {
             router.pathname === AppRoutes.PAYMENT && {
               pageSize: pageData.pageSize,
               total: payments?.total,
-              pageSizeOptions: [10, 30, 50],
+              pageSizeOptions: [10, 20, 50],
+              position: ['bottomCenter'],
               onChange: (currentPage, pageSize) => {
                 setPageData({ currentPage, pageSize })
               },
@@ -569,7 +570,6 @@ const PaymentsBlock = () => {
             </Table.Summary>
           )}
           bordered
-          size="small"
           loading={
             currUserLoading ||
             currUserFetching ||
