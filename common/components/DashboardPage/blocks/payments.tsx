@@ -20,7 +20,12 @@ import {
   ServiceName,
   ServiceType,
 } from '@utils/constants'
-import { renderCurrency, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
+import {
+  isEmpty,
+  renderCurrency,
+  toFirstUpperCase,
+  toRoundFixed,
+} from '@utils/helpers'
 import {
   Alert,
   Button,
@@ -263,50 +268,55 @@ const PaymentsBlock = () => {
         render: (monthService: IService, obj) => (
           <Popover
             content={
-              <List
-                size="small"
-                dataSource={[
-                  {
-                    label: ServiceName.maintenancePrice,
-                    value: monthService?.rentPrice,
-                  },
-                  {
-                    label: ServiceName.electricityPrice,
-                    value: monthService?.electricityPrice,
-                  },
-                  {
-                    label: ServiceName.waterPrice,
-                    value: monthService?.waterPrice,
-                  },
-                  {
-                    label: ServiceName.waterPart,
-                    value: monthService?.waterPriceTotal,
-                  },
-                  {
-                    label: ServiceName.garbageCollectorPrice,
-                    value: monthService?.garbageCollectorPrice,
-                  },
-                  {
-                    label: ServiceName.inflicionPrice,
-                    value: monthService?.inflicionPrice,
-                  },
-                ]}
-                renderItem={(item) => (
-                  <List.Item>
-                    <Flex
-                      justify="space-between"
-                      gap={16}
-                      style={{ width: '100%' }}
-                    >
-                      <Typography.Text strong>{item.label}</Typography.Text>
-                      <Typography.Text>{item.value}</Typography.Text>
-                    </Flex>
-                  </List.Item>
-                )}
-              />
+              !isEmpty(monthService) && (
+                <List
+                  size="small"
+                  dataSource={[
+                    {
+                      label: ServiceName.maintenancePrice,
+                      value: monthService?.rentPrice,
+                    },
+                    {
+                      label: ServiceName.electricityPrice,
+                      value: monthService?.electricityPrice,
+                    },
+                    {
+                      label: ServiceName.waterPrice,
+                      value: monthService?.waterPrice,
+                    },
+                    {
+                      label: ServiceName.waterPart,
+                      value: monthService?.waterPriceTotal,
+                    },
+                    {
+                      label: ServiceName.garbageCollectorPrice,
+                      value: monthService?.garbageCollectorPrice,
+                    },
+                    {
+                      label: ServiceName.inflicionPrice,
+                      value: monthService?.inflicionPrice,
+                    },
+                  ]}
+                  renderItem={(item) =>
+                    !isEmpty(item.value) && (
+                      <List.Item>
+                        <Flex
+                          justify="space-between"
+                          gap={16}
+                          style={{ width: '100%' }}
+                        >
+                          <Typography.Text strong>{item.label}</Typography.Text>
+                          <Typography.Text>{item.value}</Typography.Text>
+                        </Flex>
+                      </List.Item>
+                    )
+                  }
+                />
+              )
             }
           >
             <Button
+              disabled={isEmpty(monthService)}
               block
               style={{
                 border: 'none',
