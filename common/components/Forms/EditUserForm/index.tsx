@@ -7,14 +7,11 @@ export interface EditUserFormProps {
   form?: FormInstance;
   userId?: string;
   onFinish?: (user:IUser) => void;
-  onCancel?: () => void;
 }
 
 export const EditUserForm: React.FC<EditUserFormProps> = ({ form:_form, userId, onFinish}) => {
   const [form] = Form.useForm(_form);
   const { data: user, isLoading} = useGetUserByIdQuery(userId);
-
-  console.log(user)
 
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
   useEffect(() => {
@@ -53,16 +50,6 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({ form:_form, userId, 
         <Form.Item label="Пошта" name="email">
           <Input disabled />
         </Form.Item>
-          {/* <Form.Item>
-            { openModal ? (
-            <Button onClick={onCancel}>
-              Cancel
-            </Button>
-            ) : null}
-            <Button type="primary" htmlType="submit" loading={isUpdating}>
-              Зберегти зміни
-            </Button>
-          </Form.Item> */}
       </Form>
     </Spin>
   );  

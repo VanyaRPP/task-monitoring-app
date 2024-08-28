@@ -14,11 +14,11 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ open, userId, onOk
   return (
     <Modal
       open={open}
-      title="Редагувати користувача"
+      title="Редагування профілю"
       onCancel={onCancel}
       onOk={form.submit}
     >
-      <EditUserForm userId={userId} onFinish={onOk} onCancel={onCancel} form={form}/>
+      <EditUserForm userId={userId} onFinish={onOk} form={form}/>
     </Modal>
   );
 };

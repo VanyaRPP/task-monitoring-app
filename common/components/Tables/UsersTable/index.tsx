@@ -9,7 +9,7 @@ import { EditUserModal } from '../../EditUserModal';
 export interface UsersTableProps {}
 
 export const UsersTable: React.FC<UsersTableProps> = ({}) => {
-  const { data: users } = useGetAllUsersQuery();
+  const { data: users } = useGetAllUsersQuery()
 
   const columns = useMemo<TableColumnsType<IUser>>(() => {
     return [

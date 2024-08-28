@@ -26,7 +26,7 @@ export default async function handler(
       }
     case 'PATCH':
       try {
-        if (req.query.id !== currentUser?._id.toString() && !isGlobalAdmin) {
+        if (req.query.id !== currentUser?._id?.toString() && !isGlobalAdmin) {
           return res
             .status(400)
             .json({ success: false, message: 'not allowed' })

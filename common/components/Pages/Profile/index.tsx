@@ -112,7 +112,7 @@ export const ProfilePage: React.FC = () => {
           />
         </Card>
         <Card title="Інформація користувача" style={{ flex: 1 }}>
-          <EditUserForm userId={`${user?._id}`} form={form}/>
+          <EditUserForm userId={user?._id.toString()} form={form}/>
           <Button onClick={form.submit}>Зберегти</Button>
         </Card>
       </Flex>
