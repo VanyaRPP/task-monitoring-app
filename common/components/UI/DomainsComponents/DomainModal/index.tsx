@@ -44,7 +44,6 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
 
   const handleSubmit = async () => {
     const formData: IDomainModel = await form.validateFields()
-    console.log('formData', formData)
 
     const domainData = {
       name: formData.name,
@@ -59,8 +58,6 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       rnokpp: formData.rnokpp,
       iban: formData.iban,
     }
-
-    console.log('asdd', domainData)
 
     const response = currentDomain
       ? await editDomain({

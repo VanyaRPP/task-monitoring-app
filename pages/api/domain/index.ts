@@ -4,6 +4,7 @@ import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import EncryptionService from '@utils/encryptionService'
 
 start()
 
@@ -12,6 +13,22 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   const { isDomainAdmin, isGlobalAdmin, user } = await getCurrentUser(req, res)
+
+  const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
+
+  function encryptDomainBankTokens(obj: any, secretKey: string) {
+    const encryptionService = new EncryptionService(secretKey)
+
+    // Use map to replace each token with its encrypted version
+    obj.domainBankToken = obj.domainBankToken.map(
+      (item: { name: string; token: string }) => ({
+        ...item,
+        token: encryptionService.encrypt(item.token),
+      })
+    )
+
+    return obj
+  }
 
   switch (req.method) {
     case 'GET':
@@ -61,9 +78,9 @@ export default async function handler(
             .json({ success: false, error: 'Домен з такими даними вже існує' })
         }
 
-        console.log('dsf', req.body)
+        const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
 
-        await Domain.create(req.body)
+        await Domain.create(updatedObj)
           .then((domain) => {
             return res.status(201).json({ success: true, data: domain })
           })
