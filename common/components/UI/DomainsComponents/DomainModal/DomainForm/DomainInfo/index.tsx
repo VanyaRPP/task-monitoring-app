@@ -89,12 +89,17 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
                 size="small"
                 title={`Token ${field.name + 1}`}
                 key={field.key}
+                aria-disabled={!editable}
                 extra={
-                  <CloseOutlined
+                  <Button
+                    type="link"
+                    disabled={!editable}
                     onClick={() => {
                       remove(field.name)
                     }}
-                  />
+                  >
+                    <CloseOutlined />
+                  </Button>
                 }
               >
                 <Form.Item label="Name" name={[field.name, 'name']}>
@@ -104,13 +109,24 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
                     disabled={!editable}
                   />
                 </Form.Item>
-                <Form.Item label="Token" name={[field.name, 'token']}>
-                  <Input
-                    placeholder="Token"
-                    className={s.formInput}
-                    disabled={!editable}
-                  />
-                </Form.Item>
+                {!editable ? (
+                  <Form.Item label="Token" name={[field.name, 'shortToken']}>
+                    <Input
+                      placeholder="Token"
+                      className={s.formInput}
+                      disabled={!editable}
+                    />
+                  </Form.Item>
+                ) : (
+                  <Form.Item label="Token" name={[field.name, 'token']}>
+                    <Input
+                      placeholder="Token"
+                      className={s.formInput}
+                      disabled={!editable}
+                    />
+                  </Form.Item>
+                )}
+
                 <Form.Item
                   label="Confidant people"
                   name={[field.name, 'confidant']}

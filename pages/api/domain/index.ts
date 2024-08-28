@@ -5,6 +5,7 @@ import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import EncryptionService from '@utils/encryptionService'
+import { hidePercentCharacters } from '@utils/hidePercentCharacters/hidePercentCharacters'
 
 start()
 
@@ -24,6 +25,7 @@ export default async function handler(
       (item: { name: string; token: string }) => ({
         ...item,
         token: encryptionService.encrypt(item.token),
+        shortToken: hidePercentCharacters(item.token),
       })
     )
 
