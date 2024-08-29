@@ -26,8 +26,8 @@ export const userApi = createApi({
     getUserById: builder.query<IUser, string>({
       query: (id) => `user/${id}`,
       providesTags: (result) => ['User'],
-      transformResponse(baseQueryReturnValue:any, meta, arg) {
-      return baseQueryReturnValue.data
+      transformResponse(baseQueryReturnValue: any, meta, arg) {
+        return baseQueryReturnValue.data
       },
     }),
     // updateUserRole: builder.mutation<IUser, Partial<IUser>>({

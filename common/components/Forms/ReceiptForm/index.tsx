@@ -66,7 +66,7 @@ const ReceiptForm: FC<Props> = ({
 
         <div className={s.providerInvoice}>
           <div className={s.datecellTitle}>
-          РАХУНОК № {newData.invoiceNumber}
+            РАХУНОК № {newData.invoiceNumber}
           </div>
           <div className={s.datecellDate}>
             Від &nbsp;
@@ -93,9 +93,7 @@ const ReceiptForm: FC<Props> = ({
             </div>
           </div>
 
-          <div>
-            Призначення платежу: За послуги згідно рахунку
-          </div>
+          <div>Призначення платежу: За послуги згідно рахунку</div>
 
           <div className={s.payFixed}>
             {newData?.provider?.description?.split('\n')?.[0] || ''}

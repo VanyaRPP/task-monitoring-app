@@ -1,16 +1,21 @@
-import React from 'react';
-import { Modal, Form } from 'antd';
-import { EditUserForm } from '../Forms/EditUserForm';
+import React from 'react'
+import { Modal, Form } from 'antd'
+import { EditUserForm } from '../Forms/EditUserForm'
 
 interface EditUserModalProps {
-  open: boolean;
-  userId?: string;
-  onOk: () => void;
-  onCancel: () => void;
+  open: boolean
+  userId?: string
+  onOk: () => void
+  onCancel: () => void
 }
 
-export const EditUserModal: React.FC<EditUserModalProps> = ({ open, userId, onOk, onCancel }) => {
-  const [form] = Form.useForm();
+export const EditUserModal: React.FC<EditUserModalProps> = ({
+  open,
+  userId,
+  onOk,
+  onCancel,
+}) => {
+  const [form] = Form.useForm()
   return (
     <Modal
       open={open}
@@ -18,7 +23,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ open, userId, onOk
       onCancel={onCancel}
       onOk={form.submit}
     >
-      <EditUserForm userId={userId} onFinish={onOk} form={form}/>
+      <EditUserForm userId={userId} onFinish={onOk} form={form} />
     </Modal>
-  );
-};
+  )
+}

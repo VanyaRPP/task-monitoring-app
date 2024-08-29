@@ -5,15 +5,25 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { UsersTable } from '@components/Tables/UsersTable'
 import { Tags } from '@components/UI/Tags'
-import { Form, Avatar, Button, Card, Divider, Flex, Space, Tag, Typography } from 'antd'
+import {
+  Form,
+  Avatar,
+  Button,
+  Card,
+  Divider,
+  Flex,
+  Space,
+  Tag,
+  Typography,
+} from 'antd'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import styles from './style.module.scss'
 import { EditUserForm } from '../../Forms/EditUserForm'
 import { Roles } from '@utils/constants'
 
-export const ProfilePage: React.FC = () => {  
-  const [form] = Form.useForm();
+export const ProfilePage: React.FC = () => {
+  const [form] = Form.useForm()
   const { data: session } = useSession()
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -112,16 +122,16 @@ export const ProfilePage: React.FC = () => {
           />
         </Card>
         <Card title="Інформація користувача" style={{ flex: 1 }}>
-          <EditUserForm userId={user?._id.toString()} form={form}/>
+          <EditUserForm userId={user?._id?.toString()} form={form} />
           <Button onClick={form.submit}>Зберегти</Button>
         </Card>
       </Flex>
 
-      {isGlobalAdmin && 
+      {isGlobalAdmin && (
         <Card title="Користувачі">
           <UsersTable />
         </Card>
-      }
+      )}
     </Space>
   )
 }
