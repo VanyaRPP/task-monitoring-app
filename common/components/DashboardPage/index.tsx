@@ -15,19 +15,21 @@ const Dashboard: React.FC = () => {
 
   return (
     <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-      <Row gutter={[16, 16]}>
+      <PaymentsBlock />
+      <PaymentsChart style={{ height: '100%' }} />
+      <ServicesBlock />
+      {isGlobalAdmin && <StreetsBlock />}
+      <DomainsBlock />
+      <RealEstateBlock />
+      {/* <Row gutter={[16, 16]}>
         <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={8}>
           <CompaniesAreaChart />
         </Col>
         <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={16}>
-          <PaymentsChart style={{ height: '100%' }} />
+        <PaymentsChart style={{ height: '100%' }} />
         </Col>
-      </Row>
-      {isGlobalAdmin && <StreetsBlock />}
-      <DomainsBlock />
-      <RealEstateBlock />
-      <ServicesBlock />
-      <PaymentsBlock />
+      </Row> */}
+      <CompaniesAreaChart />
     </Space>
   )
 }
