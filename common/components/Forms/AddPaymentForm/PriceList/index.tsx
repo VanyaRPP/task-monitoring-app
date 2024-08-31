@@ -1,12 +1,12 @@
-import React, { FC, useEffect, useState } from 'react'
-import { ColumnsType } from 'antd/es/table'
-import { Table } from 'antd'
-import styles from './styles.module.scss'
 import {
   IPayment,
   IPaymentField,
 } from '@common/api/paymentApi/payment.api.types'
-import { paymentsTitle } from '@utils/constants'
+import { ServiceName } from '@utils/constants'
+import { Table } from 'antd'
+import { ColumnsType } from 'antd/es/table'
+import { FC, useEffect, useState } from 'react'
+import styles from './styles.module.scss'
 
 interface InvoicesTableData extends IPaymentField {
   number: number
@@ -24,7 +24,7 @@ const columns: ColumnsType<InvoicesTableData> = [
     dataIndex: 'type',
     key: 'type',
     render: (value, record, index) => {
-      return paymentsTitle[value]
+      return ServiceName[value]
     },
   },
   {
@@ -89,9 +89,9 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
         <div className={styles.header}>
           <div className={styles.approvalSection}>
             <div>
-              ЗАТВЕРДЖУЮ
+              <strong>ЗАТВЕРДЖУЮ</strong>
               <br />
-              {payment.provider.description}
+              <pre>{payment.provider.description?.trim()}</pre>
               <br />
               <br />
               <hr />
@@ -99,9 +99,19 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
           </div>
           <div className={styles.approvalSection}>
             <div>
-              ЗАТВЕРДЖУЮ
+              <strong>ЗАТВЕРДЖУЮ</strong>
               <br />
-              {payment.reciever.description}
+              <p>
+                <pre>
+                  {payment?.reciever?.description?.trim()} <br />
+                  {payment?.reciever?.companyName} <br />
+                  {payment?.reciever?.adminEmails?.map((email) => (
+                    <div key={email}>
+                      {email} <br />
+                    </div>
+                  ))}
+                </pre>
+              </p>
               <br />
               <br />
               <hr />
@@ -120,12 +130,11 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
         <div className={styles.contentSection}>
           <p>
             Ми, що нижче підписалися, представник Замовника{' '}
-            {payment.reciever.description}, з одного боку, і представник
-            Виконавця {payment.provider.description}, з іншого боку, склали цей
-            акт про те, що на підставі наведених документів:
+            {payment.reciever.description?.trim()}, з одного боку, і представник
+            Виконавця {payment.provider.description?.trim()}, з іншого боку,
+            склали цей акт про те, що на підставі договору, Виконавцем були
+            виконані наступні роботи (надані такі послуги):
           </p>
-          <p>Договір:</p>
-          <p>Виконавцем були виконані наступні роботи (надані такі послуги):</p>
         </div>
       </div>
 
@@ -168,13 +177,14 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               <b>Від Виконавця</b>
               <br />
               <br />
+              <br />
               <hr />
               <b>
                 {new Date(payment.invoiceCreationDate).toLocaleDateString()}
               </b>{' '}
               <br />
               <pre>
-                {payment.provider.description} <br />
+                {payment.provider.description?.trim()} <br />
               </pre>
             </div>
           </div>
@@ -182,12 +192,13 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
             <div>
               <b>Від Замовника</b> <br />
               <br />
+              <br />
               <hr />
               <b>
                 {new Date(payment.invoiceCreationDate).toLocaleDateString()}
               </b>{' '}
               <br />
-              <pre>{payment.reciever.description}</pre>
+              <pre>{payment.reciever.description?.trim()}</pre>
             </div>
           </div>
         </div>

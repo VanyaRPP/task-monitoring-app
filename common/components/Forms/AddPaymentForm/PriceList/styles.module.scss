@@ -8,8 +8,11 @@
 }
 
 .approvalSection {
+  pre {
+    word-break: break-all;
+    white-space: pre-wrap;
+  }
   width: 45%;
-  text-align: left;
 }
 
 .titleSection {
@@ -28,6 +31,9 @@
 }
 
 .signatureBlock {
+  pre {
+    word-break: break-all;
+    white-space: pre-wrap;
+  }
   width: 45%;
-  text-align: left;
 }

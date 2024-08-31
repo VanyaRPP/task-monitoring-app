@@ -54,7 +54,10 @@ export const getInvoices = ({
   prevService,
   prevPayment,
 }: IGetInvoiceProps): Array<IPaymentField> => {
-  if ((isEmpty(company) || isEmpty(service)) && isEmpty(payment)) {
+  if (
+    (isEmpty(company) || isEmpty(service)) &&
+    (isEmpty(payment) || isEmpty(payment?.invoice))
+  ) {
     return []
   }
 
@@ -181,9 +184,7 @@ export const getPlacingInvoice = ({
     type: ServiceType.Placing,
     amount: +toRoundFixed(company?.totalArea),
     price: +toRoundFixed(company?.pricePerMeter || service?.rentPrice),
-    sum: +toRoundFixed(
-      company?.totalArea * company?.pricePerMeter || service?.rentPrice
-    ),
+    sum: +toRoundFixed(company?.totalArea * (company?.pricePerMeter || service?.rentPrice)),
   }
 }
 
@@ -208,11 +209,18 @@ export const getInflicionInvoice = ({
     }
   }
 
-  if (!isNaN(prevService?.inflicionPrice) && company?.inflicion) {
+  if (company?.inflicion) {
+    if (isEmpty(prevService?.inflicionPrice)) {
+      return {
+        type: ServiceType.Inflicion,
+        price: 0,
+        sum: 0,
+      }
+    }
     const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
     const price =
       (prevPlacing?.sum ||
-        company.totalArea * (company.pricePerMeter || service.rentPrice)) *
+        company.totalArea * (company.pricePerMeter || service.rentPrice || 0)) *
       (Math.max(prevService?.inflicionPrice - 100, 0) / 100)
 
     return {

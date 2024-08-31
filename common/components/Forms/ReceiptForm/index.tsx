@@ -45,7 +45,7 @@ const ReceiptForm: FC<Props> = ({
           <div className={s.providerInfo}>
             <div className={s.label}>Постачальник</div>
             <pre className={s.preLabel}>
-              {newData?.provider?.description} <br />
+              {newData?.provider?.description?.trim()} <br />
               <br />
             </pre>
           </div>
@@ -53,7 +53,7 @@ const ReceiptForm: FC<Props> = ({
           <div className={s.receiverInfo}>
             <div className={s.label}>Одержувач</div>
             <pre className={s.preLabel}>
-              {newData?.reciever?.description} <br />
+              {newData?.reciever?.description?.trim()} <br />
               {newData?.reciever?.companyName} <br />
               {newData?.reciever?.adminEmails?.map((email) => (
                 <div key={email}>
@@ -93,7 +93,9 @@ const ReceiptForm: FC<Props> = ({
             </div>
           </div>
 
-          <div>Призначення платежу: За послуги згідно рахунку</div>
+          <div>
+            Призначення платежу: <strong>За послуги згідно рахунку</strong>
+          </div>
 
           <div className={s.payFixed}>
             {newData?.provider?.description?.split('\n')?.[0] || ''}
