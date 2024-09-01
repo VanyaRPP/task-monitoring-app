@@ -3,6 +3,18 @@ export interface IDomainModel {
   adminEmails: [string]
   streets: string[]
   description: string
+  mfo: string
+  iban: string
+  rnokpp: string
+  IEName: string
+  domainBankToken: IDomainBankToken[]
+}
+
+export interface IDomainBankToken {
+  token: string
+  shortToken: string
+  tokenName: string
+  confidant: string[]
 }
 
 export interface IExtendedDomain extends IDomainModel {
