@@ -6,6 +6,18 @@ export interface IDomain {
   adminEmails: [string]
   streets: [ObjectId]
   description: string
+  mfo: string
+  iban: string
+  rnokpp: string
+  IEName: string
+  domainBankToken: IDomainBankToken[]
+}
+
+export interface IDomainBankToken {
+  token: string
+  shortToken: string
+  tokenName: string
+  confidant: string[]
 }
 
 const DomainSchema = new Schema<IDomain>({
@@ -16,6 +28,11 @@ const DomainSchema = new Schema<IDomain>({
     required: true,
   },
   description: { type: String, required: true },
+  mfo: { type: String, required: true },
+  iban: { type: String, required: true },
+  rnokpp: { type: String, required: true },
+  IEName: { type: String, required: true },
+  domainBankToken: { type: [Object] },
 })
 
 const Domain =
