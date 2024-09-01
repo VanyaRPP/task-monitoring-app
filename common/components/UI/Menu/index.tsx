@@ -4,20 +4,28 @@ import {
   UserOutlined,
 } from '@ant-design/icons'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import useKeyCode from '@modules/hooks/useKeyCode'
 import { AppRoutes, Roles } from '@utils/constants'
 import { Menu as AntdMenu, MenuProps as AntdMenuProps } from 'antd'
 import { useSession } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 export type MenuProps = Omit<AntdMenuProps, 'selectedKeys' | 'mode' | 'items'>
 
 export const Menu: React.FC<MenuProps> = (props) => {
+  const [isDevMode, setIsDevMode] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const { data: session } = useSession()
   const { data: user } = useGetCurrentUserQuery()
+
+  const handleSequenceDetected = () => {
+    setIsDevMode(!isDevMode)
+  }
+
+  useKeyCode('hellodev', handleSequenceDetected, 2000)
 
   const isDomainAdmin = useMemo(() => {
     return user?.roles?.includes(Roles.DOMAIN_ADMIN)
@@ -28,13 +36,6 @@ export const Menu: React.FC<MenuProps> = (props) => {
 
   const items = useMemo<AntdMenuProps['items']>(() => {
     return [
-      {
-        key: 'bank',
-        type: 'submenu',
-        icon: <UserOutlined />,
-        label: 'BAnk',
-        onClick: () => router.push(AppRoutes.BANKTEST),
-      },
       {
         key: 'user_submenu',
         type: 'submenu',
@@ -122,8 +123,17 @@ export const Menu: React.FC<MenuProps> = (props) => {
           },
         ].filter(({ hidden }) => !hidden),
       },
+      {
+        ...(isDevMode && {
+          key: 'bank',
+          type: 'submenu',
+          icon: <UserOutlined />,
+          label: 'BAnk',
+          onClick: () => router.push(AppRoutes.BANKTEST),
+        }),
+      },
     ] as AntdMenuProps['items']
-  }, [router, session, isGlobalAdmin, isDomainAdmin])
+  }, [router, session, isGlobalAdmin, isDomainAdmin, isDevMode])
 
   return (
     <AntdMenu
