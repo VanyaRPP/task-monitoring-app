@@ -1,5 +1,5 @@
-import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
-import { Button } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
+import { Button, Space } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 
@@ -9,10 +9,10 @@ import {
 } from '@common/api/realestateApi/realestate.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import RealEstateModal from '@components/UI/RealEstateComponents/RealEstateModal'
-import CompanyFilterSelector from '@components/UI/Reusable/FilterSelectors/CompanyFilterSelector'
-import DomainFilterSelector from '@components/UI/Reusable/FilterSelectors/DomainFilterSelecter'
-import StreetFilterSelector from '@components/UI/Reusable/FilterSelectors/StreetFilterSelector'
-import FilterTags from '@components/UI/Reusable/FilterTags'
+import {
+  CompanyFilterTags,
+  DomainFilterTags,
+} from '@components/UI/Reusable/FilterTags'
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import s from './style.module.scss'
@@ -66,34 +66,21 @@ const CompaniesHeader: React.FC<Props> = ({
       <div className={s.firstBlock}>
         <Button type="link" onClick={() => router.push(AppRoutes.REAL_ESTATE)}>
           Компанії
-          <SelectOutlined />
         </Button>
 
         {router.pathname === AppRoutes.REAL_ESTATE && isAdmin && (
-          <>
-            <DomainFilterSelector
+          <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
+            <DomainFilterTags
+              collection={realEstates?.domainsFilter}
               filters={filters}
               setFilters={setFilters}
-              domainsFilter={realEstates?.domainsFilter}
             />
-            <StreetFilterSelector
-              style={{ marginLeft: '1rem' }}
+            <CompanyFilterTags
+              collection={realEstates?.realEstatesFilter}
               filters={filters}
               setFilters={setFilters}
-              streetsFilter={realEstates?.streetsFilter}
             />
-            <CompanyFilterSelector
-              style={{ marginLeft: '1rem' }}
-              filters={filters}
-              setFilters={setFilters}
-              companiesFilter={realEstates?.realEstatesFilter}
-            />
-            <FilterTags
-              filters={filters}
-              setFilters={setFilters}
-              collection={realEstates}
-            />
-          </>
+          </Space>
         )}
       </div>
 

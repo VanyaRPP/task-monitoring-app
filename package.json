@@ -15,7 +15,8 @@
     "prettier": "npm run prettier:fix && npm run prettier:check",
     "prettier:check": "prettier --check --ignore-path .gitignore .",
     "prettier:fix": "prettier --write --ignore-path .gitignore .",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "types:check": "tsc --noEmit"
   },
   "engines": {
     "node": ">=18"

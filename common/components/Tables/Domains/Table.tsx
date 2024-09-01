@@ -15,6 +15,7 @@ import {
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import { AppRoutes } from '@utils/constants'
+import { useEffect } from 'react'
 
 export interface Props {
   domainId?: string
@@ -27,12 +28,14 @@ export interface Props {
   domainActions: {
     edit: boolean
   }
+  handleDomainsLength: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 const DomainsTable: React.FC<Props> = ({
   domainId,
   setCurrentDomain,
   setDomainActions,
+  handleDomainsLength,
 }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.DOMAIN
@@ -41,6 +44,12 @@ const DomainsTable: React.FC<Props> = ({
     domainId,
     limit: isOnPage ? 0 : 5,
   })
+
+  useEffect(()=> {
+    if(!isLoading) {
+      handleDomainsLength(data?.length)
+    }
+  }, [data, isLoading])
 
   const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
 

@@ -1,11 +1,15 @@
+import { ReloadOutlined } from '@ant-design/icons'
 import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
-import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
+import {
+  InvoiceComponentProps,
+  InvoiceType,
+} from '@components/Tables/EditInvoiceTable'
 import { ServiceType } from '@utils/constants'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { Button, Flex, Form, Input, Space, Tooltip, Typography } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -13,11 +17,16 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service } = usePaymentContext()
+  const { company, service } = usePaymentContext()
 
   return (
     <Space direction="vertical" size={0}>
       <Typography.Text>Розміщення</Typography.Text>
+      {company?.inflicion && (
+        <Typography.Text type="secondary" style={{ fontSize: '0.9rem' }}>
+          (без врах. інд. інф.)
+        </Typography.Text>
+      )}
       <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
         {toFirstUpperCase(dateToMonthYear(service?.date))}
       </Typography.Text>
@@ -33,27 +42,63 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
 
-  const { service, company, prevService, prevPayment } = usePaymentContext()
+  const { company, prevService, prevPayment } = usePaymentContext()
 
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
+
+  const inflicionInvoice: InvoiceType | undefined = useMemo(() => {
+    return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
+  }, [invoices])
+
+  const prevPlacingInvoice = useMemo(() => {
+    return prevPayment?.invoice.find(
+      (invoice) => invoice.type === ServiceType.Placing
+    )
+  }, [prevPayment])
+
+  const rentPrice = useMemo(() => {
+    return (
+      prevPlacingInvoice?.sum ||
+      company?.totalArea * (company?.pricePerMeter || prevService?.rentPrice)
+    )
+  }, [prevPlacingInvoice, company, prevService])
+
+  const isInitial = useMemo(() => {
+    return (
+      toRoundFixed(price) ===
+      toRoundFixed(Number(rentPrice) + Number(inflicionInvoice?.sum))
+    )
+  }, [price, rentPrice, inflicionInvoice])
 
   if (company?.inflicion && !prevService?.inflicionPrice) {
     return <span>Інфляція за попередній місяць невідома</span>
   }
 
   if (company?.inflicion) {
-    const prevPlacingInvoice = prevPayment?.invoice.find(
-      (invoice) => invoice.type === ServiceType.Placing
-    )
-    const rentPrice =
-      prevPlacingInvoice?.sum ||
-      company.totalArea * (company.pricePerMeter || service.rentPrice)
-
     return (
-      <span>
-        {toRoundFixed(prevService.inflicionPrice)}% від{' '}
-        {toRoundFixed(rentPrice)} грн
-      </span>
+      <Flex justify="space-between" align="center">
+        {(editable || (!editable && isInitial)) && (
+          <Typography.Text delete={!isInitial}>
+            {toRoundFixed(rentPrice)} грн +{' '}
+            {toRoundFixed(inflicionInvoice?.sum)} грн
+          </Typography.Text>
+        )}
+        {!isInitial && editable && (
+          <Tooltip title="Відновити початкове значення">
+            <Button
+              onClick={() =>
+                form.setFieldValue(
+                  ['invoice', ...name, 'price'],
+                  +toRoundFixed(rentPrice + inflicionInvoice?.sum)
+                )
+              }
+              icon={<ReloadOutlined />}
+            />
+          </Tooltip>
+        )}
+      </Flex>
     )
   }
 
@@ -89,9 +134,40 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
 
-  const { company } = usePaymentContext()
+  const [changed, setChanged] = useState<boolean>(false)
+  const { company, prevPayment } = usePaymentContext()
 
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  // const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
+
+  // const inflicionInvoice: InvoiceType | undefined = useMemo(() => {
+  //   return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
+  // }, [invoices])
+
+  // const prevPlacingInvoice = useMemo(() => {
+  //   return prevPayment?.invoice.find(
+  //     (invoice) => invoice.type === ServiceType.Placing
+  //   )
+  // }, [prevPayment])
+
+  // useEffect(() => {
+  //   if (!company?.inflicion || changed || !editable) {
+  //     return
+  //   }
+
+  //   form.setFieldValue(
+  //     ['invoice', ...name, 'price'],
+  //     +toRoundFixed(inflicionInvoice?.sum + prevPlacingInvoice?.sum)
+  //   )
+  // }, [
+  //   form,
+  //   name,
+  //   company,
+  //   inflicionInvoice,
+  //   prevPlacingInvoice,
+  //   changed,
+  //   editable,
+  // ])
 
   const suffix = useMemo(() => {
     return company?.inflicion ? (
@@ -122,6 +198,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
         placeholder="Значення..."
         disabled={disabled}
         suffix={suffix}
+        onChange={() => setChanged(true)}
       />
     </Form.Item>
   )

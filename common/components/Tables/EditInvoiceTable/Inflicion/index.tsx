@@ -1,11 +1,11 @@
-import { QuestionCircleOutlined } from '@ant-design/icons'
+import { ReloadOutlined } from '@ant-design/icons'
 import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { ServiceType } from '@utils/constants'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Tooltip, Typography } from 'antd'
+import { Button, Flex, Form, Input, Space, Tooltip, Typography } from 'antd'
 import { useEffect, useMemo } from 'react'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
@@ -14,23 +14,20 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service, prevService } = usePaymentContext()
+  const name = useMemo(() => toArray<string>(_name), [_name])
+
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+
+  const { prevService } = usePaymentContext()
 
   return (
     <Space direction="vertical" size={0}>
-      <Tooltip
-        title={
-          prevService?.inflicionPrice &&
-          `У попередньому місяці становила ${prevService?.inflicionPrice}%`
-        }
-        placement="topLeft"
-      >
-        <Typography.Text>
-          Інфляція {!!prevService?.inflicionPrice && <QuestionCircleOutlined />}
-        </Typography.Text>
-      </Tooltip>
+      <Typography.Text>Інфляція</Typography.Text>
+      <Typography.Text type="secondary" style={{ fontSize: '0.9rem' }}>
+        {price > 0 ? '(донарах. інд. інф.)' : '(незмінна)'}
+      </Typography.Text>
       <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-        {toFirstUpperCase(dateToMonthYear(service?.date))}
+        {toFirstUpperCase(dateToMonthYear(prevService?.date))}
       </Typography.Text>
     </Space>
   )
@@ -42,21 +39,55 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service, company, prevService, prevPayment } = usePaymentContext()
+  const name = useMemo(() => toArray<string>(_name), [_name])
 
-  if (company?.inflicion && prevService?.inflicionPrice) {
-    const prevPlacingInvoice = prevPayment?.invoice.find(
+  const { company, prevService, prevPayment } = usePaymentContext()
+
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+
+  const prevPlacingInvoice = useMemo(() => {
+    return prevPayment?.invoice.find(
       (invoice) => invoice.type === ServiceType.Placing
     )
-    const rentPrice =
-      prevPlacingInvoice?.sum ||
-      company.totalArea * (company.pricePerMeter || prevService.rentPrice)
+  }, [prevPayment])
 
+  const rentPrice = useMemo(() => {
     return (
-      <span>
-        {toRoundFixed(Math.max(prevService.inflicionPrice - 100, 0))}% від{' '}
-        {toRoundFixed(rentPrice)} грн
-      </span>
+      prevPlacingInvoice?.sum ||
+      company?.totalArea * (company?.pricePerMeter || prevService?.rentPrice)
+    )
+  }, [prevPlacingInvoice, company, prevService])
+
+  const inflicion = useMemo(() => {
+    return Math.max(prevService?.inflicionPrice - 100, 0)
+  }, [prevService])
+
+  const isInitial = useMemo(() => {
+    return toRoundFixed(price) === toRoundFixed((rentPrice / 100) * inflicion)
+  }, [price, rentPrice, inflicion])
+
+  if (company?.inflicion && prevService?.inflicionPrice) {
+    return (
+      <Flex justify="space-between" align="center">
+        {(editable || (!editable && isInitial)) && (
+          <Typography.Text delete={!isInitial}>
+            {toRoundFixed(inflicion)}% від {toRoundFixed(rentPrice)} грн
+          </Typography.Text>
+        )}
+        {!isInitial && editable && (
+          <Tooltip title="Відновити початкове значення">
+            <Button
+              onClick={() =>
+                form.setFieldValue(
+                  ['invoice', ...name, 'price'],
+                  +toRoundFixed((rentPrice / 100) * inflicion)
+                )
+              }
+              icon={<ReloadOutlined />}
+            />
+          </Tooltip>
+        )}
+      </Flex>
     )
   }
 

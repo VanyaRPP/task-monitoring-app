@@ -1,6 +1,7 @@
 import { dateToDayYearMonthFormat } from '@assets/features/formatDate'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import { ServiceType, paymentsTitle } from '@utils/constants'
+import { ServiceName, ServiceType } from '@utils/constants'
+import { toRoundFixed } from '@utils/helpers'
 
 export const getPaymentsChartData = (data: IExtendedPayment[]) => {
   const preparedData = data
@@ -9,7 +10,9 @@ export const getPaymentsChartData = (data: IExtendedPayment[]) => {
           (payment?.monthService as any)?.date || payment?.invoiceCreationDate
 
         const mappedValues = payment?.invoice
-          .filter((item) => filterValues.includes(item.type as ServiceType))
+          .filter((item) =>
+            Object.values(ServiceType).includes(item.type as ServiceType)
+          )
           .map((item) => {
             const itemType =
               item.type === ServiceType.Water
@@ -17,8 +20,8 @@ export const getPaymentsChartData = (data: IExtendedPayment[]) => {
                 : item.type
             return {
               date: dateToDayYearMonthFormat(date),
-              value: +item.sum,
-              category: paymentsTitle[itemType],
+              value: +toRoundFixed(item.sum),
+              category: ServiceName[itemType],
             }
           })
         return [...mappedValues]
@@ -32,25 +35,4 @@ const compareDates = (a: any, b: any) => {
   const dateB = new Date(b.date.split('-').reverse().join('-'))
 
   return dateA.getTime() - dateB.getTime()
-}
-
-const filterValues = [
-  ServiceType.Placing,
-  ServiceType.Inflicion,
-  ServiceType.Electricity,
-  ServiceType.GarbageCollector,
-  ServiceType.Water,
-  ServiceType.WaterPart,
-  ServiceType.Maintenance,
-]
-
-export const chartConfig = {
-  xField: 'date',
-  yField: 'value',
-  seriesField: 'category',
-  legend: { size: true },
-  colorField: 'category',
-  xAxis: {
-    type: 'time',
-  },
 }

@@ -7,6 +7,7 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import useKeyCode from '@modules/hooks/useKeyCode'
 import { AppRoutes, Roles } from '@utils/constants'
 import { Menu as AntdMenu, MenuProps as AntdMenuProps } from 'antd'
+import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
@@ -37,6 +38,64 @@ export const Menu: React.FC<MenuProps> = (props) => {
   const items = useMemo<AntdMenuProps['items']>(() => {
     return [
       {
+        key: 'payments_submenu',
+        type: 'submenu',
+        label: 'Платежі',
+        icon: <DollarOutlined />,
+        children: [
+          {
+            key: AppRoutes.PAYMENT,
+            type: 'item',
+            label: <Link href={AppRoutes.PAYMENT}>{isGlobalAdmin || isDomainAdmin ? 'Платежі' : 'Мої платежі'}</Link>,
+          },
+          {
+            key: AppRoutes.PAYMENT_BULK,
+            type: 'item',
+            label: <Link href={AppRoutes.PAYMENT_BULK}>Створення рахунків</Link>,
+            hidden: !isGlobalAdmin && !isDomainAdmin,
+          },
+          {
+            key: AppRoutes.PAYMENT_CHART,
+            type: 'item',
+            label: <Link href={AppRoutes.PAYMENT_CHART}>Графік платежів</Link>,
+          },
+        ].filter(({ hidden }) => !hidden),
+      },
+      {
+        key: 'dashboard_submenu',
+        type: 'submenu',
+        label: 'Панель управління',
+        icon: <LineChartOutlined />,
+        children: [
+          {
+            key: AppRoutes.INDEX,
+            type: 'item',
+            label: <Link href={AppRoutes.INDEX}>Всі таблиці</Link>,
+          },
+          {
+            key: AppRoutes.STREETS,
+            type: 'item',
+            label: <Link href={AppRoutes.STREETS}>Вулиці</Link>,
+            hidden: !isGlobalAdmin,
+          },
+          {
+            key: AppRoutes.DOMAIN,
+            type: 'item',
+            label: <Link href={AppRoutes.DOMAIN}>Надавачі послуг</Link>,
+          },
+          {
+            key: AppRoutes.REAL_ESTATE,
+            type: 'item',
+            label: <Link href={AppRoutes.REAL_ESTATE}>Компанії</Link>,
+          },
+          {
+            key: AppRoutes.SERVICE,
+            type: 'item',
+            label: <Link href={AppRoutes.SERVICE}>Послуги</Link>,
+          },
+        ].filter(({ hidden }) => !hidden),
+      },
+      {
         key: 'user_submenu',
         type: 'submenu',
         label: session?.user?.name || 'Мої',
@@ -52,76 +111,9 @@ export const Menu: React.FC<MenuProps> = (props) => {
           {
             key: AppRoutes.PROFILE,
             type: 'item',
-            label: 'Профіль',
-            onClick: () => router.push(AppRoutes.PROFILE),
+            label: <Link href={AppRoutes.PROFILE}>Профіль</Link>,
           },
         ],
-      },
-      {
-        key: 'dashboard_submenu',
-        type: 'submenu',
-        label: 'Панель управління',
-        icon: <LineChartOutlined />,
-        children: [
-          {
-            key: AppRoutes.INDEX,
-            type: 'item',
-            label: 'Головна',
-            onClick: () => router.push(AppRoutes.INDEX),
-          },
-          {
-            key: AppRoutes.STREETS,
-            type: 'item',
-            label: 'Вулиці',
-            onClick: () => router.push(AppRoutes.STREETS),
-            hidden: !isGlobalAdmin,
-          },
-          {
-            key: AppRoutes.DOMAIN,
-            type: 'item',
-            label: 'Надавачі послуг',
-            onClick: () => router.push(AppRoutes.DOMAIN),
-          },
-          {
-            key: AppRoutes.REAL_ESTATE,
-            type: 'item',
-            label: 'Компанії',
-            onClick: () => router.push(AppRoutes.REAL_ESTATE),
-          },
-          {
-            key: AppRoutes.SERVICE,
-            type: 'item',
-            label: 'Послуги',
-            onClick: () => router.push(AppRoutes.SERVICE),
-          },
-        ].filter(({ hidden }) => !hidden),
-      },
-      {
-        key: 'payments_submenu',
-        type: 'submenu',
-        label: 'Платежі',
-        icon: <DollarOutlined />,
-        children: [
-          {
-            key: AppRoutes.PAYMENT,
-            type: 'item',
-            label: isGlobalAdmin || isDomainAdmin ? 'Платежі' : 'Мої платежі',
-            onClick: () => router.push(AppRoutes.PAYMENT),
-          },
-          {
-            key: AppRoutes.PAYMENT_BULK,
-            type: 'item',
-            label: 'Bulk',
-            onClick: () => router.push(AppRoutes.PAYMENT_BULK),
-            hidden: !isGlobalAdmin,
-          },
-          {
-            key: AppRoutes.PAYMENT_CHART,
-            type: 'item',
-            label: 'Графік платежів',
-            onClick: () => router.push(AppRoutes.PAYMENT_CHART),
-          },
-        ].filter(({ hidden }) => !hidden),
       },
       {
         ...(isDevMode && {
