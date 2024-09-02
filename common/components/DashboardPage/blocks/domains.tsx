@@ -13,7 +13,7 @@ const DomainsBlock: React.FC<Props> = ({ domainId }) => {
   const [domainActions, setDomainActions] = useState({
     edit: false,
   })
-  const [dataLength, handleDomainsLength] = useState(0)
+  const [domainsLength, setDomainsLength] = useState(0)
 
   return (
     <TableCard
@@ -26,7 +26,8 @@ const DomainsBlock: React.FC<Props> = ({ domainId }) => {
         />
       }
       style={{
-        maxHeight: dataLength * 145,
+        maxHeight: domainsLength * 145,
+        flexWrap: 'wrap',
       }}
     >
       <DomainsTable
@@ -34,7 +35,7 @@ const DomainsBlock: React.FC<Props> = ({ domainId }) => {
         setCurrentDomain={setCurrentDomain}
         setDomainActions={setDomainActions}
         domainActions={domainActions}
-        handleDomainsLength={handleDomainsLength}
+        setDomainsLength={setDomainsLength}
       />
     </TableCard>
   )
