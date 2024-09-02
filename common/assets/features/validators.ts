@@ -1,4 +1,5 @@
 import { FormRule as Rule } from 'antd'
+import IBAN from 'iban'
 
 //Normalizers
 export const allowOnlyNumbers = (value: string): string =>
@@ -104,6 +105,15 @@ export const validateField = (name: string): Rule[] => {
     },
   }
 
+  const ibanRule: Rule = {
+    validator(_, value) {
+      if (!value || IBAN.isValid(value)) {
+        return Promise.resolve()
+      }
+      return Promise.reject(new Error('Введіть правильний IBAN номер!'))
+    },
+  }
+
   switch (name) {
     case 'name':
       return [required]
@@ -149,6 +159,9 @@ export const validateField = (name: string): Rule[] => {
 
     case 'rentPrice':
       return [required, rentPrice]
+
+    case 'IBAN':
+      return [required, ibanRule]
 
     case 'required':
       return [required]

@@ -36,6 +36,7 @@ export const domainApi = createApi({
     addDomain: builder.mutation<IAddDomainResponse, IDomainModel>({
       query(data) {
         const { ...body } = data
+
         return {
           url: 'domain',
           method: 'POST',
