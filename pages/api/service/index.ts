@@ -139,18 +139,16 @@ export default async function handler(
               'city',
               '_id',
             ]),
-            Service.distinct('date', options).then(
-              (dates) => [
-                ...new Set(dates.map((date) => new Date(date).getFullYear())),
-              ]
-            ),
+            Service.distinct('date', options).then((dates) => [
+              ...new Set(dates.map((date) => new Date(date).getFullYear())),
+            ]),
             Service.aggregate([
               { $match: options },
               { $group: { _id: { month: { $month: '$date' } } } },
               { $sort: { '_id.month': 1 } },
             ]).then((results) => [
               ...new Set(results.map((result) => result._id.month)),
-            ])
+            ]),
           ])
 
         const monthFilter = () => {

@@ -23,15 +23,12 @@ export const disabledDate: DatePickerProps['disabledDate'] = (current) => {
 export const dateToDayYearMonthFormat = (date: Date): string =>
   dayjs(date).format('DD-MM-YYYY')
 
-
-
 export const dateToMonthYear = (date: Date): string =>
   dayjs(date).format('MMMM YYYY')
 
 export const dateToMonth = (date: Date): string => dayjs(date).format('MMMM')
 
-  export const dateToYear = (date: Date): string =>
-  dayjs(date).format('YYYY')
+export const dateToYear = (date: Date): string => dayjs(date).format('YYYY')
 
 export const getPreviousMonth = (date?: string) => {
   const currentInvoiceDate = dayjs(date).subtract(1, 'month')

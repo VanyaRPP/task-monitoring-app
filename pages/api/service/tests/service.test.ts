@@ -410,9 +410,11 @@ describe('Service API - GET', () => {
     const received = unpopulate(
       removeProps(response.data.map((service) => service._doc))
     )
-    const expected = services.filter(service => {
-      return service.date.getFullYear() === 2020
-    }).slice(0, limit);
+    const expected = services
+      .filter((service) => {
+        return service.date.getFullYear() === 2020
+      })
+      .slice(0, limit)
 
     expect(received).toEqual(expected)
   })
@@ -424,7 +426,7 @@ describe('Service API - GET', () => {
 
     const mockReq = {
       method: 'GET',
-      query: {limit, year},
+      query: { limit, year },
     } as any
     const mockRes = {
       status: jest.fn(() => mockRes),
@@ -443,11 +445,12 @@ describe('Service API - GET', () => {
     const received = unpopulate(
       removeProps(response.data.map((service) => service._doc))
     )
-    const expected = services.filter((service) =>
-      domains
-        .find((domain) => domain._id === service.domain)
-        .adminEmails.includes(users.domainAdmin.email) &&
-      new Date(service.date).getFullYear() === 2020
+    const expected = services.filter(
+      (service) =>
+        domains
+          .find((domain) => domain._id === service.domain)
+          .adminEmails.includes(users.domainAdmin.email) &&
+        new Date(service.date).getFullYear() === 2020
     )
 
     expect(received).toEqual(expected)
@@ -461,7 +464,7 @@ describe('Service API - GET', () => {
 
     const mockReq = {
       method: 'GET',
-      query: {year, limit},
+      query: { year, limit },
     } as any
     const mockRes = {
       status: jest.fn(() => mockRes),
@@ -479,9 +482,11 @@ describe('Service API - GET', () => {
     const received = unpopulate(
       removeProps(response.data.map((service) => service._doc))
     )
-    const expected = services.filter(service => {
-      return service.date.getFullYear() === 2020
-    }).slice(0, limit);
+    const expected = services
+      .filter((service) => {
+        return service.date.getFullYear() === 2020
+      })
+      .slice(0, limit)
 
     expect(received).toEqual(expected)
   })
@@ -512,9 +517,12 @@ describe('Service API - GET', () => {
     const received = unpopulate(
       removeProps(response.data.map((service) => service._doc))
     )
-    const expected = services.filter(service => {
-      return service.date.getFullYear() === 2019 || service.date.getFullYear() === 2020
-    });
+    const expected = services.filter((service) => {
+      return (
+        service.date.getFullYear() === 2019 ||
+        service.date.getFullYear() === 2020
+      )
+    })
 
     expect(received).toEqual(expected)
   })

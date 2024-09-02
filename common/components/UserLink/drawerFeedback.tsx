@@ -6,9 +6,7 @@ import { Avatar, Image } from 'antd'
 import s from './style.module.scss'
 
 const DrawerFeedback: React.FC<{ feedback: IFeedback }> = ({ feedback }) => {
-  const { data } = useGetUserByIdQuery(feedback.id)
-  const user = data?.data
-
+  const { data: user } = useGetUserByIdQuery(feedback.id)
   return (
     <>
       <div className={s.UserInfo}>
