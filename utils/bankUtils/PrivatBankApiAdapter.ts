@@ -108,7 +108,7 @@ class PrivatBankApiAdapter {
     )
   }
 
-  async getFinalTransactions(acc?: string, followId?: string, limit = 20) {
+  async getFinalTransactions(limit = 20, followId?: string, acc?: string) {
     const searchParams = new URLSearchParams({
       limit: limit.toString(),
     })
@@ -124,9 +124,8 @@ class PrivatBankApiAdapter {
     )
   }
 
-  async getFinalBalances(acc: string, followId?: string, limit = 20) {
+  async getFinalBalances(limit = 20, followId?: string, acc?: string) {
     const searchParams = new URLSearchParams({
-      acc,
       limit: limit.toString(),
     })
 

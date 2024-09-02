@@ -9,27 +9,29 @@ import { useEffect, useState } from 'react'
 const BankTransactions = () => {
   const [token, setToken] = useState<string>('')
 
-  const httpClient = new FetchHttpClient({
-    baseURL: 'https://acp.privatbank.ua/api',
-  })
-
-  async function fetchAndLogTransactionsForDateInterval() {
-    const apiPrivatAdapter = new PrivatBankApiAdapter(httpClient, {
-      token: token,
-      userAgent: window.navigator.userAgent,
-    })
+  const fetchBankApiDate = async () => {
     try {
-      await apiPrivatAdapter.getBankDates()
-      const transactions = await apiPrivatAdapter.getFinalTransactions()
-      console.log('!!!!!Fetched transactions for date interval:', transactions)
+      const response = await fetch('http://localhost:3000/api/bankapi/date')
+
+      // Check if the response is successful
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+
+      // Parse the response as JSON
+      const data = await response.json()
+
+      console.log('Response data:', data)
+      return data
     } catch (error) {
-      console.error('!!!!Error fetching transactions:', error)
+      console.error('Error fetching data:', error)
+      return null // Return null or handle the error as needed
     }
   }
 
   const handleClick = () => {
     if (!token) return console.log('No token')
-    fetchAndLogTransactionsForDateInterval()
+    fetchBankApiDate()
   }
 
   return (
