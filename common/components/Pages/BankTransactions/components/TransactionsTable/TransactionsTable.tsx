@@ -1,13 +1,22 @@
-import React from 'react'
-import { Table, Input, Button, Popover, DatePicker } from 'antd'
+import React, { useState } from 'react'
+import {
+  Table,
+  Input,
+  Button,
+  Popover,
+  DatePicker,
+  Dropdown,
+  Checkbox,
+  MenuProps,
+} from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   InfoCircleOutlined,
   LoadingOutlined,
   SearchOutlined,
+  SettingOutlined,
   StopOutlined,
 } from '@ant-design/icons'
 
@@ -49,6 +58,41 @@ export interface ITransaction {
 const TransactionsTable: React.FC<{ transactions: ITransaction[] }> = ({
   transactions,
 }) => {
+  const columnNames = [
+    'AUT_MY_CRF',
+    'AUT_MY_MFO',
+    'AUT_MY_ACC',
+    'AUT_MY_NAM',
+    'AUT_MY_MFO_NAME',
+    'AUT_MY_MFO_CITY',
+    'AUT_CNTR_CRF',
+    'AUT_CNTR_MFO',
+    'AUT_CNTR_ACC',
+    'AUT_CNTR_NAM',
+    'AUT_CNTR_MFO_NAME',
+    'AUT_CNTR_MFO_CITY',
+    'CCY',
+    'FL_REAL',
+    'PR_PR',
+    'DOC_TYP',
+    'NUM_DOC',
+    'DAT_KL',
+    'DAT_OD',
+    'OSND',
+    'SUM',
+    'SUM_E',
+    'REF',
+    'REFN',
+    'TIM_P',
+    'DATE_TIME_DAT_OD_TIM_P',
+    'ID',
+    'TRANTYPE',
+    'DLR',
+    'TECHNICAL_TRANSACTION_ID',
+  ]
+
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(columnNames)
+
   const getColumnSearchProps = (dataIndex: keyof ITransaction) => ({
     filterDropdown: ({
       setSelectedKeys,
@@ -174,6 +218,26 @@ const TransactionsTable: React.FC<{ transactions: ITransaction[] }> = ({
     }
   }
 
+  const handleColumnVisibilityChange = (e: any) => {
+    const { value, checked } = e.target
+    setVisibleColumns((prev) =>
+      checked ? [...prev, value] : prev.filter((col) => col !== value)
+    )
+  }
+
+  const items: MenuProps['items'] = columnNames.map((col, index) => ({
+    key: index.toString(),
+    label: (
+      <Checkbox
+        value={col}
+        checked={visibleColumns.includes(col)}
+        onChange={handleColumnVisibilityChange}
+      >
+        {col}
+      </Checkbox>
+    ),
+  }))
+
   const columns: ColumnsType<ITransaction> = [
     { title: 'My CRF', dataIndex: 'AUT_MY_CRF', key: 'AUT_MY_CRF' },
     { title: 'My MFO', dataIndex: 'AUT_MY_MFO', key: 'AUT_MY_MFO' },
@@ -273,15 +337,26 @@ const TransactionsTable: React.FC<{ transactions: ITransaction[] }> = ({
       dataIndex: 'TECHNICAL_TRANSACTION_ID',
       key: 'TECHNICAL_TRANSACTION_ID',
     },
-  ]
+  ].filter((column) => visibleColumns.includes(column.key))
 
   return (
-    <Table<ITransaction>
-      scroll={{ x: true }}
-      dataSource={transactions}
-      columns={columns}
-      rowKey="ID"
-    />
+    <div>
+      <Dropdown
+        overlayStyle={{ overflow: 'scroll', maxHeight: '300px' }}
+        menu={{
+          items,
+        }}
+        trigger={['click']}
+      >
+        <SettingOutlined />
+      </Dropdown>
+      <Table<ITransaction>
+        scroll={{ x: true }}
+        dataSource={transactions}
+        columns={columns}
+        rowKey="ID"
+      />
+    </div>
   )
 }
 
