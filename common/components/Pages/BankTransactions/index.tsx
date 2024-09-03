@@ -1,52 +1,39 @@
 /* eslint-disable no-console */
 'use client'
 
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import PrivatBankApiAdapter from '@utils/bankUtils/PrivatBankApiAdapter'
 import FetchHttpClient from '@utils/FetchHttpClient/FetchHttpClient'
-import { Button, Input } from 'antd'
-import { useEffect, useState } from 'react'
+import { Card, Tabs, TabsProps } from 'antd'
+
+import StickyBox from 'react-sticky-box'
+import DomainBankTab from './components/DomainBankTab/DomainBankTab'
 
 const BankTransactions = () => {
-  const [token, setToken] = useState<string>('')
+  const {
+    data: domains = [],
+    isLoading: isDomainsLoading,
+    isError: isDomainsError,
+  } = useGetDomainsQuery({})
 
-  const fetchBankApiDate = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/api/bankapi/date')
-
-      // Check if the response is successful
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-      }
-
-      // Parse the response as JSON
-      const data = await response.json()
-
-      console.log('Response data:', data)
-      return data
-    } catch (error) {
-      console.error('Error fetching data:', error)
-      return null // Return null or handle the error as needed
+  const items = domains.map((_, i) => {
+    return {
+      label: _.name,
+      key: _._id,
+      children: <DomainBankTab domain={_} />,
     }
-  }
+  })
 
-  const handleClick = () => {
-    if (!token) return console.log('No token')
-    fetchBankApiDate()
-  }
+  const renderTabBar: TabsProps['renderTabBar'] = (props, DefaultTabBar) => (
+    <StickyBox style={{ zIndex: 1 }}>
+      <DefaultTabBar {...props} />
+    </StickyBox>
+  )
 
   return (
-    <div>
-      <Input
-        size="large"
-        placeholder="token"
-        onChange={(e) => setToken(e.target.value)}
-      />
-      <Button size="large" type="primary" onClick={handleClick}>
-        GO!
-      </Button>
-      <br />
-      <p>Hui Transactions</p>
-    </div>
+    <Card>
+      <Tabs defaultActiveKey="1" renderTabBar={renderTabBar} items={items} />
+    </Card>
   )
 }
 

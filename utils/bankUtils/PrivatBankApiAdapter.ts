@@ -20,7 +20,7 @@ class PrivatBankApiAdapter {
     return {
       'User-Agent': this.userAgent,
       token: this.token,
-      'Content-Type': 'application/json',
+      'Content-type': 'application/json;charset=utf-8',
     }
   }
 
