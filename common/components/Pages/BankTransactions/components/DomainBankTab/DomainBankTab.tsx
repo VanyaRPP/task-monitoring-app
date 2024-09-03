@@ -54,6 +54,31 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
     }
   }
 
+  const fetchBankApiDateDate = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/bankapi/date', {
+        headers: {
+          token: token,
+          'Content-type': 'application/json;charset=utf-8',
+        },
+      })
+
+      // Check if the response is successful
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+
+      // Parse the response as JSON
+      const data = await response.json()
+
+      console.log('Response data:', data)
+      return data
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      return null // Return null or handle the error as needed
+    }
+  }
+
   const handleClick = () => {
     if (!token) return console.log('No token')
     fetchBankApiDate().then((res) => {
@@ -99,6 +124,7 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
       {viewTokens(domain.domainBankToken)}
 
       <Button onClick={handleClick}>DO</Button>
+      <Button onClick={() => fetchBankApiDateDate()}>date</Button>
 
       <br />
       <TransactionsTable transactions={tr} />

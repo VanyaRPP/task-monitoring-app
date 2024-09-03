@@ -16,3 +16,33 @@ export async function getFinalTransactions(token: string, limit?: number) {
     throw new Error(`Error in fetch ${error}`)
   }
 }
+export async function getInterimTransactions(token: string, limit?: number) {
+  const apiPrivatAdapter = new PrivatBankApiAdapter(httpClient, {
+    token: token,
+  })
+  try {
+    const finalTransactions = await apiPrivatAdapter.getInterimTransactions(
+      limit
+    )
+    return finalTransactions
+  } catch (error) {
+    throw new Error(`Error in fetch ${error}`)
+  }
+}
+export async function getTransactionsForDateInterval(
+  token: string,
+  limit?: number
+) {
+  const apiPrivatAdapter = new PrivatBankApiAdapter(httpClient, {
+    token: token,
+  })
+  try {
+    const transactions = await apiPrivatAdapter.getTransactionsForDateInterval(
+      '31-1-2022',
+      limit
+    )
+    return transactions
+  } catch (error) {
+    throw new Error(`Error in fetch ${error}`)
+  }
+}

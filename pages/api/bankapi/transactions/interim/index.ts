@@ -2,7 +2,7 @@
 // @ts-nocheck
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from '@pages/api/api.config'
-import { getTransactionsForDateInterval } from './utils/getTransactions/index'
+import { getInterimTransactions } from '../utils/getTransactions/index'
 
 start()
 
@@ -22,7 +22,7 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        getTransactionsForDateInterval(tokenHeader ?? tokenQuery)
+        getInterimTransactions(tokenHeader ?? tokenQuery)
           .then((rez) => {
             return res.status(200).json({ success: true, data: rez })
           })
