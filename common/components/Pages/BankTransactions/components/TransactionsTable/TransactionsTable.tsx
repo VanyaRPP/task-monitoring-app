@@ -1,6 +1,7 @@
 import React from 'react'
-import { Table, Input, Button, Popover } from 'antd'
+import { Table, Input, Button, Popover, DatePicker } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
+
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -9,6 +10,8 @@ import {
   SearchOutlined,
   StopOutlined,
 } from '@ant-design/icons'
+
+const { RangePicker } = DatePicker
 
 export interface ITransaction {
   AUT_MY_CRF: string
@@ -88,6 +91,57 @@ const TransactionsTable: React.FC<{ transactions: ITransaction[] }> = ({
     ),
     onFilter: (value: string, record: ITransaction) =>
       record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+  })
+
+  const getDateColumnProps = (dataIndex: keyof ITransaction) => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+    }: any) => (
+      <div style={{ padding: 8 }}>
+        <RangePicker
+          onChange={(dates) => {
+            if (dates) {
+              const formattedDates = dates.map((date) =>
+                date.format('YYYY-MM-DD')
+              )
+              setSelectedKeys(formattedDates)
+            } else {
+              setSelectedKeys([])
+            }
+          }}
+          style={{ marginBottom: 8, display: 'block' }}
+        />
+        <Button
+          type="primary"
+          onClick={() => confirm()}
+          size="small"
+          style={{ width: 90, marginRight: 8 }}
+        >
+          Search
+        </Button>
+        <Button
+          onClick={() => clearFilters()}
+          size="small"
+          style={{ width: 90 }}
+        >
+          Reset
+        </Button>
+      </div>
+    ),
+    onFilter: (value: string, record: ITransaction) => {
+      if (!value) return true
+      const [startDate, endDate] = (value as string).split(',')
+      const recordDate = new Date(record[dataIndex])
+      return (
+        (!startDate || recordDate >= new Date(startDate)) &&
+        (!endDate || recordDate <= new Date(endDate))
+      )
+    },
+    sorter: (a: ITransaction, b: ITransaction) =>
+      new Date(a[dataIndex]).getTime() - new Date(b[dataIndex]).getTime(),
   })
 
   const getPrPrIcon = (prPr: string) => {
@@ -187,9 +241,19 @@ const TransactionsTable: React.FC<{ transactions: ITransaction[] }> = ({
     },
     { title: 'Document Type', dataIndex: 'DOC_TYP', key: 'DOC_TYP' },
     { title: 'Document Number', dataIndex: 'NUM_DOC', key: 'NUM_DOC' },
-    { title: 'Client Date', dataIndex: 'DAT_KL', key: 'DAT_KL' },
-    { title: 'Transaction Date', dataIndex: 'DAT_OD', key: 'DAT_OD' },
-    { title: 'Description', dataIndex: 'OSND', key: 'OSND' },
+    {
+      title: 'Client Date',
+      dataIndex: 'DAT_KL',
+      key: 'DAT_KL',
+      ...getDateColumnProps('DAT_KL'),
+    },
+    {
+      title: 'Transaction Date',
+      dataIndex: 'DAT_OD',
+      key: 'DAT_OD',
+      ...getDateColumnProps('DAT_OD'),
+    },
+    { title: 'Description', dataIndex: 'OSND', key: 'OSND', width: 300 },
     { title: 'Amount', dataIndex: 'SUM', key: 'SUM' },
     { title: 'Amount E', dataIndex: 'SUM_E', key: 'SUM_E' },
     { title: 'Reference', dataIndex: 'REF', key: 'REF' },
@@ -199,6 +263,7 @@ const TransactionsTable: React.FC<{ transactions: ITransaction[] }> = ({
       title: 'Date Time',
       dataIndex: 'DATE_TIME_DAT_OD_TIM_P',
       key: 'DATE_TIME_DAT_OD_TIM_P',
+      ...getDateColumnProps('DATE_TIME_DAT_OD_TIM_P'),
     },
     { title: 'ID', dataIndex: 'ID', key: 'ID' },
     { title: 'Transaction Type', dataIndex: 'TRANTYPE', key: 'TRANTYPE' },
