@@ -28,14 +28,14 @@ export interface Props {
   domainActions: {
     edit: boolean
   }
-  handleDomainsLength: React.Dispatch<React.SetStateAction<number | null>>;
+  setDomainsLength: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 const DomainsTable: React.FC<Props> = ({
   domainId,
   setCurrentDomain,
   setDomainActions,
-  handleDomainsLength,
+  setDomainsLength,
 }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.DOMAIN
@@ -47,7 +47,7 @@ const DomainsTable: React.FC<Props> = ({
 
   useEffect(()=> {
     if(!isLoading) {
-      handleDomainsLength(data?.length)
+      setDomainsLength(data?.length)
     }
   }, [data, isLoading])
 
