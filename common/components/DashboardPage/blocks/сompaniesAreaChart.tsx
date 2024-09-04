@@ -9,11 +9,11 @@ import TableCard from '@components/UI/TableCard'
 import React, { useEffect, useMemo, useState } from 'react'
 
 const CompaniesAreaChart: React.FC = () => {
-  const chartElementTitle = 'Частка площі'
 
   const { data: domains } = useGetDomainsQuery({})
   const [domainId, setDomainId] = useState<string>()
   const { data } = useGetAllRealEstateQuery({})
+  const [domainName, setDomainName] = useState('')
 
   useEffect(() => {
     if (data?.domainsFilter?.length) {
@@ -37,14 +37,24 @@ const CompaniesAreaChart: React.FC = () => {
       (acc, { rentPart }) => (acc += rentPart),
       0
     )
+
+    const totalArea = areas?.companies?.reduce(
+      (acc, { totalArea }) => (acc += totalArea),
+      0
+    )
+
     const domainName = data?.domainsFilter?.find(
       ({ value }) => value === domainId
     )?.text
+    setDomainName(domainName)
 
     const newDataSource =
       areas?.companies?.map((i) => ({
         label: i.companyName,
-        value: i.rentPart,
+        value: {
+          part: i.rentPart,
+          area: i.totalArea,
+        },
       })) ?? []
 
     if (totalPart > 100) {
@@ -52,7 +62,12 @@ const CompaniesAreaChart: React.FC = () => {
     } else {
       return [
         ...newDataSource,
-        { value: 100 - totalPart, label: domainName, color: '#cecece' },
+        { value: {
+          part: 100 - totalPart,
+          area: totalArea,
+        },
+        label: domainName, 
+        color: '#cecece' },
       ]
     }
   }, [data, areas, domainId])
@@ -65,7 +80,7 @@ const CompaniesAreaChart: React.FC = () => {
       <Chart
         dataSources={dataSource}
         chartTitle={undefined}
-        chartElementTitle={chartElementTitle}
+        domainName={domainName}
       />
     </TableCard>
   )
