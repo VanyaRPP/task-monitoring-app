@@ -37,7 +37,7 @@ const ChartComponent: React.FC<{
               (item, index) =>
                 item.color || generateColorsArray(dataSources?.length)[index]
             ),
-            borderColor: token.colorBgContainer !== '#ffffff' ? '#141414' : '#ffffff',
+            borderColor: token.colorBgContainer,
             borderWidth: 2,
           },
         ],
@@ -78,10 +78,10 @@ const ChartComponent: React.FC<{
 
   return (
     <div className={s.chartContainer}>
-      {dataSources?.every((item) => item?.value?.part === 0) ? (
-        'Усі займані площі домену дорівнюють нулю'
-      ) : (
+      {dataSources?.find((item) => item?.value?.part !== 0) ? (
         <canvas ref={chartRef} className={s.chart} />
+      ) : (
+        'Усі займані площі домену дорівнюють нулю'
       )}
     </div>
   )
