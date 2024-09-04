@@ -13,6 +13,15 @@ import {
 
 const { RangePicker } = DatePicker
 
+export interface ITransactionRes {
+  data: {
+    exist_next_page: boolean
+    next_page_id: string
+    status: string
+    transactions: ITransaction[]
+  }
+}
+
 export interface ITransaction {
   AUT_MY_CRF: string
   AUT_MY_MFO: string

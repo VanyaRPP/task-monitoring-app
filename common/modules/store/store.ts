@@ -8,6 +8,7 @@ import { serviceApi } from '@common/api/serviceApi/service.api'
 import { streetApi } from '@common/api/streetApi/street.api'
 import { taskApi } from '@common/api/taskApi/task.api'
 import { userApi } from '@common/api/userApi/user.api'
+import { bankApi } from '@common/api/bankApi/bank.api'
 import sidebarReducer from '@modules/store/sidebarSlice'
 import themeReducer from '@modules/store/themeSlice'
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
@@ -24,6 +25,7 @@ export const store = configureStore({
     [notificationApi.reducerPath]: notificationApi.reducer,
     [realestateApi.reducerPath]: realestateApi.reducer,
     [streetApi.reducerPath]: streetApi.reducer,
+    [bankApi.reducerPath]: bankApi.reducer,
     sidebar: sidebarReducer,
     theme: themeReducer,
   },
@@ -38,7 +40,8 @@ export const store = configureStore({
       .concat(customerApi.middleware)
       .concat(notificationApi.middleware)
       .concat(realestateApi.middleware)
-      .concat(streetApi.middleware),
+      .concat(streetApi.middleware)
+      .concat(bankApi.middleware),
 })
 
 export type AppDispatch = typeof store.dispatch

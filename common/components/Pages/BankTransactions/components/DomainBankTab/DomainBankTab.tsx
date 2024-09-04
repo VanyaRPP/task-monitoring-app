@@ -8,6 +8,11 @@ import { Button, Card, Input, Row } from 'antd'
 
 import React, { FC, useEffect, useState } from 'react'
 import TransactionsTable from '../TransactionsTable/TransactionsTable'
+import {
+  useGetTransactionsQuery,
+  useGetDateQuery,
+  useGetBalancesQuery,
+} from '@common/api/bankApi/bank.api'
 
 interface Props {
   domain: IExtendedDomain
@@ -26,66 +31,49 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
     : ''
 
   const [tr, setTr] = useState([])
-  const fetchBankApiDate = async () => {
-    try {
-      const response = await fetch(
-        'http://localhost:3000/api/bankapi/transactions',
-        {
-          headers: {
-            token: token,
-            'Content-type': 'application/json;charset=utf-8',
-          },
-        }
-      )
 
-      // Check if the response is successful
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-      }
-
-      // Parse the response as JSON
-      const data = await response.json()
-
-      console.log('Response data:', data)
-      return data
-    } catch (error) {
-      console.error('Error fetching data:', error)
-      return null // Return null or handle the error as needed
+  const {
+    data: transactionsData,
+    error: transactionsError,
+    isLoading: transactionsLoading,
+  } = useGetTransactionsQuery(
+    { token },
+    {
+      skip: !token,
     }
-  }
+  )
 
-  const fetchBankApiDateDate = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/api/bankapi/date', {
-        headers: {
-          token: token,
-          'Content-type': 'application/json;charset=utf-8',
-        },
-      })
-
-      // Check if the response is successful
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-      }
-
-      // Parse the response as JSON
-      const data = await response.json()
-
-      console.log('Response data:', data)
-      return data
-    } catch (error) {
-      console.error('Error fetching data:', error)
-      return null // Return null or handle the error as needed
+  const {
+    data: balancesData,
+    error: balancesError,
+    isLoading: balancesLoading,
+  } = useGetBalancesQuery(
+    { token },
+    {
+      skip: !token,
     }
-  }
+  )
 
-  const handleClick = () => {
-    if (!token) return console.log('No token')
-    fetchBankApiDate().then((res) => {
-      console.log(res, 'res')
-      setTr(res.data.transactions)
-    })
-  }
+  useEffect(() => {
+    if (
+      !transactionsLoading &&
+      transactionsData &&
+      transactionsData.data.transactions
+    ) {
+      setTr(transactionsData.data.transactions)
+    }
+  }, [transactionsLoading, transactionsData])
+
+  const {
+    data: dateData,
+    error: dateError,
+    isLoading: dateLoading,
+  } = useGetDateQuery(
+    { token },
+    {
+      skip: !token,
+    }
+  )
 
   const viewTokens = (domainBankToken) => {
     return (
@@ -123,8 +111,8 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
       />
       {viewTokens(domain.domainBankToken)}
 
-      <Button onClick={handleClick}>DO</Button>
-      <Button onClick={() => fetchBankApiDateDate()}>date</Button>
+      <Button onClick={() => console.log(dateData)}>date</Button>
+      <Button onClick={() => console.log(balancesData)}>balances</Button>
 
       <br />
       <TransactionsTable transactions={tr} />
