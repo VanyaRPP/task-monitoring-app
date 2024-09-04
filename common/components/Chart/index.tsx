@@ -5,7 +5,10 @@ import s from './style.module.scss'
 import { theme } from 'antd';
 type dataSources = {
   label: string
-  value: object
+  value: {
+    part: number,
+    area: number,
+  }
   color?: string
 }
 
