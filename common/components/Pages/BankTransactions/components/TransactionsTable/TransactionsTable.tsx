@@ -91,7 +91,17 @@ const TransactionsTable: React.FC<{ transactions: ITransaction[] }> = ({
     'TECHNICAL_TRANSACTION_ID',
   ]
 
-  const [visibleColumns, setVisibleColumns] = useState<string[]>(columnNames)
+  const defaultVisibleColums = [
+    'AUT_CNTR_NAM',
+    'AUT_CNTR_ACC',
+    'OSND',
+    'SUM',
+    'PR_PR',
+    'DATE_TIME_DAT_OD_TIM_P',
+  ]
+
+  const [visibleColumns, setVisibleColumns] =
+    useState<string[]>(defaultVisibleColums)
 
   const getColumnSearchProps = (dataIndex: keyof ITransaction) => ({
     filterDropdown: ({
@@ -339,10 +349,17 @@ const TransactionsTable: React.FC<{ transactions: ITransaction[] }> = ({
     },
   ].filter((column) => visibleColumns.includes(column.key))
 
+  const [tableSettingDropdovnVisible, setTableSettingDropdovnVisible] =
+    useState<boolean>(false)
+
   return (
     <div>
       <Dropdown
         overlayStyle={{ overflow: 'scroll', maxHeight: '300px' }}
+        open={tableSettingDropdovnVisible}
+        onOpenChange={() =>
+          setTableSettingDropdovnVisible(!tableSettingDropdovnVisible)
+        }
         menu={{
           items,
         }}
