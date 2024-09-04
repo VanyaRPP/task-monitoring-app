@@ -52,7 +52,7 @@ const ChartComponent: React.FC<{
           tooltip: {
             callbacks: {
               label: function(tooltipItem) {
-                return `${domainName !== tooltipItem.label ? 'Частка площі' : 'Незаймані площі'} ${dataSources[tooltipItem.dataIndex]?.value?.area.toFixed(2)} м²`;
+                return `${domainName !== tooltipItem.label ? 'Частка площі' : 'Незайнята площа'} ${dataSources[tooltipItem.dataIndex]?.value?.area.toFixed(2)} м²`;
               },
               footer: function(tooltipItems) {
                 return `${tooltipItems[0].parsed.toFixed(2)}%`
