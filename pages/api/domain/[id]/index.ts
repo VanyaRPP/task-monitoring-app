@@ -4,6 +4,9 @@ import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import EncryptionService from '@utils/encryptionService'
+import { hidePercentCharacters } from '@utils/hidePercentCharacters/hidePercentCharacters'
+
 start()
 
 export default async function handler(
@@ -11,6 +14,23 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   const { isGlobalAdmin } = await getCurrentUser(req, res)
+
+  const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
+
+  function encryptDomainBankTokens(obj: any, secretKey: string) {
+    const encryptionService = new EncryptionService(secretKey)
+
+    // Use map to replace each token with its encrypted version
+    obj.domainBankToken = obj.domainBankToken.map(
+      (item: { name: string; token: string }) => ({
+        ...item,
+        token: encryptionService.encrypt(item.token),
+        shortToken: hidePercentCharacters(item.token),
+      })
+    )
+
+    return obj
+  }
 
   if (!isGlobalAdmin) {
     return res.status(400).json({ success: false, message: 'not allowed' })
@@ -39,6 +59,7 @@ export default async function handler(
     case 'PATCH':
       try {
         if (isGlobalAdmin) {
+          const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
           const response = await Domain.findOneAndUpdate(
             { _id: req.query.id },
             req.body,
