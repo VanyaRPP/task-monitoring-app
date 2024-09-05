@@ -32,7 +32,7 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
   const encryptionService = new EncryptionService(SECURE_TOKEN)
 
   const token = domain?.domainBankToken[0]
-    ? encryptionService.decrypt(domain?.domainBankToken[0]?.token)
+    ? encryptionService.decrypt(domain?.domainBankToken[0]?.token ?? 'token')
     : ''
 
   const {
