@@ -4,7 +4,7 @@ import {
   IExtendedDomain,
 } from '@common/api/domainApi/domain.api.types'
 import EncryptionService from '@utils/encryptionService'
-import { Button, Card, Input, Row } from 'antd'
+import { Button, Card, Input, Row, Carousel } from 'antd'
 
 import React, { FC, useEffect, useState } from 'react'
 import TransactionsTable from '../TransactionsTable/TransactionsTable'
@@ -12,10 +12,11 @@ import {
   useGetDateQuery,
   useGetBalancesQuery,
   useLazyGetTransactionsQuery,
-} from '@common/api/bankApi/bank.api'
+import s from './style.module.scss'
 import { autoBatchEnhancer } from '@reduxjs/toolkit'
 import _initial from 'lodash/initial'
 import CustomPagination from '@components/CustomPagination'
+        
 interface Props {
   domain: IExtendedDomain
 }
@@ -117,13 +118,48 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
 
   return (
     <Card>
-      <Meta
-        title={domain.name}
-        description={<TextArea rows={4} value={domain.description} disabled />}
-      />
-      {viewTokens(domain.domainBankToken)}
+      <div className={s.cardStyle}>
+        <div className={s.leftContainer}>
+          <div className={s.metaStyle}>
+            <Meta
+              title={domain.name}
+              description={
+                <TextArea
+                  value={domain.description}
+                  disabled
+                  autoSize={{ minRows: 1, maxRows: 4 }}
+                />
+              }
+            />
+          </div>
+          <div className={s.tokensContainer}>
+            {viewTokens(domain.domainBankToken)}
+          </div>
+        </div>
+
+        <div className={s.carouselStyle}>
+          <Carousel arrows infinite={false}>
+            {balancesData?.data?.balances?.map((balance, index) => (
+              <div className={s.contentStyle}>
+                <div className={s.balanceDetails}>
+                  <h3>Account: {balance.acc}</h3>
+                  <p>Currency: {balance.currency}</p>
+                  <p>Balance In: {balance.balanceIn}</p>
+                  <p>Balance Out: {balance.balanceOut}</p>
+                  <p>TurnoverCred: {balance.turnoverCred}</p>
+                  <p>TurnoverDebt: {balance.turnoverDebt}</p>
+                </div>
+              </div>
+            ))}
+          </Carousel>
+        </div>
+      </div>
+
       <Button onClick={() => console.log(dateData)}>date</Button>
-      <Button onClick={() => console.log(balancesData)}>balances</Button>
+      <Button onClick={() => console.log(balancesData?.data?.balances)}>
+        balances
+      </Button>
+
       <br />
       <TransactionsTable transactions={transactionsData?.transactions} />
       <CustomPagination
