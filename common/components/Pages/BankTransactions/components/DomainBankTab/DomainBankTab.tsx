@@ -4,19 +4,21 @@ import {
   IExtendedDomain,
 } from '@common/api/domainApi/domain.api.types'
 import EncryptionService from '@utils/encryptionService'
-import { Button, Card, Input, Row, Carousel } from 'antd'
+import { Button, Card, Input, Row, Carousel, Divider } from 'antd'
 
 import React, { FC, useEffect, useState } from 'react'
 import TransactionsTable from '../TransactionsTable/TransactionsTable'
-import {
-  useGetDateQuery,
-  useGetBalancesQuery,
-  useLazyGetTransactionsQuery,
-import s from './style.module.scss'
-import { autoBatchEnhancer } from '@reduxjs/toolkit'
-import _initial from 'lodash/initial'
 import CustomPagination from '@components/CustomPagination'
-        
+import _initial from 'lodash/initial'
+
+import s from './style.module.scss'
+import {
+  useGetBalancesQuery,
+  useGetDateQuery,
+  useLazyGetTransactionsQuery,
+} from '@common/api/bankApi/bank.api'
+import DomainBankBalance from '../DomainbankBalance/DomainBankBalance'
+
 interface Props {
   domain: IExtendedDomain
 }
@@ -44,16 +46,16 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
     }
   )
 
-  const {
-    data: dateData,
-    error: dateError,
-    isLoading: dateLoading,
-  } = useGetDateQuery(
-    { token },
-    {
-      skip: !token,
-    }
-  )
+  // const {
+  //   data: dateData,
+  //   error: dateError,
+  //   isLoading: dateLoading,
+  // } = useGetDateQuery(
+  //   { token },
+  //   {
+  //     skip: !token,
+  //   }
+  // )
 
   const [limit, setLimit] = useState(25)
   const [pageIds, setPageIds] = useState<string[]>([])
@@ -66,6 +68,7 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
 
   const [getNextTransactions, { data: transactionsData }] =
     useLazyGetTransactionsQuery()
+
   useEffect(() => {
     token && getNextTransactions({ token, limit, followId: pageIds.at(-1) })
   }, [token, limit])
@@ -138,29 +141,17 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
         </div>
 
         <div className={s.carouselStyle}>
-          <Carousel arrows infinite={false}>
-            {balancesData?.data?.balances?.map((balance, index) => (
-              <div className={s.contentStyle}>
-                <div className={s.balanceDetails}>
-                  <h3>Account: {balance.acc}</h3>
-                  <p>Currency: {balance.currency}</p>
-                  <p>Balance In: {balance.balanceIn}</p>
-                  <p>Balance Out: {balance.balanceOut}</p>
-                  <p>TurnoverCred: {balance.turnoverCred}</p>
-                  <p>TurnoverDebt: {balance.turnoverDebt}</p>
-                </div>
-              </div>
-            ))}
-          </Carousel>
+          <Card>
+            <Carousel arrows infinite={false}>
+              {balancesData?.data?.balances?.map((balance, index) => (
+                <DomainBankBalance key={balance.acc} balanceData={balance} />
+              ))}
+            </Carousel>
+          </Card>
         </div>
       </div>
 
-      <Button onClick={() => console.log(dateData)}>date</Button>
-      <Button onClick={() => console.log(balancesData?.data?.balances)}>
-        balances
-      </Button>
-
-      <br />
+      <Divider />
       <TransactionsTable transactions={transactionsData?.transactions} />
       <CustomPagination
         selectOptions={pageSizeOptions}

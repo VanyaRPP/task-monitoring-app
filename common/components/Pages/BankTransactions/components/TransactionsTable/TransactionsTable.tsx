@@ -29,8 +29,8 @@ export interface ITransactionData {
   transactions: ITransaction[]
 }
 
-export interface ITransactionRes {
-  data: ITransactionData
+export interface IBankRes<T> {
+  data: T
 }
 
 export interface ITransaction {

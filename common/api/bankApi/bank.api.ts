@@ -1,8 +1,12 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import {
+  IBankRes,
   ITransactionData,
-  ITransactionRes,
 } from '@components/Pages/BankTransactions/components/TransactionsTable/TransactionsTable'
+import {
+  IBalance,
+  IBalancesData,
+} from '@components/Pages/BankTransactions/components/DomainbankBalance/DomainBankBalance'
 
 interface IGetQuery {
   token: string
@@ -28,7 +32,8 @@ export const bankApi = createApi({
         },
         params: { startDate, limit, followId },
       }),
-      transformResponse: (response: ITransactionRes) => response.data,
+      transformResponse: (response: IBankRes<ITransactionData>) =>
+        response.data,
     }),
     getDate: builder.query<string, { token: string }>({
       query: ({ token }) => ({
@@ -40,21 +45,7 @@ export const bankApi = createApi({
         },
       }),
     }),
-    getBalances: builder.query<
-      {
-        data: {
-          balances: Array<{
-            acc: string
-            balanceIn: string
-            balanceOut: string
-            currency: string
-            turnoverCred: string
-            turnoverDebt: string
-          }>
-        }
-      },
-      { token: string }
-    >({
+    getBalances: builder.query<IBankRes<IBalancesData>, IGetQuery>({
       query: ({ token }) => ({
         url: 'balances',
         method: 'GET',
