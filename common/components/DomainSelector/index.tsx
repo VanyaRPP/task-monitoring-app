@@ -1,6 +1,6 @@
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { IDomain } from '@modules/models/Domain'
-import React, {useEffect, useMemo, useState} from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { isAdminCheck } from '@utils/helpers'
@@ -21,14 +21,14 @@ const DomainSelector: React.FC<{
     }))
   }, [domainsFilter])
 
-  const [currentValue, setCurrentValue] = useState(options.length ? options[0].value : undefined)
-
+  const [currentValue, setCurrentValue] = useState(
+    options.length ? options[0].value : undefined
+  )
 
   useEffect(() => {
-    if (!options.length)
-      return
+    if (!options.length) return
     setCurrentValue(options[0].value)
-  }, [options.length]);
+  }, [options.length])
 
   return (
     <Select
