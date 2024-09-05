@@ -15,6 +15,7 @@ export interface IDomainBankToken {
   shortToken: string
   tokenName: string
   confidant: string[]
+  name: string
 }
 
 export interface IExtendedDomain extends IDomainModel {
