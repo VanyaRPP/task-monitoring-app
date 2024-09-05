@@ -22,13 +22,15 @@ import {
 
 const { RangePicker } = DatePicker
 
+export interface ITransactionData {
+  exist_next_page: boolean
+  next_page_id: string
+  status: string
+  transactions: ITransaction[]
+}
+
 export interface ITransactionRes {
-  data: {
-    exist_next_page: boolean
-    next_page_id: string
-    status: string
-    transactions: ITransaction[]
-  }
+  data: ITransactionData
 }
 
 export interface ITransaction {
@@ -380,6 +382,7 @@ const TransactionsTable: React.FC<{ transactions: ITransaction[] }> = ({
         scroll={{ x: true }}
         dataSource={transactions}
         columns={columns}
+        pagination={false}
         rowKey="ID"
       />
     </div>

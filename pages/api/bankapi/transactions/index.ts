@@ -10,7 +10,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { token: tokenQuery } = req.query
+  const { token: tokenQuery, startDate, limit, followId } = req.query
   const { token: tokenHeader } = req.headers
 
   if (!tokenQuery && !tokenHeader) {
@@ -22,7 +22,12 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        getTransactionsForDateInterval(tokenHeader ?? tokenQuery)
+        getTransactionsForDateInterval(
+          tokenHeader ?? tokenQuery,
+          startDate,
+          limit,
+          followId
+        )
           .then((rez) => {
             return res.status(200).json({ success: true, data: rez })
           })

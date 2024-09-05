@@ -4,18 +4,19 @@ import {
   IExtendedDomain,
 } from '@common/api/domainApi/domain.api.types'
 import EncryptionService from '@utils/encryptionService'
-import { Button, Card, Input, Row } from 'antd'
+import { Button, Card, Input, Row, Carousel } from 'antd'
 
 import React, { FC, useEffect, useState } from 'react'
 import TransactionsTable from '../TransactionsTable/TransactionsTable'
 import {
-  useGetTransactionsQuery,
   useGetDateQuery,
   useGetBalancesQuery,
-} from '@common/api/bankApi/bank.api'
-import { Carousel } from 'antd'
+  useLazyGetTransactionsQuery,
 import s from './style.module.scss'
-
+import { autoBatchEnhancer } from '@reduxjs/toolkit'
+import _initial from 'lodash/initial'
+import CustomPagination from '@components/CustomPagination'
+        
 interface Props {
   domain: IExtendedDomain
 }
@@ -32,19 +33,6 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
     ? encryptionService.decrypt(domain?.domainBankToken[0]?.token)
     : ''
 
-  const [tr, setTr] = useState([])
-
-  const {
-    data: transactionsData,
-    error: transactionsError,
-    isLoading: transactionsLoading,
-  } = useGetTransactionsQuery(
-    { token },
-    {
-      skip: !token,
-    }
-  )
-
   const {
     data: balancesData,
     error: balancesError,
@@ -56,16 +44,6 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
     }
   )
 
-  useEffect(() => {
-    if (
-      !transactionsLoading &&
-      transactionsData &&
-      transactionsData.data.transactions
-    ) {
-      setTr(transactionsData.data.transactions)
-    }
-  }, [transactionsLoading, transactionsData])
-
   const {
     data: dateData,
     error: dateError,
@@ -76,6 +54,39 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
       skip: !token,
     }
   )
+
+  const [limit, setLimit] = useState(25)
+  const [pageIds, setPageIds] = useState<string[]>([])
+
+  const pageSizeOptions = [
+    { label: '25', value: 25 },
+    { label: '50', value: 50 },
+    { label: '100', value: 100 },
+  ]
+
+  const [getNextTransactions, { data: transactionsData }] =
+    useLazyGetTransactionsQuery()
+  useEffect(() => {
+    token && getNextTransactions({ token, limit, followId: pageIds.at(-1) })
+  }, [token, limit])
+
+  const onPrevButtonClick = () => {
+    setPageIds((prev) => _initial(prev))
+    getNextTransactions({
+      token,
+      limit,
+      followId: pageIds.at(-2),
+    })
+  }
+
+  const onNextButtonClick = () => {
+    setPageIds((prev) => [...prev, transactionsData.next_page_id])
+    getNextTransactions({
+      token,
+      limit,
+      followId: transactionsData.next_page_id,
+    })
+  }
 
   const viewTokens = (domainBankToken) => {
     return (
@@ -150,7 +161,18 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
       </Button>
 
       <br />
-      <TransactionsTable transactions={tr} />
+      <TransactionsTable transactions={transactionsData?.transactions} />
+      <CustomPagination
+        selectOptions={pageSizeOptions}
+        selectValue={limit}
+        onSelectChange={(e) => setLimit(e)}
+        onPrevButtonClick={onPrevButtonClick}
+        onNextButtonClick={onNextButtonClick}
+        prevButtonDisabled={!pageIds.at(-1)}
+        nextButtonDisabled={!transactionsData?.exist_next_page}
+        prevButtonText="Previous"
+        nextButtonText="Next"
+      />
     </Card>
   )
 }

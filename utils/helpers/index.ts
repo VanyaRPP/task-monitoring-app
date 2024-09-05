@@ -230,6 +230,16 @@ export const renderCurrency = (number: any): string => {
   }
 }
 
+export const formatDateDMY = (date: string) => {
+  return dayjs(date).format('DD-MM-YYYY')
+}
+
+export const getDefaultStartDate = (): string => {
+  const date = dayjs().subtract(3, 'month')
+
+  return formatDateDMY(date.toString())
+}
+
 export const getPaymentProviderAndReciever = (company) => {
   const provider: IProvider = company && {
     description: company?.domain?.description || '',
