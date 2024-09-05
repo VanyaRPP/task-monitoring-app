@@ -27,8 +27,8 @@ class PrivatBankApiAdapter {
   async getTransactionsForDateInterval(
     startDate: string,
     limit = 20,
-    endDate?: string,
     followId?: string,
+    endDate?: string,
     acc?: string
   ) {
     const searchParams = new URLSearchParams({

@@ -1,26 +1,38 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { ITransactionRes } from '@components/Pages/BankTransactions/components/TransactionsTable/TransactionsTable'
+import {
+  ITransactionData,
+  ITransactionRes,
+} from '@components/Pages/BankTransactions/components/TransactionsTable/TransactionsTable'
+
+interface IGetQuery {
+  token: string
+  startDate?: string
+  limit?: number
+  followId?: string
+}
 
 export const bankApi = createApi({
   reducerPath: 'bankApi',
   tagTypes: ['Bank', 'IBank'],
   refetchOnFocus: true,
   refetchOnReconnect: true,
-  baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
+  baseQuery: fetchBaseQuery({ baseUrl: `/api/bankapi/` }),
   endpoints: (builder) => ({
-    getTransactions: builder.query<ITransactionRes, { token: string }>({
-      query: ({ token }) => ({
-        url: 'bankapi/transactions',
+    getTransactions: builder.query<ITransactionData, IGetQuery>({
+      query: ({ token, startDate, limit, followId }) => ({
+        url: 'transactions',
         method: 'GET',
         headers: {
           token: token,
           'Content-type': 'application/json;charset=utf-8',
         },
+        params: { startDate, limit, followId },
       }),
+      transformResponse: (response: ITransactionRes) => response.data,
     }),
     getDate: builder.query<string, { token: string }>({
       query: ({ token }) => ({
-        url: 'bankapi/date',
+        url: 'date',
         method: 'GET',
         headers: {
           token: token,
@@ -30,7 +42,7 @@ export const bankApi = createApi({
     }),
     getBalances: builder.query<string, { token: string }>({
       query: ({ token }) => ({
-        url: 'bankapi/balances',
+        url: 'balances',
         method: 'GET',
         headers: {
           token: token,
@@ -41,5 +53,9 @@ export const bankApi = createApi({
   }),
 })
 
-export const { useGetTransactionsQuery, useGetDateQuery, useGetBalancesQuery } =
-  bankApi
+export const {
+  useGetTransactionsQuery,
+  useLazyGetTransactionsQuery,
+  useGetDateQuery,
+  useGetBalancesQuery,
+} = bankApi
