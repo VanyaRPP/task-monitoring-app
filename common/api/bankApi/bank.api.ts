@@ -28,7 +28,21 @@ export const bankApi = createApi({
         },
       }),
     }),
-    getBalances: builder.query<string, { token: string }>({
+    getBalances: builder.query<
+      {
+        data: {
+          balances: Array<{
+            acc: string
+            balanceIn: string
+            balanceOut: string
+            currency: string
+            turnoverCred: string
+            turnoverDebt: string
+          }>
+        }
+      },
+      { token: string }
+    >({
       query: ({ token }) => ({
         url: 'bankapi/balances',
         method: 'GET',
