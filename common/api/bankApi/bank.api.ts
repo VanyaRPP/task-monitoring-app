@@ -1,8 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import {
-  IBankRes,
-  ITransactionData,
-} from '@components/Pages/BankTransactions/components/TransactionsTable/TransactionsTable'
+// import {} from '@components/Pages/BankTransactions/components/TransactionsTable/TransactionsTable'
 import {
   IBalance,
   IBalancesData,
