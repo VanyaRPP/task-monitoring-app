@@ -233,10 +233,11 @@ export const generateColumns = (
       title: 'Transaction Time',
       dataIndex: 'DATE_TIME_DAT_OD_TIM_P',
       key: 'DATE_TIME_DAT_OD_TIM_P',
+      width: 100,
       ...getDateColumnProps('DATE_TIME_DAT_OD_TIM_P'),
     },
     {
-      title: 'Transaction Type', // TRANTYPE column
+      title: 'Type', // TRANTYPE column
       dataIndex: 'TRANTYPE',
       key: 'TRANTYPE',
       filteredValue: ['C'],

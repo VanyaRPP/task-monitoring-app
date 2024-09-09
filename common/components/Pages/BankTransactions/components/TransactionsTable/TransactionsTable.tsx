@@ -58,6 +58,7 @@ const TransactionsTable: React.FC<Props> = ({ transactions, pagination }) => {
           columns={columns}
           pagination={false}
           rowKey="ID"
+          sticky={{ offsetHeader: 64 }}
         />
         <Space
           direction="vertical"
