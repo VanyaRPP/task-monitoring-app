@@ -1,8 +1,8 @@
-import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
+import { PlusOutlined, SelectOutlined, DeleteOutlined } from '@ant-design/icons'
 import { Button, Space } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-
+import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddServiceModal from '@components/AddServiceModal'
@@ -31,6 +31,8 @@ export interface Props {
   filter?: any
   setFilter?: (filters: any) => void
   services?: any
+  handleDeleteServices?: () => void
+  selectedServices: IService[]
 }
 
 const ServicesHeader: React.FC<Props> = ({
@@ -42,6 +44,8 @@ const ServicesHeader: React.FC<Props> = ({
   filter,
   setFilter,
   services,
+  handleDeleteServices,
+  selectedServices,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -83,20 +87,28 @@ const ServicesHeader: React.FC<Props> = ({
           </Space>
         )}
       </div>
-      {showAddButton && isAdminCheck(user?.roles) && (
-        <>
-          <Button className={s.firstBlock} type="link" onClick={openModal}>
-            <PlusOutlined /> Додати
+      <div className={s.secondBlock}>
+        {showAddButton && isAdminCheck(user?.roles) && (
+          <>
+            <Button className={s.firstBlock} type="link" onClick={openModal}>
+              <PlusOutlined /> Додати
+            </Button>
+          </>
+        )}
+        {isAdminCheck(user?.roles) && router.pathname === AppRoutes.SERVICE 
+        && selectedServices.length > 0 && (
+          <Button type="link" onClick={() => handleDeleteServices()}>
+            <DeleteOutlined /> Видалити
           </Button>
-        </>
-      )}
-      {(isModalOpen || currentService) && (
-        <AddServiceModal
-          currentService={currentService}
-          closeModal={closeModal}
-          serviceActions={serviceActions}
-        />
-      )}
+        )}
+        {(isModalOpen || currentService) && (
+          <AddServiceModal
+            currentService={currentService}
+            closeModal={closeModal}
+            serviceActions={serviceActions}
+          />
+        )}
+      </div>
     </div>
   )
 }
