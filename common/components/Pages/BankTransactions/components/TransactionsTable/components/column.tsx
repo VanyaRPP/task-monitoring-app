@@ -296,10 +296,8 @@ export const columnNames = [
 
 export const defaultVisibleColumns = [
   'AUT_CNTR_NAM',
-  'AUT_CNTR_ACC',
   'OSND',
   'SUM',
-  'PR_PR',
   'DATE_TIME_DAT_OD_TIM_P',
   'TRANTYPE',
   'OPTIONS',
