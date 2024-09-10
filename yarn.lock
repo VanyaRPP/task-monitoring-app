@@ -7389,6 +7389,11 @@ react-redux@^9.1.2:
     "@types/use-sync-external-store" "^0.0.3"
     use-sync-external-store "^1.0.0"
 
+react-sticky-box@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/react-sticky-box/-/react-sticky-box-2.0.5.tgz#518c555457c58ebea127aa7d80df3d93e16a1ce8"
+  integrity sha512-JEIuN7Q3razU1NNS0vddC12GXCUkj7T4aCpC9ZSTjgBddFsBdTcN1RhYXFLjCE/KDOQqX2Ix308BcdrqtSJbkQ==
+
 react-to-print@^2.14.12:
   version "2.15.1"
   resolved "https://registry.yarnpkg.com/react-to-print/-/react-to-print-2.15.1.tgz#c9a6732cadf1118fc90d886b54a9388c419561b9"

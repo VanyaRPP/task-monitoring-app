@@ -3,6 +3,7 @@ export interface IDomainModel {
   adminEmails: [string]
   streets: string[]
   description: string
+  name: string
 }
 
 export interface IExtendedDomain extends IDomainModel {

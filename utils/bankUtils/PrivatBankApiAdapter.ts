@@ -20,23 +20,22 @@ class PrivatBankApiAdapter {
     return {
       'User-Agent': this.userAgent,
       token: this.token,
-      'Content-Type': 'application/json',
+      'Content-type': 'application/json;charset=utf-8',
     }
   }
 
   async getTransactionsForDateInterval(
-    acc: string,
     startDate: string,
-    endDate?: string,
+    limit = 20,
     followId?: string,
-    limit = 20
+    endDate?: string,
+    acc?: string
   ) {
     const searchParams = new URLSearchParams({
-      acc,
       startDate,
       limit: limit.toString(),
     })
-
+    if (acc) searchParams.append('acc', acc)
     if (endDate) searchParams.append('endDate', endDate)
     if (followId) searchParams.append('followId', followId)
 
@@ -57,11 +56,10 @@ class PrivatBankApiAdapter {
     limit = 20
   ) {
     const searchParams = new URLSearchParams({
-      acc,
       startDate,
       limit: limit.toString(),
     })
-
+    if (acc) searchParams.append('acc', acc)
     if (endDate) searchParams.append('endDate', endDate)
     if (followId) searchParams.append('followId', followId)
 
@@ -74,12 +72,12 @@ class PrivatBankApiAdapter {
     )
   }
 
-  async getInterimTransactions(acc: string, followId?: string, limit = 20) {
+  async getInterimTransactions(limit = 100, acc?: string, followId?: string) {
     const searchParams = new URLSearchParams({
-      acc,
       limit: limit.toString(),
     })
 
+    if (acc) searchParams.append('acc', acc)
     if (followId) searchParams.append('followId', followId)
 
     return this.httpClient.get(
@@ -91,12 +89,11 @@ class PrivatBankApiAdapter {
     )
   }
 
-  async getInterimBalances(acc: string, followId?: string, limit = 20) {
+  async getInterimBalances(acc?: string, followId?: string, limit = 100) {
     const searchParams = new URLSearchParams({
-      acc,
       limit: limit.toString(),
     })
-
+    if (acc) searchParams.append('acc', acc)
     if (followId) searchParams.append('followId', followId)
 
     return this.httpClient.get(
@@ -108,11 +105,12 @@ class PrivatBankApiAdapter {
     )
   }
 
-  async getFinalTransactions(acc?: string, followId?: string, limit = 20) {
+  async getFinalTransactions(limit = 20, followId?: string, acc?: string) {
     const searchParams = new URLSearchParams({
       limit: limit.toString(),
     })
 
+    if (acc) searchParams.append('acc', acc)
     if (followId) searchParams.append('followId', followId)
 
     return this.httpClient.get(
@@ -124,12 +122,12 @@ class PrivatBankApiAdapter {
     )
   }
 
-  async getFinalBalances(acc: string, followId?: string, limit = 20) {
+  async getFinalBalances(limit = 100, followId?: string, acc?: string) {
     const searchParams = new URLSearchParams({
-      acc,
       limit: limit.toString(),
     })
 
+    if (acc) searchParams.append('acc', acc)
     if (followId) searchParams.append('followId', followId)
 
     return this.httpClient.get(
