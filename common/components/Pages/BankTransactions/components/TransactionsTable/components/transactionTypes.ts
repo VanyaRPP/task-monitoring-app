@@ -30,3 +30,14 @@ export interface ITransaction {
   DLR: string
   TECHNICAL_TRANSACTION_ID: string
 }
+
+export interface ITransactionData {
+  exist_next_page: boolean
+  next_page_id: string
+  status: string
+  transactions: ITransaction[]
+}
+
+export interface IBankRes<T> {
+  data: T
+}
