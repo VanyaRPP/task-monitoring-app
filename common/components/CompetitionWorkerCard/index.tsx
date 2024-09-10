@@ -39,7 +39,8 @@ const CompetitionWorkerCard: FC<Props> = ({
   const [isFormDisabled, setIsFormDisabled] = useState<boolean>(false)
 
   const [form] = Form.useForm()
-  const { data: user } = useGetUserByIdQuery(_id)
+  const { data } = useGetUserByIdQuery(_id)
+  const user = data?.data
   const desc = ['Жахливо', 'Погано', 'Нормально', 'Добре', 'Прекрасно']
 
   const Reset = () => {

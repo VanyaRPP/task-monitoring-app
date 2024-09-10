@@ -17,7 +17,8 @@ const Comment: React.FC<{ comment: IComment; taskId: string }> = ({
     session?.data?.user?.email
   )
 
-  const { data: user } = useGetUserByIdQuery(comment.id)
+  const { data } = useGetUserByIdQuery(comment.id)
+  const user = data?.data
 
   return (
     <>

@@ -15,7 +15,8 @@ import {
 import ApplyAuctionForm from '../ApplyAuctionForm/index'
 
 export const Executor = ({ executor, type }) => {
-  const { data: worker } = useGetUserByIdQuery(`${executor.workerid}`)
+  const { data } = useGetUserByIdQuery(`${executor.workerid}`)
+  const worker = data?.data
 
   if (type === 'workerInfo') {
     return (

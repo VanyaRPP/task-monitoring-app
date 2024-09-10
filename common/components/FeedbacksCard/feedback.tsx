@@ -6,7 +6,8 @@ import { Avatar, Image, List } from 'antd'
 import s from './style.module.scss'
 
 const Feedback: React.FC<{ feedback: IFeedback }> = ({ feedback }) => {
-  const { data: user } = useGetUserByIdQuery(feedback.id)
+  const { data } = useGetUserByIdQuery(feedback.id)
+  const user = data?.data
 
   return (
     <>

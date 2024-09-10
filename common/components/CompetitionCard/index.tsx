@@ -28,7 +28,8 @@ import UserLink from '../UserLink'
 import s from './style.module.scss'
 
 export const Executor = ({ executor, type }) => {
-  const { data: worker } = useGetUserByIdQuery(`${executor.workerid}`)
+  const { data } = useGetUserByIdQuery(`${executor.workerid}`)
+  const worker = data?.data
 
   if (type === 'workerInfo') {
     return (

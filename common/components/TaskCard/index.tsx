@@ -26,9 +26,11 @@ const TaskCard = ({ taskId, task }) => {
 
   const { data: session } = useSession()
 
-  const { data: user } = useGetUserByIdQuery(`${task?.creator}`, {
+  const { data: userData } = useGetUserByIdQuery(`${task?.creator}`, {
     skip: !task,
   })
+  const user = userData?.data
+
   const [libraries] = useState(['places'] as any)
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',

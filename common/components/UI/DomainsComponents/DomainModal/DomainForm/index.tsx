@@ -1,10 +1,9 @@
 import { validateField } from '@assets/features/validators'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
-import { Form, FormInstance, Input, Select, Space } from 'antd'
+import { Form, FormInstance, Input } from 'antd'
 import { FC } from 'react'
 import DomainStreets from './DomainStreets'
 import s from './style.module.scss'
-import DomainInfo from './DomainInfo'
 
 interface Props {
   form: FormInstance<any>
@@ -35,7 +34,19 @@ const DomainForm: FC<Props> = ({
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} />
       <DomainStreets disabled={!editable} />
-      <DomainInfo editable={editable} form={form} />
+      <Form.Item
+        name="description"
+        label="Опис"
+        rules={validateField('required')}
+      >
+        <Input.TextArea
+          placeholder="Вкажіть значення"
+          className={s.formInput}
+          maxLength={512}
+          rows={4}
+          disabled={!editable}
+        />
+      </Form.Item>
     </Form>
   )
 }
