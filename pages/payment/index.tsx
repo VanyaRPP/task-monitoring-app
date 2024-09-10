@@ -3,19 +3,28 @@ import MainLayout from '@common/components/Layouts/Main'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import withAuthRedirect from '../../common/components/HOC/withAuthRedirect'
-import { AppRoutes } from '../../utils/constants'
+import { AppRoutes, Roles } from '@utils/constants'
 import { authOptions } from '../api/auth/[...nextauth]'
+import Head from 'next/head'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 export default withAuthRedirect(() => {
+  const { data: userResponse } = useGetCurrentUserQuery()
+  const isUser = userResponse?.roles?.includes(Roles.USER)
   return (
-    <MainLayout
-      path={[
-        { title: 'Панель управління', path: AppRoutes.INDEX },
-        { title: 'Платежі', path: AppRoutes.PAYMENT },
-      ]}
-    >
-      <PaymentsBlock />
-    </MainLayout>
+    <>
+      <Head>
+        <title>{isUser ? "Мої платежі" : "Платежі"}</title>
+      </Head>
+      <MainLayout
+        path={[
+          { title: 'Панель управління', path: AppRoutes.INDEX },
+          { title: 'Платежі', path: AppRoutes.PAYMENT },
+        ]}
+      >
+        <PaymentsBlock />
+      </MainLayout>
+    </>
   )
 })
 
