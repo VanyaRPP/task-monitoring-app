@@ -31,13 +31,12 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   }, [streets])
 
   useEffect(() => {
-    if (!edit && options.length === 1) {
+    if (!edit && domainId) {
       form.setFieldsValue({ street: options[0].value })
     } else if (!edit && !options.some((option) => option.value === streetId)) {
       form.setFieldsValue({ street: undefined })
     }
-  }, [form, options, streetId, edit])
-
+  }, [domainId, form, options, streetId, edit])
   return (
     <Form.Item name="street" label="Адреса" rules={validateField('required')}>
       <Select
