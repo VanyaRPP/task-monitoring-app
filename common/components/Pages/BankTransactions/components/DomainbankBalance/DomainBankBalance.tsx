@@ -36,6 +36,7 @@ export interface IBalancesData {
 interface Props {
   balanceData: IBalance
 }
+
 const DomainBankBalance: FC<Props> = ({ balanceData }) => {
   const { currency, balanceIn, balanceOut, nameACC, acc, turnoverDebt } =
     balanceData

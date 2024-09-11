@@ -53,7 +53,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
         : formData.streets,
       description: formData.description,
       IEName: formData.IEName,
-      domainBankToken: formData.domainBankToken,
+      domainBankToken: formData.domainBankToken || [],
       mfo: formData.mfo,
       rnokpp: formData.rnokpp,
       iban: formData.iban,
