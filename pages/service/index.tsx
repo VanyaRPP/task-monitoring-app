@@ -5,17 +5,23 @@ import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
+import Head from 'next/head'
 
 export default withAuthRedirect(() => {
   return (
-    <MainLayout
-      path={[
-        { title: 'Панель управління', path: AppRoutes.INDEX },
-        { title: 'Послуги', path: AppRoutes.SERVICE },
-      ]}
-    >
-      <ServicesBlock />
-    </MainLayout>
+    <>
+      <Head>
+        <title>Послуги</title>
+      </Head>
+      <MainLayout
+        path={[
+          { title: 'Панель управління', path: AppRoutes.INDEX },
+          { title: 'Послуги', path: AppRoutes.SERVICE },
+        ]}
+      >
+        <ServicesBlock />
+      </MainLayout>
+    </>
   )
 })
 
