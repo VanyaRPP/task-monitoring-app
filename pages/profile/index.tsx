@@ -3,15 +3,20 @@ import withAuthRedirect from '@components/HOC/withAuthRedirect'
 import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
-
 import { ProfilePage } from '@components/Pages/Profile'
 import { authOptions } from '../api/auth/[...nextauth]'
+import Head from 'next/head'
 
 export default withAuthRedirect(() => {
   return (
-    <MainLayout path={[{ title: 'Профіль', path: AppRoutes.PROFILE }]}>
-      <ProfilePage />
-    </MainLayout>
+    <>
+      <Head>
+        <title>Профіль</title>
+      </Head>
+      <MainLayout path={[{ title: 'Профіль', path: AppRoutes.PROFILE }]}>
+        <ProfilePage />
+      </MainLayout>
+    </>
   )
 })
 

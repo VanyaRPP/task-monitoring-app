@@ -2,8 +2,6 @@
 'use client'
 
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import PrivatBankApiAdapter from '@utils/bankUtils/PrivatBankApiAdapter'
-import FetchHttpClient from '@utils/FetchHttpClient/FetchHttpClient'
 import { Card, Tabs, TabsProps } from 'antd'
 
 import StickyBox from 'react-sticky-box'
