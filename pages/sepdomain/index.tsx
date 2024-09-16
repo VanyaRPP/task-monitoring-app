@@ -18,7 +18,7 @@ export default withAuthRedirect(() => {
     <MainLayout
       path={[
         { title: 'Панель управління', path: AppRoutes.INDEX },
-        { title: 'Обраний домен', path: AppRoutes.SEP_DOMAIN },
+        { title: `${query.name}`, path: AppRoutes.SEP_DOMAIN },
       ]}
     >
       <PaymentsBlock sepDomainID={sepDomainID}/>

@@ -43,6 +43,7 @@ export const ProfilePage: React.FC = () => {
     router.push({
       pathname: AppRoutes.SEP_DOMAIN,
       query: {
+        name: text,
         domain: value,
       },
     })
