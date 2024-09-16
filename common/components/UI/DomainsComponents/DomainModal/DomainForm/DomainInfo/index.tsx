@@ -135,7 +135,7 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
                   />
                 </Form.Item>
 
-                <Form.Item label="Token" name={[field.name, 'token']}>
+                <Form.Item label="Token" name={[field.name, 'shortToken']}>
                   <Input
                     placeholder="Token"
                     className={s.formInput}
