@@ -67,8 +67,8 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       : await addDomainEstate(domainData)
 
     if ('data' in response) {
-      form.resetFields()
       closeModal()
+      form.resetFields()
       const action = currentDomain ? 'Збережено' : 'Додано'
       message.success(action)
     } else {

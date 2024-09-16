@@ -38,7 +38,6 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
 
   const { data, isLoading } = useGetDomainsQuery({})
   const [formInstance] = useForm()
-
   const confidantPeopleOptions =
     data?.reduce((uniqueAdminEmails, domain) => {
       const newAdminEmails = domain.adminEmails.filter(
@@ -58,9 +57,6 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
       formInstance.setFieldsValue({ adminEmails })
     }
   }, [data])
-
-  const allValues = form.getFieldsValue()
-  console.log(allValues)
 
   return (
     <div>
@@ -139,20 +135,7 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
                   />
                 </Form.Item>
 
-                <Form.Item
-                  label="Token"
-                  name={[
-                    field.name,
-                    editable &&
-                    !form.getFieldValue([
-                      'domainBankToken',
-                      field.name,
-                      'shortToken',
-                    ])
-                      ? 'token'
-                      : 'shortToken',
-                  ]}
-                >
+                <Form.Item label="Token" name={[field.name, 'token']}>
                   <Input
                     placeholder="Token"
                     className={s.formInput}
