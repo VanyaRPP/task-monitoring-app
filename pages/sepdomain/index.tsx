@@ -12,13 +12,13 @@ import { authOptions } from '../api/auth/[...nextauth]'
 import { useRouter } from 'next/router'
 
 export default withAuthRedirect(() => {
-  const { query } = useRouter()
+  const { query, asPath } = useRouter()
   const sepDomainID = typeof query.domain === 'string' ? query.domain : null
   return (
     <MainLayout
       path={[
         { title: 'Панель управління', path: AppRoutes.INDEX },
-        { title: `${query.name}`, path: AppRoutes.SEP_DOMAIN },
+        { title: `${query.name}`, path: `${asPath}` },
       ]}
     >
       <PaymentsBlock sepDomainID={sepDomainID}/>
