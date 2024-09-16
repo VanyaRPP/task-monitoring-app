@@ -45,7 +45,7 @@ import React, { useCallback, useMemo, useState } from 'react'
 import s from './style.module.scss'
 
 interface PaymentsBlockProps {
-  sepDomainID: string
+  sepDomainID?: string
 }
 
 interface PaymentDeleteItem {
