@@ -38,6 +38,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       mfo: currentDomain?.mfo || '',
       rnokpp: currentDomain?.rnokpp || '',
       iban: currentDomain?.iban || '',
+      domainServices: currentDomain?.domainServices || []
     }
     form.setFieldsValue(initialValues)
   }, [currentDomain, form])
@@ -57,6 +58,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       mfo: formData.mfo,
       rnokpp: formData.rnokpp,
       iban: formData.iban,
+      domainServices: formData.domainServices
     }
 
     const response = currentDomain

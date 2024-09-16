@@ -5,6 +5,7 @@ import { FC } from 'react'
 import DomainStreets from './DomainStreets'
 import s from './style.module.scss'
 import DomainInfo from './DomainInfo'
+import DomainsServices from './DomainsServices'
 
 interface Props {
   form: FormInstance<any>
@@ -35,6 +36,7 @@ const DomainForm: FC<Props> = ({
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} />
       <DomainStreets disabled={!editable} />
+      <DomainsServices editable={editable} />
       <DomainInfo editable={editable} form={form} />
     </Form>
   )

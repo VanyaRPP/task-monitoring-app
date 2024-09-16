@@ -11,6 +11,12 @@ export interface IDomain {
   rnokpp: string
   IEName: string
   domainBankToken: IDomainBankToken[]
+  domainServices: IDomainService[]
+}
+
+export interface IDomainService {
+  name: string
+  price: number
 }
 
 export interface IDomainBankToken {
@@ -33,6 +39,7 @@ const DomainSchema = new Schema<IDomain>({
   rnokpp: { type: String, required: true },
   IEName: { type: String, required: true },
   domainBankToken: { type: [Object] },
+  domainServices: { type: [Object] },
 })
 
 const Domain =
