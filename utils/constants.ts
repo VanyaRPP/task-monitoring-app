@@ -19,6 +19,7 @@ export enum AppRoutes {
   REAL_ESTATE = '/real-estate',
   STREETS = '/streets',
   BANKTEST = '/bank',
+  SEP_DOMAIN = '/sepdomain',
 }
 
 export enum Operations {

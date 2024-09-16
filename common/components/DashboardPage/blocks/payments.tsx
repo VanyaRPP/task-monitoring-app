@@ -41,8 +41,12 @@ import {
   theme,
 } from 'antd'
 import { useRouter } from 'next/router'
-import { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import s from './style.module.scss'
+
+interface PaymentsBlockProps {
+  sepDomainID: string
+}
 
 interface PaymentDeleteItem {
   id: string
@@ -101,7 +105,7 @@ function getTypeOperation(value) {
   }
 }
 
-const PaymentsBlock = () => {
+const PaymentsBlock: React.FC<PaymentsBlockProps> = ({sepDomainID}) => {
   const router = useRouter()
   const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
   const [paymentActions, setPaymentActions] = useState({
@@ -146,7 +150,7 @@ const PaymentsBlock = () => {
       ...getDateFilter(currentDateFilter),
       ...getTypeOperation(currentTypeOperation),
       companyIds: filters?.company || undefined,
-      domainIds: filters?.domain || undefined,
+      domainIds: sepDomainID || filters?.domain || undefined,
       streetIds: filters?.street || undefined,
       type: filters?.type || undefined,
     },
@@ -201,7 +205,6 @@ const PaymentsBlock = () => {
       {
         title: 'Компанія',
         dataIndex: 'company',
-        // fixed: 'left',
         filters:
           router.pathname === AppRoutes.PAYMENT
             ? payments?.realEstatesFilter
@@ -470,6 +473,7 @@ const PaymentsBlock = () => {
           selectedPayments={selectedPayments}
           setSelectedPayments={setSelectedPayments}
           setPaymentsDeleteItems={setPaymentsDeleteItems}
+          enablePaymentsButton={sepDomainID ? false : true}
         />
       }
     >

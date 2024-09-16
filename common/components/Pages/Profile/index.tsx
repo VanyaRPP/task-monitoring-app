@@ -15,14 +15,17 @@ import {
   Space,
   Tag,
   Typography,
+  message,
 } from 'antd'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import styles from './style.module.scss'
 import { EditUserForm } from '../../Forms/EditUserForm'
-import { Roles } from '@utils/constants'
+import { AppRoutes, Roles } from '@utils/constants'
+import { useRouter } from 'next/router'
 
 export const ProfilePage: React.FC = () => {
+  const router = useRouter()
   const [form] = Form.useForm()
   const { data: session } = useSession()
   const { data: user } = useGetCurrentUserQuery()
@@ -34,6 +37,16 @@ export const ProfilePage: React.FC = () => {
       realEstatesFilter: [],
     },
   } = useGetAllRealEstateQuery({})
+
+
+  const handleTagClick = ({text, value}) => {
+    router.push({
+      pathname: AppRoutes.SEP_DOMAIN,
+      query: {
+        domain: value,
+      },
+    })
+  }
 
   return (
     <Space
@@ -90,15 +103,16 @@ export const ProfilePage: React.FC = () => {
           <Tags
             wrap
             align="center"
-            items={domains.map(({ text }) => text as string)}
+            items={domains.map((domain) => domain)}
             render={(domain, index) => (
               <Tag
                 key={index}
                 bordered={false}
                 color="purple"
-                style={{ margin: 0 }}
+                className={styles.tag}
+                onClick={() => {handleTagClick(domain)}}
               >
-                {domain}
+                {domain.text}
               </Tag>
             )}
           />

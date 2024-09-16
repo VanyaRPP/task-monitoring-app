@@ -5,9 +5,11 @@ import StreetsTable from '@components/Tables/Streets/Table'
 import TableCard from '@components/UI/TableCard'
 import { useState } from 'react'
 
-const StreetsBlock: React.FC<{
-  domainId?: string
-}> = ({ domainId }) => {
+interface StreetBlockProps {
+  domainId?: string;
+}
+
+const StreetsBlock: React.FC<StreetBlockProps> = ({ domainId }) => {
   const { data: user } = useGetCurrentUserQuery()
   const [currentStreet, setCurrentStreet] = useState<IStreet>(null)
   const [streetActions, setStreetActions] = useState({

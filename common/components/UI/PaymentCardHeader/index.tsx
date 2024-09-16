@@ -40,6 +40,7 @@ const PaymentCardHeader = ({
   selectedPayments,
   setPaymentsDeleteItems,
   setSelectedPayments,
+  enablePaymentsButton,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -117,7 +118,11 @@ const PaymentCardHeader = ({
   return (
     <Flex justify="space-between">
       <Space>
-        <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT)}>
+        <Button type="link" onClick={() => {
+          if(enablePaymentsButton) {
+            router.push(AppRoutes.PAYMENT)
+            }
+          }}>
           {isAdmin ? 'Платежі' : 'Мої оплати'}
           <SelectOutlined />
         </Button>
