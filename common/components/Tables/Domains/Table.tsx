@@ -28,7 +28,7 @@ export interface Props {
   domainActions: {
     edit: boolean
   }
-  setDomainsLength: React.Dispatch<React.SetStateAction<number | null>>;
+  setDomainsLength: React.Dispatch<React.SetStateAction<number | null>>
 }
 
 const DomainsTable: React.FC<Props> = ({
@@ -45,8 +45,8 @@ const DomainsTable: React.FC<Props> = ({
     limit: isOnPage ? 0 : 5,
   })
 
-  useEffect(()=> {
-    if(!isLoading) {
+  useEffect(() => {
+    if (!isLoading) {
       setDomainsLength(data?.length)
     }
   }, [data, isLoading])

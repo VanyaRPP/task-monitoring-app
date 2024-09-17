@@ -54,7 +54,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
         : formData.streets,
       description: formData.description,
       IEName: formData.IEName,
-      domainBankToken: formData.domainBankToken,
+      domainBankToken: formData.domainBankToken || [],
       mfo: formData.mfo,
       rnokpp: formData.rnokpp,
       iban: formData.iban,
@@ -69,8 +69,8 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       : await addDomainEstate(domainData)
 
     if ('data' in response) {
-      form.resetFields()
       closeModal()
+      form.resetFields()
       const action = currentDomain ? 'Збережено' : 'Додано'
       message.success(action)
     } else {
