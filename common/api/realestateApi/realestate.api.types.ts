@@ -1,4 +1,4 @@
-import { IDomain } from '@modules/models/Domain'
+import { IDomain, IDomainService } from '@modules/models/Domain'
 import { IFilter } from '../paymentApi/payment.api.types'
 import { IStreet } from '../streetApi/street.api.types'
 
@@ -17,7 +17,9 @@ export type IRealestate = {
   waterPart?: number
   discount?: number
   cleaning?: number
+  services:IDomainService[]
 }
+
 
 export interface IExtendedRealestate extends IRealestate {
   _id: string

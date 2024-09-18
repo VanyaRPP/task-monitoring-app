@@ -1,11 +1,25 @@
 import { validateField } from '@assets/features/validators'
-import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
+import {
+  IExtendedRealestate,
+  IRealestate,
+} from '@common/api/realestateApi/realestate.api.types'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
-import { Checkbox, Form, FormInstance, Input, InputNumber } from 'antd'
-import { FC } from 'react'
+import {
+  Button,
+  Card,
+  Checkbox,
+  Form,
+  FormInstance,
+  Input,
+  InputNumber,
+} from 'antd'
+import { FC, useEffect, useState } from 'react'
 import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
+import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
+import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import { IDomain } from '@modules/models/Domain'
 
 interface Props {
   form: FormInstance<any>
@@ -20,6 +34,23 @@ const RealEstateForm: FC<Props> = ({
   editable = true,
   setIsValueChanged,
 }) => {
+  const domainId = Form.useWatch('domain', form)
+
+  const {
+    data: domain = {} as IDomain,
+    isLoading: isDomainLoading,
+    isError: isDomainError,
+  } = useGetDomainByPkQuery({ domainId })
+
+  useEffect(() => {
+    if (domain && domain.domainServices) {
+      form.setFieldsValue({
+        ...form.getFieldsValue(),
+        services: domain.domainServices,
+      })
+    }
+  }, [domain, form])
+
   return (
     <Form
       form={form}
@@ -142,6 +173,32 @@ const RealEstateForm: FC<Props> = ({
       >
         <Checkbox disabled={!editable} />
       </Form.Item>
+      
+      <Form.List name="services">
+        {(fields, { add, remove }) => (
+          <div style={{ display: 'flex', rowGap: 16, flexDirection: 'column' }}>
+            {fields.map((field,index) => (
+              <Card
+              key={JSON.stringify(field.key)}
+              size="small"
+              title={`Послуга ${index + 1}`}
+              aria-disabled={!editable}
+            >
+              <Form.Item label="Найменування" name={[field.name, 'name']}>
+                  <Input
+                    placeholder="Найменування послуги"
+                    disabled
+                  />
+                </Form.Item>
+
+                <Form.Item label="Ціна" name={[field.name, 'price']}>
+                  <Input placeholder="Ціна послуги" disabled />
+                </Form.Item>
+            </Card>
+            ))}
+          </div>
+        )}
+      </Form.List>
     </Form>
   )
 }
