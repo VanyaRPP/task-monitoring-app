@@ -9,6 +9,8 @@ import {
 import { Popover, Input, Button, DatePicker } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { ITransaction } from './transactionTypes'
+import TransactionDrawer from './TransactionsDrawer'
+import { useState } from 'react'
 
 const { RangePicker } = DatePicker
 
@@ -253,8 +255,8 @@ export const generateColumns = (
       title: 'Options',
       dataIndex: 'OPTIONS',
       key: 'OPTIONS',
-      render: (text: string) => {
-        return <Popover title="Status">XXX</Popover>
+      render: (text: string, record: ITransaction) => {
+        return <TransactionDrawer transaction={record} />
       },
     },
   ].filter((column) => visibleColumns.includes(column.key))
