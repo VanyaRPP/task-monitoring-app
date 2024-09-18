@@ -1,14 +1,22 @@
-import { Button, Descriptions, Drawer, Select } from 'antd'
+import { Button, Descriptions, Divider, Drawer, Select } from 'antd'
 import React, { FC, useMemo, useState } from 'react'
 import { ITransaction } from './transactionTypes'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
+
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { DividedSpace } from '@components/UI/DividedSpace'
 
 interface TransactionDrawerProps {
   transaction: ITransaction
+  domain: IExtendedDomain
 }
 
-const TransactionDrawer: FC<TransactionDrawerProps> = ({ transaction }) => {
+const TransactionDrawer: FC<TransactionDrawerProps> = ({
+  transaction,
+  domain,
+}) => {
   const [drawerVisible, setDrawerVisible] = useState(false)
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
 
@@ -40,6 +48,15 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({ transaction }) => {
           : false
       ) as IRealestate[]
   }, [data, transactionAmount])
+
+  const { data: realEstatesData } = useGetAllRealEstateQuery({
+    domainId: domain._id,
+  })
+  console.log(realEstatesData)
+
+  const relatedCompanies = useMemo(() => {
+    return realEstatesData?.data || []
+  }, [realEstatesData])
 
   const showDrawer = () => {
     setDrawerVisible(true)
@@ -102,22 +119,39 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({ transaction }) => {
           <Descriptions.Item label="Date">
             {transaction.DAT_OD}
           </Descriptions.Item>
-          <Descriptions.Item label="Company">
-            <Select
-              placeholder="Select a company"
-              onChange={handleCompanyChange}
-              value={selectedCompany}
-              style={{ width: '100%' }}
-              loading={isLoading}
-            >
-              {companies?.map((company) => (
-                <Select.Option key={company._id} value={company._id}>
-                  {company.companyName}
-                </Select.Option>
-              ))}
-            </Select>
-          </Descriptions.Item>
         </Descriptions>
+        {/* <Divider /> */}
+        {/* <Descriptions.Item label="Company">
+          <Select
+            placeholder="Company for payment"
+            onChange={handleCompanyChange}
+            value={selectedCompany}
+            style={{ width: '100%' }}
+            loading={isLoading}
+          >
+            {companies?.map((company) => (
+              <Select.Option key={company._id} value={company._id}>
+                {company.companyName}
+              </Select.Option>
+            ))}
+          </Select>
+        </Descriptions.Item> */}
+        <Divider />
+        <Descriptions.Item label="Related Company">
+          <Select
+            placeholder="Related companies"
+            onChange={handleCompanyChange}
+            value={selectedCompany}
+            style={{ width: '100%' }}
+            loading={isLoading}
+          >
+            {relatedCompanies.map((company: IRealestate) => (
+              <Select.Option key={company._id} value={company._id}>
+                {company.companyName}
+              </Select.Option>
+            ))}
+          </Select>
+        </Descriptions.Item>
       </Drawer>
     </>
   )

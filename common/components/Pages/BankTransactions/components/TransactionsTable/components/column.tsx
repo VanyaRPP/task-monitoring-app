@@ -11,6 +11,7 @@ import type { ColumnsType } from 'antd/es/table'
 import { ITransaction } from './transactionTypes'
 import TransactionDrawer from './TransactionsDrawer'
 import { useState } from 'react'
+import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 
 const { RangePicker } = DatePicker
 
@@ -143,7 +144,8 @@ const getTrantypeFilterProps = () => ({
 
 // Main column generator function
 export const generateColumns = (
-  visibleColumns: string[]
+  visibleColumns: string[],
+  domain: IExtendedDomain
 ): ColumnsType<ITransaction> => {
   const columns: ColumnsType<ITransaction> = [
     { title: 'My CRF', dataIndex: 'AUT_MY_CRF', key: 'AUT_MY_CRF' },
@@ -256,7 +258,7 @@ export const generateColumns = (
       dataIndex: 'OPTIONS',
       key: 'OPTIONS',
       render: (text: string, record: ITransaction) => {
-        return <TransactionDrawer transaction={record} />
+        return <TransactionDrawer transaction={record} domain={domain} />
       },
     },
   ].filter((column) => visibleColumns.includes(column.key))
