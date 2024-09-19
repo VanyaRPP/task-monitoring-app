@@ -1,12 +1,23 @@
-import { Button, Descriptions, Divider, Drawer, Select } from 'antd'
+import {
+  Button,
+  Descriptions,
+  Divider,
+  Drawer,
+  Select,
+  Typography,
+  Space,
+  Row,
+  Col,
+} from 'antd'
 import React, { FC, useMemo, useState } from 'react'
 import { ITransaction } from './transactionTypes'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
-
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
-import { DividedSpace } from '@components/UI/DividedSpace'
+import { BankOutlined, ShopOutlined } from '@ant-design/icons'
+
+const { Title, Text } = Typography
 
 interface TransactionDrawerProps {
   transaction: ITransaction
@@ -20,24 +31,18 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const [drawerVisible, setDrawerVisible] = useState(false)
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
 
-  const { data, isLoading, error } = useGetAllPaymentsQuery({
-    limit: 1000,
-  })
-
+  const { data, isLoading } = useGetAllPaymentsQuery({ limit: 1000 })
   const transactionAmount = parseFloat(transaction.SUM as string)
 
   const companies = useMemo(() => {
     if (!data?.data) return []
-
     const filteredPayments = data.data.filter((payment) => {
       const paymentAmount =
         typeof payment.generalSum === 'string'
           ? parseFloat(payment.generalSum)
           : payment.generalSum
-
       return paymentAmount === transactionAmount
     })
-
     return filteredPayments
       .map((payment) => payment.company)
       .filter((company, index, self) =>
@@ -52,23 +57,15 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const { data: realEstatesData } = useGetAllRealEstateQuery({
     domainId: domain._id,
   })
-  console.log(realEstatesData)
 
-  const relatedCompanies = useMemo(() => {
-    return realEstatesData?.data || []
-  }, [realEstatesData])
+  const relatedCompanies = useMemo(
+    () => realEstatesData?.data || [],
+    [realEstatesData]
+  )
 
-  const showDrawer = () => {
-    setDrawerVisible(true)
-  }
-
-  const handleCloseDrawer = () => {
-    setDrawerVisible(false)
-  }
-
-  const handleCompanyChange = (value: string) => {
-    setSelectedCompany(value)
-  }
+  const showDrawer = () => setDrawerVisible(true)
+  const handleCloseDrawer = () => setDrawerVisible(false)
+  const handleCompanyChange = (value: string) => setSelectedCompany(value)
 
   return (
     <>
@@ -79,67 +76,57 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
         title="Transaction Details"
         placement="right"
         onClose={handleCloseDrawer}
-        visible={drawerVisible}
-        width="70%"
+        open={drawerVisible}
+        width="60%"
+        bodyStyle={{ padding: '24px' }}
       >
-        <Descriptions bordered>
-          <Descriptions.Item label="My CRF">
-            {transaction.AUT_MY_CRF}
-          </Descriptions.Item>
-          <Descriptions.Item label="My MFO">
-            {transaction.AUT_MY_MFO}
-          </Descriptions.Item>
-          <Descriptions.Item label="My Account">
-            {transaction.AUT_MY_ACC}
-          </Descriptions.Item>
-          <Descriptions.Item label="My Name">
-            {transaction.AUT_MY_NAM}
-          </Descriptions.Item>
-          <Descriptions.Item label="Counterparty CRF">
-            {transaction.AUT_CNTR_CRF}
-          </Descriptions.Item>
-          <Descriptions.Item label="Counterparty MFO">
-            {transaction.AUT_CNTR_MFO}
-          </Descriptions.Item>
-          <Descriptions.Item label="Counterparty Account">
-            {transaction.AUT_CNTR_ACC}
-          </Descriptions.Item>
-          <Descriptions.Item label="Counterparty Name">
-            {transaction.AUT_CNTR_NAM}
-          </Descriptions.Item>
-          <Descriptions.Item label="Currency">
-            {transaction.CCY}
-          </Descriptions.Item>
-          <Descriptions.Item label="Amount">
-            {transaction.SUM}
-          </Descriptions.Item>
-          <Descriptions.Item label="Description">
-            {transaction.OSND}
-          </Descriptions.Item>
-          <Descriptions.Item label="Date">
-            {transaction.DAT_OD}
-          </Descriptions.Item>
-        </Descriptions>
-        {/* <Divider /> */}
-        {/* <Descriptions.Item label="Company">
+        <Space direction="vertical" style={{ width: '100%' }} size="large">
+          <Title level={4}>
+            <BankOutlined /> Transaction Info
+          </Title>
+
+          <Row gutter={[16, 16]}>
+            <Col span={12}>
+              <Text strong>Counterparty CRF:</Text>
+              <br />
+              <Text>{transaction.AUT_CNTR_CRF}</Text>
+            </Col>
+            <Col span={12}>
+              <Text strong>Counterparty MFO:</Text>
+              <br />
+              <Text>{transaction.AUT_CNTR_MFO}</Text>
+            </Col>
+
+            <Col span={12}>
+              <Text strong>Counterparty Account:</Text>
+              <br />
+              <Text>{transaction.AUT_CNTR_ACC}</Text>
+            </Col>
+            <Col span={12}>
+              <Text strong>Counterparty Name:</Text>
+              <br />
+              <Text>{transaction.AUT_CNTR_NAM}</Text>
+            </Col>
+          </Row>
+
+          <Divider />
+
+          <Text strong>Description:</Text>
+          <Text>{transaction.OSND}</Text>
+
+          <Divider />
+
+          <Text strong>Amount:</Text>
+          <Text>{transaction.SUM}</Text>
+
+          <Divider />
+
+          <Title level={4}>
+            <ShopOutlined /> Related Company
+          </Title>
+          <Text strong>Select Company:</Text>
           <Select
-            placeholder="Company for payment"
-            onChange={handleCompanyChange}
-            value={selectedCompany}
-            style={{ width: '100%' }}
-            loading={isLoading}
-          >
-            {companies?.map((company) => (
-              <Select.Option key={company._id} value={company._id}>
-                {company.companyName}
-              </Select.Option>
-            ))}
-          </Select>
-        </Descriptions.Item> */}
-        <Divider />
-        <Descriptions.Item label="Related Company">
-          <Select
-            placeholder="Related companies"
+            placeholder="Select a related company"
             onChange={handleCompanyChange}
             value={selectedCompany}
             style={{ width: '100%' }}
@@ -151,7 +138,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
               </Select.Option>
             ))}
           </Select>
-        </Descriptions.Item>
+        </Space>
       </Drawer>
     </>
   )
