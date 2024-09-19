@@ -34,9 +34,11 @@ const Modal: React.FC<Props> = ({
   open = true,
   preview,
 }) => {
+  const [modal, context] = AntModal.useModal()
+
   const handleCancel = () => {
     if (changed()) {
-      AntModal.confirm({
+      modal.confirm({
         title: 'Ви впевнені, що хочете вийти?',
         content: 'Всі незбережені дані будуть втрачені',
         okText: 'Так',
@@ -49,21 +51,24 @@ const Modal: React.FC<Props> = ({
   }
 
   return (
-    <AntModal
-      confirmLoading={confirmLoading}
-      open={open}
-      maskClosable={!maskClickIgnore}
-      title={title}
-      onCancel={handleCancel}
-      onOk={onOk}
-      cancelText={cancelText}
-      okText={okText}
-      className={className ? className : s.Modal}
-      style={style}
-      okButtonProps={okButtonProps}
-    >
-      {children}
-    </AntModal>
+    <>
+      <AntModal
+        confirmLoading={confirmLoading}
+        open={open}
+        maskClosable={!maskClickIgnore}
+        title={title}
+        onCancel={handleCancel}
+        onOk={onOk}
+        cancelText={cancelText}
+        okText={okText}
+        className={className ? className : s.Modal}
+        style={style}
+        okButtonProps={okButtonProps}
+      >
+        {children}
+      </AntModal>
+      {context}
+    </>
   )
 }
 
