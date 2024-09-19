@@ -59,7 +59,7 @@ const PaymentCardHeader = ({
   const [deletePayment] = useDeleteMultiplePaymentsMutation()
 
   const handleDeletePayments = async () => {
-    ;(Modal as any).confirm({
+    (Modal as any).confirm({
       title: 'Ви впевнені, що хочете видалити обрані проплати?',
       cancelText: 'Ні',
       okText: 'Так',
