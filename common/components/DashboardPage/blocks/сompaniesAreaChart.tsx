@@ -8,10 +8,14 @@ import CompaniesAreaChartHeader from '@components/Tables/CompaniesAreaChart/Head
 import TableCard from '@components/UI/TableCard'
 import React, { useEffect, useMemo, useState } from 'react'
 
-const CompaniesAreaChart: React.FC = () => {
+interface CompaniesAreaChartProps {
+  domainID?: string
+}
+
+const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({ domainID }) => {
 
   const { data: domains } = useGetDomainsQuery({})
-  const [domainId, setDomainId] = useState<string>()
+  const [domainId, setDomainId] = useState<string>(domainID)
   const { data } = useGetAllRealEstateQuery({})
   const [domainName, setDomainName] = useState('')
 
@@ -21,6 +25,11 @@ const CompaniesAreaChart: React.FC = () => {
     } else {
       setDomainId(undefined)
     }
+    // if (domainID) {
+    //   setDomainId(domainID)
+    // } else {
+    //   data?.domainsFilter?.length ? setDomainId(data.domainsFilter[0].value) : setDomainId(undefined)
+    // }
   }, [data])
 
   const { data: areas } = useGetAreasQuery(
@@ -74,7 +83,7 @@ const CompaniesAreaChart: React.FC = () => {
 
   return (
     <TableCard
-      title={<CompaniesAreaChartHeader setDomainId={setDomainId} />}
+      title={!domainID ? <CompaniesAreaChartHeader setDomainId={setDomainId}/> : null}
       style={{ height: '100%' }}
     >
       <Chart
