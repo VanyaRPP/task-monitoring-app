@@ -17,9 +17,8 @@ export type IRealestate = {
   waterPart?: number
   discount?: number
   cleaning?: number
-  services:IDomainService[]
+  services: IDomainService[]
 }
-
 
 export interface IExtendedRealestate extends IRealestate {
   _id: string

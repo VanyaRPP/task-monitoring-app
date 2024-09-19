@@ -28,8 +28,6 @@ const RealEstateModal: FC<Props> = ({
   const [addRealEstate] = useAddRealEstateMutation()
   const [editRealEstate] = useEditRealEstateMutation()
 
- 
-
   useEffect(() => {
     const initialValues = {
       domain: currentRealEstate?.domain?.name,
@@ -48,14 +46,15 @@ const RealEstateModal: FC<Props> = ({
       waterPart: currentRealEstate?.waterPart || 0,
       discount: currentRealEstate?.discount || 0,
       cleaning: currentRealEstate?.cleaning || 0,
-      services:  currentRealEstate?.services || [],
+      services: currentRealEstate?.services || [],
     }
     form.setFieldsValue(initialValues)
   }, [currentRealEstate, form])
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
-    
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(formData))
     const realEstateData = {
       domain: currentRealEstate?.domain || formData.domain,
       street: currentRealEstate?.street || formData.street,
@@ -72,7 +71,7 @@ const RealEstateModal: FC<Props> = ({
       discount:
         formData.discount > 0 ? formData.discount * -1 : formData.discount,
       cleaning: formData.cleaning,
-      services: formData.services 
+      services: formData.services,
     }
 
     const response = currentRealEstate

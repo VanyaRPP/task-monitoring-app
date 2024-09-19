@@ -1,24 +1,24 @@
 import { validateField } from '@assets/features/validators'
 import {
   IExtendedRealestate,
-  IRealestate,
 } from '@common/api/realestateApi/realestate.api.types'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
 import {
   Button,
   Card,
   Checkbox,
+  Flex,
   Form,
   FormInstance,
   Input,
   InputNumber,
+  Typography,
 } from 'antd'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect } from 'react'
 import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
 import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
-import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { IDomain } from '@modules/models/Domain'
 
 interface Props {
@@ -44,9 +44,14 @@ const RealEstateForm: FC<Props> = ({
 
   useEffect(() => {
     if (domain && domain.domainServices) {
+      const servicesWithEnabled = domain.domainServices.map((service) => ({
+        ...service,
+        enabled: true,
+      }))
+
       form.setFieldsValue({
         ...form.getFieldsValue(),
-        services: domain.domainServices,
+        services: servicesWithEnabled,
       })
     }
   }, [domain, form])
@@ -173,28 +178,36 @@ const RealEstateForm: FC<Props> = ({
       >
         <Checkbox disabled={!editable} />
       </Form.Item>
-      
+
       <Form.List name="services">
         {(fields, { add, remove }) => (
           <div style={{ display: 'flex', rowGap: 16, flexDirection: 'column' }}>
-            {fields.map((field,index) => (
+            {fields.map((field, index) => (
               <Card
-              key={JSON.stringify(field.key)}
-              size="small"
-              title={`Послуга ${index + 1}`}
-              aria-disabled={!editable}
-            >
-              <Form.Item label="Найменування" name={[field.name, 'name']}>
-                  <Input
-                    placeholder="Найменування послуги"
-                    disabled
-                  />
+                key={JSON.stringify(field.key)}
+                size="small"
+                title={
+                  <Flex justify={'space-between'} align={'center'}>
+                    <Typography>Послуга {index + 1}</Typography>
+                    <Form.Item
+                      name={[field.name, 'enabled']}
+                      valuePropName="checked"
+                      initialValue={true}
+                    >
+                      <Checkbox disabled={!editable} />
+                    </Form.Item>
+                  </Flex>
+                }
+                aria-disabled={!editable}
+              >
+                <Form.Item label="Найменування" name={[field.name, 'name']}>
+                  <Input placeholder="Найменування послуги" disabled />
                 </Form.Item>
 
                 <Form.Item label="Ціна" name={[field.name, 'price']}>
                   <Input placeholder="Ціна послуги" disabled />
                 </Form.Item>
-            </Card>
+              </Card>
             ))}
           </div>
         )}
