@@ -86,10 +86,10 @@ const ServicesTable: React.FC<Props> = ({
       <Table
         rowKey="_id"
         pagination={
-          isOnPage && {
+          (router.pathname === AppRoutes.SERVICE ||
+            router.pathname === AppRoutes.SEP_DOMAIN) && {
             total: services?.total,
             current: pageData.currentPage,
-            pageSize: pageData.pageSize,
             showSizeChanger: true,
             pageSizeOptions: [10, 20, 50],
             position: ['bottomCenter'],

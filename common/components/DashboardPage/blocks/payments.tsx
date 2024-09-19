@@ -105,7 +105,7 @@ function getTypeOperation(value) {
   }
 }
 
-const PaymentsBlock: React.FC<PaymentsBlockProps> = ({sepDomainID}) => {
+const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const router = useRouter()
   const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
   const [paymentActions, setPaymentActions] = useState({
@@ -504,9 +504,10 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({sepDomainID}) => {
           columns={columns}
           dataSource={payments?.data}
           pagination={
-            router.pathname === AppRoutes.PAYMENT && {
-              pageSize: pageData.pageSize,
+            (router.pathname === AppRoutes.PAYMENT ||
+              router.pathname === AppRoutes.SEP_DOMAIN) && {
               total: payments?.total,
+              showSizeChanger: true,
               pageSizeOptions: [10, 20, 50],
               position: ['bottomCenter'],
               onChange: (currentPage, pageSize) => {
