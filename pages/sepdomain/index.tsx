@@ -24,6 +24,7 @@ export default withAuthRedirect(() => {
       <PaymentsBlock sepDomainID={sepDomainID}/>
       <ServicesBlock sepDomainID={sepDomainID}/>
       <RealEstateBlock sepDomainID={sepDomainID}/>
+      <StreetsBlock domainId={sepDomainID}/>
     </MainLayout>
   )
 })
