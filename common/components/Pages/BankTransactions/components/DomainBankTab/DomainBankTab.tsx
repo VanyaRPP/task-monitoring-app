@@ -150,6 +150,7 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
             nextButtonText="Next"
           />
         }
+        domain={domain}
       />
     </Card>
   )

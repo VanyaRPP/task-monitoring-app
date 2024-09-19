@@ -8,13 +8,19 @@ import {
   defaultVisibleColumns,
   generateColumns,
 } from './components/column'
+import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 
 interface Props {
   transactions: ITransaction[]
   pagination?: React.ReactNode
+  domain: IExtendedDomain
 }
 
-const TransactionsTable: React.FC<Props> = ({ transactions, pagination }) => {
+const TransactionsTable: React.FC<Props> = ({
+  transactions,
+  pagination,
+  domain,
+}) => {
   const { visibleColumns, toggleColumnVisibility } = useColumnVisibility(
     defaultVisibleColumns
   )
@@ -35,7 +41,7 @@ const TransactionsTable: React.FC<Props> = ({ transactions, pagination }) => {
   const [tableSettingDropdovnVisible, setTableSettingDropdovnVisible] =
     useState<boolean>(false)
 
-  const columns = generateColumns(visibleColumns)
+  const columns = generateColumns(visibleColumns, domain)
 
   return (
     <div>
