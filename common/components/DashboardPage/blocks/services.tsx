@@ -11,6 +11,9 @@ import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
+import { message, Modal } from 'antd'
+import { dateToMonthYear } from '@assets/features/formatDate'
 
 const ServicesBlock = () => {
   const { data: user } = useGetCurrentUserQuery()
@@ -19,6 +22,37 @@ const ServicesBlock = () => {
     edit: false,
     preview: false,
   })
+  const [selectedServices, setSelectedServices] = useState<IService[]>([])
+  const [deleteService, _] =
+  useDeleteServiceMutation()
+
+  const handleDeleteServices = () => {
+    (Modal as any).confirm({
+      title: 'Ви впевнені, що хочете видалити обрані проплати?',
+      cancelText: 'Ні',
+      okText: 'Так',
+      content: (
+        <>
+          {selectedServices.map((service, index) => (
+            <div key={index}>
+              {index + 1}. {service?.domain?.name}, {service?.street?.address}, {dateToMonthYear(service.date)}
+            </div>
+          ))}
+        </>
+      ),
+      onOk: async () => {
+        try {
+          await Promise.all(
+            selectedServices.map((service) => deleteService(service._id))
+          );
+          setSelectedServices([]);
+          message.success('Видалено!');
+        } catch (error) {
+          message.error('Помилка при видаленні рахунків');
+        }
+      },
+    })
+  }
   const [filter, setFilter] = useState<IServiceFilter>()
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.SERVICE
@@ -46,6 +80,8 @@ const ServicesBlock = () => {
           filter={filter}
           setFilter={setFilter}
           services={servicesData}
+          handleDeleteServices={handleDeleteServices}
+          selectedServices={selectedServices}
         />
       }
     >
@@ -58,6 +94,7 @@ const ServicesBlock = () => {
         isError={isError}
         filter={filter}
         setFilter={setFilter}
+        setSelectedServices={setSelectedServices}
       />
     </TableCard>
   )

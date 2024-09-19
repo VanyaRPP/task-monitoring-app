@@ -5,18 +5,25 @@ import { authOptions } from '@pages/api/auth/[...nextauth]'
 import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
+import Head from 'next/head'
 
 export default withAuthRedirect(() => {
   return (
-    <MainLayout
-      path={[
-        { title: 'Панель управління', path: AppRoutes.INDEX },
-        { title: 'Платежі', path: AppRoutes.PAYMENT },
-        { title: 'Створення рахунків', path: AppRoutes.PAYMENT_BULK },
-      ]}
-    >
-      <PaymentBulkBlock />
-    </MainLayout>
+    <>
+      <Head>
+        <title>Створення платежів</title>
+      </Head>
+
+      <MainLayout
+        path={[
+          { title: 'Панель управління', path: AppRoutes.INDEX },
+          { title: 'Платежі', path: AppRoutes.PAYMENT },
+          { title: 'Створення рахунків', path: AppRoutes.PAYMENT_BULK },
+        ]}
+      >
+        <PaymentBulkBlock />
+      </MainLayout>
+    </>
   )
 })
 
