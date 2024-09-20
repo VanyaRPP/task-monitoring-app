@@ -72,8 +72,15 @@ const StreetsTable: React.FC<Props> = ({
     <>
       <Table
         rowKey="_id"
-        size="small"
-        pagination={false}
+        pagination={
+          (router.pathname === AppRoutes.REAL_ESTATE ||
+            router.pathname === AppRoutes.SEP_DOMAIN) && {
+            hideOnSinglePage: false,
+            showSizeChanger: true,
+            pageSizeOptions: [10, 20, 50],
+            position: ['bottomCenter'],
+          }
+        }
         loading={isLoading}
         columns={getDefaultColumns(handleDelete, deleteLoading, openModal)}
         expandable={
