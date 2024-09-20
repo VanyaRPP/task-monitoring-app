@@ -22,10 +22,12 @@ export default async function handler(
 
     // Use map to replace each token with its encrypted version
     obj.domainBankToken = obj.domainBankToken.map(
-      (item: { name: string; token: string }) => ({
+      (item: { name: string; token: string; shortToken?: string }) => ({
         ...item,
-        token: encryptionService.encrypt(item.token),
-        shortToken: hidePercentCharacters(item.token),
+        // token: encryptionService.encrypt(item.token),
+        token: item.token ? item.token : encryptionService.encrypt(item.token),
+        // shortToken: hidePercentCharacters(item.token),
+        shortToken: item.shortToken || hidePercentCharacters(item.token),
       })
     )
 

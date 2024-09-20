@@ -242,6 +242,7 @@ const getDefaultColumns = ({
     },
     {
       fixed: 'right',
+      align: 'center',
       title: '',
       width: 50,
       render: (_, realEstate: IExtendedRealestate) => (

@@ -3,6 +3,7 @@ import { IFilter } from '../paymentApi/payment.api.types'
 import { IStreet } from '../streetApi/street.api.types'
 
 export type IRealestate = {
+  _id: string
   domain: IDomain
   street: IStreet
   companyName: string

@@ -3,6 +3,8 @@ import { validateField } from '@assets/features/validators'
 import React, { FC, useEffect } from 'react'
 import s from '../style.module.scss'
 import { CloseOutlined } from '@ant-design/icons'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import { useForm } from 'antd/lib/form/Form'
 
 interface Props {
   editable: boolean
@@ -33,6 +35,28 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
       })
     }
   }, [IE_NAME, IBAN, RNOKPP, MFO, form, editable])
+
+  const { data, isLoading } = useGetDomainsQuery({})
+  const [formInstance] = useForm()
+  const confidantPeopleOptions =
+    data?.reduce((uniqueAdminEmails, domain) => {
+      const newAdminEmails = domain.adminEmails.filter(
+        (email) => !uniqueAdminEmails.includes(email)
+      )
+      return [...uniqueAdminEmails, ...newAdminEmails]
+    }, []) || []
+
+  useEffect(() => {
+    if (data) {
+      const adminEmails = data.reduce((uniqueAdminEmails, domain) => {
+        const newAdminEmails = domain.adminEmails.filter(
+          (email) => !uniqueAdminEmails.includes(email)
+        )
+        return [...uniqueAdminEmails, ...newAdminEmails]
+      }, [])
+      formInstance.setFieldsValue({ adminEmails })
+    }
+  }, [data])
 
   return (
     <div>
@@ -91,15 +115,16 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
                 key={field.key}
                 aria-disabled={!editable}
                 extra={
-                  <Button
-                    type="link"
-                    disabled={!editable}
-                    onClick={() => {
-                      remove(field.name)
-                    }}
-                  >
-                    <CloseOutlined />
-                  </Button>
+                  editable && (
+                    <Button
+                      type="link"
+                      onClick={() => {
+                        remove(field.name)
+                      }}
+                    >
+                      <CloseOutlined />
+                    </Button>
+                  )
                 }
               >
                 <Form.Item label="Name" name={[field.name, 'name']}>
@@ -109,40 +134,64 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
                     disabled={!editable}
                   />
                 </Form.Item>
-                {!editable ? (
-                  <Form.Item label="Token" name={[field.name, 'shortToken']}>
-                    <Input
-                      placeholder="Token"
-                      className={s.formInput}
-                      disabled={!editable}
-                    />
-                  </Form.Item>
-                ) : (
-                  <Form.Item label="Token" name={[field.name, 'token']}>
-                    <Input
-                      placeholder="Token"
-                      className={s.formInput}
-                      disabled={!editable}
-                    />
-                  </Form.Item>
-                )}
+
+                <Form.Item label="Token" name={[field.name, 'shortToken']}>
+                  <Input
+                    placeholder="Token"
+                    className={s.formInput}
+                    disabled={
+                      !editable ||
+                      !!form.getFieldValue([
+                        'domainBankToken',
+                        field.name,
+                        'shortToken',
+                      ])
+                    }
+                  />
+                </Form.Item>
 
                 <Form.Item
                   label="Confidant people"
                   name={[field.name, 'confidant']}
+                  rules={[
+                    {
+                      required: false,
+                    },
+                  ]}
                 >
                   <Select
+                    mode="tags"
                     placeholder="Confidant people"
                     className={s.formInput}
-                    disabled={true}
-                  />
+                    disabled={!editable}
+                    onSelect={() => {
+                      formInstance.setFieldsValue({ adminEmails: [] })
+                    }}
+                    filterOption={(inputValue, option) => {
+                      if (typeof option?.value === 'string') {
+                        return option.value
+                          .toLowerCase()
+                          .includes(inputValue.toLowerCase())
+                      }
+                      return false
+                    }}
+                    showSearch
+                  >
+                    {confidantPeopleOptions?.map((person) => (
+                      <Select.Option key={person} value={person}>
+                        {person}
+                      </Select.Option>
+                    ))}
+                  </Select>
                 </Form.Item>
               </Card>
             ))}
 
-            <Button type="dashed" onClick={() => add()} block>
-              + Add Business Private Token
-            </Button>
+            {editable && (
+              <Button type="dashed" onClick={() => add()} block>
+                + Add Business Private Token
+              </Button>
+            )}
           </div>
         )}
       </Form.List>
