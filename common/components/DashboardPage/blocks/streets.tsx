@@ -5,11 +5,10 @@ import StreetsTable from '@components/Tables/Streets/Table'
 import TableCard from '@components/UI/TableCard'
 import { useState } from 'react'
 
-interface StreetBlockProps {
-  domainId?: string;
-}
-
-const StreetsBlock: React.FC<StreetBlockProps> = ({ domainId }) => {
+const StreetsBlock: React.FC<{
+  domainId?: string
+  sepDomainId?: string
+}> = ({ domainId, sepDomainId }) => {
   const { data: user } = useGetCurrentUserQuery()
   const [currentStreet, setCurrentStreet] = useState<IStreet>(null)
   const [streetActions, setStreetActions] = useState({
@@ -24,6 +23,7 @@ const StreetsBlock: React.FC<StreetBlockProps> = ({ domainId }) => {
           showAddButton
           streetActions={streetActions}
           setStreetActions={setStreetActions}
+          enableStreetsHeaderButton={sepDomainId ? false : true}
         />
       }
     >
@@ -33,6 +33,7 @@ const StreetsBlock: React.FC<StreetBlockProps> = ({ domainId }) => {
         setStreetActions={setStreetActions}
         streetActions={streetActions}
         currentStreet={currentStreet}
+        sepDomainId={sepDomainId}
       />
     </TableCard>
   )

@@ -20,16 +20,11 @@ const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({ domainID }) => 
   const [domainName, setDomainName] = useState('')
 
   useEffect(() => {
-    if (data?.domainsFilter?.length) {
-      setDomainId(data.domainsFilter[0].value)
+    if (domainID) {
+      setDomainId(domainID)
     } else {
-      setDomainId(undefined)
+      data?.domainsFilter?.length ? setDomainId(data.domainsFilter[0].value) : setDomainId(undefined)
     }
-    // if (domainID) {
-    //   setDomainId(domainID)
-    // } else {
-    //   data?.domainsFilter?.length ? setDomainId(data.domainsFilter[0].value) : setDomainId(undefined)
-    // }
   }, [data])
 
   const { data: areas } = useGetAreasQuery(

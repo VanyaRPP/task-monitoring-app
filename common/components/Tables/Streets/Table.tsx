@@ -27,6 +27,7 @@ export interface Props {
   }
   setCurrentStreet: (street: IStreet) => void
   currentStreet?: IStreet
+  sepDomainId?: string
 }
 
 const StreetsTable: React.FC<Props> = ({
@@ -35,12 +36,13 @@ const StreetsTable: React.FC<Props> = ({
   setStreetActions,
   streetActions,
   currentStreet,
+  sepDomainId,
 }) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.STREETS
 
   const { data, isLoading, isError } = useGetAllStreetsQuery({
-    domainId,
+    domainId: sepDomainId || domainId,
     limit: isOnPage ? 0 : 5,
   })
 

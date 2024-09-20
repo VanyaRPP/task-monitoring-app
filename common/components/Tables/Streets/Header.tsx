@@ -18,12 +18,14 @@ export interface Props {
       preview: boolean
     }>
   >
+  enableStreetsHeaderButton?: boolean
 }
 
 const StreetsHeader: React.FC<Props> = ({
   showAddButton = false,
   streetActions,
   setStreetActions,
+  enableStreetsHeaderButton,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -39,7 +41,7 @@ const StreetsHeader: React.FC<Props> = ({
       <Button
         type="link"
         onClick={() => {
-          router.push(AppRoutes.STREETS)
+          enableStreetsHeaderButton && router.push(AppRoutes.STREETS)
         }}
       >
         Адреси
