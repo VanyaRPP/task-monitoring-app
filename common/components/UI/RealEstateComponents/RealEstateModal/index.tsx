@@ -53,8 +53,7 @@ const RealEstateModal: FC<Props> = ({
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(formData))
+   
     const realEstateData = {
       domain: currentRealEstate?.domain || formData.domain,
       street: currentRealEstate?.street || formData.street,
