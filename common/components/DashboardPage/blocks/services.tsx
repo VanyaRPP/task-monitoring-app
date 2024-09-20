@@ -15,7 +15,11 @@ import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import { message, Modal } from 'antd'
 import { dateToMonthYear } from '@assets/features/formatDate'
 
-const ServicesBlock = () => {
+interface ServiceBlockProps {
+  sepDomainID?: string;
+}
+
+const ServicesBlock: React.FC<ServiceBlockProps> = ({sepDomainID}) => {
   const { data: user } = useGetCurrentUserQuery()
   const [currentService, setCurrentService] = useState<IService>(null)
   const [serviceActions, setServiceActions] = useState({
@@ -64,7 +68,7 @@ const ServicesBlock = () => {
   } = useGetAllServicesQuery({
     limit: isOnPage ? 0 : 5,
     streetId: filter?.street || undefined,
-    domainId: filter?.domain || undefined,
+    domainId: sepDomainID || filter?.domain || undefined,
     year: filter?.year,
     month: filter?.month,
   })
@@ -80,6 +84,7 @@ const ServicesBlock = () => {
           filter={filter}
           setFilter={setFilter}
           services={servicesData}
+          enableServiceButton={sepDomainID ? false : true}
           handleDeleteServices={handleDeleteServices}
           selectedServices={selectedServices}
         />

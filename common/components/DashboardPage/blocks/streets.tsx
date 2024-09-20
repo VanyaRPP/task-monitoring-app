@@ -7,7 +7,8 @@ import { useState } from 'react'
 
 const StreetsBlock: React.FC<{
   domainId?: string
-}> = ({ domainId }) => {
+  sepDomainId?: string
+}> = ({ domainId, sepDomainId }) => {
   const { data: user } = useGetCurrentUserQuery()
   const [currentStreet, setCurrentStreet] = useState<IStreet>(null)
   const [streetActions, setStreetActions] = useState({
@@ -22,6 +23,7 @@ const StreetsBlock: React.FC<{
           showAddButton
           streetActions={streetActions}
           setStreetActions={setStreetActions}
+          enableStreetsHeaderButton={sepDomainId ? false : true}
         />
       }
     >
@@ -31,6 +33,7 @@ const StreetsBlock: React.FC<{
         setStreetActions={setStreetActions}
         streetActions={streetActions}
         currentStreet={currentStreet}
+        sepDomainId={sepDomainId}
       />
     </TableCard>
   )
