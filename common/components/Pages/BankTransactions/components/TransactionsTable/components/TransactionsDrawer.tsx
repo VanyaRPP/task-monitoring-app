@@ -9,13 +9,18 @@ import {
   Row,
   Col,
 } from 'antd'
-import React, { FC, useMemo, useState } from 'react'
+import React, { FC, useEffect, useMemo, useState } from 'react'
 import { ITransaction } from './transactionTypes'
 import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
-import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import {
+  IDomainModel,
+  IExtendedDomain,
+} from '@common/api/domainApi/domain.api.types'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { BankOutlined, ShopOutlined } from '@ant-design/icons'
+import AddPaymentModal from '@components/AddPaymentModal'
+import { IPayment } from '@common/api/paymentApi/payment.api.types'
 
 const { Title, Text } = Typography
 
@@ -30,29 +35,9 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
 }) => {
   const [drawerVisible, setDrawerVisible] = useState(false)
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
+  const [modalVisible, setModalVisible] = useState(false)
 
-  const { data, isLoading } = useGetAllPaymentsQuery({ limit: 1000 })
   const transactionAmount = parseFloat(transaction.SUM as string)
-
-  const companies = useMemo(() => {
-    if (!data?.data) return []
-    const filteredPayments = data.data.filter((payment) => {
-      const paymentAmount =
-        typeof payment.generalSum === 'string'
-          ? parseFloat(payment.generalSum)
-          : payment.generalSum
-      return paymentAmount === transactionAmount
-    })
-    return filteredPayments
-      .map((payment) => payment.company)
-      .filter((company, index, self) =>
-        typeof company !== 'string' && company
-          ? self.findIndex(
-              (c) => (c as IRealestate)?._id === (company as IRealestate)._id
-            ) === index
-          : false
-      ) as IRealestate[]
-  }, [data, transactionAmount])
 
   const { data: realEstatesData } = useGetAllRealEstateQuery({
     domainId: domain._id,
@@ -66,6 +51,18 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const showDrawer = () => setDrawerVisible(true)
   const handleCloseDrawer = () => setDrawerVisible(false)
   const handleCompanyChange = (value: string) => setSelectedCompany(value)
+
+  const showModal = () => setModalVisible(true)
+  const closeModal = () => setModalVisible(false)
+
+  useEffect(() => {
+    if (selectedCompany) {
+      const company = relatedCompanies.find(
+        (company: IRealestate) => company._id === selectedCompany
+      )
+      console.log(company)
+    }
+  }, [selectedCompany, relatedCompanies])
 
   return (
     <>
@@ -130,7 +127,6 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
             onChange={handleCompanyChange}
             value={selectedCompany}
             style={{ width: '100%' }}
-            loading={isLoading}
           >
             {relatedCompanies.map((company: IRealestate) => (
               <Select.Option key={company._id} value={company._id}>
@@ -138,8 +134,24 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
               </Select.Option>
             ))}
           </Select>
+
+          <Button type="primary" onClick={showModal}>
+            Send
+          </Button>
         </Space>
       </Drawer>
+      {modalVisible && (
+        <AddPaymentModal
+          closeModal={closeModal}
+          paymentData={{
+            ...relatedCompanies.find(
+              (company: IRealestate) => company._id === selectedCompany
+            ),
+            generalSum: transactionAmount,
+          }}
+          paymentActions={{ edit: false, preview: false }}
+        />
+      )}
     </>
   )
 }

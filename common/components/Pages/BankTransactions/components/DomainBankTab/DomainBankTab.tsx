@@ -26,7 +26,6 @@ interface Props {
 const DomainBankTab: FC<Props> = ({ domain }) => {
   // const { Meta } = Card
   // const { TextArea } = Input
-
   const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
 
   const encryptionService = new EncryptionService(SECURE_TOKEN)

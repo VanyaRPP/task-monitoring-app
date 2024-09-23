@@ -45,7 +45,7 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
     <Form.Item
       name="monthService"
       label="Місяць"
-      rules={validateField('required')}
+      // rules={validateField('required')}
     >
       <Select
         options={options}

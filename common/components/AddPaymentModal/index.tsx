@@ -191,7 +191,7 @@ const AddPaymentModal: FC<Props> = ({
       <Modal
         title={edit ? 'Редагування рахунку' : !preview && 'Додавання рахунку'}
         onOk={activeTabKey === '1' ? handleOk : handleSubmit}
-        okButtonProps={preview ? { style: { display: 'none' }} : null }
+        okButtonProps={preview ? { style: { display: 'none' } } : null}
         changed={() => isValueChanged}
         onCancel={() => {
           form.resetFields()
