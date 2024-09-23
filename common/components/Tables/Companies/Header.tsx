@@ -32,6 +32,7 @@ export interface Props {
   realEstateActions: {
     edit: boolean
   }
+  enableRealEstateButton?: true | false
 }
 
 const CompaniesHeader: React.FC<Props> = ({
@@ -43,6 +44,7 @@ const CompaniesHeader: React.FC<Props> = ({
   realEstates,
   setRealEstateActions,
   realEstateActions,
+  enableRealEstateButton,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -64,7 +66,10 @@ const CompaniesHeader: React.FC<Props> = ({
   return (
     <div className={s.headerBlock}>
       <div className={s.firstBlock}>
-        <Button type="link" onClick={() => router.push(AppRoutes.REAL_ESTATE)}>
+        <Button type="link" onClick={() => { 
+          if(enableRealEstateButton) {
+            router.push(AppRoutes.REAL_ESTATE)
+          }}}>
           Компанії
         </Button>
 
