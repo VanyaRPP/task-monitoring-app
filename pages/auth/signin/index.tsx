@@ -15,6 +15,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import s from './style.module.scss'
+import SignInForm from '../../../common/components/Forms/AddSingInForm'
 
 type PropsType = {
   providers: Record<
@@ -72,6 +73,7 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
       )}
 
       <h2 className={s.Header}>{config.titles.signInTitle}</h2>
+      <SignInForm />
 
       {
         process.env.NODE_ENV === 'development' ? (
