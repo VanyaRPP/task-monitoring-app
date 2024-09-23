@@ -1,4 +1,4 @@
-import { SelectOutlined } from '@ant-design/icons'
+import { SelectOutlined, LoadingOutlined } from '@ant-design/icons'
 import {
   useAddPaymentMutation,
   useGetPaymentNumberQuery,
@@ -10,14 +10,27 @@ import AddressesSelect from '@common/components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@common/components/UI/Reusable/DomainsSelect'
 import { AppRoutes, Operations } from '@utils/constants'
 import { getPaymentProviderAndReciever, toRoundFixed } from '@utils/helpers'
-import { Button, message } from 'antd'
+import { Button, message, Spin } from 'antd'
 import { useRouter } from 'next/router'
+import { useState } from 'react'
+import styles from './styles.module.scss'
 
 const InvoicesHeader = () => {
   const router = useRouter()
   const { form, companies, service } = useInvoicesPaymentContext()
   const [addPayment] = useAddPaymentMutation()
   const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleClickSaveButton = async () => {
+    try {
+      setIsLoading(true)
+      await handleSave()
+    }
+    finally {
+      setIsLoading(false)
+    }
+  } 
 
   const handleSave = async () => {
     const values = await form.validateFields()
@@ -92,8 +105,8 @@ const InvoicesHeader = () => {
         <MonthServiceGeneralInfo />
       </div>
 
-      <Button type="link" onClick={handleSave}>
-        Зберегти
+      <Button type="link" disabled={isLoading} onClick={handleClickSaveButton} className={styles.saveButton}>
+        {isLoading ? <Spin indicator={<LoadingOutlined spin />} size="small" /> : `Зберегти`}
       </Button>
     </div>
   )
