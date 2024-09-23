@@ -36,12 +36,16 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
     })
 
   useEffect(() => {
-    form.setFieldValue('company', undefined)
+    if (!edit) {
+      form.setFieldValue('company', undefined)
+    }
   }, [form, streetId])
 
   useEffect(() => {
-    if (companies?.length === 1) {
-      form.setFieldValue('company', companies[0]._id)
+    if (!edit) {
+      if (companies?.length === 1) {
+        form.setFieldValue('company', companies[0]._id)
+      }
     }
   }, [form, companies])
 
@@ -53,6 +57,7 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
     >
       <Select
         filterSort={(optionA, optionB) =>
+          // TODO: invistagate ts-ignore issue
           (optionA?.label ?? '')
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
@@ -63,6 +68,7 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
         }
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
+
         filterOption={(input, option) =>
           (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
         }
