@@ -64,7 +64,7 @@ export const authOptions: NextAuthOptions = {
           }else{
             bcrypt.hash(credentials.password, saltRounds, async function (err, hash) {
               if (user) {
-                console.error('User already exists!');
+                // console.error('User already exists!');
                 return null;
               }
               if (err) throw Error('Error: Encryption error!')
@@ -83,7 +83,7 @@ export const authOptions: NextAuthOptions = {
 
           return null;
         } catch (error) {
-          console.error("Error during authorization:", error);
+          // console.error("Error during authorization:", error);
           return null;
         }
       }
