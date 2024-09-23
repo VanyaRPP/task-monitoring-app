@@ -41,8 +41,12 @@ import {
   theme,
 } from 'antd'
 import { useRouter } from 'next/router'
-import { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import s from './style.module.scss'
+
+interface PaymentsBlockProps {
+  sepDomainID?: string
+}
 
 interface PaymentDeleteItem {
   id: string
@@ -101,7 +105,7 @@ function getTypeOperation(value) {
   }
 }
 
-const PaymentsBlock = () => {
+const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const router = useRouter()
   const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
   const [paymentActions, setPaymentActions] = useState({
@@ -147,7 +151,7 @@ const PaymentsBlock = () => {
       ...getDateFilter(currentDateFilter),
       ...getTypeOperation(currentTypeOperation),
       companyIds: filters?.company || undefined,
-      domainIds: filters?.domain || undefined,
+      domainIds: sepDomainID || filters?.domain || undefined,
       streetIds: filters?.street || undefined,
       type: filters?.type || undefined,
     },
@@ -175,7 +179,7 @@ const PaymentsBlock = () => {
     return [
       {
         title: 'Надавач послуг',
-        // fixed: 'left',
+        width: router.pathname === AppRoutes.PAYMENT ? 170 : 80,
         dataIndex: 'domain',
         filters:
           router.pathname === AppRoutes.PAYMENT
@@ -202,7 +206,7 @@ const PaymentsBlock = () => {
       {
         title: 'Компанія',
         dataIndex: 'company',
-        // fixed: 'left',
+        width: router.pathname === AppRoutes.PAYMENT ? 140 : 100,
         filters:
           router.pathname === AppRoutes.PAYMENT
             ? payments?.realEstatesFilter
@@ -229,11 +233,12 @@ const PaymentsBlock = () => {
         title: 'Дата створення',
         dataIndex: 'invoiceCreationDate',
         render: dateToDefaultFormat,
-        width: 164,
+        width: router.pathname === AppRoutes.PAYMENT ? 180 : 70,
       },
       {
         title: 'Тип',
         dataIndex: 'type',
+        align: 'center',
         filters: router.pathname === AppRoutes.PAYMENT ? typeFilters : null,
         filteredValue: filters?.type || null,
         filterMultiple: false,
@@ -241,7 +246,8 @@ const PaymentsBlock = () => {
           {
             title: <Tooltip title="Дебет (Реалізація)">Дебет</Tooltip>,
             dataIndex: 'debit',
-            width: 120,
+            align: 'center',
+            width: router.pathname === AppRoutes.PAYMENT ? 130 : 45,
             render: (_, payment: IExtendedPayment) =>
               payment.type === Operations.Debit ? (
                 renderCurrency(payment.generalSum)
@@ -252,7 +258,8 @@ const PaymentsBlock = () => {
           {
             title: <Tooltip title="Кредит (Оплата)">Кредит</Tooltip>,
             dataIndex: 'credit',
-            width: 120,
+            align: 'center',
+            width: router.pathname === AppRoutes.PAYMENT ? 130 : 45,
             render: (_, payment: IExtendedPayment) =>
               payment.type === Operations.Credit ? (
                 renderCurrency(payment.generalSum)
@@ -264,8 +271,9 @@ const PaymentsBlock = () => {
       },
       {
         title: 'За місяць',
+        align: 'center',
         dataIndex: 'monthService',
-        width: 164,
+        width: router.pathname === AppRoutes.PAYMENT ? 150 : 75,
         render: (monthService: IService, obj) => (
           <Popover
             content={
@@ -350,34 +358,38 @@ const PaymentsBlock = () => {
       })),
       {
         fixed: 'right',
+        align: 'center',
         title: '',
-        width: 64,
+        width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
         render: (_, payment: IExtendedPayment) =>
           payment?.type === Operations.Debit && (
             <Button
-              icon={<EyeOutlined />}
+              style={{ padding: 0 }}
               type="link"
               onClick={() => {
                 setCurrentPayment(payment)
                 setPaymentActions({ ...paymentActions, preview: true })
               }}
-            />
+            >
+              <EyeOutlined />
+            </Button>
           ),
       },
       {
         align: 'center',
         fixed: 'right',
         title: '',
-        width: 64,
+        width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
         render: (_, payment: IExtendedPayment) => (
           <Button
-            icon={<EditOutlined />}
             type="link"
             onClick={() => {
               setCurrentPayment(payment)
               setPaymentActions({ ...paymentActions, edit: true })
             }}
-          />
+          >
+            <EditOutlined />
+          </Button>
         ),
         hidden: !isDomainAdmin && !isGlobalAdmin,
       },
@@ -385,7 +397,8 @@ const PaymentsBlock = () => {
         align: 'center',
         fixed: 'right',
         title: '',
-        width: 64,
+        width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
+
         render: (_, payment: IExtendedPayment) => (
           <Popconfirm
             id="popconfirm_custom"
@@ -462,7 +475,6 @@ const PaymentsBlock = () => {
           paymentsDeleteItems={paymentsDeleteItems}
           closeEditModal={closeEditModal}
           setCurrentDateFilter={setCurrentDateFilter}
-          setCurrentTypeOperation={setCurrentTypeOperation}
           currentPayment={currentPayment}
           paymentActions={paymentActions}
           streets={payments?.addressFilter}
@@ -473,6 +485,7 @@ const PaymentsBlock = () => {
           setSelectedPayments={setSelectedPayments}
           setPaymentsDeleteItems={setPaymentsDeleteItems}
           onColumnsSelect={setSelectedColumns}
+          enablePaymentsButton={sepDomainID ? false : true}
         />
       }
     >
@@ -503,10 +516,11 @@ const PaymentsBlock = () => {
           columns={columns}
           dataSource={payments?.data}
           pagination={
-            router.pathname === AppRoutes.PAYMENT && {
-              pageSize: pageData.pageSize,
+            (router.pathname === AppRoutes.PAYMENT ||
+              router.pathname === AppRoutes.SEP_DOMAIN) && {
               total: payments?.total,
               pageSizeOptions: [10, 20, 64],
+              showSizeChanger: true,
               position: ['bottomCenter'],
               onChange: (currentPage, pageSize) => {
                 setPageData({ currentPage, pageSize })
@@ -518,9 +532,7 @@ const PaymentsBlock = () => {
           }}
           scroll={{
             x:
-              (router.pathname === AppRoutes.PAYMENT
-                ? 1300 + selectedColumns.length * 132
-                : 1300) -
+              (router.pathname === AppRoutes.PAYMENT ? 2300 : 1300) -
               (payments?.realEstatesFilter?.length <= 1 ? 200 : 0) -
               (payments?.domainsFilter?.length <= 1 ? 200 : 0),
           }}

@@ -14,11 +14,11 @@ import {
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { dateToYear } from '@common/assets/features/formatDate'
 import { AppRoutes, Roles, ServiceName } from '@utils/constants'
-import { renderCurrency } from '@utils/helpers'
+import { renderCurrency, isAdminCheck } from '@utils/helpers'
 import { Alert, Button, Popconfirm, Table, Tooltip, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 
 interface Props {
   setServiceActions: React.Dispatch<
@@ -37,6 +37,7 @@ interface Props {
   isError?: boolean
   filter?: any
   setFilter?: (filters: any) => void
+  setSelectedServices?: (service: IService[]) => void 
 }
 
 const ServicesTable: React.FC<Props> = ({
@@ -48,6 +49,7 @@ const ServicesTable: React.FC<Props> = ({
   isError,
   filter,
   setFilter,
+  setSelectedServices,
 }) => {
   const router = useRouter()
   const { pathname } = router
@@ -63,14 +65,14 @@ const ServicesTable: React.FC<Props> = ({
   const [deleteService, { isLoading: deleteLoading }] =
     useDeleteServiceMutation()
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     const response = await deleteService(id)
     if ('data' in response) {
       message.success('Видалено!')
     } else {
       message.error('Помилка при видаленні')
     }
-  }
+  }, [deleteService])
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
@@ -85,11 +87,20 @@ const ServicesTable: React.FC<Props> = ({
     <>
       <Table
         rowKey="_id"
+        rowSelection={
+          isAdminCheck(user?.roles)
+          && router.pathname === AppRoutes.SERVICE
+          && {
+              onChange: (_, selectedRows) => {
+                setSelectedServices(selectedRows)
+              },
+          }
+        }
         pagination={
-          isOnPage && {
+          (router.pathname === AppRoutes.SERVICE ||
+            router.pathname === AppRoutes.SEP_DOMAIN) && {
             total: services?.total,
             current: pageData.currentPage,
-            pageSize: pageData.pageSize,
             showSizeChanger: true,
             pageSizeOptions: [10, 20, 50],
             position: ['bottomCenter'],

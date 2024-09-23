@@ -15,6 +15,7 @@ import {
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import { AppRoutes } from '@utils/constants'
+import { useEffect } from 'react'
 
 export interface Props {
   domainId?: string
@@ -27,6 +28,7 @@ export interface Props {
   domainActions: {
     edit: boolean
   }
+  setDomainsLength: React.Dispatch<React.SetStateAction<number | null>>
 }
 
 const DomainsTable: React.FC<Props> = ({
@@ -41,6 +43,12 @@ const DomainsTable: React.FC<Props> = ({
     domainId,
     limit: isOnPage ? 0 : 5,
   })
+
+  useEffect(() => {
+    if (!isLoading) {
+      setDomainsLength(data?.length)
+    }
+  }, [data, isLoading])
 
   const [deleteDomain, { isLoading: deleteLoading }] = useDeleteDomainMutation()
 
@@ -169,3 +177,6 @@ const getDefaultColumns = (
 ]
 
 export default DomainsTable
+function setDomainsLength(length: number) {
+  throw new Error('Function not implemented.')
+}

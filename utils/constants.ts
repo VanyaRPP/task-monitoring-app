@@ -4,7 +4,7 @@ export enum AppRoutes {
   PROFILE = '/profile',
   TASK = '/task',
   AUTH = '/auth',
-  AUTH_SIGN_IN = '/auth/sigin',
+  AUTH_SIGN_IN = '/auth/signin',
   AUTH_SIGN_UP = '/auth/signup',
   CONTACTS = '/contacts',
   ADMIN = '/admin',
@@ -19,6 +19,7 @@ export enum AppRoutes {
   REAL_ESTATE = '/real-estate',
   STREETS = '/streets',
   BANKTEST = '/bank',
+  SEP_DOMAIN = '/sepdomain',
 }
 
 export enum Operations {

@@ -33,6 +33,12 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
           label: `${i.address} (м. ${i.city})`,
         })) || [],
       description: currentDomain?.description || '',
+      IEName: currentDomain?.IEName || '',
+      domainBankToken: currentDomain?.domainBankToken || '',
+      mfo: currentDomain?.mfo || '',
+      rnokpp: currentDomain?.rnokpp || '',
+      iban: currentDomain?.iban || '',
+      domainServices: currentDomain?.domainServices || [],
     }
     form.setFieldsValue(initialValues)
   }, [currentDomain, form])
@@ -47,6 +53,12 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
         ? formData.streets.map((i: any) => i.value)
         : formData.streets,
       description: formData.description,
+      IEName: formData.IEName,
+      domainBankToken: formData.domainBankToken || [],
+      mfo: formData.mfo,
+      rnokpp: formData.rnokpp,
+      iban: formData.iban,
+      domainServices: formData.domainServices,
     }
 
     const response = currentDomain
@@ -57,8 +69,8 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       : await addDomainEstate(domainData)
 
     if ('data' in response) {
-      form.resetFields()
       closeModal()
+      form.resetFields()
       const action = currentDomain ? 'Збережено' : 'Додано'
       message.success(action)
     } else {

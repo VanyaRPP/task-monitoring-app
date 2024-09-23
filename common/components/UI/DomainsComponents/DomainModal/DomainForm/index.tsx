@@ -4,6 +4,8 @@ import { Form, FormInstance, Input } from 'antd'
 import { FC } from 'react'
 import DomainStreets from './DomainStreets'
 import s from './style.module.scss'
+import DomainInfo from './DomainInfo'
+import DomainsServices from './DomainsServices'
 
 interface Props {
   form: FormInstance<any>
@@ -34,19 +36,8 @@ const DomainForm: FC<Props> = ({
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} />
       <DomainStreets disabled={!editable} />
-      <Form.Item
-        name="description"
-        label="Опис"
-        rules={validateField('required')}
-      >
-        <Input.TextArea
-          placeholder="Вкажіть значення"
-          className={s.formInput}
-          maxLength={512}
-          rows={4}
-          disabled={!editable}
-        />
-      </Form.Item>
+      <DomainsServices editable={editable} />
+      <DomainInfo editable={editable} form={form} />
     </Form>
   )
 }
