@@ -54,7 +54,7 @@ export const authOptions: NextAuthOptions = {
         try {
           const user = await User.findOne({ email: credentials.email });
           if(credentials.authType === 'signIn'){
-            if (user && bcrypt.compare(credentials.password, user.password)) {
+            if (user && await bcrypt.compare(credentials.password, user.password)) {
               return {
                 id: user._id.toString(),
                 name: user.name,
@@ -62,23 +62,21 @@ export const authOptions: NextAuthOptions = {
               };
             }
           }else{
-            bcrypt.hash(credentials.password, saltRounds, async function (err, hash) {
-              if (user) {
-                // console.error('User already exists!');
-                return null;
-              }
-              if (err) throw Error('Error: Encryption error!')
-              const newUser = await User.create({
-                name: credentials.name,
-                email: credentials.email,
-                password: hash,
-              })
-              return {
-                id: newUser._id.toString(),
-                name: newUser.name,
-                email: newUser.email,
-              };
+            if (user) {
+              // console.error('User already exists!');
+              return null;
+            }
+            const hash = await bcrypt.hash(credentials.password, saltRounds);
+            const newUser = await User.create({
+              name: credentials.name,
+              email: credentials.email,
+              password: hash,
             })
+            return {
+              id: newUser._id.toString(),
+              name: newUser.name,
+              email: newUser.email,
+            };
           }
 
           return null;
