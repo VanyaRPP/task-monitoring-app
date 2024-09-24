@@ -61,7 +61,10 @@ const SignInForm = () => {
         <Form.Item
           label="Пошта"
           name="email"
-          rules={[{ required: true, message: 'Введіть ваш email!' }]}
+          rules={[
+            { required: true, message: 'Введіть ваш email!' },
+            { type: 'email', message: 'Введіть коректний email!' },
+          ]}
         >
           <Input
             data-e2e="authFormEmail"

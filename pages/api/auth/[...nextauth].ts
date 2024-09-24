@@ -53,7 +53,7 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials, req) {
         try {
           const user = await User.findOne({ email: credentials.email });
-          if(credentials.authType === 'signIn'){
+          if(credentials.authType === 'signIn'){ 
             if (user && await bcrypt.compare(credentials.password, user.password)) {
               return {
                 id: user._id.toString(),
@@ -62,10 +62,8 @@ export const authOptions: NextAuthOptions = {
               };
             }
           }else{
-            if (user) {
-              // console.error('User already exists!');
-              return null;
-            }
+            if (user) return null;
+            
             const hash = await bcrypt.hash(credentials.password, saltRounds);
             const newUser = await User.create({
               name: credentials.name,
@@ -81,7 +79,6 @@ export const authOptions: NextAuthOptions = {
 
           return null;
         } catch (error) {
-          // console.error("Error during authorization:", error);
           return null;
         }
       }
