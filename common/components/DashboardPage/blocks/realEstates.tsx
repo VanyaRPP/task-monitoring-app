@@ -9,6 +9,7 @@ import { isAdminCheck } from '@utils/helpers'
 import { useRouter } from 'next/router'
 import { createContext, useContext, useState } from 'react'
 
+
 export const CompanyPageContext = createContext<{
   domainId?: string
   streetId?: string | null
@@ -21,7 +22,11 @@ export interface Props {
   sepDomainID?: string
 }
 
-const RealEstateBlock: React.FC<Props> = ({ domainId, streetId, sepDomainID }) => {
+const RealEstateBlock: React.FC<Props> = ({
+  domainId,
+  streetId,
+  sepDomainID,
+}) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.REAL_ESTATE
   const { data: user } = useGetCurrentUserQuery()

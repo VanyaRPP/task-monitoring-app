@@ -26,6 +26,8 @@ import {
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 
+import { useGetRealEstateQuery } from '@common/api/filterApi/filter.api'
+
 export interface Props {
   domainId?: string
   streetId?: string
@@ -63,6 +65,11 @@ const CompaniesTable: React.FC<Props> = ({
 
   const { data: userResponse } = useGetCurrentUserQuery()
 
+  const { data: realEstatesFilter, error } = useGetRealEstateQuery({})
+  if (error) {
+    console.log(error)
+  }
+
   const [deleteRealEstate, { isLoading: deleteLoading }] =
     useDeleteRealEstateMutation()
 
@@ -93,8 +100,8 @@ const CompaniesTable: React.FC<Props> = ({
           router.pathname === AppRoutes.SEP_DOMAIN) && {
           hideOnSinglePage: false,
           showSizeChanger: true,
-            pageSizeOptions: [10, 20, 50],
-            position: ['bottomCenter']
+          pageSizeOptions: [10, 20, 50],
+          position: ['bottomCenter'],
         }
       }
       loading={isLoading}
@@ -107,9 +114,9 @@ const CompaniesTable: React.FC<Props> = ({
         deleteLoading,
         isGlobalAdmin,
         isAdmin,
-        domainsFilter: realEstates?.domainsFilter,
-        streetsFilter: realEstates?.streetsFilter,
-        realEstatesFilter: realEstates?.realEstatesFilter,
+        domainsFilter: realEstatesFilter?.domainsFilter,
+        streetsFilter: realEstatesFilter?.streetsFilter,
+        realEstatesFilter: realEstatesFilter?.realEstatesFilter,
         filters,
         pathname,
         setRealEstateActions,

@@ -22,6 +22,7 @@ import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import { Button, Flex, Space, message } from 'antd'
 import Modal from 'antd/lib/modal/Modal'
+import { log } from 'console'
 import { saveAs } from 'file-saver'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
@@ -59,7 +60,7 @@ const PaymentCardHeader = ({
   const [deletePayment] = useDeleteMultiplePaymentsMutation()
 
   const handleDeletePayments = async () => {
-    (Modal as any).confirm({
+    ;(Modal as any).confirm({
       title: 'Ви впевнені, що хочете видалити обрані проплати?',
       cancelText: 'Ні',
       okText: 'Так',
@@ -114,26 +115,26 @@ const PaymentCardHeader = ({
       message.error('Сталася несподівана помилка під час генерації PDF')
     }
   }
+  console.log(streets)
 
   return (
     <Flex justify="space-between">
       <Space>
-        <Button type="link" onClick={() => {
-          if(enablePaymentsButton) {
-            router.push(AppRoutes.PAYMENT)
+        <Button
+          type="link"
+          onClick={() => {
+            if (enablePaymentsButton) {
+              router.push(AppRoutes.PAYMENT)
             }
-          }}>
+          }}
+        >
           {isAdmin ? 'Платежі' : 'Мої оплати'}
           <SelectOutlined />
         </Button>
         {pathname === AppRoutes.PAYMENT && (
           <Space>
             <PaymentCascader onChange={setCurrentDateFilter} />
-            <StreetsSelector
-              filters={filters}
-              setFilters={setFilters}
-              streets={streets}
-            />
+            <StreetsSelector setFilters={setFilters} streets={streets} />
             <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
               <DomainFilterTags
                 collection={payments?.domainsFilter}

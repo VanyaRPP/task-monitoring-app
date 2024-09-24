@@ -2,7 +2,7 @@ import { PlusOutlined } from '@ant-design/icons'
 import { Button, Space } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-
+import { useGetRealEstateQuery } from '@common/api/filterApi/filter.api'
 import {
   IExtendedRealestate,
   IGetRealestateResponse,
@@ -63,25 +63,34 @@ const CompaniesHeader: React.FC<Props> = ({
     setRealEstateActions({ edit: false })
   }
 
+  const { data: realEstatesFilter, error } = useGetRealEstateQuery({})
+  if (error) {
+    console.log(error)
+  }
+
   return (
     <div className={s.headerBlock}>
       <div className={s.firstBlock}>
-        <Button type="link" onClick={() => { 
-          if(enableRealEstateButton) {
-            router.push(AppRoutes.REAL_ESTATE)
-          }}}>
+        <Button
+          type="link"
+          onClick={() => {
+            if (enableRealEstateButton) {
+              router.push(AppRoutes.REAL_ESTATE)
+            }
+          }}
+        >
           Компанії
         </Button>
 
         {router.pathname === AppRoutes.REAL_ESTATE && isAdmin && (
           <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
             <DomainFilterTags
-              collection={realEstates?.domainsFilter}
+              collection={realEstatesFilter?.domainsFilter}
               filters={filters}
               setFilters={setFilters}
             />
             <CompanyFilterTags
-              collection={realEstates?.realEstatesFilter}
+              collection={realEstatesFilter?.realEstatesFilter}
               filters={filters}
               setFilters={setFilters}
             />
