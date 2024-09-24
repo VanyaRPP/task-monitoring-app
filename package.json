@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "npm run browser:open && next dev",
-    "browser:open": "npx cross-env cross-env-shell \"(start http://localhost:3000 || open http://localhost:3000)\"",
     "build": "next build",
     "start": "next start",
+    "test:e2e": "playwright test",
+    "test:e2e:watch": "playwright test --ui",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "npm run lint:fix && npm run lint:check",
@@ -15,6 +16,7 @@
     "prettier": "npm run prettier:fix && npm run prettier:check",
     "prettier:check": "prettier --check --ignore-path .gitignore .",
     "prettier:fix": "prettier --write --ignore-path .gitignore .",
+    "browser:open": "npx cross-env cross-env-shell \"(start http://localhost:3000 || open http://localhost:3000)\"",
     "prepare": "husky install",
     "types:check": "tsc --noEmit"
   },
@@ -60,6 +62,7 @@
     "use-places-autocomplete": "^4.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.47.1",
     "@types/big.js": "^6.2.2",
     "@types/jest": "^28.1.8",
     "@types/jsonwebtoken": "^8.5.8",

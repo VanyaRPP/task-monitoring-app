@@ -67,6 +67,7 @@ export const extendedPayment: IExtendedPayment[] = [
       description: 'Description',
     },
     generalSum: 50,
+    someUniqueField: '',
   },
   {
     _id: '2',
@@ -89,6 +90,7 @@ export const extendedPayment: IExtendedPayment[] = [
       description: 'Description',
     },
     generalSum: 60,
+    someUniqueField: '',
   },
   {
     _id: '4',
@@ -111,6 +113,7 @@ export const extendedPayment: IExtendedPayment[] = [
       description: 'Description',
     },
     generalSum: 20,
+    someUniqueField: '',
   },
 ]
 

@@ -31,6 +31,7 @@ export interface Props {
   filter?: any
   setFilter?: (filters: any) => void
   services?: any
+  enableServiceButton?: true | false
   handleDeleteServices?: () => void
   selectedServices: IService[]
 }
@@ -44,6 +45,7 @@ const ServicesHeader: React.FC<Props> = ({
   filter,
   setFilter,
   services,
+  enableServiceButton = false,
   handleDeleteServices,
   selectedServices,
 }) => {
@@ -68,7 +70,11 @@ const ServicesHeader: React.FC<Props> = ({
   return (
     <div className={s.headerBlock}>
       <div className={s.firstBlock}>
-        <Button type="link" onClick={() => router.push(AppRoutes.SERVICE)}>
+        <Button type="link" onClick={() => {
+          if(enableServiceButton) {
+            router.push(AppRoutes.SERVICE)
+          }}
+          }>
           Послуги <SelectOutlined />
         </Button>
 

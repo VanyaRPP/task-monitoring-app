@@ -88,10 +88,13 @@ const CompaniesTable: React.FC<Props> = ({
   return (
     <Table
       rowKey="_id"
-      size="small"
       pagination={
-        !isOnPage && {
-          hideOnSinglePage: true,
+        (router.pathname === AppRoutes.REAL_ESTATE ||
+          router.pathname === AppRoutes.SEP_DOMAIN) && {
+          hideOnSinglePage: false,
+          showSizeChanger: true,
+            pageSizeOptions: [10, 20, 50],
+            position: ['bottomCenter']
         }
       }
       loading={isLoading}

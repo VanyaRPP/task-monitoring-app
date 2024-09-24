@@ -41,8 +41,12 @@ import {
   theme,
 } from 'antd'
 import { useRouter } from 'next/router'
-import { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import s from './style.module.scss'
+
+interface PaymentsBlockProps {
+  sepDomainID?: string
+}
 
 interface PaymentDeleteItem {
   id: string
@@ -101,7 +105,7 @@ function getTypeOperation(value) {
   }
 }
 
-const PaymentsBlock = () => {
+const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const router = useRouter()
   const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
   const [paymentActions, setPaymentActions] = useState({
@@ -114,6 +118,8 @@ const PaymentsBlock = () => {
     pageSize: router.pathname === AppRoutes.PAYMENT ? 10 : 5,
     currentPage: 1,
   })
+
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([])
 
   const [filters, setFilters] = useState<any>()
 
@@ -146,7 +152,7 @@ const PaymentsBlock = () => {
       ...getDateFilter(currentDateFilter),
       ...getTypeOperation(currentTypeOperation),
       companyIds: filters?.company || undefined,
-      domainIds: filters?.domain || undefined,
+      domainIds: sepDomainID || filters?.domain || undefined,
       streetIds: filters?.street || undefined,
       type: filters?.type || undefined,
     },
@@ -228,7 +234,7 @@ const PaymentsBlock = () => {
         title: 'Дата створення',
         dataIndex: 'invoiceCreationDate',
         render: dateToDefaultFormat,
-        width: router.pathname === AppRoutes.PAYMENT ? 180 : 70,
+        width: router.pathname === AppRoutes.PAYMENT ? 164 : 70,
       },
       {
         title: 'Тип',
@@ -268,7 +274,7 @@ const PaymentsBlock = () => {
         title: 'За місяць',
         align: 'center',
         dataIndex: 'monthService',
-        width: router.pathname === AppRoutes.PAYMENT ? 150 : 75,
+        width: router.pathname === AppRoutes.PAYMENT ? 164 : 75,
         render: (monthService: IService, obj) => (
           <Popover
             content={
@@ -334,12 +340,13 @@ const PaymentsBlock = () => {
           </Popover>
         ),
       },
-      ...Object.entries(ServiceName).map(([type, title]) => ({
-        title,
+      ...selectedColumns.map((value) => ({
+        title: ServiceName[value],
+        width: 132,
         ellipsis: true,
-        dataIndex: type,
+        dataIndex: value,
         render: (_, payment) => {
-          const item = payment.invoice.find((item) => item.type === type)
+          const item = payment.invoice.find((item) => item.type === value)
           const sum = +(item?.sum || item?.price)
           const currency = renderCurrency(sum?.toFixed(2))
           return (
@@ -421,6 +428,7 @@ const PaymentsBlock = () => {
     filters,
     setFilters,
     token,
+    selectedColumns,
   ])
 
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
@@ -478,6 +486,8 @@ const PaymentsBlock = () => {
           selectedPayments={selectedPayments}
           setSelectedPayments={setSelectedPayments}
           setPaymentsDeleteItems={setPaymentsDeleteItems}
+          enablePaymentsButton={sepDomainID ? false : true}
+          onColumnsSelect={setSelectedColumns}
         />
       }
     >
@@ -508,9 +518,10 @@ const PaymentsBlock = () => {
           columns={columns}
           dataSource={payments?.data}
           pagination={
-            router.pathname === AppRoutes.PAYMENT && {
-              pageSize: pageData.pageSize,
+            (router.pathname === AppRoutes.PAYMENT ||
+              router.pathname === AppRoutes.SEP_DOMAIN) && {
               total: payments?.total,
+              showSizeChanger: true,
               pageSizeOptions: [10, 20, 50],
               position: ['bottomCenter'],
               onChange: (currentPage, pageSize) => {
@@ -523,7 +534,9 @@ const PaymentsBlock = () => {
           }}
           scroll={{
             x:
-              (router.pathname === AppRoutes.PAYMENT ? 2300 : 1300) -
+              (router.pathname === AppRoutes.PAYMENT
+                ? 1300 + selectedColumns.length * 132
+                : 1300) -
               (payments?.realEstatesFilter?.length <= 1 ? 200 : 0) -
               (payments?.domainsFilter?.length <= 1 ? 200 : 0),
           }}

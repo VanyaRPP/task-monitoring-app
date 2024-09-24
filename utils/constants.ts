@@ -19,6 +19,7 @@ export enum AppRoutes {
   REAL_ESTATE = '/real-estate',
   STREETS = '/streets',
   BANKTEST = '/bank',
+  SEP_DOMAIN = '/sepdomain',
 }
 
 export enum Operations {
@@ -93,8 +94,8 @@ export enum TaskView {
 export const saltRounds = 10
 
 export enum ServiceName {
-  maintenancePrice = 'Утримання',
   placingPrice = 'Розміщення',
+  maintenancePrice = 'Утримання',
   inflicionPrice = 'Індекс інфляції',
   electricityPrice = 'Електропостачання',
   waterPrice = 'Водопостачання',
