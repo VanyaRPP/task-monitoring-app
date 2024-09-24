@@ -7,15 +7,20 @@ import Chart from '@components/Chart'
 import CompaniesAreaChartHeader from '@components/Tables/CompaniesAreaChart/Header'
 import TableCard from '@components/UI/TableCard'
 import React, { useEffect, useMemo, useState } from 'react'
+import { ExclamationCircleOutlined } from '@ant-design/icons'
+import { Typography } from 'antd'
+
+const { Text } = Typography
 
 interface CompaniesAreaChartProps {
   domainID?: string
 }
 
-const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({ domainID }) => {
-
+const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({
+  domainID,
+}) => {
   const { data: domains } = useGetDomainsQuery({})
-  const [domainId, setDomainId] = useState<string>(domainID)
+  const [domainId, setDomainId] = useState<string>(domainID || '')
   const { data } = useGetAllRealEstateQuery({})
   const [domainName, setDomainName] = useState('')
 
@@ -23,9 +28,13 @@ const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({ domainID }) => 
     if (domainID) {
       setDomainId(domainID)
     } else {
-      data?.domainsFilter?.length ? setDomainId(data.domainsFilter[0].value) : setDomainId(undefined)
+      if (data?.domainsFilter?.length) {
+        setDomainId(data.domainsFilter[0]?.value || '')
+      } else {
+        setDomainId('')
+      }
     }
-  }, [data])
+  }, [data, domainID])
 
   const { data: areas } = useGetAreasQuery(
     {
@@ -37,6 +46,10 @@ const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({ domainID }) => 
   )
 
   const dataSource = useMemo(() => {
+    if (!areas?.companies || areas.companies.length === 0) {
+      return []
+    }
+
     const totalPart = areas?.companies?.reduce(
       (acc, { rentPart }) => (acc += rentPart),
       0
@@ -47,9 +60,10 @@ const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({ domainID }) => 
       0
     )
 
-    const domainName = data?.domainsFilter?.find(
-      ({ value }) => value === domainId
-    )?.text
+    const domainName =
+      data?.domainsFilter?.find(({ value }) => value === domainId)?.text ||
+      'Невідомий домен'
+
     setDomainName(domainName)
 
     const newDataSource =
@@ -66,26 +80,45 @@ const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({ domainID }) => 
     } else {
       return [
         ...newDataSource,
-        { value: {
-          part: 100 - totalPart,
-          area: totalArea,
+        {
+          value: {
+            part: 100 - totalPart,
+            area: totalArea,
+          },
+          label: domainName,
+          color: '#cecece',
         },
-        label: domainName, 
-        color: '#cecece' },
       ]
     }
   }, [data, areas, domainId])
 
   return (
     <TableCard
-      title={!domainID ? <CompaniesAreaChartHeader setDomainId={setDomainId}/> : null}
+      title={
+        !domainID ? (
+          <CompaniesAreaChartHeader setDomainId={setDomainId} />
+        ) : null
+      }
       style={{ height: '100%' }}
     >
-      <Chart
-        dataSources={dataSource}
-        chartTitle={undefined}
-        domainName={domainName}
-      />
+      {dataSource.length === 0 ? (
+        <div
+          style={{ textAlign: 'center', padding: '20px', marginBottom: '20px' }}
+        >
+          <ExclamationCircleOutlined
+            style={{ fontSize: 24, color: '#ff4d4f' }}
+          />
+          <Text style={{ display: 'block', marginTop: '10px' }}>
+            Площі поки немає !
+          </Text>
+        </div>
+      ) : (
+        <Chart
+          dataSources={dataSource}
+          chartTitle={undefined}
+          domainName={domainName}
+        />
+      )}
     </TableCard>
   )
 }
