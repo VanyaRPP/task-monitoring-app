@@ -18,7 +18,11 @@ import {
   IExtendedDomain,
 } from '@common/api/domainApi/domain.api.types'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
-import { BankOutlined, ShopOutlined } from '@ant-design/icons'
+import {
+  BankOutlined,
+  DoubleRightOutlined,
+  ShopOutlined,
+} from '@ant-design/icons'
 import AddPaymentModal from '@components/AddPaymentModal'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 
@@ -55,19 +59,23 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const showModal = () => setModalVisible(true)
   const closeModal = () => setModalVisible(false)
 
-  useEffect(() => {
-    if (selectedCompany) {
-      const company = relatedCompanies.find(
-        (company: IRealestate) => company._id === selectedCompany
-      )
-      console.log(company)
-    }
-  }, [selectedCompany, relatedCompanies])
+  // useEffect(() => {
+  //   if (selectedCompany) {
+  //     const company = relatedCompanies.find(
+  //       (company: IRealestate) => company._id === selectedCompany
+  //     )
+  //   }
+  // }, [selectedCompany, relatedCompanies])
 
   return (
     <>
-      <Button type="primary" onClick={showDrawer}>
-        View Details
+      <Button
+        iconPosition="end"
+        icon={<DoubleRightOutlined />}
+        type="link"
+        onClick={showDrawer}
+      >
+        GO
       </Button>
       <Drawer
         title="Transaction Details"
@@ -75,7 +83,6 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
         onClose={handleCloseDrawer}
         open={drawerVisible}
         width="60%"
-        bodyStyle={{ padding: '24px' }}
       >
         <Space direction="vertical" style={{ width: '100%' }} size="large">
           <Title level={4}>
@@ -122,6 +129,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
             <ShopOutlined /> Related Company
           </Title>
           <Text strong>Select Company:</Text>
+
           <Select
             placeholder="Select a related company"
             onChange={handleCompanyChange}
@@ -135,11 +143,16 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
             ))}
           </Select>
 
-          <Button type="primary" onClick={showModal}>
+          <Button
+            type="primary"
+            disabled={!selectedCompany}
+            onClick={showModal}
+          >
             Send
           </Button>
         </Space>
       </Drawer>
+
       {modalVisible && (
         <AddPaymentModal
           closeModal={closeModal}
