@@ -119,6 +119,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     currentPage: 1,
   })
 
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([])
+
   const [filters, setFilters] = useState<any>()
 
   const closeEditModal = () => {
@@ -232,7 +234,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         title: 'Дата створення',
         dataIndex: 'invoiceCreationDate',
         render: dateToDefaultFormat,
-        width: router.pathname === AppRoutes.PAYMENT ? 180 : 70,
+        width: router.pathname === AppRoutes.PAYMENT ? 164 : 70,
       },
       {
         title: 'Тип',
@@ -272,7 +274,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         title: 'За місяць',
         align: 'center',
         dataIndex: 'monthService',
-        width: router.pathname === AppRoutes.PAYMENT ? 150 : 75,
+        width: router.pathname === AppRoutes.PAYMENT ? 164 : 75,
         render: (monthService: IService, obj) => (
           <Popover
             content={
@@ -338,12 +340,13 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           </Popover>
         ),
       },
-      ...Object.entries(ServiceName).map(([type, title]) => ({
-        title,
+      ...selectedColumns.map((value) => ({
+        title: ServiceName[value],
+        width: 132,
         ellipsis: true,
-        dataIndex: type,
+        dataIndex: value,
         render: (_, payment) => {
-          const item = payment.invoice.find((item) => item.type === type)
+          const item = payment.invoice.find((item) => item.type === value)
           const sum = +(item?.sum || item?.price)
           const currency = renderCurrency(sum?.toFixed(2))
           return (
@@ -425,6 +428,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     filters,
     setFilters,
     token,
+    selectedColumns,
   ])
 
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
@@ -483,6 +487,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           setSelectedPayments={setSelectedPayments}
           setPaymentsDeleteItems={setPaymentsDeleteItems}
           enablePaymentsButton={sepDomainID ? false : true}
+          onColumnsSelect={setSelectedColumns}
         />
       }
     >
@@ -529,7 +534,9 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           }}
           scroll={{
             x:
-              (router.pathname === AppRoutes.PAYMENT ? 2300 : 1300) -
+              (router.pathname === AppRoutes.PAYMENT
+                ? 1300 + selectedColumns.length * 132
+                : 1300) -
               (payments?.realEstatesFilter?.length <= 1 ? 200 : 0) -
               (payments?.domainsFilter?.length <= 1 ? 200 : 0),
           }}
