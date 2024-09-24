@@ -150,6 +150,7 @@ const AddPaymentModal: FC<Props> = ({
     items.push({
       key: '3',
       label: 'Акт',
+      disabled: !preview || !!(paymentData as unknown as any)?.credit,
       children: <PriceList data={payment} />,
     })
   }

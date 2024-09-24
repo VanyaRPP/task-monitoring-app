@@ -11,12 +11,8 @@ import {
 } from 'antd'
 import React, { FC, useEffect, useMemo, useState } from 'react'
 import { ITransaction } from './transactionTypes'
-import { useGetAllPaymentsQuery } from '@common/api/paymentApi/payment.api'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
-import {
-  IDomainModel,
-  IExtendedDomain,
-} from '@common/api/domainApi/domain.api.types'
+import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import {
   BankOutlined,
@@ -24,7 +20,7 @@ import {
   ShopOutlined,
 } from '@ant-design/icons'
 import AddPaymentModal from '@components/AddPaymentModal'
-import { IPayment } from '@common/api/paymentApi/payment.api.types'
+import dayjs from 'dayjs'
 
 const { Title, Text } = Typography
 
@@ -59,14 +55,8 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const showModal = () => setModalVisible(true)
   const closeModal = () => setModalVisible(false)
 
-  // useEffect(() => {
-  //   if (selectedCompany) {
-  //     const company = relatedCompanies.find(
-  //       (company: IRealestate) => company._id === selectedCompany
-  //     )
-  //   }
-  // }, [selectedCompany, relatedCompanies])
-
+  console.log(transaction)
+  console.log(domain)
   return (
     <>
       <Button
@@ -161,6 +151,8 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
               (company: IRealestate) => company._id === selectedCompany
             ),
             generalSum: transactionAmount,
+            description: `${transaction.OSND} (taken from the transaction description)`,
+            invoiceCreationDate: dayjs(transaction.DAT_OD, 'DD.MM.YYYY'),
           }}
           paymentActions={{ edit: false, preview: false }}
         />
