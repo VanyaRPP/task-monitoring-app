@@ -15,16 +15,24 @@ const { Text } = Typography
 interface CompaniesAreaChartProps {
   domainID?: string
 }
+interface CompaniesAreaChartProps {
+  domainID?: string
+}
+
+const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({ domainID }) => {
 
 const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({
   domainID,
 }) => {
   const { data: domains } = useGetDomainsQuery({})
   const [domainId, setDomainId] = useState<string>(domainID || '')
+  const [domainId, setDomainId] = useState<string>(domainID)
   const { data } = useGetAllRealEstateQuery({})
   const [domainName, setDomainName] = useState('')
 
   useEffect(() => {
+    if (domainID) {
+      setDomainId(domainID)
     if (domainID) {
       setDomainId(domainID)
     } else {
@@ -33,6 +41,7 @@ const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({
       } else {
         setDomainId('')
       }
+      data?.domainsFilter?.length ? setDomainId(data.domainsFilter[0].value) : setDomainId(undefined)
     }
   }, [data, domainID])
 
@@ -99,6 +108,7 @@ const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({
           <CompaniesAreaChartHeader setDomainId={setDomainId} />
         ) : null
       }
+      title={!domainID ? <CompaniesAreaChartHeader setDomainId={setDomainId}/> : null}
       style={{ height: '100%' }}
     >
       {dataSource.length === 0 ? (
