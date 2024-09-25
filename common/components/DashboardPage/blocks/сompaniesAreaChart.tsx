@@ -13,7 +13,7 @@ import { Typography } from 'antd'
 const { Text } = Typography
 
 interface CompaniesAreaChartProps {
-  domainID: string
+  domainID?: string
 }
 
 const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({
