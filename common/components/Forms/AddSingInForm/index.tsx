@@ -1,5 +1,5 @@
 import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons'
-import { Form, Input, Button, message, Divider } from 'antd'
+import { Form, Input, Button, message, Divider, Card } from 'antd'
 import { signIn } from 'next-auth/react'
 import { Typography } from 'antd'
 import { useState } from 'react'
@@ -93,12 +93,13 @@ const SignInForm = () => {
             {isLogin ? 'Реєстрація' : 'Вхід'}
           </Button>
         </Form.Item>
-        <Text>
-          {isLogin ? 'Вже маєте акаунт?' : 'Немаєте акаунту?'}
+        <span style={{ display: 'flex', gap: '1rem' }}>
+          <Text>{isLogin ? 'Вже маєте акаунт?' : 'Немаєте акаунту?'}</Text>
           <Link onClick={() => setIsLogin(!isLogin)}>
             {isLogin ? 'Ввійти' : 'Зареєструватись'}
           </Link>
-        </Text>
+        </span>
+
         <Divider>or</Divider>
       </Form>
     </div>
