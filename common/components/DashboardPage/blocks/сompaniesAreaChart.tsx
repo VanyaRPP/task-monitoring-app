@@ -13,35 +13,22 @@ import { Typography } from 'antd'
 const { Text } = Typography
 
 interface CompaniesAreaChartProps {
-  domainID?: string
+  domainID: string
 }
-interface CompaniesAreaChartProps {
-  domainID?: string
-}
-
-const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({ domainID }) => {
 
 const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({
   domainID,
 }) => {
   const { data: domains } = useGetDomainsQuery({})
-  const [domainId, setDomainId] = useState<string>(domainID || '')
-  const [domainId, setDomainId] = useState<string>(domainID)
+  const [domainId, setDomainId] = useState<string>()
   const { data } = useGetAllRealEstateQuery({})
   const [domainName, setDomainName] = useState('')
 
   useEffect(() => {
     if (domainID) {
       setDomainId(domainID)
-    if (domainID) {
-      setDomainId(domainID)
     } else {
-      if (data?.domainsFilter?.length) {
-        setDomainId(data.domainsFilter[0]?.value || '')
-      } else {
-        setDomainId('')
-      }
-      data?.domainsFilter?.length ? setDomainId(data.domainsFilter[0].value) : setDomainId(undefined)
+      setDomainId(undefined)
     }
   }, [data, domainID])
 
@@ -103,12 +90,7 @@ const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({
 
   return (
     <TableCard
-      title={
-        !domainID ? (
-          <CompaniesAreaChartHeader setDomainId={setDomainId} />
-        ) : null
-      }
-      title={!domainID ? <CompaniesAreaChartHeader setDomainId={setDomainId}/> : null}
+      title={<CompaniesAreaChartHeader setDomainId={setDomainId} />}
       style={{ height: '100%' }}
     >
       {dataSource.length === 0 ? (
@@ -119,7 +101,7 @@ const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({
             style={{ fontSize: 24, color: '#ff4d4f' }}
           />
           <Text style={{ display: 'block', marginTop: '10px' }}>
-            Площі поки немає !
+            Площі поки немає!
           </Text>
         </div>
       ) : (
