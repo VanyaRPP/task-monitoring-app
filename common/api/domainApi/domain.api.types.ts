@@ -39,6 +39,11 @@ export interface IGetDomainResponse {
   data: IExtendedDomain[]
 }
 
+export interface IGetDomainByPkResponse {
+  success: boolean
+  data: IExtendedDomain
+}
+
 export interface IDeleteDomainResponse {
   data: string
   success: boolean

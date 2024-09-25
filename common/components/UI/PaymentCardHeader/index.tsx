@@ -1,6 +1,7 @@
 import {
   DeleteOutlined,
   DownloadOutlined,
+  FilterOutlined,
   PlusOutlined,
   SelectOutlined,
 } from '@ant-design/icons'
@@ -18,13 +19,22 @@ import {
   CompanyFilterTags,
   DomainFilterTags,
 } from '@components/UI/Reusable/FilterTags'
-import { AppRoutes, Roles } from '@utils/constants'
+import { AppRoutes, Roles, ServiceName } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
-import { Button, Flex, Space, message } from 'antd'
+import {
+  Button,
+  Checkbox,
+  Flex,
+  Select,
+  SelectProps,
+  Space,
+  Typography,
+  message,
+} from 'antd'
 import Modal from 'antd/lib/modal/Modal'
 import { saveAs } from 'file-saver'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const PaymentCardHeader = ({
   setCurrentDateFilter,
@@ -41,6 +51,7 @@ const PaymentCardHeader = ({
   setPaymentsDeleteItems,
   setSelectedPayments,
   enablePaymentsButton,
+  onColumnsSelect,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -59,7 +70,7 @@ const PaymentCardHeader = ({
   const [deletePayment] = useDeleteMultiplePaymentsMutation()
 
   const handleDeletePayments = async () => {
-    (Modal as any).confirm({
+    ;(Modal as any).confirm({
       title: 'Ви впевнені, що хочете видалити обрані проплати?',
       cancelText: 'Ні',
       okText: 'Так',
@@ -118,16 +129,22 @@ const PaymentCardHeader = ({
   return (
     <Flex justify="space-between">
       <Space>
-        <Button type="link" onClick={() => {
-          if(enablePaymentsButton) {
-            router.push(AppRoutes.PAYMENT)
+        <Button
+          type="link"
+          onClick={() => {
+            if (enablePaymentsButton) {
+              router.push(AppRoutes.PAYMENT)
             }
-          }}>
+          }}
+        >
           {isAdmin ? 'Платежі' : 'Мої оплати'}
-          <SelectOutlined />
         </Button>
         {pathname === AppRoutes.PAYMENT && (
           <Space>
+            <ColumnSelect
+              style={{ minWidth: 200 }}
+              onSelect={onColumnsSelect}
+            />
             <PaymentCascader onChange={setCurrentDateFilter} />
             <StreetsSelector
               filters={filters}
@@ -189,6 +206,88 @@ const PaymentCardHeader = ({
           )}
       </Flex>
     </Flex>
+  )
+}
+
+interface ColumnSelectProps {
+  onSelect?: (selected: string[]) => void
+  style?: React.CSSProperties
+  className?: string
+}
+
+const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, ...props }) => {
+  const [selected, setSelected] = useState<string[]>([])
+
+  const handleSelect = (value: string[]) => {
+    setSelected(value)
+    localStorage.setItem('payments_columns', JSON.stringify(value))
+  }
+
+  const handleCheckAll = (index = 0) => {
+    if (selected.length === Object.keys(ServiceName).length) {
+      setSelected([])
+      localStorage.setItem('payments_columns', JSON.stringify([]))
+    } else {
+      const newSelected = options[index].options?.map(({ value }) => value)
+      setSelected(newSelected)
+      localStorage.setItem('payments_columns', JSON.stringify(newSelected))
+    }
+  }
+
+  useEffect(() => {
+    setSelected(JSON.parse(localStorage.getItem('payments_columns')) ?? [])
+  }, [])
+
+  useEffect(() => {
+    onSelect?.(selected)
+  }, [onSelect, selected])
+
+  useEffect(() => {
+    const savedColumns =
+      JSON.parse(localStorage.getItem('payments_columns')) ?? []
+
+    if (!savedColumns.includes('placingPrice')) {
+      savedColumns.push('placingPrice')
+      localStorage.setItem('payments_columns', JSON.stringify(savedColumns))
+    }
+
+    setSelected(savedColumns)
+  }, [])
+  const options: SelectProps['options'] = [
+    {
+      label: (
+        <Checkbox
+          onClick={() => handleCheckAll(0)}
+          indeterminate={
+            selected.length > 0 &&
+            selected.length < Object.keys(ServiceName).length
+          }
+          checked={Object.keys(ServiceName).length === selected.length}
+        >
+          <Typography.Text type="secondary">Комунальні</Typography.Text>
+        </Checkbox>
+      ),
+      options: Object.entries(ServiceName).map(([value, label]) => ({
+        value,
+        label,
+      })),
+    },
+  ]
+
+  return (
+    <Select
+    mode="multiple"
+    placeholder="Оберіть послуги"
+    value={selected}
+    onChange={handleSelect}
+    options={options}
+    maxTagCount={1}
+    allowClear
+    showSearch
+    optionFilterProp="label"
+    suffixIcon={<FilterOutlined />}
+    {...props}
+    />
   )
 }
 

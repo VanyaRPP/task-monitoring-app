@@ -17,6 +17,7 @@ export interface IDomain {
 export interface IDomainService {
   name: string
   price: number
+  enabled: boolean
 }
 
 export interface IDomainBankToken {

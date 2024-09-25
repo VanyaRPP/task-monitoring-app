@@ -150,6 +150,7 @@ const AddPaymentModal: FC<Props> = ({
     items.push({
       key: '3',
       label: 'Акт',
+      disabled: !preview || !!(paymentData as unknown as any)?.credit,
       children: <PriceList data={payment} />,
     })
   }
@@ -191,7 +192,7 @@ const AddPaymentModal: FC<Props> = ({
       <Modal
         title={edit ? 'Редагування рахунку' : !preview && 'Додавання рахунку'}
         onOk={activeTabKey === '1' ? handleOk : handleSubmit}
-        okButtonProps={preview ? { style: { display: 'none' }} : null }
+        okButtonProps={preview ? { style: { display: 'none' } } : null}
         changed={() => isValueChanged}
         onCancel={() => {
           form.resetFields()

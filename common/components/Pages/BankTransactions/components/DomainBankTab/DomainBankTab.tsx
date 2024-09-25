@@ -4,19 +4,14 @@ import {
   IExtendedDomain,
 } from '@common/api/domainApi/domain.api.types'
 import EncryptionService from '@utils/encryptionService'
-import { Card, Input, Row, Carousel, Divider } from 'antd'
+import { Card, Input, Row, Divider } from 'antd'
 
 import React, { FC, useEffect, useState } from 'react'
 import TransactionsTable from '../TransactionsTable/TransactionsTable'
 import CustomPagination from '@components/CustomPagination'
 import _initial from 'lodash/initial'
 
-import {
-  // useGetBalancesQuery,
-  // useGetDateQuery,
-  useLazyGetTransactionsQuery,
-} from '@common/api/bankApi/bank.api'
-// import DomainBankBalance from '../DomainbankBalance/DomainBankBalance'
+import { useLazyGetTransactionsQuery } from '@common/api/bankApi/bank.api'
 import s from './style.module.scss'
 
 interface Props {
@@ -24,9 +19,6 @@ interface Props {
 }
 
 const DomainBankTab: FC<Props> = ({ domain }) => {
-  // const { Meta } = Card
-  // const { TextArea } = Input
-
   const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
 
   const encryptionService = new EncryptionService(SECURE_TOKEN)

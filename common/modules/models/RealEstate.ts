@@ -1,4 +1,5 @@
 import mongoose, { ObjectId, Schema } from 'mongoose'
+import { IDomainService } from './Domain'
 
 export interface IRealEstateModel {
   domain: ObjectId
@@ -15,6 +16,7 @@ export interface IRealEstateModel {
   discount?: number
   inflicion?: boolean
   garbageCollector?: boolean
+  services: IDomainService[]
 }
 
 export const RealEstateSchema = new Schema<IRealEstateModel>({
@@ -32,6 +34,7 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   discount: { type: Number, required: false, default: 0 },
   inflicion: { type: Boolean, required: false, default: false },
   garbageCollector: { type: Boolean, required: false, default: false },
+  services: { type: [Object] },
 })
 
 const RealEstate =
