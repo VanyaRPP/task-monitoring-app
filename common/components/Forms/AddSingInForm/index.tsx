@@ -1,13 +1,10 @@
-import { Form, Input, Button, message, Divider } from 'antd'
 import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons'
-
+import { Form, Input, Button, message, Divider } from 'antd'
 import { signIn } from 'next-auth/react'
-import React from 'react'
-import { useState } from 'react'
 import { Typography } from 'antd'
-import config from '@utils/config'
+import { useState } from 'react'
 
-const { Text, Link} = Typography
+const { Text, Link } = Typography
 
 const SignInForm = () => {
   const [form] = Form.useForm()
@@ -35,7 +32,7 @@ const SignInForm = () => {
 
   return (
     <div style={{ maxWidth: 345, margin: '0 auto', padding: '15px' }}>
-      {/* <Title level={1}>
+      {/* TODO: create title for reg & log <Title level={1}>
         {isLogin ? config.titles.signInTitle : config.titles.signUpTitle}
       </Title>  */}
       <Form
@@ -97,7 +94,7 @@ const SignInForm = () => {
           </Button>
         </Form.Item>
         <Text>
-          {isLogin  ? 'Вже маєте акаунт?' : 'Немаєте акаунту?'}
+          {isLogin ? 'Вже маєте акаунт?' : 'Немаєте акаунту?'}
           <Link onClick={() => setIsLogin(!isLogin)}>
             {isLogin ? 'Ввійти' : 'Зареєструватись'}
           </Link>

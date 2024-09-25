@@ -73,7 +73,8 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
       )}
 
       <h2 className={s.Header}>{config.titles.signInTitle}</h2>
-      <SignInForm />
+
+      {process.env.NODE_ENV === 'development' && <SignInForm />}
 
       {
         process.env.NODE_ENV === 'development' ? (
