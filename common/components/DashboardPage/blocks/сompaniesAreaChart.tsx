@@ -95,14 +95,20 @@ const CompaniesAreaChart: React.FC<CompaniesAreaChartProps> = ({
     >
       {dataSource.length === 0 ? (
         <div
-          style={{ textAlign: 'center', padding: '20px', marginBottom: '20px' }}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '65px',
+            marginBottom: '20px',
+            height: '100%',
+          }}
         >
           <ExclamationCircleOutlined
-            style={{ fontSize: 24, color: '#ff4d4f' }}
+            style={{ fontSize: 24, color: 'yellow' }}
           />
-          <Text style={{ display: 'block', marginTop: '10px' }}>
-            Площі поки немає!
-          </Text>
+          <Text style={{ marginTop: '10px' }}>Площі поки немає!</Text>
         </div>
       ) : (
         <Chart
