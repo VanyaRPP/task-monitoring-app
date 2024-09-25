@@ -17,6 +17,7 @@ import InvoiceNumber from './InvoiceNumber'
 import MonthServiceSelect from './MonthServiceSelect'
 import PaymentPricesTable from './PaymentPricesTable'
 import PaymentTotal from './PaymentTotal'
+import {inputNumberParser} from "@utils/helpers";
 
 export const useInvoice = ({
   payment,
@@ -75,7 +76,7 @@ function AddPaymentForm({ paymentActions }) {
             label="Сума"
             rules={validateField('paymentPrice')}
           >
-            <InputNumber
+            <InputNumber parser={inputNumberParser}
               style={{ minWidth: '166px' }}
               placeholder="Вкажіть суму"
               disabled={preview}

@@ -1,6 +1,6 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
-import { toRoundFixed } from '@utils/helpers'
-import { Form, Input } from 'antd'
+import {inputNumberParser, toRoundFixed} from '@utils/helpers'
+import {Form, InputNumber} from 'antd'
 
 export { default as Cleaning } from './Cleaning'
 export { default as Custom } from './Custom'
@@ -50,7 +50,7 @@ export const Amount: React.FC<{
         ...rules,
       ]}
     >
-      <Input type="number" />
+      <InputNumber parser={inputNumberParser} />
     </Form.Item>
   )
 }
