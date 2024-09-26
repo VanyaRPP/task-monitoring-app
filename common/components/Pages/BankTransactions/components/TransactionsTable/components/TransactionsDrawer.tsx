@@ -55,8 +55,6 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const showModal = () => setModalVisible(true)
   const closeModal = () => setModalVisible(false)
 
-  console.log(transaction)
-  console.log(domain)
   return (
     <>
       <Button
@@ -153,6 +151,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
             generalSum: transactionAmount,
             description: `${transaction.OSND} (taken from the transaction description)`,
             invoiceCreationDate: dayjs(transaction.DAT_OD, 'DD.MM.YYYY'),
+            company: selectedCompany,
           }}
           paymentActions={{ edit: false, preview: false }}
         />
