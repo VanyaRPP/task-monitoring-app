@@ -1,6 +1,7 @@
 import { useGetPaymentNumberQuery } from '@common/api/paymentApi/payment.api'
 import { Form, InputNumber } from 'antd'
 import { useEffect } from 'react'
+import {inputNumberParser} from "@utils/helpers";
 
 export default function InvoiceNumber({ form, paymentActions }) {
   const paymentInCreation = Object.values(paymentActions).every(
@@ -18,7 +19,7 @@ export default function InvoiceNumber({ form, paymentActions }) {
 
   return (
     <Form.Item name="invoiceNumber" label="№ інвойса">
-      <InputNumber
+      <InputNumber parser={inputNumberParser}
         style={{ minWidth: '166px' }}
         placeholder="Вкажіть № інвойса"
         disabled={paymentActions?.preview}

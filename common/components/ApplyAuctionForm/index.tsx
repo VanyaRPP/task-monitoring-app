@@ -7,6 +7,7 @@ import {
   InputNumber,
   Select,
 } from 'antd'
+import {inputNumberParser} from "@utils/helpers";
 
 type PropsType = {
   isFormDisabled: boolean
@@ -43,7 +44,7 @@ const ApplyAuctionForm: React.FC<PropsType> = ({
         label="Ціна"
         rules={[{ required: true, message: 'Введіть ціну послуги!' }]}
       >
-        <InputNumber addonAfter={suffixSelector} style={{ width: '100%' }} />
+        <InputNumber parser={inputNumberParser} addonAfter={suffixSelector} style={{ width: '100%' }} />
       </Form.Item>
       <Form.Item name="description" label="Опис">
         <Input.TextArea maxLength={250} />
