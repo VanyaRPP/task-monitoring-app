@@ -1,12 +1,12 @@
 import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons'
-import { Form, Input, Button, message, Divider, Card } from 'antd'
+import { Form, Input, Button, message, Divider } from 'antd'
 import { signIn } from 'next-auth/react'
 import { Typography } from 'antd'
 import { useState } from 'react'
 
 const { Text, Link } = Typography
 
-const SignInForm = () => {
+const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
   const [form] = Form.useForm()
   const [isLogin, setIsLogin] = useState(false)
 
@@ -18,10 +18,11 @@ const SignInForm = () => {
   }) => {
     const result = await signIn('credentials', {
       redirect: true,
-      name: values.name,
-      email: values.email,
-      password: values.password,
+      name: values?.name,
+      email: values?.email,
+      password: values?.password,
       authType: isLogin ? 'registration' : 'signIn',
+      csrfToken: csrfToken,
     })
     if (result?.error) {
       message.error(result?.error)
