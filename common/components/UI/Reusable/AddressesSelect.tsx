@@ -49,7 +49,6 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
         dropdownStyle={dropdownStyle}
         allowClear
         showSearch
-        // onChange={({value}) => form.setFieldsValue({ street: value })}
       />
     </Form.Item>
   )
