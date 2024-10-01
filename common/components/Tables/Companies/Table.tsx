@@ -93,8 +93,8 @@ const CompaniesTable: React.FC<Props> = ({
           router.pathname === AppRoutes.SEP_DOMAIN) && {
           hideOnSinglePage: false,
           showSizeChanger: true,
-            pageSizeOptions: [10, 20, 50],
-            position: ['bottomCenter']
+          pageSizeOptions: [10, 20, 50],
+          position: ['bottomCenter'],
         }
       }
       loading={isLoading}

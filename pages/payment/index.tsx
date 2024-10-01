@@ -14,7 +14,7 @@ export default withAuthRedirect(() => {
   return (
     <>
       <Head>
-        <title>{isUser ? "Мої платежі" : "Платежі"}</title>
+        <title>{isUser ? 'Мої платежі' : 'Платежі'}</title>
       </Head>
       <MainLayout
         path={[

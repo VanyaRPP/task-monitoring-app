@@ -53,7 +53,7 @@ const RealEstateModal: FC<Props> = ({
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
-   
+
     const realEstateData = {
       domain: currentRealEstate?.domain || formData.domain,
       street: currentRealEstate?.street || formData.street,

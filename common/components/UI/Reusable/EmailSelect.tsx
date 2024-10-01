@@ -13,7 +13,6 @@ export default function EmailSelect({
   form,
   disabled = false,
 }: EmailSelectProps) {
-  
   const { data, isLoading } = useGetDomainsQuery({})
   const [formInstance] = useForm() // Access the form instance
 
