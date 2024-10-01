@@ -19,7 +19,7 @@ export default async function handler(
   switch (req.method) {
     case 'PATCH':
       try {
-        if (isAdmin || isGlobalAdmin || isDomainAdmin) {
+        if (isAdmin) {
           const response = await RealEstate.findOneAndUpdate(
             { _id: req.query.id },
             { archived: req.body.archived },
