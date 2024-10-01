@@ -10,6 +10,7 @@ import {
 import { Form, message } from 'antd'
 import Modal from '../../ModalWindow'
 import RealEstateForm from './RealEstateForm'
+import { IDomain } from '@modules/models/Domain'
 
 interface Props {
   closeModal: VoidFunction
@@ -45,12 +46,14 @@ const RealEstateModal: FC<Props> = ({
       waterPart: currentRealEstate?.waterPart || 0,
       discount: currentRealEstate?.discount || 0,
       cleaning: currentRealEstate?.cleaning || 0,
+      services: currentRealEstate?.services || [],
     }
     form.setFieldsValue(initialValues)
   }, [currentRealEstate, form])
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
+
     const realEstateData = {
       domain: currentRealEstate?.domain || formData.domain,
       street: currentRealEstate?.street || formData.street,
@@ -67,6 +70,7 @@ const RealEstateModal: FC<Props> = ({
       discount:
         formData.discount > 0 ? formData.discount * -1 : formData.discount,
       cleaning: formData.cleaning,
+      services: formData.services,
     }
 
     const response = currentRealEstate
