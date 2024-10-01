@@ -41,6 +41,7 @@ const RealEstateModal: FC<Props> = ({
       servicePricePerMeter: currentRealEstate?.servicePricePerMeter || 0,
       totalArea: currentRealEstate?.totalArea || 0,
       garbageCollector: currentRealEstate?.garbageCollector || false,
+      archived: currentRealEstate?.archived || false,
       rentPart: currentRealEstate?.rentPart || 0,
       inflicion: currentRealEstate?.inflicion || false,
       waterPart: currentRealEstate?.waterPart || 0,
@@ -53,7 +54,7 @@ const RealEstateModal: FC<Props> = ({
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
-   
+
     const realEstateData = {
       domain: currentRealEstate?.domain || formData.domain,
       street: currentRealEstate?.street || formData.street,
@@ -64,6 +65,7 @@ const RealEstateModal: FC<Props> = ({
       servicePricePerMeter: formData.servicePricePerMeter,
       totalArea: formData.totalArea,
       garbageCollector: formData.garbageCollector,
+      archived: formData.archived,
       rentPart: formData.rentPart,
       inflicion: formData.inflicion,
       waterPart: formData.waterPart,

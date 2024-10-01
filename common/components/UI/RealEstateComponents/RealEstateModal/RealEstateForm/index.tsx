@@ -1,7 +1,5 @@
 import { validateField } from '@assets/features/validators'
-import {
-  IExtendedRealestate,
-} from '@common/api/realestateApi/realestate.api.types'
+import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
 import {
   Button,
@@ -20,6 +18,7 @@ import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
 import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
 import { IDomain } from '@modules/models/Domain'
+import { inputNumberParser } from '@utils/helpers'
 
 interface Props {
   form: FormInstance<any>
@@ -110,6 +109,7 @@ const RealEstateForm: FC<Props> = ({
         rules={validateField('required')}
       >
         <InputNumber
+          parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
@@ -121,6 +121,7 @@ const RealEstateForm: FC<Props> = ({
         rules={validateField('required')}
       >
         <InputNumber
+          parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
@@ -131,6 +132,7 @@ const RealEstateForm: FC<Props> = ({
         label="Індивідуальне утримання (грн/м²)"
       >
         <InputNumber
+          parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
@@ -138,6 +140,7 @@ const RealEstateForm: FC<Props> = ({
       </Form.Item>
       <Form.Item name="rentPart" label="Частка загальної площі">
         <InputNumber
+          parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
@@ -145,6 +148,7 @@ const RealEstateForm: FC<Props> = ({
       </Form.Item>
       <Form.Item name="waterPart" label="Частка водопостачання">
         <InputNumber
+          parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
@@ -152,6 +156,7 @@ const RealEstateForm: FC<Props> = ({
       </Form.Item>
       <Form.Item name="cleaning" label="Прибирання (грн)">
         <InputNumber
+          parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
@@ -159,6 +164,7 @@ const RealEstateForm: FC<Props> = ({
       </Form.Item>
       <Form.Item name="discount" label="Знижка">
         <InputNumber
+          parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}

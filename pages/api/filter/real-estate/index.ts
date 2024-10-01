@@ -19,7 +19,7 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { companyId, domainId, streetId, archive, limit = 0 } = req.query
+        const { companyId, domainId, streetId } = req.query
 
         const companiesIds: string[] | null = companyId
           ? typeof companyId === 'string'
@@ -37,22 +37,18 @@ export default async function handler(
             : streetId.map((id) => decodeURIComponent(id))
           : null
 
-        /**
-         * request data filters
-         */
-        const filters: FilterQuery<typeof RealEstate> = {
-          archived: { $ne: archive },
-          ...(!!companiesIds?.length && { _id: { $in: companiesIds } }),
-          ...(!!domainsIds?.length && { domain: { $in: domainsIds } }),
-          ...(!!streetsIds?.length && { street: { $in: streetsIds } }),
-        }
-
-        /**
-         * access restrictions
-         */
         const options: FilterQuery<typeof RealEstate> = {}
 
         if (isGlobalAdmin) {
+          if (companiesIds) {
+            options.company = { $in: companiesIds }
+          }
+          if (streetsIds) {
+            options.street = { $in: streetsIds }
+          }
+          if (domainsIds) {
+            options.domain = { $in: domainsIds }
+          }
         } else if (isDomainAdmin) {
           const domains = await Domain.distinct('_id', {
             adminEmails: user.email,
@@ -65,11 +61,6 @@ export default async function handler(
         } else if (isUser) {
           options.adminEmails = user.email
         }
-
-        const realEstates = await RealEstate.find({ $and: [options, filters] })
-          .limit(+limit)
-          .populate('domain')
-          .populate('street')
 
         const { distinctDomains, distinctCompanies } =
           await getDistinctCompanyAndDomain({
@@ -85,9 +76,7 @@ export default async function handler(
         })
 
         const filteredStreets = distinctStreets
-          // parse to regular IStreet
           ?.map((street) => street.streetData as IStreet)
-          // remove dublicates
           .filter(
             (street, index, streets) =>
               index ===
@@ -95,19 +84,7 @@ export default async function handler(
                 (s) => s._id.toString() === street._id.toString()
               )
           )
-        if (
-          (domainsIds && domainsIds.length > 0) ||
-          (streetsIds && streetsIds.length > 0)
-        ) {
-          const filteredRealEstates = await RealEstate.find({
-            $and: [filters, { archived: { $ne: true } }],
-          })
 
-          return res.status(200).json({
-            success: true,
-            data: filteredRealEstates,
-          })
-        }
         return res.status(200).json({
           domainsFilter: distinctDomains?.map(({ domainDetails }) => ({
             text: domainDetails.name,
@@ -123,13 +100,12 @@ export default async function handler(
             text: `${street.address}, м.${street.city}`,
             value: street._id,
           })),
-          data: realEstates,
           success: true,
         })
       } catch (error) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        return res.status(500).json({ success: false, message: error })
+        return res.status(400).json({ success: false, message: error.message })
       }
 
     case 'POST':
@@ -143,13 +119,13 @@ export default async function handler(
               .json({ success: false, message: 'not allowed' })
           )
         }
-        // TODO: body validation
+        // TODO: валідація тіла запиту
         const realEstate = await RealEstate.create(req.body)
         return res.status(200).json({ success: true, data: realEstate })
       } catch (error) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        return res.status(400).json({ success: false, message: error })
+        return res.status(400).json({ success: false, message: error.message })
       }
   }
 }

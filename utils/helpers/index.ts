@@ -551,3 +551,16 @@ export const toTimestamp = (date: Date = new Date()): string => {
   const mmm = date.getMilliseconds().toString().padStart(3, '0')
   return `${HH}:${MM}:${SS}.${mmm}`
 }
+
+export const inputNumberParser = (value: string | undefined) => {
+  if (!value) return null
+
+  const cleanString = value
+    .replace(/(\s|,{2,})/g, '')
+    .replace(/,(?=\d{3})/g, '')
+
+  const formattedString = cleanString.replace(',', '.')
+  const result = parseFloat(formattedString)
+
+  return isNaN(result) ? null : result
+}

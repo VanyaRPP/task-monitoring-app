@@ -139,18 +139,22 @@ const PaymentCardHeader = ({
         >
           {isAdmin ? 'Платежі' : 'Мої оплати'}
         </Button>
+
         {pathname === AppRoutes.PAYMENT && (
           <Space>
             <ColumnSelect
               style={{ minWidth: 200 }}
               onSelect={onColumnsSelect}
             />
-            <PaymentCascader onChange={setCurrentDateFilter} />
-            <StreetsSelector
-              filters={filters}
-              setFilters={setFilters}
-              streets={streets}
-            />
+            <Space.Compact>
+              <PaymentCascader onChange={setCurrentDateFilter} />
+              <StreetsSelector
+                filters={filters}
+                setFilters={setFilters}
+                streets={streets}
+              />
+            </Space.Compact>
+
             <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
               <DomainFilterTags
                 collection={payments?.domainsFilter}
@@ -276,17 +280,17 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, ...props }) => {
 
   return (
     <Select
-    mode="multiple"
-    placeholder="Оберіть послуги"
-    value={selected}
-    onChange={handleSelect}
-    options={options}
-    maxTagCount={1}
-    allowClear
-    showSearch
-    optionFilterProp="label"
-    suffixIcon={<FilterOutlined />}
-    {...props}
+      mode="multiple"
+      placeholder="Оберіть послуги"
+      value={selected}
+      onChange={handleSelect}
+      options={options}
+      maxTagCount={1}
+      allowClear
+      showSearch
+      optionFilterProp="label"
+      suffixIcon={<FilterOutlined />}
+      {...props}
     />
   )
 }

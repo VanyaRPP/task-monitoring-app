@@ -76,13 +76,11 @@ export default async function handler(
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })
       }
-      
+
     case 'GET':
       try {
         if (isGlobalAdmin) {
-          const response = await Domain.findById(
-            { _id: req.query.id },
-          )
+          const response = await Domain.findById({ _id: req.query.id })
           return res.status(200).json({ success: true, data: response })
         } else {
           return res

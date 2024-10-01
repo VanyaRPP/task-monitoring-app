@@ -6,6 +6,7 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { isAdminCheck } from '@utils/helpers'
 import { Select } from 'antd'
 import s from './style.module.scss'
+import { LoadingOutlined } from '@ant-design/icons'
 
 const DomainSelector: React.FC<{
   onSelect?: (domainId: IDomain['_id']) => void

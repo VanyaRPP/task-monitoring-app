@@ -11,9 +11,7 @@ export default withAuthRedirect(() => {
   return (
     <>
       <Head>
-        <title>
-          Вулиці
-        </title>
+        <title>Вулиці</title>
       </Head>
       <MainLayout
         path={[

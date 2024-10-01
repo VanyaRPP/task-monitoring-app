@@ -38,8 +38,7 @@ export const ProfilePage: React.FC = () => {
     },
   } = useGetAllRealEstateQuery({})
 
-
-  const handleTagClick = ({text, value}) => {
+  const handleTagClick = ({ text, value }) => {
     router.push({
       pathname: AppRoutes.SEP_DOMAIN,
       query: {
@@ -111,7 +110,9 @@ export const ProfilePage: React.FC = () => {
                 bordered={false}
                 color="purple"
                 className={styles.tag}
-                onClick={() => {handleTagClick(domain)}}
+                onClick={() => {
+                  handleTagClick(domain)
+                }}
               >
                 {domain.text}
               </Tag>

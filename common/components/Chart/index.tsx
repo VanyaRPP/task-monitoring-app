@@ -2,12 +2,12 @@ import { generateColorsArray } from '@utils/helpers'
 import Chart from 'chart.js/auto'
 import React, { useEffect, useRef } from 'react'
 import s from './style.module.scss'
-import { theme } from 'antd';
+import { theme } from 'antd'
 type dataSources = {
   label: string
   value: {
-    part: number,
-    area: number,
+    part: number
+    area: number
   }
   color?: string
 }
@@ -16,7 +16,7 @@ const ChartComponent: React.FC<{
   dataSources: dataSources[]
   chartTitle: string
   domainName: string
-}> = ({ dataSources, chartTitle, domainName}) => {
+}> = ({ dataSources, chartTitle, domainName }) => {
   const chartRef = useRef<HTMLCanvasElement | null>(null)
   const myChartRef = useRef<Chart<'pie', number[], string> | null>(null)
   const { token } = theme.useToken()
@@ -51,10 +51,16 @@ const ChartComponent: React.FC<{
           },
           tooltip: {
             callbacks: {
-              label: function(tooltipItem) {
-                return `${domainName !== tooltipItem.label ? 'Частка площі' : 'Незайнята площа'} ${dataSources[tooltipItem.dataIndex]?.value?.area.toFixed(2)} м²`;
+              label: function (tooltipItem) {
+                return `${
+                  domainName !== tooltipItem.label
+                    ? 'Частка площі'
+                    : 'Незайнята площа'
+                } ${dataSources[tooltipItem.dataIndex]?.value?.area.toFixed(
+                  2
+                )} м²`
               },
-              footer: function(tooltipItems) {
+              footer: function (tooltipItems) {
                 return `${tooltipItems[0].parsed.toFixed(2)}%`
               },
             },

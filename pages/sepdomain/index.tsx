@@ -24,11 +24,11 @@ export default withAuthRedirect(() => {
       ]}
     >
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-        <PaymentsBlock sepDomainID={sepDomainID}/>
-        <ServicesBlock sepDomainID={sepDomainID}/>
-        <RealEstateBlock sepDomainID={sepDomainID}/>
-        <StreetsBlock sepDomainId={sepDomainID}/>
-        <CompaniesAreaChart domainID={sepDomainID}/>
+        <PaymentsBlock sepDomainID={sepDomainID} />
+        <ServicesBlock sepDomainID={sepDomainID} />
+        <RealEstateBlock sepDomainID={sepDomainID} />
+        <StreetsBlock sepDomainId={sepDomainID} />
+        <CompaniesAreaChart domainID={sepDomainID} />
       </Space>
     </MainLayout>
   )

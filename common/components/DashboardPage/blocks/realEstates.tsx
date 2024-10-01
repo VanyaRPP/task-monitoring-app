@@ -21,7 +21,11 @@ export interface Props {
   sepDomainID?: string
 }
 
-const RealEstateBlock: React.FC<Props> = ({ domainId, streetId, sepDomainID }) => {
+const RealEstateBlock: React.FC<Props> = ({
+  domainId,
+  streetId,
+  sepDomainID,
+}) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.REAL_ESTATE
   const { data: user } = useGetCurrentUserQuery()
