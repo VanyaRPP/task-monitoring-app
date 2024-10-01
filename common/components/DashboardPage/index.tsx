@@ -16,7 +16,7 @@ const Dashboard: React.FC = () => {
   return (
     <Space direction="vertical" size="middle" style={{ width: '100%' }}>
       <PaymentsBlock />
-      <PaymentsChart/>
+      <PaymentsChart />
       <ServicesBlock />
       {isGlobalAdmin && <StreetsBlock />}
       <DomainsBlock />

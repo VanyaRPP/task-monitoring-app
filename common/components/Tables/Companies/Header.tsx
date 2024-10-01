@@ -66,10 +66,14 @@ const CompaniesHeader: React.FC<Props> = ({
   return (
     <div className={s.headerBlock}>
       <div className={s.firstBlock}>
-        <Button type="link" onClick={() => { 
-          if(enableRealEstateButton) {
-            router.push(AppRoutes.REAL_ESTATE)
-          }}}>
+        <Button
+          type="link"
+          onClick={() => {
+            if (enableRealEstateButton) {
+              router.push(AppRoutes.REAL_ESTATE)
+            }
+          }}
+        >
           Компанії
         </Button>
 

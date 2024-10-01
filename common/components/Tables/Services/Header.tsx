@@ -70,11 +70,14 @@ const ServicesHeader: React.FC<Props> = ({
   return (
     <div className={s.headerBlock}>
       <div className={s.firstBlock}>
-        <Button type="link" onClick={() => {
-          if(enableServiceButton) {
-            router.push(AppRoutes.SERVICE)
+        <Button
+          type="link"
+          onClick={() => {
+            if (enableServiceButton) {
+              router.push(AppRoutes.SERVICE)
+            }
           }}
-          }>
+        >
           Послуги <SelectOutlined />
         </Button>
 
@@ -101,12 +104,13 @@ const ServicesHeader: React.FC<Props> = ({
             </Button>
           </>
         )}
-        {isAdminCheck(user?.roles) && router.pathname === AppRoutes.SERVICE 
-        && selectedServices.length > 0 && (
-          <Button type="link" onClick={() => handleDeleteServices()}>
-            <DeleteOutlined /> Видалити
-          </Button>
-        )}
+        {isAdminCheck(user?.roles) &&
+          router.pathname === AppRoutes.SERVICE &&
+          selectedServices.length > 0 && (
+            <Button type="link" onClick={() => handleDeleteServices()}>
+              <DeleteOutlined /> Видалити
+            </Button>
+          )}
         {(isModalOpen || currentService) && (
           <AddServiceModal
             currentService={currentService}

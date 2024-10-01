@@ -1,13 +1,13 @@
 import MainLayout from '@common/components/Layouts/Main'
 import RealEstateBlock from '@components/DashboardPage/blocks/realEstates'
 import withAuthRedirect from '@components/HOC/withAuthRedirect'
-import {AppRoutes, Roles} from '@utils/constants'
+import { AppRoutes, Roles } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 
 import { authOptions } from '../api/auth/[...nextauth]'
 import Head from 'next/head'
-import {useGetCurrentUserQuery} from "@common/api/userApi/user.api";
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 export default withAuthRedirect(() => {
   const { data: userResponse } = useGetCurrentUserQuery()
@@ -15,7 +15,7 @@ export default withAuthRedirect(() => {
   return (
     <>
       <Head>
-        <title>{isUser ? "Мої компанії" : "Компанії"}</title>
+        <title>{isUser ? 'Мої компанії' : 'Компанії'}</title>
       </Head>
       <MainLayout
         path={[

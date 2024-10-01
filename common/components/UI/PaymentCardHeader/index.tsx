@@ -276,17 +276,17 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, ...props }) => {
 
   return (
     <Select
-    mode="multiple"
-    placeholder="Оберіть послуги"
-    value={selected}
-    onChange={handleSelect}
-    options={options}
-    maxTagCount={1}
-    allowClear
-    showSearch
-    optionFilterProp="label"
-    suffixIcon={<FilterOutlined />}
-    {...props}
+      mode="multiple"
+      placeholder="Оберіть послуги"
+      value={selected}
+      onChange={handleSelect}
+      options={options}
+      maxTagCount={1}
+      allowClear
+      showSearch
+      optionFilterProp="label"
+      suffixIcon={<FilterOutlined />}
+      {...props}
     />
   )
 }

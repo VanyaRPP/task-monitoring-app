@@ -15,7 +15,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -29,7 +29,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -43,7 +43,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -57,7 +57,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -71,7 +71,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -85,7 +85,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
   })
@@ -99,7 +99,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -113,10 +113,10 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
-    
+
     it('should NOT load when company = { totalArea: 10 }', () => {
       const company: Partial<IRealestate> = {
         totalArea: 10,
@@ -127,7 +127,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -141,7 +141,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -155,7 +155,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -169,7 +169,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -183,7 +183,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -197,10 +197,10 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
-    
+
     it('should NOT load when company = { inflicion: false }', () => {
       const company: Partial<IRealestate> = {
         inflicion: false,
@@ -211,7 +211,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -225,7 +225,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
   })
@@ -239,7 +239,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
     it('should NOT load when payment = { invoice: null }', () => {
@@ -252,7 +252,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
     it('should NOT load when payment = { invoice: [] }', () => {
@@ -265,7 +265,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
     it('should NOT load when payment = { invoice: [Cleaning] }', () => {
@@ -284,7 +284,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
     it('should load when payment = { invoice: [Inflicion] }', () => {
@@ -321,7 +321,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -337,7 +337,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -354,7 +354,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -393,7 +393,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -417,10 +417,10 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
-    
+
     it('should NOT load when service = null, company = null, prevPayment = { invoice: [Cleaning] }', () => {
       const service: Partial<IService> = null
       const company: Partial<IRealestate> = null
@@ -441,7 +441,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -467,7 +467,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -493,7 +493,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -512,12 +512,11 @@ describe('getInvoices - INFLICION', () => {
         prevPayment,
       })
 
-      expect(invoices).toContainEqual(
-        {
-          type: ServiceType.Inflicion,
-          price: 0,
-          sum: 0,
-        })
+      expect(invoices).toContainEqual({
+        type: ServiceType.Inflicion,
+        price: 0,
+        sum: 0,
+      })
     })
 
     it('should load when service = { inflicionPrice: 110 }, company = { inflicion: true }, prevPayment = { invoice: [Inflicion] }', () => {
@@ -543,12 +542,11 @@ describe('getInvoices - INFLICION', () => {
         prevPayment,
       })
 
-      expect(invoices).toContainEqual(
-        {
-          type: ServiceType.Inflicion,
-          price: 0,
-          sum: 0,
-        })
+      expect(invoices).toContainEqual({
+        type: ServiceType.Inflicion,
+        price: 0,
+        sum: 0,
+      })
     })
 
     it('should load when service = { inflicionPrice: 110 }, company = { inflicion: true }, prevPayment = { invoice: [Cleaning] }', () => {
@@ -574,11 +572,11 @@ describe('getInvoices - INFLICION', () => {
         prevPayment,
       })
 
-      expect(invoices).toContainEqual(({
-          type: ServiceType.Inflicion,
-          price: 0,
-          sum: 0,
-        }))
+      expect(invoices).toContainEqual({
+        type: ServiceType.Inflicion,
+        price: 0,
+        sum: 0,
+      })
     })
   })
 
@@ -595,7 +593,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
     it('should load when service = null, company = null, payment = { invoice: [Inflicion] }', () => {
@@ -652,7 +650,7 @@ describe('getInvoices - INFLICION', () => {
     })
   })
 
-  describe('props: { service, company, prevService }' , () => {
+  describe('props: { service, company, prevService }', () => {
     it('should NOT load when service = null, company = null, prevService = null', () => {
       const service: Partial<IService> = null
       const company: Partial<IRealestate> = null
@@ -665,7 +663,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -697,11 +695,11 @@ describe('getInvoices - INFLICION', () => {
     it('should load when service = { inflicionPrice: 110, rentPrice: 90 }, company = { inflicion: true, totalArea: 70 }, prevService = { inflicionPrice: 110 }', () => {
       const service: Partial<IService> = {
         inflicionPrice: 110,
-         rentPrice: 90,
+        rentPrice: 90,
       }
       const company: Partial<IRealestate> = {
         inflicion: true,
-         totalArea: 70,
+        totalArea: 70,
       }
       const prevService: Partial<IService> = {
         inflicionPrice: 110,
@@ -736,7 +734,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -756,7 +754,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -778,7 +776,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -801,7 +799,7 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Inflicion})
+        expect.objectContaining({ type: ServiceType.Inflicion })
       )
     })
 
@@ -824,10 +822,10 @@ describe('getInvoices - INFLICION', () => {
       })
 
       expect(invoices).toContainEqual({
-          type: ServiceType.Inflicion,
-          price: 0,
-          sum: 0,
-        })
+        type: ServiceType.Inflicion,
+        price: 0,
+        sum: 0,
+      })
     })
 
     it('should load when service = { rentPrice: 90 }, company = { inflicion: true, totalArea: 70 }, prevService = { inflicionPrice: 110 } prevPayment = null', () => {

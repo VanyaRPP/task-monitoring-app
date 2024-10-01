@@ -46,12 +46,18 @@ export const Menu: React.FC<MenuProps> = (props) => {
           {
             key: AppRoutes.PAYMENT,
             type: 'item',
-            label: <Link href={AppRoutes.PAYMENT}>{isGlobalAdmin || isDomainAdmin ? 'Платежі' : 'Мої платежі'}</Link>,
+            label: (
+              <Link href={AppRoutes.PAYMENT}>
+                {isGlobalAdmin || isDomainAdmin ? 'Платежі' : 'Мої платежі'}
+              </Link>
+            ),
           },
           {
             key: AppRoutes.PAYMENT_BULK,
             type: 'item',
-            label: <Link href={AppRoutes.PAYMENT_BULK}>Створення рахунків</Link>,
+            label: (
+              <Link href={AppRoutes.PAYMENT_BULK}>Створення рахунків</Link>
+            ),
             hidden: !isGlobalAdmin && !isDomainAdmin,
           },
           {
@@ -123,7 +129,6 @@ export const Menu: React.FC<MenuProps> = (props) => {
           label: 'BAnk',
           onClick: () => router.push(AppRoutes.BANKTEST),
         }),
-
       },
     ] as AntdMenuProps['items']
   }, [router, session, isGlobalAdmin, isDomainAdmin, isDevMode])
