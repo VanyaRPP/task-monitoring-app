@@ -132,7 +132,7 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
 
 export default SignInPage
 
-export const getStaticProps: GetServerSideProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions)
 
   if (session) {
@@ -145,6 +145,6 @@ export const getStaticProps: GetServerSideProps = async (context) => {
   }
 
   const csrfToken = await getCsrfToken(context)
-
-  return { props: { providers: await getProviders(), csrfToken } }
+  const providers = await getProviders()
+  return { props: { providers, csrfToken } }
 }
