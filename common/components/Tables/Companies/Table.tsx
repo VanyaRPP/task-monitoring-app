@@ -297,90 +297,69 @@ const getDefaultColumns = ({
       ),
     },
   ]
+
   if (isAdmin) {
     columns.push({
       align: 'center',
       fixed: 'right',
       title: '',
       width: 98,
-      render: (_, realEstate: IExtendedRealestate) =>
-        isAdmin ? (
-          <Dropdown
-            menu={{
-              items: [
-                {
-                  key: 'edit',
-                  label: (
-                    <Button
-                      icon={<EditOutlined />}
-                      type="link"
-                      style={{
-                        color: '#722ed1',
-                        paddingLeft: '10px',
-                        paddingRight: '10px',
-                      }}
-                      onClick={() => {
-                        setCurrentRealEstate(realEstate)
-                        setRealEstateActions({ edit: true })
-                      }}
-                    >
-                      Редагувати
-                    </Button>
-                  ),
-                },
-                {
-                  key: 'archive',
-                  label: (
-                    <Popconfirm
-                      id="popconfirm_archive"
-                      title={`Ви впевнені що хочете ${
-                        realEstate.archived ? 'розархівувати' : 'архівувати'
-                      } цей елемент?`}
-                      onConfirm={() =>
-                        handleArchive(realEstate?._id, !realEstate.archived)
-                      }
-                      okText={
-                        realEstate.archived ? 'Розархівувати' : 'Архівувати'
-                      }
-                      cancelText="Ні"
-                      disabled={archiveLoading}
-                    >
-                      <Button
-                        type="text"
-                        icon={<InboxOutlined />}
-                        style={{
-                          color: realEstate.archived ? '#722ed1' : '#ff4d4f',
-                          paddingLeft: '10px',
-                          paddingRight: '10px',
-                        }}
-                      >
-                        {realEstate.archived ? 'Розархівувати' : 'Архівувати'}
-                      </Button>
-                    </Popconfirm>
-                  ),
-                },
-              ],
-            }}
-            placement="bottomRight"
-          >
-            <Button icon={<MoreOutlined />} />
-          </Dropdown>
-        ) : null,
-    })
-  }
-
-  if (isGlobalAdmin) {
-    columns.push({
-      align: 'center',
-      fixed: 'right',
-      title: '',
-      dataIndex: '',
-      width: 50,
       render: (_, realEstate: IExtendedRealestate) => (
         <Dropdown
           menu={{
             items: [
               {
+                key: 'edit',
+                label: (
+                  <Button
+                    icon={<EditOutlined />}
+                    type="link"
+                    style={{
+                      color: '#722ed1',
+                      paddingLeft: '10px',
+                      paddingRight: '10px',
+                    }}
+                    onClick={() => {
+                      setCurrentRealEstate(realEstate)
+                      setRealEstateActions({ edit: true })
+                    }}
+                  >
+                    Редагувати
+                  </Button>
+                ),
+              },
+              {
+                key: 'archive',
+                label: (
+                  <Popconfirm
+                    id="popconfirm_archive"
+                    title={`Ви впевнені що хочете ${
+                      realEstate.archived ? 'розархівувати' : 'архівувати'
+                    } цей елемент?`}
+                    onConfirm={() =>
+                      handleArchive(realEstate?._id, !realEstate.archived)
+                    }
+                    okText={
+                      realEstate.archived ? 'Розархівувати' : 'Архівувати'
+                    }
+                    cancelText="Ні"
+                    disabled={archiveLoading}
+                  >
+                    <Button
+                      type="text"
+                      icon={<InboxOutlined />}
+                      style={{
+                        color: realEstate.archived ? '#722ed1' : '#ff4d4f',
+                        paddingLeft: '10px',
+                        paddingRight: '10px',
+                      }}
+                    >
+                      {realEstate.archived ? 'Розархівувати' : 'Архівувати'}
+                    </Button>
+                  </Popconfirm>
+                ),
+              },
+              isGlobalAdmin && {
                 key: 'delete',
                 label: (
                   <Popconfirm
@@ -405,37 +384,6 @@ const getDefaultColumns = ({
                   </Popconfirm>
                 ),
               },
-              {
-                key: 'archive',
-                label: (
-                  <Popconfirm
-                    id="popconfirm_archive"
-                    title={`Ви впевнені що хочете ${
-                      realEstate.archived ? 'розархівувати' : 'архівувати'
-                    }?`}
-                    onConfirm={() =>
-                      handleArchive(realEstate?._id, !realEstate.archived)
-                    }
-                    okText={
-                      realEstate.archived ? 'Розархівувати' : 'Архівувати'
-                    }
-                    cancelText="Ні"
-                    disabled={archiveLoading}
-                  >
-                    <Button
-                      type="text"
-                      icon={<InboxOutlined />}
-                      style={{
-                        color: realEstate.archived ? '#722ed1' : '#ff4d4f',
-                        paddingLeft: '10px',
-                        paddingRight: '10px',
-                      }}
-                    >
-                      {realEstate.archived ? 'Розархівувати' : 'Архівувати'}
-                    </Button>
-                  </Popconfirm>
-                ),
-              },
             ],
           }}
           placement="bottomRight"
@@ -445,6 +393,7 @@ const getDefaultColumns = ({
       ),
     })
   }
+
   const domainColumn: any = {
     title: 'Надавач послуг',
     dataIndex: 'domain',
