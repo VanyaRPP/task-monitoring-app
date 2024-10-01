@@ -1,7 +1,5 @@
 import { validateField } from '@assets/features/validators'
-import {
-  IExtendedRealestate,
-} from '@common/api/realestateApi/realestate.api.types'
+import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
 import {
   Button,

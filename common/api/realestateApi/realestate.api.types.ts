@@ -13,6 +13,7 @@ export type IRealestate = {
   totalArea: number
   description: string
   garbageCollector?: boolean
+  archived?: boolean
   rentPart?: number
   inflicion?: boolean
   waterPart?: number
@@ -41,4 +42,15 @@ export interface IGetRealestateResponse {
 
 export interface IDeleteRealestateResponse {
   success: boolean
+}
+
+export interface IArchived {
+  _id?: string
+  archived?: boolean
+  success: boolean
+}
+
+export interface IExtendedArchive extends IArchived {
+  _id: string
+  _v: number
 }
