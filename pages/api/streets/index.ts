@@ -5,6 +5,7 @@ import Street from '@modules/models/Street'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import _uniqBy from 'lodash/uniqBy'
 
 start()
 
@@ -45,11 +46,11 @@ export default async function handler(
           .limit(+limit)
           .populate('streets')
 
-        const streets = domains.map((domain) => domain.streets).flat()
+        const streets = domains.flatMap((domain) => domain.streets)
 
         return res.status(200).json({
           success: true,
-          data: streets,
+          data: _uniqBy(streets, '_id'),
         })
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })
