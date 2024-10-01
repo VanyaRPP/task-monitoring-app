@@ -52,19 +52,22 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         try {
-          const user = await User.findOne({ email: credentials.email });
-          if(credentials.authType === 'signIn'){ 
-            if (user && await bcrypt.compare(credentials.password, user.password)) {
+          const user = await User.findOne({ email: credentials.email })
+          if (credentials.authType === 'signIn') {
+            if (
+              user &&
+              (await bcrypt.compare(credentials.password, user.password))
+            ) {
               return {
                 id: user._id.toString(),
                 name: user.name,
                 email: user.email,
-              };
+              }
             }
-          }else{
-            if (user) return null;
-            
-            const hash = await bcrypt.hash(credentials.password, saltRounds);
+          } else {
+            if (user) return null
+
+            const hash = await bcrypt.hash(credentials.password, saltRounds)
             const newUser = await User.create({
               name: credentials.name,
               email: credentials.email,
@@ -74,14 +77,14 @@ export const authOptions: NextAuthOptions = {
               id: newUser._id.toString(),
               name: newUser.name,
               email: newUser.email,
-            };
+            }
           }
 
-          return null;
+          return null
         } catch (error) {
-          return null;
+          return null
         }
-      }
+      },
     }),
     // EmailProvider({
     //   server: {

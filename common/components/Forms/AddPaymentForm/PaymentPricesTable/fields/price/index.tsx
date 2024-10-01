@@ -1,7 +1,7 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { ServiceType } from '@utils/constants'
-import {inputNumberParser, toRoundFixed} from '@utils/helpers'
-import {Form, InputNumber} from 'antd'
+import { inputNumberParser, toRoundFixed } from '@utils/helpers'
+import { Form, InputNumber } from 'antd'
 
 export { default as Cleaning } from './Cleaning'
 export { default as Custom } from './Custom'

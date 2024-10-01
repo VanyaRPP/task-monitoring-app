@@ -18,7 +18,7 @@ import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
 import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
 import { IDomain } from '@modules/models/Domain'
-import {inputNumberParser} from "@utils/helpers";
+import { inputNumberParser } from '@utils/helpers'
 
 interface Props {
   form: FormInstance<any>
@@ -108,7 +108,8 @@ const RealEstateForm: FC<Props> = ({
         label="Площа (м²)"
         rules={validateField('required')}
       >
-        <InputNumber parser={inputNumberParser}
+        <InputNumber
+          parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
@@ -119,7 +120,8 @@ const RealEstateForm: FC<Props> = ({
         label="Ціна (грн/м²)"
         rules={validateField('required')}
       >
-        <InputNumber parser={inputNumberParser}
+        <InputNumber
+          parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
@@ -129,35 +131,40 @@ const RealEstateForm: FC<Props> = ({
         name="servicePricePerMeter"
         label="Індивідуальне утримання (грн/м²)"
       >
-        <InputNumber parser={inputNumberParser}
+        <InputNumber
+          parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
         />
       </Form.Item>
       <Form.Item name="rentPart" label="Частка загальної площі">
-        <InputNumber parser={inputNumberParser}
+        <InputNumber
+          parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
         />
       </Form.Item>
       <Form.Item name="waterPart" label="Частка водопостачання">
-        <InputNumber parser={inputNumberParser}
+        <InputNumber
+          parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
         />
       </Form.Item>
       <Form.Item name="cleaning" label="Прибирання (грн)">
-        <InputNumber parser={inputNumberParser}
+        <InputNumber
+          parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
         />
       </Form.Item>
       <Form.Item name="discount" label="Знижка">
-        <InputNumber parser={inputNumberParser}
+        <InputNumber
+          parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}

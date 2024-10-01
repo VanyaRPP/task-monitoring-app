@@ -1,9 +1,9 @@
 import { validateField } from '@assets/features/validators'
-import { Form, FormInstance, Input, AutoComplete} from 'antd'
-import {FC, useEffect, useState} from 'react'
+import { Form, FormInstance, Input, AutoComplete } from 'antd'
+import { FC, useEffect, useState } from 'react'
 import s from './style.module.scss'
-import {useSearchStreetsQuery} from "@common/api/streetApi/street.api";
-import useDebounce from "@modules/hooks/useDebounce";
+import { useSearchStreetsQuery } from '@common/api/streetApi/street.api'
+import useDebounce from '@modules/hooks/useDebounce'
 
 interface Props {
   form: FormInstance<any>
@@ -12,17 +12,17 @@ interface Props {
 }
 
 const AddStreetForm: FC<Props> = ({ form, editable, setIsValueChanged }) => {
-  const [city, setCity] = useState('');
-  const [address, setAddress] = useState('');
-  const [options, setOptions] = useState<{ value: string }[]>([]);
+  const [city, setCity] = useState('')
+  const [address, setAddress] = useState('')
+  const [options, setOptions] = useState<{ value: string }[]>([])
 
-  const debouncedCity = useDebounce(city, 500);
-  const debouncedAddress = useDebounce(address, 500);
+  const debouncedCity = useDebounce(city, 500)
+  const debouncedAddress = useDebounce(address, 500)
 
   const { data: streets, isLoading } = useSearchStreetsQuery(
     { city: debouncedCity, address: debouncedAddress },
     { skip: !debouncedCity || !debouncedAddress }
-  );
+  )
 
   useEffect(() => {
     if (streets && streets.data.length > 0) {
@@ -30,26 +30,26 @@ const AddStreetForm: FC<Props> = ({ form, editable, setIsValueChanged }) => {
         streets.data.map((street: any) => ({
           value: street.address,
         }))
-      );
+      )
     } else {
-      setOptions([]);
+      setOptions([])
     }
-  }, [streets]);
+  }, [streets])
 
   const handleCityChange = (value: string) => {
-    setCity(value);
-    setIsValueChanged(true);
-  };
+    setCity(value)
+    setIsValueChanged(true)
+  }
 
   const handleAddressChange = (value: string) => {
-    setAddress(value);
-    setIsValueChanged(true);
-  };
+    setAddress(value)
+    setIsValueChanged(true)
+  }
 
   const handleAddressSelect = (value: string) => {
-    form.setFieldsValue({ address: value });
-    setIsValueChanged(true);
-  };
+    form.setFieldsValue({ address: value })
+    setIsValueChanged(true)
+  }
   return (
     <Form
       form={form}

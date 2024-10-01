@@ -553,14 +553,14 @@ export const toTimestamp = (date: Date = new Date()): string => {
 }
 
 export const inputNumberParser = (value: string | undefined) => {
-  if (!value) return null;
+  if (!value) return null
 
   const cleanString = value
     .replace(/(\s|,{2,})/g, '')
-    .replace(/,(?=\d{3})/g, '');
+    .replace(/,(?=\d{3})/g, '')
 
-  const formattedString = cleanString.replace(',', '.');
-  const result = parseFloat(formattedString);
+  const formattedString = cleanString.replace(',', '.')
+  const result = parseFloat(formattedString)
 
-  return isNaN(result) ? null : result;
-};
+  return isNaN(result) ? null : result
+}

@@ -16,7 +16,7 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
 import { useEffect } from 'react'
 import s from './style.module.scss'
-import {inputNumberParser} from "@utils/helpers";
+import { inputNumberParser } from '@utils/helpers'
 
 dayjs.locale('uk')
 
@@ -96,34 +96,58 @@ const AddServiceForm: React.FC<Props> = ({
           label="Утримання приміщень (грн/м²)"
           rules={validateField('required')}
         >
-          <InputNumber parser={inputNumberParser} placeholder="Вкажіть значення" className={s.formInput} />
+          <InputNumber
+            parser={inputNumberParser}
+            placeholder="Вкажіть значення"
+            className={s.formInput}
+          />
         </Form.Item>
         <Form.Item
           name="electricityPrice"
           label="Електроенергія (грн/кВт)"
           rules={validateField('electricityPrice')}
         >
-          <InputNumber parser={inputNumberParser} placeholder="Вкажіть значення" className={s.formInput} />
+          <InputNumber
+            parser={inputNumberParser}
+            placeholder="Вкажіть значення"
+            className={s.formInput}
+          />
         </Form.Item>
         <Form.Item
           name="waterPrice"
           label="Водопостачання (грн/м³)"
           rules={validateField('required')}
         >
-          <InputNumber parser={inputNumberParser} placeholder="Вкажіть значення" className={s.formInput} />
+          <InputNumber
+            parser={inputNumberParser}
+            placeholder="Вкажіть значення"
+            className={s.formInput}
+          />
         </Form.Item>
         <Form.Item
           name="waterPriceTotal"
           label="Всього водопостачання (грн/м³)"
           rules={validateField('required')}
         >
-          <InputNumber parser={inputNumberParser} placeholder="Вкажіть значення" className={s.formInput} />
+          <InputNumber
+            parser={inputNumberParser}
+            placeholder="Вкажіть значення"
+            className={s.formInput}
+          />
         </Form.Item>
         <Form.Item name="garbageCollectorPrice" label="Вивіз сміття">
-          <InputNumber parser={inputNumberParser} placeholder="Вкажіть значення" className={s.formInput} />
+          <InputNumber
+            parser={inputNumberParser}
+            placeholder="Вкажіть значення"
+            className={s.formInput}
+          />
         </Form.Item>
         <Form.Item name="inflicionPrice" label="Індекс інфляції">
-          <InputNumber parser={inputNumberParser} placeholder="Вкажіть значення" className={s.formInput} />
+          <InputNumber
+            parser={inputNumberParser}
+            placeholder="Вкажіть значення"
+            className={s.formInput}
+          />
         </Form.Item>
         <Form.Item name="description" label="Опис">
           <Input.TextArea

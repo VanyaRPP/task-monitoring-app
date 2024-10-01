@@ -4,11 +4,12 @@ import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { dateToMonth } from '@common/assets/features/formatDate'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { ServiceType } from '@utils/constants'
-import {inputNumberParser, toRoundFixed} from '@utils/helpers'
+import { inputNumberParser, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 import {
   Form,
-  Input, InputNumber,
+  Input,
+  InputNumber,
   Popconfirm,
   Space,
   TableColumnsType,
@@ -280,7 +281,8 @@ const MaintenancePrice: React.FC<{ name: number }> = ({ name }) => {
         style={{ margin: 0 }}
         rules={[validator.required(), validator.min(0)]}
       >
-        <InputNumber parser={inputNumberParser}
+        <InputNumber
+          parser={inputNumberParser}
           suffix={!!servicePricePerMeter && <QuestionCircleOutlined />}
         />
       </Form.Item>
@@ -372,7 +374,8 @@ const PlacingSum: React.FC<{ name: number }> = ({ name }) => {
         style={{ margin: 0 }}
         rules={[validator.required(), validator.min(0)]}
       >
-        <InputNumber parser={inputNumberParser}
+        <InputNumber
+          parser={inputNumberParser}
           suffix={inflicion && <QuestionCircleOutlined />}
           disabled={!inflicion}
         />
