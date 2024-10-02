@@ -16,7 +16,7 @@ export default async function handler(
   switch (req.method) {
     case 'DELETE':
       try {
-        if (!isGlobalAdmin) {
+        if (!isAdmin) {
           return res
             .status(400)
             .json({ success: false, message: 'not allowed' })
