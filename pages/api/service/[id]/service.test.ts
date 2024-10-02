@@ -182,7 +182,9 @@ xdescribe('Service API - DELETE', () => {
   it('should be removed by DomainAdmin role', async () => {
     await mockLoginAs(users.domainAdmin)
 
-    const serviceToRemove = services.find(el => el._id === '64d68421d9ba2fc8fea79d51')._id
+    const serviceToRemove = services.find(
+      (el) => el._id === '64d68421d9ba2fc8fea79d51'
+    )._id
 
     const mockReq = {
       method: 'DELETE',
