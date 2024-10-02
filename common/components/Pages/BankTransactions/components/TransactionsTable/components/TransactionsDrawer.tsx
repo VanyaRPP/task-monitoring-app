@@ -151,6 +151,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
             generalSum: transactionAmount,
             description: `${transaction.OSND} (taken from the transaction description)`,
             invoiceCreationDate: dayjs(transaction.DAT_OD, 'DD.MM.YYYY'),
+            company: selectedCompany,
           }}
           paymentActions={{ edit: false, preview: false }}
         />
