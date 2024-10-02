@@ -244,7 +244,7 @@ export const generateColumns = (
       title: 'Type', // TRANTYPE column
       dataIndex: 'TRANTYPE',
       key: 'TRANTYPE',
-      filteredValue: ['C'],
+      filteredValue: ['C', 'D'],
       ...getTrantypeFilterProps(),
     },
     { title: 'Dealer', dataIndex: 'DLR', key: 'DLR' },
