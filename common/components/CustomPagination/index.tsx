@@ -4,7 +4,7 @@ import { FC, MouseEventHandler } from 'react'
 import { DefaultOptionType } from 'antd/es/select'
 
 interface Props {
-  selectOptions: DefaultOptionType[]
+  selectOptions?: DefaultOptionType[]
   selectValue?: any
   onPrevButtonClick?: MouseEventHandler<HTMLElement>
   onNextButtonClick?: MouseEventHandler<HTMLElement>
@@ -36,11 +36,11 @@ const Pagination: FC<Props> = ({
         <LeftOutlined />
         {prevButtonText}
       </Button>
-      <Select
+      {/* <Select
         options={selectOptions}
         value={selectValue}
         onChange={onSelectChange}
-      />
+      /> */}
       <Button
         type="link"
         onClick={onNextButtonClick}

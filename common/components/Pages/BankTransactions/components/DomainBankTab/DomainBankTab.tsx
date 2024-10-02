@@ -10,7 +10,6 @@ import React, { FC, useEffect, useState } from 'react'
 import TransactionsTable from '../TransactionsTable/TransactionsTable'
 import CustomPagination from '@components/CustomPagination'
 import _initial from 'lodash/initial'
-
 import { useLazyGetTransactionsQuery } from '@common/api/bankApi/bank.api'
 import s from './style.module.scss'
 
@@ -27,21 +26,14 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
     ? encryptionService.decrypt(domain?.domainBankToken[0]?.token ?? 'token')
     : ''
 
-  const [limit, setLimit] = useState(25)
+  const [limit, setLimit] = useState(500)
   const [pageIds, setPageIds] = useState<string[]>([])
-
-  const pageSizeOptions = [
-    { label: '25', value: 25 },
-    { label: '50', value: 50 },
-    { label: '100', value: 100 },
-  ]
 
   const [getNextTransactions, { data: transactionsData }] =
     useLazyGetTransactionsQuery()
 
   useEffect(() => {
     token && getNextTransactions({ token, limit, followId: pageIds.at(-1) })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, limit])
 
   const onPrevButtonClick = () => {
@@ -61,6 +53,8 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
       followId: transactionsData.next_page_id,
     })
   }
+
+  console.log(transactionsData?.transactions)
 
   const viewTokens = (domainBankToken) => {
     return (
@@ -131,7 +125,6 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
         transactions={transactionsData?.transactions}
         pagination={
           <CustomPagination
-            selectOptions={pageSizeOptions}
             selectValue={limit}
             onSelectChange={(e) => setLimit(e)}
             onPrevButtonClick={onPrevButtonClick}
