@@ -55,6 +55,8 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const showModal = () => setModalVisible(true)
   const closeModal = () => setModalVisible(false)
 
+  console.log(transaction)
+  console.log(domain)
   return (
     <>
       <Button

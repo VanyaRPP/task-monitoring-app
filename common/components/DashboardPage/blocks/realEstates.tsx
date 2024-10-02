@@ -11,16 +11,21 @@ import { createContext, useContext, useState } from 'react'
 
 export const CompanyPageContext = createContext<{
   domainId?: string
-  streetId?: string
+  streetId?: string | null
 }>({})
 export const useCompanyPageContext = () => useContext(CompanyPageContext)
 
 export interface Props {
   domainId?: string
   streetId?: string
+  sepDomainID?: string
 }
 
-const RealEstateBlock: React.FC<Props> = ({ domainId, streetId }) => {
+const RealEstateBlock: React.FC<Props> = ({
+  domainId,
+  streetId,
+  sepDomainID,
+}) => {
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.REAL_ESTATE
   const { data: user } = useGetCurrentUserQuery()
@@ -33,7 +38,7 @@ const RealEstateBlock: React.FC<Props> = ({ domainId, streetId }) => {
     isLoading,
     isError,
   } = useGetAllRealEstateQuery({
-    domainId: domainId || filters?.domain || undefined,
+    domainId: sepDomainID || domainId || filters?.domain || undefined,
     companyId: filters?.company || undefined,
     streetId: streetId || filters?.street || undefined,
     limit: isOnPage ? 0 : 5,
@@ -54,6 +59,7 @@ const RealEstateBlock: React.FC<Props> = ({ domainId, streetId }) => {
           setFilters={setFilters}
           realEstateActions={realEstateActions}
           setRealEstateActions={setRealEstateActions}
+          enableRealEstateButton={sepDomainID ? false : true}
         />
       }
     >

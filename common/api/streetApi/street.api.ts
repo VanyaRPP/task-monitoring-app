@@ -62,6 +62,12 @@ export const streetApi = createApi({
       },
       invalidatesTags: ['Street'],
     }),
+    searchStreets: builder.query<any, { city: string; address: string }>({
+      query: ({ city, address }) => ({
+        url: 'streets/search',
+        params: { city, address },
+      }),
+    }),
   }),
 })
 
@@ -71,4 +77,5 @@ export const {
   useDeleteStreetMutation,
   useEditStreetMutation,
   useGetStreetByIdQuery,
+  useSearchStreetsQuery,
 } = streetApi
