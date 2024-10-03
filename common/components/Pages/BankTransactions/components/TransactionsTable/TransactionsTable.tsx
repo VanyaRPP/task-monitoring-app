@@ -11,7 +11,7 @@ import {
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 
 interface Props {
-  transactions: ITransaction[]
+  transactions: any
   pagination?: React.ReactNode
   domain: IExtendedDomain
 }

@@ -10,7 +10,7 @@ import React, { FC, useEffect, useState } from 'react'
 import TransactionsTable from '../TransactionsTable/TransactionsTable'
 import CustomPagination from '@components/CustomPagination'
 import _initial from 'lodash/initial'
-import { useLazyGetTransactionsQuery } from '@common/api/bankApi/bank.api'
+import { useGetTransactionsQuery } from '@common/api/bankApi/bank.api'
 import s from './style.module.scss'
 
 interface Props {
@@ -26,35 +26,15 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
     ? encryptionService.decrypt(domain?.domainBankToken[0]?.token ?? 'token')
     : ''
 
-  const [limit, setLimit] = useState(500)
-  const [pageIds, setPageIds] = useState<string[]>([])
+  const {
+    data: transactionsData,
+    isLoading,
+    error,
+  } = useGetTransactionsQuery({ token })
 
-  const [getNextTransactions, { data: transactionsData }] =
-    useLazyGetTransactionsQuery()
+  const onPrevButtonClick = () => {}
 
-  useEffect(() => {
-    token && getNextTransactions({ token, limit, followId: pageIds.at(-1) })
-  }, [token, limit])
-
-  const onPrevButtonClick = () => {
-    setPageIds((prev) => _initial(prev))
-    getNextTransactions({
-      token,
-      limit,
-      followId: pageIds.at(-2),
-    })
-  }
-
-  const onNextButtonClick = () => {
-    setPageIds((prev) => [...prev, transactionsData.next_page_id])
-    getNextTransactions({
-      token,
-      limit,
-      followId: transactionsData.next_page_id,
-    })
-  }
-
-  console.log(transactionsData?.transactions)
+  const onNextButtonClick = () => {}
 
   const viewTokens = (domainBankToken) => {
     return (
@@ -122,15 +102,15 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
       </div>
       <Divider />
       <TransactionsTable
-        transactions={transactionsData?.transactions}
+        transactions={transactionsData}
         pagination={
           <CustomPagination
-            selectValue={limit}
-            onSelectChange={(e) => setLimit(e)}
+            // selectValue={limit}
+            // onSelectChange={(e) => setLimit(e)}
             onPrevButtonClick={onPrevButtonClick}
             onNextButtonClick={onNextButtonClick}
-            prevButtonDisabled={!pageIds.at(-1)}
-            nextButtonDisabled={!transactionsData?.exist_next_page}
+            // prevButtonDisabled={!pageIds.at(-1)}
+            // nextButtonDisabled={!transactionsData?.exist_next_page}
             prevButtonText="Prev"
             nextButtonText="Next"
           />

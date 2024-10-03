@@ -22,15 +22,14 @@ export const bankApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/bankapi/` }),
   endpoints: (builder) => ({
-    getTransactions: builder.query<ITransactionData, IGetQuery>({
-      query: ({ token, startDate, limit, followId }) => ({
+    getTransactions: builder.query<ITransactionData, { token: string }>({
+      query: ({ token }) => ({
         url: 'transactions',
         method: 'GET',
         headers: {
-          token: token,
+          token,
           'Content-type': 'application/json;charset=utf-8',
         },
-        params: { startDate, limit, followId },
       }),
       transformResponse: (response: IBankRes<ITransactionData>) =>
         response.data,
@@ -58,9 +57,5 @@ export const bankApi = createApi({
   }),
 })
 
-export const {
-  useGetTransactionsQuery,
-  useLazyGetTransactionsQuery,
-  useGetDateQuery,
-  useGetBalancesQuery,
-} = bankApi
+export const { useGetTransactionsQuery, useGetDateQuery, useGetBalancesQuery } =
+  bankApi
