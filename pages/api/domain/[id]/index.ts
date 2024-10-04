@@ -25,7 +25,9 @@ export default async function handler(
       (item: { name: string; token: string; shortToken?: string }) => ({
         ...item,
         // token: encryptionService.encrypt(item.token),
-        token: item.token ? item.token : encryptionService.encrypt(item.shortToken),
+        token: item.token
+          ? item.token
+          : encryptionService.encrypt(item.shortToken),
         shortToken: hidePercentCharacters(item.shortToken),
         // shortToken: item.shortToken || hidePercentCharacters(item.token),
       })
