@@ -229,16 +229,16 @@ export const generateColumns = (
       ...getDateColumnProps('DAT_OD'),
     },
     { title: 'Description', dataIndex: 'OSND', key: 'OSND', width: 300 },
-    { title: 'Amount', dataIndex: 'SUM', key: 'SUM' },
+    { title: 'Amount', dataIndex: 'SUM', key: 'SUM', width: '10%' },
     { title: 'Amount E', dataIndex: 'SUM_E', key: 'SUM_E' },
     { title: 'Reference', dataIndex: 'REF', key: 'REF' },
     { title: 'Reference Number', dataIndex: 'REFN', key: 'REFN' },
     { title: 'Payment Time', dataIndex: 'TIM_P', key: 'TIM_P' },
     {
       title: 'Transaction Time',
+      width: '15%',
       dataIndex: 'DATE_TIME_DAT_OD_TIM_P',
       key: 'DATE_TIME_DAT_OD_TIM_P',
-      width: 100,
       ...getDateColumnProps('DATE_TIME_DAT_OD_TIM_P'),
     },
     {

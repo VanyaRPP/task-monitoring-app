@@ -11,7 +11,7 @@ import {
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 
 interface Props {
-  transactions: any
+  transactions: ITransaction[]
   pagination?: React.ReactNode
   domain: IExtendedDomain
 }
@@ -59,7 +59,7 @@ const TransactionsTable: React.FC<Props> = ({
 
       <div>
         <Table<ITransaction>
-          scroll={{ x: true }}
+          // scroll={{ x: true }}
           dataSource={transactions}
           columns={columns}
           pagination={false}

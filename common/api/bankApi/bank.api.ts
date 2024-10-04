@@ -5,7 +5,7 @@ import {
 } from '@components/Pages/BankTransactions/components/DomainbankBalance/DomainBankBalance'
 import {
   IBankRes,
-  ITransactionData,
+  ITransaction,
 } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
 
 interface IGetQuery {
@@ -22,7 +22,7 @@ export const bankApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/bankapi/` }),
   endpoints: (builder) => ({
-    getTransactions: builder.query<ITransactionData, { token: string }>({
+    getTransactions: builder.query<ITransaction[], { token: string }>({
       query: ({ token }) => ({
         url: 'transactions',
         method: 'GET',
@@ -31,8 +31,7 @@ export const bankApi = createApi({
           'Content-type': 'application/json;charset=utf-8',
         },
       }),
-      transformResponse: (response: IBankRes<ITransactionData>) =>
-        response.data,
+      transformResponse: (response: IBankRes<ITransaction[]>) => response.data,
     }),
     getDate: builder.query<string, { token: string }>({
       query: ({ token }) => ({

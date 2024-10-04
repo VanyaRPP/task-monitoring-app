@@ -100,8 +100,8 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
       <Divider /> */}
       {/* <div className={s.tokensContainer}>
         {viewTokens(domain.domainBankToken)}
-      </div> */}
-      {/* <Divider /> */}
+      </div>
+      <Divider /> */}
 
       {token ? (
         <TransactionsTable

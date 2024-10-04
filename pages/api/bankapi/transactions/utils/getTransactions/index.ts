@@ -4,6 +4,11 @@ import FetchHttpClient from '@utils/FetchHttpClient/FetchHttpClient'
 import { getDefaultStartDate } from '@utils/helpers'
 import dayjs from 'dayjs'
 
+interface TransactionsData {
+  transactions: ITransaction[]
+  next_page_id?: string
+  exist_next_page: boolean
+}
 const httpClient = new FetchHttpClient({
   baseURL: 'https://acp.privatbank.ua/api',
 })
@@ -55,11 +60,7 @@ export async function getTransactionsForDateInterval(
         startDate ?? getDefaultStartDate(),
         limit,
         currentFollowId
-      )) as {
-        transactions: ITransaction[]
-        next_page_id?: string
-        exist_next_page: boolean
-      }
+      )) as TransactionsData
 
       const transactions = response.transactions
 
