@@ -56,10 +56,9 @@ const CompaniesTable: React.FC<Props> = ({
   setFilters,
   setRealEstateActions,
   realEstateActions,
-}) => {
+}) => {  
   const router = useRouter()
   const { pathname } = router
-  const isOnPage = pathname === AppRoutes.REAL_ESTATE
 
   const { data: userResponse } = useGetCurrentUserQuery()
 
@@ -170,6 +169,7 @@ const getDefaultColumns = ({
     }>
   >
 }): ColumnType<any>[] => {
+  const isOnPage = pathname === AppRoutes.REAL_ESTATE
   const columns: ColumnType<any>[] = [
     {
       title: 'Адміністратори',
@@ -192,42 +192,49 @@ const getDefaultColumns = ({
       dataIndex: 'totalArea',
       width: 120,
       align: 'center',
+      sorter: isOnPage ? (a, b) => a.totalArea - b.totalArea : null,
     },
     {
       title: 'Ціна (грн/м²)',
       dataIndex: 'pricePerMeter',
       width: 120,
       align: 'center',
+      sorter: isOnPage ? (a, b) => a.pricePerMeter - b.pricePerMeter : null,
     },
     {
       title: 'Індивідуальне утримання (грн/м²)',
       dataIndex: 'servicePricePerMeter',
       width: 200,
       align: 'center',
+      sorter: isOnPage ? (a, b) => a.servicePricePerMeter - b.servicePricePerMeter : null,
     },
     {
       title: 'Частка загальної площі',
       dataIndex: 'rentPart',
       width: 180,
       align: 'center',
+      sorter: isOnPage ? (a, b) => a.rentPart - b.rentPart : null,
     },
     {
       title: 'Частка водопостачання',
       dataIndex: 'waterPart',
       width: 180,
       align: 'center',
+      sorter: isOnPage ? (a, b) => a.waterPart - b.waterPart : null,
     },
     {
       title: 'Прибирання (грн)',
       dataIndex: 'cleaning',
       width: 150,
       align: 'center',
+      sorter: isOnPage ? (a, b) => a.cleaning - b.cleaning : null,
     },
     {
       title: 'Знижка',
       dataIndex: 'discount',
       width: 150,
       align: 'center',
+      sorter: isOnPage ? (a, b) => a.discount - b.discount : null,
     },
     {
       align: 'center',

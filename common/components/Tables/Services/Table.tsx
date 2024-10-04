@@ -14,11 +14,11 @@ import {
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { dateToYear } from '@common/assets/features/formatDate'
 import { AppRoutes, Roles, ServiceName } from '@utils/constants'
-import { renderCurrency, isAdminCheck } from '@utils/helpers'
+import { isAdminCheck, renderCurrency } from '@utils/helpers'
 import { Alert, Button, Popconfirm, Table, Tooltip, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 interface Props {
   setServiceActions: React.Dispatch<
@@ -206,6 +206,9 @@ const getDefaultColumns = (
       width: 120,
       ellipsis: true,
       render: renderCurrency,
+      sorter: isOnPage
+        ? (a, b) => a.maintenancePrice - b.maintenancePrice
+        : null,
     },
     {
       title: ServiceName.electricityPrice,
@@ -213,6 +216,9 @@ const getDefaultColumns = (
       width: 120,
       ellipsis: true,
       render: renderCurrency,
+      sorter: isOnPage
+        ? (a, b) => a.electricityPrice - b.electricityPrice
+        : null,
     },
     {
       title: ServiceName.waterPrice,
@@ -220,6 +226,7 @@ const getDefaultColumns = (
       width: 120,
       ellipsis: true,
       render: renderCurrency,
+      sorter: isOnPage ? (a, b) => a.waterPrice - b.waterPrice : null,
     },
     {
       title: ServiceName.waterPart,
@@ -227,6 +234,7 @@ const getDefaultColumns = (
       width: 120,
       ellipsis: true,
       render: renderCurrency,
+      sorter: isOnPage ? (a, b) => a.waterPart - b.waterPart : null,
     },
     {
       title: ServiceName.garbageCollectorPrice,
@@ -234,12 +242,16 @@ const getDefaultColumns = (
       width: 120,
       ellipsis: true,
       render: renderCurrency,
+      sorter: isOnPage
+        ? (a, b) => a.garbageCollectorPrice - b.garbageCollectorPrice
+        : null,
     },
     {
       title: ServiceName.inflicionPrice,
       width: 120,
       ellipsis: true,
       dataIndex: 'inflicionPrice',
+      sorter: isOnPage ? (a, b) => a.inflicionPrice - b.inflicionPrice : null,
     },
     {
       title: 'Опис',
