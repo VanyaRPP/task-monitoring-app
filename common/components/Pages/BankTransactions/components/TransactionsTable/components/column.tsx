@@ -184,6 +184,7 @@ export const generateColumns = (
     },
     {
       title: 'Counterparty Name',
+      width: '25%',
       dataIndex: 'AUT_CNTR_NAM',
       key: 'AUT_CNTR_NAM',
       ...getColumnSearchProps('AUT_CNTR_NAM'),
@@ -242,9 +243,10 @@ export const generateColumns = (
     },
     {
       title: 'Type', // TRANTYPE column
+      width: '100px',
       dataIndex: 'TRANTYPE',
       key: 'TRANTYPE',
-      filteredValue: ['C', 'D'],
+      filteredValue: ['C'],
       ...getTrantypeFilterProps(),
     },
     { title: 'Dealer', dataIndex: 'DLR', key: 'DLR' },
@@ -255,6 +257,7 @@ export const generateColumns = (
     },
     {
       title: 'Options',
+      width: '25%',
       dataIndex: 'OPTIONS',
       key: 'OPTIONS',
       render: (text: string, record: ITransaction) => {

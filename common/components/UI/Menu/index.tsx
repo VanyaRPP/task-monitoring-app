@@ -65,6 +65,11 @@ export const Menu: React.FC<MenuProps> = (props) => {
             type: 'item',
             label: <Link href={AppRoutes.PAYMENT_CHART}>Графік платежів</Link>,
           },
+          {
+            key: 'bank',
+            type: 'item',
+            label: <Link href={AppRoutes.BANKTEST}>Банк</Link>,
+          },
         ].filter(({ hidden }) => !hidden),
       },
       {

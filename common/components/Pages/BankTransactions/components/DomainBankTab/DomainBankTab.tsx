@@ -12,6 +12,7 @@ import CustomPagination from '@components/CustomPagination'
 import _initial from 'lodash/initial'
 import { useGetTransactionsQuery } from '@common/api/bankApi/bank.api'
 import s from './style.module.scss'
+import { Alert } from 'antd'
 
 interface Props {
   domain: IExtendedDomain
@@ -36,33 +37,33 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
 
   const onNextButtonClick = () => {}
 
-  const viewTokens = (domainBankToken) => {
-    return (
-      <Row
-        wrap={false}
-        style={{ overflowX: 'scroll', gap: '1rem', paddingTop: '1rem' }}
-      >
-        {domain?.domainBankToken.length
-          ? domainBankToken.map((token: IDomainBankToken) => {
-              return (
-                <Card
-                  key={token.shortToken}
-                  size="small"
-                  title={token.name}
-                  style={{ width: '300px' }}
-                  actions={[
-                    <SettingOutlined key="setting" />,
-                    <EditOutlined key="edit" />,
-                  ]}
-                >
-                  <Input value={token.shortToken} disabled />
-                </Card>
-              )
-            })
-          : 'No bank config add token'}
-      </Row>
-    )
-  }
+  // const viewTokens = (domainBankToken) => {
+  //   return (
+  //     <Row
+  //       wrap={false}
+  //       style={{ overflowX: 'scroll', gap: '1rem', paddingTop: '1rem' }}
+  //     >
+  //       {domain?.domainBankToken.length
+  //         ? domainBankToken.map((token: IDomainBankToken) => {
+  //             return (
+  //               <Card
+  //                 key={token.shortToken}
+  //                 size="small"
+  //                 title={token.name}
+  //                 style={{ width: '300px' }}
+  //                 actions={[
+  //                   <SettingOutlined key="setting" />,
+  //                   <EditOutlined key="edit" />,
+  //                 ]}
+  //               >
+  //                 <Input value={token.shortToken} disabled />
+  //               </Card>
+  //             )
+  //           })
+  //         : 'No bank config add token'}
+  //     </Row>
+  //   )
+  // }
 
   return (
     <Card>
@@ -97,26 +98,27 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
       </div>
 
       <Divider /> */}
-      <div className={s.tokensContainer}>
+      {/* <div className={s.tokensContainer}>
         {viewTokens(domain.domainBankToken)}
-      </div>
-      <Divider />
-      <TransactionsTable
-        transactions={transactionsData}
-        pagination={
-          <CustomPagination
-            // selectValue={limit}
-            // onSelectChange={(e) => setLimit(e)}
-            onPrevButtonClick={onPrevButtonClick}
-            onNextButtonClick={onNextButtonClick}
-            // prevButtonDisabled={!pageIds.at(-1)}
-            // nextButtonDisabled={!transactionsData?.exist_next_page}
-            prevButtonText="Prev"
-            nextButtonText="Next"
-          />
-        }
-        domain={domain}
-      />
+      </div> */}
+      {/* <Divider /> */}
+
+      {token ? (
+        <TransactionsTable
+          transactions={transactionsData}
+          pagination={
+            <CustomPagination prevButtonText="Prev" nextButtonText="Next" />
+          }
+          domain={domain}
+        />
+      ) : (
+        <Alert
+          message="Error"
+          description="У цього домена немає токена для доступу до транзакцій."
+          type="warning"
+          showIcon
+        />
+      )}
     </Card>
   )
 }
