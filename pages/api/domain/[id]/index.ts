@@ -13,7 +13,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isAdmin } = await getCurrentUser(req, res)
 
   const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
 
@@ -25,16 +25,16 @@ export default async function handler(
       (item: { name: string; token: string; shortToken?: string }) => ({
         ...item,
         // token: encryptionService.encrypt(item.token),
-        token: item.token ? item.token : encryptionService.encrypt(item.token),
-        // shortToken: hidePercentCharacters(item.token),
-        shortToken: item.shortToken || hidePercentCharacters(item.token),
+        token: item.token ? item.token : encryptionService.encrypt(item.shortToken),
+        shortToken: hidePercentCharacters(item.shortToken),
+        // shortToken: item.shortToken || hidePercentCharacters(item.token),
       })
     )
 
     return obj
   }
 
-  if (!isGlobalAdmin) {
+  if (!isAdmin) {
     return res.status(400).json({ success: false, message: 'not allowed' })
   }
 
@@ -60,7 +60,7 @@ export default async function handler(
 
     case 'PATCH':
       try {
-        if (isGlobalAdmin) {
+        if (isAdmin) {
           const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
           const response = await Domain.findOneAndUpdate(
             { _id: req.query.id },
