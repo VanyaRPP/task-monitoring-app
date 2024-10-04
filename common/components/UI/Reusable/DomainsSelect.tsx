@@ -1,5 +1,5 @@
-import { validateField } from '@assets/features/validators'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import { validateField } from '@assets/features/validators'
 import { Form, FormInstance, Select } from 'antd'
 import { useEffect, useMemo } from 'react'
 

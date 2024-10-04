@@ -99,7 +99,7 @@ const InvoicesHeader = () => {
         <DomainsSelect form={form} />
         <AddressesSelect
           form={form}
-          dropdownStyle={{ minWidth: 'max-content' }}
+          // dropdownStyle={{ minWidth: 'max-content' }}
         />
         <MonthServiceGeneralInfo />
       </div>
