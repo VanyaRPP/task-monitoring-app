@@ -59,7 +59,7 @@ const TransactionsTable: React.FC<Props> = ({
 
       <div>
         <Table<ITransaction>
-          scroll={{ x: true }}
+          // scroll={{ x: true }}
           dataSource={transactions}
           columns={columns}
           pagination={false}

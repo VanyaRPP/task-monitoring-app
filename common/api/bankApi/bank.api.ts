@@ -5,7 +5,7 @@ import {
 } from '@components/Pages/BankTransactions/components/DomainbankBalance/DomainBankBalance'
 import {
   IBankRes,
-  ITransactionData,
+  ITransaction,
 } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
 
 interface IGetQuery {
@@ -22,18 +22,16 @@ export const bankApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/bankapi/` }),
   endpoints: (builder) => ({
-    getTransactions: builder.query<ITransactionData, IGetQuery>({
-      query: ({ token, startDate, limit, followId }) => ({
+    getTransactions: builder.query<ITransaction[], { token: string }>({
+      query: ({ token }) => ({
         url: 'transactions',
         method: 'GET',
         headers: {
-          token: token,
+          token,
           'Content-type': 'application/json;charset=utf-8',
         },
-        params: { startDate, limit, followId },
       }),
-      transformResponse: (response: IBankRes<ITransactionData>) =>
-        response.data,
+      transformResponse: (response: IBankRes<ITransaction[]>) => response.data,
     }),
     getDate: builder.query<string, { token: string }>({
       query: ({ token }) => ({
@@ -58,9 +56,5 @@ export const bankApi = createApi({
   }),
 })
 
-export const {
-  useGetTransactionsQuery,
-  useLazyGetTransactionsQuery,
-  useGetDateQuery,
-  useGetBalancesQuery,
-} = bankApi
+export const { useGetTransactionsQuery, useGetDateQuery, useGetBalancesQuery } =
+  bankApi
