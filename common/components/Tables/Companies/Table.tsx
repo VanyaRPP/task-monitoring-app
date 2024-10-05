@@ -32,7 +32,6 @@ import {
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
-import { usePermissions } from '@utils/helpers'
 
 export interface Props {
   domainId?: string
@@ -75,9 +74,6 @@ const CompaniesTable: React.FC<Props> = ({
     useDeleteRealEstateMutation()
   const [updateArchivedItem, { isLoading: archiveLoading }] =
     useUpdateArchivedItemMutation()
-
-  const fooCheck = usePermissions(userResponse)
-  console.log(fooCheck)
 
   const handleDelete = async (id: string) => {
     const response = await deleteRealEstate(id)
