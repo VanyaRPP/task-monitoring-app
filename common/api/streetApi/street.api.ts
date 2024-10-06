@@ -20,6 +20,7 @@ export const streetApi = createApi({
       query: ({ domainId, limit }: { domainId?: string; limit?: number }) => {
         return {
           url: `streets`,
+          method: 'GET',
           params: { domainId, limit },
         }
       },
