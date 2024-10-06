@@ -1,6 +1,5 @@
 import User from '@modules/models/User'
 import start from '@pages/api/api.config'
-import { Roles } from '@utils/constants'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -10,7 +9,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { user: currentUser, isGlobalAdmin } = await getCurrentUser(req, res)
+  const { user: currentUser } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'GET':
@@ -23,33 +22,17 @@ export default async function handler(
       }
     case 'PATCH':
       try {
-        if (req.query.id !== currentUser?._id?.toString() && !isGlobalAdmin) {
+        if (req.query.id !== currentUser?._id?.toString()) {
           return res
             .status(400)
             .json({ success: false, message: 'not allowed' })
         }
 
         if (process.env.NODE_ENV !== 'development') {
-          return res
-            .status(400)
-            .json({ success: false, message: 'only for developers' })
-        }
-
-        const user = await User.findById(req.query.id)
-        if (user.email !== req.body.email) {
-          return res
-            .status(400)
-            .json({ success: false, message: 'email cannot be changed' })
-        }
-
-        if (
-          req.body.roles &&
-          !isGlobalAdmin &&
-          !user.roles.includes(Roles.GLOBAL_ADMIN)
-        ) {
-          return res
-            .status(400)
-            .json({ success: false, message: 'you can`t change roles' })
+          return res.status(400).json({
+            success: false,
+            message: 'sorry, u can`t changes the roles',
+          })
         }
 
         const updatedUser = await User.updateOne(
