@@ -2,7 +2,7 @@ import { useInvoicesPaymentContext } from '@common/components/DashboardPage/bloc
 import { getDefaultColumns } from '@common/components/Tables/PaymentsBulk/column.config'
 import { AppRoutes, Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
-import { Alert, Form, Table } from 'antd'
+import { Alert, Empty, Form, Table } from 'antd'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 
@@ -67,6 +67,11 @@ const InvoicesTable: React.FC = () => {
           columns={getDefaultColumns(remove)}
           dataSource={fields}
           scroll={{ x: 3000 }}
+          locale={{
+            emptyText: (
+              <Empty description="За даною адресою послуг не знайдено!" />
+            ),
+          }}
         />
       )}
     </Form.List>

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
+import mongoose from 'mongoose'
 import Domain from '@modules/models/Domain'
 import Street from '@modules/models/Street'
 import start, { Data } from '@pages/api/api.config'
@@ -18,8 +19,7 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { limit = 0 } = req.query
-
+        const { limit = 0, domainId } = req.query
         const options = {}
 
         if (!isDomainAdmin && !isGlobalAdmin) {
@@ -40,6 +40,16 @@ export default async function handler(
           }
 
           options._id = { $in: adminDomainIds }
+        }
+
+        if (domainId && typeof domainId === 'string') {
+          if (mongoose.Types.ObjectId.isValid(domainId)) {
+            options._id = new mongoose.Types.ObjectId(domainId)
+          } else {
+            return res
+              .status(400)
+              .json({ success: false, message: 'Invalid domainId format' })
+          }
         }
 
         const domains = await Domain.find(options)
