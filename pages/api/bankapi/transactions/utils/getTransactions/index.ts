@@ -44,7 +44,7 @@ export async function getInterimTransactions(
 export async function getTransactionsForDateInterval(
   token: string,
   startDate?: string,
-  limit?: number,
+  limit: number = 20,
   followId?: string
 ) {
   const apiPrivatAdapter = new PrivatBankApiAdapter(httpClient, {
@@ -54,11 +54,13 @@ export async function getTransactionsForDateInterval(
   let allTransactions: ITransaction[] = []
   let currentFollowId: string | undefined = followId
 
+  const calculatedStartDate = startDate ?? getDefaultStartDateThreeMonthsAgo()
+
   try {
     while (true) {
       const response = (await apiPrivatAdapter.getTransactionsForDateInterval(
-        startDate ?? getDefaultStartDate(),
-        limit,
+        calculatedStartDate,
+        limit - allTransactions.length,
         currentFollowId
       )) as TransactionsData
 
@@ -76,9 +78,15 @@ export async function getTransactionsForDateInterval(
         break
       }
     }
-    const reversedTransactions = allTransactions.reverse()
+    const reversedTransactions = allTransactions.reverse().slice(0, limit)
     return reversedTransactions
   } catch (error) {
     throw new Error(`Error in fetch ${error}`)
   }
+}
+
+function getDefaultStartDateThreeMonthsAgo(): string {
+  const date = new Date()
+  date.setMonth(date.getMonth() - 3)
+  return date.toISOString().split('T')[0]
 }
