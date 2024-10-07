@@ -61,6 +61,7 @@ const ServicesTable: React.FC<Props> = ({
 
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isDomainAdmin = user?.roles?.includes(Roles.DOMAIN_ADMIN)
 
   const [deleteService, { isLoading: deleteLoading }] =
     useDeleteServiceMutation()
@@ -111,7 +112,7 @@ const ServicesTable: React.FC<Props> = ({
         }
         loading={isLoading}
         columns={getDefaultColumns(
-          isGlobalAdmin,
+          isAdminCheck(user?.roles),
           handleDelete,
           deleteLoading,
           setCurrentService,
