@@ -126,15 +126,6 @@ export const Menu: React.FC<MenuProps> = (props) => {
           },
         ],
       },
-      {
-        ...(isDevMode && {
-          key: 'bank',
-          type: 'submenu',
-          icon: <UserOutlined />,
-          label: 'BAnk',
-          onClick: () => router.push(AppRoutes.BANKTEST),
-        }),
-      },
     ] as AntdMenuProps['items']
   }, [router, session, isGlobalAdmin, isDomainAdmin, isDevMode])
 
