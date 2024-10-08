@@ -12,6 +12,7 @@ import { useSession } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
+import { isAdminCheck } from '@utils/helpers'
 
 export type MenuProps = Omit<AntdMenuProps, 'selectedKeys' | 'mode' | 'items'>
 
@@ -69,6 +70,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
             key: 'bank',
             type: 'item',
             label: <Link href={AppRoutes.BANKTEST}>Банк</Link>,
+            hidden: !isAdminCheck(user?.roles),
           },
         ].filter(({ hidden }) => !hidden),
       },
