@@ -179,18 +179,12 @@ describe('RealEstate API - GET', () => {
       status: mockRes.status,
       data: mockRes.json.mock.lastCall[0].data,
     }
-    // console.log('Get Data', response.data)
 
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = parseReceived(response.data)
-    // console.log('Parsed received:', received)
 
     const expected = realEstates.filter((r) => r.domain === domains[0]._id)
-    // console.log('All RealEstates:', realEstates)
-    // console.log('Domain ID:', domains[0]._id)
-
-    // console.log('Expected:', expected)
 
     expect(received).toEqual(expected)
   })
@@ -479,7 +473,7 @@ describe('RealEstate API - GET', () => {
         method: 'GET',
         query: {
           archived,
-          domainId: domains[1]._id.toString(), 
+          domainId: domains[1]._id.toString(),
           streetId: streets[1]._id.toString(),
         },
       } as any
@@ -501,8 +495,6 @@ describe('RealEstate API - GET', () => {
           estate.archived === true &&
           estate.adminEmails.includes(users.user.email)
       )
-
-      console.log('Received data:', received)
 
       expect(response.status).toHaveBeenCalledWith(200)
       expect(received).toEqual(expected)
@@ -539,7 +531,7 @@ describe('RealEstate API - GET', () => {
           estate.archived === true &&
           estate.domain === domains[0]._id.toString()
       )
-      console.log('Received data:', received)
+
       expect(response.status).toHaveBeenCalledWith(200)
       expect(received).toEqual(expected)
     })

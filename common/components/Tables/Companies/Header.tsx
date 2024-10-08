@@ -15,7 +15,7 @@ import {
 } from '@components/UI/Reusable/FilterTags'
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
-import s from './style.module.scss' 
+import s from './style.module.scss'
 
 export interface Props {
   showAddButton?: boolean
