@@ -33,6 +33,8 @@ import {
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 
+import { useState } from 'react'
+
 export interface Props {
   domainId?: string
   streetId?: string
@@ -269,14 +271,6 @@ const getDefaultColumns = ({
       align: 'center',
       title: 'Нарахування інд. інф.',
       dataIndex: 'inflicion',
-      width: 170,
-      render: (value) => <Checkbox checked={value} disabled />,
-    },
-    {
-      align: 'center',
-      title: 'Архівовані',
-      dataIndex: 'archived',
-      filterSearch: true,
       width: 170,
       render: (value) => <Checkbox checked={value} disabled />,
     },

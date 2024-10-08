@@ -1,7 +1,7 @@
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Space } from 'antd'
+import { Button, Space, Segmented } from 'antd'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 
 import {
   IExtendedRealestate,
@@ -15,7 +15,7 @@ import {
 } from '@components/UI/Reusable/FilterTags'
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
-import s from './style.module.scss'
+import s from './style.module.scss' 
 
 export interface Props {
   showAddButton?: boolean
@@ -23,6 +23,7 @@ export interface Props {
   setCurrentRealEstate?: (realEstate: IExtendedRealestate) => void
   filters?: any
   setFilters?: (filters: any) => void
+  setIsArchive?: Dispatch<SetStateAction<boolean>>
   realEstates?: IGetRealestateResponse
   setRealEstateActions: React.Dispatch<
     React.SetStateAction<{
@@ -45,6 +46,7 @@ const CompaniesHeader: React.FC<Props> = ({
   setRealEstateActions,
   realEstateActions,
   enableRealEstateButton,
+  setIsArchive,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -61,6 +63,9 @@ const CompaniesHeader: React.FC<Props> = ({
     setIsModalOpen(false)
     setCurrentRealEstate(null)
     setRealEstateActions({ edit: false })
+  }
+  const handleArchiveToggle = (value: boolean) => {
+    setIsArchive(value)
   }
 
   return (
@@ -92,6 +97,15 @@ const CompaniesHeader: React.FC<Props> = ({
           </Space>
         )}
       </div>
+
+      <Segmented
+        options={[
+          { label: 'Неархівовані', value: false },
+          { label: 'Архівовані', value: true },
+        ]}
+        onChange={handleArchiveToggle}
+        style={{ marginRight: '170px' }}
+      />
 
       {showAddButton && isAdmin && (
         <>

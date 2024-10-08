@@ -30,6 +30,7 @@ describe('RealEstate API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
     const received = parseReceived(response.data)
+
     expect(received).toEqual(realEstates)
   })
 
@@ -160,6 +161,7 @@ describe('RealEstate API - GET', () => {
 
   it('request from DomainAdmin - show DomainAdmin companies', async () => {
     await mockLoginAs(users.domainAdmin)
+    // console.log('AdminEmail', users.domainAdmin)
 
     const mockReq = {
       method: 'GET',
@@ -177,11 +179,19 @@ describe('RealEstate API - GET', () => {
       status: mockRes.status,
       data: mockRes.json.mock.lastCall[0].data,
     }
+    // console.log('Get Data', response.data)
 
     expect(response.status).toHaveBeenCalledWith(200)
 
     const received = parseReceived(response.data)
+    // console.log('Parsed received:', received)
+
     const expected = realEstates.filter((r) => r.domain === domains[0]._id)
+    // console.log('All RealEstates:', realEstates)
+    // console.log('Domain ID:', domains[0]._id)
+
+    // console.log('Expected:', expected)
+
     expect(received).toEqual(expected)
   })
 
@@ -393,6 +403,7 @@ describe('RealEstate API - GET', () => {
     }
 
     const received = parseReceived(response.data)
+
     const expected = realEstates[0]
 
     expect(response.status).toHaveBeenCalledWith(200)
@@ -434,6 +445,7 @@ describe('RealEstate API - GET', () => {
     const mockReq = {
       method: 'GET',
       query: {
+        archived: true,
         domainId: domains[2]._id.toString(),
         streetId: streets[2]._id.toString(),
       },
@@ -455,5 +467,81 @@ describe('RealEstate API - GET', () => {
 
     expect(response.status).toHaveBeenCalledWith(200)
     expect(received).toEqual([])
+  })
+
+  describe('RealEstate API - GET', () => {
+    it('User can see archived real estates where he is an admin', async () => {
+      await mockLoginAs(users.user)
+
+      const archived = 'true'
+
+      const mockReq = {
+        method: 'GET',
+        query: {
+          archived,
+          domainId: domains[1]._id.toString(), 
+          streetId: streets[1]._id.toString(),
+        },
+      } as any
+
+      const mockRes = {
+        status: jest.fn(() => mockRes),
+        json: jest.fn(),
+      } as any
+
+      await handler(mockReq, mockRes)
+
+      const response = {
+        status: mockRes.status,
+        data: mockRes.json.mock.lastCall[0].data,
+      }
+      const received = parseReceived(response.data)
+      const expected = realEstates.filter(
+        (estate) =>
+          estate.archived === true &&
+          estate.adminEmails.includes(users.user.email)
+      )
+
+      console.log('Received data:', received)
+
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(received).toEqual(expected)
+    })
+
+    it('DomainAdmin can see all archived companies in his domain', async () => {
+      await mockLoginAs(users.domainAdmin)
+
+      const archived = 'true'
+
+      const mockReq = {
+        method: 'GET',
+        query: {
+          archived,
+          domainId: domains[0]._id.toString(),
+          streetId: streets[0]._id.toString(),
+        },
+      } as any
+
+      const mockRes = {
+        status: jest.fn(() => mockRes),
+        json: jest.fn(),
+      } as any
+
+      await handler(mockReq, mockRes)
+
+      const response = {
+        status: mockRes.status,
+        data: mockRes.json.mock.lastCall[0].data,
+      }
+      const received = parseReceived(response.data)
+      const expected = realEstates.filter(
+        (estate) =>
+          estate.archived === true &&
+          estate.domain === domains[0]._id.toString()
+      )
+      console.log('Received data:', received)
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(received).toEqual(expected)
+    })
   })
 })
