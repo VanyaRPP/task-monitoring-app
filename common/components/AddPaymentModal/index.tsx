@@ -55,6 +55,18 @@ const AddPaymentModal: FC<Props> = ({
 }) => {
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true)
+
+  const handleValidate = () => {
+    form
+      .validateFields()
+      .then(() => {
+        setIsButtonDisabled(false)
+      })
+      .catch((errorInfo) => {
+        setIsButtonDisabled(errorInfo.errorFields.length > 0)
+      })
+  }
 
   const { company, service, payment, prevService, prevPayment } =
     usePaymentFormData(form, paymentData)
@@ -192,7 +204,15 @@ const AddPaymentModal: FC<Props> = ({
       <Modal
         title={edit ? 'Редагування рахунку' : !preview && 'Додавання рахунку'}
         onOk={activeTabKey === '1' ? handleOk : handleSubmit}
-        okButtonProps={preview ? { style: { display: 'none' } } : null}
+        okButtonProps={
+          preview
+            ? { style: { display: 'none' } }
+            : edit
+            ? {}
+            : isButtonDisabled
+            ? { disabled: true }
+            : null
+        }
         changed={() => isValueChanged}
         onCancel={() => {
           form.resetFields()
@@ -233,7 +253,10 @@ const AddPaymentModal: FC<Props> = ({
           form={form}
           layout="vertical"
           className={s.Form}
-          onValuesChange={() => setIsValueChanged(true)}
+          onValuesChange={() => {
+            setIsValueChanged(true)
+            handleValidate()
+          }}
         >
           <Tabs
             activeKey={activeTabKey}
