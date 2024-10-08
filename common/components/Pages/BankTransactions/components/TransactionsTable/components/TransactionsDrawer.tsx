@@ -21,6 +21,7 @@ import {
 } from '@ant-design/icons'
 import AddPaymentModal from '@components/AddPaymentModal'
 import dayjs from 'dayjs'
+import { SendOutlined } from '@ant-design/icons'
 
 const { Title, Text } = Typography
 
@@ -57,14 +58,29 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
 
   return (
     <>
-      <Button
-        iconPosition="end"
-        icon={<DoubleRightOutlined />}
-        type="link"
-        onClick={showDrawer}
-      >
-        GO
-      </Button>
+      <Space.Compact style={{ width: '100%' }}>
+        <Select
+          placeholder="Select a related company"
+          onChange={handleCompanyChange}
+          value={selectedCompany}
+          style={{ width: 'calc(100% - 80px)' }}
+        >
+          {relatedCompanies.map((company: IRealestate) => (
+            <Select.Option key={company._id} value={company._id}>
+              {company.companyName}
+            </Select.Option>
+          ))}
+        </Select>
+        <Button
+          iconPosition="end"
+          icon={<SendOutlined />}
+          type="primary"
+          onClick={showDrawer}
+          disabled={!selectedCompany}
+        >
+          Send
+        </Button>
+      </Space.Compact>
       <Drawer
         title="Transaction Details"
         placement="right"
