@@ -48,7 +48,7 @@ export const PaymentContext = createContext<IPaymentContext>({
 export const usePaymentContext = () =>
   useContext<IPaymentContext>(PaymentContext)
 
-export const handleValidate = (form, setIsButtonDisabled) => {
+const handleValidate = (form, setIsButtonDisabled) => {
   form
     .validateFields()
     .then(() => {
