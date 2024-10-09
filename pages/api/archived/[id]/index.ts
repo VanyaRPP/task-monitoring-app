@@ -5,8 +5,6 @@ import start, { Data } from '@pages/api/api.config'
 import RealEstate from '@modules/models/RealEstate'
 import { getCurrentUser } from '@utils/getCurrentUser'
 
-import { log } from 'console'
-
 start()
 
 export default async function handler(

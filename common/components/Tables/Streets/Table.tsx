@@ -16,7 +16,6 @@ import RealEstateBlock from '@components/DashboardPage/blocks/realEstates'
 import { AppRoutes } from '@utils/constants'
 import { useState } from 'react'
 
-
 export interface Props {
   domainId?: string
   setStreetActions: React.Dispatch<
@@ -63,6 +62,9 @@ const StreetsTable: React.FC<Props> = ({
 
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  const { data: userResponse } = useGetCurrentUserQuery()
+  const userRoles = usePermissions(userResponse)
+
   const closeModal = () => setIsModalOpen(false)
   const openModal = (street) => {
     setIsModalOpen(true),
@@ -71,12 +73,6 @@ const StreetsTable: React.FC<Props> = ({
   }
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
-
-  const { data: userResponse } = useGetCurrentUserQuery()
-
-  const UserRoles = usePermissions(userResponse)
-
-  console.log(UserRoles)
 
   return (
     <>
@@ -96,7 +92,7 @@ const StreetsTable: React.FC<Props> = ({
           handleDelete,
           deleteLoading,
           openModal,
-          UserRoles
+          userRoles
         )}
         expandable={
           domainId && {
@@ -123,7 +119,7 @@ const getDefaultColumns = (
   handleDelete?: (streetId: string) => void,
   deleteLoading?: boolean,
   openModal?: (street: IStreet) => void,
-  UserRoles?: { isGlobalAdmin: boolean }
+  userRoles?: { isGlobalAdmin: boolean }
 ): ColumnType<any>[] => [
   {
     title: 'Місто',
@@ -155,7 +151,7 @@ const getDefaultColumns = (
     title: '',
     width: 50,
     render: (_, street: IStreet) =>
-      UserRoles?.isGlobalAdmin && (
+      userRoles?.isGlobalAdmin && (
         <Popconfirm
           title={`Ви впевнені що хочете видалити вулицю ${street.address} (м. ${street.city})?`}
           onConfirm={() => handleDelete(street._id)}

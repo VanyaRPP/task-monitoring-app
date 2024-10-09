@@ -76,8 +76,6 @@ const CompaniesTable: React.FC<Props> = ({
   const [updateArchivedItem, { isLoading: archiveLoading }] =
     useUpdateArchivedItemMutation()
 
-  
-
   const handleDelete = async (id: string) => {
     const response = await deleteRealEstate(id)
     if ('data' in response) {
