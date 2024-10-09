@@ -139,6 +139,8 @@ const getTrantypeFilterProps = () => ({
     { text: 'Debet', value: 'D' },
     { text: 'Credit', value: 'C' },
   ],
+  defaultFilteredValue: ['C'],
+
   onFilter: (value: string, record: ITransaction) => record.TRANTYPE === value,
 })
 
@@ -246,7 +248,6 @@ export const generateColumns = (
       width: '100px',
       dataIndex: 'TRANTYPE',
       key: 'TRANTYPE',
-      filteredValue: ['C', 'D'],
       ...getTrantypeFilterProps(),
     },
     { title: 'Dealer', dataIndex: 'DLR', key: 'DLR' },
