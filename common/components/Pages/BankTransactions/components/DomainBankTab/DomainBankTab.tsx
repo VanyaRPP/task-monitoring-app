@@ -7,6 +7,7 @@ import TransactionsTable from '../TransactionsTable/TransactionsTable'
 import CustomPagination from '@components/CustomPagination'
 import _initial from 'lodash/initial'
 import { useGetTransactionsQuery } from '@common/api/bankApi/bank.api'
+
 import { Alert } from 'antd'
 
 interface Props {
