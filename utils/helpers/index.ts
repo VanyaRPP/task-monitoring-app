@@ -1,5 +1,6 @@
 import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 import User, { IUser } from '@modules/models/User'
+import RealEstate from '@modules/models/RealEstate'
 import { FormInstance } from 'antd'
 import Big from 'big.js'
 import dayjs from 'dayjs'
@@ -12,6 +13,10 @@ import {
   getStreetsPipeline,
 } from '../pipelines'
 import { PaymentOptions } from '../types'
+import { IPermissions } from '@modules/models/User'
+import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
+
+import { useState, useEffect } from 'react'
 
 export const toFirstUpperCase = (text: string) => {
   return text ? text[0].toUpperCase() + text.slice(1) : ''
@@ -563,4 +568,61 @@ export const inputNumberParser = (value: string | undefined) => {
   const result = parseFloat(formattedString)
 
   return isNaN(result) ? null : result
+}
+
+// DOMAIN ADMIN HELPER
+export async function isDomainAdmin(user?: IUser): Promise<boolean> {
+  if (!user || !user.email) {
+    return false
+  }
+
+  try {
+    const domain = await RealEstate.findOne({ adminEmails: user.email })
+    return !!domain
+  } catch (error) {
+    console.log(error)
+    return false
+  }
+}
+// GLOBAL ADMIN HELPER
+
+export function isGlobalAdmin(user?: IUser): boolean {
+  if (!user || !user.roles) {
+    return false
+  }
+
+  return user.roles.includes('GlobalAdmin')
+}
+
+// usePermissions
+
+export function usePermissions(user?: IUser): IPermissions | null {
+  const [permissions, setPermissions] = useState<IPermissions | null>(null)
+
+  const { data: userData, isLoading } = useGetUserByEmailQuery(user?.email)
+
+  const isGlobalAdminUser = isGlobalAdmin(user)
+  const isDomainAdminUser = user?.roles.includes('DomainAdmin')
+
+  const isAdmin = isGlobalAdminUser || isDomainAdminUser
+
+  useEffect(() => {
+    if (!isLoading && userData) {
+      setPermissions({
+        isGlobalAdmin: isGlobalAdminUser,
+        isDomainAdmin: isDomainAdminUser,
+        isUser: !!userData,
+        isAdmin,
+      })
+    } else if (!isLoading && !userData) {
+      setPermissions({
+        isGlobalAdmin: false,
+        isDomainAdmin: false,
+        isUser: false,
+        isAdmin: false,
+      })
+    }
+  }, [isLoading, userData, isGlobalAdminUser, isDomainAdminUser])
+
+  return permissions
 }

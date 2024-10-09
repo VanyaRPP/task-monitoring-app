@@ -32,6 +32,7 @@ import {
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
+import { usePermissions } from '@utils/helpers'
 
 import { useState } from 'react'
 
