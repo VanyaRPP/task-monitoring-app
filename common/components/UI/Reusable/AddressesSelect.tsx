@@ -21,7 +21,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
     data: streets = [],
     isLoading: isStreetsLoading,
     isError: isStreetsError,
-  } = useGetAllStreetsQuery({ domainId })
+  } = useGetAllStreetsQuery({ domainId }, { skip: !domainId })
 
   const options = useMemo(() => {
     return streets.map((i) => ({
@@ -31,12 +31,17 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   }, [streets])
 
   useEffect(() => {
-    if (!edit && domainId) {
-      form.setFieldsValue({ street: streetId ?? options[0].value })
-    } else if (!edit && !options.some((option) => option.value === streetId)) {
-      form.setFieldsValue({ street: undefined })
+    if (domainId) {
+      if (options.length === 1) {
+        form.setFieldsValue({ street: options[0].value })
+      } else {
+        if (!options.some((option) => option.value === streetId)) {
+          form.setFieldsValue({ street: options[0]?.value })
+        }
+      }
     }
-  }, [domainId, form, options, streetId, edit])
+  }, [domainId, options, streetId, form])
+
   return (
     <Form.Item name="street" label="Адреса" rules={validateField('required')}>
       <Select

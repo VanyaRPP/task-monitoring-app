@@ -599,7 +599,6 @@ export function isGlobalAdmin(user?: IUser): boolean {
 export function usePermissions(user?: IUser): IPermissions | null {
   const [permissions, setPermissions] = useState<IPermissions | null>(null)
 
-  // Викликаємо хук на верхньому рівні
   const { data: userData, isLoading } = useGetUserByEmailQuery(user?.email)
 
   const isGlobalAdminUser = isGlobalAdmin(user)

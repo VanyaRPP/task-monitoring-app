@@ -21,10 +21,13 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
     data: { data: services } = { data: [] },
     isLoading: isServicesLoading,
     isError: isServicesError,
-  } = useGetAllServicesQuery({
-    domainId,
-    streetId,
-  })
+  } = useGetAllServicesQuery(
+    {
+      domainId,
+      streetId,
+    },
+    { skip: !domainId || !streetId }
+  )
 
   const options = useMemo(() => {
     return services.map((i) => ({

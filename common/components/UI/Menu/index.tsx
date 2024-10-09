@@ -12,6 +12,7 @@ import { useSession } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
+import { isAdminCheck } from '@utils/helpers'
 
 export type MenuProps = Omit<AntdMenuProps, 'selectedKeys' | 'mode' | 'items'>
 
@@ -64,6 +65,12 @@ export const Menu: React.FC<MenuProps> = (props) => {
             key: AppRoutes.PAYMENT_CHART,
             type: 'item',
             label: <Link href={AppRoutes.PAYMENT_CHART}>Графік платежів</Link>,
+          },
+          {
+            key: 'bank',
+            type: 'item',
+            label: <Link href={AppRoutes.BANKTEST}>Банк</Link>,
+            hidden: !isAdminCheck(user?.roles),
           },
         ].filter(({ hidden }) => !hidden),
       },
@@ -120,15 +127,6 @@ export const Menu: React.FC<MenuProps> = (props) => {
             label: <Link href={AppRoutes.PROFILE}>Профіль</Link>,
           },
         ],
-      },
-      {
-        ...(isDevMode && {
-          key: 'bank',
-          type: 'submenu',
-          icon: <UserOutlined />,
-          label: 'BAnk',
-          onClick: () => router.push(AppRoutes.BANKTEST),
-        }),
       },
     ] as AntdMenuProps['items']
   }, [router, session, isGlobalAdmin, isDomainAdmin, isDevMode])
