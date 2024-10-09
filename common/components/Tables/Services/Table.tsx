@@ -13,7 +13,7 @@ import {
 } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { dateToYear } from '@common/assets/features/formatDate'
-import { AppRoutes, Roles, ServiceName } from '@utils/constants'
+import { AppRoutes, ServiceName } from '@utils/constants'
 import { renderCurrency, isAdminCheck } from '@utils/helpers'
 import { Alert, Button, Popconfirm, Table, Tooltip, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
@@ -60,8 +60,6 @@ const ServicesTable: React.FC<Props> = ({
   const isOnPage = pathname === AppRoutes.SERVICE
 
   const { data: user } = useGetCurrentUserQuery()
-  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
-  const isDomainAdmin = user?.roles?.includes(Roles.DOMAIN_ADMIN)
 
   const [deleteService, { isLoading: deleteLoading }] =
     useDeleteServiceMutation()
