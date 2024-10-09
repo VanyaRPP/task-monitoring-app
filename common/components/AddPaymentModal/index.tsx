@@ -48,6 +48,17 @@ export const PaymentContext = createContext<IPaymentContext>({
 export const usePaymentContext = () =>
   useContext<IPaymentContext>(PaymentContext)
 
+export const handleValidate = (form, setIsButtonDisabled) => {
+  form
+    .validateFields()
+    .then(() => {
+      setIsButtonDisabled(false)
+    })
+    .catch((errorInfo) => {
+      setIsButtonDisabled(errorInfo.errorFields.length > 0)
+    })
+}
+
 const AddPaymentModal: FC<Props> = ({
   closeModal,
   paymentData,
@@ -56,17 +67,6 @@ const AddPaymentModal: FC<Props> = ({
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(true)
-
-  const handleValidate = () => {
-    form
-      .validateFields()
-      .then(() => {
-        setIsButtonDisabled(false)
-      })
-      .catch((errorInfo) => {
-        setIsButtonDisabled(errorInfo.errorFields.length > 0)
-      })
-  }
 
   const { company, service, payment, prevService, prevPayment } =
     usePaymentFormData(form, paymentData)
@@ -255,7 +255,7 @@ const AddPaymentModal: FC<Props> = ({
           className={s.Form}
           onValuesChange={() => {
             setIsValueChanged(true)
-            handleValidate()
+            handleValidate(form, setIsButtonDisabled)
           }}
         >
           <Tabs
