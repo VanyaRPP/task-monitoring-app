@@ -24,10 +24,6 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
 
   const { data: transactionsData } = useGetTransactionsQuery({ token })
 
-  const onPrevButtonClick = () => {}
-
-  const onNextButtonClick = () => {}
-
   return (
     <Card>
       {token ? (
