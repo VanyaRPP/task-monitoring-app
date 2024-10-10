@@ -39,6 +39,7 @@ import {
   Typography,
   message,
   theme,
+  Empty,
 } from 'antd'
 import { useRouter } from 'next/router'
 import React, { useCallback, useMemo, useState } from 'react'
@@ -118,6 +119,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     pageSize: router.pathname === AppRoutes.PAYMENT ? 10 : 5,
     currentPage: 1,
   })
+
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([])
 
   const [filters, setFilters] = useState<any>()
 
@@ -232,7 +235,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         title: 'Дата створення',
         dataIndex: 'invoiceCreationDate',
         render: dateToDefaultFormat,
-        width: router.pathname === AppRoutes.PAYMENT ? 180 : 70,
+        width: router.pathname === AppRoutes.PAYMENT ? 164 : 70,
       },
       {
         title: 'Тип',
@@ -272,7 +275,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         title: 'За місяць',
         align: 'center',
         dataIndex: 'monthService',
-        width: router.pathname === AppRoutes.PAYMENT ? 150 : 75,
+        width: router.pathname === AppRoutes.PAYMENT ? 164 : 75,
         render: (monthService: IService, obj) => (
           <Popover
             content={
@@ -338,12 +341,13 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           </Popover>
         ),
       },
-      ...Object.entries(ServiceName).map(([type, title]) => ({
-        title,
+      ...selectedColumns.map((value) => ({
+        title: ServiceName[value],
+        width: 132,
         ellipsis: true,
-        dataIndex: type,
+        dataIndex: value,
         render: (_, payment) => {
-          const item = payment.invoice.find((item) => item.type === type)
+          const item = payment.invoice.find((item) => item.type === value)
           const sum = +(item?.sum || item?.price)
           const currency = renderCurrency(sum?.toFixed(2))
           return (
@@ -425,6 +429,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     filters,
     setFilters,
     token,
+    selectedColumns,
   ])
 
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
@@ -483,6 +488,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           setSelectedPayments={setSelectedPayments}
           setPaymentsDeleteItems={setPaymentsDeleteItems}
           enablePaymentsButton={sepDomainID ? false : true}
+          onColumnsSelect={setSelectedColumns}
         />
       }
     >
@@ -529,77 +535,83 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           }}
           scroll={{
             x:
-              (router.pathname === AppRoutes.PAYMENT ? 2300 : 1300) -
+              (router.pathname === AppRoutes.PAYMENT
+                ? 1300 + selectedColumns.length * 132
+                : 1300) -
               (payments?.realEstatesFilter?.length <= 1 ? 200 : 0) -
               (payments?.domainsFilter?.length <= 1 ? 200 : 0),
           }}
-          summary={() => (
-            <Table.Summary>
-              <Table.Summary.Row>
-                {summaryColumns.map(({ column, index }) =>
-                  column.dataIndex === 'debit' ? (
-                    <Table.Summary.Cell
-                      key={index}
-                      index={index}
-                      align="center"
-                    >
-                      {renderCurrency(
-                        toRoundFixed(payments?.totalPayments?.debit)
-                      )}
-                    </Table.Summary.Cell>
-                  ) : column.dataIndex === 'credit' ? (
-                    <Table.Summary.Cell
-                      key={index}
-                      index={index}
-                      align="center"
-                    >
-                      {renderCurrency(
-                        toRoundFixed(payments?.totalPayments?.credit)
-                      )}
-                    </Table.Summary.Cell>
-                  ) : (
-                    <Table.Summary.Cell key={index} index={index}>
-                      {Object.values(ServiceType).includes(column.dataIndex)
-                        ? renderCurrency(
-                            toRoundFixed(
-                              payments?.totalPayments?.[column.dataIndex]
+          summary={() =>
+            payments?.data?.length > 0 ? (
+              <Table.Summary>
+                <Table.Summary.Row>
+                  {summaryColumns.map(({ column, index }) =>
+                    column.dataIndex === 'debit' ? (
+                      <Table.Summary.Cell
+                        key={index}
+                        index={index}
+                        align="center"
+                      >
+                        {renderCurrency(
+                          toRoundFixed(payments?.totalPayments?.debit)
+                        )}
+                      </Table.Summary.Cell>
+                    ) : column.dataIndex === 'credit' ? (
+                      <Table.Summary.Cell
+                        key={index}
+                        index={index}
+                        align="center"
+                      >
+                        {renderCurrency(
+                          toRoundFixed(payments?.totalPayments?.credit)
+                        )}
+                      </Table.Summary.Cell>
+                    ) : (
+                      <Table.Summary.Cell key={index} index={index}>
+                        {Object.values(ServiceType).includes(column.dataIndex)
+                          ? renderCurrency(
+                              toRoundFixed(
+                                payments?.totalPayments?.[column.dataIndex]
+                              )
                             )
-                          )
-                        : null}
-                    </Table.Summary.Cell>
-                  )
-                )}
-              </Table.Summary.Row>
-              <Table.Summary.Row>
-                {summaryColumns.map(({ column, index }) =>
-                  column.dataIndex !== 'credit' ? (
-                    <Table.Summary.Cell
-                      key={index}
-                      index={index}
-                      colSpan={column.dataIndex === 'debit' ? 2 : 1}
-                      align="center"
-                    >
-                      {column.dataIndex === 'debit'
-                        ? renderCurrency(
-                            toRoundFixed(
-                              Number(payments?.totalPayments?.debit || 0) -
-                                Number(payments?.totalPayments?.credit || 0)
+                          : null}
+                      </Table.Summary.Cell>
+                    )
+                  )}
+                </Table.Summary.Row>
+                <Table.Summary.Row>
+                  {summaryColumns.map(({ column, index }) =>
+                    column.dataIndex !== 'credit' ? (
+                      <Table.Summary.Cell
+                        key={index}
+                        index={index}
+                        colSpan={column.dataIndex === 'debit' ? 2 : 1}
+                        align="center"
+                      >
+                        {column.dataIndex === 'debit'
+                          ? renderCurrency(
+                              toRoundFixed(
+                                Number(payments?.totalPayments?.debit || 0) -
+                                  Number(payments?.totalPayments?.credit || 0)
+                              )
                             )
-                          )
-                        : null}
-                    </Table.Summary.Cell>
-                  ) : null
-                )}
-              </Table.Summary.Row>
-            </Table.Summary>
-          )}
+                          : null}
+                      </Table.Summary.Cell>
+                    ) : null
+                  )}
+                </Table.Summary.Row>
+              </Table.Summary>
+            ) : null
+          }
           bordered
+          locale={{ emptyText: <Empty description="No Data" /> }}
           loading={
             currUserLoading ||
             currUserFetching ||
             paymentsLoading ||
             paymentsFetching
           }
+          footer={() => (payments?.data?.length > 0 ? 'Footer Content' : null)}
         />
       )}
     </TableCard>

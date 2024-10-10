@@ -13,7 +13,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isAdmin } = await getCurrentUser(req, res)
 
   const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
 
@@ -24,17 +24,15 @@ export default async function handler(
     obj.domainBankToken = obj.domainBankToken.map(
       (item: { name: string; token: string; shortToken?: string }) => ({
         ...item,
-        // token: encryptionService.encrypt(item.token),
-        token: item.token ? item.token : encryptionService.encrypt(item.token),
-        // shortToken: hidePercentCharacters(item.token),
-        shortToken: item.shortToken || hidePercentCharacters(item.token),
+        token: item.token || encryptionService.encrypt(item.shortToken),
+        shortToken: hidePercentCharacters(item.shortToken),
       })
     )
 
     return obj
   }
 
-  if (!isGlobalAdmin) {
+  if (!isAdmin) {
     return res.status(400).json({ success: false, message: 'not allowed' })
   }
 
@@ -60,13 +58,27 @@ export default async function handler(
 
     case 'PATCH':
       try {
-        if (isGlobalAdmin) {
+        if (isAdmin) {
           const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
           const response = await Domain.findOneAndUpdate(
             { _id: req.query.id },
             req.body,
             { new: true }
           )
+          return res.status(200).json({ success: true, data: response })
+        } else {
+          return res
+            .status(400)
+            .json({ success: false, message: 'not allowed' })
+        }
+      } catch (error) {
+        return res.status(400).json({ success: false, error: error.message })
+      }
+
+    case 'GET':
+      try {
+        if (isGlobalAdmin) {
+          const response = await Domain.findById({ _id: req.query.id })
           return res.status(200).json({ success: true, data: response })
         } else {
           return res

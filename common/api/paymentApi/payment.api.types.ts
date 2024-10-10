@@ -41,6 +41,7 @@ export interface IPayment {
 }
 
 export interface IExtendedPayment extends IPayment {
+  someUniqueField?: string
   _id: string
   _v: number
 }

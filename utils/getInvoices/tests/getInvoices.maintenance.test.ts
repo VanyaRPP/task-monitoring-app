@@ -240,7 +240,7 @@ describe('getInvoices - MAINTENANCE', () => {
         company,
       })
 
-      expect(invoices).toContainEqual({ 
+      expect(invoices).toContainEqual({
         type: ServiceType.Maintenance,
         amount: 10,
         price: 0,
@@ -260,7 +260,7 @@ describe('getInvoices - MAINTENANCE', () => {
         company,
       })
 
-      expect(invoices).toContainEqual({ 
+      expect(invoices).toContainEqual({
         type: ServiceType.Maintenance,
         amount: 0,
         price: 10,

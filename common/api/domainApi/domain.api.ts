@@ -7,6 +7,7 @@ import {
   IGetDomainResponse,
   IExtendedAreas,
   IGetAreasResponse,
+  IGetDomainByPkResponse,
 } from './domain.api.types'
 
 export const domainApi = createApi({
@@ -78,6 +79,16 @@ export const domainApi = createApi({
       ],
       transformResponse: (response: IGetAreasResponse) => response.data,
     }),
+    getDomainByPk: builder.query<IExtendedDomain, { domainId?: string }>({
+      query: ({ domainId }) => ({
+        url: `domain/${domainId}`,
+        method: 'GET',
+      }),
+      providesTags: (result, error, { domainId }) => [
+        { type: 'Domain', id: domainId },
+      ],
+      transformResponse: (response: IGetDomainByPkResponse) => response.data,
+    }),
   }),
 })
 
@@ -87,4 +98,5 @@ export const {
   useAddDomainMutation,
   useDeleteDomainMutation,
   useEditDomainMutation,
+  useGetDomainByPkQuery,
 } = domainApi

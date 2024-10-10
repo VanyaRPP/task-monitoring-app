@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import {
   IAddRealestateResponse,
   IDeleteRealestateResponse,
+  IExtendedArchive,
   IExtendedRealestate,
   IGetRealestateResponse,
   IRealestate,
@@ -11,7 +12,7 @@ export const realestateApi = createApi({
   reducerPath: 'realestateApi',
   refetchOnFocus: true,
   refetchOnReconnect: true,
-  tagTypes: ['RealEstate'],
+  tagTypes: ['RealEstate', 'ArchivedApi'],
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getAllRealEstate: builder.query<
@@ -21,9 +22,10 @@ export const realestateApi = createApi({
         domainId?: string[] | string
         streetId?: string[] | string
         companyId?: string[] | string
+        archived?: boolean
       }
     >({
-      query: ({ limit, companyId, domainId, streetId }) => {
+      query: ({ limit, companyId, domainId, streetId, archived }) => {
         return {
           url: `real-estate`,
           params: {
@@ -31,12 +33,16 @@ export const realestateApi = createApi({
             companyId,
             domainId,
             streetId,
+            archived,
           },
         }
       },
       providesTags: (response) =>
         response
-          ? response.data.map((item) => ({ type: 'RealEstate', id: item._id }))
+          ? response.data.flatMap((item) => [
+              { type: 'RealEstate', id: item._id },
+              { type: 'ArchivedApi', id: item._id },
+            ])
           : [],
     }),
 
@@ -76,6 +82,20 @@ export const realestateApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['RealEstate'] : []),
     }),
+    updateArchivedItem: builder.mutation<
+      IExtendedArchive,
+      Partial<IExtendedArchive>
+    >({
+      query(data) {
+        const { _id, ...body } = data
+        return {
+          url: `archived/${_id}`,
+          method: 'PATCH',
+          body: body,
+        }
+      },
+      invalidatesTags: (response) => (response ? ['ArchivedApi'] : []),
+    }),
   }),
 })
 
@@ -84,4 +104,5 @@ export const {
   useAddRealEstateMutation,
   useGetAllRealEstateQuery,
   useEditRealEstateMutation,
+  useUpdateArchivedItemMutation,
 } = realestateApi

@@ -16,10 +16,10 @@ import { message, Modal } from 'antd'
 import { dateToMonthYear } from '@assets/features/formatDate'
 
 interface ServiceBlockProps {
-  sepDomainID?: string;
+  sepDomainID?: string
 }
 
-const ServicesBlock: React.FC<ServiceBlockProps> = ({sepDomainID}) => {
+const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
   const { data: user } = useGetCurrentUserQuery()
   const [currentService, setCurrentService] = useState<IService>(null)
   const [serviceActions, setServiceActions] = useState({
@@ -27,11 +27,10 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({sepDomainID}) => {
     preview: false,
   })
   const [selectedServices, setSelectedServices] = useState<IService[]>([])
-  const [deleteService, _] =
-  useDeleteServiceMutation()
+  const [deleteService, _] = useDeleteServiceMutation()
 
   const handleDeleteServices = () => {
-    (Modal as any).confirm({
+    ;(Modal as any).confirm({
       title: 'Ви впевнені, що хочете видалити обрані проплати?',
       cancelText: 'Ні',
       okText: 'Так',
@@ -39,7 +38,8 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({sepDomainID}) => {
         <>
           {selectedServices.map((service, index) => (
             <div key={index}>
-              {index + 1}. {service?.domain?.name}, {service?.street?.address}, {dateToMonthYear(service.date)}
+              {index + 1}. {service?.domain?.name}, {service?.street?.address},{' '}
+              {dateToMonthYear(service.date)}
             </div>
           ))}
         </>
@@ -48,11 +48,11 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({sepDomainID}) => {
         try {
           await Promise.all(
             selectedServices.map((service) => deleteService(service._id))
-          );
-          setSelectedServices([]);
-          message.success('Видалено!');
+          )
+          setSelectedServices([])
+          message.success('Видалено!')
         } catch (error) {
-          message.error('Помилка при видаленні рахунків');
+          message.error('Помилка при видаленні рахунків')
         }
       },
     })

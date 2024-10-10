@@ -20,6 +20,7 @@ export const streetApi = createApi({
       query: ({ domainId, limit }: { domainId?: string; limit?: number }) => {
         return {
           url: `streets`,
+          method: 'GET',
           params: { domainId, limit },
         }
       },
@@ -62,6 +63,12 @@ export const streetApi = createApi({
       },
       invalidatesTags: ['Street'],
     }),
+    searchStreets: builder.query<any, { city: string; address: string }>({
+      query: ({ city, address }) => ({
+        url: 'streets/search',
+        params: { city, address },
+      }),
+    }),
   }),
 })
 
@@ -71,4 +78,5 @@ export const {
   useDeleteStreetMutation,
   useEditStreetMutation,
   useGetStreetByIdQuery,
+  useSearchStreetsQuery,
 } = streetApi

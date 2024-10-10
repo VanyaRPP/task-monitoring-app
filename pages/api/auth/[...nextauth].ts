@@ -4,6 +4,10 @@ import jwt from 'jsonwebtoken'
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
+import CredentialsProvider from 'next-auth/providers/credentials'
+import User from '@modules/models/User'
+import bcrypt from 'bcrypt'
+import { saltRounds } from '@utils/constants'
 
 function html({ url, host, email }) {
   const escapedEmail = `${email.replace(/\./g, '&#8203;.')}`
@@ -37,28 +41,51 @@ export const authOptions: NextAuthOptions = {
     },
   },
   providers: [
-    // CredentialsProvider({
-    //   name: 'Credentials',
-    //   credentials: {},
-    //   async authorize(credentials: ICredentials, req) {
-    //     try {
-    //       const user = await User.findOne({
-    //         email: credentials.email,
-    //       })
+    CredentialsProvider({
+      name: 'Credentials',
 
-    //       // encrypting and comparing password
-    //       const result = await bcrypt.compare(
-    //         credentials.password,
-    //         user.password
-    //       )
-    //       if (!result) return null
+      credentials: {
+        name: { label: 'Name', type: 'text' },
+        email: { label: 'Email', type: 'text' },
+        password: { label: 'Password', type: 'password' },
+        authType: { label: 'Auth Type', type: 'text' },
+      },
+      async authorize(credentials, req) {
+        try {
+          const user = await User.findOne({ email: credentials.email })
+          if (credentials.authType === 'signIn') {
+            if (
+              user &&
+              (await bcrypt.compare(credentials.password, user.password))
+            ) {
+              return {
+                id: user._id.toString(),
+                name: user.name,
+                email: user.email,
+              }
+            }
+          } else {
+            if (user) return null
 
-    //       return user
-    //     } catch (error) {
-    //       return null
-    //     }
-    //   },
-    // }),
+            const hash = await bcrypt.hash(credentials.password, saltRounds)
+            const newUser = await User.create({
+              name: credentials.name,
+              email: credentials.email,
+              password: hash,
+            })
+            return {
+              id: newUser._id.toString(),
+              name: newUser.name,
+              email: newUser.email,
+            }
+          }
+
+          return null
+        } catch (error) {
+          return null
+        }
+      },
+    }),
     // EmailProvider({
     //   server: {
     //     host: process.env.EMAIL_SERVER_HOST,

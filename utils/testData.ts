@@ -131,6 +131,7 @@ export const realEstates = [
     waterPart: 0,
     rentPart: 25,
     inflicion: false,
+    archived: true,
   },
   {
     _id: '64d68421d9ba2fc8fea79d22',
@@ -147,6 +148,7 @@ export const realEstates = [
     waterPart: 0,
     rentPart: 0,
     inflicion: false,
+    archived: false,
   },
   {
     _id: '64d68421d9ba2fc8fea79d23',
@@ -163,6 +165,7 @@ export const realEstates = [
     waterPart: 0,
     rentPart: 0,
     inflicion: false,
+    archived: true,
   },
   {
     _id: '64d68421d9ba2fc8fea79d24',
@@ -179,6 +182,7 @@ export const realEstates = [
     waterPart: 0,
     rentPart: 45,
     inflicion: false,
+    archived: false,
   },
   {
     _id: '64d68421d9ba2fc8fea79d25',
@@ -195,6 +199,7 @@ export const realEstates = [
     waterPart: 0,
     rentPart: 0,
     inflicion: false,
+    archived: false,
   },
   {
     _id: '64d68421d9ba2fc8fea79d26',
@@ -211,6 +216,7 @@ export const realEstates = [
     waterPart: 0,
     rentPart: 0,
     inflicion: false,
+    archived: true,
   },
   {
     _id: '64e66d436d57a8640543dda4',
@@ -227,6 +233,7 @@ export const realEstates = [
     waterPart: 0,
     rentPart: 50,
     inflicion: false,
+    archived: false,
   },
 ]
 

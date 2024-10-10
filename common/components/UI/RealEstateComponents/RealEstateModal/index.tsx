@@ -10,6 +10,7 @@ import {
 import { Form, message } from 'antd'
 import Modal from '../../ModalWindow'
 import RealEstateForm from './RealEstateForm'
+import { IDomain } from '@modules/models/Domain'
 
 interface Props {
   closeModal: VoidFunction
@@ -40,17 +41,20 @@ const RealEstateModal: FC<Props> = ({
       servicePricePerMeter: currentRealEstate?.servicePricePerMeter || 0,
       totalArea: currentRealEstate?.totalArea || 0,
       garbageCollector: currentRealEstate?.garbageCollector || false,
+      archived: currentRealEstate?.archived || false,
       rentPart: currentRealEstate?.rentPart || 0,
       inflicion: currentRealEstate?.inflicion || false,
       waterPart: currentRealEstate?.waterPart || 0,
       discount: currentRealEstate?.discount || 0,
       cleaning: currentRealEstate?.cleaning || 0,
+      services: currentRealEstate?.services || [],
     }
     form.setFieldsValue(initialValues)
   }, [currentRealEstate, form])
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
+
     const realEstateData = {
       domain: currentRealEstate?.domain || formData.domain,
       street: currentRealEstate?.street || formData.street,
@@ -61,12 +65,14 @@ const RealEstateModal: FC<Props> = ({
       servicePricePerMeter: formData.servicePricePerMeter,
       totalArea: formData.totalArea,
       garbageCollector: formData.garbageCollector,
+      archived: formData.archived,
       rentPart: formData.rentPart,
       inflicion: formData.inflicion,
       waterPart: formData.waterPart,
       discount:
         formData.discount > 0 ? formData.discount * -1 : formData.discount,
       cleaning: formData.cleaning,
+      services: formData.services,
     }
 
     const response = currentRealEstate

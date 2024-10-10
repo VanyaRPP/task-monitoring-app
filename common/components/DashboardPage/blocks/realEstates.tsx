@@ -33,17 +33,22 @@ const RealEstateBlock: React.FC<Props> = ({
   const [currentRealEstate, setCurrentRealEstate] =
     useState<IExtendedRealestate>(null)
   const [filters, setFilters] = useState<any>()
+  const [isArchive, setIsArchive] = useState(false)
 
   const {
     data: realEstates,
     isLoading,
     isError,
-  } = useGetAllRealEstateQuery({
-    domainId: sepDomainID || domainId || filters?.domain || undefined,
-    companyId: filters?.company || undefined,
-    streetId: streetId || filters?.street || undefined,
-    limit: isOnPage ? 0 : 5,
-  })
+  } = useGetAllRealEstateQuery(
+    {
+      domainId: sepDomainID || domainId || filters?.domain || undefined,
+      companyId: filters?.company || undefined,
+      streetId: streetId || filters?.street || undefined,
+      limit: isOnPage ? 0 : 5,
+      archived: isArchive,
+    },
+    { refetchOnMountOrArgChange: isArchive }
+  )
   const [realEstateActions, setRealEstateActions] = useState({
     edit: false,
   })
@@ -58,6 +63,7 @@ const RealEstateBlock: React.FC<Props> = ({
           realEstates={realEstates}
           filters={filters}
           setFilters={setFilters}
+          setIsArchive={setIsArchive}
           realEstateActions={realEstateActions}
           setRealEstateActions={setRealEstateActions}
           enableRealEstateButton={sepDomainID ? false : true}

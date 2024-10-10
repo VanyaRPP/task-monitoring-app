@@ -26,11 +26,10 @@ const InvoicesHeader = () => {
     try {
       setIsLoading(true)
       await handleSave()
-    }
-    finally {
+    } finally {
       setIsLoading(false)
     }
-  } 
+  }
 
   const handleSave = async () => {
     const values = await form.validateFields()
@@ -100,13 +99,22 @@ const InvoicesHeader = () => {
         <DomainsSelect form={form} />
         <AddressesSelect
           form={form}
-          dropdownStyle={{ minWidth: 'max-content' }}
+          // dropdownStyle={{ minWidth: 'max-content' }}
         />
         <MonthServiceGeneralInfo />
       </div>
 
-      <Button type="link" disabled={isLoading} onClick={handleClickSaveButton} className={styles.saveButton}>
-        {isLoading ? <Spin indicator={<LoadingOutlined spin />} size="small" /> : `Зберегти`}
+      <Button
+        type="link"
+        disabled={isLoading}
+        onClick={handleClickSaveButton}
+        className={styles.saveButton}
+      >
+        {isLoading ? (
+          <Spin indicator={<LoadingOutlined spin />} size="small" />
+        ) : (
+          `Зберегти`
+        )}
       </Button>
     </div>
   )

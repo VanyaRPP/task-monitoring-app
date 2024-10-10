@@ -13,7 +13,7 @@ import {
 } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { dateToYear } from '@common/assets/features/formatDate'
-import { AppRoutes, Roles, ServiceName } from '@utils/constants'
+import { AppRoutes, ServiceName } from '@utils/constants'
 import { renderCurrency, isAdminCheck } from '@utils/helpers'
 import { Alert, Button, Popconfirm, Table, Tooltip, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
@@ -37,7 +37,7 @@ interface Props {
   isError?: boolean
   filter?: any
   setFilter?: (filters: any) => void
-  setSelectedServices?: (service: IService[]) => void 
+  setSelectedServices?: (service: IService[]) => void
 }
 
 const ServicesTable: React.FC<Props> = ({
@@ -60,19 +60,21 @@ const ServicesTable: React.FC<Props> = ({
   const isOnPage = pathname === AppRoutes.SERVICE
 
   const { data: user } = useGetCurrentUserQuery()
-  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   const [deleteService, { isLoading: deleteLoading }] =
     useDeleteServiceMutation()
 
-  const handleDelete = useCallback(async (id: string) => {
-    const response = await deleteService(id)
-    if ('data' in response) {
-      message.success('Видалено!')
-    } else {
-      message.error('Помилка при видаленні')
-    }
-  }, [deleteService])
+  const handleDelete = useCallback(
+    async (id: string) => {
+      const response = await deleteService(id)
+      if ('data' in response) {
+        message.success('Видалено!')
+      } else {
+        message.error('Помилка при видаленні')
+      }
+    },
+    [deleteService]
+  )
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
@@ -88,12 +90,11 @@ const ServicesTable: React.FC<Props> = ({
       <Table
         rowKey="_id"
         rowSelection={
-          isAdminCheck(user?.roles)
-          && router.pathname === AppRoutes.SERVICE
-          && {
-              onChange: (_, selectedRows) => {
-                setSelectedServices(selectedRows)
-              },
+          isAdminCheck(user?.roles) &&
+          router.pathname === AppRoutes.SERVICE && {
+            onChange: (_, selectedRows) => {
+              setSelectedServices(selectedRows)
+            },
           }
         }
         pagination={
@@ -109,7 +110,7 @@ const ServicesTable: React.FC<Props> = ({
         }
         loading={isLoading}
         columns={getDefaultColumns(
-          isGlobalAdmin,
+          isAdminCheck(user?.roles),
           handleDelete,
           deleteLoading,
           setCurrentService,

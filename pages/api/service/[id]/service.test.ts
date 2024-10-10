@@ -177,3 +177,32 @@ describe('Service API - PATCH', () => {
     expect(response.data.notValidField).toBe(undefined)
   })
 })
+
+xdescribe('Service API - DELETE', () => {
+  it('should be removed by DomainAdmin role', async () => {
+    await mockLoginAs(users.domainAdmin)
+
+    const serviceToRemove = services.find(
+      (el) => el._id === '64d68421d9ba2fc8fea79d51'
+    )._id
+
+    const mockReq = {
+      method: 'DELETE',
+      query: { id: serviceToRemove },
+    } as any
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    const response = {
+      success: true,
+      data: `Service ${serviceToRemove} was deleted`,
+    }
+
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json).toHaveBeenCalledWith(response)
+  })
+})
