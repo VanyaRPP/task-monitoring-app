@@ -24,7 +24,7 @@ export default async function handler(
 
   if (req.method === 'GET') {
     try {
-      const { streetIds, companyIds, domainIds, type } = req.query
+      const { streetIds, companyIds, domainIds, limit, skip, type } = req.query
 
       const companiesIds: string[] | null = companyIds
         ? typeof companyIds === 'string'
@@ -54,6 +54,12 @@ export default async function handler(
           options.domain = { $in: domainsIds }
         }
       } else if (isDomainAdmin) {
+        const relatedDomainsIds = (
+          await Domain.find({
+            adminEmails: user.email,
+          })
+        ).map((domain) => domain._id.toString())
+
         if (streetsIds) {
           options.street = { $in: streetIds }
         }

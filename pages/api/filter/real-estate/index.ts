@@ -19,15 +19,36 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const {} = req.query
+        const { companyId, domainId, streetId } = req.query
 
-        if (!isUser && !isDomainAdmin && !isGlobalAdmin) {
-          return res.status(200).json({ success: false, data: [] })
-        }
+        const companiesIds: string[] | null = companyId
+          ? typeof companyId === 'string'
+            ? companyId.split(',').map((id) => decodeURIComponent(id))
+            : companyId.map((id) => decodeURIComponent(id))
+          : null
+        const domainsIds: string[] | null = domainId
+          ? typeof domainId === 'string'
+            ? domainId.split(',').map((id) => decodeURIComponent(id))
+            : domainId.map((id) => decodeURIComponent(id))
+          : null
+        const streetsIds: string[] | null = streetId
+          ? typeof streetId === 'string'
+            ? streetId.split(',').map((id) => decodeURIComponent(id))
+            : streetId.map((id) => decodeURIComponent(id))
+          : null
 
         const options: FilterQuery<typeof RealEstate> = {}
 
         if (isGlobalAdmin) {
+          if (companiesIds) {
+            options.company = { $in: companiesIds }
+          }
+          if (streetsIds) {
+            options.street = { $in: streetsIds }
+          }
+          if (domainsIds) {
+            options.domain = { $in: domainsIds }
+          }
         } else if (isDomainAdmin) {
           const domains = await Domain.distinct('_id', {
             adminEmails: user.email,
@@ -55,7 +76,6 @@ export default async function handler(
         })
 
         const filteredStreets = distinctStreets
-
           ?.map((street) => street.streetData as IStreet)
           .filter(
             (street, index, streets) =>
@@ -80,13 +100,12 @@ export default async function handler(
             text: `${street.address}, м.${street.city}`,
             value: street._id,
           })),
-
           success: true,
         })
       } catch (error) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        return res.status(400).json({ success: false, message: error })
+        return res.status(400).json({ success: false, message: error.message })
       }
 
     case 'POST':
@@ -100,13 +119,12 @@ export default async function handler(
               .json({ success: false, message: 'not allowed' })
           )
         }
-
         const realEstate = await RealEstate.create(req.body)
         return res.status(200).json({ success: true, data: realEstate })
       } catch (error) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        return res.status(400).json({ success: false, message: error })
+        return res.status(400).json({ success: false, message: error.message })
       }
   }
 }

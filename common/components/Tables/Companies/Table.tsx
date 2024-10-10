@@ -32,9 +32,7 @@ import {
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
-import { usePermissions } from '@utils/helpers'
-
-import { useState } from 'react'
+import { useGetRealEstateFiltersQuery } from '@common/api/filterApi/filter.api'
 
 export interface Props {
   domainId?: string
@@ -72,6 +70,7 @@ const CompaniesTable: React.FC<Props> = ({
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
 
   const { data: userResponse } = useGetCurrentUserQuery()
+  const { data: realEstatesFilter } = useGetRealEstateFiltersQuery()
 
   const [deleteRealEstate, { isLoading: deleteLoading }] =
     useDeleteRealEstateMutation()
@@ -135,9 +134,9 @@ const CompaniesTable: React.FC<Props> = ({
         deleteLoading,
         isGlobalAdmin,
         isAdmin,
-        domainsFilter: realEstates?.domainsFilter,
-        streetsFilter: realEstates?.streetsFilter,
-        realEstatesFilter: realEstates?.realEstatesFilter,
+        domainsFilter: realEstatesFilter?.domainsFilter,
+        streetsFilter: realEstatesFilter?.streetsFilter,
+        realEstatesFilter: realEstatesFilter?.realEstatesFilter,
         filters,
         pathname,
         setRealEstateActions,

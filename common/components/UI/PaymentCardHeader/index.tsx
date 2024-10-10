@@ -38,7 +38,6 @@ import { useEffect, useState } from 'react'
 
 const PaymentCardHeader = ({
   setCurrentDateFilter,
-  setCurrentTypeOperation,
   currentPayment,
   paymentActions,
   closeEditModal,
@@ -148,13 +147,8 @@ const PaymentCardHeader = ({
             />
             <Space.Compact>
               <PaymentCascader onChange={setCurrentDateFilter} />
-              <StreetsSelector
-                filters={filters}
-                setFilters={setFilters}
-                streets={streets}
-              />
+              <StreetsSelector setFilters={setFilters} streets={streets} />
             </Space.Compact>
-
             <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
               <DomainFilterTags
                 collection={payments?.domainsFilter}
