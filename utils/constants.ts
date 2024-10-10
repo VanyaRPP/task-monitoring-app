@@ -20,6 +20,7 @@ export enum AppRoutes {
   STREETS = '/streets',
   BANKTEST = '/bank',
   SEP_DOMAIN = '/sepdomain',
+  PROFIT = '/profit',
 }
 
 export enum Operations {

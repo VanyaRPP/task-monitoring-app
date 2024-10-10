@@ -106,3 +106,31 @@ export interface IGeneratePaymentPDFResponce {
   fileName: string
   fileExtension: string
 }
+
+export interface IGetProfitPaymentResponse {
+  success: boolean
+  date: string
+  totalGeneralSumCredit: number
+  totalGeneralSumDebit: number
+  paymentsByType: {
+    credit: IProfitPayment[]
+    debit: IProfitPayment[]
+  }
+  data: any
+}
+
+export interface IProfitPayment {
+  _id: string
+  invoiceNumber: number
+  type: string
+  invoiceCreationDate: Date
+  domain: Partial<IDomain> | string
+  street: Partial<IStreet> | string
+  company: Partial<IRealestate> | string
+  monthService: Partial<IService> | string
+  description?: string
+  invoice: IPaymentField[]
+  provider: IProvider
+  reciever: IReciever
+  generalSum: number
+}
