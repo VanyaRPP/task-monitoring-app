@@ -112,7 +112,9 @@ export interface IGeneratePaymentExcel {
 }
 
 export interface IGeneratePaymentExcelResponce {
-  buffer: Buffer,
-  fileName: string,
-  fileExtension: string,
+  buffer: {
+    data: Buffer
+  }
+  fileName: string
+  fileExtension: string
 }
