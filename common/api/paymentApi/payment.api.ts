@@ -9,6 +9,8 @@ import {
   IGetPaymentNumberResponse,
   IGetPaymentResponse,
   IPayment,
+  IGeneratePaymentExcel,
+  IGeneratePaymentExcelResponce,
 } from './payment.api.types'
 
 export const paymentApi = createApi({
@@ -136,6 +138,16 @@ export const paymentApi = createApi({
         body,
       }),
     }),
+    generateExcel: builder.mutation<
+      IGeneratePaymentExcelResponce,
+      IGeneratePaymentExcel>
+    ({
+      query: (body) => ({
+        url: 'spacehub/payment/generateExcel',
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
 })
 
@@ -148,4 +160,5 @@ export const {
   useGetPaymentNumberQuery,
   useEditPaymentMutation,
   useGeneratePdfMutation,
+  useGenerateExcelMutation,
 } = paymentApi
