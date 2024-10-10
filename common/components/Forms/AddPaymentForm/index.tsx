@@ -10,7 +10,7 @@ import PaymentTypeSelect from '@components/UI/Reusable/PaymentTypeSelect'
 import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { Form, Input, InputNumber } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import CompanySelect from './CompanySelect'
 import InvoiceCreationDate from './InvoiceCreationDate'
 import InvoiceNumber from './InvoiceNumber'
@@ -44,6 +44,8 @@ function AddPaymentForm({ paymentActions }) {
   const { form, payment, service, company, prevService, prevPayment } =
     usePaymentContext()
 
+  const [streetHasService, setStreetHasService] = useState(false)
+
   const companyId = Form.useWatch('company', form)
   const operation = Form.useWatch('operation', form)
 
@@ -62,8 +64,16 @@ function AddPaymentForm({ paymentActions }) {
   return (
     <>
       <DomainsSelect form={form} edit={edit} />
-      <AddressesSelect form={form} edit={edit} />
-      <MonthServiceSelect form={form} edit={edit} />
+      <AddressesSelect
+        form={form}
+        edit={edit}
+        onStreetHasServiceChange={setStreetHasService}
+      />
+      <MonthServiceSelect
+        form={form}
+        edit={edit}
+        disabled={!streetHasService}
+      />
       <CompanySelect form={form} edit={edit} />
       <PaymentTypeSelect edit={!companyId || edit} />
       <InvoiceNumber form={form} paymentActions={paymentActions} />

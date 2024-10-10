@@ -72,9 +72,17 @@ export default async function handler(
           )
         )
 
+        const result = streets.map((street) => ({
+          ...street._doc,
+          hasService: filteredStreets.some(
+            (filteredStreet) =>
+              filteredStreet._id.toString() === street._id.toString()
+          ),
+        }))
+
         return res.status(200).json({
           success: true,
-          data: _uniqBy(filteredStreets, '_id'),
+          data: _uniqBy(result, '_id'),
         })
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })

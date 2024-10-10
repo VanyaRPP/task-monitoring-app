@@ -7,11 +7,13 @@ import { useEffect, useMemo } from 'react'
 export interface MonthServiceSelectProps {
   form: FormInstance
   edit?: boolean
+  disabled?: boolean
 }
 
 const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
   form,
   edit,
+  disabled,
 }) => {
   const streetId: string = Form.useWatch('street', form)
   const domainId: string = Form.useWatch('domain', form)
@@ -57,6 +59,7 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
         status={isServicesError && 'error'}
         loading={isServicesLoading}
         disabled={
+          disabled ||
           isServicesLoading ||
           services.length === 1 ||
           !streetId ||
