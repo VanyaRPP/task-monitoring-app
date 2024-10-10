@@ -32,14 +32,12 @@ import {
   message,
 } from 'antd'
 import Modal from 'antd/lib/modal/Modal'
-import { log } from 'console'
 import { saveAs } from 'file-saver'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
 const PaymentCardHeader = ({
   setCurrentDateFilter,
-  setCurrentTypeOperation,
   currentPayment,
   paymentActions,
   closeEditModal,
@@ -126,7 +124,6 @@ const PaymentCardHeader = ({
       message.error('Сталася несподівана помилка під час генерації PDF')
     }
   }
-  console.log(streets)
 
   return (
     <Flex justify="space-between">
@@ -150,11 +147,7 @@ const PaymentCardHeader = ({
             />
             <Space.Compact>
               <PaymentCascader onChange={setCurrentDateFilter} />
-              <StreetsSelector
-                filters={filters}
-                setFilters={setFilters}
-                streets={streets}
-              />
+              <StreetsSelector setFilters={setFilters} streets={streets} />
             </Space.Compact>
             <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
               <DomainFilterTags

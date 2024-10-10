@@ -1,7 +1,6 @@
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Space, Segmented } from 'antd'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
 import { Dispatch, SetStateAction, useState } from 'react'
 import {
   IExtendedRealestate,
@@ -16,6 +15,7 @@ import {
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import s from './style.module.scss'
+import { useGetRealEstateFiltersQuery } from '@common/api/filterApi/filter.api'
 
 export interface Props {
   showAddButton?: boolean
@@ -42,7 +42,6 @@ const CompaniesHeader: React.FC<Props> = ({
   setCurrentRealEstate,
   filters,
   setFilters,
-  realEstates,
   setRealEstateActions,
   realEstateActions,
   enableRealEstateButton,
@@ -68,10 +67,7 @@ const CompaniesHeader: React.FC<Props> = ({
     setIsArchive(value)
   }
 
-  const { data: realEstatesFilter, error } = useGetRealEstateQuery({})
-  if (error) {
-    console.log(error)
-  }
+  const { data: realEstatesFilter } = useGetRealEstateFiltersQuery()
 
   return (
     <div className={s.headerBlock}>

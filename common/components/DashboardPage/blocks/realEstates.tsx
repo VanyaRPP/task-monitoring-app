@@ -9,7 +9,6 @@ import { isAdminCheck } from '@utils/helpers'
 import { useRouter } from 'next/router'
 import { createContext, useContext, useState } from 'react'
 
-
 export const CompanyPageContext = createContext<{
   domainId?: string
   streetId?: string | null

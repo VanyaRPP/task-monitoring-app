@@ -8,7 +8,7 @@ export const filterApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/filter/` }),
   endpoints: (builder) => ({
-    getDomains: builder.query<IPaymentFilterResponse, {}>({
+    getDomainFilters: builder.query<IPaymentFilterResponse, void>({
       query: () => {
         return {
           url: `payments`,
@@ -24,7 +24,7 @@ export const filterApi = createApi({
             ]
           : [],
     }),
-    getService: builder.query<IPaymentFilterResponse, {}>({
+    getServiceFilters: builder.query<IPaymentFilterResponse, void>({
       query: () => {
         return {
           url: 'service',
@@ -42,7 +42,7 @@ export const filterApi = createApi({
             ]
           : [],
     }),
-    getRealEstate: builder.query<IPaymentFilterResponse, {}>({
+    getRealEstateFilters: builder.query<IPaymentFilterResponse, void>({
       query: () => {
         return {
           url: 'real-estate',
@@ -61,5 +61,8 @@ export const filterApi = createApi({
   }),
 })
 
-export const { useGetDomainsQuery, useGetServiceQuery, useGetRealEstateQuery } =
-  filterApi
+export const {
+  useGetDomainFiltersQuery,
+  useGetServiceFiltersQuery,
+  useGetRealEstateFiltersQuery,
+} = filterApi
