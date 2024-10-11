@@ -37,12 +37,10 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
 
   useEffect(() => {
     if (domainId) {
-      // Якщо адрес одна, обираємо її, навіть якщо немає сервісу
       if (options.length === 1) {
         form.setFieldsValue({ street: options[0].value })
         onStreetHasServiceChange?.(options[0].hasService)
       } else {
-        // Знаходимо першу адресу з сервісом, якщо така є
         const firstStreetWithService = options.find(
           (option) => option.hasService
         )
@@ -51,7 +49,6 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
           form.setFieldsValue({ street: firstStreetWithService.value })
           onStreetHasServiceChange?.(firstStreetWithService.hasService)
         } else {
-          // Якщо сервісу немає, скидаємо вибрану адресу
           form.setFieldsValue({ street: undefined })
           onStreetHasServiceChange?.(false)
         }
@@ -60,7 +57,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   }, [domainId, options, form, onStreetHasServiceChange])
 
   const selectedStreet = options.find((option) => option.value === streetId)
-  const showTooltip = selectedStreet && !selectedStreet.hasService
+  const showTooltip = !!streetId && selectedStreet && !selectedStreet.hasService
 
   return (
     <Tooltip
