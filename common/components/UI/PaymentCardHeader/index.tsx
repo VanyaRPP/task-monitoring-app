@@ -4,11 +4,13 @@ import {
   FilterOutlined,
   PlusOutlined,
   SelectOutlined,
+  ExportOutlined,
 } from '@ant-design/icons'
 import { dateToDefaultFormat } from '@assets/features/formatDate'
 import {
   useDeleteMultiplePaymentsMutation,
   useGeneratePdfMutation,
+  useGenerateExcelMutation,
 } from '@common/api/paymentApi/payment.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddPaymentModal from '@components/AddPaymentModal'
@@ -67,6 +69,22 @@ const PaymentCardHeader = ({
   const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isAdmin = isAdminCheck(currUser?.roles)
   const [deletePayment] = useDeleteMultiplePaymentsMutation()
+
+  const [generateExcel] = useGenerateExcelMutation()
+
+  const handleExportExcel = async () => {
+    try {
+      const response = await generateExcel({
+        payments: selectedPayments,
+      })
+      const blob = new Blob([new Uint8Array(response.data.buffer?.data)], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+      saveAs(blob, `payments.xlsx`)
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
 
   const handleDeletePayments = async () => {
     ;(Modal as any).confirm({
@@ -165,6 +183,13 @@ const PaymentCardHeader = ({
         )}
       </Space>
       <Flex wrap align="center" justify="flex-end">
+        {isAdmin &&
+          pathname === AppRoutes.PAYMENT &&
+          selectedPayments.length > 0 && (
+          <Button type="link" onClick={() => handleExportExcel()}>
+            Export to Excel <ExportOutlined />
+          </Button>
+        )}
         {isAdmin && <ImportInvoices />}
         {isAdmin && (
           <Button

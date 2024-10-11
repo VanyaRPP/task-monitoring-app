@@ -61,7 +61,8 @@
     "react-to-print": "^2.14.12",
     "sass": "^1.53.0",
     "sharp": "^0.33.4",
-    "use-places-autocomplete": "^4.0.0"
+    "use-places-autocomplete": "^4.0.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.1",
