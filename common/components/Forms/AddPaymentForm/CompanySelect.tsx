@@ -13,18 +13,21 @@ export default function CompanySelect({
 }) {
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
+  const month = Form.useWatch('monthService', form)
 
-  return domainId && streetId ? (
+  const isDisabled = !domainId || !streetId || !month
+
+  return isDisabled ? (
+    <Form.Item label="Компанія">
+      <Select placeholder="Оберіть надавача послуг та адресу" disabled />
+    </Form.Item>
+  ) : (
     <RealEstateDataFetcher
       domainId={domainId}
       streetId={streetId}
       form={form}
       edit={edit}
     />
-  ) : (
-    <Form.Item label="Компанія">
-      <Select placeholder="Оберіть надавача послуг та адресу" disabled />
-    </Form.Item>
   )
 }
 
@@ -45,9 +48,11 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
     if (!edit) {
       if (companies?.length === 1) {
         form.setFieldValue('company', companies[0]._id)
+      } else if (companies?.length > 0) {
+        form.setFieldValue('company', companies[0]._id)
       }
     }
-  }, [form, companies])
+  }, [form, companies, edit])
 
   return (
     <Form.Item
