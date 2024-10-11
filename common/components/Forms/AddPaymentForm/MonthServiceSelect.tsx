@@ -39,10 +39,15 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
   }, [services])
 
   useEffect(() => {
-    if (!edit && options.length === 1) {
-      form.setFieldsValue({ monthService: options[0].value })
-    } else if (!edit && !options.some((option) => option.value === serviceId)) {
-      form.setFieldsValue({ monthService: undefined })
+    if (!edit) {
+      if (options.length === 1) {
+        form.setFieldsValue({ monthService: options[0].value })
+      } else if (
+        !serviceId ||
+        !options.some((option) => option.value === serviceId)
+      ) {
+        form.setFieldsValue({ monthService: options[0]?.value })
+      }
     }
   }, [form, options, serviceId, edit])
 

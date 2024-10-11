@@ -1,6 +1,8 @@
 import { validateField } from '@assets/features/validators'
 import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
+import { AppRoutes } from '@utils/constants'
 import { Form, FormInstance, Select, Tooltip } from 'antd'
+import Link from 'next/link'
 import { CSSProperties, useEffect, useMemo } from 'react'
 
 export interface AddressesSelectProps {
@@ -62,7 +64,16 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
 
   return (
     <Tooltip
-      title="Послуг за даною адресою не знайдено! Будь ласка, оберіть іншу адресу або додайте нову послугу за цією адресою"
+      title={
+        <span>
+          Послуг за даною адресою не знайдено! Будь ласка, оберіть іншу адресу
+          або{' '}
+          <Link href={AppRoutes.SERVICE}>
+            додайте нову послугу за цією адресою
+          </Link>
+          .
+        </span>
+      }
       visible={showTooltip}
       placement="top"
     >
