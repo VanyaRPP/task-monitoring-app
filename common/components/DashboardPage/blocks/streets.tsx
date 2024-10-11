@@ -26,7 +26,6 @@ const StreetsBlock: React.FC<{
           enableStreetsHeaderButton={sepDomainId ? false : true}
         />
       }
-      style={{ maxHeight: '200px', minHeight: '100%', overflow: 'auto' }}
     >
       <StreetsTable
         domainId={domainId}
