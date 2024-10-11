@@ -102,7 +102,6 @@ const StreetsTable: React.FC<Props> = ({
           }
         }
         dataSource={data}
-        scroll={{ x: 500 }}
       />
       {isModalOpen && (
         <AddStreetModal
