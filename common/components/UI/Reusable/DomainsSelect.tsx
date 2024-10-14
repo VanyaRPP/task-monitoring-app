@@ -1,7 +1,8 @@
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { validateField } from '@assets/features/validators'
 import { Form, FormInstance, Select } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 export interface DomainsSelectProps {
   form: FormInstance
@@ -9,11 +10,18 @@ export interface DomainsSelectProps {
 }
 
 const DomainsSelect: React.FC<DomainsSelectProps> = ({ form, edit }) => {
+  const [domains, setDomains] = useState([])
   const {
-    data: domains = [],
+    data: fetchedDomains = [],
     isLoading: isDomainsLoading,
     isError: isDomainsError,
   } = useGetDomainsQuery({})
+
+  useEffect(() => {
+    if (fetchedDomains.length) {
+      setDomains(fetchedDomains)
+    }
+  }, [fetchedDomains])
 
   const options = useMemo(() => {
     return domains.map((i) => ({
