@@ -140,8 +140,8 @@ export const paymentApi = createApi({
     }),
     generateExcel: builder.mutation<
       IGeneratePaymentExcelResponce,
-      IGeneratePaymentExcel>
-    ({
+      IGeneratePaymentExcel
+    >({
       query: (body) => ({
         url: 'spacehub/payment/generateExcel',
         method: 'POST',

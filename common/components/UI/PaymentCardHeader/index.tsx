@@ -186,10 +186,10 @@ const PaymentCardHeader = ({
         {isAdmin &&
           pathname === AppRoutes.PAYMENT &&
           selectedPayments.length > 0 && (
-          <Button type="link" onClick={() => handleExportExcel()}>
-            Export to Excel <ExportOutlined />
-          </Button>
-        )}
+            <Button type="link" onClick={() => handleExportExcel()}>
+              Export to Excel <ExportOutlined />
+            </Button>
+          )}
         {isAdmin && <ImportInvoices />}
         {isAdmin && (
           <Button
