@@ -9,6 +9,7 @@ export interface IPaymentFilterResponse {
   addressFilter: IFilter[]
   yearFilter: IFilter[]
   monthFilter: IFilter[]
+  streetsFilter: IFilter[]
   success: boolean
   total: number
 }

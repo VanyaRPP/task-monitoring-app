@@ -9,12 +9,14 @@ import { streetApi } from '@common/api/streetApi/street.api'
 import { taskApi } from '@common/api/taskApi/task.api'
 import { userApi } from '@common/api/userApi/user.api'
 import { bankApi } from '@common/api/bankApi/bank.api'
+import { filterApi } from '@common/api/filterApi/filter.api'
 import sidebarReducer from '@modules/store/sidebarSlice'
 import themeReducer from '@modules/store/themeSlice'
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 
 export const store = configureStore({
   reducer: {
+    [filterApi.reducerPath]: filterApi.reducer,
     [categoryApi.reducerPath]: categoryApi.reducer,
     [userApi.reducerPath]: userApi.reducer,
     [taskApi.reducerPath]: taskApi.reducer,
@@ -31,6 +33,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
+      .concat(filterApi.middleware)
       .concat(userApi.middleware)
       .concat(taskApi.middleware)
       .concat(categoryApi.middleware)

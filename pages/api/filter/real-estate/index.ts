@@ -100,7 +100,6 @@ export default async function handler(
               .json({ success: false, message: 'not allowed' })
           )
         }
-
         const realEstate = await RealEstate.create(req.body)
         return res.status(200).json({ success: true, data: realEstate })
       } catch (error) {

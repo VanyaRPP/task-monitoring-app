@@ -477,7 +477,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           paymentsDeleteItems={paymentsDeleteItems}
           closeEditModal={closeEditModal}
           setCurrentDateFilter={setCurrentDateFilter}
-          setCurrentTypeOperation={setCurrentTypeOperation}
           currentPayment={currentPayment}
           paymentActions={paymentActions}
           streets={payments?.addressFilter}

@@ -2,7 +2,6 @@ import { PlusOutlined } from '@ant-design/icons'
 import { Button, Space, Segmented } from 'antd'
 import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useState } from 'react'
-
 import {
   IExtendedRealestate,
   IGetRealestateResponse,
@@ -16,6 +15,7 @@ import {
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import s from './style.module.scss'
+import { useGetRealEstateFiltersQuery } from '@common/api/filterApi/filter.api'
 
 export interface Props {
   showAddButton?: boolean
@@ -42,7 +42,6 @@ const CompaniesHeader: React.FC<Props> = ({
   setCurrentRealEstate,
   filters,
   setFilters,
-  realEstates,
   setRealEstateActions,
   realEstateActions,
   enableRealEstateButton,
@@ -67,6 +66,7 @@ const CompaniesHeader: React.FC<Props> = ({
   const handleArchiveToggle = (value: boolean) => {
     setIsArchive(value)
   }
+  const { data: realEstatesFilter } = useGetRealEstateFiltersQuery()
 
   return (
     <div className={s.headerBlock}>
@@ -85,12 +85,12 @@ const CompaniesHeader: React.FC<Props> = ({
         {router.pathname === AppRoutes.REAL_ESTATE && isAdmin && (
           <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
             <DomainFilterTags
-              collection={realEstates?.domainsFilter}
+              collection={realEstatesFilter?.domainsFilter}
               filters={filters}
               setFilters={setFilters}
             />
             <CompanyFilterTags
-              collection={realEstates?.realEstatesFilter}
+              collection={realEstatesFilter?.realEstatesFilter}
               filters={filters}
               setFilters={setFilters}
             />
