@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
+import Payment from '@modules/models/Payment'
 import start from '@pages/api/api.config'
-import { getDistinctCompanyAndDomain } from '@utils/helpers'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import RealEstate from "@modules/models/RealEstate";
+import {getStreetsPipeline} from "@utils/pipelines";
+import {getFilterForAddress} from "@utils/helpers";
 
 start()
 
@@ -16,19 +17,11 @@ export default async function handler(
 
   if (req.method === 'GET') {
     try {
-      const { distinctCompanies } = await getDistinctCompanyAndDomain({
-        isGlobalAdmin,
-        user,
-        companyGroup: 'company',
-        model: RealEstate,
-      })
+      const streetsPipeline = getStreetsPipeline(isGlobalAdmin, null)
+      const streets = await Payment.aggregate(streetsPipeline)
+      const addressFilter = getFilterForAddress(streets)
 
-      const realEstatesFilter = distinctCompanies?.map(({ companyDetails }) => ({
-        text: companyDetails.companyName,
-        value: companyDetails._id,
-      }))
-
-      return res.status(200).json({ realEstatesFilter, success: true })
+      return res.status(200).json({ addressFilter, success: true })
     } catch (error) {
       return res.status(400).json({ success: false, error: error.message })
     }

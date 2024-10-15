@@ -6,7 +6,7 @@ export const filterApi = createApi({
   tagTypes: ['Filter', 'IFilter'],
   refetchOnFocus: true,
   refetchOnReconnect: true,
-  baseQuery: fetchBaseQuery({ baseUrl: `/api/filter/` }),
+  baseQuery: fetchBaseQuery({ baseUrl: `/api/filters/` }),
   endpoints: (builder) => ({
     getDomainFilters: builder.query<IPaymentFilterResponse, void>({
       query: () => {
@@ -18,16 +18,17 @@ export const filterApi = createApi({
       providesTags: (response) =>
         response
           ? [
-              { type: 'Filter', id: 'domainsFilter' },
-              { type: 'Filter', id: 'realEstatesFilter' },
-              { type: 'Filter', id: 'addressFilter' },
-            ]
+            { type: 'Filter', id: 'domainsFilter' },
+            { type: 'Filter', id: 'realEstatesFilter' },
+            { type: 'Filter', id: 'addressFilter' },
+          ]
           : [],
     }),
-    getServiceFilters: builder.query<IPaymentFilterResponse, void>({
+    // Оновлений запит для отримання фільтрів по роках і місяцях
+    getDateFilters: builder.query<IPaymentFilterResponse, void>({
       query: () => {
         return {
-          url: 'service',
+          url: 'date',
           method: 'GET',
         }
       },
@@ -35,11 +36,9 @@ export const filterApi = createApi({
       providesTags: (response) =>
         response
           ? [
-              { type: 'Filter', id: 'domainFilter' },
-              { type: 'Filter', id: 'addressFilter' },
-              { type: 'Filter', id: 'yearFilter' },
-              { type: 'Filter', id: 'monthFilter' },
-            ]
+            { type: 'Filter', id: 'yearFilter' },
+            { type: 'Filter', id: 'monthFilter' },
+          ]
           : [],
     }),
     getRealEstateFilters: builder.query<IPaymentFilterResponse, void>({
@@ -52,10 +51,10 @@ export const filterApi = createApi({
       providesTags: (response) =>
         response
           ? [
-              { type: 'Filter', id: 'domainsFilter' },
-              { type: 'Filter', id: 'realEstatesFilter' },
-              { type: 'Filter', id: 'streetsFilter' },
-            ]
+            { type: 'Filter', id: 'domainsFilter' },
+            { type: 'Filter', id: 'realEstatesFilter' },
+            { type: 'Filter', id: 'streetsFilter' },
+          ]
           : [],
     }),
   }),
@@ -63,6 +62,6 @@ export const filterApi = createApi({
 
 export const {
   useGetDomainFiltersQuery,
-  useGetServiceFiltersQuery,
+  useGetDateFiltersQuery,
   useGetRealEstateFiltersQuery,
 } = filterApi
