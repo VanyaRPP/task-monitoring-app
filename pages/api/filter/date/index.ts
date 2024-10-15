@@ -2,8 +2,8 @@
 // @ts-nocheck
 import start from '@pages/api/api.config'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import {getFormattedDate} from "@assets/features/formatDate";
-import Service from "@modules/models/Service";
+import { getFormattedDate } from '@assets/features/formatDate'
+import Service from '@modules/models/Service'
 
 start()
 
@@ -17,24 +17,34 @@ export default async function handler(
       const options: any = {}
 
       if (domainId) {
-        options.domain = { $in: domainId.split(',').map((id) => decodeURIComponent(id)) }
+        options.domain = {
+          $in: domainId.split(',').map((id) => decodeURIComponent(id)),
+        }
       }
       if (streetId) {
-        options.street = { $in: streetId.split(',').map((id) => decodeURIComponent(id)) }
+        options.street = {
+          $in: streetId.split(',').map((id) => decodeURIComponent(id)),
+        }
       }
       if (serviceId) {
-        options._id = { $in: serviceId.split(',').map((id) => decodeURIComponent(id)) }
+        options._id = {
+          $in: serviceId.split(',').map((id) => decodeURIComponent(id)),
+        }
       }
 
-      const distinctYears = await Service.distinct('date', options).then((dates) =>
-        [...new Set(dates.map((date) => new Date(date).getFullYear()))]
+      const distinctYears = await Service.distinct('date', options).then(
+        (dates) => [
+          ...new Set(dates.map((date) => new Date(date).getFullYear())),
+        ]
       )
 
       const distinctMonths = await Service.aggregate([
         { $match: options },
         { $group: { _id: { month: { $month: '$date' } } } },
         { $sort: { '_id.month': 1 } },
-      ]).then((results) => [...new Set(results.map((result) => result._id.month))])
+      ]).then((results) => [
+        ...new Set(results.map((result) => result._id.month)),
+      ])
 
       const monthFilter = distinctMonths.map((item) => {
         const date = new Date()
@@ -54,6 +64,8 @@ export default async function handler(
       return res.status(400).json({ success: false, error: error.message })
     }
   } else {
-    return res.status(405).json({ success: false, message: 'Method not allowed' })
+    return res
+      .status(405)
+      .json({ success: false, message: 'Method not allowed' })
   }
 }

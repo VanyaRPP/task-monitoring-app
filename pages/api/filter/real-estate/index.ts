@@ -4,7 +4,7 @@ import start from '@pages/api/api.config'
 import { getDistinctCompanyAndDomain } from '@utils/helpers'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import RealEstate from "@modules/models/RealEstate";
+import RealEstate from '@modules/models/RealEstate'
 
 start()
 
@@ -23,16 +23,20 @@ export default async function handler(
         model: RealEstate,
       })
 
-      const realEstatesFilter = distinctCompanies?.map(({ companyDetails }) => ({
-        text: companyDetails.companyName,
-        value: companyDetails._id,
-      }))
+      const realEstatesFilter = distinctCompanies?.map(
+        ({ companyDetails }) => ({
+          text: companyDetails.companyName,
+          value: companyDetails._id,
+        })
+      )
 
       return res.status(200).json({ realEstatesFilter, success: true })
     } catch (error) {
       return res.status(400).json({ success: false, error: error.message })
     }
   } else {
-    return res.status(405).json({ success: false, message: 'Method not allowed' })
+    return res
+      .status(405)
+      .json({ success: false, message: 'Method not allowed' })
   }
 }

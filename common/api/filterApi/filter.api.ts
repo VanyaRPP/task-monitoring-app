@@ -6,7 +6,7 @@ export const filterApi = createApi({
   tagTypes: ['Filter', 'IFilter'],
   refetchOnFocus: true,
   refetchOnReconnect: true,
-  baseQuery: fetchBaseQuery({ baseUrl: `/api/filters/` }),
+  baseQuery: fetchBaseQuery({ baseUrl: `/api/filter/` }),
   endpoints: (builder) => ({
     getDomainFilters: builder.query<IPaymentFilterResponse, void>({
       query: () => {
@@ -18,13 +18,13 @@ export const filterApi = createApi({
       providesTags: (response) =>
         response
           ? [
-            { type: 'Filter', id: 'domainsFilter' },
-            { type: 'Filter', id: 'realEstatesFilter' },
-            { type: 'Filter', id: 'addressFilter' },
-          ]
+              { type: 'Filter', id: 'domainsFilter' },
+              { type: 'Filter', id: 'realEstatesFilter' },
+              { type: 'Filter', id: 'addressFilter' },
+            ]
           : [],
     }),
-    // Оновлений запит для отримання фільтрів по роках і місяцях
+
     getDateFilters: builder.query<IPaymentFilterResponse, void>({
       query: () => {
         return {
@@ -36,9 +36,9 @@ export const filterApi = createApi({
       providesTags: (response) =>
         response
           ? [
-            { type: 'Filter', id: 'yearFilter' },
-            { type: 'Filter', id: 'monthFilter' },
-          ]
+              { type: 'Filter', id: 'yearFilter' },
+              { type: 'Filter', id: 'monthFilter' },
+            ]
           : [],
     }),
     getRealEstateFilters: builder.query<IPaymentFilterResponse, void>({
@@ -51,10 +51,10 @@ export const filterApi = createApi({
       providesTags: (response) =>
         response
           ? [
-            { type: 'Filter', id: 'domainsFilter' },
-            { type: 'Filter', id: 'realEstatesFilter' },
-            { type: 'Filter', id: 'streetsFilter' },
-          ]
+              { type: 'Filter', id: 'domainsFilter' },
+              { type: 'Filter', id: 'realEstatesFilter' },
+              { type: 'Filter', id: 'streetsFilter' },
+            ]
           : [],
     }),
   }),
