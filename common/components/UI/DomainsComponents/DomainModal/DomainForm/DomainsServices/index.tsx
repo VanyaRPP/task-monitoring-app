@@ -42,15 +42,16 @@ const DomainsServices: FC<Props> = ({ editable }) => {
                 </Form.Item>
               </Card>
             ))}
-            <Button
-              disabled={!editable}
-              type="dashed"
-              style={{ marginBottom: 10 }}
-              onClick={() => add()}
-              block
-            >
-              + Додати послугу
-            </Button>
+            {editable && (
+              <Button
+                type="dashed"
+                style={{ marginBottom: 10 }}
+                onClick={() => add()}
+                block
+              >
+                + Додати послугу
+              </Button>
+            )}
           </div>
         )}
       </Form.List>

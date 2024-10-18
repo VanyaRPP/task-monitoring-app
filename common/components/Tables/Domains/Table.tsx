@@ -67,7 +67,6 @@ const DomainsTable: React.FC<Props> = ({
   return (
     <Table
       rowKey="_id"
-      size="small"
       pagination={false}
       loading={isLoading}
       columns={getDefaultColumns(

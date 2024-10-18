@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
+import mongoose from 'mongoose'
 import Domain from '@modules/models/Domain'
 import Street from '@modules/models/Street'
+import Service from '@modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import _uniqBy from 'lodash/uniqBy'
 
 start()
 
@@ -17,8 +20,7 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { limit = 0 } = req.query
-
+        const { limit = 0, domainId } = req.query
         const options = {}
 
         if (!isDomainAdmin && !isGlobalAdmin) {
@@ -41,15 +43,46 @@ export default async function handler(
           options._id = { $in: adminDomainIds }
         }
 
+        if (domainId && typeof domainId === 'string') {
+          if (mongoose.Types.ObjectId.isValid(domainId)) {
+            options._id = new mongoose.Types.ObjectId(domainId)
+          } else {
+            return res
+              .status(400)
+              .json({ success: false, message: 'Invalid domainId format' })
+          }
+        }
+
         const domains = await Domain.find(options)
           .limit(+limit)
           .populate('streets')
 
-        const streets = domains.map((domain) => domain.streets).flat()
+        const streets = domains.flatMap((domain) => domain.streets)
+
+        const streetIds = streets.map((street) => street._id)
+
+        const servicesWithStreets = await Service.find({
+          domain: domainId,
+          street: { $in: streetIds },
+        })
+
+        const filteredStreets = streets.filter((street) =>
+          servicesWithStreets.some(
+            (service) => service.street.toString() === street._id.toString()
+          )
+        )
+
+        const result = streets.map((street) => ({
+          ...street._doc,
+          hasService: filteredStreets.some(
+            (filteredStreet) =>
+              filteredStreet._id.toString() === street._id.toString()
+          ),
+        }))
 
         return res.status(200).json({
           success: true,
-          data: streets,
+          data: _uniqBy(result, '_id'),
         })
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })

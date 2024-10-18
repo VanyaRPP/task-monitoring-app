@@ -1,8 +1,7 @@
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Space } from 'antd'
+import { Button, Space, Segmented } from 'antd'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
-
+import { Dispatch, SetStateAction, useState } from 'react'
 import {
   IExtendedRealestate,
   IGetRealestateResponse,
@@ -16,6 +15,7 @@ import {
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import s from './style.module.scss'
+import { useGetRealEstateFiltersQuery } from '@common/api/filterApi/filter.api'
 
 export interface Props {
   showAddButton?: boolean
@@ -23,6 +23,7 @@ export interface Props {
   setCurrentRealEstate?: (realEstate: IExtendedRealestate) => void
   filters?: any
   setFilters?: (filters: any) => void
+  setIsArchive?: Dispatch<SetStateAction<boolean>>
   realEstates?: IGetRealestateResponse
   setRealEstateActions: React.Dispatch<
     React.SetStateAction<{
@@ -41,10 +42,10 @@ const CompaniesHeader: React.FC<Props> = ({
   setCurrentRealEstate,
   filters,
   setFilters,
-  realEstates,
   setRealEstateActions,
   realEstateActions,
   enableRealEstateButton,
+  setIsArchive,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -62,6 +63,10 @@ const CompaniesHeader: React.FC<Props> = ({
     setCurrentRealEstate(null)
     setRealEstateActions({ edit: false })
   }
+  const handleArchiveToggle = (value: boolean) => {
+    setIsArchive(value)
+  }
+  const { data: realEstatesFilter } = useGetRealEstateFiltersQuery()
 
   return (
     <div className={s.headerBlock}>
@@ -80,17 +85,27 @@ const CompaniesHeader: React.FC<Props> = ({
         {router.pathname === AppRoutes.REAL_ESTATE && isAdmin && (
           <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
             <DomainFilterTags
-              collection={realEstates?.domainsFilter}
+              collection={realEstatesFilter?.domainsFilter}
               filters={filters}
               setFilters={setFilters}
             />
             <CompanyFilterTags
-              collection={realEstates?.realEstatesFilter}
+              collection={realEstatesFilter?.realEstatesFilter}
               filters={filters}
               setFilters={setFilters}
             />
           </Space>
         )}
+      </div>
+
+      <div className={s.segmented}>
+        <Segmented
+          options={[
+            { label: 'Неархівовані', value: false },
+            { label: 'Архівовані', value: true },
+          ]}
+          onChange={handleArchiveToggle}
+        />
       </div>
 
       {showAddButton && isAdmin && (

@@ -1,8 +1,7 @@
 import { Select } from 'antd'
-
 import s from '@components/StreetsSelector/style.module.scss'
 
-const StreetsSelector = ({ filters, setFilters, streets }) => {
+const StreetsSelector = ({ setFilters, streets }) => {
   const options = streets?.map((street) => {
     return {
       label: street.text,
@@ -11,18 +10,15 @@ const StreetsSelector = ({ filters, setFilters, streets }) => {
   })
 
   return (
-    <div className={s.streetDiv}>
-      <Select
-        dropdownStyle={{ width: 'max-content' }}
-        className={s.streetSelector}
-        placeholder="Виберіть вулицю"
-        onChange={(value) => {
-          setFilters({ street: value })
-        }}
-        allowClear
-        options={options}
-      ></Select>
-    </div>
+    <Select
+      placeholder="Виберіть вулицю"
+      style={{ width: '250px' }}
+      onChange={(value) => {
+        setFilters({ street: value })
+      }}
+      allowClear
+      options={options}
+    ></Select>
   )
 }
 

@@ -3,14 +3,20 @@ import {
   EditOutlined,
   EyeOutlined,
   QuestionCircleOutlined,
+  InboxOutlined,
+  MoreOutlined,
 } from '@ant-design/icons'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
-import { useDeleteRealEstateMutation } from '@common/api/realestateApi/realestate.api'
+import {
+  useDeleteRealEstateMutation,
+  useUpdateArchivedItemMutation,
+} from '@common/api/realestateApi/realestate.api'
 import {
   IExtendedRealestate,
   IGetRealestateResponse,
 } from '@common/api/realestateApi/realestate.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+
 import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import {
@@ -20,11 +26,13 @@ import {
   Popconfirm,
   Table,
   Tag,
-  Tooltip,
   message,
+  Tooltip,
+  Dropdown,
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
+import { useGetRealEstateFiltersQuery } from '@common/api/filterApi/filter.api'
 
 export interface Props {
   domainId?: string
@@ -61,9 +69,12 @@ const CompaniesTable: React.FC<Props> = ({
   const { pathname } = router
 
   const { data: userResponse } = useGetCurrentUserQuery()
+  const { data: realEstatesFilter } = useGetRealEstateFiltersQuery()
 
   const [deleteRealEstate, { isLoading: deleteLoading }] =
     useDeleteRealEstateMutation()
+  const [updateArchivedItem, { isLoading: archiveLoading }] =
+    useUpdateArchivedItemMutation()
 
   const handleDelete = async (id: string) => {
     const response = await deleteRealEstate(id)
@@ -71,6 +82,20 @@ const CompaniesTable: React.FC<Props> = ({
       message.success('Видалено!')
     } else {
       message.error('Помилка при видаленні')
+    }
+  }
+  const handleArchive = async (id: string, archived: boolean) => {
+    try {
+      const response = await updateArchivedItem({ _id: id, archived })
+      if ('data' in response) {
+        message.success(
+          archived ? 'Компанію архівовано' : 'Компанію розархівовано'
+        )
+      } else {
+        message.error('Помилка при зміні архівного статусу')
+      }
+    } catch (error) {
+      message.error('Виникла помилка')
     }
   }
 
@@ -98,6 +123,8 @@ const CompaniesTable: React.FC<Props> = ({
       }
       loading={isLoading}
       columns={getDefaultColumns({
+        archiveLoading,
+        handleArchive,
         domainId,
         streetId,
         isLoading,
@@ -106,9 +133,9 @@ const CompaniesTable: React.FC<Props> = ({
         deleteLoading,
         isGlobalAdmin,
         isAdmin,
-        domainsFilter: realEstates?.domainsFilter,
-        streetsFilter: realEstates?.streetsFilter,
-        realEstatesFilter: realEstates?.realEstatesFilter,
+        domainsFilter: realEstatesFilter?.domainsFilter,
+        streetsFilter: realEstatesFilter?.streetsFilter,
+        realEstatesFilter: realEstatesFilter?.realEstatesFilter,
         filters,
         pathname,
         setRealEstateActions,
@@ -135,6 +162,8 @@ const renderTooltip = (text: string) => {
 }
 
 const getDefaultColumns = ({
+  archiveLoading,
+  handleArchive,
   domainId,
   streetId,
   isLoading,
@@ -154,6 +183,8 @@ const getDefaultColumns = ({
   streetId?: string
   isLoading?: boolean
   handleDelete?: (...args: any) => void
+  handleArchive?: (...args: any) => void
+  archiveLoading?: boolean
   setCurrentRealEstate?: (realEstate: IExtendedRealestate) => void
   deleteLoading?: boolean
   isGlobalAdmin?: boolean
@@ -254,7 +285,7 @@ const getDefaultColumns = ({
       fixed: 'right',
       align: 'center',
       title: '',
-      width: 50,
+      width: 40,
       render: (_, realEstate: IExtendedRealestate) => (
         <Button
           icon={<EyeOutlined />}
@@ -273,38 +304,93 @@ const getDefaultColumns = ({
       align: 'center',
       fixed: 'right',
       title: '',
-      width: 50,
+      width: 98,
       render: (_, realEstate: IExtendedRealestate) => (
-        <Button
-          icon={<EditOutlined />}
-          type="link"
-          onClick={() => {
-            setCurrentRealEstate(realEstate)
-            setRealEstateActions({ edit: true })
+        <Dropdown
+          menu={{
+            items: [
+              {
+                key: 'edit',
+                label: (
+                  <Button
+                    icon={<EditOutlined />}
+                    type="link"
+                    style={{
+                      color: '#722ed1',
+                      paddingLeft: '10px',
+                      paddingRight: '10px',
+                    }}
+                    onClick={() => {
+                      setCurrentRealEstate(realEstate)
+                      setRealEstateActions({ edit: true })
+                    }}
+                  >
+                    Редагувати
+                  </Button>
+                ),
+              },
+              {
+                key: 'archive',
+                label: (
+                  <Popconfirm
+                    id="popconfirm_archive"
+                    title={`Ви впевнені що хочете ${
+                      realEstate.archived ? 'розархівувати' : 'архівувати'
+                    } цей елемент?`}
+                    onConfirm={() =>
+                      handleArchive(realEstate?._id, !realEstate.archived)
+                    }
+                    okText={
+                      realEstate.archived ? 'Розархівувати' : 'Архівувати'
+                    }
+                    cancelText="Ні"
+                    disabled={archiveLoading}
+                  >
+                    <Button
+                      type="text"
+                      icon={<InboxOutlined />}
+                      style={{
+                        color: realEstate.archived ? '#722ed1' : '#ff4d4f',
+                        paddingLeft: '10px',
+                        paddingRight: '10px',
+                      }}
+                    >
+                      {realEstate.archived ? 'Розархівувати' : 'Архівувати'}
+                    </Button>
+                  </Popconfirm>
+                ),
+              },
+              isGlobalAdmin && {
+                key: 'delete',
+                label: (
+                  <Popconfirm
+                    id="popconfirm_custom"
+                    title={`Ви впевнені що хочете видалити нерухомість?`}
+                    onConfirm={() => handleDelete(realEstate?._id)}
+                    okText="Видалити"
+                    cancelText="Ні"
+                    disabled={deleteLoading}
+                  >
+                    <Button
+                      type="text"
+                      icon={<DeleteOutlined />}
+                      style={{
+                        color: '#ff4d4f',
+                        paddingLeft: '10px',
+                        paddingRight: '10px',
+                      }}
+                    >
+                      Видалити
+                    </Button>
+                  </Popconfirm>
+                ),
+              },
+            ],
           }}
-        />
-      ),
-    })
-  }
-
-  if (isGlobalAdmin) {
-    columns.push({
-      align: 'center',
-      fixed: 'right',
-      title: '',
-      dataIndex: '',
-      width: 50,
-      render: (_, realEstate: IExtendedRealestate) => (
-        <Popconfirm
-          id="popconfirm_custom"
-          title={`Ви впевнені що хочете видалити нерухомість?`}
-          onConfirm={() => handleDelete(realEstate?._id)}
-          okText="Видалити"
-          cancelText="Ні"
-          disabled={deleteLoading}
+          placement="bottomRight"
         >
-          <Button type="text" icon={<DeleteOutlined />} />
-        </Popconfirm>
+          <Button icon={<MoreOutlined />} />
+        </Dropdown>
       ),
     })
   }

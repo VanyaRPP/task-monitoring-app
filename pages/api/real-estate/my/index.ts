@@ -4,6 +4,7 @@ import RealEstate from '@modules/models/RealEstate'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { REACT_LOADABLE_MANIFEST } from 'next/dist/shared/lib/constants'
 
 start()
 
@@ -22,7 +23,9 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const my = await RealEstate.find({ adminEmails: { $in: [user.email] } })
+        const my = await RealEstate.find({
+          adminEmails: { $in: [user.email] },
+        })
 
         return res.status(200).json({ success: true, data: my })
       } catch (error) {

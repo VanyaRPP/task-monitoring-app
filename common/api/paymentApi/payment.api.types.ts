@@ -106,3 +106,15 @@ export interface IGeneratePaymentPDFResponce {
   fileName: string
   fileExtension: string
 }
+
+export interface IGeneratePaymentExcel {
+  payments: IExtendedPayment[]
+}
+
+export interface IGeneratePaymentExcelResponce {
+  buffer: {
+    data: Buffer
+  }
+  fileName: string
+  fileExtension: string
+}
