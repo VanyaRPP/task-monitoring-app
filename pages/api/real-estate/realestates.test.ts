@@ -161,7 +161,6 @@ describe('RealEstate API - GET', () => {
 
   it('request from DomainAdmin - show DomainAdmin companies', async () => {
     await mockLoginAs(users.domainAdmin)
-    // console.log('AdminEmail', users.domainAdmin)
 
     const mockReq = {
       method: 'GET',
