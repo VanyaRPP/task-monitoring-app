@@ -12,6 +12,12 @@ import {
   IGeneratePaymentExcel,
   IGeneratePaymentExcelResponce,
 } from './payment.api.types'
+import { ITransaction } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
+
+interface CompareTransactionResponse {
+  success: boolean
+  isMatch: boolean
+}
 
 export const paymentApi = createApi({
   reducerPath: 'paymentApi',
@@ -148,9 +154,20 @@ export const paymentApi = createApi({
         body,
       }),
     }),
+    compareTransaction: builder.mutation<
+      CompareTransactionResponse,
+      { transaction: ITransaction }
+    >({
+      query: ({ transaction }) => ({
+        url: 'spacehub/payment/compare',
+        method: 'POST',
+        body: {
+          transaction,
+        },
+      }),
+    }),
   }),
 })
-
 export const {
   useAddPaymentMutation,
   useGetAllPaymentsQuery,
@@ -161,4 +178,5 @@ export const {
   useEditPaymentMutation,
   useGeneratePdfMutation,
   useGenerateExcelMutation,
+  useCompareTransactionMutation,
 } = paymentApi

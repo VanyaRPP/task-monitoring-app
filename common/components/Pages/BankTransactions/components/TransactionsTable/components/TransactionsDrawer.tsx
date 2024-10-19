@@ -1,5 +1,5 @@
-import { Button, Select, Space } from 'antd'
-import React, { FC, useMemo, useState } from 'react'
+import { Badge, Button, Select, Space } from 'antd'
+import React, { FC, useEffect, useMemo, useState } from 'react'
 import { ITransaction } from './transactionTypes'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
@@ -7,6 +7,7 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 import AddPaymentModal from '@components/AddPaymentModal'
 import dayjs from 'dayjs'
 import { SendOutlined } from '@ant-design/icons'
+import { useCompareTransactionMutation } from '@common/api/paymentApi/payment.api'
 
 interface TransactionDrawerProps {
   transaction: ITransaction
@@ -21,6 +22,21 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const [modalVisible, setModalVisible] = useState(false)
 
   const transactionAmount = parseFloat(transaction.SUM as string)
+
+  const [compareTransaction, { data: compareRes }] =
+    useCompareTransactionMutation()
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await compareTransaction({ transaction }).unwrap()
+      } catch (error) {
+        console.error('Помилка при порівнянні транзакції:', error)
+      }
+    }
+
+    fetchData()
+  }, [transaction, compareTransaction])
 
   const { data: realEstatesData } = useGetAllRealEstateQuery({
     domainId: domain._id,
@@ -37,29 +53,39 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
 
   return (
     <>
-      <Space.Compact style={{ width: '100%' }}>
-        <Select
-          placeholder="Select a related company"
-          onChange={handleCompanyChange}
-          value={selectedCompany}
-          style={{ width: 'calc(100% - 80px)' }}
-        >
-          {relatedCompanies.map((company: IRealestate) => (
-            <Select.Option key={company._id} value={company._id}>
-              {company.companyName}
-            </Select.Option>
-          ))}
-        </Select>
-        <Button
-          iconPosition="end"
-          icon={<SendOutlined />}
-          type="primary"
-          onClick={showModal}
-          disabled={!selectedCompany}
-        >
-          Send
-        </Button>
-      </Space.Compact>
+      <Badge.Ribbon
+        text="Платіж є"
+        color="purple"
+        style={{
+          top: '-50%',
+          visibility:
+            selectedCompany || !compareRes?.isMatch ? 'hidden' : 'visible',
+        }}
+      >
+        <Space.Compact style={{ width: '100%' }}>
+          <Select
+            placeholder="Select a related company"
+            onChange={handleCompanyChange}
+            value={selectedCompany}
+            style={{ width: 'calc(100% - 80px)' }}
+          >
+            {relatedCompanies.map((company: IRealestate) => (
+              <Select.Option key={company._id} value={company._id}>
+                {company.companyName}
+              </Select.Option>
+            ))}
+          </Select>
+          <Button
+            iconPosition="end"
+            icon={<SendOutlined />}
+            type="primary"
+            onClick={showModal}
+            disabled={!selectedCompany}
+          >
+            Send
+          </Button>
+        </Space.Compact>
+      </Badge.Ribbon>
       {modalVisible && (
         <AddPaymentModal
           closeModal={closeModal}
