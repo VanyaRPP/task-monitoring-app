@@ -47,10 +47,10 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
 
         if (firstStreetWithService) {
           form.setFieldsValue({ street: firstStreetWithService.value })
-          onStreetHasServiceChange(firstStreetWithService.hasService)
+          onStreetHasServiceChange?.(firstStreetWithService.hasService)
         } else {
           form.setFieldsValue({ street: undefined })
-          onStreetHasServiceChange(false)
+          onStreetHasServiceChange?.(false)
         }
       }
     }
@@ -89,7 +89,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
           showSearch
           onChange={(value) => {
             const selected = options.find((option) => option.value === value)
-            onStreetHasServiceChange(selected?.hasService || false)
+            onStreetHasServiceChange?.(selected?.hasService || false)
           }}
         />
       </Form.Item>

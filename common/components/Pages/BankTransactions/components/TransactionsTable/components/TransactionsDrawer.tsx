@@ -60,7 +60,6 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
           Send
         </Button>
       </Space.Compact>
-
       {modalVisible && (
         <AddPaymentModal
           closeModal={closeModal}

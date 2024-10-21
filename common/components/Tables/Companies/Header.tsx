@@ -100,14 +100,15 @@ const CompaniesHeader: React.FC<Props> = ({
         )}
       </div>
 
-      <Segmented
-        options={[
-          { label: 'Неархівовані', value: false },
-          { label: 'Архівовані', value: true },
-        ]}
-        onChange={handleArchiveToggle}
-        style={{ marginRight: '170px' }}
-      />
+      <div className={s.segmented}>
+        <Segmented
+          options={[
+            { label: 'Неархівовані', value: false },
+            { label: 'Архівовані', value: true },
+          ]}
+          onChange={handleArchiveToggle}
+        />
+      </div>
 
       {showAddButton && isAdmin && (
         <>
