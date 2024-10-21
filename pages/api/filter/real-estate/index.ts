@@ -19,7 +19,7 @@ export default async function handler(
       const { distinctCompanies } = await getDistinctCompanyAndDomain({
         isGlobalAdmin,
         user,
-        companyGroup: 'company',
+        companyGroup: '_id',
         model: RealEstate,
       })
 

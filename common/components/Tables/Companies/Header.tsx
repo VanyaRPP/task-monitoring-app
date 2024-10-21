@@ -15,7 +15,7 @@ import {
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import s from './style.module.scss'
-import { useGetRealEstateFiltersQuery } from '@common/api/filterApi/filter.api'
+import {useGetDomainFiltersQuery, useGetRealEstateFiltersQuery} from "@common/api/filterApi/filter.api";
 
 export interface Props {
   showAddButton?: boolean
@@ -67,7 +67,8 @@ const CompaniesHeader: React.FC<Props> = ({
     setIsArchive(value)
   }
 
-  const { data: realEstatesFilter } = useGetRealEstateFiltersQuery()
+  const { data: realEstate } = useGetRealEstateFiltersQuery()
+  const { data: domain } = useGetDomainFiltersQuery()
 
   return (
     <div className={s.headerBlock}>
@@ -86,12 +87,12 @@ const CompaniesHeader: React.FC<Props> = ({
         {router.pathname === AppRoutes.REAL_ESTATE && isAdmin && (
           <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
             <DomainFilterTags
-              collection={realEstatesFilter?.domainsFilter}
+              collection={domain?.domainsFilter}
               filters={filters}
               setFilters={setFilters}
             />
             <CompanyFilterTags
-              collection={realEstatesFilter?.realEstatesFilter}
+              collection={realEstate?.realEstatesFilter}
               filters={filters}
               setFilters={setFilters}
             />
