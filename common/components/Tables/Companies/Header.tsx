@@ -15,7 +15,10 @@ import {
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import s from './style.module.scss'
-import {useGetDomainFiltersQuery, useGetRealEstateFiltersQuery} from "@common/api/filterApi/filter.api";
+import {
+  useGetDomainFiltersQuery,
+  useGetRealEstateFiltersQuery,
+} from '@common/api/filterApi/filter.api'
 
 export interface Props {
   showAddButton?: boolean

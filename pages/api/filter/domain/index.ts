@@ -4,7 +4,7 @@ import start from '@pages/api/api.config'
 import { getDistinctCompanyAndDomain } from '@utils/helpers'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import RealEstate from "@modules/models/RealEstate";
+import RealEstate from '@modules/models/RealEstate'
 
 start()
 

@@ -4,9 +4,9 @@ import start from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getStreetsPipeline } from '@utils/pipelines'
-import {getDistinctStreets, getFilterForAddress} from '@utils/helpers'
-import RealEstate from "@modules/models/RealEstate";
-import {IStreet} from "@modules/models/Street";
+import { getDistinctStreets, getFilterForAddress } from '@utils/helpers'
+import RealEstate from '@modules/models/RealEstate'
+import { IStreet } from '@modules/models/Street'
 
 start()
 
@@ -29,10 +29,9 @@ export default async function handler(
         .filter(
           (street, index, streets) =>
             index ===
-            streets.findIndex(
-              (s) => s._id.toString() === street._id.toString()
-            )
-        ).map((street) => ({
+            streets.findIndex((s) => s._id.toString() === street._id.toString())
+        )
+        .map((street) => ({
           text: `${street.address}, м.${street.city}`,
           value: street._id,
         }))

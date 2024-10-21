@@ -16,11 +16,7 @@ export const filterApi = createApi({
         }
       },
       providesTags: (response) =>
-        response
-          ? [
-              { type: 'Filter', id: 'domainsFilter' }
-            ]
-          : [],
+        response ? [{ type: 'Filter', id: 'domainsFilter' }] : [],
     }),
 
     getAddressFilters: builder.query<IPaymentFilterResponse, void>({
@@ -31,11 +27,7 @@ export const filterApi = createApi({
         }
       },
       providesTags: (response) =>
-        response
-          ? [
-              { type: 'Filter', id: 'streetsFilter' },
-            ]
-          : [],
+        response ? [{ type: 'Filter', id: 'streetsFilter' }] : [],
     }),
 
     getDateFilters: builder.query<IPaymentFilterResponse, void>({
@@ -62,11 +54,7 @@ export const filterApi = createApi({
         }
       },
       providesTags: (response) =>
-        response
-          ? [
-              { type: 'Filter', id: 'realEstatesFilter' },
-            ]
-          : [],
+        response ? [{ type: 'Filter', id: 'realEstatesFilter' }] : [],
     }),
   }),
 })
@@ -75,5 +63,5 @@ export const {
   useGetAddressFiltersQuery,
   useGetDateFiltersQuery,
   useGetDomainFiltersQuery,
-  useGetRealEstateFiltersQuery
+  useGetRealEstateFiltersQuery,
 } = filterApi

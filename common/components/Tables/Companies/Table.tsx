@@ -35,8 +35,8 @@ import { useRouter } from 'next/router'
 import {
   useGetAddressFiltersQuery,
   useGetDomainFiltersQuery,
-  useGetRealEstateFiltersQuery
-} from "@common/api/filterApi/filter.api";
+  useGetRealEstateFiltersQuery,
+} from '@common/api/filterApi/filter.api'
 // import { useGetRealEstateFiltersQuery } from '@common/api/filterApi/filter.api'
 
 export interface Props {
@@ -69,7 +69,7 @@ const CompaniesTable: React.FC<Props> = ({
   setFilters,
   setRealEstateActions,
   realEstateActions,
-}) => {  
+}) => {
   const router = useRouter()
   const { pathname } = router
 
@@ -245,7 +245,9 @@ const getDefaultColumns = ({
       dataIndex: 'servicePricePerMeter',
       width: 200,
       align: 'center',
-      sorter: isOnPage ? (a, b) => a.servicePricePerMeter - b.servicePricePerMeter : null,
+      sorter: isOnPage
+        ? (a, b) => a.servicePricePerMeter - b.servicePricePerMeter
+        : null,
     },
     {
       title: 'Частка загальної площі',
