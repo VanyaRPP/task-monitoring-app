@@ -32,7 +32,12 @@ import {
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
-import { useGetRealEstateFiltersQuery } from '@common/api/filterApi/filter.api'
+import {
+  useGetAddressFiltersQuery,
+  useGetDomainFiltersQuery,
+  useGetRealEstateFiltersQuery,
+} from '@common/api/filterApi/filter.api'
+// import { useGetRealEstateFiltersQuery } from '@common/api/filterApi/filter.api'
 
 export interface Props {
   domainId?: string
@@ -64,12 +69,15 @@ const CompaniesTable: React.FC<Props> = ({
   setFilters,
   setRealEstateActions,
   realEstateActions,
-}) => {  
+}) => {
   const router = useRouter()
   const { pathname } = router
 
   const { data: userResponse } = useGetCurrentUserQuery()
-  const { data: realEstatesFilter } = useGetRealEstateFiltersQuery()
+
+  const { data: realEstate } = useGetRealEstateFiltersQuery()
+  const { data: domain } = useGetDomainFiltersQuery()
+  const { data: street } = useGetAddressFiltersQuery()
 
   const [deleteRealEstate, { isLoading: deleteLoading }] =
     useDeleteRealEstateMutation()
@@ -133,9 +141,9 @@ const CompaniesTable: React.FC<Props> = ({
         deleteLoading,
         isGlobalAdmin,
         isAdmin,
-        domainsFilter: realEstatesFilter?.domainsFilter,
-        streetsFilter: realEstatesFilter?.streetsFilter,
-        realEstatesFilter: realEstatesFilter?.realEstatesFilter,
+        domainsFilter: domain?.domainsFilter,
+        streetsFilter: street?.streetsFilter,
+        realEstatesFilter: realEstate?.realEstatesFilter,
         filters,
         pathname,
         setRealEstateActions,
@@ -237,7 +245,9 @@ const getDefaultColumns = ({
       dataIndex: 'servicePricePerMeter',
       width: 200,
       align: 'center',
-      sorter: isOnPage ? (a, b) => a.servicePricePerMeter - b.servicePricePerMeter : null,
+      sorter: isOnPage
+        ? (a, b) => a.servicePricePerMeter - b.servicePricePerMeter
+        : null,
     },
     {
       title: 'Частка загальної площі',
