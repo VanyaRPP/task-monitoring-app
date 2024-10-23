@@ -128,22 +128,47 @@ export default async function handler(
       if (servicesIds) {
         options.monthService = { $in: servicesIds }
       }
-
       const expr = filterPeriodOptions(req.query)
       if (expr.length > 0) {
         options.$expr = {
           $and: expr,
         }
       }
+      const month = 4
 
+      if (month) {
+        options.$expr = {
+          $and: [
+            {
+              $eq: [{ $month: { $toDate: '$monthService.date' } }, month]
+            }
+          ]
+        };
+      }
+
+      // try {
       const payments = await Payment.find(options)
-        .sort({ invoiceCreationDate: -1 })
+        .populate('monthService')
+        .sort({ 'monthService.date': -1, invoiceCreationDate: -1 })
         .skip(+skip)
         .limit(+limit)
         .populate('company')
         .populate('street')
         .populate('domain')
-        .populate('monthService')
+      // } catch (err) {
+      //   console.log(err)
+      // }
+
+      console.log(payments)
+
+      // let month = 9  
+      // if (month > 0) {
+      //   payments = payments.filter((payment) => {
+      //     const paymentDate = new Date(payment?.monthService?.date);
+      //     console.log(paymentDate.getMonth())
+      //     return paymentDate.getMonth() === month - 1;
+      //   });
+      // }
 
       const streetsPipeline = getStreetsPipeline(isGlobalAdmin, options.domain)
 
@@ -225,6 +250,7 @@ export default async function handler(
 
 function filterPeriodOptions(args) {
   const { year, quarter, month, day } = args
+  console.log(month)
   const filterByDateOptions = []
   if (year) {
     filterByDateOptions.push({
