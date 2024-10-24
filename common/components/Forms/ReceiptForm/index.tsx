@@ -1,11 +1,11 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import PaymentPricesTable from '@components/Forms/AddPaymentForm/PaymentPricesTable'
 import numberToTextNumber from '@utils/numberToText'
-import { Button } from 'antd'
 import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import s from './style.module.scss'
+import {PrinterOutlined} from "@ant-design/icons";
 
 interface Props {
   currPayment: IExtendedPayment
@@ -30,6 +30,7 @@ const ReceiptForm: FC<Props> = ({
 
   return (
     <>
+      <PrinterOutlined className={s.print} onClick={handlePrint} />
       <div
         className={s.invoiceContainer}
         ref={componentRef}
@@ -94,7 +95,10 @@ const ReceiptForm: FC<Props> = ({
           </div>
 
           <div>
-            Призначення платежу: <strong>За послуги згідно рахунку</strong>
+            Призначення платежу:{' '}
+            <strong>
+              Оплата за послуги згідно рахунку № {newData.invoiceNumber} від {dayjs(newData?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
+            </strong>
           </div>
 
           <div className={s.payFixed}>
@@ -104,8 +108,8 @@ const ReceiptForm: FC<Props> = ({
         </div>
 
         <div className={s.endInfo}>
-          <div className={s.endInfobolt}>Примітка:</div> *Ціна за комунальні
-          послуги вказана з урахуванням ПДВ.
+          <div className={s.endInfobolt}>Примітка:</div>
+          *Ціна за комунальні послуги вказана з урахуванням ПДВ.
           <br />
           **Ціни на комунальні послуги виставляють компанії-постачальники,
           відповідно їх ціна може <br />
@@ -113,11 +117,6 @@ const ReceiptForm: FC<Props> = ({
           компанією-постачальником.
         </div>
       </div>
-
-      <Button type="primary" onClick={handlePrint}>
-        {' '}
-        Роздрукувати Документ
-      </Button>
     </>
   )
 }

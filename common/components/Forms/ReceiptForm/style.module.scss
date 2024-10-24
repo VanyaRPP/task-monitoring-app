@@ -1,3 +1,12 @@
+.print{
+  position: absolute;
+  top: -80px;
+  right: 48px;
+  user-select: none;
+  cursor: pointer;
+  font-size: 25px;
+}
+
 .invoiceContainer {
   .providerInfo,
   .receiverInfo {
