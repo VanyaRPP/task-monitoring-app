@@ -5,9 +5,10 @@ import RealEstateBlock from '@components/DashboardPage/blocks/realEstates'
 import ServicesBlock from '@components/DashboardPage/blocks/services'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import CompaniesAreaChart from '@components/DashboardPage/blocks/сompaniesAreaChart'
-import PaymentsChart from '@components/DashboardPage/PaymentsChart'
 import { Roles } from '@utils/constants'
 import { Col, Row, Space } from 'antd'
+import PaymentsChart from "@components/DashboardPage/blocks/paymentChart";
+// import PaymentsChart from '@components/DashboardPage/PaymentsChart'
 
 const Dashboard: React.FC = () => {
   const { data: userResponse } = useGetCurrentUserQuery()
