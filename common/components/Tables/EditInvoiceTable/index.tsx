@@ -65,7 +65,9 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           rowKey="name"
           loading={loading}
           size="small"
-          dataSource={fields}
+          dataSource={fields.filter(
+            (field) => form.getFieldValue(['invoice', field.name, 'sum']) !== 0
+          )}
           pagination={false}
           footer={
             editable

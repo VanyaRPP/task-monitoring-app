@@ -11,23 +11,29 @@ export const filterApi = createApi({
     getDomainFilters: builder.query<IPaymentFilterResponse, void>({
       query: () => {
         return {
-          url: `payments`,
+          url: `domain`,
           method: 'GET',
         }
       },
       providesTags: (response) =>
-        response
-          ? [
-              { type: 'Filter', id: 'domainsFilter' },
-              { type: 'Filter', id: 'realEstatesFilter' },
-              { type: 'Filter', id: 'addressFilter' },
-            ]
-          : [],
+        response ? [{ type: 'Filter', id: 'domainsFilter' }] : [],
     }),
-    getServiceFilters: builder.query<IPaymentFilterResponse, void>({
+
+    getAddressFilters: builder.query<IPaymentFilterResponse, void>({
       query: () => {
         return {
-          url: 'service',
+          url: `street`,
+          method: 'GET',
+        }
+      },
+      providesTags: (response) =>
+        response ? [{ type: 'Filter', id: 'streetsFilter' }] : [],
+    }),
+
+    getDateFilters: builder.query<IPaymentFilterResponse, void>({
+      query: () => {
+        return {
+          url: 'date',
           method: 'GET',
         }
       },
@@ -35,8 +41,6 @@ export const filterApi = createApi({
       providesTags: (response) =>
         response
           ? [
-              { type: 'Filter', id: 'domainFilter' },
-              { type: 'Filter', id: 'addressFilter' },
               { type: 'Filter', id: 'yearFilter' },
               { type: 'Filter', id: 'monthFilter' },
             ]
@@ -50,19 +54,14 @@ export const filterApi = createApi({
         }
       },
       providesTags: (response) =>
-        response
-          ? [
-              { type: 'Filter', id: 'domainsFilter' },
-              { type: 'Filter', id: 'realEstatesFilter' },
-              { type: 'Filter', id: 'streetsFilter' },
-            ]
-          : [],
+        response ? [{ type: 'Filter', id: 'realEstatesFilter' }] : [],
     }),
   }),
 })
 
 export const {
+  useGetAddressFiltersQuery,
+  useGetDateFiltersQuery,
   useGetDomainFiltersQuery,
-  useGetServiceFiltersQuery,
   useGetRealEstateFiltersQuery,
 } = filterApi

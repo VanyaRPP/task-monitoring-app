@@ -15,7 +15,10 @@ import {
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import s from './style.module.scss'
-import { useGetRealEstateFiltersQuery } from '@common/api/filterApi/filter.api'
+import {
+  useGetDomainFiltersQuery,
+  useGetRealEstateFiltersQuery,
+} from '@common/api/filterApi/filter.api'
 
 export interface Props {
   showAddButton?: boolean
@@ -68,6 +71,9 @@ const CompaniesHeader: React.FC<Props> = ({
   }
   const { data: realEstatesFilter } = useGetRealEstateFiltersQuery()
 
+  const { data: realEstate } = useGetRealEstateFiltersQuery()
+  const { data: domain } = useGetDomainFiltersQuery()
+
   return (
     <div className={s.headerBlock}>
       <div className={s.firstBlock}>
@@ -85,12 +91,12 @@ const CompaniesHeader: React.FC<Props> = ({
         {router.pathname === AppRoutes.REAL_ESTATE && isAdmin && (
           <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
             <DomainFilterTags
-              collection={realEstatesFilter?.domainsFilter}
+              collection={domain?.domainsFilter}
               filters={filters}
               setFilters={setFilters}
             />
             <CompanyFilterTags
-              collection={realEstatesFilter?.realEstatesFilter}
+              collection={realEstate?.realEstatesFilter}
               filters={filters}
               setFilters={setFilters}
             />
@@ -98,14 +104,15 @@ const CompaniesHeader: React.FC<Props> = ({
         )}
       </div>
 
-      <Segmented
-        options={[
-          { label: 'Неархівовані', value: false },
-          { label: 'Архівовані', value: true },
-        ]}
-        onChange={handleArchiveToggle}
-        style={{ marginRight: '170px' }}
-      />
+      <div className={s.segmented}>
+        <Segmented
+          options={[
+            { label: 'Неархівовані', value: false },
+            { label: 'Архівовані', value: true },
+          ]}
+          onChange={handleArchiveToggle}
+        />
+      </div>
 
       {showAddButton && isAdmin && (
         <>
