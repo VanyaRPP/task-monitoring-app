@@ -3,10 +3,12 @@ import {
   IPaymentField,
 } from '@common/api/paymentApi/payment.api.types'
 import { ServiceName } from '@utils/constants'
-import { Table } from 'antd'
+import { Button, Table } from 'antd'
 import { ColumnsType } from 'antd/es/table'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useRef, useState } from 'react'
 import styles from './styles.module.scss'
+import { useReactToPrint } from 'react-to-print'
+import { PrinterOutlined } from '@ant-design/icons'
 
 interface InvoicesTableData extends IPaymentField {
   number: number
@@ -83,122 +85,149 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
     setPayment(data)
   }, [data])
 
+  const componentRef = useRef()
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+    documentTitle:
+      payment?.reciever?.companyName + '-inv-' + payment.invoiceNumber,
+  })
+
   return (
     <>
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <div className={styles.approvalSection}>
-            <div>
-              <strong>ЗАТВЕРДЖУЮ</strong>
-              <br />
-              <pre>{payment.provider.description?.trim()}</pre>
-              <br />
-              <br />
-              <hr />
+      <PrinterOutlined className={styles.print} onClick={handlePrint} />
+      <div ref={componentRef}>
+        <div className={styles.container}>
+          <div className={styles.header}>
+            <div className={styles.approvalSectionWrapper}>
+              <div className={styles.approvalSection}>
+                <div>
+                  <strong>ЗАТВЕРДЖУЮ</strong>
+                  <br />
+                  <pre>{payment.provider.description?.trim()}</pre>
+                </div>
+              </div>
+              <div className={styles.approvalSection}>
+                <div>
+                  <strong>ЗАТВЕРДЖУЮ</strong>
+                  <br />
+                  <p>
+                    <pre>
+                      {payment?.reciever?.description?.trim()} <br />
+                      {payment?.reciever?.companyName} <br />
+                      {payment?.reciever?.adminEmails?.map((email) => (
+                        <div key={email}>
+                          {email} <br />
+                        </div>
+                      ))}
+                    </pre>
+                  </p>
+                </div>
+              </div>
+              <div className={`${styles.approvalSection}`}>
+                <br />
+                <br />
+                <hr />
+              </div>
+              <div className={styles.approvalSection}>
+                <br />
+                <br />
+                <hr />
+              </div>
             </div>
           </div>
-          <div className={styles.approvalSection}>
-            <div>
-              <strong>ЗАТВЕРДЖУЮ</strong>
-              <br />
-              <p>
-                <pre>
-                  {payment?.reciever?.description?.trim()} <br />
-                  {payment?.reciever?.companyName} <br />
-                  {payment?.reciever?.adminEmails?.map((email) => (
-                    <div key={email}>
-                      {email} <br />
-                    </div>
-                  ))}
-                </pre>
-              </p>
-              <br />
-              <br />
-              <hr />
-            </div>
-          </div>
-        </div>
-        <div className={styles.titleSection}>
-          <h1>
-            <b>АКТ надання послуг</b>
-          </h1>
-          <p>
-            <b>№ 32 від 29 березня 2024 р.</b>
-          </p>
-          <hr />
-        </div>
-        <div className={styles.contentSection}>
-          <p>
-            Ми, що нижче підписалися, представник Замовника{' '}
-            {payment.reciever.description?.trim()}, з одного боку, і представник
-            Виконавця {payment.provider.description?.trim()}, з іншого боку,
-            склали цей акт про те, що на підставі договору, Виконавцем були
-            виконані наступні роботи (надані такі послуги):
-          </p>
-        </div>
-      </div>
-
-      <Table
-        columns={columns}
-        dataSource={getModifiedInvoices()}
-        pagination={false}
-        summary={() => {
-          return (
-            <Table.Summary.Row>
-              <Table.Summary.Cell index={0} colSpan={5}>
-                Всього:
-              </Table.Summary.Cell>
-              <Table.Summary.Cell index={1}>
-                {totalSum.toFixed(2)}
-              </Table.Summary.Cell>
-            </Table.Summary.Row>
-          )
-        }}
-      />
-
-      <div className={styles.container}>
-        <div className={styles.contentSection}>
-          <div>
-            Загальна вартість робіт (послуг) склала без ПДВ{' '}
-            {totalSum.toFixed(0)} гривень {totalFractionSum} копійок, ПДВ 0
-            гривень 00 копійок, загальна вартість робіт (послуг) із ПДВ{' '}
-            {totalSum.toFixed(0)} гривень {totalFractionSum} копійок.
+          <div className={styles.titleSection}>
+            <h1>
+              <b>АКТ надання послуг</b>
+            </h1>
+            <p>
+              <b>№ 32 від 29 березня 2024 р.</b>
+            </p>
             <br />
-            Замовник претензій по об&apos;єму, якості та строкам виконання робіт
-            (надання послуг) не має.
+            <hr />
+          </div>
+          <div className={styles.contentSection}>
+            <p>
+              Ми, що нижче підписалися, представник Замовника{' '}
+              {payment.reciever.description
+                ?.trim()
+                .replace(/(:\s)/g, ':\u00A0')}
+              , з одного боку, і представник Виконавця{' '}
+              {payment.provider.description
+                ?.trim()
+                .replace(/(:\s)/g, ':\u00A0')}
+              , з іншого боку, склали цей акт про те, що на підставі договору,
+              Виконавцем були виконані наступні роботи (надані такі послуги):
+            </p>
           </div>
         </div>
-        <hr />
-        <br />
-        <br />
-        <div className={styles.signaturesSection}>
-          <div className={styles.signatureBlock}>
+
+        <Table
+          columns={columns}
+          dataSource={getModifiedInvoices()}
+          pagination={false}
+          summary={() => {
+            return (
+              <Table.Summary.Row>
+                <Table.Summary.Cell index={0} colSpan={5}>
+                  Всього:
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={1}>
+                  {totalSum.toFixed(2)}
+                </Table.Summary.Cell>
+              </Table.Summary.Row>
+            )
+          }}
+        />
+
+        <div className={styles.container}>
+          <div className={styles.contentSection}>
             <div>
-              <b>Від Виконавця</b>
+              Загальна вартість робіт (послуг) склала без ПДВ{' '}
+              {totalSum.toFixed(0)} гривень {totalFractionSum} копійок, ПДВ 0
+              гривень 00 копійок, загальна вартість робіт (послуг) із ПДВ{' '}
+              {totalSum.toFixed(0)} гривень {totalFractionSum} копійок.
               <br />
-              <br />
-              <br />
-              <hr />
-              <b>
-                {new Date(payment.invoiceCreationDate).toLocaleDateString()}
-              </b>{' '}
-              <br />
-              <pre>
-                {payment.provider.description?.trim()} <br />
-              </pre>
+              Замовник претензій по об&apos;єму, якості та строкам виконання
+              робіт (надання послуг) не має.
             </div>
           </div>
-          <div className={styles.signatureBlock}>
-            <div>
-              <b>Від Замовника</b> <br />
-              <br />
-              <br />
-              <hr />
-              <b>
-                {new Date(payment.invoiceCreationDate).toLocaleDateString()}
-              </b>{' '}
-              <br />
-              <pre>{payment.reciever.description?.trim()}</pre>
+          <hr />
+          <br />
+          <br />
+          <div className={styles.signaturesSection}>
+            <div className={styles.signatureBlock}>
+              <div>
+                <b>Від Виконавця</b>
+                <br />
+                <br />
+                <br />
+                <hr />
+                <br />
+                <br />
+                <b>
+                  {new Date(payment.invoiceCreationDate).toLocaleDateString()}
+                </b>{' '}
+                <br />
+                <pre>
+                  {payment.provider.description?.trim()} <br />
+                </pre>
+              </div>
+            </div>
+            <div className={styles.signatureBlock}>
+              <div>
+                <b>Від Замовника</b>
+                <br />
+                <br />
+                <br />
+                <hr />
+                <br />
+                <br />
+                <b>
+                  {new Date(payment.invoiceCreationDate).toLocaleDateString()}
+                </b>{' '}
+                <br />
+                <pre>{payment.reciever.description?.trim()}</pre>
+              </div>
             </div>
           </div>
         </div>
