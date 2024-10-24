@@ -69,6 +69,7 @@ const CompaniesHeader: React.FC<Props> = ({
   const handleArchiveToggle = (value: boolean) => {
     setIsArchive(value)
   }
+  const { data: realEstatesFilter } = useGetRealEstateFiltersQuery()
 
   const { data: realEstate } = useGetRealEstateFiltersQuery()
   const { data: domain } = useGetDomainFiltersQuery()

@@ -37,7 +37,6 @@ import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
-// import { useGetRealEstateFiltersQuery } from '@common/api/filterApi/filter.api'
 
 export interface Props {
   domainId?: string
@@ -74,6 +73,7 @@ const CompaniesTable: React.FC<Props> = ({
   const { pathname } = router
 
   const { data: userResponse } = useGetCurrentUserQuery()
+  const { data: realEstatesFilter } = useGetRealEstateFiltersQuery()
 
   const { data: realEstate } = useGetRealEstateFiltersQuery()
   const { data: domain } = useGetDomainFiltersQuery()
