@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import s from './style.module.scss'
-import {PrinterOutlined} from "@ant-design/icons";
+import { PrinterOutlined } from '@ant-design/icons'
 
 interface Props {
   currPayment: IExtendedPayment
@@ -97,7 +97,8 @@ const ReceiptForm: FC<Props> = ({
           <div>
             Призначення платежу:{' '}
             <strong>
-              Оплата за послуги згідно рахунку № {newData.invoiceNumber} від {dayjs(newData?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
+              Оплата за послуги згідно рахунку № {newData.invoiceNumber} від{' '}
+              {dayjs(newData?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
             </strong>
           </div>
 
