@@ -1,5 +1,6 @@
 import Domain from '@modules/models/Domain'
 import Payment from '@modules/models/Payment'
+import Service from '@modules/models/Service'
 import RealEstate from '@modules/models/RealEstate'
 import start from '@pages/api/api.config'
 import {
@@ -128,47 +129,30 @@ export default async function handler(
       if (servicesIds) {
         options.monthService = { $in: servicesIds }
       }
-      const expr = filterPeriodOptions(req.query)
-      if (expr.length > 0) {
-        options.$expr = {
-          $and: expr,
+      // const expr = filterPeriodOptions(req.query)
+      // if (expr.length > 0) {
+      //   options.$expr = {
+      //     $and: expr,
+      //   }
+      // }
+      const services = await Service.find({
+        $expr: {
+          $and: filterDateOptions(req.query)
         }
-      }
-      const month = 4
+      });
 
-      if (month) {
-        options.$expr = {
-          $and: [
-            {
-              $eq: [{ $month: { $toDate: '$monthService.date' } }, month]
-            }
-          ]
-        };
-      }
+      const servicesIdByDate = services.map(service => service._id.toString());
 
-      // try {
+      options.monthService = { $in: servicesIdByDate };
+
       const payments = await Payment.find(options)
-        .populate('monthService')
-        .sort({ 'monthService.date': -1, invoiceCreationDate: -1 })
+        .sort({ invoiceCreationDate: -1 })
         .skip(+skip)
         .limit(+limit)
         .populate('company')
         .populate('street')
         .populate('domain')
-      // } catch (err) {
-      //   console.log(err)
-      // }
-
-      console.log(payments)
-
-      // let month = 9  
-      // if (month > 0) {
-      //   payments = payments.filter((payment) => {
-      //     const paymentDate = new Date(payment?.monthService?.date);
-      //     console.log(paymentDate.getMonth())
-      //     return paymentDate.getMonth() === month - 1;
-      //   });
-      // }
+        .populate('monthService')
 
       const streetsPipeline = getStreetsPipeline(isGlobalAdmin, options.domain)
 
@@ -248,29 +232,38 @@ export default async function handler(
   }
 }
 
+function filterDateOptions(args) {
+  const {year, quarter, month, day} = args
+  const filters = []
+  year && filters.push({ $eq: [{ $year: '$date' }, year], })
+  quarter && filters.push({ $in: [{ $month: '$date' }, quarters[+quarter]], })
+  month && filters.push({ $eq: [{ $month: '$date' }, month], })
+  day && filters.push({ $eq: [{ $dayOfMonth: '$date' }, day], })
+  return filters
+}
+
 function filterPeriodOptions(args) {
   const { year, quarter, month, day } = args
-  console.log(month)
-  const filterByDateOptions = []
+  const filters = []
   if (year) {
-    filterByDateOptions.push({
+    filters.push({
       $eq: [{ $year: '$invoiceCreationDate' }, year],
     })
   }
   if (quarter) {
-    filterByDateOptions.push({
+    filters.push({
       $in: [{ $month: '$invoiceCreationDate' }, quarters[+quarter]],
     })
   }
   if (month) {
-    filterByDateOptions.push({
+    filters.push({
       $eq: [{ $month: '$invoiceCreationDate' }, month],
     })
   }
   if (day) {
-    filterByDateOptions.push({
+    filters.push({
       $eq: [{ $dayOfMonth: '$invoiceCreationDate' }, day],
     })
   }
-  return filterByDateOptions
+  return filters
 }
