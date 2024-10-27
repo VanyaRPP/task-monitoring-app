@@ -12,6 +12,12 @@ import { IService } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import PaymentCardHeader from '@components/UI/PaymentCardHeader'
 import TableCard from '@components/UI/TableCard'
+import PaymentCascader from '@components/UI/PaymentCascader/index'
+import {
+  cascaderMonths,
+  cascaderQuarters,
+  cascaderYears,
+} from '@utils/constants'
 import {
   AppRoutes,
   Operations,
@@ -113,6 +119,20 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     edit: false,
     preview: false,
   })
+  const filtersForCreatedDate = [
+    ...cascaderMonths.map((month) => ({
+      text: month.label,
+      value: JSON.stringify({ month: month.value }),
+    })),
+    {
+      text: 'Рік',
+      value: 'Рік',
+      children: [...cascaderYears.map((year) => ({
+        text: year,
+        value: JSON.stringify({ year: year }),
+      }))]
+    }
+  ]
   const [currentDateFilter, setCurrentDateFilter] = useState()
   const [currentTypeOperation, setCurrentTypeOperation] = useState()
   const [pageData, setPageData] = useState({
@@ -156,6 +176,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       domainIds: sepDomainID || filters?.domain || undefined,
       streetIds: filters?.street || undefined,
       type: filters?.type || undefined,
+      creationDate: filters?.invoiceCreationDate || undefined,
     },
     { skip: currUserLoading || !currUser }
   )
@@ -234,6 +255,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       {
         title: 'Дата створення',
         dataIndex: 'invoiceCreationDate',
+        filters: router.pathname === AppRoutes.PAYMENT ? filtersForCreatedDate : null,
+        filteredValue: filters?.invoiceCreationDate || null,
         render: dateToDefaultFormat,
         width: router.pathname === AppRoutes.PAYMENT ? 164 : 70,
       },

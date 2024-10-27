@@ -37,7 +37,12 @@ export default async function handler(
         limit,
         skip,
         type,
+        creationDate,
       } = req.query
+
+      const creationDates = typeof creationDate === 'string' 
+      ? creationDate.split(',').map((date) => JSON.parse(date)) 
+      : null
 
       const companiesIds: string[] | null = companyIds
         ? typeof companyIds === 'string'
@@ -129,21 +134,21 @@ export default async function handler(
       if (servicesIds) {
         options.monthService = { $in: servicesIds }
       }
-      // const expr = filterPeriodOptions(req.query)
-      // if (expr.length > 0) {
-      //   options.$expr = {
-      //     $and: expr,
-      //   }
-      // }
+      const expr = filterDateCreatedOptions(creationDates)
+      if (expr.length > 0) {
+        options.$expr = {
+          $and: expr,
+        }
+      }
       const services = await Service.find({
         $expr: {
-          $and: filterDateOptions(req.query)
-        }
-      });
+          $and: filterDateOptions(req.query),
+        },
+      })
 
-      const servicesIdByDate = services.map(service => service._id.toString());
+      const servicesIdByDate = services.map((service) => service._id.toString())
 
-      options.monthService = { $in: servicesIdByDate };
+      options.monthService = { $in: servicesIdByDate }
 
       const payments = await Payment.find(options)
         .sort({ invoiceCreationDate: -1 })
@@ -233,36 +238,21 @@ export default async function handler(
 }
 
 function filterDateOptions(args) {
-  const {year, quarter, month, day} = args
+  const { year, quarter, month, day } = args
   const filters = []
-  year && filters.push({ $eq: [{ $year: '$date' }, year], })
-  quarter && filters.push({ $in: [{ $month: '$date' }, quarters[+quarter]], })
-  month && filters.push({ $eq: [{ $month: '$date' }, month], })
-  day && filters.push({ $eq: [{ $dayOfMonth: '$date' }, day], })
+  year && filters.push({ $eq: [{ $year: '$date' }, year] })
+  quarter && filters.push({ $in: [{ $month: '$date' }, quarters[+quarter]] })
+  month && filters.push({ $eq: [{ $month: '$date' }, month] })
+  day && filters.push({ $eq: [{ $dayOfMonth: '$date' }, day] })
   return filters
 }
 
-function filterPeriodOptions(args) {
-  const { year, quarter, month, day } = args
+function filterDateCreatedOptions(dates) {
   const filters = []
-  if (year) {
-    filters.push({
-      $eq: [{ $year: '$invoiceCreationDate' }, year],
-    })
-  }
-  if (quarter) {
-    filters.push({
-      $in: [{ $month: '$invoiceCreationDate' }, quarters[+quarter]],
-    })
-  }
-  if (month) {
-    filters.push({
-      $eq: [{ $month: '$invoiceCreationDate' }, month],
-    })
-  }
-  if (day) {
-    filters.push({
-      $eq: [{ $dayOfMonth: '$invoiceCreationDate' }, day],
+  if (dates) {
+    dates.forEach((date) => {
+      if (date?.month) filters.push({ $eq: [{ $month: '$invoiceCreationDate' }, date.month] })
+      if (date?.year) filters.push({ $eq: [{ $year: '$invoiceCreationDate' }, date.year] })
     })
   }
   return filters
