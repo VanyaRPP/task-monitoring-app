@@ -158,15 +158,15 @@ const PaymentCardHeader = ({
         </Button>
 
         {pathname === AppRoutes.PAYMENT && (
-          <Space>
-            <ColumnSelect
-              style={{ minWidth: 200 }}
-              onSelect={onColumnsSelect}
-            />
-            <Space.Compact>
+          <Space size='middle'>
+            <Space size='middle'>
+              <ColumnSelect
+                style={{ minWidth: 200 }}
+                onSelect={onColumnsSelect}
+              />
               <PaymentCascader onChange={setCurrentDateFilter} />
               <StreetsSelector setFilters={setFilters} streets={streets} />
-            </Space.Compact>
+            </Space>
             <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
               <DomainFilterTags
                 collection={payments?.domainsFilter}
