@@ -22,7 +22,10 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
     ? encryptionService.decrypt(domain?.domainBankToken[0]?.token ?? 'token')
     : ''
 
-  const { data: transactionsData } = useGetTransactionsQuery({ token })
+  const { data: transactionsData } = useGetTransactionsQuery(
+    { token },
+    { skip: !token }
+  )
 
   return (
     <Card>

@@ -3,17 +3,17 @@ import { ITransaction } from '@components/Pages/BankTransactions/components/Tran
 import Payment from '@modules/models/Payment'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-interface CompareTransactionRequestBody {
-  transaction: ITransaction
-}
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method === 'POST') {
+  if (req.method === 'GET') {
     try {
-      const { transaction } = req.body as CompareTransactionRequestBody
+      const transaction = Array.isArray(req.query.transaction)
+        ? req.query.transaction[0]
+        : req.query.transaction
+
+      const parsedTransaction = JSON.parse(transaction)
 
       if (!transaction) {
         return res
@@ -21,13 +21,15 @@ export default async function handler(
           .json({ success: false, message: 'Transaction data is required' })
       }
 
-      const allPayments = await Payment.find({})
+      const allPayments = await Payment.find({
+        description:
+          parsedTransaction.description +
+          ' (taken from the transaction description)',
+      })
 
-      const isMatch = allPayments.some((payment) =>
-        compareTransactions(transaction.OSND, payment.description)
-      )
-
-      return res.status(200).json({ success: true, isMatch })
+      return res
+        .status(200)
+        .json({ success: true, isMatch: allPayments.length > 0 })
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message })
     }
@@ -36,11 +38,4 @@ export default async function handler(
       .status(405)
       .json({ success: false, message: 'Method Not Allowed' })
   }
-}
-
-const compareTransactions = (osnd: string, description: string): boolean => {
-  return (
-    osnd === description ||
-    description === `${osnd} (taken from the transaction description)`
-  )
 }

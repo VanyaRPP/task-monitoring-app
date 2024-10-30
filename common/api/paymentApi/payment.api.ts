@@ -19,6 +19,11 @@ interface CompareTransactionResponse {
   isMatch: boolean
 }
 
+interface ICompareTransaction {
+  description: string
+  counterpartyName: string
+}
+
 export const paymentApi = createApi({
   reducerPath: 'paymentApi',
   refetchOnFocus: true,
@@ -154,15 +159,14 @@ export const paymentApi = createApi({
         body,
       }),
     }),
-    compareTransaction: builder.mutation<
+    compareTransaction: builder.query<
       CompareTransactionResponse,
-      { transaction: ITransaction }
+      ICompareTransaction
     >({
-      query: ({ transaction }) => ({
+      query: (transaction) => ({
         url: 'spacehub/payment/compare',
-        method: 'POST',
-        body: {
-          transaction,
+        params: {
+          transaction: JSON.stringify(transaction),
         },
       }),
     }),
@@ -178,5 +182,5 @@ export const {
   useEditPaymentMutation,
   useGeneratePdfMutation,
   useGenerateExcelMutation,
-  useCompareTransactionMutation,
+  useCompareTransactionQuery,
 } = paymentApi

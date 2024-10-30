@@ -7,7 +7,7 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 import AddPaymentModal from '@components/AddPaymentModal'
 import dayjs from 'dayjs'
 import { SendOutlined } from '@ant-design/icons'
-import { useCompareTransactionMutation } from '@common/api/paymentApi/payment.api'
+import { useCompareTransactionQuery } from '@common/api/paymentApi/payment.api'
 
 interface TransactionDrawerProps {
   transaction: ITransaction
@@ -23,20 +23,10 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
 
   const transactionAmount = parseFloat(transaction.SUM as string)
 
-  const [compareTransaction, { data: compareRes }] =
-    useCompareTransactionMutation()
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await compareTransaction({ transaction }).unwrap()
-      } catch (error) {
-        console.error('Помилка при порівнянні транзакції:', error)
-      }
-    }
-
-    fetchData()
-  }, [transaction, compareTransaction])
+  const { data: compareRes, isLoading } = useCompareTransactionQuery({
+    description: transaction.OSND,
+    counterpartyName: transaction.AUT_CNTR_NAM,
+  })
 
   const { data: realEstatesData } = useGetAllRealEstateQuery({
     domainId: domain._id,
