@@ -29,7 +29,7 @@ export default async function handler(
 
       return res
         .status(200)
-        .json({ success: true, isMatch: allPayments.length > 0 })
+        .json({ success: true, matchingPayments: allPayments })
     } catch (error) {
       return res.status(500).json({ success: false, message: error.message })
     }

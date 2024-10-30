@@ -20,6 +20,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
 }) => {
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
+  const [selectedPayment, setSelectedPayment] = useState<any>(null)
 
   const transactionAmount = parseFloat(transaction.SUM as string)
 
@@ -27,6 +28,23 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     description: transaction.OSND,
     counterpartyName: transaction.AUT_CNTR_NAM,
   })
+
+  useEffect(() => {
+    if (compareRes?.matchingPayments?.length) {
+      if (compareRes.matchingPayments.length === 1) {
+        setSelectedPayment(compareRes.matchingPayments[0])
+      } else {
+        const minInvoicePayment = compareRes.matchingPayments.reduce(
+          (minPayment, currentPayment) =>
+            currentPayment.invoiceNumber < minPayment.invoiceNumber
+              ? currentPayment
+              : minPayment,
+          compareRes.matchingPayments[0]
+        )
+        setSelectedPayment(minInvoicePayment)
+      }
+    }
+  }, [compareRes])
 
   const { data: realEstatesData } = useGetAllRealEstateQuery({
     domainId: domain._id,
@@ -49,7 +67,9 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
         style={{
           top: '-50%',
           visibility:
-            selectedCompany || !compareRes?.isMatch ? 'hidden' : 'visible',
+            selectedCompany || !compareRes?.matchingPayments.length
+              ? 'hidden'
+              : 'visible',
         }}
       >
         <Space.Compact style={{ width: '100%' }}>
@@ -80,16 +100,42 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
         <AddPaymentModal
           closeModal={closeModal}
           paymentData={{
-            ...relatedCompanies.find(
-              (company: IRealestate) => company._id === selectedCompany
-            ),
-            generalSum: transactionAmount,
-            description: `${transaction.OSND} (taken from the transaction description)`,
-            invoiceCreationDate: dayjs(transaction.DAT_OD, 'DD.MM.YYYY'),
-            company: selectedCompany,
-            domain: domain,
+            ...(selectedPayment && selectedCompany == selectedPayment.company
+              ? {
+                  // ...relatedCompanies.find(
+                  //   (company: IRealestate) => company._id === selectedCompany
+                  // ),
+                  invoiceNumber: selectedPayment.invoiceNumber,
+                  type: selectedPayment.type,
+                  invoiceCreationDate: selectedPayment.invoiceCreationDate,
+                  domain: {
+                    _id: selectedPayment.domain,
+                  },
+                  street: { _id: selectedPayment.street },
+                  company: { _id: selectedPayment.company },
+                  monthService: { _id: selectedPayment.monthService },
+                  description: `${transaction.OSND} (taken from the transaction description)`,
+                  invoice: selectedPayment.invoice,
+                  provider: selectedPayment.provider,
+                  reciever: selectedPayment.reciever,
+                  generalSum: transactionAmount,
+                }
+              : {
+                  ...relatedCompanies.find(
+                    (company: IRealestate) => company._id === selectedCompany
+                  ),
+                  generalSum: transactionAmount,
+                  description: `${transaction.OSND} (taken from the transaction description)`,
+                  invoiceCreationDate: dayjs(transaction.DAT_OD, 'DD.MM.YYYY'),
+                  company: selectedCompany,
+                  domain: domain,
+                }),
           }}
-          paymentActions={{ edit: false, preview: false }}
+          paymentActions={
+            selectedPayment && selectedCompany == selectedPayment.company
+              ? { edit: true, preview: false }
+              : { edit: false, preview: false }
+          }
         />
       )}
     </>

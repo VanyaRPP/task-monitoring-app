@@ -16,7 +16,7 @@ import { ITransaction } from '@components/Pages/BankTransactions/components/Tran
 
 interface CompareTransactionResponse {
   success: boolean
-  isMatch: boolean
+  matchingPayments: [IPayment]
 }
 
 interface ICompareTransaction {
