@@ -142,6 +142,10 @@ const PaymentCardHeader = ({
       message.error('Сталася несподівана помилка під час генерації PDF')
     }
   }
+  const shouldOpenModal = () => {
+    if (!isModalOpen || !currentPayment) return false
+    return !(!isAdmin && !paymentActions?.edit && !paymentActions?.preview)
+  }
 
   return (
     <Flex justify="space-between">
@@ -158,8 +162,8 @@ const PaymentCardHeader = ({
         </Button>
 
         {pathname === AppRoutes.PAYMENT && (
-          <Space size='middle'>
-            <Space size='middle'>
+          <Space size="middle">
+            <Space size="middle">
               <ColumnSelect
                 style={{ minWidth: 200 }}
                 onSelect={onColumnsSelect}
@@ -204,7 +208,7 @@ const PaymentCardHeader = ({
             <PlusOutlined /> Додати
           </Button>
         )}
-        {(isModalOpen || currentPayment) && (
+        {shouldOpenModal() && (
           <AddPaymentModal
             paymentActions={
               !isAdmin ? { edit: false, preview: true } : paymentActions
