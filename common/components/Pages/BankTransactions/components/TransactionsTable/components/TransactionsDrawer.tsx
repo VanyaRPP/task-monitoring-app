@@ -133,7 +133,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
           }}
           paymentActions={
             selectedPayment && selectedCompany == selectedPayment.company
-              ? { edit: true, preview: false }
+              ? { edit: false, preview: false, create: true }
               : { edit: false, preview: false }
           }
         />

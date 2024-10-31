@@ -8,6 +8,7 @@ import { CSSProperties, useEffect, useMemo } from 'react'
 export interface AddressesSelectProps {
   form: FormInstance
   edit?: boolean
+  create?: boolean
   dropdownStyle?: CSSProperties
   onStreetHasServiceChange?: (hasService: boolean) => void
 }
@@ -15,6 +16,7 @@ export interface AddressesSelectProps {
 const AddressesSelect: React.FC<AddressesSelectProps> = ({
   form,
   edit,
+  create,
   dropdownStyle,
   onStreetHasServiceChange,
 }) => {
@@ -36,21 +38,23 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   }, [streets])
 
   useEffect(() => {
-    if (domainId) {
-      if (options.length === 1) {
-        form.setFieldsValue({ street: options[0].value })
-        onStreetHasServiceChange?.(options[0].hasService)
-      } else {
-        const firstStreetWithService = options.find(
-          (option) => option.hasService
-        )
-
-        if (firstStreetWithService) {
-          form.setFieldsValue({ street: firstStreetWithService.value })
-          onStreetHasServiceChange?.(firstStreetWithService.hasService)
+    if (!create && !edit) {
+      if (domainId) {
+        if (options.length === 1) {
+          form.setFieldsValue({ street: options[0].value })
+          onStreetHasServiceChange?.(options[0].hasService)
         } else {
-          form.setFieldsValue({ street: undefined })
-          onStreetHasServiceChange?.(false)
+          const firstStreetWithService = options.find(
+            (option) => option.hasService
+          )
+
+          if (firstStreetWithService) {
+            form.setFieldsValue({ street: firstStreetWithService.value })
+            onStreetHasServiceChange?.(firstStreetWithService.hasService)
+          } else {
+            form.setFieldsValue({ street: undefined })
+            onStreetHasServiceChange?.(false)
+          }
         }
       }
     }
