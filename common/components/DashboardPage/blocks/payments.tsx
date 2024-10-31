@@ -178,11 +178,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   )
 
   useEffect(() => {
-    if (filters?.domain?.length > 0 && filters?.company?.length > 0) {
-      setCurrentPayment({
-        domain: { _id: filters.domain[0] },
-        company: { _id: filters.company[0] },
-      })
+    if (filters?.domain && filters.domain.length > 0) {
+      setCurrentPayment({domain: { _id: filters.domain[0]}, company: { _id: filters.company[0] } })
     }
   }, [filters])
 

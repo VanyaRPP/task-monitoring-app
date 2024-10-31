@@ -142,10 +142,11 @@ const PaymentCardHeader = ({
       message.error('Сталася несподівана помилка під час генерації PDF')
     }
   }
+
   const shouldOpenModal = () => {
-    if (!isModalOpen || !currentPayment) return false
-    return !(!isAdmin && !paymentActions?.edit && !paymentActions?.preview)
-  }
+    const hasPaymentActions = paymentActions?.edit || paymentActions?.preview || false;
+    return Boolean(isModalOpen) || (Boolean(currentPayment) && hasPaymentActions);
+  };
 
   return (
     <Flex justify="space-between">
