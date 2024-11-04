@@ -13,6 +13,8 @@ export default async function handler(
         ? req.query.transaction[0]
         : req.query.transaction
 
+      const selectedCompany = req.query.companyId as string
+
       const parsedTransaction = JSON.parse(transaction)
 
       if (!transaction) {
@@ -25,6 +27,7 @@ export default async function handler(
         description:
           parsedTransaction.description +
           ' (taken from the transaction description)',
+        company: selectedCompany,
       })
 
       return res

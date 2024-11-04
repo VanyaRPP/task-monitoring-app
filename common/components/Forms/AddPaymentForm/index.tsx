@@ -40,6 +40,7 @@ export const useInvoice = ({
 
 function AddPaymentForm({ paymentActions }) {
   const { preview, edit, create } = paymentActions
+  const selectedActions = { preview, edit }
 
   const { form, payment, service, company, prevService, prevPayment } =
     usePaymentContext()
@@ -78,7 +79,7 @@ function AddPaymentForm({ paymentActions }) {
       />
       <CompanySelect form={form} edit={create ? !edit : edit} create={create} />
       <PaymentTypeSelect edit={!companyId || edit} />
-      <InvoiceNumber form={form} paymentActions={paymentActions} />
+      <InvoiceNumber form={form} paymentActions={selectedActions} />
       <InvoiceCreationDate edit={preview} />
 
       {operation === Operations.Credit ? (

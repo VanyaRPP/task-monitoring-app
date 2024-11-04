@@ -25,8 +25,11 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const transactionAmount = parseFloat(transaction.SUM as string)
 
   const { data: compareRes, isLoading } = useCompareTransactionQuery({
-    description: transaction.OSND,
-    counterpartyName: transaction.AUT_CNTR_NAM,
+    transaction: {
+      description: transaction.OSND,
+      counterpartyName: transaction.AUT_CNTR_NAM,
+    },
+    selectedCompany: selectedCompany,
   })
 
   useEffect(() => {
@@ -105,7 +108,6 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                   // ...relatedCompanies.find(
                   //   (company: IRealestate) => company._id === selectedCompany
                   // ),
-                  invoiceNumber: selectedPayment.invoiceNumber,
                   type: selectedPayment.type,
                   invoiceCreationDate: selectedPayment.invoiceCreationDate,
                   domain: {
