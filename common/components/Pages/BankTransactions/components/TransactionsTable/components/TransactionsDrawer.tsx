@@ -105,9 +105,6 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
           paymentData={{
             ...(selectedPayment && selectedCompany == selectedPayment.company
               ? {
-                  // ...relatedCompanies.find(
-                  //   (company: IRealestate) => company._id === selectedCompany
-                  // ),
                   type: selectedPayment.type,
                   invoiceCreationDate: selectedPayment.invoiceCreationDate,
                   domain: {

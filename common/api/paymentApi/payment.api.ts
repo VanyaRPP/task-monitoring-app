@@ -11,18 +11,10 @@ import {
   IPayment,
   IGeneratePaymentExcel,
   IGeneratePaymentExcelResponce,
+  CompareTransactionResponse,
+  ICompareTransaction,
 } from './payment.api.types'
 import { ITransaction } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
-
-interface CompareTransactionResponse {
-  success: boolean
-  matchingPayments: [IPayment]
-}
-
-interface ICompareTransaction {
-  description: string
-  counterpartyName: string
-}
 
 export const paymentApi = createApi({
   reducerPath: 'paymentApi',
