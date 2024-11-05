@@ -74,9 +74,6 @@ const PaymentsChart: React.FC<{
     )
   }, [companyId, payments, isGlobalAdmin, isDomainAdmin, isError])
 
-
-  console.log(chartData)
-
   return (
     <Card
       title={
