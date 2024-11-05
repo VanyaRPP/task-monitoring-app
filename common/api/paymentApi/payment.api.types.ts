@@ -118,3 +118,13 @@ export interface IGeneratePaymentExcelResponce {
   fileName: string
   fileExtension: string
 }
+
+export interface CompareTransactionResponse {
+  success: boolean
+  matchingPayments: [IPayment]
+}
+
+export interface ICompareTransaction {
+  description: string
+  counterpartyName: string
+}

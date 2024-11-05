@@ -12,7 +12,7 @@ const StreetsSelector = ({ setFilters, streets }) => {
   return (
     <Select
       placeholder="Виберіть вулицю"
-      style={{ width: '250px' }}
+      style={{ width: '200px' }}
       onChange={(value) => {
         setFilters({ street: value })
       }}
