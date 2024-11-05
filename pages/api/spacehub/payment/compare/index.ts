@@ -27,7 +27,7 @@ export default async function handler(
         description:
           parsedTransaction.description +
           ' (taken from the transaction description)',
-        company: selectedCompany,
+        ...(selectedCompany ? { company: selectedCompany } : {}),
       })
 
       return res

@@ -161,13 +161,13 @@ export const paymentApi = createApi({
     }),
     compareTransaction: builder.query<
       CompareTransactionResponse,
-      { transaction: ICompareTransaction; selectedCompany: string }
+      { transaction: ICompareTransaction; selectedCompany?: string }
     >({
       query: ({ transaction, selectedCompany }) => ({
         url: 'spacehub/payment/compare',
         params: {
           transaction: JSON.stringify(transaction),
-          companyId: selectedCompany,
+          ...(selectedCompany && { companyId: selectedCompany }),
         },
       }),
     }),

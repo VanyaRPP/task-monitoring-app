@@ -29,7 +29,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
       description: transaction.OSND,
       counterpartyName: transaction.AUT_CNTR_NAM,
     },
-    selectedCompany: selectedCompany,
+    ...(selectedCompany ? { selectedCompany } : {}),
   })
 
   useEffect(() => {
