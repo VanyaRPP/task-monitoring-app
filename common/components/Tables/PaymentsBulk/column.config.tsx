@@ -321,7 +321,7 @@ const MaintenanceSum: React.FC<{ name: number }> = ({ name }) => {
       style={{ margin: 0 }}
       rules={[validator.required(), validator.min(0)]}
     >
-      <Input type="number" disabled  />
+      <Input type="number" disabled />
     </Form.Item>
   )
 }
@@ -342,8 +342,7 @@ const PlacingPrice: React.FC<{ name: number }> = ({ name }) => {
       style={{ margin: 0 }}
       rules={[validator.required(), validator.min(0)]}
     >
-      <InputNumber parser={inputNumberParser} 
-          style={{ width: 'auto' }} />
+      <InputNumber parser={inputNumberParser} style={{ width: 'auto' }} />
     </Form.Item>
   )
 }
@@ -475,8 +474,7 @@ const ElectricityAmount: React.FC<{ name: number; last?: boolean }> = ({
       style={{ margin: 0 }}
       rules={[validator.required(), validator.min(0)]}
     >
-      <InputNumber parser={inputNumberParser}
-          style={{ width: 'auto' }} />
+      <InputNumber parser={inputNumberParser} style={{ width: 'auto' }} />
     </Form.Item>
   )
 }
@@ -753,8 +751,7 @@ const Cleaning: React.FC<{ name: number }> = ({ name }) => {
         style={{ margin: 0 }}
         rules={[validator.required(), validator.min(0)]}
       >
-        <InputNumber parser={inputNumberParser}
-          style={{ width: 'auto' }} />
+        <InputNumber parser={inputNumberParser} style={{ width: 'auto' }} />
       </Form.Item>
     )
   }
@@ -782,8 +779,7 @@ const Discount: React.FC<{ name: number }> = ({ name }) => {
       style={{ margin: 0 }}
       rules={[validator.required(), validator.max(0)]}
     >
-      <InputNumber parser={inputNumberParser}
-          style={{ width: 'auto' }} />
+      <InputNumber parser={inputNumberParser} style={{ width: 'auto' }} />
     </Form.Item>
   )
 }
