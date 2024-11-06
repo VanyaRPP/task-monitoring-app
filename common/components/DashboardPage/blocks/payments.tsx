@@ -123,13 +123,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
 
   const [selectedColumns, setSelectedColumns] = useState<string[]>([])
 
-  // const [filters, setFilters] = useState<any>()
-  const [filters, setFilters] = useState({
-    company: [],
-    domain: [],
-    street: [],
-    type: null,
-  });
+  const [filters, setFilters] = useState<any>()
 
   const closeEditModal = () => {
     setCurrentPayment(null)
@@ -187,7 +181,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     if (filters.domain.length > 0) {
       setCurrentPayment({
         domain: { _id: filters.domain[0] },
-        company: { _id: filters.company?.[0] },
       })
     }
   }, [filters])

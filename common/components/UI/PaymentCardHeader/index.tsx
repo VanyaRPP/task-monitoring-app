@@ -37,7 +37,7 @@ import Modal from 'antd/lib/modal/Modal'
 import { saveAs } from 'file-saver'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { shouldOpenModal} from "@utils/shouldOpenModal";
+import { shouldOpenModal } from '@utils/shouldOpenModal'
 
 const PaymentCardHeader = ({
   setCurrentDateFilter,
