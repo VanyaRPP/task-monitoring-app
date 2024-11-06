@@ -121,7 +121,7 @@ export interface IGeneratePaymentExcelResponce {
 
 export interface CompareTransactionResponse {
   success: boolean
-  matchingPayments: [IPayment]
+  matchingPayments: [IExtendedPayment]
 }
 
 export interface ICompareTransaction {
