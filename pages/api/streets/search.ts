@@ -13,7 +13,7 @@ export default async function handler(
         if (!city || !address) {
           return res
             .status(400)
-            .json({ success: false, message: 'City and address are required' })
+            .json({ success: false, message: 'City and street are required' })
         }
         const streets = await Street.find({
           city: new RegExp(city as string, 'i'),

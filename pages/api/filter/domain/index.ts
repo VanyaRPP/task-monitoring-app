@@ -16,21 +16,19 @@ export default async function handler(
 
   if (req.method === 'GET') {
     try {
-      const { distinctCompanies } = await getDistinctCompanyAndDomain({
+      const { distinctDomains } = await getDistinctCompanyAndDomain({
         isGlobalAdmin,
         user,
-        companyGroup: '_id',
+        companyGroup: 'company',
         model: RealEstate,
       })
 
-      const realEstatesFilter = distinctCompanies?.map(
-        ({ companyDetails }) => ({
-          text: companyDetails.companyName,
-          value: companyDetails._id,
-        })
-      )
+      const domainsFilter = distinctDomains?.map(({ domainDetails }) => ({
+        text: domainDetails.name,
+        value: domainDetails._id,
+      }))
 
-      return res.status(200).json({ realEstatesFilter, success: true })
+      return res.status(200).json({ domainsFilter, success: true })
     } catch (error) {
       return res.status(400).json({ success: false, error: error.message })
     }
