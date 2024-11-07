@@ -19,7 +19,7 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { companyId, domainId, streetId, archive, limit = 0 } = req.query
+        const { companyId, domainId, streetId, archived, limit = 0 } = req.query
 
         const companiesIds: string[] | null = companyId
           ? typeof companyId === 'string'
@@ -37,11 +37,13 @@ export default async function handler(
             : streetId.map((id) => decodeURIComponent(id))
           : null
 
+        const isArchived = archived ? archived === 'true' : undefined
+
         /**
          * request data filters
          */
         const filters: FilterQuery<typeof RealEstate> = {
-          archived: { $ne: archive },
+          ...(isArchived !== undefined && { archived: isArchived }),
           ...(!!companiesIds?.length && { _id: { $in: companiesIds } }),
           ...(!!domainsIds?.length && { domain: { $in: domainsIds } }),
           ...(!!streetsIds?.length && { street: { $in: streetsIds } }),
@@ -95,19 +97,6 @@ export default async function handler(
                 (s) => s._id.toString() === street._id.toString()
               )
           )
-        if (
-          (domainsIds && domainsIds.length > 0) ||
-          (streetsIds && streetsIds.length > 0)
-        ) {
-          const filteredRealEstates = await RealEstate.find({
-            $and: [filters, { archived: { $ne: true } }],
-          })
-
-          return res.status(200).json({
-            success: true,
-            data: filteredRealEstates,
-          })
-        }
         return res.status(200).json({
           domainsFilter: distinctDomains?.map(({ domainDetails }) => ({
             text: domainDetails.name,
@@ -129,7 +118,7 @@ export default async function handler(
       } catch (error) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        return res.status(500).json({ success: false, message: error })
+        return res.status(400).json({ success: false, message: error })
       }
 
     case 'POST':

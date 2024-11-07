@@ -3,6 +3,7 @@
 import mongoose from 'mongoose'
 import Domain from '@modules/models/Domain'
 import Street from '@modules/models/Street'
+import Service from '@modules/models/Service'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -58,9 +59,30 @@ export default async function handler(
 
         const streets = domains.flatMap((domain) => domain.streets)
 
+        const streetIds = streets.map((street) => street._id)
+
+        const servicesWithStreets = await Service.find({
+          domain: domainId,
+          street: { $in: streetIds },
+        })
+
+        const filteredStreets = streets.filter((street) =>
+          servicesWithStreets.some(
+            (service) => service.street.toString() === street._id.toString()
+          )
+        )
+
+        const result = streets.map((street) => ({
+          ...street._doc,
+          hasService: filteredStreets.some(
+            (filteredStreet) =>
+              filteredStreet._id.toString() === street._id.toString()
+          ),
+        }))
+
         return res.status(200).json({
           success: true,
-          data: _uniqBy(streets, '_id'),
+          data: _uniqBy(result, '_id'),
         })
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })

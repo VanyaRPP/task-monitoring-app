@@ -7,11 +7,15 @@ import { useEffect, useMemo } from 'react'
 export interface MonthServiceSelectProps {
   form: FormInstance
   edit?: boolean
+  create?: boolean
+  disabled?: boolean
 }
 
 const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
   form,
   edit,
+  create,
+  disabled,
 }) => {
   const streetId: string = Form.useWatch('street', form)
   const domainId: string = Form.useWatch('domain', form)
@@ -37,10 +41,15 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
   }, [services])
 
   useEffect(() => {
-    if (!edit && options.length === 1) {
-      form.setFieldsValue({ monthService: options[0].value })
-    } else if (!edit && !options.some((option) => option.value === serviceId)) {
-      form.setFieldsValue({ monthService: undefined })
+    if (!edit) {
+      if (options.length === 1) {
+        form.setFieldsValue({ monthService: options[0].value })
+      } else if (
+        !serviceId ||
+        !options.some((option) => option.value === serviceId)
+      ) {
+        form.setFieldsValue({ monthService: options[0]?.value })
+      }
     }
   }, [form, options, serviceId, edit])
 
@@ -57,11 +66,14 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
         status={isServicesError && 'error'}
         loading={isServicesLoading}
         disabled={
-          isServicesLoading ||
-          services.length === 1 ||
-          !streetId ||
-          !domainId ||
-          edit
+          create
+            ? false
+            : disabled ||
+              isServicesLoading ||
+              services.length === 1 ||
+              !streetId ||
+              !domainId ||
+              edit
         }
         allowClear
         showSearch

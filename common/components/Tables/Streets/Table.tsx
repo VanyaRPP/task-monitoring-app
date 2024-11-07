@@ -3,6 +3,9 @@ import { Alert, Button, Popconfirm, Table, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
 
+import { usePermissions } from '@utils/helpers'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+
 import {
   useDeleteStreetMutation,
   useGetAllStreetsQuery,
@@ -59,6 +62,9 @@ const StreetsTable: React.FC<Props> = ({
 
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  const { data: userResponse } = useGetCurrentUserQuery()
+  const userRoles = usePermissions(userResponse)
+
   const closeModal = () => setIsModalOpen(false)
   const openModal = (street) => {
     setIsModalOpen(true),
@@ -82,7 +88,12 @@ const StreetsTable: React.FC<Props> = ({
           }
         }
         loading={isLoading}
-        columns={getDefaultColumns(handleDelete, deleteLoading, openModal)}
+        columns={getDefaultColumns(
+          handleDelete,
+          deleteLoading,
+          openModal,
+          userRoles
+        )}
         expandable={
           domainId && {
             expandedRowRender: (street) => (
@@ -91,7 +102,6 @@ const StreetsTable: React.FC<Props> = ({
           }
         }
         dataSource={data}
-        scroll={{ x: 500 }}
       />
       {isModalOpen && (
         <AddStreetModal
@@ -107,7 +117,8 @@ const StreetsTable: React.FC<Props> = ({
 const getDefaultColumns = (
   handleDelete?: (streetId: string) => void,
   deleteLoading?: boolean,
-  openModal?: (street: IStreet) => void
+  openModal?: (street: IStreet) => void,
+  userRoles?: { isGlobalAdmin: boolean }
 ): ColumnType<any>[] => [
   {
     title: 'Місто',
@@ -138,16 +149,17 @@ const getDefaultColumns = (
     fixed: 'right',
     title: '',
     width: 50,
-    render: (_, street: IStreet) => (
-      <Popconfirm
-        title={`Ви впевнені що хочете видалити вулицю ${street.address} (м. ${street.city})?`}
-        onConfirm={() => handleDelete(street._id)}
-        cancelText="Відміна"
-        disabled={deleteLoading}
-      >
-        <DeleteOutlined />
-      </Popconfirm>
-    ),
+    render: (_, street: IStreet) =>
+      userRoles?.isGlobalAdmin && (
+        <Popconfirm
+          title={`Ви впевнені що хочете видалити вулицю ${street.address} (м. ${street.city})?`}
+          onConfirm={() => handleDelete(street._id)}
+          cancelText="Відміна"
+          disabled={deleteLoading}
+        >
+          <DeleteOutlined />
+        </Popconfirm>
+      ),
   },
 ]
 

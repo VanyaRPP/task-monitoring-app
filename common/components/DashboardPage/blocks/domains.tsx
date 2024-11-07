@@ -26,7 +26,6 @@ const DomainsBlock: React.FC<Props> = ({ domainId }) => {
         />
       }
       style={{
-        maxHeight: domainsLength * 145,
         flexWrap: 'wrap',
       }}
     >
