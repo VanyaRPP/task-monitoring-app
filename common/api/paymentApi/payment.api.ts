@@ -9,6 +9,7 @@ import {
   IGetPaymentNumberResponse,
   IGetPaymentResponse,
   IPayment,
+  IGetProfitPaymentResponse,
   IGeneratePaymentExcel,
   IGeneratePaymentExcelResponce,
   CompareTransactionResponse,
@@ -20,7 +21,7 @@ export const paymentApi = createApi({
   reducerPath: 'paymentApi',
   refetchOnFocus: true,
   refetchOnReconnect: true,
-  tagTypes: ['Payment'],
+  tagTypes: ['Payment', 'Profit'],
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getAllPayments: builder.query<
@@ -81,6 +82,12 @@ export const paymentApi = createApi({
     getPayment: builder.query<IGetPaymentResponse, string>({
       query: (id) => `spacehub/payment/${id}`,
     }),
+    getProfitPayment: builder.query<IGetProfitPaymentResponse, void>({
+      query: () => ({
+        url: `profit`,
+      }),
+      providesTags: (result) => (result ? ['Profit'] : []),
+    }),
     addPayment: builder.mutation<IAddPaymentResponse, IPayment>({
       query(body) {
         return {
@@ -89,7 +96,7 @@ export const paymentApi = createApi({
           body,
         }
       },
-      invalidatesTags: (response) => (response ? ['Payment'] : []),
+      invalidatesTags: (response) => (response ? ['Payment', 'Profit'] : []),
     }),
     deletePayment: builder.mutation<
       IDeletePaymentResponse,
@@ -174,6 +181,7 @@ export const {
   useGetPaymentNumberQuery,
   useEditPaymentMutation,
   useGeneratePdfMutation,
+  useGetProfitPaymentQuery,
   useGenerateExcelMutation,
   useCompareTransactionQuery,
 } = paymentApi

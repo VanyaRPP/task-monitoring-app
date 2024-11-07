@@ -72,6 +72,12 @@ export const Menu: React.FC<MenuProps> = (props) => {
             label: <Link href={AppRoutes.BANKTEST}>Банк</Link>,
             hidden: !isAdminCheck(user?.roles),
           },
+          {
+            key: AppRoutes.PROFIT,
+            type: 'item',
+            label: <Link href={AppRoutes.PROFIT}>Прибуткі</Link>,
+            hidden: !isAdminCheck(user?.roles),
+          },
         ].filter(({ hidden }) => !hidden),
       },
       {
