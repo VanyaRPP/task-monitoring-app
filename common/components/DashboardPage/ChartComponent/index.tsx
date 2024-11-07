@@ -70,13 +70,15 @@ const ChartComponent: React.FC<ChartComponentProps> = ({
             <CompanySelector
               value={companyId}
               onChange={onCompanyChange}
-              style={{ width: 200, fontWeight: 'normal' }}/>
+              style={{ width: 200, fontWeight: 'normal' }}
+            />
           )}
           {onSizeChange && (
             <SizeSelector
               value={size}
               onChange={onSizeChange}
-              style={{ fontWeight: 'normal' }}/>
+              style={{ fontWeight: 'normal' }}
+            />
           )}
         </Space>
       }
@@ -91,8 +93,8 @@ const ChartComponent: React.FC<ChartComponentProps> = ({
               isFetching
                 ? 'Завантаження...'
                 : !companyId
-                  ? placeholder
-                  : 'Неможливо відобразити графік'
+                ? placeholder
+                : 'Неможливо відобразити графік'
             }
           />
         ) : (

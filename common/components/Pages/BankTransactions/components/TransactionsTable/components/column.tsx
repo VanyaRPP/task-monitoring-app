@@ -9,9 +9,9 @@ import {
 import { Popover, Input, Button, DatePicker } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { ITransaction } from './transactionTypes'
-import TransactionDrawer from './TransactionsDrawer'
 import { useState } from 'react'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import TransactionDrawer from './TransactionsDrawer'
 
 const { RangePicker } = DatePicker
 

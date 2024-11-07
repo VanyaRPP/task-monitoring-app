@@ -159,8 +159,8 @@ const PaymentCardHeader = ({
         </Button>
 
         {pathname === AppRoutes.PAYMENT && (
-          <Space size='middle'>
-            <Space size='middle'>
+          <Space size="middle">
+            <Space size="middle">
               <ColumnSelect
                 style={{ minWidth: 200 }}
                 onSelect={onColumnsSelect}

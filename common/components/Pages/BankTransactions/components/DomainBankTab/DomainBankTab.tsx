@@ -26,7 +26,7 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
     { token },
     { skip: !token }
   )
-  
+
   return (
     <Card>
       {token ? (

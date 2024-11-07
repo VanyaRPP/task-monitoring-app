@@ -21,8 +21,6 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<any>(null)
-  
-  const { Title, Text } = Typography
 
   const transactionAmount = parseFloat(transaction.SUM as string)
 
@@ -66,81 +64,6 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
 
   return (
     <>
-      <Space.Compact style={{ width: '100%' }}>
-        <Select
-          placeholder="Select a related company"
-          onChange={handleCompanyChange}
-          value={selectedCompany}
-          style={{ width: 'calc(100% - 80px)' }}
-        >
-          {relatedCompanies.map((company: IRealestate) => (
-            <Select.Option key={company._id} value={company._id}>
-              {company.companyName}
-            </Select.Option>
-          ))}
-        </Select>
-        <Button
-          iconPosition="end"
-          icon={<SendOutlined />}
-          type="primary"
-          onClick={showDrawer}
-          disabled={!selectedCompany}
-        >
-          Send
-        </Button>
-      </Space.Compact>
-      <Drawer
-        title="Transaction Details"
-        placement="right"
-        onClose={handleCloseDrawer}
-        open={drawerVisible}
-        width="60%"
-      >
-        <Space direction="vertical" style={{ width: '100%' }} size="large">
-          <Title level={4}>
-            <BankOutlined /> Transaction Info
-          </Title>
-
-          <Row gutter={[16, 16]}>
-            <Col span={12}>
-              <Text strong>Counterparty CRF:</Text>
-              <br />
-              <Text>{transaction.AUT_CNTR_CRF}</Text>
-            </Col>
-            <Col span={12}>
-              <Text strong>Counterparty MFO:</Text>
-              <br />
-              <Text>{transaction.AUT_CNTR_MFO}</Text>
-            </Col>
-
-            <Col span={12}>
-              <Text strong>Counterparty Account:</Text>
-              <br />
-              <Text>{transaction.AUT_CNTR_ACC}</Text>
-            </Col>
-            <Col span={12}>
-              <Text strong>Counterparty Name:</Text>
-              <br />
-              <Text>{transaction.AUT_CNTR_NAM}</Text>
-            </Col>
-          </Row>
-
-          <Divider />
-
-          <Text strong>Description:</Text>
-          <Text>{transaction.OSND}</Text>
-
-          <Divider />
-
-          <Text strong>Amount:</Text>
-          <Text>{transaction.SUM}</Text>
-
-          <Divider />
-
-          <Title level={4}>
-            <ShopOutlined /> Related Company
-          </Title>
-          <Text strong>Select Company:</Text>
       <Badge.Ribbon
         text="Платіж є"
         color="purple"

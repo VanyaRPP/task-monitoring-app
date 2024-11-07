@@ -7,7 +7,7 @@ import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import CompaniesAreaChart from '@components/DashboardPage/blocks/сompaniesAreaChart'
 import { Roles } from '@utils/constants'
 import { Col, Row, Space } from 'antd'
-import PaymentsChart from "@components/DashboardPage/blocks/paymentChart";
+import PaymentsChart from '@components/DashboardPage/blocks/paymentChart'
 
 const Dashboard: React.FC = () => {
   const { data: userResponse } = useGetCurrentUserQuery()
