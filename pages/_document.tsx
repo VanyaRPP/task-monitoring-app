@@ -5,7 +5,14 @@ import type { DocumentContext } from 'next/document'
 
 const MyDocument = () => (
   <Html lang="uk">
-    <Head />
+    <Head>
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="black-translucent"
+      />
+      <meta name="theme-color" content="#783fc4" />
+    </Head>
     <body>
       <Main />
       <NextScript />

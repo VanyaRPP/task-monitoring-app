@@ -37,6 +37,7 @@ import Modal from 'antd/lib/modal/Modal'
 import { saveAs } from 'file-saver'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import { shouldOpenModal } from '@utils/shouldOpenModal'
 
 const PaymentCardHeader = ({
   setCurrentDateFilter,
@@ -204,7 +205,7 @@ const PaymentCardHeader = ({
             <PlusOutlined /> Додати
           </Button>
         )}
-        {(isModalOpen || currentPayment) && (
+        {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
           <AddPaymentModal
             paymentActions={
               !isAdmin ? { edit: false, preview: true } : paymentActions

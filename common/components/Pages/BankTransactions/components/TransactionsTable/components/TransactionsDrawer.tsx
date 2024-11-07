@@ -141,7 +141,6 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
             <ShopOutlined /> Related Company
           </Title>
           <Text strong>Select Company:</Text>
-
       <Badge.Ribbon
         text="Платіж є"
         color="purple"

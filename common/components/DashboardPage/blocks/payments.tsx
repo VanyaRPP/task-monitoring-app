@@ -42,7 +42,7 @@ import {
   theme,
 } from 'antd'
 import { useRouter } from 'next/router'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import s from './style.module.scss'
 
 interface PaymentsBlockProps {
@@ -108,7 +108,8 @@ function getTypeOperation(value) {
 
 const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const router = useRouter()
-  const [currentPayment, setCurrentPayment] = useState<IExtendedPayment>(null)
+  const [currentPayment, setCurrentPayment] =
+    useState<Partial<IExtendedPayment>>(null)
   const [paymentActions, setPaymentActions] = useState({
     edit: false,
     preview: false,
@@ -175,6 +176,14 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     },
     [deletePayment]
   )
+
+  useEffect(() => {
+    if (filters?.domain.length > 0) {
+      setCurrentPayment({
+        domain: { _id: filters.domain[0] },
+      })
+    }
+  }, [filters])
 
   const columns: TableColumnType<any>[] = useMemo(() => {
     return [
