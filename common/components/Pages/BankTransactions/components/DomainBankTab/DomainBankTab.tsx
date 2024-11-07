@@ -4,7 +4,6 @@ import { Card } from 'antd'
 
 import React, { FC } from 'react'
 import TransactionsTable from '../TransactionsTable/TransactionsTable'
-import CustomPagination from '@components/CustomPagination'
 import _initial from 'lodash/initial'
 import { useGetTransactionsQuery } from '@common/api/bankApi/bank.api'
 import s from './style.module.scss'
@@ -23,18 +22,15 @@ const DomainBankTab: FC<Props> = ({ domain }) => {
     ? encryptionService.decrypt(domain?.domainBankToken[0]?.token ?? 'token')
     : ''
 
-  const { data: transactionsData } = useGetTransactionsQuery({ token })
-
+  const { data: transactionsData } = useGetTransactionsQuery(
+    { token },
+    { skip: !token }
+  )
+  
   return (
     <Card>
       {token ? (
-        <TransactionsTable
-          transactions={transactionsData}
-          pagination={
-            <CustomPagination prevButtonText="Prev" nextButtonText="Next" />
-          }
-          domain={domain}
-        />
+        <TransactionsTable transactions={transactionsData} domain={domain} />
       ) : (
         <Alert
           message="Error"

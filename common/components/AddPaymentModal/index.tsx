@@ -25,7 +25,7 @@ import s from './style.module.scss'
 interface Props {
   closeModal: VoidFunction
   paymentData?: any
-  paymentActions?: { edit: boolean; preview: boolean }
+  paymentActions?: { edit: boolean; preview: boolean; create?: boolean }
 }
 
 export interface IPaymentContext {
@@ -48,6 +48,17 @@ export const PaymentContext = createContext<IPaymentContext>({
 export const usePaymentContext = () =>
   useContext<IPaymentContext>(PaymentContext)
 
+const handleValidate = (form, setIsButtonDisabled) => {
+  form
+    .validateFields()
+    .then(() => {
+      setIsButtonDisabled(false)
+    })
+    .catch((errorInfo) => {
+      setIsButtonDisabled(errorInfo.errorFields.length > 0)
+    })
+}
+
 const AddPaymentModal: FC<Props> = ({
   closeModal,
   paymentData,
@@ -55,6 +66,7 @@ const AddPaymentModal: FC<Props> = ({
 }) => {
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true)
 
   const { company, service, payment, prevService, prevPayment } =
     usePaymentFormData(form, paymentData)
@@ -64,7 +76,7 @@ const AddPaymentModal: FC<Props> = ({
     useEditPaymentMutation()
 
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const { preview, edit } = paymentActions
+  const { preview, edit, create } = paymentActions
 
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)
@@ -192,7 +204,15 @@ const AddPaymentModal: FC<Props> = ({
       <Modal
         title={edit ? 'Редагування рахунку' : !preview && 'Додавання рахунку'}
         onOk={activeTabKey === '1' ? handleOk : handleSubmit}
-        okButtonProps={preview ? { style: { display: 'none' } } : null}
+        okButtonProps={
+          preview
+            ? { style: { display: 'none' } }
+            : edit
+            ? {}
+            : isButtonDisabled
+            ? { disabled: true }
+            : null
+        }
         changed={() => isValueChanged}
         onCancel={() => {
           form.resetFields()
@@ -233,7 +253,10 @@ const AddPaymentModal: FC<Props> = ({
           form={form}
           layout="vertical"
           className={s.Form}
-          onValuesChange={() => setIsValueChanged(true)}
+          onValuesChange={() => {
+            setIsValueChanged(true)
+            handleValidate(form, setIsButtonDisabled)
+          }}
         >
           <Tabs
             activeKey={activeTabKey}

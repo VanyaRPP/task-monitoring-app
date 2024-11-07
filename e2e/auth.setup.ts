@@ -5,7 +5,7 @@ import { test as setup, expect } from '@playwright/test'
 // setup('authenticate as admin', async ({ page }) => {
 //   // Perform authentication steps. Replace these actions with your own.
 //   await page.goto('https://github.com/login')
-//   await page.getByLabel('Username or email address').fill('admin')
+//   await page.getByLabel('Username or email street').fill('admin')
 //   await page.getByLabel('Password').fill('password')
 //   await page.getByRole('button', { name: 'Sign in' }).click()
 //   // Wait until the page receives the cookies.
@@ -37,7 +37,7 @@ setup('authenticate as user', async ({ page }) => {
   // Click the button
   await githubButton.click()
 
-  await page.getByLabel('Username or email address').fill('userEmail') //Github Account email here
+  await page.getByLabel('Username or email street').fill('userEmail') //Github Account email here
   await page.getByLabel('Password').fill('userPassword') //Github Account password here
 
   await page.getByRole('button', { name: 'Sign in' }).click()

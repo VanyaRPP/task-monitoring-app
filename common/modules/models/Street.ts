@@ -2,6 +2,7 @@ import mongoose, { Schema } from 'mongoose'
 export interface IStreet {
   address: string
   city: string
+  hasService?: boolean
   _id?: string
   _v: number
 }

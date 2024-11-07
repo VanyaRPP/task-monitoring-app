@@ -134,3 +134,25 @@ export interface IProfitPayment {
   reciever: IReciever
   generalSum: number
 }
+
+export interface IGeneratePaymentExcel {
+  payments: IExtendedPayment[]
+}
+
+export interface IGeneratePaymentExcelResponce {
+  buffer: {
+    data: Buffer
+  }
+  fileName: string
+  fileExtension: string
+}
+
+export interface CompareTransactionResponse {
+  success: boolean
+  matchingPayments: [IPayment]
+}
+
+export interface ICompareTransaction {
+  description: string
+  counterpartyName: string
+}

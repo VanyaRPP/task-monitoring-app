@@ -3,8 +3,11 @@ import { Button } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 
+import { usePermissions } from '@utils/helpers'
+
 import AddStreetModal from '@components/AddStreetModal'
 import { AppRoutes } from '@utils/constants'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 export interface Props {
   showAddButton?: boolean
@@ -36,6 +39,10 @@ const StreetsHeader: React.FC<Props> = ({
       setStreetActions({ ...streetActions, preview: false, edit: true })
   }
 
+  const { data: userResponse } = useGetCurrentUserQuery()
+
+  const UserRoles = usePermissions(userResponse)
+
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
       <Button
@@ -48,7 +55,7 @@ const StreetsHeader: React.FC<Props> = ({
         <SelectOutlined />
       </Button>
 
-      {showAddButton && (
+      {showAddButton && UserRoles?.isGlobalAdmin && (
         <Button type="link" onClick={openModal}>
           <PlusOutlined /> Додати
         </Button>
