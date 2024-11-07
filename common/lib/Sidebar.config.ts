@@ -8,7 +8,7 @@ const config = {
   },
   bestDomain: {
     name: 'Найкращий надавач послуг',
-    // street: 'Zhytomyr city, Mala Berdichivska street, 17',
+    // address: 'Zhytomyr city, Mala Berdichivska street, 17',
     address: 'вул. Мала Бердичівська 17, Житомир',
     rate: 4,
   },

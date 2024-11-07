@@ -215,20 +215,13 @@ const useInflicionValues = (
   previousPlacingPrice: number
   inflicionAmount: number
 } => {
-  const { form, service, prevPayments, prevService } =
-    useInvoicesPaymentContext()
+  const { form, service, prevService } = useInvoicesPaymentContext()
 
   const company: IRealestate | undefined = Form.useWatch(
     ['payments', name, 'company'],
     form
   )
-
-  const prevPayment = prevPayments.find(
-    // TODO: fix typing of IPayment and IExtendedPayment
-    // eslint-disable-next-line
-    // @ts-ignore
-    (payment) => payment.company?._id === company?._id
-  )
+  const prevPayment = usePrevPayment(name)
 
   const previousPlacingPrice = useMemo(() => {
     return (

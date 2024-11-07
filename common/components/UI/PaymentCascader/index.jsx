@@ -8,7 +8,7 @@ import { Cascader } from 'antd'
 
 const PaymentCascader = ({ onChange }) => {
   return (
-    <div className={s.PaymentCascader} >
+    <div className={s.PaymentCascader}>
       <Cascader
         placeholder="Оберіть проміжок"
         options={customOptions}

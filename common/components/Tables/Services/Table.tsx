@@ -14,11 +14,11 @@ import {
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { dateToYear } from '@common/assets/features/formatDate'
 import { AppRoutes, Roles, ServiceName } from '@utils/constants'
-import { isAdminCheck, renderCurrency } from '@utils/helpers'
+import { renderCurrency, isAdminCheck } from '@utils/helpers'
 import { Alert, Button, Popconfirm, Table, Tooltip, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
-import { useCallback, useState } from 'react'
+import { useState, useCallback } from 'react'
 
 interface Props {
   setServiceActions: React.Dispatch<
@@ -60,6 +60,7 @@ const ServicesTable: React.FC<Props> = ({
   const isOnPage = pathname === AppRoutes.SERVICE
 
   const { data: user } = useGetCurrentUserQuery()
+  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   const [deleteService, { isLoading: deleteLoading }] =
     useDeleteServiceMutation()
@@ -110,7 +111,7 @@ const ServicesTable: React.FC<Props> = ({
         }
         loading={isLoading}
         columns={getDefaultColumns(
-          isAdminCheck(user?.roles),
+          isGlobalAdmin,
           handleDelete,
           deleteLoading,
           setCurrentService,
@@ -205,9 +206,6 @@ const getDefaultColumns = (
       width: 120,
       ellipsis: true,
       render: renderCurrency,
-      sorter: isOnPage
-        ? (a, b) => a.maintenancePrice - b.maintenancePrice
-        : null,
     },
     {
       title: ServiceName.electricityPrice,
@@ -215,9 +213,6 @@ const getDefaultColumns = (
       width: 120,
       ellipsis: true,
       render: renderCurrency,
-      sorter: isOnPage
-        ? (a, b) => a.electricityPrice - b.electricityPrice
-        : null,
     },
     {
       title: ServiceName.waterPrice,
@@ -225,7 +220,6 @@ const getDefaultColumns = (
       width: 120,
       ellipsis: true,
       render: renderCurrency,
-      sorter: isOnPage ? (a, b) => a.waterPrice - b.waterPrice : null,
     },
     {
       title: ServiceName.waterPart,
@@ -233,7 +227,6 @@ const getDefaultColumns = (
       width: 120,
       ellipsis: true,
       render: renderCurrency,
-      sorter: isOnPage ? (a, b) => a.waterPart - b.waterPart : null,
     },
     {
       title: ServiceName.garbageCollectorPrice,
@@ -241,16 +234,12 @@ const getDefaultColumns = (
       width: 120,
       ellipsis: true,
       render: renderCurrency,
-      sorter: isOnPage
-        ? (a, b) => a.garbageCollectorPrice - b.garbageCollectorPrice
-        : null,
     },
     {
       title: ServiceName.inflicionPrice,
       width: 120,
       ellipsis: true,
       dataIndex: 'inflicionPrice',
-      sorter: isOnPage ? (a, b) => a.inflicionPrice - b.inflicionPrice : null,
     },
     {
       title: 'Опис',

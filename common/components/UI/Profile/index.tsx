@@ -6,7 +6,6 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { RolesSelector } from '@components/UI/RolesSelector'
 import { Tags } from '@components/UI/Tags'
 import { AppRoutes, Roles } from '@utils/constants'
-
 import {
   Avatar,
   Button,

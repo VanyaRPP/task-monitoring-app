@@ -29,7 +29,6 @@ import {
 import {
   Alert,
   Button,
-  Empty,
   Flex,
   List,
   Popconfirm,
@@ -40,6 +39,7 @@ import {
   Typography,
   message,
   theme,
+  Empty,
 } from 'antd'
 import { useRouter } from 'next/router'
 import React, { useCallback, useMemo, useState } from 'react'
@@ -159,6 +159,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     },
     { skip: currUserLoading || !currUser }
   )
+
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
   const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -235,12 +236,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         dataIndex: 'invoiceCreationDate',
         render: dateToDefaultFormat,
         width: router.pathname === AppRoutes.PAYMENT ? 164 : 70,
-        sorter:
-          router.pathname === AppRoutes.PAYMENT
-            ? (a, b) =>
-                new Date(a.invoiceCreationDate).getTime() -
-                new Date(b.invoiceCreationDate).getTime()
-            : null,
       },
       {
         title: 'Тип',
@@ -261,10 +256,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
               ) : (
                 <span className={s.currency}>-</span>
               ),
-            sorter:
-              router.pathname === AppRoutes.PAYMENT
-                ? (a, b) => a.generalSum - b.generalSum
-                : null,
           },
           {
             title: <Tooltip title="Кредит (Оплата)">Кредит</Tooltip>,
@@ -277,10 +268,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
               ) : (
                 <span className={s.currency}>-</span>
               ),
-            sorter:
-              router.pathname === AppRoutes.PAYMENT
-                ? (a, b) => a.generalSum - b.generalSum
-                : null,
           },
         ],
       },
@@ -288,9 +275,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         title: 'За місяць',
         align: 'center',
         dataIndex: 'monthService',
-        filters: router.pathname === AppRoutes.PAYMENT ? null : null,
-        filteredValue: filters?.domain || null,
-        filterSearch: true,
         width: router.pathname === AppRoutes.PAYMENT ? 164 : 75,
         render: (monthService: IService, obj) => (
           <Popover
@@ -373,9 +357,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           )
         },
         hidden: router.pathname !== AppRoutes.PAYMENT,
-        sorter: (a, b) =>
-          (a.invoice.find((i) => i.type === value)?.sum || 0) -
-          (b.invoice.find((i) => i.type === value)?.sum || 0),
       })),
       {
         fixed: 'right',
@@ -496,6 +477,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           paymentsDeleteItems={paymentsDeleteItems}
           closeEditModal={closeEditModal}
           setCurrentDateFilter={setCurrentDateFilter}
+          setCurrentTypeOperation={setCurrentTypeOperation}
           currentPayment={currentPayment}
           paymentActions={paymentActions}
           streets={payments?.addressFilter}

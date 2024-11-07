@@ -1,7 +1,6 @@
 import { Select } from 'antd'
-import s from '@components/StreetsSelector/style.module.scss'
 
-const StreetsSelector = ({ setFilters, streets }) => {
+const StreetsSelector = ({ filters, setFilters, streets }) => {
   const options = streets?.map((street) => {
     return {
       label: street.text,
@@ -12,7 +11,7 @@ const StreetsSelector = ({ setFilters, streets }) => {
   return (
     <Select
       placeholder="Виберіть вулицю"
-      style={{ width: '200px' }}
+      style={{ width: '250px' }}
       onChange={(value) => {
         setFilters({ street: value })
       }}

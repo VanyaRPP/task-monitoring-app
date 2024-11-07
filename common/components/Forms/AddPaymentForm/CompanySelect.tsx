@@ -7,34 +7,28 @@ import { useEffect } from 'react'
 export default function CompanySelect({
   form,
   edit,
-  create,
 }: {
   form: any
   edit?: boolean
-  create?: boolean
 }) {
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
-  const month = Form.useWatch('monthService', form)
 
-  const isDisabled = !domainId || !streetId || !month
-
-  return isDisabled ? (
-    <Form.Item label="Компанія">
-      <Select placeholder="Оберіть надавача послуг та адресу" disabled />
-    </Form.Item>
-  ) : (
+  return domainId && streetId ? (
     <RealEstateDataFetcher
       domainId={domainId}
       streetId={streetId}
       form={form}
       edit={edit}
-      create={create}
     />
+  ) : (
+    <Form.Item label="Компанія">
+      <Select placeholder="Оберіть надавача послуг та адресу" disabled />
+    </Form.Item>
   )
 }
 
-function RealEstateDataFetcher({ domainId, streetId, form, edit, create }) {
+function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
   const { data: { data: companies } = { data: [] }, isLoading } =
     useGetAllRealEstateQuery({
       domainId,
@@ -51,11 +45,9 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit, create }) {
     if (!edit) {
       if (companies?.length === 1) {
         form.setFieldValue('company', companies[0]._id)
-      } else if (companies?.length > 0) {
-        form.setFieldValue('company', companies[0]._id)
       }
     }
-  }, [form, companies, edit])
+  }, [form, companies])
 
   return (
     <Form.Item
@@ -86,7 +78,7 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit, create }) {
         }))}
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={companies?.length === 1 || (edit && !create) || isLoading}
+        disabled={companies?.length === 1 || edit || isLoading}
         loading={isLoading}
         showSearch
       />
