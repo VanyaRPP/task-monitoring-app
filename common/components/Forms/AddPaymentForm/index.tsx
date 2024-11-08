@@ -18,6 +18,7 @@ import MonthServiceSelect from './MonthServiceSelect'
 import PaymentPricesTable from './PaymentPricesTable'
 import PaymentTotal from './PaymentTotal'
 import { inputNumberParser } from '@utils/helpers'
+import { IDomain } from '@modules/models/Domain'
 
 export const useInvoice = ({
   payment,
@@ -39,7 +40,7 @@ export const useInvoice = ({
 }
 
 function AddPaymentForm({ paymentActions }) {
-  const { preview, edit, create } = paymentActions
+  const { preview, edit } = paymentActions
   const selectedActions = { preview, edit }
 
   const { form, payment, service, company, prevService, prevPayment } =
@@ -68,16 +69,14 @@ function AddPaymentForm({ paymentActions }) {
       <AddressesSelect
         form={form}
         edit={edit}
-        create={create}
         onStreetHasServiceChange={setStreetHasService}
       />
       <MonthServiceSelect
         form={form}
-        edit={create ? !edit : edit}
-        create={create}
+        edit={edit}
         disabled={!streetHasService}
       />
-      <CompanySelect form={form} edit={create ? !edit : edit} create={create} />
+      <CompanySelect form={form} edit={edit} />
       <PaymentTypeSelect edit={!companyId || edit} />
       <InvoiceNumber form={form} paymentActions={selectedActions} />
       <InvoiceCreationDate edit={preview} />
