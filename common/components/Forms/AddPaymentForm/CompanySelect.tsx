@@ -7,7 +7,6 @@ import { useEffect } from 'react'
 export default function CompanySelect({
   form,
   edit,
-  create,
 }: {
   form: any
   edit?: boolean
@@ -29,12 +28,13 @@ export default function CompanySelect({
       streetId={streetId}
       form={form}
       edit={edit}
-      create={create}
     />
   )
 }
 
-function RealEstateDataFetcher({ domainId, streetId, form, edit, create }) {
+function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
+  const companyId = Form.useWatch('company', form)
+
   const { data: { data: companies } = { data: [] }, isLoading } =
     useGetAllRealEstateQuery({
       domainId,
@@ -42,13 +42,7 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit, create }) {
     })
 
   useEffect(() => {
-    if (!edit) {
-      form.setFieldValue('company', undefined)
-    }
-  }, [form, streetId])
-
-  useEffect(() => {
-    if (!edit) {
+    if (!edit && !companyId) {
       if (companies?.length === 1) {
         form.setFieldValue('company', companies[0]._id)
       } else if (companies?.length > 0) {
@@ -86,7 +80,7 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit, create }) {
         }))}
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={companies?.length === 1 || (edit && !create) || isLoading}
+        disabled={companies?.length === 1 || edit || isLoading}
         loading={isLoading}
         showSearch
       />

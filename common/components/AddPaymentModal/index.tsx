@@ -25,7 +25,7 @@ import s from './style.module.scss'
 interface Props {
   closeModal: VoidFunction
   paymentData?: any
-  paymentActions?: { edit: boolean; preview: boolean; create?: boolean }
+  paymentActions?: { edit: boolean; preview: boolean }
 }
 
 export interface IPaymentContext {
@@ -76,7 +76,7 @@ const AddPaymentModal: FC<Props> = ({
     useEditPaymentMutation()
 
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const { preview, edit, create } = paymentActions
+  const { preview, edit } = paymentActions
 
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)
@@ -167,7 +167,6 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
-  // pure cringy useEffect to fill table on preview mode
   useEffect(() => {
     if (paymentActions.preview) {
       form.setFieldsValue({
@@ -227,7 +226,7 @@ const AddPaymentModal: FC<Props> = ({
       >
         <Form
           initialValues={{
-            // TODO: fix payment typing globally to not be `domain: Partial<IDomain> | string` but `Partial<IDomain>` instead
+            // // TODO: fix payment typing globally to not be `domain: Partial<IDomain> | string` but `Partial<IDomain>` instead
             // eslint-disable-next-line
             // @ts-ignore
             domain: payment?.domain?._id,
