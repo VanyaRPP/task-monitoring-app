@@ -18,7 +18,6 @@ import MonthServiceSelect from './MonthServiceSelect'
 import PaymentPricesTable from './PaymentPricesTable'
 import PaymentTotal from './PaymentTotal'
 import { inputNumberParser } from '@utils/helpers'
-import { IDomain } from '@modules/models/Domain'
 
 export const useInvoice = ({
   payment,

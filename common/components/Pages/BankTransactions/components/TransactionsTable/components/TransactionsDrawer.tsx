@@ -130,11 +130,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                   domain: domain,
                 }),
           }}
-          paymentActions={
-            selectedPayment && selectedCompany == selectedPayment.company
-              ? { edit: false, preview: false }
-              : { edit: false, preview: false }
-          }
+          paymentActions={{ edit: false, preview: false }}
         />
       )}
     </>
