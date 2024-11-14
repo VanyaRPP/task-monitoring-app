@@ -89,7 +89,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
           </Typography.Text>
         )}
         {!isInitial && editable && (
-          <Tooltip title={`Відновити початкове значення ${inflicionInvoice}`}>
+          <Tooltip title={`Відновити початкове значення`}>
             <Button
               onClick={() =>
                 form.setFieldValue(['invoice', ...name, 'price'], +initialPrice)
