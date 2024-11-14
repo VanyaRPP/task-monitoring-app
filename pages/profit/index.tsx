@@ -12,7 +12,7 @@ export default withAuthRedirect(() => {
   return (
     <>
       <Head>
-        <title>Прибуткі</title>
+        <title>Прибутки</title>
       </Head>
 
       <MainLayout
@@ -20,7 +20,7 @@ export default withAuthRedirect(() => {
           { title: 'Платежі', path: AppRoutes.PAYMENT },
           { title: 'Створення рахунків', path: AppRoutes.PAYMENT_BULK },
           { title: 'Графік платежів', path: AppRoutes.PAYMENT_CHART },
-          { title: 'Прибуткі', path: AppRoutes.PROFIT },
+          { title: 'Прибутки', path: AppRoutes.PROFIT },
         ]}
       >
         <ProfitPayment />

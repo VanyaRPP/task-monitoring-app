@@ -14,8 +14,9 @@ import {
   IGeneratePaymentExcelResponce,
   CompareTransactionResponse,
   ICompareTransaction,
+  IAddProfitPaymentResponse,
+  IProfitPayment,
 } from './payment.api.types'
-import { ITransaction } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
 
 export const paymentApi = createApi({
   reducerPath: 'paymentApi',
@@ -97,6 +98,18 @@ export const paymentApi = createApi({
         }
       },
       invalidatesTags: (response) => (response ? ['Payment', 'Profit'] : []),
+    }),
+    addProfitPayment: builder.mutation<
+      IAddProfitPaymentResponse,
+      IProfitPayment
+    >({
+      query(body) {
+        return {
+          url: `profit`,
+          method: 'POST',
+          body,
+        }
+      },
     }),
     deletePayment: builder.mutation<
       IDeletePaymentResponse,
@@ -182,6 +195,7 @@ export const {
   useEditPaymentMutation,
   useGeneratePdfMutation,
   useGetProfitPaymentQuery,
+  useAddProfitPaymentMutation,
   useGenerateExcelMutation,
   useCompareTransactionQuery,
 } = paymentApi

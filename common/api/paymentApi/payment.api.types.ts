@@ -46,9 +46,20 @@ export interface IExtendedPayment extends IPayment {
   _v: number
 }
 
+export interface IExtendedProfitPayment extends IProfitPayment {
+  someUniqueField?: string
+  _id: string
+  _v: number
+}
+
 export interface IAddPaymentResponse {
   success: boolean
   data: IExtendedPayment
+}
+
+export interface IAddProfitPaymentResponse {
+  success: boolean
+  data: IExtendedProfitPayment
 }
 
 export interface IFilter {
@@ -120,19 +131,9 @@ export interface IGetProfitPaymentResponse {
 }
 
 export interface IProfitPayment {
-  _id: string
-  invoiceNumber: number
-  type: string
-  invoiceCreationDate: Date
-  domain: Partial<IDomain> | string
-  street: Partial<IStreet> | string
-  company: Partial<IRealestate> | string
-  monthService: Partial<IService> | string
-  description?: string
-  invoice: IPaymentField[]
-  provider: IProvider
-  reciever: IReciever
-  generalSum: number
+  date: Date
+  sum: number
+  description: string
 }
 
 export interface IGeneratePaymentExcel {

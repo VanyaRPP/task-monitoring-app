@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Table, Button } from 'antd'
 import { useRouter } from 'next/router'
-import { CalendarOutlined } from '@ant-design/icons'
+import { CalendarOutlined, PlusOutlined } from '@ant-design/icons'
 
 import { useGetProfitPaymentQuery } from '@common/api/paymentApi/payment.api'
 import s from './style.module.scss'
@@ -9,12 +9,32 @@ import TableCard from '@components/UI/TableCard'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
+import { isAdminCheck } from '@utils/helpers'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import AddProfitModal from '@components/AddProfitModal'
 
 // Активуємо плагін
 dayjs.extend(localizedFormat)
 
 const ProfitPayment: React.FC = () => {
   const router = useRouter()
+  const { data: currUser } = useGetCurrentUserQuery()
+  const isAdmin = isAdminCheck(currUser?.roles)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    closeEditModal()
+  }
+
+  const closeEditModal = () => {
+    // setCurrentPayment(null)
+    // setPaymentActions({
+    //   edit: false,
+    //   preview: false,
+    // })
+  }
+
   const [selectedDate, setSelectedDate] = useState<string>()
 
   const { data: profitPayment, isLoading, isError } = useGetProfitPaymentQuery()
@@ -46,7 +66,7 @@ const ProfitPayment: React.FC = () => {
   return (
     <TableCard
       title={
-        <div className="firstBlock">
+        <div className={s.firstBlock}>
           <Button
             type="link"
             onClick={() => {
@@ -56,6 +76,17 @@ const ProfitPayment: React.FC = () => {
             <CalendarOutlined />
             Прибутки
           </Button>
+          {isAdmin && (
+            <Button type="link" onClick={() => setIsModalOpen(true)}>
+              <PlusOutlined /> Додати
+            </Button>
+          )}
+          {isModalOpen && (
+            <AddProfitModal
+              profitActions={{ edit: false, preview: true }}
+              closeModal={closeModal}
+            />
+          )}
         </div>
       }
     >
