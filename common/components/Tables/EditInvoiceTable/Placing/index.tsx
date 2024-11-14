@@ -46,7 +46,9 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   const [initialPrice, setInitialPrice] = useState(null)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
-  useEffect(() => {if (price !== undefined && initialPrice === null) setInitialPrice(price)})
+  useEffect(() => {
+    if (price !== undefined && initialPrice === null) setInitialPrice(price)
+  })
   const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
 
   const inflicionInvoice = useMemo(() => {
@@ -90,10 +92,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
           <Tooltip title={`Відновити початкове значення ${inflicionInvoice}`}>
             <Button
               onClick={() =>
-                form.setFieldValue(
-                  ['invoice', ...name, 'price'],
-                  +initialPrice
-                )
+                form.setFieldValue(['invoice', ...name, 'price'], +initialPrice)
               }
               icon={<ReloadOutlined />}
             />
