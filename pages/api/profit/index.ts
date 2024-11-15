@@ -113,7 +113,6 @@ export default async function handler(
           message: 'Credit added successfully',
         })
       } catch (error) {
-        console.log('111')
         res.status(500).json({ success: false, message: error.message })
       }
   }
