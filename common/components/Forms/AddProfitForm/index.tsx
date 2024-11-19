@@ -22,10 +22,9 @@ dayjs.locale('uk')
 
 interface Props {
   form: FormInstance<any>
-  edit: boolean
 }
 
-const AddProfitForm: React.FC<Props> = ({ form, edit }) => {
+const AddProfitForm: React.FC<Props> = ({ form }) => {
   const { MonthPicker } = DatePicker
   const date = Form.useWatch('date', form)
 
@@ -53,10 +52,6 @@ const AddProfitForm: React.FC<Props> = ({ form, edit }) => {
         <Form.Item name="description" label="Опис">
           <Input.TextArea
             placeholder="Введіть опис"
-            autoSize={{
-              minRows: 2,
-              maxRows: 5,
-            }}
             maxLength={256}
             className={s.formInput}
           />

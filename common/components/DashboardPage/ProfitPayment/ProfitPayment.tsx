@@ -27,13 +27,7 @@ const ProfitPayment: React.FC = () => {
     closeEditModal()
   }
 
-  const closeEditModal = () => {
-    // setCurrentPayment(null)
-    // setPaymentActions({
-    //   edit: false,
-    //   preview: false,
-    // })
-  }
+  const closeEditModal = () => {}
 
   const [selectedDate, setSelectedDate] = useState<string>()
 
@@ -81,12 +75,7 @@ const ProfitPayment: React.FC = () => {
               <PlusOutlined /> Додати
             </Button>
           )}
-          {isModalOpen && (
-            <AddProfitModal
-              profitActions={{ edit: false, preview: true }}
-              closeModal={closeModal}
-            />
-          )}
+          {isModalOpen && <AddProfitModal closeModal={closeModal} />}
         </div>
       }
     >
