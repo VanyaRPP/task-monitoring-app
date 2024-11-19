@@ -9,13 +9,13 @@ import {
   IGetPaymentNumberResponse,
   IGetPaymentResponse,
   IPayment,
-  IGetProfitPaymentResponse,
+  IGetCostPaymentResponse,
   IGeneratePaymentExcel,
   IGeneratePaymentExcelResponce,
   CompareTransactionResponse,
   ICompareTransaction,
-  IAddProfitPaymentResponse,
-  IProfitPayment,
+  IAddCostPaymentResponse,
+  ICostPayment,
 } from './payment.api.types'
 
 export const paymentApi = createApi({
@@ -83,7 +83,7 @@ export const paymentApi = createApi({
     getPayment: builder.query<IGetPaymentResponse, string>({
       query: (id) => `spacehub/payment/${id}`,
     }),
-    getProfitPayment: builder.query<IGetProfitPaymentResponse, void>({
+    getCostPayment: builder.query<IGetCostPaymentResponse, void>({
       query: () => ({
         url: `profit`,
       }),
@@ -99,10 +99,7 @@ export const paymentApi = createApi({
       },
       invalidatesTags: (response) => (response ? ['Payment', 'Profit'] : []),
     }),
-    addProfitPayment: builder.mutation<
-      IAddProfitPaymentResponse,
-      IProfitPayment
-    >({
+    addCostPayment: builder.mutation<IAddCostPaymentResponse, ICostPayment>({
       query(body) {
         return {
           url: `profit`,
@@ -194,8 +191,8 @@ export const {
   useGetPaymentNumberQuery,
   useEditPaymentMutation,
   useGeneratePdfMutation,
-  useGetProfitPaymentQuery,
-  useAddProfitPaymentMutation,
+  useGetCostPaymentQuery,
+  useAddCostPaymentMutation,
   useGenerateExcelMutation,
   useCompareTransactionQuery,
 } = paymentApi

@@ -24,7 +24,7 @@ interface Props {
   form: FormInstance<any>
 }
 
-const AddProfitForm: React.FC<Props> = ({ form }) => {
+const AddCostForm: React.FC<Props> = ({ form }) => {
   const { MonthPicker } = DatePicker
   const date = Form.useWatch('date', form)
 
@@ -61,4 +61,4 @@ const AddProfitForm: React.FC<Props> = ({ form }) => {
   )
 }
 
-export default AddProfitForm
+export default AddCostForm

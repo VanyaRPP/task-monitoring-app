@@ -3,7 +3,7 @@ import { Table, Button } from 'antd'
 import { useRouter } from 'next/router'
 import { CalendarOutlined, PlusOutlined } from '@ant-design/icons'
 
-import { useGetProfitPaymentQuery } from '@common/api/paymentApi/payment.api'
+import { useGetCostPaymentQuery } from '@common/api/paymentApi/payment.api'
 import s from './style.module.scss'
 import TableCard from '@components/UI/TableCard'
 import dayjs from 'dayjs'
@@ -11,7 +11,7 @@ import 'dayjs/locale/uk'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
 import { isAdminCheck } from '@utils/helpers'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import AddProfitModal from '@components/AddProfitModal'
+import AddCostModal from '@components/AddCostModal'
 
 // Активуємо плагін
 dayjs.extend(localizedFormat)
@@ -31,7 +31,7 @@ const ProfitPayment: React.FC = () => {
 
   const [selectedDate, setSelectedDate] = useState<string>()
 
-  const { data: profitPayment, isLoading, isError } = useGetProfitPaymentQuery()
+  const { data: profitPayment, isLoading, isError } = useGetCostPaymentQuery()
 
   const columns = [
     {
@@ -75,7 +75,7 @@ const ProfitPayment: React.FC = () => {
               <PlusOutlined /> Додати
             </Button>
           )}
-          {isModalOpen && <AddProfitModal closeModal={closeModal} />}
+          {isModalOpen && <AddCostModal closeModal={closeModal} />}
         </div>
       }
     >

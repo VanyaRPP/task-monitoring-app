@@ -46,7 +46,7 @@ export interface IExtendedPayment extends IPayment {
   _v: number
 }
 
-export interface IExtendedProfitPayment extends IProfitPayment {
+export interface IExtendedCostPayment extends ICostPayment {
   someUniqueField?: string
   _id: string
   _v: number
@@ -57,9 +57,9 @@ export interface IAddPaymentResponse {
   data: IExtendedPayment
 }
 
-export interface IAddProfitPaymentResponse {
+export interface IAddCostPaymentResponse {
   success: boolean
-  data: IExtendedProfitPayment
+  data: IExtendedCostPayment
 }
 
 export interface IFilter {
@@ -118,19 +118,19 @@ export interface IGeneratePaymentPDFResponce {
   fileExtension: string
 }
 
-export interface IGetProfitPaymentResponse {
+export interface IGetCostPaymentResponse {
   success: boolean
   date: string
   totalGeneralSumCredit: number
   totalGeneralSumDebit: number
   paymentsByType: {
-    credit: IProfitPayment[]
-    debit: IProfitPayment[]
+    credit: ICostPayment[]
+    debit: ICostPayment[]
   }
   data: any
 }
 
-export interface IProfitPayment {
+export interface ICostPayment {
   date: Date
   sum: number
   description: string

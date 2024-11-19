@@ -106,7 +106,7 @@ export default async function handler(
             .json({ success: false, message: 'Missing required fields' })
         }
 
-        const profit = await Credit.create(req.body)
+        const cost = await Credit.create(req.body)
 
         res.status(200).json({
           success: true,

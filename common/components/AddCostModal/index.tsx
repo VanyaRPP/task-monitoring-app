@@ -6,8 +6,8 @@ import Modal from '@components/UI/ModalWindow'
 import { Form } from 'antd'
 import dayjs from 'dayjs'
 import { FC, useState } from 'react'
-import AddProfitForm from '@components/Forms/AddProfitForm'
-import { useAddProfitPaymentMutation } from '@common/api/paymentApi/payment.api'
+import AddCostForm from '@components/Forms/AddCostForm'
+import { useAddCostPaymentMutation } from '@common/api/paymentApi/payment.api'
 import s from './style.module.scss'
 
 interface Props {
@@ -20,19 +20,18 @@ type FormData = {
   description: string
 }
 
-const AddProfitModal: FC<Props> = ({ closeModal }) => {
+const AddCostModal: FC<Props> = ({ closeModal }) => {
   const [form] = Form.useForm()
-  const [addProfit, { isLoading: isAddingLoading }] =
-    useAddProfitPaymentMutation()
+  const [addCost, { isLoading: isAddingLoading }] = useAddCostPaymentMutation()
 
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
-    const profitData = {
+    const costData = {
       date: dayjs(formData.date).toDate(),
       sum: formData.sum,
       description: formData.description || '',
     }
-    const response = await addProfit(profitData)
+    const response = await addCost(costData)
 
     if ('data' in response) {
       form.resetFields()
@@ -54,9 +53,9 @@ const AddProfitModal: FC<Props> = ({ closeModal }) => {
       cancelText={'Відміна'}
       confirmLoading={isAddingLoading}
     >
-      <AddProfitForm form={form} />
+      <AddCostForm form={form} />
     </Modal>
   )
 }
 
-export default AddProfitModal
+export default AddCostModal
