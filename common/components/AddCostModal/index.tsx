@@ -15,6 +15,7 @@ interface Props {
 }
 
 type FormData = {
+  domain: string
   date: Date
   sum: number
   description: string
@@ -22,11 +23,12 @@ type FormData = {
 
 const AddCostModal: FC<Props> = ({ closeModal }) => {
   const [form] = Form.useForm()
-  const [addCost, { isLoading: isAddingLoading }] = useAddCostPaymentMutation()
+  const [addCost, { isLoading: isLoading }] = useAddCostPaymentMutation()
 
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
     const costData = {
+      domain: formData.domain,
       date: dayjs(formData.date).toDate(),
       sum: formData.sum,
       description: formData.description || '',
@@ -51,7 +53,7 @@ const AddCostModal: FC<Props> = ({ closeModal }) => {
       className={s.Modal}
       okText={'Додати'}
       cancelText={'Відміна'}
-      confirmLoading={isAddingLoading}
+      confirmLoading={isLoading}
     >
       <AddCostForm form={form} />
     </Modal>

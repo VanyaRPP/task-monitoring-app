@@ -26,11 +26,11 @@ interface Props {
 
 const AddCostForm: React.FC<Props> = ({ form }) => {
   const { MonthPicker } = DatePicker
-  const date = Form.useWatch('date', form)
 
   return (
     <ConfigProvider locale={ukUA}>
       <Form form={form} layout="vertical" className={s.Form}>
+        <DomainsSelect form={form} />
         <Form.Item
           name="date"
           label="Місяць та рік"
