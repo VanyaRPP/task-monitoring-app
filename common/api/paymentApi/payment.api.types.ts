@@ -38,7 +38,7 @@ export interface IPayment {
   provider: IProvider
   reciever: IReciever
   generalSum: number
-  transaction: IPaymentTransactions
+  transaction?: IPaymentTransactions
 }
 
 export interface IExtendedPayment extends IPayment {
