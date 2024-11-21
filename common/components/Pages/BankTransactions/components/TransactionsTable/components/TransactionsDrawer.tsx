@@ -7,7 +7,6 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 import AddPaymentModal from '@components/AddPaymentModal'
 import dayjs from 'dayjs'
 import { SendOutlined } from '@ant-design/icons'
-import { useCompareTransactionQuery } from '@common/api/paymentApi/payment.api'
 
 interface TransactionDrawerProps {
   transaction: ITransaction
@@ -23,31 +22,6 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const [selectedPayment, setSelectedPayment] = useState<any>(null)
 
   const transactionAmount = parseFloat(transaction.SUM as string)
-
-  const { data: compareRes, isLoading } = useCompareTransactionQuery({
-    transaction: {
-      description: transaction.OSND,
-      counterpartyName: transaction.AUT_CNTR_NAM,
-    },
-    ...(selectedCompany ? { selectedCompany } : {}),
-  })
-
-  useEffect(() => {
-    if (compareRes?.matchingPayments?.length) {
-      if (compareRes.matchingPayments.length === 1) {
-        setSelectedPayment(compareRes.matchingPayments[0])
-      } else {
-        const minInvoicePayment = compareRes.matchingPayments.reduce(
-          (minPayment, currentPayment) =>
-            currentPayment.invoiceNumber < minPayment.invoiceNumber
-              ? currentPayment
-              : minPayment,
-          compareRes.matchingPayments[0]
-        )
-        setSelectedPayment(minInvoicePayment)
-      }
-    }
-  }, [compareRes])
 
   const { data: realEstatesData } = useGetAllRealEstateQuery({
     domainId: domain._id,
@@ -70,7 +44,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
         style={{
           top: '-50%',
           visibility:
-            selectedCompany || !compareRes?.matchingPayments.length
+            selectedCompany || !transaction?.isMatchingPayment
               ? 'hidden'
               : 'visible',
         }}
@@ -118,6 +92,12 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                   provider: selectedPayment.provider,
                   reciever: selectedPayment.reciever,
                   generalSum: transactionAmount,
+                  transaction: {
+                    AUT_CNTR_ACC: transaction.AUT_CNTR_ACC,
+                    AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
+                    AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
+                    Description: transaction.OSND,
+                  },
                 }
               : {
                   ...relatedCompanies.find(
@@ -128,6 +108,12 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                   invoiceCreationDate: dayjs(transaction.DAT_OD, 'DD.MM.YYYY'),
                   company: selectedCompany,
                   domain: domain,
+                  transaction: {
+                    AUT_CNTR_ACC: transaction.AUT_CNTR_ACC,
+                    AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
+                    AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
+                    Description: transaction.OSND,
+                  },
                 }),
           }}
           paymentActions={{ edit: false, preview: false }}

@@ -158,18 +158,6 @@ export const paymentApi = createApi({
         body,
       }),
     }),
-    compareTransaction: builder.query<
-      CompareTransactionResponse,
-      { transaction: ICompareTransaction; selectedCompany?: string }
-    >({
-      query: ({ transaction, selectedCompany }) => ({
-        url: 'spacehub/payment/compare',
-        params: {
-          transaction: JSON.stringify(transaction),
-          ...(selectedCompany && { companyId: selectedCompany }),
-        },
-      }),
-    }),
   }),
 })
 export const {
@@ -183,5 +171,4 @@ export const {
   useGeneratePdfMutation,
   useGetProfitPaymentQuery,
   useGenerateExcelMutation,
-  useCompareTransactionQuery,
 } = paymentApi
