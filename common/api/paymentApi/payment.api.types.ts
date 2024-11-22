@@ -38,6 +38,7 @@ export interface IPayment {
   provider: IProvider
   reciever: IReciever
   generalSum: number
+  transaction?: IPaymentTransactions
 }
 
 export interface IExtendedPayment extends IPayment {
@@ -156,4 +157,11 @@ export interface CompareTransactionResponse {
 export interface ICompareTransaction {
   description: string
   counterpartyName: string
+}
+
+export interface IPaymentTransactions {
+  AUT_CNTR_ACC: string
+  AUT_CNTR_NAM: string
+  AUT_CNTR_MFO: string
+  Description: string
 }

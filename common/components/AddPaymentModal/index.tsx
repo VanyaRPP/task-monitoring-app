@@ -71,6 +71,13 @@ const AddPaymentModal: FC<Props> = ({
   const { company, service, payment, prevService, prevPayment } =
     usePaymentFormData(form, paymentData)
 
+  const transaction = {
+    AUT_CNTR_ACC: paymentData?.transaction?.AUT_CNTR_ACC || '',
+    AUT_CNTR_NAM: paymentData?.transaction?.AUT_CNTR_NAM || '',
+    AUT_CNTR_MFO: paymentData?.transaction?.AUT_CNTR_MFO || '',
+    Description: paymentData?.transaction?.Description || '',
+  }
+
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
     useEditPaymentMutation()
@@ -110,6 +117,7 @@ const AddPaymentModal: FC<Props> = ({
       generalSum: formData.generalSum || formData.debit,
       provider,
       reciever,
+      transaction,
       invoice: formData.debit
         ? formData.invoice.filter((invoice) => +invoice.sum !== 0)
         : [],

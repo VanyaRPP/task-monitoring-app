@@ -29,6 +29,7 @@ export interface ITransaction {
   TRANTYPE: string
   DLR: string
   TECHNICAL_TRANSACTION_ID: string
+  isMatchingPayment?: boolean
 }
 
 export interface ITransactionData {

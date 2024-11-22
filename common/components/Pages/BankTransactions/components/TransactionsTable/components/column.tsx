@@ -103,14 +103,15 @@ const getDateColumnProps = (dataIndex: keyof ITransaction) => ({
   onFilter: (value: string, record: ITransaction) => {
     if (!value) return true
     const [startDate, endDate] = (value as string).split(',')
-    const recordDate = new Date(record[dataIndex])
+    const recordDate = new Date(record[dataIndex] as string)
     return (
       (!startDate || recordDate >= new Date(startDate)) &&
       (!endDate || recordDate <= new Date(endDate))
     )
   },
   sorter: (a: ITransaction, b: ITransaction) =>
-    new Date(a[dataIndex]).getTime() - new Date(b[dataIndex]).getTime(),
+    new Date(a[dataIndex] as string).getTime() -
+    new Date(b[dataIndex] as string).getTime(),
 })
 
 const getPrPrIcon = (prPr: string) => {
