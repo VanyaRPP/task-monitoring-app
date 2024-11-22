@@ -7,10 +7,15 @@ import Payment from '@modules/models/Payment'
 
 start()
 
-async function checkTransaction({ description }) {
+async function checkTransaction({ transaction }) {
   try {
     const allPayments = await Payment.find({
-      description: description + ' (taken from the transaction description)',
+      $and: [
+        { 'transaction.AUT_CNTR_ACC': transaction.AUT_CNTR_ACC },
+        { 'transaction.AUT_CNTR_NAM': transaction.AUT_CNTR_NAM },
+        { 'transaction.AUT_CNTR_MFO': transaction.AUT_CNTR_MFO },
+        { 'transaction.Description': transaction.OSND },
+      ],
     })
 
     return allPayments.length > 0
@@ -46,7 +51,7 @@ export default async function handler(
           transactions.map(async (transaction) => {
             try {
               const isMatchingPayment = await checkTransaction({
-                description: transaction.OSND,
+                transaction,
               })
 
               return {
