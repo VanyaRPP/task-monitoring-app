@@ -7,10 +7,11 @@ import { useEffect } from 'react'
 export default function CompanySelect({
   form,
   edit,
+  company,
 }: {
   form: any
   edit?: boolean
-  create?: boolean
+  company?: any
 }) {
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
@@ -28,13 +29,12 @@ export default function CompanySelect({
       streetId={streetId}
       form={form}
       edit={edit}
+      company={company}
     />
   )
 }
 
-function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
-  const companyId = Form.useWatch('company', form)
-
+function RealEstateDataFetcher({ domainId, streetId, form, edit, company }) {
   const { data: { data: companies } = { data: [] }, isLoading } =
     useGetAllRealEstateQuery({
       domainId,
@@ -42,11 +42,11 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit }) {
     })
 
   useEffect(() => {
-    if (!edit && !companyId) {
+    if (!edit) {
       if (companies?.length === 1) {
         form.setFieldValue('company', companies[0]._id)
       } else if (companies?.length > 0) {
-        form.setFieldValue('company', companies[0]._id)
+        form.setFieldValue('company', company)
       }
     }
   }, [form, companies, edit])
