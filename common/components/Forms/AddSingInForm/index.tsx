@@ -22,7 +22,7 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
       email: values?.email,
       password: values?.password,
       authType: isLogin ? 'registration' : 'signIn',
-      csrfToken: csrfToken,
+      // csrfToken: csrfToken,
     })
     if (result?.error) {
       message.error(result?.error)
