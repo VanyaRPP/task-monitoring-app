@@ -1,18 +1,16 @@
-// TODO: Move to reusable folder same level as DomainsSelect
 import { validateField } from '@assets/features/validators'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
-export default function CompanySelect({
-  form,
-  edit,
-  company,
-}: {
+interface Props {
   form: any
   edit?: boolean
-  company?: any
-}) {
+  company?: string | Partial<IRealestate>
+}
+
+export default function CompanySelect({ form, edit, company }: Props) {
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
   const month = Form.useWatch('monthService', form)
