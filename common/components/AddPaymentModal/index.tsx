@@ -25,7 +25,7 @@ import s from './style.module.scss'
 interface Props {
   closeModal: VoidFunction
   paymentData?: any
-  paymentActions?: { edit: boolean; preview: boolean }
+  paymentActions?: { edit: boolean; preview: boolean; create?: boolean }
 }
 
 export interface IPaymentContext {
@@ -83,7 +83,7 @@ const AddPaymentModal: FC<Props> = ({
     useEditPaymentMutation()
 
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const { preview, edit } = paymentActions
+  const { preview, edit, create } = paymentActions
 
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)

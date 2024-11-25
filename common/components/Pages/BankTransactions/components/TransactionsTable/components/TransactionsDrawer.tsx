@@ -7,6 +7,7 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 import AddPaymentModal from '@components/AddPaymentModal'
 import dayjs from 'dayjs'
 import { SendOutlined } from '@ant-design/icons'
+import { useCompareTransactionQuery } from '@common/api/paymentApi/payment.api'
 
 interface TransactionDrawerProps {
   transaction: ITransaction
@@ -22,6 +23,31 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const [selectedPayment, setSelectedPayment] = useState<any>(null)
 
   const transactionAmount = parseFloat(transaction.SUM as string)
+
+  const { data: compareRes, isLoading } = useCompareTransactionQuery({
+    transaction: {
+      description: transaction.OSND,
+      counterpartyName: transaction.AUT_CNTR_NAM,
+    },
+    ...(selectedCompany ? { selectedCompany } : {}),
+  })
+
+  useEffect(() => {
+    if (compareRes?.matchingPayments?.length) {
+      if (compareRes.matchingPayments.length === 1) {
+        setSelectedPayment(compareRes.matchingPayments[0])
+      } else {
+        const minInvoicePayment = compareRes.matchingPayments.reduce(
+          (minPayment, currentPayment) =>
+            currentPayment.invoiceNumber < minPayment.invoiceNumber
+              ? currentPayment
+              : minPayment,
+          compareRes.matchingPayments[0]
+        )
+        setSelectedPayment(minInvoicePayment)
+      }
+    }
+  }, [compareRes])
 
   const { data: realEstatesData } = useGetAllRealEstateQuery({
     domainId: domain._id,
@@ -116,7 +142,11 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                   },
                 }),
           }}
-          paymentActions={{ edit: false, preview: false }}
+          paymentActions={
+            selectedPayment && selectedCompany == selectedPayment.company
+              ? { edit: false, preview: false, create: true }
+              : { edit: false, preview: false }
+          }
         />
       )}
     </>

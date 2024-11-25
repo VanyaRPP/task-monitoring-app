@@ -78,7 +78,7 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit, company }) {
         }))}
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={companies?.length === 1 || edit || isLoading}
+        disabled={companies?.length === 1 || (edit && !create) || isLoading}
         loading={isLoading}
         showSearch
       />
