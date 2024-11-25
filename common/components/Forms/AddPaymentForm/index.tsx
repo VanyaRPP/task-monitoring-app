@@ -75,7 +75,7 @@ function AddPaymentForm({ paymentActions }) {
         edit={edit}
         disabled={!streetHasService}
       />
-      <CompanySelect form={form} edit={edit} company={payment.company} />
+      <CompanySelect form={form} edit={edit} company={payment?.company} />
       <PaymentTypeSelect edit={!companyId || edit} />
       <InvoiceNumber form={form} paymentActions={selectedActions} />
       <InvoiceCreationDate edit={preview} />
