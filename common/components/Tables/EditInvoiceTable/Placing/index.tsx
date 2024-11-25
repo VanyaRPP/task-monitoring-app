@@ -43,12 +43,15 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   const name = useMemo(() => toArray<string>(_name), [_name])
 
   const { company, prevService, prevPayment } = usePaymentContext()
-
+  const [initialPrice, setInitialPrice] = useState(null)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  useEffect(() => {
+    if (price !== undefined && initialPrice === null) setInitialPrice(price)
+  })
   const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
 
-  const inflicionInvoice: InvoiceType | undefined = useMemo(() => {
+  const inflicionInvoice = useMemo(() => {
     return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
   }, [invoices])
 
@@ -86,13 +89,10 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
           </Typography.Text>
         )}
         {!isInitial && editable && (
-          <Tooltip title="Відновити початкове значення">
+          <Tooltip title={`Відновити початкове значення`}>
             <Button
               onClick={() =>
-                form.setFieldValue(
-                  ['invoice', ...name, 'price'],
-                  +toRoundFixed(rentPrice + inflicionInvoice?.sum)
-                )
+                form.setFieldValue(['invoice', ...name, 'price'], +initialPrice)
               }
               icon={<ReloadOutlined />}
             />

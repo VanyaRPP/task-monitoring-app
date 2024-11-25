@@ -4,14 +4,23 @@ import {
   InfoCircleOutlined,
   LoadingOutlined,
   SearchOutlined,
+  SettingOutlined,
   StopOutlined,
 } from '@ant-design/icons'
-import { Popover, Input, Button, DatePicker } from 'antd'
+import {
+  Popover,
+  Input,
+  Button,
+  DatePicker,
+  Dropdown,
+  MenuProps,
+  Checkbox,
+} from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { ITransaction } from './transactionTypes'
-import TransactionDrawer from './TransactionsDrawer'
 import { useState } from 'react'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import TransactionDrawer from './TransactionsDrawer'
 
 const { RangePicker } = DatePicker
 
@@ -94,14 +103,15 @@ const getDateColumnProps = (dataIndex: keyof ITransaction) => ({
   onFilter: (value: string, record: ITransaction) => {
     if (!value) return true
     const [startDate, endDate] = (value as string).split(',')
-    const recordDate = new Date(record[dataIndex])
+    const recordDate = new Date(record[dataIndex] as string)
     return (
       (!startDate || recordDate >= new Date(startDate)) &&
       (!endDate || recordDate <= new Date(endDate))
     )
   },
   sorter: (a: ITransaction, b: ITransaction) =>
-    new Date(a[dataIndex]).getTime() - new Date(b[dataIndex]).getTime(),
+    new Date(a[dataIndex] as string).getTime() -
+    new Date(b[dataIndex] as string).getTime(),
 })
 
 const getPrPrIcon = (prPr: string) => {
@@ -147,9 +157,30 @@ const getTrantypeFilterProps = () => ({
 // Main column generator function
 export const generateColumns = (
   visibleColumns: string[],
-  domain: IExtendedDomain
+  domain: IExtendedDomain,
+  toggleColumnVisibility: (columnKey: string) => void
 ): ColumnsType<ITransaction> => {
+  const items: MenuProps['items'] = columnNames.map((col) => ({
+    key: col,
+    label: (
+      <Checkbox
+        value={col}
+        checked={visibleColumns.includes(col)}
+        onChange={(e) => toggleColumnVisibility(e.target.value)}
+      >
+        {col}
+      </Checkbox>
+    ),
+  }))
+
   const columns: ColumnsType<ITransaction> = [
+    {
+      title: 'Counterparty Name',
+      width: '25%',
+      dataIndex: 'AUT_CNTR_NAM',
+      key: 'AUT_CNTR_NAM',
+      ...getColumnSearchProps('AUT_CNTR_NAM'),
+    },
     { title: 'My CRF', dataIndex: 'AUT_MY_CRF', key: 'AUT_MY_CRF' },
     { title: 'My MFO', dataIndex: 'AUT_MY_MFO', key: 'AUT_MY_MFO' },
     { title: 'My Account', dataIndex: 'AUT_MY_ACC', key: 'AUT_MY_ACC' },
@@ -183,13 +214,6 @@ export const generateColumns = (
       key: 'AUT_CNTR_ACC',
       width: '200px',
       ...getColumnSearchProps('AUT_CNTR_ACC'),
-    },
-    {
-      title: 'Counterparty Name',
-      width: '25%',
-      dataIndex: 'AUT_CNTR_NAM',
-      key: 'AUT_CNTR_NAM',
-      ...getColumnSearchProps('AUT_CNTR_NAM'),
     },
     {
       title: 'Counterparty MFO Name',
@@ -257,13 +281,31 @@ export const generateColumns = (
       key: 'TECHNICAL_TRANSACTION_ID',
     },
     {
-      title: 'Options',
+      title: (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <span>Options</span>
+          <Dropdown
+            overlayStyle={{ overflow: 'scroll', maxHeight: '300px' }}
+            menu={{ items }}
+            trigger={['click']}
+          >
+            <SettingOutlined style={{ cursor: 'pointer' }} />
+          </Dropdown>
+        </div>
+      ),
       width: '25%',
       dataIndex: 'OPTIONS',
       key: 'OPTIONS',
-      render: (text: string, record: ITransaction) => {
-        return <TransactionDrawer transaction={record} domain={domain} />
-      },
+      fixed: 'right' as const,
+      render: (text: string, record: ITransaction) => (
+        <TransactionDrawer transaction={record} domain={domain} />
+      ),
     },
   ].filter((column) => visibleColumns.includes(column.key))
 

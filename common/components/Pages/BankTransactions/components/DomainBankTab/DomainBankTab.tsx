@@ -6,6 +6,7 @@ import React, { FC } from 'react'
 import TransactionsTable from '../TransactionsTable/TransactionsTable'
 import _initial from 'lodash/initial'
 import { useGetTransactionsQuery } from '@common/api/bankApi/bank.api'
+import s from './style.module.scss'
 import { Alert } from 'antd'
 
 interface Props {

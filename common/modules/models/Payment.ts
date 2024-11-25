@@ -1,5 +1,6 @@
 import {
   IPaymentField,
+  IPaymentTransactions,
   IProvider,
   IReciever,
 } from '@common/api/paymentApi/payment.api.types'
@@ -18,6 +19,7 @@ export interface IPaymentModel {
   provider: IProvider
   reciever: IReciever
   generalSum: number
+  transaction: IPaymentTransactions
 }
 
 export const PaymentSchema = new Schema<IPaymentModel>({
@@ -33,6 +35,7 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   provider: { type: Object },
   reciever: { type: Object },
   generalSum: { type: Number },
+  transaction: { type: Object },
 })
 
 const Payment =

@@ -38,7 +38,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   }, [streets])
 
   useEffect(() => {
-    if (!create && !edit) {
+    if (!edit && !streetId) {
       if (domainId) {
         if (options.length === 1) {
           form.setFieldsValue({ street: options[0].value })

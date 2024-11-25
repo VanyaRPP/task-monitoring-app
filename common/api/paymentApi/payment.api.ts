@@ -9,10 +9,13 @@ import {
   IGetPaymentNumberResponse,
   IGetPaymentResponse,
   IPayment,
+  IGetCostPaymentResponse,
   IGeneratePaymentExcel,
   IGeneratePaymentExcelResponce,
   CompareTransactionResponse,
   ICompareTransaction,
+  IAddCostPaymentResponse,
+  ICostPayment,
 } from './payment.api.types'
 import { ITransaction } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
 
@@ -20,7 +23,7 @@ export const paymentApi = createApi({
   reducerPath: 'paymentApi',
   refetchOnFocus: true,
   refetchOnReconnect: true,
-  tagTypes: ['Payment'],
+  tagTypes: ['Payment', 'Profit'],
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getAllPayments: builder.query<
@@ -81,6 +84,12 @@ export const paymentApi = createApi({
     getPayment: builder.query<IGetPaymentResponse, string>({
       query: (id) => `spacehub/payment/${id}`,
     }),
+    getCostPayment: builder.query<IGetCostPaymentResponse, void>({
+      query: () => ({
+        url: `profit`,
+      }),
+      providesTags: (result) => (result ? ['Profit'] : []),
+    }),
     addPayment: builder.mutation<IAddPaymentResponse, IPayment>({
       query(body) {
         return {
@@ -89,7 +98,16 @@ export const paymentApi = createApi({
           body,
         }
       },
-      invalidatesTags: (response) => (response ? ['Payment'] : []),
+      invalidatesTags: (response) => (response ? ['Payment', 'Profit'] : []),
+    }),
+    addCostPayment: builder.mutation<IAddCostPaymentResponse, ICostPayment>({
+      query(body) {
+        return {
+          url: `profit`,
+          method: 'POST',
+          body,
+        }
+      },
     }),
     deletePayment: builder.mutation<
       IDeletePaymentResponse,
@@ -174,6 +192,8 @@ export const {
   useGetPaymentNumberQuery,
   useEditPaymentMutation,
   useGeneratePdfMutation,
+  useGetCostPaymentQuery,
+  useAddCostPaymentMutation,
   useGenerateExcelMutation,
   useCompareTransactionQuery,
 } = paymentApi

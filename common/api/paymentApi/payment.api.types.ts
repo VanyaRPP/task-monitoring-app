@@ -38,6 +38,7 @@ export interface IPayment {
   provider: IProvider
   reciever: IReciever
   generalSum: number
+  transaction?: IPaymentTransactions
 }
 
 export interface IExtendedPayment extends IPayment {
@@ -46,9 +47,20 @@ export interface IExtendedPayment extends IPayment {
   _v: number
 }
 
+export interface IExtendedCostPayment extends ICostPayment {
+  someUniqueField?: string
+  _id: string
+  _v: number
+}
+
 export interface IAddPaymentResponse {
   success: boolean
   data: IExtendedPayment
+}
+
+export interface IAddCostPaymentResponse {
+  success: boolean
+  data: IExtendedCostPayment
 }
 
 export interface IFilter {
@@ -107,6 +119,24 @@ export interface IGeneratePaymentPDFResponce {
   fileExtension: string
 }
 
+export interface IGetCostPaymentResponse {
+  success: boolean
+  date: string
+  totalGeneralSumCredit: number
+  totalGeneralSumDebit: number
+  paymentsByType: {
+    credit: ICostPayment[]
+    debit: ICostPayment[]
+  }
+  data: any
+}
+
+export interface ICostPayment {
+  date: Date
+  sum: number
+  description: string
+}
+
 export interface IGeneratePaymentExcel {
   payments: IExtendedPayment[]
 }
@@ -127,4 +157,11 @@ export interface CompareTransactionResponse {
 export interface ICompareTransaction {
   description: string
   counterpartyName: string
+}
+
+export interface IPaymentTransactions {
+  AUT_CNTR_ACC: string
+  AUT_CNTR_NAM: string
+  AUT_CNTR_MFO: string
+  Description: string
 }
