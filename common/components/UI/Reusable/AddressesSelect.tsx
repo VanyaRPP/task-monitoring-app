@@ -8,6 +8,7 @@ import { CSSProperties, useEffect, useMemo } from 'react'
 export interface AddressesSelectProps {
   form: FormInstance
   edit?: boolean
+  create?: boolean
   dropdownStyle?: CSSProperties
   onStreetHasServiceChange?: (hasService: boolean) => void
 }
@@ -15,6 +16,7 @@ export interface AddressesSelectProps {
 const AddressesSelect: React.FC<AddressesSelectProps> = ({
   form,
   edit,
+  create,
   dropdownStyle,
   onStreetHasServiceChange,
 }) => {

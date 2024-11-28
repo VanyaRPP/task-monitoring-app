@@ -25,7 +25,7 @@ import s from './style.module.scss'
 interface Props {
   closeModal: VoidFunction
   paymentData?: any
-  paymentActions?: { edit: boolean; preview: boolean }
+  paymentActions?: { edit: boolean; preview: boolean; create?: boolean }
 }
 
 export interface IPaymentContext {
@@ -71,12 +71,19 @@ const AddPaymentModal: FC<Props> = ({
   const { company, service, payment, prevService, prevPayment } =
     usePaymentFormData(form, paymentData)
 
+  const transaction = {
+    AUT_CNTR_ACC: paymentData?.transaction?.AUT_CNTR_ACC || '',
+    AUT_CNTR_NAM: paymentData?.transaction?.AUT_CNTR_NAM || '',
+    AUT_CNTR_MFO: paymentData?.transaction?.AUT_CNTR_MFO || '',
+    Description: paymentData?.transaction?.Description || '',
+  }
+
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
     useEditPaymentMutation()
 
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const { preview, edit } = paymentActions
+  const { preview, edit, create } = paymentActions
 
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)
@@ -110,6 +117,7 @@ const AddPaymentModal: FC<Props> = ({
       generalSum: formData.generalSum || formData.debit,
       provider,
       reciever,
+      transaction,
       invoice: formData.debit
         ? formData.invoice.filter((invoice) => +invoice.sum !== 0)
         : [],

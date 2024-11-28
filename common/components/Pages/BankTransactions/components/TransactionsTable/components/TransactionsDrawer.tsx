@@ -70,7 +70,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
         style={{
           top: '-50%',
           visibility:
-            selectedCompany || !compareRes?.matchingPayments.length
+            selectedCompany || !transaction?.isMatchingPayment
               ? 'hidden'
               : 'visible',
         }}
@@ -118,6 +118,12 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                   provider: selectedPayment.provider,
                   reciever: selectedPayment.reciever,
                   generalSum: transactionAmount,
+                  transaction: {
+                    AUT_CNTR_ACC: transaction.AUT_CNTR_ACC,
+                    AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
+                    AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
+                    Description: transaction.OSND,
+                  },
                 }
               : {
                   ...relatedCompanies.find(
@@ -128,9 +134,19 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                   invoiceCreationDate: dayjs(transaction.DAT_OD, 'DD.MM.YYYY'),
                   company: selectedCompany,
                   domain: domain,
+                  transaction: {
+                    AUT_CNTR_ACC: transaction.AUT_CNTR_ACC,
+                    AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
+                    AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
+                    Description: transaction.OSND,
+                  },
                 }),
           }}
-          paymentActions={{ edit: false, preview: false }}
+          paymentActions={
+            selectedPayment && selectedCompany == selectedPayment.company
+              ? { edit: false, preview: false, create: true }
+              : { edit: false, preview: false }
+          }
         />
       )}
     </>

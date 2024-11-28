@@ -7,6 +7,7 @@ import Payment from '@modules/models/Payment'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import _groupBy from 'lodash/groupBy'
 import dayjs from 'dayjs'
+import Credit from '@modules/models/Credit'
 
 start()
 
@@ -93,6 +94,26 @@ export default async function handler(
         })
       } catch (error) {
         res.status(400).json({ success: false, message: error.message })
+      }
+
+    case 'POST':
+      try {
+        const { sum, description } = req.body
+
+        if (!sum || !description) {
+          return res
+            .status(400)
+            .json({ success: false, message: 'Missing required fields' })
+        }
+
+        const cost = await Credit.create(req.body)
+
+        res.status(200).json({
+          success: true,
+          message: 'Credit added successfully',
+        })
+      } catch (error) {
+        res.status(500).json({ success: false, message: error.message })
       }
   }
 }
