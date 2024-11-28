@@ -12,7 +12,7 @@ import {
   InputNumber,
   Typography,
 } from 'antd'
-import {FC, useEffect, useMemo, useState} from 'react'
+import { FC, useEffect, useMemo, useState } from 'react'
 import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
@@ -63,8 +63,7 @@ const RealEstateForm: FC<Props> = ({
   }, [domain, form])
 
   const isServiceExist = (value: string) => {
-    if(!domain._id || !services || !services.length)
-      return false
+    if (!domain._id || !services || !services.length) return false
     const existedValues = services.map((x) => !!x[value])
     return existedValues.includes(true)
   }
