@@ -1,0 +1,28 @@
+name: Run Playwright Tests
+
+on:
+  push:  # Trigger on push to any branch
+  pull_request:  # Trigger on pull requests
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18 # Use the Node.js version your project requires
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install # or npm install if you use npm
+
+      - name: Install Playwright dependencies
+        run: npx playwright install-deps # Installs system dependencies required by Playwright
+
+      - name: Run Playwright tests
+        run: npx playwright test
