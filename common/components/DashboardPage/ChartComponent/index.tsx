@@ -55,8 +55,6 @@ const ChartComponent: React.FC<ChartComponentProps> = ({
     return !isError && data?.length > 0 && companyId
   }, [isError, data, companyId])
 
-  console.log(data)
-
   return (
     <Card
       title={

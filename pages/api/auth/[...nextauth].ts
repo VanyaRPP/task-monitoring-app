@@ -53,6 +53,7 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials, req) {
         try {
           const user = await User.findOne({ email: credentials.email })
+
           if (credentials.authType === 'signIn') {
             if (
               user &&
@@ -143,8 +144,8 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: '/auth/signin',
-    error: '/auth/signin', ///auth/error Error code passed in query string as ?error=
+    // signIn: '/auth/signin',
+    // error: '/auth/signin', ///auth/error Error code passed in query string as ?error=
     // signOut: '/auth/signout',
     verifyRequest: '/auth/verify-request', // (used for check email message)
     // newUser: '/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
