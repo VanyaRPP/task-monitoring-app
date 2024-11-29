@@ -28,7 +28,7 @@ jobs:
         run: npx playwright install
 
       - name: Start the app in the background
-        run: yarn devv
+        run: yarn dev
 
       - name: Run Playwright tests
         run: npx playwright test
