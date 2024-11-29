@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "npm run browser:open && next dev",
-    "devv": "npm run next dev",
+    "devv": "next dev",
     "build": "next build",
     "start": "next start",
     "test:e2e": "playwright test",
