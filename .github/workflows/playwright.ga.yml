@@ -32,11 +32,6 @@ jobs:
         env:
           PORT: 3000
 
-      - name: Wait for the app to be ready
-        run: |
-          echo "Waiting for the app to be ready..."
-          timeout 30s bash -c 'until curl -s http://localhost:3000 > /dev/null; do sleep 1; done'
-
       - name: Run Playwright tests
         run: npx playwright test
 
