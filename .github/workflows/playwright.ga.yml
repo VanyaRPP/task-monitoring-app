@@ -28,9 +28,7 @@ jobs:
         run: npx playwright install
 
       - name: Start the app in the background
-        run: yarn dev &
-        env:
-          PORT: 3000
+        run: yarn devv
 
       - name: Run Playwright tests
         run: npx playwright test
