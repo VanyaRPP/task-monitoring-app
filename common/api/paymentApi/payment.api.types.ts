@@ -149,16 +149,6 @@ export interface IGeneratePaymentExcelResponce {
   fileExtension: string
 }
 
-export interface CompareTransactionResponse {
-  success: boolean
-  matchingPayments: [IPayment]
-}
-
-export interface ICompareTransaction {
-  description: string
-  counterpartyName: string
-}
-
 export interface IPaymentTransactions {
   AUT_CNTR_ACC: string
   AUT_CNTR_NAM: string

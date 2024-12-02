@@ -40,10 +40,8 @@ export const PlacesAutocomplete = ({
     () => {
       setValue(description, false)
       clearSuggestions()
-      //console.log('📍 Adr: ', description)
       getGeocode({ address: description }).then((results) => {
         const { lat, lng } = getLatLng(results[0])
-        //console.log('📍 Coordinates: ', { lat, lng })
         setAddress({ name: description, geoCode: { lat, lng } })
       })
     }
