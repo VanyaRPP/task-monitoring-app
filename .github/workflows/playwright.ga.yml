@@ -21,6 +21,17 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
+      - name: Build the application
+        run: yarn build
+
+      - name: Start the application
+        run: yarn start &
+        env:
+          PORT: 3000
+
+      - name: Wait for the server to be ready
+        run: npx wait-on http://localhost:3000
+
       - name: Install Playwright dependencies
         run: npx playwright install-deps
 
