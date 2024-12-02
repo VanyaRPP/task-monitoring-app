@@ -3,7 +3,7 @@ import { AppRoutes } from '@utils/constants'
 import routeNavigator from './routerNavigation'
 
 export const createDomainForm = (page: Page) => {
-  const goto = routeNavigator(page, AppRoutes)
+  const goto = routeNavigator(page)
 
   return {
     async openModal() {
