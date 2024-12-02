@@ -27,11 +27,5 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install
 
-      - name: Start the app in the background
-        run: yarn dev
-
       - name: Run Playwright tests
         run: npx playwright test
-
-      - name: Stop the app
-        run: kill $(jobs -p)
