@@ -25,7 +25,7 @@ jobs:
         run: yarn build
 
       - name: Start the application
-        run: yarn start &
+        run: yarn devv &
         env:
           PORT: 3000
 
