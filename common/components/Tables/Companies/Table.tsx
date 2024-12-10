@@ -37,6 +37,7 @@ import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
+import { useEffect } from 'react'
 
 export interface Props {
   domainId?: string
@@ -73,10 +74,14 @@ const CompaniesTable: React.FC<Props> = ({
   const { pathname } = router
 
   const { data: userResponse } = useGetCurrentUserQuery()
-  const { data: realEstatesFilter } = useGetRealEstateFiltersQuery()
+  const { data: domain } = useGetDomainFiltersQuery(filters?.company)
 
-  const { data: realEstate } = useGetRealEstateFiltersQuery()
-  const { data: domain } = useGetDomainFiltersQuery()
+  const { data: realEstate } = useGetRealEstateFiltersQuery(filters?.domain)
+  useEffect(() => {
+    if (domain?.length === 1) {
+      setFilters((prev) => ({ ...prev, domain: [domain[0].value] }))
+    }
+  }, [domain])
   const { data: street } = useGetAddressFiltersQuery()
 
   const [deleteRealEstate, { isLoading: deleteLoading }] =
@@ -141,7 +146,7 @@ const CompaniesTable: React.FC<Props> = ({
         deleteLoading,
         isGlobalAdmin,
         isAdmin,
-        domainsFilter: domain?.domainsFilter,
+        domainsFilter: domain,
         streetsFilter: street?.streetsFilter,
         realEstatesFilter: realEstate?.realEstatesFilter,
         filters,
