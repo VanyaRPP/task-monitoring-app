@@ -30,7 +30,6 @@ export const createPaymentForm = (page: Page) => {
       for (let i = 0; i < count; i++) {
         const item = items.nth(i);
         await expect(item).not.toHaveText('');
-        console.log(i)
       }
     },
 
