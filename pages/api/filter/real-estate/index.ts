@@ -5,6 +5,7 @@ import { getDistinctCompanyAndDomain } from '@utils/helpers'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import RealEstate from '@modules/models/RealEstate'
+import _intersectionBy from 'lodash/intersectionBy'
 
 start()
 
@@ -13,6 +14,8 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const { isGlobalAdmin, user } = await getCurrentUser(req, res)
+
+  const { domainIds } = req.query
 
   if (req.method === 'GET') {
     try {
@@ -26,11 +29,30 @@ export default async function handler(
       const realEstatesFilter = distinctCompanies?.map(
         ({ companyDetails }) => ({
           text: companyDetails.companyName,
-          value: companyDetails._id,
+          value: String(companyDetails._id),
         })
       )
 
-      return res.status(200).json({ realEstatesFilter, success: true })
+      let result = realEstatesFilter
+
+      if (domainIds) {
+        const filteredRealEstate = await RealEstate.find({
+          domain: { $in: domainIds?.split(',') },
+        })
+
+        const filteredRealEstateMapped = filteredRealestate.map((el) => ({
+          text: el.companyName,
+          value: String(el._id),
+        }))
+
+        result = _intersectionBy(
+          realEstatesFilter,
+          filteredRealEstateMapped,
+          'value'
+        )
+      }
+
+      return res.status(200).json({ realEstatesFilter: result, success: true })
     } catch (error) {
       return res.status(400).json({ success: false, error: error.message })
     }

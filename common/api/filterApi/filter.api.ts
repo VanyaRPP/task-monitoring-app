@@ -1,5 +1,11 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { IPaymentFilterResponse } from './filter.api.types'
+import {
+  BaseQueryMeta,
+  BaseQueryResult,
+  createApi,
+  fetchBaseQuery,
+} from '@reduxjs/toolkit/query/react'
+import { IFilter, IPaymentFilterResponse } from './filter.api.types'
+import { Promise } from 'mongodb'
 
 export const filterApi = createApi({
   reducerPath: 'filterApi',
@@ -8,13 +14,16 @@ export const filterApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/filter/` }),
   endpoints: (builder) => ({
-    getDomainFilters: builder.query<IPaymentFilterResponse, void>({
-      query: () => {
+    getDomainFilters: builder.query<IFilter[], string[] | void>({
+      query: (realEstateIds) => {
         return {
           url: `domain`,
           method: 'GET',
+          params: { realEstateIds },
         }
       },
+      transformResponse: (response: IPaymentFilterResponse) =>
+        response.domainsFilter,
       providesTags: (response) =>
         response ? [{ type: 'Filter', id: 'domainsFilter' }] : [],
     }),
@@ -46,11 +55,15 @@ export const filterApi = createApi({
             ]
           : [],
     }),
-    getRealEstateFilters: builder.query<IPaymentFilterResponse, void>({
-      query: () => {
+    getRealEstateFilters: builder.query<
+      IPaymentFilterResponse,
+      string[] | void
+    >({
+      query: (domainIds) => {
         return {
           url: 'real-estate',
           method: 'GET',
+          params: { domainIds },
         }
       },
       providesTags: (response) =>
