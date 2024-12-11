@@ -27,6 +27,7 @@ export default async function handler(
           return res.status(200).json({ success: true, data: [] })
         }
 
+      
         if (isDomainAdmin) {
           const adminDomains = await Domain.find({
             adminEmails: user.email,
