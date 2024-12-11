@@ -20,72 +20,44 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { limit = 0, domainId } = req.query
-        const options = {}
+        const { limit = 0, domainId } = req.query;
 
         if (!isDomainAdmin && !isGlobalAdmin) {
-          return res.status(200).json({ success: true, data: [] })
+          return res.status(200).json({ success: true, data: [] });
         }
 
-        if (isDomainAdmin) {
-          const adminDomains = await Domain.find({
-            adminEmails: user.email,
-          }).select('_id')
-
-          const adminDomainIds = adminDomains.map((domain) =>
-            domain._id.toString()
-          )
-
-          if (adminDomainIds.length === 0) {
-            return res.status(200).json({ success: true, data: [] })
-          }
-
-          options._id = { $in: adminDomainIds }
-        }
+        const streetQuery: Record<string, any> = {};
 
         if (domainId && typeof domainId === 'string') {
           if (mongoose.Types.ObjectId.isValid(domainId)) {
-            options._id = new mongoose.Types.ObjectId(domainId)
+            streetQuery.domain = new mongoose.Types.ObjectId(domainId);
           } else {
             return res
               .status(400)
-              .json({ success: false, message: 'Invalid domainId format' })
+              .json({ success: false, message: 'Invalid domainId format' });
           }
         }
 
-        const domains = await Domain.find(options)
-          .limit(+limit)
-          .populate('streets')
+        const streets = await Street.find(streetQuery).limit(+limit);
 
-        const streets = domains.flatMap((domain) => domain.streets)
-
-        const streetIds = streets.map((street) => street._id)
-
+        const streetIds = streets.map((street) => street._id);
         const servicesWithStreets = await Service.find({
-          domain: domainId,
           street: { $in: streetIds },
-        })
-
-        const filteredStreets = streets.filter((street) =>
-          servicesWithStreets.some(
-            (service) => service.street.toString() === street._id.toString()
-          )
-        )
+        });
 
         const result = streets.map((street) => ({
           ...street._doc,
-          hasService: filteredStreets.some(
-            (filteredStreet) =>
-              filteredStreet._id.toString() === street._id.toString()
+          hasService: servicesWithStreets.some(
+            (service) => service.street.toString() === street._id.toString()
           ),
-        }))
+        }));
 
         return res.status(200).json({
           success: true,
           data: _uniqBy(result, '_id'),
-        })
+        });
       } catch (error) {
-        return res.status(400).json({ success: false, error: error.message })
+        return res.status(400).json({ success: false, error: error.message });
       }
 
     case 'POST':
