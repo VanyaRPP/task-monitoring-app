@@ -22,22 +22,23 @@ export const createPaymentForm = (page: Page) => {
         .first()
       await dropdownOption.waitFor({ state: 'visible' })
       await dropdownOption.click()
-      await page.waitForTimeout(10000);
+      await page.waitForTimeout(10000)
     },
-    async checkFillInputs(){
-      const items = page.locator('.ant-select-selection-item');
-      const count = await items.count();
+    async checkFillInputs() {
+      const items = page.locator('.ant-select-selection-item')
+      const count = await items.count()
       for (let i = 0; i < count; i++) {
-        const item = items.nth(i);
-        await expect(item).not.toHaveText('');
+        const item = items.nth(i)
+        await expect(item).not.toHaveText('')
       }
     },
 
     async selectPaymentType(paymentType: string) {
-      const combobox = page.locator('.ant-form-item-required', {hasText: 'Тип оплати'})
+      const combobox = page.locator('.ant-form-item-required', {
+        hasText: 'Тип оплати',
+      })
       await expect(combobox).toBeEnabled()
       await combobox.click()
-
     },
 
     async fillPaymentDetails(invoiceNumber: string, amount?: string) {
@@ -46,11 +47,12 @@ export const createPaymentForm = (page: Page) => {
       if (amount) {
         await page.getByLabel('Сума').fill(amount)
       }
-      await page.getByLabel('Опис').fill('тест');
+      await page.getByLabel('Опис').fill('тест')
     },
 
     async checkLogicForPaymentType(paymentType: string) {
-      const selectedPaymentType = await page.locator("")
+      const selectedPaymentType = await page
+        .locator('')
         .locator('.ant-select-selection-item')
         .innerText()
 
