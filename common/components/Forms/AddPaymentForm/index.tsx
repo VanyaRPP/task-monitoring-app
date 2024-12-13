@@ -70,11 +70,7 @@ function AddPaymentForm({ paymentActions }) {
         edit={edit}
         onStreetHasServiceChange={setStreetHasService}
       />
-      <MonthServiceSelect
-        form={form}
-        edit={edit}
-        disabled={!streetHasService}
-      />
+      <MonthServiceSelect form={form} edit={edit} />
       <CompanySelect form={form} edit={edit} company={payment?.company} />
       <PaymentTypeSelect edit={!companyId || edit} />
       <InvoiceNumber form={form} paymentActions={selectedActions} />
