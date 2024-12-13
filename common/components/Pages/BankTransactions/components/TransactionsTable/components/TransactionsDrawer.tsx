@@ -87,7 +87,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                   street: { _id: selectedPayment.street },
                   company: { _id: selectedPayment.company },
                   monthService: { _id: selectedPayment.monthService },
-                  description: `${transaction.OSND} (taken from the transaction description)`,
+                  description: `${transaction.OSND}`,
                   invoice: selectedPayment.invoice,
                   provider: selectedPayment.provider,
                   reciever: selectedPayment.reciever,
@@ -104,7 +104,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                     (company: IRealestate) => company._id === selectedCompany
                   ),
                   generalSum: transactionAmount,
-                  description: `${transaction.OSND} (taken from the transaction description)`,
+                  description: `${transaction.OSND}`,
                   invoiceCreationDate: dayjs(transaction.DAT_OD, 'DD.MM.YYYY'),
                   company: selectedCompany,
                   domain: domain,
