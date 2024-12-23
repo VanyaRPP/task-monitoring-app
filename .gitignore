@@ -23,7 +23,8 @@ playwright/.auth
 next-env.d.ts
 
 # local env files
-.env*.local
+.env
+.env.local
 
 # debug
 npm-debug.log*
