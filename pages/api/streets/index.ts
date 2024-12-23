@@ -15,49 +15,47 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isDomainAdmin, user } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isUser, user } = await getCurrentUser(req, res)
 
-    switch (req.method) {
+  switch (req.method) {
     case 'GET':
       try {
-        const { limit = 0, domainId } = req.query;
+        const { limit = 0 } = req.query;
 
-        if (!isDomainAdmin && !isGlobalAdmin) {
+        if (isUser) {
           return res.status(200).json({ success: true, data: [] });
         }
 
-        const streetQuery: Record<string, any> = {};
-
-        if (domainId && typeof domainId === 'string') {
-          if (mongoose.Types.ObjectId.isValid(domainId)) {
-            streetQuery.domain = new mongoose.Types.ObjectId(domainId);
-          } else {
-            return res
-              .status(400)
-              .json({ success: false, message: 'Invalid domainId format' });
-          }
+        if (isGlobalAdmin) {
+          const streets = await Street.find({}).limit(+limit);
+          return res.status(200).json({
+            success: true,
+            data: _uniqBy(streets, '_id'),
+          });
         }
 
-        const streets = await Street.find(streetQuery).limit(+limit);
+        if (isDomainAdmin) {
+          const adminDomains = await Domain.find({
+            adminEmails: user.email,
+          }).select('streets');
 
-        const streetIds = streets.map((street) => street._id);
-        const servicesWithStreets = await Service.find({
-          street: { $in: streetIds },
-        });
+          if (!adminDomains.length) {
+            return res.status(200).json({ success: true, data: [] });
+          }
 
-        const result = streets.map((street) => ({
-          ...street._doc,
-          hasService: servicesWithStreets.some(
-            (service) => service.street.toString() === street._id.toString()
-          ),
-        }));
+          const streetIds = adminDomains.flatMap((domain) => domain.streets);
 
-        return res.status(200).json({
-          success: true,
-          data: _uniqBy(result, '_id'),
-        });
+          const streets = await Street.find({
+            _id: { $in: streetIds },
+          }).limit(+limit);
+
+          return res.status(200).json({
+            success: true,
+            data: streets,
+          });
+        }
       } catch (error) {
-        return res.status(400).json({ success: false, error: error.message });
+        return res.status(400).json({ success: false, error: error.message })
       }
 
 
