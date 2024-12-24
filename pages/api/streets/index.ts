@@ -39,20 +39,31 @@ export default async function handler(
         }
 
         if (isGlobalAdmin) {
+          let streets;
+
           if (domainId) {
             const domain = await Domain.findOne(options).populate('streets');
-            const streets = domain ? domain.streets : [];
-            return res.status(200).json({
-              success: true,
-              data: _uniqBy(streets, '_id'),
-            });
+            streets = domain ? domain.streets : [];
           } else {
-            const streets = await Street.find({}).limit(+limit);
-            return res.status(200).json({
-              success: true,
-              data: _uniqBy(streets, '_id'),
-            });
+            streets = await Street.find({}).limit(+limit);
           }
+
+          const streetIds = streets.map((street) => street._id);
+          const servicesWithStreets = await Service.find({
+            street: { $in: streetIds },
+          });
+
+          const result = streets.map((street) => ({
+            ...street._doc,
+            hasService: servicesWithStreets.some(
+              (service) => service.street.toString() === street._id.toString()
+            ),
+          }));
+
+          return res.status(200).json({
+            success: true,
+            data: _uniqBy(result, '_id'),
+          });
         }
 
         if (isDomainAdmin) {
@@ -66,6 +77,8 @@ export default async function handler(
 
           const streetIds = adminDomains.flatMap((domain) => domain.streets);
 
+          let streets;
+
           if (domainId) {
             const selectedDomain = await Domain.findOne({
               _id: domainId,
@@ -77,24 +90,30 @@ export default async function handler(
             }
 
             const selectedStreetIds = selectedDomain.streets;
-            const streets = await Street.find({
+            streets = await Street.find({
               _id: { $in: selectedStreetIds },
             }).limit(+limit);
-
-            return res.status(200).json({
-              success: true,
-              data: streets,
-            });
           } else {
-            const streets = await Street.find({
+            streets = await Street.find({
               _id: { $in: streetIds },
             }).limit(+limit);
-
-            return res.status(200).json({
-              success: true,
-              data: streets,
-            });
           }
+
+          const servicesWithStreets = await Service.find({
+            street: { $in: streetIds },
+          });
+
+          const result = streets.map((street) => ({
+            ...street._doc,
+            hasService: servicesWithStreets.some(
+              (service) => service.street.toString() === street._id.toString()
+            ),
+          }));
+
+          return res.status(200).json({
+            success: true,
+            data: result,
+          });
         }
 
         return res.status(400).json({
