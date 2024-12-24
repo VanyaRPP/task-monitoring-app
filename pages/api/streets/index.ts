@@ -20,18 +20,39 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { limit = 0 } = req.query;
+        const { limit = 0, domainId } = req.query;
+        const options: Record<string, any> = {};
 
         if (isUser) {
           return res.status(200).json({ success: true, data: [] });
         }
 
+        if (domainId && typeof domainId === 'string') {
+          if (mongoose.Types.ObjectId.isValid(domainId)) {
+            options._id = new mongoose.Types.ObjectId(domainId);
+          } else {
+            return res.status(400).json({
+              success: false,
+              message: 'Invalid domainId format',
+            });
+          }
+        }
+
         if (isGlobalAdmin) {
-          const streets = await Street.find({}).limit(+limit);
-          return res.status(200).json({
-            success: true,
-            data: _uniqBy(streets, '_id'),
-          });
+          if (domainId) {
+            const domain = await Domain.findOne(options).populate('streets');
+            const streets = domain ? domain.streets : [];
+            return res.status(200).json({
+              success: true,
+              data: _uniqBy(streets, '_id'),
+            });
+          } else {
+            const streets = await Street.find({}).limit(+limit);
+            return res.status(200).json({
+              success: true,
+              data: _uniqBy(streets, '_id'),
+            });
+          }
         }
 
         if (isDomainAdmin) {
@@ -45,20 +66,44 @@ export default async function handler(
 
           const streetIds = adminDomains.flatMap((domain) => domain.streets);
 
-          const streets = await Street.find({
-            _id: { $in: streetIds },
-          }).limit(+limit);
+          if (domainId) {
+            const selectedDomain = await Domain.findOne({
+              _id: domainId,
+              adminEmails: user.email,
+            }).select('streets');
 
-          return res.status(200).json({
-            success: true,
-            data: streets,
-          });
+            if (!selectedDomain) {
+              return res.status(200).json({ success: true, data: [] });
+            }
+
+            const selectedStreetIds = selectedDomain.streets;
+            const streets = await Street.find({
+              _id: { $in: selectedStreetIds },
+            }).limit(+limit);
+
+            return res.status(200).json({
+              success: true,
+              data: streets,
+            });
+          } else {
+            const streets = await Street.find({
+              _id: { $in: streetIds },
+            }).limit(+limit);
+
+            return res.status(200).json({
+              success: true,
+              data: streets,
+            });
+          }
         }
+
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid user role or parameters',
+        });
       } catch (error) {
-        return res.status(400).json({ success: false, error: error.message })
+        return res.status(400).json({ success: false, error: error.message });
       }
-
-
     case 'POST':
       try {
         if (isGlobalAdmin) {
