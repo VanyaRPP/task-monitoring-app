@@ -24,16 +24,16 @@ const InvoicesHeader = () => {
 
   const handleClickSaveButton = async () => {
     try {
-      await form.validateFields();
+      await form.validateFields()
       setIsLoading(true)
       await handleSave()
     } catch (error) {
-      const { errorFields } = error;
+      const { errorFields } = error
       if (errorFields && errorFields.length > 0) {
         form.scrollToField(errorFields[0].name, {
           behavior: 'smooth',
           block: 'center',
-        });
+        })
       }
     } finally {
       setIsLoading(false)
