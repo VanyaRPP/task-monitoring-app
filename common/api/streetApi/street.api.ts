@@ -53,7 +53,7 @@ export const streetApi = createApi({
       invalidatesTags: ['Street'],
     }),
     editStreet: builder.mutation<IStreet, Partial<IStreet>>({
-      query(data) {
+      query: (data) => {
         const { _id, ...body } = data
         return {
           url: `streets/${_id}`,
