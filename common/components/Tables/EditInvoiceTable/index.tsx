@@ -55,7 +55,6 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
   ...props
 }) => {
   const [form] = Form.useForm(_form)
-
   const invoices: InvoiceType[] | undefined = Form.useWatch('invoice', form)
 
   return (
@@ -65,9 +64,7 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
           rowKey="name"
           loading={loading}
           size="small"
-          dataSource={fields.filter(
-            (field) => form.getFieldValue(['invoice', field.name, 'sum']) !== 0
-          )}
+          dataSource={fields}
           pagination={false}
           footer={
             editable

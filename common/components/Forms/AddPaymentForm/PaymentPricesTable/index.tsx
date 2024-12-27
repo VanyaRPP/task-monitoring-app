@@ -15,6 +15,13 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
   loading,
 }) => {
   const { form } = usePaymentContext()
+  const invoices = form.getFieldValue('invoice')
+
+  const filteredInvoices = invoices?.filter((invoice) => invoice?.sum > 0)
+
+  form.setFieldsValue({
+    invoice: filteredInvoices,
+  })
 
   return (
     <EditInvoicesTable_unstable
