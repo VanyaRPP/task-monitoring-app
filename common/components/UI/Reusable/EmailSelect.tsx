@@ -61,15 +61,12 @@ export default function EmailSelect({
           }
           return false
         }}
-
       >
-        {
-          adminEmailOptions.map((email) => (
+        {adminEmailOptions.map((email) => (
           <Select.Option key={email} value={email}>
             {email}
           </Select.Option>
         ))}
-
       </Select>
     </Form.Item>
   )

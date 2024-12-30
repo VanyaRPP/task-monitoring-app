@@ -17,7 +17,6 @@ const DomainStreets: React.FC<DomainStreetsProps> = ({ disabled = false }) => {
       label="Закріплені адреси"
       rules={validateField('required')}
     >
-
       <Select
         options={streets?.map((i) => ({
           value: i._id,
@@ -33,13 +32,12 @@ const DomainStreets: React.FC<DomainStreetsProps> = ({ disabled = false }) => {
           formInstance.setFieldsValue({ adminEmails: [] }) // Use form instance's setFieldsValue
         }}
         filterOption={(inputValue, option) => {
-        //  debugger
+          //  debugger
           if (typeof option?.value === 'string') {
             return option.label.toLowerCase().includes(inputValue.toLowerCase())
           }
           return false
         }}
-
       >
         {/*{*/}
         {/*  adminEmailOptions.map((email) => (*/}
@@ -47,35 +45,31 @@ const DomainStreets: React.FC<DomainStreetsProps> = ({ disabled = false }) => {
         {/*      {email}*/}
         {/*    </Select.Option>*/}
         {/*  ))}*/}
-
       </Select>
 
-
-
-
-   {/*   <Select*/}
-   {/*     mode="tags"*/}
-   {/*     filterSort={(optionA, optionB) =>*/}
-   {/*       (optionA?.label ?? '')*/}
-   {/*         .toLowerCase()*/}
-   {/*         .localeCompare((optionB?.label ?? '').toLowerCase())*/}
-   {/*     }*/}
-   {/*     filterOption={(input, option) => {*/}
-   {/*       console.log(input,option)*/}
-   {/*//       debugger*/}
-   {/*       return (option?.label ?? '').toLowerCase().includes(input.toLowerCase())*/}
-   {/*     }*/}
-   {/*     }*/}
-   {/*     options={streets?.map((i) => ({*/}
-   {/*       value: i._id,*/}
-   {/*       label: `${i.address} (м. ${i.city})`,*/}
-   {/*     }))}*/}
-   {/*     optionFilterProp="children"*/}
-   {/*     placeholder="Пошук адреси111111111111111111111111111111"*/}
-   {/*     loading={isLoading}*/}
-   {/*     showSearch*/}
-   {/*     disabled={disabled}*/}
-   {/*   />*/}
+      {/*   <Select*/}
+      {/*     mode="tags"*/}
+      {/*     filterSort={(optionA, optionB) =>*/}
+      {/*       (optionA?.label ?? '')*/}
+      {/*         .toLowerCase()*/}
+      {/*         .localeCompare((optionB?.label ?? '').toLowerCase())*/}
+      {/*     }*/}
+      {/*     filterOption={(input, option) => {*/}
+      {/*       console.log(input,option)*/}
+      {/*//       debugger*/}
+      {/*       return (option?.label ?? '').toLowerCase().includes(input.toLowerCase())*/}
+      {/*     }*/}
+      {/*     }*/}
+      {/*     options={streets?.map((i) => ({*/}
+      {/*       value: i._id,*/}
+      {/*       label: `${i.address} (м. ${i.city})`,*/}
+      {/*     }))}*/}
+      {/*     optionFilterProp="children"*/}
+      {/*     placeholder="Пошук адреси111111111111111111111111111111"*/}
+      {/*     loading={isLoading}*/}
+      {/*     showSearch*/}
+      {/*     disabled={disabled}*/}
+      {/*   />*/}
     </Form.Item>
   )
 }
