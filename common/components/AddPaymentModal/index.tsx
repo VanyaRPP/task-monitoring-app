@@ -61,22 +61,29 @@ const handleValidate = (form, setIsButtonDisabled) => {
 const handleNonEmpty = (form, setIsButtonDisabled) => {
   //debugger
   const fields = form.getFieldsValue()
-  const dis = fields.domain != undefined && fields.domain.trim() != ''
-    && fields.street != undefined && fields.street.trim() != ''
-    && fields.monthService != undefined && fields.monthService.trim() != ''
-    && fields.operation != undefined && fields.operation.trim() != ''
-    && fields.generalSum
-    && fields.company != undefined && fields.company.trim() != ''
-    && fields.description != undefined && fields.description.trim() != ''
+  const dis =
+    fields.domain != undefined &&
+    fields.domain.trim() != '' &&
+    fields.street != undefined &&
+    fields.street.trim() != '' &&
+    fields.monthService != undefined &&
+    fields.monthService.trim() != '' &&
+    fields.operation != undefined &&
+    fields.operation.trim() != '' &&
+    fields.generalSum &&
+    fields.company != undefined &&
+    fields.company.trim() != '' &&
+    fields.description != undefined &&
+    fields.description.trim() != ''
 
   setIsButtonDisabled(!dis)
 }
 
 const AddPaymentModal: FC<Props> = ({
-                                      closeModal,
-                                      paymentData,
-                                      paymentActions,
-                                    }) => {
+  closeModal,
+  paymentData,
+  paymentActions,
+}) => {
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(true)
@@ -99,7 +106,7 @@ const AddPaymentModal: FC<Props> = ({
   const { preview, edit, create } = paymentActions
 
   const [activeTabKey, setActiveTabKey] = useState(
-    getActiveTab(paymentData, preview),
+    getActiveTab(paymentData, preview)
   )
 
   const { provider, reciever } = getPaymentProviderAndReciever(company)
@@ -138,9 +145,9 @@ const AddPaymentModal: FC<Props> = ({
 
     const response = edit
       ? await editPayment({
-        _id: paymentData?._id,
-        ...payment,
-      })
+          _id: paymentData?._id,
+          ...payment,
+        })
       : await addPayment(payment)
 
     if ('data' in response) {
@@ -228,10 +235,10 @@ const AddPaymentModal: FC<Props> = ({
           preview
             ? { style: { display: 'none' } }
             : edit
-              ? {}
-              : isButtonDisabled
-                ? { disabled: true }
-                : null
+            ? {}
+            : isButtonDisabled
+            ? { disabled: true }
+            : null
         }
         changed={() => isValueChanged}
         onCancel={() => {
