@@ -9,7 +9,11 @@ export const DomainFilterTags: React.FC<{
 }> = ({ collection, filters, setFilters }) => {
   return (
     <FilterTags
-      title={<Typography.Text style={{width:"8em"}}>Надавачі послуг:</Typography.Text>}
+      title={
+        <Typography.Text style={{ width: '8em' }}>
+          Надавачі послуг:
+        </Typography.Text>
+      }
       closable={collection?.length !== 1}
       color="purple"
       items={

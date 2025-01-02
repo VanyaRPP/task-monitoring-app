@@ -51,10 +51,6 @@ export default function EmailSelect({
         disabled={isLoading || disabled}
         placeholder="Пошти адмінів компанії"
         loading={isLoading}
-        onSelect={() => {
-          // Reset the value of "adminEmails" field when cleared
-          formInstance.setFieldsValue({ adminEmails: [] }) // Use form instance's setFieldsValue
-        }}
         filterOption={(inputValue, option) => {
           if (typeof option?.value === 'string') {
             return option.key.toLowerCase().includes(inputValue.toLowerCase())

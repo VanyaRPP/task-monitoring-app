@@ -145,7 +145,10 @@ const PaymentCardHeader = ({
   }
 
   return (
-    <Flex justify="space-between"  style={{ marginBottom:"10px",marginTop:"10px"}}>
+    <Flex
+      justify="space-between"
+      style={{ marginBottom: '10px', marginTop: '10px' }}
+    >
       <Space>
         <Button
           type="link"
