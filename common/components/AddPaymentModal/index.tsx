@@ -48,35 +48,12 @@ export const PaymentContext = createContext<IPaymentContext>({
 export const usePaymentContext = () =>
   useContext<IPaymentContext>(PaymentContext)
 
-const handleValidate = (form, setIsButtonDisabled) => {
-  form
-    .validateFields()
-    .then(() => {
-      setIsButtonDisabled(false)
-    })
-    .catch((errorInfo) => {
-      setIsButtonDisabled(errorInfo.errorFields.length > 0)
-    })
-}
 const handleNonEmpty = (form, setIsButtonDisabled) => {
-  //debugger
   const fields = form.getFieldsValue()
-  const dis =
-    fields.domain != undefined &&
-    fields.domain.trim() != '' &&
-    fields.street != undefined &&
-    fields.street.trim() != '' &&
-    fields.monthService != undefined &&
-    fields.monthService.trim() != '' &&
-    fields.operation != undefined &&
-    fields.operation.trim() != '' &&
-    fields.generalSum &&
-    fields.company != undefined &&
-    fields.company.trim() != '' &&
-    fields.description != undefined &&
-    fields.description.trim() != ''
 
-  setIsButtonDisabled(!dis)
+  const dis = Object.values(fields).some((value) => value === undefined)
+
+  setIsButtonDisabled(dis)
 }
 
 const AddPaymentModal: FC<Props> = ({
@@ -281,9 +258,7 @@ const AddPaymentModal: FC<Props> = ({
           layout="vertical"
           className={s.Form}
           onValuesChange={() => {
-            //debugger
             setIsValueChanged(true)
-            //handleValidate(form, setIsButtonDisabled)
             handleNonEmpty(form, setIsButtonDisabled)
           }}
         >
