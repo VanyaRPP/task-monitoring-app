@@ -2,6 +2,7 @@ import { validateField } from '@assets/features/validators'
 import { useGetAllStreetsQuery } from '@common/api/streetApi/street.api'
 import { Form, Select } from 'antd'
 import React from 'react'
+import { useForm } from 'antd/lib/form/Form'
 
 interface DomainStreetsProps {
   disabled?: boolean
@@ -17,7 +18,15 @@ const DomainStreets: React.FC<DomainStreetsProps> = ({ disabled = false }) => {
       rules={validateField('required')}
     >
       <Select
-        mode="tags"
+        options={streets?.map((i) => ({
+          value: i._id,
+          label: `${i.address} (м. ${i.city})`,
+        }))}
+        mode="multiple"
+        showSearch
+        disabled={isLoading || disabled}
+        placeholder="Пошук адреси"
+        loading={isLoading}
         filterSort={(optionA, optionB) =>
           (optionA?.label ?? '')
             .toLowerCase()
@@ -26,16 +35,7 @@ const DomainStreets: React.FC<DomainStreetsProps> = ({ disabled = false }) => {
         filterOption={(input, option) =>
           (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
         }
-        options={streets?.map((i) => ({
-          value: i._id,
-          label: `${i.address} (м. ${i.city})`,
-        }))}
-        optionFilterProp="children"
-        placeholder="Пошук адреси"
-        loading={isLoading}
-        showSearch
-        disabled={disabled}
-      />
+      ></Select>
     </Form.Item>
   )
 }
