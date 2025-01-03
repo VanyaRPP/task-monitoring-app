@@ -16,7 +16,6 @@ export interface AddressesSelectProps {
 const AddressesSelect: React.FC<AddressesSelectProps> = ({
   form,
   edit,
-  create,
   dropdownStyle,
   onStreetHasServiceChange,
 }) => {
@@ -38,7 +37,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   }, [streets])
 
   useEffect(() => {
-    if (!create && !edit) {
+    if (!edit && !streetId) {
       if (domainId) {
         if (options.length === 1) {
           form.setFieldsValue({ street: options[0].value })
@@ -58,7 +57,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
         }
       }
     }
-  }, [domainId, options, form, onStreetHasServiceChange])
+  }, [domainId, options, form, streetId])
 
   const selectedStreet = options.find((option) => option.value === streetId)
   const showTooltip = !!streetId && !selectedStreet?.hasService
@@ -85,9 +84,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
           placeholder="Пошук адреси"
           status={isStreetsError && 'error'}
           loading={isStreetsLoading}
-          disabled={
-            isStreetsLoading || streets.length === 1 || !domainId || edit
-          }
+          disabled={isStreetsLoading || streets.length === 1 || !domainId}
           dropdownStyle={dropdownStyle}
           allowClear
           showSearch

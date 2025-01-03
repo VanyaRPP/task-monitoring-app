@@ -41,22 +41,14 @@ const TransactionsTable: React.FC<Props> = ({
   const [tableSettingDropdovnVisible, setTableSettingDropdovnVisible] =
     useState<boolean>(false)
 
-  const columns = generateColumns(visibleColumns, domain)
+  const columns = generateColumns(
+    visibleColumns,
+    domain,
+    toggleColumnVisibility
+  )
 
   return (
     <div>
-      <Dropdown
-        overlayStyle={{ overflow: 'scroll', maxHeight: '300px' }}
-        open={tableSettingDropdovnVisible}
-        onOpenChange={() =>
-          setTableSettingDropdovnVisible(!tableSettingDropdovnVisible)
-        }
-        menu={{ items }}
-        trigger={['click']}
-      >
-        <SettingOutlined />
-      </Dropdown>
-
       <div>
         <Table<ITransaction>
           scroll={{ x: true }}
@@ -64,7 +56,6 @@ const TransactionsTable: React.FC<Props> = ({
           columns={columns}
           pagination={false}
           rowKey="ID"
-          sticky={{ offsetHeader: 64 }}
         />
         <Space
           direction="vertical"

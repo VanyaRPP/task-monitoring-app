@@ -3,8 +3,27 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from '@pages/api/api.config'
 import { getTransactionsForDateInterval } from './utils/getTransactions/index'
+import Payment from '@modules/models/Payment'
 
 start()
+
+async function checkTransaction({ transaction }) {
+  try {
+    const allPayments = await Payment.find({
+      $and: [
+        { 'transaction.AUT_CNTR_ACC': transaction.AUT_CNTR_ACC },
+        { 'transaction.AUT_CNTR_NAM': transaction.AUT_CNTR_NAM },
+        { 'transaction.AUT_CNTR_MFO': transaction.AUT_CNTR_MFO },
+        { 'transaction.Description': transaction.OSND },
+        { generalSum: +transaction.SUM }
+      ],
+    })
+
+    return allPayments.length > 0
+  } catch (error) {
+    throw new Error(`${error.message}`)
+  }
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -22,22 +41,39 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        getTransactionsForDateInterval(
+        const transactions = await getTransactionsForDateInterval(
           tokenHeader ?? tokenQuery,
           startDate,
           limit,
           followId
         )
-          .then((rez) => {
-            return res.status(200).json({ success: true, data: rez })
+
+        const checkedTransactions = await Promise.all(
+          transactions.map(async (transaction) => {
+            try {
+              const isMatchingPayment = await checkTransaction({
+                transaction,
+              })
+
+              return {
+                ...transaction,
+                isMatchingPayment,
+              }
+            } catch (error) {
+              return {
+                ...transaction,
+                isMatchingPayment: false,
+              }
+            }
           })
-          .catch((rez) => {
-            return res.status(409).json({ success: false, message: rez })
-          })
+        )
+
+        return res
+          .status(200)
+          .json({ success: true, data: checkedTransactions })
       } catch (error) {
-        return res.status(400).json({ success: false, message: error })
+        return res.status(400).json({ success: false, message: error.message })
       }
-      break
 
     case 'POST':
       return res

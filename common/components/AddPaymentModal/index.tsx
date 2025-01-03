@@ -48,15 +48,12 @@ export const PaymentContext = createContext<IPaymentContext>({
 export const usePaymentContext = () =>
   useContext<IPaymentContext>(PaymentContext)
 
-const handleValidate = (form, setIsButtonDisabled) => {
-  form
-    .validateFields()
-    .then(() => {
-      setIsButtonDisabled(false)
-    })
-    .catch((errorInfo) => {
-      setIsButtonDisabled(errorInfo.errorFields.length > 0)
-    })
+const handleNonEmpty = (form, setIsButtonDisabled) => {
+  const fields = form.getFieldsValue()
+
+  const dis = Object.values(fields).some((value) => value === undefined)
+
+  setIsButtonDisabled(dis)
 }
 
 const AddPaymentModal: FC<Props> = ({
@@ -70,6 +67,13 @@ const AddPaymentModal: FC<Props> = ({
 
   const { company, service, payment, prevService, prevPayment } =
     usePaymentFormData(form, paymentData)
+
+  const transaction = {
+    AUT_CNTR_ACC: paymentData?.transaction?.AUT_CNTR_ACC || '',
+    AUT_CNTR_NAM: paymentData?.transaction?.AUT_CNTR_NAM || '',
+    AUT_CNTR_MFO: paymentData?.transaction?.AUT_CNTR_MFO || '',
+    Description: paymentData?.transaction?.Description || '',
+  }
 
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
@@ -110,6 +114,7 @@ const AddPaymentModal: FC<Props> = ({
       generalSum: formData.generalSum || formData.debit,
       provider,
       reciever,
+      transaction,
       invoice: formData.debit
         ? formData.invoice.filter((invoice) => +invoice.sum !== 0)
         : [],
@@ -167,7 +172,6 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
-  // pure cringy useEffect to fill table on preview mode
   useEffect(() => {
     if (paymentActions.preview) {
       form.setFieldsValue({
@@ -227,7 +231,7 @@ const AddPaymentModal: FC<Props> = ({
       >
         <Form
           initialValues={{
-            // TODO: fix payment typing globally to not be `domain: Partial<IDomain> | string` but `Partial<IDomain>` instead
+            // // TODO: fix payment typing globally to not be `domain: Partial<IDomain> | string` but `Partial<IDomain>` instead
             // eslint-disable-next-line
             // @ts-ignore
             domain: payment?.domain?._id,
@@ -255,7 +259,7 @@ const AddPaymentModal: FC<Props> = ({
           className={s.Form}
           onValuesChange={() => {
             setIsValueChanged(true)
-            handleValidate(form, setIsButtonDisabled)
+            handleNonEmpty(form, setIsButtonDisabled)
           }}
         >
           <Tabs

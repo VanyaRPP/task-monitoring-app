@@ -9,11 +9,11 @@ import {
   IGetPaymentNumberResponse,
   IGetPaymentResponse,
   IPayment,
-  IGetProfitPaymentResponse,
+  IGetCostPaymentResponse,
   IGeneratePaymentExcel,
   IGeneratePaymentExcelResponce,
-  CompareTransactionResponse,
-  ICompareTransaction,
+  IAddCostPaymentResponse,
+  ICostPayment,
 } from './payment.api.types'
 import { ITransaction } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
 
@@ -82,7 +82,7 @@ export const paymentApi = createApi({
     getPayment: builder.query<IGetPaymentResponse, string>({
       query: (id) => `spacehub/payment/${id}`,
     }),
-    getProfitPayment: builder.query<IGetProfitPaymentResponse, void>({
+    getCostPayment: builder.query<IGetCostPaymentResponse, void>({
       query: () => ({
         url: `profit`,
       }),
@@ -97,6 +97,15 @@ export const paymentApi = createApi({
         }
       },
       invalidatesTags: (response) => (response ? ['Payment', 'Profit'] : []),
+    }),
+    addCostPayment: builder.mutation<IAddCostPaymentResponse, ICostPayment>({
+      query(body) {
+        return {
+          url: `profit`,
+          method: 'POST',
+          body,
+        }
+      },
     }),
     deletePayment: builder.mutation<
       IDeletePaymentResponse,
@@ -158,18 +167,6 @@ export const paymentApi = createApi({
         body,
       }),
     }),
-    compareTransaction: builder.query<
-      CompareTransactionResponse,
-      { transaction: ICompareTransaction; selectedCompany?: string }
-    >({
-      query: ({ transaction, selectedCompany }) => ({
-        url: 'spacehub/payment/compare',
-        params: {
-          transaction: JSON.stringify(transaction),
-          ...(selectedCompany && { companyId: selectedCompany }),
-        },
-      }),
-    }),
   }),
 })
 export const {
@@ -181,7 +178,7 @@ export const {
   useGetPaymentNumberQuery,
   useEditPaymentMutation,
   useGeneratePdfMutation,
-  useGetProfitPaymentQuery,
+  useGetCostPaymentQuery,
+  useAddCostPaymentMutation,
   useGenerateExcelMutation,
-  useCompareTransactionQuery,
 } = paymentApi

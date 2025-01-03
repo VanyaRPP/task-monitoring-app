@@ -46,21 +46,17 @@ export default function EmailSelect({
       ]}
     >
       <Select
-        mode="tags"
+        mode="multiple"
+        showSearch
         disabled={isLoading || disabled}
         placeholder="Пошти адмінів компанії"
         loading={isLoading}
-        onSelect={() => {
-          // Reset the value of "adminEmails" field when cleared
-          formInstance.setFieldsValue({ adminEmails: [] }) // Use form instance's setFieldsValue
-        }}
         filterOption={(inputValue, option) => {
           if (typeof option?.value === 'string') {
-            return option.value.toLowerCase().includes(inputValue.toLowerCase())
+            return option.key.toLowerCase().includes(inputValue.toLowerCase())
           }
           return false
         }}
-        showSearch
       >
         {adminEmailOptions.map((email) => (
           <Select.Option key={email} value={email}>

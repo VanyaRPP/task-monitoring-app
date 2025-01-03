@@ -7,15 +7,11 @@ import { useEffect, useMemo } from 'react'
 export interface MonthServiceSelectProps {
   form: FormInstance
   edit?: boolean
-  create?: boolean
-  disabled?: boolean
 }
 
 const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
   form,
   edit,
-  create,
-  disabled,
 }) => {
   const streetId: string = Form.useWatch('street', form)
   const domainId: string = Form.useWatch('domain', form)
@@ -66,14 +62,11 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
         status={isServicesError && 'error'}
         loading={isServicesLoading}
         disabled={
-          create
-            ? false
-            : disabled ||
-              isServicesLoading ||
-              services.length === 1 ||
-              !streetId ||
-              !domainId ||
-              edit
+          options.length === 0 ||
+          isServicesLoading ||
+          services.length === 1 ||
+          !streetId ||
+          !domainId
         }
         allowClear
         showSearch

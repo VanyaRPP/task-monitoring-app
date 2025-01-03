@@ -1,18 +1,16 @@
-// TODO: Move to reusable folder same level as DomainsSelect
 import { validateField } from '@assets/features/validators'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { Form, Select } from 'antd'
 import { useEffect } from 'react'
 
-export default function CompanySelect({
-  form,
-  edit,
-  create,
-}: {
+interface Props {
   form: any
   edit?: boolean
-  create?: boolean
-}) {
+  company?: string | Partial<IRealestate>
+}
+
+export default function CompanySelect({ form, edit, company }: Props) {
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
   const month = Form.useWatch('monthService', form)
@@ -29,12 +27,12 @@ export default function CompanySelect({
       streetId={streetId}
       form={form}
       edit={edit}
-      create={create}
+      company={company}
     />
   )
 }
 
-function RealEstateDataFetcher({ domainId, streetId, form, edit, create }) {
+function RealEstateDataFetcher({ domainId, streetId, form, edit, company }) {
   const { data: { data: companies } = { data: [] }, isLoading } =
     useGetAllRealEstateQuery({
       domainId,
@@ -43,16 +41,10 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit, create }) {
 
   useEffect(() => {
     if (!edit) {
-      form.setFieldValue('company', undefined)
-    }
-  }, [form, streetId])
-
-  useEffect(() => {
-    if (!edit) {
       if (companies?.length === 1) {
         form.setFieldValue('company', companies[0]._id)
       } else if (companies?.length > 0) {
-        form.setFieldValue('company', companies[0]._id)
+        form.setFieldValue('company', company)
       }
     }
   }, [form, companies, edit])
@@ -86,7 +78,7 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit, create }) {
         }))}
         optionFilterProp="children"
         placeholder="Пошук адреси"
-        disabled={companies?.length === 1 || (edit && !create) || isLoading}
+        disabled={companies?.length === 1 || isLoading}
         loading={isLoading}
         showSearch
       />
