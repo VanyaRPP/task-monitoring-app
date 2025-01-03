@@ -127,7 +127,17 @@ export const quarters = {
   '4': [10, 11, 12],
 }
 
-export const cascaderYears = ['2021', '2022', '2023', '2024']
+export const cascaderYears = (() => {
+  const currentYear = new Date().getFullYear();
+  const startYear = 2021;
+  const years: string[] = [];
+
+  for (let year = startYear; year <= currentYear + 1; year++) {
+    years.push(year.toString());
+  }
+
+  return years;
+})()
 
 export const cascaderQuarters = [
   {
