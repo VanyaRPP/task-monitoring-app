@@ -15,15 +15,16 @@ export const createPaymentForm = (page: Page) => {
 
     async selectDomain(providerName: string) {
       const serviceProviderInput = page.getByLabel('Надавач послуг')
-      await serviceProviderInput.fill('тест')
+      await serviceProviderInput.fill(providerName)
       const dropdownOption = page
         .locator('.ant-select-item-option')
-        .filter({ hasText: 'тест' })
+        .filter({ hasText: providerName })
         .first()
       await dropdownOption.waitFor({ state: 'visible' })
       await dropdownOption.click()
       await page.waitForTimeout(10000)
     },
+
     async checkFillInputs() {
       const items = page.locator('.ant-select-selection-item')
       const count = await items.count()
