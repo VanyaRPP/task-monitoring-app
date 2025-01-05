@@ -1,5 +1,6 @@
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { EditInvoicesTable_unstable } from '@components/Tables/EditInvoiceTable'
+import { useEffect } from 'react'
 
 export interface PaymentPricesTableProps {
   preview?: boolean
@@ -15,14 +16,14 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
   loading,
 }) => {
   const { form } = usePaymentContext()
-
   const invoices = form.getFieldValue('invoice')
+  useEffect(() => {
+    const filteredInvoices = invoices?.filter((invoice) => invoice?.sum > 0)
 
-  const filteredInvoices = invoices?.filter((invoice) => invoice?.sum > 0)
-
-  form.setFieldsValue({
-    invoice: filteredInvoices,
-  })
+    form.setFieldsValue({
+      invoice: filteredInvoices,
+    })
+  }, [])
 
   return (
     <EditInvoicesTable_unstable
