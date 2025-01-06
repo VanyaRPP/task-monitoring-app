@@ -18,21 +18,24 @@ export default async function handler(
   if (req.method === 'GET') {
     try {
       const { realEstates, streets } = req.query
-      const filteredCompanys = realEstates !== 'undefined' && realEstates !== 'null'
-        ? realEstates.split(',').map((id) => new mongoose.Types.ObjectId(id)) 
-        : null;
-      const filteredStreets = streets !== 'undefined' && streets !== 'null'
-        ? streets.split(',').map((id) => new mongoose.Types.ObjectId(id)) 
-        : null;
+      console.log('realEstates', realEstates)
+      const filteredCompanys =
+        realEstates !== undefined && realEstates !== 'null'
+          ? realEstates.split(',').map((id) => new mongoose.Types.ObjectId(id))
+          : null
+      const filteredStreets =
+        streets !== undefined && streets !== 'null'
+          ? streets.split(',').map((id) => new mongoose.Types.ObjectId(id))
+          : null
       const { distinctDomains } = await getDistinctCompanyAndDomain({
         isGlobalAdmin,
         user,
         companyGroup: 'company',
         model: RealEstate,
-        filters: { 
+        filters: {
           filteredCompanys: filteredCompanys,
           filteredStreets: filteredStreets,
-        }, 
+        },
       })
 
       const domainsFilter = distinctDomains?.map(({ domainDetails }) => ({

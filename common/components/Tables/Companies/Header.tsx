@@ -70,8 +70,14 @@ const CompaniesHeader: React.FC<Props> = ({
     setIsArchive(value)
   }
 
-  const { data: realEstateData } = useGetRealEstateFiltersQuery({streets: filters?.street, domains: filters?.domain})
-    const { data: domainData } = useGetDomainFiltersQuery({streets: filters?.street, realEstates: filters?.company})
+  const { data: realEstateData } = useGetRealEstateFiltersQuery({
+    streets: filters?.street,
+    domains: filters?.domain,
+  })
+  const { data: domainData } = useGetDomainFiltersQuery({
+    streets: filters?.street,
+    realEstates: filters?.company,
+  })
 
   return (
     <div className={s.headerBlock}>

@@ -77,15 +77,22 @@ const CompaniesTable: React.FC<Props> = ({
 
   const { data: userResponse } = useGetCurrentUserQuery()
 
-  
-  const { data: realEstateData } = useGetRealEstateFiltersQuery({streets: filters?.street, domains: filters?.domain})
-  const { data: domainData } = useGetDomainFiltersQuery({streets: filters?.street, realEstates: filters?.company})
-  const { data: streetData } = useGetAddressFiltersQuery({realEstates: filters?.company, domains: filters?.domain})
-  
+  const { data: realEstateData } = useGetRealEstateFiltersQuery({
+    streets: filters?.street,
+    domains: filters?.domain,
+  })
+  const { data: domainData } = useGetDomainFiltersQuery({
+    streets: filters?.street,
+    realEstates: filters?.company,
+  })
+  const { data: streetData } = useGetAddressFiltersQuery({
+    realEstates: filters?.company,
+    domains: filters?.domain,
+  })
+
   const [realEstate, setRealEstate] = useState(null)
   const [domain, setDomain] = useState(null)
   const [street, setStreet] = useState(null)
-
 
   useEffect(() => {
     setRealEstate(realEstateData)
