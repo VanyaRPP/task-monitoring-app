@@ -63,6 +63,7 @@ export function getDomainsPipeline(
 }
 
 export function getRealEstatesPipeline({
+  isGlobalAdmin,
   distinctedDomainsIds,
   distinctedStreetsIds,
   group,
