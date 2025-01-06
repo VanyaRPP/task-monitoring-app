@@ -18,7 +18,6 @@ export default async function handler(
   if (req.method === 'GET') {
     try {
       const { realEstates, streets } = req.query
-      console.log('realEstates', realEstates)
       const filteredCompanys =
         realEstates !== undefined && realEstates !== 'null'
           ? realEstates.split(',').map((id) => new mongoose.Types.ObjectId(id))
