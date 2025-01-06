@@ -164,6 +164,7 @@ export default async function handler(
           user,
           companyGroup: 'company',
           model: Payment,
+          filters: {},
         })
 
       const creditDebitPipeline = getCreditDebitPipeline(options)
