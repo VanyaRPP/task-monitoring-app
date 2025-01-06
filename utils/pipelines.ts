@@ -2,7 +2,8 @@ export function getDomainsPipeline(
   isGlobalAdmin,
   email,
   filteredCompanys = null,
-  filteredStreets = null,) {
+  filteredStreets = null
+) {
   return [
     {
       $match: {
@@ -10,7 +11,7 @@ export function getDomainsPipeline(
           $cond: [
             { $eq: [filteredCompanys, null] },
             true,
-            { $in: ["$_id", filteredCompanys] },
+            { $in: ['$_id', filteredCompanys] },
           ],
         },
       },
@@ -21,7 +22,7 @@ export function getDomainsPipeline(
           $cond: [
             { $eq: [filteredStreets, null] },
             true,
-            { $in: ["$street", filteredStreets] },
+            { $in: ['$street', filteredStreets] },
           ],
         },
       },
@@ -108,7 +109,7 @@ export function getStreetsPipeline(
   isGlobalAdmin,
   domains,
   filteredCompanys = null,
-  filteredDomains = null,
+  filteredDomains = null
 ) {
   const pipeline = [
     {
@@ -117,8 +118,8 @@ export function getStreetsPipeline(
           $cond: [
             { $eq: [filteredCompanys, null] },
             true,
-            { $in: ["$_id", filteredCompanys] },
-          ]
+            { $in: ['$_id', filteredCompanys] },
+          ],
         },
       },
     },
@@ -128,8 +129,8 @@ export function getStreetsPipeline(
           $cond: [
             { $eq: [filteredDomains, null] },
             true,
-            { $in: ["$domain", filteredDomains] },
-          ]
+            { $in: ['$domain', filteredDomains] },
+          ],
         },
       },
     },

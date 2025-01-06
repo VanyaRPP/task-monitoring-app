@@ -340,20 +340,31 @@ export async function getDistinctCompanyAndDomain({
   user,
   companyGroup,
   model,
-  filters: { 
+  filters: {
     filteredCompanys = null,
     filteredStreets = null,
     filteredDomains = null,
-  }
+  },
 }) {
-  const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email, filteredCompanys, filteredStreets)
+  const domainsPipeline = getDomainsPipeline(
+    isGlobalAdmin,
+    user.email,
+    filteredCompanys,
+    filteredStreets
+  )
   const streetsPipeline = getStreetsPipeline(isGlobalAdmin, user.email)
 
   const distinctDomains = await model.aggregate(domainsPipeline)
   const distinctStreets = await model.aggregate(streetsPipeline)
 
-  const distinctedDomainsIds = filteredDomains === null ? distinctDomains.map((domain) => domain._id) : filteredDomains
-  const distinctedStreetsIds = filteredStreets === null ? distinctStreets.map((street) => street.streetData._id) : filteredStreets
+  const distinctedDomainsIds =
+    filteredDomains === null
+      ? distinctDomains.map((domain) => domain._id)
+      : filteredDomains
+  const distinctedStreetsIds =
+    filteredStreets === null
+      ? distinctStreets.map((street) => street.streetData._id)
+      : filteredStreets
 
   const realEstatesPipeline = getRealEstatesPipeline({
     isGlobalAdmin,

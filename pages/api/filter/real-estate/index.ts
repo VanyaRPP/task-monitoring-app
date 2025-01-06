@@ -17,15 +17,17 @@ export default async function handler(
 
   if (req.method === 'GET') {
     try {
-      const {streets, domains} = req.query
-      const filteredStreets = streets !== 'undefined' && streets !== 'null'
-        ? streets.split(',').map((id) => new mongoose.Types.ObjectId(id)) 
-        : null;
+      const { streets, domains } = req.query
+      const filteredStreets =
+        streets !== undefined && streets !== 'null'
+          ? streets.split(',').map((id) => new mongoose.Types.ObjectId(id))
+          : null
 
-      const filteredDomains = domains !== 'undefined' && domains !== 'null'
-        ? domains.split(',').map((id) => new mongoose.Types.ObjectId(id)) 
-        : null;
-        
+      const filteredDomains =
+        domains !== undefined && domains !== 'null'
+          ? domains.split(',').map((id) => new mongoose.Types.ObjectId(id))
+          : null
+
       const { distinctCompanies } = await getDistinctCompanyAndDomain({
         isGlobalAdmin,
         user,
@@ -34,7 +36,7 @@ export default async function handler(
         filters: {
           filteredStreets: filteredStreets,
           filteredDomains: filteredDomains,
-        }
+        },
       })
 
       const realEstatesFilter = distinctCompanies?.map(
