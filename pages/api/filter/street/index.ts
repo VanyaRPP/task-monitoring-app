@@ -7,6 +7,7 @@ import { getStreetsPipeline } from '@utils/pipelines'
 import { getDistinctStreets, getFilterForAddress } from '@utils/helpers'
 import RealEstate from '@modules/models/RealEstate'
 import { IStreet } from '@modules/models/Street'
+import mongoose from 'mongoose'
 
 start()
 
@@ -18,9 +19,21 @@ export default async function handler(
 
   if (req.method === 'GET') {
     try {
+      const { realEstates, domains } = req.query
+      const filteredCompanys =
+        realEstates !== undefined && realEstates !== 'null'
+          ? realEstates.split(',').map((id) => new mongoose.Types.ObjectId(id))
+          : null
+
+      const filteredDomains =
+        domains !== undefined && domains !== 'null'
+          ? domains.split(',').map((id) => new mongoose.Types.ObjectId(id))
+          : null
+
       const distinctStreets = await getDistinctStreets({
         user,
         model: RealEstate,
+        filters: { filteredCompanys, filteredDomains },
       })
 
       const streetsFilter = distinctStreets
