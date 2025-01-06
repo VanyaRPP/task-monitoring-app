@@ -37,6 +37,9 @@ import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
+import { useEffect, useState } from 'react'
+import { set } from 'mongoose'
+import streets from '@pages/streets'
 
 export interface Props {
   domainId?: string
@@ -73,11 +76,22 @@ const CompaniesTable: React.FC<Props> = ({
   const { pathname } = router
 
   const { data: userResponse } = useGetCurrentUserQuery()
-  const { data: realEstatesFilter } = useGetRealEstateFiltersQuery()
 
-  const { data: realEstate } = useGetRealEstateFiltersQuery()
-  const { data: domain } = useGetDomainFiltersQuery()
-  const { data: street } = useGetAddressFiltersQuery()
+  
+  const { data: realEstateData } = useGetRealEstateFiltersQuery({streets: filters?.street, domains: filters?.domain});
+  const { data: domainData } = useGetDomainFiltersQuery({streets: filters?.street, realEstates: filters?.company});
+  const { data: streetData } = useGetAddressFiltersQuery({realEstates: filters?.company, domains: filters?.domain});
+
+  const [realEstate, setRealEstate] = useState(null)
+  const [domain, setDomain] = useState(null)
+  const [street, setStreet] = useState(null)
+
+
+  useEffect(() => {
+    setRealEstate(realEstateData)
+    setDomain(domainData)
+    setStreet(streetData)
+  }, [filters, realEstateData, domainData, streetData])
 
   const [deleteRealEstate, { isLoading: deleteLoading }] =
     useDeleteRealEstateMutation()
