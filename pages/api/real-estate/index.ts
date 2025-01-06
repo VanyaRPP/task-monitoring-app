@@ -79,11 +79,13 @@ export default async function handler(
             user,
             companyGroup: '_id',
             model: RealEstate,
+            filters: {},
           })
 
         const distinctStreets = await getDistinctStreets({
           user,
           model: RealEstate,
+          filters: {},
         })
 
         const filteredStreets = distinctStreets

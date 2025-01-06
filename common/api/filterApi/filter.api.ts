@@ -8,10 +8,10 @@ export const filterApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/filter/` }),
   endpoints: (builder) => ({
-    getDomainFilters: builder.query<IPaymentFilterResponse, void>({
-      query: () => {
+    getDomainFilters: builder.query<IPaymentFilterResponse, { streets?: any; realEstates?: any }>({
+      query: ({streets, realEstates}) => {
         return {
-          url: `domain`,
+          url: `domain?streets=${streets}&realEstates=${realEstates}`,
           method: 'GET',
         }
       },
@@ -19,10 +19,10 @@ export const filterApi = createApi({
         response ? [{ type: 'Filter', id: 'domainsFilter' }] : [],
     }),
 
-    getAddressFilters: builder.query<IPaymentFilterResponse, void>({
-      query: () => {
+    getAddressFilters: builder.query<IPaymentFilterResponse, {realEstates?: any; domains?: any}>({
+      query: ({realEstates, domains}) => {
         return {
-          url: `street`,
+          url: `street?realEstates=${realEstates}&domains=${domains}`,
           method: 'GET',
         }
       },
@@ -46,10 +46,10 @@ export const filterApi = createApi({
             ]
           : [],
     }),
-    getRealEstateFilters: builder.query<IPaymentFilterResponse, void>({
-      query: () => {
+    getRealEstateFilters: builder.query<IPaymentFilterResponse, { streets?: any; domains?: any }>({
+      query: ({streets, domains}) => {
         return {
-          url: 'real-estate',
+          url: `real-estate?streets=${streets}&domains=${domains}`,
           method: 'GET',
         }
       },
