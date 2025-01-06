@@ -63,7 +63,6 @@ export function getDomainsPipeline(
 }
 
 export function getRealEstatesPipeline({
-  isGlobalAdmin,
   distinctedDomainsIds,
   distinctedStreetsIds,
   group,
@@ -105,8 +104,6 @@ export function getRealEstatesPipeline({
 }
 
 export function getStreetsPipeline(
-  isGlobalAdmin,
-  domains,
   filteredCompanys = null,
   filteredDomains = null,
 ) {
@@ -152,14 +149,6 @@ export function getStreetsPipeline(
       },
     },
   ]
-  // if (!isGlobalAdmin) {
-  //   const matchStage = {
-  //     $match: {
-  //       $or: [{ domain: domains }],
-  //     },
-  //   }
-  //   pipeline.unshift(matchStage)
-  // }
 
   return pipeline
 }
