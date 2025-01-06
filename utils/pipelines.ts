@@ -104,6 +104,8 @@ export function getRealEstatesPipeline({
 }
 
 export function getStreetsPipeline(
+  isGlobalAdmin,
+  domains,
   filteredCompanys = null,
   filteredDomains = null,
 ) {
