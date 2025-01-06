@@ -5,6 +5,7 @@ import { getDistinctCompanyAndDomain } from '@utils/helpers'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import RealEstate from '@modules/models/RealEstate'
+import mongoose from 'mongoose'
 
 start()
 
@@ -16,11 +17,26 @@ export default async function handler(
 
   if (req.method === 'GET') {
     try {
+      const { streets, domains } = req.query
+      const filteredStreets =
+        streets !== undefined && streets !== 'null'
+          ? streets.split(',').map((id) => new mongoose.Types.ObjectId(id))
+          : null
+
+      const filteredDomains =
+        domains !== undefined && domains !== 'null'
+          ? domains.split(',').map((id) => new mongoose.Types.ObjectId(id))
+          : null
+
       const { distinctCompanies } = await getDistinctCompanyAndDomain({
         isGlobalAdmin,
         user,
         companyGroup: '_id',
         model: RealEstate,
+        filters: {
+          filteredStreets: filteredStreets,
+          filteredDomains: filteredDomains,
+        },
       })
 
       const realEstatesFilter = distinctCompanies?.map(
