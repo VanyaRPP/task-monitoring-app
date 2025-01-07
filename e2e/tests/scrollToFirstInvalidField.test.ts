@@ -9,8 +9,6 @@ test.describe('Payment Form Validation', () => {
   }) => {
     const formHelper = scrollToFirstInvalidField(page)
 
-    await page.waitForTimeout(5000)
-
     await formHelper.openForm()
 
     await formHelper.fillForm()
