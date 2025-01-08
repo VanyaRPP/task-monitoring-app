@@ -150,6 +150,8 @@ const getDefaultColumns = (
     title: '',
     width: 50,
     render: (_, street: IStreet) => (
+      userRoles?.isGlobalAdmin && (
+
       <Button
         style={{ padding: 0 }}
         type="link"
@@ -157,6 +159,7 @@ const getDefaultColumns = (
       >
         <EditOutlined />
       </Button>
+      )
     ),
   },
   {

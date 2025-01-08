@@ -69,10 +69,15 @@ const CompaniesHeader: React.FC<Props> = ({
   const handleArchiveToggle = (value: boolean) => {
     setIsArchive(value)
   }
-  const { data: realEstatesFilter } = useGetRealEstateFiltersQuery()
 
-  const { data: realEstate } = useGetRealEstateFiltersQuery()
-  const { data: domain } = useGetDomainFiltersQuery()
+  const { data: realEstateData } = useGetRealEstateFiltersQuery({
+    streets: filters?.street,
+    domains: filters?.domain,
+  })
+  const { data: domainData } = useGetDomainFiltersQuery({
+    streets: filters?.street,
+    realEstates: filters?.company,
+  })
 
   return (
     <div className={s.headerBlock}>
@@ -91,12 +96,12 @@ const CompaniesHeader: React.FC<Props> = ({
         {router.pathname === AppRoutes.REAL_ESTATE && isAdmin && (
           <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
             <DomainFilterTags
-              collection={domain?.domainsFilter}
+              collection={domainData?.domainsFilter}
               filters={filters}
               setFilters={setFilters}
             />
             <CompanyFilterTags
-              collection={realEstate?.realEstatesFilter}
+              collection={realEstateData?.realEstatesFilter}
               filters={filters}
               setFilters={setFilters}
             />

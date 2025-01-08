@@ -1,6 +1,7 @@
 import Domain from '@modules/models/Domain'
 import Payment from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
+import Service from '@modules/models/Service'
 import start from '@pages/api/api.config'
 import {
   getCreditDebitPipeline,
@@ -131,9 +132,14 @@ export default async function handler(
 
       const expr = filterPeriodOptions(req.query)
       if (expr.length > 0) {
-        options.$expr = {
-          $and: expr,
-        }
+        const services = await Service.find({
+          $expr: {
+            $and: expr,
+          },
+        }).select('_id')
+
+        const serviceIds = services.map((service) => service._id.toString())
+        options.monthService = { $in: serviceIds }
       }
 
       const payments = await Payment.find(options)
@@ -158,6 +164,7 @@ export default async function handler(
           user,
           companyGroup: 'company',
           model: Payment,
+          filters: {},
         })
 
       const creditDebitPipeline = getCreditDebitPipeline(options)
@@ -228,22 +235,22 @@ function filterPeriodOptions(args) {
   const filterByDateOptions = []
   if (year) {
     filterByDateOptions.push({
-      $eq: [{ $year: '$invoiceCreationDate' }, year],
+      $eq: [{ $year: '$date' }, +year],
     })
   }
   if (quarter) {
     filterByDateOptions.push({
-      $in: [{ $month: '$invoiceCreationDate' }, quarters[+quarter]],
+      $in: [{ $month: '$date' }, +quarters[+quarter]],
     })
   }
   if (month) {
     filterByDateOptions.push({
-      $eq: [{ $month: '$invoiceCreationDate' }, month],
+      $eq: [{ $month: '$date' }, +month],
     })
   }
   if (day) {
     filterByDateOptions.push({
-      $eq: [{ $dayOfMonth: '$invoiceCreationDate' }, day],
+      $eq: [{ $dayOfMonth: '$date' }, +day],
     })
   }
   return filterByDateOptions

@@ -316,9 +316,11 @@ export function filterOptions(options = {}, filterIds: any) {
 export async function getDistinctStreets({
   user,
   model,
+  filters: { filteredCompanys = null, filteredDomains = null },
 }: {
   user: IUser
   model: mongoose.Model<any>
+  filters: { filteredCompanys?: any; filteredDomains?: any }
 }): Promise<{ _id: mongoose.ObjectId; streetData: any }[] | undefined> {
   // TODO: group of user roles helpers maybe? Such as isGlobalAdmin(user: IUser): boolean
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -326,7 +328,9 @@ export async function getDistinctStreets({
   const distinctDomains = await model.aggregate(domainsPipeline)
   const streetsPipeline = getStreetsPipeline(
     isGlobalAdmin,
-    distinctDomains.map((domain) => domain._id)
+    distinctDomains.map((domain) => domain._id),
+    filteredCompanys,
+    filteredDomains
   )
   return await model.aggregate(streetsPipeline)
 }
@@ -336,14 +340,36 @@ export async function getDistinctCompanyAndDomain({
   user,
   companyGroup,
   model,
+  filters: {
+    filteredCompanys = null,
+    filteredStreets = null,
+    filteredDomains = null,
+  },
 }) {
-  const domainsPipeline = getDomainsPipeline(isGlobalAdmin, user.email)
-  const distinctDomains = await model.aggregate(domainsPipeline)
+  const domainsPipeline = getDomainsPipeline(
+    isGlobalAdmin,
+    user.email,
+    filteredCompanys,
+    filteredStreets
+  )
+  const streetsPipeline = getStreetsPipeline(isGlobalAdmin, user.email)
 
-  const distinctedDomainsIds = distinctDomains.map((domain) => domain._id)
+  const distinctDomains = await model.aggregate(domainsPipeline)
+  const distinctStreets = await model.aggregate(streetsPipeline)
+
+  const distinctedDomainsIds =
+    filteredDomains === null
+      ? distinctDomains.map((domain) => domain._id)
+      : filteredDomains
+  const distinctedStreetsIds =
+    filteredStreets === null
+      ? distinctStreets.map((street) => street.streetData._id)
+      : filteredStreets
+
   const realEstatesPipeline = getRealEstatesPipeline({
     isGlobalAdmin,
     distinctedDomainsIds,
+    distinctedStreetsIds,
     group: companyGroup,
   })
   const distinctCompanies = await model.aggregate(realEstatesPipeline)

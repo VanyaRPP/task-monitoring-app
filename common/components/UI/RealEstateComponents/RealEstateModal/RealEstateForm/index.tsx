@@ -19,6 +19,7 @@ import s from './style.module.scss'
 import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
 import { IDomain } from '@modules/models/Domain'
 import { inputNumberParser } from '@utils/helpers'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 
 interface Props {
   form: FormInstance<any>
@@ -41,6 +42,11 @@ const RealEstateForm: FC<Props> = ({
     isError: isDomainError,
   } = useGetDomainByPkQuery({ domainId })
 
+  const { data: servicesData } = useGetAllServicesQuery({
+    domainId: domain._id,
+  })
+  const services = servicesData?.data
+
   useEffect(() => {
     if (domain && domain.domainServices) {
       const servicesWithEnabled = domain.domainServices.map((service) => ({
@@ -54,6 +60,12 @@ const RealEstateForm: FC<Props> = ({
       })
     }
   }, [domain, form])
+
+  const isServiceExist = (value: string) => {
+    if (!domain._id || !services || !services.length) return false
+    const existedValues = services.map((x) => !!x[value])
+    return existedValues.includes(true)
+  }
 
   return (
     <Form
@@ -127,33 +139,41 @@ const RealEstateForm: FC<Props> = ({
           disabled={!editable}
         />
       </Form.Item>
-      <Form.Item
-        name="servicePricePerMeter"
-        label="Індивідуальне утримання (грн/м²)"
-      >
-        <InputNumber
-          parser={inputNumberParser}
-          placeholder="Вкажіть значення"
-          className={s.formInput}
-          disabled={!editable}
-        />
-      </Form.Item>
-      <Form.Item name="rentPart" label="Частка загальної площі">
-        <InputNumber
-          parser={inputNumberParser}
-          placeholder="Вкажіть значення"
-          className={s.formInput}
-          disabled={!editable}
-        />
-      </Form.Item>
-      <Form.Item name="waterPart" label="Частка водопостачання">
-        <InputNumber
-          parser={inputNumberParser}
-          placeholder="Вкажіть значення"
-          className={s.formInput}
-          disabled={!editable}
-        />
-      </Form.Item>
+
+      {isServiceExist('rentPrice') && (
+        <>
+          <Form.Item
+            name="servicePricePerMeter"
+            label="Індивідуальне утримання (грн/м²)"
+          >
+            <InputNumber
+              parser={inputNumberParser}
+              placeholder="Вкажіть значення"
+              className={s.formInput}
+              disabled={!editable}
+            />
+          </Form.Item>
+          <Form.Item name="rentPart" label="Частка загальної площі">
+            <InputNumber
+              parser={inputNumberParser}
+              placeholder="Вкажіть значення"
+              className={s.formInput}
+              disabled={!editable}
+            />
+          </Form.Item>
+        </>
+      )}
+      {isServiceExist('waterPrice') && (
+        <Form.Item name="waterPart" label="Частка водопостачання">
+          <InputNumber
+            parser={inputNumberParser}
+            placeholder="Вкажіть значення"
+            className={s.formInput}
+            disabled={!editable}
+          />
+        </Form.Item>
+      )}
+
       <Form.Item name="cleaning" label="Прибирання (грн)">
         <InputNumber
           parser={inputNumberParser}
@@ -162,6 +182,7 @@ const RealEstateForm: FC<Props> = ({
           disabled={!editable}
         />
       </Form.Item>
+
       <Form.Item name="discount" label="Знижка">
         <InputNumber
           parser={inputNumberParser}
@@ -170,20 +191,25 @@ const RealEstateForm: FC<Props> = ({
           disabled={!editable}
         />
       </Form.Item>
-      <Form.Item
-        valuePropName="checked"
-        name="garbageCollector"
-        label="Вивіз сміття"
-      >
-        <Checkbox disabled={!editable} />
-      </Form.Item>
-      <Form.Item
-        valuePropName="checked"
-        name="inflicion"
-        label="Індекс інфляції"
-      >
-        <Checkbox disabled={!editable} />
-      </Form.Item>
+
+      {isServiceExist('garbageCollectorPrice') && (
+        <Form.Item
+          valuePropName="checked"
+          name="garbageCollector"
+          label="Вивіз сміття"
+        >
+          <Checkbox disabled={!editable} />
+        </Form.Item>
+      )}
+      {isServiceExist('inflicionPrice') && (
+        <Form.Item
+          valuePropName="checked"
+          name="inflicion"
+          label="Індекс інфляції"
+        >
+          <Checkbox disabled={!editable} />
+        </Form.Item>
+      )}
 
       <Form.List name="services">
         {(fields, { add, remove }) => (
