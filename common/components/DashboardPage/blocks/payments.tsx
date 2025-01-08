@@ -7,6 +7,7 @@ import {
   useDeletePaymentMutation,
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
+import { useGetDomainFiltersQuery, useGetRealEstateFiltersQuery } from '@common/api/filterApi/filter.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
@@ -44,6 +45,7 @@ import {
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import s from './style.module.scss'
+import realEstate from '@pages/real-estate'
 
 interface PaymentsBlockProps {
   sepDomainID?: string
@@ -160,6 +162,13 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     },
     { skip: currUserLoading || !currUser }
   )
+  const { data: domainsFilters } = useGetDomainFiltersQuery({
+    realEstates: filters?.company,
+  })
+  const { data: companiesFilter } = useGetRealEstateFiltersQuery({
+    domains: filters?.domain,
+  });;
+
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
   const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -193,7 +202,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         dataIndex: 'domain',
         filters:
           router.pathname === AppRoutes.PAYMENT
-            ? payments?.domainsFilter
+            ? domainsFilters?.domainsFilter
             : null,
         filteredValue: filters?.domain || null,
         filterSearch: true,
@@ -219,7 +228,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         width: router.pathname === AppRoutes.PAYMENT ? 140 : 100,
         filters:
           router.pathname === AppRoutes.PAYMENT
-            ? payments?.realEstatesFilter
+            ? companiesFilter?.realEstatesFilter
             : null,
         filteredValue: filters?.company || null,
         filterSearch: true,
