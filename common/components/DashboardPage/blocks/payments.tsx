@@ -638,7 +638,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             paymentsLoading ||
             paymentsFetching
           }
-          footer={() => (payments?.data?.length > 0 ? 'Footer Content' : null)}
         />
       )}
     </TableCard>
