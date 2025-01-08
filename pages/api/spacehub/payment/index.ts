@@ -185,15 +185,6 @@ export default async function handler(
       return res.status(200).json({
         currentCompaniesCount: distinctCompanies.length,
         currentDomainsCount: distinctDomains.length,
-        domainsFilter: distinctDomains?.map(({ domainDetails }) => ({
-          text: domainDetails.name,
-          value: domainDetails._id,
-        })),
-        realEstatesFilter: distinctCompanies?.map(({ companyDetails }) => ({
-          text: companyDetails.companyName,
-          value: companyDetails._id,
-        })),
-        addressFilter: addressFilter,
         data: payments,
         totalPayments: totalPaymentsData.reduce((acc, item) => {
           acc[item._id] = item.totalSum
