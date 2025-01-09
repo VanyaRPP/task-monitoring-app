@@ -4,7 +4,6 @@ import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 
-import { ProfilePage } from '@components/Pages/Profile'
 import { authOptions } from '../api/auth/[...nextauth]'
 import BankTransactions from '@components/Pages/BankTransactions'
 

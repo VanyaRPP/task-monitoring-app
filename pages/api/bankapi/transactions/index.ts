@@ -15,7 +15,7 @@ async function checkTransaction({ transaction }) {
         { 'transaction.AUT_CNTR_NAM': transaction.AUT_CNTR_NAM },
         { 'transaction.AUT_CNTR_MFO': transaction.AUT_CNTR_MFO },
         { 'transaction.Description': transaction.OSND },
-        { generalSum: +transaction.SUM }
+        { generalSum: +transaction.SUM },
       ],
     })
 
@@ -29,7 +29,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { token: tokenQuery, startDate, limit, followId } = req.query
+  const { token: tokenQuery, startDate, limit, followId, acc } = req.query
+
   const { token: tokenHeader } = req.headers
 
   if (!tokenQuery && !tokenHeader) {
@@ -43,6 +44,7 @@ export default async function handler(
       try {
         const transactions = await getTransactionsForDateInterval(
           tokenHeader ?? tokenQuery,
+          acc,
           startDate,
           limit,
           followId
