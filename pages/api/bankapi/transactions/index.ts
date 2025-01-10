@@ -19,7 +19,10 @@ async function checkTransaction({ transaction }) {
       ],
     })
 
-    return allPayments.length > 0
+    return {
+      isMatchingPayment: allPayments.length > 0,
+      previousCompanyId: allPayments[0].company,
+    }
   } catch (error) {
     throw new Error(`${error.message}`)
   }
@@ -59,7 +62,7 @@ export default async function handler(
 
               return {
                 ...transaction,
-                isMatchingPayment,
+                ...isMatchingPayment,
               }
             } catch (error) {
               return {
