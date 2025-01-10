@@ -11,15 +11,23 @@ import s from './style.module.scss'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
 import { useGetBalancesQuery } from '@common/api/bankApi/bank.api'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import EncryptionService from '@utils/encryptionService'
 
 const BankTransactions = () => {
   const router = useRouter()
 
-  const [selectedDomain, setSelectedDomain] = useState<IExtendedDomain>()
+  const { data: domains = [] } = useGetDomainsQuery({})
+
+  const [selectedDomain, setSelectedDomain] = useState<IExtendedDomain>(
+    domains[0]
+  )
   const [selectedAcc, setSelectedAcc] = useState('')
+
+  useEffect(() => {
+    setSelectedDomain(domains[0])
+  }, [domains])
 
   const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
   const encryptionService = new EncryptionService(SECURE_TOKEN)
@@ -29,7 +37,6 @@ const BankTransactions = () => {
       )
     : ''
 
-  const { data: domains = [] } = useGetDomainsQuery({})
   const { data: balances } = useGetBalancesQuery({ token }, { skip: !token })
 
   const items = domains.map((domain) => {
