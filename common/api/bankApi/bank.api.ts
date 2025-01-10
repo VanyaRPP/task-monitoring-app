@@ -22,9 +22,12 @@ export const bankApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/bankapi/` }),
   endpoints: (builder) => ({
-    getTransactions: builder.query<ITransaction[], { token: string }>({
-      query: ({ token }) => ({
-        url: 'transactions',
+    getTransactions: builder.query<
+      ITransaction[],
+      { token: string; acc: string }
+    >({
+      query: ({ token, acc }) => ({
+        url: `transactions?acc=${acc}`,
         method: 'GET',
         headers: {
           token,
@@ -43,7 +46,7 @@ export const bankApi = createApi({
         },
       }),
     }),
-    getBalances: builder.query<IBankRes<IBalancesData>, IGetQuery>({
+    getBalances: builder.query<IBalance[], IGetQuery>({
       query: ({ token }) => ({
         url: 'balances',
         method: 'GET',
@@ -52,6 +55,8 @@ export const bankApi = createApi({
           'Content-type': 'application/json;charset=utf-8',
         },
       }),
+      transformResponse: (response: IBankRes<IBalancesData>) =>
+        response.data.balances,
     }),
   }),
 })

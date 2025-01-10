@@ -48,24 +48,22 @@ const TransactionsTable: React.FC<Props> = ({
   )
 
   return (
-    <div>
-      <div>
-        <Table<ITransaction>
-          scroll={{ x: true }}
-          dataSource={transactions}
-          columns={columns}
-          pagination={false}
-          rowKey="ID"
-        />
-        <Space
-          direction="vertical"
-          align="center"
-          style={{ width: '100%', marginTop: '0.5rem' }}
-        >
-          {pagination}
-        </Space>
-      </div>
-    </div>
+    <>
+      <Table<ITransaction>
+        scroll={{ x: true }}
+        dataSource={transactions}
+        columns={columns}
+        pagination={false}
+        rowKey="ID"
+      />
+      <Space
+        direction="vertical"
+        align="center"
+        style={{ width: '100%', marginTop: '0.5rem' }}
+      >
+        {pagination}
+      </Space>
+    </>
   )
 }
 

@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { FC, useEffect, useState } from 'react'
-import { useAddStreetMutation, useEditStreetMutation } from '@common/api/streetApi/street.api'
+import {
+  useAddStreetMutation,
+  useEditStreetMutation,
+} from '@common/api/streetApi/street.api'
 import Modal from '@components/UI/ModalWindow'
 import { IStreet } from '@modules/models/Street'
 import { Form, message } from 'antd'
