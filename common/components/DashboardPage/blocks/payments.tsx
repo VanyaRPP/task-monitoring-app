@@ -7,7 +7,10 @@ import {
   useDeletePaymentMutation,
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
-import { useGetDomainFiltersQuery, useGetRealEstateFiltersQuery } from '@common/api/filterApi/filter.api'
+import {
+  useGetDomainFiltersQuery,
+  useGetRealEstateFiltersQuery,
+} from '@common/api/filterApi/filter.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
@@ -167,7 +170,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   })
   const { data: companiesFilter } = useGetRealEstateFiltersQuery({
     domains: filters?.domain,
-  });;
+  })
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()

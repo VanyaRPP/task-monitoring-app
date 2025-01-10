@@ -6,7 +6,10 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { RolesSelector } from '@components/UI/RolesSelector'
 import { Tags } from '@components/UI/Tags'
 import { AppRoutes, Roles } from '@utils/constants'
-import { useGetDomainFiltersQuery, useGetRealEstateFiltersQuery } from '@common/api/filterApi/filter.api'
+import {
+  useGetDomainFiltersQuery,
+  useGetRealEstateFiltersQuery,
+} from '@common/api/filterApi/filter.api'
 
 import {
   Avatar,
@@ -28,10 +31,8 @@ export const Profile: React.FC = () => {
   const { data: session } = useSession()
   const { data: user } = useGetCurrentUserQuery()
 
-  
-  const { data: domains } = useGetDomainFiltersQuery({});
-  const { data: companies } = useGetRealEstateFiltersQuery({});
-
+  const { data: domains } = useGetDomainFiltersQuery({})
+  const { data: companies } = useGetRealEstateFiltersQuery({})
 
   const isDomainAdmin = useMemo(() => {
     return user?.roles?.includes(Roles.DOMAIN_ADMIN)
@@ -107,7 +108,9 @@ export const Profile: React.FC = () => {
                   }
                   wrap
                   align="center"
-                  items={domains?.domainsFilter.map(({ text }) => text as string)}
+                  items={domains?.domainsFilter.map(
+                    ({ text }) => text as string
+                  )}
                   render={(domain, index) => (
                     <Tag
                       key={index}
@@ -131,7 +134,9 @@ export const Profile: React.FC = () => {
                   }
                   wrap
                   align="center"
-                  items={companies?.realEstatesFilter.map(({ text }) => text as string)}
+                  items={companies?.realEstatesFilter.map(
+                    ({ text }) => text as string
+                  )}
                 />
               </Space>
             )}
