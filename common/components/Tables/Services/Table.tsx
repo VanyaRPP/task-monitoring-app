@@ -5,6 +5,11 @@ import {
   QuestionCircleOutlined,
 } from '@ant-design/icons'
 import { getFormattedDate } from '@assets/features/formatDate'
+import {
+  useGetAddressFiltersQuery,
+  useGetDateFiltersQuery,
+  useGetDomainFiltersQuery,
+} from '@common/api/filterApi/filter.api'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import {
@@ -61,6 +66,14 @@ const ServicesTable: React.FC<Props> = ({
 
   const { data: user } = useGetCurrentUserQuery()
 
+  const { data: domainsFilter } = useGetDomainFiltersQuery({
+    streets: filter?.street,
+  })
+  const { data: streetsFilter } = useGetAddressFiltersQuery({
+    domains: filter?.domain,
+  })
+  const { data: dateFilters } = useGetDateFiltersQuery()
+
   const [deleteService, { isLoading: deleteLoading }] =
     useDeleteServiceMutation()
 
@@ -114,10 +127,10 @@ const ServicesTable: React.FC<Props> = ({
           handleDelete,
           deleteLoading,
           setCurrentService,
-          services?.addressFilter,
-          services?.domainFilter,
-          services?.yearFilter,
-          services?.monthFilter,
+          streetsFilter?.streetsFilter,
+          domainsFilter?.domainsFilter,
+          dateFilters?.yearFilter,
+          dateFilters?.monthFilter,
           filter,
           isOnPage,
           setServiceActions,

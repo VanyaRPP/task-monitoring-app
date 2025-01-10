@@ -7,13 +7,17 @@ import { isAdminCheck } from '@utils/helpers'
 import { Select } from 'antd'
 import s from './style.module.scss'
 import { LoadingOutlined } from '@ant-design/icons'
+import {
+  useGetDomainFiltersQuery,
+  useGetRealEstateFiltersQuery,
+} from '@common/api/filterApi/filter.api'
 
 const DomainSelector: React.FC<{
   onSelect?: (domainId: IDomain['_id']) => void
 }> = ({ onSelect }) => {
   // TODO: replace with isolated domains filter api later
   const { data: { domainsFilter } = { domainsFilter: [] } } =
-    useGetAllRealEstateQuery({})
+    useGetDomainFiltersQuery({})
 
   const options = useMemo(() => {
     return domainsFilter.map(({ value, text }) => ({
