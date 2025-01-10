@@ -13,13 +13,17 @@ export const scrollToFirstInvalidField = (page: Page) => {
     fillForm: async () => {
       await page.getByLabel('Надавач послуг').click()
 
-      await page.locator('.ant-select-item', { hasText: 'Pahan domen' }).click();
+      await page.locator('.ant-select-item', { hasText: 'Pahan domen' }).click()
 
-      await page.locator('input#payments_0_invoice_electricityPrice_amount').fill('-100');
+      await page
+        .locator('input#payments_0_invoice_electricityPrice_amount')
+        .fill('-100')
     },
 
     assertErrorDisplayed: async () => {
-      await expect(page.locator('#payments_0_invoice_electricityPrice_amount')).toBeInViewport()
+      await expect(
+        page.locator('#payments_0_invoice_electricityPrice_amount')
+      ).toBeInViewport()
     },
 
     clickSaveButton: async () => {

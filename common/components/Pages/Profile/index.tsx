@@ -2,6 +2,11 @@
 
 import { UserOutlined } from '@ant-design/icons'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import {
+  useGetDomainFiltersQuery,
+  useGetRealEstateFiltersQuery,
+} from '@common/api/filterApi/filter.api'
+
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { UsersTable } from '@components/Tables/UsersTable'
 import { Tags } from '@components/UI/Tags'
@@ -31,12 +36,8 @@ export const ProfilePage: React.FC = () => {
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
 
-  const {
-    data: { domainsFilter: domains, realEstatesFilter: companies } = {
-      domainsFilter: [],
-      realEstatesFilter: [],
-    },
-  } = useGetAllRealEstateQuery({})
+  const { data: domains } = useGetDomainFiltersQuery({})
+  const { data: companies } = useGetRealEstateFiltersQuery({})
 
   const handleTagClick = ({ text, value }) => {
     router.push({
@@ -103,7 +104,7 @@ export const ProfilePage: React.FC = () => {
           <Tags
             wrap
             align="center"
-            items={domains.map((domain) => domain)}
+            items={domains?.domainsFilter.map((domain) => domain)}
             render={(domain, index) => (
               <Tag
                 key={index}
@@ -124,7 +125,9 @@ export const ProfilePage: React.FC = () => {
           <Tags
             wrap
             align="center"
-            items={companies.map(({ text }) => text as string)}
+            items={companies?.realEstatesFilter.map(
+              ({ text }) => text as string
+            )}
             render={(domain, index) => (
               <Tag
                 key={index}

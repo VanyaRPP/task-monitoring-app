@@ -68,7 +68,7 @@ const StreetsTable: React.FC<Props> = ({
   const closeModal = () => setIsModalOpen(false)
   const openModal = (street, actions) => {
     setIsModalOpen(true),
-      setStreetActions({ ...streetActions, ...actions}),
+      setStreetActions({ ...streetActions, ...actions }),
       setCurrentStreet(street)
   }
 
@@ -117,7 +117,10 @@ const StreetsTable: React.FC<Props> = ({
 const getDefaultColumns = (
   handleDelete?: (streetId: string) => void,
   deleteLoading?: boolean,
-  openModal?: (street: IStreet, actions: {preview: boolean, edit: boolean }) => void,
+  openModal?: (
+    street: IStreet,
+    actions: { preview: boolean; edit: boolean }
+  ) => void,
   userRoles?: { isGlobalAdmin: boolean }
 ): ColumnType<any>[] => [
   {
@@ -138,7 +141,7 @@ const getDefaultColumns = (
       <Button
         style={{ padding: 0 }}
         type="link"
-        onClick={() => openModal(street, {preview: true, edit: false})}
+        onClick={() => openModal(street, { preview: true, edit: false })}
       >
         <EyeOutlined />
       </Button>
@@ -149,18 +152,16 @@ const getDefaultColumns = (
     fixed: 'right',
     title: '',
     width: 50,
-    render: (_, street: IStreet) => (
+    render: (_, street: IStreet) =>
       userRoles?.isGlobalAdmin && (
-
-      <Button
-        style={{ padding: 0 }}
-        type="link"
-        onClick={() => openModal(street, {preview: false, edit: true})}
-      >
-        <EditOutlined />
-      </Button>
-      )
-    ),
+        <Button
+          style={{ padding: 0 }}
+          type="link"
+          onClick={() => openModal(street, { preview: false, edit: true })}
+        >
+          <EditOutlined />
+        </Button>
+      ),
   },
   {
     align: 'center',

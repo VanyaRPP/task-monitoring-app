@@ -18,6 +18,7 @@ const StreetsSelector = ({ setFilters, streets }) => {
       }}
       allowClear
       options={options}
+      popupMatchSelectWidth={false}
     ></Select>
   )
 }

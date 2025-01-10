@@ -15,113 +15,116 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isDomainAdmin, isUser, user } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isUser, user } = await getCurrentUser(
+    req,
+    res
+  )
 
   switch (req.method) {
     case 'GET':
       try {
-        const { limit = 0, domainId } = req.query;
-        const options: Record<string, any> = {};
+        const { limit = 0, domainId } = req.query
+        const options: Record<string, any> = {}
 
         if (isUser) {
-          return res.status(200).json({ success: true, data: [] });
+          return res.status(200).json({ success: true, data: [] })
         }
 
         if (domainId && typeof domainId === 'string') {
           if (mongoose.Types.ObjectId.isValid(domainId)) {
-            options._id = new mongoose.Types.ObjectId(domainId);
+            options._id = new mongoose.Types.ObjectId(domainId)
           } else {
             return res.status(400).json({
               success: false,
               message: 'Invalid domainId format',
-            });
+            })
           }
         }
 
         if (isGlobalAdmin) {
-          let streets;
+          let streets
 
           if (domainId) {
-            const domain = await Domain.findOne(options).populate('streets');
-            streets = domain ? domain.streets : [];
+            const domain = await Domain.findOne(options).populate('streets')
+            streets = domain ? domain.streets : []
           } else {
-            streets = await Street.find({}).limit(+limit);
+            streets = await Street.find({}).limit(+limit)
           }
 
-          const streetIds = streets.map((street) => street._id);
+          const streetIds = streets.map((street) => street._id)
           const servicesWithStreets = await Service.find({
             street: { $in: streetIds },
-          });
+          })
 
           const result = streets.map((street) => ({
             ...street._doc,
             hasService: servicesWithStreets.some(
               (service) => service.street.toString() === street._id.toString()
             ),
-          }));
+          }))
 
           return res.status(200).json({
             success: true,
             data: _uniqBy(result, '_id'),
-          });
+          })
         }
 
         if (isDomainAdmin) {
           const adminDomains = await Domain.find({
             adminEmails: user.email,
-          }).select('streets');
+          }).select('streets')
 
           if (!adminDomains.length) {
-            return res.status(200).json({ success: true, data: [] });
+            return res.status(200).json({ success: true, data: [] })
           }
 
-          const streetIds = adminDomains.flatMap((domain) => domain.streets);
+          const streetIds = adminDomains.flatMap((domain) => domain.streets)
 
-          let streets;
+          let streets
 
           if (domainId) {
             const selectedDomain = await Domain.findOne({
               _id: domainId,
               adminEmails: user.email,
-            }).select('streets');
+            }).select('streets')
 
             if (!selectedDomain) {
-              return res.status(200).json({ success: true, data: [] });
+              return res.status(200).json({ success: true, data: [] })
             }
 
-            const selectedStreetIds = selectedDomain.streets;
+            const selectedStreetIds = selectedDomain.streets
             streets = await Street.find({
               _id: { $in: selectedStreetIds },
-            }).limit(+limit);
+            }).limit(+limit)
           } else {
             streets = await Street.find({
               _id: { $in: streetIds },
-            }).limit(+limit);
+            }).limit(+limit)
           }
 
           const servicesWithStreets = await Service.find({
             street: { $in: streetIds },
-          });
+          })
 
           const result = streets.map((street) => ({
             ...street._doc,
             hasService: servicesWithStreets.some(
               (service) => service.street.toString() === street._id.toString()
             ),
-          }));
+          }))
 
           return res.status(200).json({
             success: true,
             data: result,
-          });
+          })
         }
 
         return res.status(400).json({
           success: false,
           message: 'Invalid user role or parameters',
-        });
+        })
       } catch (error) {
-        return res.status(400).json({ success: false, error: error.message });
+        return res.status(400).json({ success: false, error: error.message })
       }
     case 'POST':
       try {

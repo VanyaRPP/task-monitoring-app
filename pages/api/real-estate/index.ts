@@ -100,20 +100,6 @@ export default async function handler(
               )
           )
         return res.status(200).json({
-          domainsFilter: distinctDomains?.map(({ domainDetails }) => ({
-            text: domainDetails.name,
-            value: domainDetails._id,
-          })),
-          realEstatesFilter: distinctCompanies?.map(({ companyDetails }) => ({
-            text: companyDetails.companyName,
-            value: companyDetails._id,
-          })),
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          streetsFilter: filteredStreets?.map((street) => ({
-            text: `${street.address}, м.${street.city}`,
-            value: street._id,
-          })),
           data: realEstates,
           success: true,
         })

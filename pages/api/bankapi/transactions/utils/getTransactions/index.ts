@@ -43,6 +43,7 @@ export async function getInterimTransactions(
 }
 export async function getTransactionsForDateInterval(
   token: string,
+  acc: string,
   startDate?: string,
   limit?: number,
   followId?: string
@@ -59,7 +60,9 @@ export async function getTransactionsForDateInterval(
       const response = (await apiPrivatAdapter.getTransactionsForDateInterval(
         startDate ?? getDefaultStartDate(),
         limit,
-        currentFollowId
+        currentFollowId,
+        undefined,
+        acc
       )) as TransactionsData
 
       const transactions = response.transactions
