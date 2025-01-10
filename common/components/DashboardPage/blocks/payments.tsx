@@ -8,6 +8,7 @@ import {
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
 import {
+  useGetAddressFiltersQuery,
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
@@ -130,6 +131,28 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
 
   const [filters, setFilters] = useState<any>()
 
+  const { data: domainsFilters } = useGetDomainFiltersQuery({
+    realEstates: filters?.company,
+  })
+  const { data: companiesFilter } = useGetRealEstateFiltersQuery({
+    domains: filters?.domain,
+  })
+
+  useEffect(() => {
+    if (domainsFilters?.domainsFilter?.length === 1) {
+      setFilters({
+        ...filters,
+        domain: [domainsFilters?.domainsFilter[0]?.value],
+      })
+    }
+    if (companiesFilter?.realEstatesFilter?.length === 1) {
+      setFilters({
+        ...filters,
+        company: [companiesFilter?.realEstatesFilter[0]?.value],
+      })
+    }
+  }, [domainsFilters, companiesFilter])
+
   const closeEditModal = () => {
     setCurrentPayment(null)
     setPaymentActions({
@@ -139,6 +162,10 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   }
 
   const { token } = theme.useToken()
+
+  const { data: streetsFilter } = useGetAddressFiltersQuery({
+    domains: filters?.domain,
+  })
 
   const {
     isFetching: currUserFetching,
@@ -165,12 +192,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     },
     { skip: currUserLoading || !currUser }
   )
-  const { data: domainsFilters } = useGetDomainFiltersQuery({
-    realEstates: filters?.company,
-  })
-  const { data: companiesFilter } = useGetRealEstateFiltersQuery({
-    domains: filters?.domain,
-  })
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
@@ -519,7 +540,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           setCurrentDateFilter={setCurrentDateFilter}
           currentPayment={currentPayment}
           paymentActions={paymentActions}
-          streets={payments?.addressFilter}
+          streets={streetsFilter?.streetsFilter}
           payments={payments}
           filters={filters}
           setFilters={setFilters}
@@ -528,6 +549,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           setPaymentsDeleteItems={setPaymentsDeleteItems}
           enablePaymentsButton={sepDomainID ? false : true}
           onColumnsSelect={setSelectedColumns}
+          domainFilter={domainsFilters?.domainsFilter}
+          realEstatesFilter={companiesFilter?.realEstatesFilter}
         />
       }
     >

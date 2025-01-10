@@ -54,6 +54,8 @@ const PaymentCardHeader = ({
   setSelectedPayments,
   enablePaymentsButton,
   onColumnsSelect,
+  domainFilter,
+  realEstatesFilter,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -173,12 +175,12 @@ const PaymentCardHeader = ({
             </Space>
             <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
               <DomainFilterTags
-                collection={payments?.domainsFilter}
+                collection={domainFilter}
                 filters={filters}
                 setFilters={setFilters}
               />
               <CompanyFilterTags
-                collection={payments?.realEstatesFilter}
+                collection={realEstatesFilter}
                 filters={filters}
                 setFilters={setFilters}
               />
