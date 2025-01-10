@@ -7,6 +7,7 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 import AddPaymentModal from '@components/AddPaymentModal'
 import dayjs from 'dayjs'
 import { SendOutlined } from '@ant-design/icons'
+import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 
 interface TransactionDrawerProps {
   transaction: ITransaction
@@ -20,6 +21,8 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<any>(null)
+
+  const { data, error, isLoading } = useGetDebtorsQuery(domain._id)
 
   const transactionAmount = parseFloat(transaction.SUM as string)
 
