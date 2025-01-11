@@ -40,9 +40,18 @@ export default async function handler(
           .startOf('month')
           .toDate()
 
-        const options: FilterQuery<typeof Payment> = {
+        const paymentsOptions: FilterQuery<typeof Payment> = {
           ...(isDomainAdmin && { domain: { $in: domainsIds } }),
           invoiceCreationDate: {
+            $gte: fourMonthsAgo,
+            $lte: currentDate.toDate(),
+          },
+          type: 'credit',
+        }
+
+        const creditOptions: FilterQuery<typeof Credit> = {
+          ...(isDomainAdmin && { domain: { $in: domainsIds } }),
+          date: {
             $gte: fourMonthsAgo,
             $lte: currentDate.toDate(),
           },
@@ -52,39 +61,48 @@ export default async function handler(
           const adminDomains = await Domain.find({ adminEmails: user.email })
           const domainIds = adminDomains.map((domain) => domain._id)
 
-          options.domain = { $in: domainIds }
+          paymentsOptions.domain = { $in: domainIds }
+          creditOptions.domain = { $in: domainIds }
         }
 
-        const payments = await Payment.find(options)
+        const payments = await Payment.find(paymentsOptions)
+        const credits = await Credit.find(creditOptions)
 
         const paymentsGroupedByMonth = _groupBy(payments, (payment) =>
           dayjs(payment.invoiceCreationDate).format('YYYY-MM')
         )
 
+        const creditsGroupedByMonth = _groupBy(credits, (credit) =>
+          dayjs(credit.date).format('YYYY-MM')
+        )
+
         const result = []
 
-        Object.keys(paymentsGroupedByMonth).forEach((month) => {
-          const paymentsForMonth = paymentsGroupedByMonth[month]
-          const paymentsByType = _groupBy(paymentsForMonth, 'type')
-
-          const totalGeneralSumCredit =
-            paymentsByType.credit?.reduce(
-              (acc, payment) => acc + payment.generalSum,
-              0
-            ) || 0
-
-          const totalGeneralSumDebit =
-            paymentsByType.debit?.reduce(
-              (acc, payment) => acc + payment.generalSum,
-              0
-            ) || 0
-
+        const allMonths = new Set([
+          ...Object.keys(paymentsGroupedByMonth),
+          ...Object.keys(creditsGroupedByMonth),
+        ]);
+        
+        allMonths.forEach((month) => {
+          const paymentsForMonth = paymentsGroupedByMonth[month] || [];
+          const creditsForMonth = creditsGroupedByMonth[month] || [];
+        
+          const totalGeneralSumDebit = paymentsForMonth.reduce(
+            (acc, payment) => acc + payment.generalSum,
+            0
+          );
+        
+          const totalGeneralSumCredit = creditsForMonth.reduce(
+            (acc, credit) => acc + credit.sum,
+            0
+          );
+        
           result.push({
             totalGeneralSumCredit,
             totalGeneralSumDebit,
             month,
-          })
-        })
+          });
+        });
 
         res.status(200).json({
           success: true,
