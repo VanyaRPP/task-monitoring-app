@@ -44,13 +44,13 @@ const ProfitPayment: React.FC = () => {
       },
     },
     {
-      title: 'Дебет',
+      title: 'Прибутки',
       dataIndex: 'totalGeneralSumDebit',
       key: 'totalGeneralSumDebit',
       render: (value) => `${value.toLocaleString()} UAH`,
     },
     {
-      title: 'Кредит',
+      title: 'Витрати',
       dataIndex: 'totalGeneralSumCredit',
       key: 'totalGeneralSumCredit',
       render: (value) => `${value.toLocaleString()} UAH`,
@@ -86,6 +86,23 @@ const ProfitPayment: React.FC = () => {
         loading={isLoading}
         rowKey="month"
         pagination={false}
+        summary={(pageData: {
+          month: string,
+          totalGeneralSumDebit: number,
+          totalGeneralSumCredit: number,
+        }[]) => {
+          let totalSumDebit= 0
+          let totalSumCredit = 0
+          pageData.forEach((month) => {
+            totalSumDebit += month?.totalGeneralSumDebit || 0
+            totalSumCredit += month?.totalGeneralSumCredit || 0
+          })
+          return (  <Table.Summary.Row>
+            <Table.Summary.Cell index={0}>Всього</Table.Summary.Cell>
+            <Table.Summary.Cell index={1}>{`${totalSumDebit.toLocaleString()} UAH`}</Table.Summary.Cell>
+            <Table.Summary.Cell index={1}>{`${totalSumCredit.toLocaleString()} UAH`}</Table.Summary.Cell>
+          </Table.Summary.Row>)
+        }}
       />
     </TableCard>
   )
