@@ -22,8 +22,6 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const [modalVisible, setModalVisible] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<any>(null)
 
-  const { data, error, isLoading } = useGetDebtorsQuery(domain._id)
-
   const transactionAmount = parseFloat(transaction.SUM as string)
 
   const { data: realEstatesData } = useGetAllRealEstateQuery({

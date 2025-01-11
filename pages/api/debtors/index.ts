@@ -3,17 +3,18 @@ import start from '@pages/api/api.config'
 import RealEstate from '@modules/models/RealEstate'
 import Payment from '@modules/models/Payment'
 
-type PaymentSummary = {
-  _id: string
-  type: string
-  generalSum: number
+type DebtPerMonth = {
+  monthService: string
+  totalDue: number
+  paid: number
+  remaining: number
 }
 
 type CompanyWithPayments = {
   companyId: any
   companyName: string
-  payments: PaymentSummary[]
-  debt: number
+  debtPerMonth: DebtPerMonth[]
+  totalDebt: number
 }
 
 type Data = {
@@ -45,29 +46,51 @@ export default async function handler(
                 _id: payment._id.toString(),
                 type: payment.type,
                 generalSum: payment.generalSum,
+                monthService: payment.monthService.toString(),
               }))
 
-            let totalDebit = 0
-            let totalCredit = 0
+            const debtPerMonthMap: {
+              [monthService: string]: { debit: number; credit: number }
+            } = {}
 
             companyPayments.forEach((payment) => {
-              if (payment.type === 'debit') {
-                totalDebit += payment.generalSum
-              } else if (payment.type === 'credit') {
-                totalCredit += payment.generalSum
+              const { monthService, type, generalSum } = payment
+
+              if (!debtPerMonthMap[monthService]) {
+                debtPerMonthMap[monthService] = { debit: 0, credit: 0 }
+              }
+
+              if (type === 'debit') {
+                debtPerMonthMap[monthService].debit += generalSum
+              } else if (type === 'credit') {
+                debtPerMonthMap[monthService].credit += generalSum
               }
             })
 
-            const debt = totalDebit - totalCredit
+            let totalDebt = 0
+            const debtPerMonthArray = Object.keys(debtPerMonthMap).map(
+              (monthService) => {
+                const { debit, credit } = debtPerMonthMap[monthService]
+                const remaining = debit - credit
+                totalDebt += remaining > 0 ? remaining : 0
+
+                return {
+                  monthService,
+                  totalDue: debit,
+                  paid: credit,
+                  remaining: remaining > 0 ? remaining : 0,
+                }
+              }
+            )
 
             return {
               companyId: company._id.toString(),
               companyName: company.companyName,
-              payments: companyPayments,
-              debt: debt > 0 ? debt : 0,
+              debtPerMonth: debtPerMonthArray,
+              totalDebt,
             }
           })
-          .filter((company) => company.debt > 0)
+          .filter((company) => company.totalDebt > 0)
 
         return res.status(200).json({
           success: true,
