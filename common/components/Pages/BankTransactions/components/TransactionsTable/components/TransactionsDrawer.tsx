@@ -7,7 +7,6 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 import AddPaymentModal from '@components/AddPaymentModal'
 import dayjs from 'dayjs'
 import { SendOutlined } from '@ant-design/icons'
-import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 
 interface TransactionDrawerProps {
   transaction: ITransaction
