@@ -9,17 +9,35 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import _uniqBy from 'lodash/uniqBy'
 
+import { getRelatedDomains } from '@utils/getRelatedItems/getRelatedDomains'
+import { getRelatedStreets } from '@utils/getRelatedItems/getRelatedStreets'
+import { getRelatedCompanies } from '@utils/getRelatedItems/getRelatedCompanies'
+import { getRelatedPayments } from '@utils/getRelatedItems/getRelatedPayments'
+import { getRelatedServices } from '@utils/getRelatedItems/getRelatedServices'
 start()
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+
+   //я - 6749b79ebc23737e7adc86a7
+  //коля - 6606d091f8995a65316f5382
   const { isGlobalAdmin, isDomainAdmin, user } = await getCurrentUser(req, res)
+  const { domainIds } = await getRelatedDomains("6749b79ebc23737e7adc86a7")
+  const { solo } = await getRelatedStreets("6606d091f8995a65316f5382")
+  const { servicesIds } = await getRelatedServices("6606d091f8995a65316f5382")
+  const { companyIds } = await getRelatedCompanies("6749b79ebc23737e7adc86a7")
+  const { paymentsIds } = await getRelatedPayments("6606d091f8995a65316f5382")
+
 
   switch (req.method) {
     case 'GET':
       try {
+
+        //console.log(domainIds)
+        console.log(paymentsIds)
+
         const { limit = 0, domainId } = req.query
         const options = {}
 
