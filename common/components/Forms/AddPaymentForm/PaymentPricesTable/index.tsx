@@ -18,7 +18,7 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
   const { form } = usePaymentContext()
   const invoices = form.getFieldValue('invoice')
   useEffect(() => {
-    const filteredInvoices = invoices?.filter((invoice) => invoice?.sum > 0)
+    const filteredInvoices = invoices?.filter((invoice) => invoice?.sum > 0 || invoice?.type === 'discount')
 
     form.setFieldsValue({
       invoice: filteredInvoices,
