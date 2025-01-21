@@ -1,25 +1,26 @@
-import { Select } from 'antd'
-import s from '@components/StreetsSelector/style.module.scss'
+import { Select } from 'antd';
 
-const StreetsSelector = ({ setFilters, streets }) => {
-  const options = streets?.map((street) => {
-    return {
-      label: street.text,
-      value: street.value,
-    }
-  })
+const StreetsSelector = ({ filters = {}, setFilters, streets }) => {
+  const options = streets?.map((street) => ({
+    label: street.text,
+    value: street.value,
+  }));
 
   return (
     <Select
       placeholder="Виберіть вулицю"
       style={{ width: '200px' }}
+      value={filters?.street}
       onChange={(value) => {
-        setFilters({ street: value })
+        setFilters((prevFilters) => ({
+          ...prevFilters,
+          street: value,
+        }));
       }}
       allowClear
       options={options}
-    ></Select>
-  )
-}
+    />
+  );
+};
 
-export default StreetsSelector
+export default StreetsSelector;
