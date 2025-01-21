@@ -36,7 +36,7 @@ const StreetsHeader: React.FC<Props> = ({
   const closeModal = () => setIsModalOpen(false)
   const openModal = () => {
     setIsModalOpen(true),
-      setStreetActions({ ...streetActions, preview: false, edit: true })
+      setStreetActions({ ...streetActions, preview: false, edit: false })
   }
 
   const { data: userResponse } = useGetCurrentUserQuery()

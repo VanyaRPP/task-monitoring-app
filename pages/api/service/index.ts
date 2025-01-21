@@ -162,19 +162,6 @@ export default async function handler(
         return res.status(200).json({
           success: true,
           data: data,
-          domainFilter: relatedDomains.map((item) => ({
-            text: item.name,
-            value: item._id,
-          })),
-          addressFilter: relatedStreets.map((item) => ({
-            value: item._id,
-            text: `${item.address} (м. ${item.city})`,
-          })),
-          yearFilter: relatedYears.map((item) => ({
-            value: item,
-            text: item.toString(),
-          })),
-          monthFilter: monthFilter(),
         })
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })

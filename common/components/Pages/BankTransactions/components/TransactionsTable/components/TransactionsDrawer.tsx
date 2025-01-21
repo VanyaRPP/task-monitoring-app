@@ -53,7 +53,11 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
           <Select
             placeholder="Select a related company"
             onChange={handleCompanyChange}
-            value={selectedCompany}
+            value={
+              transaction.isMatchingPayment
+                ? transaction.previousCompanyId
+                : selectedCompany
+            }
             style={{ width: 'calc(100% - 80px)' }}
           >
             {relatedCompanies.map((company: IRealestate) => (

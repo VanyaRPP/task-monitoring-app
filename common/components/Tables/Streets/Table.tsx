@@ -1,4 +1,4 @@
-import { DeleteOutlined, EyeOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EyeOutlined, EditOutlined } from '@ant-design/icons'
 import { Alert, Button, Popconfirm, Table, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
@@ -66,9 +66,9 @@ const StreetsTable: React.FC<Props> = ({
   const userRoles = usePermissions(userResponse)
 
   const closeModal = () => setIsModalOpen(false)
-  const openModal = (street) => {
+  const openModal = (street, actions) => {
     setIsModalOpen(true),
-      setStreetActions({ ...streetActions, preview: true, edit: false }),
+      setStreetActions({ ...streetActions, ...actions }),
       setCurrentStreet(street)
   }
 
@@ -117,7 +117,10 @@ const StreetsTable: React.FC<Props> = ({
 const getDefaultColumns = (
   handleDelete?: (streetId: string) => void,
   deleteLoading?: boolean,
-  openModal?: (street: IStreet) => void,
+  openModal?: (
+    street: IStreet,
+    actions: { preview: boolean; edit: boolean }
+  ) => void,
   userRoles?: { isGlobalAdmin: boolean }
 ): ColumnType<any>[] => [
   {
@@ -138,11 +141,27 @@ const getDefaultColumns = (
       <Button
         style={{ padding: 0 }}
         type="link"
-        onClick={() => openModal(street)}
+        onClick={() => openModal(street, { preview: true, edit: false })}
       >
         <EyeOutlined />
       </Button>
     ),
+  },
+  {
+    align: 'center',
+    fixed: 'right',
+    title: '',
+    width: 50,
+    render: (_, street: IStreet) =>
+      userRoles?.isGlobalAdmin && (
+        <Button
+          style={{ padding: 0 }}
+          type="link"
+          onClick={() => openModal(street, { preview: false, edit: true })}
+        >
+          <EditOutlined />
+        </Button>
+      ),
   },
   {
     align: 'center',

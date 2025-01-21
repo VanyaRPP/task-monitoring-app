@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { FC, useEffect, useState } from 'react'
-import { useAddStreetMutation } from '@common/api/streetApi/street.api'
+import {
+  useAddStreetMutation,
+  useEditStreetMutation,
+} from '@common/api/streetApi/street.api'
 import Modal from '@components/UI/ModalWindow'
 import { IStreet } from '@modules/models/Street'
 import { Form, message } from 'antd'
@@ -24,23 +27,38 @@ const AddStreetModal: FC<Props> = ({
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
   const [addStreet, { isLoading }] = useAddStreetMutation()
+  const [editStreet, { isLoading: editLoading }] = useEditStreetMutation()
   const { edit, preview } = streetActions || {}
   const handleSubmit = async () => {
     if (preview) {
       closeModal()
       return
     }
+
     const formData: IStreet = await form.validateFields()
-    const response = await addStreet({
-      city: formData.city,
-      address: formData.address,
-    })
-    if ('data' in response) {
-      form.resetFields()
-      message.success('Додано')
-      closeModal()
+
+    if (edit && currentStreet) {
+      // Редагування адреси
+      const response = await editStreet({ _id: currentStreet._id, ...formData })
+      if ('data' in response) {
+        message.success('Адресу успішно оновлено')
+        closeModal()
+      } else {
+        message.error('Помилка при оновленні адреси')
+      }
     } else {
-      message.error('Помилка при додаванні адреси')
+      // Додавання нової адреси
+      const response = await addStreet({
+        city: formData.city,
+        address: formData.address,
+      })
+      if ('data' in response) {
+        form.resetFields()
+        message.success('Адресу додано')
+        closeModal()
+      } else {
+        message.error('Помилка при додаванні адреси')
+      }
     }
   }
 
@@ -64,14 +82,13 @@ const AddStreetModal: FC<Props> = ({
         closeModal()
       }}
       cancelText="Закрити"
-      okText={edit ? 'Створити' : 'Зберегти'}
-      confirmLoading={isLoading}
+      okText={edit ? 'Зберегти' : 'Додати'}
+      confirmLoading={isLoading || editLoading}
       preview={preview}
-      okButtonProps={{ style: { ...(!edit && { display: 'none' }) } }}
     >
       <AddStreetForm
         form={form}
-        editable={edit}
+        editable={!preview}
         setIsValueChanged={setIsValueChanged}
       />
     </Modal>

@@ -13,6 +13,7 @@ import { filterApi } from '@common/api/filterApi/filter.api'
 import sidebarReducer from '@modules/store/sidebarSlice'
 import themeReducer from '@modules/store/themeSlice'
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
+import { debtorsApi } from '@common/api/debtorsApi/debtors.api'
 
 export const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ export const store = configureStore({
     [realestateApi.reducerPath]: realestateApi.reducer,
     [streetApi.reducerPath]: streetApi.reducer,
     [bankApi.reducerPath]: bankApi.reducer,
+    [debtorsApi.reducerPath]: debtorsApi.reducer,
     sidebar: sidebarReducer,
     theme: themeReducer,
   },
@@ -44,7 +46,8 @@ export const store = configureStore({
       .concat(notificationApi.middleware)
       .concat(realestateApi.middleware)
       .concat(streetApi.middleware)
-      .concat(bankApi.middleware),
+      .concat(bankApi.middleware)
+      .concat(debtorsApi.middleware),
 })
 
 export type AppDispatch = typeof store.dispatch

@@ -30,6 +30,7 @@ export interface ITransaction {
   DLR: string
   TECHNICAL_TRANSACTION_ID: string
   isMatchingPayment?: boolean
+  previousCompanyId?: string
 }
 
 export interface ITransactionData {

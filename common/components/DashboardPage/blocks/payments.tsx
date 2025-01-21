@@ -7,6 +7,11 @@ import {
   useDeletePaymentMutation,
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
+import {
+  useGetAddressFiltersQuery,
+  useGetDomainFiltersQuery,
+  useGetRealEstateFiltersQuery,
+} from '@common/api/filterApi/filter.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
@@ -44,6 +49,7 @@ import {
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import s from './style.module.scss'
+import realEstate from '@pages/real-estate'
 
 interface PaymentsBlockProps {
   sepDomainID?: string
@@ -125,6 +131,28 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
 
   const [filters, setFilters] = useState<any>()
 
+  const { data: domainsFilters } = useGetDomainFiltersQuery({
+    realEstates: filters?.company,
+  })
+  const { data: companiesFilter } = useGetRealEstateFiltersQuery({
+    domains: filters?.domain,
+  })
+
+  useEffect(() => {
+    if (domainsFilters?.domainsFilter?.length === 1) {
+      setFilters({
+        ...filters,
+        domain: [domainsFilters?.domainsFilter[0]?.value],
+      })
+    }
+    if (companiesFilter?.realEstatesFilter?.length === 1) {
+      setFilters({
+        ...filters,
+        company: [companiesFilter?.realEstatesFilter[0]?.value],
+      })
+    }
+  }, [domainsFilters, companiesFilter])
+
   const closeEditModal = () => {
     setCurrentPayment(null)
     setPaymentActions({
@@ -134,6 +162,10 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   }
 
   const { token } = theme.useToken()
+
+  const { data: streetsFilter } = useGetAddressFiltersQuery({
+    domains: filters?.domain,
+  })
 
   const {
     isFetching: currUserFetching,
@@ -160,6 +192,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     },
     { skip: currUserLoading || !currUser }
   )
+
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
   const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -193,7 +226,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         dataIndex: 'domain',
         filters:
           router.pathname === AppRoutes.PAYMENT
-            ? payments?.domainsFilter
+            ? domainsFilters?.domainsFilter
             : null,
         filteredValue: filters?.domain || null,
         filterSearch: true,
@@ -219,7 +252,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         width: router.pathname === AppRoutes.PAYMENT ? 140 : 100,
         filters:
           router.pathname === AppRoutes.PAYMENT
-            ? payments?.realEstatesFilter
+            ? companiesFilter?.realEstatesFilter
             : null,
         filteredValue: filters?.company || null,
         filterSearch: true,
@@ -412,7 +445,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
         render: (_, payment: IExtendedPayment) => (
           <Button
-            type="link"
+          style={{ padding: 0 }}
+          type="link"
             onClick={() => {
               setCurrentPayment(payment)
               setPaymentActions({ ...paymentActions, edit: true })
@@ -507,7 +541,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           setCurrentDateFilter={setCurrentDateFilter}
           currentPayment={currentPayment}
           paymentActions={paymentActions}
-          streets={payments?.addressFilter}
+          streets={streetsFilter?.streetsFilter}
           payments={payments}
           filters={filters}
           setFilters={setFilters}
@@ -516,6 +550,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           setPaymentsDeleteItems={setPaymentsDeleteItems}
           enablePaymentsButton={sepDomainID ? false : true}
           onColumnsSelect={setSelectedColumns}
+          domainFilter={domainsFilters?.domainsFilter}
+          realEstatesFilter={companiesFilter?.realEstatesFilter}
         />
       }
     >
