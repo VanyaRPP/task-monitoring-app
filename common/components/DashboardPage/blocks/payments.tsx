@@ -1,4 +1,9 @@
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  ExclamationCircleFilled,
+} from '@ant-design/icons'
 import {
   dateToDefaultFormat,
   dateToMonthYear,
@@ -15,6 +20,7 @@ import {
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 import PaymentCardHeader from '@components/UI/PaymentCardHeader'
 import TableCard from '@components/UI/TableCard'
 import {
@@ -34,6 +40,7 @@ import {
 import {
   Alert,
   Button,
+  Switch,
   Empty,
   Flex,
   List,
@@ -131,6 +138,10 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
 
   const [filters, setFilters] = useState<any>()
 
+  const [prevCompanyFilter, setPrevCompanyFilter] = useState<
+    string[] | undefined
+  >()
+
   const { data: domainsFilters } = useGetDomainFiltersQuery({
     realEstates: filters?.company,
   })
@@ -167,6 +178,11 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     domains: filters?.domain,
   })
 
+  const { data: debtorsData } = useGetDebtorsQuery(
+    sepDomainID || filters?.domain?.[0],
+    { skip: !sepDomainID && !filters?.domain?.[0] }
+  )
+
   const {
     isFetching: currUserFetching,
     isLoading: currUserLoading,
@@ -191,6 +207,23 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       type: filters?.type || undefined,
     },
     { skip: currUserLoading || !currUser }
+  )
+
+  const getDebtForMonth = useCallback(
+    (companyId: string, monthServiceId: string) => {
+      if (!debtorsData?.companies) return 0
+
+      const companyDebt = debtorsData.companies.find(
+        (c) => c.companyId === companyId
+      )
+
+      return (
+        companyDebt?.debtPerMonth?.find(
+          (d) => d.monthService === monthServiceId
+        )?.remaining || 0
+      )
+    },
+    [debtorsData]
   )
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
@@ -256,20 +289,44 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             : null,
         filteredValue: filters?.company || null,
         filterSearch: true,
-        render: (company) =>
-          router.pathname === AppRoutes.PAYMENT ? (
-            <Tooltip title="Додати в фільтри">
-              <Typography.Link
-                onClick={() =>
-                  setFilters({ ...filters, company: [company?._id] })
-                }
-              >
-                {company?.companyName}
-              </Typography.Link>
-            </Tooltip>
+        render: (company, record: IExtendedPayment) => {
+          const monthServiceId =
+            typeof record.monthService === 'object'
+              ? record.monthService?._id
+              : record.monthService
+
+          const debtAmount = getDebtForMonth(company?._id, monthServiceId)
+
+          return router.pathname === AppRoutes.PAYMENT ? (
+            <Flex gap={4}>
+              <Tooltip title="Додати в фільтри">
+                <Typography.Link
+                  onClick={() =>
+                    setFilters({ ...filters, company: [company?._id] })
+                  }
+                >
+                  {company?.companyName}
+                </Typography.Link>
+              </Tooltip>
+              {debtAmount > 0 && (
+                <Tooltip
+                  title={`Заборгованість за місяць: ${renderCurrency(
+                    debtAmount
+                  )}`}
+                >
+                  <ExclamationCircleFilled
+                    style={{
+                      color: '#ff3232',
+                      fontSize: 14,
+                    }}
+                  />
+                </Tooltip>
+              )}
+            </Flex>
           ) : (
             company?.companyName
-          ),
+          )
+        },
         hidden: payments?.realEstatesFilter?.length <= 1,
       },
       {
@@ -492,6 +549,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     setFilters,
     token,
     selectedColumns,
+    debtorsData,
   ])
 
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
@@ -522,6 +580,16 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       )
     }
   }
+
+  const debtorCompanyIds = useMemo(
+    () =>
+      debtorsData?.companies
+        ?.filter((company) =>
+          company.debtPerMonth?.some((debt) => debt.remaining > 0)
+        )
+        ?.map((company) => company.companyId) || [],
+    [debtorsData?.companies]
+  )
 
   const summaryColumns = useMemo(() => {
     return getSummaryColumns(
@@ -591,6 +659,22 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
               onChange: (currentPage, pageSize) => {
                 setPageData({ currentPage, pageSize })
               },
+              showTotal: () => (
+                <Switch
+                  checkedChildren="Борг"
+                  unCheckedChildren="Всі"
+                  onChange={(checked) => {
+                    if (checked) {
+                      setFilters((prev) => ({
+                        ...prev,
+                        company: debtorCompanyIds,
+                      }))
+                    } else {
+                      setFilters(undefined)
+                    }
+                  }}
+                />
+              ),
             }
           }
           onChange={(_, filters) => {
