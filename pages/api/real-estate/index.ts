@@ -91,7 +91,7 @@ export default async function handler(
         const filteredStreets = distinctStreets
           // parse to regular IStreet
           ?.map((street) => street.streetData as IStreet)
-          // remove dublicates
+          // remove duplicates
           .filter(
             (street, index, streets) =>
               index ===
@@ -99,6 +99,8 @@ export default async function handler(
                 (s) => s._id.toString() === street._id.toString()
               )
           )
+        console.log("realEstates", realEstates)
+
         return res.status(200).json({
           data: realEstates,
           success: true,

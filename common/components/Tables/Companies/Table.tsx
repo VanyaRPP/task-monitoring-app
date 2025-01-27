@@ -29,6 +29,7 @@ import {
   message,
   Tooltip,
   Dropdown,
+  Typography,
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
@@ -77,6 +78,7 @@ const CompaniesTable: React.FC<Props> = ({
 
   const { data: userResponse } = useGetCurrentUserQuery()
 
+
   const { data: realEstateData } = useGetRealEstateFiltersQuery({
     streets: filters?.street,
     domains: filters?.domain,
@@ -89,7 +91,6 @@ const CompaniesTable: React.FC<Props> = ({
     realEstates: filters?.company,
     domains: filters?.domain,
   })
-
   const [realEstate, setRealEstate] = useState(null)
   const [domain, setDomain] = useState(null)
   const [street, setStreet] = useState(null)
@@ -168,6 +169,7 @@ const CompaniesTable: React.FC<Props> = ({
         filters,
         pathname,
         setRealEstateActions,
+        setFilters,
       })}
       dataSource={realEstates?.data}
       scroll={{ x: tableWidth }}
@@ -207,6 +209,7 @@ const getDefaultColumns = ({
   filters,
   pathname,
   setRealEstateActions,
+  setFilters,
 }: {
   domainId?: string
   streetId?: string
@@ -228,6 +231,7 @@ const getDefaultColumns = ({
       edit: boolean
     }>
   >
+  setFilters?: (filters: any) => void
 }): ColumnType<any>[] => {
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
   const columns: ColumnType<any>[] = [
@@ -329,6 +333,73 @@ const getDefaultColumns = ({
       ),
     },
   ]
+  const domainColumn: any = {
+    title: 'Надавач послуг',
+    dataIndex: 'domain',
+    width: 200,
+    filters: pathname === AppRoutes.REAL_ESTATE ? domainsFilter : null,
+    filteredValue: filters?.domain || null,
+    render: (domain) => (
+      <Tooltip title="Додати в фільтри">
+        <Typography.Link
+          onClick={() => {
+            console.log("domain: ",domain)
+            setFilters({ ...filters, domain: [domain?._id] })
+          }
+          }
+        >
+          {domain?.name}
+
+        </Typography.Link>
+      </Tooltip>
+    ),
+    hidden: domainsFilter?.length <= 1,
+    filterSearch: true,
+
+  }
+
+  const companyColumn: any = {
+    fixed: 'left',
+    title: 'Назва компанії',
+    dataIndex: 'companyName',
+    width: 200,
+    filters: pathname === AppRoutes.REAL_ESTATE ? realEstatesFilter : null,
+    filteredValue: filters?.company || null,
+    render: (company) => (
+      <Tooltip title="Додати в фільтри">
+        <Typography.Link
+          onClick={() => {
+            console.log("company: ", company )
+            setFilters({ ...filters, company: [company?._id] })} 
+          
+        }
+        >
+          {company}
+        </Typography.Link>
+      </Tooltip>
+    ),
+    filterSearch: true,
+
+  }
+
+  const streetColumn: any = {
+    title: 'Адреса',
+    dataIndex: 'street',
+    width: 200,
+    filters: pathname === AppRoutes.REAL_ESTATE ? streetsFilter : null,
+    filteredValue: filters?.street || null,
+    render: (street) => (
+      <Tooltip title="Додати в фільтри">
+        <Typography.Link
+          onClick={() => setFilters({ ...filters, street: [street?._id] })}
+        >
+          {street?.address} (м. {street?.city})
+        </Typography.Link>
+      </Tooltip>
+    ),
+    filterSearch: true,
+
+  }
 
   if (isAdmin) {
     columns.push({
@@ -365,9 +436,8 @@ const getDefaultColumns = ({
                 label: (
                   <Popconfirm
                     id="popconfirm_archive"
-                    title={`Ви впевнені що хочете ${
-                      realEstate.archived ? 'розархівувати' : 'архівувати'
-                    } цей елемент?`}
+                    title={`Ви впевнені що хочете ${realEstate.archived ? 'розархівувати' : 'архівувати'
+                      } цей елемент?`}
                     onConfirm={() =>
                       handleArchive(realEstate?._id, !realEstate.archived)
                     }
@@ -426,53 +496,10 @@ const getDefaultColumns = ({
     })
   }
 
-  const domainColumn: any = {
-    title: 'Надавач послуг',
-    dataIndex: 'domain',
-    width: 200,
-    render: (i) => i?.name,
-    hidden: domainsFilter?.length <= 1,
-    filterSearch: true,
-  }
 
-  const companyColumn: any = {
-    fixed: 'left',
-    title: 'Назва компанії',
-    dataIndex: 'companyName',
-    width: 200,
-    filterSearch: true,
-  }
-
-  const streetColumn: any = {
-    title: 'Адреса',
-    dataIndex: 'street',
-    width: 200,
-    filterSearch: true,
-    render: (i) => (
-      <>
-        {i?.address} (м. {i?.city})
-      </>
-    ),
-  }
-
-  if (isAdmin) {
-    companyColumn.filters =
-      pathname === AppRoutes.REAL_ESTATE ? realEstatesFilter : null
-    companyColumn.filteredValue = filters?.company || null
-
-    domainColumn.filters =
-      pathname === AppRoutes.REAL_ESTATE ? domainsFilter : null
-    domainColumn.filteredValue = filters?.domain || null
-
-    streetColumn.filters =
-      pathname === AppRoutes.REAL_ESTATE ? streetsFilter : null
-    streetColumn.filteredValue = filters?.street || null
-  }
 
   columns.unshift(streetColumn)
-
   columns.unshift(domainColumn)
-
   columns.unshift(companyColumn)
 
   return columns
