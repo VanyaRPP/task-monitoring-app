@@ -343,13 +343,11 @@ const getDefaultColumns = ({
       <Tooltip title="Додати в фільтри">
         <Typography.Link
           onClick={() => {
-            console.log("domain: ",domain)
             setFilters({ ...filters, domain: [domain?._id] })
           }
           }
         >
           {domain?.name}
-
         </Typography.Link>
       </Tooltip>
     ),
@@ -365,16 +363,14 @@ const getDefaultColumns = ({
     width: 200,
     filters: pathname === AppRoutes.REAL_ESTATE ? realEstatesFilter : null,
     filteredValue: filters?.company || null,
-    render: (company) => (
+    render: (___, company) => (
       <Tooltip title="Додати в фільтри">
         <Typography.Link
           onClick={() => {
-            console.log("company: ", company )
-            setFilters({ ...filters, company: [company?._id] })} 
-          
+            setFilters({ ...filters, company: [company._id] })} 
         }
         >
-          {company}
+          {company.companyName}
         </Typography.Link>
       </Tooltip>
     ),
@@ -499,8 +495,8 @@ const getDefaultColumns = ({
 
 
   columns.unshift(streetColumn)
-  columns.unshift(domainColumn)
-  columns.unshift(companyColumn)
+  columns.unshift(domainColumn)  
+  columns.unshift(companyColumn)  
 
   return columns
 }

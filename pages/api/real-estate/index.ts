@@ -99,7 +99,6 @@ export default async function handler(
                 (s) => s._id.toString() === street._id.toString()
               )
           )
-        console.log("realEstates", realEstates)
 
         return res.status(200).json({
           data: realEstates,
