@@ -17,8 +17,12 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
 }) => {
   const { form, company } = usePaymentContext()
   const invoices = form.getFieldValue('invoice')
-  if (company?.servicePricePerMeter >= 0) {
-    invoices[0].price = company.servicePricePerMeter
+  if (company?.servicePricePerMeter >= 0 && invoices) {
+    invoices.forEach((invoice) => {
+      if (invoice.type === 'maintenancePrice') {
+        invoice.price = company.servicePricePerMeter
+      } 
+    })
   }
   useEffect(() => {
     const filteredInvoices = invoices?.filter((invoice) => invoice?.sum > 0 || invoice?.type === 'discount')

@@ -103,7 +103,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   }
 
   if (!editable) {
-    return <span>{toRoundFixed(amount)}</span>
+    return <span>{toRoundFixed(amount)} м<sup>2</sup></span>
   }
 
   return (
