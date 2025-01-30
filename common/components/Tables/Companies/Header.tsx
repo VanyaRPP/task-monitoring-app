@@ -92,7 +92,7 @@ const CompaniesHeader: React.FC<Props> = ({
         >
           Компанії
         </Button>
-
+        
         {router.pathname === AppRoutes.REAL_ESTATE && isAdmin && (
           <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
             <DomainFilterTags
@@ -127,6 +127,7 @@ const CompaniesHeader: React.FC<Props> = ({
           {(isModalOpen || currentRealEstate) && (
             <RealEstateModal
               closeModal={closeModal}
+              chosenRealEstate={{ domain: filters?.domain[0] }}
               currentRealEstate={currentRealEstate}
               editable={realEstateActions.edit}
             />
