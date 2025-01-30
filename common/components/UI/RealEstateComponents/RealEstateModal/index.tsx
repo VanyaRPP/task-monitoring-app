@@ -32,7 +32,9 @@ const RealEstateModal: FC<Props> = ({
 
   useEffect(() => {
     const initialValues = {
-      domain: chosenRealEstate.domain ? chosenRealEstate.domain : currentRealEstate?.domain?.name,
+      domain: chosenRealEstate
+        ? chosenRealEstate.domain
+        : currentRealEstate?.domain?.name,
       street:
         currentRealEstate?.street &&
         `${currentRealEstate.street.address} (м. ${currentRealEstate.street.city})`,
@@ -56,7 +58,7 @@ const RealEstateModal: FC<Props> = ({
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
-    
+
     const realEstateData = {
       domain: currentRealEstate?.domain || formData.domain,
       street: currentRealEstate?.street || formData.street,
@@ -79,9 +81,9 @@ const RealEstateModal: FC<Props> = ({
 
     const response = currentRealEstate
       ? await editRealEstate({
-          _id: currentRealEstate?._id,
-          ...realEstateData,
-        })
+        _id: currentRealEstate?._id,
+        ...realEstateData,
+      })
       : await addRealEstate(realEstateData)
 
     if ('data' in response) {
