@@ -45,7 +45,6 @@ const PaymentCardHeader = ({
   paymentActions,
   closeEditModal,
   paymentsDeleteItems,
-  payments,
   streets,
   filters,
   setFilters,
