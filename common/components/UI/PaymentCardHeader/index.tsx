@@ -151,7 +151,7 @@ const PaymentCardHeader = ({
       justify="space-between"
       style={{ marginBottom: '10px', marginTop: '10px' }}
     >
-      <Space>
+      <Space size="middle">
         <Button
           type="link"
           onClick={() => {
@@ -173,7 +173,7 @@ const PaymentCardHeader = ({
               <PaymentCascader onChange={setCurrentDateFilter} />
               <StreetsSelector setFilters={setFilters} streets={streets} />
             </Space>
-            <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
+            <Space direction="vertical" size={4} style={{ minWidth: 150 }}>
               <DomainFilterTags
                 collection={domainFilter}
                 filters={filters}
@@ -188,7 +188,7 @@ const PaymentCardHeader = ({
           </Space>
         )}
       </Space>
-      <Flex wrap align="center" justify="flex-end">
+      <Flex wrap align="center" justify="flex-center">
         {isAdmin &&
           pathname === AppRoutes.PAYMENT &&
           selectedPayments.length > 0 && (
