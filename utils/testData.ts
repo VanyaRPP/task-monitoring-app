@@ -575,5 +575,5 @@ export const paymentsCredit = [
       },
     ],
     generalSum: -1000,
-  }
+  },
 ]

@@ -2,7 +2,13 @@ import handler from '@pages/api/debtors/index'
 import Payment from '@modules/models/Payment'
 import RealEstate from '@modules/models/RealEstate'
 import { mockLoginAs } from '@utils/mockLoginAs'
-import {users, paymentsCredit, realEstates, domains, services} from '@utils/testData'
+import {
+  users,
+  paymentsCredit,
+  realEstates,
+  domains,
+  services,
+} from '@utils/testData'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { expect } from '@jest/globals'
 
@@ -19,7 +25,7 @@ describe('Deptors API - GET', () => {
   it('should return companies with payments for the given domainId', async () => {
     await mockLoginAs(users.globalAdmin)
     // Мокаємо методи моделей
-    const mockDomainId = domains[0]._id;
+    const mockDomainId = domains[0]._id
 
     ;(Payment.find as jest.Mock).mockResolvedValue(paymentsCredit)
     ;(RealEstate.find as jest.Mock).mockResolvedValue(realEstates)
@@ -45,18 +51,18 @@ describe('Deptors API - GET', () => {
 
     const expectedResponse = [
       {
-        companyId: "64d68421d9ba2fc8fea79d21",
-        companyName: "company_0",
+        companyId: '64d68421d9ba2fc8fea79d21',
+        companyName: 'company_0',
         debtPerMonth: [
           {
             monthService: services[0]._id,
             totalDue: 0,
             paid: -1000,
-            remaining: 1000
-          }
+            remaining: 1000,
+          },
         ],
-        totalDebt: 1000
-      }
+        totalDebt: 1000,
+      },
     ]
 
     expect(response.data).toEqual(expectedResponse)

@@ -1,10 +1,10 @@
-import { Select } from 'antd';
+import { Select } from 'antd'
 
 const StreetsSelector = ({ setFilters, streets }) => {
   const options = streets?.map((street) => ({
     label: street.text,
     value: street.value,
-  }));
+  }))
 
   return (
     <Select
@@ -14,13 +14,12 @@ const StreetsSelector = ({ setFilters, streets }) => {
         setFilters((prevFilters) => ({
           ...prevFilters,
           street: value,
-        }));
+        }))
       }}
       allowClear
       options={options}
     />
-  );
-};
+  )
+}
 
-
-export default StreetsSelector;
+export default StreetsSelector
