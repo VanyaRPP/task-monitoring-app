@@ -8,12 +8,6 @@ import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import _uniqBy from 'lodash/uniqBy'
-
-import { getRelatedDomains } from '@utils/getRelatedItems/getRelatedDomains'
-import { getRelatedStreets } from '@utils/getRelatedItems/getRelatedStreets'
-import { getRelatedCompanies } from '@utils/getRelatedItems/getRelatedCompanies'
-import { getRelatedPayments } from '@utils/getRelatedItems/getRelatedPayments'
-import { getRelatedServices } from '@utils/getRelatedItems/getRelatedServices'
 start()
 
 export default async function handler(
