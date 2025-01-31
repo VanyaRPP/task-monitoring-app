@@ -1,6 +1,7 @@
 import {
   useAddDomainMutation,
   useEditDomainMutation,
+  useGetDomainsQuery,
 } from '@common/api/domainApi/domain.api'
 import { Form, message } from 'antd'
 import React, { FC, useEffect, useState } from 'react'
@@ -22,6 +23,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
   const [isValueChanged, setIsValueChanged] = useState(false)
   const [addDomainEstate] = useAddDomainMutation()
   const [editDomain] = useEditDomainMutation()
+  const { data: domains } = useGetDomainsQuery({})
 
   useEffect(() => {
     const initialValues = {
@@ -45,6 +47,19 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
 
   const handleSubmit = async () => {
     const formData: IDomainModel = await form.validateFields()
+
+    if (!currentDomain && domains?.some(domain => domain.name === formData.name)) {
+      message.error({
+        content: 'Помилка при додаванні надавача послуг!  Домен з такою назвою вже існує!',
+        duration: 4, 
+        style: {
+          marginTop: '20vh',
+          fontSize: '2rem',
+          zIndex: 9999, 
+        },
+      })
+      return
+    }
 
     const domainData = {
       name: formData.name,
