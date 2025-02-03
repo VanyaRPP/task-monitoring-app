@@ -13,6 +13,7 @@ const RealEstateCardHeader = () => {
   const { data: user } = useGetCurrentUserQuery()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [chosenRealEstate, setChosenRealEstate] = useState({ domain: '' })
 
   const closeModal = () => {
     setIsModalOpen(false)
@@ -30,7 +31,12 @@ const RealEstateCardHeader = () => {
           <PlusOutlined /> Додати
         </Button>
       )}
-      {isModalOpen && <RealEstateModal closeModal={closeModal} />}
+     {isModalOpen && (
+        <RealEstateModal
+          closeModal={closeModal}
+          chosenRealEstate={chosenRealEstate}
+        />
+      )}
     </div>
   )
 }
