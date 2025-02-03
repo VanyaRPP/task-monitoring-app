@@ -14,27 +14,16 @@ import {
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import TableCard from '@components/UI/TableCard'
-import {
-  AppRoutes,
-  Operations,
-  PERIOD_FILTR,
-  Roles,
-} from '@utils/constants'
-import {
-  renderCurrency,
-  toFirstUpperCase,
-} from '@utils/helpers'
-import {
-  Alert,
-  TableColumnType,
-  message,
-  theme,
-} from 'antd'
+import { AppRoutes, Operations, PERIOD_FILTR, Roles } from '@utils/constants'
+import { renderCurrency, toFirstUpperCase } from '@utils/helpers'
+import { Alert, TableColumnType, message, theme } from 'antd'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import {usePaymentColumns} from "@components/Tables/Payments/usePaymentColumns";
-import PaymentsTable, {PaymentDeleteItem} from "@components/Tables/Payments/Table";
-import PaymentCardHeader from "@components/Tables/Payments/Header";
+import { usePaymentColumns } from '@components/Tables/Payments/usePaymentColumns'
+import PaymentsTable, {
+  PaymentDeleteItem,
+} from '@components/Tables/Payments/Table'
+import PaymentCardHeader from '@components/Tables/Payments/Header'
 
 interface PaymentsBlockProps {
   sepDomainID?: string
@@ -197,6 +186,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   }, [filters])
 
   const columns = usePaymentColumns({
+    payments,
     domainsFilters,
     companiesFilter,
     setPaymentActions,
@@ -215,7 +205,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     dateToDefaultFormat,
     dateToMonthYear,
     toFirstUpperCase,
-    typeFilters
+    typeFilters,
   })
 
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
@@ -246,8 +236,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       )
     }
   }
-
-
 
   const summaryColumns = useMemo(() => {
     return getSummaryColumns(

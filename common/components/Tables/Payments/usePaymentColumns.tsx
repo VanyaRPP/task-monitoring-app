@@ -1,35 +1,49 @@
-import React, {useMemo} from "react";
-import {AppRoutes, Operations, ServiceName} from "@utils/constants";
-import {Button, Flex, List, Popconfirm, Popover, TableColumnType, Tooltip, Typography} from "antd";
-import {dateToDefaultFormat, dateToMonthYear} from "@assets/features/formatDate";
-import {IExtendedPayment} from "@common/api/paymentApi/payment.api.types";
-import {isEmpty, renderCurrency, toFirstUpperCase} from "@utils/helpers";
-import s from "@components/DashboardPage/blocks/style.module.scss";
-import {IService} from "@common/api/serviceApi/service.api.types";
-import {DeleteOutlined, EditOutlined, EyeOutlined} from "@ant-design/icons";
-import {IPaymentFilterResponse} from "@common/api/filterApi/filter.api.types";
+import React, { useMemo } from 'react'
+import { AppRoutes, Operations, ServiceName } from '@utils/constants'
+import {
+  Button,
+  Flex,
+  List,
+  Popconfirm,
+  Popover,
+  TableColumnType,
+  Tooltip,
+  Typography,
+} from 'antd'
+import {
+  dateToDefaultFormat,
+  dateToMonthYear,
+} from '@assets/features/formatDate'
+import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { isEmpty, renderCurrency, toFirstUpperCase } from '@utils/helpers'
+import s from '@components/DashboardPage/blocks/style.module.scss'
+import { IService } from '@common/api/serviceApi/service.api.types'
+import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
+import { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
 
 interface UsePaymentColumnsProps {
-  domainsFilters: IPaymentFilterResponse;
-  companiesFilter:  IPaymentFilterResponse;
-  setPaymentActions: React.Dispatch<React.SetStateAction<{edit: boolean, preview: boolean}>>;
-  router: any;
-  payments: any;
-  paymentActions: any;
-  isDomainAdmin: boolean;
-  isGlobalAdmin: boolean;
-  handleDeletePayment: (id: string) => void;
-  deleteLoading: boolean;
-  filters: any;
-  setFilters: (filters: any) => void;
-  token: any;
-  selectedColumns: any[];
-  setCurrentPayment: (payment: IExtendedPayment) => void;
-  renderCurrency: (value: any) => React.ReactNode;
-  dateToDefaultFormat: (date: any) => string;
-  dateToMonthYear: (date: any) => string;
-  toFirstUpperCase: (value: string) => string;
-  typeFilters: any[];
+  domainsFilters: IPaymentFilterResponse
+  companiesFilter: IPaymentFilterResponse
+  setPaymentActions: React.Dispatch<
+    React.SetStateAction<{ edit: boolean; preview: boolean }>
+  >
+  router: any
+  payments: any
+  paymentActions: any
+  isDomainAdmin: boolean
+  isGlobalAdmin: boolean
+  handleDeletePayment: (id: string) => void
+  deleteLoading: boolean
+  filters: any
+  setFilters: (filters: any) => void
+  token: any
+  selectedColumns: any[]
+  setCurrentPayment: (payment: IExtendedPayment) => void
+  renderCurrency: (value: any) => React.ReactNode
+  dateToDefaultFormat: (date: any) => string
+  dateToMonthYear: (date: any) => string
+  toFirstUpperCase: (value: string) => string
+  typeFilters: any[]
 }
 
 export const usePaymentColumns = ({
