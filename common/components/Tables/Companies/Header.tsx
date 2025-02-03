@@ -127,6 +127,7 @@ const CompaniesHeader: React.FC<Props> = ({
           {(isModalOpen || currentRealEstate) && (
             <RealEstateModal
               closeModal={closeModal}
+              chosenRealEstate={filters?.domain ? { domain: filters?.domain[0] }: null}
               currentRealEstate={currentRealEstate}
               editable={realEstateActions.edit}
             />

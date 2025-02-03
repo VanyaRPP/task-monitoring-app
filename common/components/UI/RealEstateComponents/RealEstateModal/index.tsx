@@ -13,12 +13,14 @@ import RealEstateForm from './RealEstateForm'
 import { IDomain } from '@modules/models/Domain'
 
 interface Props {
+  chosenRealEstate: { domain: string }
   closeModal: VoidFunction
   currentRealEstate?: IExtendedRealestate
   editable?: boolean
 }
 
 const RealEstateModal: FC<Props> = ({
+  chosenRealEstate,
   closeModal,
   currentRealEstate,
   editable,
@@ -30,7 +32,9 @@ const RealEstateModal: FC<Props> = ({
 
   useEffect(() => {
     const initialValues = {
-      domain: currentRealEstate?.domain?.name,
+      domain: chosenRealEstate
+      ? chosenRealEstate.domain
+      : currentRealEstate?.domain?.name,
       street:
         currentRealEstate?.street &&
         `${currentRealEstate.street.address} (м. ${currentRealEstate.street.city})`,
