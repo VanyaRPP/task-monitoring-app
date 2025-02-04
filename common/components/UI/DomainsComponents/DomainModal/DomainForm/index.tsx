@@ -1,11 +1,12 @@
+import { useState } from 'react';
 import { validateField } from '@assets/features/validators'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
-import { Form, FormInstance, Input, Select, Space } from 'antd'
-import { FC } from 'react'
+import { Form, FormInstance, Input, } from 'antd'
 import DomainStreets from './DomainStreets'
 import s from './style.module.scss'
 import DomainInfo from './DomainInfo'
 import DomainsServices from './DomainsServices'
+import ServicesSelect from '@components/UI/Reusable/ServicesSelect';
 
 interface Props {
   form: FormInstance<any>
@@ -13,11 +14,12 @@ interface Props {
   setIsValueChanged: (value: boolean) => void
 }
 
-const DomainForm: FC<Props> = ({
+const DomainForm: React.FC<Props> = ({
   form,
   editable = true,
   setIsValueChanged,
 }) => {
+  const [customServices, setCustomServices] = useState<{ _id: string; name: string }[]>([]);
   return (
     <Form
       form={form}
@@ -36,7 +38,8 @@ const DomainForm: FC<Props> = ({
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} />
       <DomainStreets disabled={!editable} />
-      <DomainsServices editable={editable} />
+      <ServicesSelect form={form} customServices={customServices} />
+      <DomainsServices form={form} editable={editable} onCustomServicesChange={setCustomServices} />
       <DomainInfo editable={editable} form={form} />
     </Form>
   )

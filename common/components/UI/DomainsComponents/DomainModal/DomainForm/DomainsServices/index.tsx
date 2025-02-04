@@ -1,12 +1,14 @@
 import { CloseOutlined } from '@ant-design/icons'
-import { Button, Card, Form, FormInstance, Input } from 'antd'
+import { Button, Card, Form, FormInstance, Input, Tooltip } from 'antd'
 import React, { FC } from 'react'
 
 interface Props {
+  form: FormInstance;
   editable: boolean
+  onCustomServicesChange: (customServices: { _id: string; name: string }[]) => void;
 }
 
-const DomainsServices: FC<Props> = ({ editable }) => {
+const DomainsServices: FC<Props> = ({ form, editable, onCustomServicesChange }) => {
   return (
     <>
       <Form.List name="domainServices">
@@ -23,7 +25,15 @@ const DomainsServices: FC<Props> = ({ editable }) => {
                     type="link"
                     disabled={!editable}
                     onClick={() => {
-                      remove(field.name)
+                      remove(field.name);
+                      onCustomServicesChange(
+                        fields
+                          .map((f) => ({
+                            _id: `${f.key}`,
+                            name: form.getFieldValue(['domainServices', f.name, 'name']),
+                          }))
+                          .filter((s) => s.name) 
+                      );
                     }}
                   >
                     <CloseOutlined />
@@ -34,15 +44,22 @@ const DomainsServices: FC<Props> = ({ editable }) => {
                   <Input
                     placeholder="Найменування послуги"
                     disabled={!editable}
+                    onChange={() => {
+                      onCustomServicesChange(
+                        fields
+                          .map((f) => ({
+                            _id: `${f.key}`,
+                            name: form.getFieldValue(['domainServices', f.name, 'name']),
+                          }))
+                          .filter((s) => s.name) 
+                      );
+                    }}
                   />
-                </Form.Item>
-
-                <Form.Item label="Ціна" name={[field.name, 'price']}>
-                  <Input placeholder="Ціна послуги" disabled={!editable} />
                 </Form.Item>
               </Card>
             ))}
             {editable && (
+              <Tooltip title="Якщо послуги зі списку вам не підходять, ви можете створити власну">
               <Button
                 type="dashed"
                 style={{ marginBottom: 10 }}
@@ -51,6 +68,7 @@ const DomainsServices: FC<Props> = ({ editable }) => {
               >
                 + Додати послугу
               </Button>
+              </Tooltip>
             )}
           </div>
         )}
