@@ -8,7 +8,6 @@ import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import _uniqBy from 'lodash/uniqBy'
-
 start()
 
 export default async function handler(
