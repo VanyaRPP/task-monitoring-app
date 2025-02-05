@@ -31,6 +31,7 @@ import {
   Tooltip,
   Dropdown,
   Switch,
+  Badge
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
@@ -490,9 +491,14 @@ const getDefaultColumns = ({
     render: (i) => {
       return !isUser && debtorCompanies?.some(companie => companie?.companyName === i) ? (
         <>
-          {i} <Tooltip title={<span>Компанія боржник<br />Сумма боргу: {debtorCompanies.find(companie => companie?.companyName === i).totalDebt} UAH<br /></span>}>
-            <InfoCircleOutlined />
-          </Tooltip>
+          {i} <Tooltip title={`Компанія боржник`}>
+              <Badge 
+                count={`${debtorCompanies.find(companie => companie?.companyName === i).totalDebt.toFixed(2)} UAH`}
+                title=""
+                style={{ backgroundColor: "#ff4d4f",
+                   cursor: "pointer" }}
+              />
+            </Tooltip>
         </>
       ) : i
     },
