@@ -19,7 +19,8 @@ type CompanyWithPayments = {
 
 type Data = {
   success: boolean
-  companies: CompanyWithPayments[]
+  companies?: CompanyWithPayments[]
+  message?: string
 }
 
 start()
@@ -31,9 +32,15 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const domainId = req.query.domainId
-        const payments = await Payment.find({ domain: domainId })
-        const companies = await RealEstate.find({ domain: domainId })
+        const domainIds = Array.isArray(req.query.domainIds) ? req.query.domainIds : req.query.domainIds.split(',')
+        if (!domainIds || domainIds.length === 0) {
+          return res.status(400).json({
+            success: false,
+            message: 'Domain ID is required',
+          })
+        }
+        const payments = await Payment.find({ domain: { $in: domainIds } })
+        const companies = await RealEstate.find({ domain: { $in: domainIds } })
 
         const companyWithPayments = companies
           .map((company) => {
@@ -97,7 +104,10 @@ export default async function handler(
           companies: companyWithPayments,
         })
       } catch (error) {
-        return res.status(500)
+        return res.status(500).json({
+          success: false,
+          message: `Error: ${error.message}`,
+        })
       }
   }
 }
