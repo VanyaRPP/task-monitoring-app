@@ -490,16 +490,22 @@ const getDefaultColumns = ({
     filterSearch: true,
     render: (i) => {
       return !isUser && debtorCompanies?.some(companie => companie?.companyName === i) ? (
-        <>
-          {i} <Tooltip title={`Компанія боржник`}>
-              <Badge 
-                count={`${debtorCompanies.find(companie => companie?.companyName === i).totalDebt.toFixed(2)} UAH`}
-                title=""
-                style={{ backgroundColor: "#ff4d4f",
-                   cursor: "pointer" }}
-              />
-            </Tooltip>
-        </>
+        <Tooltip
+        color='red' 
+        title={
+          <span>Залишок<br />
+            {debtorCompanies?.find(companie => companie?.companyName === i).totalDebt.toFixed(2)} UAH
+          </span>}>
+          <Badge
+            count={`!`}
+            title=""
+            color='red'
+            style={{ cursor: "pointer" }}
+            size='small'
+          >
+            <span>{i}</span>
+          </Badge>
+        </Tooltip>
       ) : i
     },
   }
