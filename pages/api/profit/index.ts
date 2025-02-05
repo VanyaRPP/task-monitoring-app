@@ -97,31 +97,12 @@ export default async function handler(
             0
           )
 
-        const allMonths = new Set([
-          ...Object.keys(paymentsGroupedByMonth),
-          ...Object.keys(creditsGroupedByMonth),
-        ]);
-        
-        allMonths.forEach((month) => {
-          const paymentsForMonth = paymentsGroupedByMonth[month] || [];
-          const creditsForMonth = creditsGroupedByMonth[month] || [];
-        
-          const totalGeneralSumDebit = paymentsForMonth.reduce(
-            (acc, payment) => acc + payment.generalSum,
-            0
-          );
-        
-          const totalGeneralSumCredit = creditsForMonth.reduce(
-            (acc, credit) => acc + credit.sum,
-            0
-          );
-        
           result.push({
             totalGeneralSumCredit,
             totalGeneralSumDebit,
             month,
-          });
-        });
+          })
+        })
 
         res.status(200).json({
           success: true,
