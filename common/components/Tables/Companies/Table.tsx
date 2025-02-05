@@ -76,6 +76,16 @@ export interface Props {
   }
 }
 
+const getDebtorTooltipColor = (debtor) => {
+  if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
+    return 'gray';
+  } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
+    return 'yellow';
+  } else if (debtor.totalDebt >= 20000) {
+    return 'red';
+  }
+}
+
 const CompaniesTable: React.FC<Props> = ({
   domainId,
   streetId,
@@ -489,12 +499,13 @@ const getDefaultColumns = ({
     width: 200,
     filterSearch: true,
     render: (i) => {
-      return !isUser && debtorCompanies?.some(companie => companie?.companyName === i) ? (
+      const debtor = debtorCompanies?.find(companie => companie?.companyName === i)
+      return !isUser && debtor ? (
         <Tooltip
-        color='red' 
+        color={getDebtorTooltipColor(debtor)}
         title={
           <span>Залишок<br />
-            {debtorCompanies?.find(companie => companie?.companyName === i).totalDebt.toFixed(2)} UAH
+            {debtor.totalDebt.toFixed(2)} UAH
           </span>}>
           <Badge
             count={`!`}
