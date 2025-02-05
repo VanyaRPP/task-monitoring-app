@@ -7,7 +7,7 @@ export const debtorsApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getDebtors: builder.query({
-      query: (domainId) => `debtors?domainId=${domainId}`,
+      query: (domainIds) => `debtors?domainIds=${domainIds}`,
     }),
   }),
 })

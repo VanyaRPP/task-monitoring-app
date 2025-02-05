@@ -5,6 +5,7 @@ import {
   QuestionCircleOutlined,
   InboxOutlined,
   MoreOutlined,
+  InfoCircleOutlined
 } from '@ant-design/icons'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import {
@@ -29,6 +30,8 @@ import {
   message,
   Tooltip,
   Dropdown,
+  Switch,
+  Badge
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
@@ -38,8 +41,21 @@ import {
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
 import { useEffect, useState } from 'react'
-import { set } from 'mongoose'
-import streets from '@pages/streets'
+import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
+
+type DebtPerMonth = {
+  monthService: string
+  totalDue: number
+  paid: number
+  remaining: number
+}
+
+type CompanyWithPayments = {
+  companyId: any
+  companyName: string
+  debtPerMonth: DebtPerMonth[]
+  totalDebt: number
+}
 
 export interface Props {
   domainId?: string
@@ -100,6 +116,16 @@ const CompaniesTable: React.FC<Props> = ({
     setStreet(streetData)
   }, [filters, realEstateData, domainData, streetData])
 
+  const [domainIds, setDomainIds] = useState([])
+
+  useEffect(() => {
+    if (domainData?.domainsFilter) {
+      setDomainIds(domainData?.domainsFilter.map((domain) => domain.value))
+    }
+  }, [domainData])
+  const { data, error } = useGetDebtorsQuery(domainIds)
+  const debtorCompanies = data?.companies
+
   const [deleteRealEstate, { isLoading: deleteLoading }] =
     useDeleteRealEstateMutation()
   const [updateArchivedItem, { isLoading: archiveLoading }] =
@@ -129,6 +155,7 @@ const CompaniesTable: React.FC<Props> = ({
   }
 
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isUser = userResponse?.roles?.includes(Roles.USER)
   const isAdmin = isAdminCheck(userResponse?.roles)
 
   const tableWidth =
@@ -148,6 +175,20 @@ const CompaniesTable: React.FC<Props> = ({
           showSizeChanger: true,
           pageSizeOptions: [10, 20, 50],
           position: ['bottomCenter'],
+          showTotal: () => (
+          !isUser && <Switch
+            checkedChildren="Боржники"
+            unCheckedChildren="Всі"
+            onChange={(checked) => {
+              if (checked) {
+                setFilters((prev) => ({
+                  company: debtorCompanies?.map((company) => company.companyId),
+                }))
+              } else {
+                setFilters(undefined)
+              }
+            }}
+          />),
         }
       }
       loading={isLoading}
@@ -168,6 +209,8 @@ const CompaniesTable: React.FC<Props> = ({
         filters,
         pathname,
         setRealEstateActions,
+        debtorCompanies,
+        isUser
       })}
       dataSource={realEstates?.data}
       scroll={{ x: tableWidth }}
@@ -207,6 +250,8 @@ const getDefaultColumns = ({
   filters,
   pathname,
   setRealEstateActions,
+  debtorCompanies,
+  isUser
 }: {
   domainId?: string
   streetId?: string
@@ -228,6 +273,8 @@ const getDefaultColumns = ({
       edit: boolean
     }>
   >
+  debtorCompanies?: CompanyWithPayments[]
+  isUser?: boolean
 }): ColumnType<any>[] => {
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
   const columns: ColumnType<any>[] = [
@@ -441,6 +488,20 @@ const getDefaultColumns = ({
     dataIndex: 'companyName',
     width: 200,
     filterSearch: true,
+    render: (i) => {
+      return !isUser && debtorCompanies?.some(companie => companie?.companyName === i) ? (
+        <>
+          {i} <Tooltip title={`Компанія боржник`}>
+              <Badge 
+                count={`${debtorCompanies.find(companie => companie?.companyName === i).totalDebt.toFixed(2)} UAH`}
+                title=""
+                style={{ backgroundColor: "#ff4d4f",
+                   cursor: "pointer" }}
+              />
+            </Tooltip>
+        </>
+      ) : i
+    },
   }
 
   const streetColumn: any = {
