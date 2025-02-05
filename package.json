@@ -16,7 +16,7 @@
     "prettier": "npm run prettier:fix && npm run prettier:check",
     "prettier:check": "prettier --check --ignore-path .gitignore .",
     "prettier:fix": "prettier --write --ignore-path .gitignore .",
-    "browser:open": "npx cross-env cross-env-shell \"(start http://localhost:3000 || open http://localhost:3000)\"",
+    "browser:open": "open-cli http://localhost:3000",
     "prepare": "husky install",
     "types:check": "tsc --noEmit"
   },
@@ -85,6 +85,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "mongodb-memory-server": "^8.14.0",
     "next-swagger-doc": "^0.3.4",
+    "open-cli": "^8.0.0",
     "prettier": "^2.7.1",
     "ts-jest": "^29.2.4",
     "ts-node": "^10.9.2",

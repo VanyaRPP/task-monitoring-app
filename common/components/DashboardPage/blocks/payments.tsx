@@ -445,6 +445,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
         render: (_, payment: IExtendedPayment) => (
           <Button
+            style={{ padding: 0 }}
             type="link"
             onClick={() => {
               setCurrentPayment(payment)

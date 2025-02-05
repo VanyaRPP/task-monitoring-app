@@ -536,3 +536,44 @@ export const payments = [
   },
   ...paymentsForDates,
 ].sort((a, b) => compareDates(a.invoiceCreationDate, b.invoiceCreationDate))
+
+export const paymentsCredit = [
+  {
+    _id: '64d68421d9ba2fc8fea79d63',
+    invoiceNumber: 1,
+    type: 'credit',
+    invoiceCreationDate: '2020-02-10T22:00:00.000Z',
+    domain: domains[0]._id,
+    street: streets[0]._id,
+    company: realEstates[0]._id,
+    monthService: services[0]._id,
+    description: 'none',
+    invoice: [
+      {
+        type: 'maintenancePrice',
+        amount: -10,
+        price: -10,
+        sum: -100,
+      },
+      {
+        type: 'placingPrice',
+        amount: -10,
+        price: -20,
+        sum: -200,
+      },
+      {
+        type: 'electricityPrice',
+        amount: -10,
+        price: -30,
+        sum: -300,
+      },
+      {
+        type: 'waterPrice',
+        amount: -10,
+        price: -40,
+        sum: -400,
+      },
+    ],
+    generalSum: -1000,
+  },
+]
