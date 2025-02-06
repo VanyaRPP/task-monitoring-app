@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import start from '@pages/api/api.config'
 import RealEstate from '@modules/models/RealEstate'
 import Payment from '@modules/models/Payment'
+import { getCurrentUser } from '@utils/getCurrentUser'
 
 type DebtPerMonth = {
   monthService: string
@@ -32,15 +33,26 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const domainIds = Array.isArray(req.query.domainIds) ? req.query.domainIds : req.query.domainIds.split(',')
-        if (!domainIds || domainIds.length === 0) {
+        const { isUser, isDomainAdmin, isGlobalAdmin, isAdmin, user } =
+            await getCurrentUser(req, res)
+        if (isUser) {
+          return res.status(401).json({
+            success: false,
+            message: 'Unauthorized',
+          })
+        }
+        const { 
+          domainIds
+        } = req.query
+        const domainsIds = Array.isArray(domainIds) ? domainIds : domainIds.split(',')
+        if (!domainsIds || domainsIds[0] === '' || domainsIds[0] === 'undefined' || domainsIds.length === 0) {
           return res.status(400).json({
             success: false,
             message: 'Domain ID is required',
           })
         }
-        const payments = await Payment.find({ domain: { $in: domainIds } })
-        const companies = await RealEstate.find({ domain: { $in: domainIds } })
+        const payments = await Payment.find({ domain: { $in: domainsIds } })
+        const companies = await RealEstate.find({ domain: { $in: domainsIds } })
 
         const companyWithPayments = companies
           .map((company) => {

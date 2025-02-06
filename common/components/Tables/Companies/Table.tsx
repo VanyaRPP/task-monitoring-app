@@ -133,7 +133,7 @@ const CompaniesTable: React.FC<Props> = ({
       setDomainIds(domainData?.domainsFilter.map((domain) => domain.value))
     }
   }, [domainData])
-  const { data, error } = useGetDebtorsQuery(domainIds)
+  const { data, error } = useGetDebtorsQuery({ domainIds: domainIds })
   const debtorCompanies = data?.companies
 
   const [deleteRealEstate, { isLoading: deleteLoading }] =
