@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { IGetDebtorsResponse, IGetDebtorsRequest } from './debtors.api.types'
 
 export const debtorsApi = createApi({
   reducerPath: 'debtorsApi',
@@ -6,8 +7,16 @@ export const debtorsApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getDebtors: builder.query({
-      query: (domainIds) => `debtors?domainIds=${domainIds}`,
+    getDebtors: builder.query<
+    IGetDebtorsResponse,
+    IGetDebtorsRequest
+    >({
+      query: ({ domainIds }) => {
+        return {
+          url: `debtors`,
+          params: { domainIds },
+        }
+      },
     }),
   }),
 })

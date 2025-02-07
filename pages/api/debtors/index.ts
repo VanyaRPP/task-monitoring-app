@@ -2,18 +2,11 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import start from '@pages/api/api.config'
 import RealEstate from '@modules/models/RealEstate'
 import Payment from '@modules/models/Payment'
-
-type DebtPerMonth = {
-  monthService: string
-  totalDue: number
-  paid: number
-  remaining: number
-}
+import { getCurrentUser } from '@utils/getCurrentUser'
 
 type CompanyWithPayments = {
   companyId: any
   companyName: string
-  debtPerMonth: DebtPerMonth[]
   totalDebt: number
 }
 
@@ -32,15 +25,26 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const domainIds = Array.isArray(req.query.domainIds) ? req.query.domainIds : req.query.domainIds.split(',')
-        if (!domainIds || domainIds.length === 0) {
+        const { isUser, isDomainAdmin, isGlobalAdmin, isAdmin, user } =
+            await getCurrentUser(req, res)
+        if (isUser) {
+          return res.status(401).json({
+            success: false,
+            message: 'Unauthorized',
+          })
+        }
+        const { 
+          domainIds
+        } = req.query
+        const domainsIds = Array.isArray(domainIds) ? domainIds : domainIds.split(',')
+        if (!domainsIds || domainsIds[0] === '' || domainsIds[0] === 'undefined' || domainsIds[0] === 'null' || domainsIds.length === 0) {
           return res.status(400).json({
             success: false,
             message: 'Domain ID is required',
           })
         }
-        const payments = await Payment.find({ domain: { $in: domainIds } })
-        const companies = await RealEstate.find({ domain: { $in: domainIds } })
+        const payments = await Payment.find({ domain: { $in: domainsIds } })
+        const companies = await RealEstate.find({ domain: { $in: domainsIds } })
 
         const companyWithPayments = companies
           .map((company) => {
@@ -74,27 +78,20 @@ export default async function handler(
               }
             })
 
-            let totalDebt = 0
-            const debtPerMonthArray = Object.keys(debtPerMonthMap).map(
+            let totalCredit = 0
+            let totalDebit = 0
+            Object.keys(debtPerMonthMap).map(
               (monthService) => {
                 const { debit, credit } = debtPerMonthMap[monthService]
-                const remaining = debit - credit
-                totalDebt += remaining > 0 ? remaining : 0
-
-                return {
-                  monthService,
-                  totalDue: debit,
-                  paid: credit,
-                  remaining: remaining > 0 ? remaining : 0,
-                }
+                totalCredit += credit
+                totalDebit += debit
               }
             )
 
             return {
               companyId: company._id.toString(),
               companyName: company.companyName,
-              debtPerMonth: debtPerMonthArray,
-              totalDebt,
+              totalDebt: totalDebit - totalCredit,
             }
           })
           .filter((company) => company.totalDebt > 0)
