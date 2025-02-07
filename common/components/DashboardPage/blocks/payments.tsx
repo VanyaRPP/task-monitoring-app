@@ -2,6 +2,7 @@ import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import {
   dateToDefaultFormat,
   dateToMonthYear,
+  dateToMonth,
 } from '@assets/features/formatDate'
 import {
   useDeletePaymentMutation,
@@ -11,6 +12,7 @@ import {
   useGetAddressFiltersQuery,
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
+  useGetDateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
@@ -153,6 +155,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
   }, [domainsFilters, companiesFilter])
 
+  const { data: dateFilters } = useGetDateFiltersQuery({ type: 'payment' })
+
   const closeEditModal = () => {
     setCurrentPayment(null)
     setPaymentActions({
@@ -277,12 +281,19 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         dataIndex: 'invoiceCreationDate',
         render: dateToDefaultFormat,
         width: router.pathname === AppRoutes.PAYMENT ? 164 : 70,
-        sorter:
-          router.pathname === AppRoutes.PAYMENT
-            ? (a, b) =>
-                new Date(a.invoiceCreationDate).getTime() -
-                new Date(b.invoiceCreationDate).getTime()
-            : null,
+        filterSearch: true,
+        filters: dateFilters?.monthFilter
+          ?.filter(filter => filter.value !== null)
+          ?.map(filter => ({
+            text: dateToMonth(new Date(2000, Number(filter.value) - 1)),
+            value: filter.value,
+          })) || [],
+        filteredValue: filters?.invoiceCreationDate || null,
+        onFilter: (value, record) => {
+          const recordDate = new Date(record.invoiceCreationDate);
+          if (isNaN(recordDate.getTime())) return false;
+          return (recordDate.getMonth() + 1) === Number(value);
+        },
       },
       {
         title: 'Тип',
