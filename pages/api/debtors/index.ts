@@ -36,8 +36,15 @@ export default async function handler(
         const { 
           domainIds
         } = req.query
-        const domainsIds = Array.isArray(domainIds) ? domainIds : domainIds.split(',')
-        if (!domainsIds || domainsIds[0] === '' || domainsIds[0] === 'undefined' || domainsIds[0] === 'null' || domainsIds.length === 0) {
+
+        const domainsIds = Array.isArray(domainIds) 
+        ? domainIds 
+        : domainIds.split(',')
+
+        if (!domainsIds || domainsIds[0] === '' 
+          || domainsIds[0] === 'undefined' 
+          || domainsIds[0] === 'null' 
+          || domainsIds.length === 0) {
           return res.status(400).json({
             success: false,
             message: 'Domain ID is required',
@@ -51,13 +58,13 @@ export default async function handler(
             const companyPayments = payments
               .filter(
                 (payment) =>
-                  payment.company.toString() === company._id.toString()
+                  payment?.company?.toString() === company?._id?.toString()
               )
               .map((payment) => ({
-                _id: payment._id.toString(),
-                type: payment.type,
-                generalSum: payment.generalSum,
-                monthService: payment.monthService.toString(),
+                _id: payment?._id.toString() || 'unknown',
+                type: payment?.type || 'unknown',
+                generalSum: payment?.generalSum || 0,
+                monthService: payment?.monthService?.toString() || 'unknown',
               }))
 
             const debtPerMonthMap: {
