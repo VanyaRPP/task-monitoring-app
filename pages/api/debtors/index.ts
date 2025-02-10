@@ -36,7 +36,7 @@ export default async function handler(
         const { 
           domainIds
         } = req.query
-
+        
         const domainsIds = Array.isArray(domainIds) 
         ? domainIds 
         : domainIds.split(',')
