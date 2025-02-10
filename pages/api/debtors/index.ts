@@ -34,18 +34,23 @@ export default async function handler(
     case 'GET':
       try {
         const { isUser, isDomainAdmin, isGlobalAdmin, isAdmin, user } =
-            await getCurrentUser(req, res)
+          await getCurrentUser(req, res)
         if (isUser) {
           return res.status(401).json({
             success: false,
             message: 'Unauthorized',
           })
         }
-        const { 
-          domainIds
-        } = req.query
-        const domainsIds = Array.isArray(domainIds) ? domainIds : domainIds.split(',')
-        if (!domainsIds || domainsIds[0] === '' || domainsIds[0] === 'undefined' || domainsIds.length === 0) {
+        const { domainIds } = req.query
+        const domainsIds = Array.isArray(domainIds)
+          ? domainIds
+          : domainIds.split(',')
+        if (
+          !domainsIds ||
+          domainsIds[0] === '' ||
+          domainsIds[0] === 'undefined' ||
+          domainsIds.length === 0
+        ) {
           return res.status(400).json({
             success: false,
             message: 'Domain ID is required',
