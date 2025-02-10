@@ -5,15 +5,16 @@ import { getRelatedServices } from './getRelatedServices'
 import { getRelatedCompanies } from './getRelatedCompanies'
 
 export async function getRelatedPayments(userId: string) {
-  const { domainIds } = await getRelatedDomains(userId)
-  const { serviceIds } = await getRelatedServices(userId)
-  const { companyIds } = await getRelatedCompanies(userId)
+    const { domainIds } = await getRelatedDomains(userId)
+    const { serviceIds } = await getRelatedServices(userId)
+    const { companyIds } = await getRelatedCompanies(userId)
 
-  const paymentsIds = await Payment.distinct('_id', {
-    domain: { $in: domainIds },
-    service: { $in: serviceIds },
-    company: { $in: companyIds },
-  })
+    const paymentsIds = await Payment.distinct('_id', {
+        domain: { $in: domainIds },
+        service: { $in: serviceIds },
+        company: { $in: companyIds },
+    })
 
-  return { paymentsIds }
-}
+    return {paymentsIds}
+
+}    

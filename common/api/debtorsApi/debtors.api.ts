@@ -7,7 +7,10 @@ export const debtorsApi = createApi({
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
-    getDebtors: builder.query<IGetDebtorsResponse, IGetDebtorsRequest>({
+    getDebtors: builder.query<
+    IGetDebtorsResponse,
+    IGetDebtorsRequest
+    >({
       query: ({ domainIds }) => {
         return {
           url: `debtors`,

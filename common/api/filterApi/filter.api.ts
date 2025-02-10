@@ -46,7 +46,7 @@ export const filterApi = createApi({
         return {
           url: 'date',
           method: 'GET',
-          params,
+          params
         }
       },
       providesTags: (response) =>

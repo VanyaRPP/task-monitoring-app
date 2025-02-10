@@ -52,22 +52,20 @@ export default async function handler(
           {
             $group: {
               _id: {
-                month: { $month: `$${dateField}` },
-              },
-            },
+                month: { $month: `$${dateField}` }
+              }
+            }
           },
           { $sort: { '_id.month': 1 } },
         ])
-        .then((results) =>
-          results.map((result) => result._id.month).filter(Boolean)
-        )
+        .then((results) => results.map((result) => result._id.month).filter(Boolean))
 
       const monthFilter = distinctMonths.map((month) => {
         const date = new Date()
         date.setMonth(month - 1)
         return {
           value: month,
-          text: getFormattedDate(date),
+          text: getFormattedDate(date)
         }
       })
 
@@ -75,7 +73,7 @@ export default async function handler(
         success: true,
         yearFilter: distinctYears.map((year) => ({
           value: year,
-          text: year.toString(),
+          text: year.toString()
         })),
         monthFilter,
       })
