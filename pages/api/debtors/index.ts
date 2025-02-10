@@ -4,17 +4,9 @@ import RealEstate from '@modules/models/RealEstate'
 import Payment from '@modules/models/Payment'
 import { getCurrentUser } from '@utils/getCurrentUser'
 
-type DebtPerMonth = {
-  monthService: string
-  totalDue: number
-  paid: number
-  remaining: number
-}
-
 type CompanyWithPayments = {
   companyId: any
   companyName: string
-  debtPerMonth: DebtPerMonth[]
   totalDebt: number
 }
 
@@ -64,13 +56,13 @@ export default async function handler(
             const companyPayments = payments
               .filter(
                 (payment) =>
-                  payment.company.toString() === company._id.toString()
+                  payment?.company?.toString() === company?._id?.toString()
               )
               .map((payment) => ({
-                _id: payment._id.toString(),
-                type: payment.type,
-                generalSum: payment.generalSum,
-                monthService: payment.monthService.toString(),
+                _id: payment?._id.toString() || 'unknown',
+                type: payment?.type || 'unknown',
+                generalSum: payment?.generalSum || 0,
+                monthService: payment?.monthService?.toString() || 'unknown',
               }))
 
             const debtPerMonthMap: {
@@ -91,27 +83,20 @@ export default async function handler(
               }
             })
 
-            let totalDebt = 0
-            const debtPerMonthArray = Object.keys(debtPerMonthMap).map(
+            let totalCredit = 0
+            let totalDebit = 0
+            Object.keys(debtPerMonthMap).map(
               (monthService) => {
                 const { debit, credit } = debtPerMonthMap[monthService]
-                const remaining = debit - credit
-                totalDebt += remaining > 0 ? remaining : 0
-
-                return {
-                  monthService,
-                  totalDue: debit,
-                  paid: credit,
-                  remaining: remaining > 0 ? remaining : 0,
-                }
+                totalCredit += credit
+                totalDebit += debit
               }
             )
 
             return {
               companyId: company._id.toString(),
               companyName: company.companyName,
-              debtPerMonth: debtPerMonthArray,
-              totalDebt,
+              totalDebt: totalDebit - totalCredit,
             }
           })
           .filter((company) => company.totalDebt > 0)
