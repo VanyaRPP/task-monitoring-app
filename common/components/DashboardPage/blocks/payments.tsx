@@ -282,17 +282,18 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         render: dateToDefaultFormat,
         width: router.pathname === AppRoutes.PAYMENT ? 164 : 70,
         filterSearch: true,
-        filters: dateFilters?.monthFilter
-          ?.filter(filter => filter.value !== null)
-          ?.map(filter => ({
-            text: dateToMonth(new Date(2000, Number(filter.value) - 1)),
-            value: filter.value,
-          })) || [],
+        filters:
+          dateFilters?.monthFilter
+            ?.filter((filter) => filter.value !== null)
+            ?.map((filter) => ({
+              text: dateToMonth(new Date(2000, Number(filter.value) - 1)),
+              value: filter.value,
+            })) || [],
         filteredValue: filters?.invoiceCreationDate || null,
         onFilter: (value, record) => {
-          const recordDate = new Date(record.invoiceCreationDate);
-          if (isNaN(recordDate.getTime())) return false;
-          return (recordDate.getMonth() + 1) === Number(value);
+          const recordDate = new Date(record.invoiceCreationDate)
+          if (isNaN(recordDate.getTime())) return false
+          return recordDate.getMonth() + 1 === Number(value)
         },
       },
       {

@@ -5,7 +5,7 @@ import {
   QuestionCircleOutlined,
   InboxOutlined,
   MoreOutlined,
-  InfoCircleOutlined
+  InfoCircleOutlined,
 } from '@ant-design/icons'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import {
@@ -31,7 +31,7 @@ import {
   Tooltip,
   Dropdown,
   Switch,
-  Badge
+  Badge,
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
@@ -78,11 +78,11 @@ export interface Props {
 
 const getDebtorTooltipColor = (debtor) => {
   if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
-    return 'gray';
+    return 'gray'
   } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
-    return 'yellow';
+    return 'yellow'
   } else if (debtor.totalDebt >= 20000) {
-    return 'red';
+    return 'red'
   }
 }
 
@@ -185,20 +185,24 @@ const CompaniesTable: React.FC<Props> = ({
           showSizeChanger: true,
           pageSizeOptions: [10, 20, 50],
           position: ['bottomCenter'],
-          showTotal: () => (
-          !isUser && <Switch
-            checkedChildren="Боржники"
-            unCheckedChildren="Всі"
-            onChange={(checked) => {
-              if (checked) {
-                setFilters((prev) => ({
-                  company: debtorCompanies?.map((company) => company.companyId),
-                }))
-              } else {
-                setFilters(undefined)
-              }
-            }}
-          />),
+          showTotal: () =>
+            !isUser && (
+              <Switch
+                checkedChildren="Боржники"
+                unCheckedChildren="Всі"
+                onChange={(checked) => {
+                  if (checked) {
+                    setFilters((prev) => ({
+                      company: debtorCompanies?.map(
+                        (company) => company.companyId
+                      ),
+                    }))
+                  } else {
+                    setFilters(undefined)
+                  }
+                }}
+              />
+            ),
         }
       }
       loading={isLoading}
@@ -220,7 +224,7 @@ const CompaniesTable: React.FC<Props> = ({
         pathname,
         setRealEstateActions,
         debtorCompanies,
-        isUser
+        isUser,
       })}
       dataSource={realEstates?.data}
       scroll={{ x: tableWidth }}
@@ -261,7 +265,7 @@ const getDefaultColumns = ({
   pathname,
   setRealEstateActions,
   debtorCompanies,
-  isUser
+  isUser,
 }: {
   domainId?: string
   streetId?: string
@@ -499,25 +503,33 @@ const getDefaultColumns = ({
     width: 200,
     filterSearch: true,
     render: (i) => {
-      const debtor = debtorCompanies?.find(companie => companie?.companyName === i)
+      const debtor = debtorCompanies?.find(
+        (companie) => companie?.companyName === i
+      )
       return !isUser && debtor ? (
         <Tooltip
-        color={getDebtorTooltipColor(debtor)}
-        title={
-          <span>Залишок<br />
-            {debtor.totalDebt.toFixed(2)} UAH
-          </span>}>
+          color={getDebtorTooltipColor(debtor)}
+          title={
+            <span>
+              Залишок
+              <br />
+              {debtor.totalDebt.toFixed(2)} UAH
+            </span>
+          }
+        >
           <Badge
             count={`!`}
             title=""
-            color='red'
-            style={{ cursor: "pointer" }}
-            size='small'
+            color="red"
+            style={{ cursor: 'pointer' }}
+            size="small"
           >
             <span>{i}</span>
           </Badge>
         </Tooltip>
-      ) : i
+      ) : (
+        i
+      )
     },
   }
 
