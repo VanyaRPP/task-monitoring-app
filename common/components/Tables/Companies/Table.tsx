@@ -5,6 +5,7 @@ import {
   QuestionCircleOutlined,
   InboxOutlined,
   MoreOutlined,
+  InfoCircleOutlined
 } from '@ant-design/icons'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import {
@@ -29,6 +30,8 @@ import {
   message,
   Tooltip,
   Dropdown,
+  Switch,
+  Badge
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
@@ -38,8 +41,21 @@ import {
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
 import { useEffect, useState } from 'react'
-import { set } from 'mongoose'
-import streets from '@pages/streets'
+import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
+
+type DebtPerMonth = {
+  monthService: string
+  totalDue: number
+  paid: number
+  remaining: number
+}
+
+type CompanyWithPayments = {
+  companyId: any
+  companyName: string
+  debtPerMonth: DebtPerMonth[]
+  totalDebt: number
+}
 
 export interface Props {
   domainId?: string
@@ -57,6 +73,16 @@ export interface Props {
   >
   realEstateActions: {
     edit: boolean
+  }
+}
+
+const getDebtorTooltipColor = (debtor) => {
+  if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
+    return 'gray';
+  } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
+    return 'yellow';
+  } else if (debtor.totalDebt >= 20000) {
+    return 'red';
   }
 }
 
@@ -100,6 +126,16 @@ const CompaniesTable: React.FC<Props> = ({
     setStreet(streetData)
   }, [filters, realEstateData, domainData, streetData])
 
+  const [domainIds, setDomainIds] = useState([])
+
+  useEffect(() => {
+    if (domainData?.domainsFilter) {
+      setDomainIds(domainData?.domainsFilter.map((domain) => domain.value))
+    }
+  }, [domainData])
+  const { data, error } = useGetDebtorsQuery({ domainIds: domainIds })
+  const debtorCompanies = data?.companies
+
   const [deleteRealEstate, { isLoading: deleteLoading }] =
     useDeleteRealEstateMutation()
   const [updateArchivedItem, { isLoading: archiveLoading }] =
@@ -129,6 +165,7 @@ const CompaniesTable: React.FC<Props> = ({
   }
 
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isUser = userResponse?.roles?.includes(Roles.USER)
   const isAdmin = isAdminCheck(userResponse?.roles)
 
   const tableWidth =
@@ -148,6 +185,20 @@ const CompaniesTable: React.FC<Props> = ({
           showSizeChanger: true,
           pageSizeOptions: [10, 20, 50],
           position: ['bottomCenter'],
+          showTotal: () => (
+          !isUser && <Switch
+            checkedChildren="Боржники"
+            unCheckedChildren="Всі"
+            onChange={(checked) => {
+              if (checked) {
+                setFilters((prev) => ({
+                  company: debtorCompanies?.map((company) => company.companyId),
+                }))
+              } else {
+                setFilters(undefined)
+              }
+            }}
+          />),
         }
       }
       loading={isLoading}
@@ -168,6 +219,8 @@ const CompaniesTable: React.FC<Props> = ({
         filters,
         pathname,
         setRealEstateActions,
+        debtorCompanies,
+        isUser
       })}
       dataSource={realEstates?.data}
       scroll={{ x: tableWidth }}
@@ -207,6 +260,8 @@ const getDefaultColumns = ({
   filters,
   pathname,
   setRealEstateActions,
+  debtorCompanies,
+  isUser
 }: {
   domainId?: string
   streetId?: string
@@ -228,6 +283,8 @@ const getDefaultColumns = ({
       edit: boolean
     }>
   >
+  debtorCompanies?: CompanyWithPayments[]
+  isUser?: boolean
 }): ColumnType<any>[] => {
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
   const columns: ColumnType<any>[] = [
@@ -441,6 +498,27 @@ const getDefaultColumns = ({
     dataIndex: 'companyName',
     width: 200,
     filterSearch: true,
+    render: (i) => {
+      const debtor = debtorCompanies?.find(companie => companie?.companyName === i)
+      return !isUser && debtor ? (
+        <Tooltip
+        color={getDebtorTooltipColor(debtor)}
+        title={
+          <span>Залишок<br />
+            {debtor.totalDebt.toFixed(2)} UAH
+          </span>}>
+          <Badge
+            count={`!`}
+            title=""
+            color='red'
+            style={{ cursor: "pointer" }}
+            size='small'
+          >
+            <span>{i}</span>
+          </Badge>
+        </Tooltip>
+      ) : i
+    },
   }
 
   const streetColumn: any = {

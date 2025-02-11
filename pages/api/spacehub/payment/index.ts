@@ -141,7 +141,6 @@ export default async function handler(
         const serviceIds = services.map((service) => service._id.toString())
         options.monthService = { $in: serviceIds }
       }
-
       const payments = await Payment.find(options)
         .sort({ invoiceCreationDate: -1 })
         .skip(+skip)
@@ -151,10 +150,10 @@ export default async function handler(
         .populate('domain')
         .populate('monthService')
 
-      const streetsPipeline = getStreetsPipeline(isGlobalAdmin, options.domain)
+      // const streetsPipeline = getStreetsPipeline(isGlobalAdmin, options.domain)
 
-      const streets = await Payment.aggregate(streetsPipeline)
-      const addressFilter = getFilterForAddress(streets)
+      // const streets = await Payment.aggregate(streetsPipeline)
+      // const addressFilter = getFilterForAddress(streets)
 
       const total = await Payment.countDocuments(options)
 
