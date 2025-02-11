@@ -133,7 +133,7 @@ const CompaniesTable: React.FC<Props> = ({
       setDomainIds(domainData?.domainsFilter.map((domain) => domain.value))
     }
   }, [domainData])
-  const { data, error } = useGetDebtorsQuery({ domainIds: domainIds })
+  const { data, error } = useGetDebtorsQuery({ domainIds: domainIds }, { skip: !domainIds || domainIds.length === 0 })
   const debtorCompanies = data?.companies
 
   const [deleteRealEstate, { isLoading: deleteLoading }] =
@@ -501,22 +501,16 @@ const getDefaultColumns = ({
     render: (i) => {
       const debtor = debtorCompanies?.find(companie => companie?.companyName === i)
       return !isUser && debtor ? (
-        <Tooltip
-        color={getDebtorTooltipColor(debtor)}
-        title={
-          <span>Залишок<br />
-            {debtor.totalDebt.toFixed(2)} UAH
-          </span>}>
-          <Badge
-            count={`!`}
-            title=""
-            color='red'
-            style={{ cursor: "pointer" }}
-            size='small'
-          >
-            <span>{i}</span>
-          </Badge>
-        </Tooltip>
+        <Badge
+          count={debtor.totalDebt.toFixed(2)}
+          title=""
+           color={getDebtorTooltipColor(debtor)}
+          overflowCount={Infinity}  
+          style={{ cursor: "pointer" }}
+          size='small'
+        >
+          <span>{i}</span>
+        </Badge>
       ) : i
     },
   }
