@@ -281,7 +281,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         dataIndex: 'invoiceCreationDate',
         render: dateToDefaultFormat,
         width: router.pathname === AppRoutes.PAYMENT ? 164 : 70,
-        filterSearch: true,
         filters: dateFilters?.monthFilter
           ?.filter(filter => filter.value !== null)
           ?.map(filter => ({
