@@ -138,6 +138,16 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     domains: filters?.domain,
   })
 
+  const {
+    isFetching: currUserFetching,
+    isLoading: currUserLoading,
+    isError: currUserError,
+    data: currUser,
+  } = useGetCurrentUserQuery()
+  const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isDomainAdmin = currUser?.roles?.includes(Roles.DOMAIN_ADMIN)
+  const isUser = currUser?.roles?.includes(Roles.USER)
+
   useEffect(() => {
     if (domainsFilters?.domainsFilter?.length === 1) {
       setFilters({
@@ -168,13 +178,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   })
 
   const {
-    isFetching: currUserFetching,
-    isLoading: currUserLoading,
-    isError: currUserError,
-    data: currUser,
-  } = useGetCurrentUserQuery()
-
-  const {
     isFetching: paymentsFetching,
     isLoading: paymentsLoading,
     isError: paymentsError,
@@ -195,8 +198,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
-  const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
-  const isDomainAdmin = currUser?.roles?.includes(Roles.DOMAIN_ADMIN)
+  
 
   const handleDeletePayment = useCallback(
     async (id: string) => {
