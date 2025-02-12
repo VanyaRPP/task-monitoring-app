@@ -173,7 +173,7 @@ const PaymentCardHeader = ({
               <PaymentCascader onChange={setCurrentDateFilter} />
               <StreetsSelector setFilters={setFilters} streets={streets} />
             </Space>
-            <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
+            <Space direction="vertical" size={4} style={{ minWidth: 200 }}>
               <DomainFilterTags
                 collection={domainFilter}
                 filters={filters}
