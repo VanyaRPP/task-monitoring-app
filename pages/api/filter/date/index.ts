@@ -4,6 +4,7 @@ import start from '@pages/api/api.config'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getFormattedDate } from '@assets/features/formatDate'
 import Service from '@modules/models/Service'
+import Payment from '@modules/models/Payment'
 
 start()
 
@@ -13,8 +14,13 @@ export default async function handler(
 ) {
   if (req.method === 'GET') {
     try {
-      const { domainId, streetId, serviceId } = req.query
+      const { domainId, streetId, serviceId, type } = req.query
       const options: any = {}
+      let dateField = 'date'
+
+      if (type === 'payment') {
+        dateField = 'invoiceCreationDate'
+      }
 
       if (domainId) {
         options.domain = {
@@ -32,40 +38,48 @@ export default async function handler(
         }
       }
 
-      const distinctYears = await Service.distinct('date', options).then(
-        (dates) => [
-          ...new Set(dates.map((date) => new Date(date).getFullYear())),
-        ]
-      )
+      const distinctYears = await (type === 'payment' ? Payment : Service)
+        .distinct(dateField, options)
+        .then((dates) => [
+          ...new Set(
+            dates.map((date) => new Date(date).getFullYear()).filter(Boolean)
+          ),
+        ])
 
-      const distinctMonths = await Service.aggregate([
-        { $match: options },
-        { $group: { _id: { month: { $month: '$date' } } } },
-        { $sort: { '_id.month': 1 } },
-      ]).then((results) => [
-        ...new Set(results.map((result) => result._id.month)),
-      ])
+      const distinctMonths = await (type === 'payment' ? Payment : Service)
+        .aggregate([
+          { $match: options },
+          {
+            $group: {
+              _id: {
+                month: { $month: `$${dateField}` }
+              }
+            }
+          },
+          { $sort: { '_id.month': 1 } },
+        ])
+        .then((results) => results.map((result) => result._id.month).filter(Boolean))
 
-      const monthFilter = distinctMonths.map((item) => {
+      const monthFilter = distinctMonths.map((month) => {
         const date = new Date()
-        date.setMonth(item - 1)
-        return { value: item, text: getFormattedDate(date) }
+        date.setMonth(month - 1)
+        return {
+          value: month,
+          text: getFormattedDate(date)
+        }
       })
 
       return res.status(200).json({
         success: true,
-        yearFilter: distinctYears.map((item) => ({
-          value: item,
-          text: item.toString(),
+        yearFilter: distinctYears.map((year) => ({
+          value: year,
+          text: year.toString()
         })),
         monthFilter,
       })
     } catch (error) {
       return res.status(400).json({ success: false, error: error.message })
     }
-  } else {
-    return res
-      .status(405)
-      .json({ success: false, message: 'Method not allowed' })
   }
+  return res.status(405).json({ success: false, message: 'Method not allowed' })
 }

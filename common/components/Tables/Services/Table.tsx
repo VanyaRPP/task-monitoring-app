@@ -72,7 +72,7 @@ const ServicesTable: React.FC<Props> = ({
   const { data: streetsFilter } = useGetAddressFiltersQuery({
     domains: filter?.domain,
   })
-  const { data: dateFilters } = useGetDateFiltersQuery()
+  const { data: dateFilters } = useGetDateFiltersQuery({ type: 'service' })
 
   const [deleteService, { isLoading: deleteLoading }] =
     useDeleteServiceMutation()
