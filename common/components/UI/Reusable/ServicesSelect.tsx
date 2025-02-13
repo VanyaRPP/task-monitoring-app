@@ -1,13 +1,13 @@
-import { Form, FormInstance, Select } from 'antd';
-import { CSSProperties, useMemo } from 'react';
-import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api';
+import { Form, FormInstance, Select } from 'antd'
+import { CSSProperties, useMemo } from 'react'
+import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 
 export interface ServicesSelectProps {
-  domainId?: string;
-  form: FormInstance;
-  dropdownStyle?: CSSProperties;
-  onServicesChange?: (services: string[]) => void;
-  customServices?: { _id: string; name: string }[];
+  domainId?: string
+  form: FormInstance
+  dropdownStyle?: CSSProperties
+  onServicesChange?: (services: string[]) => void
+  customServices?: { _id: string; name: string }[]
 }
 
 const ServicesSelect: React.FC<ServicesSelectProps> = ({
@@ -17,30 +17,38 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   onServicesChange,
   customServices = [],
 }) => {
-  const { data: servicesData, isLoading, isError } = useGetAllServicesQuery({ domainId });
+  const {
+    data: servicesData,
+    isLoading,
+    isError,
+  } = useGetAllServicesQuery({ domainId })
 
   const servicesList = useMemo(() => {
-    return (servicesData as any)?.services || [];
-  }, [servicesData]);
+    if (!servicesData) return []
+    return servicesData.data.map((service: any) => ({
+      _id: service._id,
+      name: service.domain.name || 'Без назви',
+    }))
+  }, [servicesData])
 
   const services = useMemo(() => {
-    return [...servicesList, ...customServices];
-  }, [servicesList, customServices]);
+    return [...servicesList, ...customServices]
+  }, [servicesList, customServices])
 
   const options = useMemo(() => {
     return services.map((service) => ({
       value: service._id,
       label: service.name,
-    }));
-  }, [services]);
+    }))
+  }, [services])
 
   const handleChange = (selectedValues: string[]) => {
-    form.setFieldsValue({ services: selectedValues });
-    onServicesChange?.(selectedValues);
-  };
+    form.setFieldsValue({ services: selectedValues })
+    onServicesChange?.(selectedValues)
+  }
 
-  if (isLoading) return <div>Завантаження послуг...</div>;
-  if (isError) return <div>Помилка при завантаженні послуг</div>;
+  if (isLoading) return <div>Завантаження послуг...</div>
+  if (isError) return <div>Помилка при завантаженні послуг</div>
 
   return (
     <Form.Item
@@ -60,7 +68,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
         onChange={handleChange}
       />
     </Form.Item>
-  );
-};
+  )
+}
 
-export default ServicesSelect;
+export default ServicesSelect
