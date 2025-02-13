@@ -18,11 +18,10 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   customServices = [],
 }) => {
   const { data: servicesData, isLoading, isError } = useGetAllServicesQuery({ domainId });
-  console.log(servicesData)
 
-  const servicesList = (servicesData as any)?.services || []  ;
-
-  
+  const servicesList = useMemo(() => {
+    return (servicesData as any)?.services || [];
+  }, [servicesData]);
 
   const services = useMemo(() => {
     return [...servicesList, ...customServices];
