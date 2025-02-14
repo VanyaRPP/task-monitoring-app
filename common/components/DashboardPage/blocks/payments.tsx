@@ -1,17 +1,19 @@
 import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import {
   dateToDefaultFormat,
+  dateToMonth,
   dateToMonthYear,
 } from '@assets/features/formatDate'
+import {
+  useGetAddressFiltersQuery,
+  useGetDateFiltersQuery,
+  useGetDomainFiltersQuery,
+  useGetRealEstateFiltersQuery,
+} from '@common/api/filterApi/filter.api'
 import {
   useDeletePaymentMutation,
   useGetAllPaymentsQuery,
 } from '@common/api/paymentApi/payment.api'
-import {
-  useGetAddressFiltersQuery,
-  useGetDomainFiltersQuery,
-  useGetRealEstateFiltersQuery,
-} from '@common/api/filterApi/filter.api'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
@@ -49,7 +51,6 @@ import {
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import s from './style.module.scss'
-import realEstate from '@pages/real-estate'
 
 interface PaymentsBlockProps {
   sepDomainID?: string
@@ -162,6 +163,15 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       })
     }
   }, [domainsFilters, companiesFilter])
+
+  const { data: dateFilters } = useGetDateFiltersQuery({ type: 'payment' })
+
+  const handlePagination = (pagination) => {
+    setPageData({
+      pageSize: pagination.pageSize,
+      currentPage: pagination.current,
+    })
+  }
 
   const closeEditModal = () => {
     setCurrentPayment(null)
@@ -279,12 +289,19 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         dataIndex: 'invoiceCreationDate',
         render: dateToDefaultFormat,
         width: router.pathname === AppRoutes.PAYMENT ? 164 : 70,
-        sorter:
-          router.pathname === AppRoutes.PAYMENT
-            ? (a, b) =>
-                new Date(a.invoiceCreationDate).getTime() -
-                new Date(b.invoiceCreationDate).getTime()
-            : null,
+        filters:
+          dateFilters?.monthFilter
+            ?.filter((filter) => filter.value !== null)
+            ?.map((filter) => ({
+              text: dateToMonth(new Date(2000, Number(filter.value) - 1)),
+              value: filter.value,
+            })) || [],
+        filteredValue: filters?.invoiceCreationDate || null,
+        onFilter: (value, record) => {
+          const recordDate = new Date(record.invoiceCreationDate)
+          if (isNaN(recordDate.getTime())) return false
+          return recordDate.getMonth() + 1 === Number(value)
+        },
       },
       {
         title: 'Тип',
@@ -586,13 +603,11 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           pagination={
             (router.pathname === AppRoutes.PAYMENT ||
               router.pathname === AppRoutes.SEP_DOMAIN) && {
-              total: payments?.total,
+              current: pageData.currentPage,
               showSizeChanger: true,
               pageSizeOptions: [10, 20, 50],
               position: ['bottomCenter'],
-              onChange: (currentPage, pageSize) => {
-                setPageData({ currentPage, pageSize })
-              },
+              onChange: handlePagination,
             }
           }
           onChange={(_, filters) => {

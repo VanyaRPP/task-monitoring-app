@@ -38,14 +38,17 @@ export const filterApi = createApi({
         response ? [{ type: 'Filter', id: 'streetsFilter' }] : [],
     }),
 
-    getDateFilters: builder.query<IPaymentFilterResponse, void>({
-      query: () => {
+    getDateFilters: builder.query<
+      IPaymentFilterResponse,
+      { type?: 'service' | 'payment' }
+    >({
+      query: (params) => {
         return {
           url: 'date',
           method: 'GET',
+          params
         }
       },
-
       providesTags: (response) =>
         response
           ? [
