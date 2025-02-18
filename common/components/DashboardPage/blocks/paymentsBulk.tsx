@@ -66,8 +66,8 @@ const PaymentBulkBlock: React.FC = () => {
     {
       streetId,
       domainId,
-      month: dayjs(service?.date).month(),
-      year: dayjs(service?.date).year(),
+      month: dayjs(service?.date).subtract(1, 'month').month() + 1,
+      year: dayjs(service?.date).subtract(1, 'month').year(),
       limit: 1,
     },
     { skip: !serviceId || !domainId || !streetId || !service }
