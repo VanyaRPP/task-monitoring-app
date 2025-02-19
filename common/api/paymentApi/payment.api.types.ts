@@ -9,6 +9,7 @@ import { IRealestate } from '../realestateApi/realestate.api.types'
 export interface IPaymentField {
   type: ServiceType | string
   name?: string
+  isIndividual?: boolean
   lastAmount?: number
   amount?: number
   price: number
