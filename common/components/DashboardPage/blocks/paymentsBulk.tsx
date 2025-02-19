@@ -83,7 +83,7 @@ const PaymentBulkBlock: React.FC = () => {
       domainIds: [domainId],
       serviceIds: [prevService?._id],
       type: Operations.Debit,
-      limit: companies?.length,
+      limit: companies?.length + 1,
     },
     { skip: !serviceId || !domainId || !streetId || !prevService || !companies }
   )
