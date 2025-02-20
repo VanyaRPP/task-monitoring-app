@@ -1,9 +1,7 @@
-// customServices.api.ts
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import {
   IGetCustomServicesResponse,
   IGetCustomServicesRequest,
-  ICustomService,
   ICreateCustomServiceRequest,
   ICreateCustomServiceResponse,
 } from './customServices.api.types'
