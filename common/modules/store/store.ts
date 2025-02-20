@@ -14,6 +14,7 @@ import sidebarReducer from '@modules/store/sidebarSlice'
 import themeReducer from '@modules/store/themeSlice'
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 import { debtorsApi } from '@common/api/debtorsApi/debtors.api'
+import { customServicesApi } from '@common/api/customServicesApi/customServices.api'
 
 export const store = configureStore({
   reducer: {
@@ -25,6 +26,7 @@ export const store = configureStore({
     [paymentApi.reducerPath]: paymentApi.reducer,
     [serviceApi.reducerPath]: serviceApi.reducer,
     [customerApi.reducerPath]: customerApi.reducer,
+    [customServicesApi.reducerPath]: customServicesApi.reducer,
     [notificationApi.reducerPath]: notificationApi.reducer,
     [realestateApi.reducerPath]: realestateApi.reducer,
     [streetApi.reducerPath]: streetApi.reducer,
@@ -43,6 +45,7 @@ export const store = configureStore({
       .concat(paymentApi.middleware)
       .concat(serviceApi.middleware)
       .concat(customerApi.middleware)
+      .concat(customServicesApi.middleware)
       .concat(notificationApi.middleware)
       .concat(realestateApi.middleware)
       .concat(streetApi.middleware)
