@@ -1,9 +1,8 @@
 export interface ICustomService {
   _id: string
   name: string
-  description: string
   domainId: string
-  fieldName?: string
+  fieldName: string
 }
 
 export interface IGetCustomServicesRequest {
@@ -17,7 +16,6 @@ export interface IGetCustomServicesResponse {
 export interface ICreateCustomServiceRequest {
   name: string
   domainId: string
-  description?: string
 }
 
 export interface ICreateCustomServiceResponse {

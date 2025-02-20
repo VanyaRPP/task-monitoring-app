@@ -13,40 +13,70 @@ export default async function handler(
   const { isGlobalAdmin } = await getCurrentUser(req, res)
 
   // if (!isGlobalAdmin) {
-  //   return res.status(400).json({ success: false, message: 'not allowed' })
+  //   return res.status(400).json({ success: false, message: 'Not allowed' })
   // }
 
   switch (req.method) {
     case 'POST':
       try {
-        const reqBody = {
-          name: req.body.name,
-          fieldName: transliterateAndCamelCase(req.body.name),
-        }
-        const customService = await CustomService.create(reqBody)
+        const { name, domainId, description } = req.body
 
-        return res.status(200).json({
+        if (!name || !domainId) {
+          return res.status(400).json({
+            success: false,
+            message: 'Missing required fields: name and domainId',
+          })
+        }
+
+        const customService = await CustomService.create({
+          name,
+          domainId,
+          description: description || '',
+          fieldName: transliterateAndCamelCase(name),
+        })
+
+        return res.status(201).json({
           success: true,
-          data: customService,
+          data: customService.toObject(),
         })
       } catch (error) {
-        return res.status(400).json({ success: false })
+        console.error('Error creating custom service:', error)
+        return res.status(500).json({
+          success: false,
+          message: 'Internal server error',
+        })
       }
 
     case 'GET':
       try {
-        const customServices = await CustomService.find().lean()
+        const domainIds = req.query.domainIds
+          ? Array.isArray(req.query.domainIds)
+            ? req.query.domainIds
+            : [req.query.domainIds]
+          : []
+
+        const query =
+          domainIds.length > 0 ? { domainId: { $in: domainIds } } : {}
+
+        const customServices = await CustomService.find(query).lean()
 
         return res.status(200).json({
           success: true,
           data: customServices,
         })
       } catch (error) {
-        return res.status(500).json({ success: false, message: 'Server Error' })
+        console.error('Error fetching custom services:', error)
+        return res.status(500).json({
+          success: false,
+          message: 'Internal server error',
+        })
       }
 
     default:
       res.setHeader('Allow', ['POST', 'GET'])
-      return res.status(405).json({ success: false, message: 'Method Not Allowed' })
+      return res.status(405).json({
+        success: false,
+        message: `Method ${req.method} Not Allowed`,
+      })
   }
 }
