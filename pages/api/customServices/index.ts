@@ -40,7 +40,6 @@ export default async function handler(
           data: customService.toObject(),
         })
       } catch (error) {
-        console.error('Error creating custom service:', error)
         return res.status(500).json({
           success: false,
           message: 'Internal server error',
@@ -65,7 +64,6 @@ export default async function handler(
           data: customServices,
         })
       } catch (error) {
-        console.error('Error fetching custom services:', error)
         return res.status(500).json({
           success: false,
           message: 'Internal server error',
