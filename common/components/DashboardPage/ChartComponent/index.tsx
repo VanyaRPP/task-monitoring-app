@@ -145,18 +145,19 @@ const CompanySelector: React.FC<Omit<SelectProps, 'options' | 'mode'>> = ({
 }) => {
   // TODO: replace with separated filter api later
   const {
-    data: { data } = { data: []},
+    data: { data } = { data: [] },
     isFetching,
     isError,
   } = useGetAllRealEstateQuery({})
-  const companies = data.length !== 0 
-  ? data?.map((company) => {
-    return { 
-      text: company.companyName,
-      value: company._id
-    }
-  })
-  : []
+  const companies =
+    data.length !== 0
+      ? data?.map((company) => {
+          return {
+            text: company.companyName,
+            value: company._id,
+          }
+        })
+      : []
 
   const options = useMemo(() => {
     return companies?.map((company: IFilter) => ({
@@ -166,10 +167,10 @@ const CompanySelector: React.FC<Omit<SelectProps, 'options' | 'mode'>> = ({
   }, [companies])
 
   useEffect(() => {
-    if (options?.length >= 1) {
+    if (options?.length >= 1 && !props.value) {
       onChange?.(options[0].value, options[0])
     }
-  }, [options, onChange])
+  }, [options, onChange, props.value])
 
   return (
     <Select

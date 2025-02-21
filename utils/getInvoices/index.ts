@@ -120,12 +120,23 @@ export const getMaintenanceInvoice = ({
     }
 
     const invoice = currInvoicesCollection[ServiceType.Maintenance]
+    const companyMaintenance =
+      company?.servicePricePerMeter >= 0
+        ? company?.servicePricePerMeter
+        : undefined
 
     return {
       type: invoice.type,
       amount: +toRoundFixed(invoice.amount),
-      price: +toRoundFixed(+invoice.price),
-      sum: +toRoundFixed(+invoice.sum || +invoice.price * +invoice.amount),
+      isIndividual: companyMaintenance !== undefined,
+      price:
+        companyMaintenance !== undefined
+          ? +toRoundFixed(companyMaintenance)
+          : +toRoundFixed(invoice.price),
+      sum:
+        companyMaintenance !== undefined
+          ? +toRoundFixed(companyMaintenance * +invoice.amount)
+          : +toRoundFixed(+invoice.sum || +invoice.price * +invoice.amount),
     }
   }
 
