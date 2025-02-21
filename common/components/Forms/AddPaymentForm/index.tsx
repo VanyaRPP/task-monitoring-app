@@ -60,7 +60,7 @@ function AddPaymentForm({ paymentActions }) {
 
   useEffect(() => {
     form.setFieldsValue({ invoice })
-  }, [form, invoice])
+  }, [form])
 
   return (
     <>
