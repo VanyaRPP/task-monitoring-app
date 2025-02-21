@@ -21,12 +21,16 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
     invoices.forEach((invoice) => {
       if (invoice.type === 'maintenancePrice') {
         invoice.price = company.servicePricePerMeter
+        invoice.isIndividual = true
       }
     })
   }
   useEffect(() => {
     const filteredInvoices = invoices?.filter(
-      (invoice) => invoice?.sum > 0 || invoice?.type === 'discount'
+      (invoice) =>
+        invoice?.sum > 0 ||
+        invoice?.type === 'discount' ||
+        invoice?.type === 'maintenancePrice'
     )
 
     form.setFieldsValue({
