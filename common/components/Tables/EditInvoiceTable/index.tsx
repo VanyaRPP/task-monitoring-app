@@ -109,7 +109,11 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
               ),
             },
             {
-              title: 'Ціна',
+              title: `Ціна ${
+                invoices?.some((invoice) => invoice?.isIndividual)
+                  ? '(індивідуальна)'
+                  : ''
+              }`,
               width: 250,
               render: (_, { name }: { name: number }) => (
                 <Price
