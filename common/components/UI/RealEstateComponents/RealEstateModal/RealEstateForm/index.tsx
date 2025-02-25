@@ -140,29 +140,28 @@ const RealEstateForm: FC<Props> = ({
         />
       </Form.Item>
 
-      {isServiceExist('rentPrice') && (
-        <>
-          <Form.Item
-            name="servicePricePerMeter"
-            label="Індивідуальне утримання (грн/м²)"
-          >
-            <InputNumber
-              parser={inputNumberParser}
-              placeholder="Вкажіть значення"
-              className={s.formInput}
-              disabled={!editable}
-            />
-          </Form.Item>
-          <Form.Item name="rentPart" label="Частка загальної площі">
-            <InputNumber
-              parser={inputNumberParser}
-              placeholder="Вкажіть значення"
-              className={s.formInput}
-              disabled={!editable}
-            />
-          </Form.Item>
-        </>
-      )}
+      <>
+        <Form.Item
+          name="servicePricePerMeter"
+          label="Індивідуальне утримання (грн/м²)"
+        >
+          <InputNumber
+            parser={inputNumberParser}
+            placeholder="Вкажіть значення"
+            className={s.formInput}
+            disabled={!editable}
+          />
+        </Form.Item>
+        <Form.Item name="rentPart" label="Частка загальної площі">
+          <InputNumber
+            parser={inputNumberParser}
+            placeholder="Вкажіть значення"
+            className={s.formInput}
+            disabled={!editable}
+          />
+        </Form.Item>
+      </>
+
       {isServiceExist('waterPrice') && (
         <Form.Item name="waterPart" label="Частка водопостачання">
           <InputNumber
