@@ -15,16 +15,9 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
   preview,
   loading,
 }) => {
-  const { form, company } = usePaymentContext()
+  const { form } = usePaymentContext()
   const invoices = form.getFieldValue('invoice')
-  if (company?.servicePricePerMeter >= 0 && invoices) {
-    invoices.forEach((invoice) => {
-      if (invoice.type === 'maintenancePrice') {
-        invoice.price = company.servicePricePerMeter
-        invoice.isIndividual = true
-      }
-    })
-  }
+
   useEffect(() => {
     const filteredInvoices = invoices?.filter(
       (invoice) =>

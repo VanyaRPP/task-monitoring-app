@@ -148,11 +148,14 @@ const PaymentCardHeader = ({
 
   return (
     <Flex
+      wrap
       justify="space-between"
-      style={{ marginBottom: '10px', marginTop: '10px' }}
+      align='center'
+      style={{ marginBottom: '10px', marginTop: '10px', maxHeight: '60px', overflowY: 'auto' }}
     >
-      <Space size="middle">
+      <Space wrap size="small">
         <Button
+          style={{ marginBottom: '10px', marginTop: '10px' }}
           type="link"
           onClick={() => {
             if (enablePaymentsButton) {
@@ -188,7 +191,7 @@ const PaymentCardHeader = ({
           </Space>
         )}
       </Space>
-      <Flex wrap align="center" justify="flex-center">
+      <Flex style={{ height: '50px', marginTop: '10px' }}>
         {isAdmin &&
           pathname === AppRoutes.PAYMENT &&
           selectedPayments.length > 0 && (
