@@ -58,6 +58,10 @@ const PaymentBulkBlock: React.FC = () => {
     { skip: !serviceId || !domainId || !streetId }
   )
 
+  const date = dayjs(service?.date).subtract(1, 'month');
+  const month = date.month() === 0 ? 11 : date.month()
+  const year = month === 11 ? date.year() - 1 : date.year()
+  console.log('month', month, 'year', year)
   const {
     data: { data: { 0: prevService } } = { data: [null] },
     isLoading: isPrevServiceLoading,
@@ -66,8 +70,8 @@ const PaymentBulkBlock: React.FC = () => {
     {
       streetId,
       domainId,
-      month: dayjs(service?.date).subtract(1, 'month').month() + 1,
-      year: dayjs(service?.date).subtract(1, 'month').year(),
+      month: month,
+      year: year,
       limit: 1,
     },
     { skip: !serviceId || !domainId || !streetId || !service }

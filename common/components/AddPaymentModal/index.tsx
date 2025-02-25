@@ -21,6 +21,11 @@ import { FC, createContext, useContext, useEffect, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
+import {
+  dateToDefaultFormat,
+  dateToMonth,
+  dateToMonthYear,
+} from '@assets/features/formatDate'
 
 interface Props {
   closeModal: VoidFunction
@@ -242,12 +247,14 @@ const AddPaymentModal: FC<Props> = ({
             // TODO: fix payment typing globally to not be `domain: Partial<IService> | string` but `Partial<IService>` instead
             // eslint-disable-next-line
             // @ts-ignore
-            monthService: payment?.monthService?._id,
+            // monthService: payment?.monthService?._id,
+            monthService: dateToMonthYear(payment?.monthService?.date).charAt(0).toUpperCase() + dateToMonthYear(payment?.monthService?.date).slice(1),
             // TODO: fix payment typing globally to not be `domain: Partial<IRealestate> | string` but `Partial<IRealestate>` instead
             // TODO: ???rename IRealestate to ICompany maybe, what the realestate means actually???
             // eslint-disable-next-line
             // @ts-ignore
-            company: payment?.company?._id,
+            // company: payment?.company?._id,
+            company: payment?.company?.companyName,
             description: payment?.description,
             generalSum: payment?.generalSum,
             invoiceNumber: payment?.invoiceNumber,
