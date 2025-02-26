@@ -32,7 +32,9 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   }, [servicesData])
 
   const services = useMemo(() => {
-    return [...servicesList, ...customServices]
+    return [...servicesList, ...customServices].sort((a, b) =>
+      a.name.localeCompare(b.name)
+    )
   }, [servicesList, customServices])
 
   const options = useMemo(() => {
