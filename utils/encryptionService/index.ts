@@ -22,8 +22,19 @@ class EncryptionService {
    * @returns The decrypted value as a string.
    */
   decrypt(encryptedValue: string): string {
-    const bytes = CryptoJS.AES.decrypt(encryptedValue, this.secretKey)
-    return bytes.toString(CryptoJS.enc.Utf8)
+    try {
+      const bytes = CryptoJS.AES.decrypt(encryptedValue, this.secretKey);
+      const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+
+      if (!decryptedText) {
+        throw new Error("Empty string");
+      }
+
+      return decryptedText;
+    } catch (error) {
+      console.error("Decryption error:", error);
+      return `Error: ${error instanceof Error ? error.message : "Unknown error"}`; 
+    }
   }
 }
 
