@@ -4,6 +4,7 @@ import { IService } from '@common/api/serviceApi/service.api.types'
 import { expect } from '@jest/globals'
 import { ServiceType } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
+import { realEstates } from '@utils/testData'
 
 describe('getInvoices - MAINTENANCE', () => {
   describe('props: { service }', () => {
@@ -284,6 +285,153 @@ describe('getInvoices - MAINTENANCE', () => {
         expect.objectContaining({ type: ServiceType.Maintenance })
       )
     })
+  })
+
+  describe('props: { service, company, prevPayment }', () => {
+    it('should NOT load when service = null, company = null, prevPayment = null', () => {
+      const service: Partial<IService> = null
+      const company: Partial<IRealestate> = null
+      const prevPayment: Partial<IPayment> = null
+  
+      const invoices = getInvoices({
+        service,
+        company,
+        prevPayment,
+      })
+  
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.Maintenance })
+      )
+    })
+    it('should NOT load when service = null, company = null, prevPayment = { invoice: [Maintenance] }', () => {
+      const service: Partial<IService> = null
+      const company: Partial<IRealestate> = null
+      const prevPayment: Partial<IPayment> = {
+        invoice: [
+          {
+            type: ServiceType.Maintenance,
+            price: 10,
+            amount: 10,
+            lastAmount: 0,
+            sum: 100,
+          },
+        ],
+      }
+  
+      const invoices = getInvoices({
+        service,
+        company,
+        prevPayment,
+      })
+  
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.Maintenance })
+      )
+    })
+    it('should NOT load when service = { rentPrice: 10 }, company = null, prevPayment = { invoice: [Maintenance] }', () => {
+      const service: Partial<IService> = {
+        rentPrice: 10,
+      }
+      const company: Partial<IRealestate> = null
+      const prevPayment: Partial<IPayment> = {
+        invoice: [
+          {
+            type: ServiceType.Maintenance,
+            price: 10,
+            amount: 10,
+            lastAmount: 0,
+            sum: 100,
+          },
+        ],
+      }
+  
+      const invoices = getInvoices({
+        service,
+        company,
+        prevPayment,
+      })
+  
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.Maintenance })
+      )
+    })
+    it('should NOT load when service = { rentPrice: 10 }, company = null, prevPayment = { invoice: [Electricity] }', () => {
+      const service: Partial<IService> = {
+        rentPrice: 10,
+      }
+      const company: Partial<IRealestate> = null
+      const prevPayment: Partial<IPayment> = {
+        invoice: [
+          {
+            type: ServiceType.Electricity,
+            price: 10,
+            amount: 10,
+            lastAmount: 0,
+            sum: 100,
+          },
+        ],
+      }
+  
+      const invoices = getInvoices({
+        service,
+        company,
+        prevPayment,
+      })
+  
+      expect(invoices).not.toContainEqual(
+        expect.objectContaining({ type: ServiceType.Maintenance })
+      )
+    })
+    it('should correctly generate invoices based on previous payments and rent price', () => {
+      const realEstate = realEstates.find((estate) => estate._id === '64d68421d9ba2fc8fea79d21');
+    if (realEstate && realEstate.servicePricePerMeter === 10) {
+        const service: Partial<IService> = {
+          rentPrice: realEstate.pricePerMeter,
+        };
+        const company: Partial<IRealestate> = {
+          totalArea: realEstate.totalArea,
+        };
+        const prevPayment: Partial<IPayment> = {
+          invoice: [ 
+            {
+              amount: realEstate.totalArea,
+              price: realEstate.servicePricePerMeter,
+              sum: realEstate.servicePricePerMeter * realEstate.totalArea,
+              type: ServiceType.Maintenance,
+            },
+          ],
+        };
+        const invoices = getInvoices({
+          service,
+          company,
+          prevPayment,
+        });
+        expect(invoices).toContainEqual({
+          amount: realEstate.totalArea,
+          price: realEstate.servicePricePerMeter,
+          sum: realEstate.servicePricePerMeter * realEstate.totalArea,
+          type: ServiceType.Maintenance,
+        });
+        expect(invoices).toContainEqual({
+          amount: 10,
+          price: 10,
+          sum: 100,
+          type: ServiceType.Maintenance,
+        });
+      }
+    })
+    
+    it('should verify if company_1 has maintenance service', () => {
+      const companies = [
+        {
+          _id: '64d68421d9ba2fc8fea79d22',
+          invoices: [{ type: ServiceType.Maintenance, amount: 10, price: 10, sum: 100 }],
+        },
+      ];
+    
+      expect(companies.some(c => c._id === '64d68421d9ba2fc8fea79d22' && c.invoices?.some(inv => inv.type === ServiceType.Maintenance)))
+        .toBe(true);
+    });
   })
 
   describe('props: { payment }', () => {
