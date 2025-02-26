@@ -1,15 +1,14 @@
-import { createMocks } from 'node-mocks-http'
 import handler from './index'
 import Domain from '@modules/models/Domain'
 import Payment from '@modules/models/Payment'
 import Credit from '@modules/models/Credit'
-
 import { getCurrentUser } from '@utils/getCurrentUser'
 import dbConnect from '@utils/dbConnect'
 import mongoClient from '@common/lib/mongodb'
 import dayjs from 'dayjs'
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
+import { NextApiRequest, NextApiResponse } from 'next'
 
 import {
   payments,
@@ -94,14 +93,15 @@ describe('Profit Payment API - GET', () => {
       },
     ])
   
-    const { req, res } = createMocks({
-      method: 'GET',
-      query: {},
-    })
+    const req = { method: 'GET', query: {} } as NextApiRequest
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as NextApiResponse
   
     await handler(req, res)
   
-    const response = JSON.parse(res._getData())
+    const response = (res.json as jest.Mock).mock.calls[0][0]
   
     const currentDate = dayjs()
     response.data.forEach((entry: any) => {
@@ -144,15 +144,16 @@ describe('Profit Payment API - GET', () => {
       user: { email: 'user@example.com' },
     })
 
-    const { req, res } = createMocks({
-      method: 'GET',
-      query: {},
-    })
+    const req = { method: 'GET', query: {} } as NextApiRequest
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as NextApiResponse
 
     await handler(req, res)
 
-    expect(res._getStatusCode()).toBe(200)
-    const response = JSON.parse(res._getData())
+    expect(res.status).toHaveBeenCalledWith(200)
+    const response = (res.json as jest.Mock).mock.calls[0][0]
     expect(response.message).toEqual('not allowed')
     expect(response.data).toEqual({})
   })
@@ -177,15 +178,16 @@ describe('Profit Payment API - GET', () => {
       },
     ])
 
-    const { req, res } = createMocks({
-      method: 'GET',
-      query: {},
-    })
+    const req = { method: 'GET', query: {} } as NextApiRequest
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as NextApiResponse
 
     await handler(req, res)
 
-    expect(res._getStatusCode()).toBe(200)
-    const response = JSON.parse(res._getData())
+    expect(res.status).toHaveBeenCalledWith(200)
+    const response = (res.json as jest.Mock).mock.calls[0][0]
 
     expect(response.success).toBe(true)
     expect(response.data.length).toBeGreaterThan(0)
@@ -200,15 +202,16 @@ describe('Profit Payment API - GET', () => {
     })
     ;(Payment.find as jest.Mock).mockRejectedValue(new Error('Database error'))
 
-    const { req, res } = createMocks({
-      method: 'GET',
-      query: {},
-    })
+    const req = { method: 'GET', query: {} } as NextApiRequest
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    } as unknown as NextApiResponse
 
     await handler(req, res)
 
-    expect(res._getStatusCode()).toBe(400)
-    const response = JSON.parse(res._getData())
+    expect(res.status).toHaveBeenCalledWith(400)
+    const response = (res.json as jest.Mock).mock.calls[0][0]
     expect(response.success).toBe(false)
     expect(response.message).toEqual('Database error')
   })
