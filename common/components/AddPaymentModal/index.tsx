@@ -72,7 +72,7 @@ const AddPaymentModal: FC<Props> = ({
 
   const { company, service, payment, prevService, prevPayment } =
     usePaymentFormData(form, paymentData)
-
+  // console.log(prevService)
   const transaction = {
     AUT_CNTR_ACC: paymentData?.transaction?.AUT_CNTR_ACC || '',
     AUT_CNTR_NAM: paymentData?.transaction?.AUT_CNTR_NAM || '',
