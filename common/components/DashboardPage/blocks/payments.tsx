@@ -126,6 +126,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const [pageData, setPageData] = useState({
     pageSize: router.pathname === AppRoutes.PAYMENT ? 10 : 5,
     currentPage: 1,
+    total: 0,
   })
 
   const [selectedColumns, setSelectedColumns] = useState<string[]>([])
@@ -170,6 +171,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     setPageData({
       pageSize: pagination.pageSize,
       currentPage: pagination.current,
+      total: pageData.total,
     })
   }
 
@@ -205,6 +207,15 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     },
     { skip: currUserLoading || !currUser }
   )
+
+  useEffect(() => {
+    if (payments?.total) {
+      setPageData((prev) => ({
+        ...prev,
+        total: payments.total,
+      }))
+    }
+  }, [payments])
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
@@ -604,6 +615,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             (router.pathname === AppRoutes.PAYMENT ||
               router.pathname === AppRoutes.SEP_DOMAIN) && {
               current: pageData.currentPage,
+              pageSize: pageData.pageSize,
+              total: pageData.total,
               showSizeChanger: true,
               pageSizeOptions: [10, 20, 50],
               position: ['bottomCenter'],
