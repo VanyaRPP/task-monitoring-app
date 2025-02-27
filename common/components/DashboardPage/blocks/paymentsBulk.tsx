@@ -60,7 +60,6 @@ const PaymentBulkBlock: React.FC = () => {
 
   const month = dayjs(service?.date).month() === 0 ? 11 : dayjs(service?.date).month()
   const year = month === 11 ? dayjs(service?.date).year() - 1 : dayjs(service?.date).year()
-  // console.log('month', month, 'year', year)
   const {
     data: { data: { 0: prevService } } = { data: [null] },
     isLoading: isPrevServiceLoading,

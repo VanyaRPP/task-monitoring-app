@@ -172,7 +172,6 @@ export function usePaymentFormData(
         skip: !prevService || !companyId || !streetId || !domainId,
       }
     )
-
   return {
     company: !!companyId ? company : null,
     service: !!serviceId ? service : null,
