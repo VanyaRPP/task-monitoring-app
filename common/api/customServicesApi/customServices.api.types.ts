@@ -6,7 +6,7 @@ export interface ICustomService {
 }
 
 export interface IGetCustomServicesRequest {
-  domainIds: string[]
+  domainId: string[] | string
 }
 
 export interface IGetCustomServicesResponse {
