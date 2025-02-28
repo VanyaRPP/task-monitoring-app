@@ -19,7 +19,7 @@ export default async function handler(
   switch (req.method) {
     case 'POST':
       try {
-        const { name, domainId, description } = req.body
+        const { name, domainId } = req.body
 
         if (!name || !domainId) {
           return res.status(400).json({
@@ -30,9 +30,8 @@ export default async function handler(
 
         const customService = await CustomService.create({
           name,
-          domainId,
-          description: description || '',
           fieldName: transliterateAndCamelCase(name),
+          domainId,
         })
 
         return res.status(201).json({
@@ -42,22 +41,22 @@ export default async function handler(
       } catch (error) {
         return res.status(500).json({
           success: false,
-          message: 'Internal server error',
+          message: 'Error creating service',
         })
       }
 
     case 'GET':
       try {
-        const domainIds = req.query.domainIds
-          ? Array.isArray(req.query.domainIds)
-            ? req.query.domainIds
-            : [req.query.domainIds]
-          : []
+        const { domainId } = req.query
 
-        const query =
-          domainIds.length > 0 ? { domainId: { $in: domainIds } } : {}
+        if (!domainId) {
+          return res.status(400).json({
+            success: false,
+            message: 'domainId is required',
+          })
+        }
 
-        const customServices = await CustomService.find(query).lean()
+        const customServices = await CustomService.find({ domainId }).lean()
 
         return res.status(200).json({
           success: true,
@@ -66,15 +65,14 @@ export default async function handler(
       } catch (error) {
         return res.status(500).json({
           success: false,
-          message: 'Internal server error',
+          message: 'Error fetching services',
         })
       }
 
     default:
-      res.setHeader('Allow', ['POST', 'GET'])
       return res.status(405).json({
         success: false,
-        message: `Method ${req.method} Not Allowed`,
+        message: `Method ${req.method} not allowed`,
       })
   }
 }

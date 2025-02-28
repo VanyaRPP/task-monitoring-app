@@ -112,6 +112,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
         form={form}
         editable={editable}
         setIsValueChanged={setIsValueChanged}
+        domainId={currentDomain?._id}
       />
     </Modal>
   )
