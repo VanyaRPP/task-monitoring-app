@@ -131,7 +131,13 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
 
   const [selectedColumns, setSelectedColumns] = useState<string[]>([])
 
-  const [filters, setFilters] = useState<any>()
+  const [filters, setFilters] = useState<any>({
+    invoiceCreationDate: null,
+    type: null,
+    domain: null,
+    company: null,
+    street: null,
+  })
 
   const { data: domainsFilters } = useGetDomainFiltersQuery({
     realEstates: filters?.company,
@@ -167,12 +173,13 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
 
   const { data: dateFilters } = useGetDateFiltersQuery({ type: 'payment' })
 
-  const handlePagination = (pagination) => {
+  const handlePagination = (pagination, filters) => {
     setPageData({
       pageSize: pagination.pageSize,
       currentPage: pagination.current,
       total: pageData.total,
     })
+    setFilters(filters)
   }
 
   const closeEditModal = () => {
@@ -623,8 +630,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
               onChange: handlePagination,
             }
           }
-          onChange={(_, filters) => {
-            setFilters(filters)
+          onChange={(_, filters, pagination) => {
+            handlePagination(pagination, filters)
           }}
           scroll={{
             x:
