@@ -9,7 +9,7 @@ import { FC, useEffect, useRef, useState } from 'react'
 import styles from './styles.module.scss'
 import { useReactToPrint } from 'react-to-print'
 import { PrinterOutlined } from '@ant-design/icons'
-
+import dayjs from 'dayjs'
 interface InvoicesTableData extends IPaymentField {
   number: number
   unit: string
@@ -140,7 +140,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               <b>АКТ надання послуг</b>
             </h1>
             <p>
-              <b>№ 32 від 29 березня 2024 р.</b>
+            <b>№ {payment?.invoiceNumber} від {dayjs(payment?.invoiceCreationDate)?.format?.('DD.MM.YYYY')} року.</b>
             </p>
             <br />
             <hr />
