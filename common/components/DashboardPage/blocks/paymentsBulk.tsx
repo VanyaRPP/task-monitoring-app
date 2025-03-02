@@ -58,8 +58,6 @@ const PaymentBulkBlock: React.FC = () => {
     { skip: !serviceId || !domainId || !streetId }
   )
 
-  const month = dayjs(service?.date).month() === 0 ? 11 : dayjs(service?.date).month()
-  const year = month === 11 ? dayjs(service?.date).year() - 1 : dayjs(service?.date).year()
   const {
     data: { data: { 0: prevService } } = { data: [null] },
     isLoading: isPrevServiceLoading,
@@ -68,8 +66,8 @@ const PaymentBulkBlock: React.FC = () => {
     {
       streetId,
       domainId,
-      month: month,
-      year: year,
+      month: dayjs(service?.date).month(),
+      year: dayjs(service?.date).year(),
       limit: 1,
     },
     { skip: !serviceId || !domainId || !streetId || !service }
