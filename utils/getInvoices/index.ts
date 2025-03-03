@@ -124,7 +124,6 @@ export const getMaintenanceInvoice = ({
       company?.servicePricePerMeter >= 0
         ? company?.servicePricePerMeter
         : undefined
-    console.log('companyMaintenance', companyMaintenance)
 
     return {
       type: invoice.type,
