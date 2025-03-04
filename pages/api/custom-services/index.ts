@@ -49,7 +49,7 @@ export default async function handler(
       try {
         const { domainId } = req.query
 
-        if (!domainId) {
+        if (!domainId || (typeof domainId === 'string' && domainId.trim().length === 0)) {
           return res.status(400).json({
             success: false,
             message: 'domainId is required',
