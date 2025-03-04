@@ -31,7 +31,7 @@ export default async function handler(
         const customService = await CustomService.create({
           name,
           fieldName: transliterateAndCamelCase(name),
-          domainId,
+          domain: domainId,
         })
 
         return res.status(201).json({
