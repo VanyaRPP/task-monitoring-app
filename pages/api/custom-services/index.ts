@@ -10,11 +10,11 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isUser } = await getCurrentUser(req, res)
 
-  // if (!isGlobalAdmin) {
-  //   return res.status(400).json({ success: false, message: 'Not allowed' })
-  // }
+  if (!isGlobalAdmin && !isDomainAdmin) {
+    return res.status(400).json({ success: false, message: 'Not allowed' })
+  }
 
   switch (req.method) {
     case 'POST':
@@ -56,7 +56,7 @@ export default async function handler(
           })
         }
 
-        const customServices = await CustomService.find({ domainId }).lean()
+        const customServices = await CustomService.find({ domain: domainId }).lean()
 
         return res.status(200).json({
           success: true,

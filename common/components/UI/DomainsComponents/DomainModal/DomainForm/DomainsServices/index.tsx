@@ -30,7 +30,7 @@ const DomainsServices: FC<Props> = ({
   const [createCustomService] = useCreateCustomServiceMutation()
 
   useEffect(() => {
-    if (customServices && customServices.data) {
+    if (customServices?.data) {
       const services = customServices.data.map((service) => ({
         _id: service._id,
         name: service.name,
@@ -48,7 +48,7 @@ const DomainsServices: FC<Props> = ({
     }
 
     const existingService = customServices?.data.find(
-      (s) => s.name === service.name && s.domainId === domainId
+      (s) => s.name === service?.name && s.domainId === domainId
     )
     if (existingService) {
       message.info('Послуга з такою назвою вже існує')
@@ -57,7 +57,7 @@ const DomainsServices: FC<Props> = ({
 
     try {
       const result = await createCustomService({
-        name: service.name,
+        name: service?.name,
         domainId,
       }).unwrap()
       const savedService = result.data
