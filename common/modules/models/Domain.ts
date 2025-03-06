@@ -12,6 +12,12 @@ export interface IDomain {
   IEName: string
   domainBankToken: IDomainBankToken[]
   domainServices: IDomainService[]
+  customServices: ICustomService[]
+}
+
+export interface ICustomService {
+  domainId: ObjectId
+  name: string
 }
 
 export interface IDomainService {
@@ -41,6 +47,12 @@ const DomainSchema = new Schema<IDomain>({
   IEName: { type: String, required: false },
   domainBankToken: { type: [Object] },
   domainServices: { type: [Object] },
+  customServices: [
+    {
+      domainId: { type: Schema.Types.ObjectId, required: true },
+      name: { type: String, required: true },
+    },
+  ],
 })
 
 const Domain =
