@@ -25,7 +25,6 @@ let realDomainIdArray = [domains[0]._id, domains[1]._id]
 describe('Deptors API - GET', () => {
   it('should NOT load when domainId = 0', async () => {
     await mockLoginAs(users.user)
-    console.log(mockLoginAs(users.user))
 
     const mockReq = { method: 'GET', query: { domainIds: 0 } } as any
     const mockRes = { status: jest.fn(() => mockRes), json: jest.fn() } as any
@@ -367,8 +366,7 @@ describe('Deptors API - GET', () => {
   })
 
   it('should load when domainId = realDomainIdArray as DomainAdmin', async () => {
-    await mockLoginAs(users.domainAdmin2)
-    console.log(mockLoginAs(users.domainAdmin2));
+    await mockLoginAs(users.domainAdmin2);
     (getCurrentUser as jest.Mock).mockResolvedValue({
       isUser: false,
       isDomainAdmin: true,

@@ -128,13 +128,13 @@ export const getMaintenanceInvoice = ({
     return {
       type: invoice.type,
       amount: +toRoundFixed(invoice.amount),
-      isIndividual: companyMaintenance !== undefined,
+      isIndividual: companyMaintenance !== undefined && companyMaintenance !== null,
       price:
-        companyMaintenance !== undefined
+        companyMaintenance !== undefined && companyMaintenance !== null
           ? +toRoundFixed(companyMaintenance)
           : +toRoundFixed(invoice.price),
       sum:
-        companyMaintenance !== undefined
+        companyMaintenance !== undefined && companyMaintenance !== null
           ? +toRoundFixed(companyMaintenance * +invoice.amount)
           : +toRoundFixed(+invoice.sum || +invoice.price * +invoice.amount),
     }
