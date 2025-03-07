@@ -31,6 +31,7 @@ interface Props {
   closeModal: VoidFunction
   paymentData?: any
   paymentActions?: { edit: boolean; preview: boolean; create?: boolean }
+  preselectedCompany?: string;
 }
 
 export interface IPaymentContext {
@@ -65,6 +66,7 @@ const AddPaymentModal: FC<Props> = ({
   closeModal,
   paymentData,
   paymentActions,
+  preselectedCompany,
 }) => {
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
@@ -177,6 +179,12 @@ const AddPaymentModal: FC<Props> = ({
   }
 
   useEffect(() => {
+    if (preselectedCompany) {
+      form.setFieldsValue({ company: preselectedCompany });
+    }
+  }, [preselectedCompany, form]);
+
+  useEffect(() => {
     if (paymentActions.preview) {
       form.setFieldsValue({
         invoice: getInvoices({
@@ -252,7 +260,7 @@ const AddPaymentModal: FC<Props> = ({
             // TODO: ???rename IRealestate to ICompany maybe, what the realestate means actually???
             // eslint-disable-next-line
             // @ts-ignore
-            company: payment?.company?._id,
+            company:  preselectedCompany || payment?.company?._id,
             // company: payment?.company?.companyName,
             description: payment?.description,
             generalSum: payment?.generalSum,

@@ -145,13 +145,19 @@ const PaymentCardHeader = ({
       message.error('Сталася несподівана помилка під час генерації PDF')
     }
   }
-
+  const selectedCompany = filters?.company?.length === 1 ? filters.company[0] : undefined;
+  console.log("Passing preselectedCompany to AddPaymentModal:", selectedCompany);
   return (
     <Flex
       wrap
       justify="space-between"
-      align='center'
-      style={{ marginBottom: '10px', marginTop: '10px', maxHeight: '60px', overflowY: 'auto' }}
+      align="center"
+      style={{
+        marginBottom: '10px',
+        marginTop: '10px',
+        maxHeight: '60px',
+        overflowY: 'auto',
+      }}
     >
       <Space wrap size="small">
         <Button
@@ -219,6 +225,7 @@ const PaymentCardHeader = ({
               !isAdmin ? { edit: false, preview: true } : paymentActions
             }
             paymentData={currentPayment}
+            preselectedCompany={selectedCompany}
             closeModal={closeModal}
           />
         )}
