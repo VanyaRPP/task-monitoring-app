@@ -97,26 +97,23 @@ const DomainsServices: FC<Props> = ({
               key={field.key}
               aria-disabled={!editable}
               extra={
-                <div>
-                  <Button
-                    type="link"
-                    onClick={() => handleSave(field.key)}
-                    disabled={!editable}
-                  >
-                    <SaveOutlined />
-                  </Button>
-                  <Button
-                    type="link"
-                    danger
-                    onClick={() => {
-                      remove(field.name)
-                      handleRemove(field.name)
-                    }}
-                    disabled={!editable}
-                  >
-                    <CloseOutlined />
-                  </Button>
-                </div>
+                editable ? (
+                  <div>
+                    <Button type="link" onClick={() => handleSave(field.key)}>
+                      <SaveOutlined />
+                    </Button>
+                    <Button
+                      type="link"
+                      danger
+                      onClick={() => {
+                        remove(field.name)
+                        handleRemove(field.name)
+                      }}
+                    >
+                      <CloseOutlined />
+                    </Button>
+                  </div>
+                ) : null
               }
             >
               <Form.Item label="Найменування" name={[field.name, 'name']}>
