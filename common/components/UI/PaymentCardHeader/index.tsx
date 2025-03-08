@@ -146,6 +146,9 @@ const PaymentCardHeader = ({
     }
   }
 
+  const selectedCompany =
+    filters?.company?.length === 1 ? filters.company[0] : undefined
+
   return (
     <Flex
       wrap
@@ -219,6 +222,7 @@ const PaymentCardHeader = ({
               !isAdmin ? { edit: false, preview: true } : paymentActions
             }
             paymentData={currentPayment}
+            preselectedCompany={selectedCompany}
             closeModal={closeModal}
           />
         )}
