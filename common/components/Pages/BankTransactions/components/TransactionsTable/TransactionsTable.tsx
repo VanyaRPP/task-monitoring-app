@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Table, Dropdown, Checkbox, MenuProps, Space } from 'antd'
 import { SettingOutlined } from '@ant-design/icons'
 import { useColumnVisibility } from './components/useColumnVisibility'
-import { ITransaction } from './components/transactionTypes'
+import { ITransaction } from '@common/api/bankApi/mockBank.api'
 import {
   columnNames,
   defaultVisibleColumns,
@@ -54,7 +54,7 @@ const TransactionsTable: React.FC<Props> = ({
         dataSource={transactions}
         columns={columns}
         pagination={false}
-        rowKey="ID"
+        rowKey={(record) => record.ID || record.AUT_MY_ACC}
       />
       <Space
         direction="vertical"

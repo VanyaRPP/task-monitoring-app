@@ -10,7 +10,7 @@ import DomainBankTab from './components/DomainBankTab/DomainBankTab'
 import s from './style.module.scss'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
-import { useGetBalancesQuery } from '@common/api/bankApi/bank.api'
+import { useGetBalancesQuery } from '@common/api/bankApi/mockBank.api'
 import { useEffect, useState } from 'react'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import EncryptionService from '@utils/encryptionService'
@@ -63,7 +63,7 @@ const BankTransactions = () => {
         {balances && (
           <Select
             placeholder="Оберіть рахунок"
-            options={balances.map((item) => ({
+            options={balances.data.balances.map((item) => ({
               label: item.acc,
               value: item.acc,
             }))}

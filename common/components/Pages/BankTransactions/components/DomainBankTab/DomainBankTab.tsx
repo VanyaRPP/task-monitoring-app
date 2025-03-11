@@ -22,7 +22,7 @@ const DomainBankTab: FC<Props> = ({ domain, token, acc }) => {
   return (
     <Card>
       {token ? (
-        <TransactionsTable transactions={transactionsData} domain={domain} />
+        <TransactionsTable transactions={transactionsData ?? []} domain={domain} />
       ) : (
         <Alert
           message="Error"

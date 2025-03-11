@@ -17,7 +17,7 @@ import {
   Checkbox,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { ITransaction } from './transactionTypes'
+import { ITransaction } from '@common/api/bankApi/mockBank.api'
 import { useState } from 'react'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import TransactionDrawer from './TransactionsDrawer'
