@@ -39,24 +39,26 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   useEffect(() => {
     if (domainId && options.length > 0) {
       if (options.length === 1) {
-        form.setFieldsValue({ street: options[0].value });
-        onStreetHasServiceChange?.(options[0].hasService);
+        form.setFieldsValue({ street: options[0].value })
+        onStreetHasServiceChange?.(options[0].hasService)
       } else {
-        const firstStreetWithService = options.find((option) => option.hasService);
+        const firstStreetWithService = options.find(
+          (option) => option.hasService
+        )
 
         if (firstStreetWithService) {
-          form.setFieldsValue({ street: firstStreetWithService.value });
-          onStreetHasServiceChange?.(firstStreetWithService.hasService);
+          form.setFieldsValue({ street: firstStreetWithService.value })
+          onStreetHasServiceChange?.(firstStreetWithService.hasService)
         } else {
-          form.setFieldsValue({ street: undefined });
-          onStreetHasServiceChange?.(false);
+          form.setFieldsValue({ street: undefined })
+          onStreetHasServiceChange?.(false)
         }
       }
     } else {
-      form.setFieldsValue({ street: undefined });
-      onStreetHasServiceChange?.(false);
+      form.setFieldsValue({ street: undefined })
+      onStreetHasServiceChange?.(false)
     }
-  }, [domainId, options, form]);
+  }, [domainId, options, form])
 
   const selectedStreet = options.find((option) => option.value === streetId)
   const showTooltip = !!streetId && !selectedStreet?.hasService

@@ -140,7 +140,11 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               <b>АКТ надання послуг</b>
             </h1>
             <p>
-            <b>№ {payment?.invoiceNumber} від {dayjs(payment?.invoiceCreationDate)?.format?.('DD.MM.YYYY')} року.</b>
+              <b>
+                № {payment?.invoiceNumber} від{' '}
+                {dayjs(payment?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}{' '}
+                року.
+              </b>
             </p>
             <br />
             <hr />

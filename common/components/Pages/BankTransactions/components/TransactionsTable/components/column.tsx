@@ -109,9 +109,11 @@ const getDateColumnProps = (dataIndex: keyof ITransaction) => ({
       (!endDate || recordDate <= new Date(endDate))
     )
   },
-  sorter: (a: ITransaction, b: ITransaction) =>
-    new Date(a[dataIndex] as string).getTime() -
-    new Date(b[dataIndex] as string).getTime(),
+  sorter: (a: ITransaction, b: ITransaction) => {
+    const dateA = a[dataIndex] ? new Date(a[dataIndex] as string).getTime() : 0;
+    const dateB = b[dataIndex] ? new Date(b[dataIndex] as string).getTime() : 0;
+    return dateA - dateB;
+  }
 })
 
 const getPrPrIcon = (prPr: string) => {
@@ -233,6 +235,7 @@ export const generateColumns = (
       key: 'PR_PR',
       render: (text: string) => {
         const { icon, text: description } = getPrPrIcon(text)
+        console.log("Rendering DATE_TIME_DAT_OD_TIM_P:", text);
         return (
           <Popover content={description} title="Status">
             {icon}
@@ -308,6 +311,8 @@ export const generateColumns = (
       ),
     },
   ].filter((column) => visibleColumns.includes(column.key))
+
+  console.log("Checking column dataIndex:", columns.map(col => (col as any).dataIndex))
 
   return columns
 }

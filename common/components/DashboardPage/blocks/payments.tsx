@@ -208,7 +208,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
-  
 
   const handleDeletePayment = useCallback(
     async (id: string) => {

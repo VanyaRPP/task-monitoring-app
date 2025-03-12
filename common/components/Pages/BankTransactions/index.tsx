@@ -26,20 +26,24 @@ const BankTransactions = () => {
   const [selectedAcc, setSelectedAcc] = useState('')
 
   useEffect(() => {
-    setSelectedDomain(domains[0])
-  }, [domains])
+    if (domains.length > 0) {
+      setSelectedDomain(domains[0]);
+    }
+  }, [domains]);
 
   const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
   const encryptionService = new EncryptionService(SECURE_TOKEN)
-  const token = selectedDomain?.domainBankToken[0]
-    ? encryptionService.decrypt(
-        selectedDomain?.domainBankToken[0]?.token ?? 'token'
-      )
-    : ''
+  // const token = selectedDomain?.domainBankToken[0]
+  //   ? encryptionService.decrypt(
+  //       selectedDomain?.domainBankToken[0]?.token ?? 'token'
+  //     )
+  //   : ''
+  const token = "mock_token"
 
   const { data: balances } = useGetBalancesQuery({ token }, { skip: !token })
 
   const items = domains.map((domain) => {
+    console.log("Passing to DomainBankTab:", { token, selectedAcc });
     return {
       label: domain.name,
       key: domain._id,
@@ -48,6 +52,12 @@ const BankTransactions = () => {
       ),
     }
   })
+  useEffect(() => {
+    if (balances?.data?.balances.length > 0 && !selectedAcc) {
+      setSelectedAcc(balances.data.balances[0].acc);
+      console.log("Auto-selected Account:", balances.data.balances[0].acc);
+    }
+  }, [balances]);
 
   const renderTabBar: TabsProps['renderTabBar'] = (props, DefaultTabBar) => (
     <StickyBox className={s.tableHeader}>
@@ -60,17 +70,17 @@ const BankTransactions = () => {
         >
           Банк
         </Button>
-        {balances && (
-          <Select
-            placeholder="Оберіть рахунок"
-            options={balances.data.balances.map((item) => ({
-              label: item.acc,
-              value: item.acc,
-            }))}
-            popupMatchSelectWidth={false}
-            onSelect={(value) => setSelectedAcc(value)}
-          />
-        )}
+        {balances?.data?.balances?.length > 0 && (
+  <Select
+    placeholder="Оберіть рахунок"
+    options={balances.data.balances.map((item) => ({
+      label: item.acc,
+      value: item.acc,
+    }))}
+    popupMatchSelectWidth={false}
+    onSelect={(value) => setSelectedAcc(value)}
+  />
+)}
       </div>
       <DefaultTabBar {...props} className={s.tabBar} />
     </StickyBox>

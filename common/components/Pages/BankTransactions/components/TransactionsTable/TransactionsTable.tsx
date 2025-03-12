@@ -46,7 +46,9 @@ const TransactionsTable: React.FC<Props> = ({
     domain,
     toggleColumnVisibility
   )
-
+  console.log("Transactions received in table:", transactions);
+  console.log("Columns in table:", columns);
+  console.log("Row keys in transactions:", transactions.map(t => t.ID));
   return (
     <>
       <Table<ITransaction>
