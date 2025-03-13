@@ -35,7 +35,6 @@ interface IBankRes<T> {
   data: T
 }
 
-
 const mockBalances: IBankRes<IBalancesData> = {
   data: {
     exist_next_page: false,
@@ -102,6 +101,7 @@ export interface ITransaction {
   TECHNICAL_TRANSACTION_ID: string
   isMatchingPayment?: boolean
   previousCompanyId?: string
+  OPTIONS?: string
 }
 
 interface ITransactionData {
@@ -110,7 +110,6 @@ interface ITransactionData {
   status: string
   transactions: ITransaction[]
 }
-
 
 const mockTransactions: IBankRes<ITransactionData> = {
   data: {
@@ -160,17 +159,20 @@ export const mockBankApi = createApi({
   reducerPath: 'mockBankApi',
   baseQuery: fakeBaseQuery(),
   endpoints: (builder) => ({
-    getBalances: builder.query<IBankRes<IBalancesData>, { token: string } | void>({
+    getBalances: builder.query<
+      IBankRes<IBalancesData>,
+      { token: string } | void
+    >({
       queryFn: async () => {
-        console.log("Returning mock balances:", mockBalances);
-        return { data: mockBalances };
+        return { data: mockBalances }
       },
     }),
-    getTransactions: builder.query<IBankRes<ITransactionData>, { token: string; acc: string }>({
+    getTransactions: builder.query<
+      IBankRes<ITransactionData>,
+      { token: string; acc: string }
+    >({
       queryFn: async ({ acc }) => {
-        console.log("Fetching mock transactions for account:", acc);
-    console.log("Returning mock transactions:", mockTransactions);
-        return { data: mockTransactions };
+        return { data: mockTransactions }
       },
     }),
   }),

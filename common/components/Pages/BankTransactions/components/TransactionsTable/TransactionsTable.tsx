@@ -10,6 +10,7 @@ import {
 } from './components/column'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 
+
 interface Props {
   transactions: ITransaction[]
   pagination?: React.ReactNode
@@ -24,7 +25,6 @@ const TransactionsTable: React.FC<Props> = ({
   const { visibleColumns, toggleColumnVisibility } = useColumnVisibility(
     defaultVisibleColumns
   )
-
   const items: MenuProps['items'] = columnNames.map((col) => ({
     key: col,
     label: (
@@ -41,14 +41,23 @@ const TransactionsTable: React.FC<Props> = ({
   const [tableSettingDropdovnVisible, setTableSettingDropdovnVisible] =
     useState<boolean>(false)
 
+
   const columns = generateColumns(
     visibleColumns,
     domain,
     toggleColumnVisibility
-  )
-  console.log("Transactions received in table:", transactions);
-  console.log("Columns in table:", columns);
-  console.log("Row keys in transactions:", transactions.map(t => t.ID));
+  ) 
+
+//   const staticColumns = [
+//     { title: 'Counterparty Name', dataIndex: 'AUT_CNTR_NAM', key: 'AUT_CNTR_NAM' },
+//     { title: 'Description', dataIndex: 'OSND', key: 'OSND' },
+//     { title: 'Amount', dataIndex: 'SUM', key: 'SUM' },
+//     { title: 'Transaction Time', dataIndex: 'DATE_TIME_DAT_OD_TIM_P', key: 'DATE_TIME_DAT_OD_TIM_P' },
+//     { title: 'Type', dataIndex: 'TRANTYPE', key: 'TRANTYPE' },
+//   ]
+
+//  const columns = staticColumns
+
   return (
     <>
       <Table<ITransaction>

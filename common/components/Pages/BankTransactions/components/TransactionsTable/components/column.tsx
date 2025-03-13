@@ -1,3 +1,4 @@
+
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -62,8 +63,11 @@ const getColumnSearchProps = (dataIndex: keyof ITransaction) => ({
       <SearchOutlined size={40} />
     </div>
   ),
-  onFilter: (value: string, record: ITransaction) =>
-    record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+  onFilter: (value: string, record: ITransaction) => {
+    const fieldValue = record[dataIndex] ? record[dataIndex].toString().toLowerCase() : "";
+    return fieldValue.includes(value.toLowerCase());
+  }
+  
 })
 
 const getDateColumnProps = (dataIndex: keyof ITransaction) => ({
@@ -110,10 +114,10 @@ const getDateColumnProps = (dataIndex: keyof ITransaction) => ({
     )
   },
   sorter: (a: ITransaction, b: ITransaction) => {
-    const dateA = a[dataIndex] ? new Date(a[dataIndex] as string).getTime() : 0;
-    const dateB = b[dataIndex] ? new Date(b[dataIndex] as string).getTime() : 0;
-    return dateA - dateB;
-  }
+    const dateA = a[dataIndex] ? new Date(a[dataIndex] as string).getTime() : 0
+    const dateB = b[dataIndex] ? new Date(b[dataIndex] as string).getTime() : 0
+    return dateA - dateB
+  },
 })
 
 const getPrPrIcon = (prPr: string) => {
@@ -174,6 +178,7 @@ export const generateColumns = (
       </Checkbox>
     ),
   }))
+  console.log("Visible columns at generateColumns:", visibleColumns);
 
   const columns: ColumnsType<ITransaction> = [
     {
@@ -309,10 +314,9 @@ export const generateColumns = (
       render: (text: string, record: ITransaction) => (
         <TransactionDrawer transaction={record} domain={domain} />
       ),
-    },
-  ].filter((column) => visibleColumns.includes(column.key))
+    }, 
+  ].filter((column) => column.key && visibleColumns.includes(column.key))
 
-  console.log("Checking column dataIndex:", columns.map(col => (col as any).dataIndex))
 
   return columns
 }
