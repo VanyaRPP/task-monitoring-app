@@ -10,7 +10,6 @@ import {
 } from './components/column'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 
-
 interface Props {
   transactions: ITransaction[]
   pagination?: React.ReactNode
