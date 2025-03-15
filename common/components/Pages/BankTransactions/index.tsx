@@ -6,6 +6,7 @@ import { Button, Card, Select, Tabs, TabsProps } from 'antd'
 
 import StickyBox from 'react-sticky-box'
 import DomainBankTab from './components/DomainBankTab/DomainBankTab'
+import DomainBankBalance from './components/DomainbankBalance/DomainBankBalance';
 
 import s from './style.module.scss'
 import { useRouter } from 'next/router'
@@ -51,6 +52,9 @@ const BankTransactions = () => {
       ),
     }
   })
+  const selectedBalance = balances?.data?.balances.find(
+    (balance) => balance.acc === selectedAcc
+  );
   useEffect(() => {
     if (balances?.data?.balances.length > 0 && !selectedAcc) {
       setSelectedAcc(balances.data.balances[0].acc)
@@ -79,6 +83,9 @@ const BankTransactions = () => {
             onSelect={(value) => setSelectedAcc(value)}
           />
         )}
+         {selectedBalance && (
+        <DomainBankBalance balanceData={selectedBalance} />
+      )}
       </div>
       <DefaultTabBar {...props} className={s.tabBar} />
     </StickyBox>

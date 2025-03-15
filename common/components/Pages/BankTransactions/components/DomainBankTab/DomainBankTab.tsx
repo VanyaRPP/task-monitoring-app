@@ -14,20 +14,18 @@ interface Props {
 }
 
 const DomainBankTab: FC<Props> = ({ domain, token, acc }) => {
-  const {
-    data: transactionsData,
-  } = useGetTransactionsQuery({ token, acc }, { skip: !token })
-  
+  const { data: transactionsData } = useGetTransactionsQuery(
+    { token, acc },
+    { skip: !token }
+  )
 
   return (
     <Card>
       {token ? (
-        
-          <TransactionsTable
-            transactions={transactionsData?.data?.transactions ?? []}
-            domain={domain}
-          />
-        
+        <TransactionsTable
+          transactions={transactionsData?.data?.transactions ?? []}
+          domain={domain}
+        />
       ) : (
         <Alert
           message="Error"

@@ -41,22 +41,21 @@ const TransactionsTable: React.FC<Props> = ({
   const [tableSettingDropdovnVisible, setTableSettingDropdovnVisible] =
     useState<boolean>(false)
 
-
   const columns = generateColumns(
     visibleColumns,
     domain,
     toggleColumnVisibility
-  ) 
+  )
 
-//   const staticColumns = [
-//     { title: 'Counterparty Name', dataIndex: 'AUT_CNTR_NAM', key: 'AUT_CNTR_NAM' },
-//     { title: 'Description', dataIndex: 'OSND', key: 'OSND' },
-//     { title: 'Amount', dataIndex: 'SUM', key: 'SUM' },
-//     { title: 'Transaction Time', dataIndex: 'DATE_TIME_DAT_OD_TIM_P', key: 'DATE_TIME_DAT_OD_TIM_P' },
-//     { title: 'Type', dataIndex: 'TRANTYPE', key: 'TRANTYPE' },
-//   ]
+  //   const staticColumns = [
+  //     { title: 'Counterparty Name', dataIndex: 'AUT_CNTR_NAM', key: 'AUT_CNTR_NAM' },
+  //     { title: 'Description', dataIndex: 'OSND', key: 'OSND' },
+  //     { title: 'Amount', dataIndex: 'SUM', key: 'SUM' },
+  //     { title: 'Transaction Time', dataIndex: 'DATE_TIME_DAT_OD_TIM_P', key: 'DATE_TIME_DAT_OD_TIM_P' },
+  //     { title: 'Type', dataIndex: 'TRANTYPE', key: 'TRANTYPE' },
+  //   ]
 
-//  const columns = staticColumns
+  //  const columns = staticColumns
 
   return (
     <>

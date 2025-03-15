@@ -1,4 +1,3 @@
-
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -64,10 +63,11 @@ const getColumnSearchProps = (dataIndex: keyof ITransaction) => ({
     </div>
   ),
   onFilter: (value: string, record: ITransaction) => {
-    const fieldValue = record[dataIndex] ? record[dataIndex].toString().toLowerCase() : "";
-    return fieldValue.includes(value.toLowerCase());
-  }
-  
+    const fieldValue = record[dataIndex]
+      ? record[dataIndex].toString().toLowerCase()
+      : ''
+    return fieldValue.includes(value.toLowerCase())
+  },
 })
 
 const getDateColumnProps = (dataIndex: keyof ITransaction) => ({
@@ -178,7 +178,7 @@ export const generateColumns = (
       </Checkbox>
     ),
   }))
-  console.log("Visible columns at generateColumns:", visibleColumns);
+  console.log('Visible columns at generateColumns:', visibleColumns)
 
   const columns: ColumnsType<ITransaction> = [
     {
@@ -240,7 +240,7 @@ export const generateColumns = (
       key: 'PR_PR',
       render: (text: string) => {
         const { icon, text: description } = getPrPrIcon(text)
-        console.log("Rendering DATE_TIME_DAT_OD_TIM_P:", text);
+        console.log('Rendering DATE_TIME_DAT_OD_TIM_P:', text)
         return (
           <Popover content={description} title="Status">
             {icon}
@@ -314,9 +314,8 @@ export const generateColumns = (
       render: (text: string, record: ITransaction) => (
         <TransactionDrawer transaction={record} domain={domain} />
       ),
-    }, 
+    },
   ].filter((column) => column.key && visibleColumns.includes(column.key))
-
 
   return columns
 }
