@@ -58,9 +58,13 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
     )
   }, [prevPlacingInvoice, company, prevService])
 
+  // const inflicion = useMemo(() => {
+  //   return Math.max(prevService?.inflicionPrice - 100, 0)
+  // }, [prevService])
+
   const inflicion = useMemo(() => {
-    return Math.max(prevService?.inflicionPrice - 100, 0)
-  }, [prevService])
+    return prevService?.inflicionPrice ?? 100;
+  }, [prevService]);
 
   const isInitial = useMemo(() => {
     return toRoundFixed(price) === toRoundFixed((rentPrice / 100) * inflicion)
