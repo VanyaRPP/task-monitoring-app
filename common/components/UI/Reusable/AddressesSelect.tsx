@@ -10,6 +10,7 @@ export interface AddressesSelectProps {
   edit?: boolean
   create?: boolean
   dropdownStyle?: CSSProperties
+  street?: string
   onStreetHasServiceChange?: (hasService: boolean) => void
 }
 
@@ -17,6 +18,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   form,
   edit,
   dropdownStyle,
+  street,
   onStreetHasServiceChange,
 }) => {
   const streetId: string = Form.useWatch('street', form)
@@ -45,7 +47,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
         const firstStreetWithService = options.find((option) => option.hasService);
 
         if (firstStreetWithService) {
-          form.setFieldsValue({ street: firstStreetWithService.value });
+          street ? form.setFieldsValue({ street: street }) : form.setFieldsValue({ street: firstStreetWithService.value });
           onStreetHasServiceChange?.(firstStreetWithService.hasService);
         } else {
           form.setFieldsValue({ street: undefined });
