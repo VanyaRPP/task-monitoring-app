@@ -69,6 +69,7 @@ function AddPaymentForm({ paymentActions }) {
         form={form}
         edit={edit}
         onStreetHasServiceChange={setStreetHasService}
+        street={company?.street?._id}
       />
       <MonthServiceSelect form={form} edit={edit} />
       <CompanySelect form={form} edit={edit} company={payment?.company} />
