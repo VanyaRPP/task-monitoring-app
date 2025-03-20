@@ -1,73 +1,51 @@
-import { Form, FormInstance, Select } from 'antd'
-import { CSSProperties, useMemo } from 'react'
+import { validateField } from '@assets/features/validators'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import { Form, FormInstance, Select } from 'antd'
+import { CSSProperties, useEffect, useMemo } from 'react'
 
 export interface ServicesSelectProps {
-  domainId?: string
   form: FormInstance
   dropdownStyle?: CSSProperties
-  onServicesChange?: (services: string[]) => void
-  customServices?: { _id: string; name: string }[]
 }
 
 const ServicesSelect: React.FC<ServicesSelectProps> = ({
-  domainId,
   form,
   dropdownStyle,
-  onServicesChange,
-  customServices = [],
 }) => {
+  const domainId: string = Form.useWatch('domain', form)
+
   const {
     data: servicesData,
     isLoading,
     isError,
-  } = useGetAllServicesQuery({ domainId })
+  } = useGetAllServicesQuery({ domainId }, { skip: !domainId })
 
-  const servicesList = useMemo(() => {
-    if (!servicesData) return []
-    return servicesData.data.map((service: any) => ({
-      _id: service._id,
-      name: service.domain.name || 'Без назви',
-    }))
-  }, [servicesData])
-
-  const services = useMemo(() => {
-    return [...servicesList, ...customServices].sort((a, b) =>
-      a.name.localeCompare(b.name)
-    )
-  }, [servicesList, customServices])
+  const services = servicesData?.data ?? []
 
   const options = useMemo(() => {
     return services.map((service) => ({
       value: service._id,
-      label: service.name,
+      label: service?.name,
     }))
   }, [services])
 
-  const handleChange = (selectedValues: string[]) => {
-    form.setFieldsValue({ services: selectedValues })
-    onServicesChange?.(selectedValues)
-  }
-
-  if (isLoading) return <div>Завантаження послуг...</div>
-  if (isError) return <div>Помилка при завантаженні послуг</div>
+  useEffect(() => {
+    if (!domainId) {
+      form.setFieldsValue({ service: undefined })
+    }
+  }, [domainId, form])
 
   return (
-    <Form.Item
-      name="services"
-      label="Послуги"
-      rules={[{ required: true, message: 'Оберіть хоча б одну послугу' }]}
-    >
+    <Form.Item name="service" label="Послуга" rules={validateField('required')}>
       <Select
-        mode="multiple"
         options={options}
-        placeholder="Оберіть послуги"
-        optionFilterProp="label"
+        placeholder="Оберіть послугу"
+        status={isError ? 'error' : ''}
+        loading={isLoading}
+        disabled={isLoading || !domainId}
         dropdownStyle={dropdownStyle}
         allowClear
         showSearch
-        value={form.getFieldValue('services') || []}
-        onChange={handleChange}
       />
     </Form.Item>
   )

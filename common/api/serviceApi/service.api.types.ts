@@ -4,6 +4,7 @@ import { IFilter } from '../paymentApi/payment.api.types'
 
 export interface IService {
   _id: string
+	name: string
   domain: Partial<IDomain>
   street: Partial<IStreet>
   rentPrice: number

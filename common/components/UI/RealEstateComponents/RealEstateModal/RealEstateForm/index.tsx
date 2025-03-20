@@ -16,6 +16,7 @@ import {
 import { FC, useEffect } from 'react'
 import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
+import ServicesSelect from '../../../Reusable/ServicesSelect'
 import s from './style.module.scss'
 import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
 import { IDomain } from '@modules/models/Domain'
@@ -91,6 +92,14 @@ const RealEstateForm: FC<Props> = ({
       ) : (
         <AddressesSelect form={form} />
       )}
+      {currentRealEstate ? (
+        <Form.Item name="street" label="Адреса">
+          <Input disabled />
+        </Form.Item>
+      ) : (
+        <ServicesSelect form={form} />
+      )}
+
       <Form.Item
         name="companyName"
         label="Назва компанії"
