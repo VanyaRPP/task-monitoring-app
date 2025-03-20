@@ -41,6 +41,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       rnokpp: currentDomain?.rnokpp || '',
       iban: currentDomain?.iban || '',
       domainServices: currentDomain?.domainServices || [],
+      customServices: currentDomain?.customServices || [],
     }
     form.setFieldsValue(initialValues)
   }, [currentDomain, form])
@@ -74,6 +75,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       rnokpp: formData.rnokpp,
       iban: formData.iban,
       domainServices: formData.domainServices,
+      customServices: formData.customServices,
     }
 
     const response = currentDomain
@@ -110,6 +112,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
         form={form}
         editable={editable}
         setIsValueChanged={setIsValueChanged}
+        domainId={currentDomain?._id}
       />
     </Modal>
   )
