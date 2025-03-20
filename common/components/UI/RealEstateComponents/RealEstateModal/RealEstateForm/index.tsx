@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { validateField } from '@assets/features/validators'
 import { IExtendedRealestate } from '@common/api/realestateApi/realestate.api.types'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
@@ -20,6 +21,7 @@ import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
 import { IDomain } from '@modules/models/Domain'
 import { inputNumberParser } from '@utils/helpers'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import DomainsServices from '@components/UI/DomainsComponents/DomainModal/DomainForm/DomainsServices'
 
 interface Props {
   form: FormInstance<any>
@@ -48,8 +50,8 @@ const RealEstateForm: FC<Props> = ({
   const services = servicesData?.data
 
   useEffect(() => {
-    if (domain && domain.domainServices) {
-      const servicesWithEnabled = domain.domainServices.map((service) => ({
+    if (services) {
+      const servicesWithEnabled = services.map((service) => ({
         ...service,
         enabled: true,
       }))
@@ -59,7 +61,7 @@ const RealEstateForm: FC<Props> = ({
         services: servicesWithEnabled,
       })
     }
-  }, [domain, form])
+  }, [services, form])
 
   const isServiceExist = (value: string) => {
     if (!domain._id || !services || !services.length) return false
@@ -115,6 +117,12 @@ const RealEstateForm: FC<Props> = ({
         />
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} />
+      <DomainsServices
+        form={form}
+        editable={false}
+        domainId={domainId}
+        onCustomServicesChange={() => {}}
+      />
       <Form.Item
         name="totalArea"
         label="Площа (м²)"
@@ -209,40 +217,6 @@ const RealEstateForm: FC<Props> = ({
           <Checkbox disabled={!editable} />
         </Form.Item>
       )}
-
-      <Form.List name="services">
-        {(fields, { add, remove }) => (
-          <div style={{ display: 'flex', rowGap: 16, flexDirection: 'column' }}>
-            {fields.map((field, index) => (
-              <Card
-                key={JSON.stringify(field.key)}
-                size="small"
-                title={
-                  <Flex justify={'space-between'} align={'center'}>
-                    <Typography>Послуга {index + 1}</Typography>
-                    <Form.Item
-                      name={[field.name, 'enabled']}
-                      valuePropName="checked"
-                      initialValue={true}
-                    >
-                      <Checkbox disabled={!editable} />
-                    </Form.Item>
-                  </Flex>
-                }
-                aria-disabled={!editable}
-              >
-                <Form.Item label="Найменування" name={[field.name, 'name']}>
-                  <Input placeholder="Найменування послуги" disabled />
-                </Form.Item>
-
-                <Form.Item label="Ціна" name={[field.name, 'price']}>
-                  <Input placeholder="Ціна послуги" disabled />
-                </Form.Item>
-              </Card>
-            ))}
-          </div>
-        )}
-      </Form.List>
     </Form>
   )
 }
