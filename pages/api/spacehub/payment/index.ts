@@ -130,18 +130,7 @@ export default async function handler(
         options.monthService = { $in: servicesIds }
       }
 
-      // const expr = filterPeriodOptions(req.query)
-      // if (expr.length > 0) {
-      //   const services = await Service.find({
-      //     $expr: {
-      //       $and: expr,
-      //     },
-      //   }).select('_id')
-
-      //   const serviceIds = services.map((service) => service._id.toString())
-      //   options.monthService = { $in: serviceIds }
-      // }
-      const expr = filterPeriodOptions(req.query);
+      const expr = filterPeriodOptions(req.query)
       if (expr.length > 0) {
           options.$expr = { $and: expr };
         }

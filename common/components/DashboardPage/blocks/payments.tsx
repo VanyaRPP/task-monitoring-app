@@ -126,7 +126,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const [currentDateFilter, setCurrentDateFilter] = useState<string[] | undefined>()
   const [currentTypeOperation, setCurrentTypeOperation] = useState()
   const [pageData, setPageData] = useState({
-    pageSize: 10, 
+    pageSize: router.pathname === AppRoutes.PAYMENT ? 10 : 5, 
     currentPage: 1,
   })
   
