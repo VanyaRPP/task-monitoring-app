@@ -130,17 +130,21 @@ export default async function handler(
         options.monthService = { $in: servicesIds }
       }
 
-      const expr = filterPeriodOptions(req.query)
-      if (expr.length > 0) {
-        const services = await Service.find({
-          $expr: {
-            $and: expr,
-          },
-        }).select('_id')
+      // const expr = filterPeriodOptions(req.query)
+      // if (expr.length > 0) {
+      //   const services = await Service.find({
+      //     $expr: {
+      //       $and: expr,
+      //     },
+      //   }).select('_id')
 
-        const serviceIds = services.map((service) => service._id.toString())
-        options.monthService = { $in: serviceIds }
-      }
+      //   const serviceIds = services.map((service) => service._id.toString())
+      //   options.monthService = { $in: serviceIds }
+      // }
+      const expr = filterPeriodOptions(req.query);
+      if (expr.length > 0) {
+          options.$expr = { $and: expr };
+        }
       const payments = await Payment.find(options)
         .sort({ invoiceCreationDate: -1 })
         .skip(+skip)
@@ -221,27 +225,30 @@ export default async function handler(
 }
 
 function filterPeriodOptions(args) {
-  const { year, quarter, month, day } = args
-  const filterByDateOptions = []
-  if (year) {
-    filterByDateOptions.push({
-      $eq: [{ $year: '$date' }, +year],
-    })
-  }
+  const { year, quarter, month, day } = args;
+  const filterByDateOptions = [];
+
+  // if (year) {
+  //   filterByDateOptions.push({
+  //     $eq: [{ $year: '$invoiceCreationDate' }, +year],
+  //   });
+  // }
   if (quarter) {
     filterByDateOptions.push({
-      $in: [{ $month: '$date' }, +quarters[+quarter]],
-    })
+      $in: [{ $month: '$invoiceCreationDate' }, quarters[+quarter]],
+    });
   }
   if (month) {
     filterByDateOptions.push({
-      $eq: [{ $month: '$date' }, +month],
-    })
+      $eq: [{ $month: '$invoiceCreationDate' }, +month],
+    });
   }
   if (day) {
     filterByDateOptions.push({
-      $eq: [{ $dayOfMonth: '$date' }, +day],
-    })
+      $eq: [{ $dayOfMonth: '$invoiceCreationDate' }, +day],
+    });
   }
-  return filterByDateOptions
+
+  return filterByDateOptions;
 }
+

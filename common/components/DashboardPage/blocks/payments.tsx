@@ -89,20 +89,22 @@ const getSummaryColumns = (
   }, [])
 }
 
-function getDateFilter(value) {
-  const [, year, period, number] = value || []
-  // TODO: add enums
+function getDateFilter(value: string[] | undefined) {
+  if (!value || !Array.isArray(value) || value.length === 0) return {}
+  const [str] = value 
+  const match = str.match(/^(\d+)-(\w+)-(\d+)$/)
+
+  if (!match) return {}
+
+  const [, year, period, number] = match
   if (period === PERIOD_FILTR.QUARTER)
-    return {
-      year,
-      quarter: number,
-    }
+    return { year: Number(year), quarter: Number(number) }
   if (period === PERIOD_FILTR.MONTH)
-    return {
-      year,
-      month: number,
-    }
-  if (period === PERIOD_FILTR.YEAR) return { year }
+    return { year: Number(year), month: Number(number) }
+  if (period === PERIOD_FILTR.YEAR)
+    return { year: Number(year) }
+
+  return {}
 }
 
 function getTypeOperation(value) {
@@ -121,12 +123,22 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     edit: false,
     preview: false,
   })
-  const [currentDateFilter, setCurrentDateFilter] = useState()
+  const [currentDateFilter, setCurrentDateFilter] = useState<string[] | undefined>()
   const [currentTypeOperation, setCurrentTypeOperation] = useState()
   const [pageData, setPageData] = useState({
-    pageSize: router.pathname === AppRoutes.PAYMENT ? 10 : 5,
+    pageSize: 10, 
     currentPage: 1,
   })
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const pageSize = Number(localStorage.getItem('pageSize')) || (router.pathname === AppRoutes.PAYMENT ? 10 : 5)
+      const currentPage = Number(localStorage.getItem('currentPage')) || 1
+      setPageData({ pageSize, currentPage })
+    }
+  }, [router.pathname])
+  
+  
 
   const [selectedColumns, setSelectedColumns] = useState<string[]>([])
 
@@ -167,6 +179,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const { data: dateFilters } = useGetDateFiltersQuery({ type: 'payment' })
 
   const handlePagination = (pagination) => {
+    localStorage.setItem('pageSize', pagination.pageSize)
+    localStorage.setItem('currentPage', pagination.current)
     setPageData({
       pageSize: pagination.pageSize,
       currentPage: pagination.current,
@@ -208,7 +222,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
-  
 
   const handleDeletePayment = useCallback(
     async (id: string) => {
@@ -230,6 +243,21 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
   }, [filters])
 
+  const [appliedFilters, setAppliedFilters] = useState<any>()
+  useEffect(() => {
+    if (appliedFilters && appliedFilters !== filters) {
+      setPageData((prev) => ({
+        ...prev,
+        currentPage: 1,
+      }))
+    }
+  }, [appliedFilters])
+
+  useEffect(() => {
+    if (JSON.stringify(appliedFilters) !== JSON.stringify(filters)) {
+      setPageData((prev) => ({ ...prev, currentPage: 1 }))
+    }
+  }, [appliedFilters])
   const columns: TableColumnType<any>[] = useMemo(() => {
     return [
       {
@@ -290,18 +318,12 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         render: dateToDefaultFormat,
         width: router.pathname === AppRoutes.PAYMENT ? 164 : 70,
         filters:
-          dateFilters?.monthFilter
-            ?.filter((filter) => filter.value !== null)
-            ?.map((filter) => ({
-              text: dateToMonth(new Date(2000, Number(filter.value) - 1)),
-              value: filter.value,
-            })) || [],
+          dateFilters?.monthFilter?.filter((filter) => filter.value !== null)?.map((filter) => ({
+            text: dateToMonth(new Date(2000, Number(filter.value) - 1)),
+            value: `${new Date().getFullYear()}-month-${filter.value}`,
+      })) || [],
         filteredValue: filters?.invoiceCreationDate || null,
-        onFilter: (value, record) => {
-          const recordDate = new Date(record.invoiceCreationDate)
-          if (isNaN(recordDate.getTime())) return false
-          return recordDate.getMonth() + 1 === Number(value)
-        },
+
       },
       {
         title: 'Тип',
@@ -604,14 +626,18 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             (router.pathname === AppRoutes.PAYMENT ||
               router.pathname === AppRoutes.SEP_DOMAIN) && {
               current: pageData.currentPage,
+              total: payments?.total || 0,
               showSizeChanger: true,
               pageSizeOptions: [10, 20, 50],
               position: ['bottomCenter'],
               onChange: handlePagination,
             }
           }
-          onChange={(_, filters) => {
-            setFilters(filters)
+          onChange={(_, nextFilters) => {
+            setFilters(nextFilters)
+            setAppliedFilters(nextFilters)
+            const val = nextFilters?.invoiceCreationDate
+            setCurrentDateFilter(Array.isArray(val) ? val.map(String) : [])
           }}
           scroll={{
             x:
