@@ -130,17 +130,34 @@ export default async function handler(
         options.monthService = { $in: servicesIds }
       }
 
-      const expr = filterPeriodOptions(req.query)
-      if (expr.length > 0) {
-        const services = await Service.find({
-          $expr: {
-            $and: expr,
-          },
-        }).select('_id')
+      // const expr = filterPeriodOptions(req.query)
+      // if (expr.length > 0) {
+      //   const services = await Service.find({
+      //     $expr: {
+      //       $and: expr,
+      //     },
+      //   }).select('_id')
 
-        const serviceIds = services.map((service) => service._id.toString())
-        options.monthService = { $in: serviceIds }
+      //   const serviceIds = services.map((service) => service._id.toString())
+      //   options.monthService = { $in: serviceIds }
+      // }
+
+      const expr = filterPeriodOptions(req.query)
+      const dateField = req.query.dateField || 'invoiceCreationDate'
+
+      if (expr.length > 0) {
+        if (dateField === 'date') {
+          const services = await Service.find({
+            $expr: { $and: expr },
+          }).select('_id')
+
+          const serviceIds = services.map((service) => service._id.toString())
+          options.monthService = { $in: serviceIds }
+        } else {
+          options.$expr = { $and: expr }
+        }
       }
+
       const payments = await Payment.find(options)
         .sort({ invoiceCreationDate: -1 })
         .skip(+skip)
@@ -150,10 +167,10 @@ export default async function handler(
         .populate('domain')
         .populate('monthService')
 
-      // const streetsPipeline = getStreetsPipeline(isGlobalAdmin, options.domain)
+      const streetsPipeline = getStreetsPipeline(isGlobalAdmin, options.domain)
 
-      // const streets = await Payment.aggregate(streetsPipeline)
-      // const addressFilter = getFilterForAddress(streets)
+      const streets = await Payment.aggregate(streetsPipeline)
+      const addressFilter = getFilterForAddress(streets)
 
       const total = await Payment.countDocuments(options)
 
@@ -221,26 +238,40 @@ export default async function handler(
 }
 
 function filterPeriodOptions(args) {
-  const { year, quarter, month, day } = args
+  const { year, quarter, day, dateField = 'invoiceCreationDate' } = args
+  let { month } = args
+  const field = `$${dateField}`
+
+  if (typeof month === 'string') {
+    month = month
+      .split(',')
+      .map(Number)
+      .filter((m) => !isNaN(m))
+  }
+
   const filterByDateOptions = []
-  if (year) {
+
+  // if (year && !isNaN(Number(year))) {
+  //   filterByDateOptions.push({
+  //     $eq: [{ $year: field }, +year],
+  //   })
+  // }
+
+  if (Array.isArray(month) && month.length > 0) {
     filterByDateOptions.push({
-      $eq: [{ $year: '$date' }, +year],
+      $in: [{ $month: field }, month],
     })
   }
+
   if (quarter) {
     filterByDateOptions.push({
-      $in: [{ $month: '$date' }, +quarters[+quarter]],
+      $in: [{ $month: field }, quarters[+quarter]],
     })
   }
-  if (month) {
+
+  if (day && !isNaN(Number(day))) {
     filterByDateOptions.push({
-      $eq: [{ $month: '$date' }, +month],
-    })
-  }
-  if (day) {
-    filterByDateOptions.push({
-      $eq: [{ $dayOfMonth: '$date' }, +day],
+      $eq: [{ $dayOfMonth: field }, +day],
     })
   }
   return filterByDateOptions
