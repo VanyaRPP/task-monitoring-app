@@ -33,12 +33,13 @@ export const paymentApi = createApi({
         email?: string
         year?: number
         quarter?: number
-        month?: number
+        month?: number | number[]
         day?: number
         domainIds?: string[]
         companyIds?: string[]
         streetIds?: string[]
         serviceIds?: string[]
+        dateField?: 'invoiceCreationDate' | 'date'
       }
     >({
       query: ({
