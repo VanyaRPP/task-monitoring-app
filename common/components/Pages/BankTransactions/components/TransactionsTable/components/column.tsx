@@ -17,7 +17,7 @@ import {
   Checkbox,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { ITransaction } from './transactionTypes'
+import { ITransaction } from '@common/api/bankApi/mockBank.api'
 import { useState } from 'react'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import TransactionDrawer from './TransactionsDrawer'
@@ -62,8 +62,12 @@ const getColumnSearchProps = (dataIndex: keyof ITransaction) => ({
       <SearchOutlined size={40} />
     </div>
   ),
-  onFilter: (value: string, record: ITransaction) =>
-    record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+  onFilter: (value: string, record: ITransaction) => {
+    const fieldValue = record[dataIndex]
+      ? record[dataIndex].toString().toLowerCase()
+      : ''
+    return fieldValue.includes(value.toLowerCase())
+  }
 })
 
 const getDateColumnProps = (dataIndex: keyof ITransaction) => ({
@@ -109,9 +113,11 @@ const getDateColumnProps = (dataIndex: keyof ITransaction) => ({
       (!endDate || recordDate <= new Date(endDate))
     )
   },
-  sorter: (a: ITransaction, b: ITransaction) =>
-    new Date(a[dataIndex] as string).getTime() -
-    new Date(b[dataIndex] as string).getTime(),
+  sorter: (a: ITransaction, b: ITransaction) => {
+    const dateA = a[dataIndex] ? new Date(a[dataIndex] as string).getTime() : 0
+    const dateB = b[dataIndex] ? new Date(b[dataIndex] as string).getTime() : 0
+    return dateA - dateB
+  },
 })
 
 const getPrPrIcon = (prPr: string) => {
@@ -307,7 +313,9 @@ export const generateColumns = (
         <TransactionDrawer transaction={record} domain={domain} />
       ),
     },
-  ].filter((column) => visibleColumns.includes(column.key))
+  ]
+  .filter((column) => typeof column.key === 'string' && visibleColumns.includes(column.key as string))
+
 
   return columns
 }
