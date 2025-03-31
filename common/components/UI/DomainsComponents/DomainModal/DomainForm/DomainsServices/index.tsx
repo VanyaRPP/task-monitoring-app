@@ -30,15 +30,24 @@ const DomainsServices: FC<Props> = ({
   const [createCustomService] = useCreateCustomServiceMutation()
 
   useEffect(() => {
-    if (customServices?.data) {
+    if (customServices?.data && domainId) {
       const services = customServices.data.map((service) => ({
         _id: service._id,
         name: service.name,
       }))
-      form.setFieldsValue({ domainServices: services })
-      onCustomServicesChange(services)
+  
+      if (form.getFieldValue('domainServices') !== undefined) {
+        form.setFieldsValue({ domainServices: services })
+        onCustomServicesChange(services)
+      } else {
+
+        setTimeout(() => {
+          form.setFieldsValue({ domainServices: services })
+          onCustomServicesChange(services)
+        }, 0)
+      }
     }
-  }, [customServices, domainId, form, onCustomServicesChange])
+  }, [customServices, domainId])
 
   const handleSave = async (fieldKey: number) => {
     const service = form.getFieldValue(['domainServices', fieldKey])
