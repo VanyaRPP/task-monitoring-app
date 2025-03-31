@@ -89,20 +89,34 @@ const getSummaryColumns = (
   }, [])
 }
 
-function getDateFilter(value) {
-  const [, year, period, number] = value || []
-  // TODO: add enums
-  if (period === PERIOD_FILTR.QUARTER)
-    return {
-      year,
-      quarter: number,
+function formatDateFilterForQuery(value: string[] | undefined) {
+  if (!value || value.length === 0) return {}
+
+  const months: number[] = []
+  let year: number | null = null
+
+  for (const str of value) {
+    const match = str.match(/^(\d+)-(\w+)-(\d+)$/)
+    if (!match) continue
+
+    const [, y, period, number] = match
+    if (!year) year = Number(y)
+    if (period === PERIOD_FILTR.MONTH) {
+      months.push(Number(number))
     }
-  if (period === PERIOD_FILTR.MONTH)
-    return {
-      year,
-      month: number,
-    }
-  if (period === PERIOD_FILTR.YEAR) return { year }
+  }
+
+  const query: any = {
+    year,
+  }
+
+  if (months.length === 1) {
+    query.month = months[0]
+  } else if (months.length > 1) {
+    query.month = months
+  }
+
+  return query
 }
 
 function getTypeOperation(value) {
@@ -121,12 +135,17 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     edit: false,
     preview: false,
   })
-  const [currentDateFilter, setCurrentDateFilter] = useState()
+  const [currentDateFilter, setCurrentDateFilter] = useState<
+    string[] | undefined
+  >()
   const [currentTypeOperation, setCurrentTypeOperation] = useState()
   const [pageData, setPageData] = useState({
     pageSize: router.pathname === AppRoutes.PAYMENT ? 10 : 5,
     currentPage: 1,
   })
+  const [selectedDateField, setSelectedDateField] = useState<
+    'invoiceCreationDate' | 'date'
+  >('invoiceCreationDate')
 
   const [selectedColumns, setSelectedColumns] = useState<string[]>([])
 
@@ -196,8 +215,9 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     {
       skip: (pageData.currentPage - 1) * pageData.pageSize,
       limit: pageData.pageSize,
-      ...getDateFilter(currentDateFilter),
+      ...formatDateFilterForQuery(currentDateFilter),
       ...getTypeOperation(currentTypeOperation),
+      dateField: selectedDateField,
       companyIds: filters?.company || undefined,
       domainIds: sepDomainID || filters?.domain || undefined,
       streetIds: filters?.street || undefined,
@@ -208,7 +228,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
-  
 
   const handleDeletePayment = useCallback(
     async (id: string) => {
@@ -230,6 +249,21 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
   }, [filters])
 
+  const [appliedFilters, setAppliedFilters] = useState<any>()
+  useEffect(() => {
+    if (appliedFilters && appliedFilters !== filters) {
+      setPageData((prev) => ({
+        ...prev,
+        currentPage: 1,
+      }))
+    }
+  }, [appliedFilters])
+
+  useEffect(() => {
+    if (JSON.stringify(appliedFilters) !== JSON.stringify(filters)) {
+      setPageData((prev) => ({ ...prev, currentPage: 1 }))
+    }
+  }, [appliedFilters])
   const columns: TableColumnType<any>[] = useMemo(() => {
     return [
       {
@@ -294,14 +328,9 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             ?.filter((filter) => filter.value !== null)
             ?.map((filter) => ({
               text: dateToMonth(new Date(2000, Number(filter.value) - 1)),
-              value: filter.value,
+              value: `${new Date().getFullYear()}-month-${filter.value}`,
             })) || [],
         filteredValue: filters?.invoiceCreationDate || null,
-        onFilter: (value, record) => {
-          const recordDate = new Date(record.invoiceCreationDate)
-          if (isNaN(recordDate.getTime())) return false
-          return recordDate.getMonth() + 1 === Number(value)
-        },
       },
       {
         title: 'Тип',
@@ -604,14 +633,18 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             (router.pathname === AppRoutes.PAYMENT ||
               router.pathname === AppRoutes.SEP_DOMAIN) && {
               current: pageData.currentPage,
+              total: payments?.total || 0,
               showSizeChanger: true,
               pageSizeOptions: [10, 20, 50],
               position: ['bottomCenter'],
               onChange: handlePagination,
             }
           }
-          onChange={(_, filters) => {
-            setFilters(filters)
+          onChange={(_, nextFilters) => {
+            setFilters(nextFilters)
+            setAppliedFilters(nextFilters)
+            const val = nextFilters?.invoiceCreationDate
+            setCurrentDateFilter(Array.isArray(val) ? val.map(String) : [])
           }}
           scroll={{
             x:
