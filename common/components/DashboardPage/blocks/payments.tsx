@@ -140,22 +140,12 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   >()
   const [currentTypeOperation, setCurrentTypeOperation] = useState()
   const [pageData, setPageData] = useState({
-    pageSize: 10,
+    pageSize: router.pathname === AppRoutes.PAYMENT ? 10 : 5,
     currentPage: 1,
   })
   const [selectedDateField, setSelectedDateField] = useState<
     'invoiceCreationDate' | 'date'
   >('invoiceCreationDate')
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const pageSize =
-        Number(localStorage.getItem('pageSize')) ||
-        (router.pathname === AppRoutes.PAYMENT ? 10 : 5)
-      const currentPage = Number(localStorage.getItem('currentPage')) || 1
-      setPageData({ pageSize, currentPage })
-    }
-  }, [router.pathname])
 
   const [selectedColumns, setSelectedColumns] = useState<string[]>([])
 
@@ -196,8 +186,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const { data: dateFilters } = useGetDateFiltersQuery({ type: 'payment' })
 
   const handlePagination = (pagination) => {
-    localStorage.setItem('pageSize', pagination.pageSize)
-    localStorage.setItem('currentPage', pagination.current)
     setPageData({
       pageSize: pagination.pageSize,
       currentPage: pagination.current,
