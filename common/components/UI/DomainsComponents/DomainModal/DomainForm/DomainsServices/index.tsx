@@ -36,16 +36,10 @@ const DomainsServices: FC<Props> = ({
         name: service.name,
       }))
   
-      if (form.getFieldValue('domainServices') !== undefined) {
+      Promise.resolve().then(() => {
         form.setFieldsValue({ domainServices: services })
         onCustomServicesChange(services)
-      } else {
-
-        setTimeout(() => {
-          form.setFieldsValue({ domainServices: services })
-          onCustomServicesChange(services)
-        }, 0)
-      }
+      })
     }
   }, [customServices, domainId])
 
