@@ -22,6 +22,7 @@ import { IDomain } from '@modules/models/Domain'
 import { inputNumberParser } from '@utils/helpers'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import DomainsServices from '@components/UI/DomainsComponents/DomainModal/DomainForm/DomainsServices'
+import { ServiceType } from '@utils/constants'
 
 interface Props {
   form: FormInstance<any>
@@ -68,6 +69,24 @@ const RealEstateForm: FC<Props> = ({
     const existedValues = services.map((x) => !!x[value])
     return existedValues.includes(true)
   }
+
+  useEffect(() => {
+    const invoice = form.getFieldValue('invoice') || (currentRealEstate as any)?.invoice || []
+    const monthService = (currentRealEstate as any)?.monthService || {}
+  
+    const garbage = invoice.find(
+      (item) => item.type === ServiceType.GarbageCollector
+    )
+    const garbageService = services?.find(s => s.garbageCollectorPrice)
+  
+    form.setFieldsValue({
+      garbageCollectorPrice:
+        garbage?.price ??
+        monthService.garbageCollectorPrice ??
+        garbageService?.garbageCollectorPrice ??
+        0,
+    })
+  }, [currentRealEstate, services])
 
   return (
     <Form
@@ -198,6 +217,17 @@ const RealEstateForm: FC<Props> = ({
           disabled={!editable}
         />
       </Form.Item>
+
+      {currentRealEstate?.garbageCollector && (
+      <Form.Item name="garbageCollectorPrice" label="Вивіз сміття (грн)">
+        <InputNumber
+          parser={inputNumberParser}
+          placeholder="0"
+          className={s.formInput}
+          disabled={!editable}
+        />
+      </Form.Item>
+      )}
 
       {isServiceExist('garbageCollectorPrice') && (
         <Form.Item
