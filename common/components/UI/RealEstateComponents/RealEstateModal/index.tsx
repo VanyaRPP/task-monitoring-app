@@ -44,9 +44,9 @@ const RealEstateModal: FC<Props> = ({
 
   useEffect(() => {
     const initialValues = {
-      domain: chosenRealEstate
-      ? chosenRealEstate.domain
-      : currentRealEstate?.domain?.name,
+      domain: chosenRealEstate?.domain
+      || currentRealEstate?.domain?.name
+      || domainId,
       street:
         currentRealEstate?.street &&
         `${currentRealEstate.street.address} (м. ${currentRealEstate.street.city})`,
