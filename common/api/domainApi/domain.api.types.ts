@@ -8,7 +8,7 @@ export interface IDomainModel {
   rnokpp: string
   IEName: string
   domainBankToken: IDomainBankToken[]
-  domainServices: IDomainService[]
+  domainServices: string[]
   customServices: ICustomService[]
 }
 
