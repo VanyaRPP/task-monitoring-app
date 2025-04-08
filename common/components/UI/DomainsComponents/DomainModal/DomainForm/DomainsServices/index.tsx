@@ -31,7 +31,8 @@ const DomainsServices: FC<Props> = ({
 
   useEffect(() => {
     if (customServices?.data && domainId) {
-      const services = customServices.data.map((service) => ({
+
+      const services = customServices.data.filter((s) => String(s.domain) === String(domainId)).map((service) => ({
         _id: service._id,
         name: service.name,
       }))
@@ -51,7 +52,7 @@ const DomainsServices: FC<Props> = ({
     }
 
     const existingService = customServices?.data.find(
-      (s) => s.name === service?.name && s.domainId === domainId
+      (s) => s.name === service?.name && s.domain === domainId
     )
     if (existingService) {
       message.info('Послуга з такою назвою вже існує')
@@ -64,25 +65,39 @@ const DomainsServices: FC<Props> = ({
         domainId,
       }).unwrap()
       const savedService = result.data
+
+      const updatedDomainServices = form
+      .getFieldValue('domainServices')
+      .map((s, idx) =>
+        idx === fieldKey ? { ...s, _id: savedService._id } : s
+      )
+
       form.setFieldsValue({
-        domainServices: form
-          .getFieldValue('domainServices')
-          .map((s, idx) =>
-            idx === fieldKey ? { ...s, _id: savedService._id } : s
-          ),
+      domainServices: updatedDomainServices,
       })
+      const currentServices: string[] = form.getFieldValue('services') || []
+      if (!currentServices.includes(savedService._id)) {
+      form.setFieldsValue({
+        services: [...currentServices, savedService._id],
+      })
+      }
       message.success('Послугу успішно збережено')
     } catch (error) {
       message.error('Помилка збереження послуги')
     }
   }
 
-  const handleRemove = (fieldName: number) => {
-    const updatedServices = form
-      .getFieldValue('domainServices')
-      .filter((_, idx) => idx !== fieldName)
-    form.setFieldsValue({ domainServices: updatedServices })
+  const handleRemove = (removedService: { _id?: string }) => {
+    const currentServiceIds: string[] = form.getFieldValue('services') || []
+  
+    if (removedService?._id && currentServiceIds.includes(removedService._id)) {
+      form.setFieldsValue({
+        services: currentServiceIds.filter(id => id !== removedService._id),
+      })
+    }
   }
+  
+  
 
   if (isLoading) return <div>Завантаження...</div>
   if (error) {
@@ -109,10 +124,11 @@ const DomainsServices: FC<Props> = ({
                       type="link"
                       danger
                       onClick={() => {
-                        remove(field.name)
-                        handleRemove(field.name)
+                        const removedService = form.getFieldValue('domainServices')[field.name] 
+                        remove(field.name) 
+                        handleRemove(removedService) 
                       }}
-                    >
+>
                       <CloseOutlined />
                     </Button>
                   </div>

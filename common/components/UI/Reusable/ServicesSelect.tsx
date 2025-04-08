@@ -1,5 +1,5 @@
 import { Form, FormInstance, Select } from 'antd'
-import { CSSProperties, useMemo } from 'react'
+import { CSSProperties, useMemo, useEffect } from 'react'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 
 export interface ServicesSelectProps {
@@ -43,6 +43,15 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
       label: service.name,
     }))
   }, [services])
+
+ useEffect(() => {
+  if (!form.getFieldValue('services')?.length && customServices.length) {
+    const ids = customServices.map(({ _id }) => _id)
+    form.setFieldsValue({ services: ids })
+    onServicesChange?.(ids)
+  }
+}, [customServices, form, onServicesChange])
+  
 
   const handleChange = (selectedValues: string[]) => {
     form.setFieldsValue({ services: selectedValues })

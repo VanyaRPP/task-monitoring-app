@@ -1,7 +1,7 @@
 export interface ICustomService {
   _id: string
   name: string
-  domainId: string
+  domain: string
   fieldName: string
 }
 
