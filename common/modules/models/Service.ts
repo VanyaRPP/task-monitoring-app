@@ -11,6 +11,7 @@ export interface IServiceModel {
   garbageCollectorPrice: number
   inflicionPrice: number
   description: string
+  losses?: number
 }
 
 export const ServiceSchema = new Schema<IServiceModel>({
@@ -24,6 +25,7 @@ export const ServiceSchema = new Schema<IServiceModel>({
   garbageCollectorPrice: { type: Number, required: false, default: 0 },
   inflicionPrice: { type: Number, required: false, default: 0 },
   description: { type: String, required: false, default: '' },
+  losses: { type: Number, required: false, default: 0 },
 })
 
 const Service =

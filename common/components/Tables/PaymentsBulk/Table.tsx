@@ -64,7 +64,7 @@ const InvoicesTable: React.FC = () => {
           size="small"
           pagination={false}
           loading={isLoading}
-          columns={getDefaultColumns(remove)}
+          columns={getDefaultColumns(remove, service?.losses)}
           dataSource={fields}
           scroll={{ x: 3000 }}
           locale={{

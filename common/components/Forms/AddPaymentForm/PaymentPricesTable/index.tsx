@@ -15,7 +15,7 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
   preview,
   loading,
 }) => {
-  const { form } = usePaymentContext()
+  const { form, service } = usePaymentContext()
   const invoices = form.getFieldValue('invoice')
 
   useEffect(() => {
