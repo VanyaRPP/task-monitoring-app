@@ -10,6 +10,7 @@ import {
   FormInstance,
   Input,
   InputNumber,
+  Typography,
 } from 'antd'
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs from 'dayjs'
@@ -38,6 +39,7 @@ const AddServiceForm: React.FC<Props> = ({
   const date = Form.useWatch('date', form)
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
+  const { Text } = Typography
 
   const { previousMonth } = usePreviousMonthService({
     date,
@@ -61,6 +63,7 @@ const AddServiceForm: React.FC<Props> = ({
         currentService?.garbageCollectorPrice ??
         previousMonth?.garbageCollectorPrice ??
         0,
+      losses: null,
     })
   }, [form, currentService, previousMonth])
 
@@ -143,6 +146,20 @@ const AddServiceForm: React.FC<Props> = ({
           />
         </Form.Item>
         <Form.Item name="inflicionPrice" label="Індекс інфляції">
+          <InputNumber
+            parser={inputNumberParser}
+            placeholder="Вкажіть значення"
+            className={s.formInput}
+          />
+        </Form.Item>
+        <Form.Item
+          name="losses"
+          label={
+            <>
+              Втрати в тр-рі, лініях, реактивна
+            </>
+          }
+        >
           <InputNumber
             parser={inputNumberParser}
             placeholder="Вкажіть значення"

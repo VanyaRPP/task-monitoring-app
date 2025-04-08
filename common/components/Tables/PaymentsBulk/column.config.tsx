@@ -19,7 +19,8 @@ import {
 import { useEffect, useMemo } from 'react'
 
 export const getDefaultColumns = (
-  remove: (index: number) => void
+  remove: (index: number) => void,
+  losses?: number
 ): TableColumnsType => [
   {
     fixed: 'left',
@@ -72,7 +73,7 @@ export const getDefaultColumns = (
     render: (_, { name }: { name: number }) => <InflicionSum name={name} />,
   },
   {
-    title: 'Електропостачання',
+    title: losses ? `Електропостачання + Втрати ${losses}%` : 'Електропостачання',
     children: [
       {
         title: 'Стара',
@@ -86,6 +87,20 @@ export const getDefaultColumns = (
         width: 160,
         render: (_, { name }: { name: number }) => (
           <ElectricityAmount name={name} />
+        ),
+      },
+      {
+        title: 'Втрати',
+        width: 200,
+        render: (_, { name }: { name: number }) => (
+          <LossElectricityPrice name={name} />
+        ),
+      },
+      {
+        title: '',
+        width: 200,
+        render: (_, { name }: { name: number }) => (
+          <LossElectricitySum name={name} />
         ),
       },
       {
@@ -182,6 +197,15 @@ export const getDefaultColumns = (
   },
 ]
 
+const CompanyName: React.FC<{ name: number }> = ({ name }) => {
+  const { form } = useInvoicesPaymentContext()
+  const companyName: string | undefined = Form.useWatch(
+    ['payments', name, 'company', 'companyName'],
+    form
+  )
+  return <Typography.Text>{companyName}</Typography.Text>
+}
+
 const usePrevPayment = (name: number): IExtendedPayment => {
   const { form, prevService, prevPayments } = useInvoicesPaymentContext()
 
@@ -251,13 +275,51 @@ const useInflicionValues = (
   }
 }
 
-const CompanyName: React.FC<{ name: number }> = ({ name }) => {
-  const { form } = useInvoicesPaymentContext()
-  const companyName: string | undefined = Form.useWatch(
-    ['payments', name, 'company', 'companyName'],
-    form
+const LossElectricitySum: React.FC<{ name: number }> = ({ name }) => {
+  const { form, service } = useInvoicesPaymentContext()
+  const lastAmount: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Electricity, 'lastAmount'],
+      form
+    ) ?? 0
+  const amount: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Electricity, 'amount'],
+      form
+    ) ?? 0
+  return (
+    <Space>
+      {service?.losses && (
+        <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
+          {((amount - lastAmount) + ((amount - lastAmount) * (service?.losses/100))).toFixed(2)} кВт
+        </Typography.Text>
+      )}
+    </Space>
   )
-  return <Typography.Text>{companyName}</Typography.Text>
+}
+
+const LossElectricityPrice: React.FC<{ name: number }> = ({ name }) => {
+  const { form, service } = useInvoicesPaymentContext()
+  // const test = Form.useWatch(['service', name], form)
+  const lastAmount: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Electricity, 'lastAmount'],
+      form
+    ) ?? 0
+  const amount: number =
+    Form.useWatch(
+      ['payments', name, 'invoice', ServiceType.Electricity, 'amount'],
+      form
+    ) ?? 0
+  return (
+    <Space>
+      {service?.losses && (
+        <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
+          {(amount - lastAmount)} + ({service?.losses}%)
+        </Typography.Text>
+      )}
+    </Space>
+  )
 }
 
 const TotalArea: React.FC<{ name: number }> = ({ name }) => {
@@ -491,11 +553,14 @@ const ElectricitySum: React.FC<{ name: number }> = ({ name }) => {
       ['payments', name, 'invoice', ServiceType.Electricity, 'amount'],
       form
     ) ?? 0
+  const loss = (amount - lastAmount) + ((amount - lastAmount) * (service?.losses/100))
 
   useEffect(() => {
     form.setFieldValue(
       ['payments', name, 'invoice', ServiceType.Electricity, 'sum'],
-      +toRoundFixed((+amount - +lastAmount) * (+service?.electricityPrice ?? 0))
+      service?.losses > 0 
+      ? +toRoundFixed(((+amount - +lastAmount) + loss) * (+service?.electricityPrice ?? 0))
+      : +toRoundFixed((+amount - +lastAmount) * (+service?.electricityPrice ?? 0))
     )
   }, [form, name, amount, lastAmount, service])
 
