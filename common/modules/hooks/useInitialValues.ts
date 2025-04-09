@@ -17,6 +17,7 @@ function useInitialValues(currentService) {
     description: currentService?.description,
     waterPriceTotal: currentService?.waterPriceTotal,
     garbageCollectorPrice: currentService?.garbageCollectorPrice,
+    losses: currentService?.losses,
   }
   return initialValues
 }

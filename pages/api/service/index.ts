@@ -169,7 +169,7 @@ export default async function handler(
 
     case 'POST':
       try {
-        if (isAdmin) {
+        if (isGlobalAdmin || isDomainAdmin) {
           // TODO: body validation
           const service = await Service.create(req.body)
           return res.status(200).json({ success: true, data: service })
