@@ -11,7 +11,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isAdmin, user } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isAdmin, user } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'DELETE':
@@ -40,7 +40,7 @@ export default async function handler(
 
     case 'PATCH':
       try {
-        if (isAdmin) {
+        if (isGlobalAdmin || isDomainAdmin) {
           if (isGlobalAdmin) {
             const response = await Service.findOneAndUpdate(
               { _id: req.query.id },
@@ -53,7 +53,7 @@ export default async function handler(
               adminEmails: { $in: [user.email] },
             })
             const domainIds = domains?.map((domain) => domain._id.toString())
-            const validDomain = domainIds?.includes(req.body.domain._id)
+            const validDomain = domainIds?.includes(req.body.domain)
             if (validDomain) {
               const response = await Service.findOneAndUpdate(
                 { _id: req.query.id },
