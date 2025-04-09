@@ -50,10 +50,12 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
       </div> 
     : (
         <DividedSpace style={{ cursor: 'pointer' }}>
-          <Typography.Text>{toRoundFixed(lastAmount)} → {toRoundFixed(amount)} кВт</Typography.Text>
+          {/* <Typography.Text>{toRoundFixed(lastAmount)} → {toRoundFixed(amount)} кВт</Typography.Text> */}
+          <Typography.Text>{(amount - lastAmount) + ((amount - lastAmount) * (service?.losses / 100))} кВт</Typography.Text>
           <Tooltip
           title={
             <div>
+              <div>{toRoundFixed(lastAmount)} → {toRoundFixed(amount)}</div>
               <div><strong>Втрати:</strong> {service?.losses}%</div>
               <div>
                 <strong>З втратами:</strong>{' '}
