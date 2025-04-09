@@ -1,7 +1,6 @@
 import { Form, FormInstance, Select } from 'antd'
 import { CSSProperties, useMemo, useEffect } from 'react'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
 
 export interface ServicesSelectProps {
   domainId?: string
@@ -16,14 +15,13 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   form,
   dropdownStyle,
   onServicesChange,
+  customServices = [],
 }) => {
   const {
     data: servicesData,
     isLoading,
     isError,
   } = useGetAllServicesQuery({ domainId })
-
-  const { data: customServices } = useGetCustomServicesQuery({})
 
   const servicesList = useMemo(() => {
     if (!servicesData) return []
@@ -34,25 +32,26 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   }, [servicesData])
 
   const services = useMemo(() => {
-    return customServices?.data
-      .slice()
-      .sort((a, b) => a.name.localeCompare(b.name))
+    return [...servicesList, ...customServices].sort((a, b) =>
+      a.name.localeCompare(b.name)
+    )
   }, [servicesList, customServices])
 
   const options = useMemo(() => {
-    return services?.map((service) => ({
+    return services.map((service) => ({
       value: service._id,
       label: service.name,
     }))
   }, [services])
 
-  useEffect(() => {
-    if (!form.getFieldValue('services')?.length && customServices.length) {
-      const ids = customServices.map(({ _id }) => _id)
-      form.setFieldsValue({ services: ids })
-      onServicesChange?.(ids)
-    }
-  }, [customServices, form, onServicesChange])
+ useEffect(() => {
+  if (!form.getFieldValue('services')?.length && customServices.length) {
+    const ids = customServices.map(({ _id }) => _id)
+    form.setFieldsValue({ services: ids })
+    onServicesChange?.(ids)
+  }
+}, [customServices, form, onServicesChange])
+  
 
   const handleChange = (selectedValues: string[]) => {
     form.setFieldsValue({ services: selectedValues })
