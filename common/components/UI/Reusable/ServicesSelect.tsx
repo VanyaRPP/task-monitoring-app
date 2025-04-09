@@ -1,6 +1,7 @@
 import { Form, FormInstance, Select } from 'antd'
 import { CSSProperties, useMemo, useEffect } from 'react'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
 
 export interface ServicesSelectProps {
   domainId?: string
@@ -14,14 +15,17 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   domainId,
   form,
   dropdownStyle,
-  onServicesChange,
-  customServices = [],
+  onServicesChange
 }) => {
   const {
     data: servicesData,
     isLoading,
     isError,
   } = useGetAllServicesQuery({ domainId })
+
+    const {
+      data: customServices
+    } = useGetCustomServicesQuery({})
 
   const servicesList = useMemo(() => {
     if (!servicesData) return []
@@ -32,13 +36,13 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   }, [servicesData])
 
   const services = useMemo(() => {
-    return [...servicesList, ...customServices].sort((a, b) =>
+    return customServices?.data.slice().sort((a, b) =>
       a.name.localeCompare(b.name)
     )
   }, [servicesList, customServices])
 
   const options = useMemo(() => {
-    return services.map((service) => ({
+    return services?.map((service) => ({
       value: service._id,
       label: service.name,
     }))

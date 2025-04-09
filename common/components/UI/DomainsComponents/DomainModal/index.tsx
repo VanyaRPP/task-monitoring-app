@@ -40,14 +40,14 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       mfo: currentDomain?.mfo || '',
       rnokpp: currentDomain?.rnokpp || '',
       iban: currentDomain?.iban || '',
-      domainServices: currentDomain?.domainServices || [],
+      services: currentDomain?.domainServices || [],
       customServices: currentDomain?.customServices || [],
     }
     form.setFieldsValue(initialValues)
   }, [currentDomain, form])
 
   const handleSubmit = async () => {
-    const formData: IDomainModel = await form.validateFields()
+    const formData = await form.validateFields()
 
     if (!currentDomain && domains?.some(domain => domain.name === formData.name)) {
       message.error({
@@ -74,7 +74,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       mfo: formData.mfo,
       rnokpp: formData.rnokpp,
       iban: formData.iban,
-      domainServices: formData.domainServices,
+      domainServices: formData.services,
       customServices: formData.customServices,
     }
 

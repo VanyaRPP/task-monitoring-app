@@ -20,6 +20,13 @@ export type IRealestate = {
   discount?: number
   cleaning?: number
   services: IDomainService[]
+  customServices?: CustomServices[]
+}
+
+export interface CustomServices {
+  fieldName: string
+  name: string
+  value: number
 }
 
 export interface IExtendedRealestate extends IRealestate {

@@ -42,10 +42,10 @@ const RealEstateForm: FC<Props> = ({
     data: domain = {} as IDomain,
     isLoading: isDomainLoading,
     isError: isDomainError,
-  } = useGetDomainByPkQuery({ domainId })
+  } = useGetDomainByPkQuery({ domainId: domainId || currentRealEstate?.domain?._id  }, { skip: !domainId && !currentRealEstate?.domain?._id })
 
   const { data: servicesData } = useGetAllServicesQuery({
-    domainId: domain._id,
+    domainId: domain?._id || currentRealEstate?.domain?._id,
   })
   const services = servicesData?.data
 
@@ -68,6 +68,7 @@ const RealEstateForm: FC<Props> = ({
     const existedValues = services.map((x) => !!x[value])
     return existedValues.includes(true)
   }
+  const domainServices = form.getFieldValue('customServices')
 
   return (
     <Form
@@ -117,12 +118,12 @@ const RealEstateForm: FC<Props> = ({
         />
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} />
-      <DomainsServices
+      {/* <DomainsServices
         form={form}
         editable={false}
         domainId={domainId}
         onCustomServicesChange={() => {}}
-      />
+      /> */}
       <Form.Item
         name="totalArea"
         label="Площа (м²)"
@@ -148,8 +149,36 @@ const RealEstateForm: FC<Props> = ({
         />
       </Form.Item>
 
-      <>
-        <Form.Item
+      {/* <> */}
+      <Form.List name="customServices">
+        {(fields, { }) => (
+          <>
+            {fields.map(({ key, name }) => (
+              <Form.Item
+                key={key}
+                name={[name, "value"]}
+                label={domainServices[name]?.name}
+              >
+                <InputNumber
+                  onChange={(value) => {
+                    const customServices = [...form.getFieldValue("customServices")]
+                    customServices[name] = {
+                      ...customServices[name],
+                      value,
+                    };
+                    form.setFieldsValue({ customServices })
+                  }}
+                  placeholder="Введіть значення"
+                  className={s.formInput}
+                  disabled={!editable}
+                />
+              </Form.Item>
+            ))}
+          </>
+        )}
+      </Form.List>
+
+        {/* <Form.Item
           name="servicePricePerMeter"
           label="Індивідуальне утримання (грн/м²)"
         >
@@ -167,10 +196,10 @@ const RealEstateForm: FC<Props> = ({
             className={s.formInput}
             disabled={!editable}
           />
-        </Form.Item>
-      </>
+        </Form.Item> */}
+      {/* </> */}
 
-      {isServiceExist('waterPrice') && (
+      {/* {isServiceExist('waterPrice') && (
         <Form.Item name="waterPart" label="Частка водопостачання">
           <InputNumber
             parser={inputNumberParser}
@@ -216,7 +245,7 @@ const RealEstateForm: FC<Props> = ({
         >
           <Checkbox disabled={!editable} />
         </Form.Item>
-      )}
+      )} */}
     </Form>
   )
 }

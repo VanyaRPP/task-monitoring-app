@@ -21,18 +21,12 @@ const DomainsServices: FC<Props> = ({
   domainId,
   onCustomServicesChange,
 }) => {
-  const {
-    data: customServices,
-    isLoading,
-    error,
-  } = useGetCustomServicesQuery({ domainId }, { skip: !domainId })
 
   const [createCustomService] = useCreateCustomServiceMutation()
 
   useEffect(() => {
     if (customServices?.data && domainId) {
-
-      const services = customServices.data.filter((s) => String(s.domain) === String(domainId)).map((service) => ({
+      const services = customServices.data.map((service) => ({
         _id: service._id,
         name: service.name,
       }))
@@ -52,7 +46,7 @@ const DomainsServices: FC<Props> = ({
     }
 
     const existingService = customServices?.data.find(
-      (s) => s.name === service?.name && s.domain === domainId
+      (s) => s.name === service?.name && s.domainId === domainId
     )
     if (existingService) {
       message.info('Послуга з такою назвою вже існує')
@@ -62,7 +56,6 @@ const DomainsServices: FC<Props> = ({
     try {
       const result = await createCustomService({
         name: service?.name,
-        domainId,
       }).unwrap()
       const savedService = result.data
 
@@ -99,10 +92,10 @@ const DomainsServices: FC<Props> = ({
   
   
 
-  if (isLoading) return <div>Завантаження...</div>
-  if (error) {
-    return <div>Помилка завантаження даних: {JSON.stringify(error)}</div>
-  }
+  // if (isLoading) return <div>Завантаження...</div>
+  // if (error) {
+  //   return <div>Помилка завантаження даних: {JSON.stringify(error)}</div>
+  // }
 
   return (
     <Form.List name="domainServices">

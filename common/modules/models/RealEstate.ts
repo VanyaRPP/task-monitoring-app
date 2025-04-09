@@ -18,6 +18,13 @@ export interface IRealEstateModel {
   garbageCollector?: boolean
   archived?: boolean
   services: IDomainService[]
+  customServices?: CustomServices[]
+}
+
+type CustomServices = {
+  fieldName: string
+  name: string
+  value: number
 }
 
 export const RealEstateSchema = new Schema<IRealEstateModel>({
@@ -37,6 +44,17 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   garbageCollector: { type: Boolean, required: false, default: false },
   archived: { type: Boolean, required: false, default: false },
   services: { type: [Object] },
+  customServices: {
+    type: [
+      {
+        fieldName: { type: String, required: true },
+        name: { type: String, required: true },
+        value: { type: Number, required: true },
+      },
+    ],
+    required: false,
+    default: [],
+  },
 })
 
 const RealEstate =
