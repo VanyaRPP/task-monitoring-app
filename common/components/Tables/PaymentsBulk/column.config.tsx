@@ -73,7 +73,9 @@ export const getDefaultColumns = (
     render: (_, { name }: { name: number }) => <InflicionSum name={name} />,
   },
   {
-    title: losses ? `Електропостачання + Втрати ${losses}%` : 'Електропостачання',
+    title: losses
+      ? `Електропостачання + Втрати ${losses}%`
+      : 'Електропостачання',
     children: [
       {
         title: 'Стара',
@@ -291,7 +293,12 @@ const LossElectricitySum: React.FC<{ name: number }> = ({ name }) => {
     <Space>
       {service?.losses && (
         <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
-          {((amount - lastAmount) + ((amount - lastAmount) * (service?.losses/100))).toFixed(2)} кВт
+          {(
+            amount -
+            lastAmount +
+            (amount - lastAmount) * (service?.losses / 100)
+          ).toFixed(2)}{' '}
+          кВт
         </Typography.Text>
       )}
     </Space>
@@ -315,7 +322,7 @@ const LossElectricityPrice: React.FC<{ name: number }> = ({ name }) => {
     <Space>
       {service?.losses && (
         <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
-          {(amount - lastAmount)} + ({service?.losses}%)
+          {amount - lastAmount} + ({service?.losses}%)
         </Typography.Text>
       )}
     </Space>
@@ -553,14 +560,19 @@ const ElectricitySum: React.FC<{ name: number }> = ({ name }) => {
       ['payments', name, 'invoice', ServiceType.Electricity, 'amount'],
       form
     ) ?? 0
-  const loss = (amount - lastAmount) + ((amount - lastAmount) * (service?.losses/100))
+  const loss =
+    amount - lastAmount + (amount - lastAmount) * (service?.losses / 100)
 
   useEffect(() => {
     form.setFieldValue(
       ['payments', name, 'invoice', ServiceType.Electricity, 'sum'],
-      service?.losses > 0 
-      ? +toRoundFixed(((+amount - +lastAmount) + loss) * (+service?.electricityPrice ?? 0))
-      : +toRoundFixed((+amount - +lastAmount) * (+service?.electricityPrice ?? 0))
+      service?.losses > 0
+        ? +toRoundFixed(
+            (+amount - +lastAmount + loss) * (+service?.electricityPrice ?? 0)
+          )
+        : +toRoundFixed(
+            (+amount - +lastAmount) * (+service?.electricityPrice ?? 0)
+          )
     )
   }, [form, name, amount, lastAmount, service])
 

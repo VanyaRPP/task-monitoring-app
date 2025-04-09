@@ -11,9 +11,9 @@ import { Form, message } from 'antd'
 import Modal from '../../ModalWindow'
 import RealEstateForm from './RealEstateForm'
 import { IDomain } from '@modules/models/Domain'
-import { 
+import {
   useGetCustomServicesQuery,
-  useGetCustomServicesByDomainQuery
+  useGetCustomServicesByDomainQuery,
 } from '@common/api/customServicesApi/customServices.api'
 
 interface Props {
@@ -35,7 +35,10 @@ const RealEstateModal: FC<Props> = ({
   const [editRealEstate] = useEditRealEstateMutation()
   const domainId = Form.useWatch('domain', form)
   // const { data: customServices } = useGetCustomServicesQuery({ _id: currentRealEstate?.domain?.domainServices }, { skip: !currentRealEstate })
-  const { data: customDomainServices } = useGetCustomServicesByDomainQuery({ domainId: currentRealEstate?.domain?._id || domainId }, { skip: !domainId && !currentRealEstate?.domain?._id })
+  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
+    { domainId: currentRealEstate?.domain?._id || domainId },
+    { skip: !domainId && !currentRealEstate?.domain?._id }
+  )
   const Services = customDomainServices?.data?.map((service) => ({
     fieldName: service.fieldName,
     name: service.name,
@@ -44,9 +47,8 @@ const RealEstateModal: FC<Props> = ({
 
   useEffect(() => {
     const initialValues = {
-      domain: chosenRealEstate?.domain
-      || currentRealEstate?.domain?.name
-      || domainId,
+      domain:
+        chosenRealEstate?.domain || currentRealEstate?.domain?.name || domainId,
       street:
         currentRealEstate?.street &&
         `${currentRealEstate.street.address} (м. ${currentRealEstate.street.city})`,
@@ -64,7 +66,9 @@ const RealEstateModal: FC<Props> = ({
       discount: currentRealEstate?.discount || 0,
       cleaning: currentRealEstate?.cleaning || 0,
       services: currentRealEstate?.services || [],
-      customServices: currentRealEstate?.customServices || [...(Services ?? [])],
+      customServices: currentRealEstate?.customServices || [
+        ...(Services ?? []),
+      ],
     }
     form.setFieldsValue(initialValues)
   }, [currentRealEstate, form, Services])
@@ -90,7 +94,7 @@ const RealEstateModal: FC<Props> = ({
         formData.discount > 0 ? formData.discount * -1 : formData.discount,
       cleaning: formData.cleaning,
       services: formData.services,
-      customServices: formData.customServices
+      customServices: formData.customServices,
     }
 
     const response = currentRealEstate

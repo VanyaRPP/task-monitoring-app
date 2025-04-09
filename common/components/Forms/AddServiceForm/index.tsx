@@ -152,14 +152,7 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
-        <Form.Item
-          name="losses"
-          label={
-            <>
-              Втрати в тр-рі, лініях, реактивна
-            </>
-          }
-        >
+        <Form.Item name="losses" label={<>Втрати в тр-рі, лініях, реактивна</>}>
           <InputNumber
             parser={inputNumberParser}
             placeholder="Вкажіть значення"

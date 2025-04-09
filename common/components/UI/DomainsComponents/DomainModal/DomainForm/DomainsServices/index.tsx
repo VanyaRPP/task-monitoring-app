@@ -21,7 +21,6 @@ const DomainsServices: FC<Props> = ({
   domainId,
   onCustomServicesChange,
 }) => {
-
   const [createCustomService] = useCreateCustomServiceMutation()
 
   useEffect(() => {
@@ -30,7 +29,7 @@ const DomainsServices: FC<Props> = ({
         _id: service._id,
         name: service.name,
       }))
-  
+
       Promise.resolve().then(() => {
         form.setFieldsValue({ domainServices: services })
         onCustomServicesChange(services)
@@ -60,19 +59,19 @@ const DomainsServices: FC<Props> = ({
       const savedService = result.data
 
       const updatedDomainServices = form
-      .getFieldValue('domainServices')
-      .map((s, idx) =>
-        idx === fieldKey ? { ...s, _id: savedService._id } : s
-      )
+        .getFieldValue('domainServices')
+        .map((s, idx) =>
+          idx === fieldKey ? { ...s, _id: savedService._id } : s
+        )
 
       form.setFieldsValue({
-      domainServices: updatedDomainServices,
+        domainServices: updatedDomainServices,
       })
       const currentServices: string[] = form.getFieldValue('services') || []
       if (!currentServices.includes(savedService._id)) {
-      form.setFieldsValue({
-        services: [...currentServices, savedService._id],
-      })
+        form.setFieldsValue({
+          services: [...currentServices, savedService._id],
+        })
       }
       message.success('Послугу успішно збережено')
     } catch (error) {
@@ -82,15 +81,13 @@ const DomainsServices: FC<Props> = ({
 
   const handleRemove = (removedService: { _id?: string }) => {
     const currentServiceIds: string[] = form.getFieldValue('services') || []
-  
+
     if (removedService?._id && currentServiceIds.includes(removedService._id)) {
       form.setFieldsValue({
-        services: currentServiceIds.filter(id => id !== removedService._id),
+        services: currentServiceIds.filter((id) => id !== removedService._id),
       })
     }
   }
-  
-  
 
   // if (isLoading) return <div>Завантаження...</div>
   // if (error) {
@@ -117,11 +114,12 @@ const DomainsServices: FC<Props> = ({
                       type="link"
                       danger
                       onClick={() => {
-                        const removedService = form.getFieldValue('domainServices')[field.name] 
-                        remove(field.name) 
-                        handleRemove(removedService) 
+                        const removedService =
+                          form.getFieldValue('domainServices')[field.name]
+                        remove(field.name)
+                        handleRemove(removedService)
                       }}
->
+                    >
                       <CloseOutlined />
                     </Button>
                   </div>

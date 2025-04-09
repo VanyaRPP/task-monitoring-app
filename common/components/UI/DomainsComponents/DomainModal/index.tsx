@@ -49,14 +49,18 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
   const handleSubmit = async () => {
     const formData = await form.validateFields()
 
-    if (!currentDomain && domains?.some(domain => domain.name === formData.name)) {
+    if (
+      !currentDomain &&
+      domains?.some((domain) => domain.name === formData.name)
+    ) {
       message.error({
-        content: 'Помилка при додаванні надавача послуг!  Домен з такою назвою вже існує!',
-        duration: 4, 
+        content:
+          'Помилка при додаванні надавача послуг!  Домен з такою назвою вже існує!',
+        duration: 4,
         style: {
           marginTop: '20vh',
           fontSize: '2rem',
-          zIndex: 9999, 
+          zIndex: 9999,
         },
       })
       return

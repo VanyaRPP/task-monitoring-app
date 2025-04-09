@@ -113,7 +113,7 @@ export default async function handler(
       } catch (error) {
         res.status(400).json({ success: false, message: error.message })
       }
-        break;
+      break
     case 'POST':
       try {
         const { sum, description } = req.body
@@ -133,6 +133,6 @@ export default async function handler(
       } catch (error) {
         res.status(500).json({ success: false, message: error.message })
       }
-      break;
+      break
   }
 }

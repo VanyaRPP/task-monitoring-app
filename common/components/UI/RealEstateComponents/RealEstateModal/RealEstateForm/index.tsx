@@ -42,7 +42,10 @@ const RealEstateForm: FC<Props> = ({
     data: domain = {} as IDomain,
     isLoading: isDomainLoading,
     isError: isDomainError,
-  } = useGetDomainByPkQuery({ domainId: domainId || currentRealEstate?.domain?._id  }, { skip: !domainId && !currentRealEstate?.domain?._id })
+  } = useGetDomainByPkQuery(
+    { domainId: domainId || currentRealEstate?.domain?._id },
+    { skip: !domainId && !currentRealEstate?.domain?._id }
+  )
 
   const { data: servicesData } = useGetAllServicesQuery({
     domainId: domain?._id || currentRealEstate?.domain?._id,
@@ -151,21 +154,23 @@ const RealEstateForm: FC<Props> = ({
 
       {/* <> */}
       <Form.List name="customServices">
-        {(fields, { }) => (
+        {(fields, {}) => (
           <>
             {fields.map(({ key, name }) => (
               <Form.Item
                 key={key}
-                name={[name, "value"]}
+                name={[name, 'value']}
                 label={domainServices[name]?.name}
               >
                 <InputNumber
                   onChange={(value) => {
-                    const customServices = [...form.getFieldValue("customServices")]
+                    const customServices = [
+                      ...form.getFieldValue('customServices'),
+                    ]
                     customServices[name] = {
                       ...customServices[name],
                       value,
-                    };
+                    }
                     form.setFieldsValue({ customServices })
                   }}
                   placeholder="Введіть значення"
@@ -178,7 +183,7 @@ const RealEstateForm: FC<Props> = ({
         )}
       </Form.List>
 
-        {/* <Form.Item
+      {/* <Form.Item
           name="servicePricePerMeter"
           label="Індивідуальне утримання (грн/м²)"
         >

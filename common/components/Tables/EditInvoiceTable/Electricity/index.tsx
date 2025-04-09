@@ -20,7 +20,8 @@ export const Name: React.FC<InvoiceComponentProps> = ({
     <Space direction="vertical" size={0}>
       <Typography.Text>Електропостачання</Typography.Text>
       <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-        {toFirstUpperCase(dateToMonthYear(service?.date))} {service?.losses > 0 ? `+ Втрати ${service?.losses}%` : ''}
+        {toFirstUpperCase(dateToMonthYear(service?.date))}{' '}
+        {service?.losses > 0 ? `+ Втрати ${service?.losses}%` : ''}
       </Typography.Text>
     </Space>
   )
@@ -38,35 +39,51 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
 
   if (!editable) {
-    return service?.losses > 0
-    ? 
-      editable 
-      ? <div style={{ lineHeight: '1.6' }}>
-        <Typography.Text>{toRoundFixed(lastAmount)} → {toRoundFixed(amount)} кВт</Typography.Text>
-        <br />
-        <Typography.Text>
-          З втратами ({service?.losses}%): <Typography.Text underline strong>{(amount - lastAmount) + ((amount - lastAmount) * (service?.losses/100))} кВт</Typography.Text>
-        </Typography.Text>
-      </div> 
-    : (
+    return service?.losses > 0 ? (
+      editable ? (
+        <div style={{ lineHeight: '1.6' }}>
+          <Typography.Text>
+            {toRoundFixed(lastAmount)} → {toRoundFixed(amount)} кВт
+          </Typography.Text>
+          <br />
+          <Typography.Text>
+            З втратами ({service?.losses}%):{' '}
+            <Typography.Text underline strong>
+              {amount -
+                lastAmount +
+                (amount - lastAmount) * (service?.losses / 100)}{' '}
+              кВт
+            </Typography.Text>
+          </Typography.Text>
+        </div>
+      ) : (
         <DividedSpace style={{ cursor: 'pointer' }}>
-          <Typography.Text>{toRoundFixed(lastAmount)} → {toRoundFixed(amount)} кВт</Typography.Text>
+          <Typography.Text>
+            {toRoundFixed(lastAmount)} → {toRoundFixed(amount)} кВт
+          </Typography.Text>
           <Tooltip
-          title={
-            <div>
-              <div><strong>Втрати:</strong> {service?.losses}%</div>
+            title={
               <div>
-                <strong>З втратами:</strong>{' '}
-                {(amount - lastAmount) + ((amount - lastAmount) * (service?.losses / 100))} кВт
+                <div>
+                  <strong>Втрати:</strong> {service?.losses}%
+                </div>
+                <div>
+                  <strong>З втратами:</strong>{' '}
+                  {amount -
+                    lastAmount +
+                    (amount - lastAmount) * (service?.losses / 100)}{' '}
+                  кВт
+                </div>
               </div>
-            </div>
-          }
-        >
-          <ExclamationCircleOutlined style={{ color: '#faad14', marginLeft: 8, cursor: 'pointer' }} />
-        </Tooltip>
+            }
+          >
+            <ExclamationCircleOutlined
+              style={{ color: '#faad14', marginLeft: 8, cursor: 'pointer' }}
+            />
+          </Tooltip>
         </DividedSpace>
-    )
-    : (
+      )
+    ) : (
       <DividedSpace>
         <span>{toRoundFixed(lastAmount)} кВт</span>
         <span>{toRoundFixed(amount)} кВт</span>
@@ -142,14 +159,15 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
   const sum = Form.useWatch(['invoice', ...name, 'sum'], form)
   const { service } = usePaymentContext()
-  const loss = (amount - lastAmount) + ((amount - lastAmount) * (service?.losses/100))
+  const loss =
+    amount - lastAmount + (amount - lastAmount) * (service?.losses / 100)
 
   useEffect(() => {
     form.setFieldValue(
       ['invoice', ...name, 'sum'],
-      service?.losses > 0 
-      ? (Math.max(+amount - +lastAmount, 0) + loss) * +price 
-      : Math.max(+amount - +lastAmount, 0) * +price,
+      service?.losses > 0
+        ? (Math.max(+amount - +lastAmount, 0) + loss) * +price
+        : Math.max(+amount - +lastAmount, 0) * +price
     )
   }, [form, name, amount, lastAmount, price])
 
