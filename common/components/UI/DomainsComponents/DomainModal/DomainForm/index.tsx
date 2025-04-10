@@ -43,12 +43,6 @@ const DomainForm: React.FC<Props> = ({
       <EmailSelect form={form} disabled={!editable} />
       <DomainStreets disabled={!editable} />
       <ServicesSelect form={form} customServices={customServices} />
-      <DomainsServices
-        form={form}
-        editable={editable}
-        domainId={domainId}
-        onCustomServicesChange={setCustomServices}
-      />
       <DomainInfo editable={editable} form={form} />
     </Form>
   )

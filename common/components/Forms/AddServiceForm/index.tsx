@@ -63,7 +63,7 @@ const AddServiceForm: React.FC<Props> = ({
         currentService?.garbageCollectorPrice ??
         previousMonth?.garbageCollectorPrice ??
         0,
-      losses: null,
+      losses: currentService?.losses ?? 0,
     })
   }, [form, currentService, previousMonth])
 
