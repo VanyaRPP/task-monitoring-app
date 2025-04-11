@@ -14,6 +14,11 @@ export interface IService {
   garbageCollectorPrice?: number
   inflicionPrice?: number
   description?: string
+  customServices?: {
+    fieldName: string
+    name: string
+    value: number
+  }[]
 }
 
 export interface IAddServiceResponse {

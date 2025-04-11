@@ -53,7 +53,7 @@ export default async function handler(
               adminEmails: { $in: [user.email] },
             })
             const domainIds = domains?.map((domain) => domain._id.toString())
-            const validDomain = domainIds?.includes(req.body.domain._id)
+            const validDomain = domainIds?.includes(req.body.domain)
             if (validDomain) {
               const response = await Service.findOneAndUpdate(
                 { _id: req.query.id },

@@ -17,6 +17,7 @@ import 'dayjs/locale/uk'
 import { useEffect } from 'react'
 import s from './style.module.scss'
 import { inputNumberParser } from '@utils/helpers'
+import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 
 dayjs.locale('uk')
 
@@ -38,6 +39,14 @@ const AddServiceForm: React.FC<Props> = ({
   const date = Form.useWatch('date', form)
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
+
+  const { data: customServices } = useGetCustomServicesByDomainQuery({ domainId: domainId }, { skip: !domainId })
+
+  const initialCustomServices = customServices?.data?.map((service) => ({
+    fieldName: service.fieldName,
+    name: service.name,
+    value: 0,
+  }))
 
   const { previousMonth } = usePreviousMonthService({
     date,
@@ -61,8 +70,9 @@ const AddServiceForm: React.FC<Props> = ({
         currentService?.garbageCollectorPrice ??
         previousMonth?.garbageCollectorPrice ??
         0,
+      customServices: currentService?.customServices || initialCustomServices || [],
     })
-  }, [form, currentService, previousMonth])
+  }, [form, currentService, previousMonth, initialCustomServices])
 
   return (
     <ConfigProvider locale={ukUA}>
@@ -91,7 +101,34 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
-        <Form.Item
+        <Form.List name="customServices">
+                {(fields, { }) => (
+                  <>
+                    {fields.map(({ key, name }) => (
+                      <Form.Item
+                        key={key}
+                        name={[name, "value"]}
+                        label={initialCustomServices[name]?.name}
+                      >
+                        <InputNumber
+                          onChange={(value) => {
+                            const customServices = [...form.getFieldValue("customServices")]
+                            customServices[name] = {
+                              ...customServices[name],
+                              value,
+                            };
+                            form.setFieldsValue({ customServices })
+                          }}
+                          placeholder="Введіть значення"
+                          className={s.formInput}
+                          disabled={!edit}
+                        />
+                      </Form.Item>
+                    ))}
+                  </>
+                )}
+              </Form.List>
+        {/* <Form.Item
           name="rentPrice"
           label="Утримання приміщень (грн/м²)"
           rules={validateField('required')}
@@ -148,7 +185,7 @@ const AddServiceForm: React.FC<Props> = ({
             placeholder="Вкажіть значення"
             className={s.formInput}
           />
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item name="description" label="Опис">
           <Input.TextArea
             placeholder="Введіть опис"

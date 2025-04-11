@@ -30,6 +30,11 @@ type FormData = {
   garbageCollectorPrice: number
   inflicionPrice: number
   description: string
+  customServices: {
+    fieldName: string
+    name: string
+    value: number 
+  }[]
 }
 
 const AddServiceModal: FC<Props> = ({
@@ -56,6 +61,7 @@ const AddServiceModal: FC<Props> = ({
       garbageCollectorPrice: formData.garbageCollectorPrice || 0,
       inflicionPrice: formData.inflicionPrice || 0,
       description: formData.description || '',
+      customServices: formData.customServices || [],
     }
     const response = currentService
       ? await editService({

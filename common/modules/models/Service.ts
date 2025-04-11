@@ -11,6 +11,11 @@ export interface IServiceModel {
   garbageCollectorPrice: number
   inflicionPrice: number
   description: string
+  customServices: {
+    fieldName: string
+    name: string
+    value: number
+  }[]
 }
 
 export const ServiceSchema = new Schema<IServiceModel>({
@@ -24,6 +29,17 @@ export const ServiceSchema = new Schema<IServiceModel>({
   garbageCollectorPrice: { type: Number, required: false, default: 0 },
   inflicionPrice: { type: Number, required: false, default: 0 },
   description: { type: String, required: false, default: '' },
+  customServices: {
+    type: [
+      {
+        fieldName: { type: String, required: true },
+        name: { type: String, required: true },
+        value: { type: Number, required: true },
+      },
+    ],
+    required: false,
+    default: [],
+  },
 })
 
 const Service =
