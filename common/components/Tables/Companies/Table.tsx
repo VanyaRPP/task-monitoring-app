@@ -504,7 +504,7 @@ const getDefaultColumns = ({
         <Badge
           count={debtor.totalDebt.toFixed(2)}
           title=""
-           color={getDebtorTooltipColor(debtor)}
+          color={getDebtorTooltipColor(debtor)}
           overflowCount={Infinity}  
           style={{ cursor: "pointer" }}
           size='small'

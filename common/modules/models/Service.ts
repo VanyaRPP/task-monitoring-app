@@ -16,6 +16,7 @@ export interface IServiceModel {
     name: string
     value: number
   }[]
+  losses?: number
 }
 
 export const ServiceSchema = new Schema<IServiceModel>({
@@ -40,6 +41,7 @@ export const ServiceSchema = new Schema<IServiceModel>({
     required: false,
     default: [],
   },
+  losses: { type: Number, required: false, default: 0 },
 })
 
 const Service =

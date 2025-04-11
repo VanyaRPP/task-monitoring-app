@@ -10,6 +10,7 @@ import {
   FormInstance,
   Input,
   InputNumber,
+  Typography,
 } from 'antd'
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs from 'dayjs'
@@ -39,6 +40,7 @@ const AddServiceForm: React.FC<Props> = ({
   const date = Form.useWatch('date', form)
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
+  const { Text } = Typography
 
   const { data: customServices } = useGetCustomServicesByDomainQuery({ domainId: domainId }, { skip: !domainId })
 
@@ -71,6 +73,7 @@ const AddServiceForm: React.FC<Props> = ({
         previousMonth?.garbageCollectorPrice ??
         0,
       customServices: currentService?.customServices || initialCustomServices || [],
+      losses: currentService?.losses ?? 0,
     })
   }, [form, currentService, previousMonth, initialCustomServices])
 
@@ -186,6 +189,21 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item> */}
+        </Form.Item>
+        <Form.Item
+          name="losses"
+          label={
+            <>
+              Втрати в тр-рі, лініях, реактивна
+            </>
+          }
+        >
+          <InputNumber
+            parser={inputNumberParser}
+            placeholder="Вкажіть значення"
+            className={s.formInput}
+          />
+        </Form.Item>
         <Form.Item name="description" label="Опис">
           <Input.TextArea
             placeholder="Введіть опис"

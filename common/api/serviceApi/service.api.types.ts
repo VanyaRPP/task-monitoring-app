@@ -19,6 +19,7 @@ export interface IService {
     name: string
     value: number
   }[]
+  losses?: number
 }
 
 export interface IAddServiceResponse {
