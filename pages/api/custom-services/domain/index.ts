@@ -29,7 +29,7 @@ export default async function handler(
         if (!domainId || Array.isArray(domainId)) {
           return res.status(400).json({
             success: false,
-            message: 'Некорректный domainId',
+            message: 'Uncorrect domainId',
           });
         }
 
@@ -38,7 +38,7 @@ export default async function handler(
         if (!domain) {
           return res.status(404).json({
             success: false,
-            message: 'Домен не найден',
+            message: 'Domain not found',
           });
         }
 

@@ -41,7 +41,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       rnokpp: currentDomain?.rnokpp || '',
       iban: currentDomain?.iban || '',
       services: currentDomain?.domainServices || [],
-      customServices: currentDomain?.customServices || [],
+      customServices: currentDomain?.domainServices || [],
     }
     form.setFieldsValue(initialValues)
   }, [currentDomain, form])
