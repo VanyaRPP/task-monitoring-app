@@ -189,7 +189,6 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item> */}
-        </Form.Item>
         <Form.Item
           name="losses"
           label={
