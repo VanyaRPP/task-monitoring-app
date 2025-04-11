@@ -1,6 +1,7 @@
 import {
   useGetCustomServicesQuery,
   useCreateCustomServiceMutation,
+  useGetCustomServicesByDomainQuery
 } from '@common/api/customServicesApi/customServices.api'
 import { CloseOutlined, SaveOutlined } from '@ant-design/icons'
 import { Button, Card, Form, FormInstance, Input, Tooltip, message } from 'antd'
@@ -21,8 +22,32 @@ const DomainsServices: FC<Props> = ({
   domainId,
   onCustomServicesChange,
 }) => {
+  const {
+    data: customServices,
+    isLoading,
+    error,
+  } = useGetCustomServicesByDomainQuery({ domainId }, { skip: !domainId })
 
   const [createCustomService] = useCreateCustomServiceMutation()
+
+  useEffect(() => {
+    if (customServices?.data && domainId) {
+      console.log('customServices.data:', customServices.data)
+
+      const services = customServices.data
+  .filter((s) => s.domain && String(s.domain) === String(domainId))
+  .map((service) => ({
+    _id: service._id,
+    name: service.name,
+  }))
+
+      Promise.resolve().then(() => {
+        form.setFieldsValue({ domainServices: services })
+        onCustomServicesChange(services)
+        console.log('filtered:', services)
+      })
+    }
+  }, [customServices, domainId])
 
   const handleSave = async (fieldKey: number) => {
     const service = form.getFieldValue(['domainServices', fieldKey])
@@ -30,44 +55,51 @@ const DomainsServices: FC<Props> = ({
       message.error('Будь ласка, введіть назву послуги')
       return
     }
-
-    // const existingService = customServices?.data.find(
-    //   (s) => s.name === service?.name && s.domainId === domainId
-    // )
-    // if (existingService) {
-    //   message.info('Послуга з такою назвою вже існує')
-    //   return
-    // }
-
+  
+    const existingService = customServices?.data.find(
+      (s) => s.name === service?.name && s.domain === domainId
+    )
+    if (existingService) {
+      message.info('Послуга з такою назвою вже існує')
+      return
+    }
+  
     try {
       const result = await createCustomService({
         name: service?.name,
+        domain: domainId,
       }).unwrap()
-      const savedService = result.data
-      form.setFieldsValue({
-        domainServices: form
-          .getFieldValue('domainServices')
-          .map((s, idx) =>
-            idx === fieldKey ? { ...s, _id: savedService._id } : s
-          ),
-      })
+
+      const currentServices: string[] = form.getFieldValue('services') || []
+      if (!currentServices.includes(result.data._id)) {
+        form.setFieldsValue({
+          services: [...currentServices, result.data._id],
+        })
+      }
+  
       message.success('Послугу успішно збережено')
     } catch (error) {
       message.error('Помилка збереження послуги')
     }
   }
+  
 
-  const handleRemove = (fieldName: number) => {
-    const updatedServices = form
-      .getFieldValue('domainServices')
-      .filter((_, idx) => idx !== fieldName)
-    form.setFieldsValue({ domainServices: updatedServices })
+  const handleRemove = (removedService: { _id?: string }) => {
+    const currentServiceIds: string[] = form.getFieldValue('services') || []
+  
+    if (removedService?._id && currentServiceIds.includes(removedService._id)) {
+      form.setFieldsValue({
+        services: currentServiceIds.filter(id => id !== removedService._id),
+      })
+    }
   }
+  
+  
 
-  // if (isLoading) return <div>Завантаження...</div>
-  // if (error) {
-  //   return <div>Помилка завантаження даних: {JSON.stringify(error)}</div>
-  // }
+  if (isLoading) return <div>Завантаження...</div>
+  if (error) {
+    return <div>Помилка завантаження даних: {JSON.stringify(error)}</div>
+  }
 
   return (
     <Form.List name="domainServices">
@@ -89,10 +121,11 @@ const DomainsServices: FC<Props> = ({
                       type="link"
                       danger
                       onClick={() => {
-                        remove(field.name)
-                        handleRemove(field.name)
+                        const removedService = form.getFieldValue('domainServices')[field.name] 
+                        remove(field.name) 
+                        handleRemove(removedService) 
                       }}
-                    >
+>
                       <CloseOutlined />
                     </Button>
                   </div>

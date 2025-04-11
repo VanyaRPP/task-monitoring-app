@@ -14,7 +14,6 @@ export default async function handler(
   const { isGlobalAdmin, isDomainAdmin, isUser } = await getCurrentUser(req, res)
 
   switch (req.method) {
-
     case 'GET':
       try {
         const { domainId } = req.query
@@ -29,24 +28,13 @@ export default async function handler(
         if (!domainId || Array.isArray(domainId)) {
           return res.status(400).json({
             success: false,
-            message: 'Uncorrect domainId',
-          });
+            message: 'Некорректный domainId',
+          })
         }
-
-        const domain = await Domain.findById(domainId).lean();
-        
-        if (!domain) {
-          return res.status(404).json({
-            success: false,
-            message: 'Domain not found',
-          });
-        }
-
-        const customServiceIds = domain.domainServices || [];
 
         const customServices = await CustomService.find({
-          _id: { $in: customServiceIds },
-        }).lean();
+          domain: domainId,
+        }).lean()
 
         return res.status(200).json({
           success: true,
@@ -67,3 +55,4 @@ export default async function handler(
       })
   }
 }
+
