@@ -1,7 +1,7 @@
 import { Form, FormInstance, Select } from 'antd'
 import { CSSProperties, useMemo, useEffect, useState } from 'react'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
+import { ServiceName } from '@utils/constants'
 
 
 export interface ServicesSelectProps {
@@ -22,12 +22,23 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   const { data: servicesData, isLoading, isError } = useGetAllServicesQuery({ domainId })
 
   const servicesList = useMemo(() => {
-    if (!servicesData) return []
-    return servicesData.data.map((service: any) => ({
-      _id: service._id,
-      name: service.domain.name
+    if (!servicesData?.data?.length) return []
+  
+    const uniqueServicesByKey = new Set<string>()
+  
+    servicesData.data.forEach((service: any) => {
+      Object.keys(ServiceName).forEach((key) => {
+        if (service[key] && typeof service[key] === 'number' && service[key] > 0) {
+          uniqueServicesByKey.add(key)
+        }
+      })
+    })
+  
+    return Array.from(uniqueServicesByKey).map((key) => ({
+      _id: key,
+      name: ServiceName[key as keyof typeof ServiceName],
     }))
-  }, [servicesData])
+  }, [servicesData])  
 
   const services = useMemo(() => {
     const all = [...servicesList, ...customServices]
@@ -43,7 +54,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   const options = useMemo(() => {
     const base = services.map((service) => ({
       value: service._id,
-      label: service.name,
+      label: service.name || service._id, 
     }))
   
     const raw = form.getFieldValue('services') || []
@@ -55,30 +66,31 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   
       const label = typeof item === 'object' && (item.label || item.name)
         || services.find((s) => s._id === value)?.name
-        || value 
+        || value
   
       const alreadyInOptions = base.find((opt) => opt.value === value)
   
       return !alreadyInOptions ? { value, label } : null
     }).filter(Boolean)
   
-    return [...base, ...extraFromForm]
+    return [...base, ...extraFromForm].filter(opt => opt.label !== opt.value)
   }, [services, form])
   
-  const formServices = rawValues.map((item: any) => {
+  const formServices = rawValues
+  .map((item: any) => {
     if (typeof item === 'string') {
-      const label = options.find((opt) => opt.value === item)?.label || item
+      const label = options.find((opt) => opt.value === item)?.label
+      if (!label || label === item) return null
       return { value: item, label }
     }
-  
+
     if (item?.value && item?.label) return item
-  
     if (item?._id && item?.name) return { value: item._id, label: item.name }
-  
     if (item?.name) return { value: item.name, label: item.name }
-  
-    return { value: String(item), label: String(item) }
+
+    return null
   })
+  .filter(Boolean)
   
   useEffect(() => {
     const current = form.getFieldValue('services')
@@ -105,7 +117,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   if (isLoading) return <div>Завантаження послуг...</div>
   if (isError) return <div>Помилка при завантаженні послуг</div>
 
-  return (
+return (
     <Form.Item label="Послуги" required>
       <Select
         mode="multiple"

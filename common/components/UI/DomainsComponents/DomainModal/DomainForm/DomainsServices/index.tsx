@@ -3,6 +3,7 @@ import {
   useCreateCustomServiceMutation,
   useGetCustomServicesByDomainQuery
 } from '@common/api/customServicesApi/customServices.api'
+import { ICustomService, ICreateCustomServiceRequest } from '@common/api/customServicesApi/customServices.api.types'
 import { CloseOutlined, SaveOutlined } from '@ant-design/icons'
 import { Button, Card, Form, FormInstance, Input, Tooltip, message } from 'antd'
 import React, { FC, useEffect } from 'react'
@@ -15,6 +16,8 @@ interface Props {
     customServices: { _id: string; name: string }[]
   ) => void
 }
+type CustomServiceWithDomain = ICustomService & { domain?: string };
+type CreateCustomServiceWithDomain = ICreateCustomServiceRequest & { domain?: string };
 
 const DomainsServices: FC<Props> = ({
   form,
@@ -26,7 +29,7 @@ const DomainsServices: FC<Props> = ({
     data: customServices,
     isLoading,
     error,
-  } = useGetCustomServicesByDomainQuery({ domainId }, { skip: !domainId })
+  } = useGetCustomServicesByDomainQuery({ domainId: domainId ? [domainId] : undefined }, { skip: !domainId })
 
   const [createCustomService] = useCreateCustomServiceMutation()
 
@@ -34,12 +37,12 @@ const DomainsServices: FC<Props> = ({
     if (customServices?.data && domainId) {
       console.log('customServices.data:', customServices.data)
 
-      const services = customServices.data
-  .filter((s) => s.domain && String(s.domain) === String(domainId))
-  .map((service) => ({
-    _id: service._id,
-    name: service.name,
-  }))
+      const services = (customServices.data as CustomServiceWithDomain[])
+      .filter((s) => s.domain && String(s.domain) === String(domainId))
+      .map((service) => ({
+        _id: service._id,
+        name: service.name,
+      }));
 
       Promise.resolve().then(() => {
         form.setFieldsValue({ domainServices: services })
@@ -56,9 +59,9 @@ const DomainsServices: FC<Props> = ({
       return
     }
   
-    const existingService = customServices?.data.find(
+    const existingService = (customServices?.data as CustomServiceWithDomain[]).find(
       (s) => s.name === service?.name && s.domain === domainId
-    )
+    );
     if (existingService) {
       message.info('Послуга з такою назвою вже існує')
       return
@@ -68,7 +71,7 @@ const DomainsServices: FC<Props> = ({
       const result = await createCustomService({
         name: service?.name,
         domain: domainId,
-      }).unwrap()
+      } as CreateCustomServiceWithDomain).unwrap();
 
       const currentServices: string[] = form.getFieldValue('services') || []
       if (!currentServices.includes(result.data._id)) {
