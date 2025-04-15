@@ -553,13 +553,14 @@ const ElectricitySum: React.FC<{ name: number }> = ({ name }) => {
       ['payments', name, 'invoice', ServiceType.Electricity, 'amount'],
       form
     ) ?? 0
-  const loss = (amount - lastAmount) + ((amount - lastAmount) * (service?.losses/100))
+  const costAmount = amount - lastAmount
+  const loss = costAmount + (costAmount * (service?.losses/100))
 
   useEffect(() => {
     form.setFieldValue(
       ['payments', name, 'invoice', ServiceType.Electricity, 'sum'],
       service?.losses > 0 
-      ? +toRoundFixed(((+amount - +lastAmount) + loss) * (+service?.electricityPrice ?? 0))
+      ? +toRoundFixed(loss * (+service?.electricityPrice.toFixed(2) ?? 0))
       : +toRoundFixed((+amount - +lastAmount) * (+service?.electricityPrice ?? 0))
     )
   }, [form, name, amount, lastAmount, service])
