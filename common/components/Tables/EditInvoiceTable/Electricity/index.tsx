@@ -144,13 +144,14 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
   const sum = Form.useWatch(['invoice', ...name, 'sum'], form)
   const { service } = usePaymentContext()
-  const loss = (amount - lastAmount) + ((amount - lastAmount) * (service?.losses/100))
+  const costAmount = amount - lastAmount
+  const loss = costAmount + (costAmount * (service?.losses/100))
 
   useEffect(() => {
     form.setFieldValue(
       ['invoice', ...name, 'sum'],
       service?.losses > 0 
-      ? (Math.max(+amount - +lastAmount, 0) + loss) * +price 
+      ? loss * +price 
       : Math.max(+amount - +lastAmount, 0) * +price,
     )
   }, [form, name, amount, lastAmount, price])
