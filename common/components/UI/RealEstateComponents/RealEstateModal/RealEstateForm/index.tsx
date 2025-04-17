@@ -36,8 +36,9 @@ const RealEstateForm: FC<Props> = ({
   editable = true,
   setIsValueChanged,
 }) => {
-  const domainId = Form.useWatch('domain', form)
-
+  // const domainId = Form.useWatch('domain', form)|| currentRealEstate?.domain?._id
+  const domainId = currentRealEstate?.domain?._id
+  const streetId = currentRealEstate?.street?._id
   const {
     data: domain = {} as IDomain,
     isLoading: isDomainLoading,
@@ -69,6 +70,16 @@ const RealEstateForm: FC<Props> = ({
     return existedValues.includes(true)
   }
 
+  const latestGarbageService = [...(services ?? [])]
+    .filter(
+      (s) =>
+        s.garbageCollectorPrice &&
+        s.garbageCollectorPrice > 0 &&
+        String(s.domain?._id) === String(domainId) &&
+        String(s.street?._id) === String(streetId)
+    )
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+    
   return (
     <Form
       form={form}
@@ -193,15 +204,26 @@ const RealEstateForm: FC<Props> = ({
         />
       </Form.Item>
 
-      {isServiceExist('garbageCollectorPrice') && (
-        <Form.Item
-          valuePropName="checked"
-          name="garbageCollector"
-          label="Вивіз сміття"
-        >
-          <Checkbox disabled={!editable} />
-        </Form.Item>
-      )}
+      <Form.Item
+        valuePropName="checked"
+        name="garbageCollector"
+        label={
+          <span>
+            Вивіз сміття{' '}
+            {latestGarbageService ? (
+              <span style={{ color: 'gray' }}>
+                ({latestGarbageService.garbageCollectorPrice} грн)
+              </span>
+            ) : (
+              <span style={{ color: 'gray' }}>(не нараховується)</span>
+            )}
+          </span>
+        }
+      >
+        <Checkbox disabled={!editable} />
+      </Form.Item>
+
+
       {isServiceExist('inflicionPrice') && (
         <Form.Item
           valuePropName="checked"
