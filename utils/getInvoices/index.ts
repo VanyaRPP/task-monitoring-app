@@ -128,7 +128,8 @@ export const getMaintenanceInvoice = ({
     return {
       type: invoice.type,
       amount: +toRoundFixed(invoice.amount),
-      isIndividual: companyMaintenance !== undefined && companyMaintenance !== null,
+      isIndividual:
+        companyMaintenance !== undefined && companyMaintenance !== null,
       price:
         companyMaintenance !== undefined && companyMaintenance !== null
           ? +toRoundFixed(companyMaintenance)
@@ -368,7 +369,6 @@ export const getGarbageCollectorInvoice = ({
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  // 🔁 Якщо вже є інвойс, повертаємо його як є
   if (Object.keys(currInvoicesCollection).length > 0) {
     if (!currInvoicesCollection[ServiceType.GarbageCollector]) {
       return
@@ -383,13 +383,12 @@ export const getGarbageCollectorInvoice = ({
     }
   }
 
-  // 📌 Підрахунок відсотка — навіть якщо company.garbageCollector === false
   if (
-    !isNaN(service?.garbageCollectorPrice) &&
-    !isNaN(company?.rentPart)
+    !isEmpty(service?.garbageCollectorPrice) &&
+    !isNaN(service.garbageCollectorPrice) &&
+    company?.garbageCollector
   ) {
-    const percentage = company.rentPart / 100
-    const price = service.garbageCollectorPrice * percentage
+    const price = service.garbageCollectorPrice * (company?.rentPart / 100)
 
     return {
       type: ServiceType.GarbageCollector,
@@ -397,13 +396,7 @@ export const getGarbageCollectorInvoice = ({
       sum: +toRoundFixed(price),
     }
   }
-
-  // 🔚 Якщо немає даних — нічого не додаємо
-  return undefined
 }
-
-
-
 
 export const getCleaningInvoice = ({
   company,

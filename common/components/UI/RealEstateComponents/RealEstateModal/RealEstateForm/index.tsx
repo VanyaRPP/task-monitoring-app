@@ -79,7 +79,7 @@ const RealEstateForm: FC<Props> = ({
         String(s.street?._id) === String(streetId)
     )
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
-    
+
   return (
     <Form
       form={form}
@@ -207,18 +207,7 @@ const RealEstateForm: FC<Props> = ({
       <Form.Item
         valuePropName="checked"
         name="garbageCollector"
-        label={
-          <span>
-            Вивіз сміття{' '}
-            {latestGarbageService ? (
-              <span style={{ color: 'gray' }}>
-                ({latestGarbageService.garbageCollectorPrice} грн)
-              </span>
-            ) : (
-              <span style={{ color: 'gray' }}>(не нараховується)</span>
-            )}
-          </span>
-        }
+        label="Вивіз сміття"
       >
         <Checkbox disabled={!editable} />
       </Form.Item>
