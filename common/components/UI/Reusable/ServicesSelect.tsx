@@ -1,7 +1,9 @@
-import { Form, FormInstance, Select } from 'antd'
+import { Form, FormInstance, Select, Button, Input, Space } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
 import { CSSProperties, useMemo } from 'react'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
+import { group } from 'console'
 
 export interface ServicesSelectProps {
   domainId?: string
@@ -57,23 +59,74 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   if (isError) return <div>Помилка при завантаженні послуг</div>
 
   return (
-    <Form.Item
-      name="services"
-      label="Послуги"
-      rules={[{ required: true, message: 'Оберіть хоча б одну послугу' }]}
-    >
-      <Select
-        mode="multiple"
-        options={options}
-        placeholder="Оберіть послуги"
-        optionFilterProp="label"
-        dropdownStyle={dropdownStyle}
-        allowClear
-        showSearch
-        value={form.getFieldValue('services') || []}
-        onChange={handleChange}
-      />
-    </Form.Item>
+    <>
+      <div style={{ marginBottom: 8 }}>Групи послуг</div>
+      <Form.List 
+      name="customServices"
+      >
+        {(fields, { add, remove }) => (
+          <>
+            {fields.map((field, index) => {
+              const groupObject = form.getFieldValue('customServices')?.[index] || {}
+              const groupName = groupObject.groupName || `group${index + 1}`
+              const groupValues = groupObject.services || []
+
+              return (
+                <Space direction="horizontal" style={{ width: '100%', justifyContent: 'space-between' }}>
+                  <Form.Item required style={{ flex: 1, marginRight: 8 }}>
+                    <Input
+                      value={groupName}
+                      onChange={(e) => {
+                        const current = form.getFieldValue('customServices')
+                        const newName = e.target.value
+                        // current[index] = { [newName]: groupValues }
+                        current[index] = { 
+                          groupName: [newName],
+                          services: groupValues
+                        }
+                        form.setFieldsValue({ customServices: current })
+                      }}
+                      placeholder="Назва групи"
+                    />
+                  </Form.Item>
+
+                  <Form.Item required style={{ flex: 3 }}>
+                    <Select
+                      mode="multiple"
+                      options={options}
+                      style={{ minWidth: '200px' }}
+                      value={groupValues}
+                      onChange={(newValues) => {
+                        const current = form.getFieldValue('customServices')
+                        current[index] = { 
+                          groupName: groupName,
+                          services: newValues 
+                        }
+                        form.setFieldsValue({ customServices: current })
+                      }}
+                      placeholder="Оберіть послуги"
+                      allowClear
+                      showSearch
+                    />
+                  </Form.Item>
+                </Space>
+              );
+            })}
+
+            <Form.Item>
+              <Button
+                type="dashed"
+                style={{ width: '100%' }}
+                onClick={() => add()}
+                icon={<PlusOutlined />}
+              >
+                Додати групу послуг
+              </Button>
+            </Form.Item>
+          </>
+        )}
+      </Form.List>
+    </>
   )
 }
 
