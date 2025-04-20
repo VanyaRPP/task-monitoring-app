@@ -17,7 +17,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   domainId,
   form,
   dropdownStyle,
-  onServicesChange
+  onServicesChange,
 }) => {
   const {
     data: servicesData,
@@ -25,9 +25,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
     isError,
   } = useGetAllServicesQuery({ domainId })
 
-    const {
-      data: customServices
-    } = useGetCustomServicesQuery({})
+  const { data: customServices } = useGetCustomServicesQuery({})
 
   const servicesList = useMemo(() => {
     if (!servicesData) return []
@@ -38,9 +36,9 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   }, [servicesData])
 
   const services = useMemo(() => {
-    return customServices?.data.slice().sort((a, b) =>
-      a.name.localeCompare(b.name)
-    )
+    return customServices?.data
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name))
   }, [servicesList, customServices])
 
   const options = useMemo(() => {
@@ -61,18 +59,21 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   return (
     <>
       <div style={{ marginBottom: 8 }}>Групи послуг</div>
-      <Form.List 
-      name="customServices"
-      >
+      <Form.List name="customServices">
         {(fields, { add, remove }) => (
           <>
             {fields.map((field, index) => {
-              const groupObject = form.getFieldValue('customServices')?.[index] || {}
-              const groupName = groupObject.groupName || `group${index + 1}`
+              const groupObject =
+                form.getFieldValue('customServices')?.[index] || {}
+              const groupName = groupObject.groupName || ``
               const groupValues = groupObject.services || []
 
               return (
-                <Space direction="horizontal" style={{ width: '100%', justifyContent: 'space-between' }}>
+                // eslint-disable-next-line react/jsx-key
+                <Space
+                  direction="horizontal"
+                  style={{ width: '100%', justifyContent: 'space-between' }}
+                >
                   <Form.Item required style={{ flex: 1, marginRight: 8 }}>
                     <Input
                       value={groupName}
@@ -80,9 +81,9 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                         const current = form.getFieldValue('customServices')
                         const newName = e.target.value
                         // current[index] = { [newName]: groupValues }
-                        current[index] = { 
-                          groupName: [newName],
-                          services: groupValues
+                        current[index] = {
+                          groupName: newName,
+                          services: groupValues,
                         }
                         form.setFieldsValue({ customServices: current })
                       }}
@@ -93,14 +94,25 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                   <Form.Item required style={{ flex: 3 }}>
                     <Select
                       mode="multiple"
-                      options={options}
+                      options={(() => {
+                        const allGroups =
+                          form.getFieldValue('customServices') || []
+                        const selectedInOthers = allGroups
+                          .filter((_, i) => i !== index)
+                          .flatMap((group) => group?.services || [])
+                        const filteredOptions = options?.map((opt) => ({
+                          ...opt,
+                          disabled: selectedInOthers.includes(opt?.value),
+                        }))
+                        return filteredOptions
+                      })()}
                       style={{ minWidth: '200px' }}
                       value={groupValues}
                       onChange={(newValues) => {
                         const current = form.getFieldValue('customServices')
-                        current[index] = { 
+                        current[index] = {
                           groupName: groupName,
-                          services: newValues 
+                          services: newValues,
                         }
                         form.setFieldsValue({ customServices: current })
                       }}
@@ -110,7 +122,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                     />
                   </Form.Item>
                 </Space>
-              );
+              )
             })}
 
             <Form.Item>

@@ -40,20 +40,21 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       mfo: currentDomain?.mfo || '',
       rnokpp: currentDomain?.rnokpp || '',
       iban: currentDomain?.iban || '',
-      customServices: [
-        { 
-          groupName: 'group1',
-          services: ['test1', 'веровіка', 'перевіка'] 
-        },
-        { 
-          groupName: 'group2',
-          services: ['test1', 'test2', 'tаппарарап'] 
-        },
-        { 
-          groupName: 'group3',
-          services: ['test1', 'test2', 'tен5н65'] 
-        },
-      ]
+      // customServices: [
+      //   {
+      //     groupName: 'group1',
+      //     services: ['test1', 'веровіка', 'перевіка']
+      //   },
+      //   {
+      //     groupName: 'group2',
+      //     services: ['test1', 'test2', 'tаппарарап']
+      //   },
+      //   {
+      //     groupName: 'group3',
+      //     services: ['test1', 'test2', 'tен5н65']
+      //   },
+      // ]
+      customServices: [],
     }
     form.setFieldsValue(initialValues)
   }, [currentDomain, form])
@@ -65,11 +66,11 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
     // if (!currentDomain && domains?.some(domain => domain.name === formData.name)) {
     //   message.error({
     //     content: 'Помилка при додаванні надавача послуг!  Домен з такою назвою вже існує!',
-    //     duration: 4, 
+    //     duration: 4,
     //     style: {
     //       marginTop: '20vh',
     //       fontSize: '2rem',
-    //       zIndex: 9999, 
+    //       zIndex: 9999,
     //     },
     //   })
     //   return
