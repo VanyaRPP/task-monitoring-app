@@ -92,28 +92,41 @@ const getSummaryColumns = (
 function formatDateFilterForQuery(value: string[] | undefined) {
   if (!value || value.length === 0) return {}
 
-  const months: number[] = []
   let year: number | null = null
+  let month: number | null = null
+  let quarter: number | null = null
 
-  for (const str of value) {
-    const match = str.match(/^(\d+)-(\w+)-(\d+)$/)
-    if (!match) continue
+  for (let i = 0; i < value.length; i += 2) {
+    const key = value[i]
+    const val = value[i + 1]
 
-    const [, y, period, number] = match
-    if (!year) year = Number(y)
-    if (period === PERIOD_FILTR.MONTH) {
-      months.push(Number(number))
+    if (!key || !val) continue
+
+    if (key === 'year') {
+      year = Number(val)
+    }
+
+    if (key === 'month') {
+      month = Number(val)
+    }
+
+    if (key === 'quarter') {
+      quarter = Number(val)
     }
   }
 
-  const query: any = {
-    year,
+  const query: any = {}
+
+  if (year !== null) {
+    query.year = year
   }
 
-  if (months.length === 1) {
-    query.month = months[0]
-  } else if (months.length > 1) {
-    query.month = months
+  if (month !== null) {
+    query.month = month
+  }
+
+  if (quarter !== null) {
+    query.quarter = quarter
   }
 
   return query
