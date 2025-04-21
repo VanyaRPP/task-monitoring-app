@@ -6,7 +6,7 @@ import { ServiceType } from '@utils/constants'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 import { Button, Flex, Form, Input, Space, Tooltip, Typography } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef  } from 'react'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -62,9 +62,37 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
     return Math.max(prevService?.inflicionPrice - 100, 0)
   }, [prevService])
 
+
+  const initialPriceRef = useRef<number | null>(null)
+  const isReadyToCompare = useRef(false)
+
+
+  useEffect(() => {
+    if (!isReadyToCompare.current && !isNaN(price) && price > 0) {
+      initialPriceRef.current = price
+      isReadyToCompare.current = true
+      console.log('[INITIAL SET]', price)
+    }
+  }, [price])
+  
+
   const isInitial = useMemo(() => {
-    return toRoundFixed(price) === toRoundFixed((rentPrice / 100) * inflicion)
-  }, [price, rentPrice, inflicion])
+    if (!isReadyToCompare.current || initialPriceRef.current === null) {
+      return true // Ще не можна порівнювати — вважаємо початковим
+    }
+  
+    const current = toRoundFixed(price)
+    const initial = toRoundFixed(initialPriceRef.current)
+    const equal = current === initial
+  
+    console.log('[CHECK]', { current, initial, equal })
+  
+    return equal
+  }, [price])
+  
+
+  
+  
 
   if (company?.inflicion && prevService?.inflicionPrice) {
     return (
@@ -74,19 +102,20 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
             {toRoundFixed(inflicion)}% від {toRoundFixed(rentPrice)} грн
           </Typography.Text>
         )}
-        {!isInitial && editable && (
-          <Tooltip title="Відновити початкове значення">
-            <Button
-              onClick={() =>
-                form.setFieldValue(
-                  ['invoice', ...name, 'price'],
-                  +toRoundFixed((rentPrice / 100) * inflicion)
-                )
-              }
-              icon={<ReloadOutlined />}
-            />
-          </Tooltip>
-        )}
+        {isReadyToCompare.current && !isInitial && editable && (
+  <Tooltip title="Відновити початкове значення">
+    <Button
+      onClick={() =>
+        form.setFieldValue(
+          ['invoice', ...name, 'price'],
+          initialPriceRef.current
+        )
+      }
+      icon={<ReloadOutlined />}
+    />
+  </Tooltip>
+)}
+
       </Flex>
     )
   }
