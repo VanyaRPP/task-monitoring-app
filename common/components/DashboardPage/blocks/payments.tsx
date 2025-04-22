@@ -89,44 +89,89 @@ const getSummaryColumns = (
   }, [])
 }
 
-function formatDateFilterForQuery(value: string[] | undefined) {
+
+function formatDateFilterForQuery(value: (string | undefined)[] | undefined) {
   if (!value || value.length === 0) return {}
 
+  const months: number[] = []
+  const quarters: number[] = []
   let year: number | null = null
-  let month: number | null = null
-  let quarter: number | null = null
 
-  for (let i = 0; i < value.length; i += 2) {
-    const key = value[i]
-    const val = value[i + 1]
+  // Фільтрація для 'Дата створення': ['2025-month-1', '2025-month-2', '2025-month-4']
+  if (typeof value[0] === 'string' && value[0]?.includes('-')) {
+    for (const str of value) {
+      if (!str) continue
+      const match = str.match(/^(\d+)-(\w+)-(\d+)$/)
+      if (!match) continue
 
-    if (!key || !val) continue
+      const [, y, period, number] = match
+      if (!year) year = Number(y)
 
-    if (key === 'year') {
-      year = Number(val)
+      if (period === 'month') {
+        months.push(Number(number))
+      } else if (period === 'quarter') {
+        quarters.push(Number(number))
+      }
     }
+  }
 
-    if (key === 'month') {
-      month = Number(val)
-    }
+  // Фільтрація для 'Оберіть проміжок': ['year', '2021', 'month', '2'] або ['year', '2021', 'quarter', '1']
+  else if (value[0] === 'year' && typeof value[1] === 'string') {
+    year = Number(value[1])
+    const period = value[2]
+    const number = value[3] ? Number(value[3]) : null
 
-    if (key === 'quarter') {
-      quarter = Number(val)
+    if (period === 'month' && number !== null) {
+      months.push(number)
+    } else if (period === 'quarter' && number !== null) {
+      quarters.push(number)
     }
   }
 
   const query: any = {}
-
-  if (year !== null) {
-    query.year = year
+  if (year !== null) query.year = year
+  if (months.length === 1) {
+    query.month = months[0]
+  } else if (months.length > 1) {
+    query.month = months
   }
 
-  if (month !== null) {
-    query.month = month
+  if (quarters.length === 1) {
+    query.quarter = quarters[0]
+  } else if (quarters.length > 1) {
+    query.quarter = quarters
   }
 
-  if (quarter !== null) {
-    query.quarter = quarter
+  return query
+}
+
+
+
+function formatDateFilterForSearch(value: string[] | undefined) {
+  if (!value || value.length === 0) return {}
+
+  const months: number[] = []
+  let year: number | null = null
+
+  for (const str of value) {
+    const match = str.match(/^(\d+)-(\w+)-(\d+)$/)
+    if (!match) continue
+
+    const [, y, period, number] = match
+    if (!year) year = Number(y)
+    if (period === PERIOD_FILTR.MONTH) {
+      months.push(Number(number))
+    }
+  }
+
+  const query: any = {
+    year,
+  }
+
+  if (months.length === 1) {
+    query.month = months[0]
+  } else if (months.length > 1) {
+    query.month = months
   }
 
   return query
