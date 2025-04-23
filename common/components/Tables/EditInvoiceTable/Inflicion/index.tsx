@@ -71,21 +71,18 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
     if (!isReadyToCompare.current && !isNaN(price) && price > 0) {
       initialPriceRef.current = price
       isReadyToCompare.current = true
-      console.log('[INITIAL SET]', price)
     }
   }, [price])
   
 
   const isInitial = useMemo(() => {
     if (!isReadyToCompare.current || initialPriceRef.current === null) {
-      return true // Ще не можна порівнювати — вважаємо початковим
+      return true 
     }
   
     const current = toRoundFixed(price)
     const initial = toRoundFixed(initialPriceRef.current)
     const equal = current === initial
-  
-    console.log('[CHECK]', { current, initial, equal })
   
     return equal
   }, [price])
@@ -103,17 +100,17 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
           </Typography.Text>
         )}
         {isReadyToCompare.current && !isInitial && editable && (
-  <Tooltip title="Відновити початкове значення">
-    <Button
-      onClick={() =>
-        form.setFieldValue(
-          ['invoice', ...name, 'price'],
-          initialPriceRef.current
-        )
-      }
-      icon={<ReloadOutlined />}
-    />
-  </Tooltip>
+          <Tooltip title="Відновити початкове значення">
+            <Button
+              onClick={() =>
+                form.setFieldValue(
+                  ['invoice', ...name, 'price'],
+                  initialPriceRef.current
+                )
+              }
+              icon={<ReloadOutlined />}
+            />
+          </Tooltip>
 )}
 
       </Flex>

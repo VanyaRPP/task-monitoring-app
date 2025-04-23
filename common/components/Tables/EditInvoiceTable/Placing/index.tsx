@@ -142,41 +142,41 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-
   const [changed, setChanged] = useState<boolean>(false)
-  const { company, prevPayment } = usePaymentContext()
-
+  const { company } = usePaymentContext()
+  const [initialPrice, setInitialPrice] = useState<number | null>(null)
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
-  // const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
+  const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
 
-  // const inflicionInvoice: InvoiceType | undefined = useMemo(() => {
-  //   return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
-  // }, [invoices])
+  const inflicionInvoice: InvoiceType | undefined = useMemo(() => {
+    return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
+  }, [invoices])
 
-  // const prevPlacingInvoice = useMemo(() => {
-  //   return prevPayment?.invoice.find(
-  //     (invoice) => invoice.type === ServiceType.Placing
-  //   )
-  // }, [prevPayment])
+  const rentSum = useMemo(() => {
+    const area = company?.totalArea ?? 0
+    const pricePerMeter = company?.pricePerMeter ?? 0
+    return area * pricePerMeter
+  }, [company])
 
-  // useEffect(() => {
-  //   if (!company?.inflicion || changed || !editable) {
-  //     return
-  //   }
+  useEffect(() => {
+    if (!company?.inflicion || changed || !editable) return
+  
+    const inflicionSum = inflicionInvoice?.sum || 0
+    const newPrice = +toRoundFixed(inflicionSum + rentSum)
 
-  //   form.setFieldValue(
-  //     ['invoice', ...name, 'price'],
-  //     +toRoundFixed(inflicionInvoice?.sum + prevPlacingInvoice?.sum)
-  //   )
-  // }, [
-  //   form,
-  //   name,
-  //   company,
-  //   inflicionInvoice,
-  //   prevPlacingInvoice,
-  //   changed,
-  //   editable,
-  // ])
+    form.setFieldValue(['invoice', ...name, 'price'], newPrice)
+  
+    
+    setInitialPrice(newPrice)
+  }, [
+    form,
+    name,
+    company?.inflicion,
+    inflicionInvoice?.sum,
+    rentSum,
+    changed,
+    editable,
+  ])
 
   const suffix = useMemo(() => {
     return company?.inflicion ? (
