@@ -24,7 +24,8 @@ const DomainBankTab: FC<Props> = ({ domain, token, acc }) => {
     <Card>
       {token ? (
         <TransactionsTable
-        transactions={transactionsData?.data?.transactions ?? []}
+        transactions={transactionsData}
+        // transactions={transactionsData?.data?.transactions ?? []}
         domain={domain}
       />
       ) : (

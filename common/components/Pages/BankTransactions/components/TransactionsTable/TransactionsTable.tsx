@@ -60,7 +60,7 @@ const TransactionsTable: React.FC<Props> = ({
   return (
     <>
       <Table<ITransaction>
-        key={transactions.length}
+        key={transactions?.length}
         scroll={{ x: true }}
         dataSource={transactions}
         columns={columns}
