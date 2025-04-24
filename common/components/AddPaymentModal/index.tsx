@@ -118,6 +118,7 @@ const AddPaymentModal: FC<Props> = ({
       invoiceCreationDate: formData.invoiceCreationDate,
       description: formData.description || '',
       generalSum: formData.generalSum || formData.debit,
+      losses: formData.losses || 0,
       provider,
       reciever,
       transaction,

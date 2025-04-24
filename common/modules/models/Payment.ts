@@ -20,6 +20,7 @@ export interface IPaymentModel {
   reciever: IReciever
   generalSum: number
   transaction: IPaymentTransactions
+  losses?: number
 }
 
 export const PaymentSchema = new Schema<IPaymentModel>({
@@ -36,6 +37,7 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   reciever: { type: Object },
   generalSum: { type: Number },
   transaction: { type: Object },
+  losses: { type: Number },
 })
 
 const Payment =
