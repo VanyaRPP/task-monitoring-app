@@ -2,7 +2,8 @@ import React, { useState } from 'react'
 import { Table, Dropdown, Checkbox, MenuProps, Space, Spin  } from 'antd'
 import { SettingOutlined } from '@ant-design/icons'
 import { useColumnVisibility } from './components/useColumnVisibility'
-import { ITransaction } from '@common/api/bankApi/mockBank.api'
+// import { ITransaction } from '@common/api/bankApi/mockBank.api'
+import { ITransaction } from './components/transactionTypes'
 import {
   columnNames,
   defaultVisibleColumns,

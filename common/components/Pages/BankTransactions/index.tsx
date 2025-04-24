@@ -27,19 +27,19 @@ const BankTransactions = () => {
   const [selectedAcc, setSelectedAcc] = useState('')
 
   useEffect(() => {
-    if (domains.length > 0) {
+    if (domains?.length > 0) {
       setSelectedDomain(domains[0])
     }
   }, [domains])
 
   const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
   const encryptionService = new EncryptionService(SECURE_TOKEN)
-  // const token = selectedDomain?.domainBankToken[0]
-  //   ? encryptionService.decrypt(
-  //       selectedDomain?.domainBankToken[0]?.token ?? 'token'
-  //     )
-  //   : ''
-  const token = 'mock_token'
+  const token = selectedDomain?.domainBankToken[0]
+    ? encryptionService.decrypt(
+        selectedDomain?.domainBankToken[0]?.token ?? 'token'
+      )
+    : ''
+  // const token = 'mock_token'
 
   const { data: balances } = useGetBalancesQuery({ token }, { skip: !token })
 

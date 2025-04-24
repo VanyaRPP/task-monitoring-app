@@ -51,26 +51,6 @@ const DomainBankBalance: FC<Props> = ({ balanceData }) => {
           gap: '16px',
         }}
       >
-        {/* 
-      <div style={{ display: 'flex', gap: '16px' }}>
-        <Statistic
-          title="In"
-          value={balanceIn}
-          precision={1}
-          valueStyle={{ color: '#3f8600' }}
-          prefix={<ArrowUpOutlined />}
-          suffix={currency}
-        />
-  
-        <Statistic
-          title="Out"
-          value={balanceOut}
-          precision={1}
-          valueStyle={{ color: '#cf1322' }}
-          prefix={<ArrowDownOutlined />}
-          suffix={currency}
-        />
-      </div> */}
 
         <Card.Meta
           // title={nameACC}

@@ -4,7 +4,8 @@ import { Card } from 'antd'
 import React, { FC } from 'react'
 import TransactionsTable from '../TransactionsTable/TransactionsTable'
 import _initial from 'lodash/initial'
-import { useGetTransactionsQuery } from '@common/api/bankApi/mockBank.api'
+// import { useGetTransactionsQuery } from '@common/api/bankApi/mockBank.api'
+import { useGetTransactionsQuery } from '@common/api/bankApi/bank.api'
 import { Alert } from 'antd'
 
 interface Props {
