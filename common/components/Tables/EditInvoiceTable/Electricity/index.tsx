@@ -46,7 +46,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
     const withLosses = base + base * (losses / 100)
 
     return losses > 0 ? (
-      <DividedSpace style={{ cursor: 'pointer' }}>
+      <DividedSpace>
         <Typography.Text>{withLosses} кВт</Typography.Text>
         <Tooltip
           title={
@@ -64,7 +64,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
           }
         >
           <ExclamationCircleOutlined
-            style={{ color: '#faad14', marginLeft: 8 }}
+            style={{ color: '#faad14', marginLeft: 8, cursor: 'pointer' }}
           />
         </Tooltip>
       </DividedSpace>
@@ -145,13 +145,15 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
   const sum = Form.useWatch(['invoice', ...name, 'sum'], form)
 
-  const costAmount = amount - lastAmount
+  const costAmount = Math.max(+amount - +lastAmount, 0)
   const loss = costAmount + costAmount * (losses / 100)
 
   useEffect(() => {
     form.setFieldValue(
       ['invoice', ...name, 'sum'],
-      losses > 0 ? loss * +price : costAmount * +price
+      losses > 0 
+      ? loss * +price 
+      : costAmount * +price
     )
   }, [form, name, amount, lastAmount, price, losses])
 
