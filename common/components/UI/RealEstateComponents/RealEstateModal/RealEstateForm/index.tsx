@@ -22,6 +22,7 @@ import { IDomain } from '@modules/models/Domain'
 import { inputNumberParser } from '@utils/helpers'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import DomainsServices from '@components/UI/DomainsComponents/DomainModal/DomainForm/DomainsServices'
+import CustomServicesCard from '../../../CustomServicesCard'
 
 interface Props {
   form: FormInstance<any>
@@ -64,11 +65,10 @@ const RealEstateForm: FC<Props> = ({
   }, [services, form])
 
   const isServiceExist = (value: string) => {
-    if (!domain._id || !services || !services.length) return false
+    if (!domain?._id || !services || !services?.length) return false
     const existedValues = services.map((x) => !!x[value])
     return existedValues.includes(true)
   }
-  const domainServices = form.getFieldValue('customServices')
 
   return (
     <Form
@@ -143,36 +143,11 @@ const RealEstateForm: FC<Props> = ({
         />
       </Form.Item>
 
-      {/* <> */}
-      <Form.List name="customServices">
-        {(fields, { }) => (
-          <>
-            {fields.map(({ key, name }) => (
-              <Form.Item
-                key={key}
-                name={[name, "value"]}
-                label={domainServices[name]?.name}
-              >
-                <InputNumber
-                  onChange={(value) => {
-                    const customServices = [...form.getFieldValue("customServices")]
-                    customServices[name] = {
-                      ...customServices[name],
-                      value,
-                    };
-                    form.setFieldsValue({ customServices })
-                  }}
-                  placeholder="Введіть значення"
-                  className={s.formInput}
-                  disabled={!editable}
-                />
-              </Form.Item>
-            ))}
-          </>
-        )}
-      </Form.List>
-
-        {/* <Form.Item
+      <CustomServicesCard
+        form={form}
+        // customServices={customServices}
+      />
+        <Form.Item
           name="servicePricePerMeter"
           label="Індивідуальне утримання (грн/м²)"
         >
@@ -190,10 +165,9 @@ const RealEstateForm: FC<Props> = ({
             className={s.formInput}
             disabled={!editable}
           />
-        </Form.Item> */}
-      {/* </> */}
+        </Form.Item>
 
-      {/* {isServiceExist('waterPrice') && (
+      {isServiceExist('waterPrice') && (
         <Form.Item name="waterPart" label="Частка водопостачання">
           <InputNumber
             parser={inputNumberParser}
@@ -239,7 +213,7 @@ const RealEstateForm: FC<Props> = ({
         >
           <Checkbox disabled={!editable} />
         </Form.Item>
-      )} */}
+      )}
     </Form>
   )
 }

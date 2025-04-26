@@ -40,21 +40,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       mfo: currentDomain?.mfo || '',
       rnokpp: currentDomain?.rnokpp || '',
       iban: currentDomain?.iban || '',
-      // customServices: [
-      //   {
-      //     groupName: 'group1',
-      //     services: ['test1', 'веровіка', 'перевіка']
-      //   },
-      //   {
-      //     groupName: 'group2',
-      //     services: ['test1', 'test2', 'tаппарарап']
-      //   },
-      //   {
-      //     groupName: 'group3',
-      //     services: ['test1', 'test2', 'tен5н65']
-      //   },
-      // ]
-      customServices: [],
+      customServices: currentDomain?.customServices || [],
     }
     form.setFieldsValue(initialValues)
   }, [currentDomain, form])
@@ -63,51 +49,51 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
     const formData = await form.validateFields()
     console.log(formData.customServices)
 
-    // if (!currentDomain && domains?.some(domain => domain.name === formData.name)) {
-    //   message.error({
-    //     content: 'Помилка при додаванні надавача послуг!  Домен з такою назвою вже існує!',
-    //     duration: 4,
-    //     style: {
-    //       marginTop: '20vh',
-    //       fontSize: '2rem',
-    //       zIndex: 9999,
-    //     },
-    //   })
-    //   return
-    // }
+    if (!currentDomain && domains?.some(domain => domain.name === formData.name)) {
+      message.error({
+        content: 'Помилка при додаванні надавача послуг!  Домен з такою назвою вже існує!',
+        duration: 4,
+        style: {
+          marginTop: '20vh',
+          fontSize: '2rem',
+          zIndex: 9999,
+        },
+      })
+      return
+    }
 
-    // const domainData = {
-    //   name: formData.name,
-    //   adminEmails: formData.adminEmails,
-    //   streets: formData.streets.some((i: any) => i.value)
-    //     ? formData.streets.map((i: any) => i.value)
-    //     : formData.streets,
-    //   description: formData.description,
-    //   IEName: formData.IEName,
-    //   domainBankToken: formData.domainBankToken || [],
-    //   mfo: formData.mfo,
-    //   rnokpp: formData.rnokpp,
-    //   iban: formData.iban,
-    //   domainServices: formData.services,
-    //   customServices: formData.customServices,
-    // }
+    const domainData = {
+      name: formData.name,
+      adminEmails: formData.adminEmails,
+      streets: formData.streets.some((i: any) => i.value)
+        ? formData.streets.map((i: any) => i.value)
+        : formData.streets,
+      description: formData.description,
+      IEName: formData.IEName,
+      domainBankToken: formData.domainBankToken || [],
+      mfo: formData.mfo,
+      rnokpp: formData.rnokpp,
+      iban: formData.iban,
+      domainServices: formData.services,
+      customServices: formData.customServices,
+    }
 
-    // const response = currentDomain
-    //   ? await editDomain({
-    //       _id: currentDomain?._id,
-    //       ...domainData,
-    //     })
-    //   : await addDomainEstate(domainData)
+    const response = currentDomain
+      ? await editDomain({
+          _id: currentDomain?._id,
+          ...domainData,
+        })
+      : await addDomainEstate(domainData)
 
-    // if ('data' in response) {
-    //   closeModal()
-    //   form.resetFields()
-    //   const action = currentDomain ? 'Збережено' : 'Додано'
-    //   message.success(action)
-    // } else {
-    //   const action = currentDomain ? 'збереженні' : 'додаванні'
-    //   message.error(`Помилка при ${action} надавача послуг`)
-    // }
+    if ('data' in response) {
+      closeModal()
+      form.resetFields()
+      const action = currentDomain ? 'Збережено' : 'Додано'
+      message.success(action)
+    } else {
+      const action = currentDomain ? 'збереженні' : 'додаванні'
+      message.error(`Помилка при ${action} надавача послуг`)
+    }
   }
 
   return (

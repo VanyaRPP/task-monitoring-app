@@ -1,6 +1,7 @@
 import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
+import service from '@pages/service'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { transliterateAndCamelCase } from '@utils/transliterateAndCamelCase'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -42,15 +43,35 @@ export default async function handler(
           });
         }
 
-        const customServiceIds = domain.domainServices || [];
+        const domainGroups = domain?.customServices?.map((service) => {
+          return {
+            groupName: service?.groupName,
+            services: service?.services
+          } 
+        })
+
+        const allServiceIds = domainGroups?.flatMap((group) => group.services).map(String)
 
         const customServices = await CustomService.find({
-          _id: { $in: customServiceIds },
-        }).lean();
+          _id: { $in: allServiceIds },
+        }).lean()
+
+        const groupedServices = domainGroups.map((group) => {
+          const services = group.services
+            .map((id) =>
+              customServices.find((service) => String(service._id) === String(id))
+            )
+            .filter(Boolean)
+
+          return {
+            groupName: group.groupName,
+            services,
+          }
+        })
 
         return res.status(200).json({
           success: true,
-          data: customServices,
+          data: groupedServices,
         })
       } catch (error: any) {
         return res.status(500).json({

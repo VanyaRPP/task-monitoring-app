@@ -13,8 +13,8 @@ export interface IDomainModel {
 }
 
 export interface ICustomService {
-  domainId: string
-  name: string
+  groupName: string
+  services: string[]
 }
 
 export interface IDomainService {

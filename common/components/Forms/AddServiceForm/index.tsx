@@ -19,6 +19,7 @@ import { useEffect } from 'react'
 import s from './style.module.scss'
 import { inputNumberParser } from '@utils/helpers'
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
+import CustomServicesCard from '@components/UI/CustomServicesCard'
 
 dayjs.locale('uk')
 
@@ -42,12 +43,17 @@ const AddServiceForm: React.FC<Props> = ({
   const streetId = Form.useWatch('street', form)
   const { Text } = Typography
 
-  const { data: customServices } = useGetCustomServicesByDomainQuery({ domainId: domainId }, { skip: !domainId })
+  const { data: customDomainServices } = useGetCustomServicesByDomainQuery({ domainId: domainId }, { skip: !domainId })
 
-  const initialCustomServices = customServices?.data?.map((service) => ({
-    fieldName: service.fieldName,
-    name: service.name,
-    value: 0,
+  const initialCustomServices = customDomainServices?.data?.map((group, i) => ({
+    groupName: group.groupName,
+    services: Array.isArray(group.services)
+      ? group.services.map((service, index) => ({
+          fieldName: service?.fieldName,
+          name: service?.name,
+          value: 0,
+        }))
+      : [],
   }))
 
   const { previousMonth } = usePreviousMonthService({
@@ -104,7 +110,8 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
-        <Form.List name="customServices">
+        <CustomServicesCard form={form}/>
+        {/* <Form.List name="customServices">
                 {(fields, { }) => (
                   <>
                     {fields.map(({ key, name }) => (
@@ -130,8 +137,8 @@ const AddServiceForm: React.FC<Props> = ({
                     ))}
                   </>
                 )}
-              </Form.List>
-        {/* <Form.Item
+              </Form.List> */}
+        <Form.Item
           name="rentPrice"
           label="Утримання приміщень (грн/м²)"
           rules={validateField('required')}
@@ -188,7 +195,7 @@ const AddServiceForm: React.FC<Props> = ({
             placeholder="Вкажіть значення"
             className={s.formInput}
           />
-        </Form.Item> */}
+        </Form.Item>
         <Form.Item
           name="losses"
           label={

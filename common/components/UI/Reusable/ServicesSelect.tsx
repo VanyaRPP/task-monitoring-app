@@ -1,5 +1,5 @@
 import { Form, FormInstance, Select, Button, Input, Space } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
+import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons'
 import { CSSProperties, useMemo } from 'react'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
@@ -38,13 +38,13 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   const services = useMemo(() => {
     return customServices?.data
       .slice()
-      .sort((a, b) => a.name.localeCompare(b.name))
+      .sort((a, b) => a?.name.localeCompare(b?.name))
   }, [servicesList, customServices])
 
   const options = useMemo(() => {
     return services?.map((service) => ({
       value: service._id,
-      label: service.name,
+      label: service?.name,
     }))
   }, [services])
 
@@ -72,7 +72,8 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                 // eslint-disable-next-line react/jsx-key
                 <Space
                   direction="horizontal"
-                  style={{ width: '100%', justifyContent: 'space-between' }}
+                  style={{ width: '100%' }}
+                  align="center"
                 >
                   <Form.Item required style={{ flex: 1, marginRight: 8 }}>
                     <Input
@@ -80,7 +81,6 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                       onChange={(e) => {
                         const current = form.getFieldValue('customServices')
                         const newName = e.target.value
-                        // current[index] = { [newName]: groupValues }
                         current[index] = {
                           groupName: newName,
                           services: groupValues,
@@ -121,6 +121,15 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                       showSearch
                     />
                   </Form.Item>
+                  <MinusCircleOutlined
+                    style={{ 
+                      position: 'relative',
+                      cursor: 'pointer',
+                      fontSize: '24px',
+                      minWidth: '24px',
+                    }}
+                    onClick={() => remove(field.name)}
+                  />
                 </Space>
               )
             })}

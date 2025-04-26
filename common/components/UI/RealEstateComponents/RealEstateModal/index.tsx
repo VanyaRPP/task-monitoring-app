@@ -34,12 +34,17 @@ const RealEstateModal: FC<Props> = ({
   const [addRealEstate] = useAddRealEstateMutation()
   const [editRealEstate] = useEditRealEstateMutation()
   const domainId = Form.useWatch('domain', form)
-  // const { data: customServices } = useGetCustomServicesQuery({ _id: currentRealEstate?.domain?.domainServices }, { skip: !currentRealEstate })
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery({ domainId: currentRealEstate?.domain?._id || domainId }, { skip: !domainId && !currentRealEstate?.domain?._id })
-  const Services = customDomainServices?.data?.map((service) => ({
-    fieldName: service.fieldName,
-    name: service.name,
-    value: 0,
+
+  const customServices = customDomainServices?.data?.map((group, i) => ({
+    groupName: group.groupName,
+    services: Array.isArray(group.services)
+      ? group.services.map((service, index) => ({
+          fieldName: service?.fieldName,
+          name: service?.name,
+          value: currentRealEstate?.customServices[i]?.services[index]?.value || 0,
+        }))
+      : [],
   }))
 
   useEffect(() => {
@@ -64,10 +69,10 @@ const RealEstateModal: FC<Props> = ({
       discount: currentRealEstate?.discount || 0,
       cleaning: currentRealEstate?.cleaning || 0,
       services: currentRealEstate?.services || [],
-      customServices: currentRealEstate?.customServices || [...(Services ?? [])],
+      customServices: [...(customServices ?? [])],
     }
     form.setFieldsValue(initialValues)
-  }, [currentRealEstate, form, Services])
+  }, [currentRealEstate, form, customServices])
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()

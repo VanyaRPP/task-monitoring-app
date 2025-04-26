@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import {
   IGetCustomServicesResponse,
+  IGetCustomDomainServicesResponse,
   IGetCustomServicesRequest,
   IGetCustomServicesByDomainRequest,
   ICreateCustomServiceRequest,
@@ -23,7 +24,7 @@ export const customServicesApi = createApi({
       providesTags: ['CustomService'],
     }),
     getCustomServicesByDomain: builder.query<
-      IGetCustomServicesResponse,
+      IGetCustomDomainServicesResponse,
       IGetCustomServicesByDomainRequest
     >({
       query: ({ domainId }) => ({
