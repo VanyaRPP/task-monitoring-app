@@ -267,6 +267,8 @@ const AddPaymentModal: FC<Props> = ({
             invoiceNumber: payment?.invoiceNumber,
             invoiceCreationDate: dayjs(payment?.invoiceCreationDate),
             operation: payment?.type || Operations.Credit,
+            invoice: getInvoices({ company, service, payment, prevService, prevPayment })
+
           }}
           form={form}
           layout="vertical"

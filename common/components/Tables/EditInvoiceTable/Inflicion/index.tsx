@@ -6,7 +6,7 @@ import { ServiceType } from '@utils/constants'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 import { Button, Flex, Form, Input, Space, Tooltip, Typography } from 'antd'
-import { useEffect, useMemo, useRef  } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -39,57 +39,33 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const name = useMemo(() => toArray<string>(_name), [_name])
+  const name = useMemo(() => toArray<string>(_name), [_name]);
 
-  const { company, prevService, prevPayment } = usePaymentContext()
+  const { company, prevService } = usePaymentContext();
 
-  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  const [initialPrice, setInitialPrice] = useState<number | null>(null);
 
-  const prevPlacingInvoice = useMemo(() => {
-    return prevPayment?.invoice.find(
-      (invoice) => invoice.type === ServiceType.Placing
-    )
-  }, [prevPayment])
+  const price = Form.useWatch(['invoice', ...name, 'price'], form);
 
   const rentPrice = useMemo(() => {
-    return (
-      prevPlacingInvoice?.sum ||
-      company?.totalArea * (company?.pricePerMeter || prevService?.rentPrice)
-    )
-  }, [prevPlacingInvoice, company, prevService])
+    const { totalArea = 1, pricePerMeter } = company || {};
+    const rentPriceValue = pricePerMeter ?? prevService?.rentPrice ?? 0;
+    return totalArea * rentPriceValue;
+  }, [company, prevService]);
 
   const inflicion = useMemo(() => {
-    return Math.max(prevService?.inflicionPrice - 100, 0)
-  }, [prevService])
-
-
-  const initialPriceRef = useRef<number | null>(null)
-  const isReadyToCompare = useRef(false)
-
+    return Math.max(prevService?.inflicionPrice - 100, 0);
+  }, [prevService]);
 
   useEffect(() => {
-    if (!isReadyToCompare.current && !isNaN(price) && price > 0) {
-      initialPriceRef.current = price
-      isReadyToCompare.current = true
+    if (initialPrice === null && price !== undefined) {
+      setInitialPrice(price); // <-- зберігаємо price, а не перераховану формулу!
     }
-  }, [price])
-  
+  }, [initialPrice, price]);
 
   const isInitial = useMemo(() => {
-    if (!isReadyToCompare.current || initialPriceRef.current === null) {
-      return true 
-    }
-  
-    const current = toRoundFixed(price)
-    const initial = toRoundFixed(initialPriceRef.current)
-    const equal = current === initial
-  
-    return equal
-  }, [price])
-  
-
-  
-  
+    return toRoundFixed(price) === toRoundFixed(initialPrice);
+  }, [price, initialPrice]);
 
   if (company?.inflicion && prevService?.inflicionPrice) {
     return (
@@ -99,28 +75,29 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
             {toRoundFixed(inflicion)}% від {toRoundFixed(rentPrice)} грн
           </Typography.Text>
         )}
-        {isReadyToCompare.current && !isInitial && editable && (
+        {!isInitial && editable && (
           <Tooltip title="Відновити початкове значення">
             <Button
-              onClick={() =>
-                form.setFieldValue(
-                  ['invoice', ...name, 'price'],
-                  initialPriceRef.current
-                )
-              }
+              onClick={() => {
+                if (initialPrice !== null) {
+                  form.setFieldValue(['invoice', ...name, 'price'], initialPrice);
+                }
+              }}
               icon={<ReloadOutlined />}
             />
           </Tooltip>
-)}
-
+        )}
       </Flex>
-    )
+    );
   }
 
   if (company?.inflicion && !prevService?.inflicionPrice) {
-    return <>Інфляція за попередній місяць невідома</>
+    return <>Інфляція за попередній місяць невідома</>;
   }
-}
+
+  return null;
+};
+
 
 export const Price: React.FC<InvoiceComponentProps> = ({
   form,
