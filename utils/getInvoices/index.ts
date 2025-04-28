@@ -4,6 +4,7 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import { current } from '@reduxjs/toolkit'
 import { ServiceType } from '@utils/constants'
 import { isEmpty, toRoundFixed } from '@utils/helpers'
 
@@ -96,6 +97,13 @@ export const getInvoices = ({
       })
     ),
     ...getCustomInvoices({
+      company,
+      service,
+      prevService,
+      currInvoicesCollection,
+      prevInvoicesCollection,
+    }),
+    ...getCustomServiceInvoices({
       company,
       service,
       prevService,
@@ -470,4 +478,27 @@ export const getCustomInvoices = ({
       price: +toRoundFixed(+invoice.sum || +invoice.price),
       sum: +toRoundFixed(+invoice.sum || +invoice.price),
     }))
+}
+
+export const getCustomServiceInvoices = ({
+  company,
+  service,
+  prevService,
+  currInvoicesCollection,
+  prevInvoicesCollection,
+}: IGetInvoiceByTypeProps): Array<IPaymentField> => {
+  if(!service?.customServices || Object.keys(currInvoicesCollection).length > 0) {
+    return []
+  }
+
+  const customServices = service?.customServices?.flatMap(group =>
+    group?.services?.map(s => ({
+      name: s.name,
+      price: +toRoundFixed(s.price),
+      sum:  +toRoundFixed(s.price),
+      type: ServiceType.Custom,
+      customService: true,
+    }))
+  )
+  return customServices
 }

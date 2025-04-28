@@ -16,10 +16,11 @@ export const Name: React.FC<InvoiceComponentProps> = ({
 
   const value = Form.useWatch(['invoice', ...name, 'name'], form)
   const type = Form.useWatch(['invoice', ...name, 'type'], form)
+  const isCustomService = Form.useWatch(['invoice', ...name, 'name'], form)
 
   const { service } = usePaymentContext()
 
-  if (!editable) {
+  if (!editable || isCustomService) {
     return (
       <Space direction="vertical" size={0}>
         <Typography.Text>{value || type}</Typography.Text>
