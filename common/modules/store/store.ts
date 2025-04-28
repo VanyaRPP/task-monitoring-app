@@ -15,6 +15,7 @@ import themeReducer from '@modules/store/themeSlice'
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 import { debtorsApi } from '@common/api/debtorsApi/debtors.api'
 import { customServicesApi } from '@common/api/customServicesApi/customServices.api'
+import { mockBankApi } from '@common/api/bankApi/mockBank.api'
 
 export const store = configureStore({
   reducer: {
@@ -32,6 +33,7 @@ export const store = configureStore({
     [streetApi.reducerPath]: streetApi.reducer,
     [bankApi.reducerPath]: bankApi.reducer,
     [debtorsApi.reducerPath]: debtorsApi.reducer,
+    [mockBankApi.reducerPath]: mockBankApi.reducer,
     sidebar: sidebarReducer,
     theme: themeReducer,
   },
@@ -50,6 +52,7 @@ export const store = configureStore({
       .concat(realestateApi.middleware)
       .concat(streetApi.middleware)
       .concat(bankApi.middleware)
+      .concat(mockBankApi.middleware)
       .concat(debtorsApi.middleware),
 })
 

@@ -14,13 +14,15 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service } = usePaymentContext()
+  const { service, payment } = usePaymentContext()
+  const losses = payment?.losses ?? service?.losses ?? 0
 
   return (
     <Space direction="vertical" size={0}>
       <Typography.Text>Електропостачання</Typography.Text>
       <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-        {toFirstUpperCase(dateToMonthYear(service?.date))} {service?.losses > 0 ? `+ Втрати ${service?.losses}%` : ''}
+        {toFirstUpperCase(dateToMonthYear(service?.date))}{' '}
+        {losses > 0 ? `+ Втрати ${losses}%` : ''}
       </Typography.Text>
     </Space>
   )
@@ -33,42 +35,40 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-  const { service } = usePaymentContext()
+  const { service, payment } = usePaymentContext()
+  const losses = payment?.losses ?? service?.losses ?? 0
+  
   const lastAmount = Form.useWatch(['invoice', ...name, 'lastAmount'], form)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
 
   if (!editable) {
-    return service?.losses > 0
-    ? 
-      editable 
-      ? <div style={{ lineHeight: '1.6' }}>
-        <Typography.Text>{toRoundFixed(lastAmount)} → {toRoundFixed(amount)} кВт</Typography.Text>
-        <br />
-        <Typography.Text>
-          З втратами ({service?.losses}%): <Typography.Text underline strong>{(amount - lastAmount) + ((amount - lastAmount) * (service?.losses/100))} кВт</Typography.Text>
-        </Typography.Text>
-      </div> 
-    : (
-        <DividedSpace style={{ cursor: 'pointer' }}>
-          {/* <Typography.Text>{toRoundFixed(lastAmount)} → {toRoundFixed(amount)} кВт</Typography.Text> */}
-          <Typography.Text>{(amount - lastAmount) + ((amount - lastAmount) * (service?.losses / 100))} кВт</Typography.Text>
-          <Tooltip
+    const base = amount - lastAmount
+    const withLosses = base + base * (losses / 100)
+
+    return losses > 0 ? (
+      <DividedSpace>
+        <Typography.Text>{withLosses} кВт</Typography.Text>
+        <Tooltip
           title={
             <div>
-              <div>{toRoundFixed(lastAmount)} → {toRoundFixed(amount)}</div>
-              <div><strong>Втрати:</strong> {service?.losses}%</div>
               <div>
-                <strong>З втратами:</strong>{' '}
-                {(amount - lastAmount) + ((amount - lastAmount) * (service?.losses / 100))} кВт
+                {toRoundFixed(lastAmount)} → {toRoundFixed(amount)}
+              </div>
+              <div>
+                <strong>Втрати:</strong> {losses}%
+              </div>
+              <div>
+                <strong>З втратами:</strong> {withLosses} кВт
               </div>
             </div>
           }
         >
-          <ExclamationCircleOutlined style={{ color: '#faad14', marginLeft: 8, cursor: 'pointer' }} />
+          <ExclamationCircleOutlined
+            style={{ color: '#faad14', marginLeft: 8, cursor: 'pointer' }}
+          />
         </Tooltip>
-        </DividedSpace>
-    )
-    : (
+      </DividedSpace>
+    ) : (
       <DividedSpace>
         <span>{toRoundFixed(lastAmount)} кВт</span>
         <span>{toRoundFixed(amount)} кВт</span>
@@ -113,7 +113,6 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
   if (!editable) {
@@ -138,6 +137,8 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 
 export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
+  const { service, payment } = usePaymentContext()
+  const losses = payment?.losses ?? service?.losses ?? 0
 
   const lastAmount = Form.useWatch(['invoice', ...name, 'lastAmount'], form)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
@@ -147,14 +148,17 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const costAmount = amount - lastAmount
   const loss = costAmount + (costAmount * (service?.losses/100))
 
+  const costAmount = Math.max(+amount - +lastAmount, 0)
+  const loss = costAmount + costAmount * (losses / 100)
+
   useEffect(() => {
     form.setFieldValue(
       ['invoice', ...name, 'sum'],
-      service?.losses > 0 
+      losses > 0 
       ? loss * +price 
-      : Math.max(+amount - +lastAmount, 0) * +price,
+      : costAmount * +price
     )
-  }, [form, name, amount, lastAmount, price])
+  }, [form, name, amount, lastAmount, price, losses])
 
   return <strong>{toRoundFixed(sum)} грн</strong>
 }

@@ -46,6 +46,7 @@
     "formidable": "^2.0.1",
     "iban": "^0.0.14",
     "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.21",
     "mockingoose": "^2.16.2",
     "mongodb": "^4.16.0",
     "mongoose": "^7.4.2",
