@@ -30,6 +30,7 @@ export interface CustomServices {
     _id: ObjectId
     name: string
     fieldName: string
+    price: number
   }
 }
 

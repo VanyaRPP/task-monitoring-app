@@ -42,12 +42,13 @@ const RealEstateModal: FC<Props> = ({
       ? group.services.map((service, index) => ({
           fieldName: service?.fieldName,
           name: service?.name,
-          value: currentRealEstate?.customServices[i]?.services[index]?.value || 0,
+          price: currentRealEstate?.customServices[i]?.services[index]?.price || 0,
         }))
       : [],
   }))
 
   useEffect(() => {
+    
     const initialValues = {
       domain: chosenRealEstate?.domain
       || currentRealEstate?.domain?.name
@@ -69,7 +70,7 @@ const RealEstateModal: FC<Props> = ({
       discount: currentRealEstate?.discount || 0,
       cleaning: currentRealEstate?.cleaning || 0,
       services: currentRealEstate?.services || [],
-      customServices: [...(customServices ?? [])],
+      customServices: customServices ?? [],
     }
     form.setFieldsValue(initialValues)
   }, [currentRealEstate, form, customServices])

@@ -145,7 +145,7 @@ const RealEstateForm: FC<Props> = ({
 
       <CustomServicesCard
         form={form}
-        // customServices={customServices}
+        disabled={!editable}
       />
         <Form.Item
           name="servicePricePerMeter"

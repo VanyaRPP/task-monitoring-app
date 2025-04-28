@@ -17,7 +17,7 @@ export interface IServiceModel {
       _id: ObjectId
       name: string
       fieldName: string
-      value: number
+      price: number
     }[]
   }[]
   losses?: number
@@ -42,7 +42,7 @@ export const ServiceSchema = new Schema<IServiceModel>({
           {
             name: { type: String, required: true },
             fieldName: { type: String, required: true },
-            value: { type: Number, required: true },
+            price: { type: Number, required: true },
           },
         ],
       },

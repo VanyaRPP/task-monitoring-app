@@ -25,7 +25,7 @@ export interface CustomServices {
     _id: ObjectId
     name: string
     fieldName: string
-    value: number
+    price: number
   }[]
 }
 

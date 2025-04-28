@@ -37,7 +37,7 @@ type FormData = {
         _id: ObjectId
         name: string
         fieldName: string
-        value: number
+        price: number
     }[]
   }[]
   losses: number
@@ -71,7 +71,6 @@ const AddServiceModal: FC<Props> = ({
       customServices: formData.customServices || [],
       ...(formData.losses > 0 && { losses: formData.losses })
     }
-    console.log('serviceData', serviceData)
     const response = currentService
       ? await editService({
           _id: currentService?._id?.toString(),

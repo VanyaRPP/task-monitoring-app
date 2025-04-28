@@ -27,7 +27,7 @@ interface ICustomServiceGroup {
 interface ICustomService {
   fieldName: string;
   name: string;
-  value: number;
+  price: number;
 }
 
 export const RealEstateSchema = new Schema<IRealEstateModel>({
@@ -55,7 +55,7 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
           {
             fieldName: { type: String, required: true },
             name: { type: String, required: true },
-            value: { type: Number, required: true },
+            price: { type: Number, required: true },
           },
         ],
       },
