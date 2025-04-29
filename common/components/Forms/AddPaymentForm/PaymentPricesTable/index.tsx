@@ -22,8 +22,9 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
     const filteredInvoices = invoices?.filter(
       (invoice) =>
         invoice?.sum > 0 ||
-        invoice?.type === 'discount' ||
-        invoice?.type === 'maintenancePrice'
+        ['discount', 'maintenancePrice', 'garbageCollectorPrice'].includes(
+          invoice?.type
+        )
     )
 
     form.setFieldsValue({

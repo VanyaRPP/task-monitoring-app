@@ -6,11 +6,12 @@ import { Button, Card, Select, Tabs, TabsProps } from 'antd'
 
 import StickyBox from 'react-sticky-box'
 import DomainBankTab from './components/DomainBankTab/DomainBankTab'
+import DomainBankBalance from './components/DomainbankBalance/DomainBankBalance'
 
 import s from './style.module.scss'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
-import { useGetBalancesQuery } from '@common/api/bankApi/bank.api'
+import { useGetBalancesQuery } from '@common/api/bankApi/mockBank.api'
 import { useEffect, useState } from 'react'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import EncryptionService from '@utils/encryptionService'
@@ -26,7 +27,9 @@ const BankTransactions = () => {
   const [selectedAcc, setSelectedAcc] = useState('')
 
   useEffect(() => {
-    setSelectedDomain(domains[0])
+    if (domains?.length > 0) {
+      setSelectedDomain(domains[0])
+    }
   }, [domains])
 
   const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
@@ -36,6 +39,7 @@ const BankTransactions = () => {
         selectedDomain?.domainBankToken[0]?.token ?? 'token'
       )
     : ''
+  // const token = 'mock_token'
 
   const { data: balances } = useGetBalancesQuery({ token }, { skip: !token })
 
@@ -49,6 +53,15 @@ const BankTransactions = () => {
     }
   })
 
+  const selectedBalance = balances?.data?.balances.find(
+    (balance) => balance.acc === selectedAcc
+  )
+  useEffect(() => {
+    if (balances?.data?.balances.length > 0 && !selectedAcc) {
+      setSelectedAcc(balances.data.balances[0].acc)
+    }
+  }, [balances])
+
   const renderTabBar: TabsProps['renderTabBar'] = (props, DefaultTabBar) => (
     <StickyBox className={s.tableHeader}>
       <div className={s.filterWrapper}>
@@ -60,10 +73,10 @@ const BankTransactions = () => {
         >
           Банк
         </Button>
-        {balances && (
+        {balances?.data?.balances?.length > 0 && (
           <Select
             placeholder="Оберіть рахунок"
-            options={balances.map((item) => ({
+            options={balances.data.balances.map((item) => ({
               label: item.acc,
               value: item.acc,
             }))}
@@ -71,6 +84,7 @@ const BankTransactions = () => {
             onSelect={(value) => setSelectedAcc(value)}
           />
         )}
+        {selectedBalance && <DomainBankBalance balanceData={selectedBalance} />}
       </div>
       <DefaultTabBar {...props} className={s.tabBar} />
     </StickyBox>

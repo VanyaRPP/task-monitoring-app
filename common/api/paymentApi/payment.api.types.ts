@@ -40,6 +40,7 @@ export interface IPayment {
   reciever: IReciever
   generalSum: number
   transaction?: IPaymentTransactions
+  losses?: number
 }
 
 export interface IExtendedPayment extends IPayment {
