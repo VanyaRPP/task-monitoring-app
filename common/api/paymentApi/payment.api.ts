@@ -80,6 +80,18 @@ export const paymentApi = createApi({
           ? response.data.map((item) => ({ type: 'Payment', id: item._id }))
           : [],
     }),
+    getPaymentsWithoutParams: builder.query<IGetPaymentResponse, void>({
+      query: () => ({
+        url: `spacehub/payment`,
+      }),
+      providesTags: (response) =>
+        response
+          ? response.data.map((item) => ({
+              type: 'Payment',
+              id: item._id,
+            }))
+          : [],
+    }),
     getPayment: builder.query<IGetPaymentResponse, string>({
       query: (id) => `spacehub/payment/${id}`,
     }),
@@ -171,6 +183,7 @@ export const paymentApi = createApi({
   }),
 })
 export const {
+  useGetPaymentsWithoutParamsQuery,
   useAddPaymentMutation,
   useGetAllPaymentsQuery,
   useGetPaymentQuery,

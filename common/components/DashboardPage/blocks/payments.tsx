@@ -17,6 +17,7 @@ import {
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { useGetPaymentsWithoutParamsQuery } from '@common/api/paymentApi/payment.api'
 import PaymentCardHeader from '@components/UI/PaymentCardHeader'
 import TableCard from '@components/UI/TableCard'
 import {
@@ -225,6 +226,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     },
     { skip: currUserLoading || !currUser }
   )
+  const { data: allPayments } = useGetPaymentsWithoutParamsQuery()
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
@@ -264,6 +266,50 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       setPageData((prev) => ({ ...prev, currentPage: 1 }))
     }
   }, [appliedFilters])
+
+  const normalizeCompanyName = (company: any): string | undefined => {
+    return typeof company === 'object'
+      ? company?.companyName?.toLowerCase()
+      : company?.toLowerCase()
+  }
+
+  const firstCompanyEntryMap = useMemo(() => {
+    const seen = new Set<string>()
+    const map = new Map<string, string>()
+
+    allPayments?.data?.forEach((p) => {
+      const name = normalizeCompanyName(p.company)
+      if (name && !seen.has(name)) {
+        seen.add(name)
+        map.set(name, p._id)
+      }
+    })
+
+    return map
+  }, [allPayments])
+  const companyDebtMap = useMemo(() => {
+    const map = new Map<string, number>()
+
+    allPayments?.data?.forEach((payment) => {
+      const name = normalizeCompanyName(payment.company)
+      if (!name) return
+
+      if (!map.has(name)) {
+        map.set(name, 0)
+      }
+
+      const current = map.get(name)!
+      const sum = Number(payment.generalSum) || 0
+
+      if (payment.type === Operations.Debit) {
+        map.set(name, current + sum)
+      } else if (payment.type === Operations.Credit) {
+        map.set(name, current - sum)
+      }
+    })
+
+    return map
+  }, [allPayments])
   const columns: TableColumnType<any>[] = useMemo(() => {
     return [
       {
@@ -373,6 +419,21 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
                 : null,
           },
         ],
+      },
+      {
+        title: 'Борг',
+        dataIndex: 'debt',
+        align: 'center',
+        width: 130,
+        render: (_, payment) => {
+          const name = normalizeCompanyName(payment.company)
+          const isFirst = payment._id === firstCompanyEntryMap.get(name)
+          const debt = companyDebtMap.get(name)
+
+          return isFirst && typeof debt === 'number'
+            ? renderCurrency(debt)
+            : '-'
+        },
       },
       {
         title: 'За місяць',
@@ -530,6 +591,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     ].filter(({ hidden }) => !hidden) as TableColumnType<any>[]
   }, [
     payments,
+    allPayments,
     router,
     paymentActions,
     isDomainAdmin,
