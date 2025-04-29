@@ -212,7 +212,6 @@ const RealEstateForm: FC<Props> = ({
         <Checkbox disabled={!editable} />
       </Form.Item>
 
-
       {isServiceExist('inflicionPrice') && (
         <Form.Item
           valuePropName="checked"

@@ -57,7 +57,7 @@ const AddServiceModal: FC<Props> = ({
       garbageCollectorPrice: formData.garbageCollectorPrice || 0,
       inflicionPrice: formData.inflicionPrice || 0,
       description: formData.description || '',
-      ...(formData.losses > 0 && { losses: formData.losses })
+      ...(formData.losses > 0 && { losses: formData.losses }),
     }
     const response = currentService
       ? await editService({

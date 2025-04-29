@@ -11,7 +11,10 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isDomainAdmin, isAdmin, user } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isAdmin, user } = await getCurrentUser(
+    req,
+    res
+  )
 
   switch (req.method) {
     case 'DELETE':

@@ -12,7 +12,7 @@ const MyDocument = () => (
         content="black-translucent"
       />
       <meta name="theme-color" content="#783fc4" />
-			<meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
     </Head>
     <body>
       <Main />
