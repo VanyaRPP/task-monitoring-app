@@ -22,7 +22,6 @@ export const setupTestEnvironment = () => {
 
   beforeAll(async () => {
     await server.start()
-
     mongoose.set('strictQuery', false)
     mongoose.connect(server.getUri(), {
       useNewUrlParser: true,
@@ -31,16 +30,15 @@ export const setupTestEnvironment = () => {
   })
 
   beforeEach(async () => {
+    await mongoose.connection.dropDatabase()
     await User.insertMany(Object.values(users))
     await (Street as any).insertMany(streets)
     await (Domain as any).insertMany(domains)
     await (RealEstate as any).insertMany(realEstates)
     await (Service as any).insertMany(services)
-    await (Payment as any).insertMany(payments)
-  })
-
-  afterEach(async () => {
-    await mongoose.connection.dropDatabase()
+    await (Payment as any).insertMany(
+      payments.map((p) => ({ ...p, _id: new mongoose.Types.ObjectId() }))
+    )
   })
 
   afterAll(async () => {

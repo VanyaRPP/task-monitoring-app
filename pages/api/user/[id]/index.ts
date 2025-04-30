@@ -20,33 +20,35 @@ export default async function handler(
       } catch (error) {
         return res.status(400).json({ success: false })
       }
-    case 'PATCH':
-      try {
-        if (req.query.id !== currentUser?._id?.toString()) {
-          return res
-            .status(400)
-            .json({ success: false, message: 'not allowed' })
+      case 'PATCH':
+        try {
+          const targetUserId = req.query.id?.toString()
+          const isSelf = currentUser?._id?.toString() === targetUserId
+          const isGlobalAdmin = currentUser?.roles?.includes('GlobalAdmin')
+          const isDevEnv = process.env.NODE_ENV === 'development'
+      
+          if (!isSelf && !isGlobalAdmin && !isDevEnv) {
+            return res.status(403).json({ success: false, message: 'Forbidden' })
+          }
+      
+          if ('roles' in req.body && !isDevEnv && !isGlobalAdmin) {
+            return res.status(400).json({ success: false, message: 'Cannot change roles' })
+          }
+      
+          // захист від присвоєння ролі GlobalAdmin іншим
+          if (
+            !isSelf &&
+            req.body.roles?.includes('GlobalAdmin') &&
+            !isDevEnv
+          ) {
+            return res.status(400).json({ success: false, message: 'Cannot assign GlobalAdmin role' })
+          }
+      
+          const updatedUser = await User.updateOne({ _id: targetUserId }, req.body)
+          return res.status(200).json({ data: updatedUser, success: true })
+        } catch (error) {
+          return res.status(400).json({ success: false })
         }
-
-        if (process.env.NODE_ENV !== 'development') {
-          return res.status(400).json({
-            success: false,
-            message: 'sorry, u can`t changes the roles',
-          })
-        }
-
-        const updatedUser = await User.updateOne(
-          { _id: req.query.id },
-          req.body
-        )
-
-        return res.status(200).json({
-          data: updatedUser,
-          success: true,
-        })
-      } catch (error) {
-        return res.status(400).json({ success: false })
-      }
 
     // try {
     //   const user = await User.updateOne(
