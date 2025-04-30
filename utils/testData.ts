@@ -1,38 +1,51 @@
 import { compareDates } from '@utils/helpers'
+import mongoose from 'mongoose'
 import { Roles } from './constants'
 
 export const users = {
   user: {
     name: 'user',
+    _id:new mongoose.Types.ObjectId( '000000000000000000000001'),
     email: 'user@example.com',
     roles: [Roles.USER],
   },
   user2: {
+    _id:new mongoose.Types.ObjectId( '000000000000000000000002'),
     name: 'user',
     email: 'user@example2.com',
     roles: [Roles.USER],
   },
   noRoleUser: {
+    _id:new mongoose.Types.ObjectId( '000000000000000000000003'),
     name: 'noRoleUser',
     email: 'noRoleUser@example.com',
     roles: [],
   },
   domainAdmin: {
+    _id:new mongoose.Types.ObjectId( '000000000000000000000004'),
     name: 'domainAdmin',
     email: 'domainAdmin@example.com',
     roles: [Roles.DOMAIN_ADMIN],
   },
   domainAdmin2: {
+    _id:new mongoose.Types.ObjectId( '000000000000000000000005'),
     name: 'domainAdmin2',
     email: 'domainAdmin2@example.com',
     roles: [Roles.DOMAIN_ADMIN],
   },
   globalAdmin: {
+    _id:new mongoose.Types.ObjectId( '000000000000000000000006'),
     name: 'globalAdmin',
     email: 'globalAdmin@example.com',
     roles: [Roles.GLOBAL_ADMIN],
   },
-}
+    devUser: {
+      _id: new mongoose.Types.ObjectId('000000000000000000000007'),
+      name: 'Dev User',
+      email: 'dev@example.com',
+      roles: ['User'],
+    }
+  }
 
 export const streets = [
   {
