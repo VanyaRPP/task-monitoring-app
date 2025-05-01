@@ -6,7 +6,7 @@ import { ServiceType } from '@utils/constants'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 import { Button, Flex, Form, Input, Space, Tooltip, Typography } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -41,30 +41,31 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
 
-  const { company, prevService, prevPayment } = usePaymentContext()
+  const { company, prevService } = usePaymentContext()
+
+  const [initialPrice, setInitialPrice] = useState<number | null>(null)
 
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
-  const prevPlacingInvoice = useMemo(() => {
-    return prevPayment?.invoice.find(
-      (invoice) => invoice.type === ServiceType.Placing
-    )
-  }, [prevPayment])
-
   const rentPrice = useMemo(() => {
-    return (
-      prevPlacingInvoice?.sum ||
-      company?.totalArea * (company?.pricePerMeter || prevService?.rentPrice)
-    )
-  }, [prevPlacingInvoice, company, prevService])
+    const { totalArea = 1, pricePerMeter } = company || {}
+    const rentPriceValue = pricePerMeter ?? prevService?.rentPrice ?? 0
+    return totalArea * rentPriceValue
+  }, [company, prevService])
 
   const inflicion = useMemo(() => {
     return Math.max(prevService?.inflicionPrice - 100, 0)
   }, [prevService])
 
+  useEffect(() => {
+    if (initialPrice === null && price !== undefined) {
+      setInitialPrice(price) // <-- зберігаємо price, а не перераховану формулу!
+    }
+  }, [initialPrice, price])
+
   const isInitial = useMemo(() => {
-    return toRoundFixed(price) === toRoundFixed((rentPrice / 100) * inflicion)
-  }, [price, rentPrice, inflicion])
+    return toRoundFixed(price) === toRoundFixed(initialPrice)
+  }, [price, initialPrice])
 
   if (company?.inflicion && prevService?.inflicionPrice) {
     return (
@@ -77,12 +78,14 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
         {!isInitial && editable && (
           <Tooltip title="Відновити початкове значення">
             <Button
-              onClick={() =>
-                form.setFieldValue(
-                  ['invoice', ...name, 'price'],
-                  +toRoundFixed((rentPrice / 100) * inflicion)
-                )
-              }
+              onClick={() => {
+                if (initialPrice !== null) {
+                  form.setFieldValue(
+                    ['invoice', ...name, 'price'],
+                    initialPrice
+                  )
+                }
+              }}
               icon={<ReloadOutlined />}
             />
           </Tooltip>
@@ -94,6 +97,8 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   if (company?.inflicion && !prevService?.inflicionPrice) {
     return <>Інфляція за попередній місяць невідома</>
   }
+
+  return null
 }
 
 export const Price: React.FC<InvoiceComponentProps> = ({

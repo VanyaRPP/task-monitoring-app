@@ -59,8 +59,16 @@ function AddPaymentForm({ paymentActions }) {
   })
 
   useEffect(() => {
-    form.setFieldsValue({ invoice })
-  }, [form, invoice])
+    const currentInvoice = form.getFieldValue('invoice')
+    const isEmptyInvoice =
+      !Array.isArray(currentInvoice) || currentInvoice.length === 0
+
+    const isNewPayment = !payment?.invoiceNumber && !payment?.domain
+
+    if ((isEmptyInvoice || isNewPayment) && invoice.length > 0) {
+      form.setFieldsValue({ invoice })
+    }
+  }, [form, invoice, payment])
 
   return (
     <>
