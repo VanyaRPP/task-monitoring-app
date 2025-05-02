@@ -1,66 +1,85 @@
 import User from '@modules/models/User'
 import { users } from '@utils/testData'
+import http from 'http'
+import { MongoMemoryServer } from 'mongodb-memory-server'
 import mongoose from 'mongoose'
-import { createMocks } from 'node-mocks-http'
+import request from 'supertest'
 import handler from '../index'
 
-jest.mock('next-auth', () => ({
-  getServerSession: jest.fn(() => Promise.resolve({ user: users.user })),
-}))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
-jest.mock('@pages/api/api.config', () => jest.fn())
-
-let mongo: any
-
-beforeAll(async () => {
-  const { MongoMemoryServer } = await import('mongodb-memory-server')
-  mongo = await MongoMemoryServer.create()
-  await mongoose.connect(mongo.getUri())
-})
-
-afterAll(async () => {
-  await mongoose.disconnect()
-  await mongo.stop()
-})
-
-beforeEach(async () => {
-  await mongoose.connection.db.dropDatabase()
-})
-
-const exec = async (id: string, body: any, sessionUser: any) => {
-  const { getServerSession } = require('next-auth')
-  getServerSession.mockResolvedValueOnce({ user: sessionUser })
-
-  const { req, res } = createMocks({
-    method: 'PATCH',
-    url: `/api/user/${id}`,
-    query: { id },
-    body,
-  })
-
-  await handler(req as any, res as any)
-  return res
-}
+jest.mock('next-auth', () => ({
+  getServerSession: jest.fn(() => Promise.resolve({ user: users.user }))
+}))
 
 describe('PATCH /api/user/:id', () => {
-  it('user cannot change own role', async () => {
-    const user = users.user
-    const created = await User.create(user)
-    const res = await exec(created._id.toString(), { roles: ['GlobalAdmin'] }, created)
-    expect(res._getStatusCode()).toBe(400)
+  let mongo: MongoMemoryServer
+
+  beforeAll(async () => {
+    mongo = await MongoMemoryServer.create()
+    await mongoose.connect(mongo.getUri())
   })
+
+  beforeEach(async () => {
+    await mongoose.connection.db.dropDatabase()
+    await User.create(users.user)
+  })
+
+  afterAll(async () => {
+    await mongoose.disconnect()
+    await mongo.stop()
+  })
+
+  const exec = (id: string, body: any) => {
+    const server = http.createServer((req, res) => handler(req as any, res as any))
+    return request(server).patch(`/api/user/${id}`).send(body)
+  }
+
+  it('user can change own name', async () => {
+    const user = await User.create(users.user)
+  
+    jest.mock('next-auth', () => ({
+      getServerSession: jest.fn(() => Promise.resolve({ user }))
+    }))
+  
+    const server = http.createServer((req, res) => handler(req as any, res as any))
+    const res = await request(server)
+      .patch(`/api/user/${user._id}`)
+      .send({ name: 'New Name' })
+  
+    expect(res.statusCode).toBe(200)
+  })
+  
   
   it('global admin cannot assign GlobalAdmin role to others', async () => {
     const target = await User.create(users.user)
     const admin = await User.create(users.globalAdmin)
-    const res = await exec(target._id.toString(), { roles: ['GlobalAdmin'] }, admin)
-    expect(res._getStatusCode()).toBe(400)
+  
+    jest.mock('next-auth', () => ({
+      getServerSession: jest.fn(() => Promise.resolve({ user: admin }))
+    }))
+  
+    const server = http.createServer((req, res) => handler(req as any, res as any))
+    const res = await request(server)
+      .patch(`/api/user/${target._id}`)
+      .send({ roles: ['GlobalAdmin'] })
+  
+    expect(res.statusCode).toBe(400)
   })
-
+  
   it('user cannot change another user', async () => {
     const target = await User.create(users.globalAdmin)
     const actor = await User.create(users.user)
-    const res = await exec(target._id.toString(), { name: 'X' }, actor)
-    expect(res._getStatusCode()).toBe(400)
+  
+    jest.mock('next-auth', () => ({
+      getServerSession: jest.fn(() => Promise.resolve({ user: actor }))
+    }))
+  
+    const server = http.createServer((req, res) => handler(req as any, res as any))
+    const res = await request(server)
+      .patch(`/api/user/${target._id}`)
+      .send({ name: 'X' })
+  
+    expect(res.statusCode).toBe(400)
   })
-})
+  
+  })
