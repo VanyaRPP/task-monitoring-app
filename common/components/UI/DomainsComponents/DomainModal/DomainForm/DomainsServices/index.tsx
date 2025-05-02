@@ -35,7 +35,7 @@ const DomainsServices: FC<Props> = ({
         _id: service._id,
         name: service.name,
       }))
-  
+
       Promise.resolve().then(() => {
         form.setFieldsValue({ domainServices: services })
         onCustomServicesChange(services)

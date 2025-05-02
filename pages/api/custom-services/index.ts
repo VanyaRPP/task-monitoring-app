@@ -10,7 +10,10 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isDomainAdmin, isUser } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isUser } = await getCurrentUser(
+    req,
+    res
+  )
 
   switch (req.method) {
     case 'POST':
@@ -18,7 +21,9 @@ export default async function handler(
         const { name, domainId } = req.body
 
         if (!isGlobalAdmin && !isDomainAdmin) {
-          return res.status(400).json({ success: false, message: 'Not allowed' })
+          return res
+            .status(400)
+            .json({ success: false, message: 'Not allowed' })
         }
 
         const trimmedName = typeof name === 'string' ? name.trim() : name
@@ -65,9 +70,9 @@ export default async function handler(
         const { domainId } = req.query
 
         if (
-          !isGlobalAdmin && 
+          !isGlobalAdmin &&
           (!domainId ||
-          (typeof domainId === 'string' && domainId.trim().length === 0))
+            (typeof domainId === 'string' && domainId.trim().length === 0))
         ) {
           return res.status(400).json({
             success: false,
@@ -75,11 +80,11 @@ export default async function handler(
           })
         }
 
-        const customServices = isGlobalAdmin 
-        ? await CustomService.find().lean() 
-        : await CustomService.find({
-          domain: domainId,
-        }).lean()
+        const customServices = isGlobalAdmin
+          ? await CustomService.find().lean()
+          : await CustomService.find({
+              domain: domainId,
+            }).lean()
 
         return res.status(200).json({
           success: true,

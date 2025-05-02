@@ -51,7 +51,6 @@ const DomainBankBalance: FC<Props> = ({ balanceData }) => {
           gap: '16px',
         }}
       >
-
         <Card.Meta
           // title={nameACC}
           // description={acc}

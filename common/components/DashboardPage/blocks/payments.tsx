@@ -331,42 +331,46 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             : null,
         filteredValue: filters?.company || null,
         filterSearch: true,
-        render: (company) => {
+        render: (company, record, index) => {
           const companyName = company?.companyName || ''
+          const companyId = company?._id
           const debtor = Array.isArray(debtorCompanies)
             ? debtorCompanies.find((d) => d.companyName === companyName)
             : null
 
-          return !isUser && debtor ? (
-            <Badge
-              count={debtor.totalDebt.toFixed(2)}
-              title=""
-              color={getDebtorTooltipColor(debtor)}
-              overflowCount={Infinity}
-              style={{ cursor: 'pointer' }}
-              size="small"
-            >
-              <Tooltip title="Додати в фільтри">
-                <Typography.Link
-                  onClick={() =>
-                    setFilters({ ...filters, company: [company?._id] })
-                  }
-                >
-                  {companyName}
-                </Typography.Link>
-              </Tooltip>
-            </Badge>
-          ) : (
+          const isFirstOccurrence =
+            payments?.data?.findIndex(
+              (item) =>
+                typeof item.company === 'object' &&
+                item.company?.companyName === companyName
+            ) === index
+
+          const companyLabel = (
             <Tooltip title="Додати в фільтри">
               <Typography.Link
-                onClick={() =>
-                  setFilters({ ...filters, company: [company?._id] })
-                }
+                onClick={() => setFilters({ ...filters, company: [companyId] })}
               >
                 {companyName}
               </Typography.Link>
             </Tooltip>
           )
+
+          if (!isUser && debtor && isFirstOccurrence) {
+            return (
+              <Badge
+                count={debtor.totalDebt.toFixed(2)}
+                title=""
+                color={getDebtorTooltipColor(debtor)}
+                overflowCount={Infinity}
+                style={{ cursor: 'pointer' }}
+                size="small"
+              >
+                {companyLabel}
+              </Badge>
+            )
+          }
+
+          return companyLabel
         },
         hidden: payments?.realEstatesFilter?.length <= 1,
       },
