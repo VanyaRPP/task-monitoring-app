@@ -293,6 +293,23 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
   }, [filters?.domain, domainsFilters])
 
+  const firstCompanyRowMap = useMemo(() => {
+    const seen = new Set<string>()
+    const map = new Map<string, string>()
+    payments?.data?.forEach((item) => {
+      const companyId =
+        typeof item.company === 'object' && item.company?._id
+          ? item.company._id
+          : undefined
+      const rowId = item._id
+      if (companyId && !seen.has(companyId)) {
+        seen.add(companyId)
+        map.set(companyId, rowId)
+      }
+    })
+    return map
+  }, [payments?.data])
+
   const columns: TableColumnType<any>[] = useMemo(() => {
     return [
       {
@@ -331,19 +348,12 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             : null,
         filteredValue: filters?.company || null,
         filterSearch: true,
-        render: (company, record, index) => {
+        render: (company, record) => {
           const companyName = company?.companyName || ''
           const companyId = company?._id
           const debtor = Array.isArray(debtorCompanies)
             ? debtorCompanies.find((d) => d.companyName === companyName)
             : null
-
-          const isFirstOccurrence =
-            payments?.data?.findIndex(
-              (item) =>
-                typeof item.company === 'object' &&
-                item.company?.companyName === companyName
-            ) === index
 
           const companyLabel = (
             <Tooltip title="Додати в фільтри">
@@ -355,7 +365,11 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             </Tooltip>
           )
 
-          if (!isUser && debtor && isFirstOccurrence) {
+          if (
+            !isUser &&
+            debtor &&
+            firstCompanyRowMap.get(companyId) === record._id
+          ) {
             return (
               <Badge
                 count={debtor.totalDebt.toFixed(2)}
