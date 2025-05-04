@@ -25,13 +25,10 @@ export type IRealestate = {
 }
 
 export interface CustomServices {
-  groupName: string
-  services: {
-    _id: ObjectId
-    name: string
-    fieldName: string
-    price: number
-  }
+  _id: ObjectId
+  label: string
+  fieldName: string
+  price: number
 }
 
 export interface IExtendedRealestate extends IRealestate {

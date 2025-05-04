@@ -1,107 +1,113 @@
-import React from "react"
-import { Card, InputNumber } from "antd"
-import { Form, FormInstance, Input, Select, Space } from "antd"
+import React, { useMemo } from 'react'
+import { InputNumber, Space, Button, Form, Dropdown, Menu } from 'antd'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { inputNumberParser } from '@utils/helpers'
-import { DeleteOutlined, CloseOutlined } from "@ant-design/icons"
+import { CloseOutlined, PlusOutlined } from '@ant-design/icons'
+import { Roles } from '@utils/constants'
 
 type CustomServicesCardProps = {
-  form: FormInstance<any>
-  customServices?: { 
-    _id: string
-    name: string
-    groupName: string
-    services: string[]
-  }[]
+  form: any
   disabled?: boolean
+  allCustomServices?: any[]
+  isServiceForm?: boolean
 }
 
-const CustomServicesCard: React.FC<CustomServicesCardProps> = (
-  { 
-    form,
-    disabled = false,
-  }) => {
+const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
+  form,
+  disabled = false,
+  allCustomServices = [],
+  isServiceForm = false
+}) => {
+  const { data: user } = useGetCurrentUserQuery()
+  const isDomainAdmin = useMemo(() => user?.roles?.includes(Roles.DOMAIN_ADMIN), [user])
+  const isGlobalAdmin = useMemo(() => user?.roles?.includes(Roles.GLOBAL_ADMIN), [user])
 
-  const customServices = form.getFieldValue('customServices')
+  const customServices = Form.useWatch('customServices', form) || []
+
+  const selectedIds = customServices.map((s: any) => s._id)
+  const dropdownOptions = allCustomServices.filter(
+    (service) => !selectedIds.includes(service?._id)
+  )
+
+  const handleAddService = (service) => {
+    if (customServices.find((s: any) => s._id === service.value)) return
+    const newEntry = {
+      _id: service?._id,
+      label: service?.label,
+      fieldName: service?.fieldName,
+      price: 0,
+    }
+    form.setFieldsValue({ customServices: [...customServices, newEntry] })
+  }
+
+  const handleRemoveService = (index: number) => {
+    const updated = [...customServices]
+    updated.splice(index, 1)
+    form.setFieldsValue({ customServices: updated })
+  }
 
   return (
-    customServices?.length 
-    ? ( 
-    <Card 
-      title="Групи послуг" 
-      bordered={false}
-      style={{ marginBottom: 16 }}
+    <div>
+      { !disabled && !isServiceForm &&
+      <Dropdown
+        overlay={
+          <Menu
+            items={dropdownOptions.map((option) => ({
+              key: option.value,
+              label: option.label,
+              onClick: () => handleAddService(option),
+            }))}
+          />
+        }
+        trigger={['click']}
       >
-        <Form.List name="customServices">
-          {(fields, {remove: removeGroup}) => (
-            <>
-              {fields.map((field, index) => {
-                const group = form.getFieldValue('customServices')?.[index] || {}
-                return (
-                  <Card
-                    key={field.key}
-                    title={group.groupName || `Невідома група №${index + 1}`}
-                    style={{ marginBottom: 16 }}
-                    extra={!disabled && <DeleteOutlined onClick={() => removeGroup(field.name)}/>}
-                  >
-                    <Form.List name={[field.name, 'services']}>
-                      {(serviceFields, { remove: removeService }) => (
-                        <>
-                          {serviceFields.map((serviceField, serviceIndex) => {
-                            const services = form.getFieldValue(['customServices', index, 'services']) || []
-                            const service = services?.[serviceField.name] || {}
-
-                            return (
-                              <Space 
-                                style={{ width: '100%' }}
-                                size="middle"
-                                >
-                              <Form.Item
-                                key={serviceField.key}
-                                name={[serviceField.name, 'price']}
-                                label={service.name || 'Послуга'}
-                                rules={[
-                                  { 
-                                    required: true,
-                                    message: 'Введіть значення',
-                                  },
-                                ]}
-                              >
-                                <InputNumber
-                                  parser={inputNumberParser}
-                                  placeholder="Введіть значення"
-                                  style={{ width: '320px' }}
-                                  disabled={disabled}
-                                />
-                              </Form.Item>
-                              {!disabled && (
-                                <CloseOutlined
-                                  onClick={() => removeService(serviceIndex)}
-                                  style={{ marginLeft: 8 }}
-                                />
-                              )}
-                              </Space>
-                            )
-                          })}
-                        </>
-                      )}
-                    </Form.List>
-                  </Card>
-                )
-              })}
-            </>
-          )}
-        </Form.List>
-      </Card>)
-      : (
-        <Card 
-          title="Групи послуг" 
-          bordered={false}
-          style={{ marginBottom: 16 }}
+        <Button
+          style={{ width: '100%', height: 40, marginBottom: 16 }}
+          type="dashed"
+          icon={<PlusOutlined />}
         >
-          <p>Групи послуг не знайдені</p>
-        </Card>
-      )
+          Індивідуальні послуги
+        </Button>
+      </Dropdown>
+      }
+
+      <Form.List name="customServices">
+        {(fields) => (
+          <>
+            {fields.map((field, index) => {
+              const service = customServices[index]
+              return (
+                <Space
+                  key={field.key}
+                  style={{ display: 'flex', marginBottom: 6, marginTop: 6 }}
+                  align="start"
+                >
+                  <Form.Item
+                    name={[field.name, 'price']}
+                    label={service?.label}
+                    rules={[{ required: true, message: 'Введіть значення' }]}
+                  >
+                    <InputNumber
+                      parser={inputNumberParser}
+                      placeholder="Введіть значення"
+                      style={{ width: !isServiceForm ? '440px' : '470px' }}
+                      disabled={disabled}
+                    />
+                  </Form.Item>
+                  {!disabled && (isDomainAdmin || isGlobalAdmin) && !isServiceForm && (
+                    <CloseOutlined
+                      onClick={() => handleRemoveService(index)}
+                      style={{ marginTop: 6, fontSize: 18, cursor: 'pointer' }}
+                    />
+                  )}
+                </Space>
+              )
+            })}
+          </>
+        )}
+      </Form.List>
+    </div>
   )
 }
 
-export default CustomServicesCard;
+export default CustomServicesCard

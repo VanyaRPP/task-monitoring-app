@@ -10,7 +10,6 @@ import {
   FormInstance,
   Input,
   InputNumber,
-  Typography,
 } from 'antd'
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs from 'dayjs'
@@ -41,20 +40,17 @@ const AddServiceForm: React.FC<Props> = ({
   const date = Form.useWatch('date', form)
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
-  const { Text } = Typography
 
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery({ domainId: domainId }, { skip: !domainId })
-
-  const initialCustomServices = customDomainServices?.data?.map((group, i) => ({
-    groupName: group.groupName,
-    services: Array.isArray(group.services)
-      ? group.services.map((service, index) => ({
-          fieldName: service?.fieldName,
-          name: service?.name,
-          value: 0,
-        }))
-      : [],
-  }))
+  
+  const initialCustomServices = customDomainServices?.data?.flatMap((group) => 
+    Array.isArray(group?.services) ? group.services.map((service) => ({
+      label: service.name || 'Невідома послуга',
+      price: 0,
+      fieldName: service.fieldName || 'defaultFieldName',
+      _id: service._id || 'defaultId',
+    })) : []
+  )
 
   const { previousMonth } = usePreviousMonthService({
     date,
@@ -110,34 +106,8 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
-        <CustomServicesCard form={form}/>
-        {/* <Form.List name="customServices">
-                {(fields, { }) => (
-                  <>
-                    {fields.map(({ key, name }) => (
-                      <Form.Item
-                        key={key}
-                        name={[name, "value"]}
-                        label={initialCustomServices[name]?.name}
-                      >
-                        <InputNumber
-                          onChange={(value) => {
-                            const customServices = [...form.getFieldValue("customServices")]
-                            customServices[name] = {
-                              ...customServices[name],
-                              value,
-                            };
-                            form.setFieldsValue({ customServices })
-                          }}
-                          placeholder="Введіть значення"
-                          className={s.formInput}
-                          disabled={!edit}
-                        />
-                      </Form.Item>
-                    ))}
-                  </>
-                )}
-              </Form.List> */}
+        <CustomServicesCard form={form} isServiceForm={true}/>
+        { !(initialCustomServices ?? []).some(item => item.fieldName === 'rentPrice') &&
         <Form.Item
           name="rentPrice"
           label="Утримання приміщень (грн/м²)"
@@ -149,6 +119,8 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
+        }
+        { !(initialCustomServices ?? []).some(item => item.fieldName === 'electricityPrice') &&
         <Form.Item
           name="electricityPrice"
           label="Електроенергія (грн/кВт)"
@@ -160,6 +132,8 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
+        }
+        { !(initialCustomServices ?? []).some(item => item.fieldName === 'waterPrice') &&
         <Form.Item
           name="waterPrice"
           label="Водопостачання (грн/м³)"
@@ -171,6 +145,8 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
+        }
+        { !(initialCustomServices ?? []).some(item => item.fieldName === 'waterPriceTotal') &&
         <Form.Item
           name="waterPriceTotal"
           label="Всього водопостачання (грн/м³)"
@@ -182,6 +158,8 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
+        }
+        { !(initialCustomServices ?? []).some(item => item.fieldName === 'garbageCollectorPrice') &&
         <Form.Item name="garbageCollectorPrice" label="Вивіз сміття">
           <InputNumber
             parser={inputNumberParser}
@@ -189,6 +167,7 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
+        }
         <Form.Item name="inflicionPrice" label="Індекс інфляції">
           <InputNumber
             parser={inputNumberParser}

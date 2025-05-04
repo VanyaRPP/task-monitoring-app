@@ -12,13 +12,10 @@ export interface IServiceModel {
   inflicionPrice: number
   description: string
   customServices: {
-    groupName: string
-    services: {
-      _id: ObjectId
-      name: string
-      fieldName: string
-      price: number
-    }[]
+    _id: ObjectId
+    label: string
+    fieldName: string
+    price: number
   }[]
   losses?: number
 }
@@ -37,14 +34,10 @@ export const ServiceSchema = new Schema<IServiceModel>({
   customServices: {
     type: [
       {
-        groupName: { type: String, required: true },
-        services: [
-          {
-            name: { type: String, required: true },
-            fieldName: { type: String, required: true },
-            price: { type: Number, required: true },
-          },
-        ],
+        _id: { type: Schema.Types.ObjectId, ref: 'CustomService' },
+        label: { type: String, required: true },
+        fieldName: { type: String, required: true },
+        price: { type: Number, required: true },
       },
     ],
     required: false,

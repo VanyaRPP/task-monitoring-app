@@ -11,6 +11,7 @@ import {
 } from '@common/api/domainApi/domain.api.types'
 import DomainForm from './DomainForm'
 import Modal from '../../ModalWindow'
+import { current } from '@reduxjs/toolkit'
 
 interface Props {
   currentDomain: IExtendedDomain
@@ -19,6 +20,7 @@ interface Props {
 }
 
 const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
+
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
   const [addDomainEstate] = useAddDomainMutation()
@@ -40,14 +42,24 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       mfo: currentDomain?.mfo || '',
       rnokpp: currentDomain?.rnokpp || '',
       iban: currentDomain?.iban || '',
-      customServices: currentDomain?.customServices || [],
+      customServices: currentDomain?.customServices 
+      || [{
+        groupName: 'Стандартні послуги',
+        services:[
+          '677d414283b6ef93c6b8ea2c',
+          '68156d2cf520914e5e1ad87c', 
+          '68156cdbf520914e5e1ad877',
+          '6816bca1e26e39a785fd7a0d',
+          '68156d58f520914e5e1ad881',
+          '677d434c83b6ef93c6b8ea3a',
+        ],
+      }],
     }
     form.setFieldsValue(initialValues)
   }, [currentDomain, form])
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
-    console.log(formData.customServices)
 
     if (!currentDomain && domains?.some(domain => domain.name === formData.name)) {
       message.error({
@@ -74,7 +86,6 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       mfo: formData.mfo,
       rnokpp: formData.rnokpp,
       iban: formData.iban,
-      domainServices: formData.services,
       customServices: formData.customServices,
     }
 

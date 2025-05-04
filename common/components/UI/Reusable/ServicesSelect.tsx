@@ -77,6 +77,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                 >
                   <Form.Item required style={{ flex: 1, marginRight: 8 }}>
                     <Input
+                      style={{ minWidth: '150px' }}
                       value={groupName}
                       onChange={(e) => {
                         const current = form.getFieldValue('customServices')
@@ -93,6 +94,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
 
                   <Form.Item required style={{ flex: 3 }}>
                     <Select
+
                       mode="multiple"
                       options={(() => {
                         const allGroups =
@@ -106,7 +108,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                         }))
                         return filteredOptions
                       })()}
-                      style={{ minWidth: '200px' }}
+                      style={{ minWidth: '150px', maxWidth: '220px' }}
                       value={groupValues}
                       onChange={(newValues) => {
                         const current = form.getFieldValue('customServices')

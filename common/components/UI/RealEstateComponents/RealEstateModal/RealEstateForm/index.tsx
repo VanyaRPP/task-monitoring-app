@@ -29,6 +29,7 @@ interface Props {
   currentRealEstate?: IExtendedRealestate
   editable?: boolean
   setIsValueChanged: (value: boolean) => void
+  customServices?: any[]
 }
 
 const RealEstateForm: FC<Props> = ({
@@ -36,6 +37,7 @@ const RealEstateForm: FC<Props> = ({
   currentRealEstate,
   editable = true,
   setIsValueChanged,
+  customServices = [],
 }) => {
   const domainId = Form.useWatch('domain', form)
 
@@ -146,7 +148,9 @@ const RealEstateForm: FC<Props> = ({
       <CustomServicesCard
         form={form}
         disabled={!editable}
+        allCustomServices={customServices}
       />
+      { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') &&
         <Form.Item
           name="servicePricePerMeter"
           label="Індивідуальне утримання (грн/м²)"
@@ -158,6 +162,7 @@ const RealEstateForm: FC<Props> = ({
             disabled={!editable}
           />
         </Form.Item>
+      }
         <Form.Item name="rentPart" label="Частка загальної площі">
           <InputNumber
             parser={inputNumberParser}
@@ -177,15 +182,16 @@ const RealEstateForm: FC<Props> = ({
           />
         </Form.Item>
       )}
-
-      <Form.Item name="cleaning" label="Прибирання (грн)">
-        <InputNumber
-          parser={inputNumberParser}
-          placeholder="Вкажіть значення"
-          className={s.formInput}
-          disabled={!editable}
-        />
-      </Form.Item>
+      { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') &&
+        <Form.Item name="cleaning" label="Прибирання (грн)">
+          <InputNumber
+            parser={inputNumberParser}
+            placeholder="Вкажіть значення"
+            className={s.formInput}
+            disabled={!editable}
+          />
+        </Form.Item>
+      }
 
       <Form.Item name="discount" label="Знижка">
         <InputNumber

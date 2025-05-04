@@ -26,7 +26,7 @@ const DomainsServices: FC<Props> = ({
 
   const handleSave = async (fieldKey: number) => {
     const service = form.getFieldValue(['domainServices', fieldKey])
-    if (!service.name) {
+    if (!service?.name) {
       message.error('Будь ласка, введіть назву послуги')
       return
     }

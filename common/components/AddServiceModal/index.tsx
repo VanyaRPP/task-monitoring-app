@@ -32,13 +32,10 @@ type FormData = {
   inflicionPrice: number
   description: string
   customServices: {
-    groupName: string
-      services: {
-        _id: ObjectId
-        name: string
-        fieldName: string
-        price: number
-    }[]
+    _id: ObjectId
+    label: string
+    fieldName: string
+    price: number
   }[]
   losses: number
 }

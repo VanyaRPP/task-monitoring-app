@@ -36,16 +36,16 @@ const RealEstateModal: FC<Props> = ({
   const domainId = Form.useWatch('domain', form)
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery({ domainId: currentRealEstate?.domain?._id || domainId }, { skip: !domainId && !currentRealEstate?.domain?._id })
 
-  const customServices = customDomainServices?.data?.map((group, i) => ({
-    groupName: group.groupName,
-    services: Array.isArray(group.services)
-      ? group.services.map((service, index) => ({
-          fieldName: service?.fieldName,
-          name: service?.name,
-          price: currentRealEstate?.customServices[i]?.services[index]?.price || 0,
+  const customServices = customDomainServices?.data?.flatMap((group) => 
+    Array.isArray(group?.services)
+      ? group.services.map((service) => ({
+          label: service.name || 'Невідома послуга',
+          price: 0,
+          fieldName: service.fieldName || 'defaultFieldName',
+          _id: service._id || 'defaultId',
         }))
-      : [],
-  }))
+      : []
+  )
 
   useEffect(() => {
     
@@ -70,7 +70,7 @@ const RealEstateModal: FC<Props> = ({
       discount: currentRealEstate?.discount || 0,
       cleaning: currentRealEstate?.cleaning || 0,
       services: currentRealEstate?.services || [],
-      customServices: customServices ?? [],
+      customServices: currentRealEstate?.customServices || [],
     }
     form.setFieldsValue(initialValues)
   }, [currentRealEstate, form, customServices])
@@ -134,6 +134,7 @@ const RealEstateModal: FC<Props> = ({
         currentRealEstate={currentRealEstate}
         editable={editable}
         setIsValueChanged={setIsValueChanged}
+        customServices={customServices}
       />
     </Modal>
   )
