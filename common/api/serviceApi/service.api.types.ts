@@ -17,7 +17,6 @@ export interface IService {
   inflicionPrice?: number
   description?: string
   customServices?: {
-    map(arg0: (s: any) => { name: any; price: number; sum: number; type: ServiceType; customService: boolean }): any
     _id: ObjectId
     label: string
     fieldName: string

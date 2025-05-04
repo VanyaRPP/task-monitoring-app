@@ -491,14 +491,18 @@ export const getCustomServiceInvoices = ({
     return []
   }
 
-  const customServices = service?.customServices?.flatMap(service =>
-    service?.map(s => ({
-      name: s.label || 'Невідома послуга',
-      price: +toRoundFixed(s.price),
-      sum:  +toRoundFixed(s.price),
-      type: ServiceType.Custom,
-      customService: true,
-    }))
-  )
+  const customServices = Array.isArray(service?.customServices)
+    ? service?.customServices.flatMap(customService =>
+        Array.isArray(customService)
+          ? customService.map(s => ({
+              name: s.label || 'Невідома послуга',
+              price: +toRoundFixed(s.price),
+              sum:  +toRoundFixed(s.price),
+              type: ServiceType.Custom,
+              customService: true,
+            }))
+          : []
+      )
+    : []
   return customServices
 }
