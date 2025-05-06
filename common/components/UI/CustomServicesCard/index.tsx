@@ -1,0 +1,113 @@
+import React, { useMemo } from 'react'
+import { InputNumber, Space, Button, Form, Dropdown, Menu } from 'antd'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { inputNumberParser } from '@utils/helpers'
+import { CloseOutlined, PlusOutlined } from '@ant-design/icons'
+import { Roles } from '@utils/constants'
+
+type CustomServicesCardProps = {
+  form: any
+  disabled?: boolean
+  allCustomServices?: any[]
+  isServiceForm?: boolean
+}
+
+const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
+  form,
+  disabled = false,
+  allCustomServices = [],
+  isServiceForm = false
+}) => {
+  const { data: user } = useGetCurrentUserQuery()
+  const isDomainAdmin = useMemo(() => user?.roles?.includes(Roles.DOMAIN_ADMIN), [user])
+  const isGlobalAdmin = useMemo(() => user?.roles?.includes(Roles.GLOBAL_ADMIN), [user])
+
+  const customServices = Form.useWatch('customServices', form) || []
+
+  const selectedIds = customServices.map((s: any) => s._id)
+  const dropdownOptions = allCustomServices.filter(
+    (service) => !selectedIds.includes(service?._id)
+  )
+
+  const handleAddService = (service) => {
+    if (customServices.find((s: any) => s._id === service.value)) return
+    const newEntry = {
+      _id: service?._id,
+      label: service?.label,
+      fieldName: service?.fieldName,
+      price: 0,
+    }
+    form.setFieldsValue({ customServices: [...customServices, newEntry] })
+  }
+
+  const handleRemoveService = (index: number) => {
+    const updated = [...customServices]
+    updated.splice(index, 1)
+    form.setFieldsValue({ customServices: updated })
+  }
+
+  return (
+    <div>
+      { !disabled && !isServiceForm &&
+      <Dropdown
+        overlay={
+          <Menu
+            items={dropdownOptions.map((option) => ({
+              key: option.value,
+              label: option.label,
+              onClick: () => handleAddService(option),
+            }))}
+          />
+        }
+        trigger={['click']}
+      >
+        <Button
+          style={{ width: '100%', height: 40, marginBottom: 16 }}
+          type="dashed"
+          icon={<PlusOutlined />}
+        >
+          Індивідуальні послуги
+        </Button>
+      </Dropdown>
+      }
+
+      <Form.List name="customServices">
+        {(fields) => (
+          <>
+            {fields.map((field, index) => {
+              const service = customServices[index]
+              return (
+                <Space
+                  key={field.key}
+                  style={{ display: 'flex', marginBottom: 6, marginTop: 6 }}
+                  align="start"
+                >
+                  <Form.Item
+                    name={[field.name, 'price']}
+                    label={service?.label}
+                    rules={[{ required: true, message: 'Введіть значення' }]}
+                  >
+                    <InputNumber
+                      parser={inputNumberParser}
+                      placeholder="Введіть значення"
+                      style={{ width: !isServiceForm ? '440px' : '470px' }}
+                      disabled={disabled}
+                    />
+                  </Form.Item>
+                  {!disabled && (isDomainAdmin || isGlobalAdmin) && !isServiceForm && (
+                    <CloseOutlined
+                      onClick={() => handleRemoveService(index)}
+                      style={{ marginTop: 6, fontSize: 18, cursor: 'pointer' }}
+                    />
+                  )}
+                </Space>
+              )
+            })}
+          </>
+        )}
+      </Form.List>
+    </div>
+  )
+}
+
+export default CustomServicesCard

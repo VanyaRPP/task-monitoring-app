@@ -3,6 +3,7 @@ import useInitialValues from '@modules/hooks/useInitialValues'
 import { DatePicker, Form, FormInstance, Input } from 'antd'
 import { FC } from 'react'
 import s from './style.module.scss'
+import CustomServicesCard from '@components/UI/CustomServicesCard'
 
 interface Props {
   form: FormInstance<any>
@@ -29,6 +30,7 @@ const PreviewServiceForm: FC<Props> = ({ form, currentService }) => {
       <Form.Item name="date" label="Місяць та рік">
         <MonthPicker format="MMMM YYYY" className={s.formInput} disabled />
       </Form.Item>
+      <CustomServicesCard form={form} disabled />
       <Form.Item name="rentPrice" label="Утримання приміщень (грн/м²)">
         <Input className={s.formInput} disabled />
       </Form.Item>
