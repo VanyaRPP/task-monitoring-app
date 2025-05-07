@@ -82,6 +82,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   realEstatesFilter,
   singleCompany,
   singleDomain,
+  onCascaderChange
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -210,8 +211,15 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
         {pathname === AppRoutes.PAYMENT && (
           <Space size="middle">
             <Space size="middle">
-              <ColumnSelect style={{ minWidth: 200 }} onSelect={onColumnsSelect} />
-              <PaymentCascader onChange={setCurrentDateFilter} />
+              <ColumnSelect
+                style={{ minWidth: 200 }}
+                onSelect={onColumnsSelect}
+              />
+              <PaymentCascader
+                onChange={(value) => {
+                  onCascaderChange?.(value)
+                }}
+              />
               <StreetsSelector setFilters={setFilters} streets={streets} />
             </Space>
             <Space direction="vertical" size="middle" align="center">
