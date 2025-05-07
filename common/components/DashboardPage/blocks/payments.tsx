@@ -704,7 +704,6 @@ const {
           realEstatesFilter={companiesFilter?.realEstatesFilter}
           singleCompany={singleCompanyName}
           singleDomain={singleDomainName}
-          onCascaderChange={handleCascaderChange}
         />
       }
     >
