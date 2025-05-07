@@ -266,21 +266,6 @@ const {
   }, [filters])
 
   const [appliedFilters, setAppliedFilters] = useState<any>()
-  // useEffect(() => {
-  //   if (appliedFilters && appliedFilters !== filters) {
-  //     setPageData((prev) => ({
-  //       ...prev,
-  //       currentPage: 1,
-  //     }))
-  //   }
-  // }, [appliedFilters])
-
-  // useEffect(() => {
-  //   if (JSON.stringify(appliedFilters) !== JSON.stringify(filters)) {
-  //     setPageData((prev) => ({ ...prev, currentPage: 1 }))
-  //   }
-  // }, [appliedFilters])
-
 
   useEffect(() => {
     const filtersChanged =
