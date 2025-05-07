@@ -69,7 +69,11 @@ describe('isDomainAdmin', () => {
     const findOneSpy = jest
       .spyOn(RealEstate, 'findOne')
       .mockRejectedValue(new Error('Database error'))
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
+    const consoleSpy = jest
+      .spyOn(console, 'log')
+      .mockImplementation((message) => {
+        /* Mocked console.log */
+      })
 
     const mockUser: IUser = {
       email: 'admin@example.com',

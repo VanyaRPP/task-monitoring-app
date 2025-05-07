@@ -6,6 +6,7 @@ import { Button, Table, TableColumnsType } from 'antd'
 import { useMemo, useState } from 'react'
 import { EditUserModal } from '../../EditUserModal'
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UsersTableProps {}
 
 export const UsersTable: React.FC<UsersTableProps> = ({}) => {

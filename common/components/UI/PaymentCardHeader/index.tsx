@@ -85,6 +85,7 @@ const PaymentCardHeader = ({
       })
       saveAs(blob, `payments.xlsx`)
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error:', error)
     }
   }
@@ -153,8 +154,13 @@ const PaymentCardHeader = ({
     <Flex
       wrap
       justify="space-between"
-      align='center'
-      style={{ marginBottom: '10px', marginTop: '10px', maxHeight: '60px', overflowY: 'auto' }}
+      align="center"
+      style={{
+        marginBottom: '10px',
+        marginTop: '10px',
+        maxHeight: '60px',
+        overflowY: 'auto',
+      }}
     >
       <Space wrap size="small">
         <Button
