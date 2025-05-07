@@ -251,11 +251,11 @@ function filterPeriodOptions(args) {
 
   const filterByDateOptions = []
 
-  // if (year && !isNaN(Number(year))) {
-  //   filterByDateOptions.push({
-  //     $eq: [{ $year: field }, +year],
-  //   })
-  // }
+  if (year && !isNaN(Number(year))) {
+    filterByDateOptions.push({
+      $eq: [{ $year: field }, +year],
+    })
+  }
 
   if (Array.isArray(month) && month.length > 0) {
     filterByDateOptions.push({

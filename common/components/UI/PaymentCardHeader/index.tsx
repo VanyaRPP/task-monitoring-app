@@ -56,6 +56,7 @@ const PaymentCardHeader = ({
   onColumnsSelect,
   domainFilter,
   realEstatesFilter,
+  onCascaderChange
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -182,7 +183,11 @@ const PaymentCardHeader = ({
                 style={{ minWidth: 200 }}
                 onSelect={onColumnsSelect}
               />
-              <PaymentCascader onChange={setCurrentDateFilter} />
+              <PaymentCascader
+                onChange={(value) => {
+                  onCascaderChange?.(value)
+                }}
+              />
               <StreetsSelector setFilters={setFilters} streets={streets} />
             </Space>
             <Space direction="vertical" size={4} style={{ minWidth: 150 }}>
