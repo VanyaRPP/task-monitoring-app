@@ -80,6 +80,7 @@ const ChartComponent: React.FC<{
     return () => {
       resizeObserver.disconnect()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartRef, dataSources, chartTitle, token])
 
   return (
