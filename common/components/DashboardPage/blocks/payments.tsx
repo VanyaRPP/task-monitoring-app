@@ -49,7 +49,7 @@ import {
   theme,
 } from 'antd'
 import { useRouter } from 'next/router'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import s from './style.module.scss'
 import { skipToken } from '@reduxjs/toolkit/query'
 
@@ -101,20 +101,22 @@ function formatDateFilterForQuery(value: string[] | undefined) {
     if (!match) continue
 
     const [, y, period, number] = match
-    if (!year) year = Number(y)
+    const parsedYear = Number(y)
+    if (!year) year = parsedYear
+
     if (period === PERIOD_FILTR.MONTH) {
       months.push(Number(number))
+    } else if (period === PERIOD_FILTR.QUARTER) {
+      const q = Number(number)
+      months.push(...[(q - 1) * 3 + 1, (q - 1) * 3 + 2, (q - 1) * 3 + 3])
+    } else if (period === PERIOD_FILTR.YEAR) {
     }
   }
 
-  const query: any = {
-    year,
-  }
-
-  if (months.length === 1) {
-    query.month = months[0]
-  } else if (months.length > 1) {
-    query.month = months
+  const query: any = {}
+  if (year) query.year = year
+  if (months.length > 0) {
+    query.month = months.length === 1 ? months[0] : months
   }
 
   return query
@@ -129,6 +131,7 @@ function getTypeOperation(value) {
 }
 
 const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
+  const paginationTriggeredRef = useRef(false)
   const router = useRouter()
   const [currentPayment, setCurrentPayment] =
     useState<Partial<IExtendedPayment>>(null)
@@ -187,6 +190,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const { data: dateFilters } = useGetDateFiltersQuery({ type: 'payment' })
 
   const handlePagination = (pagination) => {
+    paginationTriggeredRef.current = true
     setPageData({
       pageSize: pagination.pageSize,
       currentPage: pagination.current,
@@ -262,19 +266,33 @@ const {
   }, [filters])
 
   const [appliedFilters, setAppliedFilters] = useState<any>()
+  // useEffect(() => {
+  //   if (appliedFilters && appliedFilters !== filters) {
+  //     setPageData((prev) => ({
+  //       ...prev,
+  //       currentPage: 1,
+  //     }))
+  //   }
+  // }, [appliedFilters])
+
+  // useEffect(() => {
+  //   if (JSON.stringify(appliedFilters) !== JSON.stringify(filters)) {
+  //     setPageData((prev) => ({ ...prev, currentPage: 1 }))
+  //   }
+  // }, [appliedFilters])
+
+
   useEffect(() => {
-    if (appliedFilters && appliedFilters !== filters) {
+    const filtersChanged =
+      JSON.stringify(appliedFilters) !== JSON.stringify(filters)
+  
+    if (filtersChanged && !paginationTriggeredRef.current) {
       setPageData((prev) => ({
         ...prev,
         currentPage: 1,
       }))
     }
-  }, [appliedFilters])
-
-  useEffect(() => {
-    if (JSON.stringify(appliedFilters) !== JSON.stringify(filters)) {
-      setPageData((prev) => ({ ...prev, currentPage: 1 }))
-    }
+      paginationTriggeredRef.current = false
   }, [appliedFilters])
   const isSingleDomainCurrentPage = useMemo(() => {
     if (
@@ -351,15 +369,8 @@ const {
         dataIndex: 'invoiceCreationDate',
         render: dateToDefaultFormat,
         width: router.pathname === AppRoutes.PAYMENT ? 164 : 70,
-        filters:
-          dateFilters?.monthFilter
-            ?.filter((filter) => filter.value !== null)
-            ?.map((filter) => ({
-              text: dateToMonth(new Date(2000, Number(filter.value) - 1)),
-              value: `${new Date().getFullYear()}-month-${filter.value}`,
-            })) || [],
-        filteredValue: filters?.invoiceCreationDate || null,
-      },
+      }
+      ,
       {
         title: 'Тип',
         dataIndex: 'type',
@@ -613,6 +624,45 @@ const {
     )
   }, [columns, currUser, router])
 
+  const handleCascaderChange = (value: string[] | undefined) => {
+    if (!Array.isArray(value)) {
+      setCurrentDateFilter(undefined)
+      setFilters((prev) => {
+        const { invoiceCreationDate, ...rest } = prev || {}
+        return rest
+      })
+      return
+    }
+    let formatted: string[] = []
+    if (value.length === 3 && value[0] === 'year' && value[2] === 'year') {
+      const selectedYear = value[1]
+      formatted = [`${selectedYear}-year-1`]
+    }
+  
+    if (value.length === 4 && value[2] === 'month') {
+      const selectedYear = value[1]
+      const selectedMonth = value[3]
+      formatted = [`${selectedYear}-month-${selectedMonth}`]
+    }
+  
+    if (value.length === 4 && value[2] === 'quarter') {
+      const selectedYear = value[1]
+      const selectedQuarter = value[3]
+      formatted = [`${selectedYear}-quarter-${selectedQuarter}`]
+    }
+  
+    setCurrentDateFilter(formatted)
+    setFilters((prev) => ({
+      ...prev,
+      invoiceCreationDate: formatted,
+    }))
+  }
+  useEffect(() => {
+    if (filters?.invoiceCreationDate?.length > 0) {
+      setCurrentDateFilter(filters.invoiceCreationDate)
+    }
+  }, [filters?.invoiceCreationDate])
+   
   return (
     <TableCard
       title={
@@ -633,6 +683,7 @@ const {
           onColumnsSelect={setSelectedColumns}
           domainFilter={showDomainFilter ? domainsFilters?.domainsFilter : undefined}
           realEstatesFilter={companiesFilter?.realEstatesFilter}
+          onCascaderChange={handleCascaderChange}
         />
       }
     >
@@ -676,10 +727,16 @@ const {
           }
           onChange={(pagination, nextFilters) => {
             handlePagination(pagination)
-            setFilters(nextFilters)
-            setAppliedFilters(nextFilters)
-            const val = nextFilters?.invoiceCreationDate
-            setCurrentDateFilter(Array.isArray(val) ? val.map(String) : [])
+            const { invoiceCreationDate, ...otherFilters } = nextFilters || {}
+            setFilters((prev) => ({
+              ...prev,
+              ...otherFilters,
+              invoiceCreationDate: prev?.invoiceCreationDate,
+            }))
+            setAppliedFilters((prev) => ({
+              ...prev,
+              ...otherFilters,
+            }))
           }}
           scroll={{
             x:
