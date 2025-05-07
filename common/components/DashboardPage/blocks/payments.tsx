@@ -51,6 +51,7 @@ import {
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import s from './style.module.scss'
+import { skipToken } from '@reduxjs/toolkit/query'
 
 interface PaymentsBlockProps {
   sepDomainID?: string
@@ -205,16 +206,20 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const { data: streetsFilter } = useGetAddressFiltersQuery({
     domains: filters?.domain,
   })
+  const shouldSkipQuery =
+  currUserLoading || !currUser || !pageData.pageSize || !pageData.currentPage
 
-  const {
-    isFetching: paymentsFetching,
-    isLoading: paymentsLoading,
-    isError: paymentsError,
-    data: payments,
-  } = useGetAllPaymentsQuery(
-    {
+const pageKey = useMemo(
+  () => `${pageData.currentPage}_${pageData.pageSize}`,
+  [pageData]
+)
+
+const queryArgs = shouldSkipQuery
+  ? skipToken
+  : {
       skip: (pageData.currentPage - 1) * pageData.pageSize,
       limit: pageData.pageSize,
+      pageKey, 
       ...formatDateFilterForQuery(currentDateFilter),
       ...getTypeOperation(currentTypeOperation),
       dateField: selectedDateField,
@@ -222,9 +227,16 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       domainIds: sepDomainID || filters?.domain || undefined,
       streetIds: filters?.street || undefined,
       type: filters?.type || undefined,
-    },
-    { skip: currUserLoading || !currUser }
-  )
+    }
+
+const {
+  isFetching: paymentsFetching,
+  isLoading: paymentsLoading,
+  isError: paymentsError,
+  data: payments,
+} = useGetAllPaymentsQuery(queryArgs, {
+  refetchOnMountOrArgChange: true,
+})
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
@@ -264,9 +276,24 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       setPageData((prev) => ({ ...prev, currentPage: 1 }))
     }
   }, [appliedFilters])
+  const isSingleDomainCurrentPage = useMemo(() => {
+    if (
+      paymentsLoading ||
+      paymentsFetching ||
+      !payments?.data?.length
+    ) {
+      return undefined;
+    }
+    const domainIds = payments.data.map((p) =>
+      typeof p.domain === 'string' ? p.domain : p.domain?._id
+    );
+    const unique = new Set(domainIds);
+    return unique.size === 1;
+  }, [payments?.data, paymentsLoading, paymentsFetching]);
+  
   const columns: TableColumnType<any>[] = useMemo(() => {
     return [
-      {
+      ...(!isSingleDomainCurrentPage   ? [{
         title: 'Надавач послуг',
         width: router.pathname === AppRoutes.PAYMENT ? 170 : 80,
         dataIndex: 'domain',
@@ -290,8 +317,9 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           ) : (
             domain?.name
           ),
-        hidden: payments?.domainsFilter?.length <= 1,
-      },
+        },
+      ]
+    : []),
       {
         title: 'Компанія',
         dataIndex: 'company',
@@ -527,9 +555,10 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         ),
         hidden: !isDomainAdmin && !isGlobalAdmin,
       },
-    ].filter(({ hidden }) => !hidden) as TableColumnType<any>[]
+    ].filter(Boolean) as TableColumnType<any>[]; 
   }, [
-    payments,
+    isSingleDomainCurrentPage ,
+    pageData.currentPage,
     router,
     paymentActions,
     isDomainAdmin,
@@ -541,6 +570,10 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     token,
     selectedColumns,
   ])
+  const showDomainFilter = useMemo(
+    () => columns.some((col) => col.dataIndex === 'domain'),
+    [columns]
+  );
 
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
     PaymentDeleteItem[]
@@ -598,7 +631,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           setPaymentsDeleteItems={setPaymentsDeleteItems}
           enablePaymentsButton={sepDomainID ? false : true}
           onColumnsSelect={setSelectedColumns}
-          domainFilter={domainsFilters?.domainsFilter}
+          domainFilter={showDomainFilter ? domainsFilters?.domainsFilter : undefined}
           realEstatesFilter={companiesFilter?.realEstatesFilter}
         />
       }
@@ -606,7 +639,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       {deleteError || paymentsError || currUserError ? (
         <Alert message="Помилка" type="error" showIcon closable />
       ) : (
-        <Table
+        <Table 
+          key={columns.map((col) => col.dataIndex).join(',')}
           rowKey="_id"
           rowSelection={
             currUser?.roles?.includes(Roles.GLOBAL_ADMIN) &&
@@ -633,14 +667,15 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             (router.pathname === AppRoutes.PAYMENT ||
               router.pathname === AppRoutes.SEP_DOMAIN) && {
               current: pageData.currentPage,
+              pageSize: pageData.pageSize, 
               total: payments?.total || 0,
               showSizeChanger: true,
               pageSizeOptions: [10, 20, 50],
               position: ['bottomCenter'],
-              onChange: handlePagination,
             }
           }
-          onChange={(_, nextFilters) => {
+          onChange={(pagination, nextFilters) => {
+            handlePagination(pagination)
             setFilters(nextFilters)
             setAppliedFilters(nextFilters)
             const val = nextFilters?.invoiceCreationDate
@@ -660,32 +695,18 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
                 <Table.Summary.Row>
                   {summaryColumns.map(({ column, index }) =>
                     column.dataIndex === 'debit' ? (
-                      <Table.Summary.Cell
-                        key={index}
-                        index={index}
-                        align="center"
-                      >
-                        {renderCurrency(
-                          toRoundFixed(payments?.totalPayments?.debit)
-                        )}
+                      <Table.Summary.Cell key={index} index={index} align="center">
+                        {renderCurrency(toRoundFixed(payments?.totalPayments?.debit))}
                       </Table.Summary.Cell>
                     ) : column.dataIndex === 'credit' ? (
-                      <Table.Summary.Cell
-                        key={index}
-                        index={index}
-                        align="center"
-                      >
-                        {renderCurrency(
-                          toRoundFixed(payments?.totalPayments?.credit)
-                        )}
+                      <Table.Summary.Cell key={index} index={index} align="center">
+                        {renderCurrency(toRoundFixed(payments?.totalPayments?.credit))}
                       </Table.Summary.Cell>
                     ) : (
                       <Table.Summary.Cell key={index} index={index}>
                         {Object.values(ServiceType).includes(column.dataIndex)
                           ? renderCurrency(
-                              toRoundFixed(
-                                payments?.totalPayments?.[column.dataIndex]
-                              )
+                              toRoundFixed(payments?.totalPayments?.[column.dataIndex])
                             )
                           : null}
                       </Table.Summary.Cell>
