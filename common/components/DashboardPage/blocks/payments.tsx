@@ -1,4 +1,9 @@
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  MoreOutlined,
+} from '@ant-design/icons'
 import {
   dateToDefaultFormat,
   dateToMonth,
@@ -47,6 +52,7 @@ import {
   Typography,
   message,
   theme,
+  Dropdown,
 } from 'antd'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -492,40 +498,63 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         title: '',
         width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
         render: (_, payment: IExtendedPayment) => (
-          <Button
-            style={{ padding: 0 }}
-            type="link"
-            onClick={() => {
-              setCurrentPayment(payment)
-              setPaymentActions({ ...paymentActions, edit: true })
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: 'edit',
+                  label: (
+                    <Button
+                      icon={<EditOutlined />}
+                      type="link"
+                      style={{
+                        color: '#722ed1',
+                        paddingLeft: '10px',
+                        paddingRight: '10px',
+                      }}
+                      onClick={() => {
+                        setCurrentPayment(payment)
+                        setPaymentActions({ ...paymentActions, edit: true })
+                      }}
+                    >
+                      Редагувати
+                    </Button>
+                  ),
+                },
+                isGlobalAdmin && {
+                  key: 'delete',
+                  label: (
+                    <Popconfirm
+                      id="popconfirm_custom"
+                      title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+                        payment?.invoiceCreationDate as unknown as string
+                      )}?`}
+                      onConfirm={() => handleDeletePayment(payment?._id)}
+                      okText="Видалити"
+                      cancelText="Ні"
+                      disabled={deleteLoading}
+                    >
+                      <Button
+                        type="text"
+                        icon={<DeleteOutlined />}
+                        style={{
+                          color: '#ff4d4f',
+                          paddingLeft: '10px',
+                          paddingRight: '10px',
+                        }}
+                      >
+                        Видалити
+                      </Button>
+                    </Popconfirm>
+                  ),
+                },
+              ],
             }}
+            placement="bottomRight"
           >
-            <EditOutlined />
-          </Button>
+            <Button icon={<MoreOutlined />} />
+          </Dropdown>
         ),
-        hidden: !isDomainAdmin && !isGlobalAdmin,
-      },
-      {
-        align: 'center',
-        fixed: 'right',
-        title: '',
-        width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
-
-        render: (_, payment: IExtendedPayment) => (
-          <Popconfirm
-            id="popconfirm_custom"
-            title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-              payment?.invoiceCreationDate as unknown as string
-            )}?`}
-            onConfirm={() => handleDeletePayment(payment?._id)}
-            okText="Видалити"
-            cancelText="Ні"
-            disabled={deleteLoading}
-          >
-            <Button type="text" icon={<DeleteOutlined />} />
-          </Popconfirm>
-        ),
-        hidden: !isDomainAdmin && !isGlobalAdmin,
       },
     ].filter(({ hidden }) => !hidden) as TableColumnType<any>[]
   }, [
