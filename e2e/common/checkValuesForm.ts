@@ -48,6 +48,7 @@ export const checkValuesForm = (page: Page) => {
       const cellCount = await sumCells.count()
 
       if (cellCount === 0) {
+        // eslint-disable-next-line no-console
         console.error('Не знайдено жодних клітинок з "грн"')
       } else {
         for (let i = 0; i < cellCount; i++) {
@@ -58,6 +59,7 @@ export const checkValuesForm = (page: Page) => {
           const numberValue = parseFloat(numberText)
 
           if (numberValue <= 0) {
+            // eslint-disable-next-line no-console
             console.error(
               `Помилка: значення у клітинці ${
                 i + 1

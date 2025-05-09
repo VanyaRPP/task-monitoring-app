@@ -149,15 +149,18 @@ const CompanySelector: React.FC<Omit<SelectProps, 'options' | 'mode'>> = ({
     isFetching,
     isError,
   } = useGetAllRealEstateQuery({})
-  const companies =
-    data.length !== 0
-      ? data?.map((company) => {
+
+  const companies = useMemo(() => {
+    return data.length !== 0
+      ? //TODO: Add types to this line
+        data?.map((company: { companyName: any; _id: any }) => {
           return {
             text: company.companyName,
             value: company._id,
           }
         })
       : []
+  }, [data])
 
   const options = useMemo(() => {
     return companies?.map((company: IFilter) => ({

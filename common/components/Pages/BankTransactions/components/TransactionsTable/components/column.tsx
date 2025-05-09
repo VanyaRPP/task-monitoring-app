@@ -309,7 +309,6 @@ export const generateColumns = (
       width: '25%',
       dataIndex: 'OPTIONS',
       key: 'OPTIONS',
-      fixed: 'right' as const,
       render: (text: string, record: ITransaction) => (
         <TransactionDrawer transaction={record} domain={domain} />
       ),
