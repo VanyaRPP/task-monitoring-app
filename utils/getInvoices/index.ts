@@ -48,7 +48,7 @@ export interface IGetInvoiceByTypeProps {
  * @param prevPayment - represents Payment from previous month
  * @returns array of invoices for provided props
  */
-export const getInvoices = ({
+export const getInvoicesOld = ({
   company,
   service,
   payment,
@@ -488,17 +488,20 @@ export const getCustomServiceInvoices = ({
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): Array<IPaymentField> => {
-  if((!service?.customServices && !company?.customServices) || Object.keys(currInvoicesCollection).length > 0) {
+  if (
+    (!service?.customServices && !company?.customServices) ||
+    Object.keys(currInvoicesCollection).length > 0
+  ) {
     return []
   }
 
   const customServices = Array.isArray(service?.customServices)
-    ? service?.customServices.flatMap(customService =>
+    ? service?.customServices.flatMap((customService) =>
         Array.isArray(customService)
-          ? customService.map(s => ({
+          ? customService.map((s) => ({
               name: s.label || 'Невідома послуга',
               price: +toRoundFixed(s.price),
-              sum:  +toRoundFixed(s.price),
+              sum: +toRoundFixed(s.price),
               type: ServiceType.Custom,
               customService: true,
             }))
