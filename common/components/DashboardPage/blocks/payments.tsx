@@ -299,36 +299,69 @@ const {
     const unique = new Set(domainIds);
     return unique.size === 1;
   }, [payments?.data, paymentsLoading, paymentsFetching]);
-  
+
+  const isSingleCompanyCurrentPage = useMemo(() => {
+    if (
+      paymentsLoading ||
+      paymentsFetching ||
+      !payments?.data?.length
+    ) {
+      return undefined;
+    }
+    const companyIds = payments.data.map((p) =>
+      typeof p.company === 'string' ? p.company : p.company?._id
+    );
+    const unique = new Set(companyIds);
+    return unique.size === 1;
+  }, [payments?.data, paymentsLoading, paymentsFetching]);
+
+  const singleDomainName = useMemo(() => {
+    if (isSingleDomainCurrentPage && payments?.data?.length) {
+      const dom = payments.data[0].domain;
+      return typeof dom === 'string' ? dom : dom?.name;
+    }
+    return undefined;
+  }, [isSingleDomainCurrentPage, payments?.data]);
+
+  const singleCompanyName = useMemo(() => {
+    if (isSingleCompanyCurrentPage && payments?.data?.length) {
+      const comp = payments.data[0].company;
+      return typeof comp === 'string' ? comp : comp?.companyName;
+    }
+    return undefined;
+  }, [isSingleCompanyCurrentPage, payments?.data]);
+
   const columns: TableColumnType<any>[] = useMemo(() => {
     return [
-      ...(!isSingleDomainCurrentPage   ? [{
-        title: 'Надавач послуг',
-        width: router.pathname === AppRoutes.PAYMENT ? 170 : 80,
-        dataIndex: 'domain',
-        filters:
-          router.pathname === AppRoutes.PAYMENT
-            ? domainsFilters?.domainsFilter
-            : null,
-        filteredValue: filters?.domain || null,
-        filterSearch: true,
-        render: (domain) =>
-          router.pathname === AppRoutes.PAYMENT ? (
-            <Tooltip title="Додати в фільтри">
-              <Typography.Link
-                onClick={() =>
-                  setFilters({ ...filters, domain: [domain?._id] })
-                }
-              >
-                {domain?.name}
-              </Typography.Link>
-            </Tooltip>
-          ) : (
-            domain?.name
-          ),
-        },
-      ]
-    : []),
+      ...(!isSingleDomainCurrentPage
+        ? [
+            {
+              title: 'Надавач послуг',
+              width: router.pathname === AppRoutes.PAYMENT ? 170 : 80,
+              dataIndex: 'domain',
+              filters:
+                router.pathname === AppRoutes.PAYMENT
+                  ? domainsFilters?.domainsFilter
+                  : null,
+              filteredValue: filters?.domain || null,
+              filterSearch: true,
+              render: (domain) =>
+                router.pathname === AppRoutes.PAYMENT ? (
+                  <Tooltip title="Додати в фільтри">
+                    <Typography.Link
+                      onClick={() =>
+                        setFilters({ ...filters, domain: [domain?._id] })
+                      }
+                    >
+                      {domain?.name}
+                    </Typography.Link>
+                  </Tooltip>
+                ) : (
+                  domain?.name
+                ),
+            },
+          ]
+        : []),
       {
         title: 'Компанія',
         dataIndex: 'company',
@@ -353,7 +386,7 @@ const {
           ) : (
             company?.companyName
           ),
-        hidden: payments?.realEstatesFilter?.length <= 1,
+        hidden: isSingleCompanyCurrentPage === true,
       },
       {
         title: 'Дата створення',
@@ -582,7 +615,8 @@ const {
       },
     ].filter(Boolean) as TableColumnType<any>[]; 
   }, [
-    isSingleDomainCurrentPage ,
+    isSingleDomainCurrentPage,
+    isSingleCompanyCurrentPage,
     pageData.currentPage,
     router,
     paymentActions,
@@ -697,7 +731,8 @@ const {
           onColumnsSelect={setSelectedColumns}
           domainFilter={showDomainFilter ? domainsFilters?.domainsFilter : undefined}
           realEstatesFilter={companiesFilter?.realEstatesFilter}
-          onCascaderChange={handleCascaderChange}
+          singleCompany={singleCompanyName}
+          singleDomain={singleDomainName}
         />
       }
     >
