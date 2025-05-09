@@ -1,4 +1,9 @@
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  MoreOutlined,
+} from '@ant-design/icons'
 import {
   dateToDefaultFormat,
   dateToMonth,
@@ -36,6 +41,7 @@ import {
 import {
   Alert,
   Button,
+  Dropdown,
   Empty,
   Flex,
   List,
@@ -207,36 +213,36 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     domains: filters?.domain,
   })
   const shouldSkipQuery =
-  currUserLoading || !currUser || !pageData.pageSize || !pageData.currentPage
+    currUserLoading || !currUser || !pageData.pageSize || !pageData.currentPage
 
-const pageKey = useMemo(
-  () => `${pageData.currentPage}_${pageData.pageSize}`,
-  [pageData]
-)
+  const pageKey = useMemo(
+    () => `${pageData.currentPage}_${pageData.pageSize}`,
+    [pageData]
+  )
 
-const queryArgs = shouldSkipQuery
-  ? skipToken
-  : {
-      skip: (pageData.currentPage - 1) * pageData.pageSize,
-      limit: pageData.pageSize,
-      pageKey, 
-      ...formatDateFilterForQuery(currentDateFilter),
-      ...getTypeOperation(currentTypeOperation),
-      dateField: selectedDateField,
-      companyIds: filters?.company || undefined,
-      domainIds: sepDomainID || filters?.domain || undefined,
-      streetIds: filters?.street || undefined,
-      type: filters?.type || undefined,
-    }
+  const queryArgs = shouldSkipQuery
+    ? skipToken
+    : {
+        skip: (pageData.currentPage - 1) * pageData.pageSize,
+        limit: pageData.pageSize,
+        pageKey,
+        ...formatDateFilterForQuery(currentDateFilter),
+        ...getTypeOperation(currentTypeOperation),
+        dateField: selectedDateField,
+        companyIds: filters?.company || undefined,
+        domainIds: sepDomainID || filters?.domain || undefined,
+        streetIds: filters?.street || undefined,
+        type: filters?.type || undefined,
+      }
 
-const {
-  isFetching: paymentsFetching,
-  isLoading: paymentsLoading,
-  isError: paymentsError,
-  data: payments,
-} = useGetAllPaymentsQuery(queryArgs, {
-  refetchOnMountOrArgChange: true,
-})
+  const {
+    isFetching: paymentsFetching,
+    isLoading: paymentsLoading,
+    isError: paymentsError,
+    data: payments,
+  } = useGetAllPaymentsQuery(queryArgs, {
+    refetchOnMountOrArgChange: true,
+  })
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
@@ -277,49 +283,47 @@ const {
     }
   }, [appliedFilters])
   const isSingleDomainCurrentPage = useMemo(() => {
-    if (
-      paymentsLoading ||
-      paymentsFetching ||
-      !payments?.data?.length
-    ) {
-      return undefined;
+    if (paymentsLoading || paymentsFetching || !payments?.data?.length) {
+      return undefined
     }
     const domainIds = payments.data.map((p) =>
       typeof p.domain === 'string' ? p.domain : p.domain?._id
-    );
-    const unique = new Set(domainIds);
-    return unique.size === 1;
-  }, [payments?.data, paymentsLoading, paymentsFetching]);
-  
+    )
+    const unique = new Set(domainIds)
+    return unique.size === 1
+  }, [payments?.data, paymentsLoading, paymentsFetching])
+
   const columns: TableColumnType<any>[] = useMemo(() => {
     return [
-      ...(!isSingleDomainCurrentPage   ? [{
-        title: 'Надавач послуг',
-        width: router.pathname === AppRoutes.PAYMENT ? 170 : 80,
-        dataIndex: 'domain',
-        filters:
-          router.pathname === AppRoutes.PAYMENT
-            ? domainsFilters?.domainsFilter
-            : null,
-        filteredValue: filters?.domain || null,
-        filterSearch: true,
-        render: (domain) =>
-          router.pathname === AppRoutes.PAYMENT ? (
-            <Tooltip title="Додати в фільтри">
-              <Typography.Link
-                onClick={() =>
-                  setFilters({ ...filters, domain: [domain?._id] })
-                }
-              >
-                {domain?.name}
-              </Typography.Link>
-            </Tooltip>
-          ) : (
-            domain?.name
-          ),
-        },
-      ]
-    : []),
+      ...(!isSingleDomainCurrentPage
+        ? [
+            {
+              title: 'Надавач послуг',
+              width: router.pathname === AppRoutes.PAYMENT ? 170 : 80,
+              dataIndex: 'domain',
+              filters:
+                router.pathname === AppRoutes.PAYMENT
+                  ? domainsFilters?.domainsFilter
+                  : null,
+              filteredValue: filters?.domain || null,
+              filterSearch: true,
+              render: (domain) =>
+                router.pathname === AppRoutes.PAYMENT ? (
+                  <Tooltip title="Додати в фільтри">
+                    <Typography.Link
+                      onClick={() =>
+                        setFilters({ ...filters, domain: [domain?._id] })
+                      }
+                    >
+                      {domain?.name}
+                    </Typography.Link>
+                  </Tooltip>
+                ) : (
+                  domain?.name
+                ),
+            },
+          ]
+        : []),
       {
         title: 'Компанія',
         dataIndex: 'company',
@@ -500,71 +504,89 @@ const {
         align: 'center',
         title: '',
         width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
-        render: (_, payment: IExtendedPayment) =>
-          payment?.type === Operations.Debit && (
-            <Button
-              style={{ padding: 0 }}
-              type="link"
-              onClick={() => {
-                setCurrentPayment(payment)
-                setPaymentActions({ ...paymentActions, preview: true })
-              }}
-            >
-              <EyeOutlined />
-            </Button>
-          ),
-      },
-      {
-        align: 'center',
-        fixed: 'right',
-        title: '',
-        width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
         render: (_, payment: IExtendedPayment) => (
-          <Button
-            style={{ padding: 0 }}
-            type="link"
-            onClick={() => {
-              setCurrentPayment(payment)
-              setPaymentActions({ ...paymentActions, edit: true })
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: 'preview',
+                  label: (
+                    <Button
+                      type="link"
+                      onClick={() => {
+                        setCurrentPayment(payment)
+                        setPaymentActions({ ...paymentActions, preview: true })
+                      }}
+                    >
+                      <EyeOutlined /> Перегляд
+                    </Button>
+                  ),
+                },
+                {
+                  key: 'edit',
+                  label: (isDomainAdmin || isGlobalAdmin) && (
+                    <Button
+                      type="link"
+                      onClick={() => {
+                        setCurrentPayment(payment)
+                        setPaymentActions({ ...paymentActions, edit: true })
+                      }}
+                      style={{
+                        color: '#722ed1',
+                        paddingLeft: '10px',
+                        paddingRight: '10px',
+                      }}
+                    >
+                      <EditOutlined /> Редагувати
+                    </Button>
+                  ),
+                },
+                {
+                  key: 'delete',
+                  label: (isDomainAdmin || isGlobalAdmin) && (
+                    <Popconfirm
+                      title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+                        payment?.invoiceCreationDate as unknown as string
+                      )}?`}
+                      onConfirm={() => handleDeletePayment(payment?._id)}
+                      okText="Видалити"
+                      cancelText="Ні"
+                      disabled={deleteLoading}
+                    >
+                      <Button
+                        type="link"
+                        style={{
+                          color: '#ff4d4f',
+                          paddingLeft: '10px',
+                          paddingRight: '10px',
+                        }}
+                      >
+                        <DeleteOutlined /> Видалити
+                      </Button>
+                    </Popconfirm>
+                  ),
+                },
+              ].filter(Boolean),
             }}
+            placement="bottomRight"
           >
-            <EditOutlined />
-          </Button>
+            <Button icon={<MoreOutlined />} />
+          </Dropdown>
         ),
-        hidden: !isDomainAdmin && !isGlobalAdmin,
       },
-      {
-        align: 'center',
-        fixed: 'right',
-        title: '',
-        width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
-
-        render: (_, payment: IExtendedPayment) => (
-          <Popconfirm
-            id="popconfirm_custom"
-            title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-              payment?.invoiceCreationDate as unknown as string
-            )}?`}
-            onConfirm={() => handleDeletePayment(payment?._id)}
-            okText="Видалити"
-            cancelText="Ні"
-            disabled={deleteLoading}
-          >
-            <Button type="text" icon={<DeleteOutlined />} />
-          </Popconfirm>
-        ),
-        hidden: !isDomainAdmin && !isGlobalAdmin,
-      },
-    ].filter(Boolean) as TableColumnType<any>[]; 
+    ].filter(Boolean) as TableColumnType<any>[]
   }, [
-    isSingleDomainCurrentPage ,
-    pageData.currentPage,
+    isSingleDomainCurrentPage,
     router,
     paymentActions,
     isDomainAdmin,
     isGlobalAdmin,
     handleDeletePayment,
     deleteLoading,
+    domainsFilters?.domainsFilter,
+    companiesFilter?.realEstatesFilter,
+    dateFilters?.monthFilter,
+    payments?.realEstatesFilter?.length,
     filters,
     setFilters,
     token,
@@ -573,7 +595,7 @@ const {
   const showDomainFilter = useMemo(
     () => columns.some((col) => col.dataIndex === 'domain'),
     [columns]
-  );
+  )
 
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
     PaymentDeleteItem[]
@@ -631,7 +653,9 @@ const {
           setPaymentsDeleteItems={setPaymentsDeleteItems}
           enablePaymentsButton={sepDomainID ? false : true}
           onColumnsSelect={setSelectedColumns}
-          domainFilter={showDomainFilter ? domainsFilters?.domainsFilter : undefined}
+          domainFilter={
+            showDomainFilter ? domainsFilters?.domainsFilter : undefined
+          }
           realEstatesFilter={companiesFilter?.realEstatesFilter}
         />
       }
@@ -639,7 +663,7 @@ const {
       {deleteError || paymentsError || currUserError ? (
         <Alert message="Помилка" type="error" showIcon closable />
       ) : (
-        <Table 
+        <Table
           key={columns.map((col) => col.dataIndex).join(',')}
           rowKey="_id"
           rowSelection={
@@ -667,7 +691,7 @@ const {
             (router.pathname === AppRoutes.PAYMENT ||
               router.pathname === AppRoutes.SEP_DOMAIN) && {
               current: pageData.currentPage,
-              pageSize: pageData.pageSize, 
+              pageSize: pageData.pageSize,
               total: payments?.total || 0,
               showSizeChanger: true,
               pageSizeOptions: [10, 20, 50],
@@ -695,18 +719,32 @@ const {
                 <Table.Summary.Row>
                   {summaryColumns.map(({ column, index }) =>
                     column.dataIndex === 'debit' ? (
-                      <Table.Summary.Cell key={index} index={index} align="center">
-                        {renderCurrency(toRoundFixed(payments?.totalPayments?.debit))}
+                      <Table.Summary.Cell
+                        key={index}
+                        index={index}
+                        align="center"
+                      >
+                        {renderCurrency(
+                          toRoundFixed(payments?.totalPayments?.debit)
+                        )}
                       </Table.Summary.Cell>
                     ) : column.dataIndex === 'credit' ? (
-                      <Table.Summary.Cell key={index} index={index} align="center">
-                        {renderCurrency(toRoundFixed(payments?.totalPayments?.credit))}
+                      <Table.Summary.Cell
+                        key={index}
+                        index={index}
+                        align="center"
+                      >
+                        {renderCurrency(
+                          toRoundFixed(payments?.totalPayments?.credit)
+                        )}
                       </Table.Summary.Cell>
                     ) : (
                       <Table.Summary.Cell key={index} index={index}>
                         {Object.values(ServiceType).includes(column.dataIndex)
                           ? renderCurrency(
-                              toRoundFixed(payments?.totalPayments?.[column.dataIndex])
+                              toRoundFixed(
+                                payments?.totalPayments?.[column.dataIndex]
+                              )
                             )
                           : null}
                       </Table.Summary.Cell>
