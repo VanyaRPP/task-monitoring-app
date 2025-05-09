@@ -1,9 +1,12 @@
 import { validateField } from '@assets/features/validators'
-import { Form, FormInstance, Input, AutoComplete } from 'antd'
+import {
+  useGetCitiesAutocompleteQuery,
+  useSearchStreetsQuery,
+} from '@common/api/streetApi/street.api'
+import useDebounce from '@modules/hooks/useDebounce'
+import { AutoComplete, Form, FormInstance } from 'antd'
 import { FC, useEffect, useState } from 'react'
 import s from './style.module.scss'
-import { useSearchStreetsQuery } from '@common/api/streetApi/street.api'
-import useDebounce from '@modules/hooks/useDebounce'
 
 interface Props {
   form: FormInstance<any>
@@ -14,42 +17,33 @@ interface Props {
 const AddStreetForm: FC<Props> = ({ form, editable, setIsValueChanged }) => {
   const [city, setCity] = useState('')
   const [address, setAddress] = useState('')
-  const [options, setOptions] = useState<{ value: string }[]>([])
+  const [addressOptions, setAddressOptions] = useState<{ value: string }[]>([])
 
-  const debouncedCity = useDebounce(city, 500)
-  const debouncedAddress = useDebounce(address, 500)
+  const debouncedCity = useDebounce(city, 300)
+  const debouncedAddress = useDebounce(address, 300)
 
-  const { data: streets, isLoading } = useSearchStreetsQuery(
+  const { data: cityOptions = [] } = useGetCitiesAutocompleteQuery(
+    debouncedCity,
+    { skip: !debouncedCity }
+  )
+
+  const { data: streets } = useSearchStreetsQuery(
     { city: debouncedCity, address: debouncedAddress },
     { skip: !debouncedCity || !debouncedAddress }
   )
 
   useEffect(() => {
-    if (streets && streets.data.length > 0) {
-      setOptions(
+    if (streets?.data?.length) {
+      setAddressOptions(
         streets.data.map((street: any) => ({
           value: street.address,
         }))
       )
     } else {
-      setOptions([])
+      setAddressOptions([])
     }
   }, [streets])
 
-  const handleCityChange = (value: string) => {
-    setCity(value)
-    setIsValueChanged(true)
-  }
-
-  const handleAddressChange = (value: string) => {
-    setAddress(value)
-    setIsValueChanged(true)
-  }
-
-  const handleAddressSelect = (value: string) => {
-    form.setFieldsValue({ address: value })
-    setIsValueChanged(true)
-  }
   return (
     <Form
       form={form}
@@ -63,13 +57,17 @@ const AddStreetForm: FC<Props> = ({ form, editable, setIsValueChanged }) => {
         label="Місто"
         rules={validateField('city')}
       >
-        <Input
+        <AutoComplete
+          options={cityOptions.map((c) => ({ value: c }))}
           placeholder="Введіть місто"
-          maxLength={256}
-          className={s.formInput}
-          disabled={!editable}
           value={city}
-          onChange={(e) => handleCityChange(e.target.value)}
+          onChange={(val) => {
+            setCity(val)
+            setIsValueChanged(true)
+            setAddress('') // clear address if city changed
+            form.setFieldsValue({ address: '' })
+          }}
+          disabled={!editable}
         />
       </Form.Item>
       <Form.Item
@@ -79,12 +77,18 @@ const AddStreetForm: FC<Props> = ({ form, editable, setIsValueChanged }) => {
         rules={validateField('address')}
       >
         <AutoComplete
-          options={options}
+          options={addressOptions}
           placeholder="Введіть адресу"
           value={address}
-          onSelect={handleAddressSelect}
-          onSearch={handleAddressChange}
-          disabled={!editable}
+          onChange={(val) => {
+            setAddress(val)
+            setIsValueChanged(true)
+          }}
+          onSelect={(val) => {
+            form.setFieldsValue({ address: val })
+            setIsValueChanged(true)
+          }}
+          disabled={!editable || !city}
         />
       </Form.Item>
     </Form>
