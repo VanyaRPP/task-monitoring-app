@@ -53,7 +53,6 @@ import {
   Typography,
   message,
   theme,
-  Dropdown,
 } from 'antd'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
@@ -605,6 +604,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     ].filter(Boolean) as TableColumnType<any>[]
   }, [
     isSingleDomainCurrentPage,
+    isSingleCompanyCurrentPage,
     router,
     paymentActions,
     isDomainAdmin,
@@ -613,8 +613,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     deleteLoading,
     domainsFilters?.domainsFilter,
     companiesFilter?.realEstatesFilter,
-    dateFilters?.monthFilter,
-    payments?.realEstatesFilter?.length,
     filters,
     setFilters,
     token,
