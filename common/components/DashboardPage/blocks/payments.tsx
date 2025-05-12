@@ -41,6 +41,7 @@ import {
 import {
   Alert,
   Button,
+  Dropdown,
   Empty,
   Flex,
   List,
@@ -52,7 +53,6 @@ import {
   Typography,
   message,
   theme,
-  Dropdown,
 } from 'antd'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
@@ -217,36 +217,36 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     domains: filters?.domain,
   })
   const shouldSkipQuery =
-  currUserLoading || !currUser || !pageData.pageSize || !pageData.currentPage
+    currUserLoading || !currUser || !pageData.pageSize || !pageData.currentPage
 
-const pageKey = useMemo(
-  () => `${pageData.currentPage}_${pageData.pageSize}`,
-  [pageData]
-)
+  const pageKey = useMemo(
+    () => `${pageData.currentPage}_${pageData.pageSize}`,
+    [pageData]
+  )
 
-const queryArgs = shouldSkipQuery
-  ? skipToken
-  : {
-      skip: (pageData.currentPage - 1) * pageData.pageSize,
-      limit: pageData.pageSize,
-      pageKey, 
-      ...formatDateFilterForQuery(currentDateFilter),
-      ...getTypeOperation(currentTypeOperation),
-      dateField: selectedDateField,
-      companyIds: filters?.company || undefined,
-      domainIds: sepDomainID || filters?.domain || undefined,
-      streetIds: filters?.street || undefined,
-      type: filters?.type || undefined,
-    }
+  const queryArgs = shouldSkipQuery
+    ? skipToken
+    : {
+        skip: (pageData.currentPage - 1) * pageData.pageSize,
+        limit: pageData.pageSize,
+        pageKey,
+        ...formatDateFilterForQuery(currentDateFilter),
+        ...getTypeOperation(currentTypeOperation),
+        dateField: selectedDateField,
+        companyIds: filters?.company || undefined,
+        domainIds: sepDomainID || filters?.domain || undefined,
+        streetIds: filters?.street || undefined,
+        type: filters?.type || undefined,
+      }
 
-const {
-  isFetching: paymentsFetching,
-  isLoading: paymentsLoading,
-  isError: paymentsError,
-  data: payments,
-} = useGetAllPaymentsQuery(queryArgs, {
-  refetchOnMountOrArgChange: true,
-})
+  const {
+    isFetching: paymentsFetching,
+    isLoading: paymentsLoading,
+    isError: paymentsError,
+    data: payments,
+  } = useGetAllPaymentsQuery(queryArgs, {
+    refetchOnMountOrArgChange: true,
+  })
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
@@ -286,19 +286,15 @@ const {
       paginationTriggeredRef.current = false
   }, [appliedFilters])
   const isSingleDomainCurrentPage = useMemo(() => {
-    if (
-      paymentsLoading ||
-      paymentsFetching ||
-      !payments?.data?.length
-    ) {
-      return undefined;
+    if (paymentsLoading || paymentsFetching || !payments?.data?.length) {
+      return undefined
     }
     const domainIds = payments.data.map((p) =>
       typeof p.domain === 'string' ? p.domain : p.domain?._id
-    );
-    const unique = new Set(domainIds);
-    return unique.size === 1;
-  }, [payments?.data, paymentsLoading, paymentsFetching]);
+    )
+    const unique = new Set(domainIds)
+    return unique.size === 1
+  }, [payments?.data, paymentsLoading, paymentsFetching])
 
   const isSingleCompanyCurrentPage = useMemo(() => {
     if (
@@ -535,54 +531,47 @@ const {
         align: 'center',
         title: '',
         width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
-        render: (_, payment: IExtendedPayment) =>
-          payment?.type === Operations.Debit && (
-            <Button
-              style={{ padding: 0 }}
-              type="link"
-              onClick={() => {
-                setCurrentPayment(payment)
-                setPaymentActions({ ...paymentActions, preview: true })
-              }}
-            >
-              <EyeOutlined />
-            </Button>
-          ),
-      },
-      {
-        align: 'center',
-        fixed: 'right',
-        title: '',
-        width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
         render: (_, payment: IExtendedPayment) => (
           <Dropdown
             menu={{
               items: [
                 {
-                  key: 'edit',
+                  key: 'preview',
                   label: (
                     <Button
-                      icon={<EditOutlined />}
                       type="link"
+                      onClick={() => {
+                        setCurrentPayment(payment)
+                        setPaymentActions({ ...paymentActions, preview: true })
+                      }}
+                    >
+                      <EyeOutlined /> Перегляд
+                    </Button>
+                  ),
+                },
+                {
+                  key: 'edit',
+                  label: (isDomainAdmin || isGlobalAdmin) && (
+                    <Button
+                      type="link"
+                      onClick={() => {
+                        setCurrentPayment(payment)
+                        setPaymentActions({ ...paymentActions, edit: true })
+                      }}
                       style={{
                         color: '#722ed1',
                         paddingLeft: '10px',
                         paddingRight: '10px',
                       }}
-                      onClick={() => {
-                        setCurrentPayment(payment)
-                        setPaymentActions({ ...paymentActions, edit: true })
-                      }}
                     >
-                      Редагувати
+                      <EditOutlined /> Редагувати
                     </Button>
                   ),
                 },
-                isGlobalAdmin && {
+                {
                   key: 'delete',
-                  label: (
+                  label: (isDomainAdmin || isGlobalAdmin) && (
                     <Popconfirm
-                      id="popconfirm_custom"
                       title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
                         payment?.invoiceCreationDate as unknown as string
                       )}?`}
@@ -592,20 +581,19 @@ const {
                       disabled={deleteLoading}
                     >
                       <Button
-                        type="text"
-                        icon={<DeleteOutlined />}
+                        type="link"
                         style={{
                           color: '#ff4d4f',
                           paddingLeft: '10px',
                           paddingRight: '10px',
                         }}
                       >
-                        Видалити
+                        <DeleteOutlined /> Видалити
                       </Button>
                     </Popconfirm>
                   ),
                 },
-              ],
+              ].filter(Boolean),
             }}
             placement="bottomRight"
           >
@@ -613,17 +601,18 @@ const {
           </Dropdown>
         ),
       },
-    ].filter(Boolean) as TableColumnType<any>[]; 
+    ].filter(Boolean) as TableColumnType<any>[]
   }, [
     isSingleDomainCurrentPage,
     isSingleCompanyCurrentPage,
-    pageData.currentPage,
     router,
     paymentActions,
     isDomainAdmin,
     isGlobalAdmin,
     handleDeletePayment,
     deleteLoading,
+    domainsFilters?.domainsFilter,
+    companiesFilter?.realEstatesFilter,
     filters,
     setFilters,
     token,
@@ -632,7 +621,7 @@ const {
   const showDomainFilter = useMemo(
     () => columns.some((col) => col.dataIndex === 'domain'),
     [columns]
-  );
+  )
 
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
     PaymentDeleteItem[]
@@ -729,7 +718,9 @@ const {
           setPaymentsDeleteItems={setPaymentsDeleteItems}
           enablePaymentsButton={sepDomainID ? false : true}
           onColumnsSelect={setSelectedColumns}
-          domainFilter={showDomainFilter ? domainsFilters?.domainsFilter : undefined}
+          domainFilter={
+            showDomainFilter ? domainsFilters?.domainsFilter : undefined
+          }
           realEstatesFilter={companiesFilter?.realEstatesFilter}
           singleCompany={singleCompanyName}
           singleDomain={singleDomainName}
@@ -739,7 +730,7 @@ const {
       {deleteError || paymentsError || currUserError ? (
         <Alert message="Помилка" type="error" showIcon closable />
       ) : (
-        <Table 
+        <Table
           key={columns.map((col) => col.dataIndex).join(',')}
           rowKey="_id"
           rowSelection={
@@ -767,7 +758,7 @@ const {
             (router.pathname === AppRoutes.PAYMENT ||
               router.pathname === AppRoutes.SEP_DOMAIN) && {
               current: pageData.currentPage,
-              pageSize: pageData.pageSize, 
+              pageSize: pageData.pageSize,
               total: payments?.total || 0,
               showSizeChanger: true,
               pageSizeOptions: [10, 20, 50],
@@ -801,18 +792,32 @@ const {
                 <Table.Summary.Row>
                   {summaryColumns.map(({ column, index }) =>
                     column.dataIndex === 'debit' ? (
-                      <Table.Summary.Cell key={index} index={index} align="center">
-                        {renderCurrency(toRoundFixed(payments?.totalPayments?.debit))}
+                      <Table.Summary.Cell
+                        key={index}
+                        index={index}
+                        align="center"
+                      >
+                        {renderCurrency(
+                          toRoundFixed(payments?.totalPayments?.debit)
+                        )}
                       </Table.Summary.Cell>
                     ) : column.dataIndex === 'credit' ? (
-                      <Table.Summary.Cell key={index} index={index} align="center">
-                        {renderCurrency(toRoundFixed(payments?.totalPayments?.credit))}
+                      <Table.Summary.Cell
+                        key={index}
+                        index={index}
+                        align="center"
+                      >
+                        {renderCurrency(
+                          toRoundFixed(payments?.totalPayments?.credit)
+                        )}
                       </Table.Summary.Cell>
                     ) : (
                       <Table.Summary.Cell key={index} index={index}>
                         {Object.values(ServiceType).includes(column.dataIndex)
                           ? renderCurrency(
-                              toRoundFixed(payments?.totalPayments?.[column.dataIndex])
+                              toRoundFixed(
+                                payments?.totalPayments?.[column.dataIndex]
+                              )
                             )
                           : null}
                       </Table.Summary.Cell>
