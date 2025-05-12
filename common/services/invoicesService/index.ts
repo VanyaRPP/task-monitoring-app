@@ -3,7 +3,7 @@ import {
   IPayment,
 } from '@common/api/paymentApi/payment.api.types'
 import {
-  getMaintenanceInvoice,
+  // getMaintenanceInvoice,
   getPlacingInvoice,
   getInflicionInvoice,
   getElectricityInvoice,
@@ -15,6 +15,9 @@ import {
   getCustomInvoices,
   getCustomServiceInvoices,
 } from '@utils/getInvoices' //TODO: we rewrite each service
+import {
+  getMaintenanceInvoice,
+} from '@common/services/getMaintenanceInvoice'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { ServiceType } from '@utils/constants'
