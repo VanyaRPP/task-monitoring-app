@@ -1,9 +1,4 @@
-import {
-  DeleteOutlined,
-  EditOutlined,
-  EyeOutlined,
-  MoreOutlined,
-} from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import {
   dateToDefaultFormat,
   dateToMonth,
@@ -41,7 +36,6 @@ import {
 import {
   Alert,
   Button,
-  Dropdown,
   Empty,
   Flex,
   List,
@@ -53,11 +47,12 @@ import {
   Typography,
   message,
   theme,
+  Badge,
 } from 'antd'
 import { useRouter } from 'next/router'
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import s from './style.module.scss'
-import { skipToken } from '@reduxjs/toolkit/query'
+import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 
 interface PaymentsBlockProps {
   sepDomainID?: string
@@ -107,22 +102,20 @@ function formatDateFilterForQuery(value: string[] | undefined) {
     if (!match) continue
 
     const [, y, period, number] = match
-    const parsedYear = Number(y)
-    if (!year) year = parsedYear
-
+    if (!year) year = Number(y)
     if (period === PERIOD_FILTR.MONTH) {
       months.push(Number(number))
-    } else if (period === PERIOD_FILTR.QUARTER) {
-      const q = Number(number)
-      months.push(...[(q - 1) * 3 + 1, (q - 1) * 3 + 2, (q - 1) * 3 + 3])
-    } else if (period === PERIOD_FILTR.YEAR) {
     }
   }
 
-  const query: any = {}
-  if (year) query.year = year
-  if (months.length > 0) {
-    query.month = months.length === 1 ? months[0] : months
+  const query: any = {
+    year,
+  }
+
+  if (months.length === 1) {
+    query.month = months[0]
+  } else if (months.length > 1) {
+    query.month = months
   }
 
   return query
@@ -136,8 +129,17 @@ function getTypeOperation(value) {
   }
 }
 
+const getDebtorTooltipColor = (debtor) => {
+  if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
+    return 'gray'
+  } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
+    return 'yellow'
+  } else if (debtor.totalDebt >= 20000) {
+    return 'red'
+  }
+}
+
 const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
-  const paginationTriggeredRef = useRef(false)
   const router = useRouter()
   const [currentPayment, setCurrentPayment] =
     useState<Partial<IExtendedPayment>>(null)
@@ -196,7 +198,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const { data: dateFilters } = useGetDateFiltersQuery({ type: 'payment' })
 
   const handlePagination = (pagination) => {
-    paginationTriggeredRef.current = true
     setPageData({
       pageSize: pagination.pageSize,
       currentPage: pagination.current,
@@ -216,37 +217,34 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const { data: streetsFilter } = useGetAddressFiltersQuery({
     domains: filters?.domain,
   })
-  const shouldSkipQuery =
-    currUserLoading || !currUser || !pageData.pageSize || !pageData.currentPage
-
-  const pageKey = useMemo(
-    () => `${pageData.currentPage}_${pageData.pageSize}`,
-    [pageData]
-  )
-
-  const queryArgs = shouldSkipQuery
-    ? skipToken
-    : {
-        skip: (pageData.currentPage - 1) * pageData.pageSize,
-        limit: pageData.pageSize,
-        pageKey,
-        ...formatDateFilterForQuery(currentDateFilter),
-        ...getTypeOperation(currentTypeOperation),
-        dateField: selectedDateField,
-        companyIds: filters?.company || undefined,
-        domainIds: sepDomainID || filters?.domain || undefined,
-        streetIds: filters?.street || undefined,
-        type: filters?.type || undefined,
-      }
 
   const {
     isFetching: paymentsFetching,
     isLoading: paymentsLoading,
     isError: paymentsError,
     data: payments,
-  } = useGetAllPaymentsQuery(queryArgs, {
-    refetchOnMountOrArgChange: true,
-  })
+  } = useGetAllPaymentsQuery(
+    {
+      skip: (pageData.currentPage - 1) * pageData.pageSize,
+      limit: pageData.pageSize,
+      ...formatDateFilterForQuery(currentDateFilter),
+      ...getTypeOperation(currentTypeOperation),
+      dateField: selectedDateField,
+      companyIds: filters?.company || undefined,
+      domainIds: sepDomainID || filters?.domain || undefined,
+      streetIds: filters?.street || undefined,
+      type: filters?.type || undefined,
+    },
+    { skip: currUserLoading || !currUser }
+  )
+
+  const [domainIds, setDomainIds] = useState([])
+
+  const { data, error } = useGetDebtorsQuery(
+    { domainIds: domainIds },
+    { skip: !domainIds || domainIds.length === 0 }
+  )
+  const debtorCompanies = data?.companies
 
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
@@ -272,92 +270,57 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   }, [filters])
 
   const [appliedFilters, setAppliedFilters] = useState<any>()
-
   useEffect(() => {
-    const filtersChanged =
-      JSON.stringify(appliedFilters) !== JSON.stringify(filters)
-  
-    if (filtersChanged && !paginationTriggeredRef.current) {
+    if (appliedFilters && appliedFilters !== filters) {
       setPageData((prev) => ({
         ...prev,
         currentPage: 1,
       }))
     }
-      paginationTriggeredRef.current = false
   }, [appliedFilters])
-  const isSingleDomainCurrentPage = useMemo(() => {
-    if (paymentsLoading || paymentsFetching || !payments?.data?.length) {
-      return undefined
-    }
-    const domainIds = payments.data.map((p) =>
-      typeof p.domain === 'string' ? p.domain : p.domain?._id
-    )
-    const unique = new Set(domainIds)
-    return unique.size === 1
-  }, [payments?.data, paymentsLoading, paymentsFetching])
 
-  const isSingleCompanyCurrentPage = useMemo(() => {
-    if (
-      paymentsLoading ||
-      paymentsFetching ||
-      !payments?.data?.length
-    ) {
-      return undefined;
+  useEffect(() => {
+    if (JSON.stringify(appliedFilters) !== JSON.stringify(filters)) {
+      setPageData((prev) => ({ ...prev, currentPage: 1 }))
     }
-    const companyIds = payments.data.map((p) =>
-      typeof p.company === 'string' ? p.company : p.company?._id
-    );
-    const unique = new Set(companyIds);
-    return unique.size === 1;
-  }, [payments?.data, paymentsLoading, paymentsFetching]);
-
-  const singleDomainName = useMemo(() => {
-    if (isSingleDomainCurrentPage && payments?.data?.length) {
-      const dom = payments.data[0].domain;
-      return typeof dom === 'string' ? dom : dom?.name;
+  }, [appliedFilters])
+  useEffect(() => {
+    const fallbackDomains = domainsFilters?.domainsFilter?.map((d) => d.value)
+    if (filters?.domain?.length) {
+      setDomainIds(filters.domain)
+    } else if (fallbackDomains?.length) {
+      setDomainIds(fallbackDomains)
     }
-    return undefined;
-  }, [isSingleDomainCurrentPage, payments?.data]);
-
-  const singleCompanyName = useMemo(() => {
-    if (isSingleCompanyCurrentPage && payments?.data?.length) {
-      const comp = payments.data[0].company;
-      return typeof comp === 'string' ? comp : comp?.companyName;
-    }
-    return undefined;
-  }, [isSingleCompanyCurrentPage, payments?.data]);
+  }, [filters?.domain, domainsFilters])
 
   const columns: TableColumnType<any>[] = useMemo(() => {
     return [
-      ...(!isSingleDomainCurrentPage
-        ? [
-            {
-              title: 'Надавач послуг',
-              width: router.pathname === AppRoutes.PAYMENT ? 170 : 80,
-              dataIndex: 'domain',
-              filters:
-                router.pathname === AppRoutes.PAYMENT
-                  ? domainsFilters?.domainsFilter
-                  : null,
-              filteredValue: filters?.domain || null,
-              filterSearch: true,
-              render: (domain) =>
-                router.pathname === AppRoutes.PAYMENT ? (
-                  <Tooltip title="Додати в фільтри">
-                    <Typography.Link
-                      onClick={() =>
-                        setFilters({ ...filters, domain: [domain?._id] })
-                      }
-                    >
-                      {domain?.name}
-                    </Typography.Link>
-                  </Tooltip>
-                ) : (
-                  domain?.name
-                ),
-            },
-          ]
-        : []),
+      {
+        title: 'Надавач послуг',
+        width: router.pathname === AppRoutes.PAYMENT ? 170 : 80,
+        dataIndex: 'domain',
+        filters:
+          router.pathname === AppRoutes.PAYMENT
+            ? domainsFilters?.domainsFilter
+            : null,
+        filteredValue: filters?.domain || null,
+        filterSearch: true,
+        render: (domain) =>
+          router.pathname === AppRoutes.PAYMENT ? (
+            <Tooltip title="Додати в фільтри">
+              <Typography.Link
+                onClick={() =>
+                  setFilters({ ...filters, domain: [domain?._id] })
+                }
+              >
+                {domain?.name}
+              </Typography.Link>
+            </Tooltip>
+          ) : (
+            domain?.name
+          ),
+        hidden: payments?.domainsFilter?.length <= 1,
+      },
       {
         title: 'Компанія',
         dataIndex: 'company',
@@ -368,29 +331,64 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             : null,
         filteredValue: filters?.company || null,
         filterSearch: true,
-        render: (company) =>
-          router.pathname === AppRoutes.PAYMENT ? (
+        render: (company, record, index) => {
+          const companyName = company?.companyName || ''
+          const companyId = company?._id
+          const debtor = Array.isArray(debtorCompanies)
+            ? debtorCompanies.find((d) => d.companyName === companyName)
+            : null
+
+          const isFirstOccurrence =
+            payments?.data?.findIndex(
+              (item) =>
+                typeof item.company === 'object' &&
+                item.company?.companyName === companyName
+            ) === index
+
+          const companyLabel = (
             <Tooltip title="Додати в фільтри">
               <Typography.Link
-                onClick={() =>
-                  setFilters({ ...filters, company: [company?._id] })
-                }
+                onClick={() => setFilters({ ...filters, company: [companyId] })}
               >
-                {company?.companyName}
+                {companyName}
               </Typography.Link>
             </Tooltip>
-          ) : (
-            company?.companyName
-          ),
-        hidden: isSingleCompanyCurrentPage === true,
+          )
+
+          if (!isUser && debtor && isFirstOccurrence) {
+            return (
+              <Badge
+                count={debtor.totalDebt.toFixed(2)}
+                title=""
+                color={getDebtorTooltipColor(debtor)}
+                overflowCount={Infinity}
+                style={{ cursor: 'pointer' }}
+                size="small"
+              >
+                {companyLabel}
+              </Badge>
+            )
+          }
+
+          return companyLabel
+        },
+        hidden: payments?.realEstatesFilter?.length <= 1,
       },
+
       {
         title: 'Дата створення',
         dataIndex: 'invoiceCreationDate',
         render: dateToDefaultFormat,
         width: router.pathname === AppRoutes.PAYMENT ? 164 : 70,
-      }
-      ,
+        filters:
+          dateFilters?.monthFilter
+            ?.filter((filter) => filter.value !== null)
+            ?.map((filter) => ({
+              text: dateToMonth(new Date(2000, Number(filter.value) - 1)),
+              value: `${new Date().getFullYear()}-month-${filter.value}`,
+            })) || [],
+        filteredValue: filters?.invoiceCreationDate || null,
+      },
       {
         title: 'Тип',
         dataIndex: 'type',
@@ -531,97 +529,76 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         align: 'center',
         title: '',
         width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
-        render: (_, payment: IExtendedPayment) => (
-          <Dropdown
-            menu={{
-              items: [
-                {
-                  key: 'preview',
-                  label: (
-                    <Button
-                      type="link"
-                      onClick={() => {
-                        setCurrentPayment(payment)
-                        setPaymentActions({ ...paymentActions, preview: true })
-                      }}
-                    >
-                      <EyeOutlined /> Перегляд
-                    </Button>
-                  ),
-                },
-                {
-                  key: 'edit',
-                  label: (isDomainAdmin || isGlobalAdmin) && (
-                    <Button
-                      type="link"
-                      onClick={() => {
-                        setCurrentPayment(payment)
-                        setPaymentActions({ ...paymentActions, edit: true })
-                      }}
-                      style={{
-                        color: '#722ed1',
-                        paddingLeft: '10px',
-                        paddingRight: '10px',
-                      }}
-                    >
-                      <EditOutlined /> Редагувати
-                    </Button>
-                  ),
-                },
-                {
-                  key: 'delete',
-                  label: (isDomainAdmin || isGlobalAdmin) && (
-                    <Popconfirm
-                      title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-                        payment?.invoiceCreationDate as unknown as string
-                      )}?`}
-                      onConfirm={() => handleDeletePayment(payment?._id)}
-                      okText="Видалити"
-                      cancelText="Ні"
-                      disabled={deleteLoading}
-                    >
-                      <Button
-                        type="link"
-                        style={{
-                          color: '#ff4d4f',
-                          paddingLeft: '10px',
-                          paddingRight: '10px',
-                        }}
-                      >
-                        <DeleteOutlined /> Видалити
-                      </Button>
-                    </Popconfirm>
-                  ),
-                },
-              ].filter(Boolean),
-            }}
-            placement="bottomRight"
-          >
-            <Button icon={<MoreOutlined />} />
-          </Dropdown>
-        ),
+        render: (_, payment: IExtendedPayment) =>
+          payment?.type === Operations.Debit && (
+            <Button
+              style={{ padding: 0 }}
+              type="link"
+              onClick={() => {
+                setCurrentPayment(payment)
+                setPaymentActions({ ...paymentActions, preview: true })
+              }}
+            >
+              <EyeOutlined />
+            </Button>
+          ),
       },
-    ].filter(Boolean) as TableColumnType<any>[]
+      {
+        align: 'center',
+        fixed: 'right',
+        title: '',
+        width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
+        render: (_, payment: IExtendedPayment) => (
+          <Button
+            style={{ padding: 0 }}
+            type="link"
+            onClick={() => {
+              setCurrentPayment(payment)
+              setPaymentActions({ ...paymentActions, edit: true })
+            }}
+          >
+            <EditOutlined />
+          </Button>
+        ),
+        hidden: !isDomainAdmin && !isGlobalAdmin,
+      },
+      {
+        align: 'center',
+        fixed: 'right',
+        title: '',
+        width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
+
+        render: (_, payment: IExtendedPayment) => (
+          <Popconfirm
+            id="popconfirm_custom"
+            title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+              payment?.invoiceCreationDate as unknown as string
+            )}?`}
+            onConfirm={() => handleDeletePayment(payment?._id)}
+            okText="Видалити"
+            cancelText="Ні"
+            disabled={deleteLoading}
+          >
+            <Button type="text" icon={<DeleteOutlined />} />
+          </Popconfirm>
+        ),
+        hidden: !isDomainAdmin && !isGlobalAdmin,
+      },
+    ].filter(({ hidden }) => !hidden) as TableColumnType<any>[]
   }, [
-    isSingleDomainCurrentPage,
-    isSingleCompanyCurrentPage,
+    payments,
     router,
     paymentActions,
     isDomainAdmin,
     isGlobalAdmin,
     handleDeletePayment,
     deleteLoading,
-    domainsFilters?.domainsFilter,
-    companiesFilter?.realEstatesFilter,
     filters,
     setFilters,
     token,
     selectedColumns,
+    debtorCompanies,
   ])
-  const showDomainFilter = useMemo(
-    () => columns.some((col) => col.dataIndex === 'domain'),
-    [columns]
-  )
 
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
     PaymentDeleteItem[]
@@ -661,45 +638,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     )
   }, [columns, currUser, router])
 
-  const handleCascaderChange = (value: string[] | undefined) => {
-    if (!Array.isArray(value)) {
-      setCurrentDateFilter(undefined)
-      setFilters((prev) => {
-        const { invoiceCreationDate, ...rest } = prev || {}
-        return rest
-      })
-      return
-    }
-    let formatted: string[] = []
-    if (value.length === 3 && value[0] === 'year' && value[2] === 'year') {
-      const selectedYear = value[1]
-      formatted = [`${selectedYear}-year-1`]
-    }
-  
-    if (value.length === 4 && value[2] === 'month') {
-      const selectedYear = value[1]
-      const selectedMonth = value[3]
-      formatted = [`${selectedYear}-month-${selectedMonth}`]
-    }
-  
-    if (value.length === 4 && value[2] === 'quarter') {
-      const selectedYear = value[1]
-      const selectedQuarter = value[3]
-      formatted = [`${selectedYear}-quarter-${selectedQuarter}`]
-    }
-  
-    setCurrentDateFilter(formatted)
-    setFilters((prev) => ({
-      ...prev,
-      invoiceCreationDate: formatted,
-    }))
-  }
-  useEffect(() => {
-    if (filters?.invoiceCreationDate?.length > 0) {
-      setCurrentDateFilter(filters.invoiceCreationDate)
-    }
-  }, [filters?.invoiceCreationDate])
-   
   return (
     <TableCard
       title={
@@ -718,12 +656,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           setPaymentsDeleteItems={setPaymentsDeleteItems}
           enablePaymentsButton={sepDomainID ? false : true}
           onColumnsSelect={setSelectedColumns}
-          domainFilter={
-            showDomainFilter ? domainsFilters?.domainsFilter : undefined
-          }
+          domainFilter={domainsFilters?.domainsFilter}
           realEstatesFilter={companiesFilter?.realEstatesFilter}
-          singleCompany={singleCompanyName}
-          singleDomain={singleDomainName}
         />
       }
     >
@@ -731,7 +665,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         <Alert message="Помилка" type="error" showIcon closable />
       ) : (
         <Table
-          key={columns.map((col) => col.dataIndex).join(',')}
           rowKey="_id"
           rowSelection={
             currUser?.roles?.includes(Roles.GLOBAL_ADMIN) &&
@@ -758,25 +691,18 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             (router.pathname === AppRoutes.PAYMENT ||
               router.pathname === AppRoutes.SEP_DOMAIN) && {
               current: pageData.currentPage,
-              pageSize: pageData.pageSize,
               total: payments?.total || 0,
               showSizeChanger: true,
               pageSizeOptions: [10, 20, 50],
               position: ['bottomCenter'],
+              onChange: handlePagination,
             }
           }
-          onChange={(pagination, nextFilters) => {
-            handlePagination(pagination)
-            const { invoiceCreationDate, ...otherFilters } = nextFilters || {}
-            setFilters((prev) => ({
-              ...prev,
-              ...otherFilters,
-              invoiceCreationDate: prev?.invoiceCreationDate,
-            }))
-            setAppliedFilters((prev) => ({
-              ...prev,
-              ...otherFilters,
-            }))
+          onChange={(_, nextFilters) => {
+            setFilters(nextFilters)
+            setAppliedFilters(nextFilters)
+            const val = nextFilters?.invoiceCreationDate
+            setCurrentDateFilter(Array.isArray(val) ? val.map(String) : [])
           }}
           scroll={{
             x:
