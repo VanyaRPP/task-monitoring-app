@@ -22,6 +22,7 @@ import {
 
 export interface Props {
   showAddButton?: boolean
+  isSingleCompanyByData?: boolean
   currentRealEstate?: IExtendedRealestate
   setCurrentRealEstate?: (realEstate: IExtendedRealestate) => void
   filters?: any
@@ -49,6 +50,7 @@ const CompaniesHeader: React.FC<Props> = ({
   realEstateActions,
   enableRealEstateButton,
   setIsArchive,
+  isSingleCompanyByData
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -100,11 +102,14 @@ const CompaniesHeader: React.FC<Props> = ({
               filters={filters}
               setFilters={setFilters}
             />
+            {!isSingleCompanyByData && (
             <CompanyFilterTags
               collection={realEstateData?.realEstatesFilter}
               filters={filters}
               setFilters={setFilters}
             />
+          )}
+
           </Space>
         )}
       </div>
