@@ -1,22 +1,25 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
-import { toRoundFixed, isEmpty } from '@utils/helpers'
-import { ServiceType } from '@utils/constants'
 import { IGetInvoiceByTypeProps } from '../types'
+import { ServiceType } from '@utils/constants'
+import { toRoundFixed } from '@utils/helpers'
+import _isEmpty from 'lodash/isEmpty'
+
+const getPriceFromCustomServices = (
+  items: any[] | undefined,
+  fieldName: string
+): number | undefined => {
+  const found = items?.find((item) => item.fieldName === fieldName)
+  return found && !isNaN(found.price) ? +found.price : undefined
+}
 
 export const getCleaningInvoice = ({
   company,
   service,
-  prevService,
   currInvoicesCollection,
-  prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (Object.keys(currInvoicesCollection).length > 0) {
-    if (!currInvoicesCollection[ServiceType.Cleaning]) {
-      return
-    }
+  const invoice = currInvoicesCollection?.[ServiceType.Cleaning]
 
-    const invoice = currInvoicesCollection[ServiceType.Cleaning]
-
+  if (invoice) {
     return {
       type: invoice.type,
       price: +toRoundFixed(+invoice.price || +invoice.sum),
@@ -24,7 +27,26 @@ export const getCleaningInvoice = ({
     }
   }
 
-  if (!isEmpty(company?.cleaning) && !isNaN(company.cleaning)) {
+  const servicePrice = getPriceFromCustomServices(
+    service?.customServices,
+    ServiceType.Cleaning
+  )
+  const companyPrice = getPriceFromCustomServices(
+    company?.customServices,
+    ServiceType.Cleaning
+  )
+
+  const price = servicePrice ?? companyPrice
+
+  if (price !== undefined) {
+    return {
+      type: ServiceType.Cleaning,
+      price: +toRoundFixed(price),
+      sum: +toRoundFixed(price),
+    }
+  }
+
+  if (!_isEmpty(company?.cleaning) && !isNaN(company.cleaning)) {
     return {
       type: ServiceType.Cleaning,
       price: +toRoundFixed(company.cleaning),

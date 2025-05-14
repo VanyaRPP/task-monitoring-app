@@ -1,11 +1,10 @@
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import { IRealestate, CustomServices } from '@common/api/realestateApi/realestate.api.types'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { expect } from '@jest/globals'
 import { ServiceType } from '@utils/constants'
 import { getInvoices } from '@common/services/invoicesService'
 import { realEstates } from '@utils/testData'
-import { ObjectId } from 'mongodb'
 
 describe('getInvoices - MAINTENANCE', () => {
   describe('props: { service }', () => {
@@ -293,13 +292,13 @@ describe('getInvoices - MAINTENANCE', () => {
       const service: Partial<IService> = null
       const company: Partial<IRealestate> = null
       const prevPayment: Partial<IPayment> = null
-  
+
       const invoices = getInvoices({
         service,
         company,
         prevPayment,
       })
-  
+
       expect(invoices).not.toContainEqual(
         expect.objectContaining({ type: ServiceType.Maintenance })
       )
@@ -318,13 +317,13 @@ describe('getInvoices - MAINTENANCE', () => {
           },
         ],
       }
-  
+
       const invoices = getInvoices({
         service,
         company,
         prevPayment,
       })
-  
+
       expect(invoices).not.toContainEqual(
         expect.objectContaining({ type: ServiceType.Maintenance })
       )
@@ -345,13 +344,13 @@ describe('getInvoices - MAINTENANCE', () => {
           },
         ],
       }
-  
+
       const invoices = getInvoices({
         service,
         company,
         prevPayment,
       })
-  
+
       expect(invoices).not.toContainEqual(
         expect.objectContaining({ type: ServiceType.Maintenance })
       )
@@ -372,28 +371,30 @@ describe('getInvoices - MAINTENANCE', () => {
           },
         ],
       }
-  
+
       const invoices = getInvoices({
         service,
         company,
         prevPayment,
       })
-  
+
       expect(invoices).not.toContainEqual(
         expect.objectContaining({ type: ServiceType.Maintenance })
       )
     })
     it('should correctly generate invoices based on previous payments and rent price', () => {
-      const realEstate = realEstates.find((estate) => estate._id === '64d68421d9ba2fc8fea79d21');
-    if (realEstate && realEstate.servicePricePerMeter === 10) {
+      const realEstate = realEstates.find(
+        (estate) => estate._id === '64d68421d9ba2fc8fea79d21'
+      )
+      if (realEstate && realEstate.servicePricePerMeter === 10) {
         const service: Partial<IService> = {
           rentPrice: realEstate.pricePerMeter,
-        };
+        }
         const company: Partial<IRealestate> = {
           totalArea: realEstate.totalArea,
-        };
+        }
         const prevPayment: Partial<IPayment> = {
-          invoice: [ 
+          invoice: [
             {
               amount: realEstate.totalArea,
               price: realEstate.servicePricePerMeter,
@@ -401,38 +402,45 @@ describe('getInvoices - MAINTENANCE', () => {
               type: ServiceType.Maintenance,
             },
           ],
-        };
+        }
         const invoices = getInvoices({
           service,
           company,
           prevPayment,
-        });
+        })
         expect(invoices).toContainEqual({
           amount: realEstate.totalArea,
           price: realEstate.servicePricePerMeter,
           sum: realEstate.servicePricePerMeter * realEstate.totalArea,
           type: ServiceType.Maintenance,
-        });
+        })
         expect(invoices).toContainEqual({
           amount: 10,
           price: 10,
           sum: 100,
           type: ServiceType.Maintenance,
-        });
+        })
       }
     })
-    
+
     it('should verify if company_1 has maintenance service', () => {
       const companies = [
         {
           _id: '64d68421d9ba2fc8fea79d22',
-          invoices: [{ type: ServiceType.Maintenance, amount: 10, price: 10, sum: 100 }],
+          invoices: [
+            { type: ServiceType.Maintenance, amount: 10, price: 10, sum: 100 },
+          ],
         },
-      ];
-    
-      expect(companies.some(c => c._id === '64d68421d9ba2fc8fea79d22' && c.invoices?.some(inv => inv.type === ServiceType.Maintenance)))
-        .toBe(true);
-    });
+      ]
+
+      expect(
+        companies.some(
+          (c) =>
+            c._id === '64d68421d9ba2fc8fea79d22' &&
+            c.invoices?.some((inv) => inv.type === ServiceType.Maintenance)
+        )
+      ).toBe(true)
+    })
   })
 
   describe('props: { payment }', () => {
@@ -696,57 +704,55 @@ describe('getInvoices - MAINTENANCE', () => {
         expect.objectContaining({ type: ServiceType.Maintenance })
       )
     }),
+      it('should NOT load when service = { rentPrice: 10 }, company = { customService.rentPrice: null }', () => {
+        const service: Partial<IService> = {
+          rentPrice: 10,
+        }
+        const company: Partial<IRealestate> = {
+          customServices: [
+            {
+              label: 'Rent Price',
+              fieldName: 'rentPrice',
+              price: null,
+            },
+          ],
+        }
 
-    it('should NOT load when service = { rentPrice: 10 }, company = { customService.rentPrice: null }', () => {
-      const service: Partial<IService> = {
-        rentPrice: 10,
-      }
-      const company: Partial<IRealestate> = {
-        customServices: [
-          {
-            label: 'Rent Price',
-            fieldName: 'rentPrice',
-            price: null,
-          },
-        ],
-      }
-
-      const invoices = getInvoices({
-        service,
-        company,
-      })
-      expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.Maintenance })
-      )
-    }),
-
-    it('should load when service = { rentPrice: 10 }, company = { totalArea: 10, customService.rentPrice: 12 }', () => {
-      const service: Partial<IService> = {
-        rentPrice: 10,
-      }
-      const company: Partial<IRealestate> = {
-        totalArea: 10,
-        customServices: [
-          {
-            label: 'Rent Price',
-            fieldName: 'rentPrice',
-            price: 12,
-          },
-        ],
-      }
-
-      const invoices = getInvoices({
-        service,
-        company,
-      })
-      expect(invoices).toContainEqual(
-        expect.objectContaining({ 
-          type: ServiceType.Maintenance,
-          amount: 10,
-          price: 12,
-          sum: 120,
+        const invoices = getInvoices({
+          service,
+          company,
         })
-      )
-    })
+        expect(invoices).not.toContainEqual(
+          expect.objectContaining({ type: ServiceType.Maintenance })
+        )
+      }),
+      it('should load when service = { rentPrice: 10 }, company = { totalArea: 10, customService.rentPrice: 12 }', () => {
+        const service: Partial<IService> = {
+          rentPrice: 10,
+        }
+        const company: Partial<IRealestate> = {
+          totalArea: 10,
+          customServices: [
+            {
+              label: 'Rent Price',
+              fieldName: 'rentPrice',
+              price: 12,
+            },
+          ],
+        }
+
+        const invoices = getInvoices({
+          service,
+          company,
+        })
+        expect(invoices).toContainEqual(
+          expect.objectContaining({
+            type: ServiceType.Maintenance,
+            amount: 10,
+            price: 12,
+            sum: 120,
+          })
+        )
+      })
   })
 })
