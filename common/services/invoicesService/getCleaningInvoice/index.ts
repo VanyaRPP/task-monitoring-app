@@ -17,40 +17,36 @@ export const getCleaningInvoice = ({
   service,
   currInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
+  // 1. Пріоритет — invoice
   const invoice = currInvoicesCollection?.[ServiceType.Cleaning]
-
   if (invoice) {
-    return {
-      type: invoice.type,
-      price: +toRoundFixed(+invoice.price || +invoice.sum),
-      sum: +toRoundFixed(+invoice.sum || +invoice.price),
-    }
+    const price = +toRoundFixed(+invoice.price || +invoice.sum)
+    const sum = +toRoundFixed(+invoice.sum || +invoice.price)
+    return { type: invoice.type, price, sum }
   }
 
-  const servicePrice = getPriceFromCustomServices(
+  // 2. Спроба через customServices
+  const serviceCustomPrice = getPriceFromCustomServices(
     service?.customServices,
     ServiceType.Cleaning
   )
-  const companyPrice = getPriceFromCustomServices(
+
+  const companyCustomPrice = getPriceFromCustomServices(
     company?.customServices,
     ServiceType.Cleaning
   )
 
-  const price = servicePrice ?? companyPrice
-
-  if (price !== undefined) {
-    return {
-      type: ServiceType.Cleaning,
-      price: +toRoundFixed(price),
-      sum: +toRoundFixed(price),
-    }
+  const customPrice = serviceCustomPrice ?? companyCustomPrice
+  if (customPrice !== undefined) {
+    const price = +toRoundFixed(customPrice)
+    return { type: ServiceType.Cleaning, price, sum: price }
   }
 
+  // 3. Старий варіант через company[ServiceType.Cleaning]
   if (!_isEmpty(company?.cleaning) && !isNaN(company.cleaning)) {
-    return {
-      type: ServiceType.Cleaning,
-      price: +toRoundFixed(company.cleaning),
-      sum: +toRoundFixed(company.cleaning),
-    }
+    const price = +toRoundFixed(company.cleaning)
+    return { type: ServiceType.Cleaning, price, sum: price }
   }
+
+  return
 }
