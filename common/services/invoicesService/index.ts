@@ -1,47 +1,20 @@
+import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
+import { IGetInvoiceProps, InvoicesCollection } from './types'
 import {
-  IPaymentField,
-  IPayment,
-} from '@common/api/paymentApi/payment.api.types'
-import {
-  // getMaintenanceInvoice,
   getPlacingInvoice,
-  getInflicionInvoice,
-  getElectricityInvoice,
-  getWaterInvoice,
-  getWaterPartInvoice,
   getGarbageCollectorInvoice,
   getCleaningInvoice,
-  getDiscountInvoice,
-  getCustomInvoices,
   getCustomServiceInvoices,
 } from '@utils/getInvoices' //TODO: we rewrite each service
-import {
-  getMaintenanceInvoice,
-} from '@common/services/getMaintenanceInvoice'
-import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
-import { IService } from '@common/api/serviceApi/service.api.types'
-import { ServiceType } from '@utils/constants'
+import { getMaintenanceInvoice } from '@common/services/getMaintenanceInvoice'
 import { isEmpty } from '@utils/helpers'
 
-export type InvoicesCollection = {
-  [key in ServiceType | string]?: IPaymentField
-}
-
-export interface IGetInvoiceProps {
-  company?: Partial<IRealestate>
-  service?: Partial<IService>
-  payment?: Partial<IPayment>
-  prevService?: Partial<IService>
-  prevPayment?: Partial<IPayment>
-}
-
-export interface IGetInvoiceByTypeProps {
-  company?: Partial<IRealestate>
-  service?: Partial<IService>
-  prevService?: Partial<IService>
-  currInvoicesCollection: InvoicesCollection
-  prevInvoicesCollection: InvoicesCollection
-}
+import { getElectricityInvoice } from './getElectricityInvoice'
+import { getInflicionInvoice } from './getInflicionInvoice'
+import { getWaterPartInvoice } from './getWaterPartInvoice'
+import { getDiscountInvoice } from './getDiscountInvoice'
+import { getCustomInvoices } from './getCustomInvoices'
+import { getWaterInvoice } from './getWaterInvoice'
 
 /**
  * Generating initial invoices data, based on received props.
