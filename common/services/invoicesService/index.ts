@@ -9,7 +9,7 @@ import {
   getElectricityInvoice,
   getWaterInvoice,
   getWaterPartInvoice,
-  getGarbageCollectorInvoice,
+  // getGarbageCollectorInvoice,
   getCleaningInvoice,
   getDiscountInvoice,
   getCustomInvoices,
@@ -18,6 +18,9 @@ import {
 import {
   getMaintenanceInvoice,
 } from '@common/services/getMaintenanceInvoice'
+import {
+  getGarbageCollectorInvoice,
+} from '@common/services/getGarbageCollectorInvoice'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { ServiceType } from '@utils/constants'

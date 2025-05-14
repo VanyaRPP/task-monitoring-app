@@ -61,24 +61,17 @@ export const getMaintenanceInvoice = ({
     }
   }
 
-  if (
-    !isNaN(
-      company?.customServices?.find(item => item?.fieldName === 'totalArea')?.price ??
-      company?.totalArea
-    ) &&
-    !isNaN(
-      company?.customServices?.find(item => item?.fieldName === 'rentPrice')?.price ??
-      company?.servicePricePerMeter ??
-      service?.rentPrice
-    )
-  ) {
+  const totalArea = company?.customServices?.find(item => item?.fieldName === 'totalArea')?.price 
+  || company?.totalArea
 
-    const rentPrice = company?.customServices?.find(item => item?.fieldName === 'rentPrice')?.price 
-    || company?.servicePricePerMeter 
-    || service?.rentPrice
-    
-    const totalArea = company?.customServices?.find(item => item?.fieldName === 'totalArea')?.price 
-    || company?.totalArea
+  const rentPrice = company?.customServices?.find(item => item?.fieldName === 'rentPrice')?.price 
+  || company?.servicePricePerMeter 
+  || service?.rentPrice
+
+  if (
+    !isNaN(totalArea) &&
+    !isNaN(rentPrice)
+  ) {
 
     return {
       type: ServiceType.Maintenance,

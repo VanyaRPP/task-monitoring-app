@@ -5,7 +5,6 @@ import { expect } from '@jest/globals'
 import { ServiceType } from '@utils/constants'
 import { getInvoices } from '@common/services/invoicesService'
 import { realEstates } from '@utils/testData'
-import { ObjectId } from 'mongodb'
 
 describe('getInvoices - MAINTENANCE', () => {
   describe('props: { service }', () => {

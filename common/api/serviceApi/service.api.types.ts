@@ -17,7 +17,7 @@ export interface IService {
   inflicionPrice?: number
   description?: string
   customServices?: {
-    _id: ObjectId
+    _id?: ObjectId
     label: string
     fieldName: string
     price: number
