@@ -1,33 +1,33 @@
 'use client'
 
 import { UserOutlined } from '@ant-design/icons'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
 
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { FeatureFlagsTable } from '@common/components/FeatureFlagsTable'
 import { UsersTable } from '@components/Tables/UsersTable'
 import { Tags } from '@components/UI/Tags'
+import { AppRoutes, Roles } from '@utils/constants'
 import {
-  Form,
   Avatar,
   Button,
   Card,
   Divider,
   Flex,
+  Form,
   Space,
   Tag,
-  Typography,
-  message,
+  Typography
 } from 'antd'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
-import styles from './style.module.scss'
-import { EditUserForm } from '../../Forms/EditUserForm'
-import { AppRoutes, Roles } from '@utils/constants'
 import { useRouter } from 'next/router'
+import { EditUserForm } from '../../Forms/EditUserForm'
+import styles from './style.module.scss'
+
 
 export const ProfilePage: React.FC = () => {
   const router = useRouter()
@@ -147,9 +147,15 @@ export const ProfilePage: React.FC = () => {
       </Flex>
 
       {isGlobalAdmin && (
+        <>
         <Card title="Користувачі">
           <UsersTable />
         </Card>
+
+        <Card title="Фічефлаги">
+          <FeatureFlagsTable />
+        </Card>
+        </>
       )}
     </Space>
   )
