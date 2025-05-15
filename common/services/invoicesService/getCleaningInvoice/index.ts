@@ -3,14 +3,7 @@ import { IGetInvoiceByTypeProps } from '../types'
 import { ServiceType } from '@utils/constants'
 import { toRoundFixed } from '@utils/helpers'
 import _isEmpty from 'lodash/isEmpty'
-
-const getPriceFromCustomServices = (
-  items: any[] | undefined,
-  fieldName: string
-): number | undefined => {
-  const found = items?.find((item) => item.fieldName === fieldName)
-  return found && !isNaN(found.price) ? +found.price : undefined
-}
+import { getPriceFromCustomServices } from '@utils/helpers'
 
 export const getCleaningInvoice = ({
   company,

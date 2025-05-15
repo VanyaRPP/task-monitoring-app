@@ -5,7 +5,7 @@ import {
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { ServiceType } from '@utils/constants'
-import { isEmpty, toRoundFixed } from '@utils/helpers'
+import { isEmpty, toRoundFixed, getPriceFromCustomServices } from '@utils/helpers'
 
 export type InvoicesCollection = {
   [key in ServiceType | string]?: IPaymentField
@@ -41,11 +41,11 @@ export const getMaintenanceInvoice = ({
 
     const invoice = currInvoicesCollection[ServiceType.Maintenance]
     const companyMaintenance =
-    company?.customServices?.find(item => item?.fieldName === 'rentPrice')?.price >= 0
-      ? company.customServices.find(item => item?.fieldName === 'rentPrice')!.price
-      : company?.servicePricePerMeter >= 0
-        ? company.servicePricePerMeter
-        : undefined;
+      company?.customServices?.find(item => item?.fieldName === 'rentPrice')?.price >= 0
+        ? company.customServices.find(item => item?.fieldName === 'rentPrice')!.price
+        : company?.servicePricePerMeter >= 0
+          ? company.servicePricePerMeter
+          : undefined;
 
     return {
       type: invoice.type,
@@ -61,24 +61,17 @@ export const getMaintenanceInvoice = ({
     }
   }
 
-  if (
-    !isNaN(
-      company?.customServices?.find(item => item?.fieldName === 'totalArea')?.price ??
-      company?.totalArea
-    ) &&
-    !isNaN(
-      company?.customServices?.find(item => item?.fieldName === 'rentPrice')?.price ??
-      company?.servicePricePerMeter ??
-      service?.rentPrice
-    )
-  ) {
+  const rentPrice = getPriceFromCustomServices(company?.customServices, 'rentPrice')
+  ??  getPriceFromCustomServices(service?.customServices, 'rentPrice')
+  ?? company?.servicePricePerMeter
+  ?? service?.rentPrice
+  const totalArea = getPriceFromCustomServices(company?.customServices, 'totalArea') 
+  ?? company?.totalArea
 
-    const rentPrice = company?.customServices?.find(item => item?.fieldName === 'rentPrice')?.price 
-    || company?.servicePricePerMeter 
-    || service?.rentPrice
-    
-    const totalArea = company?.customServices?.find(item => item?.fieldName === 'totalArea')?.price 
-    || company?.totalArea
+  if (
+    !isNaN(totalArea) &&
+    !isNaN(rentPrice)
+  ) {
 
     return {
       type: ServiceType.Maintenance,

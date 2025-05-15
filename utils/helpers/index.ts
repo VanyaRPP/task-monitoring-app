@@ -99,6 +99,14 @@ export const isAdminCheck = (roles?: string[]): boolean => {
   )
 }
 
+export function getPriceFromCustomServices(
+  items: any[] | undefined,
+  fieldName: string
+): number | undefined {
+  const found = items?.find((item) => item.fieldName === fieldName)
+  return found && !isNaN(found.price) ? +found.price : undefined
+}
+
 export function getPlainJsObjectFromMongoose(dataArray) {
   return dataArray.map((doc) => {
     const plainObject = {}
