@@ -734,8 +734,10 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           key={columns.map((col) => col.dataIndex).join(',')}
           rowKey="_id"
           rowSelection={
-            currUser?.roles?.includes(Roles.GLOBAL_ADMIN) &&
-            router.pathname === AppRoutes.PAYMENT && {
+              (currUser?.roles?.includes(Roles.GLOBAL_ADMIN) ||
+                currUser?.roles?.includes(Roles.DOMAIN_ADMIN)) &&
+              router.pathname === AppRoutes.PAYMENT
+                ? {
               selectedRowKeys: paymentsDeleteItems.map((item) => item.id),
               preserveSelectedRowKeys: true,
               onChange: (_, selectedRows) => {
@@ -751,6 +753,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
               },
               onSelect: onSelect,
             }
+            : undefined
           }
           columns={columns}
           dataSource={payments?.data}
