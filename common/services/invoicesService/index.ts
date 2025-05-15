@@ -6,7 +6,7 @@ import {
   getCleaningInvoice,
   getCustomServiceInvoices,
 } from '@utils/getInvoices' //TODO: we rewrite each service
-import { getMaintenanceInvoice } from '@common/services/getMaintenanceInvoice'
+import { getMaintenanceInvoice } from '@common/services/invoicesService/getMaintenanceInvoice'
 import { isEmpty } from '@utils/helpers'
 
 import { getElectricityInvoice } from './getElectricityInvoice'

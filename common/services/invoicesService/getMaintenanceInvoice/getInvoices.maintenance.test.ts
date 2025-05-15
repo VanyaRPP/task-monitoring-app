@@ -1,6 +1,6 @@
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
-import { IService } from '@common/api/serviceApi/service.api.types'
+import { IService, ICustomServices } from '@common/api/serviceApi/service.api.types'
 import { expect } from '@jest/globals'
 import { ServiceType } from '@utils/constants'
 import { getInvoices } from '@common/services/invoicesService'
@@ -739,6 +739,34 @@ describe('getInvoices - MAINTENANCE', () => {
               price: 12,
             },
           ],
+        }
+
+        const invoices = getInvoices({
+          service,
+          company,
+        })
+        expect(invoices).toContainEqual(
+          expect.objectContaining({
+            type: ServiceType.Maintenance,
+            amount: 10,
+            price: 12,
+            sum: 120,
+          })
+        )
+      })
+      it('should load when service = { rentPrice: 10, customService.rentPrice: 12 }, company = { totalArea: 10 }', () => {
+        const service: Partial<IService> = {
+          rentPrice: 10,
+          customServices: [
+            {
+              label: 'Rent Price',
+              fieldName: 'rentPrice',
+              price: 12,
+            },
+          ] as Partial<ICustomServices>[],
+        } as Partial<IService>
+        const company: Partial<IRealestate> = {
+          totalArea: 10,
         }
 
         const invoices = getInvoices({
