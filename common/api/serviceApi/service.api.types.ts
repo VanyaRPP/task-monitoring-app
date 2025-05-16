@@ -21,10 +21,10 @@ export interface IService {
 }
 
 export interface ICustomServices {
-    _id: ObjectId
-    label: string
-    fieldName: string
-    price: number
+  _id: ObjectId
+  label: string
+  fieldName: string
+  price: number
 }
 
 export interface IAddServiceResponse {
