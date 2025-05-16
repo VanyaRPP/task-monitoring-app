@@ -104,7 +104,7 @@ export function getPriceFromCustomServices(
   fieldName: string
 ): number | undefined {
   const found = items?.find((item) => item.fieldName === fieldName)
-  return found && !isNaN(found.price) ? +found.price : undefined
+  return found && !isNaN(found.price) && found.price !== null ? found.price : undefined
 }
 
 export function getPlainJsObjectFromMongoose(dataArray) {

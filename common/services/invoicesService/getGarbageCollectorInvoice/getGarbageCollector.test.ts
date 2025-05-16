@@ -1,6 +1,12 @@
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import { IRealestate, CustomServices } from '@common/api/realestateApi/realestate.api.types'
-import { IService, ICustomServices } from '@common/api/serviceApi/service.api.types'
+import {
+  IRealestate,
+  CustomServices,
+} from '@common/api/realestateApi/realestate.api.types'
+import {
+  IService,
+  ICustomServices,
+} from '@common/api/serviceApi/service.api.types'
 import { expect } from '@jest/globals'
 import { ServiceType } from '@utils/constants'
 import { getInvoices } from '@common/services/invoicesService'
@@ -606,80 +612,130 @@ describe('getInvoices - GARBAGE COLLECTOR', () => {
       })
     })
   }),
-  describe('props: { service, company, payment } with prio to payment', () => {
-    it('should load when service = { customService.garbageCollectorPrice: null }, company = { rentPart: 10, garbageCollector: true }', () => {
-      const service = {
-        customServices: [
-          {
-            label: 'Garbage Collector',
-            fieldName: 'garbageCollectorPrice',
-            price: null,
-          },
-        ] as Partial<ICustomServices>
-      } as Partial<IService>
-      const company: Partial<IRealestate> = {
-        rentPart: 10,
-        garbageCollector: true,
-      }
+    describe('props: { service, company } with customServices', () => {
+      it('should NOT load when service = { customService.garbageCollectorPrice: null }, company = { rentPart: 10, garbageCollector: true }', () => {
+        const service = {
+          customServices: [
+            {
+              label: 'Garbage Collector',
+              fieldName: 'garbageCollectorPrice',
+              price: null,
+            },
+          ] as Partial<ICustomServices>,
+        } as Partial<IService>
+        const company: Partial<IRealestate> = {
+          rentPart: 10,
+          garbageCollector: true,
+        }
 
-      const invoices = getInvoices({
-        service,
-        company,
+        const invoices = getInvoices({
+          service,
+          company,
+        })
+
+        expect(invoices).not.toContainEqual(
+          expect.objectContaining({ type: ServiceType.GarbageCollector })
+        )
       })
+        it('should NOT load when service = { customService.garbageCollectorPrice: undefined }, company = { rentPart: 10, garbageCollector: true }', () => {
+          const service = {
+            customServices: [
+              {
+                label: 'Garbage Collector',
+                fieldName: 'garbageCollectorPrice',
+                price: undefined,
+              },
+            ] as Partial<ICustomServices>[],
+          } as Partial<IService>
+          const company: Partial<IRealestate> = {
+            rentPart: 10,
+            garbageCollector: true,
+          }
 
-      expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.GarbageCollector })
-      )
-    }),
-    it('should load when service = { customService.garbageCollectorPrice: undefined }, company = { rentPart: 10, garbageCollector: true }', () => {
-      const service = {
-        customServices: [
-          {
-            label: 'Garbage Collector',
-            fieldName: 'garbageCollectorPrice',
-            price: undefined,
-          },
-        ] as Partial<ICustomServices>
-      } as Partial<IService>
-      const company: Partial<IRealestate> = {
-        rentPart: 10,
-        garbageCollector: true,
-      }
+          const invoices = getInvoices({
+            service,
+            company,
+          })
 
-      const invoices = getInvoices({
-        service,
-        company,
+          expect(invoices).not.toContainEqual(
+            expect.objectContaining({ type: ServiceType.GarbageCollector })
+          )
+        })
+        it('should NOT load when service = { customService.garbageCollectorPrice: 23 }, company = { rentPart: 10, garbageCollector: false }', () => {
+          const service = {
+            customServices: [
+              {
+                label: 'Garbage Collector',
+                fieldName: 'garbageCollectorPrice',
+                price: 23,
+              },
+            ] as Partial<ICustomServices>[],
+          } as Partial<IService>
+          const company: Partial<IRealestate> = {
+            rentPart: 10,
+            garbageCollector: false,
+          }
+
+          const invoices = getInvoices({
+            service,
+            company,
+          })
+
+          expect(invoices).not.toContainEqual(
+            expect.objectContaining({ type: ServiceType.GarbageCollector })
+          )
+        })
+        it('should load when service = { customService.garbageCollectorPrice: 0 }, company = { rentPart: 10, garbageCollector: true }', () => {
+          const service = {
+            customServices: [
+              {
+                label: 'Garbage Collector',
+                fieldName: 'garbageCollectorPrice',
+                price: 0,
+              },
+            ] as Partial<ICustomServices>,
+          } as Partial<IService>
+          const company: Partial<IRealestate> = {
+            rentPart: 10,
+            garbageCollector: true,
+          }
+  
+          const invoices = getInvoices({
+            service,
+            company,
+          })
+  
+          expect(invoices).toContainEqual({
+            type: ServiceType.GarbageCollector,
+            price: 0,
+            sum: 0,
+          })
+        })
+      it('should load when service = { customService.garbageCollectorPrice: 22 }, company = { rentPart: 10, garbageCollector: true }', () => {
+        const service = {
+          customServices: [
+            {
+              label: 'Garbage Collector',
+              fieldName: 'garbageCollectorPrice',
+              price: 22,
+            },
+          ] as Partial<ICustomServices>[],
+        } as Partial<IService>
+        const company: Partial<IRealestate> = {
+          rentPart: 10,
+          garbageCollector: true,
+        }
+
+        const invoices = getInvoices({
+          service,
+          company,
+        })
+
+        expect(invoices).toContainEqual({
+          type: ServiceType.GarbageCollector,
+          price: 2.2,
+          sum: 2.2,
+        })
       })
-
-      expect(invoices).not.toContainEqual(
-        expect.objectContaining({ type: ServiceType.GarbageCollector })
-      )
     })
-    it('should load when service = { customService.garbageCollectorPrice: 22 }, company = { rentPart: 10, garbageCollector: true }', () => {
-      const service = {
-        customServices: [
-          {
-            label: 'Garbage Collector',
-            fieldName: 'garbageCollectorPrice',
-            price: 22,
-          },
-        ] as Partial<ICustomServices>
-      } as Partial<IService>
-      const company: Partial<IRealestate> = {
-        rentPart: 10,
-        garbageCollector: true,
-      }
-
-      const invoices = getInvoices({
-        service,
-        company,
-      })
-
-      expect(invoices).toContainEqual({
-        type: ServiceType.GarbageCollector,
-        price: 2.2,
-        sum: 2.2,
-      })
-    })
-  })
 })

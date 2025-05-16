@@ -2,13 +2,12 @@ import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { IGetInvoiceProps, InvoicesCollection } from './types'
 import {
   getPlacingInvoice,
-  getGarbageCollectorInvoice,
   getCleaningInvoice,
   getCustomServiceInvoices,
 } from '@utils/getInvoices' //TODO: we rewrite each service
-import { getMaintenanceInvoice } from '@common/services/invoicesService/getMaintenanceInvoice'
 import { isEmpty } from '@utils/helpers'
-
+import { getGarbageCollectorInvoice } from './getGarbageCollectorInvoice'
+import { getMaintenanceInvoice } from './getMaintenanceInvoice'
 import { getElectricityInvoice } from './getElectricityInvoice'
 import { getInflicionInvoice } from './getInflicionInvoice'
 import { getWaterPartInvoice } from './getWaterPartInvoice'
