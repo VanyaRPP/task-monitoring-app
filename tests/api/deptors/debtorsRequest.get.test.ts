@@ -19,8 +19,8 @@ jest.mock('@utils/getCurrentUser', () => ({
 
 setupTestEnvironment()
 
-const realDomainId = domains[0]._id
-const realDomainIdArray = [domains[0]._id, domains[1]._id]
+let realDomainId = domains[0]._id
+let realDomainIdArray = [domains[0]._id, domains[1]._id]
 
 describe('Deptors API - GET', () => {
   it('should NOT load when domainId = 0', async () => {
