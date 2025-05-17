@@ -5,6 +5,10 @@ import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
+import { useState } from 'react'
+
+import { PlusOutlined } from '@ant-design/icons'
+import FeatureFlagModal from '@common/components/Pages/Profile/Modal/AddFeatureFlagModal'
 
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { FeatureFlagsTable } from '@common/components/FeatureFlagsTable'
@@ -28,7 +32,6 @@ import { useRouter } from 'next/router'
 import { EditUserForm } from '../../Forms/EditUserForm'
 import styles from './style.module.scss'
 
-
 export const ProfilePage: React.FC = () => {
   const router = useRouter()
   const [form] = Form.useForm()
@@ -49,6 +52,10 @@ export const ProfilePage: React.FC = () => {
     })
   }
 
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editingFlag, setEditingFlag] = useState(null)
+
+  
   return (
     <Space
       direction="vertical"
@@ -151,10 +158,31 @@ export const ProfilePage: React.FC = () => {
         <Card title="Користувачі">
           <UsersTable />
         </Card>
+        
+        <Card>
+      <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
+        <Typography.Title level={4} style={{ margin: 0 }}>
+          Фічефлаги
+        </Typography.Title>
+          <FeatureFlagModal
+            open={modalOpen}
+            onClose={() => {
+              setModalOpen(false)
+              setEditingFlag(null)
+            }}
+          />
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => setModalOpen(true)}
+        >
+        </Button>
+      </Flex>
 
-        <Card title="Фічефлаги">
-          <FeatureFlagsTable />
-        </Card>
+      <FeatureFlagsTable/>
+
+    </Card>
+
         </>
       )}
     </Space>

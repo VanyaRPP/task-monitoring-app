@@ -1,10 +1,20 @@
-import mongoose from 'mongoose'
+import mongoose, { Document, Schema } from 'mongoose'
 
- const FeatureFlashSchema = new mongoose.Schema({
-	name: {type: String, required: true, uniqe: true},
-	description: String,
-	isEnebled: {type: Boolean, deeafult: false},
-	createdAt: {type: Date, default: Date.now}
- })
+export interface IFeatureFlag extends Document {
+  name: string
+  description?: string
+  isEnabled: boolean
+  createdAt: Date
+}
 
-export default mongoose.models.FeatureFlag || mongoose.model('FeatureFlag', FeatureFlashSchema);
+const FeatureFlagSchema = new Schema<IFeatureFlag>({
+  name: { type: String, required: true, unique: true },
+  description: { type: String },
+isEnabled: { type: Boolean, default: false },  createdAt: { type: Date, default: Date.now },
+})
+
+const FeatureFlag =
+  mongoose.models.FeatureFlag as mongoose.Model<IFeatureFlag> ||
+  mongoose.model<IFeatureFlag>('FeatureFlag', FeatureFlagSchema)
+
+export default FeatureFlag
