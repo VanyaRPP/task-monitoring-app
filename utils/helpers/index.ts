@@ -606,7 +606,6 @@ export async function isDomainAdmin(user?: IUser): Promise<boolean> {
     const domain = await RealEstate.findOne({ adminEmails: user.email })
     return !!domain
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.log(error)
     return false
   }
