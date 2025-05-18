@@ -1,7 +1,7 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { IGetInvoiceByTypeProps } from '../types'
 import { ServiceType } from '@utils/constants'
-import { toRoundFixed } from '@utils/helpers'
+import { toRoundFixed, getPriceFromCustomServices } from '@utils/helpers'
 
 export const getDiscountInvoice = ({
   company,
@@ -24,9 +24,10 @@ export const getDiscountInvoice = ({
     }
   }
 
+  const companyDiscount = getPriceFromCustomServices(company?.customServices, 'discount') ?? company?.discount
   return {
     type: ServiceType.Discount,
-    price: +toRoundFixed(company?.discount),
-    sum: +toRoundFixed(company?.discount),
+    price: +toRoundFixed(companyDiscount),
+    sum: +toRoundFixed(companyDiscount),
   }
 }
