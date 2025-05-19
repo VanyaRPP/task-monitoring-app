@@ -7,6 +7,7 @@ import { AppRoutes, Roles } from '@utils/constants'
 import { authOptions } from '../api/auth/[...nextauth]'
 import Head from 'next/head'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import FullScreenWrapper from "@components/UI/fullScreenTableWrapper/fullScreenTableWrapper"
 
 export default withAuthRedirect(() => {
   const { data: userResponse } = useGetCurrentUserQuery()
@@ -22,7 +23,9 @@ export default withAuthRedirect(() => {
           { title: 'Платежі', path: AppRoutes.PAYMENT },
         ]}
       >
-        <PaymentsBlock />
+        <FullScreenWrapper>
+          <PaymentsBlock />
+        </FullScreenWrapper>
       </MainLayout>
     </>
   )
