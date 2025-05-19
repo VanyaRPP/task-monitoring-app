@@ -42,8 +42,6 @@ const BankTransactions = () => {
     : ''
 
   const { data: balances } = useGetBalancesQuery({ token }, { skip: !token })
-  
-  console.log('balances', balances)
 
   const items = domains.map((domain) => {
     return {
