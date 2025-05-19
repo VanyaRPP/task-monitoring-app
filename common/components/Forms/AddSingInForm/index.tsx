@@ -32,7 +32,7 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
   }
 
   return (
-    <div style={{ maxWidth: 345, margin: '0 auto', padding: '15px' }}>
+    <div>
       {/* TODO: create title for reg & log <Title level={1}>
         {isLogin ? config.titles.signInTitle : config.titles.signUpTitle}
       </Title>  */}
@@ -52,7 +52,7 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
             <Input
               data-e2e="sauthFormName"
               placeholder="name"
-              prefix={<UserOutlined style={{ color: '#00000040' }} />}
+              prefix={<UserOutlined className="auth-icon" />}
             />
           </Form.Item>
         )}
@@ -68,7 +68,7 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
             data-e2e="authFormEmail"
             type="text"
             placeholder="email"
-            prefix={<MailOutlined style={{ color: '#00000040' }} />}
+            prefix={<MailOutlined className="auth-icon" />}
           />
         </Form.Item>
 
@@ -80,7 +80,7 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
           <Input.Password
             data-e2e="authFormPassword"
             placeholder="******"
-            prefix={<LockOutlined style={{ color: '#00000040' }} />}
+            prefix={<LockOutlined className="auth-icon" />}
           />
         </Form.Item>
 

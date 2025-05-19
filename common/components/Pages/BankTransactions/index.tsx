@@ -11,10 +11,10 @@ import DomainBankBalance from './components/DomainbankBalance/DomainBankBalance'
 import s from './style.module.scss'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
-import { useGetBalancesQuery } from '@common/api/bankApi/mockBank.api'
 import { useEffect, useState } from 'react'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import EncryptionService from '@utils/encryptionService'
+import { useGetBalancesQuery } from '@common/api/bankApi/bank.api'
 
 const BankTransactions = () => {
   const router = useRouter()
@@ -39,7 +39,6 @@ const BankTransactions = () => {
         selectedDomain?.domainBankToken[0]?.token ?? 'token'
       )
     : ''
-  // const token = 'mock_token'
 
   const { data: balances } = useGetBalancesQuery({ token }, { skip: !token })
 

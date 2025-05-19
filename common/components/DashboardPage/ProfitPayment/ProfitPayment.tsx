@@ -24,7 +24,10 @@ const ProfitPayment: React.FC = () => {
 
   const closeModal = () => {
     setIsModalOpen(false)
+    closeEditModal()
   }
+
+  const closeEditModal = () => {}
 
   const [selectedDate, setSelectedDate] = useState<string>()
 
