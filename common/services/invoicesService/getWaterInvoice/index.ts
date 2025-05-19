@@ -1,5 +1,5 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
-import { toRoundFixed, isEmpty } from '@utils/helpers'
+import { toRoundFixed, isEmpty, getPriceFromCustomServices } from '@utils/helpers'
 import { IGetInvoiceByTypeProps } from '../types'
 import { ServiceType } from '@utils/constants'
 
@@ -28,10 +28,16 @@ export const getWaterInvoice = ({
     }
   }
 
+  const waterPrice = getPriceFromCustomServices(service?.customServices, ServiceType.Water) 
+  ?? service?.waterPrice
+
+  const waterPart = getPriceFromCustomServices(company?.customServices, ServiceType.WaterPart) 
+  ?? company?.waterPart
+
   if (
-    !isEmpty(service?.waterPrice) &&
-    !isNaN(service.waterPrice) &&
-    (!company?.waterPart || isNaN(company?.waterPart))
+    !isEmpty(waterPrice) &&
+    !isNaN(waterPrice) &&
+    (!waterPart || isNaN(waterPart))
   ) {
     const prevWater = prevInvoicesCollection[ServiceType.Water]
 
@@ -39,7 +45,7 @@ export const getWaterInvoice = ({
       type: ServiceType.Water,
       amount: +toRoundFixed(prevWater?.amount),
       lastAmount: +toRoundFixed(prevWater?.amount),
-      price: +toRoundFixed(service.waterPrice),
+      price: +toRoundFixed(waterPrice),
       sum: 0,
     }
   }
