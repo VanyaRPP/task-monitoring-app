@@ -52,12 +52,12 @@ const BankTransactions = () => {
     }
   })
 
-  const selectedBalance = balances?.data?.balances.find(
+  const selectedBalance = balances?.find(
     (balance) => balance.acc === selectedAcc
   )
   useEffect(() => {
-    if (balances?.data?.balances.length > 0 && !selectedAcc) {
-      setSelectedAcc(balances.data.balances[0].acc)
+    if (balances?.length > 0 && !selectedAcc) {
+      setSelectedAcc(balances[0].acc)
     }
   }, [balances])
 
@@ -72,10 +72,10 @@ const BankTransactions = () => {
         >
           Банк
         </Button>
-        {balances?.data?.balances?.length > 0 && (
+        {balances?.length > 0 && (
           <Select
             placeholder="Оберіть рахунок"
-            options={balances.data.balances.map((item) => ({
+            options={balances?.map((item) => ({
               label: item.acc,
               value: item.acc,
             }))}
