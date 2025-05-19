@@ -1,6 +1,12 @@
+import { bankApi } from '@common/api/bankApi/bank.api'
+import { mockBankApi } from '@common/api/bankApi/mockBank.api'
 import { categoryApi } from '@common/api/categoriesApi/category.api'
 import { customerApi } from '@common/api/customerApi/customer.api'
+import { customServicesApi } from '@common/api/customServicesApi/customServices.api'
+import { debtorsApi } from '@common/api/debtorsApi/debtors.api'
 import { domainApi } from '@common/api/domainApi/domain.api'
+import { FeatureFlag } from '@common/api/featureFlagsApi/featureFlag.api'
+import { filterApi } from '@common/api/filterApi/filter.api'
 import { notificationApi } from '@common/api/notificationApi/notification.api'
 import { paymentApi } from '@common/api/paymentApi/payment.api'
 import { realestateApi } from '@common/api/realestateApi/realestate.api'
@@ -8,13 +14,9 @@ import { serviceApi } from '@common/api/serviceApi/service.api'
 import { streetApi } from '@common/api/streetApi/street.api'
 import { taskApi } from '@common/api/taskApi/task.api'
 import { userApi } from '@common/api/userApi/user.api'
-import { bankApi } from '@common/api/bankApi/bank.api'
-import { filterApi } from '@common/api/filterApi/filter.api'
 import sidebarReducer from '@modules/store/sidebarSlice'
 import themeReducer from '@modules/store/themeSlice'
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
-import { debtorsApi } from '@common/api/debtorsApi/debtors.api'
-import { customServicesApi } from '@common/api/customServicesApi/customServices.api'
 
 export const store = configureStore({
   reducer: {
@@ -29,11 +31,14 @@ export const store = configureStore({
     [customServicesApi.reducerPath]: customServicesApi.reducer,
     [notificationApi.reducerPath]: notificationApi.reducer,
     [realestateApi.reducerPath]: realestateApi.reducer,
+
     [streetApi.reducerPath]: streetApi.reducer,
     [bankApi.reducerPath]: bankApi.reducer,
     [debtorsApi.reducerPath]: debtorsApi.reducer,
+    [mockBankApi.reducerPath]: mockBankApi.reducer,
     sidebar: sidebarReducer,
     theme: themeReducer,
+    [FeatureFlag.reducerPath]: FeatureFlag.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -50,7 +55,9 @@ export const store = configureStore({
       .concat(realestateApi.middleware)
       .concat(streetApi.middleware)
       .concat(bankApi.middleware)
-      .concat(debtorsApi.middleware),
+      .concat(mockBankApi.middleware)
+      .concat(debtorsApi.middleware)
+      .concat(FeatureFlag.middleware)
 })
 
 export type AppDispatch = typeof store.dispatch

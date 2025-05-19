@@ -1,6 +1,8 @@
 import { IDomain } from '@modules/models/Domain'
 import { IStreet } from '@modules/models/Street'
 import { IFilter } from '../paymentApi/payment.api.types'
+import { ObjectId } from 'mongoose'
+import { ServiceType } from '@utils/constants'
 
 export interface IService {
   _id: string
@@ -14,6 +16,12 @@ export interface IService {
   garbageCollectorPrice?: number
   inflicionPrice?: number
   description?: string
+  customServices?: {
+    _id: ObjectId
+    label: string
+    fieldName: string
+    price: number
+  }[]
   losses?: number
 }
 

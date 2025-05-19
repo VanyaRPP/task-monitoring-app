@@ -33,6 +33,7 @@ const RealEstateBlock: React.FC<Props> = ({
     useState<IExtendedRealestate>(null)
   const [filters, setFilters] = useState<any>()
   const [isArchive, setIsArchive] = useState(false)
+  const [realEstateActions, setRealEstateActions] = useState({ edit: false })
 
   const {
     data: realEstates,
@@ -48,9 +49,14 @@ const RealEstateBlock: React.FC<Props> = ({
     },
     { refetchOnMountOrArgChange: isArchive }
   )
-  const [realEstateActions, setRealEstateActions] = useState({
-    edit: false,
-  })
+  const domain = sepDomainID || domainId || filters?.domain?.[0]
+
+  const isSingleCompanyByDomain = (() => {
+    if (!domain || !realEstates?.data?.length) return false
+    const domainScoped = realEstates.data.filter(r => r.domain?._id === domain)
+    const uniqueCompanies = new Set(domainScoped.map(r => r.companyName))
+    return uniqueCompanies.size === 1
+  })()
 
   return (
     <TableCard
@@ -65,7 +71,8 @@ const RealEstateBlock: React.FC<Props> = ({
           setIsArchive={setIsArchive}
           realEstateActions={realEstateActions}
           setRealEstateActions={setRealEstateActions}
-          enableRealEstateButton={sepDomainID ? false : true}
+          enableRealEstateButton={!sepDomainID}
+          isSingleCompanyByData={isSingleCompanyByDomain}
         />
       }
     >

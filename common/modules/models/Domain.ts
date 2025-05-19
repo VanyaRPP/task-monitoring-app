@@ -11,13 +11,13 @@ export interface IDomain {
   rnokpp: string
   IEName: string
   domainBankToken: IDomainBankToken[]
-  domainServices: IDomainService[]
+  domainServices: string[]
   customServices: ICustomService[]
 }
 
 export interface ICustomService {
-  domainId: ObjectId
-  name: string
+  groupName: string
+  services: string[]
 }
 
 export interface IDomainService {
@@ -49,8 +49,8 @@ const DomainSchema = new Schema<IDomain>({
   domainServices: { type: [Object] },
   customServices: [
     {
-      domainId: { type: Schema.Types.ObjectId, required: true },
-      name: { type: String, required: true },
+      groupName: { type: String, required: true },
+      services: [{ type: String, required: true }],
     },
   ],
 })

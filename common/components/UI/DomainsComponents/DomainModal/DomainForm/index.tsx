@@ -24,6 +24,7 @@ const DomainForm: React.FC<Props> = ({
   const [customServices, setCustomServices] = useState<
     { _id: string; name: string }[]
   >([])
+
   return (
     <Form
       form={form}
@@ -42,7 +43,8 @@ const DomainForm: React.FC<Props> = ({
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} />
       <DomainStreets disabled={!editable} />
-      <ServicesSelect form={form} customServices={customServices} />
+      <ServicesSelect form={form}/>
+      <DomainsServices form={form} editable={editable} onCustomServicesChange={setCustomServices}/>
       <DomainInfo editable={editable} form={form} />
     </Form>
   )

@@ -9,6 +9,7 @@ import dayjs from 'dayjs'
 import { FC, useState } from 'react'
 import AddServiceForm from '../Forms/AddServiceForm'
 import PreviewServiceForm from '../Forms/PreviewServiceForm'
+import { ObjectId } from 'mongoose'
 
 interface Props {
   closeModal: VoidFunction
@@ -30,6 +31,12 @@ type FormData = {
   garbageCollectorPrice: number
   inflicionPrice: number
   description: string
+  customServices: {
+    _id: ObjectId
+    label: string
+    fieldName: string
+    price: number
+  }[]
   losses: number
 }
 
@@ -44,6 +51,7 @@ const AddServiceModal: FC<Props> = ({
   const [editService, { isLoading: isEditingLoading }] =
     useEditServiceMutation()
   const { edit, preview } = serviceActions
+  
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
     const serviceData = {
@@ -57,6 +65,7 @@ const AddServiceModal: FC<Props> = ({
       garbageCollectorPrice: formData.garbageCollectorPrice || 0,
       inflicionPrice: formData.inflicionPrice || 0,
       description: formData.description || '',
+      customServices: formData.customServices || [],
       ...(formData.losses > 0 && { losses: formData.losses })
     }
     const response = currentService

@@ -17,7 +17,6 @@ import {
   IGetRealestateResponse,
 } from '@common/api/realestateApi/realestate.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-
 import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import {
@@ -40,7 +39,7 @@ import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 
 type DebtPerMonth = {
@@ -133,13 +132,14 @@ const CompaniesTable: React.FC<Props> = ({
       setDomainIds(domainData?.domainsFilter.map((domain) => domain.value))
     }
   }, [domainData])
-  const { data, error } = useGetDebtorsQuery({ domainIds: domainIds }, { skip: !domainIds || domainIds.length === 0 })
+  const { data, error } = useGetDebtorsQuery(
+    { domainIds: domainIds },
+    { skip: !domainIds || domainIds.length === 0 }
+  )
   const debtorCompanies = data?.companies
 
-  const [deleteRealEstate, { isLoading: deleteLoading }] =
-    useDeleteRealEstateMutation()
-  const [updateArchivedItem, { isLoading: archiveLoading }] =
-    useUpdateArchivedItemMutation()
+  const [deleteRealEstate, { isLoading: deleteLoading }] = useDeleteRealEstateMutation()
+  const [updateArchivedItem, { isLoading: archiveLoading }] = useUpdateArchivedItemMutation()
 
   const handleDelete = async (id: string) => {
     const response = await deleteRealEstate(id)
@@ -173,6 +173,12 @@ const CompaniesTable: React.FC<Props> = ({
     (isGlobalAdmin ? 50 : 0) +
     (!domainId && !streetId && !isLoading ? 400 : 0)
 
+  const isSingleCompanyByData = useMemo(() => {
+    if (!realEstates?.data || realEstates.data.length === 0) return false
+    const uniqueCompanies = new Set(realEstates.data.map((item) => item.companyName))
+    return uniqueCompanies.size === 1
+  }, [realEstates?.data])
+
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
   return (
@@ -186,19 +192,22 @@ const CompaniesTable: React.FC<Props> = ({
           pageSizeOptions: [10, 20, 50],
           position: ['bottomCenter'],
           showTotal: () => (
-          !isUser && <Switch
-            checkedChildren="Боржники"
-            unCheckedChildren="Всі"
-            onChange={(checked) => {
-              if (checked) {
-                setFilters((prev) => ({
-                  company: debtorCompanies?.map((company) => company.companyId),
-                }))
-              } else {
-                setFilters(undefined)
-              }
-            }}
-          />),
+            !isUser && (
+              <Switch
+                checkedChildren="Боржники"
+                unCheckedChildren="Всі"
+                onChange={(checked) => {
+                  if (checked) {
+                    setFilters((prev) => ({
+                      company: debtorCompanies?.map((company) => company.companyId),
+                    }))
+                  } else {
+                    setFilters(undefined)
+                  }
+                }}
+              />
+            )
+          ),
         }
       }
       loading={isLoading}
@@ -220,20 +229,29 @@ const CompaniesTable: React.FC<Props> = ({
         pathname,
         setRealEstateActions,
         debtorCompanies,
-        isUser
+        isUser,
+        isSingleCompanyByData, 
+        
       })}
       dataSource={realEstates?.data}
       scroll={{ x: tableWidth }}
       onChange={(__, filters) => {
-        setFilters({
-          domain: filters?.domain,
-          company: filters?.companyName,
-          street: filters?.street,
-        })
-      }}
-    />
-  )
-}
+      const newFilters: any = {
+      domain: filters?.domain,
+      street: filters?.street,
+    }
+
+
+      if (!isSingleCompanyByData) {
+        newFilters.company = filters?.companyName
+      }
+
+      setFilters(newFilters)
+    }}
+
+        />
+      )
+    }
 
 const renderTooltip = (text: string) => {
   return (
@@ -261,6 +279,7 @@ const getDefaultColumns = ({
   pathname,
   setRealEstateActions,
   debtorCompanies,
+  isSingleCompanyByData,
   isUser
 }: {
   domainId?: string
@@ -285,6 +304,7 @@ const getDefaultColumns = ({
   >
   debtorCompanies?: CompanyWithPayments[]
   isUser?: boolean
+  isSingleCompanyByData?: boolean
 }): ColumnType<any>[] => {
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
   const columns: ColumnType<any>[] = [
@@ -528,24 +548,26 @@ const getDefaultColumns = ({
   }
 
   if (isAdmin) {
+  if (!isSingleCompanyByData) {
     companyColumn.filters =
       pathname === AppRoutes.REAL_ESTATE ? realEstatesFilter : null
     companyColumn.filteredValue = filters?.company || null
-
-    domainColumn.filters =
-      pathname === AppRoutes.REAL_ESTATE ? domainsFilter : null
-    domainColumn.filteredValue = filters?.domain || null
-
-    streetColumn.filters =
-      pathname === AppRoutes.REAL_ESTATE ? streetsFilter : null
-    streetColumn.filteredValue = filters?.street || null
   }
+
+  domainColumn.filters =
+    pathname === AppRoutes.REAL_ESTATE ? domainsFilter : null
+  domainColumn.filteredValue = filters?.domain || null
+
+  streetColumn.filters =
+    pathname === AppRoutes.REAL_ESTATE ? streetsFilter : null
+  streetColumn.filteredValue = filters?.street || null
+}
 
   columns.unshift(streetColumn)
 
   columns.unshift(domainColumn)
 
-  columns.unshift(companyColumn)
+  if (!isSingleCompanyByData) {columns.unshift(companyColumn)}
 
   return columns
 }
