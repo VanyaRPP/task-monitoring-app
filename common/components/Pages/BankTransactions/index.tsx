@@ -78,7 +78,7 @@ const BankTransactions = () => {
         {balances?.length > 0 && (
           <Select
             placeholder="Оберіть рахунок"
-            options={balances.map((item) => ({
+            options={balances?.map((item) => ({
               label: item.acc,
               value: item.acc,
             }))}
