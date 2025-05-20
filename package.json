@@ -64,11 +64,13 @@
     "sass": "^1.53.0",
     "sharp": "^0.33.4",
     "use-places-autocomplete": "^4.0.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.1",
     "@types/big.js": "^6.2.2",
+    "@types/crypto-js": "^4.2.2",
     "@types/jest": "^28.1.8",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/mongodb": "^4.0.7",

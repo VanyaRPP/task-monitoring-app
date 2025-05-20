@@ -13,7 +13,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
-  name,
+  name: _name,
   editable,
   disabled,
 }) => {
@@ -41,18 +41,14 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-
   const { company, prevService, prevPayment } = usePaymentContext()
-  const [initialPrice, setInitialPrice] = useState<number | null>(null)
-  const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
-  const price = Form.useWatch(['invoice', ...name, 'price'], form)
-  useEffect(() => {
-    if (price !== undefined && initialPrice === null) {
-      setInitialPrice(price)
-    }
-  }, [price, initialPrice])
+
+  const [snapshotPrice, setSnapshotPrice] = useState<number | null>(null)
+  const [changed, setChanged] = useState<boolean>(false)
 
   const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
+  const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
   const inflicionInvoice = useMemo(() => {
     return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
@@ -73,7 +69,54 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
     return area * pricePerMeter
   }, [prevPlacingInvoice, company, prevService])
 
-  const isInitial = toRoundFixed(price) === toRoundFixed(initialPrice)
+  const calculatedInitialPrice = useMemo(() => {
+    return +toRoundFixed(rentPrice + (inflicionInvoice?.sum ?? 0))
+  }, [rentPrice, inflicionInvoice])
+
+  useEffect(() => {
+    setChanged(false)
+    if (
+      snapshotPrice === null &&
+      !isNaN(calculatedInitialPrice) &&
+      calculatedInitialPrice !== 0
+    ) {
+      setSnapshotPrice(calculatedInitialPrice)
+    }
+  }, [form])
+
+  useEffect(() => {
+    if (
+      snapshotPrice === null &&
+      company?.inflicion &&
+      inflicionInvoice?.sum !== undefined &&
+      !isNaN(calculatedInitialPrice)
+    ) {
+      Promise.resolve().then(() => {
+        setSnapshotPrice((prev) => prev ?? calculatedInitialPrice)
+        if (!changed) {
+          form.setFieldValue(
+            ['invoice', ...name, 'price'],
+            calculatedInitialPrice
+          )
+        }
+      })
+    }
+  }, [
+    snapshotPrice,
+    company,
+    inflicionInvoice,
+    calculatedInitialPrice,
+    changed,
+    form,
+    name,
+  ])
+
+  const isInitial = useMemo(() => {
+    if (price === undefined || snapshotPrice === null) {
+      return true
+    }
+    return toRoundFixed(price) === toRoundFixed(snapshotPrice)
+  }, [price, snapshotPrice])
 
   if (company?.inflicion && !prevService?.inflicionPrice) {
     return <span>Інфляція за попередній місяць невідома</span>
@@ -88,18 +131,21 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
             {toRoundFixed(inflicionInvoice?.sum)} грн
           </Typography.Text>
         )}
-        {!isInitial && editable && (
-          <Tooltip title={`Відновити початкове значення`}>
+        {editable && snapshotPrice !== null && !isInitial && (
+          <Tooltip title="Відновити початкове значення">
             <Button
+              icon={<ReloadOutlined />}
               onClick={() => {
-                if (initialPrice !== null) {
+                Promise.resolve().then(() => {
                   form.setFieldValue(
                     ['invoice', ...name, 'price'],
-                    initialPrice
+                    calculatedInitialPrice
                   )
-                }
+                  setSnapshotPrice(calculatedInitialPrice)
+                  setChanged(false)
+                  form.setFieldValue(['invoiceMeta', 'changed'], false)
+                })
               }}
-              icon={<ReloadOutlined />}
             />
           </Tooltip>
         )}
@@ -142,41 +188,47 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
+  const { company, prevService } = usePaymentContext()
+  const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
+  const watchedPrice = Form.useWatch(['invoice', ...name, 'price'], form)
+  const changed = Form.useWatch(['invoiceMeta', 'changed'], form) ?? false
 
-  const [changed, setChanged] = useState<boolean>(false)
-  const { company, prevPayment } = usePaymentContext()
+  const inflicionInvoice = useMemo(() => {
+    return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
+  }, [invoices])
 
-  const price = Form.useWatch(['invoice', ...name, 'price'], form)
-  // const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
+  const calculatedPrevPlacingSum = useMemo(() => {
+    const area = company?.totalArea ?? 0
+    const pricePerMeter = company?.pricePerMeter ?? prevService?.rentPrice ?? 0
+    return area * pricePerMeter
+  }, [company, prevService])
 
-  // const inflicionInvoice: InvoiceType | undefined = useMemo(() => {
-  //   return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
-  // }, [invoices])
+  const calculatedTotal = useMemo(() => {
+    return +toRoundFixed(
+      calculatedPrevPlacingSum + (inflicionInvoice?.sum ?? 0)
+    )
+  }, [calculatedPrevPlacingSum, inflicionInvoice])
 
-  // const prevPlacingInvoice = useMemo(() => {
-  //   return prevPayment?.invoice.find(
-  //     (invoice) => invoice.type === ServiceType.Placing
-  //   )
-  // }, [prevPayment])
-
-  // useEffect(() => {
-  //   if (!company?.inflicion || changed || !editable) {
-  //     return
-  //   }
-
-  //   form.setFieldValue(
-  //     ['invoice', ...name, 'price'],
-  //     +toRoundFixed(inflicionInvoice?.sum + prevPlacingInvoice?.sum)
-  //   )
-  // }, [
-  //   form,
-  //   name,
-  //   company,
-  //   inflicionInvoice,
-  //   prevPlacingInvoice,
-  //   changed,
-  //   editable,
-  // ])
+  useEffect(() => {
+    if (
+      company?.inflicion &&
+      editable &&
+      !changed &&
+      inflicionInvoice?.sum !== undefined
+    ) {
+      Promise.resolve().then(() => {
+        form.setFieldValue(['invoice', ...name, 'price'], calculatedTotal)
+      })
+    }
+  }, [
+    company,
+    editable,
+    changed,
+    inflicionInvoice?.sum,
+    calculatedTotal,
+    form,
+    name,
+  ])
 
   const suffix = useMemo(() => {
     return company?.inflicion ? (
@@ -191,7 +243,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   if (!editable) {
     return (
       <span>
-        {toRoundFixed(price)} {suffix}
+        {toRoundFixed(watchedPrice)} {suffix}
       </span>
     )
   }
@@ -207,7 +259,10 @@ export const Price: React.FC<InvoiceComponentProps> = ({
         placeholder="Значення..."
         disabled={disabled}
         suffix={suffix}
-        onChange={() => setChanged(true)}
+        value={watchedPrice}
+        onChange={() => {
+          form.setFieldValue(['invoiceMeta', 'changed'], true)
+        }}
       />
     </Form.Item>
   )
@@ -215,7 +270,6 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 
 export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-
   const { company } = usePaymentContext()
 
   const price = Form.useWatch(['invoice', ...name, 'price'], form)

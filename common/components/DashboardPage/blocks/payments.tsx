@@ -1,4 +1,9 @@
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+  MoreOutlined,
+} from '@ant-design/icons'
 import {
   dateToDefaultFormat,
   dateToMonth,
@@ -47,10 +52,13 @@ import {
   Typography,
   message,
   theme,
+  Dropdown,
+  Badge,
 } from 'antd'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import s from './style.module.scss'
+import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 
 interface PaymentsBlockProps {
   sepDomainID?: string
@@ -124,6 +132,16 @@ function getTypeOperation(value) {
     return {
       type: value === Operations.Debit ? Operations.Debit : Operations.Credit,
     }
+  }
+}
+
+const getDebtorTooltipColor = (debtor) => {
+  if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
+    return 'gray'
+  } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
+    return 'yellow'
+  } else if (debtor.totalDebt >= 20000) {
+    return 'red'
   }
 }
 
@@ -226,6 +244,14 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     { skip: currUserLoading || !currUser }
   )
 
+  const [domainIds, setDomainIds] = useState([])
+
+  const { data, error } = useGetDebtorsQuery(
+    { domainIds: domainIds },
+    { skip: !domainIds || domainIds.length === 0 }
+  )
+  const debtorCompanies = data?.companies
+
   const [deletePayment, { isLoading: deleteLoading, isError: deleteError }] =
     useDeletePaymentMutation()
 
@@ -264,6 +290,15 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       setPageData((prev) => ({ ...prev, currentPage: 1 }))
     }
   }, [appliedFilters])
+  useEffect(() => {
+    const fallbackDomains = domainsFilters?.domainsFilter?.map((d) => d.value)
+    if (filters?.domain?.length) {
+      setDomainIds(filters.domain)
+    } else if (fallbackDomains?.length) {
+      setDomainIds(fallbackDomains)
+    }
+  }, [filters?.domain, domainsFilters])
+
   const columns: TableColumnType<any>[] = useMemo(() => {
     return [
       {
@@ -302,22 +337,50 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
             : null,
         filteredValue: filters?.company || null,
         filterSearch: true,
-        render: (company) =>
-          router.pathname === AppRoutes.PAYMENT ? (
+        render: (company, record, index) => {
+          const companyName = company?.companyName || ''
+          const companyId = company?._id
+          const debtor = Array.isArray(debtorCompanies)
+            ? debtorCompanies.find((d) => d.companyName === companyName)
+            : null
+
+          const isFirstOccurrence =
+            payments?.data?.findIndex(
+              (item) =>
+                typeof item.company === 'object' &&
+                item.company?.companyName === companyName
+            ) === index
+
+          const companyLabel = (
             <Tooltip title="Додати в фільтри">
               <Typography.Link
-                onClick={() =>
-                  setFilters({ ...filters, company: [company?._id] })
-                }
+                onClick={() => setFilters({ ...filters, company: [companyId] })}
               >
-                {company?.companyName}
+                {companyName}
               </Typography.Link>
             </Tooltip>
-          ) : (
-            company?.companyName
-          ),
+          )
+
+          if (!isUser && debtor && isFirstOccurrence) {
+            return (
+              <Badge
+                count={debtor.totalDebt.toFixed(2)}
+                title=""
+                color={getDebtorTooltipColor(debtor)}
+                overflowCount={Infinity}
+                style={{ cursor: 'pointer' }}
+                size="small"
+              >
+                {companyLabel}
+              </Badge>
+            )
+          }
+
+          return companyLabel
+        },
         hidden: payments?.realEstatesFilter?.length <= 1,
       },
+
       {
         title: 'Дата створення',
         dataIndex: 'invoiceCreationDate',
@@ -492,40 +555,63 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         title: '',
         width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
         render: (_, payment: IExtendedPayment) => (
-          <Button
-            style={{ padding: 0 }}
-            type="link"
-            onClick={() => {
-              setCurrentPayment(payment)
-              setPaymentActions({ ...paymentActions, edit: true })
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: 'edit',
+                  label: (
+                    <Button
+                      icon={<EditOutlined />}
+                      type="link"
+                      style={{
+                        color: '#722ed1',
+                        paddingLeft: '10px',
+                        paddingRight: '10px',
+                      }}
+                      onClick={() => {
+                        setCurrentPayment(payment)
+                        setPaymentActions({ ...paymentActions, edit: true })
+                      }}
+                    >
+                      Редагувати
+                    </Button>
+                  ),
+                },
+                isGlobalAdmin && {
+                  key: 'delete',
+                  label: (
+                    <Popconfirm
+                      id="popconfirm_custom"
+                      title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
+                        payment?.invoiceCreationDate as unknown as string
+                      )}?`}
+                      onConfirm={() => handleDeletePayment(payment?._id)}
+                      okText="Видалити"
+                      cancelText="Ні"
+                      disabled={deleteLoading}
+                    >
+                      <Button
+                        type="text"
+                        icon={<DeleteOutlined />}
+                        style={{
+                          color: '#ff4d4f',
+                          paddingLeft: '10px',
+                          paddingRight: '10px',
+                        }}
+                      >
+                        Видалити
+                      </Button>
+                    </Popconfirm>
+                  ),
+                },
+              ],
             }}
+            placement="bottomRight"
           >
-            <EditOutlined />
-          </Button>
+            <Button icon={<MoreOutlined />} />
+          </Dropdown>
         ),
-        hidden: !isDomainAdmin && !isGlobalAdmin,
-      },
-      {
-        align: 'center',
-        fixed: 'right',
-        title: '',
-        width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
-
-        render: (_, payment: IExtendedPayment) => (
-          <Popconfirm
-            id="popconfirm_custom"
-            title={`Ви впевнені що хочете видалити оплату від ${dateToDefaultFormat(
-              payment?.invoiceCreationDate as unknown as string
-            )}?`}
-            onConfirm={() => handleDeletePayment(payment?._id)}
-            okText="Видалити"
-            cancelText="Ні"
-            disabled={deleteLoading}
-          >
-            <Button type="text" icon={<DeleteOutlined />} />
-          </Popconfirm>
-        ),
-        hidden: !isDomainAdmin && !isGlobalAdmin,
       },
     ].filter(({ hidden }) => !hidden) as TableColumnType<any>[]
   }, [
@@ -540,6 +626,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     setFilters,
     token,
     selectedColumns,
+    debtorCompanies,
   ])
 
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
@@ -609,8 +696,10 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         <Table
           rowKey="_id"
           rowSelection={
-            currUser?.roles?.includes(Roles.GLOBAL_ADMIN) &&
-            router.pathname === AppRoutes.PAYMENT && {
+              (currUser?.roles?.includes(Roles.GLOBAL_ADMIN) ||
+                currUser?.roles?.includes(Roles.DOMAIN_ADMIN)) &&
+              router.pathname === AppRoutes.PAYMENT
+                ? {
               selectedRowKeys: paymentsDeleteItems.map((item) => item.id),
               preserveSelectedRowKeys: true,
               onChange: (_, selectedRows) => {
@@ -626,6 +715,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
               },
               onSelect: onSelect,
             }
+            : undefined
           }
           columns={columns}
           dataSource={payments?.data}

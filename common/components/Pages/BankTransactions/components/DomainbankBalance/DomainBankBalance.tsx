@@ -42,40 +42,23 @@ const DomainBankBalance: FC<Props> = ({ balanceData }) => {
     balanceData
 
   return (
-    <Card bordered={false} loading={!balanceData} style={{ height: '300px' }}>
-      <Card.Meta
-        title={nameACC}
-        description={acc}
-        avatar={
-          <Statistic title={`Balance (${currency})`} value={turnoverDebt} />
-        }
-      />
-      <Row gutter={16}>
-        <Col span={12}>
-          <Card bordered={false}>
-            <Statistic
-              title="In"
-              value={balanceIn}
-              precision={1}
-              valueStyle={{ color: '#3f8600' }}
-              prefix={<ArrowUpOutlined />}
-              suffix={currency}
-            />
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card bordered={false}>
-            <Statistic
-              title="Out"
-              value={balanceOut}
-              precision={1}
-              valueStyle={{ color: '#cf1322' }}
-              prefix={<ArrowDownOutlined />}
-              suffix={currency}
-            />
-          </Card>
-        </Col>
-      </Row>
+    <Card bordered={false} loading={!balanceData} style={{ height: 'auto' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '16px',
+        }}
+      >
+        <Card.Meta
+          // title={nameACC}
+          // description={acc}
+          avatar={
+            <Statistic title={`Balance (${currency})`} value={balanceOut} />
+          }
+        />
+      </div>
     </Card>
   )
 }

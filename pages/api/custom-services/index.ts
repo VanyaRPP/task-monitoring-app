@@ -15,37 +15,24 @@ export default async function handler(
   switch (req.method) {
     case 'POST':
       try {
-        const { name, domainId } = req.body
+        const { name } = req.body
 
         if (!isGlobalAdmin && !isDomainAdmin) {
           return res.status(400).json({ success: false, message: 'Not allowed' })
         }
 
         const trimmedName = typeof name === 'string' ? name.trim() : name
-        const trimmedDomainId =
-          typeof domainId === 'string' ? domainId.trim() : domainId
 
-        if (!trimmedName || !trimmedDomainId) {
+        if (!trimmedName) {
           return res.status(400).json({
             success: false,
-            message: 'Missing required fields: name and domainId',
-          })
-        }
-
-        if (
-          typeof trimmedDomainId !== 'string' ||
-          trimmedDomainId.length === 0
-        ) {
-          return res.status(400).json({
-            success: false,
-            message: 'Invalid domainId',
+            message: 'Missing required fields: name',
           })
         }
 
         const customService = await CustomService.create({
           name: trimmedName,
           fieldName: transliterateAndCamelCase(trimmedName),
-          domain: trimmedDomainId,
         })
 
         return res.status(201).json({
@@ -62,24 +49,22 @@ export default async function handler(
 
     case 'GET':
       try {
-        const { domainId } = req.query
+        const { _id } = req.query
 
-        if (
-          !isGlobalAdmin && 
-          (!domainId ||
-          (typeof domainId === 'string' && domainId.trim().length === 0))
-        ) {
+        if (isUser) {
           return res.status(400).json({
             success: false,
-            message: 'domainId is required',
+            message: 'access denied',
           })
         }
+        
+        const customServiceIds = _id && !Array.isArray(_id) ? _id.split(',') : _id
 
-        const customServices = isGlobalAdmin 
-        ? await CustomService.find().lean() 
+        const customServices = !customServiceIds
+        ? await CustomService.find().lean()
         : await CustomService.find({
-          domain: domainId,
-        }).lean()
+            _id: { $in: customServiceIds },
+          }).lean()
 
         return res.status(200).json({
           success: true,

@@ -21,47 +21,27 @@ const DomainsServices: FC<Props> = ({
   domainId,
   onCustomServicesChange,
 }) => {
-  const {
-    data: customServices,
-    isLoading,
-    error,
-  } = useGetCustomServicesQuery({ domainId }, { skip: !domainId })
 
   const [createCustomService] = useCreateCustomServiceMutation()
 
-  useEffect(() => {
-    if (customServices?.data && domainId) {
-      const services = customServices.data.map((service) => ({
-        _id: service._id,
-        name: service.name,
-      }))
-  
-      Promise.resolve().then(() => {
-        form.setFieldsValue({ domainServices: services })
-        onCustomServicesChange(services)
-      })
-    }
-  }, [customServices, domainId])
-
   const handleSave = async (fieldKey: number) => {
     const service = form.getFieldValue(['domainServices', fieldKey])
-    if (!service.name) {
+    if (!service?.name) {
       message.error('Будь ласка, введіть назву послуги')
       return
     }
 
-    const existingService = customServices?.data.find(
-      (s) => s.name === service?.name && s.domainId === domainId
-    )
-    if (existingService) {
-      message.info('Послуга з такою назвою вже існує')
-      return
-    }
+    // const existingService = customServices?.data.find(
+    //   (s) => s.name === service?.name && s.domainId === domainId
+    // )
+    // if (existingService) {
+    //   message.info('Послуга з такою назвою вже існує')
+    //   return
+    // }
 
     try {
       const result = await createCustomService({
         name: service?.name,
-        domainId,
       }).unwrap()
       const savedService = result.data
       form.setFieldsValue({
@@ -84,10 +64,10 @@ const DomainsServices: FC<Props> = ({
     form.setFieldsValue({ domainServices: updatedServices })
   }
 
-  if (isLoading) return <div>Завантаження...</div>
-  if (error) {
-    return <div>Помилка завантаження даних: {JSON.stringify(error)}</div>
-  }
+  // if (isLoading) return <div>Завантаження...</div>
+  // if (error) {
+  //   return <div>Помилка завантаження даних: {JSON.stringify(error)}</div>
+  // }
 
   return (
     <Form.List name="domainServices">

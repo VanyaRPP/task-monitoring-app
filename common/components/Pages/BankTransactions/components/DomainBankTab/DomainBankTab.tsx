@@ -1,11 +1,8 @@
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import { Card } from 'antd'
-
-import React, { FC } from 'react'
 import TransactionsTable from '../TransactionsTable/TransactionsTable'
-import _initial from 'lodash/initial'
 import { useGetTransactionsQuery } from '@common/api/bankApi/bank.api'
-import { Alert } from 'antd'
+import { Alert, Card } from 'antd'
+import React, { FC } from 'react'
 
 interface Props {
   domain: IExtendedDomain
@@ -18,11 +15,14 @@ const DomainBankTab: FC<Props> = ({ domain, token, acc }) => {
     { token, acc },
     { skip: !token }
   )
-
+  
   return (
     <Card>
       {token ? (
-        <TransactionsTable transactions={transactionsData} domain={domain} />
+        <TransactionsTable
+        transactions={transactionsData}
+        domain={domain}
+      />
       ) : (
         <Alert
           message="Error"
