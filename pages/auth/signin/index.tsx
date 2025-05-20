@@ -34,8 +34,9 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
 
   const enabledLoginFormFeather = useFeatureFlag('StagingLogInForm')
 
+  const stg = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging'
   // eslint-disable-next-line no-console
-  console.log("NODE_ENV", process.env.NODE_ENV)
+  console.log('NODE_ENV', process.env.NEXT_PUBLIC_ENVIRONMENT)
 
   const shouldShowLoginForm =
     process.env.NODE_ENV === 'development' || enabledLoginFormFeather
@@ -85,6 +86,7 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
 
         <Card className={`card ${theme}`}>
           {shouldShowLoginForm && <SignInForm csrfToken={csrfToken} />}
+          {stg && <SignInForm csrfToken={csrfToken} />}
           <div className={s.Container}>
             {Object.values(providers)?.map((provider: any) => {
               const name = provider?.name
