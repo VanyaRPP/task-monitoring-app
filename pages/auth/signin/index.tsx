@@ -35,8 +35,6 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
   const enabledLoginFormFeather = useFeatureFlag('StagingLogInForm')
 
   const stg = process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging'
-  // eslint-disable-next-line no-console
-  console.log('NODE_ENV', process.env.NEXT_PUBLIC_ENVIRONMENT)
 
   const shouldShowLoginForm =
     process.env.NODE_ENV === 'development' || enabledLoginFormFeather
