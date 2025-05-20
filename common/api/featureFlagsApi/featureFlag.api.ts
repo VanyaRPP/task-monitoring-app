@@ -8,11 +8,24 @@ export const FeatureFlagApi = createApi({
   endpoints: (builder) => ({
     getFeatureFlags: builder.query<IFeatureFlag[], void>({
       query: () => 'feature-flags',
-      transformResponse: (response: { success: boolean; data: IFeatureFlag[] }) => response.data,
+      transformResponse: (response: {
+        success: boolean
+        data: IFeatureFlag[]
+      }) => response.data,
       providesTags: ['FeatureFlag'],
     }),
 
-    updateFeatureFlag: builder.mutation<IFeatureFlag, { id: string; data: Partial<IFeatureFlag> }>({
+    getFeatureFlagByName: builder.query<boolean, string>({
+      query: (name) => `feature-flags/by-name/${name}`,
+      transformResponse: (response: { success: boolean; data: IFeatureFlag }) =>
+        response.data.isEnabled,
+      providesTags: ['FeatureFlag'],
+    }),
+
+    updateFeatureFlag: builder.mutation<
+      IFeatureFlag,
+      { id: string; data: Partial<IFeatureFlag> }
+    >({
       query: ({ id, data }) => ({
         url: `feature-flags/${id}`,
         method: 'PATCH',
@@ -29,13 +42,14 @@ export const FeatureFlagApi = createApi({
       }),
       invalidatesTags: ['FeatureFlag'],
     }),
+
     editFeatureFlag: builder.mutation<IFeatureFlag, Partial<IFeatureFlag>>({
       query: (data) => {
         const { _id, ...body } = data
         return {
-        url: `feature-flags/${_id}`,
-        method: 'PATCH',
-        body,
+          url: `feature-flags/${_id}`,
+          method: 'PATCH',
+          body,
         }
       },
       invalidatesTags: ['FeatureFlag'],
@@ -52,9 +66,10 @@ export const FeatureFlagApi = createApi({
 })
 
 export const {
-  useGetFeatureFlagsQuery,
+  useGetFeatureFlagByNameQuery,
   useUpdateFeatureFlagMutation,
-  useAddFeatureFlagMutation,
-  useEditFeatureFlagMutation,
   useDeleteFeatureFlagMutation,
+  useEditFeatureFlagMutation,
+  useAddFeatureFlagMutation,
+  useGetFeatureFlagsQuery,
 } = FeatureFlagApi
