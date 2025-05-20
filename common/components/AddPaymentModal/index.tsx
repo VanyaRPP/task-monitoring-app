@@ -185,24 +185,37 @@ const AddPaymentModal: FC<Props> = ({
   }, [preselectedCompany, form])
 
   useEffect(() => {
-    if (!paymentActions.preview) return
+    if (!paymentActions.preview || !company || !service) return
+
+    const invoice = getInvoices({
+      company,
+      service,
+      payment,
+      prevService,
+      prevPayment,
+    })
+
+    const generalSum = invoice.reduce((acc, i) => acc + Number(i?.sum || 0), 0)
+
     form.setFieldsValue({
-      invoice: getInvoices({
-        company,
-        service,
-        payment,
-        prevService,
-        prevPayment,
-      }),
+      invoice,
+      generalSum,
+    })
+
+    setCurrPayment({
+      ...paymentData,
+      invoice,
+      generalSum,
     })
   }, [
     form,
     company,
+    service,
     payment,
     prevService,
     prevPayment,
-    service,
     paymentActions,
+    paymentData,
   ])
   useEffect(() => {
     const existingInvoice = form.getFieldValue('invoice')

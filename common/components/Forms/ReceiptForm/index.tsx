@@ -27,6 +27,10 @@ const ReceiptForm: FC<Props> = ({
       '-inv-' +
       newData.invoiceNumber,
   })
+  const invoice = newData?.invoice?.filter((i) => typeof i?.sum !== 'undefined') || []
+  const total = invoice
+    .filter((i) => Number(i?.sum) > 0)
+    .reduce((acc, i) => acc + Number(i?.sum || 0), 0)
 
   return (
     <>
@@ -90,7 +94,7 @@ const ReceiptForm: FC<Props> = ({
           <div className={s.payFixed}>
             Загальна сума оплати:
             <div className={s.payBoldSum}>
-              {(+newData?.generalSum || +newData?.debit).toFixed(2)} грн
+              {total.toFixed(2)} грн
             </div>
           </div>
 
