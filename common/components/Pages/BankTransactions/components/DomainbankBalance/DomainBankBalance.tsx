@@ -51,12 +51,11 @@ const DomainBankBalance: FC<Props> = ({ balanceData }) => {
           gap: '16px',
         }}
       >
-
         <Card.Meta
           // title={nameACC}
           // description={acc}
           avatar={
-            <Statistic title={`Balance (${currency})`} value={turnoverDebt} />
+            <Statistic title={`Balance (${currency})`} value={balanceOut} />
           }
         />
       </div>
