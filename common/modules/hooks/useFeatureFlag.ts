@@ -1,7 +1,6 @@
-import { useGetFeatureFlagsQuery } from '@common/api/featureFlagsApi/featureFlag.api'
+import { useGetFeatureFlagByNameQuery } from '@common/api/featureFlagsApi/featureFlag.api'
 
 export const useFeatureFlag = (name: string): boolean => {
-	const {data} = useGetFeatureFlagsQuery()
-	return data?.find((flag) => flag.name === name)?.isEnables ?? false
-
+  const { data } = useGetFeatureFlagByNameQuery(name)
+  return data ?? false
 }

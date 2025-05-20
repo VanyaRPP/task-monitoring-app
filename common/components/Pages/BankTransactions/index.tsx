@@ -2,19 +2,20 @@
 'use client'
 
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import { Button, Card, Select, Tabs, TabsProps } from 'antd'
+import { Button, Card, Divider, Select, Tabs, TabsProps } from 'antd'
 
 import StickyBox from 'react-sticky-box'
 import DomainBankTab from './components/DomainBankTab/DomainBankTab'
 import DomainBankBalance from './components/DomainbankBalance/DomainBankBalance'
 
 import s from './style.module.scss'
-import { useRouter } from 'next/router'
+
+import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import { useGetBalancesQuery } from '@common/api/bankApi/bank.api'
+import EncryptionService from '@utils/encryptionService'
 import { AppRoutes } from '@utils/constants'
 import { useEffect, useState } from 'react'
-import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import EncryptionService from '@utils/encryptionService'
-import { useGetBalancesQuery } from '@common/api/bankApi/bank.api'
+import { useRouter } from 'next/router'
 
 const BankTransactions = () => {
   const router = useRouter()
@@ -52,13 +53,15 @@ const BankTransactions = () => {
     }
   })
 
-  const selectedBalance = balances?.data?.balances.find(
+  const selectedBalance = balances?.find(
     (balance) => balance.acc === selectedAcc
   )
+
   useEffect(() => {
-    if (balances?.data?.balances.length > 0 && !selectedAcc) {
-      setSelectedAcc(balances.data.balances[0].acc)
+    if (balances?.length > 0 && !selectedAcc) {
+      setSelectedAcc(balances[0].acc)
     }
+
   }, [balances])
 
   const renderTabBar: TabsProps['renderTabBar'] = (props, DefaultTabBar) => (
@@ -72,10 +75,10 @@ const BankTransactions = () => {
         >
           Банк
         </Button>
-        {balances?.data?.balances?.length > 0 && (
+        {balances?.length > 0 && (
           <Select
             placeholder="Оберіть рахунок"
-            options={balances.data.balances.map((item) => ({
+            options={balances?.map((item) => ({
               label: item.acc,
               value: item.acc,
             }))}
@@ -85,6 +88,7 @@ const BankTransactions = () => {
         )}
         {selectedBalance && <DomainBankBalance balanceData={selectedBalance} />}
       </div>
+
       <DefaultTabBar {...props} className={s.tabBar} />
     </StickyBox>
   )

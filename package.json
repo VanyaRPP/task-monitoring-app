@@ -70,6 +70,7 @@
   "devDependencies": {
     "@playwright/test": "^1.47.1",
     "@types/big.js": "^6.2.2",
+    "@types/crypto-js": "^4.2.2",
     "@types/jest": "^28.1.8",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/mongodb": "^4.0.7",

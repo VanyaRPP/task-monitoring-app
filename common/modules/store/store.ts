@@ -5,7 +5,7 @@ import { customerApi } from '@common/api/customerApi/customer.api'
 import { customServicesApi } from '@common/api/customServicesApi/customServices.api'
 import { debtorsApi } from '@common/api/debtorsApi/debtors.api'
 import { domainApi } from '@common/api/domainApi/domain.api'
-import { FeatureFlag } from '@common/api/featureFlagsApi/featureFlag.api'
+import { FeatureFlagApi } from '@common/api/featureFlagsApi/featureFlag.api'
 import { filterApi } from '@common/api/filterApi/filter.api'
 import { notificationApi } from '@common/api/notificationApi/notification.api'
 import { paymentApi } from '@common/api/paymentApi/payment.api'
@@ -38,7 +38,7 @@ export const store = configureStore({
     [mockBankApi.reducerPath]: mockBankApi.reducer,
     sidebar: sidebarReducer,
     theme: themeReducer,
-    [FeatureFlag.reducerPath]: FeatureFlag.reducer,
+    [FeatureFlagApi.reducerPath]: FeatureFlagApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -57,7 +57,7 @@ export const store = configureStore({
       .concat(bankApi.middleware)
       .concat(mockBankApi.middleware)
       .concat(debtorsApi.middleware)
-      .concat(FeatureFlag.middleware)
+      .concat(FeatureFlagApi.middleware)
 })
 
 export type AppDispatch = typeof store.dispatch

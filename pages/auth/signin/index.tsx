@@ -1,7 +1,7 @@
 import SignInButton from '@common/components/UI/Buttons/SignInButton'
 import config from '@utils/config'
 import { AppRoutes, errors } from '@utils/constants'
-import { Alert, Card, Divider } from 'antd'
+import { Alert, Card } from 'antd'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { BuiltInProviderType } from 'next-auth/providers'
@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react'
 import { authOptions } from '../../api/auth/[...nextauth]'
 import s from './style.module.scss'
 import SignInForm from '../../../common/components/Forms/AddSingInForm'
+import { useFeatureFlag } from '@modules/hooks/useFeatureFlag'
 
 
 type PropsType = {
@@ -30,6 +31,11 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
   const { error } = useRouter().query
   const [customError, setCustomError] = useState('')
   const [theme, setTheme] = useState('light')
+
+  const enabledLoginFormFeather = useFeatureFlag('StagingLogInForm')
+
+  const shouldShowLoginForm =
+    process.env.NODE_ENV === 'development' || enabledLoginFormFeather
 
   useEffect(() => {
     setCustomError(error && (errors[`${error}`] ?? errors.default))
@@ -49,7 +55,6 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
         justifyContent: 'center',
         alignItems: 'center',
         minHeight: '100vh',
-        
       }}
     >
       <div>
@@ -76,10 +81,7 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
         </h2>
 
         <Card className={`card ${theme}`}>
-          
-          {process.env.NODE_ENV === 'development' && (
-            <SignInForm csrfToken={csrfToken} />
-          )}
+          {shouldShowLoginForm && <SignInForm csrfToken={csrfToken} />}
           <div className={s.Container}>
             {Object.values(providers)?.map((provider: any) => {
               const name = provider?.name
