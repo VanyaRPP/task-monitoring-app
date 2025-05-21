@@ -5,6 +5,7 @@ import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 import { Form, Input, Space, Typography } from 'antd'
 import { useEffect, useMemo } from 'react'
+import { getPriceFromCustomServices } from '@utils/helpers'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -69,8 +70,8 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-
-  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  const { company } = usePaymentContext()
+  const price = getPriceFromCustomServices(company?.customServices, 'rentPrice') || company?.servicePricePerMeter || Form.useWatch(['invoice', ...name, 'price'], form)
 
   if (!editable) {
     return (
@@ -102,8 +103,8 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 
 export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-
-  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  const { company } = usePaymentContext()
+  const price = getPriceFromCustomServices(company?.customServices, 'rentPrice') || company?.servicePricePerMeter || Form.useWatch(['invoice', ...name, 'price'], form)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
   const sum = Form.useWatch(['invoice', ...name, 'sum'], form)
 
