@@ -55,6 +55,13 @@ import {
   Dropdown,
   Badge,
 } from 'antd'
+import type {
+  TablePaginationConfig,
+  FilterValue,
+  SorterResult,
+  TableCurrentDataSource,
+} from 'antd/lib/table/interface'
+
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import s from './style.module.scss'
@@ -97,32 +104,37 @@ const getSummaryColumns = (
   }, [])
 }
 
-function formatDateFilterForQuery(value: string[] | undefined) {
-  if (!value || value.length === 0) return {}
-
-  const months: number[] = []
-  let year: number | null = null
-
-  for (const str of value) {
-    const match = str.match(/^(\d+)-(\w+)-(\d+)$/)
-    if (!match) continue
-
-    const [, y, period, number] = match
-    if (!year) year = Number(y)
-    if (period === PERIOD_FILTR.MONTH) {
-      months.push(Number(number))
-    }
+function formatDateFilterForQuery(raw: Array<string> | undefined) {
+  if (!raw?.length) {
+    return {}
   }
 
-  const query: any = {
-    year,
+  const numbers = raw
+    .map((v) => {
+      const leading = parseInt(v, 10)
+      if (!isNaN(leading)) {
+        const m = v.match(/-(\d+)\s*$/)
+        if (m) {
+          return [leading, parseInt(m[1], 10)]
+        }
+        return [leading]
+      }
+      const n = Number(v)
+      return isNaN(n) ? [] : [n]
+    })
+    .flat()
+    .filter((n) => !isNaN(n)) as number[]
+  const [year, ...months] = numbers
+  const query: any = {}
+  if (year != null) {
+    query.year = year
   }
-
   if (months.length === 1) {
     query.month = months[0]
   } else if (months.length > 1) {
     query.month = months
   }
+
 
   return query
 }
@@ -298,6 +310,28 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       setDomainIds(fallbackDomains)
     }
   }, [filters?.domain, domainsFilters])
+  const handleTableChange = (
+    pagination: TablePaginationConfig,
+    allFilters: Record<string, FilterValue | null>,
+    sorter: SorterResult<any> | SorterResult<any>[],
+    extra: TableCurrentDataSource<any>
+  ) => {
+    if (extra.action === 'paginate') {
+      handlePagination(pagination)
+    }
+
+    if (extra.action === 'filter') {
+      setFilters(allFilters)
+      setAppliedFilters(allFilters)
+
+      const raw = allFilters.invoiceCreationDate
+      const invoiceVals = Array.isArray(raw)
+        ? (raw.filter((x) => typeof x === 'string') as string[])
+        : []
+
+      setCurrentDateFilter(invoiceVals)
+    }
+  }
 
   const columns: TableColumnType<any>[] = useMemo(() => {
     return [
@@ -696,26 +730,26 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         <Table
           rowKey="_id"
           rowSelection={
-              (currUser?.roles?.includes(Roles.GLOBAL_ADMIN) ||
-                currUser?.roles?.includes(Roles.DOMAIN_ADMIN)) &&
-              router.pathname === AppRoutes.PAYMENT
-                ? {
-              selectedRowKeys: paymentsDeleteItems.map((item) => item.id),
-              preserveSelectedRowKeys: true,
-              onChange: (_, selectedRows) => {
-                setSelectedPayments(selectedRows)
-                setPaymentsDeleteItems(
-                  selectedRows.map((item) => ({
-                    id: item._id,
-                    date: item.monthService?.date,
-                    domain: item.domain?.name,
-                    company: item.company?.companyName,
-                  }))
-                )
-              },
-              onSelect: onSelect,
-            }
-            : undefined
+            (currUser?.roles?.includes(Roles.GLOBAL_ADMIN) ||
+              currUser?.roles?.includes(Roles.DOMAIN_ADMIN)) &&
+            router.pathname === AppRoutes.PAYMENT
+              ? {
+                  selectedRowKeys: paymentsDeleteItems.map((item) => item.id),
+                  preserveSelectedRowKeys: true,
+                  onChange: (_, selectedRows) => {
+                    setSelectedPayments(selectedRows)
+                    setPaymentsDeleteItems(
+                      selectedRows.map((item) => ({
+                        id: item._id,
+                        date: item.monthService?.date,
+                        domain: item.domain?.name,
+                        company: item.company?.companyName,
+                      }))
+                    )
+                  },
+                  onSelect: onSelect,
+                }
+              : undefined
           }
           columns={columns}
           dataSource={payments?.data}
@@ -730,12 +764,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
               onChange: handlePagination,
             }
           }
-          onChange={(_, nextFilters) => {
-            setFilters(nextFilters)
-            setAppliedFilters(nextFilters)
-            const val = nextFilters?.invoiceCreationDate
-            setCurrentDateFilter(Array.isArray(val) ? val.map(String) : [])
-          }}
+          onChange={handleTableChange}
           scroll={{
             x:
               (router.pathname === AppRoutes.PAYMENT
