@@ -15,14 +15,11 @@ const DomainBankTab: FC<Props> = ({ domain, token, acc }) => {
     { token, acc },
     { skip: !token }
   )
-  
+
   return (
-    <Card>
+    <Card size='small' >
       {token ? (
-        <TransactionsTable
-        transactions={transactionsData}
-        domain={domain}
-      />
+        <TransactionsTable transactions={transactionsData} domain={domain} />
       ) : (
         <Alert
           message="Error"

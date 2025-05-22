@@ -5,12 +5,11 @@
   z-index: 1;
   padding-bottom: 1rem;
   gap: 0.5rem;
+  margin-top: 2rem;
 
-  .tabBar{
-    max-width: 40%;//TODO: rework this component 40% of the screen
-  }
   .filterWrapper {
     display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 2rem;
   }

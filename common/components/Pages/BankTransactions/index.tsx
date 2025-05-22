@@ -1,25 +1,18 @@
-/* eslint-disable no-console */
 'use client'
 
-import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import { Button, Card, Divider, Select, Tabs, TabsProps } from 'antd'
-
-import StickyBox from 'react-sticky-box'
-import DomainBankTab from './components/DomainBankTab/DomainBankTab'
 import DomainBankBalance from './components/DomainbankBalance/DomainBankBalance'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import DomainBankTab from './components/DomainBankTab/DomainBankTab'
+import { Card, Select, Tabs, TabsProps } from 'antd'
 
 import s from './style.module.scss'
 
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { useGetBalancesQuery } from '@common/api/bankApi/bank.api'
 import EncryptionService from '@utils/encryptionService'
-import { AppRoutes } from '@utils/constants'
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
 
 const BankTransactions = () => {
-  const router = useRouter()
-
   const { data: domains = [] } = useGetDomainsQuery({})
 
   const [selectedDomain, setSelectedDomain] = useState<IExtendedDomain>(
@@ -62,39 +55,32 @@ const BankTransactions = () => {
       setSelectedAcc(balances[0].acc)
     }
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [balances])
 
   const renderTabBar: TabsProps['renderTabBar'] = (props, DefaultTabBar) => (
-    <StickyBox className={s.tableHeader}>
-      <div className={s.filterWrapper}>
-        <Button
-          type="link"
-          onClick={() => {
-            router.push(AppRoutes.BANKTEST)
-          }}
-        >
-          Банк
-        </Button>
-        {balances?.length > 0 && (
-          <Select
-            placeholder="Оберіть рахунок"
-            options={balances?.map((item) => ({
-              label: item.acc,
-              value: item.acc,
-            }))}
-            popupMatchSelectWidth={false}
-            onSelect={(value) => setSelectedAcc(value)}
-          />
-        )}
-        {selectedBalance && <DomainBankBalance balanceData={selectedBalance} />}
-      </div>
+    <DefaultTabBar {...props} />
+  )
 
-      <DefaultTabBar {...props} className={s.tabBar} />
-    </StickyBox>
+  const AccountBox = () => (
+    <div className={s.filterWrapper}>
+      {balances?.length > 0 && (
+        <Select
+          placeholder="Оберіть рахунок"
+          options={balances?.map((item) => ({
+            label: item.acc,
+            value: item.acc,
+          }))}
+          popupMatchSelectWidth={false}
+          onSelect={(value) => setSelectedAcc(value)}
+        />
+      )}
+      {selectedBalance && <DomainBankBalance balanceData={selectedBalance} />}
+    </div>
   )
 
   return (
-    <Card>
+    <Card title={<AccountBox/>} size="small">
       <Tabs
         defaultActiveKey="1"
         renderTabBar={renderTabBar}
