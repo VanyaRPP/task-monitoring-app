@@ -20,6 +20,7 @@ import dayjs from 'dayjs'
 import { FC, createContext, useContext, useEffect, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
+import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
 import s from './style.module.scss'
 import {
   dateToDefaultFormat,
@@ -160,7 +161,7 @@ const AddPaymentModal: FC<Props> = ({
       label: 'Перегляд',
       disabled: !preview || !!(paymentData as unknown as any)?.credit,
       children: (
-        <ReceiptForm
+        <GroupedReceiptForm
           currPayment={currPayment}
           paymentData={paymentData}
           paymentActions={paymentActions}
@@ -175,6 +176,20 @@ const AddPaymentModal: FC<Props> = ({
       label: 'Акт',
       disabled: !preview || !!(paymentData as unknown as any)?.credit,
       children: <PriceList data={payment} />,
+    })
+  }
+  if (!preview || paymentData?.type === Operations.Debit) {
+    items.push({
+      key: '4',
+      label: 'Довідка',
+      disabled: !preview || !!(paymentData as unknown as any)?.credit,
+      children: (
+        <ReceiptForm
+          currPayment={currPayment}
+          paymentData={paymentData}
+          paymentActions={paymentActions}
+        />
+      ),
     })
   }
 

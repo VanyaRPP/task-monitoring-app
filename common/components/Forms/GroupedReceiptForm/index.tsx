@@ -1,5 +1,5 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import PaymentPricesTable from '@components/Forms/AddPaymentForm/PaymentPricesTable'
+import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPricesTable'
 import numberToTextNumber from '@utils/numberToText'
 import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
@@ -13,7 +13,7 @@ interface Props {
   paymentActions: { preview: boolean; edit: boolean }
 }
 
-const ReceiptForm: FC<Props> = ({
+const GroupedReceiptForm: FC<Props> = ({
   currPayment,
   paymentData,
   paymentActions,
@@ -43,15 +43,15 @@ const ReceiptForm: FC<Props> = ({
         }}
       >
         <>
-          {/* <div className={s.providerInfo}>
+          <div className={s.providerInfo}>
             <div className={s.label}>Постачальник</div>
             <pre className={s.preLabel}>
               {newData?.provider?.description?.trim()} <br />
               <br />
             </pre>
-          </div> */}
+          </div>
 
-          {/* <div className={s.receiverInfo}>
+          <div className={s.receiverInfo}>
             <div className={s.label}>Одержувач</div>
             <pre className={s.preLabel}>
               {newData?.reciever?.description?.trim()} <br />
@@ -62,12 +62,12 @@ const ReceiptForm: FC<Props> = ({
                 </div>
               ))}
             </pre>
-          </div> */}
+          </div>
         </>
 
         <div className={s.providerInvoice}>
           <div className={s.datecellTitle}>
-            ДОВІДКА № {newData.invoiceNumber}
+            РАХУНОК № {newData.invoiceNumber}
           </div>
           <div className={s.datecellDate}>
             Від &nbsp;
@@ -83,10 +83,10 @@ const ReceiptForm: FC<Props> = ({
           </div>
         </div>
         <div className={s.tableSum}>
-          <PaymentPricesTable preview />
+          <GroupedPricesTable preview domainId={newData.domain._id} />
         </div>
         <div className={s.payTable}>
-          <SumWithText data={newData} />
+          {/* <SumWithText data={newData} /> */}
           <div className={s.payFixed}>
             Загальна сума оплати:
             <div className={s.payBoldSum}>
@@ -94,7 +94,7 @@ const ReceiptForm: FC<Props> = ({
             </div>
           </div>
 
-          {/* <div>
+          <div>
             Призначення платежу:{' '}
             <strong>
               Оплата за послуги згідно рахунку № {newData.invoiceNumber} від{' '}
@@ -105,10 +105,10 @@ const ReceiptForm: FC<Props> = ({
           <div className={s.payFixed}>
             {newData?.provider?.description?.split('\n')?.[0] || ''}
             <div className={s.lineInner}>________________</div>
-          </div> */}
+          </div>
         </div>
 
-        {/* <div className={s.endInfo}>
+        <div className={s.endInfo}>
           <div className={s.endInfobolt}>Примітка:</div>
           *Ціна за комунальні послуги вказана з урахуванням ПДВ.
           <br />
@@ -116,7 +116,7 @@ const ReceiptForm: FC<Props> = ({
           відповідно їх ціна може <br />
           змінюватись у будь-який час в односторонньму порядку
           компанією-постачальником.
-        </div> */}
+        </div>
       </div>
     </>
   )
@@ -137,4 +137,4 @@ function SumWithText({ data }) {
   )
 }
 
-export default ReceiptForm
+export default GroupedReceiptForm
