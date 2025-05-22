@@ -69,7 +69,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
           {
             key: 'bank',
             type: 'item',
-            label: <Link href={AppRoutes.BANKTEST}>Банк</Link>,
+            label: <Link href={AppRoutes.BANK}>Банк</Link>,
             hidden: !isAdminCheck(user?.roles),
           },
           {

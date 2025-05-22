@@ -9,7 +9,7 @@ import BankTransactions from '@components/Pages/BankTransactions'
 
 export default withAuthRedirect(() => {
   return (
-    <MainLayout path={[{ title: 'BankTest', path: AppRoutes.BANKTEST }]}>
+    <MainLayout path={[{ title: 'Bank', path: AppRoutes.BANK }]}>
       <BankTransactions />
     </MainLayout>
   )
