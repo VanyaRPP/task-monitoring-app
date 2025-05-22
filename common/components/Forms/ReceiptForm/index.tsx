@@ -42,44 +42,10 @@ const ReceiptForm: FC<Props> = ({
           marginLeft: '1.5em',
         }}
       >
-        <>
-          {/* <div className={s.providerInfo}>
-            <div className={s.label}>Постачальник</div>
-            <pre className={s.preLabel}>
-              {newData?.provider?.description?.trim()} <br />
-              <br />
-            </pre>
-          </div> */}
-
-          {/* <div className={s.receiverInfo}>
-            <div className={s.label}>Одержувач</div>
-            <pre className={s.preLabel}>
-              {newData?.reciever?.description?.trim()} <br />
-              {newData?.reciever?.companyName} <br />
-              {newData?.reciever?.adminEmails?.map((email) => (
-                <div key={email}>
-                  {email} <br />
-                </div>
-              ))}
-            </pre>
-          </div> */}
-        </>
 
         <div className={s.providerInvoice}>
           <div className={s.datecellTitle}>
             ДОВІДКА № {newData.invoiceNumber}
-          </div>
-          <div className={s.datecellDate}>
-            Від &nbsp;
-            {dayjs(newData?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
-            &nbsp; року.
-          </div>
-          <div className={s.datecell}>
-            Підлягає сплаті до &nbsp;
-            {dayjs(newData?.invoiceCreationDate)
-              .add(5, 'd')
-              .format('DD.MM.YYYY')}
-            &nbsp; року
           </div>
         </div>
         <div className={s.tableSum}>
@@ -93,30 +59,7 @@ const ReceiptForm: FC<Props> = ({
               {(+newData?.generalSum || +newData?.debit).toFixed(2)} грн
             </div>
           </div>
-
-          {/* <div>
-            Призначення платежу:{' '}
-            <strong>
-              Оплата за послуги згідно рахунку № {newData.invoiceNumber} від{' '}
-              {dayjs(newData?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
-            </strong>
-          </div>
-
-          <div className={s.payFixed}>
-            {newData?.provider?.description?.split('\n')?.[0] || ''}
-            <div className={s.lineInner}>________________</div>
-          </div> */}
         </div>
-
-        {/* <div className={s.endInfo}>
-          <div className={s.endInfobolt}>Примітка:</div>
-          *Ціна за комунальні послуги вказана з урахуванням ПДВ.
-          <br />
-          **Ціни на комунальні послуги виставляють компанії-постачальники,
-          відповідно їх ціна може <br />
-          змінюватись у будь-який час в односторонньму порядку
-          компанією-постачальником.
-        </div> */}
       </div>
     </>
   )
