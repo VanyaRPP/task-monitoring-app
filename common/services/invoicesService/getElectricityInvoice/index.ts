@@ -2,6 +2,7 @@ import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { ServiceType } from '@utils/constants'
 import { toRoundFixed, isEmpty } from '@utils/helpers'
 import { IGetInvoiceByTypeProps } from '../types'
+import { getPriceFromCustomServices } from '@utils/helpers'
 
 export const getElectricityInvoice = ({
   company,
@@ -27,16 +28,22 @@ export const getElectricityInvoice = ({
       ),
     }
   }
+  
+const electricityPrice =
+  getPriceFromCustomServices(
+    service?.customServices,
+    ServiceType.Electricity
+  ) ?? service?.electricityPrice
 
-  if (!isEmpty(service?.electricityPrice)) {
-    const prevElectricity = prevInvoicesCollection[ServiceType.Electricity]
+if (!isEmpty(electricityPrice)) {
+  const prevElectricity = prevInvoicesCollection[ServiceType.Electricity]
 
-    return {
-      type: ServiceType.Electricity,
-      amount: +toRoundFixed(prevElectricity?.amount),
-      lastAmount: +toRoundFixed(prevElectricity?.amount),
-      price: +toRoundFixed(service.electricityPrice),
-      sum: 0,
-    }
+  return {
+    type: ServiceType.Electricity,
+    amount: +toRoundFixed(prevElectricity?.amount),
+    lastAmount: +toRoundFixed(prevElectricity?.amount),
+    price: +toRoundFixed(electricityPrice),
+    sum: 0,
   }
+}
 }
