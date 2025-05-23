@@ -1,7 +1,7 @@
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import { Table } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export interface PaymentPricesTableProps {
   preview?: boolean
@@ -15,7 +15,6 @@ const columns = [
     dataIndex: 'key',
     key: 'key',
     width: 45,
-    
   },
   {
     title: 'Найменування послуги',
@@ -52,13 +51,18 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
   loading,
 }) => {
   const { form, company } = usePaymentContext()
-  const invoices = form.getFieldValue('invoice')
-  const { data: customDomainServices } = useGetCustomServicesByDomainQuery({ domainId: [domainId] }, { skip: !domainId })
-  const groupedInvoicesData = useMemo(() => groupedInvoices(
-    invoices,
-    customDomainServices?.data
-  ), [invoices, customDomainServices])
-
+  const [invoices, setInvoices] = useState([])
+  useEffect(() => {
+    setInvoices(form.getFieldValue('invoice'))
+  }, [form])
+  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
+    { domainId: [domainId] },
+    { skip: !domainId }
+  )
+  const groupedInvoicesData = useMemo(
+    () => groupedInvoices(invoices, customDomainServices?.data),
+    [invoices, customDomainServices]
+  )
 
   const dataSource = groupedInvoicesData?.map((group, index) => {
     return {
@@ -78,11 +82,11 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
 
   return (
     <Table
-        dataSource={dataSource}
-        columns={columns}
-        loading={loading}
-        pagination={false}
-        bordered
+      dataSource={dataSource}
+      columns={columns}
+      loading={loading}
+      pagination={false}
+      bordered
     />
   )
 }

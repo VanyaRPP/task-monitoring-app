@@ -200,38 +200,42 @@ const AddPaymentModal: FC<Props> = ({
   }, [preselectedCompany, form])
 
   useEffect(() => {
-    if (!paymentActions.preview) return
-    form.setFieldsValue({
-      invoice: getInvoices({
-        company,
-        service,
-        payment,
-        prevService,
-        prevPayment,
-      }),
-    })
+    const isPreview = paymentActions.preview
+    const existingInvoice = form.getFieldValue('invoice')
+
+    if (isPreview) {
+      form.setFieldsValue({
+        invoice: getInvoices({
+          company,
+          service,
+          payment,
+          prevService,
+          prevPayment,
+        }),
+      })
+      return
+    }
+
+    if (!existingInvoice || existingInvoice.length === 0) {
+      form.setFieldsValue({
+        invoice: getInvoices({
+          company,
+          service,
+          payment,
+          prevService,
+          prevPayment,
+        }),
+      })
+    }
   }, [
     form,
     company,
+    service,
     payment,
     prevService,
     prevPayment,
-    service,
-    paymentActions,
+    paymentActions.preview,
   ])
-  useEffect(() => {
-    const existingInvoice = form.getFieldValue('invoice')
-    if (existingInvoice?.length > 0) return
-
-    const invoice = getInvoices({
-      company,
-      service,
-      payment,
-      prevService,
-      prevPayment,
-    })
-    form.setFieldsValue({ invoice })
-  }, [form, company, service, payment, prevService, prevPayment])
 
   return (
     <PaymentContext.Provider
