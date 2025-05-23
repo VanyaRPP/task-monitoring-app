@@ -20,6 +20,7 @@ import dayjs from 'dayjs'
 import { FC, createContext, useContext, useEffect, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import ReceiptForm from '../Forms/ReceiptForm'
+import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
 import s from './style.module.scss'
 import {
   dateToDefaultFormat,
@@ -160,7 +161,7 @@ const AddPaymentModal: FC<Props> = ({
       label: 'Перегляд',
       disabled: !preview || !!(paymentData as unknown as any)?.credit,
       children: (
-        <ReceiptForm
+        <GroupedReceiptForm
           currPayment={currPayment}
           paymentData={paymentData}
           paymentActions={paymentActions}
@@ -177,6 +178,20 @@ const AddPaymentModal: FC<Props> = ({
       children: <PriceList data={payment} />,
     })
   }
+  if (!preview || paymentData?.type === Operations.Debit) {
+    items.push({
+      key: '4',
+      label: 'Довідка',
+      disabled: !preview || !!(paymentData as unknown as any)?.credit,
+      children: (
+        <ReceiptForm
+          currPayment={currPayment}
+          paymentData={paymentData}
+          paymentActions={paymentActions}
+        />
+      ),
+    })
+  }
 
   useEffect(() => {
     if (preselectedCompany) {
@@ -185,24 +200,41 @@ const AddPaymentModal: FC<Props> = ({
   }, [preselectedCompany, form])
 
   useEffect(() => {
-    if (!paymentActions.preview) return
-    form.setFieldsValue({
-      invoice: getInvoices({
-        company,
-        service,
-        payment,
-        prevService,
-        prevPayment,
-      }),
-    })
+    const isPreview = paymentActions.preview
+    const existingInvoice = form.getFieldValue('invoice')
+
+    if (isPreview) {
+      form.setFieldsValue({
+        invoice: getInvoices({
+          company,
+          service,
+          payment,
+          prevService,
+          prevPayment,
+        }),
+      })
+      return
+    }
+
+    if (!existingInvoice || existingInvoice.length === 0) {
+      form.setFieldsValue({
+        invoice: getInvoices({
+          company,
+          service,
+          payment,
+          prevService,
+          prevPayment,
+        }),
+      })
+    }
   }, [
     form,
     company,
+    service,
     payment,
     prevService,
     prevPayment,
-    service,
-    paymentActions,
+    paymentActions.preview,
   ])
   useEffect(() => {
     const existingInvoice = form.getFieldValue('invoice')

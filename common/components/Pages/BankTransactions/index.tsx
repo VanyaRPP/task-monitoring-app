@@ -70,7 +70,7 @@ const BankTransactions = () => {
         <Button
           type="link"
           onClick={() => {
-            router.push(AppRoutes.BANKTEST)
+            router.push(AppRoutes.BANK)
           }}
         >
           Банк

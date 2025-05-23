@@ -52,6 +52,8 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
           '6816bca1e26e39a785fd7a0d',
           '68156d58f520914e5e1ad881',
           '677d434c83b6ef93c6b8ea3a',
+          '68230f76a51fddf0ae165d77',
+          '682dd48d9665126611c81950'
         ],
       }],
     }
