@@ -236,6 +236,19 @@ const AddPaymentModal: FC<Props> = ({
     prevPayment,
     paymentActions.preview,
   ])
+  useEffect(() => {
+    const existingInvoice = form.getFieldValue('invoice')
+    if (existingInvoice?.length > 0) return
+
+    const invoice = getInvoices({
+      company,
+      service,
+      payment,
+      prevService,
+      prevPayment,
+    })
+    form.setFieldsValue({ invoice })
+  }, [form, company, service, payment, prevService, prevPayment])
 
   return (
     <PaymentContext.Provider
