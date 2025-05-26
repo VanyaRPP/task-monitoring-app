@@ -62,10 +62,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
       { skip: !payment.domain._id }
     )
 
-  console.log('customDomainServices', customDomainServices?.data)
-  console.log('payment', payment.invoice)
-
-  const getModifiedInvoices = () => {
+  const getModifiedInvoices = () => { // old
     return payment.invoice.map(
       (item, index) =>
         ({
@@ -86,6 +83,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
         return sum + (invoice?.sum ?? 0)
       }, 0)
       return {
+        key: index,
         number: index + 1,
         type: group?.groupName,
         unit: 'грн',
@@ -138,7 +136,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <div>
                   <strong>ЗАТВЕРДЖУЮ</strong>
                   <br />
-                  <p>
+                  <div>
                     <pre>
                       {payment?.reciever?.description?.trim()} <br />
                       {payment?.reciever?.companyName} <br />
@@ -148,7 +146,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                         </div>
                       ))}
                     </pre>
-                  </p>
+                  </div>
                 </div>
               </div>
               <div className={`${styles.approvalSection}`}>
