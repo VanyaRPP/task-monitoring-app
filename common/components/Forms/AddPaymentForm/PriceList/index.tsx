@@ -27,27 +27,27 @@ const columns: ColumnsType<InvoicesTableData> = [
     title: 'Найменування робіт, послуг',
     dataIndex: 'type',
     key: 'type',
-    // render: (value, record, index) => {
+    // render: (value, record, index) => { // old
     //   return ServiceName[value]
     // },
   },
+  // { // olc
+  //   title: 'Кіль-сть',
+  //   dataIndex: 'amount',
+  //   key: 'amount',
+  // },
+  // { // old
+  //   title: 'Од.',
+  //   dataIndex: 'unit',
+  //   key: 'unit',
+  // },
+  // { // old
+  //   title: 'Ціна з ПДВ',
+  //   dataIndex: 'price',
+  //   key: 'price',
+  // },
   {
-    title: 'Кіль-сть',
-    dataIndex: 'amount',
-    key: 'amount',
-  },
-  {
-    title: 'Од.',
-    dataIndex: 'unit',
-    key: 'unit',
-  },
-  {
-    title: 'Ціна з ПДВ',
-    dataIndex: 'price',
-    key: 'price',
-  },
-  {
-    title: 'Сума з ПДВ',
+    title: 'Сума',
     dataIndex: 'sum',
     key: 'sum',
   },
@@ -196,7 +196,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
           summary={() => {
             return (
               <Table.Summary.Row>
-                <Table.Summary.Cell index={0} colSpan={5}>
+                <Table.Summary.Cell index={0} colSpan={2}>
                   Всього:
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={1}>
