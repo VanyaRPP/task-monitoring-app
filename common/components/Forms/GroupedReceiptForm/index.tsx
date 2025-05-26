@@ -83,7 +83,11 @@ const GroupedReceiptForm: FC<Props> = ({
           </div>
         </div>
         <div className={s.tableSum}>
-          <GroupedPricesTable preview domainId={newData.domain._id} />
+          <GroupedPricesTable 
+            preview 
+            domainId={newData.domain._id}
+            invoices={newData.invoice}  
+          />
         </div>
         <div className={s.payTable}>
           {/* <SumWithText data={newData} /> */}
