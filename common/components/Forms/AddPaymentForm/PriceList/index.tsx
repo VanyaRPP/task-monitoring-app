@@ -10,6 +10,8 @@ import styles from './styles.module.scss'
 import { useReactToPrint } from 'react-to-print'
 import { PrinterOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
+import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPricesTable'
+import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 interface InvoicesTableData extends IPaymentField {
   number: number
   unit: string
@@ -25,9 +27,9 @@ const columns: ColumnsType<InvoicesTableData> = [
     title: 'Найменування робіт, послуг',
     dataIndex: 'type',
     key: 'type',
-    render: (value, record, index) => {
-      return ServiceName[value]
-    },
+    // render: (value, record, index) => {
+    //   return ServiceName[value]
+    // },
   },
   {
     title: 'Кіль-сть',
@@ -55,6 +57,13 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
   const [payment, setPayment] = useState(data)
   const [totalSum, setTotalSum] = useState(0)
   const [totalFractionSum, setTotalFractionSum] = useState(0)
+  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
+      { domainId: [payment.domain._id] },
+      { skip: !payment.domain._id }
+    )
+
+  console.log('customDomainServices', customDomainServices?.data)
+  console.log('payment', payment.invoice)
 
   const getModifiedInvoices = () => {
     return payment.invoice.map(
@@ -65,6 +74,25 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
           number: index + 1,
         } as InvoicesTableData)
     )
+  }
+
+  const groupedInvoices = (invoices: any, groups: any) => {
+    return groups?.map((group, index) => {
+      const groupFieldNames = group?.services.map((service) => service?.fieldName)
+      const groupInvoices = invoices?.filter((invoice) =>
+        groupFieldNames.includes(invoice?.type)
+      )
+      const totalGroupSum = (groupInvoices ?? []).reduce((sum, invoice) => {
+        return sum + (invoice?.sum ?? 0)
+      }, 0)
+      return {
+        number: index + 1,
+        type: group?.groupName,
+        unit: 'грн',
+        price: totalGroupSum.toFixed(2),
+        sum: totalGroupSum.toFixed(2),
+      }
+    })
   }
 
   useEffect(() => {
@@ -163,7 +191,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
 
         <Table
           columns={columns}
-          dataSource={getModifiedInvoices()}
+          dataSource={groupedInvoices(payment.invoice, customDomainServices?.data)}
           pagination={false}
           summary={() => {
             return (
@@ -178,6 +206,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
             )
           }}
         />
+        {/* <GroupedPricesTable preview domainId=''/> */}
 
         <div className={styles.container}>
           <div className={styles.contentSection}>
