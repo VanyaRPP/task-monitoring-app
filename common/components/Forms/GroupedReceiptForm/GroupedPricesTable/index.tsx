@@ -7,6 +7,7 @@ export interface PaymentPricesTableProps {
   preview?: boolean
   domainId?: string
   loading?: boolean
+  invoices?: any[]
 }
 
 const columns = [
@@ -49,12 +50,9 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
   preview,
   domainId,
   loading,
+  invoices
 }) => {
   const { form, company } = usePaymentContext()
-  const [invoices, setInvoices] = useState([])
-  useEffect(() => {
-    setInvoices(form.getFieldValue('invoice'))
-  }, [form])
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
     { domainId: [domainId] },
     { skip: !domainId }
