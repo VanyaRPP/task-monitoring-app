@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState, FC } from 'react'
 import Lottie from 'lottie-react'
 
 type SmartLottieProps = {
@@ -10,10 +10,10 @@ type SmartLottieProps = {
   autoplay?: boolean
   className?: string
   style?: React.CSSProperties
-  fallback?: React.ReactNode
+  fallback?: React.ReactElement | null
 }
 
-const LottieAnimation: React.FC<SmartLottieProps> = ({
+const LottieAnimation: FC<SmartLottieProps> = ({
   src,
   loop = true,
   autoplay = true,
