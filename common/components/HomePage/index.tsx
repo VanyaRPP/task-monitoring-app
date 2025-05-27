@@ -72,9 +72,9 @@ const HomePage: React.FC = () => {
         </div>
         <div className={s.HalfBlock}>
           <LottieAnimation
-            // src="/animations/AnimationCity.json"
-            src="https://assets7.lottiefiles.com/packages/lf20_qp1q7mct.json"
-            loop={false}
+            src="/animations/AnimationCity.json"
+            // src="https://assets7.lottiefiles.com/packages/lf20_qp1q7mct.json"
+            loop={true}
           />
         </div>
       </div>
