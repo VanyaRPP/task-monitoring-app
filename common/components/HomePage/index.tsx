@@ -7,6 +7,8 @@ import { Button } from 'antd'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import s from './style.module.scss'
+import Lottie from 'lottie-react'
+import animationData from '../../../public/animations/AnimationCity.json'
 
 const HomePage: React.FC = () => {
   const router = useRouter()
@@ -15,9 +17,6 @@ const HomePage: React.FC = () => {
       <div className={s.Title}>
         <HomePageTitle />
       </div>
-
-      <Avatar />
-
       <div className={s.Container}>
         <div className={s.HalfBlock}>
           <div className={s.Image}>
@@ -25,6 +24,10 @@ const HomePage: React.FC = () => {
             <Image src={cityImg2} alt="City" />
           </div>
         </div>
+
+        <>
+          <Lottie animationData={animationData} loop={true} />
+        </>
 
         <div className={s.HalfBlock}>
           <div className={s.Text}>
