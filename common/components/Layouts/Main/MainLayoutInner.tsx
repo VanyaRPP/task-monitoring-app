@@ -10,9 +10,18 @@ import styles from './style.module.scss'
 export interface MainLayoutProps {
   children: React.ReactNode
   path?: BreadcrumbPath[]
+  simple?: boolean
 }
 
-const MainLayoutInner: React.FC<MainLayoutProps> = ({ children, path }) => {
+const MainLayoutInner: React.FC<MainLayoutProps> = ({ children, path, simple }) => {
+  if (simple){
+    return (
+      <Layout className={styles.SimpleWrapper}>
+        <Layout.Content className={styles.Content}>{children}</Layout.Content>
+      </Layout>
+    )
+  }
+  
   return (
     <Layout hasSider>
       <Sidebar collapsible className={styles.Sidebar} />
