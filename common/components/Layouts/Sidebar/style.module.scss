@@ -1,10 +1,61 @@
 .Logo {
-  width: 100%;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  overflow: hidden;
-  border-bottom: 1px solid #00000010; // TODO: border color from antd theme
+	width: 100%;
+	height: 64px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	overflow: hidden;
+	border-bottom: 1px solid #00000010; // TODO: border color from antd theme
+	-webkit-tap-highlight-color: transparent;
+	&:focus {
+		outline: none;
+	}
+	&:focus-visible {
+		outline: none;
+	}
+}
+
+.DesktopOnly {
+	@media (max-width: 768px) {
+		display: none !important;
+	}
+}
+
+.Sidebar {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.Sidebar :global(.ant-menu) {
+	flex: 1;
+	background-color: transparent;
+}
+
+.SidebarMobile {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100vh;
+	width: 240px;
+	z-index: 1000;
+	background-color: #fff;
+	box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+	transition: transform 0.3s ease;
+	transform: translateX(-100%);
+
+	&.open {
+		transform: translateX(0);
+	}
+}
+
+.Overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.3);
+	z-index: 999;
 }

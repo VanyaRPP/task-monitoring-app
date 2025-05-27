@@ -1,3 +1,12 @@
 .Header {
   padding-inline: 24px !important;
 }
+
+.MobileMenu {
+  display: none;
+
+  @media (max-width: 768px) {
+    display: block;
+    margin-right: 8px;
+  }
+}

@@ -1,38 +1,85 @@
 .Layout {
-  width: 100vw;
-  height: 100vh;
+	display: flex;
+	flex-direction: row;
+	min-height: 100vh;
 }
 
 .Sidebar {
-  position: sticky !important;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  height: 100vh;
-  z-index: 1000;
+	position: sticky !important;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	overflow-x: hidden;
+	overflow-y: auto;
+	height: 100vh;
+	z-index: 1000;
 }
 
 .Header {
-  position: sticky !important;
-  top: 0;
-  right: 0;
-  left: 0;
-  z-index: 1000;
-  border-bottom: 1px solid #00000010; // TODO: border color from antd theme
+	position: sticky !important;
+	top: 0;
+	right: 0;
+	left: 0;
+	z-index: 1000;
+	border-bottom: 1px solid #00000010; // TODO: border color from antd theme
 }
 
 .Wrapper {
-  margin: 24px;
+	margin: 24px;
 }
 
 .Content {
-  padding: 0;
-  margin: 0;
+	padding: 0;
+	margin: 0;
 }
 
 .Footer {
-  border-top: 1px solid #00000010; // TODO: border color from antd theme
-  height: 48px;
+	border-top: 1px solid #00000010; // TODO: border color from antd theme
+	height: 48px;
+}
+
+.MainLayout {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	overflow: hidden;
+}
+
+.SidebarMobile {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 240px;
+	background: #fff;
+	z-index: 1101;
+	transform: translateX(-100%);
+	transition: transform 0.3s ease;
+
+	&.open {
+		transform: translateX(0);
+	}
+}
+
+.Overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.3);
+	z-index: 1100;
+}
+
+.Burger {
+	position: fixed;
+	top: 16px;
+	left: 16px;
+	z-index: 1100;
+}
+
+.Content {
+	padding: 16px;
+	overflow-y: auto;
+	flex: 1;
 }

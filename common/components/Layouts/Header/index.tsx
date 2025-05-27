@@ -4,6 +4,7 @@ import ThemeSwitcher from '@components/UI/ThemeSwitcher'
 import { Flex, Layout } from 'antd'
 import classNames from 'classnames'
 import styles from './style.module.scss'
+import { SidebarMobile } from '@components/Layouts/Sidebar/SidebarMobile'
 
 export interface HeaderProps {
   style?: React.CSSProperties
@@ -23,7 +24,13 @@ export const Header: React.FC<HeaderProps> = ({ className, style, path }) => {
         align="center"
         style={{ height: '100%' }}
       >
-        <Breadcrumb path={path} />
+			<div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, maxWidth: 500, overflow: 'hidden' }}>
+				<div className={styles.MobileMenu}>
+					<SidebarMobile />
+				</div>
+				<Breadcrumb path={path} />
+			</div>
+				
         <Flex gap={8} align="center">
           <ThemeSwitcher />
           <Avatar />
