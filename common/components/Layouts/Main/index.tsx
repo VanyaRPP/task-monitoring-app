@@ -1,5 +1,6 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
 import { Footer } from '@components/Layouts/Footer'
 import { Header } from '@components/Layouts/Header'
@@ -9,6 +10,10 @@ import { Layout, Button, Grid } from 'antd'
 import { MenuOutlined } from '@ant-design/icons'
 import styles from './style.module.scss'
 import classNames from 'classnames'
+
+const MainLayout = dynamic(() => import('./MainLayoutInner'), {
+  ssr: false,
+})
 
 export interface MainLayoutProps {
   children: React.ReactNode
