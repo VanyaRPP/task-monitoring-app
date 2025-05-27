@@ -2,6 +2,7 @@ import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { toRoundFixed, isEmpty } from '@utils/helpers'
 import { IGetInvoiceByTypeProps } from '../types'
 import { ServiceType } from '@utils/constants'
+import { getPriceFromCustomServices } from '@utils/helpers'
 
 export const getInflicionInvoice = ({
   company,
@@ -24,7 +25,13 @@ export const getInflicionInvoice = ({
     }
   }
 
-  if (company?.inflicion) {
+  const inflicionCompany =
+    getPriceFromCustomServices(
+      company?.customServices,
+      ServiceType.Inflicion
+    ) ?? company?.inflicion
+
+  if (inflicionCompany) {
     if (isEmpty(prevService?.inflicionPrice)) {
       return {
         type: ServiceType.Inflicion,
@@ -34,9 +41,10 @@ export const getInflicionInvoice = ({
     }
     const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
     const price =
-      (prevPlacing?.sum ||
-        company.totalArea * (company.pricePerMeter || service.rentPrice || 0)) *
-      (Math.max(prevService?.inflicionPrice - 100, 0) / 100)
+      prevPlacing?.sum ||
+      company.totalArea *
+        Number(inflicionCompany ?? 0) *
+        (Math.max(prevService?.inflicionPrice - 100, 0) / 100)
 
     return {
       type: ServiceType.Inflicion,
