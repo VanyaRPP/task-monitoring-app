@@ -2,6 +2,7 @@ import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { toRoundFixed, isEmpty } from '@utils/helpers'
 import { IGetInvoiceByTypeProps } from '../types'
 import { ServiceType } from '@utils/constants'
+import { getPriceFromCustomServices } from '@utils/helpers'
 
 export const getWaterPartInvoice = ({
   company,
@@ -24,13 +25,21 @@ export const getWaterPartInvoice = ({
     }
   }
 
+  const waterPart =
+    getPriceFromCustomServices(
+      company?.customServices,
+      ServiceType.WaterPart
+    ) ?? company?.waterPart
+  const waterPrice =
+    getPriceFromCustomServices(service?.customServices, ServiceType.Water) ??
+    service?.waterPriceTotal
   if (
-    !isEmpty(service?.waterPriceTotal) &&
-    !isNaN(service.waterPriceTotal) &&
-    !isEmpty(company?.waterPart) &&
-    !isNaN(company?.waterPart)
+    !isEmpty(waterPrice) &&
+    !isNaN(waterPrice) &&
+    !isEmpty(waterPart) &&
+    !isNaN(waterPart)
   ) {
-    const price = service.waterPriceTotal * (company.waterPart / 100)
+    const price = waterPrice * (waterPart / 100)
 
     return {
       type: ServiceType.WaterPart,
