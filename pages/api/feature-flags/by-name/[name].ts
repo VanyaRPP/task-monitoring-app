@@ -1,20 +1,16 @@
-import FeatureFlags from '@modules/models/FeatureFlag'
+import FeatureFlagService from '@modules/services/FeatureFlagServices'
+import { NextApiRequest, NextApiResponse } from 'next'
 
-export default async function handler(req, res) {
-
-  const {
-    query: { name },
-    method,
-  } = req
-
-  if (method !== 'GET') {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  
+  if (req.method !== 'GET') {
     return res
       .status(405)
       .json({ success: false, message: 'Method Not Allowed' })
   }
 
   try {
-    const flag = await FeatureFlags.findOne({ name })
+    const flag = await FeatureFlagService.getByName(req.query.name as string )
     if (!flag) {
       return res
         .status(404)
