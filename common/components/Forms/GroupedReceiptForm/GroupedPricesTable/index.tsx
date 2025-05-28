@@ -72,7 +72,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
 
   if (invoices?.find((invoice) => invoice?.type === 'discount')) {
     dataSource?.push({
-      key: dataSource?.length,
+      key: dataSource?.length + 1,
       name: 'Знижка',
       sum: invoices?.find((invoice) => invoice?.type === 'discount')?.sum,
     })
