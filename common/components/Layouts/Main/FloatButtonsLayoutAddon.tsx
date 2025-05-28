@@ -22,8 +22,7 @@ export const FloatButtonsLayoutAddon: React.FC<FloatButtonPlacementProps> = ({
       <FloatButton.Group
         type="primary"
         shape="square"
-        trigger="hover"
-        style={{ right: 24, bottom: 24 }}
+        trigger="click"
         icon={<SettingFilled />}
       >
         {allButtons.map((btn) => (
@@ -45,7 +44,6 @@ export const FloatButtonsLayoutAddon: React.FC<FloatButtonPlacementProps> = ({
       onClick={themeBtn.onClick}
       tooltip={themeBtn.tooltip}
       type="primary"
-      style={{ right: 24, bottom: 24 }}
     />
   )
 }
