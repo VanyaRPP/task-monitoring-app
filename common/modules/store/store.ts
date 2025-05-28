@@ -43,7 +43,14 @@ export const store = configureStore({
     floatButtons: floatButtonReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware()
+    getDefaultMiddleware({
+      serializableCheck: {
+        //Ignore the path where you're storing React elements/functions
+        //TODO: rewrite logic floatButtons to react context
+        ignoredPaths: ['floatButtons.buttons'],
+        ignoredActions: ['floatButtons/addButton', 'floatButtons/removeButton'],
+      },
+    })
       .concat(filterApi.middleware)
       .concat(userApi.middleware)
       .concat(taskApi.middleware)
@@ -59,7 +66,7 @@ export const store = configureStore({
       .concat(bankApi.middleware)
       .concat(mockBankApi.middleware)
       .concat(debtorsApi.middleware)
-      .concat(FeatureFlagApi.middleware)
+      .concat(FeatureFlagApi.middleware),
 })
 
 export type AppDispatch = typeof store.dispatch
