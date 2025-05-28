@@ -1,14 +1,9 @@
-import { useThemeFloatButton } from '@modules/hooks/useThemeFloatButton'
-import { SettingOutlined } from '@ant-design/icons'
-import React, { ReactNode } from 'react'
+import { useThemeFloatButton } from '@modules/hooks/useFloatButton'
+import { useAppSelector } from '@modules/store/hooks'
+import { SettingFilled } from '@ant-design/icons'
+import { FloatButtonItem } from '@utils/types'
 import { FloatButton } from 'antd'
-
-export type FloatButtonItem = {
-  key: string
-  icon: ReactNode
-  onClick: () => void
-  tooltip?: string
-}
+import React from 'react'
 
 type FloatButtonPlacementProps = {
   buttons?: FloatButtonItem[]
@@ -18,17 +13,20 @@ export const FloatButtonsLayoutAddon: React.FC<FloatButtonPlacementProps> = ({
   buttons = [],
 }) => {
   const themeBtn = useThemeFloatButton()
+  const storedButtons = useAppSelector((state) => state.floatButtons.buttons)
 
-  if (buttons.length > 1) {
+  const allButtons = [...buttons, ...storedButtons, themeBtn]
+  
+  if (allButtons.length > 1) {
     return (
       <FloatButton.Group
         type="primary"
         shape="square"
         trigger="hover"
         style={{ right: 24, bottom: 24 }}
-        icon={<SettingOutlined />}
+        icon={<SettingFilled />}
       >
-        {buttons.map((btn) => (
+        {allButtons.map((btn) => (
           <FloatButton
             key={btn.key}
             icon={btn.icon}

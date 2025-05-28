@@ -1,10 +1,11 @@
 'use client'
 
-import { FloatButtonItem, FloatButtonsLayoutAddon } from './FloatButtonsLayoutAddon'
+import { FloatButtonsLayoutAddon } from './FloatButtonsLayoutAddon'
 import { BreadcrumbPath } from '@components/UI/Breadcrumb'
 import { Sidebar } from '@components/Layouts/Sidebar'
 import { Footer } from '@components/Layouts/Footer'
 import { Header } from '@components/Layouts/Header'
+import { FloatButtonItem } from '@utils/types'
 import { Layout } from 'antd'
 
 import styles from './style.module.scss'

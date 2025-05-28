@@ -16,6 +16,7 @@ import { taskApi } from '@common/api/taskApi/task.api'
 import { userApi } from '@common/api/userApi/user.api'
 import sidebarReducer from '@modules/store/sidebarSlice'
 import themeReducer from '@modules/store/themeSlice'
+import floatButtonReducer from '@modules/store/floatButtonSlice'
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 
 export const store = configureStore({
@@ -39,6 +40,7 @@ export const store = configureStore({
     sidebar: sidebarReducer,
     theme: themeReducer,
     [FeatureFlagApi.reducerPath]: FeatureFlagApi.reducer,
+    floatButtons: floatButtonReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
