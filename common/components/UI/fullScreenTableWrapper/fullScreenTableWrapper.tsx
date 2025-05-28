@@ -1,32 +1,54 @@
-import { useState } from 'react';
-import { Button } from 'antd';
-import { FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons';
-import styles from './styled.module.scss';
+import { addButton, removeButton } from '@modules/store/floatButtonSlice'
+import { useFullScreenFloatButton } from '@modules/hooks/useFloatButton'
+import { useDispatch } from 'react-redux'
+import React, { useEffect } from 'react'
+
+import styles from './styled.module.scss'
+import { FullscreenExitOutlined, FullscreenOutlined } from '@ant-design/icons'
+import { Button } from 'antd'
 
 interface FullScreenWrapperProps {
-  children: React.ReactNode;
+  children: React.ReactNode
+  unicKey?: string
 }
 
-const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({ children }) => {
-  const [isFullScreen, setIsFullScreen] = useState(false);
+const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({
+  children,
+  unicKey,
+}) => {
+  const dispatch = useDispatch()
+  const [isFullScreen, toggleFullScreen, floatButton] =
+    useFullScreenFloatButton(unicKey || 'default')
 
-  const toggleFullScreen = () => {
-    setIsFullScreen(!isFullScreen);
-  };
+  useEffect(() => {
+    dispatch(addButton(floatButton))
+    return () => {
+      dispatch(removeButton(floatButton.key))
+    }
+  }, [dispatch, floatButton])
 
   return (
     <>
-      <Button 
-        className={styles.toggleButton}
-        onClick={toggleFullScreen}
-        type="default"
-        icon={isFullScreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
-      />
-      <div className={`${styles.contentWrapper} ${isFullScreen ? styles.fullScreen : ''}`}>
+      {isFullScreen && (
+        <Button
+          className={styles.toggleButton}
+          onClick={toggleFullScreen}
+          type="default"
+          icon={
+            isFullScreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />
+          }
+        />
+      )}
+
+      <div
+        className={`${styles.contentWrapper} ${
+          isFullScreen ? styles.fullScreen : ''
+        }`}
+      >
         {children}
       </div>
     </>
-  );
-};
+  )
+}
 
-export default FullScreenWrapper;
+export default FullScreenWrapper

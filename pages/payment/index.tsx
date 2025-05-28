@@ -12,6 +12,7 @@ import FullScreenWrapper from "@components/UI/fullScreenTableWrapper/fullScreenT
 export default withAuthRedirect(() => {
   const { data: userResponse } = useGetCurrentUserQuery()
   const isUser = userResponse?.roles?.includes(Roles.USER)
+  
   return (
     <>
       <Head>
@@ -23,7 +24,7 @@ export default withAuthRedirect(() => {
           { title: 'Платежі', path: AppRoutes.PAYMENT },
         ]}
       >
-        <FullScreenWrapper>
+        <FullScreenWrapper unicKey="payments">
           <PaymentsBlock />
         </FullScreenWrapper>
       </MainLayout>

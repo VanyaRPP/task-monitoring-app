@@ -24,7 +24,9 @@ const Home: React.FC<{
           <DashboardPage />
         </MainLayout>
       ) : (
-        <HomePage />
+        <MainLayout simple>
+          <HomePage />
+        </MainLayout>
       )}
     </>
   )

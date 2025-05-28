@@ -16,6 +16,7 @@ import { taskApi } from '@common/api/taskApi/task.api'
 import { userApi } from '@common/api/userApi/user.api'
 import sidebarReducer from '@modules/store/sidebarSlice'
 import themeReducer from '@modules/store/themeSlice'
+import floatButtonReducer from '@modules/store/floatButtonSlice'
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 
 export const store = configureStore({
@@ -39,9 +40,17 @@ export const store = configureStore({
     sidebar: sidebarReducer,
     theme: themeReducer,
     [FeatureFlagApi.reducerPath]: FeatureFlagApi.reducer,
+    floatButtons: floatButtonReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware()
+    getDefaultMiddleware({
+      serializableCheck: {
+        //Ignore the path where you're storing React elements/functions
+        //TODO: rewrite logic floatButtons to react context
+        ignoredPaths: ['floatButtons.buttons'],
+        ignoredActions: ['floatButtons/addButton', 'floatButtons/removeButton'],
+      },
+    })
       .concat(filterApi.middleware)
       .concat(userApi.middleware)
       .concat(taskApi.middleware)
@@ -57,7 +66,7 @@ export const store = configureStore({
       .concat(bankApi.middleware)
       .concat(mockBankApi.middleware)
       .concat(debtorsApi.middleware)
-      .concat(FeatureFlagApi.middleware)
+      .concat(FeatureFlagApi.middleware),
 })
 
 export type AppDispatch = typeof store.dispatch
