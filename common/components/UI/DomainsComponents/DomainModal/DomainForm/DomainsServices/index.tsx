@@ -24,8 +24,8 @@ const DomainsServices: FC<Props> = ({
 
   const [createCustomService] = useCreateCustomServiceMutation()
 
-  const handleSave = async (fieldKey: number) => {
-    const service = form.getFieldValue(['domainServices', fieldKey])
+  const handleSave = async (fieldName: number) => {
+    const service = form.getFieldValue(['domainServices', fieldName])
     if (!service?.name) {
       message.error('Будь ласка, введіть назву послуги')
       return
@@ -48,7 +48,7 @@ const DomainsServices: FC<Props> = ({
         domainServices: form
           .getFieldValue('domainServices')
           .map((s, idx) =>
-            idx === fieldKey ? { ...s, _id: savedService._id } : s
+            idx === fieldName ? { ...s, _id: savedService._id } : s
           ),
       })
       message.success('Послугу успішно збережено')
