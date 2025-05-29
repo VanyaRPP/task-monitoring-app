@@ -28,13 +28,15 @@ export const Sidebar: React.FC<Omit<SiderProps, 'children'>> = (props) => {
           </Typography.Title>
         )}
       </Link>
-      <Menu
-        defaultOpenKeys={
-          !collapsed
-            ? ['user_submenu', 'dashboard_submenu', 'payments_submenu']
-            : []
-        }
-      />
+      <div className={styles.MenuWrapper}>
+        <Menu
+          defaultOpenKeys={
+            !collapsed
+              ? ['user_submenu', 'dashboard_submenu', 'payments_submenu']
+              : []
+          }
+        />
+      </div>
     </Layout.Sider>
   )
 }
