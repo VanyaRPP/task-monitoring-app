@@ -5,12 +5,12 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  overflow: auto;
-  border-bottom: 1px solid #11111111;// TODO: border color from antd theme
+  overflow: hidden;
+  border-bottom: 1px solid #00000010; // TODO: border color from antd theme
 }
 
-
 .MenuWrapper {
-  overflow-Y:auto; 
-  height: 50%;
+  overflow-y: auto;
+  max-height: calc(100vh - 64px - 40px); 
+  padding-right: 4px; 
 }
