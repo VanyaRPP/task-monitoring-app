@@ -73,26 +73,40 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
     )
   }
 
-  const groupedInvoices = (invoices: any, groups: any) => {
-    return groups?.map((group, index) => {
-      const groupFieldNames = group?.services.map((service) => service?.fieldName)
-      const groupInvoices = invoices?.filter((invoice) =>
-        groupFieldNames.includes(invoice?.type)
-      )
-      const totalGroupSum = (groupInvoices ?? []).reduce((sum, invoice) => {
-        return sum + (invoice?.sum ?? 0)
-      }, 0)
-      return {
-        key: index,
-        number: index + 1,
-        type: group?.groupName,
-        unit: 'грн',
-        price: totalGroupSum.toFixed(2),
-        sum: totalGroupSum.toFixed(2),
-      }
+const groupedInvoices = (invoices: any, groups: any) => {
+  const result = groups?.map((group, index) => {
+    const groupFieldNames = group?.services.map((service) => service?.fieldName)
+    const groupInvoices = invoices?.filter((invoice) =>
+      groupFieldNames.includes(invoice?.type)
+    )
+    const totalGroupSum = (groupInvoices ?? []).reduce((sum, invoice) => {
+      return sum + (invoice?.sum ?? 0)
+    }, 0)
+    return {
+      key: index,
+      number: index + 1,
+      type: group?.groupName,
+      unit: 'грн',
+      price: totalGroupSum.toFixed(2),
+      sum: totalGroupSum.toFixed(2),
+    }
+  }) || []
+
+ 
+  const customInvoice = invoices?.find((invoice) => invoice?.type === 'custom')
+  if (customInvoice) {
+    result.push({
+      key: result.length,
+      number: result.length + 1,
+      type: 'Власне Custom',
+      unit: 'грн',
+      price: +customInvoice.sum,
+      sum: +customInvoice.sum,
     })
   }
 
+  return result
+}
   useEffect(() => {
     setTotalSum(
       payment.invoice.reduce((acc, item, index) => {

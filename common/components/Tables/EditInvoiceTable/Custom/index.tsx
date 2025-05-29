@@ -20,7 +20,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
 
   const { service } = usePaymentContext()
 
-  if (!editable || isCustomService) {
+  if (!editable || type !== 'custom') {
     return (
       <Space direction="vertical" size={0}>
         <Typography.Text>{value || type}</Typography.Text>
