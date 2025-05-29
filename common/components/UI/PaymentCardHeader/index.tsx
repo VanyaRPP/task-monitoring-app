@@ -41,6 +41,8 @@ import { saveAs } from 'file-saver'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { shouldOpenModal } from '@utils/shouldOpenModal'
+import { Collapse } from 'antd'
+import { UpCircleOutlined, DownCircleOutlined } from '@ant-design/icons'
 
 interface PaymentCardHeaderProps {
   setCurrentDateFilter: (val: any) => void
@@ -98,7 +100,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isAdmin = isAdminCheck(currUser?.roles)
   const [deletePayment] = useDeleteMultiplePaymentsMutation()
-
+const { Panel } = Collapse
   const [generateExcel] = useGenerateExcelMutation()
 
   const handleExportExcel = async () => {
@@ -239,17 +241,40 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
               Export to Excel <ExportOutlined />
             </Button>
           )}
-        {isAdmin && <ImportInvoices />}
         {isAdmin && (
-          <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT_BULK)}>
-            Інвойси <SelectOutlined />
-          </Button>
-        )}
-        {isAdmin && (
-          <Button type="link" onClick={() => setIsModalOpen(true)}>
-            <PlusOutlined /> Додати
-          </Button>
-        )}
+  <Collapse
+    bordered={false}
+    ghost
+    expandIcon={({ isActive }) =>
+      isActive ? <DownCircleOutlined /> : <UpCircleOutlined />
+    }
+    style={{ background: 'transparent' }}
+  >
+    <Panel
+      header={<Button type="link">Дії</Button>}
+      key="actions"
+      style={{ background: 'transparent', padding: 0 }}
+    >
+      <div style={{ display: 'flex', gap: '8px', paddingLeft: 8 }}>
+        <ImportInvoices />
+        <Button
+          type="link"
+          onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
+          style={{ padding: 0 }}
+        >
+          Інвойси <SelectOutlined />
+        </Button>
+        <Button
+          type="link"
+          onClick={() => setIsModalOpen(true)}
+          style={{ padding: 0 }}
+        >
+          <PlusOutlined /> Додати
+        </Button>
+      </div>
+    </Panel>
+  </Collapse>
+)}
         {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
           <AddPaymentModal
             paymentActions={!isAdmin ? { edit: false, preview: true } : paymentActions}
