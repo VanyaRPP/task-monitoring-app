@@ -57,6 +57,8 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
     { domainId: [domainId] },
     { skip: !domainId }
   )
+  console.log('customDomainServices', customDomainServices?.data)
+  console.log('payment', invoices)
   const groupedInvoicesData = useMemo(
     () => groupedInvoices(invoices, customDomainServices?.data),
     [invoices, customDomainServices]
