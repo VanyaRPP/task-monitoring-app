@@ -53,6 +53,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   const inflicionInvoice = useMemo(() => {
     return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
   }, [invoices])
+  console.log(inflicionInvoice?.sum)
 
   const prevPlacingInvoice = useMemo(() => {
     return prevPayment?.invoice.find(
@@ -72,51 +73,11 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   const calculatedInitialPrice = useMemo(() => {
     return +toRoundFixed(rentPrice + (inflicionInvoice?.sum ?? 0))
   }, [rentPrice, inflicionInvoice])
-
-  useEffect(() => {
-    setChanged(false)
-    if (
-      snapshotPrice === null &&
-      !isNaN(calculatedInitialPrice) &&
-      calculatedInitialPrice !== 0
-    ) {
-      setSnapshotPrice(calculatedInitialPrice)
-    }
-  }, [form])
-
-  useEffect(() => {
-    if (
-      snapshotPrice === null &&
-      company?.inflicion &&
-      inflicionInvoice?.sum !== undefined &&
-      !isNaN(calculatedInitialPrice)
-    ) {
-      Promise.resolve().then(() => {
-        setSnapshotPrice((prev) => prev ?? calculatedInitialPrice)
-        if (!changed) {
-          form.setFieldValue(
-            ['invoice', ...name, 'price'],
-            calculatedInitialPrice
-          )
-        }
-      })
-    }
-  }, [
-    snapshotPrice,
-    company,
-    inflicionInvoice,
-    calculatedInitialPrice,
-    changed,
-    form,
-    name,
-  ])
+  console.log(calculatedInitialPrice)
 
   const isInitial = useMemo(() => {
-    if (price === undefined || snapshotPrice === null) {
-      return true
-    }
-    return toRoundFixed(price) === toRoundFixed(snapshotPrice)
-  }, [price, snapshotPrice])
+    return toRoundFixed(price) === toRoundFixed(calculatedInitialPrice)
+  }, [price, calculatedInitialPrice])
 
   if (company?.inflicion && !prevService?.inflicionPrice) {
     return <span>Інфляція за попередній місяць невідома</span>
@@ -131,7 +92,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
             {toRoundFixed(inflicionInvoice?.sum)} грн
           </Typography.Text>
         )}
-        {editable && snapshotPrice !== null && !isInitial && (
+        {editable && !isInitial && (
           <Tooltip title="Відновити початкове значення">
             <Button
               icon={<ReloadOutlined />}
@@ -188,26 +149,32 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-  const { company, prevService } = usePaymentContext()
+  const { company, prevService, prevPayment } = usePaymentContext()
   const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
   const watchedPrice = Form.useWatch(['invoice', ...name, 'price'], form)
   const changed = Form.useWatch(['invoiceMeta', 'changed'], form) ?? false
-
   const inflicionInvoice = useMemo(() => {
     return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
   }, [invoices])
 
-  const calculatedPrevPlacingSum = useMemo(() => {
-    const area = company?.totalArea ?? 0
+  const prevPlacingInvoice = useMemo(() => {
+    return prevPayment?.invoice.find(
+      (invoice) => invoice.type === ServiceType.Placing
+    )
+  }, [prevPayment])
+
+  const rentPrice = useMemo(() => {
+    if (typeof prevPlacingInvoice?.sum === 'number') {
+      return prevPlacingInvoice.sum
+    }
+    const area = company?.totalArea ?? 1
     const pricePerMeter = company?.pricePerMeter ?? prevService?.rentPrice ?? 0
     return area * pricePerMeter
-  }, [company, prevService])
+  }, [prevPlacingInvoice, company, prevService])
 
-  const calculatedTotal = useMemo(() => {
-    return +toRoundFixed(
-      calculatedPrevPlacingSum + (inflicionInvoice?.sum ?? 0)
-    )
-  }, [calculatedPrevPlacingSum, inflicionInvoice])
+  const calculatedInitialPrice = useMemo(() => {
+    return +toRoundFixed(rentPrice + (inflicionInvoice?.sum ?? 0))
+  }, [rentPrice, inflicionInvoice])
 
   useEffect(() => {
     if (
@@ -217,7 +184,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
       inflicionInvoice?.sum !== undefined
     ) {
       Promise.resolve().then(() => {
-        form.setFieldValue(['invoice', ...name, 'price'], calculatedTotal)
+        form.setFieldValue(['invoice', ...name, 'price'], calculatedInitialPrice)
       })
     }
   }, [
@@ -225,7 +192,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
     editable,
     changed,
     inflicionInvoice?.sum,
-    calculatedTotal,
+    calculatedInitialPrice,
     form,
     name,
   ])
