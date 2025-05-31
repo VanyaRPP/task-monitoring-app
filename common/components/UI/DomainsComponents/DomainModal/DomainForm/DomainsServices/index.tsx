@@ -5,7 +5,7 @@ import {
 import { CloseOutlined, SaveOutlined } from '@ant-design/icons'
 import { Button, Card, Form, FormInstance, Input, Tooltip, message } from 'antd'
 import React, { FC, useEffect } from 'react'
-import { useWatch } from 'antd/es/form/Form'
+
 
 interface Props {
   form: FormInstance
@@ -66,7 +66,7 @@ const DomainsServices: FC<Props> = ({
             return (
               <Card
                 size="small"
-                title={`Послуга: ${watchedName || '(без назви)'}`}
+                title={`Послуга: ${watchedName || ''}`}
                 key={field.key}
                 aria-disabled={!editable}
                 extra={
