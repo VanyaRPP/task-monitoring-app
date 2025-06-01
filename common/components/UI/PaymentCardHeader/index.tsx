@@ -189,20 +189,12 @@ const { Panel } = Collapse
       wrap
       justify="space-between"
       align='center'
-      style={{ marginBottom: '10px', marginTop: '10px', maxHeight: '60px', overflowY: 'auto' }}
+      style={{ marginBottom: '10px', marginTop: '10px',  overflowY: 'auto' }}
     >
       <Space wrap size="small">
-        <Button
-          style={{ marginBottom: '10px', marginTop: '10px' }}
-          type="link"
-          onClick={() => {
-            if (enablePaymentsButton) {
-              router.push(AppRoutes.PAYMENT)
-            }
-          }}
-        >
-          {isAdmin ? 'Платежі' : 'Мої оплати'}
-        </Button>
+        <Button type="link" style={{ pointerEvents: 'none', cursor: 'default' }}>
+  {isAdmin ? 'Платежі' : 'Мої оплати'}
+</Button>
         {pathname === AppRoutes.PAYMENT && (
           <Space size="middle">
             <Space size="middle">
@@ -228,7 +220,7 @@ const { Panel } = Collapse
           </Space>
         )}
       </Space>
-      <Flex align="center" style={{ height: '50px', marginTop: '10px' }}>
+      <Flex align="center" style={{ marginTop: '10px' }}>
         {infoTooltip && (
           <Tooltip title={infoTooltip}>
             <InfoCircleOutlined style={{ marginRight: 16, color: 'rgba(0,0,0,0.45)' }} />
@@ -243,37 +235,79 @@ const { Panel } = Collapse
           )}
         {isAdmin && (
   <Collapse
-    bordered={false}
-    ghost
-    expandIcon={({ isActive }) =>
-      isActive ? <DownCircleOutlined /> : <UpCircleOutlined />
-    }
-    style={{ background: 'transparent' }}
-  >
-    <Panel
-      header={<Button type="link">Дії</Button>}
-      key="actions"
-      style={{ background: 'transparent', padding: 0 }}
-    >
-      <div style={{ display: 'flex', gap: '8px', paddingLeft: 8 }}>
-        <ImportInvoices />
-        <Button
-          type="link"
-          onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
-          style={{ padding: 0 }}
-        >
-          Інвойси <SelectOutlined />
-        </Button>
-        <Button
-          type="link"
-          onClick={() => setIsModalOpen(true)}
-          style={{ padding: 0 }}
-        >
-          <PlusOutlined /> Додати
-        </Button>
+  bordered={false}
+  ghost
+  expandIconPosition="right"
+  expandIcon={({ isActive }) => (
+    isActive ? (
+      <DownCircleOutlined style={{fontSize: 18 }} />
+    ) : (
+      <UpCircleOutlined style={{ fontSize: 18 }} />
+    )
+  )}
+   
+>
+  <Panel
+    key="actions"
+    header={
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          paddingRight: 8,
+          boxSizing: 'border-box',
+          pointerEvents: 'none', // ❌ забороняє взаємодію з усім header
+        }}
+      >
+        <div
+        style={{
+          pointerEvents: 'auto', // ✅ дозволяє тільки іконці бути клікабельною
+          cursor: 'pointer',
+        }}
+      >
+        {/* це заглушка для іконки, анtd сама рендерить її тут */}
+        <Button type="link" style={{ padding: 0, lineHeight: 1 }} />
       </div>
-    </Panel>
-  </Collapse>
+      </div>
+    }
+    style={{
+      background: 'transparent',
+      padding: 0,
+      margin: 0,
+    }}
+    className="custom-collapse-panel"
+  >
+    <div
+      style={{
+        marginTop: -20,
+        display: 'flex',
+        gap: 12,
+        paddingLeft: 8,
+        flexWrap: 'nowrap',
+        overflowX: 'auto',
+      }}
+    >
+      <ImportInvoices />
+      <Button
+        type="link"
+        onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
+        style={{ padding: 0 }}
+      >
+        Інвойси <SelectOutlined />
+      </Button>
+      <Button
+        type="link"
+        onClick={() => setIsModalOpen(true)}
+        style={{ padding: 0 }}
+      >
+        <PlusOutlined /> Додати
+      </Button>
+    </div>
+  </Panel>
+</Collapse>
+
 )}
         {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
           <AddPaymentModal
