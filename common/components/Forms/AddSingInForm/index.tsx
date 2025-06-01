@@ -53,6 +53,7 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
               data-e2e="sauthFormName"
               placeholder="name"
               prefix={<UserOutlined className="auth-icon" />}
+              className="responsive-input"
             />
           </Form.Item>
         )}
@@ -69,6 +70,7 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
             type="text"
             placeholder="email"
             prefix={<MailOutlined className="auth-icon" />}
+            className="responsive-input"
           />
         </Form.Item>
 
@@ -81,6 +83,7 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
             data-e2e="authFormPassword"
             placeholder="******"
             prefix={<LockOutlined className="auth-icon" />}
+            className="responsive-input"
           />
         </Form.Item>
 

@@ -5,58 +5,51 @@ body {
   overflow-x: hidden;
 }
 
-.card {
-  width: 100%;
-  max-width: 400px;
-  box-sizing: border-box;
-
-
-  &.dark {
-    background-color: rgba(251, 251, 251, 0.074);
-    backdrop-filter: blur(4px); // сам блюр
-    -webkit-backdrop-filter: blur(4px); // підтримка Safari
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
-
-
-    @media(max-width: 320px) {
-      background-color: #121212;
-      backdrop-filter: none; // Вимикаємо блюр
-      -webkit-backdrop-filter: none; // Підтримка Safari
-      border: none; // Убираємо рамку картки
-      border-radius: 0px; // Замість закруглених кутів використовуємо квадратні
-
-    }
-  }
-
-  &.light {
-    background-color: rgba(4, 4, 4, 0.253);
-    backdrop-filter: blur(4px); // сам блюр
-    -webkit-backdrop-filter: blur(4px); // підтримка Safari
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
-
-    @media(max-width: 320px) {
-      background-color: rgba(0, 0, 0, 0.074);
-      backdrop-filter: none; // Вимикаємо блюр
-      -webkit-backdrop-filter: none; // Підтримка Safari
-      border: none; // Убираємо рамку картки
-      border-radius: 0px; // Замість закруглених кутів використовуємо квадратні
-
-    }
-  }
-
-}
-
 .login-container {
   &.dark {
-    background-color: #121212;
+    background-color: rgb(18, 18, 18);
+
+    .card {
+      background-color: rgba(251, 251, 251, 0.074);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+
+      @media(max-width: 425px) {
+        background-color: #121212;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border: none;
+        border-radius: 0;
+      }
+    }
   }
 
   &.light {
     background-color: rgba(255, 255, 255, 0.9);
+
+    .card {
+      background-color: rgba(4, 4, 4, 0.253);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: none;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+
+      @media(max-width: 425px) {
+        background-color: #ffffff;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border: none;
+        border-radius: 0;
+      }
+    }
+  }
+
+  .responsive-input {
+    @media (max-width: 425px) {
+      height: 52px;
+      font-size: 18px;
+      padding: 12px 16px;
+    }
   }
 }
 
@@ -78,6 +71,7 @@ body {
 }
 
 @media print {
+
   html,
   body {
     background: white !important;
@@ -119,14 +113,14 @@ body {
   .ant-table thead {
     margin: 0 !important;
     padding: 0 !important;
-    background-color: #fafafa !important; 
+    background-color: #fafafa !important;
   }
 
-  .ant-table thead > tr:first-child > th {
+  .ant-table thead>tr:first-child>th {
     border-top: 1px solid transparent !important;
   }
 
-  .ant-table thead > tr > th {
+  .ant-table thead>tr>th {
     background-color: #fafafa !important;
     color: #333 !important;
     font-weight: 600 !important;
@@ -138,7 +132,7 @@ body {
     margin: 0 !important;
   }
 
-  .ant-table thead > tr > th:not(:last-child) {
+  .ant-table thead>tr>th:not(:last-child) {
     border-right: 1px solid #d9d9d9 !important;
   }
 
@@ -147,7 +141,7 @@ body {
     padding: 0 !important;
   }
 
-  .ant-table tbody > tr > td {
+  .ant-table tbody>tr>td {
     border-top: 1px solid #d9d9d9 !important;
     border-left: none !important;
     border-right: none !important;
@@ -156,11 +150,11 @@ body {
     margin: 0 !important;
   }
 
-  .ant-table tbody > tr:first-child > td {
+  .ant-table tbody>tr:first-child>td {
     border-top: 1px solid #d9d9d9 !important;
   }
 
-  .ant-table tbody > tr:last-of-type > td {
+  .ant-table tbody>tr:last-of-type>td {
     border-bottom: 1px solid #d9d9d9 !important;
   }
 
@@ -199,5 +193,3 @@ body {
     margin: 0;
   }
 }
-
-

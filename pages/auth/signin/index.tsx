@@ -17,7 +17,8 @@ import { authOptions } from '../../api/auth/[...nextauth]'
 import s from './style.module.scss'
 import SignInForm from '../../../common/components/Forms/AddSingInForm'
 import { useFeatureFlag } from '@modules/hooks/useFeatureFlag'
-
+import ThemeSwitcher from '@components/UI/ThemeSwitcher'
+import useTheme from '@modules/hooks/useTheme'
 
 type PropsType = {
   providers: Record<
@@ -30,7 +31,7 @@ type PropsType = {
 const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
   const { error } = useRouter().query
   const [customError, setCustomError] = useState('')
-  const [theme, setTheme] = useState('light')
+  const [theme] = useTheme()
 
   const enabledLoginFormFeather = useFeatureFlag('StagingLogInForm')
 
@@ -43,11 +44,7 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
     setCustomError(error && (errors[`${error}`] ?? errors.default))
   }, [error])
 
-  // Динамічно отримуємо поточну тему з localStorage
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'light'
-    setTheme(savedTheme)
-  }, [])
+  
 
   return (
     <div
@@ -85,6 +82,8 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
         <Card className={`card ${theme}`}>
           {shouldShowLoginForm && <SignInForm csrfToken={csrfToken} />}
           {stg && <SignInForm csrfToken={csrfToken} />}
+          
+          
           <div className={s.Container}>
             {Object.values(providers)?.map((provider: any) => {
               const name = provider?.name
@@ -98,6 +97,17 @@ const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
             })}
           </div>
         </Card>
+        </div>
+      
+       <div
+        style={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          zIndex: 1000,
+        }}
+      >
+        <ThemeSwitcher />
       </div>
     </div>
   )
