@@ -12,7 +12,11 @@ const MyDocument = () => (
         content="black-translucent"
       />
       <meta name="theme-color" content="#783fc4" />
-			<meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+      <link rel="apple-touch-icon" href="/icons/icon.png" />
+      <link rel="manifest" href="/manifest.json" />
     </Head>
     <body>
       <Main />
