@@ -612,7 +612,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
                     </Button>
                   ),
                 },
-                isGlobalAdmin && {
+                (isGlobalAdmin || isDomainAdmin) && {
                   key: 'delete',
                   label: (
                     <Popconfirm
