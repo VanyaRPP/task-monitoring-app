@@ -1,0 +1,19 @@
+.glassInput {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 8px;
+  box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.2);
+  transition: border 0.3s ease;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  &:hover,
+  &:focus {
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+}

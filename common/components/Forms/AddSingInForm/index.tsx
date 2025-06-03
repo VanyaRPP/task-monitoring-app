@@ -65,6 +65,7 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
           ]}
         >
           <Input
+            size="large"
             data-e2e="authFormEmail"
             type="text"
             placeholder="email"
@@ -78,6 +79,7 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
           rules={[{ required: true, message: 'Введіть ваш пароль!' }]}
         >
           <Input.Password
+            size="large"
             data-e2e="authFormPassword"
             placeholder="******"
             prefix={<LockOutlined className="auth-icon" />}
@@ -86,6 +88,7 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
 
         <Form.Item>
           <Button
+            size="large"
             data-e2e="authFormSubmit"
             type="primary"
             htmlType="submit"
@@ -100,7 +103,6 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
             {isLogin ? 'Ввійти' : 'Зареєструватись'}
           </Link>
         </span>
-
         <Divider>or</Divider>
       </Form>
     </div>

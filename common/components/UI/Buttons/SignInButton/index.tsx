@@ -17,7 +17,7 @@ const Icons = {
 const SingInBtn: FC<Props> = ({ provider }) => {
   return (
     <Button
-      className={s.Button}
+      size="large"
       data-e2e={provider?.name}
       onClick={() => signIn(provider?.id)}
       block
