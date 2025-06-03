@@ -1,0 +1,84 @@
+import PaymentsTable from "./Table"; 
+import PaymentCardHeader from '@components/UI/PaymentCardHeader'
+import type {
+  IExtendedPayment,
+  IGetPaymentResponse,
+  IFilter,
+} from '@common/api/paymentApi/payment.api.types'
+
+/** Тип для елемента, який додається до списку paymentsDeleteItems */
+export interface PaymentDeleteItem {
+  id: string
+  date: string
+  domain: string
+  company: string
+}
+
+export interface PaymentsHeaderProps {
+  paymentsDeleteItems: PaymentDeleteItem[]
+  closeEditModal: () => void
+  setCurrentDateFilter: (v: string[] | undefined) => void
+  currentPayment: Partial<IExtendedPayment> | null
+  paymentActions: { edit: boolean; preview: boolean }
+  streets: IFilter[]
+  payments: IGetPaymentResponse
+  filters: Record<string, any> | undefined
+  setFilters: (filters: Record<string, any> | undefined) => void
+  selectedPayments: IExtendedPayment[]
+  setSelectedPayments: (payments: IExtendedPayment[]) => void
+  setPaymentsDeleteItems: (items: PaymentDeleteItem[]) => void
+  enablePaymentsButton: boolean
+  onColumnsSelect: (columns: Array<keyof IExtendedPayment>) => void
+  domainFilter: IFilter[]
+  realEstatesFilter: IFilter[]
+}
+
+const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
+  paymentsDeleteItems,
+  closeEditModal,
+  setCurrentDateFilter,
+  currentPayment,
+  paymentActions,
+  streets,
+  payments,
+  filters,
+  setFilters,
+  selectedPayments,
+  setSelectedPayments,
+  setPaymentsDeleteItems,
+  enablePaymentsButton,
+  onColumnsSelect,
+  domainFilter,
+  realEstatesFilter,
+}) => {
+  return (
+    <PaymentCardHeader
+      paymentsDeleteItems={paymentsDeleteItems}
+      closeEditModal={closeEditModal}
+      setCurrentDateFilter={setCurrentDateFilter}
+      currentPayment={currentPayment}
+      paymentActions={paymentActions}
+      streets={streets}
+      payments={payments}
+      filters={filters}
+      setFilters={setFilters}
+      selectedPayments={selectedPayments}
+      setSelectedPayments={setSelectedPayments}
+      setPaymentsDeleteItems={setPaymentsDeleteItems}
+      enablePaymentsButton={enablePaymentsButton}
+      onColumnsSelect={onColumnsSelect}
+      domainFilter={domainFilter}
+      realEstatesFilter={realEstatesFilter}
+    />
+  )
+}
+
+export default PaymentsHeader
+  
+  
+  
+  
+  
+  
+  
+  

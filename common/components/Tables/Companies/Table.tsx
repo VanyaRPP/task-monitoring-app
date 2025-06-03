@@ -73,7 +73,9 @@ export interface Props {
   realEstateActions: {
     edit: boolean
   }
-}
+} 
+
+
 
 const getDebtorTooltipColor = (debtor) => {
   if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
