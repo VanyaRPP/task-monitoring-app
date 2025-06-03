@@ -262,7 +262,6 @@ const renderTooltip = (text: string) => {
     </Tooltip>
   )
 }
-
 const getDefaultColumns = ({
   archiveLoading,
   handleArchive,
