@@ -7,6 +7,7 @@ import { SignInButton } from '@components/UI/Buttons'
 import { Divider, Typography } from 'antd'
 import { GlassCard } from '@components/UI/GlassUI'
 import s from './style.module.scss'
+import LottieAnimation from '@components/UI/LottieAnimation'
 
 type PropsType = {
   providers: Record<
@@ -33,6 +34,19 @@ const SignInPage: FC<PropsType> = ({ providers, csrfToken }) => {
 
   return (
     <div className={s.pageWrapper}>
+      <LottieAnimation
+        src="/animations/WaveForBG.json"
+        loop
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: 'auto',
+          height: '100%',
+          objectFit: 'cover',
+          transform: 'rotate(180deg)',
+        }}
+      />
       <GlassCard className={s.signInCard}>
         <Typography.Title>Увійти</Typography.Title>
         <Divider />
