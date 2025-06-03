@@ -4,7 +4,6 @@ import { LiteralUnion, ClientSafeProvider } from 'next-auth/react'
 import { FC } from 'react'
 import SignInForm from '@components/Forms/AddSingInForm'
 import { SignInButton } from '@components/UI/Buttons'
-import { Divider, Typography } from 'antd'
 import { GlassCard } from '@components/UI/GlassUI'
 import s from './style.module.scss'
 import LottieAnimation from '@components/UI/LottieAnimation'
@@ -48,8 +47,6 @@ const SignInPage: FC<PropsType> = ({ providers, csrfToken }) => {
         }}
       />
       <GlassCard className={s.signInCard}>
-        <Typography.Title>Увійти</Typography.Title>
-        <Divider />
         {shouldShowLoginForm && <SignInForm csrfToken={csrfToken} />}
         {stg && <SignInForm csrfToken={csrfToken} />}
         <div className={s.Container}>
