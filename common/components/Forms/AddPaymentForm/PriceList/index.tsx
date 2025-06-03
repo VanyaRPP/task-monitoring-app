@@ -93,17 +93,17 @@ const groupedInvoices = (invoices: any, groups: any) => {
   }) || []
 
  
-  const customInvoice = invoices?.find((invoice) => invoice?.type === 'custom')
-  if (customInvoice) {
-    result.push({
-      key: result.length,
-      number: result.length + 1,
-      type: 'Власне Custom',
-      unit: 'грн',
-      price: +customInvoice.sum,
-      sum: +customInvoice.sum,
-    })
-  }
+ const customInvoice = invoices?.find((invoice) => invoice?.type === 'custom')
+if (customInvoice) {
+  result.push({
+    key: result.length,
+    number: result.length + 1,
+    type: customInvoice.name || 'custom',
+    unit: 'грн',
+    price: +customInvoice.sum,
+    sum: +customInvoice.sum,
+  })
+}
 
   return result
 }
