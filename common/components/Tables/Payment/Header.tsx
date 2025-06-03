@@ -1,4 +1,3 @@
-import PaymentsTable from "./Table"; 
 import PaymentCardHeader from '@components/UI/PaymentCardHeader'
 import type {
   IExtendedPayment,
@@ -6,7 +5,6 @@ import type {
   IFilter,
 } from '@common/api/paymentApi/payment.api.types'
 
-/** Тип для елемента, який додається до списку paymentsDeleteItems */
 export interface PaymentDeleteItem {
   id: string
   date: string
@@ -74,11 +72,3 @@ const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
 }
 
 export default PaymentsHeader
-  
-  
-  
-  
-  
-  
-  
-  

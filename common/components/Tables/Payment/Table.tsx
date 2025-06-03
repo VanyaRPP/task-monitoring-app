@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import { useRouter } from 'next/router'
 import {
   Table,
   Empty,
@@ -44,6 +45,8 @@ import {
 import { theme } from 'antd'
 import s from './style.module.scss'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import type { PaymentDeleteItem } from '@components/Tables/Payment/Header'
 
 export interface Props {
   sepDomainID?: string
@@ -59,7 +62,7 @@ export interface Props {
 
   currentDateFilter: string[] | undefined
   currentTypeOperation: string | undefined
-  setSelectedServices?: (service: IPayment[]) => void
+  setSelectedServices?: (payment: IPayment[]) => void
 
   selectedDateField: 'invoiceCreationDate' | 'date'
   setSelectedDateField: (field: 'invoiceCreationDate' | 'date') => void
@@ -67,7 +70,6 @@ export interface Props {
   selectedColumns: ServiceType[]
 
   deleteLoading: boolean
-  deleteError: boolean
   handleDeletePayment: (id: string) => void
 
   streetsFilter: IFilter[]
@@ -105,6 +107,26 @@ export interface Props {
   onEditClick: (payment: IExtendedPayment) => void
 
   dateFilters?: IPaymentFilterResponse
+
+  paymentsDeleteItems: PaymentDeleteItem[]
+  selectedPayments: IExtendedPayment[]
+  setSelectedPayments: (payments: IExtendedPayment[]) => void
+  setPaymentsDeleteItems: (items: PaymentDeleteItem[]) => void
+}
+
+const getSummaryColumns = (
+  columns: TableColumnType<any>[] = [],
+  index = 0
+): Array<{ column: TableColumnType<any>; index: number }> => {
+  let count = index
+  return columns.reduce((cells, column: any) => {
+    if (column.children) {
+      const nested = getSummaryColumns(column.children, count)
+      count += column.children.length
+      return [...cells, ...nested]
+    }
+    return [...cells, { column, index: count++ }]
+  }, [] as Array<{ column: TableColumnType<any>; index: number }>)
 }
 
 const getDebtorTooltipColor = (debtor: { totalDebt: number }) => {
@@ -131,7 +153,6 @@ const PaymentsTable: React.FC<Props> = ({
   setSelectedDateField,
   selectedColumns,
   deleteLoading,
-  deleteError,
   handleDeletePayment,
   streetsFilter,
   domainsFilters,
@@ -147,13 +168,21 @@ const PaymentsTable: React.FC<Props> = ({
   onViewClick,
   onEditClick,
   dateFilters,
-  setSelectedServices,
-}) => {
-  const isGlobalAdmin = currUser.roles.includes(Roles.GLOBAL_ADMIN)
-  const isDomainAdmin = currUser.roles.includes(Roles.DOMAIN_ADMIN)
-  const isUser = currUser.roles.includes(Roles.USER)
-  const { token } = theme.useToken()
 
+  paymentsDeleteItems,
+  selectedPayments,
+  setSelectedPayments,
+  setPaymentsDeleteItems,
+}) => {
+  const router = useRouter()
+  const { pathname } = router
+
+  const { data: currUserData } = useGetCurrentUserQuery()
+  const isGlobalAdmin = currUserData?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isDomainAdmin = currUserData?.roles?.includes(Roles.DOMAIN_ADMIN)
+  const isUser = currUserData?.roles?.includes(Roles.USER)
+
+  const { token } = theme.useToken()
   const columns: TableColumnType<IExtendedPayment>[] = useMemo(() => {
     return [
       {
@@ -395,7 +424,7 @@ const PaymentsTable: React.FC<Props> = ({
           const sum = +(item?.sum || item?.price || 0)
           const currency = renderCurrency(sum.toFixed(2))
           return (
-            <span style={currency === '-' ? { color: '#999' } : {}}>
+            <span className={currency === '-' ? s.currency : ''}>
               {currency}
             </span>
           )
@@ -498,13 +527,16 @@ const PaymentsTable: React.FC<Props> = ({
     companiesFilter,
     onViewClick,
     onEditClick,
+    isGlobalAdmin,
+    isUser,
   ])
+
+  const summaryColumns = useMemo(() => getSummaryColumns(columns, 0), [columns])
 
   const dataSource = payments?.data || []
   const total = payments?.total || 0
-
   const scrollX =
-    (window.location.pathname === AppRoutes.PAYMENT
+    (pathname === AppRoutes.PAYMENT
       ? 1300 + selectedColumns.length * 132
       : 1300) -
     ((domainsFilters?.domainsFilter?.length ?? 0) <= 1 ? 200 : 0) -
@@ -514,64 +546,72 @@ const PaymentsTable: React.FC<Props> = ({
     if (dataSource.length === 0) {
       return null
     }
-    const summaryColumns = columns.map((col, idx) => ({
-      column: col,
-      index: idx,
-    }))
-
     return (
       <Table.Summary>
         <Table.Summary.Row>
-          {summaryColumns.map(({ column, index }) =>
-            column.dataIndex === 'debit' ? (
-              <Table.Summary.Cell key={index} index={index} align="center">
-                {renderCurrency(
-                  toRoundFixed(payments?.totalPayments?.debit || 0)
-                )}
-              </Table.Summary.Cell>
-            ) : column.dataIndex === 'credit' ? (
-              <Table.Summary.Cell key={index} index={index} align="center">
-                {renderCurrency(
-                  toRoundFixed(payments?.totalPayments?.credit || 0)
-                )}
-              </Table.Summary.Cell>
-            ) : (
-              <Table.Summary.Cell key={index} index={index}>
-                {Object.values(ServiceType).includes(
-                  column.dataIndex as ServiceType
-                )
-                  ? renderCurrency(
-                      toRoundFixed(
-                        payments?.totalPayments?.[
-                          column.dataIndex as keyof typeof payments.totalPayments
-                        ] || 0
-                      )
+          {summaryColumns.map(({ column, index }) => {
+            if (column.dataIndex === 'debit') {
+              return (
+                <Table.Summary.Cell key={index} index={index} align="center">
+                  {renderCurrency(
+                    toRoundFixed(payments?.totalPayments?.debit || 0)
+                  )}
+                </Table.Summary.Cell>
+              )
+            }
+            if (column.dataIndex === 'credit') {
+              return (
+                <Table.Summary.Cell key={index} index={index} align="center">
+                  {renderCurrency(
+                    toRoundFixed(payments?.totalPayments?.credit || 0)
+                  )}
+                </Table.Summary.Cell>
+              )
+            }
+            if (
+              Object.values(ServiceType).includes(
+                column.dataIndex as ServiceType
+              )
+            ) {
+              return (
+                <Table.Summary.Cell key={index} index={index}>
+                  {renderCurrency(
+                    toRoundFixed(
+                      payments?.totalPayments?.[
+                        column.dataIndex as keyof typeof payments.totalPayments
+                      ] || 0
                     )
-                  : null}
-              </Table.Summary.Cell>
-            )
-          )}
+                  )}
+                </Table.Summary.Cell>
+              )
+            }
+            return <Table.Summary.Cell key={index} index={index} />
+          })}
         </Table.Summary.Row>
         <Table.Summary.Row>
-          {summaryColumns.map(({ column, index }) =>
-            column.dataIndex !== 'credit' ? (
-              <Table.Summary.Cell
-                key={index}
-                index={index}
-                colSpan={column.dataIndex === 'debit' ? 2 : 1}
-                align="center"
-              >
-                {column.dataIndex === 'debit'
-                  ? renderCurrency(
-                      toRoundFixed(
-                        Number(payments?.totalPayments?.debit || 0) -
-                          Number(payments?.totalPayments?.credit || 0)
-                      )
+          {summaryColumns.map(({ column, index }) => {
+            if (column.dataIndex === 'credit') {
+              return null
+            }
+            if (column.dataIndex === 'debit') {
+              return (
+                <Table.Summary.Cell
+                  key={index}
+                  index={index}
+                  colSpan={2}
+                  align="center"
+                >
+                  {renderCurrency(
+                    toRoundFixed(
+                      Number(payments?.totalPayments?.debit || 0) -
+                        Number(payments?.totalPayments?.credit || 0)
                     )
-                  : null}
-              </Table.Summary.Cell>
-            ) : null
-          )}
+                  )}
+                </Table.Summary.Cell>
+              )
+            }
+            return <Table.Summary.Cell key={index} index={index} />
+          })}
         </Table.Summary.Row>
       </Table.Summary>
     )
@@ -580,33 +620,63 @@ const PaymentsTable: React.FC<Props> = ({
   if (paymentsError || currUserError) {
     return <Alert message="Помилка" type="error" showIcon closable />
   }
+  const onSelect = (
+    record: IExtendedPayment,
+    selected: boolean,
+    _selectedRows: IExtendedPayment[]
+  ) => {
+    if (selected) {
+      setPaymentsDeleteItems([
+        ...paymentsDeleteItems,
+        {
+          id: record._id,
+          date: record.monthService
+            ? (record.monthService as any).date
+            : (record.invoiceCreationDate as unknown as string),
+          domain: (record.domain as any)?.name,
+          company: (record.company as any)?.companyName,
+        },
+      ])
+      setSelectedPayments([...selectedPayments, record])
+    } else {
+      const updated = paymentsDeleteItems.filter(
+        (item) => item.id !== record._id
+      )
+      setPaymentsDeleteItems(updated)
+      setSelectedPayments(
+        selectedPayments.filter((item) => item._id !== record._id)
+      )
+    }
+  }
+
+  const onChangeSelection = (
+    _selectedRowKeys: React.Key[],
+    selectedRows: IExtendedPayment[]
+  ) => {
+    setSelectedPayments(selectedRows)
+    setPaymentsDeleteItems(
+      selectedRows.map((item) => ({
+        id: item._id,
+        date: item.monthService
+          ? (item.monthService as any).date
+          : (item.invoiceCreationDate as unknown as string),
+        domain: (item.domain as any)?.name,
+        company: (item.company as any)?.companyName,
+      }))
+    )
+  }
 
   return (
     <Table
       rowKey="_id"
       rowSelection={
-        (currUser.roles.includes(Roles.GLOBAL_ADMIN) ||
-          currUser.roles.includes(Roles.DOMAIN_ADMIN)) &&
-        (window.location.pathname === AppRoutes.PAYMENT || Boolean(sepDomainID))
+        (isGlobalAdmin || isDomainAdmin) &&
+        (pathname === AppRoutes.PAYMENT || Boolean(sepDomainID))
           ? {
-              onChange: (
-                _selectedRowKeys: React.Key[],
-                selectedRows: IExtendedPayment[]
-              ) => {
-                if (setSelectedServices) {
-                  setSelectedServices(selectedRows)
-                }
-              },
-
-              onSelect: (
-                _record: IExtendedPayment,
-                _selected: boolean,
-                selectedRows: IExtendedPayment[]
-              ) => {
-                if (setSelectedServices) {
-                  setSelectedServices(selectedRows)
-                }
-              },
+              selectedRowKeys: selectedPayments.map((item) => item._id),
+              preserveSelectedRowKeys: true,
+              onChange: onChangeSelection,
+              onSelect: onSelect,
             }
           : undefined
       }

@@ -1,4 +1,3 @@
-// Payments/PaymentsBlock.tsx
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { message } from 'antd'
@@ -47,7 +46,6 @@ function formatDateFilterForQuery(raw?: string[]) {
   if (!raw?.length) {
     return {}
   }
-
   const numbers = raw
     .map((v) => {
       const leading = parseInt(v, 10)
@@ -74,7 +72,6 @@ function formatDateFilterForQuery(raw?: string[]) {
   } else if (months.length > 1) {
     query.month = months
   }
-
   return query
 }
 
@@ -106,6 +103,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const [selectedColumns, setSelectedColumns] = useState<
     Array<keyof IExtendedPayment>
   >([])
+
   const [filters, setFilters] = useState<Record<string, any> | undefined>()
 
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
@@ -118,13 +116,10 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const { data: domainsFilters } = useGetDomainFiltersQuery({
     realEstates: filters?.company,
   })
-
   const { data: companiesFilter } = useGetRealEstateFiltersQuery({
     domains: filters?.domain,
   })
-
   const { data: dateFilters } = useGetDateFiltersQuery({ type: 'payment' })
-
   const { data: streetsFilter } = useGetAddressFiltersQuery({
     domains: filters?.domain,
   })
@@ -196,32 +191,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     })
   }
 
-  const onSelectRow = (
-    record: IExtendedPayment,
-    selected: boolean,
-    _rows: IExtendedPayment[]
-  ) => {
-    if (selected) {
-      setPaymentsDeleteItems((prev) => [
-        ...prev,
-        {
-          id: record._id,
-          date: (record.monthService as any)?.date || '',
-          domain: (record.domain as any)?.name || '',
-          company: (record.company as any)?.companyName || '',
-        },
-      ])
-      setSelectedPayments((prev) => [...prev, record])
-    } else {
-      setPaymentsDeleteItems((prev) =>
-        prev.filter((item) => item.id !== record._id)
-      )
-      setSelectedPayments((prev) =>
-        prev.filter((item) => item._id !== record._id)
-      )
-    }
-  }
-
   const handleTableChange = (
     pagination: { current?: number; pageSize?: number },
     allFilters: Record<string, any> | null,
@@ -242,10 +211,39 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   }
 
   useEffect(() => {
+    if (
+      domainsFilters?.domainsFilter instanceof Array &&
+      domainsFilters.domainsFilter.length === 1
+    ) {
+      setFilters((prev = {}) => ({
+        ...prev,
+        domain: [domainsFilters.domainsFilter[0].value],
+      }))
+    }
+
+    if (
+      companiesFilter?.realEstatesFilter instanceof Array &&
+      companiesFilter.realEstatesFilter.length === 1
+    ) {
+      setFilters((prev = {}) => ({
+        ...prev,
+        company: [companiesFilter.realEstatesFilter[0].value],
+      }))
+    }
+  }, [domainsFilters, companiesFilter])
+
+  useEffect(() => {
+    setPageData((prev) => ({
+      ...prev,
+      currentPage: 1,
+    }))
+  }, [filters, currentTypeOperation, currentDateFilter])
+  useEffect(() => {
     if (filters?.domain?.length > 0) {
       setCurrentPayment({ domain: { _id: filters.domain[0] } } as any)
     }
   }, [filters])
+
   return (
     <TableCard
       title={
@@ -283,7 +281,6 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         setSelectedDateField={setSelectedDateField}
         selectedColumns={selectedColumns as any}
         deleteLoading={deleteLoading}
-        deleteError={deleteError}
         handleDeletePayment={handleDeletePayment}
         streetsFilter={streetsFilter?.streetsFilter || []}
         domainsFilters={domainsFilters}
@@ -304,6 +301,11 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           setCurrentPayment(p)
           setPaymentActions({ edit: true, preview: false })
         }}
+        dateFilters={dateFilters}
+        paymentsDeleteItems={paymentsDeleteItems}
+        selectedPayments={selectedPayments}
+        setSelectedPayments={setSelectedPayments}
+        setPaymentsDeleteItems={setPaymentsDeleteItems}
       />
     </TableCard>
   )
