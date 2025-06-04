@@ -253,9 +253,6 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           ),
         hidden: !domainsFilter || domainsFilter.length <= 1,
       },
-
-      // ─────────────────────────────────────────────────────────────────────────
-      // 2) Колонка “Компанія”
       {
         title: 'Компанія',
         dataIndex: 'company',
@@ -567,7 +564,6 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       return null
     }
     const totalPayments = payments.totalPayments
-    // Відфільтрувати тільки реальні (visible) колонки перед підрахунком
     const visibleColumns = (columns as ColumnType<IExtendedPayment>[]).filter(
       (col) => !col.hidden
     )

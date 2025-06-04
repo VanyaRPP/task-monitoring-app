@@ -95,8 +95,6 @@ interface TableEventProps {
     extra: TableCurrentDataSource<any>
   ) => void
 }
-
-/** Допоміжна функція для форматування “date filter”  */
 function formatDateFilterForQuery(raw?: string[]) {
   if (!raw?.length) return {}
   const numbers = raw
@@ -126,8 +124,6 @@ function formatDateFilterForQuery(raw?: string[]) {
   }
   return query
 }
-
-/** Допоміжна функція для “type” filter  */
 function getTypeOperation(value?: string) {
   if (value === Operations.Debit) {
     return { type: Operations.Debit }
@@ -139,8 +135,6 @@ function getTypeOperation(value?: string) {
 
 const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const router = useRouter()
-
-  // === 1) Стани для модалки перегляду/редагування ===
   const [currentPayment, setCurrentPayment] =
     useState<Partial<IExtendedPayment> | null>(null)
   const [paymentActions, setPaymentActions] = useState({
