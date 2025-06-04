@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { useRouter } from 'next/router'
 import {
   Table,
@@ -10,6 +10,7 @@ import {
   Dropdown,
   Popconfirm,
   Badge,
+  theme,
   List,
 } from 'antd'
 import {
@@ -125,7 +126,7 @@ interface PaymentsTableProps {
   filterProps: FilterProps
   paginationProps: PaginationProps
   actionProps: ActionProps
-  DebtProps: DebtProps
+  debtProps: DebtProps
   columnSelectionProps: ColumnSelectionProps
 
   paymentsDeleteItems: PaymentDeleteItem[]
@@ -181,7 +182,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   filterProps,
   paginationProps,
   actionProps,
-  DebtProps,
+  debtProps,
   columnSelectionProps,
   paymentsDeleteItems,
   selectedPayments,
@@ -216,7 +217,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
 
   const { onViewClick, onEditClick, onDelete, deleteLoading } = actionProps
 
-  const { debtorCompanies } = DebtProps
+  const { debtorCompanies } = debtProps
 
   const { selectedColumns, setSelectedColumns } = columnSelectionProps
 
@@ -225,10 +226,12 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const isGlobalAdmin = currUserRoles.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = currUserRoles.includes(Roles.DOMAIN_ADMIN)
   const isUser = currUserRoles.includes(Roles.USER)
+  const { token } = theme.useToken()
 
-  const { token } = require('antd').theme.useToken()
   const columns: ColumnsType<IExtendedPayment> = useMemo(
     () => [
+      // ─────────────────────────────────────────────────────────────────────────
+      // 1) Колонка “Надавач послуг”
       {
         title: 'Надавач послуг',
         dataIndex: 'domain',
@@ -250,6 +253,9 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           ),
         hidden: !domainsFilter || domainsFilter.length <= 1,
       },
+
+      // ─────────────────────────────────────────────────────────────────────────
+      // 2) Колонка “Компанія”
       {
         title: 'Компанія',
         dataIndex: 'company',
@@ -267,7 +273,6 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           const debtor = debtorCompanies.find(
             (d) => d.companyName === companyName
           )
-
           const isFirstOccurrence =
             payments?.data?.findIndex(
               (item) =>
@@ -284,7 +289,6 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
               </Typography.Link>
             </Tooltip>
           )
-
           if (!isUser && debtor && isFirstOccurrence) {
             return (
               <Badge
@@ -557,15 +561,17 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       currUserRoles,
     ]
   )
+
   const summary = useMemo(() => {
     if (!payments?.data?.length) {
       return null
     }
     const totalPayments = payments.totalPayments
-    const summaryCols = getSummaryColumns(
-      columns as ColumnType<IExtendedPayment>[],
-      0
+    // Відфільтрувати тільки реальні (visible) колонки перед підрахунком
+    const visibleColumns = (columns as ColumnType<IExtendedPayment>[]).filter(
+      (col) => !col.hidden
     )
+    const summaryCols = getSummaryColumns(visibleColumns, 0)
 
     return (
       <Table.Summary>

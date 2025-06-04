@@ -17,7 +17,7 @@ export interface PaymentsHeaderProps {
   paymentsDeleteItems: PaymentDeleteItem[]
   closeEditModal: () => void
   setCurrentDateFilter: (v: string[] | undefined) => void
-  currentPayment: Partial<IExtendedPayment> | null
+  currentPayment: Partial<IExtendedPayment>
   paymentActions: { edit: boolean; preview: boolean }
   streets: IFilter[]
   payments: IGetPaymentResponse
