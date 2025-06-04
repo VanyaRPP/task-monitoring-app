@@ -1,0 +1,17 @@
+.pageWrapper {
+  width: 100dvw;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
+
+  .signInCard {
+    width: 100%;
+    max-width: 450px;
+  }
+}
