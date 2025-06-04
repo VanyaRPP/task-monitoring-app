@@ -331,7 +331,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     currentPayment: currentPayment,
     paymentActions: paymentActions,
     streets: filterProps.streetsFilter,
-    payments: payments as IGetPaymentResponse,
+    payments: payments,
     filters: filterProps.filters,
     setFilters: filterProps.setFilters,
     selectedPayments: selectedPayments,
