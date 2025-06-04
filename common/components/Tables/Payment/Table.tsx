@@ -230,8 +230,6 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
 
   const columns: ColumnsType<IExtendedPayment> = useMemo(
     () => [
-      // ─────────────────────────────────────────────────────────────────────────
-      // 1) Колонка “Надавач послуг”
       {
         title: 'Надавач послуг',
         dataIndex: 'domain',
