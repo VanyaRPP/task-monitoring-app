@@ -52,18 +52,22 @@ interface ActionProps {
   onDelete: (id: string) => void
   deleteLoading: boolean
 }
+type DebtPerMonth = {
+  monthService: string
+  totalDue: number
+  paid: number
+  remaining: number
+}
+
+type CompanyWithPayments = {
+  companyId: any
+  companyName: string
+  debtPerMonth: DebtPerMonth[]
+  totalDebt: number
+}
+
 interface DebtProps {
-  debtorCompanies: Array<{
-    companyId: any
-    companyName: string
-    debtPerMonth: {
-      monthService: string
-      totalDue: number
-      paid: number
-      remaining: number
-    }[]
-    totalDebt: number
-  }>
+  debtorCompanies: CompanyWithPayments[]
 }
 interface ColumnSelectionProps {
   selectedColumns: ServiceType[]
