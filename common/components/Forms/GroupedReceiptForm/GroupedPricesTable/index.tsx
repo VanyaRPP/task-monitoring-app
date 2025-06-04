@@ -1,7 +1,7 @@
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import { Table } from 'antd'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 export interface PaymentPricesTableProps {
   preview?: boolean
@@ -42,6 +42,7 @@ const groupedInvoices = (invoices: any, groups: any) => {
       groupName: group?.groupName,
       invoices: groupInvoices,
       totalSum: totalGroupSum.toFixed(2),
+      fieldNames: groupFieldNames,
     }
   })
 }
@@ -50,35 +51,52 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
   preview,
   domainId,
   loading,
-  invoices
+  invoices,
 }) => {
-  const { form, company } = usePaymentContext()
+  const { form } = usePaymentContext()
+
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
     { domainId: [domainId] },
     { skip: !domainId }
   )
-  console.log('customDomainServices', customDomainServices?.data)
-  console.log('payment', invoices)
   const groupedInvoicesData = useMemo(
     () => groupedInvoices(invoices, customDomainServices?.data),
     [invoices, customDomainServices]
   )
 
-  const dataSource = groupedInvoicesData?.map((group, index) => {
-    return {
-      key: index + 1,
-      name: group.groupName,
-      sum: group.totalSum,
-    }
-  })
+  const groupedFieldNames = groupedInvoicesData
+    ?.flatMap((group) => group.fieldNames || []) || []
 
-  if (invoices?.find((invoice) => invoice?.type === 'discount')) {
-    dataSource?.push({
-      key: dataSource?.length + 1,
+  const dataSource = groupedInvoicesData?.map((group, index) => ({
+    key: index + 1,
+    name: group.groupName,
+    sum: group.totalSum,
+  })) || []
+
+
+  const discountInvoice = invoices?.find((inv) => inv?.type === 'discount')
+  if (discountInvoice) {
+    dataSource.push({
+      key: dataSource.length + 1,
       name: 'Знижка',
-      sum: invoices?.find((invoice) => invoice?.type === 'discount')?.sum,
+      sum: discountInvoice.sum,
     })
   }
+
+
+  const customInvoices = invoices?.filter(
+    (inv) =>
+      inv?.type === 'custom' &&
+      !groupedFieldNames.includes(inv?.type)
+  )
+
+  customInvoices?.forEach((inv) => {
+    dataSource.push({
+      key: dataSource.length + 1,
+      name: inv.name || 'Додатково',
+      sum: inv.sum,
+    })
+  })
 
   return (
     <Table

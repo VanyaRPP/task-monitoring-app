@@ -8,6 +8,8 @@
   align-items: center;
   flex-direction: row; // default for desktop
 
+  z-index: 60;
+
   // Glassmorphism effect
   background: rgba(100, 42, 181, 0.28);
   border-radius: 50px;
@@ -219,5 +221,6 @@
 
   padding: 2rem;
   text-align: justify;
+  z-index: 60;
 
 }
