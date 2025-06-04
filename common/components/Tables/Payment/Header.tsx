@@ -4,6 +4,7 @@ import type {
   IGetPaymentResponse,
   IFilter,
 } from '@common/api/paymentApi/payment.api.types'
+import type { ServiceType } from '@utils/constants'
 
 export interface PaymentDeleteItem {
   id: string
@@ -26,7 +27,8 @@ export interface PaymentsHeaderProps {
   setSelectedPayments: (payments: IExtendedPayment[]) => void
   setPaymentsDeleteItems: (items: PaymentDeleteItem[]) => void
   enablePaymentsButton: boolean
-  onColumnsSelect: (columns: Array<keyof IExtendedPayment>) => void
+  onColumnsSelect: (columns: ServiceType[]) => void
+
   domainFilter: IFilter[]
   realEstatesFilter: IFilter[]
 }
