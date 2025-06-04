@@ -19,14 +19,9 @@ import { FormInstance } from 'antd/es/form/Form'
 import dayjs from 'dayjs'
 import { FC, createContext, useContext, useEffect, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
-import ReceiptForm from '../Forms/ReceiptForm'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
+import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
-import {
-  dateToDefaultFormat,
-  dateToMonth,
-  dateToMonthYear,
-} from '@assets/features/formatDate'
 
 interface Props {
   closeModal: VoidFunction
@@ -57,9 +52,10 @@ export const usePaymentContext = () =>
 
 const handleNonEmpty = (form, setIsButtonDisabled) => {
   const fields = form.getFieldsValue()
-
-  const dis = Object.values(fields).some((value) => value === undefined)
-
+const requiredFields = ['domain', 'company'] 
+const dis = requiredFields.some(
+  (key) => fields[key] === undefined || fields[key] === null || fields[key] === ''
+)
   setIsButtonDisabled(dis)
 }
 
