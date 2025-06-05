@@ -266,8 +266,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   ) => {
     if (extra.action === 'paginate') {
       setPageData({
-        pageSize: pagination.pageSize!,
-        currentPage: pagination.current!,
+        pageSize: pagination.pageSize,
+        currentPage: pagination.current,
       })
     }
 
@@ -307,7 +307,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const paginationProps: PaginationProps = {
     pageData,
     handlePagination: (page, pageSize) =>
-      setPageData({ pageSize: pageSize!, currentPage: page }),
+      setPageData({ pageSize: pageSize, currentPage: page }),
   }
 
   const actionProps: ActionProps = {
