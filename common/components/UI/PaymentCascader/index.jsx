@@ -22,7 +22,7 @@ const customOptions = [
   {
     label: 'Рік',
     value: 'year',
-    children: cascaderYears.map((year) => {
+    children: [...cascaderYears].reverse().map((year) => {
       return {
         label: year,
         value: year,

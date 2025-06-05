@@ -132,7 +132,7 @@ export const cascaderYears = (() => {
   const startYear = 2021
   const years: string[] = []
 
-  for (let year = startYear; year <= currentYear + 1; year++) {
+  for (let year = startYear; year <= currentYear; year++) {
     years.push(year.toString())
   }
 
