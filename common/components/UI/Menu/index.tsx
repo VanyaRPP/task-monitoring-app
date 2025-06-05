@@ -138,11 +138,13 @@ export const Menu: React.FC<MenuProps> = (props) => {
   }, [router, session, isGlobalAdmin, isDomainAdmin, isDevMode])
 
   return (
+    <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
     <AntdMenu
       selectedKeys={pathname ? [pathname] : []}
       mode="inline"
       items={items}
       {...props}
     />
+   </div> 
   )
 }
