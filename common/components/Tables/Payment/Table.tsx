@@ -98,6 +98,7 @@ interface ColumnSelectionProps {
   selectedColumns: ServiceType[]
   setSelectedColumns: (cols: ServiceType[]) => void
 }
+
 interface StatusProps {
   paymentsError: boolean
   paymentsLoading: boolean
@@ -227,9 +228,8 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const isDomainAdmin = currUserRoles.includes(Roles.DOMAIN_ADMIN)
   const isUser = currUserRoles.includes(Roles.USER)
   const { token } = theme.useToken()
-
-  const columns: ColumnsType<IExtendedPayment> = useMemo(
-    () => [
+  const allColumns: ColumnsType<IExtendedPayment> = useMemo(() => {
+    return [
       {
         title: 'Надавач послуг',
         dataIndex: 'domain',
@@ -249,7 +249,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
               </Typography.Link>
             </Tooltip>
           ),
-        hidden: !domainsFilter || domainsFilter.length <= 1,
+        hidden: payments?.domainsFilter?.length <= 1,
       },
       {
         title: 'Компанія',
@@ -300,7 +300,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           }
           return companyLabel
         },
-        hidden: !companiesFilter || companiesFilter.length <= 1,
+        hidden: payments?.realEstatesFilter?.length <= 1,
       },
       {
         title: 'Дата створення',
@@ -540,37 +540,39 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           </Dropdown>
         ),
       },
-    ],
-    [
-      payments,
-      filters,
-      selectedColumns,
-      debtorCompanies,
-      sepDomainID,
-      deleteLoading,
-      dateFilters,
-      domainsFilter,
-      companiesFilter,
-      onViewClick,
-      onEditClick,
-      currUserRoles,
     ]
-  )
+  }, [
+    payments,
+    filters,
+    selectedColumns,
+    debtorCompanies,
+    sepDomainID,
+    deleteLoading,
+    dateFilters,
+    domainsFilter,
+    companiesFilter,
+    onViewClick,
+    onEditClick,
+    currUserRoles,
+  ])
 
+  const visibleColumns = (allColumns as ColumnType<IExtendedPayment>[]).filter(
+    (col) => !(col as any).hidden
+  )
   const summary = useMemo(() => {
     if (!payments?.data?.length) {
       return null
     }
     const totalPayments = payments.totalPayments
-    const visibleColumns = (columns as ColumnType<IExtendedPayment>[]).filter(
-      (col) => !col.hidden
+    const flatVisibleColumns = getSummaryColumns(
+      visibleColumns as ColumnType<IExtendedPayment>[],
+      0
     )
-    const summaryCols = getSummaryColumns(visibleColumns, 0)
 
     return (
       <Table.Summary>
         <Table.Summary.Row>
-          {summaryCols.map(({ column, index }) => {
+          {flatVisibleColumns.map(({ column, index }) => {
             if (column.dataIndex === 'debit') {
               return (
                 <Table.Summary.Cell key={index} index={index} align="center">
@@ -606,7 +608,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           })}
         </Table.Summary.Row>
         <Table.Summary.Row>
-          {summaryCols.map(({ column, index }) => {
+          {flatVisibleColumns.map(({ column, index }) => {
             if (column.dataIndex === 'credit') {
               return null
             }
@@ -632,7 +634,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         </Table.Summary.Row>
       </Table.Summary>
     )
-  }, [payments, columns])
+  }, [payments, visibleColumns])
 
   if (paymentsError || currUserError) {
     return <Alert message="Помилка" type="error" showIcon closable />
@@ -700,7 +702,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     <Table
       rowKey="_id"
       rowSelection={rowSelection}
-      columns={columns}
+      columns={visibleColumns}
       dataSource={payments?.data || []}
       pagination={{
         current: paginationProps.pageData.currentPage,
@@ -718,8 +720,8 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           (pathname === AppRoutes.PAYMENT
             ? 1300 + selectedColumns.length * 132
             : 1300) -
-          ((domainsFilter?.length || 0) <= 1 ? 200 : 0) -
-          ((companiesFilter?.length || 0) <= 1 ? 200 : 0),
+          (payments?.domainsFilter?.length <= 1 ? 200 : 0) -
+          (payments?.realEstatesFilter?.length <= 1 ? 200 : 0),
       }}
       summary={() => summary}
       bordered
