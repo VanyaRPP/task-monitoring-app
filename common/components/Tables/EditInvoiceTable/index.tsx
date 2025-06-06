@@ -205,14 +205,8 @@ export const InvoiceSelector: React.FC<{
         value: ServiceType.Discount,
         label: 'Знижка',
       },
-      {
-        value: ServiceType.Custom,
-        label: 'Власне',
-      },
-    ].filter(
-      ({ value }) => value === ServiceType.Custom || !exclude?.includes(value)
-    )
-  }, [exclude])
+  ].filter(({ value }) => !exclude?.includes(value))
+}, [exclude])
 
   return (
     <Select

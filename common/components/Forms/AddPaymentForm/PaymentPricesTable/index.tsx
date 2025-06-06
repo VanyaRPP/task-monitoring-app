@@ -1,6 +1,9 @@
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { EditInvoicesTable_unstable } from '@components/Tables/EditInvoiceTable'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Popconfirm, Button, Input, Space, message } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
+
 
 export interface PaymentPricesTableProps {
   preview?: boolean
@@ -17,6 +20,28 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
 }) => {
   const { form, service } = usePaymentContext()
   const invoices = form.getFieldValue('invoice')
+  const [customName, setCustomName] = useState('')
+  const [isPopOpen, setIsPopOpen] = useState(false)
+
+  const handleAddCustomService = () => {
+    const currentInvoice = form.getFieldValue('invoice') || []
+
+    const newInvoiceItem = {
+      name: customName,
+      amount: 1,
+      price: 0,
+      sum: 0,
+      type: 'custom',
+    }
+
+    form.setFieldsValue({
+      invoice: [...currentInvoice, newInvoiceItem],
+    })
+
+    setCustomName('')
+    setIsPopOpen(false)
+    message.success('Кастомна послуга додана')
+  }
 
   useEffect(() => {
     const filteredInvoices = invoices?.filter(
@@ -32,13 +57,42 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
     })
   }, [])
 
-  return (
+return (
+  <>
+    {!preview && (
+      <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 12 }}>
+        <Popconfirm
+          title={
+            <Space direction="vertical" style={{ display: 'flex' }}>
+              <Input
+                placeholder="Назва послуги"
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                autoFocus
+              />
+            </Space>
+          }
+          open={isPopOpen}
+          onOpenChange={setIsPopOpen}
+          onConfirm={handleAddCustomService}
+          onCancel={() => setIsPopOpen(false)}
+          okText="Підтвердити"
+          cancelText="Скасувати"
+        >
+          <Button type="dashed" icon={<PlusOutlined />}>
+            Додати кастомну послугу
+          </Button>
+        </Popconfirm>
+      </div>
+    )}
+
     <EditInvoicesTable_unstable
       form={form}
       editable={!preview}
       loading={loading}
     />
-  )
+  </>
+)
 
   /**
    * @deprecated
