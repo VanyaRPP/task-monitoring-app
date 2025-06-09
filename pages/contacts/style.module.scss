@@ -1,16 +1,78 @@
 .Header {
-  text-align: center;
-  font-size: calc(30px + (20 + 20 * 0.7) * ((100vw - 320px) / 1400));
-  margin: 0;
-  transition: color 0.2s;
-  color: var(--primaryColor);
+  margin: 2rem 2rem 1rem;
+  padding: 2rem;
+  position: sticky;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row; // default for desktop
+
+  z-index: 60;
+
+  // Glassmorphism effect
+  background: rgba(100, 42, 181, 0.28);
+  border-radius: 50px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8.4px);
+  -webkit-backdrop-filter: blur(8.4px);
+  border: 1px solid rgba(100, 42, 181, 0.43);
+
+  .Logo {
+    display: flex;
+    align-items: center;
+    font-size: calc(12px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440));
+    color: var(--primaryColor);
+    transition: color 0.5s;
+
+    @media (max-width: 425px) {
+      font-size: calc(12px + (11.5 + 11.5 * 0.7) * ((100vw - 320px) / 1440)) !important;
+    }
+  }
+
+}
+
+.HeaderCard {
+  transform: translateY(-70px);
+  // text-align: justify;
+  // font-size: calc(30px + (20 + 20 * 0.7) * ((100vw - 320px) / 1400));
+
+  margin: 0 0 -3rem 0;
+  // transition: color 0.2s;
+  // color: var(--primaryColor);
+}
+
+.ButtonSend {
+  height: 40px;
+}
+
+.Buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 190px;
+  gap: .7rem;
+
+  @media (max-width: 600px) {
+    gap: 0.5rem;
+  }
+
+  button {
+    width: 100%;
+    height: 50px;
+    font-size: 18px;
+
+    @media (max-width: 600px) {
+      height: 40px;
+    }
+  }
 }
 
 .Text {
   text-align: center;
-  font-size: calc(15px + (5 + 5 * 0.7) * ((100vw - 320px) / 1400));
-  margin: 1rem 0 2rem 0;
-
+  // font-size: calc(15px + (5 + 5 * 0.7) * ((100vw - 320px) / 1400));
+  margin: 1rem 0 5rem 0;
+  font-size: 26px;
   transition: color 0.2s;
   color: var(--textColor);
 }
@@ -23,6 +85,13 @@
   @media (max-width: 1000px) {
     flex-direction: column;
   }
+}
+
+.feedBackCard {
+  border-radius: 50px;
+  transform: translateY(83px);
+  width: 50%;
+  margin: 0 auto;
 }
 
 .Form {
@@ -60,18 +129,25 @@
   align-items: center;
   justify-content: space-between;
 
-  > a {
+  >a {
     transition: color 0.2s, opacity 0.2s;
     color: var(--textColor);
     opacity: 0.5;
   }
-  > a:hover {
+
+  >a:hover {
     opacity: 1;
+  }
+
+  .ContactMail {
+    text-decoration: underline;
   }
 
   .Contacts {
     gap: 1.25rem;
-    > div {
+    transform: translateY(-5px);
+
+    >div {
       display: flex;
       gap: 0.5rem;
     }
@@ -79,7 +155,9 @@
 
   .Media {
     gap: 0.5rem;
-    > a {
+    padding-left: 3rem;
+
+    >a {
       font-size: 18px;
     }
   }
@@ -88,8 +166,9 @@
   .Media {
     display: flex;
     flex-direction: column;
-    > * {
-      > * {
+
+    >* {
+      >* {
         font-size: 18px;
         line-height: 18px;
         transition: color 0.2s;
