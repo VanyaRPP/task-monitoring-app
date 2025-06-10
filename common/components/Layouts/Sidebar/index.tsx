@@ -17,6 +17,7 @@ export const Sidebar: React.FC<Omit<SiderProps, 'children'>> = (props) => {
       theme="light"
       collapsed={collapsed}
       width={240}
+      style={{ zIndex: 999 }}
       onCollapse={() => toggleCollapsed()}
       {...props}
     >
