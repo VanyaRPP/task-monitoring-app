@@ -104,84 +104,39 @@ const DomainsServices: FC<Props> = ({
   }
 }
 
+ return (
+  <>
+    {editable && (
+      <Popconfirm
+        title={
+          <Space direction="vertical" style={{ display: 'flex', minWidth: 300 }}>
+            <span style={{ fontSize: 20, color: '#999' }}>
+              Якщо послуги зі списку вам не підходять, ви можете створити власну
+            </span>
+            <Input
+              placeholder="Назва послуги"
+              value={customName}
+              onChange={(e) => setCustomName(e.target.value)}
+              autoFocus
+            />
+          </Space>
+        }
+        overlayStyle={{ zIndex: 1050 }}
+        open={isPopOpen}
+        onOpenChange={setIsPopOpen}
+        onConfirm={handleAddCustomService}
+        onCancel={() => setIsPopOpen(false)}
+        okText="Підтвердити"
+        cancelText="Скасувати"
+      >
+        <Button type="dashed" style={{ marginBottom: 10 }} block>
+          + Додати послугу
+        </Button>
+      </Popconfirm>
+    )}
+  </>
+)
 
-
-  return (
-    <Form.List name="domainServices">
-      {(fields, { add, remove }) => (
-        <div style={{ display: 'flex', rowGap: 16, flexDirection: 'column' }}>
-          {fields.map((field) => (
-            <Card
-              size="small"
-              title={`Послуга ${field.name + 1}`}
-              key={field.key}
-              aria-disabled={!editable}
-              extra={
-                editable ? (
-                  <div>
-                    <Button type="link" onClick={() => handleSave(field.key)}>
-                      <SaveOutlined />
-                    </Button>
-                    <Button
-                      type="link"
-                      danger
-                      onClick={() => {
-                        remove(field.name)
-                        handleRemove(field.name)
-                      }}
-                    >
-                      <CloseOutlined />
-                    </Button>
-                  </div>
-                ) : null
-              }
-            >
-              <Form.Item label="Найменування" name={[field.name, 'name']}>
-                <Input
-                  placeholder="Найменування послуги"
-                  disabled={!editable}
-                />
-              </Form.Item>
-            </Card>
-          ))}
-          {editable && (
-            <Popconfirm
-              title={
-                <Space direction="vertical" style={{ display: 'flex', minWidth: 300  }}>
-                   <span style={{ fontSize: 20, color: '#999' }}>
-                      Якщо послуги зі списку вам не підходять, ви можете створити власну
-                   </span>
-                  <Input
-                    placeholder="Назва послуги"
-                    value={customName}
-                    onChange={(e) => setCustomName(e.target.value)}
-                    autoFocus
-                  />
-                </Space>
-              }
-              overlayStyle={{ zIndex: 1050 }}
-              open={isPopOpen}
-              onOpenChange={setIsPopOpen}
-              onConfirm={handleAddCustomService}
-              onCancel={() => setIsPopOpen(false)}
-              okText="Підтвердити"
-              cancelText="Скасувати"
-            >
-              
-                <Button
-                  type="dashed"
-                  style={{ marginBottom: 10 }}
-                  block
-                >
-                  + Додати послугу
-                </Button>
-              
-            </Popconfirm>
-          )}
-        </div>
-      )}
-    </Form.List>
-  )
 }
 
 export default DomainsServices
