@@ -109,26 +109,27 @@ const DomainsServices: FC<Props> = ({
     {editable && (
       <Popconfirm
         title={
-          <Space direction="vertical" style={{ display: 'flex', minWidth: 300 }}>
-            <span style={{ fontSize: 20, color: '#999' }}>
-              Якщо послуги зі списку вам не підходять, ви можете створити власну
-            </span>
-            <Input
-              placeholder="Назва послуги"
-              value={customName}
-              onChange={(e) => setCustomName(e.target.value)}
-              autoFocus
-            />
-          </Space>
-        }
-        overlayStyle={{ zIndex: 1050 }}
-        open={isPopOpen}
-        onOpenChange={setIsPopOpen}
-        onConfirm={handleAddCustomService}
-        onCancel={() => setIsPopOpen(false)}
-        okText="Підтвердити"
-        cancelText="Скасувати"
-      >
+              <>
+        <Space direction="vertical" style={{ display: 'flex', minWidth: 300 }}>
+         <Input
+          placeholder="Введіть вашу послугу"
+          value={customName}
+          onChange={(e) => setCustomName(e.target.value)}
+          autoFocus
+         />
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginTop: 10 }}>
+          <Button onClick={() => setIsPopOpen(false)}>Скасувати</Button>
+          <Button type="primary" onClick={handleAddCustomService}>Підтвердити</Button>
+        </div>
+      </Space>
+            </>
+          }
+          open={isPopOpen}
+          onOpenChange={setIsPopOpen}
+          icon={null}
+          showCancel={false}
+          okButtonProps={{ style: { display: 'none' } }} 
+        >
         <Button type="dashed" style={{ marginBottom: 10 }} block>
           + Додати послугу
         </Button>
