@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Table, Dropdown, Checkbox, MenuProps, Space, Spin  } from 'antd'
+import { Table, Dropdown, Checkbox, MenuProps, Space, Spin } from 'antd'
 import { SettingOutlined } from '@ant-design/icons'
 import { useColumnVisibility } from './components/useColumnVisibility'
 // import { ITransaction } from '@common/api/bankApi/mockBank.api'
@@ -49,13 +49,13 @@ const TransactionsTable: React.FC<Props> = ({
     domain,
     toggleColumnVisibility
   )
-// const staticColumns = [
-//   { title: 'My Name', dataIndex: 'AUT_MY_NAM', key: 'AUT_MY_NAM' },
-//   { title: 'My Account', dataIndex: 'AUT_MY_ACC', key: 'AUT_MY_ACC' },
-//   { title: 'MFO', dataIndex: 'AUT_MY_MFO', key: 'AUT_MY_MFO' },
-//   { title: 'Transaction Type', dataIndex: 'TRANTYPE', key: 'TRANTYPE' },
-// ]
-//    const columns = staticColumns
+  // const staticColumns = [
+  //   { title: 'My Name', dataIndex: 'AUT_MY_NAM', key: 'AUT_MY_NAM' },
+  //   { title: 'My Account', dataIndex: 'AUT_MY_ACC', key: 'AUT_MY_ACC' },
+  //   { title: 'MFO', dataIndex: 'AUT_MY_MFO', key: 'AUT_MY_MFO' },
+  //   { title: 'Transaction Type', dataIndex: 'TRANTYPE', key: 'TRANTYPE' },
+  // ]
+  //    const columns = staticColumns
 
   return (
     <>

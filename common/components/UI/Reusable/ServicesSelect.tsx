@@ -126,29 +126,33 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                       showSearch
                     />
                   </Form.Item>
-                  {!disabled && <MinusCircleOutlined
-                    style={{ 
-                      position: 'relative',
-                      cursor: 'pointer',
-                      fontSize: '24px',
-                      minWidth: '24px',
-                    }}
-                    onClick={() => remove(field.name)}
-                  />}
+                  {!disabled && (
+                    <MinusCircleOutlined
+                      style={{
+                        position: 'relative',
+                        cursor: 'pointer',
+                        fontSize: '24px',
+                        minWidth: '24px',
+                      }}
+                      onClick={() => remove(field.name)}
+                    />
+                  )}
                 </Space>
               )
             })}
 
-            {!disabled && <Form.Item>
-              <Button
-                type="dashed"
-                style={{ width: '100%' }}
-                onClick={() => add()}
-                icon={<PlusOutlined />}
-              >
-                Додати групу послуг
-              </Button>
-            </Form.Item>}
+            {!disabled && (
+              <Form.Item>
+                <Button
+                  type="dashed"
+                  style={{ width: '100%' }}
+                  onClick={() => add()}
+                  icon={<PlusOutlined />}
+                >
+                  Додати групу послуг
+                </Button>
+              </Form.Item>
+            )}
           </>
         )}
       </Form.List>

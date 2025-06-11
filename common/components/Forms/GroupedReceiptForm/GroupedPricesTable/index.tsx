@@ -64,15 +64,15 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
     [invoices, customDomainServices]
   )
 
-  const groupedFieldNames = groupedInvoicesData
-    ?.flatMap((group) => group.fieldNames || []) || []
+  const groupedFieldNames =
+    groupedInvoicesData?.flatMap((group) => group.fieldNames || []) || []
 
-  const dataSource = groupedInvoicesData?.map((group, index) => ({
-    key: index + 1,
-    name: group.groupName,
-    sum: group.totalSum,
-  })) || []
-
+  const dataSource =
+    groupedInvoicesData?.map((group, index) => ({
+      key: index + 1,
+      name: group.groupName,
+      sum: group.totalSum,
+    })) || []
 
   const discountInvoice = invoices?.find((inv) => inv?.type === 'discount')
   if (discountInvoice) {
@@ -83,11 +83,8 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
     })
   }
 
-
   const customInvoices = invoices?.filter(
-    (inv) =>
-      inv?.type === 'custom' &&
-      !groupedFieldNames.includes(inv?.type)
+    (inv) => inv?.type === 'custom' && !groupedFieldNames.includes(inv?.type)
   )
 
   customInvoices?.forEach((inv) => {

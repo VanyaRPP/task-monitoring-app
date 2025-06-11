@@ -9,10 +9,7 @@ export interface DomainsSelectProps {
   edit?: boolean
 }
 
-const DomainsSelect: React.FC<DomainsSelectProps> = ({ 
-  form, 
-  edit 
-}) => {
+const DomainsSelect: React.FC<DomainsSelectProps> = ({ form, edit }) => {
   const [domains, setDomains] = useState([])
   const {
     data: fetchedDomains = [],

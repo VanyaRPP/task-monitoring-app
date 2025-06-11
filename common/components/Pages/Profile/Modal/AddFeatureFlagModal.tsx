@@ -1,6 +1,6 @@
 import {
-	useAddFeatureFlagMutation,
-	useEditFeatureFlagMutation,
+  useAddFeatureFlagMutation,
+  useEditFeatureFlagMutation,
 } from '@common/api/featureFlagsApi/featureFlag.api'
 import { IFeatureFlag } from '@common/api/featureFlagsApi/featureFlag.api.types'
 import { Form, Input, Modal, Switch, message } from 'antd'
@@ -39,7 +39,7 @@ const FeatureFlagModal: FC<Props> = ({ open, onClose, initialData }) => {
       if (isEditMode && initialData?._id) {
         const response = await editFeatureFlag({
           _id: initialData._id,
-        ...values,
+          ...values,
         })
 
         if ('data' in response) {
