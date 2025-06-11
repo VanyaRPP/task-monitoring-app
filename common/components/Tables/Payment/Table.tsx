@@ -489,6 +489,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         align: 'center',
         fixed: 'right',
         title: '',
+        hidden: isUser,
         width: sepDomainID ? 25 : 80,
         render: (_value, payment) => (
           <Dropdown
