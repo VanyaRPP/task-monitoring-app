@@ -1,4 +1,4 @@
-import FeatureFlagService from '@modules/services/FeatureFlagServices'
+import FeatureFlagService from '@common/services/FeatureFlagServices'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { NextApiRequest, NextApiResponse } from 'next'
 

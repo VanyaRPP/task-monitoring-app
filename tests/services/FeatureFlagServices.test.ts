@@ -1,5 +1,5 @@
 import FeatureFlag from '@modules/models/FeatureFlag'
-import FeatureFlagService from '@modules/services/FeatureFlagServices'
+import FeatureFlagService from '@common/services/FeatureFlagServices'
 jest.mock('@modules/models/FeatureFlag')
 
 describe('FeatureFlagService', () => {
