@@ -6,6 +6,9 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
 
+function escapeRegex(str: string) {
+  return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+}
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
@@ -32,6 +35,18 @@ export default async function handler(
           return res.status(400).json({
             success: false,
             message: 'Missing required fields: name',
+          })
+        }
+
+        const escapedName = escapeRegex(trimmedName)
+        const existingService = await CustomService.findOne({
+          name: { $regex: `^${trimmedName}$`, $options: 'i' }, 
+        })
+
+        if (existingService) {
+          return res.status(409).json({
+            success: false,
+            message: 'Послуга з такою назвою вже існує',
           })
         }
 
