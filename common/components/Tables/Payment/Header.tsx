@@ -1,10 +1,10 @@
 import PaymentCardHeader from '@components/UI/PaymentCardHeader'
-import type {
+import {
   IExtendedPayment,
   IGetPaymentResponse,
   IFilter,
 } from '@common/api/paymentApi/payment.api.types'
-import type { ServiceType } from '@utils/constants'
+import { ServiceType } from '@utils/constants'
 
 export interface PaymentDeleteItem {
   id: string

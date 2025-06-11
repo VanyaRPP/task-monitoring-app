@@ -15,77 +15,44 @@ import {
 } from '@common/api/paymentApi/payment.api'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 
-import type {
-  IExtendedPayment,
-  IGetPaymentResponse,
-  IFilter,
-} from '@common/api/paymentApi/payment.api.types'
-import type { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
+import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 
 import TableCard from '@components/UI/TableCard'
-import PaymentsHeader, {
-  PaymentDeleteItem,
-} from '@components/Tables/Payment/Header'
+import PaymentsHeader from '@components/Tables/Payment/Header'
 import PaymentsTable from '@components/Tables/Payment/Table'
 
 import { AppRoutes, Operations, ServiceType, Roles } from '@utils/constants'
 
-import type {
+import {
   TablePaginationConfig,
   FilterValue,
   SorterResult,
   TableCurrentDataSource,
 } from 'antd/lib/table/interface'
 
+import { useSelector, useDispatch } from 'react-redux'
+import {
+  setPage,
+  setFilters,
+  setDomainsFilter,
+  setCompaniesFilter,
+  setStreetsFilter,
+  setDateFilters,
+  setOpenView,
+  setOpenEdit,
+  setCloseModal,
+  setDebtorCompanies,
+  setSelectedColumns,
+  setPaymentsDeleteItems,
+  setSelectedPayments,
+  setSelectedDateField,
+} from '@modules/store/paymentsSlice'
+import { RootState } from '@modules/store/store'
+import { formatDateFilterForQuery } from '@utils/helpers'
+import { getTypeOperation } from '@utils/helpers'
+
 export interface PaymentsBlockProps {
   sepDomainID?: string
-}
-
-interface FilterProps {
-  filters: Record<string, any> | undefined
-  setFilters: (filters: Record<string, any> | undefined) => void
-  domainsFilter: IFilter[]
-  companiesFilter: IFilter[]
-  streetsFilter: IFilter[]
-  dateFilters?: IPaymentFilterResponse
-}
-interface PaginationProps {
-  pageData: { pageSize: number; currentPage: number }
-  handlePagination: (page: number, pageSize?: number) => void
-}
-interface ActionProps {
-  onViewClick: (p: IExtendedPayment) => void
-  onEditClick: (p: IExtendedPayment) => void
-  onDelete: (id: string) => void
-  deleteLoading: boolean
-}
-type DebtPerMonth = {
-  monthService: string
-  totalDue: number
-  paid: number
-  remaining: number
-}
-type CompanyWithPayments = {
-  companyId: any
-  companyName: string
-  debtPerMonth: DebtPerMonth[]
-  totalDebt: number
-}
-interface DebtProps {
-  debtorCompanies: CompanyWithPayments[]
-}
-interface ColumnSelectionProps {
-  selectedColumns: ServiceType[]
-  setSelectedColumns: (cols: ServiceType[]) => void
-}
-interface StatusProps {
-  paymentsError: boolean
-  paymentsLoading: boolean
-  paymentsFetching: boolean
-  currUserLoading: boolean
-  currUserFetching: boolean
-  currUserError: boolean
-  currUserRoles: string[]
 }
 interface TableEventProps {
   handleTableChange: (
@@ -95,70 +62,34 @@ interface TableEventProps {
     extra: TableCurrentDataSource<any>
   ) => void
 }
-function formatDateFilterForQuery(raw?: string[]) {
-  if (!raw?.length) return {}
-  const numbers = raw
-    .map((v) => {
-      const leading = parseInt(v, 10)
-      if (!isNaN(leading)) {
-        const m = v.match(/-(\d+)\s*$/)
-        if (m) {
-          return [leading, parseInt(m[1], 10)]
-        }
-        return [leading]
-      }
-      const n = Number(v)
-      return isNaN(n) ? [] : [n]
-    })
-    .flat()
-    .filter((n) => !isNaN(n)) as number[]
-  const [year, ...months] = numbers
-  const query: any = {}
-  if (year != null) {
-    query.year = year
-  }
-  if (months.length === 1) {
-    query.month = months[0]
-  } else if (months.length > 1) {
-    query.month = months
-  }
-  return query
-}
-function getTypeOperation(value?: string) {
-  if (value === Operations.Debit) {
-    return { type: Operations.Debit }
-  } else if (value === Operations.Credit) {
-    return { type: Operations.Credit }
-  }
-  return {}
-}
 
 const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const router = useRouter()
-  const [currentPayment, setCurrentPayment] =
-    useState<Partial<IExtendedPayment> | null>(null)
-  const [paymentActions, setPaymentActions] = useState({
-    edit: false,
-    preview: false,
-  })
+  const dispatch = useDispatch()
+  const {
+    filters,
+    domainsFilter,
+    companiesFilter,
+    streetsFilter,
+    dateFilters,
+    currentPayment,
+    edit,
+    preview,
+    debtorCompanies,
+    selectedColumns,
+    paymentsDeleteItems,
+    selectedPayments,
+    selectedDateField,
+    currentPage: rawCurrentPage,
+    pageSize: rawPageSize,
+  } = useSelector((s: RootState) => s.payments)
+  const handleView = (p: IExtendedPayment) => dispatch(setOpenView(p))
+  const handleEdit = (p: IExtendedPayment) => dispatch(setOpenEdit(p))
+  const handleClose = () => dispatch(setCloseModal())
 
-  const [filters, setFilters] = useState<Record<string, any> | undefined>()
-  const [selectedColumns, setSelectedColumns] = useState<ServiceType[]>([])
-
-  const [pageData, setPageData] = useState({
-    pageSize: router.pathname === AppRoutes.PAYMENT ? 10 : 5,
-    currentPage: 1,
-  })
-
-  const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<
-    PaymentDeleteItem[]
-  >([])
-  const [selectedPayments, setSelectedPayments] = useState<IExtendedPayment[]>(
-    []
-  )
-  const [selectedDateField, setSelectedDateField] = useState<
-    'invoiceCreationDate' | 'date'
-  >('invoiceCreationDate')
+  const currentPage = rawCurrentPage || 1
+  const pageSize =
+    rawPageSize || (router.pathname === AppRoutes.PAYMENT ? 10 : 5)
 
   const { data: domainsFiltersData } = useGetDomainFiltersQuery({
     realEstates: filters?.company,
@@ -167,6 +98,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     domains: filters?.domain,
   })
   const { data: dateFiltersData } = useGetDateFiltersQuery({ type: 'payment' })
+  const [domainIds, setDomainIds] = useState<string[]>([])
   const { data: streetsFilterData } = useGetAddressFiltersQuery({
     domains: filters?.domain,
   })
@@ -177,10 +109,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     isFetching: currUserFetching,
     isError: currUserError,
   } = useGetCurrentUserQuery()
-  const isGlobalAdmin = currUser?.roles?.includes(Roles.GLOBAL_ADMIN)
-  const isDomainAdmin = currUser?.roles?.includes(Roles.DOMAIN_ADMIN)
 
-  const [domainIds, setDomainIds] = useState<string[]>([])
   useEffect(() => {
     const fallback =
       domainsFiltersData?.domainsFilter?.map((d) => d.value) || []
@@ -195,7 +124,11 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     { domainIds },
     { skip: !domainIds.length }
   )
-  const debtorCompanies = debtorsData?.companies || []
+  useEffect(() => {
+    if (debtorsData?.companies) {
+      dispatch(setDebtorCompanies(debtorsData.companies))
+    }
+  }, [debtorsData, dispatch])
 
   const {
     data: payments,
@@ -204,8 +137,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     isFetching: paymentsFetching,
   } = useGetAllPaymentsQuery(
     {
-      skip: (pageData.currentPage - 1) * pageData.pageSize,
-      limit: pageData.pageSize,
+      skip: (currentPage - 1) * pageSize,
+      limit: pageSize,
       ...formatDateFilterForQuery(filters?.invoiceCreationDate),
       ...getTypeOperation(filters?.type?.[0]),
       dateField: selectedDateField,
@@ -235,29 +168,32 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   )
 
   useEffect(() => {
-    if (domainsFiltersData?.domainsFilter?.length === 1) {
-      setFilters((prev = {}) => ({
-        ...prev,
-        domain: [domainsFiltersData.domainsFilter[0].value],
-      }))
+    if (domainsFiltersData?.domainsFilter) {
+      dispatch(setDomainsFilter(domainsFiltersData.domainsFilter))
     }
-    if (companiesFilterData?.realEstatesFilter?.length === 1) {
-      setFilters((prev = {}) => ({
-        ...prev,
-        company: [companiesFilterData.realEstatesFilter[0].value],
-      }))
+    if (companiesFilterData?.realEstatesFilter) {
+      dispatch(setCompaniesFilter(companiesFilterData.realEstatesFilter))
     }
-  }, [domainsFiltersData, companiesFilterData])
+    if (streetsFilterData?.streetsFilter) {
+      dispatch(setStreetsFilter(streetsFilterData.streetsFilter))
+    }
+    dispatch(setDateFilters(dateFiltersData))
+  }, [
+    dispatch,
+    streetsFilterData?.streetsFilter,
+    domainsFiltersData?.domainsFilter,
+    companiesFilterData?.realEstatesFilter,
+    dateFiltersData,
+  ])
 
-  const closeEditModal = () => {
-    setCurrentPayment(null)
-    setPaymentActions({ edit: false, preview: false })
+  const handlePagination = (page: number, pageSizeArg?: number) => {
+    dispatch(
+      setPage({
+        page,
+        pageSize: pageSizeArg ?? pageSize,
+      })
+    )
   }
-
-  const handlePagination = (page: number, pageSize?: number) => {
-    setPageData({ pageSize: pageSize ?? pageData.pageSize, currentPage: page })
-  }
-
   const handleTableChange = (
     pagination: TablePaginationConfig,
     allFilters: Record<string, FilterValue | null> | null,
@@ -265,23 +201,25 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     extra: TableCurrentDataSource<any>
   ) => {
     if (extra.action === 'paginate') {
-      setPageData({
-        pageSize: pagination.pageSize,
-        currentPage: pagination.current,
-      })
+      handlePagination(pagination.current, pagination.pageSize)
     }
 
     if (extra.action === 'filter') {
-      setFilters(allFilters ?? undefined)
+      dispatch(setFilters(allFilters ?? undefined))
       const raw = (allFilters as any)?.invoiceCreationDate
       const invoiceVals = Array.isArray(raw)
         ? (raw.filter((x) => typeof x === 'string') as string[])
         : []
-      setFilters((prev = {}) => ({ ...prev, invoiceCreationDate: invoiceVals }))
+      dispatch(
+        setFilters({
+          ...allFilters,
+          invoiceCreationDate: invoiceVals,
+        })
+      )
     }
   }
 
-  const statusProps: StatusProps = {
+  const statusProps = {
     paymentsError: Boolean(paymentsError),
     paymentsLoading,
     paymentsFetching,
@@ -295,51 +233,46 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     handleTableChange,
   }
 
-  const filterProps: FilterProps = {
+  const filterProps = {
     filters,
-    setFilters,
-    domainsFilter: domainsFiltersData?.domainsFilter || [],
-    companiesFilter: companiesFilterData?.realEstatesFilter || [],
-    streetsFilter: streetsFilterData?.streetsFilter || [],
-    dateFilters: dateFiltersData,
+    setFilters: (f) => dispatch(setFilters(f)),
+    domainsFilter,
+    companiesFilter,
+    streetsFilter,
+    dateFilters,
   }
-
-  const paginationProps: PaginationProps = {
-    pageData,
-    handlePagination: (page, pageSize) =>
-      setPageData({ pageSize: pageSize, currentPage: page }),
+  const paginationProps = {
+    pageData: { currentPage, pageSize },
+    handlePagination,
   }
-
-  const actionProps: ActionProps = {
-    onViewClick: (p: IExtendedPayment) => {
-      setCurrentPayment(p)
-      setPaymentActions({ edit: false, preview: true })
-    },
-    onEditClick: (p: IExtendedPayment) => {
-      setCurrentPayment(p)
-      setPaymentActions({ edit: true, preview: false })
-    },
+  const actionProps = {
+    onViewClick: handleView,
+    onEditClick: handleEdit,
     onDelete: handleDeletePayment,
     deleteLoading,
   }
-
-  const debtProps: DebtProps = {
+  const debtProps = {
     debtorCompanies,
   }
 
-  const columnSelectionProps: ColumnSelectionProps = {
+  const columnSelectionProps = {
     selectedColumns,
-    setSelectedColumns,
+    setSelectedColumns: (cols) => dispatch(setSelectedColumns(cols)),
   }
 
   const headerProps: React.ComponentProps<typeof PaymentsHeader> = {
     paymentsDeleteItems,
-    closeEditModal: closeEditModal,
-    setCurrentDateFilter: (vals: string[] | undefined) => {
-      setFilters((prev = {}) => ({ ...prev, invoiceCreationDate: vals }))
+    closeEditModal: handleClose,
+    setCurrentDateFilter: (vals) => {
+      dispatch(
+        setFilters({
+          ...filters,
+          invoiceCreationDate: vals,
+        })
+      )
     },
     currentPayment,
-    paymentActions,
+    paymentActions: { edit, preview },
     streets: filterProps.streetsFilter,
     payments: payments,
     filters: filterProps.filters,
@@ -348,7 +281,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     setSelectedPayments,
     setPaymentsDeleteItems,
     enablePaymentsButton: !sepDomainID,
-    onColumnsSelect: (cols: ServiceType[]) => setSelectedColumns(cols),
+    onColumnsSelect: (cols: ServiceType[]) =>
+      dispatch(setSelectedColumns(cols)),
 
     domainFilter: filterProps.domainsFilter,
     realEstatesFilter: filterProps.companiesFilter,
