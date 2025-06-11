@@ -47,8 +47,8 @@ export const customServicesApi = createApi({
   }),
 })
 
-export const { 
+export const {
   useGetCustomServicesQuery,
   useGetCustomServicesByDomainQuery,
-  useCreateCustomServiceMutation } =
-  customServicesApi
+  useCreateCustomServiceMutation,
+} = customServicesApi

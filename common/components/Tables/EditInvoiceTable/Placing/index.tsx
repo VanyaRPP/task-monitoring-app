@@ -184,7 +184,10 @@ export const Price: React.FC<InvoiceComponentProps> = ({
       inflicionInvoice?.sum !== undefined
     ) {
       Promise.resolve().then(() => {
-        form.setFieldValue(['invoice', ...name, 'price'], calculatedInitialPrice)
+        form.setFieldValue(
+          ['invoice', ...name, 'price'],
+          calculatedInitialPrice
+        )
       })
     }
   }, [

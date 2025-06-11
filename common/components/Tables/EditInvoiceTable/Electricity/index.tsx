@@ -151,9 +151,7 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   useEffect(() => {
     form.setFieldValue(
       ['invoice', ...name, 'sum'],
-      losses > 0 
-      ? loss * +price 
-      : costAmount * +price
+      losses > 0 ? loss * +price : costAmount * +price
     )
   }, [form, name, amount, lastAmount, price, losses])
 

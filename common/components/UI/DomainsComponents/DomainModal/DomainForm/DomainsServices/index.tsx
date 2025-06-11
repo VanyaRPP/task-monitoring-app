@@ -21,7 +21,6 @@ const DomainsServices: FC<Props> = ({
   domainId,
   onCustomServicesChange,
 }) => {
-
   const [createCustomService] = useCreateCustomServiceMutation()
 
   const handleSave = async (fieldKey: number) => {

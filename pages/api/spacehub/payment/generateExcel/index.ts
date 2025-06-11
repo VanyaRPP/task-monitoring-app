@@ -1,10 +1,13 @@
 import {
   IGeneratePaymentExcelResponce,
-  IExtendedPayment
+  IExtendedPayment,
 } from '@common/api/paymentApi/payment.api.types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import * as XLSX from 'xlsx-js-style'
-import {generatePaymentsData, getAutoColSize} from '@utils/excel/generateExcelData'
+import {
+  generatePaymentsData,
+  getAutoColSize,
+} from '@utils/excel/generateExcelData'
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,7 +15,7 @@ export default async function handler(
 ) {
   if (req.method !== 'POST') return res.status(405).end()
   try {
-        const payments: IExtendedPayment[] = req.body.payments
+    const payments: IExtendedPayment[] = req.body.payments
     if (!Array.isArray(payments) || payments.length === 0) {
       return res.status(400).send('Invalid or empty payments data')
     }
@@ -41,7 +44,10 @@ export default async function handler(
     })
 
     worksheet['!cols'] = getAutoColSize(data)
-    worksheet['!rows'] = [{ hpt: 80 }, ...Array(payments.length).fill({ hpt: 43 })]
+    worksheet['!rows'] = [
+      { hpt: 80 },
+      ...Array(payments.length).fill({ hpt: 43 }),
+    ]
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Payments')
     const excelBuffer = XLSX.write(workbook, {
       type: 'buffer',

@@ -38,7 +38,9 @@ describe('FeatureFlagService', () => {
     })
 
     it('викидає помилку, якщо флаг вже існує', async () => {
-      ;(FeatureFlag.findOne as jest.Mock).mockResolvedValueOnce({ name: 'test-flag' })
+      ;(FeatureFlag.findOne as jest.Mock).mockResolvedValueOnce({
+        name: 'test-flag',
+      })
 
       await expect(
         FeatureFlagService.create({
@@ -52,7 +54,9 @@ describe('FeatureFlagService', () => {
 
   describe('isFeatureEnabled', () => {
     it('повертає true, якщо флаг увімкнено', async () => {
-      ;(FeatureFlag.findOne as jest.Mock).mockResolvedValueOnce({ isEnabled: true })
+      ;(FeatureFlag.findOne as jest.Mock).mockResolvedValueOnce({
+        isEnabled: true,
+      })
 
       const result = await FeatureFlagService.isFeatureEnabled('some-flag')
 
@@ -61,7 +65,9 @@ describe('FeatureFlagService', () => {
     })
 
     it('повертає false, якщо флаг вимкнено', async () => {
-      ;(FeatureFlag.findOne as jest.Mock).mockResolvedValueOnce({ isEnabled: false })
+      ;(FeatureFlag.findOne as jest.Mock).mockResolvedValueOnce({
+        isEnabled: false,
+      })
 
       const result = await FeatureFlagService.isFeatureEnabled('some-flag')
 

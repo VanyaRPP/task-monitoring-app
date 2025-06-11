@@ -186,8 +186,13 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     <Flex
       wrap
       justify="space-between"
-      align='center'
-      style={{ marginBottom: '10px', marginTop: '10px', maxHeight: '60px', overflowY: 'auto' }}
+      align="center"
+      style={{
+        marginBottom: '10px',
+        marginTop: '10px',
+        maxHeight: '60px',
+        overflowY: 'auto',
+      }}
     >
       <Space wrap size="small">
         <Button
@@ -229,7 +234,9 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
       <Flex align="center" style={{ height: '50px', marginTop: '10px' }}>
         {infoTooltip && (
           <Tooltip title={infoTooltip}>
-            <InfoCircleOutlined style={{ marginRight: 16, color: 'rgba(0,0,0,0.45)' }} />
+            <InfoCircleOutlined
+              style={{ marginRight: 16, color: 'rgba(0,0,0,0.45)' }}
+            />
           </Tooltip>
         )}
         {isAdmin &&
@@ -241,7 +248,10 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
           )}
         {isAdmin && <ImportInvoices />}
         {isAdmin && (
-          <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT_BULK)}>
+          <Button
+            type="link"
+            onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
+          >
             Інвойси <SelectOutlined />
           </Button>
         )}
@@ -252,7 +262,9 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
         )}
         {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
           <AddPaymentModal
-            paymentActions={!isAdmin ? { edit: false, preview: true } : paymentActions}
+            paymentActions={
+              !isAdmin ? { edit: false, preview: true } : paymentActions
+            }
             paymentData={currentPayment}
             preselectedCompany={selectedCompany}
             closeModal={closeModal}
