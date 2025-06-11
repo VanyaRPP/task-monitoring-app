@@ -140,8 +140,10 @@ export function usePaymentFormData(
 
   const { data: { data: { 0: service } } = { data: [null] } } =
     useGetAllServicesQuery({ serviceId, limit: 1 }, { skip: !serviceId })
-  const month = dayjs(service?.date).month() === 0 ? 12 : dayjs(service?.date).month()
-  const year = month === 12 ? dayjs(service?.date).year() - 1 : dayjs(service?.date).year()
+  const month =
+    dayjs(service?.date).month() === 0 ? 12 : dayjs(service?.date).month()
+  const year =
+    month === 12 ? dayjs(service?.date).year() - 1 : dayjs(service?.date).year()
   const { data: { data: { 0: prevService } } = { data: [null] } } =
     useGetAllServicesQuery(
       {

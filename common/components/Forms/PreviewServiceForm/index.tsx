@@ -58,10 +58,7 @@ const PreviewServiceForm: FC<Props> = ({ form, currentService }) => {
         />
       </Form.Item>
       <Form.Item name="losses" label="Втрати в тр-рі, лініях, реактивна">
-        <Input
-          className={s.formInput}
-          disabled
-        />
+        <Input className={s.formInput} disabled />
       </Form.Item>
     </Form>
   )

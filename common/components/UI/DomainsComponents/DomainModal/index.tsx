@@ -20,7 +20,6 @@ interface Props {
 }
 
 const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
-
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
   const [addDomainEstate] = useAddDomainMutation()
@@ -42,20 +41,21 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       mfo: currentDomain?.mfo || '',
       rnokpp: currentDomain?.rnokpp || '',
       iban: currentDomain?.iban || '',
-      customServices: currentDomain?.customServices 
-      || [{
-        groupName: 'Стандартні послуги',
-        services:[
-          '677d414283b6ef93c6b8ea2c',
-          '68156d2cf520914e5e1ad87c', 
-          '68156cdbf520914e5e1ad877',
-          '6816bca1e26e39a785fd7a0d',
-          '68156d58f520914e5e1ad881',
-          '677d434c83b6ef93c6b8ea3a',
-          '68230f76a51fddf0ae165d77',
-          '682dd48d9665126611c81950'
-        ],
-      }],
+      customServices: currentDomain?.customServices || [
+        {
+          groupName: 'Стандартні послуги',
+          services: [
+            '677d414283b6ef93c6b8ea2c',
+            '68156d2cf520914e5e1ad87c',
+            '68156cdbf520914e5e1ad877',
+            '6816bca1e26e39a785fd7a0d',
+            '68156d58f520914e5e1ad881',
+            '677d434c83b6ef93c6b8ea3a',
+            '68230f76a51fddf0ae165d77',
+            '682dd48d9665126611c81950',
+          ],
+        },
+      ],
     }
     form.setFieldsValue(initialValues)
   }, [currentDomain, form])
@@ -63,9 +63,13 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
   const handleSubmit = async () => {
     const formData = await form.validateFields()
 
-    if (!currentDomain && domains?.some(domain => domain.name === formData.name)) {
+    if (
+      !currentDomain &&
+      domains?.some((domain) => domain.name === formData.name)
+    ) {
       message.error({
-        content: 'Помилка при додаванні надавача послуг!  Домен з такою назвою вже існує!',
+        content:
+          'Помилка при додаванні надавача послуг!  Домен з такою назвою вже існує!',
         duration: 4,
         style: {
           marginTop: '20vh',

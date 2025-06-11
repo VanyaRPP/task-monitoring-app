@@ -61,7 +61,6 @@ const BankTransactions = () => {
     if (balances?.length > 0 && !selectedAcc) {
       setSelectedAcc(balances[0].acc)
     }
-
   }, [balances])
 
   const renderTabBar: TabsProps['renderTabBar'] = (props, DefaultTabBar) => (

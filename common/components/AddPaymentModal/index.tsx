@@ -54,12 +54,13 @@ const handleNonEmpty = (form, setIsButtonDisabled) => {
   const fields = form.getFieldsValue()
   const operation = fields.operation
   let requiredFields = ['domain', 'company']
-  if (operation ===  'credit' || operation === Operations.Credit) {
+  if (operation === 'credit' || operation === Operations.Credit) {
     requiredFields = ['domain', 'company', 'generalSum', 'description']
   }
   const dis = requiredFields.some(
-  (key) => fields[key] === undefined || fields[key] === null || fields[key] === ''
-)
+    (key) =>
+      fields[key] === undefined || fields[key] === null || fields[key] === ''
+  )
   setIsButtonDisabled(dis)
 }
 

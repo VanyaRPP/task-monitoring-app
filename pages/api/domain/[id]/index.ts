@@ -13,7 +13,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser } =
+    await getCurrentUser(req, res)
 
   const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
 

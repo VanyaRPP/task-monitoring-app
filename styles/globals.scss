@@ -10,7 +10,6 @@ body {
   max-width: 400px;
   box-sizing: border-box;
 
-
   &.dark {
     background-color: rgba(251, 251, 251, 0.074);
     backdrop-filter: blur(4px); // сам блюр
@@ -19,14 +18,12 @@ body {
     border-radius: 6px;
     transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
 
-
-    @media(max-width: 320px) {
+    @media (max-width: 320px) {
       background-color: #121212;
       backdrop-filter: none; // Вимикаємо блюр
       -webkit-backdrop-filter: none; // Підтримка Safari
       border: none; // Убираємо рамку картки
       border-radius: 0px; // Замість закруглених кутів використовуємо квадратні
-
     }
   }
 
@@ -38,16 +35,14 @@ body {
     border-radius: 6px;
     transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
 
-    @media(max-width: 320px) {
+    @media (max-width: 320px) {
       background-color: rgba(0, 0, 0, 0.074);
       backdrop-filter: none; // Вимикаємо блюр
       -webkit-backdrop-filter: none; // Підтримка Safari
       border: none; // Убираємо рамку картки
       border-radius: 0px; // Замість закруглених кутів використовуємо квадратні
-
     }
   }
-
 }
 
 .login-container {
@@ -119,7 +114,7 @@ body {
   .ant-table thead {
     margin: 0 !important;
     padding: 0 !important;
-    background-color: #fafafa !important; 
+    background-color: #fafafa !important;
   }
 
   .ant-table thead > tr:first-child > th {
@@ -199,5 +194,3 @@ body {
     margin: 0;
   }
 }
-
-

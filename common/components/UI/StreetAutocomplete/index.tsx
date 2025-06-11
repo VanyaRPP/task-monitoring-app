@@ -57,7 +57,10 @@ const StreetAutocomplete: FC<Props> = ({
         }}
         onSelect={(value, option) => {
           form.setFieldValue('address', value)
-          form.setFieldValue('city', (option.label as string)?.split(',')[0]?.trim())
+          form.setFieldValue(
+            'city',
+            (option.label as string)?.split(',')[0]?.trim()
+          )
           setIsValueChanged(true)
         }}
         notFoundContent={isFetching ? 'Loading...' : null}

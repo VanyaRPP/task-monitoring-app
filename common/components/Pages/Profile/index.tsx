@@ -24,7 +24,7 @@ import {
   Form,
   Space,
   Tag,
-  Typography
+  Typography,
 } from 'antd'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
@@ -55,7 +55,6 @@ export const ProfilePage: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingFlag, setEditingFlag] = useState(null)
 
-  
   return (
     <Space
       direction="vertical"
@@ -155,34 +154,35 @@ export const ProfilePage: React.FC = () => {
 
       {isGlobalAdmin && (
         <>
-        <Card title="Користувачі">
-          <UsersTable />
-        </Card>
-        
-        <Card>
-      <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
-        <Typography.Title level={4} style={{ margin: 0 }}>
-          Фічефлаги
-        </Typography.Title>
-          <FeatureFlagModal
-            open={modalOpen}
-            onClose={() => {
-              setModalOpen(false)
-              setEditingFlag(null)
-            }}
-          />
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => setModalOpen(true)}
-        >
-        </Button>
-      </Flex>
+          <Card title="Користувачі">
+            <UsersTable />
+          </Card>
 
-      <FeatureFlagsTable/>
+          <Card>
+            <Flex
+              justify="space-between"
+              align="center"
+              style={{ marginBottom: 16 }}
+            >
+              <Typography.Title level={4} style={{ margin: 0 }}>
+                Фічефлаги
+              </Typography.Title>
+              <FeatureFlagModal
+                open={modalOpen}
+                onClose={() => {
+                  setModalOpen(false)
+                  setEditingFlag(null)
+                }}
+              />
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => setModalOpen(true)}
+              ></Button>
+            </Flex>
 
-    </Card>
-
+            <FeatureFlagsTable />
+          </Card>
         </>
       )}
     </Space>

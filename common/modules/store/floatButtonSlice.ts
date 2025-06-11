@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import type { FloatButtonItem } from '@utils/types'
 
-
 interface FloatButtonState {
   buttons: FloatButtonItem[]
 }

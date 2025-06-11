@@ -41,15 +41,20 @@ const AddServiceForm: React.FC<Props> = ({
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
 
-  const { data: customDomainServices } = useGetCustomServicesByDomainQuery({ domainId: domainId }, { skip: !domainId })
-  
-  const initialCustomServices = customDomainServices?.data?.flatMap((group) => 
-    Array.isArray(group?.services) ? group.services.map((service) => ({
-      label: service.name || 'Невідома послуга',
-      price: 0,
-      fieldName: service.fieldName || 'defaultFieldName',
-      _id: service._id || 'defaultId',
-    })) : []
+  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
+    { domainId: domainId },
+    { skip: !domainId }
+  )
+
+  const initialCustomServices = customDomainServices?.data?.flatMap((group) =>
+    Array.isArray(group?.services)
+      ? group.services.map((service) => ({
+          label: service.name || 'Невідома послуга',
+          price: 0,
+          fieldName: service.fieldName || 'defaultFieldName',
+          _id: service._id || 'defaultId',
+        }))
+      : []
   )
 
   const { previousMonth } = usePreviousMonthService({
@@ -74,7 +79,8 @@ const AddServiceForm: React.FC<Props> = ({
         currentService?.garbageCollectorPrice ??
         previousMonth?.garbageCollectorPrice ??
         0,
-      customServices: currentService?.customServices || initialCustomServices || [],
+      customServices:
+        currentService?.customServices || initialCustomServices || [],
       losses: currentService?.losses ?? 0,
     })
   }, [form, currentService, previousMonth, initialCustomServices])
@@ -145,7 +151,7 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
-        
+
         {/* } */}
         {/* { !(initialCustomServices ?? []).some(item => item.fieldName === 'waterPriceTotal') && */}
         <Form.Item
@@ -176,14 +182,7 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
-        <Form.Item
-          name="losses"
-          label={
-            <>
-              Втрати в тр-рі, лініях, реактивна
-            </>
-          }
-        >
+        <Form.Item name="losses" label={<>Втрати в тр-рі, лініях, реактивна</>}>
           <InputNumber
             parser={inputNumberParser}
             placeholder="Вкажіть значення"
