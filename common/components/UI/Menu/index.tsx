@@ -143,6 +143,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
       mode="inline"
       items={items}
       {...props}
+      style={{ paddingBottom: '50px' }}
     />
   )
 }
