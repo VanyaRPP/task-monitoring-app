@@ -1,40 +1,62 @@
-import { Schema, model, Types } from 'mongoose'
+import mongoose, { ObjectId, Schema } from 'mongoose'
 
-export interface ProfitDocument {
-  _id?: Types.ObjectId
-  domain: Types.ObjectId
-  amount: number
-  type: 'debit' | 'credit' // 'debit' = витрата (-), 'credit' = прибуток (+)
-  categories?: string[]
-  description?: string
-  date: Date
-  createdAt?: Date
-  updatedAt?: Date
+export interface IDomain {
+  _id: string
+  name: string
+  adminEmails: [string]
+  streets: [ObjectId]
+  description: string
+  mfo: string
+  iban: string
+  rnokpp: string
+  IEName: string
+  domainBankToken: IDomainBankToken[]
+  domainServices: string[]
+  customServices: ICustomService[]
 }
 
-const ProfitSchema = new Schema<ProfitDocument>(
-  {
-    domain: {
-      type: Schema.Types.ObjectId,
-      ref: 'Domain',
-      required: true,
-    },
-    amount: { type: Number, required: true },
-    type: {
-      type: String,
-      enum: ['debit', 'credit'], // debit = -, credit = +
-      required: true,
-    },
-    categories: {
-      type: [String],
-      default: [],
-    },
-    description: { type: String },
-    date: { type: Date, required: true },
-  },
-  {
-    timestamps: true,
-  }
-)
+export interface ICustomService {
+  groupName: string
+  services: string[]
+}
 
-export const ProfitModel = model<ProfitDocument>('Profit', ProfitSchema)
+export interface IDomainService {
+  name: string
+  price: number
+  enabled: boolean
+}
+
+export interface IDomainBankToken {
+  token: string
+  shortToken: string
+  tokenName: string
+  confidant: string[]
+}
+
+const DomainSchema = new Schema<IDomain>({
+  name: { type: String, required: true },
+  adminEmails: { type: [String], required: true },
+  streets: {
+    type: [{ type: Schema.Types.ObjectId, ref: 'Street' }],
+    required: true,
+  },
+  description: { type: String, required: true },
+  mfo: { type: String, required: false },
+  iban: { type: String, required: false },
+  rnokpp: { type: String, required: false },
+  IEName: { type: String, required: false },
+  domainBankToken: { type: [Object] },
+  domainServices: { type: [Object] },
+  customServices: [
+    {
+      groupName: { type: String, required: true },
+      services: [{ type: String, required: true }],
+    },
+  ],
+})
+
+const Domain =
+  (mongoose.models?.Domain as mongoose.Model<IDomain>) ||
+  mongoose.model('Domain', DomainSchema)
+
+export default Domain
