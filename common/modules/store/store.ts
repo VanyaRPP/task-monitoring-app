@@ -15,7 +15,8 @@ import { streetApi } from '@common/api/streetApi/street.api'
 import { taskApi } from '@common/api/taskApi/task.api'
 import { userApi } from '@common/api/userApi/user.api'
 import sidebarReducer from '@modules/store/sidebarSlice'
-import themeReducer from '@modules/store/themeSlice'
+import themeReducer from '@modules/store/themeSlice' 
+import paymentsReducer from '@modules/store/paymentsSlice'
 import floatButtonReducer from '@modules/store/floatButtonSlice'
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 
@@ -39,6 +40,7 @@ export const store = configureStore({
     [mockBankApi.reducerPath]: mockBankApi.reducer,
     sidebar: sidebarReducer,
     theme: themeReducer,
+    payments: paymentsReducer,
     [FeatureFlagApi.reducerPath]: FeatureFlagApi.reducer,
     floatButtons: floatButtonReducer,
   },
