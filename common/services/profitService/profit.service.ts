@@ -1,4 +1,4 @@
-import { ProfitModel } from '@modules/models/Profit'
+import ProfitModel from '@modules/models/Profit'
 import { Types } from 'mongoose'
 
 export interface CreateProfitInput {
@@ -16,7 +16,7 @@ class ProfitService {
 
     const [records, total] = await Promise.all([
       ProfitModel.find()
-        .populate('domain')
+        // .populate('domain')
         .sort({ date: -1 })
         .skip(skip)
         .limit(limit),

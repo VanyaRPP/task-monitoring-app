@@ -1,7 +1,6 @@
-import { Schema, model, Types } from 'mongoose'
+import mongoose, { Schema, Types, Document, Model } from 'mongoose'
 
-export interface ProfitDocument {
-  _id?: Types.ObjectId
+export interface ProfitDocument extends Document {
   domain: Types.ObjectId
   amount: number
   type: 'debit' | 'credit' // 'debit' = витрата (-), 'credit' = прибуток (+)
@@ -22,7 +21,7 @@ const ProfitSchema = new Schema<ProfitDocument>(
     amount: { type: Number, required: true },
     type: {
       type: String,
-      enum: ['debit', 'credit'], // debit = -, credit = +
+      enum: ['debit', 'credit'],
       required: true,
     },
     categories: {
@@ -37,4 +36,8 @@ const ProfitSchema = new Schema<ProfitDocument>(
   }
 )
 
-export const ProfitModel = model<ProfitDocument>('Profit', ProfitSchema)
+const Profit =
+  (mongoose.models?.Profit as Model<ProfitDocument>) ||
+  mongoose.model<ProfitDocument>('Profit', ProfitSchema)
+
+export default Profit
