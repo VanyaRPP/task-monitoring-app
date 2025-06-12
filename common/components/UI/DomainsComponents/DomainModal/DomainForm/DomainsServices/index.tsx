@@ -2,10 +2,7 @@ import {
   useGetCustomServicesQuery,
   useCreateCustomServiceMutation,
 } from '@common/api/customServicesApi/customServices.api'
-import {
-  CloseOutlined,
-  SaveOutlined,
-} from '@ant-design/icons'
+import { CloseOutlined, SaveOutlined } from '@ant-design/icons'
 import {
   Button,
   Card,
@@ -71,73 +68,87 @@ const DomainsServices: FC<Props> = ({
     form.setFieldsValue({ domainServices: updatedServices })
   }
 
- const handleAddCustomService = async () => {
-  if (!customName) {
-    message.warning('Введіть назву послуги')
-    return
-  }
+  const handleAddCustomService = async () => {
+    if (!customName) {
+      message.warning('Введіть назву послуги')
+      return
+    }
 
-  try {
-    const result = await createCustomService({ name: customName }).unwrap()
+    try {
+      const result = await createCustomService({ name: customName }).unwrap()
 
-    const current = form.getFieldValue('domainServices') || []
-    form.setFieldsValue({
-      domainServices: [...current, { name: customName, _id: result.data._id }],
-    })
+      const current = form.getFieldValue('domainServices') || []
+      form.setFieldsValue({
+        domainServices: [
+          ...current,
+          { name: customName, _id: result.data._id },
+        ],
+      })
 
-    message.success('Кастомна послуга додана')
-    setCustomName('')
-    setIsPopOpen(false)
-  } catch (err: any) {
-    console.error('Помилка створення послуги:', err)
+      message.success('Кастомна послуга додана')
+      setCustomName('')
+      setIsPopOpen(false)
+    } catch (err: any) {
+      console.error('Помилка створення послуги:', err)
 
-    const isConflict =
-      err?.status === 409 ||
-      err?.originalStatus === 409 ||
-      err?.data?.message?.toLowerCase().includes('вже існує')
+      const isConflict =
+        err?.status === 409 ||
+        err?.originalStatus === 409 ||
+        err?.data?.message?.toLowerCase().includes('вже існує')
 
-    if (isConflict) {
-      message.warning('Послуга з такою назвою вже існує')
-    } else {
-      message.error('Помилка при додаванні послуги')
+      if (isConflict) {
+        message.warning('Послуга з такою назвою вже існує')
+      } else {
+        message.error('Помилка при додаванні послуги')
+      }
     }
   }
-}
 
- return (
-  <>
-    {editable && (
-      <Popconfirm
-        title={
-              <>
-        <Space direction="vertical" style={{ display: 'flex', minWidth: 300 }}>
-         <Input
-          placeholder="Введіть вашу послугу"
-          value={customName}
-          onChange={(e) => setCustomName(e.target.value)}
-          autoFocus
-         />
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginTop: 10 }}>
-          <Button onClick={() => setIsPopOpen(false)}>Скасувати</Button>
-          <Button type="primary" onClick={handleAddCustomService}>Підтвердити</Button>
-        </div>
-      </Space>
+  return (
+    <>
+      {editable && (
+        <Popconfirm
+          title={
+            <>
+              <Space
+                direction="vertical"
+                style={{ display: 'flex', minWidth: 300 }}
+              >
+                <Input
+                  placeholder="Введіть вашу послугу"
+                  value={customName}
+                  onChange={(e) => setCustomName(e.target.value)}
+                  autoFocus
+                />
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: 10,
+                    marginTop: 10,
+                  }}
+                >
+                  <Button onClick={() => setIsPopOpen(false)}>Скасувати</Button>
+                  <Button type="primary" onClick={handleAddCustomService}>
+                    Підтвердити
+                  </Button>
+                </div>
+              </Space>
             </>
           }
           open={isPopOpen}
           onOpenChange={setIsPopOpen}
           icon={null}
           showCancel={false}
-          okButtonProps={{ style: { display: 'none' } }} 
+          okButtonProps={{ style: { display: 'none' } }}
         >
-        <Button type="dashed" style={{ marginBottom: 10 }} block>
-          + Додати послугу
-        </Button>
-      </Popconfirm>
-    )}
-  </>
-)
-
+          <Button type="dashed" style={{ marginBottom: 10 }} block>
+            + Додати послугу
+          </Button>
+        </Popconfirm>
+      )}
+    </>
+  )
 }
 
 export default DomainsServices

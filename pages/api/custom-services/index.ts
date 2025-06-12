@@ -40,7 +40,7 @@ export default async function handler(
 
         const escapedName = escapeRegex(trimmedName)
         const existingService = await CustomService.findOne({
-          name: { $regex: `^${trimmedName}$`, $options: 'i' }, 
+          name: { $regex: `^${trimmedName}$`, $options: 'i' },
         })
 
         if (existingService) {
