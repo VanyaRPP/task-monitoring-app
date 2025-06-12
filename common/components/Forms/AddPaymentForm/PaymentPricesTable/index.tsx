@@ -39,7 +39,6 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
       loading={loading}
     />
   )
-
 }
 
 export default PaymentPricesTable

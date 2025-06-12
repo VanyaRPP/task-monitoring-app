@@ -2,7 +2,6 @@ import ProfitService from '@common/services/profitService/profit.service'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCurrentUser } from '@utils/getCurrentUser'
 
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
