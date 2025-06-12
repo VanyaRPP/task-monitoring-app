@@ -7,13 +7,16 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const { isGlobalAdmin } = await getCurrentUser(req, res)
-  // if (!isGlobalAdmin) return res.status(403).json({ success: false })
+  if (!isGlobalAdmin) return res.status(403).json({ success: false })
 
   try {
     switch (req.method) {
       case 'GET': {
         const { page = '1', limit = '10' } = req.query
-        const data = await ProfitService.getAll(+page, +limit)
+        const data = await ProfitService.getAllWithMonthSeparation(
+          +page,
+          +limit
+        )
         return res.status(200).json({ success: true, ...data })
       }
 

@@ -34,6 +34,61 @@ class ProfitService {
     }
   }
 
+  static async getAllWithMonthSeparation(page = 1, limit = 10) {
+    const skip = (page - 1) * limit
+
+    const [groupedData, total] = await Promise.all([
+      ProfitModel.aggregate([
+        {
+          $sort: { date: -1 },
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: limit,
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: '$date' },
+              month: { $month: '$date' },
+            },
+            profits: { $push: '$$ROOT' },
+          },
+        },
+        {
+          $sort: {
+            '_id.year': -1,
+            '_id.month': -1,
+          },
+        },
+      ]),
+      ProfitModel.countDocuments(),
+    ])
+
+    // Перетворення результату у вигляді об'єкта з ключами: "May 2025", "April 2025", ...
+    const data = {}
+    for (const group of groupedData) {
+      const { year, month } = group._id
+      const monthName = new Date(year, month - 1).toLocaleString('en-US', {
+        month: 'long',
+      })
+      const key = `${monthName} ${year}`
+      data[key] = group.profits
+    }
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    }
+  }
+
   static async getByDomain(domainId: string, page = 1, limit = 10) {
     const skip = (page - 1) * limit
 
