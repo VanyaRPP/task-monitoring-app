@@ -67,7 +67,6 @@ class ProfitService {
       ProfitModel.countDocuments(),
     ])
 
-    // Перетворення результату у вигляді об'єкта з ключами: "May 2025", "April 2025", ...
     const data = {}
     for (const group of groupedData) {
       const { year, month } = group._id
