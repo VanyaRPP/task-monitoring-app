@@ -23,17 +23,19 @@ class EncryptionService {
    */
   decrypt(encryptedValue: string): string {
     try {
-      const bytes = CryptoJS.AES.decrypt(encryptedValue, this.secretKey);
-      const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+      const bytes = CryptoJS.AES.decrypt(encryptedValue, this.secretKey)
+      const decryptedText = bytes.toString(CryptoJS.enc.Utf8)
 
       if (!decryptedText) {
-        throw new Error("Empty string");
+        throw new Error('Empty string')
       }
 
-      return decryptedText;
+      return decryptedText
     } catch (error) {
-      console.error("Decryption error:", error);
-      return `Error: ${error instanceof Error ? error.message : "Unknown error"}`; 
+      console.error('Decryption error:', error)
+      return `Error: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`
     }
   }
 }

@@ -42,7 +42,6 @@ const ReceiptForm: FC<Props> = ({
           marginLeft: '1.5em',
         }}
       >
-
         <div className={s.providerInvoice}>
           <div className={s.datecellTitle}>
             ДОВІДКА № {newData.invoiceNumber}

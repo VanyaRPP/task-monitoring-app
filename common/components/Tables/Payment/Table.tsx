@@ -1,4 +1,4 @@
-import  { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useRouter } from 'next/router'
 import {
   Table,
@@ -489,6 +489,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         align: 'center',
         fixed: 'right',
         title: '',
+        hidden: isUser,
         width: sepDomainID ? 25 : 80,
         render: (_value, payment) => (
           <Dropdown

@@ -2,29 +2,33 @@ import FeatureFlagService from '@common/services/FeatureFlagServices'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { NextApiRequest, NextApiResponse } from 'next'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   const { isGlobalAdmin } = await getCurrentUser(req, res)
   if (!isGlobalAdmin) return res.status(403).json({ success: false })
 
-    const id = req.query.id as string
+  const id = req.query.id as string
 
-    try {
+  try {
     switch (req.method) {
       case 'PATH': {
-        const updated = await FeatureFlagService.update(id,req.body)
+        const updated = await FeatureFlagService.update(id, req.body)
         return res.status(200).json({ success: true, data: updated })
       }
       case 'DELETE': {
         await FeatureFlagService.delete(id)
-        return res.status(200).json({ success: true})
+        return res.status(200).json({ success: true })
       }
-      
-      default: 
+
+      default:
         return res.status(405).end()
     }
-   } catch (error: any) {
-      return res.status(500).json({
-        success:false, error: error.message })
-    }
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    })
+  }
 }

@@ -2,9 +2,22 @@ import {
   useGetCustomServicesQuery,
   useCreateCustomServiceMutation,
 } from '@common/api/customServicesApi/customServices.api'
-import { CloseOutlined, SaveOutlined } from '@ant-design/icons'
-import { Button, Card, Form, FormInstance, Input, Tooltip, message } from 'antd'
-import React, { FC, useEffect } from 'react'
+import {
+  CloseOutlined,
+  SaveOutlined,
+} from '@ant-design/icons'
+import {
+  Button,
+  Card,
+  Form,
+  FormInstance,
+  Input,
+  Tooltip,
+  message,
+  Popconfirm,
+  Space,
+} from 'antd'
+import React, { FC, useState } from 'react'
 
 interface Props {
   form: FormInstance
@@ -21,8 +34,10 @@ const DomainsServices: FC<Props> = ({
   domainId,
   onCustomServicesChange,
 }) => {
-
   const [createCustomService] = useCreateCustomServiceMutation()
+
+  const [customName, setCustomName] = useState('')
+  const [isPopOpen, setIsPopOpen] = useState(false)
 
   const handleSave = async (fieldKey: number) => {
     const service = form.getFieldValue(['domainServices', fieldKey])
@@ -30,14 +45,6 @@ const DomainsServices: FC<Props> = ({
       message.error('Будь ласка, введіть назву послуги')
       return
     }
-
-    // const existingService = customServices?.data.find(
-    //   (s) => s.name === service?.name && s.domainId === domainId
-    // )
-    // if (existingService) {
-    //   message.info('Послуга з такою назвою вже існує')
-    //   return
-    // }
 
     try {
       const result = await createCustomService({
@@ -64,65 +71,73 @@ const DomainsServices: FC<Props> = ({
     form.setFieldsValue({ domainServices: updatedServices })
   }
 
-  // if (isLoading) return <div>Завантаження...</div>
-  // if (error) {
-  //   return <div>Помилка завантаження даних: {JSON.stringify(error)}</div>
-  // }
+ const handleAddCustomService = async () => {
+  if (!customName) {
+    message.warning('Введіть назву послуги')
+    return
+  }
 
-  return (
-    <Form.List name="domainServices">
-      {(fields, { add, remove }) => (
-        <div style={{ display: 'flex', rowGap: 16, flexDirection: 'column' }}>
-          {fields.map((field) => (
-            <Card
-              size="small"
-              title={`Послуга ${field.name + 1}`}
-              key={field.key}
-              aria-disabled={!editable}
-              extra={
-                editable ? (
-                  <div>
-                    <Button type="link" onClick={() => handleSave(field.key)}>
-                      <SaveOutlined />
-                    </Button>
-                    <Button
-                      type="link"
-                      danger
-                      onClick={() => {
-                        remove(field.name)
-                        handleRemove(field.name)
-                      }}
-                    >
-                      <CloseOutlined />
-                    </Button>
-                  </div>
-                ) : null
-              }
-            >
-              <Form.Item label="Найменування" name={[field.name, 'name']}>
-                <Input
-                  placeholder="Найменування послуги"
-                  disabled={!editable}
-                />
-              </Form.Item>
-            </Card>
-          ))}
-          {editable && (
-            <Tooltip title="Якщо послуги зі списку вам не підходять, ви можете створити власну">
-              <Button
-                type="dashed"
-                style={{ marginBottom: 10 }}
-                onClick={() => add()}
-                block
-              >
-                + Додати послугу
-              </Button>
-            </Tooltip>
-          )}
+  try {
+    const result = await createCustomService({ name: customName }).unwrap()
+
+    const current = form.getFieldValue('domainServices') || []
+    form.setFieldsValue({
+      domainServices: [...current, { name: customName, _id: result.data._id }],
+    })
+
+    message.success('Кастомна послуга додана')
+    setCustomName('')
+    setIsPopOpen(false)
+  } catch (err: any) {
+    console.error('Помилка створення послуги:', err)
+
+    const isConflict =
+      err?.status === 409 ||
+      err?.originalStatus === 409 ||
+      err?.data?.message?.toLowerCase().includes('вже існує')
+
+    if (isConflict) {
+      message.warning('Послуга з такою назвою вже існує')
+    } else {
+      message.error('Помилка при додаванні послуги')
+    }
+  }
+}
+
+ return (
+  <>
+    {editable && (
+      <Popconfirm
+        title={
+              <>
+        <Space direction="vertical" style={{ display: 'flex', minWidth: 300 }}>
+         <Input
+          placeholder="Введіть вашу послугу"
+          value={customName}
+          onChange={(e) => setCustomName(e.target.value)}
+          autoFocus
+         />
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginTop: 10 }}>
+          <Button onClick={() => setIsPopOpen(false)}>Скасувати</Button>
+          <Button type="primary" onClick={handleAddCustomService}>Підтвердити</Button>
         </div>
-      )}
-    </Form.List>
-  )
+      </Space>
+            </>
+          }
+          open={isPopOpen}
+          onOpenChange={setIsPopOpen}
+          icon={null}
+          showCancel={false}
+          okButtonProps={{ style: { display: 'none' } }} 
+        >
+        <Button type="dashed" style={{ marginBottom: 10 }} block>
+          + Додати послугу
+        </Button>
+      </Popconfirm>
+    )}
+  </>
+)
+
 }
 
 export default DomainsServices

@@ -1,8 +1,10 @@
 import FeatureFlagService from '@common/services/FeatureFlagServices'
 import { NextApiRequest, NextApiResponse } from 'next'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   if (req.method !== 'GET') {
     return res
       .status(405)
@@ -10,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const flag = await FeatureFlagService.getByName(req.query.name as string )
+    const flag = await FeatureFlagService.getByName(req.query.name as string)
     if (!flag) {
       return res
         .status(404)

@@ -17,42 +17,41 @@ const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({
   unicKey,
 }) => {
   const dispatch = useDispatch()
-const [isFullScreen, toggleFullScreen, floatButton] =
-  useFullScreenFloatButton(unicKey || 'default')
+  const [isFullScreen, toggleFullScreen, floatButton] =
+    useFullScreenFloatButton(unicKey || 'default')
 
-useEffect(() => {
-  dispatch(addButton(floatButton))
-  return () => {
-    dispatch(removeButton(floatButton.key))
-  }
-}, [dispatch, floatButton])
-
-useEffect(() => {
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Escape' && isFullScreen) {
-      toggleFullScreen?.()
+  useEffect(() => {
+    dispatch(addButton(floatButton))
+    return () => {
+      dispatch(removeButton(floatButton.key))
     }
-  }
+  }, [dispatch, floatButton])
 
-  const handlePopState = () => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFullScreen) {
+        toggleFullScreen?.()
+      }
+    }
+
+    const handlePopState = () => {
+      if (isFullScreen) {
+        toggleFullScreen?.()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('popstate', handlePopState)
+
     if (isFullScreen) {
-      toggleFullScreen?.()
+      window.history.pushState({ fullScreen: true }, '')
     }
-  }
 
-  window.addEventListener('keydown', handleKeyDown)
-  window.addEventListener('popstate', handlePopState)
-
-  if (isFullScreen) {
-    window.history.pushState({ fullScreen: true }, '')
-  }
-
-  return () => {
-    window.removeEventListener('keydown', handleKeyDown)
-    window.removeEventListener('popstate', handlePopState)
-  }
-}, [isFullScreen, toggleFullScreen])
-
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('popstate', handlePopState)
+    }
+  }, [isFullScreen, toggleFullScreen])
 
   return (
     <>

@@ -51,7 +51,7 @@ const AddServiceModal: FC<Props> = ({
   const [editService, { isLoading: isEditingLoading }] =
     useEditServiceMutation()
   const { edit, preview } = serviceActions
-  
+
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
     const serviceData = {
@@ -66,7 +66,7 @@ const AddServiceModal: FC<Props> = ({
       inflicionPrice: formData.inflicionPrice || 0,
       description: formData.description || '',
       customServices: formData.customServices || [],
-      ...(formData.losses > 0 && { losses: formData.losses })
+      ...(formData.losses > 0 && { losses: formData.losses }),
     }
     const response = currentService
       ? await editService({
