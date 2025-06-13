@@ -6,7 +6,8 @@ import Payment from '@modules/models/Payment'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
-
+import ProfitService from '@common/services/profitService/profit.service'
+import payment from '@pages/payment'
 start()
 
 export default async function handler(
@@ -79,7 +80,6 @@ export default async function handler(
           if (!deleted) {
             throw new Error('failed to delete')
           }
-
           return res.status(200).json({ success: true, data: deleted })
         }
 
@@ -89,7 +89,7 @@ export default async function handler(
           if (!deleted) {
             throw new Error('failed to delete')
           }
-
+          await ProfitService.deleteByIdPayment(req.query.id as string)
           return res.status(200).json({ success: true, data: deleted })
         }
 
@@ -121,6 +121,23 @@ export default async function handler(
             { _id: req.query.id },
             req.body,
             { new: true }
+          )
+          const description =
+            response.type === 'debit'
+              ? `Інвойс №${response.invoiceNumber}`
+              : response.description
+
+          const profitObject = {
+            type: response.type,
+            date: response.invoiceCreationDate,
+            amount: response.generalSum,
+            description,
+            invoiceNumber: response.invoiceNumber,
+          }
+
+          await ProfitService.updatePayment(
+            req.query.id as string,
+            profitObject
           )
           return res.status(200).json({ success: true, data: response })
         }
