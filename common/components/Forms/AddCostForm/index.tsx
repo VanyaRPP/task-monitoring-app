@@ -1,8 +1,6 @@
 import { validateField } from '@assets/features/validators'
-import { IService } from '@common/api/serviceApi/service.api.types'
-import AddressesSelect from '@components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
-import { usePreviousMonthService } from '@modules/hooks/useService'
+import { inputNumberParser } from '@utils/helpers'
 import {
   ConfigProvider,
   DatePicker,
@@ -14,17 +12,16 @@ import {
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
-import { useEffect } from 'react'
 import s from './style.module.scss'
-import { inputNumberParser } from '@utils/helpers'
 
 dayjs.locale('uk')
 
 interface Props {
   form: FormInstance<any>
+  type: string
 }
 
-const AddCostForm: React.FC<Props> = ({ form }) => {
+const AddCostForm: React.FC<Props> = ({ form, type }) => {
   const { MonthPicker } = DatePicker
 
   return (
@@ -42,7 +39,11 @@ const AddCostForm: React.FC<Props> = ({ form }) => {
             className={s.formInput}
           />
         </Form.Item>
-        <Form.Item name="sum" label="Сума" rules={validateField('required')}>
+        <Form.Item
+          name="sum"
+          label={type === 'debit' ? 'Витрати' : 'Прибутки'}
+          rules={validateField('required')}
+        >
           <InputNumber
             parser={inputNumberParser}
             placeholder="Вкажіть значення"
