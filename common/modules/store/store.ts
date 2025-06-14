@@ -15,10 +15,11 @@ import { streetApi } from '@common/api/streetApi/street.api'
 import { taskApi } from '@common/api/taskApi/task.api'
 import { userApi } from '@common/api/userApi/user.api'
 import sidebarReducer from '@modules/store/sidebarSlice'
-import themeReducer from '@modules/store/themeSlice' 
+import themeReducer from '@modules/store/themeSlice'
 import paymentsReducer from '@modules/store/paymentsSlice'
 import floatButtonReducer from '@modules/store/floatButtonSlice'
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
+import { profitApi } from '@common/api/profitsApi/profits.api'
 
 export const store = configureStore({
   reducer: {
@@ -33,7 +34,7 @@ export const store = configureStore({
     [customServicesApi.reducerPath]: customServicesApi.reducer,
     [notificationApi.reducerPath]: notificationApi.reducer,
     [realestateApi.reducerPath]: realestateApi.reducer,
-
+    [profitApi.reducerPath]: profitApi.reducer,
     [streetApi.reducerPath]: streetApi.reducer,
     [bankApi.reducerPath]: bankApi.reducer,
     [debtorsApi.reducerPath]: debtorsApi.reducer,
@@ -68,7 +69,8 @@ export const store = configureStore({
       .concat(bankApi.middleware)
       .concat(mockBankApi.middleware)
       .concat(debtorsApi.middleware)
-      .concat(FeatureFlagApi.middleware),
+      .concat(FeatureFlagApi.middleware)
+      .concat(profitApi.middleware),
 })
 
 export type AppDispatch = typeof store.dispatch

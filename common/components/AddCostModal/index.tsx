@@ -1,13 +1,10 @@
-import {
-  useAddServiceMutation,
-  useEditServiceMutation,
-} from '@common/api/serviceApi/service.api'
+import { useCreateProfitMutation } from '@common/api/profitsApi/profits.api'
+import AddCostForm from '@components/Forms/AddCostForm'
 import Modal from '@components/UI/ModalWindow'
-import { Form } from 'antd'
+import type { TabsProps } from 'antd'
+import { Form, Tabs, message } from 'antd'
 import dayjs from 'dayjs'
 import { FC, useState } from 'react'
-import AddCostForm from '@components/Forms/AddCostForm'
-import { useAddCostPaymentMutation } from '@common/api/paymentApi/payment.api'
 import s from './style.module.scss'
 
 interface Props {
@@ -19,43 +16,65 @@ type FormData = {
   date: Date
   sum: number
   description: string
+  type: string
 }
 
 const AddCostModal: FC<Props> = ({ closeModal }) => {
   const [form] = Form.useForm()
-  const [addCost, { isLoading: isLoading }] = useAddCostPaymentMutation()
+  const [type, setType] = useState<'debit' | 'credit'>('debit')
+  const [createProfit, { isLoading, isError }] = useCreateProfitMutation()
 
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
     const costData = {
       domain: formData.domain,
-      date: dayjs(formData.date).toDate(),
-      sum: formData.sum,
+      date: dayjs(formData.date).toISOString(),
+      amount: formData.sum,
       description: formData.description || '',
+      type: type as 'debit' | 'credit',
     }
-    const response = await addCost(costData)
+
+    const response = await createProfit(costData)
 
     if ('data' in response) {
       form.resetFields()
+      message.success('Успішно додано!')
       closeModal()
     }
   }
 
+  const onTabChange = (key: string) => {
+    setType(key === '1' ? 'debit' : 'credit')
+  }
+
+  const tabItems: TabsProps['items'] = [
+    {
+      key: '1',
+      label: 'Додати витрати',
+      children: <AddCostForm form={form} type="debit" />,
+    },
+    {
+      key: '2',
+      label: 'Додати прибутки',
+      children: <AddCostForm form={form} type="credit" />,
+    },
+  ]
+
   return (
     <Modal
-      title="Ціна на послуги в місяць"
+      title=""
       onOk={handleSubmit}
-      changed={() => true}
       onCancel={() => {
         form.resetFields()
         closeModal()
       }}
+      changed={() => true}
       className={s.Modal}
       okText={'Додати'}
       cancelText={'Відміна'}
       confirmLoading={isLoading}
     >
-      <AddCostForm form={form} />
+      <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />
     </Modal>
   )
 }
