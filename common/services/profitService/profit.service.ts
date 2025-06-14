@@ -3,10 +3,12 @@ import { Types } from 'mongoose'
 
 export interface CreateProfitInput {
   domain: Types.ObjectId | string
+  payment: Types.ObjectId | string
   amount: number
   type: 'debit' | 'credit'
   categories?: string[]
   description?: string
+  invoiceNumber?: string
   date: Date
 }
 
@@ -136,8 +138,27 @@ class ProfitService {
     return ProfitModel.findByIdAndUpdate(id, data, { new: true })
   }
 
+  static async updatePayment(
+    paymentId: string,
+    data: Partial<{
+      amount: number
+      type: 'debit' | 'credit'
+      categories: string[]
+      description: string
+      invoiceNumber: string
+      date: Date
+    }>
+  ) {
+    return ProfitModel.findOneAndUpdate({ payment: paymentId }, data, {
+      new: true,
+    })
+  }
+
   static async delete(id: string) {
     return ProfitModel.findByIdAndDelete(id)
+  }
+  static async deleteByIdPayment(paymentId: string) {
+    return ProfitModel.findOneAndDelete({ payment: paymentId })
   }
 
   static async getBalance(domainId: string) {
