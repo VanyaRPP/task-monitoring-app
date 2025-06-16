@@ -4,8 +4,9 @@ import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { DividedSpace } from '@components/UI/DividedSpace'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { Form, Input, Space, Typography, Tooltip, Button } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
+import { ReloadOutlined } from '@ant-design/icons'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -13,14 +14,38 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service } = usePaymentContext()
+  const { service, prevPayment, payment } = usePaymentContext()
+  const name = useMemo(() => toArray<string>(_name), [_name])
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  const lastAmount = Form.useWatch(['invoice', ...name, 'lastAmount'], form)
+  const waterAmount = payment.invoice.find((invoice) => invoice.type === 'waterPrice').lastAmount
+    ?? prevPayment.invoice.find((invoice) => invoice.type === 'waterPrice').lastAmount
 
   return (
-    <Space direction="vertical" size={0}>
-      <Typography.Text>Водопостачання</Typography.Text>
-      <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-        {toFirstUpperCase(dateToMonthYear(service?.date))}
-      </Typography.Text>
+    <Space direction="horizontal" style={{ justifyContent: 'space-between', width: '100%' }}>
+      <Space direction="vertical" size={0}>
+        <Typography.Text>Водопостачання</Typography.Text>
+        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+          {toFirstUpperCase(dateToMonthYear(service?.date))}
+        </Typography.Text>
+      </Space>
+      {editable && (service?.waterPrice !== +price || lastAmount !== waterAmount) && (
+        <Tooltip title="Відновити значення">
+          <Button
+            onClick={() => {
+              form.setFieldValue(
+                ['invoice', ...name, 'price'],
+                service?.waterPrice
+              )
+              form.setFieldValue(
+                ['invoice', ...name, 'lastAmount'],
+                waterAmount ?? Form.useWatch(['invoice', ...name, 'lastAmount'], form)
+              )
+            }}
+            icon={<ReloadOutlined />}
+          />
+        </Tooltip>
+      )}
     </Space>
   )
 }
@@ -72,16 +97,20 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
         rules={[validator.required(), validator.min(0)]}
         noStyle
       >
-        <Input
-          type="number"
-          placeholder="Значення..."
-          disabled={disabled}
-          suffix={
-            <span>
-              м<sup>3</sup>
-            </span>
-          }
-        />
+        <Space
+          direction="horizontal"
+        >
+          <Input
+            type="number"
+            placeholder="Значення..."
+            disabled={disabled}
+            suffix={
+              <span>
+                м<sup>3</sup>
+              </span>
+            }
+          />
+        </Space>
       </Form.Item>
     </Space>
   )

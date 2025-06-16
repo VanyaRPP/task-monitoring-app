@@ -53,7 +53,6 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   const inflicionInvoice = useMemo(() => {
     return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
   }, [invoices])
-  console.log(inflicionInvoice?.sum)
 
   const prevPlacingInvoice = useMemo(() => {
     return prevPayment?.invoice.find(
@@ -73,7 +72,6 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   const calculatedInitialPrice = useMemo(() => {
     return +toRoundFixed(rentPrice + (inflicionInvoice?.sum ?? 0))
   }, [rentPrice, inflicionInvoice])
-  console.log(calculatedInitialPrice)
 
   const isInitial = useMemo(() => {
     return toRoundFixed(price) === toRoundFixed(calculatedInitialPrice)
