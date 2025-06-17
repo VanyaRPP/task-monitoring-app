@@ -5,9 +5,18 @@ import { useGetByDomainQuery } from '@common/api/profitsApi/profits.api'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import { Profit } from '@common/api/profitsApi/profits.type'
 import { parentColumns, childColumns } from './tableConfig'
-import { Table, Alert } from 'antd'
-import { FC, useMemo } from 'react'
+import { Table, Alert, Button, Space, Tooltip } from 'antd'
+import { FC, useEffect, useMemo, useState, useCallback } from 'react'
 
+interface ProfitMonthSummary {
+  key: string
+  month: string
+  debit: number
+  credit: number
+  profit: number
+  count: number
+  transactions: Profit[]
+}
 
 interface ProfitTableProps {
   domainId?: string
@@ -28,7 +37,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
     { skip: !domainId }
   )
 
-  const dataSource = useMemo(() => {
+  const dataSource: ProfitMonthSummary[] = useMemo(() => {
     if (!profitsGrouped?.data) return []
 
     return Object.entries(profitsGrouped.data).map(([month, transactions]) => {
@@ -52,15 +61,39 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
     })
   }, [profitsGrouped])
 
+  const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([])
 
-  const handlePageChange = (page: number, newPageSize?: number) => {
-    dispatch(
-      setTransactionTablePagination({
-        currentPage: page,
-        pageSize: newPageSize,
-      })
-    )
-  }
+  useEffect(() => {
+    if (dataSource.length > 0) {
+      setExpandedRowKeys(dataSource.map((item) => item.key))
+    } else {
+      setExpandedRowKeys([])
+    }
+  }, [dataSource])
+
+  const expandAll = useCallback(() => {
+    setExpandedRowKeys(dataSource.map((item) => item.key))
+  }, [dataSource])
+
+  const collapseAll = useCallback(() => {
+    setExpandedRowKeys([])
+  }, [])
+
+  const isAllExpanded =
+    expandedRowKeys.length === dataSource.length && dataSource.length > 0
+
+  const handlePageChange = useCallback(
+    (page: number, newPageSize?: number) => {
+      dispatch(
+        setTransactionTablePagination({
+          currentPage: page,
+          pageSize: newPageSize,
+        })
+      )
+      setExpandedRowKeys([])
+    },
+    [dispatch]
+  )
 
   if (isError) return <Alert type="error" message="Failed to load profits." />
 
@@ -68,33 +101,60 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
     return <Alert type="info" message="No profit data available." />
 
   return (
-    <Table
-      loading={isLoading}
-      columns={parentColumns}
-      dataSource={dataSource}
-      pagination={{
-        showSizeChanger: true,
-        pageSizeOptions: ['30', '50', '80', '100'],
-        pageSize,
-        current: currentPage,
-        total: profitsGrouped.meta.total,
-        onChange: handlePageChange,
-      }}
-      expandable={{
-        expandedRowRender: (record) => (
-          <Table
-            columns={childColumns}
-            dataSource={record.transactions.map((t: Profit) => ({
-              ...t,
-              key: t._id,
-            }))}
-            pagination={false}
-          />
-        ),
-        rowExpandable: (record) => record.transactions.length > 0,
-        defaultExpandedRowKeys: dataSource.map((item) => item.key),
-      }}
-    />
+    <>
+      <Space style={{ marginBottom: 16 }}>
+        <Tooltip
+          title={isAllExpanded ? 'Collapse all rows' : 'Expand all rows'}
+        >
+          <Button
+            onClick={isAllExpanded ? collapseAll : expandAll}
+            disabled={isLoading || dataSource.length === 0}
+            aria-pressed={isAllExpanded}
+            aria-label={isAllExpanded ? 'Collapse all rows' : 'Expand all rows'}
+          >
+            {isAllExpanded ? 'Collapse All' : 'Expand All'}
+          </Button>
+        </Tooltip>
+        <span>
+          Expanded: {expandedRowKeys.length} / {dataSource.length}
+        </span>
+      </Space>
+
+      <Table
+        loading={isLoading}
+        columns={parentColumns}
+        dataSource={dataSource}
+        pagination={{
+          showSizeChanger: true,
+          pageSizeOptions: ['30', '50', '80', '100'],
+          pageSize,
+          current: currentPage,
+          total: profitsGrouped.meta.total,
+          onChange: handlePageChange,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} records`,
+        }}
+        expandable={{
+          expandedRowRender: (record) => (
+            <Table
+              columns={childColumns}
+              dataSource={record.transactions.map((t: Profit) => ({
+                ...t,
+                key: t._id,
+              }))}
+              pagination={false}
+              rowKey={(record) => record._id}
+            />
+          ),
+          rowExpandable: (record) => record.transactions.length > 0,
+          expandedRowKeys,
+          onExpandedRowsChange: (expandedKeys) =>
+            setExpandedRowKeys([...expandedKeys] as string[]),
+        }}
+        rowKey={(record) => record.key}
+        aria-label="Profit transactions summary table"
+      />
+    </>
   )
 }
 
