@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Table, Button } from 'antd'
 import { useRouter } from 'next/router'
-import { CalendarOutlined, PlusOutlined } from '@ant-design/icons'
+import { CalendarOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons'
 
 import { useGetCostPaymentQuery } from '@common/api/paymentApi/payment.api'
 import s from './style.module.scss'
@@ -33,6 +33,8 @@ const ProfitPayment: React.FC = () => {
 
   const { data: profitPayment, isLoading, isError } = useGetCostPaymentQuery()
 
+   const [previewItem, setPreviewItem] = useState<any | null>(null)
+
   const columns = [
     {
       title: 'Місяць',
@@ -55,6 +57,19 @@ const ProfitPayment: React.FC = () => {
       key: 'totalGeneralSumCredit',
       render: (value) => `${value.toLocaleString()} UAH`,
     },
+    {
+      title: '',
+      key: 'actions',
+      render: (_, record) => (
+        <Button
+          style={{ padding: 0 }}
+          type="link"
+          onClick={() => setPreviewItem(record)}
+        >
+          <EyeOutlined />
+        </Button>
+      ),
+    }
   ]
 
   return (
@@ -112,6 +127,18 @@ const ProfitPayment: React.FC = () => {
           )
         }}
       />
+      {previewItem && (
+        <AddCostModal
+          closeModal={() => setPreviewItem(null)}
+          currentCost={{
+            domain: previewItem.domain, 
+            date: new Date(previewItem.month),
+            sum: previewItem.totalGeneralSumCredit,
+            description: '',
+          }}
+          costActions={{ preview: true }}
+        />
+      )}
     </TableCard>
   )
 }

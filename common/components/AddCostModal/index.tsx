@@ -9,6 +9,15 @@ import s from './style.module.scss'
 
 interface Props {
   closeModal: VoidFunction
+  currentCost?: {
+    domain: string
+    date: Date
+    sum: number
+    description: string
+  }
+  costActions?: {
+    preview: boolean
+  }
 }
 
 type FormData = {
@@ -19,8 +28,9 @@ type FormData = {
   type: string
 }
 
-const AddCostModal: FC<Props> = ({ closeModal }) => {
+const AddCostModal: FC<Props> = ({ closeModal, costActions, currentCost }) => {
   const [form] = Form.useForm()
+  const { preview } = costActions || {}
   const [type, setType] = useState<'debit' | 'credit'>('debit')
   const [createProfit, { isLoading, isError }] = useCreateProfitMutation()
 
@@ -48,33 +58,53 @@ const AddCostModal: FC<Props> = ({ closeModal }) => {
   }
 
   const tabItems: TabsProps['items'] = [
-    {
-      key: '1',
-      label: 'Додати витрати',
-      children: <AddCostForm form={form} type="debit" />,
-    },
-    {
-      key: '2',
-      label: 'Додати прибутки',
-      children: <AddCostForm form={form} type="credit" />,
-    },
-  ]
+  {
+    key: '1',
+    label: preview ? 'Витрати' : 'Додати витрати',
+    children: (
+      <AddCostForm
+        form={form}
+        type="debit"
+        currentCost={currentCost}
+        disabled={preview}
+      />
+    ),
+  },
+  {
+    key: '2',
+    label: preview ? 'Прибутки' : 'Додати прибутки',
+    children: (
+      <AddCostForm
+        form={form}
+        type="credit"
+        currentCost={currentCost}
+        disabled={preview}
+      />
+    ),
+  },
+]
 
   return (
     <Modal
-      title=""
-      onOk={handleSubmit}
-      onCancel={() => {
-        form.resetFields()
-        closeModal()
-      }}
-      changed={() => true}
-      className={s.Modal}
-      okText={'Додати'}
-      cancelText={'Відміна'}
-      confirmLoading={isLoading}
+          title=""
+          onOk={!preview ? handleSubmit : undefined}
+          onCancel={() => {
+            form.resetFields()
+            closeModal()
+          }}
+          changed={() => !preview}
+          className={s.Modal}
+          okText={!preview ? 'Додати' : undefined}
+          okButtonProps={{ style: { ...(preview && { display: 'none' }) } }}
+          cancelText={preview ? 'Закрити' : 'Відміна'}
+          confirmLoading={isLoading}
     >
-      <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />
+      <Tabs
+        defaultActiveKey={type === 'debit' ? '1' : '2'}
+        items={tabItems}
+        onChange={onTabChange}
+      />
+
     </Modal>
   )
 }
