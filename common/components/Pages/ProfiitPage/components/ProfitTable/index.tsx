@@ -3,10 +3,10 @@
 import { setTransactionTablePagination } from '@modules/store/profitPageSlice'
 import { useGetByDomainQuery } from '@common/api/profitsApi/profits.api'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
+import { FC, useEffect, useMemo, useState, useCallback } from 'react'
 import { Profit } from '@common/api/profitsApi/profits.type'
 import { parentColumns, childColumns } from './tableConfig'
 import { Table, Alert, Button, Space, Tooltip } from 'antd'
-import { FC, useEffect, useMemo, useState, useCallback } from 'react'
 
 interface ProfitMonthSummary {
   key: string
@@ -125,6 +125,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
         columns={parentColumns}
         dataSource={dataSource}
         pagination={{
+          position: ['bottomCenter'],
           showSizeChanger: true,
           pageSizeOptions: ['30', '50', '80', '100'],
           pageSize,

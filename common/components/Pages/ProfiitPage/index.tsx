@@ -1,4 +1,5 @@
 'use client'
+import FullScreenWrapper from '@components/UI/fullScreenTableWrapper/fullScreenTableWrapper'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import { setActiveTabKey } from '@modules/store/profitPageSlice'
 import { ReactNode, useEffect, useMemo } from 'react'
@@ -36,23 +37,24 @@ const ProfitPage = () => {
   if (tabList.length === 0) return <p>No domains available.</p>
 
   return (
-    <Space
-      direction="vertical"
-      style={{ width: '100%', position: 'relative' }}
-      size="middle"
-    >
-      <Card
-        style={{ width: '100%' }}
-        title="Profit"
-        extra={<>Hello</>}
-        tabList={tabList}
-        activeTabKey={activeTabKey}
-        onTabChange={onTabChange}
-        loading={isLoading}
+    <FullScreenWrapper unicKey="profit-table">
+      <Space
+        direction="vertical"
+        style={{ width: '100%', position: 'relative' }}
+        size="middle"
       >
-        {contentList[activeTabKey]}
-      </Card>
-    </Space>
+        <Card
+          title="Profit"
+          extra={<span>DodatiSudiShos</span>}
+          tabList={tabList}
+          activeTabKey={activeTabKey}
+          onTabChange={onTabChange}
+          loading={isLoading}
+        >
+          {contentList[activeTabKey]}
+        </Card>
+      </Space>
+    </FullScreenWrapper>
   )
 }
 
