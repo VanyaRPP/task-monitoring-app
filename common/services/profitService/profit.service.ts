@@ -1,5 +1,5 @@
 import ProfitModel from '@modules/models/Profit'
-import { Types } from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 
 export interface CreateProfitInput {
   domain: Types.ObjectId | string
@@ -103,6 +103,68 @@ class ProfitService {
 
     return {
       data: records,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    }
+  }
+
+  static async getByDomainWithMonthSeparation(
+    domainId: string,
+    page = 1,
+    limit = 10
+  ) {
+    const skip = (page - 1) * limit
+
+    const [groupedData, total] = await Promise.all([
+      ProfitModel.aggregate([
+        {
+          $match: { domain: new mongoose.Types.ObjectId(domainId) },
+        },
+        {
+          $sort: { date: -1 },
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: limit,
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: '$date' },
+              month: { $month: '$date' },
+            },
+            profits: { $push: '$$ROOT' },
+          },
+        },
+        {
+          $sort: {
+            '_id.year': -1,
+            '_id.month': -1,
+          },
+        },
+      ]),
+      ProfitModel.countDocuments({ domain: domainId }),
+    ])
+
+    const data: Record<string, (typeof groupedData)[0]['profits']> = {}
+
+    for (const group of groupedData) {
+      const { year, month } = group._id
+      const monthName = new Date(year, month - 1).toLocaleString('en-US', {
+        month: 'long',
+      })
+      const key = `${monthName} ${year}`
+      data[key] = group.profits
+    }
+
+    return {
+      data,
       meta: {
         total,
         page,

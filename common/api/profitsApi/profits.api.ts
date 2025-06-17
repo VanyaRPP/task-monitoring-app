@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { Profit } from './profits.type'
+import { GroupedProfitResponse, Profit } from './profits.type'
 
 interface PaginatedResponse<T> {
   data: T[]
@@ -29,8 +29,12 @@ export const profitApi = createApi({
       providesTags: (_result, _err, id) => [{ type: 'Profit', id }],
     }),
 
-    getByDomain: builder.query<Profit[], string>({
-      query: (domainId) => `/domain/${domainId}`,
+    getByDomain: builder.query<
+      GroupedProfitResponse,
+      { domainId: string; page?: number; limit?: number }
+    >({
+      query: ({ domainId, page = 1, limit = 10 }) =>
+        `/domain/${domainId}?page=${page}&limit=${limit}`,
       providesTags: ['Profit'],
     }),
 

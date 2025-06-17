@@ -1,6 +1,7 @@
 import MainLayout from '@common/components/Layouts/Main'
 import ProfitPayment from '@components/DashboardPage/ProfitPayment/ProfitPayment'
 import withAuthRedirect from '@components/HOC/withAuthRedirect'
+import ProfitPage from '@components/Pages/ProfiitPage'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
 import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
@@ -21,7 +22,8 @@ export default withAuthRedirect(() => {
           { title: 'Прибутки', path: AppRoutes.PROFIT },
         ]}
       >
-        <ProfitPayment />
+        {/* <ProfitPayment /> */}
+        <ProfitPage />
       </MainLayout>
     </>
   )
