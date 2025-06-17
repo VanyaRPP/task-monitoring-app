@@ -6,8 +6,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { isGlobalAdmin } = await getCurrentUser(req, res)
-  if (!isGlobalAdmin) return res.status(403).json({ success: false })
+  const { isAdmin } = await getCurrentUser(req, res)
+  if (!isAdmin) return res.status(403).json({ success: false })
 
   try {
     switch (req.method) {
@@ -21,16 +21,16 @@ export default async function handler(
       }
 
       case 'POST': {
-        const { domain, amount, type, categories, description, date, payment } =
+        const { domain, amount, type, description, date } =
           req.body
+
         const record = await ProfitService.create({
           domain,
           amount,
           type,
-          categories,
+          categories: [],
           description,
           date,
-          payment,
         })
         return res.status(200).json({ success: true, data: record })
       }

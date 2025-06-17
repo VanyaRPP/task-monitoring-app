@@ -19,9 +19,14 @@ type FormData = {
   type: string
 }
 
+enum CostType {
+  DEBIT = 'debit',
+  CREDIT = 'credit',
+}
+
 const AddCostModal: FC<Props> = ({ closeModal }) => {
   const [form] = Form.useForm()
-  const [type, setType] = useState<'debit' | 'credit'>('debit')
+  const [type, setType] = useState<CostType>(CostType.DEBIT)
   const [createProfit, { isLoading, isError }] = useCreateProfitMutation()
 
   const handleSubmit = async () => {
@@ -31,7 +36,7 @@ const AddCostModal: FC<Props> = ({ closeModal }) => {
       date: dayjs(formData.date).toISOString(),
       amount: formData.sum,
       description: formData.description || '',
-      type: type as 'debit' | 'credit',
+      type: type,
     }
 
     const response = await createProfit(costData)
@@ -44,7 +49,7 @@ const AddCostModal: FC<Props> = ({ closeModal }) => {
   }
 
   const onTabChange = (key: string) => {
-    setType(key === '1' ? 'debit' : 'credit')
+    setType(key === '1' ? CostType.DEBIT : CostType.CREDIT)
   }
 
   const tabItems: TabsProps['items'] = [

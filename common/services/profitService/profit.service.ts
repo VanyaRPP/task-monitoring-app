@@ -3,7 +3,7 @@ import mongoose, { Types } from 'mongoose'
 
 export interface CreateProfitInput {
   domain: Types.ObjectId | string
-  payment: Types.ObjectId | string
+  payment?: Types.ObjectId | string
   amount: number
   type: 'debit' | 'credit'
   categories?: string[]
@@ -179,7 +179,13 @@ class ProfitService {
   }
 
   static async create(data: CreateProfitInput) {
-    return await ProfitModel.create(data)
+    try {
+      const profit = await ProfitModel.create(data)
+      return profit
+    } catch (error) {
+      console.error('Failed to create Profit record:', error)
+      throw new Error('Unable to create profit. Please try again later.')
+    }
   }
 
   static async bulkCreate(data: CreateProfitInput[]) {
