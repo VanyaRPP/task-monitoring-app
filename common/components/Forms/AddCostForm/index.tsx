@@ -12,7 +12,7 @@ import {
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from 'next-i18next'
 import s from './style.module.scss'
 
 dayjs.locale('uk')
@@ -23,7 +23,7 @@ interface Props {
 }
 
 const AddCostForm: React.FC<Props> = ({ form, type }) => {
-  const { t } = useTranslation('profitPage')
+  const { t } = useTranslation()
 
   return (
     <ConfigProvider locale={ukUA}>
@@ -31,31 +31,33 @@ const AddCostForm: React.FC<Props> = ({ form, type }) => {
         <DomainsSelect form={form} />
         <Form.Item
           name="date"
-          label={t('form.date')}
+          label={t('profitPage:form.date')}
           rules={validateField('required')}
         >
           <DatePicker
             format="MMMM YYYY DD"
-            placeholder={t('form.datePlaceholder')}
+            placeholder={t('profitPage:form.datePlaceholder', { ns: 'common' })}
             className={s.formInput}
           />
         </Form.Item>
         <Form.Item
           name="sum"
           label={
-            type === 'debit' ? t('form.amountDebit') : t('form.amountCredit')
+            type === 'debit'
+              ? t('profitPage:form.amountDebit')
+              : t('profitPage:form.amountCredit')
           }
           rules={validateField('required')}
         >
           <InputNumber
             parser={inputNumberParser}
-            placeholder={t('form.amountPlaceholder')}
+            placeholder={t('profitPage:form.amountPlaceholder')}
             className={s.formInput}
           />
         </Form.Item>
-        <Form.Item name="description" label={t('form.description')}>
+        <Form.Item name="description" label={t('profitPage:form.description')}>
           <Input.TextArea
-            placeholder={t('form.descriptionPlaceholder')}
+            placeholder={t('profitPage:form.descriptionPlaceholder')}
             maxLength={256}
             className={s.formInput}
           />

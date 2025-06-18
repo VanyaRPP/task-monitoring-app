@@ -1,7 +1,7 @@
 import { useCreateProfitMutation } from '@common/api/profitsApi/profits.api'
 import AddCostForm from '@components/Forms/AddCostForm'
 import Modal from '@components/UI/ModalWindow'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from 'next-i18next'
 import { Form, Tabs, message } from 'antd'
 import type { TabsProps } from 'antd'
 import { FC, useState } from 'react'
@@ -26,7 +26,7 @@ enum CostType {
 }
 
 const AddCostModal: FC<Props> = ({ closeModal }) => {
-  const { t } = useTranslation('profitPage')
+  const { t } = useTranslation()
   const [form] = Form.useForm()
   const [type, setType] = useState<CostType>(CostType.DEBIT)
   const [createProfit, { isLoading, isError }] = useCreateProfitMutation()
@@ -57,12 +57,12 @@ const AddCostModal: FC<Props> = ({ closeModal }) => {
   const tabItems: TabsProps['items'] = [
     {
       key: '1',
-      label: t('modal.addTitleDebit'),
+      label: t('profitPage:modal.addTitleDebit'),
       children: <AddCostForm form={form} type="debit" />,
     },
     {
       key: '2',
-      label: t('modal.addTitleCredit'),
+      label: t('profitPage:modal.addTitleCredit'),
       children: <AddCostForm form={form} type="credit" />,
     },
   ]
@@ -77,8 +77,8 @@ const AddCostModal: FC<Props> = ({ closeModal }) => {
       }}
       changed={() => true}
       className={s.Modal}
-      okText={t('modal.okText')}
-      cancelText={t('modal.cancelText')}
+      okText={t('profitPage:modal.okText')}
+      cancelText={t('profitPage:modal.cancelText')}
       confirmLoading={isLoading}
     >
       <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />
