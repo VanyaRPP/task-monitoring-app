@@ -150,41 +150,7 @@ export const ProfilePage: React.FC = () => {
           <EditUserForm userId={user?._id?.toString()} form={form} />
           <Button onClick={form.submit}>Зберегти</Button>
         </Card>
-      </Flex>
-
-      {isGlobalAdmin && (
-        <>
-          <Card title="Користувачі">
-            <UsersTable />
-          </Card>
-
-          <Card>
-            <Flex
-              justify="space-between"
-              align="center"
-              style={{ marginBottom: 16 }}
-            >
-              <Typography.Title level={4} style={{ margin: 0 }}>
-                Фічефлаги
-              </Typography.Title>
-              <FeatureFlagModal
-                open={modalOpen}
-                onClose={() => {
-                  setModalOpen(false)
-                  setEditingFlag(null)
-                }}
-              />
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => setModalOpen(true)}
-              ></Button>
-            </Flex>
-
-            <FeatureFlagsTable />
-          </Card>
-        </>
-      )}
+      </Flex> 
     </Space>
   )
 }

@@ -132,7 +132,13 @@ export const Menu: React.FC<MenuProps> = (props) => {
             type: 'item',
             label: <Link href={AppRoutes.PROFILE}>Профіль</Link>,
           },
-        ],
+          {
+            key: AppRoutes.SETTINGS,
+            type: 'item',
+            label: <Link href={AppRoutes.SETTINGS}>Налаштування</Link>,
+            hidden: !isGlobalAdmin,
+          },
+        ].filter(({ hidden }) => !hidden),
       },
     ] as AntdMenuProps['items']
   }, [router, session, isGlobalAdmin, isDomainAdmin, isDevMode])
