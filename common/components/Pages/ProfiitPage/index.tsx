@@ -57,11 +57,11 @@ const ProfitPage = () => {
         size="middle"
       >
         <Card
-          title="Profit"
+          title={<span style={{ color: '#9254de' }}>Прибутки</span>}
           extra={
             isAdmin && (
               <Button type="link" onClick={() => setIsModalOpen(true)}>
-                <PlusOutlined /> Add
+                <PlusOutlined /> Додати
               </Button>
             )
           }
