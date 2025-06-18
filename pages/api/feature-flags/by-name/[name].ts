@@ -1,4 +1,4 @@
-import FeatureFlagService from '@modules/services/FeatureFlagServices'
+import FeatureFlagService from '@common/services/FeatureFlagServices'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(

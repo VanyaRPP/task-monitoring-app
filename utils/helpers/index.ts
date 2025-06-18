@@ -15,7 +15,7 @@ import {
 import { PaymentOptions } from '../types'
 import { IPermissions } from '@modules/models/User'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
-
+import { AppRoutes, Operations } from '@utils/constants'
 import { useState, useEffect } from 'react'
 
 export const toFirstUpperCase = (text: string) => {
@@ -618,6 +618,44 @@ export function isGlobalAdmin(user?: IUser): boolean {
   }
 
   return user.roles.includes('GlobalAdmin')
+}
+
+export function formatDateFilterForQuery(raw?: string[]) {
+  if (!raw?.length) return {}
+  const numbers = raw
+    .map((v) => {
+      const leading = parseInt(v, 10)
+      if (!isNaN(leading)) {
+        const m = v.match(/-(\d+)\s*$/)
+        if (m) {
+          return [leading, parseInt(m[1], 10)]
+        }
+        return [leading]
+      }
+      const n = Number(v)
+      return isNaN(n) ? [] : [n]
+    })
+    .flat()
+    .filter((n) => !isNaN(n)) as number[]
+  const [year, ...months] = numbers
+  const query: any = {}
+  if (year != null) {
+    query.year = year
+  }
+  if (months.length === 1) {
+    query.month = months[0]
+  } else if (months.length > 1) {
+    query.month = months
+  }
+  return query
+}
+export function getTypeOperation(value?: string) {
+  if (value === Operations.Debit) {
+    return { type: Operations.Debit }
+  } else if (value === Operations.Credit) {
+    return { type: Operations.Credit }
+  }
+  return {}
 }
 
 // usePermissions

@@ -1,6 +1,6 @@
-import FeatureFlagService from '@common/services/FeatureFlagServices'
-import { getCurrentUser } from '@utils/getCurrentUser'
+import ProfitService from '@common/services/profitService/profit.service'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { getCurrentUser } from '@utils/getCurrentUser'
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,16 +9,22 @@ export default async function handler(
   const { isGlobalAdmin } = await getCurrentUser(req, res)
   if (!isGlobalAdmin) return res.status(403).json({ success: false })
 
-  const id = req.query.id as string
+  const { id } = req.query
 
   try {
     switch (req.method) {
-      case 'PATH': {
-        const updated = await FeatureFlagService.update(id, req.body)
+      case 'GET': {
+        const record = await ProfitService.getById(id as string)
+        return res.status(200).json({ success: true, data: record })
+      }
+
+      case 'PATCH': {
+        const updated = await ProfitService.update(id as string, req.body)
         return res.status(200).json({ success: true, data: updated })
       }
+
       case 'DELETE': {
-        await FeatureFlagService.delete(id)
+        await ProfitService.delete(id as string)
         return res.status(200).json({ success: true })
       }
 
@@ -26,9 +32,6 @@ export default async function handler(
         return res.status(405).end()
     }
   } catch (error: any) {
-    return res.status(500).json({
-      success: false,
-      error: error.message,
-    })
+    return res.status(500).json({ success: false, message: error.message })
   }
 }

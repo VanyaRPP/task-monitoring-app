@@ -19,14 +19,14 @@ import {
   DeleteOutlined,
   MoreOutlined,
 } from '@ant-design/icons'
-import type { ColumnsType, ColumnType } from 'antd/es/table'
+import { ColumnsType, ColumnType } from 'antd/es/table'
 
-import type {
+import {
   IExtendedPayment,
   IGetPaymentResponse,
   IFilter,
 } from '@common/api/paymentApi/payment.api.types'
-import type { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
+import { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
 
 import {
   toFirstUpperCase,
@@ -489,6 +489,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         align: 'center',
         fixed: 'right',
         title: '',
+        hidden: isUser,
         width: sepDomainID ? 25 : 80,
         render: (_value, payment) => (
           <Dropdown

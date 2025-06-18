@@ -34,6 +34,17 @@ export const domainApi = createApi({
           : [],
       transformResponse: (response: IGetDomainResponse) => response.data,
     }),
+    getDomainsByAdmin: builder.query<IExtendedDomain[], void>({
+      query: () => ({
+        url: `domain/admin`,
+        method: 'GET',
+      }),
+      providesTags: (response) =>
+        response
+          ? response.map((item) => ({ type: 'Domain', id: item._id }))
+          : [],
+      transformResponse: (response: IGetDomainResponse) => response.data,
+    }),
     addDomain: builder.mutation<IAddDomainResponse, IDomainModel>({
       query(data) {
         const { ...body } = data
@@ -99,4 +110,5 @@ export const {
   useDeleteDomainMutation,
   useEditDomainMutation,
   useGetDomainByPkQuery,
+  useGetDomainsByAdminQuery,
 } = domainApi
