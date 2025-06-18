@@ -21,8 +21,7 @@ export default async function handler(
       }
 
       case 'POST': {
-        const { domain, amount, type, description, date } =
-          req.body
+        const { domain, amount, type, description, date } = req.body
 
         const record = await ProfitService.create({
           domain,

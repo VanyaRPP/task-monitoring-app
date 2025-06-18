@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import  { Draft } from 'immer'
-import  { IFilter } from '@common/api/filterApi/filter.api.types'
-import  { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
-import  { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'  
-import { AppRoutes, Operations, ServiceType, Roles } from '@utils/constants' 
+import { Draft } from 'immer'
+import { IFilter } from '@common/api/filterApi/filter.api.types'
+import { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
+import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { AppRoutes, Operations, ServiceType, Roles } from '@utils/constants'
 import { PaymentDeleteItem } from '@components/Tables/Payment/Header'
 
 type DebtPerMonth = {
@@ -18,7 +18,6 @@ type CompanyWithPayments = {
   debtPerMonth: DebtPerMonth[]
   totalDebt: number
 }
-
 
 interface PaymentsState {
   currentPage: number
@@ -36,9 +35,7 @@ interface PaymentsState {
   paymentsDeleteItems: PaymentDeleteItem[]
   selectedPayments: IExtendedPayment[]
   selectedDateField: 'invoiceCreationDate' | 'date'
-} 
-
-
+}
 
 const initialState: PaymentsState = {
   currentPage: 0,
@@ -124,7 +121,7 @@ const paymentsSlice = createSlice({
       state: Draft<PaymentsState>,
       action: PayloadAction<IExtendedPayment[]>
     ) {
-     state.selectedPayments = action.payload as Draft<IExtendedPayment[]>
+      state.selectedPayments = action.payload as Draft<IExtendedPayment[]>
     },
 
     setSelectedDateField(

@@ -27,7 +27,6 @@ import profitPageReducer from '@modules/store/profitPageSlice'
 // Redux Toolkit imports
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
 
-
 export const store = configureStore({
   reducer: {
     [filterApi.reducerPath]: filterApi.reducer,

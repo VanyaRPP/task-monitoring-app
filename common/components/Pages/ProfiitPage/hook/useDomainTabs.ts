@@ -1,4 +1,4 @@
-import { useGetDomainsByAdminQuery } from "@common/api/domainApi/domain.api"
+import { useGetDomainsByAdminQuery } from '@common/api/domainApi/domain.api'
 
 export const useDomainTabs = () => {
   const { data = [], isLoading, isError } = useGetDomainsByAdminQuery()

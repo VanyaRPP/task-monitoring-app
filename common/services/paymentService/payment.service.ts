@@ -14,7 +14,7 @@ import {
 } from '@utils/helpers'
 import { getStreetsPipeline } from '@utils/pipelines'
 import { FilterQuery } from 'mongoose'
-import ProfitService from '@common/services/profitService/profit.service'  
+import ProfitService from '@common/services/profitService/profit.service'
 
 export interface PaymentQueryParams {
   streetIds?: string | string[]
@@ -30,7 +30,6 @@ export interface PaymentQueryParams {
   day?: string | number
   dateField?: 'invoiceCreationDate' | 'date'
 }
-
 
 export interface UserContext {
   isUser: boolean
@@ -208,26 +207,26 @@ export async function getPayments(
 
 export async function createPayment(body: any, isAdmin: boolean) {
   if (!isAdmin) throw new Error('not allowed')
-    const payment = await Payment.create(body) 
-    
+  const payment = await Payment.create(body)
+
   const description =
     payment.type === 'debit'
       ? `Інвойс №${payment.invoiceNumber}`
       : payment.description
-    
-    const profitObject = {
-        domain: payment.domain.toString(),
-        payment: payment.id.toString(),
-        amount: payment.generalSum,
-        type: payment.type as 'debit' | 'credit',
-        date: payment.invoiceCreationDate,
-        description,
-        invoiceNumber: payment.invoiceNumber.toString(),
-      }
+
+  const profitObject = {
+    domain: payment.domain.toString(),
+    payment: payment.id.toString(),
+    amount: payment.generalSum,
+    type: payment.type as 'debit' | 'credit',
+    date: payment.invoiceCreationDate,
+    description,
+    invoiceNumber: payment.invoiceNumber.toString(),
+  }
   await ProfitService.create(profitObject)
   return payment
 }
- 
+
 function filterPeriodOptions(args) {
   const { year, quarter, day, dateField = 'invoiceCreationDate' } = args
   let { month } = args
@@ -267,4 +266,3 @@ function filterPeriodOptions(args) {
   }
   return filterByDateOptions
 }
-  

@@ -22,16 +22,11 @@ interface Props {
 }
 
 const AddCostForm: React.FC<Props> = ({ form, type }) => {
-
   return (
     <ConfigProvider locale={ukUA}>
       <Form form={form} layout="vertical" className={s.Form}>
         <DomainsSelect form={form} />
-        <Form.Item
-          name="date"
-          label="Data"
-          rules={validateField('required')}
-        >
+        <Form.Item name="date" label="Data" rules={validateField('required')}>
           <DatePicker
             format="MMMM YYYY DD"
             placeholder="Date"
