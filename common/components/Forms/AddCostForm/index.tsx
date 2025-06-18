@@ -12,6 +12,7 @@ import {
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
+import { useTranslation } from 'react-i18next'
 import s from './style.module.scss'
 
 dayjs.locale('uk')
@@ -22,31 +23,39 @@ interface Props {
 }
 
 const AddCostForm: React.FC<Props> = ({ form, type }) => {
+  const { t } = useTranslation('profitPage')
+
   return (
     <ConfigProvider locale={ukUA}>
       <Form form={form} layout="vertical" className={s.Form}>
         <DomainsSelect form={form} />
-        <Form.Item name="date" label="Дата" rules={validateField('required')}>
+        <Form.Item
+          name="date"
+          label={t('form.date')}
+          rules={validateField('required')}
+        >
           <DatePicker
             format="MMMM YYYY DD"
-            placeholder="Вкажіть дату"
+            placeholder={t('form.datePlaceholder')}
             className={s.formInput}
           />
         </Form.Item>
         <Form.Item
           name="sum"
-          label={type === 'debit' ? 'Витрати' : 'Прибутки'}
+          label={
+            type === 'debit' ? t('form.amountDebit') : t('form.amountCredit')
+          }
           rules={validateField('required')}
         >
           <InputNumber
             parser={inputNumberParser}
-            placeholder="Вкажіть значення"
+            placeholder={t('form.amountPlaceholder')}
             className={s.formInput}
           />
         </Form.Item>
-        <Form.Item name="description" label="Опис">
+        <Form.Item name="description" label={t('form.description')}>
           <Input.TextArea
-            placeholder="Введіть опис"
+            placeholder={t('form.descriptionPlaceholder')}
             maxLength={256}
             className={s.formInput}
           />

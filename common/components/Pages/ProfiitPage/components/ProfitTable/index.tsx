@@ -4,9 +4,10 @@ import { setTransactionTablePagination } from '@modules/store/profitPageSlice'
 import { useGetByDomainQuery } from '@common/api/profitsApi/profits.api'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import { FC, useEffect, useMemo, useState, useCallback } from 'react'
+import { getChildColumns, getParentColumns } from './tableConfig'
 import { Profit } from '@common/api/profitsApi/profits.type'
-import { parentColumns, childColumns } from './tableConfig'
 import { Table, Alert, Button, Space, Tooltip } from 'antd'
+import { useTranslation } from 'next-i18next'
 
 interface ProfitMonthSummary {
   key: string
@@ -23,6 +24,11 @@ interface ProfitTableProps {
 }
 
 const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
+  const { t } = useTranslation('profitPage')
+  
+  const parentColumns = useMemo(() => getParentColumns(t), [t])
+  const childColumns = useMemo(() => getChildColumns(t), [t])
+
   const dispatch = useAppDispatch()
   const { currentPage, pageSize } = useAppSelector(
     (state) => state.profitPage.transactionTablePagination
@@ -95,28 +101,35 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
     [dispatch]
   )
 
-  if (isError) return <Alert type="error" message="Не вдалося завантажити прибутки." />
+  if (isError) return <Alert type="error" message={t('table.errorLoading')} />
 
   if (!profitsGrouped || Object.keys(profitsGrouped.data).length === 0)
-    return <Alert type="info" message="Даних про прибутки не знайдено." />
+    return <Alert type="info" message={t('table.noData')} />
 
   return (
     <>
       <Space style={{ marginBottom: 16 }}>
         <Tooltip
-          title={isAllExpanded ? 'Згорнути всі рядки' : 'Розгорнути всі рядки'}
+          title={t(
+            isAllExpanded ? 'table.tooltipCollapse' : 'table.tooltipExpand'
+          )}
         >
           <Button
             onClick={isAllExpanded ? collapseAll : expandAll}
             disabled={isLoading || dataSource.length === 0}
             aria-pressed={isAllExpanded}
-            aria-label={isAllExpanded ? 'Згорнути всі рядки' : 'Розгорнути всі рядки'}
+            aria-label={t(
+              isAllExpanded ? 'table.tooltipCollapse' : 'table.tooltipExpand'
+            )}
           >
-            {isAllExpanded ? 'Згорнути всі' : 'Розгорнути всі'}
+            {t(isAllExpanded ? 'table.collapseAll' : 'table.expandAll')}
           </Button>
         </Tooltip>
         <span>
-          Розгорнуто: {expandedRowKeys.length} / {dataSource.length}
+          {t('table.expanded', {
+            current: expandedRowKeys.length,
+            total: dataSource.length,
+          })}
         </span>
       </Space>
 
@@ -133,7 +146,11 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
           total: profitsGrouped.meta.total,
           onChange: handlePageChange,
           showTotal: (total, range) =>
-            `${range[0]}-${range[1]} з ${total} записів`,
+            t('table.paginationTotal', {
+              from: range[0],
+              to: range[1],
+              total,
+            }),
         }}
         expandable={{
           expandedRowRender: (record) => (
@@ -153,7 +170,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
             setExpandedRowKeys([...expandedKeys] as string[]),
         }}
         rowKey={(record) => record.key}
-        aria-label="Зведена таблиця прибутків"
+        aria-label={t('table.tableAriaLabel')}
       />
     </>
   )

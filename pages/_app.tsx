@@ -1,14 +1,14 @@
 import { Providers_pages } from '@components/Providers'
 import NextNProgress from 'nextjs-progressbar'
 import Head from 'next/head'
+import { appWithTranslation } from 'next-i18next'
+
+import '../common/lib/i18n.ts'
 
 import '@styles/globals.scss'
 import '@styles/reset.scss'
 
-export default function MyApp({
-  Component,
-  pageProps: { session, ...pageProps },
-}) {
+function MyApp({ Component, pageProps }) {
   return (
     <Providers_pages pageProps={pageProps}>
       <Head>
@@ -19,3 +19,5 @@ export default function MyApp({
     </Providers_pages>
   )
 }
+
+export default appWithTranslation(MyApp)

@@ -1,4 +1,5 @@
 'use client'
+
 import FullScreenWrapper from '@components/UI/fullScreenTableWrapper/fullScreenTableWrapper'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
@@ -10,8 +11,10 @@ import ProfitTable from './components/ProfitTable'
 import { PlusOutlined } from '@ant-design/icons'
 import { isAdminCheck } from '@utils/helpers'
 import { Button, Card, Space } from 'antd'
+import { useTranslation } from 'react-i18next'
 
 const ProfitPage = () => {
+  const { t } = useTranslation('profitPage')
   const dispatch = useAppDispatch()
   const activeTabKey = useAppSelector((state) => state.profitPage.activeTabKey)
 
@@ -46,8 +49,8 @@ const ProfitPage = () => {
     setIsModalOpen(false)
   }
 
-  if (isError) return <p>Failed to load domains.</p>
-  if (tabList.length === 0) return <p>No domains available.</p>
+  if (isError) return <p>{t('table.parent.errorLoading')}</p>
+  if (tabList.length === 0) return <p>{t('table.parent.noData')}</p>
 
   return (
     <FullScreenWrapper unicKey="profit-table">
@@ -57,11 +60,11 @@ const ProfitPage = () => {
         size="middle"
       >
         <Card
-          title={<span style={{ color: '#9254de' }}>Прибутки</span>}
+          title={t('title')}
           extra={
             isAdmin && (
               <Button type="link" onClick={() => setIsModalOpen(true)}>
-                <PlusOutlined /> Додати
+                <PlusOutlined /> {t('addButton')}
               </Button>
             )
           }

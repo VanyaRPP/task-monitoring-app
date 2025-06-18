@@ -1,11 +1,12 @@
 import { useCreateProfitMutation } from '@common/api/profitsApi/profits.api'
 import AddCostForm from '@components/Forms/AddCostForm'
 import Modal from '@components/UI/ModalWindow'
-import type { TabsProps } from 'antd'
+import { useTranslation } from 'react-i18next'
 import { Form, Tabs, message } from 'antd'
-import dayjs from 'dayjs'
+import type { TabsProps } from 'antd'
 import { FC, useState } from 'react'
 import s from './style.module.scss'
+import dayjs from 'dayjs'
 
 interface Props {
   closeModal: VoidFunction
@@ -25,6 +26,7 @@ enum CostType {
 }
 
 const AddCostModal: FC<Props> = ({ closeModal }) => {
+  const { t } = useTranslation('profitPage')
   const [form] = Form.useForm()
   const [type, setType] = useState<CostType>(CostType.DEBIT)
   const [createProfit, { isLoading, isError }] = useCreateProfitMutation()
@@ -43,7 +45,7 @@ const AddCostModal: FC<Props> = ({ closeModal }) => {
 
     if ('data' in response) {
       form.resetFields()
-      message.success('Успішно додано!')
+      message.success(t('modal.successMessage'))
       closeModal()
     }
   }
@@ -55,12 +57,12 @@ const AddCostModal: FC<Props> = ({ closeModal }) => {
   const tabItems: TabsProps['items'] = [
     {
       key: '1',
-      label: 'Додати витрати',
+      label: t('modal.addTitleDebit'),
       children: <AddCostForm form={form} type="debit" />,
     },
     {
       key: '2',
-      label: 'Додати прибутки',
+      label: t('modal.addTitleCredit'),
       children: <AddCostForm form={form} type="credit" />,
     },
   ]
@@ -75,8 +77,8 @@ const AddCostModal: FC<Props> = ({ closeModal }) => {
       }}
       changed={() => true}
       className={s.Modal}
-      okText={'Додати'}
-      cancelText={'Відміна'}
+      okText={t('modal.okText')}
+      cancelText={t('modal.cancelText')}
       confirmLoading={isLoading}
     >
       <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />

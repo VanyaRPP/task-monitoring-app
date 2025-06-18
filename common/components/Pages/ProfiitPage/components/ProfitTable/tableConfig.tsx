@@ -1,10 +1,6 @@
 import { Profit } from '@common/api/profitsApi/profits.type'
 import { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
-import 'dayjs/locale/uk'
-
-dayjs.locale('uk')
-
+import type { TFunction } from 'i18next'
 
 interface ProfitMonthSummary {
   key: string
@@ -16,9 +12,11 @@ interface ProfitMonthSummary {
   transactions: Profit[]
 }
 
-export const parentColumns: ColumnsType<ProfitMonthSummary> = [
+export const getParentColumns = (
+  t: TFunction
+): ColumnsType<ProfitMonthSummary> => [
   {
-    title: 'Місяць',
+    title: t('table.parent.month'),
     dataIndex: 'month',
     key: 'month',
     render: (month: string) =>
@@ -26,19 +24,19 @@ export const parentColumns: ColumnsType<ProfitMonthSummary> = [
   },
 
   {
-    title: 'Витрати',
+    title: t('table.parent.debit'),
     dataIndex: 'debit',
     key: 'debit',
     render: (value: number) => value.toFixed(2),
   },
   {
-    title: 'Надходження',
+    title: t('table.parent.credit'),
     dataIndex: 'credit',
     key: 'credit',
     render: (value: number) => value.toFixed(2),
   },
   {
-    title: 'Прибуток',
+    title: t('table.parent.profit'),
     dataIndex: 'profit',
     key: 'profit',
     render: (value: number) => (
@@ -48,21 +46,21 @@ export const parentColumns: ColumnsType<ProfitMonthSummary> = [
     ),
   },
   {
-    title: 'Усього записів',
+    title: t('table.parent.totalRecords'),
     dataIndex: 'count',
     key: 'count',
   },
 ]
 
-export const childColumns: ColumnsType<Profit> = [
+export const getChildColumns = (t: TFunction): ColumnsType<Profit> => [
   {
-    title: 'Дата',
+    title: t('table.child.date'),
     dataIndex: 'date',
     key: 'date',
     render: (date: string) => new Date(date).toLocaleDateString(),
   },
   {
-    title: 'Тип',
+    title: t('table.child.type'),
     dataIndex: 'type',
     key: 'type',
     render: (type: string) => {
@@ -72,17 +70,17 @@ export const childColumns: ColumnsType<Profit> = [
     },
   },
   {
-    title: 'Сума',
+    title: t('table.child.amount'),
     dataIndex: 'amount',
     key: 'amount',
   },
   {
-    title: 'Опис',
+    title: t('table.child.description'),
     dataIndex: 'description',
     key: 'description',
   },
   {
-    title: 'Категорії',
+    title: t('table.child.categories'),
     dataIndex: 'categories',
     key: 'categories',
     render: (cats: string[]) => cats?.join(', ') || '-',
