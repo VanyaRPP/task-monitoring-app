@@ -3,7 +3,8 @@ import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography } from 'antd'
+import { Form, Input, Space, Typography, Tooltip, Button } from 'antd'
+import { ReloadOutlined } from '@ant-design/icons'
 import { useEffect, useMemo } from 'react'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
@@ -31,13 +32,29 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const { service, company } = usePaymentContext()
+  const name = useMemo(() => toArray<string>(_name), [_name])
+  const waterPartPrice = +((service.waterPriceTotal * company.waterPart) / 100)
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
   if (service?.garbageCollectorPrice && company?.rentPart) {
     return (
-      <span>
-        {toRoundFixed(company.waterPart)}% від{' '}
-        {toRoundFixed(service.waterPriceTotal)} грн
-      </span>
+      <Space direction='horizontal' style={{ justifyContent: 'space-between', width: '100%' }}>
+        <span>
+          {toRoundFixed(company.waterPart)}% від{' '}
+          {toRoundFixed(service.waterPriceTotal)} грн
+        </span>
+        {editable && waterPartPrice !== price &&
+        (
+          <Tooltip title="Відновити значення">
+            <Button
+              onClick={() => {
+                form.setFieldValue(['invoice', ...name, 'price'], waterPartPrice)
+              }}
+              icon={<ReloadOutlined />}
+            />
+          </Tooltip>
+        )}
+      </Space>
     )
   }
 }
