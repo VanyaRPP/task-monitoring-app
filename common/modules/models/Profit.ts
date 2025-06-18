@@ -23,7 +23,8 @@ const ProfitSchema = new Schema<ProfitDocument>(
     payment: {
       type: Schema.Types.ObjectId,
       ref: 'Payment',
-      required: true,
+      required: false,
+      default: null,
     },
     amount: { type: Number, required: true },
     type: {

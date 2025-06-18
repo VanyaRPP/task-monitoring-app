@@ -22,7 +22,6 @@ interface Props {
 }
 
 const AddCostForm: React.FC<Props> = ({ form, type }) => {
-  const { MonthPicker } = DatePicker
 
   return (
     <ConfigProvider locale={ukUA}>
@@ -30,12 +29,12 @@ const AddCostForm: React.FC<Props> = ({ form, type }) => {
         <DomainsSelect form={form} />
         <Form.Item
           name="date"
-          label="Місяць та рік"
+          label="Data"
           rules={validateField('required')}
         >
-          <MonthPicker
-            format="MMMM YYYY"
-            placeholder="Оберіть місяць"
+          <DatePicker
+            format="MMMM YYYY DD"
+            placeholder="Date"
             className={s.formInput}
           />
         </Form.Item>

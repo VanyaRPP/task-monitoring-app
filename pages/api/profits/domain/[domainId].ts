@@ -6,15 +6,15 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { isGlobalAdmin } = await getCurrentUser(req, res)
-  if (!isGlobalAdmin) return res.status(403).json({ success: false })
+  const { isAdmin } = await getCurrentUser(req, res)
+  if (!isAdmin) return res.status(403).json({ success: false })
 
   const { domainId } = req.query
 
   try {
     if (req.method === 'GET') {
       const { page = '1', limit = '10' } = req.query
-      const data = await ProfitService.getByDomain(
+      const data = await ProfitService.getByDomainWithMonthSeparation(
         domainId as string,
         +page,
         +limit

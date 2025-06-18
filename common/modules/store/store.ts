@@ -1,3 +1,4 @@
+// API imports
 import { bankApi } from '@common/api/bankApi/bank.api'
 import { mockBankApi } from '@common/api/bankApi/mockBank.api'
 import { categoryApi } from '@common/api/categoriesApi/category.api'
@@ -9,17 +10,23 @@ import { FeatureFlagApi } from '@common/api/featureFlagsApi/featureFlag.api'
 import { filterApi } from '@common/api/filterApi/filter.api'
 import { notificationApi } from '@common/api/notificationApi/notification.api'
 import { paymentApi } from '@common/api/paymentApi/payment.api'
+import { profitApi } from '@common/api/profitsApi/profits.api'
 import { realestateApi } from '@common/api/realestateApi/realestate.api'
 import { serviceApi } from '@common/api/serviceApi/service.api'
 import { streetApi } from '@common/api/streetApi/street.api'
 import { taskApi } from '@common/api/taskApi/task.api'
 import { userApi } from '@common/api/userApi/user.api'
+
+// Redux slices
 import sidebarReducer from '@modules/store/sidebarSlice'
 import themeReducer from '@modules/store/themeSlice'
 import paymentsReducer from '@modules/store/paymentsSlice'
 import floatButtonReducer from '@modules/store/floatButtonSlice'
+import profitPageReducer from '@modules/store/profitPageSlice'
+
+// Redux Toolkit imports
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
-import { profitApi } from '@common/api/profitsApi/profits.api'
+
 
 export const store = configureStore({
   reducer: {
@@ -39,11 +46,13 @@ export const store = configureStore({
     [bankApi.reducerPath]: bankApi.reducer,
     [debtorsApi.reducerPath]: debtorsApi.reducer,
     [mockBankApi.reducerPath]: mockBankApi.reducer,
+    [FeatureFlagApi.reducerPath]: FeatureFlagApi.reducer,
+
     sidebar: sidebarReducer,
     theme: themeReducer,
     payments: paymentsReducer,
-    [FeatureFlagApi.reducerPath]: FeatureFlagApi.reducer,
     floatButtons: floatButtonReducer,
+    profitPage: profitPageReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
