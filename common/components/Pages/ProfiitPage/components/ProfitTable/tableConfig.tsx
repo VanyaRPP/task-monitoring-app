@@ -1,6 +1,7 @@
 import { Profit } from '@common/api/profitsApi/profits.type'
 import { ColumnsType } from 'antd/es/table'
 import type { TFunction } from 'i18next'
+import dayjs from 'dayjs'
 
 interface ProfitMonthSummary {
   key: string
@@ -86,3 +87,4 @@ export const getChildColumns = (t: TFunction): ColumnsType<Profit> => [
     render: (cats: string[]) => cats?.join(', ') || '-',
   },
 ]
+
