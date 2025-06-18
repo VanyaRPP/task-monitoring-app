@@ -1,6 +1,6 @@
 import { Profit } from '@common/api/profitsApi/profits.type'
 import { ColumnsType } from 'antd/es/table'
-import type { TFunction } from 'i18next'
+import { t } from 'i18next'
 import dayjs from 'dayjs'
 
 interface ProfitMonthSummary {
@@ -13,31 +13,28 @@ interface ProfitMonthSummary {
   transactions: Profit[]
 }
 
-export const getParentColumns = (
-  t: TFunction
-): ColumnsType<ProfitMonthSummary> => [
+export const parentColumns: ColumnsType<ProfitMonthSummary> = [
   {
-    title: t('table.parent.month'),
+    title: t('table.parent.month', { ns: 'profitPage' }),
     dataIndex: 'month',
     key: 'month',
     render: (month: string) =>
       dayjs(month).isValid() ? dayjs(month).format('MMMM YYYY') : month,
   },
-
   {
-    title: t('table.parent.debit'),
+    title: t('table.parent.debit', { ns: 'profitPage' }),
     dataIndex: 'debit',
     key: 'debit',
     render: (value: number) => value.toFixed(2),
   },
   {
-    title: t('table.parent.credit'),
+    title: t('table.parent.credit', { ns: 'profitPage' }),
     dataIndex: 'credit',
     key: 'credit',
     render: (value: number) => value.toFixed(2),
   },
   {
-    title: t('table.parent.profit'),
+    title: t('table.parent.profit', { ns: 'profitPage' }),
     dataIndex: 'profit',
     key: 'profit',
     render: (value: number) => (
@@ -47,44 +44,44 @@ export const getParentColumns = (
     ),
   },
   {
-    title: t('table.parent.totalRecords'),
+    title: t('table.parent.totalRecords', { ns: 'profitPage' }),
     dataIndex: 'count',
     key: 'count',
   },
 ]
 
-export const getChildColumns = (t: TFunction): ColumnsType<Profit> => [
+export const childColumns: ColumnsType<Profit> = [
   {
-    title: t('table.child.date'),
+    title: t('table.child.date', { ns: 'profitPage' }),
     dataIndex: 'date',
     key: 'date',
     render: (date: string) => new Date(date).toLocaleDateString(),
   },
   {
-    title: t('table.child.type'),
+    title: t('table.child.type', { ns: 'profitPage' }),
     dataIndex: 'type',
     key: 'type',
     render: (type: string) => {
-      if (type === 'debit') return 'Дебет'
-      if (type === 'credit') return 'Кредит'
+      if (type === 'debit') return t('table.child.debit', { ns: 'profitPage' })
+      if (type === 'credit')
+        return t('table.child.credit', { ns: 'profitPage' })
       return type
     },
   },
   {
-    title: t('table.child.amount'),
+    title: t('table.child.amount', { ns: 'profitPage' }),
     dataIndex: 'amount',
     key: 'amount',
   },
   {
-    title: t('table.child.description'),
+    title: t('table.child.description', { ns: 'profitPage' }),
     dataIndex: 'description',
     key: 'description',
   },
   {
-    title: t('table.child.categories'),
+    title: t('table.child.categories', { ns: 'profitPage' }),
     dataIndex: 'categories',
     key: 'categories',
     render: (cats: string[]) => cats?.join(', ') || '-',
   },
 ]
-

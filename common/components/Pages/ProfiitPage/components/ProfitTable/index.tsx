@@ -4,7 +4,7 @@ import { setTransactionTablePagination } from '@modules/store/profitPageSlice'
 import { useGetByDomainQuery } from '@common/api/profitsApi/profits.api'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import { FC, useEffect, useMemo, useState, useCallback } from 'react'
-import { getChildColumns, getParentColumns } from './tableConfig'
+import { parentColumns, childColumns } from './tableConfig'
 import { Profit } from '@common/api/profitsApi/profits.type'
 import { Table, Alert, Button, Space, Tooltip } from 'antd'
 import { useTranslation } from 'react-i18next'
@@ -25,9 +25,6 @@ interface ProfitTableProps {
 
 const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
   const { t } = useTranslation()
-  
-  const parentColumns = useMemo(() => getParentColumns(t), [t])
-  const childColumns = useMemo(() => getChildColumns(t), [t])
 
   const dispatch = useAppDispatch()
   const { currentPage, pageSize } = useAppSelector(

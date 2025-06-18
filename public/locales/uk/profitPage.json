@@ -17,7 +17,9 @@
       "type": "Тип",
       "amount": "Сума",
       "description": "Опис",
-      "categories": "Категорії"
+      "categories": "Категорії",
+      "debit": "Витрати",
+      "credit": "Прибутки"
     },
     "tooltipExpand": "Розгорнути всі рядки",
     "tooltipCollapse": "Згорнути всі рядки",

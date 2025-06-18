@@ -16,7 +16,9 @@
       "type": "Type",
       "amount": "Amount",
       "description": "Description",
-      "categories": "Categories"
+      "categories": "Categories",
+      "debit": "Expenses",
+      "credit": "Income"
     },
     "expandAll": "Expand all",
     "collapseAll": "Collapse all",
