@@ -13,6 +13,7 @@
     "lint": "npm run lint:fix && npm run lint:check",
     "lint:check": "eslint \"./**/*.{js,jsx,ts,tsx,json}\"",
     "lint:fix": "eslint --fix \"./**/*.{js,jsx,ts,tsx,json}\"",
+    "generate-swagger": "node scripts/generate-swagger.js",
     "prettier": "npm run prettier:fix && npm run prettier:check",
     "prettier:check": "prettier --check --ignore-path .gitignore .",
     "prettier:fix": "prettier --write --ignore-path .gitignore .",
@@ -67,7 +68,8 @@
     "sharp": "^0.33.4",
     "use-places-autocomplete": "^4.0.0",
     "xlsx": "^0.18.5",
-    "xlsx-js-style": "^1.2.0"
+    "xlsx-js-style": "^1.2.0",
+    "swagger-ui-react": "^4.19.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.1",

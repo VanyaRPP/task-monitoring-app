@@ -1,13 +1,9 @@
-import { withSwagger } from 'next-swagger-doc'
+import path from 'path'
+import { promises as fs } from 'fs'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
-const swaggerHandler = withSwagger({
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'TMA Swagger',
-      version: '0.1.0',
-    },
-  },
-  apiFolder: 'pages/api',
-})
-export default swaggerHandler()
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const specPath = path.join(process.cwd(), 'public', 'swagger.json')
+  const spec = JSON.parse(await fs.readFile(specPath, 'utf8'))
+  res.status(200).json(spec)
+}

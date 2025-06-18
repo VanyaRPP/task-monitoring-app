@@ -1,21 +1,1159 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Next Swagger API Example",
-    "version": "1.0"
+    "title": "Task Monitoring App",
+    "version": "1.0.0"
   },
   "paths": {
-    "/api/hello": {
+    "/api/api.config": {
       "get": {
-        "description": "Returns the hello world",
+        "summary": "GET /api/api.config",
         "responses": {
           "200": {
-            "description": "hello world"
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/archived/[id]": {
+      "patch": {
+        "summary": "PATCH /api/archived/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/[...nextauth]": {
+      "get": {
+        "summary": "GET /api/auth/[...nextauth]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/sign-up": {
+      "post": {
+        "summary": "POST /api/auth/sign-up",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/bankapi/balances": {
+      "get": {
+        "summary": "GET /api/bankapi/balances",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/bankapi/balances",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/bankapi/balances",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "summary": "DELETE /api/bankapi/balances",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/bankapi/balances/utils/getBalances": {
+      "get": {
+        "summary": "GET /api/bankapi/balances/utils/getBalances",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/bankapi/date": {
+      "get": {
+        "summary": "GET /api/bankapi/date",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/bankapi/date",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/bankapi/date",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "summary": "DELETE /api/bankapi/date",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/bankapi/date/utils/getBankDates": {
+      "get": {
+        "summary": "GET /api/bankapi/date/utils/getBankDates",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/bankapi": {
+      "get": {
+        "summary": "GET /api/bankapi",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/bankapi",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/bankapi",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "summary": "DELETE /api/bankapi",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/bankapi/transactions/final": {
+      "get": {
+        "summary": "GET /api/bankapi/transactions/final",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/bankapi/transactions/final",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/bankapi/transactions/final",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "summary": "DELETE /api/bankapi/transactions/final",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/bankapi/transactions": {
+      "get": {
+        "summary": "GET /api/bankapi/transactions",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/bankapi/transactions",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/bankapi/transactions",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "summary": "DELETE /api/bankapi/transactions",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/bankapi/transactions/interim": {
+      "get": {
+        "summary": "GET /api/bankapi/transactions/interim",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/bankapi/transactions/interim",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/bankapi/transactions/interim",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "summary": "DELETE /api/bankapi/transactions/interim",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/bankapi/transactions/utils/getTransactions": {
+      "get": {
+        "summary": "GET /api/bankapi/transactions/utils/getTransactions",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/callback": {
+      "get": {
+        "summary": "GET /api/callback",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/callback",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/categories/[id]": {
+      "get": {
+        "summary": "GET /api/categories/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "summary": "DELETE /api/categories/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/categories/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "summary": "GET /api/categories",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/categories",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/custom-services/domain": {
+      "get": {
+        "summary": "GET /api/custom-services/domain",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/custom-services": {
+      "post": {
+        "summary": "POST /api/custom-services",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "summary": "GET /api/custom-services",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/custom-services/real-estate": {
+      "get": {
+        "summary": "GET /api/custom-services/real-estate",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/debtors": {
+      "get": {
+        "summary": "GET /api/debtors",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/doc": {
+      "get": {
+        "summary": "GET /api/doc",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/domain/[id]": {
+      "delete": {
+        "summary": "DELETE /api/domain/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/domain/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "summary": "GET /api/domain/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/domain/admin": {
+      "get": {
+        "summary": "GET /api/domain/admin",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/domain/areas/[id]": {
+      "get": {
+        "summary": "GET /api/domain/areas/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/domain/areas/[id]/validator": {
+      "get": {
+        "summary": "GET /api/domain/areas/[id]/validator",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/domain": {
+      "get": {
+        "summary": "GET /api/domain",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/domain",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/feature-flags/[id]": {
+      "path": {
+        "summary": "PATH /api/feature-flags/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "summary": "DELETE /api/feature-flags/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/feature-flags/by-name/[name]": {
+      "get": {
+        "summary": "GET /api/feature-flags/by-name/[name]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/feature-flags": {
+      "get": {
+        "summary": "GET /api/feature-flags",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/feature-flags",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/filter/date": {
+      "get": {
+        "summary": "GET /api/filter/date",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/filter/domain": {
+      "get": {
+        "summary": "GET /api/filter/domain",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/filter/real-estate": {
+      "get": {
+        "summary": "GET /api/filter/real-estate",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/filter/street": {
+      "get": {
+        "summary": "GET /api/filter/street",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/notify/[id]": {
+      "delete": {
+        "summary": "DELETE /api/notify/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/notify/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "summary": "GET /api/notify/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/notify": {
+      "post": {
+        "summary": "POST /api/notify",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/profit": {
+      "get": {
+        "summary": "GET /api/profit",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/profit",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/profits/[id]": {
+      "get": {
+        "summary": "GET /api/profits/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/profits/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "summary": "DELETE /api/profits/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/profits/balance/[domainId]": {
+      "get": {
+        "summary": "GET /api/profits/balance/[domainId]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/profits/bulk": {
+      "post": {
+        "summary": "POST /api/profits/bulk",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/profits/domain/[domainId]": {
+      "get": {
+        "summary": "GET /api/profits/domain/[domainId]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/profits": {
+      "get": {
+        "summary": "GET /api/profits",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/profits",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/real-estate/[id]": {
+      "delete": {
+        "summary": "DELETE /api/real-estate/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/real-estate/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/real-estate": {
+      "get": {
+        "summary": "GET /api/real-estate",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/real-estate",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/real-estate/my": {
+      "get": {
+        "summary": "GET /api/real-estate/my",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/sceduled/daily": {
+      "get": {
+        "summary": "GET /api/sceduled/daily",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/sceduled/hourly": {
+      "get": {
+        "summary": "GET /api/sceduled/hourly",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/sceduled/quater": {
+      "get": {
+        "summary": "GET /api/sceduled/quater",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/sceduled/threeTimesDaily": {
+      "get": {
+        "summary": "GET /api/sceduled/threeTimesDaily",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/service/[id]": {
+      "delete": {
+        "summary": "DELETE /api/service/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/service/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/service/address": {
+      "get": {
+        "summary": "GET /api/service/address",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/service": {
+      "get": {
+        "summary": "GET /api/service",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/service",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/spacehub/payment/[id]": {
+      "get": {
+        "summary": "GET /api/spacehub/payment/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "summary": "DELETE /api/spacehub/payment/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/spacehub/payment/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/spacehub/payment/generateExcel": {
+      "get": {
+        "summary": "GET /api/spacehub/payment/generateExcel",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/spacehub/payment/generatePdf": {
+      "post": {
+        "summary": "POST /api/spacehub/payment/generatePdf",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/spacehub/payment": {
+      "get": {
+        "summary": "GET /api/spacehub/payment",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/spacehub/payment/multiple": {
+      "delete": {
+        "summary": "DELETE /api/spacehub/payment/multiple",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/spacehub/payment/number": {
+      "get": {
+        "summary": "GET /api/spacehub/payment/number",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/spacehub/payment/pipelines": {
+      "get": {
+        "summary": "GET /api/spacehub/payment/pipelines",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/streets/[id]": {
+      "delete": {
+        "summary": "DELETE /api/streets/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/streets/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/streets": {
+      "get": {
+        "summary": "GET /api/streets",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/streets",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/streets/search": {
+      "get": {
+        "summary": "GET /api/streets/search",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/task/[id]/accept": {
+      "patch": {
+        "summary": "PATCH /api/task/[id]/accept",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/task/[id]/apply": {
+      "patch": {
+        "summary": "PATCH /api/task/[id]/apply",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "summary": "DELETE /api/task/[id]/apply",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/task/[id]/change-status-task": {
+      "patch": {
+        "summary": "PATCH /api/task/[id]/change-status-task",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/task/[id]/comment": {
+      "patch": {
+        "summary": "PATCH /api/task/[id]/comment",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "summary": "DELETE /api/task/[id]/comment",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/task/[id]/edit-task": {
+      "patch": {
+        "summary": "PATCH /api/task/[id]/edit-task",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/task/[id]": {
+      "get": {
+        "summary": "GET /api/task/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/task/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "summary": "DELETE /api/task/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/task/add-file": {
+      "post": {
+        "summary": "POST /api/task/add-file",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/task": {
+      "get": {
+        "summary": "GET /api/task",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/task",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/updateprofile": {
+      "get": {
+        "summary": "GET /api/updateprofile",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /api/updateprofile",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/user/[id]/feedback": {
+      "patch": {
+        "summary": "PATCH /api/user/[id]/feedback",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/user/[id]": {
+      "get": {
+        "summary": "GET /api/user/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/user/[id]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/user/current": {
+      "get": {
+        "summary": "GET /api/user/current",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/user/email/[email]": {
+      "get": {
+        "summary": "GET /api/user/email/[email]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "summary": "PATCH /api/user/email/[email]",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/user": {
+      "get": {
+        "summary": "GET /api/user",
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
     }
-  },
-  "components": {},
-  "tags": []
+  }
 }
