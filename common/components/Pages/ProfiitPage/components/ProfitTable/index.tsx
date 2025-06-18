@@ -95,28 +95,28 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
     [dispatch]
   )
 
-  if (isError) return <Alert type="error" message="Failed to load profits." />
+  if (isError) return <Alert type="error" message="Не вдалося завантажити прибутки." />
 
   if (!profitsGrouped || Object.keys(profitsGrouped.data).length === 0)
-    return <Alert type="info" message="No profit data available." />
+    return <Alert type="info" message="Даних про прибутки не знайдено." />
 
   return (
     <>
       <Space style={{ marginBottom: 16 }}>
         <Tooltip
-          title={isAllExpanded ? 'Collapse all rows' : 'Expand all rows'}
+          title={isAllExpanded ? 'Згорнути всі рядки' : 'Розгорнути всі рядки'}
         >
           <Button
             onClick={isAllExpanded ? collapseAll : expandAll}
             disabled={isLoading || dataSource.length === 0}
             aria-pressed={isAllExpanded}
-            aria-label={isAllExpanded ? 'Collapse all rows' : 'Expand all rows'}
+            aria-label={isAllExpanded ? 'Згорнути всі рядки' : 'Розгорнути всі рядки'}
           >
-            {isAllExpanded ? 'Collapse All' : 'Expand All'}
+            {isAllExpanded ? 'Згорнути всі' : 'Розгорнути всі'}
           </Button>
         </Tooltip>
         <span>
-          Expanded: {expandedRowKeys.length} / {dataSource.length}
+          Розгорнуто: {expandedRowKeys.length} / {dataSource.length}
         </span>
       </Space>
 
@@ -133,7 +133,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
           total: profitsGrouped.meta.total,
           onChange: handlePageChange,
           showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} records`,
+            `${range[0]}-${range[1]} з ${total} записів`,
         }}
         expandable={{
           expandedRowRender: (record) => (
@@ -153,7 +153,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
             setExpandedRowKeys([...expandedKeys] as string[]),
         }}
         rowKey={(record) => record.key}
-        aria-label="Profit transactions summary table"
+        aria-label="Зведена таблиця прибутків"
       />
     </>
   )
