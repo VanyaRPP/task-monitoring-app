@@ -395,7 +395,7 @@ const getDefaultColumns = ({
       fixed: 'right',
       align: 'center',
       title: '',
-      width: 40,
+      width: 80,
       render: (_, realEstate: IExtendedRealestate) => (
         <Button
           icon={<EyeOutlined />}
