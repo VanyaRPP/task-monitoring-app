@@ -92,8 +92,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     rawPageSize || (router.pathname === AppRoutes.PAYMENT ? 10 : 5)
 
   const { data: domainsFiltersData } = useGetDomainFiltersQuery({
-  realEstates: filters?.company?.length ? filters.company : undefined,
-})
+    realEstates: filters?.company?.length ? filters.company : undefined,
+  })
   const { data: companiesFilterData } = useGetRealEstateFiltersQuery({
     domains: filters?.domain,
   })
