@@ -22,12 +22,12 @@ export default async function handler(
       try {
         const { domainId } = req.query
 
-        if (isUser) {
-          return res.status(400).json({
-            success: false,
-            message: 'access denied',
-          })
-        }
+        // if (isUser) {                    // Access for User
+        //   return res.status(400).json({
+        //     success: false,
+        //     message: 'access denied',
+        //   })
+        // }
 
         if (!domainId || Array.isArray(domainId)) {
           return res.status(400).json({
