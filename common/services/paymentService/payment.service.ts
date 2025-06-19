@@ -223,11 +223,8 @@ export async function createPayment(body: any, isAdmin: boolean) {
     description,
     invoiceNumber: payment.invoiceNumber.toString(),
   }
-
-  console.log('profitObject', profitObject)
   
-  const aas = await ProfitService.create(profitObject)
-  console.log(aas)
+  await ProfitService.create(profitObject)
   
   return payment
 }
