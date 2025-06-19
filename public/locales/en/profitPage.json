@@ -1,0 +1,62 @@
+{
+  "title": "Profit",
+  "addButton": "Add",
+  "table": {
+    "parent": {
+      "month": "Month",
+      "debit": "Debit",
+      "credit": "Credit",
+      "profit": "Profit",
+      "totalRecords": "Total records",
+      "errorLoading": "Failed to load profits.",
+      "noData": "No profit data available."
+    },
+    "child": {
+      "date": "Date",
+      "type": "Type",
+      "amount": "Amount",
+      "description": "Description",
+      "categories": "Categories",
+      "debit": "Expenses",
+      "credit": "Income"
+    },
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "tooltipExpand": "Expand all rows",
+    "tooltipCollapse": "Collapse all rows",
+    "expanded": "Expanded: {{current}} / {{total}}",
+    "tableAriaLabel": "Profit transactions summary table",
+    "paginationTotal": "{{from}}-{{to}} of {{total}} records"
+  },
+  "modal": {
+    "addTitleDebit": "Add Expense",
+    "addTitleCredit": "Add Income",
+    "okText": "Add",
+    "cancelText": "Cancel",
+    "addTitle": "Add New Profit Record",
+    "editTitle": "Edit Profit Record",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "successMessage": "Saved successfully",
+    "errorMessage": "Failed to save changes"
+  },
+  "form": {
+    "date": "Date",
+    "datePlaceholder": "Select a date",
+    "amountDebit": "Expense",
+    "amountCredit": "Income",
+    "amountPlaceholder": "Enter an amount",
+    "description": "Description",
+    "descriptionPlaceholder": "Enter a description"
+  },
+  "filters": {
+    "dateRange": "Date range",
+    "categories": "Categories",
+    "domain": "Domain"
+  },
+  "actions": {
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete"
+  }
+}

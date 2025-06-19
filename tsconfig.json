@@ -3,7 +3,7 @@
     "allowSyntheticDefaultImports": true,
     "target": "ES2020",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "typeRoots": ["./node_modules/@types"],
+    "typeRoots": ["./types", "./node_modules/@types"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -35,6 +35,7 @@
     "**/*.ts",
     "**/*.tsx",
     "custom.d.ts",
+    "types",
     "common/components/PlacesAutocomplete/index.jsx"
   ],
   "exclude": ["node_modules"]
