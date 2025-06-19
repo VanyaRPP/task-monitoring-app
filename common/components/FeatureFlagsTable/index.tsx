@@ -41,6 +41,9 @@ export const FeatureFlagsTable: React.FC = () => {
         rowKey="_id"
         dataSource={data}
         loading={isLoading}
+        pagination={{
+          position: ['bottomCenter'],
+          }}
         columns={[
           {
             title: 'Назва',
