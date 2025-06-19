@@ -1,9 +1,10 @@
-import ProfitModel from '@modules/models/Profit'
+import ProfitModel, { ProfitDocument } from '@modules/models/Profit'
 import mongoose, { Types } from 'mongoose'
 
 export interface CreateProfitInput {
   domain: Types.ObjectId | string
   payment?: Types.ObjectId | string
+  createdBy?: Types.ObjectId | string
   amount: number
   type: 'debit' | 'credit'
   categories?: string[]
@@ -18,7 +19,10 @@ class ProfitService {
 
     const [records, total] = await Promise.all([
       ProfitModel.find()
-        // .populate('domain')
+        .populate({
+          path: 'createdBy',
+          select: '_id name email',
+        })
         .sort({ date: -1 })
         .skip(skip)
         .limit(limit),
@@ -41,14 +45,41 @@ class ProfitService {
 
     const [groupedData, total] = await Promise.all([
       ProfitModel.aggregate([
+        { $sort: { date: -1 } },
+        { $skip: skip },
+        { $limit: limit },
         {
-          $sort: { date: -1 },
+          $lookup: {
+            from: 'users', // collection name
+            localField: 'createdBy',
+            foreignField: '_id',
+            as: 'createdBy',
+          },
         },
         {
-          $skip: skip,
+          $unwind: {
+            path: '$createdBy',
+            preserveNullAndEmptyArrays: true, // in case user was deleted
+          },
         },
         {
-          $limit: limit,
+          $project: {
+            domain: 1,
+            payment: 1,
+            createdBy: {
+              _id: 1,
+              name: 1,
+              email: 1,
+            },
+            amount: 1,
+            type: 1,
+            categories: 1,
+            description: 1,
+            invoiceNumber: 1,
+            date: 1,
+            createdAt: 1,
+            updatedAt: 1,
+          },
         },
         {
           $group: {
@@ -69,7 +100,7 @@ class ProfitService {
       ProfitModel.countDocuments(),
     ])
 
-    const data = {}
+    const data: Record<string, ProfitDocument[]> = {}
     for (const group of groupedData) {
       const { year, month } = group._id
       const monthName = new Date(year, month - 1).toLocaleString('en-US', {
@@ -122,16 +153,45 @@ class ProfitService {
     const [groupedData, total] = await Promise.all([
       ProfitModel.aggregate([
         {
-          $match: { domain: new mongoose.Types.ObjectId(domainId) },
+          $match: {
+            domain: new mongoose.Types.ObjectId(domainId),
+          },
+        },
+        { $sort: { date: -1 } },
+        { $skip: skip },
+        { $limit: limit },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'createdBy',
+            foreignField: '_id',
+            as: 'createdBy',
+          },
         },
         {
-          $sort: { date: -1 },
+          $unwind: {
+            path: '$createdBy',
+            preserveNullAndEmptyArrays: true,
+          },
         },
         {
-          $skip: skip,
-        },
-        {
-          $limit: limit,
+          $project: {
+            domain: 1,
+            payment: 1,
+            createdBy: {
+              _id: 1,
+              name: 1,
+              email: 1,
+            },
+            amount: 1,
+            type: 1,
+            categories: 1,
+            description: 1,
+            invoiceNumber: 1,
+            date: 1,
+            createdAt: 1,
+            updatedAt: 1,
+          },
         },
         {
           $group: {
@@ -179,7 +239,7 @@ class ProfitService {
   }
 
   static async create(data: CreateProfitInput) {
-    try {
+    try {      
       const profit = await ProfitModel.create(data)
       return profit
     } catch (error) {

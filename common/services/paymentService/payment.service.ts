@@ -223,7 +223,9 @@ export async function createPayment(body: any, isAdmin: boolean) {
     description,
     invoiceNumber: payment.invoiceNumber.toString(),
   }
+  
   await ProfitService.create(profitObject)
+  
   return payment
 }
 
