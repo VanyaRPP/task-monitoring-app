@@ -1,6 +1,63 @@
 import FeatureFlagService from '@common/services/FeatureFlagServices'
 import { NextApiRequest, NextApiResponse } from 'next'
 
+/**
+ * @swagger
+ * /api/feature-flags/by-name/{name}:
+ *   get:
+ *     tags:
+ *       - FeatureFlag
+ *     summary: Get a feature flag by name
+ *     description: Retrieves a feature flag by its unique name.
+ *     parameters:
+ *       - in: path
+ *         name: name
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique name of the feature flag
+ *     responses:
+ *       200:
+ *         description: Feature flag found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/FeatureFlag'
+ *       404:
+ *         description: Feature flag not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Feature flag not found
+ *       405:
+ *         description: Method not allowed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Method Not Allowed
+ *       500:
+ *         description: Internal server error
+ */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse

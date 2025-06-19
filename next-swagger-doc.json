@@ -1,11 +1,46 @@
 {
   "apiFolder": "pages/api",
-  "schemaFolders": ["models"],
+  "schemaFolders": ["common/modules/models"],
   "definition": {
     "openapi": "3.0.0",
     "info": {
-      "title": "Task Monitoring App",
-      "version": "1.0"
-    }
+      "title": "Task Monitoring App API",
+      "version": "1.0",
+      "description": "API documentation for the Task Monitoring App"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3000",
+        "description": "Local development server"
+      }
+    ],
+    "tags": [
+      {
+        "name": "Profit",
+        "description": "Endpoints related to profit records"
+      },
+      {
+        "name": "FeatureFlag",
+        "description": "Feature flag management endpoints"
+      },
+      {
+        "name": "User",
+        "description": "User management endpoints"
+      }
+    ],
+    "components": {
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      }
+    },
+    "security": [
+      {
+        "bearerAuth": []
+      }
+    ]
   }
 }
