@@ -3,7 +3,7 @@ import mongoose, { Schema, Types, Document, Model } from 'mongoose'
 export interface ProfitDocument extends Document {
   domain: Types.ObjectId
   payment?: Types.ObjectId
-  createdBy: Types.ObjectId
+  createdBy?: Types.ObjectId
   amount: number
   type: 'debit' | 'credit' // 'debit' = витрата (-), 'credit' = прибуток (+)
   categories?: string[]
@@ -30,7 +30,8 @@ const ProfitSchema = new Schema<ProfitDocument>(
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      required: false,
+      default: null,
     },
     amount: { type: Number, required: true },
     type: {

@@ -217,14 +217,18 @@ export async function createPayment(body: any, isAdmin: boolean) {
   const profitObject = {
     domain: payment.domain.toString(),
     payment: payment.id.toString(),
-    createdBy: "auto",
     amount: payment.generalSum,
     type: payment.type as 'debit' | 'credit',
     date: payment.invoiceCreationDate,
     description,
     invoiceNumber: payment.invoiceNumber.toString(),
   }
-  await ProfitService.create(profitObject)
+
+  console.log('profitObject', profitObject)
+  
+  const aas = await ProfitService.create(profitObject)
+  console.log(aas)
+  
   return payment
 }
 

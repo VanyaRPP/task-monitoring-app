@@ -4,7 +4,7 @@ import mongoose, { Types } from 'mongoose'
 export interface CreateProfitInput {
   domain: Types.ObjectId | string
   payment?: Types.ObjectId | string
-  createdBy: Types.ObjectId | string
+  createdBy?: Types.ObjectId | string
   amount: number
   type: 'debit' | 'credit'
   categories?: string[]

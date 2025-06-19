@@ -1,4 +1,3 @@
-import { ProfitDocument } from './../../../common/modules/models/Profit';
 import ProfitService, { CreateProfitInput } from '@common/services/profitService/profit.service'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCurrentUser } from '@utils/getCurrentUser'
