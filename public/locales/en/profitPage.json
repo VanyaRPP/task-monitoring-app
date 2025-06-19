@@ -2,6 +2,7 @@
   "title": "Profit",
   "addButton": "Add",
   "table": {
+    "tableAriaLabel": "Table summarizing profit transactions",
     "parent": {
       "month": "Month",
       "debit": "Debit",
@@ -18,34 +19,34 @@
       "description": "Description",
       "categories": "Categories",
       "debit": "Expenses",
-      "credit": "Income"
+      "credit": "Incomes"
     },
-    "expandAll": "Expand all",
-    "collapseAll": "Collapse all",
+    "noData": "No profit data available.",
     "tooltipExpand": "Expand all rows",
     "tooltipCollapse": "Collapse all rows",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
     "expanded": "Expanded: {{current}} / {{total}}",
-    "tableAriaLabel": "Profit transactions summary table",
     "paginationTotal": "{{from}}-{{to}} of {{total}} records"
   },
   "modal": {
-    "addTitleDebit": "Add Expense",
-    "addTitleCredit": "Add Income",
+    "addTitleDebit": "Add expenses",
+    "addTitleCredit": "Add incomes",
     "okText": "Add",
     "cancelText": "Cancel",
-    "addTitle": "Add New Profit Record",
-    "editTitle": "Edit Profit Record",
+    "addTitle": "Add new profit record",
+    "editTitle": "Edit profit record",
     "confirm": "Confirm",
     "cancel": "Cancel",
-    "successMessage": "Saved successfully",
+    "successMessage": "Successfully saved",
     "errorMessage": "Failed to save changes"
   },
   "form": {
     "date": "Date",
     "datePlaceholder": "Select a date",
-    "amountDebit": "Expense",
-    "amountCredit": "Income",
-    "amountPlaceholder": "Enter an amount",
+    "amountDebit": "Expenses",
+    "amountCredit": "Incomes",
+    "amountPlaceholder": "Enter amount",
     "description": "Description",
     "descriptionPlaceholder": "Enter a description"
   },
