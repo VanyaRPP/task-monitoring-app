@@ -62,7 +62,7 @@ export default async function handler(
           const record = await ProfitService.create(profitDocument)
           return res.status(200).json({ success: true, data: record })
         } catch (error) {
-          console.error('Error creating profit record:', error)
+          // console.error('Error creating profit record:', error)
           return res.status(500).json({
             success: false,
             error: 'Server error while creating profit record',
