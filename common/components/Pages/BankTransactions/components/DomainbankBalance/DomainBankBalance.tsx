@@ -27,6 +27,13 @@ export interface IBalance {
   is_final_bal: boolean // Is final balance or not
 }
 
+export interface IBalancesData {
+  exist_next_page: boolean
+  next_page_id: string
+  status: string
+  balances: IBalance[]
+}
+
 interface Props {
   balancesData: IBalance[]
 }
