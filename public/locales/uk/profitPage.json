@@ -39,7 +39,9 @@
     "confirm": "Підтвердити",
     "cancel": "Скасувати",
     "successMessage": "Успішно збережено",
-    "errorMessage": "Не вдалося зберегти зміни"
+    "errorMessage": "Не вдалося зберегти зміни",
+    "previewTitle": "Перегляд запису",
+    "closeText": "Закрити"
   },
   "form": {
     "date": "Дата",
@@ -48,7 +50,9 @@
     "amountCredit": "Прибутки",
     "amountPlaceholder": "Вкажіть значення",
     "description": "Опис",
-    "descriptionPlaceholder": "Введіть опис"
+    "descriptionPlaceholder": "Введіть опис",
+    "category": "Категорія",
+    "createdBy": "Створено :"
   },
   "filters": {
     "dateRange": "Діапазон дат",
@@ -58,6 +62,7 @@
   "actions": {
     "add": "Додати",
     "edit": "Редагувати",
-    "delete": "Видалити"
+    "delete": "Видалити",
+    "preview": "Переглянути"
   }
 }

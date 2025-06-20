@@ -4,8 +4,9 @@ import { setTransactionTablePagination } from '@modules/store/profitPageSlice'
 import { useGetByDomainQuery } from '@common/api/profitsApi/profits.api'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import { FC, useEffect, useMemo, useState, useCallback } from 'react'
-import { parentColumns, childColumns } from './tableConfig'
+import { parentColumns, getChildColumns } from './tableConfig'
 import { Profit } from '@common/api/profitsApi/profits.type'
+import AddCostModal from '@components/AddCostModal'
 import { Table, Alert, Button, Space, Tooltip } from 'antd'
 import { useTranslation } from 'react-i18next'
 
@@ -25,6 +26,8 @@ interface ProfitTableProps {
 
 const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
   const { t } = useTranslation()
+
+  const [selectedProfit, setSelectedProfit] = useState<Profit | null>(null)
 
   const dispatch = useAppDispatch()
   const { currentPage, pageSize } = useAppSelector(
@@ -160,7 +163,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
         expandable={{
           expandedRowRender: (record) => (
             <Table
-              columns={childColumns}
+              columns={getChildColumns((record) => setSelectedProfit(record))}
               dataSource={record.transactions.map((t: Profit) => ({
                 ...t,
                 key: t._id,
@@ -177,6 +180,13 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
         rowKey={(record) => record.key}
         aria-label={t('profitPage:table.tableAriaLabel')}
       />
+      {selectedProfit && (
+        <AddCostModal
+          currentProfit={selectedProfit}
+          profitActions={{ preview: true }}
+          closeModal={() => setSelectedProfit(null)}
+        />
+      )}
     </>
   )
 }
