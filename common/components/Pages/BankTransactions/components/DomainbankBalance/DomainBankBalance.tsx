@@ -1,5 +1,6 @@
-import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons'
-import { Card, Col, Row, Statistic } from 'antd'
+import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
+import { setAccount } from '@modules/store/bankSlice'
+import { Card, Select, Statistic } from 'antd'
 import React, { FC } from 'react'
 
 export interface IBalance {
@@ -26,39 +27,41 @@ export interface IBalance {
   is_final_bal: boolean // Is final balance or not
 }
 
-export interface IBalancesData {
-  exist_next_page: boolean
-  next_page_id: string
-  status: string
-  balances: IBalance[]
-}
-
 interface Props {
-  balanceData: IBalance
+  balancesData: IBalance[]
 }
 
-const DomainBankBalance: FC<Props> = ({ balanceData }) => {
-  const { currency, balanceIn, balanceOut, nameACC, acc, turnoverDebt } =
-    balanceData
+const DomainBankBalance: FC<Props> = ({ balancesData }) => {
+  const dispatch = useAppDispatch()
+  const selectedAccount = useAppSelector((state) => state.bank.account)
+
+  const balance = balancesData.find((b) => b.acc === selectedAccount)
+
+  const { currency, balanceOut, nameACC, acc } = balance ?? {}
 
   return (
-    <Card bordered={false} loading={!balanceData} style={{ height: 'auto' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: '16px',
-        }}
-      >
-        <Card.Meta
-          // title={nameACC}
-          // description={acc}
-          avatar={
-            <Statistic title={`Balance (${currency})`} value={balanceOut} />
-          }
-        />
-      </div>
+    <Card loading={!balance} style={{ marginBottom: 8 }}>
+      <Card.Meta
+        title={nameACC}
+        avatar={
+          <Statistic
+            title={`Balance (${currency})`}
+            value={Number(balanceOut)}
+            precision={2}
+          />
+        }
+        description={
+          <Select
+            value={acc}
+            style={{ minWidth: 320 }}
+            onChange={(value) => dispatch(setAccount(value))}
+            options={balancesData.map((b) => ({
+              value: b.acc,
+              label: b.acc,
+            }))}
+          />
+        }
+      />
     </Card>
   )
 }
