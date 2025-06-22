@@ -2,6 +2,78 @@ import FeatureFlagService from '@common/services/FeatureFlagServices'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { NextApiRequest, NextApiResponse } from 'next'
 
+/**
+ * @swagger
+ * tags:
+ *   - name: FeatureFlag
+ *     description: Feature flag management endpoints
+ *
+ * /api/featureFlags:
+ *   get:
+ *     tags:
+ *       - FeatureFlag
+ *     summary: Get all feature flags
+ *     description: Returns a list of all feature flags. Requires global admin access.
+ *     responses:
+ *       200:
+ *         description: List of feature flags
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/FeatureFlag'
+ *       403:
+ *         description: Forbidden - Not a global admin
+ *       500:
+ *         description: Internal server error
+ *
+ *   post:
+ *     tags:
+ *       - FeatureFlag
+ *     summary: Create a new feature flag
+ *     description: Creates a new feature flag. Requires global admin access.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - isEnabled
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Unique name for the feature flag
+ *               description:
+ *                 type: string
+ *                 description: Optional description of the feature flag
+ *               isEnabled:
+ *                 type: boolean
+ *                 description: Whether the feature flag is enabled
+ *     responses:
+ *       200:
+ *         description: Feature flag created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/FeatureFlag'
+ *       403:
+ *         description: Forbidden - Not a global admin
+ *       500:
+ *         description: Internal server error
+ */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse

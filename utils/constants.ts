@@ -2,6 +2,7 @@ export enum AppRoutes {
   INDEX = '/',
   DASHBOARD = '/dashboard',
   PROFILE = '/profile',
+  SETTINGS = '/settings',
   TASK = '/task',
   AUTH = '/auth',
   AUTH_SIGN_IN = '/auth/signin',

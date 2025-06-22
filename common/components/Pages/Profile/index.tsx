@@ -102,8 +102,8 @@ export const ProfilePage: React.FC = () => {
           </Card>
         </div>
       )}
-      <Flex gap={16}>
-        <Card title="Представник" style={{ width: '400px' }}>
+      <Flex className={styles.columns} gap={16}>
+        <Card title="Представник" className={styles.CardRepresentative} >
           <Divider orientation="left" style={{ marginTop: 0 }}>
             <Typography.Text type="secondary">Надавачі послуг</Typography.Text>
           </Divider>
@@ -146,45 +146,11 @@ export const ProfilePage: React.FC = () => {
             )}
           />
         </Card>
-        <Card title="Інформація користувача" style={{ flex: 1 }}>
+        <Card title="Інформація користувача" className={styles.CardUserInformation}>
           <EditUserForm userId={user?._id?.toString()} form={form} />
-          <Button onClick={form.submit}>Зберегти</Button>
+          <Button className={styles.ButtonSave} onClick={form.submit}>Зберегти</Button>
         </Card>
-      </Flex>
-
-      {isGlobalAdmin && (
-        <>
-          <Card title="Користувачі">
-            <UsersTable />
-          </Card>
-
-          <Card>
-            <Flex
-              justify="space-between"
-              align="center"
-              style={{ marginBottom: 16 }}
-            >
-              <Typography.Title level={4} style={{ margin: 0 }}>
-                Фічефлаги
-              </Typography.Title>
-              <FeatureFlagModal
-                open={modalOpen}
-                onClose={() => {
-                  setModalOpen(false)
-                  setEditingFlag(null)
-                }}
-              />
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => setModalOpen(true)}
-              ></Button>
-            </Flex>
-
-            <FeatureFlagsTable />
-          </Card>
-        </>
-      )}
+      </Flex> 
     </Space>
   )
 }

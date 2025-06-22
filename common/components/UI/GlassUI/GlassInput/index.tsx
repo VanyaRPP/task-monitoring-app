@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Input } from 'antd'
-import type { PasswordProps } from 'antd/es/input'
+import type { PasswordProps, TextAreaProps } from 'antd/es/input'
 import type { InputProps } from 'antd'
 import classNames from 'classnames'
 import styles from './styles.module.scss'
@@ -31,6 +31,19 @@ const GlassPassword: React.FC<PasswordProps> = ({
   return <Input.Password {...rest} status={status} className={combinedClass} />
 }
 
+const GlassTextArea: React.FC<TextAreaProps> = ({
+  className,
+  status,
+  ...rest
+}) => {
+  const combinedClass = classNames(styles.glassInput, className, {
+    [styles.error]: status === 'error',
+  })
+
+  return <Input.TextArea {...rest} status={status} className={combinedClass} />
+}
+
 export const GlassInput = Object.assign(BaseGlassInput, {
   Password: GlassPassword,
+  TextArea: GlassTextArea,
 })

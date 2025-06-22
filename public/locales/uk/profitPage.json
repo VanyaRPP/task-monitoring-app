@@ -1,0 +1,63 @@
+{
+  "title": "Прибуток",
+  "addButton": "Додати",
+  "table": {
+    "tableAriaLabel": "Таблиця з підсумком транзакцій прибутку",
+    "parent": {
+      "month": "Місяць",
+      "debit": "Дебет",
+      "credit": "Кредит",
+      "profit": "Прибуток",
+      "totalRecords": "Всього записів",
+      "errorLoading": "Не вдалося завантажити прибутки.",
+      "noData": "Дані про прибуток відсутні."
+    },
+    "child": {
+      "date": "Дата",
+      "type": "Тип",
+      "amount": "Сума",
+      "description": "Опис",
+      "categories": "Категорії",
+      "debit": "Витрати",
+      "credit": "Прибутки"
+    },
+    "noData": "Дані про прибуток відсутні.",
+    "tooltipExpand": "Розгорнути всі рядки",
+    "tooltipCollapse": "Згорнути всі рядки",
+    "expandAll": "Розгорнути всі",
+    "collapseAll": "Згорнути всі",
+    "expanded": "Розгорнуто: {{current}} / {{total}}",
+    "paginationTotal": "{{from}}-{{to}} із {{total}} записів"
+  },
+  "modal": {
+    "addTitleDebit": "Додати витрати",
+    "addTitleCredit": "Додати прибутки",
+    "okText": "Додати",
+    "cancelText": "Відміна",
+    "addTitle": "Додати новий запис прибутку",
+    "editTitle": "Редагувати запис прибутку",
+    "confirm": "Підтвердити",
+    "cancel": "Скасувати",
+    "successMessage": "Успішно збережено",
+    "errorMessage": "Не вдалося зберегти зміни"
+  },
+  "form": {
+    "date": "Дата",
+    "datePlaceholder": "Оберіть дату",
+    "amountDebit": "Витрати",
+    "amountCredit": "Прибутки",
+    "amountPlaceholder": "Вкажіть значення",
+    "description": "Опис",
+    "descriptionPlaceholder": "Введіть опис"
+  },
+  "filters": {
+    "dateRange": "Діапазон дат",
+    "categories": "Категорії",
+    "domain": "Домен"
+  },
+  "actions": {
+    "add": "Додати",
+    "edit": "Редагувати",
+    "delete": "Видалити"
+  }
+}

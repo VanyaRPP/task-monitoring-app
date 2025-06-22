@@ -4,9 +4,10 @@ import { setTransactionTablePagination } from '@modules/store/profitPageSlice'
 import { useGetByDomainQuery } from '@common/api/profitsApi/profits.api'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import { FC, useEffect, useMemo, useState, useCallback } from 'react'
-import { Profit } from '@common/api/profitsApi/profits.type'
 import { parentColumns, childColumns } from './tableConfig'
+import { Profit } from '@common/api/profitsApi/profits.type'
 import { Table, Alert, Button, Space, Tooltip } from 'antd'
+import { useTranslation } from 'react-i18next'
 
 interface ProfitMonthSummary {
   key: string
@@ -23,6 +24,7 @@ interface ProfitTableProps {
 }
 
 const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
+  const { t } = useTranslation()
   const dispatch = useAppDispatch()
   const { currentPage, pageSize } = useAppSelector(
     (state) => state.profitPage.transactionTablePagination
@@ -95,28 +97,43 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
     [dispatch]
   )
 
-  if (isError) return <Alert type="error" message="Failed to load profits." />
+  if (isError) return <Alert type="error" message={t('profitPage:table.errorLoading')} />
 
   if (!profitsGrouped || Object.keys(profitsGrouped.data).length === 0)
-    return <Alert type="info" message="No profit data available." />
+    return <Alert type="info" message={t('profitPage:table.noData')} />
 
   return (
     <>
       <Space style={{ marginBottom: 16 }}>
         <Tooltip
-          title={isAllExpanded ? 'Collapse all rows' : 'Expand all rows'}
+          title={t(
+            isAllExpanded
+              ? 'profitPage:table.tooltipCollapse'
+              : 'profitPage:table.tooltipExpand'
+          )}
         >
           <Button
             onClick={isAllExpanded ? collapseAll : expandAll}
             disabled={isLoading || dataSource.length === 0}
             aria-pressed={isAllExpanded}
-            aria-label={isAllExpanded ? 'Collapse all rows' : 'Expand all rows'}
+            aria-label={t(
+              isAllExpanded
+                ? 'profitPage:table.tooltipCollapse'
+                : 'profitPage:table.tooltipExpand'
+            )}
           >
-            {isAllExpanded ? 'Collapse All' : 'Expand All'}
+            {t(
+              isAllExpanded
+                ? 'profitPage:table.collapseAll'
+                : 'profitPage:table.expandAll'
+            )}
           </Button>
         </Tooltip>
         <span>
-          Expanded: {expandedRowKeys.length} / {dataSource.length}
+          {t('profitPage:table.expanded', {
+            current: expandedRowKeys.length,
+            total: dataSource.length,
+          })}
         </span>
       </Space>
 
@@ -133,7 +150,11 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
           total: profitsGrouped.meta.total,
           onChange: handlePageChange,
           showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} records`,
+            t('profitPage:table.paginationTotal', {
+              from: range[0],
+              to: range[1],
+              total,
+            }),
         }}
         expandable={{
           expandedRowRender: (record) => (
@@ -153,7 +174,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
             setExpandedRowKeys([...expandedKeys] as string[]),
         }}
         rowKey={(record) => record.key}
-        aria-label="Profit transactions summary table"
+        aria-label={t('profitPage:table.tableAriaLabel')}
       />
     </>
   )
