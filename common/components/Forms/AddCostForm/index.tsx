@@ -24,7 +24,6 @@ interface Props {
 
 const AddCostForm: React.FC<Props> = ({ form, type }) => {
   const { t } = useTranslation()
-
   return (
     <ConfigProvider locale={ukUA}>
       <Form form={form} layout="vertical" className={s.Form}>
