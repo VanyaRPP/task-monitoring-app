@@ -1,5 +1,6 @@
 import { Modal as AntModal, ButtonProps } from 'antd'
 import s from './style.module.scss'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   children: React.ReactNode
@@ -34,15 +35,17 @@ const Modal: React.FC<Props> = ({
   open = true,
   preview,
 }) => {
+  const { t } = useTranslation()
+
   const [modal, context] = AntModal.useModal()
 
   const handleCancel = () => {
     if (changed()) {
       modal.confirm({
-        title: 'Ви впевнені, що хочете вийти?',
-        content: 'Всі незбережені дані будуть втрачені',
-        okText: 'Так',
-        cancelText: 'Ні',
+        title: t('modal.confirmExitTitle'),
+        content: t('modal.confirmExitContent'),
+        okText: t('modal.yes'),
+        cancelText: t('modal.no'),
         onOk: onCancel,
       })
     } else {

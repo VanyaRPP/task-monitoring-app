@@ -1,0 +1,10 @@
+{
+    "table": {
+        "month": "Month",
+        "income": "Income",
+        "expenses": "Expenses",
+        "add": "Add",
+        "backToProfit": "Back to profit",
+        "total": "Total"
+    }
+}

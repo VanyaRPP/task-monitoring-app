@@ -3,6 +3,7 @@ import { validateField } from '@assets/features/validators'
 import { Form, FormInstance, Select } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { useTranslation } from 'react-i18next'
 
 export interface DomainsSelectProps {
   form: FormInstance
@@ -11,6 +12,7 @@ export interface DomainsSelectProps {
 
 const DomainsSelect: React.FC<DomainsSelectProps> = ({ form, edit }) => {
   const [domains, setDomains] = useState([])
+  const { t } = useTranslation()
   const {
     data: fetchedDomains = [],
     isLoading: isDomainsLoading,
@@ -39,13 +41,13 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({ form, edit }) => {
   return (
     <Form.Item
       name="domain"
-      label="Надавач послуг"
+      label={t('domainsSelect.label')}
       rules={validateField('required')}
     >
       <Select
         options={options}
         optionFilterProp="label"
-        placeholder="Пошук надавача послуг"
+        placeholder={t('domainsSelect.placeholder')}
         status={isDomainsError && 'error'}
         loading={isDomainsLoading}
         disabled={isDomainsLoading || domains.length === 1}

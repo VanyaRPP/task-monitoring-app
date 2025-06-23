@@ -1,0 +1,37 @@
+.wrapper {
+    display: inline-flex;
+    border: 1px solid rgb(100, 42, 181);
+    border-radius: 6px;
+    overflow: hidden;
+    height: 32px;
+    line-height: 30px;
+    font-weight: 500;
+    font-size: 14px;
+    background: none;
+}
+
+.btn {
+    border: none;
+    background: transparent;
+    padding: 0 12px;
+    cursor: pointer;
+    transition: background 0.3s;
+    color: rgba(255, 255, 255, 0.48);
+
+    &:hover {
+        background: rgba(100, 42, 181, 0.28);
+    }
+}
+
+.active {
+    background-color: none;
+    color: rgb(100, 42, 181);
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    color: rgba(100, 42, 181, 0.619);
+    padding: 0 4px;
+    user-select: none;
+}

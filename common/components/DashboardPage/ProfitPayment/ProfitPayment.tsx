@@ -12,11 +12,15 @@ import localizedFormat from 'dayjs/plugin/localizedFormat'
 import { isAdminCheck } from '@utils/helpers'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddCostModal from '@components/AddCostModal'
+import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from '@components/UI/Buttons/LanguageSwitcher'
+
 
 // Активуємо плагін
 dayjs.extend(localizedFormat)
 
 const ProfitPayment: React.FC = () => {
+  const { t } = useTranslation('profitPayment')
   const router = useRouter()
   const { data: currUser } = useGetCurrentUserQuery()
   const isAdmin = isAdminCheck(currUser?.roles)
@@ -31,11 +35,11 @@ const ProfitPayment: React.FC = () => {
 
   const [selectedDate, setSelectedDate] = useState<string>()
 
-  const { data: profitPayment, isLoading, isError } = useGetCostPaymentQuery()
+  const { data: profitPayment, isLoading } = useGetCostPaymentQuery()
 
   const columns = [
     {
-      title: 'Місяць',
+      title: t('table.month'),
       dataIndex: 'month',
       key: 'month',
       render: (value) => {
@@ -44,13 +48,13 @@ const ProfitPayment: React.FC = () => {
       },
     },
     {
-      title: 'Прибутки',
+      title: t('table.income'),
       dataIndex: 'totalGeneralSumDebit',
       key: 'totalGeneralSumDebit',
       render: (value) => `${value.toLocaleString()} UAH`,
     },
     {
-      title: 'Витрати',
+      title: t('table.expenses'),
       dataIndex: 'totalGeneralSumCredit',
       key: 'totalGeneralSumCredit',
       render: (value) => `${value.toLocaleString()} UAH`,
@@ -61,20 +65,19 @@ const ProfitPayment: React.FC = () => {
     <TableCard
       title={
         <div className={s.firstBlock}>
-          <Button
-            type="link"
-            onClick={() => {
-              router.push('/profit')
-            }}
-          >
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <Button type="link" onClick={() => router.push('/profit')}>
             <CalendarOutlined />
-            Прибутки
+            {t('table.backToProfit')}
           </Button>
+          <LanguageSwitcher />
           {isAdmin && (
             <Button type="link" onClick={() => setIsModalOpen(true)}>
-              <PlusOutlined /> Додати
+              <PlusOutlined /> {t('table.add')}
             </Button>
           )}
+          <LanguageSwitcher /> {/* 🔹 кнопка перемикання мови */}
+      </div>
           {isModalOpen && <AddCostModal closeModal={closeModal} />}
         </div>
       }
@@ -101,13 +104,15 @@ const ProfitPayment: React.FC = () => {
           })
           return (
             <Table.Summary.Row>
-              <Table.Summary.Cell index={0}>Всього</Table.Summary.Cell>
-              <Table.Summary.Cell
-                index={1}
-              >{`${totalSumDebit.toLocaleString()} UAH`}</Table.Summary.Cell>
-              <Table.Summary.Cell
-                index={1}
-              >{`${totalSumCredit.toLocaleString()} UAH`}</Table.Summary.Cell>
+              <Table.Summary.Cell index={0}>
+                {t('table.total')}
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={1}>
+                {`${totalSumDebit.toLocaleString()} UAH`}
+              </Table.Summary.Cell>
+              <Table.Summary.Cell index={2}>
+                {`${totalSumCredit.toLocaleString()} UAH`}
+              </Table.Summary.Cell>
             </Table.Summary.Row>
           )
         }}

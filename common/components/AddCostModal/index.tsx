@@ -25,8 +25,9 @@ enum CostType {
   CREDIT = 'credit',
 }
 
+
 const AddCostModal: FC<Props> = ({ closeModal }) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation('profitPage')
   const [form] = Form.useForm()
   const [type, setType] = useState<CostType>(CostType.DEBIT)
   const [createProfit, { isLoading, isError }] = useCreateProfitMutation()
@@ -57,12 +58,12 @@ const AddCostModal: FC<Props> = ({ closeModal }) => {
   const tabItems: TabsProps['items'] = [
     {
       key: '1',
-      label: t('profitPage:modal.addTitleDebit'),
+      label: t('modal.addTitleDebit'),
       children: <AddCostForm form={form} type="debit" />,
     },
     {
       key: '2',
-      label: t('profitPage:modal.addTitleCredit'),
+      label: t('modal.addTitleCredit'),
       children: <AddCostForm form={form} type="credit" />,
     },
   ]
@@ -77,8 +78,8 @@ const AddCostModal: FC<Props> = ({ closeModal }) => {
       }}
       changed={() => true}
       className={s.Modal}
-      okText={t('profitPage:modal.okText')}
-      cancelText={t('profitPage:modal.cancelText')}
+      okText={t('modal.okText')}
+      cancelText={t('modal.cancelText')}
       confirmLoading={isLoading}
     >
       <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />

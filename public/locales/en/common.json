@@ -2,6 +2,14 @@
   "siteTitle": "My Website",
   "modal": {
     "successMessage": "Changes saved successfully",
-    "errorMessage": "Failed to save changes"
+    "errorMessage": "Failed to save changes",
+    "confirmExitTitle": "Are you sure you want to exit?",
+    "confirmExitContent": "All unsaved data will be lost.",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "domainsSelect": {
+    "label": "Service provider",
+    "placeholder": "Search service provider"
   }
 }

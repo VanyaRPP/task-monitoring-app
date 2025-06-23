@@ -4,10 +4,12 @@ import { setTransactionTablePagination } from '@modules/store/profitPageSlice'
 import { useGetByDomainQuery } from '@common/api/profitsApi/profits.api'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import { FC, useEffect, useMemo, useState, useCallback } from 'react'
-import { parentColumns, childColumns } from './tableConfig'
+import { getParentColumns, getChildColumns } from './tableConfig'
 import { Profit } from '@common/api/profitsApi/profits.type'
 import { Table, Alert, Button, Space, Tooltip } from 'antd'
 import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from '@components/UI/Buttons/LanguageSwitcher'
+
 
 interface ProfitMonthSummary {
   key: string
@@ -24,8 +26,7 @@ interface ProfitTableProps {
 }
 
 const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
-  const { t } = useTranslation()
-
+  const { t, i18n } = useTranslation('profitPage')
   const dispatch = useAppDispatch()
   const { currentPage, pageSize } = useAppSelector(
     (state) => state.profitPage.transactionTablePagination
@@ -72,7 +73,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
     } else {
       setExpandedRowKeys([])
     }
-  }, [dataSource])
+  }, [dataSource, i18n.language])
 
   const expandAll = useCallback(() => {
     setExpandedRowKeys(dataSource.map((item) => item.key))
@@ -98,49 +99,53 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
     [dispatch]
   )
 
-  if (isError) return <Alert type="error" message={t('profitPage:table.errorLoading')} />
+  if (isError)
+    return <Alert type="error" message={t('table.errorLoading')} />
 
   if (!profitsGrouped || Object.keys(profitsGrouped.data).length === 0)
-    return <Alert type="info" message={t('profitPage:table.noData')} />
+    return <Alert type="info" message={t('table.noData')} />
 
   return (
     <>
-      <Space style={{ marginBottom: 16 }}>
-        <Tooltip
-          title={t(
-            isAllExpanded
-              ? 'profitPage:table.tooltipCollapse'
-              : 'profitPage:table.tooltipExpand'
-          )}
-        >
-          <Button
-            onClick={isAllExpanded ? collapseAll : expandAll}
-            disabled={isLoading || dataSource.length === 0}
-            aria-pressed={isAllExpanded}
-            aria-label={t(
+      <Space style={{ marginBottom: 16, justifyContent: 'space-between', width: '100%' }}>
+        <div>
+          <Tooltip
+            title={
               isAllExpanded
-                ? 'profitPage:table.tooltipCollapse'
-                : 'profitPage:table.tooltipExpand'
-            )}
+                ? t('table.tooltipCollapse')
+                : t('table.tooltipExpand')
+            }
           >
-            {t(
-              isAllExpanded
-                ? 'profitPage:table.collapseAll'
-                : 'profitPage:table.expandAll'
-            )}
-          </Button>
-        </Tooltip>
-        <span>
-          {t('profitPage:table.expanded', {
-            current: expandedRowKeys.length,
-            total: dataSource.length,
-          })}
-        </span>
+            <Button
+              onClick={isAllExpanded ? collapseAll : expandAll}
+              disabled={isLoading || dataSource.length === 0}
+              aria-pressed={isAllExpanded}
+              aria-label={
+                isAllExpanded
+                  ? t('table.tooltipCollapse')
+                  : t('table.tooltipExpand')
+              }
+            >
+              {isAllExpanded
+                ? t('table.collapseAll')
+                : t('table.expandAll')}
+            </Button>
+          </Tooltip>
+          <span style={{ marginLeft: 8 }}>
+            {t('table.expanded', {
+              current: expandedRowKeys.length,
+              total: dataSource.length,
+            })}
+          </span>
+        </div>
+
+        <LanguageSwitcher />
       </Space>
 
       <Table
+      key={i18n.language}
         loading={isLoading}
-        columns={parentColumns}
+        columns={getParentColumns(t)}
         dataSource={dataSource}
         pagination={{
           position: ['bottomCenter'],
@@ -151,7 +156,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
           total: profitsGrouped.meta.total,
           onChange: handlePageChange,
           showTotal: (total, range) =>
-            t('profitPage:table.paginationTotal', {
+            t('table.paginationTotal', {
               from: range[0],
               to: range[1],
               total,
@@ -160,7 +165,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
         expandable={{
           expandedRowRender: (record) => (
             <Table
-              columns={childColumns}
+              columns={getChildColumns(t)}
               dataSource={record.transactions.map((t: Profit) => ({
                 ...t,
                 key: t._id,
@@ -175,10 +180,25 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
             setExpandedRowKeys([...expandedKeys] as string[]),
         }}
         rowKey={(record) => record.key}
-        aria-label={t('profitPage:table.tableAriaLabel')}
+        aria-label={t('table.tableAriaLabel')}
       />
     </>
   )
 }
 
 export default ProfitTable
+
+
+
+
+//Було
+
+// import { parentColumns, childColumns } from './tableConfig' // Колонки ініціалізуються один раз, а t() у них не оновлюється при зміні мови.
+
+// <Table columns={parentColumns} ... />
+
+
+//стало
+// import { getParentColumns, getChildColumns } from './tableConfig' // 
+// ...
+// <Table columns={getParentColumns(t)} ... /> // Колонки створюються щоразу, коли компонент ререндериться, і вже з актуальним t().

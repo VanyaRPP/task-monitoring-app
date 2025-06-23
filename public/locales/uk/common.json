@@ -2,6 +2,14 @@
   "siteTitle": "My Website",
   "modal": {
     "successMessage": "Зміни успішно збережено",
-    "errorMessage": "Не вдалося зберегти зміни"
+    "errorMessage": "Не вдалося зберегти зміни",
+    "confirmExitTitle": "Ви впевнені, що хочете вийти?",
+    "confirmExitContent": "Всі незбережені дані будуть втрачені",
+    "yes": "Так",
+    "no": "Ні"
+  },
+  "domainsSelect": {
+    "label": "Надавач послуг",
+    "placeholder": "Пошук надавача послуг"
   }
 }
