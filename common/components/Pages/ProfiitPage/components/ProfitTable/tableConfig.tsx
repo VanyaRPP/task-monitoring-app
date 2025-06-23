@@ -2,6 +2,10 @@ import { Profit } from '@common/api/profitsApi/profits.type'
 import { ColumnsType } from 'antd/es/table'
 import { t } from 'i18next'
 import dayjs from 'dayjs'
+import { Button, Dropdown } from 'antd'
+import { EyeOutlined, EditOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons'
+import type { MenuProps } from 'antd'
+
 
 interface ProfitMonthSummary {
   key: string
@@ -50,7 +54,7 @@ export const parentColumns: ColumnsType<ProfitMonthSummary> = [
   },
 ]
 
-export const childColumns: ColumnsType<Profit> = [
+export const getChildColumns= (onPreview: (record: Profit) => void): ColumnsType<Profit> => [
   {
     title: t('table.child.date', { ns: 'profitPage' }),
     dataIndex: 'date',
@@ -84,4 +88,60 @@ export const childColumns: ColumnsType<Profit> = [
     key: 'categories',
     render: (cats: string[]) => cats?.join(', ') || '-',
   },
+  {
+    title: '',
+    key: 'action',
+    align: 'center',
+    width: 80,
+    fixed: 'right',
+    render: (_, record) => {
+  const menuItems: MenuProps['items'] = [
+    {
+      key: 'view',
+      label: (
+        <Button
+          icon={<EyeOutlined />}
+          type="link"
+          style={{ color: '#722ed1', padding: '0 10px' }}
+          onClick={() => onPreview(record)}
+        >
+          {t('actions.preview', { ns: 'profitPage' })}
+        </Button>
+      ),
+    },
+    {
+      key: 'edit',
+      label: (
+        <Button
+          icon={<EditOutlined />}
+          type="link"
+          style={{ color: '#722ed1', padding: '0 10px' }}
+          disabled
+        >
+          {t('actions.edit', { ns: 'profitPage' })}
+        </Button>
+      ),
+    },
+    {
+      key: 'delete',
+      label: (
+        <Button
+          icon={<DeleteOutlined />}
+          type="link"
+          style={{ color: '#ff4d4f', padding: '0 10px' }}
+          disabled
+        >
+          {t('actions.delete', { ns: 'profitPage' })}
+        </Button>
+      ),
+    },
+  ]
+
+  return (
+    <Dropdown menu={{ items: menuItems }} placement="bottomRight">
+      <Button icon={<MoreOutlined />} />
+    </Dropdown>
+  )
+}
+  }
 ]
