@@ -26,9 +26,7 @@ interface ProfitTableProps {
 
 const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
   const { t } = useTranslation()
-
   const [selectedProfit, setSelectedProfit] = useState<Profit | null>(null)
-
   const dispatch = useAppDispatch()
   const { currentPage, pageSize } = useAppSelector(
     (state) => state.profitPage.transactionTablePagination
