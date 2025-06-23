@@ -6,7 +6,6 @@ import { Button, Dropdown } from 'antd'
 import { EyeOutlined, EditOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 
-
 interface ProfitMonthSummary {
   key: string
   month: string
