@@ -7,11 +7,13 @@ import { useEffect } from 'react'
 interface EmailSelectProps {
   form: any
   disabled?: boolean
+  required?: boolean
 }
 
 export default function EmailSelect({
   form,
   disabled = false,
+  required = true,
 }: EmailSelectProps) {
   const { data, isLoading } = useGetDomainsQuery({})
   const [formInstance] = useForm() // Access the form instance
@@ -40,20 +42,21 @@ export default function EmailSelect({
     <Form.Item
       name="adminEmails"
       label="Адміністратори"
+      required={required}
       rules={[
-        { required: true },
+        { required },
         ...validateField('email'), // Use the imported validateField function for email validation
       ]}
     >
       <Select
-        mode="multiple"
+        mode="tags"
         showSearch
         disabled={isLoading || disabled}
         placeholder="Пошти адмінів компанії"
         loading={isLoading}
         filterOption={(inputValue, option) => {
           if (typeof option?.value === 'string') {
-            return option.key.toLowerCase().includes(inputValue.toLowerCase())
+            return option?.key?.toLowerCase()?.includes(inputValue?.toLowerCase())
           }
           return false
         }}

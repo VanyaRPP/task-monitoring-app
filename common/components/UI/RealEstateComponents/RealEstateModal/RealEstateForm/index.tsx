@@ -133,7 +133,7 @@ const RealEstateForm: FC<Props> = ({
           disabled={!editable}
         />
       </Form.Item>
-      <EmailSelect form={form} disabled={!editable} />
+      <EmailSelect form={form} disabled={!editable} required={false} />
       <Form.Item
         name="totalArea"
         label="Площа (м²)"
