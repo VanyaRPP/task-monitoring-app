@@ -98,7 +98,8 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
     },
     [dispatch]
   )
-
+  const [isEditing, setIsEditing] = useState(false)
+  
   if (isError) return <Alert type="error" message={t('profitPage:table.errorLoading')} />
 
   if (!profitsGrouped || Object.keys(profitsGrouped.data).length === 0)
@@ -161,7 +162,16 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
         expandable={{
           expandedRowRender: (record) => (
             <Table
-              columns={getChildColumns((record) => setSelectedProfit(record))}
+              columns={getChildColumns(
+                (record) => {
+                  setSelectedProfit(record)
+                  setIsEditing(false)
+                },
+                (record) => {
+                  setSelectedProfit(record)
+                  setIsEditing(true)
+                }
+              )}
               dataSource={record.transactions.map((t: Profit) => ({
                 ...t,
                 key: t._id,
@@ -181,8 +191,11 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
       {selectedProfit && (
         <AddCostModal
           currentProfit={selectedProfit}
-          profitActions={{ preview: true }}
-          closeModal={() => setSelectedProfit(null)}
+          profitActions={{ preview: !isEditing, edit: isEditing }}
+          closeModal={() => {
+            setSelectedProfit(null)
+            setIsEditing(false)
+          }}
         />
       )}
     </>

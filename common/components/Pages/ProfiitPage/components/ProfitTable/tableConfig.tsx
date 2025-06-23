@@ -54,7 +54,7 @@ export const parentColumns: ColumnsType<ProfitMonthSummary> = [
   },
 ]
 
-export const getChildColumns= (onPreview: (record: Profit) => void): ColumnsType<Profit> => [
+export const getChildColumns= (onPreview: (record: Profit) => void, onEdit: (record: Profit) => void): ColumnsType<Profit> => [
   {
     title: t('table.child.date', { ns: 'profitPage' }),
     dataIndex: 'date',
@@ -116,7 +116,7 @@ export const getChildColumns= (onPreview: (record: Profit) => void): ColumnsType
           icon={<EditOutlined />}
           type="link"
           style={{ color: '#722ed1', padding: '0 10px' }}
-          disabled
+          onClick={() => onEdit(record)}
         >
           {t('actions.edit', { ns: 'profitPage' })}
         </Button>
