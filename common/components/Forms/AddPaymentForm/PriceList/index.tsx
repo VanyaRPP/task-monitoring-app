@@ -243,9 +243,9 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               Замовник претензій по об&apos;єму, якості та строкам виконання
               робіт (надання послуг) не має.
             </div>
+            <br/>
           </div>
           <hr />
-          <br />
           <br />
           <div className={styles.signaturesSection}>
             <div className={styles.signatureBlock}>
@@ -253,9 +253,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <b>Від Виконавця</b>
                 <br />
                 <br />
-                <br />
                 <hr />
-                <br />
                 <br />
                 <b>
                   {new Date(payment.invoiceCreationDate).toLocaleDateString()}
@@ -271,9 +269,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <b>Від Замовника</b>
                 <br />
                 <br />
-                <br />
                 <hr />
-                <br />
                 <br />
                 <b>
                   {new Date(payment.invoiceCreationDate).toLocaleDateString()}
