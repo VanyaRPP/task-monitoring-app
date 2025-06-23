@@ -421,7 +421,7 @@ export const paymentsForDates = [
 
 export const payments = [
   {
-    _id: '64d68421d9ba2fc8fea79d61',
+    _id: '64d68421d9ba2fc8fea79d51',
     invoiceNumber: 3,
     type: 'debit',
     invoiceCreationDate: '2020-11-09T22:00:00.000Z',
@@ -615,3 +615,42 @@ export const paymentsCredit = [
     generalSum: -1000,
   },
 ]
+
+export const profits = [
+  {
+    _id: '64d68421d9ba2fc8fea79d61',
+    domain: domains[0]._id,
+    payment: payments[0]?._id || null,
+    createdBy: null,
+    amount: 200,
+    type: 'credit' as const,
+    categories: [],
+    description: 'Initial credit',
+    invoiceNumber: '80',
+    date: new Date('2024-12-01T00:00:00.000Z'),
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d64',
+    domain: domains[1]._id,
+    payment: null,
+    createdBy: null,
+    amount: 80,
+    type: 'debit' as const,
+    categories: ['late_fee'],
+    description: 'Service fee debit',
+    invoiceNumber: '79',
+    date: new Date('2025-01-05T00:00:00.000Z'),
+  },
+  {
+    _id: '64d68421d9ba2fc8fea79d62',
+    domain: domains[2]._id,
+    payment: null,
+    createdBy: null,
+    amount: 50,
+    type: 'credit' as const,
+    categories: [],
+    description: 'Domain 1 bonus',
+    invoiceNumber: '81',
+    date: new Date('2025-02-10T00:00:00.000Z'),
+  },
+].sort((a, b) => compareDates(a.date, b.date))
