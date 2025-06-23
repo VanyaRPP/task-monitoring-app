@@ -1,15 +1,21 @@
 import { useCreateProfitMutation } from '@common/api/profitsApi/profits.api'
+import { Profit } from '@common/api/profitsApi/profits.type'
 import AddCostForm from '@components/Forms/AddCostForm'
 import Modal from '@components/UI/ModalWindow'
 import { useTranslation } from 'next-i18next'
 import { Form, Tabs, message } from 'antd'
 import type { TabsProps } from 'antd'
-import { FC, useState } from 'react'
+import { FC, useState, useEffect } from 'react'
 import s from './style.module.scss'
 import dayjs from 'dayjs'
 
 interface Props {
   closeModal: VoidFunction
+  currentProfit?: Profit 
+  profitActions?: {
+      preview?: boolean
+      edit?: boolean
+  }
 }
 
 type FormData = {
@@ -25,7 +31,7 @@ enum CostType {
   CREDIT = 'credit',
 }
 
-const AddCostModal: FC<Props> = ({ closeModal }) => {
+const AddCostModal: FC<Props> = ({ closeModal, currentProfit, profitActions }) => {
   const { t } = useTranslation()
   const [form] = Form.useForm()
   const [type, setType] = useState<CostType>(CostType.DEBIT)
@@ -53,35 +59,63 @@ const AddCostModal: FC<Props> = ({ closeModal }) => {
   const onTabChange = (key: string) => {
     setType(key === '1' ? CostType.DEBIT : CostType.CREDIT)
   }
+   
+   const isPreview = profitActions?.preview
 
   const tabItems: TabsProps['items'] = [
     {
       key: '1',
       label: t('profitPage:modal.addTitleDebit'),
-      children: <AddCostForm form={form} type="debit" />,
+      children: <AddCostForm form={form} type="debit" disabled={isPreview} currentProfit={currentProfit} />,
     },
     {
       key: '2',
       label: t('profitPage:modal.addTitleCredit'),
-      children: <AddCostForm form={form} type="credit" />,
+      children: <AddCostForm form={form} type="credit" disabled={isPreview} currentProfit={currentProfit} />,
     },
   ]
 
+  useEffect(() => {
+      if (currentProfit) {
+        form.setFieldsValue({
+          domain: currentProfit.domain,
+          date: dayjs(currentProfit.date),
+          sum: currentProfit.amount,
+          description: currentProfit.description,
+        })
+        setType(currentProfit.type as CostType)
+      }
+    }, [currentProfit, form])
+
   return (
     <Modal
-      title=""
+      title={isPreview ? t('profitPage:modal.previewTitle') : ''}
       onOk={handleSubmit}
       onCancel={() => {
         form.resetFields()
         closeModal()
       }}
-      changed={() => true}
+      changed={() => !isPreview}
       className={s.Modal}
-      okText={t('profitPage:modal.okText')}
-      cancelText={t('profitPage:modal.cancelText')}
+      okText={isPreview ? undefined : t('profitPage:modal.okText')}
+      cancelText={isPreview ? t('profitPage:modal.closeText') : t('profitPage:modal.cancelText')}
+      okButtonProps={{ style: { ...(isPreview && { display: 'none' }) } }}
       confirmLoading={isLoading}
     >
-      <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />
+      {isPreview ? (
+        <AddCostForm
+          form={form}
+          type={type}
+          disabled
+          currentProfit={currentProfit}
+        />
+      ) : (
+        <Tabs
+          activeKey={type === 'debit' ? '1' : '2'}
+          items={tabItems}
+          onChange={onTabChange}
+        />
+      )}
     </Modal>
   )
 }

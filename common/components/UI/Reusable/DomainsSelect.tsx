@@ -7,9 +7,10 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 export interface DomainsSelectProps {
   form: FormInstance
   edit?: boolean
+  disabled?: boolean
 }
 
-const DomainsSelect: React.FC<DomainsSelectProps> = ({ form, edit }) => {
+const DomainsSelect: React.FC<DomainsSelectProps> = ({ form, edit, disabled }) => {
   const [domains, setDomains] = useState([])
   const {
     data: fetchedDomains = [],
@@ -40,7 +41,7 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({ form, edit }) => {
     <Form.Item
       name="domain"
       label="Надавач послуг"
-      rules={validateField('required')}
+      rules={!disabled ? validateField('required') : []}
     >
       <Select
         options={options}
@@ -48,7 +49,7 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({ form, edit }) => {
         placeholder="Пошук надавача послуг"
         status={isDomainsError && 'error'}
         loading={isDomainsLoading}
-        disabled={isDomainsLoading || domains.length === 1}
+        disabled={disabled ?? (isDomainsLoading || domains.length === 1)}
         allowClear
         showSearch
       />
