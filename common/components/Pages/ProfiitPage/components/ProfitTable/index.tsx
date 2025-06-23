@@ -8,7 +8,6 @@ import { getParentColumns, getChildColumns } from './tableConfig'
 import { Profit } from '@common/api/profitsApi/profits.type'
 import { Table, Alert, Button, Space, Tooltip } from 'antd'
 import { useTranslation } from 'react-i18next'
-import LanguageSwitcher from '@components/UI/Buttons/LanguageSwitcher'
 
 
 interface ProfitMonthSummary {
@@ -139,7 +138,6 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
           </span>
         </div>
 
-        <LanguageSwitcher />
       </Space>
 
       <Table

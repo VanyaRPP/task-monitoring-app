@@ -13,7 +13,6 @@ import { isAdminCheck } from '@utils/helpers'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddCostModal from '@components/AddCostModal'
 import { useTranslation } from 'react-i18next'
-import LanguageSwitcher from '@components/UI/Buttons/LanguageSwitcher'
 
 
 // Активуємо плагін
@@ -70,13 +69,11 @@ const ProfitPayment: React.FC = () => {
             <CalendarOutlined />
             {t('table.backToProfit')}
           </Button>
-          <LanguageSwitcher />
           {isAdmin && (
             <Button type="link" onClick={() => setIsModalOpen(true)}>
               <PlusOutlined /> {t('table.add')}
             </Button>
           )}
-          <LanguageSwitcher /> {/* 🔹 кнопка перемикання мови */}
       </div>
           {isModalOpen && <AddCostModal closeModal={closeModal} />}
         </div>
