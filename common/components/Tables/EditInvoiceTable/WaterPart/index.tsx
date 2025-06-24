@@ -33,7 +33,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 }) => {
   const { service, company } = usePaymentContext()
   const name = useMemo(() => toArray<string>(_name), [_name])
-  const waterPartPrice = +((service.waterPriceTotal * company.waterPart) / 100)
+  const waterPartPrice = +((service?.waterPriceTotal * company?.waterPart) / 100)
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
   if (service?.garbageCollectorPrice && company?.rentPart) {

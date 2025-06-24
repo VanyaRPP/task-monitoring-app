@@ -19,10 +19,10 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
   const lastAmount = Form.useWatch(['invoice', ...name, 'lastAmount'], form)
   const waterAmount =
-    payment.invoice.find((invoice) => invoice.type === 'waterPrice')
-      .lastAmount ??
-    prevPayment.invoice.find((invoice) => invoice.type === 'waterPrice')
-      .lastAmount
+    payment?.invoice?.find((invoice) => invoice.type === 'waterPrice')
+      ?.lastAmount ??
+    prevPayment?.invoice?.find((invoice) => invoice.type === 'waterPrice')
+      ?.lastAmount
 
   return (
     <Space
