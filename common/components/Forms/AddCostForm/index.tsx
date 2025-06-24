@@ -33,28 +33,28 @@ const AddCostForm: React.FC<Props> = ({ form, type, disabled, currentProfit }) =
   return (
     <ConfigProvider locale={ukUA}>
       <Form form={form} layout="vertical" className={s.Form}>
-        {isPreview && currentProfit?.createdBy && (
+        {(isPreview || currentProfit && currentProfit.createdBy) && (
             <div className={s.createdByWrapper}>
               <Form.Item label={t('profitPage:form.createdBy')}>
                 <div>
                   <span className={s.createdByName}>
-                    {currentProfit.createdBy.name}
+                    {currentProfit?.createdBy?.name}
                   </span>
                   <br />
                   <span className={s.createdByEmail}>
-                    {currentProfit.createdBy.email}
+                    {currentProfit?.createdBy?.email}
                   </span>
                 </div>
               </Form.Item>
             </div>
           )}
 
-        <DomainsSelect form={form} disabled={isPreview} />
+        <DomainsSelect form={form} disabled={isPreview} currentProfit={currentProfit}/>
 
         <Form.Item
           name="date"
           label={t('profitPage:form.date')}
-          rules={!disabled ? validateField('required') : []}
+          rules={(!disabled && !currentProfit) ? validateField('required') : []}
         >
           <DatePicker
             format="MMMM YYYY DD"
@@ -88,7 +88,7 @@ const AddCostForm: React.FC<Props> = ({ form, type, disabled, currentProfit }) =
                 ? t('profitPage:form.amountDebit')
                 : t('profitPage:form.amountCredit')
             }
-            rules={validateField('required')}
+            rules={(!disabled && !currentProfit) ? validateField('required') : []}
           >
             <InputNumber
               parser={inputNumberParser}

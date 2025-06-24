@@ -66,7 +66,7 @@ export const profitApi = createApi({
     >({
       query: ({ id, body }) => ({
         url: `/${id}`,
-        method: 'PUT',
+        method: 'PATCH',
         body,
       }),
       invalidatesTags: (_result, _err, { id }) => [{ type: 'Profit', id }],
