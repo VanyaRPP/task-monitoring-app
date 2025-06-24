@@ -117,8 +117,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { isGlobalAdmin } = await getCurrentUser(req, res)
-  if (!isGlobalAdmin) return res.status(403).json({ success: false })
+  const { isGlobalAdmin, isUser } = await getCurrentUser(req, res)
+  if (isUser) return res.status(403).json({ success: false })
 
   const { id } = req.query
 
