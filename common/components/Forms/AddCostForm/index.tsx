@@ -15,6 +15,7 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
 import { useTranslation } from 'next-i18next'
 import s from './style.module.scss'
+import { formatDateWithGenitiveMonthCapitalized } from '@utils/helpers' 
 
 dayjs.locale('uk')
 
@@ -57,7 +58,7 @@ const AddCostForm: React.FC<Props> = ({ form, type, disabled, currentProfit }) =
           rules={(!disabled && !currentProfit) ? validateField('required') : []}
         >
           <DatePicker
-            format="MMMM YYYY DD"
+            format={(date) => (date ? formatDateWithGenitiveMonthCapitalized(date) : '')}
             placeholder={t('profitPage:form.datePlaceholder', { ns: 'common' })}
             className={s.formInput}
             disabled={isPreview}
