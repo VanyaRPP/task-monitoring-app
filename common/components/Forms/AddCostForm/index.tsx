@@ -34,22 +34,30 @@ const AddCostForm: React.FC<Props> = ({ form, type, disabled, currentProfit }) =
   return (
     <ConfigProvider locale={ukUA}>
       <Form form={form} layout="vertical" className={s.Form}>
-        {(isPreview || currentProfit && currentProfit.createdBy) && (
+        {isPreview && (
             <div className={s.createdByWrapper}>
               <Form.Item label={t('profitPage:form.createdBy')}>
                 <div>
-                  <span className={s.createdByName}>
-                    {currentProfit?.createdBy?.name}
-                  </span>
-                  <br />
-                  <span className={s.createdByEmail}>
-                    {currentProfit?.createdBy?.email}
-                  </span>
+                  {currentProfit?.createdBy ? (
+                    <>
+                      <span className={s.createdByName}>
+                        {currentProfit.createdBy.name}
+                      </span>
+                      <br />
+                      <span className={s.createdByEmail}>
+                        {currentProfit.createdBy.email}
+                      </span>
+                    </>
+                  ) : (
+                    <span className={s.createdByName}>
+                      {t('profitPage:form.automatic')}
+                    </span>
+                  )}
                 </div>
               </Form.Item>
             </div>
           )}
-
+          
         <DomainsSelect form={form} disabled={isPreview} currentProfit={currentProfit}/>
 
         <Form.Item
