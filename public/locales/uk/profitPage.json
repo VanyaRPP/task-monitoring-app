@@ -53,7 +53,8 @@
     "description": "Опис",
     "descriptionPlaceholder": "Введіть опис",
     "category": "Категорія",
-    "createdBy": "Створено :"
+    "createdBy": "Створено :",
+    "automatic": "Автоматично"
   },
   "filters": {
     "dateRange": "Діапазон дат",

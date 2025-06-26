@@ -21,6 +21,7 @@ export const parentColumns: ColumnsType<ProfitMonthSummary> = [
     title: t('table.parent.month', { ns: 'profitPage' }),
     dataIndex: 'month',
     key: 'month',
+    width: 150,
     render: (month: string) =>
       dayjs(month).isValid() ? dayjs(month).format('MMMM YYYY') : month,
   },
@@ -28,18 +29,21 @@ export const parentColumns: ColumnsType<ProfitMonthSummary> = [
     title: t('table.parent.debit', { ns: 'profitPage' }),
     dataIndex: 'debit',
     key: 'debit',
+    width: 100,
     render: (value: number) => value.toFixed(2),
   },
   {
     title: t('table.parent.credit', { ns: 'profitPage' }),
     dataIndex: 'credit',
     key: 'credit',
+    width: 100,
     render: (value: number) => value.toFixed(2),
   },
   {
     title: t('table.parent.profit', { ns: 'profitPage' }),
     dataIndex: 'profit',
     key: 'profit',
+    width: 140,
     render: (value: number) => (
       <span style={{ color: value >= 0 ? 'green' : 'red' }}>
         {value.toFixed(2)}
@@ -50,6 +54,7 @@ export const parentColumns: ColumnsType<ProfitMonthSummary> = [
     title: t('table.parent.totalRecords', { ns: 'profitPage' }),
     dataIndex: 'count',
     key: 'count',
+    width: 160,
   },
 ]
 
@@ -62,12 +67,14 @@ export const getChildColumns= (
     title: t('table.child.date', { ns: 'profitPage' }),
     dataIndex: 'date',
     key: 'date',
+    width: 185,
     render: (date: string) => new Date(date).toLocaleDateString(),
   },
   {
     title: t('table.child.type', { ns: 'profitPage' }),
     dataIndex: 'type',
     key: 'type',
+    width: 100,
     render: (type: string) => {
       if (type === 'debit') return t('table.child.debit', { ns: 'profitPage' })
       if (type === 'credit')
@@ -79,23 +86,26 @@ export const getChildColumns= (
     title: t('table.child.amount', { ns: 'profitPage' }),
     dataIndex: 'amount',
     key: 'amount',
+    width: 100,
   },
   {
     title: t('table.child.description', { ns: 'profitPage' }),
     dataIndex: 'description',
     key: 'description',
+    width: 140,
   },
   {
     title: t('table.child.categories', { ns: 'profitPage' }),
     dataIndex: 'categories',
     key: 'categories',
+    width: 90,
     render: (cats: string[]) => cats?.join(', ') || '-',
   },
   {
     title: '',
     key: 'action',
     align: 'center',
-    width: 80,
+    width: 40,
     fixed: 'right',
     render: (_, record) => {
   const menuItems: MenuProps['items'] = [
