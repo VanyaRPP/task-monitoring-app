@@ -245,6 +245,22 @@ export const getDefaultStartDate = (): string => {
   return formatDateDMY(date.toString())
 }
 
+const monthsUaGenitiveCapitalized = [
+  'Січня', 'Лютого', 'Березня', 'Квітня', 'Травня', 'Червня', 'Липня',
+  'Серпня', 'Вересня', 'Жовтня', 'Листопада', 'Грудня',
+]
+
+/**
+ * Форматує дату в формат: 20 Червня 2025
+ * з використанням родового відмінка і великої літери
+ */
+export const formatDateWithGenitiveMonthCapitalized = (
+  date: dayjs.Dayjs | Date
+): string => {
+  const d = dayjs(date)
+  return `${d.date()} ${monthsUaGenitiveCapitalized[d.month()]} ${d.year()}`
+}
+
 export const getPaymentProviderAndReciever = (company) => {
   const provider: IProvider = company && {
     description: company?.domain?.description || '',

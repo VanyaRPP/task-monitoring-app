@@ -15,6 +15,7 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
 import { useTranslation } from 'next-i18next'
 import s from './style.module.scss'
+import { formatDateWithGenitiveMonthCapitalized } from '@utils/helpers' 
 
 dayjs.locale('uk')
 
@@ -33,31 +34,39 @@ const AddCostForm: React.FC<Props> = ({ form, type, disabled, currentProfit }) =
   return (
     <ConfigProvider locale={ukUA}>
       <Form form={form} layout="vertical" className={s.Form}>
-        {isPreview && currentProfit?.createdBy && (
+        {isPreview && (
             <div className={s.createdByWrapper}>
               <Form.Item label={t('profitPage:form.createdBy')}>
                 <div>
-                  <span className={s.createdByName}>
-                    {currentProfit.createdBy.name}
-                  </span>
-                  <br />
-                  <span className={s.createdByEmail}>
-                    {currentProfit.createdBy.email}
-                  </span>
+                  {currentProfit?.createdBy ? (
+                    <>
+                      <span className={s.createdByName}>
+                        {currentProfit.createdBy.name}
+                      </span>
+                      <br />
+                      <span className={s.createdByEmail}>
+                        {currentProfit.createdBy.email}
+                      </span>
+                    </>
+                  ) : (
+                    <span className={s.createdByName}>
+                      {t('profitPage:form.automatic')}
+                    </span>
+                  )}
                 </div>
               </Form.Item>
             </div>
           )}
-
-        <DomainsSelect form={form} disabled={isPreview} />
+          
+        <DomainsSelect form={form} disabled={isPreview} currentProfit={currentProfit}/>
 
         <Form.Item
           name="date"
           label={t('profitPage:form.date')}
-          rules={!disabled ? validateField('required') : []}
+          rules={(!disabled && !currentProfit) ? validateField('required') : []}
         >
           <DatePicker
-            format="MMMM YYYY DD"
+            format={(date) => (date ? formatDateWithGenitiveMonthCapitalized(date) : '')}
             placeholder={t('profitPage:form.datePlaceholder', { ns: 'common' })}
             className={s.formInput}
             disabled={isPreview}
@@ -88,7 +97,7 @@ const AddCostForm: React.FC<Props> = ({ form, type, disabled, currentProfit }) =
                 ? t('profitPage:form.amountDebit')
                 : t('profitPage:form.amountCredit')
             }
-            rules={validateField('required')}
+            rules={(!disabled && !currentProfit) ? validateField('required') : []}
           >
             <InputNumber
               parser={inputNumberParser}

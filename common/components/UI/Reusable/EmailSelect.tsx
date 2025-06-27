@@ -45,7 +45,7 @@ export default function EmailSelect({
       required={required}
       rules={[
         { required },
-        ...validateField('email'), // Use the imported validateField function for email validation
+        ...(required ? validateField('email') : []), // Use the imported validateField function for email validation
       ]}
     >
       <Select

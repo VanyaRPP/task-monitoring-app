@@ -2,12 +2,13 @@
 
 import { setTransactionTablePagination } from '@modules/store/profitPageSlice'
 import { useGetByDomainQuery } from '@common/api/profitsApi/profits.api'
+import { useDeleteProfitMutation } from '@common/api/profitsApi/profits.api'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import { FC, useEffect, useMemo, useState, useCallback } from 'react'
 import { parentColumns, getChildColumns } from './tableConfig'
 import { Profit } from '@common/api/profitsApi/profits.type'
 import AddCostModal from '@components/AddCostModal'
-import { Table, Alert, Button, Space, Tooltip } from 'antd'
+import { Table, Alert, Button, Space, Tooltip, message  } from 'antd'
 import { useTranslation } from 'react-i18next'
 
 interface ProfitMonthSummary {
@@ -98,7 +99,19 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
     },
     [dispatch]
   )
+  const [isEditing, setIsEditing] = useState(false)
 
+  const [deleteProfit, { isLoading: isDeleting }] = useDeleteProfitMutation()
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteProfit(id).unwrap()
+      message.success(t('messages.deleted', { ns: 'profitPage' }))
+    } catch (error) {
+      message.error(t('messages.errorDelete', { ns: 'profitPage' }))
+    }
+  }
+  
   if (isError) return <Alert type="error" message={t('profitPage:table.errorLoading')} />
 
   if (!profitsGrouped || Object.keys(profitsGrouped.data).length === 0)
@@ -161,7 +174,18 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
         expandable={{
           expandedRowRender: (record) => (
             <Table
-              columns={getChildColumns((record) => setSelectedProfit(record))}
+              columns={getChildColumns(
+                (record) => {
+                  setSelectedProfit(record)
+                  setIsEditing(false)
+                },
+                (record) => {
+                  setSelectedProfit(record)
+                  setIsEditing(true)
+                },
+                handleDelete,
+                isDeleting
+              )}
               dataSource={record.transactions.map((t: Profit) => ({
                 ...t,
                 key: t._id,
@@ -181,8 +205,11 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
       {selectedProfit && (
         <AddCostModal
           currentProfit={selectedProfit}
-          profitActions={{ preview: true }}
-          closeModal={() => setSelectedProfit(null)}
+          profitActions={{ preview: !isEditing, edit: isEditing }}
+          closeModal={() => {
+            setSelectedProfit(null)
+            setIsEditing(false)
+          }}
         />
       )}
     </>
