@@ -1,0 +1,91 @@
+{
+    "columns": {
+        "provider": "Service provider",
+        "company": "Company",
+        "invoiceCreationDate": "Creation date",
+        "type": "Type",
+        "credit": "Credit",
+        "debit": "Debit",
+        "monthService": "By month",
+        "area": "Area, m²",
+        "maintenance": "Maintenance",
+        "perMeter": "Per m²",
+        "total": "Total",
+        "placing": "Placement",
+        "water": "Water supply",
+        "waterPart": "Water (no meter)",
+        "share": "Share, %",
+        "garbage": "Garbage",
+        "cleaning": "Cleaning",
+        "discount": "Discount",
+        "electricity": "Electricity",
+        "kW": "kW",
+        "UAH": "UAH",
+        "UAHKW": "UAH/kW",
+        "UAHM": "UAH/m",
+        "electricityWithLosses": "Electricity + Losses {{losses}}%",
+        "old": "Old",
+        "new": "New",
+        "losses": "Losses",
+        "inflationIndex": "Inflation index",
+        "unknownForDate": "unknown"
+    },
+    "price": {
+        "placingPrice": "Placement",
+        "maintenancePrice": "Maintenance",
+        "inflicionPrice": "Inflation index",
+        "electricityPrice": "Electricity",
+        "waterPrice": "Water supply",
+        "garbageCollectorPrice": "Garbage collection",
+        "waterPart": "Water allocation",
+        "discount": "Discount",
+        "cleaningPrice": "Cleaning",
+        "custom": "Additional expenses"
+    },
+    "info": {
+        "forMonth": "for {{month}}"
+    },
+    "tooltips": {
+        "addToFilters": "Add to filters",
+        "debit": "Debit (Realization)",
+        "credit": "Credit (Payment)",
+        "inflicionCalc": "Accrual is based on inflation increase",
+        "individualMaintenance": "Individual maintenance according to contract",
+        "inflationaryPricing": "Inflationary pricing",
+        "inflicionTooltip": "Previous month's amount + inflation value in this invoice ({{prev}} + {{inf}})"
+    },
+    "actions": {
+        "edit": "Edit",
+        "delete": "Delete"
+    },
+    "popconfirm": {
+        "deleteConfirm": "Are you sure you want to delete the payment from {{date}}?",
+        "deleteRow": "Are you sure you want to delete this entry?"
+    },
+    "buttons": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "no": "No",
+        "yes": "Yes"
+    },
+    "empty": {
+        "noData": "No data"
+    },
+    "filters": {
+        "credit": "Credit (Payment)",
+        "debit": "Debit (Realization)"
+    },
+    "description": {
+        "services": "No service found at this address!"
+    },
+    "validation": {
+        "required": "This field is required!",
+        "notEqual": "Value must not be equal to {{value}}",
+        "min": "Value must be at least {{min}}",
+        "max": "Value must be at most {{max}}",
+        "boundary": "Value must be between {{min}} and {{max}}"
+    },
+    "message": {
+        "error": "Error"
+    }
+}

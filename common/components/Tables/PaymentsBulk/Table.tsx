@@ -5,8 +5,9 @@ import { getInvoices } from '@utils/getInvoices'
 import { Alert, Empty, Form, Table } from 'antd'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
-
+import { useTranslation } from 'next-i18next';
 const InvoicesTable: React.FC = () => {
+  const { t } = useTranslation('paymentTable')
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.PAYMENT_BULK
 
@@ -54,7 +55,7 @@ const InvoicesTable: React.FC = () => {
     })
   }, [form, service, companies, prevService, prevPayments])
 
-  if (isError) return <Alert message="Помилка" type="error" showIcon closable />
+  if (isError) return <Alert message={t('message.error')} type="error" showIcon closable />
 
   return (
     <Form.List name="payments">
@@ -64,12 +65,12 @@ const InvoicesTable: React.FC = () => {
           size="small"
           pagination={false}
           loading={isLoading}
-          columns={getDefaultColumns(remove, service?.losses)}
+          columns={getDefaultColumns(remove, t, service?.losses)}
           dataSource={fields}
           scroll={{ x: 3000 }}
           locale={{
             emptyText: (
-              <Empty description="За даною адресою послуг не знайдено!" />
+              <Empty description={t('description.services')} />
             ),
           }}
         />

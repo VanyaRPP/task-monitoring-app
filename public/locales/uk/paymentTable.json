@@ -1,0 +1,91 @@
+{
+    "columns": {
+        "provider": "Надавач послуг",
+        "company": "Компанія",
+        "invoiceCreationDate": "Дата створення",
+        "type": "Тип",
+        "credit": "Кредит",
+        "debit": "Дебет",
+        "monthService": "За місяць",
+        "area": "Площа, м²",
+        "maintenance": "Утримання",
+        "perMeter": "За м²",
+        "total": "Загальне",
+        "placing": "Розміщення",
+        "water": "Водопостачання",
+        "waterPart": "Водопостачання без лічильника",
+        "share": "Частка, %",
+        "garbage": "Вивіз ТПВ",
+        "cleaning": "Прибирання",
+        "discount": "Знижка",
+        "electricity": "Електропостачання",
+        "kW": "кВт",
+        "UAH": "грн",
+        "UAHKW": "грн/кВт",
+        "UAHM": "грн/м",
+        "electricityWithLosses": "Електропостачання + Втрати {{losses}}%",
+        "old": "Стара",
+        "new": "Нова",
+        "losses": "Втрати",
+        "inflationIndex": "Індекс інфляції",
+        "unknownForDate": "невідомий"
+    },
+    "price": {
+        "placingPrice": "Розміщення",
+        "maintenancePrice": "Утримання",
+        "inflicionPrice": "Індекс інфляції",
+        "electricityPrice": "Електропостачання",
+        "waterPrice": "Водопостачання",
+        "garbageCollectorPrice": "Вивіз ТПВ",
+        "waterPart": "Водонарахування",
+        "discount": "Знижка",
+        "cleaningPrice": "Прибирання",
+        "custom": "Додаткові витрати"
+    },
+    "info": {
+        "forMonth": "за {{month}}"
+    },
+    "tooltips": {
+        "addToFilters": "Додати в фільтри",
+        "debit": "Дебет (Реалізація)",
+        "credit": "Кредит (Оплата)",
+        "inflicionCalc": "Нарахування відбувається згідно з ростом інфляції",
+        "individualMaintenance": "Індивідуальне утримання, що передбачене договором",
+        "inflationaryPricing": "Інфляційне нарахування",
+        "inflicionTooltip": "Значення попереднього місяця + значення інфляції в цьому рахунку ({{prev}} + {{inf}})"
+    },
+    "actions": {
+        "edit": "Редагувати",
+        "delete": "Видалити"
+    },
+    "popconfirm": {
+        "deleteConfirm": "Ви впевнені, що хочете видалити оплату від {{date}}?",
+        "deleteRow": "Ви впевнені, що хочете видалити запис?"
+    },
+    "buttons": {
+        "edit": "Редагувати",
+        "delete": "Видалити",
+        "no": "Ні",
+        "yes": "Так"
+    },
+    "empty": {
+        "noData": "Немає даних"
+    },
+    "filters": {
+        "credit": "Кредит (Оплата)",
+        "debit": "Дебет (Реалізація)"
+    },
+    "description": {
+        "services": "За даною адресою послуг не знайдено!"
+    },
+    "validation": {
+        "required": "Поле обов'язкове!",
+        "notEqual": "Значення не повинно дорівнювати {{value}}",
+        "min": "Значення не може бути менше ніж {{min}}",
+        "max": "Значення не може бути більше ніж {{max}}",
+        "boundary": "Значення має бути між {{min}} та {{max}}"
+    },
+    "message": {
+        "error": "Помилка"
+    }
+}

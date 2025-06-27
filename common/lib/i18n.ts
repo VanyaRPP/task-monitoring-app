@@ -7,6 +7,8 @@ import enCommon from '../../public/locales/en/common.json'
 import ukCommon from '../../public/locales/uk/common.json'
 import enBankPage from '../../public/locales/en/bankPage.json'
 import ukBankPage from '../../public/locales/uk/bankPage.json'
+import enpaymentTable from '../../public/locales/en/paymentTable.json'
+import ukpaymentTable from '../../public/locales/uk/paymentTable.json'
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -14,16 +16,18 @@ i18n.use(initReactI18next).init({
       common: enCommon,
       bankPage: enBankPage,
       profitPage: enProfitPage,
+      paymentTable: enpaymentTable,
     },
     uk: {
       common: ukCommon,
       bankPage: ukBankPage,
       profitPage: ukProfitPage,
+      paymentTable: ukpaymentTable,
     },
   },
   lng: 'uk',
   fallbackLng: 'uk',
-  ns: ['common', 'profitPage', 'bankPage'],
+  ns: ['common', 'profitPage', 'bankPage', 'paymentTable'],
   defaultNS: 'common',
   interpolation: {
     escapeValue: false,

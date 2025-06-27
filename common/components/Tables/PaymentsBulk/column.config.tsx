@@ -5,7 +5,7 @@ import { dateToMonth } from '@common/assets/features/formatDate'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { ServiceType } from '@utils/constants'
 import { inputNumberParser, toRoundFixed } from '@utils/helpers'
-import validator from '@utils/validator'
+import {getValidator} from '@utils/validator'
 import {
   Form,
   Input,
@@ -17,34 +17,36 @@ import {
   Typography,
 } from 'antd'
 import { useEffect, useMemo } from 'react'
+import { useTranslation } from 'next-i18next'
 
 export const getDefaultColumns = (
   remove: (index: number) => void,
-  losses?: number
+  t: (key: string, options?: any) => string,
+  losses?: number,
 ): TableColumnsType => [
   {
     fixed: 'left',
-    title: 'Компанія',
+    title:  t('columns.company'),
     width: 250,
     render: (_, { name }: { name: number }) => <CompanyName name={name} />,
   },
   {
-    title: 'Площа, м²',
+    title: t('columns.area'),
     width: 160,
     render: (_, { name }: { name: number }) => <TotalArea name={name} />,
   },
   {
-    title: 'Утримання',
+    title: t('columns.maintenance'),
     children: [
       {
-        title: 'За м²',
+        title: t('columns.perMeter'),
         width: 160,
         render: (_, { name }: { name: number }) => (
           <MaintenancePrice name={name} />
         ),
       },
       {
-        title: 'Загальне',
+        title: t('columns.total'),
         width: 200,
         render: (_, { name }: { name: number }) => (
           <MaintenanceSum name={name} />
@@ -53,15 +55,15 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: 'Розміщення',
+    title: t('columns.placing'),
     children: [
       {
-        title: 'За м²',
+        title: t('columns.perMeter'),
         width: 160,
         render: (_, { name }: { name: number }) => <PlacingPrice name={name} />,
       },
       {
-        title: 'Загальне',
+        title: t('columns.total'),
         width: 200,
         render: (_, { name }: { name: number }) => <PlacingSum name={name} />,
       },
@@ -74,25 +76,25 @@ export const getDefaultColumns = (
   },
   {
     title: losses
-      ? `Електропостачання + Втрати ${losses}%`
-      : 'Електропостачання',
+      ? t('columns.electricityWithLosses', { losses })
+    : t('columns.electricity'),
     children: [
       {
-        title: 'Стара',
+        title: t('columns.old'),
         width: 160,
         render: (_, { name }: { name: number }) => (
           <ElectricityAmount name={name} last />
         ),
       },
       {
-        title: 'Нова',
+        title: t('columns.new'),
         width: 160,
         render: (_, { name }: { name: number }) => (
           <ElectricityAmount name={name} />
         ),
       },
       {
-        title: 'Втрати',
+        title: t('columns.losses'),
         width: 200,
         render: (_, { name }: { name: number }) => (
           <LossElectricityPrice name={name} />
@@ -115,17 +117,17 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: 'Водопостачання',
+    title: t('columns.water'),
     children: [
       {
-        title: 'Стара',
+        title:  t('columns.old'),
         width: 160,
         render: (_, { name }: { name: number }) => (
           <WaterAmount name={name} last />
         ),
       },
       {
-        title: 'Нова',
+        title: t('columns.new'),
         width: 160,
         render: (_, { name }: { name: number }) => <WaterAmount name={name} />,
       },
@@ -137,10 +139,10 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: 'Водопостачання без лічильника',
+    title: t('columns.waterPart'),
     children: [
       {
-        title: 'Частка, %',
+        title: t('columns.share'),
         width: 160,
         render: (_, { name }: { name: number }) => (
           <WaterPartAmount name={name} />
@@ -154,10 +156,10 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: 'Вивіз ТПВ',
+    title: t('columns.garbage'),
     children: [
       {
-        title: 'Частка, %',
+        title: t('columns.share'),
         width: 160,
         render: (_, { name }: { name: number }) => (
           <GarbageCollectorAmount name={name} />
@@ -173,12 +175,12 @@ export const getDefaultColumns = (
     ],
   },
   {
-    title: 'Прибирання',
+    title: t('columns.cleaning'),
     width: 200,
     render: (_, { name }: { name: number }) => <Cleaning name={name} />,
   },
   {
-    title: 'Знижка',
+    title: t('columns.discount'),
     width: 200,
     render: (_, { name }: { name: number }) => <Discount name={name} />,
   },
@@ -188,9 +190,9 @@ export const getDefaultColumns = (
     width: 48,
     render: (_, { name }: { name: number }) => (
       <Popconfirm
-        title="Ви впевнені, що хочете видалити запис?"
-        okText="Так"
-        cancelText="Ні"
+        title={t('popconfirm.deleteRow')}
+        okText={t('buttons.yes')}
+        cancelText={t('buttons.no')}
         onConfirm={() => remove(name)}
       >
         <CloseCircleOutlined />
@@ -278,6 +280,7 @@ const useInflicionValues = (
 }
 
 const LossElectricitySum: React.FC<{ name: number }> = ({ name }) => {
+  const { t } = useTranslation('paymentTable')
   const { form, service } = useInvoicesPaymentContext()
   const lastAmount: number =
     Form.useWatch(
@@ -298,7 +301,7 @@ const LossElectricitySum: React.FC<{ name: number }> = ({ name }) => {
             lastAmount +
             (amount - lastAmount) * (service?.losses / 100)
           ).toFixed(2)}{' '}
-          кВт
+          {t('columns.kW')}
         </Typography.Text>
       )}
     </Space>
@@ -338,7 +341,8 @@ const TotalArea: React.FC<{ name: number }> = ({ name }) => {
 
 const MaintenancePrice: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
-
+const { t } = useTranslation('paymentTable') 
+  const validator = getValidator(t) 
   const servicePricePerMeter: number =
     Form.useWatch(
       ['payments', name, 'company', 'servicePricePerMeter'],
@@ -349,7 +353,7 @@ const MaintenancePrice: React.FC<{ name: number }> = ({ name }) => {
     <Tooltip
       title={
         !!servicePricePerMeter &&
-        'Індивідуальне утримання, що передбачене договором'
+        t('tooltips.individualMaintenance')
       }
     >
       <Form.Item
@@ -368,7 +372,8 @@ const MaintenancePrice: React.FC<{ name: number }> = ({ name }) => {
 }
 const MaintenanceSum: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
-
+const { t } = useTranslation('paymentTable') 
+  const validator = getValidator(t) 
   const totalArea: number =
     Form.useWatch(['payments', name, 'company', 'totalArea'], form) ?? 0
   const price: number =
@@ -397,13 +402,14 @@ const MaintenanceSum: React.FC<{ name: number }> = ({ name }) => {
 
 const PlacingPrice: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
-
+const { t } = useTranslation('paymentTable') 
+  const validator = getValidator(t) 
   const inflicion: boolean =
     Form.useWatch(['payments', name, 'company', 'inflicion'], form) ?? false
 
   return inflicion ? (
-    <Tooltip title="Нарахуванян відбувається згідно з ростом інфляції">
-      Інфляційне нархування <QuestionCircleOutlined />
+    <Tooltip title={t('tooltips.inflicionCalc')}>
+      {t('tooltips.inflationaryPricing')} <QuestionCircleOutlined />
     </Tooltip>
   ) : (
     <Form.Item
@@ -417,7 +423,8 @@ const PlacingPrice: React.FC<{ name: number }> = ({ name }) => {
 }
 const PlacingSum: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
-
+const { t } = useTranslation('paymentTable') 
+  const validator = getValidator(t) 
   const { previousPlacingPrice, inflicionAmount } = useInflicionValues(name)
 
   const inflicion: boolean =
@@ -441,10 +448,11 @@ const PlacingSum: React.FC<{ name: number }> = ({ name }) => {
     <Tooltip
       title={
         inflicion &&
-        `Значення попереднього місяця + значення інфляції в цьому рахунку (${toRoundFixed(
-          previousPlacingPrice
-        )} + ${toRoundFixed(inflicionAmount)})`
-      }
+        t('tooltips.inflicionTooltip', {
+      prev: toRoundFixed(previousPlacingPrice),
+      inf: toRoundFixed(inflicionAmount),
+    })
+  }
     >
       <Form.Item
         name={[name, 'invoice', ServiceType.Placing, 'sum']}
@@ -463,27 +471,28 @@ const PlacingSum: React.FC<{ name: number }> = ({ name }) => {
 }
 
 const InflicionTitle: React.FC = () => {
+  const { t } = useTranslation('paymentTable')
   const { prevService } = useInvoicesPaymentContext()
 
   return (
     <Space direction="vertical" size={0}>
-      <Typography.Text>Індекс інфляції</Typography.Text>
-      {prevService?.inflicionPrice ? (
-        <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
-          {toRoundFixed(prevService.inflicionPrice)}% за{' '}
-          {dateToMonth(prevService.date)}
-        </Typography.Text>
-      ) : (
-        <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
-          за {dateToMonth(prevService?.date)} невідомий
-        </Typography.Text>
-      )}
-    </Space>
+    <Typography.Text>{t('columns.inflationIndex')}</Typography.Text>
+    {prevService?.inflicionPrice ? (
+      <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
+        {toRoundFixed(prevService.inflicionPrice)}% {t('info.forMonth', { month: dateToMonth(prevService.date) })}
+      </Typography.Text>
+    ) : (
+      <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
+        {t('info.forMonth', { month: dateToMonth(prevService?.date) })} {t('columns.unknownForDate')}
+      </Typography.Text>
+    )}
+  </Space>
   )
 }
 const InflicionSum: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
-
+const { t } = useTranslation('paymentTable') 
+  const validator = getValidator(t) 
   const inflicion: boolean =
     Form.useWatch(['payments', name, 'company', 'inflicion'], form) ?? false
   const price: number =
@@ -515,14 +524,15 @@ const InflicionSum: React.FC<{ name: number }> = ({ name }) => {
 }
 
 const ElectricitySumTitle: React.FC = () => {
+  const { t } = useTranslation('paymentTable')
   const { service } = useInvoicesPaymentContext()
 
   return (
     <Space>
-      <Typography.Text>Загальне</Typography.Text>
+      <Typography.Text>{t('columns.total')}</Typography.Text>
       {!!service?.electricityPrice && (
         <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
-          {toRoundFixed(service.electricityPrice)} грн/кВт
+          {toRoundFixed(service.electricityPrice)} {t('columns.kW')}
         </Typography.Text>
       )}
     </Space>
@@ -532,6 +542,8 @@ const ElectricityAmount: React.FC<{ name: number; last?: boolean }> = ({
   name,
   last = false,
 }) => {
+  const { t } = useTranslation('paymentTable')
+const validator = getValidator(t)
   return (
     <Form.Item
       name={[
@@ -549,7 +561,8 @@ const ElectricityAmount: React.FC<{ name: number; last?: boolean }> = ({
 }
 const ElectricitySum: React.FC<{ name: number }> = ({ name }) => {
   const { form, service } = useInvoicesPaymentContext()
-
+const { t } = useTranslation('paymentTable') 
+  const validator = getValidator(t) 
   const lastAmount: number =
     Form.useWatch(
       ['payments', name, 'invoice', ServiceType.Electricity, 'lastAmount'],
@@ -588,14 +601,15 @@ const ElectricitySum: React.FC<{ name: number }> = ({ name }) => {
 }
 
 const WaterSumTitle: React.FC = () => {
+  const { t } = useTranslation('paymentTable')
   const { service } = useInvoicesPaymentContext()
 
   return (
     <Space>
-      <Typography.Text>Загальне</Typography.Text>
+      <Typography.Text>{t('columns.total')}</Typography.Text>
       {!!service?.waterPrice && (
         <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
-          {toRoundFixed(service.waterPrice)} грн/м<sup>3</sup>
+          {toRoundFixed(service.waterPrice)} {t('columns.UAHM')}<sup>3</sup>
         </Typography.Text>
       )}
     </Space>
@@ -606,7 +620,8 @@ const WaterAmount: React.FC<{ name: number; last?: boolean }> = ({
   last = false,
 }) => {
   const { form } = useInvoicesPaymentContext()
-
+const { t } = useTranslation('paymentTable') 
+  const validator = getValidator(t) 
   const waterPart: number =
     Form.useWatch(['payments', name, 'company', 'waterPart'], form) ?? 0
 
@@ -643,7 +658,8 @@ const WaterSum: React.FC<{ name: number }> = ({ name }) => {
 
   const waterPart: number =
     Form.useWatch(['payments', name, 'company', 'waterPart'], form) ?? 0
-
+const { t } = useTranslation('paymentTable') 
+  const validator = getValidator(t) 
     useEffect(() => {
       if (!waterPart) {
         const price = service?.waterPrice ?? 0
@@ -671,13 +687,13 @@ const WaterSum: React.FC<{ name: number }> = ({ name }) => {
 
 const WaterPartSumTitle: React.FC = () => {
   const { service } = useInvoicesPaymentContext()
-
+const { t } = useTranslation('paymentTable')
   return (
     <Space>
-      <Typography.Text>Загальне</Typography.Text>
+      <Typography.Text>{t('columns.total')}</Typography.Text>
       {!!service?.waterPrice && (
         <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
-          {toRoundFixed(service.waterPriceTotal)} грн
+          {toRoundFixed(service.waterPriceTotal)} {t('columns.UAH')}
         </Typography.Text>
       )}
     </Space>
@@ -685,7 +701,8 @@ const WaterPartSumTitle: React.FC = () => {
 }
 const WaterPartAmount: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
-
+const { t } = useTranslation('paymentTable') 
+  const validator = getValidator(t)
   const waterPart: number =
     Form.useWatch(['payments', name, 'company', 'waterPart'], form) ?? 0
 
@@ -703,7 +720,8 @@ const WaterPartAmount: React.FC<{ name: number }> = ({ name }) => {
 }
 const WaterPartSum: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
-
+const { t } = useTranslation('paymentTable')
+  const validator = getValidator(t) 
   const waterPart: number =
     Form.useWatch(['payments', name, 'company', 'waterPart'], form) ?? 0
 
@@ -738,13 +756,13 @@ const WaterPartSum: React.FC<{ name: number }> = ({ name }) => {
 
 const GarbageCollectorSumTitle: React.FC = () => {
   const { service } = useInvoicesPaymentContext()
-
+const { t } = useTranslation('paymentTable')
   return (
     <Space>
-      <Typography.Text>Загальне</Typography.Text>
+      <Typography.Text>{t('columns.total')}</Typography.Text>
       {!!service?.waterPrice && (
         <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
-          {toRoundFixed(service.garbageCollectorPrice)} грн
+          {toRoundFixed(service.garbageCollectorPrice)} {t('columns.UAH')}
         </Typography.Text>
       )}
     </Space>
@@ -752,7 +770,8 @@ const GarbageCollectorSumTitle: React.FC = () => {
 }
 const GarbageCollectorAmount: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
-
+const { t } = useTranslation('paymentTable') 
+  const validator = getValidator(t) 
   const garbageCollector: boolean =
     Form.useWatch(['payments', name, 'company', 'garbageCollector'], form) ??
     false
@@ -771,7 +790,8 @@ const GarbageCollectorAmount: React.FC<{ name: number }> = ({ name }) => {
 }
 const GarbageCollectorSum: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
-
+const { t } = useTranslation('paymentTable') 
+  const validator = getValidator(t) 
   const garbageCollector: boolean =
     Form.useWatch(['payments', name, 'company', 'garbageCollector'], form) ??
     false
@@ -807,7 +827,8 @@ const GarbageCollectorSum: React.FC<{ name: number }> = ({ name }) => {
 
 const Cleaning: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
-
+const { t } = useTranslation('paymentTable') 
+  const validator = getValidator(t) 
   const cleaning: boolean =
     Form.useWatch(['payments', name, 'company', 'cleaning'], form) ?? false
 
@@ -842,7 +863,8 @@ const Cleaning: React.FC<{ name: number }> = ({ name }) => {
 
 const Discount: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
-
+const { t } = useTranslation('paymentTable') 
+  const validator = getValidator(t) 
   const price: number =
     Form.useWatch(
       ['payments', name, 'invoice', ServiceType.Discount, 'price'],

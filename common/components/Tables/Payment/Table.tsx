@@ -47,6 +47,7 @@ import {
   Operations,
 } from '@utils/constants'
 import s from './style.module.scss'
+import { useTranslation } from 'next-i18next';
 
 export interface PaymentDeleteItem {
   id: string
@@ -228,10 +229,11 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const isDomainAdmin = currUserRoles.includes(Roles.DOMAIN_ADMIN)
   const isUser = currUserRoles.includes(Roles.USER)
   const { token } = theme.useToken()
+  const { t, i18n } = useTranslation('paymentTable')
   const allColumns: ColumnsType<IExtendedPayment> = useMemo(() => {
     return [
       {
-        title: 'Надавач послуг',
+        title: t('columns.provider'),
         dataIndex: 'domain',
         width: sepDomainID ? 80 : 170,
         filters: sepDomainID ? undefined : domainsFilter,
@@ -241,7 +243,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           sepDomainID ? (
             domain.name
           ) : (
-            <Tooltip title="Додати в фільтри">
+            <Tooltip title={t('tooltips.addToFilters')}>
               <Typography.Link
                 onClick={() => setFilters({ ...filters, domain: [domain._id] })}
               >
@@ -252,7 +254,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         hidden: payments?.domainsFilter?.length <= 1,
       },
       {
-        title: 'Компанія',
+        title: t('columns.company'),
         dataIndex: 'company',
         width: sepDomainID ? 100 : 140,
         filters: sepDomainID ? undefined : companiesFilter,
@@ -276,7 +278,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
             ) === index
 
           const companyLabel = (
-            <Tooltip title="Додати в фільтри">
+            <Tooltip title={t('tooltips.addToFilters')}>
               <Typography.Link
                 onClick={() => setFilters({ ...filters, company: [companyId] })}
               >
@@ -303,7 +305,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         hidden: payments?.realEstatesFilter?.length <= 1,
       },
       {
-        title: 'Дата створення',
+        title: t('columns.invoiceCreationDate'),
         dataIndex: 'invoiceCreationDate',
         render: (date: string) => dateToDefaultFormat(date),
         width: sepDomainID ? 70 : 164,
@@ -321,20 +323,20 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         filteredValue: filters?.invoiceCreationDate || null,
       },
       {
-        title: 'Тип',
+        title: t('columns.type'),
         dataIndex: 'type',
         align: 'center',
         filters: sepDomainID
           ? undefined
           : [
-              { text: 'Кредит (Оплата)', value: Operations.Credit },
-              { text: 'Дебет (Реалізація)', value: Operations.Debit },
+              { text: t('filters.credit'), value: Operations.Credit },
+              { text: t('filters.debit') , value: Operations.Debit },
             ],
         filteredValue: filters?.type || null,
         filterMultiple: false,
         children: [
           {
-            title: <Tooltip title="Дебет (Реалізація)">Дебет</Tooltip>,
+            title: <Tooltip title={t('tooltips.debit')}>{t('columns.debit')}</Tooltip>,
             dataIndex: 'debit',
             align: 'center',
             width: sepDomainID ? 45 : 130,
@@ -350,7 +352,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                   a.generalSum - b.generalSum,
           },
           {
-            title: <Tooltip title="Кредит (Оплата)">Кредит</Tooltip>,
+            title: <Tooltip title={t('tooltips.credit')}>{t('columns.credit')}</Tooltip>,
             dataIndex: 'credit',
             align: 'center',
             width: sepDomainID ? 45 : 130,
@@ -368,7 +370,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         ],
       },
       {
-        title: 'За місяць',
+        title: t('columns.monthService'),
         dataIndex: 'monthService',
         align: 'center',
         width: sepDomainID ? 75 : 164,
@@ -452,7 +454,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         },
       },
       ...(selectedColumns.map((value) => ({
-        title: ServiceName[value],
+        title:  t(`price.${value}`),
         dataIndex: value,
         width: 132,
         ellipsis: true,
@@ -504,7 +506,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                       style={{ color: '#722ed1', padding: '0 10px' }}
                       onClick={() => onEditClick(payment)}
                     >
-                      Редагувати
+                      {t('buttons.edit')}
                     </Button>
                   ),
                 },
@@ -512,12 +514,12 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                   key: 'delete',
                   label: (
                     <Popconfirm
-                      title={`Ви впевнені, що хочете видалити оплату від ${new Date(
-                        payment.invoiceCreationDate as unknown as string
-                      ).toLocaleDateString()}?`}
+                      title={t('popconfirm.deleteConfirm', {
+  date: new Date(payment.invoiceCreationDate as unknown as string).toLocaleDateString(),
+})}
                       onConfirm={() => onDelete(payment._id)}
-                      okText="Видалити"
-                      cancelText="Ні"
+                      okText={t('buttons.delete')}
+                      cancelText={t('buttons.no')}
                       disabled={deleteLoading}
                     >
                       <Button
@@ -528,7 +530,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                           padding: '0 10px',
                         }}
                       >
-                        Видалити
+                        {t('buttons.delete')}
                       </Button>
                     </Popconfirm>
                   ),
@@ -555,6 +557,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     onViewClick,
     onEditClick,
     currUserRoles,
+    i18n.language,
   ])
 
   const visibleColumns = (allColumns as ColumnType<IExtendedPayment>[]).filter(
@@ -726,7 +729,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       }}
       summary={() => summary}
       bordered
-      locale={{ emptyText: <Empty description="No Data" /> }}
+      locale={{ emptyText: <Empty description={t('empty.noData')} /> }}
       loading={
         currUserLoading ||
         currUserFetching ||
