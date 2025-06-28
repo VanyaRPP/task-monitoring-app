@@ -37,7 +37,12 @@ export const Name: React.FC<InvoiceComponentProps> = ({
       rules={[validator.required()]}
       style={{ margin: 0 }}
     >
-      <Input placeholder="Назва..." disabled={disabled} />
+      {isCustomService 
+      ? <Typography.Text>
+        {value || 'Назва...'}
+        </Typography.Text>
+      :
+        <Input placeholder="Назва..." disabled={disabled} />}
     </Form.Item>
   )
 }
@@ -58,7 +63,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-
+  const isCustomService = Form.useWatch(['invoice', ...name, 'name'], form)
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
   if (!editable) {
