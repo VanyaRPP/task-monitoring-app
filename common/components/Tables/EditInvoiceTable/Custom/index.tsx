@@ -37,7 +37,12 @@ export const Name: React.FC<InvoiceComponentProps> = ({
       rules={[validator.required()]}
       style={{ margin: 0 }}
     >
-      <Input placeholder="Назва..." disabled={disabled || isCustomService} />
+      {isCustomService 
+      ? <Typography.Text>
+        {value || 'Назва...'}
+        </Typography.Text>
+      :
+        <Input placeholder="Назва..." disabled={disabled} />}
     </Form.Item>
   )
 }
@@ -74,7 +79,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
       <Input
         type="number"
         placeholder="Значення..."
-        disabled={disabled || isCustomService}
+        disabled={disabled}
         suffix="грн"
       />
     </Form.Item>
