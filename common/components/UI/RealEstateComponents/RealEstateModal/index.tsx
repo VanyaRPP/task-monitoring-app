@@ -73,8 +73,12 @@ const RealEstateModal: FC<Props> = ({
       services: currentRealEstate?.services || [],
       customServices: currentRealEstate?.customServices || [],
     }
+    const currentCustomServices = form.getFieldValue('customServices')
+
+  if (!currentCustomServices || currentCustomServices.length === 0) {
     form.setFieldsValue(initialValues)
-  }, [currentRealEstate, form, customServices])
+  }
+  }, [currentRealEstate, form, customServices, domainId, chosenRealEstate])
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()

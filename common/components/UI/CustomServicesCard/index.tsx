@@ -103,14 +103,14 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
                   {!disabled &&
                     (isDomainAdmin || isGlobalAdmin) &&
                     !isServiceForm && (
-                      <CloseOutlined
+                      <Button
+                        type="text"
+                        icon={<CloseOutlined />}
+                        aria-label={`remove-${service?.label}`}
+                        data-testid={`remove-${service?.label}`}
                         onClick={() => handleRemoveService(index)}
-                        style={{
-                          marginTop: 6,
-                          fontSize: 18,
-                          cursor: 'pointer',
-                        }}
-                      />
+                        style={{ marginTop: 6 }}
+                      />   
                     )}
                 </Space>
               )
