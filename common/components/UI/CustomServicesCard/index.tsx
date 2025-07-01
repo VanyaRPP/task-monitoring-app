@@ -56,15 +56,13 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
     <div>
       {!disabled && !isServiceForm && (
         <Dropdown
-          overlay={
-            <Menu
-              items={dropdownOptions.map((option) => ({
+            menu={{
+              items: dropdownOptions.map((option) => ({
                 key: option.value,
                 label: option.label,
                 onClick: () => handleAddService(option),
-              }))}
-            />
-          }
+              })),
+            }}
           trigger={['click']}
         >
           <Button
