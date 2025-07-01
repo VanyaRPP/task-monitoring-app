@@ -224,7 +224,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
 
   const { handleTableChange } = tableEventProps
   
-  const isAllTablesPage = pathname === AppRoutes.INDEX
+  const isDashboard = pathname === AppRoutes.INDEX
   
   const isGlobalAdmin = currUserRoles.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = currUserRoles.includes(Roles.DOMAIN_ADMIN)
@@ -710,9 +710,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       columns={visibleColumns}
       dataSource={payments?.data || []}
       pagination={
-        isAllTablesPage
-          ? false
-          : {
+        !isDashboard && {
               current: paginationProps.pageData.currentPage,
               total: payments?.total || 0,
               showSizeChanger: true,
