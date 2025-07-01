@@ -293,7 +293,6 @@ export const getCustomServiceInvoices = ({
   ) {
     return []
   }
-
   const customServices = Array.isArray(service?.customServices)
     ? service?.customServices.flatMap((customService) =>
         Array.isArray(customService)
@@ -307,5 +306,7 @@ export const getCustomServiceInvoices = ({
           : []
       )
     : []
+
   return customServices
 }
+

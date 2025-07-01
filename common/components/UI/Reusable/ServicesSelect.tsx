@@ -10,6 +10,7 @@ export interface ServicesSelectProps {
   form: FormInstance
   dropdownStyle?: CSSProperties
   onServicesChange?: (services: string[]) => void
+  disabled: boolean
   customServices?: { _id: string; name: string }[]
 }
 
@@ -17,6 +18,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   domainId,
   form,
   dropdownStyle,
+  disabled,
   onServicesChange,
 }) => {
   const {
@@ -79,6 +81,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                     <Input
                       style={{ minWidth: '150px' }}
                       value={groupName}
+                      disabled={disabled}
                       onChange={(e) => {
                         const current = form.getFieldValue('customServices')
                         const newName = e.target.value
@@ -94,7 +97,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
 
                   <Form.Item required style={{ flex: 3 }}>
                     <Select
-
+                      disabled={disabled}
                       mode="multiple"
                       options={(() => {
                         const allGroups =
@@ -123,29 +126,33 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                       showSearch
                     />
                   </Form.Item>
-                  <MinusCircleOutlined
-                    style={{ 
-                      position: 'relative',
-                      cursor: 'pointer',
-                      fontSize: '24px',
-                      minWidth: '24px',
-                    }}
-                    onClick={() => remove(field.name)}
-                  />
+                  {!disabled && (
+                    <MinusCircleOutlined
+                      style={{
+                        position: 'relative',
+                        cursor: 'pointer',
+                        fontSize: '24px',
+                        minWidth: '24px',
+                      }}
+                      onClick={() => remove(field.name)}
+                    />
+                  )}
                 </Space>
               )
             })}
 
-            <Form.Item>
-              <Button
-                type="dashed"
-                style={{ width: '100%' }}
-                onClick={() => add()}
-                icon={<PlusOutlined />}
-              >
-                Додати групу послуг
-              </Button>
-            </Form.Item>
+            {!disabled && (
+              <Form.Item>
+                <Button
+                  type="dashed"
+                  style={{ width: '100%' }}
+                  onClick={() => add()}
+                  icon={<PlusOutlined />}
+                >
+                  Додати групу послуг
+                </Button>
+              </Form.Item>
+            )}
           </>
         )}
       </Form.List>

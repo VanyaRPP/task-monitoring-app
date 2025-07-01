@@ -10,6 +10,8 @@ import styles from './styles.module.scss'
 import { useReactToPrint } from 'react-to-print'
 import { PrinterOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
+import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPricesTable'
+import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 interface InvoicesTableData extends IPaymentField {
   number: number
   unit: string
@@ -25,27 +27,27 @@ const columns: ColumnsType<InvoicesTableData> = [
     title: 'Найменування робіт, послуг',
     dataIndex: 'type',
     key: 'type',
-    render: (value, record, index) => {
-      return ServiceName[value]
-    },
+    // render: (value, record, index) => { // old
+    //   return ServiceName[value]
+    // },
   },
+  // { // olc
+  //   title: 'Кіль-сть',
+  //   dataIndex: 'amount',
+  //   key: 'amount',
+  // },
+  // { // old
+  //   title: 'Од.',
+  //   dataIndex: 'unit',
+  //   key: 'unit',
+  // },
+  // { // old
+  //   title: 'Ціна з ПДВ',
+  //   dataIndex: 'price',
+  //   key: 'price',
+  // },
   {
-    title: 'Кіль-сть',
-    dataIndex: 'amount',
-    key: 'amount',
-  },
-  {
-    title: 'Од.',
-    dataIndex: 'unit',
-    key: 'unit',
-  },
-  {
-    title: 'Ціна з ПДВ',
-    dataIndex: 'price',
-    key: 'price',
-  },
-  {
-    title: 'Сума з ПДВ',
+    title: 'Сума',
     dataIndex: 'sum',
     key: 'sum',
   },
@@ -55,8 +57,13 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
   const [payment, setPayment] = useState(data)
   const [totalSum, setTotalSum] = useState(0)
   const [totalFractionSum, setTotalFractionSum] = useState(0)
+  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
+    { domainId: [payment.domain._id] },
+    { skip: !payment.domain._id }
+  )
 
   const getModifiedInvoices = () => {
+    // old
     return payment.invoice.map(
       (item, index) =>
         ({
@@ -67,6 +74,44 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
     )
   }
 
+  const groupedInvoices = (invoices: any, groups: any) => {
+    const result =
+      groups?.map((group, index) => {
+        const groupFieldNames = group?.services.map(
+          (service) => service?.fieldName
+        )
+        const groupInvoices = invoices?.filter((invoice) =>
+          groupFieldNames.includes(invoice?.type)
+        )
+        const totalGroupSum = (groupInvoices ?? []).reduce((sum, invoice) => {
+          return sum + (invoice?.sum ?? 0)
+        }, 0)
+        return {
+          key: index,
+          number: index + 1,
+          type: group?.groupName,
+          unit: 'грн',
+          price: totalGroupSum.toFixed(2),
+          sum: totalGroupSum.toFixed(2),
+        }
+      }) || []
+
+    const customInvoice = invoices?.find(
+      (invoice) => invoice?.type === 'custom'
+    )
+    if (customInvoice) {
+      result.push({
+        key: result.length,
+        number: result.length + 1,
+        type: customInvoice.name || 'custom',
+        unit: 'грн',
+        price: +customInvoice.sum,
+        sum: +customInvoice.sum,
+      })
+    }
+
+    return result
+  }
   useEffect(() => {
     setTotalSum(
       payment.invoice.reduce((acc, item, index) => {
@@ -110,7 +155,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <div>
                   <strong>ЗАТВЕРДЖУЮ</strong>
                   <br />
-                  <p>
+                  <div>
                     <pre>
                       {payment?.reciever?.description?.trim()} <br />
                       {payment?.reciever?.companyName} <br />
@@ -120,7 +165,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                         </div>
                       ))}
                     </pre>
-                  </p>
+                  </div>
                 </div>
               </div>
               <div className={`${styles.approvalSection}`}>
@@ -140,7 +185,11 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               <b>АКТ надання послуг</b>
             </h1>
             <p>
-            <b>№ {payment?.invoiceNumber} від {dayjs(payment?.invoiceCreationDate)?.format?.('DD.MM.YYYY')} року.</b>
+              <b>
+                № {payment?.invoiceNumber} від{' '}
+                {dayjs(payment?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}{' '}
+                року.
+              </b>
             </p>
             <br />
             <hr />
@@ -163,12 +212,15 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
 
         <Table
           columns={columns}
-          dataSource={getModifiedInvoices()}
+          dataSource={groupedInvoices(
+            payment.invoice,
+            customDomainServices?.data
+          )}
           pagination={false}
           summary={() => {
             return (
               <Table.Summary.Row>
-                <Table.Summary.Cell index={0} colSpan={5}>
+                <Table.Summary.Cell index={0} colSpan={2}>
                   Всього:
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={1}>
@@ -178,6 +230,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
             )
           }}
         />
+        {/* <GroupedPricesTable preview domainId=''/> */}
 
         <div className={styles.container}>
           <div className={styles.contentSection}>
@@ -190,9 +243,9 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               Замовник претензій по об&apos;єму, якості та строкам виконання
               робіт (надання послуг) не має.
             </div>
+            <br/>
           </div>
           <hr />
-          <br />
           <br />
           <div className={styles.signaturesSection}>
             <div className={styles.signatureBlock}>
@@ -200,9 +253,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <b>Від Виконавця</b>
                 <br />
                 <br />
-                <br />
                 <hr />
-                <br />
                 <br />
                 <b>
                   {new Date(payment.invoiceCreationDate).toLocaleDateString()}
@@ -218,9 +269,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <b>Від Замовника</b>
                 <br />
                 <br />
-                <br />
                 <hr />
-                <br />
                 <br />
                 <b>
                   {new Date(payment.invoiceCreationDate).toLocaleDateString()}

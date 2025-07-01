@@ -6,11 +6,17 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
 
+function escapeRegex(str: string) {
+  return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+}
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isDomainAdmin, isUser } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isUser } = await getCurrentUser(
+    req,
+    res
+  )
 
   switch (req.method) {
     case 'POST':
@@ -18,7 +24,9 @@ export default async function handler(
         const { name } = req.body
 
         if (!isGlobalAdmin && !isDomainAdmin) {
-          return res.status(400).json({ success: false, message: 'Not allowed' })
+          return res
+            .status(400)
+            .json({ success: false, message: 'Not allowed' })
         }
 
         const trimmedName = typeof name === 'string' ? name.trim() : name
@@ -27,6 +35,18 @@ export default async function handler(
           return res.status(400).json({
             success: false,
             message: 'Missing required fields: name',
+          })
+        }
+
+        const escapedName = escapeRegex(trimmedName)
+        const existingService = await CustomService.findOne({
+          name: { $regex: `^${trimmedName}$`, $options: 'i' },
+        })
+
+        if (existingService) {
+          return res.status(409).json({
+            success: false,
+            message: 'Послуга з такою назвою вже існує',
           })
         }
 
@@ -57,14 +77,15 @@ export default async function handler(
             message: 'access denied',
           })
         }
-        
-        const customServiceIds = _id && !Array.isArray(_id) ? _id.split(',') : _id
+
+        const customServiceIds =
+          _id && !Array.isArray(_id) ? _id.split(',') : _id
 
         const customServices = !customServiceIds
-        ? await CustomService.find().lean()
-        : await CustomService.find({
-            _id: { $in: customServiceIds },
-          }).lean()
+          ? await CustomService.find().lean()
+          : await CustomService.find({
+              _id: { $in: customServiceIds },
+            }).lean()
 
         return res.status(200).json({
           success: true,

@@ -1,0 +1,139 @@
+{
+  "info": {
+    "name": "ProfitService API",
+    "_postman_id": "12345678-aaaa-bbbb-cccc-1234567890ab",
+    "description": "Колекція для роботи з прибутками/витратами",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get all profits (paginated + filter)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/profits?page=1&limit=10&domain=your_domain_id",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "profits"],
+          "query": [
+            { "key": "page", "value": "1" },
+            { "key": "limit", "value": "10" },
+            { "key": "domain", "value": "your_domain_id" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get profit by ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/api/profits/{{profitId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "profits", "{{profitId}}"]
+        }
+      }
+    },
+    {
+      "name": "Get all profits by domain",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/api/profits/domain/{{domainId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "profits", "domain", "{{domainId}}"]
+        }
+      }
+    },
+    {
+      "name": "Get balance by domain",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/api/profits/balance/{{domainId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "profits", "balance", "{{domainId}}"]
+        }
+      }
+    },
+    {
+      "name": "Create profit record",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"domain\": \"your_domain_id\",\n  \"amount\": 1500,\n  \"type\": \"credit\",\n  \"categories\": [\"sales\", \"bonus\"],\n  \"description\": \"Monthly income\",\n  \"date\": \"2025-06-10T00:00:00.000Z\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/profits",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "profits"]
+        }
+      }
+    },
+    {
+      "name": "Bulk create profits",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "[\n  {\n    \"domain\": \"your_domain_id\",\n    \"amount\": 500,\n    \"type\": \"debit\",\n    \"categories\": [\"utilities\"],\n    \"description\": \"Electricity bill\",\n    \"date\": \"2025-06-01T00:00:00.000Z\"\n  },\n  {\n    \"domain\": \"your_domain_id\",\n    \"amount\": 2000,\n    \"type\": \"credit\",\n    \"categories\": [\"sales\"],\n    \"description\": \"Income\",\n    \"date\": \"2025-06-02T00:00:00.000Z\"\n  }\n]"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/profits/bulk",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "profits", "bulk"]
+        }
+      }
+    },
+    {
+      "name": "Update profit record",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 1200,\n  \"categories\": [\"adjusted\"]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/profits/{{profitId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "profits", "{{profitId}}"]
+        }
+      }
+    },
+    {
+      "name": "Delete profit record",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "http://localhost:3000/api/profits/{{profitId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "profits", "{{profitId}}"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "profitId", "value": "" },
+    { "key": "domainId", "value": "your_domain_id" }
+  ]
+}

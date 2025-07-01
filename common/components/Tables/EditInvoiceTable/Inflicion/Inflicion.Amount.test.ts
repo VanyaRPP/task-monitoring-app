@@ -7,13 +7,14 @@ describe('Inflicion.Amount reset button logic', () => {
     const name = ['0']
     const initialPrice = 123.45
 
-
     if (initialPrice !== null) {
       form.setFieldValue(['invoice', ...name, 'price'], initialPrice)
     }
 
-
-    expect(setFieldValue).toHaveBeenCalledWith(['invoice', '0', 'price'], 123.45)
+    expect(setFieldValue).toHaveBeenCalledWith(
+      ['invoice', '0', 'price'],
+      123.45
+    )
   })
 
   it('не викликає setFieldValue, якщо initialPrice null', () => {

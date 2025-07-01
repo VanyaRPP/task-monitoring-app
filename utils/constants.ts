@@ -2,6 +2,7 @@ export enum AppRoutes {
   INDEX = '/',
   DASHBOARD = '/dashboard',
   PROFILE = '/profile',
+  SETTINGS = '/settings',
   TASK = '/task',
   AUTH = '/auth',
   AUTH_SIGN_IN = '/auth/signin',
@@ -18,7 +19,7 @@ export enum AppRoutes {
   CUSTOMER = '/customer',
   REAL_ESTATE = '/real-estate',
   STREETS = '/streets',
-  BANKTEST = '/bank',
+  BANK = '/bank',
   SEP_DOMAIN = '/sepdomain',
   PROFIT = '/profit',
 }
@@ -132,7 +133,7 @@ export const cascaderYears = (() => {
   const startYear = 2021
   const years: string[] = []
 
-  for (let year = startYear; year <= currentYear + 1; year++) {
+  for (let year = startYear; year <= currentYear; year++) {
     years.push(year.toString())
   }
 

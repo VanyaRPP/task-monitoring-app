@@ -1,6 +1,8 @@
 import { MailOutlined, LockOutlined, UserOutlined } from '@ant-design/icons'
-import { Form, Input, Button, message, Divider } from 'antd'
+import { GlassButton, GlassInput } from '@components/UI/GlassUI'
+import { Form, message, Divider } from 'antd'
 import { signIn } from 'next-auth/react'
+import config from '@utils/config'
 import { Typography } from 'antd'
 import { useState } from 'react'
 
@@ -32,10 +34,13 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
   }
 
   return (
-    <div style={{ maxWidth: 345, margin: '0 auto', padding: '15px' }}>
-      {/* TODO: create title for reg & log <Title level={1}>
-        {isLogin ? config.titles.signInTitle : config.titles.signUpTitle}
-      </Title>  */}
+    <>
+      <Typography.Title level={1}>
+        {isLogin ? config.titles.signUpTitle : config.titles.signInTitle}
+      </Typography.Title>
+
+      <Divider />
+
       <Form
         form={form}
         name="signin"
@@ -49,13 +54,14 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
             name="name"
             rules={[{ required: true, message: `Введіть ваше ім'я!` }]}
           >
-            <Input
+            <GlassInput
               data-e2e="sauthFormName"
               placeholder="name"
-              prefix={<UserOutlined style={{ color: '#00000040' }} />}
+              prefix={<UserOutlined className="auth-icon" />}
             />
           </Form.Item>
         )}
+
         <Form.Item
           label="Пошта"
           name="email"
@@ -64,11 +70,12 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
             { type: 'email', message: 'Введіть коректний email!' },
           ]}
         >
-          <Input
+          <GlassInput
+            size="large"
             data-e2e="authFormEmail"
             type="text"
             placeholder="email"
-            prefix={<MailOutlined style={{ color: '#00000040' }} />}
+            prefix={<MailOutlined className="auth-icon" />}
           />
         </Form.Item>
 
@@ -77,33 +84,41 @@ const SignInForm = ({ csrfToken }: { csrfToken: string }) => {
           name="password"
           rules={[{ required: true, message: 'Введіть ваш пароль!' }]}
         >
-          <Input.Password
+          <GlassInput.Password
+            size="large"
             data-e2e="authFormPassword"
             placeholder="******"
-            prefix={<LockOutlined style={{ color: '#00000040' }} />}
+            prefix={<LockOutlined className="auth-icon" />}
           />
         </Form.Item>
 
         <Form.Item>
-          <Button
+          <GlassButton
+            size="large"
             data-e2e="authFormSubmit"
             type="primary"
             htmlType="submit"
             block
           >
             {isLogin ? 'Реєстрація' : 'Вхід'}
-          </Button>
+          </GlassButton>
         </Form.Item>
-        <span style={{ display: 'flex', gap: '1rem' }}>
+
+        <span
+          style={{
+            display: 'flex',
+            gap: '1rem',
+            justifyContent: 'space-between',
+          }}
+        >
           <Text>{isLogin ? 'Вже маєте акаунт?' : 'Немаєте акаунту?'}</Text>
           <Link onClick={() => setIsLogin(!isLogin)}>
             {isLogin ? 'Ввійти' : 'Зареєструватись'}
           </Link>
         </span>
-
         <Divider>or</Divider>
       </Form>
-    </div>
+    </>
   )
 }
 

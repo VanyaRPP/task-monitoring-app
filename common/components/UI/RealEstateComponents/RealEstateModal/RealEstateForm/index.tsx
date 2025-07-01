@@ -46,7 +46,10 @@ const RealEstateForm: FC<Props> = ({
     data: domain = {} as IDomain,
     isLoading: isDomainLoading,
     isError: isDomainError,
-  } = useGetDomainByPkQuery({ domainId: domainId || currentRealEstate?.domain?._id  }, { skip: !domainId && !currentRealEstate?.domain?._id })
+  } = useGetDomainByPkQuery(
+    { domainId: domainId || currentRealEstate?.domain?._id },
+    { skip: !domainId && !currentRealEstate?.domain?._id }
+  )
 
   const { data: servicesData } = useGetAllServicesQuery({
     domainId: domain?._id || currentRealEstate?.domain?._id,
@@ -130,7 +133,7 @@ const RealEstateForm: FC<Props> = ({
           disabled={!editable}
         />
       </Form.Item>
-      <EmailSelect form={form} disabled={!editable} />
+      <EmailSelect form={form} disabled={!editable} required={false} />
       <Form.Item
         name="totalArea"
         label="Площа (м²)"
@@ -161,27 +164,27 @@ const RealEstateForm: FC<Props> = ({
         disabled={!editable}
         allCustomServices={customServices}
       />
-      { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') &&
-        <Form.Item
-          name="servicePricePerMeter"
-          label="Індивідуальне утримання (грн/м²)"
-        >
-          <InputNumber
-            parser={inputNumberParser}
-            placeholder="Вкажіть значення"
-            className={s.formInput}
-            disabled={!editable}
-          />
-        </Form.Item>
-      }
-        <Form.Item name="rentPart" label="Частка загальної площі">
-          <InputNumber
-            parser={inputNumberParser}
-            placeholder="Вкажіть значення"
-            className={s.formInput}
-            disabled={!editable}
-          />
-        </Form.Item>
+      {/* { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') && // TODO: customServices */}
+      <Form.Item
+        name="servicePricePerMeter"
+        label="Індивідуальне утримання (грн/м²)"
+      >
+        <InputNumber
+          parser={inputNumberParser}
+          placeholder="Вкажіть значення"
+          className={s.formInput}
+          disabled={!editable}
+        />
+      </Form.Item>
+      {/* } */}
+      <Form.Item name="rentPart" label="Частка загальної площі">
+        <InputNumber
+          parser={inputNumberParser}
+          placeholder="Вкажіть значення"
+          className={s.formInput}
+          disabled={!editable}
+        />
+      </Form.Item>
 
       {isServiceExist('waterPrice') && (
         <Form.Item name="waterPart" label="Частка водопостачання">
@@ -193,16 +196,16 @@ const RealEstateForm: FC<Props> = ({
           />
         </Form.Item>
       )}
-      { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') &&
-        <Form.Item name="cleaning" label="Прибирання (грн)">
-          <InputNumber
-            parser={inputNumberParser}
-            placeholder="Вкажіть значення"
-            className={s.formInput}
-            disabled={!editable}
-          />
-        </Form.Item>
-      }
+      {/* { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') && */}
+      <Form.Item name="cleaning" label="Прибирання (грн)">
+        <InputNumber
+          parser={inputNumberParser}
+          placeholder="Вкажіть значення"
+          className={s.formInput}
+          disabled={!editable}
+        />
+      </Form.Item>
+      {/* } */}
 
       <Form.Item name="discount" label="Знижка">
         <InputNumber
@@ -220,7 +223,6 @@ const RealEstateForm: FC<Props> = ({
       >
         <Checkbox disabled={!editable} />
       </Form.Item>
-
 
       {isServiceExist('inflicionPrice') && (
         <Form.Item

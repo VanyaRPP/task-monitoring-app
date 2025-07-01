@@ -6,7 +6,6 @@ import { Button, Table, TableColumnsType } from 'antd'
 import { useMemo, useState } from 'react'
 import { EditUserModal } from '../../EditUserModal'
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UsersTableProps {}
 
 export const UsersTable: React.FC<UsersTableProps> = ({}) => {
@@ -29,7 +28,8 @@ export const UsersTable: React.FC<UsersTableProps> = ({}) => {
     ]
   }, [])
 
-  return <Table dataSource={users} columns={columns} scroll={{ x: 800 }} />
+  return <Table dataSource={users} columns={columns} pagination={{
+    position: ['bottomCenter'],}} scroll={{ x: 800 }} />
 }
 
 export const EditUserButton: React.FC<{ user?: IUser['_id'] }> = ({

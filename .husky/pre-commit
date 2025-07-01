@@ -3,4 +3,4 @@
 
 # yarn test
 # yarn lint:fix
-yarn prettier:fix
+# yarn prettier:fix

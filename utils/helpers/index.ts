@@ -15,7 +15,7 @@ import {
 import { PaymentOptions } from '../types'
 import { IPermissions } from '@modules/models/User'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
-
+import { AppRoutes, Operations } from '@utils/constants'
 import { useState, useEffect } from 'react'
 
 export const toFirstUpperCase = (text: string) => {
@@ -251,6 +251,22 @@ export const getDefaultStartDate = (): string => {
   const date = dayjs().subtract(3, 'month')
 
   return formatDateDMY(date.toString())
+}
+
+const monthsUaGenitiveCapitalized = [
+  'Січня', 'Лютого', 'Березня', 'Квітня', 'Травня', 'Червня', 'Липня',
+  'Серпня', 'Вересня', 'Жовтня', 'Листопада', 'Грудня',
+]
+
+/**
+ * Форматує дату в формат: 20 Червня 2025
+ * з використанням родового відмінка і великої літери
+ */
+export const formatDateWithGenitiveMonthCapitalized = (
+  date: dayjs.Dayjs | Date
+): string => {
+  const d = dayjs(date)
+  return `${d.date()} ${monthsUaGenitiveCapitalized[d.month()]} ${d.year()}`
 }
 
 export const getPaymentProviderAndReciever = (company) => {
@@ -614,7 +630,6 @@ export async function isDomainAdmin(user?: IUser): Promise<boolean> {
     const domain = await RealEstate.findOne({ adminEmails: user.email })
     return !!domain
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.log(error)
     return false
   }
@@ -627,6 +642,44 @@ export function isGlobalAdmin(user?: IUser): boolean {
   }
 
   return user.roles.includes('GlobalAdmin')
+}
+
+export function formatDateFilterForQuery(raw?: string[]) {
+  if (!raw?.length) return {}
+  const numbers = raw
+    .map((v) => {
+      const leading = parseInt(v, 10)
+      if (!isNaN(leading)) {
+        const m = v.match(/-(\d+)\s*$/)
+        if (m) {
+          return [leading, parseInt(m[1], 10)]
+        }
+        return [leading]
+      }
+      const n = Number(v)
+      return isNaN(n) ? [] : [n]
+    })
+    .flat()
+    .filter((n) => !isNaN(n)) as number[]
+  const [year, ...months] = numbers
+  const query: any = {}
+  if (year != null) {
+    query.year = year
+  }
+  if (months.length === 1) {
+    query.month = months[0]
+  } else if (months.length > 1) {
+    query.month = months
+  }
+  return query
+}
+export function getTypeOperation(value?: string) {
+  if (value === Operations.Debit) {
+    return { type: Operations.Debit }
+  } else if (value === Operations.Credit) {
+    return { type: Operations.Credit }
+  }
+  return {}
 }
 
 // usePermissions

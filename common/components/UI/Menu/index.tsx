@@ -69,7 +69,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
           {
             key: 'bank',
             type: 'item',
-            label: <Link href={AppRoutes.BANKTEST}>Банк</Link>,
+            label: <Link href={AppRoutes.BANK}>Банк</Link>,
             hidden: !isAdminCheck(user?.roles),
           },
           {
@@ -132,7 +132,13 @@ export const Menu: React.FC<MenuProps> = (props) => {
             type: 'item',
             label: <Link href={AppRoutes.PROFILE}>Профіль</Link>,
           },
-        ],
+          {
+            key: AppRoutes.SETTINGS,
+            type: 'item',
+            label: <Link href={AppRoutes.SETTINGS}>Налаштування</Link>,
+            hidden: !isGlobalAdmin,
+          },
+        ].filter(({ hidden }) => !hidden),
       },
     ] as AntdMenuProps['items']
   }, [router, session, isGlobalAdmin, isDomainAdmin, isDevMode])
@@ -143,6 +149,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
       mode="inline"
       items={items}
       {...props}
+      style={{ paddingBottom: '50px' }}
     />
   )
 }

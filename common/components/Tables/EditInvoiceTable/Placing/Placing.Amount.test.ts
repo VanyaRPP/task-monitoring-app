@@ -7,13 +7,14 @@ describe('Кнопка повернення значення в формі', () 
     const name = ['0']
     const calculatedInitialPrice = 180
 
-
     form.setFieldValue(['invoice', ...name, 'price'], calculatedInitialPrice)
     form.setFieldValue(['invoiceMeta', 'changed'], false)
 
-
     expect(setFieldValue).toHaveBeenCalledWith(['invoice', '0', 'price'], 180)
-    expect(setFieldValue).toHaveBeenCalledWith(['invoiceMeta', 'changed'], false)
+    expect(setFieldValue).toHaveBeenCalledWith(
+      ['invoiceMeta', 'changed'],
+      false
+    )
   })
 
   it('не викликає setFieldValue, якщо ціна вже дорівнює початковій', () => {
@@ -23,12 +24,10 @@ describe('Кнопка повернення значення в формі', () 
     const calculatedInitialPrice = 180
     const currentPrice = 180
 
-
     if (currentPrice !== calculatedInitialPrice) {
       form.setFieldValue(['invoice', ...name, 'price'], calculatedInitialPrice)
       form.setFieldValue(['invoiceMeta', 'changed'], false)
     }
-
 
     expect(setFieldValue).not.toHaveBeenCalled()
   })
@@ -39,13 +38,17 @@ describe('Кнопка повернення значення в формі', () 
     const name = ['0']
     const calculatedInitialPrice = 180
 
-
     form.setFieldValue(['invoice', ...name, 'price'], calculatedInitialPrice)
     form.setFieldValue(['invoiceMeta', 'changed'], false)
 
-
-    expect(setFieldValue.mock.calls[0]).toEqual([['invoice', '0', 'price'], 180])
-    expect(setFieldValue.mock.calls[1]).toEqual([['invoiceMeta', 'changed'], false])
+    expect(setFieldValue.mock.calls[0]).toEqual([
+      ['invoice', '0', 'price'],
+      180,
+    ])
+    expect(setFieldValue.mock.calls[1]).toEqual([
+      ['invoiceMeta', 'changed'],
+      false,
+    ])
   })
 
   it('викликає саме початкове значення, передане у функцію', () => {
@@ -54,10 +57,8 @@ describe('Кнопка повернення значення в формі', () 
     const name = ['0']
     const calculatedInitialPrice = 999
 
-
     form.setFieldValue(['invoice', ...name, 'price'], calculatedInitialPrice)
     form.setFieldValue(['invoiceMeta', 'changed'], false)
-
 
     expect(setFieldValue).toHaveBeenCalledWith(['invoice', '0', 'price'], 999)
   })

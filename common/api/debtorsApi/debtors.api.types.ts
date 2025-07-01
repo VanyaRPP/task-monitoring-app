@@ -1,19 +1,19 @@
 export interface IGetDebtorsResponse {
-    companies?: {
-        companyId: string
-        companyName: string
-        debtPerMonth: {
-            monthService: string
-            totalDue: number
-            paid: number
-            remaining: number
-        }[]
-        totalDebt: number
+  companies?: {
+    companyId: string
+    companyName: string
+    debtPerMonth: {
+      monthService: string
+      totalDue: number
+      paid: number
+      remaining: number
     }[]
-    message?: string
-    succes: boolean
+    totalDebt: number
+  }[]
+  message?: string
+  succes: boolean
 }
 
 export interface IGetDebtorsRequest {
-    domainIds: any
+  domainIds: any
 }

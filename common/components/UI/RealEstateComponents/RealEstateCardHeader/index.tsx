@@ -31,7 +31,7 @@ const RealEstateCardHeader = () => {
           <PlusOutlined /> Додати
         </Button>
       )}
-     {isModalOpen && (
+      {isModalOpen && (
         <RealEstateModal
           closeModal={closeModal}
           chosenRealEstate={chosenRealEstate}

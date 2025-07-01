@@ -30,7 +30,7 @@ export interface IPayment {
   invoiceNumber: number
   type: string
   invoiceCreationDate: Date
-  domain: Partial<IDomain> | string
+  domain: Partial<IDomain> | any
   street: Partial<IStreet> | string
   company: Partial<IRealestate> | string
   monthService: Partial<IService> | string

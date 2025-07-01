@@ -12,45 +12,49 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isDomainAdmin, isUser } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isUser } = await getCurrentUser(
+    req,
+    res
+  )
 
   switch (req.method) {
-
     case 'GET':
       try {
         const { domainId } = req.query
 
-        if (isUser) {
-          return res.status(400).json({
-            success: false,
-            message: 'access denied',
-          })
-        }
+        // if (isUser) {                    // Access for User
+        //   return res.status(400).json({
+        //     success: false,
+        //     message: 'access denied',
+        //   })
+        // }
 
         if (!domainId || Array.isArray(domainId)) {
           return res.status(400).json({
             success: false,
             message: 'Uncorrect domainId',
-          });
+          })
         }
 
-        const domain = await Domain.findById(domainId).lean();
-        
+        const domain = await Domain.findById(domainId).lean()
+
         if (!domain) {
           return res.status(404).json({
             success: false,
             message: 'Domain not found',
-          });
+          })
         }
 
         const domainGroups = domain?.customServices?.map((service) => {
           return {
             groupName: service?.groupName,
-            services: service?.services
-          } 
+            services: service?.services,
+          }
         })
 
-        const allServiceIds = domainGroups?.flatMap((group) => group.services).map(String)
+        const allServiceIds = domainGroups
+          ?.flatMap((group) => group.services)
+          .map(String)
 
         const customServices = await CustomService.find({
           _id: { $in: allServiceIds },
@@ -59,7 +63,9 @@ export default async function handler(
         const groupedServices = domainGroups.map((group) => {
           const services = group.services
             .map((id) =>
-              customServices.find((service) => String(service._id) === String(id))
+              customServices.find(
+                (service) => String(service._id) === String(id)
+              )
             )
             .filter(Boolean)
 

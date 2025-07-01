@@ -1,3 +1,4 @@
+import React, { useMemo } from 'react'
 import {
   DeleteOutlined,
   DownloadOutlined,
@@ -5,6 +6,7 @@ import {
   PlusOutlined,
   SelectOutlined,
   ExportOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons'
 import { dateToDefaultFormat } from '@assets/features/formatDate'
 import {
@@ -32,6 +34,7 @@ import {
   Space,
   Typography,
   message,
+  Tooltip,
 } from 'antd'
 import Modal from 'antd/lib/modal/Modal'
 import { saveAs } from 'file-saver'
@@ -39,7 +42,28 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { shouldOpenModal } from '@utils/shouldOpenModal'
 
-const PaymentCardHeader = ({
+interface PaymentCardHeaderProps {
+  setCurrentDateFilter: (val: any) => void
+  currentPayment: any
+  paymentActions: { edit: boolean; preview: boolean }
+  closeEditModal: () => void
+  paymentsDeleteItems: any[]
+  payments: any
+  streets: any
+  filters: any
+  setFilters: (filters: any) => void
+  selectedPayments: any[]
+  setPaymentsDeleteItems: (items: any[]) => void
+  setSelectedPayments: (payments: any[]) => void
+  enablePaymentsButton: boolean
+  onColumnsSelect: (selected: string[]) => void
+  domainFilter?: any
+  realEstatesFilter?: any
+  singleCompany?: string
+  singleDomain?: string
+}
+
+const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   setCurrentDateFilter,
   currentPayment,
   paymentActions,
@@ -56,7 +80,8 @@ const PaymentCardHeader = ({
   onColumnsSelect,
   domainFilter,
   realEstatesFilter,
-  onCascaderChange
+  singleCompany,
+  singleDomain,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -86,7 +111,6 @@ const PaymentCardHeader = ({
       })
       saveAs(blob, `payments.xlsx`)
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error('Error:', error)
     }
   }
@@ -133,6 +157,8 @@ const PaymentCardHeader = ({
         const { data } = response
 
         if (data) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore
           const buffer = Buffer.from(data.buffer)
           const blob = new Blob([buffer], {
             type: `application/${data.fileExtension}`,
@@ -150,6 +176,13 @@ const PaymentCardHeader = ({
 
   const selectedCompany =
     filters?.company?.length === 1 ? filters.company[0] : undefined
+
+  const infoTooltip = useMemo(() => {
+    const texts: string[] = []
+    if (singleDomain) texts.push(`Надавач послуг: ${singleDomain}`)
+    if (singleCompany) texts.push(`Компанія: ${singleCompany}`)
+    return texts.join('\n')
+  }, [singleDomain, singleCompany])
 
   return (
     <Flex
@@ -175,7 +208,6 @@ const PaymentCardHeader = ({
         >
           {isAdmin ? 'Платежі' : 'Мої оплати'}
         </Button>
-
         {pathname === AppRoutes.PAYMENT && (
           <Space size="middle">
             <Space size="middle">
@@ -183,14 +215,10 @@ const PaymentCardHeader = ({
                 style={{ minWidth: 200 }}
                 onSelect={onColumnsSelect}
               />
-              <PaymentCascader
-                onChange={(value) => {
-                  onCascaderChange?.(value)
-                }}
-              />
+              <PaymentCascader onChange={setCurrentDateFilter} />
               <StreetsSelector setFilters={setFilters} streets={streets} />
             </Space>
-            <Space direction="vertical" size={4} style={{ minWidth: 150 }}>
+            <Space direction="vertical" size="middle" align="center">
               <DomainFilterTags
                 collection={domainFilter}
                 filters={filters}
@@ -205,7 +233,14 @@ const PaymentCardHeader = ({
           </Space>
         )}
       </Space>
-      <Flex style={{ height: '50px', marginTop: '10px' }}>
+      <Flex align="center" style={{ height: '50px', marginTop: '10px' }}>
+        {infoTooltip && (
+          <Tooltip title={infoTooltip}>
+            <InfoCircleOutlined
+              style={{ marginRight: 16, color: 'rgba(0,0,0,0.45)' }}
+            />
+          </Tooltip>
+        )}
         {isAdmin &&
           pathname === AppRoutes.PAYMENT &&
           selectedPayments.length > 0 && (

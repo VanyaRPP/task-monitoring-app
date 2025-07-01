@@ -1,33 +1,36 @@
 'use client'
 
 import { UserOutlined } from '@ant-design/icons'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
+import { useState } from 'react'
+
+import { PlusOutlined } from '@ant-design/icons'
+import FeatureFlagModal from '@common/components/Pages/Profile/Modal/AddFeatureFlagModal'
 
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { FeatureFlagsTable } from '@common/components/FeatureFlagsTable'
 import { UsersTable } from '@components/Tables/UsersTable'
 import { Tags } from '@components/UI/Tags'
+import { AppRoutes, Roles } from '@utils/constants'
 import {
-  Form,
   Avatar,
   Button,
   Card,
   Divider,
   Flex,
+  Form,
   Space,
   Tag,
   Typography,
-  message,
 } from 'antd'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
-import styles from './style.module.scss'
-import { EditUserForm } from '../../Forms/EditUserForm'
-import { AppRoutes, Roles } from '@utils/constants'
 import { useRouter } from 'next/router'
+import { EditUserForm } from '../../Forms/EditUserForm'
+import styles from './style.module.scss'
 
 export const ProfilePage: React.FC = () => {
   const router = useRouter()
@@ -48,6 +51,9 @@ export const ProfilePage: React.FC = () => {
       },
     })
   }
+
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editingFlag, setEditingFlag] = useState(null)
 
   return (
     <Space
@@ -96,8 +102,8 @@ export const ProfilePage: React.FC = () => {
           </Card>
         </div>
       )}
-      <Flex gap={16}>
-        <Card title="Представник" style={{ width: '400px' }}>
+      <Flex className={styles.columns} gap={16}>
+        <Card title="Представник" className={styles.CardRepresentative} >
           <Divider orientation="left" style={{ marginTop: 0 }}>
             <Typography.Text type="secondary">Надавачі послуг</Typography.Text>
           </Divider>
@@ -140,17 +146,11 @@ export const ProfilePage: React.FC = () => {
             )}
           />
         </Card>
-        <Card title="Інформація користувача" style={{ flex: 1 }}>
+        <Card title="Інформація користувача" className={styles.CardUserInformation}>
           <EditUserForm userId={user?._id?.toString()} form={form} />
-          <Button onClick={form.submit}>Зберегти</Button>
+          <Button className={styles.ButtonSave} onClick={form.submit}>Зберегти</Button>
         </Card>
-      </Flex>
-
-      {isGlobalAdmin && (
-        <Card title="Користувачі">
-          <UsersTable />
-        </Card>
-      )}
+      </Flex> 
     </Space>
   )
 }

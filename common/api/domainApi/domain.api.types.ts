@@ -21,6 +21,7 @@ export interface IDomainService {
 }
 
 export interface IDomainBankToken {
+  acc?: string
   token: string
   shortToken: string
   tokenName: string
