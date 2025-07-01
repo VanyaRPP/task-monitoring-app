@@ -12,6 +12,7 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { useRouter } from 'next/router'
+import ProfitPage from '@components/Pages/ProfiitPage'
 
 export default withAuthRedirect(() => {
   const { query, asPath } = useRouter()
@@ -29,6 +30,7 @@ export default withAuthRedirect(() => {
         <RealEstateBlock sepDomainID={sepDomainID} />
         <StreetsBlock sepDomainId={sepDomainID} />
         <CompaniesAreaChart domainID={sepDomainID} />
+        <ProfitPage />
       </Space>
     </MainLayout>
   )
