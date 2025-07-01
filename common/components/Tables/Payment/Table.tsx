@@ -223,7 +223,9 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const { selectedColumns, setSelectedColumns } = columnSelectionProps
 
   const { handleTableChange } = tableEventProps
-
+  
+  const isAllTablesPage = pathname === AppRoutes.INDEX
+  
   const isGlobalAdmin = currUserRoles.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = currUserRoles.includes(Roles.DOMAIN_ADMIN)
   const isUser = currUserRoles.includes(Roles.USER)
@@ -705,14 +707,18 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       rowSelection={rowSelection}
       columns={visibleColumns}
       dataSource={payments?.data || []}
-      pagination={{
-        current: paginationProps.pageData.currentPage,
-        total: payments?.total || 0,
-        showSizeChanger: true,
-        pageSizeOptions: ['10', '20', '50'],
-        position: ['bottomCenter'],
-        onChange: (page, pageSize) => handlePagination(page, pageSize),
-      }}
+      pagination={
+        isAllTablesPage
+          ? false
+          : {
+              current: paginationProps.pageData.currentPage,
+              total: payments?.total || 0,
+              showSizeChanger: true,
+              pageSizeOptions: ['10', '20', '50'],
+              position: ['bottomCenter'],
+              onChange: (page, pageSize) => handlePagination(page, pageSize),
+            }
+      }
       onChange={(pagination, allFilters, sorter, extra) =>
         handleTableChange(pagination, allFilters, sorter, extra)
       }
