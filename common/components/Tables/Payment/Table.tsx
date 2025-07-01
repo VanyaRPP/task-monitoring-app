@@ -562,6 +562,10 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const visibleColumns = (allColumns as ColumnType<IExtendedPayment>[]).filter(
     (col) => !(col as any).hidden
   )
+  const hasRowSelection =
+  (isGlobalAdmin || isDomainAdmin) &&
+  (pathname === AppRoutes.PAYMENT || Boolean(sepDomainID))
+
   const summary = useMemo(() => {
     if (!payments?.data?.length) {
       return null
@@ -575,7 +579,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     return (
       <Table.Summary>
         <Table.Summary.Row>
-          <Table.Summary.Cell index={0} />
+          {hasRowSelection && <Table.Summary.Cell index={0} />}
           {flatVisibleColumns.map(({ column, index }) => {
             if (column.dataIndex === 'debit') {
               return (
@@ -612,7 +616,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           })}
         </Table.Summary.Row>
         <Table.Summary.Row>
-          <Table.Summary.Cell index={0} />
+          {hasRowSelection && <Table.Summary.Cell index={0} />}
           {flatVisibleColumns.map(({ column, index }) => {
             if (column.dataIndex === 'credit') {
               return null
@@ -639,7 +643,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         </Table.Summary.Row>
       </Table.Summary>
     )
-  }, [payments, visibleColumns])
+  }, [payments, visibleColumns, hasRowSelection])
 
   if (paymentsError || currUserError) {
     return <Alert message="Помилка" type="error" showIcon closable />
