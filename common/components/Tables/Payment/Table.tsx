@@ -575,6 +575,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     return (
       <Table.Summary>
         <Table.Summary.Row>
+          <Table.Summary.Cell index={0} />
           {flatVisibleColumns.map(({ column, index }) => {
             if (column.dataIndex === 'debit') {
               return (
@@ -611,6 +612,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           })}
         </Table.Summary.Row>
         <Table.Summary.Row>
+          <Table.Summary.Cell index={0} />
           {flatVisibleColumns.map(({ column, index }) => {
             if (column.dataIndex === 'credit') {
               return null
