@@ -129,14 +129,10 @@ interface PaymentsTableProps {
   actionProps: ActionProps
   debtProps: DebtProps
   columnSelectionProps: ColumnSelectionProps
-
+  onSelectPayments: (rows: IExtendedPayment[]) => void
+  onSetDeleteItems: (items: PaymentDeleteItem[]) => void
   paymentsDeleteItems: PaymentDeleteItem[]
   selectedPayments: IExtendedPayment[]
-  setSelectedPayments: React.Dispatch<React.SetStateAction<IExtendedPayment[]>>
-  setPaymentsDeleteItems: React.Dispatch<
-    React.SetStateAction<PaymentDeleteItem[]>
-  >
-
   tableEventProps: TableEventProps
 }
 
@@ -179,7 +175,6 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   sepDomainID,
   payments,
   statusProps,
-
   filterProps,
   paginationProps,
   actionProps,
@@ -187,9 +182,8 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   columnSelectionProps,
   paymentsDeleteItems,
   selectedPayments,
-  setSelectedPayments,
-  setPaymentsDeleteItems,
-
+  onSelectPayments,
+  onSetDeleteItems,
   tableEventProps,
 }) => {
   const router = useRouter()
@@ -223,9 +217,9 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const { selectedColumns, setSelectedColumns } = columnSelectionProps
 
   const { handleTableChange } = tableEventProps
-  
-  const isAllTablesPage = pathname === AppRoutes.INDEX
-  
+
+  const isDashboard = pathname === AppRoutes.INDEX
+
   const isGlobalAdmin = currUserRoles.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = currUserRoles.includes(Roles.DOMAIN_ADMIN)
   const isUser = currUserRoles.includes(Roles.USER)
@@ -562,6 +556,10 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const visibleColumns = (allColumns as ColumnType<IExtendedPayment>[]).filter(
     (col) => !(col as any).hidden
   )
+  const hasRowSelection =
+    (isGlobalAdmin || isDomainAdmin) &&
+    (pathname === AppRoutes.PAYMENT || Boolean(sepDomainID))
+
   const summary = useMemo(() => {
     if (!payments?.data?.length) {
       return null
@@ -575,7 +573,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     return (
       <Table.Summary>
         <Table.Summary.Row>
-          <Table.Summary.Cell index={0} />
+          {hasRowSelection && <Table.Summary.Cell index={0} />}
           {flatVisibleColumns.map(({ column, index }) => {
             if (column.dataIndex === 'debit') {
               return (
@@ -612,7 +610,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           })}
         </Table.Summary.Row>
         <Table.Summary.Row>
-          <Table.Summary.Cell index={0} />
+          {hasRowSelection && <Table.Summary.Cell index={0} />}
           {flatVisibleColumns.map(({ column, index }) => {
             if (column.dataIndex === 'credit') {
               return null
@@ -639,7 +637,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         </Table.Summary.Row>
       </Table.Summary>
     )
-  }, [payments, visibleColumns])
+  }, [payments, visibleColumns, hasRowSelection])
 
   if (paymentsError || currUserError) {
     return <Alert message="Помилка" type="error" showIcon closable />
@@ -649,33 +647,29 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     (isGlobalAdmin || isDomainAdmin) &&
     (pathname === AppRoutes.PAYMENT || Boolean(sepDomainID))
       ? {
-          selectedRowKeys: selectedPayments.map((item) => item._id),
+          selectedRowKeys: selectedPayments.map((i) => i._id),
           preserveSelectedRowKeys: true,
 
-          onChange: (
-            _selectedRowKeys: React.Key[],
-            selectedRows: IExtendedPayment[]
-          ) => {
-            setSelectedPayments(selectedRows)
-            const newDeleteItems: PaymentDeleteItem[] = selectedRows.map(
-              (item) => ({
-                id: item._id,
-                date:
-                  typeof item.monthService === 'object' &&
-                  (item.monthService as any)?.date
-                    ? String((item.monthService as any).date)
-                    : String(item.invoiceCreationDate),
-                domain: (item.domain as any)?.name || '',
-                company: (item.company as any)?.companyName || '',
-              })
-            )
-            setPaymentsDeleteItems(newDeleteItems)
+          onChange: (_keys, rows) => {
+            onSelectPayments(rows)
+            const deleteItems = rows.map((item) => ({
+              id: item._id,
+              date:
+                typeof item.monthService === 'object' &&
+                (item.monthService as any)?.date
+                  ? String((item.monthService as any).date)
+                  : String(item.invoiceCreationDate),
+              domain: (item.domain as any)?.name || '',
+              company: (item.company as any)?.companyName || '',
+            }))
+            onSetDeleteItems(deleteItems)
           },
 
-          onSelect: (record: IExtendedPayment, selected: boolean) => {
+          onSelect: (record, selected) => {
             if (selected) {
-              setPaymentsDeleteItems((prev: PaymentDeleteItem[]) => [
-                ...prev,
+              onSelectPayments([...selectedPayments, record])
+              onSetDeleteItems([
+                ...paymentsDeleteItems,
                 {
                   id: record._id,
                   date:
@@ -687,16 +681,12 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                   company: (record.company as any)?.companyName || '',
                 },
               ])
-              setSelectedPayments((prev: IExtendedPayment[]) => [
-                ...prev,
-                record,
-              ])
             } else {
-              setPaymentsDeleteItems((prev: PaymentDeleteItem[]) =>
-                prev.filter((item) => item.id !== record._id)
+              onSelectPayments(
+                selectedPayments.filter((p) => p._id !== record._id)
               )
-              setSelectedPayments((prev: IExtendedPayment[]) =>
-                prev.filter((item) => item._id !== record._id)
+              onSetDeleteItems(
+                paymentsDeleteItems.filter((i) => i.id !== record._id)
               )
             }
           },
@@ -710,16 +700,14 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       columns={visibleColumns}
       dataSource={payments?.data || []}
       pagination={
-        isAllTablesPage
-          ? false
-          : {
-              current: paginationProps.pageData.currentPage,
-              total: payments?.total || 0,
-              showSizeChanger: true,
-              pageSizeOptions: ['10', '20', '50'],
-              position: ['bottomCenter'],
-              onChange: (page, pageSize) => handlePagination(page, pageSize),
-            }
+        !isDashboard && {
+          current: paginationProps.pageData.currentPage,
+          total: payments?.total || 0,
+          showSizeChanger: true,
+          pageSizeOptions: ['10', '20', '50'],
+          position: ['bottomCenter'],
+          onChange: (page, pageSize) => handlePagination(page, pageSize),
+        }
       }
       onChange={(pagination, allFilters, sorter, extra) =>
         handleTableChange(pagination, allFilters, sorter, extra)
