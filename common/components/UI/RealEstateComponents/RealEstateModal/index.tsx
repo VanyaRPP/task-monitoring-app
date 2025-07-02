@@ -90,17 +90,29 @@ const RealEstateModal: FC<Props> = ({
       description: formData.description,
       adminEmails: formData.adminEmails,
       pricePerMeter: formData.pricePerMeter,
-      servicePricePerMeter: formData.servicePricePerMeter,
       totalArea: formData.totalArea,
       garbageCollector: formData.garbageCollector,
       archived: formData.archived,
-      rentPart: formData.rentPart,
       inflicion: formData.inflicion,
-      waterPart: formData.waterPart,
       discount:
         formData.discount > 0 ? formData.discount * -1 : formData.discount,
-      cleaning: formData.cleaning,
       services: formData.services,
+      servicePricePerMeter:
+        formData.customServices?.find(
+          (c) => c.fieldName === 'servicePricePerMeter'
+        )?.price ?? formData.servicePricePerMeter,
+      rentPart:
+        formData.customServices?.find(
+          (custom) => custom.fieldName === 'rentPart'
+        )?.price ?? formData.rentPart,
+      waterPart:
+        formData.customServices?.find(
+          (custom) => custom.fieldName === 'waterPart'
+        )?.price ?? formData.waterPart,
+      cleaning:
+        formData.customServices?.find(
+          (custom) => custom.fieldName === 'cleaning'
+        )?.price ?? formData.cleaning,
       customServices: formData.customServices,
     }
 

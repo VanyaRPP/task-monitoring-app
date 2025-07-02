@@ -165,7 +165,7 @@ const RealEstateForm: FC<Props> = ({
         allCustomServices={customServices}
       />
       {/* { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') && // TODO: customServices */}
-      <Form.Item
+      {/* <Form.Item
         name="servicePricePerMeter"
         label="Індивідуальне утримання (грн/м²)"
       >
@@ -175,16 +175,16 @@ const RealEstateForm: FC<Props> = ({
           className={s.formInput}
           disabled={!editable}
         />
-      </Form.Item>
+      </Form.Item> */}
       {/* } */}
-      <Form.Item name="rentPart" label="Частка загальної площі">
+      {/* <Form.Item name="rentPart" label="Частка загальної площі">
         <InputNumber
           parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
         />
-      </Form.Item>
+      </Form.Item> */}
 
       {isServiceExist('waterPrice') && (
         <Form.Item name="waterPart" label="Частка водопостачання">
@@ -197,14 +197,14 @@ const RealEstateForm: FC<Props> = ({
         </Form.Item>
       )}
       {/* { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') && */}
-      <Form.Item name="cleaning" label="Прибирання (грн)">
+      {/* <Form.Item name="cleaning" label="Прибирання (грн)">
         <InputNumber
           parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
         />
-      </Form.Item>
+      </Form.Item> */}
       {/* } */}
 
       <Form.Item name="discount" label="Знижка">
