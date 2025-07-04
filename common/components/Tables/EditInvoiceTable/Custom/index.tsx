@@ -16,7 +16,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
 
   const value = Form.useWatch(['invoice', ...name, 'name'], form)
   const type = Form.useWatch(['invoice', ...name, 'type'], form)
-  const isCustomService = Form.useWatch(['invoice', ...name, 'name'], form)
+  const isCustomService = Form.useWatch(['invoice', ...name, 'customService'], form)
 
   const { service } = usePaymentContext()
 
@@ -37,11 +37,16 @@ export const Name: React.FC<InvoiceComponentProps> = ({
       rules={[validator.required()]}
       style={{ margin: 0 }}
     >
-      {isCustomService 
-      ? <Typography.Text>
-        {value || 'Назва...'}
-        </Typography.Text>
-      :
+      {isCustomService
+        ? <Space direction="vertical" size={0}>
+          <Typography.Text>
+            {value || 'Назва...'}
+          </Typography.Text>
+          <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+          {toFirstUpperCase(dateToMonthYear(service?.date))}
+          </Typography.Text>
+        </Space>
+        :
         <Input placeholder="Назва..." disabled={disabled} />}
     </Form.Item>
   )
