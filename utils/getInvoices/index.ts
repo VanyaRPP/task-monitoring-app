@@ -18,6 +18,7 @@ export interface IGetInvoiceProps {
   payment?: Partial<IPayment>
   prevService?: Partial<IService>
   prevPayment?: Partial<IPayment>
+  domainServices?: string[]
 }
 
 export interface IGetInvoiceByTypeProps {

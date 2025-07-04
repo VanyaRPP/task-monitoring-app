@@ -2,6 +2,7 @@ import {
   useAddPaymentMutation,
   useEditPaymentMutation,
 } from '@common/api/paymentApi/payment.api'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import {
   IExtendedPayment,
   IPayment,
@@ -212,6 +213,7 @@ const AddPaymentModal: FC<Props> = ({
           payment,
           prevService,
           prevPayment,
+          domainServices
         }),
       })
       return
@@ -225,6 +227,7 @@ const AddPaymentModal: FC<Props> = ({
           payment,
           prevService,
           prevPayment,
+          domainServices,
         }),
       })
     }
@@ -247,10 +250,13 @@ const AddPaymentModal: FC<Props> = ({
       payment,
       prevService,
       prevPayment,
+      domainServices,
     })
     form.setFieldsValue({ invoice })
   }, [form, company, service, payment, prevService, prevPayment])
-
+    const { data: domainsData } = useGetDomainsQuery({})
+    const currentDomain = domainsData?.find(d => d._id === service?.domain?._id)
+    const domainServices = currentDomain?.domainServices?.map(s => s.name) || []
   return (
     <PaymentContext.Provider
       value={{
