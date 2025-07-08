@@ -67,7 +67,6 @@
     display: block;
   }
 }
-
 .Name {
   display: block;
   padding: 0 1rem;
@@ -91,7 +90,8 @@
   @media (max-width: 768px) {
     flex: 0 1 100%;
   }
-}
+} 
+
 
 .Buttons {
   display: flex;
@@ -223,4 +223,7 @@
   padding: 2rem;
   text-align: justify;
   z-index: 60;
+}
+.cardPage {
+  z-index: 100000;
 }

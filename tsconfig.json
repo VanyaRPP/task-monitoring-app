@@ -2,8 +2,15 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "target": "ES2020",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "typeRoots": ["./types", "./node_modules/@types"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -16,19 +23,46 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "types": ["node", "jest"],
+    "types": [
+      "node",
+      "jest"
+    ],
     "baseUrl": ".",
     "paths": {
-      "@public/*": ["public/*"],
-      "@utils/*": ["utils/*"],
-      "@styles/*": ["styles/*"],
-      "@pages/*": ["pages/*"],
-      "@components/*": ["common/components/*"],
-      "@assets/*": ["common/assets/*"],
-      "@modules/*": ["common/modules/*"],
-      "@lib/*": ["common/lib/*"],
-      "@common/*": ["common/*"]
-    }
+      "@public/*": [
+        "public/*"
+      ],
+      "@utils/*": [
+        "utils/*"
+      ],
+      "@styles/*": [
+        "styles/*"
+      ],
+      "@pages/*": [
+        "pages/*"
+      ],
+      "@components/*": [
+        "common/components/*"
+      ],
+      "@assets/*": [
+        "common/assets/*"
+      ],
+      "@modules/*": [
+        "common/modules/*"
+      ],
+      "@lib/*": [
+        "common/lib/*"
+      ],
+      "@common/*": [
+        "common/*"
+      ]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
@@ -36,7 +70,10 @@
     "**/*.tsx",
     "custom.d.ts",
     "types",
-    "common/components/PlacesAutocomplete/index.jsx"
+    "common/components/PlacesAutocomplete/index.jsx",
+    ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }
