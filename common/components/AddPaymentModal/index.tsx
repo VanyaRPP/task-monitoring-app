@@ -203,32 +203,49 @@ const AddPaymentModal: FC<Props> = ({
   }, [preselectedCompany, form])
 
   useEffect(() => {
-    const isPreview = paymentActions.preview
-    const existingInvoice = form.getFieldValue('invoice')
-
-    if (isPreview) {
-      form.setFieldsValue({
-        invoice: getInvoices({
-          company,
-          service,
-          payment,
-          prevService,
-          prevPayment,
-        }),
+  const isPreview = paymentActions.preview
+  const existingInvoice = form.getFieldValue('invoice')
+    if (!payment) {
+      const invoices = getInvoices({
+        company,
+        service,
+        payment,
+        prevService,
+        prevPayment,
       })
-      return
-    }
+    const domainCustomServiceIds = service?.domain?.customServices?.flatMap(group => group.services) || []
+    const filteredInvoices = invoices.filter(invoice => {
+      if (invoice.type === 'maintenancePrice') return true
+      if (invoice.type !== 'custom') return false
+    const matchedService = company?.customServices?.find(s => s.label === invoice.name)
+      if (!matchedService) return false
 
-    if (!existingInvoice || existingInvoice.length === 0) {
-      form.setFieldsValue({
-        invoice: getInvoices({
-          company,
-          service,
-          payment,
-          prevService,
-          prevPayment,
-        }),
-      })
+      return domainCustomServiceIds.includes(String(matchedService._id))
+    })
+
+    form.setFieldsValue({
+      invoice: filteredInvoices,
+    })
+  } else if (isPreview) {
+    form.setFieldsValue({
+      invoice: getInvoices({
+        company,
+        service,
+        payment,
+        prevService,
+        prevPayment,
+      }),
+    })
+  } else if (!existingInvoice || existingInvoice.length === 0) {
+    form.setFieldsValue({
+      invoice: getInvoices({
+        company,
+        service,
+        payment,
+        prevService,
+        prevPayment,
+      }),
+    })
     }
   }, [
     form,
@@ -239,19 +256,6 @@ const AddPaymentModal: FC<Props> = ({
     prevPayment,
     paymentActions.preview,
   ])
-  useEffect(() => {
-    const existingInvoice = form.getFieldValue('invoice')
-    if (existingInvoice?.length > 0) return
-
-    const invoice = getInvoices({
-      company,
-      service,
-      payment,
-      prevService,
-      prevPayment,
-    })
-    form.setFieldsValue({ invoice })
-  }, [form, company, service, payment, prevService, prevPayment])
 
     useEffect(() => {
       if (edit) {
