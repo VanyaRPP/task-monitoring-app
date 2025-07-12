@@ -35,44 +35,57 @@ const AddCostForm: React.FC<Props> = ({ form, type, disabled, currentProfit }) =
     <ConfigProvider locale={ukUA}>
       <Form form={form} layout="vertical" className={s.Form}>
         {isPreview && (
-            <div className={s.createdByWrapper}>
-              <Form.Item label={t('profitPage:form.createdBy')}>
-                <div>
-                  {currentProfit?.createdBy ? (
-                    <>
-                      <span className={s.createdByName}>
-                        {currentProfit.createdBy.name}
-                      </span>
-                      <br />
-                      <span className={s.createdByEmail}>
-                        {currentProfit.createdBy.email}
-                      </span>
-                    </>
-                  ) : (
+          <div className={s.createdByWrapper}>
+            <Form.Item
+              label={
+                <>
+                  {t('profitPage:form.createdBy')}
+                  <br />
+                  <span className={s.createdByNameAutomatic}>
+                    {t('profitPage:form.automatic')}
+                  </span>
+                </>
+              }
+              style={{ marginBottom: 2 }}
+            >
+              <div>
+                {currentProfit?.createdBy ? (
+                  <>
                     <span className={s.createdByName}>
-                      {t('profitPage:form.automatic')}
+                      {currentProfit.createdBy.name}
                     </span>
-                  )}
-                </div>
-              </Form.Item>
-            </div>
-          )}
-          
-        <DomainsSelect form={form} disabled={isPreview} currentProfit={currentProfit}/>
+                    <br />
+                    <span className={s.createdByEmail}>
+                      {currentProfit.createdBy.email}
+                    </span>
+                  </>
+                ) : null}
+              </div>
+            </Form.Item>
+          </div>
+        )}
+
+        <DomainsSelect
+          form={form}
+          disabled={isPreview}
+          currentProfit={currentProfit}
+        />
 
         <Form.Item
           name="date"
           label={t('profitPage:form.date')}
-          rules={(!disabled && !currentProfit) ? validateField('required') : []}
+          rules={!disabled && !currentProfit ? validateField('required') : []}
         >
           <DatePicker
-            format={(date) => (date ? formatDateWithGenitiveMonthCapitalized(date) : '')}
+            format={(date) =>
+              date ? formatDateWithGenitiveMonthCapitalized(date) : ''
+            }
             placeholder={t('profitPage:form.datePlaceholder', { ns: 'common' })}
             className={s.formInput}
             disabled={isPreview}
           />
         </Form.Item>
-       {isPreview ? (
+        {isPreview ? (
           <Form.Item
             name="sum"
             label={
@@ -97,7 +110,7 @@ const AddCostForm: React.FC<Props> = ({ form, type, disabled, currentProfit }) =
                 ? t('profitPage:form.amountDebit')
                 : t('profitPage:form.amountCredit')
             }
-            rules={(!disabled && !currentProfit) ? validateField('required') : []}
+            rules={!disabled && !currentProfit ? validateField('required') : []}
           >
             <InputNumber
               parser={inputNumberParser}
@@ -108,10 +121,7 @@ const AddCostForm: React.FC<Props> = ({ form, type, disabled, currentProfit }) =
           </Form.Item>
         )}
 
-        <Form.Item
-          name="description"
-          label={t('profitPage:form.description')}
-        >
+        <Form.Item name="description" label={t('profitPage:form.description')}>
           <Input.TextArea
             placeholder={t('profitPage:form.descriptionPlaceholder')}
             maxLength={256}
