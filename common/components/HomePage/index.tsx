@@ -5,7 +5,7 @@ import { AppRoutes } from '@utils/constants'
 import { LogoIcon } from '@assets/icon/Logo'
 import { Button, Typography } from 'antd'
 import { useRouter } from 'next/router'
-
+import CardPage from '@components/CardSwapper'
 import s from './style.module.scss'
 
 const HomePage: React.FC = () => {
@@ -83,6 +83,10 @@ const HomePage: React.FC = () => {
               }}
             />
           </div>
+          <div className={s.cardPage}>
+            <CardPage />
+          </div>
+          
         </div>
       </div>
     </>
