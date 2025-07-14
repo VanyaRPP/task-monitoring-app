@@ -225,5 +225,24 @@
   z-index: 60;
 }
 .cardPage {
+  position: fixed;
+  bottom: 0;
+  right: 0;
   z-index: 100000;
+  pointer-events: none;
+  width: 800px;
+
+  transform: translate(5%, 20%);
+  transform-origin: bottom right;
+
+  perspective: 900px;
+  overflow: visible;
+
+  @media (max-width: 768px) {
+    transform: scale(0.75) translate(25%, 25%);
+  }
+
+  @media (max-width: 480px) {
+    transform: scale(0.55) translate(25%, 25%);
+  }
 }

@@ -73,19 +73,20 @@ const HomePage: React.FC = () => {
               </Typography.Paragraph>
             </div>
           </div>
-          <div className={s.cardPage}>
-            <CardPage />
-          </div>
           <div className={s.HalfBlock}>
-            <LottieAnimation
+            {/* <LottieAnimation
               src="/animations/AnimationCity.json"
               // src="https://assets7.lottiefiles.com/packages/lf20_qp1q7mct.json"
               loop={true}
               style={{
                 zIndex: 60,
               }}
-            />
+            /> */}
           </div>
+          <div className={s.cardPage}>
+            <CardPage />
+          </div>
+          
         </div>
       </div>
     </>

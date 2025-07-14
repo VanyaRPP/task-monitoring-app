@@ -15,7 +15,7 @@ import React, {
   useRef,
 } from 'react'
 import gsap from 'gsap'
-import './CardSwap.css'
+import styles from './styles.module.css'
 
 export interface CardSwapProps {
   width?: number | string
@@ -39,7 +39,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
     <div
       ref={ref}
       {...rest}
-      className={`card ${customClass ?? ''} ${rest.className ?? ''}`.trim()}
+      className={`${styles.card} ${customClass ?? ''} ${rest.className ?? ''}`.trim()}
     />
   )
 )
@@ -79,8 +79,8 @@ const placeNow = (el: HTMLElement, slot: Slot, skew: number) =>
   })
 
 const CardSwap: React.FC<CardSwapProps> = ({
-  width = 500,
-  height = 400,
+  width = 800,
+  height = 500,
   cardDistance = 60,
   verticalDistance = 70,
   delay = 5000,
@@ -239,7 +239,7 @@ const CardSwap: React.FC<CardSwapProps> = ({
   return (
     <div
       ref={container}
-      className="card-swap-container"
+      className={styles.cardSwapContainer}
       style={{ width, height }}
     >
       {rendered}
