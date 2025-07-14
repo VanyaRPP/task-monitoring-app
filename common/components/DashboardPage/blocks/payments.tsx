@@ -67,6 +67,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import s from './style.module.scss'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 
+import { Grid } from 'antd';
+const { useBreakpoint } = Grid;
+
+
+
 interface PaymentsBlockProps {
   sepDomainID?: string
 }
@@ -332,8 +337,10 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       setCurrentDateFilter(invoiceVals)
     }
   }
-
+const screens = useBreakpoint();
+const isMobile = screens.xs;
   const columns: TableColumnType<any>[] = useMemo(() => {
+    
     return [
       {
         title: 'Надавач послуг',
@@ -565,7 +572,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
           (b.invoice.find((i) => i.type === value)?.sum || 0),
       })),
       {
-        fixed: 'right',
+        fixed: isMobile ? undefined : 'right',
         align: 'center',
         title: '',
         width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
@@ -585,7 +592,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
       },
       {
         align: 'center',
-        fixed: 'right',
+        fixed: isMobile ? undefined : 'right',
         title: '',
         width: router.pathname === AppRoutes.PAYMENT ? 80 : 25,
         render: (_, payment: IExtendedPayment) => (
@@ -661,6 +668,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     token,
     selectedColumns,
     debtorCompanies,
+    isMobile,
   ])
 
   const [paymentsDeleteItems, setPaymentsDeleteItems] = useState<

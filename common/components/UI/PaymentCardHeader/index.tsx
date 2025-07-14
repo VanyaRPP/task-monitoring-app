@@ -7,8 +7,8 @@ import {
   SelectOutlined,
   ExportOutlined,
   InfoCircleOutlined,
-  UpOutlined ,
-
+  UpOutlined,
+  MenuOutlined,
 } from '@ant-design/icons'
 import { dateToDefaultFormat } from '@assets/features/formatDate'
 import {
@@ -34,16 +34,16 @@ import {
   Modal,
   Divider,
   theme,
+  Drawer,
+  Grid,
 } from 'antd'
 import { saveAs } from 'file-saver'
 import { useRouter } from 'next/router'
 import { shouldOpenModal } from '@utils/shouldOpenModal'
 import PaymentCardLabel from './PaymentCardLabel';
 import type { CollapseProps } from 'antd';
-
-
-
-
+import styles from './styles.module.scss'
+const { useBreakpoint } = Grid
 
 export interface PaymentCardHeaderProps {
   setCurrentDateFilter: (val: any) => void
@@ -88,9 +88,10 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [drawerVisible, setDrawerVisible] = useState(false)
+  const screens = useBreakpoint()
 
   const { data: currUser } = useGetCurrentUserQuery()
-
   const { pathname } = router
 
   const closeModal = () => {
@@ -104,8 +105,6 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   const [generateExcel] = useGenerateExcelMutation()
   const [generatePdf] = useGeneratePdfMutation()
   const { token } = theme.useToken()
-
-  // Хендлери
 
   const handleExportExcel = async () => {
     try {
@@ -151,13 +150,9 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
 
   const handleGeneratePdf = async () => {
     try {
-      const response = await generatePdf({
-        payments: selectedPayments,
-      })
-
+      const response = await generatePdf({ payments: selectedPayments })
       if ('data' in response) {
         const { data } = response
-
         if (data) {
           // @ts-ignore
           const buffer = Buffer.from(data.buffer)
@@ -174,9 +169,9 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
       message.error('Сталася несподівана помилка під час генерації PDF')
     }
   }
+const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-  const selectedCompany =
-    filters?.company?.length === 1 ? filters.company[0] : undefined
+  const selectedCompany = filters?.company?.length === 1 ? filters.company[0] : undefined
 
   const infoTooltip = useMemo(() => {
     const texts: string[] = []
@@ -186,32 +181,8 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   }, [singleDomain, singleCompany])
 
   if (!isAdmin && !isGlobalAdmin) {
-    // Звичайні користувачі бачать тільки статичний label без Collapse
     return (
       <div style={{ marginBottom: '10px', marginTop: '10px' }}>
-      <PaymentCardLabel
-        enablePaymentsButton={enablePaymentsButton}
-        onColumnsSelect={onColumnsSelect}
-        setCurrentDateFilter={setCurrentDateFilter}
-        setFilters={setFilters}
-        streets={streets}
-        filters={filters}
-        domainFilter={domainFilter}
-        realEstatesFilter={realEstatesFilter}
-        isAdmin={false}
-      />
-      </div>
-    )
-  }
-
-  const panelStyle: React.CSSProperties = {
-    border: 'none',
-  }
-
-  const getItems = (panelStyle: React.CSSProperties): CollapseProps['items'] => [
-    {
-      key: '1',
-      label: (
         <PaymentCardLabel
           enablePaymentsButton={enablePaymentsButton}
           onColumnsSelect={onColumnsSelect}
@@ -221,78 +192,106 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
           filters={filters}
           domainFilter={domainFilter}
           realEstatesFilter={realEstatesFilter}
-          isAdmin={isAdmin}
+          isAdmin={false}
         />
-      ),
-      style: panelStyle,
-      collapsible: 'icon',
-      children: (
-        <>
-          <Divider style={{ margin: '-2px 0' }} />
-          <Flex align="center" style={{ height: '50px', marginTop: '10px' }}>
-            {infoTooltip && (
-              <Tooltip title={infoTooltip}>
-                <InfoCircleOutlined
-                  style={{ marginRight: 16, color: 'rgba(0,0,0,0.45)' }}
-                />
-              </Tooltip>
-            )}
-            {isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0 && (
-              <Button type="link" onClick={handleExportExcel}>
-                Export to Excel <ExportOutlined />
-              </Button>
-            )}
-            {isAdmin && <ImportInvoices />}
-            {isAdmin && (
-              <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT_BULK)}>
-                Інвойси <SelectOutlined />
-              </Button>
-            )}
-            {isAdmin && (
-              <Button type="link" onClick={() => setIsModalOpen(true)}>
-                <PlusOutlined /> Додати
-              </Button>
-            )}
-            {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
-              <AddPaymentModal
-                paymentActions={!isAdmin ? { edit: false, preview: true } : paymentActions}
-                paymentData={currentPayment}
-                preselectedCompany={selectedCompany}
-                closeModal={closeModal}
-              />
-            )}
-            {isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0 && (
-              <Button type="link" onClick={handleGeneratePdf}>
-                Завантажити рахунки <DownloadOutlined />
-              </Button>
-            )}
-            {isGlobalAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0 && (
-              <Button type="link" onClick={handleDeletePayments}>
-                <DeleteOutlined /> Видалити
-              </Button>
-            )}
-          </Flex>
-        </>
-      ),
-    },
-  ]
+      </div>
+    )
+  }
 
-  return (
-    <Collapse
-      bordered={false}
-      defaultActiveKey={[]}
-      expandIcon={({ isActive }) => (
-        <Tooltip title="Додаткові дії">
-          <UpOutlined rotate={isActive ? 180 : 0} style={{ marginTop: 30 }} />
-        </Tooltip>
-      )}
-      expandIconPosition="right"
-      style={{ background: token.colorBgContainer }}
-      items={getItems(panelStyle)}
-      ghost
-    />
-  )
+  const panelStyle: React.CSSProperties = { border: 'none' }
+
+const label = (
+  <PaymentCardLabel
+    enablePaymentsButton={enablePaymentsButton}
+    onColumnsSelect={onColumnsSelect}
+    setCurrentDateFilter={setCurrentDateFilter}
+    setFilters={setFilters}
+    streets={streets}
+    filters={filters}
+    domainFilter={domainFilter}
+    realEstatesFilter={realEstatesFilter}
+    isAdmin={isAdmin}
+    className={styles.select}
+  />
+)
+
+const getItems = (panelStyle: React.CSSProperties): CollapseProps['items'] => [
+  {
+    key: '1',
+    label,
+    style: panelStyle,
+    collapsible: 'icon',
+    children: (
+      <>
+        <Divider className={styles.Divider}/>
+        <Flex className={styles.flexButtonContainer} align="center">
+          {infoTooltip && (
+            <Tooltip title={infoTooltip}>
+              <InfoCircleOutlined
+                style={{ marginRight: 16, color: 'rgba(0,0,0,0.45)' }}
+              />
+            </Tooltip>
+          )}
+          {isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0 && (
+            <Button type="link" onClick={handleExportExcel}>
+              Export to Excel <ExportOutlined />
+            </Button>
+          )}
+          {isAdmin && <ImportInvoices />}
+          {isAdmin && (
+            <Button type="link" onClick={() => router.push(AppRoutes.PAYMENT_BULK)}>
+              Інвойси <SelectOutlined />
+            </Button>
+          )}
+          {isAdmin && (
+            <Button type="link" onClick={() => setIsModalOpen(true)}>
+              <PlusOutlined /> Додати
+            </Button>
+          )}
+          {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
+            <AddPaymentModal
+              paymentActions={!isAdmin ? { edit: false, preview: true } : paymentActions}
+              paymentData={currentPayment}
+              preselectedCompany={selectedCompany}
+              closeModal={closeModal}
+            />
+          )}
+          {isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0 && (
+            <Button type="link" onClick={handleGeneratePdf}>
+              Завантажити рахунки <DownloadOutlined />
+            </Button>
+          )}
+          {isGlobalAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0 && (
+            <Button type="link" onClick={handleDeletePayments}>
+              <DeleteOutlined /> Видалити
+            </Button>
+          )}
+        </Flex>
+      </>
+    ),
+  },
+]
+
+return (
+  <Collapse
+   className={styles.customCollapse}
+    bordered={false}
+    defaultActiveKey={[]}
+    expandIcon={({ isActive }) => (
+      <Tooltip title="Додаткові дії">
+        <UpOutlined
+          rotate={isActive ? 0 : 180}
+          className={styles.collapseButton}
+        />
+      </Tooltip>
+    )}
+    expandIconPosition="right"
+    items={getItems(panelStyle)}
+    ghost
+  />
+)
 }
+
 
 interface ColumnSelectProps {
   onSelect?: (selected: string[]) => void
