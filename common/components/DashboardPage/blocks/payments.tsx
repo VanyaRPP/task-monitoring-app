@@ -50,6 +50,7 @@ import {
 import { RootState } from '@modules/store/store'
 import { formatDateFilterForQuery } from '@utils/helpers'
 import { getTypeOperation } from '@utils/helpers'
+import { PaymentDeleteItem } from '@components/Tables/Payment/Header'
 
 export interface PaymentsBlockProps {
   sepDomainID?: string
@@ -302,8 +303,12 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         columnSelectionProps={columnSelectionProps}
         paymentsDeleteItems={paymentsDeleteItems}
         selectedPayments={selectedPayments}
-        setSelectedPayments={setSelectedPayments}
-        setPaymentsDeleteItems={setPaymentsDeleteItems}
+        onSelectPayments={(rows: IExtendedPayment[]) =>
+          dispatch(setSelectedPayments(rows))
+        }
+        onSetDeleteItems={(items: PaymentDeleteItem[]) =>
+          dispatch(setPaymentsDeleteItems(items))
+        }
       />
     </TableCard>
   )

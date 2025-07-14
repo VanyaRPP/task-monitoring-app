@@ -16,15 +16,21 @@
   }
 }
 
-.createdByWrapper {
+.createdByWrapper { 
+  display: block;
   margin-top: 2.5rem;
 }
 
 .createdByName {
   color: #9f82f0;
-  font-weight: 600;
+  font-weight: 600; 
+  
 }
-
+.createdByNameAutomatic {
+  color: #9f82f0;
+  font-weight: 600;  
+  margin-left: 0.5rem; 
+}
 .createdByEmail {
   color: #9f82f0;
 }

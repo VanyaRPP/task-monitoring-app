@@ -1,5 +1,5 @@
 {
-  "title": "Прибуток",
+  "title": "Прибутки",
   "addButton": "Додати",
   "table": {
     "tableAriaLabel": "Таблиця з підсумком транзакцій прибутку",
@@ -33,7 +33,7 @@
     "addTitleDebit": "Додати витрати",
     "addTitleCredit": "Додати прибутки",
     "okText": "Додати",
-    "editOkText": "Змінити",
+    "editOkText": "Зберегти",
     "cancelText": "Відміна",
     "addTitle": "Додати новий запис прибутку",
     "editTitle": "Редагувати запис",

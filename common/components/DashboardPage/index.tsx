@@ -8,6 +8,7 @@ import CompaniesAreaChart from '@components/DashboardPage/blocks/сompaniesAreaC
 import { Roles } from '@utils/constants'
 import { Col, Row, Space } from 'antd'
 import PaymentsChart from '@components/DashboardPage/blocks/paymentChart'
+import ProfitPage from '@components/Pages/ProfiitPage'
 
 const Dashboard: React.FC = () => {
   const { data: userResponse } = useGetCurrentUserQuery()
@@ -21,6 +22,7 @@ const Dashboard: React.FC = () => {
       {isGlobalAdmin && <StreetsBlock />}
       <DomainsBlock />
       <RealEstateBlock />
+      <ProfitPage />
       <CompaniesAreaChart />
     </Space>
   )

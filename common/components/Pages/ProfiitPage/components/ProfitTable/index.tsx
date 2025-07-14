@@ -10,6 +10,8 @@ import { Profit } from '@common/api/profitsApi/profits.type'
 import AddCostModal from '@components/AddCostModal'
 import { Table, Alert, Button, Space, Tooltip, message  } from 'antd'
 import { useTranslation } from 'react-i18next'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@utils/constants'
 
 interface ProfitMonthSummary {
   key: string
@@ -26,6 +28,8 @@ interface ProfitTableProps {
 }
 
 const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
+  const router = useRouter()
+  const isOnPage = router.pathname === AppRoutes.PROFIT
   const { t } = useTranslation()
   const [selectedProfit, setSelectedProfit] = useState<Profit | null>(null)
   const dispatch = useAppDispatch()
@@ -67,14 +71,20 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
   }, [profitsGrouped])
 
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([])
-
+  router.pathname === AppRoutes.PROFIT ||
+    router.pathname === AppRoutes.SEP_DOMAIN
   useEffect(() => {
-    if (dataSource.length > 0) {
-      setExpandedRowKeys(dataSource.map((item) => item.key))
-    } else {
-      setExpandedRowKeys([])
+    if (
+      router.pathname === AppRoutes.PROFIT ||
+      router.pathname === AppRoutes.SEP_DOMAIN
+    ) {
+      if (dataSource.length > 0) {
+        setExpandedRowKeys(dataSource.map((item) => item.key))
+      } else {
+        setExpandedRowKeys([])
+      }
     }
-  }, [dataSource])
+  }, [dataSource, router.pathname])
 
   const expandAll = useCallback(() => {
     setExpandedRowKeys(dataSource.map((item) => item.key))
@@ -111,8 +121,9 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
       message.error(t('messages.errorDelete', { ns: 'profitPage' }))
     }
   }
-  
-  if (isError) return <Alert type="error" message={t('profitPage:table.errorLoading')} />
+
+  if (isError)
+    return <Alert type="error" message={t('profitPage:table.errorLoading')} />
 
   if (!profitsGrouped || Object.keys(profitsGrouped.data).length === 0)
     return <Alert type="info" message={t('profitPage:table.noData')} />
@@ -153,27 +164,33 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
       </Space>
 
       <Table
+        bordered={true}
         loading={isLoading}
         columns={parentColumns}
         dataSource={dataSource}
-        pagination={{
-          position: ['bottomCenter'],
-          showSizeChanger: true,
-          pageSizeOptions: ['30', '50', '80', '100'],
-          pageSize,
-          current: currentPage,
-          total: profitsGrouped.meta.total,
-          onChange: handlePageChange,
-          showTotal: (total, range) =>
-            t('profitPage:table.paginationTotal', {
-              from: range[0],
-              to: range[1],
-              total,
-            }),
-        }}
+        pagination={
+          (router.pathname === AppRoutes.PROFIT ||
+            router.pathname === AppRoutes.SEP_DOMAIN) && {
+            position: ['bottomCenter'],
+            hideOnSinglePage: false,
+            showSizeChanger: true,
+            pageSizeOptions: ['30', '50', '80', '100'],
+            pageSize,
+            current: currentPage,
+            total: profitsGrouped.meta.total,
+            onChange: handlePageChange,
+            showTotal: (total, range) =>
+              t('profitPage:table.paginationTotal', {
+                from: range[0],
+                to: range[1],
+                total,
+              }),
+          }
+        }
         expandable={{
           expandedRowRender: (record) => (
             <Table
+              bordered={true}
               columns={getChildColumns(
                 (record) => {
                   setSelectedProfit(record)
