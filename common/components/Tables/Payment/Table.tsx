@@ -224,6 +224,16 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const isDomainAdmin = currUserRoles.includes(Roles.DOMAIN_ADMIN)
   const isUser = currUserRoles.includes(Roles.USER)
   const { token } = theme.useToken()
+  const isSingleCompanyByData = useMemo(() => {
+    const list = payments?.data || []
+    if (list.length <= 1) return false
+    const unique = new Set(
+      list.map((p) =>
+        typeof p.company === 'object' ? p.company.companyName : p.company
+      )
+    )
+    return unique.size === 1
+  }, [payments?.data])
   const allColumns: ColumnsType<IExtendedPayment> = useMemo(() => {
     return [
       {
@@ -296,7 +306,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           }
           return companyLabel
         },
-        hidden: payments?.realEstatesFilter?.length <= 1,
+        hidden: isSingleCompanyByData,
       },
       {
         title: 'Дата створення',
@@ -551,6 +561,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     onViewClick,
     onEditClick,
     currUserRoles,
+    isSingleCompanyByData,
   ])
 
   const visibleColumns = (allColumns as ColumnType<IExtendedPayment>[]).filter(

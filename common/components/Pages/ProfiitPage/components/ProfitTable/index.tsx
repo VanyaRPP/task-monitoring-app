@@ -164,6 +164,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
       </Space>
 
       <Table
+        bordered={true}
         loading={isLoading}
         columns={parentColumns}
         dataSource={dataSource}
@@ -189,6 +190,7 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
         expandable={{
           expandedRowRender: (record) => (
             <Table
+              bordered={true}
               columns={getChildColumns(
                 (record) => {
                   setSelectedProfit(record)
