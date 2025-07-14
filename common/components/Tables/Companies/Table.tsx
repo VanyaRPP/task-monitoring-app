@@ -5,7 +5,7 @@ import {
   QuestionCircleOutlined,
   InboxOutlined,
   MoreOutlined,
-  InfoCircleOutlined
+  InfoCircleOutlined,
 } from '@ant-design/icons'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import {
@@ -30,7 +30,7 @@ import {
   Tooltip,
   Dropdown,
   Switch,
-  Badge
+  Badge,
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
@@ -77,11 +77,11 @@ export interface Props {
 
 const getDebtorTooltipColor = (debtor) => {
   if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
-    return 'gray';
+    return 'gray'
   } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
-    return 'yellow';
+    return 'yellow'
   } else if (debtor.totalDebt >= 20000) {
-    return 'red';
+    return 'red'
   }
 }
 
@@ -138,8 +138,10 @@ const CompaniesTable: React.FC<Props> = ({
   )
   const debtorCompanies = data?.companies
 
-  const [deleteRealEstate, { isLoading: deleteLoading }] = useDeleteRealEstateMutation()
-  const [updateArchivedItem, { isLoading: archiveLoading }] = useUpdateArchivedItemMutation()
+  const [deleteRealEstate, { isLoading: deleteLoading }] =
+    useDeleteRealEstateMutation()
+  const [updateArchivedItem, { isLoading: archiveLoading }] =
+    useUpdateArchivedItemMutation()
 
   const handleDelete = async (id: string) => {
     const response = await deleteRealEstate(id)
@@ -175,7 +177,9 @@ const CompaniesTable: React.FC<Props> = ({
 
   const isSingleCompanyByData = useMemo(() => {
     if (!realEstates?.data || realEstates.data.length === 0) return false
-    const uniqueCompanies = new Set(realEstates.data.map((item) => item.companyName))
+    const uniqueCompanies = new Set(
+      realEstates.data.map((item) => item.companyName)
+    )
     return uniqueCompanies.size === 1
   }, [realEstates?.data])
 
@@ -191,7 +195,7 @@ const CompaniesTable: React.FC<Props> = ({
           showSizeChanger: true,
           pageSizeOptions: [10, 20, 50],
           position: ['bottomCenter'],
-          showTotal: () => (
+          showTotal: () =>
             !isUser && (
               <Switch
                 checkedChildren="Боржники"
@@ -199,15 +203,16 @@ const CompaniesTable: React.FC<Props> = ({
                 onChange={(checked) => {
                   if (checked) {
                     setFilters((prev) => ({
-                      company: debtorCompanies?.map((company) => company.companyId),
+                      company: debtorCompanies?.map(
+                        (company) => company.companyId
+                      ),
                     }))
                   } else {
                     setFilters(undefined)
                   }
                 }}
               />
-            )
-          ),
+            ),
         }
       }
       loading={isLoading}
@@ -230,28 +235,25 @@ const CompaniesTable: React.FC<Props> = ({
         setRealEstateActions,
         debtorCompanies,
         isUser,
-        isSingleCompanyByData, 
-        
+        isSingleCompanyByData,
       })}
       dataSource={realEstates?.data}
       scroll={{ x: tableWidth }}
       onChange={(__, filters) => {
-      const newFilters: any = {
-      domain: filters?.domain,
-      street: filters?.street,
-    }
+        const newFilters: any = {
+          domain: filters?.domain,
+          street: filters?.street,
+        }
 
+        if (!isSingleCompanyByData) {
+          newFilters.company = filters?.companyName
+        }
 
-      if (!isSingleCompanyByData) {
-        newFilters.company = filters?.companyName
-      }
-
-      setFilters(newFilters)
-    }}
-
-        />
-      )
-    }
+        setFilters(newFilters)
+      }}
+    />
+  )
+}
 
 const renderTooltip = (text: string) => {
   return (
@@ -280,7 +282,7 @@ const getDefaultColumns = ({
   setRealEstateActions,
   debtorCompanies,
   isSingleCompanyByData,
-  isUser
+  isUser,
 }: {
   domainId?: string
   streetId?: string
@@ -393,7 +395,7 @@ const getDefaultColumns = ({
       fixed: 'right',
       align: 'center',
       title: '',
-      width: 40,
+      width: 80,
       render: (_, realEstate: IExtendedRealestate) => (
         <Button
           icon={<EyeOutlined />}
@@ -519,19 +521,23 @@ const getDefaultColumns = ({
     width: 200,
     filterSearch: true,
     render: (i) => {
-      const debtor = debtorCompanies?.find(companie => companie?.companyName === i)
+      const debtor = debtorCompanies?.find(
+        (companie) => companie?.companyName === i
+      )
       return !isUser && debtor ? (
         <Badge
           count={debtor.totalDebt.toFixed(2)}
           title=""
           color={getDebtorTooltipColor(debtor)}
-          overflowCount={Infinity}  
-          style={{ cursor: "pointer" }}
-          size='small'
+          overflowCount={Infinity}
+          style={{ cursor: 'pointer' }}
+          size="small"
         >
           <span>{i}</span>
         </Badge>
-      ) : i
+      ) : (
+        i
+      )
     },
   }
 
@@ -548,26 +554,28 @@ const getDefaultColumns = ({
   }
 
   if (isAdmin) {
-  if (!isSingleCompanyByData) {
-    companyColumn.filters =
-      pathname === AppRoutes.REAL_ESTATE ? realEstatesFilter : null
-    companyColumn.filteredValue = filters?.company || null
+    if (!isSingleCompanyByData) {
+      companyColumn.filters =
+        pathname === AppRoutes.REAL_ESTATE ? realEstatesFilter : null
+      companyColumn.filteredValue = filters?.company || null
+    }
+
+    domainColumn.filters =
+      pathname === AppRoutes.REAL_ESTATE ? domainsFilter : null
+    domainColumn.filteredValue = filters?.domain || null
+
+    streetColumn.filters =
+      pathname === AppRoutes.REAL_ESTATE ? streetsFilter : null
+    streetColumn.filteredValue = filters?.street || null
   }
-
-  domainColumn.filters =
-    pathname === AppRoutes.REAL_ESTATE ? domainsFilter : null
-  domainColumn.filteredValue = filters?.domain || null
-
-  streetColumn.filters =
-    pathname === AppRoutes.REAL_ESTATE ? streetsFilter : null
-  streetColumn.filteredValue = filters?.street || null
-}
 
   columns.unshift(streetColumn)
 
   columns.unshift(domainColumn)
 
-  if (!isSingleCompanyByData) {columns.unshift(companyColumn)}
+  if (!isSingleCompanyByData) {
+    columns.unshift(companyColumn)
+  }
 
   return columns
 }

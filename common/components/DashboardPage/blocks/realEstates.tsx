@@ -53,8 +53,10 @@ const RealEstateBlock: React.FC<Props> = ({
 
   const isSingleCompanyByDomain = (() => {
     if (!domain || !realEstates?.data?.length) return false
-    const domainScoped = realEstates.data.filter(r => r.domain?._id === domain)
-    const uniqueCompanies = new Set(domainScoped.map(r => r.companyName))
+    const domainScoped = realEstates.data.filter(
+      (r) => r.domain?._id === domain
+    )
+    const uniqueCompanies = new Set(domainScoped.map((r) => r.companyName))
     return uniqueCompanies.size === 1
   })()
 

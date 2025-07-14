@@ -19,8 +19,8 @@ jest.mock('@utils/getCurrentUser', () => ({
 
 setupTestEnvironment()
 
-let realDomainId = domains[0]._id
-let realDomainIdArray = [domains[0]._id, domains[1]._id]
+const realDomainId = domains[0]._id
+const realDomainIdArray = [domains[0]._id, domains[1]._id]
 
 describe('Deptors API - GET', () => {
   it('should NOT load when domainId = 0', async () => {
@@ -70,7 +70,7 @@ describe('Deptors API - GET', () => {
   })
 
   it('should load when domainId = realDomainId', async () => {
-    await mockLoginAs(users.domainAdmin2);
+    await mockLoginAs(users.domainAdmin2)
     ;(getCurrentUser as jest.Mock).mockResolvedValue({
       isUser: false,
       isDomainAdmin: true,
@@ -80,7 +80,7 @@ describe('Deptors API - GET', () => {
         email: users.domainAdmin2.email,
         roles: [Roles.DOMAIN_ADMIN],
       },
-    });
+    })
     ;(Payment.find as jest.Mock).mockResolvedValue([
       {
         _id: 'payment1',
@@ -96,24 +96,24 @@ describe('Deptors API - GET', () => {
         generalSum: 50,
         monthService: 'service1',
       },
-    ]);
+    ])
     ;(RealEstate.find as jest.Mock).mockResolvedValue([
       {
         _id: 'company1',
         companyName: 'Test Company',
         domain: realDomainId,
       },
-    ]);
+    ])
     const mockReq = {
       method: 'GET',
       query: { domainIds: [realDomainId] },
-    } as any;
+    } as any
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-    } as any;
-    await handler(mockReq, mockRes);
-    expect(mockRes.status).toHaveBeenCalledWith(200);
+    } as any
+    await handler(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
     expect(mockRes.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: true,
@@ -125,11 +125,11 @@ describe('Deptors API - GET', () => {
           }),
         ]),
       })
-    );
-  });
+    )
+  })
 
   it('should load when domainId = realDomainIdArray', async () => {
-    await mockLoginAs(users.domainAdmin);
+    await mockLoginAs(users.domainAdmin)
     ;(getCurrentUser as jest.Mock).mockResolvedValue({
       isUser: false,
       isDomainAdmin: true,
@@ -139,7 +139,7 @@ describe('Deptors API - GET', () => {
         email: users.domainAdmin.email,
         roles: [Roles.DOMAIN_ADMIN],
       },
-    });
+    })
     ;(Payment.find as jest.Mock).mockResolvedValue([
       {
         _id: 'payment1',
@@ -155,24 +155,24 @@ describe('Deptors API - GET', () => {
         generalSum: 50,
         monthService: 'service1',
       },
-    ]);
+    ])
     ;(RealEstate.find as jest.Mock).mockResolvedValue([
       {
         _id: 'company1',
         companyName: 'Test Company',
         domain: realDomainIdArray[0],
       },
-    ]);
+    ])
     const mockReq = {
       method: 'GET',
       query: { domainIds: realDomainIdArray },
-    } as any;
+    } as any
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-    } as any;
-    await handler(mockReq, mockRes);
-    expect(mockRes.status).toHaveBeenCalledWith(200);
+    } as any
+    await handler(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
     expect(mockRes.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: true,
@@ -184,11 +184,11 @@ describe('Deptors API - GET', () => {
           }),
         ]),
       })
-    );
-  });
+    )
+  })
 
   it('should NOT load when domainId = realDomainId as User', async () => {
-    await mockLoginAs(users.user);
+    await mockLoginAs(users.user)
     ;(getCurrentUser as jest.Mock).mockResolvedValue({
       isUser: true,
       isDomainAdmin: false,
@@ -198,28 +198,28 @@ describe('Deptors API - GET', () => {
         email: users.user.email,
         roles: [Roles.USER],
       },
-    });
+    })
     const mockReq = {
       method: 'GET',
       query: { domainIds: [realDomainId] },
-    } as any;
+    } as any
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-    } as any;
-    await handler(mockReq, mockRes);
-    expect(mockRes.status).toHaveBeenCalledWith(401);
+    } as any
+    await handler(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(401)
     expect(mockRes.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: false,
         message: 'Unauthorized',
       })
-    );
-  });
+    )
+  })
 
   it('should load when domainId = realDomainId as DomainAdmin', async () => {
-    await mockLoginAs(users.domainAdmin2);
-    (getCurrentUser as jest.Mock).mockResolvedValue({
+    await mockLoginAs(users.domainAdmin2)
+    ;(getCurrentUser as jest.Mock).mockResolvedValue({
       isUser: false,
       isDomainAdmin: true,
       isGlobalAdmin: false,
@@ -277,7 +277,7 @@ describe('Deptors API - GET', () => {
   })
 
   it('should load when domainId = realDomainId as GlobalAdmin', async () => {
-    await mockLoginAs(users.globalAdmin);
+    await mockLoginAs(users.globalAdmin)
     ;(getCurrentUser as jest.Mock).mockResolvedValue({
       isUser: false,
       isDomainAdmin: false,
@@ -287,7 +287,7 @@ describe('Deptors API - GET', () => {
         email: users.globalAdmin.email,
         roles: [Roles.GLOBAL_ADMIN],
       },
-    });
+    })
     ;(Payment.find as jest.Mock).mockResolvedValue([
       {
         _id: 'payment1',
@@ -303,24 +303,24 @@ describe('Deptors API - GET', () => {
         generalSum: 50,
         monthService: 'service1',
       },
-    ]);
+    ])
     ;(RealEstate.find as jest.Mock).mockResolvedValue([
       {
         _id: 'company1',
         companyName: 'Test Company',
         domain: realDomainId,
       },
-    ]);
+    ])
     const mockReq = {
       method: 'GET',
       query: { domainIds: [realDomainId] },
-    } as any;
+    } as any
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-    } as any;
-    await handler(mockReq, mockRes);
-    expect(mockRes.status).toHaveBeenCalledWith(200);
+    } as any
+    await handler(mockReq, mockRes)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
     expect(mockRes.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: true,
@@ -332,8 +332,8 @@ describe('Deptors API - GET', () => {
           }),
         ]),
       })
-    );
-  });
+    )
+  })
 
   it('should NOT load when domainId = realDomainIdArray as User', async () => {
     await mockLoginAs(users.user)
@@ -349,7 +349,7 @@ describe('Deptors API - GET', () => {
     })
     const mockReq = {
       method: 'GET',
-      query: { domainIds: realDomainIdArray }, 
+      query: { domainIds: realDomainIdArray },
     } as any
     const mockRes = {
       status: jest.fn().mockReturnThis(),
@@ -366,8 +366,8 @@ describe('Deptors API - GET', () => {
   })
 
   it('should load when domainId = realDomainIdArray as DomainAdmin', async () => {
-    await mockLoginAs(users.domainAdmin2);
-    (getCurrentUser as jest.Mock).mockResolvedValue({
+    await mockLoginAs(users.domainAdmin2)
+    ;(getCurrentUser as jest.Mock).mockResolvedValue({
       isUser: false,
       isDomainAdmin: true,
       isGlobalAdmin: false,

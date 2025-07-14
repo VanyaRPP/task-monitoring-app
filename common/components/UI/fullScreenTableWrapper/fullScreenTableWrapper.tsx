@@ -1,11 +1,11 @@
-import { addButton, removeButton } from '@modules/store/floatButtonSlice'
 import { useFullScreenFloatButton } from '@modules/hooks/useFloatButton'
-import { useDispatch } from 'react-redux'
+import { addButton, removeButton } from '@modules/store/floatButtonSlice'
 import React, { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
 
-import styles from './styled.module.scss'
 import { FullscreenExitOutlined, FullscreenOutlined } from '@ant-design/icons'
 import { Button } from 'antd'
+import styles from './styled.module.scss'
 
 interface FullScreenWrapperProps {
   children: React.ReactNode
@@ -26,6 +26,32 @@ const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({
       dispatch(removeButton(floatButton.key))
     }
   }, [dispatch, floatButton])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFullScreen) {
+        toggleFullScreen?.()
+      }
+    }
+
+    const handlePopState = () => {
+      if (isFullScreen) {
+        toggleFullScreen?.()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('popstate', handlePopState)
+
+    if (isFullScreen) {
+      window.history.pushState({ fullScreen: true }, '')
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('popstate', handlePopState)
+    }
+  }, [isFullScreen, toggleFullScreen])
 
   return (
     <>

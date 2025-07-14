@@ -23,15 +23,28 @@ const customOptions = [
   {
     label: 'Рік',
     value: 'year',
-    children: cascaderYears.map((year) => ({
-      label: year,
-      value: year,
-      children: [
-        { label: 'Увесь рік', value: 'year' },
-        { label: 'Місяць', value: 'month', children: cascaderMonths },
-        { label: 'Квартал', value: 'quarter', children: cascaderQuarters },
-      ],
-    })),
+    children: [...cascaderYears].reverse().map((year) => {
+      return {
+        label: year,
+        value: year,
+        children: [
+          {
+            label: 'Увесь рік',
+            value: 'year',
+          },
+          {
+            label: 'Місяць',
+            value: 'month',
+            children: cascaderMonths,
+          },
+          {
+            label: 'Квартал',
+            value: 'quarter',
+            children: cascaderQuarters,
+          },
+        ],
+      }
+    }),
   },
 ]
 

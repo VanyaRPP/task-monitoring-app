@@ -83,10 +83,10 @@ const GroupedReceiptForm: FC<Props> = ({
           </div>
         </div>
         <div className={s.tableSum}>
-          <GroupedPricesTable 
-            preview 
-            domainId={newData.domain._id}
-            invoices={newData.invoice}  
+          <GroupedPricesTable
+            preview
+            domainId={newData?.domain?._id ?? newData?.domain}
+            invoices={newData.invoice}
           />
         </div>
         <div className={s.payTable}>
@@ -112,7 +112,7 @@ const GroupedReceiptForm: FC<Props> = ({
           </div>
         </div>
 
-        <div className={s.endInfo}>
+        {/* <div className={s.endInfo}>
           <div className={s.endInfobolt}>Примітка:</div>
           *Ціна за комунальні послуги вказана з урахуванням ПДВ.
           <br />
@@ -120,7 +120,7 @@ const GroupedReceiptForm: FC<Props> = ({
           відповідно їх ціна може <br />
           змінюватись у будь-який час в односторонньму порядку
           компанією-постачальником.
-        </div>
+        </div> */}
       </div>
     </>
   )

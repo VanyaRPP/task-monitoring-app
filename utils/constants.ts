@@ -2,6 +2,7 @@ export enum AppRoutes {
   INDEX = '/',
   DASHBOARD = '/dashboard',
   PROFILE = '/profile',
+  SETTINGS = '/settings',
   TASK = '/task',
   AUTH = '/auth',
   AUTH_SIGN_IN = '/auth/signin',
@@ -132,7 +133,7 @@ export const cascaderYears = (() => {
   const startYear = 2021
   const years: string[] = []
 
-  for (let year = startYear; year <= currentYear + 1; year++) {
+  for (let year = startYear; year <= currentYear; year++) {
     years.push(year.toString())
   }
 
@@ -156,6 +157,18 @@ export const cascaderQuarters = [
     label: `IV квартал`,
     value: '4',
   },
+]
+
+export const defaultServices = [
+  '677d414283b6ef93c6b8ea2c',
+  '68156d2cf520914e5e1ad87c',
+  '68156cdbf520914e5e1ad877',
+  '6816bca1e26e39a785fd7a0d',
+  '68156d58f520914e5e1ad881',
+  '677d434c83b6ef93c6b8ea3a',
+  '68230f76a51fddf0ae165d77',
+  '682dd48d9665126611c81950',
+  '677d412483b6ef93c6b8e9fa'
 ]
 
 export const cascaderMonths = [

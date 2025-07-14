@@ -60,7 +60,9 @@ describe('Profit Payment API - GET', () => {
       isAdmin: false,
       user: { email: 'admin@example.com' },
     })
-    ;(Domain.find as jest.Mock).mockResolvedValue([{ _id: '66fff715e02a727351b1f403' }])
+    ;(Domain.find as jest.Mock).mockResolvedValue([
+      { _id: '66fff715e02a727351b1f403' },
+    ])
     ;(Payment.find as jest.Mock).mockResolvedValue([
       {
         invoiceCreationDate: new Date('2024-03-15'),
@@ -83,33 +85,34 @@ describe('Profit Payment API - GET', () => {
         type: 'debit',
       },
     ])
-  
     ;(Credit.find as jest.Mock).mockResolvedValue([
       {
         _id: '66fff715e02a727351b1f404',
-        domain: '66fff715e02a727351b1f403', 
-        date: new Date('2024-06-15'), 
+        domain: '66fff715e02a727351b1f403',
+        date: new Date('2024-06-15'),
         sum: 50000,
       },
     ])
-  
+
     const req = { method: 'GET', query: {} } as NextApiRequest
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
     } as unknown as NextApiResponse
-  
+
     await handler(req, res)
-  
+
     const response = (res.json as jest.Mock).mock.calls[0][0]
-  
+
     const currentDate = dayjs()
     response.data.forEach((entry: any) => {
       const entryDate = dayjs(entry.month, 'YYYY-MM')
-      expect(entryDate.isSameOrAfter(currentDate.subtract(12, 'month'))).toBe(true)
+      expect(entryDate.isSameOrAfter(currentDate.subtract(12, 'month'))).toBe(
+        true
+      )
       expect(entryDate.isSameOrBefore(currentDate)).toBe(true)
     })
-  
+
     expect(response.success).toBe(true)
     expect(response.data).toEqual([
       {
@@ -134,7 +137,6 @@ describe('Profit Payment API - GET', () => {
       },
     ])
   })
-  
 
   it('should return 200 with "not allowed" message if user is not an admin', async () => {
     ;(getCurrentUser as jest.Mock).mockResolvedValue({
@@ -215,5 +217,4 @@ describe('Profit Payment API - GET', () => {
     expect(response.success).toBe(false)
     expect(response.message).toEqual('Database error')
   })
-
 })

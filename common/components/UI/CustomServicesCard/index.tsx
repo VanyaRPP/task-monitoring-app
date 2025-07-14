@@ -16,11 +16,17 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
   form,
   disabled = false,
   allCustomServices = [],
-  isServiceForm = false
+  isServiceForm = false,
 }) => {
   const { data: user } = useGetCurrentUserQuery()
-  const isDomainAdmin = useMemo(() => user?.roles?.includes(Roles.DOMAIN_ADMIN), [user])
-  const isGlobalAdmin = useMemo(() => user?.roles?.includes(Roles.GLOBAL_ADMIN), [user])
+  const isDomainAdmin = useMemo(
+    () => user?.roles?.includes(Roles.DOMAIN_ADMIN),
+    [user]
+  )
+  const isGlobalAdmin = useMemo(
+    () => user?.roles?.includes(Roles.GLOBAL_ADMIN),
+    [user]
+  )
 
   const customServices = Form.useWatch('customServices', form) || []
 
@@ -48,28 +54,26 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
 
   return (
     <div>
-      { !disabled && !isServiceForm &&
-      <Dropdown
-        overlay={
-          <Menu
-            items={dropdownOptions.map((option) => ({
-              key: option.value,
-              label: option.label,
-              onClick: () => handleAddService(option),
-            }))}
-          />
-        }
-        trigger={['click']}
-      >
-        <Button
-          style={{ width: '100%', height: 40, marginBottom: 16 }}
-          type="dashed"
-          icon={<PlusOutlined />}
+      {!disabled && !isServiceForm && (
+        <Dropdown
+            menu={{
+              items: dropdownOptions.map((option) => ({
+                key: option.value,
+                label: option.label,
+                onClick: () => handleAddService(option),
+              })),
+            }}
+          trigger={['click']}
         >
-          Індивідуальні послуги
-        </Button>
-      </Dropdown>
-      }
+          <Button
+            style={{ width: '100%', height: 40, marginBottom: 16 }}
+            type="dashed"
+            icon={<PlusOutlined />}
+          >
+            Індивідуальні послуги
+          </Button>
+        </Dropdown>
+      )}
 
       <Form.List name="customServices">
         {(fields) => (
@@ -94,12 +98,18 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
                       disabled={disabled}
                     />
                   </Form.Item>
-                  {!disabled && (isDomainAdmin || isGlobalAdmin) && !isServiceForm && (
-                    <CloseOutlined
-                      onClick={() => handleRemoveService(index)}
-                      style={{ marginTop: 6, fontSize: 18, cursor: 'pointer' }}
-                    />
-                  )}
+                  {!disabled &&
+                    (isDomainAdmin || isGlobalAdmin) &&
+                    !isServiceForm && (
+                      <Button
+                        type="text"
+                        icon={<CloseOutlined />}
+                        aria-label={`remove-${service?.label}`}
+                        data-testid={`remove-${service?.label}`}
+                        onClick={() => handleRemoveService(index)}
+                        style={{ marginTop: 6 }}
+                      />   
+                    )}
                 </Space>
               )
             })}

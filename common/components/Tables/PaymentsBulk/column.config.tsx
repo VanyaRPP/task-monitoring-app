@@ -73,7 +73,9 @@ export const getDefaultColumns = (
     render: (_, { name }: { name: number }) => <InflicionSum name={name} />,
   },
   {
-    title: losses ? `Електропостачання + Втрати ${losses}%` : 'Електропостачання',
+    title: losses
+      ? `Електропостачання + Втрати ${losses}%`
+      : 'Електропостачання',
     children: [
       {
         title: 'Стара',
@@ -291,7 +293,12 @@ const LossElectricitySum: React.FC<{ name: number }> = ({ name }) => {
     <Space>
       {service?.losses && (
         <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
-          {((amount - lastAmount) + ((amount - lastAmount) * (service?.losses/100))).toFixed(2)} кВт
+          {(
+            amount -
+            lastAmount +
+            (amount - lastAmount) * (service?.losses / 100)
+          ).toFixed(2)}{' '}
+          кВт
         </Typography.Text>
       )}
     </Space>
@@ -315,7 +322,7 @@ const LossElectricityPrice: React.FC<{ name: number }> = ({ name }) => {
     <Space>
       {service?.losses && (
         <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
-          {(amount - lastAmount)} + ({service?.losses}%)
+          {amount - lastAmount} + ({service?.losses}%)
         </Typography.Text>
       )}
     </Space>
@@ -554,14 +561,18 @@ const ElectricitySum: React.FC<{ name: number }> = ({ name }) => {
       form
     ) ?? 0
   const costAmount = amount - lastAmount
-  const loss = costAmount + (costAmount * (service?.losses/100))
+  const loss = costAmount + costAmount * (service?.losses / 100)
 
   useEffect(() => {
+    const price = service?.electricityPrice ?? 0
+    const sum =
+      service?.losses > 0
+        ? +toRoundFixed(loss * +price.toFixed(2))
+        : +toRoundFixed((+amount - +lastAmount) * price)
+
     form.setFieldValue(
       ['payments', name, 'invoice', ServiceType.Electricity, 'sum'],
-      service?.losses > 0 
-      ? +toRoundFixed(loss * (+service?.electricityPrice.toFixed(2) ?? 0))
-      : +toRoundFixed((+amount - +lastAmount) * (+service?.electricityPrice ?? 0))
+      sum
     )
   }, [form, name, amount, lastAmount, service])
 
@@ -633,14 +644,17 @@ const WaterSum: React.FC<{ name: number }> = ({ name }) => {
   const waterPart: number =
     Form.useWatch(['payments', name, 'company', 'waterPart'], form) ?? 0
 
-  useEffect(() => {
-    if (!waterPart) {
-      form.setFieldValue(
-        ['payments', name, 'invoice', ServiceType.Water, 'sum'],
-        +toRoundFixed((+amount - +lastAmount) * (+service?.waterPrice ?? 0))
-      )
-    }
-  }, [form, name, amount, lastAmount, service, waterPart])
+    useEffect(() => {
+      if (!waterPart) {
+        const price = service?.waterPrice ?? 0
+        const sum = +toRoundFixed((+amount - +lastAmount) * price)
+
+        form.setFieldValue(
+          ['payments', name, 'invoice', ServiceType.Water, 'sum'],
+          sum
+        )
+      }
+    }, [form, name, amount, lastAmount, service, waterPart])
 
   if (!waterPart) {
     return (
@@ -699,14 +713,15 @@ const WaterPartSum: React.FC<{ name: number }> = ({ name }) => {
       form
     ) ?? 0
 
-  useEffect(() => {
-    if (waterPart) {
-      form.setFieldValue(
-        ['payments', name, 'invoice', ServiceType.WaterPart, 'sum'],
-        +toRoundFixed(price) ?? 0
-      )
-    }
-  }, [form, name, price, waterPart])
+    useEffect(() => {
+      if (waterPart) {
+        const sum = +toRoundFixed(price ?? 0)
+        form.setFieldValue(
+          ['payments', name, 'invoice', ServiceType.WaterPart, 'sum'],
+          sum
+        )
+      }
+    }, [form, name, price, waterPart])
 
   if (waterPart) {
     return (
@@ -767,14 +782,15 @@ const GarbageCollectorSum: React.FC<{ name: number }> = ({ name }) => {
       form
     ) ?? 0
 
-  useEffect(() => {
-    if (garbageCollector) {
-      form.setFieldValue(
-        ['payments', name, 'invoice', ServiceType.GarbageCollector, 'sum'],
-        +toRoundFixed(price) ?? 0
-      )
-    }
-  }, [form, name, price, garbageCollector])
+    useEffect(() => {
+      if (garbageCollector) {
+        const sum = +toRoundFixed(price ?? 0)
+        form.setFieldValue(
+          ['payments', name, 'invoice', ServiceType.GarbageCollector, 'sum'],
+          sum
+        )
+      }
+    }, [form, name, price, garbageCollector])
 
   if (garbageCollector) {
     return (
@@ -801,14 +817,15 @@ const Cleaning: React.FC<{ name: number }> = ({ name }) => {
       form
     ) ?? 0
 
-  useEffect(() => {
-    if (cleaning) {
-      form.setFieldValue(
-        ['payments', name, 'invoice', ServiceType.Cleaning, 'sum'],
-        +toRoundFixed(price) ?? 0
-      )
-    }
-  }, [form, name, price, cleaning])
+    useEffect(() => {
+      if (cleaning) {
+        const sum = +toRoundFixed(price ?? 0)
+        form.setFieldValue(
+          ['payments', name, 'invoice', ServiceType.Cleaning, 'sum'],
+          sum
+        )
+      }
+    }, [form, name, price, cleaning])
 
   if (cleaning) {
     return (
@@ -832,12 +849,13 @@ const Discount: React.FC<{ name: number }> = ({ name }) => {
       form
     ) ?? 0
 
-  useEffect(() => {
-    form.setFieldValue(
-      ['payments', name, 'invoice', ServiceType.Discount, 'sum'],
-      +toRoundFixed(price) ?? 0
-    )
-  }, [form, name, price])
+    useEffect(() => {
+      const sum = +toRoundFixed(price ?? 0)
+      form.setFieldValue(
+        ['payments', name, 'invoice', ServiceType.Discount, 'sum'],
+        sum
+      )
+    }, [form, name, price])
 
   return (
     <Form.Item

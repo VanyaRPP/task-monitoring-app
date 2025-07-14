@@ -1,8 +1,7 @@
 import { validateField } from '@assets/features/validators'
-import { IService } from '@common/api/serviceApi/service.api.types'
-import AddressesSelect from '@components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
-import { usePreviousMonthService } from '@modules/hooks/useService'
+import { Profit } from '@common/api/profitsApi/profits.type'
+import { inputNumberParser } from '@utils/helpers'
 import {
   ConfigProvider,
   DatePicker,
@@ -14,48 +13,130 @@ import {
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
-import { useEffect } from 'react'
+import { useTranslation } from 'next-i18next'
 import s from './style.module.scss'
-import { inputNumberParser } from '@utils/helpers'
+import { formatDateWithGenitiveMonthCapitalized } from '@utils/helpers' 
 
 dayjs.locale('uk')
 
 interface Props {
   form: FormInstance<any>
+  type: string
+  disabled?: boolean
+  currentProfit?: Profit 
 }
 
-const AddCostForm: React.FC<Props> = ({ form }) => {
-  const { MonthPicker } = DatePicker
-
+const AddCostForm: React.FC<Props> = ({ form, type, disabled, currentProfit }) => {
+  const { t } = useTranslation()
+  const isPreview = !!disabled
+  const isDebit = currentProfit?.type === 'debit'
+  const isCredit = currentProfit?.type === 'credit'
   return (
     <ConfigProvider locale={ukUA}>
       <Form form={form} layout="vertical" className={s.Form}>
-        <DomainsSelect form={form} />
+        {isPreview && (
+          <div className={s.createdByWrapper}>
+            {currentProfit?.createdBy ? (
+              <Form.Item label={t('profitPage:form.createdBy')}>
+                <div>
+                  <span className={s.createdByName}>
+                    {currentProfit.createdBy.name}
+                  </span>
+                  <br />
+                  <span className={s.createdByEmail}>
+                    {currentProfit.createdBy.email}
+                  </span>
+                </div>
+              </Form.Item>
+            ) : (
+              <Form.Item
+                style={{ marginBottom: 2 }}
+                label={
+                  <>
+                    {t('profitPage:form.createdBy')}
+                    <span className={s.createdByNameAutomatic}>
+                      {t('profitPage:form.automatic')}
+                    </span>
+                  </>
+                }
+              />
+            )}
+          </div>
+        )}
+
+        <DomainsSelect
+          form={form}
+          disabled={isPreview}
+          currentProfit={currentProfit}
+        />
+
         <Form.Item
           name="date"
-          label="Місяць та рік"
-          rules={validateField('required')}
+          label={t('profitPage:form.date')}
+          rules={!disabled && !currentProfit ? validateField('required') : []}
         >
-          <MonthPicker
-            format="MMMM YYYY"
-            placeholder="Оберіть місяць"
+          <DatePicker
+            format={(date) =>
+              date ? formatDateWithGenitiveMonthCapitalized(date) : ''
+            }
+            placeholder={t('profitPage:form.datePlaceholder', { ns: 'common' })}
             className={s.formInput}
+            disabled={isPreview}
           />
         </Form.Item>
-        <Form.Item name="sum" label="Сума" rules={validateField('required')}>
-          <InputNumber
-            parser={inputNumberParser}
-            placeholder="Вкажіть значення"
-            className={s.formInput}
-          />
-        </Form.Item>
-        <Form.Item name="description" label="Опис">
+        {isPreview ? (
+          <Form.Item
+            name="sum"
+            label={
+              isDebit
+                ? t('profitPage:form.amountDebit')
+                : isCredit
+                ? t('profitPage:form.amountCredit')
+                : t('profitPage:form.amount')
+            }
+          >
+            <Input
+              value={currentProfit?.amount}
+              disabled
+              className={s.formInput}
+            />
+          </Form.Item>
+        ) : (
+          <Form.Item
+            name="sum"
+            label={
+              type === 'debit'
+                ? t('profitPage:form.amountDebit')
+                : t('profitPage:form.amountCredit')
+            }
+            rules={!disabled && !currentProfit ? validateField('required') : []}
+          >
+            <InputNumber
+              parser={inputNumberParser}
+              placeholder={t('profitPage:form.amountPlaceholder')}
+              className={s.formInput}
+              disabled={disabled}
+            />
+          </Form.Item>
+        )}
+
+        <Form.Item name="description" label={t('profitPage:form.description')}>
           <Input.TextArea
-            placeholder="Введіть опис"
+            placeholder={t('profitPage:form.descriptionPlaceholder')}
             maxLength={256}
             className={s.formInput}
+            disabled={disabled}
           />
         </Form.Item>
+        {isPreview && (
+          <Form.Item name="categories" label={t('profitPage:form.category')}>
+            <Input
+              value={currentProfit?.categories?.join(', ')}
+              disabled
+              className={s.formInput}
+            />
+          </Form.Item>
+        )}
       </Form>
     </ConfigProvider>
   )

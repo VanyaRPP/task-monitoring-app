@@ -68,7 +68,7 @@ const getColumnSearchProps = (dataIndex: keyof ITransaction) => ({
       ? record[dataIndex].toString().toLowerCase()
       : ''
     return fieldValue.includes(value.toLowerCase())
-  }
+  },
 })
 
 const getDateColumnProps = (dataIndex: keyof ITransaction) => ({
@@ -313,9 +313,11 @@ export const generateColumns = (
         <TransactionDrawer transaction={record} domain={domain} />
       ),
     },
-  ]
-  .filter((column) => typeof column.key === 'string' && visibleColumns.includes(column.key as string))
-
+  ].filter(
+    (column) =>
+      typeof column.key === 'string' &&
+      visibleColumns.includes(column.key as string)
+  )
 
   return columns
 }

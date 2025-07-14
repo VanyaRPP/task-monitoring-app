@@ -1,5 +1,9 @@
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
-import { useDeleteFeatureFlagMutation, useGetFeatureFlagsQuery, useUpdateFeatureFlagMutation } from '@common/api/featureFlagsApi/featureFlag.api'
+import {
+  useDeleteFeatureFlagMutation,
+  useGetFeatureFlagsQuery,
+  useUpdateFeatureFlagMutation,
+} from '@common/api/featureFlagsApi/featureFlag.api'
 import { IFeatureFlag } from '@common/api/featureFlagsApi/featureFlag.api.types'
 import { Button, message, Space, Switch, Table } from 'antd'
 import { useState } from 'react'
@@ -37,6 +41,9 @@ export const FeatureFlagsTable: React.FC = () => {
         rowKey="_id"
         dataSource={data}
         loading={isLoading}
+        pagination={{
+          position: ['bottomCenter'],
+          }}
         columns={[
           {
             title: 'Назва',

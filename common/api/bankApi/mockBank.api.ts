@@ -1,38 +1,38 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 interface IBalance {
-  acc: string;
-  currency: string;
-  balanceIn: string;
-  balanceInEq: string;
-  balanceOut: string;
-  balanceOutEq: string; 
-  turnoverDebt: string;
-  turnoverDebtEq: string;
-  turnoverCred: string;
-  turnoverCredEq: string;
-  bgfIBrnm: string;
-  brnm: string;
-  dpd: string;
-  nameACC: string;
-  state: string;
-  atp: string;
-  flmn: string;
-  date_open_acc_reg: string;
-  date_open_acc_sys: string;
-  date_close_acc: string;
-  is_final_bal: boolean;
+  acc: string
+  currency: string
+  balanceIn: string
+  balanceInEq: string
+  balanceOut: string
+  balanceOutEq: string
+  turnoverDebt: string
+  turnoverDebtEq: string
+  turnoverCred: string
+  turnoverCredEq: string
+  bgfIBrnm: string
+  brnm: string
+  dpd: string
+  nameACC: string
+  state: string
+  atp: string
+  flmn: string
+  date_open_acc_reg: string
+  date_open_acc_sys: string
+  date_close_acc: string
+  is_final_bal: boolean
 }
 
 interface IBalancesData {
-  exist_next_page: boolean;
-  next_page_id: string;
-  status: string;
-  balances: IBalance[];
+  exist_next_page: boolean
+  next_page_id: string
+  status: string
+  balances: IBalance[]
 }
 
 interface IBankRes<T> {
-  data: T;
+  data: T
 }
 
 const mockBalances: IBankRes<IBalancesData> = {
@@ -66,48 +66,48 @@ const mockBalances: IBankRes<IBalancesData> = {
       },
     ],
   },
-};
+}
 
 export interface ITransaction {
-  AUT_MY_CRF: string; 
-  AUT_MY_MFO: string;
-  AUT_MY_ACC: string;
-  AUT_MY_NAM: string;
-  AUT_MY_MFO_NAME: string;
-  AUT_MY_MFO_CITY: string;
-  AUT_CNTR_CRF: string;
-  AUT_CNTR_MFO: string;
-  AUT_CNTR_ACC: string;
-  AUT_CNTR_NAM: string;
-  AUT_CNTR_MFO_NAME: string;
-  AUT_CNTR_MFO_CITY: string;
-  CCY: string;
-  FL_REAL: string;
-  PR_PR: string;
-  DOC_TYP: string;
-  NUM_DOC: string;
-  DAT_KL: string;
-  DAT_OD: string;
-  OSND: string;
-  SUM: string;
-  SUM_E: string;
-  REF: string;
-  REFN: string;
-  TIM_P: string;
-  DATE_TIME_DAT_OD_TIM_P: string;
-  ID: string;
-  TRANTYPE: string;
-  DLR: string;
-  TECHNICAL_TRANSACTION_ID: string;
-  isMatchingPayment?: boolean;
-  previousCompanyId?: string;
+  AUT_MY_CRF: string
+  AUT_MY_MFO: string
+  AUT_MY_ACC: string
+  AUT_MY_NAM: string
+  AUT_MY_MFO_NAME: string
+  AUT_MY_MFO_CITY: string
+  AUT_CNTR_CRF: string
+  AUT_CNTR_MFO: string
+  AUT_CNTR_ACC: string
+  AUT_CNTR_NAM: string
+  AUT_CNTR_MFO_NAME: string
+  AUT_CNTR_MFO_CITY: string
+  CCY: string
+  FL_REAL: string
+  PR_PR: string
+  DOC_TYP: string
+  NUM_DOC: string
+  DAT_KL: string
+  DAT_OD: string
+  OSND: string
+  SUM: string
+  SUM_E: string
+  REF: string
+  REFN: string
+  TIM_P: string
+  DATE_TIME_DAT_OD_TIM_P: string
+  ID: string
+  TRANTYPE: string
+  DLR: string
+  TECHNICAL_TRANSACTION_ID: string
+  isMatchingPayment?: boolean
+  previousCompanyId?: string
 }
 
 interface ITransactionData {
-  exist_next_page: boolean;
-  next_page_id: string;
-  status: string;
-  transactions: ITransaction[];
+  exist_next_page: boolean
+  next_page_id: string
+  status: string
+  transactions: ITransaction[]
 }
 
 const mockTransactions: IBankRes<ITransactionData> = {
@@ -152,23 +152,27 @@ const mockTransactions: IBankRes<ITransactionData> = {
       },
     ],
   },
-};
-
+}
 
 export const mockBankApi = createApi({
   reducerPath: 'mockBankApi',
-  baseQuery: async () => ({ data: {} }), 
+  baseQuery: async () => ({ data: {} }),
   endpoints: (builder) => ({
-    getBalances: builder.query<IBankRes<IBalancesData>, { token: string } | void>({
-      query: () => '', 
+    getBalances: builder.query<
+      IBankRes<IBalancesData>,
+      { token: string } | void
+    >({
+      query: () => '',
       transformResponse: () => mockBalances,
     }),
-    getTransactions: builder.query<IBankRes<ITransactionData>, { token: string; acc: string }>({
-      query: () => '', 
+    getTransactions: builder.query<
+      IBankRes<ITransactionData>,
+      { token: string; acc: string }
+    >({
+      query: () => '',
       transformResponse: () => mockTransactions,
     }),
   }),
-});
+})
 
-
-export const { useGetBalancesQuery, useGetTransactionsQuery } = mockBankApi;
+export const { useGetBalancesQuery, useGetTransactionsQuery } = mockBankApi

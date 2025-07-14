@@ -16,7 +16,7 @@ export const FloatButtonsLayoutAddon: React.FC<FloatButtonPlacementProps> = ({
   const storedButtons = useAppSelector((state) => state.floatButtons.buttons)
 
   const allButtons = [...buttons, ...storedButtons, themeBtn]
-  
+
   if (allButtons.length > 1) {
     return (
       <FloatButton.Group

@@ -41,17 +41,23 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
 
-  const { company, prevService } = usePaymentContext()
+  const { company, prevService, prevPayment } = usePaymentContext()
 
   const [initialPrice, setInitialPrice] = useState<number | null>(null)
+  const prevPlacingInvoice = useMemo(() => {
+    return prevPayment?.invoice.find(
+      (invoice) => invoice.type === ServiceType.Placing
+    )
+  }, [prevPayment])
 
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
   const rentPrice = useMemo(() => {
-    const { totalArea = 1, pricePerMeter } = company || {}
-    const rentPriceValue = pricePerMeter ?? prevService?.rentPrice ?? 0
-    return totalArea * rentPriceValue
-  }, [company, prevService])
+    return (
+      prevPlacingInvoice?.sum ||
+      company?.totalArea * (company?.pricePerMeter || prevService?.rentPrice)
+    )
+  }, [prevPlacingInvoice, company, prevService])
 
   const inflicion = useMemo(() => {
     return Math.max(prevService?.inflicionPrice - 100, 0)
@@ -59,13 +65,13 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 
   useEffect(() => {
     if (initialPrice === null && price !== undefined) {
-      setInitialPrice(price) // <-- зберігаємо price, а не перераховану формулу!
+      setInitialPrice(price)
     }
   }, [initialPrice, price])
 
   const isInitial = useMemo(() => {
-    return toRoundFixed(price) === toRoundFixed(initialPrice)
-  }, [price, initialPrice])
+    return toRoundFixed(price) === toRoundFixed((rentPrice / 100) * inflicion)
+  }, [price, rentPrice, inflicion])
 
   if (company?.inflicion && prevService?.inflicionPrice) {
     return (
@@ -78,14 +84,12 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
         {!isInitial && editable && (
           <Tooltip title="Відновити початкове значення">
             <Button
-              onClick={() => {
-                if (initialPrice !== null) {
-                  form.setFieldValue(
-                    ['invoice', ...name, 'price'],
-                    initialPrice
-                  )
-                }
-              }}
+              onClick={() =>
+                form.setFieldValue(
+                  ['invoice', ...name, 'price'],
+                  +toRoundFixed((rentPrice / 100) * inflicion)
+                )
+              }
               icon={<ReloadOutlined />}
             />
           </Tooltip>

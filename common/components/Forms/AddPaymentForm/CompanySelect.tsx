@@ -39,18 +39,18 @@ function RealEstateDataFetcher({ domainId, streetId, form, edit, company }) {
       streetId,
     })
 
-    useEffect(() => {
-      if (!edit) {
-        if (companies?.length === 1) {
-          form.setFieldValue('company', companies[0]._id)
-        } else if (companies?.length > 0 && company) {
-          const companyId = typeof company === 'object' ? company._id : company
-          if (form.getFieldValue('company') !== companyId) {
-            form.setFieldValue('company', companyId)
-          }
+  useEffect(() => {
+    if (!edit) {
+      if (companies?.length === 1) {
+        form.setFieldValue('company', companies[0]._id)
+      } else if (companies?.length > 0 && company) {
+        const companyId = typeof company === 'object' ? company._id : company
+        if (form.getFieldValue('company') !== companyId) {
+          form.setFieldValue('company', companyId)
         }
       }
-    }, [companies, company, edit, form])
+    }
+  }, [companies, company, edit, form])
 
   return (
     <Form.Item

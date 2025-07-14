@@ -50,7 +50,7 @@ const CompaniesHeader: React.FC<Props> = ({
   realEstateActions,
   enableRealEstateButton,
   setIsArchive,
-  isSingleCompanyByData
+  isSingleCompanyByData,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -103,13 +103,12 @@ const CompaniesHeader: React.FC<Props> = ({
               setFilters={setFilters}
             />
             {!isSingleCompanyByData && (
-            <CompanyFilterTags
-              collection={realEstateData?.realEstatesFilter}
-              filters={filters}
-              setFilters={setFilters}
-            />
-          )}
-
+              <CompanyFilterTags
+                collection={realEstateData?.realEstatesFilter}
+                filters={filters}
+                setFilters={setFilters}
+              />
+            )}
           </Space>
         )}
       </div>
@@ -132,7 +131,9 @@ const CompaniesHeader: React.FC<Props> = ({
           {(isModalOpen || currentRealEstate) && (
             <RealEstateModal
               closeModal={closeModal}
-              chosenRealEstate={filters?.domain ? { domain: filters?.domain[0] }: null}
+              chosenRealEstate={
+                filters?.domain ? { domain: filters?.domain[0] } : null
+              }
               currentRealEstate={currentRealEstate}
               editable={realEstateActions.edit}
             />

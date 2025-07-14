@@ -10,15 +10,15 @@ export const streetApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
   endpoints: (builder) => ({
     getCitiesAutocomplete: builder.query<string[], string>({
-      query:(search) => ({
+      query: (search) => ({
         url: 'streets/cities',
         params: { city: search },
+      }),
+      transformResponse: (res: { data: { city: string }[] }) => {
+        const uniqueCities = Array.from(new Set(res.data.map((s) => s.city)))
+        return uniqueCities
+      },
     }),
-    transformResponse: (res: { data: { city: string }[] }) => {
-      const uniqueCities = Array.from(new Set(res.data.map(s => s.city)))
-      return uniqueCities
-    },
-  }),
     getStreetById: builder.query<BaseQuery, string>({
       query: (id) => `/streets/${id}`,
       providesTags: (result) => ['Street'],

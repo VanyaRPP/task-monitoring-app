@@ -154,7 +154,8 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
       if ('data' in response) {
         const { data } = response
         if (data) {
-          // @ts-ignore
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore
           const buffer = Buffer.from(data.buffer)
           const blob = new Blob([buffer], {
             type: `application/${data.fileExtension}`,

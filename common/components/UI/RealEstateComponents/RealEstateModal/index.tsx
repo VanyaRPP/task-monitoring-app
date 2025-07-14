@@ -11,9 +11,9 @@ import { Form, message } from 'antd'
 import Modal from '../../ModalWindow'
 import RealEstateForm from './RealEstateForm'
 import { IDomain } from '@modules/models/Domain'
-import { 
+import {
   useGetCustomServicesQuery,
-  useGetCustomServicesByDomainQuery
+  useGetCustomServicesByDomainQuery,
 } from '@common/api/customServicesApi/customServices.api'
 
 interface Props {
@@ -34,9 +34,12 @@ const RealEstateModal: FC<Props> = ({
   const [addRealEstate] = useAddRealEstateMutation()
   const [editRealEstate] = useEditRealEstateMutation()
   const domainId = Form.useWatch('domain', form)
-  const { data: customDomainServices } = useGetCustomServicesByDomainQuery({ domainId: currentRealEstate?.domain?._id || domainId }, { skip: !domainId && !currentRealEstate?.domain?._id })
+  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
+    { domainId: currentRealEstate?.domain?._id || domainId },
+    { skip: !domainId && !currentRealEstate?.domain?._id }
+  )
 
-  const customServices = customDomainServices?.data?.flatMap((group) => 
+  const customServices = customDomainServices?.data?.flatMap((group) =>
     Array.isArray(group?.services)
       ? group.services.map((service) => ({
           label: service.name || 'Невідома послуга',
@@ -48,11 +51,9 @@ const RealEstateModal: FC<Props> = ({
   )
 
   useEffect(() => {
-    
     const initialValues = {
-      domain: chosenRealEstate?.domain
-      || currentRealEstate?.domain?.name
-      || domainId,
+      domain:
+        chosenRealEstate?.domain || currentRealEstate?.domain?.name || domainId,
       street:
         currentRealEstate?.street &&
         `${currentRealEstate.street.address} (м. ${currentRealEstate.street.city})`,
@@ -72,8 +73,12 @@ const RealEstateModal: FC<Props> = ({
       services: currentRealEstate?.services || [],
       customServices: currentRealEstate?.customServices || [],
     }
+    const currentCustomServices = form.getFieldValue('customServices')
+
+  if (!currentCustomServices || currentCustomServices.length === 0) {
     form.setFieldsValue(initialValues)
-  }, [currentRealEstate, form, customServices])
+  }
+  }, [currentRealEstate, form, customServices, domainId, chosenRealEstate])
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
@@ -96,7 +101,7 @@ const RealEstateModal: FC<Props> = ({
         formData.discount > 0 ? formData.discount * -1 : formData.discount,
       cleaning: formData.cleaning,
       services: formData.services,
-      customServices: formData.customServices
+      customServices: formData.customServices,
     }
 
     const response = currentRealEstate

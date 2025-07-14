@@ -19,14 +19,9 @@ import { FormInstance } from 'antd/es/form/Form'
 import dayjs from 'dayjs'
 import { FC, createContext, useContext, useEffect, useState } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
-import ReceiptForm from '../Forms/ReceiptForm'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
+import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
-import {
-  dateToDefaultFormat,
-  dateToMonth,
-  dateToMonthYear,
-} from '@assets/features/formatDate'
 
 interface Props {
   closeModal: VoidFunction
@@ -57,9 +52,15 @@ export const usePaymentContext = () =>
 
 const handleNonEmpty = (form, setIsButtonDisabled) => {
   const fields = form.getFieldsValue()
-
-  const dis = Object.values(fields).some((value) => value === undefined)
-
+  const operation = fields.operation
+  let requiredFields = ['domain', 'company']
+  if (operation === 'credit' || operation === Operations.Credit) {
+    requiredFields = ['domain', 'company', 'generalSum', 'description']
+  }
+  const dis = requiredFields.some(
+    (key) =>
+      fields[key] === undefined || fields[key] === null || fields[key] === ''
+  )
   setIsButtonDisabled(dis)
 }
 
@@ -147,6 +148,8 @@ const AddPaymentModal: FC<Props> = ({
 
   const items: TabsProps['items'] = []
 
+  const [tabsDisabled, setTabsDisabled] = useState(false)
+
   if (!preview) {
     items.push({
       key: '1',
@@ -159,7 +162,7 @@ const AddPaymentModal: FC<Props> = ({
     items.push({
       key: '2',
       label: 'Перегляд',
-      disabled: !preview || !!(paymentData as unknown as any)?.credit,
+      disabled: tabsDisabled,
       children: (
         <GroupedReceiptForm
           currPayment={currPayment}
@@ -174,7 +177,7 @@ const AddPaymentModal: FC<Props> = ({
     items.push({
       key: '3',
       label: 'Акт',
-      disabled: !preview || !!(paymentData as unknown as any)?.credit,
+      disabled: tabsDisabled,
       children: <PriceList data={payment} />,
     })
   }
@@ -182,7 +185,7 @@ const AddPaymentModal: FC<Props> = ({
     items.push({
       key: '4',
       label: 'Довідка',
-      disabled: !preview || !!(paymentData as unknown as any)?.credit,
+      disabled: tabsDisabled,
       children: (
         <ReceiptForm
           currPayment={currPayment}
@@ -250,6 +253,45 @@ const AddPaymentModal: FC<Props> = ({
     form.setFieldsValue({ invoice })
   }, [form, company, service, payment, prevService, prevPayment])
 
+    useEffect(() => {
+      if (edit) {
+        setTabsDisabled(false)
+      }
+      }, [edit])
+      const [initialValuesTabs, setInitialValuesTabs] = useState({
+        domain: typeof payment?.domain === 'string'
+          ? payment?.domain
+          : payment?.domain?._id,
+        street: typeof payment?.street === 'string'
+          ? payment?.street
+          : payment?.street?._id,
+        monthService: typeof payment?.monthService === 'string'
+          ? payment?.monthService
+          : payment?.monthService?._id,
+        company: typeof payment?.company === 'string'
+          ? payment?.company
+          : payment?.company?._id,
+        operation: payment?.type || Operations.Credit,
+      })
+
+    useEffect(() => {
+      setInitialValuesTabs({
+        domain: typeof payment?.domain === 'string'
+          ? payment?.domain
+          : payment?.domain?._id,
+        street: typeof payment?.street === 'string'
+          ? payment?.street
+          : payment?.street?._id,
+        monthService: typeof payment?.monthService === 'string'
+          ? payment?.monthService
+          : payment?.monthService?._id,
+        company: typeof payment?.company === 'string'
+          ? payment?.company
+          : payment?.company?._id,
+        operation: payment?.type || Operations.Credit,
+      })
+    }, [payment])
+
   return (
     <PaymentContext.Provider
       value={{
@@ -315,9 +357,21 @@ const AddPaymentModal: FC<Props> = ({
           form={form}
           layout="vertical"
           className={s.Form}
-          onValuesChange={() => {
+          onValuesChange={(changedValues, allValues) => {
             setIsValueChanged(true)
             handleNonEmpty(form, setIsButtonDisabled)
+            
+            const domainChanged = allValues.domain !== initialValuesTabs.domain
+            const streetChanged = allValues.street !== initialValuesTabs.street
+            const monthServiceChanged = allValues.monthService !== initialValuesTabs.monthService
+            const companyChanged = allValues.company !== initialValuesTabs.company
+            const operationChanged = allValues.operation !== initialValuesTabs.operation
+
+            if (domainChanged || streetChanged || monthServiceChanged || companyChanged || operationChanged) {
+              setTabsDisabled(true)
+            } else {
+              setTabsDisabled(false)
+            }
           }}
         >
           <Tabs
