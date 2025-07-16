@@ -3,6 +3,8 @@ import {
   FullscreenOutlined,
   MoonOutlined,
   SunFilled,
+  EditOutlined,
+  CheckOutlined,
 } from '@ant-design/icons'
 import useTheme from '@modules/hooks/useTheme'
 import { FloatButtonItem } from '@utils/types'
@@ -37,4 +39,24 @@ export const useFullScreenFloatButton = (
   )
 
   return [isFullScreen, toggleFullScreen, button]
+}
+
+export const useEditModelFloatButton = (
+  uniqueKey: string
+): [boolean, () => void, FloatButtonItem] => {
+  const [isEditMode, setIsEditMode] = useState(false)
+
+  const toggleEditMode = () => setIsEditMode((prev) => !prev)
+
+  const button = useMemo<FloatButtonItem>(
+    () => ({
+      key: `editmode-${uniqueKey}`,
+      icon: isEditMode ? <CheckOutlined /> : <EditOutlined />,
+      onClick: toggleEditMode,
+      tooltip: isEditMode ? 'Exit EditMode' : 'Enter EditMode',
+    }),
+    [isEditMode, uniqueKey]
+  )
+
+  return [isEditMode, toggleEditMode, button]
 }
