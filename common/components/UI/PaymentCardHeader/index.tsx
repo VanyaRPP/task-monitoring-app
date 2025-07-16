@@ -64,6 +64,7 @@ export interface PaymentCardHeaderProps {
   realEstatesFilter?: any
   singleCompany?: string
   singleDomain?: string
+  isDashboard?: boolean
 }
 
 const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
@@ -85,6 +86,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   realEstatesFilter,
   singleCompany,
   singleDomain,
+  isDashboard,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -272,6 +274,45 @@ const getItems = (panelStyle: React.CSSProperties): CollapseProps['items'] => [
     ),
   },
 ]
+if (isDashboard) {
+  return (
+    <>
+      <Flex justify="space-between" align="center" style={{ margin: 0 }}>
+        <Button
+          type="link"
+          onClick={() => router.push(AppRoutes.PAYMENT)}
+        >
+          Платежі
+        </Button>
+        <Flex gap={8} wrap="wrap">
+          <ImportInvoices />
+          <Button
+            type="link"
+            icon={<SelectOutlined />}
+            onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
+          >
+            Інвойси
+          </Button>
+          <Button
+            type="link"
+            icon={<PlusOutlined />}
+            onClick={() => setIsModalOpen(true)}
+          >
+            Додати
+          </Button>
+        </Flex>
+      </Flex>
+      {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
+        <AddPaymentModal
+          paymentActions={!isAdmin ? { edit: false, preview: true } : paymentActions}
+          paymentData={currentPayment}
+          preselectedCompany={selectedCompany}
+          closeModal={closeModal}
+        />
+      )}
+    </>
+  )
+}
 
 return (
   <Collapse
