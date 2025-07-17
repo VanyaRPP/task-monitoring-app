@@ -32,14 +32,8 @@
 
 }
 
-.transparentOff {
-  background: rgb(100, 42, 181) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none;
-}
-
 .toggleButton {
-  position: absolute; // або relative, залежно де хочеш
+  position: absolute;
   top: 12px;
   right: 12px;
   padding: 6px 12px;
@@ -62,6 +56,35 @@
     box-shadow: none !important;
   }
 
+}
+
+
+.lightTheme.transparentOff .toggleButton {
+  background: #ffffff !important;
+  color: #000 !important;
+  border: 1px solid rgba(100, 42, 181, 0.8) !important;
+
+  &:hover,
+  &:focus,
+  &:active {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-color: rgba(100, 42, 181, 0.8) !important;
+  }
+}
+
+.darkTheme.transparentOff .toggleButton {
+  background: #000000 !important;
+  color: #fff !important;
+  border: 1px solid rgba(100, 42, 181, 0.8) !important;
+
+  &:hover,
+  &:focus,
+  &:active {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border-color: 1px solid rgba(100, 42, 181, 0.8) !important;
+  }
 }
 
 .ButtonSend {
@@ -89,6 +112,7 @@
     }
   }
 }
+
 
 .Text {
   text-align: center;
@@ -138,12 +162,6 @@
   @media (max-width: 1000px) {
     flex-direction: column;
   }
-
-  // @media (max-width: 320px) {
-  //   margin-top: -50px;
-  //   width: 90%;
-  //   height: 30%;
-  // }
 }
 
 .feedBackCard {
@@ -151,6 +169,25 @@
   transform: translateY(60px);
   width: 23%;
   margin: 0 auto;
+
+  &.transparentOff {
+    background: white !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  &.darkTheme.transparentOff {
+    background: #000000 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  &.lightTheme.transparentOff {
+    background: white !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
 
   @media (max-width: 320px) {
     margin-top: -40px;
@@ -172,10 +209,63 @@
   }
 }
 
+.lightTheme.transparentOff {
+  background: #fff !important;
+  border-color: rgb(100, 42, 181) !important;
+}
+
+.lightTheme.transparentOff .Form input,
+.lightTheme.transparentOff .Form textarea {
+  background-color: #fff !important;
+  border: 1px solid rgba(100, 42, 181, 0.8) !important;
+  color: #000 !important;
+}
+
+
+.lightTheme.transparentOff .ButtonSend {
+  color: #000 !important;
+
+  border: 1px solid rgba(100, 42, 181, 0.8) !important;
+}
+
+.lightTheme.transparentOff .Form input::placeholder,
+.lightTheme.transparentOff .Form textarea::placeholder {
+  color: #000000 !important;
+
+}
+
+
+.darkTheme.transparentOff {
+  background: #000000 !important;
+  border-color: rgba(100, 42, 181, 0.8) !important;
+}
+
+
+.darkTheme.transparentOff .Form input,
+.darkTheme.transparentOff .Form textarea {
+  background-color: #000000 !important;
+  border: 1px solid rgba(100, 42, 181, 0.8) !important;
+  color: #ffffff !important;
+}
+
+
+.darkTheme.transparentOff .ButtonSend {
+  color: #ffffff !important;
+  background-color: rgba(0, 0, 0, 0.293) !important;
+  border: 1px solid rgba(100, 42, 181, 0.8) !important;
+}
+
+.darkTheme.transparentOff .Form input::placeholder,
+.darkTheme.transparentOff .Form textarea::placeholder {
+  color: #ffffff !important;
+
+}
+
+
 .ContactContainer {
   display: flex;
-  justify-content: end;
-  margin: 10px 260px 400px 0;
+  justify-content: center;
+  margin: 150px 30px 0 0;
 }
 
 
@@ -217,11 +307,10 @@
   .Contacts,
   .Media {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
     justify-content: center;
     gap: 1.2em;
-    padding: 2em;
 
 
     >* {
@@ -233,11 +322,6 @@
       }
 
       transition: opacity 0.2s;
-      // opacity: 0.5;
-
-      // &:hover {
-      //   opacity: 1;
-      // }
     }
   }
 }
