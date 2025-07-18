@@ -224,6 +224,7 @@ const getItems = (panelStyle: React.CSSProperties): CollapseProps['items'] => [
     label,
     style: panelStyle,
     collapsible: 'icon',
+    forceRender: true,
     children: (
       <>
         <Divider className={styles.Divider}/>
