@@ -16,13 +16,15 @@ export interface IService {
   garbageCollectorPrice?: number
   inflicionPrice?: number
   description?: string
-  customServices?: {
-    _id: ObjectId
-    label: string
-    fieldName: string
-    price: number
-  }[]
+  customServices?: ICustomServices[]
   losses?: number
+}
+
+export interface ICustomServices {
+  _id: ObjectId
+  label: string
+  fieldName: string
+  price: number
 }
 
 export interface IAddServiceResponse {

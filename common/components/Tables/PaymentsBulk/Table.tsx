@@ -1,7 +1,7 @@
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { getDefaultColumns } from '@common/components/Tables/PaymentsBulk/column.config'
+import { getInvoices } from '@common/services/invoicesService'
 import { AppRoutes, Operations } from '@utils/constants'
-import { getInvoices } from '@utils/getInvoices'
 import { Alert, Empty, Form, Table } from 'antd'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'

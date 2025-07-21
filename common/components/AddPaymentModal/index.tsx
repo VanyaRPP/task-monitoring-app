@@ -12,7 +12,6 @@ import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
 import Modal from '@components/UI/ModalWindow'
 import { usePaymentFormData } from '@modules/hooks/usePaymentData'
 import { Operations } from '@utils/constants'
-import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { Form, Tabs, TabsProps, message } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
@@ -22,6 +21,12 @@ import AddPaymentForm from '../Forms/AddPaymentForm'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
+import {
+  dateToDefaultFormat,
+  dateToMonth,
+  dateToMonthYear,
+} from '@assets/features/formatDate'
+import { getInvoices } from '@common/services/invoicesService'
 
 interface Props {
   closeModal: VoidFunction

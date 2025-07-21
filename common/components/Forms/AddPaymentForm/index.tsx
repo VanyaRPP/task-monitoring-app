@@ -8,7 +8,6 @@ import AddressesSelect from '@components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
 import PaymentTypeSelect from '@components/UI/Reusable/PaymentTypeSelect'
 import { Operations } from '@utils/constants'
-import { getInvoices } from '@utils/getInvoices'
 import { Form, Input, InputNumber } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import CompanySelect from './CompanySelect'
@@ -18,6 +17,7 @@ import MonthServiceSelect from './MonthServiceSelect'
 import PaymentPricesTable from './PaymentPricesTable'
 import PaymentTotal from './PaymentTotal'
 import { inputNumberParser } from '@utils/helpers'
+import { getInvoices } from '@common/services/invoicesService'
 
 export const useInvoice = ({
   payment,

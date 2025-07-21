@@ -4,6 +4,12 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import { getCustomInvoices } from '@common/services/invoicesService/getCustomInvoices'
+import { getDiscountInvoice } from '@common/services/invoicesService/getDiscountInvoice'
+import { getElectricityInvoice } from '@common/services/invoicesService/getElectricityInvoice'
+import { getInflicionInvoice } from '@common/services/invoicesService/getInflicionInvoice'
+import { getWaterInvoice } from '@common/services/invoicesService/getWaterInvoice'
+import { getWaterPartInvoice } from '@common/services/invoicesService/getWaterPartInvoice'
 import { current } from '@reduxjs/toolkit'
 import { ServiceType } from '@utils/constants'
 import { isEmpty, toRoundFixed } from '@utils/helpers'
@@ -48,7 +54,7 @@ export interface IGetInvoiceByTypeProps {
  * @param prevPayment - represents Payment from previous month
  * @returns array of invoices for provided props
  */
-export const getInvoices = ({
+export const getInvoicesOld = ({
   company,
   service,
   payment,
@@ -136,8 +142,6 @@ export const getMaintenanceInvoice = ({
     return {
       type: invoice.type,
       amount: +toRoundFixed(invoice.amount),
-      isIndividual:
-        companyMaintenance !== undefined && companyMaintenance !== null,
       price:
         companyMaintenance !== undefined && companyMaintenance !== null
           ? +toRoundFixed(companyMaintenance)
@@ -210,166 +214,6 @@ export const getPlacingInvoice = ({
   }
 }
 
-export const getInflicionInvoice = ({
-  company,
-  service,
-  prevService,
-  currInvoicesCollection,
-  prevInvoicesCollection,
-}: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (Object.keys(currInvoicesCollection).length > 0) {
-    if (!currInvoicesCollection[ServiceType.Inflicion]) {
-      return
-    }
-
-    const invoice = currInvoicesCollection[ServiceType.Inflicion]
-
-    return {
-      type: invoice.type,
-      price: +toRoundFixed(+invoice.sum || +invoice.price),
-      sum: +toRoundFixed(+invoice.sum || +invoice.price),
-    }
-  }
-
-  if (company?.inflicion) {
-    if (isEmpty(prevService?.inflicionPrice)) {
-      return {
-        type: ServiceType.Inflicion,
-        price: 0,
-        sum: 0,
-      }
-    }
-    const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
-    const price =
-      (prevPlacing?.sum ||
-        company.totalArea * (company.pricePerMeter || service.rentPrice || 0)) *
-      (Math.max(prevService?.inflicionPrice - 100, 0) / 100)
-
-    return {
-      type: ServiceType.Inflicion,
-      price: +toRoundFixed(price),
-      sum: +toRoundFixed(price),
-    }
-  }
-}
-
-export const getElectricityInvoice = ({
-  company,
-  service,
-  prevService,
-  currInvoicesCollection,
-  prevInvoicesCollection,
-}: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (Object.keys(currInvoicesCollection).length > 0) {
-    if (!currInvoicesCollection[ServiceType.Electricity]) {
-      return
-    }
-
-    const invoice = currInvoicesCollection[ServiceType.Electricity]
-
-    return {
-      type: invoice.type,
-      price: +toRoundFixed(+invoice.price),
-      amount: +toRoundFixed(+invoice.amount),
-      lastAmount: +toRoundFixed(+invoice.lastAmount),
-      sum: +toRoundFixed(
-        +invoice.sum || +invoice.price * (+invoice.amount - +invoice.lastAmount)
-      ),
-    }
-  }
-
-  if (!isEmpty(service?.electricityPrice)) {
-    const prevElectricity = prevInvoicesCollection[ServiceType.Electricity]
-
-    return {
-      type: ServiceType.Electricity,
-      amount: +toRoundFixed(prevElectricity?.amount),
-      lastAmount: +toRoundFixed(prevElectricity?.amount),
-      price: +toRoundFixed(service.electricityPrice),
-      sum: 0,
-    }
-  }
-}
-
-export const getWaterPartInvoice = ({
-  company,
-  service,
-  prevService,
-  currInvoicesCollection,
-  prevInvoicesCollection,
-}: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (Object.keys(currInvoicesCollection).length > 0) {
-    if (!currInvoicesCollection[ServiceType.WaterPart]) {
-      return
-    }
-
-    const invoice = currInvoicesCollection[ServiceType.WaterPart]
-
-    return {
-      type: invoice.type,
-      price: +toRoundFixed(+invoice.sum || +invoice.price),
-      sum: +toRoundFixed(+invoice.sum || +invoice.price),
-    }
-  }
-
-  if (
-    !isEmpty(service?.waterPriceTotal) &&
-    !isNaN(service.waterPriceTotal) &&
-    !isEmpty(company?.waterPart) &&
-    !isNaN(company?.waterPart)
-  ) {
-    const price = service.waterPriceTotal * (company.waterPart / 100)
-
-    return {
-      type: ServiceType.WaterPart,
-      price: +toRoundFixed(price),
-      sum: +toRoundFixed(price),
-    }
-  }
-}
-
-export const getWaterInvoice = ({
-  company,
-  service,
-  prevService,
-  currInvoicesCollection,
-  prevInvoicesCollection,
-}: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (Object.keys(currInvoicesCollection).length > 0) {
-    if (!currInvoicesCollection[ServiceType.Water]) {
-      return
-    }
-
-    const invoice = currInvoicesCollection[ServiceType.Water]
-
-    return {
-      type: invoice.type,
-      price: +toRoundFixed(+invoice.price),
-      amount: +toRoundFixed(+invoice.amount),
-      lastAmount: +toRoundFixed(+invoice.lastAmount),
-      sum: +toRoundFixed(
-        +invoice.sum || +invoice.price * (+invoice.amount - +invoice.lastAmount)
-      ),
-    }
-  }
-
-  if (
-    !isEmpty(service?.waterPrice) &&
-    !isNaN(service.waterPrice) &&
-    (!company?.waterPart || isNaN(company?.waterPart))
-  ) {
-    const prevWater = prevInvoicesCollection[ServiceType.Water]
-
-    return {
-      type: ServiceType.Water,
-      amount: +toRoundFixed(prevWater?.amount),
-      lastAmount: +toRoundFixed(prevWater?.amount),
-      price: +toRoundFixed(service.waterPrice),
-      sum: 0,
-    }
-  }
-}
-
 export const getGarbageCollectorInvoice = ({
   company,
   service,
@@ -436,51 +280,6 @@ export const getCleaningInvoice = ({
   }
 }
 
-export const getDiscountInvoice = ({
-  company,
-  service,
-  prevService,
-  currInvoicesCollection,
-  prevInvoicesCollection,
-}: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (Object.keys(currInvoicesCollection).length > 0) {
-    if (!currInvoicesCollection[ServiceType.Discount]) {
-      return
-    }
-
-    const invoice = currInvoicesCollection[ServiceType.Discount]
-
-    return {
-      type: invoice.type,
-      price: +toRoundFixed(+invoice.sum || +invoice.price),
-      sum: +toRoundFixed(+invoice.sum || +invoice.price),
-    }
-  }
-
-  return {
-    type: ServiceType.Discount,
-    price: +toRoundFixed(company?.discount),
-    sum: +toRoundFixed(company?.discount),
-  }
-}
-
-export const getCustomInvoices = ({
-  company,
-  service,
-  prevService,
-  currInvoicesCollection,
-  prevInvoicesCollection,
-}: IGetInvoiceByTypeProps): Array<IPaymentField> => {
-  return Object.values(currInvoicesCollection)
-    .filter((invoice: IPaymentField) => invoice.type === ServiceType.Custom)
-    .map((invoice) => ({
-      name: invoice.name,
-      type: invoice.type,
-      price: +toRoundFixed(+invoice.sum || +invoice.price),
-      sum: +toRoundFixed(+invoice.sum || +invoice.price),
-    }))
-}
-
 export const getCustomServiceInvoices = ({
   company,
   service,
@@ -494,16 +293,18 @@ export const getCustomServiceInvoices = ({
   ) {
     return []
   }
-  const customServices = Array.isArray(company?.customServices)
-    ? company?.customServices.flatMap((customService) => (
-        {
-          name: customService.label || 'Невідома послуга',
-          price: +toRoundFixed(customService.price),
-          sum: +toRoundFixed(customService.price),
-          type: ServiceType.Custom,
-          customService: true,
-        }
-      ))
+  const customServices = Array.isArray(service?.customServices)
+    ? service?.customServices.flatMap((customService) =>
+        Array.isArray(customService)
+          ? customService.map((s) => ({
+              name: s.label || 'Невідома послуга',
+              price: +toRoundFixed(s.price),
+              sum: +toRoundFixed(s.price),
+              type: ServiceType.Custom,
+              customService: true,
+            }))
+          : []
+      )
     : []
 
   return customServices
