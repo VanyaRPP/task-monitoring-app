@@ -79,6 +79,7 @@ export const getInvoices = ({
         company,
         service,
         prevService,
+        prevPayment,
         currInvoicesCollection,
         prevInvoicesCollection,
       })
@@ -87,6 +88,7 @@ export const getInvoices = ({
       company,
       service,
       prevService,
+      prevPayment,
       currInvoicesCollection,
       prevInvoicesCollection,
     }),
@@ -94,6 +96,7 @@ export const getInvoices = ({
       company,
       service,
       prevService,
+      prevPayment,
       currInvoicesCollection,
       prevInvoicesCollection,
     }),
