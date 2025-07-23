@@ -74,14 +74,18 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
     )
   }
 
-  const groupedInvoices = (invoices: any, groups: any) => {
+  const groupedInvoices = (invoices: any, groups: any) => { // TODO: FIX maintenancePrice && rentPrice logic
     const result =
       groups?.map((group, index) => {
         const groupFieldNames = group?.services.map(
           (service) => service?.fieldName
         )
         const groupInvoices = invoices?.filter((invoice) =>
-          groupFieldNames.includes(invoice?.type)
+          group?.services?.some((service) =>
+            (invoice?.name === service?.name ||
+            invoice?.type === service?.fieldName) ||
+            (invoice?.type === 'maintenancePrice' && service?.fieldName === 'rentPrice')
+          )
         )
         const totalGroupSum = (groupInvoices ?? []).reduce((sum, invoice) => {
           return sum + (invoice?.sum ?? 0)
@@ -96,19 +100,19 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
         }
       }) || []
 
-    const customInvoice = invoices?.find(
-      (invoice) => invoice?.type === 'custom'
-    )
-    if (customInvoice) {
-      result.push({
-        key: result.length,
-        number: result.length + 1,
-        type: customInvoice.name || 'custom',
-        unit: 'грн',
-        price: +customInvoice.sum,
-        sum: +customInvoice.sum,
-      })
-    }
+    // const customInvoice = invoices?.find(
+    //   (invoice) => invoice?.type === 'custom'
+    // )
+    // if (customInvoice) {
+    //   result.push({
+    //     key: result.length,
+    //     number: result.length + 1,
+    //     type: customInvoice.name || 'custom',
+    //     unit: 'грн',
+    //     price: +customInvoice.sum,
+    //     sum: +customInvoice.sum,
+    //   })
+    // }
 
     return result
   }
