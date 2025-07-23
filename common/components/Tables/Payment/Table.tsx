@@ -47,6 +47,8 @@ import {
   Operations,
 } from '@utils/constants'
 import s from './style.module.scss'
+import { Grid } from 'antd'
+
 
 export interface PaymentDeleteItem {
   id: string
@@ -220,10 +222,25 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
 
   const isDashboard = pathname === AppRoutes.INDEX
 
+const { useBreakpoint } = Grid
+
+const screens = useBreakpoint()
+const isMobile = !screens.md
+
   const isGlobalAdmin = currUserRoles.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = currUserRoles.includes(Roles.DOMAIN_ADMIN)
   const isUser = currUserRoles.includes(Roles.USER)
   const { token } = theme.useToken()
+  const isSingleCompanyByData = useMemo(() => {
+    const list = payments?.data || []
+    if (list.length <= 1) return false
+    const unique = new Set(
+      list.map((p) =>
+        typeof p.company === 'object' ? p.company.companyName : p.company
+      )
+    )
+    return unique.size === 1
+  }, [payments?.data])
   const allColumns: ColumnsType<IExtendedPayment> = useMemo(() => {
     return [
       {
@@ -296,7 +313,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           }
           return companyLabel
         },
-        hidden: payments?.realEstatesFilter?.length <= 1,
+        hidden: isSingleCompanyByData,
       },
       {
         title: 'Дата створення',
@@ -464,7 +481,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           (b.invoice.find((i) => i.type === value)?.sum || 0),
       })) as ColumnType<IExtendedPayment>[]),
       {
-        fixed: 'right',
+        fixed: isMobile ? undefined : 'right',
         align: 'center',
         title: '',
         width: sepDomainID ? 25 : 80,
@@ -483,7 +500,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       },
       {
         align: 'center',
-        fixed: 'right',
+        fixed: isMobile ? undefined : 'right',
         title: '',
         hidden: isUser,
         width: sepDomainID ? 25 : 80,
@@ -551,6 +568,8 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     onViewClick,
     onEditClick,
     currUserRoles,
+    isSingleCompanyByData,
+    isMobile,
   ])
 
   const visibleColumns = (allColumns as ColumnType<IExtendedPayment>[]).filter(

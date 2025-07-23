@@ -31,6 +31,7 @@ export interface PaymentsHeaderProps {
 
   domainFilter: IFilter[]
   realEstatesFilter: IFilter[]
+  isDashboard?: boolean
 }
 
 const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
@@ -50,6 +51,7 @@ const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
   onColumnsSelect,
   domainFilter,
   realEstatesFilter,
+  isDashboard,
 }) => {
   return (
     <PaymentCardHeader
@@ -69,6 +71,7 @@ const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
       onColumnsSelect={onColumnsSelect}
       domainFilter={domainFilter}
       realEstatesFilter={realEstatesFilter}
+      isDashboard={isDashboard}
     />
   )
 }

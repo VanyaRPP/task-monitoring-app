@@ -5,31 +5,37 @@ interface StreetsSelectorProps {
   streets: IFilter[]
   filters?: Record<string, any>
   setFilters: (f: Record<string, any>) => void
+  className?: string
+  [key: string]: any 
 }
 
 const StreetsSelector: React.FC<StreetsSelectorProps> = ({
   streets,
   filters = {},
   setFilters,
+  className,
+  ...props
 }) => {
-  const options = streets.map((streets) => ({
-    label: streets.text,
-    value: streets.value,
+  const options = streets.map((street) => ({
+    label: street.text,
+    value: street.value,
   }))
 
   return (
     <Select
       placeholder="Виберіть вулицю"
-      style={{ width: 200 }}
+      // style={{ width: 200 }}
       value={filters?.street}
       onChange={(value) =>
-        setFilters({
-          ...filters,
+        setFilters((prev) => ({
+          ...prev,
           street: value,
-        })
+        }))
       }
       allowClear
+      className={className}
       options={options}
+      {...props}
     />
   )
 }

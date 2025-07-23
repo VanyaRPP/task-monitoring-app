@@ -46,7 +46,7 @@ function AddPaymentForm({ paymentActions }) {
     usePaymentContext()
 
   const [streetHasService, setStreetHasService] = useState(false)
-
+  const selectedDomain = Form.useWatch('domain', form)
   const companyId = Form.useWatch('company', form)
   const operation = Form.useWatch('operation', form)
 
@@ -57,7 +57,11 @@ function AddPaymentForm({ paymentActions }) {
     prevService,
     prevPayment,
   })
-
+  useEffect(() => {
+    if (selectedDomain) {
+      form.resetFields(['street', 'monthService', 'company', 'operation'])
+    }
+  }, [selectedDomain, form])
   useEffect(() => {
     const currentInvoice = form.getFieldValue('invoice')
     const isEmptyInvoice =
