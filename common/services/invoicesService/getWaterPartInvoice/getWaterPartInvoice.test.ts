@@ -627,7 +627,7 @@ describe('getInvoices - WATER', () => {
   })
   describe('props: { service, company, prevPayment } with customServices', () => {
   it(
-    'should load WaterPart from prevPayment when service = { customServices.waterPriceTotal: undefined }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }',
+    'should load with prevPayment when customServices = { waterPriceTotal: undefined }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }',
     () => {
       const service: Partial<IService> = {
         customServices: [
@@ -660,7 +660,7 @@ describe('getInvoices - WATER', () => {
   )
 
   it(
-    'should load WaterPart from prevPayment when service = { customServices.waterPriceTotal: null }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }',
+     "should load with prevPayment when customServices = { waterPriceTotal: null }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }",
     () => {
       const service: Partial<IService> = {
         customServices: [
@@ -693,7 +693,7 @@ describe('getInvoices - WATER', () => {
   )
 
   it(
-    'should load WaterPart from prevPayment when service = { customServices.waterPriceTotal: 0 }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }',
+    'should load with prevPayment when customServices = { waterPriceTotal: 0 }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }',
     () => {
       const service: Partial<IService> = {
         customServices: [
@@ -726,7 +726,7 @@ describe('getInvoices - WATER', () => {
   )
 
   it(
-    'should load WaterPart from prevPayment when service = { customServices.waterPriceTotal: 10 }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }',
+    'should load with prevPayment when customServices = { waterPriceTotal: 10 }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }',
     () => {
       const service: Partial<IService> = {
         customServices: [
@@ -758,7 +758,7 @@ describe('getInvoices - WATER', () => {
     }
   )
 })
-it('should load WaterPart from currInvoicesCollection when present', () => {
+it('should load WaterPart from currInvoicesCollection when company = { waterPart: 10 }, service = { waterPriceTotal: 10 }', () => {
   const service: Partial<IService> = { waterPriceTotal: 10 }
   const company: Partial<IRealestate> = { waterPart: 10 }
 
@@ -785,7 +785,7 @@ it('should load WaterPart from currInvoicesCollection when present', () => {
   })
 })
 
-it('should load WaterPart with 0 sum when company.waterPart is 0', () => {
+it('should load WaterPart from currInvoicesCollection when company = { waterPart: 0 }, service = { waterPriceTotal: 100 }', () => {
   const service: Partial<IService> = { waterPriceTotal: 100 }
   const company: Partial<IRealestate> = { waterPart: 0 }
 
@@ -801,7 +801,7 @@ it('should load WaterPart with 0 sum when company.waterPart is 0', () => {
   })
 })
 
-it('should NOT load WaterPart when service and company have no water data', () => {
+it('should NOT load WaterPart when service = undefined company = undefined ', () => {
   const service: Partial<IService> = {}
   const company: Partial<IRealestate> = {}
 

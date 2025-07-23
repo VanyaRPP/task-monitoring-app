@@ -48,30 +48,22 @@ export const getWaterPartInvoice = ({
   let waterPrice: number | undefined
 
   if (isCompanyHasWaterPart) {
-    const customServiceWater = company?.customServices?.find(
-      (s) => s.fieldName === ServiceType.WaterPart
-    )
+  const priceFromCustom = getPriceFromCustomServices(company?.customServices, ServiceType.WaterPart)
 
-    if (customServiceWater && (customServiceWater.price === undefined || customServiceWater.price === null)) {
-      return
-    }
-
-    waterPrice =
-      getPriceFromCustomServices(company?.customServices, ServiceType.WaterPart) ??
-      company?.waterPart
-  } else {
-    const customServiceWater = service?.customServices?.find(
-      (s) => s.fieldName === ServiceType.WaterPart
-    )
-
-    if (customServiceWater && (customServiceWater.price === undefined || customServiceWater.price === null)) {
-      return
-    }
-
-    waterPrice =
-      getPriceFromCustomServices(service?.customServices, ServiceType.WaterPart) ??
-      service?.waterPriceTotal
+  if (priceFromCustom == null) {
+    return
   }
+
+  waterPrice = priceFromCustom ?? company?.waterPart
+  } else {
+  const priceFromCustom = getPriceFromCustomServices(service?.customServices, ServiceType.WaterPart)
+
+  if (priceFromCustom == null) {
+    return
+  }
+
+  waterPrice = priceFromCustom ?? service?.waterPriceTotal
+}
 
   if (
     !isEmpty(waterPrice) &&
