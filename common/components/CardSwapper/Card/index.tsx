@@ -71,7 +71,7 @@ import React, {
       y: slot.y,
       z: slot.z,
       xPercent: -50,
-      yPercent: -50,
+      yPercent: -30,
       skewY: skew,
       transformOrigin: 'center center',
       zIndex: slot.zIndex,
@@ -79,14 +79,14 @@ import React, {
     })
   
   const CardSwap: React.FC<CardSwapProps> = ({
-    width = 800,
-    height = 500,
+    width = 500,
+    height = 300,
     cardDistance = 60,
     verticalDistance = 70,
     delay = 5000,
     pauseOnHover = false,
     onCardClick,
-    skewAmount = 6,
+    skewAmount = 0,
     easing = 'elastic',
     children,
   }) => {

@@ -88,9 +88,9 @@
   justify-content: center;
   align-items: center;
 
-  @media (max-width: 768px) {
-    flex: 0 1 100%;
-  }
+  // @media (max-width: 768px) {
+  //   flex: 0 1 100%;
+  // }
 }
 
 .Buttons {
@@ -226,12 +226,13 @@
 }
 
 .cardPage {
-  position: fixed;
+  position: relative;
   bottom: 0;
   right: 0;
   z-index: 100000;
   pointer-events: none;
-  width: 1000px;
+  width: 50%;
+
 
   transform: translate(5%, 20%);
   transform-origin: bottom right;
@@ -239,11 +240,11 @@
   perspective: 900px;
   overflow: visible;
 
-  @media (max-width: 768px) {
-    transform: scale(0.75) translate(25%, 25%);
-  }
+  // @media (max-width: 768px) {
+  //   transform: scale(0.75) translate(25%, 25%);
+  // }
 
-  @media (max-width: 480px) {
-    transform: scale(0.55) translate(25%, 25%);
-  }
+  // @media (max-width: 480px) {
+  //   transform: scale(0.55) translate(25%, 25%);
+  // }
 }

@@ -74,21 +74,14 @@ const HomePage: React.FC = () => {
             </div>
           </div>
           <div className={s.HalfBlock}>
-            <LottieAnimation
-              src="/animations/AnimationCity.json"
-              // src="https://assets7.lottiefiles.com/packages/lf20_qp1q7mct.json"
-              loop={true}
-              style={{
-                zIndex: 60,
-              }}
-            />
+            <div className={s.cardPage}>
+              <CardPage />
+            </div>
           </div>
-          <div className={s.cardPage}>
-            <CardPage />
-          </div>
-          
+
         </div>
       </div>
+
     </>
   )
 }
