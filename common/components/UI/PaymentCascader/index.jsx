@@ -5,19 +5,20 @@ import {
   cascaderYears,
 } from '@utils/constants'
 import { Cascader } from 'antd'
+import clsx from 'clsx'
 
-const PaymentCascader = ({ onChange }) => {
+const PaymentCascader = ({ onChange, className }) => {
   return (
-    <div className={s.PaymentCascader}>
+    <div className={clsx(s.PaymentCascader, className)}>
       <Cascader
         placeholder="Оберіть проміжок"
         options={customOptions}
         onChange={onChange}
+        className={className}
       />
     </div>
   )
 }
-
 const customOptions = [
   {
     label: 'Рік',

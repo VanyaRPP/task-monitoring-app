@@ -625,129 +625,195 @@ describe('getInvoices - WATER', () => {
       }
     })
   })
-  describe('props: { service, company, payment } with customServices', () => {
-    it(
-      'should NOT load when service = { customServices.waterPriceTotal: undefined }, ' +
-        'company = { waterPart: 10 }, payment = { invoice: [WaterPart] }',
-      () => {
-        const service: Partial<IService> = {
-          customServices: [
-            {
-              label: 'Water',
-              fieldName: ServiceType.Water, 
-              price: undefined,
-            },
-          ] as Partial<ICustomServices>[],
-        } as Partial<IService>
-        const company: Partial<IRealestate> = { waterPart: 10 }
-        const prevPayment: Partial<IPayment> = {
-          invoice: [{ type: ServiceType.WaterPart, price: 12, sum: 120 }],
-        }
+  describe('props: { service, company, prevPayment } with customServices', () => {
+  it(
+    'should load with prevPayment when customServices = { waterPriceTotal: undefined }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }',
+    () => {
+      const service: Partial<IService> = {
+        customServices: [
+          {
+            label: 'Water',
+            fieldName: ServiceType.Water,
+            price: undefined,
+          },
+        ] as Partial<ICustomServices>[],
+      } as Partial<IService>
 
-        const invoices = getInvoices({
-          service,
-          company,
-          prevPayment, 
-        })
+      const company: Partial<IRealestate> = { waterPart: 10 }
 
-        expect(invoices).not.toContainEqual(
-          expect.objectContaining({ type: ServiceType.WaterPart })
-        )
+      const prevPayment: Partial<IPayment> = {
+        invoice: [{ type: ServiceType.WaterPart, price: 12, sum: 120 }],
       }
-    )
 
-    it(
-      'should NOT load when service = { customServices.waterPriceTotal: null }, ' +
-        'company = { waterPart: 10 }, payment = { invoice: [WaterPart] }',
-      () => {
-        const service: Partial<IService> = {
-          customServices: [
-            {
-              label: 'Water',
-              fieldName: ServiceType.Water,
-              price: null,
-            },
-          ] as Partial<ICustomServices>[],
-        } as Partial<IService>
-        const company: Partial<IRealestate> = { waterPart: 10 }
-        const prevPayment: Partial<IPayment> = {
-          invoice: [{ type: ServiceType.WaterPart, price: 12, sum: 120 }],
-        }
+      const invoices = getInvoices({
+        service,
+        company,
+        prevPayment,
+      })
 
-        const invoices = getInvoices({
-          service,
-          company,
-          prevPayment,
-        })
+      expect(invoices).toContainEqual({
+        type: ServiceType.WaterPart,
+        price: 120,
+        sum: 120,
+      })
+    }
+  )
 
-        expect(invoices).not.toContainEqual(
-          expect.objectContaining({ type: ServiceType.WaterPart })
-        )
+  it(
+     "should load with prevPayment when customServices = { waterPriceTotal: null }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }",
+    () => {
+      const service: Partial<IService> = {
+        customServices: [
+          {
+            label: 'Water',
+            fieldName: ServiceType.Water,
+            price: null,
+          },
+        ] as Partial<ICustomServices>[],
+      } as Partial<IService>
+
+      const company: Partial<IRealestate> = { waterPart: 10 }
+
+      const prevPayment: Partial<IPayment> = {
+        invoice: [{ type: ServiceType.WaterPart, price: 12, sum: 120 }],
       }
-    )
 
-    it(
-      'should load when service = { customServices.waterPriceTotal: 0 }, ' +
-        'company = { waterPart: 10 }, payment = { invoice: [WaterPart] }',
-      () => {
-        const service: Partial<IService> = {
-          customServices: [
-            {
-              label: 'Water',
-              fieldName: ServiceType.Water,
-              price: 0,
-            },
-          ] as Partial<ICustomServices>[],
-        } as Partial<IService>
-        const company: Partial<IRealestate> = { waterPart: 10 }
-        const prevPayment: Partial<IPayment> = {
-          invoice: [{ type: ServiceType.WaterPart, price: 12, sum: 120 }],
-        }
+      const invoices = getInvoices({
+        service,
+        company,
+        prevPayment,
+      })
 
-        const invoices = getInvoices({
-          service,
-          company,
-          prevPayment,
-        })
+      expect(invoices).toContainEqual({
+        type: ServiceType.WaterPart,
+        price: 120,
+        sum: 120,
+      })
+    }
+  )
 
-        expect(invoices).toContainEqual({
-          type: ServiceType.WaterPart,
-          price: 0, 
-          sum: 0,
-        })
+  it(
+    'should load with prevPayment when customServices = { waterPriceTotal: 0 }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }',
+    () => {
+      const service: Partial<IService> = {
+        customServices: [
+          {
+            label: 'Water',
+            fieldName: ServiceType.Water,
+            price: 0,
+          },
+        ] as Partial<ICustomServices>[],
+      } as Partial<IService>
+
+      const company: Partial<IRealestate> = { waterPart: 10 }
+
+      const prevPayment: Partial<IPayment> = {
+        invoice: [{ type: ServiceType.WaterPart, price: 0, sum: 0 }],
       }
-    )
 
-    it(
-      'should load when service = { customServices.waterPriceTotal: 10 }, ' +
-        'company = { waterPart: 10 }, payment = { invoice: [WaterPart] }',
-      () => {
-        const service: Partial<IService> = {
-          customServices: [
-            {
-              label: 'Water',
-              fieldName: ServiceType.Water,
-              price: 10,
-            },
-          ] as Partial<ICustomServices>[],
-        } as Partial<IService>
-        const company: Partial<IRealestate> = { waterPart: 10 }
-        const prevPayment: Partial<IPayment> = {
-          invoice: [{ type: ServiceType.WaterPart, price: 12, sum: 120 }],
-        }
+      const invoices = getInvoices({
+        service,
+        company,
+        prevPayment,
+      })
 
-        const invoices = getInvoices({
-          service,
-          company,
-          prevPayment,
-        })
+      expect(invoices).toContainEqual({
+        type: ServiceType.WaterPart,
+        price: 0,
+        sum: 0,
+      })
+    }
+  )
 
-        expect(invoices).toContainEqual({
-          type: ServiceType.WaterPart,
-          price: 1, 
-          sum: 1,
-        })
+  it(
+    'should load with prevPayment when customServices = { waterPriceTotal: 10 }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }',
+    () => {
+      const service: Partial<IService> = {
+        customServices: [
+          {
+            label: 'Water',
+            fieldName: ServiceType.Water,
+            price: 10,
+          },
+        ] as Partial<ICustomServices>[],
+      } as Partial<IService>
+
+      const company: Partial<IRealestate> = { waterPart: 10 }
+
+      const prevPayment: Partial<IPayment> = {
+        invoice: [{ type: ServiceType.WaterPart, price: 1, sum: 1 }],
       }
-    )
+
+      const invoices = getInvoices({
+        service,
+        company,
+        prevPayment,
+      })
+
+      expect(invoices).toContainEqual({
+        type: ServiceType.WaterPart,
+        price: 1,
+        sum: 1,
+      })
+    }
+  )
+})
+it('should load WaterPart from currInvoicesCollection when company = { waterPart: 10 }, service = { waterPriceTotal: 10 }', () => {
+  const service: Partial<IService> = { waterPriceTotal: 10 }
+  const company: Partial<IRealestate> = { waterPart: 10 }
+
+  const currInvoicesCollection = {
+    [ServiceType.WaterPart]: {
+      type: ServiceType.WaterPart,
+      price: 50,
+      sum: 50,
+    },
+  }
+
+  const invoices = getInvoices({
+    service,
+    company,
+    payment: {
+      invoice: [currInvoicesCollection[ServiceType.WaterPart]],
+    },
   })
+
+  expect(invoices).toContainEqual({
+    type: ServiceType.WaterPart,
+    price: 50,
+    sum: 50,
+  })
+})
+
+it('should load WaterPart from currInvoicesCollection when company = { waterPart: 0 }, service = { waterPriceTotal: 100 }', () => {
+  const service: Partial<IService> = { waterPriceTotal: 100 }
+  const company: Partial<IRealestate> = { waterPart: 0 }
+
+  const invoices = getInvoices({
+    service,
+    company,
+  })
+
+  expect(invoices).toContainEqual({
+    type: ServiceType.WaterPart,
+    price: 0,
+    sum: 0,
+  })
+})
+
+it('should NOT load WaterPart when service = undefined company = undefined ', () => {
+  const service: Partial<IService> = {}
+  const company: Partial<IRealestate> = {}
+
+  const invoices = getInvoices({
+    service,
+    company,
+  })
+
+  expect(invoices).not.toContainEqual(
+    expect.objectContaining({ type: ServiceType.WaterPart })
+  )
+})
+
+
 })

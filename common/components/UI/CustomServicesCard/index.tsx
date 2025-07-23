@@ -56,15 +56,13 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
     <div>
       {!disabled && !isServiceForm && (
         <Dropdown
-          overlay={
-            <Menu
-              items={dropdownOptions.map((option) => ({
+            menu={{
+              items: dropdownOptions.map((option) => ({
                 key: option.value,
                 label: option.label,
                 onClick: () => handleAddService(option),
-              }))}
-            />
-          }
+              })),
+            }}
           trigger={['click']}
         >
           <Button
@@ -103,14 +101,14 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
                   {!disabled &&
                     (isDomainAdmin || isGlobalAdmin) &&
                     !isServiceForm && (
-                      <CloseOutlined
+                      <Button
+                        type="text"
+                        icon={<CloseOutlined />}
+                        aria-label={`remove-${service?.label}`}
+                        data-testid={`remove-${service?.label}`}
                         onClick={() => handleRemoveService(index)}
-                        style={{
-                          marginTop: 6,
-                          fontSize: 18,
-                          cursor: 'pointer',
-                        }}
-                      />
+                        style={{ marginTop: 6 }}
+                      />   
                     )}
                 </Space>
               )

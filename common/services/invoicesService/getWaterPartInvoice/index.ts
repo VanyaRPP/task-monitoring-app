@@ -8,9 +8,22 @@ export const getWaterPartInvoice = ({
   company,
   service,
   prevService,
+  prevPayment,
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
+  const paymentInvoices = prevPayment?.invoice
+
+  if (paymentInvoices?.some(i => i.type === ServiceType.WaterPart)) {
+    const waterPartInvoice = paymentInvoices.find(i => i.type === ServiceType.WaterPart)
+
+    return {
+      type: waterPartInvoice.type,
+      price: +toRoundFixed(+waterPartInvoice.sum || +waterPartInvoice.price),
+      sum: +toRoundFixed(+waterPartInvoice.sum || +waterPartInvoice.price),
+    }
+  }
+
   if (Object.keys(currInvoicesCollection).length > 0) {
     if (!currInvoicesCollection[ServiceType.WaterPart]) {
       return
@@ -26,25 +39,45 @@ export const getWaterPartInvoice = ({
   }
 
   const waterPart =
-    getPriceFromCustomServices(
-      company?.customServices,
-      ServiceType.WaterPart
-    ) ?? company?.waterPart
-  const waterPrice =
-    getPriceFromCustomServices(service?.customServices, ServiceType.Water) ??
-    service?.waterPriceTotal
+    getPriceFromCustomServices(company?.customServices, ServiceType.WaterPart) ??
+    company?.waterPart
+
+  const isCompanyHasWaterPart =
+    !isEmpty(waterPart) && !isNaN(waterPart)
+
+  let waterPrice: number | undefined
+
+  if (isCompanyHasWaterPart) {
+  const priceFromCustom = getPriceFromCustomServices(company?.customServices, ServiceType.WaterPart)
+
+  if (priceFromCustom == null) {
+    return
+  }
+
+  waterPrice = priceFromCustom ?? company?.waterPart
+  } else {
+  const priceFromCustom = getPriceFromCustomServices(service?.customServices, ServiceType.WaterPart)
+
+  if (priceFromCustom == null) {
+    return
+  }
+
+  waterPrice = priceFromCustom ?? service?.waterPriceTotal
+}
+
   if (
     !isEmpty(waterPrice) &&
     !isNaN(waterPrice) &&
     !isEmpty(waterPart) &&
     !isNaN(waterPart)
   ) {
-    const price = waterPrice * (waterPart / 100)
+    const sum = waterPrice * (waterPart / 100)
 
     return {
       type: ServiceType.WaterPart,
-      price: +toRoundFixed(price),
-      sum: +toRoundFixed(price),
+      price: +toRoundFixed(sum),
+      sum: +toRoundFixed(sum),
     }
   }
+  return
 }
