@@ -5,7 +5,7 @@ import { AppRoutes } from '@utils/constants'
 import { LogoIcon } from '@assets/icon/Logo'
 import { Button, Typography } from 'antd'
 import { useRouter } from 'next/router'
-
+import CardPage from '@components/CardSwapper'
 import s from './style.module.scss'
 
 const HomePage: React.FC = () => {
@@ -74,17 +74,14 @@ const HomePage: React.FC = () => {
             </div>
           </div>
           <div className={s.HalfBlock}>
-            <LottieAnimation
-              src="/animations/AnimationCity.json"
-              // src="https://assets7.lottiefiles.com/packages/lf20_qp1q7mct.json"
-              loop={true}
-              style={{
-                zIndex: 60,
-              }}
-            />
+            <div className={s.cardPage}>
+              <CardPage />
+            </div>
           </div>
+
         </div>
       </div>
+
     </>
   )
 }
