@@ -113,7 +113,7 @@ const AddServiceForm: React.FC<Props> = ({
           />
         </Form.Item>
         <CustomServicesCard form={form} isServiceForm={true}/> 
-        { !(initialCustomServices ?? []).some(item => item.fieldName === 'rentPrice') && // TODO: customServices
+        {/* { !(initialCustomServices ?? []).some(item => item.fieldName === 'rentPrice') && // TODO: customServices
         <Form.Item
           name="rentPrice"
           label="Утримання приміщень (грн/м²)"
@@ -180,7 +180,7 @@ const AddServiceForm: React.FC<Props> = ({
             placeholder="Вкажіть значення"
             className={s.formInput}
           />
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item
           name="losses"
           label={<>Втрати в трансформаторі, лініях, реактивна (%)</>}
