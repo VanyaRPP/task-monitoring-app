@@ -62,17 +62,17 @@ function AddPaymentForm({ paymentActions }) {
       form.resetFields(['street', 'monthService', 'company', 'operation'])
     }
   }, [selectedDomain, form])
-  useEffect(() => {
-    const currentInvoice = form.getFieldValue('invoice')
-    const isEmptyInvoice =
-      !Array.isArray(currentInvoice) || currentInvoice.length === 0
+  // useEffect(() => {
+  //   const currentInvoice = form.getFieldValue('invoice')
+  //   const isEmptyInvoice =
+  //     !Array.isArray(currentInvoice) || currentInvoice.length === 0
 
-    const isNewPayment = !payment?.invoiceNumber && !payment?.domain
+  //   const isNewPayment = !payment?.invoiceNumber && !payment?.domain
 
-    if ((isEmptyInvoice || isNewPayment) && invoice.length > 0) {
-      form.setFieldsValue({ invoice })
-    }
-  }, [form, invoice, payment])
+  //   if ((isEmptyInvoice || isNewPayment) && invoice.length > 0) {
+  //     form.setFieldsValue({ invoice })
+  //   }
+  // }, [form, invoice, payment])
 
   return (
     <>

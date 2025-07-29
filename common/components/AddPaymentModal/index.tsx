@@ -206,29 +206,45 @@ const AddPaymentModal: FC<Props> = ({
     const isPreview = paymentActions.preview
     const existingInvoice = form.getFieldValue('invoice')
 
-    if (isPreview) {
-      form.setFieldsValue({
-        invoice: getInvoices({
-          company,
-          service,
-          payment,
-          prevService,
-          prevPayment,
-        }),
-      })
-      return
+    let generatedInvoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevService,
+      prevPayment,
+    })
+console.log(generatedInvoices)
+    const standardTypes = new Set(
+      generatedInvoices
+        .filter((inv) => inv.type && inv.type !== 'custom')
+        .map((inv) => inv.type)
+    )
+
+    const aliasMap: Record<string, string> = {
+      rentPrice: 'maintenancePrice',
+      znyzhka: 'discount',
+      rentPart: 'rentPart',
+      cleaningPrice: 'cleaningPrice',
+      placingPrice: 'placingPrice',
+      waterPart: 'waterPart',
+      garbageCollectorPrice: 'garbageCollectorPrice',
+      inflicionPrice: 'inflicionPrice',
     }
 
-    if (!existingInvoice || existingInvoice.length === 0) {
-      form.setFieldsValue({
-        invoice: getInvoices({
-          company,
-          service,
-          payment,
-          prevService,
-          prevPayment,
-        }),
+    generatedInvoices = generatedInvoices.filter((inv) => {
+      if (!(inv as any).customService) return true
+
+      const isDuplicate = company?.customServices?.some((cs) => {
+        const mapped = aliasMap[cs.fieldName]
+        const isLabelMatch = cs.label === inv.name
+        const isFieldUsed = mapped && standardTypes.has(mapped)
+        return isLabelMatch && isFieldUsed
       })
+
+      return !isDuplicate
+    })
+    if (isPreview || !existingInvoice || existingInvoice.length === 0) {
+      form.setFieldsValue({ invoice: generatedInvoices })
     }
   }, [
     form,
