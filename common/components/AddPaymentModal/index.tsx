@@ -17,8 +17,16 @@ import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { Form, Tabs, TabsProps, message } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
 import dayjs from 'dayjs'
-import { FC, createContext, useContext, useEffect, useState } from 'react'
+import {
+  FC,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+} from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
+import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
@@ -73,6 +81,7 @@ const AddPaymentModal: FC<Props> = ({
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(true)
+  const [needResetInvoices, setNeedResetInvoices] = useState(false)
 
   const { company, service, payment, prevService, prevPayment } =
     usePaymentFormData(form, paymentData)
@@ -106,6 +115,27 @@ const AddPaymentModal: FC<Props> = ({
       }
     })
   }
+  const domainId = Form.useWatch('domain', form)
+  const [pendingDomain, setPendingDomain] = useState<string | null>(null)
+  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
+    { domainId },
+    { skip: !domainId }
+  )
+
+  const groups = customDomainServices?.data ?? []
+
+  const allInvoices = useMemo(
+    () => getInvoices({ company, service, payment, prevService, prevPayment }),
+    [company, service, payment, prevService, prevPayment]
+  )
+  const allowedServices = groups.flatMap((group) => group.services)
+  const filteredInvoices = useMemo(() => {
+    return allInvoices.filter((inv) =>
+      allowedServices.some(
+        (s) => inv.type === s.fieldName || inv.name === s.name
+      )
+    )
+  }, [allInvoices, allowedServices])
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
@@ -197,100 +227,67 @@ const AddPaymentModal: FC<Props> = ({
   }
 
   useEffect(() => {
-    if (preselectedCompany) {
-      form.setFieldsValue({ company: preselectedCompany })
-    }
-  }, [preselectedCompany, form])
+    if (edit) return
+    if (!domainId) return
+    setNeedResetInvoices(true)
+  }, [domainId, edit])
 
   useEffect(() => {
-    const isPreview = paymentActions.preview
-    const existingInvoice = form.getFieldValue('invoice')
+    if (!needResetInvoices) return
+    if (filteredInvoices.length === 0) return
 
-    if (isPreview) {
-      form.setFieldsValue({
-        invoice: getInvoices({
-          company,
-          service,
-          payment,
-          prevService,
-          prevPayment,
-        }),
-      })
-      return
-    }
+    form.resetFields(['invoice'])
+    form.setFieldsValue({ invoice: filteredInvoices })
 
-    if (!existingInvoice || existingInvoice.length === 0) {
-      form.setFieldsValue({
-        invoice: getInvoices({
-          company,
-          service,
-          payment,
-          prevService,
-          prevPayment,
-        }),
-      })
-    }
-  }, [
-    form,
-    company,
-    service,
-    payment,
-    prevService,
-    prevPayment,
-    paymentActions.preview,
-  ])
+    setNeedResetInvoices(false)
+  }, [filteredInvoices, needResetInvoices, form])
+
   useEffect(() => {
-    const existingInvoice = form.getFieldValue('invoice')
-    if (existingInvoice?.length > 0) return
+    if (edit) {
+      setTabsDisabled(false)
+    }
+  }, [edit])
+  const [initialValuesTabs, setInitialValuesTabs] = useState({
+    domain:
+      typeof payment?.domain === 'string'
+        ? payment?.domain
+        : payment?.domain?._id,
+    street:
+      typeof payment?.street === 'string'
+        ? payment?.street
+        : payment?.street?._id,
+    monthService:
+      typeof payment?.monthService === 'string'
+        ? payment?.monthService
+        : payment?.monthService?._id,
+    company:
+      typeof payment?.company === 'string'
+        ? payment?.company
+        : payment?.company?._id,
+    operation: payment?.type || Operations.Credit,
+  })
 
-    const invoice = getInvoices({
-      company,
-      service,
-      payment,
-      prevService,
-      prevPayment,
+  useEffect(() => {
+    setInitialValuesTabs({
+      domain:
+        typeof payment?.domain === 'string'
+          ? payment?.domain
+          : payment?.domain?._id,
+      street:
+        typeof payment?.street === 'string'
+          ? payment?.street
+          : payment?.street?._id,
+      monthService:
+        typeof payment?.monthService === 'string'
+          ? payment?.monthService
+          : payment?.monthService?._id,
+      company:
+        typeof payment?.company === 'string'
+          ? payment?.company
+          : payment?.company?._id,
+      operation: payment?.type || Operations.Credit,
     })
-    form.setFieldsValue({ invoice })
-  }, [form, company, service, payment, prevService, prevPayment])
-
-    useEffect(() => {
-      if (edit) {
-        setTabsDisabled(false)
-      }
-      }, [edit])
-      const [initialValuesTabs, setInitialValuesTabs] = useState({
-        domain: typeof payment?.domain === 'string'
-          ? payment?.domain
-          : payment?.domain?._id,
-        street: typeof payment?.street === 'string'
-          ? payment?.street
-          : payment?.street?._id,
-        monthService: typeof payment?.monthService === 'string'
-          ? payment?.monthService
-          : payment?.monthService?._id,
-        company: typeof payment?.company === 'string'
-          ? payment?.company
-          : payment?.company?._id,
-        operation: payment?.type || Operations.Credit,
-      })
-
-    useEffect(() => {
-      setInitialValuesTabs({
-        domain: typeof payment?.domain === 'string'
-          ? payment?.domain
-          : payment?.domain?._id,
-        street: typeof payment?.street === 'string'
-          ? payment?.street
-          : payment?.street?._id,
-        monthService: typeof payment?.monthService === 'string'
-          ? payment?.monthService
-          : payment?.monthService?._id,
-        company: typeof payment?.company === 'string'
-          ? payment?.company
-          : payment?.company?._id,
-        operation: payment?.type || Operations.Credit,
-      })
-    }, [payment])
+  }, [payment])
 
   return (
     <PaymentContext.Provider
@@ -341,6 +338,9 @@ const AddPaymentModal: FC<Props> = ({
             // eslint-disable-next-line
             // @ts-ignore
             monthService: payment?.monthService?._id,
+            invoice: paymentData?.invoice?.length
+              ? paymentData.invoice
+              : filteredInvoices,
             // monthService: dateToMonthYear(payment?.monthService?.date).charAt(0).toUpperCase() + dateToMonthYear(payment?.monthService?.date).slice(1),
             // TODO: fix payment typing globally to not be `domain: Partial<IRealestate> | string` but `Partial<IRealestate>` instead
             // TODO: ???rename IRealestate to ICompany maybe, what the realestate means actually???
@@ -360,14 +360,23 @@ const AddPaymentModal: FC<Props> = ({
           onValuesChange={(changedValues, allValues) => {
             setIsValueChanged(true)
             handleNonEmpty(form, setIsButtonDisabled)
-            
+
             const domainChanged = allValues.domain !== initialValuesTabs.domain
             const streetChanged = allValues.street !== initialValuesTabs.street
-            const monthServiceChanged = allValues.monthService !== initialValuesTabs.monthService
-            const companyChanged = allValues.company !== initialValuesTabs.company
-            const operationChanged = allValues.operation !== initialValuesTabs.operation
+            const monthServiceChanged =
+              allValues.monthService !== initialValuesTabs.monthService
+            const companyChanged =
+              allValues.company !== initialValuesTabs.company
+            const operationChanged =
+              allValues.operation !== initialValuesTabs.operation
 
-            if (domainChanged || streetChanged || monthServiceChanged || companyChanged || operationChanged) {
+            if (
+              domainChanged ||
+              streetChanged ||
+              monthServiceChanged ||
+              companyChanged ||
+              operationChanged
+            ) {
               setTabsDisabled(true)
             } else {
               setTabsDisabled(false)
