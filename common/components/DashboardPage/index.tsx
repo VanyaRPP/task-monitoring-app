@@ -7,7 +7,7 @@ import ServicesBlock from '@components/DashboardPage/blocks/services'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import CompaniesAreaChart from '@components/DashboardPage/blocks/сompaniesAreaChart'
 import { Roles } from '@utils/constants'
-import { Col, Row, Space } from 'antd'
+import { Col, Row, Space, Button, Flex } from 'antd'
 import PaymentsChart from '@components/DashboardPage/blocks/paymentChart'
 import ProfitPage from '@components/Pages/ProfiitPage'
 import 'react-grid-layout/css/styles.css'
@@ -82,6 +82,22 @@ const Dashboard: React.FC = () => {
   }, [])
   return (
     <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Flex justify='flex-end' gap='small' style={{ 
+        width: '100%',
+        backgroundColor: '#141414',
+        padding: '5px',
+        position: 'sticky',
+        zIndex: 1000,
+        border: '1px solid #333',
+        borderRadius: '8px',
+        }}>
+        <Button>
+          test
+        </Button>
+        <Button>
+          test
+        </Button>
+      </Flex>
       <ReactGridLayout
         className="dashboard-grid"
         compactType="vertical"
