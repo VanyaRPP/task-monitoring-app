@@ -50,6 +50,18 @@ function AddPaymentForm({ paymentActions }) {
   const companyId = Form.useWatch('company', form)
   const operation = Form.useWatch('operation', form)
 
+  const invoice = useInvoice({
+    payment,
+    service,
+    company,
+    prevService,
+    prevPayment,
+  })
+  useEffect(() => {
+    if (selectedDomain) {
+      form.resetFields(['street', 'monthService', 'company', 'operation'])
+    }
+  }, [selectedDomain, form])
   useEffect(() => {
     if (selectedDomain) {
       form.resetFields([

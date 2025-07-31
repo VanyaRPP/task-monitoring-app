@@ -234,6 +234,7 @@ const isMobile = !screens.md
   const isSingleCompanyByData = useMemo(() => {
     const list = payments?.data || []
     const uniqueCompanies = new Set(
+
       list.map((p) =>
         typeof p.company === 'object' ? p.company.companyName : p.company
       )
