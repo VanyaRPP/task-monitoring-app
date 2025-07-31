@@ -27,6 +27,9 @@ import { AppRoutes } from '@utils/constants'
 import { LogoIcon } from '@assets/icon/Logo'
 import { useRouter } from 'next/router'
 import GlassIcons from '@components/UI/GlassUI/GlassIcons'
+import {Dropdown } from 'antd'
+import type { MenuProps } from 'antd'
+
 
 interface GlassIconsItem {
   icon: React.ReactElement
@@ -47,6 +50,32 @@ const items: GlassIconsItem[] = [
 }
 ];
 
+const mapItems: MenuProps['items'] = [
+  {
+    key: 'google',
+    label: (
+      <a
+        href="https://www.google.com/maps?q=Мала+Бердичівська+17б,+Житомир"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Відкрити в Google Maps
+      </a>
+    ),
+  },
+  {
+    key: 'apple',
+    label: (
+      <a
+        href="http://maps.apple.com/?q=Мала+Бердичівська+17б,+Житомир"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Відкрити в Apple Maps
+      </a>
+    ),
+  },
+];
 
 const ContactsPage: React.FC = () => {
   const [addCallback, { isLoading }] = useAddCallbackMutation()
@@ -108,7 +137,9 @@ const [transparent, setTransparent] = useState(true);
           </div>
         </div>
               
-        <GlassCard id="glassCard" className={s.feedBackCard}>
+        <GlassCard id="glassCard" className={`${s.feedBackCard} ${transparent ? '' : s.transparentOff} ${
+    theme === 'light' ? s.lightTheme : s.darkTheme
+  }`}>
           <Button
   onClick={() => {
     const card = document.getElementById('glassCard');
@@ -157,44 +188,36 @@ const [transparent, setTransparent] = useState(true);
           </div>
           
       </GlassCard>
-      
- 
-              
+        
         <div className={s.ContactContainer}>
-          <div className={s.Links}>
-            <div className={s.Contacts}>
-              <div className={s.ContactAdress}>
-                <HomeOutlined />
-                <p className={s.ContactAdressForGoogle}>
-          <a 
-            href="https://www.google.com/maps?q=Мала+Бердичівська+17б,+Житомир"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              cursor: 'pointer',
-              color: 'rgb(112, 92, 141)',
-              padding: 0,
-              display: 'flex',
-              alignItems: 'center',
-              textDecoration: 'underline',
-            }}
-          >
-           
-           Вул. Мала Бердичівська 17б,<br /> м. Житомир
-          </a>
-        </p>
-              </div>
-              <div className={s.ContactPhone}>
-                <PhoneOutlined />
-                <p>+38(073)-777-5242</p>
-              </div>
-              <div className={s.ContactMail}>
-                <MailOutlined />
-                <a href="mailto:mail@spacehub.in.ua">mail@spacehub.in.ua</a>
-              </div>
-            </div>
-            </div>
-            </div>
+  <div className={s.Links}>
+    <div className={s.Contacts}>
+      <div className={s.ContactAdress}>
+        <HomeOutlined />
+        
+          <Dropdown menu={{ items: mapItems, className: s.dropdownMenu }} placement="bottomLeft">
+            <a
+              onClick={(e) => e.preventDefault()}
+              className={s.ContactMail}
+            >
+              Вул. Мала Бердичівська 17б, м. Житомир
+            </a>
+          </Dropdown>
+       
+      </div>
+
+      <div className={s.ContactPhone}>
+        <PhoneOutlined />
+        <p>+38(073)-777-5242</p>
+      </div>
+
+      <div className={s.ContactMail}>
+        <MailOutlined />
+        <a href="mailto:mail@spacehub.in.ua">mail@spacehub.in.ua</a>
+      </div>
+    </div>
+  </div>
+</div>
 
 <GlassIcons items={items} className="custom-class"/></div>
             

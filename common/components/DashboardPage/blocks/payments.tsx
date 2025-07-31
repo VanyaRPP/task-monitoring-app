@@ -287,6 +287,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
 
     domainFilter: filterProps.domainsFilter,
     realEstatesFilter: filterProps.companiesFilter,
+    isDashboard: router.pathname === AppRoutes.INDEX,
   }
 
   return (
