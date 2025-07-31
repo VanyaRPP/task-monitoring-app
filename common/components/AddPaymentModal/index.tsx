@@ -128,14 +128,14 @@ const AddPaymentModal: FC<Props> = ({
     () => getInvoices({ company, service, payment, prevService, prevPayment }),
     [company, service, payment, prevService, prevPayment]
   )
-  const allowedServices = groups.flatMap((group) => group.services)
-  const filteredInvoices = useMemo(() => {
-    return allInvoices.filter((inv) =>
-      allowedServices.some(
-        (s) => inv.type === s.fieldName || inv.name === s.name
-      )
-    )
-  }, [allInvoices, allowedServices])
+  // const allowedServices = groups.flatMap((group) => group.services)
+  // const filteredInvoices = useMemo(() => {
+  //   return allInvoices.filter((inv) =>
+  //     allowedServices.some(
+  //       (s) => inv.type === s.fieldName || inv.name === s.name
+  //     )
+  //   )
+  // }, [allInvoices, allowedServices])
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
@@ -234,13 +234,13 @@ const AddPaymentModal: FC<Props> = ({
 
   useEffect(() => {
     if (!needResetInvoices) return
-    if (filteredInvoices.length === 0) return
+    if (allInvoices.length === 0) return
 
     form.resetFields(['invoice'])
-    form.setFieldsValue({ invoice: filteredInvoices })
+    form.setFieldsValue({ invoice: allInvoices })
 
     setNeedResetInvoices(false)
-  }, [filteredInvoices, needResetInvoices, form])
+  }, [allInvoices, needResetInvoices, form])
 
   useEffect(() => {
     if (edit) {
@@ -340,7 +340,7 @@ const AddPaymentModal: FC<Props> = ({
             monthService: payment?.monthService?._id,
             invoice: paymentData?.invoice?.length
               ? paymentData.invoice
-              : filteredInvoices,
+              : allInvoices,
             // monthService: dateToMonthYear(payment?.monthService?.date).charAt(0).toUpperCase() + dateToMonthYear(payment?.monthService?.date).slice(1),
             // TODO: fix payment typing globally to not be `domain: Partial<IRealestate> | string` but `Partial<IRealestate>` instead
             // TODO: ???rename IRealestate to ICompany maybe, what the realestate means actually???
