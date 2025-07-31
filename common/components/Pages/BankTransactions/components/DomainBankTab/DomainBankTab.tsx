@@ -7,7 +7,7 @@ import TransactionsTable from '../TransactionsTable/TransactionsTable'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import EncryptionService from '@utils/encryptionService'
 import { FC, useEffect, useMemo } from 'react'
-import { Alert, Card } from 'antd'
+import { Alert, Card, Spin } from 'antd'
 import { useTranslation } from 'next-i18next'
 import { setAccount } from '@modules/store/bankSlice'
 import DomainBankBalance from '../DomainbankBalance/DomainBankBalance'
@@ -54,7 +54,15 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
       { skip: !decryptedToken || !selectedAccount }
     )
 
-  if (isDomainError || !domain) {
+  if (isDomainLoading || !domain) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
+        <Spin size="large" />
+      </div>
+    )
+  }
+
+  if (isDomainError) {
     return (
       <Alert
         message={t('domainErrorTitle')}

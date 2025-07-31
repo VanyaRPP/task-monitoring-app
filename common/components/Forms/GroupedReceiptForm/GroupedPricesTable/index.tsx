@@ -29,20 +29,25 @@ const columns = [
   },
 ]
 
-const groupedInvoices = (invoices: any, groups: any) => {
+const groupedInvoices = (invoices: any[], groups: any[]) => { // TODO: FIX maintenancePrice && rentPrice logic
   return groups?.map((group) => {
-    const groupFieldNames = group?.services.map((service) => service?.fieldName)
     const groupInvoices = invoices?.filter((invoice) =>
-      groupFieldNames.includes(invoice?.type)
+      group?.services?.some((service) =>
+        (invoice?.name === service?.name ||
+        invoice?.type === service?.fieldName) ||
+        (invoice?.type === 'maintenancePrice' && service?.fieldName === 'rentPrice')
+      )
     )
+
     const totalGroupSum = (groupInvoices ?? []).reduce((sum, invoice) => {
       return sum + (invoice?.sum ?? 0)
     }, 0)
+
     return {
       groupName: group?.groupName,
       invoices: groupInvoices,
       totalSum: totalGroupSum.toFixed(2),
-      fieldNames: groupFieldNames,
+      fieldNames: group?.services?.map((s) => s?.fieldName),
     }
   })
 }
@@ -73,7 +78,6 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
       name: group.groupName,
       sum: group.totalSum,
     })) || []
-
   const discountInvoice = invoices?.find((inv) => inv?.type === 'discount')
   if (discountInvoice) {
     dataSource.push({
@@ -87,13 +91,13 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
     (inv) => inv?.type === 'custom' && !groupedFieldNames.includes(inv?.type)
   )
 
-  customInvoices?.forEach((inv) => {
-    dataSource.push({
-      key: dataSource.length + 1,
-      name: inv.name || 'Додатково',
-      sum: inv.sum,
-    })
-  })
+  // customInvoices?.forEach((inv) => { // Uncomment to add custom invoices
+  //   dataSource.push({
+  //     key: dataSource.length + 1,
+  //     name: inv.name || 'Додатково',
+  //     sum: inv.sum,
+  //   })
+  // })
 
   return (
     <Table

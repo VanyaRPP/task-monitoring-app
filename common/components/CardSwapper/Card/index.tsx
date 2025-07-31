@@ -1,7 +1,3 @@
-/*
-  Installed from https://reactbits.dev/ts/default/
-*/
-
 import React, {
   Children,
   cloneElement,

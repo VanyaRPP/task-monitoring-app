@@ -94,7 +94,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                       placeholder="Назва групи"
                     />
                   </Form.Item>
-
+                <div style={{ flex: 3, position: 'relative', paddingRight: '32px', marginBottom: '20px' }}>
                   <Form.Item required style={{ flex: 3 }}>
                     <Select
                       disabled={disabled}
@@ -111,7 +111,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                         }))
                         return filteredOptions
                       })()}
-                      style={{ minWidth: '150px', maxWidth: '220px' }}
+                      style={{ width: '220px' }}
                       value={groupValues}
                       onChange={(newValues) => {
                         const current = form.getFieldValue('customServices')
@@ -129,14 +129,17 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                   {!disabled && (
                     <MinusCircleOutlined
                       style={{
-                        position: 'relative',
+                        position: 'absolute',
+                        top: '50%',
+                        right: '-5px', 
+                        transform: 'translateY(-50%)',
                         cursor: 'pointer',
                         fontSize: '24px',
-                        minWidth: '24px',
                       }}
                       onClick={() => remove(field.name)}
                     />
                   )}
+                 </div>
                 </Space>
               )
             })}
