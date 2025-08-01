@@ -5,6 +5,7 @@ import {
   SunFilled,
   EditOutlined,
   CheckOutlined,
+  CloseCircleOutlined, 
 } from '@ant-design/icons'
 import useTheme from '@modules/hooks/useTheme'
 import { FloatButtonItem } from '@utils/types'
@@ -51,7 +52,7 @@ export const useEditModelFloatButton = (
   const button = useMemo<FloatButtonItem>(
     () => ({
       key: `editmode-${uniqueKey}`,
-      icon: isEditMode ? <CheckOutlined /> : <EditOutlined />,
+      icon: isEditMode ? <CheckOutlined /> : <EditOutlined style={{ fontSize: 18, color: '#9254de' }} />,
       onClick: toggleEditMode,
       tooltip: isEditMode ? 'Exit EditMode' : 'Enter EditMode',
     }),
@@ -59,4 +60,24 @@ export const useEditModelFloatButton = (
   )
 
   return [isEditMode, toggleEditMode, button]
+}
+
+export const useDragDropPanelFloatButton = (
+  uniqueKey: string
+): [boolean, () => void, FloatButtonItem] => {
+  const [visible, setVisible] = useState(false)
+
+  const toggleVisible = () => setVisible((prev) => !prev)
+
+  const button = useMemo<FloatButtonItem>(
+    () => ({
+      key: `dragdroppanel-${uniqueKey}`,
+      icon: visible ? <CloseCircleOutlined /> : <EditOutlined />,
+      onClick: toggleVisible,
+      tooltip: visible ? 'Disable drag & drop' : 'Enable drag & drop',
+    }),
+    [visible, uniqueKey]
+  )
+
+  return [visible, toggleVisible, button]
 }

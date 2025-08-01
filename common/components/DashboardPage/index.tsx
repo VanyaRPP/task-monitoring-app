@@ -7,17 +7,19 @@ import ServicesBlock from '@components/DashboardPage/blocks/services'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import CompaniesAreaChart from '@components/DashboardPage/blocks/сompaniesAreaChart'
 import { Roles } from '@utils/constants'
-import { Col, Row, Space, Button, Flex } from 'antd'
+import { Col, Row, Space, Button, Flex, Tooltip } from 'antd'
+import { CloseOutlined } from '@ant-design/icons'
 import PaymentsChart from '@components/DashboardPage/blocks/paymentChart'
 import ProfitPage from '@components/Pages/ProfiitPage'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 import { addButton, removeButton } from '@modules/store/floatButtonSlice'
-import { useEditModelFloatButton } from '@modules/hooks/useFloatButton'
+import { useEditModelFloatButton, useDragDropPanelFloatButton  } from '@modules/hooks/useFloatButton'
 import { useDispatch } from 'react-redux'
 import { WidthProvider } from 'react-grid-layout'
 import GridLayout, { Layout } from 'react-grid-layout'
 import s from './style.module.scss'
+import useTheme from '@modules/hooks/useTheme'
 
 import { WidgetWrapper } from '@components/UI/WidgetWrapper'
 const MARGIN_Y = 12
@@ -34,6 +36,16 @@ const ALL_WIDGETS = [
   'companies',
 ] as const
 type WidgetKey = (typeof ALL_WIDGETS)[number]
+const widgetLabels: Record<WidgetKey, string> = {
+  payments: 'Платежі',
+  paymentsChart: 'Графік платежів',
+  services: 'Послуги',
+  streets: 'Адреси',
+  domain: 'Надавачі послуг',
+  realEstate: 'Компанії',
+  profits: 'Прибутки',
+  companies: 'Займані площі',
+}
 
 const widgetMap: Record<WidgetKey, React.ReactNode> = {
   payments: <PaymentsBlock />,
@@ -51,24 +63,37 @@ const Dashboard: React.FC = () => {
   const { data: userResponse } = useGetCurrentUserQuery()
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
 
-  const [isEditMode, toggleEditMode, editFloatButton] =
-    useEditModelFloatButton('dashboard')
+  const [isEditMode, toggleEditMode, editFloatButton] = useEditModelFloatButton('dashboard')
+  const [isPanelVisible, togglePanelVisible, panelFloatButton] = useDragDropPanelFloatButton('dashboard')
+
+  const [theme] = useTheme()
+  const isDark = theme === 'dark'
+
   useEffect(() => {
-    dispatch(addButton(editFloatButton))
-    return () => {
-      dispatch(removeButton(editFloatButton.key))
-    }
-  }, [dispatch, editFloatButton])
+      dispatch(addButton(panelFloatButton)) 
+      return () => {
+        dispatch(removeButton(panelFloatButton.key))
+      }
+    }, [dispatch, panelFloatButton])
+
+  useEffect(() => {
+      if (isPanelVisible && !isEditMode) {
+        toggleEditMode()
+      } else if (!isPanelVisible && isEditMode) {
+        toggleEditMode()
+      }
+    }, [isPanelVisible])
 
   const [layout, setLayout] = useState<Layout[]>(() =>
-    ALL_WIDGETS.filter((w) => w !== 'streets' || isGlobalAdmin).map((w, i) => ({
-      i: w,
-      x: 0,
-      w: 1,
-      h: 2,
-      y: 0,
-    }))
-  )
+  ALL_WIDGETS.map((w, i) => ({
+    i: w,
+    x: 0,
+    w: 1,
+    h: 2,
+    y: 0,
+  }))
+)
+
   const handleNodeHeight = useCallback((id: string, newH: number) => {
     setLayout((prev) => {
       const idx = prev.findIndex((item) => item.i === id)
@@ -81,23 +106,63 @@ const Dashboard: React.FC = () => {
     })
   }, [])
   return (
-    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-      <Flex justify='flex-end' gap='small' style={{ 
+    <div style={{ width: '100%' }}>
+      {isPanelVisible && (
+      <div  style={{ 
+        display: 'flex',    
+        justifyContent: 'space-between',
+        gap: '8px',
         width: '100%',
-        backgroundColor: '#141414',
-        padding: '5px',
+        top: '90px',
+        backgroundColor: isDark ? '#141414' : '#fff',
+        color: isDark ? '#fff' : '#000',
+        padding: '15px',
+        paddingRight: '25px',
         position: 'sticky',
         zIndex: 1000,
-        border: '1px solid #333',
+        border: `1px solid ${isDark ? '#333' : '#d9d9d9'}`,
         borderRadius: '8px',
-        }}>
-        <Button>
-          test
-        </Button>
-        <Button>
-          test
-        </Button>
-      </Flex>
+        boxShadow: isDark ? undefined : '0 2px 8px rgba(0,0,0,0.1)',
+        marginBottom: 25
+         }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {layout.map((item) => (
+                  <Button
+                    key={item.i}
+                    type="link"
+                    onClick={() => {
+                      const element = document.getElementById(item.i)
+                      if (element) {
+                        element.scrollIntoView({
+                          behavior: 'smooth',
+                          block: 'center',
+                        })
+                      }
+                    }}
+                  >
+                    {widgetLabels[item.i as WidgetKey]}
+                  </Button>
+                ))}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div
+                    style={{
+                      width: 1,
+                      height: 23,
+                      backgroundColor: '#555',
+                      marginRight: 25,
+                      marginTop: 5,
+                    }}
+                  />
+                  <Tooltip title="Disable drag & drop">
+                    <Button
+                      icon={<CloseOutlined />}
+                      onClick={togglePanelVisible}
+                    />
+                  </Tooltip>
+                </div>
+              </div> 
+              )}               
       <ReactGridLayout
         className="dashboard-grid"
         compactType="vertical"
@@ -115,7 +180,7 @@ const Dashboard: React.FC = () => {
         }}
       >
         {layout.map((item) => (
-          <div key={item.i} data-grid={item} className={s.gridItem}>
+          <div key={item.i} data-grid={item} className={s.gridItem} id={item.i}>
             <WidgetWrapper
               id={item.i}
               rowHeight={60}
@@ -128,7 +193,7 @@ const Dashboard: React.FC = () => {
           </div>
         ))}
       </ReactGridLayout>
-    </Space>
+    </div>  
   )
 }
 
