@@ -159,11 +159,11 @@ const RealEstateForm: FC<Props> = ({
         />
       </Form.Item>
 
-      {/* <CustomServicesCard
+      <CustomServicesCard
         form={form}
         disabled={!editable}
         allCustomServices={customServices}
-      /> */}
+      />
       {/* { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') && // TODO: customServices */}
       {/* <Form.Item
         name="servicePricePerMeter"
@@ -207,14 +207,14 @@ const RealEstateForm: FC<Props> = ({
       </Form.Item> */}
       {/* } */}
 
-      <Form.Item name="discount" label="Знижка">
+      {/* <Form.Item name="discount" label="Знижка">
         <InputNumber
           parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
         />
-      </Form.Item>
+      </Form.Item> */}
 
       <Form.Item
         valuePropName="checked"
