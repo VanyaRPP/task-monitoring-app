@@ -41,6 +41,55 @@ const AddServiceForm: React.FC<Props> = ({
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
 
+  const filteredServicesPrice = (customServices) => {
+    return customServices?.map((service) => {
+      let price = null
+  
+      switch (service.fieldName) {
+        case 'electricityPrice':
+          price = currentService?.electricityPrice
+          ?? currentService?.customServices?.find(service => service.fieldName === 'electricityPrice')?.price 
+          ?? 0
+          break
+        case 'inflicionPrice':
+          price = currentService?.inflicionPrice
+          ?? currentService?.customServices?.find(service => service.fieldName === 'inflicionPrice')?.price 
+          ?? 0
+          break
+        case 'rentPrice':
+          price = currentService?.rentPrice
+          ?? currentService?.customServices?.find(service => service.fieldName === 'rentPrice')?.price 
+          ?? 0
+          break
+        case 'waterPrice':
+          price = currentService?.waterPrice
+          ?? currentService?.customServices?.find(service => service.fieldName === 'waterPrice')?.price 
+          ?? 0
+          break
+        case 'waterPriceTotal':
+          price = currentService?.waterPriceTotal
+          ?? currentService?.customServices?.find(service => service.fieldName === 'waterPriceTotal')?.price 
+          ?? 0
+          break
+        case 'garbageCollectorPrice':
+          price = currentService?.garbageCollectorPrice
+          ?? currentService?.customServices?.find(service => service.fieldName === 'garbageCollectorPrice')?.price 
+          ?? 0
+          break
+        default:
+          price = currentService?.[service?.fieldName]
+          ?? currentService?.customServices?.find(service => service?.fieldName === service?.fieldName)?.price 
+          ?? 0
+          break
+      }
+  
+      return {
+        ...service,
+        price,
+      }
+    })
+  }
+
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
     { domainId: domainId },
     { skip: !domainId }
@@ -56,6 +105,8 @@ const AddServiceForm: React.FC<Props> = ({
         }))
       : []
   )
+
+  const filteredCustomServices = filteredServicesPrice(initialCustomServices)
 
   const { previousMonth } = usePreviousMonthService({
     date,
@@ -80,7 +131,7 @@ const AddServiceForm: React.FC<Props> = ({
         previousMonth?.garbageCollectorPrice ??
         0,
       customServices:
-        currentService?.customServices || initialCustomServices || [],
+        currentService?.customServices || filteredCustomServices || [],
       losses: currentService?.losses ?? 0,
     })
   }, [form, currentService, previousMonth, initialCustomServices])
