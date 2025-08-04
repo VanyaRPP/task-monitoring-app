@@ -25,6 +25,7 @@ import { WidgetWrapper } from '@components/UI/WidgetWrapper'
 const MARGIN_Y = 12
 const MARGIN_X = 12
 const ReactGridLayout = WidthProvider(GridLayout)
+const LAYOUT_STORAGE_KEY = 'dashboard-layout'
 const ALL_WIDGETS = [
   'payments',
   'paymentsChart',
@@ -63,36 +64,45 @@ const Dashboard: React.FC = () => {
   const { data: userResponse } = useGetCurrentUserQuery()
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
 
-  const [isEditMode, toggleEditMode, editFloatButton] = useEditModelFloatButton('dashboard')
-  const [isPanelVisible, togglePanelVisible, panelFloatButton] = useDragDropPanelFloatButton('dashboard')
+  const [isEditMode, toggleEditMode, editFloatButton] =
+    useEditModelFloatButton('dashboard')
+  const [isPanelVisible, togglePanelVisible, panelFloatButton] =
+    useDragDropPanelFloatButton('dashboard')
 
   const [theme] = useTheme()
   const isDark = theme === 'dark'
 
   useEffect(() => {
-      dispatch(addButton(panelFloatButton)) 
-      return () => {
-        dispatch(removeButton(panelFloatButton.key))
-      }
-    }, [dispatch, panelFloatButton])
+    dispatch(addButton(panelFloatButton))
+    return () => {
+      dispatch(removeButton(panelFloatButton.key))
+    }
+  }, [dispatch, panelFloatButton])
 
   useEffect(() => {
-      if (isPanelVisible && !isEditMode) {
-        toggleEditMode()
-      } else if (!isPanelVisible && isEditMode) {
-        toggleEditMode()
-      }
-    }, [isPanelVisible])
+    if (isPanelVisible && !isEditMode) {
+      toggleEditMode()
+    } else if (!isPanelVisible && isEditMode) {
+      toggleEditMode()
+    }
+  }, [isPanelVisible])
 
-  const [layout, setLayout] = useState<Layout[]>(() =>
-  ALL_WIDGETS.map((w, i) => ({
-    i: w,
-    x: 0,
-    w: 1,
-    h: 2,
-    y: 0,
-  }))
-)
+  const [layout, setLayout] = useState<Layout[]>(() => {
+    const saved = localStorage.getItem(LAYOUT_STORAGE_KEY)
+    return saved
+      ? (JSON.parse(saved) as Layout[])
+      : ALL_WIDGETS.map((w, i) => ({
+          i: w,
+          x: 0,
+          w: 1,
+          h: 2,
+          y: 0,
+        }))
+  })
+  const handleLayoutChange = useCallback((newLayout: Layout[]) => {
+    setLayout(newLayout)
+    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(newLayout))
+  }, [])
 
   const handleNodeHeight = useCallback((id: string, newH: number) => {
     setLayout((prev) => {
@@ -108,61 +118,60 @@ const Dashboard: React.FC = () => {
   return (
     <div style={{ width: '100%' }}>
       {isPanelVisible && (
-      <div  style={{ 
-        display: 'flex',    
-        justifyContent: 'space-between',
-        gap: '8px',
-        width: '100%',
-        top: '90px',
-        backgroundColor: isDark ? '#141414' : '#fff',
-        color: isDark ? '#fff' : '#000',
-        padding: '15px',
-        paddingRight: '25px',
-        position: 'sticky',
-        zIndex: 1000,
-        border: `1px solid ${isDark ? '#333' : '#d9d9d9'}`,
-        borderRadius: '8px',
-        boxShadow: isDark ? undefined : '0 2px 8px rgba(0,0,0,0.1)',
-        marginBottom: 25
-         }}>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {layout.map((item) => (
-                  <Button
-                    key={item.i}
-                    type="link"
-                    onClick={() => {
-                      const element = document.getElementById(item.i)
-                      if (element) {
-                        element.scrollIntoView({
-                          behavior: 'smooth',
-                          block: 'center',
-                        })
-                      }
-                    }}
-                  >
-                    {widgetLabels[item.i as WidgetKey]}
-                  </Button>
-                ))}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div
-                    style={{
-                      width: 1,
-                      height: 23,
-                      backgroundColor: '#555',
-                      marginRight: 25,
-                      marginTop: 5,
-                    }}
-                  />
-                  <Tooltip title="Disable drag & drop">
-                    <Button
-                      icon={<CloseOutlined />}
-                      onClick={togglePanelVisible}
-                    />
-                  </Tooltip>
-                </div>
-              </div> 
-              )}               
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: '8px',
+            width: '100%',
+            top: '90px',
+            backgroundColor: isDark ? '#141414' : '#fff',
+            color: isDark ? '#fff' : '#000',
+            padding: '15px',
+            paddingRight: '25px',
+            position: 'sticky',
+            zIndex: 1000,
+            border: `1px solid ${isDark ? '#333' : '#d9d9d9'}`,
+            borderRadius: '8px',
+            boxShadow: isDark ? undefined : '0 2px 8px rgba(0,0,0,0.1)',
+            marginBottom: 25,
+          }}
+        >
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {layout.map((item) => (
+              <Button
+                key={item.i}
+                type="link"
+                onClick={() => {
+                  const element = document.getElementById(item.i)
+                  if (element) {
+                    element.scrollIntoView({
+                      behavior: 'smooth',
+                      block: 'center',
+                    })
+                  }
+                }}
+              >
+                {widgetLabels[item.i as WidgetKey]}
+              </Button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div
+              style={{
+                width: 1,
+                height: 23,
+                backgroundColor: '#555',
+                marginRight: 25,
+                marginTop: 5,
+              }}
+            />
+            <Tooltip title="Disable drag & drop">
+              <Button icon={<CloseOutlined />} onClick={togglePanelVisible} />
+            </Tooltip>
+          </div>
+        </div>
+      )}
       <ReactGridLayout
         className="dashboard-grid"
         compactType="vertical"
@@ -175,9 +184,7 @@ const Dashboard: React.FC = () => {
         isDraggable={isEditMode}
         isResizable={false}
         isBounded={true}
-        onLayoutChange={() => {
-          /* TODO: saveChanges */
-        }}
+        onLayoutChange={handleLayoutChange}
       >
         {layout.map((item) => (
           <div key={item.i} data-grid={item} className={s.gridItem} id={item.i}>
@@ -193,7 +200,7 @@ const Dashboard: React.FC = () => {
           </div>
         ))}
       </ReactGridLayout>
-    </div>  
+    </div>
   )
 }
 
