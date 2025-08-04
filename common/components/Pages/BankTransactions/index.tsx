@@ -7,7 +7,7 @@ import DomainBankTab from './components/DomainBankTab/DomainBankTab'
 import { useDomainTabs } from '../ProfiitPage/hook/useDomainTabs'
 import { ReactNode, useMemo, useEffect } from 'react'
 import { useTranslation } from 'next-i18next'
-import { Card, Space, Alert } from 'antd'
+import { Card, Space, Alert, Spin } from 'antd'
 
 const BankTransactions = () => {
   const { t } = useTranslation('bankPage')
@@ -52,24 +52,27 @@ const BankTransactions = () => {
         style={{ width: '100%', position: 'relative' }}
         size="middle"
       >
-        {tabList.length > 0 ? (
-          <Card
-            title={t('title')}
-            tabList={tabList}
-            activeTabKey={activeDomainId || tabList[0].key}
-            onTabChange={onTabChange}
-            loading={isLoading}
-          >
-            {activeDomainId ? contentList[activeDomainId] : null}
-          </Card>
-        ) : (
-          <Alert
-            message={t('noDomains')}
-            description={t('noDomainsDescription')}
-            type="info"
-            showIcon
-          />
-        )}
+        {isLoading || tabList.length === 0 ? (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 100 }}>
+          <Spin size="large" />
+        </div>
+      ) : isError ? (
+        <Alert
+          message={t('errorTitle')}
+          description={t('errorDescription')}
+          type="error"
+          showIcon
+        />
+      ) : (
+        <Card
+          title={t('title')}
+          tabList={tabList}
+          activeTabKey={activeDomainId || tabList[0].key}
+          onTabChange={onTabChange}
+        >
+          {activeDomainId ? contentList[activeDomainId] : null}
+        </Card>
+      )}
       </Space>
     </FullScreenWrapper>
   )

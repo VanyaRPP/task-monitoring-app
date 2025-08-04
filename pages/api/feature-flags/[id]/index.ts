@@ -96,7 +96,7 @@ export default async function handler(
 
   try {
     switch (req.method) {
-      case 'PATH': {
+      case 'PATCH': {
         const updated = await FeatureFlagService.update(id, req.body)
         return res.status(200).json({ success: true, data: updated })
       }

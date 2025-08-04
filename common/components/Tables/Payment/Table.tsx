@@ -233,14 +233,24 @@ const isMobile = !screens.md
   const { token } = theme.useToken()
   const isSingleCompanyByData = useMemo(() => {
     const list = payments?.data || []
-    if (list.length <= 1) return false
-    const unique = new Set(
+    const uniqueCompanies = new Set(
+
       list.map((p) =>
         typeof p.company === 'object' ? p.company.companyName : p.company
       )
     )
-    return unique.size === 1
-  }, [payments?.data])
+    return filters?.company?.length === 1 && uniqueCompanies.size === 1
+  }, [payments?.data, filters?.company])
+  const isSingleDomainByData = useMemo(() => {
+    const list = payments?.data || []
+    const uniqueDomains = new Set(
+      list.map((p) =>
+        typeof p.domain === 'object' ? p.domain.name : p.domain
+      )
+    )
+    return filters?.domain?.length === 1 && uniqueDomains.size === 1
+  }, [payments?.data, filters?.domain])
+
   const allColumns: ColumnsType<IExtendedPayment> = useMemo(() => {
     return [
       {
@@ -262,7 +272,7 @@ const isMobile = !screens.md
               </Typography.Link>
             </Tooltip>
           ),
-        hidden: payments?.domainsFilter?.length <= 1,
+        hidden: isSingleDomainByData || isSingleCompanyByData,
       },
       {
         title: 'Компанія',
@@ -323,13 +333,13 @@ const isMobile = !screens.md
         filters:
           !sepDomainID && dateFilters?.monthFilter
             ? dateFilters.monthFilter
-                .filter((f) => f.value != null)
-                .map((f) => ({
-                  text: toFirstUpperCase(
-                    dateToMonth(new Date(2000, Number(f.value) - 1))
-                  ),
-                  value: `${new Date().getFullYear()}-month-${f.value}`,
-                }))
+              .filter((f) => f.value != null)
+              .map((f) => ({
+                text: toFirstUpperCase(
+                  dateToMonth(new Date(2000, Number(f.value) - 1))
+                ),
+                value: `${new Date().getFullYear()}-month-${f.value}`,
+              }))
             : [],
         filteredValue: filters?.invoiceCreationDate || null,
       },
@@ -340,9 +350,9 @@ const isMobile = !screens.md
         filters: sepDomainID
           ? undefined
           : [
-              { text: 'Кредит (Оплата)', value: Operations.Credit },
-              { text: 'Дебет (Реалізація)', value: Operations.Debit },
-            ],
+            { text: 'Кредит (Оплата)', value: Operations.Credit },
+            { text: 'Дебет (Реалізація)', value: Operations.Debit },
+          ],
         filteredValue: filters?.type || null,
         filterMultiple: false,
         children: [
@@ -360,7 +370,7 @@ const isMobile = !screens.md
             sorter: sepDomainID
               ? undefined
               : (a: IExtendedPayment, b: IExtendedPayment) =>
-                  a.generalSum - b.generalSum,
+                a.generalSum - b.generalSum,
           },
           {
             title: <Tooltip title="Кредит (Оплата)">Кредит</Tooltip>,
@@ -376,7 +386,7 @@ const isMobile = !screens.md
             sorter: sepDomainID
               ? undefined
               : (a: IExtendedPayment, b: IExtendedPayment) =>
-                  a.generalSum - b.generalSum,
+                a.generalSum - b.generalSum,
           },
         ],
       },
@@ -618,7 +628,7 @@ const isMobile = !screens.md
                   {renderCurrency(
                     toRoundFixed(
                       totalPayments[
-                        column.dataIndex as keyof typeof totalPayments
+                      column.dataIndex as keyof typeof totalPayments
                       ] || 0
                     )
                   )}
@@ -645,7 +655,7 @@ const isMobile = !screens.md
                   {renderCurrency(
                     toRoundFixed(
                       Number(totalPayments.debit || 0) -
-                        Number(totalPayments.credit || 0)
+                      Number(totalPayments.credit || 0)
                     )
                   )}
                 </Table.Summary.Cell>
@@ -664,52 +674,52 @@ const isMobile = !screens.md
 
   const rowSelection =
     (isGlobalAdmin || isDomainAdmin) &&
-    (pathname === AppRoutes.PAYMENT || Boolean(sepDomainID))
+      (pathname === AppRoutes.PAYMENT || Boolean(sepDomainID))
       ? {
-          selectedRowKeys: selectedPayments.map((i) => i._id),
-          preserveSelectedRowKeys: true,
+        selectedRowKeys: selectedPayments.map((i) => i._id),
+        preserveSelectedRowKeys: true,
 
-          onChange: (_keys, rows) => {
-            onSelectPayments(rows)
-            const deleteItems = rows.map((item) => ({
-              id: item._id,
-              date:
-                typeof item.monthService === 'object' &&
+        onChange: (_keys, rows) => {
+          onSelectPayments(rows)
+          const deleteItems = rows.map((item) => ({
+            id: item._id,
+            date:
+              typeof item.monthService === 'object' &&
                 (item.monthService as any)?.date
-                  ? String((item.monthService as any).date)
-                  : String(item.invoiceCreationDate),
-              domain: (item.domain as any)?.name || '',
-              company: (item.company as any)?.companyName || '',
-            }))
-            onSetDeleteItems(deleteItems)
-          },
+                ? String((item.monthService as any).date)
+                : String(item.invoiceCreationDate),
+            domain: (item.domain as any)?.name || '',
+            company: (item.company as any)?.companyName || '',
+          }))
+          onSetDeleteItems(deleteItems)
+        },
 
-          onSelect: (record, selected) => {
-            if (selected) {
-              onSelectPayments([...selectedPayments, record])
-              onSetDeleteItems([
-                ...paymentsDeleteItems,
-                {
-                  id: record._id,
-                  date:
-                    typeof record.monthService === 'object' &&
+        onSelect: (record, selected) => {
+          if (selected) {
+            onSelectPayments([...selectedPayments, record])
+            onSetDeleteItems([
+              ...paymentsDeleteItems,
+              {
+                id: record._id,
+                date:
+                  typeof record.monthService === 'object' &&
                     (record.monthService as any)?.date
-                      ? String((record.monthService as any).date)
-                      : String(record.invoiceCreationDate),
-                  domain: (record.domain as any)?.name || '',
-                  company: (record.company as any)?.companyName || '',
-                },
-              ])
-            } else {
-              onSelectPayments(
-                selectedPayments.filter((p) => p._id !== record._id)
-              )
-              onSetDeleteItems(
-                paymentsDeleteItems.filter((i) => i.id !== record._id)
-              )
-            }
-          },
-        }
+                    ? String((record.monthService as any).date)
+                    : String(record.invoiceCreationDate),
+                domain: (record.domain as any)?.name || '',
+                company: (record.company as any)?.companyName || '',
+              },
+            ])
+          } else {
+            onSelectPayments(
+              selectedPayments.filter((p) => p._id !== record._id)
+            )
+            onSetDeleteItems(
+              paymentsDeleteItems.filter((i) => i.id !== record._id)
+            )
+          }
+        },
+      }
       : undefined
 
   return (
