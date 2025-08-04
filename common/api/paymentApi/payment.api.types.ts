@@ -14,6 +14,7 @@ export interface IPaymentField {
   amount?: number
   price: number
   sum: number
+  fieldName?: string
 }
 
 export interface IProvider {
