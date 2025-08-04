@@ -30,6 +30,7 @@ import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import s from './style.module.scss'
+import serviceFilter from './serviceFilter'
 
 interface Props {
   closeModal: VoidFunction
@@ -121,22 +122,16 @@ const AddPaymentModal: FC<Props> = ({
     { domainId },
     { skip: !domainId }
   )
-
   const groups = customDomainServices?.data ?? []
 
   const allInvoices = useMemo(
     () => getInvoices({ company, service, payment, prevService, prevPayment }),
     [company, service, payment, prevService, prevPayment]
   )
-  // const allowedServices = groups.flatMap((group) => group.services)
-  // const filteredInvoices = useMemo(() => {
-  //   return allInvoices.filter((inv) =>
-  //     allowedServices.some(
-  //       (s) => inv.type === s.fieldName || inv.name === s.name
-  //     )
-  //   )
-  // }, [allInvoices, allowedServices])
-
+  const allowedServices = groups.flatMap((group) => group.services)
+  const filteredInvoices = useMemo(() => {
+    return serviceFilter(allInvoices, allowedServices)
+  }, [allInvoices, allowedServices])
   const handleSubmit = async () => {
     const formData = await form.validateFields()
 
@@ -235,9 +230,10 @@ const AddPaymentModal: FC<Props> = ({
   useEffect(() => {
     if (!needResetInvoices) return
     if (allInvoices.length === 0) return
+    // if (filteredInvoices?.length === 0) return
 
     form.resetFields(['invoice'])
-    form.setFieldsValue({ invoice: allInvoices })
+    form.setFieldsValue({ invoice: filteredInvoices })
 
     setNeedResetInvoices(false)
   }, [allInvoices, needResetInvoices, form])
@@ -358,7 +354,7 @@ const AddPaymentModal: FC<Props> = ({
             monthService: payment?.monthService?._id,
             invoice: paymentData?.invoice?.length
               ? paymentData.invoice
-              : allInvoices,
+              : filteredInvoices,
             // monthService: dateToMonthYear(payment?.monthService?.date).charAt(0).toUpperCase() + dateToMonthYear(payment?.monthService?.date).slice(1),
             // TODO: fix payment typing globally to not be `domain: Partial<IRealestate> | string` but `Partial<IRealestate>` instead
             // TODO: ???rename IRealestate to ICompany maybe, what the realestate means actually???

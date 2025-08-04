@@ -501,6 +501,7 @@ export const getCustomServiceInvoices = ({
           price: +toRoundFixed(customService.price),
           sum: +toRoundFixed(customService.price),
           type: ServiceType.Custom,
+          fieldName: customService.fieldName || 'custom',
           customService: true,
         }
       ))
