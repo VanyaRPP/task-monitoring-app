@@ -494,19 +494,30 @@ export const getCustomServiceInvoices = ({
   ) {
     return []
   }
-  const customServices = Array.isArray(company?.customServices)
-    ? company?.customServices.flatMap((customService) => (
-        {
-          name: customService.label || 'Невідома послуга',
-          price: +toRoundFixed(customService.price),
-          sum: +toRoundFixed(customService.price),
-          type: ServiceType.Custom,
-          fieldName: customService.fieldName || 'custom',
-          customService: true,
-        }
-      ))
-    : []
+
+  const serviceCustoms = Array.isArray(service?.customServices) ? service.customServices : []
+  const companyCustoms = Array.isArray(company?.customServices) ? company.customServices : []
+
+  const customServices = serviceCustoms.map((serviceItem) => {
+    const companyItem = companyCustoms.find(
+      (c) => c?.fieldName === serviceItem?.fieldName
+    )
+
+    const price = +toRoundFixed(
+      companyItem?.price ?? serviceItem?.price ?? 0
+    )
+
+    return {
+      name: serviceItem?.label || 'Невідома послуга',
+      price,
+      sum: price,
+      type: ServiceType.Custom,
+      fieldName: serviceItem?.fieldName || 'custom',
+      customService: true,
+    }
+  })
 
   return customServices
 }
+
 

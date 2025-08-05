@@ -19,6 +19,13 @@ export default function serviceFilter(
     return !duplicateStandardExists
   })
   return uniqueInvoices?.filter((inv) => {
+
+    if (inv?.fieldName === 'waterPrice' 
+      || inv?.fieldName === 'waterPriceTotal'
+      || inv?.fieldName === 'rentPart') {
+      return false
+    }
+
     const isMaintenance =
       inv?.type === 'maintenancePrice' 
       && allowedFieldNames?.includes('rentPrice')

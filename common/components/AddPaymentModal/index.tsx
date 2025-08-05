@@ -130,7 +130,7 @@ const AddPaymentModal: FC<Props> = ({
   )
   const allowedServices = groups.flatMap((group) => group.services)
   const filteredInvoices = useMemo(() => {
-    return serviceFilter(allInvoices, allowedServices)
+    return serviceFilter(allInvoices, allowedServices) // TODO: delete after custom service refactor
   }, [allInvoices, allowedServices])
   const handleSubmit = async () => {
     const formData = await form.validateFields()
