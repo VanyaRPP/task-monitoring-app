@@ -230,8 +230,7 @@ const AddPaymentModal: FC<Props> = ({
   useEffect(() => {
     if (!needResetInvoices) return
     if (allInvoices.length === 0) return
-    // if (filteredInvoices?.length === 0) return
-
+    
     form.resetFields(['invoice'])
     form.setFieldsValue({ invoice: filteredInvoices })
 
