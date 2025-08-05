@@ -168,7 +168,8 @@ export const defaultServices = [
   '677d434c83b6ef93c6b8ea3a',
   '68230f76a51fddf0ae165d77',
   '682dd48d9665126611c81950',
-  '677d412483b6ef93c6b8e9fa'
+  '677d412483b6ef93c6b8e9fa',
+  '677d437c83b6ef93c6b8ea50'
 ]
 
 export const cascaderMonths = [

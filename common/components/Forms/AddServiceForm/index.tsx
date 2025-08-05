@@ -131,7 +131,9 @@ const AddServiceForm: React.FC<Props> = ({
         previousMonth?.garbageCollectorPrice ??
         0,
       customServices:
-        currentService?.customServices || filteredCustomServices || [],
+      (currentService?.customServices?.length > 0 
+        ? currentService.customServices 
+        : filteredCustomServices) || [],
       losses: currentService?.losses ?? 0,
     })
   }, [form, currentService, previousMonth, initialCustomServices])

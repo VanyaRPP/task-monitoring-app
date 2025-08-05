@@ -97,7 +97,9 @@ const RealEstateModal: FC<Props> = ({
       discount: currentRealEstate?.discount || 0,
       cleaning: currentRealEstate?.cleaning || 0,
       services: currentRealEstate?.services || [],
-      customServices: currentRealEstate?.customServices || filteredCustomServices || [],
+      customServices: (currentRealEstate?.customServices?.length > 0 
+        ? currentRealEstate.customServices 
+        : filteredCustomServices) || [],
     }
     const currentCustomServices = form.getFieldValue('customServices')
 
