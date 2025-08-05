@@ -58,15 +58,27 @@ const AddServiceModal: FC<Props> = ({
       domain: currentService?.domain?._id?.toString() || formData.domain,
       street: currentService?.street?._id?.toString() || formData.street,
       date: dayjs(formData.date).toDate(),
-      rentPrice: formData.rentPrice,
-      electricityPrice: formData.electricityPrice,
-      waterPrice: formData.waterPrice,
-      waterPriceTotal: formData.waterPriceTotal,
-      garbageCollectorPrice: formData.garbageCollectorPrice || 0,
-      inflicionPrice: formData.inflicionPrice || 0,
-      description: formData.description || '',
-      customServices: formData.customServices || [],
-      ...(formData.losses > 0 && { losses: formData.losses }),
+      rentPrice: formData.customServices?.find(
+        (c) => c.fieldName === 'rentPrice'
+      )?.price ?? formData?.rentPrice,
+      electricityPrice: formData?.customServices?.find(
+        (c) => c.fieldName === 'electricityPrice'
+      )?.price ?? formData?.electricityPrice,
+      waterPrice: formData?.customServices?.find(
+        (c) => c.fieldName === 'waterPrice'
+      )?.price ?? formData?.waterPrice,
+      waterPriceTotal: formData?.customServices?.find(
+        (c) => c.fieldName === 'waterPriceTotal'
+      )?.price ?? formData?.waterPriceTotal,
+      garbageCollectorPrice: formData?.customServices?.find(
+        (c) => c.fieldName === 'garbageCollectorPrice'
+      )?.price || formData?.garbageCollectorPrice || 0,
+      inflicionPrice: formData?.customServices?.find(
+        (c) => c.fieldName === 'inflicionPrice'
+      )?.price || formData?.inflicionPrice || 0,
+      description: formData?.description || '',
+      customServices: formData?.customServices || [],
+      ...(formData?.losses > 0 && { losses: formData?.losses }),
     }
     const response = currentService
       ? await editService({

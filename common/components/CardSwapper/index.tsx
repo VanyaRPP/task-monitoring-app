@@ -7,8 +7,8 @@ const CardPage: React.FC = () => {
     return (
       <div>
         <CardSwap
-          cardDistance={30}
-          verticalDistance={50}
+          cardDistance={20}
+          verticalDistance={30}
           delay={3000}
           pauseOnHover={false}
         >
