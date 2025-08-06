@@ -1,5 +1,5 @@
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useLayoutEffect, useMemo } from 'react'
 import DomainsBlock from '@components/DashboardPage/blocks/domains'
 import PaymentsBlock from '@components/DashboardPage/blocks/payments'
 import RealEstateBlock from '@components/DashboardPage/blocks/realEstates'
@@ -7,8 +7,8 @@ import ServicesBlock from '@components/DashboardPage/blocks/services'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import CompaniesAreaChart from '@components/DashboardPage/blocks/сompaniesAreaChart'
 import { Roles } from '@utils/constants'
-import { Col, Row, Space, Button, Flex, Tooltip } from 'antd'
-import { CloseOutlined } from '@ant-design/icons'
+import { Col, Row, Space, Button, Flex,  message, Tooltip } from 'antd'
+import { CloseOutlined, SaveOutlined } from '@ant-design/icons'
 import PaymentsChart from '@components/DashboardPage/blocks/paymentChart'
 import ProfitPage from '@components/Pages/ProfiitPage'
 import 'react-grid-layout/css/styles.css'
@@ -86,23 +86,56 @@ const Dashboard: React.FC = () => {
       toggleEditMode()
     }
   }, [isPanelVisible])
+  const getLayoutStorageKey = (userId?: string) =>
+    userId ? `dashboard-layout-${userId}` : 'dashboard-layout'
+    const visibleWidgets = useMemo(() => {
+  return isGlobalAdmin
+    ? ALL_WIDGETS
+    : ALL_WIDGETS.filter((w) => w !== 'profits')
+}, [isGlobalAdmin])
+const visibleWidgetMap = useMemo(() => {
+  return Object.fromEntries(
+    visibleWidgets.map((key) => [key, widgetMap[key]])
+  ) as typeof widgetMap
+}, [visibleWidgets])
+  const DEFAULT_LAYOUT: Layout[] = visibleWidgets.map((w) => ({
+    i: w,
+    x: 0,
+    w: 1,
+    h: 2,
+    y: 0,
+  }))
 
-  const [layout, setLayout] = useState<Layout[]>(() => {
-    const saved = localStorage.getItem(LAYOUT_STORAGE_KEY)
-    return saved
-      ? (JSON.parse(saved) as Layout[])
-      : ALL_WIDGETS.map((w, i) => ({
-          i: w,
-          x: 0,
-          w: 1,
-          h: 2,
-          y: 0,
-        }))
-  })
-  const handleLayoutChange = useCallback((newLayout: Layout[]) => {
-    setLayout(newLayout)
-    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(newLayout))
-  }, [])
+  const [layout, setLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
+  const [tempLayout, setTempLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
+
+ const [isLayoutReady, setIsLayoutReady] = useState(false)
+
+  useEffect(() => {
+    const userId = userResponse?._id?.toString()
+    if (!userId) return
+
+    const saved = localStorage.getItem(getLayoutStorageKey(userId))
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as Layout[]
+        setLayout(parsed)
+        setTempLayout(parsed)
+      } catch {}
+    }
+    setIsLayoutReady(true)
+  }, [userResponse?._id])
+
+  
+  const handleLayoutChange = useCallback(
+    (newLayout: Layout[]) => {
+      setTempLayout(newLayout)
+    },
+    []
+  )
+  useLayoutEffect(() => {
+    setTempLayout(layout)
+  }, [layout])
 
   const handleNodeHeight = useCallback((id: string, newH: number) => {
     setLayout((prev) => {
@@ -166,12 +199,26 @@ const Dashboard: React.FC = () => {
                 marginTop: 5,
               }}
             />
+           <Tooltip title="Save location">
+              <Button
+                icon={<SaveOutlined />}
+                onClick={() => {
+                  const userId = userResponse?._id?.toString()
+                  if (!userId) return
+                  localStorage.setItem(getLayoutStorageKey(userId), JSON.stringify(tempLayout))
+                  setLayout(tempLayout)
+                  message.success('Location saved!')
+                  togglePanelVisible()
+                }}
+              />
+            </Tooltip>
             <Tooltip title="Disable drag & drop">
               <Button icon={<CloseOutlined />} onClick={togglePanelVisible} />
             </Tooltip>
           </div>
         </div>
       )}
+      {isLayoutReady && (
       <ReactGridLayout
         className="dashboard-grid"
         compactType="vertical"
@@ -195,11 +242,12 @@ const Dashboard: React.FC = () => {
               isEditMode={isEditMode}
               onHeightChange={handleNodeHeight}
             >
-              {widgetMap[item.i as WidgetKey]}
+               {visibleWidgetMap[item.i as WidgetKey]}
             </WidgetWrapper>
           </div>
         ))}
       </ReactGridLayout>
+      )}
     </div>
   )
 }
