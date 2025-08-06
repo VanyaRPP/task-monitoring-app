@@ -64,7 +64,7 @@ const PaymentCardLabel = ({
           <Space
             direction="vertical"
             size="middle"
-            align={isMobile ? 'start' : 'center'}
+            align='start'
             className={styles.tags}
           >
             <DomainFilterTags
