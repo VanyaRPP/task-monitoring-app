@@ -20,7 +20,8 @@ import { useEffect, useMemo } from 'react'
 
 export const getDefaultColumns = (
   remove: (index: number) => void,
-  losses?: number
+  losses?: number ,
+  extraColumns: TableColumnsType = []
 ): TableColumnsType => [
   {
     fixed: 'left',
@@ -181,7 +182,8 @@ export const getDefaultColumns = (
     title: 'Знижка',
     width: 200,
     render: (_, { name }: { name: number }) => <Discount name={name} />,
-  },
+    }, 
+  ...extraColumns,
   {
     fixed: 'right',
     align: 'center',

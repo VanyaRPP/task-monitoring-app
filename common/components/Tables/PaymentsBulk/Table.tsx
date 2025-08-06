@@ -2,9 +2,11 @@ import { useInvoicesPaymentContext } from '@common/components/DashboardPage/bloc
 import { getDefaultColumns } from '@common/components/Tables/PaymentsBulk/column.config'
 import { AppRoutes, Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
-import { Alert, Empty, Form, Table } from 'antd'
+import { Alert, Empty, Form, Table, Input } from 'antd'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
+import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
+import serviceFilter from '@components/AddPaymentModal/serviceFilter'
 
 const InvoicesTable: React.FC = () => {
   const router = useRouter()
@@ -20,6 +22,28 @@ const InvoicesTable: React.FC = () => {
     isError,
   } = useInvoicesPaymentContext()
 
+  const domainId = Form.useWatch('domain', form)
+
+  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
+    { domainId },
+    { skip: !domainId }
+  )
+  const groups = customDomainServices?.data ?? []
+  const allowedServices = groups.flatMap((group) => group.services)
+  const dynamicColumns = useMemo(() => {
+    return allowedServices.map((svc) => ({
+      title: svc.name,
+      width: 160,
+      render: (_: any, { name }: { name: number }) => (
+        <Form.Item
+          name={[name, 'invoice', svc.fieldName, 'sum']}
+          style={{ margin: 0 }}
+        >
+          <Input />
+        </Form.Item>
+      ),
+    }))
+  }, [allowedServices])
   useEffect(() => {
     if (!companies || companies.length === 0 || !service) {
       return form.setFieldsValue({ payments: [] })
@@ -36,23 +60,36 @@ const InvoicesTable: React.FC = () => {
             payment.type === Operations.Debit
         )
 
-        const invoice = getInvoices({
+        const allinvoice = getInvoices({
           company,
           service,
           prevService,
           prevPayment,
-        }).reduce((acc, invoice) => {
-          acc[invoice.name || invoice.type] = invoice
+        })
+        const filteredInvoice = serviceFilter(allinvoice, allowedServices)
+
+        const invoiceObjectForTheAll = allinvoice.reduce((acc, inv) => {
+          acc[inv.name || inv.type] = inv
           return acc
-        }, {})
+        }, {} as Record<string, any>)
+
+        const invoiceObjectForCustom = filteredInvoice.reduce((acc, inv) => {
+          acc[inv.fieldName || inv.type] = inv
+          return acc
+        }, {} as Record<string, any>)
+
+        const invoiceObject = {
+          ...invoiceObjectForTheAll,
+          ...invoiceObjectForCustom,
+        }
 
         return {
           company,
-          invoice,
+          invoice: invoiceObject,
         }
       }),
     })
-  }, [form, service, companies, prevService, prevPayments])
+  }, [form, service, companies, prevService, prevPayments, allowedServices])
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
@@ -64,7 +101,9 @@ const InvoicesTable: React.FC = () => {
           size="small"
           pagination={false}
           loading={isLoading}
-          columns={getDefaultColumns(remove, service?.losses)}
+          columns={[
+            ...getDefaultColumns(remove, service?.losses, dynamicColumns),
+          ]}
           dataSource={fields}
           scroll={{ x: 3000 }}
           locale={{
