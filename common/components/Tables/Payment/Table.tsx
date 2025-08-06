@@ -323,7 +323,7 @@ const isMobile = !screens.md
           }
           return companyLabel
         },
-        hidden: isSingleCompanyByData,
+        hidden: filters?.company?.lenght === 1,
       },
       {
         title: 'Дата створення',

@@ -57,22 +57,6 @@ function AddPaymentForm({ paymentActions }) {
     prevService,
     prevPayment,
   })
-  useEffect(() => {
-    if (selectedDomain) {
-      form.resetFields(['street', 'monthService', 'company', 'operation'])
-    }
-  }, [selectedDomain, form])
-  useEffect(() => {
-    if (selectedDomain) {
-      form.resetFields([
-        'street',
-        'monthService',
-        'company',
-        'operation',
-        'invoice',
-      ])
-    }
-  }, [selectedDomain, form])
 
   return (
     <>
