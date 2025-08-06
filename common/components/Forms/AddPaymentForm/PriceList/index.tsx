@@ -77,9 +77,6 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
   const groupedInvoices = (invoices: any, groups: any) => { // TODO: FIX maintenancePrice && rentPrice logic
     const result =
       groups?.map((group, index) => {
-        const groupFieldNames = group?.services.map(
-          (service) => service?.fieldName
-        )
         const groupInvoices = invoices?.filter((invoice) =>
           group?.services?.some((service) =>
             (invoice?.name === service?.name ||
@@ -87,9 +84,11 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
             (invoice?.type === 'maintenancePrice' && service?.fieldName === 'rentPrice')
           )
         )
+
         const totalGroupSum = (groupInvoices ?? []).reduce((sum, invoice) => {
           return sum + (invoice?.sum ?? 0)
         }, 0)
+
         return {
           key: index,
           number: index + 1,
@@ -100,19 +99,19 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
         }
       }) || []
 
-    // const customInvoice = invoices?.find(
-    //   (invoice) => invoice?.type === 'custom'
-    // )
-    // if (customInvoice) {
-    //   result.push({
-    //     key: result.length,
-    //     number: result.length + 1,
-    //     type: customInvoice.name || 'custom',
-    //     unit: 'грн',
-    //     price: +customInvoice.sum,
-    //     sum: +customInvoice.sum,
-    //   })
-    // }
+    const customInvoice = invoices?.find(
+      (invoice) => invoice?.type === 'custom' && !invoice?.customService
+    )
+    if (customInvoice) {
+      result.push({
+        key: result.length,
+        number: result.length + 1,
+        type: customInvoice.name || 'custom',
+        unit: 'грн',
+        price: +customInvoice.sum,
+        sum: +customInvoice.sum,
+      })
+    }
 
     return result
   }
@@ -211,6 +210,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               , з іншого боку, склали цей акт про те, що на підставі договору,
               Виконавцем були виконані наступні роботи (надані такі послуги):
             </p>
+            <br/>
           </div>
         </div>
 

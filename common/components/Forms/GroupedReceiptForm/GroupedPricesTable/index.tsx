@@ -29,8 +29,8 @@ const columns = [
   },
 ]
 
-const groupedInvoices = (invoices: any[], groups: any[]) => { // TODO: FIX maintenancePrice && rentPrice logic
-  return groups?.map((group) => {
+const groupedInvoices = (invoices: any, groups: any) => { // TODO: FIX maintenancePrice && rentPrice logic
+  const result = groups?.map((group) => {
     const groupInvoices = invoices?.filter((invoice) =>
       group?.services?.some((service) =>
         (invoice?.name === service?.name ||
@@ -49,7 +49,9 @@ const groupedInvoices = (invoices: any[], groups: any[]) => { // TODO: FIX maint
       totalSum: totalGroupSum.toFixed(2),
       fieldNames: group?.services?.map((s) => s?.fieldName),
     }
-  })
+  }) || []
+
+  return result
 }
 
 const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
@@ -91,13 +93,13 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
     (inv) => inv?.type === 'custom' && !groupedFieldNames.includes(inv?.type)
   )
 
-  // customInvoices?.forEach((inv) => { // Uncomment to add custom invoices
-  //   dataSource.push({
-  //     key: dataSource.length + 1,
-  //     name: inv.name || 'Додатково',
-  //     sum: inv.sum,
-  //   })
-  // })
+  customInvoices?.forEach((inv) => { // Uncomment to add custom invoices
+    dataSource.push({
+      key: dataSource.length + 1,
+      name: inv.name || 'Додатково',
+      sum: inv.sum,
+    })
+  })
 
   return (
     <Table
