@@ -94,7 +94,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
   )
 
   customInvoices?.forEach((inv) => { // Uncomment to add custom invoices
-    dataSource.push({
+    !inv?.customService && dataSource.push({
       key: dataSource.length + 1,
       name: inv.name || 'Додатково',
       sum: inv.sum,
