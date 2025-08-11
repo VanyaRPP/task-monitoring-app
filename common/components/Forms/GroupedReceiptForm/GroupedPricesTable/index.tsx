@@ -23,10 +23,14 @@ const columns = [
     key: 'name',
   },
   {
-    title: 'Сума, грн',
-    dataIndex: 'sum',
-    key: 'sum',
+  title: 'Сума, грн',
+  dataIndex: 'sum',
+  key: 'sum',
+  render: (value: any) => {
+    const n = Number(value)
+    return isFinite(n) ? n.toFixed(2) : value
   },
+  }
 ]
 
 const groupedInvoices = (invoices: any, groups: any) => { // TODO: FIX maintenancePrice && rentPrice logic
