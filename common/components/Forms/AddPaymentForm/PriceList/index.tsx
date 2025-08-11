@@ -100,18 +100,19 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
       }) || []
 
     const customInvoice = invoices?.find(
-      (invoice) => invoice?.type === 'custom' && !invoice?.customService
-    )
-    if (customInvoice) {
-      result.push({
-        key: result.length,
-        number: result.length + 1,
-        type: customInvoice.name || 'custom',
-        unit: 'грн',
-        price: +customInvoice.sum,
-        sum: +customInvoice.sum,
-      })
-    }
+  (invoice) => invoice?.type === 'custom' && !invoice?.customService
+)
+if (customInvoice) {
+  const n = Number(customInvoice.sum) || 0
+  result.push({
+    key: result.length,
+    number: result.length + 1,
+    type: customInvoice.name || 'custom',
+    unit: 'грн',
+    price: n.toFixed(2), 
+    sum: n.toFixed(2),     
+  })
+}
 
     return result
   }
