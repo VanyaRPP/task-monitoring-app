@@ -77,7 +77,6 @@ const StreetsTable: React.FC<Props> = ({
   return (
     <>
       <Table
-      style={{ height: '100%' }}
         rowKey="_id"
         pagination={
           (router.pathname === AppRoutes.REAL_ESTATE ||

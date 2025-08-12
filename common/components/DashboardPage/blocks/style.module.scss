@@ -5,61 +5,49 @@
 .Table {
   max-height: max-content;
   cursor: pointer;
-
   button {
     color: var(--textColor);
   }
-
   button:disabled {
     color: #88888830;
   }
-
   li a {
     color: var(--primaryColor);
   }
-
   :global {
     .ant-pagination-item-active {
       background-color: var(--primaryColorHover);
     }
-
     .ant-pagination-item-active a {
       color: white;
     }
   }
 }
-
 .block {
   display: flex;
   justify-content: space-between;
 }
-
 .popconfirm {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
 .icon {
   font-size: 14px;
 }
-
 .eyelined {
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
 .spin {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
 }
 
 .payer {
   color: #1677ff !important;
-
   &:hover {
     color: #4096ff;
   }
@@ -68,21 +56,17 @@
 .summ_item {
   text-align: end;
 }
-
 .saldo {
   text-align: center;
 }
-
 .title {
   color: var(--primaryColor);
   font-weight: 400;
 }
-
 .noScroll {
   // 200px to compensate header and footer heights
   min-height: calc(100vh - 200px) !important;
 }
-
 .Pagination {
   display: flex;
   justify-content: center;

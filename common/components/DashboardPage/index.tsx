@@ -22,8 +22,8 @@ import s from './style.module.scss'
 import useTheme from '@modules/hooks/useTheme'
 
 import { WidgetWrapper } from '@components/UI/WidgetWrapper'
-// const MARGIN_Y = 12
-// const MARGIN_X = 12
+const MARGIN_Y = 12
+const MARGIN_X = 12
 const ReactGridLayout = WidthProvider(GridLayout)
 const LAYOUT_STORAGE_KEY = 'dashboard-layout'
 const ALL_WIDGETS = [
@@ -98,13 +98,13 @@ const visibleWidgetMap = useMemo(() => {
     visibleWidgets.map((key) => [key, widgetMap[key]])
   ) as typeof widgetMap
 }, [visibleWidgets])
-  const DEFAULT_LAYOUT: Layout[] = visibleWidgets.map((w, index) => ({
-  i: w,
-  x: 0,
-  y: index * 2, //додав цей параметр щоб кожна табличка була рівно нижче попередньої
-  w: 1,
-  h: 2,
-}));
+  const DEFAULT_LAYOUT: Layout[] = visibleWidgets.map((w) => ({
+    i: w,
+    x: 0,
+    w: 1,
+    h: 2,
+    y: 0,
+  }))
 
   const [layout, setLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
   const [tempLayout, setTempLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
@@ -220,24 +220,33 @@ const visibleWidgetMap = useMemo(() => {
       )}
       {isLayoutReady && (
       <ReactGridLayout
-  className="dashboard-grid"
-  compactType="vertical"
-  layout={layout}
-  cols={1} 
-  rowHeight={310}// забрав віджетвраппер тим самим збільшив висоту рядків
-  margin={[0, 15]}// додав марджіни щоб був рівний відступ
-  useCSSTransforms={true}
-  isDraggable={isEditMode}
-  isResizable={false}
-  isBounded={true}
-  onLayoutChange={handleLayoutChange}
->
-  {layout.map((item) => (
-    <div key={item.i} data-grid={item} className={s.gridItem}>
-      {visibleWidgetMap[item.i as WidgetKey]}
-    </div>
-  ))}
-</ReactGridLayout>
+        className="dashboard-grid"
+        compactType="vertical"
+        layout={layout}
+        cols={1}
+        rowHeight={60}
+        margin={[MARGIN_X, MARGIN_Y]}
+        useCSSTransforms={true}
+        listenToWindowResize={true}
+        isDraggable={isEditMode}
+        isResizable={false}
+        isBounded={true}
+        onLayoutChange={handleLayoutChange}
+      >
+        {layout.map((item) => (
+          <div key={item.i} data-grid={item} className={s.gridItem} id={item.i}>
+            <WidgetWrapper
+              id={item.i}
+              rowHeight={60}
+              marginY={MARGIN_Y}
+              isEditMode={isEditMode}
+              onHeightChange={handleNodeHeight}
+            >
+               {visibleWidgetMap[item.i as WidgetKey]}
+            </WidgetWrapper>
+          </div>
+        ))}
+      </ReactGridLayout>
       )}
     </div>
   )

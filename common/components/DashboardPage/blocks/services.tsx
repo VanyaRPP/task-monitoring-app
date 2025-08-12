@@ -74,7 +74,6 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
   })
   return (
     <TableCard
-    style={{ height: '100%' }}
       title={
         <ServicesHeader
           showAddButton={isAdminCheck(user?.roles)}

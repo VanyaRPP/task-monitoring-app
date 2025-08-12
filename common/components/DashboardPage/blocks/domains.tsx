@@ -17,7 +17,6 @@ const DomainsBlock: React.FC<Props> = ({ domainId }) => {
 
   return (
     <TableCard
-    
       title={
         <DomainsHeader
           currentDomain={currentDomain}
@@ -27,7 +26,7 @@ const DomainsBlock: React.FC<Props> = ({ domainId }) => {
         />
       }
       style={{
-        flexWrap: 'wrap',height: '100%' 
+        flexWrap: 'wrap',
       }}
     >
       <DomainsTable
