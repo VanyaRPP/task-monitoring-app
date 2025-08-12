@@ -56,10 +56,11 @@ const ProfitPage = () => {
     <FullScreenWrapper unicKey="profit-table">
       <Space
         direction="vertical"
-        style={{ width: '100%', position: 'relative' }}
+        style={{ width: '100%', position: 'relative',height: '100%'}}
         size="middle"
       >
         <Card
+        style={{ height: '100%' }}
           title={t('profitPage:title')}
           extra={
             isAdmin && (

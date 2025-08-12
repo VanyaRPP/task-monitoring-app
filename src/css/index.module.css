@@ -1,0 +1,40 @@
+.default {
+  color: red;
+}
+
+.error {
+  visibility: hidden;
+}
+
+.Input :global .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
+.Input :global .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input:hover {
+  background: var(--backgroundColorPrimary);
+}/*# sourceMappingURL=index.module.css.map */ms: flex-end;
+  gap: 0.5rem;
+}
+.NotificationWrapper .header .controls div {
+  font-size: 0.6rem;
+  font-weight: 600;
+}
+.NotificationWrapper .header .controls div:first-child:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+.NotificationWrapper .header .controls div:last-child:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+.NotificationWrapper .body {
+  padding: 10px;
+}/*# sourceMappingURL=index.module.css.map */groundColorPrimary);
+}
+.FormItem :global .ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input,
+.FormItem :global .ant-input-status-success {
+  color: var(--textColor);
+  background-color: var(--backgroundColorPrimary);
+}
+.FormItem .Input:-webkit-autofill,
+.FormItem .Input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--textColor) !important;
+  box-shadow: 0 0 0 100px var(--backgroundColorPrimary) inset !important;
+}/*# sourceMappingURL=index.module.css.map */

@@ -18,6 +18,7 @@ const StreetsBlock: React.FC<{
 
   return (
     <TableCard
+    style={{ height: '100%' }}
       title={
         <StreetsHeader
           showAddButton

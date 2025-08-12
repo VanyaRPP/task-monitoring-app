@@ -62,6 +62,7 @@ const RealEstateBlock: React.FC<Props> = ({
 
   return (
     <TableCard
+    style={{ height: '100%' }}
       title={
         <CompaniesHeader
           showAddButton={isAdminCheck(user?.roles)}

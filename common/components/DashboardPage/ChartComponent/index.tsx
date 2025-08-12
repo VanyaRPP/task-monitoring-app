@@ -57,6 +57,7 @@ const ChartComponent: React.FC<ChartComponentProps> = ({
 
   return (
     <Card
+    
       title={
         <Space>
           <Link href={link}>
@@ -82,6 +83,7 @@ const ChartComponent: React.FC<ChartComponentProps> = ({
       }
       style={{
         ...(isError && { borderColor: token.colorError }),
+        height: '100%'
       }}
     >
       <Spin spinning={isFetching}>

@@ -100,7 +100,9 @@ const ServicesTable: React.FC<Props> = ({
 
   return (
     <>
+    
       <Table
+      style={{ height: '100%' }}
         rowKey="_id"
         rowSelection={
           isAdminCheck(user?.roles) &&
