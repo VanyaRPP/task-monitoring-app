@@ -11,38 +11,17 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
   const [totalSum, setTotalSum] = useState(0)
   const [totalFractionSum, setTotalFractionSum] = useState(0)
 
-
-        return {
-          key: index,
-          number: index + 1,
-          type: group?.groupName,
-          unit: 'грн',
-          price: totalGroupSum.toFixed(2),
-          sum: totalGroupSum.toFixed(2),
-        }
-      }) || []
-
-    const customInvoice = invoices?.find(
-  (invoice) => invoice?.type === 'custom' && !invoice?.customService
-)
-if (customInvoice) {
-  const n = Number(customInvoice.sum) || 0
-  result.push({
-    key: result.length,
-    number: result.length + 1,
-    type: customInvoice.name || 'custom',
-    unit: 'грн',
-    price: n.toFixed(2), 
-    sum: n.toFixed(2),     
-  })
-}
-
-    return result
-  }
-
   useEffect(() => {
     setPayment(data)
   }, [data])
+
+  useEffect(() => {
+    const sum = payment.invoice.reduce((acc, item) => acc + Number(item.sum), 0)
+    setTotalSum(sum)
+
+    const [, fraction] = sum.toFixed(2).split('.')
+    setTotalFractionSum(Number(fraction))
+  }, [payment])
 
   useEffect(() => {
     const sum = payment.invoice.reduce((acc, item) => acc + Number(item.sum), 0)
