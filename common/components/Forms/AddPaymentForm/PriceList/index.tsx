@@ -23,6 +23,14 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
     setTotalFractionSum(Number(fraction))
   }, [payment])
 
+  useEffect(() => {
+    const sum = payment.invoice.reduce((acc, item) => acc + Number(item.sum), 0)
+    setTotalSum(sum)
+
+    const [, fraction] = sum.toFixed(2).split('.')
+    setTotalFractionSum(Number(fraction))
+  }, [payment])
+
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
