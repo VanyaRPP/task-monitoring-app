@@ -228,20 +228,20 @@ const AddPaymentModal: FC<Props> = ({
   }, [domainId, edit])
 
   useEffect(() => {
-    if (!needResetInvoices) return
     if (allInvoices.length === 0) return
-    
+
     form.resetFields(['invoice'])
     form.setFieldsValue({ invoice: filteredInvoices })
 
     setNeedResetInvoices(false)
-  }, [allInvoices, needResetInvoices, form])
+  }, [allInvoices, form])
 
   useEffect(() => {
     if (edit) {
       setTabsDisabled(false)
     }
   }, [edit])
+
   const [initialValuesTabs, setInitialValuesTabs] = useState({
     domain:
       typeof payment?.domain === 'string'
@@ -284,23 +284,27 @@ const AddPaymentModal: FC<Props> = ({
     })
   }, [payment])
 
-    useEffect(() => {
-      setInitialValuesTabs({
-        domain: typeof payment?.domain === 'string'
+  useEffect(() => {
+    setInitialValuesTabs({
+      domain:
+        typeof payment?.domain === 'string'
           ? payment?.domain
           : payment?.domain?._id,
-        street: typeof payment?.street === 'string'
+      street:
+        typeof payment?.street === 'string'
           ? payment?.street
           : payment?.street?._id,
-        monthService: typeof payment?.monthService === 'string'
+      monthService:
+        typeof payment?.monthService === 'string'
           ? payment?.monthService
           : payment?.monthService?._id,
-        company: typeof payment?.company === 'string'
+      company:
+        typeof payment?.company === 'string'
           ? payment?.company
           : payment?.company?._id,
-        operation: payment?.type || Operations.Credit,
-      })
-    }, [payment])
+      operation: payment?.type || Operations.Credit,
+    })
+  }, [payment])
 
   return (
     <PaymentContext.Provider
