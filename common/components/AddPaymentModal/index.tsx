@@ -117,6 +117,10 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
   const domainId = Form.useWatch('domain', form)
+  const streetId = Form.useWatch('street', form)
+  const monthServiceId = Form.useWatch('monthService', form)
+  const companyId = Form.useWatch('company', form)
+  const operation = Form.useWatch('operation', form)
   const [pendingDomain, setPendingDomain] = useState<string | null>(null)
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
     { domainId },
@@ -222,26 +226,45 @@ const AddPaymentModal: FC<Props> = ({
   }
 
   useEffect(() => {
-    if (edit) return
-    if (!domainId) return
-    setNeedResetInvoices(true)
-  }, [domainId, edit])
+    if (edit) return;
+    if (!domainId) return;
+
+    form.setFieldsValue({
+      street: undefined,
+      monthService: undefined,
+      company: undefined,
+      generalSum: undefined,
+      description: undefined,
+      invoiceNumber: undefined,
+      invoiceCreationDate: undefined,
+      invoice: [],
+    });
+    setActiveTabKey('1');
+    setCurrPayment(undefined);
+    setNeedResetInvoices(false);
+  }, [domainId, edit, form]);
 
   useEffect(() => {
-    if (allInvoices.length === 0) return
+    if (!needResetInvoices) return;
+    if (allInvoices.length === 0) return;
 
-    form.resetFields(['invoice'])
-    form.setFieldsValue({ invoice: filteredInvoices })
+    form.setFieldsValue({ invoice: filteredInvoices });
+    setNeedResetInvoices(false);
+  }, [needResetInvoices, allInvoices, filteredInvoices, form]);
 
-    setNeedResetInvoices(false)
-  }, [allInvoices, form])
+  useEffect(() => {
+    if (edit) return;
+    if (operation !== Operations.Debit) return;               
+    if (!domainId || !streetId || !monthServiceId || !companyId) return;
+
+    setNeedResetInvoices(true);                           
+  }, [edit, operation, domainId, streetId, monthServiceId, companyId]);
 
   useEffect(() => {
     if (edit) {
       setTabsDisabled(false)
     }
   }, [edit])
-
   const [initialValuesTabs, setInitialValuesTabs] = useState({
     domain:
       typeof payment?.domain === 'string'
