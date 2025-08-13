@@ -465,6 +465,7 @@ const isMobile = !screens.md
                         justifyContent: 'space-between',
                         width: '100%',
                         gap: 8,
+                        whiteSpace: 'nowrap'
                       }}
                     >
                       <Typography.Text strong>{item.label}</Typography.Text>
