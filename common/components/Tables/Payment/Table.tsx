@@ -251,6 +251,23 @@ const isMobile = !screens.md
     return filters?.domain?.length === 1 && uniqueDomains.size === 1
   }, [payments?.data, filters?.domain])
 
+    const themeKey = useMemo(
+    () =>
+      [
+        token.colorBgElevated,
+        token.colorText,
+        token.colorBorderSecondary,
+        token.boxShadowSecondary,
+        token.colorFillSecondary,
+      ].join('|'),
+    [
+      token.colorBgElevated,
+      token.colorText,
+      token.colorBorderSecondary,
+      token.boxShadowSecondary,
+      token.colorFillSecondary,
+    ]
+  );
   const allColumns: ColumnsType<IExtendedPayment> = useMemo(() => {
     return [
       {
@@ -447,6 +464,7 @@ const isMobile = !screens.md
                         display: 'flex',
                         justifyContent: 'space-between',
                         width: '100%',
+                        gap: 8,
                       }}
                     >
                       <Typography.Text strong>{item.label}</Typography.Text>
@@ -458,20 +476,31 @@ const isMobile = !screens.md
             />
           )
 
-          return (
-            <Tooltip title={popoverContent} placement="top">
-              <Button
-                disabled={isEmpty(monthService)}
-                block
-                style={{
-                  border: 'none',
-                  backgroundColor: token.colorFillSecondary,
-                }}
-              >
-                {formatted}
-              </Button>
+          const btn = (
+            <Button
+              disabled={isEmpty(monthService)}
+              block
+              style={{
+                border: 'none',
+                backgroundColor: token.colorFillSecondary,
+              }}
+            >
+              {formatted}
+            </Button>
+          );
+
+          return isEmpty(monthService) ? (
+            btn
+          ) : (
+            <Tooltip
+              key={themeKey}
+              color={token.colorBgElevated}
+              title={<div style={{ color: token.colorText }}>{popoverContent}</div>}
+              placement="top"
+            >
+              {btn}
             </Tooltip>
-          )
+          );
         },
       },
       ...(selectedColumns.map((value) => ({
@@ -580,6 +609,7 @@ const isMobile = !screens.md
     currUserRoles,
     isSingleCompanyByData,
     isMobile,
+    themeKey,
   ])
 
   const visibleColumns = (allColumns as ColumnType<IExtendedPayment>[]).filter(
