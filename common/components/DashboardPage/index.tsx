@@ -224,7 +224,7 @@ const visibleWidgetMap = useMemo(() => {
   compactType="vertical"
   layout={layout}
   cols={1} 
-  rowHeight={310}// забрав віджетвраппер тим самим збільшив висоту рядків
+  rowHeight={310}// забрав віджетвраппер тим самим збільшив висоту рядків, якщо все ж будуть великі розриви то перероблю
   margin={[0, 15]}// додав марджіни щоб був рівний відступ
   useCSSTransforms={true}
   isDraggable={isEditMode}
