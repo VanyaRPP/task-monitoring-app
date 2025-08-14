@@ -291,7 +291,8 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   }
 
   return (
-    <TableCard title={<PaymentsHeader {...headerProps} />}>
+    <TableCard title={<PaymentsHeader {...headerProps} />}
+    style={{ height: '100%' }}>
       <PaymentsTable
         sepDomainID={sepDomainID}
         payments={payments}

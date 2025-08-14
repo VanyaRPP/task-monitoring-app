@@ -26,7 +26,7 @@ const DomainsBlock: React.FC<Props> = ({ domainId }) => {
         />
       }
       style={{
-        flexWrap: 'wrap',
+        flexWrap: 'wrap',height: '100%'
       }}
     >
       <DomainsTable

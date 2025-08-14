@@ -82,6 +82,7 @@ const ChartComponent: React.FC<ChartComponentProps> = ({
       }
       style={{
         ...(isError && { borderColor: token.colorError }),
+        height: '100%'
       }}
     >
       <Spin spinning={isFetching}>

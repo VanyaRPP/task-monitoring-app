@@ -724,6 +724,7 @@ const isMobile = !screens.md
 
   return (
     <Table
+    style={{ height: '100%' }}
       rowKey="_id"
       rowSelection={rowSelection}
       columns={visibleColumns}

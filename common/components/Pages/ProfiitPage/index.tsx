@@ -60,6 +60,7 @@ const ProfitPage = () => {
         size="middle"
       >
         <Card
+         style={{ height: '100%' }}
           title={t('profitPage:title')}
           extra={
             isAdmin && (
