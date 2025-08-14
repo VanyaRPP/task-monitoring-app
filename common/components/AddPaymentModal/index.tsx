@@ -59,18 +59,22 @@ export const PaymentContext = createContext<IPaymentContext>({
 export const usePaymentContext = () =>
   useContext<IPaymentContext>(PaymentContext)
 
-const handleNonEmpty = (form, setIsButtonDisabled) => {
+  const handleNonEmpty = (form: FormInstance, setIsButtonDisabled: (v: boolean) => void) => {
   const fields = form.getFieldsValue()
   const operation = fields.operation
   let requiredFields = ['domain', 'company']
   if (operation === 'credit' || operation === Operations.Credit) {
     requiredFields = ['domain', 'company', 'generalSum', 'description']
   }
-  const dis = requiredFields.some(
-    (key) =>
-      fields[key] === undefined || fields[key] === null || fields[key] === ''
-  )
-  setIsButtonDisabled(dis)
+  const isBlank = (v: any) =>
+    v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0)
+
+  const submitDisabled = requiredFields.some((k) => isBlank(fields[k]))
+  setIsButtonDisabled(submitDisabled)
+  const requiredForTabs: string[] = ['domain', 'company', 'generalSum', 'description']
+  const hasAnyFilled = requiredForTabs.some((k) => !isBlank(fields[k]))
+
+  return !hasAnyFilled
 }
 
 const AddPaymentModal: FC<Props> = ({
@@ -173,7 +177,7 @@ const AddPaymentModal: FC<Props> = ({
 
   const items: TabsProps['items'] = []
 
-  const [tabsDisabled, setTabsDisabled] = useState(false)
+  const [tabsDisabled, setTabsDisabled] = useState(true)
 
   if (!preview) {
     items.push({
@@ -376,28 +380,30 @@ const AddPaymentModal: FC<Props> = ({
           className={s.Form}
           onValuesChange={(changedValues, allValues) => {
             setIsValueChanged(true)
-            handleNonEmpty(form, setIsButtonDisabled)
+            const dis = handleNonEmpty(form, setIsButtonDisabled) 
+            setTabsDisabled(dis)
+            // handleNonEmpty(form, setIsButtonDisabled)
 
-            const domainChanged = allValues.domain !== initialValuesTabs.domain
-            const streetChanged = allValues.street !== initialValuesTabs.street
-            const monthServiceChanged =
-              allValues.monthService !== initialValuesTabs.monthService
-            const companyChanged =
-              allValues.company !== initialValuesTabs.company
-            const operationChanged =
-              allValues.operation !== initialValuesTabs.operation
+            // const domainChanged = allValues.domain !== initialValuesTabs.domain
+            // const streetChanged = allValues.street !== initialValuesTabs.street
+            // const monthServiceChanged =
+            //   allValues.monthService !== initialValuesTabs.monthService
+            // const companyChanged =
+            //   allValues.company !== initialValuesTabs.company
+            // const operationChanged =
+            //   allValues.operation !== initialValuesTabs.operation
 
-            if (
-              domainChanged ||
-              streetChanged ||
-              monthServiceChanged ||
-              companyChanged ||
-              operationChanged
-            ) {
-              setTabsDisabled(true)
-            } else {
-              setTabsDisabled(false)
-            }
+            // if (
+            //   domainChanged ||
+            //   streetChanged ||
+            //   monthServiceChanged ||
+            //   companyChanged ||
+            //   operationChanged
+            // ) {
+            //   setTabsDisabled(true)
+            // } else {
+            //   setTabsDisabled(false)
+            // }
           }}
         >
           <Tabs
