@@ -196,7 +196,6 @@ const AddPaymentModal: FC<Props> = ({
 
     const values = await form.validateFields()
 
-
     if (values.operation === Operations.Credit) {
       handleSubmit()
       return
@@ -249,7 +248,6 @@ const AddPaymentModal: FC<Props> = ({
     if (activeTabKey !== '1' || saved) return
     form.setFieldsValue({ invoice: filteredInvoices })
   }, [filteredInvoices, saved, activeTabKey, form])
-
 
   return (
     <PaymentContext.Provider
