@@ -1,54 +1,53 @@
-import { useMemo } from 'react'
-import { useRouter } from 'next/router'
 import {
-  Table,
-  Empty,
-  Alert,
-  Tooltip,
-  Typography,
-  Button,
-  Dropdown,
-  Popconfirm,
-  Badge,
-  theme,
-  List,
-} from 'antd'
-import {
-  EyeOutlined,
-  EditOutlined,
   DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
   MoreOutlined,
 } from '@ant-design/icons'
+import {
+  Alert,
+  Badge,
+  Button,
+  Dropdown,
+  Empty,
+  List,
+  Popconfirm,
+  Table,
+  theme,
+  Tooltip,
+  Typography,
+} from 'antd'
 import { ColumnsType, ColumnType } from 'antd/es/table'
+import { useRouter } from 'next/router'
+import { useMemo } from 'react'
 
+import { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
 import {
   IExtendedPayment,
-  IGetPaymentResponse,
   IFilter,
+  IGetPaymentResponse,
 } from '@common/api/paymentApi/payment.api.types'
-import { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
 
-import {
-  toFirstUpperCase,
-  renderCurrency,
-  toRoundFixed,
-  isEmpty,
-} from '@utils/helpers'
 import {
   dateToDefaultFormat,
   dateToMonth,
   dateToMonthYear,
 } from '@assets/features/formatDate'
 import {
-  ServiceType,
-  ServiceName,
   AppRoutes,
-  Roles,
   Operations,
+  Roles,
+  ServiceName,
+  ServiceType,
 } from '@utils/constants'
-import s from './style.module.scss'
+import {
+  isEmpty,
+  renderCurrency,
+  toFirstUpperCase,
+  toRoundFixed,
+} from '@utils/helpers'
 import { Grid } from 'antd'
-
+import s from './style.module.scss'
 
 export interface PaymentDeleteItem {
   id: string
@@ -222,10 +221,10 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
 
   const isDashboard = pathname === AppRoutes.INDEX
 
-const { useBreakpoint } = Grid
+  const { useBreakpoint } = Grid
 
-const screens = useBreakpoint()
-const isMobile = !screens.md
+  const screens = useBreakpoint()
+  const isMobile = !screens.md
 
   const isGlobalAdmin = currUserRoles.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = currUserRoles.includes(Roles.DOMAIN_ADMIN)
@@ -234,7 +233,6 @@ const isMobile = !screens.md
   const isSingleCompanyByData = useMemo(() => {
     const list = payments?.data || []
     const uniqueCompanies = new Set(
-
       list.map((p) =>
         typeof p.company === 'object' ? p.company.companyName : p.company
       )
@@ -244,13 +242,28 @@ const isMobile = !screens.md
   const isSingleDomainByData = useMemo(() => {
     const list = payments?.data || []
     const uniqueDomains = new Set(
-      list.map((p) =>
-        typeof p.domain === 'object' ? p.domain.name : p.domain
-      )
+      list.map((p) => (typeof p.domain === 'object' ? p.domain.name : p.domain))
     )
     return filters?.domain?.length === 1 && uniqueDomains.size === 1
   }, [payments?.data, filters?.domain])
 
+  const themeKey = useMemo(
+    () =>
+      [
+        token.colorBgElevated,
+        token.colorText,
+        token.colorBorderSecondary,
+        token.boxShadowSecondary,
+        token.colorFillSecondary,
+      ].join('|'),
+    [
+      token.colorBgElevated,
+      token.colorText,
+      token.colorBorderSecondary,
+      token.boxShadowSecondary,
+      token.colorFillSecondary,
+    ]
+  )
   const allColumns: ColumnsType<IExtendedPayment> = useMemo(() => {
     return [
       {
@@ -333,13 +346,13 @@ const isMobile = !screens.md
         filters:
           !sepDomainID && dateFilters?.monthFilter
             ? dateFilters.monthFilter
-              .filter((f) => f.value != null)
-              .map((f) => ({
-                text: toFirstUpperCase(
-                  dateToMonth(new Date(2000, Number(f.value) - 1))
-                ),
-                value: `${new Date().getFullYear()}-month-${f.value}`,
-              }))
+                .filter((f) => f.value != null)
+                .map((f) => ({
+                  text: toFirstUpperCase(
+                    dateToMonth(new Date(2000, Number(f.value) - 1))
+                  ),
+                  value: `${new Date().getFullYear()}-month-${f.value}`,
+                }))
             : [],
         filteredValue: filters?.invoiceCreationDate || null,
       },
@@ -350,9 +363,9 @@ const isMobile = !screens.md
         filters: sepDomainID
           ? undefined
           : [
-            { text: 'Кредит (Оплата)', value: Operations.Credit },
-            { text: 'Дебет (Реалізація)', value: Operations.Debit },
-          ],
+              { text: 'Кредит (Оплата)', value: Operations.Credit },
+              { text: 'Дебет (Реалізація)', value: Operations.Debit },
+            ],
         filteredValue: filters?.type || null,
         filterMultiple: false,
         children: [
@@ -370,7 +383,7 @@ const isMobile = !screens.md
             sorter: sepDomainID
               ? undefined
               : (a: IExtendedPayment, b: IExtendedPayment) =>
-                a.generalSum - b.generalSum,
+                  a.generalSum - b.generalSum,
           },
           {
             title: <Tooltip title="Кредит (Оплата)">Кредит</Tooltip>,
@@ -386,7 +399,7 @@ const isMobile = !screens.md
             sorter: sepDomainID
               ? undefined
               : (a: IExtendedPayment, b: IExtendedPayment) =>
-                a.generalSum - b.generalSum,
+                  a.generalSum - b.generalSum,
           },
         ],
       },
@@ -447,9 +460,15 @@ const isMobile = !screens.md
                         display: 'flex',
                         justifyContent: 'space-between',
                         width: '100%',
+                        gap: 8,
+                        whiteSpace: 'nowrap',
                       }}
                     >
-                      <Typography.Text strong>{item.label}</Typography.Text>
+                      <Typography.Text strong>
+                        {String(item.value).length > 6 && item.label.length > 12
+                          ? item.label.slice(0, 10) + '.'
+                          : item.label}
+                      </Typography.Text>
                       <Typography.Text>{item.value}</Typography.Text>
                     </div>
                   </List.Item>
@@ -458,18 +477,31 @@ const isMobile = !screens.md
             />
           )
 
-          return (
-            <Tooltip title={popoverContent} placement="top">
-              <Button
-                disabled={isEmpty(monthService)}
-                block
-                style={{
-                  border: 'none',
-                  backgroundColor: token.colorFillSecondary,
-                }}
-              >
-                {formatted}
-              </Button>
+          const btn = (
+            <Button
+              disabled={isEmpty(monthService)}
+              block
+              style={{
+                border: 'none',
+                backgroundColor: token.colorFillSecondary,
+              }}
+            >
+              {formatted}
+            </Button>
+          )
+
+          return isEmpty(monthService) ? (
+            btn
+          ) : (
+            <Tooltip
+              key={themeKey}
+              color={token.colorBgElevated}
+              title={
+                <div style={{ color: token.colorText }}>{popoverContent}</div>
+              }
+              placement="top"
+            >
+              {btn}
             </Tooltip>
           )
         },
@@ -580,6 +612,7 @@ const isMobile = !screens.md
     currUserRoles,
     isSingleCompanyByData,
     isMobile,
+    themeKey,
   ])
 
   const visibleColumns = (allColumns as ColumnType<IExtendedPayment>[]).filter(
@@ -628,7 +661,7 @@ const isMobile = !screens.md
                   {renderCurrency(
                     toRoundFixed(
                       totalPayments[
-                      column.dataIndex as keyof typeof totalPayments
+                        column.dataIndex as keyof typeof totalPayments
                       ] || 0
                     )
                   )}
@@ -655,7 +688,7 @@ const isMobile = !screens.md
                   {renderCurrency(
                     toRoundFixed(
                       Number(totalPayments.debit || 0) -
-                      Number(totalPayments.credit || 0)
+                        Number(totalPayments.credit || 0)
                     )
                   )}
                 </Table.Summary.Cell>
@@ -674,52 +707,52 @@ const isMobile = !screens.md
 
   const rowSelection =
     (isGlobalAdmin || isDomainAdmin) &&
-      (pathname === AppRoutes.PAYMENT || Boolean(sepDomainID))
+    (pathname === AppRoutes.PAYMENT || Boolean(sepDomainID))
       ? {
-        selectedRowKeys: selectedPayments.map((i) => i._id),
-        preserveSelectedRowKeys: true,
+          selectedRowKeys: selectedPayments.map((i) => i._id),
+          preserveSelectedRowKeys: true,
 
-        onChange: (_keys, rows) => {
-          onSelectPayments(rows)
-          const deleteItems = rows.map((item) => ({
-            id: item._id,
-            date:
-              typeof item.monthService === 'object' &&
+          onChange: (_keys, rows) => {
+            onSelectPayments(rows)
+            const deleteItems = rows.map((item) => ({
+              id: item._id,
+              date:
+                typeof item.monthService === 'object' &&
                 (item.monthService as any)?.date
-                ? String((item.monthService as any).date)
-                : String(item.invoiceCreationDate),
-            domain: (item.domain as any)?.name || '',
-            company: (item.company as any)?.companyName || '',
-          }))
-          onSetDeleteItems(deleteItems)
-        },
+                  ? String((item.monthService as any).date)
+                  : String(item.invoiceCreationDate),
+              domain: (item.domain as any)?.name || '',
+              company: (item.company as any)?.companyName || '',
+            }))
+            onSetDeleteItems(deleteItems)
+          },
 
-        onSelect: (record, selected) => {
-          if (selected) {
-            onSelectPayments([...selectedPayments, record])
-            onSetDeleteItems([
-              ...paymentsDeleteItems,
-              {
-                id: record._id,
-                date:
-                  typeof record.monthService === 'object' &&
+          onSelect: (record, selected) => {
+            if (selected) {
+              onSelectPayments([...selectedPayments, record])
+              onSetDeleteItems([
+                ...paymentsDeleteItems,
+                {
+                  id: record._id,
+                  date:
+                    typeof record.monthService === 'object' &&
                     (record.monthService as any)?.date
-                    ? String((record.monthService as any).date)
-                    : String(record.invoiceCreationDate),
-                domain: (record.domain as any)?.name || '',
-                company: (record.company as any)?.companyName || '',
-              },
-            ])
-          } else {
-            onSelectPayments(
-              selectedPayments.filter((p) => p._id !== record._id)
-            )
-            onSetDeleteItems(
-              paymentsDeleteItems.filter((i) => i.id !== record._id)
-            )
-          }
-        },
-      }
+                      ? String((record.monthService as any).date)
+                      : String(record.invoiceCreationDate),
+                  domain: (record.domain as any)?.name || '',
+                  company: (record.company as any)?.companyName || '',
+                },
+              ])
+            } else {
+              onSelectPayments(
+                selectedPayments.filter((p) => p._id !== record._id)
+              )
+              onSetDeleteItems(
+                paymentsDeleteItems.filter((i) => i.id !== record._id)
+              )
+            }
+          },
+        }
       : undefined
 
   return (
