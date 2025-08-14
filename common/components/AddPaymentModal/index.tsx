@@ -1,3 +1,4 @@
+import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import {
   useAddPaymentMutation,
   useEditPaymentMutation,
@@ -22,15 +23,21 @@ import {
   createContext,
   useContext,
   useEffect,
-  useState,
   useMemo,
+  useState,
 } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
-import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
 import ReceiptForm from '../Forms/ReceiptForm'
-import s from './style.module.scss'
 import serviceFilter from './serviceFilter'
+import s from './style.module.scss'
+
+const DEFAULT_INVOICES = [
+  'discount',
+  'maintenancePrice',
+  'garbageCollectorPrice',
+  'electricityPrice',
+]
 
 interface Props {
   closeModal: VoidFunction
@@ -56,21 +63,14 @@ export const PaymentContext = createContext<IPaymentContext>({
   company: null,
   form: null,
 })
+
 export const usePaymentContext = () =>
   useContext<IPaymentContext>(PaymentContext)
 
-const handleNonEmpty = (form, setIsButtonDisabled) => {
-  const fields = form.getFieldsValue()
-  const operation = fields.operation
-  let requiredFields = ['domain', 'company']
-  if (operation === 'credit' || operation === Operations.Credit) {
-    requiredFields = ['domain', 'company', 'generalSum', 'description']
-  }
-  const dis = requiredFields.some(
-    (key) =>
-      fields[key] === undefined || fields[key] === null || fields[key] === ''
-  )
-  setIsButtonDisabled(dis)
+const getId = (obj?: string | Partial<{ _id: string }>) => {
+  if (!obj) return ''
+  if (typeof obj === 'string') return obj
+  return obj._id
 }
 
 const AddPaymentModal: FC<Props> = ({
@@ -79,13 +79,16 @@ const AddPaymentModal: FC<Props> = ({
   paymentActions,
   preselectedCompany,
 }) => {
+  const { preview, edit } = paymentActions
+
   const [form] = Form.useForm()
-  const [isValueChanged, setIsValueChanged] = useState(false)
-  const [isButtonDisabled, setIsButtonDisabled] = useState(true)
-  const [needResetInvoices, setNeedResetInvoices] = useState(false)
+
+  const domainId = Form.useWatch('domain', form)
 
   const { company, service, payment, prevService, prevPayment } =
     usePaymentFormData(form, paymentData)
+  const { provider, reciever } = getPaymentProviderAndReciever(company)
+
   const transaction = {
     AUT_CNTR_ACC: paymentData?.transaction?.AUT_CNTR_ACC || '',
     AUT_CNTR_NAM: paymentData?.transaction?.AUT_CNTR_NAM || '',
@@ -93,45 +96,115 @@ const AddPaymentModal: FC<Props> = ({
     Description: paymentData?.transaction?.Description || '',
   }
 
+  const [changed, setChanged] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
     useEditPaymentMutation()
-
-  const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const { preview, edit, create } = paymentActions
 
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)
   )
 
-  const { provider, reciever } = getPaymentProviderAndReciever(company)
-
-  const handleOk = () => {
-    form.validateFields().then((values) => {
-      if (values.operation === Operations.Credit) {
-        handleSubmit()
-      } else {
-        setCurrPayment({ ...values, provider, reciever })
-        setActiveTabKey('2')
-      }
-    })
-  }
-  const domainId = Form.useWatch('domain', form)
-  const [pendingDomain, setPendingDomain] = useState<string | null>(null)
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
     { domainId },
     { skip: !domainId }
   )
-  const groups = customDomainServices?.data ?? []
 
-  const allInvoices = useMemo(
-    () => getInvoices({ company, service, payment, prevService, prevPayment }),
-    [company, service, payment, prevService, prevPayment]
-  )
-  const allowedServices = groups.flatMap((group) => group.services)
   const filteredInvoices = useMemo(() => {
-    return serviceFilter(allInvoices, allowedServices) // TODO: delete after custom service refactor
-  }, [allInvoices, allowedServices])
+    const allInvoices = getInvoices({
+      company,
+      service,
+      payment,
+      prevService,
+      prevPayment,
+    })
+    const groups = customDomainServices?.data ?? []
+    const allowedServices = groups.flatMap((group) => group.services)
+    const serviceFilteredInvoices = serviceFilter(allInvoices, allowedServices) // TODO: delete after custom service refactor
+    return serviceFilteredInvoices?.filter(
+      (invoice) => invoice?.sum > 0 || DEFAULT_INVOICES.includes(invoice?.type)
+    )
+  }, [
+    company,
+    service,
+    payment,
+    prevService,
+    prevPayment,
+    customDomainServices,
+  ])
+
+  const items: TabsProps['items'] = []
+  const shouldTabsEnabled = (edit && !changed) || preview || saved
+
+  if (!preview) {
+    items.push({
+      key: '1',
+      label: 'Рахунок',
+      children: <AddPaymentForm paymentActions={paymentActions} />,
+    })
+  }
+
+  if (!preview || paymentData?.type === Operations.Debit) {
+    items.push({
+      key: '2',
+      label: 'Перегляд',
+      disabled: !shouldTabsEnabled,
+      children: (
+        <GroupedReceiptForm
+          currPayment={currPayment}
+          paymentData={paymentData}
+          paymentActions={paymentActions}
+        />
+      ),
+    })
+  }
+
+  if (payment) {
+    items.push({
+      key: '3',
+      label: 'Акт',
+      disabled: !shouldTabsEnabled,
+      children: <PriceList data={payment} />,
+    })
+  }
+
+  if (!preview || paymentData?.type === Operations.Debit) {
+    items.push({
+      key: '4',
+      label: 'Довідка',
+      disabled: !shouldTabsEnabled,
+      children: (
+        <ReceiptForm
+          currPayment={currPayment}
+          paymentData={paymentData}
+          paymentActions={paymentActions}
+        />
+      ),
+    })
+  }
+
+  const handleChange = () => {
+    setSaved(false)
+    setChanged(true)
+  }
+
+  const handleOk = async () => {
+    setChanged(false)
+    setSaved(true)
+
+    const values = await form.validateFields()
+
+    if (values.operation === Operations.Credit) {
+      handleSubmit()
+      return
+    }
+
+    setCurrPayment({ ...values, provider, reciever })
+    setActiveTabKey('2')
+  }
+
   const handleSubmit = async () => {
     const formData = await form.validateFields()
 
@@ -171,140 +244,10 @@ const AddPaymentModal: FC<Props> = ({
     }
   }
 
-  const items: TabsProps['items'] = []
-
-  const [tabsDisabled, setTabsDisabled] = useState(false)
-
-  if (!preview) {
-    items.push({
-      key: '1',
-      label: 'Рахунок',
-      children: <AddPaymentForm paymentActions={paymentActions} />,
-    })
-  }
-
-  if (!preview || paymentData?.type === Operations.Debit) {
-    items.push({
-      key: '2',
-      label: 'Перегляд',
-      disabled: tabsDisabled,
-      children: (
-        <GroupedReceiptForm
-          currPayment={currPayment}
-          paymentData={paymentData}
-          paymentActions={paymentActions}
-        />
-      ),
-    })
-  }
-
-  if (payment) {
-    items.push({
-      key: '3',
-      label: 'Акт',
-      disabled: tabsDisabled,
-      children: <PriceList data={payment} />,
-    })
-  }
-  if (!preview || paymentData?.type === Operations.Debit) {
-    items.push({
-      key: '4',
-      label: 'Довідка',
-      disabled: tabsDisabled,
-      children: (
-        <ReceiptForm
-          currPayment={currPayment}
-          paymentData={paymentData}
-          paymentActions={paymentActions}
-        />
-      ),
-    })
-  }
-
   useEffect(() => {
-    if (edit) return
-    if (!domainId) return
-    setNeedResetInvoices(true)
-  }, [domainId, edit])
-
-  useEffect(() => {
-    if (allInvoices.length === 0) return
-
-    form.resetFields(['invoice'])
+    if (activeTabKey !== '1' || saved) return
     form.setFieldsValue({ invoice: filteredInvoices })
-
-    setNeedResetInvoices(false)
-  }, [allInvoices, form])
-
-  useEffect(() => {
-    if (edit) {
-      setTabsDisabled(false)
-    }
-  }, [edit])
-
-  const [initialValuesTabs, setInitialValuesTabs] = useState({
-    domain:
-      typeof payment?.domain === 'string'
-        ? payment?.domain
-        : payment?.domain?._id,
-    street:
-      typeof payment?.street === 'string'
-        ? payment?.street
-        : payment?.street?._id,
-    monthService:
-      typeof payment?.monthService === 'string'
-        ? payment?.monthService
-        : payment?.monthService?._id,
-    company:
-      typeof payment?.company === 'string'
-        ? payment?.company
-        : payment?.company?._id,
-    operation: payment?.type || Operations.Credit,
-  })
-
-  useEffect(() => {
-    setInitialValuesTabs({
-      domain:
-        typeof payment?.domain === 'string'
-          ? payment?.domain
-          : payment?.domain?._id,
-      street:
-        typeof payment?.street === 'string'
-          ? payment?.street
-          : payment?.street?._id,
-      monthService:
-        typeof payment?.monthService === 'string'
-          ? payment?.monthService
-          : payment?.monthService?._id,
-      company:
-        typeof payment?.company === 'string'
-          ? payment?.company
-          : payment?.company?._id,
-      operation: payment?.type || Operations.Credit,
-    })
-  }, [payment])
-
-  useEffect(() => {
-    setInitialValuesTabs({
-      domain:
-        typeof payment?.domain === 'string'
-          ? payment?.domain
-          : payment?.domain?._id,
-      street:
-        typeof payment?.street === 'string'
-          ? payment?.street
-          : payment?.street?._id,
-      monthService:
-        typeof payment?.monthService === 'string'
-          ? payment?.monthService
-          : payment?.monthService?._id,
-      company:
-        typeof payment?.company === 'string'
-          ? payment?.company
-          : payment?.company?._id,
-      operation: payment?.type || Operations.Credit,
-    })
-  }, [payment])
+  }, [filteredInvoices, saved, activeTabKey, form])
 
   return (
     <PaymentContext.Provider
@@ -321,15 +264,9 @@ const AddPaymentModal: FC<Props> = ({
         title={edit ? 'Редагування рахунку' : !preview && 'Додавання рахунку'}
         onOk={activeTabKey === '1' ? handleOk : handleSubmit}
         okButtonProps={
-          preview
-            ? { style: { display: 'none' } }
-            : edit
-            ? {}
-            : isButtonDisabled
-            ? { disabled: true }
-            : null
+          preview ? { style: { display: 'none' } } : edit ? {} : null
         }
-        changed={() => isValueChanged}
+        changed={() => changed}
         onCancel={() => {
           form.resetFields()
           closeModal()
@@ -339,32 +276,14 @@ const AddPaymentModal: FC<Props> = ({
         confirmLoading={isAddingLoading || isEditingLoading}
         className={s.Modal}
         style={{ top: 20 }}
-        preview={preview}
       >
         <Form
           initialValues={{
-            // // TODO: fix payment typing globally to not be `domain: Partial<IDomain> | string` but `Partial<IDomain>` instead
-            // eslint-disable-next-line
-            // @ts-ignore
-            domain: payment?.domain?._id,
-            // TODO: fix payment typing globally to not be `domain: Partial<IStreet> | string` but `Partial<IStreet>` instead
-            // eslint-disable-next-line
-            // @ts-ignore
-            street: payment?.street?._id,
-            // TODO: fix payment typing globally to not be `domain: Partial<IService> | string` but `Partial<IService>` instead
-            // eslint-disable-next-line
-            // @ts-ignore
-            monthService: payment?.monthService?._id,
-            invoice: paymentData?.invoice?.length
-              ? paymentData.invoice
-              : filteredInvoices,
-            // monthService: dateToMonthYear(payment?.monthService?.date).charAt(0).toUpperCase() + dateToMonthYear(payment?.monthService?.date).slice(1),
-            // TODO: fix payment typing globally to not be `domain: Partial<IRealestate> | string` but `Partial<IRealestate>` instead
-            // TODO: ???rename IRealestate to ICompany maybe, what the realestate means actually???
-            // eslint-disable-next-line
-            // @ts-ignore
-            company: preselectedCompany || payment?.company?._id,
-            // company: payment?.company?.companyName,
+            domain: getId(payment?.domain),
+            street: getId(payment?.street),
+            company: preselectedCompany || getId(payment?.company),
+            monthService: getId(payment?.monthService),
+            invoice: payment?.invoice || filteredInvoices,
             description: payment?.description,
             generalSum: payment?.generalSum,
             invoiceNumber: payment?.invoiceNumber,
@@ -374,31 +293,7 @@ const AddPaymentModal: FC<Props> = ({
           form={form}
           layout="vertical"
           className={s.Form}
-          onValuesChange={(changedValues, allValues) => {
-            setIsValueChanged(true)
-            handleNonEmpty(form, setIsButtonDisabled)
-
-            const domainChanged = allValues.domain !== initialValuesTabs.domain
-            const streetChanged = allValues.street !== initialValuesTabs.street
-            const monthServiceChanged =
-              allValues.monthService !== initialValuesTabs.monthService
-            const companyChanged =
-              allValues.company !== initialValuesTabs.company
-            const operationChanged =
-              allValues.operation !== initialValuesTabs.operation
-
-            if (
-              domainChanged ||
-              streetChanged ||
-              monthServiceChanged ||
-              companyChanged ||
-              operationChanged
-            ) {
-              setTabsDisabled(true)
-            } else {
-              setTabsDisabled(false)
-            }
-          }}
+          onChange={handleChange}
         >
           <Tabs
             activeKey={activeTabKey}
