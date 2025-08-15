@@ -196,6 +196,7 @@ const AddPaymentModal: FC<Props> = ({
 
     const values = await form.validateFields()
 
+
     if (values.operation === Operations.Credit) {
       handleSubmit()
       return
