@@ -4,7 +4,6 @@ import {
 } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
-import { current } from '@reduxjs/toolkit'
 import { ServiceType } from '@utils/constants'
 import { isEmpty, toRoundFixed } from '@utils/helpers'
 
@@ -148,6 +147,8 @@ export const getMaintenanceInvoice = ({
           : +toRoundFixed(+invoice.sum || +invoice.price * +invoice.amount),
     }
   }
+
+  if (company.servicePricePerMeter === 0) return
 
   if (
     !isNaN(company?.totalArea) &&
@@ -495,17 +496,19 @@ export const getCustomServiceInvoices = ({
     return []
   }
 
-  const serviceCustoms = Array.isArray(service?.customServices) ? service.customServices : []
-  const companyCustoms = Array.isArray(company?.customServices) ? company.customServices : []
+  const serviceCustoms = Array.isArray(service?.customServices)
+    ? service.customServices
+    : []
+  const companyCustoms = Array.isArray(company?.customServices)
+    ? company.customServices
+    : []
 
   const customServices = serviceCustoms.map((serviceItem) => {
     const companyItem = companyCustoms.find(
       (c) => c?.fieldName === serviceItem?.fieldName
     )
 
-    const price = +toRoundFixed(
-      companyItem?.price ?? serviceItem?.price ?? 0
-    )
+    const price = +toRoundFixed(companyItem?.price ?? serviceItem?.price ?? 0)
 
     return {
       name: serviceItem?.label || 'Невідома послуга',
@@ -519,5 +522,3 @@ export const getCustomServiceInvoices = ({
 
   return customServices
 }
-
-

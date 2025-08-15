@@ -250,7 +250,6 @@ const AddPaymentModal: FC<Props> = ({
     form.setFieldsValue({ invoice: filteredInvoices })
   }, [filteredInvoices, saved, activeTabKey, form])
 
-
   return (
     <PaymentContext.Provider
       value={{
