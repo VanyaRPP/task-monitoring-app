@@ -20,7 +20,8 @@ import { useEffect, useMemo } from 'react'
 
 export const getDefaultColumns = (
   remove: (index: number) => void,
-  losses?: number ,
+  _allowedServices: any,
+  losses?: number,
   extraColumns: TableColumnsType = []
 ): TableColumnsType => [
   {
@@ -34,155 +35,179 @@ export const getDefaultColumns = (
     width: 160,
     render: (_, { name }: { name: number }) => <TotalArea name={name} />,
   },
-  {
-    title: 'Утримання',
-    children: [
-      {
-        title: 'За м²',
-        width: 160,
-        render: (_, { name }: { name: number }) => (
-          <MaintenancePrice name={name} />
-        ),
-      },
-      {
-        title: 'Загальне',
+  _allowedServices.some((inv) => inv?.fieldName === 'rentPrice')
+    ? {
+        title: 'Утримання',
+        children: [
+          {
+            title: 'За м²',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <MaintenancePrice name={name} />
+            ),
+          },
+          {
+            title: 'Загальне',
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <MaintenanceSum name={name} />
+            ),
+          },
+        ],
+      }
+    : {},
+  _allowedServices.some((inv) => inv?.fieldName === 'placingPrice')
+    ? {
+        title: 'Розміщення',
+        children: [
+          {
+            title: 'За м²',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <PlacingPrice name={name} />
+            ),
+          },
+          {
+            title: 'Загальне',
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <PlacingSum name={name} />
+            ),
+          },
+        ],
+      }
+    : {},
+  _allowedServices.some((inv) => inv?.fieldName === 'inflicionPrice')
+    ? {
+        title: <InflicionTitle />,
         width: 200,
-        render: (_, { name }: { name: number }) => (
-          <MaintenanceSum name={name} />
-        ),
-      },
-    ],
-  },
-  {
-    title: 'Розміщення',
-    children: [
-      {
-        title: 'За м²',
-        width: 160,
-        render: (_, { name }: { name: number }) => <PlacingPrice name={name} />,
-      },
-      {
-        title: 'Загальне',
+        render: (_, { name }: { name: number }) => <InflicionSum name={name} />,
+      }
+    : {},
+  _allowedServices.some((inv) => inv?.fieldName === 'electricityPrice')
+    ? {
+        title: losses
+          ? `Електропостачання + Втрати ${losses}%`
+          : 'Електропостачання',
+        children: [
+          {
+            title: 'Стара',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <ElectricityAmount name={name} last />
+            ),
+          },
+          {
+            title: 'Нова',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <ElectricityAmount name={name} />
+            ),
+          },
+          {
+            title: 'Втрати',
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <LossElectricityPrice name={name} />
+            ),
+          },
+          {
+            title: '',
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <LossElectricitySum name={name} />
+            ),
+          },
+          {
+            title: <ElectricitySumTitle />,
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <ElectricitySum name={name} />
+            ),
+          },
+        ],
+      }
+    : {},
+  _allowedServices.some((inv) => inv?.fieldName === 'waterPrice')
+    ? {
+        title: 'Водопостачання',
+        children: [
+          {
+            title: 'Стара',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <WaterAmount name={name} last />
+            ),
+          },
+          {
+            title: 'Нова',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <WaterAmount name={name} />
+            ),
+          },
+          {
+            title: <WaterSumTitle />,
+            width: 200,
+            render: (_, { name }: { name: number }) => <WaterSum name={name} />,
+          },
+        ],
+      }
+    : {},
+  _allowedServices.some((inv) => inv?.fieldName === 'waterPartAmount')
+    ? {
+        title: 'Водопостачання без лічильника',
+        children: [
+          {
+            title: 'Частка, %',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <WaterPartAmount name={name} />
+            ),
+          },
+          {
+            title: <WaterPartSumTitle />,
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <WaterPartSum name={name} />
+            ),
+          },
+        ],
+      }
+    : {},
+  _allowedServices.some((inv) => inv?.fieldName === 'GarbageCollectorAmount')
+    ? {
+        title: 'Вивіз ТПВ',
+        children: [
+          {
+            title: 'Частка, %',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <GarbageCollectorAmount name={name} />
+            ),
+          },
+          {
+            title: <GarbageCollectorSumTitle />,
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <GarbageCollectorSum name={name} />
+            ),
+          },
+        ],
+      }
+    : {},
+  _allowedServices.some((inv) => inv?.fieldName === 'Cleaning')
+    ? {
+        title: 'Прибирання',
         width: 200,
-        render: (_, { name }: { name: number }) => <PlacingSum name={name} />,
-      },
-    ],
-  },
-  {
-    title: <InflicionTitle />,
-    width: 200,
-    render: (_, { name }: { name: number }) => <InflicionSum name={name} />,
-  },
-  {
-    title: losses
-      ? `Електропостачання + Втрати ${losses}%`
-      : 'Електропостачання',
-    children: [
-      {
-        title: 'Стара',
-        width: 160,
-        render: (_, { name }: { name: number }) => (
-          <ElectricityAmount name={name} last />
-        ),
-      },
-      {
-        title: 'Нова',
-        width: 160,
-        render: (_, { name }: { name: number }) => (
-          <ElectricityAmount name={name} />
-        ),
-      },
-      {
-        title: 'Втрати',
-        width: 200,
-        render: (_, { name }: { name: number }) => (
-          <LossElectricityPrice name={name} />
-        ),
-      },
-      {
-        title: '',
-        width: 200,
-        render: (_, { name }: { name: number }) => (
-          <LossElectricitySum name={name} />
-        ),
-      },
-      {
-        title: <ElectricitySumTitle />,
-        width: 200,
-        render: (_, { name }: { name: number }) => (
-          <ElectricitySum name={name} />
-        ),
-      },
-    ],
-  },
-  {
-    title: 'Водопостачання',
-    children: [
-      {
-        title: 'Стара',
-        width: 160,
-        render: (_, { name }: { name: number }) => (
-          <WaterAmount name={name} last />
-        ),
-      },
-      {
-        title: 'Нова',
-        width: 160,
-        render: (_, { name }: { name: number }) => <WaterAmount name={name} />,
-      },
-      {
-        title: <WaterSumTitle />,
-        width: 200,
-        render: (_, { name }: { name: number }) => <WaterSum name={name} />,
-      },
-    ],
-  },
-  {
-    title: 'Водопостачання без лічильника',
-    children: [
-      {
-        title: 'Частка, %',
-        width: 160,
-        render: (_, { name }: { name: number }) => (
-          <WaterPartAmount name={name} />
-        ),
-      },
-      {
-        title: <WaterPartSumTitle />,
-        width: 200,
-        render: (_, { name }: { name: number }) => <WaterPartSum name={name} />,
-      },
-    ],
-  },
-  {
-    title: 'Вивіз ТПВ',
-    children: [
-      {
-        title: 'Частка, %',
-        width: 160,
-        render: (_, { name }: { name: number }) => (
-          <GarbageCollectorAmount name={name} />
-        ),
-      },
-      {
-        title: <GarbageCollectorSumTitle />,
-        width: 200,
-        render: (_, { name }: { name: number }) => (
-          <GarbageCollectorSum name={name} />
-        ),
-      },
-    ],
-  },
-  {
-    title: 'Прибирання',
-    width: 200,
-    render: (_, { name }: { name: number }) => <Cleaning name={name} />,
-  },
+        render: (_, { name }: { name: number }) => <Cleaning name={name} />,
+      }
+    : {},
   {
     title: 'Знижка',
     width: 200,
     render: (_, { name }: { name: number }) => <Discount name={name} />,
-    }, 
+  },
   ...extraColumns,
   {
     fixed: 'right',
@@ -646,17 +671,17 @@ const WaterSum: React.FC<{ name: number }> = ({ name }) => {
   const waterPart: number =
     Form.useWatch(['payments', name, 'company', 'waterPart'], form) ?? 0
 
-    useEffect(() => {
-      if (!waterPart) {
-        const price = service?.waterPrice ?? 0
-        const sum = +toRoundFixed((+amount - +lastAmount) * price)
+  useEffect(() => {
+    if (!waterPart) {
+      const price = service?.waterPrice ?? 0
+      const sum = +toRoundFixed((+amount - +lastAmount) * price)
 
-        form.setFieldValue(
-          ['payments', name, 'invoice', ServiceType.Water, 'sum'],
-          sum
-        )
-      }
-    }, [form, name, amount, lastAmount, service, waterPart])
+      form.setFieldValue(
+        ['payments', name, 'invoice', ServiceType.Water, 'sum'],
+        sum
+      )
+    }
+  }, [form, name, amount, lastAmount, service, waterPart])
 
   if (!waterPart) {
     return (
@@ -715,15 +740,15 @@ const WaterPartSum: React.FC<{ name: number }> = ({ name }) => {
       form
     ) ?? 0
 
-    useEffect(() => {
-      if (waterPart) {
-        const sum = +toRoundFixed(price ?? 0)
-        form.setFieldValue(
-          ['payments', name, 'invoice', ServiceType.WaterPart, 'sum'],
-          sum
-        )
-      }
-    }, [form, name, price, waterPart])
+  useEffect(() => {
+    if (waterPart) {
+      const sum = +toRoundFixed(price ?? 0)
+      form.setFieldValue(
+        ['payments', name, 'invoice', ServiceType.WaterPart, 'sum'],
+        sum
+      )
+    }
+  }, [form, name, price, waterPart])
 
   if (waterPart) {
     return (
@@ -784,15 +809,15 @@ const GarbageCollectorSum: React.FC<{ name: number }> = ({ name }) => {
       form
     ) ?? 0
 
-    useEffect(() => {
-      if (garbageCollector) {
-        const sum = +toRoundFixed(price ?? 0)
-        form.setFieldValue(
-          ['payments', name, 'invoice', ServiceType.GarbageCollector, 'sum'],
-          sum
-        )
-      }
-    }, [form, name, price, garbageCollector])
+  useEffect(() => {
+    if (garbageCollector) {
+      const sum = +toRoundFixed(price ?? 0)
+      form.setFieldValue(
+        ['payments', name, 'invoice', ServiceType.GarbageCollector, 'sum'],
+        sum
+      )
+    }
+  }, [form, name, price, garbageCollector])
 
   if (garbageCollector) {
     return (
@@ -819,15 +844,15 @@ const Cleaning: React.FC<{ name: number }> = ({ name }) => {
       form
     ) ?? 0
 
-    useEffect(() => {
-      if (cleaning) {
-        const sum = +toRoundFixed(price ?? 0)
-        form.setFieldValue(
-          ['payments', name, 'invoice', ServiceType.Cleaning, 'sum'],
-          sum
-        )
-      }
-    }, [form, name, price, cleaning])
+  useEffect(() => {
+    if (cleaning) {
+      const sum = +toRoundFixed(price ?? 0)
+      form.setFieldValue(
+        ['payments', name, 'invoice', ServiceType.Cleaning, 'sum'],
+        sum
+      )
+    }
+  }, [form, name, price, cleaning])
 
   if (cleaning) {
     return (
@@ -851,13 +876,13 @@ const Discount: React.FC<{ name: number }> = ({ name }) => {
       form
     ) ?? 0
 
-    useEffect(() => {
-      const sum = +toRoundFixed(price ?? 0)
-      form.setFieldValue(
-        ['payments', name, 'invoice', ServiceType.Discount, 'sum'],
-        sum
-      )
-    }, [form, name, price])
+  useEffect(() => {
+    const sum = +toRoundFixed(price ?? 0)
+    form.setFieldValue(
+      ['payments', name, 'invoice', ServiceType.Discount, 'sum'],
+      sum
+    )
+  }, [form, name, price])
 
   return (
     <Form.Item
