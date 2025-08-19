@@ -25,6 +25,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  useRef
 } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
@@ -84,6 +85,14 @@ const AddPaymentModal: FC<Props> = ({
   const [form] = Form.useForm()
 
   const domainId = Form.useWatch('domain', form)
+  const firstRunRef = useRef(true)
+  useEffect(() => {
+    if (firstRunRef.current) {
+      firstRunRef.current = false
+      return
+    }
+    form.resetFields(['company'])        
+  }, [domainId, form])
 
   const { company, service, payment, prevService, prevPayment } =
     usePaymentFormData(form, paymentData)
