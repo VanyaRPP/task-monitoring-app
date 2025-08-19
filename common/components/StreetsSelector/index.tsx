@@ -16,21 +16,22 @@ const StreetsSelector: React.FC<StreetsSelectorProps> = ({
   className,
   ...props
 }) => {
-  const options = streets.map((street) => ({
-    label: street.text,
-    value: street.value,
-  }))
+  const options = [...streets]
+    .sort((a, b) => a.text.localeCompare(b.text))
+    .map((street) => ({
+      label: street.text,
+      value: String(street.value),
+    }))
 
   return (
     <Select
       placeholder="Виберіть вулицю"
-      // style={{ width: 200 }}
       value={filters?.street}
       onChange={(value) =>
-        setFilters((prev) => ({
-          ...prev,
-          street: value,
-        }))
+        setFilters({
+          ...filters,
+          street: value ?? undefined,
+        })
       }
       allowClear
       className={className}
