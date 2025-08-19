@@ -6,7 +6,7 @@ interface StreetsSelectorProps {
   filters?: Record<string, any>
   setFilters: (f: Record<string, any>) => void
   className?: string
-  [key: string]: any 
+  [key: string]: any
 }
 
 const StreetsSelector: React.FC<StreetsSelectorProps> = ({
@@ -30,7 +30,7 @@ const StreetsSelector: React.FC<StreetsSelectorProps> = ({
       onChange={(value) =>
         setFilters({
           ...filters,
-          street: value ?? undefined,
+          street: value,
         })
       }
       allowClear
