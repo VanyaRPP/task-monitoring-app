@@ -10,7 +10,7 @@ import { AppRoutes, TaskStatuses } from '@utils/constants'
 import { getFormattedAddress } from '@utils/helpers'
 import { Badge, Button, Card } from 'antd'
 import classNames from 'classnames'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 import Router from 'next/router'
 import s from './style.module.scss'
 

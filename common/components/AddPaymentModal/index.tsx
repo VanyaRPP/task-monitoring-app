@@ -17,7 +17,7 @@ import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { Form, Tabs, TabsProps, message } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 import {
   FC,
   createContext,

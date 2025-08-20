@@ -9,7 +9,7 @@ import InvoicesTable from '@common/components/Tables/PaymentsBulk/Table'
 import TableCard from '@common/components/UI/TableCard'
 import { Operations } from '@utils/constants'
 import { Form, FormInstance } from 'antd'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 import { createContext, useContext } from 'react'
 
 export const InvoicesPaymentContext = createContext<{

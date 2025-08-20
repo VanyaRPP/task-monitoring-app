@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import Notification, { INotification } from '@modules/models/Notification'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start from '../api.config'
 

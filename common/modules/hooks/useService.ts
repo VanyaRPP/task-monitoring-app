@@ -1,5 +1,5 @@
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 
 interface IUseServiceProps {
   serviceId?: string

@@ -6,7 +6,7 @@ import Domain from '@modules/models/Domain'
 import Payment from '@modules/models/Payment'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import _groupBy from 'lodash/groupBy'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 import Credit from '@modules/models/Credit'
 
 start()

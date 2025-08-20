@@ -5,7 +5,7 @@ import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import AddPaymentModal from '@components/AddPaymentModal'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 import { SendOutlined } from '@ant-design/icons'
 
 interface TransactionDrawerProps {

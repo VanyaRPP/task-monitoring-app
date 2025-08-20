@@ -11,8 +11,7 @@ import {
   InputNumber,
 } from 'antd'
 import ukUA from 'antd/lib/locale/uk_UA'
-import dayjs from 'dayjs'
-import 'dayjs/locale/uk'
+import dayjs from '@utils/dayjs'
 import { useTranslation } from 'next-i18next'
 import s from './style.module.scss'
 import { formatDateWithGenitiveMonthCapitalized } from '@utils/helpers' 

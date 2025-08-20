@@ -1,5 +1,5 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 import { ServiceType } from '../constants'
 import { renderCurrency } from '../helpers'
 import nameField from './nameFieldGenerator'

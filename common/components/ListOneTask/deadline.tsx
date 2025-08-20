@@ -1,6 +1,6 @@
 import { FieldTimeOutlined, FireOutlined } from '@ant-design/icons'
 import classNames from 'classnames'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 import s from './style.module.scss'
 
 interface Props {

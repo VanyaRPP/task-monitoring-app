@@ -2,7 +2,7 @@ import { ITransaction } from '@components/Pages/BankTransactions/components/Tran
 import PrivatBankApiAdapter from '@utils/bankUtils/PrivatBankApiAdapter'
 import FetchHttpClient from '@utils/FetchHttpClient/FetchHttpClient'
 import { getDefaultStartDate } from '@utils/helpers'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 
 interface TransactionsData {
   transactions: ITransaction[]

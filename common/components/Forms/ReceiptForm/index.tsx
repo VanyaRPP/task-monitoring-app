@@ -1,7 +1,7 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import PaymentPricesTable from '@components/Forms/AddPaymentForm/PaymentPricesTable'
 import numberToTextNumber from '@utils/numberToText'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import s from './style.module.scss'

@@ -2,7 +2,7 @@
 // @ts-nocheck
 import Task, { ITask } from '@modules/models/Task'
 import { TaskStatuses } from '@utils/constants'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import start from '../api.config'
 

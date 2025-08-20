@@ -1,7 +1,7 @@
 import { Form, DatePicker, ConfigProvider } from 'antd'
 import ukUA from 'antd/lib/locale/uk_UA'
-import dayjs from 'dayjs'
-import 'dayjs/locale/uk'
+import dayjs from '@utils/dayjs'
+
 
 dayjs.locale('uk')
 

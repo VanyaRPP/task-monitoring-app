@@ -1,4 +1,4 @@
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 
 function useInitialValues(currentService) {
   // TODO: add useEffect || useCallback ?

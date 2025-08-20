@@ -1,7 +1,7 @@
 import { FC, useEffect, useRef, useState } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import { PrinterOutlined } from '@ant-design/icons'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 import styles from './styles.module.scss'
 import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPricesTable'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'

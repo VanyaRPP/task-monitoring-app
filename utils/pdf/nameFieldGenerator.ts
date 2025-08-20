@@ -1,7 +1,7 @@
 import { getFormattedDate } from '@assets/features/formatDate'
 import Service from '@modules/models/Service'
 import { ServiceType } from '@utils/constants'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 
 export default async function nameField(invoiceType, paymentData) {
   const paymentDate =

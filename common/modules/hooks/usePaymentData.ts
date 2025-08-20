@@ -6,7 +6,7 @@ import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { Operations } from '@utils/constants'
 import { Form, FormInstance } from 'antd'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 
 export interface IUsePaymentDataProps {
   form: FormInstance

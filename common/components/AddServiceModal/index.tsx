@@ -5,7 +5,7 @@ import {
 import { IService } from '@common/api/serviceApi/service.api.types'
 import Modal from '@components/UI/ModalWindow'
 import { Form, message } from 'antd'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 import { FC, useState } from 'react'
 import AddServiceForm from '../Forms/AddServiceForm'
 import PreviewServiceForm from '../Forms/PreviewServiceForm'

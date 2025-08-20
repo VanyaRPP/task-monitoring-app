@@ -7,7 +7,7 @@ import { Form, Tabs, message } from 'antd'
 import type { TabsProps } from 'antd'
 import { FC, useState, useEffect } from 'react'
 import s from './style.module.scss'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 
 interface Props {
   closeModal: VoidFunction

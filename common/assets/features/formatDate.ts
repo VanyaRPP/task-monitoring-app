@@ -1,11 +1,7 @@
 import { toFirstUpperCase } from '@utils/helpers'
 import { DatePickerProps } from 'antd'
-import dayjs from 'dayjs'
-import 'dayjs/locale/uk'
-import localizedFormat from 'dayjs/plugin/localizedFormat'
+import dayjs from '@utils/dayjs'
 
-dayjs.extend(localizedFormat)
-dayjs.locale('uk')
 
 export const dateToDefaultFormat = (deadline: string): string =>
   dayjs(deadline).format('LL')

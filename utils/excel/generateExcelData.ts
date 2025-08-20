@@ -1,5 +1,5 @@
 import { dateToDefaultFormat } from '@assets/features/formatDate'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 
 function formatNumber(value: number | string | undefined | null): string {
   const num = Number(value)

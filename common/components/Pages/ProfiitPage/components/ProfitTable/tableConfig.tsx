@@ -1,7 +1,7 @@
 import { Profit } from '@common/api/profitsApi/profits.type'
 import { ColumnsType } from 'antd/es/table'
 import { t } from 'i18next'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 import { Button, Dropdown,Popconfirm } from 'antd'
 import { EyeOutlined, EditOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons'
 import type { MenuProps } from 'antd'

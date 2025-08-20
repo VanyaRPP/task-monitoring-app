@@ -12,8 +12,7 @@ import {
   InputNumber,
 } from 'antd'
 import ukUA from 'antd/lib/locale/uk_UA'
-import dayjs from 'dayjs'
-import 'dayjs/locale/uk'
+import dayjs from '@utils/dayjs'
 import { useEffect } from 'react'
 import s from './style.module.scss'
 import { inputNumberParser } from '@utils/helpers'

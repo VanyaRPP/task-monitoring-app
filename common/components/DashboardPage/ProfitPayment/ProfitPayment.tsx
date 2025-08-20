@@ -6,15 +6,11 @@ import { CalendarOutlined, PlusOutlined } from '@ant-design/icons'
 import { useGetCostPaymentQuery } from '@common/api/paymentApi/payment.api'
 import s from './style.module.scss'
 import TableCard from '@components/UI/TableCard'
-import dayjs from 'dayjs'
-import 'dayjs/locale/uk'
-import localizedFormat from 'dayjs/plugin/localizedFormat'
+import dayjs from '@utils/dayjs'
 import { isAdminCheck } from '@utils/helpers'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddCostModal from '@components/AddCostModal'
 
-// Активуємо плагін
-dayjs.extend(localizedFormat)
 
 const ProfitPayment: React.FC = () => {
   const router = useRouter()

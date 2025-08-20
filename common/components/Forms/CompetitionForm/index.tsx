@@ -2,7 +2,7 @@ import { allowOnlyNumbers, validateField } from '@assets/features/validators'
 import CustomTooltip from '@components/UI/CustomTooltip'
 import { ITask } from '@modules/models/Task'
 import { DatePicker, Form, FormInstance, Input } from 'antd'
-import dayjs from 'dayjs'
+import dayjs from '@utils/dayjs'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 
 dayjs.extend(isSameOrAfter)
