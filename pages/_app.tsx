@@ -2,6 +2,11 @@ import { Providers_pages } from '@components/Providers'
 import NextNProgress from 'nextjs-progressbar'
 import Head from 'next/head'
 import { appWithTranslation } from 'next-i18next'
+import dayjs from 'dayjs'
+import 'dayjs/locale/uk'
+import localizedFormat from 'dayjs/plugin/localizedFormat'
+dayjs.extend(localizedFormat)
+dayjs.locale('uk')
 
 import '../common/lib/i18n.ts'
 
