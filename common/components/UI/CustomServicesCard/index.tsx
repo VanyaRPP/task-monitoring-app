@@ -83,18 +83,26 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
               return (
                 <Space
                   key={field.key}
-                  style={{ display: 'flex', marginBottom: 6, marginTop: 6 }}
+                  style={{
+                    width: '100%',
+                    display: 'grid',
+                    gridTemplateColumns: disabled ? '1fr' : '1fr auto', 
+                    columnGap: 8,
+                    marginBottom: 6,
+                    marginTop: 6,
+                  }}
                   align="start"
                 >
                   <Form.Item
                     name={[field.name, 'price']}
                     label={service?.label}
                     rules={[{ required: true, message: 'Введіть значення' }]}
+                    style={{ width: '100%' }}               
                   >
                     <InputNumber
                       parser={inputNumberParser}
                       placeholder="Введіть значення"
-                      style={{ width: !isServiceForm ? '440px' : '470px' }}
+                      style={{ width: disabled ? '100%' : (!isServiceForm ? 440 : 470) }} 
                       disabled={disabled}
                     />
                   </Form.Item>
