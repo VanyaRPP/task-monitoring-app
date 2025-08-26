@@ -1,23 +1,42 @@
 import { Select } from 'antd'
+import { IFilter } from '@common/api/paymentApi/payment.api.types'
 
-const StreetsSelector = ({ setFilters, streets }) => {
-  const options = streets?.map((street) => ({
-    label: street.text,
-    value: street.value,
-  }))
+interface StreetsSelectorProps {
+  streets: IFilter[]
+  filters?: Record<string, any>
+  setFilters: (f: Record<string, any>) => void
+  className?: string
+  [key: string]: any
+}
+
+const StreetsSelector: React.FC<StreetsSelectorProps> = ({
+  streets,
+  filters = {},
+  setFilters,
+  className,
+  ...props
+}) => {
+  const options = [...streets]
+    .sort((a, b) => a.text.localeCompare(b.text))
+    .map((street) => ({
+      label: street.text,
+      value: String(street.value),
+    }))
 
   return (
     <Select
       placeholder="Виберіть вулицю"
-      style={{ width: '200px' }}
-      onChange={(value) => {
-        setFilters((prevFilters) => ({
-          ...prevFilters,
+      value={filters?.street}
+      onChange={(value) =>
+        setFilters({
+          ...filters,
           street: value,
-        }))
-      }}
+        })
+      }
       allowClear
+      className={className}
       options={options}
+      {...props}
     />
   )
 }

@@ -13,7 +13,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isAdmin } = await getCurrentUser(req, res)
+  const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser } =
+    await getCurrentUser(req, res)
 
   const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
 
@@ -32,7 +33,7 @@ export default async function handler(
     return obj
   }
 
-  if (!isAdmin) {
+  if (isUser) {
     return res.status(400).json({ success: false, message: 'not allowed' })
   }
 
@@ -77,7 +78,7 @@ export default async function handler(
 
     case 'GET':
       try {
-        if (isGlobalAdmin) {
+        if (!isUser) {
           const response = await Domain.findById({ _id: req.query.id })
           return res.status(200).json({ success: true, data: response })
         } else {

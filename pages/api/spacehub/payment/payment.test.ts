@@ -1,6 +1,5 @@
 import { expect } from '@jest/globals'
 import handler from '.'
-
 import { parseReceived } from '@utils/helpers'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
@@ -348,6 +347,33 @@ it('get valid distinctCompanies as DomainAdmin', async () => {
   expect(response.realEstatesFilter[0].value.toString()).toEqual(
     realEstates[0]._id
   )
+})
+it('difference between debit and credit', async () => {
+  await mockLoginAs(users.globalAdmin)
+
+  const mockReq = {
+    method: 'GET',
+    query: {},
+  } as any
+
+  const mockRes = {
+    status: jest.fn(() => mockRes),
+    json: jest.fn(),
+  } as any
+
+  await handler(mockReq, mockRes)
+
+  const { totalPayments } = mockRes.json.mock.lastCall[0] || {}
+
+  expect(mockRes.status).toHaveBeenCalledWith(200)
+
+  const debit = totalPayments?.debit || 0
+  const credit = totalPayments?.credit || 0
+
+  const calculatedDifference = Number((debit - credit).toFixed(2))
+
+  expect(typeof calculatedDifference).toBe('number')
+  expect(calculatedDifference).toBeCloseTo(debit - credit, 2)
 })
 
 // it('load payments as GlobalAdmin by domainId - success', async () => {

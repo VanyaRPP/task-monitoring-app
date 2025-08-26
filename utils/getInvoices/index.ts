@@ -102,6 +102,13 @@ export const getInvoices = ({
       currInvoicesCollection,
       prevInvoicesCollection,
     }),
+    ...getCustomServiceInvoices({
+      company,
+      service,
+      prevService,
+      currInvoicesCollection,
+      prevInvoicesCollection,
+    }),
   ]
 
   return invoices.filter((invoice) => invoice)
@@ -128,7 +135,8 @@ export const getMaintenanceInvoice = ({
     return {
       type: invoice.type,
       amount: +toRoundFixed(invoice.amount),
-      isIndividual: companyMaintenance !== undefined && companyMaintenance !== null,
+      isIndividual:
+        companyMaintenance !== undefined && companyMaintenance !== null,
       price:
         companyMaintenance !== undefined && companyMaintenance !== null
           ? +toRoundFixed(companyMaintenance)
@@ -139,6 +147,8 @@ export const getMaintenanceInvoice = ({
           : +toRoundFixed(+invoice.sum || +invoice.price * +invoice.amount),
     }
   }
+
+  if (company.servicePricePerMeter === 0) return
 
   if (
     !isNaN(company?.totalArea) &&
@@ -470,4 +480,45 @@ export const getCustomInvoices = ({
       price: +toRoundFixed(+invoice.sum || +invoice.price),
       sum: +toRoundFixed(+invoice.sum || +invoice.price),
     }))
+}
+
+export const getCustomServiceInvoices = ({
+  company,
+  service,
+  prevService,
+  currInvoicesCollection,
+  prevInvoicesCollection,
+}: IGetInvoiceByTypeProps): Array<IPaymentField> => {
+  if (
+    (!service?.customServices && !company?.customServices) ||
+    Object.keys(currInvoicesCollection).length > 0
+  ) {
+    return []
+  }
+
+  const serviceCustoms = Array.isArray(service?.customServices)
+    ? service.customServices
+    : []
+  const companyCustoms = Array.isArray(company?.customServices)
+    ? company.customServices
+    : []
+
+  const customServices = serviceCustoms.map((serviceItem) => {
+    const companyItem = companyCustoms.find(
+      (c) => c?.fieldName === serviceItem?.fieldName
+    )
+
+    const price = +toRoundFixed(companyItem?.price ?? serviceItem?.price ?? 0)
+
+    return {
+      name: serviceItem?.label || 'Невідома послуга',
+      price,
+      sum: price,
+      type: ServiceType.Custom,
+      fieldName: serviceItem?.fieldName || 'custom',
+      customService: true,
+    }
+  })
+
+  return customServices
 }

@@ -1,0 +1,83 @@
+.print {
+  position: absolute;
+  top: -80px;
+  right: 48px;
+  user-select: none;
+  cursor: pointer;
+  font-size: 25px;
+}
+
+.invoiceContainer {
+  .providerInfo,
+  .receiverInfo {
+    .label {
+      width: 110px;
+      font-size: 14px;
+    }
+    .preLabel {
+      vertical-align: top;
+      margin-top: 0;
+    }
+    .info_adres__bold {
+      font-weight: 700;
+    }
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+  }
+
+  .providerInvoice {
+    .datecellTitle {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .datecellDate {
+      font-weight: 700;
+    }
+    padding: 6px 0px;
+    font-size: 14px;
+    display: flex;
+    font-family: Arial, Helvetica, sans-serif;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tableSum {
+    width: 94%;
+  }
+
+  .payTable {
+    .payFixed {
+      display: flex;
+    }
+    .payBold {
+      text-transform: lowercase;
+      font-weight: 700;
+      margin-left: 10px;
+    }
+    .payBoldSum {
+      font-weight: 800;
+      margin-left: 10px;
+    }
+    .lineInner {
+      margin-left: 10px;
+    }
+    padding: 10px 0px 0px 0px;
+    font-size: 16px;
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .endInfo {
+    .endInfobolt {
+      font-weight: 700;
+      margin-right: 20px;
+    }
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 10px 0px;
+    width: 800px;
+    position: relative;
+    display: flex;
+  }
+}

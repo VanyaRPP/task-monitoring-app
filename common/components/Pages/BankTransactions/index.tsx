@@ -1,92 +1,80 @@
-/* eslint-disable no-console */
 'use client'
-
-import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import { Button, Card, Select, Tabs, TabsProps } from 'antd'
-
-import StickyBox from 'react-sticky-box'
+/* eslint-disable no-console */
+import FullScreenWrapper from '@components/UI/fullScreenTableWrapper/fullScreenTableWrapper'
+import { setAccount, setActiveDomainId } from '@modules/store/bankSlice'
+import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import DomainBankTab from './components/DomainBankTab/DomainBankTab'
-
-import s from './style.module.scss'
-import { useRouter } from 'next/router'
-import { AppRoutes } from '@utils/constants'
-import { useGetBalancesQuery } from '@common/api/bankApi/bank.api'
-import { useEffect, useState } from 'react'
-import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import EncryptionService from '@utils/encryptionService'
+import { useDomainTabs } from '../ProfiitPage/hook/useDomainTabs'
+import { ReactNode, useMemo, useEffect } from 'react'
+import { useTranslation } from 'next-i18next'
+import { Card, Space, Alert, Spin } from 'antd'
 
 const BankTransactions = () => {
-  const router = useRouter()
+  const { t } = useTranslation('bankPage')
+  const dispatch = useAppDispatch()
+  const activeDomainId = useAppSelector((state) => state.bank.activeDomainId)
 
-  const { data: domains = [] } = useGetDomainsQuery({})
-
-  const [selectedDomain, setSelectedDomain] = useState<IExtendedDomain>(
-    domains[0]
-  )
-  const [selectedAcc, setSelectedAcc] = useState('')
+  const { tabList, isLoading, isError } = useDomainTabs()
 
   useEffect(() => {
-    setSelectedDomain(domains[0])
-  }, [domains])
-
-  const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
-  const encryptionService = new EncryptionService(SECURE_TOKEN)
-  const token = selectedDomain?.domainBankToken[0]
-    ? encryptionService.decrypt(
-        selectedDomain?.domainBankToken[0]?.token ?? 'token'
-      )
-    : ''
-
-  const { data: balances } = useGetBalancesQuery({ token }, { skip: !token })
-
-  const items = domains.map((domain) => {
-    return {
-      label: domain.name,
-      key: domain._id,
-      children: (
-        <DomainBankTab domain={domain} token={token} acc={selectedAcc} />
-      ),
+    if (tabList.length && !activeDomainId) {
+      dispatch(setActiveDomainId(tabList[0].key))
+      dispatch(setAccount(null))
     }
-  })
+  }, [tabList, activeDomainId, dispatch])
 
-  const renderTabBar: TabsProps['renderTabBar'] = (props, DefaultTabBar) => (
-    <StickyBox className={s.tableHeader}>
-      <div className={s.filterWrapper}>
-        <Button
-          type="link"
-          onClick={() => {
-            router.push(AppRoutes.BANKTEST)
-          }}
-        >
-          Банк
-        </Button>
-        {balances && (
-          <Select
-            placeholder="Оберіть рахунок"
-            options={balances.map((item) => ({
-              label: item.acc,
-              value: item.acc,
-            }))}
-            popupMatchSelectWidth={false}
-            onSelect={(value) => setSelectedAcc(value)}
-          />
-        )}
-      </div>
-      <DefaultTabBar {...props} className={s.tabBar} />
-    </StickyBox>
-  )
+  const contentList = useMemo(() => {
+    return tabList.reduce((acc, domain) => {
+      acc[domain.key] = <DomainBankTab domainId={domain.key} />
+      return acc
+    }, {} as Record<string, ReactNode>)
+  }, [tabList])
+
+  const onTabChange = (key: string) => {
+    dispatch(setActiveDomainId(key))
+  }
+
+  if (isError) {
+    return (
+      <Alert
+        message={t('errorTitle')}
+        description={t('errorDescription')}
+        type="error"
+        showIcon
+      />
+    )
+  }
 
   return (
-    <Card>
-      <Tabs
-        defaultActiveKey="1"
-        renderTabBar={renderTabBar}
-        items={items}
-        onChange={(id) =>
-          setSelectedDomain(domains.find((domain) => domain._id === id))
-        }
-      />
-    </Card>
+    <FullScreenWrapper unicKey="bank-table">
+      <Space
+        direction="vertical"
+        style={{ width: '100%', position: 'relative' }}
+        size="middle"
+      >
+        {isLoading || tabList.length === 0 ? (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 100 }}>
+          <Spin size="large" />
+        </div>
+      ) : isError ? (
+        <Alert
+          message={t('errorTitle')}
+          description={t('errorDescription')}
+          type="error"
+          showIcon
+        />
+      ) : (
+        <Card
+          title={t('title')}
+          tabList={tabList}
+          activeTabKey={activeDomainId || tabList[0].key}
+          onTabChange={onTabChange}
+        >
+          {activeDomainId ? contentList[activeDomainId] : null}
+        </Card>
+      )}
+      </Space>
+    </FullScreenWrapper>
   )
 }
 

@@ -44,6 +44,8 @@ export async function generateZip(
     })
 
     archive.on('end', () => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
       resolve(Buffer.concat(buffers))
     })
 

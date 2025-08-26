@@ -11,6 +11,8 @@ import {
 } from '@common/api/domainApi/domain.api.types'
 import DomainForm from './DomainForm'
 import Modal from '../../ModalWindow'
+import { current } from '@reduxjs/toolkit'
+import { defaultServices } from '@utils/constants'
 
 interface Props {
   currentDomain: IExtendedDomain
@@ -40,23 +42,31 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       mfo: currentDomain?.mfo || '',
       rnokpp: currentDomain?.rnokpp || '',
       iban: currentDomain?.iban || '',
-      domainServices: currentDomain?.domainServices || [],
-      customServices: currentDomain?.customServices || [],
+      customServices: currentDomain?.customServices || [
+        {
+          groupName: 'Стандартні послуги',
+          services: defaultServices,
+        },
+      ],
     }
     form.setFieldsValue(initialValues)
   }, [currentDomain, form])
 
   const handleSubmit = async () => {
-    const formData: IDomainModel = await form.validateFields()
+    const formData = await form.validateFields()
 
-    if (!currentDomain && domains?.some(domain => domain.name === formData.name)) {
+    if (
+      !currentDomain &&
+      domains?.some((domain) => domain.name === formData.name)
+    ) {
       message.error({
-        content: 'Помилка при додаванні надавача послуг!  Домен з такою назвою вже існує!',
-        duration: 4, 
+        content:
+          'Помилка при додаванні надавача послуг!  Домен з такою назвою вже існує!',
+        duration: 4,
         style: {
           marginTop: '20vh',
           fontSize: '2rem',
-          zIndex: 9999, 
+          zIndex: 9999,
         },
       })
       return
@@ -74,7 +84,6 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       mfo: formData.mfo,
       rnokpp: formData.rnokpp,
       iban: formData.iban,
-      domainServices: formData.domainServices,
       customServices: formData.customServices,
     }
 

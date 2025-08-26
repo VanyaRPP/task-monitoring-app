@@ -14,6 +14,7 @@ export interface IPaymentField {
   amount?: number
   price: number
   sum: number
+  fieldName?: string
 }
 
 export interface IProvider {
@@ -30,7 +31,7 @@ export interface IPayment {
   invoiceNumber: number
   type: string
   invoiceCreationDate: Date
-  domain: Partial<IDomain> | string
+  domain: Partial<IDomain> | any
   street: Partial<IStreet> | string
   company: Partial<IRealestate> | string
   monthService: Partial<IService> | string
@@ -40,6 +41,7 @@ export interface IPayment {
   reciever: IReciever
   generalSum: number
   transaction?: IPaymentTransactions
+  losses?: number
 }
 
 export interface IExtendedPayment extends IPayment {

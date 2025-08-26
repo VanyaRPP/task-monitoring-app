@@ -17,6 +17,8 @@ import 'dayjs/locale/uk'
 import { useEffect } from 'react'
 import s from './style.module.scss'
 import { inputNumberParser } from '@utils/helpers'
+import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
+import CustomServicesCard from '@components/UI/CustomServicesCard'
 
 dayjs.locale('uk')
 
@@ -38,6 +40,73 @@ const AddServiceForm: React.FC<Props> = ({
   const date = Form.useWatch('date', form)
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
+
+  const filteredServicesPrice = (customServices) => {
+    return customServices?.map((service) => {
+      let price = null
+  
+      switch (service.fieldName) {
+        case 'electricityPrice':
+          price = currentService?.electricityPrice
+          ?? currentService?.customServices?.find(service => service.fieldName === 'electricityPrice')?.price 
+          ?? 0
+          break
+        case 'inflicionPrice':
+          price = currentService?.inflicionPrice
+          ?? currentService?.customServices?.find(service => service.fieldName === 'inflicionPrice')?.price 
+          ?? 0
+          break
+        case 'rentPrice':
+          price = currentService?.rentPrice
+          ?? currentService?.customServices?.find(service => service.fieldName === 'rentPrice')?.price 
+          ?? 0
+          break
+        case 'waterPrice':
+          price = currentService?.waterPrice
+          ?? currentService?.customServices?.find(service => service.fieldName === 'waterPrice')?.price 
+          ?? 0
+          break
+        case 'waterPriceTotal':
+          price = currentService?.waterPriceTotal
+          ?? currentService?.customServices?.find(service => service.fieldName === 'waterPriceTotal')?.price 
+          ?? 0
+          break
+        case 'garbageCollectorPrice':
+          price = currentService?.garbageCollectorPrice
+          ?? currentService?.customServices?.find(service => service.fieldName === 'garbageCollectorPrice')?.price 
+          ?? 0
+          break
+        default:
+          price = currentService?.[service?.fieldName]
+          ?? currentService?.customServices?.find(service => service?.fieldName === service?.fieldName)?.price 
+          ?? 0
+          break
+      }
+  
+      return {
+        ...service,
+        price,
+      }
+    })
+  }
+
+  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
+    { domainId: domainId },
+    { skip: !domainId }
+  )
+
+  const initialCustomServices = customDomainServices?.data?.flatMap((group) =>
+    Array.isArray(group?.services)
+      ? group.services.map((service) => ({
+          label: service.name || 'Невідома послуга',
+          price: 0,
+          fieldName: service.fieldName || 'defaultFieldName',
+          _id: service._id || 'defaultId',
+        }))
+      : []
+  )
+
+  const filteredCustomServices = filteredServicesPrice(initialCustomServices)
 
   const { previousMonth } = usePreviousMonthService({
     date,
@@ -61,8 +130,13 @@ const AddServiceForm: React.FC<Props> = ({
         currentService?.garbageCollectorPrice ??
         previousMonth?.garbageCollectorPrice ??
         0,
+      customServices:
+      (currentService?.customServices?.length > 0 
+        ? currentService.customServices 
+        : filteredCustomServices) || [],
+      losses: currentService?.losses ?? 0,
     })
-  }, [form, currentService, previousMonth])
+  }, [form, currentService, previousMonth, initialCustomServices])
 
   return (
     <ConfigProvider locale={ukUA}>
@@ -91,6 +165,8 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
+        <CustomServicesCard form={form} isServiceForm={true}/> 
+        {/* { !(initialCustomServices ?? []).some(item => item.fieldName === 'rentPrice') && // TODO: customServices
         <Form.Item
           name="rentPrice"
           label="Утримання приміщень (грн/м²)"
@@ -102,6 +178,8 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
+        }
+        { !(initialCustomServices ?? []).some(item => item.fieldName === 'electricityPrice') &&
         <Form.Item
           name="electricityPrice"
           label="Електроенергія (грн/кВт)"
@@ -113,6 +191,8 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
+        }
+        { !(initialCustomServices ?? []).some(item => item.fieldName === 'waterPrice') &&
         <Form.Item
           name="waterPrice"
           label="Водопостачання (грн/м³)"
@@ -124,6 +204,8 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
+        }
+        { !(initialCustomServices ?? []).some(item => item.fieldName === 'waterPriceTotal') && 
         <Form.Item
           name="waterPriceTotal"
           label="Всього водопостачання (грн/м³)"
@@ -135,6 +217,8 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
+        } 
+        { !(initialCustomServices ?? []).some(item => item.fieldName === 'garbageCollectorPrice') &&
         <Form.Item name="garbageCollectorPrice" label="Вивіз сміття">
           <InputNumber
             parser={inputNumberParser}
@@ -142,7 +226,18 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
+        } 
         <Form.Item name="inflicionPrice" label="Індекс інфляції">
+          <InputNumber
+            parser={inputNumberParser}
+            placeholder="Вкажіть значення"
+            className={s.formInput}
+          />
+        </Form.Item> */}
+        <Form.Item
+          name="losses"
+          label={<>Втрати в трансформаторі, лініях, реактивна (%)</>}
+        >
           <InputNumber
             parser={inputNumberParser}
             placeholder="Вкажіть значення"

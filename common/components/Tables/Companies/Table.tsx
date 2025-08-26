@@ -5,7 +5,7 @@ import {
   QuestionCircleOutlined,
   InboxOutlined,
   MoreOutlined,
-  InfoCircleOutlined
+  InfoCircleOutlined,
 } from '@ant-design/icons'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import {
@@ -17,7 +17,6 @@ import {
   IGetRealestateResponse,
 } from '@common/api/realestateApi/realestate.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-
 import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import {
@@ -31,7 +30,7 @@ import {
   Tooltip,
   Dropdown,
   Switch,
-  Badge
+  Badge,
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
@@ -40,7 +39,7 @@ import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 
 type DebtPerMonth = {
@@ -78,11 +77,11 @@ export interface Props {
 
 const getDebtorTooltipColor = (debtor) => {
   if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
-    return 'gray';
+    return 'gray'
   } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
-    return 'yellow';
+    return 'yellow'
   } else if (debtor.totalDebt >= 20000) {
-    return 'red';
+    return 'red'
   }
 }
 
@@ -133,7 +132,10 @@ const CompaniesTable: React.FC<Props> = ({
       setDomainIds(domainData?.domainsFilter.map((domain) => domain.value))
     }
   }, [domainData])
-  const { data, error } = useGetDebtorsQuery({ domainIds: domainIds }, { skip: !domainIds || domainIds.length === 0 })
+  const { data, error } = useGetDebtorsQuery(
+    { domainIds: domainIds },
+    { skip: !domainIds || domainIds.length === 0 }
+  )
   const debtorCompanies = data?.companies
 
   const [deleteRealEstate, { isLoading: deleteLoading }] =
@@ -173,6 +175,14 @@ const CompaniesTable: React.FC<Props> = ({
     (isGlobalAdmin ? 50 : 0) +
     (!domainId && !streetId && !isLoading ? 400 : 0)
 
+  const isSingleCompanyByData = useMemo(() => {
+    if (!realEstates?.data || realEstates.data.length === 0) return false
+    const uniqueCompanies = new Set(
+      realEstates.data.map((item) => item.companyName)
+    )
+    return uniqueCompanies.size === 1
+  }, [realEstates?.data])
+
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
   return (
@@ -185,20 +195,24 @@ const CompaniesTable: React.FC<Props> = ({
           showSizeChanger: true,
           pageSizeOptions: [10, 20, 50],
           position: ['bottomCenter'],
-          showTotal: () => (
-          !isUser && <Switch
-            checkedChildren="Боржники"
-            unCheckedChildren="Всі"
-            onChange={(checked) => {
-              if (checked) {
-                setFilters((prev) => ({
-                  company: debtorCompanies?.map((company) => company.companyId),
-                }))
-              } else {
-                setFilters(undefined)
-              }
-            }}
-          />),
+          showTotal: () =>
+            !isUser && (
+              <Switch
+                checkedChildren="Боржники"
+                unCheckedChildren="Всі"
+                onChange={(checked) => {
+                  if (checked) {
+                    setFilters((prev) => ({
+                      company: debtorCompanies?.map(
+                        (company) => company.companyId
+                      ),
+                    }))
+                  } else {
+                    setFilters(undefined)
+                  }
+                }}
+              />
+            ),
         }
       }
       loading={isLoading}
@@ -220,16 +234,22 @@ const CompaniesTable: React.FC<Props> = ({
         pathname,
         setRealEstateActions,
         debtorCompanies,
-        isUser
+        isUser,
+        isSingleCompanyByData,
       })}
       dataSource={realEstates?.data}
       scroll={{ x: tableWidth }}
       onChange={(__, filters) => {
-        setFilters({
+        const newFilters: any = {
           domain: filters?.domain,
-          company: filters?.companyName,
           street: filters?.street,
-        })
+        }
+
+        if (!isSingleCompanyByData) {
+          newFilters.company = filters?.companyName
+        }
+
+        setFilters(newFilters)
       }}
     />
   )
@@ -261,7 +281,8 @@ const getDefaultColumns = ({
   pathname,
   setRealEstateActions,
   debtorCompanies,
-  isUser
+  isSingleCompanyByData,
+  isUser,
 }: {
   domainId?: string
   streetId?: string
@@ -285,6 +306,7 @@ const getDefaultColumns = ({
   >
   debtorCompanies?: CompanyWithPayments[]
   isUser?: boolean
+  isSingleCompanyByData?: boolean
 }): ColumnType<any>[] => {
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
   const columns: ColumnType<any>[] = [
@@ -373,7 +395,7 @@ const getDefaultColumns = ({
       fixed: 'right',
       align: 'center',
       title: '',
-      width: 40,
+      width: 80,
       render: (_, realEstate: IExtendedRealestate) => (
         <Button
           icon={<EyeOutlined />}
@@ -499,19 +521,23 @@ const getDefaultColumns = ({
     width: 200,
     filterSearch: true,
     render: (i) => {
-      const debtor = debtorCompanies?.find(companie => companie?.companyName === i)
+      const debtor = debtorCompanies?.find(
+        (companie) => companie?.companyName === i
+      )
       return !isUser && debtor ? (
         <Badge
           count={debtor.totalDebt.toFixed(2)}
           title=""
-           color={getDebtorTooltipColor(debtor)}
-          overflowCount={Infinity}  
-          style={{ cursor: "pointer" }}
-          size='small'
+          color={getDebtorTooltipColor(debtor)}
+          overflowCount={Infinity}
+          style={{ cursor: 'pointer' }}
+          size="small"
         >
           <span>{i}</span>
         </Badge>
-      ) : i
+      ) : (
+        i
+      )
     },
   }
 
@@ -528,9 +554,11 @@ const getDefaultColumns = ({
   }
 
   if (isAdmin) {
-    companyColumn.filters =
-      pathname === AppRoutes.REAL_ESTATE ? realEstatesFilter : null
-    companyColumn.filteredValue = filters?.company || null
+    if (!isSingleCompanyByData) {
+      companyColumn.filters =
+        pathname === AppRoutes.REAL_ESTATE ? realEstatesFilter : null
+      companyColumn.filteredValue = filters?.company || null
+    }
 
     domainColumn.filters =
       pathname === AppRoutes.REAL_ESTATE ? domainsFilter : null
@@ -545,7 +573,9 @@ const getDefaultColumns = ({
 
   columns.unshift(domainColumn)
 
-  columns.unshift(companyColumn)
+  if (!isSingleCompanyByData) {
+    columns.unshift(companyColumn)
+  }
 
   return columns
 }

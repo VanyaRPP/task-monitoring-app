@@ -1,21 +1,17 @@
-import SignInButton from '@common/components/UI/Buttons/SignInButton'
-import config from '@utils/config'
-import { AppRoutes, errors } from '@utils/constants'
-import { Alert, Card, Divider } from 'antd'
-import { GetServerSideProps } from 'next'
-import { getServerSession } from 'next-auth'
+import { authOptions } from '../../api/auth/[...nextauth]'
 import { BuiltInProviderType } from 'next-auth/providers'
+import SignInPage from '@components/Pages/SignInPage'
+import MainLayout from '@components/Layouts/Main'
+import { getServerSession } from 'next-auth'
+import { AppRoutes } from '@utils/constants'
+import { GetServerSideProps } from 'next'
+import { FC } from 'react'
 import {
   ClientSafeProvider,
   getCsrfToken,
   getProviders,
   LiteralUnion,
 } from 'next-auth/react'
-import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
-import { authOptions } from '../../api/auth/[...nextauth]'
-import s from './style.module.scss'
-import SignInForm from '../../../common/components/Forms/AddSingInForm'
 
 type PropsType = {
   providers: Record<
@@ -25,57 +21,15 @@ type PropsType = {
   csrfToken: string | undefined
 }
 
-const SignInPage: React.FC<PropsType> = ({ providers, csrfToken }) => {
-  const { error } = useRouter().query
-  const [customError, setCustomError] = useState('')
-
-  useEffect(() => {
-    setCustomError(error && (errors[`${error}`] ?? errors.default))
-  }, [error])
-
+const SignInDefaultPage: FC<PropsType> = ({ providers, csrfToken }) => {
   return (
-    <>
-      {error && customError !== undefined && (
-        <Alert
-          message="Помилка"
-          description={customError}
-          type="error"
-          showIcon
-          closable
-        />
-      )}
-
-      <h2 className={s.Header}>{config.titles.signInTitle}</h2>
-
-      <Card>
-        {process.env.NODE_ENV === 'development' && (
-          <SignInForm csrfToken={csrfToken} />
-        )}
-        {process.env.NODE_ENV === 'development' ? (
-          <div className={s.Container}>
-            {Object.values(providers)?.map(
-              (provider: any) =>
-                provider?.name === 'GitHub' && (
-                  <SignInButton key={provider?.name} provider={provider} />
-                )
-            )}
-          </div>
-        ) : (
-          <div className={s.Container}>
-            {Object.values(providers).map(
-              (provider: any) =>
-                provider?.name === 'Google' && (
-                  <SignInButton key={provider?.name} provider={provider} />
-                )
-            )}
-          </div>
-        )}
-      </Card>
-    </>
+    <MainLayout simple>
+      <SignInPage providers={providers} csrfToken={csrfToken} />
+    </MainLayout>
   )
 }
 
-export default SignInPage
+export default SignInDefaultPage
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions)

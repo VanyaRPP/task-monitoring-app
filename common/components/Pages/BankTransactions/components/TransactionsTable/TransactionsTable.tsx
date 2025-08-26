@@ -1,45 +1,42 @@
-import React, { useState } from 'react'
-import { Table, Dropdown, Checkbox, MenuProps, Space } from 'antd'
-import { SettingOutlined } from '@ant-design/icons'
+import React from 'react'
+import { Table, Checkbox, MenuProps, Space } from 'antd'
 import { useColumnVisibility } from './components/useColumnVisibility'
 import { ITransaction } from './components/transactionTypes'
-import {
-  columnNames,
-  defaultVisibleColumns,
-  generateColumns,
-} from './components/column'
+import { defaultVisibleColumns, generateColumns } from './components/column'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 
 interface Props {
   transactions: ITransaction[]
   pagination?: React.ReactNode
   domain: IExtendedDomain
+  loading?: boolean
 }
 
 const TransactionsTable: React.FC<Props> = ({
   transactions,
   pagination,
   domain,
+  loading,
 }) => {
   const { visibleColumns, toggleColumnVisibility } = useColumnVisibility(
     defaultVisibleColumns
   )
 
-  const items: MenuProps['items'] = columnNames.map((col) => ({
-    key: col,
-    label: (
-      <Checkbox
-        value={col}
-        checked={visibleColumns.includes(col)}
-        onChange={(e) => toggleColumnVisibility(e.target.value)}
-      >
-        {col}
-      </Checkbox>
-    ),
-  }))
+  // const items: MenuProps['items'] = columnNames.map((col) => ({
+  //   key: col,
+  //   label: (
+  //     <Checkbox
+  //       value={col}
+  //       checked={visibleColumns.includes(col)}
+  //       onChange={(e) => toggleColumnVisibility(e.target.value)}
+  //     >
+  //       {col}
+  //     </Checkbox>
+  //   ),
+  // }))
 
-  const [tableSettingDropdovnVisible, setTableSettingDropdovnVisible] =
-    useState<boolean>(false)
+  // const [tableSettingDropdovnVisible, setTableSettingDropdovnVisible] =
+  //   useState<boolean>(false)
 
   const columns = generateColumns(
     visibleColumns,
@@ -50,11 +47,14 @@ const TransactionsTable: React.FC<Props> = ({
   return (
     <>
       <Table<ITransaction>
+        key={transactions?.length}
         scroll={{ x: true }}
         dataSource={transactions}
         columns={columns}
         pagination={false}
         rowKey="ID"
+        loading={loading}
+        sticky={{ offsetHeader: 64 }}
       />
       <Space
         direction="vertical"

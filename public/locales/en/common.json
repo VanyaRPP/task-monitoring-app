@@ -1,0 +1,7 @@
+{
+  "siteTitle": "My Website",
+  "modal": {
+    "successMessage": "Changes saved successfully",
+    "errorMessage": "Failed to save changes"
+  }
+}

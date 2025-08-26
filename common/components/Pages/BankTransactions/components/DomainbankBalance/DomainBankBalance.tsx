@@ -1,5 +1,6 @@
-import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons'
-import { Card, Col, Row, Statistic } from 'antd'
+import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
+import { setAccount } from '@modules/store/bankSlice'
+import { Card, Select, Statistic } from 'antd'
 import React, { FC } from 'react'
 
 export interface IBalance {
@@ -34,48 +35,40 @@ export interface IBalancesData {
 }
 
 interface Props {
-  balanceData: IBalance
+  balancesData: IBalance[]
 }
 
-const DomainBankBalance: FC<Props> = ({ balanceData }) => {
-  const { currency, balanceIn, balanceOut, nameACC, acc, turnoverDebt } =
-    balanceData
+const DomainBankBalance: FC<Props> = ({ balancesData }) => {
+  const dispatch = useAppDispatch()
+  const selectedAccount = useAppSelector((state) => state.bank.account)
+
+  const balance = balancesData.find((b) => b.acc === selectedAccount)
+
+  const { currency, balanceOut, nameACC, acc } = balance ?? {}
 
   return (
-    <Card bordered={false} loading={!balanceData} style={{ height: '300px' }}>
+    <Card loading={!balance} style={{ marginBottom: 8 }}>
       <Card.Meta
         title={nameACC}
-        description={acc}
         avatar={
-          <Statistic title={`Balance (${currency})`} value={turnoverDebt} />
+          <Statistic
+            title={`Balance (${currency})`}
+            value={Number(balanceOut)}
+            precision={2}
+          />
+        }
+        description={
+          <Select
+            value={acc}
+            style={{ minWidth: 320 }}
+            onChange={(value) => dispatch(setAccount(value))}
+            options={balancesData.map((b) => ({
+              value: b.acc,
+              label: b.acc,
+            }))}
+          />
         }
       />
-      <Row gutter={16}>
-        <Col span={12}>
-          <Card bordered={false}>
-            <Statistic
-              title="In"
-              value={balanceIn}
-              precision={1}
-              valueStyle={{ color: '#3f8600' }}
-              prefix={<ArrowUpOutlined />}
-              suffix={currency}
-            />
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card bordered={false}>
-            <Statistic
-              title="Out"
-              value={balanceOut}
-              precision={1}
-              valueStyle={{ color: '#cf1322' }}
-              prefix={<ArrowDownOutlined />}
-              suffix={currency}
-            />
-          </Card>
-        </Col>
-      </Row>
     </Card>
   )
 }

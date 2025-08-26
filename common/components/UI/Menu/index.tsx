@@ -6,13 +6,13 @@ import {
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import useKeyCode from '@modules/hooks/useKeyCode'
 import { AppRoutes, Roles } from '@utils/constants'
+import { isAdminCheck } from '@utils/helpers'
 import { Menu as AntdMenu, MenuProps as AntdMenuProps } from 'antd'
-import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
-import { isAdminCheck } from '@utils/helpers'
 
 export type MenuProps = Omit<AntdMenuProps, 'selectedKeys' | 'mode' | 'items'>
 
@@ -69,7 +69,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
           {
             key: 'bank',
             type: 'item',
-            label: <Link href={AppRoutes.BANKTEST}>Банк</Link>,
+            label: <Link href={AppRoutes.BANK}>Банк</Link>,
             hidden: !isAdminCheck(user?.roles),
           },
           {
@@ -132,7 +132,13 @@ export const Menu: React.FC<MenuProps> = (props) => {
             type: 'item',
             label: <Link href={AppRoutes.PROFILE}>Профіль</Link>,
           },
-        ],
+          {
+            key: AppRoutes.SETTINGS,
+            type: 'item',
+            label: <Link href={AppRoutes.SETTINGS}>Налаштування</Link>,
+            hidden: !isGlobalAdmin,
+          },
+        ].filter(({ hidden }) => !hidden),
       },
     ] as AntdMenuProps['items']
   }, [router, session, isGlobalAdmin, isDomainAdmin, isDevMode])
@@ -143,6 +149,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
       mode="inline"
       items={items}
       {...props}
+      style={{ paddingBottom: '50px' }}
     />
   )
 }

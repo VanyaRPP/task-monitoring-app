@@ -12,7 +12,17 @@ const MyDocument = () => (
         content="black-translucent"
       />
       <meta name="theme-color" content="#783fc4" />
+      <meta name="application-name" content="E-ORENDA" />
+      <meta name="mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+      <link rel="manifest" href="/manifest.json" />
+      <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon152.png" />
+      <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon180.png" />
+      <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon167.png" />
     </Head>
+
     <body>
       <Main />
       <NextScript />

@@ -1,6 +1,7 @@
 import { IDomain, IDomainService } from '@modules/models/Domain'
 import { IFilter } from '../paymentApi/payment.api.types'
 import { IStreet } from '../streetApi/street.api.types'
+import { ObjectId } from 'mongoose'
 
 export type IRealestate = {
   _id?: string
@@ -20,6 +21,14 @@ export type IRealestate = {
   discount?: number
   cleaning?: number
   services: IDomainService[]
+  customServices?: CustomServices[]
+}
+
+export interface CustomServices {
+  _id: ObjectId
+  label: string
+  fieldName: string
+  price: number
 }
 
 export interface IExtendedRealestate extends IRealestate {

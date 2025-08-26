@@ -6,7 +6,7 @@ import { ServiceType } from '@utils/constants'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 import { Button, Flex, Form, Input, Space, Tooltip, Typography } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -43,13 +43,14 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 
   const { company, prevService, prevPayment } = usePaymentContext()
 
-  const price = Form.useWatch(['invoice', ...name, 'price'], form)
-
+  const [initialPrice, setInitialPrice] = useState<number | null>(null)
   const prevPlacingInvoice = useMemo(() => {
     return prevPayment?.invoice.find(
       (invoice) => invoice.type === ServiceType.Placing
     )
   }, [prevPayment])
+
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
   const rentPrice = useMemo(() => {
     return (
@@ -61,6 +62,12 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   const inflicion = useMemo(() => {
     return Math.max(prevService?.inflicionPrice - 100, 0)
   }, [prevService])
+
+  useEffect(() => {
+    if (initialPrice === null && price !== undefined) {
+      setInitialPrice(price)
+    }
+  }, [initialPrice, price])
 
   const isInitial = useMemo(() => {
     return toRoundFixed(price) === toRoundFixed((rentPrice / 100) * inflicion)
@@ -94,6 +101,8 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   if (company?.inflicion && !prevService?.inflicionPrice) {
     return <>Інфляція за попередній місяць невідома</>
   }
+
+  return null
 }
 
 export const Price: React.FC<InvoiceComponentProps> = ({

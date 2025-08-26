@@ -1,26 +1,27 @@
 import { AppRoutes } from '@utils/constants'
 import { Button, Result } from 'antd'
 import Router from 'next/router'
-
-const style = {
-  color: 'var(--textColor)',
-  transition: 'color 0.5s ease-in-out',
-}
+import s from './404.module.scss'
 
 const NotFoundPage: React.FC = () => {
   return (
-    <Result
-      status="404"
-      title={<h3 style={style}>404</h3>}
-      subTitle={
-        <p style={style}>Вибачте, сторінка, яку ви відвідали, не існує.</p>
-      }
-      extra={
-        <Button onClick={() => Router.push(AppRoutes.INDEX)} type="primary">
-          Назад
-        </Button>
-      }
-    />
+    <div className={s.NotFound}>
+      <div className={s.GlassCard}>
+        <Result
+          status="404"
+          title={<h1 className={s.Title}>404</h1>}
+          subTitle={<p className={s.SubTitle}>Вибачте, сторінка, яку ви відвідали, не існує.</p>}
+          extra={
+            <Button
+              className={s.Button}
+              onClick={() => Router.push(AppRoutes.INDEX)}
+            >
+              Назад
+            </Button>
+          }
+        />
+      </div>
+    </div>
   )
 }
 

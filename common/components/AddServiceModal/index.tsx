@@ -9,6 +9,7 @@ import dayjs from 'dayjs'
 import { FC, useState } from 'react'
 import AddServiceForm from '../Forms/AddServiceForm'
 import PreviewServiceForm from '../Forms/PreviewServiceForm'
+import { ObjectId } from 'mongoose'
 
 interface Props {
   closeModal: VoidFunction
@@ -30,6 +31,13 @@ type FormData = {
   garbageCollectorPrice: number
   inflicionPrice: number
   description: string
+  customServices: {
+    _id: ObjectId
+    label: string
+    fieldName: string
+    price: number
+  }[]
+  losses: number
 }
 
 const AddServiceModal: FC<Props> = ({
@@ -43,19 +51,34 @@ const AddServiceModal: FC<Props> = ({
   const [editService, { isLoading: isEditingLoading }] =
     useEditServiceMutation()
   const { edit, preview } = serviceActions
+
   const handleSubmit = async () => {
     const formData: FormData = await form.validateFields()
     const serviceData = {
       domain: currentService?.domain?._id?.toString() || formData.domain,
       street: currentService?.street?._id?.toString() || formData.street,
       date: dayjs(formData.date).toDate(),
-      rentPrice: formData.rentPrice,
-      electricityPrice: formData.electricityPrice,
-      waterPrice: formData.waterPrice,
-      waterPriceTotal: formData.waterPriceTotal,
-      garbageCollectorPrice: formData.garbageCollectorPrice || 0,
-      inflicionPrice: formData.inflicionPrice || 0,
-      description: formData.description || '',
+      rentPrice: formData.customServices?.find(
+        (c) => c.fieldName === 'rentPrice'
+      )?.price ?? formData?.rentPrice,
+      electricityPrice: formData?.customServices?.find(
+        (c) => c.fieldName === 'electricityPrice'
+      )?.price ?? formData?.electricityPrice,
+      waterPrice: formData?.customServices?.find(
+        (c) => c.fieldName === 'waterPrice'
+      )?.price ?? formData?.waterPrice,
+      waterPriceTotal: formData?.customServices?.find(
+        (c) => c.fieldName === 'waterPriceTotal'
+      )?.price ?? formData?.waterPriceTotal,
+      garbageCollectorPrice: formData?.customServices?.find(
+        (c) => c.fieldName === 'garbageCollectorPrice'
+      )?.price || formData?.garbageCollectorPrice || 0,
+      inflicionPrice: formData?.customServices?.find(
+        (c) => c.fieldName === 'inflicionPrice'
+      )?.price || formData?.inflicionPrice || 0,
+      description: formData?.description || '',
+      customServices: formData?.customServices || [],
+      ...(formData?.losses > 0 && { losses: formData?.losses }),
     }
     const response = currentService
       ? await editService({

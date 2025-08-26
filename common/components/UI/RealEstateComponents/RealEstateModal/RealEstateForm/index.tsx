@@ -22,12 +22,14 @@ import { IDomain } from '@modules/models/Domain'
 import { inputNumberParser } from '@utils/helpers'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import DomainsServices from '@components/UI/DomainsComponents/DomainModal/DomainForm/DomainsServices'
+import CustomServicesCard from '../../../CustomServicesCard'
 
 interface Props {
   form: FormInstance<any>
   currentRealEstate?: IExtendedRealestate
   editable?: boolean
   setIsValueChanged: (value: boolean) => void
+  customServices?: any[]
 }
 
 const RealEstateForm: FC<Props> = ({
@@ -35,17 +37,22 @@ const RealEstateForm: FC<Props> = ({
   currentRealEstate,
   editable = true,
   setIsValueChanged,
+  customServices = [],
 }) => {
-  const domainId = Form.useWatch('domain', form)
-
+  // const domainId = Form.useWatch('domain', form)|| currentRealEstate?.domain?._id
+  const domainId = currentRealEstate?.domain?._id
+  const streetId = currentRealEstate?.street?._id
   const {
     data: domain = {} as IDomain,
     isLoading: isDomainLoading,
     isError: isDomainError,
-  } = useGetDomainByPkQuery({ domainId })
+  } = useGetDomainByPkQuery(
+    { domainId: domainId || currentRealEstate?.domain?._id },
+    { skip: !domainId && !currentRealEstate?.domain?._id }
+  )
 
   const { data: servicesData } = useGetAllServicesQuery({
-    domainId: domain._id,
+    domainId: domain?._id || currentRealEstate?.domain?._id,
   })
   const services = servicesData?.data
 
@@ -64,10 +71,20 @@ const RealEstateForm: FC<Props> = ({
   }, [services, form])
 
   const isServiceExist = (value: string) => {
-    if (!domain._id || !services || !services.length) return false
+    if (!domain?._id || !services || !services?.length) return false
     const existedValues = services.map((x) => !!x[value])
     return existedValues.includes(true)
   }
+
+  const latestGarbageService = [...(services ?? [])]
+    .filter(
+      (s) =>
+        s.garbageCollectorPrice &&
+        s.garbageCollectorPrice > 0 &&
+        String(s.domain?._id) === String(domainId) &&
+        String(s.street?._id) === String(streetId)
+    )
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
 
   return (
     <Form
@@ -116,13 +133,7 @@ const RealEstateForm: FC<Props> = ({
           disabled={!editable}
         />
       </Form.Item>
-      <EmailSelect form={form} disabled={!editable} />
-      <DomainsServices
-        form={form}
-        editable={false}
-        domainId={domainId}
-        onCustomServicesChange={() => {}}
-      />
+      <EmailSelect form={form} disabled={!editable} required={false} />
       <Form.Item
         name="totalArea"
         label="Площа (м²)"
@@ -148,29 +159,34 @@ const RealEstateForm: FC<Props> = ({
         />
       </Form.Item>
 
-      <>
-        <Form.Item
-          name="servicePricePerMeter"
-          label="Індивідуальне утримання (грн/м²)"
-        >
-          <InputNumber
-            parser={inputNumberParser}
-            placeholder="Вкажіть значення"
-            className={s.formInput}
-            disabled={!editable}
-          />
-        </Form.Item>
-        <Form.Item name="rentPart" label="Частка загальної площі">
-          <InputNumber
-            parser={inputNumberParser}
-            placeholder="Вкажіть значення"
-            className={s.formInput}
-            disabled={!editable}
-          />
-        </Form.Item>
-      </>
+      <CustomServicesCard
+        form={form}
+        disabled={!editable}
+        allCustomServices={customServices}
+      /> 
+      {/* { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') && // TODO: customServices */}
+      {/* <Form.Item
+        name="servicePricePerMeter"
+        label="Індивідуальне утримання (грн/м²)"
+      >
+        <InputNumber
+          parser={inputNumberParser}
+          placeholder="Вкажіть значення"
+          className={s.formInput}
+          disabled={!editable}
+        />
+      </Form.Item> */}
+      {/* } */}
+      {/* <Form.Item name="rentPart" label="Частка загальної площі">
+        <InputNumber
+          parser={inputNumberParser}
+          placeholder="Вкажіть значення"
+          className={s.formInput}
+          disabled={!editable}
+        />
+      </Form.Item> */}
 
-      {isServiceExist('waterPrice') && (
+      {/* {isServiceExist('waterPrice') && (
         <Form.Item name="waterPart" label="Частка водопостачання">
           <InputNumber
             parser={inputNumberParser}
@@ -179,35 +195,35 @@ const RealEstateForm: FC<Props> = ({
             disabled={!editable}
           />
         </Form.Item>
-      )}
-
-      <Form.Item name="cleaning" label="Прибирання (грн)">
+      )} */}
+      {/* { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') && */}
+      {/* <Form.Item name="cleaning" label="Прибирання (грн)">
         <InputNumber
           parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
         />
-      </Form.Item>
+      </Form.Item> */}
+      {/* } */}
 
-      <Form.Item name="discount" label="Знижка">
+      {/* <Form.Item name="discount" label="Знижка">
         <InputNumber
           parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
         />
+      </Form.Item> */}
+
+      <Form.Item
+        valuePropName="checked"
+        name="garbageCollector"
+        label="Вивіз сміття"
+      >
+        <Checkbox disabled={!editable} />
       </Form.Item>
 
-      {isServiceExist('garbageCollectorPrice') && (
-        <Form.Item
-          valuePropName="checked"
-          name="garbageCollector"
-          label="Вивіз сміття"
-        >
-          <Checkbox disabled={!editable} />
-        </Form.Item>
-      )}
       {isServiceExist('inflicionPrice') && (
         <Form.Item
           valuePropName="checked"

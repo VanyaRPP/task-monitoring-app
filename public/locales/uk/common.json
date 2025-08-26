@@ -1,0 +1,7 @@
+{
+  "siteTitle": "My Website",
+  "modal": {
+    "successMessage": "Зміни успішно збережено",
+    "errorMessage": "Не вдалося зберегти зміни"
+  }
+}
