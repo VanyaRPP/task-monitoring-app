@@ -89,6 +89,9 @@ const Dashboard: React.FC = () => {
   const getLayoutStorageKey = (userId?: string) =>
     userId ? `dashboard-layout-${userId}` : 'dashboard-layout'
     const visibleWidgets = useMemo(() => {
+       if (isGlobalAdmin === undefined) {
+    return ALL_WIDGETS
+  }
   return isGlobalAdmin
     ? ALL_WIDGETS
     : ALL_WIDGETS.filter((w) => w !== 'profits')
