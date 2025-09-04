@@ -1,7 +1,6 @@
 import PaymentsChart from '@components/DashboardPage/PaymentsChart'
 import withAuthRedirect from '@components/HOC/withAuthRedirect'
 import MainLayout from '@components/Layouts/Main'
-import FullScreenWrapper from '@components/UI/fullScreenTableWrapper/fullScreenTableWrapper'
 import { authOptions } from '@pages/api/auth/[...nextauth]'
 import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
@@ -16,9 +15,7 @@ export default withAuthRedirect(() => {
         { title: 'Графік платежів', path: AppRoutes.PAYMENT_CHART },
       ]}
     >
-      <FullScreenWrapper unicKey="payments-chart">
         <PaymentsChart />
-      </FullScreenWrapper>
     </MainLayout>
   )
 })
