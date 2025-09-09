@@ -1,6 +1,5 @@
 'use client'
 /* eslint-disable no-console */
-import FullScreenWrapper from '@components/UI/fullScreenTableWrapper/fullScreenTableWrapper'
 import { setAccount, setActiveDomainId } from '@modules/store/bankSlice'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import DomainBankTab from './components/DomainBankTab/DomainBankTab'
@@ -46,7 +45,6 @@ const BankTransactions = () => {
   }
 
   return (
-    <FullScreenWrapper unicKey="bank-table">
       <Space
         direction="vertical"
         style={{ width: '100%', position: 'relative' }}
@@ -74,7 +72,6 @@ const BankTransactions = () => {
         </Card>
       )}
       </Space>
-    </FullScreenWrapper>
   )
 }
 
