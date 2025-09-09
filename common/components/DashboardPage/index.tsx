@@ -152,28 +152,10 @@ const visibleWidgetMap = useMemo(() => {
     })
   }, [])
   return (
-    <div style={{ width: '100%' }}>
+    <div className={s.wrapper}>
       {isPanelVisible && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            gap: '8px',
-            width: '100%',
-            top: '90px',
-            backgroundColor: isDark ? '#141414' : '#fff',
-            color: isDark ? '#fff' : '#000',
-            padding: '15px',
-            paddingRight: '25px',
-            position: 'sticky',
-            zIndex: 1000,
-            border: `1px solid ${isDark ? '#333' : '#d9d9d9'}`,
-            borderRadius: '8px',
-            boxShadow: isDark ? undefined : '0 2px 8px rgba(0,0,0,0.1)',
-            marginBottom: 25,
-          }}
-        >
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        <div className={`${s.toolbar} ${isDark ? s.dark : s.light}`}>
+          <div className={s.buttonsBlock}>
             {layout.map((item) => (
               <Button
                 key={item.i}
@@ -192,16 +174,8 @@ const visibleWidgetMap = useMemo(() => {
               </Button>
             ))}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div
-              style={{
-                width: 1,
-                height: 23,
-                backgroundColor: '#555',
-                marginRight: 25,
-                marginTop: 5,
-              }}
-            />
+          <div className={s.actions}>
+            <div className={s.divider}/>
            <Tooltip title="Save location">
               <Button
                 icon={<SaveOutlined />}
