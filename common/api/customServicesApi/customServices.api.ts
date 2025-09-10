@@ -44,6 +44,15 @@ export const customServicesApi = createApi({
       }),
       invalidatesTags: ['CustomService'],
     }),
+		deleteCustomService: builder.mutation<void, string>({
+			query: (id) => ({
+				url: `custom-services/${id}`,
+				method: 'DELETE',
+			}),
+			invalidatesTags: (result, error, id) => [
+				'CustomService',
+			],
+		}),
   }),
 })
 
@@ -51,4 +60,5 @@ export const {
   useGetCustomServicesQuery,
   useGetCustomServicesByDomainQuery,
   useCreateCustomServiceMutation,
+  useDeleteCustomServiceMutation,
 } = customServicesApi

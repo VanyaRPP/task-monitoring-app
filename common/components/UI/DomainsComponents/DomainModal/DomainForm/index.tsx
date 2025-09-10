@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { validateField } from '@assets/features/validators'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
-import { Form, FormInstance, Input } from 'antd'
+import { Form, FormInstance, Input, Space } from 'antd'
 import DomainStreets from './DomainStreets'
 import s from './style.module.scss'
 import DomainInfo from './DomainInfo'
@@ -43,12 +43,15 @@ const DomainForm: React.FC<Props> = ({
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} />
       <DomainStreets disabled={!editable} />
-      <ServicesSelect form={form} disabled={!editable} />
-      <DomainsServices
-        form={form}
-        editable={editable}
-        onCustomServicesChange={setCustomServices}
-      />
+      <Space direction="vertical" style={{ width: '100%' }}>
+        <ServicesSelect form={form} disabled={!editable} />
+        <DomainsServices
+          form={form}
+          editable={editable}
+          onCustomServicesChange={setCustomServices}
+        />
+      </Space>
+
       <DomainInfo editable={editable} form={form} />
     </Form>
   )

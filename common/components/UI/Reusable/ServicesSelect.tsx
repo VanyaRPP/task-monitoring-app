@@ -1,9 +1,9 @@
+/* eslint-disable no-console */
 import { Form, FormInstance, Select, Button, Input, Space } from 'antd'
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons'
 import { CSSProperties, useMemo } from 'react'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
-import { group } from 'console'
 
 export interface ServicesSelectProps {
   domainId?: string
@@ -11,7 +11,6 @@ export interface ServicesSelectProps {
   dropdownStyle?: CSSProperties
   onServicesChange?: (services: string[]) => void
   disabled: boolean
-  customServices?: { _id: string; name: string }[]
 }
 
 const ServicesSelect: React.FC<ServicesSelectProps> = ({
@@ -21,12 +20,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   disabled,
   onServicesChange,
 }) => {
-  const {
-    data: servicesData,
-    isLoading,
-    isError,
-  } = useGetAllServicesQuery({ domainId })
-
+  const { data: servicesData, isLoading, isError } = useGetAllServicesQuery({ domainId })
   const { data: customServices } = useGetCustomServicesQuery({})
 
   const servicesList = useMemo(() => {
@@ -55,6 +49,29 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
     onServicesChange?.(selectedValues)
   }
 
+  const handleDeleteCustomService = async (serviceId: string) => {
+    try {
+      const res = await fetch(`/api/custom-services/${serviceId}`, {
+        method: 'DELETE',
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        const currentGroups = form.getFieldValue('customServices') || []
+        const updatedGroups = currentGroups.map((group: any) => ({
+          ...group,
+          services: (group.services || []).filter((s: string) => s !== serviceId),
+        }))
+        form.setFieldsValue({ customServices: updatedGroups })
+      } else {
+        alert(`Помилка: ${data.message}`)
+      }
+    } catch (err) {
+      console.error(err)
+      alert('Сталася помилка при видаленні послуги')
+    }
+  }
+
   if (isLoading) return <div>Завантаження послуг...</div>
   if (isError) return <div>Помилка при завантаженні послуг</div>
 
@@ -65,14 +82,13 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
         {(fields, { add, remove }) => (
           <>
             {fields.map((field, index) => {
-              const groupObject =
-                form.getFieldValue('customServices')?.[index] || {}
+              const groupObject = form.getFieldValue('customServices')?.[index] || {}
               const groupName = groupObject.groupName || ``
               const groupValues = groupObject.services || []
 
               return (
-                // eslint-disable-next-line react/jsx-key
                 <Space
+                  key={field.key}
                   direction="horizontal"
                   style={{ width: '100%' }}
                   align="center"
@@ -84,9 +100,8 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                       disabled={disabled}
                       onChange={(e) => {
                         const current = form.getFieldValue('customServices')
-                        const newName = e.target.value
                         current[index] = {
-                          groupName: newName,
+                          groupName: e.target.value,
                           services: groupValues,
                         }
                         form.setFieldsValue({ customServices: current })
@@ -94,58 +109,60 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                       placeholder="Назва групи"
                     />
                   </Form.Item>
-                <div style={{ flex: 3, position: 'relative', paddingRight: '32px', marginBottom: '20px' }}>
-                  <Form.Item required style={{ flex: 3 }}>
-                    <Select
-                      disabled={disabled}
-                      mode="multiple"
-                      options={(() => {
-                        const allGroups =
-                          form.getFieldValue('customServices') || []
-                        const selectedInOthers = allGroups
-                          .filter((_, i) => i !== index)
-                          .flatMap((group) => group?.services || [])
-                        const filteredOptions = options?.map((opt) => ({
-                          ...opt,
-                          disabled: selectedInOthers.includes(opt?.value),
-                        }))
-                        return filteredOptions
-                      })()}
-                      style={{ width: '220px' }}
-                      value={groupValues}
-                      onChange={(newValues) => {
-                        const current = form.getFieldValue('customServices')
-                        current[index] = {
-                          groupName: groupName,
-                          services: newValues,
-                        }
-                        form.setFieldsValue({ customServices: current })
-                      }}
-                      placeholder="Оберіть послуги"
-                      allowClear
-                      showSearch
-                    />
-                  </Form.Item>
-                  {!disabled && (
-                    <MinusCircleOutlined
-                      style={{
-                        position: 'absolute',
-                        top: '50%',
-                        right: '-5px', 
-                        transform: 'translateY(-50%)',
-                        cursor: 'pointer',
-                        fontSize: '24px',
-                      }}
-                      onClick={() => remove(field.name)}
-                    />
-                  )}
-                 </div>
+                  <div style={{ flex: 3, position: 'relative', paddingRight: '32px', marginBottom: '20px' }}>
+                    <Form.Item required style={{ flex: 3 }}>
+                      <Select
+                        disabled={disabled}
+                        mode="multiple"
+                        options={(() => {
+                          const allGroups = form.getFieldValue('customServices') || []
+                          const selectedInOthers = allGroups
+                            .filter((_, i) => i !== index)
+                            .flatMap((group) => group?.services || [])
+                          const filteredOptions = options?.map((opt) => ({
+                            ...opt,
+                            disabled: selectedInOthers.includes(opt?.value),
+                          }))
+                          return filteredOptions
+                        })()}
+                        style={{ width: '220px' }}
+                        value={groupValues}
+                        onChange={(newValues) => {
+                          const current = form.getFieldValue('customServices')
+                          current[index] = {
+                            groupName: groupName,
+                            services: newValues,
+                          }
+                          form.setFieldsValue({ customServices: current })
+                        }}
+                        placeholder="Оберіть послуги"
+                        allowClear
+                        showSearch
+                      />
+                    </Form.Item>
+                    {!disabled && (
+                      <MinusCircleOutlined
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          right: '-5px',
+                          transform: 'translateY(-50%)',
+                          cursor: 'pointer',
+                          fontSize: '24px',
+                        }}
+                        onClick={() => {
+                          remove(field.name)
+                          groupValues.forEach((serviceId: string) => handleDeleteCustomService(serviceId))
+                        }}
+                      />
+                    )}
+                  </div>
                 </Space>
               )
             })}
 
             {!disabled && (
-              <Form.Item>
+              <Form.Item style={{ marginBottom: 16 }}>
                 <Button
                   type="dashed"
                   style={{ width: '100%' }}
