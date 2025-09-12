@@ -408,7 +408,24 @@ const getDefaultColumns = ({
       ),
     },
   ]
-
+  if (isAdmin) {
+    columns.push({
+      fixed: 'right',
+      align: 'center',
+      title: '',
+      width: 56,
+      render: (_, realEstate: IExtendedRealestate) => (
+        <Button
+          icon={<EditOutlined />}
+          type="link"
+          onClick={() => {
+            setCurrentRealEstate(realEstate)
+            setRealEstateActions({ edit: true })
+          }}
+        />
+      ),
+    })
+  }
   if (isAdmin) {
     columns.push({
       align: 'center',
@@ -419,26 +436,6 @@ const getDefaultColumns = ({
         <Dropdown
           menu={{
             items: [
-              {
-                key: 'edit',
-                label: (
-                  <Button
-                    icon={<EditOutlined />}
-                    type="link"
-                    style={{
-                      color: '#722ed1',
-                      paddingLeft: '10px',
-                      paddingRight: '10px',
-                    }}
-                    onClick={() => {
-                      setCurrentRealEstate(realEstate)
-                      setRealEstateActions({ edit: true })
-                    }}
-                  >
-                    Редагувати
-                  </Button>
-                ),
-              },
               {
                 key: 'archive',
                 label: (

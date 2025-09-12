@@ -385,10 +385,26 @@ export const getGarbageCollectorInvoice = ({
 
     const invoice = currInvoicesCollection[ServiceType.GarbageCollector]
 
+    if (company?.garbageCollector === false) {
+      return {
+        type: ServiceType.GarbageCollector,
+        price: 0,
+        sum: 0,
+      }
+    }
+
     return {
       type: invoice.type,
       price: +toRoundFixed(+invoice.sum || +invoice.price),
       sum: +toRoundFixed(+invoice.sum || +invoice.price),
+    }
+  }
+
+  if (company?.garbageCollector === false) {
+    return {
+      type: ServiceType.GarbageCollector,
+      price: 0,
+      sum: 0,
     }
   }
 
@@ -397,6 +413,7 @@ export const getGarbageCollectorInvoice = ({
     !isNaN(service.garbageCollectorPrice) &&
     company?.garbageCollector
   ) {
+    
     const price = service.garbageCollectorPrice * (company?.rentPart / 100)
 
     return {
