@@ -51,7 +51,7 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
     updated.splice(index, 1)
     form.setFieldsValue({ customServices: updated })
   }
-
+  const dashIfEmpty = (v: any) => (v === 0 || v ? v : '-');
   return (
     <div>
       {!disabled && !isServiceForm && (
@@ -97,7 +97,10 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
                     name={[field.name, 'price']}
                     label={service?.label}
                     rules={[{ required: true, message: 'Введіть значення' }]}
-                    style={{ width: '100%' }}               
+                    style={{ width: '100%' }} 
+                    getValueProps={(v) =>
+                      disabled ? { value: dashIfEmpty(v) } : { value: v }
+                    }              
                   >
                     <InputNumber
                       parser={inputNumberParser}
