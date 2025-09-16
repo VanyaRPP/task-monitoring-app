@@ -11,9 +11,11 @@ import ProfitTable from './components/ProfitTable'
 import { PlusOutlined } from '@ant-design/icons'
 import { isAdminCheck } from '@utils/helpers'
 import { Button, Card, Space } from 'antd'
+import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
 const ProfitPage = () => {
+  const router = useRouter()
   const { t } = useTranslation()
   const dispatch = useAppDispatch()
   const activeTabKey = useAppSelector((state) => state.profitPage.activeTabKey)
@@ -60,7 +62,14 @@ const ProfitPage = () => {
         size="middle"
       >
         <Card
-          title={t('profitPage:title')}
+          title={
+            <Button
+              type="link"
+              onClick={() => router.push('/profit')}
+              >
+                {t('profitPage:title')}
+              </Button>
+          }                 
           extra={
             isAdmin && (
               <Button type="link" onClick={() => setIsModalOpen(true)}>
