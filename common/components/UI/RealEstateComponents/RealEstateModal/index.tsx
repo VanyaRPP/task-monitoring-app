@@ -45,15 +45,15 @@ const RealEstateModal: FC<Props> = ({
 
       if (service.fieldName === 'rentPrice') {
         price = currentRealEstate?.servicePricePerMeter 
-        || currentRealEstate?.customServices?.find(service => service.fieldName === 'rentPrice')?.price 
-        || null
+        ?? currentRealEstate?.customServices?.find(service => service.fieldName === 'rentPrice')?.price 
+        ?? null
       }
       else if (service.fieldName === 'cleaningPrice') {
         price = currentRealEstate?.cleaning 
-        || currentRealEstate?.customServices?.find(service => service.fieldName === 'cleaningPrice')?.price 
-        || null
+        ?? currentRealEstate?.customServices?.find(service => service.fieldName === 'cleaningPrice')?.price 
+        ?? null
       } else {
-        price = currentRealEstate?.[service.fieldName] || null
+        price = currentRealEstate?.[service.fieldName] ?? null
       }
       return {
         ...service,
