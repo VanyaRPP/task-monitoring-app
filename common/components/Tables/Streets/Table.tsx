@@ -14,7 +14,12 @@ import { IStreet } from '@common/api/streetApi/street.api.types'
 import AddStreetModal from '@components/AddStreetModal'
 import RealEstateBlock from '@components/DashboardPage/blocks/realEstates'
 import { AppRoutes } from '@utils/constants'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import RealEstateForm from '@components/UI/RealEstateComponents/RealEstateModal/RealEstateForm'
+
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '@common/modules/store/store'
+import { setPage, setStreetsData } from '@common/modules/store/serviceSlice'
 
 export interface Props {
   domainId?: string
@@ -44,10 +49,22 @@ const StreetsTable: React.FC<Props> = ({
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.STREETS
 
+	const dispatch = useDispatch()
+	const { currentPage, pageSize, totalCount } = useSelector(
+		(state: RootState) => state.streets
+	)
+
   const { data, isLoading, isError } = useGetAllStreetsQuery({
     domainId: sepDomainId || domainId,
-    limit: isOnPage ? 0 : 5,
+    page: currentPage,
+		limit: pageSize,
   })
+
+	useEffect(() => {
+		if (data) {
+			dispatch(setStreetsData({ data: data.data, totalCount: data.totalCount}))
+		}
+	}, [data, dispatch])
 
   const [deleteStreet, { isLoading: deleteLoading }] = useDeleteStreetMutation()
 
@@ -78,30 +95,29 @@ const StreetsTable: React.FC<Props> = ({
     <>
       <Table
         rowKey="_id"
-        pagination={
-          (router.pathname === AppRoutes.REAL_ESTATE ||
-            router.pathname === AppRoutes.SEP_DOMAIN) && {
+				loading={isLoading}
+				columns={getDefaultColumns(handleDelete, deleteLoading, openModal, userRoles)}
+				expandable={
+					domainId && {
+						expandedRowRender: (street) => (
+							<RealEstateBlock domainId={domainId} streetId={street._id} />
+						),
+					}
+				}
+				dataSource = {data?.data || []}
+        pagination={{
+						current: currentPage,
+						pageSize: pageSize,
+						total: data?.totalCount,
             hideOnSinglePage: false,
             showSizeChanger: true,
             pageSizeOptions: [10, 20, 50],
-            position: ['bottomCenter'],
+						position: ['bottomCenter'],
+						onChange: (newPage, newPageSize) => {
+							dispatch(setPage({ page: newPage, pageSize: newPageSize }))
+						},
           }
         }
-        loading={isLoading}
-        columns={getDefaultColumns(
-          handleDelete,
-          deleteLoading,
-          openModal,
-          userRoles
-        )}
-        expandable={
-          domainId && {
-            expandedRowRender: (street) => (
-              <RealEstateBlock domainId={domainId} streetId={street._id} />
-            ),
-          }
-        }
-        dataSource={data}
       />
       {isModalOpen && (
         <AddStreetModal
