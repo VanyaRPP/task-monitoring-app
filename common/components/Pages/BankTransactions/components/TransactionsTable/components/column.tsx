@@ -276,7 +276,7 @@ export const generateColumns = (
     },
     {
       title: 'Type', // TRANTYPE column
-      minWidth: '100px',
+      width: '100px',
       dataIndex: 'TRANTYPE',
       key: 'TRANTYPE',
       ...getTrantypeFilterProps(),
