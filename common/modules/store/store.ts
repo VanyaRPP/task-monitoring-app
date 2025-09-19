@@ -24,6 +24,7 @@ import paymentsReducer from '@modules/store/paymentsSlice'
 import floatButtonReducer from '@modules/store/floatButtonSlice'
 import profitPageReducer from '@modules/store/profitPageSlice'
 import bankReducer from '@modules/store/bankSlice'
+import streetReducer from '@modules/store/serviceSlice'
 
 // Redux Toolkit imports
 import { Action, configureStore, ThunkAction } from '@reduxjs/toolkit'
@@ -54,6 +55,7 @@ export const store = configureStore({
     floatButtons: floatButtonReducer,
     profitPage: profitPageReducer,
     bank: bankReducer,
+		streets: streetReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
