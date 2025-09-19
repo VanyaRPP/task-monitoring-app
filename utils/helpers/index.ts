@@ -371,6 +371,7 @@ export async function getDistinctCompanyAndDomain({
     filteredCompanys = null,
     filteredStreets = null,
     filteredDomains = null,
+    archived = null,
   },
 }) {
   const domainsPipeline = getDomainsPipeline(
@@ -398,6 +399,7 @@ export async function getDistinctCompanyAndDomain({
     distinctedDomainsIds,
     distinctedStreetsIds,
     group: companyGroup,
+    archived,
   })
   const distinctCompanies = await model.aggregate(realEstatesPipeline)
 
