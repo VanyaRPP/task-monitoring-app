@@ -97,6 +97,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   })
   const { data: companiesFilterData } = useGetRealEstateFiltersQuery({
     domains: filters?.domain,
+    archived: false,
   })
   const { data: dateFiltersData } = useGetDateFiltersQuery({ type: 'payment' })
   const [domainIds, setDomainIds] = useState<string[]>([])
