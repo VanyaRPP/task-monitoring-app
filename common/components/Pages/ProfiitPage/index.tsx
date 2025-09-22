@@ -68,7 +68,7 @@ const ProfitPage = () => {
               onClick={() => router.push('/profit')}
               >
                 {t('profitPage:title')}
-              </Button>
+            </Button>
           }                 
           extra={
             isAdmin && (

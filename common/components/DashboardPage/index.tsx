@@ -55,13 +55,22 @@ const widgetMap: Record<WidgetKey, React.ReactNode> = {
   streets: <StreetsBlock />,
   domain: <DomainsBlock />,
   realEstate: <RealEstateBlock />,
-  profits: <ProfitPage />,
+  profits: <div style={{ marginTop: '-13px' }}><ProfitPage /></div>,
   companies: <CompaniesAreaChart />,
+}
+
+const getCustomGridHeight = (tableName: string) => {
+  switch (tableName) {
+    case 'payments': return 1;
+    case 'profits': return 0.3;
+    default: return 0;
+  }
 }
 
 const Dashboard: React.FC = () => {
   const dispatch = useDispatch()
   const { data: userResponse } = useGetCurrentUserQuery()
+  const [hiddenWidgets, setHiddenWidgets] = useState<WidgetKey[]>([])
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   const [isEditMode, toggleEditMode, editFloatButton] =
@@ -109,10 +118,20 @@ const visibleWidgetMap = useMemo(() => {
     y: 0,
   }))
 
+  const filteredWidgets = useMemo(() => {
+    return visibleWidgets.filter((w) => !hiddenWidgets.includes(w))
+  }, [visibleWidgets, hiddenWidgets])
+
+  const filteredWidgetMap = useMemo(() => {
+    return Object.fromEntries(
+      filteredWidgets.map((key) => [key, widgetMap[key]])
+    ) as typeof widgetMap
+  }, [filteredWidgets])
+
   const [layout, setLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
   const [tempLayout, setTempLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
 
- const [isLayoutReady, setIsLayoutReady] = useState(false)
+  const [isLayoutReady, setIsLayoutReady] = useState(false)
 
   useEffect(() => {
     const userId = userResponse?._id?.toString()
@@ -176,7 +195,7 @@ const visibleWidgetMap = useMemo(() => {
           </div>
           <div className={s.actions}>
             <div className={s.divider}/>
-           <Tooltip title="Save location">
+          <Tooltip title="Зберегти">
               <Button
                 icon={<SaveOutlined />}
                 onClick={() => {
@@ -201,7 +220,7 @@ const visibleWidgetMap = useMemo(() => {
         compactType="vertical"
         layout={layout}
         cols={1}
-        rowHeight={60}
+        rowHeight={1}
         margin={[MARGIN_X, MARGIN_Y]}
         useCSSTransforms={true}
         listenToWindowResize={true}
@@ -214,13 +233,29 @@ const visibleWidgetMap = useMemo(() => {
           <div key={item.i} data-grid={item} className={s.gridItem} id={item.i}>
             <WidgetWrapper
               id={item.i}
-              rowHeight={60}
+              rowHeight={1.3}
               marginY={MARGIN_Y}
               isEditMode={isEditMode}
-              onHeightChange={handleNodeHeight}
+              onHeightChange={(tableName, pxHeight: number) => {
+                const newH = Math.ceil(pxHeight + getCustomGridHeight(tableName));
+                handleNodeHeight(item.i, newH)
+              }}
             >
-               {visibleWidgetMap[item.i as WidgetKey]}
+              <div className={s.filterWrapper}>
+                {visibleWidgetMap[item.i as WidgetKey]}
+              </div>
             </WidgetWrapper>
+
+            {isEditMode && (
+              <Button
+                data-no-drag
+                className={s.deleteIcon}
+                icon={<CloseOutlined style={{ color: 'white' }} />}
+                onClick={() =>
+                  setHiddenWidgets((prev) => [...prev, item.i as WidgetKey])
+                }
+              />
+            )}
           </div>
         ))}
       </ReactGridLayout>
