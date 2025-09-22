@@ -98,7 +98,7 @@ const Dashboard: React.FC = () => {
   const getLayoutStorageKey = (userId?: string) =>
     userId ? `dashboard-layout-${userId}` : 'dashboard-layout'
     const visibleWidgets = useMemo(() => {
-       if (isGlobalAdmin === undefined) {
+      if (isGlobalAdmin === undefined) {
     return ALL_WIDGETS
   }
   return isGlobalAdmin
@@ -230,7 +230,7 @@ const visibleWidgetMap = useMemo(() => {
         onLayoutChange={handleLayoutChange}
       >
         {layout.map((item) => (
-          <div key={item.i} data-grid={item} className={s.gridItem} id={item.i}>
+          <div key={item.i} data-grid={item} className={isEditMode ? s.gridItem : ''} id={item.i}>
             <WidgetWrapper
               id={item.i}
               rowHeight={1.3}
