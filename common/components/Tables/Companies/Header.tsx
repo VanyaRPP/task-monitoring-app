@@ -102,7 +102,7 @@ const CompaniesHeader: React.FC<Props> = ({
               filters={filters}
               setFilters={setFilters}
             />
-            {!isSingleCompanyByData && (
+            {(
               <CompanyFilterTags
                 collection={realEstateData?.realEstatesFilter}
                 filters={filters}

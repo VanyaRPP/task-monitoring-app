@@ -39,36 +39,30 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   }, [streets])
 
   useEffect(() => {
-        if (!domainId) {
+    if (domainId && options.length > 0) {
+      if (options.length === 1) {
+        form.setFieldsValue({ street: options[0].value })
+        onStreetHasServiceChange?.(options[0].hasService)
+      } else {
+        const firstStreetWithService = options.find(
+          (option) => option.hasService
+        )
+
+        if (firstStreetWithService) {
+          street
+            ? form.setFieldsValue({ street: street })
+            : form.setFieldsValue({ street: firstStreetWithService.value })
+          onStreetHasServiceChange?.(firstStreetWithService.hasService)
+        } else {
           form.setFieldsValue({ street: undefined })
           onStreetHasServiceChange?.(false)
-          return
-        }
-        if (isStreetsLoading) return
-        if (options.length === 0) {
-          form.setFieldsValue({ street: undefined })
-          onStreetHasServiceChange?.(false)
-          return
-        }
-        const hasInOptions = (id?: string) =>
-          !!id && options.some((o) => o.value === id)
-        const currentId = form.getFieldValue('street') as string | undefined
-        if (hasInOptions(currentId)) {
-          const selected = options.find((o) => o.value === currentId)
-          onStreetHasServiceChange?.(!!selected?.hasService)
-          return
-        }
-        if (hasInOptions(street)) {
-          const fromProp = options.find((o) => o.value === street)!
-          form.setFieldsValue({ street: fromProp.value })
-          onStreetHasServiceChange?.(fromProp.hasService)
-          return
-        }
-        const firstWithService = options.find((o) => o.hasService)
-        const fallback = firstWithService ?? options[0]
-        form.setFieldsValue({ street: fallback.value })
-        onStreetHasServiceChange?.(!!fallback.hasService)
-      }, [domainId, isStreetsLoading, options, street, form, onStreetHasServiceChange])
+             }
+      }
+    } else {
+      form.setFieldsValue({ street: undefined })
+      onStreetHasServiceChange?.(false)
+    }
+  }, [domainId, options, form, street])
 
   const selectedStreet = options.find((option) => option.value === streetId)
   const showTooltip = !!selectedStreet && !selectedStreet.hasService
