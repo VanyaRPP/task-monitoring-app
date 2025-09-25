@@ -46,6 +46,7 @@ import {
   toFirstUpperCase,
   toRoundFixed,
 } from '@utils/helpers'
+import { getDebtorTooltipColor } from '@utils/helpers'
 import { Grid } from 'antd'
 import s from './style.module.scss'
 
@@ -159,17 +160,6 @@ const getSummaryColumns = (
     },
     []
   )
-}
-
-const getDebtorTooltipColor = (debtor: { totalDebt: number }) => {
-  if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
-    return 'gray'
-  } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
-    return 'yellow'
-  } else if (debtor.totalDebt >= 20000) {
-    return 'red'
-  }
-  return undefined
 }
 
 const PaymentsTable: React.FC<PaymentsTableProps> = ({
