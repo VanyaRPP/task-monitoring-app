@@ -4,6 +4,10 @@ import {
   IServiceFilter,
 } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import {
+  useGetAddressFiltersQuery,
+  useGetDomainFiltersQuery,
+} from '@common/api/filterApi/filter.api'
 import ServicesHeader from '@components/Tables/Services/Header'
 import ServicesTable from '@components/Tables/Services/Table'
 import TableCard from '@components/UI/TableCard'
@@ -57,21 +61,30 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
       },
     })
   }
-  const [filter, setFilter] = useState<IServiceFilter>()
+
+const [filter, setFilter] = useState<IServiceFilter>({
+  domain: [],
+  street: [],
+  year: undefined,
+  month: undefined,
+})
+
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.SERVICE
-
-  const {
-    data: servicesData,
-    isLoading,
-    isError,
-  } = useGetAllServicesQuery({
-    limit: isOnPage ? 0 : 5,
-    streetId: filter?.street || undefined,
-    domainId: sepDomainID || filter?.domain || undefined,
-    year: filter?.year,
-    month: filter?.month,
+  const { data: domainsFilter } = useGetDomainFiltersQuery({
+    streets: filter?.street,
   })
+  const { data: streetsFilter } = useGetAddressFiltersQuery({
+   domains: sepDomainID ? [sepDomainID] : filter?.domain,
+  })
+
+const { data: servicesData, isLoading, isError } = useGetAllServicesQuery({
+  limit: isOnPage ? 0 : 5,
+  streetIds: filter.street?.length ? filter.street : undefined, // ⬅ було streetId
+  domainIds: sepDomainID ? [sepDomainID] : (filter.domain?.length ? filter.domain : undefined), // ⬅ було domainId
+  year: filter?.year,
+  month: filter?.month,
+})
   return (
     <TableCard
       title={
@@ -83,7 +96,10 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
           setServiceActions={setServiceActions}
           filter={filter}
           setFilter={setFilter}
-          services={servicesData}
+           services={{
+            domainFilter: domainsFilter?.domainsFilter ?? [],
+            addressFilter: streetsFilter?.streetsFilter ?? [],
+          }}
           enableServiceButton={sepDomainID ? false : true}
           handleDeleteServices={handleDeleteServices}
           selectedServices={selectedServices}
@@ -100,6 +116,8 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
         filter={filter}
         setFilter={setFilter}
         setSelectedServices={setSelectedServices}
+        addressFilter={streetsFilter?.streetsFilter}
+        domainFilter={domainsFilter?.domainsFilter}
       />
     </TableCard>
   )

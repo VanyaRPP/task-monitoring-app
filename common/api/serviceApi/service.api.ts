@@ -19,32 +19,36 @@ export const serviceApi = createApi({
       {
         limit?: number
         userId?: string
-        domainId?: string
-        streetId?: string
+        domainIds?: string[]
+        streetIds?: string[]
         serviceId?: string
         year?: number
         month?: number
       }
     >({
-      query: ({
-        limit,
-        userId,
-        domainId,
-        streetId,
-        serviceId,
-        year,
-        month,
-      }) => {
+      serializeQueryArgs: ({ queryArgs }) => {
+        const { domainIds = [], streetIds = [], ...rest } = (queryArgs ?? {}) as any
         return {
-          url: `service`,
-          params: { limit, userId, domainId, streetId, serviceId, year, month },
+          ...rest,
+          domainIds: [...domainIds].sort(),
+          streetIds: [...streetIds].sort(),
         }
+      },
+      query: ({ limit, userId, serviceId, year, month, domainIds, streetIds }) => {
+        const params: Record<string, any> = { limit, userId, serviceId, year, month }
+
+        const d = domainIds?.filter(Boolean)
+        const s = streetIds?.filter(Boolean)
+
+        if (d?.length) params.domainIds = d 
+        if (s?.length) params.streetIds = s
+
+        return { url: `service`, params }
       },
       providesTags: (response: IGetServiceResponse) =>
         response?.data
           ? response.data.map((item) => ({ type: 'Service', id: item._id }))
           : [],
-      // transformResponse: (response: any) => response.data,
     }),
     getServicesAddress: builder.query({
       query: () => {

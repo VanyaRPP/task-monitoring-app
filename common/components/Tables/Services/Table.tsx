@@ -6,9 +6,7 @@ import {
 } from '@ant-design/icons'
 import { getFormattedDate } from '@assets/features/formatDate'
 import {
-  useGetAddressFiltersQuery,
   useGetDateFiltersQuery,
-  useGetDomainFiltersQuery,
 } from '@common/api/filterApi/filter.api'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
@@ -43,6 +41,8 @@ interface Props {
   filter?: any
   setFilter?: (filters: any) => void
   setSelectedServices?: (service: IService[]) => void
+  addressFilter?: IFilter[]; 
+  domainFilter?: IFilter[]; 
 }
 
 const ServicesTable: React.FC<Props> = ({
@@ -55,6 +55,8 @@ const ServicesTable: React.FC<Props> = ({
   filter,
   setFilter,
   setSelectedServices,
+  addressFilter = [], 
+  domainFilter = [], 
 }) => {
   const router = useRouter()
   const { pathname } = router
@@ -66,12 +68,7 @@ const ServicesTable: React.FC<Props> = ({
 
   const { data: user } = useGetCurrentUserQuery()
 
-  const { data: domainsFilter } = useGetDomainFiltersQuery({
-    streets: filter?.street,
-  })
-  const { data: streetsFilter } = useGetAddressFiltersQuery({
-    domains: filter?.domain,
-  })
+
   const { data: dateFilters } = useGetDateFiltersQuery({ type: 'service' })
 
   const [deleteService, { isLoading: deleteLoading }] =
@@ -127,8 +124,8 @@ const ServicesTable: React.FC<Props> = ({
           handleDelete,
           deleteLoading,
           setCurrentService,
-          streetsFilter?.streetsFilter,
-          domainsFilter?.domainsFilter,
+          addressFilter,    
+          domainFilter, 
           dateFilters?.yearFilter,
           dateFilters?.monthFilter,
           filter,
