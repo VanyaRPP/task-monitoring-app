@@ -36,6 +36,7 @@ const StreetsSelector: React.FC<StreetsSelectorProps> = ({
       allowClear
       className={className}
       options={options}
+      dropdownStyle={{ width: 'max-content' }}
       {...props}
     />
   )
