@@ -2,13 +2,11 @@ import {
   DeleteOutlined,
   EditOutlined,
   EyeOutlined,
-  MoreOutlined,
 } from '@ant-design/icons'
 import {
   Alert,
   Badge,
   Button,
-  Dropdown,
   Empty,
   List,
   Popconfirm,
@@ -20,6 +18,8 @@ import {
 import { ColumnsType, ColumnType } from 'antd/es/table'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
+import { usePermissions } from '@utils/helpers'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 import { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
 import {
@@ -46,6 +46,7 @@ import {
   toFirstUpperCase,
   toRoundFixed,
 } from '@utils/helpers'
+import { getDebtorTooltipColor } from '@utils/helpers'
 import { Grid } from 'antd'
 import s from './style.module.scss'
 
@@ -161,17 +162,6 @@ const getSummaryColumns = (
   )
 }
 
-const getDebtorTooltipColor = (debtor: { totalDebt: number }) => {
-  if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
-    return 'gray'
-  } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
-    return 'yellow'
-  } else if (debtor.totalDebt >= 20000) {
-    return 'red'
-  }
-  return undefined
-}
-
 const PaymentsTable: React.FC<PaymentsTableProps> = ({
   sepDomainID,
   payments,
@@ -189,7 +179,8 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
 }) => {
   const router = useRouter()
   const { pathname } = router
-
+  const { data: userResponse } = useGetCurrentUserQuery()
+  const userRoles = usePermissions(userResponse)
   const {
     paymentsError,
     paymentsLoading,
@@ -523,78 +514,54 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           (b.invoice.find((i) => i.type === value)?.sum || 0),
       })) as ColumnType<IExtendedPayment>[]),
       {
-        fixed: isMobile ? undefined : 'right',
         align: 'center',
+        fixed: 'right',
         title: '',
-        width: sepDomainID ? 25 : 80,
+        width: 50,
+        render: (_value, payment) => (
+          <Button
+            style={{ padding: 0 }}
+            type="link"
+            onClick={() => onViewClick(payment)}
+          >
+            <EyeOutlined />
+          </Button>
+        ),
+      },
+      {
+        align: 'center',
+        fixed: 'right',
+        title: '',
+        width: 50,
         render: (_value, payment) =>
-          payment.type === Operations.Debit && (
+          userRoles?.isGlobalAdmin && (
             <Button
               style={{ padding: 0 }}
               type="link"
-              onClick={() => {
-                onViewClick(payment)
-              }}
+              onClick={() => onEditClick(payment)}
             >
-              <EyeOutlined />
+              <EditOutlined />
             </Button>
           ),
       },
       {
         align: 'center',
-        fixed: isMobile ? undefined : 'right',
+        fixed: 'right',
         title: '',
-        hidden: isUser,
-        width: sepDomainID ? 25 : 80,
-        render: (_value, payment) => (
-          <Dropdown
-            menu={{
-              items: [
-                {
-                  key: 'edit',
-                  label: (
-                    <Button
-                      icon={<EditOutlined />}
-                      type="link"
-                      style={{ color: '#722ed1', padding: '0 10px' }}
-                      onClick={() => onEditClick(payment)}
-                    >
-                      Редагувати
-                    </Button>
-                  ),
-                },
-                (isGlobalAdmin || isDomainAdmin) && {
-                  key: 'delete',
-                  label: (
-                    <Popconfirm
-                      title={`Ви впевнені, що хочете видалити оплату від ${new Date(
-                        payment.invoiceCreationDate as unknown as string
-                      ).toLocaleDateString()}?`}
-                      onConfirm={() => onDelete(payment._id)}
-                      okText="Видалити"
-                      cancelText="Ні"
-                      disabled={deleteLoading}
-                    >
-                      <Button
-                        type="text"
-                        icon={<DeleteOutlined />}
-                        style={{
-                          color: '#ff4d4f',
-                          padding: '0 10px',
-                        }}
-                      >
-                        Видалити
-                      </Button>
-                    </Popconfirm>
-                  ),
-                },
-              ].filter(Boolean),
-            }}
-            placement="bottomRight"
-          >
-            <Button icon={<MoreOutlined />} />
-          </Dropdown>
-        ),
+        width: 50,
+        render: (_value, payment) =>
+          userRoles?.isGlobalAdmin && (
+            <Popconfirm
+              title={`Ви впевнені, що хочете видалити оплату від ${new Date(
+                payment.invoiceCreationDate as unknown as string
+                ).toLocaleDateString()}?`}
+              onConfirm={() => onDelete(payment._id)}
+              cancelText="Відміна"
+              disabled={deleteLoading}
+            >
+              <DeleteOutlined />
+            </Popconfirm>
+          ),
       },
     ]
   }, [
