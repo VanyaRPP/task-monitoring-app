@@ -50,6 +50,6 @@ yarn-error.log*
 /pages/api-doc.tsx
 
 # build
-/public/sw.js
-/public/workbox-*.js
-/public/worker-*.js
+public/sw.js
+public/workbox-*.js
+public/worker-*.js
