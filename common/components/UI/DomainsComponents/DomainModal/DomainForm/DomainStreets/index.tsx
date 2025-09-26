@@ -18,7 +18,7 @@ const DomainStreets: React.FC<DomainStreetsProps> = ({ disabled = false }) => {
       rules={validateField('required')}
     >
       <Select
-        options={streets?.map((i) => ({
+        options={streets?.data?.map((i) => ({
           value: i._id,
           label: `${i.address} (м. ${i.city})`,
         }))}
