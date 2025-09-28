@@ -13,27 +13,35 @@ import {
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import s from './style.module.scss'
+import {
+  useGetAddressFiltersQuery,
+  useGetDomainFiltersQuery,
+} from '@common/api/filterApi/filter.api'
 
 export interface Props {
   showAddButton?: boolean
-  currentService?: IService
-  setCurrentService?: (service: IService) => void
-  serviceActions?: {
-    edit: boolean
-    preview: boolean
-  }
-  setServiceActions: React.Dispatch<
-    React.SetStateAction<{
-      edit: boolean
-      preview: boolean
-    }>
-  >
+  currentService?: IService | null
+  setCurrentService?: (service: IService | null) => void
+  serviceActions?: { edit: boolean; preview: boolean }
+  setServiceActions: React.Dispatch<React.SetStateAction<{ edit: boolean; preview: boolean }>>
   filter?: any
   setFilter?: (filters: any) => void
   services?: any
-  enableServiceButton?: true | false
+  enableServiceButton?: boolean
   handleDeleteServices?: () => void
   selectedServices: IService[]
+}
+
+function valuesToTexts(
+  values: (string | number)[] = [],
+  list: { value: string | number; text: string }[] = []
+) {
+  const map = new Map(list.map(o => [String(o.value), o.text]))
+  return values.map(v => map.get(String(v))).filter(Boolean) as string[]
+}
+function compact(list: string[], max = 2) {
+  if (!list?.length) return ''
+  return list.length <= max ? list.join(', ') : `${list.slice(0, max).join(', ')} +${list.length - max}`
 }
 
 const ServicesHeader: React.FC<Props> = ({
@@ -44,24 +52,24 @@ const ServicesHeader: React.FC<Props> = ({
   setServiceActions,
   filter,
   setFilter,
-  services,
   enableServiceButton = false,
   handleDeleteServices,
   selectedServices,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
-
   const { data: user } = useGetCurrentUserQuery()
-
+  const { data: domainsFilter } = useGetDomainFiltersQuery({
+    streets: filter?.street,
+  })
+  const { data: streetsFilter } = useGetAddressFiltersQuery({
+    domains: filter?.domain,
+  })
   const openModal = () => setIsModalOpen(true)
   const closeModal = () => {
     setIsModalOpen(false)
-    setCurrentService(null)
-    setServiceActions({
-      edit: false,
-      preview: false,
-    })
+    setCurrentService?.(null)
+    setServiceActions({ edit: false, preview: false })
   }
 
   if (router.query.email)
@@ -70,26 +78,27 @@ const ServicesHeader: React.FC<Props> = ({
   return (
     <div className={s.headerBlock}>
       <div className={s.firstBlock}>
-        <Button
-          type="link"
-          onClick={() => {
-            if (enableServiceButton) {
-              router.push(AppRoutes.SERVICE)
-            }
-          }}
-        >
-          Послуги <SelectOutlined />
-        </Button>
+        <Space wrap size={8} align="center">
+          <Button
+            type="link"
+            onClick={() => {
+              if (enableServiceButton) router.push(AppRoutes.SERVICE)
+            }}
+          >
+            Послуги <SelectOutlined />
+          </Button>
+        </Space>
+
 
         {router.pathname === AppRoutes.SERVICE && (
           <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
             <DomainFilterTags
-              collection={services?.domainFilter}
+              collection={domainsFilter?.domainsFilter}
               filters={filter}
               setFilters={setFilter}
             />
             <StreetFilterTags
-              collection={services?.addressFilter}
+              collection={streetsFilter?.streetsFilter}
               filters={filter}
               setFilters={setFilter}
             />
@@ -98,22 +107,20 @@ const ServicesHeader: React.FC<Props> = ({
       </div>
       <div className={s.secondBlock}>
         {showAddButton && isAdminCheck(user?.roles) && (
-          <>
-            <Button className={s.firstBlock} type="link" onClick={openModal}>
-              <PlusOutlined /> Додати
-            </Button>
-          </>
+          <Button className={s.firstBlock} type="link" onClick={openModal}>
+            <PlusOutlined /> Додати
+          </Button>
         )}
         {isAdminCheck(user?.roles) &&
           router.pathname === AppRoutes.SERVICE &&
           selectedServices.length > 0 && (
-            <Button type="link" onClick={() => handleDeleteServices()}>
+            <Button type="link" onClick={() => handleDeleteServices?.()}>
               <DeleteOutlined /> Видалити
             </Button>
           )}
         {(isModalOpen || currentService) && (
           <AddServiceModal
-            currentService={currentService}
+            currentService={currentService ?? null}
             closeModal={closeModal}
             serviceActions={serviceActions}
           />
