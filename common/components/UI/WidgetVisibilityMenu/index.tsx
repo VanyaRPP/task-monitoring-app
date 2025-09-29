@@ -18,7 +18,7 @@ const WidgetVisibilityMenu: React.FC<Props> = ({ hidden, onChange, available, la
         maxHeight: 300,
         overflowY: 'auto',
         padding: '8px 0',
-        backgroundColor: token.colorBgContainer, // светлый/тёмный фон автоматически
+        backgroundColor: token.colorBgContainer,
         borderRadius: 8,
       }}
     >
