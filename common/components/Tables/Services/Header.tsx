@@ -32,18 +32,6 @@ export interface Props {
   selectedServices: IService[]
 }
 
-function valuesToTexts(
-  values: (string | number)[] = [],
-  list: { value: string | number; text: string }[] = []
-) {
-  const map = new Map(list.map(o => [String(o.value), o.text]))
-  return values.map(v => map.get(String(v))).filter(Boolean) as string[]
-}
-function compact(list: string[], max = 2) {
-  if (!list?.length) return ''
-  return list.length <= max ? list.join(', ') : `${list.slice(0, max).join(', ')} +${list.length - max}`
-}
-
 const ServicesHeader: React.FC<Props> = ({
   showAddButton = false,
   currentService,
