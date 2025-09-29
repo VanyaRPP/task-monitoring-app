@@ -1,4 +1,4 @@
-import { PlusOutlined } from '@ant-design/icons'
+import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
 import { Button, Space, Segmented } from 'antd'
 import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useState } from 'react'
@@ -93,6 +93,7 @@ const CompaniesHeader: React.FC<Props> = ({
           }}
         >
           Компанії
+          <SelectOutlined />
         </Button>
 
         {router.pathname === AppRoutes.REAL_ESTATE && isAdmin && (
