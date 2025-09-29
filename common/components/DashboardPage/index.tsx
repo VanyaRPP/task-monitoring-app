@@ -119,6 +119,34 @@ const Dashboard: React.FC = () => {
 
   const getLayoutStorageKey = (userId?: string) =>
     userId ? `dashboard-layout-${userId}` : 'dashboard-layout'
+<<<<<<< HEAD
+=======
+    const visibleWidgets = useMemo(() => {
+      if (isGlobalAdmin === undefined) {
+    return ALL_WIDGETS
+  }
+  return isGlobalAdmin
+    ? ALL_WIDGETS
+    : ALL_WIDGETS.filter((w) => w !== 'profits')
+}, [isGlobalAdmin])
+const visibleWidgetMap = useMemo(() => {
+  return Object.fromEntries(
+    visibleWidgets.map((key) => [key, widgetMap[key]])
+  ) as typeof widgetMap
+}, [visibleWidgets])
+  const DEFAULT_LAYOUT: Layout[] = visibleWidgets.map((w) => ({
+    i: w,
+    x: 0,
+    w: 1,
+    h: 2,
+    y: 0,
+  }))
+
+  const [layout, setLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
+  const [tempLayout, setTempLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
+
+ const [isLayoutReady, setIsLayoutReady] = useState(false)
+>>>>>>> 684fb94bf9b2f67b360de53fdf0f896f213e234c
 
   useEffect(() => {
     const userId = userResponse?._id?.toString()
@@ -185,6 +213,7 @@ const Dashboard: React.FC = () => {
             ))}
           </div>
           <div className={s.actions}>
+<<<<<<< HEAD
             <div
               className={s.divider}
               style={{ backgroundColor: isDark ? '#555' : '#ccc' }}
@@ -196,18 +225,28 @@ const Dashboard: React.FC = () => {
             </Dropdown>
 
             <Tooltip title="Save location">
+=======
+            <div className={s.divider}/>
+           <Tooltip title="Зберегти">
+>>>>>>> 684fb94bf9b2f67b360de53fdf0f896f213e234c
               <Button
                 icon={<SaveOutlined />}
                 onClick={() => {
                   const userId = userResponse?._id?.toString()
                   if (!userId) return
+<<<<<<< HEAD
                   localStorage.setItem(getLayoutStorageKey(userId), JSON.stringify({ layout, hidden: hiddenWidget }))
                   message.success('Location saved!')
+=======
+                  localStorage.setItem(getLayoutStorageKey(userId), JSON.stringify(tempLayout))
+                  setLayout(tempLayout)
+                  message.success('Збережено!')
+>>>>>>> 684fb94bf9b2f67b360de53fdf0f896f213e234c
                   togglePanelVisible()
                 }}
               />
             </Tooltip>
-            <Tooltip title="Disable drag & drop">
+            <Tooltip title="Вийти з режиму редагування">
               <Button icon={<CloseOutlined />} onClick={togglePanelVisible} />
             </Tooltip>
           </div>
@@ -237,7 +276,11 @@ const Dashboard: React.FC = () => {
               isEditMode={isEditMode}
               onHeightChange={handleNodeHeight}
             >
+<<<<<<< HEAD
                 {widgetMap[item.i as WidgetKey]}
+=======
+              {visibleWidgetMap[item.i as WidgetKey]}
+>>>>>>> 684fb94bf9b2f67b360de53fdf0f896f213e234c
             </WidgetWrapper>
           </div>
         ))}

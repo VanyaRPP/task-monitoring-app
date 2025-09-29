@@ -68,8 +68,9 @@ export function getRealEstatesPipeline({
   distinctedDomainsIds,
   distinctedStreetsIds,
   group,
+  archived,
 }) {
-  return [
+  const pipeline: any[] = [
     {
       $group: {
         _id: `$${group}`,
@@ -96,13 +97,28 @@ export function getRealEstatesPipeline({
         },
       },
     },
-    {
-      $project: {
-        'companyDetails.companyName': 1,
-        'companyDetails._id': 1,
-      },
-    },
   ]
+
+  if (archived === true || archived === 'true') {
+    pipeline.push({
+      $match: { 'companyDetails.archived': true },
+    })
+  }
+  if (archived === false || archived === 'false') {
+    pipeline.push({
+      $match: { 'companyDetails.archived': { $ne: true } },
+    })
+  }
+
+  pipeline.push({
+    $project: {
+      'companyDetails.companyName': 1,
+      'companyDetails._id': 1,
+      'companyDetails.archived': 1,
+    },
+  })
+
+  return pipeline
 }
 
 export function getStreetsPipeline(
