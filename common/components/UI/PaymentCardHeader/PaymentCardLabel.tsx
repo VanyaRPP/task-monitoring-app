@@ -10,6 +10,7 @@ import { AppRoutes } from '@utils/constants'
 import { useRouter } from 'next/router'
 import { ColumnSelect } from '@components/UI/PaymentCardHeader'
 import styles from './styles.module.scss'
+import { SelectOutlined } from '@ant-design/icons'
 
 const { useBreakpoint } = Grid
 
@@ -46,6 +47,7 @@ const PaymentCardLabel = ({
         }}
       >
         {isAdmin ? 'Платежі' : 'Мої платежі'}
+        <SelectOutlined />
       </Button>
 
       {pathname === AppRoutes.PAYMENT && (

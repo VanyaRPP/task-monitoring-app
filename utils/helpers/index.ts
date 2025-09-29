@@ -720,3 +720,14 @@ export function usePermissions(user?: IUser): IPermissions | null {
   return permissions
 }
 
+export const getDebtorTooltipColor = (debtor: { totalDebt: number}): string => {
+  if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
+    return 'gray'
+  } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
+    return 'yellow'
+  } else if (debtor.totalDebt >= 20000) {
+    return 'red'
+  }
+  return undefined
+}
+

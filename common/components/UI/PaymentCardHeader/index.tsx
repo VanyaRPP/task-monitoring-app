@@ -295,6 +295,7 @@ if (isDashboard) {
           onClick={() => router.push(AppRoutes.PAYMENT)}
         >
           Платежі
+          <SelectOutlined />
         </Button>
         <Flex gap={8} wrap="wrap">
           <ImportInvoices />

@@ -1,6 +1,21 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { IPaymentFilterResponse } from './filter.api.types'
 
+function cleanParams(params: Record<string, any>) {
+  const cleaned: Record<string, any> = {}
+  Object.entries(params).forEach(([key, value]) => {
+    if (
+      value !== null &&
+      value !== undefined &&
+      !(Array.isArray(value) && value.length === 0) &&
+      value !== ''
+    ) {
+      cleaned[key] = value
+    }
+  })
+  return cleaned
+}
+
 export const filterApi = createApi({
   reducerPath: 'filterApi',
   tagTypes: ['Filter', 'IFilter'],
@@ -16,7 +31,7 @@ export const filterApi = createApi({
         return {
           url: `domain`,
           method: 'GET',
-          params: { streets, realEstates },
+          params: cleanParams({ streets, realEstates }),
         }
       },
       providesTags: (response) =>
@@ -31,7 +46,7 @@ export const filterApi = createApi({
         return {
           url: `street`,
           method: 'GET',
-          params: { realEstates, domains },
+          params: cleanParams({ realEstates, domains }),
         }
       },
       providesTags: (response) =>
@@ -46,7 +61,7 @@ export const filterApi = createApi({
         return {
           url: 'date',
           method: 'GET',
-          params,
+          params: cleanParams(params),
         }
       },
       providesTags: (response) =>
@@ -65,7 +80,7 @@ export const filterApi = createApi({
         return {
           url: `real-estate`,
           method: 'GET',
-          params: { streets, domains, archived },
+          params: cleanParams({ streets, domains, archived }),
         }
       },
       providesTags: (response) =>

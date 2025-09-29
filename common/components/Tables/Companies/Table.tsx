@@ -19,6 +19,7 @@ import {
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
+import { getDebtorTooltipColor } from '@utils/helpers'
 import {
   Alert,
   Button,
@@ -74,16 +75,6 @@ export interface Props {
     edit: boolean
   }
   isArchive: boolean
-}
-
-const getDebtorTooltipColor = (debtor) => {
-  if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
-    return 'gray'
-  } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
-    return 'yellow'
-  } else if (debtor.totalDebt >= 20000) {
-    return 'red'
-  }
 }
 
 const CompaniesTable: React.FC<Props> = ({
