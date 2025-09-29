@@ -74,6 +74,7 @@ export interface Props {
   realEstateActions: {
     edit: boolean
   }
+  isArchive: boolean
 }
 
 const CompaniesTable: React.FC<Props> = ({
@@ -87,6 +88,7 @@ const CompaniesTable: React.FC<Props> = ({
   setFilters,
   setRealEstateActions,
   realEstateActions,
+  isArchive,
 }) => {
   const router = useRouter()
   const { pathname } = router
@@ -96,6 +98,7 @@ const CompaniesTable: React.FC<Props> = ({
   const { data: realEstateData } = useGetRealEstateFiltersQuery({
     streets: filters?.street,
     domains: filters?.domain,
+    archived: isArchive,
   })
   const { data: domainData } = useGetDomainFiltersQuery({
     streets: filters?.street,
