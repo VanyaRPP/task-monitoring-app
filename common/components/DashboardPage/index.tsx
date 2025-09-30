@@ -85,7 +85,7 @@ const Dashboard: React.FC = () => {
     } else if (!isPanelVisible && isEditMode) {
       toggleEditMode()
     }
-  }, [isPanelVisible])
+  },          [isPanelVisible])
   const getLayoutStorageKey = (userId?: string) =>
     userId ? `dashboard-layout-${userId}` : 'dashboard-layout'
     const visibleWidgets = useMemo(() => {
