@@ -17,7 +17,7 @@ export default async function handler(
 
   if (req.method === 'GET') {
     try {
-      const { streets, domains } = req.query
+      const { streets, domains, archived } = req.query
       const filteredStreets =
         streets !== undefined && streets !== 'null'
           ? streets.split(',').map((id) => new mongoose.Types.ObjectId(id))
@@ -36,6 +36,7 @@ export default async function handler(
         filters: {
           filteredStreets: filteredStreets,
           filteredDomains: filteredDomains,
+          archived,
         },
       })
 

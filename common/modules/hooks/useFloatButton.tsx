@@ -74,7 +74,7 @@ export const useDragDropPanelFloatButton = (
       key: `dragdroppanel-${uniqueKey}`,
       icon: visible ? <CloseCircleOutlined /> : <EditOutlined />,
       onClick: toggleVisible,
-      tooltip: visible ? 'Disable drag & drop' : 'Enable drag & drop',
+      tooltip: visible ? 'Вийти з режиму редагування' : 'Режим редагування',
     }),
     [visible, uniqueKey]
   )

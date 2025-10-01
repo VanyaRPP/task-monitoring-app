@@ -89,7 +89,7 @@ const Dashboard: React.FC = () => {
   const getLayoutStorageKey = (userId?: string) =>
     userId ? `dashboard-layout-${userId}` : 'dashboard-layout'
     const visibleWidgets = useMemo(() => {
-       if (isGlobalAdmin === undefined) {
+      if (isGlobalAdmin === undefined) {
     return ALL_WIDGETS
   }
   return isGlobalAdmin
@@ -176,7 +176,7 @@ const visibleWidgetMap = useMemo(() => {
           </div>
           <div className={s.actions}>
             <div className={s.divider}/>
-           <Tooltip title="Save location">
+           <Tooltip title="Зберегти">
               <Button
                 icon={<SaveOutlined />}
                 onClick={() => {
@@ -184,12 +184,12 @@ const visibleWidgetMap = useMemo(() => {
                   if (!userId) return
                   localStorage.setItem(getLayoutStorageKey(userId), JSON.stringify(tempLayout))
                   setLayout(tempLayout)
-                  message.success('Location saved!')
+                  message.success('Збережено!')
                   togglePanelVisible()
                 }}
               />
             </Tooltip>
-            <Tooltip title="Disable drag & drop">
+            <Tooltip title="Вийти з режиму редагування">
               <Button icon={<CloseOutlined />} onClick={togglePanelVisible} />
             </Tooltip>
           </div>
@@ -219,7 +219,7 @@ const visibleWidgetMap = useMemo(() => {
               isEditMode={isEditMode}
               onHeightChange={handleNodeHeight}
             >
-               {visibleWidgetMap[item.i as WidgetKey]}
+              {visibleWidgetMap[item.i as WidgetKey]}
             </WidgetWrapper>
           </div>
         ))}
