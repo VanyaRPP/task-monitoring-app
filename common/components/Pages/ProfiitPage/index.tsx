@@ -8,7 +8,7 @@ import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { useDomainTabs } from './hook/useDomainTabs'
 import AddCostModal from '@components/AddCostModal'
 import ProfitTable from './components/ProfitTable'
-import { PlusOutlined } from '@ant-design/icons'
+import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
 import { isAdminCheck } from '@utils/helpers'
 import { Button, Card, Space } from 'antd'
 import { useRouter } from 'next/router'
@@ -68,6 +68,7 @@ const ProfitPage = () => {
               onClick={() => router.push('/profit')}
               >
                 {t('profitPage:title')}
+                <SelectOutlined />
               </Button>
           }                 
           extra={
