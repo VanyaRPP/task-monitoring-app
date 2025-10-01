@@ -236,11 +236,25 @@
   perspective: 900px;
   overflow: visible;
 
-  // @media (max-width: 768px) {
-  //   transform: scale(0.75) translate(25%, 25%);
-  // }
+   @media (min-width: 768px) and (max-width: 1199px) {
+    position: relative;
+    bottom: 1rem;
+    margin: 0 auto;
+    transform-origin: center bottom;
+     transform: scale(0.8) translate(15%);
+   }
 
-  // @media (max-width: 480px) {
-  //   transform: scale(0.55) translate(25%, 25%);
-  // }
+   @media (max-width: 480px) {
+    position: relative;
+    transform-origin: center bottom;
+     transform: scale(0.55) translate(15%, -55%);
+   }
+   
+   @media (min-width: 1200px) {
+    position: relative;
+    bottom: 1rem;
+    right: 1rem;
+    transform: scale(0.9) translate(5%);
+    transform-origin: bottom right;
+   }
 }
