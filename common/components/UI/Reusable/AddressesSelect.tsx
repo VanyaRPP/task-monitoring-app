@@ -31,7 +31,9 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   } = useGetAllStreetsQuery({ domainId }, { skip: !domainId })
 
   const options = useMemo(() => {
-    return streets.map((i) => ({
+		const list = Array.isArray(streets) ? streets : streets?.data ?? []
+
+    return list.map((i) => ({
       value: i._id,
       label: `${i.address} (м. ${i.city})`,
       hasService: i.hasService,
@@ -56,7 +58,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
         } else {
           form.setFieldsValue({ street: undefined })
           onStreetHasServiceChange?.(false)
-             }
+        }
       }
     } else {
       form.setFieldsValue({ street: undefined })
@@ -89,7 +91,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
           placeholder="Пошук адреси"
           status={isStreetsError && 'error'}
           loading={isStreetsLoading}
-          disabled={isStreetsLoading || streets.length === 1 || !domainId}
+          disabled={isStreetsLoading || options.length === 1 || !domainId}
           dropdownStyle={dropdownStyle}
           allowClear
           showSearch

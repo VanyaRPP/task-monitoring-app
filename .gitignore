@@ -49,6 +49,8 @@ yarn-error.log*
 # specific files
 /pages/api-doc.tsx
 
-# PWA build artifacts
+
+# build
 /public/sw.js
 /public/workbox-*.js
+
