@@ -49,22 +49,22 @@ const StreetsTable: React.FC<Props> = ({
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.STREETS
 
-	const dispatch = useDispatch()
-	const { currentPage, pageSize, totalCount } = useSelector(
-		(state: RootState) => state.streets
-	)
+  const dispatch = useDispatch()
+  const { currentPage, pageSize, totalCount } = useSelector(
+    (state: RootState) => state.streets
+  )
 
   const { data, isLoading, isError } = useGetAllStreetsQuery({
     domainId: sepDomainId || domainId,
-    page: currentPage,
-		limit: pageSize,
+    page: isOnPage ? currentPage : 1,
+    limit: isOnPage ? pageSize : 5,
   })
 
-	useEffect(() => {
-		if (data) {
-			dispatch(setStreetsData({ data: data.data, totalCount: data.totalCount}))
-		}
-	}, [data, dispatch])
+  useEffect(() => {
+    if (data) {
+      dispatch(setStreetsData({ data: data.data, totalCount: data.totalCount }))
+    }
+  }, [data, dispatch])
 
   const [deleteStreet, { isLoading: deleteLoading }] = useDeleteStreetMutation()
 
@@ -95,27 +95,33 @@ const StreetsTable: React.FC<Props> = ({
     <>
       <Table
         rowKey="_id"
-				loading={isLoading}
-				columns={getDefaultColumns(handleDelete, deleteLoading, openModal, userRoles)}
-				expandable={
-					domainId && {
-						expandedRowRender: (street) => (
-							<RealEstateBlock domainId={domainId} streetId={street._id} />
-						),
-					}
-				}
-				dataSource = {data?.data || []}
-        pagination={{
-						current: currentPage,
-						pageSize: pageSize,
-						total: data?.totalCount,
+        loading={isLoading}
+        columns={getDefaultColumns(
+          handleDelete,
+          deleteLoading,
+          openModal,
+          userRoles
+        )}
+        expandable={
+          domainId && {
+            expandedRowRender: (street) => (
+              <RealEstateBlock domainId={domainId} streetId={street._id} />
+            ),
+          }
+        }
+        dataSource={data?.data || []}
+        pagination={
+          router.pathname === AppRoutes.STREETS && {
+            current: currentPage,
+            pageSize: pageSize,
+            total: data?.totalCount,
             hideOnSinglePage: false,
             showSizeChanger: true,
             pageSizeOptions: [10, 20, 50],
-						position: ['bottomCenter'],
-						onChange: (newPage, newPageSize) => {
-							dispatch(setPage({ page: newPage, pageSize: newPageSize }))
-						},
+            position: ['bottomCenter'],
+            onChange: (newPage, newPageSize) => {
+              dispatch(setPage({ page: newPage, pageSize: newPageSize }))
+            },
           }
         }
       />
