@@ -49,7 +49,8 @@ yarn-error.log*
 # specific files
 /pages/api-doc.tsx
 
+
 # build
-public/sw.js
-public/workbox-*.js
-public/worker-*.js
+/public/sw.js
+/public/workbox-*.js
+

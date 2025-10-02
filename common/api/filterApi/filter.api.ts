@@ -74,13 +74,13 @@ export const filterApi = createApi({
     }),
     getRealEstateFilters: builder.query<
       IPaymentFilterResponse,
-      { streets?: any; domains?: any }
+      { streets?: any; domains?: any, archived?: boolean }
     >({
-      query: ({ streets, domains }) => {
+      query: ({ streets, domains, archived }) => {
         return {
           url: `real-estate`,
           method: 'GET',
-          params: cleanParams({ streets, domains }),
+          params: cleanParams({ streets, domains, archived }),
         }
       },
       providesTags: (response) =>

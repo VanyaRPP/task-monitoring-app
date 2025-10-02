@@ -10,7 +10,7 @@ import { AppRoutes } from '@utils/constants'
 import { useRouter } from 'next/router'
 import { ColumnSelect } from '@components/UI/PaymentCardHeader'
 import styles from './styles.module.scss'
-
+import { SelectOutlined } from '@ant-design/icons'
 
 const { useBreakpoint } = Grid
 
@@ -47,6 +47,7 @@ const PaymentCardLabel = ({
         }}
       >
         {isAdmin ? 'Платежі' : 'Мої платежі'}
+        <SelectOutlined />
       </Button>
 
       {pathname === AppRoutes.PAYMENT && (
@@ -56,11 +57,10 @@ const PaymentCardLabel = ({
           className={styles.section}
         >
           <div className={styles.selectors}>
-  <ColumnSelect className={styles.select} onSelect={onColumnsSelect} />
-  <PaymentCascader className={styles.select} onChange={setCurrentDateFilter} />
-  <StreetsSelector className={styles.select} setFilters={setFilters} streets={streets} />
-</div>
-
+            <ColumnSelect className={styles.select} onSelect={onColumnsSelect} />
+            <PaymentCascader className={styles.select} onChange={setCurrentDateFilter} />
+            <StreetsSelector className={styles.select} setFilters={setFilters} streets={streets} />
+          </div>
           <Space
             direction="vertical"
             size="middle"

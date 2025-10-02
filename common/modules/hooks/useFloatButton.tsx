@@ -17,7 +17,7 @@ export const useThemeFloatButton = (): FloatButtonItem => {
   return {
     key: 'theme',
     icon: theme === 'light' ? <MoonOutlined /> : <SunFilled />,
-    tooltip: `Switch to ${theme === 'light' ? 'dark' : 'light'} theme`,
+    tooltip: `Перемкнути на ${theme === 'light' ? 'темну' : 'світлу'} тему`,
     onClick: () => setTheme(theme === 'light' ? 'dark' : 'light'),
   }
 }
@@ -74,7 +74,7 @@ export const useDragDropPanelFloatButton = (
       key: `dragdroppanel-${uniqueKey}`,
       icon: visible ? <CloseCircleOutlined /> : <EditOutlined />,
       onClick: toggleVisible,
-      tooltip: visible ? 'Disable drag & drop' : 'Enable drag & drop',
+      tooltip: visible ? 'Вийти з режиму редагування' : 'Режим редагування',
     }),
     [visible, uniqueKey]
   )

@@ -30,7 +30,10 @@ export const FloatButtonsLayoutAddon: React.FC<FloatButtonPlacementProps> = ({
             key={btn.key}
             icon={btn.icon}
             onClick={btn.onClick}
-            tooltip={btn.tooltip}
+            tooltip={{
+              title: btn.tooltip,
+              placement: 'left',
+            }}
           />
         ))}
       </FloatButton.Group>
@@ -42,7 +45,10 @@ export const FloatButtonsLayoutAddon: React.FC<FloatButtonPlacementProps> = ({
       key={themeBtn.key}
       icon={themeBtn.icon}
       onClick={themeBtn.onClick}
-      tooltip={themeBtn.tooltip}
+      tooltip={{
+        title: themeBtn.tooltip,
+        placement: 'left',
+      }}
       type="primary"
     />
   )
