@@ -17,7 +17,7 @@ export const useThemeFloatButton = (): FloatButtonItem => {
   return {
     key: 'theme',
     icon: theme === 'light' ? <MoonOutlined /> : <SunFilled />,
-    tooltip: `Switch to ${theme === 'light' ? 'dark' : 'light'} theme`,
+    tooltip: `Перемкнути на ${theme === 'light' ? 'темну' : 'світлу'} тему`,
     onClick: () => setTheme(theme === 'light' ? 'dark' : 'light'),
   }
 }
