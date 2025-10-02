@@ -229,7 +229,15 @@ const Dashboard: React.FC = () => {
         onLayoutChange={handleLayoutChange}
       >
         {renderedLayout.map((item) => (
-          <div key={item.i} data-grid={item} className={s.gridItem} id={item.i}>
+            <div
+              key={item.i}
+              data-grid={item}
+              className={s.gridItem}
+              id={item.i}
+              style={{
+                display: hiddenWidget.includes(item.i as WidgetKey) ? 'none' : 'block',
+              }}
+            >
             <WidgetWrapper
               id={item.i}
               rowHeight={60}
