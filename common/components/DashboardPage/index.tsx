@@ -80,7 +80,6 @@ const Dashboard: React.FC = () => {
     useDragDropPanelFloatButton('dashboard')
 
   const [theme] = useTheme()
-  console.log('theme', theme)
   const isDark = theme === 'dark'
 
   useEffect(() => {
