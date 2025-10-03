@@ -14,12 +14,7 @@ import { IStreet } from '@common/api/streetApi/street.api.types'
 import AddStreetModal from '@components/AddStreetModal'
 import RealEstateBlock from '@components/DashboardPage/blocks/realEstates'
 import { AppRoutes } from '@utils/constants'
-import { useEffect, useState } from 'react'
-import RealEstateForm from '@components/UI/RealEstateComponents/RealEstateModal/RealEstateForm'
-
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '@common/modules/store/store'
-import { setPage, setStreetsData } from '@common/modules/store/serviceSlice'
+import { useState } from 'react'
 
 export interface Props {
   domainId?: string
@@ -49,22 +44,10 @@ const StreetsTable: React.FC<Props> = ({
   const router = useRouter()
   const isOnPage = router.pathname === AppRoutes.STREETS
 
-  const dispatch = useDispatch()
-  const { currentPage, pageSize, totalCount } = useSelector(
-    (state: RootState) => state.streets
-  )
-
   const { data, isLoading, isError } = useGetAllStreetsQuery({
     domainId: sepDomainId || domainId,
-    page: isOnPage ? currentPage : 1,
-    limit: isOnPage ? pageSize : 5,
+    limit: isOnPage ? 0 : 5,
   })
-
-  useEffect(() => {
-    if (data) {
-      dispatch(setStreetsData({ data: data.data, totalCount: data.totalCount }))
-    }
-  }, [data, dispatch])
 
   const [deleteStreet, { isLoading: deleteLoading }] = useDeleteStreetMutation()
 
@@ -95,6 +78,15 @@ const StreetsTable: React.FC<Props> = ({
     <>
       <Table
         rowKey="_id"
+        pagination={
+          (router.pathname === AppRoutes.REAL_ESTATE ||
+            router.pathname === AppRoutes.SEP_DOMAIN) && {
+            hideOnSinglePage: false,
+            showSizeChanger: true,
+            pageSizeOptions: [10, 20, 50],
+            position: ['bottomCenter'],
+          }
+        }
         loading={isLoading}
         columns={getDefaultColumns(
           handleDelete,
@@ -109,21 +101,7 @@ const StreetsTable: React.FC<Props> = ({
             ),
           }
         }
-        dataSource={data?.data || []}
-        pagination={
-          router.pathname === AppRoutes.STREETS && {
-            current: currentPage,
-            pageSize: pageSize,
-            total: data?.totalCount,
-            hideOnSinglePage: false,
-            showSizeChanger: true,
-            pageSizeOptions: [10, 20, 50],
-            position: ['bottomCenter'],
-            onChange: (newPage, newPageSize) => {
-              dispatch(setPage({ page: newPage, pageSize: newPageSize }))
-            },
-          }
-        }
+        dataSource={data}
       />
       {isModalOpen && (
         <AddStreetModal
