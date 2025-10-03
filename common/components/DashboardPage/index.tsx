@@ -63,6 +63,7 @@ const getCustomGridHeight = (tableName: string) => {
   switch (tableName) {
     case 'payments': return 1;
     case 'profits': return 0.3;
+    case 'services': return 0.3;
     default: return 0;
   }
 }
@@ -79,6 +80,7 @@ const Dashboard: React.FC = () => {
     useDragDropPanelFloatButton('dashboard')
 
   const [theme] = useTheme()
+  console.log('theme', theme)
   const isDark = theme === 'dark'
 
   useEffect(() => {
@@ -245,17 +247,6 @@ const visibleWidgetMap = useMemo(() => {
                 {visibleWidgetMap[item.i as WidgetKey]}
               </div>
             </WidgetWrapper>
-
-            {isEditMode && (
-              <Button
-                data-no-drag
-                className={s.deleteIcon}
-                icon={<CloseOutlined style={{ color: 'white' }} />}
-                onClick={() =>
-                  setHiddenWidgets((prev) => [...prev, item.i as WidgetKey])
-                }
-              />
-            )}
           </div>
         ))}
       </ReactGridLayout>
