@@ -105,18 +105,16 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
         rules={[validator.required(), validator.min(0)]}
         noStyle
       >
-        <Space direction="horizontal">
-          <Input
-            type="number"
-            placeholder="Значення..."
-            disabled={disabled}
-            suffix={
-              <span>
-                м<sup>3</sup>
-              </span>
-            }
-          />
-        </Space>
+        <Input
+          type="number"
+          placeholder="Значення..."
+          disabled={disabled}
+          suffix={
+            <span>
+              м<sup>3</sup>
+            </span>
+          }
+        />
       </Form.Item>
     </Space>
   )

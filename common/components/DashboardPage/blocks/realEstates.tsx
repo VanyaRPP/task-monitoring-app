@@ -89,6 +89,7 @@ const RealEstateBlock: React.FC<Props> = ({
         setFilters={setFilters}
         realEstateActions={realEstateActions}
         setRealEstateActions={setRealEstateActions}
+        isArchive={isArchive}
       />
     </TableCard>
   )
