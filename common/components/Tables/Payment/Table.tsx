@@ -255,6 +255,59 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       token.colorFillSecondary,
     ]
   )
+    const invoiceFilters = useMemo(() => {
+      if (sepDomainID) return [];
+      const MIN_YEAR = 2021;
+      const currentYear = new Date().getFullYear();
+      const generatedYears = Array.from(
+        { length: currentYear - MIN_YEAR + 1 },
+        (_, i) => currentYear - i
+      );
+      const backendYears: number[] =
+        (dateFilters as any)?.yearFilter
+          ?.filter((y: any) => y?.value)
+          ?.map((y: any) => Number(y.value)) ?? [];
+
+      const years = Array.from(new Set([...backendYears, ...generatedYears]))
+        .sort((a, b) => b - a);
+
+      const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+      return years.map((y) => ({
+        text: String(y),
+        value: String(y),
+        children: [
+          {
+            text: 'Увесь рік',
+            value: `${y}-all`,
+          },
+          {
+            text: 'Місяць',
+            value: `${y}-month`,
+            children: months.map((m) => ({
+              text: toFirstUpperCase(dateToMonth(new Date(2000, m - 1))),
+              value: `${y}-month-${m}`, 
+            })),
+          },
+        ],
+      }));
+    }, [sepDomainID, dateFilters]);
+
+    const expandYearSelections = (vals?: string[] | null) => {
+      if (!Array.isArray(vals)) return vals;
+      const out: string[] = [];
+      vals.forEach((v) => {
+        const m = v.match(/^(\d{4})-all$/);
+        if (m) {
+          const y = Number(m[1]);
+          for (let i = 1; i <= 12; i++) out.push(`${y}-month-${i}`);
+        } else {
+          out.push(v);
+        }
+      });
+      return out;
+    };
+
   const allColumns: ColumnsType<IExtendedPayment> = useMemo(() => {
     return [
       {
@@ -334,17 +387,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         dataIndex: 'invoiceCreationDate',
         render: (date: string) => dateToDefaultFormat(date),
         width: sepDomainID ? 70 : 164,
-        filters:
-          !sepDomainID && dateFilters?.monthFilter
-            ? dateFilters.monthFilter
-                .filter((f) => f.value != null)
-                .map((f) => ({
-                  text: toFirstUpperCase(
-                    dateToMonth(new Date(2000, Number(f.value) - 1))
-                  ),
-                  value: `${new Date().getFullYear()}-month-${f.value}`,
-                }))
-            : [],
+        filters: invoiceFilters, 
         filteredValue: filters?.invoiceCreationDate || null,
       },
       {
@@ -738,9 +781,16 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           onChange: (page, pageSize) => handlePagination(page, pageSize),
         }
       }
-      onChange={(pagination, allFilters, sorter, extra) =>
-        handleTableChange(pagination, allFilters, sorter, extra)
-      }
+      onChange={(pagination, allFilters, sorter, extra) => {
+        const nextFilters = { ...allFilters };
+        if (Array.isArray(nextFilters.invoiceCreationDate)) {
+          nextFilters.invoiceCreationDate = expandYearSelections(
+            nextFilters.invoiceCreationDate as string[]
+          );
+        }
+        handleTableChange(pagination, nextFilters, sorter, extra);
+          }
+        }
       scroll={{
         x:
           (pathname === AppRoutes.PAYMENT
