@@ -1,8 +1,4 @@
-import {
-  DeleteOutlined,
-  EditOutlined,
-  EyeOutlined,
-} from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
 import {
   Alert,
   Badge,
@@ -523,6 +519,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
             style={{ padding: 0 }}
             type="link"
             onClick={() => onViewClick(payment)}
+            disabled={payment.type === Operations.Credit}
           >
             <EyeOutlined />
           </Button>
@@ -534,7 +531,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         title: '',
         width: 50,
         render: (_value, payment) =>
-          userRoles?.isGlobalAdmin && (
+          (userRoles?.isGlobalAdmin || userRoles?.isDomainAdmin) && (
             <Button
               style={{ padding: 0 }}
               type="link"
@@ -549,12 +546,12 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         fixed: 'right',
         title: '',
         width: 50,
-        render: (_value, payment) =>
-          userRoles?.isGlobalAdmin && (
+        render: (_value, payment: IExtendedPayment) =>
+          (userRoles?.isGlobalAdmin || userRoles?.isDomainAdmin) && (
             <Popconfirm
               title={`Ви впевнені, що хочете видалити оплату від ${new Date(
                 payment.invoiceCreationDate as unknown as string
-                ).toLocaleDateString()}?`}
+              ).toLocaleDateString()}?`}
               onConfirm={() => onDelete(payment._id)}
               cancelText="Відміна"
               disabled={deleteLoading}
