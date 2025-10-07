@@ -10,7 +10,7 @@ export const CompanyFilterTags: React.FC<{
   return (
     <FilterTags
       title={
-        <Typography.Text style={{ width: '8em' }}>Компанії:</Typography.Text>
+        <Typography.Text>Компанії:</Typography.Text>
       }
       closable={collection?.length !== 1}
       color="blue"
