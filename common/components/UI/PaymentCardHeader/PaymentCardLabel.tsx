@@ -38,7 +38,7 @@ const PaymentCardLabel = ({
       className={styles.container}
     >
       <Button
-      className={styles.paymentButton}
+        className={styles.paymentButton}
         type="link"
         onClick={() => {
           if (enablePaymentsButton) {
@@ -57,14 +57,24 @@ const PaymentCardLabel = ({
           className={styles.section}
         >
           <div className={styles.selectors}>
-            <ColumnSelect className={styles.select} onSelect={onColumnsSelect} />
-            <PaymentCascader className={styles.select} onChange={setCurrentDateFilter} />
-            <StreetsSelector className={styles.select} setFilters={setFilters} streets={streets} />
+            <ColumnSelect
+              className={styles.select}
+              onSelect={onColumnsSelect}
+            />
+            <PaymentCascader
+              className={styles.select}
+              onChange={setCurrentDateFilter}
+            />
+            <StreetsSelector
+              className={styles.select}
+              setFilters={setFilters}
+              streets={streets}
+            />
           </div>
           <Space
             direction="vertical"
             size="middle"
-            align='start'
+            align="start"
             className={styles.tags}
           >
             <DomainFilterTags

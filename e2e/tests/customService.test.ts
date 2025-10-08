@@ -19,13 +19,11 @@ test('додавання індивідуальної послуги', async () 
 })
 
 test('редагування індивідуальної послуги', async () => {
-
   await form.addCustomService('Інфляція')
   await form.editCustomService('Інфляція', '123')
 })
 
 test('видалення індивідуальної послуги', async () => {
-
   await form.addCustomService('Інфляція')
   await form.removeCustomService('Інфляція')
 })

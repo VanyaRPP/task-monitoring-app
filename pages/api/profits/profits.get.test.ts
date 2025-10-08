@@ -5,13 +5,12 @@ import { profits, users, domains } from '@utils/testData'
 import listHandler from './index'
 import idHandler from './[id]'
 import domainHandler from './domain/[domainId]'
-import balanceHandler from './balance/[domainId]' 
-import bulkHandler from './bulk' 
+import balanceHandler from './balance/[domainId]'
+import bulkHandler from './bulk'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
 jest.mock('@pages/api/api.config', () => jest.fn())
-
 
 setupTestEnvironment()
 
@@ -344,7 +343,7 @@ describe('Profits API – GET /api/profits/balance/:domainId (getBalance)', () =
         expect(body.data[0].amount).toBe(items[0].amount)
       })
     })
-  }) 
+  })
   describe('PATCH /api/profits/:id', () => {
     it('403 for non-globalAdmin', async () => {
       await mockLoginAs(users.user)
@@ -426,4 +425,4 @@ describe('Profits API – GET /api/profits/balance/:domainId (getBalance)', () =
       })
     })
   })
-}) 
+})

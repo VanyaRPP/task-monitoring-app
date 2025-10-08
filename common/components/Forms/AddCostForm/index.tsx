@@ -15,7 +15,7 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
 import { useTranslation } from 'next-i18next'
 import s from './style.module.scss'
-import { formatDateWithGenitiveMonthCapitalized } from '@utils/helpers' 
+import { formatDateWithGenitiveMonthCapitalized } from '@utils/helpers'
 
 dayjs.locale('uk')
 
@@ -23,10 +23,15 @@ interface Props {
   form: FormInstance<any>
   type: string
   disabled?: boolean
-  currentProfit?: Profit 
+  currentProfit?: Profit
 }
 
-const AddCostForm: React.FC<Props> = ({ form, type, disabled, currentProfit }) => {
+const AddCostForm: React.FC<Props> = ({
+  form,
+  type,
+  disabled,
+  currentProfit,
+}) => {
   const { t } = useTranslation()
   const isPreview = !!disabled
   const isDebit = currentProfit?.type === 'debit'

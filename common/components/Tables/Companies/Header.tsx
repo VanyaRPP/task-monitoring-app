@@ -103,13 +103,13 @@ const CompaniesHeader: React.FC<Props> = ({
               filters={filters}
               setFilters={setFilters}
             />
-            {(
+            {
               <CompanyFilterTags
                 collection={realEstateData?.realEstatesFilter}
                 filters={filters}
                 setFilters={setFilters}
               />
-            )}
+            }
           </Space>
         )}
       </div>

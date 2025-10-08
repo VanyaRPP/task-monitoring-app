@@ -94,52 +94,59 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
                       placeholder="Назва групи"
                     />
                   </Form.Item>
-                <div style={{ flex: 3, position: 'relative', paddingRight: '32px', marginBottom: '20px' }}>
-                  <Form.Item required style={{ flex: 3 }}>
-                    <Select
-                      disabled={disabled}
-                      mode="multiple"
-                      options={(() => {
-                        const allGroups =
-                          form.getFieldValue('customServices') || []
-                        const selectedInOthers = allGroups
-                          .filter((_, i) => i !== index)
-                          .flatMap((group) => group?.services || [])
-                        const filteredOptions = options?.map((opt) => ({
-                          ...opt,
-                          disabled: selectedInOthers.includes(opt?.value),
-                        }))
-                        return filteredOptions
-                      })()}
-                      style={{ width: '220px' }}
-                      value={groupValues}
-                      onChange={(newValues) => {
-                        const current = form.getFieldValue('customServices')
-                        current[index] = {
-                          groupName: groupName,
-                          services: newValues,
-                        }
-                        form.setFieldsValue({ customServices: current })
-                      }}
-                      placeholder="Оберіть послуги"
-                      allowClear
-                      showSearch
-                    />
-                  </Form.Item>
-                  {!disabled && (
-                    <MinusCircleOutlined
-                      style={{
-                        position: 'absolute',
-                        top: '50%',
-                        right: '-5px', 
-                        transform: 'translateY(-50%)',
-                        cursor: 'pointer',
-                        fontSize: '24px',
-                      }}
-                      onClick={() => remove(field.name)}
-                    />
-                  )}
-                 </div>
+                  <div
+                    style={{
+                      flex: 3,
+                      position: 'relative',
+                      paddingRight: '32px',
+                      marginBottom: '20px',
+                    }}
+                  >
+                    <Form.Item required style={{ flex: 3 }}>
+                      <Select
+                        disabled={disabled}
+                        mode="multiple"
+                        options={(() => {
+                          const allGroups =
+                            form.getFieldValue('customServices') || []
+                          const selectedInOthers = allGroups
+                            .filter((_, i) => i !== index)
+                            .flatMap((group) => group?.services || [])
+                          const filteredOptions = options?.map((opt) => ({
+                            ...opt,
+                            disabled: selectedInOthers.includes(opt?.value),
+                          }))
+                          return filteredOptions
+                        })()}
+                        style={{ width: '220px' }}
+                        value={groupValues}
+                        onChange={(newValues) => {
+                          const current = form.getFieldValue('customServices')
+                          current[index] = {
+                            groupName: groupName,
+                            services: newValues,
+                          }
+                          form.setFieldsValue({ customServices: current })
+                        }}
+                        placeholder="Оберіть послуги"
+                        allowClear
+                        showSearch
+                      />
+                    </Form.Item>
+                    {!disabled && (
+                      <MinusCircleOutlined
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          right: '-5px',
+                          transform: 'translateY(-50%)',
+                          cursor: 'pointer',
+                          fontSize: '24px',
+                        }}
+                        onClick={() => remove(field.name)}
+                      />
+                    )}
+                  </div>
                 </Space>
               )
             })}

@@ -10,7 +10,11 @@ const NotFoundPage: React.FC = () => {
         <Result
           status="404"
           title={<h1 className={s.Title}>404</h1>}
-          subTitle={<p className={s.SubTitle}>Вибачте, сторінка, яку ви відвідали, не існує.</p>}
+          subTitle={
+            <p className={s.SubTitle}>
+              Вибачте, сторінка, яку ви відвідали, не існує.
+            </p>
+          }
           extra={
             <Button
               className={s.Button}

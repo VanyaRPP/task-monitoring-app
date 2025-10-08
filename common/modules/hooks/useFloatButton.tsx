@@ -5,7 +5,7 @@ import {
   SunFilled,
   EditOutlined,
   CheckOutlined,
-  CloseCircleOutlined, 
+  CloseCircleOutlined,
 } from '@ant-design/icons'
 import useTheme from '@modules/hooks/useTheme'
 import { FloatButtonItem } from '@utils/types'
@@ -52,7 +52,11 @@ export const useEditModelFloatButton = (
   const button = useMemo<FloatButtonItem>(
     () => ({
       key: `editmode-${uniqueKey}`,
-      icon: isEditMode ? <CheckOutlined /> : <EditOutlined style={{ fontSize: 18, color: '#9254de' }} />,
+      icon: isEditMode ? (
+        <CheckOutlined />
+      ) : (
+        <EditOutlined style={{ fontSize: 18, color: '#9254de' }} />
+      ),
       onClick: toggleEditMode,
       tooltip: isEditMode ? 'Exit EditMode' : 'Enter EditMode',
     }),
