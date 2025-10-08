@@ -1,0 +1,120 @@
+.print {
+  position: absolute;
+  top: -80px;
+  right: 48px;
+  user-select: none;
+  cursor: pointer;
+  font-size: 25px;
+}
+
+.invoiceContainer {
+  height: 100%;
+  margin-top: 2em;
+  margin-right: 1.5em;
+  margin-left: 1.5em;
+
+  .providerInfo,
+  .receiverInfo {
+    .label {
+      width: 110px;
+      font-size: 14px;
+    }
+    .preLabel {
+      vertical-align: top;
+      margin-top: 0;
+    }
+    .info_adres__bold {
+      font-weight: 700;
+    }
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+  }
+
+  .providerInvoice {
+    .datecellTitle {
+      font-size: 20px;
+      font-weight: 700;
+      text-align: center;
+      word-wrap: break-word;
+      word-break: break-word;
+      hyphens: auto;
+      line-height: 1.2;
+      max-width: 100%;
+    }
+    .datecellDate {
+      font-weight: 700;
+    }
+    padding: 6px 0px;
+    font-size: 14px;
+    display: flex;
+    font-family: Arial, Helvetica, sans-serif;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .transactionInfo {
+    width: 70%;
+    margin: 0 auto;
+    padding: 15px;
+    background-color: #f9f9f9;
+    font-family: Arial, Helvetica, sans-serif;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+  }
+
+  .transactionTitle {
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 14px;
+    text-align: left;
+    justify-content: center;
+    display: flex;
+  }
+
+  .transactionPartyTitle {
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 14px;
+    text-align: left;
+    justify-content: center;
+    display: flex;
+  }
+
+  .transactionDetails {
+    div {
+      margin-bottom: 8px;
+      font-size: 14px;
+      line-height: 1.4;
+
+      strong {
+        font-weight: 600;
+        margin-right: 8px;
+      }
+    }
+  }
+
+  .payTable {
+    .payFixed {
+      display: flex;
+    }
+    .payBold {
+      text-transform: lowercase;
+      font-weight: 700;
+      margin-left: 10px;
+    }
+    .payBoldSum {
+      font-weight: 800;
+      margin-left: 10px;
+    }
+    .lineInner {
+      margin-left: 10px;
+    }
+    padding: 10px 0px 0px 0px;
+    font-size: 16px;
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
