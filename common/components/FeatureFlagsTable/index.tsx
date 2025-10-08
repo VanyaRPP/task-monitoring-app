@@ -43,7 +43,7 @@ export const FeatureFlagsTable: React.FC = () => {
         loading={isLoading}
         pagination={{
           position: ['bottomCenter'],
-          }}
+        }}
         columns={[
           {
             title: 'Назва',

@@ -15,7 +15,7 @@ export default withAuthRedirect(() => {
         { title: 'Графік платежів', path: AppRoutes.PAYMENT_CHART },
       ]}
     >
-        <PaymentsChart />
+      <PaymentsChart />
     </MainLayout>
   )
 })

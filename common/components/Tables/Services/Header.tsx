@@ -23,7 +23,9 @@ export interface Props {
   currentService?: IService | null
   setCurrentService?: (service: IService | null) => void
   serviceActions?: { edit: boolean; preview: boolean }
-  setServiceActions: React.Dispatch<React.SetStateAction<{ edit: boolean; preview: boolean }>>
+  setServiceActions: React.Dispatch<
+    React.SetStateAction<{ edit: boolean; preview: boolean }>
+  >
   filter?: any
   setFilter?: (filters: any) => void
   services?: any
@@ -76,7 +78,6 @@ const ServicesHeader: React.FC<Props> = ({
             Послуги <SelectOutlined />
           </Button>
         </Space>
-
 
         {router.pathname === AppRoutes.SERVICE && (
           <Space direction="vertical" size={4} style={{ minWidth: 300 }}>

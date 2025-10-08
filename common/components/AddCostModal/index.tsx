@@ -1,4 +1,7 @@
-import { useCreateProfitMutation, useUpdateProfitMutation, } from '@common/api/profitsApi/profits.api'
+import {
+  useCreateProfitMutation,
+  useUpdateProfitMutation,
+} from '@common/api/profitsApi/profits.api'
 import { Profit } from '@common/api/profitsApi/profits.type'
 import AddCostForm from '@components/Forms/AddCostForm'
 import Modal from '@components/UI/ModalWindow'
@@ -11,10 +14,10 @@ import dayjs from 'dayjs'
 
 interface Props {
   closeModal: VoidFunction
-  currentProfit?: Profit 
+  currentProfit?: Profit
   profitActions?: {
-      preview?: boolean
-      edit?: boolean
+    preview?: boolean
+    edit?: boolean
   }
 }
 
@@ -31,7 +34,11 @@ enum CostType {
   CREDIT = 'credit',
 }
 
-const AddCostModal: FC<Props> = ({ closeModal, currentProfit, profitActions }) => {
+const AddCostModal: FC<Props> = ({
+  closeModal,
+  currentProfit,
+  profitActions,
+}) => {
   const { t } = useTranslation()
   const [form] = Form.useForm()
   const [type, setType] = useState<CostType>(CostType.DEBIT)
@@ -39,67 +46,80 @@ const AddCostModal: FC<Props> = ({ closeModal, currentProfit, profitActions }) =
   const [updateProfit] = useUpdateProfitMutation()
 
   const handleSubmit = async () => {
-  const formData: FormData = await form.validateFields()
-  const costData = {
-    domain: formData.domain,
-    date: dayjs(formData.date).toISOString(),
-    amount: formData.sum,
-    description: formData.description || '',
-    type: type,
-  }
+    const formData: FormData = await form.validateFields()
+    const costData = {
+      domain: formData.domain,
+      date: dayjs(formData.date).toISOString(),
+      amount: formData.sum,
+      description: formData.description || '',
+      type: type,
+    }
 
-  let response
-  if (isEdit && currentProfit?._id) {
-    response = await updateProfit({ id: currentProfit._id, body: costData })
-  } else {
-    response = await createProfit(costData)
-  }
+    let response
+    if (isEdit && currentProfit?._id) {
+      response = await updateProfit({ id: currentProfit._id, body: costData })
+    } else {
+      response = await createProfit(costData)
+    }
 
-  if ('data' in response) {
-    form.resetFields()
-    message.success(
-      isEdit
-        ? t('profitPage:modal.editSuccess') 
-        : t('profitPage:modal.successMessage')
-    )
-    closeModal()
-  } else {
-    message.error(t('profitPage:modal.errorMessage')) 
+    if ('data' in response) {
+      form.resetFields()
+      message.success(
+        isEdit
+          ? t('profitPage:modal.editSuccess')
+          : t('profitPage:modal.successMessage')
+      )
+      closeModal()
+    } else {
+      message.error(t('profitPage:modal.errorMessage'))
+    }
   }
-}
-
 
   const onTabChange = (key: string) => {
     setType(key === '1' ? CostType.DEBIT : CostType.CREDIT)
   }
-   
-   const isPreview = profitActions?.preview
-   const isEdit = profitActions?.edit
-  
+
+  const isPreview = profitActions?.preview
+  const isEdit = profitActions?.edit
+
   const tabItems: TabsProps['items'] = [
     {
       key: '1',
       label: t('profitPage:modal.addTitleDebit'),
-      children: <AddCostForm form={form} type="debit" disabled={isPreview} currentProfit={currentProfit} />,
+      children: (
+        <AddCostForm
+          form={form}
+          type="debit"
+          disabled={isPreview}
+          currentProfit={currentProfit}
+        />
+      ),
     },
     {
       key: '2',
       label: t('profitPage:modal.addTitleCredit'),
-      children: <AddCostForm form={form} type="credit" disabled={isPreview} currentProfit={currentProfit} />,
+      children: (
+        <AddCostForm
+          form={form}
+          type="credit"
+          disabled={isPreview}
+          currentProfit={currentProfit}
+        />
+      ),
     },
   ]
 
   useEffect(() => {
-      if (currentProfit) {
-        form.setFieldsValue({
-          domain: currentProfit.domain,
-          date: dayjs(currentProfit.date),
-          sum: currentProfit.amount,
-          description: currentProfit.description,
-        })
-        setType(currentProfit.type as CostType)
-      }
-    }, [currentProfit, form])
+    if (currentProfit) {
+      form.setFieldsValue({
+        domain: currentProfit.domain,
+        date: dayjs(currentProfit.date),
+        sum: currentProfit.amount,
+        description: currentProfit.description,
+      })
+      setType(currentProfit.type as CostType)
+    }
+  }, [currentProfit, form])
 
   return (
     <Modal
@@ -121,14 +141,18 @@ const AddCostModal: FC<Props> = ({ closeModal, currentProfit, profitActions }) =
         isPreview
           ? undefined
           : isEdit
-          ? t('profitPage:modal.editOkText') 
-          : t('profitPage:modal.okText')   
+          ? t('profitPage:modal.editOkText')
+          : t('profitPage:modal.okText')
       }
-      cancelText={isPreview ? t('profitPage:modal.closeText') : t('profitPage:modal.cancelText')}
+      cancelText={
+        isPreview
+          ? t('profitPage:modal.closeText')
+          : t('profitPage:modal.cancelText')
+      }
       okButtonProps={{ style: { ...(isPreview && { display: 'none' }) } }}
       confirmLoading={isLoading}
     >
-      {(isPreview || isEdit) ? (
+      {isPreview || isEdit ? (
         <AddCostForm
           form={form}
           type={type}

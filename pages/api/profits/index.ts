@@ -1,4 +1,6 @@
-import ProfitService, { CreateProfitInput } from '@common/services/profitService/profit.service'
+import ProfitService, {
+  CreateProfitInput,
+} from '@common/services/profitService/profit.service'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCurrentUser } from '@utils/getCurrentUser'
 
@@ -149,7 +151,7 @@ export default async function handler(
           invoiceNumber: invoiceNumber?.trim(),
           payment,
         }
-        
+
         try {
           const record = await ProfitService.create(profitDocument)
           return res.status(200).json({ success: true, data: record })

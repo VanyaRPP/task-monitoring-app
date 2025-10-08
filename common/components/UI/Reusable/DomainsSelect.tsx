@@ -11,7 +11,12 @@ export interface DomainsSelectProps {
   currentProfit?: any
 }
 
-const DomainsSelect: React.FC<DomainsSelectProps> = ({ form, edit, disabled, currentProfit }) => {
+const DomainsSelect: React.FC<DomainsSelectProps> = ({
+  form,
+  edit,
+  disabled,
+  currentProfit,
+}) => {
   const [domains, setDomains] = useState([])
   const {
     data: fetchedDomains = [],
@@ -42,7 +47,7 @@ const DomainsSelect: React.FC<DomainsSelectProps> = ({ form, edit, disabled, cur
     <Form.Item
       name="domain"
       label="Надавач послуг"
-      rules={(!disabled && !currentProfit) ? validateField('required') : []}
+      rules={!disabled && !currentProfit ? validateField('required') : []}
     >
       <Select
         options={options}

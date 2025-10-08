@@ -75,17 +75,28 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                   </pre>
                 </div>
               </div>
-              <div className={styles.approvalSection}><br /><br /><hr /></div>
-              <div className={styles.approvalSection}><br /><br /><hr /></div>
+              <div className={styles.approvalSection}>
+                <br />
+                <br />
+                <hr />
+              </div>
+              <div className={styles.approvalSection}>
+                <br />
+                <br />
+                <hr />
+              </div>
             </div>
           </div>
 
           <div className={styles.titleSection}>
-            <h1><b>АКТ надання послуг</b></h1>
+            <h1>
+              <b>АКТ надання послуг</b>
+            </h1>
             <p>
               <b>
                 № {payment?.invoiceNumber} від{' '}
-                {dayjs(payment?.invoiceCreationDate)?.format?.('DD.MM.YYYY')} року.
+                {dayjs(payment?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}{' '}
+                року.
               </b>
             </p>
             <br />
@@ -95,10 +106,14 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
           <div className={styles.contentSection}>
             <p>
               Ми, що нижче підписалися, представник Замовника{' '}
-              {payment.reciever.description?.trim().replace(/(:\s)/g, ':\u00A0')},
-              з одного боку, і представник Виконавця{' '}
-              {payment.provider.description?.trim().replace(/(:\s)/g, ':\u00A0')},
-              з іншого боку, склали цей акт про те, що на підставі договору,
+              {payment.reciever.description
+                ?.trim()
+                .replace(/(:\s)/g, ':\u00A0')}
+              , з одного боку, і представник Виконавця{' '}
+              {payment.provider.description
+                ?.trim()
+                .replace(/(:\s)/g, ':\u00A0')}
+              , з іншого боку, склали цей акт про те, що на підставі договору,
               Виконавцем були виконані наступні роботи (надані такі послуги):
             </p>
           </div>
@@ -119,8 +134,8 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 гривень 00 копійок, загальна вартість робіт (послуг) із ПДВ{' '}
                 {totalSum.toFixed(0)} гривень {totalFractionSum} копійок.
                 <br />
-                Замовник претензій по об’єму, якості та строкам виконання
-                робіт (надання послуг) не має.
+                Замовник претензій по об’єму, якості та строкам виконання робіт
+                (надання послуг) не має.
               </div>
               <br />
             </div>
@@ -134,7 +149,9 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                   <br />
                   <hr />
                   <br />
-                  <b>{new Date(payment.invoiceCreationDate).toLocaleDateString()}</b>
+                  <b>
+                    {new Date(payment.invoiceCreationDate).toLocaleDateString()}
+                  </b>
                   <br />
                   <pre>{payment.provider.description?.trim()}</pre>
                 </div>
@@ -146,7 +163,9 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                   <br />
                   <hr />
                   <br />
-                  <b>{new Date(payment.invoiceCreationDate).toLocaleDateString()}</b>
+                  <b>
+                    {new Date(payment.invoiceCreationDate).toLocaleDateString()}
+                  </b>
                   <br />
                   <pre>{payment.reciever.description?.trim()}</pre>
                 </div>

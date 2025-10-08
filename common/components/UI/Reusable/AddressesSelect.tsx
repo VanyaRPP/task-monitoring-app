@@ -56,7 +56,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
         } else {
           form.setFieldsValue({ street: undefined })
           onStreetHasServiceChange?.(false)
-             }
+        }
       }
     } else {
       form.setFieldsValue({ street: undefined })

@@ -121,13 +121,13 @@ export async function generateHtmlFromThemplate(
               <div class="detailed-list__key">Одержувач</div>
               <div class="detailed-list__value pos">
                 ${paymentData?.reciever?.description.replace(
-    /\n/g,
-    '<br />'
-  )} <br />
+                  /\n/g,
+                  '<br />'
+                )} <br />
                 ${paymentData?.reciever?.companyName} <br />
                 ${paymentData?.reciever?.adminEmails
-      ?.map((email) => `<div>${email}</div><br />`)
-      .join('')}
+                  ?.map((email) => `<div>${email}</div><br />`)
+                  .join('')}
               </div>
             </div>
           </div>
@@ -135,11 +135,11 @@ export async function generateHtmlFromThemplate(
           <div class="invoice-title">
             <h1>INVOICE № INV-${paymentData.invoiceNumber}</h1>
             <b>Від ${dayjs(paymentData?.invoiceCreationDate)?.format?.(
-        'DD.MM.YYYY'
-      )} року.</b>
+              'DD.MM.YYYY'
+            )} року.</b>
             <p>Підлягає сплаті до ${dayjs(paymentData?.invoiceCreationDate)
-      .add(5, 'd')
-      .format('DD.MM.YYYY')} року</p>
+              .add(5, 'd')
+              .format('DD.MM.YYYY')} року</p>
           </div>
         </div>
         <table>
@@ -157,10 +157,12 @@ export async function generateHtmlFromThemplate(
           </tbody>
         </table>
         <div class="summary">
-          <div>Загальна сума до оплати: <b>${paymentData?.generalSum || paymentData?.debit
-    } грн</b></div>
-          <div>${paymentData?.provider?.description?.split('\n')?.[0] || ''
-    }&nbsp; ________________</div>
+          <div>Загальна сума до оплати: <b>${
+            paymentData?.generalSum || paymentData?.debit
+          } грн</b></div>
+          <div>${
+            paymentData?.provider?.description?.split('\n')?.[0] || ''
+          }&nbsp; ________________</div>
         </div>
       </div>
     </body>
@@ -168,7 +170,8 @@ export async function generateHtmlFromThemplate(
   `
 }
 
-{/* <div class="note">   // deleted text
+{
+  /* <div class="note">   // deleted text
   <div class="note__title">
     <p><b>Примітка:</b></p>
   </div>
@@ -180,7 +183,8 @@ export async function generateHtmlFromThemplate(
       односторонньму порядку компанією-постачальником.
     </p>
   </div>
-</div> */}
+</div> */
+}
 
 async function generateDataForTable(dataToMap, paymentData) {
   const promises = dataToMap

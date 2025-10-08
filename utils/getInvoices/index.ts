@@ -413,7 +413,6 @@ export const getGarbageCollectorInvoice = ({
     !isNaN(service.garbageCollectorPrice) &&
     company?.garbageCollector
   ) {
-    
     const price = service.garbageCollectorPrice * (company?.rentPart / 100)
 
     return {

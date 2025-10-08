@@ -51,18 +51,18 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
     updated.splice(index, 1)
     form.setFieldsValue({ customServices: updated })
   }
-  const dashIfEmpty = (v: any) => (v === 0 || v ? v : '-');
+  const dashIfEmpty = (v: any) => (v === 0 || v ? v : '-')
   return (
     <div>
       {!disabled && !isServiceForm && (
         <Dropdown
-            menu={{
-              items: dropdownOptions.map((option) => ({
-                key: option.value,
-                label: option.label,
-                onClick: () => handleAddService(option),
-              })),
-            }}
+          menu={{
+            items: dropdownOptions.map((option) => ({
+              key: option.value,
+              label: option.label,
+              onClick: () => handleAddService(option),
+            })),
+          }}
           trigger={['click']}
         >
           <Button
@@ -86,7 +86,7 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
                   style={{
                     width: '100%',
                     display: 'grid',
-                    gridTemplateColumns: disabled ? '1fr' : '1fr auto', 
+                    gridTemplateColumns: disabled ? '1fr' : '1fr auto',
                     columnGap: 8,
                     marginBottom: 6,
                     marginTop: 6,
@@ -97,15 +97,17 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
                     name={[field.name, 'price']}
                     label={service?.label}
                     rules={[{ required: true, message: 'Введіть значення' }]}
-                    style={{ width: '100%' }} 
+                    style={{ width: '100%' }}
                     getValueProps={(v) =>
                       disabled ? { value: dashIfEmpty(v) } : { value: v }
-                    }              
+                    }
                   >
                     <InputNumber
                       parser={inputNumberParser}
                       placeholder="Введіть значення"
-                      style={{ width: disabled ? '100%' : (!isServiceForm ? 440 : 470) }} 
+                      style={{
+                        width: disabled ? '100%' : !isServiceForm ? 440 : 470,
+                      }}
                       disabled={disabled}
                     />
                   </Form.Item>
@@ -119,7 +121,7 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
                         data-testid={`remove-${service?.label}`}
                         onClick={() => handleRemoveService(index)}
                         style={{ marginTop: 6 }}
-                      />   
+                      />
                     )}
                 </Space>
               )

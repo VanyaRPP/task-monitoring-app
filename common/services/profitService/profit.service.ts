@@ -239,7 +239,7 @@ class ProfitService {
   }
 
   static async create(data: CreateProfitInput) {
-    try {      
+    try {
       const profit = await ProfitModel.create(data)
       return profit
     } catch (error) {

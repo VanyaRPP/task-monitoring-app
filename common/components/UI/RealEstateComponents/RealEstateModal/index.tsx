@@ -39,19 +39,25 @@ const RealEstateModal: FC<Props> = ({
     { skip: !domainId && !currentRealEstate?.domain?._id }
   )
 
-  const filteredServicesPrice = (customServices) => { // TODO: delete after custom services refactor
-    const updatedCustomServices = customServices?.map(service => {
+  const filteredServicesPrice = (customServices) => {
+    // TODO: delete after custom services refactor
+    const updatedCustomServices = customServices?.map((service) => {
       let price = null
 
       if (service.fieldName === 'rentPrice') {
-        price = currentRealEstate?.servicePricePerMeter 
-        ?? currentRealEstate?.customServices?.find(service => service.fieldName === 'rentPrice')?.price 
-        ?? null
-      }
-      else if (service.fieldName === 'cleaningPrice') {
-        price = currentRealEstate?.cleaning 
-        ?? currentRealEstate?.customServices?.find(service => service.fieldName === 'cleaningPrice')?.price 
-        ?? null
+        price =
+          currentRealEstate?.servicePricePerMeter ??
+          currentRealEstate?.customServices?.find(
+            (service) => service.fieldName === 'rentPrice'
+          )?.price ??
+          null
+      } else if (service.fieldName === 'cleaningPrice') {
+        price =
+          currentRealEstate?.cleaning ??
+          currentRealEstate?.customServices?.find(
+            (service) => service.fieldName === 'cleaningPrice'
+          )?.price ??
+          null
       } else {
         price = currentRealEstate?.[service.fieldName] ?? null
       }
@@ -97,16 +103,24 @@ const RealEstateModal: FC<Props> = ({
       discount: currentRealEstate?.discount || 0,
       cleaning: currentRealEstate?.cleaning || 0,
       services: currentRealEstate?.services || [],
-      customServices: (currentRealEstate?.customServices?.length > 0 
-        ? currentRealEstate.customServices 
-        : filteredCustomServices) || [],
+      customServices:
+        (currentRealEstate?.customServices?.length > 0
+          ? currentRealEstate.customServices
+          : filteredCustomServices) || [],
     }
     const currentCustomServices = form.getFieldValue('customServices')
 
-  if (!currentCustomServices || currentCustomServices.length === 0) {
-    form.setFieldsValue(initialValues)
-  }
-  }, [currentRealEstate, form, customServices, filteredCustomServices, domainId, chosenRealEstate])
+    if (!currentCustomServices || currentCustomServices.length === 0) {
+      form.setFieldsValue(initialValues)
+    }
+  }, [
+    currentRealEstate,
+    form,
+    customServices,
+    filteredCustomServices,
+    domainId,
+    chosenRealEstate,
+  ])
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
@@ -126,9 +140,8 @@ const RealEstateModal: FC<Props> = ({
         formData.discount > 0 ? formData.discount * -1 : formData.discount,
       services: formData.services,
       servicePricePerMeter:
-        formData.customServices?.find(
-          (c) => c.fieldName === 'rentPrice'
-        )?.price ?? formData.servicePricePerMeter,
+        formData.customServices?.find((c) => c.fieldName === 'rentPrice')
+          ?.price ?? formData.servicePricePerMeter,
       rentPart:
         formData.customServices?.find(
           (custom) => custom.fieldName === 'rentPart'

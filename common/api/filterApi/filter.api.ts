@@ -74,7 +74,7 @@ export const filterApi = createApi({
     }),
     getRealEstateFilters: builder.query<
       IPaymentFilterResponse,
-      { streets?: any; domains?: any, archived?: boolean }
+      { streets?: any; domains?: any; archived?: boolean }
     >({
       query: ({ streets, domains, archived }) => {
         return {

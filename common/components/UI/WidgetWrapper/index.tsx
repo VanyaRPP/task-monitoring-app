@@ -1,4 +1,3 @@
-
 import React, { FC, ReactNode } from 'react'
 import { useDynamicHeight } from '@modules/hooks/useDynamicHeight '
 import s from './style.module.scss'
@@ -9,8 +8,8 @@ interface WidgetWrapperProps {
   marginY: number
   padding?: number
   onHeightChange: (id: string, h: number) => void
-  children: ReactNode 
-  isEditMode 
+  children: ReactNode
+  isEditMode
 }
 
 export const WidgetWrapper: FC<WidgetWrapperProps> = ({

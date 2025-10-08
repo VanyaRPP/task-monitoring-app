@@ -9,7 +9,12 @@ interface Props {
   labels: Record<WidgetKey, string>
 }
 
-const WidgetVisibilityMenu: React.FC<Props> = ({ hidden, onChange, available, labels }) => {
+const WidgetVisibilityMenu: React.FC<Props> = ({
+  hidden,
+  onChange,
+  available,
+  labels,
+}) => {
   const { token } = theme.useToken()
 
   return (
