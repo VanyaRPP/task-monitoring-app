@@ -10,7 +10,7 @@ export const DomainFilterTags: React.FC<{
   return (
     <FilterTags
       title={
-        <Typography.Text style={{ width: '8em' }}>
+        <Typography.Text>
           Надавачі послуг:
         </Typography.Text>
       }

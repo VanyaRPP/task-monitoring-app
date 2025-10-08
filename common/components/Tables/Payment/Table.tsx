@@ -519,7 +519,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
             style={{ padding: 0 }}
             type="link"
             onClick={() => onViewClick(payment)}
-            disabled={payment.type === Operations.Credit}
+            // disabled={payment.type === Operations.Credit}
           >
             <EyeOutlined />
           </Button>
