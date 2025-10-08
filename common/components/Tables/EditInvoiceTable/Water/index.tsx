@@ -12,7 +12,6 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   form,
   name: _name,
   editable,
-  disabled,
 }) => {
   const { service, prevPayment, payment } = usePaymentContext()
   const name = useMemo(() => toArray<string>(_name), [_name])
@@ -23,7 +22,6 @@ export const Name: React.FC<InvoiceComponentProps> = ({
       ?.lastAmount ??
     prevPayment?.invoice?.find((invoice) => invoice.type === 'waterPrice')
       ?.lastAmount
-
   return (
     <Space
       direction="horizontal"
@@ -46,8 +44,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
                 )
                 form.setFieldValue(
                   ['invoice', ...name, 'lastAmount'],
-                  waterAmount ??
-                    Form.useWatch(['invoice', ...name, 'lastAmount'], form)
+                  waterAmount ?? lastAmount
                 )
               }}
               icon={<ReloadOutlined />}

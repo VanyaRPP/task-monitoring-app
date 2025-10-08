@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
-import { useRouter } from 'next/router' 
+import { useRouter } from 'next/router'
 import { useFullScreenFloatButton } from '@modules/hooks/useFloatButton'
 import { addButton, removeButton } from '@modules/store/floatButtonSlice'
 import { FullscreenExitOutlined, FullscreenOutlined } from '@ant-design/icons'
@@ -12,7 +12,10 @@ interface FullScreenWrapperProps {
   unicKey?: string
 }
 
-const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({ children, unicKey }) => {
+const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({
+  children,
+  unicKey,
+}) => {
   const dispatch = useDispatch()
   const { pathname } = useRouter()
   const isDashboardRoute =
@@ -24,14 +27,14 @@ const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({ children, unicKey
     useFullScreenFloatButton(unicKey || 'default')
 
   useEffect(() => {
-  if (!allowFullscreen) return
+    if (!allowFullscreen) return
 
-  dispatch(addButton(floatButton))
+    dispatch(addButton(floatButton))
 
-  return () => {
-    dispatch(removeButton(floatButton.key))
-  }
-}, [dispatch, floatButton, allowFullscreen])
+    return () => {
+      dispatch(removeButton(floatButton.key))
+    }
+  }, [dispatch, floatButton, allowFullscreen])
 
   useEffect(() => {
     if (!allowFullscreen) return
@@ -59,7 +62,9 @@ const FullScreenWrapper: React.FC<FullScreenWrapperProps> = ({ children, unicKey
           className={styles.toggleButton}
           onClick={toggleFullScreen}
           type="default"
-          icon={isFullScreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+          icon={
+            isFullScreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />
+          }
         />
       )}
 

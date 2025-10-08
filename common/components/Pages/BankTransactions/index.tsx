@@ -45,13 +45,15 @@ const BankTransactions = () => {
   }
 
   return (
-      <Space
-        direction="vertical"
-        style={{ width: '100%', position: 'relative' }}
-        size="middle"
-      >
-        {isLoading || tabList.length === 0 ? (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 100 }}>
+    <Space
+      direction="vertical"
+      style={{ width: '100%', position: 'relative' }}
+      size="middle"
+    >
+      {isLoading || tabList.length === 0 ? (
+        <div
+          style={{ display: 'flex', justifyContent: 'center', marginTop: 100 }}
+        >
           <Spin size="large" />
         </div>
       ) : isError ? (
@@ -71,7 +73,7 @@ const BankTransactions = () => {
           {activeDomainId ? contentList[activeDomainId] : null}
         </Card>
       )}
-      </Space>
+    </Space>
   )
 }
 

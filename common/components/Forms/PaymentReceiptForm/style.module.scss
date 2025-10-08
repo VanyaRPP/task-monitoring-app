@@ -1,0 +1,184 @@
+.print {
+  position: absolute;
+  top: -80px;
+  right: 48px;
+  user-select: none;
+  cursor: pointer;
+  font-size: 25px;
+  color: var(--textColor);
+  transition: color 0.5s;
+
+  &:hover {
+    color: var(--primaryColorHover);
+  }
+}
+
+.invoiceContainer {
+  height: 100%;
+  margin-top: 2em;
+  margin-right: 1.5em;
+  margin-left: 1.5em;
+  padding: 20px;
+
+  .providerInfo,
+  .receiverInfo {
+    .label {
+      width: 110px;
+      font-size: 14px;
+    }
+    .preLabel {
+      vertical-align: top;
+      margin-top: 0;
+    }
+    .info_adres__bold {
+      font-weight: 700;
+    }
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+  }
+
+  .providerInvoice {
+    .datecellTitle {
+      font-size: 20px;
+      font-weight: 700;
+      text-align: center;
+      word-wrap: break-word;
+      word-break: break-word;
+      hyphens: auto;
+      line-height: 1.2;
+      max-width: 100%;
+      color: var(--textColor);
+      transition: color 0.5s;
+    }
+    .datecellDate {
+      font-weight: 700;
+      color: var(--textColor);
+      transition: color 0.5s;
+    }
+    padding: 6px 0px;
+    font-size: 14px;
+    display: flex;
+    font-family: Arial, Helvetica, sans-serif;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .transactionInfo {
+    width: 70%;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    box-sizing: border-box;
+  }
+
+  .transactionTitle {
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 14px;
+    text-align: left;
+    justify-content: center;
+    display: flex;
+    color: var(--textColor);
+    transition: color 0.5s;
+  }
+
+  .transactionPartyTitle {
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 14px;
+    text-align: left;
+    justify-content: center;
+    display: flex;
+    color: var(--textColor);
+    transition: color 0.5s;
+  }
+
+  .transactionDetails {
+    div {
+      margin-bottom: 8px;
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--textColor);
+      transition: color 0.5s, background-color 0.5s, border-color 0.5s;
+      padding: 8px 12px;
+      background-color: var(--backgroundColorPrimary);
+      border: 1px solid rgba(136, 136, 136, 0.2);
+      border-radius: 4px;
+
+      strong {
+        font-weight: 600;
+        margin-right: 8px;
+        color: var(--textColor);
+      }
+    }
+  }
+
+  .payerDetails {
+    div {
+      margin-bottom: 0;
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--textColor);
+      transition: color 0.5s, background-color 0.5s, border-color 0.5s;
+      padding: 8px 12px;
+      background-color: var(--backgroundColorPrimary);
+      border: 1px solid rgba(136, 136, 136, 0.2);
+      border-bottom: none;
+
+      &:first-child {
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+      }
+
+      &:last-child {
+        border-bottom: 1px solid rgba(136, 136, 136, 0.2);
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+      }
+
+      strong {
+        font-weight: 600;
+        margin-right: 8px;
+        color: var(--textColor);
+      }
+    }
+  }
+
+  .payTable {
+    .payFixed {
+      display: flex;
+      color: var(--textColor);
+      transition: color 0.5s, background-color 0.5s, border-color 0.5s;
+      padding: 12px 16px;
+      background-color: var(--backgroundColorPrimary);
+      border: 2px solid var(--primaryColor);
+      border-radius: 6px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+    .payBold {
+      text-transform: lowercase;
+      font-weight: 700;
+      margin-left: 10px;
+      color: var(--textColor);
+      transition: color 0.5s;
+    }
+    .payBoldSum {
+      font-weight: 800;
+      margin-left: 10px;
+      color: var(--textColor);
+      transition: color 0.5s;
+    }
+    .lineInner {
+      margin-left: 10px;
+      color: var(--textColor);
+      transition: color 0.5s;
+    }
+    padding: 10px 0px 0px 0px;
+    font-size: 16px;
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

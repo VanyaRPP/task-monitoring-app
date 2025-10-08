@@ -11,10 +11,10 @@ export interface Profit {
   createdAt?: string
   updatedAt?: string
   createdBy?: {
-  _id?: string
-  name: string
-  email: string
-}
+    _id?: string
+    name: string
+    email: string
+  }
 }
 
 export interface Meta {

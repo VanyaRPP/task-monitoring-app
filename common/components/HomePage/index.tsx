@@ -78,10 +78,8 @@ const HomePage: React.FC = () => {
               <CardPage />
             </div>
           </div>
-
         </div>
       </div>
-
     </>
   )
 }

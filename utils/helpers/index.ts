@@ -18,7 +18,6 @@ import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Operations } from '@utils/constants'
 import { useState, useEffect } from 'react'
 
-
 export const toFirstUpperCase = (text: string) => {
   return text ? text[0].toUpperCase() + text.slice(1) : ''
 }
@@ -635,7 +634,7 @@ export async function isDomainAdmin(user?: IUser): Promise<boolean> {
     const domain = await RealEstate.findOne({ adminEmails: user.email })
     return !!domain
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return false
   }
 }
@@ -720,7 +719,9 @@ export function usePermissions(user?: IUser): IPermissions | null {
   return permissions
 }
 
-export const getDebtorTooltipColor = (debtor: { totalDebt: number}): string => {
+export const getDebtorTooltipColor = (debtor: {
+  totalDebt: number
+}): string => {
   if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
     return 'gray'
   } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
@@ -730,4 +731,3 @@ export const getDebtorTooltipColor = (debtor: { totalDebt: number}): string => {
   }
   return undefined
 }
-

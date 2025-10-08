@@ -44,45 +44,66 @@ const AddServiceForm: React.FC<Props> = ({
   const filteredServicesPrice = (customServices) => {
     return customServices?.map((service) => {
       let price = null
-  
+
       switch (service.fieldName) {
         case 'electricityPrice':
-          price = currentService?.electricityPrice
-          ?? currentService?.customServices?.find(service => service.fieldName === 'electricityPrice')?.price 
-          ?? 0
+          price =
+            currentService?.electricityPrice ??
+            currentService?.customServices?.find(
+              (service) => service.fieldName === 'electricityPrice'
+            )?.price ??
+            0
           break
         case 'inflicionPrice':
-          price = currentService?.inflicionPrice
-          ?? currentService?.customServices?.find(service => service.fieldName === 'inflicionPrice')?.price 
-          ?? 0
+          price =
+            currentService?.inflicionPrice ??
+            currentService?.customServices?.find(
+              (service) => service.fieldName === 'inflicionPrice'
+            )?.price ??
+            0
           break
         case 'rentPrice':
-          price = currentService?.rentPrice
-          ?? currentService?.customServices?.find(service => service.fieldName === 'rentPrice')?.price 
-          ?? 0
+          price =
+            currentService?.rentPrice ??
+            currentService?.customServices?.find(
+              (service) => service.fieldName === 'rentPrice'
+            )?.price ??
+            0
           break
         case 'waterPrice':
-          price = currentService?.waterPrice
-          ?? currentService?.customServices?.find(service => service.fieldName === 'waterPrice')?.price 
-          ?? 0
+          price =
+            currentService?.waterPrice ??
+            currentService?.customServices?.find(
+              (service) => service.fieldName === 'waterPrice'
+            )?.price ??
+            0
           break
         case 'waterPriceTotal':
-          price = currentService?.waterPriceTotal
-          ?? currentService?.customServices?.find(service => service.fieldName === 'waterPriceTotal')?.price 
-          ?? 0
+          price =
+            currentService?.waterPriceTotal ??
+            currentService?.customServices?.find(
+              (service) => service.fieldName === 'waterPriceTotal'
+            )?.price ??
+            0
           break
         case 'garbageCollectorPrice':
-          price = currentService?.garbageCollectorPrice
-          ?? currentService?.customServices?.find(service => service.fieldName === 'garbageCollectorPrice')?.price 
-          ?? 0
+          price =
+            currentService?.garbageCollectorPrice ??
+            currentService?.customServices?.find(
+              (service) => service.fieldName === 'garbageCollectorPrice'
+            )?.price ??
+            0
           break
         default:
-          price = currentService?.[service?.fieldName]
-          ?? currentService?.customServices?.find(service => service?.fieldName === service?.fieldName)?.price 
-          ?? 0
+          price =
+            currentService?.[service?.fieldName] ??
+            currentService?.customServices?.find(
+              (service) => service?.fieldName === service?.fieldName
+            )?.price ??
+            0
           break
       }
-  
+
       return {
         ...service,
         price,
@@ -131,9 +152,9 @@ const AddServiceForm: React.FC<Props> = ({
         previousMonth?.garbageCollectorPrice ??
         0,
       customServices:
-      (currentService?.customServices?.length > 0 
-        ? currentService.customServices 
-        : filteredCustomServices) || [],
+        (currentService?.customServices?.length > 0
+          ? currentService.customServices
+          : filteredCustomServices) || [],
       losses: currentService?.losses ?? 0,
     })
   }, [form, currentService, previousMonth, initialCustomServices])
@@ -165,7 +186,7 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item>
-        <CustomServicesCard form={form} isServiceForm={true}/> 
+        <CustomServicesCard form={form} isServiceForm={true} />
         {/* { !(initialCustomServices ?? []).some(item => item.fieldName === 'rentPrice') && // TODO: customServices
         <Form.Item
           name="rentPrice"

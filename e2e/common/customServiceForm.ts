@@ -5,7 +5,9 @@ export const customServiceForm = (page: Page) => {
     async openEditModalForCompany(companyName: string) {
       await expect(page).toHaveURL(/\/real-estate/)
       await page.waitForLoadState('networkidle')
-      await expect(page.locator('.ant-table-wrapper')).toBeVisible({ timeout: 10000 })
+      await expect(page.locator('.ant-table-wrapper')).toBeVisible({
+        timeout: 10000,
+      })
 
       const row = page.locator('tr', { hasText: companyName })
       await expect(row).toBeVisible()
@@ -23,7 +25,9 @@ export const customServiceForm = (page: Page) => {
     },
 
     async addCustomService(serviceName: string) {
-      const addButton = page.getByRole('button', { name: /Індивідуальні послуги/ })
+      const addButton = page.getByRole('button', {
+        name: /Індивідуальні послуги/,
+      })
       await expect(addButton).toBeVisible()
       await addButton.click()
 
@@ -31,12 +35,16 @@ export const customServiceForm = (page: Page) => {
       await expect(serviceItem).toBeVisible()
       await serviceItem.click()
 
-      const input = page.getByRole('spinbutton', { name: new RegExp(serviceName, 'i') })
+      const input = page.getByRole('spinbutton', {
+        name: new RegExp(serviceName, 'i'),
+      })
       await expect(input).toBeVisible()
     },
 
     async editCustomService(serviceName: string, newValue: string) {
-      const input = page.getByRole('spinbutton', { name: new RegExp(serviceName, 'i') })
+      const input = page.getByRole('spinbutton', {
+        name: new RegExp(serviceName, 'i'),
+      })
       await expect(input).toBeVisible()
       await input.fill(newValue)
       await expect(input).toHaveValue(newValue)
@@ -49,11 +57,11 @@ export const customServiceForm = (page: Page) => {
       const deleteButton = page.getByTestId(`remove-${serviceName}`)
       const btnCount = await deleteButton.count()
 
-    if (btnCount > 0) {
-      await expect(deleteButton).toBeVisible({ timeout: 10000 })
-      await deleteButton.click()
-      await expect(formItem).toHaveCount(0)
-    }
-  }
+      if (btnCount > 0) {
+        await expect(deleteButton).toBeVisible({ timeout: 10000 })
+        await deleteButton.click()
+        await expect(formItem).toHaveCount(0)
+      }
+    },
   }
 }

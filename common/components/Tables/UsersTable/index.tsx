@@ -28,8 +28,16 @@ export const UsersTable: React.FC<UsersTableProps> = ({}) => {
     ]
   }, [])
 
-  return <Table dataSource={users} columns={columns} pagination={{
-    position: ['bottomCenter'],}} scroll={{ x: 800 }} />
+  return (
+    <Table
+      dataSource={users}
+      columns={columns}
+      pagination={{
+        position: ['bottomCenter'],
+      }}
+      scroll={{ x: 800 }}
+    />
+  )
 }
 
 export const EditUserButton: React.FC<{ user?: IUser['_id'] }> = ({

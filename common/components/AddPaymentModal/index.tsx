@@ -25,10 +25,11 @@ import {
   useEffect,
   useMemo,
   useState,
-  useRef
+  useRef,
 } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
+import PaymentReceiptForm from '../Forms/PaymentReceiptForm'
 import ReceiptForm from '../Forms/ReceiptForm'
 import serviceFilter from './serviceFilter'
 import s from './style.module.scss'
@@ -91,7 +92,7 @@ const AddPaymentModal: FC<Props> = ({
       firstRunRef.current = false
       return
     }
-    form.resetFields(['company'])        
+    form.resetFields(['company'])
   }, [domainId, form])
 
   const { company, service, payment, prevService, prevPayment } =
@@ -155,22 +156,33 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
-  if (!preview || paymentData?.type === Operations.Debit) {
+  if (
+    !preview ||
+    paymentData?.type === Operations.Debit ||
+    paymentData?.type === Operations.Credit
+  ) {
     items.push({
       key: '2',
       label: 'Перегляд',
       disabled: !shouldTabsEnabled,
-      children: (
-        <GroupedReceiptForm
-          currPayment={currPayment}
-          paymentData={paymentData}
-          paymentActions={paymentActions}
-        />
-      ),
+      children:
+        paymentData?.type === Operations.Credit ? (
+          <PaymentReceiptForm
+            currPayment={currPayment}
+            paymentData={paymentData}
+            paymentActions={paymentActions}
+          />
+        ) : (
+          <GroupedReceiptForm
+            currPayment={currPayment}
+            paymentData={paymentData}
+            paymentActions={paymentActions}
+          />
+        ),
     })
   }
 
-  if (payment) {
+  if (payment && paymentData?.type !== Operations.Credit) {
     items.push({
       key: '3',
       label: 'Акт',
@@ -204,7 +216,6 @@ const AddPaymentModal: FC<Props> = ({
     setSaved(true)
 
     const values = await form.validateFields()
-
 
     if (values.operation === Operations.Credit) {
       handleSubmit()
@@ -316,9 +327,10 @@ const AddPaymentModal: FC<Props> = ({
   )
 }
 
-function getActiveTab(paymentData, edit) {
+function getActiveTab(paymentData, preview) {
+  if (preview) return '2'
   if (paymentData?.type === Operations.Credit) return '1'
-  return edit ? '2' : '1'
+  return '1'
 }
 
 export default AddPaymentModal

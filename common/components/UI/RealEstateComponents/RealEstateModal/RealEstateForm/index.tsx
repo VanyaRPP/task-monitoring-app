@@ -163,7 +163,7 @@ const RealEstateForm: FC<Props> = ({
         form={form}
         disabled={!editable}
         allCustomServices={customServices}
-      /> 
+      />
       {/* { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') && // TODO: customServices */}
       {/* <Form.Item
         name="servicePricePerMeter"
