@@ -193,9 +193,9 @@ const Dashboard: React.FC = () => {
   }, [])
 
   const renderedLayout = useMemo(
-    () => layout.filter((item) => visibleWidgets.includes(item.i as WidgetKey)),
-    [layout, visibleWidgets]
-  )
+      () => layout.filter((item) => (visibleWidgets as readonly string[]).includes(item.i)),
+      [layout, visibleWidgets]
+    )
 
   return (
     <div className={s.wrapper}>
