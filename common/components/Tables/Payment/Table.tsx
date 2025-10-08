@@ -1,4 +1,8 @@
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+} from '@ant-design/icons'
 import {
   Alert,
   Badge,

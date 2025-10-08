@@ -341,6 +341,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   }
 
   return (
+<<<<<<< HEAD
     <Collapse
       className={styles.customCollapse}
       bordered={false}
@@ -352,6 +353,42 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             className={styles.collapseButton}
           />
         </Tooltip>
+=======
+    <>
+      <Flex justify="space-between" align="center" style={{ margin: 0 }}>
+        <Button
+          type="link"
+          onClick={() => router.push(AppRoutes.PAYMENT)}
+        >
+          Платежі
+          <SelectOutlined />
+        </Button>
+        <Flex gap={8} wrap="wrap">
+          <ImportInvoices />
+          <Button
+            type="link"
+            icon={<SelectOutlined />}
+            onClick={() => router.push(AppRoutes.PAYMENT_BULK)}
+          >
+            Інвойси
+          </Button>
+          <Button
+            type="link"
+            icon={<PlusOutlined />}
+            onClick={() => setIsModalOpen(true)}
+          >
+            Додати
+          </Button>
+        </Flex>
+      </Flex>
+      {shouldOpenModal(isModalOpen, currentPayment, paymentActions) && (
+        <AddPaymentModal
+          paymentActions={!isAdmin ? { edit: false, preview: true } : paymentActions}
+          paymentData={currentPayment}
+          preselectedCompany={selectedCompany}
+          closeModal={closeModal}
+        />
+>>>>>>> deploy
       )}
       expandIconPosition="right"
       items={getItems(panelStyle)}

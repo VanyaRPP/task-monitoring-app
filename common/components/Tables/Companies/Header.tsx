@@ -103,7 +103,11 @@ const CompaniesHeader: React.FC<Props> = ({
               filters={filters}
               setFilters={setFilters}
             />
+<<<<<<< HEAD
             {
+=======
+            {(
+>>>>>>> deploy
               <CompanyFilterTags
                 collection={realEstateData?.realEstatesFilter}
                 filters={filters}

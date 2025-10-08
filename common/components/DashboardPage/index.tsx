@@ -129,6 +129,33 @@ const Dashboard: React.FC = () => {
   const getLayoutStorageKey = (userId?: string) =>
     userId ? `dashboard-layout-${userId}` : 'dashboard-layout'
 
+  const visibleWidgets = useMemo(() => {
+    if (isGlobalAdmin === undefined) {
+      return ALL_WIDGETS
+    }
+    return isGlobalAdmin
+      ? ALL_WIDGETS
+      : ALL_WIDGETS.filter((w) => w !== 'profits')
+  }, [isGlobalAdmin])
+
+  const visibleWidgetMap = useMemo(() => {
+    return Object.fromEntries(
+      visibleWidgets.map((key) => [key, widgetMap[key]])
+    ) as typeof widgetMap
+  }, [visibleWidgets])
+
+  const DEFAULT_LAYOUT: Layout[] = visibleWidgets.map((w) => ({
+    i: w,
+    x: 0,
+    w: 1,
+    h: 2,
+    y: 0,
+  }))
+
+  const [layout, setLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
+  const [tempLayout, setTempLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
+  const [isLayoutReady, setIsLayoutReady] = useState(false)
+
   useEffect(() => {
     const userId = userResponse?._id?.toString()
     if (!userId) return
@@ -212,8 +239,9 @@ const Dashboard: React.FC = () => {
                   if (!userId) return
                   localStorage.setItem(
                     getLayoutStorageKey(userId),
-                    JSON.stringify({ layout, hidden: hiddenWidget })
+                    JSON.stringify(tempLayout)
                   )
+                  setLayout(tempLayout)
                   message.success('Збережено!')
                   togglePanelVisible()
                 }}
@@ -259,7 +287,7 @@ const Dashboard: React.FC = () => {
                 isEditMode={isEditMode}
                 onHeightChange={handleNodeHeight}
               >
-                {widgetMap[item.i as WidgetKey]}
+                {visibleWidgetMap[item.i as WidgetKey]}
               </WidgetWrapper>
             </div>
           ))}

@@ -63,11 +63,22 @@ const ProfitPage = () => {
       >
         <Card
           title={
+<<<<<<< HEAD
             <Button type="link" onClick={() => router.push('/profit')}>
               {t('profitPage:title')}
               <SelectOutlined />
             </Button>
           }
+=======
+            <Button
+              type="link"
+              onClick={() => router.push('/profit')}
+              >
+                {t('profitPage:title')}
+                <SelectOutlined />
+              </Button>
+          }                 
+>>>>>>> deploy
           extra={
             isAdmin && (
               <Button type="link" onClick={() => setIsModalOpen(true)}>
