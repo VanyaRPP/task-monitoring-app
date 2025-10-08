@@ -27,31 +27,7 @@ const PaymentReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
     <>
       <PrinterOutlined className={s.print} onClick={handlePrint} />
       <div className={s.invoiceContainer} ref={componentRef}>
-        <>
-          <div className={s.providerInfo}>
-            <div className={s.label}>Одержувач</div>
-            <pre className={s.preLabel}>
-              {newData?.reciever?.description?.trim()} <br />
-              <br />
-            </pre>
-          </div>
-
-          <div className={s.receiverInfo}>
-            <div className={s.label}>Платник</div>
-            <pre className={s.preLabel}>
-              {newData?.company?.companyName}
-              {newData?.company?.address && (
-                <>
-                  <br />
-                  {newData?.company?.address}
-                </>
-              )}
-              {newData?.company?.adminEmails?.map((email) => (
-                <div key={email}>{email}</div>
-              ))}
-            </pre>
-          </div>
-        </>
+        <></>
 
         <div className={s.providerInvoice}>
           <div className={s.datecellTitle}>
@@ -66,6 +42,42 @@ const PaymentReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
 
         {newData?.transaction && (
           <div className={s.transactionInfo}>
+            <div className={s.transactionTitle}>Платник:</div>
+            <div className={s.transactionDetails}>
+              <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    whiteSpace: 'pre-line',
+                  }}
+                >
+                  {[
+                    ...(newData?.reciever?.description?.trim() || '')
+                      .split('\n')
+                      .filter(Boolean)
+                      .map((line, idx) => (
+                        <div
+                          key={`desc-${idx}`}
+                          style={{ marginBottom: '8px' }}
+                        >
+                          {line}
+                        </div>
+                      )),
+                    newData?.company?.companyName && (
+                      <div key="companyName" style={{ marginBottom: '8px' }}>
+                        {newData.company.companyName}
+                      </div>
+                    ),
+                    ...(newData?.company?.adminEmails || []).map((email) => (
+                      <div key={email} style={{ marginBottom: '8px' }}>
+                        {email}
+                      </div>
+                    )),
+                  ].filter(Boolean)}
+                </div>
+              </div>
+            </div>
             <div className={s.transactionTitle}>Деталі транзакції:</div>
             <div className={s.transactionDetails}>
               <div>
@@ -84,53 +96,15 @@ const PaymentReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
                 <strong>Призначення платежу:</strong>
                 <span>{newData.transaction.Description}</span>
               </div>
+              <div className={s.payFixed}>
+                <strong>Отримана сума:</strong>
+                {(+newData?.generalSum || +newData?.debit).toFixed(2)} грн
+              </div>
             </div>
           </div>
         )}
-
-        <div className={s.payTable}>
-          <SumWithText data={newData} />
-          <div className={s.payFixed}>
-            Отримана сума:
-            <div className={s.payBoldSum}>
-              {(+newData?.generalSum || +newData?.debit).toFixed(2)} грн
-            </div>
-          </div>
-
-          <div>
-            Призначення платежу:{' '}
-            <strong>
-              {newData?.description ||
-                `Оплата за послуги згідно рахунку № ${
-                  newData.invoiceNumber
-                } від ${dayjs(newData?.invoiceCreationDate)?.format?.(
-                  'DD.MM.YYYY'
-                )}`}
-            </strong>
-          </div>
-
-          <div className={s.payFixed}>
-            {newData?.reciever?.description?.split('\n')?.[0] || ''}
-            <div className={s.lineInner}>________________</div>
-          </div>
-        </div>
       </div>
     </>
-  )
-}
-
-function SumWithText({ data }) {
-  const rest = numberToTextNumber(data?.generalSum || data?.debit)
-  return (
-    rest && (
-      <div className={s.payFixed}>
-        Всього на суму:
-        <div className={s.payBold}>
-          {rest}
-          &nbsp;грн
-        </div>
-      </div>
-    )
   )
 }
 
