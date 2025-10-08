@@ -19,6 +19,7 @@ import {
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
+import { getDebtorTooltipColor } from '@utils/helpers'
 import {
   Alert,
   Button,
@@ -73,16 +74,7 @@ export interface Props {
   realEstateActions: {
     edit: boolean
   }
-}
-
-const getDebtorTooltipColor = (debtor) => {
-  if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
-    return 'gray'
-  } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
-    return 'yellow'
-  } else if (debtor.totalDebt >= 20000) {
-    return 'red'
-  }
+  isArchive: boolean
 }
 
 const CompaniesTable: React.FC<Props> = ({
@@ -96,6 +88,7 @@ const CompaniesTable: React.FC<Props> = ({
   setFilters,
   setRealEstateActions,
   realEstateActions,
+  isArchive,
 }) => {
   const router = useRouter()
   const { pathname } = router
@@ -105,6 +98,7 @@ const CompaniesTable: React.FC<Props> = ({
   const { data: realEstateData } = useGetRealEstateFiltersQuery({
     streets: filters?.street,
     domains: filters?.domain,
+    archived: isArchive,
   })
   const { data: domainData } = useGetDomainFiltersQuery({
     streets: filters?.street,
@@ -408,7 +402,24 @@ const getDefaultColumns = ({
       ),
     },
   ]
-
+  if (isAdmin) {
+    columns.push({
+      fixed: 'right',
+      align: 'center',
+      title: '',
+      width: 56,
+      render: (_, realEstate: IExtendedRealestate) => (
+        <Button
+          icon={<EditOutlined />}
+          type="link"
+          onClick={() => {
+            setCurrentRealEstate(realEstate)
+            setRealEstateActions({ edit: true })
+          }}
+        />
+      ),
+    })
+  }
   if (isAdmin) {
     columns.push({
       align: 'center',
@@ -419,26 +430,6 @@ const getDefaultColumns = ({
         <Dropdown
           menu={{
             items: [
-              {
-                key: 'edit',
-                label: (
-                  <Button
-                    icon={<EditOutlined />}
-                    type="link"
-                    style={{
-                      color: '#722ed1',
-                      paddingLeft: '10px',
-                      paddingRight: '10px',
-                    }}
-                    onClick={() => {
-                      setCurrentRealEstate(realEstate)
-                      setRealEstateActions({ edit: true })
-                    }}
-                  >
-                    Редагувати
-                  </Button>
-                ),
-              },
               {
                 key: 'archive',
                 label: (

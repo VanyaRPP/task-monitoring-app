@@ -1,54 +1,54 @@
-import { useMemo } from 'react'
-import { useRouter } from 'next/router'
 import {
-  Table,
-  Empty,
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+} from '@ant-design/icons'
+import {
   Alert,
+  Badge,
+  Button,
+  Empty,
+  List,
+  Popconfirm,
+  Table,
+  theme,
   Tooltip,
   Typography,
-  Button,
-  Dropdown,
-  Popconfirm,
-  Badge,
-  theme,
-  List,
 } from 'antd'
-import {
-  EyeOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  MoreOutlined,
-} from '@ant-design/icons'
 import { ColumnsType, ColumnType } from 'antd/es/table'
+import { useRouter } from 'next/router'
+import { useMemo } from 'react'
+import { usePermissions } from '@utils/helpers'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
+import { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
 import {
   IExtendedPayment,
-  IGetPaymentResponse,
   IFilter,
+  IGetPaymentResponse,
 } from '@common/api/paymentApi/payment.api.types'
-import { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
 
-import {
-  toFirstUpperCase,
-  renderCurrency,
-  toRoundFixed,
-  isEmpty,
-} from '@utils/helpers'
 import {
   dateToDefaultFormat,
   dateToMonth,
   dateToMonthYear,
 } from '@assets/features/formatDate'
 import {
-  ServiceType,
-  ServiceName,
   AppRoutes,
-  Roles,
   Operations,
+  Roles,
+  ServiceName,
+  ServiceType,
 } from '@utils/constants'
-import s from './style.module.scss'
+import {
+  isEmpty,
+  renderCurrency,
+  toFirstUpperCase,
+  toRoundFixed,
+} from '@utils/helpers'
+import { getDebtorTooltipColor } from '@utils/helpers'
 import { Grid } from 'antd'
-
+import s from './style.module.scss'
 
 export interface PaymentDeleteItem {
   id: string
@@ -162,17 +162,6 @@ const getSummaryColumns = (
   )
 }
 
-const getDebtorTooltipColor = (debtor: { totalDebt: number }) => {
-  if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
-    return 'gray'
-  } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
-    return 'yellow'
-  } else if (debtor.totalDebt >= 20000) {
-    return 'red'
-  }
-  return undefined
-}
-
 const PaymentsTable: React.FC<PaymentsTableProps> = ({
   sepDomainID,
   payments,
@@ -190,7 +179,8 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
 }) => {
   const router = useRouter()
   const { pathname } = router
-
+  const { data: userResponse } = useGetCurrentUserQuery()
+  const userRoles = usePermissions(userResponse)
   const {
     paymentsError,
     paymentsLoading,
@@ -222,10 +212,10 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
 
   const isDashboard = pathname === AppRoutes.INDEX
 
-const { useBreakpoint } = Grid
+  const { useBreakpoint } = Grid
 
-const screens = useBreakpoint()
-const isMobile = !screens.md
+  const screens = useBreakpoint()
+  const isMobile = !screens.md
 
   const isGlobalAdmin = currUserRoles.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = currUserRoles.includes(Roles.DOMAIN_ADMIN)
@@ -233,14 +223,38 @@ const isMobile = !screens.md
   const { token } = theme.useToken()
   const isSingleCompanyByData = useMemo(() => {
     const list = payments?.data || []
-    if (list.length <= 1) return false
-    const unique = new Set(
+    const uniqueCompanies = new Set(
       list.map((p) =>
         typeof p.company === 'object' ? p.company.companyName : p.company
       )
     )
-    return unique.size === 1
-  }, [payments?.data])
+    return filters?.company?.length === 1 && uniqueCompanies.size === 1
+  }, [payments?.data, filters?.company])
+  const isSingleDomainByData = useMemo(() => {
+    const list = payments?.data || []
+    const uniqueDomains = new Set(
+      list.map((p) => (typeof p.domain === 'object' ? p.domain.name : p.domain))
+    )
+    return filters?.domain?.length === 1 && uniqueDomains.size === 1
+  }, [payments?.data, filters?.domain])
+
+  const themeKey = useMemo(
+    () =>
+      [
+        token.colorBgElevated,
+        token.colorText,
+        token.colorBorderSecondary,
+        token.boxShadowSecondary,
+        token.colorFillSecondary,
+      ].join('|'),
+    [
+      token.colorBgElevated,
+      token.colorText,
+      token.colorBorderSecondary,
+      token.boxShadowSecondary,
+      token.colorFillSecondary,
+    ]
+  )
   const allColumns: ColumnsType<IExtendedPayment> = useMemo(() => {
     return [
       {
@@ -262,7 +276,7 @@ const isMobile = !screens.md
               </Typography.Link>
             </Tooltip>
           ),
-        hidden: payments?.domainsFilter?.length <= 1,
+        hidden: isSingleDomainByData || isSingleCompanyByData,
       },
       {
         title: 'Компанія',
@@ -313,7 +327,7 @@ const isMobile = !screens.md
           }
           return companyLabel
         },
-        hidden: isSingleCompanyByData,
+        hidden: filters?.company?.lenght === 1,
       },
       {
         title: 'Дата створення',
@@ -437,9 +451,15 @@ const isMobile = !screens.md
                         display: 'flex',
                         justifyContent: 'space-between',
                         width: '100%',
+                        gap: 8,
+                        whiteSpace: 'nowrap',
                       }}
                     >
-                      <Typography.Text strong>{item.label}</Typography.Text>
+                      <Typography.Text strong>
+                        {String(item.value).length > 6 && item.label.length > 12
+                          ? item.label.slice(0, 10) + '.'
+                          : item.label}
+                      </Typography.Text>
                       <Typography.Text>{item.value}</Typography.Text>
                     </div>
                   </List.Item>
@@ -448,18 +468,31 @@ const isMobile = !screens.md
             />
           )
 
-          return (
-            <Tooltip title={popoverContent} placement="top">
-              <Button
-                disabled={isEmpty(monthService)}
-                block
-                style={{
-                  border: 'none',
-                  backgroundColor: token.colorFillSecondary,
-                }}
-              >
-                {formatted}
-              </Button>
+          const btn = (
+            <Button
+              disabled={isEmpty(monthService)}
+              block
+              style={{
+                border: 'none',
+                backgroundColor: token.colorFillSecondary,
+              }}
+            >
+              {formatted}
+            </Button>
+          )
+
+          return isEmpty(monthService) ? (
+            btn
+          ) : (
+            <Tooltip
+              key={themeKey}
+              color={token.colorBgElevated}
+              title={
+                <div style={{ color: token.colorText }}>{popoverContent}</div>
+              }
+              placement="top"
+            >
+              {btn}
             </Tooltip>
           )
         },
@@ -481,78 +514,54 @@ const isMobile = !screens.md
           (b.invoice.find((i) => i.type === value)?.sum || 0),
       })) as ColumnType<IExtendedPayment>[]),
       {
-        fixed: isMobile ? undefined : 'right',
         align: 'center',
+        fixed: 'right',
         title: '',
-        width: sepDomainID ? 25 : 80,
+        width: 50,
+        render: (_value, payment) => (
+          <Button
+            style={{ padding: 0 }}
+            type="link"
+            onClick={() => onViewClick(payment)}
+          >
+            <EyeOutlined />
+          </Button>
+        ),
+      },
+      {
+        align: 'center',
+        fixed: 'right',
+        title: '',
+        width: 50,
         render: (_value, payment) =>
-          payment.type === Operations.Debit && (
+          userRoles?.isGlobalAdmin && (
             <Button
               style={{ padding: 0 }}
               type="link"
-              onClick={() => {
-                onViewClick(payment)
-              }}
+              onClick={() => onEditClick(payment)}
             >
-              <EyeOutlined />
+              <EditOutlined />
             </Button>
           ),
       },
       {
         align: 'center',
-        fixed: isMobile ? undefined : 'right',
+        fixed: 'right',
         title: '',
-        hidden: isUser,
-        width: sepDomainID ? 25 : 80,
-        render: (_value, payment) => (
-          <Dropdown
-            menu={{
-              items: [
-                {
-                  key: 'edit',
-                  label: (
-                    <Button
-                      icon={<EditOutlined />}
-                      type="link"
-                      style={{ color: '#722ed1', padding: '0 10px' }}
-                      onClick={() => onEditClick(payment)}
-                    >
-                      Редагувати
-                    </Button>
-                  ),
-                },
-                (isGlobalAdmin || isDomainAdmin) && {
-                  key: 'delete',
-                  label: (
-                    <Popconfirm
-                      title={`Ви впевнені, що хочете видалити оплату від ${new Date(
-                        payment.invoiceCreationDate as unknown as string
-                      ).toLocaleDateString()}?`}
-                      onConfirm={() => onDelete(payment._id)}
-                      okText="Видалити"
-                      cancelText="Ні"
-                      disabled={deleteLoading}
-                    >
-                      <Button
-                        type="text"
-                        icon={<DeleteOutlined />}
-                        style={{
-                          color: '#ff4d4f',
-                          padding: '0 10px',
-                        }}
-                      >
-                        Видалити
-                      </Button>
-                    </Popconfirm>
-                  ),
-                },
-              ].filter(Boolean),
-            }}
-            placement="bottomRight"
-          >
-            <Button icon={<MoreOutlined />} />
-          </Dropdown>
-        ),
+        width: 50,
+        render: (_value, payment) =>
+          userRoles?.isGlobalAdmin && (
+            <Popconfirm
+              title={`Ви впевнені, що хочете видалити оплату від ${new Date(
+                payment.invoiceCreationDate as unknown as string
+                ).toLocaleDateString()}?`}
+              onConfirm={() => onDelete(payment._id)}
+              cancelText="Відміна"
+              disabled={deleteLoading}
+            >
+              <DeleteOutlined />
+            </Popconfirm>
+          ),
       },
     ]
   }, [
@@ -570,6 +579,7 @@ const isMobile = !screens.md
     currUserRoles,
     isSingleCompanyByData,
     isMobile,
+    themeKey,
   ])
 
   const visibleColumns = (allColumns as ColumnType<IExtendedPayment>[]).filter(

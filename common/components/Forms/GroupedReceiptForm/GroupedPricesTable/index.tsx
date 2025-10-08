@@ -23,28 +23,39 @@ const columns = [
     key: 'name',
   },
   {
-    title: 'Сума, грн',
-    dataIndex: 'sum',
-    key: 'sum',
+  title: 'Сума, грн',
+  dataIndex: 'sum',
+  key: 'sum',
+  render: (value: any) => {
+    const n = Number(value)
+    return isFinite(n) ? n.toFixed(2) : value
   },
+  }
 ]
 
-const groupedInvoices = (invoices: any, groups: any) => {
-  return groups?.map((group) => {
-    const groupFieldNames = group?.services.map((service) => service?.fieldName)
+const groupedInvoices = (invoices: any, groups: any) => { // TODO: FIX maintenancePrice && rentPrice logic
+  const result = groups?.map((group) => {
     const groupInvoices = invoices?.filter((invoice) =>
-      groupFieldNames.includes(invoice?.type)
+      group?.services?.some((service) =>
+        (invoice?.name === service?.name ||
+        invoice?.type === service?.fieldName) ||
+        (invoice?.type === 'maintenancePrice' && service?.fieldName === 'rentPrice')
+      )
     )
+
     const totalGroupSum = (groupInvoices ?? []).reduce((sum, invoice) => {
       return sum + (invoice?.sum ?? 0)
     }, 0)
+
     return {
       groupName: group?.groupName,
       invoices: groupInvoices,
       totalSum: totalGroupSum.toFixed(2),
-      fieldNames: groupFieldNames,
+      fieldNames: group?.services?.map((s) => s?.fieldName),
     }
-  })
+  }) || []
+
+  return result
 }
 
 const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
@@ -73,7 +84,6 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
       name: group.groupName,
       sum: group.totalSum,
     })) || []
-
   const discountInvoice = invoices?.find((inv) => inv?.type === 'discount')
   if (discountInvoice) {
     dataSource.push({
@@ -87,8 +97,8 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
     (inv) => inv?.type === 'custom' && !groupedFieldNames.includes(inv?.type)
   )
 
-  customInvoices?.forEach((inv) => {
-    dataSource.push({
+  customInvoices?.forEach((inv) => { // Uncomment to add custom invoices
+    !inv?.customService && dataSource.push({
       key: dataSource.length + 1,
       name: inv.name || 'Додатково',
       sum: inv.sum,

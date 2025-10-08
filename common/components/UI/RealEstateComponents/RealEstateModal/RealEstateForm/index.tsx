@@ -163,9 +163,9 @@ const RealEstateForm: FC<Props> = ({
         form={form}
         disabled={!editable}
         allCustomServices={customServices}
-      />
+      /> 
       {/* { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') && // TODO: customServices */}
-      <Form.Item
+      {/* <Form.Item
         name="servicePricePerMeter"
         label="Індивідуальне утримання (грн/м²)"
       >
@@ -175,18 +175,18 @@ const RealEstateForm: FC<Props> = ({
           className={s.formInput}
           disabled={!editable}
         />
-      </Form.Item>
+      </Form.Item> */}
       {/* } */}
-      <Form.Item name="rentPart" label="Частка загальної площі">
+      {/* <Form.Item name="rentPart" label="Частка загальної площі">
         <InputNumber
           parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
         />
-      </Form.Item>
+      </Form.Item> */}
 
-      {isServiceExist('waterPrice') && (
+      {/* {isServiceExist('waterPrice') && (
         <Form.Item name="waterPart" label="Частка водопостачання">
           <InputNumber
             parser={inputNumberParser}
@@ -195,26 +195,26 @@ const RealEstateForm: FC<Props> = ({
             disabled={!editable}
           />
         </Form.Item>
-      )}
+      )} */}
       {/* { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') && */}
-      <Form.Item name="cleaning" label="Прибирання (грн)">
+      {/* <Form.Item name="cleaning" label="Прибирання (грн)">
         <InputNumber
           parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
         />
-      </Form.Item>
+      </Form.Item> */}
       {/* } */}
 
-      <Form.Item name="discount" label="Знижка">
+      {/* <Form.Item name="discount" label="Знижка">
         <InputNumber
           parser={inputNumberParser}
           placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
         />
-      </Form.Item>
+      </Form.Item> */}
 
       <Form.Item
         valuePropName="checked"

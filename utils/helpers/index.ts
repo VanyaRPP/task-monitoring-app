@@ -18,6 +18,7 @@ import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Operations } from '@utils/constants'
 import { useState, useEffect } from 'react'
 
+
 export const toFirstUpperCase = (text: string) => {
   return text ? text[0].toUpperCase() + text.slice(1) : ''
 }
@@ -254,8 +255,18 @@ export const getDefaultStartDate = (): string => {
 }
 
 const monthsUaGenitiveCapitalized = [
-  'Січня', 'Лютого', 'Березня', 'Квітня', 'Травня', 'Червня', 'Липня',
-  'Серпня', 'Вересня', 'Жовтня', 'Листопада', 'Грудня',
+  'Січня',
+  'Лютого',
+  'Березня',
+  'Квітня',
+  'Травня',
+  'Червня',
+  'Липня',
+  'Серпня',
+  'Вересня',
+  'Жовтня',
+  'Листопада',
+  'Грудня',
 ]
 
 /**
@@ -368,6 +379,7 @@ export async function getDistinctCompanyAndDomain({
     filteredCompanys = null,
     filteredStreets = null,
     filteredDomains = null,
+    archived = null,
   },
 }) {
   const domainsPipeline = getDomainsPipeline(
@@ -395,6 +407,7 @@ export async function getDistinctCompanyAndDomain({
     distinctedDomainsIds,
     distinctedStreetsIds,
     group: companyGroup,
+    archived,
   })
   const distinctCompanies = await model.aggregate(realEstatesPipeline)
 
@@ -714,3 +727,15 @@ export function usePermissions(user?: IUser): IPermissions | null {
 
   return permissions
 }
+
+export const getDebtorTooltipColor = (debtor: { totalDebt: number}): string => {
+  if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
+    return 'gray'
+  } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
+    return 'yellow'
+  } else if (debtor.totalDebt >= 20000) {
+    return 'red'
+  }
+  return undefined
+}
+

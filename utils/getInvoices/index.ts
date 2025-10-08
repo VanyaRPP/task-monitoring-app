@@ -154,6 +154,8 @@ export const getMaintenanceInvoice = ({
     }
   }
 
+  if (company.servicePricePerMeter === 0) return
+
   if (
     !isNaN(company?.totalArea) &&
     (!isNaN(company?.servicePricePerMeter) || !isNaN(service?.rentPrice))
@@ -229,10 +231,26 @@ export const getGarbageCollectorInvoice = ({
 
     const invoice = currInvoicesCollection[ServiceType.GarbageCollector]
 
+    if (company?.garbageCollector === false) {
+      return {
+        type: ServiceType.GarbageCollector,
+        price: 0,
+        sum: 0,
+      }
+    }
+
     return {
       type: invoice.type,
       price: +toRoundFixed(+invoice.sum || +invoice.price),
       sum: +toRoundFixed(+invoice.sum || +invoice.price),
+    }
+  }
+
+  if (company?.garbageCollector === false) {
+    return {
+      type: ServiceType.GarbageCollector,
+      price: 0,
+      sum: 0,
     }
   }
 
@@ -241,6 +259,7 @@ export const getGarbageCollectorInvoice = ({
     !isNaN(service.garbageCollectorPrice) &&
     company?.garbageCollector
   ) {
+    
     const price = service.garbageCollectorPrice * (company?.rentPart / 100)
 
     return {
@@ -294,20 +313,30 @@ export const getCustomServiceInvoices = ({
   ) {
     return []
   }
-  const customServices = Array.isArray(service?.customServices)
-    ? service?.customServices.flatMap((customService) =>
-        Array.isArray(customService)
-          ? customService.map((s) => ({
-              name: s.label || 'Невідома послуга',
-              price: +toRoundFixed(s.price),
-              sum: +toRoundFixed(s.price),
-              type: ServiceType.Custom,
-              customService: true,
-            }))
-          : []
-      )
+
+  const serviceCustoms = Array.isArray(service?.customServices)
+    ? service.customServices
     : []
+  const companyCustoms = Array.isArray(company?.customServices)
+    ? company.customServices
+    : []
+
+  const customServices = serviceCustoms.map((serviceItem) => {
+    const companyItem = companyCustoms.find(
+      (c) => c?.fieldName === serviceItem?.fieldName
+    )
+
+    const price = +toRoundFixed(companyItem?.price ?? serviceItem?.price ?? 0)
+
+    return {
+      name: serviceItem?.label || 'Невідома послуга',
+      price,
+      sum: price,
+      type: ServiceType.Custom,
+      fieldName: serviceItem?.fieldName || 'custom',
+      customService: true,
+    }
+  })
 
   return customServices
 }
-

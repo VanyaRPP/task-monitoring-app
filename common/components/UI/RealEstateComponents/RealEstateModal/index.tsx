@@ -39,16 +39,42 @@ const RealEstateModal: FC<Props> = ({
     { skip: !domainId && !currentRealEstate?.domain?._id }
   )
 
+  const filteredServicesPrice = (customServices) => { // TODO: delete after custom services refactor
+    const updatedCustomServices = customServices?.map(service => {
+      let price = null
+
+      if (service.fieldName === 'rentPrice') {
+        price = currentRealEstate?.servicePricePerMeter 
+        ?? currentRealEstate?.customServices?.find(service => service.fieldName === 'rentPrice')?.price 
+        ?? null
+      }
+      else if (service.fieldName === 'cleaningPrice') {
+        price = currentRealEstate?.cleaning 
+        ?? currentRealEstate?.customServices?.find(service => service.fieldName === 'cleaningPrice')?.price 
+        ?? null
+      } else {
+        price = currentRealEstate?.[service.fieldName] ?? null
+      }
+      return {
+        ...service,
+        price,
+      }
+    })
+    return updatedCustomServices
+  }
+
   const customServices = customDomainServices?.data?.flatMap((group) =>
     Array.isArray(group?.services)
-      ? group.services.map((service) => ({
-          label: service.name || 'Невідома послуга',
-          price: 0,
-          fieldName: service.fieldName || 'defaultFieldName',
-          _id: service._id || 'defaultId',
+      ? group?.services?.map((service) => ({
+          label: service?.name || 'Невідома послуга',
+          price: currentRealEstate?.[service?.fieldName] || null,
+          fieldName: service?.fieldName || 'defaultFieldName',
+          _id: service?._id || 'defaultId',
         }))
       : []
   )
+
+  const filteredCustomServices = filteredServicesPrice(customServices)
 
   useEffect(() => {
     const initialValues = {
@@ -71,14 +97,16 @@ const RealEstateModal: FC<Props> = ({
       discount: currentRealEstate?.discount || 0,
       cleaning: currentRealEstate?.cleaning || 0,
       services: currentRealEstate?.services || [],
-      customServices: currentRealEstate?.customServices || [],
+      customServices: (currentRealEstate?.customServices?.length > 0 
+        ? currentRealEstate.customServices 
+        : filteredCustomServices) || [],
     }
     const currentCustomServices = form.getFieldValue('customServices')
 
   if (!currentCustomServices || currentCustomServices.length === 0) {
     form.setFieldsValue(initialValues)
   }
-  }, [currentRealEstate, form, customServices, domainId, chosenRealEstate])
+  }, [currentRealEstate, form, customServices, filteredCustomServices, domainId, chosenRealEstate])
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
@@ -90,17 +118,29 @@ const RealEstateModal: FC<Props> = ({
       description: formData.description,
       adminEmails: formData.adminEmails,
       pricePerMeter: formData.pricePerMeter,
-      servicePricePerMeter: formData.servicePricePerMeter,
       totalArea: formData.totalArea,
       garbageCollector: formData.garbageCollector,
       archived: formData.archived,
-      rentPart: formData.rentPart,
       inflicion: formData.inflicion,
-      waterPart: formData.waterPart,
       discount:
         formData.discount > 0 ? formData.discount * -1 : formData.discount,
-      cleaning: formData.cleaning,
       services: formData.services,
+      servicePricePerMeter:
+        formData.customServices?.find(
+          (c) => c.fieldName === 'rentPrice'
+        )?.price ?? formData.servicePricePerMeter,
+      rentPart:
+        formData.customServices?.find(
+          (custom) => custom.fieldName === 'rentPart'
+        )?.price ?? formData.rentPart,
+      waterPart:
+        formData.customServices?.find(
+          (custom) => custom.fieldName === 'waterPart'
+        )?.price ?? formData.waterPart,
+      cleaning:
+        formData.customServices?.find(
+          (custom) => custom.fieldName === 'cleaningPrice'
+        )?.price ?? formData.cleaning,
       customServices: formData.customServices,
     }
 
@@ -139,7 +179,7 @@ const RealEstateModal: FC<Props> = ({
         currentRealEstate={currentRealEstate}
         editable={editable}
         setIsValueChanged={setIsValueChanged}
-        customServices={customServices}
+        customServices={filteredCustomServices}
       />
     </Modal>
   )

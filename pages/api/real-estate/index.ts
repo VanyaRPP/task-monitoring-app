@@ -43,7 +43,7 @@ export default async function handler(
          * request data filters
          */
         const filters: FilterQuery<typeof RealEstate> = {
-          ...(isArchived !== undefined && { archived: isArchived }),
+          archived: isArchived !== undefined ? isArchived : false,
           ...(!!companiesIds?.length && { _id: { $in: companiesIds } }),
           ...(!!domainsIds?.length && { domain: { $in: domainsIds } }),
           ...(!!streetsIds?.length && { street: { $in: streetsIds } }),

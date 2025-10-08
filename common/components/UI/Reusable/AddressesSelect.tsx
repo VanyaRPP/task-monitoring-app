@@ -56,7 +56,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
         } else {
           form.setFieldsValue({ street: undefined })
           onStreetHasServiceChange?.(false)
-        }
+             }
       }
     } else {
       form.setFieldsValue({ street: undefined })
@@ -65,7 +65,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   }, [domainId, options, form, street])
 
   const selectedStreet = options.find((option) => option.value === streetId)
-  const showTooltip = !!streetId && !selectedStreet?.hasService
+  const showTooltip = !!selectedStreet && !selectedStreet.hasService
 
   return (
     <Tooltip

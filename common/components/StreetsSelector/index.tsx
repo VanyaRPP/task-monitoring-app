@@ -6,7 +6,7 @@ interface StreetsSelectorProps {
   filters?: Record<string, any>
   setFilters: (f: Record<string, any>) => void
   className?: string
-  [key: string]: any 
+  [key: string]: any
 }
 
 const StreetsSelector: React.FC<StreetsSelectorProps> = ({
@@ -16,25 +16,30 @@ const StreetsSelector: React.FC<StreetsSelectorProps> = ({
   className,
   ...props
 }) => {
-  const options = streets.map((street) => ({
-    label: street.text,
-    value: street.value,
-  }))
+  const options = [...streets]
+    .sort((a, b) => a.text.localeCompare(b.text))
+    .map((street) => ({
+      label: street.text,
+      value: String(street.value),
+    }))
 
   return (
     <Select
       placeholder="Виберіть вулицю"
-      // style={{ width: 200 }}
       value={filters?.street}
       onChange={(value) =>
-        setFilters((prev) => ({
-          ...prev,
+        setFilters({
+          ...filters,
           street: value,
-        }))
+        })
       }
+      style={{
+        minWidth: 250,
+      }}
       allowClear
       className={className}
       options={options}
+      dropdownStyle={{ width: 'max-content' }}
       {...props}
     />
   )

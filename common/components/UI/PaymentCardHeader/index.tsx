@@ -183,8 +183,11 @@ const [isMenuOpen, setIsMenuOpen] = useState(false)
     return texts.join('\n')
   }, [singleDomain, singleCompany])
 
+  const { preview, edit } = paymentActions
+
   if (!isAdmin && !isGlobalAdmin) {
-    return (
+  return (
+    <>
       <div style={{ marginBottom: '10px', marginTop: '10px' }}>
         <PaymentCardLabel
           enablePaymentsButton={enablePaymentsButton}
@@ -198,8 +201,16 @@ const [isMenuOpen, setIsMenuOpen] = useState(false)
           isAdmin={false}
         />
       </div>
-    )
-  }
+      {preview && currentPayment && (
+        <AddPaymentModal
+          paymentActions={{ preview: true, edit: false }}
+          paymentData={currentPayment}
+          closeModal={closeEditModal}
+        />
+      )}
+    </>
+  )
+}
 
   const panelStyle: React.CSSProperties = { border: 'none' }
 
@@ -284,6 +295,7 @@ if (isDashboard) {
           onClick={() => router.push(AppRoutes.PAYMENT)}
         >
           Платежі
+          <SelectOutlined />
         </Button>
         <Flex gap={8} wrap="wrap">
           <ImportInvoices />
