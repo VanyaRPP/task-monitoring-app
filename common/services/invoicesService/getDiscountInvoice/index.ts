@@ -24,7 +24,9 @@ export const getDiscountInvoice = ({
     }
   }
 
-  const companyDiscount = getPriceFromCustomServices(company?.customServices, 'discount') ?? company?.discount
+  const companyDiscount = getPriceFromCustomServices(company?.customServices, 'discount') 
+  ?? getPriceFromCustomServices(company?.customServices, 'discount') 
+  ?? company?.discount
   return {
     type: ServiceType.Discount,
     price: +toRoundFixed(companyDiscount),

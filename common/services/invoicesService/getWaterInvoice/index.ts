@@ -28,10 +28,12 @@ export const getWaterInvoice = ({
     }
   }
 
-  const waterPrice = getPriceFromCustomServices(service?.customServices, ServiceType.Water) 
+  const waterPrice = getPriceFromCustomServices(company?.customServices, ServiceType.Water) 
+  ?? getPriceFromCustomServices(service?.customServices, ServiceType.Water) 
   ?? service?.waterPrice
 
   const waterPart = getPriceFromCustomServices(company?.customServices, ServiceType.WaterPart) 
+  ?? getPriceFromCustomServices(service?.customServices, ServiceType.WaterPart) 
   ?? company?.waterPart
 
   if (

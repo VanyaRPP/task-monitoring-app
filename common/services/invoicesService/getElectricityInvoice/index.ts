@@ -29,21 +29,23 @@ export const getElectricityInvoice = ({
     }
   }
   
-const electricityPrice =
-  getPriceFromCustomServices(
+  const electricityPrice = getPriceFromCustomServices(
+    company?.customServices,
+    ServiceType.Electricity
+  )?? getPriceFromCustomServices(
     service?.customServices,
     ServiceType.Electricity
   ) ?? service?.electricityPrice
 
-if (!isEmpty(electricityPrice)) {
-  const prevElectricity = prevInvoicesCollection[ServiceType.Electricity]
+  if (!isEmpty(electricityPrice)) {
+    const prevElectricity = prevInvoicesCollection[ServiceType.Electricity]
 
-  return {
-    type: ServiceType.Electricity,
-    amount: +toRoundFixed(prevElectricity?.amount),
-    lastAmount: +toRoundFixed(prevElectricity?.amount),
-    price: +toRoundFixed(electricityPrice),
-    sum: 0,
+    return {
+      type: ServiceType.Electricity,
+      amount: +toRoundFixed(prevElectricity?.amount),
+      lastAmount: +toRoundFixed(prevElectricity?.amount),
+      price: +toRoundFixed(electricityPrice),
+      sum: 0,
+    }
   }
-}
 }

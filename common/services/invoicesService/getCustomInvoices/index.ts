@@ -18,5 +18,6 @@ export const getCustomInvoices = ({
       type: invoice.type,
       price: +toRoundFixed(+invoice.sum || +invoice.price),
       sum: +toRoundFixed(+invoice.sum || +invoice.price),
-    }))
+    })
+  )
 }

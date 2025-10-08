@@ -627,7 +627,7 @@ describe('getInvoices - WATER', () => {
   })
   describe('props: { service, company, prevPayment } with customServices', () => {
   it(
-    'should load with prevPayment when customServices = { waterPriceTotal: undefined }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }',
+    'should NOT load with prevPayment when customServices = { waterPriceTotal: undefined }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }',
     () => {
       const service: Partial<IService> = {
         customServices: [
@@ -651,7 +651,7 @@ describe('getInvoices - WATER', () => {
         prevPayment,
       })
 
-      expect(invoices).toContainEqual({
+      expect(invoices).not.toContainEqual({
         type: ServiceType.WaterPart,
         price: 120,
         sum: 120,
@@ -660,7 +660,7 @@ describe('getInvoices - WATER', () => {
   )
 
   it(
-     "should load with prevPayment when customServices = { waterPriceTotal: null }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }",
+     "should NOT load with prevPayment when customServices = { waterPriceTotal: null }, company = { waterPart: 10 }, prevPayment = { invoice: [WaterPart] }",
     () => {
       const service: Partial<IService> = {
         customServices: [
@@ -684,7 +684,7 @@ describe('getInvoices - WATER', () => {
         prevPayment,
       })
 
-      expect(invoices).toContainEqual({
+      expect(invoices).not.toContainEqual({
         type: ServiceType.WaterPart,
         price: 120,
         sum: 120,
@@ -699,7 +699,7 @@ describe('getInvoices - WATER', () => {
         customServices: [
           {
             label: 'Water',
-            fieldName: ServiceType.Water,
+            fieldName: ServiceType.WaterPart,
             price: 0,
           },
         ] as Partial<ICustomServices>[],
@@ -732,7 +732,7 @@ describe('getInvoices - WATER', () => {
         customServices: [
           {
             label: 'Water',
-            fieldName: ServiceType.Water,
+            fieldName: ServiceType.WaterPart,
             price: 10,
           },
         ] as Partial<ICustomServices>[],
@@ -814,6 +814,5 @@ it('should NOT load WaterPart when service = undefined company = undefined ', ()
     expect.objectContaining({ type: ServiceType.WaterPart })
   )
 })
-
 
 })

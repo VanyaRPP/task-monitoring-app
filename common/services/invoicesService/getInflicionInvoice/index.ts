@@ -25,11 +25,9 @@ export const getInflicionInvoice = ({
     }
   }
 
-  const inflicionCompany =
-    getPriceFromCustomServices(
-      company?.customServices,
-      ServiceType.Inflicion
-    ) ?? company?.inflicion
+  const inflicionCompany = getPriceFromCustomServices(company?.customServices, ServiceType.Inflicion) 
+    ?? getPriceFromCustomServices(service?.customServices, ServiceType.Inflicion)
+    ?? company?.inflicion
 
   if (inflicionCompany) {
     if (isEmpty(prevService?.inflicionPrice)) {

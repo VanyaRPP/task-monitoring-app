@@ -1,10 +1,5 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { IGetInvoiceProps, InvoicesCollection } from './types'
-import {
-  getPlacingInvoice,
-  getCleaningInvoice,
-  getCustomServiceInvoices,
-} from '@utils/getInvoices' //TODO: we rewrite each service
 import { isEmpty } from '@utils/helpers'
 import { getGarbageCollectorInvoice } from './getGarbageCollectorInvoice'
 import { getMaintenanceInvoice } from './getMaintenanceInvoice'
@@ -14,6 +9,9 @@ import { getWaterPartInvoice } from './getWaterPartInvoice'
 import { getDiscountInvoice } from './getDiscountInvoice'
 import { getCustomInvoices } from './getCustomInvoices'
 import { getWaterInvoice } from './getWaterInvoice'
+import { getPlacingInvoice } from './getPlacingInvoice'
+import { getCleaningInvoice } from './getCleaningInvoice'
+import { getCustomServiceInvoices } from './getCustomServiceInvoice'
 
 /**
  * Generating initial invoices data, based on received props.

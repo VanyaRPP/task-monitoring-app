@@ -23,6 +23,6 @@ export interface IGetInvoiceByTypeProps {
   service?: Partial<IService>
   prevService?: Partial<IService>
   prevPayment?: Partial<IPayment>
-  currInvoicesCollection: InvoicesCollection
-  prevInvoicesCollection: InvoicesCollection
+  currInvoicesCollection?: InvoicesCollection
+  prevInvoicesCollection?: InvoicesCollection
 }
