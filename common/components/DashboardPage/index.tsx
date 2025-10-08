@@ -107,16 +107,22 @@ const Dashboard: React.FC = () => {
     })
   }, [isGlobalAdmin, hiddenWidget])
 
-  const [layout, setLayout] = useState<Layout[]>(
-    ALL_WIDGETS.map((w, idx) => ({
-      i: w,
-      x: 0,
-      y: idx * 2,
-      w: 1,
-      h: 2,
-    }))
-  )
+  const visibleWidgetMap = useMemo(() => {
+    return Object.fromEntries(
+      visibleWidgets.map((key) => [key, widgetMap[key]])
+    ) as typeof widgetMap
+  }, [visibleWidgets])
 
+  const DEFAULT_LAYOUT: Layout[] = visibleWidgets.map((w) => ({
+    i: w,
+    x: 0,
+    w: 1,
+    h: 2,
+    y: 0,
+  }))
+
+  const [layout, setLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
+  const [tempLayout, setTempLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
   const [isLayoutReady, setIsLayoutReady] = useState(false)
 
   useEffect(() => {
@@ -137,8 +143,12 @@ const Dashboard: React.FC = () => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
-        setLayout(parsed.layout)
-        setHiddenWidget(parsed.hidden ?? [])
+        if (parsed.layout) {
+          setLayout(parsed.layout)
+        }
+        if (parsed.hidden) {
+          setHiddenWidget(parsed.hidden)
+        }
       } catch {}
     }
     setIsLayoutReady(true)
@@ -259,7 +269,7 @@ const Dashboard: React.FC = () => {
                 isEditMode={isEditMode}
                 onHeightChange={handleNodeHeight}
               >
-                {widgetMap[item.i as WidgetKey]}
+                {visibleWidgetMap[item.i as WidgetKey]}
               </WidgetWrapper>
             </div>
           ))}
