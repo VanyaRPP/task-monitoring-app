@@ -1,5 +1,11 @@
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import { useState, useEffect, useCallback, useLayoutEffect, useMemo } from 'react'
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+} from 'react'
 import DomainsBlock from '@components/DashboardPage/blocks/domains'
 import PaymentsBlock from '@components/DashboardPage/blocks/payments'
 import RealEstateBlock from '@components/DashboardPage/blocks/realEstates'
@@ -7,14 +13,17 @@ import ServicesBlock from '@components/DashboardPage/blocks/services'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import CompaniesAreaChart from '@components/DashboardPage/blocks/сompaniesAreaChart'
 import { Roles } from '@utils/constants'
-import { Col, Row, Space, Button, Flex,  message, Tooltip, Dropdown } from 'antd'
+import { Col, Row, Space, Button, Flex, message, Tooltip, Dropdown } from 'antd'
 import { CloseOutlined, SaveOutlined, EyeOutlined } from '@ant-design/icons'
 import PaymentsChart from '@components/DashboardPage/blocks/paymentChart'
 import ProfitPage from '@components/Pages/ProfiitPage'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 import { addButton, removeButton } from '@modules/store/floatButtonSlice'
-import { useEditModelFloatButton, useDragDropPanelFloatButton  } from '@modules/hooks/useFloatButton'
+import {
+  useEditModelFloatButton,
+  useDragDropPanelFloatButton,
+} from '@modules/hooks/useFloatButton'
 import { useDispatch } from 'react-redux'
 import { WidthProvider } from 'react-grid-layout'
 import GridLayout, { Layout } from 'react-grid-layout'
@@ -201,7 +210,10 @@ const Dashboard: React.FC = () => {
                 onClick={() => {
                   const userId = userResponse?._id?.toString()
                   if (!userId) return
-                  localStorage.setItem(getLayoutStorageKey(userId), JSON.stringify({ layout, hidden: hiddenWidget }))
+                  localStorage.setItem(
+                    getLayoutStorageKey(userId),
+                    JSON.stringify({ layout, hidden: hiddenWidget })
+                  )
                   message.success('Збережено!')
                   togglePanelVisible()
                 }}
@@ -214,42 +226,44 @@ const Dashboard: React.FC = () => {
         </div>
       )}
       {isLayoutReady && (
-      <ReactGridLayout
-        className="dashboard-grid"
-        compactType="vertical"
-        layout={layout}
-        cols={1}
-        rowHeight={60}
-        margin={[MARGIN_X, MARGIN_Y]}
-        useCSSTransforms={true}
-        listenToWindowResize={true}
-        isDraggable={isEditMode}
-        isResizable={false}
-        isBounded={true}
-        onLayoutChange={handleLayoutChange}
-      >
-        {renderedLayout.map((item) => (
+        <ReactGridLayout
+          className="dashboard-grid"
+          compactType="vertical"
+          layout={layout}
+          cols={1}
+          rowHeight={60}
+          margin={[MARGIN_X, MARGIN_Y]}
+          useCSSTransforms={true}
+          listenToWindowResize={true}
+          isDraggable={isEditMode}
+          isResizable={false}
+          isBounded={true}
+          onLayoutChange={handleLayoutChange}
+        >
+          {renderedLayout.map((item) => (
             <div
               key={item.i}
               data-grid={item}
               className={s.gridItem}
               id={item.i}
               style={{
-                display: hiddenWidget.includes(item.i as WidgetKey) ? 'none' : 'block',
+                display: hiddenWidget.includes(item.i as WidgetKey)
+                  ? 'none'
+                  : 'block',
               }}
             >
-            <WidgetWrapper
-              id={item.i}
-              rowHeight={60}
-              marginY={MARGIN_Y}
-              isEditMode={isEditMode}
-              onHeightChange={handleNodeHeight}
-            >
+              <WidgetWrapper
+                id={item.i}
+                rowHeight={60}
+                marginY={MARGIN_Y}
+                isEditMode={isEditMode}
+                onHeightChange={handleNodeHeight}
+              >
                 {widgetMap[item.i as WidgetKey]}
-            </WidgetWrapper>
-          </div>
-        ))}
-      </ReactGridLayout>
+              </WidgetWrapper>
+            </div>
+          ))}
+        </ReactGridLayout>
       )}
     </div>
   )
