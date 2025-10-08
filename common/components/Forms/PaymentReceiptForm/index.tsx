@@ -5,6 +5,7 @@ import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import s from './style.module.scss'
 import { PrinterOutlined } from '@ant-design/icons'
+import { theme } from 'antd'
 
 interface Props {
   currPayment: IExtendedPayment
@@ -15,6 +16,8 @@ interface Props {
 const PaymentReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const newData = currPayment || paymentData
   const componentRef = useRef()
+  const { token } = theme.useToken()
+
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle:
@@ -43,41 +46,21 @@ const PaymentReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
         {newData?.transaction && (
           <div className={s.transactionInfo}>
             <div className={s.transactionTitle}>Платник:</div>
-            <div className={s.transactionDetails}>
-              <div>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    whiteSpace: 'pre-line',
-                  }}
-                >
-                  {[
-                    ...(newData?.reciever?.description?.trim() || '')
-                      .split('\n')
-                      .filter(Boolean)
-                      .map((line, idx) => (
-                        <div
-                          key={`desc-${idx}`}
-                          style={{ marginBottom: '8px' }}
-                        >
-                          {line}
-                        </div>
-                      )),
-                    newData?.company?.companyName && (
-                      <div key="companyName" style={{ marginBottom: '8px' }}>
-                        {newData.company.companyName}
-                      </div>
-                    ),
-                    ...(newData?.company?.adminEmails || []).map((email) => (
-                      <div key={email} style={{ marginBottom: '8px' }}>
-                        {email}
-                      </div>
-                    )),
-                  ].filter(Boolean)}
-                </div>
-              </div>
+            <div className={s.payerDetails}>
+              {[
+                ...(newData?.reciever?.description?.trim() || '')
+                  .split('\n')
+                  .filter(Boolean)
+                  .map((line, idx) => <div key={`desc-${idx}`}>{line}</div>),
+                newData?.company?.companyName && (
+                  <div key="companyName">{newData.company.companyName}</div>
+                ),
+                ...(newData?.company?.adminEmails || []).map((email) => (
+                  <div key={email}>{email}</div>
+                )),
+              ].filter(Boolean)}
             </div>
+            <br />
             <div className={s.transactionTitle}>Деталі транзакції:</div>
             <div className={s.transactionDetails}>
               <div>
