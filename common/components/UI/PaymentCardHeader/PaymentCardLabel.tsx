@@ -57,7 +57,6 @@ const PaymentCardLabel = ({
           className={styles.section}
         >
           <div className={styles.selectors}>
-<<<<<<< HEAD
             <ColumnSelect
               className={styles.select}
               onSelect={onColumnsSelect}
@@ -71,11 +70,6 @@ const PaymentCardLabel = ({
               setFilters={setFilters}
               streets={streets}
             />
-=======
-            <ColumnSelect className={styles.select} onSelect={onColumnsSelect} />
-            <PaymentCascader className={styles.select} onChange={setCurrentDateFilter} />
-            <StreetsSelector className={styles.select} setFilters={setFilters} streets={streets} />
->>>>>>> deploy
           </div>
           <Space
             direction="vertical"
