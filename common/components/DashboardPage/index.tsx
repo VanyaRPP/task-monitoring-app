@@ -107,37 +107,6 @@ const Dashboard: React.FC = () => {
     })
   }, [isGlobalAdmin, hiddenWidget])
 
-  const [layout, setLayout] = useState<Layout[]>(
-    ALL_WIDGETS.map((w, idx) => ({
-      i: w,
-      x: 0,
-      y: idx * 2,
-      w: 1,
-      h: 2,
-    }))
-  )
-
-  const [isLayoutReady, setIsLayoutReady] = useState(false)
-
-  useEffect(() => {
-    dispatch(addButton(panelFloatButton))
-    return () => {
-      dispatch(removeButton(panelFloatButton.key))
-    }
-  }, [dispatch, panelFloatButton])
-
-  const getLayoutStorageKey = (userId?: string) =>
-    userId ? `dashboard-layout-${userId}` : 'dashboard-layout'
-
-  const visibleWidgets = useMemo(() => {
-    if (isGlobalAdmin === undefined) {
-      return ALL_WIDGETS
-    }
-    return isGlobalAdmin
-      ? ALL_WIDGETS
-      : ALL_WIDGETS.filter((w) => w !== 'profits')
-  }, [isGlobalAdmin])
-
   const visibleWidgetMap = useMemo(() => {
     return Object.fromEntries(
       visibleWidgets.map((key) => [key, widgetMap[key]])
@@ -157,6 +126,16 @@ const Dashboard: React.FC = () => {
   const [isLayoutReady, setIsLayoutReady] = useState(false)
 
   useEffect(() => {
+    dispatch(addButton(panelFloatButton))
+    return () => {
+      dispatch(removeButton(panelFloatButton.key))
+    }
+  }, [dispatch, panelFloatButton])
+
+  const getLayoutStorageKey = (userId?: string) =>
+    userId ? `dashboard-layout-${userId}` : 'dashboard-layout'
+
+  useEffect(() => {
     const userId = userResponse?._id?.toString()
     if (!userId) return
 
@@ -164,8 +143,12 @@ const Dashboard: React.FC = () => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
-        setLayout(parsed.layout)
-        setHiddenWidget(parsed.hidden ?? [])
+        if (parsed.layout) {
+          setLayout(parsed.layout)
+        }
+        if (parsed.hidden) {
+          setHiddenWidget(parsed.hidden)
+        }
       } catch {}
     }
     setIsLayoutReady(true)
@@ -239,9 +222,8 @@ const Dashboard: React.FC = () => {
                   if (!userId) return
                   localStorage.setItem(
                     getLayoutStorageKey(userId),
-                    JSON.stringify(tempLayout)
+                    JSON.stringify({ layout, hidden: hiddenWidget })
                   )
-                  setLayout(tempLayout)
                   message.success('Збережено!')
                   togglePanelVisible()
                 }}
