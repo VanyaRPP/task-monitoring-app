@@ -28,6 +28,7 @@ const InvoicesTable: React.FC = () => {
     { domainId },
     { skip: !domainId }
   )
+
   const groups = customDomainServices?.data ?? []
   const allowedServices = groups.flatMap((group) => group.services)
 
@@ -60,6 +61,7 @@ const InvoicesTable: React.FC = () => {
         ),
       }))
   }, [allowedServices])
+
   useEffect(() => {
     if (!companies || companies.length === 0 || !service) {
       return form.setFieldsValue({ payments: [] })
@@ -82,6 +84,7 @@ const InvoicesTable: React.FC = () => {
           prevService,
           prevPayment,
         })
+
         const filteredInvoice = serviceFilter(allinvoice, allowedServices)
 
         const invoiceObjectForTheAll = allinvoice.reduce((acc, inv) => {
