@@ -134,13 +134,17 @@ const AddCostForm: React.FC<Props> = ({
           />
         </Form.Item>
         {isPreview && (
-          <Form.Item name="categories" label={t('profitPage:form.category')}>
-            <Input
-              value={currentProfit?.categories?.join(', ')}
-              disabled
-              className={s.formInput}
-            />
-          </Form.Item>
+          <Form.Item
+    name="categories"
+    label={t('profitPage:form.category')}
+    initialValue={
+      currentProfit?.categories?.length
+        ? currentProfit.categories.join(', ')
+        : 'Без категорії'
+    }
+  >
+    <Input disabled className={s.formInput} />
+  </Form.Item>
         )}
       </Form>
     </ConfigProvider>
