@@ -7,6 +7,7 @@ import { getInvoices } from '@utils/getInvoices'
 import { Alert, Empty, Form, Input, Table } from 'antd'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo } from 'react'
+import { defaultServices } from '@utils/constants'
 
 const InvoicesTable: React.FC = () => {
   const router = useRouter()
@@ -32,28 +33,15 @@ const InvoicesTable: React.FC = () => {
   const groups = customDomainServices?.data ?? []
   const allowedServices = groups.flatMap((group) => group.services)
 
-  const excludedFields = [
-    'electricityPrice',
-    'cleaningPrice',
-    'rentPart',
-    'inflicionPrice',
-    'waterPrice',
-    'waterPart',
-    'waterPriceTotal',
-    'rentPrice',
-    'znyzhka',
-    'placingPrice',
-  ]
-
-  const dynamicColumns = useMemo(() => {
+  const customServicesColumns = useMemo(() => {
     return allowedServices
-      .filter((service) => !excludedFields.includes(service?.fieldName))
-      .map((svc) => ({
-        title: svc.name,
+      .filter((service) => !defaultServices.includes(service?._id.toString()))
+      .map((s) => ({
+        title: s.name,
         width: 160,
         render: (_: any, { name }: { name: number }) => (
           <Form.Item
-            name={[name, 'invoice', svc.fieldName, 'sum']}
+            name={[name, 'invoice', s.fieldName, 'sum']}
             style={{ margin: 0 }}
           >
             <Input />
@@ -125,7 +113,7 @@ const InvoicesTable: React.FC = () => {
               remove,
               allowedServices,
               service?.losses,
-              dynamicColumns
+              customServicesColumns
             ),
           ]}
           dataSource={fields}
