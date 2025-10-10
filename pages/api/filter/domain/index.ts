@@ -36,11 +36,13 @@ export default async function handler(
           filteredStreets: filteredStreets,
         },
       })
+      // console.log('API /filter/domain distinctDomains:', distinctDomains?.length, distinctDomains?.[0])
 
       const domainsFilter = distinctDomains?.map(({ domainDetails }) => ({
         text: domainDetails.name,
         value: domainDetails._id,
       }))
+      console.log('domainsFilter (frontend response):', domainsFilter?.length, domainsFilter)
 
       return res.status(200).json({ domainsFilter, success: true })
     } catch (error) {

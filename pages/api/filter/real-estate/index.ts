@@ -39,6 +39,10 @@ export default async function handler(
           archived,
         },
       })
+// console.log('API /filter/real-estate distinctCompanies:',
+//   distinctCompanies?.length,
+//   distinctCompanies?.[0]
+// )
 
       const realEstatesFilter = distinctCompanies?.map(
         ({ companyDetails }) => ({
@@ -46,6 +50,7 @@ export default async function handler(
           value: companyDetails._id,
         })
       )
+// console.log('realEstatesFilter (frontend response):', realEstatesFilter?.length, realEstatesFilter?.slice(0, 2))
 
       return res.status(200).json({ realEstatesFilter, success: true })
     } catch (error) {

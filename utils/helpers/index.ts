@@ -12,6 +12,7 @@ import {
   getRealEstatesPipeline,
   getStreetsPipeline,
 } from '../pipelines'
+import { IDomain } from '@modules/models/Domain'
 import { PaymentOptions } from '../types'
 import { IPermissions } from '@modules/models/User'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
@@ -364,8 +365,8 @@ export async function getDistinctStreets({
 export async function getDistinctCompanyAndDomain({
   isGlobalAdmin,
   user,
-  companyGroup,
-  model,
+  companyGroup, 
+  model, 
   filters: {
     filteredCompanys = null,
     filteredStreets = null,
@@ -373,34 +374,96 @@ export async function getDistinctCompanyAndDomain({
     archived = null,
   },
 }) {
-  const domainsPipeline = getDomainsPipeline(
-    isGlobalAdmin,
-    user.email,
-    filteredCompanys,
-    filteredStreets
-  )
-  const streetsPipeline = getStreetsPipeline(isGlobalAdmin, user.email)
+  const Domain = mongoose.model<IDomain>('Domain')
+  const normalizedArchived =
+    archived === true || archived === 'true'
+      ? true
+      : archived === false || archived === 'false'
+      ? false
+      : null
 
-  const distinctDomains = await model.aggregate(domainsPipeline)
-  const distinctStreets = await model.aggregate(streetsPipeline)
+  // console.log('getDistinctCompanyAndDomain start:', {
+  //   isGlobalAdmin,
+  //   user: user?.email,
+  //   filteredCompanys,
+  //   filteredStreets,
+  //   filteredDomains,
+  //   archived,
+  //   normalizedArchived,
+  // })
+  let accessibleDomainIds: string[] | null = null
+  if (!isGlobalAdmin) {
+    const domainsForUser = await Domain.find(
+      { adminEmails: user.email },
+      { _id: 1 }
+    ).lean()
+    accessibleDomainIds = domainsForUser.map((d) => d._id.toString())
+  }
+  const companyQuery: any = {}
 
-  const distinctedDomainsIds =
-    filteredDomains === null
-      ? distinctDomains.map((domain) => domain._id)
-      : filteredDomains
-  const distinctedStreetsIds =
-    filteredStreets === null
-      ? distinctStreets.map((street) => street.streetData._id)
-      : filteredStreets
+  if (filteredCompanys && Array.isArray(filteredCompanys) && filteredCompanys.length) {
+    companyQuery._id = { $in: filteredCompanys.map((id) => id.toString()) }
+  }
+  if (filteredStreets && Array.isArray(filteredStreets) && filteredStreets.length) {
+    companyQuery.street = { $in: filteredStreets.map((id) => id.toString()) }
+  }
+  if (filteredDomains && Array.isArray(filteredDomains) && filteredDomains.length) {
+    companyQuery.domain = { $in: filteredDomains.map((id) => id.toString()) }
+  }
 
-  const realEstatesPipeline = getRealEstatesPipeline({
-    isGlobalAdmin,
-    distinctedDomainsIds,
-    distinctedStreetsIds,
-    group: companyGroup,
-    archived,
-  })
-  const distinctCompanies = await model.aggregate(realEstatesPipeline)
+  if (normalizedArchived === true) {
+    companyQuery.archived = true
+  } else if (normalizedArchived === false) {
+    companyQuery.$or = [
+      { archived: { $ne: true } },
+      { archived: { $exists: false } },
+    ]
+  } 
+
+  if (!isGlobalAdmin) {
+    const conds: any[] = [{ adminEmails: user.email }]
+
+    if (accessibleDomainIds && accessibleDomainIds.length) {
+      conds.push({ domain: { $in: accessibleDomainIds } })
+    }
+
+    if (conds.length) {
+      companyQuery.$or = companyQuery.$or
+        ? { $and: [companyQuery.$and || [], { $or: conds }, { $or: companyQuery.$or }] }
+        : { $or: conds }
+      companyQuery.$and = companyQuery.$and || []
+      companyQuery.$and.push({ $or: conds })
+    }
+  }
+
+  const companiesRaw = await RealEstate.find(companyQuery)
+    .select('_id companyName archived domain street adminEmails')
+    .lean()
+
+  const distinctCompanies = companiesRaw.map((c) => ({ companyDetails: c }))
+
+  const domainIdsFromCompanies = [
+    ...new Set(companiesRaw.map((c) => (c.domain ? c.domain.toString() : null)).filter(Boolean)),
+  ]
+
+  const finalDomainIds =
+    !isGlobalAdmin && accessibleDomainIds
+      ? domainIdsFromCompanies.filter((id) => accessibleDomainIds!.includes(id))
+      : domainIdsFromCompanies
+  const domainsRaw = finalDomainIds.length
+    ? await Domain.find({ _id: { $in: finalDomainIds } })
+        .select('name adminEmails archived')
+        .lean()
+    : []
+
+  const distinctDomains = domainsRaw.map((d) => ({ _id: d._id.toString(), domainDetails: d }))
+
+  // console.log('getDistinctCompanyAndDomain result:', {
+  //   domainsCount: distinctDomains?.length ?? 0,
+  //   companiesCount: distinctCompanies?.length ?? 0,
+  //   sampleCompany: distinctCompanies?.[0],
+  //   sampleDomain: distinctDomains?.[0],
+  // })
 
   return { distinctDomains, distinctCompanies }
 }
