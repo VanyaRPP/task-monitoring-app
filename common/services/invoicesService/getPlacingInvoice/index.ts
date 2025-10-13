@@ -26,15 +26,6 @@ export const getPlacingInvoice = ({
     }
   }
 
-  const inflicionCompany =
-    getPriceFromCustomServices(
-      company?.customServices,
-      ServiceType.Inflicion) 
-    ?? getPriceFromCustomServices(
-      service?.customServices,
-      ServiceType.Inflicion) 
-    ?? company?.inflicion
-
   const rentPrice = getPriceFromCustomServices(
     company?.customServices,
     'rentPrice') 
@@ -43,7 +34,7 @@ export const getPlacingInvoice = ({
     'rentPrice')
   ?? service?.rentPrice
 
-  if (inflicionCompany) {
+  if (company?.inflicion) {
     const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
     const price =
       (prevPlacing?.sum ||
