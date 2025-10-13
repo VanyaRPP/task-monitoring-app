@@ -113,7 +113,7 @@ const InvoicesTable: React.FC = () => {
               remove,
               allowedServices,
               service?.losses,
-              customServicesColumns
+              // customServicesColumns
             ),
           ]}
           dataSource={fields}
