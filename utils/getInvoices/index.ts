@@ -192,7 +192,8 @@ export const getPlacingInvoice = ({
     const price =
       (prevPlacing?.sum ||
         company.totalArea * (company.pricePerMeter || service?.rentPrice)) *
-      ((prevService?.inflicionPrice || 100) / 100)
+      (((prevService?.inflicionPrice || 100) / 100) < 1 ? 1 : ((prevService?.inflicionPrice || 100) / 100))
+    console.log('price', price)
 
     return {
       type: ServiceType.Placing,

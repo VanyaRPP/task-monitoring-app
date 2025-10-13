@@ -292,7 +292,7 @@ const useInflicionValues = (
 
   return {
     previousPlacingPrice,
-    inflicionAmount,
+    inflicionAmount: inflicionAmount < 0 ? 0 : inflicionAmount,
   }
 }
 
