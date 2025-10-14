@@ -22,6 +22,22 @@ const InvoicesHeader = () => {
   const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
   const [isLoading, setIsLoading] = useState(false)
 
+  const invoiceCSFilter = (invoices) => {
+    return invoices.filter(
+      (invoice) => 
+        invoice.fieldName !== 'waterPart'
+      && invoice.fieldName !== 'waterPrice' 
+      && invoice.fieldName !== 'waterPriceTotal'
+      && invoice.fieldName !== 'inflicionPrice'
+      && invoice.fieldName !== 'rentPrice'
+      && invoice.fieldName !== 'cleaningPrice'
+      && invoice.fieldName !== 'electricityPrice'
+      && invoice.fieldName !== 'garbageCollectorPrice'
+      && invoice.fieldName !== 'placingPrice'
+      && invoice.fieldName !== 'rentPart'
+      )
+  } 
+
   const handleClickSaveButton = async () => {
     try {
       await form.validateFields()
@@ -71,7 +87,7 @@ const InvoicesHeader = () => {
         generalSum: +toRoundFixed(generalSum),
         provider,
         reciever,
-        invoice,
+        invoice: invoiceCSFilter(invoice),
       }
     })
 
