@@ -272,20 +272,23 @@ export const formatDateWithGenitiveMonthCapitalized = (
 }
 
 export const invoiceCSFilter = (invoices) => {
-    return invoices.filter(
-      (invoice) => 
-        invoice.fieldName !== 'waterPart'
-      && invoice.fieldName !== 'waterPrice' 
-      && invoice.fieldName !== 'waterPriceTotal'
-      && invoice.fieldName !== 'inflicionPrice'
-      && invoice.fieldName !== 'rentPrice'
-      && invoice.fieldName !== 'cleaningPrice'
-      && invoice.fieldName !== 'electricityPrice'
-      && invoice.fieldName !== 'garbageCollectorPrice'
-      && invoice.fieldName !== 'placingPrice'
-      && invoice.fieldName !== 'rentPart'
-      )
-  } 
+  const excludedFields = [
+    'waterPart',
+    'waterPrice',
+    'waterPriceTotal',
+    'inflicionPrice',
+    'rentPrice',
+    'cleaningPrice',
+    'electricityPrice',
+    'garbageCollectorPrice',
+    'placingPrice',
+    'rentPart',
+  ]
+
+  return invoices.filter(
+    (invoice) => !excludedFields.includes(invoice.fieldName)
+  )
+}
 
 export const getPaymentProviderAndReciever = (company) => {
   const provider: IProvider = company && {
