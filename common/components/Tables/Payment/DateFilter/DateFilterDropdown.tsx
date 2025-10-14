@@ -12,13 +12,13 @@ const DateFilterDropdown: React.FC<Props> = ({
   confirm,
   clearFilters,
 }) => {
-  const [expandedKeys, setExpandedKeys] = useState<string[]>([]) 
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([])
   const treeData = useMemo(
     () =>
-      data.map(y => ({
+      data.map((y) => ({
         key: y.value,
         title: y.text,
-        children: (y.children || []).map(c => ({
+        children: (y.children || []).map((c) => ({
           key: c.value,
           title: c.text,
         })),
@@ -27,22 +27,37 @@ const DateFilterDropdown: React.FC<Props> = ({
   )
 
   return (
-    <div style={{ padding: 8, width: 200 }}>
+    <div style={{ padding: 8 }}>
       <div style={{ maxHeight: 280, overflow: 'auto', marginBottom: 8 }}>
         <Tree
           checkable
           selectable={false}
           defaultExpandAll={false}
           expandedKeys={expandedKeys}
-          onExpand={keys => setExpandedKeys(keys as string[])}
+          onExpand={(keys) => setExpandedKeys(keys as string[])}
           treeData={treeData}
           checkedKeys={selectedKeys as string[]}
-          onCheck={keys => setSelectedKeys(keys as string[])}
+          onCheck={(keys) => setSelectedKeys(keys as string[])}
         />
       </div>
       <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
-        <Button onClick={() => { clearFilters?.()}}>Reset</Button>
-        <Button type="primary" onClick={() => confirm()}>OK</Button>
+        <Button
+          onClick={() => {
+            clearFilters?.()
+            setExpandedKeys([])
+          }}
+        >
+          Скинути
+        </Button>
+        <Button
+          type="primary"
+          onClick={() => {
+            confirm()
+            setExpandedKeys([])
+          }}
+        >
+          OK
+        </Button>
       </div>
     </div>
   )
