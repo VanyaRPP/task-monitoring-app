@@ -36,7 +36,7 @@ export const getDefaultColumns = (
     render: (_, { name }: { name: number }) => <TotalArea name={name} />,
   },
   _allowedServices.some((inv) => inv?.fieldName === 'rentPrice')
-    ? {
+    && {
         title: 'Утримання',
         children: [
           {
@@ -54,10 +54,9 @@ export const getDefaultColumns = (
             ),
           },
         ],
-      }
-    : {},
+      },
   _allowedServices.some((inv) => inv?.fieldName === 'placingPrice')
-    ? {
+    && {
         title: 'Розміщення',
         children: [
           {
@@ -75,17 +74,15 @@ export const getDefaultColumns = (
             ),
           },
         ],
-      }
-    : {},
+      },
   _allowedServices.some((inv) => inv?.fieldName === 'inflicionPrice')
-    ? {
+    && {
         title: <InflicionTitle />,
         width: 200,
         render: (_, { name }: { name: number }) => <InflicionSum name={name} />,
-      }
-    : {},
+      },
   _allowedServices.some((inv) => inv?.fieldName === 'electricityPrice')
-    ? {
+    && {
         title: losses
           ? `Електропостачання + Втрати ${losses}%`
           : 'Електропостачання',
@@ -126,10 +123,9 @@ export const getDefaultColumns = (
             ),
           },
         ],
-      }
-    : {},
+      },
   _allowedServices.some((inv) => inv?.fieldName === 'waterPrice')
-    ? {
+    && {
         title: 'Водопостачання',
         children: [
           {
@@ -152,10 +148,9 @@ export const getDefaultColumns = (
             render: (_, { name }: { name: number }) => <WaterSum name={name} />,
           },
         ],
-      }
-    : {},
+      },
   _allowedServices.some((inv) => inv?.fieldName === 'waterPartAmount')
-    ? {
+    && {
         title: 'Водопостачання без лічильника',
         children: [
           {
@@ -173,10 +168,9 @@ export const getDefaultColumns = (
             ),
           },
         ],
-      }
-    : {},
+      },
   _allowedServices.some((inv) => inv?.fieldName === 'GarbageCollectorAmount')
-    ? {
+    && {
         title: 'Вивіз ТПВ',
         children: [
           {
@@ -194,15 +188,13 @@ export const getDefaultColumns = (
             ),
           },
         ],
-      }
-    : {},
+      },
   _allowedServices.some((inv) => inv?.fieldName === 'Cleaning')
-    ? {
+    && {
         title: 'Прибирання',
         width: 200,
         render: (_, { name }: { name: number }) => <Cleaning name={name} />,
-      }
-    : {},
+      },
   {
     title: 'Знижка',
     width: 200,
@@ -224,7 +216,7 @@ export const getDefaultColumns = (
       </Popconfirm>
     ),
   },
-]
+].filter(Boolean) as TableColumnsType
 
 const CompanyName: React.FC<{ name: number }> = ({ name }) => {
   const { form } = useInvoicesPaymentContext()
@@ -300,7 +292,7 @@ const useInflicionValues = (
 
   return {
     previousPlacingPrice,
-    inflicionAmount,
+    inflicionAmount: inflicionAmount < 0 ? 0 : inflicionAmount,
   }
 }
 

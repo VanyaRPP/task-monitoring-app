@@ -14,6 +14,7 @@ import { Button, message, Spin } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import styles from './styles.module.scss'
+import { invoiceCSFilter } from '@utils/helpers'
 
 const InvoicesHeader = () => {
   const router = useRouter()
@@ -51,8 +52,9 @@ const InvoicesHeader = () => {
       const invoice = Object.values(payment.invoice || {}).filter(
         ({ sum }) => sum
       )
+      const filteredInvoice = invoiceCSFilter(invoice);
 
-      const generalSum = invoice.reduce(
+      const generalSum = filteredInvoice.reduce(
         (acc: number, invoice: IPaymentField) => {
           return acc + (+invoice.sum || 0)
         },
@@ -71,7 +73,7 @@ const InvoicesHeader = () => {
         generalSum: +toRoundFixed(generalSum),
         provider,
         reciever,
-        invoice,
+        invoice: filteredInvoice,
       }
     })
 

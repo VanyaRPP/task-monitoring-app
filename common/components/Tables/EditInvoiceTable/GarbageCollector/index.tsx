@@ -56,16 +56,16 @@ export const Price: React.FC<InvoiceComponentProps> = ({
     return <span>{toRoundFixed(price)} грн</span>
   }
 
-  // return (
-  //   <Form.Item name={[...name, 'price']} rules={[validator.required()]} noStyle>
-  //     <Input
-  //       type="number"
-  //       placeholder="Значення..."
-  //       disabled={disabled}
-  //       suffix="грн"
-  //     />
-  //   </Form.Item>
-  // )
+  return (
+    <Form.Item name={[...name, 'price']} rules={[validator.required()]} noStyle>
+      <Input
+        type="number"
+        placeholder="Значення..."
+        disabled={disabled}
+        suffix="грн"
+      />
+    </Form.Item>
+  )
 }
 
 export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {

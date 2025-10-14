@@ -271,6 +271,25 @@ export const formatDateWithGenitiveMonthCapitalized = (
   return `${d.date()} ${monthsUaGenitiveCapitalized[d.month()]} ${d.year()}`
 }
 
+export const invoiceCSFilter = (invoices) => {
+  const excludedFields = [
+    'waterPart',
+    'waterPrice',
+    'waterPriceTotal',
+    'inflicionPrice',
+    'rentPrice',
+    'cleaningPrice',
+    'electricityPrice',
+    'garbageCollectorPrice',
+    'placingPrice',
+    'rentPart',
+  ]
+
+  return invoices.filter(
+    (invoice) => !excludedFields.includes(invoice.fieldName)
+  )
+}
+
 export const getPaymentProviderAndReciever = (company) => {
   const provider: IProvider = company && {
     description: company?.domain?.description || '',
