@@ -14,6 +14,7 @@ import { Button, message, Spin } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import styles from './styles.module.scss'
+import { invoiceCSFilter } from '@utils/helpers'
 
 const InvoicesHeader = () => {
   const router = useRouter()
@@ -21,22 +22,6 @@ const InvoicesHeader = () => {
   const [addPayment] = useAddPaymentMutation()
   const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
   const [isLoading, setIsLoading] = useState(false)
-
-  const invoiceCSFilter = (invoices) => {
-    return invoices.filter(
-      (invoice) => 
-        invoice.fieldName !== 'waterPart'
-      && invoice.fieldName !== 'waterPrice' 
-      && invoice.fieldName !== 'waterPriceTotal'
-      && invoice.fieldName !== 'inflicionPrice'
-      && invoice.fieldName !== 'rentPrice'
-      && invoice.fieldName !== 'cleaningPrice'
-      && invoice.fieldName !== 'electricityPrice'
-      && invoice.fieldName !== 'garbageCollectorPrice'
-      && invoice.fieldName !== 'placingPrice'
-      && invoice.fieldName !== 'rentPart'
-      )
-  } 
 
   const handleClickSaveButton = async () => {
     try {
