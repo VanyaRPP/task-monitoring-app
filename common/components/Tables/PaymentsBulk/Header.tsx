@@ -67,8 +67,9 @@ const InvoicesHeader = () => {
       const invoice = Object.values(payment.invoice || {}).filter(
         ({ sum }) => sum
       )
+      const filteredInvoice = invoiceCSFilter(invoice);
 
-      const generalSum = invoice.reduce(
+      const generalSum = filteredInvoice.reduce(
         (acc: number, invoice: IPaymentField) => {
           return acc + (+invoice.sum || 0)
         },
@@ -87,7 +88,7 @@ const InvoicesHeader = () => {
         generalSum: +toRoundFixed(generalSum),
         provider,
         reciever,
-        invoice: invoiceCSFilter(invoice),
+        invoice: filteredInvoice,
       }
     })
 
