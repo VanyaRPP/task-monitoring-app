@@ -46,6 +46,8 @@ import { getDebtorTooltipColor } from '@utils/helpers'
 import { Grid } from 'antd'
 import s from './style.module.scss'
 
+import DateFilterDropdown from './DateFilter/DateFilterDropdown'
+
 export interface PaymentDeleteItem {
   id: string
   date: string
@@ -330,18 +332,43 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         dataIndex: 'invoiceCreationDate',
         render: (date: string) => dateToDefaultFormat(date),
         width: sepDomainID ? 70 : 164,
-        filters:
-          !sepDomainID && dateFilters?.monthFilter
-            ? dateFilters.monthFilter
-                .filter((f) => f.value != null)
-                .map((f) => ({
-                  text: toFirstUpperCase(
-                    dateToMonth(new Date(2000, Number(f.value) - 1))
-                  ),
-                  value: `${new Date().getFullYear()}-month-${f.value}`,
-                }))
-            : [],
+        filters: !sepDomainID && dateFilters ? (() => {
+          const monthItems =
+            (dateFilters.monthFilter ?? [])
+              .filter(f => f.value != null)
+              .map(f => ({
+                num: Number(f.value),
+                label: toFirstUpperCase(
+                  dateToMonth(new Date(2000, Number(f.value) - 1)),
+                ),
+              }))
+
+          const MIN_YEAR = 2025
+          const currentYear = new Date().getFullYear()
+          const backendYears: number[] =
+            (dateFilters.yearFilter ?? [])
+              .filter(y => y?.value != null)
+              .map(y => Number(y.value))
+
+          const years = Array.from(
+            new Set([
+              ...backendYears,
+              ...Array.from({ length: currentYear - MIN_YEAR + 1 }, (_, i) => currentYear - i),
+            ]),
+          ).sort((a, b) => b - a)
+          return years.map(y => ({
+            text: String(y),
+            value: String(y),
+            children: monthItems.map(m => ({
+              text: m.label,
+              value: `${y}-month-${m.num}`,
+            })),
+          }))
+        })() : [],
         filteredValue: filters?.invoiceCreationDate || null,
+        filterDropdown: (ddProps) => (
+          <DateFilterDropdown data={(ddProps.filters as any) ?? []} {...ddProps} />
+        ),
       },
       {
         title: 'Тип',
