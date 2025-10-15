@@ -291,7 +291,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
                   Завантажити рахунки <DownloadOutlined />
                 </Button>
               )}
-            {isGlobalAdmin &&
+            {isAdmin &&
               pathname === AppRoutes.PAYMENT &&
               selectedPayments.length > 0 && (
                 <Button type="link" onClick={handleDeletePayments}>
