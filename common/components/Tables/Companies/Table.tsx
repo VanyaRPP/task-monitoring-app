@@ -182,6 +182,11 @@ const CompaniesTable: React.FC<Props> = ({
   return (
     <Table
       rowKey="_id"
+      locale={{
+        cancelSort: 'Скасувати сортування',
+        triggerAsc: 'Сортувати за зростанням',
+        triggerDesc: 'Сортувати за спаданням',
+      }}
       pagination={
         (router.pathname === AppRoutes.REAL_ESTATE ||
           router.pathname === AppRoutes.SEP_DOMAIN) && {
@@ -315,7 +320,6 @@ const getDefaultColumns = ({
       title: 'Опис',
       dataIndex: 'description',
       width: 100,
-      ellipsis: true,
       align: 'center',
       render: renderTooltip,
     },
