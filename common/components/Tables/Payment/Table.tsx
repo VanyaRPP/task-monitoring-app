@@ -47,6 +47,7 @@ import { Grid } from 'antd'
 import s from './style.module.scss'
 
 import DateFilterDropdown from './DateFilter/DateFilterDropdown'
+import { off } from 'process'
 
 export interface PaymentDeleteItem {
   id: string
@@ -621,22 +622,23 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       visibleColumns as ColumnType<IExtendedPayment>[],
       0
     )
-
+    const offset = hasRowSelection ? 1 : 0
     return (
       <Table.Summary>
         <Table.Summary.Row>
           {hasRowSelection && <Table.Summary.Cell index={0} />}
           {flatVisibleColumns.map(({ column, index }) => {
+            const idx = index + offset
             if (column.dataIndex === 'debit') {
               return (
-                <Table.Summary.Cell key={index} index={index} align="center">
+                <Table.Summary.Cell key={idx} index={idx} align="center">
                   {renderCurrency(toRoundFixed(totalPayments.debit || 0))}
                 </Table.Summary.Cell>
               )
             }
             if (column.dataIndex === 'credit') {
               return (
-                <Table.Summary.Cell key={index} index={index} align="center">
+                <Table.Summary.Cell key={idx} index={idx} align="center">
                   {renderCurrency(toRoundFixed(totalPayments.credit || 0))}
                 </Table.Summary.Cell>
               )
@@ -647,7 +649,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
               )
             ) {
               return (
-                <Table.Summary.Cell key={index} index={index}>
+                <Table.Summary.Cell key={idx} index={idx}>
                   {renderCurrency(
                     toRoundFixed(
                       totalPayments[
@@ -658,20 +660,18 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                 </Table.Summary.Cell>
               )
             }
-            return <Table.Summary.Cell key={index} index={index} />
+            return <Table.Summary.Cell key={idx} index={idx} />
           })}
         </Table.Summary.Row>
         <Table.Summary.Row>
           {hasRowSelection && <Table.Summary.Cell index={0} />}
           {flatVisibleColumns.map(({ column, index }) => {
-            if (column.dataIndex === 'credit') {
-              return null
-            }
+            const idx = index + offset
             if (column.dataIndex === 'debit') {
               return (
                 <Table.Summary.Cell
-                  key={index}
-                  index={index}
+                  key={idx}
+                  index={idx}
                   colSpan={2}
                   align="center"
                 >
@@ -684,7 +684,10 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                 </Table.Summary.Cell>
               )
             }
-            return <Table.Summary.Cell key={index} index={index} />
+            if (column.dataIndex === 'credit') {
+              return null
+            }
+            return <Table.Summary.Cell key={idx} index={idx} />
           })}
         </Table.Summary.Row>
       </Table.Summary>
