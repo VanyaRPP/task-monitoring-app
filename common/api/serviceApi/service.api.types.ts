@@ -23,6 +23,8 @@ export interface IService {
     price: number
   }[]
   losses?: number
+  consumedElectricity?: number
+  generalElectricity?: number
 }
 
 export interface IAddServiceResponse {

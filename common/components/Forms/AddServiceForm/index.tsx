@@ -19,6 +19,7 @@ import s from './style.module.scss'
 import { inputNumberParser } from '@utils/helpers'
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import CustomServicesCard from '@components/UI/CustomServicesCard'
+import { LossesCollapse } from '@components/Losses/LossesCollapse'
 
 dayjs.locale('uk')
 
@@ -255,16 +256,14 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item> */}
-        <Form.Item
-          name="losses"
-          label={<>Втрати в трансформаторі, лініях, реактивна (%)</>}
-        >
-          <InputNumber
-            parser={inputNumberParser}
-            placeholder="Вкажіть значення"
-            className={s.formInput}
-          />
-        </Form.Item>
+        <LossesCollapse
+          form={form}
+          name='losses'
+          index={5}
+          isServiceForm
+        />
+        <br/>
+        <br/>
         <Form.Item name="description" label="Опис">
           <Input.TextArea
             placeholder="Введіть опис"
