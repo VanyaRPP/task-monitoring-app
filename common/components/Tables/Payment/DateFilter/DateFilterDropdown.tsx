@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import type { FilterDropdownProps } from 'antd/es/table/interface'
 import { Tree, Button } from 'antd'
 
@@ -12,7 +12,11 @@ const DateFilterDropdown: React.FC<Props> = ({
   confirm,
   clearFilters,
 }) => {
-  const [expandedKeys, setExpandedKeys] = useState<string[]>([])
+  const [expandedKeys, setExpandedKeys] = useState<string[]>(() => {
+    const year2025 = data.find(d => d.value === '2025')
+    return year2025 ? [year2025.value] : []
+  })
+
   const treeData = useMemo(
     () =>
       data.map((y) => ({
@@ -25,6 +29,12 @@ const DateFilterDropdown: React.FC<Props> = ({
       })),
     [data]
   )
+  useEffect(() => {
+    const year2025 = data.find(d => d.value === '2025')
+    if (year2025) {
+      setExpandedKeys([year2025.value])
+    }
+  }, [data])
 
   return (
     <div style={{ padding: 8 }}>
@@ -32,7 +42,6 @@ const DateFilterDropdown: React.FC<Props> = ({
         <Tree
           checkable
           selectable={false}
-          defaultExpandAll={false}
           expandedKeys={expandedKeys}
           onExpand={(keys) => setExpandedKeys(keys as string[])}
           treeData={treeData}
@@ -44,7 +53,8 @@ const DateFilterDropdown: React.FC<Props> = ({
         <Button
           onClick={() => {
             clearFilters?.()
-            setExpandedKeys([])
+            const year2025 = data.find(d => d.value === '2025')
+            setExpandedKeys(year2025 ? [year2025.value] : [])
           }}
         >
           Скинути
@@ -53,7 +63,8 @@ const DateFilterDropdown: React.FC<Props> = ({
           type="primary"
           onClick={() => {
             confirm()
-            setExpandedKeys([])
+            const year2025 = data.find(d => d.value === '2025')
+            setExpandedKeys(year2025 ? [year2025.value] : [])
           }}
         >
           OK
