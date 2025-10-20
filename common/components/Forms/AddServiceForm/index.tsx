@@ -157,8 +157,19 @@ const AddServiceForm: React.FC<Props> = ({
           ? currentService.customServices
           : filteredCustomServices) || [],
       losses: currentService?.losses ?? 0,
+      consumedElectricity: currentService?.consumedElectricity ?? null,
+      generalElectricity: currentService?.generalElectricity ?? null,
+      isVAT: currentService?.isVAT || true,
     })
   }, [form, currentService, previousMonth, initialCustomServices])
+
+  useEffect(() => {
+    form.setFields([
+      { name: 'consumedElectricity', value: currentService?.consumedElectricity ?? null },
+      { name: 'generalElectricity', value: currentService?.generalElectricity ?? null },
+      { name: 'isVAT', value: currentService?.isVAT ?? true },
+    ])
+  }, [currentService, form])
 
   return (
     <ConfigProvider locale={ukUA}>
@@ -171,6 +182,9 @@ const AddServiceForm: React.FC<Props> = ({
           street: currentService?.street?._id,
           date: dayjs(currentService?.date),
           description: currentService?.description,
+          consumedElectricity: currentService?.consumedElectricity ?? null,
+          generalElectricity: currentService?.generalElectricity ?? null,
+          isVAT: currentService?.isVAT || true,
         }}
         onValuesChange={() => setIsValueChanged(true)}
       >
@@ -259,7 +273,6 @@ const AddServiceForm: React.FC<Props> = ({
         <LossesCollapse
           form={form}
           name='losses'
-          index={5}
           isServiceForm
         />
         <br/>

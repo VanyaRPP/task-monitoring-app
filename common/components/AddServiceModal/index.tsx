@@ -38,6 +38,9 @@ type FormData = {
     price: number
   }[]
   losses: number
+  consumedElectricity?: number
+  generalElectricity?: number
+  isVAT?: boolean
 }
 
 const AddServiceModal: FC<Props> = ({
@@ -85,6 +88,9 @@ const AddServiceModal: FC<Props> = ({
       description: formData?.description || '',
       customServices: formData?.customServices || [],
       ...(formData?.losses > 0 && { losses: formData?.losses }),
+      consumedElectricity: formData?.consumedElectricity || null,
+      generalElectricity: formData?.generalElectricity || null,
+      isVAT: formData?.isVAT || true,
     }
     const response = currentService
       ? await editService({

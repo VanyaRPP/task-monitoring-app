@@ -25,6 +25,7 @@ export interface IService {
   losses?: number
   consumedElectricity?: number
   generalElectricity?: number
+  isVAT?: boolean
 }
 
 export interface IAddServiceResponse {
