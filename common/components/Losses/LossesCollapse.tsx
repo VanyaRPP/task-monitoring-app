@@ -1,48 +1,63 @@
-import React, { useEffect, useState } from 'react'
+import { inputNumberParser } from '@utils/helpers'
 import {
-  Collapse,
-  InputNumber,
-  Form,
-  Checkbox,
-  Row,
   Col,
-  Space,
+  Collapse,
+  Flex,
+  Form,
+  FormInstance,
+  InputNumber,
+  Row,
   Typography,
 } from 'antd'
-import { inputNumberParser } from '@utils/helpers'
+import { useEffect, useMemo } from 'react'
 
-export const LossesCollapse = ({
-  form,
-  name,
-  isServiceForm,
-  disabled = false,
-}) => {
-  const { Text } = Typography
-  const [pricekWH, setPricekWH] = useState(0)
+const { Text } = Typography
+
+export interface LossesCollapseProps {
+  form: FormInstance
+  name: string
+  disabled?: boolean
+}
+
+export const LossesCollapse: React.FC<LossesCollapseProps> = (props) => {
+  const { form, name, disabled = false } = props
 
   const customServices = Form.useWatch('customServices', form)
-  const consumed = Form.useWatch('consumedElectricity', form)
-  const total = Form.useWatch('generalElectricity', form)
-  const isVAT = Form.useWatch('isVAT', form)
+  const consumed: number = Form.useWatch('consumedElectricity', form) ?? 0
 
-  useEffect(() => {
+  // всього без пдв
+  const total: number = Form.useWatch('generalElectricity', form) ?? 0
+
+  // всього з пдв
+  const totalWithVAT = total * 1.2
+
+  // ціна з пдв
+  const pricekWHWithVAT = useMemo(() => {
     const electricityService = customServices?.find(
       (item) => item?.fieldName === 'electricityPrice'
     )
-    setPricekWH(electricityService?.price ?? 0)
+    return electricityService?.price ?? 0
   }, [customServices])
 
+  // ціна без пдв
+  const pricekWH = pricekWHWithVAT / 1.2
+
+  // всього по тарифу без пдв
+  const totalFromTariff = pricekWH * consumed
+
+  // втрати (з пдв і без пдв однакові)
+  const losses = total / totalFromTariff - 1
+  const lossesPercent = losses * 100
+
+  const labelPricekWH = pricekWH ? pricekWH.toFixed(2) : 'Тариф'
+  const labelConsumed = consumed ? consumed.toFixed(2) : 'Спожито'
+  const labelTotal = total ? total.toFixed(2) : 'Загальне'
+  const labelTotalWithVAT = totalWithVAT ? totalWithVAT.toFixed(2) : '0.00'
+  const labelLossesPercent = lossesPercent ? lossesPercent.toFixed(2) : '0.00'
+
   useEffect(() => {
-    if (consumed && total) {
-      const rawPrice = pricekWH
-      const tariff = isVAT ? Number(rawPrice) : Number(rawPrice) / 1.2
-      const priceWithTariff = tariff * Number(consumed)
-      const lossesPercent =
-        ((Number(total) - priceWithTariff) / priceWithTariff) * 100
-      const formatted = Number(lossesPercent.toFixed(2))
-      form.setFieldsValue({ losses: formatted })
-    }
-  }, [consumed, total, isVAT, pricekWH])
+    form.setFieldValue(name, isNaN(lossesPercent) ? 0 : Number(lossesPercent.toFixed(2)))
+  }, [form, name, lossesPercent])
 
   return (
     <Collapse size="small" bordered={false}>
@@ -58,57 +73,32 @@ export const LossesCollapse = ({
               parser={inputNumberParser}
               placeholder="Втрати електроенергії"
               disabled={disabled}
-              style={{
-                width: disabled ? '100%' : !isServiceForm ? 365 : 395,
-              }}
+              style={{ width: '100%' }}
             />
           </Form.Item>
         }
       >
-        <Space
-          direction="horizontal"
-          style={{
-            marginBottom: 16,
-            width: '100%',
-            justifyContent: 'space-evenly',
-          }}
+        <Form.Item
+          name="consumedElectricity"
+          label="Спожито (кВт)"
+          style={{ flex: 1 }}
         >
-          <Space direction="vertical">
-            <Text>Спожито (кВт)</Text>
-            <Form.Item name="consumedElectricity" noStyle>
-              <InputNumber
-                placeholder="Спожито"
-                style={{ width: 150 }}
-                onChange={(value) =>
-                  form.setFieldValue('consumedElectricity', value)
-                }
-              />
-            </Form.Item>
-            <div />
-            <Text>Ціна кВт: {isVAT ? pricekWH : (pricekWH / 1.2).toFixed(2)}</Text>
-          </Space>
+          <InputNumber placeholder="Спожито" style={{ width: '100%' }} />
+        </Form.Item>
 
-          <Space direction="vertical">
-            <Text>Всього (грн без ПДВ)</Text>
-            <Form.Item name="generalElectricity" noStyle>
-              <InputNumber
-                placeholder="Загальне"
-                style={{ width: 150 }}
-                onChange={(value) =>
-                  form.setFieldValue('generalElectricity', value)
-                }
-              />
-            </Form.Item>
-            <div />
-            <Form.Item name="isVAT" valuePropName="checked" noStyle>
-              <Checkbox
-                onChange={(e) => form.setFieldValue('isVAT', e.target.checked)}
-              >
-                ПДВ (+20%)
-              </Checkbox>
-            </Form.Item>
-          </Space>
-        </Space>
+        <Flex style={{ width: '100%' }} gap={16}>
+          <Form.Item
+            name="generalElectricity"
+            label="Всього (грн без ПДВ)"
+            style={{ flex: 1 }}
+          >
+            <InputNumber placeholder="Загальне" style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item label="Всього (грн з ПДВ)" style={{ flex: 1 }}>
+            <Text>{labelTotalWithVAT}</Text>
+          </Form.Item>
+        </Flex>
 
         <Row
           align="middle"
@@ -116,22 +106,12 @@ export const LossesCollapse = ({
           style={{ fontSize: 20, fontFamily: 'serif', lineHeight: 1.2 }}
         >
           <Col style={{ textAlign: 'center', marginRight: 8 }}>
-            {total || 'Загальне'} - (
-            {isVAT ? pricekWH : (pricekWH / 1.2).toFixed(2)} *{' '}
-            {consumed || 'Спожито'})
-            <div
-              style={{
-                borderTop: '1px solid',
-                margin: '2px 0',
-              }}
-            />
-            ({isVAT ? pricekWH : (pricekWH / 1.2).toFixed(2)} *{' '}
-            {consumed || 'Спожито'})
+            {labelTotal} - ({labelPricekWH} * {labelConsumed})
+            <div style={{ borderTop: '1px solid', margin: '2px 0' }} />(
+            {labelPricekWH} * {labelConsumed})
           </Col>
           <Col>
-            <Text>
-              × 100 ≈ {form.getFieldValue('losses') ?? 0}%
-            </Text>
+            <Text>× 100 ≈ {labelLossesPercent}%</Text>
           </Col>
         </Row>
       </Collapse.Panel>
