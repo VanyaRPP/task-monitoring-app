@@ -331,7 +331,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         title: 'Дата створення',
         dataIndex: 'invoiceCreationDate',
         render: (date: string) => dateToDefaultFormat(date),
-        width: sepDomainID ? 70 : 164,
+        width: sepDomainID ? 70 : 170,
         filters: !sepDomainID && dateFilters ? (() => {
           const monthItems =
             (dateFilters.monthFilter ?? [])
