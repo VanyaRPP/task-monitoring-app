@@ -236,6 +236,22 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     return filters?.domain?.length === 1 && uniqueDomains.size === 1
   }, [payments?.data, filters?.domain])
 
+   const widenFilterDropdown = (w = 240) => (open: boolean) => {
+      if (!open) return
+      requestAnimationFrame(() => {
+        document.querySelectorAll<HTMLElement>('.ant-table-filter-dropdown').forEach(el => {
+          el.style.width = `${w}px`
+          el.style.maxWidth = '90vw'
+          el.querySelectorAll<HTMLElement>('.ant-checkbox + span').forEach(span => {
+            span.style.whiteSpace = 'normal'
+            span.style.wordBreak = 'break-word'
+            span.style.lineHeight = '1.2'
+            span.style.display = 'inline-block'
+            span.style.maxWidth = '100%'
+          })
+        })
+      })
+    }
   const themeKey = useMemo(
     () =>
       [
@@ -283,6 +299,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         filters: sepDomainID ? undefined : companiesFilter,
         filteredValue: filters?.company || null,
         filterSearch: true,
+        onFilterDropdownOpenChange: widenFilterDropdown(240),
         render: (
           company: { _id: string; companyName: string },
           _record: IExtendedPayment,
