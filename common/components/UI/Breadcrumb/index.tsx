@@ -8,6 +8,7 @@ import {
 } from 'antd'
 import { useRouter } from 'next/navigation'
 import { useMemo } from 'react'
+import { useScrollToTop } from '@modules/hooks/useScrollToTop'
 import styles from './style.module.scss'
 
 export type BreadcrumbPath = {
@@ -21,6 +22,7 @@ export interface BreadcrumbProps extends Omit<AntdBreadcrumbProps, 'items'> {
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({ path, ...props }) => {
   const router = useRouter()
+  const { handleNavigateHome } = useScrollToTop()
 
   const paths: any[] = useMemo(() => {
     return (
@@ -34,7 +36,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ path, ...props }) => {
   return (
     <AntdBreadcrumb
       className={styles.Breadcrumb}
-      items={[{ title: <HomeOutlined /> }, ...paths]}
+      items={[{ title: <HomeOutlined />, onClick: handleNavigateHome }, ...paths]}
       itemRender={(item) =>
         item.onClick ? (
           <Button
