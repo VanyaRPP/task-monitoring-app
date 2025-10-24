@@ -273,7 +273,6 @@ const AddServiceForm: React.FC<Props> = ({
         <LossesCollapse
           form={form}
           name='losses'
-          isServiceForm
         />
         <br/>
         <br/>
