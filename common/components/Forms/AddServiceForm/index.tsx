@@ -136,6 +136,8 @@ const AddServiceForm: React.FC<Props> = ({
   })
 
   useEffect(() => {
+    const currentCustomServices = form.getFieldValue('customServices')
+      if (!currentCustomServices || currentCustomServices.length === 0) {
     form.setFieldsValue({
       electricityPrice:
         currentService?.electricityPrice ??
@@ -157,6 +159,7 @@ const AddServiceForm: React.FC<Props> = ({
           : filteredCustomServices) || [],
       losses: currentService?.losses ?? 0,
     })
+  }
   }, [form, currentService, previousMonth, initialCustomServices])
 
   return (
