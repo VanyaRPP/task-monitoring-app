@@ -1,15 +1,17 @@
 import MainLayout from '@common/components/Layouts/Main'
+import { useScrollToTop } from '@modules/hooks/useScrollToTop'
 import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
+import Head from 'next/head'
 import DashboardPage from '../common/components/DashboardPage'
 import HomePage from '../common/components/HomePage/index'
 import { authOptions } from './api/auth/[...nextauth]'
-import Head from 'next/head'
 
 const Home: React.FC<{
   isAuth: boolean
 }> = ({ isAuth }) => {
+  const { handleNavigateHome } = useScrollToTop()
   return (
     <>
       <Head>
@@ -20,6 +22,9 @@ const Home: React.FC<{
       {isAuth ? (
         <MainLayout
           path={[{ title: 'Панель управління', path: AppRoutes.INDEX }]}
+          onPathClick={(path) => {
+            if (path === AppRoutes.INDEX) handleNavigateHome()
+          }}
         >
           <DashboardPage />
         </MainLayout>
