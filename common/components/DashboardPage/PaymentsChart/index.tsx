@@ -16,6 +16,7 @@ import {
   Space,
   Spin,
   theme,
+  Form,
 } from 'antd'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
@@ -90,11 +91,16 @@ const PaymentsChart: React.FC<{
               style={{ width: 200, fontWeight: 'normal' }}
             />
             {router.pathname === AppRoutes.PAYMENT_CHART && (
+              <Form.Item
+              label="Кількість платежів"
+              style={{ margin: 0 }}
+            >
               <SizeSelector
                 value={size}
                 onChange={setSize}
                 style={{ fontWeight: 'normal' }}
               />
+            </Form.Item>
             )}
           </Space>
         </Flex>
