@@ -1,6 +1,7 @@
 'use client'
 
 import { HomeOutlined } from '@ant-design/icons'
+import { useScrollToTop } from '@modules/hooks/useScrollToTop'
 import {
   Breadcrumb as AntdBreadcrumb,
   BreadcrumbProps as AntdBreadcrumbProps,
@@ -8,7 +9,6 @@ import {
 } from 'antd'
 import { useRouter } from 'next/navigation'
 import { useMemo } from 'react'
-import { useScrollToTop } from '@modules/hooks/useScrollToTop'
 import styles from './style.module.scss'
 
 export type BreadcrumbPath = {
@@ -18,9 +18,14 @@ export type BreadcrumbPath = {
 
 export interface BreadcrumbProps extends Omit<AntdBreadcrumbProps, 'items'> {
   path?: BreadcrumbPath[]
+  onPathClick?: (path: string) => void
 }
 
-export const Breadcrumb: React.FC<BreadcrumbProps> = ({ path, ...props }) => {
+export const Breadcrumb: React.FC<BreadcrumbProps> = ({
+  path,
+  onPathClick,
+  ...props
+}) => {
   const router = useRouter()
   const { handleNavigateHome } = useScrollToTop()
 
@@ -28,15 +33,26 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ path, ...props }) => {
     return (
       path?.map((item) => ({
         title: item.title,
-        ...(!!item.path && { onClick: () => router.push(item.path) }),
+        ...(!!item.path && {
+          onClick: () => {
+            if (onPathClick) {
+              onPathClick(item.path)
+            } else {
+              router.push(item.path)
+            }
+          },
+        }),
       })) ?? []
     )
-  }, [router, path])
+  }, [router, path, onPathClick])
 
   return (
     <AntdBreadcrumb
       className={styles.Breadcrumb}
-      items={[{ title: <HomeOutlined />, onClick: handleNavigateHome }, ...paths]}
+      items={[
+        { title: <HomeOutlined />, onClick: handleNavigateHome },
+        ...paths,
+      ]}
       itemRender={(item) =>
         item.onClick ? (
           <Button
