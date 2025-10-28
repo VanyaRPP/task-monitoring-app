@@ -47,6 +47,7 @@ import { Grid } from 'antd'
 import s from './style.module.scss'
 
 import DateFilterDropdown from './DateFilter/DateFilterDropdown'
+import { off } from 'process'
 
 export interface PaymentDeleteItem {
   id: string
@@ -236,6 +237,22 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     return filters?.domain?.length === 1 && uniqueDomains.size === 1
   }, [payments?.data, filters?.domain])
 
+   const widenFilterDropdown = (w = 240) => (open: boolean) => {
+      if (!open) return
+      requestAnimationFrame(() => {
+        document.querySelectorAll<HTMLElement>('.ant-table-filter-dropdown').forEach(el => {
+          el.style.width = `${w}px`
+          el.style.maxWidth = '90vw'
+          el.querySelectorAll<HTMLElement>('.ant-checkbox + span').forEach(span => {
+            span.style.whiteSpace = 'normal'
+            span.style.wordBreak = 'break-word'
+            span.style.lineHeight = '1.2'
+            span.style.display = 'inline-block'
+            span.style.maxWidth = '100%'
+          })
+        })
+      })
+    }
   const themeKey = useMemo(
     () =>
       [
@@ -283,6 +300,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         filters: sepDomainID ? undefined : companiesFilter,
         filteredValue: filters?.company || null,
         filterSearch: true,
+        onFilterDropdownOpenChange: widenFilterDropdown(240),
         render: (
           company: { _id: string; companyName: string },
           _record: IExtendedPayment,
@@ -331,7 +349,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         title: 'Дата створення',
         dataIndex: 'invoiceCreationDate',
         render: (date: string) => dateToDefaultFormat(date),
-        width: sepDomainID ? 70 : 164,
+        width: sepDomainID ? 70 : 170,
         filters: !sepDomainID && dateFilters ? (() => {
           const monthItems =
             (dateFilters.monthFilter ?? [])
@@ -621,22 +639,23 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       visibleColumns as ColumnType<IExtendedPayment>[],
       0
     )
-
+    const offset = hasRowSelection ? 1 : 0
     return (
       <Table.Summary>
         <Table.Summary.Row>
           {hasRowSelection && <Table.Summary.Cell index={0} />}
           {flatVisibleColumns.map(({ column, index }) => {
+            const idx = index + offset
             if (column.dataIndex === 'debit') {
               return (
-                <Table.Summary.Cell key={index} index={index} align="center">
+                <Table.Summary.Cell key={idx} index={idx} align="center">
                   {renderCurrency(toRoundFixed(totalPayments.debit || 0))}
                 </Table.Summary.Cell>
               )
             }
             if (column.dataIndex === 'credit') {
               return (
-                <Table.Summary.Cell key={index} index={index} align="center">
+                <Table.Summary.Cell key={idx} index={idx} align="center">
                   {renderCurrency(toRoundFixed(totalPayments.credit || 0))}
                 </Table.Summary.Cell>
               )
@@ -647,7 +666,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
               )
             ) {
               return (
-                <Table.Summary.Cell key={index} index={index}>
+                <Table.Summary.Cell key={idx} index={idx}>
                   {renderCurrency(
                     toRoundFixed(
                       totalPayments[
@@ -658,20 +677,18 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                 </Table.Summary.Cell>
               )
             }
-            return <Table.Summary.Cell key={index} index={index} />
+            return <Table.Summary.Cell key={idx} index={idx} />
           })}
         </Table.Summary.Row>
         <Table.Summary.Row>
           {hasRowSelection && <Table.Summary.Cell index={0} />}
           {flatVisibleColumns.map(({ column, index }) => {
-            if (column.dataIndex === 'credit') {
-              return null
-            }
+            const idx = index + offset
             if (column.dataIndex === 'debit') {
               return (
                 <Table.Summary.Cell
-                  key={index}
-                  index={index}
+                  key={idx}
+                  index={idx}
                   colSpan={2}
                   align="center"
                 >
@@ -684,7 +701,10 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                 </Table.Summary.Cell>
               )
             }
-            return <Table.Summary.Cell key={index} index={index} />
+            if (column.dataIndex === 'credit') {
+              return null
+            }
+            return <Table.Summary.Cell key={idx} index={idx} />
           })}
         </Table.Summary.Row>
       </Table.Summary>

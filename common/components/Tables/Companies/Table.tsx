@@ -42,6 +42,7 @@ import {
 } from '@common/api/filterApi/filter.api'
 import { useEffect, useState, useMemo } from 'react'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
+import CollapsedTags from '@components/UI/CollapsedTags'
 
 type DebtPerMonth = {
   monthService: string
@@ -314,7 +315,7 @@ const getDefaultColumns = ({
       dataIndex: 'adminEmails',
       width: 250,
       render: (adminEmails) =>
-        adminEmails.map((email) => <Tag key={email}>{email}</Tag>),
+        <CollapsedTags items={adminEmails} maxVisible={2} />,
     },
     {
       title: 'Опис',

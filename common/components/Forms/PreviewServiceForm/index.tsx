@@ -4,6 +4,7 @@ import { DatePicker, Form, FormInstance, Input } from 'antd'
 import { FC } from 'react'
 import s from './style.module.scss'
 import CustomServicesCard from '@components/UI/CustomServicesCard'
+import { LossesCollapse } from '@components/Losses/LossesCollapse'
 
 interface Props {
   form: FormInstance<any>
@@ -31,7 +32,7 @@ const PreviewServiceForm: FC<Props> = ({ form, currentService }) => {
         <MonthPicker format="MMMM YYYY" className={s.formInput} disabled />
       </Form.Item>
       <CustomServicesCard form={form} disabled />
-      <Form.Item name="rentPrice" label="Утримання приміщень (грн/м²)">
+      {/* <Form.Item name="rentPrice" label="Утримання приміщень (грн/м²)">
         <Input className={s.formInput} disabled />
       </Form.Item>
       <Form.Item name="electricityPrice" label="Електроенергія (грн/кВт)">
@@ -48,7 +49,7 @@ const PreviewServiceForm: FC<Props> = ({ form, currentService }) => {
       </Form.Item>
       <Form.Item name="inflicionPrice" label="Індекс інфляції">
         <Input className={s.formInput} disabled />
-      </Form.Item>
+      </Form.Item> */}
       <Form.Item name="description" label="Опис">
         <Input.TextArea
           autoSize={{ minRows: 2, maxRows: 5 }}
@@ -57,12 +58,11 @@ const PreviewServiceForm: FC<Props> = ({ form, currentService }) => {
           disabled
         />
       </Form.Item>
-      <Form.Item
-        name="losses"
-        label="Втрати в трансформаторі, лініях, реактивна (%)"
-      >
-        <Input className={s.formInput} disabled />
-      </Form.Item>
+      <LossesCollapse
+        form={form}
+        name='losses'
+        disabled
+      />
     </Form>
   )
 }

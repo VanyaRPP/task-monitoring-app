@@ -11,6 +11,7 @@ import {
   Card,
   Empty,
   Flex,
+  Form,
   Select,
   SelectProps,
   Space,
@@ -90,11 +91,13 @@ const PaymentsChart: React.FC<{
               style={{ width: 200, fontWeight: 'normal' }}
             />
             {router.pathname === AppRoutes.PAYMENT_CHART && (
-              <SizeSelector
-                value={size}
-                onChange={setSize}
-                style={{ fontWeight: 'normal' }}
-              />
+              <Form.Item label="Кількість платежів" style={{ margin: 0 }}>
+                <SizeSelector
+                  value={size}
+                  onChange={setSize}
+                  style={{ fontWeight: 'normal' }}
+                />
+              </Form.Item>
             )}
           </Space>
         </Flex>
@@ -177,22 +180,22 @@ const CompanySelector: React.FC<Omit<SelectProps, 'options' | 'mode'>> = ({
     isFetching,
     isError,
   } = useGetAllRealEstateQuery({})
-  const companies =
-    data.length !== 0
-      ? data?.map((company) => {
-          return {
-            text: company.companyName,
-            value: company._id,
-          }
-        })
-      : []
 
   const options = useMemo(() => {
+    const companies =
+      data.length !== 0
+        ? data?.map((company) => {
+            return {
+              text: company.companyName,
+              value: company._id,
+            }
+          })
+        : []
     return companies?.map((company: IFilter) => ({
       label: company.text,
       value: company.value,
     }))
-  }, [companies])
+  }, [data])
 
   useEffect(() => {
     if (options?.length >= 1 && !props.value) {
