@@ -19,6 +19,7 @@ import s from './style.module.scss'
 import { inputNumberParser } from '@utils/helpers'
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import CustomServicesCard from '@components/UI/CustomServicesCard'
+import { LossesCollapse } from '@components/Losses/LossesCollapse'
 
 dayjs.locale('uk')
 
@@ -158,9 +159,20 @@ const AddServiceForm: React.FC<Props> = ({
           ? currentService.customServices
           : filteredCustomServices) || [],
       losses: currentService?.losses ?? 0,
+      consumedElectricity: currentService?.consumedElectricity ?? null,
+      generalElectricity: currentService?.generalElectricity ?? null,
+      isVAT: currentService?.isVAT || true,
     })
   }
   }, [form, currentService, previousMonth, initialCustomServices])
+
+  useEffect(() => {
+    form.setFields([
+      { name: 'consumedElectricity', value: currentService?.consumedElectricity ?? null },
+      { name: 'generalElectricity', value: currentService?.generalElectricity ?? null },
+      { name: 'isVAT', value: currentService?.isVAT ?? true },
+    ])
+  }, [currentService, form])
 
   return (
     <ConfigProvider locale={ukUA}>
@@ -173,6 +185,9 @@ const AddServiceForm: React.FC<Props> = ({
           street: currentService?.street?._id,
           date: dayjs(currentService?.date),
           description: currentService?.description,
+          consumedElectricity: currentService?.consumedElectricity ?? null,
+          generalElectricity: currentService?.generalElectricity ?? null,
+          isVAT: currentService?.isVAT || true,
         }}
         onValuesChange={() => setIsValueChanged(true)}
       >
@@ -258,16 +273,12 @@ const AddServiceForm: React.FC<Props> = ({
             className={s.formInput}
           />
         </Form.Item> */}
-        <Form.Item
-          name="losses"
-          label={<>Втрати в трансформаторі, лініях, реактивна (%)</>}
-        >
-          <InputNumber
-            parser={inputNumberParser}
-            placeholder="Вкажіть значення"
-            className={s.formInput}
-          />
-        </Form.Item>
+        <LossesCollapse
+          form={form}
+          name='losses'
+        />
+        <br/>
+        <br/>
         <Form.Item name="description" label="Опис">
           <Input.TextArea
             placeholder="Введіть опис"
