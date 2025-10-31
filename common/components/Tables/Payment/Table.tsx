@@ -14,7 +14,7 @@ import {
 import { ColumnsType, ColumnType } from 'antd/es/table'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
-import { usePermissions } from '@utils/helpers'
+import { formatDebt, usePermissions } from '@utils/helpers'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 import { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
@@ -330,7 +330,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           if (!isUser && debtor && isFirstOccurrence) {
             return (
               <Badge
-                count={debtor.totalDebt.toFixed(2)}
+                count={formatDebt(debtor.totalDebt)}
                 title=""
                 color={getDebtorTooltipColor(debtor)}
                 overflowCount={Infinity}

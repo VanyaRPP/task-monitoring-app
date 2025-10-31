@@ -18,7 +18,7 @@ import {
 } from '@common/api/realestateApi/realestate.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
-import { isAdminCheck } from '@utils/helpers'
+import { formatDebt, isAdminCheck } from '@utils/helpers'
 import { getDebtorTooltipColor } from '@utils/helpers'
 import {
   Alert,
@@ -522,7 +522,7 @@ const getDefaultColumns = ({
       )
       return !isUser && debtor ? (
         <Badge
-          count={debtor.totalDebt.toFixed(2)}
+          count={formatDebt(debtor.totalDebt)}
           title=""
           color={getDebtorTooltipColor(debtor)}
           overflowCount={Infinity}
