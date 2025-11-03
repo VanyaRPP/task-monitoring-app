@@ -738,6 +738,15 @@ export function usePermissions(user?: IUser): IPermissions | null {
   return permissions
 }
 
+export function formatDebt(amount: number): string {
+  if (amount === 0) return '0.00'
+  if (amount > 0 && amount < 0.01) {
+    const roundedUp = Math.ceil(amount * 10000) / 10000 * 100
+    return roundedUp.toFixed(2)
+  }
+  return amount.toFixed(2)
+}
+
 export const getDebtorTooltipColor = (debtor: {
   totalDebt: number
 }): string => {
