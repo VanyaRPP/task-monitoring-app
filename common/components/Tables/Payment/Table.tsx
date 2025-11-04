@@ -16,7 +16,7 @@ import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { usePermissions } from '@utils/helpers'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-
+import  MonthFilterDropdown  from './DateFilter/MonthFilterDropdown'
 import { IPaymentFilterResponse } from '@common/api/filterApi/filter.api.types'
 import {
   IExtendedPayment,
@@ -440,103 +440,68 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         dataIndex: 'monthService',
         align: 'center',
         width: sepDomainID ? 75 : 164,
-        render: (
-          monthService: Partial<IExtendedPayment> | string | null,
-          payment: IExtendedPayment
-        ) => {
-          let rawDate: any | undefined
-          if (typeof monthService === 'string') {
-            rawDate = payment.invoiceCreationDate as unknown as string
-          } else {
-            rawDate =
-              (monthService as any)?.date ||
-              (payment.invoiceCreationDate as unknown as string)
-          }
+        filters: !sepDomainID && dateFilters ? (() => {
+          const monthItems =
+            (dateFilters.monthFilter ?? [])
+              .filter(f => f.value != null)
+              .map(f => ({
+                num: Number(f.value),
+                label: toFirstUpperCase(
+                  dateToMonth(new Date(2000, Number(f.value) - 1)),
+                ),
+              }))
 
-          const formatted = toFirstUpperCase(dateToMonthYear(rawDate))
+          const MIN_YEAR = 2025
+          const currentYear = new Date().getFullYear()
+          const backendYears: number[] =
+            (dateFilters.yearFilter ?? [])
+              .filter(y => y?.value != null)
+              .map(y => Number(y.value))
 
-          const popoverContent = (
-            <List
-              size="small"
-              dataSource={[
-                {
-                  label: ServiceName.maintenancePrice,
-                  value: (monthService as any)?.rentPrice,
+          const years = Array.from(
+            new Set([
+              ...backendYears,
+              ...Array.from({ length: currentYear - MIN_YEAR + 1 }, (_, i) => currentYear - i),
+            ]),
+          ).sort((a, b) => b - a)
+          return years.map(y => ({
+            text: String(y),
+            value: String(y),
+            children: monthItems.map(m => ({
+              text: m.label,
+              value: `${y}-month-${m.num}`,
+            })),
+          }))
+        })() : [],
+        filteredValue: filters?.monthService || null,
+        filterDropdown: (ddProps) => (
+          <MonthFilterDropdown 
+            {...ddProps}
+            data={(ddProps.filters as any) ?? []}
+            onFilterChange={(keys) => {
+              setFilters({
+                ...filters,
+                monthService: keys,
+                dateField: 'monthService.date'
+              });
+              
+              handleTableChange(
+                { current: 1, pageSize: pageData.pageSize },
+                { 
+                  ...filters,
+                  monthService: keys,
+                  dateField: 'monthService.date'
                 },
-                {
-                  label: ServiceName.electricityPrice,
-                  value: (monthService as any)?.electricityPrice,
-                },
-                {
-                  label: ServiceName.waterPrice,
-                  value: (monthService as any)?.waterPrice,
-                },
-                {
-                  label: ServiceName.waterPart,
-                  value: (monthService as any)?.waterPriceTotal,
-                },
-                {
-                  label: ServiceName.garbageCollectorPrice,
-                  value: (monthService as any)?.garbageCollectorPrice,
-                },
-                {
-                  label: ServiceName.inflicionPrice,
-                  value: (monthService as any)?.inflicionPrice,
-                },
-              ]}
-              renderItem={(item) =>
-                !isEmpty(item.value) && (
-                  <List.Item>
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        width: '100%',
-                        gap: 8,
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      <Typography.Text strong>
-                        {String(item.value).length > 6 && item.label.length > 12
-                          ? item.label.slice(0, 10) + '.'
-                          : item.label}
-                      </Typography.Text>
-                      <Typography.Text>{item.value}</Typography.Text>
-                    </div>
-                  </List.Item>
-                )
-              }
-            />
-          )
-
-          const btn = (
-            <Button
-              disabled={isEmpty(monthService)}
-              block
-              style={{
-                border: 'none',
-                backgroundColor: token.colorFillSecondary,
-              }}
-            >
-              {formatted}
-            </Button>
-          )
-
-          return isEmpty(monthService) ? (
-            btn
-          ) : (
-            <Tooltip
-              key={themeKey}
-              color={token.colorBgElevated}
-              title={
-                <div style={{ color: token.colorText }}>{popoverContent}</div>
-              }
-              placement="top"
-            >
-              {btn}
-            </Tooltip>
-          )
-        },
+                {},
+                { action: 'filter' }
+              )
+            }}
+          />
+        ),
+        render: (monthService: any) => {
+          if (!monthService?.date) return '-'
+          return dateToMonthYear(monthService.date)
+        }
       },
       ...(selectedColumns.map((value) => ({
         title: ServiceName[value],
@@ -781,9 +746,16 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           onChange: (page, pageSize) => handlePagination(page, pageSize),
         }
       }
-      onChange={(pagination, allFilters, sorter, extra) =>
-        handleTableChange(pagination, allFilters, sorter, extra)
-      }
+      onChange={(pagination, allFilters, sorter, extra) => {
+        console.log('TABLE onChange called', { pagination, allFilters, sorter, extra });
+
+        if (extra.action === 'filter') {
+          handleTableChange(pagination, allFilters, sorter, extra);
+        } else {
+          handleTableChange(pagination, allFilters, sorter, extra);
+        }
+      }}
+
       scroll={{
         x:
           (pathname === AppRoutes.PAYMENT

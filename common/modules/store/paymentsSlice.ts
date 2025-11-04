@@ -34,7 +34,7 @@ interface PaymentsState {
   selectedColumns: ServiceType[]
   paymentsDeleteItems: PaymentDeleteItem[]
   selectedPayments: IExtendedPayment[]
-  selectedDateField: 'invoiceCreationDate' | 'date'
+  selectedDateField: 'invoiceCreationDate' | 'monthService.date'
 }
 
 const initialState: PaymentsState = {
@@ -126,7 +126,7 @@ const paymentsSlice = createSlice({
 
     setSelectedDateField(
       state: Draft<PaymentsState>,
-      action: PayloadAction<'invoiceCreationDate' | 'date'>
+      action: PayloadAction<'invoiceCreationDate' | 'monthService.date'>
     ) {
       state.selectedDateField = action.payload
     },

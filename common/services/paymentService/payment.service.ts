@@ -24,11 +24,11 @@ export interface PaymentQueryParams {
   limit?: string
   skip?: string
   type?: 'debit' | 'credit'
+  dateField?: 'invoiceCreationDate' | 'monthService.date' | 'date'
   year?: string | number
   month?: string | number | (string | number)[]
   quarter?: string | number
   day?: string | number
-  dateField?: 'invoiceCreationDate' | 'date'
 }
 
 export interface UserContext {
@@ -45,7 +45,7 @@ export async function getPayments(
   userContext: UserContext
 ) {
   const { isUser, isDomainAdmin, isGlobalAdmin, user } = userContext
-  const { streetIds, companyIds, domainIds, serviceIds, limit, skip, type } =
+  const { streetIds, companyIds, domainIds, serviceIds, limit, skip, type, dateField } =
     reqQuery
 
   const companiesIds: string[] | null = companyIds
@@ -139,19 +139,38 @@ export async function getPayments(
   }
 
   const expr = filterPeriodOptions(reqQuery)
-  const dateField = reqQuery.dateField || 'invoiceCreationDate'
-  if (expr.length > 0) {
-    if (dateField === 'date') {
-      const services = await Service.find({
-        $expr: { $and: expr },
-      }).select('_id')
+  const dateFieldResolved = dateField || 'invoiceCreationDate'
 
-      const serviceIds = services.map((service) => service._id.toString())
-      options.monthService = { $in: serviceIds }
-    } else {
-      options.$expr = { $and: expr }
+if (expr.length > 0) {
+  if (dateFieldResolved === 'monthService.date') {
+
+    const year = Number(reqQuery.year);
+    const month = Number(reqQuery.month);
+    const start = new Date(year, month - 1, 1);
+    const end = new Date(year, month, 1);
+    const serviceDocs = await Service.find({
+      date: {
+        $gte: start,
+        $lt: end,
+      },
+    }).select("_id");
+
+    const serviceIds = serviceDocs.map(s => s._id.toString());
+    if (serviceIds.length === 0) {
+      return {
+        currentCompaniesCount: 0,
+        currentDomainsCount: 0,
+        data: [],
+        totalPayments: {},
+        success: true,
+        total: 0
+      };
     }
+    options.monthService = { $in: serviceIds };
+  } else {
+    options.$expr = { $and: expr };
   }
+}
 
   const payments = await Payment.find(options)
     .sort({ invoiceCreationDate: -1 })
@@ -229,7 +248,7 @@ export async function createPayment(body: any, isAdmin: boolean) {
   return payment
 }
 
-function filterPeriodOptions(args) {
+function filterPeriodOptions(args: Partial<PaymentQueryParams>) {
   const { year, quarter, day, dateField = 'invoiceCreationDate' } = args
   let { month } = args
   const field = `$${dateField}`
