@@ -276,7 +276,18 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         title: 'Надавач послуг',
         dataIndex: 'domain',
         width: sepDomainID ? 80 : 170,
-        filters: sepDomainID ? undefined : domainsFilter,
+        filters: sepDomainID
+          ? undefined
+          : Array.from(
+            new Set(
+              (payments?.data || []).map((p) =>
+                typeof p.domain === 'object' ? p.domain.name : p.domain
+            )
+          )
+        ).map((name) => ({
+            text: name,
+            value: name,
+          })),
         filteredValue: filters?.domain || null,
         filterSearch: true,
         render: (domain: { _id: string; name: string }) =>
@@ -297,7 +308,18 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         title: 'Компанія',
         dataIndex: 'company',
         width: sepDomainID ? 100 : 140,
-        filters: sepDomainID ? undefined : companiesFilter,
+        filters: sepDomainID
+          ? undefined
+          : Array.from(
+            new Set(
+              (payments?.data || []).map((p) =>
+                typeof p.company === 'object' ? p.company.companyName : p.company
+            )
+          )
+        ).map((name) => ({
+            text: name,
+            value: name,
+          })),
         filteredValue: filters?.company || null,
         filterSearch: true,
         onFilterDropdownOpenChange: widenFilterDropdown(240),
