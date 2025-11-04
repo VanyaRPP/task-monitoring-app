@@ -63,7 +63,11 @@ const PaymentCardLabel = ({
             />
             <PaymentCascader
               className={styles.select}
+              selectedMonths={filters?.invoiceCreationDate ?? []}
               onChange={setCurrentDateFilter}
+              payments={undefined}
+              monthsByYear={undefined}
+              availableYears={undefined}
             />
             <StreetsSelector
               className={styles.select}

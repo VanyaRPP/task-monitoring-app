@@ -361,7 +361,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
             value: String(y),
             children: monthItems.map(m => ({
               text: m.label,
-              value: `${y}-month-${m.num}`,
+              value: `${y}-${m.num}`,         
             })),
           }))
         })() : [],

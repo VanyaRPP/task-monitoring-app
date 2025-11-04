@@ -52,6 +52,7 @@ const DateFilterDropdown: React.FC<Props> = ({
       <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
         <Button
           onClick={() => {
+            setSelectedKeys([])
             clearFilters?.()
             const year2025 = data.find(d => d.value === '2025')
             setExpandedKeys(year2025 ? [year2025.value] : [])
