@@ -9,7 +9,6 @@ const toArray = (x) =>
 
 const M = toArray(cascaderMonths)
 const Q = toArray(cascaderQuarters)
-
 const SEP = '|'
 const QUARTER_TO_MONTHS = { Q1:[1,2,3], Q2:[4,5,6], Q3:[7,8,9], Q4:[10,11,12] }
 const getQuarterMonths = (qVal) => {
@@ -159,6 +158,15 @@ const PaymentCascader = ({
     if (rest?.startsWith('m:')) return [`${y}-${Number(rest.slice(2))}`]
     return []
   }
+  const monthIdsForYear = (y) =>
+    (M || []).map((m) => `${y}-${Number(m.value ?? m)}`);
+
+  const countFullYearsExcept = (selectedSet, excludeYear, yearsList) =>
+    (yearsList || []).reduce((acc, y) => {
+      if (y === excludeYear) return acc;
+      const all12 = monthIdsForYear(y).every((id) => selectedSet.has(id));
+      return acc + (all12 ? 1 : 0);
+    }, 0);
 
   const coveredCountInSelection = (coverKeys, selectedMonthIdsSet) =>
     coverKeys.reduce((acc, id) => acc + (selectedMonthIdsSet.has(id) ? 1 : 0), 0)
@@ -176,18 +184,22 @@ const PaymentCascader = ({
         maxTagCount={1}
         maxTagPlaceholder={() => null}
         tagRender={({ value: v }) => {
-          const meta = labelMap.get(String(v))
-          if (!meta) return null
-
-          const baseText = meta.kind === 'year' ? `${meta.year}` : `${meta.text} ${meta.year}`
-          const selectedMonths = keyToMonths(renderedValue)
-          const selectedSet = new Set(selectedMonths)
-          const cover = monthsCoveredByKey(String(v))
-          const baseCovered = coveredCountInSelection(cover, selectedSet)
-          const extra = Math.max(0, selectedSet.size - baseCovered)
-          const text = extra > 0 ? `${baseText} +${extra}` : baseText
-
-          return <span style={{ padding: 0, margin: 0 }}>{text}</span>
+          const meta = labelMap.get(String(v));
+          if (!meta) return null;
+          const baseText =
+            meta.kind === 'year' ? String(meta.year) : `${meta.text} ${meta.year}`;
+          const selectedMonths = keyToMonths(renderedValue);
+          const selectedSet = new Set(selectedMonths);
+          const cover = monthsCoveredByKey(String(v));
+          const baseCovered = coveredCountInSelection(cover, selectedSet);
+          let extraMonths = Math.max(0, selectedSet.size - baseCovered);
+          if (meta.kind === 'year') {
+            const fullYears = countFullYearsExcept(selectedSet, meta.year, years);
+            const remainderMonths = Math.max(0, extraMonths - fullYears * 12);
+            const extra = fullYears + remainderMonths;
+            return <span style={{ padding: 0, margin: 0 }}>{extra > 0 ? `${baseText} +${extra}` : baseText}</span>;
+          }
+          return <span style={{ padding: 0, margin: 0 }}>{extraMonths > 0 ? `${baseText} +${extraMonths}` : baseText}</span>;
         }}
         showSearch={false}
         listHeight={320}
@@ -218,21 +230,17 @@ const PaymentCascader = ({
           }
           const raw = Array.isArray(val) ? val.map((v) => (v && v.value) ?? v) : []
           const set = new Set(raw)
-
           const trigger = extra?.triggerValue != null ? String(extra.triggerValue) : null
           const [triggerYear, triggerRest] = trigger ? trigger.split(SEP) : []
           const isChecked = extra?.selected ?? extra?.checked ?? false
-
           const removeYearChildren = (year) => {
             ;(M || []).forEach((m) => set.delete(`${year}${SEP}m:${m.value ?? m}`))
             ;(Q || []).forEach((q) => set.delete(`${year}${SEP}q:${q.value ?? q}`))
           }
-
           if (trigger && triggerRest === 'year') {
             removeYearChildren(triggerYear)
             if (isChecked) set.add(trigger); else set.delete(trigger)
           }
-
           if (trigger && triggerRest?.startsWith('q:')) {
             const qId = triggerRest.slice(2)
             const months = getQuarterMonthsAvailable(Number(triggerYear), qId)
@@ -245,12 +253,10 @@ const PaymentCascader = ({
               months.forEach((m) => set.delete(`${triggerYear}${SEP}m:${m}`))
             }
           }
-
           if (trigger && triggerRest?.startsWith('m:')) {
             set.delete(`${triggerYear}${SEP}year`)
             ;(Q || []).forEach((q) => set.delete(`${triggerYear}${SEP}q:${q.value ?? q}`))
           }
-
           const nextKeys = Array.from(set)
           const nextMonths = keyToMonths(nextKeys)
 
