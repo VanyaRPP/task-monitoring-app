@@ -18,8 +18,9 @@ import {
 } from '@common/api/realestateApi/realestate.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
-import { formatDebt, isAdminCheck } from '@utils/helpers'
+import { formatDebt, isAdminCheck, renderCurrency } from '@utils/helpers'
 import { getDebtorTooltipColor } from '@utils/helpers'
+import s from './style.module.scss'
 import {
   Alert,
   Button,
@@ -338,6 +339,12 @@ const getDefaultColumns = ({
       width: 120,
       align: 'center',
       sorter: isOnPage ? (a, b) => a.pricePerMeter - b.pricePerMeter : null,
+      render: (value) =>
+        value !== null && value !== undefined && value !== 0 ? (
+          renderCurrency(value)
+        ) : (
+          <span className={s.currency}>-</span>
+        )
     },
     {
       title: 'Індивідуальне утримання (грн/м²)',
@@ -347,6 +354,12 @@ const getDefaultColumns = ({
       sorter: isOnPage
         ? (a, b) => a.servicePricePerMeter - b.servicePricePerMeter
         : null,
+      render: (value) =>
+        value !== null && value !== undefined && value !== 0 ? (
+          renderCurrency(value)
+        ) : (
+          <span className={s.currency}>-</span>
+        )
     },
     {
       title: 'Частка загальної площі',
@@ -368,6 +381,12 @@ const getDefaultColumns = ({
       width: 150,
       align: 'center',
       sorter: isOnPage ? (a, b) => a.cleaning - b.cleaning : null,
+      render: (value) =>
+        value !== null && value !== undefined && value !== 0 ? (
+          renderCurrency(value)
+        ) : (
+          <span className={s.currency}>-</span>
+        )
     },
     {
       title: 'Знижка',
