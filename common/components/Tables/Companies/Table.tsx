@@ -394,6 +394,12 @@ const getDefaultColumns = ({
       width: 150,
       align: 'center',
       sorter: isOnPage ? (a, b) => a.discount - b.discount : null,
+      render: (value) =>
+        value !== null && value !== undefined && value !== 0 ? (
+          renderCurrency(value)
+        ) : (
+          <span className={s.currency}>-</span>
+        )
     },
     {
       align: 'center',
