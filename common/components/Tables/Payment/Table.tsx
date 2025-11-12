@@ -23,7 +23,7 @@ import {
   IFilter,
   IGetPaymentResponse,
 } from '@common/api/paymentApi/payment.api.types'
-
+import { useGetDateTreeQuery }from '@common/api/filterApi/filter.api'
 import {
   dateToDefaultFormat,
   dateToMonth,
@@ -343,7 +343,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           }
           return companyLabel
         },
-        hidden: filters?.company?.lenght === 1,
+        hidden: filters?.company?.length === 1,
       },
       {
         title: 'Дата створення',
@@ -440,68 +440,90 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         dataIndex: 'monthService',
         align: 'center',
         width: sepDomainID ? 75 : 164,
-        filters: !sepDomainID && dateFilters ? (() => {
-          const monthItems =
-            (dateFilters.monthFilter ?? [])
-              .filter(f => f.value != null)
-              .map(f => ({
-                num: Number(f.value),
-                label: toFirstUpperCase(
-                  dateToMonth(new Date(2000, Number(f.value) - 1)),
-                ),
-              }))
-
-          const MIN_YEAR = 2025
-          const currentYear = new Date().getFullYear()
-          const backendYears: number[] =
-            (dateFilters.yearFilter ?? [])
-              .filter(y => y?.value != null)
-              .map(y => Number(y.value))
-
-          const years = Array.from(
-            new Set([
-              ...backendYears,
-              ...Array.from({ length: currentYear - MIN_YEAR + 1 }, (_, i) => currentYear - i),
-            ]),
-          ).sort((a, b) => b - a)
-          return years.map(y => ({
-            text: String(y),
-            value: String(y),
-            children: monthItems.map(m => ({
-              text: m.label,
-              value: `${y}-month-${m.num}`,
-            })),
-          }))
-        })() : [],
+        filters: dateFilters?.tree || [],
         filteredValue: filters?.monthService || null,
+
+        onFilter: () => true,
+
         filterDropdown: (ddProps) => (
-          <MonthFilterDropdown 
+          <MonthFilterDropdown
             {...ddProps}
-            data={(ddProps.filters as any) ?? []}
+            data={dateFilters?.tree || []}
             onFilterChange={(keys) => {
-              setFilters({
-                ...filters,
-                monthService: keys,
-                dateField: 'monthService.date'
-              });
-              
-              handleTableChange(
-                { current: 1, pageSize: pageData.pageSize },
-                { 
-                  ...filters,
-                  monthService: keys,
-                  dateField: 'monthService.date'
-                },
-                {},
-                { action: 'filter' }
-              )
+              ddProps.setSelectedKeys?.(keys)
+              ddProps.confirm?.({ closeDropdown: true })
             }}
           />
-        ),
+      ),
+
         render: (monthService: any) => {
-          if (!monthService?.date) return '-'
-          return dateToMonthYear(monthService.date)
-        }
+          const date = monthService && typeof monthService === 'object' 
+            ? monthService.date 
+            : null
+
+          if (!date) {
+            return (
+              <Button
+                disabled
+                block
+                style={{ border: 'none', backgroundColor: token.colorFillSecondary }}
+              >
+                -
+              </Button>
+            )
+          }
+
+          const formatted = toFirstUpperCase(dateToMonthYear(date))
+          
+          const contentItems = [
+            { label: ServiceName.maintenancePrice, value: monthService?.rentPrice },
+            { label: ServiceName.electricityPrice, value: monthService?.electricityPrice },
+            { label: ServiceName.waterPrice, value: monthService?.waterPrice },
+            { label: ServiceName.waterPart, value: monthService?.waterPriceTotal },
+            { label: ServiceName.garbageCollectorPrice, value: monthService?.garbageCollectorPrice },
+            { label: ServiceName.inflicionPrice, value: monthService?.inflicionPrice },
+          ].filter((item) => !isEmpty(item.value))
+
+          const list = (
+            <List
+              size="small"
+              dataSource={contentItems}
+              renderItem={(item) => (
+                <List.Item>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    width: '100%', 
+                    gap: 8, 
+                    whiteSpace: 'nowrap' 
+                  }}>
+                    <Typography.Text strong>{item.label}</Typography.Text>
+                    <Typography.Text>{item.value}</Typography.Text>
+                  </div>
+                </List.Item>
+              )}
+            />
+          )
+
+          return (
+            <Tooltip
+              key={themeKey}
+              color={token.colorBgElevated}
+              title={<div style={{ color: token.colorText }}>{list}</div>}
+              placement="top"
+            >
+              <Button
+                block
+                style={{
+                  border: 'none',
+                  backgroundColor: token.colorFillSecondary,
+                }}
+              >
+                {formatted}
+              </Button>
+            </Tooltip>
+          )
+        },
       },
       ...(selectedColumns.map((value) => ({
         title: ServiceName[value],
@@ -747,8 +769,6 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         }
       }
       onChange={(pagination, allFilters, sorter, extra) => {
-        console.log('TABLE onChange called', { pagination, allFilters, sorter, extra });
-
         if (extra.action === 'filter') {
           handleTableChange(pagination, allFilters, sorter, extra);
         } else {

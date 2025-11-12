@@ -9,7 +9,7 @@ type Props = FilterDropdownProps & {
 }
 
 const MonthFilterDropdown: React.FC<Props> = ({
-  data,
+  data = [],
   selectedKeys,
   setSelectedKeys,
   confirm,
@@ -23,7 +23,7 @@ const MonthFilterDropdown: React.FC<Props> = ({
 
   const treeData = useMemo(
     () =>
-      data.map((y) => ({
+      (data || []).map((y) => ({
         key: y.value,
         title: y.text,
         children: (y.children || []).map((c) => ({
@@ -34,18 +34,40 @@ const MonthFilterDropdown: React.FC<Props> = ({
     [data]
   )
 
-  // Только месячные ключи (YYYY-month-N)
-  const handleCheck = (checkedKeys: any) => {
-    const keys = Array.isArray(checkedKeys) ? checkedKeys : checkedKeys.checked || []
-    const monthKeys = keys.filter((k) => /^\d{4}-month-\d{1,2}$/.test(String(k)))
-    setSelectedKeys?.(monthKeys)
+  const isAcceptableKey = (k: unknown) =>
+    typeof k === 'string' && /^\d{4}-(month|quarter)-\d{1,2}$/.test(k)
+
+  const handleCheck = (checked: any) => {
+    const keysArr: string[] = Array.isArray(checked)
+      ? checked
+      : Array.isArray(checked?.checked)
+      ? checked.checked
+      : []
+
+    const filtered = keysArr.filter((k) => isAcceptableKey(k))
+    setSelectedKeys?.(filtered)
   }
 
   const handleConfirm = () => {
-    const keys = selectedKeys as string[]
-    onFilterChange?.(keys)
+    const keys = (selectedKeys || []).filter((k) => isAcceptableKey(k))
+    onFilterChange?.(keys as string[])
     confirm?.({ closeDropdown: true })
   }
+
+  const handleClear = () => {
+    setSelectedKeys?.([])
+    clearFilters?.()
+    onFilterChange?.([])
+    const firstYear = data[0]?.value
+    setExpandedKeys(firstYear ? [firstYear] : [])
+  }
+
+  useEffect(() => {
+    if (!expandedKeys.length && data.length) {
+      const firstYear = data[0]?.value
+      if (firstYear) setExpandedKeys([firstYear])
+    }
+  }, [data])
 
   return (
     <div style={{ padding: 8 }}>
@@ -56,8 +78,9 @@ const MonthFilterDropdown: React.FC<Props> = ({
           expandedKeys={expandedKeys}
           onExpand={(keys) => setExpandedKeys(keys as string[])}
           treeData={treeData}
-          checkedKeys={selectedKeys as string[]}
+          checkedKeys={(selectedKeys || []).filter((k) => isAcceptableKey(k))}
           onCheck={handleCheck}
+          checkStrictly={false}
         />
       </div>
       <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>

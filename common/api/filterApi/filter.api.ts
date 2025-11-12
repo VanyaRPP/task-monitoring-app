@@ -53,6 +53,24 @@ export const filterApi = createApi({
         response ? [{ type: 'Filter', id: 'streetsFilter' }] : [],
     }),
 
+    getDateTree: builder.query<
+      { success: boolean; tree: any[] },
+      { source?: 'monthService' | 'invoiceCreationDate'; domainIds?: string[]; companyIds?: string[]; streetIds?: string[] }
+    >({
+      query: ({ source = 'monthService', domainIds, companyIds, streetIds }) => {
+        const params: any = { source }
+        if (domainIds?.length) params.domainIds = domainIds.join(',')
+        if (companyIds?.length) params.companyIds = companyIds.join(',')
+        if (streetIds?.length) params.streetIds = streetIds.join(',')
+        return {
+          url: 'date-tree',
+          method: 'GET',
+          params,
+        }
+      },
+    providesTags: (res) => (res ? [{ type: 'Filter', id: 'dateTree' }] : []),
+    }),
+    
     getDateFilters: builder.query<
       IPaymentFilterResponse,
       { type?: 'service' | 'payment' }
@@ -92,6 +110,7 @@ export const filterApi = createApi({
 export const {
   useGetAddressFiltersQuery,
   useGetDateFiltersQuery,
+  useGetDateTreeQuery,
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } = filterApi

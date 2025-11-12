@@ -7,6 +7,7 @@ import {
   useGetRealEstateFiltersQuery,
   useGetAddressFiltersQuery,
   useGetDateFiltersQuery,
+  useGetDateTreeQuery,
 } from '@common/api/filterApi/filter.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import {
@@ -64,6 +65,15 @@ interface TableEventProps {
   ) => void
 }
 
+const parseKey = (val?: string) => {
+  if (!val) return null
+  const monthMatch = String(val).match(/^(\d{4})-month-(\d{1,2})$/)
+  if (monthMatch) return { type: 'month' as const, year: Number(monthMatch[1]), month: Number(monthMatch[2]) }
+  const quarterMatch = String(val).match(/^(\d{4})-quarter-(\d)$/)
+  if (quarterMatch) return { type: 'quarter' as const, year: Number(quarterMatch[1]), quarter: Number(quarterMatch[2]) }
+  return null
+}
+
 const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   const router = useRouter()
   const dispatch = useDispatch()
@@ -113,8 +123,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
   } = useGetCurrentUserQuery()
 
   useEffect(() => {
-    const fallback =
-      domainsFiltersData?.domainsFilter?.map((d) => d.value) || []
+    const fallback = domainsFiltersData?.domainsFilter?.map((d) => d.value) || []
     if (filters?.domain?.length) {
       setDomainIds(filters.domain)
     } else if (fallback.length) {
@@ -132,190 +141,188 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
   }, [debtorsData, dispatch])
 
-  const dateQueryParams = useCallback(() => {
-    const monthKeys = filters?.monthService as string[] | undefined
-    const invoiceKeys = filters?.invoiceCreationDate as string[] | undefined
-    
-    if (monthKeys?.length) {
-      const parseDate = (key: string) => {
-        const match = key.match(/^(\d{4})-month-(\d{1,2})$/)
-        return match ? { year: parseInt(match[1]), month: parseInt(match[2]) } : null
-      }
-      
-      const parsed = parseDate(monthKeys[0])
-      if (parsed) {
-        return {
-          year: parsed.year,
-          month: parsed.month,
-          dateField: 'monthService.date' as const
-        }
-      }
+  const dateTreeQ = useGetDateTreeQuery({
+    source: 'monthService',
+    domainIds: filters?.domain,
+    companyIds: filters?.company,
+    streetIds: filters?.street,
+  })
+
+const queryParams = useMemo(() => {
+  const base = {
+    skip: (currentPage - 1) * pageSize,
+    limit: pageSize,
+  }
+
+  const parseArray = (arr?: string[]) =>
+    (arr || []).map((v) => parseKey(v)).filter(Boolean)
+
+  const monthServiceParsed = parseArray(filters?.monthService)
+  const invoiceParsed = parseArray(filters?.invoiceCreationDate)
+
+  let dateField: 'invoiceCreationDate' | 'monthService.date' = 'invoiceCreationDate'
+  let year: number[] | undefined
+  let month: number[] | undefined
+  let quarter: number[] | undefined
+  let monthService: string[] | undefined
+
+  if (monthServiceParsed.length) {
+    dateField = 'monthService.date'
+    year = [...new Set(monthServiceParsed.map((p) => p.year))]
+    month = monthServiceParsed.filter(p => p.type === 'month').map(p => p.month!)
+    quarter = monthServiceParsed.filter(p => p.type === 'quarter').map(p => p.quarter!)
+    monthService = filters?.monthService
+  } else if (invoiceParsed.length) {
+    dateField = 'invoiceCreationDate'
+    year = [...new Set(invoiceParsed.map((p) => p.year))]
+    month = invoiceParsed.filter(p => p.type === 'month').map(p => p.month!)
+    quarter = invoiceParsed.filter(p => p.type === 'quarter').map(p => p.quarter!)
+  }
+
+  return {
+    ...base,
+    year,
+    month,
+    quarter,
+    dateField,
+    monthService,
+  }
+}, [currentPage, pageSize, filters?.monthService, filters?.invoiceCreationDate, filters])
+
+  const apiArgs = {
+    ...queryParams,
+    ...getTypeOperation(filters?.type?.[0]),
+    companyIds: filters?.company || undefined,
+    domainIds: sepDomainID || filters?.domain || undefined,
+    streetIds: filters?.street || undefined,
+  } as any
+  apiArgs.dateField = queryParams.dateField as 'invoiceCreationDate' | 'monthService.date'
+  const { data: payments, isError: paymentsError, isLoading: paymentsLoading, isFetching: paymentsFetching } = useGetAllPaymentsQuery(apiArgs, { skip: currUserLoading || !currUser })
+
+  const [deletePaymentMutation, { isLoading: deleteLoading }] = useDeletePaymentMutation()
+
+  const handleDeletePayment = useCallback(async (id: string) => {
+    const response = await deletePaymentMutation(id)
+    if ('data' in response) {
+      message.success('Видалено!')
+    } else {
+      message.error('Помилка при видаленні рахунку')
     }
-
-    if (invoiceKeys?.length) {
-      const parseDate = (key: string) => {
-        const match = key.match(/^(\d{4})-month-(\d{1,2})$/)
-        return match ? { year: parseInt(match[1]), month: parseInt(match[2]) } : null
-      }
-      
-      const parsed = parseDate(invoiceKeys[0])
-      if (parsed) {
-        return {
-          year: parsed.year,
-          month: parsed.month,
-          dateField: 'invoiceCreationDate' as const
-        }
-      }
-    }
-
-    return {
-      dateField: 'invoiceCreationDate' as const
-    }
-  }, [filters?.monthService, filters?.invoiceCreationDate])
-
-  const queryParams = useMemo(() => {
-    const baseParams = {
-      skip: (currentPage - 1) * pageSize,
-      limit: pageSize,
-      dateField: selectedDateField,
-    };
-
-    if (filters?.year && filters?.month) {
-      return {
-        ...baseParams,
-        year: filters.year[0],
-        month: filters.month[0],
-      };
-    }
-
-    return baseParams;
-  }, [currentPage, pageSize, selectedDateField, filters])
-
-  const {
-    data: payments,
-    isError: paymentsError,
-    isLoading: paymentsLoading,
-    isFetching: paymentsFetching,
-  } = useGetAllPaymentsQuery(
-    {
-      ...queryParams,
-      ...getTypeOperation(filters?.type?.[0]),
-      companyIds: filters?.company || undefined,
-      domainIds: sepDomainID || filters?.domain || undefined,
-      streetIds: filters?.street || undefined,
-    },
-    { skip: currUserLoading || !currUser }
-  )
-
-  const [
-    deletePaymentMutation,
-    { isLoading: deleteLoading, isError: deleteError },
-  ] = useDeletePaymentMutation()
-
-  const handleDeletePayment = useCallback(
-    async (id: string) => {
-      const response = await deletePaymentMutation(id)
-      if ('data' in response) {
-        message.success('Видалено!')
-      } else {
-        message.error('Помилка при видаленні рахунку')
-      }
-    },
-    [deletePaymentMutation]
-  )
+  }, [deletePaymentMutation])
 
   useEffect(() => {
-    if (domainsFiltersData?.domainsFilter) {
-      dispatch(setDomainsFilter(domainsFiltersData.domainsFilter))
-    }
-    if (companiesFilterData?.realEstatesFilter) {
-      dispatch(setCompaniesFilter(companiesFilterData.realEstatesFilter))
-    }
-    if (streetsFilterData?.streetsFilter) {
-      dispatch(setStreetsFilter(streetsFilterData.streetsFilter))
-    }
-    dispatch(setDateFilters(dateFiltersData))
-  }, [
-    dispatch,
-    streetsFilterData?.streetsFilter,
-    domainsFiltersData?.domainsFilter,
-    companiesFilterData?.realEstatesFilter,
-    dateFiltersData,
-  ])
+    if (domainsFiltersData?.domainsFilter) dispatch(setDomainsFilter(domainsFiltersData.domainsFilter))
+    if (companiesFilterData?.realEstatesFilter) dispatch(setCompaniesFilter(companiesFilterData.realEstatesFilter))
+    if (streetsFilterData?.streetsFilter) dispatch(setStreetsFilter(streetsFilterData.streetsFilter))
 
-  const handlePagination = (page: number, pageSizeArg?: number) => {
+    if (dateTreeQ?.data?.tree) {
+      dispatch(setDateFilters({
+        ...dateFiltersData,
+        tree: dateTreeQ.data.tree,
+      }))
+    } else {
+      dispatch(setDateFilters(dateFiltersData))
+    }
+  }, [dateTreeQ?.data, dateFiltersData, domainsFiltersData?.domainsFilter, companiesFilterData?.realEstatesFilter, streetsFilterData?.streetsFilter, dispatch])
+
+  const handlePagination = (page: number, pageSizeArg?: number) => dispatch(setPage({ page, pageSize: pageSizeArg ?? pageSize }))
+
+  const handleTableChange = (
+  pagination: TablePaginationConfig,
+  tableFilters: Record<string, FilterValue | null> | null,
+  sorter: SorterResult<any> | SorterResult<any>[],
+  extra: TableCurrentDataSource<any>
+) => {
+  if (extra.action === "paginate") {
     dispatch(
       setPage({
-        page,
-        pageSize: pageSizeArg ?? pageSize,
+        page: pagination.current || 1,
+        pageSize: pagination.pageSize,
       })
     )
+    return
   }
-  const handleTableChange = (
-    pagination: TablePaginationConfig,
-    tableFilters: Record<string, FilterValue | null> | null,
-    sorter: SorterResult<any> | SorterResult<any>[],
-    extra: TableCurrentDataSource<any>
-  ) => {
 
-    if (extra.action === 'filter') {
-      dispatch(setPage({ page: 1 }));
+  if (extra.action === "filter") {
+    dispatch(setPage({ page: 1 }))
 
-      const currentFilters = filters ? { ...filters } : {};
-      const incoming = (tableFilters || {}) as Record<string, any>;
-      const newFilters: Record<string, any> = { ...currentFilters, ...incoming };
-      delete newFilters.year;
-      delete newFilters.month;
+    const incoming = (tableFilters || {}) as Record<string, any>
+    const newFilters = { ...filters, ...incoming }
 
-      if (Array.isArray(incoming.monthService) && incoming.monthService.length > 0) {
-        const key = String(incoming.monthService[0]);
-        const match = key.match(/^(\d{4})-month-(\d{1,2})$/);
-        if (match) {
-          const yearStr = match[1];
-          const monthStr = match[2];
-          dispatch(setSelectedDateField('monthService.date'));
-          newFilters.year = [String(yearStr)];
-          newFilters.month = [String(monthStr)];
-          delete newFilters.invoiceCreationDate;
-        }
-      }
-      else if (
-        Array.isArray(incoming.invoiceCreationDate) &&
-        incoming.invoiceCreationDate.length > 0
-      ) {
-        const key = String(incoming.invoiceCreationDate[0]);
-        const match = key.match(/^(\d{4})-month-(\d{1,2})$/);
-        if (match) {
-          const yearStr = match[1];
-          const monthStr = match[2];
-          dispatch(setSelectedDateField('invoiceCreationDate'));
-          newFilters.year = [String(yearStr)];
-          newFilters.month = [String(monthStr)];
-          delete newFilters.monthService;
-        }
-      } else {
-        dispatch(setSelectedDateField('invoiceCreationDate'));
-        delete newFilters.year;
-        delete newFilters.month;
-      }
-      dispatch(setFilters(newFilters));
-      return;
+    delete newFilters.year
+    delete newFilters.month
+    delete newFilters.quarter
+
+    const parseArray = (arr?: any[]) =>
+      (arr || [])
+        .map((v) => parseKey(String(v)))
+        .filter(Boolean)
+
+    const monthServiceParsed = parseArray(incoming.monthService)
+    const invoiceParsed = parseArray(incoming.invoiceCreationDate)
+
+    if (monthServiceParsed.length) {
+      dispatch(setSelectedDateField('monthService.date'))
+
+      newFilters.year = [
+        ...new Set(monthServiceParsed.map((p) => String(p.year))),
+      ]
+
+      const months = monthServiceParsed
+        .filter((p) => p.type === "month")
+        .map((p) => String(p.month))
+
+      const quarters = monthServiceParsed
+        .filter((p) => p.type === "quarter")
+        .map((p) => String(p.quarter))
+
+      if (months.length) newFilters.month = months
+      if (quarters.length) newFilters.quarter = quarters
+
+      delete newFilters.invoiceCreationDate
+      dispatch(setFilters(newFilters))
+      return
     }
 
-    if (extra.action === 'paginate') {
-      dispatch(
-        setPage({
-          page: pagination.current || 1,
-          pageSize: pagination.pageSize,
-        })
-      );
-      return;
+    if (invoiceParsed.length) {
+      dispatch(setSelectedDateField("invoiceCreationDate"))
+
+      newFilters.year = [
+        ...new Set(invoiceParsed.map((p) => String(p.year))),
+      ]
+
+      const months = invoiceParsed
+        .filter((p) => p.type === "month")
+        .map((p) => String(p.month))
+
+      const quarters = invoiceParsed
+        .filter((p) => p.type === "quarter")
+        .map((p) => String(p.quarter))
+
+      if (months.length) newFilters.month = months
+      if (quarters.length) newFilters.quarter = quarters
+
+      delete newFilters.monthService
+      dispatch(setFilters(newFilters))
+      return
     }
 
-    if (tableFilters) {
-      dispatch(setFilters({ ...filters, ...tableFilters }));
-    }
-  };
+    dispatch(setSelectedDateField("invoiceCreationDate"))
+    delete newFilters.year
+    delete newFilters.month
+    delete newFilters.quarter
+    delete newFilters.monthService
+    delete newFilters.invoiceCreationDate
+
+    dispatch(setFilters(newFilters))
+    return
+  }
+
+  if (tableFilters) {
+    dispatch(setFilters({ ...filters, ...tableFilters }))
+  }
+}
+
   const statusProps = {
     paymentsError: Boolean(paymentsError),
     paymentsLoading,

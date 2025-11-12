@@ -15,6 +15,7 @@ import {
 import { getStreetsPipeline } from '@utils/pipelines'
 import { FilterQuery } from 'mongoose'
 import ProfitService from '@common/services/profitService/profit.service'
+import mongoose from 'mongoose'
 
 export interface PaymentQueryParams {
   streetIds?: string | string[]
@@ -40,60 +41,48 @@ export interface UserContext {
   }
 }
 
-export async function getPayments(
-  reqQuery: PaymentQueryParams,
-  userContext: UserContext
-) {
-  const { isUser, isDomainAdmin, isGlobalAdmin, user } = userContext
-  const { streetIds, companyIds, domainIds, serviceIds, limit, skip, type, dateField } =
-    reqQuery
+function parseCommaParam(param?: string | string[] | undefined) {
+  if (!param) return null
+  if (Array.isArray(param)) return param
+  return String(param).split(',').map((p) => decodeURIComponent(p))
+}
 
-  const companiesIds: string[] | null = companyIds
-    ? typeof companyIds === 'string'
-      ? companyIds.split(',').map((id) => decodeURIComponent(id))
-      : companyIds.map((id) => decodeURIComponent(id))
-    : null
-  const streetsIds: string[] | null = streetIds
-    ? typeof streetIds === 'string'
-      ? streetIds.split(',').map((id) => decodeURIComponent(id))
-      : streetIds.map((id) => decodeURIComponent(id))
-    : null
-  const domainsIds: string[] | null = domainIds
-    ? typeof domainIds === 'string'
-      ? domainIds.split(',').map((id) => decodeURIComponent(id))
-      : domainIds.map((id) => decodeURIComponent(id))
-    : null
-  const servicesIds: string[] | null = serviceIds
-    ? typeof serviceIds === 'string'
-      ? serviceIds.split(',').map((id) => decodeURIComponent(id))
-      : serviceIds.map((id) => decodeURIComponent(id))
-    : null
+function toObjectIdIfValid(id: any) {
+  try {
+    if (mongoose.Types.ObjectId.isValid(String(id))) return new mongoose.Types.ObjectId(String(id))
+  } catch {
+  }
+  return id
+}
+
+export async function getPayments(reqQuery: PaymentQueryParams, userContext: UserContext) {
+  const { isUser, isDomainAdmin, isGlobalAdmin, user } = userContext
+  const { streetIds, companyIds, domainIds, serviceIds, limit = '10', skip = '0', type, dateField } = reqQuery
+
+  const companiesIds = parseCommaParam(companyIds as any)
+  const streetsIds = parseCommaParam(streetIds as any)
+  const domainsIds = parseCommaParam(domainIds as any)
+  const servicesIds = parseCommaParam(serviceIds as any)
+
   const options: FilterQuery<typeof Payment> = {}
 
   if (isGlobalAdmin) {
     if (companiesIds) {
-      options.company = { $in: companiesIds }
+      options.company = { $in: companiesIds.map(String) }
     }
     if (streetsIds) {
-      options.street = { $in: streetIds }
+      options.street = { $in: streetsIds.map(String) }
     }
     if (domainsIds) {
-      options.domain = { $in: domainsIds }
+      options.domain = { $in: domainsIds.map(String) }
     }
   } else if (isDomainAdmin) {
-    const relatedDomainsIds = (
-      await Domain.find({
-        adminEmails: user.email,
-      })
-    ).map((domain) => domain._id.toString())
+    const relatedDomainsIds = (await Domain.find({ adminEmails: user.email })).map((d) => d._id.toString())
 
     const companies = await RealEstate.find({
       ...(companiesIds ? { _id: { $in: companiesIds } } : {}),
-      $or: [
-        { adminEmails: user.email },
-        { domain: { $in: relatedDomainsIds } },
-      ],
-    })
+      $or: [{ adminEmails: user.email }, { domain: { $in: relatedDomainsIds } }],
+    }).lean()
 
     options.company = {
       $in: companies.map(({ _id }) => _id.toString()),
@@ -106,76 +95,182 @@ export async function getPayments(
     const domains = await Domain.find({
       ...(domainsIds ? { _id: { $in: domainsIds } } : {}),
       adminEmails: user.email,
-    })
+    }).lean()
 
-    options.domain = {
-      $in: domains.map(({ _id }) => _id.toString()),
-    }
+    options.domain = { $in: domains.map((d) => String(d._id)) }
   } else if (isUser) {
     const companies = await RealEstate.find({
       ...(companiesIds ? { _id: { $in: companiesIds } } : {}),
       adminEmails: user.email,
-      ...(domainIds ? { domain: { $in: domainIds } } : {}),
-    })
+      ...(domainsIds ? { domain: { $in: domainsIds as any } } : {}),
+    }).lean()
 
-    options.company = {
-      $in: companies.map(({ _id }) => _id.toString()),
-    }
-    options.domain = {
-      $in: companies.map(({ domain }) => domain.toString()),
-    }
+    options.company = { $in: companies.map((c) => String(c._id)) }
+    options.domain = { $in: companies.map((c) => String((c as any).domain)) }
 
-    if (streetsIds) {
-      options.street = { $in: streetIds }
-    }
+    if (streetsIds) options.street = { $in: streetsIds }
   }
 
-  if (type) {
-    options.type = type
-  }
-  // TODO: add security
+  if (type) options.type = type
+
   if (servicesIds) {
-    options.monthService = { $in: servicesIds }
+    const normalized = servicesIds.map((id) => String(id))
+    options.monthService = { $in: normalized.map((id) => toObjectIdIfValid(id)) }
+  }
+
+  const parseKey = (val?: string | number | string[] | number[]) => {
+    if (!val) return null
+    const raw = Array.isArray(val) ? String(val[0]) : String(val)
+    const monthMatch = raw.match(/^(\d{4})-month-(\d{1,2})$/)
+    if (monthMatch) {
+      return { 
+        type: 'month' as const, 
+        year: Number(monthMatch[1]), 
+        month: Number(monthMatch[2]) 
+      }
+    }
+    const quarterMatch = raw.match(/^(\d{4})-quarter-(\d)$/)
+    if (quarterMatch) { 
+      return { 
+        type: 'quarter' as const, 
+        year: Number(quarterMatch[1]), 
+        quarter: Number(quarterMatch[2]) 
+      }
+    }
+    return null
   }
 
   const expr = filterPeriodOptions(reqQuery)
   const dateFieldResolved = dateField || 'invoiceCreationDate'
 
-if (expr.length > 0) {
-  if (dateFieldResolved === 'monthService.date') {
-
-    const year = Number(reqQuery.year);
-    const month = Number(reqQuery.month);
-    const start = new Date(year, month - 1, 1);
-    const end = new Date(year, month, 1);
-    const serviceDocs = await Service.find({
-      date: {
-        $gte: start,
-        $lt: end,
-      },
-    }).select("_id");
-
-    const serviceIds = serviceDocs.map(s => s._id.toString());
-    if (serviceIds.length === 0) {
-      return {
-        currentCompaniesCount: 0,
-        currentDomainsCount: 0,
-        data: [],
-        totalPayments: {},
-        success: true,
-        total: 0
-      };
+  async function applyMonthServiceFilter(q: PaymentQueryParams, opts: any) {
+    const normalizeToArray = (input?: string | number | (string | number)[]) => {
+      if (input == null) return []
+      if (Array.isArray(input)) return input.map(String)
+      return String(input).split(',').map((v) => v.trim()).filter(Boolean)
     }
-    options.monthService = { $in: serviceIds };
-  } else {
-    options.$expr = { $and: expr };
+
+    const rawMonths: string[] = [
+      ...normalizeToArray(q.month),
+      ...normalizeToArray((q as any).monthService),
+    ]
+
+    if (!rawMonths.length) {
+      console.log('applyMonthServiceFilter: no rawMonths -> skip')
+      return
+    }
+
+    if (
+      rawMonths.length &&
+      q.year &&
+      !String(rawMonths[0]).includes('month') &&
+      !String(rawMonths[0]).includes('quarter')
+    ) {
+      const years = Array.isArray(q.year) ? q.year.map(String) : [String(q.year)]
+      const expanded: string[] = []
+      for (const y of years) {
+        for (const m of rawMonths) {
+          expanded.push(`${y}-month-${m}`)
+        }
+      }
+      console.log('applyMonthServiceFilter: auto-expanded rawMonths →', expanded)
+      rawMonths.splice(0, rawMonths.length, ...expanded)
+    }
+
+    const parsed = rawMonths
+      .map((v) => {
+        const raw = String(v)
+        const m = raw.match(/^(\d{4})-month-(\d{1,2})$/)
+        if (m)
+          return {
+            type: 'month' as const,
+            year: Number(m[1]),
+            month: Number(m[2]),
+          }
+        const qM = raw.match(/^(\d{4})-quarter-(\d)$/)
+        if (qM)
+          return {
+            type: 'quarter' as const,
+            year: Number(qM[1]),
+            quarter: Number(qM[2]),
+          }
+        return null
+      })
+      .filter(Boolean) as Array<{
+        type: 'month' | 'quarter'
+        year: number
+        month?: number
+        quarter?: number
+      }>
+
+    if (!parsed.length) {
+      console.log('applyMonthServiceFilter: parsed is empty -> skip', { rawMonths })
+      return
+    }
+
+    const years = Array.from(new Set(parsed.map((p) => p.year)))
+    const months = Array.from(
+      new Set(parsed.filter((p) => p.type === 'month').map((p) => p.month!).filter(Boolean))
+    )
+    const quarters = Array.from(
+      new Set(parsed.filter((p) => p.type === 'quarter').map((p) => p.quarter!).filter(Boolean))
+    )
+
+    const ranges: { start: Date; end: Date }[] = []
+    for (const y of years) {
+      for (const m of months) {
+        ranges.push({
+          start: new Date(y, Number(m) - 1, 1),
+          end: new Date(y, Number(m), 1),
+        })
+      }
+    }
+
+    const quarterMap: Record<number, number[]> = {
+      1: [1, 2, 3],
+      2: [4, 5, 6],
+      3: [7, 8, 9],
+      4: [10, 11, 12],
+    }
+
+    for (const y of years) {
+      for (const q of quarters) {
+        const monthsForQ = quarterMap[Number(q)] || []
+        for (const m of monthsForQ) {
+          ranges.push({
+            start: new Date(y, m - 1, 1),
+            end: new Date(y, m, 1),
+          })
+        }
+      }
+    }
+
+    if (!ranges.length) {
+      console.log('applyMonthServiceFilter: no ranges -> skip', { years, months, quarters })
+      return
+    }
+
+    const orConditions = ranges.map((r) => ({
+      date: { $gte: r.start, $lt: r.end },
+    }))
+
+    const serviceIds: any[] = await Service.distinct('_id', { $or: orConditions })
+    const uniqueIds = Array.from(new Set((serviceIds || []).map((id) => String(id))))
+    const finalIds = uniqueIds.map(id => String(id))
+    opts.monthService = { $in: finalIds }
   }
-}
+
+
+  if (dateFieldResolved === 'monthService.date') {
+    await applyMonthServiceFilter(reqQuery, options)
+  } else if (expr.length > 0) {
+    options.$expr = { $and: expr }
+  }
 
   const payments = await Payment.find(options)
     .sort({ invoiceCreationDate: -1 })
-    .skip(+skip)
-    .limit(+limit)
+    .skip(Number(skip || 0))
+    .limit(Number(limit || 10))
     .populate('company')
     .populate('street')
     .populate('domain')
@@ -206,46 +301,19 @@ if (expr.length > 0) {
   const genralSumPipeline = getTotalGeneralSumPipeline(options)
   const totalGeneralSum = await Payment.aggregate(genralSumPipeline)
 
-  const totalPaymentsData = [
-    ...totalPayments,
-    ...totalInvoices,
-    ...totalGeneralSum,
-  ]
+  const totalPaymentsData = [...totalPayments, ...totalInvoices, ...totalGeneralSum]
+
   return {
     currentCompaniesCount: distinctCompanies.length,
     currentDomainsCount: distinctDomains.length,
     data: payments,
-    totalPayments: totalPaymentsData.reduce((acc, item) => {
+    totalPayments: totalPaymentsData.reduce((acc: any, item: any) => {
       acc[item._id] = item.totalSum
       return acc
     }, {}),
     success: true,
     total,
   }
-}
-
-export async function createPayment(body: any, isAdmin: boolean) {
-  if (!isAdmin) throw new Error('not allowed')
-  const payment = await Payment.create(body)
-
-  const description =
-    payment.type === 'debit'
-      ? `Інвойс №${payment.invoiceNumber}`
-      : payment.description
-
-  const profitObject = {
-    domain: payment.domain.toString(),
-    payment: payment.id.toString(),
-    amount: payment.generalSum,
-    type: payment.type as 'debit' | 'credit',
-    date: payment.invoiceCreationDate,
-    description,
-    invoiceNumber: payment.invoiceNumber.toString(),
-  }
-
-  await ProfitService.create(profitObject)
-
-  return payment
 }
 
 function filterPeriodOptions(args: Partial<PaymentQueryParams>) {
@@ -260,7 +328,7 @@ function filterPeriodOptions(args: Partial<PaymentQueryParams>) {
       .filter((m) => !isNaN(m))
   }
 
-  const filterByDateOptions = []
+  const filterByDateOptions: any[] = []
 
   if (year && !isNaN(Number(year))) {
     filterByDateOptions.push({
@@ -287,3 +355,27 @@ function filterPeriodOptions(args: Partial<PaymentQueryParams>) {
   }
   return filterByDateOptions
 }
+export async function createPayment(body: any, isAdmin: boolean) {
+  if (!isAdmin) throw new Error('not allowed')
+  const payment = await Payment.create(body)
+
+  const description =
+    payment.type === 'debit'
+      ? `Інвойс №${payment.invoiceNumber}`
+      : payment.description
+
+  const profitObject = {
+    domain: payment.domain.toString(),
+    payment: payment.id.toString(),
+    amount: payment.generalSum,
+    type: payment.type as 'debit' | 'credit',
+    date: payment.invoiceCreationDate,
+    description,
+    invoiceNumber: payment.invoiceNumber.toString(),
+  }
+
+  await ProfitService.create(profitObject)
+
+  return payment
+}
+

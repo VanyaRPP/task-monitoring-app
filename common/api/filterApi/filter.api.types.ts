@@ -4,6 +4,7 @@ export interface IFilter {
 }
 
 export interface IPaymentFilterResponse {
+  tree: any[]
   domainsFilter: IFilter[]
   realEstatesFilter: IFilter[]
   addressFilter: IFilter[]
