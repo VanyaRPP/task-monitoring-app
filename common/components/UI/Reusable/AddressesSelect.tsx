@@ -56,7 +56,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
         } else {
           form.setFieldsValue({ street: undefined })
           onStreetHasServiceChange?.(false)
-             }
+        }
       }
     } else {
       form.setFieldsValue({ street: undefined })
@@ -72,7 +72,7 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
       title={
         <span>
           Послуг за даною адресою не знайдено! Будь ласка, оберіть іншу адресу
-          або
+          або{" "}
           <Link href={AppRoutes.SERVICE}>
             додайте нову послугу за цією адресою
           </Link>

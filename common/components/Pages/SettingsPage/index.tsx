@@ -9,21 +9,12 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { FeatureFlagsTable } from '@common/components/FeatureFlagsTable'
 import { UsersTable } from '@components/Tables/UsersTable'
 import { Roles } from '@utils/constants'
-import {
-  Button,
-  Card,
-  Flex,
-  Space,
-  Typography,
-} from 'antd'
+import { Button, Card, Flex, Space, Typography } from 'antd'
 import { Tabs } from 'antd'
-
-
 
 export const SettingsPage: React.FC = () => {
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
-
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingFlag, setEditingFlag] = useState(null)
@@ -34,52 +25,51 @@ export const SettingsPage: React.FC = () => {
       style={{ width: '100%', position: 'relative' }}
       size="middle"
     >
-      
       {isGlobalAdmin && (
         <>
           <Card>
-              <Tabs
-                defaultActiveKey="users"
-                  items={[
-                  {
-                    key: 'users',
-                   label: 'Користувачі',
-                   children: <UsersTable />,
-                 },
-                  {
-                    key: 'flags',
-                   label: 'Фічефлаги',
-                    children: (
-                  <>
-              <Flex
-                justify="space-between"
-                align="center"
-                style={{ marginBottom: 16 }}
-              >
-                <Typography.Title level={4} style={{ margin: 0 }}>
-                  Фічефлаги
-                </Typography.Title>
-                <FeatureFlagModal
-                  open={modalOpen}
-                  onClose={() => {
-                    setModalOpen(false)
-                    setEditingFlag(null)
-                  }}
-                />
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => setModalOpen(true)}
-                ></Button>
-              </Flex>
+            <Tabs
+              defaultActiveKey="users"
+              items={[
+                {
+                  key: 'users',
+                  label: 'Користувачі',
+                  children: <UsersTable />,
+                },
+                {
+                  key: 'flags',
+                  label: 'Фічефлаги',
+                  children: (
+                    <>
+                      <Flex
+                        justify="space-between"
+                        align="center"
+                        style={{ marginBottom: 16 }}
+                      >
+                        <Typography.Title level={4} style={{ margin: 0 }}>
+                          Фічефлаги
+                        </Typography.Title>
+                        <FeatureFlagModal
+                          open={modalOpen}
+                          onClose={() => {
+                            setModalOpen(false)
+                            setEditingFlag(null)
+                          }}
+                        />
+                        <Button
+                          type="primary"
+                          icon={<PlusOutlined />}
+                          onClick={() => setModalOpen(true)}
+                        ></Button>
+                      </Flex>
 
-              <FeatureFlagsTable />
-            </>
-          ),
-        },
-      ]}
-    />
-  </Card>
+                      <FeatureFlagsTable />
+                    </>
+                  ),
+                },
+              ]}
+            />
+          </Card>
         </>
       )}
     </Space>

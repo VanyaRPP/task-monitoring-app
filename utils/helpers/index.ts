@@ -18,7 +18,6 @@ import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Operations } from '@utils/constants'
 import { useState, useEffect } from 'react'
 
-
 export const toFirstUpperCase = (text: string) => {
   return text ? text[0].toUpperCase() + text.slice(1) : ''
 }
@@ -270,6 +269,25 @@ export const formatDateWithGenitiveMonthCapitalized = (
 ): string => {
   const d = dayjs(date)
   return `${d.date()} ${monthsUaGenitiveCapitalized[d.month()]} ${d.year()}`
+}
+
+export const invoiceCSFilter = (invoices) => {
+  const excludedFields = [
+    'waterPart',
+    'waterPrice',
+    'waterPriceTotal',
+    'inflicionPrice',
+    'rentPrice',
+    'cleaningPrice',
+    'electricityPrice',
+    'garbageCollectorPrice',
+    'placingPrice',
+    'rentPart',
+  ]
+
+  return invoices.filter(
+    (invoice) => !excludedFields.includes(invoice.fieldName)
+  )
 }
 
 export const getPaymentProviderAndReciever = (company) => {
@@ -635,7 +653,7 @@ export async function isDomainAdmin(user?: IUser): Promise<boolean> {
     const domain = await RealEstate.findOne({ adminEmails: user.email })
     return !!domain
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return false
   }
 }
@@ -720,7 +738,18 @@ export function usePermissions(user?: IUser): IPermissions | null {
   return permissions
 }
 
-export const getDebtorTooltipColor = (debtor: { totalDebt: number}): string => {
+export function formatDebt(amount: number): string {
+  if (amount === 0) return '0.00'
+  if (amount > 0 && amount < 0.01) {
+    const roundedUp = Math.ceil(amount * 10000) / 10000 * 100
+    return roundedUp.toFixed(2)
+  }
+  return amount.toFixed(2)
+}
+
+export const getDebtorTooltipColor = (debtor: {
+  totalDebt: number
+}): string => {
   if (debtor.totalDebt > 0 && debtor.totalDebt < 5000) {
     return 'gray'
   } else if (debtor.totalDebt >= 5000 && debtor.totalDebt < 20000) {
@@ -730,4 +759,3 @@ export const getDebtorTooltipColor = (debtor: { totalDebt: number}): string => {
   }
   return undefined
 }
-

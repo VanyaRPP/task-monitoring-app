@@ -192,7 +192,7 @@ export const getPlacingInvoice = ({
     const price =
       (prevPlacing?.sum ||
         company.totalArea * (company.pricePerMeter || service?.rentPrice)) *
-      ((prevService?.inflicionPrice || 100) / 100)
+      (((prevService?.inflicionPrice || 100) / 100) < 1 ? 1 : ((prevService?.inflicionPrice || 100) / 100))
 
     return {
       type: ServiceType.Placing,
@@ -413,7 +413,6 @@ export const getGarbageCollectorInvoice = ({
     !isNaN(service.garbageCollectorPrice) &&
     company?.garbageCollector
   ) {
-    
     const price = service.garbageCollectorPrice * (company?.rentPart / 100)
 
     return {

@@ -18,6 +18,9 @@ export interface IServiceModel {
     price: number
   }[]
   losses?: number
+  consumedElectricity?: number
+  generalElectricity?: number
+  isVAT?: boolean
 }
 
 export const ServiceSchema = new Schema<IServiceModel>({
@@ -44,6 +47,9 @@ export const ServiceSchema = new Schema<IServiceModel>({
     default: [],
   },
   losses: { type: Number, required: false, default: 0 },
+  consumedElectricity: { type: Number, required: false, default: null },
+  generalElectricity: { type: Number, required: false, default: null },
+  isVAT: { type: Boolean, required: false, default: true },
 })
 
 const Service =

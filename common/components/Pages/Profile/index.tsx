@@ -103,7 +103,7 @@ export const ProfilePage: React.FC = () => {
         </div>
       )}
       <Flex className={styles.columns} gap={16}>
-        <Card title="Представник" className={styles.CardRepresentative} >
+        <Card title="Представник" className={styles.CardRepresentative}>
           <Divider orientation="left" style={{ marginTop: 0 }}>
             <Typography.Text type="secondary">Надавачі послуг</Typography.Text>
           </Divider>
@@ -146,11 +146,16 @@ export const ProfilePage: React.FC = () => {
             )}
           />
         </Card>
-        <Card title="Інформація користувача" className={styles.CardUserInformation}>
+        <Card
+          title="Інформація користувача"
+          className={styles.CardUserInformation}
+        >
           <EditUserForm userId={user?._id?.toString()} form={form} />
-          <Button className={styles.ButtonSave} onClick={form.submit}>Зберегти</Button>
+          <Button className={styles.ButtonSave} onClick={form.submit}>
+            Зберегти
+          </Button>
         </Card>
-      </Flex> 
+      </Flex>
     </Space>
   )
 }

@@ -18,7 +18,7 @@ import {
 } from '@common/api/realestateApi/realestate.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
-import { isAdminCheck } from '@utils/helpers'
+import { formatDebt, isAdminCheck } from '@utils/helpers'
 import { getDebtorTooltipColor } from '@utils/helpers'
 import {
   Alert,
@@ -42,6 +42,7 @@ import {
 } from '@common/api/filterApi/filter.api'
 import { useEffect, useState, useMemo } from 'react'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
+import CollapsedTags from '@components/UI/CollapsedTags'
 
 type DebtPerMonth = {
   monthService: string
@@ -182,6 +183,11 @@ const CompaniesTable: React.FC<Props> = ({
   return (
     <Table
       rowKey="_id"
+      locale={{
+        cancelSort: 'Скасувати сортування',
+        triggerAsc: 'Сортувати за зростанням',
+        triggerDesc: 'Сортувати за спаданням',
+      }}
       pagination={
         (router.pathname === AppRoutes.REAL_ESTATE ||
           router.pathname === AppRoutes.SEP_DOMAIN) && {
@@ -309,13 +315,12 @@ const getDefaultColumns = ({
       dataIndex: 'adminEmails',
       width: 250,
       render: (adminEmails) =>
-        adminEmails.map((email) => <Tag key={email}>{email}</Tag>),
+        <CollapsedTags items={adminEmails} maxVisible={2} />,
     },
     {
       title: 'Опис',
       dataIndex: 'description',
       width: 100,
-      ellipsis: true,
       align: 'center',
       render: renderTooltip,
     },
@@ -517,7 +522,7 @@ const getDefaultColumns = ({
       )
       return !isUser && debtor ? (
         <Badge
-          count={debtor.totalDebt.toFixed(2)}
+          count={formatDebt(debtor.totalDebt)}
           title=""
           color={getDebtorTooltipColor(debtor)}
           overflowCount={Infinity}

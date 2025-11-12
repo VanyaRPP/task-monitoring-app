@@ -19,6 +19,9 @@ function useInitialValues(currentService) {
     garbageCollectorPrice: currentService?.garbageCollectorPrice,
     customServices: currentService.customServices,
     losses: currentService?.losses,
+    consumedElectricity: currentService?.consumedElectricity || null,
+    generalElectricity: currentService?.generalElectricity || null,
+    isVAT: currentService?.isVAT || true,
   }
   return initialValues
 }

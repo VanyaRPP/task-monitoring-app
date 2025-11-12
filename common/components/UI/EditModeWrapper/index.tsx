@@ -2,12 +2,9 @@ import React, { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { addButton, removeButton } from '@modules/store/floatButtonSlice'
 import { useEditModelFloatButton } from '@modules/hooks/useFloatButton'
-import styles from './styled.module.scss' 
-import { Button } from 'antd' 
-import {
-  EditOutlined,
-  CheckOutlined,
-} from '@ant-design/icons'
+import styles from './styled.module.scss'
+import { Button } from 'antd'
+import { EditOutlined, CheckOutlined } from '@ant-design/icons'
 
 interface EditModeWrapperProps {
   children: React.ReactNode
@@ -16,7 +13,7 @@ interface EditModeWrapperProps {
 
 const EditModeWrapper: React.FC<EditModeWrapperProps> = ({
   children,
-  uniqueKey 
+  uniqueKey,
 }) => {
   const dispatch = useDispatch()
 
@@ -42,11 +39,9 @@ const EditModeWrapper: React.FC<EditModeWrapperProps> = ({
         />
       )}
 
-        {children}
-
+      {children}
     </>
   )
 }
-
 
 export default EditModeWrapper

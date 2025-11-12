@@ -38,6 +38,9 @@ type FormData = {
     price: number
   }[]
   losses: number
+  consumedElectricity?: number
+  generalElectricity?: number
+  isVAT?: boolean
 }
 
 const AddServiceModal: FC<Props> = ({
@@ -58,27 +61,36 @@ const AddServiceModal: FC<Props> = ({
       domain: currentService?.domain?._id?.toString() || formData.domain,
       street: currentService?.street?._id?.toString() || formData.street,
       date: dayjs(formData.date).toDate(),
-      rentPrice: formData.customServices?.find(
-        (c) => c.fieldName === 'rentPrice'
-      )?.price ?? formData?.rentPrice,
-      electricityPrice: formData?.customServices?.find(
-        (c) => c.fieldName === 'electricityPrice'
-      )?.price ?? formData?.electricityPrice,
-      waterPrice: formData?.customServices?.find(
-        (c) => c.fieldName === 'waterPrice'
-      )?.price ?? formData?.waterPrice,
-      waterPriceTotal: formData?.customServices?.find(
-        (c) => c.fieldName === 'waterPriceTotal'
-      )?.price ?? formData?.waterPriceTotal,
-      garbageCollectorPrice: formData?.customServices?.find(
-        (c) => c.fieldName === 'garbageCollectorPrice'
-      )?.price || formData?.garbageCollectorPrice || 0,
-      inflicionPrice: formData?.customServices?.find(
-        (c) => c.fieldName === 'inflicionPrice'
-      )?.price || formData?.inflicionPrice || 0,
+      rentPrice:
+        formData.customServices?.find((c) => c.fieldName === 'rentPrice')
+          ?.price ?? formData?.rentPrice,
+      electricityPrice:
+        formData?.customServices?.find(
+          (c) => c.fieldName === 'electricityPrice'
+        )?.price ?? formData?.electricityPrice,
+      waterPrice:
+        formData?.customServices?.find((c) => c.fieldName === 'waterPrice')
+          ?.price ?? formData?.waterPrice,
+      waterPriceTotal:
+        formData?.customServices?.find((c) => c.fieldName === 'waterPriceTotal')
+          ?.price ?? formData?.waterPriceTotal,
+      garbageCollectorPrice:
+        formData?.customServices?.find(
+          (c) => c.fieldName === 'garbageCollectorPrice'
+        )?.price ||
+        formData?.garbageCollectorPrice ||
+        0,
+      inflicionPrice:
+        formData?.customServices?.find((c) => c.fieldName === 'inflicionPrice')
+          ?.price ||
+        formData?.inflicionPrice ||
+        0,
       description: formData?.description || '',
       customServices: formData?.customServices || [],
       ...(formData?.losses > 0 && { losses: formData?.losses }),
+      consumedElectricity: formData?.consumedElectricity || null,
+      generalElectricity: formData?.generalElectricity || null,
+      isVAT: formData?.isVAT || true,
     }
     const response = currentService
       ? await editService({

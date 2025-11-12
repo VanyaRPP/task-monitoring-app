@@ -56,7 +56,9 @@ export default function EmailSelect({
         loading={isLoading}
         filterOption={(inputValue, option) => {
           if (typeof option?.value === 'string') {
-            return option?.key?.toLowerCase()?.includes(inputValue?.toLowerCase())
+            return option?.key
+              ?.toLowerCase()
+              ?.includes(inputValue?.toLowerCase())
           }
           return false
         }}

@@ -33,22 +33,30 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 }) => {
   const { service, company } = usePaymentContext()
   const name = useMemo(() => toArray<string>(_name), [_name])
-  const waterPartPrice = +((service?.waterPriceTotal * company?.waterPart) / 100)
+  const waterPartPrice = +(
+    (service?.waterPriceTotal * company?.waterPart) /
+    100
+  )
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
   if (service?.garbageCollectorPrice && company?.rentPart) {
     return (
-      <Space direction='horizontal' style={{ justifyContent: 'space-between', width: '100%' }}>
+      <Space
+        direction="horizontal"
+        style={{ justifyContent: 'space-between', width: '100%' }}
+      >
         <span>
           {toRoundFixed(company.waterPart)}% від{' '}
           {toRoundFixed(service.waterPriceTotal)} грн
         </span>
-        {editable && waterPartPrice !== price &&
-        (
+        {editable && waterPartPrice !== price && (
           <Tooltip title="Відновити значення">
             <Button
               onClick={() => {
-                form.setFieldValue(['invoice', ...name, 'price'], waterPartPrice)
+                form.setFieldValue(
+                  ['invoice', ...name, 'price'],
+                  waterPartPrice
+                )
               }}
               icon={<ReloadOutlined />}
             />

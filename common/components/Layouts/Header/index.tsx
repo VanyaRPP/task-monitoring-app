@@ -8,9 +8,15 @@ export interface HeaderProps {
   style?: React.CSSProperties
   className?: string
   path?: BreadcrumbPath[]
+  onPathClick?: (path: string) => void
 }
 
-export const Header: React.FC<HeaderProps> = ({ className, style, path }) => {
+export const Header: React.FC<HeaderProps> = ({
+  className,
+  style,
+  path,
+  onPathClick,
+}) => {
   return (
     <Layout.Header
       style={style}
@@ -22,7 +28,7 @@ export const Header: React.FC<HeaderProps> = ({ className, style, path }) => {
         align="center"
         style={{ height: '100%' }}
       >
-        <Breadcrumb path={path} />
+        <Breadcrumb path={path} onPathClick={onPathClick} />
         <Flex gap={8} align="center">
           <Avatar />
         </Flex>

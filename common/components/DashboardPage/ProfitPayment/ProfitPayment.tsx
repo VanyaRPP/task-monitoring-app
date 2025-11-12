@@ -24,14 +24,11 @@ const ProfitPayment: React.FC = () => {
 
   const closeModal = () => {
     setIsModalOpen(false)
-    closeEditModal()
   }
 
-  const closeEditModal = () => {}
 
-  const [selectedDate, setSelectedDate] = useState<string>()
 
-  const { data: profitPayment, isLoading, isError } = useGetCostPaymentQuery()
+  const { data: profitPayment, isLoading } = useGetCostPaymentQuery()
 
   const columns = [
     {

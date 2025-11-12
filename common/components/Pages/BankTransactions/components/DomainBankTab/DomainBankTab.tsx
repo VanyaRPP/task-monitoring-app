@@ -56,7 +56,9 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
 
   if (isDomainLoading || !domain) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
+      <div
+        style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}
+      >
         <Spin size="large" />
       </div>
     )
