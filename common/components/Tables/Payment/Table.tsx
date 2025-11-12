@@ -270,6 +270,17 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       token.colorFillSecondary,
     ]
   )
+  const allowedCompanyIds = useMemo(
+    () => new Set((debtorCompanies ?? []).map(d => String(d.companyId))),
+    [debtorCompanies]
+  )
+  const companiesFilterWithPayments = useMemo(
+    () =>
+      (companiesFilter ?? []).filter(opt =>
+        allowedCompanyIds.has(String(opt.value))
+      ),
+    [companiesFilter, allowedCompanyIds]
+  )
   const allColumns: ColumnsType<IExtendedPayment> = useMemo(() => {
     return [
       {
@@ -297,7 +308,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         title: 'Компанія',
         dataIndex: 'company',
         width: sepDomainID ? 100 : 140,
-        filters: sepDomainID ? undefined : companiesFilter,
+        filters: sepDomainID ? undefined : companiesFilterWithPayments,
         filteredValue: filters?.company || null,
         filterSearch: true,
         onFilterDropdownOpenChange: widenFilterDropdown(240),
@@ -343,7 +354,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           }
           return companyLabel
         },
-        hidden: filters?.company?.lenght === 1,
+        hidden: filters?.company?.length === 1,
       },
       {
         title: 'Дата створення',
