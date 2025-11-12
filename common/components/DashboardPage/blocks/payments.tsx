@@ -166,7 +166,17 @@ const queryParams = useMemo(() => {
   let quarter: number[] | undefined
   let monthService: string[] | undefined
 
-  if (monthServiceParsed.length) {
+  if (
+    Array.isArray(filters?.invoiceCreationDate) &&
+    filters.invoiceCreationDate.length === 3 &&
+    typeof filters.invoiceCreationDate[0] === 'string'
+  ) {
+    const [yearVal, type, value] = filters.invoiceCreationDate
+    dateField = 'invoiceCreationDate'
+    year = [Number(yearVal)]
+    if (type === 'month') month = [Number(value)]
+    if (type === 'quarter') quarter = [Number(value)]
+  } else if (monthServiceParsed.length) {
     dateField = 'monthService.date'
     year = [...new Set(monthServiceParsed.map((p) => p.year))]
     month = monthServiceParsed.filter(p => p.type === 'month').map(p => p.month!)
@@ -232,96 +242,96 @@ const queryParams = useMemo(() => {
   tableFilters: Record<string, FilterValue | null> | null,
   sorter: SorterResult<any> | SorterResult<any>[],
   extra: TableCurrentDataSource<any>
-) => {
-  if (extra.action === "paginate") {
-    dispatch(
-      setPage({
-        page: pagination.current || 1,
-        pageSize: pagination.pageSize,
-      })
-    )
-    return
-  }
-
-  if (extra.action === "filter") {
-    dispatch(setPage({ page: 1 }))
-
-    const incoming = (tableFilters || {}) as Record<string, any>
-    const newFilters = { ...filters, ...incoming }
-
-    delete newFilters.year
-    delete newFilters.month
-    delete newFilters.quarter
-
-    const parseArray = (arr?: any[]) =>
-      (arr || [])
-        .map((v) => parseKey(String(v)))
-        .filter(Boolean)
-
-    const monthServiceParsed = parseArray(incoming.monthService)
-    const invoiceParsed = parseArray(incoming.invoiceCreationDate)
-
-    if (monthServiceParsed.length) {
-      dispatch(setSelectedDateField('monthService.date'))
-
-      newFilters.year = [
-        ...new Set(monthServiceParsed.map((p) => String(p.year))),
-      ]
-
-      const months = monthServiceParsed
-        .filter((p) => p.type === "month")
-        .map((p) => String(p.month))
-
-      const quarters = monthServiceParsed
-        .filter((p) => p.type === "quarter")
-        .map((p) => String(p.quarter))
-
-      if (months.length) newFilters.month = months
-      if (quarters.length) newFilters.quarter = quarters
-
-      delete newFilters.invoiceCreationDate
-      dispatch(setFilters(newFilters))
+  ) => {
+    if (extra.action === "paginate") {
+      dispatch(
+        setPage({
+          page: pagination.current || 1,
+          pageSize: pagination.pageSize,
+        })
+      )
       return
     }
 
-    if (invoiceParsed.length) {
+    if (extra.action === "filter") {
+      dispatch(setPage({ page: 1 }))
+
+      const incoming = (tableFilters || {}) as Record<string, any>
+      const newFilters = { ...filters, ...incoming }
+
+      delete newFilters.year
+      delete newFilters.month
+      delete newFilters.quarter
+
+      const parseArray = (arr?: any[]) =>
+        (arr || [])
+          .map((v) => parseKey(String(v)))
+          .filter(Boolean)
+
+      const monthServiceParsed = parseArray(incoming.monthService)
+      const invoiceParsed = parseArray(incoming.invoiceCreationDate)
+
+      if (monthServiceParsed.length) {
+        dispatch(setSelectedDateField('monthService.date'))
+
+        newFilters.year = [
+          ...new Set(monthServiceParsed.map((p) => String(p.year))),
+        ]
+
+        const months = monthServiceParsed
+          .filter((p) => p.type === "month")
+          .map((p) => String(p.month))
+
+        const quarters = monthServiceParsed
+          .filter((p) => p.type === "quarter")
+          .map((p) => String(p.quarter))
+
+        if (months.length) newFilters.month = months
+        if (quarters.length) newFilters.quarter = quarters
+
+        delete newFilters.invoiceCreationDate
+        dispatch(setFilters(newFilters))
+        return
+      }
+
+      if (invoiceParsed.length) {
+        dispatch(setSelectedDateField("invoiceCreationDate"))
+
+        newFilters.year = [
+          ...new Set(invoiceParsed.map((p) => String(p.year))),
+        ]
+
+        const months = invoiceParsed
+          .filter((p) => p.type === "month")
+          .map((p) => String(p.month))
+
+        const quarters = invoiceParsed
+          .filter((p) => p.type === "quarter")
+          .map((p) => String(p.quarter))
+
+        if (months.length) newFilters.month = months
+        if (quarters.length) newFilters.quarter = quarters
+
+        delete newFilters.monthService
+        dispatch(setFilters(newFilters))
+        return
+      }
+
       dispatch(setSelectedDateField("invoiceCreationDate"))
-
-      newFilters.year = [
-        ...new Set(invoiceParsed.map((p) => String(p.year))),
-      ]
-
-      const months = invoiceParsed
-        .filter((p) => p.type === "month")
-        .map((p) => String(p.month))
-
-      const quarters = invoiceParsed
-        .filter((p) => p.type === "quarter")
-        .map((p) => String(p.quarter))
-
-      if (months.length) newFilters.month = months
-      if (quarters.length) newFilters.quarter = quarters
-
+      delete newFilters.year
+      delete newFilters.month
+      delete newFilters.quarter
       delete newFilters.monthService
+      delete newFilters.invoiceCreationDate
+
       dispatch(setFilters(newFilters))
       return
     }
 
-    dispatch(setSelectedDateField("invoiceCreationDate"))
-    delete newFilters.year
-    delete newFilters.month
-    delete newFilters.quarter
-    delete newFilters.monthService
-    delete newFilters.invoiceCreationDate
-
-    dispatch(setFilters(newFilters))
-    return
+    if (tableFilters) {
+      dispatch(setFilters({ ...filters, ...tableFilters }))
+    }
   }
-
-  if (tableFilters) {
-    dispatch(setFilters({ ...filters, ...tableFilters }))
-  }
-}
 
   const statusProps = {
     paymentsError: Boolean(paymentsError),
@@ -363,23 +373,26 @@ const queryParams = useMemo(() => {
     selectedColumns,
     setSelectedColumns: (cols) => dispatch(setSelectedColumns(cols)),
   }
-const handleColumnsSelect = useCallback(
-  (cols: ServiceType[]) => {
-    dispatch(setSelectedColumns(cols))
-  },
-  [dispatch]
-)
+  const handleColumnsSelect = useCallback(
+    (cols: ServiceType[]) => {
+      dispatch(setSelectedColumns(cols))
+    },
+    [dispatch]
+  )
   const headerProps: React.ComponentProps<typeof PaymentsHeader> = {
     paymentsDeleteItems,
     closeEditModal: handleClose,
-    setCurrentDateFilter: (vals) => {
-      dispatch(
-        setFilters({
-          ...filters,
-          invoiceCreationDate: vals,
-        })
-      )
-    },
+setCurrentDateFilter: (vals) => {
+  console.debug('[PaymentsHeader] setCurrentDateFilter vals:', vals)
+  dispatch(setSelectedDateField('invoiceCreationDate'))
+  dispatch(
+    setFilters({
+      ...filters,
+      invoiceCreationDate: vals,
+      dateField: 'invoiceCreationDate',
+    })
+  )
+},
     currentPayment,
     paymentActions: { edit, preview },
     streets: filterProps.streetsFilter,
