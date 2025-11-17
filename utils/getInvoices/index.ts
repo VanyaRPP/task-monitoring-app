@@ -273,6 +273,7 @@ export const getElectricityInvoice = ({
       price: +toRoundFixed(+invoice.price),
       amount: +toRoundFixed(+invoice.amount),
       lastAmount: +toRoundFixed(+invoice.lastAmount),
+      losses: +toRoundFixed(+invoice?.losses) || undefined,
       sum: +toRoundFixed(
         +invoice.sum || +invoice.price * (+invoice.amount - +invoice.lastAmount)
       ),
@@ -286,6 +287,7 @@ export const getElectricityInvoice = ({
       type: ServiceType.Electricity,
       amount: +toRoundFixed(prevElectricity?.amount),
       lastAmount: +toRoundFixed(prevElectricity?.amount),
+      losses: +toRoundFixed(service?.losses) || undefined,
       price: +toRoundFixed(service.electricityPrice),
       sum: 0,
     }

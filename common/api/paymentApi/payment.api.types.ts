@@ -11,6 +11,7 @@ export interface IPaymentField {
   name?: string
   isIndividual?: boolean
   lastAmount?: number
+  losses?: number
   amount?: number
   price: number
   sum: number
