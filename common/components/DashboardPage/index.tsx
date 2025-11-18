@@ -1,11 +1,5 @@
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
-import {
-  useState,
-  useEffect,
-  useCallback,
-  useLayoutEffect,
-  useMemo,
-} from 'react'
+import { useState, useEffect, useCallback, useLayoutEffect, useMemo } from 'react'
 import DomainsBlock from '@components/DashboardPage/blocks/domains'
 import PaymentsBlock from '@components/DashboardPage/blocks/payments'
 import RealEstateBlock from '@components/DashboardPage/blocks/realEstates'
@@ -13,17 +7,14 @@ import ServicesBlock from '@components/DashboardPage/blocks/services'
 import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import CompaniesAreaChart from '@components/DashboardPage/blocks/сompaniesAreaChart'
 import { Roles } from '@utils/constants'
-import { Col, Row, Space, Button, Flex, message, Tooltip, Dropdown } from 'antd'
+import { Col, Row, Space, Button, Flex,  message, Tooltip, Dropdown } from 'antd'
 import { CloseOutlined, SaveOutlined, EyeOutlined } from '@ant-design/icons'
 import PaymentsChart from '@components/DashboardPage/blocks/paymentChart'
 import ProfitPage from '@components/Pages/ProfiitPage'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 import { addButton, removeButton } from '@modules/store/floatButtonSlice'
-import {
-  useEditModelFloatButton,
-  useDragDropPanelFloatButton,
-} from '@modules/hooks/useFloatButton'
+import { useEditModelFloatButton, useDragDropPanelFloatButton  } from '@modules/hooks/useFloatButton'
 import { useDispatch } from 'react-redux'
 import { WidthProvider } from 'react-grid-layout'
 import GridLayout, { Layout } from 'react-grid-layout'
@@ -56,9 +47,30 @@ const widgetLabels: Record<WidgetKey, string> = {
   companies: 'Займані площі',
 }
 
+const widgetMap: Record<WidgetKey, React.ReactNode> = {
+  payments: <PaymentsBlock />,
+  paymentsChart: <PaymentsChart />,
+  services: <ServicesBlock />,
+  streets: <StreetsBlock />,
+  domain: <DomainsBlock />,
+  realEstate: <RealEstateBlock />,
+  profits: <div style={{ marginTop: '-13px' }}><ProfitPage /></div>,
+  companies: <CompaniesAreaChart />,
+}
+
+const getCustomGridHeight = (tableName: string) => {
+  switch (tableName) {
+    case 'payments': return 1;
+    case 'profits': return 0.3;
+    case 'services': return 0.3;
+    default: return 0;
+  }
+}
+
 const Dashboard: React.FC = () => {
   const dispatch = useDispatch()
   const { data: userResponse } = useGetCurrentUserQuery()
+  const [hiddenWidgets, setHiddenWidgets] = useState<WidgetKey[]>([])
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   const [isEditMode, toggleEditMode, editFloatButton] =
@@ -99,32 +111,6 @@ const Dashboard: React.FC = () => {
     }
   }, [isPanelVisible, isEditMode, toggleEditMode])
 
-  const visibleWidgets = useMemo(() => {
-    if (isGlobalAdmin === undefined) return ALL_WIDGETS
-    return ALL_WIDGETS.filter((w) => {
-      if (!isGlobalAdmin && w === 'profits') return false
-      return !hiddenWidget.includes(w)
-    })
-  }, [isGlobalAdmin, hiddenWidget])
-
-  const visibleWidgetMap = useMemo(() => {
-    return Object.fromEntries(
-      visibleWidgets.map((key) => [key, widgetMap[key]])
-    ) as typeof widgetMap
-  }, [visibleWidgets])
-
-  const DEFAULT_LAYOUT: Layout[] = visibleWidgets.map((w) => ({
-    i: w,
-    x: 0,
-    w: 1,
-    h: 2,
-    y: 0,
-  }))
-
-  const [layout, setLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
-  const [tempLayout, setTempLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
-  const [isLayoutReady, setIsLayoutReady] = useState(false)
-
   useEffect(() => {
     dispatch(addButton(panelFloatButton))
     return () => {
@@ -134,6 +120,41 @@ const Dashboard: React.FC = () => {
 
   const getLayoutStorageKey = (userId?: string) =>
     userId ? `dashboard-layout-${userId}` : 'dashboard-layout'
+    const visibleWidgets = useMemo(() => {
+      if (isGlobalAdmin === undefined) {
+    return ALL_WIDGETS
+  }
+    return isGlobalAdmin
+      ? ALL_WIDGETS
+      : ALL_WIDGETS.filter((w) => w !== 'profits')
+  }, [isGlobalAdmin])
+  const visibleWidgetMap = useMemo(() => {
+    return Object.fromEntries(
+      visibleWidgets.map((key) => [key, widgetMap[key]])
+    ) as typeof widgetMap
+  }, [visibleWidgets])
+    const DEFAULT_LAYOUT: Layout[] = visibleWidgets.map((w) => ({
+      i: w,
+      x: 0,
+      w: 1,
+      h: 2,
+      y: 0,
+    }))
+
+  const filteredWidgets = useMemo(() => {
+    return visibleWidgets.filter((w) => !hiddenWidgets.includes(w))
+  }, [visibleWidgets, hiddenWidgets])
+
+  const filteredWidgetMap = useMemo(() => {
+    return Object.fromEntries(
+      filteredWidgets.map((key) => [key, widgetMap[key]])
+    ) as typeof widgetMap
+  }, [filteredWidgets])
+
+  const [layout, setLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
+  const [tempLayout, setTempLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
+
+  const [isLayoutReady, setIsLayoutReady] = useState(false)
 
   useEffect(() => {
     const userId = userResponse?._id?.toString()
@@ -143,12 +164,8 @@ const Dashboard: React.FC = () => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
-        if (parsed.layout) {
-          setLayout(parsed.layout)
-        }
-        if (parsed.hidden) {
-          setHiddenWidget(parsed.hidden)
-        }
+        setLayout(parsed.layout)
+        setHiddenWidget(parsed.hidden ?? [])
       } catch {}
     }
     setIsLayoutReady(true)
@@ -176,9 +193,9 @@ const Dashboard: React.FC = () => {
   }, [])
 
   const renderedLayout = useMemo(
-    () => layout.filter((item) => visibleWidgets.includes(item.i as WidgetKey)),
-    [layout, visibleWidgets]
-  )
+      () => layout.filter((item) => (visibleWidgets as readonly string[]).includes(item.i)),
+      [layout, visibleWidgets]
+    )
 
   return (
     <div className={s.wrapper}>
@@ -220,10 +237,7 @@ const Dashboard: React.FC = () => {
                 onClick={() => {
                   const userId = userResponse?._id?.toString()
                   if (!userId) return
-                  localStorage.setItem(
-                    getLayoutStorageKey(userId),
-                    JSON.stringify({ layout, hidden: hiddenWidget })
-                  )
+                  localStorage.setItem(getLayoutStorageKey(userId), JSON.stringify({ layout, hidden: hiddenWidget }))
                   message.success('Збережено!')
                   togglePanelVisible()
                 }}
@@ -236,44 +250,47 @@ const Dashboard: React.FC = () => {
         </div>
       )}
       {isLayoutReady && (
-        <ReactGridLayout
-          className="dashboard-grid"
-          compactType="vertical"
-          layout={layout}
-          cols={1}
-          rowHeight={60}
-          margin={[MARGIN_X, MARGIN_Y]}
-          useCSSTransforms={true}
-          listenToWindowResize={true}
-          isDraggable={isEditMode}
-          isResizable={false}
-          isBounded={true}
-          onLayoutChange={handleLayoutChange}
-        >
-          {renderedLayout.map((item) => (
+      <ReactGridLayout
+        className="dashboard-grid"
+        compactType="vertical"
+        layout={layout}
+        cols={1}
+        rowHeight={1}
+        margin={[MARGIN_X, MARGIN_Y]}
+        useCSSTransforms={true}
+        listenToWindowResize={true}
+        isDraggable={isEditMode}
+        isResizable={false}
+        isBounded={true}
+        onLayoutChange={handleLayoutChange}
+      >
+        {renderedLayout.map((item) => (
             <div
               key={item.i}
               data-grid={item}
-              className={s.gridItem}
+              className={isEditMode ? s.gridItem : ''}
               id={item.i}
               style={{
-                display: hiddenWidget.includes(item.i as WidgetKey)
-                  ? 'none'
-                  : 'block',
+                display: hiddenWidget.includes(item.i as WidgetKey) ? 'none' : 'block',
               }}
             >
-              <WidgetWrapper
-                id={item.i}
-                rowHeight={60}
-                marginY={MARGIN_Y}
-                isEditMode={isEditMode}
-                onHeightChange={handleNodeHeight}
-              >
+            <WidgetWrapper
+              id={item.i}
+              rowHeight={1.3}
+              marginY={MARGIN_Y}
+              isEditMode={isEditMode}
+              onHeightChange={(tableName, pxHeight: number) => {
+                const newH = Math.ceil(pxHeight + getCustomGridHeight(tableName));
+                handleNodeHeight(item.i, newH)
+              }}
+            >
+              <div className={s.filterWrapper}>
                 {visibleWidgetMap[item.i as WidgetKey]}
-              </WidgetWrapper>
-            </div>
-          ))}
-        </ReactGridLayout>
+              </div>
+            </WidgetWrapper>
+          </div>
+        ))}
+      </ReactGridLayout>
       )}
     </div>
   )

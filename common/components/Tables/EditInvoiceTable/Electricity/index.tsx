@@ -15,7 +15,8 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const { service, payment } = usePaymentContext()
-  const losses = payment?.losses ?? service?.losses ?? 0
+  const name = useMemo(() => toArray<string>(_name), [_name])
+  const losses = Form.useWatch(['invoice', ...name, 'losses'], form) ?? 0
 
   return (
     <Space direction="vertical" size={0}>
@@ -36,7 +37,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
   const { service, payment } = usePaymentContext()
-  const losses = payment?.losses ?? service?.losses ?? 0
+  const losses = Form.useWatch(['invoice', ...name, 'losses'], form) ?? 0
 
   const lastAmount = Form.useWatch(['invoice', ...name, 'lastAmount'], form)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
@@ -138,7 +139,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
   const { service, payment } = usePaymentContext()
-  const losses = payment?.losses ?? service?.losses ?? 0
+  const losses = Form.useWatch(['invoice', ...name, 'losses'], form) ?? 0
 
   const lastAmount = Form.useWatch(['invoice', ...name, 'lastAmount'], form)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
