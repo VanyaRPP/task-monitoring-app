@@ -73,7 +73,7 @@ function AddPaymentForm({ paymentActions }) {
       <PaymentTypeSelect edit={!companyId || edit} />
       <InvoiceNumber form={form} paymentActions={selectedActions} />
       <InvoiceCreationDate edit={preview} />
-      <UpdateInvoiceButton form={form}  />
+      <UpdateInvoiceButton form={form} service={service} />
 
       {operation === Operations.Credit ? (
         <>

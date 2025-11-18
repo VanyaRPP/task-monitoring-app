@@ -1,12 +1,14 @@
 import { Button, Space, Form, FormInstance, message } from 'antd';
+import { IService } from '@common/api/serviceApi/service.api.types'
 
 interface UpdateInvoiceButtonProps {
   form: FormInstance;
+  service?: IService;
   onClick?: () => void;
   disabled?: boolean;
 }
 
-export default function UpdateInvoiceButton({ form, onClick, disabled }: UpdateInvoiceButtonProps) {
+export default function UpdateInvoiceButton({ form, service, onClick, disabled }: UpdateInvoiceButtonProps) {
 
   const handleUpdateClick = () => {
     try {
@@ -16,7 +18,7 @@ export default function UpdateInvoiceButton({ form, onClick, disabled }: UpdateI
         if (item.type === "electricityPrice") {
           return {
             ...item,
-            losses: 777,
+            losses: service?.losses || item.losses,
           };
         }
         return item;
