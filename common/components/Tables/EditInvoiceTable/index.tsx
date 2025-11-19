@@ -228,7 +228,7 @@ export const InvoiceSelector: React.FC<{
 
 export interface InvoiceComponentProps {
   form?: FormInstance
-  name?: string | string | number | number[]
+  name?: string | string[] | number | number[]
   editable?: boolean
   disabled?: boolean
 }
