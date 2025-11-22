@@ -12,7 +12,7 @@ jest.mock('@components/AddPaymentModal', () => ({
 }))
 
 describe('WaterPart.Sum', () => {
-    it('коректно розраховує суму при числовому значенні price', async () => {
+    it('correct sum with numeric price', async () => {
         const [form] = Form.useForm();
 
         form.setFieldsValue({
@@ -33,7 +33,7 @@ describe('WaterPart.Sum', () => {
         expect(screen.getByText('150.00 грн')).toBeDefined();
     });
 
-    it('встановлює sum = 0 при undefined значенні price', async () => {
+    it('sets sum = 0 for undefined price', async () => {
         const [form] = Form.useForm();
 
         form.setFieldsValue({
@@ -56,7 +56,7 @@ describe('WaterPart.Sum', () => {
         expect(screen.getByText('0.00 грн')).toBeDefined()
     })
 
-    it('ставить sum = 0 при null значенні price', async () => {
+    it('sets sum = 0 for null price', async () => {
         const [form] = Form.useForm();
 
         form.setFieldsValue({

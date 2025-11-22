@@ -13,7 +13,7 @@ jest.mock('@components/AddPaymentModal', () => ({
 }));
 
 describe('Inflicion.Sum', () => {
-    it('коректно розраховує суму при числовому значенні price', async () => {
+    it('correct sum with numeric price', async () => {
         const [form] = Form.useForm();
 
         form.setFieldsValue({
@@ -34,7 +34,7 @@ describe('Inflicion.Sum', () => {
         expect(screen.getByText('200.00 грн')).toBeDefined();
     });
 
-    it('встановлює sum = 0 при undefined значенні price', async () => {
+    it('sets sum = 0 for undefined price', async () => {
         const [form] = Form.useForm();
 
         form.setFieldsValue({
@@ -56,7 +56,7 @@ describe('Inflicion.Sum', () => {
         expect(screen.getByText('0.00 грн')).toBeDefined();
     });
 
-    it('ставить sum = 0 при null значенні price', async () => {
+    it('sets sum = 0 for null price', async () => {
         const [form] = Form.useForm();
 
         form.setFieldsValue({
