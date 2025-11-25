@@ -25,7 +25,7 @@ export type IRealestate = {
 }
 
 export interface CustomServices {
-  _id: ObjectId
+  _id: string
   label: string
   fieldName: string
   price: number
