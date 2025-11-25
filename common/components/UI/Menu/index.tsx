@@ -112,6 +112,11 @@ export const Menu: React.FC<MenuProps> = (props) => {
             type: 'item',
             label: <Link href={AppRoutes.SERVICE}>Послуги</Link>,
           },
+          {
+            key: AppRoutes.MYSERVICES,
+            type: 'item',
+            label: <Link href={AppRoutes.MYSERVICES}>Мої послуги</Link>,
+          }
         ].filter(({ hidden }) => !hidden),
       },
       {
