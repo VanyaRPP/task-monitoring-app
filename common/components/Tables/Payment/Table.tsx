@@ -349,7 +349,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           }
           return companyLabel
         },
-        hidden: filters?.company?.length === 1,
+        hidden: isDomainAdmin ? isSingleCompanyByData : false,
       },
       {
         title: 'Дата створення',
