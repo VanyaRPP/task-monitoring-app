@@ -216,6 +216,12 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const screens = useBreakpoint()
   const isMobile = !screens.md
 
+  const domainsFromData = Array.from(
+    new Set(payments?.data?.map((p) => p.domain?._id))
+  )
+
+  const isSingleDomainByRealData = domainsFromData.length === 1
+
   const isGlobalAdmin = currUserRoles.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = currUserRoles.includes(Roles.DOMAIN_ADMIN)
   const isUser = currUserRoles.includes(Roles.USER)
@@ -291,7 +297,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
               </Typography.Link>
             </Tooltip>
           ),
-        hidden: isSingleDomainByData || isSingleCompanyByData,
+        hidden: isDomainAdmin ? isSingleDomainByRealData : false,
       },
       {
         title: 'Компанія',
@@ -343,7 +349,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           }
           return companyLabel
         },
-        hidden: filters?.company?.lenght === 1,
+        hidden: isDomainAdmin ? isSingleCompanyByData : false,
       },
       {
         title: 'Дата створення',
