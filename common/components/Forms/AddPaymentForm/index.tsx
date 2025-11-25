@@ -16,7 +16,6 @@ import InvoiceCreationDate from './InvoiceCreationDate'
 import InvoiceNumber from './InvoiceNumber'
 import MonthServiceSelect from './MonthServiceSelect'
 import PaymentPricesTable from './PaymentPricesTable'
-import UpdateInvoiceButton from './UpdateInvoiceButton'
 import PaymentTotal from './PaymentTotal'
 import { inputNumberParser } from '@utils/helpers'
 
@@ -73,7 +72,6 @@ function AddPaymentForm({ paymentActions }) {
       <PaymentTypeSelect edit={!companyId || edit} />
       <InvoiceNumber form={form} paymentActions={selectedActions} />
       <InvoiceCreationDate edit={preview} />
-      <UpdateInvoiceButton form={form} service={service} />
 
       {operation === Operations.Credit ? (
         <>
@@ -103,7 +101,7 @@ function AddPaymentForm({ paymentActions }) {
         </>
       ) : (
         <>
-          <PaymentPricesTable preview={preview} />
+          <PaymentPricesTable preview={preview} service={service} />
           <PaymentTotal form={form} />
         </>
       )}
