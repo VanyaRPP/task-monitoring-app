@@ -71,6 +71,7 @@ const RealEstateBlock: React.FC<Props> = ({
           filters={filters}
           setFilters={setFilters}
           setIsArchive={setIsArchive}
+          isArchive={isArchive} 
           realEstateActions={realEstateActions}
           setRealEstateActions={setRealEstateActions}
           enableRealEstateButton={!sepDomainID}

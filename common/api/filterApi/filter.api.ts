@@ -25,13 +25,13 @@ export const filterApi = createApi({
   endpoints: (builder) => ({
     getDomainFilters: builder.query<
       IPaymentFilterResponse,
-      { streets?: any; realEstates?: any }
+      { streets?: any; realEstates?: any; archived?: boolean }
     >({
-      query: ({ streets, realEstates }) => {
+      query: ({ streets, realEstates, archived }) => {
         return {
           url: `domain`,
           method: 'GET',
-          params: cleanParams({ streets, realEstates }),
+          params: cleanParams({ streets, realEstates, archived }),
         }
       },
       providesTags: (response) =>

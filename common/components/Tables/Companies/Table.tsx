@@ -105,6 +105,7 @@ const CompaniesTable: React.FC<Props> = ({
   const { data: domainData } = useGetDomainFiltersQuery({
     streets: filters?.street,
     realEstates: filters?.company,
+    archived: isArchive,         
   })
   const { data: streetData } = useGetAddressFiltersQuery({
     realEstates: filters?.company,

@@ -2,9 +2,10 @@ export function getDomainsPipeline(
   isGlobalAdmin,
   email,
   filteredCompanys = null,
-  filteredStreets = null
+  filteredStreets = null,
+  archived = null
 ) {
-  return [
+  const pipeline: any[] = [
     {
       $match: {
         $expr: {
@@ -27,6 +28,19 @@ export function getDomainsPipeline(
         },
       },
     },
+  ]
+  if (archived === true || archived === 'true') {
+    pipeline.push({
+      $match: { archived: true },
+    })
+  }
+
+  if (archived === false || archived === 'false') {
+    pipeline.push({
+      $match: { archived: { $ne: true } },
+    })
+  }
+  pipeline.push(
     {
       $group: {
         _id: '$domain',
@@ -59,8 +73,9 @@ export function getDomainsPipeline(
         'domainDetails.name': 1,
         'domainDetails._id': 1,
       },
-    },
-  ]
+    }
+  )
+  return pipeline
 }
 
 export function getRealEstatesPipeline({

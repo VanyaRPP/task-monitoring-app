@@ -28,6 +28,7 @@ export interface Props {
   filters?: any
   setFilters?: (filters: any) => void
   setIsArchive?: Dispatch<SetStateAction<boolean>>
+  isArchive?: boolean 
   realEstates?: IGetRealestateResponse
   setRealEstateActions: React.Dispatch<
     React.SetStateAction<{
@@ -51,6 +52,7 @@ const CompaniesHeader: React.FC<Props> = ({
   enableRealEstateButton,
   setIsArchive,
   isSingleCompanyByData,
+  isArchive, 
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -69,16 +71,18 @@ const CompaniesHeader: React.FC<Props> = ({
     setRealEstateActions({ edit: false })
   }
   const handleArchiveToggle = (value: boolean) => {
-    setIsArchive(value)
+    setIsArchive?.(value)
   }
 
   const { data: realEstateData } = useGetRealEstateFiltersQuery({
     streets: filters?.street,
     domains: filters?.domain,
+    archived: isArchive, 
   })
   const { data: domainData } = useGetDomainFiltersQuery({
     streets: filters?.street,
     realEstates: filters?.company,
+    archived: isArchive, 
   })
 
   return (

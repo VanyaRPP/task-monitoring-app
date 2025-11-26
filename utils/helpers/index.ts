@@ -396,7 +396,8 @@ export async function getDistinctCompanyAndDomain({
     isGlobalAdmin,
     user.email,
     filteredCompanys,
-    filteredStreets
+    filteredStreets,
+    archived
   )
   const streetsPipeline = getStreetsPipeline(isGlobalAdmin, user.email)
 
