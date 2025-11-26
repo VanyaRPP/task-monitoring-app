@@ -1,6 +1,5 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import { IService } from '@common/api/serviceApi/service.api.types' 
 import { ServiceType } from '@utils/constants'
 import { toArray } from '@utils/helpers'
 import { Form, FormInstance, Select, Table } from 'antd'
@@ -16,11 +15,10 @@ import Maintenance from './Maintenance'
 import Placing from './Placing'
 import Water from './Water'
 import WaterPart from './WaterPart'
-import UpdateInvoiceButton from '../../Forms/AddPaymentForm/UpdateInvoiceButton' 
 
 export interface TableProps {
   form?: FormInstance
-  service?: IService  
+
   editable?: boolean
   disabled?: boolean
 
@@ -38,37 +36,6 @@ export interface TableProps {
   className?: string
   style?: React.CSSProperties
 }
-interface SumCellProps extends InvoiceComponentProps {
-  service?: IService
-}
-
-const SumCell: React.FC<SumCellProps> = ({
-  form,
-  name,
-  editable,
-  disabled,
-  service,
-}) => {
-  const record = Form.useWatch(
-    ['invoice', ...toArray<string>(name)],
-    form
-  ) as InvoiceType | undefined
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <Sum
-        form={form}
-        name={name}
-        editable={editable}
-        disabled={disabled}
-      />
-
-      {record?.type === ServiceType.Electricity && service && (
-        <UpdateInvoiceButton form={form} service={service} />
-      )}
-    </div>
-  )
-}
 
 export type EditInvoicesTableProps = Omit<
   TableProps,
@@ -85,7 +52,6 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
   disabled = false,
   loading = false,
   selectable = false,
-  service, 
   ...props
 }) => {
   const [form] = Form.useForm(_form)
@@ -162,12 +128,11 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
               title: 'Сума',
               width: 200,
               render: (_, { name }: { name: number }) => (
-                <SumCell
+                <Sum
                   form={form}
                   name={name}
                   editable={editable}
                   disabled={disabled}
-                  service={service}
                 />
               ),
             },
@@ -263,7 +228,7 @@ export const InvoiceSelector: React.FC<{
 
 export interface InvoiceComponentProps {
   form?: FormInstance
-  name?: string | string[] | number | number[]
+  name?: string | string | number | number[]
   editable?: boolean
   disabled?: boolean
 }
