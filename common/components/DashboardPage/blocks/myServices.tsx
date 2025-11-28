@@ -1,31 +1,40 @@
+import React, { useState, useEffect } from 'react'
 import TableCard from '@components/UI/TableCard'
 import MyServicesHeader from '@components/Tables/MyServices/Header'
 import MyServicesTable from '@components/Tables/MyServices/Table'
-import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
-import { useState } from 'react'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 
 const MyServicesBlock: React.FC = () => {
-  const { data: servicesData } = useGetCustomServicesQuery({})
-  const [selectedService, setSelectedService] = useState<string>()
+  const { data: domainsData, isLoading } = useGetDomainsQuery({})
+  const [selectedDomain, setSelectedDomain] = useState<string | undefined>()
 
-  const serviceOptions =
-    servicesData?.data?.map((service) => ({
-      value: service._id,
-      label: service.name ,
+  useEffect(() => {
+    if (!selectedDomain && domainsData && domainsData.length > 0) {
+      setSelectedDomain(domainsData[0]._id)
+    }
+  }, [domainsData, selectedDomain])
+
+  const domainOptions =
+    domainsData?.map((domain) => ({
+      value: domain._id,
+      label: domain.name,
     })) || []
+
+  const handleDomainChange = (value: string) => {
+    setSelectedDomain(value)
+  }
 
   return (
     <TableCard
       title={
         <MyServicesHeader
-          domainOptions={serviceOptions}
-          selectedDomain={selectedService}
-          onDomainChange={setSelectedService}
+          domainOptions={domainOptions}
+          selectedDomain={selectedDomain}
+          onDomainChange={handleDomainChange}
         />
       }
     >
-      {}
-      {selectedService && <MyServicesTable serviceId={selectedService} />}
+      <MyServicesTable domainId={selectedDomain} />
     </TableCard>
   )
 }
