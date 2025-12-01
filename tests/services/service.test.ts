@@ -2,7 +2,7 @@ import { expect } from '@jest/globals'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { domains, services, users } from '@utils/testData'
-import handler from '.'
+import handler from '../../pages/api/service/[id]'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -43,7 +43,7 @@ describe('Service API - PATCH', () => {
     const updatedData = {
       ...services[0],
       description: 'updated',
-      domain: domains[0],
+      domain: domains[0]._id,
     }
 
     const mockReq = {
@@ -178,7 +178,7 @@ describe('Service API - PATCH', () => {
   })
 })
 
-xdescribe('Service API - DELETE', () => {
+describe('Service API - DELETE', () => {
   it('should be removed by DomainAdmin role', async () => {
     await mockLoginAs(users.domainAdmin)
 
