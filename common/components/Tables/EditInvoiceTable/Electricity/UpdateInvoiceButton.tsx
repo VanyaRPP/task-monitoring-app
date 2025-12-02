@@ -1,4 +1,5 @@
 import { Button, Space, Form, FormInstance, message } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons'
 import { IService } from '@common/api/serviceApi/service.api.types'
 
 interface UpdateInvoiceButtonProps {
@@ -35,12 +36,20 @@ export default function UpdateInvoiceButton({ form, service, onClick, disabled }
   };
 
   return (
-    <Form.Item>
-      <Space style={{ width: '100%', justifyContent: 'right' }} >
-        <Button type="primary" onClick={handleUpdateClick} disabled={disabled}>
-          Оновити рахунок
-        </Button>
-      </Space>
-    </Form.Item>
+      <Button
+        icon={<ReloadOutlined />}
+        onClick={handleUpdateClick}
+        disabled={disabled}
+        size="small"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: 28,
+          width: 28,
+          padding: 0,
+          borderRadius: 4, 
+        }}
+      />
   );
 }

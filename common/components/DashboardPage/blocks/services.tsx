@@ -14,6 +14,7 @@ import { useState } from 'react'
 import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import { message, Modal } from 'antd'
 import { dateToMonthYear } from '@assets/features/formatDate'
+import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
 
 interface ServiceBlockProps {
   sepDomainID?: string
@@ -29,6 +30,8 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
   const [selectedServices, setSelectedServices] = useState<IService[]>([])
   const [deleteService, _] = useDeleteServiceMutation()
 
+  const { data: customServicesData } = useGetCustomServicesQuery({})
+
   const handleDeleteServices = () => {
     ;(Modal as any).confirm({
       title: 'Ви впевнені, що хочете видалити обрані проплати?',
@@ -38,7 +41,7 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
         <>
           {selectedServices.map((service, index) => (
             <div key={index}>
-              {index + 1}. {service?.domain?.name}, {service?.street?.address},{' '}
+              {index + 1}. {service?.domain?.name}, {service?.street?.address},
               {dateToMonthYear(service.date)}
             </div>
           ))}
@@ -95,6 +98,7 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
         setServiceActions={setServiceActions}
         serviceActions={serviceActions}
         services={servicesData}
+        customServices={customServicesData?.data}
         isLoading={isLoading}
         isError={isError}
         filter={filter}

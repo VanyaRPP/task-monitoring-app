@@ -87,7 +87,7 @@ const AddServiceModal: FC<Props> = ({
         0,
       description: formData?.description || '',
       customServices: formData?.customServices || [],
-      ...(formData?.losses > 0 && { losses: formData?.losses }),
+      losses: formData?.losses || null,
       consumedElectricity: formData?.consumedElectricity || null,
       generalElectricity: formData?.generalElectricity || null,
       isVAT: formData?.isVAT || true,

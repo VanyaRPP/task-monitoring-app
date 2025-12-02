@@ -5,7 +5,6 @@ import {
   QuestionCircleOutlined,
   InboxOutlined,
   MoreOutlined,
-  InfoCircleOutlined,
 } from '@ant-design/icons'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import {
@@ -27,7 +26,6 @@ import {
   Checkbox,
   Popconfirm,
   Table,
-  Tag,
   message,
   Tooltip,
   Dropdown,
@@ -59,6 +57,19 @@ type CompanyWithPayments = {
   totalDebt: number
 }
 
+const STANDARD_SERVICE_NAMES = [
+  'Опис',
+  'Площа (м²)',
+  'Ціна (грн/м²)',
+  'Індивідуальне утримання (грн/м²)',
+  'Частка загальної площі',
+  'Частка водопостачання',
+  'Прибирання (грн)',
+  'Знижка',
+  'Вивіз сміття',
+  'Нарахування інд. інф.',
+]
+
 export interface Props {
   domainId?: string
   streetId?: string
@@ -77,6 +88,7 @@ export interface Props {
     edit: boolean
   }
   isArchive: boolean
+  customServices?: { _id: string; name: string }[]
 }
 
 const CompaniesTable: React.FC<Props> = ({
@@ -91,6 +103,7 @@ const CompaniesTable: React.FC<Props> = ({
   setRealEstateActions,
   realEstateActions,
   isArchive,
+  customServices,
 }) => {
   const router = useRouter()
   const { pathname } = router
@@ -179,6 +192,13 @@ const CompaniesTable: React.FC<Props> = ({
     return uniqueCompanies.size === 1
   }, [realEstates?.data])
 
+  const filteredCustomServices = useMemo(() => {
+    return customServices?.filter((custom) => {
+      const isStandardName = STANDARD_SERVICE_NAMES.includes(custom.name)
+      return !isStandardName
+    })
+  }, [customServices])
+
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
   return (
@@ -237,6 +257,7 @@ const CompaniesTable: React.FC<Props> = ({
         debtorCompanies,
         isUser,
         isSingleCompanyByData,
+        customServices: filteredCustomServices,
       })}
       dataSource={realEstates?.data}
       scroll={{ x: tableWidth }}
@@ -256,9 +277,11 @@ const CompaniesTable: React.FC<Props> = ({
   )
 }
 
-const renderTooltip = (text: string) => {
+const renderTooltip = (text?: string) => {
+  const value = (text ?? '').trim()
+
   return (
-    <Tooltip title={text} placement="top">
+    <Tooltip title={value || null} placement="top">
       <QuestionCircleOutlined />
     </Tooltip>
   )
@@ -282,8 +305,9 @@ const getDefaultColumns = ({
   pathname,
   setRealEstateActions,
   debtorCompanies,
-  isSingleCompanyByData,
   isUser,
+  isSingleCompanyByData,
+  customServices,
 }: {
   domainId?: string
   streetId?: string
@@ -308,6 +332,7 @@ const getDefaultColumns = ({
   debtorCompanies?: CompanyWithPayments[]
   isUser?: boolean
   isSingleCompanyByData?: boolean
+  customServices?: { _id: string; name: string }[]
 }): ColumnType<any>[] => {
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
   const columns: ColumnType<any>[] = [
@@ -315,8 +340,9 @@ const getDefaultColumns = ({
       title: 'Адміністратори',
       dataIndex: 'adminEmails',
       width: 250,
-      render: (adminEmails) =>
-        <CollapsedTags items={adminEmails} maxVisible={2} />,
+      render: (adminEmails) => (
+        <CollapsedTags items={adminEmails} maxVisible={2} />
+      ),
     },
     {
       title: 'Опис',
@@ -344,7 +370,7 @@ const getDefaultColumns = ({
           renderCurrency(value)
         ) : (
           <span className={s.currency}>-</span>
-        )
+        ),
     },
     {
       title: 'Індивідуальне утримання (грн/м²)',
@@ -359,7 +385,7 @@ const getDefaultColumns = ({
           renderCurrency(value)
         ) : (
           <span className={s.currency}>-</span>
-        )
+        ),
     },
     {
       title: 'Частка загальної площі',
@@ -386,7 +412,7 @@ const getDefaultColumns = ({
           renderCurrency(value)
         ) : (
           <span className={s.currency}>-</span>
-        )
+        ),
     },
     {
       title: 'Знижка',
@@ -399,7 +425,7 @@ const getDefaultColumns = ({
           renderCurrency(value)
         ) : (
           <span className={s.currency}>-</span>
-        )
+        ),
     },
     {
       align: 'center',
@@ -415,23 +441,30 @@ const getDefaultColumns = ({
       width: 170,
       render: (value) => <Checkbox checked={value} disabled />,
     },
-    {
-      fixed: 'right',
-      align: 'center',
-      title: '',
-      width: 80,
-      render: (_, realEstate: IExtendedRealestate) => (
-        <Button
-          icon={<EyeOutlined />}
-          type="link"
-          onClick={() => {
-            setCurrentRealEstate(realEstate)
-            setRealEstateActions({ edit: false })
-          }}
-        />
-      ),
-    },
   ]
+
+  if (customServices?.length) {
+    customServices.forEach((custom) => {
+      columns.push({
+        title: custom.name,
+        dataIndex: custom._id,
+        width: 150,
+        align: 'center',
+        ellipsis: true,
+        render: (_, record: IExtendedRealestate) => {
+          const match = (record as any).individualServices?.find(
+            (s) => String(s._id) === String(custom._id)
+          )
+          return match ? (
+            renderCurrency(match.price)
+          ) : (
+            <span className={s.currency}>-</span>
+          )
+        },
+      })
+    })
+  }
+
   if (isAdmin) {
     columns.push({
       fixed: 'right',

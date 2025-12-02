@@ -1,5 +1,6 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
+import { IService } from '@common/api/serviceApi/service.api.types' 
 import { ServiceType } from '@utils/constants'
 import { toArray } from '@utils/helpers'
 import { Form, FormInstance, Select, Table } from 'antd'
@@ -18,7 +19,7 @@ import WaterPart from './WaterPart'
 
 export interface TableProps {
   form?: FormInstance
-
+  service?: IService  
   editable?: boolean
   disabled?: boolean
 
@@ -52,6 +53,7 @@ export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
   disabled = false,
   loading = false,
   selectable = false,
+  service, 
   ...props
 }) => {
   const [form] = Form.useForm(_form)
@@ -228,7 +230,7 @@ export const InvoiceSelector: React.FC<{
 
 export interface InvoiceComponentProps {
   form?: FormInstance
-  name?: string | string | number | number[]
+  name?: string | string[] | number | number[]
   editable?: boolean
   disabled?: boolean
 }

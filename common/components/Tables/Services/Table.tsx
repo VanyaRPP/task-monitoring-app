@@ -22,6 +22,7 @@ import { AppRoutes, Roles, ServiceName } from '@utils/constants'
 import { isAdminCheck, renderCurrency } from '@utils/helpers'
 import { Alert, Button, Popconfirm, Table, Tooltip, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
+import { customServiceForm } from 'e2e/common/customServiceForm'
 import { useRouter } from 'next/router'
 import { useCallback, useState } from 'react'
 
@@ -43,6 +44,7 @@ interface Props {
   filter?: any
   setFilter?: (filters: any) => void
   setSelectedServices?: (service: IService[]) => void
+  customServices?: { _id: string; name: string }[]
 }
 
 const ServicesTable: React.FC<Props> = ({
@@ -55,6 +57,7 @@ const ServicesTable: React.FC<Props> = ({
   filter,
   setFilter,
   setSelectedServices,
+  customServices,
 }) => {
   const router = useRouter()
   const { pathname } = router
@@ -98,6 +101,13 @@ const ServicesTable: React.FC<Props> = ({
     })
   }
 
+  const filteredCustomServices = customServices?.filter(
+    (custom) =>
+      !services?.data.some((service) =>
+        service.customServices?.some((s) => String(s._id) === custom._id)
+      )
+  )
+
   return (
     <>
       <Table
@@ -134,7 +144,8 @@ const ServicesTable: React.FC<Props> = ({
           filter,
           isOnPage,
           setServiceActions,
-          serviceActions
+          serviceActions,
+          filteredCustomServices
         )}
         dataSource={services?.data}
         scroll={{ x: 1750 }}
@@ -174,13 +185,15 @@ const getDefaultColumns = (
   serviceActions?: {
     edit: boolean
     preview: boolean
-  }
+  },
+  customServices?: { _id: string; name: string }[]
 ): ColumnType<any>[] => {
   const columns: ColumnType<any>[] = [
     {
       fixed: 'left',
       title: 'Надавач послуг',
       dataIndex: 'domain',
+      width: 180,
       filters: isOnPage ? domainFilter : null,
       filteredValue: filter?.domain || null,
       render: (i) => i?.name,
@@ -198,6 +211,7 @@ const getDefaultColumns = (
     {
       title: 'Адреса',
       dataIndex: 'street',
+      width: 250,
       filters: isOnPage ? addressFilter : null,
       filteredValue: filter?.street || null,
       render: (i) => `${i?.address} (м. ${i?.city})`,
@@ -293,6 +307,24 @@ const getDefaultColumns = (
       ),
     },
   ]
+
+  if (customServices?.length) {
+    customServices
+      .forEach((custom) => {
+        columns.splice(columns.length - 2, 0, {
+          title: custom.name,
+          dataIndex: custom._id,
+          width: 120,
+          ellipsis: true,
+          render: (_, record: IService) => {
+            const match = record.customServices?.find(
+              (s) => String(s._id) === String(custom._id)
+            )
+            return match ? renderCurrency(match.price) : '-'
+          },
+        })
+      })
+  }
 
   if (isAdmin) {
     columns.push(

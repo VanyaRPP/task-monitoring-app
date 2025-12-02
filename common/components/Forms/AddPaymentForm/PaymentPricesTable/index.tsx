@@ -1,10 +1,12 @@
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { EditInvoicesTable_unstable } from '@components/Tables/EditInvoiceTable'
+import { IService } from '@common/api/serviceApi/service.api.types' 
 import { useEffect } from 'react'
 
 export interface PaymentPricesTableProps {
   preview?: boolean
   loading?: boolean
+  service?: IService
 }
 
 /**
@@ -40,6 +42,7 @@ const PaymentPricesTable: React.FC<PaymentPricesTableProps> = ({
       form={form}
       editable={!preview}
       loading={loading}
+      service={service}
     />
   )
 }
