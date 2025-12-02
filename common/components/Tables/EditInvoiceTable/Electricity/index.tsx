@@ -7,6 +7,7 @@ import validator from '@utils/validator'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { Form, Input, Space, Typography, Tooltip } from 'antd'
 import { useEffect, useMemo } from 'react'
+import UpdateInvoiceButton from './UpdateInvoiceButton'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -19,12 +20,24 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   const losses = Form.useWatch(['invoice', ...name, 'losses'], form) ?? 0
 
   return (
-    <Space direction="vertical" size={0}>
-      <Typography.Text>Електропостачання</Typography.Text>
-      <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-        {toFirstUpperCase(dateToMonthYear(service?.date))}{' '}
-        {losses > 0 ? `+ Втрати ${losses}%` : ''}
-      </Typography.Text>
+    <Space
+      direction="horizontal"
+      size='large'
+    >
+      <Space direction="vertical" size={0}>
+        <Typography.Text>Електропостачання</Typography.Text>
+        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+          {toFirstUpperCase(dateToMonthYear(service?.date))}{' '}
+          {losses > 0 ? `+ Втрати ${losses}%` : ''}
+        </Typography.Text>
+      </Space>
+      {editable && (
+        <UpdateInvoiceButton
+          form={form}
+          service={service}
+          disabled={disabled}
+        />
+      )}
     </Space>
   )
 }
@@ -139,7 +152,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
   const { service, payment } = usePaymentContext()
-  const losses = Form.useWatch(['invoice', ...name, 'losses'], form) ?? 0
+  const losses = Form.useWatch(['invoice', ...name, 'losses'], form)
 
   const lastAmount = Form.useWatch(['invoice', ...name, 'lastAmount'], form)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
