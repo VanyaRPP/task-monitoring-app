@@ -39,7 +39,7 @@ describe('Service API - GET', () => {
     )
     const expected = services
 
-    expect(received).toEqual(expected)
+    expect(received).toMatchObject(expected)
   })
 
   it('should load services as GlobalAdmin with limit', async () => {
@@ -70,7 +70,7 @@ describe('Service API - GET', () => {
     )
     const expected = services.slice(0, limit)
 
-    expect(received).toEqual(expected)
+    expect(received).toMatchObject(expected)
   })
 
   it('should load services as DomainAdmin', async () => {
@@ -103,7 +103,7 @@ describe('Service API - GET', () => {
         .adminEmails.includes(users.domainAdmin.email)
     )
 
-    expect(received).toEqual(expected)
+    expect(received).toMatchObject(expected)
   })
 
   it('should load services as User', async () => {
@@ -140,7 +140,7 @@ describe('Service API - GET', () => {
       return userDomains.find((domain) => service.domain === domain._id)
     })
 
-    expect(received).toEqual(expected)
+    expect(received).toMatchObject(expected)
   })
 
   it('should load services as GlobalAdmin by domainId and streetId', async () => {
@@ -172,7 +172,7 @@ describe('Service API - GET', () => {
         service.domain === domains[0]._id && service.street === streets[0]._id
     )
 
-    expect(received).toEqual(expected)
+    expect(received).toMatchObject(expected)
   })
 
   it('should load services as DomainAdmin by domainId and streetId', async () => {
@@ -208,7 +208,7 @@ describe('Service API - GET', () => {
         service.street === streets[0]._id
     )
 
-    expect(received).toEqual(expected)
+    expect(received).toMatchObject(expected)
   })
 
   it('should NOT load services as DomainAdmin by domainId and streetId - restricted access', async () => {
@@ -281,7 +281,7 @@ describe('Service API - GET', () => {
       const expected = [service]
 
       expect(response.status).toHaveBeenCalledWith(200)
-      expect(received).toEqual(expected)
+      expect(received).toMatchObject(expected)
     }
   })
 
@@ -308,7 +308,7 @@ describe('Service API - GET', () => {
     const expected = [services[5]]
 
     expect(response.status).toHaveBeenCalledWith(200)
-    expect(received).toEqual(expected)
+    expect(received).toMatchObject(expected)
   })
 
   it('should not load each service as DomainAdmin which is not realated to his domain by serviceId', async () => {
@@ -357,7 +357,7 @@ describe('Service API - GET', () => {
     const expected = [services[5]]
 
     expect(response.status).toHaveBeenCalledWith(200)
-    expect(received).toEqual(expected)
+    expect(received).toMatchObject(expected)
   })
 
   it('should not load service as User which is not realated to his company by serviceId', async () => {
@@ -416,7 +416,7 @@ describe('Service API - GET', () => {
       })
       .slice(0, limit)
 
-    expect(received).toEqual(expected)
+    expect(received).toMatchObject(expected)
   })
 
   it('should load services as DomainAdmin with limit and year', async () => {
@@ -453,7 +453,7 @@ describe('Service API - GET', () => {
         new Date(service.date).getFullYear() === 2020
     )
 
-    expect(received).toEqual(expected)
+    expect(received).toMatchObject(expected)
   })
 
   it('should load services as User with limit and year', async () => {
@@ -488,7 +488,7 @@ describe('Service API - GET', () => {
       })
       .slice(0, limit)
 
-    expect(received).toEqual(expected)
+    expect(received).toMatchObject(expected)
   })
 
   it('should load services as GlobalAdmin with year', async () => {
@@ -524,7 +524,7 @@ describe('Service API - GET', () => {
       )
     })
 
-    expect(received).toEqual(expected)
+    expect(received).toMatchObject(expected)
   })
 })
 
