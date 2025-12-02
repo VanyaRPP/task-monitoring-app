@@ -139,31 +139,31 @@ const AddServiceForm: React.FC<Props> = ({
   useEffect(() => {
     const currentCustomServices = form.getFieldValue('customServices')
       if (!currentCustomServices || currentCustomServices.length === 0) {
-    form.setFieldsValue({
-      electricityPrice:
-        currentService?.electricityPrice ??
-        previousMonth?.electricityPrice ??
-        0,
-      inflicionPrice:
-        currentService?.inflicionPrice ?? previousMonth?.inflicionPrice ?? 0,
-      rentPrice: currentService?.rentPrice ?? previousMonth?.rentPrice ?? 0,
-      waterPrice: currentService?.waterPrice ?? previousMonth?.waterPrice ?? 0,
-      waterPriceTotal:
-        currentService?.waterPriceTotal ?? previousMonth?.waterPriceTotal ?? 0,
-      garbageCollectorPrice:
-        currentService?.garbageCollectorPrice ??
-        previousMonth?.garbageCollectorPrice ??
-        0,
-      customServices:
-        (currentService?.customServices?.length > 0
-          ? currentService.customServices
-          : filteredCustomServices) || [],
-      losses: currentService?.losses ?? 0,
-      consumedElectricity: currentService?.consumedElectricity ?? null,
-      generalElectricity: currentService?.generalElectricity ?? null,
-      isVAT: currentService?.isVAT || true,
-    })
-  }
+      form.setFieldsValue({
+        electricityPrice:
+          currentService?.electricityPrice ??
+          previousMonth?.electricityPrice ??
+          0,
+        inflicionPrice:
+          currentService?.inflicionPrice ?? previousMonth?.inflicionPrice ?? 0,
+        rentPrice: currentService?.rentPrice ?? previousMonth?.rentPrice ?? 0,
+        waterPrice: currentService?.waterPrice ?? previousMonth?.waterPrice ?? 0,
+        waterPriceTotal:
+          currentService?.waterPriceTotal ?? previousMonth?.waterPriceTotal ?? 0,
+        garbageCollectorPrice:
+          currentService?.garbageCollectorPrice ??
+          previousMonth?.garbageCollectorPrice ??
+          0,
+        customServices:
+          (currentService?.customServices?.length > 0
+            ? currentService.customServices
+            : filteredCustomServices) || [],
+        losses: currentService?.losses,
+        consumedElectricity: currentService?.consumedElectricity ?? null,
+        generalElectricity: currentService?.generalElectricity ?? null,
+        isVAT: currentService?.isVAT || true,
+      })
+    }
   }, [form, currentService, previousMonth, initialCustomServices])
 
   useEffect(() => {
@@ -185,6 +185,7 @@ const AddServiceForm: React.FC<Props> = ({
           street: currentService?.street?._id,
           date: dayjs(currentService?.date),
           description: currentService?.description,
+          losses: currentService?.losses,
           consumedElectricity: currentService?.consumedElectricity ?? null,
           generalElectricity: currentService?.generalElectricity ?? null,
           isVAT: currentService?.isVAT || true,

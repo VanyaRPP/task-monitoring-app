@@ -37,7 +37,6 @@ export default function UpdateInvoiceButton({ form, service, onClick, disabled }
 
   return (
       <Button
-        type="primary"
         icon={<ReloadOutlined />}
         onClick={handleUpdateClick}
         disabled={disabled}

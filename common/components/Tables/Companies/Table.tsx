@@ -277,9 +277,11 @@ const CompaniesTable: React.FC<Props> = ({
   )
 }
 
-const renderTooltip = (text: string) => {
+const renderTooltip = (text?: string) => {
+  const value = (text ?? '').trim()
+
   return (
-    <Tooltip title={text} placement="top">
+    <Tooltip title={value || null} placement="top">
       <QuestionCircleOutlined />
     </Tooltip>
   )
