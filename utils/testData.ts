@@ -69,6 +69,9 @@ export const domains = [
     adminEmails: [users.domainAdmin.email],
     streets: [streets[0]._id],
     description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
   },
   {
     _id: '64d68421d9ba2fc8fea79d12',
@@ -76,6 +79,9 @@ export const domains = [
     adminEmails: [users.user.email],
     streets: [streets[1]._id],
     description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
   },
   {
     _id: '64d68421d9ba2fc8fea79d13',
@@ -83,6 +89,9 @@ export const domains = [
     adminEmails: [],
     streets: [],
     description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
   },
   {
     _id: '64d68421d9ba2fc8fea79d14',
@@ -90,6 +99,9 @@ export const domains = [
     adminEmails: [],
     streets: [],
     description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
   },
   {
     _id: '64d68421d9ba2fc8fea79d15',
@@ -97,6 +109,9 @@ export const domains = [
     adminEmails: [],
     streets: [],
     description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
   },
   {
     _id: '64d68421d9ba2fc8fea79d16',
@@ -104,6 +119,9 @@ export const domains = [
     adminEmails: [],
     streets: [],
     description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
   },
   {
     _id: '64e725c7a62fdf2d22b84c4a',
@@ -111,6 +129,9 @@ export const domains = [
     adminEmails: [users.domainAdmin2.email],
     streets: [],
     description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
   },
 ]
 

@@ -69,7 +69,10 @@ describe('isDomainAdmin', () => {
     const findOneSpy = jest
       .spyOn(RealEstate, 'findOne')
       .mockRejectedValue(new Error('Database error'))
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(jest.fn())
+
+    const consoleSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(jest.fn())
 
     const mockUser: IUser = {
       email: 'admin@example.com',
@@ -78,7 +81,12 @@ describe('isDomainAdmin', () => {
     }
 
     const result = await isDomainAdmin(mockUser)
-    expect(consoleSpy).toHaveBeenCalledWith(new Error('Database error'))
+
+    expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error))
+    expect((consoleSpy.mock.calls[0][0] as Error).message).toBe(
+      'Database error'
+    )
+
     expect(result).toBe(false)
 
     findOneSpy.mockRestore()
