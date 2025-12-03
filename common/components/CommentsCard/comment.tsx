@@ -1,4 +1,4 @@
-import { Comment as CommentAntd } from '@ant-design/compatible'
+import { Avatar, List, Typography } from 'antd'
 import {
   useGetUserByEmailQuery,
   useGetUserByIdQuery,
@@ -20,17 +20,21 @@ const Comment: React.FC<{ comment: IComment; taskId: string }> = ({
   const { data: user } = useGetUserByIdQuery(comment.id)
 
   return (
-    <>
-      <CommentAntd
+      <List.Item
         className={classNames(s.Comment, {
           [s.Active]: sessionUser?.data?._id === user?._id,
         })}
-        author={user ? <UserLink user={user} /> : 'Власника не знайдено'}
-        avatar={user?.image || undefined}
-        content={<p className={s.Description}>{comment?.text}</p>}
-        // datetime={dayjs(comment?.datetime).fromNow()}
-      />
-    </>
+      >
+        <List.Item.Meta
+          avatar={<Avatar src={user?.image || undefined} />}
+          title={
+            <>
+              {user ? <UserLink user={user} /> : 'Власника не знайдено'}
+            </>
+          }
+            description={<p className={s.Description}>{comment?.text}</p>}
+          />        
+      </List.Item>
   )
 }
 

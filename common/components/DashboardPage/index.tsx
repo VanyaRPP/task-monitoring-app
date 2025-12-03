@@ -225,7 +225,19 @@ const Dashboard: React.FC = () => {
               className={s.divider}
               style={{ backgroundColor: isDark ? '#555' : '#ccc' }}
             />
-            <Dropdown overlay={menu} trigger={['click']}>
+            <Dropdown
+              trigger={['click']}
+              dropdownRender={() => (
+                <div style={{ padding: 8 }}>
+                  <WidgetVisibilityMenu
+                    hidden={hiddenWidget}
+                    onChange={setHiddenWidget}
+                    available={[...ALL_WIDGETS]}
+                    labels={widgetLabels}
+                  />
+               </div>
+             )}
+            >
               <Tooltip title="Приховати віджети">
                 <Button icon={<EyeOutlined />}></Button>
               </Tooltip>

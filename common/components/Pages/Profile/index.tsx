@@ -104,7 +104,7 @@ export const ProfilePage: React.FC = () => {
       )}
       <Flex className={styles.columns} gap={16}>
         <Card title="Представник" className={styles.CardRepresentative}>
-          <Divider orientation="left" style={{ marginTop: 0 }}>
+          <Divider titlePlacement="start" style={{ marginTop: 0 }}>
             <Typography.Text type="secondary">Надавачі послуг</Typography.Text>
           </Divider>
           <Tags
@@ -116,7 +116,7 @@ export const ProfilePage: React.FC = () => {
                 key={index}
                 bordered={false}
                 color="purple"
-                className={styles.tag}
+                className={styles.tag}                      
                 onClick={() => {
                   handleTagClick(domain)
                 }}
@@ -125,7 +125,7 @@ export const ProfilePage: React.FC = () => {
               </Tag>
             )}
           />
-          <Divider orientation="left">
+          <Divider titlePlacement="start">
             <Typography.Text type="secondary">Компанії</Typography.Text>
           </Divider>
           <Tags

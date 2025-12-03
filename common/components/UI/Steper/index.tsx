@@ -6,8 +6,6 @@ import { useChangeTaskStatusMutation } from '../../../api/taskApi/task.api'
 import ConfirmTask from '../../Forms/ConfirmTask'
 import s from './style.module.scss'
 
-const { Step } = Steps
-
 const Steper: React.FC<any> = ({ steps, onSubmitModal }) => {
   const [current, setCurrent] = useState(0)
   const router = useRouter()
@@ -31,11 +29,13 @@ const Steper: React.FC<any> = ({ steps, onSubmitModal }) => {
 
   return (
     <>
-      <Steps current={current}>
-        {steps.map((item) => (
-          <Step key={item.title} title={item.title} />
-        ))}
-      </Steps>
+      <Steps 
+        current={current}
+        items={steps.map((item) => ({
+          key: item.title,
+          title: item.title,
+        }))}
+      />      
       <div className="stepsContent">{steps[current].content}</div>
       <div className="stepsAction">
         {current < 1 && (

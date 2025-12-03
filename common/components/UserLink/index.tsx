@@ -43,7 +43,7 @@ const UserLink: React.FC<{ user: IUser }> = ({ user }) => {
           title={`Профіль користувача ${user?.name}`}
           placement="right"
           onClose={onClose}
-          visible={visible}
+          open={visible}
           width={'50%'}
           className={s.Drawer}
           bodyStyle={{ backgroundColor: 'var(--backgroundColor)' }}

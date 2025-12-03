@@ -356,7 +356,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
           />
         </Tooltip>
       )}
-      expandIconPosition="right"
+      expandIconPosition="end"
       items={getItems(panelStyle)}
       ghost
     />
