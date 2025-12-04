@@ -48,6 +48,7 @@ describe('API Route - POST Method', () => {
 
       const mockReq = {
         method: 'POST',
+        query: { domainId: 'valid-domain-id' },
         body: { name },
       }
 
@@ -56,7 +57,7 @@ describe('API Route - POST Method', () => {
         json: jest.fn(),
       }
 
-      await handler(mockReq, mockRes)
+      await handler(mockReq as any, mockRes)
 
       expect(mockRes.status).toHaveBeenCalledWith(400)
     })
@@ -65,6 +66,7 @@ describe('API Route - POST Method', () => {
   describe('Role-Based Access Control', () => {
     const validReq = {
       method: 'POST',
+      query: { domainId: 'valid-domain-id' },
       body: { name: 'Test Service' },
     }
 
