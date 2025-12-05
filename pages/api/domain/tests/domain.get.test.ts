@@ -343,6 +343,11 @@ function parseReceived(data: any) {
   return data.map(({ _doc: domain }) => {
     const { __v, _id, streets, ...rest } = domain
 
+		delete (rest as any).customServices
+		delete (rest as any).domainBankToken
+		delete (rest as any).domainServices
+		delete (rest as any).realEstate
+
     return {
       _id: _id.toString(),
       streets: streets.map(({ _id }) => _id.toString()),

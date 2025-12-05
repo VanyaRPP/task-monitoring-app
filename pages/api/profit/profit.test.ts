@@ -51,8 +51,15 @@ jest.mock('@next-auth/mongodb-adapter', () => ({
 
 describe('Profit Payment API - GET', () => {
   beforeEach(() => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date('2024-10-01'))
     jest.clearAllMocks()
   })
+
+	afterEach(() => {
+		jest.useRealTimers()
+	})
+
   it('should return grouped payments for a DomainAdmin and log data', async () => {
     ;(getCurrentUser as jest.Mock).mockResolvedValue({
       isDomainAdmin: true,
