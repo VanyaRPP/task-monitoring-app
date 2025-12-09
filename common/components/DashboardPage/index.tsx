@@ -8,7 +8,7 @@ import StreetsBlock from '@components/DashboardPage/blocks/streets'
 import CompaniesAreaChart from '@components/DashboardPage/blocks/сompaniesAreaChart'
 import { Roles } from '@utils/constants'
 import { Col, Row, Space, Button, Flex,  message, Tooltip, Dropdown } from 'antd'
-import { CloseOutlined, SaveOutlined, EyeOutlined } from '@ant-design/icons'
+import { CloseOutlined, SaveOutlined, EyeOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import PaymentsChart from '@components/DashboardPage/blocks/paymentChart'
 import ProfitPage from '@components/Pages/ProfiitPage'
 import 'react-grid-layout/css/styles.css'
@@ -22,6 +22,7 @@ import s from './style.module.scss'
 import useTheme from '@modules/hooks/useTheme'
 import WidgetVisibilityMenu from '@components/UI/WidgetVisibilityMenu'
 import { WidgetWrapper } from '@components/UI/WidgetWrapper'
+import DashboardTour from '@components/DashboardPage/DashboardTour'
 const MARGIN_Y = 12
 const MARGIN_X = 12
 const ReactGridLayout = WidthProvider(GridLayout)
@@ -72,6 +73,7 @@ const Dashboard: React.FC = () => {
   const { data: userResponse } = useGetCurrentUserQuery()
   const [hiddenWidgets, setHiddenWidgets] = useState<WidgetKey[]>([])
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const [showTour, setShowTour] = useState(false)
 
   const [isEditMode, toggleEditMode, editFloatButton] =
     useEditModelFloatButton('dashboard')
@@ -110,13 +112,22 @@ const Dashboard: React.FC = () => {
       toggleEditMode()
     }
   }, [isPanelVisible, isEditMode, toggleEditMode])
+  const tourFloatButton = useMemo(() => ({
+    key: 'dashboard-tour',
+    icon: <QuestionCircleOutlined/>,
+    onClick: () => setShowTour(true),
+    tooltip: 'Тур',
+    order: 5,
+  }), [])
 
   useEffect(() => {
     dispatch(addButton(panelFloatButton))
+    dispatch(addButton(tourFloatButton))
     return () => {
       dispatch(removeButton(panelFloatButton.key))
+      dispatch(removeButton(tourFloatButton.key))
     }
-  }, [dispatch, panelFloatButton])
+  }, [dispatch, panelFloatButton, tourFloatButton])
 
   const getLayoutStorageKey = (userId?: string) =>
     userId ? `dashboard-layout-${userId}` : 'dashboard-layout'
@@ -197,6 +208,9 @@ const Dashboard: React.FC = () => {
       [layout, visibleWidgets]
     )
 
+  const handleCloseTour = () => {
+    setShowTour(false)
+  }
   return (
     <div className={s.wrapper}>
       {isPanelVisible && (
@@ -292,6 +306,13 @@ const Dashboard: React.FC = () => {
         ))}
       </ReactGridLayout>
       )}
+      <DashboardTour userRoles={userResponse?.roles || []} />
+      <DashboardTour 
+        isVisible={showTour} 
+        onClose={handleCloseTour}
+        isManualStart={true}
+        userRoles={userResponse?.roles || []}
+      />
     </div>
   )
 }
