@@ -4,12 +4,12 @@ import numberToTextNumber from '@utils/numberToText'
 import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
-import s from './style.module.scss'
 import { PrinterOutlined } from '@ant-design/icons'
+import s from './style.module.scss'
 
 interface Props {
-  currPayment: IExtendedPayment
-  paymentData: any
+  currPayment?: IExtendedPayment | null
+  paymentData?: IExtendedPayment | null | undefined
   paymentActions: { preview: boolean; edit: boolean }
 }
 
@@ -18,19 +18,26 @@ const GroupedReceiptForm: FC<Props> = ({
   paymentData,
   paymentActions,
 }) => {
-  const newData = currPayment || paymentData
-  const componentRef = useRef()
+  const rawData = currPayment ?? paymentData ?? null
+  const data = rawData as any
+
+  const componentRef = useRef<HTMLDivElement | null>(null)
+
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
     documentTitle:
-      (newData?.company?.companyName || newData?.reciever?.companyName) +
-      '-inv-' +
-      newData.invoiceNumber,
+      (data?.company?.companyName ?? data?.reciever?.companyName ?? '') +
+        '-inv-' +
+        (data?.invoiceNumber ?? '') || 'invoice',
   })
+  if (!rawData) {
+    return null
+  }
 
   return (
     <>
       <PrinterOutlined className={s.print} onClick={handlePrint} />
+
       <div
         className={s.invoiceContainer}
         ref={componentRef}
@@ -46,7 +53,7 @@ const GroupedReceiptForm: FC<Props> = ({
           <div className={s.providerInfo}>
             <div className={s.label}>Постачальник</div>
             <pre className={s.preLabel}>
-              {newData?.provider?.description?.trim()} <br />
+              {data?.provider?.description?.trim()} <br />
               <br />
             </pre>
           </div>
@@ -54,9 +61,9 @@ const GroupedReceiptForm: FC<Props> = ({
           <div className={s.receiverInfo}>
             <div className={s.label}>Одержувач</div>
             <pre className={s.preLabel}>
-              {newData?.reciever?.description?.trim()} <br />
-              {newData?.reciever?.companyName} <br />
-              {newData?.reciever?.adminEmails?.map((email) => (
+              {data?.reciever?.description?.trim()} <br />
+              {data?.reciever?.companyName} <br />
+              {data?.reciever?.adminEmails?.map((email: string) => (
                 <div key={email}>
                   {email} <br />
                 </div>
@@ -66,67 +73,54 @@ const GroupedReceiptForm: FC<Props> = ({
         </>
 
         <div className={s.providerInvoice}>
-          <div className={s.datecellTitle}>
-            РАХУНОК № {newData.invoiceNumber}
-          </div>
+          <div className={s.datecellTitle}>РАХУНОК № {data.invoiceNumber}</div>
           <div className={s.datecellDate}>
             Від &nbsp;
-            {dayjs(newData?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
+            {dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
             &nbsp; року.
           </div>
           <div className={s.datecell}>
             Підлягає сплаті до &nbsp;
-            {dayjs(newData?.invoiceCreationDate)
-              .add(5, 'd')
-              .format('DD.MM.YYYY')}
+            {dayjs(data?.invoiceCreationDate).add(5, 'd').format('DD.MM.YYYY')}
             &nbsp; року
           </div>
         </div>
+
         <div className={s.tableSum}>
           <GroupedPricesTable
             preview
-            domainId={newData?.domain?._id ?? newData?.domain}
-            invoices={newData.invoice}
+            domainId={data?.domain?._id ?? data?.domain}
+            invoices={data?.invoice ?? []}
           />
         </div>
+
         <div className={s.payTable}>
-          {/* <SumWithText data={newData} /> */}
           <div className={s.payFixed}>
             Загальна сума оплати:
             <div className={s.payBoldSum}>
-              {(+newData?.generalSum || +newData?.debit).toFixed(2)} грн
+              {(+data?.generalSum || +data?.debit || 0).toFixed(2)} грн
             </div>
           </div>
 
           <div>
             Призначення платежу:{' '}
             <strong>
-              Оплата за послуги згідно рахунку № {newData.invoiceNumber} від{' '}
-              {dayjs(newData?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
+              Оплата за послуги згідно рахунку № {data.invoiceNumber} від{' '}
+              {dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
             </strong>
           </div>
 
           <div className={s.payFixed}>
-            {newData?.provider?.description?.split('\n')?.[0] || ''}
+            {data?.provider?.description?.split('\n')?.[0] || ''}
             <div className={s.lineInner}>________________</div>
           </div>
         </div>
-
-        {/* <div className={s.endInfo}>
-          <div className={s.endInfobolt}>Примітка:</div>
-          *Ціна за комунальні послуги вказана з урахуванням ПДВ.
-          <br />
-          **Ціни на комунальні послуги виставляють компанії-постачальники,
-          відповідно їх ціна може <br />
-          змінюватись у будь-який час в односторонньму порядку
-          компанією-постачальником.
-        </div> */}
       </div>
     </>
   )
 }
 
-function SumWithText({ data }) {
+function SumWithText({ data }: { data?: any }) {
   const rest = numberToTextNumber(data?.generalSum || data?.debit)
   return (
     rest && (
