@@ -6,31 +6,37 @@ export const users = {
     name: 'user',
     email: 'user@example.com',
     roles: [Roles.USER],
+    isWorker: false,
   },
   user2: {
     name: 'user',
     email: 'user@example2.com',
     roles: [Roles.USER],
+    isWorker: false,
   },
   noRoleUser: {
     name: 'noRoleUser',
     email: 'noRoleUser@example.com',
     roles: [],
+    isWorker: false,
   },
   domainAdmin: {
     name: 'domainAdmin',
     email: 'domainAdmin@example.com',
     roles: [Roles.DOMAIN_ADMIN],
+    isWorker: false,
   },
   domainAdmin2: {
     name: 'domainAdmin2',
     email: 'domainAdmin2@example.com',
     roles: [Roles.DOMAIN_ADMIN],
+    isWorker: false,
   },
   globalAdmin: {
     name: 'globalAdmin',
     email: 'globalAdmin@example.com',
     roles: [Roles.GLOBAL_ADMIN],
+    isWorker: false,
   },
 }
 

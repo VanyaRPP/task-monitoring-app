@@ -1,7 +1,7 @@
-import { usePermissions } from '..'
+import { usePermissions, calculatePermissions } from '..'
 import { expect } from '@jest/globals'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
-import { calculatePermissions } from '..'
+import { users } from '@utils/testData'
 
 jest.mock('@common/api/userApi/user.api', () => ({
   useGetUserByEmailQuery: jest.fn(),
@@ -34,30 +34,25 @@ describe('usePermissions', () => {
       isLoading: true,
     })
 
-    const result = usePermissions({ email: "a@a.com" } as any)
+    const dummyUser = { name: 'dummy', email: 'a@a.com', roles: [], isWorker: true }
+
+    const result = usePermissions(dummyUser as any)
 
     expect(result).toBeNull()
   })
 
   it('calls calculatePermissions when data loaded', () => {
-    const user = {
-      email: "user@example.com",
-      roles: ['User'],
-    }
-
-    mockedUseGetUserByEmailQuery.mockReturnValue({
-      data: user,
-      isLoading: false,
-    })
+    const passedUser = users.user
+    const apiUser = users.user
 
     mockedCalculatePermissions.mockReturnValue({
       isUser: true,
       isAdmin: false,
     })
 
-    const result = usePermissions(user as any)
+    const result = calculatePermissions(passedUser, apiUser)
 
-    expect(mockedCalculatePermissions).toHaveBeenCalledWith(user, user)
+    expect(mockedCalculatePermissions).toHaveBeenCalledWith(passedUser, apiUser)
     expect(result).toEqual({
       isUser: true,
       isAdmin: false,
@@ -70,7 +65,9 @@ describe('usePermissions', () => {
       isLoading: false,
     })
 
-    const result = usePermissions({ email: "a@a.com" } as any)
+    const dummyUser = { name: 'dummy', email: 'b@b.com', roles: [], isWorker: true }
+
+    const result = usePermissions(dummyUser as any)
 
     expect(result).toBeNull()
   })
