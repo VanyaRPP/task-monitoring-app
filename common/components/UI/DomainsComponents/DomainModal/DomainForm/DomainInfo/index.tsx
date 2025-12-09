@@ -3,15 +3,15 @@ import { validateField } from '@assets/features/validators'
 import React, { FC, useEffect } from 'react'
 import s from '../style.module.scss'
 import { CloseOutlined } from '@ant-design/icons'
-import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { useForm } from 'antd/lib/form/Form'
 
 interface Props {
   editable: boolean
   form: any
+	allDomains: any
 }
 
-const DomainInfo: FC<Props> = ({ editable, form }) => {
+const DomainInfo: FC<Props> = ({ editable, form, allDomains }) => {
   // Watch the values of specific fields
   const IE_NAME = Form.useWatch('IEName', form)
   const IBAN = Form.useWatch('iban', form)
@@ -36,7 +36,7 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
     }
   }, [IE_NAME, IBAN, RNOKPP, MFO, form, editable])
 
-  const { data, isLoading } = useGetDomainsQuery({})
+	const data = allDomains
   const [formInstance] = useForm()
   const confidantPeopleOptions =
     data?.reduce((uniqueAdminEmails, domain) => {

@@ -11,7 +11,6 @@ import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import AddDomainModal from '@components/UI/DomainsComponents/DomainModal'
 import { AppRoutes } from '@utils/constants'
 import { Roles } from '@utils/constants'
-import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 export interface Props {
   currentDomain?: IExtendedDomain
@@ -24,6 +23,8 @@ export interface Props {
   domainActions: {
     edit: boolean
   }
+	user: any
+	allDomains: any
 }
 
 const DomainsHeader: React.FC<Props> = ({
@@ -31,11 +32,12 @@ const DomainsHeader: React.FC<Props> = ({
   setCurrentDomain,
   domainActions,
   setDomainActions,
+	user,
+	allDomains,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { data: userResponse } = useGetCurrentUserQuery()
-  const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   const openModal = () => {
     setCurrentDomain(null)
@@ -72,6 +74,7 @@ const DomainsHeader: React.FC<Props> = ({
             currentDomain={currentDomain}
             closeModal={closeModal}
             editable={domainActions.edit}
+						allDomains={allDomains}
           />
         )}
       </>

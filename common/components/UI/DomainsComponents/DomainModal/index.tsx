@@ -1,7 +1,6 @@
 import {
   useAddDomainMutation,
   useEditDomainMutation,
-  useGetDomainsQuery,
 } from '@common/api/domainApi/domain.api'
 import { Form, message } from 'antd'
 import React, { FC, useEffect, useState } from 'react'
@@ -18,14 +17,20 @@ interface Props {
   currentDomain: IExtendedDomain
   closeModal: VoidFunction
   editable: boolean
+  allDomains: any
 }
 
-const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
+const DomainModal: FC<Props> = ({
+  currentDomain,
+  closeModal,
+  editable,
+  allDomains,
+}) => {
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
   const [addDomainEstate] = useAddDomainMutation()
   const [editDomain] = useEditDomainMutation()
-  const { data: domains } = useGetDomainsQuery({})
+  const domains = allDomains
 
   useEffect(() => {
     const initialValues = {
@@ -122,6 +127,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
         editable={editable}
         setIsValueChanged={setIsValueChanged}
         domainId={currentDomain?._id}
+        allDomains={allDomains}
       />
     </Modal>
   )

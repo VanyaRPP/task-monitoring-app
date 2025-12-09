@@ -13,6 +13,7 @@ interface Props {
   editable?: boolean
   setIsValueChanged: (value: boolean) => void
   domainId?: string
+	allDomains: any
 }
 
 const DomainForm: React.FC<Props> = ({
@@ -20,6 +21,7 @@ const DomainForm: React.FC<Props> = ({
   editable = true,
   setIsValueChanged,
   domainId,
+	allDomains,
 }) => {
   const [customServices, setCustomServices] = useState<
     { _id: string; name: string }[]
@@ -49,7 +51,7 @@ const DomainForm: React.FC<Props> = ({
         editable={editable}
         onCustomServicesChange={setCustomServices}
       />
-      <DomainInfo editable={editable} form={form} />
+      <DomainInfo editable={editable} form={form} allDomains={allDomains} />
     </Form>
   )
 }
