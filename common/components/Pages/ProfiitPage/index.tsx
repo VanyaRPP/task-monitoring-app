@@ -4,7 +4,7 @@ import FullScreenWrapper from '@components/UI/fullScreenTableWrapper/fullScreenT
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { setActiveTabKey } from '@modules/store/profitPageSlice'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { useDomainTabs } from './hook/useDomainTabs'
 import AddCostModal from '@components/AddCostModal'
 import ProfitTable from './components/ProfitTable'
@@ -21,7 +21,10 @@ const ProfitPage = () => {
   const activeTabKey = useAppSelector((state) => state.profitPage.activeTabKey)
 
   const { data: currentUser } = useGetCurrentUserQuery()
-  const isAdmin = isAdminCheck(currentUser?.roles)
+  const isAdmin = useMemo(
+    () => isAdminCheck(currentUser?.roles),
+    [currentUser?.roles]
+  )
 
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -36,23 +39,31 @@ const ProfitPage = () => {
     }
   }, [tabList, isLoading, activeTabKey, dispatch])
 
-  const onTabChange = (key: string) => {
-    dispatch(setActiveTabKey(key))
-  }
+  const onTabChange = useCallback(
+    (key: string) => {
+      dispatch(setActiveTabKey(key))
+    },
+    [dispatch]
+  )
 
-  const contentList = useMemo(() => {
-    return tabList.reduce((acc, domain) => {
-      acc[domain.key] = <ProfitTable domainId={domain.key} />
-      return acc
-    }, {} as Record<string, ReactNode>)
-  }, [tabList])
+  const resolvedActiveKey = useMemo(() => {
+    if (!tabList.length) return undefined
+    const isValid = tabList.some((tab) => tab.key === activeTabKey)
+    return isValid ? activeTabKey : tabList[0].key
+  }, [tabList, activeTabKey])
 
-  const closeModal = () => {
-    setIsModalOpen(false)
-  }
+  const openModal = useCallback(() => setIsModalOpen(true), [])
+  const closeModal = useCallback(() => setIsModalOpen(false), [])
 
   if (isError) return <p>{t('profitPage:table.parent.errorLoading')}</p>
-  if (tabList.length === 0) return <p>{t('profitPage:table.parent.noData')}</p>
+  if (isLoading && !tabList.length) {
+    return (
+      <FullScreenWrapper unicKey="profit-table">
+        <Card loading />
+      </FullScreenWrapper>
+    )
+  }
+  if (!tabList.length) return <p>{t('profitPage:table.parent.noData')}</p>
 
   return (
     <FullScreenWrapper unicKey="profit-table">
@@ -70,17 +81,17 @@ const ProfitPage = () => {
           }
           extra={
             isAdmin && (
-              <Button type="link" onClick={() => setIsModalOpen(true)}>
+              <Button type="link" onClick={openModal}>
                 <PlusOutlined /> {t('profitPage:addButton')}
               </Button>
             )
           }
           tabList={tabList}
-          activeTabKey={activeTabKey}
+          activeTabKey={resolvedActiveKey}
           onTabChange={onTabChange}
           loading={isLoading}
         >
-          {contentList[activeTabKey]}
+          {resolvedActiveKey && <ProfitTable domainId={resolvedActiveKey} />}
         </Card>
         {isModalOpen && <AddCostModal closeModal={closeModal} />}
       </Space>

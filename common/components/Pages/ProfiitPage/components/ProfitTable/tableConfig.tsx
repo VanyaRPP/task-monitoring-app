@@ -11,7 +11,8 @@ import {
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 
-interface ProfitMonthSummary {
+// 👇 експортований тип, який ти потім імпортуєш у ProfitTable
+export interface ProfitMonthSummary {
   key: string
   month: string
   debit: number
@@ -21,28 +22,40 @@ interface ProfitMonthSummary {
   transactions: Profit[]
 }
 
+/** Хелпер форматування місяця */
+const renderMonth = (month: string) => {
+  const parsed = dayjs(month)
+  return parsed.isValid() ? parsed.format('MMMM YYYY') : month
+}
+
+/** Хелпер форматування суми */
+const renderAmount = (value: number) => value.toFixed(2)
+
+/** Хелпер для дати в дочірній таблиці */
+const renderDate = (date: string) =>
+  dayjs(date).isValid() ? dayjs(date).format('DD.MM.YYYY') : date
+
 export const parentColumns: ColumnsType<ProfitMonthSummary> = [
   {
     title: t('table.parent.month', { ns: 'profitPage' }),
     dataIndex: 'month',
     key: 'month',
     width: 150,
-    render: (month: string) =>
-      dayjs(month).isValid() ? dayjs(month).format('MMMM YYYY') : month,
+    render: renderMonth,
   },
   {
     title: t('table.parent.debit', { ns: 'profitPage' }),
     dataIndex: 'debit',
     key: 'debit',
     width: 100,
-    render: (value: number) => value.toFixed(2),
+    render: renderAmount,
   },
   {
     title: t('table.parent.credit', { ns: 'profitPage' }),
     dataIndex: 'credit',
     key: 'credit',
     width: 100,
-    render: (value: number) => value.toFixed(2),
+    render: renderAmount,
   },
   {
     title: t('table.parent.profit', { ns: 'profitPage' }),
@@ -51,7 +64,7 @@ export const parentColumns: ColumnsType<ProfitMonthSummary> = [
     width: 140,
     render: (value: number) => (
       <span style={{ color: value >= 0 ? 'green' : 'red' }}>
-        {value.toFixed(2)}
+        {renderAmount(value)}
       </span>
     ),
   },
@@ -60,6 +73,62 @@ export const parentColumns: ColumnsType<ProfitMonthSummary> = [
     dataIndex: 'count',
     key: 'count',
     width: 160,
+  },
+]
+
+/** Хелпер для побудови меню дій */
+const buildMenuItems = (
+  record: Profit,
+  onPreview: (record: Profit) => void,
+  onEdit: (record: Profit) => void,
+  onDelete: (id: string) => void,
+  isDeleting: boolean
+): MenuProps['items'] => [
+  {
+    key: 'view',
+    label: (
+      <Button
+        icon={<EyeOutlined />}
+        type="link"
+        style={{ color: '#722ed1', padding: '0 10px' }}
+        onClick={() => onPreview(record)}
+      >
+        {t('actions.preview', { ns: 'profitPage' })}
+      </Button>
+    ),
+  },
+  {
+    key: 'edit',
+    label: (
+      <Button
+        icon={<EditOutlined />}
+        type="link"
+        style={{ color: '#722ed1', padding: '0 10px' }}
+        onClick={() => onEdit(record)}
+      >
+        {t('actions.edit', { ns: 'profitPage' })}
+      </Button>
+    ),
+  },
+  {
+    key: 'delete',
+    label: (
+      <Popconfirm
+        title={t('prompts.confirmDelete', { ns: 'profitPage' })}
+        onConfirm={() => onDelete(record._id)}
+        okText={t('actions.delete', { ns: 'profitPage' })}
+        cancelText={t('actions.cancel', { ns: 'profitPage' })}
+      >
+        <Button
+          icon={<DeleteOutlined />}
+          type="link"
+          style={{ color: '#ff4d4f', padding: '0 10px' }}
+          loading={isDeleting}
+        >
+          {t('actions.delete', { ns: 'profitPage' })}
+        </Button>
+      </Popconfirm>
+    ),
   },
 ]
 
@@ -74,7 +143,7 @@ export const getChildColumns = (
     dataIndex: 'date',
     key: 'date',
     width: 185,
-    render: (date: string) => new Date(date).toLocaleDateString(),
+    render: renderDate,
   },
   {
     title: t('table.child.type', { ns: 'profitPage' }),
@@ -93,6 +162,7 @@ export const getChildColumns = (
     dataIndex: 'amount',
     key: 'amount',
     width: 100,
+    render: renderAmount,
   },
   {
     title: t('table.child.description', { ns: 'profitPage' }),
@@ -114,53 +184,13 @@ export const getChildColumns = (
     width: 40,
     fixed: 'right',
     render: (_, record) => {
-      const menuItems: MenuProps['items'] = [
-        {
-          key: 'view',
-          label: (
-            <Button
-              icon={<EyeOutlined />}
-              type="link"
-              style={{ color: '#722ed1', padding: '0 10px' }}
-              onClick={() => onPreview(record)}
-            >
-              {t('actions.preview', { ns: 'profitPage' })}
-            </Button>
-          ),
-        },
-        {
-          key: 'edit',
-          label: (
-            <Button
-              icon={<EditOutlined />}
-              type="link"
-              style={{ color: '#722ed1', padding: '0 10px' }}
-              onClick={() => onEdit(record)}
-            >
-              {t('actions.edit', { ns: 'profitPage' })}
-            </Button>
-          ),
-        },
-        {
-          key: 'delete',
-          label: (
-            <Popconfirm
-              title={t('prompts.confirmDelete', { ns: 'profitPage' })}
-              onConfirm={() => onDelete(record._id)}
-              okText={t('actions.delete', { ns: 'profitPage' })}
-              cancelText={t('actions.cancel', { ns: 'profitPage' })}
-            >
-              <Button
-                icon={<DeleteOutlined />}
-                type="link"
-                style={{ color: '#ff4d4f', padding: '0 10px' }}
-              >
-                {t('actions.delete', { ns: 'profitPage' })}
-              </Button>
-            </Popconfirm>
-          ),
-        },
-      ]
+      const menuItems = buildMenuItems(
+        record,
+        onPreview,
+        onEdit,
+        onDelete,
+        isDeleting
+      )
 
       return (
         <Dropdown menu={{ items: menuItems }} placement="bottomRight">

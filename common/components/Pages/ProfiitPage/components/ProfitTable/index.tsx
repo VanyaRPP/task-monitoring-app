@@ -1,27 +1,20 @@
 'use client'
 
 import { setTransactionTablePagination } from '@modules/store/profitPageSlice'
-import { useGetByDomainQuery } from '@common/api/profitsApi/profits.api'
-import { useDeleteProfitMutation } from '@common/api/profitsApi/profits.api'
+import {
+  useGetByDomainQuery,
+  useDeleteProfitMutation,
+} from '@common/api/profitsApi/profits.api'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import { FC, useEffect, useMemo, useState, useCallback } from 'react'
-import { parentColumns, getChildColumns } from './tableConfig'
+import { parentColumns, getChildColumns, ProfitMonthSummary, } from './tableConfig'
 import { Profit } from '@common/api/profitsApi/profits.type'
 import AddCostModal from '@components/AddCostModal'
 import { Table, Alert, Button, Space, Tooltip, message } from 'antd'
+import type { TablePaginationConfig } from 'antd/es/table'  
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@utils/constants'
-
-interface ProfitMonthSummary {
-  key: string
-  month: string
-  debit: number
-  credit: number
-  profit: number
-  count: number
-  transactions: Profit[]
-}
 
 interface ProfitTableProps {
   domainId?: string
@@ -29,9 +22,7 @@ interface ProfitTableProps {
 
 const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
   const router = useRouter()
-  const isOnPage = router.pathname === AppRoutes.PROFIT
   const { t } = useTranslation()
-  const [selectedProfit, setSelectedProfit] = useState<Profit | null>(null)
   const dispatch = useAppDispatch()
   const { currentPage, pageSize } = useAppSelector(
     (state) => state.profitPage.transactionTablePagination
@@ -46,17 +37,29 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
     { skip: !domainId }
   )
 
+  const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([])
+  const [selectedProfit, setSelectedProfit] = useState<Profit | null>(null)
+  const [isEditing, setIsEditing] = useState(false)
+
+  const [deleteProfit, { isLoading: isDeleting }] = useDeleteProfitMutation()
+
+  const shouldPaginate =
+    router.pathname === AppRoutes.PROFIT ||
+    router.pathname === AppRoutes.SEP_DOMAIN
+
   const dataSource: ProfitMonthSummary[] = useMemo(() => {
-    if (!profitsGrouped?.data) return []
+    const grouped = profitsGrouped?.data
+    if (!grouped) return []
 
-    return Object.entries(profitsGrouped.data).map(([month, transactions]) => {
-      const debit = transactions
-        .filter((t) => t.type === 'debit')
-        .reduce((acc, t) => acc + t.amount, 0)
-
-      const credit = transactions
-        .filter((t) => t.type === 'credit')
-        .reduce((acc, t) => acc + t.amount, 0)
+    return Object.entries(grouped).map(([month, transactions]) => {
+      const { debit, credit } = transactions.reduce(
+        (acc, t) => {
+          if (t.type === 'debit') acc.debit += t.amount
+          else if (t.type === 'credit') acc.credit += t.amount
+          return acc
+        },
+        { debit: 0, credit: 0 }
+      )
 
       return {
         key: month,
@@ -68,23 +71,13 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
         transactions,
       }
     })
-  }, [profitsGrouped])
+  }, [profitsGrouped?.data])
 
-  const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([])
-  router.pathname === AppRoutes.PROFIT ||
-    router.pathname === AppRoutes.SEP_DOMAIN
   useEffect(() => {
-    if (
-      router.pathname === AppRoutes.PROFIT ||
-      router.pathname === AppRoutes.SEP_DOMAIN
-    ) {
-      if (dataSource.length > 0) {
-        setExpandedRowKeys(dataSource.map((item) => item.key))
-      } else {
-        setExpandedRowKeys([])
-      }
-    }
-  }, [dataSource, router.pathname])
+    if (!shouldPaginate) return
+
+    setExpandedRowKeys(dataSource.length ? dataSource.map((i) => i.key) : [])
+  }, [dataSource, shouldPaginate])
 
   const expandAll = useCallback(() => {
     setExpandedRowKeys(dataSource.map((item) => item.key))
@@ -102,25 +95,82 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
       dispatch(
         setTransactionTablePagination({
           currentPage: page,
-          pageSize: newPageSize,
+          pageSize: newPageSize ?? pageSize,
         })
       )
       setExpandedRowKeys([])
     },
-    [dispatch]
+    [dispatch, pageSize]
   )
-  const [isEditing, setIsEditing] = useState(false)
 
-  const [deleteProfit, { isLoading: isDeleting }] = useDeleteProfitMutation()
+  const handleDelete = useCallback(
+    async (id: string) => {
+      try {
+        await deleteProfit(id).unwrap()
+        message.success(t('messages.deleted', { ns: 'profitPage' }))
+      } catch {
+        message.error(t('messages.errorDelete', { ns: 'profitPage' }))
+      }
+    },
+    [deleteProfit, t]
+  )
 
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteProfit(id).unwrap()
-      message.success(t('messages.deleted', { ns: 'profitPage' }))
-    } catch (error) {
-      message.error(t('messages.errorDelete', { ns: 'profitPage' }))
-    }
-  }
+  const childColumns = useMemo(
+    () =>
+      getChildColumns(
+        (record) => {
+          setSelectedProfit(record)
+          setIsEditing(false)
+        },
+        (record) => {
+          setSelectedProfit(record)
+          setIsEditing(true)
+        },
+        handleDelete,
+        isDeleting
+      ),
+    [handleDelete, isDeleting]
+  )
+
+  const expandedRowRender = useCallback(
+    (record: ProfitMonthSummary) => (
+      <Table
+        bordered
+        columns={childColumns}
+        dataSource={record.transactions.map((t) => ({
+          ...t,
+          key: t._id,
+        }))}
+        pagination={false}
+        rowKey="_id"
+      />
+    ),
+    [childColumns]
+  )
+
+  // 👇 головне виправлення
+  const paginationConfig = useMemo<TablePaginationConfig | false>(
+    () =>
+      shouldPaginate
+        ? {
+            position: ['bottomCenter'], // без `as const`
+            hideOnSinglePage: false,
+            showSizeChanger: true,
+            pageSizeOptions: ['30', '50', '80', '100'],
+            pageSize,
+            current: currentPage,
+            total: profitsGrouped?.meta.total,
+            onChange: handlePageChange,
+            showTotal: (total: number, range: [number, number]) =>
+              t('profitPage:table.paginationTotal', {
+                from: range[0],
+                to: range[1],
+                total,
+              }),
+          }
+        : false,
+    [shouldPaginate, pageSize, currentPage, profitsGrouped?.meta.total, t, handlePageChange]
+  )
 
   if (isError)
     return <Alert type="error" message={t('profitPage:table.errorLoading')} />
@@ -164,61 +214,22 @@ const ProfitTable: FC<ProfitTableProps> = ({ domainId }) => {
       </Space>
 
       <Table
-        bordered={true}
+        bordered
         loading={isLoading}
         columns={parentColumns}
         dataSource={dataSource}
-        pagination={
-          (router.pathname === AppRoutes.PROFIT ||
-            router.pathname === AppRoutes.SEP_DOMAIN) && {
-            position: ['bottomCenter'],
-            hideOnSinglePage: false,
-            showSizeChanger: true,
-            pageSizeOptions: ['30', '50', '80', '100'],
-            pageSize,
-            current: currentPage,
-            total: profitsGrouped.meta.total,
-            onChange: handlePageChange,
-            showTotal: (total, range) =>
-              t('profitPage:table.paginationTotal', {
-                from: range[0],
-                to: range[1],
-                total,
-              }),
-          }
-        }
+        pagination={paginationConfig}
         expandable={{
-          expandedRowRender: (record) => (
-            <Table
-              bordered={true}
-              columns={getChildColumns(
-                (record) => {
-                  setSelectedProfit(record)
-                  setIsEditing(false)
-                },
-                (record) => {
-                  setSelectedProfit(record)
-                  setIsEditing(true)
-                },
-                handleDelete,
-                isDeleting
-              )}
-              dataSource={record.transactions.map((t: Profit) => ({
-                ...t,
-                key: t._id,
-              }))}
-              pagination={false}
-              rowKey={(record) => record._id}
-            />
-          ),
+          expandedRowRender,
           rowExpandable: (record) => record.transactions.length > 0,
           expandedRowKeys,
           onExpandedRowsChange: (expandedKeys) =>
-            setExpandedRowKeys([...expandedKeys] as string[]),
+            setExpandedRowKeys(expandedKeys as string[]),
         }}
         rowKey={(record) => record.key}
         aria-label={t('profitPage:table.tableAriaLabel')}
       />
+
       {selectedProfit && (
         <AddCostModal
           currentProfit={selectedProfit}
