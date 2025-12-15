@@ -16,7 +16,10 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   const { service } = usePaymentContext()
 
   return (
-    <>
+    <Space
+      direction="horizontal"
+      style={{ justifyContent: 'space-between', width: '100%' }}
+    >
       <Space direction="vertical" size={0}>
         <Typography.Text>Вивіз ТПВ</Typography.Text>
         <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
@@ -40,7 +43,7 @@ export const Name: React.FC<InvoiceComponentProps> = ({
           </Tooltip>
         )
       }
-    </>
+    </Space>
   )
 }
 
