@@ -1,13 +1,11 @@
 'use client'
 
-import { UserOutlined } from '@ant-design/icons'
 import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
 import { useState } from 'react'
 
-import { PlusOutlined } from '@ant-design/icons'
 import FeatureFlagModal from '@common/components/Pages/Profile/Modal/AddFeatureFlagModal'
 
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
@@ -15,6 +13,7 @@ import { FeatureFlagsTable } from '@common/components/FeatureFlagsTable'
 import { UsersTable } from '@components/Tables/UsersTable'
 import { Tags } from '@components/UI/Tags'
 import { AppRoutes, Roles } from '@utils/constants'
+import { UserOutlined, PlusOutlined } from '@ant-design/icons'
 import {
   Avatar,
   Button,
@@ -29,6 +28,7 @@ import {
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
+import { skipToken } from '@reduxjs/toolkit/query'
 import { EditUserForm } from '../../Forms/EditUserForm'
 import styles from './style.module.scss'
 
@@ -36,7 +36,10 @@ export const ProfilePage: React.FC = () => {
   const router = useRouter()
   const [form] = Form.useForm()
   const { data: session } = useSession()
-  const { data: user } = useGetCurrentUserQuery()
+  const {
+    data: user,
+    isLoading: userLoading,
+  } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   const { data: domains } = useGetDomainFiltersQuery({})
@@ -64,14 +67,16 @@ export const ProfilePage: React.FC = () => {
       {!!session?.user && (
         <div className={styles.User}>
           <Card className={styles.Background}>
-            <Image
-              className={styles.Image}
-              src={session.user.image || ''}
-              alt="background"
-              priority
-              sizes="256px 256px"
-              fill
-            />
+            {session.user.image && (
+              <Image
+                className={styles.Image}
+                src={session.user.image}
+                alt="background"
+                priority
+                sizes="256px 256px"
+                fill
+              />
+            )}
           </Card>
           <Card className={styles.Content} size="small">
             <Card.Meta
@@ -82,7 +87,7 @@ export const ProfilePage: React.FC = () => {
               }
               description={<Tags items={user?.roles} />}
               avatar={
-                !!session.user.image && (
+                session.user.image && (
                   <Avatar
                     size={128}
                     icon={<UserOutlined />}
@@ -110,7 +115,7 @@ export const ProfilePage: React.FC = () => {
           <Tags
             wrap
             align="center"
-            items={domains?.domainsFilter.map((domain) => domain)}
+            items={domains?.domainsFilter ?? []}
             render={(domain, index) => (
               <Tag
                 key={index}
@@ -131,17 +136,15 @@ export const ProfilePage: React.FC = () => {
           <Tags
             wrap
             align="center"
-            items={companies?.realEstatesFilter.map(
-              ({ text }) => text as string
-            )}
-            render={(domain, index) => (
+            items={companies?.realEstatesFilter ?? []}
+            render={(item, index) => (
               <Tag
                 key={index}
                 bordered={false}
                 color="blue"
                 style={{ margin: 0 }}
               >
-                {domain}
+                {item.text}
               </Tag>
             )}
           />
@@ -150,8 +153,15 @@ export const ProfilePage: React.FC = () => {
           title="Інформація користувача"
           className={styles.CardUserInformation}
         >
-          <EditUserForm userId={user?._id?.toString()} form={form} />
-          <Button className={styles.ButtonSave} onClick={form.submit}>
+          <EditUserForm
+            userId={user?._id}
+            form={form}
+          />
+          <Button
+            className={styles.ButtonSave}
+            onClick={form.submit}
+            disabled={!user}
+          >
             Зберегти
           </Button>
         </Card>

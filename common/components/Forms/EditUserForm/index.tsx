@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react'
+import type { ObjectId } from 'mongoose'
 import { Form, Input, FormInstance, Spin, message } from 'antd'
+import { skipToken } from '@reduxjs/toolkit/query'
 import {
   useGetUserByIdQuery,
   useUpdateUserMutation,
@@ -8,7 +10,7 @@ import { IUser } from '@modules/models/User'
 
 export interface EditUserFormProps {
   form?: FormInstance
-  userId?: string
+  userId?: string | ObjectId | typeof skipToken
   onFinish?: (user: IUser) => void
 }
 
@@ -18,34 +20,51 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
   onFinish,
 }) => {
   const [form] = Form.useForm(_form)
-  const { data: user, isLoading } = useGetUserByIdQuery(userId)
+
+  const idForQuery: string | typeof skipToken =
+    userId === skipToken || userId == null ? skipToken : String(userId)
+
+  const {
+    data: user,
+    isLoading,
+  } = useGetUserByIdQuery(idForQuery)
 
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
+
   useEffect(() => {
-    if (user) {
-      form.setFieldsValue({
-        name: user.name,
-        email: user.email,
-      })
-    }
+    if (!user) return
+
+    form.setFieldsValue({
+      name: user.name,
+      email: user.email,
+    })
   }, [user, form])
 
   const handleSubmit = async (values: any) => {
+    if (!user?._id) return
     try {
-      const response = await updateUser({ _id: user?._id, ...values })
-      if ('error' in response) {
-        throw new Error((response.error as any).data.message)
-      }
+      const response = await updateUser({
+        _id: user._id,
+        ...values,
+      }).unwrap()
+
       message.success('Профіль успішно оновлено!')
-      onFinish?.(response.data)
-    } catch (error) {
-      message.error(`Не вдалося оновити профіль (${error.message})`)
+      onFinish?.(response)
+    } catch (error: any) {
+      message.error(
+        `Не вдалося оновити профіль (${error?.data?.message ?? 'error'})`,
+      )
     }
   }
 
   return (
-    <Spin spinning={isLoading}>
-      <Form form={form} layout="vertical" onFinish={handleSubmit}>
+    <Spin spinning={isLoading || isUpdating}>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSubmit}
+        disabled={!user}
+      >
         <Form.Item label="Ім'я" name="name">
           <Input />
         </Form.Item>
