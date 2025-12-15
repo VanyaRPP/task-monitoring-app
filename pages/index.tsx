@@ -10,7 +10,8 @@ import { authOptions } from './api/auth/[...nextauth]'
 
 const Home: React.FC<{
   isAuth: boolean
-}> = ({ isAuth }) => {
+  initialSession?: any
+}> = ({ isAuth, initialSession }) => {
   const { handleNavigateHome } = useScrollToTop()
   return (
     <>
@@ -26,7 +27,7 @@ const Home: React.FC<{
             if (path === AppRoutes.INDEX) handleNavigateHome()
           }}
         >
-          <DashboardPage />
+          <DashboardPage initialSession={initialSession} />
         </MainLayout>
       ) : (
         <MainLayout simple>
@@ -49,6 +50,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   return {
-    props: { isAuth: true },
+    props: {
+      isAuth: true,
+      initialSession: JSON.parse(JSON.stringify(session)),
+    },
   }
 }
