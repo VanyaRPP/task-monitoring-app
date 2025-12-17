@@ -26,6 +26,9 @@ export interface IReciever {
   companyName: string
   adminEmails: string[]
   description: string
+  AUT_CNTR_ACC: string
+  AUT_CNTR_NAM: string
+  AUT_CNTR_MFO: string
 }
 
 export interface IPayment {
@@ -154,8 +157,5 @@ export interface IGeneratePaymentExcelResponce {
 }
 
 export interface IPaymentTransactions {
-  AUT_CNTR_ACC: string
-  AUT_CNTR_NAM: string
-  AUT_CNTR_MFO: string
   Description: string
 }

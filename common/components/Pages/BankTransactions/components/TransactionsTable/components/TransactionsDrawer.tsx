@@ -97,9 +97,9 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                   reciever: selectedPayment.reciever,
                   generalSum: transactionAmount,
                   transaction: {
-                    AUT_CNTR_ACC: transaction.AUT_CNTR_ACC,
-                    AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
-                    AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
+                    AUT_CNTR_ACC: selectedPayment.reciever.AUT_CNTR_ACC,
+                    AUT_CNTR_NAM: selectedPayment.reciever.AUT_CNTR_NAM,
+                    AUT_CNTR_MFO: selectedPayment.reciever.AUT_CNTR_MFO,
                     Description: transaction.OSND,
                   },
                 }
