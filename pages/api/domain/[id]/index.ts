@@ -19,16 +19,17 @@ export default async function handler(
   const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
 
   function encryptDomainBankTokens(obj: any, secretKey: string) {
+    if (!obj.domainBankToken || !Array.isArray(obj.domainBankToken)) {
+      return obj
+    }
+
     const encryptionService = new EncryptionService(secretKey)
 
-    // Use map to replace each token with its encrypted version
-    obj.domainBankToken = obj.domainBankToken.map(
-      (item: { name: string; token: string; shortToken?: string }) => ({
-        ...item,
-        token: item.token || encryptionService.encrypt(item.shortToken),
-        shortToken: hidePercentCharacters(item.shortToken),
-      })
-    )
+    obj.domainBankToken = obj.domainBankToken.map(item => ({
+      ...item,
+      token: item.token || encryptionService.encrypt(item.shortToken),
+      shortToken: hidePercentCharacters(item.shortToken),
+    }))
 
     return obj
   }
@@ -63,7 +64,7 @@ export default async function handler(
           const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
           const response = await Domain.findOneAndUpdate(
             { _id: req.query.id },
-            req.body,
+            updatedObj,
             { new: true }
           )
           return res.status(200).json({ success: true, data: response })

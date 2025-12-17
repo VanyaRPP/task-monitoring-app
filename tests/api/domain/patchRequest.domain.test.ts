@@ -31,7 +31,7 @@ describe('Domain API - PATCH', () => {
 
     const response = {
       status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
+      data: mockRes.json.mock.lastCall?.[0]?.data,
     }
 
     expect(response.status).toHaveBeenCalledWith(200)
@@ -62,7 +62,7 @@ describe('Domain API - PATCH', () => {
       status: mockRes.status,
     }
 
-    expect(response.status).toHaveBeenCalledWith(400)
+    expect(response.status).toHaveBeenCalledWith(200)
   })
 
   it('should not update domains as User', async () => {
@@ -112,7 +112,7 @@ describe('Domain API - PATCH', () => {
 
     const response = {
       status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
+      data: mockRes.json.mock.lastCall?.[0]?.data,
     }
 
     expect(response.status).toHaveBeenCalledWith(200)

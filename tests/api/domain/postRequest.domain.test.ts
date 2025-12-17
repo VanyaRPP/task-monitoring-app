@@ -2,11 +2,13 @@ import handler from '@pages/api/domain/index'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { users } from '@utils/testData'
+import Domain from '@modules/models/Domain'
 
 const { expect } = require('@jest/globals')
 
 jest.mock('@pages/api/api.config', () => jest.fn())
 jest.mock('@utils/getCurrentUser', () => ({ getCurrentUser: jest.fn() }))
+jest.mock('@modules/models/Domain')
 
 setupTestEnvironment()
 
@@ -21,12 +23,20 @@ describe('Domain API - POST', () => {
         description: 'none',
       },
     } as any
+
     const mockRes = {
       status: jest.fn(() => mockRes),
       json: jest.fn(),
     } as any
 
     ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: true })
+
+    ;(Domain.findOne as jest.Mock).mockResolvedValueOnce(null)
+
+    ;(Domain.create as jest.Mock).mockResolvedValueOnce({
+      _id: 'test123',
+      ...mockReq.body,
+    })
 
     await handler(mockReq, mockRes)
 
@@ -43,7 +53,8 @@ describe('Domain API - POST', () => {
       })
     )
   })
-  it('should not create a new domain because it already exists', async () => {
+
+  it('should not create a domain because it already exists', async () => {
     const mockReq = {
       method: 'POST',
       body: {
@@ -53,12 +64,18 @@ describe('Domain API - POST', () => {
         description: 'none',
       },
     } as any
+
     const mockRes = {
       status: jest.fn(() => mockRes),
       json: jest.fn(),
     } as any
 
     ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: true })
+
+    ;(Domain.findOne as jest.Mock).mockResolvedValueOnce({
+      name: 'domain 0',
+      errors: ['Домен з такими даними вже існує'],
+    })
 
     await handler(mockReq, mockRes)
 
