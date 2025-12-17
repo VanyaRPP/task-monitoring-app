@@ -4,8 +4,8 @@ import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 import { Form, Input, Space, Typography, Button, Tooltip } from 'antd'
-import { useEffect, useMemo } from 'react'
 import { ReloadOutlined } from '@ant-design/icons'
+import { useEffect, useMemo } from 'react'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -13,7 +13,8 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service } = usePaymentContext()
+  const { company, service } = usePaymentContext()
+  const gardagePrice = service?.garbageCollectorPrice * (company?.rentPart / 100)
 
   return (
     <Space
@@ -28,14 +29,14 @@ export const Name: React.FC<InvoiceComponentProps> = ({
       </Space>
       {
         editable &&
-        (service?.garbageCollectorPrice !==
+        (gardagePrice !==
           Form.useWatch(['invoice', ...toArray<string>(_name), 'price'], form)) && (
           <Tooltip title="Відновити значення">
             <Button
               onClick={() => {
                 form.setFieldValue(
                   ['invoice', ...toArray<string>(_name), 'price'],
-                  service?.garbageCollectorPrice
+                  gardagePrice
                 )
               }}
               icon={<ReloadOutlined />}
