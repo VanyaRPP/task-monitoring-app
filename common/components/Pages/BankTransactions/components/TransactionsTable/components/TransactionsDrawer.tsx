@@ -3,7 +3,6 @@ import React, { FC, useEffect, useMemo, useState } from 'react'
 import { ITransaction } from './transactionTypes'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import AddPaymentModal from '@components/AddPaymentModal'
 import dayjs from 'dayjs'
 import { SendOutlined } from '@ant-design/icons'
@@ -11,11 +10,13 @@ import { SendOutlined } from '@ant-design/icons'
 interface TransactionDrawerProps {
   transaction: ITransaction
   domain: IExtendedDomain
+	companies: IRealestate[]
 }
 
 const TransactionDrawer: FC<TransactionDrawerProps> = ({
   transaction,
   domain,
+	companies,
 }) => {
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
@@ -23,13 +24,9 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
 
   const transactionAmount = parseFloat(transaction.SUM as string)
 
-  const { data: realEstatesData } = useGetAllRealEstateQuery({
-    domainId: domain._id,
-  })
-
   const relatedCompanies = useMemo(
-    () => realEstatesData?.data || [],
-    [realEstatesData]
+    () => companies || [],
+    [companies]
   )
   const handleCompanyChange = (value: string) => setSelectedCompany(value)
 

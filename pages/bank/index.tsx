@@ -7,13 +7,15 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '../api/auth/[...nextauth]'
 import BankTransactions from '@components/Pages/BankTransactions'
 
-export default withAuthRedirect(() => {
-  return (
-    <MainLayout path={[{ title: 'Bank', path: AppRoutes.BANK }]}>
-      <BankTransactions />
-    </MainLayout>
-  )
-})
+export default withAuthRedirect(
+  ({ initialSession }: { initialSession: any }) => {
+    return (
+      <MainLayout path={[{ title: 'Bank', path: AppRoutes.BANK }]}>
+        <BankTransactions initialSession={initialSession} />
+      </MainLayout>
+    )
+  }
+)
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getServerSession(context.req, context.res, authOptions)
@@ -28,6 +30,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   return {
-    props: {},
+    props: { initialSession: JSON.parse(JSON.stringify(session)) },
   }
 }

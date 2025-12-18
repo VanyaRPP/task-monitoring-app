@@ -22,6 +22,7 @@ import { ITransaction } from './transactionTypes'
 import { useState } from 'react'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import TransactionDrawer from './TransactionsDrawer'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 
 const { RangePicker } = DatePicker
 
@@ -165,7 +166,8 @@ const getTrantypeFilterProps = () => ({
 export const generateColumns = (
   visibleColumns: string[],
   domain: IExtendedDomain,
-  toggleColumnVisibility: (columnKey: string) => void
+  toggleColumnVisibility: (columnKey: string) => void,
+  companies: IRealestate[]
 ): ColumnsType<ITransaction> => {
   const items: MenuProps['items'] = columnNames.map((col) => ({
     key: col,
@@ -310,7 +312,7 @@ export const generateColumns = (
       dataIndex: 'OPTIONS',
       key: 'OPTIONS',
       render: (text: string, record: ITransaction) => (
-        <TransactionDrawer transaction={record} domain={domain} />
+        <TransactionDrawer transaction={record} domain={domain} companies={companies} />
       ),
     },
   ].filter(

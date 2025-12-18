@@ -4,11 +4,15 @@ import { setAccount, setActiveDomainId } from '@modules/store/bankSlice'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import DomainBankTab from './components/DomainBankTab/DomainBankTab'
 import { useDomainTabs } from '../ProfiitPage/hook/useDomainTabs'
-import { ReactNode, useMemo, useEffect } from 'react'
+import { ReactNode, useMemo, useEffect, FC } from 'react'
 import { useTranslation } from 'next-i18next'
 import { Card, Space, Alert, Spin } from 'antd'
 
-const BankTransactions = () => {
+interface Props {
+  initialSession?: any
+}
+
+const BankTransactions: FC<Props> = ({ initialSession }) => {
   const { t } = useTranslation('bankPage')
   const dispatch = useAppDispatch()
   const activeDomainId = useAppSelector((state) => state.bank.activeDomainId)
@@ -21,13 +25,6 @@ const BankTransactions = () => {
       dispatch(setAccount(null))
     }
   }, [tabList, activeDomainId, dispatch])
-
-  const contentList = useMemo(() => {
-    return tabList.reduce((acc, domain) => {
-      acc[domain.key] = <DomainBankTab domainId={domain.key} />
-      return acc
-    }, {} as Record<string, ReactNode>)
-  }, [tabList])
 
   const onTabChange = (key: string) => {
     dispatch(setActiveDomainId(key))
@@ -70,7 +67,7 @@ const BankTransactions = () => {
           activeTabKey={activeDomainId || tabList[0].key}
           onTabChange={onTabChange}
         >
-          {activeDomainId ? contentList[activeDomainId] : null}
+          {activeDomainId && <DomainBankTab domainId={activeDomainId} />}
         </Card>
       )}
     </Space>
