@@ -58,6 +58,10 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     selectedCompany ??
     (transaction.isMatchingPayment ? transaction.previousCompanyId : null)
 
+  const selectValue =
+    selectedCompany ??
+    (transaction.isMatchingPayment ? transaction.previousCompanyId : null)
+
   const showModal = () => setModalVisible(true)
   const closeModal = (success?: boolean) => {
     setModalVisible(false)
