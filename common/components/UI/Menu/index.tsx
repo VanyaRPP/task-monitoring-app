@@ -89,7 +89,12 @@ export const Menu: React.FC<MenuProps> = (props) => {
           {
             key: AppRoutes.INDEX,
             type: 'item',
-            label: <Link href={AppRoutes.INDEX}>Всі таблиці</Link>,
+            label: <Link href={AppRoutes.INDEX}>Головна сторінка</Link>,
+          },
+          {
+            key: AppRoutes.TABLES,
+            type: 'item',
+            label: <Link href={AppRoutes.TABLES}>Всі таблиці</Link>,
           },
           {
             key: AppRoutes.STREETS,

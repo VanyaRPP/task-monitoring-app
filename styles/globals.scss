@@ -11,36 +11,45 @@ body {
   box-sizing: border-box;
 
   &.dark {
-    background-color: rgba(251, 251, 251, 0.074);
-    backdrop-filter: blur(4px); // сам блюр
-    -webkit-backdrop-filter: blur(4px); // підтримка Safari
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(10, 10, 14, 0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+
+    border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 6px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+
     transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
 
     @media (max-width: 320px) {
       background-color: #121212;
-      backdrop-filter: none; // Вимикаємо блюр
-      -webkit-backdrop-filter: none; // Підтримка Safari
-      border: none; // Убираємо рамку картки
-      border-radius: 0px; // Замість закруглених кутів використовуємо квадратні
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border: none;
+      border-radius: 0px;
+      box-shadow: none;
     }
   }
 
+
   &.light {
-    background-color: rgba(4, 4, 4, 0.253);
-    backdrop-filter: blur(4px); // сам блюр
-    -webkit-backdrop-filter: blur(4px); // підтримка Safari
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+
+    border: 1px solid rgba(20, 20, 40, 0.10);
     border-radius: 6px;
+    box-shadow: 0 12px 35px rgba(20, 20, 40, 0.10);
+
     transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
 
     @media (max-width: 320px) {
-      background-color: rgba(0, 0, 0, 0.074);
-      backdrop-filter: none; // Вимикаємо блюр
-      -webkit-backdrop-filter: none; // Підтримка Safari
-      border: none; // Убираємо рамку картки
-      border-radius: 0px; // Замість закруглених кутів використовуємо квадратні
+      background-color: #ffffff;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border: none;
+      border-radius: 0px;
+      box-shadow: none;
     }
   }
 }
