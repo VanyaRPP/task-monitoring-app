@@ -298,6 +298,9 @@ export const getPaymentProviderAndReciever = (company) => {
     companyName: company?.companyName,
     adminEmails: company?.adminEmails,
     description: company?.description,
+    AUT_CNTR_ACC: company?.AUT_CNTR_ACC || '',
+    AUT_CNTR_NAM: company?.AUT_CNTR_MFO || '',
+    AUT_CNTR_MFO: company?.AUT_CNTR_NAM || '',
   }
 
   return { provider, reciever }
@@ -736,6 +739,29 @@ export function usePermissions(user?: IUser): IPermissions | null {
   }, [isLoading, userData, isGlobalAdminUser, isDomainAdminUser])
 
   return permissions
+}
+
+export function calculatePermissions(userDate: any, user: IUser) {
+  const isGlobalAdminUser = isGlobalAdmin(user)
+  const isDomainAdminUser = user?.roles.includes('DomainAdmin')
+  
+  const isAdmin = isGlobalAdminUser || isDomainAdminUser
+
+  if (!userDate) {
+    return {
+      isGlobalAdmin: false,
+      isDomainAdmin: false,
+      isUser: false,
+      isAdmin: false,
+    }
+  }
+  
+  return {
+    isGlobalAdmin: isGlobalAdminUser,
+    isDomainAdmin: isDomainAdminUser,
+    isUser: true,
+    isAdmin,
+  }
 }
 
 export function formatDebt(amount: number): string {

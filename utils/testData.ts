@@ -6,31 +6,37 @@ export const users = {
     name: 'user',
     email: 'user@example.com',
     roles: [Roles.USER],
+    isWorker: false,
   },
   user2: {
     name: 'user',
     email: 'user@example2.com',
     roles: [Roles.USER],
+    isWorker: false,
   },
   noRoleUser: {
     name: 'noRoleUser',
     email: 'noRoleUser@example.com',
     roles: [],
+    isWorker: false,
   },
   domainAdmin: {
     name: 'domainAdmin',
     email: 'domainAdmin@example.com',
     roles: [Roles.DOMAIN_ADMIN],
+    isWorker: false,
   },
   domainAdmin2: {
     name: 'domainAdmin2',
     email: 'domainAdmin2@example.com',
     roles: [Roles.DOMAIN_ADMIN],
+    isWorker: false,
   },
   globalAdmin: {
     name: 'globalAdmin',
     email: 'globalAdmin@example.com',
     roles: [Roles.GLOBAL_ADMIN],
+    isWorker: false,
   },
 }
 
@@ -69,6 +75,9 @@ export const domains = [
     adminEmails: [users.domainAdmin.email],
     streets: [streets[0]._id],
     description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
   },
   {
     _id: '64d68421d9ba2fc8fea79d12',
@@ -76,6 +85,9 @@ export const domains = [
     adminEmails: [users.user.email],
     streets: [streets[1]._id],
     description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
   },
   {
     _id: '64d68421d9ba2fc8fea79d13',
@@ -83,6 +95,9 @@ export const domains = [
     adminEmails: [],
     streets: [],
     description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
   },
   {
     _id: '64d68421d9ba2fc8fea79d14',
@@ -90,6 +105,9 @@ export const domains = [
     adminEmails: [],
     streets: [],
     description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
   },
   {
     _id: '64d68421d9ba2fc8fea79d15',
@@ -97,6 +115,9 @@ export const domains = [
     adminEmails: [],
     streets: [],
     description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
   },
   {
     _id: '64d68421d9ba2fc8fea79d16',
@@ -104,6 +125,9 @@ export const domains = [
     adminEmails: [],
     streets: [],
     description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
   },
   {
     _id: '64e725c7a62fdf2d22b84c4a',
@@ -111,6 +135,9 @@ export const domains = [
     adminEmails: [users.domainAdmin2.email],
     streets: [],
     description: 'none',
+    customServices: [],
+    domainBankToken: [],
+    domainServices: [],
   },
 ]
 

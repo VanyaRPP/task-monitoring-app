@@ -1,8 +1,7 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
-import { IService } from '@common/api/serviceApi/service.api.types' 
+import { IService } from '@common/api/serviceApi/service.api.types'
 import { ServiceType } from '@utils/constants'
-import { toArray } from '@utils/helpers'
 import { Form, FormInstance, Select, Table } from 'antd'
 import React, { useCallback, useMemo } from 'react'
 
@@ -19,7 +18,7 @@ import WaterPart from './WaterPart'
 
 export interface TableProps {
   form?: FormInstance
-  service?: IService  
+  service?: IService
   editable?: boolean
   disabled?: boolean
 
@@ -44,114 +43,125 @@ export type EditInvoicesTableProps = Omit<
 >
 export type InvoiceType = IPayment['invoice'][0]
 
+export interface InvoiceComponentProps {
+  form?: FormInstance
+  name?: string | string[] | number | number[]
+  editable?: boolean
+  disabled?: boolean
+  record?: InvoiceType
+}
+
 export const EditInvoicesTable_unstable: React.FC<EditInvoicesTableProps> = ({
   form: _form,
-  selected: _selected = [],
-  onSelect,
-  onDelete,
   editable = false,
   disabled = false,
   loading = false,
-  selectable = false,
-  service, 
+  service,
   ...props
 }) => {
   const [form] = Form.useForm(_form)
-
-  const invoices: InvoiceType[] | undefined = Form.useWatch('invoice', form)
+  const invoices: InvoiceType[] = Form.useWatch('invoice', form) || []
 
   return (
     <Form.List name="invoice">
-      {(fields, { add, remove }) => (
-        <Table
-          rowKey="name"
-          loading={loading}
-          size="small"
-          dataSource={fields}
-          pagination={false}
-          footer={
-            editable
-              ? () => (
-                  <InvoiceSelector
-                    exclude={invoices?.map(({ type }) => type as ServiceType)}
-                    onSelect={(value) => add({ type: value })}
-                  />
-                )
-              : null
-          }
-          scroll={{ x: 750 }}
-          columns={[
-            {
-              title: '№',
-              width: 50,
-              render: (_, __, index) => index + 1,
-            },
-            {
-              title: 'Назва',
-              width: 400,
-              render: (_, { name }: { name: number }) => (
-                <Name
-                  form={form}
-                  name={name}
-                  editable={editable}
-                  disabled={disabled}
-                />
-              ),
-            },
-            {
-              title: 'Кількість',
-              width: 500,
-              render: (_, { name }: { name: number }) => (
-                <Amount
-                  form={form}
-                  name={name}
-                  editable={editable}
-                  disabled={disabled}
-                />
-              ),
-            },
-            {
-              title: `Ціна ${
-                invoices?.some((invoice) => invoice?.isIndividual)
-                  ? '(індивідуальна)'
-                  : ''
-              }`,
-              width: 250,
-              render: (_, { name }: { name: number }) => (
-                <Price
-                  form={form}
-                  name={name}
-                  editable={editable}
-                  disabled={disabled}
-                />
-              ),
-            },
-            {
-              title: 'Сума',
-              width: 200,
-              render: (_, { name }: { name: number }) => (
-                <Sum
-                  form={form}
-                  name={name}
-                  editable={editable}
-                  disabled={disabled}
-                />
-              ),
-            },
-            {
-              width: 50,
-              render: (_, record: { name: number }) => (
-                <MinusCircleOutlined
-                  onClick={() => !disabled && remove(record.name)}
-                  style={{ opacity: disabled ? 0.5 : 1 }}
-                />
-              ),
-              hidden: !editable,
-            },
-          ].filter((column) => !column.hidden)}
-          {...props}
-        />
-      )}
+      {(fields, { add, remove }) => {
+        const columns = [
+          {
+            title: '№',
+            width: 50,
+            render: (_: any, __: any, index: number) => index + 1,
+          },
+          {
+            title: 'Назва',
+            width: 400,
+            render: (_: any, { name }: { name: number }) => (
+              <Name
+                form={form}
+                name={name}
+                record={invoices[name]}
+                editable={editable}
+                disabled={disabled}
+              />
+            ),
+          },
+          {
+            title: 'Кількість',
+            width: 500,
+            render: (_: any, { name }: { name: number }) => (
+              <Amount
+                form={form}
+                name={name}
+                record={invoices[name]}
+                editable={editable}
+                disabled={disabled}
+              />
+            ),
+          },
+          {
+            title: `Ціна ${
+              invoices?.some((invoice) => invoice?.isIndividual)
+                ? '(індивідуальна)'
+                : ''
+            }`,
+            width: 250,
+            render: (_: any, { name }: { name: number }) => (
+              <Price
+                form={form}
+                name={name}
+                record={invoices[name]}
+                editable={editable}
+                disabled={disabled}
+              />
+            ),
+          },
+          {
+            title: 'Сума',
+            width: 200,
+            render: (_: any, { name }: { name: number }) => (
+              <Sum
+                form={form}
+                name={name}
+                record={invoices[name]}
+                editable={editable}
+                disabled={disabled}
+              />
+            ),
+          },
+          {
+            width: 50,
+            render: (_: any, record: { name: number }) => (
+              <MinusCircleOutlined
+                onClick={() => !disabled && remove(record.name)}
+                style={{ opacity: disabled ? 0.5 : 1 }}
+              />
+            ),
+            hidden: !editable,
+          },
+        ].filter((column) => !column.hidden)
+
+        return (
+          <Table
+            rowKey="name"
+            loading={loading}
+            size="small"
+            dataSource={fields}
+            pagination={false}
+            footer={
+              editable
+                ? () => (
+                    <InvoiceSelector
+                      exclude={invoices?.map(({ type }) => type as ServiceType)}
+                      onSelect={(value) => add({ type: value })}
+                    />
+                  )
+                : null
+            }
+            scroll={{ x: 750 }}
+            columns={columns}
+            {...props}
+          />
+        )
+      }}
     </Form.List>
   )
 }
@@ -163,58 +173,30 @@ export const InvoiceSelector: React.FC<{
   const handleSelect = useCallback(
     (value: ServiceType) => {
       if (value === ServiceType.Custom || !exclude?.includes(value)) {
-        onSelect(value)
+        onSelect?.(value)
       }
     },
     [exclude, onSelect]
   )
 
-  const options = useMemo(() => {
-    return [
-      {
-        value: ServiceType.Maintenance,
-        label: 'Утримання',
-      },
-      {
-        value: ServiceType.Placing,
-        label: 'Розміщення',
-      },
-      {
-        value: ServiceType.Inflicion,
-        label: 'Інфляція',
-      },
-      {
-        value: ServiceType.GarbageCollector,
-        label: 'Вивіз ТПВ',
-      },
-      {
-        value: ServiceType.Electricity,
-        label: 'Електропостачання',
-      },
-      {
-        value: ServiceType.Water,
-        label: 'Водопостачання',
-      },
-      {
-        value: ServiceType.WaterPart,
-        label: 'Частка водопостачання',
-      },
-      {
-        value: ServiceType.Cleaning,
-        label: 'Прибирання',
-      },
-      {
-        value: ServiceType.Discount,
-        label: 'Знижка',
-      },
-      {
-        value: ServiceType.Custom,
-        label: 'Власне',
-      },
-    ].filter(
-      ({ value }) => value === ServiceType.Custom || !exclude?.includes(value)
-    )
-  }, [exclude])
+  const options = useMemo(
+    () =>
+      [
+        { value: ServiceType.Maintenance, label: 'Утримання' },
+        { value: ServiceType.Placing, label: 'Розміщення' },
+        { value: ServiceType.Inflicion, label: 'Інфляція' },
+        { value: ServiceType.GarbageCollector, label: 'Вивіз ТПВ' },
+        { value: ServiceType.Electricity, label: 'Електропостачання' },
+        { value: ServiceType.Water, label: 'Водопостачання' },
+        { value: ServiceType.WaterPart, label: 'Частка водопостачання' },
+        { value: ServiceType.Cleaning, label: 'Прибирання' },
+        { value: ServiceType.Discount, label: 'Знижка' },
+        { value: ServiceType.Custom, label: 'Власне' },
+      ].filter(
+        ({ value }) => value === ServiceType.Custom || !exclude?.includes(value)
+      ),
+    [exclude]
+  )
 
   return (
     <Select
@@ -226,13 +208,6 @@ export const InvoiceSelector: React.FC<{
       options={options}
     />
   )
-}
-
-export interface InvoiceComponentProps {
-  form?: FormInstance
-  name?: string | string[] | number | number[]
-  editable?: boolean
-  disabled?: boolean
 }
 
 const Name: React.FC<InvoiceComponentProps> = (props) => {
@@ -272,22 +247,16 @@ const Component: React.FC<
   InvoiceComponentProps & {
     type: 'name' | 'amount' | 'price' | 'sum'
   }
-> = ({ form, name, type, ...props }) => {
-  const record = Form.useWatch(['invoice', ...toArray<string>(name)], form)
-
-  if (!record) {
-    return
-  }
+> = ({ form, name, type, record, ...props }) => {
+  if (!record) return null
 
   const components =
     ComponentsCollection[record.type] ||
     ComponentsCollection[ServiceType.Custom]
 
-  if (!components) {
-    return
-  }
+  if (!components) return null
 
-  const Component =
+  const C =
     type === 'name'
       ? components.Name
       : type === 'amount'
@@ -298,9 +267,7 @@ const Component: React.FC<
       ? components.Sum
       : null
 
-  if (!Component) {
-    return
-  }
+  if (!C) return null
 
-  return <Component form={form} name={name} {...props} />
+  return <C form={form} name={name} {...props} />
 }

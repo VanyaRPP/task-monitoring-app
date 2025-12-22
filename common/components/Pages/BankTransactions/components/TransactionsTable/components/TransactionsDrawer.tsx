@@ -33,6 +33,10 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   )
   const handleCompanyChange = (value: string) => setSelectedCompany(value)
 
+  const selectValue =
+    selectedCompany ??
+    (transaction.isMatchingPayment ? transaction.previousCompanyId : null)
+
   const showModal = () => setModalVisible(true)
   const closeModal = () => setModalVisible(false)
 
@@ -53,11 +57,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
           <Select
             placeholder="Select a related company"
             onChange={handleCompanyChange}
-            value={
-              transaction.isMatchingPayment
-                ? transaction.previousCompanyId
-                : selectedCompany
-            }
+            value={selectValue ?? undefined}
             style={{ width: 'calc(100% - 80px)' }}
           >
             {relatedCompanies.map((company: IRealestate) => (
@@ -97,9 +97,9 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                   reciever: selectedPayment.reciever,
                   generalSum: transactionAmount,
                   transaction: {
-                    AUT_CNTR_ACC: transaction.AUT_CNTR_ACC,
-                    AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
-                    AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
+                    AUT_CNTR_ACC: selectedPayment.reciever.AUT_CNTR_ACC,
+                    AUT_CNTR_NAM: selectedPayment.reciever.AUT_CNTR_NAM,
+                    AUT_CNTR_MFO: selectedPayment.reciever.AUT_CNTR_MFO,
                     Description: transaction.OSND,
                   },
                 }

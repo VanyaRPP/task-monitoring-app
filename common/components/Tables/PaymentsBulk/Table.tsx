@@ -30,73 +30,84 @@ const InvoicesTable: React.FC = () => {
     { skip: !domainId }
   )
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const groups = customDomainServices?.data ?? []
-  const allowedServices = groups.flatMap((group) => group.services)
 
-  const customServicesColumns = useMemo(() => {
-    return allowedServices
-      .filter((service) => !defaultServices.includes(service?._id.toString()))
-      .map((s) => ({
-        title: s.name,
-        width: 160,
-        render: (_: any, { name }: { name: number }) => (
-          <Form.Item
-            name={[name, 'invoice', s.fieldName, 'sum']}
-            style={{ margin: 0 }}
-          >
-            <Input />
-          </Form.Item>
-        ),
-      }))
-  }, [allowedServices])
+  const allowedServices = useMemo(
+    () => groups.flatMap((group) => group.services),
+    [groups]
+  )
+
+  const customServicesColumns = useMemo(
+    () =>
+      allowedServices
+        .filter((s) => !defaultServices.includes(s?._id.toString()))
+        .map((s) => ({
+          title: s.name,
+          width: 160,
+          render: (_: any, { name }: { name: number }) => (
+            <Form.Item
+              name={[name, 'invoice', s.fieldName, 'sum']}
+              style={{ margin: 0 }}
+            >
+              <Input />
+            </Form.Item>
+          ),
+        })),
+    [allowedServices]
+  )
+
+  const paymentsValue = useMemo(() => {
+    if (!companies || companies.length === 0 || !service) return []
+
+    return companies.map((company) => {
+      const prevPayment = prevPayments?.find(
+        (payment) =>
+          // eslint-disable-next-line
+          // @ts-ignore
+          payment.company?._id === company._id &&
+          payment.type === Operations.Debit
+      )
+
+      const allinvoice = getInvoices({
+        company,
+        service,
+        prevService,
+        prevPayment,
+      })
+
+      const filteredInvoice = serviceFilter(allinvoice, allowedServices)
+
+      const invoiceObjectForTheAll = allinvoice.reduce((acc, inv) => {
+        acc[inv.name || inv.type] = inv
+        return acc
+      }, {} as Record<string, any>)
+
+      const invoiceObjectForCustom = filteredInvoice.reduce((acc, inv) => {
+        acc[inv.fieldName || inv.type] = inv
+        return acc
+      }, {} as Record<string, any>)
+
+      const invoiceObject = {
+        ...invoiceObjectForTheAll,
+        ...invoiceObjectForCustom,
+      }
+
+      return {
+        company,
+        invoice: invoiceObject,
+      }
+    })
+  }, [companies, service, prevService, prevPayments, allowedServices])
 
   useEffect(() => {
     if (!companies || companies.length === 0 || !service) {
-      return form.setFieldsValue({ payments: [] })
+      form.setFieldsValue({ payments: [] })
+      return
     }
 
-    form.setFieldsValue({
-      payments: companies?.map((company) => {
-        const prevPayment = prevPayments?.find(
-          (payment) =>
-            // TODO: fix typing of IPayment and IExtendedPayment
-            // eslint-disable-next-line
-            // @ts-ignore
-            payment.company?._id === company._id &&
-            payment.type === Operations.Debit
-        )
-
-        const allinvoice = getInvoices({
-          company,
-          service,
-          prevService,
-          prevPayment,
-        })
-
-        const filteredInvoice = serviceFilter(allinvoice, allowedServices)
-
-        const invoiceObjectForTheAll = allinvoice.reduce((acc, inv) => {
-          acc[inv.name || inv.type] = inv
-          return acc
-        }, {} as Record<string, any>)
-
-        const invoiceObjectForCustom = filteredInvoice.reduce((acc, inv) => {
-          acc[inv.fieldName || inv.type] = inv
-          return acc
-        }, {} as Record<string, any>)
-
-        const invoiceObject = {
-          ...invoiceObjectForTheAll,
-          ...invoiceObjectForCustom,
-        }
-
-        return {
-          company,
-          invoice: invoiceObject,
-        }
-      }),
-    })
-  }, [form, service, companies, prevService, prevPayments, allowedServices])
+    form.setFieldsValue({ payments: paymentsValue })
+  }, [form, companies, service, paymentsValue])
 
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 

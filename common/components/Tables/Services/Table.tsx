@@ -5,11 +5,6 @@ import {
   QuestionCircleOutlined,
 } from '@ant-design/icons'
 import { getFormattedDate } from '@assets/features/formatDate'
-import {
-  useGetAddressFiltersQuery,
-  useGetDateFiltersQuery,
-  useGetDomainFiltersQuery,
-} from '@common/api/filterApi/filter.api'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import {
@@ -24,6 +19,7 @@ import { Alert, Button, Popconfirm, Table, Tooltip, message } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { customServiceForm } from 'e2e/common/customServiceForm'
 import { useRouter } from 'next/router'
+import React from 'react'
 import { useCallback, useState } from 'react'
 
 interface Props {
@@ -45,6 +41,10 @@ interface Props {
   setFilter?: (filters: any) => void
   setSelectedServices?: (service: IService[]) => void
   customServices?: { _id: string; name: string }[]
+  user: any
+  domainsFilter: any
+  streetsFilter: any
+  dateFilters: any
 }
 
 const ServicesTable: React.FC<Props> = ({
@@ -58,6 +58,10 @@ const ServicesTable: React.FC<Props> = ({
   setFilter,
   setSelectedServices,
   customServices,
+  user,
+  domainsFilter,
+  streetsFilter,
+  dateFilters,
 }) => {
   const router = useRouter()
   const { pathname } = router
@@ -66,16 +70,6 @@ const ServicesTable: React.FC<Props> = ({
     currentPage: 1,
   })
   const isOnPage = pathname === AppRoutes.SERVICE
-
-  const { data: user } = useGetCurrentUserQuery()
-
-  const { data: domainsFilter } = useGetDomainFiltersQuery({
-    streets: filter?.street,
-  })
-  const { data: streetsFilter } = useGetAddressFiltersQuery({
-    domains: filter?.domain,
-  })
-  const { data: dateFilters } = useGetDateFiltersQuery({ type: 'service' })
 
   const [deleteService, { isLoading: deleteLoading }] =
     useDeleteServiceMutation()
@@ -309,21 +303,20 @@ const getDefaultColumns = (
   ]
 
   if (customServices?.length) {
-    customServices
-      .forEach((custom) => {
-        columns.splice(columns.length - 2, 0, {
-          title: custom.name,
-          dataIndex: custom._id,
-          width: 120,
-          ellipsis: true,
-          render: (_, record: IService) => {
-            const match = record.customServices?.find(
-              (s) => String(s._id) === String(custom._id)
-            )
-            return match ? renderCurrency(match.price) : '-'
-          },
-        })
+    customServices.forEach((custom) => {
+      columns.splice(columns.length - 2, 0, {
+        title: custom.name,
+        dataIndex: custom._id,
+        width: 120,
+        ellipsis: true,
+        render: (_, record: IService) => {
+          const match = record.customServices?.find(
+            (s) => String(s._id) === String(custom._id)
+          )
+          return match ? renderCurrency(match.price) : '-'
+        },
       })
+    })
   }
 
   if (isAdmin) {
@@ -370,4 +363,4 @@ const getDefaultColumns = (
   return columns
 }
 
-export default ServicesTable
+export default React.memo(ServicesTable)

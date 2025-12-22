@@ -230,11 +230,11 @@ describe('Payments API - GET', () => {
   getPaymentsByYearTest(2022)
 
   it('GET payments by month', async () => {
-    mockLoginAs(users.user)
+    await mockLoginAs(users.user)
 
     const mockReq = {
       method: 'GET',
-      query: { month: 2 },
+      query: { month: '2' },
     } as any
 
     const mockRes = {
@@ -260,7 +260,7 @@ describe('Payments API - GET', () => {
     expect(recived).toEqual(expected)
   })
   it('GET payments by quarter', async () => {
-    mockLoginAs(users.user)
+    await mockLoginAs(users.user)
 
     const mockReq = {
       method: 'GET',
@@ -337,16 +337,32 @@ it('get valid distinctCompanies as DomainAdmin', async () => {
 
   await handler(mockReq, mockRes)
 
+  const lastCall = mockRes.json.mock.lastCall[0]
+
   const response = {
     status: mockRes.status,
-    data: mockRes.json.mock.lastCall[0].data,
-    realEstatesFilter: mockRes.json.mock.lastCall[0].realEstatesFilter,
+    data: lastCall.data,
+    currentCompaniesCount: lastCall.currentCompaniesCount,
+    currentDomainsCount: lastCall.currentDomainsCount,
   }
 
   expect(response.status).toHaveBeenCalledWith(200)
-  expect(response.realEstatesFilter[0].value.toString()).toEqual(
-    realEstates[0]._id
+
+  const visiblePaymentsForDomainAdmin = payments.filter((payment) =>
+    domains
+      .find((domain) => domain._id === payment.domain)
+      ?.adminEmails.includes(users.domainAdmin.email)
   )
+
+  const distinctCompanyIds = Array.from(
+    new Set(visiblePaymentsForDomainAdmin.map((p) => p.company.toString()))
+  )
+  const distinctDomainIds = Array.from(
+    new Set(visiblePaymentsForDomainAdmin.map((p) => p.domain.toString()))
+  )
+
+  expect(response.currentCompaniesCount).toBe(distinctCompanyIds.length)
+  expect(response.currentDomainsCount).toBe(distinctDomainIds.length)
 })
 it('difference between debit and credit', async () => {
   await mockLoginAs(users.globalAdmin)
@@ -436,7 +452,7 @@ describe('Payments API - POST', () => {
 
 function getPaymentsByYearTest(year) {
   it(`GET payments by year ${year}`, async () => {
-    mockLoginAs(users.user)
+    await mockLoginAs(users.user)
 
     const mockReq = {
       method: 'GET',
