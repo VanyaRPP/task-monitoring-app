@@ -9,6 +9,7 @@ import CompaniesAreaChart from '@components/DashboardPage/blocks/сompaniesAreaC
 import { Roles } from '@utils/constants'
 import { Col, Row, Space, Button, Flex,  message, Tooltip, Dropdown } from 'antd'
 import { CloseOutlined, SaveOutlined, EyeOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import { CloseOutlined, SaveOutlined, EyeOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import PaymentsChart from '@components/DashboardPage/blocks/paymentChart'
 import ProfitPage from '@components/Pages/ProfiitPage'
 import { addButton, removeButton } from '@modules/store/floatButtonSlice'
@@ -19,23 +20,6 @@ import useTheme from '@modules/hooks/useTheme'
 import WidgetVisibilityMenu from '@components/UI/WidgetVisibilityMenu'
 import { WidgetWrapper } from '@components/UI/WidgetWrapper'
 import DashboardTour from '@components/DashboardPage/DashboardTour'
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-  DragStartEvent,
-} from '@dnd-kit/core'
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  useSortable,
-  arrayMove,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-
 const MARGIN_Y = 12
 const ALL_WIDGETS = [
   'payments',
@@ -116,6 +100,7 @@ const Dashboard: React.FC = () => {
   const { data: userResponse } = useGetCurrentUserQuery()
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
   const [showTour, setShowTour] = useState(false)
+  const [showTour, setShowTour] = useState(false)
 
   const [isEditMode, toggleEditMode, editFloatButton] =
     useEditModelFloatButton('dashboard')
@@ -151,14 +136,24 @@ const Dashboard: React.FC = () => {
     tooltip: 'Тур',
     order: 5,
   }), [])
+  const tourFloatButton = useMemo(() => ({
+    key: 'dashboard-tour',
+    icon: <QuestionCircleOutlined/>,
+    onClick: () => setShowTour(true),
+    tooltip: 'Тур',
+    order: 5,
+  }), [])
 
   useEffect(() => {
     dispatch(addButton(panelFloatButton))
     dispatch(addButton(tourFloatButton))
+    dispatch(addButton(tourFloatButton))
     return () => {
       dispatch(removeButton(panelFloatButton.key))
       dispatch(removeButton(tourFloatButton.key))
+      dispatch(removeButton(tourFloatButton.key))
     }
+  }, [dispatch, panelFloatButton, tourFloatButton])
   }, [dispatch, panelFloatButton, tourFloatButton])
 
   const getLayoutStorageKey = (userId?: string) =>
@@ -227,22 +222,14 @@ const Dashboard: React.FC = () => {
     })
   }, [])
 
-  const handleDragCancel = useCallback(() => {
-    setIsDraggingActive(false)
-    document.body.style.cursor = ''
-  }, [])
-
-  const handleSave = useCallback(() => {
-    const userId = userResponse?._id?.toString()
-    if (!userId) return
-    localStorage.setItem(
-      getLayoutStorageKey(userId),
-      JSON.stringify({ layout: orderedWidgets, hidden: hiddenWidget })
+  const renderedLayout = useMemo(
+      () => layout.filter((item) => (visibleWidgets as readonly string[]).includes(item.i)),
+      [layout, visibleWidgets]
     )
-    message.success('Збережено!')
-    togglePanelVisible()
-  }, [userResponse?._id, orderedWidgets, hiddenWidget, togglePanelVisible])
 
+  const handleCloseTour = () => {
+    setShowTour(false)
+  }
   return (
     <div className={s.wrapper}>
       {isPanelVisible && (
@@ -322,7 +309,7 @@ const Dashboard: React.FC = () => {
       <DashboardTour userRoles={userResponse?.roles || []} />
       <DashboardTour 
         isVisible={showTour} 
-        onClose={() => setShowTour(false)}
+        onClose={handleCloseTour}
         isManualStart={true}
         userRoles={userResponse?.roles || []}
       />
