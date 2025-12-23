@@ -3,67 +3,74 @@ import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography, Button, Tooltip } from 'antd'
-import { ReloadOutlined } from '@ant-design/icons'
+import { Form, Input, Space, Typography, Tooltip, Flex } from 'antd'
 import { useEffect, useMemo } from 'react'
+import UpdateInvoiceButton from '@components/UI/Buttons/UpdateInvoiceButton/UpdateInvoiceButton'
+
+const calculateGarbagePrice = (
+  basePrice?: number,
+  rentPart?: number
+) => {
+  if (!basePrice || !rentPart) return 0
+  return +(basePrice * (rentPart / 100))
+}
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
   name: _name,
   editable,
-  disabled,
 }) => {
-  const { company, service } = usePaymentContext()
-  const gardagePrice = service?.garbageCollectorPrice * (company?.rentPart / 100)
+  const { service, company } = usePaymentContext()
+  const name = useMemo(() => toArray<string>(_name), [_name])
+
+  const calculatedPrice = calculateGarbagePrice(
+    service?.garbageCollectorPrice,
+    company?.rentPart
+  )
+
+  const currentPrice = Form.useWatch(['invoice', ...name, 'price'], form)
+
+  const isInitial =
+    toRoundFixed(currentPrice) === toRoundFixed(calculatedPrice)
 
   return (
-    <Space
-      direction="horizontal"
-      style={{ justifyContent: 'space-between', width: '100%' }}
-    >
+    <Flex justify="space-between" align="center">
       <Space direction="vertical" size={0}>
         <Typography.Text>Вивіз ТПВ</Typography.Text>
         <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
           {toFirstUpperCase(dateToMonthYear(service?.date))}
         </Typography.Text>
       </Space>
-      {
-        editable &&
-        (gardagePrice !==
-          Form.useWatch(['invoice', ...toArray<string>(_name), 'price'], form)) && (
-          <Tooltip title="Відновити значення">
-            <Button
-              onClick={() => {
-                form.setFieldValue(
-                  ['invoice', ...toArray<string>(_name), 'price'],
-                  gardagePrice
-                )
-              }}
-              icon={<ReloadOutlined />}
-            />
-          </Tooltip>
-        )
-      }
-    </Space>
+
+      {editable && !isInitial && (
+        <Tooltip title="Відновити значення">
+          <UpdateInvoiceButton
+            onClick={() => {
+              form.setFieldValue(
+                ['invoice', ...name, 'price'],
+                calculatedPrice
+              )
+            }}
+          />
+        </Tooltip>
+      )}
+    </Flex>
   )
 }
 
-export const Amount: React.FC<InvoiceComponentProps> = ({
-  form,
-  name: _name,
-  editable,
-  disabled,
-}) => {
+export const Amount: React.FC<InvoiceComponentProps> = () => {
   const { service, company } = usePaymentContext()
 
-  if (service?.garbageCollectorPrice && company?.rentPart) {
-    return (
-      <span>
-        {toRoundFixed(company.rentPart)}% від{' '}
-        {toRoundFixed(service.garbageCollectorPrice)} грн
-      </span>
-    )
+  if (!service?.garbageCollectorPrice || !company?.rentPart) {
+    return null
   }
+
+  return (
+    <span>
+      {toRoundFixed(company.rentPart)}% від{' '}
+      {toRoundFixed(service.garbageCollectorPrice)} грн
+    </span>
+  )
 }
 
 export const Price: React.FC<InvoiceComponentProps> = ({

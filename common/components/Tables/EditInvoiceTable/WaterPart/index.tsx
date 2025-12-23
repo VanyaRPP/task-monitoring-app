@@ -3,68 +3,106 @@ import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography, Tooltip, Button } from 'antd'
-import { ReloadOutlined } from '@ant-design/icons'
+import { Form, Input, Space, Typography, Tooltip, Flex } from 'antd'
 import { useEffect, useMemo } from 'react'
+import UpdateInvoiceButton from '@components/UI/Buttons/UpdateInvoiceButton/UpdateInvoiceButton'
 
-export const Name: React.FC<InvoiceComponentProps> = ({
+const useWaterPartCalculation = (form: any, name: string[]) => {
+  const { service, company } = usePaymentContext()
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+
+  const calculatedPrice = useMemo(() => {
+    if (
+      typeof service?.waterPriceTotal !== 'number' ||
+      typeof company?.waterPart !== 'number'
+    ) {
+      return null
+    }
+
+    return (service.waterPriceTotal * company.waterPart) / 100
+  }, [service, company])
+
+  const isChanged = useMemo(() => {
+    if (calculatedPrice === null || price === undefined) return false
+    return (
+      toRoundFixed(calculatedPrice) !==
+      toRoundFixed(price)
+    )
+  }, [calculatedPrice, price])
+
+  return {
+    calculatedPrice,
+    isChanged,
+  }
+}
+
+export const Name: React.FC<InvoiceComponentProps> = ({ 
   form,
   name: _name,
   editable,
   disabled,
 }) => {
+
   const { service } = usePaymentContext()
+  const name = useMemo(() => toArray<string>(_name), [_name])
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+
+
+  const { calculatedPrice, isChanged } = useWaterPartCalculation(form, name)
+
+  useEffect(() => {
+    if (
+      editable &&
+      calculatedPrice !== null &&
+      price === undefined
+    ) {
+      form.setFieldValue(
+        ['invoice', ...name, 'price'],
+        calculatedPrice
+      )
+    }
+  }, [editable, calculatedPrice, price, form, name])
 
   return (
-    <Space direction="vertical" size={0}>
-      <Typography.Text>Частка водопостачання</Typography.Text>
-      <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-        {toFirstUpperCase(dateToMonthYear(service?.date))}
-      </Typography.Text>
-    </Space>
+    <Flex justify="space-between" align="center">
+      <Space direction="vertical" size={0}>
+        <Typography.Text>Частка водопостачання</Typography.Text>
+        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+          {toFirstUpperCase(dateToMonthYear(service?.date))}
+        </Typography.Text>
+      </Space>
+      {isChanged && calculatedPrice !== null && (
+        <Tooltip title="Відновити значення">
+          <UpdateInvoiceButton
+            onClick={() => {
+              form.setFieldValue(
+                ['invoice', ...name, 'price'],
+                calculatedPrice
+              )
+            }}
+          />
+        </Tooltip>
+      )}
+    </Flex>
   )
 }
 
-export const Amount: React.FC<InvoiceComponentProps> = ({
-  form,
-  name: _name,
-  editable,
-  disabled,
-}) => {
+export const Amount: React.FC<InvoiceComponentProps> = () => {
   const { service, company } = usePaymentContext()
-  const name = useMemo(() => toArray<string>(_name), [_name])
-  const waterPartPrice = +(
-    (service?.waterPriceTotal * company?.waterPart) /
-    100
-  )
-  const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
-  if (service?.garbageCollectorPrice && company?.rentPart) {
-    return (
-      <Space
-        direction="horizontal"
-        style={{ justifyContent: 'space-between', width: '100%' }}
-      >
-        <span>
-          {toRoundFixed(company.waterPart)}% від{' '}
-          {toRoundFixed(service.waterPriceTotal)} грн
-        </span>
-        {editable && waterPartPrice !== price && (
-          <Tooltip title="Відновити значення">
-            <Button
-              onClick={() => {
-                form.setFieldValue(
-                  ['invoice', ...name, 'price'],
-                  waterPartPrice
-                )
-              }}
-              icon={<ReloadOutlined />}
-            />
-          </Tooltip>
-        )}
-      </Space>
-    )
+  if (
+    typeof service?.waterPriceTotal !== 'number' ||
+    typeof company?.waterPart !== 'number'
+  ) {
+    return <span>—</span>
   }
+
+  return (
+    <span>
+      {toRoundFixed(company.waterPart)}% від{' '}
+      {toRoundFixed(service.waterPriceTotal)} грн
+    </span>
+  )
 }
 
 export const Price: React.FC<InvoiceComponentProps> = ({
@@ -82,14 +120,18 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   }
 
   return (
-    <Form.Item name={[...name, 'price']} rules={[validator.required()]} noStyle>
-      <Input
-        type="number"
-        placeholder="Значення..."
-        disabled={disabled}
-        suffix="грн"
-      />
-    </Form.Item>
+      <Form.Item
+        name={[...name, 'price']}
+        rules={[validator.required(), validator.min(0)]}
+        noStyle
+      >
+        <Input
+          type="number"
+          placeholder="Значення..."
+          disabled={disabled}
+          suffix="грн"
+        />
+      </Form.Item>
   )
 }
 

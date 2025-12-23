@@ -4,24 +4,78 @@ import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { DividedSpace } from '@components/UI/DividedSpace'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography, Tooltip, Button } from 'antd'
-import { useEffect, useMemo, useState } from 'react'
-import { ReloadOutlined } from '@ant-design/icons'
+import { useEffect, useMemo, useRef } from 'react'
+import { Form, Input, Space, Typography, Tooltip } from 'antd'
+import UpdateInvoiceButton from '@components/UI/Buttons/UpdateInvoiceButton/UpdateInvoiceButton'
+
+const useWaterReset = (
+  form: any,
+  name: (string | number)[],
+  initialPrice?: number
+) => {
+  const initialRef = useRef<{
+    price?: number
+    lastAmount?: number
+    amount?: number
+  } | null>(null)
+
+  if (!initialRef.current) {
+    initialRef.current = {
+      price:
+        initialPrice ??
+        form.getFieldValue(['invoice', ...name, 'price']),
+      lastAmount: form.getFieldValue(['invoice', ...name, 'lastAmount']),
+      amount: form.getFieldValue(['invoice', ...name, 'amount']),
+    }
+  }
+
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  const lastAmount = Form.useWatch(['invoice', ...name, 'lastAmount'], form)
+  const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
+
+  const isChanged =
+    price !== initialRef.current.price ||
+    lastAmount !== initialRef.current.lastAmount ||
+    amount !== initialRef.current.amount
+
+  const resetAll = () => {
+    form.setFields([
+      {
+        name: ['invoice', ...name, 'price'],
+        value: initialRef.current!.price,
+      },
+      {
+        name: ['invoice', ...name, 'lastAmount'],
+        value: initialRef.current!.lastAmount,
+      },
+      {
+        name: ['invoice', ...name, 'amount'],
+        value: initialRef.current!.amount,
+      },
+    ])
+  }
+
+  return {
+    isChanged,
+    resetAll,
+  }
+}
+
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
   name: _name,
   editable,
 }) => {
-  const { service, prevPayment, payment } = usePaymentContext()
+  const { service } = usePaymentContext()
   const name = useMemo(() => toArray<string>(_name), [_name])
-  const price = Form.useWatch(['invoice', ...name, 'price'], form)
-  const lastAmount = Form.useWatch(['invoice', ...name, 'lastAmount'], form)
-  const waterAmount =
-    payment?.invoice?.find((invoice) => invoice.type === 'waterPrice')
-      ?.lastAmount ??
-    prevPayment?.invoice?.find((invoice) => invoice.type === 'waterPrice')
-      ?.lastAmount
+
+  const { isChanged, resetAll } = useWaterReset(
+    form,
+    name,
+    service?.waterPrice
+  )
+
   return (
     <Space
       direction="horizontal"
@@ -33,24 +87,12 @@ export const Name: React.FC<InvoiceComponentProps> = ({
           {toFirstUpperCase(dateToMonthYear(service?.date))}
         </Typography.Text>
       </Space>
-      {editable &&
-        (service?.waterPrice !== +price || lastAmount !== waterAmount) && (
-          <Tooltip title="Відновити значення">
-            <Button
-              onClick={() => {
-                form.setFieldValue(
-                  ['invoice', ...name, 'price'],
-                  service?.waterPrice
-                )
-                form.setFieldValue(
-                  ['invoice', ...name, 'lastAmount'],
-                  waterAmount ?? lastAmount
-                )
-              }}
-              icon={<ReloadOutlined />}
-            />
-          </Tooltip>
-        )}
+
+      {editable && isChanged && (
+        <Tooltip title="Відновити значення">
+          <UpdateInvoiceButton onClick={resetAll} />
+        </Tooltip>
+      )}
     </Space>
   )
 }

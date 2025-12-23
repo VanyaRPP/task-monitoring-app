@@ -3,8 +3,10 @@ import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography } from 'antd'
+import { Form, Input, Space, Typography, Tooltip, Flex } from 'antd'
 import { useEffect, useMemo } from 'react'
+import UpdateInvoiceButton from '@components/UI/Buttons/UpdateInvoiceButton/UpdateInvoiceButton'
+import { ServiceType } from '@utils/constants'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -14,13 +16,39 @@ export const Name: React.FC<InvoiceComponentProps> = ({
 }) => {
   const { service } = usePaymentContext()
 
+  const name = useMemo(() => toArray<string>(_name), [_name])
+  const invoices = Form.useWatch(['invoice'], form) || []
+  const currentPrice = Form.useWatch(['invoice', ...name, 'price'], form)
+
+  const discountInvoice = useMemo(
+    () =>
+      invoices.find(
+        (invoice: any) => invoice.type === ServiceType.Inflicion
+      ),
+    [invoices]
+  )
+
   return (
-    <Space direction="vertical" size={0}>
-      <Typography.Text>Знижка</Typography.Text>
-      <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-        {toFirstUpperCase(dateToMonthYear(service?.date))}
-      </Typography.Text>
-    </Space>
+    <Flex justify="space-between" align="center">
+      <Space direction="vertical" size={0} style={{ flex: 1, minWidth: 0 }}>
+        <Typography.Text>Знижка</Typography.Text>
+        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+          {toFirstUpperCase(dateToMonthYear(service?.date))}
+        </Typography.Text>
+      </Space>
+        {editable && discountInvoice !== currentPrice && (
+          <Tooltip title="Відновити значення">
+            <UpdateInvoiceButton
+              onClick={() => {
+                form.setFieldValue(
+                  ['invoice', ...name, 'price'],
+                  discountInvoice
+                )
+              }}
+            />
+          </Tooltip>
+        )}
+    </Flex>
   )
 }
 

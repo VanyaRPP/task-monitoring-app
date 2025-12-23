@@ -3,24 +3,75 @@ import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography } from 'antd'
+import { Flex, Form, Input, Space, Tooltip, Typography } from 'antd'
 import { useEffect, useMemo } from 'react'
+import UpdateInvoiceButton from '@components/UI/Buttons/UpdateInvoiceButton/UpdateInvoiceButton'
+
+const useMaintenanceCalculations = (form: any, name: number[]) => {
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
+
+  const initialPrice = useMemo(() => {
+    return form.getFieldValue(['invoice', ...name, 'price'])
+  }, [])
+
+  const initialAmount = useMemo(() => {
+    return form.getFieldValue(['invoice', ...name, 'amount'])
+  }, [])
+
+  const isInitial = useMemo(() => {
+    return (
+      toRoundFixed(price) === toRoundFixed(initialPrice) &&
+      toRoundFixed(amount) === toRoundFixed(initialAmount)
+    )
+  }, [price, amount, initialPrice, initialAmount])
+
+  return {
+    isInitial,
+    initialPrice,
+    initialAmount,
+  }
+}
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
-  name,
+  name: _name,
   editable,
-  disabled,
 }) => {
   const { service } = usePaymentContext()
+  const name = useMemo(() => toArray<number>(_name), [_name])
+
+  const { isInitial, initialPrice, initialAmount } =
+    useMaintenanceCalculations(form, name)
 
   return (
-    <Space direction="vertical" size={0}>
-      <Typography.Text>Утримання</Typography.Text>
-      <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-        {toFirstUpperCase(dateToMonthYear(service?.date))}
-      </Typography.Text>
-    </Space>
+    <Flex justify="space-between" align="center">
+      <Space direction="vertical" size={0}>
+        <Typography.Text>Утримання</Typography.Text>
+        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+          {toFirstUpperCase(dateToMonthYear(service?.date))}
+        </Typography.Text>
+      </Space>
+
+      {editable && !isInitial && (
+        <Tooltip title="Відновити початкове значення">
+          <UpdateInvoiceButton
+            onClick={() => {
+              Promise.resolve().then(() => {
+                form.setFieldValue(
+                  ['invoice', ...name, 'price'],
+                  initialPrice
+                )
+                form.setFieldValue(
+                  ['invoice', ...name, 'amount'],
+                  initialAmount
+                )
+              })
+            }}
+          />
+        </Tooltip>
+      )}
+    </Flex>
   )
 }
 
@@ -30,8 +81,8 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const name = useMemo(() => toArray<string>(_name), [_name])
 
+  const name = useMemo(() => toArray<number>(_name), [_name])
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
 
   if (!editable) {
@@ -68,8 +119,8 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const name = useMemo(() => toArray<string>(_name), [_name])
 
+  const name = useMemo(() => toArray<number>(_name), [_name])
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
   if (!editable) {

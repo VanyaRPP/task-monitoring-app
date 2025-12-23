@@ -5,42 +5,107 @@ import { DividedSpace } from '@components/UI/DividedSpace'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
-import { Form, Input, Space, Typography, Tooltip } from 'antd'
-import { useEffect, useMemo } from 'react'
-import UpdateInvoiceButton from './UpdateInvoiceButton'
+import { Form, Input, Space, Typography, Tooltip, Flex } from 'antd'
+import { useEffect, useMemo, useRef } from 'react'
+import UpdateInvoiceButton from '../../../UI/Buttons/UpdateInvoiceButton/UpdateInvoiceButton'
+
+const useElectricityReset = (
+  form: any,
+  name: (string | number)[],
+  initialPrice?: number
+) => {
+  const initialRef = useRef<{
+    price?: number
+    amount?: number
+    lastAmount?: number
+    losses?: number
+  } | null>(null)
+
+  if (!initialRef.current) {
+    initialRef.current = {
+      price:
+        initialPrice ??
+        form.getFieldValue(['invoice', ...name, 'price']),
+      amount: form.getFieldValue(['invoice', ...name, 'amount']),
+      lastAmount: form.getFieldValue(['invoice', ...name, 'lastAmount']),
+      losses: form.getFieldValue(['invoice', ...name, 'losses']),
+    }
+  }
+
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
+  const lastAmount = Form.useWatch(['invoice', ...name, 'lastAmount'], form)
+  const losses = Form.useWatch(['invoice', ...name, 'losses'], form)
+
+  const isChanged =
+    price !== initialRef.current.price ||
+    amount !== initialRef.current.amount ||
+    lastAmount !== initialRef.current.lastAmount ||
+    losses !== initialRef.current.losses
+
+  const resetAll = () => {
+    form.setFields([
+      {
+        name: ['invoice', ...name, 'price'],
+        value: initialRef.current!.price,
+      },
+      {
+        name: ['invoice', ...name, 'amount'],
+        value: initialRef.current!.amount,
+      },
+      {
+        name: ['invoice', ...name, 'lastAmount'],
+        value: initialRef.current!.lastAmount,
+      },
+      {
+        name: ['invoice', ...name, 'losses'],
+        value: initialRef.current!.losses,
+      },
+    ])
+  }
+
+  return {
+    isChanged,
+    resetAll,
+  }
+}
+
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
   name: _name,
   editable,
-  disabled,
 }) => {
-  const { service, payment } = usePaymentContext()
+  const { service } = usePaymentContext()
   const name = useMemo(() => toArray<string>(_name), [_name])
+
   const losses = Form.useWatch(['invoice', ...name, 'losses'], form) ?? 0
 
+  const { isChanged, resetAll } = useElectricityReset(
+    form,
+    name,
+    service?.electricityPrice
+  )
+
   return (
-    <Space
-      direction="horizontal"
-      size='large'
-    >
+    <Flex justify="space-between" align="center">
       <Space direction="vertical" size={0}>
         <Typography.Text>Електропостачання</Typography.Text>
         <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-          {toFirstUpperCase(dateToMonthYear(service?.date))}{' '}
-          {losses > 0 ? `+ Втрати ${losses}%` : ''}
+          {toFirstUpperCase(dateToMonthYear(service?.date))}
+          {losses > 0 ? ` + Втрати ${losses}%` : ''}
         </Typography.Text>
       </Space>
-      {editable && (
-        <UpdateInvoiceButton
-          form={form}
-          service={service}
-          disabled={disabled}
-        />
+
+      {editable && isChanged && (
+        <Tooltip title="Відновити значення">
+          <UpdateInvoiceButton onClick={resetAll} />
+        </Tooltip>
       )}
-    </Space>
+    </Flex>
   )
 }
+
 
 export const Amount: React.FC<InvoiceComponentProps> = ({
   form,

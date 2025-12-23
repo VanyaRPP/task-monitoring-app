@@ -3,24 +3,59 @@ import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography } from 'antd'
-import { useEffect, useMemo } from 'react'
+import { ServiceType } from '@utils/constants'
+import { Form, Input, Space, Tooltip, Typography, Flex } from 'antd'
+import { useEffect, useMemo, useRef } from 'react'
+import UpdateInvoiceButton from '@components/UI/Buttons/UpdateInvoiceButton/UpdateInvoiceButton'
+
+const useCleaningReset = (form: any, name: (string | number)[]) => {
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+
+  const initialPrice = useMemo(() => {
+    return form.getFieldValue(['invoice', ...name, 'price'])
+  }, [])
+
+  const isInitial = useMemo(() => {
+    return toRoundFixed(price) === toRoundFixed(initialPrice)
+  }, [price, initialPrice])
+
+  const reset = () => {
+    form.setFieldValue(['invoice', ...name, 'price'], initialPrice)
+  }
+
+  return {
+    isInitial,
+    initialPrice,
+    reset,
+  }
+}
+
+
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
   name: _name,
   editable,
-  disabled,
 }) => {
+  const name = useMemo(() => toArray<string>(_name), [_name])
   const { service } = usePaymentContext()
 
+  const { isInitial, reset } = useCleaningReset(form, name)
+
   return (
-    <Space direction="vertical" size={0}>
-      <Typography.Text>Прибирання</Typography.Text>
-      <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-        {toFirstUpperCase(dateToMonthYear(service?.date))}
-      </Typography.Text>
-    </Space>
+    <Flex justify="space-between" align="center">
+      <Space direction="vertical" size={0} style={{ flex: 1, minWidth: 0 }}>
+        <Typography.Text>Прибирання</Typography.Text>
+        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+          {toFirstUpperCase(dateToMonthYear(service?.date))}
+        </Typography.Text>
+      </Space>
+      {editable && !isInitial && (
+        <Tooltip title="Відновити значення">
+          <UpdateInvoiceButton onClick={reset} />
+        </Tooltip>
+      )}
+    </Flex>
   )
 }
 
