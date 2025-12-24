@@ -39,6 +39,12 @@ export const LossesCollapse: React.FC<LossesCollapseProps> = (props) => {
     return electricityService?.price ?? 0
   }, [customServices])
 
+  const hasElectricityService = useMemo(() => {
+    return customServices?.some(
+      (item) => item?.fieldName === 'electricityPrice'
+    )
+  }, [customServices])
+
   // ціна без пдв
   const pricekWH = pricekWHWithVAT / 1.2
 
@@ -56,8 +62,16 @@ export const LossesCollapse: React.FC<LossesCollapseProps> = (props) => {
   const labelLossesPercent = lossesPercent ? lossesPercent.toFixed(2) : '0.00'
 
   useEffect(() => {
+    if (!hasElectricityService) {
+      return
+    }
     form.setFieldValue(name, isNaN(lossesPercent) ? 0 : Number(lossesPercent.toFixed(2)))
-  }, [form, name, lossesPercent])
+  }, [form, name, lossesPercent, hasElectricityService])
+
+   // якщо немає послуги з ціною електроенергії, то не виводимо втрати
+  if (!hasElectricityService) {
+    return null
+  }
 
   return (
     <Collapse size="small" bordered={false}>
