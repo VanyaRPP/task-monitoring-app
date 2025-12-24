@@ -60,7 +60,7 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
 
   return (
     <div>
-      <Form.Item name="IEName" label="FOP" rules={validateField('required')}>
+      <Form.Item name="IEName" label="FOP">
         <Space.Compact className={s.formInput}>
           <Input
             placeholder="Вкажіть ФОП"
@@ -71,7 +71,7 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
         </Space.Compact>
       </Form.Item>
       {/* IBAN */}
-      <Form.Item name="iban" label="IBAN" rules={validateField('IBAN')}>
+      <Form.Item name="iban" label="IBAN">
         <Input
           placeholder="Вкажіть IBAN"
           maxLength={34}
@@ -79,7 +79,7 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
           disabled={!editable}
         />
       </Form.Item>
-      <Form.Item name="rnokpp" label="РНОКПП" rules={validateField('required')}>
+      <Form.Item name="rnokpp" label="РНОКПП">
         <Input
           placeholder="Вкажіть РНОКПП"
           maxLength={256}
@@ -87,7 +87,7 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
           disabled={!editable}
         />
       </Form.Item>
-      <Form.Item name="mfo" label="МФО" rules={validateField('required')}>
+      <Form.Item name="mfo" label="МФО">
         <Input
           placeholder="Вкажіть МФО"
           maxLength={256}
