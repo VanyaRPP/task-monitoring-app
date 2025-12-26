@@ -12,6 +12,7 @@ import {
   Input,
   InputNumber,
   Select,
+  Select,
   Typography,
 } from 'antd'
 import { FC, useEffect } from 'react'
@@ -161,47 +162,46 @@ const RealEstateForm: FC<Props> = ({
         </Select>
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} required={false} />
-      <Form.Item name="discount" label="Знижка" rules={validateField('number')}>
+      <Form.Item
+        name="totalArea"
+        label="Площа (м²)"
+        rules={validateField('required')}
+      >
         <InputNumber
-          min={0}
-          max={100}
-          precision={2}
-          formatter={(value) => `${value}`}
-          placeholder="Вкажіть знижку"
+          parser={inputNumberParser}
+          placeholder="Вкажіть значення"
           className={s.formInput}
           disabled={!editable}
-          style={{ width: '100%' }}
         />
       </Form.Item>
-
-      {isMeterBasedServiceExist && (
-        <>
-          <Form.Item
-            name="totalArea"
-            label="Площа (м²)"
-            rules={validateField('required')}
-          >
-            <InputNumber
-              parser={inputNumberParser}
-              placeholder="Вкажіть значення"
-              className={s.formInput}
-              disabled={!editable}
-            />
-          </Form.Item>
-          <Form.Item
-            name="pricePerMeter"
-            label="Ціна (грн/м²)"
-            rules={validateField('required')}
-          >
-            <InputNumber
-              parser={inputNumberParser}
-              placeholder="Вкажіть значення"
-              className={s.formInput}
-              disabled={!editable}
-            />
-          </Form.Item>
-        </>
-      )}
+      <Form.Item
+        name="pricePerMeter"
+        label="Ціна (грн/м²)"
+        rules={validateField('required')}
+      >
+        <InputNumber
+          parser={inputNumberParser}
+          placeholder="Вкажіть значення"
+          className={s.formInput}
+          disabled={!editable}
+        />
+      </Form.Item>
+      <Form.Item
+        name="currency"
+        label="Валюта"
+        rules={validateField('required')}
+      >
+        <Select
+          placeholder="Оберіть валюту"
+          className={s.formInput}
+          disabled={!editable}
+        >
+          <Select.Option value="UAH">UAH</Select.Option>
+          <Select.Option value="USD">USD</Select.Option>
+          <Select.Option value="EUR">EUR</Select.Option>
+        </Select>
+      </Form.Item>
+      
       <CustomServicesCard
         form={form}
         disabled={!editable}
