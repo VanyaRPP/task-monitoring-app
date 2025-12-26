@@ -11,6 +11,7 @@ import {
   FormInstance,
   Input,
   InputNumber,
+  Select,
   Typography,
 } from 'antd'
 import { FC, useEffect } from 'react'
@@ -158,7 +159,22 @@ const RealEstateForm: FC<Props> = ({
           disabled={!editable}
         />
       </Form.Item>
-
+      <Form.Item
+        name="currency"
+        label="Валюта"
+        rules={validateField('required')}
+      >
+        <Select
+          placeholder="Оберіть валюту"
+          className={s.formInput}
+          disabled={!editable}
+        >
+          <Select.Option value="UAH">UAH</Select.Option>
+          <Select.Option value="USD">USD</Select.Option>
+          <Select.Option value="EUR">EUR</Select.Option>
+        </Select>
+      </Form.Item>
+      
       <CustomServicesCard
         form={form}
         disabled={!editable}
