@@ -2,7 +2,7 @@ import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { DividedSpace } from '@components/UI/DividedSpace'
-import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
+import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { Form, Input, Space, Typography, Tooltip } from 'antd'
@@ -128,9 +128,10 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  const {  company } = usePaymentContext()
 
   if (!editable) {
-    return <span>{toRoundFixed(price)} грн/кВт</span>
+    return <span>{currencyWithUnit(toRoundFixed(price), company, 'кВт')}</span>
   }
 
   return (
@@ -143,7 +144,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
         type="number"
         placeholder="Значення..."
         disabled={disabled}
-        suffix="грн/кВт"
+        suffix={currencyWithUnit('', company, 'кВт')}
       />
     </Form.Item>
   )
@@ -151,7 +152,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 
 export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-  const { service, payment } = usePaymentContext()
+  const { service, payment, company } = usePaymentContext()
   const losses = Form.useWatch(['invoice', ...name, 'losses'], form)
 
   const lastAmount = Form.useWatch(['invoice', ...name, 'lastAmount'], form)
@@ -169,7 +170,7 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
     )
   }, [form, name, amount, lastAmount, price, losses])
 
-  return <strong>{toRoundFixed(sum)} грн</strong>
+  return <strong>{currencyWithUnit(toRoundFixed(sum), company)} </strong>
 }
 
 const Electricity = {

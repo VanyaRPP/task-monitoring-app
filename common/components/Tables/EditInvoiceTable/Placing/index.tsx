@@ -6,7 +6,7 @@ import {
   InvoiceType,
 } from '@components/Tables/EditInvoiceTable'
 import { ServiceType } from '@utils/constants'
-import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
+import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 import { Button, Flex, Form, Input, Space, Tooltip, Typography } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
@@ -86,8 +86,8 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
       <Flex justify="space-between" align="center">
         {(editable || (!editable && isInitial)) && (
           <Typography.Text delete={!isInitial}>
-            {toRoundFixed(rentPrice)} грн +{' '}
-            {toRoundFixed(inflicionInvoice?.sum)} грн
+            {currencyWithUnit(toRoundFixed(rentPrice), company)} +{' '}
+            {currencyWithUnit(toRoundFixed(inflicionInvoice?.sum), company)} ={' '}
           </Typography.Text>
         )}
         {editable && !isInitial && (
@@ -200,10 +200,10 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 
   const suffix = useMemo(() => {
     return company?.inflicion ? (
-      <span>грн</span>
+      <span>{currencyWithUnit('', company)}</span>
     ) : (
       <span>
-        грн/м<sup>2</sup>
+        {currencyWithUnit('', company)}/м<sup>2</sup>
       </span>
     )
   }, [company])
@@ -251,7 +251,7 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
     )
   }, [form, name, price, amount, company])
 
-  return <strong>{toRoundFixed(sum)} грн</strong>
+  return <strong>{currencyWithUnit(toRoundFixed(sum), company)}</strong>
 }
 
 const Placing = {

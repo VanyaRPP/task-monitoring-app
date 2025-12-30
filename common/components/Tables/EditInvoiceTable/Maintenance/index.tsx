@@ -1,7 +1,7 @@
 import { dateToMonthYear } from '@assets/features/formatDate'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
-import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
+import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 import { Form, Input, Space, Typography } from 'antd'
 import { useEffect, useMemo } from 'react'
@@ -71,11 +71,12 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   const name = useMemo(() => toArray<string>(_name), [_name])
 
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  const { company } = usePaymentContext()
 
   if (!editable) {
     return (
       <span>
-        {toRoundFixed(price)} грн/м<sup>2</sup>
+        {toRoundFixed(price)} {currencyWithUnit('', company)}/м<sup>2</sup>
       </span>
     )
   }
@@ -92,7 +93,7 @@ export const Price: React.FC<InvoiceComponentProps> = ({
         disabled={disabled}
         suffix={
           <span>
-            грн/м<sup>2</sup>
+            {currencyWithUnit('', company)}/м<sup>2</sup>
           </span>
         }
       />
@@ -106,12 +107,13 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
   const sum = Form.useWatch(['invoice', ...name, 'sum'], form)
+  const { company } = usePaymentContext()
 
   useEffect(() => {
     form.setFieldValue(['invoice', ...name, 'sum'], +price * +amount)
   }, [form, name, price, amount])
 
-  return <strong>{toRoundFixed(sum)} грн</strong>
+  return <strong>{currencyWithUnit(toRoundFixed(sum), company)}</strong>
 }
 
 const Maintenance = {
