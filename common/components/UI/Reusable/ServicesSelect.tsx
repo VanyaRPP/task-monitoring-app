@@ -2,8 +2,11 @@ import { Form, FormInstance, Select, Button, Input, Space } from 'antd'
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons'
 import { CSSProperties, useMemo } from 'react'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
-import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
-import { group } from 'console'
+import {
+  useGetCustomServicesByDomainQuery,
+  useGetCustomServicesQuery,
+} from '@common/api/customServicesApi/customServices.api'
+import { defaultServices } from '@utils/constants'
 
 export interface ServicesSelectProps {
   domainId?: string
@@ -27,7 +30,12 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
     isError,
   } = useGetAllServicesQuery({ domainId })
 
-  const { data: customServices } = useGetCustomServicesQuery({})
+  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
+    { domainId: [domainId] },
+    { skip: !domainId }
+  )
+
+  const { data: allCustomServices } = useGetCustomServicesQuery({})
 
   const servicesList = useMemo(() => {
     if (!servicesData) return []
@@ -38,16 +46,50 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   }, [servicesData])
 
   const services = useMemo(() => {
-    return customServices?.data
-      .slice()
-      .sort((a, b) => a?.name.localeCompare(b?.name))
-  }, [servicesList, customServices])
+    if (domainId && customDomainServices?.data) {
+      const allServices = customDomainServices.data.flatMap(
+        (group) => group.services || []
+      )
+      return allServices
+        .slice()
+        .sort((a, b) => a?.name?.localeCompare(b?.name || '') || 0)
+    }
+
+    if (!domainId && allCustomServices?.data) {
+      const defaultServicesList = allCustomServices.data
+        .filter((service) => {
+          const serviceId = String(service._id)
+          return defaultServices.includes(serviceId)
+        })
+        .map((service) => ({
+          _id: service._id,
+          name: service.name || 'Без назви',
+        }))
+      return defaultServicesList
+        .slice()
+        .sort((a, b) => a?.name?.localeCompare(b?.name || '') || 0)
+    }
+
+    return []
+  }, [domainId, customDomainServices, allCustomServices])
 
   const options = useMemo(() => {
-    return services?.map((service) => ({
-      value: service._id,
-      label: service?.name,
-    }))
+    if (!services || services.length === 0) return []
+    
+    const validServices = services.filter((service) => {
+      const hasId = service?._id !== undefined && service?._id !== null
+      const hasName = service?.name !== undefined && service?.name !== null && service?.name !== ''
+      return hasId && hasName
+    })
+    
+    return validServices.map((service) => {
+      const serviceId = String(service._id)
+      const serviceName = service.name?.trim() || serviceId
+      return {
+        value: serviceId,
+        label: serviceName,
+      }
+    })
   }, [services])
 
   const handleChange = (selectedValues: string[]) => {
