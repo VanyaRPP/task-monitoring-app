@@ -31,7 +31,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
   } = useGetAllServicesQuery({ domainId })
 
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
-    { domainId },
+    { domainId: [domainId] },
     { skip: !domainId }
   )
 

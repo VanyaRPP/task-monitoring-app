@@ -22,7 +22,7 @@ export interface IGetCustomServicesRequest {
 }
 
 export interface IGetCustomServicesByDomainRequest {
-  domainId?: string
+  domainId?: string[]
 }
 
 export interface IGetCustomServicesResponse {
