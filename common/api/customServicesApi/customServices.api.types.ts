@@ -10,11 +10,11 @@ export interface ICustomService {
 export interface ICustomDomainService {
   groupName: string
   services: {
-    _id: ObjectId
+    _id: ObjectId | string
     name: string
     fieldName: string
-    __v: number
-  }
+    __v?: number
+  }[]
 }
 
 export interface IGetCustomServicesRequest {
