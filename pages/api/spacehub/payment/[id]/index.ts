@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
+import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
+import Payment from '@common/modules/models/Payment'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import Domain from '@modules/models/Domain'
-import Payment from '@modules/models/Payment'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -100,6 +101,25 @@ export default async function handler(
 
     case 'PATCH':
       try {
+        const current = await Payment.findById(req.query.id)
+        if (!current) throw new Error('Payment not found')
+        await PaymentChangeLog.create({
+          paymentId: current._id,
+          date: new Date(),
+          reason: 'edit-payment',
+          actorId: user?._id,
+          actorEmail: user?.email,
+          invoiceData: {
+            invoiceNumber: current.invoiceNumber,
+            invoiceCreationDate: current.invoiceCreationDate,
+            invoice: current.invoice,
+            provider: current.provider,
+            reciever: current.reciever,
+            generalSum: current.generalSum,
+            description: current.description,
+            type: current.type,
+          },
+        })
         if (isDomainAdmin) {
           const domain = await Domain.findOne({
             _id: req.body.domain,
@@ -112,6 +132,7 @@ export default async function handler(
               req.body,
               { new: true }
             )
+
             return res.status(200).json({ success: true, data: response })
           }
         }
@@ -122,6 +143,7 @@ export default async function handler(
             req.body,
             { new: true }
           )
+
           const description =
             response.type === 'debit'
               ? `Інвойс №${response.invoiceNumber}`
@@ -139,11 +161,12 @@ export default async function handler(
             req.query.id as string,
             profitObject
           )
+
           return res.status(200).json({ success: true, data: response })
         }
 
         return res.status(400).json({ success: false, message: 'not allowed' })
-      } catch (error) {
+      } catch (error: any) {
         return res.status(400).json({ success: false, error: error.message })
       }
   }
