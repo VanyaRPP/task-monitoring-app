@@ -9,15 +9,27 @@ start()
 
 async function checkTransaction({ transaction }) {
   try {
-    const allPayments = await Payment.find({
+    let allPayments = await Payment.find({
       $and: [
-        { 'transaction.AUT_CNTR_ACC': transaction.AUT_CNTR_ACC },
-        { 'transaction.AUT_CNTR_NAM': transaction.AUT_CNTR_NAM },
-        { 'transaction.AUT_CNTR_MFO': transaction.AUT_CNTR_MFO },
+        { 'receiver.AUT_CNTR_ACC': transaction.AUT_CNTR_ACC },
+        { 'receiver.AUT_CNTR_NAM': transaction.AUT_CNTR_NAM },
+        { 'receiver.AUT_CNTR_MFO': transaction.AUT_CNTR_MFO },
         { 'transaction.Description': transaction.OSND },
         { generalSum: +transaction.SUM },
       ],
     })
+    
+    if (!allPayments.length) {
+      allPayments = await Payment.find({
+        $and: [
+          { 'transaction.AUT_CNTR_ACC': transaction.AUT_CNTR_ACC },
+          { 'transaction.AUT_CNTR_NAM': transaction.AUT_CNTR_NAM },
+          { 'transaction.AUT_CNTR_MFO': transaction.AUT_CNTR_MFO },
+          { 'transaction.Description': transaction.OSND },
+          { generalSum: +transaction.SUM },
+        ],
+      })
+    }
 
     return {
       isMatchingPayment: allPayments.length > 0,
