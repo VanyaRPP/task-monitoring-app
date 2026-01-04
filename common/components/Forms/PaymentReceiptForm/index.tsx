@@ -65,15 +65,15 @@ const PaymentReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
             <div className={s.transactionDetails}>
               <div>
                 <strong>Рахунок платника:</strong>
-                <span>{newData.reciever.AUT_CNTR_ACC}</span>
+                <span>{newData.reciever.AUT_CNTR_ACC ?? newData.transaction.AUT_CNTR_ACC}</span>
               </div>
               <div>
                 <strong>Назва платника:</strong>
-                <span>{newData.reciever.AUT_CNTR_NAM}</span>
+                <span>{newData.reciever.AUT_CNTR_NAM ?? newData.transaction.AUT_CNTR_NAM}</span>
               </div>
               <div>
                 <strong>МФО банку:</strong>
-                <span>{newData.reciever.AUT_CNTR_MFO}</span>
+                <span>{newData.reciever.AUT_CNTR_MFO ?? newData.transaction.AUT_CNTR_MFO}</span>
               </div>
               <div>
                 <strong>Призначення платежу:</strong>
