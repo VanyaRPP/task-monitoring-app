@@ -100,9 +100,9 @@ const AddPaymentModal: FC<Props> = ({
   const { provider, reciever } = getPaymentProviderAndReciever(company)
 
   const transaction = {
-    AUT_CNTR_ACC: paymentData?.reciever?.AUT_CNTR_ACC || '',
-    AUT_CNTR_NAM: paymentData?.reciever?.AUT_CNTR_NAM || '',
-    AUT_CNTR_MFO: paymentData?.reciever?.AUT_CNTR_MFO || '',
+    AUT_CNTR_ACC: paymentData?.transaction?.AUT_CNTR_ACC || '',
+    AUT_CNTR_NAM: paymentData?.transaction?.AUT_CNTR_NAM || '',
+    AUT_CNTR_MFO: paymentData?.transaction?.AUT_CNTR_MFO || '',
     Description: paymentData?.transaction?.Description || '',
   }
 
