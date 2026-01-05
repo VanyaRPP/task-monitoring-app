@@ -106,7 +106,7 @@ const RealEstateForm: FC<Props> = ({
           <Input disabled />
         </Form.Item>
       ) : (
-        <AddressesSelect form={form} />
+        <AddressesSelect form={form} key={currentRealEstate?._id || Date.now()} edit={editable} />
       )}
       <Form.Item
         name="companyName"
