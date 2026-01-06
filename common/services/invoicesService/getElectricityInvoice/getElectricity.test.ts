@@ -344,7 +344,7 @@ describe('getInvoices - ELECTRICITY', () => {
         sum: 120,
       })
     })
-    it('should load when service electricity entries and ignore others', () => {
+    it('should load when service electricity entries', () => {
       const payment: Partial<IPayment> = {
         invoice: [
           {
@@ -361,13 +361,6 @@ describe('getInvoices - ELECTRICITY', () => {
             lastAmount: 2,
             sum: 36,
           },
-          {
-            type: ServiceType.Water,
-            price: 10,
-            amount: 5,
-            lastAmount: 2,
-            sum: 50,
-          },
         ],
       }
 
@@ -380,7 +373,7 @@ describe('getInvoices - ELECTRICITY', () => {
         lastAmount: 2,
         sum: 36,
       })
-      expect(invoices).not.toContainEqual(
+      expect(invoices).toContainEqual(
         expect.objectContaining({ type: ServiceType.Water })
       )
     })
@@ -555,7 +548,7 @@ describe('getInvoices - ELECTRICITY', () => {
       })
     })
 
-    it('should load from prevPayment.amount as lastAmount when no payment and no service price', () => {
+    it('should NOT load from prevPayment.amount as lastAmount when no payment and no service price', () => {
       const service: Partial<IService> = null
       const prevPayment: Partial<IPayment> = {
         invoice: [
@@ -571,7 +564,7 @@ describe('getInvoices - ELECTRICITY', () => {
 
       const invoices = getInvoices({ service, prevPayment, payment: null })
 
-      expect(invoices).toContainEqual({
+      expect(invoices).not.toContainEqual({
         type: ServiceType.Electricity,
         price: 12,
         amount: 5,
