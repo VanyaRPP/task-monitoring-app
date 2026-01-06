@@ -11,17 +11,28 @@ export const getWaterPartInvoice = ({
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (Object.keys(currInvoicesCollection).length > 0) {
-    if (!currInvoicesCollection[ServiceType.WaterPart]) {
-      return
-    }
-
+  if (currInvoicesCollection?.[ServiceType.WaterPart]) {
     const invoice = currInvoicesCollection[ServiceType.WaterPart]
 
     return {
       type: invoice.type,
       price: +toRoundFixed(+invoice.sum || +invoice.price),
       sum: +toRoundFixed(+invoice.sum || +invoice.price),
+    }
+  }
+
+  const hasCustomServices =
+    getPriceFromCustomServices(company?.customServices, ServiceType.Water) != null ||
+    getPriceFromCustomServices(service?.customServices, ServiceType.Water) != null ||
+    getPriceFromCustomServices(company?.customServices, ServiceType.WaterPart) != null ||
+    getPriceFromCustomServices(service?.customServices, ServiceType.WaterPart) != null
+
+  const prevInvoice = prevInvoicesCollection?.[ServiceType.WaterPart]
+  if (prevInvoice && hasCustomServices) {
+    return {
+      type: prevInvoice.type,
+      price: +toRoundFixed(prevInvoice.price),
+      sum: +toRoundFixed(prevInvoice.sum),
     }
   }
 
@@ -47,4 +58,5 @@ export const getWaterPartInvoice = ({
       sum: +toRoundFixed(price),
     }
   }
+  return
 }

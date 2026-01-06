@@ -1,8 +1,7 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
-import { toRoundFixed, isEmpty } from '@utils/helpers'
+import { toRoundFixed, isEmpty, getPriceFromCustomServices } from '@utils/helpers'
 import { IGetInvoiceByTypeProps } from '../types'
 import { ServiceType } from '@utils/constants'
-import { getPriceFromCustomServices } from '@utils/helpers'
 
 export const getPlacingInvoice = ({
   company,

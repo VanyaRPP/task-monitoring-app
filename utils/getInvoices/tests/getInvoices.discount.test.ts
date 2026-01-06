@@ -3,7 +3,7 @@ import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { expect } from '@jest/globals'
 import { ServiceType } from '@utils/constants'
-import { getInvoices } from '@utils/getInvoices'
+import { getInvoices } from '@common/services/invoicesService'
 
 describe('getInvoices - DISCOUNT', () => {
   describe('props: { company }', () => {

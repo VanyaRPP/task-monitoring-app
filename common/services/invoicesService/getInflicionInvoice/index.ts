@@ -1,8 +1,7 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
-import { toRoundFixed, isEmpty } from '@utils/helpers'
+import { toRoundFixed, isEmpty, getPriceFromCustomServices } from '@utils/helpers'
 import { IGetInvoiceByTypeProps } from '../types'
 import { ServiceType } from '@utils/constants'
-import { getPriceFromCustomServices } from '@utils/helpers'
 
 export const getInflicionInvoice = ({
   company,
@@ -11,43 +10,44 @@ export const getInflicionInvoice = ({
   currInvoicesCollection,
   prevInvoicesCollection,
 }: IGetInvoiceByTypeProps): IPaymentField | undefined => {
-  if (Object.keys(currInvoicesCollection).length > 0) {
-    if (!currInvoicesCollection[ServiceType.Inflicion]) {
-      return
-    }
 
-    const invoice = currInvoicesCollection[ServiceType.Inflicion]
-
+  const invoice = currInvoicesCollection?.[ServiceType.Inflicion]
+  if (invoice) {
     return {
       type: invoice.type,
-      price: +toRoundFixed(+invoice.sum || +invoice.price),
-      sum: +toRoundFixed(+invoice.sum || +invoice.price),
+      price: +toRoundFixed(invoice.sum ?? +invoice.price),
+      sum: +toRoundFixed(invoice.sum ?? +invoice.price),
     }
   }
+  const prevPlacing = prevInvoicesCollection?.[ServiceType.Placing]
+  const base =
+    prevPlacing?.sum ??
+    company?.totalArea * (service?.rentPrice ?? 0)
 
-  const inflicionCompany = getPriceFromCustomServices(company?.customServices, ServiceType.Inflicion) 
-    ?? getPriceFromCustomServices(service?.customServices, ServiceType.Inflicion)
-    ?? company?.inflicion
+  const inflicionEnabled =
+    getPriceFromCustomServices(company?.customServices, ServiceType.Inflicion) ??
+    company?.inflicion
 
-  if (inflicionCompany) {
-    if (isEmpty(prevService?.inflicionPrice)) {
-      return {
-        type: ServiceType.Inflicion,
-        price: 0,
-        sum: 0,
-      }
-    }
-    const prevPlacing = prevInvoicesCollection[ServiceType.Placing]
-    const price =
-      prevPlacing?.sum ||
-      company.totalArea *
-        Number(inflicionCompany ?? 0) *
-        (Math.max(prevService?.inflicionPrice - 100, 0) / 100)
+  if (!inflicionEnabled) return
 
+  const prevInflicionPrice =
+    getPriceFromCustomServices(prevService?.customServices, ServiceType.Inflicion) ??
+    prevService?.inflicionPrice
+
+  const price =
+    base * (Math.max(prevInflicionPrice - 100, 0) / 100)
+
+  if (isEmpty(prevInflicionPrice)) {
     return {
       type: ServiceType.Inflicion,
       price: +toRoundFixed(price),
       sum: +toRoundFixed(price),
     }
+  }
+
+  return {
+    type: ServiceType.Inflicion,
+    price: +toRoundFixed(price),
+    sum: +toRoundFixed(price),
   }
 }
