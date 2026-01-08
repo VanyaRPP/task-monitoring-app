@@ -18,6 +18,22 @@ export default async function handler(
     res
   )
 
+  const domainId = req.query.domainId
+
+  if (
+    !domainId ||
+    typeof domainId !== 'string' ||
+    domainId.trim().length === 0 ||
+    domainId === 'null' ||
+    domainId === 'undefined' ||
+    domainId === '0'
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid domainId',
+    })
+  }
+
   switch (req.method) {
     case 'POST':
       try {
@@ -74,7 +90,7 @@ export default async function handler(
         if (isUser) {
           return res.status(400).json({
             success: false,
-            message: 'access denied',
+            message: 'Not allowed',
           })
         }
 

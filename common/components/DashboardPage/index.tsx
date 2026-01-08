@@ -203,9 +203,14 @@ const Dashboard: React.FC = () => {
     })
   }, [])
 
+  const isWidgetKey = (key: string): key is WidgetKey => {
+    return ALL_WIDGETS.includes(key as WidgetKey)
+  }
+
   const renderedLayout = useMemo(
-      () => layout.filter((item) => (visibleWidgets as readonly string[]).includes(item.i)),
-      [layout, visibleWidgets]
+      () => layout.filter((item) => isWidgetKey(item.i) && visibleWidgets.includes(item.i) &&
+        !hiddenWidget.includes(item.i)),
+      [layout, visibleWidgets, hiddenWidget]
     )
 
   const handleCloseTour = () => {
@@ -283,10 +288,7 @@ const Dashboard: React.FC = () => {
               key={item.i}
               data-grid={item}
               className={isEditMode ? s.gridItem : ''}
-              id={item.i}
-              style={{
-                display: hiddenWidget.includes(item.i as WidgetKey) ? 'none' : 'block',
-              }}
+              id={item.i}            
             >
             <WidgetWrapper
               id={item.i}

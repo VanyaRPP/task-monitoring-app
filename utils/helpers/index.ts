@@ -299,9 +299,6 @@ export const getPaymentProviderAndReciever = (company) => {
     companyName: company?.companyName,
     adminEmails: company?.adminEmails,
     description: company?.description,
-    AUT_CNTR_ACC: company?.AUT_CNTR_ACC || '',
-    AUT_CNTR_NAM: company?.AUT_CNTR_MFO || '',
-    AUT_CNTR_MFO: company?.AUT_CNTR_NAM || '',
   }
 
   return { provider, reciever }

@@ -87,6 +87,10 @@ const RealEstateForm: FC<Props> = ({
     )
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
 
+  const isMeterBasedServiceExist = 
+    isServiceExist('placingPrice') ||
+    isServiceExist('rentPrice') 
+
   return (
     <Form
       form={form}
@@ -135,6 +139,8 @@ const RealEstateForm: FC<Props> = ({
         />
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} required={false} />
+      {isMeterBasedServiceExist && (
+        <>
       <Form.Item
         name="totalArea"
         label="Площа (м²)"
