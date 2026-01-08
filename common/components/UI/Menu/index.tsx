@@ -29,12 +29,20 @@ export const Menu: React.FC<MenuProps> = (props) => {
 
   useKeyCode('hellodev', handleSequenceDetected, 2000)
 
-  const isDomainAdmin = useMemo(() => {
-    return user?.roles?.includes(Roles.DOMAIN_ADMIN)
+  const roles = useMemo<string[]>(() => {
+    const r = (user as any)?.roles ?? (user as any)?.role
+    return Array.isArray(r) ? r : r ? [r] : []
   }, [user])
-  const isGlobalAdmin = useMemo(() => {
-    return user?.roles?.includes(Roles.GLOBAL_ADMIN)
-  }, [user])
+
+  const isDomainAdmin = useMemo(
+    () => roles.includes(Roles.DOMAIN_ADMIN),
+    [roles]
+  )
+
+  const isGlobalAdmin = useMemo(
+    () => roles.includes(Roles.GLOBAL_ADMIN),
+    [roles]
+  )
 
   const items = useMemo<AntdMenuProps['items']>(() => {
     return [
@@ -70,13 +78,13 @@ export const Menu: React.FC<MenuProps> = (props) => {
             key: 'bank',
             type: 'item',
             label: <Link href={AppRoutes.BANK}>Банк</Link>,
-            hidden: !isAdminCheck(user?.roles),
+            hidden: !isAdminCheck(roles),
           },
           {
             key: AppRoutes.PROFIT,
             type: 'item',
             label: <Link href={AppRoutes.PROFIT}>Прибутки</Link>,
-            hidden: !isAdminCheck(user?.roles),
+            hidden: !isAdminCheck(roles),
           },
         ].filter(({ hidden }) => !hidden),
       },
@@ -89,7 +97,12 @@ export const Menu: React.FC<MenuProps> = (props) => {
           {
             key: AppRoutes.INDEX,
             type: 'item',
-            label: <Link href={AppRoutes.INDEX}>Всі таблиці</Link>,
+            label: <Link href={AppRoutes.INDEX}>Головна сторінка</Link>,
+          },
+          {
+            key: AppRoutes.TABLES,
+            type: 'item',
+            label: <Link href={AppRoutes.TABLES}>Всі таблиці</Link>,
           },
           {
             key: AppRoutes.STREETS,
@@ -138,10 +151,16 @@ export const Menu: React.FC<MenuProps> = (props) => {
             label: <Link href={AppRoutes.SETTINGS}>Налаштування</Link>,
             hidden: !isGlobalAdmin,
           },
+          {
+            key: AppRoutes.USERS,
+            type: 'item',
+            label: <Link href={AppRoutes.USERS}>Користувачі</Link>,
+            hidden: !isGlobalAdmin,
+          },
         ].filter(({ hidden }) => !hidden),
       },
     ] as AntdMenuProps['items']
-  }, [router, session, isGlobalAdmin, isDomainAdmin, isDevMode])
+  }, [isGlobalAdmin, isDomainAdmin, user?.roles, session?.user?.name])
 
   return (
     <AntdMenu
@@ -152,4 +171,4 @@ export const Menu: React.FC<MenuProps> = (props) => {
       style={{ paddingBottom: '50px' }}
     />
   )
-}
+} 

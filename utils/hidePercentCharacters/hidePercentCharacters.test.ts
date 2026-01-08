@@ -1,19 +1,18 @@
 import { hidePercentCharacters } from './hidePercentCharacters'
 
 describe('hidePercentCharacters', () => {
-  it('should hide first and last 5% of characters, with a minimum of 3 visible characters', () => {
+  it('should hide characters based on 5% rule with minimum 3 visible', () => {
     const cases = [
-      { input: 'abcdefghij', expected: 'abc****ghi' }, // 10 characters, 5% = 0.5 -> 1 character hidden
-      { input: 'abcdefghijklm', expected: 'ab***ghijklm' }, // 13 characters, 5% = 0.65 -> 1 character hidden
-      { input: 'abcdefghijklmnopqr', expected: 'abc*****opqr' }, // 18 characters, 5% = 0.9 -> 1 character hidden
-      { input: 'abcdefghijklmnop', expected: 'abc*****nop' }, // 16 characters, 5% = 0.8 -> 1 character hidden
-      { input: 'abcdefghij', expected: 'abc****ghi' }, // 10 characters, 5% = 0.5 -> 1 character hidden
-      { input: 'ab', expected: 'ab' }, // Less than 6 characters
-      { input: 'abc', expected: 'abc' }, // Exactly 3 characters
-      { input: 'abcdefghijklmno', expected: 'abc****lmno' }, // 15 characters, 5% = 0.75 -> 1 character hidden
-      { input: 'a', expected: 'a' }, // Single character
-      { input: 'abcdef', expected: 'ab***ef' }, // 6 characters, 5% = 0.3 -> 1 character hidden
-      { input: 'abcdefg', expected: 'ab****g' }, // 7 characters, 5% = 0.35 -> 1 character hidden
+      { input: 'abcdefghij', expected: 'abc****hij' },               // 10 chars → hide 1 from start/end → show 3+3
+      { input: 'abcdefghijklm', expected: 'abc*******klm' },         // 13 chars → hide 1 → visibleStart=3, visibleEnd=10
+      { input: 'abcdefghijklmnopqr', expected: 'abc************pqr' }, // 18 chars → long middle mask, keep first/last 3
+      { input: 'abcdefghijklmnop', expected: 'abc**********nop' },     // 16 chars → hide 1, leave 3 first + 3 last
+      { input: 'abcdefghijklmno', expected: 'abc*********mno' },       // 15 chars → consistent masking
+      { input: 'abcdefg', expected: 'abc*efg' },                      // 7 chars → slice(0,3) + mask(1) + slice(4)
+      { input: 'abcdef', expected: 'abcdef' },                        // <= 2*minVisible=6 → return same
+      { input: 'abc', expected: 'abc' },                              // exactly 3 chars → untouched
+      { input: 'ab', expected: 'ab' },                                // less than min visible → untouched
+      { input: 'a', expected: 'a' },                                  // single char → untouched
     ]
 
     cases.forEach(({ input, expected }) => {

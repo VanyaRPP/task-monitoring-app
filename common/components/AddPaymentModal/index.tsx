@@ -191,20 +191,27 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
-  if (!preview || paymentData?.type === Operations.Debit) {
-    items.push({
-      key: '4',
-      label: 'Довідка',
-      disabled: !shouldTabsEnabled,
-      children: (
-        <ReceiptForm
-          currPayment={currPayment}
-          paymentData={paymentData}
-          paymentActions={paymentActions}
-        />
-      ),
-    })
-  }
+  const operation = Form.useWatch('operation', form)
+
+const effectiveOperation = preview
+  ? paymentData?.type
+  : operation
+
+  if (effectiveOperation === Operations.Debit) {
+  items.push({
+    key: '4',
+    label: 'Довідка',
+    disabled: !shouldTabsEnabled,
+    children: (
+      <ReceiptForm
+        currPayment={currPayment}
+        paymentData={paymentData}
+        paymentActions={paymentActions}
+      />
+    ),
+  })
+}
+
 
   const handleChange = () => {
     setSaved(false)

@@ -5,6 +5,7 @@ import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
 import Head from 'next/head'
 import DashboardPage from '../common/components/DashboardPage'
+import DashboardLanding from '../common/components/Pages/DashboardLanding'
 import HomePage from '../common/components/HomePage/index'
 import { authOptions } from './api/auth/[...nextauth]'
 
@@ -26,11 +27,11 @@ const Home: React.FC<{
             if (path === AppRoutes.INDEX) handleNavigateHome()
           }}
         >
-          <DashboardPage />
+          <DashboardLanding /> 
         </MainLayout>
       ) : (
         <MainLayout simple>
-          <HomePage />
+          <HomePage /> 
         </MainLayout>
       )}
     </>

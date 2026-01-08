@@ -3,7 +3,8 @@ import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography } from 'antd'
+import { Form, Input, Space, Typography, Button, Tooltip } from 'antd'
+import { ReloadOutlined } from '@ant-design/icons'
 import { useEffect, useMemo } from 'react'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
@@ -12,14 +13,37 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service } = usePaymentContext()
+  const { company, service } = usePaymentContext()
+  const gardagePrice = service?.garbageCollectorPrice * (company?.rentPart / 100)
 
   return (
-    <Space direction="vertical" size={0}>
-      <Typography.Text>Вивіз ТПВ</Typography.Text>
-      <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-        {toFirstUpperCase(dateToMonthYear(service?.date))}
-      </Typography.Text>
+    <Space
+      direction="horizontal"
+      style={{ justifyContent: 'space-between', width: '100%' }}
+    >
+      <Space direction="vertical" size={0}>
+        <Typography.Text>Вивіз ТПВ</Typography.Text>
+        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+          {toFirstUpperCase(dateToMonthYear(service?.date))}
+        </Typography.Text>
+      </Space>
+      {
+        editable &&
+        (gardagePrice !==
+          Form.useWatch(['invoice', ...toArray<string>(_name), 'price'], form)) && (
+          <Tooltip title="Відновити значення">
+            <Button
+              onClick={() => {
+                form.setFieldValue(
+                  ['invoice', ...toArray<string>(_name), 'price'],
+                  gardagePrice
+                )
+              }}
+              icon={<ReloadOutlined />}
+            />
+          </Tooltip>
+        )
+      }
     </Space>
   )
 }

@@ -2,7 +2,6 @@ import { PlusOutlined, SelectOutlined, DeleteOutlined } from '@ant-design/icons'
 import { Button, Space } from 'antd'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddServiceModal from '@components/AddServiceModal'
@@ -13,10 +12,7 @@ import {
 import { AppRoutes } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import s from './style.module.scss'
-import {
-  useGetAddressFiltersQuery,
-  useGetDomainFiltersQuery,
-} from '@common/api/filterApi/filter.api'
+import React from 'react'
 
 export interface Props {
   showAddButton?: boolean
@@ -32,6 +28,9 @@ export interface Props {
   enableServiceButton?: boolean
   handleDeleteServices?: () => void
   selectedServices: IService[]
+	user: any
+	domainsFilter: any
+	streetsFilter: any
 }
 
 const ServicesHeader: React.FC<Props> = ({
@@ -45,16 +44,12 @@ const ServicesHeader: React.FC<Props> = ({
   enableServiceButton = false,
   handleDeleteServices,
   selectedServices,
+	user,
+	domainsFilter,
+	streetsFilter,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { data: user } = useGetCurrentUserQuery()
-  const { data: domainsFilter } = useGetDomainFiltersQuery({
-    streets: filter?.street,
-  })
-  const { data: streetsFilter } = useGetAddressFiltersQuery({
-    domains: filter?.domain,
-  })
   const openModal = () => setIsModalOpen(true)
   const closeModal = () => {
     setIsModalOpen(false)
@@ -119,4 +114,4 @@ const ServicesHeader: React.FC<Props> = ({
   )
 }
 
-export default ServicesHeader
+export default React.memo(ServicesHeader)

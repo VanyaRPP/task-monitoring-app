@@ -12,6 +12,7 @@ import DomainForm from './DomainForm'
 import Modal from '../../ModalWindow'
 import { current } from '@reduxjs/toolkit'
 import { defaultServices } from '@utils/constants'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 interface Props {
   currentDomain: IExtendedDomain
@@ -31,11 +32,13 @@ const DomainModal: FC<Props> = ({
   const [addDomainEstate] = useAddDomainMutation()
   const [editDomain] = useEditDomainMutation()
   const domains = allDomains
+  const { data: domains } = useGetDomainsQuery({})
+  const { data: user } = useGetCurrentUserQuery()
 
   useEffect(() => {
     const initialValues = {
       name: currentDomain?.name || '',
-      adminEmails: currentDomain?.adminEmails || [],
+      adminEmails: currentDomain?.adminEmails || (user?.email ?  [user.email] : []),
       streets:
         currentDomain?.streets.map((i: any) => ({
           value: i._id,
@@ -55,7 +58,7 @@ const DomainModal: FC<Props> = ({
       ],
     }
     form.setFieldsValue(initialValues)
-  }, [currentDomain, form])
+  }, [currentDomain, form, user])
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()

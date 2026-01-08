@@ -2,19 +2,13 @@ import {
   useGetCustomServicesQuery,
   useCreateCustomServiceMutation,
 } from '@common/api/customServicesApi/customServices.api'
-import { CloseOutlined, SaveOutlined } from '@ant-design/icons'
 import {
   Button,
-  Card,
-  Form,
   FormInstance,
-  Input,
-  Tooltip,
   message,
-  Popconfirm,
-  Space,
 } from 'antd'
 import React, { FC, useState } from 'react'
+import DomainModal, { ServiceItem } from './DomainModal'
 
 interface Props {
   form: FormInstance
@@ -32,9 +26,8 @@ const DomainsServices: FC<Props> = ({
   onCustomServicesChange,
 }) => {
   const [createCustomService] = useCreateCustomServiceMutation()
-
-  const [customName, setCustomName] = useState('')
-  const [isPopOpen, setIsPopOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const { data: customServicesData } = useGetCustomServicesQuery({})
 
   const handleSave = async (fieldKey: number) => {
     const service = form.getFieldValue(['domainServices', fieldKey])
@@ -68,84 +61,104 @@ const DomainsServices: FC<Props> = ({
     form.setFieldsValue({ domainServices: updatedServices })
   }
 
-  const handleAddCustomService = async () => {
-    if (!customName) {
-      message.warning('Введіть назву послуги')
-      return
-    }
-
-    try {
-      const result = await createCustomService({ name: customName }).unwrap()
-
-      const current = form.getFieldValue('domainServices') || []
-      form.setFieldsValue({
-        domainServices: [
-          ...current,
-          { name: customName, _id: result.data._id },
-        ],
+  const handleOpenModal = () => {
+    setIsModalOpen(true)
+  }
+  
+  const handleSaveServices = (servicesByGroup: { [groupName: string]: string[] }) => {
+    if (!customServicesData) return
+    const allServices = 'data' in customServicesData 
+      ? customServicesData.data 
+      : customServicesData
+    
+    const customServices = Object.entries(servicesByGroup).map(([groupName, services]) => ({
+      groupName,
+      services
+    }))
+ 
+    form.setFieldsValue({
+      customServices: customServices
+    })
+    
+    const allSelectedServices: any[] = []
+    Object.values(servicesByGroup).forEach(groupServices => {
+      groupServices.forEach(serviceId => {
+        const service = allServices.find((s: any) => s._id === serviceId)
+        if (service && !allSelectedServices.find(s => s._id === serviceId)) {
+          allSelectedServices.push(service)
+        }
       })
+    })
+    
+    form.setFieldsValue({
+      domainServices: allSelectedServices.map((service: any) => ({
+        _id: service._id,
+        name: service.name,
+      })),
+    })
+    
+    onCustomServicesChange(allSelectedServices.map((service: any) => ({
+      _id: service._id,
+      name: service.name,
+    })))
 
-      message.success('Кастомна послуга додана')
-      setCustomName('')
-      setIsPopOpen(false)
-    } catch (err: any) {
-      console.error('Помилка створення послуги:', err)
+    setIsModalOpen(false)
+    message.success('Зміни збережено')
+  }
+  
+  const getServicesData = (): ServiceItem[] => {
+    if (!customServicesData) return []
 
-      const isConflict =
-        err?.status === 409 ||
-        err?.originalStatus === 409 ||
-        err?.data?.message?.toLowerCase().includes('вже існує')
+    const allServices = 'data' in customServicesData 
+      ? customServicesData.data 
+      : customServicesData
 
-      if (isConflict) {
-        message.warning('Послуга з такою назвою вже існує')
-      } else {
-        message.error('Помилка при додаванні послуги')
+    return allServices.map((service: any) => ({
+      key: service._id,
+      title: service.name,
+    }))
+  }
+  
+  const getServiceGroups = () => {
+    const customServices = form.getFieldValue('customServices') || []
+    const groups = customServices.map((group: any, index: number) => {
+      const groupName = group?.groupName || `Група ${index + 1}`
+      const selectedServices = group?.services || []
+      
+      return {
+        groupName,
+        services: selectedServices
       }
-    }
+    })
+    
+    return groups
+  }
+
+  const handleCreateCustomService = async (name: string) => {
+    const result = await createCustomService({ name }).unwrap()
+    return result
   }
 
   return (
     <>
       {editable && (
-        <Popconfirm
-          title={
-            <>
-              <Space
-                direction="vertical"
-                style={{ display: 'flex', minWidth: 300 }}
-              >
-                <Input
-                  placeholder="Введіть вашу послугу"
-                  value={customName}
-                  onChange={(e) => setCustomName(e.target.value)}
-                  autoFocus
-                />
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    gap: 10,
-                    marginTop: 10,
-                  }}
-                >
-                  <Button onClick={() => setIsPopOpen(false)}>Скасувати</Button>
-                  <Button type="primary" onClick={handleAddCustomService}>
-                    Підтвердити
-                  </Button>
-                </div>
-              </Space>
-            </>
-          }
-          open={isPopOpen}
-          onOpenChange={setIsPopOpen}
-          icon={null}
-          showCancel={false}
-          okButtonProps={{ style: { display: 'none' } }}
-        >
-          <Button type="dashed" style={{ marginBottom: 10 }} block>
-            + Додати послугу
+        <>
+          <Button
+            style={{ marginBottom: 10 }} 
+            block
+            onClick={handleOpenModal}
+          >
+            Мої Послуги
           </Button>
-        </Popconfirm>
+          <DomainModal
+            open={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            data={getServicesData()}
+            serviceGroups={getServiceGroups()}
+            onSave={handleSaveServices}
+            onCreateCustomService={handleCreateCustomService}
+          />
+        </>
       )}
     </>
   )

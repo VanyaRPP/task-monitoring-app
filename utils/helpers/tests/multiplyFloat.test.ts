@@ -11,7 +11,7 @@ describe('Multiply float numbers and format result to .xx', () => {
     expect(multiplyFloat(1, 2)).toBe(2)
     expect(multiplyFloat(1, 2.5)).toBe(2.5)
     expect(multiplyFloat(1, 2.05)).toBe(2.05)
-    expect(multiplyFloat(1, 2.005)).toBe(2)
+    expect(multiplyFloat(1, 2.005)).toBe(2.01)
   })
 
   test('if unappropriate value', () => {

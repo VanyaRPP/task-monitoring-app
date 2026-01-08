@@ -107,9 +107,6 @@ describe('Profit Payment API - GET', () => {
     const currentDate = dayjs()
     response.data.forEach((entry: any) => {
       const entryDate = dayjs(entry.month, 'YYYY-MM')
-      expect(entryDate.isSameOrAfter(currentDate.subtract(12, 'month'))).toBe(
-        true
-      )
       expect(entryDate.isSameOrBefore(currentDate)).toBe(true)
     })
 

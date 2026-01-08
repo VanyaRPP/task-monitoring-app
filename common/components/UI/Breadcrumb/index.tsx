@@ -29,29 +29,35 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   const router = useRouter()
   const { handleNavigateHome } = useScrollToTop()
 
-  const paths: any[] = useMemo(() => {
+  const normalizedPath = useMemo(() => {
+    if (!path?.length) return []
+    const firstTitle =
+      typeof path[0]?.title === 'string' ? path[0].title.trim() : ''
+    return firstTitle === 'Панель управління' ? path.slice(1) : path
+  }, [path])
+
+  const paths = useMemo(() => {
     return (
-      path?.map((item) => ({
+      normalizedPath.map((item) => ({
         title: item.title,
-        ...(!!item.path && {
+        ...(item.path && {
           onClick: () => {
-            if (onPathClick) {
-              onPathClick(item.path)
-            } else {
-              router.push(item.path)
-            }
+            if (onPathClick) onPathClick(item.path!)
+            else router.push(item.path!)
           },
         }),
       })) ?? []
     )
-  }, [router, path, onPathClick])
+  }, [router, normalizedPath, onPathClick])
+
+  const showCrumbs = paths.length > 0
 
   return (
     <AntdBreadcrumb
       className={styles.Breadcrumb}
       items={[
         { title: <HomeOutlined />, onClick: handleNavigateHome },
-        ...paths,
+        ...(showCrumbs ? paths : []),
       ]}
       itemRender={(item) =>
         item.onClick ? (

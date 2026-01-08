@@ -5,6 +5,7 @@ import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
 import { Form, Input, Space, Typography } from 'antd'
 import { useEffect, useMemo } from 'react'
+import { UpdateInvoiceButton } from './UpdateInvoiceButton'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -16,12 +17,21 @@ export const Name: React.FC<InvoiceComponentProps> = ({
 
   const value = Form.useWatch(['invoice', ...name, 'name'], form)
   const type = Form.useWatch(['invoice', ...name, 'type'], form)
+  const fieldName = Form.useWatch(['invoice', ...name, 'fieldName'], form)
   const isCustomService = Form.useWatch(
     ['invoice', ...name, 'customService'],
     form
   )
 
-  const { service } = usePaymentContext()
+const { service, company } = usePaymentContext()
+const currentPrice = Form.useWatch(['invoice', ...name, 'price'], form)
+
+const defaultPrice = useMemo(() => {
+  if (!fieldName) return undefined
+
+  return company?.customServices?.find(s => s.fieldName === fieldName)?.price
+      ?? service?.customServices?.find(s => s.fieldName === fieldName)?.price
+}, [company?.customServices, service?.customServices, fieldName])
 
   if (!editable || type !== 'custom') {
     return (
@@ -35,6 +45,10 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   }
 
   return (
+  <Space
+      direction="horizontal"
+      style={{ justifyContent: 'space-between', width: '100%' }}
+      >
     <Form.Item
       name={[...name, 'name']}
       rules={[validator.required()]}
@@ -51,6 +65,16 @@ export const Name: React.FC<InvoiceComponentProps> = ({
         <Input placeholder="Назва..." disabled={disabled} />
       )}
     </Form.Item>
+      <UpdateInvoiceButton
+        currentPrice={currentPrice}
+        defaultPrice={defaultPrice}
+        editable={editable}
+        type={type}
+        onRestore={() =>
+          form.setFieldValue(['invoice', ...name, 'price'], defaultPrice)
+        }
+      />
+    </Space>
   )
 }
 
@@ -70,7 +94,6 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-  const isCustomService = Form.useWatch(['invoice', ...name, 'name'], form)
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
   if (!editable) {
@@ -95,7 +118,6 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 
 export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
   useEffect(() => {

@@ -738,6 +738,29 @@ export function usePermissions(user?: IUser): IPermissions | null {
   return permissions
 }
 
+export function calculatePermissions(userDate: any, user: IUser) {
+  const isGlobalAdminUser = isGlobalAdmin(user)
+  const isDomainAdminUser = user?.roles.includes('DomainAdmin')
+  
+  const isAdmin = isGlobalAdminUser || isDomainAdminUser
+
+  if (!userDate) {
+    return {
+      isGlobalAdmin: false,
+      isDomainAdmin: false,
+      isUser: false,
+      isAdmin: false,
+    }
+  }
+  
+  return {
+    isGlobalAdmin: isGlobalAdminUser,
+    isDomainAdmin: isDomainAdminUser,
+    isUser: true,
+    isAdmin,
+  }
+}
+
 export function formatDebt(amount: number): string {
   if (amount === 0) return '0.00'
   if (amount > 0 && amount < 0.01) {

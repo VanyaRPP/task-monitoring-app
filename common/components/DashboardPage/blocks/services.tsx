@@ -15,6 +15,11 @@ import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
 import { message, Modal } from 'antd'
 import { dateToMonthYear } from '@assets/features/formatDate'
 import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
+import {
+  useGetAddressFiltersQuery,
+  useGetDateFiltersQuery,
+  useGetDomainFiltersQuery,
+} from '@common/api/filterApi/filter.api'
 
 interface ServiceBlockProps {
   sepDomainID?: string
@@ -31,6 +36,20 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
   const [deleteService, _] = useDeleteServiceMutation()
 
   const { data: customServicesData } = useGetCustomServicesQuery({})
+
+  const [filter, setFilter] = useState<IServiceFilter>()
+  const router = useRouter()
+  const isOnPage = router.pathname === AppRoutes.SERVICE
+
+  const { data: domainsFilter } = useGetDomainFiltersQuery({
+    streets: filter?.street,
+  })
+  const { data: streetsFilter } = useGetAddressFiltersQuery({
+    domains: filter?.domain,
+  })
+  const { data: dateFilters } = useGetDateFiltersQuery({
+    type: 'service',
+  })
 
   const handleDeleteServices = () => {
     ;(Modal as any).confirm({
@@ -60,9 +79,6 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
       },
     })
   }
-  const [filter, setFilter] = useState<IServiceFilter>()
-  const router = useRouter()
-  const isOnPage = router.pathname === AppRoutes.SERVICE
 
   const {
     data: servicesData,
@@ -75,6 +91,7 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
     year: filter?.year,
     month: filter?.month,
   })
+
   return (
     <TableCard
       title={
@@ -90,6 +107,9 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
           enableServiceButton={sepDomainID ? false : true}
           handleDeleteServices={handleDeleteServices}
           selectedServices={selectedServices}
+          user={user}
+          domainsFilter={domainsFilter}
+          streetsFilter={streetsFilter}
         />
       }
     >
@@ -104,6 +124,10 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
         filter={filter}
         setFilter={setFilter}
         setSelectedServices={setSelectedServices}
+        user={user}
+        domainsFilter={domainsFilter}
+        streetsFilter={streetsFilter}
+        dateFilters={dateFilters}
       />
     </TableCard>
   )
