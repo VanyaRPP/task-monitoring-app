@@ -235,6 +235,13 @@ export const renderCurrency = (number: any): string => {
   }
 }
 
+export const renderPrice = (value?: unknown): string => {
+  if (typeof value !== 'number' || !isFinite(value)) {
+    return '-'
+  }
+  return renderCurrency(value)
+}
+
 export const formatDateDMY = (date: string) => {
   return dayjs(date).format('DD-MM-YYYY')
 }
