@@ -8,7 +8,16 @@ import {
 import { ServiceType } from '@utils/constants'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Button, Flex, Form, Input, Space, Tooltip, Typography } from 'antd'
+import {
+  Button,
+  Flex,
+  Form,
+  Input,
+  Space,
+  Tooltip,
+  Typography,
+  message,
+} from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
@@ -17,20 +26,71 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { company, service } = usePaymentContext()
+  const name = useMemo(() => toArray<string>(_name), [_name])
+  const { company, service, prevService, prevPayment } = usePaymentContext()
+
+  const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+
+  const inflicionInvoice = useMemo(() => {
+    return invoices?.find((invoice) => invoice.type === ServiceType.Inflicion)
+  }, [invoices])
+
+  const prevPlacingInvoice = useMemo(() => {
+    return prevPayment?.invoice.find(
+      (invoice) => invoice.type === ServiceType.Placing
+    )
+  }, [prevPayment])
+
+  const rentPrice = useMemo(() => {
+    if (typeof prevPlacingInvoice?.sum === 'number') {
+      return prevPlacingInvoice.sum
+    }
+    const area = company?.totalArea ?? 1
+    const pricePerMeter = company?.pricePerMeter ?? prevService?.rentPrice ?? 0
+    return area * pricePerMeter
+  }, [prevPlacingInvoice, company, prevService])
+
+  const calculatedInitialPrice = useMemo(() => {
+    return +toRoundFixed(rentPrice + (inflicionInvoice?.sum ?? 0))
+  }, [rentPrice, inflicionInvoice])
+
+  const isInitial = useMemo(() => {
+    return toRoundFixed(price) === toRoundFixed(calculatedInitialPrice)
+  }, [price, calculatedInitialPrice])
 
   return (
-    <Space direction="vertical" size={0}>
-      <Typography.Text>Розміщення</Typography.Text>
-      {company?.inflicion && (
-        <Typography.Text type="secondary" style={{ fontSize: '0.9rem' }}>
-          (без врах. інд. інф.)
+    <Flex justify="space-between" align="center" gap={12}>
+      <Space direction="vertical" size={0}>
+        <Typography.Text>Розміщення</Typography.Text>
+        {company?.inflicion && (
+          <Typography.Text type="secondary" style={{ fontSize: '0.9rem' }}>
+            (без врах. інд. інф.)
+          </Typography.Text>
+        )}
+        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+          {toFirstUpperCase(dateToMonthYear(service?.date))}
         </Typography.Text>
+      </Space>
+      {company?.inflicion && editable && !isInitial && (
+        <Tooltip title="Відновити початкове значення">
+          <Button
+            icon={<ReloadOutlined />}
+            disabled={disabled}
+            onClick={() => {
+              Promise.resolve().then(() => {
+                form.setFieldValue(
+                  ['invoice', ...name, 'price'],
+                  calculatedInitialPrice
+                )
+                form.setFieldValue(['invoiceMeta', 'changed'], false)
+                message.success('Початкове значення відновлено')
+              })
+            }}
+          />
+        </Tooltip>
       )}
-      <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-        {toFirstUpperCase(dateToMonthYear(service?.date))}
-      </Typography.Text>
-    </Space>
+    </Flex>
   )
 }
 
@@ -42,9 +102,6 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
   const { company, prevService, prevPayment } = usePaymentContext()
-
-  const [snapshotPrice, setSnapshotPrice] = useState<number | null>(null)
-  const [changed, setChanged] = useState<boolean>(false)
 
   const invoices: InvoiceType[] = Form.useWatch(['invoice'], form)
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
@@ -89,24 +146,6 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
             {toRoundFixed(rentPrice)} грн +{' '}
             {toRoundFixed(inflicionInvoice?.sum)} грн
           </Typography.Text>
-        )}
-        {editable && !isInitial && (
-          <Tooltip title="Відновити початкове значення">
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                Promise.resolve().then(() => {
-                  form.setFieldValue(
-                    ['invoice', ...name, 'price'],
-                    calculatedInitialPrice
-                  )
-                  setSnapshotPrice(calculatedInitialPrice)
-                  setChanged(false)
-                  form.setFieldValue(['invoiceMeta', 'changed'], false)
-                })
-              }}
-            />
-          </Tooltip>
         )}
       </Flex>
     )

@@ -3,18 +3,52 @@ import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography, Button, Tooltip } from 'antd'
+import { Form, Input, Space, Typography, Button, Tooltip, message } from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
   name: _name,
   editable,
   disabled,
+  record,
 }) => {
   const { company, service } = usePaymentContext()
-  const gardagePrice = service?.garbageCollectorPrice * (company?.rentPart / 100)
+  const name = useMemo(() => toArray<string>(_name), [_name])
+
+  const garbagePrice = useMemo(() => {
+    const base = service?.garbageCollectorPrice ?? 0
+    const part = company?.rentPart ?? 0
+    return base * (part / 100)
+  }, [service?.garbageCollectorPrice, company?.rentPart])
+  const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  const rowKey = useMemo(
+    () => `${record?.type ?? 'unknown'}:${name.join('.')}`,
+    [record?.type, name]
+  )
+
+  const initialRef = useRef<{
+    rowKey: string
+    price: any
+    ready: boolean
+  } | null>(null)
+
+  useEffect(() => {
+    initialRef.current = null
+  }, [rowKey])
+
+  const canSnapshot = price !== undefined
+
+  if (!initialRef.current) {
+    initialRef.current = { rowKey, price, ready: canSnapshot }
+  } else if (!initialRef.current.ready && canSnapshot) {
+    initialRef.current = { rowKey, price, ready: true }
+  }
+
+  const initial = initialRef.current
+  const isChanged =
+    initial.ready && toRoundFixed(price) !== toRoundFixed(initial.price)
 
   return (
     <Space
@@ -27,33 +61,25 @@ export const Name: React.FC<InvoiceComponentProps> = ({
           {toFirstUpperCase(dateToMonthYear(service?.date))}
         </Typography.Text>
       </Space>
-      {
-        editable &&
-        (gardagePrice !==
-          Form.useWatch(['invoice', ...toArray<string>(_name), 'price'], form)) && (
-          <Tooltip title="Відновити значення">
-            <Button
-              onClick={() => {
-                form.setFieldValue(
-                  ['invoice', ...toArray<string>(_name), 'price'],
-                  gardagePrice
-                )
-              }}
-              icon={<ReloadOutlined />}
-            />
-          </Tooltip>
-        )
-      }
+
+      {editable && isChanged && (
+        <Tooltip title="Відновити значення">
+          <Button
+            icon={<ReloadOutlined />}
+            disabled={disabled}
+            onClick={() => {
+              form.setFieldValue(['invoice', ...name, 'price'], initial.price)
+              form.setFieldValue(['invoiceMeta', 'changed'], false)
+              message.success('Початкове значення відновлено')
+            }}
+          />
+        </Tooltip>
+      )}
     </Space>
   )
 }
 
-export const Amount: React.FC<InvoiceComponentProps> = ({
-  form,
-  name: _name,
-  editable,
-  disabled,
-}) => {
+export const Amount: React.FC<InvoiceComponentProps> = () => {
   const { service, company } = usePaymentContext()
 
   if (service?.garbageCollectorPrice && company?.rentPart) {
@@ -64,6 +90,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
       </span>
     )
   }
+  return null
 }
 
 export const Price: React.FC<InvoiceComponentProps> = ({
@@ -73,7 +100,6 @@ export const Price: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
 
   if (!editable) {
@@ -94,7 +120,6 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 
 export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
-
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
   const sum = Form.useWatch(['invoice', ...name, 'sum'], form)
 
@@ -105,11 +130,5 @@ export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   return <strong>{toRoundFixed(sum)} грн</strong>
 }
 
-const GarbageCollector = {
-  Name,
-  Amount,
-  Price,
-  Sum,
-}
-
+const GarbageCollector = { Name, Amount, Price, Sum }
 export default GarbageCollector
