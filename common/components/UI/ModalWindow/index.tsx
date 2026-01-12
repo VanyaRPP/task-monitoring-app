@@ -16,6 +16,7 @@ interface Props {
   okButtonProps?: ButtonProps
   title: string
   preview?: boolean
+  destroyOnHidden?: boolean
 }
 
 const Modal: React.FC<Props> = ({
@@ -33,6 +34,7 @@ const Modal: React.FC<Props> = ({
   okButtonProps,
   open = true,
   preview,
+  destroyOnHidden = false, ...props
 }) => {
   const [modal, context] = AntModal.useModal()
 
@@ -64,6 +66,8 @@ const Modal: React.FC<Props> = ({
         className={className ? className : s.Modal}
         style={style}
         okButtonProps={okButtonProps}
+        {...props}
+        destroyOnHidden={destroyOnHidden}
       >
         {children}
       </AntModal>
