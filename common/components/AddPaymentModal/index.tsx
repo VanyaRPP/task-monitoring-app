@@ -248,7 +248,7 @@ const effectiveOperation = preview
       generalSum: formData.generalSum || formData.debit,
       provider,
       reciever,
-      transaction,
+      ...(paymentData?.transaction && { transaction }),
       invoice: formData.debit
         ? formData.invoice.filter((invoice) => +invoice.sum !== 0)
         : [],
