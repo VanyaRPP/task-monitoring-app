@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
 import s from './DashboardLanding.module.scss'
+import MainMenuSteps from '../MainMenuSteps'
 
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false })
 
@@ -54,6 +55,7 @@ const DashboardLanding = () => {
               )}
             </div>
           </div>
+          <MainMenuSteps/>
         </div>
       </div>
     </section>
