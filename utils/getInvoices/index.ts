@@ -540,3 +540,45 @@ export const getCustomServiceInvoices = ({
 
   return customServices
 }
+
+export interface IGetSingleCustomServiceInvoiceProps {
+  company?: Partial<IRealestate>
+  service?: Partial<IService>
+  fieldName: string
+}
+
+export const getSingleCustomServiceInvoice = ({
+  company,
+  service,
+  fieldName,
+}: IGetSingleCustomServiceInvoiceProps): IPaymentField | undefined => {
+    if (!fieldName) return
+    
+    const serviceCustom = Array.isArray(service?.customServices)
+    ? service.customServices
+    : []
+
+    const companyCustom = Array.isArray(company?.customServices)
+    ? company.customServices
+    : []
+
+    const serviceItem = serviceCustom.find(
+      (item) => item.fieldName === fieldName
+    )
+
+    if (!serviceItem) return
+
+    const companyItem = companyCustom.find(
+      (item) => item.fieldName === fieldName
+    )
+
+    const price = +toRoundFixed(companyItem?.price ?? serviceItem?.price ?? 0)
+
+    return {
+      name: serviceItem?.label || 'Невідома послуга',
+      type: ServiceType.Custom,
+      fieldName: serviceItem.fieldName,
+      price,
+      sum:price
+    }
+}
