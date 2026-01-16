@@ -11,6 +11,7 @@ import {
   useUpdateUserMutation,
 } from '@common/api/userApi/user.api'
 import type { IUser } from '@common/api/userApi/user.api.types'
+import Head from 'next/head'
 
 const getAvatarGradient = (seed: string) => {
   let hash = 0
@@ -175,6 +176,10 @@ export default function UsersPage() {
   )
 
   return (
+    <>
+    <Head>
+      <title>Користувачі</title>
+    </Head>
     <MainLayout
       path={[
         { title: 'Панель управління', path: AppRoutes.INDEX },
@@ -199,5 +204,6 @@ export default function UsersPage() {
         />
       </Card>
     </MainLayout>
+    </>
   )
 }
