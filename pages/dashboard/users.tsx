@@ -125,7 +125,7 @@ export default function UsersPage() {
       {
         title: (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span>Ім'я</span>
+            <span>{`Ім'я`}</span>
             <Input
               placeholder="Пошук по імені"
               prefix={<SearchOutlined />}
