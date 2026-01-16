@@ -7,7 +7,7 @@ import Payment from '@modules/models/Payment'
 
 start()
 
-async function checkTransaction({ transaction }) {
+export async function  checkTransaction({ transaction }) {
   try {
     const allPayments = await Payment.find({
       $and: [
