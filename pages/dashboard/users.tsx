@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Avatar, Card, Table, Select, message } from 'antd'
+import { Avatar, Card, Table, Select, message, Button } from 'antd'
+import { SearchOutlined  } from '@ant-design/icons'
 import type { SelectProps } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import MainLayout from '@common/components/Layouts/Main'
@@ -11,6 +12,7 @@ import {
   useUpdateUserMutation,
 } from '@common/api/userApi/user.api'
 import type { IUser } from '@common/api/userApi/user.api.types'
+import UserInfoModal from './UserFormModal'
 
 const getAvatarGradient = (seed: string) => {
   let hash = 0
@@ -56,6 +58,8 @@ export default function UsersPage() {
 
   const [updateUser, { isLoading: isUpdatingUser }] = useUpdateUserMutation()
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null)
+  const [selectedUser, setSelectedUser] = useState<IUser | null>(null)
+  const [modalVisible, setModalVisible] = useState(false)
 
   const isGlobalAdmin = useMemo(() => {
     const role = (currentUser as any)?.roles || (currentUser as any)?.role
@@ -72,12 +76,21 @@ export default function UsersPage() {
 
   const [pageSize, setPageSize] = useState<number>(10)
 
+  const handleOpenUserInfo = (user: IUser) => {
+    setSelectedUser(user)
+    setModalVisible(true)
+  }
+
+  const handleCloseModal = () => {
+    setModalVisible(false)
+    setSelectedUser(null)
+  }
+
   const columns = useMemo<ColumnsType<IUser>>(
     () => [
       {
-        title: 'Аватар',
         key: 'avatar',
-        width: 120,
+        width: 60,
         render: (_: any, user) => {
           const name = user?.name || user?.email || '?'
           const image = user?.image
@@ -111,8 +124,17 @@ export default function UsersPage() {
         title: "Ім'я",
         dataIndex: 'name',
         key: 'name',
+        width: 500,
         render: (_: any, user) =>
           (user as any)?.name || (user as any)?.fullName || '—',
+        sorter: (a: IUser, b: IUser) => {
+          const nameA = (a.name || '').toLowerCase()
+          const nameB = (b.name || '').toLowerCase()
+          if (nameA < nameB) return -1
+          if (nameA > nameB) return 1
+          return 0
+        },
+        sortDirections: ['ascend', 'descend'],
       },
       {
         title: 'Імейл',
@@ -157,6 +179,18 @@ export default function UsersPage() {
       },
 
       {
+        key: 'info',
+        width: 60,
+        align: 'center',
+        render: (_: any, user) => (
+          <Button
+            type="link"
+            icon={<SearchOutlined />}
+            onClick={() => handleOpenUserInfo(user as IUser)}
+          />
+        ),
+      },
+      {
         title: 'Пароль',
         key: 'password',
         width: 140,
@@ -185,6 +219,11 @@ export default function UsersPage() {
       <Card style={{ width: '100%' }}>
         <Table<IUser>
           rowKey="_id"
+          locale={{
+            cancelSort: 'Скасувати сортування',
+            triggerAsc: 'Сортувати за зростанням',
+            triggerDesc: 'Сортувати за спаданням',
+          }}
           loading={isUsersLoading || isCurrentUserLoading}
           dataSource={users}
           columns={columns}
@@ -198,6 +237,11 @@ export default function UsersPage() {
           scroll={{ x: 900 }}
         />
       </Card>
+      <UserInfoModal
+        visible={modalVisible}
+        onClose={handleCloseModal}
+        user={selectedUser}
+      />
     </MainLayout>
   )
 }
