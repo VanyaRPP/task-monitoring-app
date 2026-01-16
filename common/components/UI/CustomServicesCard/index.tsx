@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { InputNumber, Space, Button, Form, Dropdown, Menu } from 'antd'
+import { InputNumber, Space, Button, Form, Dropdown, Menu, Tooltip } from 'antd'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { inputNumberParser } from '@utils/helpers'
 import { CloseOutlined, PlusOutlined } from '@ant-design/icons'
@@ -55,24 +55,29 @@ const CustomServicesCard: React.FC<CustomServicesCardProps> = ({
   return (
     <div>
       {!disabled && !isServiceForm && (
-        <Dropdown
-          menu={{
-            items: dropdownOptions.map((option) => ({
-              key: option.value,
-              label: option.label,
-              onClick: () => handleAddService(option),
-            })),
-          }}
-          trigger={['click']}
+        <Tooltip
+          title={dropdownOptions.length === 0 ? 'У обраного домена відсутні послуги' : ''}
+          placement="top"
         >
-          <Button
-            style={{ width: '100%', height: 40, marginBottom: 16 }}
-            type="dashed"
-            icon={<PlusOutlined />}
+          <Dropdown
+            menu={{
+              items: dropdownOptions.map((option) => ({
+                key: option.value,
+                label: option.label,
+                onClick: () => handleAddService(option),
+              })),
+            }}
+            trigger={['click']}
           >
-            Індивідуальні послуги
-          </Button>
-        </Dropdown>
+            <Button
+              style={{ width: '100%', height: 40, marginBottom: 16 }}
+              type="dashed"
+              icon={<PlusOutlined />}
+            >
+              Індивідуальні послуги
+            </Button>
+          </Dropdown>
+        </Tooltip>
       )}
 
       <Form.List name="customServices">

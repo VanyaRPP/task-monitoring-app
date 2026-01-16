@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Avatar, Card, Table, Select, message, Button } from 'antd'
-import { SearchOutlined  } from '@ant-design/icons'
+import { Avatar, Card, Table, Select, message, Input, Button } from 'antd'
+import { FilterOutlined, SearchOutlined } from '@ant-design/icons'
 import type { SelectProps } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import MainLayout from '@common/components/Layouts/Main'
@@ -60,6 +60,8 @@ export default function UsersPage() {
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null)
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
+  const [searchName, setSearchName] = useState<string>('')
+  const [searchEmail, setSearchEmail] = useState<string>('')
 
   const isGlobalAdmin = useMemo(() => {
     const role = (currentUser as any)?.roles || (currentUser as any)?.role
@@ -85,6 +87,17 @@ export default function UsersPage() {
     setModalVisible(false)
     setSelectedUser(null)
   }
+  const filteredUsers = useMemo(() => {
+    return users.filter((user) => {
+      const name = ((user as any)?.name || (user as any)?.fullName || '').toLowerCase()
+      const email = ((user as any)?.email || '').toLowerCase()
+      
+      const matchesName = name.includes(searchName.toLowerCase())
+      const matchesEmail = email.includes(searchEmail.toLowerCase())
+      
+      return matchesName && matchesEmail
+    })
+  }, [users, searchName, searchEmail])
 
   const columns = useMemo<ColumnsType<IUser>>(
     () => [
@@ -121,7 +134,20 @@ export default function UsersPage() {
         },
       },
       {
-        title: "Ім'я",
+        title: (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span>{`Ім'я`}</span>
+            <Input
+              placeholder="Пошук по імені"
+              prefix={<SearchOutlined />}
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
+              allowClear
+              style={{ width: 200 }}
+            />
+          </div>
+        ),
         dataIndex: 'name',
         key: 'name',
         width: 500,
@@ -137,7 +163,20 @@ export default function UsersPage() {
         sortDirections: ['ascend', 'descend'],
       },
       {
-        title: 'Імейл',
+        title: (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span>Імейл</span>
+            <Input
+              placeholder="Пошук по email"
+              prefix={<SearchOutlined />}
+              value={searchEmail}
+              onChange={(e) => setSearchEmail(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
+              allowClear
+              style={{ width: 200 }}
+            />
+          </div>
+        ),
         dataIndex: 'email',
         key: 'email',
         render: (email: any) => email || '—',
@@ -205,7 +244,7 @@ export default function UsersPage() {
         },
       },
     ],
-    [isGlobalAdmin, updateUser, refetchUsers, isUpdatingUser, updatingUserId]
+    [isGlobalAdmin, updateUser, refetchUsers, isUpdatingUser, updatingUserId, searchName, searchEmail]
   )
 
   return (
@@ -225,7 +264,7 @@ export default function UsersPage() {
             triggerDesc: 'Сортувати за спаданням',
           }}
           loading={isUsersLoading || isCurrentUserLoading}
-          dataSource={users}
+          dataSource={filteredUsers}
           columns={columns}
           pagination={{
             pageSize,
