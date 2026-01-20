@@ -14,7 +14,7 @@ export async function  checkTransaction({ transaction }) {
         { 'transaction.AUT_CNTR_ACC': transaction.AUT_CNTR_ACC },
         { 'transaction.AUT_CNTR_NAM': transaction.AUT_CNTR_NAM },
         { 'transaction.AUT_CNTR_MFO': transaction.AUT_CNTR_MFO },
-        { 'transaction.Description': transaction.OSND },
+        // { 'transaction.Description': transaction.OSND },
         { generalSum: +transaction.SUM },
       ],
     })
