@@ -12,7 +12,7 @@ import { Roles } from '@utils/constants'
 import { Button, Card, Flex, Space, Typography } from 'antd'
 import { Tabs } from 'antd'
 
-export const SettingsPage: React.FC = () => {
+export const AdminPanelPage: React.FC = () => {
   const { data: user } = useGetCurrentUserQuery()
   const isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
 
