@@ -7,14 +7,14 @@ import Payment from '@modules/models/Payment'
 
 start()
 
-async function checkTransaction({ transaction }) {
+export async function  checkTransaction({ transaction }) {
   try {
     const allPayments = await Payment.find({
       $and: [
         { 'transaction.AUT_CNTR_ACC': transaction.AUT_CNTR_ACC },
         { 'transaction.AUT_CNTR_NAM': transaction.AUT_CNTR_NAM },
         { 'transaction.AUT_CNTR_MFO': transaction.AUT_CNTR_MFO },
-        { 'transaction.Description': transaction.OSND },
+        // { 'transaction.Description': transaction.OSND },
         { generalSum: +transaction.SUM },
       ],
     })

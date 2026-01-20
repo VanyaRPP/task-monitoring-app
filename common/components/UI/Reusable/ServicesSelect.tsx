@@ -97,11 +97,11 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
     onServicesChange?.(selectedValues)
   }
 
-  if (isLoading) return <div>Завантаження послуг...</div>
-  if (isError) return <div>Помилка при завантаженні послуг</div>
+  //if (isLoading) return <div>Завантаження послуг...</div>
+  //if (isError) return <div>Помилка при завантаженні послуг</div>
 
   return (
-    <>
+    <div style={{ display: 'none' }}>
       <div style={{ marginBottom: 8 }}>Групи послуг</div>
       <Form.List name="customServices">
         {(fields, { add, remove }) => (
@@ -208,7 +208,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
           </>
         )}
       </Form.List>
-    </>
+    </div>
   )
 }
 

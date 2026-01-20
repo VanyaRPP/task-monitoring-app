@@ -3,7 +3,7 @@ import withAuthRedirect from '@components/HOC/withAuthRedirect'
 import { AppRoutes } from '@utils/constants'
 import { GetServerSideProps } from 'next'
 import { getServerSession } from 'next-auth'
-import { SettingsPage } from '@components/Pages/SettingsPage'
+import { AdminPanelPage } from '@components/Pages/SettingsPage'
 import { authOptions } from '../api/auth/[...nextauth]'
 import Head from 'next/head'
 
@@ -11,10 +11,10 @@ export default withAuthRedirect(() => {
   return (
     <>
       <Head>
-        <title>Налаштування</title>
+        <title>Адмін панель</title>
       </Head>
-      <MainLayout path={[{ title: 'Налаштування', path: AppRoutes.SETTINGS }]}>
-        <SettingsPage />
+      <MainLayout path={[{ title: 'Адмін панель', path: AppRoutes.ADMIN_PANEL }]}>
+        <AdminPanelPage />
       </MainLayout>
     </>
   )
