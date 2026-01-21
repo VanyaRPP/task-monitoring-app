@@ -70,7 +70,16 @@ const RealEstateForm: FC<Props> = ({
     }
   }, [services, form])
 
+  const isServiceExistById = (serviceId: string) => {
+    if (!domain?.customServices?.length) return false
+  
+    return domain.customServices.some(group =>
+      group.services?.includes(serviceId)
+    )
+  }
+
   const isServiceExist = (value: string) => {
+    console.log('domain', domain)
     if (!domain?._id || !services || !services?.length) return false
     const existedValues = services.map((x) => !!x[value])
     return existedValues.includes(true)
@@ -87,8 +96,8 @@ const RealEstateForm: FC<Props> = ({
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
 
   const isMeterBasedServiceExist = 
-    isServiceExist('placingPrice') ||
-    isServiceExist('rentPrice') 
+    isServiceExistById('677d414283b6ef93c6b8ea2c') ||
+    isServiceExistById('682dd48d9665126611c81950')
 
   return (
     <Form
