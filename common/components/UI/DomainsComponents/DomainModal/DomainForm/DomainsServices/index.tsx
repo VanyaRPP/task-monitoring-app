@@ -136,7 +136,7 @@ const DomainsServices: FC<Props> = ({
   }
 
   const handleCreateCustomService = async (name: string) => {
-    const result = await createCustomService({ name }).unwrap()
+    const result = await createCustomService({ name, domainId: domainId || '' }).unwrap()
     return result
   }
 
