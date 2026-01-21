@@ -108,7 +108,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
             key: AppRoutes.STREETS,
             type: 'item',
             label: <Link href={AppRoutes.STREETS}>Вулиці</Link>,
-            hidden: !isGlobalAdmin,
+            hidden: !isGlobalAdmin && !isDomainAdmin,
           },
           {
             key: AppRoutes.DOMAIN,

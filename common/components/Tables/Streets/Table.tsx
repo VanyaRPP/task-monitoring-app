@@ -121,7 +121,7 @@ const getDefaultColumns = (
     street: IStreet,
     actions: { preview: boolean; edit: boolean }
   ) => void,
-  userRoles?: { isGlobalAdmin: boolean }
+  userRoles?: { isGlobalAdmin: boolean; isDomainAdmin: boolean }
 ): ColumnType<any>[] => [
   {
     title: 'Місто',
@@ -152,8 +152,9 @@ const getDefaultColumns = (
     fixed: 'right',
     title: '',
     width: 50,
-    render: (_, street: IStreet) =>
-      userRoles?.isGlobalAdmin && (
+    render: (_, street: IStreet) => {
+      const isAdmin = userRoles?.isGlobalAdmin || userRoles?.isDomainAdmin
+      return isAdmin ? (
         <Button
           style={{ padding: 0 }}
           type="link"
@@ -161,15 +162,17 @@ const getDefaultColumns = (
         >
           <EditOutlined />
         </Button>
-      ),
+      ) : null
+    },
   },
   {
     align: 'center',
     fixed: 'right',
     title: '',
     width: 50,
-    render: (_, street: IStreet) =>
-      userRoles?.isGlobalAdmin && (
+    render: (_, street: IStreet) => {
+      const isAdmin = userRoles?.isGlobalAdmin || userRoles?.isDomainAdmin
+      return isAdmin ? (
         <Popconfirm
           title={`Ви впевнені що хочете видалити вулицю ${street.address} (м. ${street.city})?`}
           onConfirm={() => handleDelete(street._id)}
@@ -178,7 +181,8 @@ const getDefaultColumns = (
         >
           <DeleteOutlined />
         </Popconfirm>
-      ),
+      ) : null
+    },
   },
 ]
 

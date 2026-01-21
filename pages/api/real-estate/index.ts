@@ -56,6 +56,7 @@ export default async function handler(
 
         if (isGlobalAdmin) {
         } else if (isDomainAdmin) {
+          // Filter domains by admin email
           const domains = await Domain.distinct('_id', {
             adminEmails: user.email,
           })
@@ -120,6 +121,37 @@ export default async function handler(
               .json({ success: false, message: 'not allowed' })
           )
         }
+
+        if (isDomainAdmin && !isGlobalAdmin) {
+          const { domain } = req.body
+          if (!domain) {
+            return res
+              .status(400)
+              .json({ success: false, message: 'Domain is required' })
+          }
+
+          const adminDomain = await Domain.findOne({
+            _id: domain,
+            adminEmails: user.email,
+          })
+
+          if (!adminDomain) {
+            return res
+              .status(403)
+              .json({
+                success: false,
+                message: 'Access denied: domain not found or you are not an admin of this domain',
+              })
+          }
+
+          if (!req.body.adminEmails || !Array.isArray(req.body.adminEmails)) {
+            req.body.adminEmails = []
+          }
+          if (!req.body.adminEmails.includes(user.email)) {
+            req.body.adminEmails.push(user.email)
+          }
+        }
+
         // TODO: body validation
         const realEstate = await RealEstate.create(req.body)
         return res.status(200).json({ success: true, data: realEstate })
