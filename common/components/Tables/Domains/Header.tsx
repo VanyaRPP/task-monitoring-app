@@ -36,6 +36,8 @@ const DomainsHeader: React.FC<Props> = ({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { data: userResponse } = useGetCurrentUserQuery()
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
+  const isDomainAdmin = userResponse?.roles?.includes(Roles.DOMAIN_ADMIN)
+  const isAdmin = isGlobalAdmin || isDomainAdmin
 
   const openModal = () => {
     setCurrentDomain(null)
@@ -62,7 +64,7 @@ const DomainsHeader: React.FC<Props> = ({
       </Button>
 
       <>
-        {isGlobalAdmin && (
+        {isAdmin && (
           <Button type="link" onClick={openModal}>
             <PlusOutlined /> Додати
           </Button>
