@@ -148,7 +148,7 @@ export const getMaintenanceInvoice = ({
     }
   }
 
-  if (company.servicePricePerMeter === 0) return
+  if (company?.servicePricePerMeter === 0) return
 
   if (
     !isNaN(company?.totalArea) &&
