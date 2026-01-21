@@ -48,6 +48,7 @@ const DomainForm: React.FC<Props> = ({
         form={form}
         editable={editable}
         onCustomServicesChange={setCustomServices}
+        domainId={domainId}
       />
       <DomainInfo editable={editable} form={form} />
     </Form>
