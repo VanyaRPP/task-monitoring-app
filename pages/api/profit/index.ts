@@ -58,7 +58,9 @@ export default async function handler(
         }
 
         if (isDomainAdmin) {
-          const adminDomains = await Domain.find({ adminEmails: user.email })
+          const adminDomains = await Domain.find({
+            adminEmails: user.email,
+          })
           const domainIds = adminDomains.map((domain) => domain._id)
 
           paymentsOptions.domain = { $in: domainIds }

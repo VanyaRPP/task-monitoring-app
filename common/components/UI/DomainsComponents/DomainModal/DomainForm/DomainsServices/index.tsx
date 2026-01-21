@@ -38,6 +38,7 @@ const DomainsServices: FC<Props> = ({
 
     try {
       const result = await createCustomService({
+        domainId: domainId || '',
         name: service?.name,
       }).unwrap()
       const savedService = result.data
