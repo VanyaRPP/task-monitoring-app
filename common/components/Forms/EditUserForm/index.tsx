@@ -5,7 +5,6 @@ import {
   useUpdateUserMutation,
 } from '@common/api/userApi/user.api'
 import { IUser } from '@modules/models/User'
-import { CopyOutlined } from '@ant-design/icons/lib/icons'
 
 export interface EditUserFormProps {
   form?: FormInstance
@@ -44,13 +43,6 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
     }
   }
 
-  const handleCopyEmail = () => {
-    if (user?.email) {
-      navigator.clipboard.writeText(user.email)
-      message.success('Пошту скопійовано!')
-    }
-  }
-
   return (
     <Spin spinning={isLoading}>
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
@@ -58,7 +50,7 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({
           <Input />
         </Form.Item>
         <Form.Item label="Пошта" name="email">
-          <Input readOnly suffix={<CopyOutlined onClick={handleCopyEmail} style={{ cursor: 'pointer' }} />} />
+          <Input disabled />
         </Form.Item>
       </Form>
     </Spin>
