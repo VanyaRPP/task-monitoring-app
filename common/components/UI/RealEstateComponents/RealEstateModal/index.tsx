@@ -7,12 +7,10 @@ import {
   IExtendedRealestate,
   IRealestate,
 } from '@common/api/realestateApi/realestate.api.types'
-import { Form, message } from 'antd'
+import { Form, message, Tooltip } from 'antd'
 import Modal from '../../ModalWindow'
 import RealEstateForm from './RealEstateForm'
-import { IDomain } from '@modules/models/Domain'
 import {
-  useGetCustomServicesQuery,
   useGetCustomServicesByDomainQuery,
 } from '@common/api/customServicesApi/customServices.api'
 
@@ -81,6 +79,7 @@ const RealEstateModal: FC<Props> = ({
   )
 
   const filteredCustomServices = filteredServicesPrice(customServices)
+  const noServicesFound = !customDomainServices?.data?.some((group) => Array.isArray(group.services) && group.services.length > 0)
 
   useEffect(() => {
     const initialValues = {
@@ -108,19 +107,11 @@ const RealEstateModal: FC<Props> = ({
           ? currentRealEstate.customServices
           : filteredCustomServices) || [],
     }
-    const currentCustomServices = form.getFieldValue('customServices')
-
-    if (!currentCustomServices || currentCustomServices.length === 0) {
-      form.setFieldsValue(initialValues)
-    }
-  }, [
-    currentRealEstate,
-    form,
-    customServices,
-    filteredCustomServices,
-    domainId,
-    chosenRealEstate,
-  ])
+  const setValues = !form.isFieldsTouched() || currentRealEstate;
+  if (setValues) {
+    form.setFieldsValue(initialValues);
+  }
+}, [currentRealEstate, form, filteredCustomServices, domainId, chosenRealEstate]);
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
@@ -187,13 +178,23 @@ const RealEstateModal: FC<Props> = ({
       okButtonProps={{ style: { ...(!editable && { display: 'none' }) } }}
       preview={!editable}
     >
-      <RealEstateForm
-        form={form}
-        currentRealEstate={currentRealEstate}
-        editable={editable}
-        setIsValueChanged={setIsValueChanged}
-        customServices={filteredCustomServices}
-      />
+      <Tooltip
+      title={
+        noServicesFound
+        ? 'Послуг за даною адресою не знайдено! Будь ласка, оберіть іншу адресу або додайте нову послугу за цією адресою.' : ''
+      }
+      placement="top"
+      >
+        <div>
+          <RealEstateForm
+          form={form}
+          currentRealEstate={currentRealEstate}
+          editable={editable}
+          setIsValueChanged={setIsValueChanged}
+          customServices={filteredCustomServices}
+          />
+          </div>
+          </Tooltip>
     </Modal>
   )
 }
