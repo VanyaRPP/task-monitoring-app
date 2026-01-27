@@ -34,14 +34,8 @@ const ROLE_OPTIONS: SelectProps['options'] = [
 ]
 
 const getUserRoleValue = (u: any): string => {
-  const r = u?.roles ?? u?.role
-  if (Array.isArray(r)) {
-    if (r.includes(Roles.GLOBAL_ADMIN)) return Roles.GLOBAL_ADMIN
-    if (r.includes(Roles.DOMAIN_ADMIN)) return Roles.DOMAIN_ADMIN
-    if (r.includes(Roles.USER)) return Roles.USER
-    return r[0] ?? Roles.USER
-  }
-  return r ?? Roles.USER
+  if (u?.role) return u.role
+  return u?.roles?.[0] ?? Roles.USER
 }
 
 export default function UsersPage() {
@@ -62,11 +56,8 @@ export default function UsersPage() {
   const [searchEmail, setSearchEmail] = useState<string>('')
 
   const isGlobalAdmin = useMemo(() => {
-    const role = (currentUser as any)?.roles || (currentUser as any)?.role
-    return (
-      role === Roles.GLOBAL_ADMIN ||
-      (Array.isArray(role) && role.includes(Roles.GLOBAL_ADMIN))
-    )
+    const role = getUserRoleValue(currentUser as any)
+    return role === Roles.GLOBAL_ADMIN
   }, [currentUser])
 
   useEffect(() => {
@@ -78,12 +69,16 @@ export default function UsersPage() {
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
-      const name = ((user as any)?.name || (user as any)?.fullName || '').toLowerCase()
+      const name = (
+        (user as any)?.name ||
+        (user as any)?.fullName ||
+        ''
+      ).toLowerCase()
       const email = ((user as any)?.email || '').toLowerCase()
-      
+
       const matchesName = name.includes(searchName.toLowerCase())
       const matchesEmail = email.includes(searchEmail.toLowerCase())
-      
+
       return matchesName && matchesEmail
     })
   }, [users, searchName, searchEmail])
@@ -186,7 +181,6 @@ export default function UsersPage() {
                   }).unwrap()
 
                   message.success('Роль оновлено')
-                  refetchUsers()
                 } catch (e) {
                   message.error('Не вдалося оновити роль')
                 } finally {
@@ -213,38 +207,46 @@ export default function UsersPage() {
         },
       },
     ],
-    [isGlobalAdmin, updateUser, refetchUsers, isUpdatingUser, updatingUserId, searchName, searchEmail]
+    [
+      isGlobalAdmin,
+      updateUser,
+      refetchUsers,
+      isUpdatingUser,
+      updatingUserId,
+      searchName,
+      searchEmail,
+    ]
   )
 
   return (
     <>
-    <Head>
-      <title>Користувачі</title>
-    </Head>
-    <MainLayout
-      path={[
-        { title: 'Панель управління', path: AppRoutes.INDEX },
-        { title: 'Всі таблиці', path: AppRoutes.TABLES },
-        { title: 'Користувачі', path: AppRoutes.USERS },
-      ]}
-    >
-      <Card style={{ width: '100%' }}>
-        <Table<IUser>
-          rowKey="_id"
-          loading={isUsersLoading || isCurrentUserLoading}
-          dataSource={filteredUsers}
-          columns={columns}
-          pagination={{
-            pageSize,
-            showSizeChanger: true,
-            pageSizeOptions: [10, 20, 50, 100],
-            position: ['bottomCenter'],
-            onShowSizeChange: (_current, size) => setPageSize(size),
-          }}
-          scroll={{ x: 900 }}
-        />
-      </Card>
-    </MainLayout>
+      <Head>
+        <title>Користувачі</title>
+      </Head>
+      <MainLayout
+        path={[
+          { title: 'Панель управління', path: AppRoutes.INDEX },
+          { title: 'Всі таблиці', path: AppRoutes.TABLES },
+          { title: 'Користувачі', path: AppRoutes.USERS },
+        ]}
+      >
+        <Card style={{ width: '100%' }}>
+          <Table<IUser>
+            rowKey="_id"
+            loading={isUsersLoading || isCurrentUserLoading}
+            dataSource={filteredUsers}
+            columns={columns}
+            pagination={{
+              pageSize,
+              showSizeChanger: true,
+              pageSizeOptions: [10, 20, 50, 100],
+              position: ['bottomCenter'],
+              onShowSizeChange: (_current, size) => setPageSize(size),
+            }}
+            scroll={{ x: 900 }}
+          />
+        </Card>
+      </MainLayout>
     </>
   )
 }
