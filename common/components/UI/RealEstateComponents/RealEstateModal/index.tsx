@@ -7,7 +7,7 @@ import {
   IExtendedRealestate,
   IRealestate,
 } from '@common/api/realestateApi/realestate.api.types'
-import { Form, message, Tooltip } from 'antd'
+import { Form, message } from 'antd'
 import Modal from '../../ModalWindow'
 import RealEstateForm from './RealEstateForm'
 import {
@@ -79,7 +79,6 @@ const RealEstateModal: FC<Props> = ({
   )
 
   const filteredCustomServices = filteredServicesPrice(customServices)
-  const noServicesFound = !customDomainServices?.data?.some((group) => Array.isArray(group.services) && group.services.length > 0)
 
   useEffect(() => {
     const initialValues = {
@@ -166,35 +165,29 @@ const RealEstateModal: FC<Props> = ({
     }
   }
 
+  const handleCancel = () => {
+  form.resetFields()
+  closeModal()
+}
   return (
     <Modal
       style={{ top: 20 }}
       title={'Компанії'}
       onOk={handleSubmit}
       changed={() => isValueChanged}
-      onCancel={closeModal}
+      onCancel={handleCancel}
       okText={currentRealEstate ? 'Зберегти' : 'Додати'}
       cancelText={'Відміна'}
       okButtonProps={{ style: { ...(!editable && { display: 'none' }) } }}
       preview={!editable}
     >
-      <Tooltip
-      title={
-        noServicesFound
-        ? 'Послуг за даною адресою не знайдено! Будь ласка, оберіть іншу адресу або додайте нову послугу за цією адресою.' : ''
-      }
-      placement="top"
-      >
-        <div>
-          <RealEstateForm
-          form={form}
-          currentRealEstate={currentRealEstate}
-          editable={editable}
-          setIsValueChanged={setIsValueChanged}
-          customServices={filteredCustomServices}
-          />
-          </div>
-          </Tooltip>
+      <RealEstateForm
+        form={form}
+        currentRealEstate={currentRealEstate}
+        editable={editable}
+        setIsValueChanged={setIsValueChanged}
+        customServices={filteredCustomServices}
+      />
     </Modal>
   )
 }

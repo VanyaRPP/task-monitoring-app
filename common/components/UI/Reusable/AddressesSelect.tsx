@@ -39,33 +39,34 @@ const AddressesSelect: React.FC<AddressesSelectProps> = ({
   }, [streets])
 
   useEffect(() => {
-    if (domainId && options.length > 0) {
-      if (options.length === 1) {
-        form.setFieldsValue({ street: options[0].value })
-        onStreetHasServiceChange?.(options[0].hasService)
-      } else {
-        const firstStreetWithService = options.find(
-          (option) => option.hasService
-        )
-
-        if (firstStreetWithService) {
-          street
-            ? form.setFieldsValue({ street: street })
-            : form.setFieldsValue({ street: firstStreetWithService.value })
-          onStreetHasServiceChange?.(firstStreetWithService.hasService)
-        } else {
-          form.setFieldsValue({ street: undefined })
-          onStreetHasServiceChange?.(false)
-        }
-      }
-    } else {
+    if (!domainId) {
       form.setFieldsValue({ street: undefined })
       onStreetHasServiceChange?.(false)
+      return
     }
-  }, [domainId, options, form, street])
 
-  const selectedStreet = options.find((option) => option.value === streetId)
-  const showTooltip = !!selectedStreet && !selectedStreet.hasService
+    if (options.length === 0) {
+      form.setFieldsValue({ street: undefined })
+      onStreetHasServiceChange?.(false)
+      return
+    }
+    const streetExists = street && options.some(opt => opt.value === street || opt.label.includes(street))
+    const firstStreet = options[0]
+
+    if (streetExists) {
+      const matched = options.find(opt => opt.value === street || opt.label.includes(street))
+      form.setFieldsValue({ street: matched?.value })
+      onStreetHasServiceChange?.(matched?.hasService || false)
+    } else if (firstStreet) {
+      form.setFieldsValue({ street: firstStreet.value })
+      onStreetHasServiceChange?.(firstStreet.hasService)
+    } else {
+    form.setFieldsValue({ street: undefined })
+    onStreetHasServiceChange?.(false)
+  }
+}, [domainId, options, form, street, onStreetHasServiceChange])
+
+const showTooltip = !!domainId && !isStreetsLoading && streets.length === 0
 
   return (
     <Tooltip
