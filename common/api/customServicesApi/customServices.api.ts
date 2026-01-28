@@ -19,6 +19,7 @@ export const customServicesApi = createApi({
     >({
       query: ({ _id }) => ({
         url: 'custom-services',
+        method: 'GET',
         params: { _id },
       }),
       providesTags: ['CustomService'],

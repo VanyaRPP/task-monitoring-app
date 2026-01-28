@@ -13,7 +13,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser } =
+  const { isGlobalAdmin, isDomainAdmin, isAdmin, isUser, user } =
     await getCurrentUser(req, res)
 
   const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
@@ -41,6 +41,28 @@ export default async function handler(
   switch (req.method) {
     case 'DELETE':
       try {
+        if (!isAdmin) {
+          return res
+            .status(403)
+            .json({ success: false, message: 'Access denied: not an admin' })
+        }
+
+        if (isDomainAdmin && !isGlobalAdmin) {
+          const domain = await Domain.findOne({
+            _id: req.query.id,
+            adminEmails: user.email,
+          })
+
+          if (!domain) {
+            return res
+              .status(403)
+              .json({
+                success: false,
+                message: 'Access denied: domain not found or you are not an admin of this domain',
+              })
+          }
+        }
+
         await Domain.findByIdAndRemove(req.query.id).then((domain) => {
           if (domain) {
             return res.status(200).json({
@@ -60,8 +82,35 @@ export default async function handler(
 
     case 'PATCH':
       try {
-        if (isAdmin) {
+        if (!isAdmin) {
+          return res
+            .status(403)
+            .json({ success: false, message: 'Access denied: not an admin' })
+        }
+
+        if (isDomainAdmin && !isGlobalAdmin) {
+          const domain = await Domain.findOne({
+            _id: req.query.id,
+            adminEmails: user.email,
+          })
+
+          if (!domain) {
+            return res
+              .status(403)
+              .json({
+                success: false,
+                message: 'Access denied: domain not found or you are not an admin of this domain',
+              })
+          }
+
           const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
+          if (!updatedObj.adminEmails || !Array.isArray(updatedObj.adminEmails)) {
+            updatedObj.adminEmails = []
+          }
+          if (!updatedObj.adminEmails.includes(user.email)) {
+            updatedObj.adminEmails.push(user.email)
+          }
+
           const response = await Domain.findOneAndUpdate(
             { _id: req.query.id },
             updatedObj,
@@ -69,9 +118,13 @@ export default async function handler(
           )
           return res.status(200).json({ success: true, data: response })
         } else {
-          return res
-            .status(400)
-            .json({ success: false, message: 'not allowed' })
+          const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
+          const response = await Domain.findOneAndUpdate(
+            { _id: req.query.id },
+            updatedObj,
+            { new: true }
+          )
+          return res.status(200).json({ success: true, data: response })
         }
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })
@@ -79,13 +132,31 @@ export default async function handler(
 
     case 'GET':
       try {
-        if (!isUser) {
+        if (isUser) {
+          return res
+            .status(403)
+            .json({ success: false, message: 'Access denied' })
+        }
+
+        if (isDomainAdmin && !isGlobalAdmin) {
+          const domain = await Domain.findOne({
+            _id: req.query.id,
+            adminEmails: user.email,
+          })
+
+          if (!domain) {
+            return res
+              .status(403)
+              .json({
+                success: false,
+                message: 'Access denied: domain not found or you are not an admin of this domain',
+              })
+          }
+
+          return res.status(200).json({ success: true, data: domain })
+        } else {
           const response = await Domain.findById({ _id: req.query.id })
           return res.status(200).json({ success: true, data: response })
-        } else {
-          return res
-            .status(400)
-            .json({ success: false, message: 'not allowed' })
         }
       } catch (error) {
         return res.status(400).json({ success: false, error: error.message })

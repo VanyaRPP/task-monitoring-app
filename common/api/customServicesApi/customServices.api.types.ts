@@ -34,6 +34,7 @@ export interface IGetCustomDomainServicesResponse {
 }
 
 export interface ICreateCustomServiceRequest {
+  domainId: string
   name: string
 }
 

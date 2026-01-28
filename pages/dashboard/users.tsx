@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Avatar, Card, Table, Select, message, Input, Button } from 'antd'
-import { FilterOutlined, SearchOutlined } from '@ant-design/icons'
+import { Avatar, Card, Table, Select, message, Input, Button } from 'antd
+import { SearchOutlined, FilterOutlined, EditOutlined } from '@ant-design/icons'
 import type { SelectProps } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import MainLayout from '@common/components/Layouts/Main'
@@ -14,6 +14,7 @@ import {
 import type { IUser } from '@common/api/userApi/user.api.types'
 import UserInfoModal from './UserFormModal'
 import Head from 'next/head'
+import { EditUserModal } from '@common/components/EditUserModal'
 
 const getAvatarGradient = (seed: string) => {
   let hash = 0
@@ -43,6 +44,26 @@ const getUserRoleValue = (u: any): string => {
     return r[0] ?? Roles.USER
   }
   return r ?? Roles.USER
+}
+
+export const EditUserButton: React.FC<{ userId?: string }> = ({ userId }) => {
+  const [open, setOpen] = useState<boolean>(false)
+
+  return (
+    <>
+      <Button
+        type="link"
+        icon={<EditOutlined />}
+        onClick={() => setOpen(true)}
+      />
+      <EditUserModal
+        open={open}
+        userId={userId}
+        onOk={() => setOpen(false)}
+        onCancel={() => setOpen(false)}
+      />
+    </>
+  )
 }
 
 export default function UsersPage() {
@@ -90,12 +111,16 @@ export default function UsersPage() {
   }
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
-      const name = ((user as any)?.name || (user as any)?.fullName || '').toLowerCase()
+      const name = (
+        (user as any)?.name ||
+        (user as any)?.fullName ||
+        ''
+      ).toLowerCase()
       const email = ((user as any)?.email || '').toLowerCase()
-      
+
       const matchesName = name.includes(searchName.toLowerCase())
       const matchesEmail = email.includes(searchEmail.toLowerCase())
-      
+
       return matchesName && matchesEmail
     })
   }, [users, searchName, searchEmail])
@@ -107,7 +132,7 @@ export default function UsersPage() {
         width: 60,
         render: (_: any, user) => {
           const name = user?.name || user?.email || '?'
-          const image = user?.image
+          const image = (user as any)?.image
 
           const DEFAULT_AVATAR =
             'https://avatars.githubusercontent.com/u/583231?v=4'
@@ -217,7 +242,6 @@ export default function UsersPage() {
           )
         },
       },
-
       {
         key: 'info',
         width: 60,
@@ -244,49 +268,55 @@ export default function UsersPage() {
           return hasPassword ? '••••••' : '—'
         },
       },
+      {
+        key: 'actions',
+        fixed: 'right',
+        width: 48,
+        render: (_: any, user) => (
+          <EditUserButton userId={(user as any)?._id?.toString()} />
+        ),
+      },
     ],
-    [isGlobalAdmin, updateUser, refetchUsers, isUpdatingUser, updatingUserId, searchName, searchEmail]
+    [
+      isGlobalAdmin,
+      updateUser,
+      refetchUsers,
+      isUpdatingUser,
+      updatingUserId,
+      searchName,
+      searchEmail,
+    ]
   )
 
   return (
     <>
-    <Head>
-      <title>Користувачі</title>
-    </Head>
-    <MainLayout
-      path={[
-        { title: 'Панель управління', path: AppRoutes.INDEX },
-        { title: 'Всі таблиці', path: AppRoutes.TABLES },
-        { title: 'Користувачі', path: AppRoutes.USERS },
-      ]}
-    >
-      <Card style={{ width: '100%' }}>
-        <Table<IUser>
-          rowKey="_id"
-          locale={{
-            cancelSort: 'Скасувати сортування',
-            triggerAsc: 'Сортувати за зростанням',
-            triggerDesc: 'Сортувати за спаданням',
-          }}
-          loading={isUsersLoading || isCurrentUserLoading}
-          dataSource={filteredUsers}
-          columns={columns}
-          pagination={{
-            pageSize,
-            showSizeChanger: true,
-            pageSizeOptions: [10, 20, 50, 100],
-            position: ['bottomCenter'],
-            onShowSizeChange: (_current, size) => setPageSize(size),
-          }}
-          scroll={{ x: 900 }}
-        />
-      </Card>
-      <UserInfoModal
-        visible={modalVisible}
-        onClose={handleCloseModal}
-        user={selectedUser}
-      />
-    </MainLayout>
+      <Head>
+        <title>Користувачі</title>
+      </Head>
+      <MainLayout
+        path={[
+          { title: 'Панель управління', path: AppRoutes.INDEX },
+          { title: 'Всі таблиці', path: AppRoutes.TABLES },
+          { title: 'Користувачі', path: AppRoutes.USERS },
+        ]}
+      >
+        <Card style={{ width: '100%' }}>
+          <Table<IUser>
+            rowKey="_id"
+            loading={isUsersLoading || isCurrentUserLoading}
+            dataSource={filteredUsers}
+            columns={columns}
+            pagination={{
+              pageSize,
+              showSizeChanger: true,
+              pageSizeOptions: [10, 20, 50, 100],
+              position: ['bottomCenter'],
+              onShowSizeChange: (_current, size) => setPageSize(size),
+            }}
+            scroll={{ x: 900 }}
+          />
+        </Card>
+      </MainLayout>
     </>
   )
 }

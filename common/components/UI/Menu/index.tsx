@@ -108,7 +108,7 @@ export const Menu: React.FC<MenuProps> = (props) => {
             key: AppRoutes.STREETS,
             type: 'item',
             label: <Link href={AppRoutes.STREETS}>Вулиці</Link>,
-            hidden: !isGlobalAdmin,
+            hidden: !isGlobalAdmin && !isDomainAdmin,
           },
           {
             key: AppRoutes.DOMAIN,
@@ -146,9 +146,9 @@ export const Menu: React.FC<MenuProps> = (props) => {
             label: <Link href={AppRoutes.PROFILE}>Профіль</Link>,
           },
           {
-            key: AppRoutes.SETTINGS,
+            key: AppRoutes.ADMIN_PANEL,
             type: 'item',
-            label: <Link href={AppRoutes.SETTINGS}>Налаштування</Link>,
+            label: <Link href={AppRoutes.ADMIN_PANEL}>Адмін панель</Link>,
             hidden: !isGlobalAdmin,
           },
           {

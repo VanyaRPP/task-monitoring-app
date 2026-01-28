@@ -90,12 +90,12 @@ export default function numberToTextNumber(number) {
         (str[3] !== '0' ? ' ' + o[parseInt(str[3])] : '')
   }
 
-  const arr = out.split(' ')
+  const arr = out?.split(' ')
   arr[0] =
     typeof arr?.[0] === 'string'
       ? arr[0].charAt(0).toUpperCase() + arr[0].slice(1)
       : ''
-  out = arr.join(' ')
+  out = arr?.join(' ')
 
   return out
 }
