@@ -35,14 +35,8 @@ const ROLE_OPTIONS: SelectProps['options'] = [
 ]
 
 const getUserRoleValue = (u: any): string => {
-  const r = u?.roles ?? u?.role
-  if (Array.isArray(r)) {
-    if (r.includes(Roles.GLOBAL_ADMIN)) return Roles.GLOBAL_ADMIN
-    if (r.includes(Roles.DOMAIN_ADMIN)) return Roles.DOMAIN_ADMIN
-    if (r.includes(Roles.USER)) return Roles.USER
-    return r[0] ?? Roles.USER
-  }
-  return r ?? Roles.USER
+  if (u?.role) return u.role
+  return u?.roles?.[0] ?? Roles.USER
 }
 
 export const EditUserButton: React.FC<{ userId?: string }> = ({ userId }) => {
@@ -83,11 +77,8 @@ export default function UsersPage() {
   const [searchEmail, setSearchEmail] = useState<string>('')
 
   const isGlobalAdmin = useMemo(() => {
-    const role = (currentUser as any)?.roles || (currentUser as any)?.role
-    return (
-      role === Roles.GLOBAL_ADMIN ||
-      (Array.isArray(role) && role.includes(Roles.GLOBAL_ADMIN))
-    )
+    const role = getUserRoleValue(currentUser as any)
+    return role === Roles.GLOBAL_ADMIN
   }, [currentUser])
 
   useEffect(() => {
@@ -211,7 +202,6 @@ export default function UsersPage() {
                   }).unwrap()
 
                   message.success('Роль оновлено')
-                  refetchUsers()
                 } catch (e) {
                   message.error('Не вдалося оновити роль')
                 } finally {

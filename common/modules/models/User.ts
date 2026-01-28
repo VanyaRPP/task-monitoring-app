@@ -4,6 +4,7 @@ import { IService } from '@common/api/serviceApi/service.api.types'
 import { IAddress } from '@modules/models/Task'
 import mongoose, { ObjectId, Schema } from 'mongoose'
 import { ITask } from './Task'
+import { normalizeRoles } from '@utils/roles'
 
 export interface IUser {
   _id?: ObjectId | string
@@ -139,6 +140,34 @@ const UserSchema = new mongoose.Schema<IUser>({
   address: { type: Object },
   password: { type: String },
 })
+UserSchema.pre('validate', function (next) {
+  this.roles = normalizeRoles(this.roles)
+  next()
+})
+
+UserSchema.pre(
+  ['findOneAndUpdate', 'updateOne', 'updateMany'],
+  function (next) {
+    const update: any = this.getUpdate() || {}
+
+    const incoming = update?.roles ?? update?.$set?.roles ?? update?.$set?.role
+
+    if (incoming !== undefined) {
+      const normalized = normalizeRoles(incoming)
+
+      if (update.roles !== undefined) update.roles = normalized
+      if (update.$set?.roles !== undefined) update.$set.roles = normalized
+      if (update.$set?.role !== undefined) {
+        update.$set.roles = normalized
+        delete update.$set.role
+      }
+
+      this.setUpdate(update)
+    }
+
+    next()
+  }
+)
 
 const User =
   (mongoose?.models?.User as mongoose.Model<IUser>) ||
