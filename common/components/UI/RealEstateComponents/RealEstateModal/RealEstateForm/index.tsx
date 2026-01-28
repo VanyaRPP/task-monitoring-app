@@ -79,6 +79,7 @@ const RealEstateForm: FC<Props> = ({
   }
 
   const isServiceExist = (value: string) => {
+    console.log('domain', domain)
     if (!domain?._id || !services || !services?.length) return false
     const existedValues = services.map((x) => !!x[value])
     return existedValues.includes(true)

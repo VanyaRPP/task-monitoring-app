@@ -2,7 +2,7 @@ import {
   useAddRealEstateMutation,
   useEditRealEstateMutation,
 } from '@common/api/realestateApi/realestate.api'
-import React, { FC, useEffect, useState } from 'react'
+import React, { FC, useEffect, useState, useRef, useMemo } from 'react'
 import {
   IExtendedRealestate,
   IRealestate,
@@ -29,61 +29,40 @@ const RealEstateModal: FC<Props> = ({
 }) => {
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
+  const initializedRef = useRef(false)
   const [addRealEstate] = useAddRealEstateMutation()
   const [editRealEstate] = useEditRealEstateMutation()
   const domainId = Form.useWatch('domain', form)
+  const currentDomainId = currentRealEstate?.domain?._id || domainId
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
-    { domainId: currentRealEstate?.domain?._id || domainId },
-    { skip: !domainId && !currentRealEstate?.domain?._id }
+    { domainId: currentDomainId },
+    { skip: !currentDomainId }
   )
 
-  const filteredServicesPrice = (customServices) => {
-    // TODO: delete after custom services refactor
-    const updatedCustomServices = customServices?.map((service) => {
-      let price = null
-
-      if (service.fieldName === 'rentPrice') {
-        price =
-          currentRealEstate?.servicePricePerMeter ??
-          currentRealEstate?.customServices?.find(
-            (service) => service.fieldName === 'rentPrice'
-          )?.price ??
-          null
-      } else if (service.fieldName === 'cleaningPrice') {
-        price =
-          currentRealEstate?.cleaning ??
-          currentRealEstate?.customServices?.find(
-            (service) => service.fieldName === 'cleaningPrice'
-          )?.price ??
-          null
-      } else {
-        price = currentRealEstate?.[service.fieldName] ?? null
-      }
-      return {
-        ...service,
-        price,
-      }
-    })
-    return updatedCustomServices
-  }
-
-  const customServices = customDomainServices?.data?.flatMap((group) =>
-    Array.isArray(group?.services)
-      ? group?.services?.map((service) => ({
-          label: service?.name || 'Невідома послуга',
-          price: currentRealEstate?.[service?.fieldName] || null,
-          fieldName: service?.fieldName || 'defaultFieldName',
-          _id: service?._id || 'defaultId',
-        }))
-      : []
-  )
-
-  const filteredCustomServices = filteredServicesPrice(customServices)
+  const domainCustomServices = useMemo(() => {
+    return (
+      customDomainServices?.data?.flatMap((group) =>
+        Array.isArray(group?.services)
+          ? group.services.map((s) => ({
+              _id: s._id,
+              label: s.name,
+              fieldName: s.fieldName,
+              price: 0,
+            }))
+          : []
+      ) || []
+    )
+  }, [customDomainServices])
 
   useEffect(() => {
-    const initialValues = {
+    if (initializedRef.current) return
+    if (!currentDomainId) return
+
+    form.setFieldsValue({
       domain:
-        chosenRealEstate?.domain || currentRealEstate?.domain?.name || domainId,
+        chosenRealEstate?.domain ||
+        currentRealEstate?.domain?._id ||
+        currentDomainId,
       street:
         currentRealEstate?.street &&
         `${currentRealEstate.street.address} (м. ${currentRealEstate.street.city})`,
@@ -102,18 +81,21 @@ const RealEstateModal: FC<Props> = ({
       cleaning: currentRealEstate?.cleaning || 0,
       services: currentRealEstate?.services || [],
       customServices:
-        (currentRealEstate?.customServices?.length > 0
+        currentRealEstate?.customServices?.length > 0
           ? currentRealEstate.customServices
-          : filteredCustomServices) || [],
-    }
-  const setValues = !form.isFieldsTouched() || currentRealEstate;
-  if (setValues) {
-    form.setFieldsValue(initialValues);
-  }
-}, [currentRealEstate, form, filteredCustomServices, domainId, chosenRealEstate]);
+          : [],
+    })
+
+    initializedRef.current = true
+  }, [currentDomainId])
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
+
+    const filteredCustomServices =
+      formData.customServices?.filter(
+        (s) => typeof s.price === 'number' && s.price > 0
+      ) || []
 
     const realEstateData = {
       domain: currentRealEstate?.domain || formData.domain,
@@ -144,7 +126,7 @@ const RealEstateModal: FC<Props> = ({
         formData.customServices?.find(
           (custom) => custom.fieldName === 'cleaningPrice'
         )?.price ?? formData.cleaning,
-      customServices: formData.customServices,
+      customServices: filteredCustomServices,
     }
 
     const response = currentRealEstate
@@ -186,7 +168,7 @@ const RealEstateModal: FC<Props> = ({
         currentRealEstate={currentRealEstate}
         editable={editable}
         setIsValueChanged={setIsValueChanged}
-        customServices={filteredCustomServices}
+        customServices={domainCustomServices}
       />
     </Modal>
   )
