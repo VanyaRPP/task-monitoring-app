@@ -145,7 +145,7 @@ const CompaniesTable: React.FC<Props> = ({
     { domainIds: domainIds },
     { skip: !domainIds || domainIds.length === 0 }
   )
-  const debtorCompanies = data?.companies // боржники
+  const debtorCompanies = data?.companies
 
   const [deleteRealEstate, { isLoading: deleteLoading }] =
     useDeleteRealEstateMutation()
