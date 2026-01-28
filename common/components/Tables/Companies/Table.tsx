@@ -145,7 +145,7 @@ const CompaniesTable: React.FC<Props> = ({
     { domainIds: domainIds },
     { skip: !domainIds || domainIds.length === 0 }
   )
-  const debtorCompanies = data?.companies
+  const debtorCompanies = data?.companies // боржники
 
   const [deleteRealEstate, { isLoading: deleteLoading }] =
     useDeleteRealEstateMutation()
@@ -570,11 +570,23 @@ const getDefaultColumns = ({
     dataIndex: 'companyName',
     width: 200,
     filterSearch: true,
-    render: (i) => {
+    render: (i: string) => {
+      if (isUser || !debtorCompanies) return i;
       const debtor = debtorCompanies?.find(
         (companie) => companie?.companyName === i
-      )
-      return !isUser && debtor ? (
+      );
+
+       if (!debtor) return i;
+
+      const tooltipDebtor = (
+        <div>
+          <p><b>Компанія боржник</b></p>
+          <p>Назва компанії: {i}</p>
+          <p>Сума боргу: {formatDebt(debtor.totalDebt)}</p>
+        </div>
+      );
+
+      return (
         <Badge
           count={formatDebt(debtor.totalDebt)}
           title=""
@@ -582,14 +594,15 @@ const getDefaultColumns = ({
           overflowCount={Infinity}
           style={{ cursor: 'pointer' }}
           size="small"
+          offset={[3, -8]}
         >
-          <span>{i}</span>
+          <Tooltip title={tooltipDebtor}>
+            <span style={{cursor: 'pointer'}}>{i}</span>
+          </Tooltip>
         </Badge>
-      ) : (
-        i
-      )
+      );
     },
-  }
+  };
 
   const streetColumn: any = {
     title: 'Адреса',
