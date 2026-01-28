@@ -7,7 +7,6 @@ import FeatureFlagModal from '@common/components/Pages/Profile/Modal/AddFeatureF
 
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { FeatureFlagsTable } from '@common/components/FeatureFlagsTable'
-import { UsersTable } from '@components/Tables/UsersTable'
 import { Roles } from '@utils/constants'
 import { Button, Card, Flex, Space, Typography } from 'antd'
 import { Tabs } from 'antd'
@@ -31,11 +30,6 @@ export const AdminPanelPage: React.FC = () => {
             <Tabs
               defaultActiveKey="users"
               items={[
-                {
-                  key: 'users',
-                  label: 'Користувачі',
-                  children: <UsersTable />,
-                },
                 {
                   key: 'flags',
                   label: 'Фічефлаги',
