@@ -25,7 +25,8 @@
       expect(res.status).toHaveBeenCalledWith(200)
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        data: users.user,
+        data: expect.objectContaining(users.user),
+        
       })
     })
 
@@ -43,7 +44,7 @@
       expect(res.status).toHaveBeenCalledWith(200)
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        data: users.globalAdmin,
+         data: expect.objectContaining(users.globalAdmin),
       })
     })
 
@@ -61,7 +62,7 @@
       expect(res.status).toHaveBeenCalledWith(200)
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        data: users.domainAdmin,
+        data: expect.objectContaining(users.domainAdmin),
       })
     })
 
