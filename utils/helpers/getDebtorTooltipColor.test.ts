@@ -21,4 +21,19 @@ describe('getDebtorTooltipColor', () => {
     expect(getDebtorTooltipColor({ totalDebt: 0 })).toBeUndefined()
     expect(getDebtorTooltipColor({ totalDebt: -100 })).toBeUndefined()
   })
+  test('returns undefined when totalDebt is NaN', () => {
+    expect(getDebtorTooltipColor({ totalDebt: NaN })).toBeUndefined()
+  })
+  
+  test('returns undefined when totalDebt is null', () => {
+    expect(
+      getDebtorTooltipColor({ totalDebt: null as any })
+    ).toBeUndefined()
+  })
+
+  test('throws error when debtor is undefined', () => {
+    expect(() =>
+      getDebtorTooltipColor(undefined as any)
+    ).toThrow()
+  })
 })

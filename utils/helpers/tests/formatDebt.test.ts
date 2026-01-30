@@ -20,4 +20,13 @@ describe('formatDebt', () => {
     expect(formatDebt(-5)).toBe('-5.00')
     expect(formatDebt(-3.456)).toBe('-3.46')
   })
+
+  test('returns "NaN" when amount is NaN', () => {
+    expect(formatDebt(NaN)).toBe('NaN')
+  })
+
+  test('throws error when amount is undefined', () => {
+    expect(() => formatDebt(undefined as any)).toThrow()
+  })
+
 })
