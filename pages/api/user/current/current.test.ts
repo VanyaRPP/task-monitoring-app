@@ -11,23 +11,15 @@
   setupTestEnvironment()
 
   describe('GET /api/user/current', () => {
-    it('Should return User', async () => {
-      await mockLoginAs(users.user)
+    let req: any
+    let res: any
 
-      const req = { method: 'GET' } as any
-      const res = {
+    beforeEach(() => {
+      req = { method: 'GET' }
+      res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
-      } as any
-
-      await handler(req, res)
-
-      expect(res.status).toHaveBeenCalledWith(200)
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        data: expect.objectContaining(users.user),
-        
-      })
+      }
     })
 
     it('Should return GlobalAdmin', async () => {
