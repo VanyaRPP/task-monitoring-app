@@ -76,16 +76,20 @@ const ServicesHeader: React.FC<Props> = ({
 
         {router.pathname === AppRoutes.SERVICE && (
           <Space direction="vertical" size={4} style={{ minWidth: 300 }}>
-            <DomainFilterTags
-              collection={domainsFilter?.domainsFilter}
-              filters={filter}
-              setFilters={setFilter}
-            />
-            <StreetFilterTags
-              collection={streetsFilter?.streetsFilter}
-              filters={filter}
-              setFilters={setFilter}
-            />
+            {domainsFilter?.domainsFilter && domainsFilter.domainsFilter.length > 1 && (
+              <DomainFilterTags
+                collection={domainsFilter.domainsFilter}
+                filters={filter}
+                setFilters={setFilter}
+              />
+            )}
+            {streetsFilter?.streetsFilter && streetsFilter.streetsFilter.length > 1 && (
+              <StreetFilterTags
+                collection={streetsFilter.streetsFilter}
+                filters={filter}
+                setFilters={setFilter}
+              />
+            )}
           </Space>
         )}
       </div>

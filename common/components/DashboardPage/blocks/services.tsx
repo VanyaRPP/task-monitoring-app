@@ -86,10 +86,15 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
     isError,
   } = useGetAllServicesQuery({
     limit: isOnPage ? 0 : 5,
-    streetId: filter?.street || undefined,
-    domainId: sepDomainID || filter?.domain || undefined,
-    year: filter?.year,
-    month: filter?.month,
+    streetId:
+      (Array.isArray(filter?.street) ? filter.street[0] : filter?.street) ||
+      undefined,
+    domainId:
+      sepDomainID ||
+      (Array.isArray(filter?.domain) ? filter.domain[0] : filter?.domain) ||
+      undefined,
+    year: Array.isArray(filter?.year) ? filter.year[0] : filter?.year,
+    month: Array.isArray(filter?.month) ? filter.month[0] : filter?.month,
   })
 
   return (

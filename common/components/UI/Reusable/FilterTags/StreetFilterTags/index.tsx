@@ -1,11 +1,12 @@
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import FilterTags from '@components/UI/Reusable/FilterTags'
 import { Typography } from 'antd'
+import { IServiceFilter } from '@common/api/serviceApi/service.api.types'
 
 export const StreetFilterTags: React.FC<{
   collection: IFilter[]
-  filters: { street: string[] }
-  setFilters: React.Dispatch<React.SetStateAction<{ street: string[] }>>
+  filters: IServiceFilter | undefined
+  setFilters: (filters: IServiceFilter | undefined) => void
 }> = ({ collection, filters, setFilters }) => {
   return (
     <FilterTags
@@ -19,12 +20,16 @@ export const StreetFilterTags: React.FC<{
               filters?.street?.includes(filter.value)
             )
       }
-      onClose={(item) =>
+      onClose={(item) => {
+        const currentStreet = Array.isArray(filters?.street)
+          ? filters.street
+          : []
+        const newStreet = currentStreet.filter((f) => f !== item.value)
         setFilters({
           ...filters,
-          street: filters?.street?.filter((filter) => filter !== item.value),
+          street: newStreet.length > 0 ? (newStreet as any) : undefined,
         })
-      }
+      }}
     />
   )
 }

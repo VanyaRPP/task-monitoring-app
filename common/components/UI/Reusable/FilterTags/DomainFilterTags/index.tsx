@@ -1,11 +1,12 @@
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import FilterTags from '@components/UI/Reusable/FilterTags'
 import { Typography } from 'antd'
+import { IServiceFilter } from '@common/api/serviceApi/service.api.types'
 
 export const DomainFilterTags: React.FC<{
   collection: IFilter[]
-  filters: { domain: string[] }
-  setFilters: React.Dispatch<React.SetStateAction<{ domain: string[] }>>
+  filters: IServiceFilter | undefined
+  setFilters: (filters: IServiceFilter | undefined) => void
 }> = ({ collection, filters, setFilters }) => {
   return (
     <FilterTags
@@ -19,12 +20,17 @@ export const DomainFilterTags: React.FC<{
               filters?.domain?.includes(filter.value)
             )
       }
-      onClose={(item) =>
+      onClose={(item) => {
+        const currentDomain = Array.isArray(filters?.domain)
+          ? filters.domain
+          : []
+        const newDomain = currentDomain.filter((f) => f !== item.value)
         setFilters({
           ...filters,
-          domain: filters?.domain?.filter((filter) => filter !== item.value),
+          domain: newDomain.length > 0 ? (newDomain as any) : undefined,
         })
-      }
+      }}
     />
   )
 }
+
