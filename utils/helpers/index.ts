@@ -7,7 +7,7 @@ import Big from 'big.js'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
 import mongoose, { ObjectId } from 'mongoose'
-import { Roles, ServiceType } from '../constants'
+import { CURRENCY_MAP, Roles, ServiceType } from '../constants'
 import {
   getDomainsPipeline,
   getRealEstatesPipeline,
@@ -18,6 +18,7 @@ import { IPermissions } from '@modules/models/User'
 import { useGetUserByEmailQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Operations } from '@utils/constants'
 import { useState, useEffect } from 'react'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 
 export const toFirstUpperCase = (text: string) => {
   return text ? text[0].toUpperCase() + text.slice(1) : ''
@@ -338,6 +339,18 @@ export function toRoundFixed(value: string | number | any, length = 2): string {
     return '0'
   }
 }
+
+export function currencyWithUnit(
+  value: number | string,
+  company?: IRealestate,
+  unit?: string
+) {
+  const currency = company?.currency ?? 'UAH'
+  const label = CURRENCY_MAP[currency]?.label ?? 'грн'
+
+  return `${value} ${label}${unit ? `/${unit}` : ''}`
+}
+
 
 export function multiplyFloat(a, b) {
   const bigA = Big(toRoundFixed(`${a}`))

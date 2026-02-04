@@ -11,6 +11,7 @@ import {
   FormInstance,
   Input,
   InputNumber,
+  Select,
   Typography,
 } from 'antd'
 import { FC, useEffect } from 'react'
@@ -147,90 +148,56 @@ const RealEstateForm: FC<Props> = ({
         />
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} required={false} />
+
       {isMeterBasedServiceExist && (
         <>
-      <Form.Item
-        name="totalArea"
-        label="Площа (м²)"
-        rules={validateField('required')}
-      >
-        <InputNumber
-          parser={inputNumberParser}
-          placeholder="Вкажіть значення"
-          className={s.formInput}
-          disabled={!editable}
-        />
-      </Form.Item>
-      <Form.Item
-        name="pricePerMeter"
-        label="Ціна (грн/м²)"
-        rules={validateField('required')}
-      >
-        <InputNumber
-          parser={inputNumberParser}
-          placeholder="Вкажіть значення"
-          className={s.formInput}
-          disabled={!editable}
-        />
-      </Form.Item>
+          <Form.Item
+            name="totalArea"
+            label="Площа (м²)"
+            rules={validateField('required')}
+          >
+            <InputNumber
+              parser={inputNumberParser}
+              placeholder="Вкажіть значення"
+              className={s.formInput}
+              disabled={!editable}
+            />
+          </Form.Item>
+          <Form.Item
+            name="pricePerMeter"
+            label="Ціна (грн/м²)"
+            rules={validateField('required')}
+          >
+            <InputNumber
+              parser={inputNumberParser}
+              placeholder="Вкажіть значення"
+              className={s.formInput}
+              disabled={!editable}
+            />
+          </Form.Item>
+          <Form.Item
+            name="currency"
+            label="Валюта"
+            rules={validateField('required')}
+          >
+            <Select
+              placeholder="Оберіть валюту"
+              className={s.formInput}
+              disabled={!editable}
+            >
+              <Select.Option value="UAH">UAH</Select.Option>
+              <Select.Option value="USD">USD</Select.Option>
+              <Select.Option value="EUR">EUR</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <CustomServicesCard
+            form={form}
+            disabled={!editable}
+            allCustomServices={customServices}
+          />
         </>
       )}
-      <CustomServicesCard
-        form={form}
-        disabled={!editable}
-        allCustomServices={customServices}
-      />
-      {/* { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') && // TODO: customServices */}
-      {/* <Form.Item
-        name="servicePricePerMeter"
-        label="Індивідуальне утримання (грн/м²)"
-      >
-        <InputNumber
-          parser={inputNumberParser}
-          placeholder="Вкажіть значення"
-          className={s.formInput}
-          disabled={!editable}
-        />
-      </Form.Item> */}
-      {/* } */}
-      {/* <Form.Item name="rentPart" label="Частка загальної площі">
-        <InputNumber
-          parser={inputNumberParser}
-          placeholder="Вкажіть значення"
-          className={s.formInput}
-          disabled={!editable}
-        />
-      </Form.Item> */}
-
-      {/* {isServiceExist('waterPrice') && (
-        <Form.Item name="waterPart" label="Частка водопостачання">
-          <InputNumber
-            parser={inputNumberParser}
-            placeholder="Вкажіть значення"
-            className={s.formInput}
-            disabled={!editable}
-          />
-        </Form.Item>
-      )} */}
-      {/* { !(customServices ?? []).some(item => item.fieldName === 'rentPrice') && */}
-      {/* <Form.Item name="cleaning" label="Прибирання (грн)">
-        <InputNumber
-          parser={inputNumberParser}
-          placeholder="Вкажіть значення"
-          className={s.formInput}
-          disabled={!editable}
-        />
-      </Form.Item> */}
-      {/* } */}
-
-      {/* <Form.Item name="discount" label="Знижка">
-        <InputNumber
-          parser={inputNumberParser}
-          placeholder="Вкажіть значення"
-          className={s.formInput}
-          disabled={!editable}
-        />
-      </Form.Item> */}
 
       <Form.Item
         valuePropName="checked"
