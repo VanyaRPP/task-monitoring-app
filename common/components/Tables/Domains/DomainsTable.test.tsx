@@ -57,6 +57,10 @@ beforeEach(() => {
   ])
 })
 
+afterEach(() => {
+  jest.clearAllMocks()
+})
+
 it('renders domains table with data', () => {
   ;(useGetDomainsQuery as jest.Mock).mockReturnValue({
     data: mockDomains,

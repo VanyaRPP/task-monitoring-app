@@ -73,6 +73,10 @@ describe('CompaniesTable - Column Visibility', () => {
     });
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
 
   test('should display company column when there are multiple unique companies', () => {
     const mockRealEstates: IGetRealestateResponse = {
