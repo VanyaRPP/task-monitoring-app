@@ -213,11 +213,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const screens = useBreakpoint()
   const isMobile = !screens.md
 
-  const domainsFromData = Array.from(
-    new Set(payments?.data?.map((p) => p.domain?._id))
-  )
-
-  const isSingleDomainByRealData = domainsFromData.length === 1
+  const isSingleDomainByRealData = domainsFilter.length === 1
 
   const isGlobalAdmin = currUserRoles.includes(Roles.GLOBAL_ADMIN)
   const isDomainAdmin = currUserRoles.includes(Roles.DOMAIN_ADMIN)
@@ -240,7 +236,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     return filters?.domain?.length === 1 && uniqueDomains.size === 1
   }, [payments?.data, filters?.domain])
 
-   const widenFilterDropdown = (w = 240) => (open: boolean) => {
+  const widenFilterDropdown = (w = 240) => (open: boolean) => {
       if (!open) return
       requestAnimationFrame(() => {
         document.querySelectorAll<HTMLElement>('.ant-table-filter-dropdown').forEach(el => {
