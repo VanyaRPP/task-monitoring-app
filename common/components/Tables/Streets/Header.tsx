@@ -42,6 +42,7 @@ const StreetsHeader: React.FC<Props> = ({
   const { data: userResponse } = useGetCurrentUserQuery()
 
   const UserRoles = usePermissions(userResponse)
+  const isAdmin = UserRoles?.isGlobalAdmin || UserRoles?.isDomainAdmin
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -55,7 +56,7 @@ const StreetsHeader: React.FC<Props> = ({
         <SelectOutlined />
       </Button>
 
-      {showAddButton && UserRoles?.isGlobalAdmin && (
+      {showAddButton && isAdmin && (
         <Button type="link" onClick={openModal}>
           <PlusOutlined /> Додати
         </Button>

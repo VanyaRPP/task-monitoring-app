@@ -4,24 +4,51 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from '@pages/api/api.config'
 import { getTransactionsForDateInterval } from './utils/getTransactions/index'
 import Payment from '@modules/models/Payment'
+import { toRoundFixed } from '@utils/helpers'
 
 start()
 
-async function checkTransaction({ transaction }) {
+export async function  checkTransaction({ transaction }) {
   try {
+    const normalizedSum = +toRoundFixed(transaction.SUM)
+    
+    const normalizedAcc = transaction.AUT_CNTR_ACC?.trim() || ''
+    const normalizedNam = transaction.AUT_CNTR_NAM?.trim() || ''
+    const normalizedMfo = transaction.AUT_CNTR_MFO?.trim() || ''
+
     const allPayments = await Payment.find({
       $and: [
-        { 'transaction.AUT_CNTR_ACC': transaction.AUT_CNTR_ACC },
-        { 'transaction.AUT_CNTR_NAM': transaction.AUT_CNTR_NAM },
-        { 'transaction.AUT_CNTR_MFO': transaction.AUT_CNTR_MFO },
-        { 'transaction.Description': transaction.OSND },
-        { generalSum: +transaction.SUM },
+        {
+          $expr: {
+            $eq: [
+              { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_ACC', ''] } } },
+              normalizedAcc
+            ]
+          }
+        },
+        {
+          $expr: {
+            $eq: [
+              { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_NAM', ''] } } },
+              normalizedNam
+            ]
+          }
+        },
+        {
+          $expr: {
+            $eq: [
+              { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_MFO', ''] } } },
+              normalizedMfo
+            ]
+          }
+        },
+        { generalSum: normalizedSum },
       ],
     })
 
     return {
       isMatchingPayment: allPayments.length > 0,
-      previousCompanyId: allPayments[0].company,
+      previousCompanyId: allPayments.length > 0 ? allPayments[0].company : null,
     }
   } catch (error) {
     throw new Error(`${error.message}`)

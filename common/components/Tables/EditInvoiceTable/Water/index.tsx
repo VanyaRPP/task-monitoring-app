@@ -4,24 +4,20 @@ import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { DividedSpace } from '@components/UI/DividedSpace'
 import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography, Tooltip, Button } from 'antd'
-import { useEffect, useMemo, useState } from 'react'
-import { ReloadOutlined } from '@ant-design/icons'
+import { Form, Input, Space, Typography } from 'antd'
+import { useEffect, useMemo } from 'react'
+import { ServiceType } from '@utils/constants'
+import UpdateInvoiceButton from '../UpdateInvoiceButton'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
   name: _name,
   editable,
+  disabled,
 }) => {
-  const { service, prevPayment, payment } = usePaymentContext()
+  const { service } = usePaymentContext()
   const name = useMemo(() => toArray<string>(_name), [_name])
-  const price = Form.useWatch(['invoice', ...name, 'price'], form)
-  const lastAmount = Form.useWatch(['invoice', ...name, 'lastAmount'], form)
-  const waterAmount =
-    payment?.invoice?.find((invoice) => invoice.type === 'waterPrice')
-      ?.lastAmount ??
-    prevPayment?.invoice?.find((invoice) => invoice.type === 'waterPrice')
-      ?.lastAmount
+
   return (
     <Space
       direction="horizontal"
@@ -33,24 +29,14 @@ export const Name: React.FC<InvoiceComponentProps> = ({
           {toFirstUpperCase(dateToMonthYear(service?.date))}
         </Typography.Text>
       </Space>
-      {editable &&
-        (service?.waterPrice !== +price || lastAmount !== waterAmount) && (
-          <Tooltip title="Відновити значення">
-            <Button
-              onClick={() => {
-                form.setFieldValue(
-                  ['invoice', ...name, 'price'],
-                  service?.waterPrice
-                )
-                form.setFieldValue(
-                  ['invoice', ...name, 'lastAmount'],
-                  waterAmount ?? lastAmount
-                )
-              }}
-              icon={<ReloadOutlined />}
-            />
-          </Tooltip>
-        )}
+      {editable && (
+        <UpdateInvoiceButton
+          form={form!}
+          name={name}
+          serviceType={ServiceType.Water}
+          disabled={disabled}
+        />
+      )}
     </Space>
   )
 }

@@ -73,11 +73,13 @@ export default async function handler(
             adminEmails: user.email,
           }).select('streets')
 
-          if (!adminDomains.length) {
-            return res.status(200).json({ success: true, data: [] })
-          }
+          const adminStreetIds = adminDomains.flatMap((domain) => domain.streets)
 
-          const streetIds = adminDomains.flatMap((domain) => domain.streets)
+          const allDomains = await Domain.find({}).select('streets')
+          const allUsedStreetIds = allDomains.flatMap((domain) => domain.streets)
+          const otherAdminsStreetIds = allUsedStreetIds.filter(
+            (id) => !adminStreetIds.some((adminId) => adminId.toString() === id.toString())
+          )
 
           let streets
 
@@ -96,13 +98,31 @@ export default async function handler(
               _id: { $in: selectedStreetIds },
             }).limit(+limit)
           } else {
+            const freeStreets = await Street.find({
+              _id: { $nin: allUsedStreetIds },
+            })
+
+            const domainStreets = adminStreetIds.length
+              ? await Street.find({
+                  _id: { $in: adminStreetIds },
+                })
+              : []
+
+            const allAvailableStreetIds = [
+              ...new Set([
+                ...domainStreets.map((s) => s._id.toString()),
+                ...freeStreets.map((s) => s._id.toString()),
+              ]),
+            ]
+
             streets = await Street.find({
-              _id: { $in: streetIds },
+              _id: { $in: allAvailableStreetIds },
             }).limit(+limit)
           }
 
+          const allAvailableStreetIds = streets.map((s) => s._id)
           const servicesWithStreets = await Service.find({
-            street: { $in: streetIds },
+            street: { $in: allAvailableStreetIds },
           })
 
           const result = streets.map((street) => ({
@@ -127,16 +147,16 @@ export default async function handler(
       }
     case 'POST':
       try {
-        if (isGlobalAdmin) {
-          const street = await Street.create(req.body)
-          return res.status(200).json({ success: true, data: street })
-        } else {
+        if (!isDomainAdmin && !isGlobalAdmin) {
           return res
-            .status(400)
-            .json({ success: false, message: 'not allowed' })
+            .status(403)
+            .json({ success: false, message: 'Access denied: not an admin' })
         }
+
+        const street = await Street.create(req.body)
+        return res.status(200).json({ success: true, data: street })
       } catch (error) {
-        return res.status(400).json({ success: false })
+        return res.status(400).json({ success: false, error: error.message })
       }
   }
 }

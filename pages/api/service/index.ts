@@ -97,10 +97,16 @@ export default async function handler(
         }
 
         if (isDomainAdmin) {
-          const domains = await Domain.find({
-            ...(filters.domain ? { _id: filters.domain } : {}),
+          // Filter domains by admin email
+          const domainFilter: any = {
             adminEmails: { $in: [user.email] },
-          })
+          }
+
+          if (filters.domain) {
+            domainFilter._id = filters.domain
+          }
+
+          const domains = await Domain.find(domainFilter)
 
           if (domains) {
             options.domain = { $in: domains.map(({ _id }) => _id) }
@@ -170,6 +176,29 @@ export default async function handler(
     case 'POST':
       try {
         if (isGlobalAdmin || isDomainAdmin) {
+          if (isDomainAdmin && !isGlobalAdmin) {
+            const { domain } = req.body
+            if (!domain) {
+              return res
+                .status(400)
+                .json({ success: false, message: 'Domain is required' })
+            }
+
+            const adminDomain = await Domain.findOne({
+              _id: domain,
+              adminEmails: user.email,
+            })
+
+            if (!adminDomain) {
+              return res
+                .status(403)
+                .json({
+                  success: false,
+                  message: 'Access denied: domain not found or you are not an admin of this domain',
+                })
+            }
+          }
+
           // TODO: body validation
           const service = await Service.create(req.body)
           return res.status(200).json({ success: true, data: service })

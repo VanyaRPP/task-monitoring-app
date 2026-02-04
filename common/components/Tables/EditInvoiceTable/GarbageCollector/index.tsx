@@ -3,9 +3,10 @@ import { usePaymentContext } from '@components/AddPaymentModal'
 import { InvoiceComponentProps } from '@components/Tables/EditInvoiceTable'
 import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { Form, Input, Space, Typography, Button, Tooltip } from 'antd'
-import { ReloadOutlined } from '@ant-design/icons'
-import { useContext, useEffect, useMemo } from 'react'
+import { Form, Input, Space, Typography } from 'antd'
+import { useEffect, useMemo } from 'react'
+import { ServiceType } from '@utils/constants'
+import UpdateInvoiceButton from '../UpdateInvoiceButton'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -13,8 +14,8 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { company, service } = usePaymentContext()
-  const gardagePrice = service?.garbageCollectorPrice * (company?.rentPart / 100)
+  const { service } = usePaymentContext()
+  const name = useMemo(() => toArray<string>(_name), [_name])
 
   return (
     <Space
@@ -27,23 +28,14 @@ export const Name: React.FC<InvoiceComponentProps> = ({
           {toFirstUpperCase(dateToMonthYear(service?.date))}
         </Typography.Text>
       </Space>
-      {
-        editable &&
-        (gardagePrice !==
-          Form.useWatch(['invoice', ...toArray<string>(_name), 'price'], form)) && (
-          <Tooltip title="Відновити значення">
-            <Button
-              onClick={() => {
-                form.setFieldValue(
-                  ['invoice', ...toArray<string>(_name), 'price'],
-                  gardagePrice
-                )
-              }}
-              icon={<ReloadOutlined />}
-            />
-          </Tooltip>
-        )
-      }
+      {editable && (
+        <UpdateInvoiceButton
+          form={form!}
+          name={name}
+          serviceType={ServiceType.GarbageCollector}
+          disabled={disabled}
+        />
+      )}
     </Space>
   )
 }

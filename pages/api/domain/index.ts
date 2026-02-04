@@ -41,7 +41,7 @@ export default async function handler(
         const domainIds = typeof domainId === 'string' ? [domainId] : domainId
         const streetIds = typeof streetId === 'string' ? [streetId] : streetId
 
-        const options = {}
+        const options: any = {}
 
         if (!isDomainAdmin && !isGlobalAdmin) {
           return res.status(200).json({ success: true, data: [] })
@@ -49,14 +49,22 @@ export default async function handler(
 
         if (isDomainAdmin) {
           options.adminEmails = user.email
-        }
 
-        if (domainIds?.length > 0) {
-          options._id = { $in: domainIds }
-        }
+          if (domainIds?.length > 0) {
+            options._id = { $in: domainIds }
+          }
 
-        if (streetIds?.length > 0) {
-          options.streets = streetIds
+          if (streetIds?.length > 0) {
+            options.streets = streetIds
+          }
+        } else {
+          if (domainIds?.length > 0) {
+            options._id = { $in: domainIds }
+          }
+
+          if (streetIds?.length > 0) {
+            options.streets = streetIds
+          }
         }
 
         const domains = await Domain.find(options)
@@ -69,6 +77,12 @@ export default async function handler(
       }
     case 'POST':
       try {
+        if (!isDomainAdmin && !isGlobalAdmin) {
+          return res
+            .status(403)
+            .json({ success: false, error: 'Access denied: not an admin' })
+        }
+
         const { name, streets } = req.body
 
         const existingDomain = await Domain.findOne({
@@ -82,6 +96,15 @@ export default async function handler(
         }
 
         const updatedObj = encryptDomainBankTokens(req.body, SECURE_TOKEN)
+
+        if (isDomainAdmin && !isGlobalAdmin) {
+          if (!updatedObj.adminEmails || !Array.isArray(updatedObj.adminEmails)) {
+            updatedObj.adminEmails = []
+          }
+          if (!updatedObj.adminEmails.includes(user.email)) {
+            updatedObj.adminEmails.push(user.email)
+          }
+        }
 
         await Domain.create(updatedObj)
           .then((domain) => {

@@ -7,7 +7,8 @@ import validator from '@utils/validator'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { Form, Input, Space, Typography, Tooltip } from 'antd'
 import { useEffect, useMemo } from 'react'
-import UpdateInvoiceButton from './UpdateInvoiceButton'
+import { ServiceType } from '@utils/constants'
+import UpdateInvoiceButton from '../UpdateInvoiceButton'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -15,14 +16,14 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  const { service, payment } = usePaymentContext()
+  const { service, payment, company } = usePaymentContext()
   const name = useMemo(() => toArray<string>(_name), [_name])
   const losses = Form.useWatch(['invoice', ...name, 'losses'], form) ?? 0
 
   return (
     <Space
       direction="horizontal"
-      size='large'
+      style={{ justifyContent: 'space-between', width: '100%' }}
     >
       <Space direction="vertical" size={0}>
         <Typography.Text>Електропостачання</Typography.Text>
@@ -33,8 +34,9 @@ export const Name: React.FC<InvoiceComponentProps> = ({
       </Space>
       {editable && (
         <UpdateInvoiceButton
-          form={form}
-          service={service}
+          form={form!}
+          name={name}
+          serviceType={ServiceType.Electricity}
           disabled={disabled}
         />
       )}

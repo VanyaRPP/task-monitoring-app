@@ -5,6 +5,8 @@ import { currencyWithUnit, toArray, toFirstUpperCase, toRoundFixed } from '@util
 import validator from '@utils/validator'
 import { Form, Input, Space, Typography } from 'antd'
 import { useEffect, useMemo } from 'react'
+import { ServiceType } from '@utils/constants'
+import UpdateInvoiceButton from '../UpdateInvoiceButton'
 
 export const Name: React.FC<InvoiceComponentProps> = ({
   form,
@@ -13,13 +15,27 @@ export const Name: React.FC<InvoiceComponentProps> = ({
   disabled,
 }) => {
   const { service } = usePaymentContext()
+  const name = useMemo(() => toArray<string>(_name), [_name])
 
   return (
-    <Space direction="vertical" size={0}>
-      <Typography.Text>Знижка</Typography.Text>
-      <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
-        {toFirstUpperCase(dateToMonthYear(service?.date))}
-      </Typography.Text>
+    <Space
+      direction="horizontal"
+      style={{ justifyContent: 'space-between', width: '100%' }}
+    >
+      <Space direction="vertical" size={0}>
+        <Typography.Text>Знижка</Typography.Text>
+        <Typography.Text type="secondary" style={{ fontSize: '0.75rem' }}>
+          {toFirstUpperCase(dateToMonthYear(service?.date))}
+        </Typography.Text>
+      </Space>
+      {editable && (
+        <UpdateInvoiceButton
+          form={form!}
+          name={name}
+          serviceType={ServiceType.Discount}
+          disabled={disabled}
+        />
+      )}
     </Space>
   )
 }

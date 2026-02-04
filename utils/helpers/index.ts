@@ -1,6 +1,7 @@
 import { IProvider, IReciever } from '@common/api/paymentApi/payment.api.types'
 import User, { IUser } from '@modules/models/User'
 import RealEstate from '@modules/models/RealEstate'
+import Domain from '@modules/models/Domain'
 import { FormInstance } from 'antd'
 import Big from 'big.js'
 import dayjs from 'dayjs'
@@ -234,6 +235,13 @@ export const renderCurrency = (number: any): string => {
   } else {
     return '-'
   }
+}
+
+export const renderPrice = (value?: unknown): string => {
+  if (typeof value !== 'number' || !isFinite(value)) {
+    return '-'
+  }
+  return renderCurrency(value)
 }
 
 export const formatDateDMY = (date: string) => {
@@ -668,6 +676,20 @@ export async function isDomainAdmin(user?: IUser): Promise<boolean> {
   } catch (error) {
     console.error(error)
     return false
+  }
+}
+
+export async function getDomainAdminDomains(
+  userEmail: string
+): Promise<string[]> {
+  try {
+    const domains = await Domain.find({
+      adminEmails: userEmail,
+    })
+    return domains.map((domain) => domain._id.toString())
+  } catch (error) {
+    console.error(error)
+    return []
   }
 }
 // GLOBAL ADMIN HELPER

@@ -17,7 +17,7 @@ import {
 } from '@common/api/realestateApi/realestate.api.types'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { AppRoutes, Roles } from '@utils/constants'
-import { formatDebt, isAdminCheck, renderCurrency } from '@utils/helpers'
+import { formatDebt, isAdminCheck, renderCurrency, renderPrice } from '@utils/helpers'
 import { getDebtorTooltipColor } from '@utils/helpers'
 import s from './style.module.scss'
 import {
@@ -365,12 +365,8 @@ const getDefaultColumns = ({
       width: 120,
       align: 'center',
       sorter: isOnPage ? (a, b) => a.pricePerMeter - b.pricePerMeter : null,
-      render: (value) =>
-        value !== null && value !== undefined && value !== 0 ? (
-          renderCurrency(value)
-        ) : (
-          <span className={s.currency}>-</span>
-        ),
+      render: (value) => <span className={s.currency}>{renderPrice(value)}</span>
+
     },
     {
       title: 'Індивідуальне утримання (грн/м²)',
@@ -574,11 +570,23 @@ const getDefaultColumns = ({
     dataIndex: 'companyName',
     width: 200,
     filterSearch: true,
-    render: (i) => {
+    render: (i: string) => {
+      if (isUser || !debtorCompanies) return i;
       const debtor = debtorCompanies?.find(
         (companie) => companie?.companyName === i
-      )
-      return !isUser && debtor ? (
+      );
+
+       if (!debtor) return i;
+
+      const tooltipDebtor = (
+        <div>
+          <p><b>Компанія боржник</b></p>
+          <p>Назва компанії: {i}</p>
+          <p>Сума боргу: {formatDebt(debtor.totalDebt)}</p>
+        </div>
+      );
+
+      return (
         <Badge
           count={formatDebt(debtor.totalDebt)}
           title=""
@@ -586,14 +594,15 @@ const getDefaultColumns = ({
           overflowCount={Infinity}
           style={{ cursor: 'pointer' }}
           size="small"
+          offset={[3, -8]}
         >
-          <span>{i}</span>
+          <Tooltip title={tooltipDebtor}>
+            <span style={{cursor: 'pointer'}}>{i}</span>
+          </Tooltip>
         </Badge>
-      ) : (
-        i
-      )
+      );
     },
-  }
+  };
 
   const streetColumn: any = {
     title: 'Адреса',
