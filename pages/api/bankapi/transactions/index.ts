@@ -5,6 +5,9 @@ import start, { Data } from '@pages/api/api.config'
 import { getTransactionsForDateInterval } from './utils/getTransactions/index'
 import Payment from '@modules/models/Payment'
 import { toRoundFixed } from '@utils/helpers'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@pages/api/auth/[...nextauth]'
+import { Roles } from '@utils/constants'
 
 start()
 
@@ -59,6 +62,29 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  const session = await getServerSession(req, res, authOptions)
+    if (!session) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized',
+      })
+    }
+
+    const userRoles = session.user?.roles || []
+
+    const allowedRoles = [Roles.GLOBAL_ADMIN, Roles.DOMAIN_ADMIN]
+
+    const hasAccess = userRoles.some((role) =>
+      allowedRoles.includes(role)
+    )
+
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden',
+      })
+    }
+    
   const { token: tokenQuery, startDate, limit, followId, acc } = req.query
 
   const { token: tokenHeader } = req.headers
