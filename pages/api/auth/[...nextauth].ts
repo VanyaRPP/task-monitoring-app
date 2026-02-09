@@ -63,7 +63,6 @@ export const authOptions: NextAuthOptions = {
                 id: user._id.toString(),
                 name: user.name,
                 email: user.email,
-                roles: user.roles,
               }
             }
           } else {
@@ -79,7 +78,6 @@ export const authOptions: NextAuthOptions = {
               id: newUser._id.toString(),
               name: newUser.name,
               email: newUser.email,
-              roles: newUser.roles,
             }
           }
 
@@ -139,15 +137,9 @@ export const authOptions: NextAuthOptions = {
       return baseUrl
     },
     async session({ session, user, token }) {
-      if (session.user) {
-        session.user.roles = token.roles as string[]
-      }
       return session
     },
     async jwt({ token, user, account, profile, isNewUser }) {
-      if (user) {
-        token.roles = (user as any).roles
-      }
       return token
     },
   },
