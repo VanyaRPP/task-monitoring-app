@@ -1,4 +1,5 @@
 import CustomService from '@modules/models/CustomService'
+import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { transliterateAndCamelCase } from '@utils/transliterateAndCamelCase'
@@ -26,7 +27,7 @@ export default async function handler(
         if (!isGlobalAdmin && !isDomainAdmin) {
           return res
             .status(400)
-            .json({ success: false, message: 'Not allowed' })
+            .json({ success: false, message: 'Не дозволено' })
         }
 
         const trimmedName = typeof name === 'string' ? name.trim() : name
@@ -34,7 +35,7 @@ export default async function handler(
         if (!trimmedName) {
           return res.status(400).json({
             success: false,
-            message: 'Missing required fields: name',
+            message: 'Назва послуги не може бути порожньою',
           })
         }
 
@@ -62,7 +63,72 @@ export default async function handler(
       } catch (error: any) {
         return res.status(500).json({
           success: false,
-          message: 'Error creating service',
+          message: 'Помилка при створенні сервісу',
+          error: error.message,
+        })
+      }
+
+    case 'DELETE':
+      try {
+        const { id, domainId } = req.query
+
+        if (!isGlobalAdmin && !isDomainAdmin) {
+          return res
+            .status(400)
+            .json({ success: false, message: 'Не дозволено' })
+        }
+
+        if (!id || Array.isArray(id)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Відсутній або некоректний id',
+          })
+        }
+
+        if (!domainId || Array.isArray(domainId)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Відсутній або некоректний domainId',
+          })
+        }
+
+        const domain = await Domain.findById(domainId).lean()
+        if (!domain) {
+          return res.status(404).json({
+            success: false,
+            message: 'Надавач послуг не знайдений',
+          })
+        }
+
+        if (isDomainAdmin && !isGlobalAdmin) {
+          const isServiceInDomain = domain.customServices?.some(group =>
+            group.services?.some(serviceId => String(serviceId) === String(id))
+          )
+          if (!isServiceInDomain) {
+            return res.status(403).json({
+              success: false,
+              message: 'Послуга не належить цьому надавачу послуг',
+            })
+          }
+        }
+
+        const deletedService = await CustomService.findByIdAndDelete(id)
+
+        if (!deletedService) {
+          return res.status(404).json({
+            success: false,
+            message: 'Сервіс не знайдений',
+          })
+        }
+
+        return res.status(200).json({
+          success: true,
+          data: 'Сервіс успішно видалено',
+        })
+      } catch (error: any) {
+        return res.status(500).json({
+          success: false,
+          message: 'Помилка при видаленні сервісу',
           error: error.message,
         })
       }
@@ -74,7 +140,7 @@ export default async function handler(
         if (isUser) {
           return res.status(400).json({
             success: false,
-            message: 'Not allowed',
+            message: 'Не дозволено',
           })
         }
 
@@ -94,7 +160,7 @@ export default async function handler(
       } catch (error: any) {
         return res.status(500).json({
           success: false,
-          message: 'Error fetching services',
+          message: 'Помилка при отриманні сервісів',
           error: error.message,
         })
       }
@@ -102,7 +168,7 @@ export default async function handler(
     default:
       return res.status(405).json({
         success: false,
-        message: `Method ${req.method} not allowed`,
+        message: `Метод ${req.method} не дозволений`,
       })
   }
 }
