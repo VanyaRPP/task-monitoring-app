@@ -10,6 +10,7 @@ import { FeatureFlagsTable } from '@common/components/FeatureFlagsTable'
 import { Roles } from '@utils/constants'
 import { Button, Card, Flex, Space, Typography } from 'antd'
 import { Tabs } from 'antd'
+import {UsersTable} from '@common/components/Tables/UsersTable'
 
 export const AdminPanelPage: React.FC = () => {
   const { data: user } = useGetCurrentUserQuery()
@@ -30,6 +31,24 @@ export const AdminPanelPage: React.FC = () => {
             <Tabs
               defaultActiveKey="users"
               items={[
+                {
+                  key: 'users',
+                  label: 'Користувачі',
+                  children: (
+                    <>
+                      <Flex
+                        justify="space-between"
+                        align="center"
+                        style={{ marginBottom: 16 }}
+                      >
+                        <Typography.Title level={4} style={{ marginBottom: 16 }}>
+                          Користувачі
+                        </Typography.Title>
+                      </Flex>
+                      <UsersTable />
+                    </>
+                  ),
+                },
                 {
                   key: 'flags',
                   label: 'Фічефлаги',
