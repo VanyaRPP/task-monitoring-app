@@ -159,3 +159,34 @@ export interface IPaymentTransactions {
   AUT_CNTR_MFO: string
   Description: string
 }
+
+export interface IPaymentInvoiceSnapshot {
+  invoiceNumber: number
+  invoiceCreationDate: Date
+  invoice: IPaymentField[]
+  provider: IProvider
+  reciever: IReciever
+  generalSum: number
+  description?: string
+  type: string
+}
+
+export interface IPaymentChangeLog {
+  _id: string
+  paymentId: string
+  date: string
+  reason?: string
+  actorId?: string
+  actorEmail?: string
+  invoiceData: IPaymentInvoiceSnapshot
+}
+
+export interface IGetPaymentChangeLogsResponse {
+  success: boolean
+  data: IPaymentChangeLog[]
+}
+
+export interface ICreatePaymentChangeLogResponse {
+  success: boolean
+  data: IPaymentChangeLog
+}

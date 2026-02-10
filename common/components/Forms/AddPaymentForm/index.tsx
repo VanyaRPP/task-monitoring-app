@@ -9,8 +9,8 @@ import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
 import PaymentTypeSelect from '@components/UI/Reusable/PaymentTypeSelect'
 import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
-import { Form, Input, InputNumber } from 'antd'
-import { useEffect, useMemo, useState } from 'react'
+import { Form, Input, InputNumber, Select, Button } from 'antd'
+import { useMemo, useState } from 'react'
 import CompanySelect from './CompanySelect'
 import InvoiceCreationDate from './InvoiceCreationDate'
 import InvoiceNumber from './InvoiceNumber'
@@ -18,6 +18,14 @@ import MonthServiceSelect from './MonthServiceSelect'
 import PaymentPricesTable from './PaymentPricesTable'
 import PaymentTotal from './PaymentTotal'
 import { inputNumberParser } from '@utils/helpers'
+import type { SelectProps } from 'antd'
+import type { ChangelogOption } from '@components/AddPaymentModal/changelog/types'
+
+type AddPaymentFormProps = {
+  paymentActions: { preview: boolean; edit: boolean; create?: boolean }
+  changelogOptions?: ChangelogOption[]
+  changelogLoading?: boolean
+}
 
 export const useInvoice = ({
   payment,
@@ -38,7 +46,11 @@ export const useInvoice = ({
   return invoices
 }
 
-function AddPaymentForm({ paymentActions }) {
+function AddPaymentForm({
+  paymentActions,
+  changelogOptions = [],
+  changelogLoading,
+}: AddPaymentFormProps) {
   const { preview, edit } = paymentActions
   const selectedActions = { preview, edit }
 
@@ -46,18 +58,18 @@ function AddPaymentForm({ paymentActions }) {
     usePaymentContext()
 
   const [streetHasService, setStreetHasService] = useState(false)
-  const selectedDomain = Form.useWatch('domain', form)
   const companyId = Form.useWatch('company', form)
   const operation = Form.useWatch('operation', form)
+  const changelogId = Form.useWatch('changelogId', form)
 
-  const invoice = useInvoice({
+  useInvoice({
     payment,
     service,
     company,
     prevService,
     prevPayment,
   })
-
+  const showCurrentVersionBtn = !!changelogId
   return (
     <>
       <DomainsSelect form={form} edit={edit} />
@@ -72,6 +84,26 @@ function AddPaymentForm({ paymentActions }) {
       <PaymentTypeSelect edit={!companyId || edit} />
       <InvoiceNumber form={form} paymentActions={selectedActions} />
       <InvoiceCreationDate edit={preview} />
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Form.Item
+          name="changelogId"
+          label="Історія змін"
+          tooltip="Попередні версії рахунку. Зберігаються автоматично після кожного редагування."
+          style={{ width: 320 }}
+        >
+          <Select
+            allowClear
+            placeholder="Оберіть версію рахунку"
+            options={changelogOptions}
+            optionLabelProp="shortLabel"
+            loading={changelogLoading}
+            disabled={preview}
+            notFoundContent={
+              changelogLoading ? 'Завантаження...' : 'Історії змін ще немає'
+            }
+          />
+        </Form.Item>
+      </div>
 
       {operation === Operations.Credit ? (
         <>

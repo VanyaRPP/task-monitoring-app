@@ -5,6 +5,8 @@ import start, { Data } from '@pages/api/api.config'
 import { getTransactionsForDateInterval } from './utils/getTransactions/index'
 import Payment from '@modules/models/Payment'
 import { toRoundFixed } from '@utils/helpers'
+import { Roles } from '@utils/constants'
+import { getCurrentUser } from '@utils/getCurrentUser'
 
 start()
 
@@ -18,14 +20,14 @@ export async function  checkTransaction({ transaction }) {
 
     const allPayments = await Payment.find({
       $and: [
-        {
-          $expr: {
-            $eq: [
-              { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_ACC', ''] } } },
-              Acc
-            ]
-          }
-        },
+        // {
+        //   $expr: {
+        //     $eq: [
+        //       { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_ACC', ''] } } },
+        //       Acc
+        //     ]
+        //   }
+        // },
         // {
         //   $expr: {
         //     $eq: [
@@ -59,6 +61,25 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  const {
+    isGlobalAdmin,
+    isDomainAdmin,
+    user,
+  } = await getCurrentUser(req, res)
+
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      message: 'Unauthorized',
+    })
+  }
+
+  if (!isGlobalAdmin && !isDomainAdmin) {
+    return res.status(403).json({
+      success: false,
+      message: 'Forbidden',
+    })
+  }
   const { token: tokenQuery, startDate, limit, followId, acc } = req.query
 
   const { token: tokenHeader } = req.headers
