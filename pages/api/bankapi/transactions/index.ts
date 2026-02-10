@@ -18,14 +18,14 @@ export async function  checkTransaction({ transaction }) {
 
     const allPayments = await Payment.find({
       $and: [
-        {
-          $expr: {
-            $eq: [
-              { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_ACC', ''] } } },
-              Acc
-            ]
-          }
-        },
+        // {
+        //   $expr: {
+        //     $eq: [
+        //       { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_ACC', ''] } } },
+        //       Acc
+        //     ]
+        //   }
+        // },
         // {
         //   $expr: {
         //     $eq: [

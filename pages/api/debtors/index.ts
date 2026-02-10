@@ -93,14 +93,20 @@ export default async function handler(
               totalCredit += credit
               totalDebit += debit
             })
+            const totalDebitFixed = Number(totalDebit.toFixed(2))
+            const totalCreditFixed = Number(totalCredit.toFixed(2))
 
             return {
               companyId: company._id.toString(),
               companyName: company.companyName,
-              totalDebt: totalDebit - totalCredit,
+              totalDebt: (totalDebitFixed - totalCreditFixed).toFixed(2),
             }
           })
-          .filter((company) => company.totalDebt > 0)
+          .filter((company) => Number(company?.totalDebt) > 0)
+          .map((company) => ({
+            ...company,
+            totalDebt: Number(company.totalDebt),
+          }))
 
         return res.status(200).json({
           success: true,
