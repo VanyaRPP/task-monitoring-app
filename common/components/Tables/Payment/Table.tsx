@@ -326,7 +326,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
               </Typography.Link>
             </Tooltip>
           )
-          if (!isUser && debtor && isFirstOccurrence) {
+          if (!isUser && debtor && isFirstOccurrence && debtor.totalDebt > 1) {
             return (
               <Badge
                 count={formatDebt(debtor.totalDebt)}
