@@ -9,8 +9,8 @@ import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
 import PaymentTypeSelect from '@components/UI/Reusable/PaymentTypeSelect'
 import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
-import { Form, Input, InputNumber, Select, Button } from 'antd'
-import { useMemo, useState } from 'react'
+import { Form, Input, InputNumber, Select } from 'antd'
+import { useMemo, useState, useEffect } from 'react'
 import CompanySelect from './CompanySelect'
 import InvoiceCreationDate from './InvoiceCreationDate'
 import InvoiceNumber from './InvoiceNumber'
@@ -62,6 +62,15 @@ function AddPaymentForm({
   const operation = Form.useWatch('operation', form)
   const changelogId = Form.useWatch('changelogId', form)
 
+  useEffect(() => {
+    if (!changelogId) return
+    
+    const exists = changelogOptions.some(opt => opt.value === changelogId)
+    if (!exists) {
+      form.setFieldValue('changelogId', undefined)
+    }
+  }, [changelogOptions, changelogId, form])
+
   useInvoice({
     payment,
     service,
@@ -70,6 +79,7 @@ function AddPaymentForm({
     prevPayment,
   })
   const showCurrentVersionBtn = !!changelogId
+  
   return (
     <>
       <DomainsSelect form={form} edit={edit} />
