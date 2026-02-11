@@ -18,7 +18,6 @@ import MonthServiceSelect from './MonthServiceSelect'
 import PaymentPricesTable from './PaymentPricesTable'
 import PaymentTotal from './PaymentTotal'
 import { inputNumberParser } from '@utils/helpers'
-import type { SelectProps } from 'antd'
 import type { ChangelogOption } from '@components/AddPaymentModal/changelog/types'
 
 type AddPaymentFormProps = {
@@ -80,6 +79,8 @@ function AddPaymentForm({
   })
   const showCurrentVersionBtn = !!changelogId
   
+  
+  const showChangelog = changelogOptions.length > 0
   return (
     <>
       <DomainsSelect form={form} edit={edit} />
@@ -94,7 +95,9 @@ function AddPaymentForm({
       <PaymentTypeSelect edit={!companyId || edit} />
       <InvoiceNumber form={form} paymentActions={selectedActions} />
       <InvoiceCreationDate edit={preview} />
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      
+    {showChangelog && (
+      <div>
         <Form.Item
           name="changelogId"
           label="Історія змін"
@@ -114,6 +117,7 @@ function AddPaymentForm({
           />
         </Form.Item>
       </div>
+    )}
 
       {operation === Operations.Credit ? (
         <>
