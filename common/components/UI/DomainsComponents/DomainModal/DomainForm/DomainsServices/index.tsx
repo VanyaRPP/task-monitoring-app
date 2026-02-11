@@ -158,7 +158,6 @@ const DomainsServices: FC<Props> = ({
             serviceGroups={getServiceGroups()}
             onSave={handleSaveServices}
             onCreateCustomService={handleCreateCustomService}
-            domainId={domainId || ''}
           />
         </>
       )}

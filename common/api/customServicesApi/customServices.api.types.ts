@@ -44,7 +44,6 @@ export interface ICreateCustomServiceResponse {
 
 export interface IDeleteCustomServiceRequest {
   id: string
-  domainId: string
 }
 
 export interface IDeleteCustomServiceResponse {

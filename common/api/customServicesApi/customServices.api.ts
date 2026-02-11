@@ -52,10 +52,10 @@ export const customServicesApi = createApi({
       IDeleteCustomServiceResponse,
       IDeleteCustomServiceRequest
     >({
-      query: ({ id, domainId }) => ({
+      query: ({ id }) => ({
         url: 'custom-services',
         method: 'DELETE',
-        params: { id, domainId },
+        params: { id},
       }),
       invalidatesTags: ['CustomService'],
     }),
