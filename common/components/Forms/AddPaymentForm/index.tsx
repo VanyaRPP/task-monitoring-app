@@ -9,7 +9,7 @@ import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
 import PaymentTypeSelect from '@components/UI/Reusable/PaymentTypeSelect'
 import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
-import { Form, Input, InputNumber, Select, Button } from 'antd'
+import { Form, Input, InputNumber, Select } from 'antd'
 import { useMemo, useState } from 'react'
 import CompanySelect from './CompanySelect'
 import InvoiceCreationDate from './InvoiceCreationDate'
@@ -18,7 +18,6 @@ import MonthServiceSelect from './MonthServiceSelect'
 import PaymentPricesTable from './PaymentPricesTable'
 import PaymentTotal from './PaymentTotal'
 import { inputNumberParser } from '@utils/helpers'
-import type { SelectProps } from 'antd'
 import type { ChangelogOption } from '@components/AddPaymentModal/changelog/types'
 
 type AddPaymentFormProps = {
@@ -69,7 +68,8 @@ function AddPaymentForm({
     prevService,
     prevPayment,
   })
-  const showCurrentVersionBtn = !!changelogId
+  
+  const showChangelog = changelogOptions.length > 0
   return (
     <>
       <DomainsSelect form={form} edit={edit} />
@@ -84,7 +84,9 @@ function AddPaymentForm({
       <PaymentTypeSelect edit={!companyId || edit} />
       <InvoiceNumber form={form} paymentActions={selectedActions} />
       <InvoiceCreationDate edit={preview} />
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      
+    {showChangelog && (
+      <div>
         <Form.Item
           name="changelogId"
           label="Історія змін"
@@ -104,6 +106,7 @@ function AddPaymentForm({
           />
         </Form.Item>
       </div>
+    )}
 
       {operation === Operations.Credit ? (
         <>
