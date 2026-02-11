@@ -3,6 +3,7 @@ import {Modal,Transfer,Typography,Button,Card,Space,Input,message,Collapse,Popco
 import type { CollapseProps } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 import { useDeleteCustomServiceMutation } from '@common/api/customServicesApi/customServices.api'
+import { defaultServices } from '@utils/constants'
 
 const { Text } = Typography
 
@@ -193,6 +194,10 @@ const DomainModal: FC<Props> = ({
     setTargetKeys(newTargetKeys)
   }
 
+  const isDefaultService = (serviceKey: string) => {
+    return defaultServices.includes(serviceKey)
+  }
+
   const renderTransfer = (groupName: string) => (
     <div style={{ position: 'relative' }}>
       <Transfer
@@ -205,9 +210,12 @@ const DomainModal: FC<Props> = ({
           height: 300,
           overflow: 'auto'
         }}
-        render={item => (
+        render={item => {
+          const isDefault = isDefaultService(item.key)
+          return (
           <Space style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
             <Text strong>{item.title}</Text>
+              {!isDefault && (
             <Popconfirm
               title="Видалити послугу?"
               description="Ви впевнені, що хочете видалити цю послугу? Вона буде видалена з усіх груп."
@@ -227,8 +235,9 @@ const DomainModal: FC<Props> = ({
                 onClick={e => e.stopPropagation()}
               />
             </Popconfirm>
+              )}
           </Space>
-        )}
+          )}}
         locale={{ itemUnit: 'послуга', itemsUnit: 'послуг' }}
       />
     </div>
