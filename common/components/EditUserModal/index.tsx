@@ -1,11 +1,16 @@
 import React, { useEffect } from 'react'
-import { Modal, Form, Input, Spin, message } from 'antd'
+import { Modal, Form, Input, Spin, message, Select } from 'antd'
 import { CopyOutlined } from '@ant-design/icons'
 import {
   useGetUserByIdQuery,
   useUpdateUserMutation,
 } from '@common/api/userApi/user.api'
 import { IUser } from '@modules/models/User'
+import {
+  useGetDomainFiltersQuery,
+  useGetRealEstateFiltersQuery,
+} from '@common/api/filterApi/filter.api'
+
 
 interface EditUserModalProps {
   open: boolean
@@ -22,6 +27,8 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
 }) => {
   const [form] = Form.useForm()
   const { data: user, isLoading } = useGetUserByIdQuery(userId)
+  const { data: allDomains, isLoading: isDomainsLoading } = useGetDomainFiltersQuery({});
+  const { data: allCompanies, isLoading: isCompaniesLoading } = useGetRealEstateFiltersQuery({});
 
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation()
   useEffect(() => {
@@ -29,6 +36,8 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
       form.setFieldsValue({
         name: user.name,
         email: user.email,
+        adminDomains: user.adminDomains?.map((d) => d._id),
+        adminCompanies: user.adminCompanies?.map((c) => c._id),
       })
     }
   }, [user, form])
@@ -67,6 +76,47 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
           </Form.Item>
           <Form.Item label="Пошта" name="email">
             <Input readOnly suffix={<CopyOutlined onClick={handleCopyEmail} style={{ cursor: 'pointer' }} />} />
+          </Form.Item>
+          <Form.Item
+            label="Адміністратор доменів"
+            name="adminDomains"
+          >
+            <Select
+              mode="multiple"
+              showSearch
+              placement="bottomLeft" 
+              listHeight={200}
+              
+              placeholder="Виберіть домени"
+              loading={isDomainsLoading}
+              options={allDomains?.domainsFilter?.map((d: any) => ({
+                  value: d.value,
+                  label: d.text,  
+                }))}
+              filterOption={(input, option) =>
+                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+            />
+          </Form.Item>
+          <Form.Item
+            label="Адміністратор Компаній"
+            name="adminCompanies"
+          >
+            <Select
+              mode="multiple"
+              showSearch
+              placement="bottomLeft" 
+              listHeight={200}
+              placeholder="Виберіть компанії"
+              loading={isCompaniesLoading}
+              options={allCompanies?.realEstatesFilter?.map((c: any) => ({
+                    value: c.value,
+                    label: c.text,  
+              }))}
+              filterOption={(input, option) =>
+                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+            />
           </Form.Item>
         </Form>
       </Spin>

@@ -22,6 +22,8 @@ export interface IUser {
   tel?: string
   address?: IAddress
   password?: string
+  adminDomains?: { _id: string; name: string }[]; 
+  adminCompanies?: { _id: string; name: string }[];
 }
 export interface IFeedback {
   id: string
