@@ -36,8 +36,8 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
       form.setFieldsValue({
         name: user.name,
         email: user.email,
-        adminDomains: user.adminDomains?.map((d) => d._id),
-        adminCompanies: user.adminCompanies?.map((c) => c._id),
+        adminDomains: ('adminDomains' in user) ? (user as any).adminDomains.map((d: any) => d._id) : [],
+        adminCompanies: ('adminCompanies' in user) ? (user as any).adminCompanies.map((c: any) => c._id) : [],
       })
     }
   }, [user, form])
