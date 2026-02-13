@@ -3,6 +3,8 @@ import {Modal,Transfer,Typography,Button,Card,Space,Input,message,Collapse,Popco
 import type { CollapseProps } from 'antd'
 import { DeleteOutlined } from '@ant-design/icons'
 import { useDeleteCustomServiceMutation } from '@common/api/customServicesApi/customServices.api'
+import { Roles } from '@utils/constants'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 const { Text } = Typography
 
@@ -24,7 +26,7 @@ interface Props {
   onSave: (servicesByGroup: Record<string, string[]>) => void
   onCreateCustomService: (name: string) => Promise<any>
   onDeleteCustomService?: (serviceKey: string) => void
-  domainId: string
+  isGlobalAdmin?: boolean
 }
 
 const DomainModal: FC<Props> = ({
@@ -35,7 +37,7 @@ const DomainModal: FC<Props> = ({
   onSave,
   onCreateCustomService,
   onDeleteCustomService,
-  domainId,
+  isGlobalAdmin,
 }) => {
   const [targetKeys, setTargetKeys] = useState<Record<string, string[]>>({})
   const [localServiceGroups, setLocalServiceGroups] = useState<ServiceGroup[]>([])
@@ -43,6 +45,8 @@ const DomainModal: FC<Props> = ({
   const [newGroupName, setNewGroupName] = useState('')
   const [newServiceName, setNewServiceName] = useState('')
   const [activePanel, setActivePanel] = useState<string | string[]>([])
+  const { data: user } = useGetCurrentUserQuery()
+  isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   useEffect(() => {
     const initialTargets: Record<string, string[]> = {}
@@ -75,15 +79,12 @@ const DomainModal: FC<Props> = ({
     useDeleteCustomServiceMutation()
 
   const handleDeleteService = async (serviceKey: string) => {
-    if (!domainId) {
-      message.error('Domain ID відсутній')
-      return
-    }
-    {
+    try {
       const result = await deleteCustomService({ 
         id: serviceKey, 
-        domainId 
       }).unwrap()
+
+      message.success(result.data || 'Сервіс успішно видалено')
 
       setTargetKeys(prev => {
         const updated: Record<string, string[]> = {}
@@ -103,6 +104,8 @@ const DomainModal: FC<Props> = ({
       setLocalData(prev => prev.filter(item => item.key !== serviceKey))
 
       onDeleteCustomService?.(serviceKey)
+    } catch (error) {
+        message.error(error?.data?.message || 'Помилка при видаленні')
     }
   }
 
@@ -208,6 +211,7 @@ const DomainModal: FC<Props> = ({
         render={item => (
           <Space style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
             <Text strong>{item.title}</Text>
+            {isGlobalAdmin && (
             <Popconfirm
               title="Видалити послугу?"
               description="Ви впевнені, що хочете видалити цю послугу? Вона буде видалена з усіх груп."
@@ -227,6 +231,7 @@ const DomainModal: FC<Props> = ({
                 onClick={e => e.stopPropagation()}
               />
             </Popconfirm>
+              )}
           </Space>
         )}
         locale={{ itemUnit: 'послуга', itemsUnit: 'послуг' }}
@@ -341,13 +346,15 @@ const DomainModal: FC<Props> = ({
                 title={
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span>Група: {g.groupName}</span>
-                    <Button
+                    {isGlobalAdmin && ( 
+                      <Button
                       type="text"
                       danger
                       onClick={() => handleRemoveGroup(g.groupName)}
                     >
                       Видалити групу послуг
-                    </Button>
+                    </Button> 
+                    )}
                   </div>
                 }
                 size="small"
