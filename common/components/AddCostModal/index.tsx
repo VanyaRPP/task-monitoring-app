@@ -11,6 +11,7 @@ import type { TabsProps } from 'antd'
 import { FC, useState, useEffect } from 'react'
 import s from './style.module.scss'
 import dayjs from 'dayjs'
+import Category from '@modules/models/Category'
 
 interface Props {
   closeModal: VoidFunction
@@ -27,6 +28,7 @@ type FormData = {
   sum: number
   description: string
   type: string
+  categories: string[]
 }
 
 enum CostType {
@@ -53,6 +55,7 @@ const AddCostModal: FC<Props> = ({
       amount: formData.sum,
       description: formData.description || '',
       type: type,
+      categories: formData.categories || [],
     }
 
     let response
@@ -116,6 +119,7 @@ const AddCostModal: FC<Props> = ({
         date: dayjs(currentProfit.date),
         sum: currentProfit.amount,
         description: currentProfit.description,
+        categories: currentProfit.categories || [],
       })
       setType(currentProfit.type as CostType)
     }
