@@ -32,6 +32,13 @@ const ROLE_OPTIONS: SelectProps['options'] = [
   { value: Roles.USER, label: 'User' },
 ]
 
+const ROLE_FILTER_OPTIONS: SelectProps['options'] = [
+  { value: 'all', label: 'Усі' },
+  { value: Roles.GLOBAL_ADMIN, label: 'Global Admin' },
+  { value: Roles.DOMAIN_ADMIN, label: 'Domain Admin' },
+  { value: Roles.USER, label: 'User' },
+]
+
 const getUserRoleValue = (u: any): string =>
   u?.role ?? u?.roles?.[0] ?? Roles.USER
 
@@ -63,6 +70,7 @@ export const UsersTable: React.FC = () => {
   const [updatingUserId, setUpdatingUserId] = useState<IUser['_id'] | null>(null)
   const [searchName, setSearchName] = useState('')
   const [searchEmail, setSearchEmail] = useState('')
+  const [searchRole, setSearchRole] = useState<string>('all')
   const [pageSize, setPageSize] = useState(10)
 
   const filteredUsers = useMemo(
@@ -71,13 +79,14 @@ export const UsersTable: React.FC = () => {
         const name =
           ((user as any)?.name || (user as any)?.fullName || '').toLowerCase()
         const email = ((user as any)?.email || '').toLowerCase()
+        const userRole = getUserRoleValue(user)
+        const matchesName = name.includes(searchName.toLowerCase())
+        const matchesEmail = email.includes(searchEmail.toLowerCase())
+        const matchesRole = searchRole === 'all' || userRole === searchRole
 
-        return (
-          name.includes(searchName.toLowerCase()) &&
-          email.includes(searchEmail.toLowerCase())
-        )
+        return matchesName && matchesEmail && matchesRole
       }),
-    [users, searchName, searchEmail]
+    [users, searchName, searchEmail, searchRole]
   )
 
   const columns = useMemo<ColumnsType<IUser>>(
@@ -146,7 +155,20 @@ export const UsersTable: React.FC = () => {
         dataIndex: 'email',
       },
       {
-        title: 'Роль',
+        title: (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            Роль
+            <Select
+              placeholder="Пошук по ролям"
+              value={searchRole}
+              onChange={(value) => setSearchRole(value)}
+              options={ROLE_FILTER_OPTIONS}
+              style={{ width: 170 }}
+              allowClear
+              onClear={() => setSearchRole('all')}
+            />
+          </div>
+        ),
         render: (_, user) => {
           const currentRole = getUserRoleValue(user)
 
@@ -204,6 +226,7 @@ export const UsersTable: React.FC = () => {
     [
       searchName,
       searchEmail,
+      searchRole,
       isUpdatingUser,
       updatingUserId,
       updateUser,
