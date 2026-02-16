@@ -16,6 +16,7 @@ import {
   ICostPayment,
   IGetPaymentChangeLogsResponse,
   ICreatePaymentChangeLogResponse,
+  IDeletePaymentChangeLogResponse,
 } from './payment.api.types'
 import { ITransaction } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
 
@@ -188,11 +189,21 @@ export const paymentApi = createApi({
       invalidatesTags: (res, err, args) =>
         res ? [{ type: 'Payment', id: args.paymentId }] : [],
     }),
+
+    deletePaymentChangeLog: builder.mutation<
+      IDeletePaymentChangeLogResponse,
+      { paymentId: string; changeLogid: string }
+    >({
+      query: ({paymentId, changeLogid}) => ({
+        url: `spacehub/payment/${paymentId}/change-log?changeLogId=${changeLogid}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (res, err, args) =>
+        res ? [{ type: 'Payment', id: args.paymentId }] : [],
+    }),
   }),
 })
 export const {
-  useGetPaymentChangeLogsQuery,
-  useCreatePaymentChangeLogMutation,
   useAddPaymentMutation,
   useGetAllPaymentsQuery,
   useGetPaymentQuery,
@@ -204,4 +215,7 @@ export const {
   useGetCostPaymentQuery,
   useAddCostPaymentMutation,
   useGenerateExcelMutation,
+  useGetPaymentChangeLogsQuery,
+  useCreatePaymentChangeLogMutation,
+  useDeletePaymentChangeLogMutation
 } = paymentApi

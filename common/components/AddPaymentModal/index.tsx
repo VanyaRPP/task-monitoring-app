@@ -2,6 +2,7 @@ import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi
 import {
   useAddPaymentMutation,
   useEditPaymentMutation,
+  useDeletePaymentChangeLogMutation,
 } from '@common/api/paymentApi/payment.api'
 import {
   IExtendedPayment,
@@ -102,7 +103,19 @@ const AddPaymentModal: FC<Props> = ({
   const { data: changelogRes, isLoading: changelogLoading } =
     useGetPaymentChangeLogsQuery(paymentId, { skip: !edit || !paymentId })
 
-  const changelogOptions = useChangelogOptions(changelogRes)
+  const [deleteChangeLog] = useDeletePaymentChangeLogMutation()
+
+  const handleDeleteChangeLog = async (logId: string) => {
+    if (!logId || !paymentId) return
+    
+    try {
+      await deleteChangeLog({ paymentId, changeLogid: logId }).unwrap()
+    } catch (error) {
+      console.error('Error deleting changelog:', error)
+    }
+  }
+
+  const changelogOptions = useChangelogOptions(changelogRes, handleDeleteChangeLog)
 
   const { company, service, payment, prevService, prevPayment } =
     usePaymentFormData(form, paymentData)
