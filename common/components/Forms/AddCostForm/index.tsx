@@ -9,6 +9,7 @@ import {
   FormInstance,
   Input,
   InputNumber,
+  Select,
 } from 'antd'
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs from 'dayjs'
@@ -133,19 +134,30 @@ const AddCostForm: React.FC<Props> = ({
             disabled={disabled}
           />
         </Form.Item>
-        {isPreview && (
-          <Form.Item
-            name="categories"
-            label={t('profitPage:form.category')}
-            initialValue={
-              currentProfit?.categories?.length
-                ? currentProfit.categories.join(', ')
-                : 'Без категорії'
-            }
-          >
-            <Input disabled className={s.formInput} />
-          </Form.Item>
-        )}
+        <Form.Item
+          name="categories"
+          label={t('profitPage:form.category')}
+        >
+          {isPreview ? (
+            <Input
+              value={
+                currentProfit?.categories?.length
+                  ? currentProfit.categories.join(', ')
+                  : 'Без категорії'
+              }
+              disabled
+              className={s.formInput}
+            />
+          ) : (
+            <Select
+              mode="tags"
+              tokenSeparators={[',']}
+              placeholder="Оберіть або введіть категорії"
+              disabled={disabled}
+              className={s.formInput}
+            />
+          )}
+        </Form.Item>
       </Form>
     </ConfigProvider>
   )
