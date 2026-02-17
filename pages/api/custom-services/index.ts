@@ -2,6 +2,7 @@ import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import { defaultServicesSet, isProtectedService } from '@utils/helpers'
 import { transliterateAndCamelCase } from '@utils/transliterateAndCamelCase'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -70,41 +71,48 @@ export default async function handler(
 
     case 'DELETE':
       try {
-    if (!isGlobalAdmin) {
-      return res.status(403).json({
-        success: false,
-        message: 'Тільки Global Admin може видаляти послуги',
-      })
-    }
+        if (!isGlobalAdmin) {
+          return res.status(403).json({
+            success: false,
+            message: 'Тільки Global Admin може видаляти послуги',
+          })
+        }
 
-    const { id } = req.query
+        const { id } = req.query
 
-    if (!id || Array.isArray(id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Відсутній або некоректний id',
-      })
-    }
+        if (!id || Array.isArray(id)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Відсутній або некоректний id',
+          })
+        }
 
-    const deletedService = await CustomService.findByIdAndDelete(id)
+        if (defaultServicesSet.has(id)) {
+          return res.status(403).json({
+            success: false,
+            message: 'Системні послуги не можна видаляти',
+          })
+        }
 
-    if (!deletedService) {
-      return res.status(404).json({
-        success: false,
-        message: 'Сервіс не знайдений',
-      })
-    }
+        const deletedService = await CustomService.findById(id).lean()
 
-    return res.status(200).json({
-      success: true,
-      data: 'Сервіс успішно видалено',
-    })
-  } catch (error: any) {
-    return res.status(500).json({
-      success: false,
-      message: 'Помилка при видаленні сервісу',
-      error: error.message,
-    })
+        if (!deletedService) {
+          return res.status(404).json({
+            success: false,
+            message: 'Сервіс не знайдений',
+          })
+        }
+        
+        return res.status(200).json({
+          success: true,
+          data: 'Сервіс успішно видалено',
+        })
+      } catch (error: any) {
+        return res.status(500).json({
+          success: false,
+          message: 'Помилка при видаленні сервісу',
+          error: error.message,
+        })
       }
 
     case 'GET':

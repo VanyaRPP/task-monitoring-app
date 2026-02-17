@@ -7,7 +7,7 @@ import Big from 'big.js'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
 import mongoose, { ObjectId } from 'mongoose'
-import { CURRENCY_MAP, Roles, ServiceType } from '../constants'
+import { CURRENCY_MAP, Roles, defaultServices, ServiceType } from '../constants'
 import {
   getDomainsPipeline,
   getRealEstatesPipeline,
@@ -816,4 +816,11 @@ export const getDebtorTooltipColor = (debtor: {
     return 'red'
   }
   return undefined
+}
+export const defaultServicesSet = new Set(defaultServices)
+
+export const isProtectedService = (id?: string): boolean => {
+
+  if (!id) return false
+  return defaultServicesSet.has(id)
 }

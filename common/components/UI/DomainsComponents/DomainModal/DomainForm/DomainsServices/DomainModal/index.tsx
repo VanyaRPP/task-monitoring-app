@@ -5,6 +5,7 @@ import { DeleteOutlined } from '@ant-design/icons'
 import { useDeleteCustomServiceMutation } from '@common/api/customServicesApi/customServices.api'
 import { Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { isProtectedService } from '@utils/helpers'
 
 const { Text } = Typography
 
@@ -211,27 +212,27 @@ const DomainModal: FC<Props> = ({
         render={item => (
           <Space style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
             <Text strong>{item.title}</Text>
-            {isGlobalAdmin && (
-            <Popconfirm
-              title="Видалити послугу?"
-              description="Ви впевнені, що хочете видалити цю послугу? Вона буде видалена з усіх груп."
-              onConfirm={(e) => {
-                e?.stopPropagation()
-                handleDeleteService(item.key)
-              }}
-              okText="Так"
-              cancelText="Ні"
-              disabled={isDeleting}
-            >
-              <DeleteOutlined
-                style={{ 
-                  color: isDeleting ? '#ccc' : 'red', 
-                  cursor: isDeleting ? 'not-allowed' : 'pointer' 
+            {!isProtectedService(item.key) && isGlobalAdmin && (
+              <Popconfirm
+                title="Видалити послугу?"
+                description="Ви впевнені, що хочете видалити цю послугу? Вона буде видалена з усіх груп."
+                onConfirm={(e) => {
+                  e?.stopPropagation()
+                  handleDeleteService(item.key)
                 }}
-                onClick={e => e.stopPropagation()}
-              />
-            </Popconfirm>
-              )}
+                okText="Так"
+                cancelText="Ні"
+                disabled={isDeleting}
+              >
+                <DeleteOutlined
+                  style={{ 
+                    color: isDeleting ? '#ccc' : 'red', 
+                    cursor: isDeleting ? 'not-allowed' : 'pointer' 
+                  }}
+                  onClick={e => e.stopPropagation()}
+                />
+              </Popconfirm>
+            )}
           </Space>
         )}
         locale={{ itemUnit: 'послуга', itemsUnit: 'послуг' }}
