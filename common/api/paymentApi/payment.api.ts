@@ -14,9 +14,6 @@ import {
   IGeneratePaymentExcelResponce,
   IAddCostPaymentResponse,
   ICostPayment,
-  IGetPaymentChangeLogsResponse,
-  ICreatePaymentChangeLogResponse,
-  IDeletePaymentChangeLogResponse,
 } from './payment.api.types'
 import { ITransaction } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
 
@@ -171,36 +168,6 @@ export const paymentApi = createApi({
         body,
       }),
     }),
-    getPaymentChangeLogs: builder.query<IGetPaymentChangeLogsResponse, string>({
-      query: (paymentId) => `spacehub/payment/${paymentId}/change-log`,
-      providesTags: (res, err, paymentId) =>
-        res ? [{ type: 'Payment', id: paymentId }] : [],
-    }),
-
-    createPaymentChangeLog: builder.mutation<
-      ICreatePaymentChangeLogResponse,
-      { paymentId: string; invoiceData: any; reason?: string }
-    >({
-      query: ({ paymentId, ...body }) => ({
-        url: `spacehub/payment/${paymentId}/change-log`,
-        method: 'POST',
-        body,
-      }),
-      invalidatesTags: (res, err, args) =>
-        res ? [{ type: 'Payment', id: args.paymentId }] : [],
-    }),
-
-    deletePaymentChangeLog: builder.mutation<
-      IDeletePaymentChangeLogResponse,
-      { paymentId: string; changeLogid: string }
-    >({
-      query: ({paymentId, changeLogid}) => ({
-        url: `spacehub/payment/${paymentId}/change-log?changeLogId=${changeLogid}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: (res, err, args) =>
-        res ? [{ type: 'Payment', id: args.paymentId }] : [],
-    }),
   }),
 })
 export const {
@@ -215,7 +182,4 @@ export const {
   useGetCostPaymentQuery,
   useAddCostPaymentMutation,
   useGenerateExcelMutation,
-  useGetPaymentChangeLogsQuery,
-  useCreatePaymentChangeLogMutation,
-  useDeletePaymentChangeLogMutation
 } = paymentApi
