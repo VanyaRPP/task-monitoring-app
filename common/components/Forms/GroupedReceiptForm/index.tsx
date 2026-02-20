@@ -4,7 +4,8 @@ import numberToTextNumber from '@utils/numberToText'
 import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
-import { PrinterOutlined } from '@ant-design/icons'
+import { PrinterOutlined, EditOutlined } from '@ant-design/icons'
+import { Tooltip } from 'antd'
 import s from './style.module.scss'
 
 interface Props {
@@ -38,6 +39,9 @@ const GroupedReceiptForm: FC<Props> = ({
     <>
       <PrinterOutlined className={s.print} onClick={handlePrint} />
 
+      <Tooltip title="Режим редагування">
+        <EditOutlined className={s.edit} />
+      </Tooltip>
       <div
         className={s.invoiceContainer}
         ref={componentRef}
