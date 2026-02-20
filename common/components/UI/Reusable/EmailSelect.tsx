@@ -1,8 +1,10 @@
 import { validateField } from '@assets/features/validators'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
-import { useGetAllUsersQuery } from '@common/api/userApi/user.api'
-import { Avatar, Form, Select } from 'antd'
+import { useGetAllUsersQuery, useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { Avatar, Form, Select, Tooltip } from 'antd'
+import type { CustomTagProps } from 'rc-select/lib/BaseSelect'
 import { useMemo } from 'react'
+import { CloseOutlined } from '@ant-design/icons'
 
 interface EmailSelectProps {
   form: any
@@ -29,6 +31,10 @@ export default function EmailSelect({
 }: EmailSelectProps) {
   const { data: domains, isLoading: isDomainsLoading } = useGetDomainsQuery({})
   const { data: users = [], isLoading: isUsersLoading } = useGetAllUsersQuery()
+
+  const { data: currentUser } = useGetCurrentUserQuery()
+  const currentUserEmail = currentUser?.email?.toLowerCase()
+
   const adminEmails: string[] = useMemo(() => {
     const set = new Set<string>()
     ;(domains || []).forEach((d: any) => {
@@ -102,6 +108,38 @@ export default function EmailSelect({
   }, [adminEmails, userByEmail])
 
   const isLoading = isDomainsLoading || isUsersLoading
+  const tagRender = (props: CustomTagProps) => {
+    const { label, value, closable, onClose } = props
+    const isSelf = value?.toString().toLowerCase() === currentUserEmail
+
+    const tagContent = (
+      <span
+        className="ant-select-selection-item"
+        style={{
+          cursor: isSelf ? 'not-allowed' : 'default',
+        }}
+      >
+        <span className="ant-select-selection-item-content">{label}</span>
+        {closable && !isSelf && (
+          <span
+            className="ant-select-selection-item-remove"
+            onClick={onClose}
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            <CloseOutlined style={{ fontSize: 10 }} />
+          </span>
+        )}
+      </span>
+    )
+    if (isSelf) {
+      return (
+        <Tooltip title="Неможливо видалити самого себе">
+          {tagContent}
+        </Tooltip>
+      )
+    }
+    return tagContent
+  }
 
   return (
     <Form.Item
@@ -118,6 +156,7 @@ export default function EmailSelect({
         placeholder="Пошти адмінів компанії"
         loading={isLoading}
         optionLabelProp="value"
+        tagRender={tagRender}
         filterOption={(input, option: any) => {
           const q = (input || '').toLowerCase()
           return (option?.searchText || '').includes(q)

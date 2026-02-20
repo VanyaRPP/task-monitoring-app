@@ -1,14 +1,14 @@
-.gridItem .react-grid-layout .react-grid-item .react-grid-placeholder {
-  opacity: 0.1 !important;
+.gridItem {
   position: relative;
 } 
 .gridItem:hover::after {
-  z-index: 10000;
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   border-radius: 10px;
-  background-color: rgba(0, 0, 0, 0.1) !important
+  background-color: rgba(0, 0, 0, 0.1);
+  pointer-events: none;
 }
 
 .gridItem:hover .deleteIcon {

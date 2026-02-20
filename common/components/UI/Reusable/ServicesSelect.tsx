@@ -41,7 +41,7 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
     if (!servicesData) return []
     return servicesData.data.map((service: any) => ({
       _id: service._id,
-      name: service.domain.name || 'Без назви',
+      name: service.domain || 'Без назви',
     }))
   }, [servicesData])
 

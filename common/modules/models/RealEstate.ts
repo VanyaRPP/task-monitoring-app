@@ -10,6 +10,7 @@ export interface IRealEstateModel {
   pricePerMeter: number
   servicePricePerMeter?: number
   totalArea?: number
+  currency?: string
   rentPart?: number
   waterPart?: number
   cleaning?: number
@@ -36,9 +37,10 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   pricePerMeter: { type: Number, required: true, default: 0 },
   servicePricePerMeter: { type: Number, required: false },
   totalArea: { type: Number, required: true, default: 0 },
+  currency: { type: String, required: false, default: 'UAH' },
   rentPart: { type: Number, required: true, default: 0 },
   waterPart: { type: Number, required: true, default: 0 },
-  cleaning: { type: Number, required: false, defailt: 0 },
+  cleaning: { type: Number, required: false, default: 0 },
   discount: { type: Number, required: false, default: 0 },
   inflicion: { type: Boolean, required: false, default: false },
   garbageCollector: { type: Boolean, required: false, default: false },

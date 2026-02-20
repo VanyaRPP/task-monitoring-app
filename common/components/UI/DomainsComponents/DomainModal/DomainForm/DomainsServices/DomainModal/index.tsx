@@ -1,6 +1,11 @@
 import React, { FC, useEffect, useState } from 'react'
-import {Modal,Transfer,Typography,Button,Card,Space,Input,message,Collapse,} from 'antd'
+import {Modal,Transfer,Typography,Button,Card,Space,Input,message,Collapse,Popconfirm} from 'antd'
 import type { CollapseProps } from 'antd'
+import { DeleteOutlined } from '@ant-design/icons'
+import { useDeleteCustomServiceMutation } from '@common/api/customServicesApi/customServices.api'
+import { Roles } from '@utils/constants'
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { isProtectedService } from '@utils/helpers'
 
 const { Text } = Typography
 
@@ -21,6 +26,8 @@ interface Props {
   serviceGroups: ServiceGroup[]
   onSave: (servicesByGroup: Record<string, string[]>) => void
   onCreateCustomService: (name: string) => Promise<any>
+  onDeleteCustomService?: (serviceKey: string) => void
+  isGlobalAdmin?: boolean
 }
 
 const DomainModal: FC<Props> = ({
@@ -30,12 +37,17 @@ const DomainModal: FC<Props> = ({
   serviceGroups,
   onSave,
   onCreateCustomService,
+  onDeleteCustomService,
+  isGlobalAdmin,
 }) => {
   const [targetKeys, setTargetKeys] = useState<Record<string, string[]>>({})
   const [localServiceGroups, setLocalServiceGroups] = useState<ServiceGroup[]>([])
+  const [localData, setLocalData] = useState<ServiceItem[]>([])
   const [newGroupName, setNewGroupName] = useState('')
   const [newServiceName, setNewServiceName] = useState('')
   const [activePanel, setActivePanel] = useState<string | string[]>([])
+  const { data: user } = useGetCurrentUserQuery()
+  isGlobalAdmin = user?.roles?.includes(Roles.GLOBAL_ADMIN)
 
   useEffect(() => {
     const initialTargets: Record<string, string[]> = {}
@@ -46,7 +58,8 @@ const DomainModal: FC<Props> = ({
 
     setTargetKeys(initialTargets)
     setLocalServiceGroups(serviceGroups)
-  }, [serviceGroups])
+    setLocalData(data)
+  }, [serviceGroups, data])
 
   const handleChange = (
     groupName: string,
@@ -63,6 +76,40 @@ const DomainModal: FC<Props> = ({
     )
   }
 
+  const [deleteCustomService, { isLoading: isDeleting }] =
+    useDeleteCustomServiceMutation()
+
+  const handleDeleteService = async (serviceKey: string) => {
+    try {
+      const result = await deleteCustomService({ 
+        id: serviceKey, 
+      }).unwrap()
+
+      message.success(result.data || 'Сервіс успішно видалено')
+
+      setTargetKeys(prev => {
+        const updated: Record<string, string[]> = {}
+        Object.entries(prev).forEach(([group, keys]) => {
+          updated[group] = keys.filter(k => k !== serviceKey)
+        })
+        return updated
+      })
+
+      setLocalServiceGroups(prev =>
+        prev.map(group => ({
+          ...group,
+          services: group.services.filter(s => s !== serviceKey),
+        }))
+      )
+
+      setLocalData(prev => prev.filter(item => item.key !== serviceKey))
+
+      onDeleteCustomService?.(serviceKey)
+    } catch (error) {
+        message.error(error?.data?.message || 'Помилка при видаленні')
+    }
+  }
+
   const getFilteredData = (groupName: string): ServiceItem[] => {
     const usedKeys = new Set<string>()
 
@@ -72,7 +119,7 @@ const DomainModal: FC<Props> = ({
       }
     })
 
-    return data.filter(
+    return localData.filter(
       item =>
         !usedKeys.has(item.key) ||
         (targetKeys[groupName] || []).includes(item.key)
@@ -162,7 +209,32 @@ const DomainModal: FC<Props> = ({
           height: 300,
           overflow: 'auto'
         }}
-        render={item => <Text strong>{item.title}</Text>}
+        render={item => (
+          <Space style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+            <Text strong>{item.title}</Text>
+            {!isProtectedService(item.key) && isGlobalAdmin && (
+              <Popconfirm
+                title="Видалити послугу?"
+                description="Ви впевнені, що хочете видалити цю послугу? Вона буде видалена з усіх груп."
+                onConfirm={(e) => {
+                  e?.stopPropagation()
+                  handleDeleteService(item.key)
+                }}
+                okText="Так"
+                cancelText="Ні"
+                disabled={isDeleting}
+              >
+                <DeleteOutlined
+                  style={{ 
+                    color: isDeleting ? '#ccc' : 'red', 
+                    cursor: isDeleting ? 'not-allowed' : 'pointer' 
+                  }}
+                  onClick={e => e.stopPropagation()}
+                />
+              </Popconfirm>
+            )}
+          </Space>
+        )}
         locale={{ itemUnit: 'послуга', itemsUnit: 'послуг' }}
       />
     </div>
@@ -275,13 +347,15 @@ const DomainModal: FC<Props> = ({
                 title={
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span>Група: {g.groupName}</span>
-                    <Button
+                    {isGlobalAdmin && ( 
+                      <Button
                       type="text"
                       danger
                       onClick={() => handleRemoveGroup(g.groupName)}
                     >
                       Видалити групу послуг
-                    </Button>
+                    </Button> 
+                    )}
                   </div>
                 }
                 size="small"

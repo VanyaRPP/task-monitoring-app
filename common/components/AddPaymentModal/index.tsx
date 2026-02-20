@@ -3,6 +3,10 @@ import {
   useAddPaymentMutation,
   useEditPaymentMutation,
 } from '@common/api/paymentApi/payment.api'
+import { 
+  useGetPaymentChangeLogsQuery, 
+  useDeletePaymentChangeLogMutation 
+} from '@common/api/changelogApi/changelog.api'
 import {
   IExtendedPayment,
   IPayment,
@@ -15,8 +19,9 @@ import { usePaymentFormData } from '@modules/hooks/usePaymentData'
 import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
-import { Form, Tabs, TabsProps, message } from 'antd'
+import { Form, Tabs, TabsProps, message, Tooltip } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
+import { useChangelogOptions } from './changelog/useChangelogOptions'
 import dayjs from 'dayjs'
 import {
   FC,
@@ -81,19 +86,38 @@ const AddPaymentModal: FC<Props> = ({
   paymentActions,
   preselectedCompany,
 }) => {
-  const { preview, edit } = paymentActions
+  const { preview, edit } = paymentActions ?? { preview: false, edit: false }
 
+  const paymentId = paymentData?._id
   const [form] = Form.useForm()
+  const firstRunRef = useRef(true)
+  const restoringRef = useRef(false)
+  const [changed, setChanged] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
+  const [activeTabKey, setActiveTabKey] = useState(
+    getActiveTab(paymentData, preview)
+  )
 
   const domainId = Form.useWatch('domain', form)
-  const firstRunRef = useRef(true)
-  useEffect(() => {
-    if (firstRunRef.current) {
-      firstRunRef.current = false
-      return
+  const selectedChangelogId = Form.useWatch('changelogId', form)
+
+  const { data: changelogRes, isLoading: changelogLoading } =
+    useGetPaymentChangeLogsQuery(paymentId, { skip: !edit || !paymentId })
+
+  const [deleteChangeLog] = useDeletePaymentChangeLogMutation()
+
+  const handleDeleteChangeLog = async (logId: string) => {
+    if (!logId || !paymentId) return
+    
+    try {
+      await deleteChangeLog({ paymentId, changeLogid: logId }).unwrap()
+    } catch (error) {
+      console.error('Error deleting changelog:', error)
     }
-    form.resetFields(['company'])
-  }, [domainId, form])
+  }
+
+  const changelogOptions = useChangelogOptions(changelogRes, handleDeleteChangeLog)
 
   const { company, service, payment, prevService, prevPayment } =
     usePaymentFormData(form, paymentData)
@@ -106,17 +130,17 @@ const AddPaymentModal: FC<Props> = ({
     Description: paymentData?.transaction?.Description || '',
   }
 
-  const [changed, setChanged] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
+  useEffect(() => {
+    if (firstRunRef.current) {
+      firstRunRef.current = false
+      return
+    }
+    form.resetFields(['company'])
+  }, [domainId, form])
+
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
     useEditPaymentMutation()
-
-  const [activeTabKey, setActiveTabKey] = useState(
-    getActiveTab(paymentData, preview)
-  )
-
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
     { domainId },
     { skip: !domainId }
@@ -130,9 +154,12 @@ const AddPaymentModal: FC<Props> = ({
       prevService,
       prevPayment,
     })
+
     const groups = customDomainServices?.data ?? []
     const allowedServices = groups.flatMap((group) => group.services)
-    const serviceFilteredInvoices = serviceFilter(allInvoices, allowedServices) // TODO: delete after custom service refactor
+
+    const serviceFilteredInvoices = serviceFilter(allInvoices, allowedServices)
+
     return serviceFilteredInvoices?.filter(
       (invoice) => invoice?.sum > 0 || DEFAULT_INVOICES.includes(invoice?.type)
     )
@@ -145,6 +172,29 @@ const AddPaymentModal: FC<Props> = ({
     customDomainServices,
   ])
 
+  useEffect(() => {
+    if (!selectedChangelogId) return
+
+    const logs = changelogRes?.data ?? []
+    const selected = logs.find((l) => l._id === selectedChangelogId)
+    if (!selected?.invoiceData) return
+
+    restoringRef.current = true
+
+    form.setFieldsValue({
+      invoiceNumber: selected.invoiceData.invoiceNumber,
+      invoiceCreationDate: dayjs(selected.invoiceData.invoiceCreationDate),
+      description: selected.invoiceData.description,
+      generalSum: selected.invoiceData.generalSum,
+      operation: selected.invoiceData.type,
+      invoice: selected.invoiceData.invoice,
+    })
+
+    queueMicrotask(() => {
+      restoringRef.current = false
+    })
+  }, [selectedChangelogId, changelogRes, form])
+
   const items: TabsProps['items'] = []
   const shouldTabsEnabled = (edit && !changed) || preview || saved
 
@@ -152,7 +202,13 @@ const AddPaymentModal: FC<Props> = ({
     items.push({
       key: '1',
       label: 'Рахунок',
-      children: <AddPaymentForm paymentActions={paymentActions} />,
+      children: (
+        <AddPaymentForm
+          paymentActions={paymentActions}
+          changelogOptions={changelogOptions}
+          changelogLoading={changelogLoading}
+        />
+      ),
     })
   }
 
@@ -193,27 +249,25 @@ const AddPaymentModal: FC<Props> = ({
 
   const operation = Form.useWatch('operation', form)
 
-const effectiveOperation = preview
-  ? paymentData?.type
-  : operation
+  const effectiveOperation = preview ? paymentData?.type : operation
 
   if (effectiveOperation === Operations.Debit) {
-  items.push({
-    key: '4',
-    label: 'Довідка',
-    disabled: !shouldTabsEnabled,
-    children: (
-      <ReceiptForm
-        currPayment={currPayment}
-        paymentData={paymentData}
-        paymentActions={paymentActions}
-      />
-    ),
-  })
-}
-
+    items.push({
+      key: '4',
+      label: 'Довідка',
+      disabled: !shouldTabsEnabled,
+      children: (
+        <ReceiptForm
+          currPayment={currPayment}
+          paymentData={paymentData}
+          paymentActions={paymentActions}
+        />
+      ),
+    })
+  }
 
   const handleChange = () => {
+    if (restoringRef.current) return
     setSaved(false)
     setChanged(true)
   }
@@ -307,6 +361,7 @@ const effectiveOperation = preview
       >
         <Form
           initialValues={{
+            changelogId: undefined,
             domain: getId(payment?.domain),
             street: getId(payment?.street),
             company: preselectedCompany || getId(payment?.company),

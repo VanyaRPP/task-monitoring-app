@@ -41,3 +41,17 @@ export interface ICreateCustomServiceRequest {
 export interface ICreateCustomServiceResponse {
   data: ICustomService
 }
+
+export interface IDeleteCustomServiceRequest {
+  id: string
+}
+
+export interface IDeleteCustomServiceResponse {
+  data: string
+  success: boolean
+}
+
+export interface IExtendedCustomService extends ICustomService {
+  _id: string
+  __v: number
+}
