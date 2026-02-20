@@ -83,8 +83,9 @@ export const UsersTable: React.FC = () => {
   const columns = useMemo<ColumnsType<IUser>>(
     () => [
       {
-        title: 'Аватар',
-        width: 120,
+        title: '',
+        width: 70,
+        align: 'center',
         render: (_, user) => {
           const name = user?.name || user?.email || '?'
           const image = (user as any)?.image

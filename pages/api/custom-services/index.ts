@@ -2,6 +2,7 @@ import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import { defaultServicesSet, isProtectedService } from '@utils/helpers'
 import { transliterateAndCamelCase } from '@utils/transliterateAndCamelCase'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -70,13 +71,14 @@ export default async function handler(
 
     case 'DELETE':
       try {
-        const { id, domainId } = req.query
-
-        if (!isGlobalAdmin && !isDomainAdmin) {
-          return res
-            .status(400)
-            .json({ success: false, message: 'Не дозволено' })
+        if (!isGlobalAdmin) {
+          return res.status(403).json({
+            success: false,
+            message: 'Тільки Global Admin може видаляти послуги',
+          })
         }
+
+        const { id } = req.query
 
         if (!id || Array.isArray(id)) {
           return res.status(400).json({
@@ -85,34 +87,14 @@ export default async function handler(
           })
         }
 
-        if (!domainId || Array.isArray(domainId)) {
-          return res.status(400).json({
+        if (defaultServicesSet.has(id)) {
+          return res.status(403).json({
             success: false,
-            message: 'Відсутній або некоректний domainId',
+            message: 'Системні послуги не можна видаляти',
           })
         }
 
-        const domain = await Domain.findById(domainId).lean()
-        if (!domain) {
-          return res.status(404).json({
-            success: false,
-            message: 'Надавач послуг не знайдений',
-          })
-        }
-
-        if (isDomainAdmin && !isGlobalAdmin) {
-          const isServiceInDomain = domain.customServices?.some(group =>
-            group.services?.some(serviceId => String(serviceId) === String(id))
-          )
-          if (!isServiceInDomain) {
-            return res.status(403).json({
-              success: false,
-              message: 'Послуга не належить цьому надавачу послуг',
-            })
-          }
-        }
-
-        const deletedService = await CustomService.findByIdAndDelete(id)
+        const deletedService = await CustomService.findById(id).lean()
 
         if (!deletedService) {
           return res.status(404).json({
@@ -120,7 +102,7 @@ export default async function handler(
             message: 'Сервіс не знайдений',
           })
         }
-
+        
         return res.status(200).json({
           success: true,
           data: 'Сервіс успішно видалено',

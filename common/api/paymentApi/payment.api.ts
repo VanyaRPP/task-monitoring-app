@@ -14,8 +14,6 @@ import {
   IGeneratePaymentExcelResponce,
   IAddCostPaymentResponse,
   ICostPayment,
-  IGetPaymentChangeLogsResponse,
-  ICreatePaymentChangeLogResponse,
 } from './payment.api.types'
 import { ITransaction } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
 
@@ -170,29 +168,9 @@ export const paymentApi = createApi({
         body,
       }),
     }),
-    getPaymentChangeLogs: builder.query<IGetPaymentChangeLogsResponse, string>({
-      query: (paymentId) => `spacehub/payment/${paymentId}/change-log`,
-      providesTags: (res, err, paymentId) =>
-        res ? [{ type: 'Payment', id: paymentId }] : [],
-    }),
-
-    createPaymentChangeLog: builder.mutation<
-      ICreatePaymentChangeLogResponse,
-      { paymentId: string; invoiceData: any; reason?: string }
-    >({
-      query: ({ paymentId, ...body }) => ({
-        url: `spacehub/payment/${paymentId}/change-log`,
-        method: 'POST',
-        body,
-      }),
-      invalidatesTags: (res, err, args) =>
-        res ? [{ type: 'Payment', id: args.paymentId }] : [],
-    }),
   }),
 })
 export const {
-  useGetPaymentChangeLogsQuery,
-  useCreatePaymentChangeLogMutation,
   useAddPaymentMutation,
   useGetAllPaymentsQuery,
   useGetPaymentQuery,

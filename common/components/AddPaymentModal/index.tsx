@@ -3,6 +3,10 @@ import {
   useAddPaymentMutation,
   useEditPaymentMutation,
 } from '@common/api/paymentApi/payment.api'
+import { 
+  useGetPaymentChangeLogsQuery, 
+  useDeletePaymentChangeLogMutation 
+} from '@common/api/changelogApi/changelog.api'
 import {
   IExtendedPayment,
   IPayment,
@@ -17,7 +21,6 @@ import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { Form, Tabs, TabsProps, message, Tooltip } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
-import { useGetPaymentChangeLogsQuery } from '@common/api/paymentApi/payment.api'
 import { useChangelogOptions } from './changelog/useChangelogOptions'
 import dayjs from 'dayjs'
 import {
@@ -102,7 +105,19 @@ const AddPaymentModal: FC<Props> = ({
   const { data: changelogRes, isLoading: changelogLoading } =
     useGetPaymentChangeLogsQuery(paymentId, { skip: !edit || !paymentId })
 
-  const changelogOptions = useChangelogOptions(changelogRes)
+  const [deleteChangeLog] = useDeletePaymentChangeLogMutation()
+
+  const handleDeleteChangeLog = async (logId: string) => {
+    if (!logId || !paymentId) return
+    
+    try {
+      await deleteChangeLog({ paymentId, changeLogid: logId }).unwrap()
+    } catch (error) {
+      console.error('Error deleting changelog:', error)
+    }
+  }
+
+  const changelogOptions = useChangelogOptions(changelogRes, handleDeleteChangeLog)
 
   const { company, service, payment, prevService, prevPayment } =
     usePaymentFormData(form, paymentData)
