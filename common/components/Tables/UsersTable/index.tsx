@@ -7,6 +7,7 @@ import type { SelectProps } from 'antd'
 import {
   useGetAllUsersQuery,
   useUpdateUserMutation,
+  useGetCurrentUserQuery 
 } from '@common/api/userApi/user.api'
 import type { IUser } from '@common/api/userApi/user.api.types'
 import { Roles } from '@utils/constants'
@@ -56,6 +57,7 @@ const EditUserButton: React.FC<{ userId?: IUser['_id'] }> = ({ userId }) => {
 }
 
 export const UsersTable: React.FC = () => {
+  const { data: currentUser } = useGetCurrentUserQuery()
   const { data: users = [], isLoading } = useGetAllUsersQuery()
   const [updateUser, { isLoading: isUpdatingUser }] =
     useUpdateUserMutation()
@@ -150,6 +152,11 @@ export const UsersTable: React.FC = () => {
         title: 'Роль',
         render: (_, user) => {
           const currentRole = getUserRoleValue(user)
+          const isSelf = currentUser?._id?.toString() === user?._id?.toString()
+          const isGlobalAdminUser = currentRole === Roles.GLOBAL_ADMIN
+          if (isSelf && isGlobalAdminUser) {
+            return 'Global Admin'
+          }
 
           return (
             <Select
