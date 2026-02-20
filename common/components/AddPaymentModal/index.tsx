@@ -2,8 +2,11 @@ import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi
 import {
   useAddPaymentMutation,
   useEditPaymentMutation,
-  useDeletePaymentChangeLogMutation,
 } from '@common/api/paymentApi/payment.api'
+import { 
+  useGetPaymentChangeLogsQuery, 
+  useDeletePaymentChangeLogMutation 
+} from '@common/api/changelogApi/changelog.api'
 import {
   IExtendedPayment,
   IPayment,
@@ -18,7 +21,6 @@ import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { Form, Tabs, TabsProps, message, Tooltip } from 'antd'
 import { FormInstance } from 'antd/es/form/Form'
-import { useGetPaymentChangeLogsQuery } from '@common/api/paymentApi/payment.api'
 import { useChangelogOptions } from './changelog/useChangelogOptions'
 import dayjs from 'dayjs'
 import {
