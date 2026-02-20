@@ -2,7 +2,7 @@ import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { getDefaultColumns } from '@common/components/Tables/PaymentsBulk/column.config'
 import serviceFilter from '@components/AddPaymentModal/serviceFilter'
-import { AppRoutes, Operations } from '@utils/constants'
+import { AppRoutes, Operations, ServiceType } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { Alert, Empty, Form, Input, Table } from 'antd'
 import { useRouter } from 'next/router'
@@ -66,6 +66,15 @@ const InvoicesTable: React.FC = () => {
           // eslint-disable-next-line
           // @ts-ignore
           payment.company?._id === company._id &&
+          // eslint-disable-next-line
+          // @ts-ignore
+          payment.monthService?._id === prevService?._id &&
+          // eslint-disable-next-line
+          // @ts-ignore
+          payment.street?._id === prevService?.street?._id &&
+          // eslint-disable-next-line
+          // @ts-ignore
+          payment.domain?._id === prevService?.domain?._id &&
           payment.type === Operations.Debit
       )
 
