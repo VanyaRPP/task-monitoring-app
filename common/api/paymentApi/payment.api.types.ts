@@ -190,3 +190,6 @@ export interface ICreatePaymentChangeLogResponse {
   success: boolean
   data: IPaymentChangeLog
 }
+export interface IDeletePaymentChangeLogResponse {
+  success: boolean
+}

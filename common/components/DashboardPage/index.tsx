@@ -11,21 +11,32 @@ import { Col, Row, Space, Button, Flex,  message, Tooltip, Dropdown } from 'antd
 import { CloseOutlined, SaveOutlined, EyeOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import PaymentsChart from '@components/DashboardPage/blocks/paymentChart'
 import ProfitPage from '@components/Pages/ProfiitPage'
-import 'react-grid-layout/css/styles.css'
-import 'react-resizable/css/styles.css'
 import { addButton, removeButton } from '@modules/store/floatButtonSlice'
 import { useEditModelFloatButton, useDragDropPanelFloatButton  } from '@modules/hooks/useFloatButton'
 import { useDispatch } from 'react-redux'
-import { WidthProvider } from 'react-grid-layout'
-import GridLayout, { Layout } from 'react-grid-layout'
 import s from './style.module.scss'
 import useTheme from '@modules/hooks/useTheme'
 import WidgetVisibilityMenu from '@components/UI/WidgetVisibilityMenu'
 import { WidgetWrapper } from '@components/UI/WidgetWrapper'
 import DashboardTour from '@components/DashboardPage/DashboardTour'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragStartEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+
 const MARGIN_Y = 12
-const MARGIN_X = 12
-const ReactGridLayout = WidthProvider(GridLayout)
 const ALL_WIDGETS = [
   'payments',
   'paymentsChart',
@@ -55,23 +66,54 @@ const widgetMap: Record<WidgetKey, React.ReactNode> = {
   streets: <StreetsBlock />,
   domain: <DomainsBlock />,
   realEstate: <RealEstateBlock />,
-  profits: <div style={{ marginTop: '-13px' }}><ProfitPage /></div>,
+  profits: <ProfitPage />,
   companies: <CompaniesAreaChart />,
 }
 
-const getCustomGridHeight = (tableName: string) => {
-  switch (tableName) {
-    case 'payments': return 1;
-    case 'profits': return 0.3;
-    case 'services': return 0.3;
-    default: return 0;
+interface SortableWidgetProps {
+  id: WidgetKey
+  isEditMode: boolean
+  children: React.ReactNode
+}
+
+const SortableWidget: React.FC<SortableWidgetProps> = ({ id, isEditMode, children }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id, disabled: !isEditMode })
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    marginBottom: MARGIN_Y,
+    cursor: isEditMode ? (isDragging ? 'grabbing' : 'grab') : 'default',
+    userSelect: 'none',
+    touchAction: 'none',
+    maxWidth: '100%',
+    boxSizing: 'border-box',
+    overflow: 'hidden',
   }
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      id={id}
+      className={isEditMode ? s.gridItem : ''}
+      {...(isEditMode ? { ...attributes, ...listeners } : {})}
+    >
+      {children}
+    </div>
+  )
 }
 
 const Dashboard: React.FC = () => {
   const dispatch = useDispatch()
   const { data: userResponse } = useGetCurrentUserQuery()
-  const [hiddenWidgets, setHiddenWidgets] = useState<WidgetKey[]>([])
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
   const [showTour, setShowTour] = useState(false)
 
@@ -94,16 +136,6 @@ const Dashboard: React.FC = () => {
       />
     </div>
   )
-  const widgetMap: Record<WidgetKey, React.ReactNode> = {
-    payments: <PaymentsBlock />,
-    paymentsChart: <PaymentsChart />,
-    services: <ServicesBlock />,
-    streets: <StreetsBlock />,
-    domain: <DomainsBlock />,
-    realEstate: <RealEstateBlock />,
-    profits: <ProfitPage />,
-    companies: <CompaniesAreaChart />,
-  }
 
   useEffect(() => {
     if (isPanelVisible && !isEditMode) {
@@ -131,40 +163,14 @@ const Dashboard: React.FC = () => {
 
   const getLayoutStorageKey = (userId?: string) =>
     userId ? `dashboard-layout-${userId}` : 'dashboard-layout'
-    const visibleWidgets = useMemo(() => {
-      if (isGlobalAdmin === undefined) {
-    return ALL_WIDGETS
-  }
+  const visibleWidgets = useMemo<WidgetKey[]>(() => {
+    if (isGlobalAdmin === undefined) return [...ALL_WIDGETS]
     return isGlobalAdmin
-      ? ALL_WIDGETS
+      ? [...ALL_WIDGETS]
       : ALL_WIDGETS.filter((w) => w !== 'profits')
   }, [isGlobalAdmin])
-  const visibleWidgetMap = useMemo(() => {
-    return Object.fromEntries(
-      visibleWidgets.map((key) => [key, widgetMap[key]])
-    ) as typeof widgetMap
-  }, [visibleWidgets])
-    const DEFAULT_LAYOUT: Layout[] = visibleWidgets.map((w) => ({
-      i: w,
-      x: 0,
-      w: 1,
-      h: 2,
-      y: 0,
-    }))
 
-  const filteredWidgets = useMemo(() => {
-    return visibleWidgets.filter((w) => !hiddenWidgets.includes(w))
-  }, [visibleWidgets, hiddenWidgets])
-
-  const filteredWidgetMap = useMemo(() => {
-    return Object.fromEntries(
-      filteredWidgets.map((key) => [key, widgetMap[key]])
-    ) as typeof widgetMap
-  }, [filteredWidgets])
-
-  const [layout, setLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
-  const [tempLayout, setTempLayout] = useState<Layout[]>(DEFAULT_LAYOUT)
-
+  const [orderedWidgets, setOrderedWidgets] = useState<WidgetKey[]>(visibleWidgets)
   const [isLayoutReady, setIsLayoutReady] = useState(false)
 
   useEffect(() => {
@@ -175,67 +181,85 @@ const Dashboard: React.FC = () => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
-        setLayout(parsed.layout)
+        const savedOrder: WidgetKey[] = parsed.layout ?? []
+        const merged = [
+          ...savedOrder.filter((w) => visibleWidgets.includes(w)),
+          ...visibleWidgets.filter((w) => !savedOrder.includes(w)),
+        ]
+        setOrderedWidgets(merged)
         setHiddenWidget(parsed.hidden ?? [])
       } catch {}
+    } else {
+      setOrderedWidgets(visibleWidgets)
     }
     setIsLayoutReady(true)
   }, [userResponse?._id])
 
-  const handleLayoutChange = useCallback((newLayout: Layout[]) => {
-    setLayout((prev) =>
-      prev.map((item) => {
-        const updated = newLayout.find((l) => l.i === item.i)
-        return updated ? { ...item, ...updated } : item
-      })
-    )
+  const renderedWidgets = useMemo(
+    () => orderedWidgets.filter((w) => !hiddenWidget.includes(w)),
+    [orderedWidgets, hiddenWidget]
+  )
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    })
+  )
+
+  const [isDraggingActive, setIsDraggingActive] = useState(false)
+
+  const handleDragStart = useCallback((_event: DragStartEvent) => {
+    setIsDraggingActive(true)
+    document.body.style.cursor = 'grabbing'
   }, [])
 
-  const handleNodeHeight = useCallback((id: string, newH: number) => {
-    setLayout((prev) => {
-      const idx = prev.findIndex((item) => item.i === id)
-      if (idx === -1 || prev[idx].h === newH) {
-        return prev
-      }
-      const next = [...prev]
-      next[idx] = { ...prev[idx], h: newH }
-      return next
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    setIsDraggingActive(false)
+    document.body.style.cursor = ''
+
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    setOrderedWidgets((prev) => {
+      const oldIndex = prev.indexOf(active.id as WidgetKey)
+      const newIndex = prev.indexOf(over.id as WidgetKey)
+      return arrayMove(prev, oldIndex, newIndex)
     })
   }, [])
 
-  const isWidgetKey = (key: string): key is WidgetKey => {
-    return ALL_WIDGETS.includes(key as WidgetKey)
-  }
+  const handleDragCancel = useCallback(() => {
+    setIsDraggingActive(false)
+    document.body.style.cursor = ''
+  }, [])
 
-  const renderedLayout = useMemo(
-      () => layout.filter((item) => isWidgetKey(item.i) && visibleWidgets.includes(item.i) &&
-        !hiddenWidget.includes(item.i)),
-      [layout, visibleWidgets, hiddenWidget]
+  const handleSave = useCallback(() => {
+    const userId = userResponse?._id?.toString()
+    if (!userId) return
+    localStorage.setItem(
+      getLayoutStorageKey(userId),
+      JSON.stringify({ layout: orderedWidgets, hidden: hiddenWidget })
     )
+    message.success('Збережено!')
+    togglePanelVisible()
+  }, [userResponse?._id, orderedWidgets, hiddenWidget, togglePanelVisible])
 
-  const handleCloseTour = () => {
-    setShowTour(false)
-  }
   return (
     <div className={s.wrapper}>
       {isPanelVisible && (
         <div className={`${s.toolbar} ${isDark ? s.dark : s.light}`}>
           <div className={s.buttonsBlock}>
-            {layout.map((item) => (
+            {orderedWidgets.map((key) => (
               <Button
-                key={item.i}
+                key={key}
                 type="link"
                 onClick={() => {
-                  const element = document.getElementById(item.i)
+                  const element = document.getElementById(key)
                   if (element) {
-                    element.scrollIntoView({
-                      behavior: 'smooth',
-                      block: 'center',
-                    })
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' })
                   }
                 }}
               >
-                {widgetLabels[item.i as WidgetKey]}
+                {widgetLabels[key]}
               </Button>
             ))}
           </div>
@@ -246,21 +270,12 @@ const Dashboard: React.FC = () => {
             />
             <Dropdown overlay={menu} trigger={['click']}>
               <Tooltip title="Приховати віджети">
-                <Button icon={<EyeOutlined />}></Button>
+                <Button icon={<EyeOutlined />} />
               </Tooltip>
             </Dropdown>
 
             <Tooltip title="Зберегти">
-              <Button
-                icon={<SaveOutlined />}
-                onClick={() => {
-                  const userId = userResponse?._id?.toString()
-                  if (!userId) return
-                  localStorage.setItem(getLayoutStorageKey(userId), JSON.stringify({ layout, hidden: hiddenWidget }))
-                  message.success('Збережено!')
-                  togglePanelVisible()
-                }}
-              />
+              <Button icon={<SaveOutlined />} onClick={handleSave} />
             </Tooltip>
             <Tooltip title="Вийти з режиму редагування">
               <Button icon={<CloseOutlined />} onClick={togglePanelVisible} />
@@ -269,49 +284,45 @@ const Dashboard: React.FC = () => {
         </div>
       )}
       {isLayoutReady && (
-      <ReactGridLayout
-        className="dashboard-grid"
-        compactType="vertical"
-        layout={layout}
-        cols={1}
-        rowHeight={1}
-        margin={[MARGIN_X, MARGIN_Y]}
-        useCSSTransforms={true}
-        listenToWindowResize={true}
-        isDraggable={isEditMode}
-        isResizable={false}
-        isBounded={true}
-        onLayoutChange={handleLayoutChange}
-      >
-        {renderedLayout.map((item) => (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+          <SortableContext
+            items={renderedWidgets}
+            strategy={verticalListSortingStrategy}
+          >
             <div
-              key={item.i}
-              data-grid={item}
-              className={isEditMode ? s.gridItem : ''}
-              id={item.i}            
+              className="dashboard-grid"
+              style={{ maxWidth: '100%', overflow: 'hidden' }}
             >
-            <WidgetWrapper
-              id={item.i}
-              rowHeight={1.3}
-              marginY={MARGIN_Y}
-              isEditMode={isEditMode}
-              onHeightChange={(tableName, pxHeight: number) => {
-                const newH = Math.ceil(pxHeight + getCustomGridHeight(tableName));
-                handleNodeHeight(item.i, newH)
-              }}
-            >
-              <div className={s.filterWrapper}>
-                {visibleWidgetMap[item.i as WidgetKey]}
-              </div>
-            </WidgetWrapper>
-          </div>
-        ))}
-      </ReactGridLayout>
+              {renderedWidgets.map((key) => (
+                <SortableWidget key={key} id={key} isEditMode={isEditMode}>
+                  <WidgetWrapper
+                    id={key}
+                    rowHeight={1.3}
+                    marginY={MARGIN_Y}
+                    isEditMode={isEditMode}
+                    onHeightChange={() => {
+                    }}
+                  >
+                    <div className={s.filterWrapper}>
+                      {widgetMap[key]}
+                    </div>
+                  </WidgetWrapper>
+                </SortableWidget>
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
       <DashboardTour userRoles={userResponse?.roles || []} />
       <DashboardTour 
         isVisible={showTour} 
-        onClose={handleCloseTour}
+        onClose={() => setShowTour(false)}
         isManualStart={true}
         userRoles={userResponse?.roles || []}
       />

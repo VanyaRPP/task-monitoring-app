@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import mongoose from 'mongoose'
+import mongoose, { Mongoose } from 'mongoose'
 import dbConnect from '@utils/dbConnect'
 import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
 import Payment from '@common/modules/models/Payment'
@@ -51,6 +51,37 @@ export default async function handler(
     })
 
     return res.status(201).json({ success: true, data: log })
+  }
+
+  if (req.method === 'DELETE') {
+    const changeLogId = req.query.changeLogId as string
+
+    if (
+      !mongoose.Types.ObjectId.isValid(paymentId) || 
+      !mongoose.Types.ObjectId.isValid(changeLogId)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid ids'
+      })
+    }
+  
+    const deleted = await PaymentChangeLog.findOneAndDelete({
+      _id: changeLogId,
+      paymentId
+    })
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: 'ChangeLog not found'
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: deleted,
+    })
   }
 
   return res.status(405).json({ success: false, message: 'Method not allowed' })
