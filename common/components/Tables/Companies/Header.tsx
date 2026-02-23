@@ -19,6 +19,7 @@ import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
+import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
 
 export interface Props {
   showAddButton?: boolean
@@ -55,6 +56,9 @@ const CompaniesHeader: React.FC<Props> = ({
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  const { data: customServicesResponse } = useGetCustomServicesQuery({})
+  const customServices = customServicesResponse?.data || []
+  
   const { data: user } = useGetCurrentUserQuery()
   const isAdmin = isAdminCheck(user?.roles)
 
@@ -128,13 +132,24 @@ const CompaniesHeader: React.FC<Props> = ({
         onChange={handleServicesChange}
         maxTagCount="responsive"
       >
-        <Select.Option value="totalArea">Площа (м²)</Select.Option>
-        <Select.Option value="pricePerMeter">Ціна (грн/м²)</Select.Option>
-        <Select.Option value="cleaning">Прибирання (грн)</Select.Option>
-        <Select.Option value="waterPart">Частка водопостачання</Select.Option>
-        <Select.Option value="garbageCollector">Вивіз сміття</Select.Option>
-        <Select.Option value="inflicion">Нарахування інд. інф.</Select.Option>
-      </Select>
+        <Select.OptGroup label="Стандартні">
+          <Select.Option value="totalArea">Площа (м²)</Select.Option>
+          <Select.Option value="pricePerMeter">Ціна (грн/м²)</Select.Option>
+          <Select.Option value="cleaning">Прибирання (грн)</Select.Option>
+          <Select.Option value="waterPart">Частка водопостачання</Select.Option>
+          <Select.Option value="garbageCollector">Вивіз сміття</Select.Option>
+          <Select.Option value="inflicion">Нарахування інд. інф.</Select.Option>
+        </Select.OptGroup>
+        {customServices.length > 0 && (
+        <Select.OptGroup label="Кастомні">
+          {customServices.map((service) => (
+            <Select.Option key={service._id} value={service._id}>
+              {service.name}
+            </Select.Option>
+        ))}
+        </Select.OptGroup>
+      )}
+    </Select>
     </div>  
       </div>
       <div className={s.segmented}>

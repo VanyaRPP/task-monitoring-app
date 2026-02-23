@@ -175,27 +175,37 @@ const CompaniesTable: React.FC<Props> = ({
       message.error('Виникла помилка')
     }
   }
-    const dataSource = useMemo(() => {
-    const data = realEstates?.data || []
-    const selectedServices = filters?.services || []
+  const dataSource = useMemo(() => {
+  const rawData = realEstates?.data || []
+  if (rawData.length === 0) return []
 
-    if (selectedServices.length === 0) return data
+  const data = [...rawData]
 
-    return data.filter((item: any) => {
-      return selectedServices.some((serviceKey: string) => {
+  data.sort((a, b) => (a.companyName || '').localeCompare(b.companyName || ''))
 
-        const standardVal = item[serviceKey]
-        const hasStandard = standardVal !== null && standardVal !== undefined && standardVal !== 0 && standardVal !== false
+  const selectedServices = filters?.services || []
 
+  if (selectedServices.length === 0) return data
 
-        const hasCustom = item.individualServices?.some((s: any) => 
-          (s._id === serviceKey || s.fieldName === serviceKey) && s.price > 0
-        )
+  return data.filter((item: any) => {
+    return selectedServices.some((serviceKey: string) => {
+      
+      const val = item[serviceKey]
+      if (val !== null && val !== undefined) {
+        if (typeof val === 'number' && val > 0) return true
+        if (typeof val === 'boolean' && val === true) return true
+      }
 
-        return hasStandard || hasCustom
-      })
+      const checkArray = (arr: any[]) => 
+        arr?.some((s: any) => {
+          const serviceId = typeof s === 'string' ? s : (s._id || s.serviceId || s.service)
+          return String(serviceId) === String(serviceKey)
+        })
+
+      return checkArray(item.services) || checkArray(item.customServices)
     })
-  }, [realEstates, filters?.services])
+  })
+}, [realEstates?.data, filters?.services])
 
 
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
