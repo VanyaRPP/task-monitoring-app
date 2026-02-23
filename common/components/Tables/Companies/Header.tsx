@@ -1,5 +1,5 @@
 import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
-import { Button, Space, Segmented } from 'antd'
+import { Button, Space, Segmented, Select } from 'antd'
 import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useState } from 'react'
 import {
@@ -81,6 +81,13 @@ const CompaniesHeader: React.FC<Props> = ({
     realEstates: filters?.company,
   })
 
+  const handleServicesChange = (values: string[]) => {
+  setFilters((prev: any) => ({
+    ...prev,
+    services: values,
+  }))
+}
+
   return (
     <div className={s.headerBlock}>
       <div className={s.firstBlock}>
@@ -111,8 +118,25 @@ const CompaniesHeader: React.FC<Props> = ({
             />
           </Space>
         )}
+      <div style={{ position: 'absolute', left: 400,}}>
+      <Select
+        mode="multiple"
+        allowClear
+        placeholder="Фільтр послуг"
+        style={{ width: "250px" }}
+        value={filters?.services || []}
+        onChange={handleServicesChange}
+        maxTagCount="responsive"
+      >
+        <Select.Option value="totalArea">Площа (м²)</Select.Option>
+        <Select.Option value="pricePerMeter">Ціна (грн/м²)</Select.Option>
+        <Select.Option value="cleaning">Прибирання (грн)</Select.Option>
+        <Select.Option value="waterPart">Частка водопостачання</Select.Option>
+        <Select.Option value="garbageCollector">Вивіз сміття</Select.Option>
+        <Select.Option value="inflicion">Нарахування інд. інф.</Select.Option>
+      </Select>
+    </div>  
       </div>
-
       <div className={s.segmented}>
         <Segmented
           options={[

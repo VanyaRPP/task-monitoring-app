@@ -31,6 +31,7 @@ import {
   Dropdown,
   Switch,
   Badge,
+  Select,
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
@@ -103,7 +104,7 @@ const CompaniesTable: React.FC<Props> = ({
   setRealEstateActions,
   realEstateActions,
   isArchive,
-  customServices,
+  customServices,  
 }) => {
   const router = useRouter()
   const { pathname } = router
@@ -174,6 +175,28 @@ const CompaniesTable: React.FC<Props> = ({
       message.error('Виникла помилка')
     }
   }
+    const dataSource = useMemo(() => {
+    const data = realEstates?.data || []
+    const selectedServices = filters?.services || []
+
+    if (selectedServices.length === 0) return data
+
+    return data.filter((item: any) => {
+      return selectedServices.some((serviceKey: string) => {
+
+        const standardVal = item[serviceKey]
+        const hasStandard = standardVal !== null && standardVal !== undefined && standardVal !== 0 && standardVal !== false
+
+
+        const hasCustom = item.individualServices?.some((s: any) => 
+          (s._id === serviceKey || s.fieldName === serviceKey) && s.price > 0
+        )
+
+        return hasStandard || hasCustom
+      })
+    })
+  }, [realEstates, filters?.services])
+
 
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
   const isUser = userResponse?.roles?.includes(Roles.USER)
@@ -257,9 +280,9 @@ const CompaniesTable: React.FC<Props> = ({
         debtorCompanies,
         isUser,
         isSingleCompanyByData,
-        customServices: filteredCustomServices,
+        customServices: filteredCustomServices, 
       })}
-      dataSource={realEstates?.data}
+      dataSource={dataSource}
       scroll={{ x: tableWidth }}
       onChange={(__, filters) => {
         const newFilters: any = {
@@ -332,17 +355,90 @@ const getDefaultColumns = ({
   debtorCompanies?: CompanyWithPayments[]
   isUser?: boolean
   isSingleCompanyByData?: boolean
-  customServices?: { _id: string; name: string }[]
+  customServices?: { _id: string; name: string; fieldName?: string }[]
 }): ColumnType<any>[] => {
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
-  const columns: ColumnType<any>[] = [
+  const selectedServices = filters?.services || []
+
+  const serviceColumnsMap: Record<string, ColumnType<any>> = {
+    totalArea: {
+      title: 'Площа (м²)',
+      dataIndex: 'totalArea',
+      width: 120,
+      align: 'center',
+      sorter: isOnPage ? (a, b) => a.totalArea - b.totalArea : null,
+    },
+    pricePerMeter: {
+      title: 'Ціна (грн/м²)',
+      dataIndex: 'pricePerMeter',
+      width: 120,
+      align: 'center',
+      sorter: isOnPage ? (a, b) => a.pricePerMeter - b.pricePerMeter : null,
+      render: (value) => <span className={s.currency}>{renderPrice(value)}</span>
+    },
+    servicePricePerMeter: {
+      title: 'Індивідуальне утримання (грн/м²)',
+      dataIndex: 'servicePricePerMeter',
+      width: 200,
+      align: 'center',
+      sorter: isOnPage ? (a, b) => a.servicePricePerMeter - b.servicePricePerMeter : null,
+      render: (value) => value ? renderCurrency(value) : <span className={s.currency}>-</span>,
+    },
+    rentPart: {
+      title: 'Частка загальної площі',
+      dataIndex: 'rentPart',
+      width: 180,
+      align: 'center',
+      sorter: isOnPage ? (a, b) => a.rentPart - b.rentPart : null,
+    },
+    waterPart: {
+      title: 'Частка водопостачання',
+      dataIndex: 'waterPart',
+      width: 180,
+      align: 'center',
+      sorter: isOnPage ? (a, b) => a.waterPart - b.waterPart : null,
+    },
+    cleaning: {
+      title: 'Прибирання (грн)',
+      dataIndex: 'cleaning',
+      width: 150,
+      align: 'center',
+      sorter: isOnPage ? (a, b) => a.cleaning - b.cleaning : null,
+      render: (value) => value ? renderCurrency(value) : <span className={s.currency}>-</span>,
+    },
+    discount: {
+      title: 'Знижка',
+      dataIndex: 'discount',
+      width: 150,
+      align: 'center',
+      sorter: isOnPage ? (a, b) => a.discount - b.discount : null,
+      render: (value) => value ? renderCurrency(value) : <span className={s.currency}>-</span>,
+    },
+    garbageCollector: {
+      align: 'center',
+      title: 'Вивіз сміття',
+      dataIndex: 'garbageCollector',
+      width: 150,
+      render: (value) => <Checkbox checked={value} disabled />,
+    },
+    inflicion: {
+      align: 'center',
+      title: 'Нарахування інд. інф.',
+      dataIndex: 'inflicion',
+      width: 170,
+      render: (value) => <Checkbox checked={value} disabled />,
+    },
+  }
+
+  const showAll = selectedServices.length === 0
+  const keysToRender = showAll ? Object.keys(serviceColumnsMap) : selectedServices
+
+  const resultColumns: ColumnType<any>[] = [
     {
       title: 'Адміністратори',
       dataIndex: 'adminEmails',
       width: 250,
-      render: (adminEmails) => (
-        <CollapsedTags items={adminEmails} maxVisible={2} />
-      ),
+      render: (adminEmails) => <CollapsedTags items={adminEmails} maxVisible={2} />,
     },
     {
       title: 'Опис',
@@ -351,170 +447,56 @@ const getDefaultColumns = ({
       align: 'center',
       render: renderTooltip,
     },
-    // TODO: enum
-    {
-      title: 'Площа (м²)',
-      dataIndex: 'totalArea',
-      width: 120,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.totalArea - b.totalArea : null,
-    },
-    {
-      title: 'Ціна (грн/м²)',
-      dataIndex: 'pricePerMeter',
-      width: 120,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.pricePerMeter - b.pricePerMeter : null,
-      render: (value) => <span className={s.currency}>{renderPrice(value)}</span>
-
-    },
-    {
-      title: 'Індивідуальне утримання (грн/м²)',
-      dataIndex: 'servicePricePerMeter',
-      width: 200,
-      align: 'center',
-      sorter: isOnPage
-        ? (a, b) => a.servicePricePerMeter - b.servicePricePerMeter
-        : null,
-      render: (value) =>
-        value !== null && value !== undefined && value !== 0 ? (
-          renderCurrency(value)
-        ) : (
-          <span className={s.currency}>-</span>
-        ),
-    },
-    {
-      title: 'Частка загальної площі',
-      dataIndex: 'rentPart',
-      width: 180,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.rentPart - b.rentPart : null,
-    },
-    {
-      title: 'Частка водопостачання',
-      dataIndex: 'waterPart',
-      width: 180,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.waterPart - b.waterPart : null,
-    },
-    {
-      title: 'Прибирання (грн)',
-      dataIndex: 'cleaning',
-      width: 150,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.cleaning - b.cleaning : null,
-      render: (value) =>
-        value !== null && value !== undefined && value !== 0 ? (
-          renderCurrency(value)
-        ) : (
-          <span className={s.currency}>-</span>
-        ),
-    },
-    {
-      title: 'Знижка',
-      dataIndex: 'discount',
-      width: 150,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.discount - b.discount : null,
-      render: (value) =>
-        value !== null && value !== undefined && value !== 0 ? (
-          renderCurrency(value)
-        ) : (
-          <span className={s.currency}>-</span>
-        ),
-    },
-    {
-      align: 'center',
-      title: 'Вивіз сміття',
-      dataIndex: 'garbageCollector',
-      width: 150,
-      render: (value) => <Checkbox checked={value} disabled />,
-    },
-    {
-      align: 'center',
-      title: 'Нарахування інд. інф.',
-      dataIndex: 'inflicion',
-      width: 170,
-      render: (value) => <Checkbox checked={value} disabled />,
-    },
   ]
+
+  keysToRender.forEach((key) => {
+    if (serviceColumnsMap[key]) {
+      resultColumns.push(serviceColumnsMap[key])
+    }
+  })
 
   if (customServices?.length) {
     customServices.forEach((custom) => {
-      columns.push({
-        title: custom.name,
-        dataIndex: custom._id,
-        width: 150,
-        align: 'center',
-        ellipsis: true,
-        render: (_, record: IExtendedRealestate) => {
-          const match = (record as any).individualServices?.find(
-            (s) => String(s._id) === String(custom._id)
-          )
-          return match ? (
-            renderCurrency(match.price)
-          ) : (
-            <span className={s.currency}>-</span>
-          )
-        },
-      })
+      const isSelected = selectedServices.includes(custom._id) || selectedServices.includes(custom.fieldName)
+      if (showAll || isSelected) {
+        resultColumns.push({
+          title: custom.name,
+          dataIndex: custom._id,
+          width: 150,
+          align: 'center',
+          ellipsis: true,
+          render: (_, record: IExtendedRealestate) => {
+            const match = (record as any).individualServices?.find(
+              (s: any) => String(s._id) === String(custom._id)
+            )
+            return match ? renderCurrency(match.price) : <span className={s.currency}>-</span>
+          },
+        })
+      }
     })
   }
 
   if (isAdmin) {
-    columns.push({
-      fixed: 'right',
-      align: 'center',
-      title: '',
-      width: 56,
+    resultColumns.push({
+      fixed: 'right', align: 'center', title: '', width: 56,
       render: (_, realEstate: IExtendedRealestate) => (
-        <Button
-          icon={<EditOutlined />}
-          type="link"
-          onClick={() => {
+        <Button icon={<EditOutlined />} type="link" onClick={() => {
             setCurrentRealEstate(realEstate)
             setRealEstateActions({ edit: true })
-          }}
-        />
+        }} />
       ),
     })
-  }
-  if (isAdmin) {
-    columns.push({
-      align: 'center',
-      fixed: 'right',
-      title: '',
-      width: 98,
+
+    resultColumns.push({
+      align: 'center', fixed: 'right', title: '', width: 98,
       render: (_, realEstate: IExtendedRealestate) => (
-        <Dropdown
-          menu={{
+        <Dropdown menu={{
             items: [
               {
                 key: 'archive',
                 label: (
-                  <Popconfirm
-                    id="popconfirm_archive"
-                    title={`Ви впевнені що хочете ${
-                      realEstate.archived ? 'розархівувати' : 'архівувати'
-                    } цей елемент?`}
-                    onConfirm={() =>
-                      handleArchive(realEstate?._id, !realEstate.archived)
-                    }
-                    okText={
-                      realEstate.archived ? 'Розархівувати' : 'Архівувати'
-                    }
-                    cancelText="Ні"
-                    disabled={archiveLoading}
-                  >
-                    <Button
-                      type="text"
-                      icon={<InboxOutlined />}
-                      style={{
-                        color: realEstate.archived ? '#722ed1' : '#ff4d4f',
-                        paddingLeft: '10px',
-                        paddingRight: '10px',
-                      }}
-                    >
+                  <Popconfirm title={`Ви впевнені?`} onConfirm={() => handleArchive(realEstate?._id, !realEstate.archived)}>
+                    <Button type="text" icon={<InboxOutlined />} style={{ color: realEstate.archived ? '#722ed1' : '#ff4d4f', padding: '0 10px' }}>
                       {realEstate.archived ? 'Розархівувати' : 'Архівувати'}
                     </Button>
                   </Popconfirm>
@@ -523,29 +505,12 @@ const getDefaultColumns = ({
               isGlobalAdmin && {
                 key: 'delete',
                 label: (
-                  <Popconfirm
-                    id="popconfirm_custom"
-                    title={`Ви впевнені що хочете видалити нерухомість?`}
-                    onConfirm={() => handleDelete(realEstate?._id)}
-                    okText="Видалити"
-                    cancelText="Ні"
-                    disabled={deleteLoading}
-                  >
-                    <Button
-                      type="text"
-                      icon={<DeleteOutlined />}
-                      style={{
-                        color: '#ff4d4f',
-                        paddingLeft: '10px',
-                        paddingRight: '10px',
-                      }}
-                    >
-                      Видалити
-                    </Button>
+                  <Popconfirm title="Видалити нерухомість?" onConfirm={() => handleDelete(realEstate?._id)}>
+                    <Button type="text" icon={<DeleteOutlined />} style={{ color: '#ff4d4f', padding: '0 10px' }}>Видалити</Button>
                   </Popconfirm>
                 ),
               },
-            ],
+            ].filter(Boolean) as any,
           }}
           placement="bottomRight"
         >
@@ -555,92 +520,46 @@ const getDefaultColumns = ({
     })
   }
 
+  const streetColumn: any = {
+    title: 'Адреса', dataIndex: 'street', width: 200,
+    render: (i: any) => `${i?.address} (м. ${i?.city})`,
+  }
+
   const domainColumn: any = {
-    title: 'Надавач послуг',
-    dataIndex: 'domain',
-    width: 200,
-    render: (i) => i?.name,
+    title: 'Надавач послуг', dataIndex: 'domain', width: 200,
+    render: (i: any) => i?.name,
     hidden: domainsFilter?.length <= 1,
-    filterSearch: true,
   }
 
   const companyColumn: any = {
-    fixed: 'left',
-    title: 'Назва компанії',
-    dataIndex: 'companyName',
-    width: 200,
-    filterSearch: true,
-    render: (i: string) => {
-      if (isUser || !debtorCompanies) return i;
-      const debtor = debtorCompanies?.find(
-        (companie) => companie?.companyName === i
-      );
-
-       if (!debtor) return i;
-
-      const tooltipDebtor = (
-        <div>
-          <p><b>Компанія боржник</b></p>
-          <p>Назва компанії: {i}</p>
-          <p>Сума боргу: {formatDebt(debtor.totalDebt)}</p>
-        </div>
-      );
-
+    fixed: 'left', title: 'Назва компанії', dataIndex: 'companyName', width: 200,
+    render: (name: string) => {
+      const debtor = debtorCompanies?.find((c) => c.companyName === name)
+      if (isUser || !debtor) return name
       return (
-        <Badge
-          count={formatDebt(debtor.totalDebt)}
-          title=""
-          color={getDebtorTooltipColor(debtor)}
-          overflowCount={Infinity}
-          style={{ cursor: 'pointer' }}
-          size="small"
-          offset={[3, -8]}
-        >
-          <Tooltip title={tooltipDebtor}>
-            <span style={{cursor: 'pointer'}}>{i}</span>
-          </Tooltip>
+        <Badge count={formatDebt(debtor.totalDebt)} color={getDebtorTooltipColor(debtor)} size="small" offset={[3, -8]}>
+          <Tooltip title="Компанія боржник"><span style={{ cursor: 'pointer', fontWeight: 500 }}>{name}</span></Tooltip>
         </Badge>
-      );
+      )
     },
-  };
-
-  const streetColumn: any = {
-    title: 'Адреса',
-    dataIndex: 'street',
-    width: 200,
-    filterSearch: true,
-    render: (i) => (
-      <>
-        {i?.address} (м. {i?.city})
-      </>
-    ),
   }
 
   if (isAdmin) {
     if (!isSingleCompanyByData) {
-      companyColumn.filters =
-        pathname === AppRoutes.REAL_ESTATE ? realEstatesFilter : null
+      companyColumn.filters = isOnPage ? realEstatesFilter : null
       companyColumn.filteredValue = filters?.company || null
     }
-
-    domainColumn.filters =
-      pathname === AppRoutes.REAL_ESTATE ? domainsFilter : null
+    domainColumn.filters = isOnPage ? domainsFilter : null
     domainColumn.filteredValue = filters?.domain || null
-
-    streetColumn.filters =
-      pathname === AppRoutes.REAL_ESTATE ? streetsFilter : null
+    streetColumn.filters = isOnPage ? streetsFilter : null
     streetColumn.filteredValue = filters?.street || null
   }
 
-  columns.unshift(streetColumn)
+  resultColumns.unshift(streetColumn)
+  resultColumns.unshift(domainColumn)
+  if (!isSingleCompanyByData) resultColumns.unshift(companyColumn)
 
-  columns.unshift(domainColumn)
-
-  if (!isSingleCompanyByData) {
-    columns.unshift(companyColumn)
-  }
-
-  return columns
+  return resultColumns
 }
 
 export default CompaniesTable

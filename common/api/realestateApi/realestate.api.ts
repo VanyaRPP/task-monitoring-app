@@ -22,10 +22,11 @@ export const realestateApi = createApi({
         domainId?: string[] | string
         streetId?: string[] | string
         companyId?: string[] | string
+        services?: string[] | string
         archived?: boolean
       }
     >({
-      query: ({ limit, companyId, domainId, streetId, archived }) => {
+      query: ({ limit, companyId, domainId, streetId, archived, services }) => {
         return {
           url: `real-estate`,
           params: {
@@ -34,6 +35,7 @@ export const realestateApi = createApi({
             domainId,
             streetId,
             archived,
+            services,
           },
         }
       },
