@@ -1,5 +1,6 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 
 const ALL_WIDGET_IDS = ['payments', 'paymentsChart', 'services', 'streets', 'domain', 'realEstate', 'profits', 'companies']
@@ -88,9 +89,10 @@ describe('Dashboard — basic behaviors', () => {
   })
 
   it('Обробка переміщень таблиць: змінює порядок і зберігає його', async () => {
+    const user = userEvent.setup()
     render(React.createElement(TestDashboard))
-    fireEvent.click(screen.getByTestId('move-down-payments'))
-    fireEvent.click(screen.getByLabelText('save'))
+    await user.click(screen.getByTestId('move-down-payments'))
+    await user.click(screen.getByRole('button', { name: 'save' }))
 
     const raw = localStorage.getItem('dashboard-layout-user-123')
     expect(raw).not.toBeNull()
@@ -100,9 +102,10 @@ describe('Dashboard — basic behaviors', () => {
   })
 
   it('Збереження у local Storage: зберігає layout і hidden', async () => {
+    const user = userEvent.setup()
     render(React.createElement(TestDashboard))
-    fireEvent.click(screen.getByTestId('toggle-streets'))
-    fireEvent.click(screen.getByLabelText('save'))
+    await user.click(screen.getByTestId('toggle-streets'))
+    await user.click(screen.getByRole('button', { name: 'save' }))
 
     const raw = localStorage.getItem('dashboard-layout-user-123')
     expect(raw).not.toBeNull()
@@ -113,17 +116,19 @@ describe('Dashboard — basic behaviors', () => {
   })
 
   it('Приховання таблиць: ховає віджет після вибору у меню видимості', async () => {
+    const user = userEvent.setup()
     render(React.createElement(TestDashboard))
     expect(screen.getByTestId('widget-payments')).toBeInTheDocument()
-    fireEvent.click(screen.getByTestId('toggle-payments'))
+    await user.click(screen.getByTestId('toggle-payments'))
     await waitFor(() => expect(screen.queryByTestId('widget-payments')).not.toBeInTheDocument())
   })
 
   it('Відображення таблиць після приховання: показує віджет знову після повторного кліку', async () => {
+    const user = userEvent.setup()
     render(React.createElement(TestDashboard))
-    fireEvent.click(screen.getByTestId('toggle-services'))
+    await user.click(screen.getByTestId('toggle-services'))
     await waitFor(() => expect(screen.queryByTestId('widget-services')).not.toBeInTheDocument())
-    fireEvent.click(screen.getByTestId('toggle-services'))
+    await user.click(screen.getByTestId('toggle-services'))
     await waitFor(() => expect(screen.getByTestId('widget-services')).toBeInTheDocument())
   })
 })
