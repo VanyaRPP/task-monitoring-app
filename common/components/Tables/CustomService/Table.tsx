@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import type React from 'react'
 import { Button, Card, Flex, Transfer, Typography } from 'antd'
 import type { TransferDirection } from 'antd/es/transfer'
 
@@ -23,8 +24,8 @@ export const CustomServicesTable: React.FC<Props> = ({
     [services]
   )
 
-  const [targetKeys, setTargetKeys] = useState<string[]>([])
-  const [selectedKeys, setSelectedKeys] = useState<string[]>([])
+  const [targetKeys, setTargetKeys] = useState<React.Key[]>([])
+  const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([])
 
   return (
     <Card
@@ -34,9 +35,7 @@ export const CustomServicesTable: React.FC<Props> = ({
       }}
       title={
         <Flex align="center" justify="space-between" gap={12}>
-          <Typography.Text strong>
-            Група: {groupTitle}
-          </Typography.Text>
+          <Typography.Text strong>Група: {groupTitle}</Typography.Text>
 
           <Button type="link" danger style={{ padding: 0 }} onClick={onDeleteGroup}>
             Видалити групу послуг
@@ -50,10 +49,10 @@ export const CustomServicesTable: React.FC<Props> = ({
         titles={['Доступні послуги', 'Обрані послуги']}
         targetKeys={targetKeys}
         selectedKeys={selectedKeys}
-        onChange={(nextTargetKeys: string[], _direction: TransferDirection) =>
+        onChange={(nextTargetKeys: React.Key[], _direction: TransferDirection) =>
           setTargetKeys(nextTargetKeys)
         }
-        onSelectChange={(sourceSelectedKeys, targetSelectedKeys) =>
+        onSelectChange={(sourceSelectedKeys: React.Key[], targetSelectedKeys: React.Key[]) =>
           setSelectedKeys([...sourceSelectedKeys, ...targetSelectedKeys])
         }
         render={(item) => item.title}
