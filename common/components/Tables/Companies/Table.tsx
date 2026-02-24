@@ -183,29 +183,8 @@ const CompaniesTable: React.FC<Props> = ({
 
   data.sort((a, b) => (a.companyName || '').localeCompare(b.companyName || ''))
 
-  const selectedServices = filters?.services || []
-
-  if (selectedServices.length === 0) return data
-
-  return data.filter((item: any) => {
-    return selectedServices.some((serviceKey: string) => {
-      
-      const val = item[serviceKey]
-      if (val !== null && val !== undefined) {
-        if (typeof val === 'number' && val > 0) return true
-        if (typeof val === 'boolean' && val === true) return true
-      }
-
-      const checkArray = (arr: any[]) => 
-        arr?.some((s: any) => {
-          const serviceId = typeof s === 'string' ? s : (s._id || s.serviceId || s.service)
-          return String(serviceId) === String(serviceKey)
-        })
-
-      return checkArray(item.services) || checkArray(item.customServices)
-    })
-  })
-}, [realEstates?.data, filters?.services])
+  return data
+}, [realEstates?.data])
 
 
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
