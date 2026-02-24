@@ -132,14 +132,6 @@ const CompaniesHeader: React.FC<Props> = ({
         onChange={handleServicesChange}
         maxTagCount="responsive"
       >
-        <Select.OptGroup label="Стандартні">
-          <Select.Option value="totalArea">Площа (м²)</Select.Option>
-          <Select.Option value="pricePerMeter">Ціна (грн/м²)</Select.Option>
-          <Select.Option value="cleaning">Прибирання (грн)</Select.Option>
-          <Select.Option value="waterPart">Частка водопостачання</Select.Option>
-          <Select.Option value="garbageCollector">Вивіз сміття</Select.Option>
-          <Select.Option value="inflicion">Нарахування інд. інф.</Select.Option>
-        </Select.OptGroup>
         {customServices.length > 0 && (
         <Select.OptGroup label="Кастомні">
           {customServices.map((service) => (
