@@ -58,18 +58,17 @@ type CompanyWithPayments = {
   totalDebt: number
 }
 
-const STANDARD_SERVICE_NAMES = [
-  'Опис',
-  'Площа (м²)',
-  'Ціна (грн/м²)',
-  'Індивідуальне утримання (грн/м²)',
-  'Частка загальної площі',
-  'Частка водопостачання',
-  'Прибирання (грн)',
-  'Знижка',
-  'Вивіз сміття',
-  'Нарахування інд. інф.',
-]
+const SERVICE_COLUMNS_CONFIG: Record<string, any> = {
+  totalArea: { title: 'Площа (м²)', width: 120 },
+  pricePerMeter: { title: 'Ціна (грн/м²)', width: 120, isPrice: true },
+  servicePricePerMeter: { title: 'Індивідуальне утримання (грн/м²)', width: 200, isPrice: true },
+  rentPart: { title: 'Частка загальної площі', width: 200 },
+  waterPart: { title: 'Частка водопостачання', width: 180 },
+  cleaning: { title: 'Прибирання (грн)', width: 150, isPrice: true },
+  discount: { title: 'Знижка', width: 150, isPrice: true },
+  garbageCollector: { title: 'Вивіз сміття', width: 150, isCheckbox: true },
+  inflicion: { title: 'Нарахування інд. інф.', width: 170, isCheckbox: true },
+};
 
 export interface Props {
   domainId?: string
@@ -206,7 +205,7 @@ const CompaniesTable: React.FC<Props> = ({
 
   const filteredCustomServices = useMemo(() => {
     return customServices?.filter((custom) => {
-      const isStandardName = STANDARD_SERVICE_NAMES.includes(custom.name)
+      const isStandardName = Object.keys(SERVICE_COLUMNS_CONFIG).includes(custom.name)
       return !isStandardName
     })
   }, [customServices])
@@ -349,78 +348,44 @@ const getDefaultColumns = ({
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
   const selectedServices = filters?.services || []
 
-  const serviceColumnsMap: Record<string, ColumnType<any>> = {
-    totalArea: {
-      title: 'Площа (м²)',
-      dataIndex: 'totalArea',
-      width: 120,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.totalArea - b.totalArea : null,
-    },
-    pricePerMeter: {
-      title: 'Ціна (грн/м²)',
-      dataIndex: 'pricePerMeter',
-      width: 120,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.pricePerMeter - b.pricePerMeter : null,
-      render: (value) => <span className={s.currency}>{renderPrice(value)}</span>
-    },
-    servicePricePerMeter: {
-      title: 'Індивідуальне утримання (грн/м²)',
-      dataIndex: 'servicePricePerMeter',
-      width: 200,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.servicePricePerMeter - b.servicePricePerMeter : null,
-      render: (value) => value ? renderCurrency(value) : <span className={s.currency}>-</span>,
-    },
-    rentPart: {
-      title: 'Частка загальної площі',
-      dataIndex: 'rentPart',
-      width: 180,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.rentPart - b.rentPart : null,
-    },
-    waterPart: {
-      title: 'Частка водопостачання',
-      dataIndex: 'waterPart',
-      width: 180,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.waterPart - b.waterPart : null,
-    },
-    cleaning: {
-      title: 'Прибирання (грн)',
-      dataIndex: 'cleaning',
-      width: 150,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.cleaning - b.cleaning : null,
-      render: (value) => value ? renderCurrency(value) : <span className={s.currency}>-</span>,
-    },
-    discount: {
-      title: 'Знижка',
-      dataIndex: 'discount',
-      width: 150,
-      align: 'center',
-      sorter: isOnPage ? (a, b) => a.discount - b.discount : null,
-      render: (value) => value ? renderCurrency(value) : <span className={s.currency}>-</span>,
-    },
-    garbageCollector: {
-      align: 'center',
-      title: 'Вивіз сміття',
-      dataIndex: 'garbageCollector',
-      width: 150,
-      render: (value) => <Checkbox checked={value} disabled />,
-    },
-    inflicion: {
-      align: 'center',
-      title: 'Нарахування інд. інф.',
-      dataIndex: 'inflicion',
-      width: 170,
-      render: (value) => <Checkbox checked={value} disabled />,
-    },
-  }
-
   const showAll = selectedServices.length === 0
-  const keysToRender = showAll ? Object.keys(serviceColumnsMap) : selectedServices
+  const keysToRender = showAll ? Object.keys(SERVICE_COLUMNS_CONFIG) : selectedServices
+
+  const dynamicServiceColumns = keysToRender.map((key) => {
+    const config = SERVICE_COLUMNS_CONFIG[key]
+
+    if (config) {
+      return {
+        title: config.title,
+        dataIndex: key,
+        key,
+        width: config.width,
+        align: 'center',
+        sorter: !config.isCheckbox && isOnPage ? (a, b) => a[key] - b[key] : null,
+        render: (value) => {
+          if (config.isCheckbox) return <Checkbox checked={value} disabled />
+          if (config.isPrice) return value ? renderCurrency(value) : <span className={s.currency}>-</span>
+          return value || '-'
+        },
+      }
+    }
+
+    const customSrv = customServices?.find((s) => s._id === key)
+    if (customSrv) {
+      return {
+        title: customSrv.name,
+        key,
+        width: 150,
+        align: 'center',
+        render: (_, record: IExtendedRealestate) => {
+          const match = [...(record.services || []), ...(record.customServices || []), ...((record as any).individualServices || [])]
+            .find((s) => String(s._id || s.serviceId) === String(key))
+          return match?.price ? renderCurrency(match.price) : <span className={s.currency}>-</span>
+        },
+      }
+    }
+    return null
+  }).filter(Boolean) as ColumnType<any>[]
 
   const resultColumns: ColumnType<any>[] = [
     {
@@ -432,39 +397,13 @@ const getDefaultColumns = ({
     {
       title: 'Опис',
       dataIndex: 'description',
-      width: 100,
+      width: 120,
       align: 'center',
       render: renderTooltip,
     },
+    ...dynamicServiceColumns,
   ]
-
-  keysToRender.forEach((key) => {
-    if (serviceColumnsMap[key]) {
-      resultColumns.push(serviceColumnsMap[key])
-    }
-  })
-
-  if (customServices?.length) {
-    customServices.forEach((custom) => {
-      const isSelected = selectedServices.includes(custom._id) || selectedServices.includes(custom.fieldName)
-      if (showAll || isSelected) {
-        resultColumns.push({
-          title: custom.name,
-          dataIndex: custom._id,
-          width: 150,
-          align: 'center',
-          ellipsis: true,
-          render: (_, record: IExtendedRealestate) => {
-            const match = (record as any).individualServices?.find(
-              (s: any) => String(s._id) === String(custom._id)
-            )
-            return match ? renderCurrency(match.price) : <span className={s.currency}>-</span>
-          },
-        })
-      }
-    })
-  }
-
+  
   if (isAdmin) {
     resultColumns.push({
       fixed: 'right', align: 'center', title: '', width: 56,
@@ -510,8 +449,8 @@ const getDefaultColumns = ({
   }
 
   const streetColumn: any = {
-    title: 'Адреса', dataIndex: 'street', width: 200,
-    render: (i: any) => `${i?.address} (м. ${i?.city})`,
+    title: 'Адреса', dataIndex: 'street', width: 260,
+    render: (i: any) => i ? `${i.address} (м. ${i.city})` : '-',
   }
 
   const domainColumn: any = {
