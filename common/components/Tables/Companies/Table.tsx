@@ -335,11 +335,7 @@ const getDefaultColumns = ({
   streetsFilter: IFilter[]
   filters?: any
   pathname?: string
-  setRealEstateActions: React.Dispatch<
-    React.SetStateAction<{
-      edit: boolean
-    }>
-  >
+  setRealEstateActions: React.Dispatch<React.SetStateAction<{ edit: boolean }>>
   debtorCompanies?: CompanyWithPayments[]
   isUser?: boolean
   isSingleCompanyByData?: boolean
@@ -349,7 +345,11 @@ const getDefaultColumns = ({
   const selectedServices = filters?.services || []
 
   const showAll = selectedServices.length === 0
-  const keysToRender = showAll ? Object.keys(SERVICE_COLUMNS_CONFIG) : selectedServices
+  const keysToRender = showAll 
+  ? [
+      ...Object.keys(SERVICE_COLUMNS_CONFIG), 
+      ...(customServices?.map(s => s._id) || [])
+    ] : selectedServices
 
   const dynamicServiceColumns = keysToRender.map((key) => {
     const config = SERVICE_COLUMNS_CONFIG[key]
@@ -370,16 +370,24 @@ const getDefaultColumns = ({
       }
     }
 
-    const customSrv = customServices?.find((s) => s._id === key)
+    const customSrv = customServices?.find((s) => s._id === key || s.fieldName === key)
     if (customSrv) {
       return {
         title: customSrv.name,
         key,
-        width: 150,
+        width: 160,
         align: 'center',
         render: (_, record: IExtendedRealestate) => {
-          const match = [...(record.services || []), ...(record.customServices || []), ...((record as any).individualServices || [])]
-            .find((s) => String(s._id || s.serviceId) === String(key))
+          const allServices = [
+            ...(record.services || []),
+            ...(record.customServices || []),
+            ...((record as any).individualServices || [])
+          ]
+          
+          const match = allServices.find(
+            (s) => String(s._id || s.serviceId) === String(customSrv._id)
+          )
+          
           return match?.price ? renderCurrency(match.price) : <span className={s.currency}>-</span>
         },
       }
@@ -389,7 +397,7 @@ const getDefaultColumns = ({
 
   const resultColumns: ColumnType<any>[] = [
     {
-      title: 'Адміністратори',
+      title: 'Администраторы',
       dataIndex: 'adminEmails',
       width: 250,
       render: (adminEmails) => <CollapsedTags items={adminEmails} maxVisible={2} />,
@@ -397,11 +405,11 @@ const getDefaultColumns = ({
     {
       title: 'Опис',
       dataIndex: 'description',
-      width: 120,
+      width: 100,
       align: 'center',
       render: renderTooltip,
     },
-    ...dynamicServiceColumns,
+    ...dynamicServiceColumns
   ]
   
   if (isAdmin) {
