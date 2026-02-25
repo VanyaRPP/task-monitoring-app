@@ -210,6 +210,36 @@ const CompaniesTable: React.FC<Props> = ({
     })
   }, [customServices])
 
+  const activeServiceKeys = useMemo(() => {
+    if (filters?.services?.length > 0) {
+      return filters.services
+    }
+
+    const keys = new Set<string>()
+
+    dataSource.forEach((record: any) => {
+      Object.keys(SERVICE_COLUMNS_CONFIG).forEach((key) => {
+        const value = record[key]
+        const config = SERVICE_COLUMNS_CONFIG[key]
+        if (config.isCheckbox ? value === true : value > 0) {
+          keys.add(key)
+        }
+      })
+
+      const allNested = [
+        ...(record.services || []),
+        ...(record.customServices || []),
+        ...(record.individualServices || []),
+      ]
+      allNested.forEach((s) => {
+        const id = s._id || s.serviceId
+        if (id) keys.add(String(id))
+      })
+    })
+
+    return Array.from(keys)
+  }, [dataSource, filters?.services])
+
   if (isError) return <Alert message="Помилка" type="error" showIcon closable />
 
   return (
@@ -269,6 +299,7 @@ const CompaniesTable: React.FC<Props> = ({
         isUser,
         isSingleCompanyByData,
         customServices: filteredCustomServices, 
+        keysToRender: activeServiceKeys,
       })}
       dataSource={dataSource}
       scroll={{ x: tableWidth }}
@@ -319,6 +350,7 @@ const getDefaultColumns = ({
   isUser,
   isSingleCompanyByData,
   customServices,
+  keysToRender,
 }: {
   domainId?: string
   streetId?: string
@@ -340,16 +372,10 @@ const getDefaultColumns = ({
   isUser?: boolean
   isSingleCompanyByData?: boolean
   customServices?: { _id: string; name: string; fieldName?: string }[]
+  keysToRender: string[]
 }): ColumnType<any>[] => {
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
   const selectedServices = filters?.services || []
-
-  const showAll = selectedServices.length === 0
-  const keysToRender = showAll 
-  ? [
-      ...Object.keys(SERVICE_COLUMNS_CONFIG), 
-      ...(customServices?.map(s => s._id) || [])
-    ] : selectedServices
 
   const dynamicServiceColumns = keysToRender.map((key) => {
     const config = SERVICE_COLUMNS_CONFIG[key]
