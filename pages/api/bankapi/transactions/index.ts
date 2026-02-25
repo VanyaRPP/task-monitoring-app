@@ -28,14 +28,14 @@ export async function  checkTransaction({ transaction }) {
         //     ]
         //   }
         // },
-        {
-          $expr: {
-            $eq: [
-              { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_NAM', ''] } } },
-              Nam
-            ]
-          }
-        },
+        // {
+        //   $expr: {
+        //     $eq: [
+        //       { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_NAM', ''] } } },
+        //       Nam
+        //     ]
+        //   }
+        // },
         {
           $expr: {
             $eq: [
