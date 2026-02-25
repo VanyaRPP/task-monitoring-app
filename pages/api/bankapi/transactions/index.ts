@@ -36,14 +36,14 @@ export async function  checkTransaction({ transaction }) {
             ]
           }
         },
-        {
-          $expr: {
-            $eq: [
-              { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_MFO', ''] } } },
-              Mfo
-            ]
-          }
-        },
+        // {
+        //   $expr: {
+        //     $eq: [
+        //       { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_MFO', ''] } } },
+        //       Mfo
+        //     ]
+        //   }
+        // },
         { generalSum: Sum },
       ],
     })
