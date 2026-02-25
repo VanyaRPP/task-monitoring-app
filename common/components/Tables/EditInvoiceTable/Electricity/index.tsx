@@ -71,7 +71,7 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
                 {toRoundFixed(lastAmount)} → {toRoundFixed(amount)}
               </div>
               <div>
-                <strong>Втрати:</strong> {losses}%
+                <strong>Втрати:</strong> {(losses).toFixed(2)}%
               </div>
               <div>
                 <strong>З втратами:</strong> {withLosses} кВт
