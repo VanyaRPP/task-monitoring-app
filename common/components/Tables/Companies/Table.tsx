@@ -397,7 +397,7 @@ const getDefaultColumns = ({
 
   const resultColumns: ColumnType<any>[] = [
     {
-      title: 'Администратори',
+      title: 'Адміністратори',
       dataIndex: 'adminEmails',
       width: 250,
       render: (adminEmails) => <CollapsedTags items={adminEmails} maxVisible={2} />,
