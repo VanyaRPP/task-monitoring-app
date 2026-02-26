@@ -216,6 +216,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         setFilters({
           ...allFilters,
           invoiceCreationDate: invoiceVals,
+          street: filters?.street,
         })
       )
     }
