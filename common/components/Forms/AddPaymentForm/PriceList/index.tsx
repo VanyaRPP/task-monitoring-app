@@ -125,8 +125,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               invoices={payment.invoice}
             />
           </div>
-
-          <div className={styles.contaiіner}>
+          <div className={styles.container}>
             <div className={styles.contentSection}>
               <div>
                 Загальна вартість робіт (послуг) склала без ПДВ{' '}
