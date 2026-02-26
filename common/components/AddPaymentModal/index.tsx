@@ -279,7 +279,7 @@ const AddPaymentModal: FC<Props> = ({
     const values = await form.validateFields()
 
     if (values.operation === Operations.Credit) {
-      handleSubmit()
+      await handleSubmit()
       return
     }
 
@@ -297,7 +297,13 @@ const AddPaymentModal: FC<Props> = ({
       street: formData.street,
       company: formData.company,
       monthService: formData.monthService,
-      invoiceCreationDate: formData.invoiceCreationDate,
+      invoiceCreationDate: formData.invoiceCreationDate
+        ? new Date(Date.UTC(
+            formData.invoiceCreationDate.year(),
+            formData.invoiceCreationDate.month(),
+            formData.invoiceCreationDate.date()
+          ))
+        : null,
       description: formData.description || '',
       generalSum: formData.generalSum || formData.debit,
       provider,
