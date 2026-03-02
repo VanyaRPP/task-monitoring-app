@@ -108,13 +108,10 @@ const RealEstateForm: FC<Props> = ({
       className={s.Form}
       onValuesChange={() => setIsValueChanged(true)}
     >
-      {currentRealEstate ? (
-        <Form.Item name="domain" label="Надавач послуг">
-          <Input disabled />
-        </Form.Item>
-      ) : (
-        <DomainsSelect form={form} />
-      )}
+      <DomainsSelect
+        form={form}
+        disabled={!!currentRealEstate}
+      />
       {currentRealEstate ? (
         <Form.Item name="street" label="Адреса">
           <Input disabled />
