@@ -19,8 +19,13 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        const { companyId, domainId, streetId, archived, limit = 0 } = req.query
+        const { companyId, domainId, streetId, archived, services, limit = 0 } = req.query
 
+        const servicesIds: string[] | null = services
+          ? typeof services === 'string'
+            ? services.split(',').map((id) => decodeURIComponent(id))
+            : (services as string[]).map((id) => decodeURIComponent(id))
+          : null
         const companiesIds: string[] | null = companyId
           ? typeof companyId === 'string'
             ? companyId.split(',').map((id) => decodeURIComponent(id))
@@ -47,6 +52,23 @@ export default async function handler(
           ...(!!companiesIds?.length && { _id: { $in: companiesIds } }),
           ...(!!domainsIds?.length && { domain: { $in: domainsIds } }),
           ...(!!streetsIds?.length && { street: { $in: streetsIds } }),
+        }
+
+        if (servicesIds && servicesIds.length > 0) {
+          filters.$or = servicesIds.map((serviceKey) => {
+            if (['cleaning', 'totalArea', 'pricePerMeter', 'waterPart'].includes(serviceKey)) {
+              return { [serviceKey]: { $gt: 0 } }
+            }
+            if (['garbageCollector', 'inflicion'].includes(serviceKey)) {
+              return { [serviceKey]: true }
+            }
+            return {
+              $or: [
+                { services: { $elemMatch: { $or: [{ _id: serviceKey }, { serviceId: serviceKey }, { service: serviceKey }] } } },
+                { customServices: { $elemMatch: { $or: [{ _id: serviceKey }, { serviceId: serviceKey }, { service: serviceKey }] } } }
+              ]
+            }
+          })
         }
 
         /**

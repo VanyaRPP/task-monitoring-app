@@ -40,18 +40,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (isSelf && isRoleUpdate && !isGlobalAdmin) {
           return res.status(403).json({ success: false, message: 'not allowed' })
         }
-        if (isSelf && isRoleUpdate && isGlobalAdmin) {
-          const nextRoles = req.body.roles ?? (req.body.role ? [req.body.role] : [])
-          const willLoseGlobal =
-            Array.isArray(nextRoles) && !nextRoles.includes(Roles.GLOBAL_ADMIN)
-
-          if (willLoseGlobal) {
-            return res.status(403).json({
-              success: false,
-              message: "You can't remove GLOBAL_ADMIN from yourself",
-            })
-          }
-        }
 
         const updatedUser = await User.updateOne({ _id: targetId }, req.body)
 

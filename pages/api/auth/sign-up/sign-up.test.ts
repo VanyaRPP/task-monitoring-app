@@ -28,6 +28,10 @@ describe('POST /api/auth/sign-up', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+  
 
   it('Should create new user', async () => {
     ;(User.findOne as jest.Mock).mockResolvedValue(null)

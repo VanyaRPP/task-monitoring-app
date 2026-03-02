@@ -351,6 +351,48 @@ export function currencyWithUnit(
   return `${value} ${label}${unit ? `/${unit}` : ''}`
 }
 
+export const normalizeCurrency = (currency?: string): 'UAH' | 'USD' | 'EUR' => {
+  const normalizedCurrency = currency?.toUpperCase()
+
+  if (normalizedCurrency === 'USD' || normalizedCurrency === 'EUR') {
+    return normalizedCurrency
+  }
+
+  return 'UAH'
+}
+
+export const getCurrencyShortLabel = (currency?: string): string => {
+  const normalizedCurrency = normalizeCurrency(currency)
+
+  return {
+    UAH: 'грн',
+    USD: 'USD',
+    EUR: 'EUR',
+  }[normalizedCurrency]
+}
+
+export const getCurrencySymbol = (currency?: string): string => {
+  const normalizedCurrency = normalizeCurrency(currency)
+
+  return {
+    UAH: '₴',
+    USD: '$',
+    EUR: '€',
+  }[normalizedCurrency]
+}
+
+export const getCurrencyNames = (
+  currency?: string
+): { major: string; minor: string } => {
+  const normalizedCurrency = normalizeCurrency(currency)
+
+  return {
+    UAH: { major: 'гривень', minor: 'копійок' },
+    USD: { major: 'доларів', minor: 'центів' },
+    EUR: { major: 'євро', minor: 'центів' },
+  }[normalizedCurrency]
+}
+
 
 export function multiplyFloat(a, b) {
   const bigA = Big(toRoundFixed(`${a}`))

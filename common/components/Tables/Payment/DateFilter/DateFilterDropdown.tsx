@@ -12,9 +12,10 @@ const DateFilterDropdown: React.FC<Props> = ({
   confirm,
   clearFilters,
 }) => {
+  const currentYear = new Date().getFullYear()
+  const currentYearData = data.find(d => d.value === String(currentYear))
   const [expandedKeys, setExpandedKeys] = useState<string[]>(() => {
-    const year2025 = data.find(d => d.value === '2025')
-    return year2025 ? [year2025.value] : []
+    return currentYearData ? [currentYearData.value] : []
   })
 
   const treeData = useMemo(
@@ -30,9 +31,8 @@ const DateFilterDropdown: React.FC<Props> = ({
     [data]
   )
   useEffect(() => {
-    const year2025 = data.find(d => d.value === '2025')
-    if (year2025) {
-      setExpandedKeys([year2025.value])
+    if (currentYearData) {
+      setExpandedKeys([currentYearData.value])
     }
   }, [data])
 
@@ -53,8 +53,7 @@ const DateFilterDropdown: React.FC<Props> = ({
         <Button
           onClick={() => {
             clearFilters?.()
-            const year2025 = data.find(d => d.value === '2025')
-            setExpandedKeys(year2025 ? [year2025.value] : [])
+            setExpandedKeys(currentYearData ? [currentYearData.value] : [])
           }}
         >
           Скинути
@@ -63,8 +62,7 @@ const DateFilterDropdown: React.FC<Props> = ({
           type="primary"
           onClick={() => {
             confirm()
-            const year2025 = data.find(d => d.value === '2025')
-            setExpandedKeys(year2025 ? [year2025.value] : [])
+            setExpandedKeys(currentYearData ? [currentYearData.value] : [])
           }}
         >
           OK

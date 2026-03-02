@@ -67,14 +67,15 @@ const RealEstateForm: FC<Props> = ({
       form.setFieldsValue({
         ...form.getFieldsValue(),
         services: servicesWithEnabled,
+        discount: currentRealEstate?.discount || 0,
       })
     }
-  }, [services, form])
+  }, [services, currentRealEstate, form])
 
   const isServiceExistById = (serviceId: string) => {
     if (!domain?.customServices?.length) return false
-  
-    return domain.customServices.some(group =>
+
+    return domain.customServices.some((group) =>
       group.services?.includes(serviceId)
     )
   }
@@ -95,7 +96,7 @@ const RealEstateForm: FC<Props> = ({
     )
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
 
-  const isMeterBasedServiceExist = 
+  const isMeterBasedServiceExist =
     isServiceExistById('677d414283b6ef93c6b8ea2c') ||
     isServiceExistById('682dd48d9665126611c81950')
 
@@ -146,7 +147,35 @@ const RealEstateForm: FC<Props> = ({
           disabled={!editable}
         />
       </Form.Item>
+
+      <Form.Item
+        name="currency"
+        label="Валюта"
+        rules={validateField('required')}
+      >
+        <Select
+          placeholder="Оберіть валюту"
+          className={s.formInput}
+          disabled={!editable}
+        >
+          <Select.Option value="UAH">UAH</Select.Option>
+          <Select.Option value="USD">USD</Select.Option>
+          <Select.Option value="EUR">EUR</Select.Option>
+        </Select>
+      </Form.Item>
       <EmailSelect form={form} disabled={!editable} required={false} />
+      <Form.Item name="discount" label="Знижка" rules={validateField('number')}>
+        <InputNumber
+          min={0}
+          max={100}
+          precision={2}
+          formatter={(value) => `${value}`}
+          placeholder="Вкажіть знижку"
+          className={s.formInput}
+          disabled={!editable}
+          style={{ width: '100%' }}
+        />
+      </Form.Item>
 
       {isMeterBasedServiceExist && (
         <>
@@ -174,29 +203,13 @@ const RealEstateForm: FC<Props> = ({
               disabled={!editable}
             />
           </Form.Item>
-          <Form.Item
-            name="currency"
-            label="Валюта"
-            rules={validateField('required')}
-          >
-            <Select
-              placeholder="Оберіть валюту"
-              className={s.formInput}
-              disabled={!editable}
-            >
-              <Select.Option value="UAH">UAH</Select.Option>
-              <Select.Option value="USD">USD</Select.Option>
-              <Select.Option value="EUR">EUR</Select.Option>
-            </Select>
-          </Form.Item>
-
-          <CustomServicesCard
-            form={form}
-            disabled={!editable}
-            allCustomServices={customServices}
-          />
         </>
       )}
+      <CustomServicesCard
+        form={form}
+        disabled={!editable}
+        allCustomServices={customServices}
+      />
 
       <Form.Item
         valuePropName="checked"

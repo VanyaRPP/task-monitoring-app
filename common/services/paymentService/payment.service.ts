@@ -207,6 +207,13 @@ export async function getPayments(
 
 export async function createPayment(body: any, isAdmin: boolean) {
   if (!isAdmin) throw new Error('not allowed')
+  if (body.invoiceCreationDate) {
+    const d = new Date(body.invoiceCreationDate)
+    body.invoiceCreationDate = new Date(
+      Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())
+    )
+  }
+
   const payment = await Payment.create(body)
 
   const description =

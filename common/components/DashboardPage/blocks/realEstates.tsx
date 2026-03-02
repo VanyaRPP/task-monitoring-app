@@ -47,6 +47,7 @@ const RealEstateBlock: React.FC<Props> = ({
       domainId: sepDomainID || domainId || filters?.domain || undefined,
       companyId: filters?.company || undefined,
       streetId: streetId || filters?.street || undefined,
+      services: filters?.services || undefined,
       limit: isOnPage ? 0 : 5,
       archived: isArchive,
     },
@@ -93,7 +94,7 @@ const RealEstateBlock: React.FC<Props> = ({
         realEstateActions={realEstateActions}
         setRealEstateActions={setRealEstateActions}
         isArchive={isArchive}
-        customServices={customServicesData?.data}
+        customServices={customServicesData?.data || []}
       />
     </TableCard>
   )

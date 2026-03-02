@@ -92,6 +92,7 @@ const AddPaymentModal: FC<Props> = ({
   const [form] = Form.useForm()
   const firstRunRef = useRef(true)
   const restoringRef = useRef(false)
+  const lastLoadedCompanyId = useRef<string | null>(null);
   const [changed, setChanged] = useState(false)
   const [saved, setSaved] = useState(false)
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
@@ -159,6 +160,16 @@ const AddPaymentModal: FC<Props> = ({
     const allowedServices = groups.flatMap((group) => group.services)
 
     const serviceFilteredInvoices = serviceFilter(allInvoices, allowedServices)
+    const hasDiscount = serviceFilteredInvoices.some(inv => inv.type === 'discount')
+  
+  if (!hasDiscount && company?.discount) {
+    serviceFilteredInvoices.push({
+      type: 'discount',
+      name: 'Знижка',
+      price: company.discount,
+      sum: company.discount,
+    })
+  }
 
     return serviceFilteredInvoices?.filter(
       (invoice) => invoice?.sum > 0 || DEFAULT_INVOICES.includes(invoice?.type)
@@ -279,7 +290,7 @@ const AddPaymentModal: FC<Props> = ({
     const values = await form.validateFields()
 
     if (values.operation === Operations.Credit) {
-      handleSubmit()
+      await handleSubmit()
       return
     }
 
@@ -297,7 +308,13 @@ const AddPaymentModal: FC<Props> = ({
       street: formData.street,
       company: formData.company,
       monthService: formData.monthService,
-      invoiceCreationDate: formData.invoiceCreationDate,
+      invoiceCreationDate: formData.invoiceCreationDate
+        ? new Date(Date.UTC(
+            formData.invoiceCreationDate.year(),
+            formData.invoiceCreationDate.month(),
+            formData.invoiceCreationDate.date()
+          ))
+        : null,
       description: formData.description || '',
       generalSum: formData.generalSum || formData.debit,
       provider,
@@ -327,9 +344,21 @@ const AddPaymentModal: FC<Props> = ({
   }
 
   useEffect(() => {
-    if (activeTabKey !== '1' || saved) return
-    form.setFieldsValue({ invoice: filteredInvoices })
-  }, [filteredInvoices, saved, activeTabKey, form])
+    if (activeTabKey !== '1' || saved || !company || !company._id) return
+  const isEditing = !!paymentId || edit; 
+
+  if (isEditing) {
+    lastLoadedCompanyId.current = company._id;
+    return;
+  }
+
+  const isNewCompanySelected = lastLoadedCompanyId.current !== company._id;
+
+  if (isNewCompanySelected) {
+    form.setFieldsValue({ invoice: filteredInvoices });
+    lastLoadedCompanyId.current = company._id;
+  }
+  }, [company, filteredInvoices, paymentId, edit, activeTabKey, saved, form])
 
   return (
     <PaymentContext.Provider
@@ -366,7 +395,9 @@ const AddPaymentModal: FC<Props> = ({
             street: getId(payment?.street),
             company: preselectedCompany || getId(payment?.company),
             monthService: getId(payment?.monthService),
-            invoice: payment?.invoice || filteredInvoices,
+            invoice: (payment?.invoice && payment.invoice.length > 0) 
+              ? payment.invoice 
+              : filteredInvoices,
             description: payment?.description,
             generalSum: payment?.generalSum,
             invoiceNumber: payment?.invoiceNumber,

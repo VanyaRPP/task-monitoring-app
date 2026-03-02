@@ -69,6 +69,7 @@ const PaymentCardLabel = ({
               className={styles.select}
               setFilters={setFilters}
               streets={streets}
+              filters={filters}
             />
           </div>
           <Space

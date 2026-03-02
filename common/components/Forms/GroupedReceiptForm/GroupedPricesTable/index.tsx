@@ -2,28 +2,33 @@ import { usePaymentContext } from '@components/AddPaymentModal'
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import { Table } from 'antd'
 import { useMemo } from 'react'
+import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
 
 export interface PaymentPricesTableProps {
   preview?: boolean
   domainId?: string
+  currency?: string
   loading?: boolean
   invoices?: any[]
 }
 
-const columns = [
+const getColumns = (currency?: string) => [
   {
-    title: '№',
+    title: normalizeCurrency(currency) === 'UAH' ? '№' : 'No.',
     dataIndex: 'key',
     key: 'key',
     width: 45,
   },
   {
-    title: 'Найменування послуги',
+    title:
+      normalizeCurrency(currency) === 'UAH'
+        ? 'Найменування послуги'
+        : 'Service name',
     dataIndex: 'name',
     key: 'name',
   },
   {
-    title: 'Сума, грн',
+    title: `${normalizeCurrency(currency) === 'UAH' ? 'Сума' : 'Amount'}, ${getCurrencyShortLabel(currency)}`,
     dataIndex: 'sum',
     key: 'sum',
     render: (value: any) => {
@@ -65,10 +70,11 @@ const groupedInvoices = (invoices: any, groups: any) => {
 const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
   preview,
   domainId,
+  currency,
   loading,
   invoices,
 }) => {
-  const { form } = usePaymentContext()
+  const { form, company } = usePaymentContext()
 
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
     { domainId: [domainId] },
@@ -78,6 +84,8 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
     () => groupedInvoices(invoices, customDomainServices?.data),
     [invoices, customDomainServices]
   )
+
+  const { domain } = form.getFieldsValue()
 
   const groupedFieldNames =
     groupedInvoicesData?.flatMap((group) => group.fieldNames || []) || []
@@ -89,10 +97,12 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
       sum: group.totalSum,
     })) || []
   const discountInvoice = invoices?.find((inv) => inv?.type === 'discount')
+  const isEnglish = normalizeCurrency(currency || company?.currency || domain?.currency) !== 'UAH'
+
   if (discountInvoice) {
     dataSource.push({
       key: dataSource.length + 1,
-      name: 'Знижка',
+      name: isEnglish ? 'Discount' : 'Знижка',
       sum: discountInvoice.sum,
     })
   }
@@ -106,7 +116,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
     !inv?.customService &&
       dataSource.push({
         key: dataSource.length + 1,
-        name: inv.name || 'Додатково',
+        name: inv.name || (isEnglish ? 'Additional' : 'Додатково'),
         sum: inv.sum,
       })
   })
@@ -114,7 +124,7 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
   return (
     <Table
       dataSource={dataSource}
-      columns={columns}
+      columns={getColumns(currency || company?.currency || domain?.currency)}
       loading={loading}
       pagination={false}
       bordered
