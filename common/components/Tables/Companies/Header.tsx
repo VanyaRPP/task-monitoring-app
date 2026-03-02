@@ -1,5 +1,5 @@
 import { PlusOutlined, SelectOutlined } from '@ant-design/icons'
-import { Button, Space, Segmented } from 'antd'
+import { Button, Space, Segmented, Select } from 'antd'
 import { useRouter } from 'next/router'
 import { Dispatch, SetStateAction, useState } from 'react'
 import {
@@ -19,6 +19,7 @@ import {
   useGetDomainFiltersQuery,
   useGetRealEstateFiltersQuery,
 } from '@common/api/filterApi/filter.api'
+import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
 
 export interface Props {
   showAddButton?: boolean
@@ -55,6 +56,9 @@ const CompaniesHeader: React.FC<Props> = ({
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  const { data: customServicesResponse } = useGetCustomServicesQuery({})
+  const customServices = customServicesResponse?.data || []
+  
   const { data: user } = useGetCurrentUserQuery()
   const isAdmin = isAdminCheck(user?.roles)
 
@@ -80,6 +84,13 @@ const CompaniesHeader: React.FC<Props> = ({
     streets: filters?.street,
     realEstates: filters?.company,
   })
+
+  const handleServicesChange = (values: string[]) => {
+  setFilters((prev: any) => ({
+    ...prev,
+    services: values,
+  }))
+}
 
   return (
     <div className={s.headerBlock}>
@@ -111,8 +122,28 @@ const CompaniesHeader: React.FC<Props> = ({
             />
           </Space>
         )}
+      <div style={{ position: 'absolute', left: 400,}}>
+      <Select
+        mode="multiple"
+        allowClear
+        placeholder="Фільтр послуг"
+        style={{ width: "250px" }}
+        value={filters?.services || []}
+        onChange={handleServicesChange}
+        maxTagCount="responsive"
+      >
+        {customServices.length > 0 && (
+        <Select.OptGroup label="Кастомні">
+          {customServices.map((service) => (
+            <Select.Option key={service._id} value={service._id}>
+              {service.name}
+            </Select.Option>
+        ))}
+        </Select.OptGroup>
+      )}
+    </Select>
+    </div>  
       </div>
-
       <div className={s.segmented}>
         <Segmented
           options={[
