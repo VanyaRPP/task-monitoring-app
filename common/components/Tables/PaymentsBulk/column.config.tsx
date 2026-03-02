@@ -310,7 +310,7 @@ const LossElectricitySum: React.FC<{ name: number }> = ({ name }) => {
     ) ?? 0
   return (
     <Space>
-      {service?.losses && (
+      {service?.losses && amount > 0 && (
         <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
           {(
             amount -
@@ -339,7 +339,7 @@ const LossElectricityPrice: React.FC<{ name: number }> = ({ name }) => {
     ) ?? 0
   return (
     <Space>
-      {service?.losses && (
+      {service?.losses && amount > 0 && (
         <Typography.Text type="secondary" style={{ fontWeight: 'lighter' }}>
           {amount - lastAmount} + ({service?.losses}%)
         </Typography.Text>
