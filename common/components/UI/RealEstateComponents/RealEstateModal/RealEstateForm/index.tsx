@@ -67,9 +67,10 @@ const RealEstateForm: FC<Props> = ({
       form.setFieldsValue({
         ...form.getFieldsValue(),
         services: servicesWithEnabled,
+        discount: currentRealEstate?.discount || 0,
       })
     }
-  }, [services, form])
+  }, [services, currentRealEstate, form])
 
   const isServiceExistById = (serviceId: string) => {
     if (!domain?.customServices?.length) return false
@@ -147,6 +148,22 @@ const RealEstateForm: FC<Props> = ({
         />
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} required={false} />
+          <Form.Item
+            name="discount"
+            label="Знижка"
+            rules={validateField('number')}
+          >
+            <InputNumber
+              min={0}
+              max={100}
+              precision={2} 
+              formatter={(value) => `${value}`}
+              placeholder="Вкажіть знижку"
+              className={s.formInput}
+              disabled={!editable}
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
 
       {isMeterBasedServiceExist && (
         <>
