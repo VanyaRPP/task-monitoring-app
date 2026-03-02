@@ -1,6 +1,6 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { usePaymentContext } from '@components/AddPaymentModal'
-import { toRoundFixed } from '@utils/helpers'
+import { getCurrencySymbol, toRoundFixed } from '@utils/helpers'
 import { useEffect } from 'react'
 
 export { default as Cleaning } from './Cleaning'
@@ -19,6 +19,9 @@ export const Sum: React.FC<{
   record: IPaymentField & { key: string }
 }> = ({ record }) => {
   const { form } = usePaymentContext()
+  const company = form.getFieldValue('company')
+  const domain = form.getFieldValue('domain')
+  const currencyLabel = getCurrencySymbol(company?.currency || domain?.currency)
 
   const { lastAmount, amount, price } = record
 
@@ -40,5 +43,9 @@ export const Sum: React.FC<{
     record.lastAmount,
   ])
 
-  return <>{toRoundFixed(record.sum)} грн</>
+  return (
+    <>
+      {toRoundFixed(record.sum)} {currencyLabel}
+    </>
+  )
 }

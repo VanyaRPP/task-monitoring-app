@@ -1,6 +1,8 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPricesTable'
+import { usePaymentContext } from '@components/AddPaymentModal'
 import numberToTextNumber from '@utils/numberToText'
+import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
 import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
@@ -19,8 +21,13 @@ const GroupedReceiptForm: FC<Props> = ({
   paymentData,
   paymentActions,
 }) => {
+  const { company } = usePaymentContext()
   const rawData = currPayment ?? paymentData ?? null
   const data = rawData as any
+  const currency =
+    data?.company?.currency || company?.currency || data?.domain?.currency
+  const currencyLabel = getCurrencyShortLabel(currency)
+  const isEnglish = normalizeCurrency(currency) !== 'UAH'
 
   const componentRef = useRef<HTMLDivElement | null>(null)
 
@@ -55,7 +62,7 @@ const GroupedReceiptForm: FC<Props> = ({
       >
         <>
           <div className={s.providerInfo}>
-            <div className={s.label}>Постачальник</div>
+            <div className={s.label}>{isEnglish ? 'Provider' : 'Постачальник'}</div>
             <pre className={s.preLabel}>
               {data?.provider?.description?.trim()} <br />
               <br />
@@ -63,7 +70,7 @@ const GroupedReceiptForm: FC<Props> = ({
           </div>
 
           <div className={s.receiverInfo}>
-            <div className={s.label}>Одержувач</div>
+            <div className={s.label}>{isEnglish ? 'Recipient' : 'Одержувач'}</div>
             <pre className={s.preLabel}>
               {data?.reciever?.description?.trim()} <br />
               {data?.reciever?.companyName} <br />
@@ -77,16 +84,22 @@ const GroupedReceiptForm: FC<Props> = ({
         </>
 
         <div className={s.providerInvoice}>
-          <div className={s.datecellTitle}>РАХУНОК № {data.invoiceNumber}</div>
+          <div className={s.datecellTitle}>
+            {isEnglish ? 'INVOICE №' : 'РАХУНОК №'} {data.invoiceNumber}
+          </div>
           <div className={s.datecellDate}>
-            Від &nbsp;
+            {isEnglish ? 'dated' : 'Від'} &nbsp;
             {dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
-            &nbsp; року.
+            {isEnglish ? '.' : ' року.'}
           </div>
           <div className={s.datecell}>
-            Підлягає сплаті до &nbsp;
+            {isEnglish ? 'Due by' : 'Підлягає сплаті до'} &nbsp;
             {dayjs(data?.invoiceCreationDate).add(5, 'd').format('DD.MM.YYYY')}
-            &nbsp; року
+            {!isEnglish && (
+              <>
+                &nbsp; року
+              </>
+            )}
           </div>
         </div>
 
@@ -94,23 +107,30 @@ const GroupedReceiptForm: FC<Props> = ({
           <GroupedPricesTable
             preview
             domainId={data?.domain?._id ?? data?.domain}
+            currency={currency}
             invoices={data?.invoice ?? []}
           />
         </div>
 
         <div className={s.payTable}>
           <div className={s.payFixed}>
-            Загальна сума оплати:
+            {isEnglish ? 'Total payment amount:' : 'Загальна сума оплати:'}
             <div className={s.payBoldSum}>
-              {(+data?.generalSum || +data?.debit || 0).toFixed(2)} грн
+              {(+data?.generalSum || +data?.debit || 0).toFixed(2)}{' '}
+              {currencyLabel}
             </div>
           </div>
 
           <div>
-            Призначення платежу:{' '}
+            {isEnglish ? 'Payment purpose:' : 'Призначення платежу:'}{' '}
             <strong>
-              Оплата за послуги згідно рахунку № {data.invoiceNumber} від{' '}
-              {dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
+              {isEnglish
+                ? `Payment for services according to invoice № ${data.invoiceNumber} dated ${dayjs(
+                    data?.invoiceCreationDate
+                  )?.format?.('DD.MM.YYYY')}`
+                : `Оплата за послуги згідно рахунку № ${data.invoiceNumber} від ${dayjs(
+                    data?.invoiceCreationDate
+                  )?.format?.('DD.MM.YYYY')}`}
             </strong>
           </div>
 
@@ -125,14 +145,31 @@ const GroupedReceiptForm: FC<Props> = ({
 }
 
 function SumWithText({ data }: { data?: any }) {
+  const { company } = usePaymentContext()
+  const currency =
+    data?.company?.currency || company?.currency || data?.domain?.currency
+  const currencyLabel = getCurrencyShortLabel(currency)
+  const isEnglish = normalizeCurrency(currency) !== 'UAH'
   const rest = numberToTextNumber(data?.generalSum || data?.debit)
+
+  if (isEnglish) {
+    return (
+      <div className={s.payFixed}>
+        Total amount:
+        <div className={s.payBold}>
+          {(+data?.generalSum || +data?.debit || 0).toFixed(2)} {currencyLabel}
+        </div>
+      </div>
+    )
+  }
+
   return (
     rest && (
       <div className={s.payFixed}>
         Всього на суму:
         <div className={s.payBold}>
           {rest}
-          &nbsp;грн
+          &nbsp;{currencyLabel}
         </div>
       </div>
     )

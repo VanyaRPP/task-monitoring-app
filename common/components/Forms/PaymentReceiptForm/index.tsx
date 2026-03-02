@@ -1,5 +1,6 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import numberToTextNumber from '@utils/numberToText'
+import { getCurrencyShortLabel } from '@utils/helpers'
 import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
@@ -15,6 +16,8 @@ interface Props {
 
 const PaymentReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const newData = currPayment || paymentData
+  const currency = newData?.company?.currency || newData?.domain?.currency
+  const currencyLabel = getCurrencyShortLabel(currency)
   const componentRef = useRef()
   const { token } = theme.useToken()
 
@@ -81,7 +84,8 @@ const PaymentReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
               </div>
               <div className={s.payFixed}>
                 <strong>Отримана сума:</strong>
-                {(+newData?.generalSum || +newData?.debit).toFixed(2)} грн
+                {(+newData?.generalSum || +newData?.debit).toFixed(2)}{' '}
+                {currencyLabel}
               </div>
             </div>
           </div>

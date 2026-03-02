@@ -1,6 +1,8 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import PaymentPricesTable from '@components/Forms/AddPaymentForm/PaymentPricesTable'
+import { usePaymentContext } from '@components/AddPaymentModal'
 import numberToTextNumber from '@utils/numberToText'
+import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
 import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
@@ -18,7 +20,12 @@ const ReceiptForm: FC<Props> = ({
   paymentData,
   paymentActions,
 }) => {
+  const { company } = usePaymentContext()
   const newData = currPayment || paymentData
+  const currency =
+    newData?.company?.currency || company?.currency || newData?.domain?.currency
+  const currencyLabel = getCurrencyShortLabel(currency)
+  const isEnglish = normalizeCurrency(currency) !== 'UAH'
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -44,7 +51,7 @@ const ReceiptForm: FC<Props> = ({
       >
         <div className={s.providerInvoice}>
           <div className={s.datecellTitle}>
-            ДОВІДКА № {newData.invoiceNumber}
+            {isEnglish ? 'CERTIFICATE №' : 'ДОВІДКА №'} {newData.invoiceNumber}
           </div>
         </div>
         <div className={s.tableSum}>
@@ -53,9 +60,10 @@ const ReceiptForm: FC<Props> = ({
         <div className={s.payTable}>
           <SumWithText data={newData} />
           <div className={s.payFixed}>
-            Загальна сума:
+            {isEnglish ? 'Total amount:' : 'Загальна сума:'}
             <div className={s.payBoldSum}>
-              {(+newData?.generalSum || +newData?.debit).toFixed(2)} грн
+              {(+newData?.generalSum || +newData?.debit).toFixed(2)}{' '}
+              {currencyLabel}
             </div>
           </div>
         </div>
@@ -65,14 +73,31 @@ const ReceiptForm: FC<Props> = ({
 }
 
 function SumWithText({ data }) {
+  const { company } = usePaymentContext()
+  const currency =
+    data?.company?.currency || company?.currency || data?.domain?.currency
+  const currencyLabel = getCurrencyShortLabel(currency)
+  const isEnglish = normalizeCurrency(currency) !== 'UAH'
   const rest = numberToTextNumber(data?.generalSum || data?.debit)
+
+  if (isEnglish) {
+    return (
+      <div className={s.payFixed}>
+        Total in words:
+        <div className={s.payBold}>
+          {(+data?.generalSum || +data?.debit || 0).toFixed(2)} {currencyLabel}
+        </div>
+      </div>
+    )
+  }
+
   return (
     rest && (
       <div className={s.payFixed}>
         Всього на суму:
         <div className={s.payBold}>
           {rest}
-          &nbsp;грн
+          &nbsp;{currencyLabel}
         </div>
       </div>
     )

@@ -16,6 +16,11 @@ import {
   useGetCustomServicesByDomainQuery,
 } from '@common/api/customServicesApi/customServices.api'
 
+const getEntityId = (value?: { _id?: string } | string) => {
+  if (!value) return ''
+  return typeof value === 'string' ? value : value._id || ''
+}
+
 interface Props {
   chosenRealEstate: { domain: string }
   closeModal: VoidFunction
@@ -35,7 +40,7 @@ const RealEstateModal: FC<Props> = ({
   const [addRealEstate] = useAddRealEstateMutation()
   const [editRealEstate] = useEditRealEstateMutation()
   const domainId = Form.useWatch('domain', form)
-  const currentDomainId = currentRealEstate?.domain?._id || domainId
+  const currentDomainId = getEntityId(currentRealEstate?.domain) || domainId
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
     { domainId: currentDomainId },
     { skip: !currentDomainId }
@@ -63,7 +68,7 @@ const RealEstateModal: FC<Props> = ({
     form.setFieldsValue({
       domain:
         chosenRealEstate?.domain ||
-        currentRealEstate?.domain?._id ||
+        getEntityId(currentRealEstate?.domain) ||
         currentDomainId,
       street:
         currentRealEstate?.street &&
@@ -90,7 +95,7 @@ const RealEstateModal: FC<Props> = ({
     })
 
     initializedRef.current = true
-  }, [currentDomainId])
+  }, [currentDomainId, chosenRealEstate?.domain, currentRealEstate, form])
 
   const handleSubmit = async () => {
     const formData: IRealestate = await form.validateFields()
