@@ -1,28 +1,28 @@
 import type { Config } from 'jest'
 import { pathsToModuleNameMapper } from 'ts-jest'
 import { compilerOptions } from './tsconfig.json'
-import { TextEncoder, TextDecoder } from 'util'
-
-global.TextEncoder = TextEncoder
-global.TextDecoder = TextDecoder
 
 const config: Config = {
-  testMatch: ['**/*.test.ts'],
+  preset: 'ts-jest',
+  testMatch: ['**/*.test.ts', '**/*.test.tsx'],
   testPathIgnorePatterns: ['/node_modules/', '/.next/'],
-  setupFiles: ['<rootDir>/jest.config.ts'],
-  testEnvironment: 'node',
-  transform: {
-    '^.+\\.ts?$': [
-      'ts-jest',
-      {
-        tsconfig: 'tsconfig.json',
-      },
-    ],
-  },
-  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
-    prefix: '<rootDir>/',
-  }),
-  moduleFileExtensions: ['ts', 'js'],
-}
+  testEnvironment: 'jsdom',
 
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.jest.json',
+    },
+  },
+
+  moduleNameMapper: {
+    ...pathsToModuleNameMapper(compilerOptions.paths, {
+      prefix: '<rootDir>/',
+    }),
+    '\\.(css|scss|sass)$': 'identity-obj-proxy',
+  },
+
+  moduleFileExtensions: ['ts', 'tsx', 'js'],
+}
 export default config
