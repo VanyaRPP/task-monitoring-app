@@ -1,4 +1,6 @@
 import { Operations } from '@utils/constants'
+import { getCurrencySymbol } from '@utils/helpers'
+import { usePaymentContext } from '@components/AddPaymentModal'
 import { Form, FormInstance } from 'antd'
 import { FC, useEffect } from 'react'
 
@@ -7,8 +9,10 @@ interface Props {
 }
 
 const PaymentTotal: FC<Props> = ({ form }) => {
+  const { company } = usePaymentContext()
   const invoices = Form.useWatch(['invoice'], form)
   const total = Form.useWatch(Operations.Debit, form)
+  const currencyLabel = getCurrencySymbol(company?.currency)
 
   useEffect(() => {
     const newTotal = Object.entries<{ sum: number }>(invoices || []).reduce(
@@ -30,7 +34,7 @@ const PaymentTotal: FC<Props> = ({ form }) => {
       name={Operations.Debit}
       initialValue={0}
     >
-      <>Сума: {(+total)?.toFixed(2)} ₴</>
+      <>Сума: {(+total)?.toFixed(2)} {currencyLabel}</>
     </Form.Item>
   )
 }

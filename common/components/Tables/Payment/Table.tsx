@@ -223,18 +223,18 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     const list = payments?.data || []
     const uniqueCompanies = new Set(
       list.map((p) =>
-        typeof p.company === 'object' ? p.company.companyName : p.company
+        typeof p.company === 'object' ? p?.company?.companyName : p?.company
       )
     )
-    return filters?.company?.length === 1 && uniqueCompanies.size === 1
+    return filters?.company?.length === 1 && uniqueCompanies?.size === 1
   }, [payments?.data, filters?.company])
-  const isSingleDomainByData = useMemo(() => {
-    const list = payments?.data || []
-    const uniqueDomains = new Set(
-      list.map((p) => (typeof p.domain === 'object' ? p.domain.name : p.domain))
-    )
-    return filters?.domain?.length === 1 && uniqueDomains.size === 1
-  }, [payments?.data, filters?.domain])
+  // const isSingleDomainByData = useMemo(() => {
+  //   const list = payments?.data || []
+  //   const uniqueDomains = new Set(
+  //     list.map((p) => (typeof p?.domain === 'object' ? p.domain?.name : p?.domain))
+  //   )
+  //   return filters?.domain?.length === 1 && uniqueDomains.size === 1
+  // }, [payments?.data, filters?.domain])
 
   const widenFilterDropdown = (w = 240) => (open: boolean) => {
       if (!open) return
@@ -284,9 +284,9 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           ) : (
             <Tooltip title="Додати в фільтри">
               <Typography.Link
-                onClick={() => setFilters({ ...filters, domain: [domain._id] })}
+                onClick={() => setFilters({ ...filters, domain: [domain?._id] })}
               >
-                {domain.name}
+                {domain?.name}
               </Typography.Link>
             </Tooltip>
           ),
