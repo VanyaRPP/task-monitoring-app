@@ -12,6 +12,7 @@ import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import {
   useGetAllPaymentsQuery,
   useDeletePaymentMutation,
+  useDeleteMultiplePaymentsMutation,
 } from '@common/api/paymentApi/payment.api'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 
@@ -20,8 +21,10 @@ import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import TableCard from '@components/UI/TableCard'
 import PaymentsHeader from '@components/Tables/Payment/Header'
 import PaymentsTable from '@components/Tables/Payment/Table'
+import ModalDelete from '@components/UI/ModalDelete'
 
 import { AppRoutes, Operations, ServiceType, Roles } from '@utils/constants'
+import { dateToDefaultFormat } from '@assets/features/formatDate'
 
 import {
   TablePaginationConfig,
@@ -30,6 +33,7 @@ import {
   TableCurrentDataSource,
 } from 'antd/lib/table/interface'
 
+import type { ColumnsType } from 'antd/es/table'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   setPage,
@@ -84,6 +88,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     currentPage: rawCurrentPage,
     pageSize: rawPageSize,
   } = useSelector((s: RootState) => s.payments)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const handleView = (p: IExtendedPayment) => dispatch(setOpenView(p))
   const handleEdit = (p: IExtendedPayment) => dispatch(setOpenEdit(p))
   const handleClose = () => dispatch(setCloseModal())
@@ -156,6 +161,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     deletePaymentMutation,
     { isLoading: deleteLoading, isError: deleteError },
   ] = useDeletePaymentMutation()
+  const [deleteMultiplePayments] = useDeleteMultiplePaymentsMutation()
 
   const handleDeletePayment = useCallback(
     async (id: string) => {
@@ -168,6 +174,39 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     },
     [deletePaymentMutation]
   )
+
+  const handleDeleteConfirm = async () => {
+    const response = await deleteMultiplePayments(
+      paymentsDeleteItems.map((item) => item.id)
+    )
+    if ('data' in response) {
+      dispatch(setPaymentsDeleteItems([]))
+      dispatch(setSelectedPayments([]))
+      setDeleteModalOpen(false)
+      message.success('Видалено!')
+    } else {
+      message.error('Помилка при видаленні рахунків')
+    }
+  }
+
+  const deleteColumns: ColumnsType<PaymentDeleteItem> = [
+    {
+      title: 'Домен',
+      dataIndex: 'domain',
+      key: 'domain',
+    },
+    {
+      title: 'Компанія',
+      dataIndex: 'company',
+      key: 'company',
+    },
+    {
+      title: 'Дата',
+      dataIndex: 'date',
+      key: 'date',
+      render: (date) => dateToDefaultFormat(date),
+    },
+  ]
 
   useEffect(() => {
     if (domainsFiltersData?.domainsFilter) {
@@ -285,13 +324,14 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     enablePaymentsButton: !sepDomainID,
     onColumnsSelect: (cols: ServiceType[]) =>
       dispatch(setSelectedColumns(cols)),
-
     domainFilter: filterProps.domainsFilter,
     realEstatesFilter: filterProps.companiesFilter,
     isDashboard: router.pathname === AppRoutes.INDEX,
+    onDeleteClick: () => setDeleteModalOpen(true),
   }
 
   return (
+    <>
     <TableCard title={<PaymentsHeader {...headerProps} />}>
       <PaymentsTable
         sepDomainID={sepDomainID}
@@ -313,6 +353,15 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         }
       />
     </TableCard>
+      <ModalDelete
+        open={deleteModalOpen}
+        onCancel={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        data={paymentsDeleteItems}
+        columns={deleteColumns}
+        rowKey={(item) => item.id}
+      />
+    </>
   )
 }
 
