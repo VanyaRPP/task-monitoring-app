@@ -1,4 +1,4 @@
-import { Badge, Button, Select, Space } from 'antd'
+import { Badge, Button, Select, Space, Dropdown, message, type MenuProps } from 'antd'
 import React, { FC, useEffect, useMemo, useState } from 'react'
 import { ITransaction } from './transactionTypes'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
@@ -6,7 +6,7 @@ import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import AddPaymentModal from '@components/AddPaymentModal'
 import dayjs from 'dayjs'
-import { SendOutlined } from '@ant-design/icons'
+import { SendOutlined, DownOutlined } from '@ant-design/icons'
 
 interface TransactionDrawerProps {
   transaction: ITransaction
@@ -21,6 +21,9 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const [modalVisible, setModalVisible] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<any>(null)
 
+  const [isMfoMatched, setIsMfoMatched] = useState(false)
+  const [loading, setLoading] = useState(false)
+
   const transactionAmount = parseFloat(transaction.SUM as string)
 
   const { data: realEstatesData } = useGetAllRealEstateQuery({
@@ -31,14 +34,54 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     () => realEstatesData?.data || [],
     [realEstatesData]
   )
-  const handleCompanyChange = (value: string) => setSelectedCompany(value)
+
+  useEffect(() => {
+    
+    if (!transaction?.isMatchingPayment && relatedCompanies.length > 0) {
+      const foundByMfo = relatedCompanies.find(
+        (company: any) => company.mfo === transaction.AUT_CNTR_MFO
+      )
+
+      if (foundByMfo) {
+        setSelectedCompany(foundByMfo._id)
+        setIsMfoMatched(true)
+      }
+    }
+  }, [transaction, relatedCompanies])
+
+  const handleCompanyChange = (value: string) => {
+    setSelectedCompany(value)
+    setIsMfoMatched(false)
+  }
 
   const selectValue =
     selectedCompany ??
     (transaction.isMatchingPayment ? transaction.previousCompanyId : null)
 
   const showModal = () => setModalVisible(true)
-  const closeModal = () => setModalVisible(false)
+  const closeModal = (success?: boolean) => {
+    setModalVisible(false)
+    if (success === true) {
+      message.success('Рахунок успішно створено!')
+    }
+    setLoading(false)
+  }
+
+  const dropdownItems: MenuProps['items'] = [
+    {
+      key: 'credit',
+      label: 'Створити рахунок "Кредит"',
+      onClick: () => {
+        setLoading(true)
+        showModal()
+      },
+    },
+    {
+      key: 'standard',
+      label: 'Звичайна дія',
+      onClick: showModal,
+    },
+  ]
 
   return (
     <>
@@ -66,15 +109,24 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
               </Select.Option>
             ))}
           </Select>
-          <Button
-            iconPosition="end"
-            icon={<SendOutlined />}
-            type="primary"
-            onClick={showModal}
-            disabled={!selectedCompany}
-          >
-            Send
-          </Button>
+          {isMfoMatched ? (
+            <Dropdown menu={{ items: dropdownItems }} trigger={['click']}>
+              <Button type="primary" loading={loading}>
+                Send <DownOutlined />
+              </Button>
+            </Dropdown>
+          ) : (
+            <Button
+              iconPosition="end"
+              icon={<SendOutlined />}
+              type="primary"
+              onClick={showModal}
+              disabled={!selectedCompany}
+              loading={loading}
+            >
+              Send
+            </Button>
+          )}
         </Space.Compact>
       </Badge.Ribbon>
       {modalVisible && (
