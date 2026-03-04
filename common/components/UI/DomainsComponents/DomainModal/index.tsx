@@ -6,12 +6,10 @@ import {
 import { Form, message } from 'antd'
 import React, { FC, useEffect, useState } from 'react'
 import {
-  IDomainModel,
   IExtendedDomain,
 } from '@common/api/domainApi/domain.api.types'
 import DomainForm from './DomainForm'
 import Modal from '../../ModalWindow'
-import { current } from '@reduxjs/toolkit'
 import { defaultServices } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
@@ -38,7 +36,6 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
           value: i._id,
           label: `${i.address} (м. ${i.city})`,
         })) || [],
-      description: currentDomain?.description || '',
       IEName: currentDomain?.IEName || '',
       domainBankToken: currentDomain?.domainBankToken || '',
       mfo: currentDomain?.mfo || '',
@@ -52,6 +49,11 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       ],
     }
     form.setFieldsValue(initialValues)
+    setTimeout(() => {
+      form.setFieldsValue({
+        description: currentDomain?.description || '',
+      })
+    }, 0)
   }, [currentDomain, form, user])
 
   const handleSubmit = async () => {
