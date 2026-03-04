@@ -17,76 +17,223 @@
 }
 
 .invoiceContainer {
-  .providerInfo,
-  .receiverInfo {
-    .label {
-      width: 110px;
-      font-size: 14px;
-    }
-    .preLabel {
-      vertical-align: top;
-      margin-top: 0;
-    }
-    .info_adres__bold {
-      font-weight: 700;
-    }
-    font-family: Arial, Helvetica, sans-serif;
-    display: flex;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 2.2rem 2.4rem;
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.invoiceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.6rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+
+  h1 {
+    margin: 0;
+    font-size: 2.1rem;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+  }
+}
+
+.brandBlock {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.brandLogo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-style: italic;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.brandText {
+  font-size: 0.95rem;
+  font-weight: 700;
+
+  small {
+    display: block;
+    opacity: 0.8;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+  }
+}
+
+.invoiceInfoCard {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 2rem;
+  align-items: start;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 1.3rem 1.5rem;
+  margin: 0 auto 1.5rem;
+}
+
+.infoColumn {
+  font-size: 0.95rem;
+  line-height: 1.45;
+
+  h4 {
+    margin: 0 0 0.5rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    opacity: 0.9;
+  }
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.3rem;
+
+  span {
+    opacity: 0.85;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+  }
+}
+
+.paymentInfo {
+  margin-top: 0;
+}
+
+.invoiceTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.6rem;
+  table-layout: fixed;
+
+  th,
+  td {
+    text-align: left;
+    padding: 0.7rem 0.6rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.95rem;
   }
 
-  .providerInvoice {
-    .datecellTitle {
-      font-size: 20px;
-      font-weight: 700;
+  th {
+    font-size: 0.78rem;
+    letter-spacing: 0.09em;
+    opacity: 0.9;
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+  }
+
+  th:nth-child(2),
+  th:nth-child(3),
+  th:nth-child(4),
+  td:nth-child(2),
+  td:nth-child(3),
+  td:nth-child(4) {
+    width: 15%;
+    text-align: right;
+  }
+}
+
+.totalsBlock {
+  width: 360px;
+  max-width: 100%;
+}
+
+.summarySection {
+  margin-top: 1.1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.invoiceDates {
+  min-width: 240px;
+  max-width: 360px;
+  padding-top: 0.35rem;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.3rem 0;
+  font-size: 0.95rem;
+}
+
+.grandTotal {
+  margin-top: 0.2rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.footerNote {
+  margin-top: 2.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+}
+
+.signatureLine {
+  opacity: 0.8;
+  font-style: italic;
+  padding-top: 60px;
+}
+
+@media (max-width: 900px) {
+  .invoiceContainer {
+    padding: 1.2rem;
+  }
+
+  .invoiceHeader {
+    h1 {
+      font-size: 1.6rem;
     }
-    .datecellDate {
-      font-weight: 700;
+  }
+
+  .invoiceInfoCard {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .invoiceTable {
+    th,
+    td {
+      font-size: 0.86rem;
+      padding: 0.55rem 0.4rem;
     }
-    padding: 6px 0px;
-    font-size: 14px;
-    display: flex;
-    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .summarySection {
     flex-direction: column;
-    align-items: center;
   }
 
-  .tableSum {
-    width: 94%;
-  }
-
-  .payTable {
-    .payFixed {
-      display: flex;
-    }
-    .payBold {
-      text-transform: lowercase;
-      font-weight: 700;
-      margin-left: 10px;
-    }
-    .payBoldSum {
-      font-weight: 800;
-      margin-left: 10px;
-    }
-    .lineInner {
-      margin-left: 10px;
-    }
-    padding: 10px 0px 0px 0px;
-    font-size: 16px;
-    font-family: Arial, Helvetica, sans-serif;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .endInfo {
-    .endInfobolt {
-      font-weight: 700;
-      margin-right: 20px;
-    }
-    font-family: Arial, Helvetica, sans-serif;
-    padding: 10px 0px;
-    width: 800px;
-    position: relative;
-    display: flex;
+  .invoiceDates,
+  .totalsBlock {
+    width: 100%;
+    max-width: 100%;
   }
 }
