@@ -3,7 +3,13 @@ export default function serviceFilter(
   domainServices: any[]
 ): any[] {
   if (!invoices || !domainServices) return []
-  const allowedFieldNames = domainServices?.map((s) => s?.fieldName)
+  const allowedFieldNames = domainServices
+    ?.map((s) => s?.fieldName)
+    .filter(Boolean)
+  const allowedNames = domainServices?.map((s) => s?.name).filter(Boolean)
+  const allowedIds = domainServices
+    ?.map((s) => String(s?._id || ''))
+    .filter(Boolean)
 
   const uniqueInvoices = invoices?.filter((inv) => {
     if (inv?.type !== 'custom') return true
@@ -37,8 +43,17 @@ export default function serviceFilter(
     const isTypeAllowed = allowedFieldNames?.includes(inv?.type)
     const isFieldNameAllowed =
       inv?.fieldName && allowedFieldNames?.includes(inv?.fieldName)
-    const isNameAllowed = inv?.name && allowedFieldNames?.includes(inv?.name)
+    const isNameAllowed = inv?.name && allowedNames?.includes(inv?.name)
+    const isIdAllowed =
+      (inv?.serviceId || inv?._id) &&
+      allowedIds?.includes(String(inv?.serviceId || inv?._id))
 
-    return isTypeAllowed || isFieldNameAllowed || isNameAllowed || isMaintenance
+    return (
+      isTypeAllowed ||
+      isFieldNameAllowed ||
+      isNameAllowed ||
+      isIdAllowed ||
+      isMaintenance
+    )
   })
 }

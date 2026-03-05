@@ -53,13 +53,13 @@ const groupedInvoices = (invoices: any, groups: any) => {
       )
 
       const totalGroupSum = (groupInvoices ?? []).reduce((sum, invoice) => {
-        return sum + (invoice?.sum ?? 0)
+        return sum + (Number(invoice?.sum) || 0)
       }, 0)
 
       return {
         groupName: group?.groupName,
         invoices: groupInvoices,
-        totalSum: totalGroupSum.toFixed(2),
+        totalSum: totalGroupSum,
         fieldNames: group?.services?.map((s) => s?.fieldName),
       }
     }) || []
@@ -91,11 +91,13 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
     groupedInvoicesData?.flatMap((group) => group.fieldNames || []) || []
 
   const dataSource =
-    groupedInvoicesData?.map((group, index) => ({
-      key: index + 1,
-      name: group.groupName,
-      sum: group.totalSum,
-    })) || []
+    groupedInvoicesData
+      ?.filter((group) => Number(group?.totalSum || 0).toFixed(2) !== '0.00')
+      .map((group, index) => ({
+        key: index + 1,
+        name: group.groupName,
+        sum: group.totalSum,
+      })) || []
   const discountInvoice = invoices?.find((inv) => inv?.type === 'discount')
   const isEnglish = normalizeCurrency(currency || company?.currency || domain?.currency) !== 'UAH'
 

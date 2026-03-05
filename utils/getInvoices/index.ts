@@ -530,10 +530,12 @@ export const getCustomServiceInvoices = ({
 
     return {
       name: serviceItem?.label || 'Невідома послуга',
+      amount: 1,
       price,
       sum: price,
       type: ServiceType.Custom,
       fieldName: serviceItem?.fieldName || 'custom',
+      serviceId: String(serviceItem?._id || ''),
       customService: true,
     }
   })
@@ -578,6 +580,8 @@ export const getSingleCustomServiceInvoice = ({
       name: serviceItem?.label || 'Невідома послуга',
       type: ServiceType.Custom,
       fieldName: serviceItem.fieldName,
+      serviceId: String(serviceItem?._id || ''),
+      amount: 1,
       price,
       sum:price
     }

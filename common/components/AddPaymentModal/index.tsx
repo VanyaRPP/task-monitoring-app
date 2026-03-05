@@ -345,18 +345,24 @@ const AddPaymentModal: FC<Props> = ({
 
   useEffect(() => {
     if (activeTabKey !== '1' || saved || !company || !company._id) return
-  const isEditing = !!paymentId || edit; 
+  const isEditing = !!paymentId || edit
+  const currentInvoices = form.getFieldValue('invoice')
+  const hasCurrentInvoices =
+    Array.isArray(currentInvoices) && currentInvoices.length > 0
+  const hasFilteredInvoices =
+    Array.isArray(filteredInvoices) && filteredInvoices.length > 0
 
   if (isEditing) {
-    lastLoadedCompanyId.current = company._id;
-    return;
+    lastLoadedCompanyId.current = company._id
+    return
   }
 
-  const isNewCompanySelected = lastLoadedCompanyId.current !== company._id;
+  const isNewCompanySelected = lastLoadedCompanyId.current !== company._id
+  const shouldHydrateEmptyInvoices = !hasCurrentInvoices && hasFilteredInvoices
 
-  if (isNewCompanySelected) {
-    form.setFieldsValue({ invoice: filteredInvoices });
-    lastLoadedCompanyId.current = company._id;
+  if (isNewCompanySelected || shouldHydrateEmptyInvoices) {
+    form.setFieldsValue({ invoice: filteredInvoices })
+    lastLoadedCompanyId.current = company._id
   }
   }, [company, filteredInvoices, paymentId, edit, activeTabKey, saved, form])
 
