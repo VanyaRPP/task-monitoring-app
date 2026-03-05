@@ -84,7 +84,32 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   editable,
   disabled,
 }) => {
-  return null
+  const name = useMemo(() => toArray<string>(_name), [_name])
+  const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
+
+  useEffect(() => {
+    if (amount === undefined || amount === null || Number.isNaN(+amount)) {
+      form?.setFieldValue(['invoice', ...name, 'amount'], 1)
+    }
+  }, [amount, form, name])
+
+  if (!editable) {
+    return <span>{toRoundFixed(amount || 1)}</span>
+  }
+
+  return (
+    <Form.Item
+      name={[...name, 'amount']}
+      rules={[validator.required(), validator.min(1)]}
+      style={{ margin: 0 }}
+    >
+      <Input
+        type="number"
+        placeholder="К-сть..."
+        disabled={disabled}
+      />
+    </Form.Item>
+  )
 }
 
 export const Price: React.FC<InvoiceComponentProps> = ({
@@ -120,12 +145,14 @@ export const Price: React.FC<InvoiceComponentProps> = ({
 export const Sum: React.FC<InvoiceComponentProps> = ({ form, name: _name }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
   const price = Form.useWatch(['invoice', ...name, 'price'], form)
+  const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
   const sum = Form.useWatch(['invoice', ...name, 'sum'], form)
   const { company } = usePaymentContext()
   
   useEffect(() => {
-    form.setFieldValue(['invoice', ...name, 'sum'], +price)
-  }, [form, name, price])
+    const quantity = +amount > 0 ? +amount : 1
+    form.setFieldValue(['invoice', ...name, 'sum'], +price * quantity)
+  }, [form, name, price, amount])
 
   return <strong>{currencyWithUnit(toRoundFixed(sum), company)}</strong>
 }
