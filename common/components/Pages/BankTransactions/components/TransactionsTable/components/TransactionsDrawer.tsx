@@ -70,7 +70,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const dropdownItems: MenuProps['items'] = [
     {
       key: 'credit',
-      label: 'Створити рахунок "Кредит"',
+      label: 'Швидке створення',
       onClick: () => {
         setLoading(true)
         showModal()
@@ -78,7 +78,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     },
     {
       key: 'standard',
-      label: 'Звичайна дія',
+      label: 'Ручне створення',
       onClick: showModal,
     },
   ]
