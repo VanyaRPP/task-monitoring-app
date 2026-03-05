@@ -36,6 +36,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
           value: i._id,
           label: `${i.address} (м. ${i.city})`,
         })) || [],
+      description: currentDomain?.description || '',
       IEName: currentDomain?.IEName || '',
       domainBankToken: currentDomain?.domainBankToken || '',
       mfo: currentDomain?.mfo || '',
@@ -49,11 +50,6 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       ],
     }
     form.setFieldsValue(initialValues)
-    setTimeout(() => {
-      form.setFieldsValue({
-        description: currentDomain?.description || '',
-      })
-    }, 0)
   }, [currentDomain, form, user])
 
   const handleSubmit = async () => {
