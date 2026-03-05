@@ -10,6 +10,7 @@ export interface IPaymentField {
   type: ServiceType | string
   name?: string
   isIndividual?: boolean
+  serviceId?: string
   lastAmount?: number
   losses?: number
   amount?: number
