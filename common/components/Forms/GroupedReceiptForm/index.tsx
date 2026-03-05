@@ -1,4 +1,5 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPricesTable'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { CURRENCY_MAP } from '@utils/constants'
 import dayjs from 'dayjs'
@@ -8,22 +9,6 @@ import { PrinterOutlined, EditOutlined } from '@ant-design/icons'
 import { Dropdown, Tooltip } from 'antd'
 import s from './style.module.scss'
 import cs from './templates/style.module.scss'
-
-const normalizeCurrency = (currency?: string): 'UAH' | 'USD' | 'EUR' => {
-  const value = currency?.toUpperCase()
-  if (value === 'USD' || value === 'EUR') return value
-  return 'UAH'
-}
-
-const getCurrencyShortLabel = (currency?: string): string => {
-  const normalized = normalizeCurrency(currency)
-  const label = CURRENCY_MAP[normalized]?.label
-
-  if (normalized === 'USD') return 'USD'
-  if (normalized === 'EUR') return 'EUR'
-
-  return label || 'грн'
-}
 
 const normalizeCurrency = (currency?: string): 'UAH' | 'USD' | 'EUR' => {
   const value = currency?.toUpperCase()
@@ -156,8 +141,6 @@ const GroupedReceiptForm: FC<Props> = ({
               <br />
             </pre>
           </div>
-          <h1>{isEnglish ? 'INVOICE' : 'РАХУНОК'} <small>№{data?.invoiceNumber}</small></h1>
-        </div>
 
           <div className={cs.receiverInfo}>
             <div className={cs.label}>{isEnglish ? 'Recipient' : 'Одержувач'}</div>
@@ -169,7 +152,7 @@ const GroupedReceiptForm: FC<Props> = ({
                   {email} <br />
                 </div>
               ))}
-            </div>
+            </pre>
           </div>
 
           <div className={cs.providerInvoice}>
