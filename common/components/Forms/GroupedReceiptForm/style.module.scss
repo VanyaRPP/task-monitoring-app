@@ -200,10 +200,45 @@
 .signatureLine {
   opacity: 0.8;
   font-style: italic;
-  padding-top: 60px;
+  padding-top: 40px;
 }
 
-@media (max-width: 900px) {
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  .print,
+  .edit {
+    display: none !important;
+  }
+
+  .invoiceHeader {
+    border-bottom: 1px solid #000 !important;
+  }
+  
+  .invoiceInfoCard {
+    background: #c7c7c7;
+  }
+
+  .invoiceTable th {
+    border-bottom: 1px solid #000 !important;
+    color: #000 !important;
+  }
+
+  .invoiceTable td {
+    border-bottom: 1px solid #eee !important;
+    color: #000 !important;
+  }
+
+  .grandTotal {
+    border-top: 1px solid #000 !important;
+    color: #000 !important;
+  }
+}
+
+@media screen and (max-width: 900px) {
   .invoiceContainer {
     padding: 1.2rem;
   }
