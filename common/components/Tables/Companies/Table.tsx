@@ -465,10 +465,12 @@ const getDefaultColumns = ({
     title: 'Надавач послуг', dataIndex: 'domain', width: 200,
     render: (i: any) => i?.name,
     hidden: domainsFilter?.length <= 1,
+    filterSearch: true,
   }
 
   const companyColumn: any = {
     fixed: 'left', title: 'Назва компанії', dataIndex: 'companyName', width: 200,
+    filterSearch: true,
     render: (name: string) => {
       const debtor = debtorCompanies?.find((c) => c.companyName === name)
       if (isUser || !debtor) return name
