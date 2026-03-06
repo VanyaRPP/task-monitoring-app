@@ -102,9 +102,51 @@ const GroupedReceiptForm: FC<Props> = ({
     }
   })
 
+  const bankAddressLabelRegex =
+    /^(bank name and address|bank name|bank address|назва банку|адреса банку)\s*:/i
+
+  const normalizedBankDetailsLines = bankDetailsLines.reduce(
+    (acc: string[], line: string) => {
+      const normalizedLine = line?.trim()
+      if (!normalizedLine) {
+        return acc
+      }
+
+      const lastLine = acc[acc.length - 1] || ''
+      const shouldAppendToPrevious =
+        !!lastLine &&
+        bankAddressLabelRegex.test(lastLine) &&
+        !normalizedLine.includes(':')
+
+      if (shouldAppendToPrevious) {
+        acc[acc.length - 1] = `${lastLine} ${normalizedLine}`.trim()
+      } else {
+        acc.push(normalizedLine)
+      }
+
+      return acc
+    },
+    []
+  )
+
+  const entrepreneurTitleRegex =
+    /^(private entrepreneur|private enterprise|fop|фоп|фізична особа\s*-?\s*підприємець)$/i
+
+  const normalizedCompanyName = (data?.reciever?.companyName || '').trim()
+  const firstPaymentInfoLine = (paymentInfoDescriptionLines?.[0] || '').trim()
+  const hasEntrepreneurTitle = entrepreneurTitleRegex.test(firstPaymentInfoLine)
+
+  const companyDisplayName = hasEntrepreneurTitle
+    ? `${firstPaymentInfoLine} ${normalizedCompanyName}`.trim()
+    : normalizedCompanyName
+
+  const paymentInfoBodyLines = hasEntrepreneurTitle
+    ? paymentInfoDescriptionLines.slice(1)
+    : paymentInfoDescriptionLines
+
   const paymentInfoLines = [
-    data?.reciever?.companyName,
-    ...paymentInfoDescriptionLines,
+    companyDisplayName,
+    ...paymentInfoBodyLines,
     ...(data?.reciever?.adminEmails || []),
   ].filter(Boolean)
 
@@ -330,10 +372,10 @@ const GroupedReceiptForm: FC<Props> = ({
                 </div>
               </div>
 
-              {!!bankDetailsLines.length && (
+              {!!normalizedBankDetailsLines.length && (
                 <div className={`${s.infoColumn} ${s.infoCard} ${s.bankDetailsCard}`}>
                   <div className={s.infoList}>
-                    {bankDetailsLines.map((line: string, idx: number) => (
+                    {normalizedBankDetailsLines.map((line: string, idx: number) => (
                       <div
                         className={s.infoLine}
                         key={`${line}-${idx}`}
