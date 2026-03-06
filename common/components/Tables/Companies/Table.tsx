@@ -43,6 +43,7 @@ import {
 import { useEffect, useState, useMemo } from 'react'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 import CollapsedTags from '@components/UI/CollapsedTags'
+import service from '@pages/service'
 
 type DebtPerMonth = {
   monthService: string
@@ -282,7 +283,11 @@ const CompaniesTable: React.FC<Props> = ({
           newFilters.company = filters?.companyName
         }
 
-        setFilters(newFilters)
+        setFilters((prev) => ({
+          ...prev,
+          ...newFilters,
+          services: prev?.services,
+        }))
       }}
     />
   )
@@ -365,7 +370,7 @@ const getDefaultColumns = ({
         render: (value) => {
           if (config.isCheckbox) return <Checkbox checked={value} disabled />
           if (config.isPrice) return value ? renderCurrency(value) : <span className={s.currency}>-</span>
-          return value || '-'
+          return value ?? '-'
         },
       }
     }

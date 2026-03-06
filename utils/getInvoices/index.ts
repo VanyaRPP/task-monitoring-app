@@ -282,11 +282,12 @@ export const getElectricityInvoice = ({
 
   if (!isEmpty(service?.electricityPrice)) {
     const prevElectricity = prevInvoicesCollection[ServiceType.Electricity]
+    const prevAmount = +toRoundFixed(prevElectricity?.amount ?? 0)
 
     return {
       type: ServiceType.Electricity,
-      amount: 0,
-      lastAmount: +toRoundFixed(prevElectricity?.amount),
+      amount: prevAmount,
+      lastAmount: prevAmount,
       losses: +toRoundFixed(service?.losses) || undefined,
       price: +toRoundFixed(service.electricityPrice),
       sum: 0,
