@@ -5,6 +5,7 @@ import {
   QuestionCircleOutlined,
   InboxOutlined,
   MoreOutlined,
+  SearchOutlined,
 } from '@ant-design/icons'
 import { IFilter } from '@common/api/paymentApi/payment.api.types'
 import {
@@ -32,6 +33,7 @@ import {
   Switch,
   Badge,
   Select,
+  Input,
 } from 'antd'
 import { ColumnType } from 'antd/lib/table'
 import { useRouter } from 'next/router'
@@ -128,6 +130,9 @@ const CompaniesTable: React.FC<Props> = ({
   const [domain, setDomain] = useState(null)
   const [street, setStreet] = useState(null)
 
+  const [searchCompany, setSearchCompany] = useState('')
+  const [searchDomain, setSearchDomain] = useState('')
+
   useEffect(() => {
     setRealEstate(realEstateData)
     setDomain(domainData)
@@ -178,12 +183,15 @@ const CompaniesTable: React.FC<Props> = ({
   const rawData = realEstates?.data || []
   if (rawData.length === 0) return []
 
-  const data = [...rawData]
-
-  data.sort((a, b) => (a.companyName || '').localeCompare(b.companyName || ''))
-
-  return data
-}, [realEstates?.data])
+  return [...rawData]
+    .filter((item) =>
+      (item.companyName || '').toLowerCase().includes(searchCompany.toLowerCase())
+    )
+    .filter((item) =>
+      (item.domain?.name || '').toLowerCase().includes(searchDomain.toLowerCase())
+    )
+    .sort((a, b) => (a.companyName || '').localeCompare(b.companyName || ''))
+}, [realEstates?.data, searchCompany, searchDomain])
 
 
   const isGlobalAdmin = userResponse?.roles?.includes(Roles.GLOBAL_ADMIN)
@@ -269,6 +277,10 @@ const CompaniesTable: React.FC<Props> = ({
         isUser,
         isSingleCompanyByData,
         customServices: filteredCustomServices, 
+        searchCompany,
+        setSearchCompany,
+        searchDomain,
+        setSearchDomain,
       })}
       dataSource={dataSource}
       scroll={{ x: tableWidth }}
@@ -319,6 +331,10 @@ const getDefaultColumns = ({
   isUser,
   isSingleCompanyByData,
   customServices,
+  searchCompany,
+  setSearchCompany,
+  searchDomain,
+  setSearchDomain,
 }: {
   domainId?: string
   streetId?: string
@@ -340,6 +356,10 @@ const getDefaultColumns = ({
   isUser?: boolean
   isSingleCompanyByData?: boolean
   customServices?: { _id: string; name: string; fieldName?: string }[]
+  searchCompany: string
+  setSearchCompany: (v: string) => void
+  searchDomain: string
+  setSearchDomain: (v: string) => void
 }): ColumnType<any>[] => {
   const isOnPage = pathname === AppRoutes.REAL_ESTATE
   const selectedServices = filters?.services || []
@@ -462,13 +482,44 @@ const getDefaultColumns = ({
   }
 
   const domainColumn: any = {
-    title: 'Надавач послуг', dataIndex: 'domain', width: 200,
-    render: (i: any) => i?.name,
-    hidden: domainsFilter?.length <= 1,
-  }
+  title: (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span>Надавач послуг</span>
+      <Input
+        placeholder="Пошук..."
+        prefix={<SearchOutlined />}
+        value={searchDomain}
+        onChange={(e) => setSearchDomain(e.target.value)}
+        allowClear
+        style={{ width: 160 }}
+        onClick={(e) => e.stopPropagation()}
+      />
+    </div>
+  ),
+  dataIndex: 'domain',
+  width: 340,
+  render: (i: any) => i?.name,
+  hidden: domainsFilter?.length <= 1,
+}
 
   const companyColumn: any = {
-    fixed: 'left', title: 'Назва компанії', dataIndex: 'companyName', width: 200,
+  fixed: 'left',
+  title: (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span>Назва компанії</span>
+      <Input
+        placeholder="Пошук..."
+        prefix={<SearchOutlined />}
+        value={searchCompany}
+        onChange={(e) => setSearchCompany(e.target.value)}
+        allowClear
+        style={{ width: 160 }}
+        onClick={(e) => e.stopPropagation()}
+      />
+    </div>
+  ),
+  dataIndex: 'companyName',
+  width: 340,
     render: (name: string) => {
       const debtor = debtorCompanies?.find((c) => c.companyName === name)
       if (isUser || !debtor) return name
