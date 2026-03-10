@@ -28,7 +28,7 @@ export interface PaymentsHeaderProps {
   setPaymentsDeleteItems: (items: PaymentDeleteItem[]) => void
   enablePaymentsButton: boolean
   onColumnsSelect: (columns: ServiceType[]) => void
-
+  onDeleteClick?: () => void
   domainFilter: IFilter[]
   realEstatesFilter: IFilter[]
   isDashboard?: boolean
@@ -52,6 +52,7 @@ const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
   domainFilter,
   realEstatesFilter,
   isDashboard,
+  onDeleteClick
 }) => {
   return (
     <PaymentCardHeader
@@ -72,6 +73,7 @@ const PaymentsHeader: React.FC<PaymentsHeaderProps> = ({
       domainFilter={domainFilter}
       realEstatesFilter={realEstatesFilter}
       isDashboard={isDashboard}
+      onDeleteClick={onDeleteClick}
     />
   )
 }
