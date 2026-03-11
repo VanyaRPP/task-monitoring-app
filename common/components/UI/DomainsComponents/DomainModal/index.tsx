@@ -6,12 +6,10 @@ import {
 import { Form, message } from 'antd'
 import React, { FC, useEffect, useState } from 'react'
 import {
-  IDomainModel,
   IExtendedDomain,
 } from '@common/api/domainApi/domain.api.types'
 import DomainForm from './DomainForm'
 import Modal from '../../ModalWindow'
-import { current } from '@reduxjs/toolkit'
 import { defaultServices } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 

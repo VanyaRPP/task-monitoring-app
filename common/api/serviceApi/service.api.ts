@@ -40,11 +40,12 @@ export const serviceApi = createApi({
           params: { limit, userId, domainId, streetId, serviceId, year, month },
         }
       },
-      providesTags: (response: IGetServiceResponse) =>
-        response?.data
-          ? response.data.map((item) => ({ type: 'Service', id: item._id }))
-          : [],
-      // transformResponse: (response: any) => response.data,
+      providesTags: (response: IGetServiceResponse) => [
+        'Service',
+        ...(response?.data
+          ? response.data.map((item) => ({ type: 'Service' as const, id: item._id }))
+          : []),
+      ],
     }),
     getServicesAddress: builder.query({
       query: () => {
@@ -77,7 +78,7 @@ export const serviceApi = createApi({
           method: 'DELETE',
         }
       },
-      invalidatesTags: (response) => (response ? ['Service'] : []),
+      invalidatesTags: (result, error, id) => [{ type: 'Service', id }],
     }),
     editService: builder.mutation<
       IService,
@@ -94,7 +95,7 @@ export const serviceApi = createApi({
           body: body,
         }
       },
-      invalidatesTags: (response) => (response ? ['Service'] : []),
+      invalidatesTags: (result) => result ? [{ type: 'Service', id: result._id }] : [],
     }),
   }),
 })

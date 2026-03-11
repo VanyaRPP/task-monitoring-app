@@ -12,7 +12,7 @@ import { isAdminCheck } from '@utils/helpers'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { useDeleteServiceMutation } from '@common/api/serviceApi/service.api'
-import { message, Modal } from 'antd'
+import { message } from 'antd'
 import { dateToMonthYear } from '@assets/features/formatDate'
 import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
 import {
@@ -20,6 +20,8 @@ import {
   useGetDateFiltersQuery,
   useGetDomainFiltersQuery,
 } from '@common/api/filterApi/filter.api'
+import ModalDelete from '@components/UI/ModalDelete'
+import type { ColumnsType } from 'antd/es/table'
 
 interface ServiceBlockProps {
   sepDomainID?: string
@@ -33,8 +35,9 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
     preview: false,
   })
   const [selectedServices, setSelectedServices] = useState<IService[]>([])
-  const [deleteService, _] = useDeleteServiceMutation()
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
 
+  const [deleteService] = useDeleteServiceMutation()
   const { data: customServicesData } = useGetCustomServicesQuery({})
 
   const [filter, setFilter] = useState<IServiceFilter>()
@@ -51,34 +54,37 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
     type: 'service',
   })
 
-  const handleDeleteServices = () => {
-    ;(Modal as any).confirm({
-      title: 'Ви впевнені, що хочете видалити обрані проплати?',
-      cancelText: 'Ні',
-      okText: 'Так',
-      content: (
-        <>
-          {selectedServices.map((service, index) => (
-            <div key={index}>
-              {index + 1}. {service?.domain?.name}, {service?.street?.address},
-              {dateToMonthYear(service.date)}
-            </div>
-          ))}
-        </>
-      ),
-      onOk: async () => {
-        try {
-          await Promise.all(
-            selectedServices.map((service) => deleteService(service._id))
-          )
-          setSelectedServices([])
-          message.success('Видалено!')
-        } catch (error) {
-          message.error('Помилка при видаленні рахунків')
-        }
-      },
-    })
+  const handleDeleteConfirm = async () => {
+    try {
+      await Promise.all(
+        selectedServices.map((service) => deleteService(service._id))
+      )
+      setSelectedServices([])
+      setDeleteModalOpen(false)
+      message.success('Видалено!')
+    } catch {
+      message.error('Помилка при видаленні рахунків')
+    }
   }
+
+  const deleteColumns: ColumnsType<IService> = [
+    {
+      title: 'Домен',
+      dataIndex: ['domain', 'name'],
+      key: 'domain',
+    },
+    {
+      title: 'Адреса',
+      dataIndex: ['street', 'address'],
+      key: 'street',
+    },
+    {
+      title: 'Період',
+      dataIndex: 'date',
+      key: 'date',
+      render: (date) => dateToMonthYear(date),
+    },
+  ]
 
   const {
     data: servicesData,
@@ -93,6 +99,7 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
   })
 
   return (
+  <>
     <TableCard
       title={
         <ServicesHeader
@@ -105,7 +112,7 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
           setFilter={setFilter}
           services={servicesData}
           enableServiceButton={sepDomainID ? false : true}
-          handleDeleteServices={handleDeleteServices}
+          handleDeleteServices={() => setDeleteModalOpen(true)}
           selectedServices={selectedServices}
           user={user}
           domainsFilter={domainsFilter}
@@ -130,6 +137,15 @@ const ServicesBlock: React.FC<ServiceBlockProps> = ({ sepDomainID }) => {
         dateFilters={dateFilters}
       />
     </TableCard>
+      <ModalDelete
+        open={deleteModalOpen}
+        onCancel={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        data={selectedServices}
+        columns={deleteColumns}
+        rowKey={(service) => service._id}
+      />
+    </>
   )
 }
 

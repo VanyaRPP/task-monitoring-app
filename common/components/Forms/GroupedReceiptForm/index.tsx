@@ -46,6 +46,10 @@ const GroupedReceiptForm: FC<Props> = ({
     data?.company?.currency || company?.currency || data?.domain?.currency
   const currencyLabel = getCurrencyShortLabel(currency)
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
+  const invoiceDatePrefix = dayjs(data?.invoiceCreationDate).isValid()
+    ? dayjs(data?.invoiceCreationDate).format('DDMMYY')
+    : ''
+  const modernInvoiceNumber = `${invoiceDatePrefix}${data?.invoiceNumber || ''}`
   const domainName =
     data?.domain?.name ||
     (typeof company?.domain === 'object' ? company?.domain?.name : '')
@@ -350,7 +354,7 @@ const GroupedReceiptForm: FC<Props> = ({
                 <div>{data?.reciever?.companyName || ''}</div>
               </div>
             </div>
-            <h1>{isEnglish ? 'INVOICE' : 'РАХУНОК'} №{data?.invoiceNumber}</h1>
+            <h1>{isEnglish ? 'INVOICE' : 'РАХУНОК'} №{modernInvoiceNumber}</h1>
           </div>
 
           <div className={s.invoiceInfoCard}>
