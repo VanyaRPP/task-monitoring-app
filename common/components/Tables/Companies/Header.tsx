@@ -122,12 +122,12 @@ const CompaniesHeader: React.FC<Props> = ({
             />
           </Space>
         )}
-      <div style={{ marginLeft: 24, width: 250, flexShrink: 0, marginRight: 24 }}>
+      <div className={s.servicesFilter}>
       <Select
         mode="multiple"
         allowClear
         placeholder="Фільтр послуг"
-        style={{ width: "100%" }}
+        style={{ width: "250px" }}
         value={filters?.services || []}
         onChange={handleServicesChange}
         maxTagCount="responsive"

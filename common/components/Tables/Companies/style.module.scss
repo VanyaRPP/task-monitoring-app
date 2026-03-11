@@ -2,12 +2,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .firstBlock {
   display: flex;
-  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 12px;
+}
+
+.servicesFilter {
+  flex: 0 0 250px;
 }
 
 .segmented {
