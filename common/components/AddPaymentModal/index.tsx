@@ -60,6 +60,8 @@ export interface IPaymentContext {
   prevService: IService
   company: IRealestate
   form: FormInstance
+  template: 'classic' | 'olimp'                     
+  setTemplate: (t: 'classic' | 'olimp') => void
 }
 
 export const PaymentContext = createContext<IPaymentContext>({
@@ -69,6 +71,8 @@ export const PaymentContext = createContext<IPaymentContext>({
   prevService: null,
   company: null,
   form: null,
+  template: 'classic', 
+  setTemplate: () => void 0,
 })
 
 export const usePaymentContext = () =>
@@ -96,6 +100,7 @@ const AddPaymentModal: FC<Props> = ({
   const [changed, setChanged] = useState(false)
   const [saved, setSaved] = useState(false)
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
+  const [template, setTemplate] = useState<'classic' | 'olimp'>('classic')
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)
   )
@@ -249,7 +254,8 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
-  if (payment && paymentData?.type !== Operations.Credit) {
+
+  if (payment && paymentData?.type !== Operations.Credit && template !== 'olimp') {
     items.push({
       key: '3',
       label: 'Акт',
@@ -375,6 +381,8 @@ const AddPaymentModal: FC<Props> = ({
         payment,
         prevPayment,
         form,
+        template, 
+        setTemplate,
       }}
     >
       <Modal

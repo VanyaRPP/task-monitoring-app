@@ -37,7 +37,7 @@ const GroupedReceiptForm: FC<Props> = ({
   paymentData,
   paymentActions: _paymentActions,
 }) => {
-  const [template, setTemplate] = useState<'olimp' | 'classic'>('classic')
+  const { template, setTemplate } = usePaymentContext();
   const [topInfoCardHeight, setTopInfoCardHeight] = useState<number>(0)
   const { company } = usePaymentContext()
   const rawData = currPayment ?? paymentData ?? null
