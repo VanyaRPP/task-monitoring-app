@@ -18,10 +18,8 @@ export { default as WaterPart } from './WaterPart'
 export const Sum: React.FC<{
   record: IPaymentField & { key: string }
 }> = ({ record }) => {
-  const { form } = usePaymentContext()
-  const company = form.getFieldValue('company')
-  const domain = form.getFieldValue('domain')
-  const currencyLabel = getCurrencySymbol(company?.currency || domain?.currency)
+  const { form, company } = usePaymentContext()
+  const currencyLabel = getCurrencySymbol(company?.currency)
 
   const { lastAmount, amount, price } = record
 

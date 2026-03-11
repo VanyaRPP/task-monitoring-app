@@ -308,13 +308,7 @@ const AddPaymentModal: FC<Props> = ({
       street: formData.street,
       company: formData.company,
       monthService: formData.monthService,
-      invoiceCreationDate: formData.invoiceCreationDate
-        ? new Date(Date.UTC(
-            formData.invoiceCreationDate.year(),
-            formData.invoiceCreationDate.month(),
-            formData.invoiceCreationDate.date()
-          ))
-        : null,
+      invoiceCreationDate: formData.invoiceCreationDate,
       description: formData.description || '',
       generalSum: formData.generalSum || formData.debit,
       provider,
