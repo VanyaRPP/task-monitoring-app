@@ -3,7 +3,7 @@ import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPric
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { CURRENCY_MAP } from '@utils/constants'
 import dayjs from 'dayjs'
-import { FC, useRef, useState } from 'react'
+import { FC, useEffect, useRef, useState } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import { PrinterOutlined, EditOutlined } from '@ant-design/icons'
 import { Dropdown, Tooltip } from 'antd'
@@ -37,7 +37,8 @@ const GroupedReceiptForm: FC<Props> = ({
   paymentData,
   paymentActions: _paymentActions,
 }) => {
-  const [template, setTemplate] = useState<'classic' | 'modern'>('classic')
+  const [template, setTemplate] = useState<'olimp' | 'classic'>('classic')
+  const [topInfoCardHeight, setTopInfoCardHeight] = useState<number>(0)
   const { company } = usePaymentContext()
   const rawData = currPayment ?? paymentData ?? null
   const data = rawData as any
@@ -45,6 +46,10 @@ const GroupedReceiptForm: FC<Props> = ({
     data?.company?.currency || company?.currency || data?.domain?.currency
   const currencyLabel = getCurrencyShortLabel(currency)
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
+  const invoiceDatePrefix = dayjs(data?.invoiceCreationDate).isValid()
+    ? dayjs(data?.invoiceCreationDate).format('DDMMYY')
+    : ''
+  const modernInvoiceNumber = `${invoiceDatePrefix}${data?.invoiceNumber || ''}`
   const domainName =
     data?.domain?.name ||
     (typeof company?.domain === 'object' ? company?.domain?.name : '')
@@ -76,13 +81,131 @@ const GroupedReceiptForm: FC<Props> = ({
     Boolean
   )
 
+  const receiverDescriptionLines = (
+    data?.reciever?.description?.split('\n') || []
+  )
+    .map((line: string) => line?.trim())
+    .filter(Boolean)
+
+  const bankDetailsTriggerRegex =
+    /(account details|usd account details|iban|swift|bic|bank name|bank address|bank name and address|рахунок|банк|мфо)/i
+
+  const paymentInfoDescriptionLines: string[] = []
+  const bankDetailsLines: string[] = []
+  let isBankSection = false
+
+  receiverDescriptionLines.forEach((line: string) => {
+    if (bankDetailsTriggerRegex.test(line)) {
+      isBankSection = true
+    }
+
+    if (isBankSection) {
+      bankDetailsLines.push(line)
+    } else {
+      paymentInfoDescriptionLines.push(line)
+    }
+  })
+
+  const bankAddressLabelRegex =
+    /^(bank name and address|bank name|bank address|назва банку|адреса банку)\s*:/i
+
+  const normalizedBankDetailsLines = bankDetailsLines.reduce(
+    (acc: string[], line: string) => {
+      const normalizedLine = line?.trim()
+      if (!normalizedLine) {
+        return acc
+      }
+
+      const lastLine = acc[acc.length - 1] || ''
+      const shouldAppendToPrevious =
+        !!lastLine &&
+        bankAddressLabelRegex.test(lastLine) &&
+        !normalizedLine.includes(':')
+
+      if (shouldAppendToPrevious) {
+        acc[acc.length - 1] = `${lastLine} ${normalizedLine}`.trim()
+      } else {
+        acc.push(normalizedLine)
+      }
+
+      return acc
+    },
+    []
+  )
+
+  const entrepreneurTitleRegex =
+    /^(private entrepreneur|private enterprise|fop|фоп|фізична особа\s*-?\s*підприємець)$/i
+
+  const normalizedCompanyName = (data?.reciever?.companyName || '').trim()
+  const firstPaymentInfoLine = (paymentInfoDescriptionLines?.[0] || '').trim()
+  const hasEntrepreneurTitle = entrepreneurTitleRegex.test(firstPaymentInfoLine)
+
+  const companyDisplayName = hasEntrepreneurTitle
+    ? `${firstPaymentInfoLine} ${normalizedCompanyName}`.trim()
+    : normalizedCompanyName
+
+  const paymentInfoBodyLines = hasEntrepreneurTitle
+    ? paymentInfoDescriptionLines.slice(1)
+    : paymentInfoDescriptionLines
+
   const paymentInfoLines = [
-    data?.reciever?.companyName,
-    ...(data?.reciever?.description?.trim()?.split('\n') || []),
+    companyDisplayName,
+    ...paymentInfoBodyLines,
     ...(data?.reciever?.adminEmails || []),
   ].filter(Boolean)
 
+  const renderBankDetailsLine = (line: string) => {
+    const trimmedLine = line?.trim?.() || ''
+    const separatorIndex = trimmedLine.indexOf(':')
+
+    const renderWithBoldUsd = (value: string) =>
+      value.split(/(USD)/gi).map((chunk, idx) =>
+        chunk.toUpperCase() === 'USD' ? (
+          <span className={s.bankDetailsLabel} key={`usd-${idx}`}>
+            {chunk}
+          </span>
+        ) : (
+          chunk
+        )
+      )
+
+    if (separatorIndex < 0) {
+      return renderWithBoldUsd(trimmedLine)
+    }
+
+    const label = trimmedLine.slice(0, separatorIndex + 1)
+    const value = trimmedLine.slice(separatorIndex + 1).trim()
+
+    return (
+      <>
+        <span className={s.bankDetailsLabel}>{renderWithBoldUsd(label)}</span>
+        {value ? <> {renderWithBoldUsd(value)}</> : ''}
+      </>
+    )
+  }
+
   const componentRef = useRef<HTMLDivElement | null>(null)
+  const paymentInfoCardRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!paymentInfoCardRef.current) {
+      return
+    }
+
+    const updateHeight = () => {
+      const nextHeight = Math.ceil(
+        paymentInfoCardRef.current?.getBoundingClientRect().height || 0
+      )
+      setTopInfoCardHeight(nextHeight)
+    }
+
+    updateHeight()
+
+    const observer = new ResizeObserver(updateHeight)
+    observer.observe(paymentInfoCardRef.current)
+
+    return () => observer.disconnect()
+  }, [paymentInfoLines.length, isEnglish, template])
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -98,11 +221,11 @@ const GroupedReceiptForm: FC<Props> = ({
   const templateItems = [
     {
       key: 'classic',
-      label: isEnglish ? 'First template' : 'Перший шаблон',
+      label: 'Класичний шаблон',
     },
     {
-      key: 'modern',
-      label: isEnglish ? 'Second template' : 'Другий шаблон',
+      key: 'olimp',
+      label: 'OLIMP DIGITAL OÜ',
     },
   ]
 
@@ -114,7 +237,7 @@ const GroupedReceiptForm: FC<Props> = ({
         trigger={['click']}
         menu={{
           items: templateItems,
-          onClick: ({ key }) => setTemplate(key as 'classic' | 'modern'),
+          onClick: ({ key }) => setTemplate(key as 'classic' | 'olimp'),
         }}
       >
         <Tooltip title={isEnglish ? 'Select template' : 'Обрати шаблон'}>
@@ -224,31 +347,68 @@ const GroupedReceiptForm: FC<Props> = ({
         >
           <div className={s.invoiceHeader}>
             <div className={s.brandBlock}>
-              <div className={s.brandLogo}>
+              {/* <div className={s.brandLogo}>
                 <img src="/icons/icon-96x96.png" alt="SpaceHub" />
-              </div>
+              </div> */}
               <div className={s.brandText}>
-                <div>{domainName || ''}</div>
+                <div>{data?.reciever?.companyName || ''}</div>
               </div>
             </div>
-            <h1>{isEnglish ? 'INVOICE' : 'РАХУНОК'} <small>№{data?.invoiceNumber}</small></h1>
+            <h1>{isEnglish ? 'INVOICE' : 'РАХУНОК'} №{modernInvoiceNumber}</h1>
           </div>
 
           <div className={s.invoiceInfoCard}>
-            <div className={s.infoColumn}>
-              <div className={s.paymentInfo}>
+            <div className={s.infoColumnStack}>
+              <div
+                ref={paymentInfoCardRef}
+                className={`${s.infoColumn} ${s.infoCard} ${s.topInfoCard}`}
+              >
                 <h4>{isEnglish ? 'PAYMENT INFO:' : 'ПЛАТІЖНІ ДАНІ:'}</h4>
-                {paymentInfoLines.map((line: string, idx: number) => (
-                  <div key={`${line}-${idx}`}>{line}</div>
-                ))}
+                <div className={s.infoList}>
+                  {paymentInfoLines.map((line: string, idx: number) => (
+                    <div
+                      className={`${s.infoLine} ${idx === 0 ? s.infoLineAccent : ''}`}
+                      key={`${line}-${idx}`}
+                    >
+                      {line}
+                    </div>
+                  ))}
+                </div>
               </div>
+
+              {!!normalizedBankDetailsLines.length && (
+                <div className={`${s.infoColumn} ${s.infoCard} ${s.bankDetailsCard}`}>
+                  <div className={s.infoList}>
+                    {normalizedBankDetailsLines.map((line: string, idx: number) => (
+                      <div
+                        className={s.infoLine}
+                        key={`${line}-${idx}`}
+                      >
+                        {renderBankDetailsLine(line)}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className={s.infoColumn}>
+            <div
+              className={`${s.infoColumn} ${s.infoCard} ${s.topInfoCard} ${s.issuedToCard}`}
+              style={
+                topInfoCardHeight > 0 ? { height: `${topInfoCardHeight}px` } : undefined
+              }
+            >
               <h4>{isEnglish ? 'ISSUED TO:' : 'ОТРИМУВАЧ:'}</h4>
-              {issuedToLines.map((line: string, idx: number) => (
-                <div key={`${line}-${idx}`}>{line}</div>
-              ))}
+              <div className={s.infoList}>
+                {issuedToLines.map((line: string, idx: number) => (
+                  <div
+                    className={`${s.infoLine} ${idx === 0 ? s.infoLineAccent : ''}`}
+                    key={`${line}-${idx}`}
+                  >
+                    {line}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
