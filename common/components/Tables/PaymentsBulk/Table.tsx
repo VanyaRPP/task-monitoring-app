@@ -128,6 +128,7 @@ const InvoicesTable: React.FC = () => {
           size="small"
           pagination={false}
           loading={isLoading}
+          tableLayout="fixed"
           columns={[
             ...getDefaultColumns(
               remove,
@@ -137,7 +138,7 @@ const InvoicesTable: React.FC = () => {
             ),
           ]}
           dataSource={fields}
-          scroll={{ x: 3000 }}
+          scroll={{ x: 1200 }}
           locale={{
             emptyText: (
               <Empty description="За даною адресою послуг не знайдено!" />
