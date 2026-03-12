@@ -34,6 +34,18 @@ describe('normalizeCurrency', () => {
   it('повертає EUR для "EUR"', () => {
     expect(normalizeCurrency('EUR')).toBe('EUR')
   })
+  
+  it('нормалізує змішаний регістр "Usd" -> "USD"', () => {
+    expect(normalizeCurrency('Usd')).toBe('USD')
+  })
+
+  it('нормалізує змішаний регістр "EuR" -> "EUR"', () => {
+    expect(normalizeCurrency('EuR')).toBe('EUR')
+  })
+
+  it('нормалізує змішаний регістр "Uah" -> "UAH"', () => {
+    expect(normalizeCurrency('Uah')).toBe('UAH')
+  })
 })
 
 describe('getCurrencyShortLabel', () => {
@@ -111,5 +123,25 @@ describe('currencyWithUnit', () => {
 
   it('fallback до "грн" якщо currency відсутня в company', () => {
     expect(currencyWithUnit(100, {} as any)).toBe('100 грн')
+  })
+  
+  it('відображає суму з USD міткою без unit', () => {
+    expect(currencyWithUnit(100, { currency: 'USD' } as any)).toBe('100 USD')
+  })
+
+  it('відображає суму з EUR міткою без unit', () => {
+    expect(currencyWithUnit(100, { currency: 'EUR' } as any)).toBe('100 EUR')
+  })
+
+  it('відображає суму з USD міткою з unit', () => {
+    expect(currencyWithUnit(200, { currency: 'USD' } as any, 'м²')).toBe('200 USD/м²')
+  })
+
+  it('відображає рядкове значення суми', () => {
+    expect(currencyWithUnit('500', { currency: 'UAH' } as any)).toBe('500 грн')
+  })
+
+  it('відображає рядкове значення з unit', () => {
+    expect(currencyWithUnit('300', { currency: 'USD' } as any, 'м²')).toBe('300 USD/м²')
   })
 })

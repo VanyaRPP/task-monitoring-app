@@ -244,6 +244,6 @@ export const inflicionDescription = `
 
 export const CURRENCY_MAP = {
   UAH: { label: 'грн' },
-  USD: { label: 'usd' },
-  EUR: { label: 'eur' },
+  USD: { label: 'USD' },
+  EUR: { label: 'EUR' },
 } as const
