@@ -1,5 +1,5 @@
 import { CloseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { usePrevPayment } from './hooks/usePrevPayment/usePrevPayment'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { dateToMonth } from '@common/assets/features/formatDate'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
@@ -152,59 +152,26 @@ const CompanyName: React.FC<{ name: number }> = ({ name }) => {
   return <Typography.Text>{companyName}</Typography.Text>
 }
 
-const usePrevPayment = (name: number): IExtendedPayment => {
-  const { form, prevService, prevPayments } = useInvoicesPaymentContext()
-
-  const companyId: string | undefined = Form.useWatch(
-    ['payments', name, 'company', '_id'],
-    form
-  )
-
-  return useMemo(() => {
-    return prevPayments?.find(
-      (prevPayment) =>
-        // eslint-disable-next-line
-        // @ts-ignore
-        prevPayment?.company?._id === companyId &&
-        // eslint-disable-next-line
-        // @ts-ignore
-        prevPayment?.monthService?._id === prevService?._id &&
-        // eslint-disable-next-line
-        // @ts-ignore
-        prevPayment?.street?._id === prevService?.street?._id &&
-        // eslint-disable-next-line
-        // @ts-ignore
-        prevPayment?.domain?._id === prevService?.domain?._id
-    )
-  }, [prevPayments, companyId, prevService])
-}
-
 const useInflicionValues = (
   name: number
 ): {
   previousPlacingPrice: number
   inflicionAmount: number
 } => {
-  const { form, service, prevPayments, prevService } =
+  const { form, service, prevService } =
     useInvoicesPaymentContext()
+
+  const prevPayment = usePrevPayment(name)
 
   const company: IRealestate | undefined = Form.useWatch(
     ['payments', name, 'company'],
     form
   )
 
-  const prevPayment = prevPayments.find(
-    // TODO: fix typing of IPayment and IExtendedPayment
-    // eslint-disable-next-line
-    // @ts-ignore
-    (payment) => payment.company?._id === company?._id
-  )
-
   const previousPlacingPrice = useMemo(() => {
     return (
-      prevPayment?.invoice?.find((item) => item.type === ServiceType.Placing)
-        ?.sum ||
-      company?.totalArea * (company?.pricePerMeter || service?.rentPrice)
+      prevPayment?.invoice?.find((item) => item.type === ServiceType.Placing)?.sum ||
+      (company?.totalArea || 0) * ((company?.pricePerMeter || 0) || (service?.rentPrice || 0))
     )
   }, [prevPayment, company, service])
 
