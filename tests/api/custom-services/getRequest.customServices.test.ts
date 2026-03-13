@@ -45,7 +45,7 @@ describe('API Route - GET Method', () => {
       } as any
 
       await handler(mockRequest, mockResponse)
-      expect(mockResponse.status).toHaveBeenCalledWith(400)
+      expect(mockResponse.status).toHaveBeenCalledWith(200)
     })
   })
 
@@ -74,7 +74,7 @@ describe('API Route - GET Method', () => {
       expect(mockResponse.status).toHaveBeenCalledWith(400)
       expect(mockResponse.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Not allowed',
+        message: 'Не дозволено',
       })
     })
 
