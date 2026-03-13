@@ -87,7 +87,7 @@ describe('API Route - POST Method', () => {
       expect(mockRes.status).toHaveBeenCalledWith(400)
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Not allowed',
+        message: 'Не дозволено',
       })
     })
 
