@@ -46,6 +46,7 @@ import styles from './styles.module.scss'
 const { useBreakpoint } = Grid
 
 export interface PaymentCardHeaderProps {
+  onDeleteClick?: () => void
   setCurrentDateFilter: (val: any) => void
   currentPayment: any
   paymentActions: { edit: boolean; preview: boolean }
@@ -87,6 +88,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   singleCompany,
   singleDomain,
   isDashboard,
+  onDeleteClick
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -120,35 +122,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     }
   }
 
-  const handleDeletePayments = async () => {
-    Modal.confirm({
-      title: 'Ви впевнені, що хочете видалити обрані проплати?',
-      cancelText: 'Ні',
-      okText: 'Так',
-      content: (
-        <>
-          {paymentsDeleteItems.map((item, index) => (
-            <div key={index}>
-              {index + 1}. {item.domain}, {item.company},{' '}
-              {dateToDefaultFormat(item.date)}
-            </div>
-          ))}
-        </>
-      ),
-      onOk: async () => {
-        const response = await deletePayment(
-          paymentsDeleteItems.map((item) => item.id)
-        )
-        if ('data' in response) {
-          setPaymentsDeleteItems([])
-          setSelectedPayments([])
-          message.success('Видалено!')
-        } else {
-          message.error('Помилка при видаленні рахунків')
-        }
-      },
-    })
-  }
+ 
 
   const handleGeneratePdf = async () => {
     try {
@@ -294,7 +268,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             {isAdmin &&
               pathname === AppRoutes.PAYMENT &&
               selectedPayments.length > 0 && (
-                <Button type="link" onClick={handleDeletePayments}>
+                <Button type="link" onClick={onDeleteClick}>
                   <DeleteOutlined /> Видалити
                 </Button>
               )}

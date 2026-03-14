@@ -228,13 +228,12 @@ export function filterInvoiceObject(obj) {
 //   number ? new Intl.NumberFormat('en-EN').format(number) : '-'
 
 export const renderCurrency = (number: any): string => {
-  if (!isNaN(number)) {
-    return new Intl.NumberFormat('en-US').format(
-      Number(toRoundFixed(number.toString()))
-    )
-  } else {
+  if (number == null || isNaN(number)) {
     return '-'
   }
+  return new Intl.NumberFormat('en-US').format(
+    Number(toRoundFixed(number.toString()))
+  )
 }
 
 export const renderPrice = (value?: unknown): string => {

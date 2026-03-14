@@ -19,21 +19,30 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
   const MFO = Form.useWatch('mfo', form)
 
   useEffect(() => {
-    // Initialize an array to hold the description lines
-    const descriptionLines = []
+    if (!editable) return
 
-    // Conditionally add lines to the description based on field values
-    if (IE_NAME) descriptionLines.push(`${IE_NAME}`)
-    if (IBAN) descriptionLines.push(`IBAN: ${IBAN}`)
-    if (RNOKPP) descriptionLines.push(`РНОКПП: ${RNOKPP}`)
-    if (MFO) descriptionLines.push(`МФО: ${MFO}`)
-
-    // Update the description field in the form
-    if (editable) {
-      form.setFieldsValue({
-        description: descriptionLines.join('\n'), // Join lines with a newline character
+    const currentDescription: string = form.getFieldValue('description') || ''
+    const autoLinePatterns = [/^ФОП: /, /^IBAN: /, /^РНОКПП: /, /^МФО: /]
+    const autoValues = [IE_NAME, IBAN, RNOKPP, MFO].filter(Boolean)
+    const customLines = currentDescription
+      .split('\n')
+      .filter((line) => {
+        if (!line.trim()) return false
+        if (autoLinePatterns.some((p) => p.test(line))) return false
+        if (autoValues.includes(line.trim())) return false
+        return true
       })
-    }
+
+    const autoLines = [
+      IE_NAME ? `ФОП: ${IE_NAME}` : '',
+      IBAN ? `IBAN: ${IBAN}` : '',
+      RNOKPP ? `РНОКПП: ${RNOKPP}` : '',
+      MFO ? `МФО: ${MFO}` : '',
+    ].filter(Boolean)
+
+    form.setFieldsValue({
+      description: [...autoLines, ...customLines].join('\n'),
+    })
   }, [IE_NAME, IBAN, RNOKPP, MFO, form, editable])
 
   const { data, isLoading } = useGetDomainsQuery({})

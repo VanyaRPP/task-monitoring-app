@@ -55,7 +55,7 @@ export const customServicesApi = createApi({
       query: ({ id }) => ({
         url: 'custom-services',
         method: 'DELETE',
-        params: { id},
+        params: { id },
       }),
       invalidatesTags: ['CustomService'],
     }),

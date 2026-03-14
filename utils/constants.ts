@@ -161,16 +161,16 @@ export const cascaderQuarters = [
 ]
 
 export const defaultServices = [
-  '677d414283b6ef93c6b8ea2c',
-  '68156d2cf520914e5e1ad87c',
-  '68156cdbf520914e5e1ad877',
-  '6816bca1e26e39a785fd7a0d',
-  '68156d58f520914e5e1ad881',
-  '677d434c83b6ef93c6b8ea3a',
-  '68230f76a51fddf0ae165d77',
-  '682dd48d9665126611c81950',
-  '677d412483b6ef93c6b8e9fa',
-  '677d437c83b6ef93c6b8ea50',
+  '677d414283b6ef93c6b8ea2c', // Утримання приміщень (грн/м²)
+  '68156d2cf520914e5e1ad87c', // Електропостачання
+  '68156cdbf520914e5e1ad877', // Водопостачання (грн/м³)
+  '6816bca1e26e39a785fd7a0d', // Всього Водопостачання (грн/м³)
+  '68156d58f520914e5e1ad881', // Вивіз сміття
+  '677d434c83b6ef93c6b8ea3a', // Прибирання (грн)
+  '68230f76a51fddf0ae165d77', // Інфляція
+  '682dd48d9665126611c81950', // Розміщення
+  '677d412483b6ef93c6b8e9fa', // Частка водопостачання
+  '677d437c83b6ef93c6b8ea50', // Частка загальної площі
 ]
 
 export const cascaderMonths = [
@@ -244,6 +244,6 @@ export const inflicionDescription = `
 
 export const CURRENCY_MAP = {
   UAH: { label: 'грн' },
-  USD: { label: 'usd' },
-  EUR: { label: 'eur' },
+  USD: { label: 'USD' },
+  EUR: { label: 'EUR' },
 } as const

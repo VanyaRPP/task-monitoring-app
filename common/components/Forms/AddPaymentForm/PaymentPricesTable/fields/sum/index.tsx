@@ -18,10 +18,10 @@ export { default as WaterPart } from './WaterPart'
 export const Sum: React.FC<{
   record: IPaymentField & { key: string }
 }> = ({ record }) => {
-  const { form } = usePaymentContext()
-  const company = form.getFieldValue('company')
-  const domain = form.getFieldValue('domain')
-  const currencyLabel = getCurrencySymbol(company?.currency || domain?.currency)
+  const { form, company } = usePaymentContext()
+  // domain is not in context; form.getFieldValue('domain') returns an ID string, not an object,
+  // so currency fallback to domain is not possible here — company.currency is the source of truth
+  const currencyLabel = getCurrencySymbol(company?.currency)
 
   const { lastAmount, amount, price } = record
 

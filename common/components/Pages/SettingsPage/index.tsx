@@ -11,6 +11,7 @@ import { Roles } from '@utils/constants'
 import { Button, Card, Flex, Space, Typography } from 'antd'
 import { Tabs } from 'antd'
 import {UsersTable} from '@common/components/Tables/UsersTable'
+import { CustomServicesTable } from '@common/components/Tables/CustomService/Table'
 
 export const AdminPanelPage: React.FC = () => {
   const { data: user } = useGetCurrentUserQuery()
@@ -78,6 +79,13 @@ export const AdminPanelPage: React.FC = () => {
 
                       <FeatureFlagsTable />
                     </>
+                  ),
+                },
+                {
+                  key: 'customservices',
+                  label: 'Послуги',
+                  children: (                               
+                     <CustomServicesTable />                 
                   ),
                 },
               ]}
