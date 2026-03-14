@@ -19,6 +19,8 @@ export const Sum: React.FC<{
   record: IPaymentField & { key: string }
 }> = ({ record }) => {
   const { form, company } = usePaymentContext()
+  // domain is not in context; form.getFieldValue('domain') returns an ID string, not an object,
+  // so currency fallback to domain is not possible here — company.currency is the source of truth
   const currencyLabel = getCurrencySymbol(company?.currency)
 
   const { lastAmount, amount, price } = record

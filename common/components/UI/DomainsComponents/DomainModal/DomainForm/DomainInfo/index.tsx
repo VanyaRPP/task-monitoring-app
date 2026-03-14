@@ -23,11 +23,13 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
 
     const currentDescription: string = form.getFieldValue('description') || ''
     const autoLinePatterns = [/^ФОП: /, /^IBAN: /, /^РНОКПП: /, /^МФО: /]
+    const autoValues = [IE_NAME, IBAN, RNOKPP, MFO].filter(Boolean)
     const customLines = currentDescription
       .split('\n')
       .filter((line) => {
         if (!line.trim()) return false
         if (autoLinePatterns.some((p) => p.test(line))) return false
+        if (autoValues.includes(line.trim())) return false
         return true
       })
 
