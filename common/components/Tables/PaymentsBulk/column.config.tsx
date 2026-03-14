@@ -5,6 +5,7 @@ import { dateToMonth } from '@common/assets/features/formatDate'
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { ServiceType } from '@utils/constants'
 import { inputNumberParser, toRoundFixed } from '@utils/helpers'
+import TotalArea from './cells/TotalArea'
 import validator from '@utils/validator'
 import {
   Form,
@@ -238,13 +239,6 @@ const LossElectricityPrice: React.FC<{ name: number }> = ({ name }) => {
       )}
     </Space>
   )
-}
-
-const TotalArea: React.FC<{ name: number }> = ({ name }) => {
-  const { form } = useInvoicesPaymentContext()
-  const totalArea: number =
-    Form.useWatch(['payments', name, 'company', 'totalArea'], form) ?? 0
-  return <Typography.Text>{totalArea}</Typography.Text>
 }
 
 const MaintenancePrice: React.FC<{ name: number }> = ({ name }) => {
