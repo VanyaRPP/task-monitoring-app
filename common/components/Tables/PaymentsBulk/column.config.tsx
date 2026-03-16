@@ -7,6 +7,7 @@ import { ServiceType } from '@utils/constants'
 import { inputNumberParser, toRoundFixed } from '@utils/helpers'
 import TotalArea from './cells/TotalArea'
 import CompanyName from './cells/CompanyName'
+import { useInflicionValues } from '@common/components/Tables/PaymentsBulk/hooks/usePrevPayment/useInflicionValues/useInflicionValues'
 import validator from '@utils/validator'
 import {
   Form,
@@ -143,41 +144,6 @@ export const getDefaultColumns = (
     ...extraColumns,
     actionColumn,
   ]
-}
-const useInflicionValues = (
-  name: number
-): {
-  previousPlacingPrice: number
-  inflicionAmount: number
-} => {
-  const { form, service, prevService } =
-    useInvoicesPaymentContext()
-
-  const prevPayment = usePrevPayment(name)
-
-  const company: IRealestate | undefined = Form.useWatch(
-    ['payments', name, 'company'],
-    form
-  )
-
-  const previousPlacingPrice = useMemo(() => {
-    return (
-      prevPayment?.invoice?.find((item) => item.type === ServiceType.Placing)?.sum ||
-      (company?.totalArea || 0) * ((company?.pricePerMeter || 0) || (service?.rentPrice || 0))
-    )
-  }, [prevPayment, company, service])
-
-  const inflicionAmount = useMemo(() => {
-    return (
-      previousPlacingPrice *
-      (((prevService?.inflicionPrice || 100) - 100) / 100)
-    )
-  }, [previousPlacingPrice, prevService])
-
-  return {
-    previousPlacingPrice,
-    inflicionAmount: inflicionAmount < 0 ? 0 : inflicionAmount,
-  }
 }
 
 const LossElectricitySum: React.FC<{ name: number }> = ({ name }) => {
