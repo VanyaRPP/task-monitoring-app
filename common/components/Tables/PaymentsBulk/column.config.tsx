@@ -6,6 +6,7 @@ import { useInvoicesPaymentContext } from '@common/components/DashboardPage/bloc
 import { ServiceType } from '@utils/constants'
 import { inputNumberParser, toRoundFixed } from '@utils/helpers'
 import TotalArea from './cells/TotalArea'
+import CompanyName from './cells/CompanyName'
 import validator from '@utils/validator'
 import {
   Form,
@@ -143,16 +144,6 @@ export const getDefaultColumns = (
     actionColumn,
   ]
 }
-
-const CompanyName: React.FC<{ name: number }> = ({ name }) => {
-  const { form } = useInvoicesPaymentContext()
-  const companyName: string | undefined = Form.useWatch(
-    ['payments', name, 'company', 'companyName'],
-    form
-  )
-  return <Typography.Text>{companyName}</Typography.Text>
-}
-
 const useInflicionValues = (
   name: number
 ): {
