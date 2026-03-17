@@ -12,34 +12,34 @@ start()
 
 export async function  checkTransaction({ transaction }) {
   try {
-    const Sum = +toRoundFixed(transaction.SUM)
+    const Sum = transaction.SUM
     
-    const Acc = transaction.AUT_CNTR_ACC?.trim() || ''
-    const Nam = transaction.AUT_CNTR_NAM?.trim() || ''
-    const Mfo = transaction.AUT_CNTR_MFO?.trim() || ''
+    const Acc = transaction.AUT_CNTR_ACC || ''
+    const Nam = transaction.AUT_CNTR_NAM || ''
+    const Mfo = transaction.AUT_CNTR_MFO || ''
 
     const allPayments = await Payment.find({
       $and: [
-        // {
-        //   $expr: {
-        //     $eq: [
-        //       { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_ACC', ''] } } },
-        //       Acc
-        //     ]
-        //   }
-        // },
-        // {
-        //   $expr: {
-        //     $eq: [
-        //       { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_NAM', ''] } } },
-        //       Nam
-        //     ]
-        //   }
-        // },
         {
           $expr: {
             $eq: [
-              { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_MFO', ''] } } },
+               { input: { $ifNull: ['$transaction.AUT_CNTR_ACC', ''] }  },
+              Acc
+            ]
+          }
+        },
+        {
+          $expr: {
+            $eq: [
+              { input: { $ifNull: ['$transaction.AUT_CNTR_NAM', ''] } },
+              Nam
+            ]
+          }
+        },
+        {
+          $expr: {
+            $eq: [
+               { input: { $ifNull: ['$transaction.AUT_CNTR_MFO', ''] }  },
               Mfo
             ]
           }
