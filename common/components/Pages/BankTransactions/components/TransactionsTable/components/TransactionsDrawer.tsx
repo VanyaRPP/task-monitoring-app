@@ -39,7 +39,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     
     if (!transaction?.isMatchingPayment && relatedCompanies.length > 0) {
       const foundByMfo = relatedCompanies.find(
-        (company: any) => company.mfo === transaction.AUT_CNTR_MFO
+        (company: any) => company.mfo === transaction.AUT_MY_MFO
       )
 
       if (foundByMfo) {
