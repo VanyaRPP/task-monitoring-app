@@ -59,7 +59,7 @@ const PaymentsChart: React.FC<{
       companyIds: [companyId],
     },
     {
-      skip: (!isGlobalAdmin && !isDomainAdmin) || !companyId,
+      skip: !companyId,
     }
   )
 
@@ -68,12 +68,11 @@ const PaymentsChart: React.FC<{
 
   const isValid = useMemo(() => {
     return (
-      (isGlobalAdmin || isDomainAdmin) &&
-      payments?.length &&
-      companyId &&
-      !isError
-    )
-  }, [companyId, payments, isGlobalAdmin, isDomainAdmin, isError])
+    payments?.length > 0 &&
+    !!companyId &&
+    !isError
+  )
+  }, [companyId, payments, isError])
 
   return (
     <Card

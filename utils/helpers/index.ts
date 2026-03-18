@@ -476,6 +476,7 @@ export async function getDistinctCompanyAndDomain({
 
   const realEstatesPipeline = getRealEstatesPipeline({
     isGlobalAdmin,
+    userEmail: user.email,
     distinctedDomainsIds,
     distinctedStreetsIds,
     group: companyGroup,

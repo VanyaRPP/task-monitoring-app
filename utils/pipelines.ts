@@ -65,6 +65,7 @@ export function getDomainsPipeline(
 
 export function getRealEstatesPipeline({
   isGlobalAdmin,
+  userEmail,
   distinctedDomainsIds,
   distinctedStreetsIds,
   group,
@@ -89,12 +90,19 @@ export function getRealEstatesPipeline({
     },
     {
       $match: {
-        $expr: {
-          $and: [
-            { $in: ['$companyDetails.domain', distinctedDomainsIds] },
-            { $in: ['$companyDetails.street', distinctedStreetsIds] },
-          ],
-        },
+        $and: [
+          ...(isGlobalAdmin 
+            ? [] 
+            : [{ 'companyDetails.adminEmails': { $in: [userEmail.toLowerCase()] } }]),
+
+          ...(distinctedDomainsIds && distinctedDomainsIds.length > 0 
+            ? [{ 'companyDetails.domain': { $in: distinctedDomainsIds } }] 
+            : []),
+
+          ...(distinctedStreetsIds && distinctedStreetsIds.length > 0 
+            ? [{ 'companyDetails.street': { $in: distinctedStreetsIds } }] 
+            : []),
+        ],
       },
     },
   ]
