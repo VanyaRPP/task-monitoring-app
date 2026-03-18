@@ -51,6 +51,7 @@ interface Props {
   paymentData?: any
   paymentActions?: { edit: boolean; preview: boolean; create?: boolean }
   preselectedCompany?: string
+  preselectedDomain?: string
 }
 
 export interface IPaymentContext {
@@ -89,6 +90,7 @@ const AddPaymentModal: FC<Props> = ({
   paymentData,
   paymentActions,
   preselectedCompany,
+  preselectedDomain,
 }) => {
   const { preview, edit } = paymentActions ?? { preview: false, edit: false }
 
@@ -141,6 +143,7 @@ const AddPaymentModal: FC<Props> = ({
       firstRunRef.current = false
       return
     }
+    if (preselectedCompany) return
     form.resetFields(['company'])
   }, [domainId, form])
 
@@ -407,7 +410,7 @@ const AddPaymentModal: FC<Props> = ({
         <Form
           initialValues={{
             changelogId: undefined,
-            domain: getId(payment?.domain),
+            domain: preselectedDomain || getId(payment?.domain),
             street: getId(payment?.street),
             company: preselectedCompany || getId(payment?.company),
             monthService: getId(payment?.monthService),
