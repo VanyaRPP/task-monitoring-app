@@ -2,6 +2,18 @@ import { Button, Tooltip } from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'
 import React from 'react'
 
+const normalizeComparableValue = (value: unknown) => {
+  if (typeof value === 'number') {
+    return Number.isNaN(value) ? value : value
+  }
+
+  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(+value)) {
+    return +value
+  }
+
+  return value
+}
+
 interface UpdateInvoiceButtonProps {
   currentPrice?: number
   defaultPrice?: number
@@ -19,11 +31,14 @@ export const UpdateInvoiceButton: React.FC<UpdateInvoiceButtonProps> = ({
   type,
   disabled,
 }) => {
+  const normalizedCurrentPrice = normalizeComparableValue(currentPrice)
+  const normalizedDefaultPrice = normalizeComparableValue(defaultPrice)
+
   const isVisible =
     editable &&
     type === 'custom' &&
     defaultPrice !== undefined &&
-    currentPrice !== defaultPrice
+    normalizedCurrentPrice !== normalizedDefaultPrice
 
   if (!isVisible) return null
 
