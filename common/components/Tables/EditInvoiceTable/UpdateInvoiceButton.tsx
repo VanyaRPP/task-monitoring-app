@@ -17,6 +17,18 @@ import { toArray, toRoundFixed } from '@utils/helpers'
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
 import { useMemo } from 'react'
 
+const normalizeComparableValue = (value: unknown) => {
+  if (typeof value === 'number') {
+    return Number.isNaN(value) ? value : +toRoundFixed(value)
+  }
+
+  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(+value)) {
+    return +toRoundFixed(+value)
+  }
+
+  return value
+}
+
 interface UpdateInvoiceButtonProps {
   form: FormInstance
   name: string | string[] | number | number[]
@@ -85,12 +97,8 @@ export default function UpdateInvoiceButton({
         return true
       }
 
-      const expectedRounded = typeof expectedValue === 'number' 
-        ? +toRoundFixed(expectedValue) 
-        : expectedValue
-      const currentRounded = typeof currentValue === 'number' 
-        ? +toRoundFixed(currentValue) 
-        : currentValue
+      const expectedRounded = normalizeComparableValue(expectedValue)
+      const currentRounded = normalizeComparableValue(currentValue)
 
       if (expectedRounded !== currentRounded) {
         return true

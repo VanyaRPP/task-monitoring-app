@@ -81,3 +81,77 @@
     display: flex;
   }
 }
+
+@media print {
+  .invoiceContainer {
+    margin: 0 !important;
+    width: 100% !important;
+    overflow: visible !important;
+
+    .tableSum {
+      width: 100% !important;
+      overflow: visible !important;
+    }
+
+    :global(.ant-table-wrapper),
+    :global(.ant-table),
+    :global(.ant-table-container),
+    :global(.ant-table-content) {
+      width: 100% !important;
+      overflow: visible !important;
+    }
+
+    :global(.ant-table-content table) {
+      width: 100% !important;
+      min-width: 0 !important;
+      table-layout: auto !important;
+    }
+
+    :global(.ant-table-cell) {
+      white-space: nowrap !important;
+      word-break: break-word !important;
+    }
+
+    :global(.ant-table-thead > tr > th),
+    :global(.ant-table-tbody > tr > td) {
+      padding: 10px 14px !important;
+    }
+
+    :global(.ant-table-thead > tr > th:nth-child(1)),
+    :global(.ant-table-tbody > tr > td:nth-child(1)) {
+      width: 6% !important;
+    }
+
+    :global(.ant-table-thead > tr > th:nth-child(2)),
+    :global(.ant-table-tbody > tr > td:nth-child(2)) {
+      width: 50% !important;
+    }
+
+    :global(.ant-table-thead > tr > th:nth-child(3)),
+    :global(.ant-table-tbody > tr > td:nth-child(3)) {
+      width: 12% !important;
+    }
+
+    :global(.ant-table-thead > tr > th:nth-child(4)),
+    :global(.ant-table-tbody > tr > td:nth-child(4)) {
+      width: 16% !important;
+    }
+
+    :global(.ant-table-thead > tr > th:nth-child(5)),
+    :global(.ant-table-tbody > tr > td:nth-child(5)) {
+      width: 16% !important;
+    }
+
+    :global(.ant-table-tbody > tr:first-child > td) {
+      border-top: none !important;
+    }
+
+    :global(.ant-table-tbody > tr > td:nth-child(2) .ant-typography:first-child) {
+      white-space: nowrap !important;
+    }
+
+    :global(.ant-table-tbody > tr > td:nth-child(2) .ant-typography:nth-child(2)) {
+      white-space: nowrap !important;
+    }
+  }
+}
