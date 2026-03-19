@@ -29,6 +29,19 @@ const ReceiptForm: FC<Props> = ({
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
+    pageStyle: `
+      @page {
+        size: auto;
+        margin: 8mm;
+      }
+
+      @media print {
+        html,
+        body {
+          overflow: visible !important;
+        }
+      }
+    `,
     documentTitle:
       (newData?.company?.companyName || newData?.reciever?.companyName) +
       '-inv-' +
