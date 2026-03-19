@@ -123,9 +123,17 @@ const RealEstateForm: FC<Props> = ({
         form={form}
         disabled={!!currentRealEstate}
       />
+      <Form.Item name="street" hidden>
+        <Input />
+      </Form.Item>
       {currentRealEstate ? (
-        <Form.Item name="street" label="Адреса">
-          <Input disabled />
+        <Form.Item label="Адреса">
+          <Input
+            disabled
+            value={
+              currentRealEstate?.street?.address || ''
+            }
+          />
         </Form.Item>
       ) : (
         <AddressesSelect form={form} key={domainId} />
