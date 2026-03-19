@@ -252,5 +252,74 @@ describe('getInvoices - CUSTOM', () => {
         expect.objectContaining({ type: ServiceType.Cleaning })
       )
     })
+
+    it('should load custom invoice from company custom service when service custom service is missing', () => {
+      const service: Partial<IService> = {
+        customServices: [],
+      }
+      const company: Partial<IRealestate> = {
+        customServices: [
+          {
+            _id: '65b8a9f4a35a75f7da9f1010' as any,
+            label: 'Інтернет',
+            fieldName: 'internetPrice',
+            price: 250,
+          },
+        ],
+      }
+
+      const invoices = getInvoices({
+        service,
+        company,
+      })
+
+      expect(invoices).toContainEqual(
+        expect.objectContaining({
+          type: ServiceType.Custom,
+          name: 'Інтернет',
+          fieldName: 'internetPrice',
+          price: 250,
+          sum: 250,
+        })
+      )
+    })
+
+    it('should prefer company custom service price when service custom service exists with zero price', () => {
+      const service: Partial<IService> = {
+        customServices: [
+          {
+            _id: '65b8a9f4a35a75f7da9f1011' as any,
+            label: 'Інтернет',
+            fieldName: 'internetPrice',
+            price: 0,
+          },
+        ],
+      }
+      const company: Partial<IRealestate> = {
+        customServices: [
+          {
+            _id: '65b8a9f4a35a75f7da9f1011' as any,
+            label: 'Інтернет',
+            fieldName: 'internetPrice',
+            price: 300,
+          },
+        ],
+      }
+
+      const invoices = getInvoices({
+        service,
+        company,
+      })
+
+      expect(invoices).toContainEqual(
+        expect.objectContaining({
+          type: ServiceType.Custom,
+          name: 'Інтернет',
+          fieldName: 'internetPrice',
+          price: 300,
+          sum: 300,
+        })
+      )
+    })
   })
 })
