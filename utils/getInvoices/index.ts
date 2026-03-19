@@ -522,26 +522,54 @@ export const getCustomServiceInvoices = ({
     ? company.customServices
     : []
 
-  const customServices = serviceCustoms.map((serviceItem) => {
-    const companyItem = companyCustoms.find(
-      (c) => c?.fieldName === serviceItem?.fieldName
-    )
-
-    const price = +toRoundFixed(companyItem?.price ?? serviceItem?.price ?? 0)
-
-    return {
-      name: serviceItem?.label || 'Невідома послуга',
-      amount: 1,
-      price,
-      sum: price,
-      type: ServiceType.Custom,
-      fieldName: serviceItem?.fieldName || 'custom',
-      serviceId: String(serviceItem?._id || ''),
-      customService: true,
+  const customByFieldName = new Map<
+    string,
+    {
+      serviceItem?: (typeof serviceCustoms)[number]
+      companyItem?: (typeof companyCustoms)[number]
     }
+  >()
+
+  serviceCustoms.forEach((serviceItem) => {
+    if (!serviceItem?.fieldName) return
+
+    customByFieldName.set(serviceItem.fieldName, {
+      serviceItem,
+      companyItem: companyCustoms.find(
+        (companyItem) => companyItem?.fieldName === serviceItem.fieldName
+      ),
+    })
   })
 
-  return customServices
+  companyCustoms.forEach((companyItem) => {
+    if (!companyItem?.fieldName || customByFieldName.has(companyItem.fieldName)) {
+      return
+    }
+
+    customByFieldName.set(companyItem.fieldName, {
+      serviceItem: serviceCustoms.find(
+        (serviceItem) => serviceItem?.fieldName === companyItem.fieldName
+      ),
+      companyItem,
+    })
+  })
+
+  return Array.from(customByFieldName.entries()).map(
+    ([fieldName, { serviceItem, companyItem }]) => {
+      const price = +toRoundFixed(companyItem?.price ?? serviceItem?.price ?? 0)
+
+      return {
+        name: serviceItem?.label || companyItem?.label || 'Невідома послуга',
+        amount: 1,
+        price,
+        sum: price,
+        type: ServiceType.Custom,
+        fieldName,
+        serviceId: String(serviceItem?._id || companyItem?._id || ''),
+        customService: true,
+      }
+    }
+  )
 }
 
 export interface IGetSingleCustomServiceInvoiceProps {
