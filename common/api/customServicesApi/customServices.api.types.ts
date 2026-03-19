@@ -3,6 +3,7 @@ import { ObjectId } from 'mongoose'
 export interface ICustomService {
   _id: string
   groupName?: string
+  fieldName: string
   name: string
   services?: string
 }

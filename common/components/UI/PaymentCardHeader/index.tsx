@@ -16,6 +16,8 @@ import {
   useGeneratePdfMutation,
   useGenerateExcelMutation,
 } from '@common/api/paymentApi/payment.api'
+import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
+import { useGetCustomServicesQuery } from '@common/api/customServicesApi/customServices.api'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddPaymentModal from '@components/AddPaymentModal'
 import ImportInvoices from '@components/UI/PaymentCardHeader/ImportInvoices'
@@ -108,6 +110,8 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   const [deletePayment] = useDeleteMultiplePaymentsMutation()
   const [generateExcel] = useGenerateExcelMutation()
   const [generatePdf] = useGeneratePdfMutation()
+  const { data: allDomains = [] } = useGetDomainsQuery({});
+  const { data: allServicesData } = useGetCustomServicesQuery({});
   const { token } = theme.useToken()
 
   const handleExportExcel = async () => {
@@ -121,8 +125,6 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
       console.error('Error:', error)
     }
   }
-
- 
 
   const handleGeneratePdf = async () => {
     try {
@@ -163,6 +165,31 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
 
   const { preview, edit } = paymentActions
 
+  const allSystemServices = useMemo(() => {
+  return allServicesData?.data || [];
+  }, [allServicesData]);
+
+  const selectedDomainId = useMemo(() => {
+  const domain = filters?.domain;
+  return Array.isArray(domain) ? domain[0] : domain;
+  }, [filters?.domain]);
+
+  const allowedServices = useMemo(() => {
+  if (!selectedDomainId || !allDomains.length || !allSystemServices.length) return null;
+
+  const currentDomain = allDomains.find((d: any) => d._id === selectedDomainId);
+  if (!currentDomain?.customServices) return [];
+
+  const serviceIds = currentDomain.customServices.flatMap((group: any) => group.services);
+
+  return serviceIds
+    .map((id) => {
+      const serviceInfo = allSystemServices.find((s: any) => s._id === id);
+      return serviceInfo?.fieldName;
+    })
+    .filter(Boolean);
+  }, [selectedDomainId, allDomains, allSystemServices]);
+
   if (!isAdmin && !isGlobalAdmin) {
     return (
       <>
@@ -177,6 +204,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             domainFilter={domainFilter}
             realEstatesFilter={realEstatesFilter}
             isAdmin={false}
+            allowedServices={allowedServices}
           />
         </div>
         {preview && currentPayment && (
@@ -204,6 +232,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
       realEstatesFilter={realEstatesFilter}
       isAdmin={isAdmin}
       className={styles.select}
+      allowedServices={allowedServices}
     />
   )
 
@@ -341,10 +370,31 @@ interface ColumnSelectProps {
   onSelect?: (selected: string[]) => void
   style?: React.CSSProperties
   className?: string
+  allowedServices: string[] | null
 }
 
-const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, ...props }) => {
+const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, ...props }) => {
   const [selected, setSelected] = useState<string[]>([])
+
+  const filterOptions = useMemo(() => {
+    const allServices = Object.entries(ServiceName);
+    if (allowedServices) {
+      return allServices.filter(([key]) => allowedServices.includes(key));
+    }
+    return allServices;
+  }, [allowedServices]);
+
+  useEffect(() => {
+    if (allowedServices) {
+    setSelected((prevSelected) => {
+      const validSelected = prevSelected.filter(val => allowedServices.includes(val));
+      if (validSelected.length === prevSelected.length) {
+        return prevSelected;
+      }
+
+      return validSelected;
+    });
+  }}, [allowedServices]);
 
   const handleSelect = (value: string[]) => {
     setSelected(value)
@@ -352,13 +402,13 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, ...props }) => {
   }
 
   const handleCheckAll = (index = 0) => {
-    if (selected.length === Object.keys(ServiceName).length) {
+    if (selected.length === filterOptions.length) {
       setSelected([])
       localStorage.setItem('payments_columns', JSON.stringify([]))
     } else {
-      const newSelected = options[index].options?.map(({ value }) => value)
-      setSelected(newSelected)
-      localStorage.setItem('payments_columns', JSON.stringify(newSelected))
+      const keysToSelect = filterOptions.map(([val]) => val)
+    setSelected(keysToSelect)
+      localStorage.setItem('payments_columns', JSON.stringify(keysToSelect))
     }
   }
 
@@ -387,16 +437,13 @@ const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, ...props }) => {
       label: (
         <Checkbox
           onClick={() => handleCheckAll(0)}
-          indeterminate={
-            selected.length > 0 &&
-            selected.length < Object.keys(ServiceName).length
-          }
-          checked={Object.keys(ServiceName).length === selected.length}
+          indeterminate={selected.length > 0 && selected.length < filterOptions.length}
+          checked={filterOptions.length > 0 && selected.length === filterOptions.length}
         >
           <Typography.Text type="secondary">Комунальні</Typography.Text>
         </Checkbox>
       ),
-      options: Object.entries(ServiceName).map(([value, label]) => ({
+      options: filterOptions.map(([value, label]) => ({
         value,
         label,
       })),

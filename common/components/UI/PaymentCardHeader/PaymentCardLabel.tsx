@@ -24,6 +24,7 @@ const PaymentCardLabel = ({
   domainFilter,
   realEstatesFilter,
   isAdmin,
+  allowedServices,
 }: any) => {
   const router = useRouter()
   const { pathname } = router
@@ -60,6 +61,7 @@ const PaymentCardLabel = ({
             <ColumnSelect
               className={styles.select}
               onSelect={onColumnsSelect}
+              allowedServices={allowedServices}
             />
             <PaymentCascader
               className={styles.select}
