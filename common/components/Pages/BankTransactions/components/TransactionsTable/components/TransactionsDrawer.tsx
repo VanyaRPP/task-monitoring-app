@@ -36,10 +36,15 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   )
 
   useEffect(() => {
-    
+    setSelectedCompany(null)
+    setIsMfoMatched(false)
+    setLoading(false)
+  }, [transaction.TECHNICAL_TRANSACTION_ID])
+
+  useEffect(() => {
     if (!transaction?.isMatchingPayment && relatedCompanies.length > 0) {
       const foundByMfo = relatedCompanies.find(
-        (company: any) => company.mfo === transaction.AUT_MY_MFO
+        (company: IRealestate) => company.mfo === transaction.AUT_CNTR_MFO
       )
 
       if (foundByMfo) {
@@ -47,7 +52,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
         setIsMfoMatched(true)
       }
     }
-  }, [transaction, relatedCompanies])
+  }, [transaction.TECHNICAL_TRANSACTION_ID, relatedCompanies])
 
   const handleCompanyChange = (value: string) => {
     setSelectedCompany(value)
@@ -58,11 +63,27 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     selectedCompany ??
     (transaction.isMatchingPayment ? transaction.previousCompanyId : null)
 
+  const saveMfoToCompany = async (companyId: string) => {
+    if (!transaction.AUT_CNTR_MFO) return
+    try {
+      await fetch(`/api/realestate/${companyId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mfo: transaction.AUT_CNTR_MFO }),
+      })
+    } catch (error) {
+      console.error('Failed to save MFO to company:', error)
+    }
+  }
+
   const showModal = () => setModalVisible(true)
-  const closeModal = (success?: boolean) => {
+  const closeModal = async (success?: boolean) => {
     setModalVisible(false)
     if (success === true) {
       message.success('Рахунок успішно створено!')
+      if (selectedCompany && !isMfoMatched) {
+        await saveMfoToCompany(selectedCompany)
+      }
     }
     setLoading(false)
   }

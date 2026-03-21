@@ -23,6 +23,7 @@ export type IRealestate = {
   cleaning?: number
   services: IDomainService[]
   customServices?: CustomServices[]
+  mfo: string
 }
 
 export interface CustomServices {
