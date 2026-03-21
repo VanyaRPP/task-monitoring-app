@@ -116,6 +116,7 @@ const RealEstateModal: FC<Props> = ({
       currency: formData.currency,
       garbageCollector: formData.garbageCollector,
       archived: formData.archived,
+      mfo: formData.mfo,
       inflicion: formData.inflicion,
       discount:
         formData.discount > 0 ? formData.discount * -1 : formData.discount,

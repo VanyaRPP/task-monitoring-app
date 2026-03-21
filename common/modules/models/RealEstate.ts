@@ -18,6 +18,7 @@ export interface IRealEstateModel {
   inflicion?: boolean
   garbageCollector?: boolean
   archived?: boolean
+  mfo?: string
   services: IDomainService[]
   customServices?: ICustomService[]
 }
@@ -45,6 +46,7 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   inflicion: { type: Boolean, required: false, default: false },
   garbageCollector: { type: Boolean, required: false, default: false },
   archived: { type: Boolean, required: false, default: false },
+  mfo: { type: String, required: false, default: '' },
   services: { type: [Object] },
   customServices: {
     type: [
