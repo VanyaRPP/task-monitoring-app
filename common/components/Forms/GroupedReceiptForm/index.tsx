@@ -5,8 +5,8 @@ import { CURRENCY_MAP } from '@utils/constants'
 import dayjs from 'dayjs'
 import { FC, useEffect, useRef, useState } from 'react'
 import { useReactToPrint } from 'react-to-print'
-import { PrinterOutlined, EditOutlined } from '@ant-design/icons'
-import { Dropdown, Tooltip } from 'antd'
+import { PrinterOutlined, EditOutlined, SendOutlined } from '@ant-design/icons'
+import { Dropdown, Tooltip, message } from 'antd'
 import s from './style.module.scss'
 import cs from './templates/style.module.scss'
 
@@ -229,10 +229,36 @@ const GroupedReceiptForm: FC<Props> = ({
     },
   ]
 
+  const handleSendToTelegram = async () => {
+  const hide = message.loading('Генерація та відправка PDF...', 0);
+  
+  try {
+    const response = await fetch('/api/telegram/send-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paymentData: data }), 
+    });
+
+    if (response.ok) {
+      message.success('Готово! Інвойс уже в Telegram.');
+    } else {
+      throw new Error('Помилка сервера при генерації PDF');
+    }
+  } catch (err: any) {
+    message.error(err.message);
+  } finally {
+    hide();
+  }
+};
+
   return (
     <>
+        <SendOutlined 
+          // className={s.telegramIcon} 
+          // onClick={handleSendToTelegram} 
+          // style={{ color: '#24A1DE' }}
+        />
       <PrinterOutlined className={s.print} onClick={handlePrint} />
-
       <Dropdown
         trigger={['click']}
         menu={{
