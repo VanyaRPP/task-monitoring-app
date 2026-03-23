@@ -120,6 +120,8 @@ const CompaniesTable: React.FC<Props> = ({
     streets: filters?.street,
     realEstates: filters?.company,
   })
+  const { data: allDomainsData } = useGetDomainFiltersQuery({})
+
   const { data: streetData } = useGetAddressFiltersQuery({
     realEstates: filters?.company,
     domains: filters?.domain,
@@ -249,6 +251,7 @@ const CompaniesTable: React.FC<Props> = ({
         isGlobalAdmin,
         isAdmin,
         domainsFilter: domain?.domainsFilter,
+        allDomains: allDomainsData?.domainsFilter,
         streetsFilter: street?.streetsFilter,
         realEstatesFilter: realEstate?.realEstatesFilter,
         filters,
@@ -300,6 +303,7 @@ const getDefaultColumns = ({
   isGlobalAdmin,
   isAdmin,
   domainsFilter,
+  allDomains,
   streetsFilter,
   realEstatesFilter,
   filters,
@@ -321,6 +325,7 @@ const getDefaultColumns = ({
   isGlobalAdmin?: boolean
   isAdmin?: boolean
   domainsFilter?: IFilter[]
+  allDomains?: IFilter[]
   realEstatesFilter?: IFilter[]
   streetsFilter: IFilter[]
   filters?: any
@@ -566,7 +571,7 @@ const getDefaultColumns = ({
     dataIndex: 'domain',
     width: 200,
     render: (i) => i?.name,
-    hidden: domainsFilter?.length <= 1,
+    hidden: (allDomains?.length ?? 0) <= 1,
     filterSearch: true,
   }
 
