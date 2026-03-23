@@ -1,41 +1,64 @@
 # Data Setup: Entities Configuration
 
-**Description**: Before any billing or task management can occur, the system's "static" data must be populated. This involves defining who provides services (Domains), who receives them (Real Estate), and how much they cost (Services).
+**Description**: Before any billing or task management can occur, the system's "static" data must be populated. This flow is typically performed by a **Global Admin** or **Domain Admin**.
 
 ## 1. Create Domain (Service Provider)
+This entity represents the company providing the services (e.g., the Property Management Firm).
+
 *   **Location**: `/domain` page.
 *   **Action**: Click the **Add** button (visible to Admins).
-*   **Fields**:
-    *   **Name**: The official name of the Service Provider organization.
-    *   **Currency**: The default currency for invoices (e.g., UAH, USD).
-    *   **Bank Details**: IBAN, Bank Name, SWIFT code (for generating invoices).
-    *   **Admin Contacts**: Email addresses for notifications.
-    *   **Description/Footer**: Text to appear on the bottom of invoices (Signatures area).
+*   **Modal Form Fields**:
+    *   **Name**: Official legal name of the organization.
+    *   **Currency**: Default currency (e.g., `UAH`, `USD`). Affects invoice language (English for non-UAH).
+    *   **Bank Details**:
+        *   `IBAN`: International Bank Account Number.
+        *   `Bank Name`: Name of the bank.
+        *   `SWIFT`: Bank identifier code.
+    *   **Admin Contacts**: List of email addresses that will receive system notifications.
+    *   **Description/Footer**: Legal text or signatory info displayed at the bottom of the "Service Acceptance Act".
+*   **System Action**: Validates unique name -> `POST /api/domain`.
 
 ## 2. Create Real Estate (Tenants/Objects)
+These are the clients or physical objects that will receive invoices.
+
 *   **Location**: `/real-estate` page.
-*   **Action**: Click **Add**.
-*   **Fields**:
+*   **Action**: Click **Add** button.
+*   **Form Fields**:
     *   **Company Name**: Name of the tenant or object.
-    *   **Domain**: Select the parent Service Provider.
-    *   **Address/Street**: Link to a specific physical location.
-    *   **Description**: Additional details about the tenant (e.g., Director's name for contracts).
-    *   **Bank Details**: Tenant's billing information.
+    *   **Domain**: Dropdown to link this object to a Service Provider.
+    *   **Street**: Physical location grouping.
+    *   **Description**: Contract details (e.g., "Director Ivanenko I.I., acting on the basis of..."). Appears in the invoice header.
+    *   **Bank Details**: Tenant's billing information (for reference).
+    *   **Admin Emails**: Email addresses where the PDF invoices will be sent.
+*   **System Action**: `POST /api/real-estate`.
 
 ## 3. Configure Services (Tariffs)
-*   **Location**: `/service` page.
-*   **Action**: Click **Add** to create a tariff plan for a specific month.
-*   **Key Fields**:
-    *   **Provider (Domain)**: Select who is charging.
-    *   **Month/Year**: The billing period (e.g., "January 2026").
-    *   **Rent Price**: Cost per square meter/unit.
-    *   **Electricity Price**: Cost per kW.
-    *   **Water Price**: Cost per cubic meter.
-    *   **Garbage Collection**: Fixed cost or per unit.
-    *   **Inflation Index**: Adjustment percentage if applicable.
-    *   **Description**: Notes visible on the invoice.
+This sets the pricing model for a specific month.
 
-> **Note**: Creating a Service record essentially sets the "Price List" for a specific month. Payments created in that month will pull these values automatically.
+*   **Location**: `/service` page.
+*   **Action**: Click **Add** to open the creation modal.
+*   **Form Fields** (from `createServiceForm.ts`):
+    1.  **Provider**: Select the Domain.
+    2.  **Date**: Select Month/Year (e.g., "Jan 2026").
+    3.  **Tariffs**:
+        *   `Утримання приміщень` (Rent): Price per m².
+        *   `Електроенергія` (Electricity): Price per kW.
+        *   `Всього водопостачання` (Water): Price per m³.
+        *   `Вивіз сміття` (Garbage): Fixed price.
+        *   `Inflation`: Percentage add-on.
+    4.  **Description**: Text field.
+*   **System Action**: `POST /api/service`. This record acts as the "Price List" for the selected month.
+
+## 4. Categories & Streets
+Additional helper entities used for filtering and classification.
+
+*   **Streets** (`/streets`):
+    *   Used to group Real Estate objects physically.
+    *   Admin enters `Title` and `City`.
+    *   API: `POST /api/streets`.
+*   **Categories** (`/categories`):
+    *   Used to tag Tasks (e.g., "Plumbing", "Security").
+    *   API: `POST /api/categories`.
 
 ---
 
