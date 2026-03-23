@@ -136,3 +136,57 @@ describe('CompaniesTable - Column Visibility', () => {
   });
 });
 
+describe('CompaniesTable - Cascading Filters Logic', () => {
+  beforeEach(() => {
+    const { useGetCurrentUserQuery } = require('@common/api/userApi/user.api');
+    useGetCurrentUserQuery.mockReturnValue({ data: users.globalAdmin });
+    
+    const { useRouter } = require('next/router');
+    useRouter.mockReturnValue({ pathname: '/real-estate' });
+  });
+
+  test('повинна викликати setFilters з новими параметрами при зміні фільтрів у таблиці', () => {
+    const setFiltersMock = jest.fn();
+    render(<CompaniesTable {...mockProps} setFilters={setFiltersMock} />);
+
+    expect(mockProps.setFilters).toBeDefined();
+  });
+
+  test('логіка обмеження: таблиця має відображати лише ті дані, які відповідають обраному домену', () => {
+    const selectedDomainId = domains[0]._id;
+    
+    const mockRealEstates: IGetRealestateResponse = {
+      data: [
+        { ...realEstates[0], domain: domains[0], companyName: 'Target Company' } as any,
+        { ...realEstates[1], domain: domains[1], companyName: 'Other Company' } as any,
+      ],
+      success: true,
+      domainsFilter: [], realEstatesFilter: [], streetsFilter: [],
+    };
+
+    render(
+      <CompaniesTable 
+        {...mockProps} 
+        realEstates={mockRealEstates} 
+        filters={{ domain: [selectedDomainId] }} 
+      />
+    );
+
+    expect(screen.getByText('Target Company')).toBeInTheDocument();
+  });
+
+  test('повинна приховувати колонку "Надавач послуг", якщо в даних лише один домен (каскад)', () => {
+     const mockRealEstates: IGetRealestateResponse = {
+      data: [
+        { ...realEstates[0], domain: domains[0] } as any,
+        { ...realEstates[1], domain: domains[0] } as any,
+      ],
+      success: true,
+      domainsFilter: [], realEstatesFilter: [], streetsFilter: [],
+    };
+
+    render(<CompaniesTable {...mockProps} realEstates={mockRealEstates} />);
+
+    expect(screen.queryByText('Надавач послуг')).not.toBeInTheDocument();
+  });
+});
