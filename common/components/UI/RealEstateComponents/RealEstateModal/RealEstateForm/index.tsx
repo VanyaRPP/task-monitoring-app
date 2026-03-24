@@ -40,8 +40,8 @@ const RealEstateForm: FC<Props> = ({
   setIsValueChanged,
   customServices = [],
 }) => {
-  // const domainId = Form.useWatch('domain', form)|| currentRealEstate?.domain?._id
-  const domainId = currentRealEstate?.domain?._id
+  const watchedDomainId = Form.useWatch('domain', form)
+  const domainId = watchedDomainId || currentRealEstate?.domain?._id
   const streetId = currentRealEstate?.street?._id
   const {
     data: domain = {} as IDomain,
@@ -65,12 +65,23 @@ const RealEstateForm: FC<Props> = ({
       }))
 
       form.setFieldsValue({
-        ...form.getFieldsValue(),
         services: servicesWithEnabled,
         discount: currentRealEstate?.discount || 0,
       })
     }
   }, [services, currentRealEstate, form])
+
+  useEffect(() => {
+    if (!domainId) return
+
+    if (currentRealEstate?.street?._id) {
+      setTimeout(() => {
+        form.setFieldsValue({
+          street: currentRealEstate.street._id,
+        })
+      }, 0)
+    }
+  }, [domainId, currentRealEstate, form])
 
   const isServiceExistById = (serviceId: string) => {
     if (!domain?.customServices?.length) return false
@@ -112,12 +123,20 @@ const RealEstateForm: FC<Props> = ({
         form={form}
         disabled={!!currentRealEstate}
       />
+      <Form.Item name="street" hidden>
+        <Input />
+      </Form.Item>
       {currentRealEstate ? (
-        <Form.Item name="street" label="Адреса">
-          <Input disabled />
+        <Form.Item label="Адреса">
+          <Input
+            disabled
+            value={
+              currentRealEstate?.street?.address || ''
+            }
+          />
         </Form.Item>
       ) : (
-        <AddressesSelect form={form} />
+        <AddressesSelect form={form} key={domainId} />
       )}
       <Form.Item
         name="companyName"

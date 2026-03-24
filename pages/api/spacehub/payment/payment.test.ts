@@ -4,12 +4,23 @@ import { parseReceived } from '@utils/helpers'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
 import { domains, payments, realEstates, users } from '@utils/testData'
+import { sendInvoiceEmail } from '@utils/email/sendInvoiceEmail'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
 jest.mock('@pages/api/api.config', () => jest.fn())
+jest.mock('@utils/email/sendInvoiceEmail', () => ({
+  sendInvoiceEmail: jest.fn(),
+}))
 
 setupTestEnvironment()
+
+const sendInvoiceEmailMock = sendInvoiceEmail as jest.Mock
+
+beforeEach(() => {
+  sendInvoiceEmailMock.mockClear()
+  sendInvoiceEmailMock.mockResolvedValue(true)
+})
 
 describe('Payments API - GET', () => {
   it('load payments as GlobalAdmin - success', async () => {
@@ -447,6 +458,76 @@ describe('Payments API - POST', () => {
     }
 
     expect(response.status).toHaveBeenLastCalledWith(200)
+  })
+
+  it('POST debit payment sends invoice email to domain admins', async () => {
+    await mockLoginAs(users.globalAdmin)
+    const { _id, ...data } = payments[0]
+
+    const mockReq = {
+      method: 'POST',
+      body: {
+        ...data,
+        provider: {
+          description: 'Provider',
+        },
+        reciever: {
+          companyName: 'Domain 0',
+          adminEmails: [users.domainAdmin.email],
+          description: 'Receiver',
+        },
+      },
+    } as any
+
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenLastCalledWith(200)
+    expect(sendInvoiceEmailMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        invoiceNumber: data.invoiceNumber,
+        type: 'debit',
+        reciever: expect.objectContaining({
+          adminEmails: [users.domainAdmin.email],
+        }),
+      })
+    )
+  })
+
+  it('POST credit payment does not send invoice email', async () => {
+    await mockLoginAs(users.globalAdmin)
+    const { _id, ...data } = payments[0]
+
+    const mockReq = {
+      method: 'POST',
+      body: {
+        ...data,
+        type: 'credit',
+        description: 'Manual credit',
+        provider: {
+          description: 'Provider',
+        },
+        reciever: {
+          companyName: 'Domain 0',
+          adminEmails: [users.domainAdmin.email],
+          description: 'Receiver',
+        },
+      },
+    } as any
+
+    const mockRes = {
+      status: jest.fn(() => mockRes),
+      json: jest.fn(),
+    } as any
+
+    await handler(mockReq, mockRes)
+
+    expect(mockRes.status).toHaveBeenLastCalledWith(200)
+    expect(sendInvoiceEmailMock).not.toHaveBeenCalled()
   })
 })
 

@@ -28,7 +28,7 @@ const PaymentsChart: React.FC = () => {
       companyIds: [companyId],
     },
     {
-      skip: (!isGlobalAdmin && !isDomainAdmin) || !companyId,
+      skip: !companyId,
     }
   )
 

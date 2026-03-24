@@ -21,112 +21,194 @@ import {
 } from 'antd'
 import { useEffect, useMemo } from 'react'
 
-const serviceColumns = {
-  rentPrice: {
-    title: 'Утримання',
-    children: [
-      {
-        title: 'За м²',
-        width: 160,
-        render: (_, { name }) => <MaintenancePrice name={name} />,
-      },
-      {
-        title: 'Загальне',
-        width: 200,
-        render: (_, { name }) => <MaintenanceSum name={name} />,
-      },
-    ],
-  },
-
-  placingPrice: {
-    title: 'Розміщення',
-    children: [
-      {
-        title: 'За м²',
-        width: 160,
-        render: (_, { name }) => <PlacingPrice name={name} />,
-      },
-      {
-        title: 'Загальне',
-        width: 200,
-        render: (_, { name }) => <PlacingSum name={name} />,
-      },
-    ],
-  },
-
-  electricityPrice: (losses?: number) => ({
-    title: losses
-      ? `Електропостачання + Втрати ${losses}%`
-      : 'Електропостачання',
-    children: [
-      {
-        title: 'Стара',
-        width: 160,
-        render: (_, { name }) => <ElectricityAmount name={name} last />,
-      },
-      {
-        title: 'Нова',
-        width: 160,
-        render: (_, { name }) => <ElectricityAmount name={name} />,
-      },
-      {
-        title: 'Втрати',
-        width: 200,
-        render: (_, { name }) => <LossElectricityPrice name={name} />,
-      },
-      {
-        title: '',
-        width: 200,
-        render: (_, { name }) => <LossElectricitySum name={name} />,
-      },
-      {
-        title: <ElectricitySumTitle />,
-        width: 200,
-        render: (_, { name }) => <ElectricitySum name={name} />,
-      },
-    ],
-  }),
-}
-
 export const getDefaultColumns = (
   remove: (index: number) => void,
-  allowedServices: any[],
+  _allowedServices: any,
   losses?: number,
   extraColumns: TableColumnsType = []
-): TableColumnsType => {
-
-  const baseColumns: TableColumnsType = [
-    {
-      fixed: 'left',
-      title: 'Компанія',
-      width: 150,
-      ellipsis: true,
-      render: (_, { name }) => <CompanyName name={name} />,
-    },
-    {
-      title: 'Площа, м²',
-      width: 160,
-      render: (_, { name }) => <TotalArea name={name} />,
-    },
-  ]
-
-  const dynamicColumns = allowedServices
-    .map(service => {
-      const column = serviceColumns[service.fieldName]
-
-      if (!column) return null
-
-      return typeof column === 'function'
-        ? column(losses)
-        : column
-    })
-    .filter(Boolean)
-
-  const actionColumn = {
+): TableColumnsType => [
+  {
+    fixed: 'left',
+    title: 'Компанія',
+    width: 250,
+    render: (_, { name }: { name: number }) => <CompanyName name={name} />,
+  },
+  {
+    title: 'Площа, м²',
+    width: 160,
+    render: (_, { name }: { name: number }) => <TotalArea name={name} />,
+  },
+  _allowedServices.some((inv) => inv?.fieldName === 'rentPrice')
+    && {
+        title: 'Утримання',
+        children: [
+          {
+            title: 'За м²',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <MaintenancePrice name={name} />
+            ),
+          },
+          {
+            title: 'Загальне',
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <MaintenanceSum name={name} />
+            ),
+          },
+        ],
+      },
+  _allowedServices.some((inv) => inv?.fieldName === 'placingPrice')
+    && {
+        title: 'Розміщення',
+        children: [
+          {
+            title: 'За м²',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <PlacingPrice name={name} />
+            ),
+          },
+          {
+            title: 'Загальне',
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <PlacingSum name={name} />
+            ),
+          },
+        ],
+      },
+  _allowedServices.some((inv) => inv?.fieldName === 'inflicionPrice')
+    && {
+        title: <InflicionTitle />,
+        width: 200,
+        render: (_, { name }: { name: number }) => <InflicionSum name={name} />,
+      },
+  _allowedServices.some((inv) => inv?.fieldName === 'electricityPrice')
+    && {
+        title: losses
+          ? `Електропостачання + Втрати ${losses}%`
+          : 'Електропостачання',
+        children: [
+          {
+            title: 'Стара',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <ElectricityAmount name={name} last />
+            ),
+          },
+          {
+            title: 'Нова',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <ElectricityAmount name={name} />
+            ),
+          },
+          {
+            title: 'Втрати',
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <LossElectricityPrice name={name} />
+            ),
+          },
+          {
+            title: '',
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <LossElectricitySum name={name} />
+            ),
+          },
+          {
+            title: <ElectricitySumTitle />,
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <ElectricitySum name={name} />
+            ),
+          },
+        ],
+      },
+  _allowedServices.some((inv) => inv?.fieldName === 'waterPrice')
+    && {
+        title: 'Водопостачання',
+        children: [
+          {
+            title: 'Стара',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <WaterAmount name={name} last />
+            ),
+          },
+          {
+            title: 'Нова',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <WaterAmount name={name} />
+            ),
+          },
+          {
+            title: <WaterSumTitle />,
+            width: 200,
+            render: (_, { name }: { name: number }) => <WaterSum name={name} />,
+          },
+        ],
+      },
+  _allowedServices.some((inv) => inv?.fieldName === 'waterPartAmount')
+    && {
+        title: 'Водопостачання без лічильника',
+        children: [
+          {
+            title: 'Частка, %',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <WaterPartAmount name={name} />
+            ),
+          },
+          {
+            title: <WaterPartSumTitle />,
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <WaterPartSum name={name} />
+            ),
+          },
+        ],
+      },
+  _allowedServices.some((inv) => inv?.fieldName === 'GarbageCollectorAmount')
+    && {
+        title: 'Вивіз ТПВ',
+        children: [
+          {
+            title: 'Частка, %',
+            width: 160,
+            render: (_, { name }: { name: number }) => (
+              <GarbageCollectorAmount name={name} />
+            ),
+          },
+          {
+            title: <GarbageCollectorSumTitle />,
+            width: 200,
+            render: (_, { name }: { name: number }) => (
+              <GarbageCollectorSum name={name} />
+            ),
+          },
+        ],
+      },
+  _allowedServices.some((inv) => inv?.fieldName === 'Cleaning')
+    && {
+        title: 'Прибирання',
+        width: 200,
+        render: (_, { name }: { name: number }) => <Cleaning name={name} />,
+      },
+  {
+    title: 'Знижка',
+    width: 200,
+    render: (_, { name }: { name: number }) => <Discount name={name} />,
+  },
+  ...extraColumns,
+  {
     fixed: 'right',
     align: 'center',
     width: 48,
-    render: (_, { name }) => (
+    render: (_, { name }: { name: number }) => (
       <Popconfirm
         title="Ви впевнені, що хочете видалити запис?"
         okText="Так"
@@ -136,15 +218,8 @@ export const getDefaultColumns = (
         <CloseCircleOutlined />
       </Popconfirm>
     ),
-  }
-
-  return [
-    ...baseColumns,
-    ...dynamicColumns,
-    ...extraColumns,
-    actionColumn,
-  ]
-}
+  },
+].filter(Boolean) as TableColumnsType
 
 const LossElectricitySum: React.FC<{ name: number }> = ({ name }) => {
   const { form, service } = useInvoicesPaymentContext()

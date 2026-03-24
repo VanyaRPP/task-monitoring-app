@@ -12,9 +12,46 @@ import {
   getDistinctCompanyAndDomain,
   getFilterForAddress,
 } from '@utils/helpers'
+import {
+  sendInvoiceEmail,
+  type InvoiceEmailPayment,
+} from '@utils/email/sendInvoiceEmail'
 import { getStreetsPipeline } from '@utils/pipelines'
 import { FilterQuery } from 'mongoose'
 import ProfitService from '@common/services/profitService/profit.service'
+
+function isEmailDebugEnabled() {
+  return (
+    process.env.EMAIL_DEBUG === 'true' ||
+    process.env.NODE_ENV === 'development'
+  )
+}
+
+function maskEmail(email?: string) {
+  if (!email) {
+    return 'missing'
+  }
+
+  const [localPart = '', domainPart = ''] = email.split('@')
+
+  if (!domainPart) {
+    return `${localPart.slice(0, 2)}***`
+  }
+
+  return `${localPart.slice(0, 2)}***@${domainPart}`
+}
+
+function maskEmails(emails: string[] = []) {
+  return emails.map((email) => maskEmail(email))
+}
+
+function logPaymentEmailDebug(stage: string, details: Record<string, unknown>) {
+  if (!isEmailDebugEnabled()) {
+    return
+  }
+
+  console.info(`[payment-email] ${stage}`, details)
+}
 
 export interface PaymentQueryParams {
   streetIds?: string | string[]
@@ -207,12 +244,6 @@ export async function getPayments(
 
 export async function createPayment(body: any, isAdmin: boolean) {
   if (!isAdmin) throw new Error('not allowed')
-  if (body.invoiceCreationDate) {
-    const d = new Date(body.invoiceCreationDate)
-    body.invoiceCreationDate = new Date(
-      Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())
-    )
-  }
 
   const payment = await Payment.create(body)
 
@@ -232,6 +263,65 @@ export async function createPayment(body: any, isAdmin: boolean) {
   }
 
   await ProfitService.create(profitObject)
+
+  if (payment.type === 'debit') {
+    try {
+      logPaymentEmailDebug('prepare_started', {
+        paymentId: payment.id?.toString?.() || 'unknown',
+        invoiceNumber: payment.invoiceNumber,
+        domainId: payment.domain?.toString?.() || 'unknown',
+      })
+
+      const paymentSnapshot =
+        (typeof payment.toObject === 'function'
+          ? payment.toObject()
+          : payment) as InvoiceEmailPayment
+      const currentReceiver = paymentSnapshot.reciever || {}
+      const shouldLoadDomainData =
+        !currentReceiver.companyName ||
+        !currentReceiver.description ||
+        !currentReceiver.adminEmails?.length
+      const domain =
+        shouldLoadDomainData && payment.domain
+          ? await Domain.findById(payment.domain).select(
+              'adminEmails name description'
+            )
+          : null
+
+      paymentSnapshot.reciever = {
+        companyName: currentReceiver.companyName || domain?.name || 'invoice',
+        adminEmails:
+          currentReceiver.adminEmails?.length
+            ? currentReceiver.adminEmails
+            : domain?.adminEmails || [],
+        description: currentReceiver.description || domain?.description || '',
+      }
+
+      logPaymentEmailDebug('receiver_resolved', {
+        paymentId: payment.id?.toString?.() || 'unknown',
+        invoiceNumber: payment.invoiceNumber,
+        usedDomainFallback: Boolean(domain),
+        recipients: maskEmails(paymentSnapshot.reciever.adminEmails),
+        sender: maskEmail(
+          process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER || 'missing'
+        ),
+      })
+
+      const emailSent = await sendInvoiceEmail(paymentSnapshot)
+
+      logPaymentEmailDebug('send_finished', {
+        paymentId: payment.id?.toString?.() || 'unknown',
+        invoiceNumber: payment.invoiceNumber,
+        emailSent,
+      })
+    } catch (error) {
+      console.error('[payment-email] send_failed', {
+        paymentId: payment.id?.toString?.() || 'unknown',
+        invoiceNumber: payment.invoiceNumber,
+        message: error?.message,
+      })
+    }
+  }
 
   return payment
 }

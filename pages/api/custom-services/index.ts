@@ -94,7 +94,7 @@ export default async function handler(
           })
         }
 
-        const deletedService = await CustomService.findById(id).lean()
+        const deletedService = await CustomService.findByIdAndDelete(id)
 
         if (!deletedService) {
           return res.status(404).json({
