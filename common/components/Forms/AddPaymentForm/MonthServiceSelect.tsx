@@ -3,6 +3,7 @@ import { validateField } from '@assets/features/validators'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { Form, FormInstance, Select } from 'antd'
 import { useEffect, useMemo } from 'react'
+import dayjs from 'dayjs'
 
 export interface MonthServiceSelectProps {
   form: FormInstance
@@ -30,11 +31,21 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
   )
 
   const options = useMemo(() => {
+  if (services && services.length > 0) {
     return services.map((i) => ({
       value: i._id,
       label: getFormattedDate(i.date, 'MMMM YYYY'),
     }))
-  }, [services])
+  }
+  const now = dayjs()
+  return Array.from({ length: 12 }).map((_, i) => {
+    const date = now.subtract(i, 'month').startOf('month')
+    return {
+      value: date.toISOString(),
+      label: date.format('MMMM YYYY'),
+    }
+  })
+}, [services])
 
   useEffect(() => {
     if (!edit) {
@@ -59,13 +70,11 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
         options={options}
         optionFilterProp="label"
         placeholder="Місяць"
-        status={isServicesError && 'error'}
+        status={isServicesError ? 'error' : undefined}
         loading={isServicesLoading}
         disabled={
-          options.length === 0 ||
-          isServicesLoading ||
-          services.length === 1 ||
-          !streetId ||
+          isServicesLoading || 
+          !streetId || 
           !domainId
         }
         allowClear
