@@ -31,21 +31,21 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
   )
 
   const options = useMemo(() => {
-  if (services && services.length > 0) {
+  if (services?.length > 0) {
     return services.map((i) => ({
       value: i._id,
       label: getFormattedDate(i.date, 'MMMM YYYY'),
-    }))
+    }));
   }
-  const now = dayjs()
-  return Array.from({ length: 12 }).map((_, i) => {
-    const date = now.subtract(i, 'month').startOf('month')
+
+  return Array.from({ length: 12 }, (_, i) => {
+    const month = dayjs().subtract(i, 'month').startOf('month');
     return {
-      value: date.toISOString(),
-      label: date.format('MMMM YYYY'),
-    }
-  })
-}, [services])
+      value: month.toISOString(),
+      label: month.format('MMMM YYYY'),
+    };
+  });
+}, [services]);
 
   useEffect(() => {
     if (!edit) {
