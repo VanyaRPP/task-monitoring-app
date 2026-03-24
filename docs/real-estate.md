@@ -1,85 +1,84 @@
-# RealEstate (Компанії)
+# RealEstate (Companies)
 
-Сторінка для управління компаніями — об'єктами нерухомості які належать надавачам послуг.
+A page for managing companies — real estate entities that belong to service providers.
 
-## Сторінка
-- **Роут:** `/real-estate`
-- **Файл:** [RealEstateBlock](/common\components\DashboardPage\blocks\realEstates.tsx)
-- **Таблиця:** [CompaniesTable](/common\components\Tables\Companies\Table.tsx)
-- **Хедер:** [CompaniesHeader](/common\components\Tables\Companies\Header.tsx)
+## Page
+- **Route:** `/real-estate`
+- **File:** [RealEstateBlock](/common/components/DashboardPage/blocks/realEstates.tsx)
+- **Table:** [CompaniesTable](/common/components/Tables/Companies/Table.tsx)
+- **Header:** [CompaniesHeader](/common/components/Tables/Companies/Header.tsx)
 
-## Вигляд сторінки
-![Сторінка компаній](./screenshots/real-estate.png)
+## Page View
+![Real Estate Page](./screenshots/real-estate.png)
 
-## Компоненти
-- `RealEstateBlock` — головний блок сторінки
-- `CompaniesHeader` — хедер з фільтрами та кнопкою додавання
-- `CompaniesTable` — таблиця компаній
-- `RealEstateModal` — модалка додавання/редагування компанії
-- `RealEstateForm` — форма модалки з усіма полями
-- `RealEstateCardHeader` — хедер картки на дашборді
-- `CustomServicesCard` — картка кастомних послуг
-- `DomainsSelect` — вибір надавача послуг
-- `AddressesSelect` — вибір адреси
+## Components
+- `RealEstateBlock` — main page container
+- `CompaniesHeader` — header with filters and add button
+- `CompaniesTable` — companies table
+- `RealEstateModal` — modal for adding/editing a company
+- `RealEstateForm` — modal form with all fields
+- `RealEstateCardHeader` — dashboard card header
+- `CustomServicesCard` — custom services card
+- `DomainsSelect` — service provider selector
+- `AddressesSelect` — address selector
 
-
-## RealEstateModal (модалка)
-- **Опис:** Модальне вікно для додавання та редагування компанії.
-- **Файл:** [RealEstateModal](/common\components\UI\RealEstateComponents\RealEstateModal\index.tsx)
-- **Вигляд модалки:**
+## RealEstateModal (modal)
+- **Description:** Modal window for creating and editing a company.
+- **File:** [RealEstateModal](/common/components/UI/RealEstateComponents/RealEstateModal/index.tsx)
+- **Modal View:**
 
 ![RealEstateModal](./screenshots/realEstateModal.png)
 
-### Поля форми
-| Поле | Опис |
-|------|------|
-| `domain` | Надавач послуг |
-| `street` | Адреса |
-| `companyName` | Назва компанії |
-| `description` | Опис |
-| `adminEmails` | Email адміністраторів |
-| `currency` | Валюта (UAH, USD, EUR) |
-| `discount` | Знижка |
-| `totalArea` | Площа (м²) |
-| `pricePerMeter` | Ціна (грн/м²) |
-| `garbageCollector` | Вивіз сміття |
-| `inflicion` | Індекс інфляції |
-| `customServices` | Кастомні послуги |
-| `archived` | Архівована |
+### Form Fields
+| Field | Description |
+|------|------------|
+| `domain` | Service provider |
+| `street` | Address |
+| `companyName` | Company name |
+| `description` | Description |
+| `adminEmails` | Admin emails |
+| `currency` | Currency (UAH, USD, EUR) |
+| `discount` | Discount |
+| `totalArea` | Area (m²) |
+| `pricePerMeter` | Price (UAH/m²) |
+| `garbageCollector` | Garbage collection |
+| `inflicion` | Inflation index |
+| `customServices` | Custom services |
+| `archived` | Archived |
 
-## Ролі доступу
-| Роль | Доступ |
+## Access Roles
+| Role | Access |
 |------|--------|
-| `GLOBAL_ADMIN` | Повний доступ |
-| `DOMAIN_ADMIN` | Бачить компанії свого домену, може додавати та редагувати |
-| `USER` | Бачить тільки свої компанії |
+| `GLOBAL_ADMIN` | Full access |
+| `DOMAIN_ADMIN` | Can see companies of their domain, can add and edit |
+| `USER` | Can see only their companies |
 
 ## API endpoints
 
-| Метод | URL | Опис |
-|-------|-----|------|
-| `GET` | `/api/real-estate` | Отримати всі компанії |
-| `POST` | `/api/real-estate` | Створити компанію |
-| `PATCH` | `/api/real-estate/:id` | Редагувати компанію |
-| `DELETE` | `/api/real-estate/:id` | Видалити компанію |
-| `PATCH` | `/api/archived/:id` | Архівувати компанію |
+| Method | URL | Description |
+|--------|-----|------------|
+| `GET` | `/api/real-estate` | Get all companies |
+| `POST` | `/api/real-estate` | Create company |
+| `PATCH` | `/api/real-estate/:id` | Edit company |
+| `DELETE` | `/api/real-estate/:id` | Delete company |
+| `PATCH` | `/api/archived/:id` | Archive company |
 
-## RTK Query хуки
+## RTK Query hooks
 
-| Хук | Опис |
-|-----|------|
-| `useGetAllRealEstateQuery` | Отримати всі компанії |
-| `useAddRealEstateMutation` | Додати компанію |
-| `useEditRealEstateMutation` | Редагувати компанію |
-| `useDeleteRealEstateMutation` | Видалити компанію |
-| `useUpdateArchivedItemMutation` | Архівувати компанію |
-| `useGetDomainByPkQuery` | Отримати домен по id |
-| `useGetAllServicesQuery` | Отримати послуги домену |
-| `useGetCustomServicesQuery` | Отримати кастомні послуги |
-| `useGetCustomServicesByDomainQuery` | Отримати кастомні послуги домену |
-| `useGetCurrentUserQuery` | Поточний юзер |
+| Hook | Description |
+|------|------------|
+| `useGetAllRealEstateQuery` | Get all companies |
+| `useAddRealEstateMutation` | Add company |
+| `useEditRealEstateMutation` | Edit company |
+| `useDeleteRealEstateMutation` | Delete company |
+| `useUpdateArchivedItemMutation` | Archive company |
+| `useGetDomainByPkQuery` | Get domain by id |
+| `useGetAllServicesQuery` | Get domain services |
+| `useGetCustomServicesQuery` | Get custom services |
+| `useGetCustomServicesByDomainQuery` | Get domain custom services |
+| `useGetCurrentUserQuery` | Current user |
 
-## API файли
+## API files
 - [realestate.api.ts](/common/api/realestateApi/realestate.api.ts)
 - [realestate.api.types.ts](/common/api/realestateApi/realestate.api.types.ts)
 

@@ -1,86 +1,85 @@
-# Payments (Платежі)
+# Payments
 
-Сторінка платежів призначена для управління фінансовими операціями, зокрема створення, перегляду, редагування та аналізу рахунків (платежів) між компаніями та надавачами послуг.
+The Payments page is designed for managing financial operations, including creating, viewing, editing, and analyzing invoices (payments) between companies and service providers.
 
-## Сторінка
-- **Роут:** `/payments`
-- **Файл:** [PaymentsBlock](/common\components\DashboardPage\blocks\payments.tsx)
-- **Таблиця сторінки:** [PaymentsTable](/common\components\Tables\Payment\Table.tsx)
-- **Хедер сторінки:** [PaymentsHeader](/common/components\Tables\Payment\Header.tsx)
+## Page
+- **Route:** `/payments`
+- **File:** [PaymentsBlock](/common/components/DashboardPage/blocks/payments.tsx)
+- **Page Table:** [PaymentsTable](/common/components/Tables/Payment/Table.tsx)
+- **Page Header:** [PaymentsHeader](/common/components/Tables/Payment/Header.tsx)
 
-## Вигляд сторінки
+## Page View
 
 ![payment](./screenshots/payment.png)
 
-## Компоненти
-- `PaymentsBlock` — головний блок сторінки
-- `PaymentsHeader` — хедер головної сторінки 
-- `PaymentCardHeader` — шапка з фільтрами та діями
-- `PaymentsTable` — таблиця платежів
-- `AddPaymentModal` — модалка додавання/редагування/перегляду
+## Components
+- `PaymentsBlock` — main page container
+- `PaymentsHeader` — main page header
+- `PaymentCardHeader` — header with filters and actions
+- `PaymentsTable` — payments table
+- `AddPaymentModal` — modal for adding/editing/viewing
 
 ## AddPaymentModal
-- **Опис:** Модальне вікно для додавання, редагування та перегляду платежу.
-- **Файл:** [AddPaymentModal](/common\components\AddPaymentModal\index.tsx)
-- **Вигляд модалки:**
+- **Description:** Modal window for creating, editing, and viewing a payment.
+- **File:** [AddPaymentModal](/common/components/AddPaymentModal/index.tsx)
+- **Modal View:**
 
 ![AddPaymentModal](./screenshots/addPaymentModal.png)
 
 ## Redux
 - **Slice:** `payments`
-- **Файл:** [modules/store/paymentsSlice.ts](../../modules/store/paymentsSlice.ts)
+- **File:** [modules/store/paymentsSlice.ts](/modules/store/paymentsSlice.ts)
 - **Actions:**
-  - `setPage` — пагінація
-  - `setFilters` — фільтри таблиці
-  - `setDomainsFilter` — фільтр доменів
-  - `setCompaniesFilter` — фільтр компаній
-  - `setStreetsFilter` — фільтр вулиць
-  - `setDateFilters` — фільтр дат
-  - `setOpenView` — відкрити перегляд
-  - `setOpenEdit` — відкрити редагування
-  - `setCloseModal` — закрити модалку
-  - `setDebtorCompanies` — компанії боржники
-  - `setSelectedColumns` — вибрані колонки
-  - `setPaymentsDeleteItems` — елементи для видалення
-  - `setSelectedPayments` — вибрані платежі
-  - `setSelectedDateField` — поле дати для фільтрації
-  
+  - `setPage` — pagination
+  - `setFilters` — table filters
+  - `setDomainsFilter` — domains filter
+  - `setCompaniesFilter` — companies filter
+  - `setStreetsFilter` — streets filter
+  - `setDateFilters` — date filters
+  - `setOpenView` — open view mode
+  - `setOpenEdit` — open edit mode
+  - `setCloseModal` — close modal
+  - `setDebtorCompanies` — debtor companies
+  - `setSelectedColumns` — selected columns
+  - `setPaymentsDeleteItems` — items for deletion
+  - `setSelectedPayments` — selected payments
+  - `setSelectedDateField` — selected date field for filtering
 
 ## API endpoints
 
-| Метод | URL | Опис |
-|-------|-----|------|
-| GET | `/api/spacehub/payment` | Отримати всі платежі |
-| GET | `/api/spacehub/payment/:id` | Отримати платіж по id |
-| POST | `/api/spacehub/payment` | Додати платіж |
-| PATCH | `/api/spacehub/payment/:id` | Редагувати платіж |
-| DELETE | `/api/spacehub/payment/:id` | Видалити платіж |
-| DELETE | `/api/spacehub/payment/multiple` | Видалити декілька платежів |
-| POST | `/api/spacehub/payment/generatePdf` | Генерація PDF |
-| POST | `/api/spacehub/payment/generateExcel` | Генерація Excel |
-| GET | `/api/spacehub/payment/:id/change-log` | Отримати changelog платежу |
-| POST | `/api/spacehub/payment/:id/change-log` | Створити changelog |
+| Method | URL | Description |
+|--------|-----|------------|
+| GET | `/api/spacehub/payment` | Get all payments |
+| GET | `/api/spacehub/payment/:id` | Get payment by id |
+| POST | `/api/spacehub/payment` | Create payment |
+| PATCH | `/api/spacehub/payment/:id` | Edit payment |
+| DELETE | `/api/spacehub/payment/:id` | Delete payment |
+| DELETE | `/api/spacehub/payment/multiple` | Delete multiple payments |
+| POST | `/api/spacehub/payment/generatePdf` | Generate PDF |
+| POST | `/api/spacehub/payment/generateExcel` | Generate Excel |
+| GET | `/api/spacehub/payment/:id/change-log` | Get payment changelog |
+| POST | `/api/spacehub/payment/:id/change-log` | Create changelog |
 
-## RTK Query хуки
+## RTK Query hooks
 
-| Хук | Опис |
-|-----|------|
-| `useGetAllPaymentsQuery` | Отримати всі платежі з фільтрами |
-| `useGetPaymentQuery` | Отримати один платіж |
-| `useAddPaymentMutation` | Додати платіж |
-| `useEditPaymentMutation` | Редагувати платіж |
-| `useDeletePaymentMutation` | Видалити платіж |
-| `useDeleteMultiplePaymentsMutation` | Видалити декілька |
-| `useGeneratePdfMutation` | Генерація PDF |
-| `useGenerateExcelMutation` | Генерація Excel |
-| `useGetPaymentChangeLogsQuery` | Отримати changelog |
-| `useCreatePaymentChangeLogMutation` | Створити changelog |
-| `useGetDomainFiltersQuery` | Фільтри доменів |
-| `useGetRealEstateFiltersQuery` | Фільтри компаній |
-| `useGetAddressFiltersQuery` | Фільтри адрес |
-| `useGetDateFiltersQuery` | Фільтри дат |
-| `useGetCurrentUserQuery` | Поточний юзер |
-| `useGetDebtorsQuery` | Боржники |
+| Hook | Description |
+|------|------------|
+| `useGetAllPaymentsQuery` | Get all payments with filters |
+| `useGetPaymentQuery` | Get a single payment |
+| `useAddPaymentMutation` | Add payment |
+| `useEditPaymentMutation` | Edit payment |
+| `useDeletePaymentMutation` | Delete payment |
+| `useDeleteMultiplePaymentsMutation` | Delete multiple payments |
+| `useGeneratePdfMutation` | Generate PDF |
+| `useGenerateExcelMutation` | Generate Excel |
+| `useGetPaymentChangeLogsQuery` | Get changelog |
+| `useCreatePaymentChangeLogMutation` | Create changelog |
+| `useGetDomainFiltersQuery` | Domain filters |
+| `useGetRealEstateFiltersQuery` | Company filters |
+| `useGetAddressFiltersQuery` | Address filters |
+| `useGetDateFiltersQuery` | Date filters |
+| `useGetCurrentUserQuery` | Current user |
+| `useGetDebtorsQuery` | Debtors |
 
 ## API
 

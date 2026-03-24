@@ -1,68 +1,68 @@
-# Services (Послуги)
+# Services
 
-Сторінка для управління послугами — місячними даними про комунальні платежі для компаній.
+The Services page is designed for managing services — monthly data about utility payments for companies.
 
-## Сторінка
-- **Роут:** `/service`
-- **Файл:** [ServicesBlock](/common\components\DashboardPage\blocks\services.tsx)
-- **Таблиця:** [ServicesTable](/common\components\Tables\Services\Table.tsx)
-- **Хедер:** [ServicesHeader](/common\components\Tables\Services\Header.tsx)
+## Page
+- **Route:** `/service`
+- **File:** [ServicesBlock](/common/components/DashboardPage/blocks/services.tsx)
+- **Table:** [ServicesTable](/common/components/Tables/Services/Table.tsx)
+- **Header:** [ServicesHeader](/common/components/Tables/Services/Header.tsx)
 
-## Вигляд сторінки
-![Сторінка послуг](./screenshots/service.png)
+## Page View
+![Services Page](./screenshots/service.png)
 
-## Компоненти
-- `ServicesBlock` — головний блок сторінки
-- `ServicesHeader` — хедер з фільтрами та кнопкою додавання
-- `ServicesTable` — таблиця послуг з фільтрами
-- `AddServiceModal` — модалка додавання/редагування послуги
-- `AddServiceForm` — Форма для додавання та редагування
-- `PreviewServiceForm` — Форма тільки для перегляду
-- `ServiceCardHeader` — хедер картки на дашборді
-- `DomainFilterTags` — теги фільтру надавачів послуг
-- `StreetFilterTags` — теги фільтру вулиць
-- `ModalDelete` — модалка підтвердження видалення
+## Components
+- `ServicesBlock` — main page container
+- `ServicesHeader` — header with filters and add button
+- `ServicesTable` — services table with filters
+- `AddServiceModal` — modal for adding/editing a service
+- `AddServiceForm` — form for adding and editing
+- `PreviewServiceForm` — form for view only
+- `ServiceCardHeader` — dashboard card header
+- `DomainFilterTags` — service provider filter tags
+- `StreetFilterTags` — street filter tags
+- `ModalDelete` — delete confirmation modal
 
-## Вигляд модалки
-- **Опис:** Модальне вікно для додавання, редагування та перегляду послуги за місяць.
-- **Файл:** [AddServiceModal](/common\components\AddServiceModal\index.tsx)
-- **Вигляд модалки:**
+## Modal View
+- **Description:** Modal window for creating, editing, and viewing a monthly service.
+- **File:** [AddServiceModal](/common/components/AddServiceModal/index.tsx)
+- **Modal View:**
 
-![Модалка послуги](./screenshots/addServiceModal.png)
+![Service Modal](./screenshots/addServiceModal.png)
 
-## Ролі доступу
-| Роль | Доступ |
+## Access Roles
+| Role | Access |
 |------|--------|
-| `GLOBAL_ADMIN` | Повний доступ |
-| `DOMAIN_ADMIN` | Бачить послуги свого домену, може додавати та редагувати |
-| `USER` | Бачить тільки послуги своїх компаній |
+| `GLOBAL_ADMIN` | Full access |
+| `DOMAIN_ADMIN` | Can see services of their domain, can add and edit |
+| `USER` | Can see only services of their companies |
 
 ## API endpoints
 
-| Метод | URL | Опис |
-|-------|-----|------|
-| `GET` | `/api/service` | Отримати всі послуги |
-| `GET` | `/api/service/address` | Отримати адреси послуг |
-| `POST` | `/api/service` | Створити послугу |
-| `PATCH` | `/api/service/:id` | Редагувати послугу |
-| `DELETE` | `/api/service/:id` | Видалити послугу |
+| Method | URL | Description |
+|--------|-----|------------|
+| `GET` | `/api/service` | Get all services |
+| `GET` | `/api/service/address` | Get service addresses |
+| `POST` | `/api/service` | Create service |
+| `PATCH` | `/api/service/:id` | Edit service |
+| `DELETE` | `/api/service/:id` | Delete service |
 
-## RTK Query хуки
+## RTK Query hooks
 
-| Хук | Опис |
-|-----|------|
-| `useGetAllServicesQuery` | Отримати всі послуги |
-| `useGetServicesAddressQuery` | Отримати адреси послуг |
-| `useAddServiceMutation` | Додати послугу |
-| `useEditServiceMutation` | Редагувати послугу |
-| `useDeleteServiceMutation` | Видалити послугу |
-| `useGetCurrentUserQuery` | Поточний юзер |
-| `useGetCustomServicesQuery` | Отримати кастомні послуги |
-| `useGetDomainFiltersQuery` | Фільтри доменів |
-| `useGetAddressFiltersQuery` | Фільтри адрес |
-| `useGetDateFiltersQuery` | Фільтри дат |
+| Hook | Description |
+|------|------------|
+| `useGetAllServicesQuery` | Get all services |
+| `useGetServicesAddressQuery` | Get service addresses |
+| `useAddServiceMutation` | Add service |
+| `useEditServiceMutation` | Edit service |
+| `useDeleteServiceMutation` | Delete service |
+| `useGetCurrentUserQuery` | Current user |
+| `useGetCustomServicesQuery` | Get custom services |
+| `useGetDomainFiltersQuery` | Domain filters |
+| `useGetAddressFiltersQuery` | Address filters |
+| `useGetDateFiltersQuery` | Date filters |
 
-## API файли
+## API files
 - [service.api.ts](/common/api/serviceApi/service.api.ts)
 - [service.api.types.ts](/common/api/serviceApi/service.api.types.ts)
 
