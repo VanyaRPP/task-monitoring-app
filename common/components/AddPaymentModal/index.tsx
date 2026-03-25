@@ -134,6 +134,7 @@ const AddPaymentModal: FC<Props> = ({
     AUT_CNTR_NAM: paymentData?.transaction?.AUT_CNTR_NAM || '',
     AUT_CNTR_MFO: paymentData?.transaction?.AUT_CNTR_MFO || '',
     Description: paymentData?.transaction?.Description || '',
+    TECHNICAL_TRANSACTION_ID: paymentData?.transaction?.TECHNICAL_TRANSACTION_ID,
   }
 
   useEffect(() => {
