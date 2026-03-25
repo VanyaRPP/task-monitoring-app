@@ -10,41 +10,29 @@ import { getCurrentUser } from '@utils/getCurrentUser'
 
 start()
 
-export async function  checkTransaction({ transaction }) {
+export async function checkTransaction({ transaction }) {
   try {
     const Sum = +toRoundFixed(transaction.SUM)
-    
-    const Acc = transaction.AUT_CNTR_ACC?.trim() || ''
-    const Nam = transaction.AUT_CNTR_NAM?.trim() || ''
     const Mfo = transaction.AUT_CNTR_MFO?.trim() || ''
 
     const allPayments = await Payment.find({
-      $and: [
-        // {
-        //   $expr: {
-        //     $eq: [
-        //       { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_ACC', ''] } } },
-        //       Acc
-        //     ]
-        //   }
-        // },
-        // {
-        //   $expr: {
-        //     $eq: [
-        //       { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_NAM', ''] } } },
-        //       Nam
-        //     ]
-        //   }
-        // },
+      $or: [
         {
-          $expr: {
-            $eq: [
-              { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_MFO', ''] } } },
-              Mfo
-            ]
-          }
+          'transaction.TECHNICAL_TRANSACTION_ID': transaction.TECHNICAL_TRANSACTION_ID,
         },
-        { generalSum: Sum },
+        {
+          $and: [
+            {
+              $expr: {
+                $eq: [
+                  { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_MFO', ''] } } },
+                  Mfo,
+                ],
+              },
+            },
+            { generalSum: Sum },
+          ],
+        },
       ],
     })
 
