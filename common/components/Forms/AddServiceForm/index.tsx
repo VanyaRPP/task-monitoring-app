@@ -10,18 +10,24 @@ import {
   FormInstance,
   Input,
   InputNumber,
+  Collapse,
+  Checkbox,
+  Table,
 } from 'antd'
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
-import { useEffect } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import s from './style.module.scss'
 import { inputNumberParser } from '@utils/helpers'
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
+import { useGetAreasQuery } from '@common/api/domainApi/domain.api'
 import CustomServicesCard from '@components/UI/CustomServicesCard'
 import { LossesCollapse } from '@components/Losses/LossesCollapse'
 
 dayjs.locale('uk')
+
+const { Panel } = Collapse
 
 interface Props {
   form: FormInstance<any>
@@ -37,10 +43,31 @@ const AddServiceForm: React.FC<Props> = ({
   setIsValueChanged,
 }) => {
   const { MonthPicker } = DatePicker
+  const [showAreaCalc, setShowAreaCalc] = useState(false)
 
   const date = Form.useWatch('date', form)
   const domainId = Form.useWatch('domain', form)
   const streetId = Form.useWatch('street', form)
+
+  const { data: areasData, isLoading: isAreasLoading } = useGetAreasQuery(
+    { domainId },
+    { skip: !domainId }
+  )
+
+  const companiesAreaInfo = useMemo(() => {
+    
+  const companies = (areasData as any)?.companies || []
+  const totalAreaSum = (areasData as any)?.totalArea || 0
+
+  return companies.map((c: any) => ({
+    key: c.companyName + Math.random(),
+    name: c.companyName,          
+    area: c.totalArea,                 
+    percentage: totalAreaSum > 0 
+      ? ((c.totalArea / totalAreaSum) * 100).toFixed(2) 
+      : 0
+  }))
+}, [areasData])
 
   const filteredServicesPrice = (customServices) => {
     return customServices?.map((service) => {
@@ -277,7 +304,38 @@ const AddServiceForm: React.FC<Props> = ({
         <LossesCollapse
           form={form}
           name='losses'
-        />
+        />  
+        <Collapse ghost style={{ marginTop: '16px', border: '1px solid #d9d9d9', borderRadius: '8px' }}>
+          <Panel header="Розрахунок площі по компаніях" key="area-calc">
+            <Checkbox 
+              checked={showAreaCalc} 
+              onChange={(e) => setShowAreaCalc(e.target.checked)}
+              style={{ marginBottom: '12px' }}
+            >
+              Обрахунок загальної площі
+            </Checkbox>
+
+            {showAreaCalc && (
+              <Table
+                dataSource={companiesAreaInfo}
+                pagination={false}
+                loading={isAreasLoading}
+                size="small"
+                bordered
+                columns={[
+                  { title: 'Назва компанії', dataIndex: 'name', key: 'name' },
+                  { title: 'Площа (м²)', dataIndex: 'area', key: 'area' },
+                  { 
+                    title: 'Частка (%)', 
+                    dataIndex: 'percentage', 
+                    key: 'percentage',
+                    render: (text) => <strong>{text}%</strong>
+                  },
+                ]}
+              />
+            )}
+          </Panel>
+        </Collapse>
         <br/>
         <br/>
         <Form.Item name="description" label="Опис">
