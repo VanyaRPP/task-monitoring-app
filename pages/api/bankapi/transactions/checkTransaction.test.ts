@@ -53,16 +53,31 @@ describe('checkTransaction', () => {
     jest.clearAllMocks() 
   })
 
-  it('calls Payment.find with TECHNICAL_TRANSACTION_ID only', async () => {
-    mockedFind.mockResolvedValue([{ company: 'company-1' }])
+it('calls Payment.find with TECHNICAL_TRANSACTION_ID, trimmed MFO and rounded SUM', async () => {
+  mockedFind.mockResolvedValue([{ company: 'company-1' }])
 
-    await checkTransaction({ transaction })
+  await checkTransaction({ transaction })
 
-    expect(mockedFind).toHaveBeenCalledTimes(1)
-    expect(mockedFind).toHaveBeenCalledWith({
-      'transaction.TECHNICAL_TRANSACTION_ID': 'tx_001_online',
-    })
+  expect(mockedFind).toHaveBeenCalledTimes(1)
+  expect(mockedFind).toHaveBeenCalledWith({
+    'transaction.TECHNICAL_TRANSACTION_ID': 'tx_001_online',
+    $and: [
+      {
+        $expr: {
+          $eq: [
+            {
+              $trim: {
+                input: { $ifNull: ['$transaction.AUT_CNTR_MFO', ''] },
+              },
+            },
+            '300001',
+          ],
+        },
+      },
+      { generalSum: 100.5 },
+    ],
   })
+})
 
   it('returns isMatchingPayment=true and previousCompanyId when payment exists', async () => {
     mockedFind.mockResolvedValue([{ company: 'company-123' }])
