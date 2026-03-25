@@ -75,6 +75,22 @@ export default function SplashCursor({
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return // Guard canvas early
+    function isWebGLSupported() {
+      const testCanvas = document.createElement('canvas')
+      const gl =
+        testCanvas.getContext('webgl') ||
+        testCanvas.getContext('experimental-webgl')
+
+      return gl instanceof WebGLRenderingContext
+    }
+
+    if (!isWebGLSupported()) {
+      console.warn('WebGL is not supported in this browser/device.')
+      return
+    }
+
+    const webGLContext = getWebGLContext(canvas)
+    if (!webGLContext) return
 
     // Pointer and config setup
     const pointers: Pointer[] = [pointerPrototype()]
@@ -100,7 +116,7 @@ export default function SplashCursor({
     }
 
     // Get WebGL context (WebGL1 or WebGL2)
-    const { gl, ext } = getWebGLContext(canvas)
+    const { gl, ext } = webGLContext
     if (!gl || !ext) return
 
     // If no linear filtering, reduce resolution
@@ -132,7 +148,7 @@ export default function SplashCursor({
       }
 
       if (!gl) {
-        throw new Error('Unable to initialize WebGL.')
+        return null
       }
 
       const isWebGL2 = 'drawBuffers' in gl
