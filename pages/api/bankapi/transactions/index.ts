@@ -19,33 +19,34 @@ export async function  checkTransaction({ transaction }) {
     const Mfo = transaction.AUT_CNTR_MFO?.trim() || ''
 
     const allPayments = await Payment.find({
-      $and: [
-        // {
-        //   $expr: {
-        //     $eq: [
-        //       { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_ACC', ''] } } },
-        //       Acc
-        //     ]
-        //   }
-        // },
-        // {
-        //   $expr: {
-        //     $eq: [
-        //       { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_NAM', ''] } } },
-        //       Nam
-        //     ]
-        //   }
-        // },
-        {
-          $expr: {
-            $eq: [
-              { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_MFO', ''] } } },
-              Mfo
-            ]
-          }
-        },
-        { generalSum: Sum },
-      ],
+        'transaction.TECHNICAL_TRANSACTION_ID': transaction.TECHNICAL_TRANSACTION_ID,
+      // $and: [
+      //   {
+      //     $expr: {
+      //       $eq: [
+      //         { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_ACC', ''] } } },
+      //         Acc
+      //       ]
+      //     }
+      //   },
+      //   {
+      //     $expr: {
+      //       $eq: [
+      //         { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_NAM', ''] } } },
+      //         Nam
+      //       ]
+      //     }
+      //   },
+      //   {
+      //     $expr: {
+      //       $eq: [
+      //         { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_MFO', ''] } } },
+      //         Mfo
+      //       ]
+      //     }
+      //   },
+      //   { generalSum: Sum },
+      // ],
     })
 
     return {

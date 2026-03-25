@@ -42,15 +42,15 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   }, [transaction.TECHNICAL_TRANSACTION_ID])
 
   useEffect(() => {
-    if (!transaction?.isMatchingPayment && relatedCompanies.length > 0) {
-      const foundByMfo = relatedCompanies.find(
-        (company: IRealestate) => company.mfo === transaction.AUT_CNTR_MFO
-      )
+    if (relatedCompanies.length === 0) return
 
-      if (foundByMfo) {
-        setSelectedCompany(foundByMfo._id)
-        setIsMfoMatched(true)
-      }
+    const foundByMfo = relatedCompanies.find(
+      (company: IRealestate) => company.mfo === transaction.AUT_CNTR_MFO
+    )
+
+    if (foundByMfo) {
+      setSelectedCompany(foundByMfo._id)
+      setIsMfoMatched(true)
     }
   }, [transaction.TECHNICAL_TRANSACTION_ID, relatedCompanies])
 
@@ -58,10 +58,6 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     setSelectedCompany(value)
     setIsMfoMatched(false)
   }
-
-  const selectValue =
-    selectedCompany ??
-    (transaction.isMatchingPayment ? transaction.previousCompanyId : null)
 
   const saveMfoToCompany = async (companyId: string) => {
     if (!transaction.AUT_CNTR_MFO) return
@@ -104,6 +100,14 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     },
   ]
 
+  const transactionPayload = {
+    AUT_CNTR_ACC: transaction.AUT_CNTR_ACC,
+    AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
+    AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
+    Description: transaction.OSND,
+    TECHNICAL_TRANSACTION_ID: transaction.TECHNICAL_TRANSACTION_ID, // ← ключевое поле
+  }
+
   return (
     <>
       <Badge.Ribbon
@@ -111,17 +115,14 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
         color="purple"
         style={{
           top: '-50%',
-          visibility:
-            selectedCompany || !transaction?.isMatchingPayment
-              ? 'hidden'
-              : 'visible',
+          visibility: transaction.isMatchingPayment ? 'visible' : 'hidden',
         }}
       >
         <Space.Compact style={{ width: '100%' }}>
           <Select
             placeholder="Select a related company"
             onChange={handleCompanyChange}
-            value={selectValue ?? undefined}
+            value={selectedCompany ?? undefined}
             style={{ width: 'calc(100% - 80px)' }}
           >
             {relatedCompanies.map((company: IRealestate) => (
@@ -158,9 +159,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
               ? {
                   type: selectedPayment.type,
                   invoiceCreationDate: selectedPayment.invoiceCreationDate,
-                  domain: {
-                    _id: selectedPayment.domain,
-                  },
+                  domain: { _id: selectedPayment.domain },
                   street: { _id: selectedPayment.street },
                   company: { _id: selectedPayment.company },
                   monthService: { _id: selectedPayment.monthService },
@@ -169,12 +168,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                   provider: selectedPayment.provider,
                   reciever: selectedPayment.reciever,
                   generalSum: transactionAmount,
-                  transaction: {
-                    AUT_CNTR_ACC: transaction.AUT_CNTR_ACC,
-                    AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
-                    AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
-                    Description: transaction.OSND,
-                  },
+                  transaction: transactionPayload,
                 }
               : {
                   ...relatedCompanies.find(
@@ -185,12 +179,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                   invoiceCreationDate: dayjs(transaction.DAT_OD, 'DD.MM.YYYY'),
                   company: selectedCompany,
                   domain: domain,
-                  transaction: {
-                    AUT_CNTR_ACC: transaction.AUT_CNTR_ACC,
-                    AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
-                    AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
-                    Description: transaction.OSND,
-                  },
+                  transaction: transactionPayload,
                 }),
           }}
           paymentActions={
