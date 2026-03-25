@@ -4,7 +4,7 @@ import { useInvoicesPaymentContext } from '@common/components/DashboardPage/bloc
 import { ServiceType } from '@utils/constants'
 import { inputNumberParser, toRoundFixed } from '@utils/helpers'
 import validator from '@utils/validator'
-import { useInflicionValues } from '@common/components/Tables/PaymentsBulk/hooks/usePrevPayment/useInflicionValues/useInflicionValues'
+import { useInflicionValues } from '@components/Tables/PaymentsBulk/hooks/useInflicionValues/useInflicionValues'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 
 export const PlacingSum: React.FC<{ name: number }> = ({ name }) => {
