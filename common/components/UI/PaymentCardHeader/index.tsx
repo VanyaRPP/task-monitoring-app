@@ -152,7 +152,18 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const selectedCompany =
-    filters?.company?.length === 1 ? filters.company[0] : undefined
+     useMemo(() => {
+    if (filters?.company?.length === 1) return filters.company[0]
+    if (realEstatesFilter?.length === 1) return realEstatesFilter[0].value
+    return undefined
+  }, [filters?.company, realEstatesFilter])
+
+  const selectedDomain =
+  useMemo(() => {
+    if (filters?.domain?.length === 1) return filters.domain[0]
+    if (domainFilter?.length === 1) return domainFilter[0].value
+    return undefined
+  }, [filters?.domain, domainFilter])
 
   const infoTooltip = useMemo(() => {
     const texts: string[] = []
@@ -255,6 +266,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
                 }
                 paymentData={currentPayment}
                 preselectedCompany={selectedCompany}
+                preselectedDomain={selectedDomain}
                 closeModal={closeModal}
               />
             )}
@@ -310,6 +322,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
             }
             paymentData={currentPayment}
             preselectedCompany={selectedCompany}
+            preselectedDomain={selectedDomain}
             closeModal={closeModal}
           />
         )}
