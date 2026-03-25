@@ -122,7 +122,7 @@ const CompaniesTable: React.FC<Props> = ({
   })
   const { data: streetData } = useGetAddressFiltersQuery({
     realEstates: filters?.company,
-    domains: filters?.domain,
+    domains: filters?.domain ?? domainData?.domainsFilter?.map((d) => d.value),
   })
 
   const [realEstate, setRealEstate] = useState(null)
