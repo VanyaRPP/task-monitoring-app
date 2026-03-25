@@ -50,36 +50,36 @@ describe('checkTransaction', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks() 
+    jest.clearAllMocks()
   })
 
-it('calls Payment.find with TECHNICAL_TRANSACTION_ID, trimmed MFO and rounded SUM', async () => {
-  mockedFind.mockResolvedValue([{ company: 'company-1' }])
+  it('calls Payment.find with $or containing TECHNICAL_TRANSACTION_ID and MFO+sum fallback', async () => {
+    mockedFind.mockResolvedValue([{ company: 'company-1' }])
 
-  await checkTransaction({ transaction })
+    await checkTransaction({ transaction })
 
-  expect(mockedFind).toHaveBeenCalledTimes(1)
-  expect(mockedFind).toHaveBeenCalledWith({
-    'transaction.TECHNICAL_TRANSACTION_ID': 'tx_001_online',
-    $and: [
-      {
-        $expr: {
-          $eq: [
+    expect(mockedFind).toHaveBeenCalledTimes(1)
+    expect(mockedFind).toHaveBeenCalledWith({
+      $or: [
+        { 'transaction.TECHNICAL_TRANSACTION_ID': 'tx_001_online' },
+        {
+          $and: [
             {
-              $trim: {
-                input: { $ifNull: ['$transaction.AUT_CNTR_MFO', ''] },
+              $expr: {
+                $eq: [
+                  { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_MFO', ''] } } },
+                  '300001',
+                ],
               },
             },
-            '300001',
+            { generalSum: 100.50 },
           ],
         },
-      },
-      { generalSum: 100.5 },
-    ],
+      ],
+    })
   })
-})
 
-  it('returns isMatchingPayment=true and previousCompanyId when payment exists', async () => {
+  it('returns isMatchingPayment=true when new payment found by TECHNICAL_TRANSACTION_ID', async () => {
     mockedFind.mockResolvedValue([{ company: 'company-123' }])
 
     const result = await checkTransaction({ transaction })
@@ -88,6 +88,23 @@ it('calls Payment.find with TECHNICAL_TRANSACTION_ID, trimmed MFO and rounded SU
       isMatchingPayment: true,
       previousCompanyId: 'company-123',
     })
+  })
+
+  it('still finds old payments when TECHNICAL_TRANSACTION_ID is missing (fallback via MFO+sum)', async () => {
+    mockedFind.mockResolvedValue([{ company: 'old-company' }])
+
+    const result = await checkTransaction({
+      transaction: { ...transaction, TECHNICAL_TRANSACTION_ID: undefined },
+    })
+
+    expect(result).toEqual({
+      isMatchingPayment: true,
+      previousCompanyId: 'old-company',
+    })
+
+    expect(mockedFind).toHaveBeenCalledWith(
+      expect.objectContaining({ $or: expect.any(Array) })
+    )
   })
 
   it('returns isMatchingPayment=false and previousCompanyId=null when no payments found', async () => {
@@ -101,7 +118,7 @@ it('calls Payment.find with TECHNICAL_TRANSACTION_ID, trimmed MFO and rounded SU
     })
   })
 
-  it('returns first match when multiple payments exist for same transaction', async () => {
+  it('returns first match when multiple payments found', async () => {
     mockedFind.mockResolvedValue([
       { company: 'company-first' },
       { company: 'company-second' },
@@ -110,24 +127,23 @@ it('calls Payment.find with TECHNICAL_TRANSACTION_ID, trimmed MFO and rounded SU
     const result = await checkTransaction({ transaction })
 
     expect(result.previousCompanyId).toBe('company-first')
+    expect(result.isMatchingPayment).toBe(true)
   })
 
-  it('throws Error when Payment.find throws', async () => {
+  it('throws Error with original message when Payment.find throws', async () => {
     mockedFind.mockRejectedValue(new Error('DB down'))
 
     await expect(checkTransaction({ transaction })).rejects.toThrow('DB down')
   })
 
-  it('handles missing TECHNICAL_TRANSACTION_ID gracefully', async () => {
+  it('coerces SUM string to number for generalSum comparison', async () => {
     mockedFind.mockResolvedValue([])
 
-    const result = await checkTransaction({
-      transaction: { ...transaction, TECHNICAL_TRANSACTION_ID: undefined },
-    })
+    await checkTransaction({ transaction: { ...transaction, SUM: '9134.25' } })
 
-    expect(result).toEqual({
-      isMatchingPayment: false,
-      previousCompanyId: null,
-    })
+    const callArg = mockedFind.mock.calls[0][0]
+    const andClause = callArg.$or[1].$and
+    const sumClause = andClause.find((c: any) => c.generalSum !== undefined)
+    expect(sumClause.generalSum).toBe(9134.25)
   })
 })

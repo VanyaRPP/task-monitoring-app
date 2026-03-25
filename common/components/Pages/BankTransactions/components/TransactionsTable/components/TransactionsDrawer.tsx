@@ -51,6 +51,12 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     if (foundByMfo) {
       setSelectedCompany(foundByMfo._id)
       setIsMfoMatched(true)
+      return
+    }
+
+    if (transaction.isMatchingPayment && transaction.previousCompanyId) {
+      setSelectedCompany(transaction.previousCompanyId)
+      setIsMfoMatched(false)
     }
   }, [transaction.TECHNICAL_TRANSACTION_ID, relatedCompanies])
 
