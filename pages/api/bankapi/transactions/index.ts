@@ -4,36 +4,20 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from '@pages/api/api.config'
 import { getTransactionsForDateInterval } from './utils/getTransactions/index'
 import Payment from '@modules/models/Payment'
-import { toRoundFixed } from '@utils/helpers'
-import { Roles } from '@utils/constants'
 import { getCurrentUser } from '@utils/getCurrentUser'
 
 start()
 
 export async function checkTransaction({ transaction }) {
   try {
-    const Sum = +toRoundFixed(transaction.SUM)
-    const Mfo = transaction.AUT_CNTR_MFO?.trim() || ''
+    const TxId = transaction.TECHNICAL_TRANSACTION_ID
+
+    if (!TxId) {
+      return { isMatchingPayment: false, previousCompanyId: null }
+    }
 
     const allPayments = await Payment.find({
-      $or: [
-        {
-          'transaction.TECHNICAL_TRANSACTION_ID': transaction.TECHNICAL_TRANSACTION_ID,
-        },
-        {
-          $and: [
-            {
-              $expr: {
-                $eq: [
-                  { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_MFO', ''] } } },
-                  Mfo,
-                ],
-              },
-            },
-            { generalSum: Sum },
-          ],
-        },
-      ],
+      'transaction.TECHNICAL_TRANSACTION_ID': TxId,
     })
 
     return {
@@ -92,19 +76,10 @@ export default async function handler(
         const checkedTransactions = await Promise.all(
           transactions.map(async (transaction) => {
             try {
-              const isMatchingPayment = await checkTransaction({
-                transaction,
-              })
-
-              return {
-                ...transaction,
-                ...isMatchingPayment,
-              }
+              const matchResult = await checkTransaction({ transaction })
+              return { ...transaction, ...matchResult }
             } catch (error) {
-              return {
-                ...transaction,
-                isMatchingPayment: false,
-              }
+              return { ...transaction, isMatchingPayment: false, previousCompanyId: null }
             }
           })
         )
@@ -127,8 +102,6 @@ export default async function handler(
         .json({ success: false, message: 'not implemented' })
 
     case 'DELETE':
-      return res
-        .status(501)
-        .json({ success: false, message: 'not implemented' })
+      return res.status(501).json({ success: false, message: 'not implemented' })
   }
 }
