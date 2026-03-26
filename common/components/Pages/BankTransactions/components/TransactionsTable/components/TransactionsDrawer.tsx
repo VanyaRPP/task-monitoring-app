@@ -111,7 +111,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
     AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
     Description: transaction.OSND,
-    TECHNICAL_TRANSACTION_ID: transaction.TECHNICAL_TRANSACTION_ID, // ← ключевое поле
+    TECHNICAL_TRANSACTION_ID: transaction.TECHNICAL_TRANSACTION_ID,
   }
 
   return (
