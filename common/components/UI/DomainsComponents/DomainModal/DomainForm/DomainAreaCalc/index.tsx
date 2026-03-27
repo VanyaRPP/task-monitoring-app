@@ -1,8 +1,9 @@
 import React, { useMemo, useEffect } from 'react'
-import { Card, Checkbox, Table, InputNumber, Spin, Form, Empty, Tooltip, Button} from 'antd'
+import { Card, Table, InputNumber, Spin, Form, Empty, Tooltip, Button, Collapse } from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'
 import { useGetAreasQuery } from '@common/api/domainApi/domain.api'
 import ChartComponent from '@components/Chart'
+import s from '../style.module.scss'
 
 interface Props {
   domainId?: string
@@ -12,12 +13,13 @@ interface Props {
 
 const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form }) => {
   const { data: areasData, isLoading, isFetching, refetch } = useGetAreasQuery(
-    { domainId }, 
+    { domainId },
     { skip: !domainId }
   )
 
   const watchedCompanies = Form.useWatch('companiesAreas', form)
   const showTable = Form.useWatch('showAreaDetails', form)
+
   const formCompanies = useMemo(() => watchedCompanies || [], [watchedCompanies])
   const hasPlacementService = formCompanies.length > 0
 
@@ -31,45 +33,56 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form }) => {
 
   const dataSource = useMemo(() => {
     return formCompanies.map((c: any) => {
-      const calculatedPercent = baseTotalArea > 0 
-        ? ((Number(c.area) / baseTotalArea) * 100).toFixed(2) 
-        : "0.00";
+      const calculatedPercent =
+        baseTotalArea > 0 ? ((Number(c.area) / baseTotalArea) * 100).toFixed(2) : '0.00'
 
       return {
         ...c,
-        displayPercent: c.userInputPercent !== undefined ? c.userInputPercent : calculatedPercent
+        displayPercent: c.userInputPercent !== undefined ? c.userInputPercent : calculatedPercent,
       }
     })
   }, [formCompanies, baseTotalArea])
 
   const chartDataSources = useMemo(() => {
     return formCompanies.map((item: any) => {
-    const purePercent = currentTotalArea > 0 
-      ? Number(((Number(item.area) / currentTotalArea) * 100).toFixed(2))
-      : 0;
+      const purePercent =
+        currentTotalArea > 0
+          ? Number(((Number(item.area) / currentTotalArea) * 100).toFixed(2))
+          : 0
 
-    return {
-      label: item.name,
-      value: {
-        part: purePercent, 
-        area: Number(item.area) || 0,
-      },
-    };
-  });
-}, [formCompanies, currentTotalArea]);
+      return {
+        label: item.name,
+        value: {
+          part: purePercent,
+          area: Number(item.area) || 0,
+        },
+      }
+    })
+  }, [formCompanies, currentTotalArea])
 
   useEffect(() => {
-  if (areasData?.companies && !isFetching) {
-    const freshData = areasData.companies.map((c: any) => ({
-      name: c.companyName,
-      area: c.totalArea,
-      rentPart: c.rentPart,
-      key: c.companyName,
-    }));
-    
-    form.setFieldValue('companiesAreas', freshData);
-  }
-}, [areasData, isFetching, form]);
+    if (areasData?.companies && !isFetching) {
+      const freshData = areasData.companies.map((c: any) => ({
+        name: c.companyName,
+        area: c.totalArea,
+        rentPart: c.rentPart,
+        key: c.companyName,
+      }))
+
+      form.setFieldValue('companiesAreas', freshData)
+    }
+  }, [areasData, isFetching, form])
+
+  const [canShowChart, setCanShowChart] = React.useState(false);
+
+  useEffect(() => {
+    if (showTable) {
+      const timer = setTimeout(() => setCanShowChart(true), 300);
+      return () => clearTimeout(timer);
+    } else {
+      setCanShowChart(false);
+    }
+  }, [showTable]);
 
   const columns = [
     { title: 'Назва компанії', dataIndex: 'name', key: 'name' },
@@ -82,13 +95,17 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form }) => {
           min={0}
           value={value}
           disabled={!editable}
-          style={{ width: '100%' }}
+          className={s.fullWidth}
           addonAfter="м²"
           precision={2}
           onChange={(newVal) => {
-            const updated = [...formCompanies];
-            updated[index] = { ...updated[index], area: newVal || 0, userInputPercent: undefined };
-            form.setFieldValue('companiesAreas', updated);
+            const updated = [...formCompanies]
+            updated[index] = {
+              ...updated[index],
+              area: newVal || 0,
+              userInputPercent: undefined,
+            }
+            form.setFieldValue('companiesAreas', updated)
           }}
         />
       ),
@@ -103,44 +120,58 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form }) => {
           max={100}
           value={value}
           disabled={!editable || baseTotalArea === 0}
-          style={{ width: '100%' }}
+          className={s.fullWidth}
           addonAfter="%"
           precision={2}
           step={0.1}
           stringMode
           onChange={(newVal) => {
-            const updated = [...formCompanies];
-            updated[index] = { ...updated[index], userInputPercent: newVal };
-            form.setFieldValue('companiesAreas', updated);
+            const updated = [...formCompanies]
+            updated[index] = { ...updated[index], userInputPercent: newVal }
+            form.setFieldValue('companiesAreas', updated)
           }}
           onBlur={() => {
-            const typedPercent = Number(record.userInputPercent);
+            const typedPercent = Number(record.userInputPercent)
             if (!isNaN(typedPercent)) {
-              const totalBase = currentTotalArea;  
-            if (totalBase > 0) {
-              const newAreaForCurrent = (totalBase * typedPercent) / 100;
-              const remainingArea = totalBase - newAreaForCurrent;
-        
-          const otherCompaniesTotalArea = formCompanies.reduce((acc: number, c: any, i: number) => 
-            i !== index ? acc + (Number(c.area) || 0) : acc, 0);
+              const totalBase = currentTotalArea
+              if (totalBase > 0) {
+                const newAreaForCurrent = (totalBase * typedPercent) / 100
+                const remainingArea = totalBase - newAreaForCurrent
 
-          const updated = formCompanies.map((c: any, i: number) => {
-            if (i === index) {
-              return { ...c, area: Number(newAreaForCurrent.toFixed(2)), userInputPercent: undefined };
+                const otherCompaniesTotalArea = formCompanies.reduce(
+                  (acc: number, c: any, i: number) =>
+                    i !== index ? acc + (Number(c.area) || 0) : acc,
+                  0
+                )
+
+                const updated = formCompanies.map((c: any, i: number) => {
+                  if (i === index) {
+                    return {
+                      ...c,
+                      area: Number(newAreaForCurrent.toFixed(2)),
+                      userInputPercent: undefined,
+                    }
+                  }
+
+                  let newOtherArea = 0
+                  if (otherCompaniesTotalArea > 0) {
+                    newOtherArea = (c.area / otherCompaniesTotalArea) * remainingArea
+                  } else if (remainingArea > 0) {
+                    newOtherArea = remainingArea / (formCompanies.length - 1)
+                  }
+
+                  return {
+                    ...c,
+                    area: Number(newOtherArea.toFixed(2)),
+                    userInputPercent: undefined,
+                  }
+                })
+
+                form.setFieldValue('companiesAreas', updated)
+              }
             }
-            let newOtherArea = 0;
-            if (otherCompaniesTotalArea > 0) {
-              newOtherArea = (c.area / otherCompaniesTotalArea) * remainingArea;
-            } else if (remainingArea > 0) {
-              newOtherArea = remainingArea / (formCompanies.length - 1);
-            }
-          return { ...c, area: Number(newOtherArea.toFixed(2)), userInputPercent: undefined };
-          });
-          form.setFieldValue('companiesAreas', updated);
-          }
-          }
           }}
-        onPressEnter={(e: any) => e.target.blur()}
+          onPressEnter={(e: any) => e.target.blur()}
         />
       ),
     },
@@ -149,80 +180,97 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form }) => {
   if (!domainId) return null
 
   return (
-    <div style={{ marginTop: '24px', marginBottom: '24px' }}>
-      <Form.Item name="companiesAreas" hidden><div /></Form.Item>
-      <Form.Item name="showAreaDetails" valuePropName="checked" hidden><Checkbox /></Form.Item>
+    <div className={s.wrapper}>
+      <Form.Item name="companiesAreas" hidden noStyle>
+        <div />
+      </Form.Item>
+      <Form.Item name="showAreaDetails" hidden noStyle>
+        <div />
+      </Form.Item>
 
-      <Card
-        size="small"
-        styles={{
-          body: {
-            padding: showTable && hasPlacementService ? '16px' : 0,
-            display: showTable && hasPlacementService ? 'block' : 'none'
-          }
-        }}
-       title={
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-          <Checkbox 
-            disabled={!editable || (isLoading && !hasPlacementService)}
-            checked={!!showTable}
-            onChange={(e) => form.setFieldValue('showAreaDetails', e.target.checked)}
-          >
-            Розрахунок площі по компаніях
-          </Checkbox>
+      <Card size="small" className={s.card} title={null}>
+        <Collapse
+          ghost          
+          activeKey={showTable ? ['1'] : []}
+          onChange={(keys) => {
+            form.setFieldValue('showAreaDetails', keys.length > 0)
+          }}
+          items={[
+            {
+              key: '1',
+              forceRender: true,
+              label: (
+                <div className={s.header}>
+                  <span className={s.title}>
+                    Розрахунок площі по компаніях
+                  </span>
 
-          <Tooltip title="Оновити дані">
-            <Button 
-              type="text" 
-              shape="circle" 
-              icon={<ReloadOutlined spin={isFetching} />} 
-              onClick={() => refetch()} 
-              disabled={isLoading || isFetching}
-              style={{ marginLeft: '8px' }}
-            />
-          </Tooltip>
-        </div>
-      }
-      >
-        {showTable && (
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {isLoading || isFetching ? (
-              <div style={{ textAlign: 'center', padding: '20px' }}><Spin size="large" /></div>
-            ) : hasPlacementService ? (
-              currentTotalArea > 0 ? (
-                <>
-                  <Table
-                    dataSource={dataSource}
-                    columns={columns}
-                    pagination={false}
-                    size="small"
-                    bordered
-                    summary={() => (
-                      <Table.Summary.Row style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
-                        <Table.Summary.Cell index={0}><b>Всього</b></Table.Summary.Cell>
-                        <Table.Summary.Cell index={1}><b>{currentTotalArea.toFixed(2)} м²</b></Table.Summary.Cell>
-                        <Table.Summary.Cell index={2}><b>100%</b></Table.Summary.Cell>
-                      </Table.Summary.Row>
-                    )}
-                  />
-                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: '-80px', marginBottom: '-90px' }}>
-                    <ChartComponent 
-                      dataSources={chartDataSources} 
-                      chartTitle="Розподіл площ" 
-                      domainName="Загальна площа" 
+                  <Tooltip title="Оновити дані">
+                    <Button
+                      type="text"
+                      shape="circle"
+                      icon={<ReloadOutlined spin={isFetching} />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        refetch()
+                      }}
+                      disabled={isLoading || isFetching}
                     />
-                  </div>
-                </>
-              ) : (
-                <div style={{ padding: '40px 0' }}>
-                  <Empty description="Усі площі дорівнюють нулю" />
+                  </Tooltip>
                 </div>
-              )
-            ) : (
-              <div style={{ padding: '20px', textAlign: 'center' }}>Дані відсутні</div>
-            )}
-          </div>
-        )}
+              ),
+              children: (
+                <div className={s.content}>
+                  {isLoading || isFetching ? (
+                    <div className={s.center}>
+                      <Spin size="large" />
+                    </div>
+                  ) : hasPlacementService ? (
+                    currentTotalArea > 0 ? (
+                      <>
+                        <Table
+                          dataSource={dataSource}
+                          columns={columns}
+                          pagination={false}
+                          size="small"
+                          bordered
+                          summary={() => (
+                            <Table.Summary.Row>
+                              <Table.Summary.Cell index={0}>
+                                <b>Всього</b>
+                              </Table.Summary.Cell>
+                              <Table.Summary.Cell index={1}>
+                                <b>{currentTotalArea.toFixed(2)} м²</b>
+                              </Table.Summary.Cell>
+                              <Table.Summary.Cell index={2}>
+                                <b>100%</b>
+                              </Table.Summary.Cell>
+                            </Table.Summary.Row>
+                          )}
+                        />
+                        {canShowChart && (
+                        <div className={s.chart}>
+                          <ChartComponent
+                            dataSources={chartDataSources}
+                            chartTitle="Розподіл площ"
+                            domainName="Загальна площа"
+                          />
+                        </div>
+                      )}
+                      </>
+                    ) : (
+                      <div className={s.empty}>
+                        <Empty description="Усі площі дорівнюють нулю" />
+                      </div>
+                    )
+                  ) : (
+                    <div className={s.noData}>Дані відсутні</div>
+                  )}
+                </div>
+              ),
+            },
+          ]}
+        />
       </Card>
     </div>
   )
