@@ -32,8 +32,8 @@ const getDropdownSendButton = () =>
 
 const makeTransaction = (overrides = {}) => ({
   TECHNICAL_TRANSACTION_ID: 'tx_001',
+  AUT_CNTR_ACC: 'UA803220010000026001350058717',
   AUT_CNTR_MFO: '322001',
-  AUT_CNTR_ACC: '1234567890',
   AUT_CNTR_NAM: 'ТОВ Тест',
   AUT_MY_CRF: '2479002623',
   AUT_MY_MFO: '305299',
@@ -69,7 +69,7 @@ const makeTransaction = (overrides = {}) => ({
 const makeCompany = (overrides = {}) => ({
   _id: 'company_001',
   companyName: 'ТОВ Тест',
-  mfo: '322001',
+  account: 'UA803220010000026001350058717',
   domain: { _id: 'domain_001' },
   street: { _id: 'street_001' },
   adminEmails: [],
@@ -109,7 +109,7 @@ describe('Badge "Платіж є"', () => {
 
   it('remains visible after user selects a company (badge is read-only from backend)', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: 'OTHER_MFO' })] },
+      data: { data: [makeCompany({ account: 'OTHER_ACC' })] },
     })
     renderDrawer(makeTransaction({ isMatchingPayment: true }))
 
@@ -121,7 +121,7 @@ describe('Badge "Платіж є"', () => {
     })
   })
 
-  it('updates correctly when switching to a transaction with isMatchingPayment=false', async () => {
+  it('updates when switching to a transaction with isMatchingPayment=false', async () => {
     const { rerender } = renderDrawer(makeTransaction({ isMatchingPayment: true }))
 
     rerender(
@@ -142,7 +142,7 @@ describe('Badge "Платіж є"', () => {
 describe('State reset when transaction changes', () => {
   it('clears selectedCompany when TECHNICAL_TRANSACTION_ID changes', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: 'OTHER_MFO' })] },
+      data: { data: [makeCompany({ account: 'OTHER_ACC' })] },
     })
     const { rerender } = renderDrawer(makeTransaction())
 
@@ -154,7 +154,7 @@ describe('State reset when transaction changes', () => {
 
     rerender(
       <TransactionDrawer
-        transaction={makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_002', AUT_CNTR_MFO: 'UNKNOWN' })}
+        transaction={makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_002', AUT_CNTR_ACC: 'UNKNOWN' })}
         domain={makeDomain() as any}
       />
     )
@@ -164,18 +164,18 @@ describe('State reset when transaction changes', () => {
     })
   })
 
-  it('clears isMfoMatched on transaction change — Dropdown replaced with plain Send button', async () => {
+  it('clears isAccountMatched on transaction change — Dropdown replaced with plain Send', async () => {
     const { rerender } = renderDrawer()
 
     await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
 
     mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: 'NO_MATCH' })] },
+      data: { data: [makeCompany({ account: 'NO_MATCH' })] },
     })
 
     rerender(
       <TransactionDrawer
-        transaction={makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_002', AUT_CNTR_MFO: 'NO_MATCH_MFO' })}
+        transaction={makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_002', AUT_CNTR_ACC: 'NO_MATCH_ACC' })}
         domain={makeDomain() as any}
       />
     )
@@ -188,18 +188,17 @@ describe('State reset when transaction changes', () => {
 })
 
 
-
-describe('MFO auto-match', () => {
-  it('auto-selects company when company.mfo matches transaction.AUT_CNTR_MFO', async () => {
+describe('Account auto-match (AUT_CNTR_ACC)', () => {
+  it('auto-selects company when company.account matches transaction.AUT_CNTR_ACC', async () => {
     renderDrawer()
     await waitFor(() => {
       expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('ТОВ Тест')
     })
   })
 
-  it('does not auto-select when mfo does not match', async () => {
+  it('does not auto-select when account does not match', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: 'NO_MATCH' })] },
+      data: { data: [makeCompany({ account: 'UA000000000000000000000000000' })] },
     })
     renderDrawer()
     await waitFor(() => {
@@ -207,14 +206,31 @@ describe('MFO auto-match', () => {
     })
   })
 
-  it('shows Dropdown Send button when MFO matched', async () => {
+  it('correctly distinguishes two companies in the same bank (same MFO, different IBAN)', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: {
+        data: [
+          makeCompany({ _id: 'company_A', companyName: 'Компанія А', account: 'UA111111111111111111111111111' }),
+          makeCompany({ _id: 'company_B', companyName: 'Компанія Б', account: 'UA803220010000026001350058717' }),
+        ],
+      },
+    })
+
+    renderDrawer(makeTransaction({ AUT_CNTR_ACC: 'UA803220010000026001350058717' }))
+
+    await waitFor(() => {
+      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('Компанія Б')
+    })
+  })
+
+  it('shows Dropdown Send button when account matched', async () => {
     renderDrawer()
     await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
   })
 
-  it('shows plain Send button disabled when no MFO match and no company selected', async () => {
+  it('shows plain Send button disabled when no account match and no company selected', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: 'NO_MATCH' })] },
+      data: { data: [makeCompany({ account: 'NO_MATCH' })] },
     })
     renderDrawer()
     await waitFor(() => {
@@ -225,7 +241,7 @@ describe('MFO auto-match', () => {
 
   it('enables plain Send button after manual selection', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: 'NO_MATCH' })] },
+      data: { data: [makeCompany({ account: 'NO_MATCH' })] },
     })
     renderDrawer()
 
@@ -240,20 +256,13 @@ describe('MFO auto-match', () => {
 })
 
 
-
-
 describe('Auto-match fallback for old companies (via previousCompanyId)', () => {
-  it('auto-selects company by previousCompanyId when company has no mfo saved', async () => {
+  it('auto-selects company by previousCompanyId when company has no account saved', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: undefined })] }, 
+      data: { data: [makeCompany({ account: undefined })] },
     })
 
-    renderDrawer(
-      makeTransaction({
-        isMatchingPayment: true,
-        previousCompanyId: 'company_001', 
-      })
-    )
+    renderDrawer(makeTransaction({ isMatchingPayment: true, previousCompanyId: 'company_001' }))
 
     await waitFor(() => {
       expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('ТОВ Тест')
@@ -262,51 +271,43 @@ describe('Auto-match fallback for old companies (via previousCompanyId)', () => 
 
   it('does not auto-select if isMatchingPayment=false even with previousCompanyId', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: undefined })] },
+      data: { data: [makeCompany({ account: undefined })] },
     })
 
-    renderDrawer(
-      makeTransaction({
-        isMatchingPayment: false,
-        previousCompanyId: 'company_001',
-      })
-    )
+    renderDrawer(makeTransaction({ isMatchingPayment: false, previousCompanyId: 'company_001' }))
 
     await waitFor(() => {
       expect(document.querySelector('.ant-select-selection-item')).toBeNull()
     })
   })
 
-  it('prefers mfo match over previousCompanyId when both are available', async () => {
+  it('prefers account match over previousCompanyId when both available', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: {
         data: [
-          makeCompany({ _id: 'company_mfo', companyName: 'MFO Company', mfo: '322001' }),
-          makeCompany({ _id: 'company_old', companyName: 'Old Company', mfo: undefined }),
+          makeCompany({ _id: 'company_acc', companyName: 'Account Company', account: 'UA803220010000026001350058717' }),
+          makeCompany({ _id: 'company_old', companyName: 'Old Company', account: undefined }),
         ],
       },
     })
 
-    renderDrawer(
-      makeTransaction({
-        AUT_CNTR_MFO: '322001',
-        isMatchingPayment: true,
-        previousCompanyId: 'company_old',
-      })
-    )
+    renderDrawer(makeTransaction({
+      AUT_CNTR_ACC: 'UA803220010000026001350058717',
+      isMatchingPayment: true,
+      previousCompanyId: 'company_old',
+    }))
 
     await waitFor(() => {
-      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('MFO Company')
+      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('Account Company')
     })
   })
 })
 
 
-
 describe('transactionPayload includes TECHNICAL_TRANSACTION_ID', () => {
   it('passes TECHNICAL_TRANSACTION_ID to AddPaymentModal via paymentData.transaction', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: 'NO_MATCH' })] },
+      data: { data: [makeCompany({ account: 'NO_MATCH' })] },
     })
     renderDrawer(makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_unique_001' }))
 
@@ -322,12 +323,12 @@ describe('transactionPayload includes TECHNICAL_TRANSACTION_ID', () => {
   })
 })
 
-describe('saveMfoToCompany after successful payment creation', () => {
-  it('calls PATCH with mfo when company was manually selected and success=true', async () => {
+describe('saveAccountToCompany after successful payment creation', () => {
+  it('calls PATCH with account when company was manually selected and success=true', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: undefined })] },
+      data: { data: [makeCompany({ account: undefined })] },
     })
-    renderDrawer(makeTransaction({ AUT_CNTR_MFO: '322001' }))
+    renderDrawer(makeTransaction({ AUT_CNTR_ACC: 'UA803220010000026001350058717' }))
 
     await userEvent.click(screen.getByRole('combobox'))
     await userEvent.click(await screen.findByText('ТОВ Тест'))
@@ -339,13 +340,13 @@ describe('saveMfoToCompany after successful payment creation', () => {
         '/api/realestate/company_001',
         expect.objectContaining({
           method: 'PATCH',
-          body: JSON.stringify({ mfo: '322001' }),
+          body: JSON.stringify({ account: 'UA803220010000026001350058717' }),
         })
       )
     })
   })
 
-  it('does NOT call PATCH when company was auto-matched by MFO (already saved)', async () => {
+  it('does NOT call PATCH when company was auto-matched by account (already saved)', async () => {
     renderDrawer()
 
     await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
@@ -364,7 +365,7 @@ describe('saveMfoToCompany after successful payment creation', () => {
 
   it('does NOT call PATCH when modal closes with success=false', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: undefined })] },
+      data: { data: [makeCompany({ account: undefined })] },
     })
     renderDrawer()
 

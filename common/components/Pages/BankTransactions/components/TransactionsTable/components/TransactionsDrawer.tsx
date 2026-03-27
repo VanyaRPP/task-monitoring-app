@@ -20,8 +20,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<any>(null)
-
-  const [isMfoMatched, setIsMfoMatched] = useState(false)
+  const [isAccountMatched, setIsAccountMatched] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const transactionAmount = parseFloat(transaction.SUM as string)
@@ -37,54 +36,55 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
 
   useEffect(() => {
     setSelectedCompany(null)
-    setIsMfoMatched(false)
+    setIsAccountMatched(false)
     setLoading(false)
   }, [transaction.TECHNICAL_TRANSACTION_ID])
 
   useEffect(() => {
     if (relatedCompanies.length === 0) return
 
-    const foundByMfo = relatedCompanies.find(
-      (company: IRealestate) => company.mfo === transaction.AUT_CNTR_MFO
+    const foundByAccount = relatedCompanies.find(
+      (company: IRealestate) => company.account === transaction.AUT_CNTR_ACC
     )
 
-    if (foundByMfo) {
-      setSelectedCompany(foundByMfo._id)
-      setIsMfoMatched(true)
+    if (foundByAccount) {
+      setSelectedCompany(foundByAccount._id)
+      setIsAccountMatched(true)
       return
     }
 
     if (transaction.isMatchingPayment && transaction.previousCompanyId) {
       setSelectedCompany(transaction.previousCompanyId)
-      setIsMfoMatched(false)
+      setIsAccountMatched(false)
     }
   }, [transaction.TECHNICAL_TRANSACTION_ID, relatedCompanies])
 
   const handleCompanyChange = (value: string) => {
     setSelectedCompany(value)
-    setIsMfoMatched(false)
+    setIsAccountMatched(false)
   }
 
-  const saveMfoToCompany = async (companyId: string) => {
-    if (!transaction.AUT_CNTR_MFO) return
+  const saveAccountToCompany = async (companyId: string) => {
+    if (!transaction.AUT_CNTR_ACC) return
     try {
       await fetch(`/api/realestate/${companyId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mfo: transaction.AUT_CNTR_MFO }),
+        body: JSON.stringify({ account: transaction.AUT_CNTR_ACC }),
       })
     } catch (error) {
-      console.error('Failed to save MFO to company:', error)
+      console.error('Failed to save account to company:', error)
     }
   }
 
   const showModal = () => setModalVisible(true)
+
   const closeModal = async (success?: boolean) => {
     setModalVisible(false)
     if (success === true) {
       message.success('Рахунок успішно створено!')
-      if (selectedCompany && !isMfoMatched) {
-        await saveMfoToCompany(selectedCompany)
+      if (selectedCompany && !isAccountMatched) {
+        await saveAccountToCompany(selectedCompany)
       }
     }
     setLoading(false)
@@ -137,7 +137,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
               </Select.Option>
             ))}
           </Select>
-          {isMfoMatched ? (
+          {isAccountMatched ? (
             <Dropdown menu={{ items: dropdownItems }} trigger={['click']}>
               <Button type="primary" loading={loading}>
                 Send <DownOutlined />
