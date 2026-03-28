@@ -167,7 +167,7 @@ export const mockBankApi = createApi({
     }),
     getTransactions: builder.query<
       IBankRes<ITransactionData>,
-      { token: string; acc: string }
+      { token: string; acc: string; domainId?: string }
     >({
       query: () => '',
       transformResponse: () => mockTransactions,
