@@ -269,7 +269,7 @@ describe('Auto-match fallback for old companies (via previousCompanyId)', () => 
     })
   })
 
-  it('does not auto-select if isMatchingPayment=false even with previousCompanyId', async () => {
+  it('auto-selects by previousCompanyId from account history (isMatchingPayment false)', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: { data: [makeCompany({ account: undefined })] },
     })
@@ -277,7 +277,7 @@ describe('Auto-match fallback for old companies (via previousCompanyId)', () => 
     renderDrawer(makeTransaction({ isMatchingPayment: false, previousCompanyId: 'company_001' }))
 
     await waitFor(() => {
-      expect(document.querySelector('.ant-select-selection-item')).toBeNull()
+      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('ТОВ Тест')
     })
   })
 

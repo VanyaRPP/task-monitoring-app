@@ -31,14 +31,24 @@ jest.mock(
 
 jest.mock('@modules/models/Payment', () => ({
   __esModule: true,
-  default: { find: jest.fn() },
+  default: {
+    find: jest.fn(),
+    findOne: jest.fn(),
+  },
 }))
 
 import Payment from '@modules/models/Payment'
-import { checkTransaction } from './index'
+import { checkTransaction, normalizeBankAccount } from './index'
+
+describe('normalizeBankAccount', () => {
+  it('trims whitespace', () => {
+    expect(normalizeBankAccount('  UA123  ')).toBe('UA123')
+  })
+})
 
 describe('checkTransaction', () => {
   const mockedFind = (Payment as unknown as { find: jest.Mock }).find
+  const mockedFindOne = (Payment as unknown as { findOne: jest.Mock }).findOne
 
   const transaction = {
     TECHNICAL_TRANSACTION_ID: 'tx_001_online',
@@ -52,14 +62,17 @@ describe('checkTransaction', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockedFindOne.mockReturnValue({
+      sort: jest.fn().mockReturnValue({
+        lean: jest.fn().mockResolvedValue(null),
+      }),
+    })
   })
-
-  
 
   it('calls Payment.find with TECHNICAL_TRANSACTION_ID only', async () => {
     mockedFind.mockResolvedValue([{ company: 'company-1' }])
 
-    await checkTransaction({ transaction })
+    await checkTransaction({ transaction, domainId: null })
 
     expect(mockedFind).toHaveBeenCalledTimes(1)
     expect(mockedFind).toHaveBeenCalledWith({
@@ -70,7 +83,7 @@ describe('checkTransaction', () => {
   it('does NOT use MFO or generalSum in the query', async () => {
     mockedFind.mockResolvedValue([])
 
-    await checkTransaction({ transaction })
+    await checkTransaction({ transaction, domainId: null })
 
     const callArg = mockedFind.mock.calls[0][0]
     expect(callArg).not.toHaveProperty('$or')
@@ -79,12 +92,10 @@ describe('checkTransaction', () => {
     expect(JSON.stringify(callArg)).not.toContain('AUT_CNTR_MFO')
   })
 
-  
-
   it('returns isMatchingPayment=true and previousCompanyId when payment found', async () => {
     mockedFind.mockResolvedValue([{ company: 'company-123' }])
 
-    const result = await checkTransaction({ transaction })
+    const result = await checkTransaction({ transaction, domainId: null })
 
     expect(result).toEqual({
       isMatchingPayment: true,
@@ -95,7 +106,7 @@ describe('checkTransaction', () => {
   it('returns isMatchingPayment=false and previousCompanyId=null when no payments found', async () => {
     mockedFind.mockResolvedValue([])
 
-    const result = await checkTransaction({ transaction })
+    const result = await checkTransaction({ transaction, domainId: null })
 
     expect(result).toEqual({
       isMatchingPayment: false,
@@ -109,31 +120,54 @@ describe('checkTransaction', () => {
       { company: 'company-second' },
     ])
 
-    const result = await checkTransaction({ transaction })
+    const result = await checkTransaction({ transaction, domainId: null })
 
     expect(result.previousCompanyId).toBe('company-first')
     expect(result.isMatchingPayment).toBe(true)
   })
 
-  it('returns false when TECHNICAL_TRANSACTION_ID is missing — no guessing', async () => {
+  it('returns false when TECHNICAL_TRANSACTION_ID is missing — no tx match; no domainId for account fallback', async () => {
     const result = await checkTransaction({
       transaction: { ...transaction, TECHNICAL_TRANSACTION_ID: undefined },
+      domainId: null,
     })
 
-    
     expect(mockedFind).not.toHaveBeenCalled()
+    expect(mockedFindOne).not.toHaveBeenCalled()
     expect(result).toEqual({
       isMatchingPayment: false,
       previousCompanyId: null,
     })
   })
 
-  it('returns false when TECHNICAL_TRANSACTION_ID is empty string — no guessing', async () => {
+  it('falls back to last payment by AUT_CNTR_ACC in domain when tx id unknown', async () => {
+    mockedFindOne.mockReturnValue({
+      sort: jest.fn().mockReturnValue({
+        lean: jest.fn().mockResolvedValue({ company: 'company-from-iban' }),
+      }),
+    })
+
     const result = await checkTransaction({
-      transaction: { ...transaction, TECHNICAL_TRANSACTION_ID: '' },
+      transaction: { ...transaction, TECHNICAL_TRANSACTION_ID: undefined },
+      domainId: 'domain-xyz',
     })
 
     expect(mockedFind).not.toHaveBeenCalled()
+    expect(mockedFindOne).toHaveBeenCalled()
+    expect(result).toEqual({
+      isMatchingPayment: false,
+      previousCompanyId: 'company-from-iban',
+    })
+  })
+
+  it('returns false when TECHNICAL_TRANSACTION_ID is empty string — tries account fallback only with domainId', async () => {
+    const result = await checkTransaction({
+      transaction: { ...transaction, TECHNICAL_TRANSACTION_ID: '' },
+      domainId: null,
+    })
+
+    expect(mockedFind).not.toHaveBeenCalled()
+    expect(mockedFindOne).not.toHaveBeenCalled()
     expect(result).toEqual({
       isMatchingPayment: false,
       previousCompanyId: null,
@@ -141,17 +175,17 @@ describe('checkTransaction', () => {
   })
 
   it('ANTI-FALSE-POSITIVE: same MFO and sum from different transaction never causes match', async () => {
-    
     mockedFind.mockResolvedValue([])
     const result = await checkTransaction({
       transaction: {
         ...transaction,
         TECHNICAL_TRANSACTION_ID: 'tx_completely_different',
       },
+      domainId: null,
     })
 
     expect(result.isMatchingPayment).toBe(false)
-    
+
     expect(mockedFind).toHaveBeenCalledWith({
       'transaction.TECHNICAL_TRANSACTION_ID': 'tx_completely_different',
     })
@@ -160,6 +194,8 @@ describe('checkTransaction', () => {
   it('throws Error with original message when Payment.find throws', async () => {
     mockedFind.mockRejectedValue(new Error('DB down'))
 
-    await expect(checkTransaction({ transaction })).rejects.toThrow('DB down')
+    await expect(
+      checkTransaction({ transaction, domainId: null })
+    ).rejects.toThrow('DB down')
   })
 })

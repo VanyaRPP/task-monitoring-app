@@ -50,7 +50,11 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
 
   const { data: transactionsData, isLoading: isTransactionsLoading } =
     useGetTransactionsQuery(
-      { token: decryptedToken, acc: selectedAccount ?? undefined },
+      {
+        token: decryptedToken,
+        acc: selectedAccount ?? undefined,
+        domainId,
+      },
       { skip: !decryptedToken || !selectedAccount }
     )
 

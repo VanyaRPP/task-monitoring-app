@@ -53,11 +53,17 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
       return
     }
 
-    if (transaction.isMatchingPayment && transaction.previousCompanyId) {
-      setSelectedCompany(transaction.previousCompanyId)
+    if (transaction.previousCompanyId) {
+      setSelectedCompany(String(transaction.previousCompanyId))
       setIsAccountMatched(false)
     }
-  }, [transaction.TECHNICAL_TRANSACTION_ID, relatedCompanies])
+  }, [
+    transaction.TECHNICAL_TRANSACTION_ID,
+    transaction.AUT_CNTR_ACC,
+    transaction.previousCompanyId,
+    transaction.isMatchingPayment,
+    relatedCompanies,
+  ])
 
   const handleCompanyChange = (value: string) => {
     setSelectedCompany(value)
