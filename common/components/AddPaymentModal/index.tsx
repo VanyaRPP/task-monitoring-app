@@ -47,7 +47,7 @@ const DEFAULT_INVOICES = [
 ]
 
 interface Props {
-  closeModal: VoidFunction
+  closeModal: (success?: boolean) => void
   paymentData?: any
   paymentActions?: { edit: boolean; preview: boolean; create?: boolean }
   preselectedCompany?: string
@@ -348,7 +348,7 @@ const AddPaymentModal: FC<Props> = ({
       const action = edit ? 'Збережено' : 'Додано'
       form.resetFields()
       message.success(action)
-      closeModal()
+      closeModal(true)
     } else {
       const action = edit ? 'збереженні' : 'додаванні'
       message.error(`Помилка при ${action} рахунку`)
