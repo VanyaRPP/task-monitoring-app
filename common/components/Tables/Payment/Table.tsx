@@ -220,14 +220,8 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const isUser = currUserRoles.includes(Roles.USER)
   const { token } = theme.useToken()
   const isSingleCompanyByData = useMemo(() => {
-    const list = payments?.data || []
-    const uniqueCompanies = new Set(
-      list.map((p) =>
-        typeof p.company === 'object' ? p?.company?.companyName : p?.company
-      )
-    )
-    return filters?.company?.length === 1 && uniqueCompanies?.size === 1
-  }, [payments?.data, filters?.company])
+     return companiesFilter?.length === 1
+}, [companiesFilter])
   // const isSingleDomainByData = useMemo(() => {
   //   const list = payments?.data || []
   //   const uniqueDomains = new Set(
