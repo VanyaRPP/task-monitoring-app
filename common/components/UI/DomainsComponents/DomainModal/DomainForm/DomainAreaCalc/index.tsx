@@ -2,7 +2,6 @@ import React, { useMemo, useEffect } from 'react'
 import { Card, Table, InputNumber, Spin, Form, Empty, Tooltip, Button, Collapse } from 'antd'
 import { ReloadOutlined } from '@ant-design/icons'
 import { useGetAreasQuery } from '@common/api/domainApi/domain.api'
-import { useEditRealEstateMutation } from '@common/api/realestateApi/realestate.api'
 import ChartComponent from '@components/Chart'
 import s from '../style.module.scss'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
@@ -11,14 +10,15 @@ interface Props {
   domainId?: string
   editable: boolean
   form: any
+  setIsValueChanged?: (value: boolean) => void
 }
 
-const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form }) => {
+const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form, setIsValueChanged}) => {
   const { data: areasData, isLoading, isFetching, refetch } = useGetAreasQuery(
     { domainId },
-    { skip: !domainId }
+    { skip: !domainId, refetchOnMountOrArgChange: true }
   )
-  const [editRealEstate] = useEditRealEstateMutation()
+
   const { data: allRealEstate } = useGetAllRealEstateQuery({});
 
   const watchedCompanies = Form.useWatch('companiesAreas', form)
@@ -36,14 +36,14 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form }) => {
   }, [formCompanies])
 
   const dataSource = useMemo(() => {
-  return formCompanies.map((c: any) => {
-    const percent =
-      currentTotalArea > 0
-        ? ((Number(c.area) / currentTotalArea) * 100).toFixed(2)
-        : '0.00'
-    return { ...c, percent }
-  })
-}, [formCompanies, currentTotalArea])
+    return formCompanies.map((c: any) => {
+      const percent =
+        currentTotalArea > 0
+          ? ((Number(c.area) / currentTotalArea) * 100).toFixed(2)
+          : '0.00'
+      return { ...c, percent }
+    })
+  }, [formCompanies, currentTotalArea])
 
   const chartDataSources = useMemo(() => {
     return formCompanies.map((item: any) => {
@@ -62,53 +62,53 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form }) => {
   }, [formCompanies, totalRentWeight])
 
   useEffect(() => {
-  const currentValues = form.getFieldValue('companiesAreas')
-  
-  if (areasData?.companies && !isFetching && (!currentValues || currentValues.length === 0)) {
-    const freshData = areasData.companies.map((c: any) => {
-      const original = allRealEstate?.data?.find((item: any) => item.companyName === c.companyName)
-      
-      return {
-        _id: original?._id || c._id,
-        name: c.companyName,
-        area: c.totalArea,
-        rentPart: c.rentPart,
-        key: original?._id || c.companyName,
+    if (domainId) {
+      refetch();
+    }
+  }, [domainId, refetch]);
+
+  useEffect(() => {
+    const currentValues = form.getFieldValue('companiesAreas');
+    
+    if (areasData?.companies && !isFetching) {
+      if (!currentValues || currentValues.length === 0) {
+        const freshData = areasData.companies.map((c: any) => {
+          const original = allRealEstate?.data?.find((item: any) => item.companyName === c.companyName);
+          
+          return {
+            _id: original?._id || c._id,
+            name: c.companyName,
+            area: c.totalArea,
+            rentPart: c.rentPart,
+            key: original?._id || c.companyName,
+          };
+        });
+
+        form.setFieldValue('companiesAreas', freshData);
       }
+    }
+  }, [areasData, isFetching, allRealEstate, form]);
+
+  const handleUpdate = (index: number, changedFields: { area?: number }) => {
+    const updatedCompanies = [...formCompanies]
+    const newArea = changedFields.area !== undefined ? changedFields.area : updatedCompanies[index].area
+    
+    const newTotalArea = updatedCompanies.reduce((acc: number, c: any, i: number) => {
+      return acc + (i === index ? newArea : (Number(c.area) || 0))
+    }, 0)
+
+    const finalData = updatedCompanies.map((c: any, i: number) => {
+      const area = i === index ? newArea : (Number(c.area) || 0)
+      const rentPart = newTotalArea > 0 ? (area / newTotalArea) * 100 : 0
+      return { ...c, area, rentPart }
     })
 
-    form.setFieldValue('companiesAreas', freshData)
+    form.setFieldValue('companiesAreas', finalData)
+
+    if (setIsValueChanged) {
+      setIsValueChanged(true)
+    }
   }
-}, [areasData, isFetching, allRealEstate])
-
-  const handleUpdate = async (index: number, changedFields: { area?: number }) => {
-  const company = formCompanies[index]
-
-  const newArea = changedFields.area !== undefined ? changedFields.area : company.area
-  
-  const newTotalArea = formCompanies.reduce((acc: number, c: any, i: number) => {
-    return acc + (i === index ? newArea : (Number(c.area) || 0))
-  }, 0)
-
-  const updatedCompanies = [...formCompanies]
-  
-  const finalData = updatedCompanies.map((c: any, i: number) => {
-    const area = i === index ? newArea : (Number(c.area) || 0)
-    const rentPart = newTotalArea > 0 ? (area / newTotalArea) * 100 : 0
-    return { ...c, area, rentPart }
-  })
-
-  form.setFieldValue('companiesAreas', finalData)
-  try {
-    await editRealEstate({
-      _id: company._id,
-      totalArea: newArea,
-      rentPart: (newArea / newTotalArea) * 100,
-    }).unwrap()
-  } catch (e) {
-    console.error('Помилка збереження:', e)
-  }
-}
 
   const columns = [
     { title: 'Назва компанії', dataIndex: 'name', key: 'name' },
@@ -133,7 +133,7 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form }) => {
       dataIndex: 'percent',
       key: 'percent',
       render: (percent: string) => <b>{percent} %</b>,
-  },
+    },
   ]
 
   if (!domainId) return null
@@ -155,14 +155,19 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form }) => {
               label: (
                 <div className={s.header}>
                   <span className={s.title}>Розрахунок площі по компаніях</span>
-                  <Tooltip title="Оновити дані">
+                    <Tooltip title="Оновити дані (скинути зміни)">
                     <Button
                       type="text"
                       shape="circle"
                       icon={<ReloadOutlined spin={isFetching} />}
                       onClick={(e) => {
-                        e.stopPropagation()
-                        refetch()
+                        e.stopPropagation();
+                        form.setFieldValue('companiesAreas', []); 
+                        
+                        if (setIsValueChanged) {
+                          setIsValueChanged(false);
+                        }
+                        refetch();
                       }}
                       disabled={isLoading || isFetching}
                     />
