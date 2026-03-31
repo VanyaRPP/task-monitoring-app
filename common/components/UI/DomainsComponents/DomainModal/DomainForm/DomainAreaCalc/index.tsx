@@ -157,6 +157,7 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form, setIsV
                   <span className={s.title}>Розрахунок площі по компаніях</span>
                     <Tooltip title="Оновити дані (скинути зміни)">
                     <Button
+                      data-testid="reload-button"
                       type="text"
                       shape="circle"
                       icon={<ReloadOutlined spin={isFetching} />}
