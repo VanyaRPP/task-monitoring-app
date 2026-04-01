@@ -253,11 +253,11 @@ const GroupedReceiptForm: FC<Props> = ({
 
   return (
     <>
-        <SendOutlined 
+        {/* <SendOutlined 
           // className={s.telegramIcon} 
           // onClick={handleSendToTelegram} 
           // style={{ color: '#24A1DE' }}
-        />
+        /> */}
       <PrinterOutlined className={s.print} onClick={handlePrint} />
       <Dropdown
         trigger={['click']}
