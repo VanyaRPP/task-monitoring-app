@@ -1,0 +1,687 @@
+$gold:        #c9a84c;
+$gold-light:  #e2c47a;
+$gold-muted:  rgba(201, 168, 76, 0.18);
+$gold-glow:   rgba(201, 168, 76, 0.08);
+
+$surface-0:   rgba(255, 255, 255, 0.03);
+$surface-1:   rgba(255, 255, 255, 0.06);
+$surface-2:   rgba(255, 255, 255, 0.09);
+
+$border-soft: rgba(255, 255, 255, 0.10);
+$border-gold: rgba(201, 168, 76, 0.30);
+
+$shadow-card: 0 4px 24px rgba(0, 0, 0, 0.28), 0 1px 4px rgba(0, 0, 0, 0.18);
+$shadow-sm:   0 2px 10px rgba(0, 0, 0, 0.18);
+
+$radius-xl:   20px;
+$radius-lg:   14px;
+$radius-md:   10px;
+
+$font:        'Inter', 'Helvetica Neue', Arial, sans-serif;
+
+
+@mixin card {
+  background: $surface-1;
+  border: 1px solid $border-soft;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+}
+
+@mixin gold-card {
+  background: linear-gradient(135deg, $gold-glow 0%, $surface-1 100%);
+  border: 1px solid $border-gold;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+}
+
+
+.scInvoice {
+  font-family: $font;
+  font-size: 13px;
+  line-height: 1.55;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+.scHeader {
+  @include gold-card;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.8rem 2.2rem;
+  margin-bottom: 1.2rem;
+  position: relative;
+  overflow: hidden;
+
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+}
+
+.scBrand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  z-index: 1;
+}
+
+.scBrandName {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  background: linear-gradient(90deg, #fff 0%, $gold-light 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.15;
+}
+
+.scBrandSub {
+  font-size: 0.7rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: $gold;
+  font-weight: 500;
+}
+
+.scInvoiceTitle {
+  text-align: right;
+  z-index: 1;
+
+  h1 {
+    margin: 0;
+    font-size: 2.1rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #fff;
+    line-height: 1;
+  }
+}
+
+.scInvoiceNum {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: $gold;
+  font-weight: 600;
+  margin-top: 0.35rem;
+  text-align: right;
+}
+
+
+.scMeta {
+  @include card;
+  display: flex;
+  gap: 0;
+  margin-bottom: 1.2rem;
+  overflow: hidden;
+}
+
+.scMetaItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1rem 1.4rem;
+
+  & + & {
+    border-left: 1px solid $border-soft;
+  }
+}
+
+.scMetaLabel {
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $gold;
+  font-weight: 600;
+}
+
+.scMetaValue {
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+
+
+
+
+.scParties {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  align-items: start;
+}
+
+.scPartyStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.scPartyCard {
+  @include card;
+  padding: 1.2rem 1.4rem;
+}
+
+.scPartyLabel {
+  font-size: 0.64rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: $gold;
+  font-weight: 700;
+  margin-bottom: 0.65rem;
+}
+
+.scPartyName {
+  font-size: 0.97rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 0.3rem;
+}
+
+.scPartyLine {
+  font-size: 0.82rem;
+  opacity: 0.7;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+
+.scBankCard {
+  margin-top: 0.8rem;
+  padding: 0.75rem 1rem;
+  background: $surface-0;
+  border: 1px solid $border-soft;
+  border-radius: $radius-md;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+}
+
+.scBankLine {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.scBankLineLabel {
+  font-weight: 700;
+  opacity: 1;
+}
+
+
+
+
+
+.scTableCard {
+  @include card;
+  overflow: hidden;
+  margin-bottom: 1.1rem;
+}
+
+.scTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+
+  thead {
+    background: $surface-2;
+
+    th {
+      font-size: 0.64rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: $gold;
+      font-weight: 700;
+      padding: 0.85rem 1.1rem;
+      text-align: left;
+      border-bottom: 1px solid $border-gold;
+    }
+  }
+
+  tbody tr {
+    transition: background 0.15s;
+
+    &:hover {
+      background: $surface-2;
+    }
+
+    td {
+      font-size: 0.88rem;
+      padding: 0.8rem 1.1rem;
+      border-bottom: 1px solid $border-soft;
+      vertical-align: middle;
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  
+  th:nth-child(2), td:nth-child(2) {
+    width: 14%;
+    text-align: right;
+  }
+  
+  th:nth-child(3), td:nth-child(3) {
+    width: 9%;
+    text-align: right;
+  }
+  
+  th:nth-child(4), td:nth-child(4) {
+    width: 20%;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+
+
+
+
+.scSummary {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.scDates {
+  @include card;
+  padding: 1rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 220px;
+}
+
+.scDateRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  font-size: 0.82rem;
+
+  span {
+    font-size: 0.72rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    opacity: 0.5;
+  }
+
+  strong {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.scTotalsCard {
+  @include gold-card;
+  padding: 1.1rem 1.4rem;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.scTotalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.3rem 0;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.scGrandTotal {
+  margin-top: 0.6rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid $border-gold;
+  font-size: 1.18rem;
+  font-weight: 800;
+  opacity: 1;
+  letter-spacing: -0.02em;
+  color: $gold-light;
+}
+
+
+
+
+
+.scFooter {
+  @include card;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 1.1rem 1.4rem;
+}
+
+.scThankYou {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: $gold;
+  font-weight: 700;
+}
+
+.scSignatureBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.scSignatureLine {
+  font-size: 0.78rem;
+  opacity: 0.4;
+  padding-top: 52px;
+}
+
+.scSignatureCaption {
+  font-size: 0.68rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  opacity: 0.45;
+}
+
+
+
+
+
+$gold-l:         #9a7a2e;
+$gold-light-l:   #8a6820;
+$gold-muted-l:   rgba(154, 122, 46, 0.12);
+$gold-glow-l:    rgba(154, 122, 46, 0.06);
+$surface-0-l:    rgba(0, 0, 0, 0.015);
+$surface-1-l:    rgba(0, 0, 0, 0.03);
+$surface-2-l:    rgba(0, 0, 0, 0.05);
+$border-soft-l:  rgba(0, 0, 0, 0.10);
+$border-gold-l:  rgba(154, 122, 46, 0.30);
+$shadow-card-l:  0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.06);
+$shadow-sm-l:    0 2px 10px rgba(0, 0, 0, 0.06);
+
+:global(:root[data-theme='light']) {
+  .scInvoice     { color: #1a1a1a; }
+
+  .scHeader {
+    background: linear-gradient(135deg, $gold-glow-l 0%, $surface-1-l 100%);
+    border-color: $border-gold-l;
+    box-shadow: $shadow-sm-l;
+    &::before {
+      background: radial-gradient(circle, rgba(154, 122, 46, 0.08) 0%, transparent 70%);
+    }
+  }
+
+  .scBrandName {
+    background: linear-gradient(90deg, #1a1a1a 0%, $gold-l 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  .scBrandSub       { color: $gold-l; }
+
+  .scInvoiceTitle h1 { color: #1a1a1a; }
+  .scInvoiceNum      { color: $gold-l; }
+
+  .scMeta {
+    background: $surface-1-l;
+    border-color: $border-soft-l;
+    box-shadow: $shadow-sm-l;
+  }
+  .scMetaItem + .scMetaItem { border-left-color: $border-soft-l; }
+  .scMetaLabel   { color: $gold-l; }
+  .scMetaValue   { color: #1a1a1a; }
+
+  .scPartyCard {
+    background: $surface-1-l;
+    border-color: $border-soft-l;
+    box-shadow: $shadow-sm-l;
+  }
+  .scPartyLabel  { color: $gold-l; }
+  .scPartyName   { color: #1a1a1a; }
+  .scPartyLine   { color: rgba(0, 0, 0, 0.55); }
+
+  .scBankCard {
+    background: $surface-0-l;
+    border-color: $border-soft-l;
+  }
+  .scBankLine       { color: rgba(0, 0, 0, 0.55); }
+  .scBankLineLabel  { color: #1a1a1a; }
+
+  .scTableCard {
+    background: $surface-1-l;
+    border-color: $border-soft-l;
+    box-shadow: $shadow-sm-l;
+  }
+
+  .scTable {
+    thead {
+      background: $surface-2-l;
+      th { color: $gold-l; border-bottom-color: $border-gold-l; }
+    }
+    tbody tr {
+      &:hover { background: $surface-2-l; }
+      td { border-bottom-color: $border-soft-l; color: #1a1a1a; }
+    }
+  }
+
+  .scDates {
+    background: $surface-1-l;
+    border-color: $border-soft-l;
+    box-shadow: $shadow-sm-l;
+  }
+  .scDateRow {
+    span   { color: rgba(0, 0, 0, 0.45); }
+    strong { color: #1a1a1a; }
+  }
+
+  .scTotalsCard {
+    background: linear-gradient(135deg, $gold-glow-l 0%, $surface-1-l 100%);
+    border-color: $border-gold-l;
+    box-shadow: $shadow-sm-l;
+  }
+  .scTotalRow {
+    color: rgba(0, 0, 0, 0.55);
+  }
+  .scGrandTotal {
+    border-top-color: $border-gold-l;
+    color: $gold-light-l;
+  }
+
+  .scFooter {
+    background: $surface-1-l;
+    border-color: $border-soft-l;
+    box-shadow: $shadow-sm-l;
+  }
+  .scThankYou        { color: $gold-l; }
+  .scSignatureLine   { color: rgba(0, 0, 0, 0.35); }
+  .scSignatureCaption { color: rgba(0, 0, 0, 0.40); }
+}
+
+
+
+
+
+@media (max-width: 860px) {
+  .scHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .scInvoiceTitle { text-align: left; }
+  .scInvoiceNum   { text-align: left; }
+
+  .scMeta {
+    flex-wrap: wrap;
+  }
+
+  .scMetaItem {
+    min-width: 140px;
+    & + & { border-left: none; border-top: 1px solid $border-soft; }
+  }
+
+  .scParties {
+    grid-template-columns: 1fr;
+  }
+
+  .scSummary {
+    flex-direction: column;
+  }
+
+  .scDates,
+  .scTotalsCard {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+
+
+
+
+@media print {
+  @page { size: A4; margin: 12mm 14mm; }
+
+  .scInvoice {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    color: #111 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .scHeader {
+    flex-direction: row !important;
+    align-items: center !important;
+    background: linear-gradient(135deg, rgba(201,168,76,0.06) 0%, #fff 100%) !important;
+    border-color: rgba(201,168,76,0.3) !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+    &::before { opacity: 0.06 !important; }
+  }
+  .scInvoiceTitle { text-align: right !important; }
+  .scInvoiceTitle h1 { color: #111 !important; }
+  .scInvoiceNum  { color: #9a7a2e !important; text-align: right !important; }
+  .scBrandName {
+    -webkit-text-fill-color: #111 !important;
+    background: none !important;
+    color: #111 !important;
+  }
+  .scBrandSub    { color: #9a7a2e !important; }
+
+  .scMeta {
+    flex-wrap: nowrap !important;
+    background: #fff !important;
+    border-color: #d8d8d8 !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+  }
+  .scMetaItem {
+    min-width: 0 !important;
+    flex: 1 !important;
+    & + & { border-left: 1px solid #e0e0e0 !important; border-top: none !important; }
+  }
+  .scMetaLabel   { color: #9a7a2e !important; }
+  .scMetaValue   { color: #111 !important; }
+
+  .scParties     { grid-template-columns: 1.15fr 1fr !important; }
+  .scPartyCard {
+    background: #fff !important;
+    border-color: #d8d8d8 !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+  }
+  .scPartyLabel  { color: #9a7a2e !important; }
+  .scPartyName   { color: #111 !important; }
+  .scPartyLine   { color: #555 !important; opacity: 1 !important; }
+
+  .scBankCard {
+    background: #f5f5f5 !important;
+    border-color: #d8d8d8 !important;
+    border-radius: 10px !important;
+  }
+  .scBankLine      { color: #555 !important; opacity: 1 !important; }
+  .scBankLineLabel { color: #111 !important; opacity: 1 !important; }
+
+  .scTableCard {
+    background: #fff !important;
+    border-color: #d8d8d8 !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+  }
+  .scTable {
+    thead {
+      background: #f5f5f5 !important;
+      th { color: #9a7a2e !important; border-bottom-color: #c9a84c !important; }
+    }
+    tbody tr {
+      &:hover { background: transparent !important; }
+      td { border-bottom-color: #e8e8e8 !important; color: #111 !important; }
+    }
+  }
+
+  .scSummary {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+  }
+  .scDates {
+    background: #fff !important;
+    border-color: #d8d8d8 !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+    min-width: 220px !important;
+  }
+  .scDateRow {
+    span   { color: #888 !important; opacity: 1 !important; }
+    strong { color: #111 !important; }
+  }
+
+  .scTotalsCard {
+    background: linear-gradient(135deg, rgba(201,168,76,0.06) 0%, #fff 100%) !important;
+    border-color: rgba(201,168,76,0.3) !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+    min-width: 220px !important;
+  }
+  .scTotalRow    { color: #555 !important; opacity: 1 !important; }
+  .scGrandTotal  { border-top-color: #c9a84c !important; color: #8a6820 !important; opacity: 1 !important; }
+
+  .scFooter {
+    background: #fff !important;
+    border-color: #d8d8d8 !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+  }
+  .scThankYou    { color: #9a7a2e !important; }
+  .scSignatureLine { color: #888 !important; opacity: 1 !important; }
+  .scSignatureCaption { color: #888 !important; opacity: 1 !important; }
+
+  .scPartyCard,
+  .scTableCard,
+  .scSummary,
+  .scFooter,
+  .scMeta {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
