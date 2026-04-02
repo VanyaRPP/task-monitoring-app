@@ -1,0 +1,557 @@
+$ink:           #ffffff;
+$ink-muted:     rgba(255, 255, 255, 0.50);
+$ink-faint:     rgba(255, 255, 255, 0.22);
+
+$accent:        #ffffff;           
+$line:          rgba(255, 255, 255, 0.16);
+$line-strong:   rgba(255, 255, 255, 0.38);
+$line-thick:    rgba(255, 255, 255, 0.72);
+
+$surface:       rgba(255, 255, 255, 0.00);
+$surface-hover: rgba(255, 255, 255, 0.03);
+
+$sans:  'Inter', 'Helvetica Neue', Arial, sans-serif;
+$serif: 'Georgia', 'Times New Roman', serif;
+
+.mlInvoice {
+  font-family: $sans;
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 3.4rem;
+  box-sizing: border-box;
+  border: 1px solid $line;
+  border-radius: 12px;
+}
+
+.mlHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 2rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid $line-strong;
+  position: relative;
+
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: $line;
+  }
+}
+
+.mlBrand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.mlBrandName {
+  font-size: 1.45rem;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.mlBrandRule {
+  width: 36px;
+  height: 1px;
+  background: $line-thick;
+  display: block;
+}
+
+.mlBrandSub {
+  font-size: 0.67rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: $ink-muted;
+  font-weight: 400;
+}
+
+.mlInvoiceMeta {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  align-items: flex-end;
+}
+
+.mlInvoiceWord {
+  font-size: 0.67rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: $ink-muted;
+}
+
+.mlInvoiceNumber {
+  font-size: 1.65rem;
+  font-weight: 200;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.mlDateRow {
+  display: flex;
+  gap: 3rem;
+  margin-bottom: 2.4rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid $line;
+}
+
+.mlDateItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.mlDateLabel {
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: $ink-muted;
+}
+
+.mlDateValue {
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.mlParties {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  margin-bottom: 2.8rem;
+}
+
+.mlParty {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding-left: 1rem;
+  border-left: 1px solid $line-strong;
+}
+
+.mlPartyLabel {
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: $ink-muted;
+  margin-bottom: 0.2rem;
+}
+
+.mlPartyName {
+  font-size: 0.97rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.mlPartyLine {
+  font-size: 0.82rem;
+  color: $ink-muted;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+
+.mlBankBlock {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid $line;
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+}
+
+.mlBankLine {
+  font-size: 0.79rem;
+  color: $ink-muted;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.mlBankLineLabel {
+  color: $ink;
+  font-weight: 600;
+}
+
+
+
+
+
+.mlTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin-bottom: 0;
+
+  thead tr {
+    border-top: 1px solid $line-strong;
+    border-bottom: 1px solid $line-strong;
+  }
+
+  th {
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: $ink-muted;
+    font-weight: 500;
+    padding: 0.65rem 0.5rem;
+    text-align: left;
+  }
+
+  td {
+    font-size: 0.88rem;
+    padding: 0.85rem 0.5rem;
+    border-bottom: 1px solid $line;
+    color: $ink;
+    vertical-align: top;
+  }
+
+  tbody tr {
+    transition: background 0.12s;
+    &:hover { background: $surface-hover; }
+    &:last-child td { border-bottom: none; }
+  }
+
+  
+  th:nth-child(2), td:nth-child(2) {
+    width: 14%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  
+  th:nth-child(3), td:nth-child(3) {
+    width: 9%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  
+  th:nth-child(4), td:nth-child(4) {
+    width: 20%;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+}
+
+
+
+
+
+.mlTotalsArea {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 1.8rem;
+  padding-top: 1.8rem;
+  border-top: 1px solid $line-strong;
+  gap: 2rem;
+}
+
+.mlPaymentNote {
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.mlPaymentNoteLabel {
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: $ink-muted;
+  margin-bottom: 0.1rem;
+}
+
+.mlPaymentNoteText {
+  font-size: 0.82rem;
+  color: $ink-muted;
+  line-height: 1.55;
+}
+
+.mlTotalsBlock {
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.mlTotalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  padding: 0.35rem 0;
+  font-size: 0.85rem;
+  border-bottom: 1px solid $line;
+
+  span { color: $ink-muted; letter-spacing: 0.03em; }
+
+  &:last-of-type { border-bottom: none; }
+}
+
+.mlGrandTotal {
+  margin-top: 0.5rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid $line-thick !important;
+  border-bottom: none !important;
+
+  span {
+    font-size: 0.67rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: $ink-muted;
+    font-weight: 500;
+  }
+
+  strong {
+    font-size: 1.35rem;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    color: $ink;
+  }
+}
+
+
+
+
+
+.mlFooter {
+  margin-top: 3rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid $line;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+}
+
+.mlFooterNote {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $ink-muted;
+}
+
+.mlSignatureBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.mlSignatureLine {
+  font-size: 0.75rem;
+  color: $ink-muted;
+  padding-top: 52px;
+  letter-spacing: 0.1em;
+}
+
+.mlSignatureCaption {
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: $ink-muted;
+}
+
+
+
+
+
+$ink-l:           #1a1a1a;
+$ink-muted-l:     rgba(0, 0, 0, 0.50);
+$line-l:          rgba(0, 0, 0, 0.10);
+$line-strong-l:   rgba(0, 0, 0, 0.20);
+$line-thick-l:    rgba(0, 0, 0, 0.45);
+$surface-hover-l: rgba(0, 0, 0, 0.03);
+
+:global(:root[data-theme='light']) {
+  .mlInvoice {
+    border-color: $line-l;
+    color: $ink-l;
+  }
+
+  .mlHeader {
+    border-bottom-color: $line-strong-l;
+    &::after { background: $line-l; }
+  }
+
+  .mlBrandName      { color: $ink-l; }
+  .mlBrandRule       { background: $line-thick-l; }
+  .mlBrandSub        { color: $ink-muted-l; }
+  .mlInvoiceWord     { color: $ink-muted-l; }
+  .mlInvoiceNumber   { color: $ink-l; }
+
+  .mlDateRow         { border-bottom-color: $line-l; }
+  .mlDateLabel       { color: $ink-muted-l; }
+  .mlDateValue       { color: $ink-l; }
+
+  .mlParty           { border-left-color: $line-strong-l; }
+  .mlPartyLabel      { color: $ink-muted-l; }
+  .mlPartyName       { color: $ink-l; }
+  .mlPartyLine       { color: $ink-muted-l; }
+
+  .mlBankBlock       { border-top-color: $line-l; }
+  .mlBankLine        { color: $ink-muted-l; }
+  .mlBankLineLabel   { color: $ink-l; }
+
+  .mlTable {
+    thead tr {
+      border-top-color: $line-strong-l;
+      border-bottom-color: $line-strong-l;
+    }
+    th  { color: $ink-muted-l; }
+    td  { border-bottom-color: $line-l; color: $ink-l; }
+    tbody tr:hover { background: $surface-hover-l; }
+  }
+
+  .mlTotalsArea      { border-top-color: $line-strong-l; }
+  .mlPaymentNoteLabel { color: $ink-muted-l; }
+  .mlPaymentNoteText  { color: $ink-muted-l; }
+
+  .mlTotalRow {
+    border-bottom-color: $line-l;
+    span { color: $ink-muted-l; }
+  }
+
+  .mlGrandTotal {
+    border-top-color: $line-thick-l !important;
+    span   { color: $ink-muted-l; }
+    strong { color: $ink-l; }
+  }
+
+  .mlFooter          { border-top-color: $line-l; }
+  .mlFooterNote      { color: $ink-muted-l; }
+  .mlSignatureLine   { color: $ink-muted-l; }
+  .mlSignatureCaption { color: $ink-muted-l; }
+}
+
+
+
+
+
+@media (max-width: 820px) {
+  .mlInvoice {
+    padding: 1.8rem 1.4rem;
+  }
+
+  .mlHeader {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .mlInvoiceMeta { align-items: flex-start; text-align: left; }
+
+  .mlParties {
+    grid-template-columns: 1fr;
+    gap: 1.6rem;
+  }
+
+  .mlTotalsArea {
+    flex-direction: column;
+  }
+
+  .mlTotalsBlock, .mlPaymentNote {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+
+
+
+
+@media print {
+  @page { size: A4; margin: 14mm 16mm; }
+
+  .mlInvoice {
+    max-width: none !important;
+    width: 100% !important;
+    padding: 2.4rem 2.8rem !important;
+    margin: 0 !important;
+    border: 1px solid #d0d0d0 !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    color: #111 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .mlHeader {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    border-bottom-color: #999 !important;
+    &::after { background: #ccc !important; }
+  }
+
+  .mlInvoiceMeta     { align-items: flex-end !important; text-align: right !important; }
+  .mlBrandName       { color: #111 !important; }
+  .mlBrandRule       { background: #333 !important; }
+  .mlInvoiceNumber   { color: #111 !important; }
+
+  .mlBrandSub,
+  .mlInvoiceWord     { color: #666 !important; }
+
+  .mlDateRow         { border-bottom-color: #d8d8d8 !important; }
+  .mlDateLabel       { color: #666 !important; }
+  .mlDateValue       { color: #111 !important; }
+
+  .mlParties         { grid-template-columns: 1fr 1fr !important; }
+  .mlParty           { border-left-color: #999 !important; }
+  .mlPartyLabel      { color: #666 !important; }
+  .mlPartyName       { color: #111 !important; }
+  .mlPartyLine       { color: #555 !important; }
+
+  .mlBankBlock       { border-top-color: #d8d8d8 !important; }
+  .mlBankLine        { color: #555 !important; }
+  .mlBankLineLabel   { color: #111 !important; }
+
+  .mlTable {
+    thead tr { border-color: #888 !important; }
+    th       { color: #666 !important; }
+    td       { border-bottom-color: #e0e0e0 !important; color: #111 !important; }
+    tbody tr:hover { background: transparent !important; }
+  }
+
+  .mlTotalsArea {
+    flex-direction: row !important;
+    border-top-color: #888 !important;
+  }
+  .mlTotalsBlock     { min-width: 260px !important; }
+  .mlPaymentNote     { max-width: 380px !important; }
+  .mlPaymentNoteLabel { color: #666 !important; }
+  .mlPaymentNoteText { color: #555 !important; }
+  .mlTotalRow {
+    border-bottom-color: #e0e0e0 !important;
+    span { color: #666 !important; }
+  }
+  .mlGrandTotal {
+    border-top-color: #333 !important;
+    span   { color: #666 !important; }
+    strong { color: #111 !important; }
+  }
+
+  .mlFooter          { border-top-color: #d8d8d8 !important; }
+  .mlFooterNote      { color: #666 !important; }
+  .mlSignatureLine   { color: #666 !important; }
+  .mlSignatureCaption { color: #666 !important; }
+
+  .mlParties,
+  .mlTable tbody tr,
+  .mlTotalsArea,
+  .mlFooter {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
