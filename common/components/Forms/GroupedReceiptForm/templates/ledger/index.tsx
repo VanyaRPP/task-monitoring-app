@@ -55,7 +55,7 @@ const LedgerTemplate: FC<TemplateProps> = ({
       <div className={lg.lgParties}>
         <div className={lg.lgPartyBox}>
           <div className={lg.lgPartyHeader}>
-            {isEnglish ? 'Bill from' : 'Платіжні дані'}
+            {isEnglish ? 'Сontractor' : 'Підрядник'}
           </div>
           <div className={lg.lgPartyBody}>
             {paymentInfoLines.map((line: string, idx: number) => (
@@ -86,7 +86,7 @@ const LedgerTemplate: FC<TemplateProps> = ({
         </div>
         <div className={lg.lgPartyBox}>
           <div className={lg.lgPartyHeader}>
-            {isEnglish ? 'Issued to' : 'Отримувач'}
+            {isEnglish ? 'Customer' : 'Замовник'}
           </div>
           <div className={lg.lgPartyBody}>
             {issuedToLines.map((line: string, idx: number) => (

@@ -27,7 +27,7 @@ $mono:          'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
   padding: 2.6rem 3rem;
   box-sizing: border-box;
   border: 1px solid $rule-mid;
-  border-top: 4px solid $charcoal;
+  // border-top: 4px solid $charcoal;
   border-radius: 4px;
   background: $surface;
 }
@@ -352,7 +352,6 @@ $mono:          'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
 .lgGrandTotal {
   margin-top: 0.4rem;
   padding-top: 0.55rem;
-  border-top: 2px solid $rule-strong;
   color: $ink;
   font-size: 1.1rem;
 
@@ -498,7 +497,6 @@ $surface-stripe-l: rgba(0, 0, 0, 0.02);
     strong { color: #1a1a1a; }
   }
   .lgGrandTotal {
-    border-top-color: $rule-strong-l;
     color: #1a1a1a;
     span   { color: $charcoal-l; }
     strong { color: #1a1a1a; }
@@ -624,7 +622,6 @@ $surface-stripe-l: rgba(0, 0, 0, 0.02);
     strong { color: #111 !important; }
   }
   .lgGrandTotal {
-    border-top-color: #999 !important;
     color: #111 !important;
     span   { color: #444 !important; }
     strong { color: #111 !important; }

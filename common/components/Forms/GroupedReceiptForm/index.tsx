@@ -6,17 +6,8 @@ import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import { PrinterOutlined, EditOutlined, SendOutlined } from '@ant-design/icons'
 import { Dropdown, Tooltip, message } from 'antd'
+import dynamic from 'next/dynamic'
 import s from './style.module.scss'
-
-import ClassicTemplate from './templates/classic'
-import MonolineTemplate from './templates/monoline'
-import TechstudioTemplate from './templates/techstudio'
-import SoftcardTemplate from './templates/softcard'
-import SwissTemplate from './templates/swiss'
-import EditorialTemplate from './templates/editorial'
-import LedgerTemplate from './templates/ledger'
-import AzureTemplate from './templates/azure'
-import OlimpTemplate from './templates/olimp'
 
 const normalizeCurrency = (currency?: string): 'UAH' | 'USD' | 'EUR' => {
   const value = currency?.toUpperCase()
@@ -37,25 +28,25 @@ const getCurrencyShortLabel = (currency?: string): string => {
 const templateItems = [
   { key: 'classic',    label: 'Класичний шаблон' },
   { key: 'olimp',      label: 'OLIMP DIGITAL OÜ' },
-  { key: 'swiss',      label: 'Swiss Minimal' },
-  { key: 'softcard',   label: 'Soft Card Premium' },
-  { key: 'techstudio', label: 'Tech Studio Invoice' },
-  { key: 'monoline',   label: 'Monoline Business' },
-  { key: 'editorial',  label: 'Editorial Premium' },
+  // { key: 'swiss',      label: 'Swiss Minimal' },
+  // { key: 'softcard',   label: 'Soft Card Premium' },
+  // { key: 'techstudio', label: 'Tech Studio Invoice' },
+  // { key: 'monoline',   label: 'Monoline Business' },
+  // { key: 'editorial',  label: 'Editorial Premium' },
   { key: 'ledger',     label: 'Formal Ledger' },
-  { key: 'azure',      label: 'Azure Corporate' },
+  // { key: 'azure',      label: 'Azure Corporate' },
 ]
 
-const templateMap: Record<string, FC<any>> = {
-  classic: ClassicTemplate,
-  monoline: MonolineTemplate,
-  techstudio: TechstudioTemplate,
-  softcard: SoftcardTemplate,
-  swiss: SwissTemplate,
-  editorial: EditorialTemplate,
-  ledger: LedgerTemplate,
-  azure: AzureTemplate,
-  olimp: OlimpTemplate,
+const templateMap = {
+  classic:    dynamic(() => import('./templates/classic'), { ssr: false }),
+  // monoline:   dynamic(() => import('./templates/monoline'), { ssr: false }),
+  // techstudio: dynamic(() => import('./templates/techstudio'), { ssr: false }),
+  // softcard: dynamic(() => import('./templates/softcard'), { ssr: false }),
+  // swiss: dynamic(() => import('./templates/swiss'), { ssr: false }),
+  // editorial: dynamic(() => import('./templates/editorial'), { ssr: false }),
+  ledger: dynamic(() => import('./templates/ledger'), { ssr: false }),
+  // azure: dynamic(() => import('./templates/azure'), { ssr: false }),
+  olimp: dynamic(() => import('./templates/olimp'), { ssr: false }),
 }
 
 interface Props {
@@ -220,7 +211,7 @@ const GroupedReceiptForm: FC<Props> = ({
     }
   };
 
-  const TemplateComponent = templateMap[template] || OlimpTemplate
+  const TemplateComponent = templateMap[template] || templateMap.olimp
 
   const templateProps = {
     data,
