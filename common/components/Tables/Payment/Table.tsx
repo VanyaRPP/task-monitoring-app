@@ -284,7 +284,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
               </Typography.Link>
             </Tooltip>
           ),
-        hidden: isDomainAdmin ? isSingleDomainByRealData : false,
+        hidden: isDomainAdmin ? (isSingleCompanyByData && !filters?.company) : false,
       },
       {
         title: 'Компанія',
@@ -336,7 +336,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           }
           return companyLabel
         },
-        hidden: isDomainAdmin ? isSingleCompanyByData : false,
+        hidden: isDomainAdmin ? (isSingleCompanyByData && !filters?.domain) : false,
       },
       {
         title: 'Дата створення',
