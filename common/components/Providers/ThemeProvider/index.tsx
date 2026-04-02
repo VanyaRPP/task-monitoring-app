@@ -11,10 +11,6 @@ export const ThemeProvider: React.FC<{
   const [isPrinting, setIsPrinting] = useState(false)
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-  }, [theme])
-
-  useEffect(() => {
     const handleBeforePrint = () => setIsPrinting(true)
     const handleAfterPrint = () => setIsPrinting(false)
 
@@ -67,10 +63,6 @@ export const ThemeProvider_pages: React.FC<{
 }> = ({ children, pageProps }) => {
   const [theme] = useTheme()
   const [isPrinting, setIsPrinting] = useState(false)
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-  }, [theme])
 
   useEffect(() => {
     const handleBeforePrint = () => setIsPrinting(true)

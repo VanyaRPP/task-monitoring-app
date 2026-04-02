@@ -61,8 +61,8 @@ export interface IPaymentContext {
   prevService: IService
   company: IRealestate
   form: FormInstance
-  template: 'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'
-  setTemplate: (t: 'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure') => void
+  template: 'classic' | 'olimp'                     
+  setTemplate: (t: 'classic' | 'olimp') => void
 }
 
 export const PaymentContext = createContext<IPaymentContext>({
@@ -102,7 +102,7 @@ const AddPaymentModal: FC<Props> = ({
   const [changed, setChanged] = useState(false)
   const [saved, setSaved] = useState(false)
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const [template, setTemplate] = useState<'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'>('classic')
+  const [template, setTemplate] = useState<'classic' | 'olimp'>('classic')
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)
   )
