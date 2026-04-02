@@ -118,6 +118,9 @@ const RealEstateForm: FC<Props> = ({
       layout="vertical"
       className={s.Form}
       onValuesChange={() => setIsValueChanged(true)}
+      initialValues={{
+        currency: currentRealEstate?.currency || 'UAH',
+      }}
     >
       <DomainsSelect
         form={form}

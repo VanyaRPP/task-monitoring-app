@@ -1,7 +1,7 @@
 import { Operations } from '@utils/constants'
 import { getCurrencySymbol } from '@utils/helpers'
 import { usePaymentContext } from '@components/AddPaymentModal'
-import { Form, FormInstance } from 'antd'
+import { Form, FormInstance, Select } from 'antd'
 import { FC, useEffect } from 'react'
 
 interface Props {
@@ -34,8 +34,21 @@ const PaymentTotal: FC<Props> = ({ form }) => {
       name={Operations.Debit}
       initialValue={0}
     >
-      <>Сума: {(+total)?.toFixed(2)} {currencyLabel}</>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span>Сума: {(+total)?.toFixed(2)}</span>
+
+      <Form.Item name="currency" noStyle initialValue="UAH">
+        <Select
+          style={{ width: 53 }}
+          options={[
+            { value: 'UAH', label: '₴' },
+            { value: 'USD', label: '$' },
+            { value: 'EUR', label: '€' },
+          ]}
+        />
     </Form.Item>
+    </div>
+  </Form.Item>
   )
 }
 

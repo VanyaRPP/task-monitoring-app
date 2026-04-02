@@ -121,18 +121,35 @@ function AddPaymentForm({
 
       {operation === Operations.Credit ? (
         <>
+        <Form.Item label="Сума" required>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+
           <Form.Item
             name="generalSum"
-            label="Сума"
+            noStyle
             rules={validateField('paymentPrice')}
           >
             <InputNumber
               parser={inputNumberParser}
-              style={{ minWidth: '166px' }}
+              style={{ width: 160 }}
               placeholder="Вкажіть суму"
+              disabled={preview}
+              />
+           </Form.Item>
+
+           <Form.Item name="currency" noStyle initialValue="UAH">
+            <Select
+              style={{ width: 53 }}
+              options={[
+                { value: 'UAH', label: '₴' },
+                { value: 'USD', label: '$' },
+                { value: 'EUR', label: '€' },
+              ]}
               disabled={preview}
             />
           </Form.Item>
+        </div>
+      </Form.Item>
           <Form.Item
             name="description"
             label="Опис"
