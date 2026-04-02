@@ -1,0 +1,776 @@
+$cyan:          #00d4c8;
+$cyan-dim:      rgba(0, 212, 200, 0.15);
+$cyan-glow:     rgba(0, 212, 200, 0.06);
+$cyan-border:   rgba(0, 212, 200, 0.25);
+
+$green:         #39d98a;
+$green-dim:     rgba(57, 217, 138, 0.12);
+
+$shell:         #0d1117;
+$surface-1:     rgba(255, 255, 255, 0.04);
+$surface-2:     rgba(255, 255, 255, 0.07);
+$border:        rgba(255, 255, 255, 0.08);
+$border-hi:     rgba(255, 255, 255, 0.14);
+
+$mono:          'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+$sans:          'Inter', 'Helvetica Neue', Arial, sans-serif;
+
+$radius:        8px;
+
+@mixin panel {
+  background: $surface-1;
+  border: 1px solid $border;
+  border-radius: $radius;
+}
+
+@mixin cyan-panel {
+  background: $cyan-glow;
+  border: 1px solid $cyan-border;
+  border-radius: $radius;
+}
+
+@mixin tag {
+  display: inline-block;
+  font-family: $mono;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  padding: 0.15em 0.55em;
+  border-radius: 4px;
+  background: $cyan-dim;
+  color: $cyan;
+  font-weight: 500;
+}
+
+.tsInvoice {
+  font-family: $sans;
+  font-size: 13px;
+  line-height: 1.55;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.tsTopBar {
+  @include panel;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 1.2rem;
+  margin-bottom: 0.75rem;
+  gap: 1rem;
+}
+
+.tsWindowDots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.tsDot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+
+  &:nth-child(1) { background: #ff5f57; }
+  &:nth-child(2) { background: #febc2e; }
+  &:nth-child(3) { background: #28c840; }
+}
+
+.tsFilePath {
+  font-family: $mono;
+  font-size: 0.72rem;
+  color: $cyan;
+  opacity: 0.75;
+  letter-spacing: 0.03em;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tsBadge {
+  @include tag;
+}
+
+.tsHeader {
+  @include cyan-panel;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 1.6rem 1.8rem;
+  margin-bottom: 0.75rem;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle, rgba(0,212,200,0.18) 1px, transparent 1px);
+    background-size: 22px 22px;
+    pointer-events: none;
+    opacity: 0.55;
+  }
+}
+
+.tsBrand {
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.tsBrandIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.15rem;
+}
+
+.tsBrandIconBox {
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid $cyan;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: $mono;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: $cyan;
+  background: $cyan-dim;
+  letter-spacing: 0;
+}
+
+.tsBrandName {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.tsBrandSub {
+  font-family: $mono;
+  font-size: 0.68rem;
+  color: $cyan;
+  opacity: 0.7;
+  letter-spacing: 0.08em;
+}
+
+.tsInvoiceHead {
+  text-align: right;
+  z-index: 1;
+
+  h1 {
+    margin: 0;
+    font-family: $mono;
+    font-size: 1.85rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: $cyan;
+    line-height: 1;
+  }
+}
+
+.tsInvoiceNum {
+  display: block;
+  font-family: $mono;
+  font-size: 0.72rem;
+  opacity: 0.55;
+  letter-spacing: 0.08em;
+  margin-top: 0.35rem;
+  color: $cyan;
+}
+
+.tsMeta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 0.75rem;
+  border: 1px solid $border;
+  border-radius: $radius;
+  overflow: hidden;
+}
+
+.tsMetaItem {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 1.1rem;
+  background: $surface-1;
+  border-right: 1px solid $border;
+
+  &:last-child { border-right: none; }
+}
+
+.tsMetaLabel {
+  font-family: $mono;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: $cyan;
+  text-transform: uppercase;
+  opacity: 0.65;
+  margin-bottom: 0.2rem;
+}
+
+.tsMetaValue {
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.tsParties {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  align-items: start;
+}
+
+.tsPartyCard {
+  @include panel;
+  padding: 1.1rem 1.3rem;
+  position: relative;
+}
+
+.tsPartyCard::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 2px;
+  border-radius: 2px;
+  background: $cyan;
+  opacity: 0.6;
+}
+
+.tsPartyLabel {
+  font-family: $mono;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: $cyan;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+
+  &::before { content: ' | '; opacity: 0.5; margin-right: 4px; }
+}
+
+.tsPartyName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 0.28rem;
+}
+
+.tsPartyLine {
+  font-size: 0.81rem;
+  opacity: 0.65;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.tsBankCard {
+  margin-top: 0.8rem;
+  padding: 0.7rem 0.9rem;
+  background: $surface-2;
+  border: 1px solid $border-hi;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.tsBankLine {
+  font-family: $mono;
+  font-size: 0.75rem;
+  opacity: 0.7;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.tsBankLineLabel {
+  color: $cyan;
+  font-weight: 600;
+  opacity: 1;
+}
+
+.tsTableWrap {
+  @include panel;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.tsTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+
+  thead {
+    background: $surface-2;
+
+    th {
+      font-family: $mono;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: $cyan;
+      font-weight: 600;
+      padding: 0.75rem 1.1rem;
+      text-align: left;
+      border-bottom: 1px solid $cyan-border;
+
+      &::before { content: '#'; opacity: 0.35; margin-right: 2px; }
+    }
+  }
+
+  tbody tr {
+    &:nth-child(even) { background: $surface-1; }
+
+    td {
+      font-size: 0.86rem;
+      padding: 0.75rem 1.1rem;
+      border-bottom: 1px solid $border;
+      vertical-align: middle;
+    }
+
+    &:last-child td { border-bottom: none; }
+  }
+
+  th:nth-child(2), td:nth-child(2) {
+    width: 14%;
+    text-align: right;
+    font-family: $mono;
+    font-size: 0.82rem;
+  }
+  th:nth-child(3), td:nth-child(3) {
+    width: 9%;
+    text-align: right;
+    font-family: $mono;
+    font-size: 0.82rem;
+  }
+  
+  th:nth-child(4), td:nth-child(4) {
+    width: 20%;
+    text-align: right;
+    white-space: nowrap;
+    font-family: $mono;
+    font-size: 0.82rem;
+    color: $green;
+  }
+}
+
+.tsSummary {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.tsDates {
+  @include panel;
+  padding: 0.9rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 220px;
+}
+
+.tsDateRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  font-size: 0.82rem;
+
+  span {
+    font-family: $mono;
+    font-size: 0.65rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: $cyan;
+    opacity: 0.6;
+  }
+
+  strong {
+    font-family: $mono;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+}
+
+.tsTotalsCard {
+  @include panel;
+  padding: 1rem 1.3rem;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-color: $cyan-border;
+  background: $cyan-glow;
+}
+
+.tsTotalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.28rem 0;
+  font-size: 0.83rem;
+  opacity: 0.65;
+
+  span { font-family: $mono; font-size: 0.75rem; letter-spacing: 0.05em; }
+  strong { font-family: $mono; }
+}
+
+.tsGrandTotal {
+  margin-top: 0.55rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid $cyan-border;
+  opacity: 1;
+  font-size: 1.15rem;
+
+  span {
+    font-size: 0.78rem;
+    color: $cyan;
+    font-weight: 700;
+    opacity: 1;
+    letter-spacing: 0.1em;
+  }
+
+  strong {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: $green;
+    letter-spacing: -0.02em;
+  }
+}
+
+.tsFooter {
+  @include panel;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0.9rem 1.3rem;
+}
+
+.tsFooterLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.tsFooterComment {
+  font-family: $mono;
+  font-size: 0.68rem;
+  color: $green;
+  opacity: 0.65;
+  letter-spacing: 0.04em;
+
+  &::before { content: '/* '; }
+  &::after  { content: ' */'; }
+}
+
+.tsFooterStatus {
+  @include tag;
+  font-size: 0.65rem;
+  margin-top: 0.25rem;
+  align-self: flex-start;
+}
+
+.tsSignatureBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+}
+
+.tsSignatureLine {
+  font-family: $mono;
+  font-size: 0.75rem;
+  opacity: 0.35;
+  padding-top: 52px;
+  letter-spacing: 0.12em;
+}
+
+.tsSignatureCaption {
+  font-family: $mono;
+  font-size: 0.65rem;
+  opacity: 0.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+$cyan-l:        #008a83;
+$green-l:       #1a8a50;
+$surface-1-l:   rgba(0, 0, 0, 0.03);
+$surface-2-l:   rgba(0, 0, 0, 0.05);
+$border-l:      rgba(0, 0, 0, 0.10);
+$border-hi-l:   rgba(0, 0, 0, 0.15);
+$cyan-dim-l:    rgba(0, 140, 135, 0.10);
+$cyan-glow-l:   rgba(0, 140, 135, 0.05);
+$cyan-border-l: rgba(0, 140, 135, 0.25);
+
+:global(:root[data-theme='light']) {
+  .tsInvoice     { color: #1a1a1a; }
+
+  .tsTopBar {
+    background: $surface-1-l;
+    border-color: $border-l;
+  }
+
+  .tsFilePath    { color: $cyan-l; }
+  .tsBadge       { background: $cyan-dim-l; color: $cyan-l; }
+
+  .tsHeader {
+    background: $cyan-glow-l;
+    border-color: $cyan-border-l;
+    &::before {
+      background-image: radial-gradient(circle, rgba(0, 140, 135, 0.14) 1px, transparent 1px);
+    }
+  }
+
+  .tsBrandIconBox {
+    border-color: $cyan-l;
+    color: $cyan-l;
+    background: $cyan-dim-l;
+  }
+
+  .tsBrandName   { color: #1a1a1a; }
+  .tsBrandSub    { color: $cyan-l; }
+
+  .tsInvoiceHead h1 { color: $cyan-l; }
+  .tsInvoiceNum     { color: $cyan-l; }
+
+  .tsMeta        { border-color: $border-l; }
+  .tsMetaItem    { background: $surface-1-l; border-right-color: $border-l; }
+  .tsMetaLabel   { color: $cyan-l; }
+  .tsMetaValue   { color: #1a1a1a; }
+
+  .tsPartyCard {
+    background: $surface-1-l;
+    border-color: $border-l;
+    &::before { background: $cyan-l; }
+  }
+
+  .tsPartyLabel  { color: $cyan-l; }
+  .tsPartyName   { color: #1a1a1a; }
+  .tsPartyLine   { color: rgba(0, 0, 0, 0.55); }
+
+  .tsBankCard {
+    background: $surface-2-l;
+    border-color: $border-hi-l;
+  }
+  .tsBankLine       { color: rgba(0, 0, 0, 0.55); }
+  .tsBankLineLabel  { color: $cyan-l; }
+
+  .tsTableWrap {
+    background: $surface-1-l;
+    border-color: $border-l;
+  }
+
+  .tsTable {
+    thead {
+      background: $surface-2-l;
+      th { color: $cyan-l; border-bottom-color: $cyan-border-l; }
+    }
+    tbody tr {
+      &:nth-child(even) { background: $surface-1-l; }
+      td { border-bottom-color: $border-l; color: #1a1a1a; }
+    }
+    td:nth-child(4) { color: $green-l; }
+  }
+
+  .tsDates {
+    background: $surface-1-l;
+    border-color: $border-l;
+  }
+  .tsDateRow {
+    span   { color: $cyan-l; }
+    strong { color: #1a1a1a; }
+  }
+
+  .tsTotalsCard {
+    background: $cyan-glow-l;
+    border-color: $cyan-border-l;
+  }
+  .tsTotalRow {
+    span   { color: rgba(0, 0, 0, 0.55); }
+    strong { color: #1a1a1a; }
+  }
+  .tsGrandTotal {
+    border-top-color: $cyan-border-l;
+    span   { color: $cyan-l; }
+    strong { color: $green-l; }
+  }
+
+  .tsFooter {
+    background: $surface-1-l;
+    border-color: $border-l;
+  }
+  .tsFooterComment   { color: $green-l; }
+  .tsFooterStatus    { background: $cyan-dim-l; color: $cyan-l; }
+  .tsSignatureLine   { color: rgba(0, 0, 0, 0.35); }
+  .tsSignatureCaption { color: rgba(0, 0, 0, 0.45); }
+}
+
+@media (max-width: 860px) {
+  .tsHeader {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .tsInvoiceHead { text-align: left; }
+  .tsInvoiceNum  { text-align: left; }
+
+  .tsMeta {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tsMetaItem:nth-child(2) { border-right: none; }
+  .tsMetaItem:nth-child(3) { border-top: 1px solid $border; }
+  .tsMetaItem:nth-child(4) { border-top: 1px solid $border; }
+
+  .tsParties {
+    grid-template-columns: 1fr;
+  }
+
+  .tsSummary {
+    flex-direction: column;
+  }
+
+  .tsDates,
+  .tsTotalsCard {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media print {
+  @page { size: A4; margin: 12mm 14mm; }
+
+  .tsInvoice {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    color: #111 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .tsTopBar,
+  .tsPartyCard,
+  .tsTableWrap,
+  .tsDates,
+  .tsFooter {
+    background: #ffffff !important;
+    box-shadow: none !important;
+    border-color: #d0d0d0 !important;
+    border-radius: 8px !important;
+  }
+
+  .tsHeader {
+    grid-template-columns: 1fr auto !important;
+    background: rgba(0, 140, 135, 0.04) !important;
+    border-color: rgba(0, 140, 135, 0.25) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    &::before { opacity: 0.06 !important; }
+  }
+  .tsInvoiceHead { text-align: right !important; }
+  .tsInvoiceHead h1 { color: #007a75 !important; }
+  .tsInvoiceNum  { color: #007a75 !important; text-align: right !important; }
+  .tsBrandName   { color: #111 !important; }
+  .tsBrandIconBox { border-color: #007a75 !important; color: #007a75 !important; background: rgba(0,140,135,0.08) !important; }
+  .tsBrandSub    { color: #007a75 !important; }
+  .tsBadge       { background: rgba(0,140,135,0.08) !important; color: #007a75 !important; }
+  .tsFilePath    { color: #007a75 !important; }
+
+  .tsMeta {
+    grid-template-columns: repeat(4, 1fr) !important;
+    border-color: #d0d0d0 !important;
+    border-radius: 8px !important;
+  }
+  .tsMetaItem {
+    background: #fafafa !important;
+    border-right-color: #e0e0e0 !important;
+    border-top: none !important;
+  }
+  .tsMetaLabel   { color: #007a75 !important; opacity: 1 !important; }
+  .tsMetaValue   { color: #111 !important; }
+
+  .tsParties     { grid-template-columns: 1.15fr 1fr !important; }
+  .tsPartyCard::before { background: #007a75 !important; opacity: 1 !important; }
+  .tsPartyLabel  { color: #007a75 !important; }
+  .tsPartyName   { color: #111 !important; }
+  .tsPartyLine   { color: #555 !important; opacity: 1 !important; }
+
+  .tsBankCard    { background: #f6f6f6 !important; border-color: #d8d8d8 !important; border-radius: 6px !important; }
+  .tsBankLine    { color: #555 !important; opacity: 1 !important; }
+  .tsBankLineLabel { color: #007a75 !important; opacity: 1 !important; }
+
+  .tsTable {
+    thead {
+      background: #f3f3f3 !important;
+      th { color: #007a75 !important; border-bottom-color: rgba(0,140,135,0.35) !important; opacity: 1 !important; }
+      th::before { color: #007a75 !important; }
+    }
+    tbody tr {
+      &:nth-child(even) { background: #fafafa !important; }
+      &:hover { background: transparent !important; }
+      td { border-bottom-color: #e8e8e8 !important; color: #111 !important; }
+    }
+    td:nth-child(4) { color: #1a7a50 !important; }
+  }
+
+  .tsSummary {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+  }
+  .tsDates {
+    border-radius: 8px !important;
+    min-width: 220px !important;
+  }
+  .tsDateRow {
+    span   { color: #007a75 !important; opacity: 1 !important; }
+    strong { color: #111 !important; }
+  }
+
+  .tsTotalsCard {
+    background: rgba(0,140,135,0.04) !important;
+    border-color: rgba(0,140,135,0.3) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    min-width: 220px !important;
+  }
+  .tsTotalRow {
+    opacity: 1 !important;
+    span   { color: #555 !important; }
+    strong { color: #111 !important; }
+  }
+  .tsGrandTotal {
+    border-top-color: rgba(0,140,135,0.35) !important;
+    span   { color: #007a75 !important; opacity: 1 !important; }
+    strong { color: #1a7a50 !important; }
+  }
+
+  .tsFooter      { border-radius: 8px !important; }
+  .tsFooterComment { color: #1a7a50 !important; opacity: 1 !important; }
+  .tsFooterStatus { background: #e6f9f5 !important; color: #007a75 !important; }
+  .tsSignatureLine { color: #888 !important; opacity: 1 !important; }
+  .tsSignatureCaption { color: #888 !important; opacity: 1 !important; }
+
+  .tsTopBar,
+  .tsPartyCard,
+  .tsTableWrap,
+  .tsSummary,
+  .tsFooter,
+  .tsMeta {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
