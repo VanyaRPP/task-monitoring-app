@@ -44,6 +44,7 @@ import PaymentCardLabel from './PaymentCardLabel'
 import type { CollapseProps } from 'antd'
 import styles from './styles.module.scss'
 const { useBreakpoint } = Grid
+import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 
 export interface PaymentCardHeaderProps {
   onDeleteClick?: () => void
@@ -172,6 +173,17 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     return texts.join('\n')
   }, [singleDomain, singleCompany])
 
+  const allowedServices = useMemo(() => {
+  if (!payments?.data?.length) return undefined
+  const types = new Set<string>()
+  payments.data.forEach((payment: IExtendedPayment) => {
+    payment.invoice?.forEach((field) => {
+      if (field.type) types.add(field.type)
+    })
+  })
+  return types
+}, [payments])
+
   const { preview, edit } = paymentActions
 
   if (!isAdmin && !isGlobalAdmin) {
@@ -215,6 +227,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
       realEstatesFilter={realEstatesFilter}
       isAdmin={isAdmin}
       className={styles.select}
+      allowedServices={allowedServices}
     />
   )
 
@@ -354,62 +367,116 @@ interface ColumnSelectProps {
   onSelect?: (selected: string[]) => void
   style?: React.CSSProperties
   className?: string
+  allowedServices?: Set<string>
 }
 
-const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, ...props }) => {
+const ColumnSelect: React.FC<ColumnSelectProps> = ({ onSelect, allowedServices, ...props }) => {
   const [selected, setSelected] = useState<string[]>([])
+  const [filterByAvailable, setFilterByAvailable] = useState(true)
+
+  const filteredEntries = useMemo(() => {
+    return Object.entries(ServiceName).filter(([value]) => {
+      if (!filterByAvailable || !allowedServices) return true
+      return allowedServices.has(value)
+    })
+  }, [filterByAvailable, allowedServices])
 
   const handleSelect = (value: string[]) => {
     setSelected(value)
     localStorage.setItem('payments_columns', JSON.stringify(value))
   }
 
-  const handleCheckAll = (index = 0) => {
-    if (selected.length === Object.keys(ServiceName).length) {
+  const handleCheckAll = () => {
+    const allFiltered = filteredEntries.map(([value]) => value)
+    if (selected.length === allFiltered.length &&
+        allFiltered.every(v => selected.includes(v))) {
       setSelected([])
       localStorage.setItem('payments_columns', JSON.stringify([]))
     } else {
-      const newSelected = options[index].options?.map(({ value }) => value)
-      setSelected(newSelected)
-      localStorage.setItem('payments_columns', JSON.stringify(newSelected))
+      setSelected(allFiltered)
+      localStorage.setItem('payments_columns', JSON.stringify(allFiltered))
     }
   }
 
   useEffect(() => {
-    setSelected(JSON.parse(localStorage.getItem('payments_columns') ?? '[]'))
+    if (filterByAvailable && allowedServices) {
+      const filtered = selected.filter(s => allowedServices.has(s))
+      if (filtered.length !== selected.length) {
+        setSelected(filtered)
+        localStorage.setItem('payments_columns', JSON.stringify(filtered))
+      }
+    }
+  }, [filterByAvailable, allowedServices])
+
+  useEffect(() => {
+  if (!allowedServices || !filterByAvailable) return
+  
+  const allAvailable = Object.entries(ServiceName)
+    .filter(([value]) => allowedServices.has(value))
+    .map(([value]) => value)
+
+  setSelected(allAvailable)
+  localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
+}, [allowedServices])
+
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
+    if (!saved.includes('placingPrice')) {
+      saved.push('placingPrice')
+      localStorage.setItem('payments_columns', JSON.stringify(saved))
+    }
+    setSelected(saved)
   }, [])
+
+  useEffect(() => {
+  if (!allowedServices || !filterByAvailable) return
+
+  const saved = JSON.parse(localStorage.getItem('payments_columns') ?? '[]')
+
+  if (saved.length > 0) return
+
+  const allAvailable = Object.entries(ServiceName)
+    .filter(([value]) => allowedServices.has(value))
+    .map(([value]) => value)
+
+  setSelected(allAvailable)
+  localStorage.setItem('payments_columns', JSON.stringify(allAvailable))
+}, [allowedServices])
 
   useEffect(() => {
     onSelect?.(selected)
   }, [onSelect, selected])
 
-  useEffect(() => {
-    const savedColumns = JSON.parse(
-      localStorage.getItem('payments_columns') ?? '[]'
-    )
+  const allFiltered = filteredEntries.map(([value]) => value)
+  const isAllChecked = allFiltered.length > 0 &&
+    allFiltered.every(v => selected.includes(v))
+  const isIndeterminate = selected.some(s => allFiltered.includes(s)) && !isAllChecked
 
-    if (!savedColumns.includes('placingPrice')) {
-      savedColumns.push('placingPrice')
-      localStorage.setItem('payments_columns', JSON.stringify(savedColumns))
-    }
-
-    setSelected(savedColumns)
-  }, [])
   const options: SelectProps['options'] = [
     {
       label: (
+        <div>
         <Checkbox
-          onClick={() => handleCheckAll(0)}
-          indeterminate={
-            selected.length > 0 &&
-            selected.length < Object.keys(ServiceName).length
-          }
-          checked={Object.keys(ServiceName).length === selected.length}
-        >
+          checked={filterByAvailable}
+          onChange={(e) => setFilterByAvailable(e.target.checked)}
+          onClick={(e) => e.stopPropagation()}
+          >
+            <Typography.Text type="secondary">Доступні сервіси</Typography.Text>
+          </Checkbox>
+          <Divider style={{ margin: '4px 0' }} />
+          <Checkbox
+            onClick={(e) => {
+              e.stopPropagation()
+              handleCheckAll()
+            }}
+            indeterminate={isIndeterminate}
+            checked={isAllChecked}
+          >
           <Typography.Text type="secondary">Комунальні</Typography.Text>
         </Checkbox>
+        </div>
       ),
-      options: Object.entries(ServiceName).map(([value, label]) => ({
+      options: filteredEntries.map(([value, label]) => ({ 
         value,
         label,
       })),
