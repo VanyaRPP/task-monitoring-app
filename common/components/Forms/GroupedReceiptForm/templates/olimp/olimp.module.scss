@@ -50,7 +50,7 @@
 }
 
 .brandText {
-  font-size: 0.95rem;
+  font-size: 1.35rem;
   font-weight: 700;
 
   small {
@@ -219,7 +219,6 @@
 .grandTotal {
   margin-top: 0.2rem;
   padding-top: 0.6rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.25);
   font-size: 1.1rem;
   font-weight: 700;
 }
@@ -284,7 +283,6 @@
   }
 
   .grandTotal {
-    border-top-color: rgba(0, 0, 0, 0.18);
     color: #1a1a1a;
   }
 
@@ -456,7 +454,6 @@
     font-size: 1.1rem !important;
     padding-top: 0.6rem !important;
     margin-top: 0.2rem !important;
-    border-top-color: rgba(0, 0, 0, 0.25) !important;
     color: #111 !important;
   }
 
