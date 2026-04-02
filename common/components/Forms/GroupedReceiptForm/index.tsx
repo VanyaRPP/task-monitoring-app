@@ -1,4 +1,5 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { useEditPaymentMutation } from '@common/api/paymentApi/payment.api'
 import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPricesTable'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { CURRENCY_MAP } from '@utils/constants'
@@ -37,15 +38,34 @@ const GroupedReceiptForm: FC<Props> = ({
   paymentData,
   paymentActions: _paymentActions,
 }) => {
-  const { template, setTemplate } = usePaymentContext();
+  const { template, setTemplate, company } = usePaymentContext();
+  const [editPayment] = useEditPaymentMutation();
   const [topInfoCardHeight, setTopInfoCardHeight] = useState<number>(0)
-  const { company } = usePaymentContext()
   const rawData = currPayment ?? paymentData ?? null
   const data = rawData as any
+  const paymentId = data?._id;
   const currency =
     data?.company?.currency || company?.currency || data?.domain?.currency
   const currencyLabel = getCurrencyShortLabel(currency)
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
+
+  useEffect(() => {
+    if (data?.template) {
+      setTemplate(data.template);
+    }
+  }, [data?.template, setTemplate]);
+
+  const handleTemplateChange = (key: 'classic' | 'olimp') => {
+  setTemplate(key)
+
+  if (paymentId) {
+    editPayment({ _id: paymentId, template: key })
+      .unwrap()
+      .then(() => message.success('Шаблон збережено'))
+      .catch((err) => console.error('Помилка запиту:', err))
+  }
+}
+
   const invoiceDatePrefix = dayjs(data?.invoiceCreationDate).isValid()
     ? dayjs(data?.invoiceCreationDate).format('DDMMYY')
     : ''
@@ -263,7 +283,8 @@ const GroupedReceiptForm: FC<Props> = ({
         trigger={['click']}
         menu={{
           items: templateItems,
-          onClick: ({ key }) => setTemplate(key as 'classic' | 'olimp'),
+          onClick: ({ key }) => handleTemplateChange(key as 'classic' | 'olimp'),
+          selectedKeys: [template || 'classic'],
         }}
       >
         <Tooltip title={isEnglish ? 'Select template' : 'Обрати шаблон'}>
