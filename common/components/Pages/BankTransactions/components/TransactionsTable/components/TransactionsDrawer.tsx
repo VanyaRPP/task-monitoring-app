@@ -7,6 +7,7 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 import AddPaymentModal from '@components/AddPaymentModal'
 import dayjs from 'dayjs'
 import { SendOutlined, DownOutlined } from '@ant-design/icons'
+import { matchCompany, MatchType } from './bankHelper'
 
 interface TransactionDrawerProps {
   transaction: ITransaction
@@ -19,7 +20,6 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
 }) => {
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
-  const [selectedPayment, setSelectedPayment] = useState<any>(null)
   const [isAccountMatched, setIsAccountMatched] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -35,35 +35,16 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   )
 
   useEffect(() => {
-    setSelectedCompany(null)
-    setIsAccountMatched(false)
-    setLoading(false)
-  }, [transaction.TECHNICAL_TRANSACTION_ID])
+    if (!relatedCompanies.length) return
 
-  useEffect(() => {
-    if (relatedCompanies.length === 0) return
-
-    const foundByAccount = relatedCompanies.find(
-      (company: IRealestate) => company.account === transaction.AUT_CNTR_ACC
+    const { companyId, matchedBy } = matchCompany(
+      transaction,
+      relatedCompanies
     )
 
-    if (foundByAccount) {
-      setSelectedCompany(foundByAccount._id)
-      setIsAccountMatched(true)
-      return
-    }
-
-    if (transaction.previousCompanyId) {
-      setSelectedCompany(String(transaction.previousCompanyId))
-      setIsAccountMatched(false)
-    }
-  }, [
-    transaction.TECHNICAL_TRANSACTION_ID,
-    transaction.AUT_CNTR_ACC,
-    transaction.previousCompanyId,
-    transaction.isMatchingPayment,
-    relatedCompanies,
-  ])
+    setSelectedCompany(companyId)
+    setIsAccountMatched(matchedBy === MatchType.ACCOUNT)
+  }, [transaction, relatedCompanies])
 
   const handleCompanyChange = (value: string) => {
     setSelectedCompany(value)
@@ -72,6 +53,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
 
   const saveAccountToCompany = async (companyId: string) => {
     if (!transaction.AUT_CNTR_ACC) return
+    if (transaction.AUT_CNTR_NAM?.includes('Транз')) return
     try {
       await fetch(`/api/realestate/${companyId}`, {
         method: 'PATCH',
@@ -166,38 +148,22 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
       {modalVisible && (
         <AddPaymentModal
           closeModal={closeModal}
-          paymentData={{
-            ...(selectedPayment && selectedCompany == selectedPayment.company
-              ? {
-                  type: selectedPayment.type,
-                  invoiceCreationDate: selectedPayment.invoiceCreationDate,
-                  domain: { _id: selectedPayment.domain },
-                  street: { _id: selectedPayment.street },
-                  company: { _id: selectedPayment.company },
-                  monthService: { _id: selectedPayment.monthService },
-                  description: `${transaction.OSND}`,
-                  invoice: selectedPayment.invoice,
-                  provider: selectedPayment.provider,
-                  reciever: selectedPayment.reciever,
-                  generalSum: transactionAmount,
-                  transaction: transactionPayload,
-                }
-              : {
-                  ...relatedCompanies.find(
-                    (company: IRealestate) => company._id === selectedCompany
-                  ),
-                  generalSum: transactionAmount,
-                  description: `${transaction.OSND}`,
-                  invoiceCreationDate: dayjs(transaction.DAT_OD, 'DD.MM.YYYY'),
-                  company: selectedCompany,
-                  domain: domain,
-                  transaction: transactionPayload,
-                }),
-          }}
+          paymentData={
+            // тут якась маячня. Покрити тестом
+            {
+              ...relatedCompanies.find(
+                (company: IRealestate) => company._id === selectedCompany
+              ),
+              generalSum: transactionAmount,
+              description: `${transaction.OSND}`,
+              invoiceCreationDate: dayjs(transaction.DAT_OD, 'DD.MM.YYYY'),
+              company: selectedCompany,
+              domain: domain,
+              transaction: transactionPayload,
+            }}
           paymentActions={
-            selectedPayment && selectedCompany == selectedPayment.company
-              ? { edit: false, preview: false, create: true }
-              : { edit: false, preview: false }
+            // і це фігня. тест треба
+            { edit: false, preview: false }
           }
         />
       )}
