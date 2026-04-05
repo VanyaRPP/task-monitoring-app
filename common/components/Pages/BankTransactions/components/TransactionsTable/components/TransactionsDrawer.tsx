@@ -7,7 +7,7 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 import AddPaymentModal from '@components/AddPaymentModal'
 import dayjs from 'dayjs'
 import { SendOutlined, DownOutlined } from '@ant-design/icons'
-import { matchCompany, MatchType } from './bankHelper'
+import { matchCompany, MatchType, getResolvedDescription } from './bankHelper'
 
 interface TransactionDrawerProps {
   transaction: ITransaction
@@ -98,7 +98,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     AUT_CNTR_ACC: transaction.AUT_CNTR_ACC,
     AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
     AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
-    Description: transaction.OSND,
+    Description: getResolvedDescription(transaction, relatedCompanies),
     TECHNICAL_TRANSACTION_ID: transaction.TECHNICAL_TRANSACTION_ID,
   }
 

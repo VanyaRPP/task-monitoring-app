@@ -1,4 +1,4 @@
-import { matchCompany } from './bankHelper'
+import { matchCompany, getResolvedDescription } from './bankHelper'
 import { ITransaction } from './transactionTypes'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 
@@ -148,3 +148,51 @@ describe('matchCompany', () => {
     })
 })
 
+describe('getResolvedDescription', () => {
+    it('should return account number if matched by account', () => {
+        const transaction = {
+            AUT_CNTR_ACC: 'UA293220010000026205305849120',
+            AUT_CNTR_NAM: 'Вітюк Дмитро Олександрович',
+            OSND: 'Оплата послуг',
+        } as ITransaction
+
+        const result = getResolvedDescription(transaction, companies)
+
+        expect(result).toBe('UA293220010000026205305849120')
+    })
+
+    it('should return original OSND if matched by previousCompanyId', () => {
+        const transaction = {
+            AUT_CNTR_ACC: 'UNKNOWN_ACC',
+            previousCompanyId: 'sport-space-id',
+            OSND: 'Абонемент',
+        } as ITransaction
+
+        const result = getResolvedDescription(transaction, companies)
+
+        expect(result).toBe('Абонемент')
+    })
+
+    it('should return original OSND if nothing matched', () => {
+        const transaction = {
+            AUT_CNTR_ACC: 'UNKNOWN_ACC',
+            OSND: 'Просто переказ',
+        } as ITransaction
+
+        const result = getResolvedDescription(transaction, companies)
+
+        expect(result).toBe('Просто переказ')
+    })
+
+    it('should return original OSND for транзитний рахунок', () => {
+        const transaction = {
+            AUT_CNTR_ACC: 'UA293052990000029023866100110',
+            AUT_CNTR_NAM: 'Транз.рахунок платежi',
+            OSND: 'Транзитний платіж',
+        } as ITransaction
+
+        const result = getResolvedDescription(transaction, companies)
+
+        expect(result).toBe('Транзитний платіж')
+    })
+})

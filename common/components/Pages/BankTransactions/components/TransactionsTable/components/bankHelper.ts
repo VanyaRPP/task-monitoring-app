@@ -8,7 +8,7 @@ export enum MatchType {
 
 export const matchCompany = (
   transaction: ITransaction,
-  companies: IRealestate[]
+  companies: IRealestate[] = []
 ): { companyId: string | null; matchedBy: MatchType | null } => {
   // 1. account (якщо нормальний)
   const byAccount = companies.find(
@@ -31,4 +31,19 @@ export const matchCompany = (
   }
 
   return { companyId: null, matchedBy: null }
+}
+
+export const getResolvedDescription = (
+  transaction: ITransaction,
+  companies: IRealestate[]
+): string => {
+  const match = matchCompany(transaction, companies);
+
+  // Если данные по полю AUT_CNTR_ACC совпали (MatchType.ACCOUNT)
+  if (match.matchedBy === MatchType.ACCOUNT) {
+    return transaction.AUT_CNTR_ACC || transaction.OSND || '';
+  }
+
+  // Во всех остальных случаях оставляем оригинальное назначение платежа
+  return transaction.OSND || '';
 }
