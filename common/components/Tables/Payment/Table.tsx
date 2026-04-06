@@ -798,4 +798,6 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   )
 }
 
+PaymentsTable.displayName = 'PaymentsTable'
+
 export default PaymentsTable

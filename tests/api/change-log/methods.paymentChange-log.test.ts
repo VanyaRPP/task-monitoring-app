@@ -4,75 +4,57 @@ import { expect } from '@jest/globals'
 import mongoose from 'mongoose'
 
 jest.mock('@utils/dbConnect', () => jest.fn())
-jest.mock('@common/modules/models/PaymentChangeLog')
-jest.mock('@common/modules/models/Payment')
 
 setupTestEnvironment()
 
 describe('PaymentChangeLog API - Unsupported Methods', () => {
-  const validPaymentId = new mongoose.Types.ObjectId().toString()
+  const validPaymentId = new mongoose.Types.ObjectId().toHexString()
 
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  it('should return 405 for PUT request', async () => {
-    const mockReq = {
-      method: 'PUT',
-      query: { id: validPaymentId },
-    } as any
+  const unsupportedMethods = ['PUT', 'PATCH']
 
-    const mockRes = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    } as any
+  unsupportedMethods.forEach((method) => {
+    it(`should return 405 for ${method} request`, async () => {
+      const mockReq = {
+        method,
+        query: { id: validPaymentId },
+      } as any
 
-    await handler(mockReq, mockRes)
+      const mockRes = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn().mockReturnThis(),
+      } as any
 
-    expect(mockRes.status).toHaveBeenCalledWith(405)
-    expect(mockRes.json).toHaveBeenCalledWith({
-      success: false,
-      message: 'Method not allowed',
+      await handler(mockReq, mockRes)
+
+      expect(mockRes.status).toHaveBeenCalledWith(405)
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Method not allowed',
+      })
     })
   })
 
-  it('should return 405 for DELETE request', async () => {
+  it('should return 400 for DELETE request without changeLogId', async () => {
     const mockReq = {
       method: 'DELETE',
-      query: { id: validPaymentId },
+      query: { id: validPaymentId }, 
     } as any
 
     const mockRes = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
+      json: jest.fn().mockReturnThis(),
     } as any
 
     await handler(mockReq, mockRes)
 
-    expect(mockRes.status).toHaveBeenCalledWith(405)
+    expect(mockRes.status).toHaveBeenCalledWith(400)
     expect(mockRes.json).toHaveBeenCalledWith({
       success: false,
-      message: 'Method not allowed',
-    })
-  })
-
-  it('should return 405 for PATCH request', async () => {
-    const mockReq = {
-      method: 'PATCH',
-      query: { id: validPaymentId },
-    } as any
-
-    const mockRes = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    } as any
-
-    await handler(mockReq, mockRes)
-
-    expect(mockRes.status).toHaveBeenCalledWith(405)
-    expect(mockRes.json).toHaveBeenCalledWith({
-      success: false,
-      message: 'Method not allowed',
+      message: 'Invalid ids',
     })
   })
 })
