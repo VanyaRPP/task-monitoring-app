@@ -37,8 +37,8 @@ const RealEstateModal: FC<Props> = ({
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
   const initializedRef = useRef(false)
-  const [addRealEstate] = useAddRealEstateMutation()
-  const [editRealEstate] = useEditRealEstateMutation()
+  const [addRealEstate, { isLoading: isAdding }] = useAddRealEstateMutation()
+  const [editRealEstate, { isLoading: isEditing }] = useEditRealEstateMutation()
   const domainId = Form.useWatch('domain', form)
   const currentDomainId = getEntityId(currentRealEstate?.domain) || domainId
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
@@ -169,6 +169,7 @@ const RealEstateModal: FC<Props> = ({
       cancelText={'Відміна'}
       okButtonProps={{ style: { ...(!editable && { display: 'none' }) } }}
       preview={!editable}
+      confirmLoading={isAdding || isEditing}
     >
       <RealEstateForm
         form={form}
