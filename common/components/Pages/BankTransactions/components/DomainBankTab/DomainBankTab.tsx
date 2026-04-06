@@ -3,6 +3,7 @@ import {
   useGetBalancesQuery,
 } from '@common/api/bankApi/bank.api'
 import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import TransactionsTable from '../TransactionsTable/TransactionsTable'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import EncryptionService from '@utils/encryptionService'
@@ -58,6 +59,38 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
       { skip: !decryptedToken || !selectedAccount }
     )
 
+  const { data: realEstatesData } = useGetAllRealEstateQuery({
+    domainId,
+  })
+
+  const companies = useMemo(
+    () => realEstatesData?.data || [],
+    [realEstatesData]
+  )
+
+  const enrichedTransactions = useMemo(() => {
+    if (!transactionsData?.length) return transactionsData
+
+    const osndToCompanyId = new Map<string, string>()
+    for (const tx of transactionsData) {
+      const isTransit = tx.AUT_CNTR_NAM?.includes('Транз')
+      if (isTransit && tx.OSND && tx.previousCompanyId) {
+        osndToCompanyId.set(tx.OSND, tx.previousCompanyId)
+      }
+    }
+
+    if (!osndToCompanyId.size) return transactionsData
+
+    return transactionsData.map((tx) => {
+      const isTransit = tx.AUT_CNTR_NAM?.includes('Транз')
+      if (isTransit && tx.OSND && !tx.previousCompanyId) {
+        const companyId = osndToCompanyId.get(tx.OSND)
+        if (companyId) return { ...tx, previousCompanyId: companyId }
+      }
+      return tx
+    })
+  }, [transactionsData])
+
   if (isDomainLoading || !domain) {
     return (
       <div
@@ -99,9 +132,10 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
         <>
           <DomainBankBalance balancesData={balances} />
           <TransactionsTable
-            transactions={transactionsData}
+            transactions={enrichedTransactions}
             domain={domain}
             loading={isTransactionsLoading}
+            companies={companies}
           />
         </>
       ) : (

@@ -10,19 +10,18 @@ export const matchCompany = (
   transaction: ITransaction,
   companies: IRealestate[] = []
 ): { companyId: string | null; matchedBy: MatchType | null } => {
-  // 1. account (якщо нормальний)
-  const byAccount = companies.find(
-    (c) =>
-      c.account &&
-      c.account === transaction.AUT_CNTR_ACC &&
-      !transaction.AUT_CNTR_NAM?.includes('Транз')
-  )
+  const isTransit = transaction.AUT_CNTR_NAM?.includes('Транз')
 
-  if (byAccount) {
-    return { companyId: byAccount._id!, matchedBy: MatchType.ACCOUNT }
+  if (!isTransit) {
+    const byAccount = companies.find(
+      (c) => c.account && c.account === transaction.AUT_CNTR_ACC
+    )
+
+    if (byAccount) {
+      return { companyId: byAccount._id!, matchedBy: MatchType.ACCOUNT }
+    }
   }
 
-  // 2. previousCompanyId (твій best source зараз)
   if (transaction.previousCompanyId) {
     return {
       companyId: String(transaction.previousCompanyId),
