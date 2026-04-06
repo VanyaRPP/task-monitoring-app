@@ -66,7 +66,7 @@ const RealEstateForm: FC<Props> = ({
 
       form.setFieldsValue({
         services: servicesWithEnabled,
-        discount: currentRealEstate?.discount || 0,
+       // discount: currentRealEstate?.discount || 0,
       })
     }
   }, [services, currentRealEstate, form])
@@ -180,7 +180,7 @@ const RealEstateForm: FC<Props> = ({
         </Select>
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} required={false} />
-      <Form.Item name="discount" label="Знижка" rules={validateField('number')}>
+      {/*<Form.Item name="discount" label="Знижка" rules={validateField('number')}>
         <InputNumber
           min={0}
           max={100}
@@ -192,7 +192,8 @@ const RealEstateForm: FC<Props> = ({
           style={{ width: '100%' }}
         />
       </Form.Item>
-
+      */}
+      
       {isMeterBasedServiceExist && (
         <>
           <Form.Item
@@ -227,13 +228,14 @@ const RealEstateForm: FC<Props> = ({
         allCustomServices={customServices}
       />
 
-      <Form.Item
+      {/*<Form.Item
         valuePropName="checked"
         name="garbageCollector"
         label="Вивіз сміття"
       >
         <Checkbox disabled={!editable} />
       </Form.Item>
+      */}
 
       {isServiceExist('inflicionPrice') && (
         <Form.Item
