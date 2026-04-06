@@ -187,7 +187,7 @@ const CompaniesTable: React.FC<Props> = ({
 
   const isSingleCompanyByData = useMemo(() => {
     return realEstateData?.realEstatesFilter?.length === 1
-  }, [realEstates?.data])
+  }, [realEstateData?.realEstatesFilter?.length])
 
   const filteredCustomServices = useMemo(() => {
     return customServices?.filter((custom) => {
