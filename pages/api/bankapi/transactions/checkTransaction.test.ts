@@ -160,6 +160,31 @@ describe('checkTransaction', () => {
     })
   })
 
+  it('falls back to account when txId exists but no payment found', async () => {
+    mockedFind.mockResolvedValue([])
+
+    mockedFindOne.mockReturnValue({
+      sort: jest.fn().mockReturnValue({
+        lean: jest.fn().mockResolvedValue({ company: 'company-from-iban' }),
+      }),
+    })
+
+    const result = await checkTransaction({
+      transaction: {
+        ...transaction,
+        TECHNICAL_TRANSACTION_ID: 'tx_unknown_but_iban_known',
+      },
+      domainId: 'domain-xyz',
+    })
+
+    expect(mockedFind).toHaveBeenCalledTimes(1)
+    expect(mockedFindOne).toHaveBeenCalledTimes(1)
+    expect(result).toEqual({
+      isMatchingPayment: false,
+      previousCompanyId: 'company-from-iban',
+    })
+  })
+
   it('returns false when TECHNICAL_TRANSACTION_ID is empty string — tries account fallback only with domainId', async () => {
     const result = await checkTransaction({
       transaction: { ...transaction, TECHNICAL_TRANSACTION_ID: '' },
