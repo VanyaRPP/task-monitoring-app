@@ -1,13 +1,12 @@
 import { Badge, Button, Select, Space, Dropdown, message, type MenuProps } from 'antd'
 import React, { FC, useEffect, useMemo, useState } from 'react'
 import { ITransaction } from './transactionTypes'
-import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import AddPaymentModal from '@components/AddPaymentModal'
 import dayjs from 'dayjs'
 import { SendOutlined, DownOutlined } from '@ant-design/icons'
-import { matchCompany, MatchType } from './bankHelper'
+import { matchCompany, MatchType, getResolvedDescription } from './bankHelper'
+import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 
 interface TransactionDrawerProps {
   transaction: ITransaction
@@ -25,9 +24,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
 
   const transactionAmount = parseFloat(transaction.SUM as string)
 
-  const { data: realEstatesData } = useGetAllRealEstateQuery({
-    domainId: domain._id,
-  })
+  const { data: realEstatesData } = useGetAllRealEstateQuery({ domainId: domain._id })
 
   const relatedCompanies = useMemo(
     () => realEstatesData?.data || [],
@@ -98,7 +95,8 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     AUT_CNTR_ACC: transaction.AUT_CNTR_ACC,
     AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
     AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
-    Description: transaction.OSND,
+    OSND: transaction.OSND,
+    Description: getResolvedDescription(transaction, relatedCompanies),
     TECHNICAL_TRANSACTION_ID: transaction.TECHNICAL_TRANSACTION_ID,
   }
 
@@ -119,7 +117,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
             value={selectedCompany ?? undefined}
             style={{ width: 'calc(100% - 80px)' }}
           >
-            {relatedCompanies.map((company: IRealestate) => (
+            {relatedCompanies.map((company) => (
               <Select.Option key={company._id} value={company._id}>
                 {company.companyName}
               </Select.Option>
@@ -148,23 +146,19 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
       {modalVisible && (
         <AddPaymentModal
           closeModal={closeModal}
-          paymentData={
-            // тут якась маячня. Покрити тестом
-            {
-              ...relatedCompanies.find(
-                (company: IRealestate) => company._id === selectedCompany
-              ),
-              generalSum: transactionAmount,
-              description: `${transaction.OSND}`,
-              invoiceCreationDate: dayjs(transaction.DAT_OD, 'DD.MM.YYYY'),
-              company: selectedCompany,
-              domain: domain,
-              transaction: transactionPayload,
-            }}
-          paymentActions={
-            // і це фігня. тест треба
-            { edit: false, preview: false }
-          }
+          paymentData={{
+            ...relatedCompanies.find((company) => company._id === selectedCompany),
+            generalSum: transactionAmount,
+            description: getResolvedDescription(transaction, relatedCompanies),
+            invoiceCreationDate: dayjs(transaction.DAT_OD, 'DD.MM.YYYY'),
+            company: selectedCompany,
+            domain: domain,
+            transaction: transactionPayload,
+          }}
+          paymentActions={{
+            edit: false,
+            preview: false,
+          }}
         />
       )}
     </>

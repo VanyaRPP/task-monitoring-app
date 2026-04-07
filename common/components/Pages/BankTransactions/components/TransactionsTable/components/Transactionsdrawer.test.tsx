@@ -138,7 +138,6 @@ describe('Badge "Платіж є"', () => {
 })
 
 
-
 describe('State reset when transaction changes', () => {
   it('clears selectedCompany when TECHNICAL_TRANSACTION_ID changes', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
@@ -301,11 +300,45 @@ describe('Auto-match fallback for old companies (via previousCompanyId)', () => 
       expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('Account Company')
     })
   })
+
+  it('transit account — auto-selects by previousCompanyId enriched from same OSND sibling', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: undefined })] },
+    })
+
+    renderDrawer(makeTransaction({
+      AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+      AUT_CNTR_ACC: 'UA293052990000029023866100110',
+      previousCompanyId: 'company_001',
+      isMatchingPayment: false,
+    }))
+
+    await waitFor(() => {
+      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('ТОВ Тест')
+    })
+  })
+
+  it('transit account — shows no selection when previousCompanyId is null and account is transit', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: undefined })] },
+    })
+
+    renderDrawer(makeTransaction({
+      AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+      AUT_CNTR_ACC: 'UA293052990000029023866100110',
+      previousCompanyId: null,
+      isMatchingPayment: false,
+    }))
+
+    await waitFor(() => {
+      expect(document.querySelector('.ant-select-selection-item')).toBeNull()
+    })
+  })
 })
 
 
-describe('transactionPayload includes TECHNICAL_TRANSACTION_ID', () => {
-  it('passes TECHNICAL_TRANSACTION_ID to AddPaymentModal via paymentData.transaction', async () => {
+describe('transactionPayload passed to AddPaymentModal', () => {
+  it('includes TECHNICAL_TRANSACTION_ID', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: { data: [makeCompany({ account: 'NO_MATCH' })] },
     })
@@ -321,7 +354,27 @@ describe('transactionPayload includes TECHNICAL_TRANSACTION_ID', () => {
 
     expect(lastPaymentData?.transaction?.TECHNICAL_TRANSACTION_ID).toBe('tx_unique_001')
   })
+
+  it('includes OSND so future transit sibling lookups can find this payment', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: 'NO_MATCH' })] },
+    })
+    renderDrawer(makeTransaction({
+      OSND: 'Сплата за послуги, Чорна Марина Євгеніївна',
+    }))
+
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(await screen.findByText('ТОВ Тест'))
+    await userEvent.click(screen.getByRole('button', { name: /Send/i }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-payment-modal')).toBeInTheDocument()
+    })
+
+    expect(lastPaymentData?.transaction?.OSND).toBe('Сплата за послуги, Чорна Марина Євгеніївна')
+  })
 })
+
 
 describe('saveAccountToCompany after successful payment creation', () => {
   it('calls PATCH with account when company was manually selected and success=true', async () => {
@@ -376,6 +429,28 @@ describe('saveAccountToCompany after successful payment creation', () => {
 
     await waitFor(() => {
       expect(global.fetch).not.toHaveBeenCalled()
+    })
+  })
+
+  it('does NOT call PATCH for transit account even when manually selected', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: undefined })] },
+    })
+    renderDrawer(makeTransaction({
+      AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+      AUT_CNTR_ACC: 'UA293052990000029023866100110',
+    }))
+
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(await screen.findByText('ТОВ Тест'))
+    await userEvent.click(screen.getByRole('button', { name: /Send/i }))
+    await userEvent.click(await screen.findByText('Confirm'))
+
+    await waitFor(() => {
+      expect(global.fetch).not.toHaveBeenCalledWith(
+        expect.stringContaining('/api/realestate/'),
+        expect.objectContaining({ method: 'PATCH' })
+      )
     })
   })
 })
