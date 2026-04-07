@@ -79,7 +79,8 @@ export async function getTransactionsForDateInterval(
         break
       }
     }
-    return allTransactions
+    const reversedTransactions = allTransactions.reverse()
+    return reversedTransactions
   } catch (error) {
     throw new Error(`Error in fetch ${error}`)
   }
