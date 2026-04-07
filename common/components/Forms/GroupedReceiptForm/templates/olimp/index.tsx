@@ -84,7 +84,8 @@ const OlimpTemplate: FC<TemplateProps> = ({
         <div className={s.brandBlock}>
           <div className={s.brandText}>
             <div>{data?.reciever?.companyName || ''}</div>
-          </div>
+              <span className={s.dateOlimp}>Note: {dayjs(data?.invoiceCreationDate)?.format?.('MMMM YYYY')}</span>
+          </div> 
         </div>
         <h1>{isEnglish ? 'INVOICE' : 'РАХУНОК'} №{modernInvoiceNumber}</h1>
       </div>
