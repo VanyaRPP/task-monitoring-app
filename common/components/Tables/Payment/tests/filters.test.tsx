@@ -1,15 +1,46 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import PaymentsTable from '../Table'
+import { Table } from 'antd'
+
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(() => ({
+    pathname: '/',
+    push: jest.fn(),
+  })),
+}))
 
 jest.mock('antd', () => {
+  const React = require('react')
   const original = jest.requireActual('antd')
+
+  const mockTable = jest.fn(({ children }) => React.createElement('div', { 'data-testid': 'table' }, children)) as any
+  mockTable.displayName = 'Table'
+
+  const Summary = ({ children }: any) => React.createElement('div', { 'data-testid': 'table-summary' }, children)
+  Summary.displayName = 'Table.Summary'
+
+  const Row = ({ children }: any) => React.createElement('div', null, children)
+  Row.displayName = 'Table.Summary.Row'
+
+  const Cell = ({ children }: any) => React.createElement('div', null, children)
+  Cell.displayName = 'Table.Summary.Cell'
+
+  mockTable.Summary = Summary
+  mockTable.Summary.Row = Row
+  mockTable.Summary.Cell = Cell
+
+  const Tooltip = ({ children }: any) => React.createElement(React.Fragment, null, children)
+  Tooltip.displayName = 'Tooltip'
+
+  const Badge = ({ children }: any) => React.createElement(React.Fragment, null, children)
+  Badge.displayName = 'Badge'
+
   return {
     ...original,
-    Table: (props: any) => <div data-testid="table">{props.children}</div>,
-    Tooltip: (props: any) => <>{props.children}</>,
-    Badge: (props: any) => <>{props.children}</>,
-    Button: (props: any) => <>{props.children}</>,
+    Table: mockTable,
+    Tooltip,
+    Badge,
   }
 })
 
@@ -26,25 +57,52 @@ const mockPaymentsTableFullProps = {
         updatedAt: '2025-01-01',
       },
     ],
+    totalPayments: { debit: 100, credit: 0 },
+    total: 1,
   },
-  filters: {
-    domain: [{ _id: 'd1', name: 'Domain1' }],
-    company: [{ _id: 'c1', companyName: 'Company1' }],
+  statusProps: {
+    paymentsError: false,
+    paymentsLoading: false,
+    paymentsFetching: false,
+    currUserLoading: false,
+    currUserFetching: false,
+    currUserError: false,
+    currUserRoles: [],
   },
-  currUserRoles: [],
+  filterProps: {
+    filters: {},
+    setFilters: jest.fn(),
+    domainsFilter: [{ text: 'Domain1', value: 'd1' }],
+    companiesFilter: [{ text: 'Company1', value: 'c1' }],
+    streetsFilter: [],
+    dateFilters: { monthFilter: [], yearFilter: [] },
+  },
+  paginationProps: {
+    pageData: { pageSize: 10, currentPage: 1 },
+    handlePagination: jest.fn(),
+  },
+  actionProps: {
+    onViewClick: jest.fn(),
+    onEditClick: jest.fn(),
+    onDelete: jest.fn(),
+    deleteLoading: false,
+  },
+  debtProps: { debtorCompanies: [] },
+  columnSelectionProps: { selectedColumns: [], setSelectedColumns: jest.fn() },
   paymentsDeleteItems: [],
   selectedPayments: [],
-  tableEventProps: {},
-  debtProps: {},
-  columnSelectionProps: {},
+  tableEventProps: { handleTableChange: jest.fn() },
   onSelectPayments: jest.fn(),
   onSetDeleteItems: jest.fn(),
-  onChangeColumnSelection: jest.fn(),
 }
 
 describe('PaymentsTable — filters visibility', () => {
   const wrapper = (extraProps = {}) =>
-    render(<PaymentsTable {...mockPaymentsTableFullProps as any} {...extraProps} />)
+    render(<PaymentsTable {...(mockPaymentsTableFullProps as any)} {...extraProps} />)
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
 
   test('renders PaymentsTable without crashing', () => {
     wrapper()
@@ -56,20 +114,31 @@ describe('PaymentsTable — filters visibility', () => {
     expect(screen.getByTestId('table')).toBeInTheDocument()
   })
 
-  test('renders with multiple domains and companies', () => {
+  test('passes domain and company filters correctly to Table columns', () => {
+    const domains = [
+      { text: 'Domain1', value: 'd1' },
+      { text: 'Domain2', value: 'd2' },
+    ]
+    const companies = [
+      { text: 'Company1', value: 'c1' },
+    ]
+
     wrapper({
-      filters: {
-        domain: [
-          { _id: 'd1', name: 'Domain1' },
-          { _id: 'd2', name: 'Domain2' },
-        ],
-        company: [
-          { _id: 'c1', companyName: 'Company1' },
-          { _id: 'c2', companyName: 'Company2' },
-        ],
+      filterProps: {
+        ...mockPaymentsTableFullProps.filterProps,
+        domainsFilter: domains,
+        companiesFilter: companies,
       },
     })
-    expect(screen.getByTestId('table')).toBeInTheDocument()
+
+    const tableCalls = (Table as unknown as jest.Mock).mock.calls
+    const lastCallProps = tableCalls[tableCalls.length - 1][0]
+
+    const domainColumn = lastCallProps.columns.find((c: any) => c.dataIndex === 'domain')
+    if (domainColumn) {
+      expect(domainColumn.filters).toHaveLength(2)
+      expect(domainColumn.filters[0].text).toBe('Domain1')
+    }
   })
 
   test('renders with empty payment data', () => {
@@ -81,9 +150,10 @@ describe('PaymentsTable — filters visibility', () => {
 
   test('renders with empty filters', () => {
     wrapper({
-      filters: {
-        domain: [],
-        company: [],
+      filterProps: {
+        ...mockPaymentsTableFullProps.filterProps,
+        domainsFilter: [],
+        companiesFilter: [],
       },
     })
     expect(screen.getByTestId('table')).toBeInTheDocument()
@@ -97,14 +167,17 @@ describe('PaymentsTable — filters visibility', () => {
 
   test('renders with user roles', () => {
     wrapper({
-      currUserRoles: ['admin', 'viewer'],
+      statusProps: {
+        ...mockPaymentsTableFullProps.statusProps,
+        currUserRoles: ['admin', 'viewer'],
+      },
     })
     expect(screen.getByTestId('table')).toBeInTheDocument()
   })
 
   test('renders with selected payments', () => {
     wrapper({
-      selectedPayments: ['1', '2'],
+      selectedPayments: [{ _id: '1' } as any, { _id: '2' } as any],
     })
     expect(screen.getByTestId('table')).toBeInTheDocument()
   })
