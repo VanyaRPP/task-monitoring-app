@@ -814,7 +814,7 @@ describe('getInvoices - Placing', () => {
         totalArea: 70,
       }
       const prevService: Partial<IService> = {
-        inflicionPrice: 70,
+        inflicionPrice: 110,
       }
       const prevPayment: Partial<IPayment> = {
         invoice: [
@@ -835,8 +835,8 @@ describe('getInvoices - Placing', () => {
 
       expect(invoices).toContainEqual({
         type: ServiceType.Placing,
-        price: 441,
-        sum: 441,
+        price: 693,
+        sum: 693,
       })
     })
 
