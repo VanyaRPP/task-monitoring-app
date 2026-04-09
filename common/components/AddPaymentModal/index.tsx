@@ -414,7 +414,7 @@ const AddPaymentModal: FC<Props> = ({
             domain: preselectedDomain || getId(payment?.domain),
             street: getId(payment?.street),
             company: preselectedCompany || getId(payment?.company),
-            monthService: getId(payment?.monthService),
+            monthService: getId(paymentData?.monthService || payment?.monthService),
             invoice: (payment?.invoice && payment.invoice.length > 0) 
               ? payment.invoice 
               : filteredInvoices,

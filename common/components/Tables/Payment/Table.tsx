@@ -299,8 +299,8 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
           _record: IExtendedPayment,
           index: number
         ) => {
-          const companyName = company.companyName
-          const companyId = company._id
+          const companyName = company?.companyName
+          const companyId = company?._id
           const debtor = debtorCompanies.find(
             (d) => d.companyName === companyName
           )
@@ -308,7 +308,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
             payments?.data?.findIndex(
               (item) =>
                 typeof item.company === 'object' &&
-                (item.company as any).companyName === companyName
+                (item.company as any)?.companyName === companyName
             ) === index
 
           const companyLabel = (
