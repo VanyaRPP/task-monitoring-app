@@ -1,8 +1,8 @@
-import { getFormattedDate } from '@assets/features/formatDate'
 import { validateField } from '@assets/features/validators'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { Form, FormInstance, Select } from 'antd'
 import { useEffect, useMemo } from 'react'
+import dayjs from 'dayjs'
 
 export interface MonthServiceSelectProps {
   form: FormInstance
@@ -15,7 +15,7 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
 }) => {
   const streetId: string = Form.useWatch('street', form)
   const domainId: string = Form.useWatch('domain', form)
-  const serviceId: string = Form.useWatch('service', form)
+  const monthService: string = Form.useWatch('monthService', form)
 
   const {
     data: { data: services } = { data: [] },
@@ -30,9 +30,13 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
   )
 
   const options = useMemo(() => {
-    return services.map((i) => ({
-      value: i._id,
-      label: getFormattedDate(i.date, 'MMMM YYYY'),
+    const serviceMonths = services?.map(i => dayjs(i.date).startOf('month').toISOString()) || []
+    const currentMonths = Array.from({ length: 12 }, (_, i) => dayjs().subtract(i, 'month').startOf('month').toISOString())
+    const allMonths = [...new Set([...serviceMonths, ...currentMonths])]
+    allMonths.sort((a, b) => dayjs(b).diff(dayjs(a)))
+    return allMonths.map(month => ({
+      value: month,
+      label: dayjs(month).format('MMMM YYYY'),
     }))
   }, [services])
 
@@ -41,13 +45,13 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
       if (options.length === 1) {
         form.setFieldsValue({ monthService: options[0].value })
       } else if (
-        !serviceId ||
-        !options.some((option) => option.value === serviceId)
+        !monthService ||
+        !options.some((option) => option.value === monthService)
       ) {
         form.setFieldsValue({ monthService: options[0]?.value })
       }
     }
-  }, [form, options, serviceId, edit])
+  }, [form, options, monthService, edit])
 
   return (
     <Form.Item
@@ -59,13 +63,11 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
         options={options}
         optionFilterProp="label"
         placeholder="Місяць"
-        status={isServicesError && 'error'}
+        status={isServicesError ? 'error' : undefined}
         loading={isServicesLoading}
         disabled={
-          options.length === 0 ||
-          isServicesLoading ||
-          services.length === 1 ||
-          !streetId ||
+          isServicesLoading || 
+          !streetId || 
           !domainId
         }
         allowClear
