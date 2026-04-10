@@ -42,6 +42,9 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       mfo: currentDomain?.mfo || '',
       rnokpp: currentDomain?.rnokpp || '',
       iban: currentDomain?.iban || '',
+      domainType: currentDomain?.domainType || 'communal',
+      ownServiceName: currentDomain?.ownServiceName || '',
+      ownServiceValue: currentDomain?.ownServiceValue || '',
       customServices: currentDomain?.customServices || [
         {
           groupName: 'Стандартні послуги',
@@ -53,7 +56,8 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
   }, [currentDomain, form, user])
 
   const handleSubmit = async () => {
-    const formData = await form.validateFields()
+    await form.validateFields()
+    const formData = form.getFieldsValue()
 
     if (
       !currentDomain &&
@@ -85,6 +89,9 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       rnokpp: formData.rnokpp,
       iban: formData.iban,
       customServices: formData.customServices,
+      domainType: formData.domainType,
+      ownServiceName: formData.ownServiceName,
+      ownServiceValue: formData.ownServiceValue,
     }
 
     const response = currentDomain

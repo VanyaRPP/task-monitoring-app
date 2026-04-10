@@ -4,11 +4,14 @@ import {
 } from '@common/api/customServicesApi/customServices.api'
 import {
   Button,
+  Form,
   FormInstance,
   message,
 } from 'antd'
 import React, { FC, useState } from 'react'
 import DomainModal, { ServiceItem } from './DomainModal'
+import DomainModalType from './DomainModalType'
+import { defaultServices } from '@utils/constants'
 
 interface Props {
   form: FormInstance
@@ -28,6 +31,38 @@ const DomainsServices: FC<Props> = ({
   const [createCustomService] = useCreateCustomServiceMutation()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { data: customServicesData } = useGetCustomServicesQuery({})
+
+  const domainType = Form.useWatch('domainType', form)
+
+  const handleTypeChange = (type: string) => {
+    form.setFieldsValue({ domainType: type })
+
+    let newServices: string[] = []
+    const IT_SERVICE_NAME = 'For the provision of IT services'
+
+    if (type === 'communal') {
+      newServices = defaultServices
+    } else if (type === 'it') {
+      newServices = [IT_SERVICE_NAME]
+    } else if (type === 'own') {
+      const ownName = form.getFieldValue('ownServiceName')
+      newServices = ownName ? [ownName] : []
+    }
+
+    const newCustomServices = [
+      {
+        groupName: 'Стандартні послуги',
+        services: newServices,
+      },
+    ]
+
+    form.setFieldsValue({ 
+      customServices: newCustomServices,
+      domainServices: [] 
+    })
+
+    onCustomServicesChange([])
+  }
 
   const handleSave = async (fieldKey: number) => {
     const service = form.getFieldValue(['domainServices', fieldKey])
@@ -144,6 +179,10 @@ const DomainsServices: FC<Props> = ({
     <>
       {editable && (
         <>
+          <DomainModalType
+            domainType={domainType}
+            onTypeChange={handleTypeChange}
+          />
           <Button
             style={{ marginBottom: 10 }} 
             block

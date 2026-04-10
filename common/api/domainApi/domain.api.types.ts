@@ -9,6 +9,9 @@ export interface IDomainModel {
   IEName: string
   domainBankToken: IDomainBankToken[]
   customServices: ICustomService[]
+  domainType?: string;
+  ownServiceName?: string;
+  ownServiceValue?: string | number;
 }
 
 export interface ICustomService {

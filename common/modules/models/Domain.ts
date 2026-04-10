@@ -13,6 +13,9 @@ export interface IDomain {
   domainBankToken: IDomainBankToken[]
   domainServices: string[]
   customServices: ICustomService[]
+  domainType?: string
+  ownServiceName?: string
+  ownServiceValue?: string | number
 }
 
 export interface ICustomService {
@@ -53,6 +56,9 @@ const DomainSchema = new Schema<IDomain>({
       services: [{ type: String, required: true }],
     },
   ],
+  domainType: { type: String, required: false },
+  ownServiceName: { type: String, required: false },
+  ownServiceValue: { type: Schema.Types.Mixed, required: false },
 })
 
 const Domain =
