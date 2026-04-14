@@ -177,12 +177,18 @@ const AddPaymentModal: FC<Props> = ({
       name: 'Знижка',
       price: company.discount,
       sum: company.discount,
+        amount: 1,
     })
   }
 
-    return serviceFilteredInvoices?.filter(
-      (invoice) => invoice?.sum > 0 || DEFAULT_INVOICES.includes(invoice?.type)
-    )
+    return serviceFilteredInvoices
+      ?.filter(
+        (invoice) => invoice?.sum > 0 || DEFAULT_INVOICES.includes(invoice?.type)
+      )
+      .map((inv) => ({
+        ...inv,
+        amount: inv.amount || 1,
+      }))
   }, [
     company,
     service,
@@ -298,13 +304,17 @@ const AddPaymentModal: FC<Props> = ({
     setSaved(true)
 
     const values = await form.validateFields()
+    const invoice = (values.invoice || []).map((inv: any) => ({
+      ...inv,
+      amount: inv.amount || 1,
+    }))
 
     if (values.operation === Operations.Credit) {
       await handleSubmit()
       return
     }
 
-    setCurrPayment({ ...values, provider, reciever })
+    setCurrPayment({ ...values, invoice, provider, reciever })
     setActiveTabKey('2')
   }
 
@@ -332,8 +342,11 @@ const AddPaymentModal: FC<Props> = ({
       provider,
       reciever,
       transaction,
-      invoice: formData.debit
-        ? formData.invoice.filter((invoice) => +invoice.sum !== 0)
+      invoice:
+        formData.operation === Operations.Debit
+          ? (formData.invoice || [])
+              .filter((inv: any) => +inv.sum !== 0)
+              .map((inv: any) => ({ ...inv, amount: inv.amount || 1 }))
         : [],
     }
 

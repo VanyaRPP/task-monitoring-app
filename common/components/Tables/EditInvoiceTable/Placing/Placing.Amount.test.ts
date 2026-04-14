@@ -62,4 +62,14 @@ describe('Кнопка повернення значення в формі', () 
 
     expect(setFieldValue).toHaveBeenCalledWith(['invoice', '0', 'price'], 999)
   })
+
+  it('має зберігати значення amount при оновленні форми', () => {
+    const setFieldValue = jest.fn()
+    const form = { setFieldValue }
+    const name = ['0']
+    const amount = 5
+
+    form.setFieldValue(['invoice', ...name, 'amount'], amount)
+    expect(setFieldValue).toHaveBeenCalledWith(['invoice', '0', 'amount'], 5)
+  })
 })
