@@ -13,7 +13,7 @@ setupTestEnvironment()
 describe('API Route - DELETE Method', () => {
   it('should delete a street successfully', async () => {
     const testStreetId = '649324b7ff4981c7363ceb31'
-    ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: true })
+    ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: true, isAdmin: true })
     await (Street as any).create({
       _id: testStreetId,
       address: 'Test Address',
@@ -37,7 +37,7 @@ describe('API Route - DELETE Method', () => {
 
   it('should return 400 if street to delete is not found', async () => {
     const nonExistentStreetId = '649324b7ff4981c7363ceb99'
-    ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: true })
+    ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: true, isAdmin: true })
 
     const mockRequest = {
       method: 'DELETE',
@@ -59,7 +59,7 @@ describe('API Route - DELETE Method', () => {
 
   it('should return 400 if an error occurs during deletion', async () => {
     const testStreetId = '649324b7ff4981c7363ceb31'
-    ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: true })
+    ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: true, isAdmin: true })
     await (Street as any).create({
       _id: testStreetId,
       address: 'Test Address',
@@ -85,9 +85,9 @@ describe('API Route - DELETE Method', () => {
     })
   })
 
-  it('should return 400 if user is not authorized to delete streets', async () => {
+  it('should return 403 if user is not authorized to delete streets', async () => {
     const testStreetId = '649324b7ff4981c7363ceb31'
-    ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: false })
+    ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: false, isAdmin: false })
 
     const mockRequest = { method: 'DELETE', query: { id: testStreetId } } as any
     const mockResponse = {
@@ -97,10 +97,10 @@ describe('API Route - DELETE Method', () => {
 
     await handler(mockRequest, mockResponse)
 
-    expect(mockResponse.status).toHaveBeenCalledWith(400)
+    expect(mockResponse.status).toHaveBeenCalledWith(403)
     expect(mockResponse.json).toHaveBeenCalledWith({
       success: false,
-      message: 'not allowed',
+      message: 'Access denied: not an admin',
     })
   })
 })
