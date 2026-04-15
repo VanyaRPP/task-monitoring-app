@@ -104,7 +104,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     <>
       <Badge.Ribbon
         text="Платіж є"
-        color="purple"
+        color="RoyalBlue"
         style={{
           top: '-50%',
           visibility: transaction.isMatchingPayment ? 'visible' : 'hidden',
