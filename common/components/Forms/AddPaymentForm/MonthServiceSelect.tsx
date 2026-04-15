@@ -1,8 +1,15 @@
 import { validateField } from '@assets/features/validators'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
+import {
+  buildMonthServicePlaceholder,
+  isMonthServicePlaceholder,
+  parseMonthServicePlaceholder,
+} from '@common/components/Forms/AddPaymentForm/month-service-placeholder'
 import { Form, FormInstance, Select } from 'antd'
-import { useEffect, useMemo } from 'react'
 import dayjs from 'dayjs'
+import { useEffect, useMemo } from 'react'
+
+const ROLLING_MONTH_COUNT = 12
 
 export interface MonthServiceSelectProps {
   form: FormInstance
@@ -30,14 +37,39 @@ const MonthServiceSelect: React.FC<MonthServiceSelectProps> = ({
   )
 
   const options = useMemo(() => {
-    const serviceMonths = services?.map(i => dayjs(i.date).startOf('month').toISOString()) || []
-    const currentMonths = Array.from({ length: 12 }, (_, i) => dayjs().subtract(i, 'month').startOf('month').toISOString())
-    const allMonths = [...new Set([...serviceMonths, ...currentMonths])]
-    allMonths.sort((a, b) => dayjs(b).diff(dayjs(a)))
-    return allMonths.map(month => ({
-      value: month,
-      label: dayjs(month).format('MMMM YYYY'),
-    }))
+    const byMonthKey = new Map<
+      string,
+      { value: string; label: string }
+    >()
+
+    for (const svc of services ?? []) {
+      const key = dayjs(svc.date).startOf('month').format('YYYY-MM')
+      byMonthKey.set(key, {
+        value: svc._id,
+        label: dayjs(svc.date).format('MMMM YYYY'),
+      })
+    }
+
+    for (let i = 0; i < ROLLING_MONTH_COUNT; i++) {
+      const m = dayjs().subtract(i, 'month').startOf('month')
+      const key = m.format('YYYY-MM')
+      if (!byMonthKey.has(key)) {
+        byMonthKey.set(key, {
+          value: buildMonthServicePlaceholder(m),
+          label: m.format('MMMM YYYY'),
+        })
+      }
+    }
+
+    const sortKey = (opt: { value: string }) => {
+      if (isMonthServicePlaceholder(opt.value)) {
+        return parseMonthServicePlaceholder(opt.value).valueOf()
+      }
+      const svc = services?.find((s) => s._id === opt.value)
+      return svc ? dayjs(svc.date).valueOf() : 0
+    }
+
+    return [...byMonthKey.values()].sort((a, b) => sortKey(b) - sortKey(a))
   }, [services])
 
   useEffect(() => {
