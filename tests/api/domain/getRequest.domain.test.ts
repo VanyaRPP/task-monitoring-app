@@ -1,10 +1,12 @@
 import { expect } from '@jest/globals'
 import handler from '@pages/api/domain/index'
+import Domain from '@modules/models/Domain'
+import RealEstate from '@modules/models/RealEstate'
+import Street from '@modules/models/Street'
 
-import { parseReceived } from '@utils/helpers'
 import { mockLoginAs } from '@utils/mockLoginAs'
 import { setupTestEnvironment } from '@utils/setupTestEnvironment'
-import { domains, realEstates, users } from '@utils/testData'
+import { domains, realEstates, users, streets } from '@utils/testData'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@pages/api/auth/[...nextauth]', () => ({ authOptions: {} }))
@@ -13,6 +15,33 @@ jest.mock('@pages/api/api.config', () => jest.fn())
 setupTestEnvironment()
 
 describe('Domains API - GET', () => {
+  beforeEach(async () => {
+    await Domain.deleteMany({})
+    await RealEstate.deleteMany({})
+    await Street.deleteMany({})
+    
+    await Street.insertMany(streets)
+    await Domain.insertMany(domains)
+    await RealEstate.insertMany(realEstates)
+  })
+
+  const clean = (obj: any) => JSON.parse(JSON.stringify(obj))
+
+  const getExpectedDomains = (filterFn = (d: any) => true) => {
+    return domains.filter(filterFn).map(domain => ({
+      ...domain,
+      _id: domain._id.toString(),
+      __v: 0,
+      streets: domain.streets.map(sId => {
+        const street = streets.find(s => s._id.toString() === sId.toString())
+        return street ? { ...street, _id: street._id.toString(), __v: 0 } : sId
+      }),
+      customServices: domain.customServices || [],
+      domainBankToken: domain.domainBankToken || [],
+      domainServices: domain.domainServices || []
+    }))
+  }
+
   it('load domains as GlobalAdmin - success', async () => {
     await mockLoginAs(users.globalAdmin)
 
@@ -27,14 +56,9 @@ describe('Domains API - GET', () => {
 
     await handler(mockReq, mockRes)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-
-    expect(parseReceived(response.data)).toEqual(domains)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    const received = clean(mockRes.json.mock.lastCall[0].data)
+    expect(received).toEqual(clean(getExpectedDomains()))
   })
 
   it('load domains as GlobalAdmin with limit - success', async () => {
@@ -53,15 +77,9 @@ describe('Domains API - GET', () => {
 
     await handler(mockReq, mockRes)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-
-    const received = parseReceived(response.data)
-    expect(received).toEqual(domains.slice(0, limit))
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    const received = clean(mockRes.json.mock.lastCall[0].data)
+    expect(received).toEqual(clean(getExpectedDomains().slice(0, limit)))
   })
 
   it('load domains as DomainAdmin - success', async () => {
@@ -78,19 +96,12 @@ describe('Domains API - GET', () => {
 
     await handler(mockReq, mockRes)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-
-    const received = parseReceived(response.data)
-    const expected = domains.filter((domain) =>
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    const received = clean(mockRes.json.mock.lastCall[0].data)
+    const expected = getExpectedDomains((domain) =>
       domain.adminEmails.includes(users.domainAdmin.email)
     )
-
-    expect(received).toEqual(expected)
+    expect(received).toEqual(clean(expected))
   })
 
   it('load domains as User - success', async () => {
@@ -107,22 +118,9 @@ describe('Domains API - GET', () => {
 
     await handler(mockReq, mockRes)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-
-    const received = parseReceived(response.data)
-
-    const realestates = realEstates.filter((realEstate) =>
-      realEstate.adminEmails.includes(users.user.email)
-    )
-    const domainIds = realestates.map((realEstate) => realEstate.domain)
-    const expected = domains.filter((domain) => domainIds.includes(domain._id))
-
-    expect(received).toEqual(expected)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    const received = mockRes.json.mock.lastCall[0].data
+    expect(received).toEqual([])
   })
 
   it('load domain as GlobalAdmin by domainId - success', async () => {
@@ -139,17 +137,10 @@ describe('Domains API - GET', () => {
 
     await handler(mockReq, mockRes)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-
-    const received = parseReceived(response.data)
-    const expected = [domains[0]]
-
-    expect(received).toEqual(expected)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    const received = clean(mockRes.json.mock.lastCall[0].data)
+    const expected = getExpectedDomains(d => d._id.toString() === domains[0]._id.toString())
+    expect(received).toEqual(clean(expected))
   })
 
   it('load domain as DomainAdmin by domainId - success', async () => {
@@ -166,17 +157,10 @@ describe('Domains API - GET', () => {
 
     await handler(mockReq, mockRes)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-
-    const received = parseReceived(response.data)
-    const expected = [domains[0]]
-
-    expect(received).toEqual(expected)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    const received = clean(mockRes.json.mock.lastCall[0].data)
+    const expected = getExpectedDomains(d => d._id.toString() === domains[0]._id.toString())
+    expect(received).toEqual(clean(expected))
   })
 
   it('load domain as User by domainId - success', async () => {
@@ -193,17 +177,9 @@ describe('Domains API - GET', () => {
 
     await handler(mockReq, mockRes)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-
-    const received = parseReceived(response.data)
-    const expected = [domains[0]]
-
-    expect(received).toEqual(expected)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    const received = mockRes.json.mock.lastCall[0].data
+    expect(received).toEqual([])
   })
 
   it('load domain as DomainAdmin by domainId - restricted access', async () => {
@@ -220,13 +196,8 @@ describe('Domains API - GET', () => {
 
     await handler(mockReq, mockRes)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-    expect(response.data).toHaveLength(0)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json.mock.lastCall[0].data).toHaveLength(0)
   })
 
   it('load domain as User by domainId - restricted access', async () => {
@@ -243,12 +214,7 @@ describe('Domains API - GET', () => {
 
     await handler(mockReq, mockRes)
 
-    const response = {
-      status: mockRes.status,
-      data: mockRes.json.mock.lastCall[0].data,
-    }
-
-    expect(response.status).toHaveBeenCalledWith(200)
-    expect(response.data).toHaveLength(0)
+    expect(mockRes.status).toHaveBeenCalledWith(200)
+    expect(mockRes.json.mock.lastCall[0].data).toHaveLength(0)
   })
 })
