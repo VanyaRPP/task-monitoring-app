@@ -34,20 +34,19 @@ const getColumns = (currency?: string) => {
       width: 100,
       render: (value: any, record: any = {}) => {
         const n = Number(value)
-          if (!isFinite(n) || n === 0) return '-'
+        const type = record.type
+        const displayValue = !isFinite(n) || n === 0 ? 1 : n
           
-          const type = record.type
-
           if (type === ServiceType.Placing || type === 'rentPrice') {
-            return `${n.toFixed(2)} ${isUah ? 'м²' : 'm²'}`
+            return `${displayValue.toFixed(2)} ${isUah ? 'м²' : 'm²'}`
           }
           if (type === ServiceType.Electricity || type === 'electricityPrice') {
-            return `${n.toFixed(2)} ${isUah ? 'кВт' : 'kWh'}`
+            return `${displayValue.toFixed(2)} ${isUah ? 'кВт' : 'kWh'}`
           }
           if (type === ServiceType.Water || type === 'waterPrice' || type === 'waterPriceTotal') {
-            return `${n.toFixed(2)} ${isUah ? 'м³' : 'm³'}`
+            return `${displayValue.toFixed(2)} ${isUah ? 'м³' : 'm³'}`
           }
-          return n
+          return displayValue
       },
     },
     {
@@ -104,9 +103,15 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
 
         if (!name) {
           switch (inv.type) {
+            case ServiceType.Maintenance:
+              name = isEnglish ? 'Maintenance' : 'Утримання'
+              break
             case ServiceType.Placing:
             case 'rentPrice':
               name = isEnglish ? 'Placing' : 'Розміщення'
+              break
+            case ServiceType.Inflicion:
+              name = isEnglish ? 'Inflation' : 'Інфляція'
               break
             case ServiceType.Electricity:
             case 'electricityPrice':
@@ -117,15 +122,25 @@ const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
             case 'waterPriceTotal':
               name = isEnglish ? 'Water supply' : 'Водопостачання'
               break
+            case ServiceType.WaterPart:
+              name = isEnglish ? 'Water supply share' : 'Частка водопостачання'
+              break
             case ServiceType.GarbageCollector:
             case 'garbageCollectorPrice':
               name = isEnglish ? 'Garbage removal' : 'Вивіз ТПВ'
               break
+            case ServiceType.Cleaning:
+              name = isEnglish ? 'Cleaning' : 'Прибирання'
+              break
+            case ServiceType.Discount:
             case 'discount':
               name = isEnglish ? 'Discount' : 'Знижка'
               break
+            case ServiceType.Custom:
+              name = isEnglish ? 'Custom' : 'Власне'
+              break
             default:
-              name = isEnglish ? 'Additional' : 'Додатково'
+              name = inv.name || (isEnglish ? 'Additional' : 'Додатково')
           }
         }
 
