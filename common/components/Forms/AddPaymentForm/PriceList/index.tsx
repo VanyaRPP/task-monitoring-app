@@ -65,7 +65,6 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                   <br />
                   <pre>
                     {payment?.reciever?.description?.trim()} <br />
-                    {payment?.reciever?.companyName} <br />
                     {payment?.reciever?.adminEmails?.map((email) => (
                       <div key={email}>
                         {email} <br />

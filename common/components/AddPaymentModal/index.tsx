@@ -73,6 +73,8 @@ export interface IPaymentContext {
   form: FormInstance
   template: 'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'
   setTemplate: (t: 'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure') => void
+  showQuantityInPreview: boolean
+  setShowQuantityInPreview: (value: boolean) => void
 }
 
 export const PaymentContext = createContext<IPaymentContext>({
@@ -84,6 +86,8 @@ export const PaymentContext = createContext<IPaymentContext>({
   form: null,
   template: 'classic', 
   setTemplate: () => void 0,
+  showQuantityInPreview: false,
+  setShowQuantityInPreview: () => void 0,
 })
 
 export const usePaymentContext = () =>
@@ -113,6 +117,7 @@ const AddPaymentModal: FC<Props> = ({
   const [saved, setSaved] = useState(false)
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
   const [template, setTemplate] = useState<'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'>('classic')
+  const [showQuantityInPreview, setShowQuantityInPreview] = useState(false)
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)
   )
@@ -479,6 +484,8 @@ const AddPaymentModal: FC<Props> = ({
         form,
         template, 
         setTemplate,
+        showQuantityInPreview,
+        setShowQuantityInPreview,
       }}
     >
       <Modal
