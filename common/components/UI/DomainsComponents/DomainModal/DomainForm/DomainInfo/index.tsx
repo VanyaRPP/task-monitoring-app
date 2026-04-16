@@ -12,7 +12,7 @@ interface Props {
 }
 
 const DomainInfo: FC<Props> = ({ editable, form }) => {
-  // Watch the values of specific fields
+  // Watch the values of specific fields 
   const IE_NAME = Form.useWatch('IEName', form)
   const IBAN = Form.useWatch('iban', form)
   const RNOKPP = Form.useWatch('rnokpp', form)
