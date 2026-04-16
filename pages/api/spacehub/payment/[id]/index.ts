@@ -103,6 +103,45 @@ export default async function handler(
       try {
         const current = await Payment.findById(req.query.id)
         if (!current) throw new Error('Payment not found')
+          const isTemplateUpdate = typeof req.body.template !== 'undefined' && req.body.invoice === undefined
+    if (isTemplateUpdate) {
+      if (!isGlobalAdmin && !isDomainAdmin) {
+        return res.status(403).json({ success: false, message: 'not allowed' })
+      }
+
+      const templateKey = req.body.template
+      const scope = req.body._templateScope
+    
+      if (scope === 'company' && !isGlobalAdmin) {
+        return res.status(403).json({ success: false, message: 'domain adminn can`t change template for company' })
+      }
+      
+      if (scope === 'company') {
+        const result = await Payment.updateMany(
+          { company: current.company },
+          { $set: { template: templateKey } }
+        )
+        return res.status(200).json({success: true, modifiedCount: result.modifiedCount,})
+      }
+
+      if (scope === 'domain') {
+        const result = await Payment.updateMany(
+          { domain: current.domain },
+          { $set: { template: templateKey } }
+        )
+
+        return res.status(200).json({success: true, modifiedCount: result.modifiedCount,})
+      }
+
+      const response = await Payment.findOneAndUpdate(
+        { _id: req.query.id },
+        { $set: { template: templateKey } },
+        { new: true }
+      )
+
+      return res.status(200).json({ success: true, data: response })
+    }
+
         await PaymentChangeLog.create({
           paymentId: current._id,
           date: new Date(),
@@ -118,6 +157,7 @@ export default async function handler(
             generalSum: current.generalSum,
             description: current.description,
             type: current.type,
+            template: req.body.template,
           },
         })
         if (isDomainAdmin) {
@@ -135,6 +175,7 @@ export default async function handler(
 
             return res.status(200).json({ success: true, data: response })
           }
+          return res.status(403).json({ success: false, message: 'not allowed' })
         }
 
         if (isGlobalAdmin) {

@@ -112,7 +112,7 @@ const AddPaymentModal: FC<Props> = ({
   const [changed, setChanged] = useState(false)
   const [saved, setSaved] = useState(false)
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const [template, setTemplate] = useState<'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'>('classic')
+  const [template, setTemplate] = useState<'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'>((paymentData?.template as any) ?? 'classic')
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)
   )
@@ -425,6 +425,7 @@ const AddPaymentModal: FC<Props> = ({
       invoice: formData.debit
         ? formData.invoice.filter((invoice) => +invoice.sum !== 0)
         : [],
+      template: template,
     }
 
     const response = edit

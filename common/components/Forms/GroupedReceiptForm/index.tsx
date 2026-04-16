@@ -4,8 +4,8 @@ import { CURRENCY_MAP } from '@utils/constants'
 import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
-import { PrinterOutlined, EditOutlined, SendOutlined } from '@ant-design/icons'
-import { Dropdown, Tooltip, message } from 'antd'
+import { PrinterOutlined, EditOutlined, SendOutlined, RightOutlined, CheckOutlined } from '@ant-design/icons'
+import { Dropdown, Tooltip, message, MenuProps } from 'antd'
 import dynamic from 'next/dynamic'
 import s from './style.module.scss'
 
@@ -211,6 +211,79 @@ const GroupedReceiptForm: FC<Props> = ({
     }
   };
 
+  const companyLabel = (data?.company as any)?.companyName ?? company?.companyName ?? ''
+
+  const handleSaveForPayment = (templateKey: string) => {
+    if (!data?._id) return message.warning('Платіж не знайдено')
+      setTemplate(templateKey as any)
+      fetch(`/api/spacehub/payment/${data._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ template: templateKey }),
+      })
+    }
+
+  const handleSaveForCompany = (templateKey: string) => {
+    if (!data?._id) return message.warning('Платіж не знайдено')
+      setTemplate(templateKey as any)
+    fetch(`/api/spacehub/payment/${data._id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ template: templateKey, _templateScope: 'company' }),
+    }).then(() => message.success(`Шаблон збережено для компанії (${companyLabel})`))
+    .catch(() => message.error('Помилка збереження'))
+  }
+    
+  const handleSaveForDomain = (templateKey: string) => {
+    if (!data?._id) return message.warning('Платіж не знайдено')
+      setTemplate(templateKey as any)
+    fetch(`/api/spacehub/payment/${data._id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ template: templateKey, _templateScope: 'domain' }),
+    }).then(() => message.success(`Шаблон збережено для домену (${domainName})`))
+    .catch(() => message.error('Помилка збереження'))
+  }
+
+  const makeSaveMenu = (templateKey: string): MenuProps => ({
+    items: [
+      {
+        key: 'company',
+        label: (<div>Вибрати дефолтним для цієї компанії{' '}<span style={{ opacity: 0.5, fontSize: '13px' }}>«{domainName}»</span></div>
+        )
+      },
+      {
+        key: 'domain',
+        label:(<div>Вибрати дефолтним для цього домену{' '}<span style={{ opacity: 0.5, fontSize: '13px' }}>«{companyLabel}»</span></div>
+  )
+        
+        },
+      ],
+      onClick: ({ key, domEvent }) => {
+        domEvent.stopPropagation()
+        if (key === 'company') handleSaveForCompany(templateKey)
+          if (key === 'domain') handleSaveForDomain(templateKey)
+          },
+        })
+
+  const dropdownItems = templateItems.map(item => ({
+    key: item.key,
+    label: (
+    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <span onClick={() => handleSaveForPayment(item.key)}
+        style={{display: 'flex', gap: 6 }}>
+          {template === item.key && (
+          <CheckOutlined style={{ fontSize: 12, opacity: 0.7 }} />
+        )}
+        {item.label}
+      </span>
+      <Dropdown placement={'right' as unknown as any} menu={makeSaveMenu(item.key)} trigger={['hover']}>
+        <RightOutlined style={{ fontSize: 12, opacity: 0.7 }} />
+      </Dropdown>
+      </div>
+      ),
+}))
+
   const TemplateComponent = templateMap[template] || templateMap.olimp
 
   const templateProps = {
@@ -241,9 +314,10 @@ const GroupedReceiptForm: FC<Props> = ({
       <PrinterOutlined className={s.print} onClick={handlePrint} />
       <Dropdown
         trigger={['click']}
+        placement="bottomLeft"
         menu={{
-          items: templateItems,
-          onClick: ({ key }) => setTemplate(key as 'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'),
+          items: dropdownItems,
+          style: { minWidth: 240 },
         }}
       >
         <Tooltip title={isEnglish ? 'Select template' : 'Обрати шаблон'}>
