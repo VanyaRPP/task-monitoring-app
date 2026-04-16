@@ -1,8 +1,8 @@
 import { usePaymentContext } from '@components/AddPaymentModal'
-import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
 import { Table } from 'antd'
 import { useMemo } from 'react'
 import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
+import { ServiceType } from '@utils/constants'
 
 export interface PaymentPricesTableProps {
   preview?: boolean
@@ -12,116 +12,133 @@ export interface PaymentPricesTableProps {
   invoices?: any[]
 }
 
-const getColumns = (currency?: string) => [
-  {
-    title: normalizeCurrency(currency) === 'UAH' ? '№' : 'No.',
-    dataIndex: 'key',
-    key: 'key',
-    width: 45,
-  },
-  {
-    title:
-      normalizeCurrency(currency) === 'UAH'
-        ? 'Найменування послуги'
-        : 'Service name',
-    dataIndex: 'name',
-    key: 'name',
-  },
-  {
-    title: `${normalizeCurrency(currency) === 'UAH' ? 'Сума' : 'Amount'}, ${getCurrencyShortLabel(currency)}`,
-    dataIndex: 'sum',
-    key: 'sum',
-    render: (value: any) => {
-      const n = Number(value)
-      return isFinite(n) ? n.toFixed(2) : value
+const getColumns = (currency?: string) => {
+  const isUah = normalizeCurrency(currency) === 'UAH'
+  const currencyLabel = getCurrencyShortLabel(currency)
+  return [
+    {
+      title: isUah ? '№' : 'No.',
+      dataIndex: 'key',
+      key: 'key',
+      width: 45,
     },
-  },
-]
+    {
+      title: isUah ? 'Найменування послуги' : 'Service name',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: isUah ? 'К-сть' : 'Quantity',
+      dataIndex: 'amount',
+      key: 'amount',
+      width: 100,
+      render: (value: any, record: any = {}) => {
+        const n = Number(value)
+          if (!isFinite(n) || n === 0) return '-'
+          
+          const type = record.type
 
-const groupedInvoices = (invoices: any, groups: any) => {
-  // TODO: FIX maintenancePrice && rentPrice logic
-  const result =
-    groups?.map((group) => {
-      const groupInvoices = invoices?.filter((invoice) =>
-        group?.services?.some(
-          (service) =>
-            invoice?.name === service?.name ||
-            invoice?.type === service?.fieldName ||
-            (invoice?.type === 'maintenancePrice' &&
-              service?.fieldName === 'rentPrice')
-        )
-      )
+          if (type === ServiceType.Placing || type === 'rentPrice') {
+            return `${n.toFixed(2)} ${isUah ? 'м²' : 'm²'}`
+          }
+          if (type === ServiceType.Electricity || type === 'electricityPrice') {
+            return `${n.toFixed(2)} ${isUah ? 'кВт' : 'kWh'}`
+          }
+          if (type === ServiceType.Water || type === 'waterPrice' || type === 'waterPriceTotal') {
+            return `${n.toFixed(2)} ${isUah ? 'м³' : 'm³'}`
+          }
+          return n
+      },
+    },
+    {
+      title: `${isUah ? 'Ціна' : 'Price'}, ${currencyLabel}`,
+      dataIndex: 'price',
+      key: 'price',
+      width: 120,
+      render: (value: any, record: any = {}) => {
+        const n = Number(value)
+        if (!isFinite(n) || n === 0) return '-'
+        const formatted = n.toFixed(2)
+        const type = record.type
 
-      const totalGroupSum = (groupInvoices ?? []).reduce((sum, invoice) => {
-        return sum + (Number(invoice?.sum) || 0)
-      }, 0)
-
-      return {
-        groupName: group?.groupName,
-        invoices: groupInvoices,
-        totalSum: totalGroupSum,
-        fieldNames: group?.services?.map((s) => s?.fieldName),
-      }
-    }) || []
-
-  return result
+        if (type === ServiceType.Placing || type === 'rentPrice') {
+          return `${formatted} ${currencyLabel}/${isUah ? 'м²' : 'm²'}`
+        }
+        if (type === ServiceType.Electricity || type === 'electricityPrice') {
+          return `${formatted} ${currencyLabel}/${isUah ? 'кВт' : 'kWh'}`
+        }
+        if (type === ServiceType.Water || type === 'waterPrice' || type === 'waterPriceTotal') {
+          return `${formatted} ${currencyLabel}/${isUah ? 'м³' : 'm³'}`
+        }
+        return formatted
+      },
+    },
+    {
+      title: `${isUah ? 'Сума' : 'Amount'}, ${currencyLabel}`,
+      dataIndex: 'sum',
+      key: 'sum',
+      width: 120,
+      render: (value: any) => {
+        const n = Number(value)
+        return isFinite(n) ? n.toFixed(2) : value
+      },
+    },
+  ]
 }
 
 const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
-  preview,
-  domainId,
   currency,
   loading,
   invoices,
 }) => {
   const { form, company } = usePaymentContext()
-
-  const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
-    { domainId: [domainId] },
-    { skip: !domainId }
-  )
-  const groupedInvoicesData = useMemo(
-    () => groupedInvoices(invoices, customDomainServices?.data),
-    [invoices, customDomainServices]
-  )
-
   const { domain } = form.getFieldsValue()
 
-  const groupedFieldNames =
-    groupedInvoicesData?.flatMap((group) => group.fieldNames || []) || []
-
-  const dataSource =
-    groupedInvoicesData
-      ?.filter((group) => Number(group?.totalSum || 0).toFixed(2) !== '0.00')
-      .map((group, index) => ({
-        key: index + 1,
-        name: group.groupName,
-        sum: group.totalSum,
-      })) || []
-  const discountInvoice = invoices?.find((inv) => inv?.type === 'discount')
   const isEnglish = normalizeCurrency(currency || company?.currency || domain?.currency) !== 'UAH'
 
-  if (discountInvoice) {
-    dataSource.push({
-      key: dataSource.length + 1,
-      name: isEnglish ? 'Discount' : 'Знижка',
-      sum: discountInvoice.sum,
-    })
-  }
+  const dataSource = useMemo(() => {
+    return invoices
+      ?.filter((inv) => Number(inv?.sum || 0) !== 0 || inv?.type === 'discount')
+      .map((inv, index) => {
+        let name = inv.name
 
-  const customInvoices = invoices?.filter(
-    (inv) => inv?.type === 'custom' && !groupedFieldNames.includes(inv?.type)
-  )
+        if (!name) {
+          switch (inv.type) {
+            case ServiceType.Placing:
+            case 'rentPrice':
+              name = isEnglish ? 'Placing' : 'Розміщення'
+              break
+            case ServiceType.Electricity:
+            case 'electricityPrice':
+              name = isEnglish ? 'Electricity' : 'Електроенергія'
+              break
+            case ServiceType.Water:
+            case 'waterPrice':
+            case 'waterPriceTotal':
+              name = isEnglish ? 'Water supply' : 'Водопостачання'
+              break
+            case ServiceType.GarbageCollector:
+            case 'garbageCollectorPrice':
+              name = isEnglish ? 'Garbage removal' : 'Вивіз ТПВ'
+              break
+            case 'discount':
+              name = isEnglish ? 'Discount' : 'Знижка'
+              break
+            default:
+              name = isEnglish ? 'Additional' : 'Додатково'
+          }
+        }
 
-  customInvoices?.forEach((inv) => {
-    // Uncomment to add custom invoices
-    !inv?.customService &&
-      dataSource.push({
-        key: dataSource.length + 1,
-        name: inv.name || (isEnglish ? 'Additional' : 'Додатково'),
-        sum: inv.sum,
-      })
-  })
+        return {
+          key: index + 1,
+          name: name,
+          sum: inv.sum,
+          amount: inv.amount,
+          price: inv.price,
+          type: inv.type,
+        }
+      }) || []
+  }, [invoices, isEnglish])
 
   return (
     <Table
