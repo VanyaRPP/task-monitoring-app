@@ -105,7 +105,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
 
       <div className={cs.payFixed}>
         {data?.provider?.description?.split('\n')?.[0] || ''}
-        <div className={cs.lineInner}>________________</div>
+        {/* <div className={cs.lineInner}>________________</div> */}
       </div>
     </div>
   </div>
