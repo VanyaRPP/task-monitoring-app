@@ -100,7 +100,7 @@ function AddPaymentForm({
             className={changelogRowStyles.previewQtyText}
             htmlFor={previewQtyCheckboxId}
           >
-            К-сть і ціна
+            Деталі
           </label>
           <Checkbox
             id={previewQtyCheckboxId}
