@@ -9,6 +9,14 @@ jest.mock('@common/api/realestateApi/realestate.api', () => ({
   useGetAllRealEstateQuery: jest.fn(),
 }))
 
+jest.mock('./useQuicksend', () => ({
+  useQuickSend: jest.fn(() => ({
+    handleQuickSend: jest.fn(),
+    services: [],
+    loading: false,
+  })),
+}))
+
 jest.mock('@components/AddPaymentModal', () => ({
   __esModule: true,
   default: ({ closeModal, paymentData }: { closeModal: (success?: boolean) => void; paymentData: any }) => {
@@ -27,7 +35,7 @@ const mockUseGetAllRealEstateQuery = useGetAllRealEstateQuery as jest.Mock
 
 const getDropdownSendButton = () =>
   Array.from(document.querySelectorAll('button')).find((btn) =>
-    btn.querySelector('.anticon-down')
+    btn.textContent?.includes('Send') && btn.querySelector('.anticon-down')
   )
 
 const makeTransaction = (overrides = {}) => ({
