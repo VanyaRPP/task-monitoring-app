@@ -104,6 +104,11 @@ const AddServiceModal: FC<Props> = ({
       closeModal()
       const action = currentService ? 'Збережено' : 'Додано'
       message.success(action)
+
+      const channel = new BroadcastChannel('payments_sync_channel')
+      channel.postMessage('PAYMENT_CREATED')
+
+      setTimeout(() => channel.close(), 100)
     } else {
       const action = currentService ? 'збереженні' : 'додаванні'
       message.error(`Помилка при ${action} рахунку`)

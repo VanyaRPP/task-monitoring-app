@@ -438,6 +438,11 @@ const AddPaymentModal: FC<Props> = ({
       const action = edit ? 'Збережено' : 'Додано'
       form.resetFields()
       message.success(action)
+
+      const channel = new BroadcastChannel('payments_sync_channel')
+      channel.postMessage('PAYMENT_CREATED')
+      setTimeout(() => channel.close(), 100)
+
       closeModal(true)
     } else {
       const action = edit ? 'збереженні' : 'додаванні'
