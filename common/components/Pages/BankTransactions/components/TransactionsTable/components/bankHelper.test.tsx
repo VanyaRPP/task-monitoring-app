@@ -105,6 +105,39 @@ describe('matchByRnokpp', () => {
 
         expect(matchByRnokpp(transaction, mockCompanies)).toBeNull()
     })
+
+    it('should match by rnokpp found in company description', () => {
+        const companyWithRnokppInDescription: IRealestate = {
+            _id: 'kincal-desc-id',
+            companyName: 'Vocal Kincal',
+            account: '',
+            rnokpp: '',
+            description: 'Юлія Кінцал\nм. Житомир\nвул. Кибальчича 4\n3042507187\n+380671511260',
+        } as IRealestate
+
+        const transaction = {
+            AUT_CNTR_ACC: 'UA293052990000029023866100110',
+            AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+            RECIPIENT_ULTMT_NCEO: '3042507187',
+        } as ITransaction
+
+        expect(matchByRnokpp(transaction, [companyWithRnokppInDescription])).toEqual({
+            companyId: 'kincal-desc-id',
+            matchedBy: 'rnokpp',
+        })
+    })
+
+    it('should prioritize rnokpp field over description', () => {
+        const byField: IRealestate = { _id: 'by-field', companyName: 'A', account: '', rnokpp: '3042507187' } as IRealestate
+        const byDesc: IRealestate = { _id: 'by-desc', companyName: 'B', account: '', rnokpp: '', description: '3042507187' } as IRealestate
+
+        const transaction = { RECIPIENT_ULTMT_NCEO: '3042507187' } as ITransaction
+
+        expect(matchByRnokpp(transaction, [byField, byDesc])).toEqual({
+            companyId: 'by-field',
+            matchedBy: 'rnokpp',
+        })
+    })
 })
 
 describe('matchByPrevious', () => {
