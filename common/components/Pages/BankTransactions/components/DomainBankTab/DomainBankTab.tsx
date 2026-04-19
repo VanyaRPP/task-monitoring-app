@@ -2,11 +2,6 @@ import {
   useGetTransactionsQuery,
   useGetBalancesQuery,
 } from '@common/api/bankApi/bank.api'
-import {
-  MOCK_BALANCES,
-  MOCK_DOMAIN,
-  MOCK_TRANSACTIONS,
-} from '@common/api/bankApi/mockBank.api'
 import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import TransactionsTable from '../TransactionsTable/TransactionsTable'
@@ -17,8 +12,6 @@ import { Alert, Card, Spin } from 'antd'
 import { useTranslation } from 'next-i18next'
 import { setAccount } from '@modules/store/bankSlice'
 import DomainBankBalance from '../DomainbankBalance/DomainBankBalance'
-
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_BANK === 'true'
 
 interface Props {
   domainId: string
@@ -33,7 +26,7 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
     data: domain,
     isLoading: isDomainLoading,
     isError: isDomainError,
-  } = useGetDomainByPkQuery({ domainId }, { skip: !domainId || USE_MOCK })
+  } = useGetDomainByPkQuery({ domainId }, { skip: !domainId })
 
   const SECURE_TOKEN = process.env.NEXT_PUBLIC_MONGODB_SECRET_TOKEN
   const encryptionService = new EncryptionService(SECURE_TOKEN)
@@ -47,18 +40,9 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
     data: balances,
     isLoading: isBalancesLoading,
     isError: isBalancesError,
-  } = useGetBalancesQuery(
-    { token: decryptedToken },
-    { skip: !decryptedToken || USE_MOCK }
-  )
-
-  const effectiveBalances = USE_MOCK ? MOCK_BALANCES : balances
+  } = useGetBalancesQuery({ token: decryptedToken }, { skip: !decryptedToken })
 
   useEffect(() => {
-    if (USE_MOCK) {
-      dispatch(setAccount(MOCK_BALANCES[0].acc))
-      return
-    }
     if (balances?.length && domain?.iban) {
       const matched = balances.find((b) => b.acc === domain.iban)
       dispatch(setAccount(matched?.acc ?? balances[0].acc))
@@ -72,7 +56,7 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
         acc: selectedAccount ?? undefined,
         domainId,
       },
-      { skip: !decryptedToken || !selectedAccount || USE_MOCK }
+      { skip: !decryptedToken || !selectedAccount }
     )
 
   const { data: realEstatesData } = useGetAllRealEstateQuery({
@@ -107,7 +91,7 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
     })
   }, [transactionsData])
 
-  if (!USE_MOCK && (isDomainLoading || !domain)) {
+  if (isDomainLoading || !domain) {
     return (
       <div
         style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}
@@ -117,7 +101,7 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
     )
   }
 
-  if (!USE_MOCK && isDomainError) {
+  if (isDomainError) {
     return (
       <Alert
         message={t('domainErrorTitle')}
@@ -128,7 +112,7 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
     )
   }
 
-  if (!USE_MOCK && (isBalancesError || !balances?.length)) {
+  if (isBalancesError || !balances?.length) {
     return (
       <Alert
         message={t('balanceErrorTitle')}
@@ -144,12 +128,12 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
       styles={{ body: { padding: '3px' } }}
       loading={isDomainLoading || isBalancesLoading}
     >
-      {(decryptedToken || USE_MOCK) ? (
+      {decryptedToken ? (
         <>
-          <DomainBankBalance balancesData={effectiveBalances} />
+          <DomainBankBalance balancesData={balances} />
           <TransactionsTable
-            transactions={USE_MOCK ? MOCK_TRANSACTIONS : enrichedTransactions}
-            domain={USE_MOCK ? MOCK_DOMAIN : domain}
+            transactions={enrichedTransactions}
+            domain={domain}
             loading={isTransactionsLoading}
             companies={companies}
           />
