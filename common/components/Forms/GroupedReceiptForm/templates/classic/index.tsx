@@ -43,7 +43,6 @@ const ClassicTemplate: FC<TemplateProps> = ({
       <div className={cs.label}>{isEnglish ? 'Recipient' : 'Одержувач'}</div>
       <pre className={cs.preLabel}>
         {data?.reciever?.description?.trim()} <br />
-        {data?.reciever?.companyName} <br />
         {data?.reciever?.adminEmails?.map((email: string) => (
           <div key={email}>
             {email} <br />
@@ -75,6 +74,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
     <div className={cs.tableSum}>
       <GroupedPricesTable
         preview
+        usePreviewQuantityToggle
         domainId={data?.domain?._id ?? data?.domain}
         currency={currency}
         invoices={data?.invoice ?? []}
