@@ -1,28 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-
-interface IBalance {
-  acc: string
-  currency: string
-  balanceIn: string
-  balanceInEq: string
-  balanceOut: string
-  balanceOutEq: string
-  turnoverDebt: string
-  turnoverDebtEq: string
-  turnoverCred: string
-  turnoverCredEq: string
-  bgfIBrnm: string
-  brnm: string
-  dpd: string
-  nameACC: string
-  state: string
-  atp: string
-  flmn: string
-  date_open_acc_reg: string
-  date_open_acc_sys: string
-  date_close_acc: string
-  is_final_bal: boolean
-}
+import { ITransaction } from '@components/Pages/BankTransactions/components/TransactionsTable/components/transactionTypes'
+import { IBalance } from '@components/Pages/BankTransactions/components/DomainbankBalance/DomainBankBalance'
+import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 
 interface IBalancesData {
   exist_next_page: boolean
@@ -66,41 +45,6 @@ const mockBalances: IBankRes<IBalancesData> = {
       },
     ],
   },
-}
-
-export interface ITransaction {
-  AUT_MY_CRF: string
-  AUT_MY_MFO: string
-  AUT_MY_ACC: string
-  AUT_MY_NAM: string
-  AUT_MY_MFO_NAME: string
-  AUT_MY_MFO_CITY: string
-  AUT_CNTR_CRF: string
-  AUT_CNTR_MFO: string
-  AUT_CNTR_ACC: string
-  AUT_CNTR_NAM: string
-  AUT_CNTR_MFO_NAME: string
-  AUT_CNTR_MFO_CITY: string
-  CCY: string
-  FL_REAL: string
-  PR_PR: string
-  DOC_TYP: string
-  NUM_DOC: string
-  DAT_KL: string
-  DAT_OD: string
-  OSND: string
-  SUM: string
-  SUM_E: string
-  REF: string
-  REFN: string
-  TIM_P: string
-  DATE_TIME_DAT_OD_TIM_P: string
-  ID: string
-  TRANTYPE: string
-  DLR: string
-  TECHNICAL_TRANSACTION_ID: string
-  isMatchingPayment?: boolean
-  previousCompanyId?: string
 }
 
 interface ITransactionData {
@@ -153,6 +97,153 @@ const mockTransactions: IBankRes<ITransactionData> = {
     ],
   },
 }
+
+export const MOCK_BALANCES: IBalance[] = [
+  {
+    acc: 'UA483052990000026004006407606',
+    currency: 'UAH',
+    balanceIn: '150000',
+    balanceInEq: '150000',
+    balanceOut: '50000',
+    balanceOutEq: '50000',
+    turnoverDebt: '50000',
+    turnoverDebtEq: '50000',
+    turnoverCred: '150000',
+    turnoverCredEq: '150000',
+    bgfIBrnm: '',
+    brnm: 'АТ КБ "ПРИВАТБАНК"',
+    dpd: '19.01.2026',
+    nameACC: 'Єршова Л. М. ФОП',
+    state: 'a',
+    atp: 'L',
+    flmn: '305299',
+    date_open_acc_reg: '2020-01-01',
+    date_open_acc_sys: '2020-01-01',
+    date_close_acc: '',
+    is_final_bal: true,
+  },
+]
+
+export const MOCK_DOMAIN: IExtendedDomain = {
+  _id: '64d0e6440fa634ae5408739e',
+  _v: 0,
+  name: 'ФОП Єршова Л.М.',
+  adminEmails: ['my.yershov@gmail.com'],
+  streets: [],
+  description:
+    'ФОП: Єршова Л. М. ФОП\nIBAN: UA483052990000026004006407606\nРНОКПП: 2479002623\nМФО: 305299',
+  mfo: '305299',
+  iban: 'UA483052990000026004006407606',
+  rnokpp: '2479002623',
+  IEName: 'Єршова Л. М. ФОП',
+  domainBankToken: [],
+  customServices: [],
+}
+
+export const MOCK_TRANSACTIONS: ITransaction[] = [
+  {
+    AUT_MY_CRF: '2479002623',
+    AUT_MY_MFO: '305299',
+    AUT_MY_ACC: 'UA483052990000026004006407606',
+    AUT_MY_NAM: 'Єршова Л. М. ФОП',
+    AUT_MY_MFO_NAME: 'АТ КБ "ПРИВАТБАНК"',
+    AUT_MY_MFO_CITY: 'ДНІПРО',
+    AUT_CNTR_CRF: '14360570',
+    AUT_CNTR_MFO: '305299',
+    AUT_CNTR_ACC: 'UA293052990000029023866100110',
+    AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+    AUT_CNTR_MFO_NAME: 'АТ КБ "ПРИВАТБАНК"',
+    AUT_CNTR_MFO_CITY: 'ДНІПРО',
+    CCY: 'UAH',
+    FL_REAL: 'r',
+    PR_PR: 'r',
+    DOC_TYP: 'm',
+    NUM_DOC: '@2PL917714',
+    DAT_KL: '19.01.2026',
+    DAT_OD: '19.01.2026',
+    OSND: 'Сплата за послуги згідно рахунку № 939 від 08.01.2026, Кінцал Юлія Анатоліївна',
+    SUM: '4494.63',
+    SUM_E: '4494.63',
+    REF: 'D3K8Q1JANX690Q',
+    REFN: 'P',
+    TIM_P: '21:11',
+    DATE_TIME_DAT_OD_TIM_P: '19.01.2026 21:11:00',
+    ID: 'D3K8Q1JANX690QP19012026211100',
+    TRANTYPE: 'C',
+    DLR: null,
+    TECHNICAL_TRANSACTION_ID: 'D3K8Q1JANX690QP19012026211100',
+    isMatchingPayment: false,
+    previousCompanyId: null,
+  },
+  {
+    AUT_MY_CRF: '2479002623',
+    AUT_MY_MFO: '305299',
+    AUT_MY_ACC: 'UA483052990000026004006407606',
+    AUT_MY_NAM: 'Єршова Л. М. ФОП',
+    AUT_MY_MFO_NAME: 'АТ КБ "ПРИВАТБАНК"',
+    AUT_MY_MFO_CITY: 'ДНІПРО',
+    AUT_CNTR_CRF: '14360570',
+    AUT_CNTR_MFO: '305299',
+    AUT_CNTR_ACC: 'UA293052990000029023866100110',
+    AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+    AUT_CNTR_MFO_NAME: 'АТ КБ "ПРИВАТБАНК"',
+    AUT_CNTR_MFO_CITY: 'ДНІПРО',
+    CCY: 'UAH',
+    FL_REAL: 'r',
+    PR_PR: 'r',
+    DOC_TYP: 'm',
+    NUM_DOC: '@2PL084365',
+    DAT_KL: '03.02.2026',
+    DAT_OD: '03.02.2026',
+    OSND: 'За послуги, Ісаєв Андрій Миколайович',
+    SUM: '4.01',
+    SUM_E: '4.01',
+    REF: 'D3K0Q23AORYBS4',
+    REFN: 'P',
+    TIM_P: '21:31',
+    DATE_TIME_DAT_OD_TIM_P: '03.02.2026 21:31:00',
+    ID: 'D3K0Q23AORYBS4P03022026213100',
+    TRANTYPE: 'C',
+    DLR: null,
+    TECHNICAL_TRANSACTION_ID: 'D3K0Q23AORYBS4P03022026213100',
+    isMatchingPayment: false,
+    previousCompanyId: null,
+  },
+  {
+    AUT_MY_CRF: '2479002623',
+    AUT_MY_MFO: '305299',
+    AUT_MY_ACC: 'UA483052990000026004006407606',
+    AUT_MY_NAM: 'Єршова Л. М. ФОП',
+    AUT_MY_MFO_NAME: 'АТ КБ "ПРИВАТБАНК"',
+    AUT_MY_MFO_CITY: 'ДНІПРО',
+    AUT_CNTR_CRF: '14360570',
+    AUT_CNTR_MFO: '305299',
+    AUT_CNTR_ACC: 'UA223052990000065108918490969',
+    AUT_CNTR_NAM: 'ЗА ДЕБЕТУВАННЯ РАХУНКУ(UAH)',
+    AUT_CNTR_MFO_NAME: 'АТ КБ "ПРИВАТБАНК"',
+    AUT_CNTR_MFO_CITY: 'ДНІПРО',
+    CCY: 'UAH',
+    FL_REAL: 'r',
+    PR_PR: 'r',
+    DOC_TYP: 'm',
+    NUM_DOC: '23OD5NMMDY',
+    DAT_KL: '03.02.2026',
+    DAT_OD: '03.02.2026',
+    OSND: 'Комiсiя за виконання платежiв в нацiональнiй валютi у сумi 82686.07 грн вiд 03.02.2026, згiдно з вiдкритою офертою банку N б/н вiд 30.04.2024 та тарифiв банку, без ПДВ.',
+    SUM: '5.00',
+    SUM_E: '5.00',
+    REF: 'JBKLQ23OD5NMMD',
+    REFN: 'Y',
+    TIM_P: '22:51',
+    DATE_TIME_DAT_OD_TIM_P: '03.02.2026 22:51:00',
+    ID: 'JBKLQ23OD5NMMDY03022026225100',
+    TRANTYPE: 'D',
+    DLR: 'CP7/F6B9LG8=',
+    TECHNICAL_TRANSACTION_ID: 'JBKLQ23OD5NMMDY03022026225100',
+    isMatchingPayment: false,
+    previousCompanyId: null,
+  },
+]
 
 export const mockBankApi = createApi({
   reducerPath: 'mockBankApi',

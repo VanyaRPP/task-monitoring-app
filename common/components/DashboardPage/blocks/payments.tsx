@@ -13,6 +13,7 @@ import {
   useGetAllPaymentsQuery,
   useDeletePaymentMutation,
   useDeleteMultiplePaymentsMutation,
+  paymentApi,
 } from '@common/api/paymentApi/payment.api'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 
@@ -156,6 +157,20 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     },
     { skip: currUserLoading || !currUser }
   )
+
+  useEffect(() => {
+    const channel = new BroadcastChannel('payments_sync_channel')
+
+    channel.onmessage = (event) => {
+      if (event.data === 'PAYMENT_CREATED') {
+        dispatch(paymentApi.util.invalidateTags(['Payment']))
+      }
+    }
+
+    return () => {
+      channel.close()
+    }
+  }, [dispatch])
 
   const [
     deletePaymentMutation,

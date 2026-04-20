@@ -76,7 +76,7 @@ const PaymentCardLabel = ({
           </div>
           <Space
             direction="vertical"
-            size="middle"
+            size={4}
             align="start"
             className={styles.tags}
           >
