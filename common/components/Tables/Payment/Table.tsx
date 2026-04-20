@@ -47,7 +47,7 @@ import s from './style.module.scss'
 
 import DateFilterDropdown from './DateFilter/DateFilterDropdown'
 import { off } from 'process'
-
+import PaymentDropdown from '@components/PaymentDropDown'
 export interface PaymentDeleteItem {
   id: string
   date: string
@@ -73,6 +73,7 @@ interface ActionProps {
   onViewClick: (p: IExtendedPayment) => void
   onEditClick: (p: IExtendedPayment) => void
   onDelete: (id: string) => void
+  onMarkPaid: (p: IExtendedPayment) => void
   deleteLoading: boolean
 }
 
@@ -198,7 +199,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
 
   const { pageData, handlePagination } = paginationProps
 
-  const { onViewClick, onEditClick, onDelete, deleteLoading } = actionProps
+  const { onViewClick, onEditClick, onDelete, onMarkPaid, deleteLoading } = actionProps
 
   const { debtorCompanies } = debtProps
 
@@ -551,52 +552,19 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         align: 'center',
         fixed: 'right',
         title: '',
-        width: 50,
-        render: (_value, payment) => (
-          <Button
-            style={{ padding: 0 }}
-            type="link"
-            onClick={() => onViewClick(payment)}
-          >
-            <EyeOutlined />
-          </Button>
-        ),
-      },
-      {
-        align: 'center',
-        fixed: 'right',
-        title: '',
-        width: 50,
-        render: (_value, payment) =>
-          (isGlobalAdmin || isDomainAdmin) && (
-            <Button
-              style={{ padding: 0 }}
-              type="link"
-              onClick={() => onEditClick(payment)}
-            >
-              <EditOutlined />
-            </Button>
-          ),
-      },
-      {
-        align: 'center',
-        fixed: 'right',
-        title: '',
-        width: 50,
-        render: (_value, payment: IExtendedPayment) =>
-          (isGlobalAdmin || isDomainAdmin) && (
-            <Popconfirm
-              title={`Ви впевнені, що хочете видалити оплату від ${new Date(
-                payment.invoiceCreationDate as unknown as string
-              ).toLocaleDateString()}?`}
-              onConfirm={() => onDelete(payment._id)}
-              cancelText="Відміна"
-              disabled={deleteLoading}
-            >
-              <DeleteOutlined />
-            </Popconfirm>
-          ),
-      },
+        width: 48,
+        render: (_value, payment: IExtendedPayment) => (
+        <PaymentDropdown
+        payment={payment}
+        isAdmin={isGlobalAdmin || isDomainAdmin}
+        onView={onViewClick}
+        onEdit={onEditClick}
+        onDelete={onDelete}
+        onMarkPaid={onMarkPaid}
+        deleteLoading={deleteLoading}
+        />
+      )
+    },
     ]
   }, [
     payments,
@@ -611,6 +579,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     onViewClick,
     onEditClick,
     currUserRoles,
+    onMarkPaid,
     isSingleCompanyByData,
     isMobile,
     themeKey,

@@ -14,10 +14,11 @@ import {
   useDeletePaymentMutation,
   useDeleteMultiplePaymentsMutation,
   paymentApi,
+  useAddPaymentMutation,
 } from '@common/api/paymentApi/payment.api'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 
-import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { IExtendedPayment, IPayment } from '@common/api/paymentApi/payment.api.types'
 
 import TableCard from '@components/UI/TableCard'
 import PaymentsHeader from '@components/Tables/Payment/Header'
@@ -172,6 +173,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
   }, [dispatch])
 
+  const [addPayment] = useAddPaymentMutation()
   const [
     deletePaymentMutation,
     { isLoading: deleteLoading, isError: deleteError },
@@ -189,7 +191,33 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     },
     [deletePaymentMutation]
   )
+  const handleMarkPaid = useCallback(
+    async (source: IExtendedPayment) => {
+      const monthServiceId =  typeof source.monthService === 'string' ? source.monthService : source.monthService?._id
+      const newCredit: IPayment = {
+        invoiceNumber: 0,
+        type: Operations.Credit,
+        domain: source.domain,
+        street: source.street,
+        company: source.company,
+        monthService: monthServiceId,
+        invoiceCreationDate: new Date(),
+        generalSum: source.generalSum,
+        provider: source.provider,
+        reciever: source.reciever,
+        transaction: undefined,
+        invoice: undefined,
+      }
 
+      const response = await addPayment(newCredit)
+      if ('data' in response) {
+        message.success('Кредіт‑платіж створено')
+      } else {
+        message.error('Не вдалося створити оплату')
+      }
+    },
+    [addPayment]
+  )
   const handleDeleteConfirm = async () => {
     const response = await deleteMultiplePayments(
       paymentsDeleteItems.map((item) => item.id)
@@ -307,6 +335,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     onEditClick: handleEdit,
     onDelete: handleDeletePayment,
     deleteLoading,
+    onMarkPaid: handleMarkPaid
   }
   const debtProps = {
     debtorCompanies,
