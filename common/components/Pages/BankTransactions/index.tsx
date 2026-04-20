@@ -10,6 +10,7 @@ import { useDomainTabs } from '../ProfiitPage/hook/useDomainTabs'
 import { ReactNode, useMemo, useEffect } from 'react'
 import { useTranslation } from 'next-i18next'
 import { Card, Space, Alert, Spin } from 'antd'
+import { paymentApi } from '@common/api/paymentApi/payment.api'
 
 const BankTransactions = () => {
   const { t } = useTranslation('bankPage')
@@ -17,6 +18,20 @@ const BankTransactions = () => {
   const activeDomainId = useAppSelector((state) => state.bank.activeDomainId)
 
   const { tabList, isLoading, isError } = useDomainTabs()
+
+  useEffect(() => {
+    const channel = new BroadcastChannel('payments_sync_channel')
+
+    channel.onmessage = (event) => {
+      if (event.data === 'PAYMENT_CREATED') {
+        dispatch(paymentApi.util.invalidateTags(['Payment']))
+      }
+    }
+
+    return () => {
+      channel.close()
+    }
+  }, [dispatch])
 
   useEffect(() => {
     if (tabList.length && !activeDomainId) {
