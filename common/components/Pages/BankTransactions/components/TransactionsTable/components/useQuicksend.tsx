@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
 import { message } from 'antd'
-import dayjs from 'dayjs'
 import { ITransaction } from './transactionTypes'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
@@ -9,7 +8,7 @@ import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { getResolvedDescription } from './bankHelper'
 import { Operations } from '@utils/constants'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
-import { buildMonthServicePlaceholder } from '@common/components/Forms/AddPaymentForm/month-service-placeholder'
+import { getRollingServices, formatDate, toDate } from './datesHelper'
 
 const ROLLING_MONTH_COUNT = 12
 
@@ -46,23 +45,7 @@ export const useQuickSend = ({
   }, { skip: !domain._id || !streetId })
 
   const services = useMemo(() => {
-    const allServices = servicesData?.data || []
-    const byMonthKey = new Map<string, any>()
-
-    for (const svc of allServices) {
-      const key = dayjs(svc.date).startOf('month').format('YYYY-MM')
-      byMonthKey.set(key, svc)
-    }
-
-    for (let i = 0; i < ROLLING_MONTH_COUNT; i++) {
-      const m = dayjs().subtract(i, 'month').startOf('month')
-      const key = m.format('YYYY-MM')
-      if (!byMonthKey.has(key)) {
-        byMonthKey.set(key, { _id: buildMonthServicePlaceholder(m), date: m.toISOString() })
-      }
-    }
-
-    return [...byMonthKey.values()].sort((a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf())
+    return getRollingServices(servicesData?.data || [], ROLLING_MONTH_COUNT)
   }, [servicesData])
 
   const transactionPayload = useMemo(() => ({
@@ -92,7 +75,7 @@ export const useQuickSend = ({
       })
 
       await addPayment({
-        invoiceCreationDate: dayjs(service.date).toDate(),
+        invoiceCreationDate: toDate(service.date),
         monthService: service._id,
         domain: domain._id,
         company: selectedCompanyId,
@@ -107,7 +90,7 @@ export const useQuickSend = ({
         transaction: transactionPayload,
       }).unwrap()
 
-      message.success(`Рахунок за ${dayjs(service.date).format('MMMM YYYY')} успішно створено!`)
+      message.success(`Рахунок за ${formatDate(service.date, 'MMMM YYYY')} успішно створено!`)
     } catch (error) {
       console.error('Quick send error:', error)
       message.error('Помилка при створенні рахунку')

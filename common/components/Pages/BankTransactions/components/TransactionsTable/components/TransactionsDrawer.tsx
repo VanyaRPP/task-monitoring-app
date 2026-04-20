@@ -3,9 +3,9 @@ import React, { FC, useEffect, useMemo, useState } from 'react'
 import { ITransaction } from './transactionTypes'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import AddPaymentModal from '@components/AddPaymentModal'
-import dayjs from 'dayjs'
 import { SendOutlined, DownOutlined, CalendarOutlined } from '@ant-design/icons'
 import { matchCompany, MatchType, getResolvedDescription } from './bankHelper'
+import { formatDate, parseDate } from './datesHelper'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useQuickSend } from './useQuicksend'
 
@@ -110,7 +110,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
 
   const quickSendMenuItems: MenuProps['items'] = services.map((service) => ({
     key: service._id,
-    label: dayjs(service.date).format('MMMM YYYY'),
+    label: formatDate(service.date, 'MMMM YYYY'),
     icon: <CalendarOutlined />,
     onClick: () => handleQuickSend(service),
   }))
@@ -195,7 +195,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
             ...relatedCompanies.find((company) => company._id === selectedCompany),
             generalSum: transactionAmount,
             description: getResolvedDescription(transaction, relatedCompanies),
-            invoiceCreationDate: dayjs(transaction.DAT_OD, 'DD.MM.YYYY'),
+            invoiceCreationDate: parseDate(transaction.DAT_OD, 'DD.MM.YYYY'),
             company: selectedCompany,
             domain: domain,
             transaction: transactionPayload,
