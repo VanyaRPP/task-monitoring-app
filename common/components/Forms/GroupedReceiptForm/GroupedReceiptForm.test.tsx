@@ -14,6 +14,8 @@ jest.mock('@components/AddPaymentModal', () => ({
       currency: 'UAH',
       domain: { name: 'Test Domain', description: 'Test Company\nKyiv' },
     },
+    showQuantityInPreview: false,
+    setShowQuantityInPreview: jest.fn(),
   }),
 }))
 

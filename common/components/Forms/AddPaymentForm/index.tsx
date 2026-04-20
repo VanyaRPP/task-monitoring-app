@@ -9,8 +9,8 @@ import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
 import PaymentTypeSelect from '@components/UI/Reusable/PaymentTypeSelect'
 import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
-import { Checkbox, Form, Input, InputNumber, Select, Tooltip } from 'antd'
-import { useEffect, useId, useMemo, useState } from 'react'
+import { Form, Input, InputNumber, Select } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
 import CompanySelect from './CompanySelect'
 import InvoiceCreationDate from './InvoiceCreationDate'
 import InvoiceNumber from './InvoiceNumber'
@@ -61,8 +61,6 @@ function AddPaymentForm({
     company,
     prevService,
     prevPayment,
-    showQuantityInPreview,
-    setShowQuantityInPreview,
   } = usePaymentContext()
 
   const [streetHasService, setStreetHasService] = useState(false)
@@ -90,27 +88,6 @@ function AddPaymentForm({
   
   
   const showChangelog = changelogOptions.length > 0
-  const previewQtyCheckboxId = useId()
-
-  const previewQtyControl = (
-    <Tooltip title="Показувати кількість і ціну в таблиці «Перегляд»">
-      <div className={changelogRowStyles.previewQtyBox}>
-        <div className={changelogRowStyles.previewQtyRow}>
-          <label
-            className={changelogRowStyles.previewQtyText}
-            htmlFor={previewQtyCheckboxId}
-          >
-            Деталі
-          </label>
-          <Checkbox
-            id={previewQtyCheckboxId}
-            checked={showQuantityInPreview}
-            onChange={(e) => setShowQuantityInPreview(e.target.checked)}
-          />
-        </div>
-      </div>
-    </Tooltip>
-  )
 
   return (
     <>
@@ -127,40 +104,29 @@ function AddPaymentForm({
       <InvoiceNumber form={form} paymentActions={selectedActions} />
       <InvoiceCreationDate edit={preview} />
       
-    {!preview && operation !== Operations.Credit && (
-      <>
-        {showChangelog ? (
-          <div className={changelogRowStyles.changelogRow}>
-            <div className={changelogRowStyles.changelogSelect}>
-              <Form.Item
-                name="changelogId"
-                label="Історія змін"
-                tooltip="Попередні версії рахунку. Зберігаються автоматично після кожного редагування."
-              >
-                <Select
-                  allowClear
-                  placeholder="Оберіть версію рахунку"
-                  options={changelogOptions}
-                  optionLabelProp="shortLabel"
-                  loading={changelogLoading}
-                  disabled={preview}
-                  notFoundContent={
-                    changelogLoading ? 'Завантаження...' : 'Історії змін ще немає'
-                  }
-                />
-              </Form.Item>
-            </div>
-            <div className={changelogRowStyles.previewQtyToggle}>
-              {previewQtyControl}
-            </div>
-          </div>
-        ) : (
-          <div className={changelogRowStyles.previewQtyToggleOnly}>
-            {previewQtyControl}
-          </div>
-        )}
-      </>
-    )}
+    {!preview && operation !== Operations.Credit && showChangelog ? (
+      <div className={changelogRowStyles.changelogRow}>
+        <div className={changelogRowStyles.changelogSelect}>
+          <Form.Item
+            name="changelogId"
+            label="Історія змін"
+            tooltip="Попередні версії рахунку. Зберігаються автоматично після кожного редагування."
+          >
+            <Select
+              allowClear
+              placeholder="Оберіть версію рахунку"
+              options={changelogOptions}
+              optionLabelProp="shortLabel"
+              loading={changelogLoading}
+              disabled={preview}
+              notFoundContent={
+                changelogLoading ? 'Завантаження...' : 'Історії змін ще немає'
+              }
+            />
+          </Form.Item>
+        </div>
+      </div>
+    ) : null}
 
       {operation === Operations.Credit ? (
         <>
