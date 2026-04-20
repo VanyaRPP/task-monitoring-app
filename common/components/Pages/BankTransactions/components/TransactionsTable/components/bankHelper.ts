@@ -25,8 +25,9 @@ export const matchByRnokpp = (
   companies: IRealestate[]
 ): MatchResult | null => {
   if (!transaction.RECIPIENT_ULTMT_NCEO) return null
+  const nceo = transaction.RECIPIENT_ULTMT_NCEO
   const company = companies.find(
-    (c) => c.rnokpp && c.rnokpp === transaction.RECIPIENT_ULTMT_NCEO
+    (c) => (c.rnokpp && c.rnokpp === nceo) || c.description?.includes(nceo)
   )
   return company ? { companyId: company._id!, matchedBy: MatchType.RNOKPP } : null
 }
