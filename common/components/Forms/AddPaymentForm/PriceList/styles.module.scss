@@ -14,6 +14,29 @@
   font-size: 25px;
 }
 
+.tableDetailsToggle {
+  position: absolute;
+  top: -48px;
+  right: 88px;
+  user-select: none;
+  cursor: pointer;
+  font-size: 25px;
+  color: rgba(0, 0, 0, 0.45);
+  transition: color 0.2s;
+
+  &:hover {
+    color: rgba(0, 0, 0, 0.75);
+  }
+}
+
+.tableDetailsToggleActive {
+  color: var(--ant-color-primary, #1677ff);
+
+  &:hover {
+    color: var(--ant-color-primary-hover, #4096ff);
+  }
+}
+
 .approvalSectionWrapper {
   display: flex;
   justify-content: space-between;

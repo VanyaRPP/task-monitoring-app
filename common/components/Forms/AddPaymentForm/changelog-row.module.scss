@@ -1,0 +1,13 @@
+.changelogRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  width: 100%;
+}
+
+.changelogSelect {
+  width: 320px;
+  max-width: 100%;
+}

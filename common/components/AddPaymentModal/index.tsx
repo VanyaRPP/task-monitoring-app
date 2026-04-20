@@ -73,6 +73,8 @@ export interface IPaymentContext {
   form: FormInstance
   template: 'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'
   setTemplate: (t: 'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure') => void
+  showQuantityInPreview: boolean
+  setShowQuantityInPreview: (value: boolean) => void
 }
 
 export const PaymentContext = createContext<IPaymentContext>({
@@ -84,6 +86,8 @@ export const PaymentContext = createContext<IPaymentContext>({
   form: null,
   template: 'classic', 
   setTemplate: () => void 0,
+  showQuantityInPreview: false,
+  setShowQuantityInPreview: () => void 0,
 })
 
 export const usePaymentContext = () =>
@@ -94,6 +98,11 @@ const getId = (obj?: string | Partial<{ _id: string }>) => {
   if (typeof obj === 'string') return obj
   return obj._id
 }
+
+const getPreviewQtyStorageKey = (id?: string) =>
+  id
+    ? `addPayment:showQuantityInPreview:${id}`
+    : 'addPayment:showQuantityInPreview:draft'
 
 const AddPaymentModal: FC<Props> = ({
   closeModal,
@@ -113,9 +122,30 @@ const AddPaymentModal: FC<Props> = ({
   const [saved, setSaved] = useState(false)
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
   const [template, setTemplate] = useState<'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'>('classic')
+  const [showQuantityInPreview, setShowQuantityInPreviewState] =
+    useState(false)
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)
   )
+
+  const setShowQuantityInPreview = useCallback(
+    (value: boolean) => {
+      setShowQuantityInPreviewState(value)
+      if (typeof window === 'undefined') return
+      sessionStorage.setItem(
+        getPreviewQtyStorageKey(paymentId),
+        value ? '1' : '0'
+      )
+    },
+    [paymentId]
+  )
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const raw = sessionStorage.getItem(getPreviewQtyStorageKey(paymentId))
+    if (raw === '1') setShowQuantityInPreviewState(true)
+    if (raw === '0') setShowQuantityInPreviewState(false)
+  }, [paymentId])
 
   const domainId = Form.useWatch('domain', form)
   const selectedChangelogId = Form.useWatch('changelogId', form)
@@ -484,6 +514,8 @@ const AddPaymentModal: FC<Props> = ({
         form,
         template, 
         setTemplate,
+        showQuantityInPreview,
+        setShowQuantityInPreview,
       }}
     >
       <Modal
