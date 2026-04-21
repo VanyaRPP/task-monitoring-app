@@ -12,10 +12,19 @@ import {
   IPayment,
 } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import {
+  serviceApi,
+  useAddServiceMutation,
+} from '@common/api/serviceApi/service.api'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
+import {
+  isMonthServicePlaceholder,
+  parseMonthServicePlaceholder,
+} from '@common/components/Forms/AddPaymentForm/month-service-placeholder'
 import Modal from '@components/UI/ModalWindow'
 import { usePaymentFormData } from '@modules/hooks/usePaymentData'
+import { useAppDispatch } from '@modules/store/hooks'
 import { Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
@@ -26,11 +35,12 @@ import dayjs from 'dayjs'
 import {
   FC,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
-  useState,
   useRef,
+  useState,
 } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
@@ -63,6 +73,8 @@ export interface IPaymentContext {
   form: FormInstance
   template: 'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'
   setTemplate: (t: 'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure') => void
+  showQuantityInPreview: boolean
+  setShowQuantityInPreview: (value: boolean) => void
 }
 
 export const PaymentContext = createContext<IPaymentContext>({
@@ -74,6 +86,8 @@ export const PaymentContext = createContext<IPaymentContext>({
   form: null,
   template: 'classic', 
   setTemplate: () => void 0,
+  showQuantityInPreview: false,
+  setShowQuantityInPreview: () => void 0,
 })
 
 export const usePaymentContext = () =>
@@ -84,6 +98,11 @@ const getId = (obj?: string | Partial<{ _id: string }>) => {
   if (typeof obj === 'string') return obj
   return obj._id
 }
+
+const getPreviewQtyStorageKey = (id?: string) =>
+  id
+    ? `addPayment:showQuantityInPreview:${id}`
+    : 'addPayment:showQuantityInPreview:draft'
 
 const AddPaymentModal: FC<Props> = ({
   closeModal,
@@ -103,9 +122,30 @@ const AddPaymentModal: FC<Props> = ({
   const [saved, setSaved] = useState(false)
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
   const [template, setTemplate] = useState<'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'>('classic')
+  const [showQuantityInPreview, setShowQuantityInPreviewState] =
+    useState(false)
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)
   )
+
+  const setShowQuantityInPreview = useCallback(
+    (value: boolean) => {
+      setShowQuantityInPreviewState(value)
+      if (typeof window === 'undefined') return
+      sessionStorage.setItem(
+        getPreviewQtyStorageKey(paymentId),
+        value ? '1' : '0'
+      )
+    },
+    [paymentId]
+  )
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const raw = sessionStorage.getItem(getPreviewQtyStorageKey(paymentId))
+    if (raw === '1') setShowQuantityInPreviewState(true)
+    if (raw === '0') setShowQuantityInPreviewState(false)
+  }, [paymentId])
 
   const domainId = Form.useWatch('domain', form)
   const selectedChangelogId = Form.useWatch('changelogId', form)
@@ -148,9 +188,55 @@ const AddPaymentModal: FC<Props> = ({
     form.resetFields(['company'])
   }, [domainId, form])
 
+  const dispatch = useAppDispatch()
+  const [addService] = useAddServiceMutation()
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
     useEditPaymentMutation()
+
+  const resolveMonthServiceId = useCallback(
+    async (raw: string, domain: string, street: string) => {
+      if (!isMonthServicePlaceholder(raw)) {
+        return raw
+      }
+      const monthStart = parseMonthServicePlaceholder(raw)
+      const year = monthStart.year()
+      const month = monthStart.month() + 1
+
+      const existing = await dispatch(
+        serviceApi.endpoints.getAllServices.initiate(
+          {
+            domainId: domain,
+            streetId: street,
+            year,
+            month,
+            limit: 1,
+          },
+          { subscribe: false, forceRefetch: true }
+        )
+      ).unwrap()
+
+      const found = existing.data?.[0]
+      if (found?._id) {
+        return found._id
+      }
+
+      const created = await addService({
+        domain,
+        street,
+        date: monthStart.startOf('month').toDate(),
+        rentPrice: 0,
+        electricityPrice: 0,
+        waterPrice: 0,
+        waterPriceTotal: 0,
+        description: '',
+        customServices: [],
+      }).unwrap()
+
+      return created.data._id
+    },
+    [dispatch, addService]
+  )
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
     { domainId },
     { skip: !domainId }
@@ -304,12 +390,46 @@ const AddPaymentModal: FC<Props> = ({
       return
     }
 
-    setCurrPayment({ ...values, provider, reciever })
+    let monthServiceId = values.monthService
+    try {
+      monthServiceId = await resolveMonthServiceId(
+        values.monthService,
+        values.domain,
+        values.street
+      )
+    } catch (e) {
+      console.error('resolveMonthServiceId failed', e)
+      message.error('Не вдалося підготувати місяць послуг')
+      setSaved(false)
+      setChanged(true)
+      return
+    }
+    form.setFieldsValue({ monthService: monthServiceId })
+    setCurrPayment({
+      ...values,
+      monthService: monthServiceId,
+      provider,
+      reciever,
+    })
     setActiveTabKey('2')
   }
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
+
+    let monthServiceId = formData.monthService
+    try {
+      monthServiceId = await resolveMonthServiceId(
+        formData.monthService,
+        formData.domain,
+        formData.street
+      )
+    } catch (e) {
+      console.error('resolveMonthServiceId failed', e)
+      message.error('Не вдалося підготувати місяць послуг')
+      return
+    }
+    form.setFieldsValue({ monthService: monthServiceId })
 
     const payment = {
       invoiceNumber: formData.invoiceNumber,
@@ -317,7 +437,7 @@ const AddPaymentModal: FC<Props> = ({
       domain: formData.domain,
       street: formData.street,
       company: formData.company,
-      monthService: formData.monthService,
+      monthService: monthServiceId,
       invoiceCreationDate: formData.invoiceCreationDate
         ? new Date(
             Date.UTC(
@@ -348,6 +468,11 @@ const AddPaymentModal: FC<Props> = ({
       const action = edit ? 'Збережено' : 'Додано'
       form.resetFields()
       message.success(action)
+
+      const channel = new BroadcastChannel('payments_sync_channel')
+      channel.postMessage('PAYMENT_CREATED')
+      setTimeout(() => channel.close(), 100)
+
       closeModal(true)
     } else {
       const action = edit ? 'збереженні' : 'додаванні'
@@ -389,6 +514,8 @@ const AddPaymentModal: FC<Props> = ({
         form,
         template, 
         setTemplate,
+        showQuantityInPreview,
+        setShowQuantityInPreview,
       }}
     >
       <Modal

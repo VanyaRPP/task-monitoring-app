@@ -12,7 +12,7 @@ interface Props {
 }
 
 const DomainInfo: FC<Props> = ({ editable, form }) => {
-  // Watch the values of specific fields
+  // Watch the values of specific fields 
   const IE_NAME = Form.useWatch('IEName', form)
   const IBAN = Form.useWatch('iban', form)
   const RNOKPP = Form.useWatch('rnokpp', form)
@@ -22,7 +22,7 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
     if (!editable) return
 
     const currentDescription: string = form.getFieldValue('description') || ''
-    const autoLinePatterns = [/^ФОП: /, /^IBAN: /, /^РНОКПП: /, /^МФО: /]
+    const autoLinePatterns = [/^IBAN: /, /^РНОКПП: /, /^МФО: /]
     const autoValues = [IE_NAME, IBAN, RNOKPP, MFO].filter(Boolean)
     const customLines = currentDescription
       .split('\n')
@@ -34,7 +34,7 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
       })
 
     const autoLines = [
-      IE_NAME ? `ФОП: ${IE_NAME}` : '',
+      // IE_NAME ? `ФОП: ${IE_NAME}` : '',
       IBAN ? `IBAN: ${IBAN}` : '',
       RNOKPP ? `РНОКПП: ${RNOKPP}` : '',
       MFO ? `МФО: ${MFO}` : '',
@@ -69,7 +69,7 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
 
   return (
     <div>
-      <Form.Item name="IEName" label="FOP">
+      {/* <Form.Item name="IEName" label="FOP">
         <Space.Compact className={s.formInput}>
           <Input
             placeholder="Вкажіть ФОП"
@@ -78,7 +78,7 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
             disabled={!editable}
           />
         </Space.Compact>
-      </Form.Item>
+      </Form.Item> */}
       {/* IBAN */}
       <Form.Item name="iban" label="IBAN">
         <Input

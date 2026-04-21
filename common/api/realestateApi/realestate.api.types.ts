@@ -24,6 +24,7 @@ export type IRealestate = {
   services: IDomainService[]
   customServices?: CustomServices[]
   account?: string
+  rnokpp?: string
 }
 
 export interface CustomServices {

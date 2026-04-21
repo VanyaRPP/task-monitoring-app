@@ -60,7 +60,7 @@ export const Tags = <T,>({
   }, [collapsed, setCollapsed])
 
   return (
-    <Flex gap={8} style={{ marginBottom: 12 }} {...rest}>
+    <Flex gap={8} {...rest}>
       {title}
 
       {items.length > 0
