@@ -14,6 +14,7 @@ import {
   useDeletePaymentMutation,
   useDeleteMultiplePaymentsMutation,
   paymentApi,
+  useGetPaymentNumberQuery,
   useAddPaymentMutation,
 } from '@common/api/paymentApi/payment.api'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
@@ -179,7 +180,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     { isLoading: deleteLoading, isError: deleteError },
   ] = useDeletePaymentMutation()
   const [deleteMultiplePayments] = useDeleteMultiplePaymentsMutation()
-
+  const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
   const handleDeletePayment = useCallback(
     async (id: string) => {
       const response = await deletePaymentMutation(id)
@@ -195,7 +196,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     async (source: IExtendedPayment) => {
       const monthServiceId =  typeof source.monthService === 'string' ? source.monthService : source.monthService?._id
       const newCredit: IPayment = {
-        invoiceNumber: 0,
+        invoiceNumber: newInvoiceNumber,
         type: Operations.Credit,
         domain: source.domain,
         street: source.street,
@@ -205,7 +206,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         generalSum: source.generalSum,
         provider: source.provider,
         reciever: source.reciever,
-        transaction: undefined,
+        transaction: source.transaction,
         invoice: undefined,
       }
 

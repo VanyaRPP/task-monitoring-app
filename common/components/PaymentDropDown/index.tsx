@@ -22,32 +22,39 @@ const PaymentDropdown: React.FC<Props> = ({
   onMarkPaid,
   deleteLoading,
 }) => {
-  const { token } = theme.useToken()
   const items: MenuProps['items'] = [
-    { key: 'view', label: 'Переглянути', icon: <EyeOutlined/> },
-    { key: 'edit', label: 'Редагувати', icon: <EditOutlined/>,
-      style: isAdmin ? {} : { display: 'none' } },
-    { key: 'mark', label: 'Позначити оплату', icon: <CheckOutlined/>, 
-      style: payment.type === Operations.Credit || !isAdmin ? { display: 'none' } : {},},
-    { type: 'divider' },
-    { key: 'delete', danger: true, disabled: deleteLoading,
-      style: isAdmin ? {} : { display: 'none' },
-      label: (
-        <Popconfirm
-          title={`Ви впевнені, що хочете видалити оплату від ${new Date(
-            payment.invoiceCreationDate as unknown as string
-          ).toLocaleDateString()}?`}
-          onConfirm={() => onDelete(payment._id)}
-          cancelText="Відміна"
-          disabled={deleteLoading}
-        >
-          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <DeleteOutlined /> Видалити
-          </span>
-        </Popconfirm>
-      ),
-    },
-  ]
+  { key: 'view', label: 'Переглянути', icon: <EyeOutlined /> },
+
+  ...(isAdmin
+    ? [{ key: 'edit', label: 'Редагувати', icon: <EditOutlined /> }]
+    : []),
+
+  ...(isAdmin && payment.type !== Operations.Credit
+    ? [{ key: 'mark', label: 'Позначити оплату', icon: <CheckOutlined /> }]
+    : []),
+
+  { type: 'divider' },
+
+  ...(isAdmin
+    ? [
+        {
+          key: 'delete',
+          danger: true,
+          disabled: deleteLoading,
+          label: (
+            <Popconfirm
+              title="Видалити?"
+              onConfirm={() => onDelete(payment._id)}
+            >
+              <span>
+                <DeleteOutlined /> Видалити
+              </span>
+            </Popconfirm>
+          ),
+        },
+      ]
+    : []),
+]
 
   const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
     if (key === 'view') onView(payment)
