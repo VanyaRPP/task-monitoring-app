@@ -22,6 +22,11 @@ const PaymentDropdown: React.FC<Props> = ({
   onMarkPaid,
   deleteLoading,
 }) => {
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(payment._id);
+  };
+
   const items: MenuProps['items'] = [
   { key: 'view', label: 'Переглянути', icon: <EyeOutlined /> },
 
@@ -43,12 +48,14 @@ const PaymentDropdown: React.FC<Props> = ({
           disabled: deleteLoading,
           label: (
             <Popconfirm
-              title="Видалити?"
-              onConfirm={() => onDelete(payment._id)}
-            >
-              <span>
-                <DeleteOutlined /> Видалити
-              </span>
+              title={`Ви впевнені, що хочете видалити оплату від ${new Date(          
+                payment.invoiceCreationDate as unknown as string                       
+              ).toLocaleDateString()}?`}                       
+              onConfirm={() => onDelete(payment._id)}                       
+              cancelText="Відміна"                        
+              disabled={deleteLoading}               
+                        >
+                <DeleteOutlined /> Видалити платіж
             </Popconfirm>
           ),
         },

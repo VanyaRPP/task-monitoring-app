@@ -180,7 +180,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     { isLoading: deleteLoading, isError: deleteError },
   ] = useDeletePaymentMutation()
   const [deleteMultiplePayments] = useDeleteMultiplePaymentsMutation()
-  const { data: newInvoiceNumber = 1 } = useGetPaymentNumberQuery({})
+  const { data: newInvoiceNumber = 1, refetch: refetchInvoiceNumber } = useGetPaymentNumberQuery({})
   const handleDeletePayment = useCallback(
     async (id: string) => {
       const response = await deletePaymentMutation(id)
@@ -193,10 +193,20 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     [deletePaymentMutation]
   )
   const handleMarkPaid = useCallback(
-    async (source: IExtendedPayment) => {
-      const monthServiceId =  typeof source.monthService === 'string' ? source.monthService : source.monthService?._id
+  async (source: IExtendedPayment) => {
+    const { data: currentNumber } = await refetchInvoiceNumber()
+    const invoiceNumber = currentNumber ?? newInvoiceNumber
+    const monthServiceId = typeof source.monthService === 'string' ? source.monthService : source.monthService?._id
+    const company = source.company as any
+    const transaction = {
+      AUT_CNTR_ACC: source.transaction?.AUT_CNTR_ACC || company?.account || '',
+      AUT_CNTR_NAM: source.transaction?.AUT_CNTR_NAM || company?.companyName || '',
+      AUT_CNTR_MFO: source.transaction?.AUT_CNTR_MFO || company?.mfo || '',
+      Description: source.transaction?.Description || source.description || '',
+    }
+
       const newCredit: IPayment = {
-        invoiceNumber: newInvoiceNumber,
+        invoiceNumber,
         type: Operations.Credit,
         domain: source.domain,
         street: source.street,
@@ -206,7 +216,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         generalSum: source.generalSum,
         provider: source.provider,
         reciever: source.reciever,
-        transaction: source.transaction,
+        transaction,
         invoice: undefined,
       }
 
@@ -217,7 +227,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
         message.error('Не вдалося створити оплату')
       }
     },
-    [addPayment]
+    [addPayment, newInvoiceNumber]
   )
   const handleDeleteConfirm = async () => {
     const response = await deleteMultiplePayments(
