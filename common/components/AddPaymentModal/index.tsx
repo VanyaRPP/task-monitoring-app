@@ -109,7 +109,7 @@ const AddPaymentModal: FC<Props> = ({
   const [form] = Form.useForm()
   const firstRunRef = useRef(true)
   const restoringRef = useRef(false)
-  const lastLoadedCompanyId = useRef<string | null>(null);
+  const lastLoadedCompanyId = useRef<string | null>(null)
   const [changed, setChanged] = useState(false)
   const [saved, setSaved] = useState(false)
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
@@ -236,16 +236,16 @@ const AddPaymentModal: FC<Props> = ({
     const allowedServices = groups.flatMap((group) => group.services)
 
     const serviceFilteredInvoices = serviceFilter(allInvoices, allowedServices)
-    const hasDiscount = serviceFilteredInvoices.some(inv => inv.type === 'discount')
-  
-  if (!hasDiscount && company?.discount) {
-    serviceFilteredInvoices.push({
-      type: 'discount',
-      name: 'Знижка',
-      price: company.discount,
-      sum: company.discount,
-    })
-  }
+    const hasDiscount = serviceFilteredInvoices.some((inv) => inv.type === 'discount')
+
+    if (!hasDiscount && company?.discount) {
+      serviceFilteredInvoices.push({
+        type: 'discount',
+        name: 'Знижка',
+        price: company.discount,
+        sum: company.discount,
+      })
+    }
 
     return serviceFilteredInvoices?.filter(
       (invoice) => invoice?.sum > 0 || DEFAULT_INVOICES.includes(invoice?.type)
@@ -324,7 +324,6 @@ const AddPaymentModal: FC<Props> = ({
         ),
     })
   }
-
 
   if (payment && paymentData?.type !== Operations.Credit && template !== 'olimp') {
     items.push({
@@ -436,7 +435,7 @@ const AddPaymentModal: FC<Props> = ({
       invoice: formData.debit
         ? formData.invoice.filter((invoice) => +invoice.sum !== 0)
         : [],
-      template: template,
+      template,
     }
 
     const response = edit
@@ -459,25 +458,26 @@ const AddPaymentModal: FC<Props> = ({
 
   useEffect(() => {
     if (activeTabKey !== '1' || saved || !company || !company._id) return
-  const isEditing = !!paymentId || edit
-  const currentInvoices = form.getFieldValue('invoice')
-  const hasCurrentInvoices =
-    Array.isArray(currentInvoices) && currentInvoices.length > 0
-  const hasFilteredInvoices =
-    Array.isArray(filteredInvoices) && filteredInvoices.length > 0
 
-  if (isEditing) {
-    lastLoadedCompanyId.current = company._id
-    return
-  }
+    const isEditing = !!paymentId || edit
+    const currentInvoices = form.getFieldValue('invoice')
+    const hasCurrentInvoices =
+      Array.isArray(currentInvoices) && currentInvoices.length > 0
+    const hasFilteredInvoices =
+      Array.isArray(filteredInvoices) && filteredInvoices.length > 0
 
-  const isNewCompanySelected = lastLoadedCompanyId.current !== company._id
-  const shouldHydrateEmptyInvoices = !hasCurrentInvoices && hasFilteredInvoices
+    if (isEditing) {
+      lastLoadedCompanyId.current = company._id
+      return
+    }
 
-  if (isNewCompanySelected || shouldHydrateEmptyInvoices) {
-    form.setFieldsValue({ invoice: filteredInvoices })
-    lastLoadedCompanyId.current = company._id
-  }
+    const isNewCompanySelected = lastLoadedCompanyId.current !== company._id
+    const shouldHydrateEmptyInvoices = !hasCurrentInvoices && hasFilteredInvoices
+
+    if (isNewCompanySelected || shouldHydrateEmptyInvoices) {
+      form.setFieldsValue({ invoice: filteredInvoices })
+      lastLoadedCompanyId.current = company._id
+    }
   }, [company, filteredInvoices, paymentId, edit, activeTabKey, saved, form])
 
   return (
@@ -489,7 +489,7 @@ const AddPaymentModal: FC<Props> = ({
         payment,
         prevPayment,
         form,
-        template, 
+        template,
         setTemplate,
       }}
     >
@@ -542,10 +542,8 @@ const AddPaymentModal: FC<Props> = ({
   )
 }
 
-function getActiveTab(paymentData, preview) {
-  if (preview) return '2'
-  if (paymentData?.type === Operations.Credit) return '1'
-  return '1'
+function getActiveTab(_paymentData: any, preview: boolean): string {
+  return preview ? '2' : '1'
 }
 
 export default AddPaymentModal
