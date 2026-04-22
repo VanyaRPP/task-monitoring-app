@@ -43,9 +43,9 @@ const makeTransaction = (overrides = {}) => ({
   AUT_CNTR_ACC: 'UA803220010000026001350058717',
   AUT_CNTR_MFO: '322001',
   AUT_CNTR_NAM: 'ТОВ Тест',
-  AUT_MY_CRF: '2479002623',
-  AUT_MY_MFO: '305299',
-  AUT_MY_ACC: 'UA483052990000026004006407606',
+  AUT_MY_CRF: '0000000000',
+  AUT_MY_MFO: '300000',
+  AUT_MY_ACC: 'UA300000000000000000000000001',
   AUT_MY_NAM: 'Тест Т. Е. ФОП',
   AUT_MY_MFO_NAME: 'ПРИВАТБАНК',
   AUT_MY_MFO_CITY: 'Дніпро',
@@ -316,7 +316,7 @@ describe('Auto-match fallback for old companies (via previousCompanyId)', () => 
 
     renderDrawer(makeTransaction({
       AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
-      AUT_CNTR_ACC: 'UA293052990000029023866100110',
+      AUT_CNTR_ACC: 'UA300000000000000000000000002',
       previousCompanyId: 'company_001',
       isMatchingPayment: false,
     }))
@@ -333,7 +333,7 @@ describe('Auto-match fallback for old companies (via previousCompanyId)', () => 
 
     renderDrawer(makeTransaction({
       AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
-      AUT_CNTR_ACC: 'UA293052990000029023866100110',
+      AUT_CNTR_ACC: 'UA300000000000000000000000002',
       previousCompanyId: null,
       isMatchingPayment: false,
     }))
@@ -446,7 +446,7 @@ describe('saveAccountToCompany after successful payment creation', () => {
     })
     renderDrawer(makeTransaction({
       AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
-      AUT_CNTR_ACC: 'UA293052990000029023866100110',
+      AUT_CNTR_ACC: 'UA300000000000000000000000002',
     }))
 
     await userEvent.click(screen.getByRole('combobox'))
