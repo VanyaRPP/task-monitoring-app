@@ -3,6 +3,9 @@
 import { setAccount, setActiveDomainId } from '@modules/store/bankSlice'
 import { useAppDispatch, useAppSelector } from '@modules/store/hooks'
 import DomainBankTab from './components/DomainBankTab/DomainBankTab'
+import MockDomainBankTab from './components/DomainBankTab/MockDomainBankTab'
+
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_BANK === 'true'
 import { useDomainTabs } from '../ProfiitPage/hook/useDomainTabs'
 import { ReactNode, useMemo, useEffect } from 'react'
 import { useTranslation } from 'next-i18next'
@@ -85,7 +88,7 @@ const BankTransactions = () => {
           activeTabKey={activeDomainId || tabList[0].key}
           onTabChange={onTabChange}
         >
-          {activeDomainId ? contentList[activeDomainId] : null}
+          {USE_MOCK ? <MockDomainBankTab /> : activeDomainId ? contentList[activeDomainId] : null}
         </Card>
       )}
     </Space>
