@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { buildCreditFromDebit } from './buildCreditFromDebit'
 import { useRouter } from 'next/router'
 import { message } from 'antd'
 
@@ -14,6 +15,8 @@ import {
   useDeletePaymentMutation,
   useDeleteMultiplePaymentsMutation,
   paymentApi,
+  useGetPaymentNumberQuery,
+  useAddPaymentMutation,
 } from '@common/api/paymentApi/payment.api'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 
@@ -24,7 +27,7 @@ import PaymentsHeader from '@components/Tables/Payment/Header'
 import PaymentsTable from '@components/Tables/Payment/Table'
 import ModalDelete from '@components/UI/ModalDelete'
 
-import { AppRoutes, Operations, ServiceType, Roles } from '@utils/constants'
+import { AppRoutes, ServiceType, Roles } from '@utils/constants'
 import { dateToDefaultFormat } from '@assets/features/formatDate'
 
 import {
@@ -172,12 +175,13 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     }
   }, [dispatch])
 
+  const [addPayment] = useAddPaymentMutation()
   const [
     deletePaymentMutation,
     { isLoading: deleteLoading, isError: deleteError },
   ] = useDeletePaymentMutation()
   const [deleteMultiplePayments] = useDeleteMultiplePaymentsMutation()
-
+  const { data: newInvoiceNumber = 1, refetch: refetchInvoiceNumber } = useGetPaymentNumberQuery({})
   const handleDeletePayment = useCallback(
     async (id: string) => {
       const response = await deletePaymentMutation(id)
@@ -189,7 +193,19 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     },
     [deletePaymentMutation]
   )
-
+  const handleMarkPaid = useCallback(
+    async (source: IExtendedPayment) => {
+      const { data: currentNumber } = await refetchInvoiceNumber()
+      const invoiceNumber = currentNumber ?? newInvoiceNumber
+      const response = await addPayment(buildCreditFromDebit(source, invoiceNumber))
+      if ('data' in response) {
+        message.success('Кредіт‑платіж створено')
+      } else {
+        message.error('Не вдалося створити оплату')
+      }
+    },
+    [addPayment, newInvoiceNumber, refetchInvoiceNumber]
+  )
   const handleDeleteConfirm = async () => {
     const response = await deleteMultiplePayments(
       paymentsDeleteItems.map((item) => item.id)
@@ -307,6 +323,7 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     onEditClick: handleEdit,
     onDelete: handleDeletePayment,
     deleteLoading,
+    onMarkPaid: handleMarkPaid
   }
   const debtProps = {
     debtorCompanies,
