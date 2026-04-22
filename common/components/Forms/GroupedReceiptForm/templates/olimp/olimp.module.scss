@@ -176,12 +176,14 @@
   td:nth-child(2) {
     width: 12%;
     text-align: right;
+    white-space: nowrap;
   }
 
   th:nth-child(3),
   td:nth-child(3) {
     width: 10%;
     text-align: right;
+    white-space: nowrap;
   }
 
   th:nth-child(4),
