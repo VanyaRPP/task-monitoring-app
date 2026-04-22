@@ -45,6 +45,7 @@ export interface IPayment {
   transaction?: IPaymentTransactions
   losses?: number
   template?: string
+  _templateScope?: string
 }
 
 export interface IExtendedPayment extends IPayment {

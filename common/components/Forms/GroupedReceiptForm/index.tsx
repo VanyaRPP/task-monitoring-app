@@ -1,4 +1,5 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { useEditPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { CURRENCY_MAP } from '@utils/constants'
 import dayjs from 'dayjs'
@@ -62,6 +63,7 @@ const GroupedReceiptForm: FC<Props> = ({
 }) => {
   const { template, setTemplate } = usePaymentContext();
   const { company } = usePaymentContext()
+  const [editPayment] = useEditPaymentMutation()
   const rawData = currPayment ?? paymentData ?? null
   const data = rawData as any
   const currency =
@@ -215,34 +217,30 @@ const GroupedReceiptForm: FC<Props> = ({
 
   const handleSaveForPayment = (templateKey: string) => {
     if (!data?._id) return message.warning('Платіж не знайдено')
-      setTemplate(templateKey as any)
-      fetch(`/api/spacehub/payment/${data._id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ template: templateKey }),
-      })
-    }
-
-  const handleSaveForCompany = (templateKey: string) => {
-    if (!data?._id) return message.warning('Платіж не знайдено')
-      setTemplate(templateKey as any)
-    fetch(`/api/spacehub/payment/${data._id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ template: templateKey, _templateScope: 'company' }),
-    }).then(() => message.success(`Шаблон збережено для компанії (${companyLabel})`))
-    .catch(() => message.error('Помилка збереження'))
+    setTemplate(templateKey as any)
+    editPayment({ _id: data._id, template: templateKey })
   }
-    
-  const handleSaveForDomain = (templateKey: string) => {
+
+  const handleSaveForCompany = async (templateKey: string) => {
     if (!data?._id) return message.warning('Платіж не знайдено')
-      setTemplate(templateKey as any)
-    fetch(`/api/spacehub/payment/${data._id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ template: templateKey, _templateScope: 'domain' }),
-    }).then(() => message.success(`Шаблон збережено для домену (${domainName})`))
-    .catch(() => message.error('Помилка збереження'))
+    setTemplate(templateKey as any)
+    const result = await editPayment({ _id: data._id, template: templateKey, _templateScope: 'company' })
+    if ('error' in result) {
+      message.error('Помилка збереження')
+    } else {
+      message.success(`Шаблон збережено для компанії (${companyLabel})`)
+    }
+  }
+
+  const handleSaveForDomain = async (templateKey: string) => {
+    if (!data?._id) return message.warning('Платіж не знайдено')
+    setTemplate(templateKey as any)
+    const result = await editPayment({ _id: data._id, template: templateKey, _templateScope: 'domain' })
+    if ('error' in result) {
+      message.error('Помилка збереження')
+    } else {
+      message.success(`Шаблон збережено для домену (${domainName})`)
+    }
   }
 
   const makeSaveMenu = (templateKey: string): MenuProps => ({
