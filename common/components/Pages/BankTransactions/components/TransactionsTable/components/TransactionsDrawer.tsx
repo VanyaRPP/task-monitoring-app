@@ -8,6 +8,7 @@ import { matchCompany, MatchType, getResolvedDescription } from './bankHelper'
 import { formatDate, parseDate } from './datesHelper'
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
 import { useQuickSend } from './useQuicksend'
+import { buildTransactionPayload } from './quickSendHelpers'
 
 interface TransactionDrawerProps {
   transaction: ITransaction
@@ -99,14 +100,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     },
   ]
 
-  const transactionPayload = {
-    AUT_CNTR_ACC: transaction.AUT_CNTR_ACC,
-    AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
-    AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
-    OSND: transaction.OSND,
-    Description: getResolvedDescription(transaction, relatedCompanies),
-    TECHNICAL_TRANSACTION_ID: transaction.TECHNICAL_TRANSACTION_ID,
-  }
+  const transactionPayload = buildTransactionPayload(transaction, relatedCompanies)
 
   const quickSendMenuItems: MenuProps['items'] = services.slice(-10).map((service) => ({
     key: service._id,
