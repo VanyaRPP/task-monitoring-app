@@ -30,6 +30,11 @@ export enum Operations {
   Debit = 'debit',
 }
 
+export enum SortOrder {
+  ASC = 1,
+  DESC = -1,
+}
+
 export enum ColumnsRoleView {
   GlobalAdmin = 1,
   User = 2,

@@ -7,7 +7,7 @@ import {
   getInvoicesTotalPipeline,
   getTotalGeneralSumPipeline,
 } from '@pages/api/spacehub/payment/pipelines'
-import { quarters } from '@utils/constants'
+import { quarters, SortOrder } from '@utils/constants'
 import {
   getDistinctCompanyAndDomain,
   getFilterForAddress,
@@ -191,7 +191,7 @@ export async function getPayments(
   }
 
   const payments = await Payment.find(options)
-    .sort({ invoiceCreationDate: -1 })
+    .sort({ invoiceCreationDate: SortOrder.DESC, type: SortOrder.ASC })
     .skip(+skip)
     .limit(+limit)
     .populate('company')
