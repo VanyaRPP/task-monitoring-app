@@ -19,6 +19,7 @@ export interface IRealEstateModel {
   garbageCollector?: boolean
   archived?: boolean
   account?: string
+  rnokpp?: string
   defaultTemplate?: string
   services: IDomainService[]
   customServices?: ICustomService[]
@@ -48,6 +49,7 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   garbageCollector: { type: Boolean, required: false, default: false },
   archived: { type: Boolean, required: false, default: false },
   account: { type: String, required: false, default: '' },
+  rnokpp: { type: String, required: false, default: '' },
   defaultTemplate: { type: String, required: false },
   services: { type: [Object] },
   customServices: {

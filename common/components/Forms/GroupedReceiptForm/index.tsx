@@ -6,7 +6,13 @@ import { CURRENCY_MAP } from '@utils/constants'
 import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
-import { PrinterOutlined, EditOutlined, SendOutlined, RightOutlined, CheckOutlined } from '@ant-design/icons'
+import {
+  PrinterOutlined,
+  EditOutlined,
+  RightOutlined,
+  CheckOutlined,
+  TableOutlined,
+} from '@ant-design/icons'
 import { Dropdown, Tooltip, message, MenuProps } from 'antd'
 import dynamic from 'next/dynamic'
 import s from './style.module.scss'
@@ -62,8 +68,8 @@ const GroupedReceiptForm: FC<Props> = ({
   paymentData,
   paymentActions: _paymentActions,
 }) => {
-  const { template, setTemplate } = usePaymentContext();
-  const { company } = usePaymentContext()
+  const { template, setTemplate, company, showQuantityInPreview, setShowQuantityInPreview } =
+    usePaymentContext()
   const [editPayment] = useEditPaymentMutation()
   const rawData = currPayment ?? paymentData ?? null
   const data = rawData as any
@@ -302,11 +308,6 @@ const GroupedReceiptForm: FC<Props> = ({
 
   return (
     <>
-        {/* <SendOutlined 
-          // className={s.telegramIcon} 
-          // onClick={handleSendToTelegram} 
-          // style={{ color: '#24A1DE' }}
-        /> */}
       <PrinterOutlined className={s.print} onClick={handlePrint} />
       <Dropdown
         trigger={['click']}
@@ -320,6 +321,30 @@ const GroupedReceiptForm: FC<Props> = ({
           <EditOutlined className={s.edit} />
         </Tooltip>
       </Dropdown>
+      <Tooltip title="Показувати кількість і ціну в таблиці перегляду">
+        <TableOutlined
+          role="button"
+          tabIndex={0}
+          aria-label={
+            showQuantityInPreview
+              ? 'Приховати кількість і ціну в перегляді'
+              : 'Показати кількість і ціну в перегляді'
+          }
+          aria-pressed={showQuantityInPreview}
+          className={`${s.tableDetailsToggle} ${
+            showQuantityInPreview ? s.tableDetailsToggleActive : ''
+          }`}
+          onClick={() =>
+            setShowQuantityInPreview(!showQuantityInPreview)
+          }
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              setShowQuantityInPreview(!showQuantityInPreview)
+            }
+          }}
+        />
+      </Tooltip>
 
       <TemplateComponent {...templateProps} />
     </>

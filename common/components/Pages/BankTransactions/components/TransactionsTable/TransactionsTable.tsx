@@ -12,6 +12,7 @@ interface Props {
   domain: IExtendedDomain
   loading?: boolean
   companies: IRealestate[]
+  refetchTransactions?: () => void
 }
 
 const TransactionsTable: React.FC<Props> = ({
@@ -20,6 +21,7 @@ const TransactionsTable: React.FC<Props> = ({
   domain,
   loading,
   companies,
+  refetchTransactions,
 }) => {
   const { visibleColumns, toggleColumnVisibility } = useColumnVisibility(
     defaultVisibleColumns
@@ -45,7 +47,8 @@ const TransactionsTable: React.FC<Props> = ({
     visibleColumns,
     domain,
     toggleColumnVisibility,
-    companies
+    companies,
+    refetchTransactions
   )
 
   return (

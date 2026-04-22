@@ -1,7 +1,7 @@
 .print {
   position: absolute;
   top: -80px;
-  right: 80px;
+  right: 118px;
   user-select: none;
   cursor: pointer;
   font-size: 25px;
@@ -19,8 +19,31 @@
 .edit {
   position: absolute;
   top: -80px;
+  right: 80px;
+  user-select: none;
+  cursor: pointer;
+  font-size: 25px;
+}
+
+.tableDetailsToggle {
+  position: absolute;
+  top: -80px;
   right: 40px;
   user-select: none;
   cursor: pointer;
   font-size: 25px;
+  color: rgba(0, 0, 0, 0.45);
+  transition: color 0.2s;
+
+  &:hover {
+    color: rgba(0, 0, 0, 0.75);
+  }
+}
+
+.tableDetailsToggleActive {
+  color: var(--ant-color-primary, #1677ff);
+
+  &:hover {
+    color: var(--ant-color-primary-hover, #4096ff);
+  }
 }

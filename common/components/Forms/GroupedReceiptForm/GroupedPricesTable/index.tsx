@@ -1,132 +1,327 @@
-import { usePaymentContext } from '@components/AddPaymentModal'
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
+import { usePaymentContext } from '@components/AddPaymentModal'
 import { Table } from 'antd'
+import type { TFunction } from 'i18next'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import { getInvoiceServiceLabelKey } from '@utils/invoice-service-label-key'
 import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
+import { ServiceType } from '@utils/constants'
+import s from './index.module.scss'
 
 export interface PaymentPricesTableProps {
   preview?: boolean
+  usePreviewQuantityToggle?: boolean
   domainId?: string
   currency?: string
   loading?: boolean
   invoices?: any[]
 }
 
-const getColumns = (currency?: string) => [
-  {
-    title: normalizeCurrency(currency) === 'UAH' ? '№' : 'No.',
-    dataIndex: 'key',
-    key: 'key',
-    width: 45,
-  },
-  {
-    title:
-      normalizeCurrency(currency) === 'UAH'
-        ? 'Найменування послуги'
-        : 'Service name',
-    dataIndex: 'name',
-    key: 'name',
-  },
-  {
-    title: `${normalizeCurrency(currency) === 'UAH' ? 'Сума' : 'Amount'}, ${getCurrencyShortLabel(currency)}`,
+interface IPriceTableRow {
+  key: number
+  name: string
+  sum: number | string
+  amount?: number
+  price?: number
+  type?: string
+}
+
+export function shouldShowInvoiceQuantityAndPriceColumns(
+  preview?: boolean,
+  usePreviewQuantityToggle?: boolean,
+  showQuantityInPreview?: boolean
+): boolean {
+  return (
+    !preview ||
+    !usePreviewQuantityToggle ||
+    !!showQuantityInPreview
+  )
+}
+
+export function shouldUseGroupedByDomainPreviewLayout(
+  preview?: boolean,
+  usePreviewQuantityToggle?: boolean,
+  showQuantityInPreview?: boolean,
+  resolvedDomainId?: string,
+  groupsLength?: number
+): boolean {
+  return (
+    !!preview &&
+    !!usePreviewQuantityToggle &&
+    !showQuantityInPreview &&
+    !!resolvedDomainId &&
+    (groupsLength ?? 0) > 0
+  )
+}
+
+function getInvoiceTableLng(currency?: string): 'en' | 'uk' {
+  return normalizeCurrency(currency) === 'UAH' ? 'uk' : 'en'
+}
+
+const invoiceMatchesGroupService = (invoice: any, service: any): boolean =>
+  invoice?.name === service?.name ||
+  invoice?.type === service?.fieldName ||
+  (invoice?.type === 'maintenancePrice' && service?.fieldName === 'rentPrice')
+
+const assignInvoicesToGroupsFirstWin = (
+  invoices: any[] | undefined,
+  groups: any[] | undefined
+): {
+  groupRows: Array<{ groupName: string; totalSum: string }>
+  unmatchedInvoices: any[]
+} => {
+  if (!groups?.length || !invoices?.length) {
+    return { groupRows: [], unmatchedInvoices: invoices ?? [] }
+  }
+
+  const remaining = new Set(invoices.filter((inv) => inv?.type !== 'discount'))
+  const groupRows: Array<{ groupName: string; totalSum: string }> = []
+
+  for (const group of groups) {
+    const groupInvoices: any[] = []
+    for (const inv of [...remaining]) {
+      if (
+        group?.services?.some((service: any) =>
+          invoiceMatchesGroupService(inv, service)
+        )
+      ) {
+        groupInvoices.push(inv)
+        remaining.delete(inv)
+      }
+    }
+
+    const totalGroupSum = groupInvoices.reduce(
+      (sum, invoice) => sum + Number(invoice?.sum ?? 0),
+      0
+    )
+
+    if (groupInvoices.length === 0) {
+      continue
+    }
+
+    if (totalGroupSum === 0) {
+      groupInvoices.forEach((inv) => remaining.add(inv))
+      continue
+    }
+
+    groupRows.push({
+      groupName: group?.groupName ?? '',
+      totalSum: totalGroupSum.toFixed(2),
+    })
+  }
+
+  return { groupRows, unmatchedInvoices: [...remaining] }
+}
+
+function resolveInvoiceLabel(inv: any, t: TFunction<'groupedReceipt'>): string {
+  if (inv?.name) return inv.name
+  const key = getInvoiceServiceLabelKey(inv.type)
+  return t(`services.${key}`)
+}
+
+const getColumns = (
+  currency: string | undefined,
+  includeQuantityAndPrice: boolean,
+  t: TFunction<'groupedReceipt'>
+) => {
+  const currencyLabel = getCurrencyShortLabel(currency)
+  const baseColumns = [
+    {
+      title: t('columns.rowNumber'),
+      dataIndex: 'key',
+      key: 'key',
+      width: 45,
+    },
+    {
+      title: t('columns.serviceName'),
+      dataIndex: 'name',
+      key: 'name',
+    },
+  ]
+
+  const quantityAndPriceColumns = [
+    {
+      title: t('columns.quantity'),
+      dataIndex: 'amount',
+      key: 'amount',
+      width: 100,
+      className: s.priceCell,
+      render: (value: any, record: any = {}) => {
+        const n = Number(value)
+        const type = record.type
+        const displayValue = !isFinite(n) || n === 0 ? 1 : n
+
+        if (type === ServiceType.Placing || type === 'rentPrice') {
+          return `${displayValue.toFixed(2)} ${t('units.m2')}`
+        }
+        if (type === ServiceType.Electricity || type === 'electricityPrice') {
+          return `${displayValue.toFixed(2)} ${t('units.kWh')}`
+        }
+        if (
+          type === ServiceType.Water ||
+          type === 'waterPrice' ||
+          type === 'waterPriceTotal'
+        ) {
+          return `${displayValue.toFixed(2)} ${t('units.m3')}`
+        }
+        return displayValue
+      },
+    },
+    {
+      title: t('columns.price', { currency: currencyLabel }),
+      dataIndex: 'price',
+      key: 'price',
+      width: 120,
+      className: s.priceCell,
+      render: (value: any, record: any = {}) => {
+        const n = Number(value)
+        if (!isFinite(n) || n === 0) return '-'
+        const formatted = n.toFixed(2)
+        const type = record.type
+
+        if (type === ServiceType.Placing || type === 'rentPrice') {
+          return `${formatted} ${currencyLabel}/${t('units.m2')}`
+        }
+        if (type === ServiceType.Electricity || type === 'electricityPrice') {
+          return `${formatted} ${currencyLabel}/${t('units.kWh')}`
+        }
+        if (
+          type === ServiceType.Water ||
+          type === 'waterPrice' ||
+          type === 'waterPriceTotal'
+        ) {
+          return `${formatted} ${currencyLabel}/${t('units.m3')}`
+        }
+        return formatted
+      },
+    },
+  ]
+
+  const sumColumn = {
+    title: t('columns.amount', { currency: currencyLabel }),
     dataIndex: 'sum',
     key: 'sum',
+    width: 120,
+    className: s.priceCell,
     render: (value: any) => {
       const n = Number(value)
       return isFinite(n) ? n.toFixed(2) : value
     },
-  },
-]
+  }
 
-const groupedInvoices = (invoices: any, groups: any) => {
-  // TODO: FIX maintenancePrice && rentPrice logic
-  const result =
-    groups?.map((group) => {
-      const groupInvoices = invoices?.filter((invoice) =>
-        group?.services?.some(
-          (service) =>
-            invoice?.name === service?.name ||
-            invoice?.type === service?.fieldName ||
-            (invoice?.type === 'maintenancePrice' &&
-              service?.fieldName === 'rentPrice')
-        )
-      )
+  if (!includeQuantityAndPrice) {
+    return [...baseColumns, sumColumn]
+  }
 
-      const totalGroupSum = (groupInvoices ?? []).reduce((sum, invoice) => {
-        return sum + (Number(invoice?.sum) || 0)
-      }, 0)
-
-      return {
-        groupName: group?.groupName,
-        invoices: groupInvoices,
-        totalSum: totalGroupSum,
-        fieldNames: group?.services?.map((s) => s?.fieldName),
-      }
-    }) || []
-
-  return result
+  return [...baseColumns, ...quantityAndPriceColumns, sumColumn]
 }
 
 const GroupedPricesTable: React.FC<PaymentPricesTableProps> = ({
-  preview,
-  domainId,
   currency,
   loading,
   invoices,
+  preview,
+  usePreviewQuantityToggle,
+  domainId,
 }) => {
-  const { form, company } = usePaymentContext()
+  const { form, company, showQuantityInPreview } = usePaymentContext()
+  const { domain } = form.getFieldsValue()
+  const { i18n } = useTranslation('groupedReceipt')
+
+  const resolvedDomainId =
+    typeof domainId === 'string'
+      ? domainId
+      : (domainId as { _id?: string } | undefined)?._id
 
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
-    { domainId: [domainId] },
-    { skip: !domainId }
-  )
-  const groupedInvoicesData = useMemo(
-    () => groupedInvoices(invoices, customDomainServices?.data),
-    [invoices, customDomainServices]
+    { domainId: resolvedDomainId as any },
+    { skip: !resolvedDomainId || !usePreviewQuantityToggle }
   )
 
-  const { domain } = form.getFieldsValue()
+  const resolvedCurrency = currency || company?.currency || domain?.currency
+  const invoiceLng = getInvoiceTableLng(resolvedCurrency)
 
-  const groupedFieldNames =
-    groupedInvoicesData?.flatMap((group) => group.fieldNames || []) || []
-
-  const dataSource =
-    groupedInvoicesData
-      ?.filter((group) => Number(group?.totalSum || 0).toFixed(2) !== '0.00')
-      .map((group, index) => ({
-        key: index + 1,
-        name: group.groupName,
-        sum: group.totalSum,
-      })) || []
-  const discountInvoice = invoices?.find((inv) => inv?.type === 'discount')
-  const isEnglish = normalizeCurrency(currency || company?.currency || domain?.currency) !== 'UAH'
-
-  if (discountInvoice) {
-    dataSource.push({
-      key: dataSource.length + 1,
-      name: isEnglish ? 'Discount' : 'Знижка',
-      sum: discountInvoice.sum,
-    })
-  }
-
-  const customInvoices = invoices?.filter(
-    (inv) => inv?.type === 'custom' && !groupedFieldNames.includes(inv?.type)
+  const tInvoice = useMemo(
+    () => i18n.getFixedT(invoiceLng, 'groupedReceipt'),
+    [i18n, invoiceLng]
   )
 
-  customInvoices?.forEach((inv) => {
-    // Uncomment to add custom invoices
-    !inv?.customService &&
-      dataSource.push({
-        key: dataSource.length + 1,
-        name: inv.name || (isEnglish ? 'Additional' : 'Додатково'),
+  const includeQuantityAndPrice = shouldShowInvoiceQuantityAndPriceColumns(
+    preview,
+    usePreviewQuantityToggle,
+    showQuantityInPreview
+  )
+
+  const useGroupedByDomainLayout = shouldUseGroupedByDomainPreviewLayout(
+    preview,
+    usePreviewQuantityToggle,
+    showQuantityInPreview,
+    resolvedDomainId,
+    customDomainServices?.data?.length ?? 0
+  )
+
+  const dataSource = useMemo(() => {
+    const filtered =
+      invoices?.filter(
+        (inv) => Number(inv?.sum || 0) !== 0 || inv?.type === 'discount'
+      ) ?? []
+
+    if (!useGroupedByDomainLayout) {
+      return (
+        filtered.map((inv, index) => ({
+          key: index + 1,
+          name: resolveInvoiceLabel(inv, tInvoice),
+          sum: inv.sum,
+          amount: inv.amount,
+          price: inv.price,
+          type: inv.type,
+        })) ?? []
+      )
+    }
+
+    const groups = customDomainServices?.data ?? []
+    const nonDiscount = filtered.filter((inv) => inv?.type !== 'discount')
+    const { groupRows, unmatchedInvoices } = assignInvoicesToGroupsFirstWin(
+      nonDiscount,
+      groups
+    )
+
+    const rows: IPriceTableRow[] = groupRows.map((group, index) => ({
+      key: index + 1,
+      name: group.groupName,
+      sum: group.totalSum,
+    }))
+
+    const discountInvoice = filtered.find((inv) => inv?.type === 'discount')
+    if (discountInvoice) {
+      rows.push({
+        key: rows.length + 1,
+        name: tInvoice('services.discount'),
+        sum: discountInvoice.sum,
+      })
+    }
+
+    unmatchedInvoices.forEach((inv) => {
+      rows.push({
+        key: rows.length + 1,
+        name: resolveInvoiceLabel(inv, tInvoice),
         sum: inv.sum,
       })
-  })
+    })
+
+    return rows
+  }, [
+    invoices,
+    tInvoice,
+    useGroupedByDomainLayout,
+    customDomainServices?.data,
+  ])
 
   return (
-    <Table
+    <Table<IPriceTableRow>
       dataSource={dataSource}
-      columns={getColumns(currency || company?.currency || domain?.currency)}
+      columns={getColumns(resolvedCurrency, includeQuantityAndPrice, tInvoice)}
       loading={loading}
       pagination={false}
       bordered

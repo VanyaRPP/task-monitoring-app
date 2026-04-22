@@ -29,6 +29,8 @@ export interface ITransaction {
   TRANTYPE: string
   DLR: string
   TECHNICAL_TRANSACTION_ID: string
+  RECIPIENT_ULTMT_NCEO?: string
+  RECIPIENT_ULTMT_NAME?: string
   isMatchingPayment?: boolean
   previousCompanyId?: string
 }

@@ -1,298 +1,197 @@
-import { matchCompany, getResolvedDescription } from './bankHelper'
+import {
+    matchCompany,
+    matchByAccount,
+    matchByRnokpp,
+    matchByPrevious,
+    getResolvedDescription,
+} from './bankHelper'
 import { ITransaction } from './transactionTypes'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 
 const mockCompanies: IRealestate[] = [
-    {
-        _id: '1',
-        companyName: 'Sport Space',
-        account: 'UA123',
-    } as IRealestate,
-    {
-        _id: '2',
-        companyName: 'Nude',
-        account: 'UA456',
-    } as IRealestate,
+    { _id: '1', companyName: 'Sport Space', account: 'UA123' } as IRealestate,
+    { _id: '2', companyName: 'Nude', account: 'UA456' } as IRealestate,
 ]
 
 const companies: IRealestate[] = [
-    {
-        _id: 'sport-space-id',
-        companyName: 'Sport Space',
-        account: undefined,
-    } as IRealestate,
-    {
-        _id: 'vityuk-id',
-        companyName: 'Вітюк Дмитро Олександрович',
-        account: 'UA293220010000026205305849120',
-    } as IRealestate,
-    {
-        _id: 'nude-id',
-        companyName: 'Nude',
-        account: undefined,
-    } as IRealestate,
-    {
-        _id: 'olimp-id',
-        companyName: 'OlimpDigital',
-        account: undefined,
-    } as IRealestate,
+    { _id: 'sport-space-id', companyName: 'Sport Space', account: undefined } as IRealestate,
+    { _id: 'vityuk-id', companyName: 'Вітюк Дмитро Олександрович', account: 'UA293220010000026205305849120' } as IRealestate,
+    { _id: 'nude-id', companyName: 'Nude', account: undefined } as IRealestate,
+    { _id: 'olimp-id', companyName: 'OlimpDigital', account: undefined } as IRealestate,
 ]
 
-describe('matchCompany', () => {
-    it('should match by account', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UA123',
-            AUT_CNTR_NAM: 'Some Company',
-        } as ITransaction
+const kincalCompany: IRealestate = {
+    _id: 'kincal-id',
+    companyName: 'Vocal Kincal',
+    account: '',
+    rnokpp: '3042507187',
+} as IRealestate
 
-        const result = matchCompany(transaction, mockCompanies)
+describe('matchByAccount', () => {
+    it('should return match when account found', () => {
+        const transaction = { AUT_CNTR_ACC: 'UA123', AUT_CNTR_NAM: 'Some Company' } as ITransaction
 
-        expect(result).toEqual({
+        expect(matchByAccount(transaction, mockCompanies)).toEqual({ companyId: '1', matchedBy: 'account' })
+    })
+
+    it('should return null for transit transaction', () => {
+        const transaction = { AUT_CNTR_ACC: 'UA123', AUT_CNTR_NAM: 'Транз.рахунок платежi' } as ITransaction
+
+        expect(matchByAccount(transaction, mockCompanies)).toBeNull()
+    })
+
+    it('should return null if AUT_CNTR_NAM is undefined (treated as non-transit)', () => {
+        const transaction = { AUT_CNTR_ACC: 'UA123', AUT_CNTR_NAM: undefined } as ITransaction
+
+        expect(matchByAccount(transaction, mockCompanies)).toEqual({ companyId: '1', matchedBy: 'account' })
+    })
+
+    it('should return null if account not found', () => {
+        const transaction = { AUT_CNTR_ACC: 'UA999', AUT_CNTR_NAM: 'Some Company' } as ITransaction
+
+        expect(matchByAccount(transaction, mockCompanies)).toBeNull()
+    })
+
+    it('should return null if AUT_CNTR_ACC is empty', () => {
+        const transaction = { AUT_CNTR_ACC: '', AUT_CNTR_NAM: 'Some Company' } as ITransaction
+
+        expect(matchByAccount(transaction, mockCompanies)).toBeNull()
+    })
+
+    it('should be case-sensitive', () => {
+        const transaction = { AUT_CNTR_ACC: 'ua123', AUT_CNTR_NAM: 'Some Company' } as ITransaction
+
+        expect(matchByAccount(transaction, mockCompanies)).toBeNull()
+    })
+
+    it('should return null if account has leading/trailing spaces', () => {
+        const transaction = { AUT_CNTR_ACC: ' UA123 ', AUT_CNTR_NAM: 'Some Company' } as ITransaction
+
+        expect(matchByAccount(transaction, mockCompanies)).toBeNull()
+    })
+
+    it('should return first match when multiple companies share the same account', () => {
+        const duplicates = [
+            { _id: '1', companyName: 'First', account: 'UA123' } as IRealestate,
+            { _id: '2', companyName: 'Second', account: 'UA123' } as IRealestate,
+        ]
+
+        expect(matchByAccount({ AUT_CNTR_ACC: 'UA123' } as ITransaction, duplicates)).toEqual({
             companyId: '1',
             matchedBy: 'account',
         })
     })
+})
 
-    it('should NOT match транзитний рахунок if OSND does not contain company name', () => {
+describe('matchByRnokpp', () => {
+    it('should return match when RECIPIENT_ULTMT_NCEO matches company rnokpp', () => {
         const transaction = {
-            AUT_CNTR_ACC: 'UA123',
-            AUT_CNTR_NAM: 'Транз.рахунок платежi',
-            OSND: 'Unrelated description',
+            AUT_CNTR_ACC: 'UA293052990000029023866100110',
+            AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+            RECIPIENT_ULTMT_NCEO: '3042507187',
         } as ITransaction
 
-        const result = matchCompany(transaction, mockCompanies)
+        expect(matchByRnokpp(transaction, [kincalCompany])).toEqual({ companyId: 'kincal-id', matchedBy: 'rnokpp' })
+    })
 
-        expect(result).toEqual({
-            companyId: null,
-            matchedBy: null,
+    it('should return null if RECIPIENT_ULTMT_NCEO is absent', () => {
+        const transaction = { AUT_CNTR_ACC: 'UA123', AUT_CNTR_NAM: 'Транз.рахунок платежi' } as ITransaction
+
+        expect(matchByRnokpp(transaction, [kincalCompany])).toBeNull()
+    })
+
+    it('should return null if no company has matching rnokpp', () => {
+        const transaction = { AUT_CNTR_ACC: 'UA123', RECIPIENT_ULTMT_NCEO: '9999999999' } as ITransaction
+
+        expect(matchByRnokpp(transaction, mockCompanies)).toBeNull()
+    })
+
+    it('should match by rnokpp found in company description', () => {
+        const companyWithRnokppInDescription: IRealestate = {
+            _id: 'kincal-desc-id',
+            companyName: 'Vocal Kincal',
+            account: '',
+            rnokpp: '',
+            description: 'Юлія Кінцал\nм. Житомир\nвул. Кибальчича 4\n3042507187\n+380671511260',
+        } as IRealestate
+
+        const transaction = {
+            AUT_CNTR_ACC: 'UA293052990000029023866100110',
+            AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+            RECIPIENT_ULTMT_NCEO: '3042507187',
+        } as ITransaction
+
+        expect(matchByRnokpp(transaction, [companyWithRnokppInDescription])).toEqual({
+            companyId: 'kincal-desc-id',
+            matchedBy: 'rnokpp',
         })
     })
 
-    it('should use previousCompanyId for транзитний рахунок', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UA123',
-            AUT_CNTR_NAM: 'Транз.рахунок платежi',
-            previousCompanyId: 'some-company-id',
-        } as ITransaction
+    it('should prioritize rnokpp field over description', () => {
+        const byField: IRealestate = { _id: 'by-field', companyName: 'A', account: '', rnokpp: '3042507187' } as IRealestate
+        const byDesc: IRealestate = { _id: 'by-desc', companyName: 'B', account: '', rnokpp: '', description: '3042507187' } as IRealestate
 
-        const result = matchCompany(transaction, mockCompanies)
+        const transaction = { RECIPIENT_ULTMT_NCEO: '3042507187' } as ITransaction
 
-        expect(result).toEqual({
+        expect(matchByRnokpp(transaction, [byField, byDesc])).toEqual({
+            companyId: 'by-field',
+            matchedBy: 'rnokpp',
+        })
+    })
+})
+
+describe('matchByPrevious', () => {
+    it('should return match when previousCompanyId is present', () => {
+        expect(matchByPrevious({ previousCompanyId: 'some-company-id' } as ITransaction)).toEqual({
             companyId: 'some-company-id',
             matchedBy: 'previous',
         })
     })
 
-    it('should fallback to previousCompanyId', () => {
+    it('should return null when previousCompanyId is absent', () => {
+        expect(matchByPrevious({ previousCompanyId: undefined } as ITransaction)).toBeNull()
+    })
+})
+
+describe('matchCompany', () => {
+    it('should prioritize account over rnokpp', () => {
+        const transaction = { AUT_CNTR_ACC: 'UA123', AUT_CNTR_NAM: 'Some Company', RECIPIENT_ULTMT_NCEO: '3042507187' } as ITransaction
+
+        expect(matchCompany(transaction, [
+            { _id: 'acc-id', companyName: 'Sport Space', account: 'UA123', rnokpp: '3042507187' } as IRealestate,
+            kincalCompany,
+        ])).toEqual({ companyId: 'acc-id', matchedBy: 'account' })
+    })
+
+    it('should prioritize account over previousCompanyId', () => {
+        const transaction = { AUT_CNTR_ACC: 'UA123', AUT_CNTR_NAM: 'Some Company', previousCompanyId: '2' } as ITransaction
+
+        expect(matchCompany(transaction, mockCompanies)).toEqual({ companyId: '1', matchedBy: 'account' })
+    })
+
+    it('should prioritize rnokpp over previousCompanyId for transit', () => {
         const transaction = {
-            AUT_CNTR_ACC: 'UNKNOWN',
-            AUT_CNTR_NAM: 'Random',
-            previousCompanyId: '2',
+            AUT_CNTR_ACC: 'UA293052990000029023866100110',
+            AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+            RECIPIENT_ULTMT_NCEO: '3042507187',
+            previousCompanyId: 'sport-space-id',
         } as ITransaction
 
-        const result = matchCompany(transaction, mockCompanies)
-
-        expect(result).toEqual({
-            companyId: '2',
-            matchedBy: 'previous',
-        })
+        expect(matchCompany(transaction, [...companies, kincalCompany])).toEqual({ companyId: 'kincal-id', matchedBy: 'rnokpp' })
     })
 
-    it('should return null if nothing matched', () => {
+    it('should fall through to previousCompanyId when transit and no rnokpp match', () => {
         const transaction = {
-            AUT_CNTR_ACC: 'UNKNOWN',
-            AUT_CNTR_NAM: 'Random',
-        } as ITransaction
-
-        const result = matchCompany(transaction, mockCompanies)
-
-        expect(result).toEqual({
-            companyId: null,
-            matchedBy: null,
-        })
-    })
-
-    it('should ignore companies without account', () => {
-        const companies = [
-            {
-                _id: '3',
-                companyName: 'No Account Company',
-            } as IRealestate,
-        ]
-
-        const transaction = {
-            AUT_CNTR_ACC: 'UA999',
-            AUT_CNTR_NAM: 'Test',
-        } as ITransaction
-
-        const result = matchCompany(transaction, companies)
-
-        expect(result).toEqual({
-            companyId: null,
-            matchedBy: null,
-        })
-    })
-
-    it('should match Вітюк by account', () => {
-        const transaction: ITransaction = {
-            AUT_CNTR_ACC: 'UA293220010000026205305849120',
-            AUT_CNTR_NAM: 'Вітюк Дмитро Олександрович',
-            previousCompanyId: undefined,
-        } as ITransaction
-
-        const result = matchCompany(transaction, companies)
-
-        expect(result).toEqual({
-            companyId: 'vityuk-id',
-            matchedBy: 'account',
-        })
-    })
-
-    it('should match Шептієва (Sport Space) by previousCompanyId, ignoring транзитний рахунок', () => {
-        const transaction: ITransaction = {
-            AUT_CNTR_ACC: 'UA293052990000029023866100110', // транзит
+            AUT_CNTR_ACC: 'UA293052990000029023866100110',
             AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
             previousCompanyId: 'sport-space-id',
         } as ITransaction
 
-        const result = matchCompany(transaction, companies)
-
-        expect(result).toEqual({
-            companyId: 'sport-space-id',
-            matchedBy: 'previous',
-        })
+        expect(matchCompany(transaction, companies)).toEqual({ companyId: 'sport-space-id', matchedBy: 'previous' })
     })
 
-    it('should prioritize account over previousCompanyId', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UA123',
-            AUT_CNTR_NAM: 'Some Company',
-            previousCompanyId: '2',
-        } as ITransaction
-
-        const result = matchCompany(transaction, mockCompanies)
-
-        expect(result).toEqual({
-            companyId: '1',
-            matchedBy: 'account',
-        })
-    })
-
-    it('should return null if AUT_CNTR_ACC is empty', () => {
-        const transaction = {
-            AUT_CNTR_ACC: '',
-            AUT_CNTR_NAM: 'Some Company',
-            previousCompanyId: '2',
-        } as ITransaction
-
-        const result = matchCompany(transaction, mockCompanies)
-
-        expect(result).toEqual({
-            companyId: '2',
-            matchedBy: 'previous',
-        })
-    })
-
-    it('should return null if AUT_CNTR_ACC is undefined', () => {
-        const transaction = {
-            AUT_CNTR_ACC: undefined,
-            AUT_CNTR_NAM: 'Some Company',
-            previousCompanyId: '2',
-        } as ITransaction
-
-        const result = matchCompany(transaction, mockCompanies)
-
-        expect(result).toEqual({
-            companyId: '2',
-            matchedBy: 'previous',
-        })
-    })
-
-    it('should return previousCompanyId if companies array is empty but previousCompanyId exists', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UA123',
-            AUT_CNTR_NAM: 'Some Company',
-            previousCompanyId: '2',
-        } as ITransaction
-
-        const result = matchCompany(transaction, [])
-
-        expect(result).toEqual({
-            companyId: '2',
-            matchedBy: 'previous',
-        })
-    })
-
-    it('should match first company if multiple have same account', () => {
-        const companiesWithDuplicate = [
-            { _id: '1', companyName: 'First', account: 'UA123' } as IRealestate,
-            { _id: '2', companyName: 'Second', account: 'UA123' } as IRealestate,
-        ]
-
-        const transaction = {
-            AUT_CNTR_ACC: 'UA123',
-            AUT_CNTR_NAM: 'Some Company',
-        } as ITransaction
-
-        const result = matchCompany(transaction, companiesWithDuplicate)
-
-        expect(result).toEqual({
-            companyId: '1',
-            matchedBy: 'account',
-        })
-    })
-
-    it('should not match if account has different case', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'ua123',
-            AUT_CNTR_NAM: 'Some Company',
-        } as ITransaction
-
-        const result = matchCompany(transaction, mockCompanies)
-
-        expect(result).toEqual({
-            companyId: null,
-            matchedBy: null,
-        })
-    })
-
-    it('should not match if account does not exist in companies', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UA999',
-            AUT_CNTR_NAM: 'Some Company',
-        } as ITransaction
-
-        const result = matchCompany(transaction, mockCompanies)
-
-        expect(result).toEqual({
-            companyId: null,
-            matchedBy: null,
-        })
-    })
-
-    it('should handle AUT_CNTR_NAM undefined', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UA123',
-            AUT_CNTR_NAM: undefined,
-        } as ITransaction
-
-        const result = matchCompany(transaction, mockCompanies)
-
-        expect(result).toEqual({
-            companyId: '1',
-            matchedBy: 'account',
-        })
-    })
-
-    it('should not match if account has leading/trailing spaces', () => {
-        const transaction = {
-            AUT_CNTR_ACC: ' UA123 ',
-            AUT_CNTR_NAM: 'Some Company',
-        } as ITransaction
-
-        const result = matchCompany(transaction, mockCompanies)
-
-        expect(result).toEqual({
+    it('should return null result when nothing matches', () => {
+        expect(matchCompany({ AUT_CNTR_ACC: 'UNKNOWN', AUT_CNTR_NAM: 'Random' } as ITransaction, mockCompanies)).toEqual({
             companyId: null,
             matchedBy: null,
         })
@@ -300,135 +199,21 @@ describe('matchCompany', () => {
 })
 
 describe('getResolvedDescription', () => {
-    it('should return account number if matched by account', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UA293220010000026205305849120',
-            AUT_CNTR_NAM: 'Вітюк Дмитро Олександрович',
-            OSND: 'Оплата послуг',
-        } as ITransaction
+    it('should return AUT_CNTR_ACC if matched by account', () => {
+        const transaction = { AUT_CNTR_ACC: 'UA293220010000026205305849120', AUT_CNTR_NAM: 'Вітюк Дмитро Олександрович', OSND: 'Оплата послуг' } as ITransaction
 
-        const result = getResolvedDescription(transaction, companies)
-
-        expect(result).toBe('UA293220010000026205305849120')
+        expect(getResolvedDescription(transaction, companies)).toBe('UA293220010000026205305849120')
     })
 
-    it('should return original OSND if matched by previousCompanyId', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UNKNOWN_ACC',
-            previousCompanyId: 'sport-space-id',
-            OSND: 'Абонемент',
-        } as ITransaction
+    it('should return OSND if not matched by account', () => {
+        const transaction = { AUT_CNTR_ACC: 'UNKNOWN_ACC', previousCompanyId: '2', OSND: 'Абонемент' } as ITransaction
 
-        const result = getResolvedDescription(transaction, companies)
-
-        expect(result).toBe('Абонемент')
+        expect(getResolvedDescription(transaction, mockCompanies)).toBe('Абонемент')
     })
 
-    it('should return original OSND if nothing matched', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UNKNOWN_ACC',
-            OSND: 'Просто переказ',
-        } as ITransaction
+    it('should return empty string if OSND is absent and not matched by account', () => {
+        const transaction = { AUT_CNTR_ACC: 'UNKNOWN', OSND: '' } as ITransaction
 
-        const result = getResolvedDescription(transaction, companies)
-
-        expect(result).toBe('Просто переказ')
-    })
-
-    it('should return original OSND for транзитний рахунок', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UA293052990000029023866100110',
-            AUT_CNTR_NAM: 'Транз.рахунок платежi',
-            OSND: 'Транзитний платіж',
-        } as ITransaction
-
-        const result = getResolvedDescription(transaction, companies)
-
-        expect(result).toBe('Транзитний платіж')
-    })
-
-    it('should return AUT_CNTR_ACC even if OSND is present when matched by account', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UA123',
-            AUT_CNTR_NAM: 'Some Company',
-            OSND: 'Some description',
-        } as ITransaction
-
-        const result = getResolvedDescription(transaction, mockCompanies)
-
-        expect(result).toBe('UA123')
-    })
-
-    it('should return OSND if AUT_CNTR_ACC is empty but matched by account', () => {
-        const companiesWithEmptyAccount = [
-            { _id: '1', companyName: 'Test', account: '' } as IRealestate,
-        ]
-
-        const transaction = {
-            AUT_CNTR_ACC: '',
-            AUT_CNTR_NAM: 'Some Company',
-            OSND: 'Empty account description',
-        } as ITransaction
-
-        const result = getResolvedDescription(transaction, companiesWithEmptyAccount)
-
-        expect(result).toBe('Empty account description')
-    })
-
-    it('should return empty string if OSND is empty and not matched by account', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UNKNOWN',
-            OSND: '',
-        } as ITransaction
-
-        const result = getResolvedDescription(transaction, mockCompanies)
-
-        expect(result).toBe('')
-    })
-
-    it('should return OSND if companies array is empty', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UA123',
-            OSND: 'No companies',
-        } as ITransaction
-
-        const result = getResolvedDescription(transaction, [])
-
-        expect(result).toBe('No companies')
-    })
-
-    it('should return AUT_CNTR_ACC if matched by account and OSND is undefined', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UA123',
-            AUT_CNTR_NAM: 'Some Company',
-            OSND: undefined,
-        } as ITransaction
-
-        const result = getResolvedDescription(transaction, mockCompanies)
-
-        expect(result).toBe('UA123')
-    })
-
-    it('should return OSND if matched by previous and AUT_CNTR_ACC is present', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UNKNOWN_ACC',
-            previousCompanyId: '2',
-            OSND: 'Previous match description',
-        } as ITransaction
-
-        const result = getResolvedDescription(transaction, mockCompanies)
-
-        expect(result).toBe('Previous match description')
-    })
-
-    it('should handle undefined OSND gracefully', () => {
-        const transaction = {
-            AUT_CNTR_ACC: 'UNKNOWN',
-            OSND: undefined,
-        } as ITransaction
-
-        const result = getResolvedDescription(transaction, mockCompanies)
-
-        expect(result).toBe('')
+        expect(getResolvedDescription(transaction, mockCompanies)).toBe('')
     })
 })
