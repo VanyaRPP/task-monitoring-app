@@ -454,3 +454,46 @@ describe('saveAccountToCompany after successful payment creation', () => {
     })
   })
 })
+
+
+describe('refetchTransactions', () => {
+  it('is called when modal closes with success=true', async () => {
+    const refetchTransactions = jest.fn()
+    render(
+      <TransactionDrawer
+        transaction={makeTransaction()}
+        domain={makeDomain() as any}
+        refetchTransactions={refetchTransactions}
+      />
+    )
+
+    await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
+    await userEvent.click(getDropdownSendButton()!)
+    await userEvent.click(await screen.findByText('Швидке створення'))
+    await userEvent.click(await screen.findByText('Confirm'))
+
+    await waitFor(() => {
+      expect(refetchTransactions).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it('is NOT called when modal closes with success=false', async () => {
+    const refetchTransactions = jest.fn()
+    render(
+      <TransactionDrawer
+        transaction={makeTransaction()}
+        domain={makeDomain() as any}
+        refetchTransactions={refetchTransactions}
+      />
+    )
+
+    await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
+    await userEvent.click(getDropdownSendButton()!)
+    await userEvent.click(await screen.findByText('Швидке створення'))
+    await userEvent.click(await screen.findByText('Cancel'))
+
+    await waitFor(() => {
+      expect(refetchTransactions).not.toHaveBeenCalled()
+    })
+  })
+})

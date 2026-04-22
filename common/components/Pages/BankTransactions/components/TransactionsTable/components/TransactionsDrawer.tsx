@@ -11,11 +11,13 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 interface TransactionDrawerProps {
   transaction: ITransaction
   domain: IExtendedDomain
+  refetchTransactions?: () => void
 }
 
 const TransactionDrawer: FC<TransactionDrawerProps> = ({
   transaction,
   domain,
+  refetchTransactions
 }) => {
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
@@ -71,6 +73,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
       if (selectedCompany && !isAccountMatched) {
         await saveAccountToCompany(selectedCompany)
       }
+      refetchTransactions?.()
     }
     setLoading(false)
   }

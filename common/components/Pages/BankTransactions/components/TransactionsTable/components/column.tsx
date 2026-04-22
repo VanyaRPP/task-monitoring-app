@@ -170,7 +170,8 @@ export const generateColumns = (
   visibleColumns: string[],
   domain: IExtendedDomain,
   toggleColumnVisibility: (columnKey: string) => void,
-  companies: IRealestate[]
+  companies: IRealestate[],
+  refetchTransactions?: () => void
 ): ColumnsType<ITransaction> => {
   const items: MenuProps['items'] = columnNames.map((col) => ({
     key: col,
@@ -323,7 +324,7 @@ export const generateColumns = (
       dataIndex: 'OPTIONS',
       key: 'OPTIONS',
       render: (text: string, record: ITransaction) => (
-        <TransactionDrawer transaction={record} domain={domain} />
+        <TransactionDrawer transaction={record} domain={domain} refetchTransactions={refetchTransactions} />
       ),
     },
   ].filter(
