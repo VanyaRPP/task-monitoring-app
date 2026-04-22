@@ -1,7 +1,8 @@
 import { CheckOutlined, DeleteOutlined, EditOutlined, EyeOutlined, MoreOutlined } from '@ant-design/icons'
-import { Button, Dropdown, MenuProps, Popconfirm, theme } from 'antd'
+import { Button, Dropdown, MenuProps, Modal } from 'antd'
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { Operations } from '@utils/constants'
+import { dateToDefaultFormat } from '@assets/features/formatDate'
 
 interface Props {
   payment: IExtendedPayment
@@ -22,51 +23,41 @@ const PaymentDropdown: React.FC<Props> = ({
   onMarkPaid,
   deleteLoading,
 }) => {
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete(payment._id);
-  };
-
-  const items: MenuProps['items'] = [
-  { key: 'view', label: 'Переглянути', icon: <EyeOutlined /> },
-
-  ...(isAdmin
-    ? [{ key: 'edit', label: 'Редагувати', icon: <EditOutlined /> }]
-    : []),
-
-  ...(isAdmin && payment.type !== Operations.Credit
-    ? [{ key: 'mark', label: 'Позначити оплату', icon: <CheckOutlined /> }]
-    : []),
-
-  { type: 'divider' },
-
-  ...(isAdmin
+  const adminItems: MenuProps['items'] = isAdmin
     ? [
+        { key: 'edit', label: 'Редагувати', icon: <EditOutlined /> },
+        ...(payment.type !== Operations.Credit
+          ? [{ key: 'mark', label: 'Позначити оплату', icon: <CheckOutlined /> }]
+          : []),
+        { type: 'divider' },
         {
           key: 'delete',
           danger: true,
           disabled: deleteLoading,
-          label: (
-            <Popconfirm
-              title={`Ви впевнені, що хочете видалити оплату від ${new Date(          
-                payment.invoiceCreationDate as unknown as string                       
-              ).toLocaleDateString()}?`}                       
-              onConfirm={() => onDelete(payment._id)}                       
-              cancelText="Відміна"                        
-              disabled={deleteLoading}               
-                        >
-                <DeleteOutlined /> Видалити платіж
-            </Popconfirm>
-          ),
+          label: 'Видалити платіж',
+          icon: <DeleteOutlined />,
         },
       ]
-    : []),
-]
+    : []
+
+  const items: MenuProps['items'] = [
+    { key: 'view', label: 'Переглянути', icon: <EyeOutlined /> },
+    ...adminItems,
+  ]
 
   const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
     if (key === 'view') onView(payment)
     if (key === 'edit') onEdit(payment)
     if (key === 'mark') onMarkPaid(payment)
+    if (key === 'delete') {
+      Modal.confirm({
+        title: `Видалити оплату від ${dateToDefaultFormat(payment.invoiceCreationDate as unknown as string)}?`,
+        okText: 'Так',
+        cancelText: 'Відміна',
+        okType: 'danger',
+        onOk: () => onDelete(payment._id),
+      })
+    }
   }
 
   return (
