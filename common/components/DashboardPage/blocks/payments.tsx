@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { buildCreditFromDebit } from './buildCreditFromDebit'
 import { useRouter } from 'next/router'
 import { message } from 'antd'
 
@@ -19,14 +20,14 @@ import {
 } from '@common/api/paymentApi/payment.api'
 import { useGetDebtorsQuery } from '@common/api/debtorsApi/debtors.api'
 
-import { IExtendedPayment, IPayment } from '@common/api/paymentApi/payment.api.types'
+import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 
 import TableCard from '@components/UI/TableCard'
 import PaymentsHeader from '@components/Tables/Payment/Header'
 import PaymentsTable from '@components/Tables/Payment/Table'
 import ModalDelete from '@components/UI/ModalDelete'
 
-import { AppRoutes, Operations, ServiceType, Roles } from '@utils/constants'
+import { AppRoutes, ServiceType, Roles } from '@utils/constants'
 import { dateToDefaultFormat } from '@assets/features/formatDate'
 
 import {
@@ -193,41 +194,17 @@ const PaymentsBlock: React.FC<PaymentsBlockProps> = ({ sepDomainID }) => {
     [deletePaymentMutation]
   )
   const handleMarkPaid = useCallback(
-  async (source: IExtendedPayment) => {
-    const { data: currentNumber } = await refetchInvoiceNumber()
-    const invoiceNumber = currentNumber ?? newInvoiceNumber
-    const monthServiceId = typeof source.monthService === 'string' ? source.monthService : source.monthService?._id
-    const company = source.company as any
-    const transaction = {
-      AUT_CNTR_ACC: source.transaction?.AUT_CNTR_ACC || company?.account || '',
-      AUT_CNTR_NAM: source.transaction?.AUT_CNTR_NAM || company?.companyName || '',
-      AUT_CNTR_MFO: source.transaction?.AUT_CNTR_MFO || company?.mfo || '',
-      Description: source.transaction?.Description || source.description || '',
-    }
-
-      const newCredit: IPayment = {
-        invoiceNumber,
-        type: Operations.Credit,
-        domain: source.domain,
-        street: source.street,
-        company: source.company,
-        monthService: monthServiceId,
-        invoiceCreationDate: new Date(),
-        generalSum: source.generalSum,
-        provider: source.provider,
-        reciever: source.reciever,
-        transaction,
-        invoice: undefined,
-      }
-
-      const response = await addPayment(newCredit)
+    async (source: IExtendedPayment) => {
+      const { data: currentNumber } = await refetchInvoiceNumber()
+      const invoiceNumber = currentNumber ?? newInvoiceNumber
+      const response = await addPayment(buildCreditFromDebit(source, invoiceNumber))
       if ('data' in response) {
         message.success('Кредіт‑платіж створено')
       } else {
         message.error('Не вдалося створити оплату')
       }
     },
-    [addPayment, newInvoiceNumber]
+    [addPayment, newInvoiceNumber, refetchInvoiceNumber]
   )
   const handleDeleteConfirm = async () => {
     const response = await deleteMultiplePayments(
