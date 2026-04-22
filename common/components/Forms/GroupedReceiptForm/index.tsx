@@ -1,6 +1,7 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useEditPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { usePaymentContext } from '@components/AddPaymentModal'
+import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
 import { CURRENCY_MAP } from '@utils/constants'
 import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
@@ -215,72 +216,69 @@ const GroupedReceiptForm: FC<Props> = ({
 
   const companyLabel = (data?.company as any)?.companyName ?? company?.companyName ?? ''
 
-  const handleSaveForPayment = (templateKey: string) => {
+  const handleSaveTemplate = async (templateKey: TemplateKey, scope?: 'company' | 'domain') => {
     if (!data?._id) return message.warning('Платіж не знайдено')
-    setTemplate(templateKey as any)
-    editPayment({ _id: data._id, template: templateKey })
-  }
-
-  const handleSaveForCompany = async (templateKey: string) => {
-    if (!data?._id) return message.warning('Платіж не знайдено')
-    setTemplate(templateKey as any)
-    const result = await editPayment({ _id: data._id, template: templateKey, _templateScope: 'company' })
-    if ('error' in result) {
+    setTemplate(templateKey)
+    const result = await editPayment({ _id: data._id, template: templateKey, _templateScope: scope })
+    if (scope && 'error' in result) {
       message.error('Помилка збереження')
-    } else {
+    } else if (scope === 'company') {
       message.success(`Шаблон збережено для компанії (${companyLabel})`)
-    }
-  }
-
-  const handleSaveForDomain = async (templateKey: string) => {
-    if (!data?._id) return message.warning('Платіж не знайдено')
-    setTemplate(templateKey as any)
-    const result = await editPayment({ _id: data._id, template: templateKey, _templateScope: 'domain' })
-    if ('error' in result) {
-      message.error('Помилка збереження')
-    } else {
+    } else if (scope === 'domain') {
       message.success(`Шаблон збережено для домену (${domainName})`)
     }
   }
 
-  const makeSaveMenu = (templateKey: string): MenuProps => ({
+  const makeSaveMenu = (templateKey: TemplateKey): MenuProps => ({
     items: [
       {
         key: 'company',
-        label: (<div>Вибрати дефолтним для цієї компанії{' '}<span style={{ opacity: 0.5, fontSize: '13px' }}>«{domainName}»</span></div>
-        )
+        label: (
+          <div>
+            Вибрати дефолтним для цієї компанії{' '}
+            <span style={{ opacity: 0.5, fontSize: '13px' }}>«{companyLabel}»</span>
+          </div>
+        ),
       },
       {
         key: 'domain',
-        label:(<div>Вибрати дефолтним для цього домену{' '}<span style={{ opacity: 0.5, fontSize: '13px' }}>«{companyLabel}»</span></div>
-  )
-        
-        },
-      ],
-      onClick: ({ key, domEvent }) => {
-        domEvent.stopPropagation()
-        if (key === 'company') handleSaveForCompany(templateKey)
-          if (key === 'domain') handleSaveForDomain(templateKey)
-          },
-        })
+        label: (
+          <div>
+            Вибрати дефолтним для цього домену{' '}
+            <span style={{ opacity: 0.5, fontSize: '13px' }}>«{domainName}»</span>
+          </div>
+        ),
+      },
+    ],
+    onClick: ({ key, domEvent }) => {
+      domEvent.stopPropagation()
+      if (key === 'company' || key === 'domain') {
+        handleSaveTemplate(templateKey, key)
+      }
+    },
+  })
 
-  const dropdownItems = templateItems.map(item => ({
+  const dropdownItems = templateItems.map((item) => ({
     key: item.key,
     label: (
-    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-      <span onClick={() => handleSaveForPayment(item.key)}
-        style={{display: 'flex', gap: 6 }}>
-          {template === item.key && (
-          <CheckOutlined style={{ fontSize: 12, opacity: 0.7 }} />
-        )}
-        {item.label}
-      </span>
-      <Dropdown placement={'right' as unknown as any} menu={makeSaveMenu(item.key)} trigger={['hover']}>
-        <RightOutlined style={{ fontSize: 12, opacity: 0.7 }} />
-      </Dropdown>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <span
+          onClick={() => handleSaveTemplate(item.key as TemplateKey)}
+          style={{ display: 'flex', gap: 6 }}
+        >
+          {template === item.key && <CheckOutlined style={{ fontSize: 12, opacity: 0.7 }} />}
+          {item.label}
+        </span>
+        <Dropdown
+          placement={'right' as unknown as any}
+          menu={makeSaveMenu(item.key as TemplateKey)}
+          trigger={['hover']}
+        >
+          <RightOutlined style={{ fontSize: 12, opacity: 0.7 }} />
+        </Dropdown>
       </div>
-      ),
-}))
+    ),
+  }))
 
   const TemplateComponent = templateMap[template] || templateMap.olimp
 

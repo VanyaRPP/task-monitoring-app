@@ -2,6 +2,7 @@
 // @ts-nocheck
 import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
 import Payment from '@common/modules/models/Payment'
+import RealEstate from '@common/modules/models/RealEstate'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
@@ -112,25 +113,23 @@ export default async function handler(
       const templateKey = req.body.template
       const scope = req.body._templateScope
     
-      if (scope === 'company' && !isGlobalAdmin) {
-        return res.status(403).json({ success: false, message: 'domain adminn can`t change template for company' })
-      }
-      
       if (scope === 'company') {
-        const result = await Payment.updateMany(
-          { company: current.company },
-          { $set: { template: templateKey } }
-        )
-        return res.status(200).json({success: true, modifiedCount: result.modifiedCount,})
+        if (!isGlobalAdmin) {
+          return res.status(403).json({ success: false, message: 'not allowed' })
+        }
+        await RealEstate.findByIdAndUpdate(current.company, { $set: { defaultTemplate: templateKey } })
+        return res.status(200).json({ success: true })
       }
 
       if (scope === 'domain') {
-        const result = await Payment.updateMany(
-          { domain: current.domain },
-          { $set: { template: templateKey } }
-        )
-
-        return res.status(200).json({success: true, modifiedCount: result.modifiedCount,})
+        if (!isGlobalAdmin) {
+          const domain = await Domain.findOne({ _id: current.domain, adminEmails: { $in: [user.email] } })
+          if (!domain) {
+            return res.status(403).json({ success: false, message: 'not allowed' })
+          }
+        }
+        await Domain.findByIdAndUpdate(current.domain, { $set: { defaultTemplate: templateKey } })
+        return res.status(200).json({ success: true })
       }
 
       const response = await Payment.findOneAndUpdate(

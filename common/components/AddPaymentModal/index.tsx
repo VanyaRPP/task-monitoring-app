@@ -1,4 +1,5 @@
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
+import { resolveTemplate, TemplateKey } from './resolveTemplate'
 import {
   useAddPaymentMutation,
   useEditPaymentMutation,
@@ -71,8 +72,8 @@ export interface IPaymentContext {
   prevService: IService
   company: IRealestate
   form: FormInstance
-  template: 'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'
-  setTemplate: (t: 'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure') => void
+  template: TemplateKey
+  setTemplate: (t: TemplateKey) => void
 }
 
 export const PaymentContext = createContext<IPaymentContext>({
@@ -112,7 +113,17 @@ const AddPaymentModal: FC<Props> = ({
   const [changed, setChanged] = useState(false)
   const [saved, setSaved] = useState(false)
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const [template, setTemplate] = useState<'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'>((paymentData?.template as any) ?? 'classic')
+  const companyDefaultTemplate =
+    typeof paymentData?.company === 'object'
+      ? (paymentData.company as any)?.defaultTemplate
+      : (paymentData as any)?.defaultTemplate
+  const domainDefaultTemplate =
+    typeof paymentData?.domain === 'object'
+      ? (paymentData.domain as any)?.defaultTemplate
+      : undefined
+  const [template, setTemplate] = useState<TemplateKey>(
+    resolveTemplate(paymentData?.template, companyDefaultTemplate, domainDefaultTemplate)
+  )
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)
   )
