@@ -46,7 +46,6 @@ import { Grid } from 'antd'
 import s from './style.module.scss'
 
 import DateFilterDropdown from './DateFilter/DateFilterDropdown'
-import { off } from 'process'
 import PaymentDropdown from '@components/PaymentDropDown'
 export interface PaymentDeleteItem {
   id: string
@@ -221,8 +220,8 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const isUser = currUserRoles.includes(Roles.USER)
   const { token } = theme.useToken()
   const isSingleCompanyByData = useMemo(() => {
-     return companiesFilter?.length === 1
-}, [companiesFilter])
+    return companiesFilter?.length === 1
+  }, [companiesFilter])
   // const isSingleDomainByData = useMemo(() => {
   //   const list = payments?.data || []
   //   const uniqueDomains = new Set(
@@ -232,21 +231,21 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   // }, [payments?.data, filters?.domain])
 
   const widenFilterDropdown = (w = 240) => (open: boolean) => {
-      if (!open) return
-      requestAnimationFrame(() => {
-        document.querySelectorAll<HTMLElement>('.ant-table-filter-dropdown').forEach(el => {
-          el.style.width = `${w}px`
-          el.style.maxWidth = '90vw'
-          el.querySelectorAll<HTMLElement>('.ant-checkbox + span').forEach(span => {
-            span.style.whiteSpace = 'normal'
-            span.style.wordBreak = 'break-word'
-            span.style.lineHeight = '1.2'
-            span.style.display = 'inline-block'
-            span.style.maxWidth = '100%'
-          })
+    if (!open) return
+    requestAnimationFrame(() => {
+      document.querySelectorAll<HTMLElement>('.ant-table-filter-dropdown').forEach(el => {
+        el.style.width = `${w}px`
+        el.style.maxWidth = '90vw'
+        el.querySelectorAll<HTMLElement>('.ant-checkbox + span').forEach(span => {
+          span.style.whiteSpace = 'normal'
+          span.style.wordBreak = 'break-word'
+          span.style.lineHeight = '1.2'
+          span.style.display = 'inline-block'
+          span.style.maxWidth = '100%'
         })
       })
-    }
+    })
+  }
   const themeKey = useMemo(
     () =>
       [
@@ -554,17 +553,17 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         title: '',
         width: 48,
         render: (_value, payment: IExtendedPayment) => (
-        <PaymentDropdown
-        payment={payment}
-        isAdmin={isGlobalAdmin || isDomainAdmin}
-        onView={onViewClick}
-        onEdit={onEditClick}
-        onDelete={onDelete}
-        onMarkPaid={onMarkPaid}
-        deleteLoading={deleteLoading}
-        />
-      )
-    },
+          <PaymentDropdown
+            payment={payment}
+            isAdmin={isGlobalAdmin || isDomainAdmin}
+            onView={onViewClick}
+            onEdit={onEditClick}
+            onDelete={onDelete}
+            onMarkPaid={onMarkPaid}
+            deleteLoading={deleteLoading}
+          />
+        ),
+      },
     ]
   }, [
     payments,
