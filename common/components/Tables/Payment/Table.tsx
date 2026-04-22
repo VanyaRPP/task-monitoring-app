@@ -12,7 +12,6 @@ import {
   Typography,
 } from 'antd'
 import { ColumnsType, ColumnType } from 'antd/es/table'
-import { sortPayments } from './sortPayments'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
 import { formatDebt } from '@utils/helpers'
@@ -617,10 +616,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     themeKey,
   ])
 
-  const sortedDataSource = useMemo(
-    () => sortPayments(payments?.data ?? []),
-    [payments?.data]
-  )
+  const sortedDataSource = payments?.data ?? []
 
   const visibleColumns = (allColumns as ColumnType<IExtendedPayment>[]).filter(
     (col) => !(col as any).hidden

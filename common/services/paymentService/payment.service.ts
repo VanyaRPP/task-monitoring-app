@@ -191,7 +191,7 @@ export async function getPayments(
   }
 
   const payments = await Payment.find(options)
-    .sort({ invoiceCreationDate: -1 })
+    .sort({ invoiceCreationDate: -1, type: 1 })
     .skip(+skip)
     .limit(+limit)
     .populate('company')
