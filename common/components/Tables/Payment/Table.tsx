@@ -616,6 +616,28 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     themeKey,
   ])
 
+  const sortedDataSource = useMemo(() => {
+  if (!payments?.data) return []
+
+  return [...payments.data].sort((a, b) => {
+    const dateA = new Date(a.invoiceCreationDate as unknown as string).getTime()
+    const dateB = new Date(b.invoiceCreationDate as unknown as string).getTime()
+
+    if (dateB !== dateA) {
+      return dateB - dateA
+    }
+
+    if (a.type === Operations.Credit && b.type === Operations.Debit) {
+      return -1
+    }
+    if (a.type === Operations.Debit && b.type === Operations.Credit) {
+      return 1
+    }
+
+    return 0
+  })
+  }, [payments?.data])
+
   const visibleColumns = (allColumns as ColumnType<IExtendedPayment>[]).filter(
     (col) => !(col as any).hidden
   )
@@ -763,7 +785,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       rowKey="_id"
       rowSelection={rowSelection}
       columns={visibleColumns}
-      dataSource={payments?.data || []}
+      dataSource={sortedDataSource}
       pagination={
         !isDashboard && {
           current: paginationProps.pageData.currentPage,
