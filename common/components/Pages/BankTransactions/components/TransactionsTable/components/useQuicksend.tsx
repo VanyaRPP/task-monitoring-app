@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { message } from 'antd'
 import { ITransaction } from './transactionTypes'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
@@ -9,6 +9,7 @@ import { getResolvedDescription } from './bankHelper'
 import { Operations } from '@utils/constants'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { getRollingServices, formatDate, toDate } from './datesHelper'
+import { getStreetId, buildTransactionPayload } from './quickSendHelpers'
 
 const ROLLING_MONTH_COUNT = 12
 
@@ -28,76 +29,60 @@ export const useQuickSend = ({
   const [loading, setLoading] = useState(false)
   const [addPayment] = useAddPaymentMutation()
 
-  const company = useMemo(
-    () => relatedCompanies.find((c) => c._id === selectedCompanyId),
-    [relatedCompanies, selectedCompanyId]
+  const company = relatedCompanies.find((c) => c._id === selectedCompanyId)
+  const streetId = getStreetId(company)
+
+  const { data: servicesData, isLoading: isServicesLoading } = useGetAllServicesQuery(
+    { domainId: domain._id, streetId },
+    { skip: !domain._id || !streetId }
   )
 
-  const streetId = useMemo(() => {
-    return typeof company?.street === 'object'
-      ? (company.street as any)?._id
-      : company?.street
-  }, [company])
+  const services = getRollingServices(servicesData?.data || [], ROLLING_MONTH_COUNT)
 
-  const { data: servicesData, isLoading: isServicesLoading } = useGetAllServicesQuery({
-    domainId: domain._id,
-    streetId,
-  }, { skip: !domain._id || !streetId })
+  const handleQuickSend = useCallback(
+    async (service: any) => {
+      if (!selectedCompanyId) {
+        message.warning('Будь ласка, оберіть компанію')
+        return
+      }
+      setLoading(true)
 
-  const services = useMemo(() => {
-    return getRollingServices(servicesData?.data || [], ROLLING_MONTH_COUNT)
-  }, [servicesData])
+      try {
+        const company = relatedCompanies.find((c) => c._id === selectedCompanyId)
+        if (!company) throw new Error('Company not found')
 
-  const transactionPayload = useMemo(() => ({
-    AUT_CNTR_ACC: transaction.AUT_CNTR_ACC,
-    AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
-    AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
-    OSND: transaction.OSND,
-    Description: getResolvedDescription(transaction, relatedCompanies),
-    TECHNICAL_TRANSACTION_ID: transaction.TECHNICAL_TRANSACTION_ID,
-  }), [transaction, relatedCompanies])
+        const { provider, reciever } = getPaymentProviderAndReciever({
+          company,
+          domain,
+          operation: Operations.Credit,
+        })
 
-  const handleQuickSend = useCallback(async (service: any) => {
-    if (!selectedCompanyId) {
-      message.warning('Будь ласка, оберіть компанію')
-      return
-    }
-    setLoading(true)
+        await addPayment({
+          invoiceCreationDate: toDate(service.date),
+          monthService: service._id,
+          domain: domain._id,
+          company: selectedCompanyId,
+          street: getStreetId(company) ?? '',
+          invoiceNumber: 0,
+          invoice: [],
+          generalSum: parseFloat(transaction.SUM as string),
+          description: getResolvedDescription(transaction, relatedCompanies),
+          type: Operations.Credit,
+          provider,
+          reciever,
+          transaction: buildTransactionPayload(transaction, relatedCompanies),
+        }).unwrap()
 
-    try {
-      const company = relatedCompanies.find((c) => c._id === selectedCompanyId)
-      if (!company) throw new Error('Company not found')
-
-      const { provider, reciever } = getPaymentProviderAndReciever({
-        company,
-        domain,
-        operation: Operations.Credit,
-      })
-
-      await addPayment({
-        invoiceCreationDate: toDate(service.date),
-        monthService: service._id,
-        domain: domain._id,
-        company: selectedCompanyId,
-        street: typeof company.street === 'object' ? (company.street as any)?._id : company.street,
-        invoiceNumber: 0,
-        invoice: [],
-        generalSum: parseFloat(transaction.SUM as string),
-        description: getResolvedDescription(transaction, relatedCompanies),
-        type: Operations.Credit,
-        provider,
-        reciever: reciever,
-        transaction: transactionPayload,
-      }).unwrap()
-
-      message.success(`Рахунок за ${formatDate(service.date, 'MMMM YYYY')} успішно створено!`)
-    } catch (error) {
-      console.error('Quick send error:', error)
-      message.error('Помилка при створенні рахунку')
-    } finally {
-      setLoading(false)
-    }
-  }, [selectedCompanyId, relatedCompanies, domain, addPayment, transaction, transactionPayload])
+        message.success(`Рахунок за ${formatDate(service.date, 'MMMM YYYY')} успішно створено!`)
+      } catch (error) {
+        console.error('Quick send error:', error)
+        message.error('Помилка при створенні рахунку')
+      } finally {
+        setLoading(false)
+      }
+    },
+    [selectedCompanyId, relatedCompanies, domain, addPayment, transaction]
+  )
 
   return {
     loading,
