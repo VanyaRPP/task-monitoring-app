@@ -69,6 +69,7 @@ import Payment from '@modules/models/Payment'
 import ProfitService from '@common/services/profitService/profit.service'
 import { sendInvoiceEmail } from '@utils/email/sendInvoiceEmail'
 import { createPayment, getPayments } from './payment.service'
+import { SortOrder, Operations } from '@utils/constants'
 
 const domainFindByIdMock = Domain.findById as jest.Mock
 const paymentCreateMock = Payment.create as jest.Mock
@@ -85,9 +86,19 @@ const globalAdminContext = {
 describe('getPayments — sorting', () => {
   beforeEach(() => jest.clearAllMocks())
 
-  it('sorts by invoiceCreationDate desc, then credit before debit', async () => {
+  it('passes correct sort params to MongoDB', async () => {
     await getPayments({}, globalAdminContext)
-    expect(sortMock).toHaveBeenCalledWith({ invoiceCreationDate: -1, type: 1 })
+    expect(sortMock).toHaveBeenCalledWith({
+      invoiceCreationDate: SortOrder.DESC,
+      type: SortOrder.ASC,
+    })
+  })
+
+  it('SortOrder.ASC on type puts credit before debit (alphabetical invariant)', () => {
+    const types = [Operations.Debit, Operations.Credit]
+    const sorted = [...types].sort((a, b) => a.localeCompare(b) * SortOrder.ASC)
+    expect(sorted[0]).toBe(Operations.Credit)
+    expect(sorted[1]).toBe(Operations.Debit)
   })
 })
 

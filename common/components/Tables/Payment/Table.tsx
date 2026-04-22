@@ -220,8 +220,8 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   const isUser = currUserRoles.includes(Roles.USER)
   const { token } = theme.useToken()
   const isSingleCompanyByData = useMemo(() => {
-     return companiesFilter?.length === 1
-}, [companiesFilter])
+    return companiesFilter?.length === 1
+  }, [companiesFilter])
   // const isSingleDomainByData = useMemo(() => {
   //   const list = payments?.data || []
   //   const uniqueDomains = new Set(
@@ -231,21 +231,21 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
   // }, [payments?.data, filters?.domain])
 
   const widenFilterDropdown = (w = 240) => (open: boolean) => {
-      if (!open) return
-      requestAnimationFrame(() => {
-        document.querySelectorAll<HTMLElement>('.ant-table-filter-dropdown').forEach(el => {
-          el.style.width = `${w}px`
-          el.style.maxWidth = '90vw'
-          el.querySelectorAll<HTMLElement>('.ant-checkbox + span').forEach(span => {
-            span.style.whiteSpace = 'normal'
-            span.style.wordBreak = 'break-word'
-            span.style.lineHeight = '1.2'
-            span.style.display = 'inline-block'
-            span.style.maxWidth = '100%'
-          })
+    if (!open) return
+    requestAnimationFrame(() => {
+      document.querySelectorAll<HTMLElement>('.ant-table-filter-dropdown').forEach(el => {
+        el.style.width = `${w}px`
+        el.style.maxWidth = '90vw'
+        el.querySelectorAll<HTMLElement>('.ant-checkbox + span').forEach(span => {
+          span.style.whiteSpace = 'normal'
+          span.style.wordBreak = 'break-word'
+          span.style.lineHeight = '1.2'
+          span.style.display = 'inline-block'
+          span.style.maxWidth = '100%'
         })
       })
-    }
+    })
+  }
   const themeKey = useMemo(
     () =>
       [
@@ -388,9 +388,9 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
         filters: sepDomainID
           ? undefined
           : [
-              { text: 'Кредит (Оплата)', value: Operations.Credit },
-              { text: 'Дебет (Реалізація)', value: Operations.Debit },
-            ],
+            { text: 'Кредит (Оплата)', value: Operations.Credit },
+            { text: 'Дебет (Реалізація)', value: Operations.Debit },
+          ],
         filteredValue: filters?.type || null,
         filterMultiple: false,
         children: [
@@ -408,7 +408,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
             sorter: sepDomainID
               ? undefined
               : (a: IExtendedPayment, b: IExtendedPayment) =>
-                  a.generalSum - b.generalSum,
+                a.generalSum - b.generalSum,
           },
           {
             title: <Tooltip title="Кредит (Оплата)">Кредит</Tooltip>,
@@ -424,7 +424,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
             sorter: sepDomainID
               ? undefined
               : (a: IExtendedPayment, b: IExtendedPayment) =>
-                  a.generalSum - b.generalSum,
+                a.generalSum - b.generalSum,
           },
         ],
       },
@@ -616,8 +616,6 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     themeKey,
   ])
 
-  const sortedDataSource = payments?.data ?? []
-
   const visibleColumns = (allColumns as ColumnType<IExtendedPayment>[]).filter(
     (col) => !(col as any).hidden
   )
@@ -665,7 +663,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                   {renderCurrency(
                     toRoundFixed(
                       totalPayments[
-                        column.dataIndex as keyof typeof totalPayments
+                      column.dataIndex as keyof typeof totalPayments
                       ] || 0
                     )
                   )}
@@ -690,7 +688,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
                   {renderCurrency(
                     toRoundFixed(
                       Number(totalPayments.debit || 0) -
-                        Number(totalPayments.credit || 0)
+                      Number(totalPayments.credit || 0)
                     )
                   )}
                 </Table.Summary.Cell>
@@ -712,52 +710,52 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
 
   const rowSelection =
     (isGlobalAdmin || isDomainAdmin) &&
-    (pathname === AppRoutes.PAYMENT || Boolean(sepDomainID))
+      (pathname === AppRoutes.PAYMENT || Boolean(sepDomainID))
       ? {
-          selectedRowKeys: selectedPayments.map((i) => i._id),
-          preserveSelectedRowKeys: true,
+        selectedRowKeys: selectedPayments.map((i) => i._id),
+        preserveSelectedRowKeys: true,
 
-          onChange: (_keys, rows) => {
-            onSelectPayments(rows)
-            const deleteItems = rows.map((item) => ({
-              id: item._id,
-              date:
-                typeof item.monthService === 'object' &&
+        onChange: (_keys, rows) => {
+          onSelectPayments(rows)
+          const deleteItems = rows.map((item) => ({
+            id: item._id,
+            date:
+              typeof item.monthService === 'object' &&
                 (item.monthService as any)?.date
-                  ? String((item.monthService as any).date)
-                  : String(item.invoiceCreationDate),
-              domain: (item.domain as any)?.name || '',
-              company: (item.company as any)?.companyName || '',
-            }))
-            onSetDeleteItems(deleteItems)
-          },
+                ? String((item.monthService as any).date)
+                : String(item.invoiceCreationDate),
+            domain: (item.domain as any)?.name || '',
+            company: (item.company as any)?.companyName || '',
+          }))
+          onSetDeleteItems(deleteItems)
+        },
 
-          onSelect: (record, selected) => {
-            if (selected) {
-              onSelectPayments([...selectedPayments, record])
-              onSetDeleteItems([
-                ...paymentsDeleteItems,
-                {
-                  id: record._id,
-                  date:
-                    typeof record.monthService === 'object' &&
+        onSelect: (record, selected) => {
+          if (selected) {
+            onSelectPayments([...selectedPayments, record])
+            onSetDeleteItems([
+              ...paymentsDeleteItems,
+              {
+                id: record._id,
+                date:
+                  typeof record.monthService === 'object' &&
                     (record.monthService as any)?.date
-                      ? String((record.monthService as any).date)
-                      : String(record.invoiceCreationDate),
-                  domain: (record.domain as any)?.name || '',
-                  company: (record.company as any)?.companyName || '',
-                },
-              ])
-            } else {
-              onSelectPayments(
-                selectedPayments.filter((p) => p._id !== record._id)
-              )
-              onSetDeleteItems(
-                paymentsDeleteItems.filter((i) => i.id !== record._id)
-              )
-            }
-          },
-        }
+                    ? String((record.monthService as any).date)
+                    : String(record.invoiceCreationDate),
+                domain: (record.domain as any)?.name || '',
+                company: (record.company as any)?.companyName || '',
+              },
+            ])
+          } else {
+            onSelectPayments(
+              selectedPayments.filter((p) => p._id !== record._id)
+            )
+            onSetDeleteItems(
+              paymentsDeleteItems.filter((i) => i.id !== record._id)
+            )
+          }
+        },
+      }
       : undefined
 
   return (
@@ -765,7 +763,7 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
       rowKey="_id"
       rowSelection={rowSelection}
       columns={visibleColumns}
-      dataSource={sortedDataSource}
+      dataSource={payments?.data ?? []}
       pagination={
         !isDashboard && {
           current: paginationProps.pageData.currentPage,
