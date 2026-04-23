@@ -25,20 +25,9 @@ export async function generateZip(
   payments: IExtendedPayment[]
 ): Promise<Buffer> {
   const archive = archiver('zip', { zlib: { level: 9 } })
+  const buffers: Buffer[] = []
 
-  const promises = payments.map(async (payment, index) => {
-    const pdfBuffer = await generatePdf(payment)
-    archive.append(pdfBuffer, {
-      name: `${payments[index]?.reciever?.companyName}-inv-${payments[index]?.invoiceNumber}.pdf`,
-    })
-  })
-
-  await Promise.all(promises)
-
-  return new Promise((resolve, reject) => {
-    archive.finalize()
-    const buffers: Buffer[] = []
-
+  const archivePromise = new Promise<Buffer>((resolve, reject) => {
     archive.on('data', (buffer) => {
       buffers.push(buffer)
     })
@@ -53,4 +42,31 @@ export async function generateZip(
       reject(err)
     })
   })
+
+  const browser = await puppeteer.launch({ headless: true })
+
+  try {
+    for (const payment of payments) {
+      const page = await browser.newPage()
+      const html = await generateHtmlFromThemplate(payment)
+      
+      await page.setContent(html)
+
+      const pdfBuffer = await page.pdf({
+        format: 'a4',
+        printBackground: true,
+      })
+      await page.close()
+
+      archive.append(pdfBuffer, {
+        name: `${payment?.reciever?.companyName}-inv-${payment?.invoiceNumber}.pdf`,
+      })
+    }
+  } finally {
+    await browser.close()
+  }
+
+  archive.finalize()
+
+  return archivePromise
 }

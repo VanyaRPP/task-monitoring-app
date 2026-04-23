@@ -30,6 +30,8 @@ export default async function nameField(invoiceType, paymentData) {
       return await generateWaterField(dateMonth)
     case ServiceType.Cleaning:
       return await generateCleaningField(dateMonth)
+    default:
+      return `<span>${invoiceType || ''}<br><small class="muted">${dateMonth}</small></span>`
   }
 }
 

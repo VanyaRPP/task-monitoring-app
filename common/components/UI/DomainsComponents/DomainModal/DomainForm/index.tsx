@@ -1,12 +1,18 @@
 import { useState } from 'react'
 import { validateField } from '@assets/features/validators'
 import EmailSelect from '@components/UI/Reusable/EmailSelect'
-import { Form, FormInstance, Input } from 'antd'
+import { Form, FormInstance, Input, Select } from 'antd'
 import DomainStreets from './DomainStreets'
 import s from './style.module.scss'
 import DomainInfo from './DomainInfo'
 import DomainsServices from './DomainsServices'
 import ServicesSelect from '@components/UI/Reusable/ServicesSelect'
+
+const TEMPLATE_OPTIONS = [
+  { value: 'classic', label: 'Класичний шаблон' },
+  { value: 'olimp',   label: 'OLIMP DIGITAL OÜ' },
+  { value: 'ledger',  label: 'Formal Ledger' },
+]
 
 interface Props {
   form: FormInstance<any>
@@ -51,6 +57,14 @@ const DomainForm: React.FC<Props> = ({
         domainId={domainId}
       />
       <DomainInfo editable={editable} form={form} />
+      <Form.Item name="defaultTemplate" label="Шаблон за замовчуванням">
+        <Select
+          options={TEMPLATE_OPTIONS}
+          placeholder="Класичний шаблон"
+          disabled={!editable}
+          allowClear
+        />
+      </Form.Item>
     </Form>
   )
 }
