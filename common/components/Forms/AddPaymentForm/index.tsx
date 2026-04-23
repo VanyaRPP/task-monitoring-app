@@ -7,7 +7,7 @@ import { InvoiceType } from '@components/Tables/EditInvoiceTable'
 import AddressesSelect from '@components/UI/Reusable/AddressesSelect'
 import DomainsSelect from '@components/UI/Reusable/DomainsSelect'
 import PaymentTypeSelect from '@components/UI/Reusable/PaymentTypeSelect'
-import { Operations } from '@utils/constants'
+import { Operations, CURRENCY_SELECT_OPTIONS } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { Form, Input, InputNumber, Select } from 'antd'
 import { useMemo, useState, useEffect } from 'react'
@@ -19,6 +19,7 @@ import PaymentPricesTable from './PaymentPricesTable'
 import PaymentTotal from './PaymentTotal'
 import { inputNumberParser } from '@utils/helpers'
 import type { ChangelogOption } from '@components/AddPaymentModal/changelog/types'
+import s from './style.module.scss'
 
 type AddPaymentFormProps = {
   paymentActions: { preview: boolean; edit: boolean; create?: boolean }
@@ -122,34 +123,28 @@ function AddPaymentForm({
       {operation === Operations.Credit ? (
         <>
         <Form.Item label="Сума" required>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-
-          <Form.Item
-            name="generalSum"
-            noStyle
-            rules={validateField('paymentPrice')}
-          >
-            <InputNumber
-              parser={inputNumberParser}
-              style={{ width: 160 }}
-              placeholder="Вкажіть суму"
-              disabled={preview}
+          <div className={s.sumRow}>
+            <Form.Item
+              name="generalSum"
+              noStyle
+              rules={validateField('paymentPrice')}
+            >
+              <InputNumber
+                parser={inputNumberParser}
+                style={{ width: 160 }}
+                placeholder="Вкажіть суму"
+                disabled={preview}
               />
-           </Form.Item>
-
-           <Form.Item name="currency" noStyle>
-            <Select
-              style={{ width: 53 }}
-              options={[
-                { value: 'UAH', label: '₴' },
-                { value: 'USD', label: '$' },
-                { value: 'EUR', label: '€' },
-              ]}
-              disabled={preview}
-            />
-          </Form.Item>
-        </div>
-      </Form.Item>
+            </Form.Item>
+            <Form.Item name="currency" noStyle>
+              <Select
+                className={s.currencySelect}
+                options={CURRENCY_SELECT_OPTIONS}
+                disabled={preview}
+              />
+            </Form.Item>
+          </div>
+        </Form.Item>
           <Form.Item
             name="description"
             label="Опис"

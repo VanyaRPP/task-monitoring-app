@@ -1,30 +1,14 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPricesTable'
 import { usePaymentContext } from '@components/AddPaymentModal'
-import { CURRENCY_MAP } from '@utils/constants'
+import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
 import dayjs from 'dayjs'
 import { FC, useEffect, useRef, useState } from 'react'
 import { useReactToPrint } from 'react-to-print'
-import { PrinterOutlined, EditOutlined, SendOutlined } from '@ant-design/icons'
+import { PrinterOutlined, EditOutlined } from '@ant-design/icons'
 import { Dropdown, Tooltip, message } from 'antd'
 import s from './style.module.scss'
 import cs from './templates/style.module.scss'
-
-const normalizeCurrency = (currency?: string): 'UAH' | 'USD' | 'EUR' => {
-  const value = currency?.toUpperCase()
-  if (value === 'USD' || value === 'EUR') return value
-  return 'UAH'
-}
-
-const getCurrencyShortLabel = (currency?: string): string => {
-  const normalized = normalizeCurrency(currency)
-  const label = CURRENCY_MAP[normalized]?.label
-
-  if (normalized === 'USD') return 'USD'
-  if (normalized === 'EUR') return 'EUR'
-
-  return label || 'грн'
-}
 
 interface Props {
   currPayment?: IExtendedPayment | null
@@ -253,11 +237,6 @@ const GroupedReceiptForm: FC<Props> = ({
 
   return (
     <>
-        <SendOutlined 
-          // className={s.telegramIcon} 
-          // onClick={handleSendToTelegram} 
-          // style={{ color: '#24A1DE' }}
-        />
       <PrinterOutlined className={s.print} onClick={handlePrint} />
       <Dropdown
         trigger={['click']}

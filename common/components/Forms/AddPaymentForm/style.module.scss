@@ -1,4 +1,14 @@
 .Form {
+  .sumRow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .currencySelect {
+    width: 90px;
+  }
+
   .inputNumber {
     width: 100%;
   }

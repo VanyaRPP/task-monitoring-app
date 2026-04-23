@@ -1,6 +1,7 @@
-import { Operations } from '@utils/constants'
+import { Operations, CURRENCY_SELECT_OPTIONS } from '@utils/constants'
 import { Form, FormInstance, Select } from 'antd'
 import { FC, useEffect } from 'react'
+import s from './style.module.scss'
 
 interface Props {
   form: FormInstance<any>
@@ -30,19 +31,14 @@ const PaymentTotal: FC<Props> = ({ form }) => {
       name={Operations.Debit}
       initialValue={0}
     >
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div className={s.sumRow}>
       <span>Сума: {(+total)?.toFixed(2)}</span>
-
       <Form.Item name="currency" noStyle>
         <Select
-          style={{ width: 53 }}
-          options={[
-            { value: 'UAH', label: '₴' },
-            { value: 'USD', label: '$' },
-            { value: 'EUR', label: '€' },
-          ]}
+          className={s.currencySelect}
+          options={CURRENCY_SELECT_OPTIONS}
         />
-    </Form.Item>
+      </Form.Item>
     </div>
   </Form.Item>
   )
