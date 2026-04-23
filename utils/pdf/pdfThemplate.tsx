@@ -4,11 +4,77 @@ import { ServiceType } from '../constants'
 import { renderCurrency } from '../helpers'
 import nameField from './nameFieldGenerator'
 
+const sharedStyles = `
+  * { font-family: Arial, Helvetica, sans-serif; }
+  body { margin: 0; padding: 0; display: flex; justify-content: center; min-height: 100vh; }
+  .invoice-wrapper { padding: 2rem; max-width: 800px; width: 100%; box-sizing: border-box; }
+  .detailed-list .detailed-list__item { display: flex; margin-bottom: 1rem; }
+  .detailed-list .detailed-list__item .detailed-list__key { min-width: 150px; }
+  .invoice-title { text-align: center; }
+  .summary { margin-top: 1rem; }
+  .muted { color: #868686; }
+  .pos { padding: 0; vertical-align: top; border: white; }
+  table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  table td { padding: 1.5ex; border-bottom: 1px solid #ececec; }
+  table th { padding: 1rem 0.5rem; text-align: left; background-color: #fafafa; border-bottom: 1px solid #ececec; }
+`
+
+function buildHeader(paymentData: any): string {
+  return `
+    <div class="detailed-list">
+      <div class="detailed-list__item">
+        <div class="detailed-list__key">Постачальник</div>
+        <div class="detailed-list__value">
+          ${(paymentData?.provider?.description || '').replace(/\n/g, '<br />')}
+        </div>
+      </div>
+      <div class="detailed-list__item">
+        <div class="detailed-list__key">Одержувач</div>
+        <div class="detailed-list__value pos">
+          ${paymentData?.reciever?.companyName || ''} <br />
+          ${(paymentData?.reciever?.description || '').replace(/\n/g, '<br />')} <br />
+          ${(paymentData?.reciever?.adminEmails || []).map((email) => `<div>${email}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="invoice-title">
+      <h1>РАХУНОК № ${paymentData.invoiceNumber}</h1>
+      <b>Від ${dayjs(paymentData?.invoiceCreationDate)?.format?.('DD.MM.YYYY')} року.</b>
+      <p>Підлягає сплаті до ${dayjs(paymentData?.invoiceCreationDate).add(5, 'd').format('DD.MM.YYYY')} року</p>
+    </div>
+  `
+}
+
 export async function generateHtmlFromThemplate(
   paymentData: IExtendedPayment | any
 ) {
-  const dataToMap = paymentData?.invoice
+  const isCredit = paymentData?.type === 'credit'
 
+  if (isCredit) {
+    const sum = paymentData?.generalSum ?? 0
+    return `
+    <!DOCTYPE html>
+    <html lang="uk">
+      <head>
+        <meta charset="UTF-8" />
+        <title>Invoice</title>
+        <style>${sharedStyles}
+          .description-block { margin-top: 1.5rem; white-space: pre-wrap; }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-wrapper">
+          <div class="heading">${buildHeader(paymentData)}</div>
+          <div class="description-block">${paymentData?.description || ''}</div>
+          <div class="summary">
+            <div>Загальна сума до оплати: <b>${sum} грн</b></div>
+          </div>
+        </div>
+      </body>
+    </html>`
+  }
+
+  const dataToMap = paymentData?.invoice
   const dataForTable = await generateDataForTable(dataToMap, paymentData)
   const htmlRows = dataForTable
     .map(
@@ -22,6 +88,7 @@ export async function generateHtmlFromThemplate(
     </tr>`
     )
     .join('')
+
   return `
   <!DOCTYPE html>
   <html lang="uk">
@@ -29,119 +96,11 @@ export async function generateHtmlFromThemplate(
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Invoice</title>
-      <style>
-        * {
-          font-family: Arial, Helvetica, sans-serif;
-        }
-
-        body {
-          margin: 0;
-          padding: 0;
-          size: A4;
-          display: flex;
-          justify-content: center;
-          min-height: 100vh;
-        }
-  
-        .invoice-wrapper {
-          padding: 2rem;
-          max-width: 800px;
-          width: 100%;
-          box-sizing: border-box;
-        }
-  
-        .detailed-list .detailed-list__item {
-          display: flex;
-          margin-bottom: 1rem;
-        }
-  
-        .detailed-list .detailed-list__item .detailed-list__key {
-          min-width: 150px;
-        }
-  
-        .invoice-title {
-          text-align: center;
-        }
-  
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 1rem;
-        }
-  
-        table td {
-          padding: 1.5ex;
-          border-bottom: 1px solid #ececec;
-        }
-  
-        table th {
-          padding: 1rem 0.5rem;
-          position: relative;
-          text-align: left;
-          background-color: #fafafa;
-          border-bottom: 1px solid #ececec;
-        }
-  
-        .summary {
-          margin-top: 1rem;
-        }
-  
-        .note {
-          display: flex;
-          margin-top: 1rem;
-        }
-  
-        .note .note__description {
-          margin-left: 1rem;
-        }
-  
-        .muted {
-          color: #868686;
-        }
-
-        .pos {
-          padding: 0;
-          vertical-align: top;
-          border: white;
-        }
-      </style>
+      <style>${sharedStyles}</style>
     </head>
-  
     <body>
       <div class="invoice-wrapper">
-        <div class="heading">
-          <div class="detailed-list">
-            <div class="detailed-list__item">
-              <div class="detailed-list__key">Постачальник</div>
-              <div class="detailed-list__value">
-                ${paymentData?.provider?.description.replace(/\n/g, '<br />')}
-              </div>
-            </div>
-            <div class="detailed-list__item">
-              <div class="detailed-list__key">Одержувач</div>
-              <div class="detailed-list__value pos">
-                ${paymentData?.reciever?.description.replace(
-                  /\n/g,
-                  '<br />'
-                )} <br />
-                ${paymentData?.reciever?.companyName} <br />
-                ${paymentData?.reciever?.adminEmails
-                  ?.map((email) => `<div>${email}</div><br />`)
-                  .join('')}
-              </div>
-            </div>
-          </div>
-  
-          <div class="invoice-title">
-            <h1>INVOICE № INV-${paymentData.invoiceNumber}</h1>
-            <b>Від ${dayjs(paymentData?.invoiceCreationDate)?.format?.(
-              'DD.MM.YYYY'
-            )} року.</b>
-            <p>Підлягає сплаті до ${dayjs(paymentData?.invoiceCreationDate)
-              .add(5, 'd')
-              .format('DD.MM.YYYY')} року</p>
-          </div>
-        </div>
+        <div class="heading">${buildHeader(paymentData)}</div>
         <table>
           <thead>
             <tr>
@@ -152,22 +111,15 @@ export async function generateHtmlFromThemplate(
               <th>Сума</th>
             </tr>
           </thead>
-          <tbody>
-            ${htmlRows}
-          </tbody>
+          <tbody>${htmlRows}</tbody>
         </table>
         <div class="summary">
-          <div>Загальна сума до оплати: <b>${
-            paymentData?.generalSum || paymentData?.debit
-          } грн</b></div>
-          <div>${
-            paymentData?.provider?.description?.split('\n')?.[0] || ''
-          }&nbsp; ________________</div>
+          <div>Загальна сума до оплати: <b>${paymentData?.generalSum || paymentData?.debit} грн</b></div>
+          <div>${paymentData?.provider?.description?.split('\n')?.[0] || ''}&nbsp; ________________</div>
         </div>
       </div>
     </body>
-  </html>
-  `
+  </html>`
 }
 
 {
