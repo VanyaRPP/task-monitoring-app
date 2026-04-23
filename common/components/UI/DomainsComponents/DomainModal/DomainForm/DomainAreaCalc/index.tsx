@@ -68,26 +68,22 @@ const AreaCalculationCard: React.FC<Props> = ({ domainId, editable, form, setIsV
   }, [domainId, refetch]);
 
   useEffect(() => {
-    const currentValues = form.getFieldValue('companiesAreas');
-    
-    if (areasData?.companies && !isFetching) {
-      if (!currentValues || currentValues.length === 0) {
-        const freshData = areasData.companies.map((c: any) => {
-          const original = allRealEstate?.data?.find((item: any) => item.companyName === c.companyName);
-          
-          return {
-            _id: original?._id || c._id,
-            name: c.companyName,
-            area: c.totalArea,
-            rentPart: c.rentPart,
-            key: original?._id || c.companyName,
-          };
-        });
-
-        form.setFieldValue('companiesAreas', freshData);
-      }
+    if (areasData?.companies && !isFetching && !isLoading) {
+      const freshData = areasData.companies.map((c: any) => {
+        const original = allRealEstate?.data?.find(
+          (item: any) => item.companyName === c.companyName
+        )
+        return {
+          _id: original?._id || c._id,
+          name: c.companyName,
+          area: c.totalArea,
+          rentPart: c.rentPart,
+          key: original?._id || c.companyName,
+        }
+      })
+      form.setFieldsValue({ companiesAreas: freshData })
     }
-  }, [areasData, isFetching, allRealEstate, form]);
+  }, [areasData, isFetching, isLoading, allRealEstate, form])
 
   const handleUpdate = (index: number, changedFields: { area?: number }) => {
     const updatedCompanies = [...formCompanies]

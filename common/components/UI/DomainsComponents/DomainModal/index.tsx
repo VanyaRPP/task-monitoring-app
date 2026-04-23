@@ -117,12 +117,12 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
             await Promise.all(savePromises)
           } catch (e) {
             console.error('Помилка при збереженні площ компаній:', e);
-            message.warning('Домен збережено, але виникла помилка при оновленні даних площ');
+            return message.error('Виникла помилка при оновленні даних площ');
           }
         }
-      form.setFieldValue('companiesAreas', []);
-      setIsValueChanged(false);
+      
       closeModal()
+      setIsValueChanged(false);
       form.resetFields()
       const action = currentDomain ? 'Збережено' : 'Додано'
       message.success(action)
