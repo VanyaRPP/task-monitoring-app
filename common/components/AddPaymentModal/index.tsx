@@ -377,6 +377,10 @@ const AddPaymentModal: FC<Props> = ({
     form.setFieldsValue({ invoice: filteredInvoices })
     lastLoadedCompanyId.current = company._id
   }
+
+  if (isNewCompanySelected) {
+    form.setFieldValue('currency', company.currency || 'UAH')
+  }
   }, [company, filteredInvoices, paymentId, edit, activeTabKey, saved, form])
 
   return (

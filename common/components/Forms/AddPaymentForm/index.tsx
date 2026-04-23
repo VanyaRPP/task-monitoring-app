@@ -137,7 +137,7 @@ function AddPaymentForm({
               />
            </Form.Item>
 
-           <Form.Item name="currency" noStyle initialValue="UAH">
+           <Form.Item name="currency" noStyle>
             <Select
               style={{ width: 53 }}
               options={[
