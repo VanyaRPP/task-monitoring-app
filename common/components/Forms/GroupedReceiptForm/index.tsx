@@ -1,58 +1,35 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
+import { useEditPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { usePaymentContext } from '@components/AddPaymentModal'
-import { CURRENCY_MAP } from '@utils/constants'
+import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
+import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
+import { Currency } from '@utils/constants'
 import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import {
   PrinterOutlined,
   EditOutlined,
-  SendOutlined,
+  RightOutlined,
+  CheckOutlined,
   TableOutlined,
 } from '@ant-design/icons'
-import { Dropdown, Tooltip, message } from 'antd'
+import { Dropdown, Tooltip, message, MenuProps } from 'antd'
 import dynamic from 'next/dynamic'
 import s from './style.module.scss'
-
-const normalizeCurrency = (currency?: string): 'UAH' | 'USD' | 'EUR' => {
-  const value = currency?.toUpperCase()
-  if (value === 'USD' || value === 'EUR') return value
-  return 'UAH'
-}
-
-const getCurrencyShortLabel = (currency?: string): string => {
-  const normalized = normalizeCurrency(currency)
-  const label = CURRENCY_MAP[normalized]?.label
-
-  if (normalized === 'USD') return 'USD'
-  if (normalized === 'EUR') return 'EUR'
-
-  return label || 'грн'
-}
 
 const templateItems = [
   { key: 'classic',    label: 'Класичний шаблон' },
   { key: 'olimp',      label: 'OLIMP DIGITAL OÜ' },
-  // { key: 'swiss',      label: 'Swiss Minimal' },
-  // { key: 'softcard',   label: 'Soft Card Premium' },
-  // { key: 'techstudio', label: 'Tech Studio Invoice' },
-  // { key: 'monoline',   label: 'Monoline Business' },
-  // { key: 'editorial',  label: 'Editorial Premium' },
   { key: 'ledger',     label: 'Formal Ledger' },
-  // { key: 'azure',      label: 'Azure Corporate' },
 ]
 
 const templateMap = {
-  classic:    dynamic(() => import('./templates/classic'), { ssr: false }),
-  // monoline:   dynamic(() => import('./templates/monoline'), { ssr: false }),
-  // techstudio: dynamic(() => import('./templates/techstudio'), { ssr: false }),
-  // softcard: dynamic(() => import('./templates/softcard'), { ssr: false }),
-  // swiss: dynamic(() => import('./templates/swiss'), { ssr: false }),
-  // editorial: dynamic(() => import('./templates/editorial'), { ssr: false }),
-  ledger: dynamic(() => import('./templates/ledger'), { ssr: false }),
-  // azure: dynamic(() => import('./templates/azure'), { ssr: false }),
-  olimp: dynamic(() => import('./templates/olimp'), { ssr: false }),
+  classic: dynamic(() => import('./templates/classic'), { ssr: false }),
+  ledger:  dynamic(() => import('./templates/ledger'),  { ssr: false }),
+  olimp:   dynamic(() => import('./templates/olimp'),   { ssr: false }),
 }
+
 
 interface Props {
   currPayment?: IExtendedPayment | null
@@ -67,12 +44,13 @@ const GroupedReceiptForm: FC<Props> = ({
 }) => {
   const { template, setTemplate, company, showQuantityInPreview, setShowQuantityInPreview } =
     usePaymentContext()
+  const [editPayment] = useEditPaymentMutation()
   const rawData = currPayment ?? paymentData ?? null
   const data = rawData as any
   const currency =
-    data?.company?.currency || company?.currency || data?.domain?.currency
+    data?.currency || data?.company?.currency || company?.currency || data?.domain?.currency
   const currencyLabel = getCurrencyShortLabel(currency)
-  const isEnglish = normalizeCurrency(currency) !== 'UAH'
+  const isEnglish = normalizeCurrency(currency) !== Currency.UAH
   const invoiceDatePrefix = dayjs(data?.invoiceCreationDate).isValid()
     ? dayjs(data?.invoiceCreationDate).format('DDMMYY')
     : ''
@@ -216,6 +194,81 @@ const GroupedReceiptForm: FC<Props> = ({
     }
   };
 
+  const companyLabel = (data?.company as any)?.companyName ?? company?.companyName ?? ''
+
+  const handleSaveTemplate = async (templateKey: TemplateKey, scope?: 'company' | 'domain' | 'payment') => {
+    if (!data?._id) return message.warning('Платіж не знайдено')
+    setTemplate(templateKey)
+    const result = await editPayment({
+      _id: data._id,
+      template: templateKey,
+      _templateScope: scope !== 'payment' ? scope : undefined,
+    })
+    if ('error' in result) {
+      message.error('Помилка збереження')
+    } else if (scope === 'company') {
+      message.success(`Шаблон збережено для компанії (${companyLabel})`)
+    } else if (scope === 'domain') {
+      message.success(`Шаблон збережено для домену (${domainName})`)
+    }
+  }
+
+  const makeSaveMenu = (templateKey: TemplateKey): MenuProps => ({
+    items: [
+      {
+        key: 'payment',
+        label: 'Зберегти для цього платежу',
+      },
+      { type: 'divider' },
+      {
+        key: 'company',
+        label: (
+          <div>
+            Дефолт для компанії{' '}
+            <span style={{ opacity: 0.5, fontSize: '13px' }}>«{companyLabel}»</span>
+          </div>
+        ),
+      },
+      {
+        key: 'domain',
+        label: (
+          <div>
+            Дефолт для домену{' '}
+            <span style={{ opacity: 0.5, fontSize: '13px' }}>«{domainName}»</span>
+          </div>
+        ),
+      },
+    ],
+    onClick: ({ key, domEvent }) => {
+      domEvent.stopPropagation()
+      if (key === 'payment' || key === 'company' || key === 'domain') {
+        handleSaveTemplate(templateKey, key)
+      }
+    },
+  })
+
+  const dropdownItems = templateItems.map((item) => ({
+    key: item.key,
+    label: (
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <span
+          onClick={() => handleSaveTemplate(item.key as TemplateKey)}
+          style={{ display: 'flex', gap: 6 }}
+        >
+          {template === item.key && <CheckOutlined style={{ fontSize: 12, opacity: 0.7 }} />}
+          {item.label}
+        </span>
+        <Dropdown
+          placement={'right' as unknown as any}
+          menu={makeSaveMenu(item.key as TemplateKey)}
+          trigger={['hover']}
+        >
+          <RightOutlined style={{ fontSize: 12, opacity: 0.7 }} />
+        </Dropdown>
+      </div>
+    ),
+  }))
+
   const TemplateComponent = templateMap[template] || templateMap.olimp
 
   const templateProps = {
@@ -241,9 +294,10 @@ const GroupedReceiptForm: FC<Props> = ({
       <PrinterOutlined className={s.print} onClick={handlePrint} />
       <Dropdown
         trigger={['click']}
+        placement="bottomLeft"
         menu={{
-          items: templateItems,
-          onClick: ({ key }) => setTemplate(key as 'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'),
+          items: dropdownItems,
+          style: { minWidth: 240 },
         }}
       >
         <Tooltip title={isEnglish ? 'Select template' : 'Обрати шаблон'}>

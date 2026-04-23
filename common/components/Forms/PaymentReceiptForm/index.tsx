@@ -16,7 +16,7 @@ interface Props {
 
 const PaymentReceiptForm: FC<Props> = ({ currPayment, paymentData }) => {
   const newData = currPayment || paymentData
-  const currency = newData?.company?.currency || newData?.domain?.currency
+  const currency = newData?.currency || newData?.company?.currency || newData?.domain?.currency
   const currencyLabel = getCurrencyShortLabel(currency)
   const componentRef = useRef()
   const { token } = theme.useToken()

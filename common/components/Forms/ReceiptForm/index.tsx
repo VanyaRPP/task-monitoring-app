@@ -23,7 +23,7 @@ const ReceiptForm: FC<Props> = ({
   const { company } = usePaymentContext()
   const newData = currPayment || paymentData
   const currency =
-    newData?.company?.currency || company?.currency || newData?.domain?.currency
+    newData?.currency || newData?.company?.currency || company?.currency || newData?.domain?.currency
   const currencyLabel = getCurrencyShortLabel(currency)
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
   const componentRef = useRef()
