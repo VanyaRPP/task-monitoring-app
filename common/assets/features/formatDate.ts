@@ -40,3 +40,15 @@ export const getPreviousMonth = (date?: string) => {
 export const getFormattedDate = (date: Date, format = 'MMMM'): string => {
   return toFirstUpperCase(dayjs(date).format(format))
 }
+
+export const formatInvoiceDate = (date?: Date | string | null): string => {
+  if (!date) return ''
+  const d = dayjs(date)
+  return d.isValid() ? d.format('DD.MM.YYYY') : ''
+}
+
+export const formatInvoiceDueDate = (date?: Date | string | null, days = 5): string => {
+  if (!date) return ''
+  const d = dayjs(date)
+  return d.isValid() ? d.add(days, 'd').format('DD.MM.YYYY') : ''
+}
