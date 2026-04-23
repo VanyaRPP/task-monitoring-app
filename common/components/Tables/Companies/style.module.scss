@@ -16,6 +16,7 @@
   gap: 8px;
   margin-top: 3px;
   margin-bottom: 5px;
+  margin-right: -100px;
 }
 
 .segmented {
@@ -26,12 +27,38 @@
   margin-bottom: 16px;
   margin-top: 12px;
   margin-left: auto;
-
-  @media (max-width: 768px) {
-    width: 100%;
-  }
+  margin-right: auto;
 }
 
 .addButton {
   margin-left: auto;
+}
+
+@media (max-width: 992px) {
+  .firstBlock {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .segmented {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .addButton {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .segmented {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .addButton {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 12px;
+  }
 }

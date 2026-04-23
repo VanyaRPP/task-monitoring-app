@@ -152,25 +152,25 @@ const CompaniesHeader: React.FC<Props> = ({
           ]}
           onChange={handleArchiveToggle}
         />
-
-        {showAddButton && isAdmin && (
-          <>
-            <Button type="link" onClick={openModal} className={s.addButton}>
-              <PlusOutlined /> Додати
-            </Button>
-            {(isModalOpen || currentRealEstate) && (
-              <RealEstateModal
-                closeModal={closeModal}
-                chosenRealEstate={
-                  filters?.domain ? { domain: filters?.domain[0] } : null
-                }
-                currentRealEstate={currentRealEstate}
-                editable={realEstateActions.edit}
-              />
-            )}
-          </>
-        )}
       </div>
+
+      {showAddButton && isAdmin && (
+        <>
+          <Button type="link" onClick={openModal} className={s.addButton}>
+            <PlusOutlined /> Додати
+          </Button>
+          {(isModalOpen || currentRealEstate) && (
+            <RealEstateModal
+              closeModal={closeModal}
+              chosenRealEstate={
+                filters?.domain ? { domain: filters?.domain[0] } : null
+              }
+              currentRealEstate={currentRealEstate}
+              editable={realEstateActions.edit}
+            />
+          )}
+        </>
+      )}
     </div>
   )
 }
