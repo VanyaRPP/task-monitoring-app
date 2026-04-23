@@ -1,0 +1,46 @@
+name: Sync PR with Asana
+
+on:
+  pull_request:
+    types: [opened, closed, reopened]
+
+jobs:
+  update-asana:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Extract Asana Task ID from PR title
+        id: extract
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          TASK_ID=$(echo "$TITLE" | grep -oE '[0-9]{8,}' | head -n 1)
+          echo "task_id=$TASK_ID" >> $GITHUB_OUTPUT
+
+      - name: Debug
+        run: echo "Task ID = ${{ steps.extract.outputs.task_id }}"
+
+      - name: Move task in Asana
+        if: steps.extract.outputs.task_id != ''
+        run: |
+          ACTION="${{ github.event.action }}"
+
+          if [ "$ACTION" == "opened" ]; then
+            SECTION_ID="REVIEW_SECTION_ID"
+          elif [ "$ACTION" == "closed" ]; then
+            if [ "${{ github.event.pull_request.merged }}" == "true" ]; then
+              SECTION_ID="DONE_SECTION_ID"
+            else
+              SECTION_ID="TODO_SECTION_ID"
+            fi
+          elif [ "$ACTION" == "reopened" ]; then
+            SECTION_ID="IN_PROGRESS_SECTION_ID"
+          fi
+
+          curl -X POST "https://app.asana.com/api/1.0/sections/$SECTION_ID/addTask" \
+          -H "Authorization: Bearer ${{ secrets.ASANA_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "data": {
+              "task": "'"${{ steps.extract.outputs.task_id }}"'"
+            }
+          }'
