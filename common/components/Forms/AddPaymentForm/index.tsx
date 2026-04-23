@@ -71,7 +71,7 @@ function AddPaymentForm({
 
   useEffect(() => {
     if (!changelogId) return
-    
+
     const exists = changelogOptions.some(opt => opt.value === changelogId)
     if (!exists) {
       form.setFieldValue('changelogId', undefined)
@@ -86,8 +86,8 @@ function AddPaymentForm({
     prevPayment,
   })
   const showCurrentVersionBtn = !!changelogId
-  
-  
+
+
   const showChangelog = changelogOptions.length > 0
 
   return (
@@ -102,58 +102,56 @@ function AddPaymentForm({
       <MonthServiceSelect form={form} edit={edit} />
       <CompanySelect form={form} edit={edit} company={payment?.company} />
       <PaymentTypeSelect edit={!companyId || edit} />
-      <InvoiceNumber form={form} paymentActions={selectedActions} />
-      <InvoiceCreationDate edit={preview} />
-      
-    {!preview && operation !== Operations.Credit && showChangelog ? (
-      <div className={changelogRowStyles.changelogRow}>
-        <div className={changelogRowStyles.changelogSelect}>
-          <Form.Item
-            name="changelogId"
-            label="Історія змін"
-            tooltip="Попередні версії рахунку. Зберігаються автоматично після кожного редагування."
-          >
-            <Select
-              allowClear
-              placeholder="Оберіть версію рахунку"
-              options={changelogOptions}
-              optionLabelProp="shortLabel"
-              loading={changelogLoading}
-              disabled={preview}
-              notFoundContent={
-                changelogLoading ? 'Завантаження...' : 'Історії змін ще немає'
-              }
-            />
-          </Form.Item>
-        </div>
+      <div className={s.invoiceRow}>
+        <InvoiceNumber form={form} paymentActions={selectedActions} />
+        <Form.Item name="currency" label=" ">
+          <Select
+            className={s.currencySelect}
+            options={CURRENCY_SELECT_OPTIONS}
+            disabled={preview}
+          />
+        </Form.Item>
       </div>
-    ) : null}
+      <InvoiceCreationDate edit={preview} />
 
-      {operation === Operations.Credit ? (
-        <>
-        <Form.Item label="Сума" required>
-          <div className={s.sumRow}>
+      {!preview && operation !== Operations.Credit && showChangelog ? (
+        <div className={changelogRowStyles.changelogRow}>
+          <div className={changelogRowStyles.changelogSelect}>
             <Form.Item
-              name="generalSum"
-              noStyle
-              rules={validateField('paymentPrice')}
+              name="changelogId"
+              label="Історія змін"
+              tooltip="Попередні версії рахунку. Зберігаються автоматично після кожного редагування."
             >
-              <InputNumber
-                parser={inputNumberParser}
-                style={{ width: 160 }}
-                placeholder="Вкажіть суму"
-                disabled={preview}
-              />
-            </Form.Item>
-            <Form.Item name="currency" noStyle>
               <Select
-                className={s.currencySelect}
-                options={CURRENCY_SELECT_OPTIONS}
+                allowClear
+                placeholder="Оберіть версію рахунку"
+                options={changelogOptions}
+                optionLabelProp="shortLabel"
+                loading={changelogLoading}
                 disabled={preview}
+                notFoundContent={
+                  changelogLoading ? 'Завантаження...' : 'Історії змін ще немає'
+                }
               />
             </Form.Item>
           </div>
-        </Form.Item>
+        </div>
+      ) : null}
+
+      {operation === Operations.Credit ? (
+        <>
+          <Form.Item
+            name="generalSum"
+            label="Сума"
+            rules={validateField('paymentPrice')}
+          >
+            <InputNumber
+              parser={inputNumberParser}
+              style={{ width: 160 }}
+              placeholder="Вкажіть суму"
+              disabled={preview}
+            />
+          </Form.Item>
           <Form.Item
             name="description"
             label="Опис"

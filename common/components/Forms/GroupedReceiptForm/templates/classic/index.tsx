@@ -95,17 +95,16 @@ const ClassicTemplate: FC<TemplateProps> = ({
         <strong>
           {isEnglish
             ? `Payment for services according to invoice № ${data.invoiceNumber} dated ${dayjs(
-                data?.invoiceCreationDate
-              )?.format?.('DD.MM.YYYY')}`
+              data?.invoiceCreationDate
+            )?.format?.('DD.MM.YYYY')}`
             : `Оплата за послуги згідно рахунку № ${data.invoiceNumber} від ${dayjs(
-                data?.invoiceCreationDate
-              )?.format?.('DD.MM.YYYY')}`}
+              data?.invoiceCreationDate
+            )?.format?.('DD.MM.YYYY')}`}
         </strong>
       </div>
 
       <div className={cs.payFixed}>
-        {data?.provider?.description?.split('\n')?.[0] || ''}
-        {/* <div className={cs.lineInner}>________________</div> */}
+        {data?.domain?.name || data?.provider?.description?.split('\n')?.[0] || ''}
       </div>
     </div>
   </div>

@@ -5,10 +5,6 @@
     align-items: center;
   }
 
-  .currencySelect {
-    width: 90px;
-  }
-
   .inputNumber {
     width: 100%;
   }
@@ -31,4 +27,14 @@
     font-size: 1.25rem;
     margin-top: 1rem;
   }
+}
+
+.invoiceRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.currencySelect {
+  width: 50px;
 }
