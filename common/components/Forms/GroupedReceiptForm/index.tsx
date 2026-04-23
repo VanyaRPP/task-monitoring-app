@@ -3,6 +3,7 @@ import { useEditPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
 import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
+import { Currency } from '@utils/constants'
 import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
@@ -49,7 +50,7 @@ const GroupedReceiptForm: FC<Props> = ({
   const currency =
     data?.currency || data?.company?.currency || company?.currency || data?.domain?.currency
   const currencyLabel = getCurrencyShortLabel(currency)
-  const isEnglish = normalizeCurrency(currency) !== 'UAH'
+  const isEnglish = normalizeCurrency(currency) !== Currency.UAH
   const invoiceDatePrefix = dayjs(data?.invoiceCreationDate).isValid()
     ? dayjs(data?.invoiceCreationDate).format('DDMMYY')
     : ''

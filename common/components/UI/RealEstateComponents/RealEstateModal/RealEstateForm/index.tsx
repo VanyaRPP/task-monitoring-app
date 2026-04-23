@@ -21,7 +21,7 @@ import s from './style.module.scss'
 import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
 import { IDomain } from '@modules/models/Domain'
 import { inputNumberParser } from '@utils/helpers'
-import { CURRENCY_SELECT_OPTIONS } from '@utils/constants'
+import { CURRENCY_SELECT_OPTIONS, Currency } from '@utils/constants'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import DomainsServices from '@components/UI/DomainsComponents/DomainModal/DomainForm/DomainsServices'
 import CustomServicesCard from '../../../CustomServicesCard'
@@ -120,7 +120,7 @@ const RealEstateForm: FC<Props> = ({
       className={s.Form}
       onValuesChange={() => setIsValueChanged(true)}
       initialValues={{
-        currency: currentRealEstate?.currency || 'UAH',
+        currency: currentRealEstate?.currency || Currency.UAH,
       }}
     >
       <DomainsSelect

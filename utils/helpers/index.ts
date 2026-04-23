@@ -7,7 +7,7 @@ import Big from 'big.js'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
 import mongoose, { ObjectId } from 'mongoose'
-import { CURRENCY_MAP, Roles, defaultServices, ServiceType } from '../constants'
+import { CURRENCY_MAP, Currency, Roles, defaultServices, ServiceType } from '../constants'
 import {
   getDomainsPipeline,
   getRealEstatesPipeline,
@@ -344,20 +344,20 @@ export function currencyWithUnit(
   company?: IRealestate,
   unit?: string
 ) {
-  const currency = company?.currency ?? 'UAH'
+  const currency = company?.currency ?? Currency.UAH
   const label = CURRENCY_MAP[currency]?.label ?? 'грн'
 
   return `${value} ${label}${unit ? `/${unit}` : ''}`
 }
 
-export const normalizeCurrency = (currency?: string): 'UAH' | 'USD' | 'EUR' => {
+export const normalizeCurrency = (currency?: string): Currency => {
   const normalizedCurrency = currency?.toUpperCase()
 
-  if (normalizedCurrency === 'USD' || normalizedCurrency === 'EUR') {
+  if (normalizedCurrency === Currency.USD || normalizedCurrency === Currency.EUR) {
     return normalizedCurrency
   }
 
-  return 'UAH'
+  return Currency.UAH
 }
 
 export const getCurrencyShortLabel = (currency?: string): string =>
