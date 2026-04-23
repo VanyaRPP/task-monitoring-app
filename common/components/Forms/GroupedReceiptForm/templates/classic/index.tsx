@@ -43,6 +43,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
     <div className={cs.receiverInfo}>
       <div className={cs.label}>{isEnglish ? 'Recipient' : 'Одержувач'}</div>
       <pre className={cs.preLabel}>
+        {data?.reciever?.companyName && <><strong>{data.reciever.companyName}</strong>{'\n'}</>}
         {data?.reciever?.description?.trim()} <br />
         {data?.reciever?.adminEmails?.map((email: string) => (
           <div key={email}>
