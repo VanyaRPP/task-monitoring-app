@@ -42,6 +42,7 @@ export interface IPayment {
   provider: IProvider
   reciever: IReciever
   generalSum: number
+  currency?: string
   transaction?: IPaymentTransactions
   losses?: number
   template?: string

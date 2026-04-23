@@ -26,7 +26,7 @@ import {
 import Modal from '@components/UI/ModalWindow'
 import { usePaymentFormData } from '@modules/hooks/usePaymentData'
 import { useAppDispatch } from '@modules/store/hooks'
-import { Operations } from '@utils/constants'
+import { Operations, Currency } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { Form, Tabs, TabsProps, message, Tooltip } from 'antd'
@@ -458,6 +458,7 @@ const AddPaymentModal: FC<Props> = ({
         : null,
       description: formData.description || '',
       generalSum: formData.generalSum || formData.debit,
+      currency: formData.currency || Currency.UAH,
       provider,
       reciever,
       transaction,
@@ -512,6 +513,10 @@ const AddPaymentModal: FC<Props> = ({
       form.setFieldsValue({ invoice: filteredInvoices })
       lastLoadedCompanyId.current = company._id
     }
+
+    if (isNewCompanySelected) {
+      form.setFieldValue('currency', company.currency || Currency.UAH)
+    }
   }, [company, filteredInvoices, paymentId, edit, activeTabKey, saved, form])
 
   return (
@@ -558,6 +563,7 @@ const AddPaymentModal: FC<Props> = ({
               : filteredInvoices,
             description: payment?.description,
             generalSum: payment?.generalSum,
+            currency: payment?.currency || Currency.UAH,
             invoiceNumber: payment?.invoiceNumber,
             invoiceCreationDate: dayjs(payment?.invoiceCreationDate),
             operation: payment?.type || Operations.Credit,

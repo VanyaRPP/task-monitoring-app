@@ -5,6 +5,7 @@ import {
   IReciever,
 } from '@common/api/paymentApi/payment.api.types'
 import mongoose, { ObjectId, Schema } from 'mongoose'
+import { Currency } from '@utils/constants'
 
 export interface IPaymentModel {
   invoiceNumber: number
@@ -19,6 +20,7 @@ export interface IPaymentModel {
   provider: IProvider
   reciever: IReciever
   generalSum: number
+  currency?: string
   transaction: IPaymentTransactions
   losses?: number
   template?: string
@@ -37,6 +39,7 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   provider: { type: Object },
   reciever: { type: Object },
   generalSum: { type: Number },
+  currency: { type: String, required: false, default: Currency.UAH },
   transaction: { type: Object },
   losses: { type: Number },
    template: { 

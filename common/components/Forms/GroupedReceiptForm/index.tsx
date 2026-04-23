@@ -2,7 +2,8 @@ import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
 import { useEditPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { usePaymentContext } from '@components/AddPaymentModal'
 import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
-import { CURRENCY_MAP } from '@utils/constants'
+import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
+import { Currency } from '@utils/constants'
 import dayjs from 'dayjs'
 import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
@@ -17,45 +18,18 @@ import { Dropdown, Tooltip, message, MenuProps } from 'antd'
 import dynamic from 'next/dynamic'
 import s from './style.module.scss'
 
-const normalizeCurrency = (currency?: string): 'UAH' | 'USD' | 'EUR' => {
-  const value = currency?.toUpperCase()
-  if (value === 'USD' || value === 'EUR') return value
-  return 'UAH'
-}
-
-const getCurrencyShortLabel = (currency?: string): string => {
-  const normalized = normalizeCurrency(currency)
-  const label = CURRENCY_MAP[normalized]?.label
-
-  if (normalized === 'USD') return 'USD'
-  if (normalized === 'EUR') return 'EUR'
-
-  return label || 'грн'
-}
-
 const templateItems = [
   { key: 'classic',    label: 'Класичний шаблон' },
   { key: 'olimp',      label: 'OLIMP DIGITAL OÜ' },
-  // { key: 'swiss',      label: 'Swiss Minimal' },
-  // { key: 'softcard',   label: 'Soft Card Premium' },
-  // { key: 'techstudio', label: 'Tech Studio Invoice' },
-  // { key: 'monoline',   label: 'Monoline Business' },
-  // { key: 'editorial',  label: 'Editorial Premium' },
   { key: 'ledger',     label: 'Formal Ledger' },
-  // { key: 'azure',      label: 'Azure Corporate' },
 ]
 
 const templateMap = {
-  classic:    dynamic(() => import('./templates/classic'), { ssr: false }),
-  // monoline:   dynamic(() => import('./templates/monoline'), { ssr: false }),
-  // techstudio: dynamic(() => import('./templates/techstudio'), { ssr: false }),
-  // softcard: dynamic(() => import('./templates/softcard'), { ssr: false }),
-  // swiss: dynamic(() => import('./templates/swiss'), { ssr: false }),
-  // editorial: dynamic(() => import('./templates/editorial'), { ssr: false }),
-  ledger: dynamic(() => import('./templates/ledger'), { ssr: false }),
-  // azure: dynamic(() => import('./templates/azure'), { ssr: false }),
-  olimp: dynamic(() => import('./templates/olimp'), { ssr: false }),
+  classic: dynamic(() => import('./templates/classic'), { ssr: false }),
+  ledger:  dynamic(() => import('./templates/ledger'),  { ssr: false }),
+  olimp:   dynamic(() => import('./templates/olimp'),   { ssr: false }),
 }
+
 
 interface Props {
   currPayment?: IExtendedPayment | null
@@ -74,9 +48,9 @@ const GroupedReceiptForm: FC<Props> = ({
   const rawData = currPayment ?? paymentData ?? null
   const data = rawData as any
   const currency =
-    data?.company?.currency || company?.currency || data?.domain?.currency
+    data?.currency || data?.company?.currency || company?.currency || data?.domain?.currency
   const currencyLabel = getCurrencyShortLabel(currency)
-  const isEnglish = normalizeCurrency(currency) !== 'UAH'
+  const isEnglish = normalizeCurrency(currency) !== Currency.UAH
   const invoiceDatePrefix = dayjs(data?.invoiceCreationDate).isValid()
     ? dayjs(data?.invoiceCreationDate).format('DDMMYY')
     : ''

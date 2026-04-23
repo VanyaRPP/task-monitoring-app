@@ -1,4 +1,5 @@
 import mongoose, { ObjectId, Schema } from 'mongoose'
+import { Currency } from '@utils/constants'
 import { IDomainService } from './Domain'
 
 export interface IRealEstateModel {
@@ -40,7 +41,7 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   pricePerMeter: { type: Number, required: true, default: 0 },
   servicePricePerMeter: { type: Number, required: false },
   totalArea: { type: Number, required: true, default: 0 },
-  currency: { type: String, required: false, default: 'UAH' },
+  currency: { type: String, required: false, default: Currency.UAH },
   rentPart: { type: Number, required: true, default: 0 },
   waterPart: { type: Number, required: true, default: 0 },
   cleaning: { type: Number, required: false, default: 0 },
