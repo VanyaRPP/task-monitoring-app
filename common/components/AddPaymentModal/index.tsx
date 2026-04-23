@@ -1,4 +1,5 @@
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
+import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
 import { resolveTemplate, TemplateKey } from './resolveTemplate'
 import {
   useAddPaymentMutation,
@@ -126,11 +127,15 @@ const AddPaymentModal: FC<Props> = ({
     typeof paymentData?.company === 'object'
       ? (paymentData.company as any)?.defaultTemplate
       : (paymentData as any)?.defaultTemplate
+  const paymentDomainId =
+    typeof paymentData?.domain === 'object'
+      ? paymentData.domain?._id
+      : (paymentData?.domain || preselectedDomain || undefined)
   const domainDefaultTemplate =
     typeof paymentData?.domain === 'object'
       ? (paymentData.domain as any)?.defaultTemplate
       : undefined
-  const [template, setTemplate] = useState<TemplateKey>(
+const [template, setTemplate] = useState<TemplateKey>(
     resolveTemplate(paymentData?.template, companyDefaultTemplate, domainDefaultTemplate)
   )
   const [showQuantityInPreview, setShowQuantityInPreviewState] = useState(false)
@@ -159,6 +164,18 @@ const AddPaymentModal: FC<Props> = ({
 
   const domainId = Form.useWatch('domain', form)
   const selectedChangelogId = Form.useWatch('changelogId', form)
+
+  const activeDomainId = String(domainId || paymentDomainId || '')
+  const { data: fetchedDomain } = useGetDomainByPkQuery(
+    { domainId: activeDomainId },
+    { skip: !activeDomainId || typeof paymentData?.domain === 'object' }
+  )
+
+  useEffect(() => {
+    if (paymentData?.template) return
+    const resolved = fetchedDomain?.defaultTemplate
+    if (resolved) setTemplate(resolved as TemplateKey)
+  }, [activeDomainId, fetchedDomain?.defaultTemplate])
 
   const { data: changelogRes, isLoading: changelogLoading } =
     useGetPaymentChangeLogsQuery(paymentId, { skip: !edit || !paymentId })
