@@ -1,6 +1,6 @@
 import { FC } from 'react'
+import dayjs from 'dayjs'
 import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPricesTable'
-import { formatInvoiceDate, formatInvoiceDueDate } from '@common/assets/features/formatDate'
 import { TemplateProps } from '../types'
 import cs from './style.module.scss'
 
@@ -34,7 +34,6 @@ const ClassicTemplate: FC<TemplateProps> = ({
     <div className={cs.providerInfo}>
       <div className={cs.label}>{isEnglish ? 'Provider' : 'Постачальник'}</div>
       <pre className={cs.preLabel}>
-        {data?.domain?.name && <><strong>{data.domain.name}</strong>{'\n'}</>}
         {data?.provider?.description?.trim()} <br />
         <br />
       </pre>
@@ -43,7 +42,6 @@ const ClassicTemplate: FC<TemplateProps> = ({
     <div className={cs.receiverInfo}>
       <div className={cs.label}>{isEnglish ? 'Recipient' : 'Одержувач'}</div>
       <pre className={cs.preLabel}>
-        {data?.reciever?.companyName && <><strong>{data.reciever.companyName}</strong>{'\n'}</>}
         {data?.reciever?.description?.trim()} <br />
         {data?.reciever?.adminEmails?.map((email: string) => (
           <div key={email}>
@@ -59,12 +57,12 @@ const ClassicTemplate: FC<TemplateProps> = ({
       </div>
       <div className={cs.datecellDate}>
         {isEnglish ? 'Dated' : 'Від'} &nbsp;
-        {formatInvoiceDate(data?.invoiceCreationDate)}
+        {dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
         {isEnglish ? '.' : ' року.'}
       </div>
       <div className={cs.datecell}>
         {isEnglish ? 'Due by' : 'Підлягає сплаті до'} &nbsp;
-        {formatInvoiceDueDate(data?.invoiceCreationDate)}
+        {dayjs(data?.invoiceCreationDate).add(5, 'd').format('DD.MM.YYYY')}
         {!isEnglish && (
           <>
             &nbsp; року
@@ -96,13 +94,18 @@ const ClassicTemplate: FC<TemplateProps> = ({
         {isEnglish ? 'Payment purpose:' : 'Призначення платежу:'}{' '}
         <strong>
           {isEnglish
-            ? `Payment for services according to invoice № ${data.invoiceNumber} dated ${formatInvoiceDate(data?.invoiceCreationDate)}`
-            : `Оплата за послуги згідно рахунку № ${data.invoiceNumber} від ${formatInvoiceDate(data?.invoiceCreationDate)}`}
+            ? `Payment for services according to invoice № ${data.invoiceNumber} dated ${dayjs(
+                data?.invoiceCreationDate
+              )?.format?.('DD.MM.YYYY')}`
+            : `Оплата за послуги згідно рахунку № ${data.invoiceNumber} від ${dayjs(
+                data?.invoiceCreationDate
+              )?.format?.('DD.MM.YYYY')}`}
         </strong>
       </div>
 
       <div className={cs.payFixed}>
-        {data?.domain?.name || data?.provider?.description?.split('\n')?.[0] || ''}
+        {data?.provider?.description?.split('\n')?.[0] || ''}
+        {/* <div className={cs.lineInner}>________________</div> */}
       </div>
     </div>
   </div>

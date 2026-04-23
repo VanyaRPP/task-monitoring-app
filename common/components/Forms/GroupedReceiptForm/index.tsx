@@ -9,7 +9,7 @@ import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import {
   PrinterOutlined,
-  LayoutOutlined,
+  EditOutlined,
   RightOutlined,
   CheckOutlined,
   TableOutlined,
@@ -301,7 +301,7 @@ const GroupedReceiptForm: FC<Props> = ({
         }}
       >
         <Tooltip title={isEnglish ? 'Select template' : 'Обрати шаблон'}>
-          <LayoutOutlined className={s.edit} />
+          <EditOutlined className={s.edit} />
         </Tooltip>
       </Dropdown>
       <Tooltip title="Показувати кількість і ціну в таблиці перегляду">

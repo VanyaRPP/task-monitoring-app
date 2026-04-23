@@ -1,6 +1,5 @@
-import { Operations } from '@utils/constants'
-import { getCurrencyShortLabel } from '@utils/helpers'
-import { Form, FormInstance } from 'antd'
+import { Operations, CURRENCY_SELECT_OPTIONS } from '@utils/constants'
+import { Form, FormInstance, Select } from 'antd'
 import { FC, useEffect } from 'react'
 import s from './style.module.scss'
 
@@ -11,8 +10,6 @@ interface Props {
 const PaymentTotal: FC<Props> = ({ form }) => {
   const invoices = Form.useWatch(['invoice'], form)
   const total = Form.useWatch(Operations.Debit, form)
-  const currency = Form.useWatch('currency', form)
-  const currencyLabel = getCurrencyShortLabel(currency)
 
   useEffect(() => {
     const newTotal = Object.entries<{ sum: number }>(invoices || []).reduce(
@@ -28,8 +25,16 @@ const PaymentTotal: FC<Props> = ({ form }) => {
       name={Operations.Debit}
       initialValue={0}
     >
-      <span>Сума: {(+total)?.toFixed(2)} {currencyLabel}</span>
-    </Form.Item>
+    <div className={s.sumRow}>
+      <span>Сума: {(+total)?.toFixed(2)}</span>
+      <Form.Item name="currency" noStyle>
+        <Select
+          className={s.currencySelect}
+          options={CURRENCY_SELECT_OPTIONS}
+        />
+      </Form.Item>
+    </div>
+  </Form.Item>
   )
 }
 
