@@ -43,7 +43,7 @@ const GroupedReceiptForm: FC<Props> = ({
   const rawData = currPayment ?? paymentData ?? null
   const data = rawData as any
   const currency =
-    data?.company?.currency || company?.currency || data?.domain?.currency
+    data?.currency || data?.company?.currency || company?.currency || data?.domain?.currency
   const currencyLabel = getCurrencyShortLabel(currency)
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
   const invoiceDatePrefix = dayjs(data?.invoiceCreationDate).isValid()

@@ -19,6 +19,7 @@ export interface IPaymentModel {
   provider: IProvider
   reciever: IReciever
   generalSum: number
+  currency?: string
   transaction: IPaymentTransactions
   losses?: number
 }
@@ -36,6 +37,7 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   provider: { type: Object },
   reciever: { type: Object },
   generalSum: { type: Number },
+  currency: { type: String, required: false, default: 'UAH' },
   transaction: { type: Object },
   losses: { type: Number },
 })
