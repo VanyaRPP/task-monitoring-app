@@ -222,11 +222,15 @@ const GroupedReceiptForm: FC<Props> = ({
 
   const companyLabel = (data?.company as any)?.companyName ?? company?.companyName ?? ''
 
-  const handleSaveTemplate = async (templateKey: TemplateKey, scope?: 'company' | 'domain') => {
+  const handleSaveTemplate = async (templateKey: TemplateKey, scope?: 'company' | 'domain' | 'payment') => {
     if (!data?._id) return message.warning('Платіж не знайдено')
     setTemplate(templateKey)
-    const result = await editPayment({ _id: data._id, template: templateKey, _templateScope: scope })
-    if (scope && 'error' in result) {
+    const result = await editPayment({
+      _id: data._id,
+      template: templateKey,
+      _templateScope: scope !== 'payment' ? scope : undefined,
+    })
+    if ('error' in result) {
       message.error('Помилка збереження')
     } else if (scope === 'company') {
       message.success(`Шаблон збережено для компанії (${companyLabel})`)
@@ -238,10 +242,15 @@ const GroupedReceiptForm: FC<Props> = ({
   const makeSaveMenu = (templateKey: TemplateKey): MenuProps => ({
     items: [
       {
+        key: 'payment',
+        label: 'Зберегти для цього платежу',
+      },
+      { type: 'divider' },
+      {
         key: 'company',
         label: (
           <div>
-            Вибрати дефолтним для цієї компанії{' '}
+            Дефолт для компанії{' '}
             <span style={{ opacity: 0.5, fontSize: '13px' }}>«{companyLabel}»</span>
           </div>
         ),
@@ -250,7 +259,7 @@ const GroupedReceiptForm: FC<Props> = ({
         key: 'domain',
         label: (
           <div>
-            Вибрати дефолтним для цього домену{' '}
+            Дефолт для домену{' '}
             <span style={{ opacity: 0.5, fontSize: '13px' }}>«{domainName}»</span>
           </div>
         ),
@@ -258,7 +267,7 @@ const GroupedReceiptForm: FC<Props> = ({
     ],
     onClick: ({ key, domEvent }) => {
       domEvent.stopPropagation()
-      if (key === 'company' || key === 'domain') {
+      if (key === 'payment' || key === 'company' || key === 'domain') {
         handleSaveTemplate(templateKey, key)
       }
     },
