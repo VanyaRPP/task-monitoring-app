@@ -25,6 +25,7 @@ export type IRealestate = {
   customServices?: CustomServices[]
   account?: string
   rnokpp?: string
+  defaultTemplate?: string
 }
 
 export interface CustomServices {

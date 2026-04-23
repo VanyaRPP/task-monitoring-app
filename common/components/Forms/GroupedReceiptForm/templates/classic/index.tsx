@@ -56,7 +56,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
         {isEnglish ? 'INVOICE №' : 'РАХУНОК №'} {data.invoiceNumber}
       </div>
       <div className={cs.datecellDate}>
-        {isEnglish ? 'dated' : 'Від'} &nbsp;
+        {isEnglish ? 'Dated' : 'Від'} &nbsp;
         {dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
         {isEnglish ? '.' : ' року.'}
       </div>

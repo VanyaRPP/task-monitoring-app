@@ -6,7 +6,7 @@ import AddPaymentModal from '@components/AddPaymentModal'
 import { SendOutlined, DownOutlined, CalendarOutlined } from '@ant-design/icons'
 import { matchCompany, MatchType, getResolvedDescription } from './bankHelper'
 import { formatDate, parseDate } from './datesHelper'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { useGetAllRealEstateQuery, useEditRealEstateMutation } from '@common/api/realestateApi/realestate.api'
 import { useQuickSend } from './useQuicksend'
 import { buildTransactionPayload } from './quickSendHelpers'
 
@@ -29,6 +29,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const transactionAmount = parseFloat(transaction.SUM as string)
 
   const { data: realEstatesData } = useGetAllRealEstateQuery({ domainId: domain._id })
+  const [editRealEstate] = useEditRealEstateMutation()
 
   const relatedCompanies = useMemo(
     () => realEstatesData?.data || [],
@@ -62,15 +63,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const saveAccountToCompany = async (companyId: string) => {
     if (!transaction.AUT_CNTR_ACC) return
     if (transaction.AUT_CNTR_NAM?.includes('Транз')) return
-    try {
-      await fetch(`/api/realestate/${companyId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ account: transaction.AUT_CNTR_ACC }),
-      })
-    } catch (error) {
-      console.error('Failed to save account to company:', error)
-    }
+    await editRealEstate({ _id: companyId, account: transaction.AUT_CNTR_ACC })
   }
 
   const showModal = () => setModalVisible(true)

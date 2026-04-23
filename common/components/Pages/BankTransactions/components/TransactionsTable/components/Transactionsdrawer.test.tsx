@@ -5,8 +5,10 @@ import TransactionDrawer from './TransactionsDrawer'
 
 let lastPaymentData: any = null
 
+const mockEditRealEstate = jest.fn()
 jest.mock('@common/api/realestateApi/realestate.api', () => ({
   useGetAllRealEstateQuery: jest.fn(),
+  useEditRealEstateMutation: jest.fn(() => [mockEditRealEstate]),
 }))
 
 jest.mock('./useQuicksend', () => ({
@@ -385,7 +387,7 @@ describe('transactionPayload passed to AddPaymentModal', () => {
 
 
 describe('saveAccountToCompany after successful payment creation', () => {
-  it('calls PATCH with account when company was manually selected and success=true', async () => {
+  it('calls editRealEstate with account when company was manually selected and success=true', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: { data: [makeCompany({ account: undefined })] },
     })
@@ -397,17 +399,14 @@ describe('saveAccountToCompany after successful payment creation', () => {
     await userEvent.click(await screen.findByText('Confirm'))
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        '/api/realestate/company_001',
-        expect.objectContaining({
-          method: 'PATCH',
-          body: JSON.stringify({ account: 'UA803220010000026001350058717' }),
-        })
-      )
+      expect(mockEditRealEstate).toHaveBeenCalledWith({
+        _id: 'company_001',
+        account: 'UA803220010000026001350058717',
+      })
     })
   })
 
-  it('does NOT call PATCH when company was auto-matched by account (already saved)', async () => {
+  it('does NOT call editRealEstate when company was auto-matched by account (already saved)', async () => {
     renderDrawer()
 
     await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
@@ -417,14 +416,11 @@ describe('saveAccountToCompany after successful payment creation', () => {
     await userEvent.click(await screen.findByText('Confirm'))
 
     await waitFor(() => {
-      expect(global.fetch).not.toHaveBeenCalledWith(
-        expect.stringContaining('/api/realestate/'),
-        expect.objectContaining({ method: 'PATCH' })
-      )
+      expect(mockEditRealEstate).not.toHaveBeenCalled()
     })
   })
 
-  it('does NOT call PATCH when modal closes with success=false', async () => {
+  it('does NOT call editRealEstate when modal closes with success=false', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: { data: [makeCompany({ account: undefined })] },
     })
@@ -436,11 +432,11 @@ describe('saveAccountToCompany after successful payment creation', () => {
     await userEvent.click(await screen.findByText('Cancel'))
 
     await waitFor(() => {
-      expect(global.fetch).not.toHaveBeenCalled()
+      expect(mockEditRealEstate).not.toHaveBeenCalled()
     })
   })
 
-  it('does NOT call PATCH for transit account even when manually selected', async () => {
+  it('does NOT call editRealEstate for transit account even when manually selected', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: { data: [makeCompany({ account: undefined })] },
     })
@@ -455,10 +451,7 @@ describe('saveAccountToCompany after successful payment creation', () => {
     await userEvent.click(await screen.findByText('Confirm'))
 
     await waitFor(() => {
-      expect(global.fetch).not.toHaveBeenCalledWith(
-        expect.stringContaining('/api/realestate/'),
-        expect.objectContaining({ method: 'PATCH' })
-      )
+      expect(mockEditRealEstate).not.toHaveBeenCalled()
     })
   })
 })

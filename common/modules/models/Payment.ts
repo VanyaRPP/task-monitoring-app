@@ -21,6 +21,7 @@ export interface IPaymentModel {
   generalSum: number
   transaction: IPaymentTransactions
   losses?: number
+  template?: string
 }
 
 export const PaymentSchema = new Schema<IPaymentModel>({
@@ -38,6 +39,10 @@ export const PaymentSchema = new Schema<IPaymentModel>({
   generalSum: { type: Number },
   transaction: { type: Object },
   losses: { type: Number },
+   template: { 
+    type: String, 
+    default: 'classic',
+  }
 })
 
 const Payment =
