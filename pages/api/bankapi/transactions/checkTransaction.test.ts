@@ -160,6 +160,109 @@ describe('checkTransaction', () => {
     })
   })
 
+  it('does NOT fall back to AUT_CNTR_ACC for транзитний рахунок', async () => {
+    const result = await checkTransaction({
+      transaction: {
+        ...transaction,
+        TECHNICAL_TRANSACTION_ID: undefined,
+        AUT_CNTR_NAM: 'Транз.рахунок платежi',
+        OSND: undefined,
+      },
+      domainId: 'domain-xyz',
+    })
+
+    expect(mockedFind).not.toHaveBeenCalled()
+    expect(mockedFindOne).not.toHaveBeenCalled()
+    expect(result).toEqual({
+      isMatchingPayment: false,
+      previousCompanyId: null,
+    })
+  })
+
+  it('falls back to OSND for транзитний рахунок (no txId)', async () => {
+    mockedFindOne.mockReturnValue({
+      sort: jest.fn().mockReturnValue({
+        lean: jest.fn().mockResolvedValue({ company: 'company-from-osnd' }),
+      }),
+    })
+
+    const result = await checkTransaction({
+      transaction: {
+        ...transaction,
+        TECHNICAL_TRANSACTION_ID: undefined,
+        AUT_CNTR_NAM: 'Транз.рахунок платежi',
+        OSND: 'Some payment description',
+      },
+      domainId: 'domain-xyz',
+    })
+
+    expect(mockedFind).not.toHaveBeenCalled()
+    expect(mockedFindOne).toHaveBeenCalledWith({
+      'transaction.OSND': 'Some payment description',
+    })
+    expect(result).toEqual({
+      isMatchingPayment: false,
+      previousCompanyId: 'company-from-osnd',
+    })
+  })
+
+  it('falls back to OSND for транзитний рахунок when txId present but no matching payment', async () => {
+    // Real-world scenario: transaction D3K4Q3Q... has a valid txId but was never invoiced,
+    // while a sibling transaction D3P3Q41... with the same OSND WAS invoiced.
+    // The OSND lookup should find the company from the sibling payment.
+    mockedFind.mockResolvedValue([]) // txId search finds nothing
+    mockedFindOne.mockReturnValue({
+      sort: jest.fn().mockReturnValue({
+        lean: jest.fn().mockResolvedValue({ company: 'company-from-osnd' }),
+      }),
+    })
+
+    const result = await checkTransaction({
+      transaction: {
+        ...transaction,
+        TECHNICAL_TRANSACTION_ID: 'D3K4Q3QAS2IGJEP26032026204100',
+        AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+        OSND: 'Сплата за послуги знідно рахунку, Чорна Марина Євгеніївна',
+      },
+      domainId: 'domain-xyz',
+    })
+
+    expect(mockedFind).toHaveBeenCalledWith({
+      'transaction.TECHNICAL_TRANSACTION_ID': 'D3K4Q3QAS2IGJEP26032026204100',
+    })
+    expect(mockedFindOne).toHaveBeenCalledWith({
+      'transaction.OSND': 'Сплата за послуги знідно рахунку, Чорна Марина Євгеніївна',
+    })
+    expect(result).toEqual({
+      isMatchingPayment: false,
+      previousCompanyId: 'company-from-osnd',
+    })
+  })
+
+  it('OSND fallback for транзитний рахунок does not include domain filter', async () => {
+    // Transit accounts are shared across domains — lookup must be domain-agnostic
+    mockedFind.mockResolvedValue([])
+    mockedFindOne.mockReturnValue({
+      sort: jest.fn().mockReturnValue({
+        lean: jest.fn().mockResolvedValue({ company: 'company-from-osnd' }),
+      }),
+    })
+
+    await checkTransaction({
+      transaction: {
+        ...transaction,
+        TECHNICAL_TRANSACTION_ID: undefined,
+        AUT_CNTR_NAM: 'Транз.рахунок платежi',
+        OSND: 'Transit payment',
+      },
+      domainId: 'domain-xyz',
+    })
+
+    const findOneArg = mockedFindOne.mock.calls[0][0]
+    expect(findOneArg).not.toHaveProperty('domain')
+    expect(findOneArg).toEqual({ 'transaction.OSND': 'Transit payment' })
+  })
+
   it('returns false when TECHNICAL_TRANSACTION_ID is empty string — tries account fallback only with domainId', async () => {
     const result = await checkTransaction({
       transaction: { ...transaction, TECHNICAL_TRANSACTION_ID: '' },

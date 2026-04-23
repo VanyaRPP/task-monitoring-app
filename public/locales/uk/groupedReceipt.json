@@ -1,0 +1,27 @@
+{
+  "columns": {
+    "rowNumber": "№",
+    "serviceName": "Найменування послуги",
+    "quantity": "К-сть",
+    "price": "Ціна, {{currency}}",
+    "amount": "Сума, {{currency}}"
+  },
+  "units": {
+    "m2": "м²",
+    "kWh": "кВт",
+    "m3": "м³"
+  },
+  "services": {
+    "maintenance": "Утримання",
+    "placing": "Розміщення",
+    "inflicion": "Інфляція",
+    "electricity": "Електроенергія",
+    "water": "Водопостачання",
+    "waterPart": "Частка водопостачання",
+    "garbageCollector": "Вивіз ТПВ",
+    "cleaning": "Прибирання",
+    "discount": "Знижка",
+    "custom": "Власне",
+    "additional": "Додатково"
+  }
+}

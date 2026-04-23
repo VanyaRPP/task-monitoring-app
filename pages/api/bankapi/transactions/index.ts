@@ -32,16 +32,11 @@ export async function checkTransaction({ transaction, domainId }) {
       }
     }
 
-    const acc = normalizeBankAccount(transaction.AUT_CNTR_ACC)
-    if (domainId && acc) {
+    const isTransit = transaction.AUT_CNTR_NAM?.includes('Транз')
+
+    if (isTransit && transaction.OSND) {
       const payment = await Payment.findOne({
-        domain: domainId,
-        $or: [
-          { 'transaction.AUT_CNTR_ACC': acc },
-          ...(transaction.AUT_CNTR_ACC !== acc
-            ? [{ 'transaction.AUT_CNTR_ACC': transaction.AUT_CNTR_ACC }]
-            : []),
-        ],
+        'transaction.OSND': transaction.OSND,
       })
         .sort({ invoiceCreationDate: -1 })
         .lean()
@@ -50,6 +45,30 @@ export async function checkTransaction({ transaction, domainId }) {
         return {
           isMatchingPayment: false,
           previousCompanyId: String(payment.company),
+        }
+      }
+    }
+
+    if (!isTransit) {
+      const acc = normalizeBankAccount(transaction.AUT_CNTR_ACC)
+      if (domainId && acc) {
+        const payment = await Payment.findOne({
+          domain: domainId,
+          $or: [
+            { 'transaction.AUT_CNTR_ACC': acc },
+            ...(transaction.AUT_CNTR_ACC !== acc
+              ? [{ 'transaction.AUT_CNTR_ACC': transaction.AUT_CNTR_ACC }]
+              : []),
+          ],
+        })
+          .sort({ invoiceCreationDate: -1 })
+          .lean()
+
+        if (payment?.company) {
+          return {
+            isMatchingPayment: false,
+            previousCompanyId: String(payment.company),
+          }
         }
       }
     }

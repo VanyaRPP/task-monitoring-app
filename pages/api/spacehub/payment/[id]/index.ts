@@ -2,6 +2,7 @@
 // @ts-nocheck
 import PaymentChangeLog from '@common/modules/models/PaymentChangeLog'
 import Payment from '@common/modules/models/Payment'
+import RealEstate from '@common/modules/models/RealEstate'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
@@ -103,6 +104,43 @@ export default async function handler(
       try {
         const current = await Payment.findById(req.query.id)
         if (!current) throw new Error('Payment not found')
+          const isTemplateUpdate = typeof req.body.template !== 'undefined' && req.body.invoice === undefined
+    if (isTemplateUpdate) {
+      if (!isGlobalAdmin && !isDomainAdmin) {
+        return res.status(403).json({ success: false, message: 'not allowed' })
+      }
+
+      const templateKey = req.body.template
+      const scope = req.body._templateScope
+    
+      if (scope === 'company') {
+        if (!isGlobalAdmin) {
+          return res.status(403).json({ success: false, message: 'not allowed' })
+        }
+        await RealEstate.findByIdAndUpdate(current.company, { $set: { defaultTemplate: templateKey } })
+        return res.status(200).json({ success: true })
+      }
+
+      if (scope === 'domain') {
+        if (!isGlobalAdmin) {
+          const domain = await Domain.findOne({ _id: current.domain, adminEmails: { $in: [user.email] } })
+          if (!domain) {
+            return res.status(403).json({ success: false, message: 'not allowed' })
+          }
+        }
+        await Domain.findByIdAndUpdate(current.domain, { $set: { defaultTemplate: templateKey } })
+        return res.status(200).json({ success: true })
+      }
+
+      const response = await Payment.findOneAndUpdate(
+        { _id: req.query.id },
+        { $set: { template: templateKey } },
+        { new: true }
+      )
+
+      return res.status(200).json({ success: true, data: response })
+    }
+
         await PaymentChangeLog.create({
           paymentId: current._id,
           date: new Date(),
@@ -118,6 +156,7 @@ export default async function handler(
             generalSum: current.generalSum,
             description: current.description,
             type: current.type,
+            template: req.body.template,
           },
         })
         if (isDomainAdmin) {
@@ -135,6 +174,7 @@ export default async function handler(
 
             return res.status(200).json({ success: true, data: response })
           }
+          return res.status(403).json({ success: false, message: 'not allowed' })
         }
 
         if (isGlobalAdmin) {

@@ -1,7 +1,23 @@
+const sortMock = jest.fn().mockReturnThis()
+const skipMock = jest.fn().mockReturnThis()
+const limitMock = jest.fn().mockReturnThis()
+const populateMock = jest.fn().mockReturnThis()
+const leanMock = jest.fn().mockResolvedValue([])
+const findMock = jest.fn(() => ({
+  sort: sortMock,
+  skip: skipMock,
+  limit: limitMock,
+  populate: populateMock,
+  lean: leanMock,
+}))
+
 jest.mock('@modules/models/Payment', () => ({
   __esModule: true,
   default: {
     create: jest.fn(),
+    find: findMock,
+    aggregate: jest.fn().mockResolvedValue([]),
+    countDocuments: jest.fn().mockResolvedValue(0),
   },
 }))
 
@@ -40,8 +56,8 @@ jest.mock('@pages/api/spacehub/payment/pipelines', () => ({
 }))
 
 jest.mock('@utils/helpers', () => ({
-  getDistinctCompanyAndDomain: jest.fn(),
-  getFilterForAddress: jest.fn(),
+  getDistinctCompanyAndDomain: jest.fn().mockResolvedValue({ distinctDomains: [], distinctCompanies: [] }),
+  getFilterForAddress: jest.fn().mockReturnValue({}),
 }))
 
 jest.mock('@utils/pipelines', () => ({
@@ -52,12 +68,39 @@ import Domain from '@modules/models/Domain'
 import Payment from '@modules/models/Payment'
 import ProfitService from '@common/services/profitService/profit.service'
 import { sendInvoiceEmail } from '@utils/email/sendInvoiceEmail'
-import { createPayment } from './payment.service'
+import { createPayment, getPayments } from './payment.service'
+import { SortOrder, Operations } from '@utils/constants'
 
 const domainFindByIdMock = Domain.findById as jest.Mock
 const paymentCreateMock = Payment.create as jest.Mock
 const createProfitMock = ProfitService.create as jest.Mock
 const sendInvoiceEmailMock = sendInvoiceEmail as jest.Mock
+
+const globalAdminContext = {
+  isGlobalAdmin: true,
+  isDomainAdmin: false,
+  isUser: false,
+  user: { email: 'admin@test.com' },
+}
+
+describe('getPayments — sorting', () => {
+  beforeEach(() => jest.clearAllMocks())
+
+  it('passes correct sort params to MongoDB', async () => {
+    await getPayments({}, globalAdminContext)
+    expect(sortMock).toHaveBeenCalledWith({
+      invoiceCreationDate: SortOrder.DESC,
+      type: SortOrder.ASC,
+    })
+  })
+
+  it('SortOrder.ASC on type puts credit before debit (alphabetical invariant)', () => {
+    const types = [Operations.Debit, Operations.Credit]
+    const sorted = [...types].sort((a, b) => a.localeCompare(b) * SortOrder.ASC)
+    expect(sorted[0]).toBe(Operations.Credit)
+    expect(sorted[1]).toBe(Operations.Debit)
+  })
+})
 
 describe('createPayment', () => {
   beforeEach(() => {

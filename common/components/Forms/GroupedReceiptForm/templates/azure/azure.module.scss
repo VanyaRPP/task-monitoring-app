@@ -1,0 +1,713 @@
+$blue:          #5b9bf5;
+$blue-deep:     #3b82f6;
+$blue-dim:      rgba(59, 130, 246, 0.12);
+$blue-glow:     rgba(59, 130, 246, 0.06);
+$blue-border:   rgba(59, 130, 246, 0.28);
+
+$green:         #34d399;
+$green-dim:     rgba(52, 211, 153, 0.10);
+
+$surface-0:     rgba(255, 255, 255, 0.02);
+$surface-1:     rgba(255, 255, 255, 0.05);
+$surface-2:     rgba(255, 255, 255, 0.08);
+
+$border:        rgba(255, 255, 255, 0.10);
+$border-hi:     rgba(255, 255, 255, 0.16);
+
+$shadow:        0 2px 12px rgba(0, 0, 0, 0.22), 0 1px 3px rgba(0, 0, 0, 0.12);
+
+$font:          'Inter', 'Helvetica Neue', Arial, sans-serif;
+$radius:        12px;
+$radius-sm:     8px;
+
+
+@mixin card {
+  background: $surface-1;
+  border: 1px solid $border;
+  border-radius: $radius;
+}
+
+@mixin blue-card {
+  background: $blue-glow;
+  border: 1px solid $blue-border;
+  border-radius: $radius;
+}
+
+.azInvoice {
+  font-family: $font;
+  font-size: 13px;
+  line-height: 1.55;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.azHeader {
+  @include blue-card;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.6rem 2rem;
+  margin-bottom: 0.85rem;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 280px;
+    height: 100%;
+    background: linear-gradient(135deg, transparent 40%, rgba(59, 130, 246, 0.08) 100%);
+    pointer-events: none;
+  }
+}
+
+.azBrand {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  z-index: 1;
+}
+
+.azBrandIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: $blue-dim;
+  border: 1.5px solid $blue;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: $blue;
+  flex-shrink: 0;
+}
+
+.azBrandText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.azBrandName {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+.azBrandSub {
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $blue;
+  font-weight: 500;
+}
+
+.azInvoiceHead {
+  text-align: right;
+  z-index: 1;
+
+  h1 {
+    margin: 0;
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: $blue;
+    line-height: 1;
+  }
+}
+
+.azInvoiceNum {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: $blue;
+  opacity: 0.65;
+  font-weight: 600;
+  margin-top: 0.3rem;
+}
+
+.azMeta {
+  @include card;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 0.85rem;
+  overflow: hidden;
+}
+
+.azMetaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.75rem 1.1rem;
+  border-right: 1px solid $border;
+
+  &:last-child { border-right: none; }
+}
+
+.azMetaLabel {
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $blue;
+  opacity: 0.7;
+  font-weight: 600;
+}
+
+.azMetaValue {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.azParties {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
+  align-items: start;
+}
+
+.azPartyCard {
+  @include card;
+  padding: 1.1rem 1.3rem;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 3px;
+    border-radius: 2px;
+    background: $blue;
+    opacity: 0.5;
+  }
+}
+
+.azPartyLabel {
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $blue;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+}
+
+.azPartyName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 0.25rem;
+}
+
+.azPartyLine {
+  font-size: 0.82rem;
+  opacity: 0.6;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.azBankCard {
+  margin-top: 0.8rem;
+  padding: 0.7rem 0.9rem;
+  background: $surface-2;
+  border: 1px solid $border-hi;
+  border-radius: $radius-sm;
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+}
+
+.azBankLine {
+  font-size: 0.77rem;
+  opacity: 0.65;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.azBankLineLabel {
+  color: $blue;
+  font-weight: 700;
+  opacity: 1;
+}
+
+.azTableWrap {
+  @include card;
+  overflow: hidden;
+  margin-bottom: 0.85rem;
+}
+
+.azTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+
+  thead {
+    background: $surface-2;
+
+    th {
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: $blue;
+      font-weight: 700;
+      padding: 0.75rem 1.1rem;
+      text-align: left;
+      border-bottom: 1px solid $blue-border;
+    }
+  }
+
+  tbody tr {
+    transition: background 0.12s;
+    &:hover { background: $surface-1; }
+
+    td {
+      font-size: 0.88rem;
+      padding: 0.75rem 1.1rem;
+      border-bottom: 1px solid $border;
+      vertical-align: middle;
+    }
+
+    &:last-child td { border-bottom: none; }
+  }
+
+  th:nth-child(2), td:nth-child(2) {
+    width: 14%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  th:nth-child(3), td:nth-child(3) {
+    width: 9%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  th:nth-child(4), td:nth-child(4) {
+    width: 20%;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: $green;
+  }
+}
+
+
+
+
+
+.azSummary {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.azDates {
+  @include card;
+  padding: 0.9rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 220px;
+}
+
+.azDateRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  font-size: 0.82rem;
+
+  span {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: $blue;
+    opacity: 0.65;
+  }
+
+  strong {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+}
+
+.azTotalsCard {
+  @include blue-card;
+  padding: 1rem 1.3rem;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.azTotalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.28rem 0;
+  font-size: 0.83rem;
+  opacity: 0.6;
+
+  span { font-size: 0.75rem; letter-spacing: 0.05em; }
+}
+
+.azGrandTotal {
+  margin-top: 0.5rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid $blue-border;
+  opacity: 1;
+  font-size: 1.1rem;
+
+  span {
+    font-size: 0.75rem;
+    color: $blue;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  strong {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: $green;
+    letter-spacing: -0.02em;
+  }
+}
+
+
+
+
+
+.azFooter {
+  @include card;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0.9rem 1.3rem;
+}
+
+.azFooterLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.azFooterNote {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: $blue;
+  font-weight: 600;
+}
+
+.azFooterBadge {
+  display: inline-block;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  padding: 0.15em 0.55em;
+  border-radius: 4px;
+  background: $green-dim;
+  color: $green;
+  font-weight: 600;
+  margin-top: 0.25rem;
+  align-self: flex-start;
+}
+
+.azSignatureBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+}
+
+.azSignatureLine {
+  font-size: 0.75rem;
+  opacity: 0.35;
+  padding-top: 52px;
+  letter-spacing: 0.1em;
+}
+
+.azSignatureCaption {
+  font-size: 0.65rem;
+  opacity: 0.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+
+
+
+
+$blue-l:         #2563eb;
+$green-l:        #16a34a;
+$blue-dim-l:     rgba(37, 99, 235, 0.10);
+$blue-glow-l:    rgba(37, 99, 235, 0.04);
+$blue-border-l:  rgba(37, 99, 235, 0.22);
+$green-dim-l:    rgba(22, 163, 74, 0.08);
+$surface-1-l:    rgba(0, 0, 0, 0.025);
+$surface-2-l:    rgba(0, 0, 0, 0.045);
+$border-l:       rgba(0, 0, 0, 0.10);
+$border-hi-l:    rgba(0, 0, 0, 0.14);
+$shadow-l:       0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+
+:global(:root[data-theme='light']) {
+  .azInvoice     { color: #1a1a1a; }
+
+  .azHeader {
+    background: $blue-glow-l;
+    border-color: $blue-border-l;
+  }
+
+  .azBrandIcon {
+    background: $blue-dim-l;
+    border-color: $blue-l;
+    color: $blue-l;
+  }
+  .azBrandName   { color: #1a1a1a; }
+  .azBrandSub    { color: $blue-l; }
+
+  .azInvoiceHead h1 { color: $blue-l; }
+  .azInvoiceNum     { color: $blue-l; }
+
+  .azMeta {
+    background: $surface-1-l;
+    border-color: $border-l;
+  }
+  .azMetaItem    { border-right-color: $border-l; }
+  .azMetaLabel   { color: $blue-l; }
+  .azMetaValue   { color: #1a1a1a; }
+
+  .azPartyCard {
+    background: $surface-1-l;
+    border-color: $border-l;
+    &::before { background: $blue-l; }
+  }
+  .azPartyLabel  { color: $blue-l; }
+  .azPartyName   { color: #1a1a1a; }
+  .azPartyLine   { color: rgba(0, 0, 0, 0.55); }
+
+  .azBankCard {
+    background: $surface-2-l;
+    border-color: $border-hi-l;
+  }
+  .azBankLine       { color: rgba(0, 0, 0, 0.55); }
+  .azBankLineLabel  { color: $blue-l; }
+
+  .azTableWrap {
+    background: $surface-1-l;
+    border-color: $border-l;
+  }
+  .azTable {
+    thead {
+      background: $surface-2-l;
+      th { color: $blue-l; border-bottom-color: $blue-border-l; }
+    }
+    tbody tr {
+      &:hover { background: $surface-1-l; }
+      td { border-bottom-color: $border-l; color: #1a1a1a; }
+    }
+    td:nth-child(4) { color: $green-l; }
+  }
+
+  .azDates {
+    background: $surface-1-l;
+    border-color: $border-l;
+  }
+  .azDateRow {
+    span   { color: $blue-l; }
+    strong { color: #1a1a1a; }
+  }
+
+  .azTotalsCard {
+    background: $blue-glow-l;
+    border-color: $blue-border-l;
+  }
+  .azTotalRow {
+    span   { color: rgba(0, 0, 0, 0.55); }
+    strong { color: #1a1a1a; }
+  }
+  .azGrandTotal {
+    border-top-color: $blue-border-l;
+    span   { color: $blue-l; }
+    strong { color: $green-l; }
+  }
+
+  .azFooter {
+    background: $surface-1-l;
+    border-color: $border-l;
+  }
+  .azFooterNote     { color: $blue-l; }
+  .azFooterBadge    { background: $green-dim-l; color: $green-l; }
+  .azSignatureLine  { color: rgba(0, 0, 0, 0.35); }
+  .azSignatureCaption { color: rgba(0, 0, 0, 0.40); }
+}
+
+
+
+
+
+@media (max-width: 860px) {
+  .azHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .azInvoiceHead { text-align: left; }
+
+  .azMeta { grid-template-columns: repeat(2, 1fr); }
+  .azMetaItem:nth-child(2) { border-right: none; }
+  .azMetaItem:nth-child(3),
+  .azMetaItem:nth-child(4) { border-top: 1px solid $border; }
+
+  .azParties { grid-template-columns: 1fr; }
+
+  .azSummary { flex-direction: column; }
+  .azDates,
+  .azTotalsCard { width: 100%; min-width: 0; }
+}
+
+
+
+
+
+@media print {
+  @page { size: A4; margin: 12mm 14mm; }
+
+  .azInvoice {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    color: #111 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .azHeader {
+    flex-direction: row !important;
+    align-items: center !important;
+    background: rgba(37, 99, 235, 0.03) !important;
+    border-color: rgba(37, 99, 235, 0.25) !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    &::before { opacity: 0.03 !important; }
+  }
+  .azInvoiceHead { text-align: right !important; }
+  .azInvoiceHead h1 { color: #2563eb !important; }
+  .azInvoiceNum  { color: #2563eb !important; opacity: 1 !important; }
+  .azBrandName   { color: #111 !important; }
+  .azBrandSub    { color: #2563eb !important; }
+  .azBrandIcon   { border-color: #2563eb !important; color: #2563eb !important; background: rgba(37,99,235,0.06) !important; }
+
+  .azMeta {
+    grid-template-columns: repeat(4, 1fr) !important;
+    background: #fff !important;
+    border-color: #d0d0d0 !important;
+    border-radius: 12px !important;
+  }
+  .azMetaItem {
+    border-right-color: #e0e0e0 !important;
+    border-top: none !important;
+  }
+  .azMetaLabel   { color: #2563eb !important; opacity: 1 !important; }
+  .azMetaValue   { color: #111 !important; }
+
+  .azParties     { grid-template-columns: 1.15fr 1fr !important; }
+  .azPartyCard {
+    background: #fff !important;
+    border-color: #d0d0d0 !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    &::before { background: #2563eb !important; opacity: 1 !important; }
+  }
+  .azPartyLabel  { color: #2563eb !important; }
+  .azPartyName   { color: #111 !important; }
+  .azPartyLine   { color: #555 !important; opacity: 1 !important; }
+
+  .azBankCard {
+    background: #f6f6f6 !important;
+    border-color: #d8d8d8 !important;
+    border-radius: 8px !important;
+  }
+  .azBankLine      { color: #555 !important; opacity: 1 !important; }
+  .azBankLineLabel { color: #2563eb !important; opacity: 1 !important; }
+
+  .azTableWrap {
+    background: #fff !important;
+    border-color: #d0d0d0 !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+  }
+  .azTable {
+    thead {
+      background: #f5f5f5 !important;
+      th { color: #2563eb !important; border-bottom-color: rgba(37,99,235,0.25) !important; }
+    }
+    tbody tr {
+      &:hover { background: transparent !important; }
+      td { border-bottom-color: #e8e8e8 !important; color: #111 !important; }
+    }
+    td:nth-child(4) { color: #16a34a !important; }
+  }
+
+  .azSummary {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+  }
+  .azDates {
+    background: #fff !important;
+    border-color: #d0d0d0 !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    min-width: 220px !important;
+  }
+  .azDateRow {
+    span   { color: #2563eb !important; opacity: 1 !important; }
+    strong { color: #111 !important; }
+  }
+
+  .azTotalsCard {
+    background: rgba(37,99,235,0.03) !important;
+    border-color: rgba(37,99,235,0.25) !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    min-width: 220px !important;
+  }
+  .azTotalRow {
+    opacity: 1 !important;
+    span   { color: #555 !important; }
+    strong { color: #111 !important; }
+  }
+  .azGrandTotal {
+    border-top-color: rgba(37,99,235,0.25) !important;
+    span   { color: #2563eb !important; opacity: 1 !important; }
+    strong { color: #16a34a !important; }
+  }
+
+  .azFooter {
+    background: #fff !important;
+    border-color: #d0d0d0 !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+  }
+  .azFooterNote  { color: #2563eb !important; }
+  .azFooterBadge { background: #e8f5e9 !important; color: #16a34a !important; }
+  .azSignatureLine { color: #888 !important; opacity: 1 !important; }
+  .azSignatureCaption { color: #888 !important; opacity: 1 !important; }
+
+  .azPartyCard,
+  .azTableWrap,
+  .azSummary,
+  .azFooter,
+  .azMeta {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "columns": {
+    "rowNumber": "No.",
+    "serviceName": "Service name",
+    "quantity": "Quantity",
+    "price": "Price, {{currency}}",
+    "amount": "Amount, {{currency}}"
+  },
+  "units": {
+    "m2": "m²",
+    "kWh": "kWh",
+    "m3": "m³"
+  },
+  "services": {
+    "maintenance": "Maintenance",
+    "placing": "Placing",
+    "inflicion": "Inflation",
+    "electricity": "Electricity",
+    "water": "Water supply",
+    "waterPart": "Water supply share",
+    "garbageCollector": "Garbage removal",
+    "cleaning": "Cleaning",
+    "discount": "Discount",
+    "custom": "Custom",
+    "additional": "Additional"
+  }
+}

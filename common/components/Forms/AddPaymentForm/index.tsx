@@ -10,7 +10,7 @@ import PaymentTypeSelect from '@components/UI/Reusable/PaymentTypeSelect'
 import { Operations, CURRENCY_SELECT_OPTIONS } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { Form, Input, InputNumber, Select } from 'antd'
-import { useMemo, useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import CompanySelect from './CompanySelect'
 import InvoiceCreationDate from './InvoiceCreationDate'
 import InvoiceNumber from './InvoiceNumber'
@@ -20,6 +20,7 @@ import PaymentTotal from './PaymentTotal'
 import { inputNumberParser } from '@utils/helpers'
 import type { ChangelogOption } from '@components/AddPaymentModal/changelog/types'
 import s from './style.module.scss'
+import changelogRowStyles from './changelog-row.module.scss'
 
 type AddPaymentFormProps = {
   paymentActions: { preview: boolean; edit: boolean; create?: boolean }
@@ -54,8 +55,14 @@ function AddPaymentForm({
   const { preview, edit } = paymentActions
   const selectedActions = { preview, edit }
 
-  const { form, payment, service, company, prevService, prevPayment } =
-    usePaymentContext()
+  const {
+    form,
+    payment,
+    service,
+    company,
+    prevService,
+    prevPayment,
+  } = usePaymentContext()
 
   const [streetHasService, setStreetHasService] = useState(false)
   const companyId = Form.useWatch('company', form)
@@ -82,6 +89,7 @@ function AddPaymentForm({
   
   
   const showChangelog = changelogOptions.length > 0
+
   return (
     <>
       <DomainsSelect form={form} edit={edit} />
@@ -97,28 +105,29 @@ function AddPaymentForm({
       <InvoiceNumber form={form} paymentActions={selectedActions} />
       <InvoiceCreationDate edit={preview} />
       
-    {showChangelog && (
-      <div>
-        <Form.Item
-          name="changelogId"
-          label="Історія змін"
-          tooltip="Попередні версії рахунку. Зберігаються автоматично після кожного редагування."
-          style={{ width: 320 }}
-        >
-          <Select
-            allowClear
-            placeholder="Оберіть версію рахунку"
-            options={changelogOptions}
-            optionLabelProp="shortLabel"
-            loading={changelogLoading}
-            disabled={preview}
-            notFoundContent={
-              changelogLoading ? 'Завантаження...' : 'Історії змін ще немає'
-            }
-          />
-        </Form.Item>
+    {!preview && operation !== Operations.Credit && showChangelog ? (
+      <div className={changelogRowStyles.changelogRow}>
+        <div className={changelogRowStyles.changelogSelect}>
+          <Form.Item
+            name="changelogId"
+            label="Історія змін"
+            tooltip="Попередні версії рахунку. Зберігаються автоматично після кожного редагування."
+          >
+            <Select
+              allowClear
+              placeholder="Оберіть версію рахунку"
+              options={changelogOptions}
+              optionLabelProp="shortLabel"
+              loading={changelogLoading}
+              disabled={preview}
+              notFoundContent={
+                changelogLoading ? 'Завантаження...' : 'Історії змін ще немає'
+              }
+            />
+          </Form.Item>
+        </div>
       </div>
-    )}
+    ) : null}
 
       {operation === Operations.Credit ? (
         <>

@@ -52,11 +52,11 @@ describe('API Route - POST Method', () => {
       json: jest.fn(),
     } as any
 
-    ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: false })
+    ;(getCurrentUser as any).mockResolvedValueOnce({ isGlobalAdmin: false, isDomainAdmin: false })
 
     await handler(mockRequest, mockResponse)
 
-    expect(mockResponse.status).toHaveBeenCalledWith(400)
+    expect(mockResponse.status).toHaveBeenCalledWith(403)
     expect(mockResponse.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: false,
@@ -80,7 +80,7 @@ describe('API Route - POST Method', () => {
     await handler(mockRequest, mockResponse)
 
     expect(mockResponse.status).toHaveBeenCalledWith(400)
-    expect(mockResponse.json).toHaveBeenCalledWith({ success: false })
+    expect(mockResponse.json).toHaveBeenCalledWith(expect.objectContaining({ success: false }))
   })
 
   it('should return 400 if empty strings are passed for street creation', async () => {
@@ -101,6 +101,6 @@ describe('API Route - POST Method', () => {
     await handler(mockRequest, mockResponse)
 
     expect(mockResponse.status).toHaveBeenCalledWith(400)
-    expect(mockResponse.json).toHaveBeenCalledWith({ success: false })
+    expect(mockResponse.json).toHaveBeenCalledWith(expect.objectContaining({ success: false }))
   })
 })

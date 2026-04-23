@@ -93,6 +93,8 @@ describe('getSingleCustomServiceInvoice', () => {
         name: 'Service custom',
         type: ServiceType.Custom,
         fieldName: 'customField',
+        amount: 1,
+        serviceId: expect.any(String),
         price: 200,
         sum: 200,
       })
@@ -163,6 +165,8 @@ describe('getSingleCustomServiceInvoice', () => {
         name: 'Service custom',
         type: ServiceType.Custom,
         fieldName: 'customField',
+        amount: 1,
+        serviceId: expect.any(String),
         price: 150,
         sum: 150,
       })

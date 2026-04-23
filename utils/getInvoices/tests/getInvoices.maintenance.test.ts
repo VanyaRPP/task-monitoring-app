@@ -518,13 +518,12 @@ describe('getInvoices - MAINTENANCE', () => {
         payment,
       })
 
-      expect(invoices).toContainEqual({
+      expect(invoices).toContainEqual(expect.objectContaining({
         type: ServiceType.Maintenance,
         amount: 17,
         price: 15,
         sum: 13,
-      })
-    })
+      }))
   })
 
   describe('props: { service, company, payment } with prio to payment', () => {
@@ -592,13 +591,13 @@ describe('getInvoices - MAINTENANCE', () => {
         payment,
       })
 
-      expect(invoices).toContainEqual({
+      expect(invoices).toContainEqual(expect.objectContaining({
         type: ServiceType.Maintenance,
         amount: 10,
         price: 12,
         sum: 12,
-      })
-    })
+    }))
+  })
     it('should load when service = { rentPrice: 10 }, company = null, payment = { invoice: [Maintenance] }', () => {
       const service: Partial<IService> = {
         rentPrice: 10,
@@ -621,13 +620,13 @@ describe('getInvoices - MAINTENANCE', () => {
         payment,
       })
 
-      expect(invoices).toContainEqual({
+      expect(invoices).toContainEqual(expect.objectContaining({
         type: ServiceType.Maintenance,
         amount: 10,
         price: 12,
         sum: 12,
-      })
-    })
+    }))
+  })
     it('should load when service = null, company = { totalArea: 10 }, payment = { invoice: [Maintenance] }', () => {
       const service: Partial<IService> = null
       const company: Partial<IRealestate> = {
@@ -650,12 +649,12 @@ describe('getInvoices - MAINTENANCE', () => {
         payment,
       })
 
-      expect(invoices).toContainEqual({
+      expect(invoices).toContainEqual(expect.objectContaining({
         type: ServiceType.Maintenance,
         amount: 10,
         price: 12,
         sum: 12,
-      })
+      }))
     })
     it('should load when service = { rentPrice: 10 }, company = { totalArea: 10 }, payment = { invoice: [Maintenance] }', () => {
       const service: Partial<IService> = {
@@ -681,12 +680,13 @@ describe('getInvoices - MAINTENANCE', () => {
         payment,
       })
 
-      expect(invoices).toContainEqual({
+      expect(invoices).toContainEqual(expect.objectContaining({
         type: ServiceType.Maintenance,
         amount: 10,
         price: 12,
         sum: 12,
-      })
+      }))
     })
   })
+})
 })

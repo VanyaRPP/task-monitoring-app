@@ -1,14 +1,34 @@
 import { IExtendedPayment } from '@common/api/paymentApi/payment.api.types'
-import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPricesTable'
+import { useEditPaymentMutation } from '@common/api/paymentApi/payment.api'
 import { usePaymentContext } from '@components/AddPaymentModal'
+import { TemplateKey } from '@components/AddPaymentModal/resolveTemplate'
 import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
 import dayjs from 'dayjs'
-import { FC, useEffect, useRef, useState } from 'react'
+import { FC, useRef } from 'react'
 import { useReactToPrint } from 'react-to-print'
-import { PrinterOutlined, EditOutlined } from '@ant-design/icons'
-import { Dropdown, Tooltip, message } from 'antd'
+import {
+  PrinterOutlined,
+  EditOutlined,
+  RightOutlined,
+  CheckOutlined,
+  TableOutlined,
+} from '@ant-design/icons'
+import { Dropdown, Tooltip, message, MenuProps } from 'antd'
+import dynamic from 'next/dynamic'
 import s from './style.module.scss'
-import cs from './templates/style.module.scss'
+
+const templateItems = [
+  { key: 'classic',    label: 'Класичний шаблон' },
+  { key: 'olimp',      label: 'OLIMP DIGITAL OÜ' },
+  { key: 'ledger',     label: 'Formal Ledger' },
+]
+
+const templateMap = {
+  classic: dynamic(() => import('./templates/classic'), { ssr: false }),
+  ledger:  dynamic(() => import('./templates/ledger'),  { ssr: false }),
+  olimp:   dynamic(() => import('./templates/olimp'),   { ssr: false }),
+}
+
 
 interface Props {
   currPayment?: IExtendedPayment | null
@@ -21,9 +41,9 @@ const GroupedReceiptForm: FC<Props> = ({
   paymentData,
   paymentActions: _paymentActions,
 }) => {
-  const { template, setTemplate } = usePaymentContext();
-  const [topInfoCardHeight, setTopInfoCardHeight] = useState<number>(0)
-  const { company } = usePaymentContext()
+  const { template, setTemplate, company, showQuantityInPreview, setShowQuantityInPreview } =
+    usePaymentContext()
+  const [editPayment] = useEditPaymentMutation()
   const rawData = currPayment ?? paymentData ?? null
   const data = rawData as any
   const currency =
@@ -138,58 +158,7 @@ const GroupedReceiptForm: FC<Props> = ({
     ...(data?.reciever?.adminEmails || []),
   ].filter(Boolean)
 
-  const renderBankDetailsLine = (line: string) => {
-    const trimmedLine = line?.trim?.() || ''
-    const separatorIndex = trimmedLine.indexOf(':')
-
-    const renderWithBoldUsd = (value: string) =>
-      value.split(/(USD)/gi).map((chunk, idx) =>
-        chunk.toUpperCase() === 'USD' ? (
-          <span className={s.bankDetailsLabel} key={`usd-${idx}`}>
-            {chunk}
-          </span>
-        ) : (
-          chunk
-        )
-      )
-
-    if (separatorIndex < 0) {
-      return renderWithBoldUsd(trimmedLine)
-    }
-
-    const label = trimmedLine.slice(0, separatorIndex + 1)
-    const value = trimmedLine.slice(separatorIndex + 1).trim()
-
-    return (
-      <>
-        <span className={s.bankDetailsLabel}>{renderWithBoldUsd(label)}</span>
-        {value ? <> {renderWithBoldUsd(value)}</> : ''}
-      </>
-    )
-  }
-
   const componentRef = useRef<HTMLDivElement | null>(null)
-  const paymentInfoCardRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    if (!paymentInfoCardRef.current) {
-      return
-    }
-
-    const updateHeight = () => {
-      const nextHeight = Math.ceil(
-        paymentInfoCardRef.current?.getBoundingClientRect().height || 0
-      )
-      setTopInfoCardHeight(nextHeight)
-    }
-
-    updateHeight()
-
-    const observer = new ResizeObserver(updateHeight)
-    observer.observe(paymentInfoCardRef.current)
-
-    return () => observer.disconnect()
-  }, [paymentInfoLines.length, isEnglish, template])
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -202,281 +171,164 @@ const GroupedReceiptForm: FC<Props> = ({
     return null
   }
 
-  const templateItems = [
-    {
-      key: 'classic',
-      label: 'Класичний шаблон',
-    },
-    {
-      key: 'olimp',
-      label: 'OLIMP DIGITAL OÜ',
-    },
-  ]
-
   const handleSendToTelegram = async () => {
-  const hide = message.loading('Генерація та відправка PDF...', 0);
-  
-  try {
-    const response = await fetch('/api/telegram/send-pdf', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paymentData: data }), 
-    });
+    const hide = message.loading('Генерація та відправка PDF...', 0);
 
-    if (response.ok) {
-      message.success('Готово! Інвойс уже в Telegram.');
-    } else {
-      throw new Error('Помилка сервера при генерації PDF');
+    try {
+      const response = await fetch('/api/telegram/send-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentData: data }),
+      });
+
+      if (response.ok) {
+        message.success('Готово! Інвойс уже в Telegram.');
+      } else {
+        throw new Error('Помилка сервера при генерації PDF');
+      }
+    } catch (err: any) {
+      message.error(err.message);
+    } finally {
+      hide();
     }
-  } catch (err: any) {
-    message.error(err.message);
-  } finally {
-    hide();
+  };
+
+  const companyLabel = (data?.company as any)?.companyName ?? company?.companyName ?? ''
+
+  const handleSaveTemplate = async (templateKey: TemplateKey, scope?: 'company' | 'domain' | 'payment') => {
+    if (!data?._id) return message.warning('Платіж не знайдено')
+    setTemplate(templateKey)
+    const result = await editPayment({
+      _id: data._id,
+      template: templateKey,
+      _templateScope: scope !== 'payment' ? scope : undefined,
+    })
+    if ('error' in result) {
+      message.error('Помилка збереження')
+    } else if (scope === 'company') {
+      message.success(`Шаблон збережено для компанії (${companyLabel})`)
+    } else if (scope === 'domain') {
+      message.success(`Шаблон збережено для домену (${domainName})`)
+    }
   }
-};
+
+  const makeSaveMenu = (templateKey: TemplateKey): MenuProps => ({
+    items: [
+      {
+        key: 'payment',
+        label: 'Зберегти для цього платежу',
+      },
+      { type: 'divider' },
+      {
+        key: 'company',
+        label: (
+          <div>
+            Дефолт для компанії{' '}
+            <span style={{ opacity: 0.5, fontSize: '13px' }}>«{companyLabel}»</span>
+          </div>
+        ),
+      },
+      {
+        key: 'domain',
+        label: (
+          <div>
+            Дефолт для домену{' '}
+            <span style={{ opacity: 0.5, fontSize: '13px' }}>«{domainName}»</span>
+          </div>
+        ),
+      },
+    ],
+    onClick: ({ key, domEvent }) => {
+      domEvent.stopPropagation()
+      if (key === 'payment' || key === 'company' || key === 'domain') {
+        handleSaveTemplate(templateKey, key)
+      }
+    },
+  })
+
+  const dropdownItems = templateItems.map((item) => ({
+    key: item.key,
+    label: (
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <span
+          onClick={() => handleSaveTemplate(item.key as TemplateKey)}
+          style={{ display: 'flex', gap: 6 }}
+        >
+          {template === item.key && <CheckOutlined style={{ fontSize: 12, opacity: 0.7 }} />}
+          {item.label}
+        </span>
+        <Dropdown
+          placement={'right' as unknown as any}
+          menu={makeSaveMenu(item.key as TemplateKey)}
+          trigger={['hover']}
+        >
+          <RightOutlined style={{ fontSize: 12, opacity: 0.7 }} />
+        </Dropdown>
+      </div>
+    ),
+  }))
+
+  const TemplateComponent = templateMap[template] || templateMap.olimp
+
+  const templateProps = {
+    data,
+    componentRef,
+    isEnglish,
+    currencyLabel,
+    currency,
+    modernInvoiceNumber,
+    rows,
+    getQty,
+    subtotal,
+    taxPercent,
+    taxAmount,
+    total,
+    paymentInfoLines,
+    issuedToLines,
+    normalizedBankDetailsLines,
+  }
 
   return (
     <>
       <PrinterOutlined className={s.print} onClick={handlePrint} />
       <Dropdown
         trigger={['click']}
+        placement="bottomLeft"
         menu={{
-          items: templateItems,
-          onClick: ({ key }) => setTemplate(key as 'classic' | 'olimp'),
+          items: dropdownItems,
+          style: { minWidth: 240 },
         }}
       >
         <Tooltip title={isEnglish ? 'Select template' : 'Обрати шаблон'}>
           <EditOutlined className={s.edit} />
         </Tooltip>
       </Dropdown>
-
-      {template === 'classic' ? (
-        <div
-          className={cs.invoiceContainer}
-          ref={componentRef}
-          style={{
-            width: '100%',
-            height: '100%',
-            marginTop: '2em',
-            marginRight: '1.5em',
-            marginLeft: '1.5em',
+      <Tooltip title="Показувати кількість і ціну в таблиці перегляду">
+        <TableOutlined
+          role="button"
+          tabIndex={0}
+          aria-label={
+            showQuantityInPreview
+              ? 'Приховати кількість і ціну в перегляді'
+              : 'Показати кількість і ціну в перегляді'
+          }
+          aria-pressed={showQuantityInPreview}
+          className={`${s.tableDetailsToggle} ${
+            showQuantityInPreview ? s.tableDetailsToggleActive : ''
+          }`}
+          onClick={() =>
+            setShowQuantityInPreview(!showQuantityInPreview)
+          }
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              setShowQuantityInPreview(!showQuantityInPreview)
+            }
           }}
-        >
-          <div className={cs.providerInfo}>
-            <div className={cs.label}>{isEnglish ? 'Provider' : 'Постачальник'}</div>
-            <pre className={cs.preLabel}>
-              {data?.provider?.description?.trim()} <br />
-              <br />
-            </pre>
-          </div>
+        />
+      </Tooltip>
 
-          <div className={cs.receiverInfo}>
-            <div className={cs.label}>{isEnglish ? 'Recipient' : 'Одержувач'}</div>
-            <pre className={cs.preLabel}>
-              {data?.reciever?.description?.trim()} <br />
-              {data?.reciever?.companyName} <br />
-              {data?.reciever?.adminEmails?.map((email: string) => (
-                <div key={email}>
-                  {email} <br />
-                </div>
-              ))}
-            </pre>
-          </div>
-
-          <div className={cs.providerInvoice}>
-            <div className={cs.datecellTitle}>
-              {isEnglish ? 'INVOICE №' : 'РАХУНОК №'} {data.invoiceNumber}
-            </div>
-            <div className={cs.datecellDate}>
-              {isEnglish ? 'dated' : 'Від'} &nbsp;
-              {dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}
-              {isEnglish ? '.' : ' року.'}
-            </div>
-            <div className={cs.datecell}>
-              {isEnglish ? 'Due by' : 'Підлягає сплаті до'} &nbsp;
-              {dayjs(data?.invoiceCreationDate).add(5, 'd').format('DD.MM.YYYY')}
-              {!isEnglish && (
-                <>
-                  &nbsp; року
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className={cs.tableSum}>
-            <GroupedPricesTable
-              preview
-              domainId={data?.domain?._id ?? data?.domain}
-              currency={currency}
-              invoices={data?.invoice ?? []}
-            />
-          </div>
-
-          <div className={cs.payTable}>
-            <div className={cs.payFixed}>
-              {isEnglish ? 'Total payment amount:' : 'Загальна сума оплати:'}
-              <div className={cs.payBoldSum}>
-                {(+data?.generalSum || +data?.debit || 0).toFixed(2)}{' '}
-                {currencyLabel}
-              </div>
-            </div>
-
-            <div>
-              {isEnglish ? 'Payment purpose:' : 'Призначення платежу:'}{' '}
-              <strong>
-                {isEnglish
-                  ? `Payment for services according to invoice № ${data.invoiceNumber} dated ${dayjs(
-                      data?.invoiceCreationDate
-                    )?.format?.('DD.MM.YYYY')}`
-                  : `Оплата за послуги згідно рахунку № ${data.invoiceNumber} від ${dayjs(
-                      data?.invoiceCreationDate
-                    )?.format?.('DD.MM.YYYY')}`}
-              </strong>
-            </div>
-
-            <div className={cs.payFixed}>
-              {data?.provider?.description?.split('\n')?.[0] || ''}
-              <div className={cs.lineInner}>________________</div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div
-          className={s.invoiceContainer}
-          ref={componentRef}
-          style={{
-            width: '100%',
-            maxWidth: '980px',
-            margin: '2em auto 1em',
-          }}
-        >
-          <div className={s.invoiceHeader}>
-            <div className={s.brandBlock}>
-              {/* <div className={s.brandLogo}>
-                <img src="/icons/icon-96x96.png" alt="SpaceHub" />
-              </div> */}
-              <div className={s.brandText}>
-                <div>{data?.reciever?.companyName || ''}</div>
-              </div>
-            </div>
-            <h1>{isEnglish ? 'INVOICE' : 'РАХУНОК'} №{modernInvoiceNumber}</h1>
-          </div>
-
-          <div className={s.invoiceInfoCard}>
-            <div className={s.infoColumnStack}>
-              <div
-                ref={paymentInfoCardRef}
-                className={`${s.infoColumn} ${s.infoCard} ${s.topInfoCard}`}
-              >
-                <h4>{isEnglish ? 'PAYMENT INFO:' : 'ПЛАТІЖНІ ДАНІ:'}</h4>
-                <div className={s.infoList}>
-                  {paymentInfoLines.map((line: string, idx: number) => (
-                    <div
-                      className={`${s.infoLine} ${idx === 0 ? s.infoLineAccent : ''}`}
-                      key={`${line}-${idx}`}
-                    >
-                      {line}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {!!normalizedBankDetailsLines.length && (
-                <div className={`${s.infoColumn} ${s.infoCard} ${s.bankDetailsCard}`}>
-                  <div className={s.infoList}>
-                    {normalizedBankDetailsLines.map((line: string, idx: number) => (
-                      <div
-                        className={s.infoLine}
-                        key={`${line}-${idx}`}
-                      >
-                        {renderBankDetailsLine(line)}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div
-              className={`${s.infoColumn} ${s.infoCard} ${s.topInfoCard} ${s.issuedToCard}`}
-              style={
-                topInfoCardHeight > 0 ? { height: `${topInfoCardHeight}px` } : undefined
-              }
-            >
-              <h4>{isEnglish ? 'ISSUED TO:' : 'ОТРИМУВАЧ:'}</h4>
-              <div className={s.infoList}>
-                {issuedToLines.map((line: string, idx: number) => (
-                  <div
-                    className={`${s.infoLine} ${idx === 0 ? s.infoLineAccent : ''}`}
-                    key={`${line}-${idx}`}
-                  >
-                    {line}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <table className={s.invoiceTable}>
-            <thead>
-              <tr>
-                <th>{isEnglish ? 'DESCRIPTION' : 'ОПИС'}</th>
-                <th>{isEnglish ? 'RATE' : 'ЦІНА'}</th>
-                <th>{isEnglish ? 'QTY' : 'К-СТЬ'}</th>
-                <th>{isEnglish ? 'TOTAL' : 'СУМА'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((item: any, index: number) => {
-                const qty = getQty(item)
-                const rate = Number.isFinite(Number(item?.price))
-                  ? Number(item.price)
-                  : qty
-                  ? Number(item?.sum || 0) / qty
-                  : Number(item?.sum || 0)
-
-                return (
-                  <tr key={`${item?.type || item?.name}-${index}`}>
-                    <td>{item?.name || item?.type || '-'}</td>
-                    <td>{rate.toFixed(2)}</td>
-                    <td>{qty}</td>
-                    <td>
-                      {Number(item?.sum || 0).toFixed(2)} {currencyLabel}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-
-          <div className={s.summarySection}>
-            <div className={s.invoiceDates}>
-              <div className={s.infoRow}>
-                <span>{isEnglish ? 'DATE:' : 'ДАТА:'}</span>
-                <strong>{dayjs(data?.invoiceCreationDate)?.format?.('DD.MM.YYYY')}</strong>
-              </div>
-              <div className={s.infoRow}>
-                <span>{isEnglish ? 'DUE DATE:' : 'СТРОК ОПЛАТИ:'}</span>
-                <strong>{dayjs(data?.invoiceCreationDate).add(5, 'd').format('DD.MM.YYYY')}</strong>
-              </div>
-            </div>
-
-            <div className={s.totalsBlock}>
-              <div className={`${s.totalRow} ${s.grandTotal}`}>
-                <span>{isEnglish ? 'TOTAL' : 'ВСЬОГО'}</span>
-                <strong>
-                  {total.toFixed(2)} {currencyLabel}
-                </strong>
-              </div>
-            </div>
-          </div>
-
-          <div className={s.footerNote}>
-            <strong>{isEnglish ? 'THANK YOU' : 'ДЯКУЄМО'}</strong>
-            <div className={s.signatureLine}>______________</div>
-          </div>
-        </div>
-      )}
+      <TemplateComponent {...templateProps} />
     </>
   )
 }

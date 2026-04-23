@@ -184,6 +184,6 @@ describe('GetCompanyAreas', () => {
     await handler(mockReq, mockRes)
     const responseData = await mockRes.json.mock.calls[0][0]
     expect(mockRes.status).toHaveBeenCalledWith(400)
-    expect(responseData.message).toBe('You are not autorized')
+    expect(responseData.message).toBe('You do not have a real estate object')
   })
 })

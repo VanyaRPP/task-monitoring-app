@@ -1,0 +1,645 @@
+
+$charcoal:      #c8c8c8;
+$charcoal-dim:  rgba(200, 200, 200, 0.10);
+$slate:         rgba(255, 255, 255, 0.55);
+
+$ink:           rgba(255, 255, 255, 0.90);
+$ink-muted:     rgba(255, 255, 255, 0.48);
+
+$rule:          rgba(255, 255, 255, 0.10);
+$rule-mid:      rgba(255, 255, 255, 0.18);
+$rule-strong:   rgba(255, 255, 255, 0.30);
+
+$surface:       rgba(255, 255, 255, 0.02);
+$surface-stripe: rgba(255, 255, 255, 0.03);
+$surface-head:  rgba(255, 255, 255, 0.06);
+
+$font:          'Inter', 'Helvetica Neue', Arial, sans-serif;
+$mono:          'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+
+.lgInvoice {
+  font-family: $font;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2.6rem 3rem;
+  box-sizing: border-box;
+  border: 1px solid $rule-mid;
+  // border-top: 4px solid $charcoal;
+  border-radius: 4px;
+  background: $surface;
+}
+
+.lgHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.8rem;
+  padding-bottom: 1.4rem;
+  border-bottom: 2px solid $rule-strong;
+}
+
+.lgBrand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.lgBrandName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.15;
+}
+
+.lgBrandSub {
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: $ink-muted;
+  font-weight: 500;
+}
+
+.lgInvoiceTitle {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+}
+
+.lgDocType {
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: $ink-muted;
+  background: $surface-head;
+  padding: 0.2em 0.7em;
+  border-radius: 3px;
+  border: 1px solid $rule;
+}
+
+.lgInvoiceNumber {
+  font-family: $mono;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+
+.lgMeta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid $rule-mid;
+  border-radius: 4px;
+  margin-bottom: 1.8rem;
+  overflow: hidden;
+}
+
+.lgMetaCell {
+  padding: 0.65rem 1rem;
+  border-right: 1px solid $rule;
+  background: $surface-head;
+
+  &:last-child { border-right: none; }
+}
+
+.lgMetaCellLabel {
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: $ink-muted;
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+
+.lgMetaCellValue {
+  font-family: $mono;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.lgParties {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.lgPartyBox {
+  border: 1px solid $rule-mid;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.lgPartyHeader {
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: $ink-muted;
+  background: $surface-head;
+  padding: 0.45rem 1rem;
+  border-bottom: 1px solid $rule;
+}
+
+.lgPartyBody {
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.lgPartyName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.lgPartyLine {
+  font-size: 0.82rem;
+  color: $ink-muted;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.lgBankSection {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid $rule;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.lgBankLine {
+  font-family: $mono;
+  font-size: 0.75rem;
+  color: $ink-muted;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.lgBankLineLabel {
+  color: $ink;
+  font-weight: 700;
+}
+
+
+
+
+
+.lgTableWrap {
+  border: 1px solid $rule-mid;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.lgTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+
+  thead {
+    background: $surface-head;
+
+    th {
+      font-size: 0.6rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: $ink-muted;
+      font-weight: 700;
+      padding: 0.7rem 1rem;
+      text-align: left;
+      border-bottom: 2px solid $rule-strong;
+    }
+  }
+
+  tbody tr {
+    &:nth-child(even) { background: $surface-stripe; }
+
+    td {
+      font-size: 0.88rem;
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid $rule;
+      vertical-align: middle;
+    }
+
+    &:last-child td { border-bottom: none; }
+  }
+
+  th:nth-child(2), td:nth-child(2) {
+    width: 14%;
+    text-align: right;
+    white-space: nowrap;
+    font-family: $mono;
+    font-size: 0.82rem;
+  }
+  th:nth-child(3), td:nth-child(3) {
+    width: 9%;
+    text-align: right;
+    white-space: nowrap;
+    font-family: $mono;
+    font-size: 0.82rem;
+  }
+  th:nth-child(4), td:nth-child(4) {
+    width: 20%;
+    text-align: right;
+    white-space: nowrap;
+    font-family: $mono;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+}
+
+
+
+
+
+.lgSummary {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.2rem;
+  margin-top: 1.6rem;
+}
+
+.lgDates {
+  border: 1px solid $rule-mid;
+  border-radius: 4px;
+  overflow: hidden;
+  min-width: 220px;
+}
+
+.lgDatesHeader {
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: $ink-muted;
+  background: $surface-head;
+  padding: 0.4rem 1rem;
+  border-bottom: 1px solid $rule;
+}
+
+.lgDatesBody {
+  padding: 0.6rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.lgDateRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  font-size: 0.82rem;
+
+  span {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: $ink-muted;
+  }
+
+  strong {
+    font-family: $mono;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+}
+
+.lgTotalsBox {
+  border: 1px solid $rule-strong;
+  border-radius: 4px;
+  min-width: 280px;
+  overflow: hidden;
+}
+
+.lgTotalsHeader {
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: $ink-muted;
+  background: $surface-head;
+  padding: 0.4rem 1rem;
+  border-bottom: 1px solid $rule;
+}
+
+.lgTotalsBody {
+  padding: 0.6rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.lgTotalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.28rem 0;
+  font-size: 0.83rem;
+  color: $ink-muted;
+
+  span { font-size: 0.75rem; letter-spacing: 0.05em; }
+  strong { font-family: $mono; color: $ink; }
+}
+
+.lgGrandTotal {
+  margin-top: 0.4rem;
+  padding-top: 0.55rem;
+  color: $ink;
+  font-size: 1.1rem;
+
+  span {
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: $charcoal;
+  }
+
+  strong {
+    font-family: $mono;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: $ink;
+  }
+}
+
+
+
+
+
+.lgFooter {
+  margin-top: 2.4rem;
+  padding-top: 1.2rem;
+  border-top: 2px solid $rule-strong;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+}
+
+.lgFooterNote {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: $ink-muted;
+}
+
+.lgSignatureBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+}
+
+.lgSignatureLine {
+  font-size: 0.75rem;
+  color: $ink-muted;
+  padding-top: 52px;
+  letter-spacing: 0.08em;
+}
+
+.lgSignatureCaption {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: $ink-muted;
+}
+
+
+
+
+
+$charcoal-l:     #444;
+$rule-l:         rgba(0, 0, 0, 0.08);
+$rule-mid-l:     rgba(0, 0, 0, 0.14);
+$rule-strong-l:  rgba(0, 0, 0, 0.22);
+$surface-l:      rgba(0, 0, 0, 0.01);
+$surface-head-l: rgba(0, 0, 0, 0.035);
+$surface-stripe-l: rgba(0, 0, 0, 0.02);
+
+:global(:root[data-theme='light']) {
+  .lgInvoice {
+    border-color: $rule-mid-l;
+    border-top-color: $charcoal-l;
+    background: $surface-l;
+    color: #1a1a1a;
+  }
+
+  .lgHeader        { border-bottom-color: $rule-strong-l; }
+  .lgBrandName     { color: #1a1a1a; }
+  .lgBrandSub      { color: rgba(0, 0, 0, 0.50); }
+  .lgDocType {
+    color: rgba(0, 0, 0, 0.50);
+    background: $surface-head-l;
+    border-color: $rule-l;
+  }
+  .lgInvoiceNumber { color: #1a1a1a; }
+
+  .lgMeta          { border-color: $rule-mid-l; }
+  .lgMetaCell {
+    border-right-color: $rule-l;
+    background: $surface-head-l;
+  }
+  .lgMetaCellLabel { color: rgba(0, 0, 0, 0.50); }
+  .lgMetaCellValue { color: #1a1a1a; }
+
+  .lgPartyBox      { border-color: $rule-mid-l; }
+  .lgPartyHeader {
+    color: rgba(0, 0, 0, 0.50);
+    background: $surface-head-l;
+    border-bottom-color: $rule-l;
+  }
+  .lgPartyName     { color: #1a1a1a; }
+  .lgPartyLine     { color: rgba(0, 0, 0, 0.55); }
+  .lgBankSection   { border-top-color: $rule-l; }
+  .lgBankLine      { color: rgba(0, 0, 0, 0.55); }
+  .lgBankLineLabel { color: #1a1a1a; }
+
+  .lgTableWrap     { border-color: $rule-mid-l; }
+  .lgTable {
+    thead {
+      background: $surface-head-l;
+      th { color: rgba(0, 0, 0, 0.50); border-bottom-color: $rule-strong-l; }
+    }
+    tbody tr {
+      &:nth-child(even) { background: $surface-stripe-l; }
+      td { border-bottom-color: $rule-l; color: #1a1a1a; }
+    }
+  }
+
+  .lgDates            { border-color: $rule-mid-l; }
+  .lgDatesHeader {
+    color: rgba(0, 0, 0, 0.50);
+    background: $surface-head-l;
+    border-bottom-color: $rule-l;
+  }
+  .lgDateRow {
+    span   { color: rgba(0, 0, 0, 0.50); }
+    strong { color: #1a1a1a; }
+  }
+
+  .lgTotalsBox        { border-color: $rule-strong-l; }
+  .lgTotalsHeader {
+    color: rgba(0, 0, 0, 0.50);
+    background: $surface-head-l;
+    border-bottom-color: $rule-l;
+  }
+  .lgTotalRow {
+    color: rgba(0, 0, 0, 0.55);
+    strong { color: #1a1a1a; }
+  }
+  .lgGrandTotal {
+    color: #1a1a1a;
+    span   { color: $charcoal-l; }
+    strong { color: #1a1a1a; }
+  }
+
+  .lgFooter           { border-top-color: $rule-strong-l; }
+  .lgFooterNote       { color: rgba(0, 0, 0, 0.50); }
+  .lgSignatureLine    { color: rgba(0, 0, 0, 0.40); }
+  .lgSignatureCaption { color: rgba(0, 0, 0, 0.40); }
+}
+
+
+
+
+
+@media (max-width: 860px) {
+  .lgInvoice { padding: 1.4rem 1rem; }
+
+  .lgHeader {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .lgInvoiceTitle { align-items: flex-start; }
+
+  .lgMeta { grid-template-columns: repeat(2, 1fr); }
+  .lgMetaCell:nth-child(2) { border-right: none; }
+  .lgMetaCell:nth-child(3),
+  .lgMetaCell:nth-child(4) { border-top: 1px solid $rule; }
+
+  .lgParties { grid-template-columns: 1fr; }
+
+  .lgSummary { flex-direction: column; }
+  .lgDates,
+  .lgTotalsBox { width: 100%; min-width: 0; }
+}
+
+
+
+
+
+@media print {
+  @page { size: A4; margin: 12mm 14mm; }
+
+  .lgInvoice {
+    max-width: none !important;
+    width: 100% !important;
+    padding: 2rem 2.4rem !important;
+    margin: 0 !important;
+    border: 1px solid #ccc !important;
+    border-top: 4px solid #444 !important;
+    border-radius: 4px !important;
+    background: #fff !important;
+    color: #111 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .lgHeader {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    border-bottom-color: #999 !important;
+  }
+  .lgInvoiceTitle { align-items: flex-end !important; }
+  .lgBrandName    { color: #111 !important; }
+  .lgBrandSub     { color: #555 !important; }
+  .lgInvoiceNumber { color: #111 !important; }
+  .lgDocType      { background: #f0f0f0 !important; border-color: #ddd !important; color: #555 !important; }
+
+  .lgMeta {
+    grid-template-columns: repeat(4, 1fr) !important;
+    border-color: #ccc !important;
+    border-radius: 4px !important;
+  }
+  .lgMetaCell {
+    background: #f5f5f5 !important;
+    border-right-color: #e0e0e0 !important;
+    border-top: none !important;
+  }
+  .lgMetaCellLabel { color: #555 !important; }
+  .lgMetaCellValue { color: #111 !important; }
+
+  .lgParties      { grid-template-columns: 1.15fr 1fr !important; }
+  .lgPartyBox     { border-color: #ccc !important; border-radius: 4px !important; }
+  .lgPartyHeader  { background: #f5f5f5 !important; border-bottom-color: #e0e0e0 !important; color: #555 !important; }
+  .lgPartyName    { color: #111 !important; }
+  .lgPartyLine    { color: #555 !important; }
+  .lgBankSection  { border-top-color: #e0e0e0 !important; }
+  .lgBankLine     { color: #555 !important; }
+  .lgBankLineLabel { color: #111 !important; }
+
+  .lgTableWrap    { border-color: #ccc !important; border-radius: 4px !important; }
+  .lgTable {
+    thead {
+      background: #f5f5f5 !important;
+      th { color: #555 !important; border-bottom-color: #999 !important; }
+    }
+    tbody tr:nth-child(even) { background: #fafafa !important; }
+    tbody td { border-bottom-color: #eee !important; color: #111 !important; }
+  }
+
+  .lgSummary      { flex-direction: row !important; justify-content: space-between !important; }
+  .lgDates {
+    border-color: #ccc !important;
+    border-radius: 4px !important;
+    min-width: 220px !important;
+  }
+  .lgDatesHeader  { background: #f5f5f5 !important; border-bottom-color: #e0e0e0 !important; color: #555 !important; }
+  .lgDateRow {
+    span   { color: #555 !important; }
+    strong { color: #111 !important; }
+  }
+
+  .lgTotalsBox {
+    border-color: #999 !important;
+    border-radius: 4px !important;
+    min-width: 220px !important;
+  }
+  .lgTotalsHeader { background: #f5f5f5 !important; border-bottom-color: #e0e0e0 !important; color: #555 !important; }
+  .lgTotalRow {
+    color: #555 !important;
+    strong { color: #111 !important; }
+  }
+  .lgGrandTotal {
+    color: #111 !important;
+    span   { color: #444 !important; }
+    strong { color: #111 !important; }
+  }
+
+  .lgFooter       { border-top-color: #999 !important; }
+  .lgFooterNote   { color: #555 !important; }
+  .lgSignatureLine { color: #888 !important; }
+  .lgSignatureCaption { color: #888 !important; }
+
+  .lgPartyBox,
+  .lgTableWrap,
+  .lgSummary,
+  .lgFooter,
+  .lgMeta {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

@@ -22,6 +22,10 @@ import { ITransaction } from './transactionTypes'
 import { useState } from 'react'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import TransactionDrawer from './TransactionsDrawer'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import { getResolvedDescription } from './bankHelper'
+
+
 
 const { RangePicker } = DatePicker
 
@@ -165,7 +169,9 @@ const getTrantypeFilterProps = () => ({
 export const generateColumns = (
   visibleColumns: string[],
   domain: IExtendedDomain,
-  toggleColumnVisibility: (columnKey: string) => void
+  toggleColumnVisibility: (columnKey: string) => void,
+  companies: IRealestate[],
+  refetchTransactions?: () => void
 ): ColumnsType<ITransaction> => {
   const items: MenuProps['items'] = columnNames.map((col) => ({
     key: col,
@@ -261,7 +267,15 @@ export const generateColumns = (
       key: 'DAT_OD',
       ...getDateColumnProps('DAT_OD'),
     },
-    { title: 'Description', dataIndex: 'OSND', key: 'OSND', width: 300 },
+      {
+      title: 'Description',
+      dataIndex: 'OSND',
+      key: 'OSND',
+      width: 300,
+      render: (text: string, record: ITransaction) => {
+        return getResolvedDescription(record, companies);
+      },
+    },
     { title: 'Amount', dataIndex: 'SUM', key: 'SUM', width: '10%' },
     { title: 'Amount E', dataIndex: 'SUM_E', key: 'SUM_E' },
     { title: 'Reference', dataIndex: 'REF', key: 'REF' },
@@ -310,7 +324,7 @@ export const generateColumns = (
       dataIndex: 'OPTIONS',
       key: 'OPTIONS',
       render: (text: string, record: ITransaction) => (
-        <TransactionDrawer transaction={record} domain={domain} />
+        <TransactionDrawer transaction={record} domain={domain} refetchTransactions={refetchTransactions} />
       ),
     },
   ].filter(

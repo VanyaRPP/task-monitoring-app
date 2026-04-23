@@ -1,0 +1,473 @@
+.invoiceContainer {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 2.2rem 2.4rem;
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.invoiceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.6rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+
+  h1 {
+    margin: 0;
+    font-size: 2.1rem;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+  }
+}
+.dateOlimp {
+  font-size: 17px;
+  font-weight: 100;
+}
+
+.brandBlock {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.brandLogo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-style: italic;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.brandText {
+  font-size: 1.35rem;
+  font-weight: 700;
+
+  small {
+    display: block;
+    opacity: 0.8;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+  }
+}
+
+.invoiceInfoCard {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1rem;
+  align-items: start;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  margin: 0 auto 1.5rem;
+}
+
+.infoColumn {
+  font-size: 0.95rem;
+  line-height: 1.45;
+
+  h4 {
+    margin: 0 0 0.8rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    opacity: 0.9;
+  }
+}
+
+.infoColumnStack {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.infoCard {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1rem 1.1rem;
+}
+
+.topInfoCard {
+  min-height: 170px;
+}
+
+.issuedToCard {
+  margin-top: 0;
+}
+
+.bankDetailsCard {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.infoList {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.infoLine {
+  font-size: 1rem;
+  line-height: 1.3;
+  opacity: 0.95;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.infoLineAccent {
+  font-weight: 700;
+  font-size: large;
+  letter-spacing: 0.01em;
+  margin-bottom: 0.3rem;
+}
+
+.bankDetailsLabel {
+  font-weight: 700;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.3rem;
+
+  span {
+    opacity: 0.85;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+  }
+}
+
+.invoiceTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.6rem;
+  table-layout: fixed;
+
+  th,
+  td {
+    text-align: left;
+    padding: 0.7rem 0.6rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.95rem;
+  }
+
+  th {
+    font-size: 0.78rem;
+    letter-spacing: 0.09em;
+    opacity: 0.9;
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+  }
+
+  th:nth-child(2),
+  td:nth-child(2) {
+    width: 12%;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  th:nth-child(3),
+  td:nth-child(3) {
+    width: 10%;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  th:nth-child(4),
+  td:nth-child(4) {
+    width: 18%;
+    text-align: right;
+    white-space: nowrap;
+  }
+}
+
+.totalsBlock {
+  width: 360px;
+  max-width: 100%;
+}
+
+.summarySection {
+  margin-top: 1.1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.invoiceDates {
+  min-width: 240px;
+  max-width: 360px;
+  padding-top: 0.35rem;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.3rem 0;
+  font-size: 0.95rem;
+}
+
+.grandTotal {
+  margin-top: 0.2rem;
+  padding-top: 0.6rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.footerNote {
+  margin-top: 2.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+}
+
+.signatureLine {
+  opacity: 0.8;
+  font-style: italic;
+  padding-top: 60px;
+}
+
+:global(:root[data-theme='light']) {
+  .invoiceContainer {
+    border-color: rgba(0, 0, 0, 0.12);
+    background: rgba(0, 0, 0, 0.01);
+    color: #1a1a1a;
+  }
+
+  .invoiceHeader {
+    border-bottom-color: rgba(0, 0, 0, 0.12);
+    h1 { color: #1a1a1a; }
+  }
+
+  .brandLogo {
+    border-color: rgba(0, 0, 0, 0.20);
+  }
+
+  .brandText {
+    color: #1a1a1a;
+    small { color: rgba(0, 0, 0, 0.55); }
+  }
+
+  .infoCard {
+    border-color: rgba(0, 0, 0, 0.12);
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  .bankDetailsCard {
+    background: rgba(0, 0, 0, 0.015);
+    border-color: rgba(0, 0, 0, 0.15);
+  }
+
+  .infoColumn h4   { color: #1a1a1a; }
+  .infoLine        { color: #1a1a1a; }
+  .infoLineAccent  { color: #1a1a1a; }
+  .bankDetailsLabel { color: #1a1a1a; }
+
+  .infoRow span    { color: rgba(0, 0, 0, 0.55); }
+
+  .invoiceTable {
+    th, td { border-bottom-color: rgba(0, 0, 0, 0.10); }
+    th { color: rgba(0, 0, 0, 0.55); }
+    td { color: #1a1a1a; }
+  }
+
+  .grandTotal {
+    color: #1a1a1a;
+  }
+
+  .totalRow {
+    color: #1a1a1a;
+    span { color: rgba(0, 0, 0, 0.55); }
+  }
+
+  .signatureLine { color: rgba(0, 0, 0, 0.55); }
+}
+
+@media (max-width: 900px) {
+  .invoiceContainer {
+    padding: 1.2rem;
+  }
+
+  .invoiceHeader {
+    h1 {
+      font-size: 1.6rem;
+    }
+  }
+
+  .invoiceInfoCard {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .topInfoCard {
+    min-height: 0;
+  }
+
+  .issuedToCard {
+    margin-top: 0;
+  }
+
+  .invoiceTable {
+    th,
+    td {
+      font-size: 0.86rem;
+      padding: 0.55rem 0.4rem;
+    }
+  }
+
+  .summarySection {
+    flex-direction: column;
+  }
+
+  .invoiceDates,
+  .totalsBlock {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media print {
+  @page { size: A4; margin: 12mm 14mm; }
+
+  .invoiceContainer,
+  .invoiceContainer * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .invoiceContainer {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 1.8rem 2rem !important;
+    background: #ffffff !important;
+    color: #111 !important;
+    border: 1px solid #d8d8d8 !important;
+    border-radius: 18px !important;
+    box-shadow: none !important;
+  }
+
+  .invoiceHeader {
+    border-bottom-color: rgba(0, 0, 0, 0.15) !important;
+    h1 { color: #111 !important; }
+  }
+
+  .brandLogo     { border-color: rgba(0, 0, 0, 0.2) !important; }
+  .brandText     { color: #111 !important; }
+
+  .invoiceInfoCard {
+    grid-template-columns: 1.2fr 1fr !important;
+    gap: 1rem !important;
+    align-items: stretch !important;
+  }
+
+  .infoColumnStack { display: contents !important; }
+
+  .infoColumnStack > .topInfoCard {
+    grid-column: 1 / 2;
+    grid-row: 1;
+    height: auto !important;
+    min-height: 170px !important;
+    align-self: stretch !important;
+  }
+
+  .issuedToCard {
+    margin-top: 0 !important;
+    grid-column: 2 / 3;
+    grid-row: 1;
+    height: auto !important;
+    min-height: 170px !important;
+    align-self: stretch !important;
+  }
+
+  .topInfoCard   { min-height: 170px; }
+
+  .bankDetailsCard {
+    grid-column: 1 / 2;
+    grid-row: 2;
+    width: 100% !important;
+    max-width: 100% !important;
+    justify-self: start;
+    background: #f8f8f8 !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .infoCard {
+    border-color: rgba(0, 0, 0, 0.15) !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+  }
+
+  .infoColumn h4   { color: #111 !important; }
+  .infoLine        { color: #111 !important; opacity: 1 !important; }
+  .infoLineAccent  { color: #111 !important; }
+  .bankDetailsLabel { color: #111 !important; }
+
+  .invoiceTable {
+    th, td { font-size: 0.95rem; padding: 0.7rem 0.6rem; }
+    th     { color: #555 !important; opacity: 1 !important; }
+    th, td { border-bottom-color: rgba(0, 0, 0, 0.12) !important; }
+    td     { color: #111 !important; }
+  }
+
+  .infoRow span  { color: #555 !important; opacity: 1 !important; }
+  .signatureLine { color: #555 !important; opacity: 1 !important; }
+
+  .summarySection {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    gap: 1.5rem !important;
+  }
+
+  .invoiceDates {
+    min-width: 240px !important;
+    max-width: 360px !important;
+    width: 100% !important;
+  }
+
+  .totalsBlock {
+    width: 360px !important;
+    min-width: 320px !important;
+    max-width: 360px !important;
+    flex: 0 0 360px !important;
+  }
+
+  .totalRow {
+    font-size: 0.95rem !important;
+    color: #111 !important;
+    span { color: #555 !important; }
+  }
+
+  .grandTotal {
+    font-size: 1.1rem !important;
+    padding-top: 0.6rem !important;
+    margin-top: 0.2rem !important;
+    color: #111 !important;
+  }
+
+  .infoCard,
+  .invoiceTable tr,
+  .summarySection,
+  .footerNote {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
