@@ -34,6 +34,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
     <div className={cs.providerInfo}>
       <div className={cs.label}>{isEnglish ? 'Provider' : 'Постачальник'}</div>
       <pre className={cs.preLabel}>
+        {data?.domain?.name && <><strong>{data.domain.name}</strong>{'\n'}</>}
         {data?.provider?.description?.trim()} <br />
         <br />
       </pre>
