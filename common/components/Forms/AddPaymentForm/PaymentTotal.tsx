@@ -21,13 +21,7 @@ const PaymentTotal: FC<Props> = ({ form }) => {
 
   return (
     <Form.Item
-      style={{
-        display: 'flex',
-        justifyContent: 'flex-end',
-        fontWeight: 'bold',
-        fontSize: 20,
-        marginTop: '1rem',
-      }}
+      className={s.totalItem}
       name={Operations.Debit}
       initialValue={0}
     >

@@ -360,25 +360,11 @@ export const normalizeCurrency = (currency?: string): 'UAH' | 'USD' | 'EUR' => {
   return 'UAH'
 }
 
-export const getCurrencyShortLabel = (currency?: string): string => {
-  const normalizedCurrency = normalizeCurrency(currency)
+export const getCurrencyShortLabel = (currency?: string): string =>
+  CURRENCY_MAP[normalizeCurrency(currency)].label
 
-  return {
-    UAH: 'грн',
-    USD: 'USD',
-    EUR: 'EUR',
-  }[normalizedCurrency]
-}
-
-export const getCurrencySymbol = (currency?: string): string => {
-  const normalizedCurrency = normalizeCurrency(currency)
-
-  return {
-    UAH: '₴',
-    USD: '$',
-    EUR: '€',
-  }[normalizedCurrency]
-}
+export const getCurrencySymbol = (currency?: string): string =>
+  CURRENCY_MAP[normalizeCurrency(currency)].symbol
 
 export const getCurrencyNames = (
   currency?: string
