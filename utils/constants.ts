@@ -30,6 +30,11 @@ export enum Operations {
   Debit = 'debit',
 }
 
+export enum SortOrder {
+  ASC = 1,
+  DESC = -1,
+}
+
 export enum ColumnsRoleView {
   GlobalAdmin = 1,
   User = 2,
@@ -260,8 +265,20 @@ export const inflicionDescription = `
 Тож для того щоб визначити розмір орендної плати за кожний наступний місяць оренди, необхідно розмір орендної плати за попередній місяць помножити на індекс інфляції за поточний місяць.
 При цьому зверніть увагу: такий механізм розрахунку застосовується незалежно від розміру індексу інфляції, тобто незалежно від того, перевищує ця величина 100 % чи ні, адже ніяких виключень та додаткових вимог з цього приводу чинне законодавство не містить.`
 
+export enum Currency {
+  UAH = 'UAH',
+  USD = 'USD',
+  EUR = 'EUR',
+}
+
 export const CURRENCY_MAP = {
-  UAH: { label: 'грн' },
-  USD: { label: 'USD' },
-  EUR: { label: 'EUR' },
+  UAH: { label: 'грн', symbol: '₴' },
+  USD: { label: 'USD', symbol: '$' },
+  EUR: { label: 'EUR', symbol: '€' },
 } as const
+
+export const CURRENCY_SELECT_OPTIONS = [
+  { value: Currency.UAH, label: `${Currency.UAH} (₴)` },
+  { value: Currency.USD, label: `${Currency.USD} ($)` },
+  { value: Currency.EUR, label: `${Currency.EUR} (€)` },
+]

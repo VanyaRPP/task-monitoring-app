@@ -49,7 +49,7 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
     }
   }, [balances, domainId, domain?.iban, dispatch])
 
-  const { data: transactionsData, isLoading: isTransactionsLoading } =
+  const { data: transactionsData, isLoading: isTransactionsLoading, refetch: refetchTransactions} =
     useGetTransactionsQuery(
       {
         token: decryptedToken,
@@ -136,6 +136,7 @@ const DomainBankTab: FC<Props> = ({ domainId }) => {
             domain={domain}
             loading={isTransactionsLoading}
             companies={companies}
+            refetchTransactions={refetchTransactions}
           />
         </>
       ) : (

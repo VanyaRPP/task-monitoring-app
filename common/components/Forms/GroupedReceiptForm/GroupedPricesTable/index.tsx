@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { getInvoiceServiceLabelKey } from '@utils/invoice-service-label-key'
 import { getCurrencyShortLabel, normalizeCurrency } from '@utils/helpers'
 import { ServiceType } from '@utils/constants'
+import s from './index.module.scss'
 
 export interface PaymentPricesTableProps {
   preview?: boolean
@@ -145,6 +146,7 @@ const getColumns = (
       dataIndex: 'amount',
       key: 'amount',
       width: 100,
+      className: s.priceCell,
       render: (value: any, record: any = {}) => {
         const n = Number(value)
         const type = record.type
@@ -171,6 +173,7 @@ const getColumns = (
       dataIndex: 'price',
       key: 'price',
       width: 120,
+      className: s.priceCell,
       render: (value: any, record: any = {}) => {
         const n = Number(value)
         if (!isFinite(n) || n === 0) return '-'
@@ -200,6 +203,7 @@ const getColumns = (
     dataIndex: 'sum',
     key: 'sum',
     width: 120,
+    className: s.priceCell,
     render: (value: any) => {
       const n = Number(value)
       return isFinite(n) ? n.toFixed(2) : value

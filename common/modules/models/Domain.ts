@@ -52,6 +52,7 @@ const DomainSchema = new Schema<IDomain>({
   IEName: { type: String, required: false },
   domainBankToken: { type: [Object] },
   domainServices: { type: [Object] },
+  defaultTemplate: { type: String, required: false },
   customServices: [
     {
       groupName: { type: String, required: true },

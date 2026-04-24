@@ -235,12 +235,14 @@ $mono:          'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
   th:nth-child(2), td:nth-child(2) {
     width: 14%;
     text-align: right;
+    white-space: nowrap;
     font-family: $mono;
     font-size: 0.82rem;
   }
   th:nth-child(3), td:nth-child(3) {
     width: 9%;
     text-align: right;
+    white-space: nowrap;
     font-family: $mono;
     font-size: 0.82rem;
   }

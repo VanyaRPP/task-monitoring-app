@@ -47,6 +47,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
           label: `${i.address} (м. ${i.city})`,
         })) || [],
       description: currentDomain?.description || '',
+      defaultTemplate: currentDomain?.defaultTemplate || null,
       IEName: currentDomain?.IEName || '',
       domainBankToken: currentDomain?.domainBankToken || '',
       mfo: currentDomain?.mfo || '',
@@ -102,6 +103,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
         ? formData.streets.map((i: any) => i.value)
         : formData.streets,
       description: formData.description,
+      defaultTemplate: formData.defaultTemplate || undefined,
       IEName: formData.IEName,
       domainBankToken: formData.domainBankToken || [],
       mfo: formData.mfo,

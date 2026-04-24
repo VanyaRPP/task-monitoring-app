@@ -21,6 +21,7 @@ import s from './style.module.scss'
 import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
 import { IDomain } from '@modules/models/Domain'
 import { inputNumberParser } from '@utils/helpers'
+import { CURRENCY_SELECT_OPTIONS, Currency } from '@utils/constants'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import DomainsServices from '@components/UI/DomainsComponents/DomainModal/DomainForm/DomainsServices'
 import CustomServicesCard from '../../../CustomServicesCard'
@@ -118,6 +119,9 @@ const RealEstateForm: FC<Props> = ({
       layout="vertical"
       className={s.Form}
       onValuesChange={() => setIsValueChanged(true)}
+      initialValues={{
+        currency: currentRealEstate?.currency || Currency.UAH,
+      }}
     >
       <DomainsSelect
         form={form}
@@ -172,12 +176,9 @@ const RealEstateForm: FC<Props> = ({
         <Select
           placeholder="Оберіть валюту"
           className={s.formInput}
+          options={CURRENCY_SELECT_OPTIONS}
           disabled={!editable}
-        >
-          <Select.Option value="UAH">UAH</Select.Option>
-          <Select.Option value="USD">USD</Select.Option>
-          <Select.Option value="EUR">EUR</Select.Option>
-        </Select>
+        />
       </Form.Item>
       <EmailSelect form={form} disabled={!editable} required={false} />
       {/*<Form.Item name="discount" label="Знижка" rules={validateField('number')}>
