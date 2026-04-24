@@ -28,10 +28,9 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
 
   const company = payment?.company as { currency?: string } | string | undefined
   const companyCurrency = typeof company === 'object' ? company?.currency : undefined
-  const currency = companyCurrency || payment?.domain?.currency
-  const currencyNames = getCurrencyNames(currency)
+  const currency = payment?.currency || companyCurrency || payment?.domain?.currency 
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
-
+  const currencyNames = getCurrencyNames(currency, isEnglish)
   const { showQuantityInPreview, setShowQuantityInPreview } = usePaymentContext()
 
   const componentRef = useRef()
