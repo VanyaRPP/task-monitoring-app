@@ -6,7 +6,7 @@ import { defaultServicesSet, isProtectedService } from '@utils/helpers'
 import { transliterateAndCamelCase } from '@utils/transliterateAndCamelCase'
 import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { escapeRegexForMongo } from '@utils/escape-regex'
+import { escapeRegexForMongo } from '@utils/escape-regex/escape-regex'
 
 start()
 export default async function handler(
