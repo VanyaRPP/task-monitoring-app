@@ -14,6 +14,7 @@ export interface IDomainModel {
   ownServiceValue?: string | number;
   customDomainTypeLabel?: string;
   customServiceGroupName?: string;
+  defaultTemplate?: string
 }
 
 export interface ICustomDomainTypeTemplate {

@@ -18,6 +18,7 @@ export interface IDomain {
   ownServiceValue?: string | number
   customDomainTypeLabel?: string
   customServiceGroupName?: string
+  defaultTemplate?: string
 }
 
 export interface ICustomService {
