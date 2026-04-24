@@ -1,177 +1,139 @@
+import { useGetCustomDomainTypeTemplatesQuery } from '@common/api/domainApi/domain.api'
 import {
   useGetCustomServicesQuery,
   useCreateCustomServiceMutation,
 } from '@common/api/customServicesApi/customServices.api'
-import {
-  Button,
-  Form,
-  FormInstance,
-  message,
-} from 'antd'
+import { useResolveServiceId } from '@common/modules/hooks/use-resolve-service-id'
+import { Button, Form, FormInstance, message } from 'antd'
 import React, { FC, useState } from 'react'
-import DomainModal, { ServiceItem } from './DomainModal'
+import DomainModal, {
+  IDomainServiceGroupSavePayload,
+  ServiceItem,
+} from './DomainModal'
 import DomainModalType from './DomainModalType'
-import { defaultServices } from '@utils/constants'
+import { IT_DEFAULT_SERVICE_NAME } from '@utils/constants'
+import {
+  filterServicesForDomainCatalogPicker,
+  getStaticServicePresetForKind,
+  normalizeDomainServiceKind,
+} from '@utils/domain/domain-service-policy'
 
 interface Props {
   form: FormInstance
   editable: boolean
   domainId?: string
-  onCustomServicesChange: (
-    customServices: { _id: string; name: string }[]
-  ) => void
 }
 
-const DomainsServices: FC<Props> = ({
-  form,
-  editable,
-  domainId,
-  onCustomServicesChange,
-}) => {
+const DomainsServices: FC<Props> = ({ form, editable, domainId }) => {
   const [createCustomService] = useCreateCustomServiceMutation()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { data: customServicesData } = useGetCustomServicesQuery({})
+  const { data: typeTemplates = [] } = useGetCustomDomainTypeTemplatesQuery(
+    undefined,
+    { skip: !editable }
+  )
+  const { resolveByName, catalogServices } = useResolveServiceId(domainId)
 
   const domainType = Form.useWatch('domainType', form)
 
-  const handleTypeChange = (type: string) => {
+  const handleTypeChangeAsync = async (type: string) => {
     form.setFieldsValue({ domainType: type })
+    const kind = normalizeDomainServiceKind(type)
+    const preset = getStaticServicePresetForKind(kind)
 
-    let newServices: string[] = []
-    const IT_SERVICE_NAME = 'For the provision of IT services'
+    let groups = preset.groups.map((g) => ({
+      groupName: g.groupName,
+      services: [...g.serviceIds],
+    }))
 
-    if (type === 'communal') {
-      newServices = defaultServices
-    } else if (type === 'it') {
-      newServices = [IT_SERVICE_NAME]
-    } else if (type === 'own') {
-      const ownName = form.getFieldValue('ownServiceName')
-      newServices = ownName ? [ownName] : []
+    if (kind === 'it') {
+      const id = await resolveByName(IT_DEFAULT_SERVICE_NAME)
+      groups = [
+        {
+          groupName: preset.groups[0].groupName,
+          services: id ? [id] : [],
+        },
+      ]
+    } else if (kind === 'custom') {
+      const groupName =
+        form.getFieldValue('customServiceGroupName')?.trim() ||
+        preset.groups[0].groupName
+      groups = [{ groupName, services: [] }]
     }
 
-    const newCustomServices = [
-      {
-        groupName: 'Стандартні послуги',
-        services: newServices,
-      },
-    ]
-
-    form.setFieldsValue({ 
-      customServices: newCustomServices,
-      domainServices: [] 
+    form.setFieldsValue({
+      customServices: groups,
     })
-
-    onCustomServicesChange([])
   }
 
-  const handleSave = async (fieldKey: number) => {
-    const service = form.getFieldValue(['domainServices', fieldKey])
-    if (!service?.name) {
-      message.error('Будь ласка, введіть назву послуги')
-      return
-    }
-
-    try {
-      const result = await createCustomService({
-        domainId: domainId || '',
-        name: service?.name,
-      }).unwrap()
-      const savedService = result.data
-      form.setFieldsValue({
-        domainServices: form
-          .getFieldValue('domainServices')
-          .map((s, idx) =>
-            idx === fieldKey ? { ...s, _id: savedService._id } : s
-          ),
-      })
-      message.success('Послугу успішно збережено')
-    } catch (error) {
-      message.error('Помилка збереження послуги')
-    }
+  const handleTypeChange = (type: string) => {
+    void handleTypeChangeAsync(type)
   }
 
-  const handleRemove = (fieldName: number) => {
-    const updatedServices = form
-      .getFieldValue('domainServices')
-      .filter((_, idx) => idx !== fieldName)
-    form.setFieldsValue({ domainServices: updatedServices })
+  const syncCustomServicesGroupFromLabels = () => {
+    if (form.getFieldValue('domainType') !== 'own') return
+    const preset = getStaticServicePresetForKind('custom')
+    const groupName =
+      form.getFieldValue('customServiceGroupName')?.trim() ||
+      preset.groups[0].groupName
+    const existing = form.getFieldValue('customServices') || []
+    const services = existing[0]?.services || []
+    form.setFieldsValue({
+      customServices: [{ groupName, services }],
+    })
   }
 
   const handleOpenModal = () => {
     setIsModalOpen(true)
   }
-  
-  const handleSaveServices = (servicesByGroup: { [groupName: string]: string[] }) => {
-    if (!customServicesData) return
-    const allServices = 'data' in customServicesData 
-      ? customServicesData.data 
-      : customServicesData
-    
-    const customServices = Object.entries(servicesByGroup).map(([groupName, services]) => ({
-      groupName,
-      services
-    }))
- 
+
+  const handleSaveServices = (
+    orderedGroups: IDomainServiceGroupSavePayload[]
+  ) => {
     form.setFieldsValue({
-      customServices: customServices
-    })
-    
-    const allSelectedServices: any[] = []
-    Object.values(servicesByGroup).forEach(groupServices => {
-      groupServices.forEach(serviceId => {
-        const service = allServices.find((s: any) => s._id === serviceId)
-        if (service && !allSelectedServices.find(s => s._id === serviceId)) {
-          allSelectedServices.push(service)
-        }
-      })
-    })
-    
-    form.setFieldsValue({
-      domainServices: allSelectedServices.map((service: any) => ({
-        _id: service._id,
-        name: service.name,
+      customServices: orderedGroups.map((g) => ({
+        groupName: g.groupName,
+        services: [...g.services],
       })),
     })
-    
-    onCustomServicesChange(allSelectedServices.map((service: any) => ({
-      _id: service._id,
-      name: service.name,
-    })))
 
     setIsModalOpen(false)
     message.success('Зміни збережено')
   }
-  
+
   const getServicesData = (): ServiceItem[] => {
     if (!customServicesData) return []
 
-    const allServices = 'data' in customServicesData 
-      ? customServicesData.data 
-      : customServicesData
+    const allServices = catalogServices
+    const kind = normalizeDomainServiceKind(domainType)
+    const filtered = filterServicesForDomainCatalogPicker(allServices, kind)
 
-    return allServices.map((service: any) => ({
+    return filtered.map((service: any) => ({
       key: service._id,
       title: service.name,
     }))
   }
-  
+
   const getServiceGroups = () => {
-    const customServices = form.getFieldValue('customServices') || []
-    const groups = customServices.map((group: any, index: number) => {
+    const customServicesField = form.getFieldValue('customServices') || []
+    const groups = customServicesField.map((group: any, index: number) => {
       const groupName = group?.groupName || `Група ${index + 1}`
       const selectedServices = group?.services || []
-      
+
       return {
         groupName,
-        services: selectedServices
+        services: selectedServices,
       }
     })
-    
+
     return groups
   }
 
   const handleCreateCustomService = async (name: string) => {
-    const result = await createCustomService({ name, domainId: domainId || '' }).unwrap()
+    const result = await createCustomService({
+      name,
+      domainId: domainId || '',
+    }).unwrap()
     return result
   }
 
@@ -180,11 +142,14 @@ const DomainsServices: FC<Props> = ({
       {editable && (
         <>
           <DomainModalType
-            domainType={domainType}
             onTypeChange={handleTypeChange}
+            onCustomLabelsBlur={syncCustomServicesGroupFromLabels}
+            onTemplateApplied={syncCustomServicesGroupFromLabels}
+            templates={typeTemplates}
+            editable={editable}
           />
           <Button
-            style={{ marginBottom: 10 }} 
+            style={{ marginBottom: 10 }}
             block
             onClick={handleOpenModal}
           >

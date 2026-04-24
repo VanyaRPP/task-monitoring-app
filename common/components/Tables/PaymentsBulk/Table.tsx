@@ -8,6 +8,10 @@ import { Alert, Empty, Form, Input, Table } from 'antd'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo } from 'react'
 import { defaultServices } from '@utils/constants'
+import {
+  getDomainInvoiceUiPolicy,
+  normalizeDomainServiceKind,
+} from '@utils/domain/domain-service-policy'
 import { findPrevPaymentMatch } from './hooks/usePrevPayment/usePrevPayment'
 
 const InvoicesTable: React.FC = () => {
@@ -34,10 +38,22 @@ const InvoicesTable: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const groups = customDomainServices?.data ?? []
 
-  const allowedServices = useMemo(
-    () => groups.flatMap((group) => group.services),
-    [groups]
+  const domainServiceKind = normalizeDomainServiceKind(
+    service?.domain?.domainType
   )
+  const { hideUtilityServicesInDomainPickers } =
+    getDomainInvoiceUiPolicy(domainServiceKind)
+
+  const allowedServices = useMemo(() => {
+    const flat = groups.flatMap((group) => group.services)
+    if (!hideUtilityServicesInDomainPickers) {
+      return flat
+    }
+    const utilitySet = new Set(defaultServices.map(String))
+    return flat.filter(
+      (s) => s?._id != null && !utilitySet.has(String(s._id))
+    )
+  }, [groups, hideUtilityServicesInDomainPickers])
 
   const customServicesColumns = useMemo(
     () =>

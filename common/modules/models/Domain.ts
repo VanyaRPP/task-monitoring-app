@@ -16,6 +16,8 @@ export interface IDomain {
   domainType?: string
   ownServiceName?: string
   ownServiceValue?: string | number
+  customDomainTypeLabel?: string
+  customServiceGroupName?: string
 }
 
 export interface ICustomService {
@@ -59,6 +61,8 @@ const DomainSchema = new Schema<IDomain>({
   domainType: { type: String, required: false },
   ownServiceName: { type: String, required: false },
   ownServiceValue: { type: Schema.Types.Mixed, required: false },
+  customDomainTypeLabel: { type: String, required: false },
+  customServiceGroupName: { type: String, required: false },
 })
 
 const Domain =

@@ -48,7 +48,7 @@ yarn-error.log*
 
 # specific files
 /pages/api-doc.tsx
-.cursor
+/.cursor
 
 # PWA build artifacts
 /public/sw.js

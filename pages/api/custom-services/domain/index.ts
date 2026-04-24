@@ -2,6 +2,11 @@ import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
+import {
+  getStaticServicePresetForKind,
+  normalizeDomainServiceKind,
+} from '@utils/domain/domain-service-policy'
+import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 start()
@@ -43,16 +48,24 @@ export default async function handler(
           })
         }
 
+        const kind = normalizeDomainServiceKind(domain.domainType)
+
+        const emptyPresetShell = () =>
+          getStaticServicePresetForKind(kind).groups.map((g) => ({
+            groupName: g.groupName,
+            services: [] as unknown[],
+          }))
+
         if (!domain.customServices || domain.customServices.length === 0) {
           return res.status(200).json({
             success: true,
-            data: [],
+            data: emptyPresetShell(),
           })
         }
 
-        const domainGroups = domain.customServices.map((service) => {
+        const domainGroups = domain.customServices.map((service, index) => {
           return {
-            groupName: service?.groupName,
+            groupName: service?.groupName ?? `Група ${index + 1}`,
             services: service?.services || [],
           }
         })
@@ -60,12 +73,15 @@ export default async function handler(
         const allServiceIds = domainGroups
           .flatMap((group) => group.services || [])
           .map(String)
-          .filter(Boolean)
+          .filter((id) => mongoose.Types.ObjectId.isValid(id))
 
         if (allServiceIds.length === 0) {
           return res.status(200).json({
             success: true,
-            data: [],
+            data: domainGroups.map((group, index) => ({
+              groupName: group.groupName ?? `Група ${index + 1}`,
+              services: [],
+            })),
           })
         }
 
@@ -73,7 +89,7 @@ export default async function handler(
           _id: { $in: allServiceIds },
         }).lean()
 
-        const groupedServices = domainGroups.map((group) => {
+        const groupedServices = domainGroups.map((group, index) => {
           const services = (group.services || [])
             .map((id) =>
               customServices.find(
@@ -83,7 +99,7 @@ export default async function handler(
             .filter(Boolean)
 
           return {
-            groupName: group.groupName,
+            groupName: group.groupName ?? `Група ${index + 1}`,
             services,
           }
         })

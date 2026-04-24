@@ -4,13 +4,11 @@ import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
 import { defaultServicesSet, isProtectedService } from '@utils/helpers'
 import { transliterateAndCamelCase } from '@utils/transliterateAndCamelCase'
+import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { escapeRegexForMongo } from '@utils/escape-regex'
 
 start()
-
-function escapeRegex(str: string) {
-  return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
-}
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
@@ -40,7 +38,7 @@ export default async function handler(
           })
         }
 
-        const escapedName = escapeRegex(trimmedName)
+        const escapedName = escapeRegexForMongo(trimmedName)
         const existingService = await CustomService.findOne({
           name: { $regex: `^${escapedName}$`, $options: 'i' },
         })
@@ -126,14 +124,24 @@ export default async function handler(
           })
         }
 
-        const customServiceIds =
-          _id && !Array.isArray(_id) ? _id.split(',') : _id
+        const hasExplicitIds =
+          _id !== undefined && _id !== null && _id !== ''
 
-        const customServices = !customServiceIds
-          ? await CustomService.find().lean()
-          : await CustomService.find({
-              _id: { $in: customServiceIds },
-            }).lean()
+        let customServices
+        if (!hasExplicitIds) {
+          customServices = await CustomService.find().lean()
+        } else {
+          const rawIds: string[] = Array.isArray(_id)
+            ? _id.flatMap((value) => String(value).split(','))
+            : String(_id).split(',')
+          const validIds = rawIds
+            .map((id) => id.trim())
+            .filter((id) => mongoose.Types.ObjectId.isValid(id))
+
+          customServices = validIds.length
+            ? await CustomService.find({ _id: { $in: validIds } }).lean()
+            : []
+        }
 
         return res.status(200).json({
           success: true,

@@ -19,12 +19,17 @@ interface ServiceGroup {
   services: string[]
 }
 
+export interface IDomainServiceGroupSavePayload {
+  groupName: string
+  services: string[]
+}
+
 interface Props {
   open: boolean
   onClose: () => void
   data: ServiceItem[]
   serviceGroups: ServiceGroup[]
-  onSave: (servicesByGroup: Record<string, string[]>) => void
+  onSave: (orderedGroups: IDomainServiceGroupSavePayload[]) => void
   onCreateCustomService: (name: string) => Promise<any>
   onDeleteCustomService?: (serviceKey: string) => void
   isGlobalAdmin?: boolean
@@ -241,7 +246,11 @@ const DomainModal: FC<Props> = ({
   )
 
   const handleSaveModal = () => {
-    onSave(targetKeys)
+    const orderedGroups = localServiceGroups.map((g) => ({
+      groupName: g.groupName,
+      services: (targetKeys[g.groupName] || []).map(String),
+    }))
+    onSave(orderedGroups)
     onClose()
   }
 

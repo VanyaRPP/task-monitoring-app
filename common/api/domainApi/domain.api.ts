@@ -8,11 +8,12 @@ import {
   IExtendedAreas,
   IGetAreasResponse,
   IGetDomainByPkResponse,
+  ICustomDomainTypeTemplate,
 } from './domain.api.types'
 
 export const domainApi = createApi({
   reducerPath: 'domainApi',
-  tagTypes: ['Domain', 'IDomain'],
+  tagTypes: ['Domain', 'IDomain', 'CustomDomainTypeTemplate'],
   refetchOnFocus: true,
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
@@ -100,6 +101,34 @@ export const domainApi = createApi({
       ],
       transformResponse: (response: IGetDomainByPkResponse) => response.data,
     }),
+    getCustomDomainTypeTemplates: builder.query<ICustomDomainTypeTemplate[], void>(
+      {
+        query: () => ({
+          url: 'custom-domain-type-templates',
+          method: 'GET',
+        }),
+        providesTags: ['CustomDomainTypeTemplate'],
+        transformResponse: (response: {
+          success: boolean
+          data: ICustomDomainTypeTemplate[]
+        }) => response.data ?? [],
+      }
+    ),
+    addCustomDomainTypeTemplate: builder.mutation<
+      ICustomDomainTypeTemplate,
+      { typeLabel: string; groupName: string }
+    >({
+      query: (body) => ({
+        url: 'custom-domain-type-templates',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['CustomDomainTypeTemplate'],
+      transformResponse: (response: {
+        success: boolean
+        data: ICustomDomainTypeTemplate
+      }) => response.data,
+    }),
   }),
 })
 
@@ -111,4 +140,6 @@ export const {
   useEditDomainMutation,
   useGetDomainByPkQuery,
   useGetDomainsByAdminQuery,
+  useGetCustomDomainTypeTemplatesQuery,
+  useAddCustomDomainTypeTemplateMutation,
 } = domainApi
