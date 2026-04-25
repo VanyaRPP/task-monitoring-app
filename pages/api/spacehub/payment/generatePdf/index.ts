@@ -22,7 +22,7 @@ export default async function handler(
           res.setHeader('Content-Disposition', 'attachment; filename=formData')
 
           const response = {
-            fileName: `${payments[0]?.reciever?.companyName}-inv-${payments[0]?.invoiceNumber}`,
+            fileName: `${payments[0]?.reciever?.companyName} inv ${payments[0]?.invoiceNumber}`,
             fileExtension: 'pdf',
             buffer: pdfBuffer,
           }
