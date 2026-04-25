@@ -8,6 +8,10 @@ import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPric
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { getCurrencyNames, normalizeCurrency } from '@utils/helpers'
 import { usePaymentContext } from '@components/AddPaymentModal'
+import {
+  getDomainHeading,
+  getRecipientCompanyHeading,
+} from '@common/components/Forms/GroupedReceiptForm/templates/invoice-party-headings'
 
 const PriceList: FC<{ data: IPayment }> = ({ data }) => {
   const [payment, setPayment] = useState(data)
@@ -26,13 +30,39 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
     setTotalFractionSum(Number(fraction))
   }, [payment])
 
-  const company = payment?.company as { currency?: string } | string | undefined
-  const companyCurrency = typeof company === 'object' ? company?.currency : undefined
+  const paymentCompany = payment?.company as { currency?: string } | string | undefined
+  const companyCurrency = typeof paymentCompany === 'object' ? paymentCompany?.currency : undefined
   const currency = companyCurrency || payment?.domain?.currency
   const currencyNames = getCurrencyNames(currency)
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
 
-  const { showQuantityInPreview, setShowQuantityInPreview } = usePaymentContext()
+  const { company, showQuantityInPreview, setShowQuantityInPreview } =
+    usePaymentContext()
+
+  const domainNameFromContext =
+    typeof company?.domain === 'object' && company?.domain !== null
+      ? (company.domain as { name?: string }).name
+      : undefined
+  const domainHeading = getDomainHeading(payment, domainNameFromContext)
+  const customerHeading = getRecipientCompanyHeading(
+    payment,
+    company?.companyName
+  )
+
+  const formatActNarrowSpace = (value: string | undefined) =>
+    (value?.trim() || '').replace(/(:\s)/g, ':\u00A0')
+  const introCustomerText = [
+    customerHeading,
+    formatActNarrowSpace(payment?.reciever?.description),
+  ]
+    .filter((s) => s.length > 0)
+    .join(' ')
+  const introProviderText = [
+    domainHeading,
+    formatActNarrowSpace(payment?.provider?.description),
+  ]
+    .filter((s) => s.length > 0)
+    .join(' ')
 
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
@@ -92,6 +122,12 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <div>
                   <strong>{isEnglish ? 'APPROVED' : 'ЗАТВЕРДЖУЮ'}</strong>
                   <br />
+                  {!!domainHeading && (
+                    <>
+                      <strong>{domainHeading}</strong>
+                      <br />
+                    </>
+                  )}
                   <pre>{payment.provider.description?.trim()}</pre>
                 </div>
               </div>
@@ -99,6 +135,12 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <div>
                   <strong>{isEnglish ? 'APPROVED' : 'ЗАТВЕРДЖУЮ'}</strong>
                   <br />
+                  {!!customerHeading && (
+                    <>
+                      <strong>{customerHeading}</strong>
+                      <br />
+                    </>
+                  )}
                   <pre>
                     {payment?.reciever?.description?.trim()} <br />
                     {payment?.reciever?.adminEmails?.map((email) => (
@@ -143,13 +185,9 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               {isEnglish ? (
                 <>
                   We, the undersigned, the representative of the Customer{' '}
-                  {payment.reciever.description
-                    ?.trim()
-                    .replace(/(:\s)/g, ':\u00A0')}
+                  {introCustomerText}
                   , on one side, and the representative of the Provider{' '}
-                  {payment.provider.description
-                    ?.trim()
-                    .replace(/(:\s)/g, ':\u00A0')}
+                  {introProviderText}
                   , on the other side, have executed this Act confirming that,
                   under the agreement, the Provider performed the following
                   services:
@@ -157,14 +195,9 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
               ) : (
                 <>
                   Ми, що нижче підписалися, представник Замовника{' '}
-                  {payment.reciever.description
-                    ?.trim()
-                    .replace(/(:\s)/g, ':\u00A0')}
-                  , з одного боку, і представник Виконавця{' '}
-                  {payment.provider.description
-                    ?.trim()
-                    .replace(/(:\s)/g, ':\u00A0')}
-                  , з іншого боку, склали цей акт про те, що на підставі
+                  {introCustomerText}
+                  , з одного боку, і представник Виконавця {introProviderText},
+                  з іншого боку, склали цей акт про те, що на підставі
                   договору, Виконавцем були виконані наступні роботи (надані
                   такі послуги):
                 </>
@@ -222,6 +255,12 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <div>
                   <b>{isEnglish ? 'Provider' : 'Від Виконавця'}</b>
                   <br />
+                  {!!domainHeading && (
+                    <>
+                      <b>{domainHeading}</b>
+                      <br />
+                    </>
+                  )}
                   <br />
                   <hr />
                   <br />
@@ -236,6 +275,12 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                 <div>
                   <b>{isEnglish ? 'Customer' : 'Від Замовника'}</b>
                   <br />
+                  {!!customerHeading && (
+                    <>
+                      <b>{customerHeading}</b>
+                      <br />
+                    </>
+                  )}
                   <br />
                   <hr />
                   <br />

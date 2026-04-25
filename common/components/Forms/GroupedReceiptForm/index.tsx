@@ -22,12 +22,14 @@ const templateItems = [
   { key: 'classic',    label: 'Класичний шаблон' },
   { key: 'olimp',      label: 'OLIMP DIGITAL OÜ' },
   { key: 'ledger',     label: 'Formal Ledger' },
+  { key: 'official',   label: 'Official Invoice' },
 ]
 
 const templateMap = {
   classic: dynamic(() => import('./templates/classic'), { ssr: false }),
   ledger:  dynamic(() => import('./templates/ledger'),  { ssr: false }),
   olimp:   dynamic(() => import('./templates/olimp'),   { ssr: false }),
+  official: dynamic(() => import('./templates/official'), { ssr: false }),
 }
 
 
@@ -153,8 +155,12 @@ const GroupedReceiptForm: FC<Props> = ({
     ? paymentInfoDescriptionLines.slice(1)
     : paymentInfoDescriptionLines
 
+  const shouldPrependDescriptionTitleLine = hasEntrepreneurTitle || !normalizedCompanyName
+
   const paymentInfoLines = [
-    companyDisplayName,
+    ...(shouldPrependDescriptionTitleLine && companyDisplayName
+      ? [companyDisplayName]
+      : []),
     ...paymentInfoBodyLines,
     ...(data?.reciever?.adminEmails || []),
   ].filter(Boolean)
@@ -271,6 +277,10 @@ const GroupedReceiptForm: FC<Props> = ({
 
   const TemplateComponent = templateMap[template] || templateMap.olimp
 
+  const companyLabelForTemplate =
+    (data?.company as { companyName?: string } | undefined)?.companyName ??
+    companyLabel
+
   const templateProps = {
     data,
     componentRef,
@@ -278,6 +288,8 @@ const GroupedReceiptForm: FC<Props> = ({
     currencyLabel,
     currency,
     modernInvoiceNumber,
+    domainName,
+    companyLabel: companyLabelForTemplate,
     rows,
     getQty,
     subtotal,

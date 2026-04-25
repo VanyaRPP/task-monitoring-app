@@ -1,6 +1,10 @@
 import { FC } from 'react'
 import dayjs from 'dayjs'
 import { TemplateProps } from '../types'
+import {
+  getBillFromHeadingAndBodyLines,
+  getIssuedToHeadingAndBodyLines,
+} from '../invoice-party-headings'
 import ml from './monoline.module.scss'
 
 const MonolineTemplate: FC<TemplateProps> = ({
@@ -9,6 +13,7 @@ const MonolineTemplate: FC<TemplateProps> = ({
   isEnglish,
   currencyLabel,
   modernInvoiceNumber,
+  domainName,
   rows,
   getQty,
   subtotal,
@@ -18,7 +23,13 @@ const MonolineTemplate: FC<TemplateProps> = ({
   paymentInfoLines,
   issuedToLines,
   normalizedBankDetailsLines,
-}) => (
+}) => {
+  const { heading: paymentHeading, bodyLines: paymentBodyLines } =
+    getBillFromHeadingAndBodyLines(data, paymentInfoLines)
+  const { heading: issuedHeading, bodyLines: issuedBodyLines } =
+    getIssuedToHeadingAndBodyLines(data, issuedToLines, domainName)
+
+  return (
   <div className={ml.mlInvoice} ref={componentRef} style={{ width: '100%', margin: '2em auto 1em' }}>
     <div className={ml.mlHeader}>
       <div className={ml.mlBrand}>
@@ -50,8 +61,16 @@ const MonolineTemplate: FC<TemplateProps> = ({
     <div className={ml.mlParties}>
       <div className={ml.mlParty}>
         <div className={ml.mlPartyLabel}>{isEnglish ? 'Bill from' : 'Платіжні дані'}</div>
-        {paymentInfoLines.map((line: string, idx: number) => (
-          <div key={`pi-${idx}`} className={idx === 0 ? ml.mlPartyName : ml.mlPartyLine}>{line}</div>
+        {!!paymentHeading && (
+          <div className={ml.mlPartyName}>{paymentHeading}</div>
+        )}
+        {paymentBodyLines.map((line: string, idx: number) => (
+          <div
+            key={`pi-${idx}`}
+            className={!paymentHeading && idx === 0 ? ml.mlPartyName : ml.mlPartyLine}
+          >
+            {line}
+          </div>
         ))}
         {!!normalizedBankDetailsLines.length && (
           <div className={ml.mlBankBlock}>
@@ -70,8 +89,16 @@ const MonolineTemplate: FC<TemplateProps> = ({
       </div>
       <div className={ml.mlParty}>
         <div className={ml.mlPartyLabel}>{isEnglish ? 'Issued to' : 'Отримувач'}</div>
-        {issuedToLines.map((line: string, idx: number) => (
-          <div key={`it-${idx}`} className={idx === 0 ? ml.mlPartyName : ml.mlPartyLine}>{line}</div>
+        {!!issuedHeading && (
+          <div className={ml.mlPartyName}>{issuedHeading}</div>
+        )}
+        {issuedBodyLines.map((line: string, idx: number) => (
+          <div
+            key={`it-${idx}`}
+            className={!issuedHeading && idx === 0 ? ml.mlPartyName : ml.mlPartyLine}
+          >
+            {line}
+          </div>
         ))}
       </div>
     </div>
@@ -140,6 +167,7 @@ const MonolineTemplate: FC<TemplateProps> = ({
       </div>
     </div>
   </div>
-)
+  )
+}
 
 export default MonolineTemplate
