@@ -9,18 +9,20 @@ export interface IDomainModel {
   IEName: string
   domainBankToken: IDomainBankToken[]
   customServices: ICustomService[]
-  domainType?: string;
-  ownServiceName?: string;
-  ownServiceValue?: string | number;
-  customDomainTypeLabel?: string;
-  customServiceGroupName?: string;
+  domainTypeTemplateId?: string
   defaultTemplate?: string
 }
 
-export interface ICustomDomainTypeTemplate {
-  _id: string;
-  typeLabel: string;
-  groupName: string;
+export interface IDomainTypeTemplateGroup {
+  groupName: string
+  serviceIds: string[]
+}
+
+export interface IDomainTypeTemplate {
+  _id: string
+  name: string
+  isBuiltIn: boolean
+  groups: IDomainTypeTemplateGroup[]
 }
 
 export interface ICustomService {

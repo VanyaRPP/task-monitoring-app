@@ -1,8 +1,5 @@
 import { IPaymentField } from '@common/api/paymentApi/payment.api.types'
-import {
-  COMMUNAL_UTILITY_CUSTOM_SERVICE_ID_TO_SERVICE_TYPE,
-  ServiceType,
-} from '../constants'
+import { UTILITY_SERVICE_ID_TO_TYPE, ServiceType } from '../constants'
 
 export type IInvoiceLineAddPayload = Partial<IPaymentField> & {
   type: ServiceType | string
@@ -51,10 +48,10 @@ export function flattenDomainCatalogServices(
 export function invoiceLineExcludeKey(
   inv: Pick<IPaymentField, 'type' | 'fieldName' | 'serviceId'>
 ): string {
+  if (inv.serviceId) return `sid:${inv.serviceId}`
   const t = inv.type
   if (t === ServiceType.Custom || t === 'custom') {
     if (inv.fieldName) return `custom:${inv.fieldName}`
-    if (inv.serviceId) return `sid:${inv.serviceId}`
     return 'custom:generic'
   }
   return `stype:${t}`
@@ -74,12 +71,12 @@ export function buildInvoiceAddPayloadFromCatalogRow(
   row: Pick<IDomainCatalogServiceRow, '_id' | 'name' | 'fieldName'>
 ): IInvoiceLineAddPayload {
   const id = String(row._id)
-  const mapped = COMMUNAL_UTILITY_CUSTOM_SERVICE_ID_TO_SERVICE_TYPE[id]
+  const mapped = UTILITY_SERVICE_ID_TO_TYPE[id]
   if (mapped) {
-    return { type: mapped }
+    return { type: mapped, serviceId: id }
   }
   if (row.fieldName && isEnumUtilityServiceType(row.fieldName)) {
-    return { type: row.fieldName }
+    return { type: row.fieldName, serviceId: id }
   }
   return {
     type: ServiceType.Custom,

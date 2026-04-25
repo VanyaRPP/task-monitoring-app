@@ -1,197 +1,78 @@
-import { Checkbox, Col, Form, Input, Row, Select } from 'antd'
-import React, { FC, useMemo } from 'react'
+import { Button, Col, Form, Row, Select, Space } from 'antd'
+import React, { FC, useMemo, useState } from 'react'
 
-import { ICustomDomainTypeTemplate } from '@common/api/domainApi/domain.api.types'
-import {
-  buildDomainTypeSelectBaseOptions,
-  computeDomainTypeSelectValue,
-  mergeDomainTypeSelectOptionsWithCustomValue,
-  parseDomainTypeSelectChange,
-} from '@utils/domain/domain-modal-type-select'
+import { IDomainTypeTemplate } from '@common/api/domainApi/domain.api.types'
+import CreateTemplateModal from './CreateTemplateModal'
 
 interface Props {
-  onTypeChange: (value: string) => void
-  onCustomLabelsBlur?: () => void
-  onTemplateApplied?: () => void
-  templates?: ICustomDomainTypeTemplate[]
+  templates: IDomainTypeTemplate[]
   editable?: boolean
+  onTemplateChange: (templateId: string | null) => void
 }
 
 const DomainModalType: FC<Props> = ({
-  onTypeChange,
-  onCustomLabelsBlur,
-  onTemplateApplied,
-  templates = [],
+  templates,
   editable = true,
+  onTemplateChange,
 }) => {
   const form = Form.useFormInstance()
-  const domainType = Form.useWatch('domainType', form)
-  const typeLabel = Form.useWatch('customDomainTypeLabel', form)
-  const groupName = Form.useWatch('customServiceGroupName', form)
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
 
-  const selectValue = useMemo(
+  const options = useMemo(
     () =>
-      computeDomainTypeSelectValue(domainType, typeLabel, groupName, templates),
-    [domainType, typeLabel, groupName, templates]
-  )
-
-  const baseOptions = useMemo(
-    () => buildDomainTypeSelectBaseOptions(templates),
+      templates.map((t) => ({
+        value: t._id,
+        label: t.isBuiltIn ? t.name : `${t.name} (адмін)`,
+      })),
     [templates]
   )
-
-  const selectOptions = useMemo(
-    () =>
-      mergeDomainTypeSelectOptionsWithCustomValue(baseOptions, selectValue),
-    [baseOptions, selectValue]
-  )
-
-  const handleServiceTypeChange = (v: string) => {
-    const parsed = parseDomainTypeSelectChange(v, templates)
-    if (!parsed) return
-
-    switch (parsed.kind) {
-      case 'communal':
-      case 'it':
-        form.setFieldsValue({ domainType: parsed.kind })
-        onTypeChange(parsed.kind)
-        return
-      case 'own_manual_empty':
-        form.setFieldsValue({
-          domainType: 'own',
-          customDomainTypeLabel: '',
-          customServiceGroupName: '',
-        })
-        onTypeChange('own')
-        return
-      case 'own_from_template':
-        form.setFieldsValue({
-          domainType: 'own',
-          customDomainTypeLabel: parsed.typeLabel,
-          customServiceGroupName: parsed.groupName,
-        })
-        onTypeChange('own')
-        onTemplateApplied?.()
-        return
-      case 'own_from_custom_encoded':
-        form.setFieldsValue({
-          domainType: 'own',
-          customDomainTypeLabel: parsed.typeLabel,
-          customServiceGroupName: parsed.groupName,
-        })
-        onTypeChange('own')
-        onTemplateApplied?.()
-        return
-      default:
-        return
-    }
-  }
 
   return (
     <>
       <Row gutter={16} style={{ marginBottom: 16 }}>
         <Col span={24}>
-          <Form.Item name="domainType" noStyle hidden preserve>
-            <input type="hidden" />
-          </Form.Item>
-          <Form.Item label="Тип послуг" style={{ marginBottom: 0 }}>
+          <Form.Item
+            name="domainTypeTemplateId"
+            label="Тип послуг (шаблон)"
+            style={{ marginBottom: 0 }}
+          >
             <Select
-              placeholder="Оберіть тип"
-              value={selectValue}
-              onChange={handleServiceTypeChange}
+              placeholder="Оберіть шаблон"
+              onChange={(value: string | null) =>
+                onTemplateChange(value ?? null)
+              }
               style={{ width: '100%' }}
               disabled={!editable}
-              options={selectOptions}
+              options={options}
               optionFilterProp="label"
               showSearch
+              allowClear
             />
           </Form.Item>
         </Col>
       </Row>
 
-      {domainType === 'own' && (
-        <>
-          <Row gutter={16} style={{ marginBottom: 16 }}>
-            <Col xs={24} sm={12}>
-              <Form.Item
-                name="customDomainTypeLabel"
-                label="Назва типу"
-                dependencies={['domainType']}
-                rules={[
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (getFieldValue('domainType') !== 'own') {
-                        return Promise.resolve()
-                      }
-                      if (!value?.trim()) {
-                        return Promise.reject(
-                          new Error('Введіть назву типу')
-                        )
-                      }
-                      return Promise.resolve()
-                    },
-                  }),
-                ]}
-                preserve={true}
-                style={{ marginBottom: 0 }}
-              >
-                <Input
-                  placeholder="Напр. Охорона, Оренда приміщень"
-                  disabled={!editable}
-                  onBlur={() => onCustomLabelsBlur?.()}
-                />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={12}>
-              <Form.Item
-                name="customServiceGroupName"
-                label="Назва групи послуг"
-                dependencies={['domainType']}
-                rules={[
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (getFieldValue('domainType') !== 'own') {
-                        return Promise.resolve()
-                      }
-                      if (!value?.trim()) {
-                        return Promise.reject(
-                          new Error('Введіть назву групи')
-                        )
-                      }
-                      return Promise.resolve()
-                    },
-                  }),
-                ]}
-                preserve={true}
-                style={{ marginBottom: 0 }}
-              >
-                <Input
-                  placeholder="Група в каталозі «Мої послуги»"
-                  disabled={!editable}
-                  onBlur={() => onCustomLabelsBlur?.()}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          {editable && (
-            <Row style={{ marginBottom: 16 }}>
-              <Col span={24}>
-                <Form.Item
-                  name="publishCustomTypeTemplate"
-                  valuePropName="checked"
-                  preserve={false}
-                  style={{ marginBottom: 0 }}
-                >
-                  <Checkbox>
-                    Зробити цей тип і групу доступними іншим адмінам як шаблон
-                  </Checkbox>
-                </Form.Item>
-              </Col>
-            </Row>
-          )}
-        </>
+      {editable && (
+        <Row style={{ marginBottom: 16 }}>
+          <Col span={24}>
+            <Space>
+              <Button onClick={() => setIsCreateOpen(true)}>
+                + Створити новий шаблон
+              </Button>
+            </Space>
+          </Col>
+        </Row>
       )}
+
+      <CreateTemplateModal
+        open={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        onCreated={(created) => {
+          form.setFieldsValue({ domainTypeTemplateId: created._id })
+          onTemplateChange(created._id)
+          setIsCreateOpen(false)
+        }}
+      />
     </>
   )
 }

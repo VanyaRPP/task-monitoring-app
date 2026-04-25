@@ -8,12 +8,13 @@ import {
   IExtendedAreas,
   IGetAreasResponse,
   IGetDomainByPkResponse,
-  ICustomDomainTypeTemplate,
+  IDomainTypeTemplate,
+  IDomainTypeTemplateGroup,
 } from './domain.api.types'
 
 export const domainApi = createApi({
   reducerPath: 'domainApi',
-  tagTypes: ['Domain', 'IDomain', 'CustomDomainTypeTemplate'],
+  tagTypes: ['Domain', 'IDomain', 'DomainTypeTemplate'],
   refetchOnFocus: true,
   refetchOnReconnect: true,
   baseQuery: fetchBaseQuery({ baseUrl: `/api/` }),
@@ -101,32 +102,30 @@ export const domainApi = createApi({
       ],
       transformResponse: (response: IGetDomainByPkResponse) => response.data,
     }),
-    getCustomDomainTypeTemplates: builder.query<ICustomDomainTypeTemplate[], void>(
-      {
-        query: () => ({
-          url: 'custom-domain-type-templates',
-          method: 'GET',
-        }),
-        providesTags: ['CustomDomainTypeTemplate'],
-        transformResponse: (response: {
-          success: boolean
-          data: ICustomDomainTypeTemplate[]
-        }) => response.data ?? [],
-      }
-    ),
-    addCustomDomainTypeTemplate: builder.mutation<
-      ICustomDomainTypeTemplate,
-      { typeLabel: string; groupName: string }
+    getDomainTypeTemplates: builder.query<IDomainTypeTemplate[], void>({
+      query: () => ({
+        url: 'domain-type-templates',
+        method: 'GET',
+      }),
+      providesTags: ['DomainTypeTemplate'],
+      transformResponse: (response: {
+        success: boolean
+        data: IDomainTypeTemplate[]
+      }) => response.data ?? [],
+    }),
+    addDomainTypeTemplate: builder.mutation<
+      IDomainTypeTemplate,
+      { name: string; groups: IDomainTypeTemplateGroup[] }
     >({
       query: (body) => ({
-        url: 'custom-domain-type-templates',
+        url: 'domain-type-templates',
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['CustomDomainTypeTemplate'],
+      invalidatesTags: ['DomainTypeTemplate'],
       transformResponse: (response: {
         success: boolean
-        data: ICustomDomainTypeTemplate
+        data: IDomainTypeTemplate
       }) => response.data,
     }),
   }),
@@ -140,6 +139,6 @@ export const {
   useEditDomainMutation,
   useGetDomainByPkQuery,
   useGetDomainsByAdminQuery,
-  useGetCustomDomainTypeTemplatesQuery,
-  useAddCustomDomainTypeTemplateMutation,
+  useGetDomainTypeTemplatesQuery,
+  useAddDomainTypeTemplateMutation,
 } = domainApi

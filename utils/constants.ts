@@ -165,13 +165,12 @@ export const cascaderQuarters = [
   },
 ]
 
-export const IT_DEFAULT_SERVICE_NAME = 'For the provision of IT services'
-
-export const COMMUNAL_DEFAULT_SERVICE_GROUP_NAME = 'Стандартні послуги'
-
-export const IT_DEFAULT_SERVICE_GROUP_NAME = 'IT-послуги'
-
-const DEFAULT_COMMUNAL_UTILITY_ENTRIES: ReadonlyArray<
+// Mapping CustomService._id → ServiceType for utility services that drive
+// invoicing logic (electricity formulas, water-share split, etc).
+// Used only by the invoicing layer to translate a generic catalog entry into
+// a typed payment line. NOT a "default list of services for a domain" —
+// that role now belongs to seeded DomainTypeTemplate records.
+const UTILITY_SERVICE_ID_ENTRIES: ReadonlyArray<
   readonly [id: string, serviceType: ServiceType]
 > = [
   ['677d414283b6ef93c6b8ea2c', ServiceType.Maintenance], // Утримання приміщень (грн/м²)
@@ -187,13 +186,10 @@ const DEFAULT_COMMUNAL_UTILITY_ENTRIES: ReadonlyArray<
 ]
 
 export const defaultServices: readonly string[] =
-  DEFAULT_COMMUNAL_UTILITY_ENTRIES.map(([id]) => id)
+  UTILITY_SERVICE_ID_ENTRIES.map(([id]) => id)
 
-export const COMMUNAL_UTILITY_CUSTOM_SERVICE_ID_TO_SERVICE_TYPE = Object.freeze(
-  Object.fromEntries(DEFAULT_COMMUNAL_UTILITY_ENTRIES) as Record<
-    string,
-    ServiceType
-  >
+export const UTILITY_SERVICE_ID_TO_TYPE = Object.freeze(
+  Object.fromEntries(UTILITY_SERVICE_ID_ENTRIES) as Record<string, ServiceType>
 ) as Readonly<Partial<Record<string, ServiceType>>>
 
 export const cascaderMonths = [

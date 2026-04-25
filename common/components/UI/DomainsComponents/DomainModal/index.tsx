@@ -1,20 +1,14 @@
 import {
-  useAddCustomDomainTypeTemplateMutation,
   useAddDomainMutation,
   useEditDomainMutation,
   useGetDomainsQuery,
+  useGetDomainTypeTemplatesQuery,
 } from '@common/api/domainApi/domain.api'
 import { Form, message } from 'antd'
-import React, { FC, useEffect, useState } from 'react'
-import {
-  IExtendedDomain,
-} from '@common/api/domainApi/domain.api.types'
+import React, { FC, useEffect, useMemo, useState } from 'react'
+import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import DomainForm from './DomainForm'
 import Modal from '../../ModalWindow'
-import {
-  normalizeDomainServiceKind,
-  presetGroupsToFormValues,
-} from '@utils/domain/domain-service-policy'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 
 interface Props {
@@ -28,19 +22,36 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
   const [isValueChanged, setIsValueChanged] = useState(false)
   const [addDomainEstate, { isLoading: isAdding }] = useAddDomainMutation()
   const [editDomain, { isLoading: isEditing }] = useEditDomainMutation()
-  const [publishTypeTemplate] = useAddCustomDomainTypeTemplateMutation()
   const { data: domains } = useGetDomainsQuery({})
   const { data: user } = useGetCurrentUserQuery()
+  const { data: templates = [] } = useGetDomainTypeTemplatesQuery(undefined, {
+    skip: !editable,
+  })
+
+  const defaultTemplateId = useMemo(
+    () => templates.find((t) => t.isBuiltIn && t.name === 'Комунальні')?._id,
+    [templates]
+  )
 
   useEffect(() => {
-    const domainType = currentDomain?.domainType || 'communal'
-    const customServices = currentDomain?.customServices?.length
-      ? currentDomain.customServices
-      : presetGroupsToFormValues(normalizeDomainServiceKind(domainType))
+    const templateId =
+      currentDomain?.domainTypeTemplateId || defaultTemplateId || null
 
-    const initialValues = {
+    let customServices = currentDomain?.customServices ?? []
+    if (!customServices.length && templateId) {
+      const tpl = templates.find((t) => t._id === templateId)
+      if (tpl) {
+        customServices = tpl.groups.map((g) => ({
+          groupName: g.groupName,
+          services: g.serviceIds.map(String),
+        }))
+      }
+    }
+
+    form.setFieldsValue({
       name: currentDomain?.name || '',
-      adminEmails: currentDomain?.adminEmails || (user?.email ?  [user.email] : []),
+      adminEmails:
+        currentDomain?.adminEmails || (user?.email ? [user.email] : []),
       streets:
         currentDomain?.streets.map((i: any) => ({
           value: i._id,
@@ -53,23 +64,10 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       mfo: currentDomain?.mfo || '',
       rnokpp: currentDomain?.rnokpp || '',
       iban: currentDomain?.iban || '',
-      domainType,
-      customDomainTypeLabel:
-        currentDomain?.customDomainTypeLabel ??
-        (domainType === 'own'
-          ? currentDomain?.ownServiceName ?? ''
-          : ''),
-      customServiceGroupName:
-        currentDomain?.customServiceGroupName ??
-        (domainType === 'own'
-          ? currentDomain?.customServices?.[0]?.groupName ?? ''
-          : ''),
-      ownServiceValue: currentDomain?.ownServiceValue || '',
-      publishCustomTypeTemplate: false,
+      domainTypeTemplateId: templateId,
       customServices,
-    }
-    form.setFieldsValue(initialValues)
-  }, [currentDomain, form, user])
+    })
+  }, [currentDomain, form, user, templates, defaultTemplateId])
 
   const handleSubmit = async () => {
     await form.validateFields()
@@ -83,18 +81,10 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
         content:
           'Помилка при додаванні надавача послуг!  Домен з такою назвою вже існує!',
         duration: 4,
-        style: {
-          marginTop: '20vh',
-          fontSize: '2rem',
-          zIndex: 9999,
-        },
+        style: { marginTop: '20vh', fontSize: '2rem', zIndex: 9999 },
       })
       return
     }
-
-    const isOwn = formData.domainType === 'own'
-    const typeLabel = formData.customDomainTypeLabel?.trim() ?? ''
-    const groupLabel = formData.customServiceGroupName?.trim() ?? ''
 
     const domainData = {
       name: formData.name,
@@ -110,51 +100,17 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       rnokpp: formData.rnokpp,
       iban: formData.iban,
       customServices: formData.customServices,
-      domainType: formData.domainType,
-      customDomainTypeLabel: isOwn ? typeLabel : '',
-      customServiceGroupName: isOwn ? groupLabel : '',
-      ownServiceName: isOwn ? typeLabel : '',
-      ownServiceValue: formData.ownServiceValue,
+      domainTypeTemplateId: formData.domainTypeTemplateId || undefined,
     }
 
     const response = currentDomain
-      ? await editDomain({
-          _id: currentDomain?._id,
-          ...domainData,
-        })
+      ? await editDomain({ _id: currentDomain?._id, ...domainData })
       : await addDomainEstate(domainData)
 
     if ('data' in response) {
-      let templatePublished = false
-      let templateError: string | undefined
-      if (
-        formData.publishCustomTypeTemplate &&
-        isOwn &&
-        typeLabel &&
-        groupLabel
-      ) {
-        try {
-          await publishTypeTemplate({
-            typeLabel,
-            groupName: groupLabel,
-          }).unwrap()
-          templatePublished = true
-        } catch (e) {
-          console.error('publishTypeTemplate failed', e)
-          templateError =
-            'Шаблон не додано (можливо вже є в списку).'
-        }
-      }
       closeModal()
       form.resetFields()
-      const action = currentDomain ? 'Збережено' : 'Додано'
-      if (templateError) {
-        message.warning(`${action}. ${templateError}`)
-      } else if (templatePublished) {
-        message.success(`${action}. Шаблон доступний іншим адмінам.`)
-      } else {
-        message.success(action)
-      }
+      message.success(currentDomain ? 'Збережено' : 'Додано')
     } else {
       const action = currentDomain ? 'збереженні' : 'додаванні'
       message.error(`Помилка при ${action} надавача послуг`)

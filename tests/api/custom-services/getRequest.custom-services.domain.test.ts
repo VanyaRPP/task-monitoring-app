@@ -68,11 +68,10 @@ describe('API GET custom-services/domain', () => {
     expect(res.status).toHaveBeenCalledWith(404)
   })
 
-  it('returns preset shell when customServices empty', async () => {
+  it('returns empty array when customServices empty', async () => {
     ;(Domain.findById as jest.Mock).mockReturnValue(
       mockLean({
         _id: '64d68421d9ba2fc8fea79d11',
-        domainType: 'it',
         customServices: [],
       })
     )
@@ -90,16 +89,13 @@ describe('API GET custom-services/domain', () => {
 
     expect(res.status).toHaveBeenCalledWith(200)
     const { data } = res.json.mock.calls[0][0]
-    expect(Array.isArray(data)).toBe(true)
-    expect(data[0].groupName).toBeTruthy()
-    expect(data[0].services).toEqual([])
+    expect(data).toEqual([])
   })
 
   it('returns groups with empty services when ids invalid; fallback groupName', async () => {
     ;(Domain.findById as jest.Mock).mockReturnValue(
       mockLean({
         _id: '64d68421d9ba2fc8fea79d11',
-        domainType: 'own',
         customServices: [
           { groupName: undefined, services: ['not-an-objectid'] },
         ],
@@ -128,7 +124,6 @@ describe('API GET custom-services/domain', () => {
     ;(Domain.findById as jest.Mock).mockReturnValue(
       mockLean({
         _id: '64d68421d9ba2fc8fea79d11',
-        domainType: 'communal',
         customServices: [{ groupName: 'G', services: [sid] }],
       })
     )

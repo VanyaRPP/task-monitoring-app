@@ -2,16 +2,12 @@ import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi
 import { useInvoicesPaymentContext } from '@common/components/DashboardPage/blocks/paymentsBulk'
 import { getDefaultColumns } from '@common/components/Tables/PaymentsBulk/column.config'
 import serviceFilter from '@components/AddPaymentModal/serviceFilter'
-import { AppRoutes, Operations, ServiceType } from '@utils/constants'
+import { AppRoutes, Operations } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { Alert, Empty, Form, Input, Table } from 'antd'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo } from 'react'
 import { defaultServices } from '@utils/constants'
-import {
-  getDomainInvoiceUiPolicy,
-  normalizeDomainServiceKind,
-} from '@utils/domain/domain-service-policy'
 import { findPrevPaymentMatch } from './hooks/usePrevPayment/usePrevPayment'
 
 const InvoicesTable: React.FC = () => {
@@ -38,22 +34,10 @@ const InvoicesTable: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const groups = customDomainServices?.data ?? []
 
-  const domainServiceKind = normalizeDomainServiceKind(
-    service?.domain?.domainType
+  const allowedServices = useMemo(
+    () => groups.flatMap((group) => group.services),
+    [groups]
   )
-  const { hideUtilityServicesInDomainPickers } =
-    getDomainInvoiceUiPolicy(domainServiceKind)
-
-  const allowedServices = useMemo(() => {
-    const flat = groups.flatMap((group) => group.services)
-    if (!hideUtilityServicesInDomainPickers) {
-      return flat
-    }
-    const utilitySet = new Set(defaultServices.map(String))
-    return flat.filter(
-      (s) => s?._id != null && !utilitySet.has(String(s._id))
-    )
-  }, [groups, hideUtilityServicesInDomainPickers])
 
   const customServicesColumns = useMemo(
     () =>

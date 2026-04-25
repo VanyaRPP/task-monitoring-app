@@ -7,10 +7,6 @@ import {
   useGetCustomServicesQuery,
 } from '@common/api/customServicesApi/customServices.api'
 import { defaultServices } from '@utils/constants'
-import {
-  filterServicesForDomainCatalogPicker,
-  normalizeDomainServiceKind,
-} from '@utils/domain/domain-service-policy'
 
 export interface ServicesSelectProps {
   domainId?: string
@@ -41,9 +37,6 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
 
   const { data: allCustomServices } = useGetCustomServicesQuery({})
 
-  const domainType = Form.useWatch('domainType', form)
-  const domainServiceKind = normalizeDomainServiceKind(domainType)
-
   const servicesList = useMemo(() => {
     if (!servicesData) return []
     return servicesData.data.map((service: any) => ({
@@ -57,10 +50,9 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
       const allServices = customDomainServices.data.flatMap(
         (group) => group.services || []
       )
-      const sorted = allServices
+      return allServices
         .slice()
         .sort((a, b) => a?.name?.localeCompare(b?.name || '') || 0)
-      return filterServicesForDomainCatalogPicker(sorted, domainServiceKind)
     }
 
     if (!domainId && allCustomServices?.data) {
@@ -73,14 +65,13 @@ const ServicesSelect: React.FC<ServicesSelectProps> = ({
           _id: service._id,
           name: service.name || 'Без назви',
         }))
-      const sorted = defaultServicesList
+      return defaultServicesList
         .slice()
         .sort((a, b) => a?.name?.localeCompare(b?.name || '') || 0)
-      return filterServicesForDomainCatalogPicker(sorted, domainServiceKind)
     }
 
     return []
-  }, [domainId, customDomainServices, allCustomServices, domainServiceKind])
+  }, [domainId, customDomainServices, allCustomServices])
 
   const options = useMemo(() => {
     if (!services || services.length === 0) return []

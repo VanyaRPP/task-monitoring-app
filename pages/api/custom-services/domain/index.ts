@@ -2,10 +2,6 @@ import CustomService from '@modules/models/CustomService'
 import Domain from '@modules/models/Domain'
 import start, { Data } from '@pages/api/api.config'
 import { getCurrentUser } from '@utils/getCurrentUser'
-import {
-  getStaticServicePresetForKind,
-  normalizeDomainServiceKind,
-} from '@utils/domain/domain-service-policy'
 import mongoose from 'mongoose'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -48,18 +44,10 @@ export default async function handler(
           })
         }
 
-        const kind = normalizeDomainServiceKind(domain.domainType)
-
-        const emptyPresetShell = () =>
-          getStaticServicePresetForKind(kind).groups.map((g) => ({
-            groupName: g.groupName,
-            services: [] as unknown[],
-          }))
-
         if (!domain.customServices || domain.customServices.length === 0) {
           return res.status(200).json({
             success: true,
-            data: emptyPresetShell(),
+            data: [],
           })
         }
 
