@@ -6,6 +6,7 @@ export interface IRealEstateModel {
   domain: ObjectId
   street: ObjectId
   companyName: string
+  invoiceName?: string
   description: string
   adminEmails: string[]
   pricePerMeter: number
@@ -36,6 +37,7 @@ export const RealEstateSchema = new Schema<IRealEstateModel>({
   domain: { type: Schema.Types.ObjectId, ref: 'Domain' },
   street: { type: Schema.Types.ObjectId, ref: 'Street' },
   companyName: { type: String, required: true },
+  invoiceName: { type: String, required: false },
   description: { type: String, required: true },
   adminEmails: { type: [String], required: true },
   pricePerMeter: { type: Number, required: true, default: 0 },

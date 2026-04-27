@@ -61,8 +61,10 @@ export function generateClassicHtml(data: any): string {
     : ''
   const providerDescription = escapeHtml((data?.provider?.description || '').trim())
 
-  const receiverCompanyName = data?.reciever?.companyName
-    ? `<strong>${escapeHtml(data.reciever.companyName)}</strong>\n`
+  const displayReceiverName = data?.company?.invoiceName || data?.reciever?.invoiceName || data?.reciever?.companyName
+
+  const receiverCompanyName = displayReceiverName
+    ? `<strong>${escapeHtml(displayReceiverName)}</strong>\n`
     : ''
   const receiverDescription = escapeHtml((data?.reciever?.description || '').trim())
   const receiverEmails = (data?.reciever?.adminEmails || [])

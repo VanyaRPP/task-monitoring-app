@@ -74,6 +74,7 @@ const RealEstateModal: FC<Props> = ({
         currentRealEstate?.street &&
         `${currentRealEstate.street.address} (м. ${currentRealEstate.street.city})`,
       companyName: currentRealEstate?.companyName || '',
+      invoiceName: currentRealEstate?.invoiceName || '',
       description: currentRealEstate?.description || '',
       adminEmails: currentRealEstate?.adminEmails || [],
       pricePerMeter: currentRealEstate?.pricePerMeter || 0,
@@ -110,6 +111,7 @@ const RealEstateModal: FC<Props> = ({
       domain: currentRealEstate?.domain || formData.domain,
       street: currentRealEstate?.street || formData.street,
       companyName: formData.companyName,
+      invoiceName: formData.invoiceName,
       description: formData.description,
       adminEmails: formData.adminEmails,
       pricePerMeter: formData.pricePerMeter,
