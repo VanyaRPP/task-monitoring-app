@@ -9,12 +9,11 @@ import {
   Form,
   FormInstance,
   Input,
-  InputNumber,
 } from 'antd'
 import ukUA from 'antd/lib/locale/uk_UA'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
-import { useEffect } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import s from './style.module.scss'
 import { inputNumberParser } from '@utils/helpers'
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
@@ -277,7 +276,7 @@ const AddServiceForm: React.FC<Props> = ({
         <LossesCollapse
           form={form}
           name='losses'
-        />
+        />  
         <br/>
         <br/>
         <Form.Item name="description" label="Опис">
