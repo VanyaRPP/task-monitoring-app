@@ -156,8 +156,9 @@ const PaymentsTable: React.FC<PaymentsTableProps> = ({
     return <Alert message="Помилка" type="error" showIcon closable />
   }
 
-  const rowSelection = hasRowSelection
+const rowSelection = hasRowSelection
     ? {
+        columnWidth: 28,
         selectedRowKeys: selectedPayments.map(i => i._id),
         preserveSelectedRowKeys: true,
         onChange: (_keys: React.Key[], rows: IExtendedPayment[]) => {
