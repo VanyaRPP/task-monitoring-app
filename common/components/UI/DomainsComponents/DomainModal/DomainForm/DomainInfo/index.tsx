@@ -11,9 +11,10 @@ interface Props {
   editable: boolean
   form: any
   currentDomainId?: string
+  setIsValueChanged: (value: boolean) => void
 }
 
-const DomainInfo: FC<Props> = ({ editable, form, currentDomainId }) => {
+const DomainInfo: FC<Props> = ({ editable, form, currentDomainId, setIsValueChanged }) => {
   // Watch the values of specific fields
   const IE_NAME = Form.useWatch('IEName', form)
   const IBAN = Form.useWatch('iban', form)
@@ -125,6 +126,7 @@ const DomainInfo: FC<Props> = ({ editable, form, currentDomainId }) => {
       domainId={domainId} 
       editable={editable} 
       form={form} 
+      setIsValueChanged={setIsValueChanged}
       />
 
       <Form.List name="domainBankToken">

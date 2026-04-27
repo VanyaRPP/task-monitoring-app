@@ -56,7 +56,7 @@ const DomainForm: React.FC<Props> = ({
         onCustomServicesChange={setCustomServices}
         domainId={domainId}
       />
-      <DomainInfo editable={editable} form={form} currentDomainId={domainId}/>
+      <DomainInfo editable={editable} form={form} currentDomainId={domainId} setIsValueChanged={setIsValueChanged} />
       <Form.Item name="defaultTemplate" label="Шаблон за замовчуванням">
         <Select
           options={TEMPLATE_OPTIONS}
