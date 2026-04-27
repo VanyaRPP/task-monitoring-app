@@ -8,6 +8,7 @@ export type IRealestate = {
   domain: IDomain
   street: IStreet
   companyName: string
+  invoiceName?: string
   adminEmails: string[]
   pricePerMeter: number
   servicePricePerMeter?: number
