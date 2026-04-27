@@ -98,7 +98,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
 
   const transactionPayload = buildTransactionPayload(transaction, relatedCompanies)
 
-  const quickSendMenuItems: MenuProps['items'] = services.slice(-10).map((service) => ({
+  const quickSendMenuItems: MenuProps['items'] = services.map((service) => ({
     key: service._id,
     label: formatDate(service.date, 'MMMM YYYY'),
     icon: <CalendarOutlined />,
