@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import AreaCalculationCard from './index';
+import AreaCalculationCard from './DomainAreaCalc';
 import { useGetAreasQuery } from '@common/api/domainApi/domain.api';
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api';
 import { Form } from 'antd';

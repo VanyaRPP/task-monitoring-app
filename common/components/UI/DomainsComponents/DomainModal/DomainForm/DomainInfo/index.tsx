@@ -5,7 +5,7 @@ import s from '../style.module.scss'
 import { CloseOutlined } from '@ant-design/icons'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { useForm } from 'antd/lib/form/Form'
-import AreaCalculationCard from '../DomainAreaCalc'
+import AreaCalculationCard from './DomainAreaCalc'
 
 interface Props {
   editable: boolean
