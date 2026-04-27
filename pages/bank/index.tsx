@@ -1,3 +1,4 @@
+import Head from 'next/head'
 import MainLayout from '@common/components/Layouts/Main'
 import withAuthRedirect from '@components/HOC/withAuthRedirect'
 import { AppRoutes } from '@utils/constants'
@@ -9,9 +10,14 @@ import BankTransactions from '@components/Pages/BankTransactions'
 
 export default withAuthRedirect(() => {
   return (
-    <MainLayout path={[{ title: 'Bank', path: AppRoutes.BANK }]}>
-      <BankTransactions />
-    </MainLayout>
+    <>
+      <Head>
+        <title>Банківські транзакції</title>
+      </Head>
+      <MainLayout path={[{ title: 'Bank', path: AppRoutes.BANK }]}>
+        <BankTransactions />
+      </MainLayout>
+    </>
   )
 })
 
