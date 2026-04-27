@@ -83,23 +83,21 @@ export const Amount: React.FC<InvoiceComponentProps> = ({
   name: _name,
   editable,
   disabled,
+  record,
 }) => {
   const name = useMemo(() => toArray<string>(_name), [_name])
   const amount = Form.useWatch(['invoice', ...name, 'amount'], form)
-
-  useEffect(() => {
-    if (amount === undefined || amount === null || Number.isNaN(+amount)) {
-      form?.setFieldValue(['invoice', ...name, 'amount'], 1)
-    }
-  }, [amount, form, name])
+  const initialAmount = record?.amount ?? 1
+  const currentAmount = amount ?? initialAmount
 
   if (!editable) {
-    return <span>{toRoundFixed(amount || 1)}</span>
+    return <span>{toRoundFixed(currentAmount)}</span>
   }
 
   return (
     <Form.Item
       name={[...name, 'amount']}
+      initialValue={initialAmount}
       rules={[validator.required(), validator.min(1)]}
       style={{ margin: 0 }}
     >

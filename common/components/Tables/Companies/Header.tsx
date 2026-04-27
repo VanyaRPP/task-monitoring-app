@@ -58,7 +58,7 @@ const CompaniesHeader: React.FC<Props> = ({
 
   const { data: customServicesResponse } = useGetCustomServicesQuery({})
   const customServices = customServicesResponse?.data || []
-  
+
   const { data: user } = useGetCurrentUserQuery()
   const isAdmin = isAdminCheck(user?.roles)
 
@@ -86,11 +86,11 @@ const CompaniesHeader: React.FC<Props> = ({
   })
 
   const handleServicesChange = (values: string[]) => {
-  setFilters((prev: any) => ({
-    ...prev,
-    services: values,
-  }))
-}
+    setFilters((prev: any) => ({
+      ...prev,
+      services: values,
+    }))
+  }
 
   return (
     <div className={s.headerBlock}>
@@ -122,29 +122,29 @@ const CompaniesHeader: React.FC<Props> = ({
             />
           </Space>
         )}
-      <div style={{ position: 'absolute', left: 400,}}>
-      <Select
-        mode="multiple"
-        allowClear
-        placeholder="Фільтр послуг"
-        style={{ width: "250px" }}
-        value={filters?.services || []}
-        onChange={handleServicesChange}
-        maxTagCount="responsive"
-      >
-        {customServices.length > 0 && (
-        <Select.OptGroup label="Кастомні">
-          {customServices.map((service) => (
-            <Select.Option key={service._id} value={service._id}>
-              {service.name}
-            </Select.Option>
-        ))}
-        </Select.OptGroup>
-      )}
-    </Select>
-    </div>  
       </div>
+
       <div className={s.segmented}>
+        <Select
+          mode="multiple"
+          allowClear
+          placeholder="Фільтр послуг"
+          style={{ width: "250px", minWidth: "150px" }}
+          value={filters?.services || []}
+          onChange={handleServicesChange}
+          maxTagCount="responsive"
+        >
+          {customServices.length > 0 && (
+            <Select.OptGroup label="Кастомні">
+              {customServices.map((service) => (
+                <Select.Option key={service._id} value={service._id}>
+                  {service.name}
+                </Select.Option>
+              ))}
+            </Select.OptGroup>
+          )}
+        </Select>
+
         <Segmented
           options={[
             { label: 'Неархівовані', value: false },
@@ -156,7 +156,7 @@ const CompaniesHeader: React.FC<Props> = ({
 
       {showAddButton && isAdmin && (
         <>
-          <Button type="link" onClick={openModal}>
+          <Button type="link" onClick={openModal} className={s.addButton}>
             <PlusOutlined /> Додати
           </Button>
           {(isModalOpen || currentRealEstate) && (

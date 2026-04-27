@@ -23,7 +23,9 @@ export type IRealestate = {
   cleaning?: number
   services: IDomainService[]
   customServices?: CustomServices[]
-  mfo: string
+  account?: string
+  rnokpp?: string
+  defaultTemplate?: string
 }
 
 export interface CustomServices {

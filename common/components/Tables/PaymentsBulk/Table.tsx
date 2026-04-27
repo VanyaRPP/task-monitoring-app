@@ -8,6 +8,7 @@ import { Alert, Empty, Form, Input, Table } from 'antd'
 import { useRouter } from 'next/router'
 import { useEffect, useMemo } from 'react'
 import { defaultServices } from '@utils/constants'
+import { findPrevPaymentMatch } from './hooks/usePrevPayment/usePrevPayment'
 
 const InvoicesTable: React.FC = () => {
   const router = useRouter()
@@ -61,28 +62,20 @@ const InvoicesTable: React.FC = () => {
     if (!companies || companies.length === 0 || !service) return []
 
     return companies.map((company) => {
-      const prevPayment = prevPayments?.find(
-        (payment) =>
-          // eslint-disable-next-line
-          // @ts-ignore
-          payment.company?._id === company._id &&
-          // eslint-disable-next-line
-          // @ts-ignore
-          payment.monthService?._id === prevService?._id &&
-          // eslint-disable-next-line
-          // @ts-ignore
-          payment.street?._id === prevService?.street?._id &&
-          // eslint-disable-next-line
-          // @ts-ignore
-          payment.domain?._id === prevService?.domain?._id &&
-          payment.type === Operations.Debit
-      )
+      const prevPayment = findPrevPaymentMatch(prevPayments, {
+        companyId: company._id,
+        serviceId: prevService?._id,
+        streetId: prevService?.street?._id,
+        domainId: prevService?.domain?._id,
+      })
+
+      const validPrevPayment = prevPayment?.type === Operations.Debit ? prevPayment : undefined
 
       const allinvoice = getInvoices({
         company,
         service,
         prevService,
-        prevPayment,
+        prevPayment: validPrevPayment,
       })
 
       const filteredInvoice = serviceFilter(allinvoice, allowedServices)

@@ -4,6 +4,10 @@ import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.a
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 import { useGetAllServicesQuery } from '@common/api/serviceApi/service.api'
 import { IService } from '@common/api/serviceApi/service.api.types'
+import {
+  isMonthServicePlaceholder,
+  parseMonthServicePlaceholder,
+} from '@common/components/Forms/AddPaymentForm/month-service-placeholder'
 import { Operations } from '@utils/constants'
 import { Form, FormInstance } from 'antd'
 import dayjs from 'dayjs'
@@ -130,34 +134,89 @@ export function usePaymentFormData(
     // eslint-disable-next-line
     // @ts-ignore
     Form.useWatch('street', form) || paymentData?.street?._id
-  const serviceId: string | undefined =
+  const monthServiceRaw: string | undefined =
     // eslint-disable-next-line
     // @ts-ignore
-    Form.useWatch('monthService', form) || paymentData?.monthService?._id
+    Form.useWatch('monthService', form) ||
+    (typeof paymentData?.monthService === 'string'
+      ? paymentData.monthService
+      : paymentData?.monthService?._id)
+
+  const isMonthPlaceholder = isMonthServicePlaceholder(monthServiceRaw)
+  const serviceByIdParam =
+    typeof monthServiceRaw === 'string' && !isMonthPlaceholder
+      ? monthServiceRaw
+      : undefined
+  const placeholderAnchor = isMonthPlaceholder
+    ? parseMonthServicePlaceholder(monthServiceRaw)
+    : undefined
+  const placeholderYear = placeholderAnchor?.year()
+  const placeholderMonth = placeholderAnchor
+    ? placeholderAnchor.month() + 1
+    : undefined
 
   const { data: { data: { 0: company } } = { data: [null] } } =
     useGetAllRealEstateQuery({ companyId, limit: 1 }, { skip: !companyId })
 
-  const { data: { data: { 0: service } } = { data: [null] } } =
-    useGetAllServicesQuery({ serviceId, limit: 1 }, { skip: !serviceId })
-  const month =
-    dayjs(service?.date).month() === 0 ? 12 : dayjs(service?.date).month()
-  const year =
-    month === 12 ? dayjs(service?.date).year() - 1 : dayjs(service?.date).year()
+  const { data: { data: { 0: serviceById } } = { data: [null] } } =
+    useGetAllServicesQuery(
+      { serviceId: serviceByIdParam, limit: 1 },
+      { skip: !serviceByIdParam }
+    )
+
+  const { data: { data: { 0: serviceByMonth } } = { data: [null] } } =
+    useGetAllServicesQuery(
+      {
+        domainId,
+        streetId,
+        year: placeholderYear,
+        month: placeholderMonth,
+        limit: 1,
+      },
+      {
+        skip:
+          !isMonthPlaceholder ||
+          !domainId ||
+          !streetId ||
+          placeholderYear === undefined ||
+          placeholderMonth === undefined,
+      }
+    )
+
+  const service = serviceById ?? serviceByMonth ?? null
+
+  const anchorDate =
+    service?.date != null
+      ? dayjs(service.date)
+      : placeholderAnchor ?? null
+  const hasAnchor = anchorDate != null && anchorDate.isValid()
+  const prevMonthMongo = !hasAnchor
+    ? 0
+    : anchorDate.month() === 0
+      ? 12
+      : anchorDate.month()
+  const prevYearMongo = !hasAnchor
+    ? 0
+    : prevMonthMongo === 12 && anchorDate.month() === 0
+      ? anchorDate.year() - 1
+      : anchorDate.year()
+
   const { data: { data: { 0: prevService } } = { data: [null] } } =
     useGetAllServicesQuery(
       {
-        streetId: service?.street?._id,
-        domainId: service?.domain?._id,
-        // eslint-disable-next-line
-        // @ts-ignore
-        month: month,
-        // eslint-disable-next-line
-        // @ts-ignore
-        year: year,
+        streetId: service?.street?._id ?? streetId,
+        domainId: service?.domain?._id ?? domainId,
+        month: prevMonthMongo,
+        year: prevYearMongo,
         limit: 1,
       },
-      { skip: !serviceId || !service }
+      {
+        skip:
+          !hasAnchor ||
+          !streetId ||
+          !domainId ||
+          (!service && !isMonthPlaceholder),
+      }
     )
 
   const { data: { data: { 0: prevPayment } } = { data: [null] } } =
@@ -176,9 +235,12 @@ export function usePaymentFormData(
     )
   return {
     company: !!companyId ? company : null,
-    service: !!serviceId ? service : null,
+    service,
     payment: paymentData,
-    prevService: !!serviceId && !!service ? prevService : null,
+    prevService:
+      hasAnchor && streetId && domainId && (service || isMonthPlaceholder)
+        ? prevService
+        : null,
     prevPayment:
       !!prevService && !!companyId && !!streetId && !!domainId
         ? prevPayment

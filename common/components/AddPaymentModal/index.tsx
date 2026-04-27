@@ -1,4 +1,6 @@
 import { useGetCustomServicesByDomainQuery } from '@common/api/customServicesApi/customServices.api'
+import { useGetDomainByPkQuery } from '@common/api/domainApi/domain.api'
+import { resolveTemplate, TemplateKey } from './resolveTemplate'
 import {
   useAddPaymentMutation,
   useEditPaymentMutation,
@@ -12,11 +14,20 @@ import {
   IPayment,
 } from '@common/api/paymentApi/payment.api.types'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
+import {
+  serviceApi,
+  useAddServiceMutation,
+} from '@common/api/serviceApi/service.api'
 import { IService } from '@common/api/serviceApi/service.api.types'
 import PriceList from '@common/components/Forms/AddPaymentForm/PriceList'
+import {
+  isMonthServicePlaceholder,
+  parseMonthServicePlaceholder,
+} from '@common/components/Forms/AddPaymentForm/month-service-placeholder'
 import Modal from '@components/UI/ModalWindow'
 import { usePaymentFormData } from '@modules/hooks/usePaymentData'
-import { Operations } from '@utils/constants'
+import { useAppDispatch } from '@modules/store/hooks'
+import { Operations, Currency } from '@utils/constants'
 import { getInvoices } from '@utils/getInvoices'
 import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { Form, Tabs, TabsProps, message, Tooltip } from 'antd'
@@ -26,11 +37,12 @@ import dayjs from 'dayjs'
 import {
   FC,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
-  useState,
   useRef,
+  useState,
 } from 'react'
 import AddPaymentForm from '../Forms/AddPaymentForm'
 import GroupedReceiptForm from '../Forms/GroupedReceiptForm'
@@ -47,10 +59,11 @@ const DEFAULT_INVOICES = [
 ]
 
 interface Props {
-  closeModal: VoidFunction
+  closeModal: (success?: boolean) => void
   paymentData?: any
   paymentActions?: { edit: boolean; preview: boolean; create?: boolean }
   preselectedCompany?: string
+  preselectedDomain?: string
 }
 
 export interface IPaymentContext {
@@ -60,8 +73,10 @@ export interface IPaymentContext {
   prevService: IService
   company: IRealestate
   form: FormInstance
-  template: 'classic' | 'olimp'                     
-  setTemplate: (t: 'classic' | 'olimp') => void
+  template: TemplateKey
+  setTemplate: (t: TemplateKey) => void
+  showQuantityInPreview: boolean
+  setShowQuantityInPreview: (value: boolean) => void
 }
 
 export const PaymentContext = createContext<IPaymentContext>({
@@ -73,6 +88,8 @@ export const PaymentContext = createContext<IPaymentContext>({
   form: null,
   template: 'classic', 
   setTemplate: () => void 0,
+  showQuantityInPreview: false,
+  setShowQuantityInPreview: () => void 0,
 })
 
 export const usePaymentContext = () =>
@@ -84,11 +101,17 @@ const getId = (obj?: string | Partial<{ _id: string }>) => {
   return obj._id
 }
 
+const getPreviewQtyStorageKey = (id?: string) =>
+  id
+    ? `addPayment:showQuantityInPreview:${id}`
+    : 'addPayment:showQuantityInPreview:draft'
+
 const AddPaymentModal: FC<Props> = ({
   closeModal,
   paymentData,
   paymentActions,
   preselectedCompany,
+  preselectedDomain,
 }) => {
   const { preview, edit } = paymentActions ?? { preview: false, edit: false }
 
@@ -96,17 +119,63 @@ const AddPaymentModal: FC<Props> = ({
   const [form] = Form.useForm()
   const firstRunRef = useRef(true)
   const restoringRef = useRef(false)
-  const lastLoadedCompanyId = useRef<string | null>(null);
+  const lastLoadedCompanyId = useRef<string | null>(null)
   const [changed, setChanged] = useState(false)
   const [saved, setSaved] = useState(false)
   const [currPayment, setCurrPayment] = useState<IExtendedPayment>()
-  const [template, setTemplate] = useState<'classic' | 'olimp'>('classic')
+  const companyDefaultTemplate =
+    typeof paymentData?.company === 'object'
+      ? (paymentData.company as any)?.defaultTemplate
+      : (paymentData as any)?.defaultTemplate
+  const paymentDomainId =
+    typeof paymentData?.domain === 'object'
+      ? paymentData.domain?._id
+      : (paymentData?.domain || preselectedDomain || undefined)
+  const domainDefaultTemplate =
+    typeof paymentData?.domain === 'object'
+      ? (paymentData.domain as any)?.defaultTemplate
+      : undefined
+const [template, setTemplate] = useState<TemplateKey>(
+    resolveTemplate(paymentData?.template, companyDefaultTemplate, domainDefaultTemplate)
+  )
+  const [showQuantityInPreview, setShowQuantityInPreviewState] = useState(false)
   const [activeTabKey, setActiveTabKey] = useState(
     getActiveTab(paymentData, preview)
   )
 
+  const setShowQuantityInPreview = useCallback(
+    (value: boolean) => {
+      setShowQuantityInPreviewState(value)
+      if (typeof window === 'undefined') return
+      sessionStorage.setItem(
+        getPreviewQtyStorageKey(paymentId),
+        value ? '1' : '0'
+      )
+    },
+    [paymentId]
+  )
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const raw = sessionStorage.getItem(getPreviewQtyStorageKey(paymentId))
+    if (raw === '1') setShowQuantityInPreviewState(true)
+    if (raw === '0') setShowQuantityInPreviewState(false)
+  }, [paymentId])
+
   const domainId = Form.useWatch('domain', form)
   const selectedChangelogId = Form.useWatch('changelogId', form)
+
+  const activeDomainId = String(domainId || paymentDomainId || '')
+  const { data: fetchedDomain } = useGetDomainByPkQuery(
+    { domainId: activeDomainId },
+    { skip: !activeDomainId || typeof paymentData?.domain === 'object' }
+  )
+
+  useEffect(() => {
+    if (paymentData?.template) return
+    const resolved = fetchedDomain?.defaultTemplate
+    if (resolved) setTemplate(resolved as TemplateKey)
+  }, [activeDomainId, fetchedDomain?.defaultTemplate])
 
   const { data: changelogRes, isLoading: changelogLoading } =
     useGetPaymentChangeLogsQuery(paymentId, { skip: !edit || !paymentId })
@@ -134,6 +203,7 @@ const AddPaymentModal: FC<Props> = ({
     AUT_CNTR_NAM: paymentData?.transaction?.AUT_CNTR_NAM || '',
     AUT_CNTR_MFO: paymentData?.transaction?.AUT_CNTR_MFO || '',
     Description: paymentData?.transaction?.Description || '',
+    TECHNICAL_TRANSACTION_ID: paymentData?.transaction?.TECHNICAL_TRANSACTION_ID,
   }
 
   useEffect(() => {
@@ -141,12 +211,59 @@ const AddPaymentModal: FC<Props> = ({
       firstRunRef.current = false
       return
     }
+    if (preselectedCompany) return
     form.resetFields(['company'])
   }, [domainId, form])
 
+  const dispatch = useAppDispatch()
+  const [addService] = useAddServiceMutation()
   const [addPayment, { isLoading: isAddingLoading }] = useAddPaymentMutation()
   const [editPayment, { isLoading: isEditingLoading }] =
     useEditPaymentMutation()
+
+  const resolveMonthServiceId = useCallback(
+    async (raw: string, domain: string, street: string) => {
+      if (!isMonthServicePlaceholder(raw)) {
+        return raw
+      }
+      const monthStart = parseMonthServicePlaceholder(raw)
+      const year = monthStart.year()
+      const month = monthStart.month() + 1
+
+      const existing = await dispatch(
+        serviceApi.endpoints.getAllServices.initiate(
+          {
+            domainId: domain,
+            streetId: street,
+            year,
+            month,
+            limit: 1,
+          },
+          { subscribe: false, forceRefetch: true }
+        )
+      ).unwrap()
+
+      const found = existing.data?.[0]
+      if (found?._id) {
+        return found._id
+      }
+
+      const created = await addService({
+        domain,
+        street,
+        date: monthStart.startOf('month').toDate(),
+        rentPrice: 0,
+        electricityPrice: 0,
+        waterPrice: 0,
+        waterPriceTotal: 0,
+        description: '',
+        customServices: [],
+      }).unwrap()
+
+      return created.data._id
+    },
+    [dispatch, addService]
+  )
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
     { domainId },
     { skip: !domainId }
@@ -165,16 +282,16 @@ const AddPaymentModal: FC<Props> = ({
     const allowedServices = groups.flatMap((group) => group.services)
 
     const serviceFilteredInvoices = serviceFilter(allInvoices, allowedServices)
-    const hasDiscount = serviceFilteredInvoices.some(inv => inv.type === 'discount')
-  
-  if (!hasDiscount && company?.discount) {
-    serviceFilteredInvoices.push({
-      type: 'discount',
-      name: 'Знижка',
-      price: company.discount,
-      sum: company.discount,
-    })
-  }
+    const hasDiscount = serviceFilteredInvoices.some((inv) => inv.type === 'discount')
+
+    if (!hasDiscount && company?.discount) {
+      serviceFilteredInvoices.push({
+        type: 'discount',
+        name: 'Знижка',
+        price: company.discount,
+        sum: company.discount,
+      })
+    }
 
     return serviceFilteredInvoices?.filter(
       (invoice) => invoice?.sum > 0 || DEFAULT_INVOICES.includes(invoice?.type)
@@ -254,7 +371,6 @@ const AddPaymentModal: FC<Props> = ({
     })
   }
 
-
   if (payment && paymentData?.type !== Operations.Credit && template !== 'olimp') {
     items.push({
       key: '3',
@@ -300,12 +416,46 @@ const AddPaymentModal: FC<Props> = ({
       return
     }
 
-    setCurrPayment({ ...values, provider, reciever })
+    let monthServiceId = values.monthService
+    try {
+      monthServiceId = await resolveMonthServiceId(
+        values.monthService,
+        values.domain,
+        values.street
+      )
+    } catch (e) {
+      console.error('resolveMonthServiceId failed', e)
+      message.error('Не вдалося підготувати місяць послуг')
+      setSaved(false)
+      setChanged(true)
+      return
+    }
+    form.setFieldsValue({ monthService: monthServiceId })
+    setCurrPayment({
+      ...values,
+      monthService: monthServiceId,
+      provider,
+      reciever,
+    })
     setActiveTabKey('2')
   }
 
   const handleSubmit = async () => {
     const formData = await form.validateFields()
+
+    let monthServiceId = formData.monthService
+    try {
+      monthServiceId = await resolveMonthServiceId(
+        formData.monthService,
+        formData.domain,
+        formData.street
+      )
+    } catch (e) {
+      console.error('resolveMonthServiceId failed', e)
+      message.error('Не вдалося підготувати місяць послуг')
+      return
+    }
+    form.setFieldsValue({ monthService: monthServiceId })
 
     const payment = {
       invoiceNumber: formData.invoiceNumber,
@@ -313,7 +463,7 @@ const AddPaymentModal: FC<Props> = ({
       domain: formData.domain,
       street: formData.street,
       company: formData.company,
-      monthService: formData.monthService,
+      monthService: monthServiceId,
       invoiceCreationDate: formData.invoiceCreationDate
         ? new Date(
             Date.UTC(
@@ -325,12 +475,14 @@ const AddPaymentModal: FC<Props> = ({
         : null,
       description: formData.description || '',
       generalSum: formData.generalSum || formData.debit,
+      currency: formData.currency || Currency.UAH,
       provider,
       reciever,
       transaction,
       invoice: formData.debit
         ? formData.invoice.filter((invoice) => +invoice.sum !== 0)
         : [],
+      template,
     }
 
     const response = edit
@@ -344,7 +496,12 @@ const AddPaymentModal: FC<Props> = ({
       const action = edit ? 'Збережено' : 'Додано'
       form.resetFields()
       message.success(action)
-      closeModal()
+
+      const channel = new BroadcastChannel('payments_sync_channel')
+      channel.postMessage('PAYMENT_CREATED')
+      setTimeout(() => channel.close(), 100)
+
+      closeModal(true)
     } else {
       const action = edit ? 'збереженні' : 'додаванні'
       message.error(`Помилка при ${action} рахунку`)
@@ -353,25 +510,30 @@ const AddPaymentModal: FC<Props> = ({
 
   useEffect(() => {
     if (activeTabKey !== '1' || saved || !company || !company._id) return
-  const isEditing = !!paymentId || edit
-  const currentInvoices = form.getFieldValue('invoice')
-  const hasCurrentInvoices =
-    Array.isArray(currentInvoices) && currentInvoices.length > 0
-  const hasFilteredInvoices =
-    Array.isArray(filteredInvoices) && filteredInvoices.length > 0
 
-  if (isEditing) {
-    lastLoadedCompanyId.current = company._id
-    return
-  }
+    const isEditing = !!paymentId || edit
+    const currentInvoices = form.getFieldValue('invoice')
+    const hasCurrentInvoices =
+      Array.isArray(currentInvoices) && currentInvoices.length > 0
+    const hasFilteredInvoices =
+      Array.isArray(filteredInvoices) && filteredInvoices.length > 0
 
-  const isNewCompanySelected = lastLoadedCompanyId.current !== company._id
-  const shouldHydrateEmptyInvoices = !hasCurrentInvoices && hasFilteredInvoices
+    if (isEditing) {
+      lastLoadedCompanyId.current = company._id
+      return
+    }
 
-  if (isNewCompanySelected || shouldHydrateEmptyInvoices) {
-    form.setFieldsValue({ invoice: filteredInvoices })
-    lastLoadedCompanyId.current = company._id
-  }
+    const isNewCompanySelected = lastLoadedCompanyId.current !== company._id
+    const shouldHydrateEmptyInvoices = !hasCurrentInvoices && hasFilteredInvoices
+
+    if (isNewCompanySelected || shouldHydrateEmptyInvoices) {
+      form.setFieldsValue({ invoice: filteredInvoices })
+      lastLoadedCompanyId.current = company._id
+    }
+
+    if (isNewCompanySelected) {
+      form.setFieldValue('currency', company.currency || Currency.UAH)
+    }
   }, [company, filteredInvoices, paymentId, edit, activeTabKey, saved, form])
 
   return (
@@ -383,8 +545,10 @@ const AddPaymentModal: FC<Props> = ({
         payment,
         prevPayment,
         form,
-        template, 
+        template,
         setTemplate,
+        showQuantityInPreview,
+        setShowQuantityInPreview,
       }}
     >
       <Modal
@@ -407,7 +571,7 @@ const AddPaymentModal: FC<Props> = ({
         <Form
           initialValues={{
             changelogId: undefined,
-            domain: getId(payment?.domain),
+            domain: preselectedDomain || getId(payment?.domain),
             street: getId(payment?.street),
             company: preselectedCompany || getId(payment?.company),
             monthService: getId(payment?.monthService),
@@ -416,6 +580,7 @@ const AddPaymentModal: FC<Props> = ({
               : filteredInvoices,
             description: payment?.description,
             generalSum: payment?.generalSum,
+            currency: payment?.currency || Currency.UAH,
             invoiceNumber: payment?.invoiceNumber,
             invoiceCreationDate: dayjs(payment?.invoiceCreationDate),
             operation: payment?.type || Operations.Credit,
@@ -436,10 +601,8 @@ const AddPaymentModal: FC<Props> = ({
   )
 }
 
-function getActiveTab(paymentData, preview) {
-  if (preview) return '2'
-  if (paymentData?.type === Operations.Credit) return '1'
-  return '1'
+function getActiveTab(_paymentData: any, preview: boolean): string {
+  return preview ? '2' : '1'
 }
 
 export default AddPaymentModal

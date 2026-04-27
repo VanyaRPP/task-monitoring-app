@@ -37,8 +37,8 @@ const RealEstateModal: FC<Props> = ({
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
   const initializedRef = useRef(false)
-  const [addRealEstate] = useAddRealEstateMutation()
-  const [editRealEstate] = useEditRealEstateMutation()
+  const [addRealEstate, { isLoading: isAdding }] = useAddRealEstateMutation()
+  const [editRealEstate, { isLoading: isEditing }] = useEditRealEstateMutation()
   const domainId = Form.useWatch('domain', form)
   const currentDomainId = getEntityId(currentRealEstate?.domain) || domainId
   const { data: customDomainServices } = useGetCustomServicesByDomainQuery(
@@ -82,6 +82,7 @@ const RealEstateModal: FC<Props> = ({
       currency: currentRealEstate?.currency || 'UAH',
       garbageCollector: currentRealEstate?.garbageCollector || false,
       archived: currentRealEstate?.archived || false,
+      account: currentRealEstate?.account || '',
       rentPart: currentRealEstate?.rentPart || 0,
       inflicion: currentRealEstate?.inflicion || false,
       waterPart: currentRealEstate?.waterPart || 0,
@@ -116,7 +117,7 @@ const RealEstateModal: FC<Props> = ({
       currency: formData.currency,
       garbageCollector: formData.garbageCollector,
       archived: formData.archived,
-      mfo: formData.mfo,
+      account: formData.account,
       inflicion: formData.inflicion,
       discount:
         formData.discount > 0 ? formData.discount * -1 : formData.discount,
@@ -168,6 +169,7 @@ const RealEstateModal: FC<Props> = ({
       cancelText={'Відміна'}
       okButtonProps={{ style: { ...(!editable && { display: 'none' }) } }}
       preview={!editable}
+      confirmLoading={isAdding || isEditing}
     >
       <RealEstateForm
         form={form}

@@ -24,16 +24,20 @@ export const bankApi = createApi({
   endpoints: (builder) => ({
     getTransactions: builder.query<
       ITransaction[],
-      { token: string; acc: string }
+      { token: string; acc: string; domainId?: string }
     >({
-      query: ({ token, acc }) => ({
-        url: `transactions?acc=${acc}`,
-        method: 'GET',
-        headers: {
-          token,
-          'Content-type': 'application/json;charset=utf-8',
-        },
-      }),
+      query: ({ token, acc, domainId }) => {
+        const params = new URLSearchParams({ acc })
+        if (domainId) params.set('domainId', domainId)
+        return {
+          url: `transactions?${params.toString()}`,
+          method: 'GET',
+          headers: {
+            token,
+            'Content-type': 'application/json;charset=utf-8',
+          },
+        }
+      },
       transformResponse: (response: IBankRes<ITransaction[]>) => response.data,
     }),
     getDate: builder.query<string, { token: string }>({

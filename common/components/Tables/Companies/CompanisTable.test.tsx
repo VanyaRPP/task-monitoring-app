@@ -2,40 +2,70 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CompaniesTable from './Table';
-import { realEstates, domains, streets, users } from '@utils/testData';
 import { IGetRealestateResponse } from '@common/api/realestateApi/realestate.api.types';
+import { useGetCurrentUserQuery } from '@common/api/userApi/user.api';
+import { useGetAddressFiltersQuery, useGetDomainFiltersQuery, useGetRealEstateFiltersQuery } from '@common/api/filterApi/filter.api';
 
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
+
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
 
 jest.mock('@common/api/userApi/user.api', () => ({
   useGetCurrentUserQuery: jest.fn(),
 }));
 
 jest.mock('@common/api/realestateApi/realestate.api', () => ({
-  useDeleteRealEstateMutation: jest.fn(),
-  useUpdateArchivedItemMutation: jest.fn(),
+  useDeleteRealEstateMutation: jest.fn(() => [jest.fn(), { isLoading: false }]),
+  useUpdateArchivedItemMutation: jest.fn(() => [jest.fn(), { isLoading: false }]),
 }));
 
+const mockFilterData = {
+  streetsFilter: [],
+  domainsFilter: [],
+  realEstatesFilter: [],
+};
+
 jest.mock('@common/api/filterApi/filter.api', () => ({
-  useGetAddressFiltersQuery: jest.fn(),
-  useGetDomainFiltersQuery: jest.fn(),
-  useGetRealEstateFiltersQuery: jest.fn(),
+  useGetAddressFiltersQuery: jest.fn(() => ({ data: mockFilterData })),
+  useGetDomainFiltersQuery: jest.fn(() => ({ data: mockFilterData })),
+  useGetRealEstateFiltersQuery: jest.fn(() => ({ data: mockFilterData })),
 }));
 
 jest.mock('@common/api/debtorsApi/debtors.api', () => ({
-  useGetDebtorsQuery: jest.fn(),
+  useGetDebtorsQuery: jest.fn(() => ({ data: { companies: [] } })),
 }));
 
 jest.mock('next/router', () => ({
-  useRouter: jest.fn(),
+  useRouter: jest.fn(() => ({
+    pathname: '/real-estate',
+  })),
 }));
+
+const mockRealEstatesData = [
+  { _id: '1', companyName: 'Company A', domain: { name: 'Domain 1' }, street: { address: 'Street 1', city: 'City 1' }, adminEmails: [] },
+  { _id: '2', companyName: 'Company B', domain: { name: 'Domain 2' }, street: { address: 'Street 2', city: 'City 2' }, adminEmails: [] },
+];
 
 const mockProps = {
   realEstates: {
-    data: [],
+    data: mockRealEstatesData,
     success: true,
-    domainsFilter: [],
-    realEstatesFilter: [],
-    streetsFilter: [],
   } as IGetRealestateResponse,
   isLoading: false,
   isError: false,
@@ -47,29 +77,10 @@ const mockProps = {
   customServices: [],
 };
 
-describe('CompaniesTable - Column Visibility', () => {
+describe('CompaniesTable', () => {
   beforeEach(() => {
-    const { useGetCurrentUserQuery } = require('@common/api/userApi/user.api');
-    useGetCurrentUserQuery.mockReturnValue({
-      data: users.globalAdmin,
-    });
-
-    const { useDeleteRealEstateMutation, useUpdateArchivedItemMutation } = require('@common/api/realestateApi/realestate.api');
-    useDeleteRealEstateMutation.mockReturnValue([jest.fn(), { isLoading: false }]);
-    useUpdateArchivedItemMutation.mockReturnValue([jest.fn(), { isLoading: false }]);
-
-    const { useGetAddressFiltersQuery, useGetDomainFiltersQuery, useGetRealEstateFiltersQuery } = require('@common/api/filterApi/filter.api');
-    useGetAddressFiltersQuery.mockReturnValue({ data: { streetsFilter: [] } });
-    useGetDomainFiltersQuery.mockReturnValue({ data: { domainsFilter: [] } });
-    useGetRealEstateFiltersQuery.mockReturnValue({ data: { realEstatesFilter: [] } });
-
-    const { useGetDebtorsQuery } = require('@common/api/debtorsApi/debtors.api');
-    useGetDebtorsQuery.mockReturnValue({ data: { companies: [] } });
-
-
-    const { useRouter } = require('next/router');
-    useRouter.mockReturnValue({
-      pathname: '/real-estate',
+    (useGetCurrentUserQuery as jest.Mock).mockReturnValue({
+      data: { roles: ['global_admin'] },
     });
   });
 
@@ -77,62 +88,43 @@ describe('CompaniesTable - Column Visibility', () => {
     jest.clearAllMocks();
   });
 
+  test('should display company column when multiple companies are available in filters', () => {
+    const multipleCompanies = { realEstatesFilter: [{ value: '1' }, { value: '2' }] };
+    (useGetRealEstateFiltersQuery as jest.Mock).mockReturnValue({
+      data: multipleCompanies,
+    });
 
-  test('should display company column when there are multiple unique companies', () => {
-    const mockRealEstates: IGetRealestateResponse = {
-      data: [
-        { ...realEstates[0], 
-            domain: { ...domains[0], mfo: '', iban: '', rnokpp: '', IEName: '' } as any, 
-            street: { ...streets[0], _v: 1 } as any, companyName: 'Company A', _v: 1, services: [] },
-        { ...realEstates[1], 
-            domain: { ...domains[1], mfo: '', iban: '', rnokpp: '', IEName: '' } as any, 
-            street: { ...streets[1], _v: 1 } as any, companyName: 'Company B', _v: 1, services: [] },
-      ],
-      success: true,
-      domainsFilter: [],
-      realEstatesFilter: [],
-      streetsFilter: [],
-    };
-
-    render(<CompaniesTable {...mockProps} realEstates={mockRealEstates} />);
-
+    render(<CompaniesTable {...mockProps} />);
     expect(screen.getByText('Назва компанії')).toBeInTheDocument();
   });
 
-  test('should hide company column when there is only one unique company', () => {
-    const mockRealEstates: IGetRealestateResponse = {
-      data: [
-        { ...realEstates[0], 
-            domain: { ...domains[0], mfo: '', iban: '', rnokpp: '', IEName: '' } as any, 
-            street: { ...streets[0], _v: 1 } as any, companyName: 'Company A', _v: 1, services: [] },
-        { ...realEstates[1], 
-            domain: { ...domains[1], mfo: '', iban: '', rnokpp: '', IEName: '' } as any, 
-            street: { ...streets[1], _v: 1 } as any, companyName: 'Company A', _v: 1, services: [] },
-      ],
-      success: true,
-      domainsFilter: [],
-      realEstatesFilter: [],
-      streetsFilter: [],
-    };
+  test('should hide company column when only one company is available in filters', () => {
+    const singleCompany = { realEstatesFilter: [{ value: '1' }] };
+    (useGetRealEstateFiltersQuery as jest.Mock).mockReturnValue({
+      data: singleCompany,
+    });
 
-    render(<CompaniesTable {...mockProps} realEstates={mockRealEstates} />);
-
+    render(<CompaniesTable {...mockProps} />);
     expect(screen.queryByText('Назва компанії')).not.toBeInTheDocument();
   });
 
-  test('should display company column when data is empty', () => {
+  test('should hide domain column when only one domain is available in filters', () => {
+    const singleDomain = { domainsFilter: [{ value: 'd1' }] };
+    (useGetDomainFiltersQuery as jest.Mock).mockReturnValue({
+      data: singleDomain,
+    });
 
-    const mockRealEstates: IGetRealestateResponse = {
-      data: [],
-      success: true,
-      domainsFilter: [],
-      realEstatesFilter: [],
-      streetsFilter: [],
-    };
+    render(<CompaniesTable {...mockProps} />);
+    expect(screen.queryByText('Надавач послуг')).not.toBeInTheDocument();
+  });
 
-    render(<CompaniesTable {...mockProps} realEstates={mockRealEstates} />);
+  test('should render error alert when isError is true', () => {
+    render(<CompaniesTable {...mockProps} isError={true} />);
+    expect(screen.getByText('Помилка')).toBeInTheDocument();
+  });
 
-    expect(screen.getByText('Назва компанії')).toBeInTheDocument();
+  test('should render loading state', () => {
+    render(<CompaniesTable {...mockProps} isLoading={true} />);
+    expect(document.querySelector('.ant-spin')).toBeInTheDocument();
   });
 });
-

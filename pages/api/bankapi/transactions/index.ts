@@ -4,54 +4,76 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import start, { Data } from '@pages/api/api.config'
 import { getTransactionsForDateInterval } from './utils/getTransactions/index'
 import Payment from '@modules/models/Payment'
-import { toRoundFixed } from '@utils/helpers'
-import { Roles } from '@utils/constants'
+import Domain from '@modules/models/Domain'
 import { getCurrentUser } from '@utils/getCurrentUser'
 
 start()
 
-export async function  checkTransaction({ transaction }) {
+export function normalizeBankAccount(acc: string | undefined | null) {
+  if (acc == null || typeof acc !== 'string') return ''
+  return acc.trim()
+}
+
+export async function checkTransaction({ transaction, domainId }) {
   try {
-    const Sum = +toRoundFixed(transaction.SUM)
-    
-    const Acc = transaction.AUT_CNTR_ACC?.trim() || ''
-    const Nam = transaction.AUT_CNTR_NAM?.trim() || ''
-    const Mfo = transaction.AUT_CNTR_MFO?.trim() || ''
+    const txId = normalizeBankAccount(transaction.TECHNICAL_TRANSACTION_ID)
 
-    const allPayments = await Payment.find({
-      $and: [
-        // {
-        //   $expr: {
-        //     $eq: [
-        //       { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_ACC', ''] } } },
-        //       Acc
-        //     ]
-        //   }
-        // },
-        // {
-        //   $expr: {
-        //     $eq: [
-        //       { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_NAM', ''] } } },
-        //       Nam
-        //     ]
-        //   }
-        // },
-        {
-          $expr: {
-            $eq: [
-              { $trim: { input: { $ifNull: ['$transaction.AUT_CNTR_MFO', ''] } } },
-              Mfo
-            ]
-          }
-        },
-        { generalSum: Sum },
-      ],
-    })
+    if (txId) {
+      const allPayments = await Payment.find({
+        'transaction.TECHNICAL_TRANSACTION_ID': txId,
+      })
 
-    return {
-      isMatchingPayment: allPayments.length > 0,
-      previousCompanyId: allPayments.length > 0 ? allPayments[0].company : null,
+      if (allPayments.length > 0) {
+        const company = allPayments[0].company
+        return {
+          isMatchingPayment: true,
+          previousCompanyId: company != null ? String(company) : null,
+        }
+      }
     }
+
+    const isTransit = transaction.AUT_CNTR_NAM?.includes('Транз')
+
+    if (isTransit && transaction.OSND) {
+      const payment = await Payment.findOne({
+        'transaction.OSND': transaction.OSND,
+      })
+        .sort({ invoiceCreationDate: -1 })
+        .lean()
+
+      if (payment?.company) {
+        return {
+          isMatchingPayment: false,
+          previousCompanyId: String(payment.company),
+        }
+      }
+    }
+
+    if (!isTransit) {
+      const acc = normalizeBankAccount(transaction.AUT_CNTR_ACC)
+      if (domainId && acc) {
+        const payment = await Payment.findOne({
+          domain: domainId,
+          $or: [
+            { 'transaction.AUT_CNTR_ACC': acc },
+            ...(transaction.AUT_CNTR_ACC !== acc
+              ? [{ 'transaction.AUT_CNTR_ACC': transaction.AUT_CNTR_ACC }]
+              : []),
+          ],
+        })
+          .sort({ invoiceCreationDate: -1 })
+          .lean()
+
+        if (payment?.company) {
+          return {
+            isMatchingPayment: false,
+            previousCompanyId: String(payment.company),
+          }
+        }
+      }
+    }
+
+    return { isMatchingPayment: false, previousCompanyId: null }
   } catch (error) {
     throw new Error(`${error.message}`)
   }
@@ -80,7 +102,8 @@ export default async function handler(
       message: 'Forbidden',
     })
   }
-  const { token: tokenQuery, startDate, limit, followId, acc } = req.query
+  const { token: tokenQuery, startDate, limit, followId, acc, domainId } =
+    req.query
 
   const { token: tokenHeader } = req.headers
 
@@ -88,6 +111,22 @@ export default async function handler(
     return res
       .status(404)
       .json({ success: false, message: 'Error! No bank token!' })
+  }
+
+  const domainIdStr =
+    typeof domainId === 'string' && domainId.length > 0 ? domainId : null
+
+  if (domainIdStr && isDomainAdmin && !isGlobalAdmin) {
+    const allowed = await Domain.findOne({
+      _id: domainIdStr,
+      adminEmails: user.email,
+    })
+    if (!allowed) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: domain',
+      })
+    }
   }
 
   switch (req.method) {
@@ -101,22 +140,19 @@ export default async function handler(
           followId
         )
 
+        const resolvedDomainId =
+          domainIdStr && (isGlobalAdmin || isDomainAdmin) ? domainIdStr : null
+
         const checkedTransactions = await Promise.all(
           transactions.map(async (transaction) => {
             try {
-              const isMatchingPayment = await checkTransaction({
+              const matchResult = await checkTransaction({
                 transaction,
+                domainId: resolvedDomainId,
               })
-
-              return {
-                ...transaction,
-                ...isMatchingPayment,
-              }
+              return { ...transaction, ...matchResult }
             } catch (error) {
-              return {
-                ...transaction,
-                isMatchingPayment: false,
-              }
+              return { ...transaction, isMatchingPayment: false, previousCompanyId: null }
             }
           })
         )
@@ -139,8 +175,6 @@ export default async function handler(
         .json({ success: false, message: 'not implemented' })
 
     case 'DELETE':
-      return res
-        .status(501)
-        .json({ success: false, message: 'not implemented' })
+      return res.status(501).json({ success: false, message: 'not implemented' })
   }
 }

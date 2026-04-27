@@ -4,12 +4,15 @@ import { useColumnVisibility } from './components/useColumnVisibility'
 import { ITransaction } from './components/transactionTypes'
 import { defaultVisibleColumns, generateColumns } from './components/column'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
+import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
 
 interface Props {
   transactions: ITransaction[]
   pagination?: React.ReactNode
   domain: IExtendedDomain
   loading?: boolean
+  companies: IRealestate[]
+  refetchTransactions?: () => void
 }
 
 const TransactionsTable: React.FC<Props> = ({
@@ -17,6 +20,8 @@ const TransactionsTable: React.FC<Props> = ({
   pagination,
   domain,
   loading,
+  companies,
+  refetchTransactions,
 }) => {
   const { visibleColumns, toggleColumnVisibility } = useColumnVisibility(
     defaultVisibleColumns
@@ -41,7 +46,9 @@ const TransactionsTable: React.FC<Props> = ({
   const columns = generateColumns(
     visibleColumns,
     domain,
-    toggleColumnVisibility
+    toggleColumnVisibility,
+    companies,
+    refetchTransactions
   )
 
   return (

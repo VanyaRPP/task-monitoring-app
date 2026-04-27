@@ -1,11 +1,13 @@
 import { FC, useEffect, useRef, useState } from 'react'
 import { useReactToPrint } from 'react-to-print'
-import { PrinterOutlined } from '@ant-design/icons'
+import { PrinterOutlined, TableOutlined } from '@ant-design/icons'
+import { Tooltip } from 'antd'
 import dayjs from 'dayjs'
 import styles from './styles.module.scss'
 import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPricesTable'
 import { IPayment } from '@common/api/paymentApi/payment.api.types'
 import { getCurrencyNames, normalizeCurrency } from '@utils/helpers'
+import { usePaymentContext } from '@components/AddPaymentModal'
 
 const PriceList: FC<{ data: IPayment }> = ({ data }) => {
   const [payment, setPayment] = useState(data)
@@ -26,9 +28,10 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
 
   const company = payment?.company as { currency?: string } | string | undefined
   const companyCurrency = typeof company === 'object' ? company?.currency : undefined
-  const currency = companyCurrency || payment?.domain?.currency
-  const currencyNames = getCurrencyNames(currency)
+  const currency = payment?.currency || companyCurrency || payment?.domain?.currency 
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
+  const currencyNames = getCurrencyNames(currency, isEnglish)
+  const { showQuantityInPreview, setShowQuantityInPreview } = usePaymentContext()
 
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
@@ -39,6 +42,38 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
 
   return (
     <>
+      <Tooltip
+        title={
+          isEnglish
+            ? 'Show quantity and price columns in the act table'
+            : 'Показувати кількість і ціну в таблиці акту'
+        }
+      >
+        <TableOutlined
+          role="button"
+          tabIndex={0}
+          aria-label={
+            showQuantityInPreview
+              ? isEnglish
+                ? 'Hide quantity and price in act table'
+                : 'Приховати кількість і ціну в акті'
+              : isEnglish
+                ? 'Show quantity and price in act table'
+                : 'Показати кількість і ціну в акті'
+          }
+          aria-pressed={showQuantityInPreview}
+          className={`${styles.tableDetailsToggle} ${
+            showQuantityInPreview ? styles.tableDetailsToggleActive : ''
+          }`}
+          onClick={() => setShowQuantityInPreview(!showQuantityInPreview)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              setShowQuantityInPreview(!showQuantityInPreview)
+            }
+          }}
+        />
+      </Tooltip>
       <PrinterOutlined className={styles.print} onClick={handlePrint} />
       <div ref={componentRef}>
         <div
@@ -65,7 +100,6 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
                   <br />
                   <pre>
                     {payment?.reciever?.description?.trim()} <br />
-                    {payment?.reciever?.companyName} <br />
                     {payment?.reciever?.adminEmails?.map((email) => (
                       <div key={email}>
                         {email} <br />
@@ -140,6 +174,7 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
           <div style={{ marginTop: '1em' }}>
             <GroupedPricesTable
               preview
+              usePreviewQuantityToggle
               domainId={payment?.domain?._id}
               currency={currency}
               invoices={payment.invoice}

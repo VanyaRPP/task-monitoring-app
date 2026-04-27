@@ -1,35 +1,54 @@
 import React from 'react'
-import { render, screen, waitFor, act } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import TransactionDrawer from './TransactionsDrawer'
 
+let lastPaymentData: any = null
+
+const mockEditRealEstate = jest.fn()
 jest.mock('@common/api/realestateApi/realestate.api', () => ({
   useGetAllRealEstateQuery: jest.fn(),
+  useEditRealEstateMutation: jest.fn(() => [mockEditRealEstate]),
+}))
+
+jest.mock('./useQuicksend', () => ({
+  useQuickSend: jest.fn(() => ({
+    handleQuickSend: jest.fn(),
+    services: [],
+    loading: false,
+  })),
 }))
 
 jest.mock('@components/AddPaymentModal', () => ({
   __esModule: true,
-  default: ({ closeModal }: { closeModal: (success?: boolean) => void }) => (
-    <div data-testid="add-payment-modal">
-      <button onClick={() => closeModal(true)}>Confirm</button>
-      <button onClick={() => closeModal(false)}>Cancel</button>
-    </div>
-  ),
+  default: ({ closeModal, paymentData }: { closeModal: (success?: boolean) => void; paymentData: any }) => {
+    lastPaymentData = paymentData
+    return (
+      <div data-testid="add-payment-modal">
+        <button onClick={() => closeModal(true)}>Confirm</button>
+        <button onClick={() => closeModal(false)}>Cancel</button>
+      </div>
+    )
+  },
 }))
 
 import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
-
 const mockUseGetAllRealEstateQuery = useGetAllRealEstateQuery as jest.Mock
+
+const getDropdownSendButton = () =>
+  Array.from(document.querySelectorAll('button')).find((btn) =>
+    btn.textContent?.includes('Send') && btn.querySelector('.anticon-down')
+  )
 
 const makeTransaction = (overrides = {}) => ({
   TECHNICAL_TRANSACTION_ID: 'tx_001',
+  AUT_CNTR_ACC: 'UA803220010000026001350058717',
   AUT_CNTR_MFO: '322001',
-  AUT_CNTR_ACC: '1234567890',
   AUT_CNTR_NAM: 'ТОВ Тест',
-  AUT_MY_CRF: '2479002623',
-  AUT_MY_MFO: '305299',
-  AUT_MY_ACC: 'UA483052990000026004006407606',
-  AUT_MY_NAM: 'ТОВ Тест',
+  AUT_MY_CRF: '0000000000',
+  AUT_MY_MFO: '300000',
+  AUT_MY_ACC: 'UA300000000000000000000000001',
+  AUT_MY_NAM: 'Тест Т. Е. ФОП',
   AUT_MY_MFO_NAME: 'ПРИВАТБАНК',
   AUT_MY_MFO_CITY: 'Дніпро',
   AUT_CNTR_MFO_NAME: 'УНІВЕРСАЛ БАНК',
@@ -60,7 +79,7 @@ const makeTransaction = (overrides = {}) => ({
 const makeCompany = (overrides = {}) => ({
   _id: 'company_001',
   companyName: 'ТОВ Тест',
-  mfo: '322001',
+  account: 'UA803220010000026001350058717',
   domain: { _id: 'domain_001' },
   street: { _id: 'street_001' },
   adminEmails: [],
@@ -71,258 +90,411 @@ const makeCompany = (overrides = {}) => ({
   ...overrides,
 })
 
-const makeDomain = () => ({
-  _id: 'domain_001',
-  name: 'Test Domain',
-})
-
-
+const makeDomain = () => ({ _id: 'domain_001', name: 'Test Domain' })
 
 const renderDrawer = (transaction = makeTransaction(), domain = makeDomain()) =>
   render(<TransactionDrawer transaction={transaction} domain={domain as any} />)
 
 beforeEach(() => {
   jest.clearAllMocks()
+  lastPaymentData = null
   global.fetch = jest.fn().mockResolvedValue({ ok: true })
   mockUseGetAllRealEstateQuery.mockReturnValue({
     data: { data: [makeCompany()] },
   })
 })
 
-
-
 describe('Badge "Платіж є"', () => {
   it('is hidden when isMatchingPayment is false', () => {
     renderDrawer(makeTransaction({ isMatchingPayment: false }))
-    const ribbon = document.querySelector('.ant-ribbon')
-    expect(ribbon).toHaveStyle({ visibility: 'hidden' })
+    expect(document.querySelector('.ant-ribbon')).toHaveStyle({ visibility: 'hidden' })
   })
 
-  it('is visible when isMatchingPayment is true and no company is selected', async () => {
-    
+  it('is visible when isMatchingPayment is true', async () => {
+    renderDrawer(makeTransaction({ isMatchingPayment: true }))
+    await waitFor(() => {
+      expect(document.querySelector('.ant-ribbon')).toHaveStyle({ visibility: 'visible' })
+    })
+  })
+
+  it('remains visible after user selects a company (badge is read-only from backend)', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: 'OTHER_MFO' })] },
+      data: { data: [makeCompany({ account: 'OTHER_ACC' })] },
+    })
+    renderDrawer(makeTransaction({ isMatchingPayment: true }))
+
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(await screen.findByText('ТОВ Тест'))
+
+    await waitFor(() => {
+      expect(document.querySelector('.ant-ribbon')).toHaveStyle({ visibility: 'visible' })
+    })
+  })
+
+  it('updates when switching to a transaction with isMatchingPayment=false', async () => {
+    const { rerender } = renderDrawer(makeTransaction({ isMatchingPayment: true }))
+
+    rerender(
+      <TransactionDrawer
+        transaction={makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_002', isMatchingPayment: false })}
+        domain={makeDomain() as any}
+      />
+    )
+
+    await waitFor(() => {
+      expect(document.querySelector('.ant-ribbon')).toHaveStyle({ visibility: 'hidden' })
+    })
+  })
+})
+
+
+describe('State reset when transaction changes', () => {
+  it('clears selectedCompany when TECHNICAL_TRANSACTION_ID changes', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: 'OTHER_ACC' })] },
+    })
+    const { rerender } = renderDrawer(makeTransaction())
+
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(await screen.findByText('ТОВ Тест'))
+    await waitFor(() => {
+      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('ТОВ Тест')
+    })
+
+    rerender(
+      <TransactionDrawer
+        transaction={makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_002', AUT_CNTR_ACC: 'UNKNOWN' })}
+        domain={makeDomain() as any}
+      />
+    )
+
+    await waitFor(() => {
+      expect(document.querySelector('.ant-select-selection-item')).toBeNull()
+    })
+  })
+
+  it('clears isAccountMatched on transaction change — Dropdown replaced with plain Send', async () => {
+    const { rerender } = renderDrawer()
+
+    await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
+
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: 'NO_MATCH' })] },
+    })
+
+    rerender(
+      <TransactionDrawer
+        transaction={makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_002', AUT_CNTR_ACC: 'NO_MATCH_ACC' })}
+        domain={makeDomain() as any}
+      />
+    )
+
+    await waitFor(() => {
+      expect(getDropdownSendButton()).toBeFalsy()
+      expect(screen.getByRole('button', { name: /Send/i })).toBeDisabled()
+    })
+  })
+})
+
+
+describe('Account auto-match (AUT_CNTR_ACC)', () => {
+  it('auto-selects company when company.account matches transaction.AUT_CNTR_ACC', async () => {
+    renderDrawer()
+    await waitFor(() => {
+      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('ТОВ Тест')
+    })
+  })
+
+  it('does not auto-select when account does not match', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: 'UA000000000000000000000000000' })] },
+    })
+    renderDrawer()
+    await waitFor(() => {
+      expect(document.querySelector('.ant-select-selection-item')).toBeNull()
+    })
+  })
+
+  it('correctly distinguishes two companies in the same bank (same MFO, different IBAN)', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: {
+        data: [
+          makeCompany({ _id: 'company_A', companyName: 'Компанія А', account: 'UA111111111111111111111111111' }),
+          makeCompany({ _id: 'company_B', companyName: 'Компанія Б', account: 'UA803220010000026001350058717' }),
+        ],
+      },
+    })
+
+    renderDrawer(makeTransaction({ AUT_CNTR_ACC: 'UA803220010000026001350058717' }))
+
+    await waitFor(() => {
+      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('Компанія Б')
+    })
+  })
+
+  it('shows Dropdown Send button when account matched', async () => {
+    renderDrawer()
+    await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
+  })
+
+  it('shows plain Send button disabled when no account match and no company selected', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: 'NO_MATCH' })] },
+    })
+    renderDrawer()
+    await waitFor(() => {
+      expect(getDropdownSendButton()).toBeFalsy()
+      expect(screen.getByRole('button', { name: /Send/i })).toBeDisabled()
+    })
+  })
+
+  it('enables plain Send button after manual selection', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: 'NO_MATCH' })] },
+    })
+    renderDrawer()
+
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(await screen.findByText('ТОВ Тест'))
+
+    await waitFor(() => {
+      expect(getDropdownSendButton()).toBeFalsy()
+      expect(screen.getByRole('button', { name: /Send/i })).not.toBeDisabled()
+    })
+  })
+})
+
+
+describe('Auto-match fallback for old companies (via previousCompanyId)', () => {
+  it('auto-selects company by previousCompanyId when company has no account saved', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: undefined })] },
     })
 
     renderDrawer(makeTransaction({ isMatchingPayment: true, previousCompanyId: 'company_001' }))
 
     await waitFor(() => {
-      const ribbon = document.querySelector('.ant-ribbon')
-      expect(ribbon).toHaveStyle({ visibility: 'visible' })
+      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('ТОВ Тест')
     })
   })
 
-  it('is hidden when user manually selects a company', async () => {
+  it('auto-selects by previousCompanyId from account history (isMatchingPayment false)', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: 'OTHER_MFO' })] },
+      data: { data: [makeCompany({ account: undefined })] },
     })
 
-    renderDrawer(makeTransaction({ isMatchingPayment: true }))
-
-    const select = screen.getByRole('combobox')
-    await userEvent.click(select)
-    const option = await screen.findByText('ТОВ Тест')
-    await userEvent.click(option)
+    renderDrawer(makeTransaction({ isMatchingPayment: false, previousCompanyId: 'company_001' }))
 
     await waitFor(() => {
-      const ribbon = document.querySelector('.ant-ribbon')
-      expect(ribbon).toHaveStyle({ visibility: 'hidden' })
+      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('ТОВ Тест')
+    })
+  })
+
+  it('prefers account match over previousCompanyId when both available', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: {
+        data: [
+          makeCompany({ _id: 'company_acc', companyName: 'Account Company', account: 'UA803220010000026001350058717' }),
+          makeCompany({ _id: 'company_old', companyName: 'Old Company', account: undefined }),
+        ],
+      },
+    })
+
+    renderDrawer(makeTransaction({
+      AUT_CNTR_ACC: 'UA803220010000026001350058717',
+      isMatchingPayment: true,
+      previousCompanyId: 'company_old',
+    }))
+
+    await waitFor(() => {
+      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('Account Company')
+    })
+  })
+
+  it('transit account — auto-selects by previousCompanyId enriched from same OSND sibling', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: undefined })] },
+    })
+
+    renderDrawer(makeTransaction({
+      AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+      AUT_CNTR_ACC: 'UA300000000000000000000000002',
+      previousCompanyId: 'company_001',
+      isMatchingPayment: false,
+    }))
+
+    await waitFor(() => {
+      expect(document.querySelector('.ant-select-selection-item')).toHaveTextContent('ТОВ Тест')
+    })
+  })
+
+  it('transit account — shows no selection when previousCompanyId is null and account is transit', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: undefined })] },
+    })
+
+    renderDrawer(makeTransaction({
+      AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+      AUT_CNTR_ACC: 'UA300000000000000000000000002',
+      previousCompanyId: null,
+      isMatchingPayment: false,
+    }))
+
+    await waitFor(() => {
+      expect(document.querySelector('.ant-select-selection-item')).toBeNull()
     })
   })
 })
 
 
+describe('transactionPayload passed to AddPaymentModal', () => {
+  it('includes TECHNICAL_TRANSACTION_ID', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: 'NO_MATCH' })] },
+    })
+    renderDrawer(makeTransaction({ TECHNICAL_TRANSACTION_ID: 'tx_unique_001' }))
 
-describe('State reset when transaction changes', () => {
-  it('clears selectedCompany when TECHNICAL_TRANSACTION_ID changes', async () => {
-    const { rerender } = renderDrawer(makeTransaction({ isMatchingPayment: true }))
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(await screen.findByText('ТОВ Тест'))
+    await userEvent.click(screen.getByRole('button', { name: /Send/i }))
 
-    
-    const select = screen.getByRole('combobox')
-    await userEvent.click(select)
-    const option = await screen.findByText('ТОВ Тест')
-    await userEvent.click(option)
+    await waitFor(() => {
+      expect(screen.getByTestId('add-payment-modal')).toBeInTheDocument()
+    })
 
-    
-    rerender(
+    expect(lastPaymentData?.transaction?.TECHNICAL_TRANSACTION_ID).toBe('tx_unique_001')
+  })
+
+  it('includes OSND so future transit sibling lookups can find this payment', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: 'NO_MATCH' })] },
+    })
+    renderDrawer(makeTransaction({
+      OSND: 'Сплата за послуги, Чорна Марина Євгеніївна',
+    }))
+
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(await screen.findByText('ТОВ Тест'))
+    await userEvent.click(screen.getByRole('button', { name: /Send/i }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-payment-modal')).toBeInTheDocument()
+    })
+
+    expect(lastPaymentData?.transaction?.OSND).toBe('Сплата за послуги, Чорна Марина Євгеніївна')
+  })
+})
+
+
+describe('saveAccountToCompany after successful payment creation', () => {
+  it('calls editRealEstate with account when company was manually selected and success=true', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: undefined })] },
+    })
+    renderDrawer(makeTransaction({ AUT_CNTR_ACC: 'UA803220010000026001350058717' }))
+
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(await screen.findByText('ТОВ Тест'))
+    await userEvent.click(screen.getByRole('button', { name: /Send/i }))
+    await userEvent.click(await screen.findByText('Confirm'))
+
+    await waitFor(() => {
+      expect(mockEditRealEstate).toHaveBeenCalledWith({
+        _id: 'company_001',
+        account: 'UA803220010000026001350058717',
+      })
+    })
+  })
+
+  it('does NOT call editRealEstate when company was auto-matched by account (already saved)', async () => {
+    renderDrawer()
+
+    await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
+
+    await userEvent.click(getDropdownSendButton()!)
+    await userEvent.click(await screen.findByText('Швидке створення'))
+    await userEvent.click(await screen.findByText('Confirm'))
+
+    await waitFor(() => {
+      expect(mockEditRealEstate).not.toHaveBeenCalled()
+    })
+  })
+
+  it('does NOT call editRealEstate when modal closes with success=false', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: undefined })] },
+    })
+    renderDrawer()
+
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(await screen.findByText('ТОВ Тест'))
+    await userEvent.click(screen.getByRole('button', { name: /Send/i }))
+    await userEvent.click(await screen.findByText('Cancel'))
+
+    await waitFor(() => {
+      expect(mockEditRealEstate).not.toHaveBeenCalled()
+    })
+  })
+
+  it('does NOT call editRealEstate for transit account even when manually selected', async () => {
+    mockUseGetAllRealEstateQuery.mockReturnValue({
+      data: { data: [makeCompany({ account: undefined })] },
+    })
+    renderDrawer(makeTransaction({
+      AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
+      AUT_CNTR_ACC: 'UA300000000000000000000000002',
+    }))
+
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(await screen.findByText('ТОВ Тест'))
+    await userEvent.click(screen.getByRole('button', { name: /Send/i }))
+    await userEvent.click(await screen.findByText('Confirm'))
+
+    await waitFor(() => {
+      expect(mockEditRealEstate).not.toHaveBeenCalled()
+    })
+  })
+})
+
+
+describe('refetchTransactions', () => {
+  it('is called when modal closes with success=true', async () => {
+    const refetchTransactions = jest.fn()
+    render(
       <TransactionDrawer
-        transaction={makeTransaction({
-          TECHNICAL_TRANSACTION_ID: 'tx_002',
-          isMatchingPayment: true,
-          AUT_CNTR_MFO: 'UNKNOWN_MFO',
-        })}
+        transaction={makeTransaction()}
         domain={makeDomain() as any}
+        refetchTransactions={refetchTransactions}
       />
     )
 
+    await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
+    await userEvent.click(getDropdownSendButton()!)
+    await userEvent.click(await screen.findByText('Швидке створення'))
+    await userEvent.click(await screen.findByText('Confirm'))
+
     await waitFor(() => {
-      
-      const ribbon = document.querySelector('.ant-ribbon')
-      expect(ribbon).toHaveStyle({ visibility: 'visible' })
+      expect(refetchTransactions).toHaveBeenCalledTimes(1)
     })
   })
 
-  it('does not carry over isMfoMatched from previous transaction', async () => {
-    const { rerender } = renderDrawer()
-
-    
-    await waitFor(() => {
-      expect(screen.getByText(/Send/)).toBeInTheDocument()
-    })
-
-    
-    mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: 'NO_MATCH' })] },
-    })
-
-    rerender(
+  it('is NOT called when modal closes with success=false', async () => {
+    const refetchTransactions = jest.fn()
+    render(
       <TransactionDrawer
-        transaction={makeTransaction({
-          TECHNICAL_TRANSACTION_ID: 'tx_002',
-          AUT_CNTR_MFO: 'NO_MATCH_MFO',
-        })}
+        transaction={makeTransaction()}
         domain={makeDomain() as any}
+        refetchTransactions={refetchTransactions}
       />
     )
 
-    await waitFor(() => {
-      
-      expect(screen.queryByRole('button', { name: /DownOutlined|DownOutlined/i })).not.toBeInTheDocument()
-    })
-  })
-})
-
-
-
-describe('MFO auto-match', () => {
-  it('auto-selects company when company.mfo matches transaction.AUT_CNTR_MFO', async () => {
-    renderDrawer()
-
-    
-    
-    await waitFor(() => {
-      const selectionItem = document.querySelector('.ant-select-selection-item')
-      expect(selectionItem).toHaveTextContent('ТОВ Тест')
-    })
-  })
-
-  it('does not auto-select when mfo does not match', async () => {
-    mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: 'NO_MATCH' })] },
-    })
-
-    renderDrawer()
+    await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
+    await userEvent.click(getDropdownSendButton()!)
+    await userEvent.click(await screen.findByText('Швидке створення'))
+    await userEvent.click(await screen.findByText('Cancel'))
 
     await waitFor(() => {
-      const select = screen.getByRole('combobox')
-      expect(select).not.toHaveValue('ТОВ Тест')
-    })
-  })
-
-  it('shows dropdown button when MFO matched', async () => {
-    renderDrawer()
-
-    await waitFor(() => {
-      
-      const sendButtons = screen.getAllByText(/Send/)
-      expect(sendButtons.length).toBeGreaterThan(0)
-      
-      expect(document.querySelector('.anticon-down')).toBeInTheDocument()
-    })
-  })
-
-  it('shows plain Send button (disabled) when no MFO match and no company selected', async () => {
-    mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: 'NO_MATCH' })] },
-    })
-
-    renderDrawer()
-
-    await waitFor(() => {
-      const sendButton = screen.getByRole('button', { name: /Send/i })
-      expect(sendButton).toBeDisabled()
-    })
-  })
-})
-
-
-
-describe('saveMfoToCompany after successful payment creation', () => {
-  it('calls PATCH with mfo when modal closes with success=true and company was manually selected', async () => {
-    mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: undefined })] }, 
-    })
-
-    renderDrawer(makeTransaction({ AUT_CNTR_MFO: '322001' }))
-
-    
-    const select = screen.getByRole('combobox')
-    await userEvent.click(select)
-    const option = await screen.findByText('ТОВ Тест')
-    await userEvent.click(option)
-
-    
-    const sendButton = screen.getByRole('button', { name: /Send/i })
-    await userEvent.click(sendButton)
-
-    const confirmButton = await screen.findByText('Confirm')
-    await userEvent.click(confirmButton)
-
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        '/api/realestate/company_001',
-        expect.objectContaining({
-          method: 'PATCH',
-          body: JSON.stringify({ mfo: '322001' }),
-        })
-      )
-    })
-  })
-
-  it('does NOT call PATCH when company was auto-matched by MFO (already saved)', async () => {
-    renderDrawer() 
-
-    await waitFor(() => {
-      expect(document.querySelector('.anticon-down')).toBeInTheDocument()
-    })
-
-    
-    const dropdownButton = screen.getByText(/Send/)
-    await userEvent.click(dropdownButton)
-    const quickCreate = await screen.findByText('Швидке створення')
-    await userEvent.click(quickCreate)
-
-    const confirmButton = await screen.findByText('Confirm')
-    await userEvent.click(confirmButton)
-
-    await waitFor(() => {
-      expect(global.fetch).not.toHaveBeenCalledWith(
-        expect.stringContaining('/api/realestate/'),
-        expect.objectContaining({ method: 'PATCH' })
-      )
-    })
-  })
-
-  it('does NOT call PATCH when modal closes with success=false', async () => {
-    mockUseGetAllRealEstateQuery.mockReturnValue({
-      data: { data: [makeCompany({ mfo: undefined })] },
-    })
-
-    renderDrawer()
-
-    const select = screen.getByRole('combobox')
-    await userEvent.click(select)
-    const option = await screen.findByText('ТОВ Тест')
-    await userEvent.click(option)
-
-    const sendButton = screen.getByRole('button', { name: /Send/i })
-    await userEvent.click(sendButton)
-
-    const cancelButton = await screen.findByText('Cancel')
-    await userEvent.click(cancelButton)
-
-    await waitFor(() => {
-      expect(global.fetch).not.toHaveBeenCalled()
+      expect(refetchTransactions).not.toHaveBeenCalled()
     })
   })
 })

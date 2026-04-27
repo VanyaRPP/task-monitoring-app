@@ -25,7 +25,7 @@ const DomainInfo: FC<Props> = ({ editable, form, currentDomainId }) => {
     if (!editable) return
 
     const currentDescription: string = form.getFieldValue('description') || ''
-    const autoLinePatterns = [/^ФОП: /, /^IBAN: /, /^РНОКПП: /, /^МФО: /]
+    const autoLinePatterns = [/^IBAN: /, /^РНОКПП: /, /^МФО: /]
     const autoValues = [IE_NAME, IBAN, RNOKPP, MFO].filter(Boolean)
     const customLines = currentDescription
       .split('\n')
@@ -37,7 +37,7 @@ const DomainInfo: FC<Props> = ({ editable, form, currentDomainId }) => {
       })
 
     const autoLines = [
-      IE_NAME ? `ФОП: ${IE_NAME}` : '',
+      // IE_NAME ? `ФОП: ${IE_NAME}` : '',
       IBAN ? `IBAN: ${IBAN}` : '',
       RNOKPP ? `РНОКПП: ${RNOKPP}` : '',
       MFO ? `МФО: ${MFO}` : '',
@@ -72,7 +72,7 @@ const DomainInfo: FC<Props> = ({ editable, form, currentDomainId }) => {
 
   return (
     <div>
-      <Form.Item name="IEName" label="FOP">
+      {/* <Form.Item name="IEName" label="FOP">
         <Space.Compact className={s.formInput}>
           <Input
             placeholder="Вкажіть ФОП"
@@ -81,7 +81,7 @@ const DomainInfo: FC<Props> = ({ editable, form, currentDomainId }) => {
             disabled={!editable}
           />
         </Space.Compact>
-      </Form.Item>
+      </Form.Item> */}
       {/* IBAN */}
       <Form.Item name="iban" label="IBAN">
         <Input
@@ -107,7 +107,11 @@ const DomainInfo: FC<Props> = ({ editable, form, currentDomainId }) => {
           disabled={!editable}
         />
       </Form.Item>
-      <Form.Item name="description" label="Опис">
+      <Form.Item
+        name="description"
+        label="Опис"
+        rules={validateField('description')}
+      >
         <Input.TextArea
           placeholder="Вкажіть значення"
           className={s.formInput}

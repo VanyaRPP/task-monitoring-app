@@ -122,7 +122,7 @@ const CompaniesTable: React.FC<Props> = ({
   })
   const { data: streetData } = useGetAddressFiltersQuery({
     realEstates: filters?.company,
-    domains: filters?.domain,
+    domains: filters?.domain ?? domainData?.domainsFilter?.map((d) => d.value),
   })
 
   const [realEstate, setRealEstate] = useState(null)
@@ -186,12 +186,8 @@ const CompaniesTable: React.FC<Props> = ({
     (!domainId && !streetId && !isLoading ? 400 : 0)
 
   const isSingleCompanyByData = useMemo(() => {
-    if (!realEstates?.data || realEstates.data.length === 0) return false
-    const uniqueCompanies = new Set(
-      realEstates.data.map((item) => item.companyName)
-    )
-    return uniqueCompanies.size === 1
-  }, [realEstates?.data])
+    return realEstateData?.realEstatesFilter?.length === 1
+  }, [realEstateData?.realEstatesFilter?.length])
 
   const filteredCustomServices = useMemo(() => {
     return customServices?.filter((custom) => {

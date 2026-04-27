@@ -22,8 +22,8 @@ interface Props {
 const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
   const [form] = Form.useForm()
   const [isValueChanged, setIsValueChanged] = useState(false)
-  const [addDomainEstate] = useAddDomainMutation()
-  const [editDomain] = useEditDomainMutation()
+  const [addDomainEstate, { isLoading: isAdding }] = useAddDomainMutation()
+  const [editDomain, { isLoading: isEditing }] = useEditDomainMutation()
   const { data: domains } = useGetDomainsQuery({})
   const { data: user } = useGetCurrentUserQuery()
 
@@ -37,6 +37,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
           label: `${i.address} (м. ${i.city})`,
         })) || [],
       description: currentDomain?.description || '',
+      defaultTemplate: currentDomain?.defaultTemplate || null,
       IEName: currentDomain?.IEName || '',
       domainBankToken: currentDomain?.domainBankToken || '',
       mfo: currentDomain?.mfo || '',
@@ -79,6 +80,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
         ? formData.streets.map((i: any) => i.value)
         : formData.streets,
       description: formData.description,
+      defaultTemplate: formData.defaultTemplate || undefined,
       IEName: formData.IEName,
       domainBankToken: formData.domainBankToken || [],
       mfo: formData.mfo,
@@ -116,6 +118,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       cancelText={'Відміна'}
       okButtonProps={{ style: { ...(!editable && { display: 'none' }) } }}
       preview={!editable}
+      confirmLoading={isAdding || isEditing}
     >
       <DomainForm
         form={form}
