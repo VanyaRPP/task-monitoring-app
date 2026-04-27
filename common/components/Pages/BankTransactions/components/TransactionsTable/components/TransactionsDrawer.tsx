@@ -9,6 +9,7 @@ import { formatDate, parseDate } from './datesHelper'
 import { useGetAllRealEstateQuery, useEditRealEstateMutation } from '@common/api/realestateApi/realestate.api'
 import { useQuickSend } from './useQuicksend'
 import { buildTransactionPayload } from './quickSendHelpers'
+import styles from './style.module.scss'
 
 interface TransactionDrawerProps {
   transaction: ITransaction
@@ -164,7 +165,10 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
                 Send
               </Button>
               <Dropdown
-                menu={{ items: quickSendMenuItems }}
+                menu={{ 
+                  items: quickSendMenuItems,
+                  className: styles.monthsDropdown
+                }}
                 trigger={['hover', 'click']}
                 disabled={!selectedCompany || services.length === 0}
               >

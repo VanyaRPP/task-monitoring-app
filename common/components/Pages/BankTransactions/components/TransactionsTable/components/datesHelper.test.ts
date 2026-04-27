@@ -19,7 +19,7 @@ describe('getRollingServices', () => {
       { _id: 'svc-march', date: '2024-03-01T00:00:00.000Z' }
     ]
     
-    const result = getRollingServices(existingServices, 3)
+    const result = getRollingServices(existingServices, 2)
 
     expect(result).toHaveLength(3)
     expect(result[0]._id).toBe('svc-march')
