@@ -104,7 +104,11 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
           disabled={!editable}
         />
       </Form.Item>
-      <Form.Item name="description" label="Опис">
+      <Form.Item
+        name="description"
+        label="Опис"
+        rules={validateField('description')}
+      >
         <Input.TextArea
           placeholder="Вкажіть значення"
           className={s.formInput}
