@@ -14,7 +14,7 @@ import {
   Select,
   Typography,
 } from 'antd'
-import { FC, useEffect } from 'react'
+import { FC, useEffect, useState } from 'react'
 import AddressesSelect from '../../../Reusable/AddressesSelect'
 import DomainsSelect from '../../../Reusable/DomainsSelect'
 import s from './style.module.scss'
@@ -57,6 +57,21 @@ const RealEstateForm: FC<Props> = ({
     domainId: domain?._id || currentRealEstate?.domain?._id,
   })
   const services = servicesData?.data
+
+  const [isInvoiceNameManuallyEdited, setIsInvoiceNameManuallyEdited] = useState(false)
+
+  const handleValuesChange = (changedValues: any, allValues: any) => {
+    setIsValueChanged(true)
+
+    if (changedValues.invoiceName !== undefined) {
+      setIsInvoiceNameManuallyEdited(true)
+    }
+    if (changedValues.companyName !== undefined && !isInvoiceNameManuallyEdited && !currentRealEstate) {
+      form.setFieldsValue({
+        invoiceName: changedValues.companyName,
+      })
+    }
+  }
 
   useEffect(() => {
     if (services) {
@@ -118,9 +133,10 @@ const RealEstateForm: FC<Props> = ({
       requiredMark={editable}
       layout="vertical"
       className={s.Form}
-      onValuesChange={() => setIsValueChanged(true)}
+      onValuesChange={handleValuesChange}
       initialValues={{
         currency: currentRealEstate?.currency || Currency.UAH,
+        invoiceName: currentRealEstate?.invoiceName || '',
       }}
     >
       <DomainsSelect
@@ -154,6 +170,20 @@ const RealEstateForm: FC<Props> = ({
           disabled={!editable}
         />
       </Form.Item>
+
+<Form.Item
+        name="invoiceName"
+        label="Назва для рахунків"
+        rules={validateField('required')}
+      >
+        <Input
+          placeholder="Назва для рахунків"
+          maxLength={256}
+          className={s.formInput}
+          disabled={!editable}
+        />
+      </Form.Item>
+
       <Form.Item
         name="description"
         label="Опис"
