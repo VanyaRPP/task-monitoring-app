@@ -6,8 +6,6 @@
     "dev": "npm run browser:open && next dev",
     "build": "next build",
     "start": "next start",
-    "test:e2e": "playwright test",
-    "test:e2e:watch": "playwright test --ui",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "npm run lint:fix && npm run lint:check",
@@ -83,7 +81,6 @@
     "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.47.1",
     "@testing-library/user-event": "^14.6.1",
     "@types/big.js": "^6.2.2",
     "@types/crypto-js": "^4.2.2",
