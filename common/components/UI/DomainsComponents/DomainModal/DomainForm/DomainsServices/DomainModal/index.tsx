@@ -1,8 +1,16 @@
 import React, { FC, useEffect, useState } from 'react'
 import {Modal,Transfer,Typography,Button,Card,Space,Input,message,Collapse,Popconfirm} from 'antd'
 import type { CollapseProps } from 'antd'
-import { DeleteOutlined } from '@ant-design/icons'
-import { useDeleteCustomServiceMutation } from '@common/api/customServicesApi/customServices.api'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  CheckOutlined,
+  CloseOutlined,
+} from '@ant-design/icons'
+import {
+  useDeleteCustomServiceMutation,
+  useEditCustomServiceMutation,
+} from '@common/api/customServicesApi/customServices.api'
 import { Roles } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import { isProtectedService } from '@utils/helpers'
@@ -32,6 +40,7 @@ interface Props {
   onSave: (orderedGroups: IDomainServiceGroupSavePayload[]) => void
   onCreateCustomService: (name: string) => Promise<any>
   onDeleteCustomService?: (serviceKey: string) => void
+  onUpdateCustomService?: (id: string, newTitle: string) => Promise<void>
   isGlobalAdmin?: boolean
 }
 
@@ -43,12 +52,15 @@ const DomainModal: FC<Props> = ({
   onSave,
   onCreateCustomService,
   onDeleteCustomService,
+  onUpdateCustomService,
   isGlobalAdmin,
 }) => {
   const [targetKeys, setTargetKeys] = useState<Record<string, string[]>>({})
   const [localServiceGroups, setLocalServiceGroups] = useState<ServiceGroup[]>([])
   const [localData, setLocalData] = useState<ServiceItem[]>([])
   const [newGroupName, setNewGroupName] = useState('')
+  const [editingKey, setEditingKey] = useState<string | null>(null)
+  const [tempTitle, setTempTitle] = useState('')
   const [newServiceName, setNewServiceName] = useState('')
   const [activePanel, setActivePanel] = useState<string | string[]>([])
   const { data: user } = useGetCurrentUserQuery()
@@ -83,6 +95,9 @@ const DomainModal: FC<Props> = ({
 
   const [deleteCustomService, { isLoading: isDeleting }] =
     useDeleteCustomServiceMutation()
+
+  const [editCustomService, { isLoading: isUpdating }] =
+    useEditCustomServiceMutation()
 
   const handleDeleteService = async (serviceKey: string) => {
     try {
@@ -129,6 +144,43 @@ const DomainModal: FC<Props> = ({
         !usedKeys.has(item.key) ||
         (targetKeys[groupName] || []).includes(item.key)
     )
+  }
+
+  const handleStartEdit = (item: ServiceItem) => {
+    setEditingKey(item.key)
+    setTempTitle(item.title)
+  }
+
+  const handleCancelEdit = () => {
+    setEditingKey(null)
+    setTempTitle('')
+  }
+
+  const handleSaveEdit = async (item: ServiceItem) => {
+    if (!tempTitle.trim()) {
+      message.warning('Назва не може бути порожньою')
+      return
+    }
+
+    if (tempTitle.trim() === item.title) {
+      handleCancelEdit()
+      return
+    }
+
+    try {
+      await editCustomService({
+        _id: item.key,
+        name: tempTitle.trim(),
+      }).unwrap()
+
+      setLocalData((prev) =>
+        prev.map((s) => (s.key === item.key ? { ...s, title: tempTitle.trim() } : s))
+      )
+      message.success('Назву послуги оновлено')
+      handleCancelEdit()
+    } catch (error) {
+      message.error(error?.data?.message || 'Не вдалося оновити назву')
+    }
   }
 
   const handleSaveNewGroup = () => {
@@ -214,32 +266,91 @@ const DomainModal: FC<Props> = ({
           height: 300,
           overflow: 'auto'
         }}
-        render={item => (
-          <Space style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-            <Text strong>{item.title}</Text>
-            {!isProtectedService(item.key) && isGlobalAdmin && (
-              <Popconfirm
-                title="Видалити послугу?"
-                description="Ви впевнені, що хочете видалити цю послугу? Вона буде видалена з усіх груп."
-                onConfirm={(e) => {
-                  e?.stopPropagation()
-                  handleDeleteService(item.key)
-                }}
-                okText="Так"
-                cancelText="Ні"
-                disabled={isDeleting}
-              >
-                <DeleteOutlined
-                  style={{ 
-                    color: isDeleting ? '#ccc' : 'red', 
-                    cursor: isDeleting ? 'not-allowed' : 'pointer' 
+        render={(item) => {
+          const isEditing = editingKey === item.key
+          const isCustom = !isProtectedService(item.key)
+
+          return (
+            <Space
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                width: '100%',
+              }}
+            >
+              {isEditing ? (
+                <Input
+                  size="small"
+                  value={tempTitle}
+                  onChange={(e) => setTempTitle(e.target.value)}
+                  onPressEnter={() => handleSaveEdit(item)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') handleCancelEdit()
                   }}
-                  onClick={e => e.stopPropagation()}
+                  autoFocus
                 />
-              </Popconfirm>
-            )}
-          </Space>
-        )}
+              ) : (
+                <Text strong>{item.title}</Text>
+              )}
+
+              <Space size="small">
+                {isCustom && isGlobalAdmin && (
+                  <>
+                    {isEditing ? (
+                      <>
+                        <Button
+                          type="text"
+                          size="small"
+                        icon={
+                          <CheckOutlined
+                            style={{
+                              color: '#642AB5',
+                              stroke: '#642AB5',
+                              strokeWidth: 60,
+                            }}
+                          />
+                        }
+                          onClick={() => handleSaveEdit(item)}
+                          loading={isUpdating}
+                        />
+                        <Button
+                          type="text"
+                          size="small"
+                        icon={
+                          <CloseOutlined
+                            style={{ stroke: 'currentColor', strokeWidth: 60 }}
+                          />
+                        }
+                          onClick={handleCancelEdit}
+                          disabled={isUpdating}
+                        />
+                      </>
+                    ) : (
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<EditOutlined />}
+                        onClick={() => handleStartEdit(item)}
+                        disabled={isUpdating || isDeleting}
+                      />
+                    )}
+                    <Popconfirm
+                      title="Видалити послугу?"
+                      onConfirm={() => handleDeleteService(item.key)}
+                      okText="Так"
+                      cancelText="Ні"
+                      disabled={isDeleting || isUpdating}
+                    >
+                      <DeleteOutlined
+                        style={{ color: (isDeleting || isUpdating) ? '#ccc' : 'red', cursor: 'pointer' }}
+                      />
+                    </Popconfirm>
+                  </>
+                )}
+              </Space>
+            </Space>
+          )
+        }}
         locale={{ itemUnit: 'послуга', itemsUnit: 'послуг' }}
       />
     </div>

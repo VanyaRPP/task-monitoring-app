@@ -113,6 +113,75 @@ export default async function handler(
         })
       }
 
+    case 'PATCH':
+      try {
+        if (!isGlobalAdmin) {
+          return res.status(403).json({
+            success: false,
+            message: 'Тільки Global Admin може редагувати послуги',
+          })
+        }
+
+        const { id } = req.query
+        const { name } = req.body
+
+        if (!id || Array.isArray(id)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Відсутній або некоректний id',
+          })
+        }
+
+        const trimmedName = typeof name === 'string' ? name.trim() : name
+
+        if (!trimmedName) {
+          return res.status(400).json({
+            success: false,
+            message: 'Назва послуги не може бути порожньою',
+          })
+        }
+
+        const escapedName = escapeRegexForMongo(trimmedName)
+        const existingService = await CustomService.findOne({
+          name: { $regex: `^${escapedName}$`, $options: 'i' },
+          _id: { $ne: id },
+        })
+
+        if (existingService) {
+          return res.status(409).json({
+            success: false,
+            message: 'Послуга з такою назвою вже існує',
+          })
+        }
+
+        const updatedService = await CustomService.findByIdAndUpdate(
+          id,
+          {
+            name: trimmedName,
+            fieldName: transliterateAndCamelCase(trimmedName),
+          },
+          { new: true }
+        )
+
+        if (!updatedService) {
+          return res.status(404).json({
+            success: false,
+            message: 'Сервіс не знайдений',
+          })
+        }
+
+        return res.status(200).json({
+          success: true,
+          data: updatedService.toObject(),
+        })
+      } catch (error: any) {
+        return res.status(500).json({
+          success: false,
+          message: 'Помилка при оновленні сервісу',
+          error: error.message,
+        })
+      }
+
     case 'GET':
       try {
         const { _id } = req.query
