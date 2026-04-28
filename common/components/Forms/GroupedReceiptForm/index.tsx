@@ -238,18 +238,6 @@ const GroupedReceiptForm: FC<Props> = ({
 
   return (
     <>
-      <PrinterOutlined className={s.print} onClick={handlePrint} />
-      <Dropdown
-        trigger={['click']}
-        menu={{
-          items: templateItems,
-          onClick: ({ key }) => setTemplate(key as 'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'),
-        }}
-      >
-        <Tooltip title={isEnglish ? 'Select template' : 'Обрати шаблон'}>
-          <EditOutlined className={s.edit} />
-        </Tooltip>
-      </Dropdown>
       <Tooltip title="Показувати кількість і ціну в таблиці перегляду">
         <TableOutlined
           role="button"
@@ -273,6 +261,22 @@ const GroupedReceiptForm: FC<Props> = ({
             }
           }}
         />
+      </Tooltip>
+
+      <Dropdown
+        trigger={['click']}
+        menu={{
+          items: templateItems,
+          onClick: ({ key }) => setTemplate(key as 'classic' | 'olimp' | 'swiss' | 'softcard' | 'techstudio' | 'monoline' | 'editorial' | 'ledger' | 'azure'),
+        }}
+      >
+        <Tooltip title={isEnglish ? 'Select template' : 'Обрати шаблон'}>
+          <EditOutlined className={s.edit} />
+        </Tooltip>
+      </Dropdown>
+
+      <Tooltip title="Друк" placement="top">
+        <PrinterOutlined className={s.print} onClick={handlePrint} />
       </Tooltip>
 
       <TemplateComponent {...templateProps} />

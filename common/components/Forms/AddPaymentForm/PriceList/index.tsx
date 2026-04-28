@@ -75,7 +75,11 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
           }}
         />
       </Tooltip>
-      <PrinterOutlined className={styles.print} onClick={handlePrint} />
+      
+      <Tooltip title="Друк" placement="top">
+        <PrinterOutlined className={styles.print} onClick={handlePrint} />
+      </Tooltip>
+
       <div ref={componentRef}>
         <div
           className={styles.container}
