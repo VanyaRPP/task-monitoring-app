@@ -1,17 +1,64 @@
 .headerBlock {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
+  width: 100%;
+  white-space: normal;
 }
 
 .firstBlock {
   display: flex;
   flex-direction: row;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 3px;
+  margin-bottom: 5px;
+  margin-right: -100px;
 }
 
 .segmented {
   display: flex;
   align-items: center;
-  margin-right: 120px;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  margin-top: 12px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.addButton {
+  margin-left: auto;
+}
+
+@media (max-width: 992px) {
+  .firstBlock {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .segmented {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .addButton {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .segmented {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .addButton {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 12px;
+  }
 }

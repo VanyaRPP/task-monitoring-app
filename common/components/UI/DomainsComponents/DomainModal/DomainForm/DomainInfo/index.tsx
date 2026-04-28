@@ -1,23 +1,27 @@
 import { Button, Card, Form, Input, Select, Space } from 'antd'
 import { validateField } from '@assets/features/validators'
-import React, { FC, useEffect } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import s from '../style.module.scss'
 import { CloseOutlined } from '@ant-design/icons'
 import { useGetDomainsQuery } from '@common/api/domainApi/domain.api'
 import { useForm } from 'antd/lib/form/Form'
+import AreaCalculationCard from './DomainAreaCalc'
 
 interface Props {
   editable: boolean
   form: any
+  currentDomainId?: string
+  setIsValueChanged: (value: boolean) => void
 }
 
-const DomainInfo: FC<Props> = ({ editable, form }) => {
-  // Watch the values of specific fields 
+const DomainInfo: FC<Props> = ({ editable, form, currentDomainId, setIsValueChanged }) => {
+  // Watch the values of specific fields
   const IE_NAME = Form.useWatch('IEName', form)
   const IBAN = Form.useWatch('iban', form)
   const RNOKPP = Form.useWatch('rnokpp', form)
   const MFO = Form.useWatch('mfo', form)
-
+  
+  const domainId = currentDomainId;
   useEffect(() => {
     if (!editable) return
 
@@ -104,7 +108,11 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
           disabled={!editable}
         />
       </Form.Item>
-      <Form.Item name="description" label="Опис">
+      <Form.Item
+        name="description"
+        label="Опис"
+        rules={validateField('description')}
+      >
         <Input.TextArea
           placeholder="Вкажіть значення"
           className={s.formInput}
@@ -113,6 +121,13 @@ const DomainInfo: FC<Props> = ({ editable, form }) => {
           disabled={!editable}
         />
       </Form.Item>
+
+      <AreaCalculationCard 
+      domainId={domainId} 
+      editable={editable} 
+      form={form} 
+      setIsValueChanged={setIsValueChanged}
+      />
 
       <Form.List name="domainBankToken">
         {(fields, { add, remove }) => (

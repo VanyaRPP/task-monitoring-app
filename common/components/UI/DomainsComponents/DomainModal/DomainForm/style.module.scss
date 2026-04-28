@@ -15,3 +15,83 @@
     margin: 0;
   }
 }
+
+.wrapper {
+  margin: 24px 0;
+}
+
+.card {
+  :global {
+    .ant-card-body {
+      padding: 0;
+    }
+
+    .ant-collapse {
+      background: transparent;
+    }
+
+    .ant-collapse-item {
+      border: none;
+    }
+
+    .ant-collapse-header {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+    }
+
+    .ant-collapse-expand-icon {
+      display: flex;
+      align-items: center;
+      height: 100%;
+
+      // ВОТ ЭТО ФИКСИТ ПРОБЛЕМУ
+      transform: translateY(4px);
+    }
+
+    .ant-collapse-content-box {
+      padding: 0 16px 16px;
+    }
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.title {
+  font-weight: 500;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.center {
+  text-align: center;
+  padding: 20px;
+}
+
+.chart {
+  display: flex;
+  justify-content: center;
+  margin-top: -40px;
+  margin-bottom: -60px;
+}
+
+.empty {
+  padding: 40px 0;
+}
+
+.noData {
+  padding: 20px;
+  text-align: center;
+}

@@ -45,8 +45,13 @@ const DomainForm: React.FC<Props> = ({
       <EmailSelect form={form} disabled={!editable} />
       <DomainStreets disabled={!editable} />
       <ServicesSelect form={form} disabled={!editable} domainId={domainId} />
-      <DomainsServices form={form} editable={editable} domainId={domainId} />
-      <DomainInfo editable={editable} form={form} />
+      <DomainsServices
+        form={form}
+        editable={editable}
+        onCustomServicesChange={setCustomServices}
+        domainId={domainId}
+      />
+      <DomainInfo editable={editable} form={form} currentDomainId={domainId} setIsValueChanged={setIsValueChanged} />
       <Form.Item name="defaultTemplate" label="Шаблон за замовчуванням">
         <Select
           options={TEMPLATE_OPTIONS}

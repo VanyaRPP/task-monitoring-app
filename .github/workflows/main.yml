@@ -2,7 +2,7 @@ name: Sync PR with Asana
 
 on:
   pull_request:
-    types: [opened, closed, reopened]
+    types: [В процесі, Code review, Testing]
 
 jobs:
   update-asana:
@@ -24,8 +24,12 @@ jobs:
         run: |
           ACTION="${{ github.event.action }}"
 
-          if [ "$ACTION" == "opened" ]; then
+          if [ "$ACTION" == "В процесі" ]; then
             SECTION_ID="REVIEW_SECTION_ID"
+          elif [ "$ACTION" == "Code review" ]; then
+            SECTION_ID="REVIEW_SECTION_ID"
+          elif [ "$ACTION" == "Testing" ]; then
+            SECTION_ID="TESTING_SECTION_ID"
           elif [ "$ACTION" == "closed" ]; then
             if [ "${{ github.event.pull_request.merged }}" == "true" ]; then
               SECTION_ID="DONE_SECTION_ID"

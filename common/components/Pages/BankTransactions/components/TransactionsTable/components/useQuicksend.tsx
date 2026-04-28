@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useMemo } from 'react'
 import { message } from 'antd'
 import { ITransaction } from './transactionTypes'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
@@ -8,8 +8,10 @@ import { getPaymentProviderAndReciever } from '@utils/helpers'
 import { getResolvedDescription } from './bankHelper'
 import { Operations } from '@utils/constants'
 import { IRealestate } from '@common/api/realestateApi/realestate.api.types'
-import { getRollingServices, formatDate, toDate } from './datesHelper'
+import { formatDate, toDate } from './datesHelper'
 import { getStreetId, buildTransactionPayload } from './quickSendHelpers'
+import dayjs from 'dayjs'
+import { buildMonthServicePlaceholder } from '@common/components/Forms/AddPaymentForm/month-service-placeholder'
 
 const ROLLING_MONTH_COUNT = 12
 
@@ -37,7 +39,29 @@ export const useQuickSend = ({
     { skip: !domain._id || !streetId }
   )
 
-  const services = getRollingServices(servicesData?.data || [], ROLLING_MONTH_COUNT)
+  const services = useMemo(() => {
+    const fetchedServices = servicesData?.data || []
+    const byMonthKey = new Map<string, { _id: string; date: dayjs.Dayjs }>()
+
+    for (const svc of fetchedServices) {
+      const m = dayjs(svc.date)
+      const key = m.startOf('month').format('YYYY-MM')
+      byMonthKey.set(key, { _id: svc._id, date: m })
+    }
+
+    for (let i = 0; i < ROLLING_MONTH_COUNT; i++) {
+      const m = dayjs().subtract(i, 'month').startOf('month')
+      const key = m.format('YYYY-MM')
+      if (!byMonthKey.has(key)) {
+        byMonthKey.set(key, {
+          _id: buildMonthServicePlaceholder(m),
+          date: m,
+        })
+      }
+    }
+
+    return [...byMonthKey.values()].sort((a, b) => b.date.valueOf() - a.date.valueOf())
+  }, [servicesData])
 
   const handleQuickSend = useCallback(
     async (service: any) => {
@@ -48,7 +72,6 @@ export const useQuickSend = ({
       setLoading(true)
 
       try {
-        const company = relatedCompanies.find((c) => c._id === selectedCompanyId)
         if (!company) throw new Error('Company not found')
 
         const { provider, reciever } = getPaymentProviderAndReciever({
@@ -81,7 +104,7 @@ export const useQuickSend = ({
         setLoading(false)
       }
     },
-    [selectedCompanyId, relatedCompanies, domain, addPayment, transaction]
+    [selectedCompanyId, relatedCompanies, domain, addPayment, transaction, company]
   )
 
   return {
