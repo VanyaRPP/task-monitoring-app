@@ -7,7 +7,7 @@ import Big from 'big.js'
 import dayjs from 'dayjs'
 import 'dayjs/locale/uk'
 import mongoose, { ObjectId } from 'mongoose'
-import { CURRENCY_MAP, Roles, defaultServices, ServiceType } from '../constants'
+import { CURRENCY_MAP, Currency, Roles, defaultServices, ServiceType } from '../constants'
 import {
   getDomainsPipeline,
   getRealEstatesPipeline,
@@ -344,46 +344,41 @@ export function currencyWithUnit(
   company?: IRealestate,
   unit?: string
 ) {
-  const currency = company?.currency ?? 'UAH'
+  const currency = company?.currency ?? Currency.UAH
   const label = CURRENCY_MAP[currency]?.label ?? 'грн'
 
   return `${value} ${label}${unit ? `/${unit}` : ''}`
 }
 
-export const normalizeCurrency = (currency?: string): 'UAH' | 'USD' | 'EUR' => {
+export const normalizeCurrency = (currency?: string): Currency => {
   const normalizedCurrency = currency?.toUpperCase()
 
-  if (normalizedCurrency === 'USD' || normalizedCurrency === 'EUR') {
+  if (normalizedCurrency === Currency.USD || normalizedCurrency === Currency.EUR) {
     return normalizedCurrency
   }
 
-  return 'UAH'
+  return Currency.UAH
 }
 
-export const getCurrencyShortLabel = (currency?: string): string => {
-  const normalizedCurrency = normalizeCurrency(currency)
+export const getCurrencyShortLabel = (currency?: string): string =>
+  CURRENCY_MAP[normalizeCurrency(currency)].label
 
-  return {
-    UAH: 'грн',
-    USD: 'USD',
-    EUR: 'EUR',
-  }[normalizedCurrency]
-}
-
-export const getCurrencySymbol = (currency?: string): string => {
-  const normalizedCurrency = normalizeCurrency(currency)
-
-  return {
-    UAH: '₴',
-    USD: '$',
-    EUR: '€',
-  }[normalizedCurrency]
-}
+export const getCurrencySymbol = (currency?: string): string =>
+  CURRENCY_MAP[normalizeCurrency(currency)].symbol
 
 export const getCurrencyNames = (
-  currency?: string
+  currency?: string,
+  isEnglish?: boolean
 ): { major: string; minor: string } => {
   const normalizedCurrency = normalizeCurrency(currency)
+
+  if (isEnglish) {
+    return {
+      UAH: { major: 'hryvnias', minor: 'kopecks' },
+      USD: { major: 'dollars', minor: 'cents' },
+      EUR: { major: 'euros', minor: 'cents' },
+    }[normalizedCurrency]
+  }
 
   return {
     UAH: { major: 'гривень', minor: 'копійок' },
@@ -391,7 +386,6 @@ export const getCurrencyNames = (
     EUR: { major: 'євро', minor: 'центів' },
   }[normalizedCurrency]
 }
-
 
 export function multiplyFloat(a, b) {
   const bigA = Big(toRoundFixed(`${a}`))

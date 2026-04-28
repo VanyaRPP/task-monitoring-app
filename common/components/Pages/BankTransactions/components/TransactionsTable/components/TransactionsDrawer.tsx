@@ -3,19 +3,24 @@ import React, { FC, useEffect, useMemo, useState } from 'react'
 import { ITransaction } from './transactionTypes'
 import { IExtendedDomain } from '@common/api/domainApi/domain.api.types'
 import AddPaymentModal from '@components/AddPaymentModal'
-import dayjs from 'dayjs'
-import { SendOutlined, DownOutlined } from '@ant-design/icons'
+import { SendOutlined, DownOutlined, CalendarOutlined } from '@ant-design/icons'
 import { matchCompany, MatchType, getResolvedDescription } from './bankHelper'
-import { useGetAllRealEstateQuery } from '@common/api/realestateApi/realestate.api'
+import { formatDate, parseDate } from './datesHelper'
+import { useGetAllRealEstateQuery, useEditRealEstateMutation } from '@common/api/realestateApi/realestate.api'
+import { useQuickSend } from './useQuicksend'
+import { buildTransactionPayload } from './quickSendHelpers'
+import styles from './style.module.scss'
 
 interface TransactionDrawerProps {
   transaction: ITransaction
   domain: IExtendedDomain
+  refetchTransactions?: () => void
 }
 
 const TransactionDrawer: FC<TransactionDrawerProps> = ({
   transaction,
   domain,
+  refetchTransactions
 }) => {
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
@@ -25,11 +30,19 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const transactionAmount = parseFloat(transaction.SUM as string)
 
   const { data: realEstatesData } = useGetAllRealEstateQuery({ domainId: domain._id })
+  const [editRealEstate] = useEditRealEstateMutation()
 
   const relatedCompanies = useMemo(
     () => realEstatesData?.data || [],
     [realEstatesData]
   )
+
+  const { handleQuickSend, services, loading: quickSendLoading } = useQuickSend({
+    transaction,
+    domain,
+    selectedCompanyId: selectedCompany,
+    relatedCompanies,
+  })
 
   useEffect(() => {
     if (!relatedCompanies.length) return
@@ -51,15 +64,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
   const saveAccountToCompany = async (companyId: string) => {
     if (!transaction.AUT_CNTR_ACC) return
     if (transaction.AUT_CNTR_NAM?.includes('Транз')) return
-    try {
-      await fetch(`/api/realestate/${companyId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ account: transaction.AUT_CNTR_ACC }),
-      })
-    } catch (error) {
-      console.error('Failed to save account to company:', error)
-    }
+    await editRealEstate({ _id: companyId, account: transaction.AUT_CNTR_ACC })
   }
 
   const showModal = () => setModalVisible(true)
@@ -71,6 +76,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
       if (selectedCompany && !isAccountMatched) {
         await saveAccountToCompany(selectedCompany)
       }
+      refetchTransactions?.()
     }
     setLoading(false)
   }
@@ -91,14 +97,14 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
     },
   ]
 
-  const transactionPayload = {
-    AUT_CNTR_ACC: transaction.AUT_CNTR_ACC,
-    AUT_CNTR_NAM: transaction.AUT_CNTR_NAM,
-    AUT_CNTR_MFO: transaction.AUT_CNTR_MFO,
-    OSND: transaction.OSND,
-    Description: getResolvedDescription(transaction, relatedCompanies),
-    TECHNICAL_TRANSACTION_ID: transaction.TECHNICAL_TRANSACTION_ID,
-  }
+  const transactionPayload = buildTransactionPayload(transaction, relatedCompanies)
+
+  const quickSendMenuItems: MenuProps['items'] = services.map((service) => ({
+    key: service._id,
+    label: formatDate(service.date, 'MMMM YYYY'),
+    icon: <CalendarOutlined />,
+    onClick: () => handleQuickSend(service),
+  }))
 
   return (
     <>
@@ -124,22 +130,55 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
             ))}
           </Select>
           {isAccountMatched ? (
-            <Dropdown menu={{ items: dropdownItems }} trigger={['click']}>
-              <Button type="primary" loading={loading}>
-                Send <DownOutlined />
-              </Button>
-            </Dropdown>
+            <>
+              <Dropdown menu={{ items: dropdownItems }} trigger={['click']}>
+                <Button 
+                  type="primary" 
+                  loading={loading || quickSendLoading}
+                  icon={<DownOutlined style={{ fontSize: '12px' }} />}
+                  iconPosition="end"
+                >
+                  Send
+                </Button>
+              </Dropdown>
+              <Dropdown
+                menu={{ items: quickSendMenuItems }}
+                trigger={['hover', 'click']}
+                disabled={!selectedCompany || services.length === 0}
+              >
+                <Button
+                  type="primary"
+                  icon={<DownOutlined />}
+                  loading={quickSendLoading}
+                />
+              </Dropdown>
+            </>
           ) : (
-            <Button
-              iconPosition="end"
-              icon={<SendOutlined />}
-              type="primary"
-              onClick={showModal}
-              disabled={!selectedCompany}
-              loading={loading}
-            >
-              Send
-            </Button>
+            <>
+              <Button
+                type="primary"
+                onClick={showModal}
+                disabled={!selectedCompany}
+                loading={loading || quickSendLoading}
+                icon={<SendOutlined style={{ fontSize: '25px' }} />}
+              >
+                Send
+              </Button>
+              <Dropdown
+                menu={{ 
+                  items: quickSendMenuItems,
+                  className: styles.monthsDropdown
+                }}
+                trigger={['hover', 'click']}
+                disabled={!selectedCompany || services.length === 0}
+              >
+                <Button
+                  type="primary"
+                  icon={<DownOutlined />}
+                  loading={quickSendLoading}
+                />
+              </Dropdown>
+            </>
           )}
         </Space.Compact>
       </Badge.Ribbon>
@@ -150,7 +189,7 @@ const TransactionDrawer: FC<TransactionDrawerProps> = ({
             ...relatedCompanies.find((company) => company._id === selectedCompany),
             generalSum: transactionAmount,
             description: getResolvedDescription(transaction, relatedCompanies),
-            invoiceCreationDate: dayjs(transaction.DAT_OD, 'DD.MM.YYYY'),
+            invoiceCreationDate: parseDate(transaction.DAT_OD, 'DD.MM.YYYY'),
             company: selectedCompany,
             domain: domain,
             transaction: transactionPayload,

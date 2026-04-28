@@ -1,4 +1,10 @@
 .Form {
+  .sumRow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
   .inputNumber {
     width: 100%;
   }
@@ -16,14 +22,19 @@
   }
   .totalItem {
     display: flex;
-    align-items: center;
-    flex-direction: row;
     justify-content: flex-end;
-    gap: 1rem;
-    font-size: 1rem;
+    font-weight: bold;
+    font-size: 1.25rem;
     margin-top: 1rem;
-    p {
-      font-weight: bold;
-    }
   }
+}
+
+.invoiceRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.currencySelect {
+  width: 50px;
 }

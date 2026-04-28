@@ -5,8 +5,18 @@ import TransactionDrawer from './TransactionsDrawer'
 
 let lastPaymentData: any = null
 
+const mockEditRealEstate = jest.fn()
 jest.mock('@common/api/realestateApi/realestate.api', () => ({
   useGetAllRealEstateQuery: jest.fn(),
+  useEditRealEstateMutation: jest.fn(() => [mockEditRealEstate]),
+}))
+
+jest.mock('./useQuicksend', () => ({
+  useQuickSend: jest.fn(() => ({
+    handleQuickSend: jest.fn(),
+    services: [],
+    loading: false,
+  })),
 }))
 
 jest.mock('@components/AddPaymentModal', () => ({
@@ -27,7 +37,7 @@ const mockUseGetAllRealEstateQuery = useGetAllRealEstateQuery as jest.Mock
 
 const getDropdownSendButton = () =>
   Array.from(document.querySelectorAll('button')).find((btn) =>
-    btn.querySelector('.anticon-down')
+    btn.textContent?.includes('Send') && btn.querySelector('.anticon-down')
   )
 
 const makeTransaction = (overrides = {}) => ({
@@ -35,9 +45,9 @@ const makeTransaction = (overrides = {}) => ({
   AUT_CNTR_ACC: 'UA803220010000026001350058717',
   AUT_CNTR_MFO: '322001',
   AUT_CNTR_NAM: 'ТОВ Тест',
-  AUT_MY_CRF: '2479002623',
-  AUT_MY_MFO: '305299',
-  AUT_MY_ACC: 'UA483052990000026004006407606',
+  AUT_MY_CRF: '0000000000',
+  AUT_MY_MFO: '300000',
+  AUT_MY_ACC: 'UA300000000000000000000000001',
   AUT_MY_NAM: 'Тест Т. Е. ФОП',
   AUT_MY_MFO_NAME: 'ПРИВАТБАНК',
   AUT_MY_MFO_CITY: 'Дніпро',
@@ -308,7 +318,7 @@ describe('Auto-match fallback for old companies (via previousCompanyId)', () => 
 
     renderDrawer(makeTransaction({
       AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
-      AUT_CNTR_ACC: 'UA293052990000029023866100110',
+      AUT_CNTR_ACC: 'UA300000000000000000000000002',
       previousCompanyId: 'company_001',
       isMatchingPayment: false,
     }))
@@ -325,7 +335,7 @@ describe('Auto-match fallback for old companies (via previousCompanyId)', () => 
 
     renderDrawer(makeTransaction({
       AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
-      AUT_CNTR_ACC: 'UA293052990000029023866100110',
+      AUT_CNTR_ACC: 'UA300000000000000000000000002',
       previousCompanyId: null,
       isMatchingPayment: false,
     }))
@@ -377,7 +387,7 @@ describe('transactionPayload passed to AddPaymentModal', () => {
 
 
 describe('saveAccountToCompany after successful payment creation', () => {
-  it('calls PATCH with account when company was manually selected and success=true', async () => {
+  it('calls editRealEstate with account when company was manually selected and success=true', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: { data: [makeCompany({ account: undefined })] },
     })
@@ -389,17 +399,14 @@ describe('saveAccountToCompany after successful payment creation', () => {
     await userEvent.click(await screen.findByText('Confirm'))
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        '/api/realestate/company_001',
-        expect.objectContaining({
-          method: 'PATCH',
-          body: JSON.stringify({ account: 'UA803220010000026001350058717' }),
-        })
-      )
+      expect(mockEditRealEstate).toHaveBeenCalledWith({
+        _id: 'company_001',
+        account: 'UA803220010000026001350058717',
+      })
     })
   })
 
-  it('does NOT call PATCH when company was auto-matched by account (already saved)', async () => {
+  it('does NOT call editRealEstate when company was auto-matched by account (already saved)', async () => {
     renderDrawer()
 
     await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
@@ -409,14 +416,11 @@ describe('saveAccountToCompany after successful payment creation', () => {
     await userEvent.click(await screen.findByText('Confirm'))
 
     await waitFor(() => {
-      expect(global.fetch).not.toHaveBeenCalledWith(
-        expect.stringContaining('/api/realestate/'),
-        expect.objectContaining({ method: 'PATCH' })
-      )
+      expect(mockEditRealEstate).not.toHaveBeenCalled()
     })
   })
 
-  it('does NOT call PATCH when modal closes with success=false', async () => {
+  it('does NOT call editRealEstate when modal closes with success=false', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: { data: [makeCompany({ account: undefined })] },
     })
@@ -428,17 +432,17 @@ describe('saveAccountToCompany after successful payment creation', () => {
     await userEvent.click(await screen.findByText('Cancel'))
 
     await waitFor(() => {
-      expect(global.fetch).not.toHaveBeenCalled()
+      expect(mockEditRealEstate).not.toHaveBeenCalled()
     })
   })
 
-  it('does NOT call PATCH for transit account even when manually selected', async () => {
+  it('does NOT call editRealEstate for transit account even when manually selected', async () => {
     mockUseGetAllRealEstateQuery.mockReturnValue({
       data: { data: [makeCompany({ account: undefined })] },
     })
     renderDrawer(makeTransaction({
       AUT_CNTR_NAM: 'Транз.рахунок платежi_ DN, DG, DZ',
-      AUT_CNTR_ACC: 'UA293052990000029023866100110',
+      AUT_CNTR_ACC: 'UA300000000000000000000000002',
     }))
 
     await userEvent.click(screen.getByRole('combobox'))
@@ -447,10 +451,50 @@ describe('saveAccountToCompany after successful payment creation', () => {
     await userEvent.click(await screen.findByText('Confirm'))
 
     await waitFor(() => {
-      expect(global.fetch).not.toHaveBeenCalledWith(
-        expect.stringContaining('/api/realestate/'),
-        expect.objectContaining({ method: 'PATCH' })
-      )
+      expect(mockEditRealEstate).not.toHaveBeenCalled()
+    })
+  })
+})
+
+
+describe('refetchTransactions', () => {
+  it('is called when modal closes with success=true', async () => {
+    const refetchTransactions = jest.fn()
+    render(
+      <TransactionDrawer
+        transaction={makeTransaction()}
+        domain={makeDomain() as any}
+        refetchTransactions={refetchTransactions}
+      />
+    )
+
+    await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
+    await userEvent.click(getDropdownSendButton()!)
+    await userEvent.click(await screen.findByText('Швидке створення'))
+    await userEvent.click(await screen.findByText('Confirm'))
+
+    await waitFor(() => {
+      expect(refetchTransactions).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it('is NOT called when modal closes with success=false', async () => {
+    const refetchTransactions = jest.fn()
+    render(
+      <TransactionDrawer
+        transaction={makeTransaction()}
+        domain={makeDomain() as any}
+        refetchTransactions={refetchTransactions}
+      />
+    )
+
+    await waitFor(() => expect(getDropdownSendButton()).toBeTruthy())
+    await userEvent.click(getDropdownSendButton()!)
+    await userEvent.click(await screen.findByText('Швидке створення'))
+    await userEvent.click(await screen.findByText('Cancel'))
+
+    await waitFor(() => {
+      expect(refetchTransactions).not.toHaveBeenCalled()
     })
   })
 })

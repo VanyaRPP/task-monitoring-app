@@ -2,7 +2,7 @@ import { generateColorsArray } from '@utils/helpers'
 import Chart from 'chart.js/auto'
 import React, { useEffect, useRef } from 'react'
 import s from './style.module.scss'
-import { theme } from 'antd'
+import { theme, Empty} from 'antd'
 type dataSources = {
   label: string
   value: {
@@ -83,13 +83,16 @@ const ChartComponent: React.FC<{
   }, [chartRef, dataSources, chartTitle, token])
 
   return (
-    <div className={s.chartContainer}>
-      {dataSources?.find((item) => item?.value?.part !== 0) ? (
-        <canvas ref={chartRef} className={s.chart} />
-      ) : (
-        'Усі займані площі домену дорівнюють нулю'
-      )}
-    </div>
+    <div className={s.chartContainer} style={{ minHeight: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    {dataSources?.some((item) => item?.value?.area > 0) ? (
+      <canvas ref={chartRef} className={s.chart} />
+    ) : (
+      <Empty 
+        image={Empty.PRESENTED_IMAGE_SIMPLE} 
+        description={<span style={{ color: token.colorTextDescription }}>Усі площі дорівнюють нулю</span>} 
+      />
+    )}
+  </div>
   )
 }
 export default ChartComponent
