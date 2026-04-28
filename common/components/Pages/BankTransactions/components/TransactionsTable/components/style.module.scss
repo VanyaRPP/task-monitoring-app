@@ -1,0 +1,29 @@
+.monthsDropdown {
+  max-height: 170px !important;
+  overflow-y: auto !important;
+  background-color: #1f1f1f !important; 
+  border-radius: 8px !important;
+  padding: 4px 0;
+  min-width: 170px !important;
+
+  &::-webkit-scrollbar {
+    width: 14px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.786); 
+    border-radius: 10px;
+    border: 4px solid #1f1f1f; 
+    background-clip: padding-box;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.786);
+    }
+  }
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.786) #1f1f1f;
+}

@@ -110,6 +110,8 @@
 
 .section {
   width: 100%;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 .selectors {
@@ -231,7 +233,8 @@
 }
 
 .tags {
-  width: 100%;
+  white-space: nowrap;
+  min-width: 200px;
 
   @media (min-width: 320px) and (max-width: 375px) {
     margin-left: -15px;

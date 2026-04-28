@@ -9,17 +9,31 @@ dayjs.locale('uk')
 export const getRollingServices = (allServices: any[], rollingMonthCount: number) => {
   const byMonthKey = new Map<string, any>()
 
+  let earliestDate = dayjs().subtract(rollingMonthCount, 'month').startOf('month')
+
   for (const svc of allServices) {
-    const key = dayjs(svc.date).startOf('month').format('YYYY-MM')
+    const svcDate = dayjs(svc.date).startOf('month')
+    const key = svcDate.format('YYYY-MM')
     byMonthKey.set(key, svc)
-  }
-  for (let i = 0; i < rollingMonthCount; i++) {
-    const m = dayjs().subtract(i, 'month').startOf('month')
-    const key = m.format('YYYY-MM')
-    if (!byMonthKey.has(key)) {
-      byMonthKey.set(key, { _id: buildMonthServicePlaceholder(m), date: m.toISOString() })
+
+    if (svcDate.isBefore(earliestDate)) {
+      earliestDate = svcDate
     }
   }
+
+  let current = dayjs().startOf('month')
+  
+  while (current.isAfter(earliestDate) || current.isSame(earliestDate, 'month')) {
+    const key = current.format('YYYY-MM')
+    if (!byMonthKey.has(key)) {
+      byMonthKey.set(key, { 
+        _id: buildMonthServicePlaceholder(current), 
+        date: current.toISOString() 
+      })
+    }
+    current = current.subtract(1, 'month')
+  }
+
   return [...byMonthKey.values()].sort((a, b) => 
     dayjs(b.date).valueOf() - dayjs(a.date).valueOf()
   )

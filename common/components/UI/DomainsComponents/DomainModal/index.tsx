@@ -12,6 +12,7 @@ import DomainForm from './DomainForm'
 import Modal from '../../ModalWindow'
 import { defaultServices } from '@utils/constants'
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
+import { useEditRealEstateMutation } from '@common/api/realestateApi/realestate.api'
 
 interface Props {
   currentDomain: IExtendedDomain
@@ -26,6 +27,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
   const [editDomain, { isLoading: isEditing }] = useEditDomainMutation()
   const { data: domains } = useGetDomainsQuery({})
   const { data: user } = useGetCurrentUserQuery()
+  const [editRealEstate] = useEditRealEstateMutation()
 
   useEffect(() => {
     const initialValues = {
@@ -97,7 +99,30 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
       : await addDomainEstate(domainData)
 
     if ('data' in response) {
+      const companiesAreas = formData.companiesAreas || []
+
+        if (companiesAreas.length > 0) {
+          try {
+            const savePromises = companiesAreas.map((company: any) => {
+              if (company._id) {
+                return editRealEstate({
+                  _id: company._id,
+                  totalArea: company.area,
+                  rentPart: company.rentPart,
+                }).unwrap()
+              }
+              return Promise.resolve()
+            })
+
+            await Promise.all(savePromises)
+          } catch (e) {
+            console.error('Помилка при збереженні площ компаній:', e);
+            return message.error('Виникла помилка при оновленні даних площ');
+          }
+        }
+      
       closeModal()
+      setIsValueChanged(false);
       form.resetFields()
       const action = currentDomain ? 'Збережено' : 'Додано'
       message.success(action)
