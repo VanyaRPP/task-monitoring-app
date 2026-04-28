@@ -48,7 +48,7 @@ const ClassicTemplate: FC<TemplateProps> = ({
         {data?.reciever?.adminEmails?.map((email: string) => (
           <div key={email}>
             {email} <br />
-          </div>
+          </div> 
         ))}
       </pre>
     </div>
