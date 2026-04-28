@@ -194,13 +194,23 @@ export const InvoiceSelector: React.FC<{
     if (!domainId) return []
     const groups = catalogRes?.data ?? []
     const rows = flattenDomainCatalogServices(groups)
-    return rows.map(catalogRowToSelectOption).filter(
+    const catalogOptions = rows.map(catalogRowToSelectOption).filter(
       (opt) => !excludeKeys?.includes(opt.value)
     )
+    const customOption = {
+      value: ServiceType.Custom,
+      label: 'Власне',
+      payload: { type: ServiceType.Custom },
+    }
+    return [...catalogOptions, customOption]
   }, [catalogRes, domainId, excludeKeys])
 
   const handleSelect = useCallback(
     (value: string) => {
+      if (value === ServiceType.Custom) {
+        onSelect?.({ type: ServiceType.Custom })
+        return
+      }
       const opt = options.find((o) => o.value === value)
       if (!opt || excludeKeys?.includes(opt.value)) return
       onSelect?.(opt.payload)

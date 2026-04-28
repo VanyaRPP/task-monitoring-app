@@ -101,9 +101,6 @@ export function catalogRowToSelectOption(row: IDomainCatalogServiceRow): {
     fieldName: payload.fieldName,
     serviceId: payload.serviceId,
   })
-  const label =
-    row.groupName && row.groupName.trim()
-      ? `${row.name} (${row.groupName})`
-      : row.name
+  const label = row.name
   return { value: excludeKey, label, payload }
 }
