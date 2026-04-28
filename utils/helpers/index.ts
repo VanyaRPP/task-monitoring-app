@@ -367,9 +367,18 @@ export const getCurrencySymbol = (currency?: string): string =>
   CURRENCY_MAP[normalizeCurrency(currency)].symbol
 
 export const getCurrencyNames = (
-  currency?: string
+  currency?: string,
+  isEnglish?: boolean
 ): { major: string; minor: string } => {
   const normalizedCurrency = normalizeCurrency(currency)
+
+  if (isEnglish) {
+    return {
+      UAH: { major: 'hryvnias', minor: 'kopecks' },
+      USD: { major: 'dollars', minor: 'cents' },
+      EUR: { major: 'euros', minor: 'cents' },
+    }[normalizedCurrency]
+  }
 
   return {
     UAH: { major: 'гривень', minor: 'копійок' },
@@ -377,7 +386,6 @@ export const getCurrencyNames = (
     EUR: { major: 'євро', minor: 'центів' },
   }[normalizedCurrency]
 }
-
 
 export function multiplyFloat(a, b) {
   const bigA = Big(toRoundFixed(`${a}`))
