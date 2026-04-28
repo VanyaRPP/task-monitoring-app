@@ -1,4 +1,7 @@
-import DomainTypeTemplate from '@modules/models/domain-type-template'
+import DomainTypeTemplate, {
+  DOMAIN_TYPE_TEMPLATE_CATEGORIES,
+  DomainTypeTemplateCategory,
+} from '@modules/models/domain-type-template'
 import start, { Data } from '@pages/api/api.config'
 import { withErrorHandler } from '@utils/api-handler'
 import { getCurrentUser } from '@utils/getCurrentUser'
@@ -42,11 +45,16 @@ function parseGroups(raw: unknown): {
   return { groups }
 }
 
+function parseCategory(raw: unknown): DomainTypeTemplateCategory {
+  const v = String(raw ?? '').trim() as DomainTypeTemplateCategory
+  return DOMAIN_TYPE_TEMPLATE_CATEGORIES.includes(v) ? v : 'other'
+}
+
 async function domainTypeTemplatesHandler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { isAdmin } = await getCurrentUser(req, res)
+  const { isAdmin, user } = await getCurrentUser(req, res)
 
   switch (req.method) {
     case 'GET': {
@@ -55,7 +63,9 @@ async function domainTypeTemplatesHandler(
           .status(403)
           .json({ success: false, message: 'Немає доступу' })
       }
-      const list = await DomainTypeTemplate.find().sort({ name: 1 }).lean()
+      const includeArchived = req.query.includeArchived === 'true'
+      const filter = includeArchived ? {} : { archivedAt: null }
+      const list = await DomainTypeTemplate.find(filter).sort({ name: 1 }).lean()
       return res.status(200).json({ success: true, data: list })
     }
 
@@ -78,6 +88,8 @@ async function domainTypeTemplatesHandler(
         return res.status(400).json({ success: false, message: error })
       }
 
+      const category = parseCategory(req.body?.category)
+
       const existing = await DomainTypeTemplate.findOne({ name }).lean()
       if (existing) {
         return res
@@ -87,8 +99,10 @@ async function domainTypeTemplatesHandler(
 
       const created = await DomainTypeTemplate.create({
         name,
+        category,
         isBuiltIn: false,
         groups,
+        createdBy: user?._id,
       })
       return res.status(201).json({ success: true, data: created })
     }

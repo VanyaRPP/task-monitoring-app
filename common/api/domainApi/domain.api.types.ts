@@ -13,6 +13,14 @@ export interface IDomainModel {
   defaultTemplate?: string
 }
 
+export type DomainTypeTemplateCategory =
+  | 'utility'
+  | 'it'
+  | 'edu'
+  | 'auto'
+  | 'real-estate'
+  | 'other'
+
 export interface IDomainTypeTemplateGroup {
   groupName: string
   serviceIds: string[]
@@ -21,8 +29,17 @@ export interface IDomainTypeTemplateGroup {
 export interface IDomainTypeTemplate {
   _id: string
   name: string
+  category: DomainTypeTemplateCategory
   isBuiltIn: boolean
   groups: IDomainTypeTemplateGroup[]
+  createdBy?: string
+  archivedAt?: string | null
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface IDomainTypeTemplateWithUsage extends IDomainTypeTemplate {
+  usageCount: number
 }
 
 export interface ICustomService {

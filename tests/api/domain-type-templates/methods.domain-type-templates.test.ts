@@ -15,6 +15,14 @@ jest.mock('@modules/models/domain-type-template', () => ({
     findOne: jest.fn(),
     create: jest.fn(),
   },
+  DOMAIN_TYPE_TEMPLATE_CATEGORIES: [
+    'utility',
+    'it',
+    'edu',
+    'auto',
+    'real-estate',
+    'other',
+  ],
 }))
 
 jest.mock('@utils/getCurrentUser', () => ({
@@ -42,7 +50,7 @@ describe('API /api/domain-type-templates', () => {
   describe('GET', () => {
     it('returns 403 for non-admin', async () => {
       asNonAdmin()
-      const req = { method: 'GET', body: {} } as any
+      const req = { method: 'GET', body: {}, query: {} } as any
       const res = makeRes()
       await handler(req, res)
       expect(res.status).toHaveBeenCalledWith(403)
@@ -53,7 +61,7 @@ describe('API /api/domain-type-templates', () => {
       const sort = jest.fn(() => ({ lean: jest.fn().mockResolvedValue([{ name: 'A' }]) }))
       ;(DomainTypeTemplate.find as jest.Mock).mockReturnValue({ sort })
 
-      const req = { method: 'GET', body: {} } as any
+      const req = { method: 'GET', body: {}, query: {} } as any
       const res = makeRes()
       await handler(req, res)
 
@@ -70,6 +78,7 @@ describe('API /api/domain-type-templates', () => {
       const req = {
         method: 'POST',
         body: { name: 'X', groups: [{ groupName: 'G', serviceIds: [] }] },
+        query: {},
       } as any
       const res = makeRes()
       await handler(req, res)
@@ -89,6 +98,7 @@ describe('API /api/domain-type-templates', () => {
       const req = {
         method: 'POST',
         body: { name: 'X', groups: [{ groupName: '', serviceIds: [] }] },
+        query: {},
       } as any
       const res = makeRes()
       await handler(req, res)
@@ -103,6 +113,7 @@ describe('API /api/domain-type-templates', () => {
           name: 'X',
           groups: [{ groupName: 'G', serviceIds: ['not-an-id'] }],
         },
+        query: {},
       } as any
       const res = makeRes()
       await handler(req, res)
@@ -118,6 +129,7 @@ describe('API /api/domain-type-templates', () => {
       const req = {
         method: 'POST',
         body: { name: 'X', groups: [{ groupName: 'G', serviceIds: [] }] },
+        query: {},
       } as any
       const res = makeRes()
       await handler(req, res)
@@ -137,6 +149,7 @@ describe('API /api/domain-type-templates', () => {
       const req = {
         method: 'POST',
         body: { name: '  X  ', groups: [{ groupName: 'G', serviceIds: [] }] },
+        query: {},
       } as any
       const res = makeRes()
       await handler(req, res)
@@ -153,7 +166,7 @@ describe('API /api/domain-type-templates', () => {
   describe('other methods', () => {
     it('returns 405 for unsupported method', async () => {
       asAdmin()
-      const req = { method: 'DELETE', body: {} } as any
+      const req = { method: 'DELETE', body: {}, query: {} } as any
       const res = makeRes()
       await handler(req, res)
       expect(res.status).toHaveBeenCalledWith(405)

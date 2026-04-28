@@ -12,6 +12,7 @@ import { Button, Card, Flex, Space, Typography } from 'antd'
 import { Tabs } from 'antd'
 import {UsersTable} from '@common/components/Tables/UsersTable'
 import { CustomServicesTable } from '@common/components/Tables/CustomService/Table'
+import { DomainTypeTemplatesTable } from '@common/components/Tables/DomainTypeTemplates'
 
 export const AdminPanelPage: React.FC = () => {
   const { data: user } = useGetCurrentUserQuery()
@@ -84,9 +85,14 @@ export const AdminPanelPage: React.FC = () => {
                 {
                   key: 'customservices',
                   label: 'Послуги',
-                  children: (                               
-                     <CustomServicesTable />                 
+                  children: (
+                     <CustomServicesTable />
                   ),
+                },
+                {
+                  key: 'templates',
+                  label: 'Шаблони типів',
+                  children: <DomainTypeTemplatesTable />,
                 },
               ]}
             />

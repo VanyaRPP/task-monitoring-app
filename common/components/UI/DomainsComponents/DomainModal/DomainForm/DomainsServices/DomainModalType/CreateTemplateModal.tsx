@@ -1,6 +1,10 @@
 import { useAddDomainTypeTemplateMutation } from '@common/api/domainApi/domain.api'
-import { IDomainTypeTemplate } from '@common/api/domainApi/domain.api.types'
-import { Form, Input, Modal, message } from 'antd'
+import {
+  DomainTypeTemplateCategory,
+  IDomainTypeTemplate,
+} from '@common/api/domainApi/domain.api.types'
+import { DOMAIN_TYPE_TEMPLATE_CATEGORY_OPTIONS } from '@utils/domain/domain-type-template-categories'
+import { Form, Input, Modal, Select, message } from 'antd'
 import React, { FC } from 'react'
 
 interface Props {
@@ -14,10 +18,11 @@ const CreateTemplateModal: FC<Props> = ({ open, onClose, onCreated }) => {
   const [addTemplate, { isLoading }] = useAddDomainTypeTemplateMutation()
 
   const handleOk = async () => {
-    const { name, groupName } = await form.validateFields()
+    const { name, groupName, category } = await form.validateFields()
     try {
       const created = await addTemplate({
         name: name.trim(),
+        category: category as DomainTypeTemplateCategory,
         groups: [{ groupName: groupName.trim(), serviceIds: [] }],
       }).unwrap()
       message.success('Шаблон створено')
@@ -47,13 +52,20 @@ const CreateTemplateModal: FC<Props> = ({ open, onClose, onCreated }) => {
       onCancel={handleCancel}
       confirmLoading={isLoading}
     >
-      <Form form={form} layout="vertical">
+      <Form form={form} layout="vertical" initialValues={{ category: 'other' }}>
         <Form.Item
           name="name"
           label="Назва шаблону"
           rules={[{ required: true, message: 'Введіть назву шаблону' }]}
         >
           <Input placeholder="Напр. IT-послуги для розробки сайтів" />
+        </Form.Item>
+        <Form.Item
+          name="category"
+          label="Категорія"
+          rules={[{ required: true }]}
+        >
+          <Select options={DOMAIN_TYPE_TEMPLATE_CATEGORY_OPTIONS} />
         </Form.Item>
         <Form.Item
           name="groupName"
