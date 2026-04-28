@@ -33,8 +33,9 @@ const PriceList: FC<{ data: IPayment }> = ({ data }) => {
   const paymentCompany = payment?.company as { currency?: string } | string | undefined
   const companyCurrency = typeof paymentCompany === 'object' ? paymentCompany?.currency : undefined
   const currency = payment?.currency || companyCurrency || payment?.domain?.currency 
-  const currencyNames = getCurrencyNames(currency, isEnglish)
   const isEnglish = normalizeCurrency(currency) !== 'UAH'
+  const currencyNames = getCurrencyNames(currency, isEnglish)
+
   
 
   const { company, showQuantityInPreview, setShowQuantityInPreview } =
