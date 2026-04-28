@@ -1,6 +1,10 @@
 import { FC } from 'react'
 import dayjs from 'dayjs'
 import { TemplateProps } from '../types'
+import {
+  getBillFromHeadingAndBodyLines,
+  getIssuedToHeadingAndBodyLines,
+} from '../invoice-party-headings'
 import sw from './swiss.module.scss'
 
 const SwissTemplate: FC<TemplateProps> = ({
@@ -9,6 +13,7 @@ const SwissTemplate: FC<TemplateProps> = ({
   isEnglish,
   currencyLabel,
   modernInvoiceNumber,
+  domainName,
   rows,
   getQty,
   subtotal,
@@ -18,7 +23,13 @@ const SwissTemplate: FC<TemplateProps> = ({
   paymentInfoLines,
   issuedToLines,
   normalizedBankDetailsLines,
-}) => (
+}) => {
+  const { heading: paymentHeading, bodyLines: paymentBodyLines } =
+    getBillFromHeadingAndBodyLines(data, paymentInfoLines)
+  const { heading: issuedHeading, bodyLines: issuedBodyLines } =
+    getIssuedToHeadingAndBodyLines(data, issuedToLines, domainName)
+
+  return (
   <div className={sw.swissInvoice} ref={componentRef} style={{ width: '100%', margin: '2em auto 1em' }}>
     <div className={sw.swissHeader}>
       <div className={sw.swissBrand}>
@@ -49,8 +60,22 @@ const SwissTemplate: FC<TemplateProps> = ({
     <div className={sw.swissParties}>
       <div className={sw.swissParty}>
         <div className={sw.swissPartyLabel}>{isEnglish ? 'Bill from' : 'Платіжні дані'}</div>
-        {paymentInfoLines.map((line: string, idx: number) => (
-          <div key={`pi-${idx}`} className={idx === 0 ? `${sw.swissPartyLine} ${sw.swissPartyLineStrong}` : sw.swissPartyLine}>{line}</div>
+        {!!paymentHeading && (
+          <div className={`${sw.swissPartyLine} ${sw.swissPartyLineStrong}`}>
+            {paymentHeading}
+          </div>
+        )}
+        {paymentBodyLines.map((line: string, idx: number) => (
+          <div
+            key={`pi-${idx}`}
+            className={
+              !paymentHeading && idx === 0
+                ? `${sw.swissPartyLine} ${sw.swissPartyLineStrong}`
+                : sw.swissPartyLine
+            }
+          >
+            {line}
+          </div>
         ))}
         {!!normalizedBankDetailsLines.length && (
           <div className={sw.swissBankCard}>
@@ -69,8 +94,22 @@ const SwissTemplate: FC<TemplateProps> = ({
       </div>
       <div className={sw.swissParty}>
         <div className={sw.swissPartyLabel}>{isEnglish ? 'Issued to' : 'Отримувач'}</div>
-        {issuedToLines.map((line: string, idx: number) => (
-          <div key={`it-${idx}`} className={idx === 0 ? `${sw.swissPartyLine} ${sw.swissPartyLineStrong}` : sw.swissPartyLine}>{line}</div>
+        {!!issuedHeading && (
+          <div className={`${sw.swissPartyLine} ${sw.swissPartyLineStrong}`}>
+            {issuedHeading}
+          </div>
+        )}
+        {issuedBodyLines.map((line: string, idx: number) => (
+          <div
+            key={`it-${idx}`}
+            className={
+              !issuedHeading && idx === 0
+                ? `${sw.swissPartyLine} ${sw.swissPartyLineStrong}`
+                : sw.swissPartyLine
+            }
+          >
+            {line}
+          </div>
         ))}
       </div>
     </div>
@@ -127,6 +166,7 @@ const SwissTemplate: FC<TemplateProps> = ({
       </div>
     </div>
   </div>
-)
+  )
+}
 
 export default SwissTemplate

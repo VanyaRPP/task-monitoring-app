@@ -2,6 +2,10 @@ import { FC } from 'react'
 import GroupedPricesTable from '@components/Forms/GroupedReceiptForm/GroupedPricesTable'
 import { formatInvoiceDate, formatInvoiceDueDate } from '@common/assets/features/formatDate'
 import { TemplateProps } from '../types'
+import {
+  getDomainHeading,
+  getRecipientCompanyHeading,
+} from '../invoice-party-headings'
 import cs from './style.module.scss'
 
 const ClassicTemplate: FC<TemplateProps> = ({
@@ -10,6 +14,8 @@ const ClassicTemplate: FC<TemplateProps> = ({
   isEnglish,
   currencyLabel,
   currency,
+  domainName,
+  companyLabel,
   rows,
   getQty,
   subtotal,
@@ -19,7 +25,11 @@ const ClassicTemplate: FC<TemplateProps> = ({
   paymentInfoLines,
   issuedToLines,
   normalizedBankDetailsLines,
-}) => (
+}) => {
+  const providerDomainHeading = getDomainHeading(data, domainName)
+  const recipientCompanyHeading = getRecipientCompanyHeading(data, companyLabel)
+
+  return (
   <div
     className={cs.invoiceContainer}
     ref={componentRef}
@@ -34,7 +44,12 @@ const ClassicTemplate: FC<TemplateProps> = ({
     <div className={cs.providerInfo}>
       <div className={cs.label}>{isEnglish ? 'Provider' : 'Постачальник'}</div>
       <pre className={cs.preLabel}>
-        {data?.domain?.name && <><strong>{data.domain.name}</strong>{'\n'}</>}
+        {!!providerDomainHeading && (
+          <>
+            <strong>{providerDomainHeading}</strong>
+            {'\n'}
+          </>
+        )}
         {data?.provider?.description?.trim()} <br />
         <br />
       </pre>
@@ -43,7 +58,12 @@ const ClassicTemplate: FC<TemplateProps> = ({
     <div className={cs.receiverInfo}>
       <div className={cs.label}>{isEnglish ? 'Recipient' : 'Одержувач'}</div>
       <pre className={cs.preLabel}>
-        {data?.reciever?.companyName && <><strong>{data.reciever.companyName}</strong>{'\n'}</>}
+        {!!recipientCompanyHeading && (
+          <>
+            <strong>{recipientCompanyHeading}</strong>
+            {'\n'}
+          </>
+        )}
         {data?.reciever?.description?.trim()} <br />
         {data?.reciever?.adminEmails?.map((email: string) => (
           <div key={email}>
@@ -102,10 +122,13 @@ const ClassicTemplate: FC<TemplateProps> = ({
       </div>
 
       <div className={cs.payFixed}>
-        {data?.domain?.name || data?.provider?.description?.split('\n')?.[0] || ''}
+        {providerDomainHeading ||
+          data?.provider?.description?.split('\n')?.[0] ||
+          ''}
       </div>
     </div>
   </div>
-)
+  )
+}
 
 export default ClassicTemplate

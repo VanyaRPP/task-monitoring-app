@@ -1,6 +1,10 @@
 import { FC, useEffect, useRef, useState } from 'react'
 import dayjs from 'dayjs'
 import { TemplateProps } from '../types'
+import {
+  getBillFromHeadingAndBodyLines,
+  getIssuedToHeadingAndBodyLines,
+} from '../invoice-party-headings'
 import s from './olimp.module.scss'
 
 const OlimpTemplate: FC<TemplateProps> = ({
@@ -9,6 +13,7 @@ const OlimpTemplate: FC<TemplateProps> = ({
   isEnglish,
   currencyLabel,
   modernInvoiceNumber,
+  domainName,
   rows,
   getQty,
   subtotal,
@@ -19,6 +24,11 @@ const OlimpTemplate: FC<TemplateProps> = ({
   issuedToLines,
   normalizedBankDetailsLines,
 }) => {
+  const { heading: paymentHeading, bodyLines: paymentBodyLines } =
+    getBillFromHeadingAndBodyLines(data, paymentInfoLines)
+  const { heading: issuedHeading, bodyLines: issuedBodyLines } =
+    getIssuedToHeadingAndBodyLines(data, issuedToLines, domainName)
+
   const [topInfoCardHeight, setTopInfoCardHeight] = useState<number>(0)
   const paymentInfoCardRef = useRef<HTMLDivElement | null>(null)
 
@@ -68,7 +78,7 @@ const OlimpTemplate: FC<TemplateProps> = ({
     observer.observe(paymentInfoCardRef.current)
 
     return () => observer.disconnect()
-  }, [paymentInfoLines.length, isEnglish])
+  }, [paymentInfoLines.length, paymentBodyLines.length, isEnglish])
 
   return (
     <div
@@ -100,9 +110,18 @@ const OlimpTemplate: FC<TemplateProps> = ({
           >
             <h4>{isEnglish ? 'PAYMENT INFO:' : 'ПЛАТІЖНІ ДАНІ:'}</h4>
             <div className={s.infoList}>
-              {paymentInfoLines.map((line: string, idx: number) => (
+              {!!paymentHeading && (
+                <div className={`${s.infoLine} ${s.infoLineAccent}`}>
+                  {paymentHeading}
+                </div>
+              )}
+              {paymentBodyLines.map((line: string, idx: number) => (
                 <div
-                  className={`${s.infoLine} ${idx === 0 ? s.infoLineAccent : ''}`}
+                  className={
+                    !paymentHeading && idx === 0
+                      ? `${s.infoLine} ${s.infoLineAccent}`
+                      : s.infoLine
+                  }
                   key={`${line}-${idx}`}
                 >
                   {line}
@@ -135,9 +154,18 @@ const OlimpTemplate: FC<TemplateProps> = ({
         >
           <h4>{isEnglish ? 'ISSUED TO:' : 'ОТРИМУВАЧ:'}</h4>
           <div className={s.infoList}>
-            {issuedToLines.map((line: string, idx: number) => (
+            {!!issuedHeading && (
+              <div className={`${s.infoLine} ${s.infoLineAccent}`}>
+                {issuedHeading}
+              </div>
+            )}
+            {issuedBodyLines.map((line: string, idx: number) => (
               <div
-                className={`${s.infoLine} ${idx === 0 ? s.infoLineAccent : ''}`}
+                className={
+                  !issuedHeading && idx === 0
+                    ? `${s.infoLine} ${s.infoLineAccent}`
+                    : s.infoLine
+                }
                 key={`${line}-${idx}`}
               >
                 {line}
