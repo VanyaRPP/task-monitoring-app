@@ -1,13 +1,22 @@
 import { FC } from 'react'
 import dayjs from 'dayjs'
 import { TemplateProps } from '../types'
+import {
+  getBillFromHeadingAndBodyLines,
+  getIssuedToHeadingAndBodyLines,
+} from '../invoice-party-headings'
 import ts from './techstudio.module.scss'
 
 const TechstudioTemplate: FC<TemplateProps> = ({
-  data, componentRef, isEnglish, currencyLabel, modernInvoiceNumber,
+  data, componentRef, isEnglish, currencyLabel, modernInvoiceNumber, domainName,
   rows, getQty, subtotal, taxPercent, taxAmount, total,
   paymentInfoLines, issuedToLines, normalizedBankDetailsLines,
 }) => {
+  const { heading: paymentHeading, bodyLines: paymentBodyLines } =
+    getBillFromHeadingAndBodyLines(data, paymentInfoLines)
+  const { heading: issuedHeading, bodyLines: issuedBodyLines } =
+    getIssuedToHeadingAndBodyLines(data, issuedToLines, domainName)
+
   return (
     <div
       className={ts.tsInvoice}
@@ -72,10 +81,17 @@ const TechstudioTemplate: FC<TemplateProps> = ({
           <div className={ts.tsPartyLabel}>
             {isEnglish ? 'Bill from' : 'Платіжні дані'}
           </div>
-          {paymentInfoLines.map((line: string, idx: number) => (
+          {!!paymentHeading && (
+            <div className={ts.tsPartyName}>{paymentHeading}</div>
+          )}
+          {paymentBodyLines.map((line: string, idx: number) => (
             <div
               key={`pi-${idx}`}
-              className={idx === 0 ? ts.tsPartyName : ts.tsPartyLine}
+              className={
+                !paymentHeading && idx === 0
+                  ? ts.tsPartyName
+                  : ts.tsPartyLine
+              }
             >
               {line}
             </div>
@@ -103,10 +119,17 @@ const TechstudioTemplate: FC<TemplateProps> = ({
           <div className={ts.tsPartyLabel}>
             {isEnglish ? 'Issued to' : 'Отримувач'}
           </div>
-          {issuedToLines.map((line: string, idx: number) => (
+          {!!issuedHeading && (
+            <div className={ts.tsPartyName}>{issuedHeading}</div>
+          )}
+          {issuedBodyLines.map((line: string, idx: number) => (
             <div
               key={`it-${idx}`}
-              className={idx === 0 ? ts.tsPartyName : ts.tsPartyLine}
+              className={
+                !issuedHeading && idx === 0
+                  ? ts.tsPartyName
+                  : ts.tsPartyLine
+              }
             >
               {line}
             </div>

@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import { generateClassicHtml } from './templates/classicHtml'
 import { generateOlimpHtml } from './templates/olimpHtml'
 import { generateLedgerHtml } from './templates/ledgerHtml'
+import { generateOfficialHtml } from './templates/officialHtml'
 
 function resolvePaymentTemplate(paymentData: any): string {
   return (
@@ -69,6 +70,7 @@ export async function generateHtmlFromThemplate(
   const templateKey = resolvePaymentTemplate(paymentData)
   if (templateKey === 'olimp') return generateOlimpHtml(paymentData)
   if (templateKey === 'ledger') return generateLedgerHtml(paymentData)
+  if (templateKey === 'official') return generateOfficialHtml(paymentData)
   return generateClassicHtml(paymentData)
 }
 

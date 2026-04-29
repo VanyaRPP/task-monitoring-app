@@ -30,9 +30,26 @@ jest.mock('@components/Forms/GroupedReceiptForm/GroupedPricesTable', () => ({
   default: () => <div>GroupedPricesTable</div>,
 }))
 
+jest.mock('@common/api/paymentApi/payment.api', () => ({
+  useEditPaymentMutation: () => [jest.fn().mockResolvedValue({ data: {} })],
+}))
+
+jest.mock('next/dynamic', () => (importFn: () => Promise<any>) => {
+  let Component: any = null
+  importFn().then((mod: any) => {
+    Component = mod.default
+  })
+  const DynamicComponent = (props: any) => {
+    if (!Component) return null
+    return require('react').createElement(Component, props)
+  }
+  return DynamicComponent
+})
+
 const mockPayment = {
   invoiceNumber: '123',
   invoiceCreationDate: '2024-01-01',
+  monthService: '12345j32jkl5423',
   reciever: {
     companyName: 'Test Company',
     description: 'Kyiv\nUkraine',
