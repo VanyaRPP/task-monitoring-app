@@ -47,6 +47,18 @@ const DomainForm: React.FC<Props> = ({
           disabled={!editable}
         />
       </Form.Item>
+      <Form.Item
+        name="nameForInvoices"
+        label="Назва для рахунків"
+        tooltip="Використовується в рахунках замість назви домену"
+      >
+        <Input
+          placeholder="За замовчуванням = назві домену"
+          maxLength={256}
+          className={s.formInput}
+          disabled={!editable}
+        />
+      </Form.Item>
       <EmailSelect form={form} disabled={!editable} />
       <DomainStreets disabled={!editable} />
       <ServicesSelect form={form} disabled={!editable} domainId={domainId} />

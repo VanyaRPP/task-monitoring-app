@@ -1,5 +1,6 @@
 export interface IDomainModel {
   name: string
+  nameForInvoices?: string
   adminEmails: [string]
   streets: string[]
   description: string

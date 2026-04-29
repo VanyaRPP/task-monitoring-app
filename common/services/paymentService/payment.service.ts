@@ -289,7 +289,8 @@ export async function createPayment(body: any, isAdmin: boolean) {
           : null
 
       paymentSnapshot.reciever = {
-        companyName: currentReceiver.companyName || domain?.name || 'invoice',
+        companyName: currentReceiver.companyName || domain?.nameForInvoices || domain?.name || 'invoice',
+        nameForInvoices: domain?.nameForInvoices || domain?.name || '',
         adminEmails:
           currentReceiver.adminEmails?.length
             ? currentReceiver.adminEmails

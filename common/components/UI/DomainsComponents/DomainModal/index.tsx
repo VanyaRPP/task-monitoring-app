@@ -30,6 +30,7 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
   useEffect(() => {
     const initialValues = {
       name: currentDomain?.name || '',
+      nameForInvoices: currentDomain?.nameForInvoices || '',
       adminEmails: currentDomain?.adminEmails || (user?.email ?  [user.email] : []),
       streets:
         currentDomain?.streets.map((i: any) => ({
@@ -75,6 +76,9 @@ const DomainModal: FC<Props> = ({ currentDomain, closeModal, editable }) => {
 
     const domainData = {
       name: formData.name,
+      nameForInvoices: formData.nameForInvoices && formData.nameForInvoices.trim() !== ''
+        ? formData.nameForInvoices
+        : formData.name,
       adminEmails: formData.adminEmails,
       streets: formData.streets.some((i: any) => i.value)
         ? formData.streets.map((i: any) => i.value)

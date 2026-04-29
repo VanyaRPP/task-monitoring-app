@@ -3,6 +3,7 @@ import mongoose, { ObjectId, Schema } from 'mongoose'
 export interface IDomain {
   _id: string
   name: string
+  nameForInvoices?: string
   adminEmails: [string]
   streets: [ObjectId]
   description: string
@@ -36,6 +37,7 @@ export interface IDomainBankToken {
 
 const DomainSchema = new Schema<IDomain>({
   name: { type: String, required: true },
+  nameForInvoices: { type: String, required: false },
   adminEmails: { type: [String], required: true },
   streets: {
     type: [{ type: Schema.Types.ObjectId, ref: 'Street' }],

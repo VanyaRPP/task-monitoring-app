@@ -27,6 +27,7 @@ export interface IReciever {
   companyName: string
   adminEmails: string[]
   description: string
+  nameForInvoices?: string
 }
 
 export interface IPayment {
