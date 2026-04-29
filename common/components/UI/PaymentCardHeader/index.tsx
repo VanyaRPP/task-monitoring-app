@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import {
+  CheckOutlined,
   DeleteOutlined,
   DownloadOutlined,
   FilterOutlined,
@@ -20,7 +21,7 @@ import {
 import { useGetCurrentUserQuery } from '@common/api/userApi/user.api'
 import AddPaymentModal from '@components/AddPaymentModal'
 import ImportInvoices from '@components/UI/PaymentCardHeader/ImportInvoices'
-import { AppRoutes, Roles, ServiceName } from '@utils/constants'
+import { AppRoutes, Operations, Roles, ServiceName } from '@utils/constants'
 import { isAdminCheck } from '@utils/helpers'
 import {
   Button,
@@ -69,6 +70,7 @@ export interface PaymentCardHeaderProps {
   singleCompany?: string
   singleDomain?: string
   isDashboard?: boolean
+  onBulkMarkPaid?: (payments: IExtendedPayment[]) => void
 }
 
 const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
@@ -91,7 +93,8 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
   singleCompany,
   singleDomain,
   isDashboard,
-  onDeleteClick
+  onDeleteClick,
+  onBulkMarkPaid,
 }) => {
   const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -161,6 +164,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     if (key === 'add') setIsModalOpen(true)
     if (key === 'download') handleGeneratePdf()
     if (key === 'delete') onDeleteClick()
+    if (key === 'bulkMarkPaid') onBulkMarkPaid?.(selectedPayments as IExtendedPayment[])
   }
 
   const selectedCompany =
@@ -183,6 +187,15 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     if (singleCompany) texts.push(`Компанія: ${singleCompany}`)
     return texts.join('\n')
   }, [singleDomain, singleCompany])
+
+  const canBulkMarkPaid = useMemo(
+    () =>
+      selectedPayments.length > 1 &&
+      selectedPayments.every(
+        (payment: IExtendedPayment) => payment.type === Operations.Debit
+      ),
+    [selectedPayments]
+  )
 
   const allowedServices = useMemo(() => {
   if (!payments?.data?.length) return undefined
@@ -231,6 +244,7 @@ const PaymentCardHeader: React.FC<PaymentCardHeaderProps> = ({
     ...(isAdmin ? [{ key: 'invoices', label: 'Інвойси', icon: <SelectOutlined /> }] : []),
     ...(isAdmin ? [{ key: 'add', label: 'Додати', icon: <PlusOutlined /> }] : []),
     ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0 ? [{ key: 'download', label: 'Завантажити рахунки', icon: <DownloadOutlined /> }] : []),
+    ...(isAdmin && pathname === AppRoutes.PAYMENT && canBulkMarkPaid ? [{ key: 'bulkMarkPaid', label: 'Позначити оплати', icon: <CheckOutlined /> }] : []),
     ...(isAdmin && pathname === AppRoutes.PAYMENT && selectedPayments.length > 0 ? [{ key: 'delete', label: 'Видалити', icon: <DeleteOutlined />, danger: true }] : []),
   ]
 
